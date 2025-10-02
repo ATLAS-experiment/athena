@@ -28,7 +28,7 @@ class MinBiasPRDAssociation;
 
 namespace DerivationFramework {
 
-class UnassociatedHitsGetterTool : public AthAlgTool, virtual public IUnassociatedHitsGetterTool {
+class UnassociatedHitsGetterTool : public extends<AthAlgTool, IUnassociatedHitsGetterTool> {
 public:
 
   UnassociatedHitsGetterTool(const std::string& type,

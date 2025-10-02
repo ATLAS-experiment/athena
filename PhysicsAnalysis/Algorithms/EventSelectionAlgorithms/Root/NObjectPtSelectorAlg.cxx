@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -28,7 +28,7 @@ namespace CP {
 
   StatusCode NObjectPtSelectorAlg::execute() {
     // accessors
-    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+    static const SG::ConstAccessor<float> acc_pt_dressed("pt_dressed");
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
@@ -51,9 +51,9 @@ namespace CP {
       for (const xAOD::IParticle *obj : *objects){
         if (!m_objectSelection || m_objectSelection.getBool(*obj, sys)){
           if (m_useDressedProperties) {
-            if (acc_pt_dressed(*obj) > m_ptmin) count++;
+            if (acc_pt_dressed(*obj) >= m_ptmin) count++;
           } else {
-            if (obj->pt() > m_ptmin) count++;
+            if (obj->pt() >= m_ptmin) count++;
           }
         }
       }

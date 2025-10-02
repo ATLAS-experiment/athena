@@ -24,9 +24,10 @@ using namespace RCU;
 
 int main ()
 {
-  RCU_ASSERT_SOFT (match_expr (boost::regex (".*\\.root.*"), "test.root_4"));
-  RCU_ASSERT_SOFT (!match_expr (boost::regex (".*\\.root.*"), "test.asdroot_4"));
-  RCU_ASSERT_SOFT (!match_expr (boost::regex (".*\\.root"), "test.root_4"));
-  RCU_ASSERT_SOFT (match_expr (boost::regex (glob_to_regexp ("*.root*")), "test.root_4"));
-  RCU_ASSERT_SOFT (!match_expr (boost::regex (glob_to_regexp ("*.root*")), "test.asdroot_4"));
+/// STL version
+  RCU_ASSERT_SOFT(match_expr(std::regex(R"(.*\.root.*)"), "test.root_4"));
+  RCU_ASSERT_SOFT(!match_expr(std::regex(R"(.*\.root.*)"), "test.asdroot_4"));
+  RCU_ASSERT_SOFT(!match_expr(std::regex(R"(.*\.root)"), "test.root_4"));
+  RCU_ASSERT_SOFT(match_expr(std::regex(glob_to_regexp("*.root*")), "test.root_4"));
+  RCU_ASSERT_SOFT(!match_expr(std::regex(glob_to_regexp("*.root*")), "test.asdroot_4"));
 }

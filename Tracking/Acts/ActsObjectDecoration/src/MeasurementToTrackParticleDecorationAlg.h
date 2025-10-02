@@ -21,7 +21,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "Acts/Definitions/Units.hpp"
 #include "ActsEvent/TrackContainer.h"
@@ -60,73 +60,73 @@ namespace ActsTrk {
       
     private:
       
-      ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
       
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticlesKey {
 	this, "TrackParticleKey", "", "Input track particle collection"};
       
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementRegionKey{
-	this, "MeasurementRegionKey", "measurement_region",
+	this, "MeasurementRegionKey", m_trackParticlesKey, "measurement_region",
 	"Decorate track particle with region of the measurement (barrel, ec)"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementDetectorKey{
-	this, "MeasurementDetectorKey", "measurement_det",
+	this, "MeasurementDetectorKey", m_trackParticlesKey, "measurement_det",
 	"Decorate track particle with measurement detector id (innermost pix, pix, strip)"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementLayerKey{
-	this, "MeasurementLayerKey", "measurement_iLayer",
+	this, "MeasurementLayerKey", m_trackParticlesKey, "measurement_iLayer",
 	"Decorate track particle with measurement layer"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_chi2HitPredictedKey{
-	this, "Chi2HitPredictedKey", "chi2_hit_predicted",
+	this, "Chi2HitPredictedKey", m_trackParticlesKey, "chi2_hit_predicted",
 	"Predicted Chi2 contribution for each hit"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_chi2HitFilteredKey{
-	this, "Chi2HitFilteredKey", "chi2_hit_filtered",
+	this, "Chi2HitFilteredKey", m_trackParticlesKey, "chi2_hit_filtered",
 	"Filtered Chi2 contribution for each hit"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementTypeKey{
-	this, "MeasurementTypeKey", "measurement_type",
+	this, "MeasurementTypeKey", m_trackParticlesKey, "measurement_type",
 	"Decorate track particle with type of track state (outlier,hole, biased/unbiased)"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementPhiWidthKey{
-	this, "MeasurementPhiWidthKey", "hitResiduals_phiWidth",
+	this, "MeasurementPhiWidthKey", m_trackParticlesKey, "hitResiduals_phiWidth",
 	"Decorate track particle with measurement cluster size (in r-phi)"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementEtaWidthKey{
-	this, "MeasurementEtaWidthKey", "hitResiduals_etaWidth",
+	this, "MeasurementEtaWidthKey", m_trackParticlesKey, "hitResiduals_etaWidth",
 	"Decorate track particle with measurement cluster size (in eta)"};
       
       
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_residualLocXkey{
-	this, "ResidualLocXkey", "hitResiduals_residualLocX",
+	this, "ResidualLocXkey", m_trackParticlesKey, "hitResiduals_residualLocX",
 	"Decorate track particle with unbiased residual in local x"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_pullLocXkey{
-	this, "PullLocXkey", "hitResiduals_pullLocX",
+	this, "PullLocXkey", m_trackParticlesKey, "hitResiduals_pullLocX",
 	"Decorate track particle with unbiased pull in local x"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementLocXkey{
-	this, "MeasurementLocXkey", "measurementLocX",
+	this, "MeasurementLocXkey", m_trackParticlesKey, "measurementLocX",
 	"Decorate track particle with measurement local x"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackParameterLocXkey{
-	this, "TrackParameterLocXkey", "trackParamLocX",
+	this, "TrackParameterLocXkey", m_trackParticlesKey, "trackParamLocX",
 	"Decorate track particle with unbiased prediction in local x"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementLocCovXkey{
-	this, "MeasurementLocCovXkey", "measurementLocCovX",
+	this, "MeasurementLocCovXkey", m_trackParticlesKey, "measurementLocCovX",
 	"Decorate track particle with local x measurement covariance"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackParameterLocCovXkey{
-	this, "TrackParameterLocCovXkey", "trackParameterLocCovX",
+	this, "TrackParameterLocCovXkey", m_trackParticlesKey, "trackParameterLocCovX",
 	"Decorate track particle with unbiased local x prediction covariance"};
       
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_residualLocYkey{
-	this, "ResidualLocYkey", "hitResiduals_residualLocY",
+	this, "ResidualLocYkey", m_trackParticlesKey, "hitResiduals_residualLocY",
 	"Decorate track particle with unbiased residual in local y"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_pullLocYkey{
-	this, "PullLocYkey", "hitResiduals_pullLocY",
+	this, "PullLocYkey", m_trackParticlesKey, "hitResiduals_pullLocY",
 	"Decorate track particle with unbiased pull in local y"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementLocYkey{
-	this, "MeasurementLocYkey", "measurementLocY",
+	this, "MeasurementLocYkey", m_trackParticlesKey, "measurementLocY",
 	"Decorate track particle with measurement local y"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackParameterLocYkey{
-	this, "TrackParameterLocYkey", "trackParamLocY",
+	this, "TrackParameterLocYkey", m_trackParticlesKey, "trackParamLocY",
 	"Decorate track particle with unbiased prediction in local y"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_measurementLocCovYkey{
-	this, "MeasurementLocCovYkey", "measurementLocCovY",
+	this, "MeasurementLocCovYkey", m_trackParticlesKey, "measurementLocCovY",
 	"Decorate track particle with local y measurement covariance"};
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackParameterLocCovYkey{
-	this, "TrackParameterLocCovYkey", "trackParameterLocCovY",
+	this, "TrackParameterLocCovYkey", m_trackParticlesKey, "trackParameterLocCovY",
 	"Decorate track particle with unbiased local y prediction covariance"};
     };
 }

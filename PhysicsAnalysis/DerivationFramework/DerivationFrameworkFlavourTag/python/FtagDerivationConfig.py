@@ -1,88 +1,40 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
-from BTagging.JetBTagginglessConfig import JetBTagginglessAlgCfg
+from BTagging.BTagConfig import GetTaggerTrainingMap
+from BTagging.BTagLegacyConfig import BTagAlgsCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 
-from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
-from AthenaConfiguration.Enums import LHCPeriod
 import ParticleJetTools.ParentDecoratorConfig as pdc
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
-def JetCollectionsBTaggingCfg(cfgFlags, jet_cols, pv_cols=None,
-                             trackAugmenterPrefix=None):
 
-    if pv_cols is None:
-        pv_cols = ['PrimaryVertices'] * len(jet_cols)
-    if len(pv_cols) != len(jet_cols):
-        raise ValueError('PV collection length is not the same as Jets')
+def _addDepsByTaggername(cfgFlags, tagger: str) -> ComponentAccumulator:
+    """
+    Add additional algorithms based on the dirname of the network files.
 
+    Parameters
+    ----------
+    cfgFlags : ConfigFlags
+        The configuration flags for.
+    tagger : str
+        The name of the tagger.
+
+    Returns
+    -------
+    ComponentAccumulator
+        An accumulator containing the additional algorithms based on the dirname.
+    """
     acc = ComponentAccumulator()
-
-    for jet_col, pv_col in zip(jet_cols, pv_cols):
-        acc.merge(JetBTagginglessAlgCfg(cfgFlags, jet_col, pv_col, trackAugmenterPrefix))
-
+    for gnn in ["GN2Xv02", "GN2XTauV00"]:
+        if gnn in tagger:
+            acc.merge(TrackLeptonDecorationCfg(cfgFlags))
     return acc
 
-def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
-                          trackAugmenterPrefix=None):
-    """
-    Run flavour tagging in derivations.
-    Configures several jet collections at once.
-    """
-
-    if pv_cols is None:
-        pv_cols = ['PrimaryVertices'] * len(jet_cols)
-    if len(pv_cols) != len(jet_cols):
-        raise ValueError('PV collection length is not the same as Jets')
-
-    acc = ComponentAccumulator()
-
-    acc.merge(JetTagCalibCfg(cfgFlags))
-
-    if 'AntiKt4EMTopoJets' in jet_cols:
-        acc.merge(
-            RenameInputContainerEmTopoHacksCfg('oldAODVersion')
-        )
-
-    if PFLOW_JETS in jet_cols and cfgFlags.BTagging.Trackless:
-        acc.merge(
-            RenameInputContainerEmPflowHacksCfg('tracklessAODVersion')
-        )
-
-    # decorate tracks with detailed truth info and reco lepton info
-    acc.merge(trackTruthDecorator(cfgFlags))
-    acc.merge(TrackLeptonDecorationCfg(cfgFlags))
-
-    # Treat large-R jets as a special case
-    largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-
-    # Run flavour tagging on each jet collection
-    for jet_col, pv_col in zip(jet_cols, pv_cols):
-
-        if jet_col == largeRJetCollection:
-            acc.merge(BTagLargeRDecoration(cfgFlags, largeRJetCollection))
-        else:
-            # Run flavour tagging on this jet collection
-            acc.merge(
-                tagSingleJetCollection(
-                    cfgFlags, jet_col, pv_col,
-                    trackAugmenterPrefix=trackAugmenterPrefix
-                )
-            )
-    
-
-    if  cfgFlags.BTagging.GNNVertexFitter  and cfgFlags.GeoModel.Run < LHCPeriod.Run4:
-      from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
-      acc.merge(GNNVertexFitterAlgCfg(cfgFlags))
-      acc.merge(GNNVertexFitterAlgCfg(cfgFlags, inclusive=True))
-    
-    return acc
 
 def HLTJetFTagDecorationCfg(cfgFlags):
     from ParticleJetTools.ParticleJetToolsConfig import getJetDeltaRFlavorLabelTool
@@ -100,8 +52,15 @@ def HLTJetFTagDecorationCfg(cfgFlags):
 
 def BTagLargeRDecoration(cfgFlags, jet_col):
 
-    jet_col_name_without_Jets = jet_col.replace('Jets', '')
-    nnFiles = GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets)
+    nnList = cfgFlags.BTagging.NNs[jet_col]
+
+    nnFiles = []
+    for nnDict in nnList:
+        folds = nnDict['folds']
+        if len(folds) != 1:
+            raise ValueError(
+                "Multifold networks aren't supported for large-R jets")
+        nnFiles.append(folds[0])
 
     # Doesn't need to be configurable at the moment
     trackContainer = 'GhostTrack'
@@ -122,8 +81,11 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
         if nnFile.split('/')[0] == "JetCalibTools":
             # not technically a tagger, but works in this code
             tagger_name = nnFile.split('_')[-2]
+
+        acc.merge(_addDepsByTaggername(cfgFlags, tagger_name))
+
         acc.addEventAlgo(
-            CompFactory.FlavorTagDiscriminants.JetTagDecoratorAlg(
+            CompFactory.FlavorTagInference.JetTagDecoratorAlg(
                 f'{jet_col}{tagger_name}JetTagAlg',
                 container=jet_col,
                 constituentContainer=trackContainer,
@@ -139,7 +101,7 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
     return acc
 
 
-def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
+def LegacyBTaggingCfg(cfgFlags, jet_col, pv_col='PrimaryVertices',
                            trackAugmenterPrefix=None):
     """
     Return a component accumulator which runs tagging on a single jet collection.
@@ -160,6 +122,7 @@ def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
     ))
 
     # schedule tagging algorithms for this jet collection
+
     acc.merge(BTagAlgsCfg(
         inputFlags=cfgFlags,
         JetCollection=jet_col_name_without_Jets,

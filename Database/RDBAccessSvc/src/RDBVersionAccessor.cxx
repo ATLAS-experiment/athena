@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -50,7 +50,7 @@ RDBVersionAccessor::RDBVersionAccessor(const std::string& childNode
 void RDBVersionAccessor::getChildTagData()
 {
   std::string parentNodeId, childNodeId, parentTagId;
-  int nRows;
+  int nRows{};
 
   if(!m_session) {
     m_msgStream << MSG::ERROR << "VersionAccessor: No connection to database!" << endmsg;
@@ -157,7 +157,7 @@ void RDBVersionAccessor::getChildTagData()
 
     if(m_childNode==m_parentNode) {
       m_tagName = m_parentTag;
-      m_tagID = parentTagId;
+      m_tagID = std::move(parentTagId);
       return;
     }
 
@@ -176,7 +176,7 @@ void RDBVersionAccessor::getChildTagData()
     std::vector<std::string> path;
     path.push_back(childNodeId);
     std::string currentParrent = childNodeId;
-    std::string currentChild = childNodeId;
+    std::string currentChild = std::move(childNodeId);
 
     coral::AttributeList bindsNode ATLAS_THREAD_SAFE;
     bindsNode.extend<std::string>("nodeId");

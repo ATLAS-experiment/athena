@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,7 +14,7 @@
  */
 
 // class header
-#include "LArG4GenShowerLib/LArG4GenShowerLib.h"
+#include "LArG4GenShowerLib.h"
 
 // local include(s):
 #include "LArG4GenShowerLib/StepInfo.h"
@@ -80,25 +80,6 @@ private:
     return true; //it's here just to avoid warnings
   }
 };
-
-LArG4GenShowerLib::LArG4GenShowerLib(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator), m_stat_numshowers(0), m_stat_valid(0), m_stat_invalid(0), m_stat_nolib(0)
-{
-  declareProperty("MaxDistance",   m_maxDistance = 50000.,
-                  "max distance squared after which the hits will be truncated");
-  declareProperty("MinEnergy",   m_minEnergy = .99,
-                  "energy border, that truncation won't cross");
-  declareProperty("MaxRadius",        m_maxRadius = 25.,
-                  "maximal radius squared until two hits will be combined");
-  declareProperty("ContainmentEnergy",        m_containmentEnergy = 0.95,
-                  "energy fraction that will be inside containment borders");
-  declareProperty("LibStructFiles",   m_lib_struct_files,
-                  "List of files to read library structures from");
-  declareProperty("EnergyFraction",   m_energyFraction = .02,
-                  "the allowed amount of energy that can be deposited outside calorimeter region ");
-  declareProperty("PhysicsList", m_physicslist_name = "FTFP_BERT", "Geant4 PhysicsList used in the simulation");
-}
-
 
 StatusCode LArG4GenShowerLib::initialize()
 {
@@ -514,8 +495,6 @@ void LArG4GenShowerLib::calculateMoments(const ShowerLib::StepInfoCollection& ev
     yav   += (*i)->y()*(*i)->dep();
     xav2  += (*i)->x()*(*i)->x()*(*i)->dep();
     yav2  += (*i)->y()*(*i)->y()*(*i)->dep();
-    //    std::cout << "TRUNC EXYZ"<<(*i)->x()<<" "<<(*i)->y()<<" "<<(*i)->z()
-    //      <<" "<<(*i)->dep()<<" "<<(*i)->code<<std::endl;
   }
 
   // Center of gravity:

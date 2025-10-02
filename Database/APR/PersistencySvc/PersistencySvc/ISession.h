@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_ISESSION_H
 #define INCLUDE_PERSISTENCYSVC_ISESSION_H
 
+#include "PersistencySvc/DatabaseSpecification.h"
 #include <string>
 #include <vector>
-#include "PersistencySvc/DatabaseSpecification.h"
+#include <memory>
 
 namespace pool {
 
@@ -53,7 +54,7 @@ namespace pool {
     virtual std::vector< std::string > connectedDatabases() const = 0;
 
     /// Returns a pointer to a database object. The user acquires ownership of that object.
-    virtual IDatabase* databaseHandle( const std::string& dbName,
+    virtual std::unique_ptr<IDatabase> databaseHandle( const std::string& dbName,
                                        DatabaseSpecification::NameType dbNameType ) = 0;
 
     /// Returns the file catalog in use

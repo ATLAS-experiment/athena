@@ -6,37 +6,24 @@ atlas_subdir(ActsEventCnv)
 # External dependencies:
 find_package(Acts COMPONENTS Core)
 
-# Component(s) in the package:
-atlas_add_library(ActsEventCnvLib
-    ActsEventCnv/*.h
-    PUBLIC_HEADERS ActsEventCnv
-    INTERFACE
-    LINK_LIBRARIES
-    ActsCore
-    ActsEventLib
-    GaudiKernel
-    StoreGateLib
-    TrkParameters
-    TrkTrack
-    xAODMeasurementBase
-    xAODTracking
-)
 
 atlas_add_component(ActsEventCnv
     src/*.h src/*.cxx
     src/components/*.cxx
     LINK_LIBRARIES
-    ActsEventCnvLib
-    ActsCore
+    Acts::Core
     ActsEventLib
     ActsGeometryLib
     ActsGeometryInterfacesLib
+    ActsToolInterfacesLib
+    ActsCalibratorsLib
     ActsInteropLib
     AthenaBaseComps
     GaudiKernel
     InDetPrepRawData
     InDetReadoutGeometry
     InDetRIO_OnTrack
+    MuonReadoutGeometry
     MuonReadoutGeometryR4
     StoreGateLib
     TrkEventPrimitives
@@ -48,8 +35,7 @@ atlas_add_component(ActsEventCnv
     TrkTrack
     xAODInDetMeasurement
     xAODMeasurementBase
-    xAODTracking
-)
+    xAODTracking)
 
 atlas_add_test(ActsEventCnvTrackTest
     SCRIPT test/testTrackConversion.py
@@ -59,4 +45,5 @@ atlas_add_test(ActsEventCnvTrackTest
 atlas_add_test(ActsEventCnvMuonTrackTest
     SCRIPT test/testMuonTrackConversion.py
     PROPERTIES TIMEOUT 900
+    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from AtasTrackingGeometryConversion
     POST_EXEC_SCRIPT noerror.sh)

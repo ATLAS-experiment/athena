@@ -3,7 +3,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 #copied from DQPostProcessi.py and modified
 # Sami Kama
-from __future__ import print_function
 import sys
 def _dolsrwrapper(fname):
     import ROOT

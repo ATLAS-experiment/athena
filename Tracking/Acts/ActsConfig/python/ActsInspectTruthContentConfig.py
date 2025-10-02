@@ -23,15 +23,32 @@ def ActsInspectTruthContentAlgCfg(flags,
                                   name: str = "ActsInspectTruthContentAlg",
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault('Clusters', isdet(flags,
-                                        pixel=['ITkPixelClusters'],
-                                        strip=['ITkStripClusters']))
-    kwargs.setdefault('TruthAssociationMaps', isdet(flags,
-                                                    pixel=['ITkPixelClustersToTruthParticles'],
-                                                    strip=['ITkStripClustersToTruthParticles']))
-    
-    kwargs.setdefault('Seeds', ['ActsFastPixelSeeds'] if flags.Tracking.doITkFastTracking else ['ActsPixelSeeds', 'ActsStripSeeds'])
-    kwargs.setdefault('Tracks', ['ActsTracks'] if not flags.Acts.doAmbiguityResolution else ['ActsResolvedTracks'])
+    if flags.Acts.useHGTDClusterInTrackFinding and flags.Detector.EnableHGTD:
+        kwargs.setdefault('Clusters', isdet(flags,
+                                            pixel=['ITkPixelClusters'],
+                                            strip=['ITkStripClusters'],
+                                            hgtd=['HGTD_Clusters']))
+        
+        kwargs.setdefault('TruthAssociationMaps', isdet(flags,
+                                                        pixel=['ITkPixelClustersToTruthParticles'],
+                                                        strip=['ITkStripClustersToTruthParticles'],
+                                                        hgtd=['HgtdClustersToTruthParticles']))
+    else:
+        kwargs.setdefault('Clusters', isdet(flags,
+                                            pixel=['ITkPixelClusters'],
+                                            strip=['ITkStripClusters']))
+                
+        kwargs.setdefault('TruthAssociationMaps', isdet(flags,
+                                                        pixel=['ITkPixelClustersToTruthParticles'],
+                                                        strip=['ITkStripClustersToTruthParticles']))
+
+    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+    if isFastPrimaryPass(flags):
+        kwargs.setdefault('Seeds', ['ActsPixelSeeds'])
+        kwargs.setdefault('Tracks', ['ActsTracks'] if not flags.Acts.doAmbiguityResolution else ['ActsResolvedTracks'])
+    else:
+        kwargs.setdefault('Seeds', ['ActsLegacyPixelSeeds', 'ActsLegacyStripSeeds'])
+        kwargs.setdefault('Tracks', ['ActsLegacyTracks'] if not flags.Acts.doAmbiguityResolution else ['ActsLegacyResolvedTracks'])
 
     acc.addEventAlgo(CompFactory.ActsTrk.ActsInspectTruthContentAlg(name, **kwargs))
     return acc

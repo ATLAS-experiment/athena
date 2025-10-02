@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p6.cxx
@@ -11,6 +11,7 @@
 #include "PersistentDataModelTPCnv/DataHeader_p6.h"
 #include "PersistentDataModelTPCnv/DataHeaderCnv_p6.h"
 #include <climits>
+#include <algorithm>
 
 using FullElement  = DataHeader_p6::FullElement;
 
@@ -55,6 +56,13 @@ bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
          trans->m_pClid = form.getObjType( obj_idx );
          trans->m_clids = form.getObjSymLinks( obj_idx );
          trans->m_hashes = form.getObjHashes( obj_idx );
+
+         if (!std::ranges::is_sorted (trans->m_alias)) {
+           // Should really be sorted, but just in case...
+           std::ranges::sort (trans->m_alias);
+           auto ret = std::ranges::unique (trans->m_alias);
+           trans->m_alias.erase (ret.begin(), ret.end());
+         }
       }
    }
    return form.sizeDb() > db_idx and form.sizeObj() > (size_t)obj_idx;

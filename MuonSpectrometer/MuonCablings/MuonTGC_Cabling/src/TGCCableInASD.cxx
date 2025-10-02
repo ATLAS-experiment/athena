@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInASD.h"
@@ -12,50 +12,21 @@ namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
 TGCCableInASD::TGCCableInASD(const std::string& filename)
-  : TGCCable(TGCCable::InASD)
-{
-  m_database[TGCId::Endcap][TGCId::WD] = 
-    new TGCDatabaseASDToPP(filename,"EWD");
-  m_database[TGCId::Endcap][TGCId::WT] = 
-    new TGCDatabaseASDToPP(filename,"EWT");
-  m_database[TGCId::Endcap][TGCId::SD] =
-    new TGCDatabaseASDToPP(filename,"ESD");
-  m_database[TGCId::Endcap][TGCId::ST] =
-    new TGCDatabaseASDToPP(filename,"EST");
-  m_database[TGCId::Endcap][TGCId::WI] =
-    new TGCDatabaseASDToPP(filename,"EWI");
-  m_database[TGCId::Endcap][TGCId::SI] =
-    new TGCDatabaseASDToPP(filename,"ESI");
-  m_database[TGCId::Forward][TGCId::WD] = 
-    new TGCDatabaseASDToPP(filename,"FWD");
-  m_database[TGCId::Forward][TGCId::WT] =
-    new TGCDatabaseASDToPP(filename,"FWT");
-  m_database[TGCId::Forward][TGCId::SD] =
-    new TGCDatabaseASDToPP(filename,"FSD");
-  m_database[TGCId::Forward][TGCId::ST] = 
-    new TGCDatabaseASDToPP(filename,"FST");
-  m_database[TGCId::Forward][TGCId::WI] =
-    new TGCDatabaseASDToPP(filename,"FWI");
-  m_database[TGCId::Forward][TGCId::SI] = 
-    new TGCDatabaseASDToPP(filename,"FSI");
+  : TGCCable(TGCCable::InASD) {
+  m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabaseASDToPP>(filename,"EWD");
+  m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabaseASDToPP>(filename,"EWT");
+  m_database[TGCId::Endcap][TGCId::SD] = std::make_unique<TGCDatabaseASDToPP>(filename,"ESD");
+  m_database[TGCId::Endcap][TGCId::ST] = std::make_unique<TGCDatabaseASDToPP>(filename,"EST");
+  m_database[TGCId::Endcap][TGCId::WI] = std::make_unique<TGCDatabaseASDToPP>(filename,"EWI");
+  m_database[TGCId::Endcap][TGCId::SI] = std::make_unique<TGCDatabaseASDToPP>(filename,"ESI");
+  m_database[TGCId::Forward][TGCId::WD] = std::make_unique<TGCDatabaseASDToPP>(filename,"FWD");
+  m_database[TGCId::Forward][TGCId::WT] = std::make_unique<TGCDatabaseASDToPP>(filename,"FWT");
+  m_database[TGCId::Forward][TGCId::SD] = std::make_unique<TGCDatabaseASDToPP>(filename,"FSD");
+  m_database[TGCId::Forward][TGCId::ST] = std::make_unique<TGCDatabaseASDToPP>(filename,"FST");
+  m_database[TGCId::Forward][TGCId::WI] = std::make_unique<TGCDatabaseASDToPP>(filename,"FWI");
+  m_database[TGCId::Forward][TGCId::SI] = std::make_unique<TGCDatabaseASDToPP>(filename,"FSI");
 }
   
-TGCCableInASD::~TGCCableInASD(void)
-{
-  delete m_database[TGCId::Endcap][TGCId::WD];
-  delete m_database[TGCId::Endcap][TGCId::WT];
-  delete m_database[TGCId::Endcap][TGCId::SD];
-  delete m_database[TGCId::Endcap][TGCId::ST];
-  delete m_database[TGCId::Endcap][TGCId::WI];
-  delete m_database[TGCId::Endcap][TGCId::SI];
-  delete m_database[TGCId::Forward][TGCId::WD];
-  delete m_database[TGCId::Forward][TGCId::WT];
-  delete m_database[TGCId::Forward][TGCId::SD];
-  delete m_database[TGCId::Forward][TGCId::ST];
-  delete m_database[TGCId::Forward][TGCId::WI];
-  delete m_database[TGCId::Forward][TGCId::SI];
-}
-
 TGCChannelId* TGCCableInASD::getChannel(const TGCChannelId* channelId,
 					bool orChannel) const {
   if(channelId){
@@ -72,8 +43,7 @@ TGCChannelId*TGCCableInASD::getChannelIn(const TGCChannelId* asdout,
   if(orChannel) return nullptr;
   if(asdout->isValid()==false) return nullptr;
 
-  TGCDatabase* databaseP = 
-    m_database[asdout->getRegionType()][asdout->getModuleType()];
+  TGCDatabase* databaseP = m_database[asdout->getRegionType()][asdout->getModuleType()].get();
   
   TGCChannelASDIn* asdin = nullptr;
 
@@ -136,8 +106,7 @@ TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
   const int asdinLayer = asdin->getLayer();
   const int asdinChannel = asdin->getChannel();
 
-  TGCDatabase* databaseP =
-    m_database[asdin->getRegionType()][asdin->getModuleType()];
+  TGCDatabase* databaseP = m_database[asdin->getRegionType()][asdin->getModuleType()].get();
   
   TGCChannelASDOut* asdout = nullptr;
 
@@ -180,36 +149,35 @@ TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
 	dbChamber = dbChamber-1;
       
       int dbChannel = asdinChannel-1;
-      if(databaseP->getEntry(i,7)==dbChannel&&
-	 databaseP->getEntry(i,1)==dbChamber&&
-	 databaseP->getEntry(i,0)==asdinLayer)
-	{
-	  channel = databaseP->getEntry(i,6);
-	  break;
-	}
+      if(databaseP->getEntry(i,7)==dbChannel &&
+         databaseP->getEntry(i,1)==dbChamber &&
+         databaseP->getEntry(i,0)==asdinLayer) {
+        channel = databaseP->getEntry(i,6);
+        break;
+      }
     }
   } else {
     // asdin->isBackward() can not be used because this method rely on sector number for asdout
     bool is_Backward = false; 
     if(asdin->isEndcap()){
       if(!asdin->isInner()) { 
-	if(asdin->isAside()) is_Backward = (sector%2==1);
-	else                 is_Backward = (sector%2==0); 
+        if(asdin->isAside()) is_Backward = (sector%2==1);
+        else                 is_Backward = (sector%2==0); 
       } else {
-	// EI  
-	// Special case of EI11
-	if(sector == 15) {
-	  if(asdin->isAside()) is_Backward = false;
-	  else                 is_Backward = true; 
-	} else if(sector == 16) {
+        // EI
+        // Special case of EI11
+        if(sector == 15) {
+          if(asdin->isAside()) is_Backward = false;
+          else                 is_Backward = true; 
+        } else if(sector == 16) {
 	  if(asdin->isAside()) is_Backward = true;
 	  else                 is_Backward = false; 
-	} else {
+        } else {
 	  //  A-side phi0 F: phi1 F: phi2 B
 	  //  C-side phi0 B: phi1 B: phi2 F
 	  if(asdin->isAside())  is_Backward = (sector%3==2);
 	  else                  is_Backward = (sector%3!=2);
-	}
+        }
       }
     } else {
       if(asdin->isAside()) is_Backward = true; //All Backward for A-side

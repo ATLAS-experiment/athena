@@ -41,7 +41,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_PhiModulesPerRingSCT = 52
     m_PhiModulesShift_sct_barrel = 208
     m_EtaModulesShift_sct_barrel = 84
-    m_PhiModulesShift_sct_ec = 500
+    m_PhiModulesShift_sct_ec = 548 #52 mod/disk x 9 disk + 10*8 gaps
     m_minTRTResWindow = -0.6
     m_maxTRTResWindow = 0.6
     m_TRTB_nSectorBins = 32
@@ -216,7 +216,16 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         name = 'm_trt_ec_phi,m_trt_ec_lrVsPhiSec;trt_ec_lrVsPhiSec_' + layer
         tool.defineHistogram(name, title = title, type = 'TProfile', xbins = m_TRTEC_nPhiBins, xmin = -0.5 , xmax = m_TRTEC_nPhiBins - 0.5)
 
-        
+    # TRT residuals vs pt-wheel for end-caps
+    residualECTRT2DProfArray = helper.addArray([len(layersTRTEC)], alg, 'TRTResECvspT_2DProf', topPath = pathResiduals)
+    for postfix, tool in residualECTRT2DProfArray.Tools.items():
+        layer = layersTRTEC[int(postfix.split('_')[1])]
+        title = ('Residual vs pT-Wheel TRT %s; Wheel; Momentum p_{T}; Residual [mm]' % layer.upper()) 
+        name = 'm_layer_or_wheel,m_pT,m_trt_ec_residualR;trt_ec_resVsqPtWheel_' + layer
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = 20, xmin = - 0.5, xmax = 20 - 0.5,
+                                                  ybins = 80, ymin = -40, ymax = 40,
+                                                  zmin = m_minTRTResWindow, zmax = m_maxTRTResWindow)
+
     #Silicon Plots
     #Common for Pixel and SCT, barrel and Endcaps
     varName = 'm_si_residualx;si_residualx'
@@ -667,12 +676,6 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     varName = 'm_sct_eca_pullx;sct_eca_pulllx'
     title = 'UnBiased X Pull SCT EndCap A;Pull'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=-m_RangeOfPullHistos, xmax=m_RangeOfPullHistos)
-    
-    varName = 'm_modPhiShift_sct_eca,m_residualX_sct_eca;sct_eca_xresvsmodphi_2d'
-    title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECA;(Modified) Phi-ID;Residual [mm]'
-    residualGroup.defineHistogram(varName, title = title, type = 'TProfile', path=pathResiduals,
-                                  xbins = m_PhiModulesShift_sct_ec, xmin = 0, xmax = m_PhiModulesShift_sct_ec,
-                                  ybins = 100 * m_FinerBinningFactor, ymin=m_minSCTResFillRange, ymax=m_maxSCTResFillRange)
 
     varName = 'm_modPhiShift_sct_eca,m_residualX_sct_eca;sct_eca_xresvsmodphi_profile'
     title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECA;(Modified) Phi-ID;Residual [mm]'
@@ -715,12 +718,6 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     varName = 'm_sct_ecc_pullx;sct_ecc_pulllx'
     title = 'UnBiased X Pull SCT EndCap C;Pull'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=-m_RangeOfPullHistos, xmax=m_RangeOfPullHistos)
-
-    varName = 'm_modPhiShift_sct_ecc,m_residualX_sct_ecc;sct_ecc_xresvsmodphi_2d'
-    title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECC;(Modified) Phi-ID;Residual [mm]'
-    residualGroup.defineHistogram(varName, title = title, type = 'TProfile', path=pathResiduals,
-                                  xbins = m_PhiModulesShift_sct_ec, xmin = 0, xmax = m_PhiModulesShift_sct_ec,
-                                  ybins = 100 * m_FinerBinningFactor, ymin=m_minSCTResFillRange, ymax=m_maxSCTResFillRange)
 
     varName = 'm_modPhiShift_sct_ecc,m_residualX_sct_ecc;sct_ecc_xresvsmodphi_profile'
     title = 'X Residual Mean vs (Modified) Module Phi-ID SCT ECC;(Modified) Phi-ID;Residual [mm]'

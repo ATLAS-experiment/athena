@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXForwardJetsAlgo - Algorithm for forward Jets in jFEX
@@ -33,7 +33,7 @@ namespace LVL1{
       virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs(int seedThreshold) =0;
       virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
       
-      virtual int SumEtSeed(unsigned int TTID) = 0;
+      virtual int SumEtSeed(unsigned int TTID) const = 0;
 
    private:
 

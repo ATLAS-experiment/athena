@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsFast', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags):
@@ -25,8 +25,11 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
         TrackingComponent.ActsValidateConversionSeeds : "ActsValidateConversionSeeds",
         TrackingComponent.ActsValidateLargeRadiusSeeds: "ActsValidateLargeRadiusSeeds",
+        TrackingComponent.ActsValidateLargeRadiusStandalone: "ActsValidateLargeRadiusStandalone",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
         TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
+        TrackingComponent.ActsValidateF100 : "ActsValidateF100",
+        TrackingComponent.ActsValidateF150 : "ActsValidateF150",
     }
     
     # Athena Pass
@@ -35,17 +38,17 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ActiveConfig",
             f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")]
 
-    # Acts Pass
+    # Acts Pass - Legacy like
+    if TrackingComponent.ActsLegacyChain in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLegacyPass")]
+
+    # Acts Pass - Fast Tracking based
     if TrackingComponent.ActsChain in flags.Tracking.recoChain:
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
-
-    # Acts Fast Pass
-    if TrackingComponent.ActsFastChain in flags.Tracking.recoChain:
-        flags_set += [flags.cloneAndReplace(
-            "Tracking.ActiveConfig",
-            "Tracking.ITkActsFastPass")]
         
     # Acts Heavy Ion Pass
     if TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
@@ -102,7 +105,7 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkFPGAPass")]
-
+        
     # Photon conversion tracking reco
     if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
         flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
@@ -227,7 +230,7 @@ def ITkTrackRecoPassCfg(flags,
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
     if extension in _actsExtensions:
-        TrackContainer = extension + "ResolvedTracks"
+        TrackContainer = extension + "ResolvedTracks" if flags.Acts.doAmbiguityResolution else extension + "Tracks"
     if doTrackOverlay and extension == "Conversion":
         TrackContainer = flags.Overlay.SigPrefix + TrackContainer
 
@@ -397,6 +400,7 @@ def ITkTrackFinalCfg(flags,
             'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
             'ActsConversion' in splitProbName or \
             'ActsLargeRadius' in splitProbName or \
+            'ActsValidateLargeRadiusStandalone' in splitProbName or \
             'ActsLowPt' in splitProbName or \
             ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
         
@@ -455,7 +459,28 @@ def ITkExtendedPRDInfoCfg(flags):
 
     from DerivationFrameworkInDet.InDetToolsConfig import (
         ITkTSOS_CommonKernelCfg)
-    result.merge(ITkTSOS_CommonKernelCfg(flags))
+    # Set up one algorithm for each output tracking container
+    # Always done for default pass
+    # Done for other passes if pass requests to store track seeds OR track candidates OR requests separate container
+    # Input handling/configuration of algorithm for specific cases is done in TSOS_CommonKernelCfg
+    listOfExtensionsRequesting = [
+        e for e in _extensions_list if (e == '')
+        or (flags.Tracking[f"ITk{e}Pass"].storeTrackSeeds) # Store Si track seeds
+        or (flags.Tracking[f"ITk{e}Pass"].storeSiSPSeededTracks) # Store Si candidate tracks
+        or (flags.Tracking[f"ITk{e}Pass"].storeSeparateContainer) ] # Particular tracking pass requesting separate container from main pass
+
+    result.merge(ITkTSOS_CommonKernelCfg(
+        flags, listOfExtensions = listOfExtensionsRequesting))
+
+    if flags.Tracking.doStoreTrackSeeds:
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            ITkSiSPSeedsTSOS_CommonKernelCfg)
+        # Setup one algorithm for each output tracking container
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list if (e == '') or
+            flags.Tracking[f"ITk{e}Pass"].storeTrackSeeds ]
+        result.merge(ITkSiSPSeedsTSOS_CommonKernelCfg(
+            flags, listOfExtensions = listOfExtensionsRequesting))
 
     if flags.Tracking.doStoreSiSPSeededTracks:
         listOfExtensionsRequesting = [
@@ -692,7 +717,7 @@ if __name__ == "__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     top_acc.merge(PoolReadCfg(flags))
 
-    if flags.Input.isMC:
+    if flags.Input.isMC and flags.Output.doGEN_AOD2xAOD:
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
         top_acc.merge(GEN_AOD2xAODCfg(flags))
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigT1Run3ZDC.h"
 
@@ -13,13 +13,6 @@
 using json = nlohmann::json;
 
 namespace LVL1 {
-
-//--------------------------------
-// Constructors and destructors
-//--------------------------------
-
-TrigT1Run3ZDC::TrigT1Run3ZDC(const std::string &name, ISvcLocator *pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator) {}
 
 //---------------------------------
 // initialise()
@@ -112,9 +105,7 @@ StatusCode TrigT1Run3ZDC::initialize() {
 // execute() method called once per event
 //----------------------------------------------
 
-StatusCode TrigT1Run3ZDC::execute() {
-
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
 
   // create uints to hold trigger averages
   unsigned int trigAvgAHG = 0;

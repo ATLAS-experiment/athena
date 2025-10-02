@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HLTSEEDING_CTPUNPACKINGTOOL_H
@@ -9,6 +9,7 @@
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigConfData/HLTMenu.h"
 #include "TrigConfData/L1Menu.h"
+#include "xAODTrigger/CTPResult.h"
 
 /**
  * @class decodes CTP information in order to activate HLT chains
@@ -21,7 +22,7 @@ public:
                     const IInterface* parent );
 
   /// Fills the list of chains that should be activated in a given event (note HLT prescaling happens at a later stage)
-  virtual StatusCode decode(const ROIB::RoIBResult& roib, HLT::IDVec& enabledChains) const override;
+  virtual StatusCode decode(const EventContext& ctx, const ROIB::RoIBResult& roib, HLT::IDVec& enabledChains) const override;
 
   virtual StatusCode initialize() override;
 
@@ -40,9 +41,16 @@ private:
   SG::ReadHandleKey<TrigConf::L1Menu>  m_L1MenuKey{
     this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu", "L1 Menu"};
 
+  SG::ReadHandleKey<xAOD::CTPResult>  m_ctpResultKey{
+    this, "CTPResult", "StoreGateSvc+CTPResult", "CTP Result"};
+
   Gaudi::Property<bool> m_useTBPBit{
     this, "UseTBPBits", false,
     "When true, use Trigger Before Prescale bits instead of Trigger After Veto (for testing only)"};
+
+  Gaudi::Property<bool> m_useEDMxAOD{
+    this, "UseEDMxAOD", false,
+    "When true, use xAOD::CTPResult object when decoding instead of relying on ROIB::RoIBResult for CTP words"};
 
   std::map<std::string, size_t> m_itemNametoCTPIDMap;
 };

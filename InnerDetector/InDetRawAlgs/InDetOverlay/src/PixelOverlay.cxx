@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetOverlay/PixelOverlay.h"
@@ -13,6 +13,12 @@
 
 namespace Overlay
 {
+
+struct PixelRDOSorter {
+  bool operator()(PixelRDORawData *digit1, PixelRDORawData *digit2) {
+    return digit1->identify() < digit2->identify();
+  }
+} PixelRDOSorterObject;
 
 // Specialize mergeChannelData() for the Pixel
 template <>
@@ -42,6 +48,15 @@ std::unique_ptr<PixelRDO_Collection> copyCollection(
   }
   return outputCollection;
 }
+
+// Specizlize sortCollection() for the Pixel
+template <>
+void sortCollection(PixelRDO_Collection *collection) {
+  if (!std::is_sorted(collection->begin(), collection->end(), PixelRDOSorterObject)) {
+    std::stable_sort(collection->begin(), collection->end(), PixelRDOSorterObject);
+  }
+}
+
 } // namespace Overlay
 
 
@@ -106,7 +121,7 @@ StatusCode PixelOverlay::execute(const EventContext& ctx) const
   DataPool<Pixel1RawData> dataItemsPool(ctx);
   // It resizes but lets reserve already quite a few
   dataItemsPool.prepareToAdd(100000);
-  ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr(), dataItemsPool));
+  ATH_CHECK(overlayContainerWithSorting(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr(), dataItemsPool));
   ATH_MSG_DEBUG("Pixel Result   = " << Overlay::debugPrint(outputContainer.ptr()));
 
   ATH_MSG_DEBUG("execute() end");

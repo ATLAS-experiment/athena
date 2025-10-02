@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=2 sw=2
@@ -14,30 +14,7 @@ using ROOT::Math::PtEtaPhiMVector;
 
 // Default constructor
 MissingMassTool::MissingMassTool(const std::string& name) : asg::AsgTool(name)
-
 {
-  declareProperty("Decorate",			m_decorate=false, "Activate EventInfo decoration");
-  declareProperty("FloatStoppingCrit",		m_float_stop=true, "Activate floating stopping criterion");
-  declareProperty("CalibSet",			m_calib_set="2019", "Calibration: 2019"); // Change to "2024" if the new MMC version is to be used.
-  // default negative. Only set parameter if positive
-  // so that the default are in MissingMassCalculator code
-  declareProperty("NsigmaMET",			m_n_sigma_met=-1);
-  declareProperty("UseTailCleanup",		m_tail_cleanup=-1); 
-  declareProperty("UseVerbose",			m_use_verbose=-1);
-  declareProperty("NiterFit2",			m_niter_fit_2=-1);
-  declareProperty("NiterFit3",			m_niter_fit_3=-1);
-  // Property not there in latest MMC tags
-  declareProperty("UseTauProbability",		m_use_tau_probability=-1);
-  declareProperty("UseMnuProbability",		m_use_mnu_probability=false);
-  declareProperty("UseDefaults",		m_use_defaults=-1);
-  declareProperty("UseEfficiencyRecovery",	m_use_efficiency_recovery=-1);
-  declareProperty("UseMETDphiLL",		m_use_met_param_dphiLL = false);
-  // Available parameterization files: MMC_params_v051224_angle_noLikelihoodFit.root and MMC_params_v051224_angle_likelihoodFit.root. More details on the differences between these two options can be found in the slides:
-  // https://indico.cern.ch/event/1487242/contributions/6269201/attachments/2989313/5265428/HbbHtautau_MMCstudies_statusReport_181224_v2.pdf
-  declareProperty("ParamFilePath",            m_param_file_path = "MMC_params_v1_fixed.root"); 
-  declareProperty("BeamEnergy",     m_beam_energy = 6500.0);
-  declareProperty("LFVLeplepRefit", m_lfv_leplep_refit = true);
-  declareProperty("SaveLlhHisto", m_save_llh_histo = false, "Save MMC LLh histograms for debugging purpose. If enabled, it can slow down MMC running time");
 }
 
 // Copy constructor
@@ -57,8 +34,6 @@ StatusCode MissingMassTool::initialize()
     aset = MMCCalibrationSet::UPGRADE;
   } else if (m_calib_set == "LFV") {
     aset = MMCCalibrationSet::LFVMMC2012;
-  } else if (m_calib_set == "2016MC15C") {
-    aset = MMCCalibrationSet::MMC2016MC15C;
   } else if (m_calib_set == "2019") {
     aset = MMCCalibrationSet::MMC2019;
   } else if (m_calib_set == "2024") {
@@ -68,17 +43,20 @@ StatusCode MissingMassTool::initialize()
   }
 
 
-  if(aset == MMCCalibrationSet::MMC2019 &&  m_param_file_path.find("v051224") != std::string::npos){
+  if(aset == MMCCalibrationSet::MMC2019 &&  m_param_file_path.value().find("v051224") != std::string::npos){
 		ATH_MSG_WARNING( m_param_file_path << " param file not suitable for 2019 calibration set; please use MMC_params_v1_fixed.root");
 	}
  
-	if(aset == MMCCalibrationSet::MMC2024 && m_param_file_path.find("MMC_params_v1") != std::string::npos){
+	if(aset == MMCCalibrationSet::MMC2024 && m_param_file_path.value().find("MMC_params_v1") != std::string::npos){
     ATH_MSG_WARNING( m_param_file_path << " param file not suitable for 2024 calibration set; please use MMC_params_v051224_angle_likelihoodFit.root or MMC_params_v051224_angle_noLikelihoodFit.root"); 
 	}
 
 	m_MMC = new MissingMassCalculator(aset, m_param_file_path);
-  // set properties if non negative
   m_MMC->SetUseFloatStopping(m_float_stop);
+  m_MMC->SetFloatStoppingMinIter(m_float_stop_miniter);
+  m_MMC->SetFloatStoppingCheckFreq(m_float_stop_checkfreq);
+  m_MMC->SetFloatStoppingComp(m_float_stop_comp);
+	// set properties if non negative
   if (m_n_sigma_met>=0) m_MMC->SetNsigmaMETscan(m_n_sigma_met);
   if (m_tail_cleanup>=0) m_MMC->preparedInput.SetUseTailCleanup(m_tail_cleanup);
   if (m_use_verbose>=0) m_MMC->preparedInput.SetUseVerbose(m_use_verbose);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -41,6 +41,10 @@ void CaloPhiParabola::makeTheCorrection (const Context& myctx,
   float coefs[3];
 
   unsigned int n_samples = energies.size();
+  if (n_samples == 0) {
+    ATH_MSG_ERROR("Empty energies vector");
+    return;
+  }
 
   unsigned int shape[] = {n_samples, 4};
   CaloRec::WritableArrayData<2> pol2Parm (shape);

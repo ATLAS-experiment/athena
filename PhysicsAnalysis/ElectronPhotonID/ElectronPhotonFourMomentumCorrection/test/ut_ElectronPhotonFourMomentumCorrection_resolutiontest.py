@@ -124,7 +124,7 @@ class TestEgammaResolution(unittest.TestCase):
     @unittest.skip("CHECK")
     def test_resolution_interface(self):
         tool = ROOT.CP.EgammaCalibrationAndSmearingTool("tool")
-        tool.setProperty("ESModel", "es2012c").ignore()
+        tool.setProperty("ESModel", "es2024_Run3_v0").ignore()
         tool.setProperty["int"]("doSmearing", 0).ignore()
         self.assertTrue(tool.initialize().isSuccess())
 

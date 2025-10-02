@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // Written by Bill Balunas (balunas@cern.ch)
 // Based on DiBjetFilter by Stephen Bienek
@@ -8,23 +8,17 @@
 #define GENERATORFILTERSxAODMULTIBJETFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "xAODTruth/TruthParticle.h"
+#include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
-#include "xAODTruth/TruthParticleAuxContainer.h"
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
-
-//Random number generator required for accepting light jets
-class TRandom3;
 
 class xAODMultiBjetFilter:public GenFilter {
 
-  public:
-    xAODMultiBjetFilter(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~xAODMultiBjetFilter();
-    virtual StatusCode filterInitialize();
-    virtual StatusCode filterFinalize();
-    virtual StatusCode filterEvent();
+public:
+  using GenFilter::GenFilter;
+
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterFinalize() override final;
+  virtual StatusCode filterEvent() override final;
 
 private:
 
@@ -44,13 +38,15 @@ private:
     Gaudi::Property<double> m_bottomEtaMax{this,"BottomEtaMax",3.0,"Maximal bottom eta"};
     Gaudi::Property<int> m_nBJetsMin{this,"NBJetsMin",0,"Minimal b-jet multiplicity"};
     Gaudi::Property<int> m_nBJetsMax{this,"NBJetsMax",-1,"Maximal b-jet multiplicity"};
-    Gaudi::Property<std::string> m_TruthJetContainerName{this,"TruthContainerName","AntiKt4TruthJets","Truht jet container name"};
+
+    SG::ReadHandleKey<xAOD::JetContainer> m_TruthJetContainerName{this, "TruthJetContainer", "AntiKt4TruthJets"}; // Name of the truth jet container
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
 
     // Internal bookkeeping variables
-    int    m_NPass;
-    int    m_Nevt;
-    double m_SumOfWeights_Pass;
-    double m_SumOfWeights_Evt;
+    int    m_NPass{};
+    int    m_Nevt{};
+    double m_SumOfWeights_Pass{};
+    double m_SumOfWeights_Evt{};
 };
 
 #endif

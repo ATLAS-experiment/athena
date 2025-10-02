@@ -30,7 +30,6 @@ else()
     find_package( graphviz )
     find_package( pygraphviz )
     find_package( requests )
-    find_package( six )
     
     # Install files from the package:
     atlas_install_python_modules( python/*.py python/scripts POST_BUILD_CMD ${ATLAS_FLAKE8} )

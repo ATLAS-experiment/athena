@@ -32,6 +32,7 @@ if __name__=='__main__':
     parser.print_help()
     sys.exit(0)
 
+  print(vars(args))
 
   #Translation table ... with a few potential variant spellings
   objTable={"RAMP":"Ramp",
@@ -122,6 +123,9 @@ if __name__=='__main__':
   if len(objects)!=len(objectsOnl):
     flags.IOVDb.DBConnection="COOLOFL_LAR/CONDBR2" 
 
+  if "fSampl" in objects:
+     flags.Overlay.DataOverlay=True
+
   flags.lock()
   
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -136,6 +140,9 @@ if __name__=='__main__':
                                TimeStampInterval = 1))
 
 
+  if "fSampl" in objects:
+     from IOVDbSvc.IOVDbSvcConfig import addOverride
+     cfg.merge(addOverride(flags,"/LAR/ElecCalibMC/fSampl","LARElecCalibMCfSampl-G496-19213-FTFP_BERT_BIRK"))
 
   #Get LAr basic services and cond-algos
   from LArGeoAlgsNV.LArGMConfig import LArGMCfg
@@ -236,10 +243,10 @@ if __name__=='__main__':
        for fld in flds:
           if 'OFC' in fld:
              if args.ftag:
-                cfg.merge(addFolders(flags,fld,tag="".join(foldername.split('/')) + args.ftag))
+                cfg.merge(addFolders(flags,fld,tag="".join(fld.split('/')) + args.ftag))
              else:
                 cfg.merge(addFolders(flags,fld))
-             ckey= 'LArOFC' if '1phase' in fld else 'LArLArOFCPhys4samples'
+             ckey= 'LArOFC'
              ntname= 'OFC' if '1phase' in fld  else 'OFC_1ns'
              break
     else:         
@@ -284,9 +291,22 @@ if __name__=='__main__':
 
 
   if "Shape" in objects:
-    ckey = "LArShapeSC" if flags.LArCalib.isSC else "LArShape"
+    if args.offline: 
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       for fld in flds:
+          if 'Shape' in fld:
+             if args.ftag:
+                cfg.merge(addFolders(flags,fld,tag="".join(fld.split('/')) + args.ftag))
+             else:
+                cfg.merge(addFolders(flags,fld))
+             ckey= 'LArShape'
+             ntname= 'SHAPE' if '1phase' in fld  else 'SHAPE_1ns'
+             break
+    else:         
+       ckey = "LArShapeSC" if flags.LArCalib.isSC else "LArShape"
     if flags.Input.isMC:
        ckey="LArShapeSym"
+
     cfg.addEventAlgo(CompFactory.LArShape2Ntuple(ContainerKey=ckey,
                                                  AddFEBTempInfo   = False,   
                                                  AddCalib = True,
@@ -295,6 +315,14 @@ if __name__=='__main__':
                
                                                ))
   if "MphysOverMcal" in objects:
+    if args.offline:
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       if flags.LArCalib.isSC:
+          print('offline, adding /LAR/ElecCalibOflSC/MphysOverMcal/RTM folder')
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOflSC/MphysOverMcal/RTM',modifiers='<key>LArMphysOverMcalSC</key>',className='LArMphysOverMcalComplete'))
+       else:   
+          cfg.merge(addFolders(flags,'/LAR/ElecCalibOfl/MphysOverMcal/RTM',className='LArMphysOverMcalComplete'))
+
     cfg.addEventAlgo(CompFactory.LArMphysOverMcal2Ntuple(ContainerKey   = "LArMphysOverMcalSC" if flags.LArCalib.isSC else "LArMphysOverMcal",
                                                          AddFEBTempInfo   = False,
                                                          AddCalib = True,
@@ -370,9 +398,11 @@ if __name__=='__main__':
                                                ))
 
   if "DSPThr" in objects:
-     from IOVDbSvc.IOVDbSvcConfig import addFolders
-     cfg.merge(addFolders(flags,"/LAR/Configuration/DSPThresholdFlat/Thresholds",detDb="LAR_ONL"))  
-     cfg.addEventAlgo(CompFactory.LArDSPThresholds2Ntuple(DumpFlat=True,FlatFolder="/LAR/Configuration/DSPThresholdFlat/Thresholds"))
+     from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
+     f1 = "/LAR/Configuration/DSPThresholdFlat/Thresholds"
+     f2 = "/LAR/NoiseOfl/DSPThresholds"
+     cfg.merge(addFoldersSplitOnline(flags,"LAR",f1,f2,splitMC=True))
+     cfg.addEventAlgo(CompFactory.LArDSPThresholds2Ntuple(DumpFlat=True,FlatFolder=f2 if flags.Input.isMC else f1))
 
   if "MinBias" in objects:
      #FIXME different for MC

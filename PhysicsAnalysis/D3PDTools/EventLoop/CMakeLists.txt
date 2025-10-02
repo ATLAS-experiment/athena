@@ -30,6 +30,10 @@ atlas_add_library( EventLoop
    LINK_LIBRARIES ${ROOT_LIBRARIES} AnaAlgorithmLib AsgServicesLib AsgMessagingLib AsgTools SampleHandler
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver RootCoreUtils RootUtils xAODCore xAODRootAccess )
 
+atlas_add_component( EventLoopComponents
+   src/components/*.cxx
+   LINK_LIBRARIES EventLoop )
+
 target_compile_definitions (EventLoop PUBLIC USE_CMAKE)
 
 file (GLOB util_sources RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/util/[a-zA-Z0-9]*.cxx")

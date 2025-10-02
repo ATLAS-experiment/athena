@@ -1,52 +1,121 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
+#include "ActsGeometry/ActsDetectorElement.h"
+#include "ActsGeometryInterfaces/IDetectorElement.h"
 
-ActsTrackingGeometryTool::ActsTrackingGeometryTool(const std::string& type, const std::string& name,
-    const IInterface* parent)
-  : base_class(type, name, parent)
-{
+#include "Acts/Geometry/TrackingGeometry.hpp"
+
+
+using namespace ActsTrk;
+
+StatusCode ActsTrackingGeometryTool::initialize() {
+    ATH_MSG_DEBUG(name() << " initializing");
+    if (parent() != toolSvc()) {
+        ATH_MSG_ERROR("The tool is initialized as a private tool but should be public");
+        return StatusCode::FAILURE;
+    }
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    ATH_CHECK(m_rchk.initialize());
+    m_detIdMap = createDetectorElementToGeoIdMap();
+    if (!m_detIdMap) {
+        return StatusCode::FAILURE;
+    }
+    return StatusCode::SUCCESS;
 }
 
-StatusCode
-ActsTrackingGeometryTool::initialize()
-{
-  ATH_MSG_INFO(name() << " initializing");
-
-  ATH_CHECK( m_trackingGeometrySvc.retrieve() );
-
-  ATH_CHECK( m_rchk.initialize() );
-
-  return StatusCode::SUCCESS;
+std::shared_ptr<const Acts::TrackingGeometry> ActsTrackingGeometryTool::trackingGeometry() const {
+    return m_trackingGeometrySvc->trackingGeometry();
+}
+const ActsTrk::DetectorElementToActsGeometryIdMap* ActsTrackingGeometryTool::surfaceIdMap() const {
+    return m_detIdMap.get();
 }
 
-std::shared_ptr<const Acts::TrackingGeometry>
-ActsTrackingGeometryTool::trackingGeometry() const
-{
-  return m_trackingGeometrySvc->trackingGeometry();
+const ActsGeometryContext& ActsTrackingGeometryTool::getGeometryContext(const EventContext& ctx) const {
+    ATH_MSG_DEBUG("Creating alignment context for event");
+    const ActsGeometryContext* geoCtx{nullptr};
+    if (!SG::get(geoCtx, m_rchk, ctx).isSuccess()) {
+        ATH_MSG_ERROR("Creating alignment context failed: read cond handle invalid!");
+    }
+    return *geoCtx;
 }
 
-const ActsGeometryContext&
-ActsTrackingGeometryTool::getGeometryContext(const EventContext& ctx) const
-{
-  ATH_MSG_DEBUG("Creating alignment context for event");
-  SG::ReadHandle<ActsGeometryContext> rch(m_rchk, ctx);
-
-  if(!rch.isValid()) {
-    ATH_MSG_ERROR("Creating alignment context failed: read cond handle invalid!");
-  }
-
-  return *rch;
+const ActsGeometryContext& ActsTrackingGeometryTool::getNominalGeometryContext() const {
+     return m_trackingGeometrySvc->getNominalContext();
 }
 
-const ActsGeometryContext&
-ActsTrackingGeometryTool::getNominalGeometryContext() const {
 
-  return m_trackingGeometrySvc->getNominalContext();
-}
-const ActsGeometryContext& ActsTrackingGeometryTool::getGeometryContext() const {
-    return getGeometryContext(Gaudi::Hive::currentContext());
-}
+std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> 
+    ActsTrackingGeometryTool::createDetectorElementToGeoIdMap() const {
+    // create map from
+    auto detector_element_to_geoid = std::make_unique<DetectorElementToActsGeometryIdMap>();
 
+    struct Counter{ 
+        unsigned n_detector_elements{0};
+        unsigned n_missing_detector_elements{0};
+        unsigned n_wrong_type{0};
+    };
+    Counter counter {};
+    trackingGeometry()->visitSurfaces([this, &counter, &detector_element_to_geoid](const Acts::Surface *surface) {
+        if (!surface || !surface->associatedDetectorElement()) {
+            ++counter.n_wrong_type;
+            return;
+        }
+        const auto* detEl = dynamic_cast<const IDetectorElementBase*>(surface->associatedDetectorElement());
+        if (!detEl) {
+            ++counter.n_missing_detector_elements;
+            return;
+        }
+        auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type,
+                                                                          const IdentifierHash& hash) {
+            detector_element_to_geoid->insert(std::make_pair(makeDetectorElementKey(type, hash),
+                                                             DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId())));
+            ++counter.n_detector_elements;
+        };
+        switch(detEl->detectorType()) {
+            using enum DetectorType;
+            case Pixel:
+                insert_id(xAOD::UncalibMeasType::PixelClusterType,
+                          dynamic_cast<const ActsDetectorElement*>(detEl)->identifyHash());
+                break;
+            case Sct:
+                insert_id(xAOD::UncalibMeasType::StripClusterType,
+                          dynamic_cast<const ActsDetectorElement*>(detEl)->identifyHash());
+                break;
+            case Hgtd:
+                insert_id(xAOD::UncalibMeasType::HGTDClusterType,
+                         dynamic_cast<const ActsDetectorElement*>(detEl)->identifyHash());
+                break;
+            case Trt: {
+                break;
+            }
+            /// Muon system
+            case Mdt:
+            case Rpc:
+            case Tgc:
+            case Csc:
+            case Mm:
+            case sTgc:{
+                // surface map not needed for the muon detectors
+               ++counter.n_detector_elements; 
+               break;
+            }
+            case UnDefined:
+                ATH_MSG_ERROR("Undefined element encountered");
+                counter.n_detector_elements = 0;
+                return;
+        }
+    }, true /*sensitive surfaces*/);
+    ATH_MSG_INFO( "Surfaces without associated detector elements " << counter.n_missing_detector_elements
+                << " (with " << counter.n_detector_elements << ")" );
+    if (counter.n_detector_elements==0) {
+        ATH_MSG_ERROR( "No surface with associated detector element" );
+        return nullptr;
+    }
+    if (counter.n_wrong_type>0) {
+        ATH_MSG_WARNING( "Surfaces associated to detector elements not of type Trk::TrkDetElementBase :" << counter.n_wrong_type);
+    }
+    return detector_element_to_geoid;
+}

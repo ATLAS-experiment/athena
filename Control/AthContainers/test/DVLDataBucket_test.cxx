@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DVLDataBucket_test.cxx 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file AthContainers/test/DVLDataBucket_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -31,7 +30,7 @@
 struct Reg
   : public SG::IRegisterTransient
 {
-  virtual void registerTransient (void* p);
+  virtual void registerTransient (void* p) override;
   std::vector<void*> m_log;
 };
 

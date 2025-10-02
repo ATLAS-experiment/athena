@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // updated by Leigh Schaefer <leigh.schaefer@cern.ch> April 2017
@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "TSystem.h"
 #include "TRT_StrawMap.h"
 
 using namespace std;
@@ -44,9 +45,11 @@ int main(int argc, char **argv)
     initializeDeadStrawsList();
 
     int run = atoi(argv[1]);
-
+    //coverity[tainted_data]
     std::string filename = "straws." + std::to_string(run) + ".txt";
     std::cout << filename << std::endl;
+    std::cout << "Created output/ folder.\n";
+    gSystem->mkdir("output/",1);
 
     // options for which straws to mask
     for (int i = 2; i < argc; ++i)
@@ -92,12 +95,13 @@ int main(int argc, char **argv)
         }
     }
 
-    std::cout << " checkNoisy_HT = " << checkNoisy_HT
-              << "\n checkNoisy_LT = " << checkNoisy_LT
-              << "\n checkLoEff_HT = " << checkLoEff_HT
-              << "\n checkLoEff_LT = " << checkLoEff_LT
-              << "\n checkDead_LT  = " << checkDead_LT
-              << "\n StatusPermanent  = " << onlyMaskBoards
+    std::cout << "\nOption selection:"
+              << "\n - checkNoisy_HT = " << checkNoisy_HT
+              << "\n - checkNoisy_LT = " << checkNoisy_LT
+              << "\n - checkLoEff_HT = " << checkLoEff_HT
+              << "\n - checkLoEff_LT = " << checkLoEff_LT
+              << "\n - checkDead_LT  = " << checkDead_LT
+              << "\n - StatusPermanent  = " << onlyMaskBoards
               << std::endl;
 
     simpleAnalysis(filename);
@@ -143,6 +147,7 @@ void initializeDeadStrawsList()
         strawMap map(tmp[0], tmp[1], tmp[4], tmp[3], tmp[2]);
         if (tmp[5] > 0)
         {
+            //coverity[tainted_data]
             deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][map.straw()] = tmp[5];
             count++;
         }
@@ -191,7 +196,7 @@ void simpleAnalysis(const std::string& filename)
 
             if (tmp[3] == 0         ) skip = 12; // 0 hits
         }
-
+        //coverity[tainted_data]
         if (deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]] == 1)
         {
             if (!onlyMaskBoards)
@@ -380,6 +385,10 @@ void reportResults(const std::string & filename, int run)
     assert(f);
     int count(0), nevents(0), tmp[9];
     FILE *fout = fopen("TRT_StrawStatusReport.txt", "w");
+    if (!fout) {
+      printf ("Cannot open output file");
+      exit(1);
+    }
     fprintf(fout, "%d %d %d %d %d %lf %lf %lf %2d\n", 0, 0, 0, 0, run, 0., 0., 0., 0);
     //what do these numbers mean, what are valid ranges for them?
     while (fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8) == 9)
@@ -401,6 +410,7 @@ void reportResults(const std::string & filename, int run)
         int j = int(tmp[1]);
         int k = int(tmp[2]);
         strawMap map(side, j, k);
+        //coverity[tainted_data]
         fprintf(fout, "%d %d %d %d %d %lf %lf %lf %2d\n", tmp[0], tmp[1], tmp[2], deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]], tmp[4], occupancy, HToccupancy, efficiency, map.layer());
     }
 

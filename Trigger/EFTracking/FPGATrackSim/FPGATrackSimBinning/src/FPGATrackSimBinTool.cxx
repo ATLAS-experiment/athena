@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanTool.cxx
@@ -8,6 +8,9 @@
  */
 
 #include "FPGATrackSimBinning/FPGATrackSimBinTool.h"
+
+using FPGATrackSimBinUtil::ParSet;
+using FPGATrackSimBinUtil::IdxSet;
 
 FPGATrackSimBinTool::FPGATrackSimBinTool(const std::string &algname, const std::string &name,
   const IInterface *ifc)
@@ -50,6 +53,8 @@ StatusCode FPGATrackSimBinTool::initialize() {
     }
     prev = step.get();
   }
+
+  ATH_MSG_DEBUG("Finished initializing BinTool");
 
   return StatusCode::SUCCESS;
 }
@@ -146,3 +151,21 @@ void FPGATrackSimBinTool::computeValidBins(const IFPGATrackSimEventSelectionSvc*
   }
 }
 
+ParSet FPGATrackSimBinTool::center() const
+{
+    ParSet parset;
+    for (unsigned i = 0; i < FPGATrackSimTrackPars::NPARS; i++)
+    {
+        parset[i] = parCenter(i);
+    }
+    return parset;
+}
+
+// ----------------------------------------------------------------------------------------
+//  Write Firmware LUTs (constants)
+// ----------------------------------------------------------------------------------------
+void FPGATrackSimBinTool::writeLUTs() const {
+  for (const auto &step : m_steps) {
+    m_binDesc->writeLUTs(*step.get());
+  }
+}

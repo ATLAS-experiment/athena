@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataModelTestDataRead/src/AllocTestAuxContainer_v1.cxx
@@ -12,6 +12,7 @@
 #undef NDEBUG
 #include "DataModelTestDataRead/versions/AllocTestAuxContainer_v1.h"
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/xmalloc.h"
 
 
 namespace {
@@ -31,7 +32,7 @@ public:
 
   virtual void* do_allocate (size_t bytes, std::size_t /*alignment*/) override
   {
-    size_t* p = reinterpret_cast<size_t*>(malloc (bytes + 2*sizeof(size_t)));
+    size_t* p = reinterpret_cast<size_t*>(CxxUtils::xmalloc (bytes + 2*sizeof(size_t)));
     p[0] = bytes;
     p[1] = MAGIC;
     return p + 2;

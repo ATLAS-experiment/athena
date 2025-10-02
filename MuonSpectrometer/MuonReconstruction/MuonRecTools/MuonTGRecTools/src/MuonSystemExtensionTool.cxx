@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSystemExtensionTool.h"
@@ -32,14 +32,6 @@ namespace{
 }
 namespace Muon {
 
-
-
-
-    MuonSystemExtensionTool::MuonSystemExtensionTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonSystemExtensionTool>(this);
-    }
-
     StatusCode MuonSystemExtensionTool::initialize() {
         ATH_CHECK(m_caloExtensionTool.retrieve());
         ATH_CHECK(m_extrapolator.retrieve());
@@ -59,39 +51,36 @@ namespace Muon {
             double sectorPhi = m_sectorMapping.sectorPhi(sector);
             const Amg::Transform3D sectorRotation(Amg::getRotateZ3D(sectorPhi));
             if (!initializeGeometryBarrel(sector, sectorRotation)) return false;
-            if (!initializeGeometryEndcap(sector, MuonStationIndex::EndcapA, sectorRotation)) return false;
-            if (!initializeGeometryEndcap(sector, MuonStationIndex::EndcapC, sectorRotation)) return false;
+            if (!initializeGeometryEndcap(sector, DetRegIdx::EndcapA, sectorRotation)) return false;
+            if (!initializeGeometryEndcap(sector, DetRegIdx::EndcapC, sectorRotation)) return false;
         }
 
         return true;
     }
 
-    bool MuonSystemExtensionTool::initializeGeometryEndcap(int sector, MuonStationIndex::DetectorRegionIndex regionIndex,
+    bool MuonSystemExtensionTool::initializeGeometryEndcap(int sector, DetRegIdx regionIndex,
                                                            const Amg::Transform3D& sectorRotation) {
-        ATH_MSG_DEBUG("Initializing endcap: sector " << sector << " " << MuonStationIndex::regionName(regionIndex));
+        using namespace MuonStationIndex;
+        ATH_MSG_DEBUG("Initializing endcap: sector " << sector << " " << regionName(regionIndex));
 
-        SurfaceVec& surfaces = m_referenceSurfaces[regionIndex][sector - 1];
+        SurfaceVec& surfaces = m_referenceSurfaces[toInt(regionIndex)][sector - 1];
         MuonChamberLayerDescription chamberLayerDescription;
 
-        static const std::vector<MuonStationIndex::StIndex> layers = {MuonStationIndex::EI, MuonStationIndex::EE, MuonStationIndex::EM,
-                                                         MuonStationIndex::EO};
+        static constexpr std::array<StIndex, 4> layers{StIndex::EI, StIndex::EE, StIndex::EM, StIndex::EO};
 
-        for (const MuonStationIndex::StIndex& stLayer : layers) {
+        for (const StIndex stLayer : layers) {
             // calculate reference position from radial position of the layer
-            MuonStationIndex::LayerIndex layer = MuonStationIndex::toLayerIndex(stLayer);
+            LayerIndex layer = toLayerIndex(stLayer);
             MuonChamberLayerDescriptor layerDescriptor = chamberLayerDescription.getDescriptor(sector, regionIndex, layer);
             // reference transform + surface
             Amg::Transform3D trans{Amg::getTranslateZ3D(layerDescriptor.referencePosition) *sectorRotation};  //*Amg::AngleAxis3D(xToZRotation,Amg::Vector3D(0.,1.,0.)
             std::unique_ptr<Trk::PlaneSurface> surface = std::make_unique<Trk::PlaneSurface>(trans);
             // sanity checks
-            if (msgLvl(MSG::VERBOSE)) {
-                ATH_MSG_VERBOSE("initializeGeometryEndcap() --  sector " << sector << " layer " << MuonStationIndex::layerName(layer) << " surface "
-                                            <<Amg::toString(surface->transform())
-                                            << " center " << Amg::toString(surface->center()) << " theta " << surface->normal().theta() 
-                                            << " normal:  " <<Amg::toString(surface->normal()));
-                
-                
-            }
+           
+            ATH_MSG_VERBOSE("initializeGeometryEndcap() --  sector " << sector << " layer " << layerName(layer) 
+                            << " surface "<<Amg::toString(surface->transform())
+                            << " center " << Amg::toString(surface->center()) << " theta " << surface->normal().theta() 
+                            << " normal:  " <<Amg::toString(surface->normal()));
 
             MuonLayerSurface data(std::move(surface), sector, regionIndex, layer);
             surfaces.push_back(std::move(data));
@@ -105,16 +94,17 @@ namespace Muon {
     bool MuonSystemExtensionTool::initializeGeometryBarrel(int sector, const Amg::Transform3D& sectorRotation) {
         MuonChamberLayerDescription chamberLayerDescription;
 
-        SurfaceVec& surfaces = m_referenceSurfaces[MuonStationIndex::Barrel][sector - 1];
+        using namespace MuonStationIndex;
+        SurfaceVec& surfaces = m_referenceSurfaces[toInt(DetectorRegionIndex::Barrel)][sector - 1];
         constexpr double xToZRotation = -M_PI_2;
 
-        for (unsigned int stationLayer = MuonStationIndex::BI; stationLayer <= MuonStationIndex::BE; ++stationLayer) {
+        for (const StIndex  stationLayer : {StIndex::BI, StIndex::BM, StIndex::BO, StIndex::BE}) {
             // skip BEE if in small sectors, not installed
-            if (stationLayer == MuonStationIndex::BE && m_sectorMapping.isSmall(sector)) continue;
+            if (stationLayer == StIndex::BE && m_sectorMapping.isSmall(sector)) continue;
 
             // calculate reference position from radial position of the laeyr
-            MuonStationIndex::LayerIndex layer = MuonStationIndex::toLayerIndex((MuonStationIndex::StIndex)(stationLayer));
-            MuonChamberLayerDescriptor layerDescriptor = chamberLayerDescription.getDescriptor(sector, MuonStationIndex::Barrel, layer);
+            LayerIndex layer = toLayerIndex(stationLayer);
+            MuonChamberLayerDescriptor layerDescriptor = chamberLayerDescription.getDescriptor(sector, DetectorRegionIndex::Barrel, layer);
             Amg::Vector3D positionInSector(layerDescriptor.referencePosition, 0., 0.);
             Amg::Vector3D globalPosition = sectorRotation * positionInSector;
 
@@ -131,10 +121,8 @@ namespace Muon {
                                            << " lpos3d " << Amg::toString(surface->transform().inverse() * globalPosition) 
                                            << " normal: " << Amg::toString(surface->normal()));
             }
-            MuonLayerSurface data(std::move(surface), sector, MuonStationIndex::Barrel, layer);
+            MuonLayerSurface data{std::move(surface), sector, DetectorRegionIndex::Barrel, layer};
             surfaces.push_back(std::move(data));
-
-
         }
         return true;
     }
@@ -179,7 +167,7 @@ namespace Muon {
         std::vector<std::shared_ptr<Trk::TrackParameters> > trackParametersVec;
 
         // loop over reference surfaces
-        for (const Muon::MuonLayerSurface& it : surfaces) {
+        for (const MuonLayerSurface& it : surfaces) {
             // extrapolate to next layer
             const Trk::Surface& surface = *it.surfacePtr;
             ATH_MSG_VERBOSE(" startPars: "<<m_printer->print(*currentPars));
@@ -230,11 +218,12 @@ namespace Muon {
     }
     MuonSystemExtensionTool::SurfaceVec MuonSystemExtensionTool::getSurfacesForIntersection(const Trk::TrackParameters& muonEntryPars,
                                                                                             const SystemExtensionCache& cache) const {
+        using namespace MuonStationIndex;
         // if in endcaps pick endcap surfaces
         const double eta = muonEntryPars.position().eta();
-        MuonStationIndex::DetectorRegionIndex regionIndex = MuonStationIndex::Barrel;
-        if (eta < -1.05) regionIndex = MuonStationIndex::EndcapC;
-        if (eta > 1.05) regionIndex = MuonStationIndex::EndcapA;
+        DetectorRegionIndex regionIndex = DetectorRegionIndex::Barrel;
+        if (eta < -1.05) regionIndex = DetectorRegionIndex::EndcapC;
+        if (eta > 1.05) regionIndex = DetectorRegionIndex::EndcapA;
 
         // in barrel pick primary sector
         const double phi = muonEntryPars.position().phi();
@@ -245,21 +234,21 @@ namespace Muon {
         if (cache.useHitSectors) {
             const auto map_itr = cache.sectorsWithHits->find(regionIndex);
             if (map_itr == cache.sectorsWithHits->end()) {
-                ATH_MSG_DEBUG("No hits in detector region " << Muon::MuonStationIndex::regionName(regionIndex));
+                ATH_MSG_DEBUG("No hits in detector region " << regionName(regionIndex));
                 return surfaces;
             }
             std::vector<int>::const_iterator sec_itr = std::find_if(
-                sectors.begin(), sectors.end(), [&map_itr](const int& sector) -> bool { return map_itr->second.count(sector); });
+                sectors.begin(), sectors.end(), [&map_itr](const int sector) -> bool { return map_itr->second.count(sector); });
             if (sec_itr == sectors.end()) {
-                ATH_MSG_DEBUG("No hits found for sector " << m_sectorMapping.getSector(phi) << " in MuonStation "
-                                                          << Muon::MuonStationIndex::regionName(regionIndex));
+                ATH_MSG_DEBUG("No hits found for sector " << m_sectorMapping.getSector(phi) 
+                            << " in MuonStation " << regionName(regionIndex));
                 return surfaces;
             }
         }
 
         for (const int sector : sectors) {
-            surfaces.insert(surfaces.end(), m_referenceSurfaces[regionIndex][sector - 1].begin(),
-                            m_referenceSurfaces[regionIndex][sector - 1].end());
+            const SurfaceVec& toInsert{m_referenceSurfaces[toInt(regionIndex)][sector - 1]};
+            surfaces.insert(surfaces.end(), toInsert.begin(), toInsert.end());
         }
         std::stable_sort(surfaces.begin(), surfaces.end(), 
                          [&muonEntryPars](const MuonLayerSurface& s1, const MuonLayerSurface& s2) {
@@ -269,7 +258,7 @@ namespace Muon {
                          });
         if (msgLvl(MSG::VERBOSE)) {
             for (auto& s1 : surfaces) {
-                ATH_MSG_VERBOSE("Surface "<<Muon::MuonStationIndex::layerName(s1.layerIndex)
+                ATH_MSG_VERBOSE("Surface "<<layerName(s1.layerIndex)
                               <<", center: "<<Amg::toString(s1.surfacePtr->center())
                               <<", pathAlongPars "<<pathAlongPars(muonEntryPars,s1.surfacePtr->center())
                               <<std::endl<<(*s1.surfacePtr));
@@ -292,8 +281,8 @@ namespace Muon {
         std::vector<const Trk::TrackStateOnSurface*> cmbParVec{};
 
         ATH_MSG_VERBOSE("Calo entry parameters "<<m_printer->print(*entryPars));
-        std::vector<Muon::MuonSystemExtension::Intersection> intersections{};
-        Muon::MuonLayerSurface lastSurf{};
+        std::vector<MuonSystemExtension::Intersection> intersections{};
+        MuonLayerSurface lastSurf{};
         
         const Trk::TrackStates::const_iterator end_itr = cmbTrk->trackStateOnSurfaces()->end();
         for (Trk::TrackStates::const_iterator itr = cmbTrk->trackStateOnSurfaces()->begin(); itr != end_itr; ++itr) {
@@ -310,11 +299,13 @@ namespace Muon {
                 continue;
             }
                
-            Muon::MuonStationIndex::DetectorRegionIndex regionIdx = m_idHelperSvc->regionIndex(measId);
-            Muon::MuonStationIndex::LayerIndex layerIdx = m_idHelperSvc->layerIndex(measId);
-            if (layerIdx == Muon::MuonStationIndex::BarrelExtended) {
-                regionIdx = Muon::MuonStationIndex::DetectorRegionIndex::Barrel;
-                layerIdx = Muon::MuonStationIndex::Inner;
+            
+            using namespace MuonStationIndex;
+            DetectorRegionIndex regionIdx = m_idHelperSvc->regionIndex(measId);
+            LayerIndex layerIdx = m_idHelperSvc->layerIndex(measId);
+            if (layerIdx == LayerIndex::BarrelExtended) {
+                regionIdx = DetectorRegionIndex::Barrel;
+                layerIdx  = LayerIndex::Inner;
             }
 
             const int sector = m_sectorMapping.getSector(msTSOS->measurementOnTrack()->associatedSurface().center().phi());
@@ -323,15 +314,15 @@ namespace Muon {
             if (lastSurf.layerIndex == layerIdx && lastSurf.regionIndex == regionIdx && lastSurf.sector == sector) {
                 continue;
             }
-            const SurfaceVec& refSurfaces = m_referenceSurfaces[regionIdx][sector - 1];
+            const SurfaceVec& refSurfaces = m_referenceSurfaces[toInt(regionIdx)][sector - 1];
             SurfaceVec::const_iterator surfItr = std::find_if(refSurfaces.begin(), refSurfaces.end(),
                                                     [&layerIdx](const MuonLayerSurface& surf){
                                                     return surf.layerIndex == layerIdx;
                                                     });
             if (surfItr == refSurfaces.end()) {
                 ATH_MSG_WARNING("Failed to find a reference surface matching to combined parameters "<<m_printer->print(*msTSOS)
-                                <<", sector: "<<sector <<", layer: "<<Muon::MuonStationIndex::layerName(layerIdx)
-                                <<", region index: "<<Muon::MuonStationIndex::regionName(regionIdx));
+                                <<", sector: "<<sector <<", layer: "<<layerName(layerIdx)
+                                <<", region index: "<<regionName(regionIdx));
                 continue;
             }
             lastSurf = (*surfItr);
@@ -356,13 +347,10 @@ namespace Muon {
                                                                                      target, Trk::anyDirection, false, Trk::muon)};
             if (!exPars) {
                 ATH_MSG_VERBOSE(__LINE__<<" - Failed to extrapolate track @ "<<m_printer->print(*msTSOS)
-                                <<", sector: "<<sector
-                                <<", layer: "<<Muon::MuonStationIndex::layerName(layerIdx)
-                                <<", region index: "<<Muon::MuonStationIndex::regionName(regionIdx)
-                                <<" to surface "<<std::endl<<target<<std::endl
-                                <<", sector: "<<lastSurf.sector
-                                <<", layer: "<<Muon::MuonStationIndex::layerName(lastSurf.layerIndex)
-                                <<", region index: "<<Muon::MuonStationIndex::regionName(lastSurf.regionIndex)
+                                <<", sector: "<<sector <<", layer: "<<layerName(layerIdx)
+                                <<", region index: "<<regionName(regionIdx) <<" to surface "<<std::endl<<target<<std::endl
+                                <<", sector: "<<lastSurf.sector <<", layer: "<<layerName(lastSurf.layerIndex)
+                                <<", region index: "<<regionName(lastSurf.regionIndex)
                                 <<" pathAlongPars "<<pathAlongPars(*msTSOS->trackParameters(), target.center())
                                 <<", dir: "<<Amg::toString(msTSOS->trackParameters()->momentum().unit()));
                 continue;

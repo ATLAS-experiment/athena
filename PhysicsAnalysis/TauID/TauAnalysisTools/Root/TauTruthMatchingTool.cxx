@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s)
@@ -26,7 +26,6 @@ TauTruthMatchingTool::TauTruthMatchingTool( const std::string& name )
   , m_accPhiVis("phi_vis")
   , m_accMVis("m_vis")
 {
-  declareProperty( "MaxDeltaR", m_dMaxDeltaR = 0.2);
 }
 
 //______________________________________________________________________________
@@ -88,7 +87,7 @@ const xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xT
   }
   
   // if matched to a truth particle return its pointer, else return a null pointer
-  if ((bool)accIsTruthMatched(xTau))
+  if (static_cast<bool>(accIsTruthMatched(xTau)))
     {
       if (accTruthParticleLink(xTau).isValid())
       {
@@ -125,14 +124,9 @@ TLorentzVector TauTruthMatchingTool::getTruthTauP4Vis(const xAOD::TauJet& xTau)
   if (xTruthTau == nullptr)
   {
     ATH_MSG_INFO("no truth particle was found, returning TLorentzVector with all values equal to 0");
-    return vTLV;
+  } else {
+    vTLV = getTruthTauP4Vis(*xTruthTau);	  
   }
-
-  vTLV.SetPtEtaPhiM(
-    m_accPtVis(*xTruthTau),
-    m_accEtaVis(*xTruthTau),
-    m_accPhiVis(*xTruthTau),
-    m_accMVis(*xTruthTau));
   return vTLV;
 }
 
@@ -159,19 +153,10 @@ TLorentzVector TauTruthMatchingTool::getTruthTauP4Invis(const xAOD::TauJet& xTau
   if (xTruthTau == nullptr)
   {
     ATH_MSG_INFO("no truth particle was found, returning TLorentzVector with all values equal to 0");
-    return vTLV;
-  }
-
-  static const SG::ConstAccessor<double> accPtInvis("pt_invis");
-  static const SG::ConstAccessor<double> accEtaInvis("eta_invis");
-  static const SG::ConstAccessor<double> accPhiInvis("phi_invis");
-  static const SG::ConstAccessor<double> accMInvis("m_invis");
-  vTLV.SetPtEtaPhiM(
-    accPtInvis(*xTruthTau),
-    accEtaInvis(*xTruthTau),
-    accPhiInvis(*xTruthTau),
-    accMInvis(*xTruthTau));
-  return vTLV;
+  } else {
+    vTLV = getTruthTauP4Invis(*xTruthTau);
+  } 
+  return vTLV; 
 }
 
 //______________________________________________________________________________
@@ -344,7 +329,7 @@ StatusCode TauTruthMatchingTool::checkTruthMatch (const xAOD::TauJet& xTau, cons
     if (xTau.p4().DeltaR(vTruthVisTLV) <= m_dMaxDeltaR)
     {
       static const SG::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
-      if ((bool)accIsHadronicTau(*xTruthTauIt))
+      if (static_cast<bool>(accIsHadronicTau(*xTruthTauIt)))
         eTruthMatchedParticleType = TruthHadronicTau;
       else
         eTruthMatchedParticleType = TruthLeptonicTau;

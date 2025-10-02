@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloSwClcon_v2.cxx
@@ -93,6 +93,10 @@ void CaloSwClcon_v2::makeTheCorrection (const Context& myctx,
   unsigned int n_energies = energies.size();
   unsigned int shape[] = {n_energies, 2};
   CaloRec::WritableArrayData<2> offstab (shape);
+  if (n_energies == 0) {
+    ATH_MSG_ERROR("Empty energies vector");
+    return;
+  }
 
   for (unsigned int i=0; i<n_energies; i++) {
     offstab[i][0] = energies[i];

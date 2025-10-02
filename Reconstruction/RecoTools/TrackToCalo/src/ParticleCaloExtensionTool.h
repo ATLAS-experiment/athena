@@ -52,8 +52,6 @@ public:
   virtual ~ParticleCaloExtensionTool();
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode finalize() override final;
-
   /*
    * Implement the IParticleCaloExtension methods
    * see IParticleCaloExtension.h for

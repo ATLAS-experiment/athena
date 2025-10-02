@@ -4,7 +4,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 
 class ParticleLevelOverlapRemovalBlock(ConfigBlock):
-    """ConfigBlock for particle-level truth taus"""
+    """ConfigBlock for particle-level overlap removal"""
 
     def __init__(self):
         super(ParticleLevelOverlapRemovalBlock, self).__init__()
@@ -24,6 +24,10 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
                        info='whether to use rapidity instead of pseudo-rapidity for the calculation of DeltaR')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.label
 
     def makeAlgs(self, config):
         alg = config.createAlgorithm('CP::ParticleLevelOverlapRemovalAlg',

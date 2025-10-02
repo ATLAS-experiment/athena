@@ -12,6 +12,7 @@
 #include "SGTools/TestStore.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect.h"
+#include "TestTools/expect_exception.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
 #include "CxxUtils/checker_macros.h"
@@ -58,8 +59,8 @@ int main ATLAS_NOT_THREAD_SAFE () {
   std::cout << "initialize SG::WriteHandleKey<DecisionContainer> whkT" << std::endl;
   assert( whkT.initialize().isSuccess() );
   std::cout << "call createAndStore( whkT ) with default context, twice" << std::endl;
-  SG::WriteHandle<DecisionContainer> whT1 = createAndStore( whkT );
-  SG::WriteHandle<DecisionContainer> whT2 = createAndStore( whkT );
+  SG::WriteHandle<DecisionContainer> whT1 = createAndStore( whkT, ctx );
+  SG::WriteHandle<DecisionContainer> whT2 = createAndStore( whkT, ctx );
   // There will be WARNING ERROR and FATAL messages from the above line
   std::cout << "handle name \"" << whT1.name() << "\" isPresent " << whT1.isPresent()<< " isValid " << whT1.isValid() << std::endl;
   std::cout << "handle name \"" << whT2.name() << "\" isPresent " << whT2.isPresent()<< " isValid " << whT2.isValid() << std::endl;
@@ -71,7 +72,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   std::cout << "initialize SG::WriteHandleKey<DecisionContainer> whk1" << std::endl;
   assert( whk1.initialize().isSuccess() );
   std::cout << "call createAndStore( whk1 ) with default context" << std::endl;
-  SG::WriteHandle<DecisionContainer> wh1 = createAndStore( whk1 );
+  SG::WriteHandle<DecisionContainer> wh1 = createAndStore( whk1, ctx );
   std::cout << "handle name " << wh1.name() << " store " << wh1.store() << std::endl;
   VALUE( wh1.store() ) EXPECTED ( "StoreGateSvc_Impl" );
   assert( wh1.isValid() );
@@ -214,6 +215,30 @@ int main ATLAS_NOT_THREAD_SAFE () {
   VALUE ( d5self.index() ) EXPECTED ( d6seed.index() );
   VALUE ( d5self.key()   ) EXPECTED ( d6seed.key()   );
 
+  // Test chain/leg helper methods
+  HLT::Identifier id = createLegName("HLT_mu50_L1MU20", 2);
+  VALUE ( id.name() ) EXPECTED ( "leg002_HLT_mu50_L1MU20" );
+
+  HLT::Identifier legId = getIDFromLeg(id);
+  VALUE ( legId.name() ) EXPECTED ( "HLT_mu50_L1MU20" );
+
+  EXPECT_EXCEPTION( std::runtime_error, getIDFromLeg(HLT::Identifier("foo")) );
+
+  VALUE ( getIndexFromLeg(id) ) EXPECTED ( 2 );
+  VALUE ( getIndexFromLeg("HLT_mu50_L1MU20") ) EXPECTED ( 0 );
+  EXPECT_EXCEPTION( std::runtime_error, getIndexFromLeg("foo") );
+
+  const auto& [name, index] = getNameAndIndexFromLeg("leg002_HLT_mu50_L1MU20");
+  VALUE ( name ) EXPECTED ( "HLT_mu50_L1MU20" );
+  VALUE ( index ) EXPECTED ( 2 );
+
+  EXPECT_EXCEPTION( std::runtime_error, getNameAndIndexFromLeg("foo") );
+
+  VALUE ( isLegId("HLT_mu50_L1MU20") ) EXPECTED ( false );
+  VALUE ( isChainId("HLT_mu50_L1MU20") ) EXPECTED ( true );
+
+  VALUE ( isLegId("leg002_HLT_mu50_L1MU20") ) EXPECTED ( true );
+  VALUE ( isChainId("leg002_HLT_mu50_L1MU20") ) EXPECTED ( false );
+
   return 0;
-  
 }

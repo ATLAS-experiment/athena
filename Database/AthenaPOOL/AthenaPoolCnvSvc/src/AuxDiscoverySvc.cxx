@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AuxDiscoverySvc.cxx
@@ -37,7 +37,7 @@ public:
 };
 
 bool AuxDiscoverySvc::getAuxStore(void* obj, const Guid& classId, const std::string& contId) {
-   pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId); // Needed for Properties and TClass
+   const pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId); // Needed for Properties and TClass
    if (info == nullptr) {
       return false;
    }
@@ -110,7 +110,7 @@ SG::auxid_t AuxDiscoverySvc::getAuxID(const std::string& attrName, const std::st
 
 SG::auxid_set_t
 AuxDiscoverySvc::getAuxIDs(const void* obj, const Guid& classId, const std::string& contId) {
-   pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId); // Needed for Properties and TClass
+   const pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId); // Needed for Properties and TClass
    if (info == nullptr) {
       return SG::auxid_set_t();
    }

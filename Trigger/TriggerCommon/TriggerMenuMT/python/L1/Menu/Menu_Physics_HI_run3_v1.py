@@ -50,7 +50,7 @@ def defineMenu():
         'L1_MU3V_jJ50',
         'L1_MU3V_jJ60',        
 
-        'L1_eTAU12_EMPTY', 'L1_eTAU80', 'L1_eTAU12',
+        'L1_eTAU12_EMPTY', 'L1_eTAU80', 'L1_eTAU12', 'L1_eTAU140',
 
         # single jet 
         # new calo
@@ -92,6 +92,10 @@ def defineMenu():
         'L1_VjTE600',
         'L1_jTE50_VjTE600',
         'L1_jTE50_VjTE200',
+
+        # jTEFWD UCC seeds: ATR-30726
+        'L1_jTEFWD6500',
+
         #Overlay items
         'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
 
@@ -154,6 +158,7 @@ def defineMenu():
         'L1_1ZDC_A_1ZDC_C_VjTE200', 'L1_ZDC_1XOR5_VjTE200',
         'L1_ZDC_XOR_VjTE200', 'L1_VZDC_A_VZDC_C_VjTE200',
         'L1_ZDC_A_C_VjTE50',
+        'L1_ZDC_OR_VjTE50', 'L1_ZDC_XOR_VjTE50', 'L1_TRT_ZDC_OR_VjTE50', 'L1_TRT_ZDC_A_C_VjTE50', 'L1_TRT_ZDC_XOR_VjTE50',  # for O+O/p+O
         #UPC jet items
         'L1_VZDC_A_VZDC_C_jTE5_VjTE200','L1_ZDC_XOR_jTE5_VjTE200',
         'L1_1ZDC_NZDC_jTE5_VjTE200','L1_5ZDC_A_5ZDC_C_jTE5_VjTE200',
@@ -213,6 +218,7 @@ def defineMenu():
 
 
         # VDM
+        'L1_TRT_BGRP11',
 
         # ZDC bits and comb for debugging
         'L1_ZDC_BIT2',
@@ -232,13 +238,6 @@ def defineMenu():
         # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
         # They are needed for scheduled 2023 5 TeV pp runs, so not removed from the menu
         'L1_ZDC_OR'           ,
-        'L1_ZDC_XOR_E2'       ,
-        'L1_ZDC_XOR_E1_E3'    ,
-        'L1_ZDC_E1_AND_E1'    ,
-        'L1_ZDC_E1_AND_E2ORE3',
-        'L1_ZDC_E2_AND_E2'    ,
-        'L1_ZDC_E2_AND_E3'    ,
-        'L1_ZDC_E3_AND_E3'    ,
         'L1_ZDC_A_AND_C'      ,
         'L1_ZDC_OR_EMPTY', 'L1_ZDC_OR_UNPAIRED_NONISO',
         'L1_ZDC_A_AND_C_EMPTY', 'L1_ZDC_A_AND_C_UNPAIRED_NONISO',
@@ -246,12 +245,41 @@ def defineMenu():
         #'L1_ZDC_OR_LHCF',
 
         #ZDC pp (ATR-29027)
-        'L1_ZDC_PP_A','L1_ZDC_PP_C','L1_ZDC_PP_OR','L1_ZDC_PP_A_C',
-        'L1_ZDC_PP_A2','L1_ZDC_PP_C2','L1_ZDC_PP_OR2',
-        'L1_ZDC_PP_A_EMPTY','L1_ZDC_PP_C_EMPTY',
-        'L1_ZDC_PP_A2_EMPTY','L1_ZDC_PP_C2_EMPTY',
-        'L1_ZDC_PP_A_UNPAIRED_NONISO','L1_ZDC_PP_C_UNPAIRED_NONISO',
-        'L1_ZDC_PP_A2_UNPAIRED_NONISO','L1_ZDC_PP_C2_UNPAIRED_NONISO',
+        # 'L1_ZDC_PP_A','L1_ZDC_PP_C','L1_ZDC_PP_OR','L1_ZDC_PP_A_C',
+        # 'L1_ZDC_PP_A2','L1_ZDC_PP_C2','L1_ZDC_PP_OR2',
+        # 'L1_ZDC_PP_A_EMPTY','L1_ZDC_PP_C_EMPTY',
+        # 'L1_ZDC_PP_A2_EMPTY','L1_ZDC_PP_C2_EMPTY',
+        # 'L1_ZDC_PP_A_UNPAIRED_NONISO','L1_ZDC_PP_C_UNPAIRED_NONISO',
+        # 'L1_ZDC_PP_A2_UNPAIRED_NONISO','L1_ZDC_PP_C2_UNPAIRED_NONISO',
+
+        # Run3 ZDC items for O+O runs (ATR-30690)
+        'L1_ZDC_XNXN',
+        'L1_ZDC_XNYN',
+        'L1_ZDC_XNZN',
+        'L1_ZDC_XN_XOR',
+        'L1_ZDC_YN_XOR',
+        'L1_ZDC_ZN_XOR',
+        'L1_ZDC_YN',
+        'L1_ZDC_ZN',
+        'L1_ZDC_LOR',
+        'L1_ZDC_YNYN',
+        'L1_ZDC_LOR_EMPTY', 'L1_ZDC_LOR_UNPAIRED_NONISO',
+        
+        # Run3 TRT+ZDC items for O+O runs (ATR-30690)
+        'L1_TRT_ZDC_OR',
+        'L1_TRT_ZDC_XNXN',
+        'L1_TRT_ZDC_XNYN',
+        'L1_TRT_ZDC_XNZN',
+        'L1_TRT_ZDC_XN_XOR',
+        'L1_TRT_ZDC_YN_XOR',
+        'L1_TRT_ZDC_ZN_XOR',
+        'L1_TRT_ZDC_YN',
+        'L1_TRT_ZDC_ZN',
+        'L1_TRT_ZDC_LOR',
+        'L1_TRT_ZDC_YNYN',
+        'L1_TRT_ZDC_A',
+        'L1_TRT_ZDC_C',
+        'L1_TRT_ZDC_A_C',
 
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
@@ -261,14 +289,8 @@ def defineMenu():
         'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
         'L1_eEM9_AFP_A_OR_C','L1_eEM9_AFP_A_AND_C',
 
-        'L1_AFP_A_OR_C_J12', 'L1_AFP_A_AND_C_J12',
         'L1_AFP_A_OR_C_jJ20', 'L1_AFP_A_AND_C_jJ20',
         'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
-     
-        'L1_AFP_A_AND_C_TOF_J20', 'L1_AFP_A_AND_C_TOF_T0T1_J20', 
-        'L1_AFP_A_AND_C_TOF_J30', 'L1_AFP_A_AND_C_TOF_T0T1_J30',
-        'L1_AFP_A_AND_C_TOF_J50', 'L1_AFP_A_AND_C_TOF_T0T1_J50',
-        'L1_AFP_A_AND_C_TOF_J75', 'L1_AFP_A_AND_C_TOF_T0T1_J75',
 
         'L1_AFP_A_AND_C_TOF_jJ50', 'L1_AFP_A_AND_C_TOF_T0T1_jJ50', 
         'L1_AFP_A_AND_C_TOF_jJ60', 'L1_AFP_A_AND_C_TOF_T0T1_jJ60',
@@ -283,7 +305,6 @@ def defineMenu():
         'L1_AFP_A_OR_C_EMPTY', 'L1_AFP_A_OR_C_FIRSTEMPTY',
         'L1_AFP_A_OR_C_TOF_UNPAIRED_ISO', 'L1_AFP_A_OR_C_TOF_UNPAIRED_NONISO',
         'L1_AFP_A_OR_C_TOF_EMPTY', 'L1_AFP_A_OR_C_TOF_FIRSTEMPTY',
-        'L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
        
 
         # MBTS (ATR-24701)
@@ -313,9 +334,15 @@ def defineMenu():
         'L1_DPHI-2eEM1_VjTE200','L1_DPHI-2eTAU1_VjTE200',
         'L1_DPHI-2eEM1_VjTE200_GAP_AANDC','L1_DPHI-2eTAU1_VjTE200_GAP_AANDC',
 
-        #ATR-17320
-        # 'L1_CEP-CjJ100',
-        # 'L1_CEP-CjJ90' ,
+        # ATR-30727
+        'L1_10INVM-DPHI-2jJ5_VjTE200', 'L1_15INVM-DPHI-2jJ5_VjTE200', 'L1_20INVM-DPHI-2jJ5_VjTE200', 'L1_25INVM-DPHI-2jJ5_VjTE200',
+        'L1_10SUM-DPHI-2jJ5_VjTE200', 'L1_15SUM-DPHI-2jJ5_VjTE200', 'L1_20SUM-DPHI-2jJ5_VjTE200', 'L1_25SUM-DPHI-2jJ5_VjTE200',
+        'L1_15INVM-15SUM-DPHI-2jJ5_VjTE200', 'L1_20INVM-20SUM-DPHI-2jJ5_VjTE200',
+
+        # ATR-30728
+        'L1_1INVM-DPHI-2eTAU1_VjTE200', 'L1_2INVM-DPHI-2eTAU1_VjTE200', 'L1_3INVM-DPHI-2eTAU1_VjTE200', 'L1_4INVM-DPHI-2eTAU1_VjTE200',
+        'L1_3SUM-DPHI-2eTAU1_VjTE200', 'L1_4SUM-DPHI-2eTAU1_VjTE200',
+
         
         #ATR-28678 Ph1 Items for Phisics_pp_Run3
         "L1_jJ30_BGRP12",

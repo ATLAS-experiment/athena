@@ -320,19 +320,24 @@ const T* get (const ReadHandleKey<T>& key,
               const EventContext& ctx);
 
 
+/**
+ * @brief Convenience function to retrieve an object given a @c ReadHandleKey.
+ * @param ptr Pointer to the retrieved object.
+ * @param key The key to retrieve.
+ *
+ * In case of error, sets @c ptr to nullptr and returns FAILURE. In case of an
+ * empty key, sets @c ptr to nullptr and returns SUCCESS.
+ */
+template <class T>
+StatusCode get (const T*& ptr,
+                const ReadHandleKey<T>& key,
+                const EventContext& ctx);
+
 } /* namespace SG */
 
 
 
 #include "StoreGate/ReadHandle.icc"
-
-
-#ifndef NO_LEGACY_HANDLES
-namespace SG {
-  template <class T>
-  using RVar = ReadHandle<T>;
-} 
-#endif
 
 
 #endif //> !STOREGATE_SG_READHANDLE_H

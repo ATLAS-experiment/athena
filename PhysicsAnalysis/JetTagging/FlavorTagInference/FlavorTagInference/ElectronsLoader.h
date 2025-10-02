@@ -34,9 +34,8 @@ ConstituentsInputConfig createElectronsLoaderConfig(
 class ElectronsLoader final : public IConstituentsLoader {
  public:
   ElectronsLoader(const ConstituentsInputConfig&, const FTagOptions& options);
-  std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
-      const xAOD::Jet& jet, [[maybe_unused]] const SG::AuxElement& btag
-  ) const override;
+  std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(
+      const xAOD::IParticle& jet ) const override;
   const FTagDataDependencyNames& getDependencies() const override;
   const std::set<std::string>& getUsedRemap() const override;
   const std::string& getName() const override;
@@ -44,7 +43,7 @@ class ElectronsLoader final : public IConstituentsLoader {
 
  protected:
   // typedefs
-  typedef xAOD::Jet Jet;
+  typedef xAOD::IParticle Jet;
   typedef std::pair<std::string, double> NamedVar;
   typedef std::pair<std::string, std::vector<double>> NamedSeq;
   // electrons typedefs
@@ -64,7 +63,7 @@ class ElectronsLoader final : public IConstituentsLoader {
 
   ElectronSortVar electronSortVar(ConstituentsSortOrder);
 
-  Electrons getElectronsFromJet(const xAOD::Jet& jet) const;
+  Electrons getElectronsFromJet(const xAOD::IParticle& jet) const;
   std::pair<ElectronFilter,std::set<std::string>> electronFilter(ConstituentsSelection config);
 
   ElectronSortVar m_electronSortVar;

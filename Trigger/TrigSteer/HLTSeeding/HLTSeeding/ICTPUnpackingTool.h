@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HLTSEEDING_ICTPUNPACKINGTOOL_H
@@ -29,7 +29,7 @@ public:
    * @warning If none of CTP bits is set this is also an error condition, this is an event which should not have been
    * passed to HLT
    */
-  virtual StatusCode decode(const ROIB::RoIBResult& roib, HLT::IDVec& enabledChains) const = 0;
+  virtual StatusCode decode(const EventContext& ctx, const ROIB::RoIBResult& roib, HLT::IDVec& enabledChains) const = 0;
 
   /**
    * The method decodes CTP bits content of the RoIBResult and checks if L1 Items from a given list of names passed

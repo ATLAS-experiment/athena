@@ -115,7 +115,7 @@ namespace Analysis {
     //retrieve VxSecVertexInfo
     SG::ReadHandle<Trk::VxSecVertexInfoContainer> h_VxSecVertexInfoName (m_VxSecVertexInfoName, ctx);
     if (!h_VxSecVertexInfoName.isValid()) {
-      ATH_MSG_ERROR( " cannot retrieve primary vertex container with key " << m_VxSecVertexInfoName.key()  );
+      ATH_MSG_ERROR( " cannot retrieve secondary vertex container with key " << m_VxSecVertexInfoName.key()  );
       return StatusCode::FAILURE;
     }
     ATH_MSG_DEBUG("Size of VxSecVertexInfo: " << h_VxSecVertexInfoName->size());

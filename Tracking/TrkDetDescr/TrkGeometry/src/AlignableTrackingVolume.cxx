@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,35 +12,12 @@
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkVolumes/VolumeBounds.h"
 
-Trk::AlignableTrackingVolume::AlignableTrackingVolume()
-    : Trk::TrackingVolume(),
-      m_alignedTV(nullptr),
-      m_sampleID(0),
-      m_alignment(nullptr),
-      m_binnedMaterial(nullptr) {}
-
 Trk::AlignableTrackingVolume::AlignableTrackingVolume(
-    Amg::Transform3D* htrans, Amg::Transform3D* align, VolumeBounds* volbounds,
-    const Trk::BinnedMaterial* matprop, int sampleID,
+    std::unique_ptr<Amg::Transform3D> htrans,
+    std::shared_ptr<VolumeBounds> volbounds,
+    const Trk::BinnedMaterial& matprop,
+    int sampleID,
     const std::string& volumeName)
-    : Trk::TrackingVolume(htrans, volbounds, *matprop, nullptr, nullptr,
-                          volumeName),
-      m_alignedTV(nullptr),
-      m_sampleID(sampleID),
-      m_alignment(align),
-      m_binnedMaterial(matprop) {
-  if (m_alignment) m_alignedTV = this->cloneTV(*m_alignment);
-}
-
-Trk::AlignableTrackingVolume::~AlignableTrackingVolume() {
-  // the volume does not own entry/exit surfaces
-  delete m_alignedTV;
-  delete m_alignment;
-  delete m_binnedMaterial;
-}
-
-const Trk::TrackingVolume* Trk::AlignableTrackingVolume::alignedTrackingVolume()
-    const {
-  if (m_alignedTV) return m_alignedTV;
-  return this;
-}
+    : Trk::TrackingVolume(std::move(htrans), std::move(volbounds), matprop, nullptr, nullptr, volumeName),
+      m_binnedMaterial(matprop),
+      m_sampleID(sampleID){}

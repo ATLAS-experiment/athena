@@ -7,8 +7,6 @@
 #     begin                : 28 03 2020
 #     email                : tong.qiu@cern.ch
 #  **************************************************************************
-from __future__ import print_function
-from __future__ import division
 import numpy as np
 from eFEXNTuple import *
 from plotlib import *

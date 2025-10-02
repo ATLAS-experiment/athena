@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -155,7 +155,7 @@
 //                           
 //============================================================================
 //
-#include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
+#include "BPhysVertexTrackBase.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
@@ -367,14 +367,13 @@ namespace DerivationFramework {
   BPhysVertexTrackBase::BPhysVertexTrackBase(const std::string& t,
 					     const std::string& n,
 					     const IInterface*  p)
-    : AthAlgTool(t,n,p), m_trackToVertexTool("Reco::TrackToVertex"),
+    : base_class(t,n,p), m_trackToVertexTool("Reco::TrackToVertex"),
       m_tvaTool("CP::TrackVertexAssociationTool"),
       m_tvaToolHasWpLoose(false),
       m_tracks(NULL), m_tracksAux(NULL), m_nEvtsSeen(0), m_eventInfo(nullptr),
       m_trackTypesUsed(0), m_runNumber(0), m_evtNumber(0),
       m_debugTracksInThisEvent(false) {
     
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     // Declare branch prefix
     declareProperty("BranchPrefixes", m_branchPrefixes);
@@ -1165,7 +1164,7 @@ namespace DerivationFramework {
       if ( vtx.nRefTrks() == (int)vtx.vtx()->nTrackParticles() ) {
 	for (int i=0; i<vtx.nRefTrks(); ++i) {
 	  const xAOD::TrackParticle* otp =
-	    (const xAOD::TrackParticle*)vtx.refTrkOrigin(i);
+	    static_cast<const xAOD::TrackParticle*>(vtx.refTrkOrigin(i));
 	  if ( otp != NULL ) {
 	    if ( std::find(muonIdTracks.begin(), muonIdTracks.end(), otp)
 		 != muonIdTracks.end() ) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RoIPEBInfoWriterTool.h"
@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <string_view>
+#include "xAODTrigMissingET/TrigMissingETContainer.h"
 
 // =============================================================================
 
@@ -29,15 +30,21 @@ StatusCode RoIPEBInfoWriterTool::initialize() {
 
 // =============================================================================
 
-PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const PEBInfoWriterToolBase::Input& input) const {
+PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const EventContext& ctx, const PEBInfoWriterToolBase::Input& input) const {
   // Create output PEBInfo starting from the static extra PEBInfo
   PEBInfo pebi = m_extraPebInfo;
 
   ATH_MSG_DEBUG("Processing RoI " << **(input.roiEL));
   // Assert we're not being passed a full-scan RoI which makes no sense for RoI-based PEB
   if ((*input.roiEL)->isFullscan()) {
-    ATH_MSG_ERROR("Full-scan RoI passed as input to RoIPEBInfoWriterTool");
-    return {};
+    auto met_feature_vec = TrigCompositeUtils::findLinks<xAOD::TrigMissingETContainer>(input.decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+    if (not met_feature_vec.empty()) {
+      ATH_MSG_DEBUG("Ignoring MET leg passed to RoIPEBInfoWriterTool");
+      return pebi;
+    } else {
+      ATH_MSG_ERROR("Full-scan RoI passed as input to RoIPEBInfoWriterTool");
+      return {};
+    }
   }
 
   float eta = (*input.roiEL)->eta();
@@ -61,7 +68,7 @@ PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const PEBInfo
 
   for (const auto& tool : m_regionSelectorTools) {
     std::vector<uint32_t> detROBs;
-    tool->lookup(Gaudi::Hive::currentContext())->ROBIDList(roiForPEB, detROBs);
+    tool->lookup(ctx)->ROBIDList(roiForPEB, detROBs);
     pebi.robs.insert(detROBs.begin(),detROBs.end());
   }
 

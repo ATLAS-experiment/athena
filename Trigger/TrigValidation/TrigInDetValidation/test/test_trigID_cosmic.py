@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for cosmic
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-input: valid1.310772.CosmicRays_CollisionSetup.recon.RDO.s4559_s4560_r16709_tid45807425_00
+# art-input-nfiles: 2
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -33,8 +35,8 @@ Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
-preexec_reco = ["from AthenaConfiguration.Enums import BeamType", "flags.Beam.Type=BeamType.Cosmics",
-                "flags.Tracking.doTRTStandalone=False",
+preexec_all = ["from AthenaConfiguration.Enums import BeamType;flags.Beam.Type=BeamType.Cosmics"]
+preexec_reco = ["flags.Tracking.doTRTStandalone=False",
                 "flags.Tracking.doForwardTracks=False",
                 "flags.Tracking.doLargeD0=False"]
 Input   = 'mc_cosmics'    # defined in TrigValTools/share/TrigValInputs.json  

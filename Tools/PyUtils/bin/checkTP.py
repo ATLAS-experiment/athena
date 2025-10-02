@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file:    checkTP.py
 # @purpose: dump the layout of a class (data members and bases)
@@ -14,8 +14,6 @@
 #
 # if checkTP.py has been made 'chmod +x' one can just do:
 # ./checkTP.py CaloCellContainer
-
-from __future__ import print_function
 
 import sys
 import os

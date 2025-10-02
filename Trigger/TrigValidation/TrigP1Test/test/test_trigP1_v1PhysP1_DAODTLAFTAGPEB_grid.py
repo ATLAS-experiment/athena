@@ -3,7 +3,10 @@
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: 24.0/Athena
+# art-input: group.trig-hlt.data24_13p6TeV.00475321.physics_Main.daq.RAW
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
@@ -25,7 +28,7 @@ from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
-triggermenu = 'Dev_pp_run3_v1_HLTReprocessing_prescale'
+triggermenu = 'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale'
 
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
@@ -44,7 +47,8 @@ filter_bs = ExecStep.ExecStep('FilterBS')
 filter_bs.type = 'other'
 filter_bs.executable = 'trigbs_extractStream.py'
 filter_bs.input = ''
-filter_bs.args = '-s FTagPEBTLA ' + find_file('*_HLTMPPy_output.*.data')
+# cannot use 'find_file' as it only keeps the last file matching the pattern
+filter_bs.args = '-s FTagPEBTLA ' + '`find . -name "*_HLTMPPy_output.*.data"`'
 
 # Tier-0 reco step (BS->AOD)
 tlarecoPreExec = f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';"
@@ -64,12 +68,8 @@ tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
 test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [hlt, filter_bs, tlareco]
-test.check_steps = CheckSteps.default_check_steps(test)
-add_analysis_steps(test)
-
-# Overwrite default histogram file name for checks
-for step in [test.get_step(name) for name in ['RootComp']]:
-    step.input_file = 'ExampleMonitorOutput.root'
+test.check_steps = CheckSteps.default_check_steps(test, checkfile_input='DAOD_TLAFTAGPEB.pool.root')
+add_analysis_steps(test, input_file='DAOD_TLAFTAGPEB.pool.root')
 
 import sys
 sys.exit(test.run())

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __STRAW_MAP_H__
@@ -196,10 +196,12 @@ int strawMap::TTCgroup() {
 int strawMap::HVpad() {
 	if (std::abs(m_side)==1) return m_strawToHVpad_barrel[m_straw];
 	assert( std::abs(m_side)==2 ); // end-caps	
-	auto asdblr =  this->ASDBLR();
+	int asdblr =  this->ASDBLR();
 	if (asdblr < 0){
 	  throw std::runtime_error("asdblr is less than zero");
 	}
+	//overflow guarded against in the above lines
+	//coverity[return_overflow]
 	return ( (this->DTMROC()) * 2 + (asdblr) );	
 };
 
@@ -247,6 +249,7 @@ void strawMap::initialize() {
 	//what are these numbers, what are valid ranges?
 	while(fscanf(f, "%d %d %d %d %d %d %d %d\n", index, index+1, index+2, index+3, index+4, index+5, index+6, index+7)==8) {
 		assert(index[0]>=0 && index[0]<5482);
+		//coverity[tainted_data]
 		m_strawToLayer[index[0]] = index[1];
 		m_strawToStrawLayer[index[0]] = index[2];
 		m_strawToStrawWithinLayer[index[0]] = index[3];

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPEVENTLOOPMGR_H
@@ -15,7 +15,9 @@
 
 // Athena headers
 #include "AthenaBaseComps/AthMessaging.h"
+#include "AthenaKernel/IEvtIdModifierSvc.h"
 #include "PileUpTools/PileUpStream.h"
+#include "PileUpTools/PileUpMisc.h"
 
 // Gaudi headers
 #include "Gaudi/Property.h"
@@ -34,7 +36,7 @@ class PileUpMergeSvc;
 class StoreGateSvc;
 class EventContext;
 class EventID;
-class IEvtIdModifierSvc;
+
 
 /** @class PileUpEventLoopMgr
     @brief The ATLAS event loop for pile-up applications.
@@ -51,31 +53,22 @@ public:
   virtual ~PileUpEventLoopMgr();
 
 public:
-  /// implementation of IAppMgrUI::initialize
-  virtual StatusCode initialize();
-  /// implementation of IAppMgrUI::finalize
-  virtual StatusCode finalize();
-  /// implementation of IAppMgreUI::terminate
-  //  virtual StatusCode terminate();
-  /// implementation of IAppMgrUI::nextEvent
-  virtual StatusCode nextEvent(int maxevt);
-  /// implementation of IEventProcessor::executeEvent(void* par)
-  virtual StatusCode executeEvent( EventContext &&ctx );
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
+  virtual StatusCode nextEvent(int maxevt) override;
+  virtual StatusCode executeEvent( EventContext &&ctx ) override;
 
-  /// Seek to a given event
-  virtual StatusCode seek(int evt);
-  /// Return the current event count
-  virtual int curEvent() const;
-
-  virtual void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream);
+  virtual StatusCode seek(int evt) override;
+  virtual int curEvent() const override;
 
   using AthMessaging::msg;
   using AthMessaging::msgLvl;
 
-
 private:
   /// Reference to the Algorithm Execution State Svc
   SmartIF<IAlgExecStateSvc>  m_aess;
+
+  void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream);
 
   /// setup input and overlay selectors and iters
   StatusCode setupStreams();
@@ -92,79 +85,66 @@ private:
   /// Incident Service
   ServiceHandle<IIncidentSvc> m_incidentSvc;
 
-  /// PileUp Merge Service
-  ServiceHandle<PileUpMergeSvc> m_mergeSvc;
-
   /// Input Stream
   PileUpStream m_origStream;
 
   /// output store
   ServiceHandle<StoreGateSvc> m_evtStore;              // overlaid (output) event store
-  
-  typedef ServiceHandle<IEvtIdModifierSvc> IEvtIdModifierSvc_t;
-  /// @property Reference to the EventID modifier Service
-  IEvtIdModifierSvc_t m_evtIdModSvc;
 
-  //unsigned int m_nInputs;
-  //unsigned int m_nStores;
+  ServiceHandle<IEvtSelector> m_origSel{this, "OrigSelector", "EventSelector",
+    "EventSelector for original (physics) events stream"};
+  ServiceHandle<IEvtSelector> m_signalSel{this, "SignalSelector", "",
+    "EventSelector for signal (hard-scatter) events stream"};
+  ServiceHandle<IBeamIntensity> m_beamInt{this, "BeamInt", "FlatBM",
+    "The service providing the beam intensity distribution"};
+  ServiceHandle<IBeamLuminosity> m_beamLumi{this, "BeamLuminosity", "LumiProfileSvc",
+    "The service providing the beam luminosity distribution vs. run"};
+  ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc",
+    "PileUp Merge Service"};
+  ServiceHandle<IEvtIdModifierSvc> m_evtIdModSvc{this, "EvtIdModifierSvc", "",
+    "ServiceHandle for EvtIdModifierSvc"};
 
-  /// @name Properties
-  //@{
-  /// Original (Physics) Event selector (background for overlay).
-  ServiceHandle<IEvtSelector> m_origSel;
-  /// Signal Event selector (for overlay).
-  ServiceHandle<IEvtSelector> m_signalSel;
-  /// BkgStreamsCaches managing background events
-  ToolHandleArray<IBkgStreamsCache> m_caches;
-  /// (max) minBias interactions per Xing, for setting MC luminosity
-  Gaudi::Property<float> m_maxCollPerXing;
-
-  /// Xing frequency(ns);
-  Gaudi::Property<float> m_xingFreq;
-  /// first xing to be simulated (0th xing is 1st after trigger)
-  Gaudi::Property<int> m_firstXing;
-  /// last xing to be simulated (0th xing is 1st after trigger)
-  Gaudi::Property<int> m_lastXing;
-
-  /// property: allow sub evts EOF condition when maxevt==-1
-  Gaudi::Property<bool> m_allowSubEvtsEOF;
-
-  /// property: process bkg events xing by xing without caching them
-  Gaudi::Property<bool> m_xingByXing;
-
-  /// property: control behaviour of event loop on algorithm failure
-  Gaudi::Property<int> m_failureMode;
-
-  /// SG key for the EventInfoContainer
-  Gaudi::Property<std::string> m_evinfName;
-
-  /// SG key for the EventInfoContainer
-  Gaudi::Property<std::string> m_evinfContName;
-
-  /// property: beam intensity service handle for beam profile in local time
-  ServiceHandle<IBeamIntensity> m_beamInt;
-  /// property: beam intensity service handle for luminosity profile in iovtime
-  ServiceHandle<IBeamLuminosity> m_beamLumi;
-  //@}
+  Gaudi::Property<unsigned int> m_maxBunchCrossingPerOrbit{this, "MaxBunchCrossingPerOrbit", 3564,
+    "The number of slots in each LHC beam. Default: 3564."};
+  Gaudi::Property<float> m_xingFreq{this, "XingFrequency", 25.0,
+    "ns"};
+  Gaudi::Property<int> m_firstXing{this, "firstXing", -2,
+    "time of first xing / XingFrequency (0th xing is 1st after trigger)"};
+  Gaudi::Property<int> m_lastXing{this, "lastXing", 1,
+    "time of last xing / XingFrequency (0th xing is 1st after trigger)"};
+  Gaudi::Property<float> m_maxCollPerXing{this, "MaxMinBiasCollPerXing", 23.0,
+    "Set to digitization numberOfCollisions prop. for variable-mu and RunDMC jobs."};
+  ToolHandleArray<IBkgStreamsCache> m_caches{this, "bkgCaches", {},
+    "list of tools managing bkg events"};
+  Gaudi::Property<bool> m_allowSubEvtsEOF{this, "AllowSubEvtsEOF", true,
+    "if true(default) an EOF condition in the BkgStreamsCaches is not considered "
+    "to be an error IF maxevt=-1 (loop over all available events)"};
+  Gaudi::Property<bool> m_xingByXing{this, "XingByXing", false,
+    "if set to true we will not cache bkg events from one xing to then next. "
+    "This greatly increases the amount of I/O and greatly reduces the memory required to run a job"};
+  Gaudi::Property<int> m_failureMode{this, "FailureMode", 1,
+    "Controls behaviour of event loop depending on return code of"
+    " Algorithms. 0: all non-SUCCESSes terminate job. "
+    "1: RECOVERABLE skips to next event, FAILURE terminates job "
+    "(DEFAULT). 2: RECOVERABLE and FAILURE skip to next events"};
+  Gaudi::Property<bool> m_allowSerialAndMPToDiffer{this, "AllowSerialAndMPToDiffer", true,
+    "When set to False, this will allow the code to reproduce serial output in an "
+    "AthenaMP job, albeit with a significant performance penalty."};
+  Gaudi::Property<std::string> m_evinfName{this, "EventInfoName", c_pileUpEventInfoObjName,
+    "SG key for the EventInfo object"};
+  Gaudi::Property<std::string> m_evinfContName{this, "EventInfoContName", c_pileUpEventInfoContName,
+    "SG key for the EventInfoContainer object"};
+  Gaudi::Property<uint32_t> m_mcChannelNumber{ this, "MCChannelNumber", 0,
+    "sample MC channel number" };
 
   /// current run number
-  uint32_t m_currentRun;
-  bool m_firstRun;
+  uint32_t m_currentRun{0};
+  bool m_firstRun{true};
 
-  /// max bunch crossings per orbit
-  unsigned int m_maxBunchCrossingPerOrbit;
+  int m_nevt{0};
+  int m_ncurevt{0};
+  bool m_skipExecAlgs{false};
+  bool m_loadProxies{true};
 
-  int m_nevt;
-
-  int m_ncurevt;
-  bool m_skipExecAlgs;
-  bool m_loadProxies;
-
-  /// property: Default true. When set to false, this will allow the
-  /// code to reproduce serial output in an AthenaMP job, albeit with
-  /// a significant performance penalty.
-  Gaudi::Property<bool> m_allowSerialAndMPToDiffer;
-
-  Gaudi::Property<uint32_t> m_mcChannelNumber{ this, "MCChannelNumber", 0, "sample MC channel number" };
 };
 #endif // PILEUPTOOLS_PILEUPEVENTLOOPMGR_H

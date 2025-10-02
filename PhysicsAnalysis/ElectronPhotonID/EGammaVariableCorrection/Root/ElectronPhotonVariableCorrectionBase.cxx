@@ -912,7 +912,7 @@ const StatusCode ElectronPhotonVariableCorrectionBase::interpolate(float& return
 
     // if evalPoint is right to the rightmost bin center, return the rightmost bin center without interpolation
     float rightmost_bin_center = 0;
-    ANA_CHECK(getBinCenter(rightmost_bin_center, binning, binning.size()-1))
+    ANA_CHECK(getBinCenter(rightmost_bin_center, binning, binning.size()-1));
     if (evalPoint >= rightmost_bin_center)
     {
         return_parameter_value = binValues.at(binValues.size()-1);

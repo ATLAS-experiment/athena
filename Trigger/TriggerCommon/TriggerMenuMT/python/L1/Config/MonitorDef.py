@@ -154,7 +154,8 @@ class MonitorDef:
                 "L1_2eEM10L_MU8F", "L1_MU3V_jJ40",
                 # L1Topo (Topo2 always in)
                 "L1_LLPDPHI-jXE40-jJ40",
-                "L1_BPH-0DR3-eEM9jJ40_MU5VF", "L1_BPH-0M9-eEM9-eEM7_MU5VF", "L1_BPH-0DR3-eEM9jJ40_2MU3V",
+                "L1_BPH-0M9-eEM9-eEM7_MU5VF",
+                "L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25",
                 "L1_BPH-0M9-eEM9-eEM7",  "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
                 "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",
@@ -218,7 +219,6 @@ class MonitorDef:
                     "L1_jJ30p0ETA25", "L1_jJ40p0ETA25",
                     "L1_jJ70p0ETA23", "L1_jJ55p0ETA23",
                     "L1_jJ80p0ETA25", "L1_jJ85p0ETA21",
-                    "L1_jLJ180",
                     "L1_jEM25", "L1_jEM20M",
                     #
                     "L1_eEM7", "L1_eEM10L", "L1_eEM15",
@@ -301,15 +301,6 @@ class MonitorDef:
                     # AFP
                     "L1_AFP_A_OR_C", "L1_AFP_A_AND_C",
                     # AFP combined
-                    "L1_AFP_A_AND_C_J12",
-                    "L1_AFP_A_AND_C_TOF_J20",
-                    "L1_AFP_A_AND_C_TOF_J30",
-                    "L1_AFP_A_AND_C_TOF_J50",
-                    "L1_AFP_A_AND_C_TOF_J75",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J20",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J30",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J50",
-                    "L1_AFP_A_AND_C_TOF_T0T1_J75",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ125",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ50",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ60",
@@ -320,21 +311,23 @@ class MonitorDef:
                     "L1_AFP_A_AND_C_TOF_jJ90",
                     "L1_AFP_A_AND_C_jJ20",
                     "L1_AFP_A_AND_C_jJ30",
-                    "L1_AFP_A_OR_C_J12",
                     "L1_AFP_A_OR_C_jJ20",
                     "L1_AFP_A_OR_C_jJ30",
                     # ZDC
                     "L1_ZDC_A_AND_C",
-                    "L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
-                    "L1_ZDC_E1_AND_E2ORE3",
-                    "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
-                    # ZDC items in pp
-                    "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_OR", "L1_ZDC_PP_A_C",
-                    "L1_ZDC_PP_A2", "L1_ZDC_PP_C2", "L1_ZDC_PP_OR2",
                     # Mu+X
                     "L1_MU5VF_AFP_A_OR_C",
                     # Phase-I L1Calo
                     "L1_eEM9_AFP_A_AND_C", #"L1_eEM9_AFP_A_OR_C",
+                    # ATR-31296 – Oxygen/Neon runs
+                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_XOR",
+                    "L1_ZDC_XNXN", "L1_ZDC_XNYN", "L1_ZDC_XNZN",
+                    "L1_ZDC_XN_XOR", "L1_ZDC_YN_XOR", "L1_ZDC_ZN_XOR",
+                    "L1_ZDC_YN", "L1_ZDC_ZN", "L1_ZDC_LOR", "L1_ZDC_YNYN",
+                    "L1_TRT_FILLED",
+                    "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
+                    "L1_jJ10", "L1_jJ20",
+                    "L1_eEM5", "L1_eEM9",
                 ])
 
                 # lowMu HLT menu: Add triggers that are not in the MC menu
@@ -357,9 +350,7 @@ class MonitorDef:
                         "L1_AFP_NSA_BGRP12",
                         "L1_AFP_NSC_BGRP12",
                         # AFP combined
-                        "L1_AFP_A_AND_C_MBTS_2",
                         "L1_AFP_A_AND_C_TOF_T0T1",
-                        "L1_AFP_A_OR_C_MBTS_2",
                     ])
 
             else: # HI HLT menu
@@ -453,10 +444,9 @@ class MonitorDef:
             ])
             if "lowMu" in menuFullName:
                 monItemsHF[TBP|TAP|TAV].extend([
-                    "L1_ZDC_PP_A", "L1_ZDC_PP_C", "L1_ZDC_PP_A_C", # luminosity measurements
-                    "L1_ZDC_PP_OR",                                # luminosity measurements
-                    "L1_ZDC_PP_A2", "L1_ZDC_PP_C2",                # luminosity measurements
-                    "L1_ZDC_PP_OR2",                               # luminosity measurements
+                    # ATR-31296 – Oxygen/Neon runs
+                    "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", "L1_ZDC_OR", "L1_ZDC_LOR",
+                    "L1_ZDC_XN_XOR", "L1_ZDC_YN_XOR", "L1_ZDC_ZN_XOR"
                 ])
             else: # HI HLT menu
                 monItemsHF[TBP|TAP|TAV].extend([

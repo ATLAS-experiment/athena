@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
 #include "TrkDetDescrInterfaces/ILayerArrayCreator.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/PlaneLayer.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
@@ -27,55 +26,61 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 // STL
 #include <algorithm>
+#include <memory>
 
 namespace Trk {
 
     class Layer;
     class PlaneLayer;
 
-    /**@typedef LayerOrderPosition */
-    typedef std::pair< SharedObject<const Layer>, Amg::Vector3D> LayerOrderPosition;
-
-
-    /** @class LayerArrayCreator
+   /** @class LayerArrayCreator
 
       The LayerArrayCreator is a simple Tool that helps to construct
       LayerArrays from std::vector of Trk::CylinderLayer, Trk::DiscLayer, Trk::PlaneLayer.
+      The input layers are
 
       It fills the gaps automatically with Trk::NavigationLayer to be processed easily in the
       Navigation of the Extrapolation process.
 
-      @author Andreas.Salzburger@cern.ch   
+      @author Andreas.Salzburger@cern.ch
+
+      @author Christos Anastopoulos (Athena MT modifications)
      */
 
     class LayerArrayCreator : public AthAlgTool, virtual public ILayerArrayCreator {
+      /**@typedef LayerOrderPosition */
+      using LayerOrderPosition = std::pair< std::shared_ptr<const Layer>, Amg::Vector3D>;
 
       public:
         /** Constructor */
         LayerArrayCreator(const std::string&,const std::string&,const IInterface*);
-        
+
         /** Destructor */
-        virtual ~LayerArrayCreator();
+        virtual ~LayerArrayCreator() = default;
 
         /** LayerArrayCreator interface method - for Barrel-like layers */
-        LayerArray* cylinderLayerArray(const std::vector<CylinderLayer* >& layers,
-                                       double rmin,
-                                       double rmax,
-                                       BinningType btype = arbitrary) const;
+        std::unique_ptr<Trk::BinnedArray1D<Layer>> cylinderLayerArray(
+            const std::vector<CylinderLayer*>& layers,
+            double rmin,
+            double rmax,
+            BinningType btype = arbitrary) const;
 
         /** LayerArrayCreator interface method - for Endcap-like layers */
-        LayerArray* discLayerArray(const std::vector< DiscLayer* >& layers,
-                                   double zmin,
-                                   double zmax,
-                                   BinningType btype = arbitrary) const;
+        std::unique_ptr<Trk::BinnedArray1D<Layer>> discLayerArray(
+            const std::vector<DiscLayer*>& layers,
+            double zmin,
+            double zmax,
+            BinningType btype = arbitrary) const;
 
         /** LayerArrayCreator interface method - for Planar-like layers */
-        LayerArray* planeLayerArray(const std::vector< PlaneLayer* >& layers,
-                                    double min,
-                                    double max,
-                                    BinningType btype = arbitrary,
-                                    Trk::BinningValue bv = Trk::binX) const;
-      private :
+        std::unique_ptr<Trk::BinnedArray1D<Layer>> planeLayerArray(
+            const std::vector<PlaneLayer*>& layers,
+            double min,
+            double max,
+            BinningType btype = arbitrary,
+            Trk::BinningValue bv = Trk::binX) const;
+
+       private:
         Trk::Layer*             checkAndReplaceEmptyLayer(Trk::Layer* lay) const;
         int                     m_emptyLayerMode;       //!< 0 - do nothing, 1 - replace with navigation layer, 2 - delete
     };

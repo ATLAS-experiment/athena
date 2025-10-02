@@ -23,6 +23,7 @@
 #include "AthenaMonitoring/AthenaMonManager.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 #include "TH1F.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -58,7 +59,7 @@ ZeeTaPMonTool::ZeeTaPMonTool(const std::string & type, const std::string & name,
      m_hLB_N(nullptr)
 {
   // Name of the electron collection
-  declareProperty("massPeak", m_MassPeak = 91188, "Resonance peak position" );
+  declareProperty("massPeak", m_MassPeak = ParticleConstants::ZMassInMeV, "Resonance peak position" );
   declareProperty("electronEtCut",m_ElectronEtCut = 15*GeV, "Et cut for electrons");
   declareProperty("massLowerCut", m_MassLowerCut = 70*GeV,"Lower mass cut");
   declareProperty("massUpperCut", m_MassUpperCut = 110*GeV,"Upper mass cut");

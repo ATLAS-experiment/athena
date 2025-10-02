@@ -3,6 +3,7 @@
 */
 
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
@@ -17,11 +18,14 @@
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoVDetectorElement.h"
 #include "GeoModelHelpers/defineWorld.h"
+#include "GeoModelHelpers/ThreadPool.h"
 
 #include <thread>
 #include <future>
 #include <chrono>
 #include <random>
+#include <unordered_map>
+
 
 class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElement{
     public:
@@ -55,31 +59,30 @@ class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElem
         ActsTrk::TransformCacheDetEle<TestDetElement> m_cache{IdentifierHash{1}, this};
 };
 
+using ExpectationMap_t = std::unordered_map<const TestDetElement*, Amg::Transform3D>;
+
 template<> Amg::Transform3D 
     ActsTrk::TransformCacheDetEle<TestDetElement>::fetchTransform(const ActsTrk::DetectorAlignStore* store) const {
     return m_parent->getMaterialGeom()->getAbsoluteTransform(store->geoModelAlignment.get()) * Amg::getRotateX3D(M_PI);
 }
 
-/** Returns how many threads have not yet finished their work*/
-template <class T> size_t count_active(const std::vector<std::future<T>>& threads) {
-    size_t counts{0};
-    for (const std::future<T>& thread : threads) {
-         using namespace std::chrono_literals;
-        if (thread.wait_for(0ms) != std::future_status::ready) ++counts;
-    }
-    return counts;
+std::unique_ptr<ActsTrk::DetectorAlignStore> makeAlignedStore(const std::shared_ptr<GeoAlignmentStore>& condAlign) {
+    auto store = std::make_unique<ActsTrk::DetectorAlignStore>(ActsTrk::DetectorType::Csc);
+    store->geoModelAlignment = std::make_unique<GeoAlignmentStore>(*condAlign);
+    store->geoModelAlignment->clearPosCache();
+    return store;
+
 }
 
 
-class WorkerTask {
+class WorkerTask : public GeoThreading::ThreadPool::IThreadTask {
     public:
         WorkerTask(const std::vector<std::shared_ptr<TestDetElement>>& detElements,
-                   std::shared_ptr<GeoAlignmentStore> condAlignment):
-            m_detEles{detElements} {
-            // m_store->geoModelAlignment = condAlignment;
-            m_store->geoModelAlignment = std::make_unique<GeoAlignmentStore>(*condAlignment);
-            m_store->geoModelAlignment->clearPosCache();
-        }
+                   const std::shared_ptr<GeoAlignmentStore>& condAlignment,
+                   const ExpectationMap_t& trfMap):
+            m_detEles{detElements},
+            m_store{makeAlignedStore(condAlignment)},
+            m_trfMap{trfMap} {}
 #if defined(FLATTEN) && defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
@@ -88,133 +91,132 @@ class WorkerTask {
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-        bool execute() {
+        void execute() override final {
+
+            std::random_device rd;
+            std::mt19937 g(rd());
+            std::ranges::shuffle(m_detEles, g);
+
             ActsGeometryContext gctx{};
             gctx.setStore(m_store);
-            Amg::Transform3D combinedTrf{Amg::Transform3D::Identity()};
-            for (unsigned int daemon = 0 ; daemon < 666; ++daemon) {
-                for (const auto& det : m_detEles) {
-                    const Amg::Transform3D& trf{det->transform(gctx.context())};
-                    // assert(trf.data()[0] != 624626.56);
-
-                    combinedTrf = trf * combinedTrf;
-                    Amg::Vector3D vec = trf.inverse() * Amg::Vector3D{51515,6262,7272};
-                    
-                    if (vec.dot(vec) < 0. || std::pow(vec.eta() * vec.theta(), 2) < 0.) {
-                            std::cout<<"Confusion "<<std::endl;
-                    }
-                }           
-            }
-            m_executed = true;
-            return true;
-        }
-        bool executed() const { return m_executed; }
-    private:
-        std::vector<std::shared_ptr<TestDetElement>> m_detEles{};
-        std::shared_ptr<ActsTrk::DetectorAlignStore> m_store{std::make_unique<ActsTrk::DetectorAlignStore>(ActsTrk::DetectorType::Csc)};
-        bool m_executed{false};
-
-};
-
-class WorkerNode {
-    public:
-        WorkerNode() = default;
-
-        bool hasTask() const {
-            std::shared_lock guard{m_mutex};
-            return m_hasTask;
-        }
-        void assignTask(std::unique_ptr<WorkerTask> task) {        
-            if (hasTask()) return;
-            std::unique_lock guard {m_mutex};
-            m_task = std::move(task);
-            m_hasTask = true;
-        }
-        bool executeTask() {
-            while (!m_abort) {                
-                if (m_task) {
-                    m_task->execute();
-                    std::unique_lock guard{m_mutex};
-                    m_task.reset();
-                    m_hasTask = false;
-                } else {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            
+            for (const auto& det : m_detEles) {
+                const auto find_itr = m_trfMap.find(det.get());
+                if (find_itr == m_trfMap.end()) {
+                    THROW_EXCEPTION("Detector element not in reference transform map");
+                }
+                const Amg::Transform3D& trf{det->transform(gctx.context())};
+                if (!Amg::isIdentity(trf.inverse() * find_itr->second)){
+                    THROW_EXCEPTION("Different alignment detected "<<std::endl
+                        <<" ***    found: "<<Amg::toString(trf)<<std::endl
+                        <<" *** expected: "<<Amg::toString(find_itr->second));
                 }
             }
-            return true;
         }
-        void finalize() {
-            m_abort = true; 
-        }
+        bool ready() const override final { return true; }
     private:
-        mutable std::shared_mutex m_mutex{};
-        bool m_hasTask{false};
-        std::atomic<bool> m_abort{false};
-        std::unique_ptr<WorkerTask> m_task{};
+        std::vector<std::shared_ptr<TestDetElement>> m_detEles{};
+        std::shared_ptr<ActsTrk::DetectorAlignStore> m_store{};
+        const ExpectationMap_t& m_trfMap;
 };
-
-
 int main() {
     
-    unsigned int nThreads = std::min(8u, std::thread::hardware_concurrency());
-    constexpr unsigned int numTrials = 40;
+    
+    auto& pool = GeoThreading::ThreadPool::getPool(-1);
+    constexpr unsigned int numTrials = 666;
 
+    constexpr unsigned nAlign = 250;
+    constexpr unsigned nDetPerAlign = 55;
     /* Define the world and place randomly the volumes */
     PVLink world{createGeoWorld()};
     
     /** Define the GeoAlignmentStore to move the volumes coherently */
-    std::shared_ptr<GeoAlignmentStore> condAlignment = std::make_shared<GeoAlignmentStore>();
+    auto condAlignment = std::make_shared<GeoAlignmentStore>();
    
     std::vector<std::shared_ptr<TestDetElement>> detElements{};
-    
-    for (unsigned int k =0 ; k < 25; ++k) {
+
+    for (unsigned int k =0 ; k < nAlign; ++k) {
         GeoIntrusivePtr<GeoAlignableTransform> alignTrf = make_intrusive<GeoAlignableTransform>(Amg::getTranslateX3D(k+1));
         condAlignment->setDelta(alignTrf, Amg::getTranslateY3D(k+1) * Amg::getRotateX3D(M_PI_2));
         world->add(alignTrf);
         
         GeoIntrusivePtr<GeoPhysVol> alignBox = make_intrusive<GeoPhysVol>(world->getLogVol());
         world->add(alignBox);
-        for (unsigned int d = 0 ; d < 66; ++d) {
-            world->add(make_intrusive<GeoTransform>(Amg::getTranslateZ3D(d+6)));
+        for (unsigned int d = 0 ; d < nDetPerAlign; ++d) {
+            alignBox->add(make_intrusive<GeoTransform>(Amg::getTranslateZ3D(d+6)));
             GeoIntrusivePtr<GeoFullPhysVol> detVol{make_intrusive<GeoFullPhysVol>(world->getLogVol())};
-            world->add(detVol);
+            alignBox->add(detVol);
             detElements.emplace_back(std::make_unique<TestDetElement>(detVol));
         }
     }
+
     condAlignment->lockDelta();
-
-    std::vector<std::unique_ptr<WorkerNode>> workers{};
-    std::vector<std::future<bool>> threads{};
-    
-    for (unsigned int node = 0 ; node < nThreads; ++node) {
-        workers.emplace_back(std::make_unique<WorkerNode>());
-        WorkerNode* testerPtr = workers.back().get();
-        threads.emplace_back(std::async(std::launch::async,[testerPtr](){return testerPtr->executeTask();}));
-
+    /// First check the positions of the detectors
+    if (detElements.size() != nDetPerAlign * nAlign) {
+        std::cerr<<"Not enough detector elements were constructed "<<detElements.size()<<" vs. "<<(nDetPerAlign * nAlign )<<std::endl;
+        return EXIT_FAILURE;
     }
     
-    std::random_device rd;
-    std::mt19937 g(rd());
+    ExpectationMap_t unalignedTrfs{}, alignedTrfs{};
+    {
+        ActsGeometryContext uGctx{};
+        ActsGeometryContext aGctx{};
+        uGctx.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(ActsTrk::DetectorType::Csc));
+        aGctx.setStore(makeAlignedStore(condAlignment));
+        for (unsigned int k =0 ; k < nAlign ; ++k) {
+            const Amg::Transform3D baseTrf{Amg::getTranslateX3D(k+1)};
+            const Amg::Transform3D baseAlTrf{baseTrf * Amg::getTranslateY3D(k+1) * Amg::getRotateX3D(M_PI_2)};
 
-    unsigned int executedAttempts{};
-    while (executedAttempts < numTrials) {
-        for (auto& worker : workers) {
-            if (!worker->hasTask()) {
-                worker->assignTask(std::make_unique<WorkerTask>(detElements, condAlignment));
-                std::cout<<"Launch new worker "<<executedAttempts<<" "<<std::endl;
-                if (executedAttempts % 100 == 0) std::shuffle(detElements.begin(),detElements.end(), g);
-                ++executedAttempts;
+            for (unsigned int d = 0; d< nDetPerAlign; ++d) {
+                const Amg::Transform3D uExpTrf = baseTrf * 
+                                                 Amg::getTranslateZ3D(d+6)* 
+                                                 Amg::getRotateX3D(M_PI);
+                const auto* detEle = detElements[k*nDetPerAlign + d].get();
+                const Amg::Transform3D& uDetTrf{detEle->transform(uGctx.context())};
+                if (!Amg::isIdentity(uExpTrf *  detEle->transform(uGctx.context()).inverse())){
+                    std::cerr<<"Detector element is not where it's expected: "<<std::endl
+                             <<" ** expect: "<<Amg::toString(uExpTrf)<<std::endl
+                             <<" **  found: "<<Amg::toString(uDetTrf)<<std::endl;
+                    return EXIT_FAILURE;
+                }
+                unalignedTrfs.insert(std::make_pair(detEle, uExpTrf));
+                const Amg::Transform3D aExpTrf = baseAlTrf * 
+                                                 Amg::getTranslateZ3D(d+6)* 
+                                                 Amg::getRotateX3D(M_PI);
+                const Amg::Transform3D& aDetTrf{detEle->transform(aGctx.context())};
+                if (!Amg::isIdentity(aExpTrf * detEle->transform(aGctx.context()).inverse())){
+                    std::cerr<<"Aligned detector  element is not where it's expected: "<<std::endl
+                             <<" ** expect: "<<Amg::toString(aExpTrf)<<std::endl
+                             <<" **  found: "<<Amg::toString(aDetTrf)<<std::endl;
+                    return EXIT_FAILURE;
+                }
+                alignedTrfs.insert(std::make_pair(detEle, aExpTrf));
+
             }
         }
-        std::this_thread::sleep_for(std::chrono::nanoseconds(100));
     }
-    for (auto & worker : workers) {
-        worker->finalize();
+        std::cout<<"Detector element positioning test passed. "<<std::endl;
+    if (detElements.size() != alignedTrfs.size()) {
+        std::cerr<<"Aligned expectation map is too small detEle: "<<detElements.size()<<" vs. map: "<<alignedTrfs.size()<<std::endl;
+        return EXIT_FAILURE;
     }
-    while (count_active(threads) > 0){
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    if (detElements.size() != unalignedTrfs.size()) {
+        std::cerr<<"Nominal expectation map is too small detEle: "<<detElements.size()<<" vs. map: "<<unalignedTrfs.size()<<std::endl;
+        return EXIT_FAILURE;
     }
 
+
+    unsigned int executedAttempts{0};
+    while (executedAttempts < numTrials) {
+        
+        if(numTrials % 3 == 0) {
+            pool.appendTask(std::make_unique<WorkerTask>(detElements, std::make_shared<GeoAlignmentStore>(), unalignedTrfs));
+        } else{
+            pool.appendTask(std::make_unique<WorkerTask>(detElements, condAlignment, alignedTrfs));
+        }
+        ++executedAttempts;
+    }
+    pool.drainQueue();
     return EXIT_SUCCESS;
 }
 

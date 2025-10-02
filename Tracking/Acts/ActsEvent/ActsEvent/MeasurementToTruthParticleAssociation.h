@@ -26,7 +26,12 @@ namespace ActsTrk
          return  m_sourceMeasurements.getDataPtr();
       }
       bool isCompatibleWith(const xAOD::UncalibratedMeasurementContainer *container) const {
-         return container == m_sourceMeasurements;
+         
+         if (!container) return false;
+
+         if (container == m_sourceMeasurements.getDataPtr()) return true;
+         
+         return false;
       }
 
       // convenience methods to convert "data-links" to derived measurement container

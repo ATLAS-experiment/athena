@@ -31,15 +31,15 @@
 namespace {
     const Trk::Material dummyMaterial{1.e10, 1.e10, 0., 0., 0.};
 
-    Amg::Transform3D* makeTransform(const Amg::Transform3D& trf) {
-        return std::make_unique<Amg::Transform3D>(trf).release();
+std::unique_ptr<Amg::Transform3D> makeTransform(const Amg::Transform3D& trf) {
+        return std::make_unique<Amg::Transform3D>(trf);
     }
 }
 
 namespace Trk {
 VolumeConverter::VolumeConverter() : AthMessaging("VolumeConverter") {}
 
-std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv, 
+std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv,
                                                            bool simplify, bool blend,
                                                            double blendMassLimit) const {
 
@@ -120,7 +120,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
             auto confinedVols =std::make_unique<std::vector<TrackingVolume*>>();
             confinedVols->push_back(std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
             envName = name + "_envelope";
-            trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
+            trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, std::move(confinedVols), envName);
         }
 
         return trEnv;
@@ -172,32 +172,32 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
                                         0.5 * ((*span).yMin + (*span).yMax),
                                         0.5 * ((*span).zMin + (*span).zMax)}};
 
-        std::unique_ptr<VolumeBounds> bounds =
-            std::make_unique<CuboidVolumeBounds>(
+        std::shared_ptr<VolumeBounds> bounds =
+            std::make_shared<CuboidVolumeBounds>(
                 0.5 * ((*span).xMax - (*span).xMin),
                 0.5 * ((*span).yMax - (*span).yMin),
                 0.5 * ((*span).zMax - (*span).zMin));
         envelope = std::make_unique<Volume>(
-            makeTransform(cylTrf), bounds.release());
+            makeTransform(cylTrf), std::move(bounds));
     } else {
         double dPhi = (*span).phiMin > (*span).phiMax
                           ? (*span).phiMax - (*span).phiMin + 2 * M_PI
                           : (*span).phiMax - (*span).phiMin;
-        std::unique_ptr<VolumeBounds> cylBounds{};
+        std::shared_ptr<VolumeBounds> cylBounds{};
         Amg::Transform3D cylTrf{transf};
         if (dPhi < 2 * M_PI) {
             double aPhi = 0.5 * ((*span).phiMax + (*span).phiMin);
-            cylBounds = std::make_unique<CylinderVolumeBounds>(
+            cylBounds = std::make_shared<CylinderVolumeBounds>(
                 (*span).rMin, (*span).rMax, 0.5 * dPhi,
                 0.5 * ((*span).zMax - (*span).zMin));
             cylTrf = cylTrf * Amg::getRotateZ3D(aPhi);
         } else {
-            cylBounds = std::make_unique<CylinderVolumeBounds>(
+            cylBounds = std::make_shared<CylinderVolumeBounds>(
                 (*span).rMin, (*span).rMax,
                 0.5 * ((*span).zMax - (*span).zMin));
         }
         envelope = std::make_unique<Volume>(
-            makeTransform(cylTrf), cylBounds.release());
+            makeTransform(cylTrf), std::move(cylBounds));
     }
 
     double volEnv = calculateVolume(*envelope);
@@ -217,7 +217,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
         auto confinedVols = std::make_unique<std::vector<TrackingVolume*>>();
         confinedVols->push_back( std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
         envName = envName + "_envelope";
-        trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
+        trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, std::move(confinedVols), envName);
     }
 
     return trEnv;
@@ -244,11 +244,11 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
                 dynamic_cast<const SubtractedVolumeBounds*>(&bounds);
             if (comb) {
                 (*sIter).parts[ii].reset(comb->first()->clone());
-                VolumePart vp = (*sIter);
-                constituents.push_back(vp);
-                constituents.back().parts[ii].reset(comb->second()->clone());
-                constituents.push_back(vp);
-                constituents.back().parts.emplace_back(comb->second()->clone());
+                VolumePart vp(*sIter); //copy here
+                constituents.push_back(vp); //inser copy the iter can be invalidated
+                constituents.back().parts[ii].reset(comb->second()->clone()); //modify
+                constituents.push_back(vp); //push copy
+                constituents.back().parts.emplace_back(comb->second()->clone());//modify
                 constituents.back().sign = -1. * constituents.back().sign;
                 update = true;
                 break;
@@ -351,7 +351,7 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
     VolumePairVec constituents;
     constituents.emplace_back(std::make_unique<Volume>(trVol), nullptr);
     VolumePairVec::iterator sIter = constituents.begin();
-    std::unique_ptr<VolumeBounds> newBounds{};
+    std::shared_ptr<VolumeBounds> newBounds{};
     while (sIter != constituents.end()) {
         /// Check whether the first operand in the iterator is a composite one
         const CombinedVolumeBounds* comb =
@@ -367,15 +367,15 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
             std::shared_ptr<Volume> combFirst{comb->first()->clone()};
             std::shared_ptr<Volume> combSecond{comb->second()->clone()};
             if (comb->intersection()) {
-                newBounds = std::make_unique<Trk::SubtractedVolumeBounds>(
-                    combFirst->clone(), combSecond->clone());
+                newBounds = std::make_shared<Trk::SubtractedVolumeBounds>(
+                std::unique_ptr<Trk::Volume>(combFirst->clone()), std::unique_ptr<Trk::Volume>(combSecond->clone()));
                 std::unique_ptr<Trk::Volume> newSubVol =
-                    std::make_unique<Volume>(nullptr, newBounds.release());
+                    std::make_unique<Volume>(nullptr, std::move(newBounds));
                 if (subVol) {
-                    newBounds = std::make_unique<CombinedVolumeBounds>(
-                        subVol->clone(), newSubVol.release(), false);
+                    newBounds = std::make_shared<CombinedVolumeBounds>(
+                      std::unique_ptr<Trk::Volume>(subVol->clone()), std::move(newSubVol), false);
                     std::shared_ptr<Volume> newCSubVol =
-                        std::make_unique<Volume>(nullptr, newBounds.release());
+                        std::make_unique<Volume>(nullptr, std::move(newBounds));
                     constituents.insert(sIter,
                                         std::make_pair(combFirst, newCSubVol));
                 } else {
@@ -385,10 +385,11 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
             } else {
                 constituents.insert(sIter, std::make_pair(combFirst, subVol));
                 if (subVol) {
-                    newBounds = std::make_unique<CombinedVolumeBounds>(
-                        subVol->clone(), combFirst->clone(), false);
+                    newBounds = std::make_shared<CombinedVolumeBounds>(
+                      std::unique_ptr<Trk::Volume>(subVol->clone()),
+                      std::unique_ptr<Trk::Volume>(combFirst->clone()), false);
                     std::unique_ptr<Trk::Volume> newSubVol =
-                        std::make_unique<Volume>(nullptr, newBounds.release());
+                        std::make_unique<Volume>(nullptr, std::move(newBounds));
                     constituents.insert(
                         sIter,
                         std::make_pair(combSecond, std::move(newSubVol)));
@@ -404,10 +405,11 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
             std::shared_ptr<Volume> innerVol{sub->inner()->clone()};
             std::shared_ptr<Volume> outerVol{sub->outer()->clone()};
             if (subVol) {
-                newBounds = std::make_unique<CombinedVolumeBounds>(
-                    subVol->clone(), innerVol->clone(), false);
+                newBounds = std::make_shared<CombinedVolumeBounds>(
+                    std::unique_ptr<Trk::Volume>(subVol->clone()),
+                    std::unique_ptr<Trk::Volume>(innerVol->clone()), false);
                 std::unique_ptr<Volume> newSubVol =
-                    std::make_unique<Trk::Volume>(nullptr, newBounds.release());
+                    std::make_unique<Trk::Volume>(nullptr, newBounds);
                 constituents.insert(
                     sIter, std::make_pair(outerVol, std::move(newSubVol)));
             } else {
@@ -502,8 +504,16 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
     }
 
     //
-    double minZ{1.e6}, maxZ{-1.e6}, minPhi{2 * M_PI}, maxPhi{0.}, minR{1.e6},
-        maxR{0.}, minX{1.e6}, maxX{-1.e6}, minY{1.e6}, maxY{-1.e6};
+    double minZ{1.e6};
+    double maxZ{-1.e6};
+    double minPhi{2 * M_PI};
+    double maxPhi{0.};
+    double minR{1.e6};
+    double maxR{0.};
+    double minX{1.e6};
+    double maxX{-1.e6};
+    double minY{1.e6};
+    double maxY{-1.e6};
 
     // defined vertices and edges
     std::vector<Amg::Vector3D> vtx;

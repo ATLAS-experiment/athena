@@ -31,7 +31,7 @@
 #include <typeinfo>
 #include <iterator>
 #include <map>
-
+#include <string>
 #include "boost/lexical_cast.hpp"
 
 using namespace std;
@@ -43,7 +43,7 @@ namespace {
       bool first=true;
       for(int id : v) {
          if(first) { first = false; } else { joined += ","; }
-         joined += boost::lexical_cast<string,int>(id);
+         joined += std::to_string(id);
       }
       return joined;
    }
@@ -216,7 +216,7 @@ TrigConf::CaloInfoLoader::loadMinTobInfo( CaloInfo& data, const vector<int> & mi
    bool first=true;
    for(int id : mintobIDs) {
       if(first) { first = false; } else { cond += ","; }
-      cond += boost::lexical_cast<string,int>(id);
+      cond += std::to_string(id);
    }
    cond += ")";
    q->setCondition( cond, coral::AttributeList() );

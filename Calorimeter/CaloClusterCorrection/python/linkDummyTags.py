@@ -6,7 +6,6 @@
 # Purpose: 
 #
 
-from __future__ import print_function
 
 
 import CoolConvUtilities.AtlCoolLib as AtlCoolLib

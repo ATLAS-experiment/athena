@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s):
@@ -156,7 +156,7 @@ namespace xAOD {
       }
 
       // Create a branch for each xAOD interface object:
-      for( auto ef_itr : *ef ) {
+      for( const auto& ef_itr : *ef ) {
 
          // Convenience reference:
          const xAOD::EventFormatElement& efe = ef_itr.second;

@@ -25,12 +25,13 @@
 #include "TrkDriftCircleMath/TransformToLine.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "AthContainers/ConstAccessor.h"
+#include "MuonClusterization/RpcHitClustering.h"
 
 namespace {
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458 inside calculateTof()/calculateBeta()
 
 }
-
+using namespace Muon::MuonStationIndex;
 namespace MuonCombined {
 
     std::string printIntersectionToString(const Muon::MuonSystemExtension::Intersection& intersection) {
@@ -318,8 +319,8 @@ namespace MuonCombined {
                 if (!mdt) continue;
 
                 if (m_segmentMDTT) {
-                    int chIndexWithBIR = m_idHelperSvc->chamberIndex(mdt->identify());
-                    if (chIndexWithBIR == Muon::MuonStationIndex::BIL) {
+                    int chIndexWithBIR = toInt(m_idHelperSvc->chamberIndex(mdt->identify()));
+                    if (chIndexWithBIR == toInt(ChIndex::BIL)) {
                         std::string stName = m_idHelperSvc->chamberNameString(id);
                         if (stName[2] == 'R') { chIndexWithBIR += 1000; }
                     }
@@ -959,11 +960,11 @@ namespace MuonCombined {
                     if (nextensions == 0)
                         theCandidate = candidate.get();
                     else {
-                        std::shared_ptr<Candidate> newCandidate = std::make_unique<Candidate>(candidate->betaSeed);
+                        std::shared_ptr<Candidate> newCandidate = std::make_shared<Candidate>(candidate->betaSeed);
                         newCandidate->layerDataVec = layerDataVec;
                         newCandidate->hits = hits;
-                        newCandidates.push_back(newCandidate);
                         theCandidate = newCandidate.get();
+                        newCandidates.emplace_back(std::move(newCandidate));
                     }
 
                     // create a LayerData object to add to the selected candidate
@@ -1198,7 +1199,8 @@ namespace MuonCombined {
                 Trk::SegmentCollection::iterator sit_end = segColl->end();
                 for (; sit != sit_end; ++sit) {
                     Trk::Segment* tseg = *sit;
-                    Muon::MuonSegment* mseg = dynamic_cast<Muon::MuonSegment*>(tseg);
+                    Muon::MuonSegment* mseg = static_cast<Muon::MuonSegment*>(tseg);
+                    assert(dynamic_cast<Muon::MuonSegment*>(tseg) != nullptr);
                     ATH_MSG_DEBUG("Segment:  " << m_printer->print(*mseg));
                     segments.push_back(std::shared_ptr<const Muon::MuonSegment>(mseg));
                 }
@@ -1307,7 +1309,7 @@ namespace MuonCombined {
         Muon::MuonStationIndex::LayerIndex layerIndex = intersection.layerSurface.layerIndex;
 
         // get hough data
-        SG::ReadHandle<Muon::MuonLayerHoughTool::HoughDataPerSectorVec> houghDataPerSectorVec{m_houghDataPerSectorVecKey,ctx};
+        SG::ReadHandle houghDataPerSectorVec{m_houghDataPerSectorVecKey,ctx};
         if (!houghDataPerSectorVec.isValid()) {
             ATH_MSG_ERROR("Hough data per sector vector not found");
             return;
@@ -1321,20 +1323,20 @@ namespace MuonCombined {
         }
 
         // get hough maxima in the layer
-        unsigned int sectorLayerHash = Muon::MuonStationIndex::sectorLayerHash(regionIndex, layerIndex);
+        unsigned int layHash = Muon::MuonStationIndex::sectorLayerHash(regionIndex, layerIndex);
         const Muon::MuonLayerHoughTool::HoughDataPerSector& houghDataPerSector = houghDataPerSectorVec->vec[sector - 1];
 
         // sanity check
-        if (houghDataPerSector.maxVec.size() <= sectorLayerHash) {
+        if (houghDataPerSector.maxVec.size() <= layHash) {
             ATH_MSG_WARNING(" houghDataPerSector.maxVec.size() smaller than hash " << houghDataPerSector.maxVec.size() << " hash "
-                                                                                   << sectorLayerHash);
+                                                                                   << layHash);
             return;
         }
-        const Muon::MuonLayerHoughTool::MaximumVec& maxVec = houghDataPerSector.maxVec[sectorLayerHash];
+        const Muon::MuonLayerHoughTool::MaximumVec& maxVec = houghDataPerSector.maxVec[layHash];
         if (maxVec.empty()) return;
 
         // get local coordinates in the layer frame
-        bool barrelLike = intersection.layerSurface.regionIndex == Muon::MuonStationIndex::Barrel;
+        bool barrelLike = intersection.layerSurface.regionIndex == DetectorRegionIndex::Barrel;
 
         // in the endcaps take the r in the sector frame from the local position of the extrapolation
         float phi = intersection.trackParameters->position().phi();
@@ -1350,7 +1352,7 @@ namespace MuonCombined {
         float theta = std::atan2(y, x);
 
         // get phi hits
-        const Muon::MuonLayerHoughTool::PhiMaximumVec& phiMaxVec = houghDataPerSector.phiMaxVec[regionIndex];
+        const Muon::MuonLayerHoughTool::PhiMaximumVec& phiMaxVec = houghDataPerSector.phiMaxVec[toInt(regionIndex)];
         ATH_MSG_DEBUG("   Got Phi Hough maxima " << phiMaxVec.size() << " phi " << phi);
 
         // lambda to handle calibration and selection of clusters

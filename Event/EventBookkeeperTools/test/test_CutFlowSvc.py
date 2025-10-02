@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Test CutFlowSvc
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 from argparse import ArgumentParser
@@ -29,18 +29,20 @@ parser.add_argument("--sharedWriter", default=False,
                     action="store_true", help="Run with shared writer")
 args = parser.parse_args()
 
+maxEvents = 200
 flags = initConfigFlags()
 if args.input:
   flags.Input.Files = [args.input]
 elif args.data:
   flags.Input.Files = defaultTestFiles.RAW_RUN2
+  # defaultTestFiles.RAW_RUN2 is now limited to 50 events
+  maxEvents = 50
 else:
   flags.Input.Files = defaultTestFiles.AOD_RUN2_MC
 
 # Flags relating to multithreaded execution
 threads = args.threads
 procs = args.processes
-maxEvents = 200
 flags.Concurrency.NumThreads = threads
 flags.Concurrency.NumProcs = procs
 if threads > 0:
@@ -74,6 +76,7 @@ if flags.Input.Format is Format.BS:
 else:
   acc.merge(PoolReadCfg(flags))
 
+# FIXME: this is not resolved properly for RAW data input
 if 'EventInfo' not in flags.Input.Collections:
   from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
   acc.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True))

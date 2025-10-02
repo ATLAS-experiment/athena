@@ -69,7 +69,8 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
         kwargs.setdefault("doToFCorrection", True)
         kwargs.setdefault("InputObjectName", "sTGC_Hits")
         the_tool = CompFactory.sTgcDigitizationTool(name, **kwargs)
-    else:
+
+    elif flags.Muon.doFastsTGCDigitization:
         from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
         result.merge(ActsGeometryContextAlgCfg(flags))
         kwargs.setdefault("StreamName", "sTgcSimForklift")
@@ -83,6 +84,19 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
         from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
         result.merge(NswErrorCalibDbAlgCfg(flags))
         the_tool = CompFactory.MuonR4.sTgcFastDigiTool(name, **kwargs)
+
+    else:
+        from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+        result.merge(ActsGeometryContextAlgCfg(flags))
+        kwargs.setdefault("StreamName", "sTgcSimForklift")
+        kwargs.setdefault("SimHitKey", "xStgcSimHits")
+        kwargs.setdefault("EffiDataKey", "")    
+
+        from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg, STgcCalibSmearingToolCfg
+        kwargs.setdefault("doToFCorrection", True)
+        kwargs.setdefault("SmearingTool", result.popToolsAndMerge(STgcCalibSmearingToolCfg(flags)))
+        result.merge(NswErrorCalibDbAlgCfg(flags))
+        the_tool = CompFactory.MuonR4.sTgcDigitizationTool(name, **kwargs)
 
     result.setPrivateTools(the_tool)
     return result

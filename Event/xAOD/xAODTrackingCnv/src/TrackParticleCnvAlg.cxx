@@ -16,11 +16,8 @@
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-
 // Local include(s):
 #include "TrackParticleCnvAlg.h"
-
-
 
 namespace xAODMaker {
 TrackParticleCnvAlg::TrackParticleCnvAlg(const std::string& name,
@@ -60,19 +57,7 @@ TrackParticleCnvAlg::initialize()
   ATH_CHECK(
     m_aodTruth.initialize(m_addTruthLink && m_convertAODTrackParticles));
   ATH_CHECK(m_trackTruth.initialize(m_addTruthLink && m_convertTracks));
-  if (m_addTruthLink) {
-     const std::string container_key = m_convertTracks ? m_xaodout.key() : m_xaodTrackParticlesout.key();
-     m_xaodTruthOriginKey = container_key+".truthOrigin";
-     m_xaodTruthTypeKey =   container_key+".truthType";
-     m_xaodTruthLinkKey =  container_key+".truthParticleLink";
-     m_xaodTruthMatchProbKey = container_key+".truthMatchProbability";
-  }
-  const bool init_truthKey =  m_addTruthLink;
-  ATH_CHECK(m_xaodTruthOriginKey.initialize(init_truthKey && !m_truthClassifier.empty()));
-  ATH_CHECK(m_xaodTruthTypeKey.initialize(init_truthKey && !m_truthClassifier.empty()));
-  ATH_CHECK(m_xaodTruthLinkKey.initialize(init_truthKey));
-  ATH_CHECK(m_xaodTruthMatchProbKey.initialize(init_truthKey));
-  
+
   // Retrieve monitoring tools if provided
   ATH_CHECK(m_trackMonitoringTool.retrieve(DisableTool{ !m_doMonitoring }));
   ATH_CHECK(m_monTool.retrieve(DisableTool{ !m_doMonitoring }));
@@ -97,7 +82,7 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
 
   //timer object for total execution time
   auto mnt_timer_Total  = Monitored::Timer<std::chrono::milliseconds>("TIME_Total");
-  
+
   // Retrieve the AOD particles:
   if (m_convertAODTrackParticles) {
     SG::ReadHandle<Rec::TrackParticleContainer> rh_aod(m_aod, ctx);
@@ -120,7 +105,7 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
       tracks = rh_tracks.cptr();
       ATH_MSG_VERBOSE("Got TrackCollection with key " << m_tracks.key()
                                                       << " found.");
-                                                      
+
     }
   }
   if (m_addTruthLink) {
@@ -175,8 +160,10 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
     {
       if(dummyVertex)
       {
-        ATH_MSG_INFO("No primary vertex found, will use dummy vertex at "<<dummyVertex->x()<<","<<dummyVertex->y()<<","<<dummyVertex->z());
-        primaryVertex=dummyVertex;
+        ATH_MSG_INFO("No primary vertex found, will use dummy vertex at "
+                     << dummyVertex->x() << "," << dummyVertex->y() << ","
+                     << dummyVertex->z());
+        primaryVertex = dummyVertex;
       }
       else
       {
@@ -204,13 +191,11 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
         ATH_MSG_VERBOSE("Got ObservedTrackMap with key " << m_tracksMap.key()
                                                         << " found.");
       }
-
-      convert(
-        (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout, truthLinks, primaryVertex, tracksMap);
-    }
-    else{
-      convert(
-        (*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout, truthLinks, primaryVertex);
+      convert((*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout,
+              truthLinks, primaryVertex, tracksMap);
+    } else {
+      convert((*tracks), trackTruth, m_TrackCollectionCnvTool, wh_xaodout,
+              truthLinks, primaryVertex);
     }
     // Monitor track parameters
     if (m_doMonitoring)
@@ -222,16 +207,13 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
     ATH_CHECK(wh_xaodTrackParticlesout.record(
       std::make_unique<xAOD::TrackParticleContainer>(),
       std::make_unique<xAOD::TrackParticleAuxContainer>()));
-    convert((*aod),
-            aodTruth,
-            m_RecTrackParticleContainerCnvTool,
-            wh_xaodTrackParticlesout,
-            truthLinks);
+    convert((*aod), aodTruth, m_RecTrackParticleContainerCnvTool,
+            wh_xaodTrackParticlesout, truthLinks);
   }
 
   //extra scope needed to trigger the monitoring
   {auto monTime = Monitored::Group(m_monTool, mnt_timer_Total);}
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -318,7 +300,7 @@ TrackParticleCnvAlg::convert(
   // loop over AOD and converted xAOD for summary info and truth links
   for (; itr_xaod != end_xaod; ++itr_xaod) {
     // protect if something went wrong and there is no converted xaod equivalent
-    
+
     if (!(*itr_xaod)) {
       ATH_MSG_WARNING("Empty element in xAOD container!");
       continue;
@@ -337,14 +319,14 @@ TrackParticleCnvAlg::convert(
       npix = nsct = ntrt = npixh = nscth = npixshim = npixsplit = -1;
       const Trk::Track *tr = particle->track();
       if (tr){
-	const Trk::TrackSummary *ts = tr->trackSummary();
-	if (ts){
-	  npix = ts->get(Trk::numberOfPixelHits);
-	  nsct = ts->get(Trk::numberOfSCTHits);
-	  ntrt = ts->get(Trk::numberOfTRTHits);
-	  nscth= ts->get(Trk::numberOfSCTHoles);
-	  npixh= ts->get(Trk::numberOfPixelHoles);
-	}
+        const Trk::TrackSummary* ts = tr->trackSummary();
+        if (ts) {
+          npix = ts->get(Trk::numberOfPixelHits);
+          nsct = ts->get(Trk::numberOfSCTHits);
+          ntrt = ts->get(Trk::numberOfTRTHits);
+          nscth = ts->get(Trk::numberOfSCTHoles);
+          npixh = ts->get(Trk::numberOfPixelHoles);
+        }
       }
       msg() << MSG::DEBUG << "REGTEST: " << std::setw(5) << trackCounter
 	    << "  pT:  " << std::setw(10) << particle->pt()
@@ -354,14 +336,10 @@ TrackParticleCnvAlg::convert(
 	    << "  z0:  " << particle->z0()
 	    << "\t" << npix << "/" << nsct << "/" << ntrt << "/holes/" << npixh << "/" << nscth
 	    << endmsg;
-
     }
- 
-
     //
     // --------- statistics
     //
-
     if (m_addTruthLink) {
       MCTruthPartClassifier::ParticleType type = MCTruthPartClassifier::Unknown;
       MCTruthPartClassifier::ParticleOrigin origin =
@@ -396,7 +374,7 @@ TrackParticleCnvAlg::convert(
             // if configured also get truth classification
             if (result->second.particleLink().cptr() &&
                 !m_truthClassifier.empty()) {
-              auto truthClass = m_truthClassifier->particleTruthClassifier(
+              auto truthClass = m_truthClassifier->particleHepMCTruthClassifier(
                 result->second.particleLink());
               type = truthClass.first;
               origin = truthClass.second;
@@ -412,6 +390,8 @@ TrackParticleCnvAlg::convert(
           }
         }
       }
+      //This is the Algorithm creating TrackParticles
+      //
       static const SG::AuxElement::Accessor<
         ElementLink<xAOD::TruthParticleContainer>>
         theLink("truthParticleLink");

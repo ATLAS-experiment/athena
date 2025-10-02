@@ -34,7 +34,7 @@ StatusCode Gbts2ActsSeedingTool::finalize() {
 
 StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
   
-    std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo);
+  std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
     
@@ -69,15 +69,16 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 	node.m_x = pos.x() - shift_x;
 	node.m_y = pos.y() - shift_y;
 	node.m_z = pos.z();
-        node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
+	node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
 	node.m_phi = std::atan2(node.m_y, node.m_x);
 	node.m_idx = idx;
 
         if(isPixel && m_useML){
-            const xAOD::PixelCluster* pCL = dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
-            if(pCL != nullptr){
-                node.m_pcw = pCL->widthInEta();
-            }
+            //Check type in debug build otherwise assume it is correct
+            assert(dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front())!=nullptr);
+            const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
+            node.m_pcw = pCL->widthInEta();
+            node.m_locPosY = pCL->localPosition<2>().y();
         }
     }
 
@@ -99,7 +100,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     storage->initializeNodes(m_useML);
 
-    storage->generatePhiIndexing(1.5*m_phiSliceWidth);
+    storage->generatePhiIndexing(1.5f*m_phiSliceWidth);
 
     std::vector<GNN_Edge> edgeStorage;
 
@@ -170,13 +171,15 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
         if(vN.size()<3) continue;
 	
-	const auto & sp1 = spContainer.at(vN[0]->sp_idx()).externalSpacePoint();
-	const auto & sp2 = spContainer.at(vN[1]->sp_idx()).externalSpacePoint();
-	const auto & sp3 = spContainer.at(vN[2]->sp_idx()).externalSpacePoint();
+        std::vector<const xAOD::SpacePoint*> sps;
+        sps.reserve(vN.size());
+        for (const auto* vNptr : vN) {
+          sps.push_back(&spContainer.at(vNptr->sp_idx()).externalSpacePoint());
+        }
 	
 	//add seed to output
 
-	std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(sp1, sp2, sp3);
+	std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(std::move(sps));
 	
         seedContainer.push_back(std::move(to_add));
     }

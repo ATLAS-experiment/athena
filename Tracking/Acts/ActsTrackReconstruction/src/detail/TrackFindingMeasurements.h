@@ -1,14 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGMEASUREMENTS_H
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGMEASUREMENTS_H
 
+#include <vector>
+
+#include "ActsEvent/Seed.h"
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
+#include "src/detail/MeasurementIndex.h"
 
 namespace ActsTrk {
-  struct DetectorElementToActsGeometryIdMap;
+struct DetectorElementToActsGeometryIdMap;
 }
 
 namespace ActsTrk::detail {
@@ -24,17 +28,39 @@ namespace ActsTrk::detail {
     ~TrackFindingMeasurements() = default;
 
     void addMeasurements(std::size_t typeIndex,
-                         const xAOD::UncalibratedMeasurementContainer &clusterContainer,
-                         const DetectorElementToActsGeometryIdMap &detectorElementToGeoid);
+                        const xAOD::UncalibratedMeasurementContainer &clusterContainer,
+                        const DetectorElementToActsGeometryIdMap &detectorElementToGeoid,
+                        const MeasurementIndex *measurementIndex = nullptr);
+    MeasurementRangeListFlat setMeasurementRangesForced(const ActsTrk::Seed &seed,
+                                                        const MeasurementIndex &measurementIndex) const;
+    MeasurementRange markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier);
 
-    inline const ActsTrk::detail::MeasurementRangeList &measurementRanges() const;
+    inline const MeasurementRangeList &measurementRanges() const;
     inline std::size_t nMeasurements() const;
     inline const std::vector<std::size_t> &measurementOffsets() const;
+    inline const xAOD::UncalibratedMeasurementContainer *container(std::size_t typeIndex) const;
 
   private:
+    struct MeasurementSurfaceIndex {
+      Acts::GeometryIdentifier measurementSurfaceId;
+      unsigned int typeIndex;
+      unsigned int sl_idx;
+    };
+
+    template <typename MeasurementRangeList_t>
+    static MeasurementRange *addMeasurementToRange(MeasurementRangeList_t &measurementRanges,
+                                                  unsigned int typeIndex,
+                                                  unsigned int sl_idx,
+                                                  unsigned int sl_idx_end,
+                                                  const xAOD::UncalibratedMeasurement *measurement,
+                                                  Acts::GeometryIdentifier measurementSurfaceId);
+
     std::vector<std::size_t> m_measurementOffsets;
     // ActsTrk::detail::MeasurementRangeList is an std::unordered_map;
-    ActsTrk::detail::MeasurementRangeList m_measurementRanges{};
+    MeasurementRangeList m_measurementRanges{};
+    std::vector<const xAOD::UncalibratedMeasurementContainer *> m_containers{};
+    std::vector<MeasurementSurfaceIndex> m_surfaceIndices;
+
     std::size_t m_measurementsTotal{0ul};
   };
 

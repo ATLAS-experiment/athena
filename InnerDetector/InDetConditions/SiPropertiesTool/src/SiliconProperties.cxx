@@ -134,24 +134,24 @@ double SiliconProperties::calcHoleHallFactor(double temperature) {
 double SiliconProperties::calcDriftMobility(double electricField, double electricField_critical, double saturationVelocity, double beta) {
   // Equation from ATL-INDET-2001-004
   return saturationVelocity / electricField_critical / 
-    pow(std::abs(1. + pow(std::abs(electricField/electricField_critical), beta)), 1./beta);
+    std::pow(std::abs(1. + std::pow(std::abs(electricField/electricField_critical), beta)), 1./beta);
 }
   
 double SiliconProperties::calcElectronDriftMobility(double temperature, double electricField) const {
   // Equations from ATL-INDET-2001-004
-//  double saturationVelocity = elecV_sat_0 * pow(temperature, elecV_sat_exp);
-  double saturationVelocity = m_electronSaturationVelocity*pow(temperature, elecV_sat_exp);
-  double electricField_critical = elecE_crit_0 * pow(temperature, elecE_crit_exp);
-  double beta = elecBeta_0 * pow(temperature, elecBeta_exp);
+//  double saturationVelocity = elecV_sat_0 * std::pow(temperature, elecV_sat_exp);
+  double saturationVelocity = m_electronSaturationVelocity*std::pow(temperature, elecV_sat_exp);
+  double electricField_critical = elecE_crit_0 * std::pow(temperature, elecE_crit_exp);
+  double beta = elecBeta_0 * std::pow(temperature, elecBeta_exp);
   return calcDriftMobility(electricField, electricField_critical, saturationVelocity, beta);
 } 
 
 double SiliconProperties::calcHoleDriftMobility(double temperature, double electricField) const {
   // Equations from ATL-INDET-2001-004
-//  double saturationVelocity = holeV_sat_0 * pow(temperature, holeV_sat_exp);
-  double saturationVelocity = m_holeSaturationVelocity*pow(temperature, holeV_sat_exp);
-  double electricField_critical = holeE_crit_0 * pow(temperature, holeE_crit_exp);
-  double beta = holeBeta_0 * pow(temperature, holeBeta_exp);
+//  double saturationVelocity = holeV_sat_0 * std::pow(temperature, holeV_sat_exp);
+  double saturationVelocity = m_holeSaturationVelocity*std::pow(temperature, holeV_sat_exp);
+  double electricField_critical = holeE_crit_0 * std::pow(temperature, holeE_crit_exp);
+  double beta = holeBeta_0 * std::pow(temperature, holeBeta_exp);
   return calcDriftMobility(electricField, electricField_critical, saturationVelocity, beta);
 } 
 

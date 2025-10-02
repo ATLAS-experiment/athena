@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -228,12 +228,12 @@ TH1D* smooth( TH1D* hin, bool sym ) {
 
 
 
-  hist_generator::hist_generator(TH1D* h, bool _smooth ) : m_random(0) {
+  hist_generator::hist_generator(TH1D* h, bool smooth_ ) : m_random(0) {
     
   /// save the original histogram (should save a copy ho hum) 
   m_raw = h;
   
-  if ( _smooth ) {
+  if ( smooth_ ) {
     /// smooth the original
     m_smooth = smooth( h );
   }
@@ -351,7 +351,7 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
     ///     case with fewer events, n, and estimate the uncertainty
     ///     by scaling by sqrt( n/N )
      
-    double _Nevents = Nevents; 
+    double Nevents_ = Nevents;
 
     if ( Nevents>Nevent_max ) { 
       ///      std::cout << "generate() " << h->GetName() << " requested " << Nevents << " using default max of " << Nevent_max << std::endl;
@@ -361,7 +361,7 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
     if ( Nevents<Nevent_min ) Nevents = Nevent_min;
 
     /// set the correct error scaling to the correct number of events
-    fnscale = std::sqrt( Nevents/_Nevents );
+    fnscale = std::sqrt( Nevents/Nevents_ );
 
     //    std::cout << "\tusing: " << Nevents << std::endl;
 
@@ -390,20 +390,20 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
       
       for ( int i=Nevents ; i-- ; )  h3->Fill( g.generate() );
       
-      double _mean95  = findMean( h3, frac );
-      //      double _rms95 = 1.1479538518*rmsFrac( h3, 0.95, _mean95 ); 
-      double _rms95 = rmsFrac( h3, frac, _mean95 );
+      double mean95_  = findMean( h3, frac );
+      //      double _rms95 = 1.1479538518*rmsFrac( h3, 0.95, mean95_ );
+      double rms95_ = rmsFrac( h3, frac, mean95_ );
 
 
 #if 0
-      std::cout << j << "\texpt mean " << _mean95 << "\trms95 " << _rms95 << std::endl; 
+      std::cout << j << "\texpt mean " << mean95_ << "\trms95 " << rms95_ << std::endl;
 
       if ( std::string(h->GetTitle()).find("[ 34.4747 - 42.1697 ]")!=std::string::npos ) { 
 
       std::cout << "mean " << h3->GetMean() << " +- " << h3->GetMeanError() 
-		<< " (" << _mean95 << ") " 
+		<< " (" << mean95_ << ") "
 		<< "\trms " << h3->GetRMS() << " +- " << h3->GetRMSError()  
-		<< " (" << _rms95 << ") " 
+		<< " (" << rms95_ << ") " 
 		<< "\t pseudo data (" << Nevents << " events)"  
 		<< std::endl;
     } 
@@ -412,10 +412,10 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
       
 
       //  mean.push_back( h3->GetMean() );
-      mean.push_back( _mean95 );
-      rms.push_back( _rms95 );
+      mean.push_back( mean95_ );
+      rms.push_back( rms95_ );
       
-      m_THrms->Fill( _rms95 );
+      m_THrms->Fill( rms95_ );
 
       delete h3;
     }

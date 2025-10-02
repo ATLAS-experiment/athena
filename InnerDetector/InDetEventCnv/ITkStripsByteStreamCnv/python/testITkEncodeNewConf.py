@@ -2,6 +2,23 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
+
+def ITkStripRawContByteStreamToolCfg(flags, name="ITkStripRawContByteStreamToolCustom", **kwargs) :
+    acc = ComponentAccumulator()
+    acc.setPrivateTools( CompFactory.ITkStripsRawContByteStreamTool(name=name,**kwargs))
+    return acc
+
+def ITkStripRawContByteStreamToolProviderToolCfg(flags, name="SCTRawContByteStreamToolProviderTool", **kwargs) :
+    acc = ComponentAccumulator()
+    if "RawContByteStreamTool" not in kwargs :
+        kwargs.setdefault("RawContByteStreamTool", acc.popToolsAndMerge(ITkStripRawContByteStreamToolCfg(flags)))
+    acc.addPublicTool( CompFactory.ITkStripRawContByteStreamToolProviderTool(name=name,**kwargs))
+    return acc
+
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
@@ -13,8 +30,8 @@ if __name__ == "__main__":
     flags.ITk.Geometry.AllLocal = False
 
     # for debugging
-    from AthenaCommon.Constants import DEBUG
-    flags.Exec.OutputLevel=DEBUG
+    from AthenaCommon.Constants import INFO
+    flags.Exec.OutputLevel=INFO
     
     flags.lock()
 
@@ -32,6 +49,9 @@ if __name__ == "__main__":
     writingAcc.getService("ByteStreamEventStorageOutputSvc").StreamName = "StreamBSFileOutput"
     acc.merge(writingAcc)
 
+    if flags.GeoModel.Run is LHCPeriod.Run4:
+        acc.merge(ITkStripRawContByteStreamToolProviderToolCfg(flags))        
+
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc.merge(ITkStripReadoutGeometryCfg(flags))
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
@@ -46,4 +66,4 @@ if __name__ == "__main__":
                                  inputKey="McEventInfo",
                                  outputKey="EventInfo"))
     
-    acc.run(maxEvents=100)
+    acc.run(maxEvents=2)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /cvs/PF/pool/StorageSvc/src/DbStorageExplorer.cpp,v 1.26 2010/05/11 00:16:07 frankb Exp $
@@ -16,7 +16,6 @@
 // Framework include files
 #include "DbStorageSvc.h"
 #include "DbStorageExplorer.h"
-#include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbDatabase.h"
@@ -60,7 +59,7 @@ DbStorageExplorer::~DbStorageExplorer()
 
 DbStatus DbStorageExplorer::queryInterface(const Guid& riid,void** ppvInterface)  {
   if ( riid == IStorageExplorer::interfaceID() )  {
-    *ppvInterface = (IStorageExplorer*)this;
+    *ppvInterface = static_cast<IStorageExplorer*>(this);
     m_pOuter->addRef();
     return Success;
   }
@@ -101,7 +100,7 @@ DbStatus DbStorageExplorer::disconnect(FileDescriptor& fDesc) {
 
 /// Access the size of the database: May be undefined for some technologies
 long long int DbStorageExplorer::databaseSize(FileDescriptor& refDB)  const   {
-  DbConnection* dbc = dynamic_cast<DbConnection*>(refDB.dbc());
+  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
   if ( dbc )   {
     DbDatabase  dbH(__DB(refDB));
     return dbH.size();

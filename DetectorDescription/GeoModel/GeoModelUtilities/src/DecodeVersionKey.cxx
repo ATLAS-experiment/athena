@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/DecodeVersionKey.h"
@@ -73,7 +73,7 @@ void DecodeVersionKey::defineTag(const T* svc, const std::string & node)
     getCustomTag(indetOverrideTag, indetTag);
   }
   if (!indetTag.empty()) {
-    m_tag = indetTag;
+    m_tag = std::move(indetTag);
     m_node = "InnerDetector";
   }
 
@@ -82,7 +82,7 @@ void DecodeVersionKey::defineTag(const T* svc, const std::string & node)
   m_custom = getCustomTag(nodeOverrideTag, outputTag);
 
   if (!outputTag.empty()) {
-    m_tag  = outputTag;
+    m_tag  = std::move(outputTag);
     m_node = node;
   }
 }

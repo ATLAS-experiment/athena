@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_JFEXTAUROITHRESHOLDSTOOL_H
 #define HLTSEEDING_JFEXTAUROITHRESHOLDSTOOL_H
@@ -13,7 +13,8 @@ public:
   jFexTauRoIThresholdsTool(const std::string& type, const std::string& name, const IInterface* parent)
   : HLTSeedingRoIToolDefs::jFexTau::ThresholdBaseClass(type, name, parent) {}
 
-  virtual uint64_t getPattern(const xAOD::jFexTauRoI& roi,
+  virtual uint64_t getPattern(const EventContext& ctx,
+                              const xAOD::jFexTauRoI& roi,
                               const ThrVec& menuThresholds,
                               const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const override;
 };

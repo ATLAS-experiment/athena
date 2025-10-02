@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <atomic>
 
 // EDM include(s):
 #include "AthContainers/AuxStoreInternal.h"
@@ -608,13 +609,15 @@ namespace xAOD {
      if( m_parentLink.isValid() ) {
        ids.insert (m_parentLink->getAuxIDs());
      }
-     m_auxids = ids;
 
      auxid_set_t decors = m_store->getDecorIDs();
      if( m_parentLink.isValid() ) {
        ids.insert (m_parentLink->getDecorIDs());
      }
+
      m_decorids = std::move(decors);
+     std::atomic_thread_fence( std::memory_order_seq_cst );
+     m_auxids = std::move(ids);
 
      m_auxidsValid = true;
    }

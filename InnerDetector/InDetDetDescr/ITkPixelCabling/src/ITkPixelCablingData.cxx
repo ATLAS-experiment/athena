@@ -30,6 +30,11 @@ ITkPixelCablingData::onlineId(const Identifier & id) const{
   return result->second;
 }
 
+void ITkPixelCablingData::print() const {
+    std::cout << "Online -> Offline ModuleInfo map " << m_online2ModuleInfoMap.size() << "\n";
+    std::cout << "Offline -> Online ModuleInfo map " << m_offline2ModuleInfoMap.size() << "\n";
+}
+
 //stream extraction to read value from stream into ITkPixelCablingData
 std::istream& 
 operator>>(std::istream & is, ITkPixelCablingData & cabling){
@@ -51,4 +56,38 @@ operator<<(std::ostream & os, const ITkPixelCablingData & cabling){
   }
   os<<std::endl;
   return os;
+}
+
+void ITkPixelCablingData::addEntryOffOn(const Identifier& offlineId, const ITkPixelOnlineId& onlineId){
+    m_offline2OnlineMap.insert({offlineId, onlineId});
+}
+
+void ITkPixelCablingData::addEntryOffOn(const Identifier& offlineId, const ITkPixelCabling::ModuleInfo<ITkPixelOnlineId>& moduleInfo){
+    m_offline2ModuleInfoMap.insert({offlineId, moduleInfo});
+}
+
+void ITkPixelCablingData::addEntryOnOff(const ITkPixelOnlineId& onlineId, const Identifier& offlineId){
+    m_online2OfflineMap.insert({onlineId, offlineId});
+}
+
+void ITkPixelCablingData::addEntryOnOff(const ITkPixelOnlineId& onlineId, const ITkPixelCabling::ModuleInfo<Identifier>& moduleInfo){
+    m_online2ModuleInfoMap.insert({onlineId, moduleInfo});
+}
+
+ITkPixelCabling::ModuleInfo<ITkPixelOnlineId> ITkPixelCablingData::onlineModuleInfo(const Identifier & id) const {
+    std::unordered_map<Identifier, ITkPixelCabling::ModuleInfo<ITkPixelOnlineId>>::const_iterator it = m_offline2ModuleInfoMap.find(id);
+    if (it == m_offline2ModuleInfoMap.end()){
+        return {ITkPixelOnlineId(0), ITkPixelCabling::ModuleType::Undefined, ITkPixelCabling::TransformType::UndefinedTransform};
+    }
+    
+    return it->second;
+}
+
+ITkPixelCabling::ModuleInfo<Identifier> ITkPixelCablingData::offlineModuleInfo(const ITkPixelOnlineId & id) const {
+    std::unordered_map<ITkPixelOnlineId, ITkPixelCabling::ModuleInfo<Identifier>>::const_iterator it = m_online2ModuleInfoMap.find(id);
+    if (it == m_online2ModuleInfoMap.end()){
+        return {Identifier(0), ITkPixelCabling::ModuleType::Undefined, ITkPixelCabling::TransformType::UndefinedTransform};
+    }
+    
+    return it->second;
 }

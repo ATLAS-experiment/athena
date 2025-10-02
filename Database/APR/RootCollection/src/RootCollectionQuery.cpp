@@ -11,21 +11,12 @@
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionColumn.h"
 #include "CollectionBase/CollectionBaseNames.h"
-#include "CollectionBase/boost_tokenizer_headers.h"
-
-#include "POOLCore/Exception.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/MessageStream.h"
 
 #include "TEventList.h"
-#include "TFormula.h"
-#include "APRTreeFormula.h"
-
-//#include <iostream>
-//using namespace std;
-
 
 pool::RootCollection::RootCollectionQuery::
 RootCollectionQuery(
@@ -43,39 +34,6 @@ RootCollectionQuery(
 pool::RootCollection::RootCollectionQuery::~RootCollectionQuery()
 {
    delete m_cursor;   m_cursor = 0;
-}
-
-
-void
-pool::RootCollection::RootCollectionQuery::addToOutputList( const std::string& columnNames )
-{
-   typedef boost::tokenizer<boost::char_separator<char> > Tizer;
-   boost::char_separator<char> sep(" ,");
-   Tizer tizer( columnNames, sep );
-
-   for( Tizer::iterator token = tizer.begin(); token != tizer.end(); ++token ) { 
-      if( *token == "*" ) {
-         selectAll();
-         return;
-      }
-      // Check if is a Token column.
-      if( m_description.column( *token ).type() == CollectionBaseNames::tokenTypeName ) {
-         addToTokenOutputList( *token );
-      } else {
-         addToAttributeOutputList( *token );
-      }
-   }
-}
-
-
-void
-pool::RootCollection::RootCollectionQuery::addToOutputList( const std::vector<std::string>& columnNames )
-{
-  for ( std::vector< std::string >::const_iterator
-           iName = columnNames.begin(); iName != columnNames.end(); ++iName )
-  {
-     addToOutputList( *iName );
-  }
 }
 
 
@@ -105,70 +63,15 @@ pool::RootCollection::RootCollectionQuery::selectAll()
 }
 
 
-void
-pool::RootCollection::RootCollectionQuery::
-setCondition( const std::string& whereClause,
-              coral::AttributeList* /* attributeBindData */,
-              pool::TokenList* /*tokenBindData */ )
-{
-   m_whereClause += whereClause;
-}
-
-
-const std::string&
-pool::RootCollection::RootCollectionQuery::whereClause() const
-{
-  return m_whereClause;
-}
-
-
-void
-pool::RootCollection::RootCollectionQuery::setRowCacheSize( int )
-{
-}
-
-
-
 pool::ICollectionCursor& 
 pool::RootCollection::RootCollectionQuery::execute()
 {
-   //cout << "* Executing query: " << m_whereClause << endl;
    if( !m_skipEventRef && m_description.hasEventReferenceColumn() )  {
       addToTokenOutputList( m_description.eventReferenceColumnName() );
    }
   
   TEventList* eventList = 0;
 
-  if( m_whereClause.size() && m_tree->GetEntries()>0 ) {
-     // branch adresses have to be reset here!
-     // if select is not called for the first time
-     // the branches might still be bound to attribute addresses
-     // which are already deleted. If TTree::Draw is called in 
-     // this case, it writes to freed memory ... bad things will happen soon.
-     const TObjArray* branches = m_tree->GetListOfBranches();
-     Int_t nbranches = branches->GetEntriesFast();
-     for (int i=0; i<nbranches-1; ++i){
-        TBranch* branch = (TBranch*)branches->UncheckedAt(i);
-        branch->ResetAddress();
-     }
-     eventList = new TEventList("preselected","");
-     eventList->SetDirectory(0);
-
-     APRTreeFormula formula(m_whereClause, m_tree);
-     if( !formula.GetNdim() )  {
-        std::string errorMsg = "Could not construct TTreeFormula object, probably because of incorrect ROOT predicate syntax in expression `" + m_whereClause + "'";
-        throw pool::Exception( errorMsg,
-                               "RootCollectionQuery::execute", 
-                               "RootCollection");
-     }
-     int entries = (int)m_tree->GetEntries();
-     for( int i = 0; i < entries; ++i ) {
-        m_tree->LoadTree(i);
-        if( formula.EvalInstance() )
-           eventList->Enter(i);
-     }
-  }
-  
   // Create collection row buffer to contain query output.
   pool::CollectionRowBuffer collectionRowBuffer( m_outputTokenList, m_outputAttributeList );
 
@@ -189,11 +92,9 @@ pool::RootCollection::RootCollectionQuery::addToTokenOutputList( const std::stri
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
       try {
          m_description.tokenColumn( columnName ); 
-      } catch( pool::Exception& /* e */ ) {
+      } catch( std::runtime_error& /* e */ ) {
          std::string errorMsg( "Token column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RootCollectionQuery::addToTokenOutputList",
-                             "RootCollection" );
+         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionQuery::addToTokenOutputList \" from \" RootCollection \")");
       }
       m_outputTokenList.extend( columnName );
       m_selectedColumnNames.insert( columnName );
@@ -209,26 +110,10 @@ pool::RootCollection::RootCollectionQuery::addToAttributeOutputList( const std::
    if( m_selectedColumnNames.find( columnName ) == m_selectedColumnNames.end() ) {
       try {
          m_outputAttributeList.extend( columnName, m_description.attributeColumn( columnName ).type() );
-      } catch( pool::Exception& /* e */) {
+      } catch( std::runtime_error& /* e */ ) {
          std::string errorMsg( "Attribute column with name `" + columnName + "' does not exist." );
-         throw pool::Exception( errorMsg,
-                             "RootCollectionQuery::addToAttributeOutputList",
-                             "RootCollection" );
+         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionQuery::addToAttributeOutputList \" from \" RootCollection \")");
       }         
       m_selectedColumnNames.insert( columnName );
    }
 }
-
-
-
-void
-pool::RootCollection::RootCollectionQuery::
-skipEventReference( bool skip )
-{
-   m_skipEventRef = skip;
-}
-
-
-
-
-

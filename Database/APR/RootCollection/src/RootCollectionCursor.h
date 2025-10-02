@@ -12,11 +12,9 @@
 #include "CollectionBase/ICollectionDescription.h"
 #include "CollectionBase/ICollectionCursor.h"
 
-#include "PersistencySvc/IPositionSeek.h"
-#include "AthenaKernel/ICollectionSize.h"
-
-#include "TTree.h"
-#include "TEventList.h"
+class TTree;
+class TBranch;
+class TEventList;
 
 namespace pool {
    namespace RootCollection {
@@ -25,9 +23,7 @@ namespace pool {
        *
        * An interface used to navigate the result of a query on a collection.
        */
-      class RootCollectionCursor : public ICollectionCursor,
-                                   virtual public IPositionSeek,
-                                   virtual public implements<ICollectionSize>
+      class RootCollectionCursor : public ICollectionCursor
       {
      public:
 
@@ -44,11 +40,11 @@ namespace pool {
         /// Returns the selected Tokens and Attributes for the current row of the query result set.
         virtual const pool::CollectionRowBuffer& currentRow() const override;
 
-        /// Seeks the cursor to a given position in the collection.
-        virtual bool seek(long long int position) override;
-
         /// Return the size of the collection.
-        virtual int size() override;
+        virtual std::size_t size() override;
+
+        /// Seeks the cursor to a given position in the collection.
+        virtual bool seek(std::size_t position) override;
 
         /// Returns the event reference Token for the current row.
         virtual const Token& eventRef() const override;
@@ -69,7 +65,6 @@ namespace pool {
 
         const TEventList                *m_eventList;
 
-        
         char                             m_charBuffer[c_maxLengthOfStrings];
 
         typedef std::vector< std::pair<TBranch*, std::string*> >  AttrBranchVector_t;
@@ -78,8 +73,8 @@ namespace pool {
         AttrBranchVector_t              m_attrBranches;
         TokenBranchVector_t             m_tokenBranches;
 
-        int                             m_idx;
-        Long64_t                        m_entries;
+        std::size_t                     m_idx;
+        std::size_t                     m_entries;
         bool                            m_dummyRef;
       };
    }

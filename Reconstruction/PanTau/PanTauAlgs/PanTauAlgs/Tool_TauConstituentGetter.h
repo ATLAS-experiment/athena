@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_TAUCONSTITUENTGETTER
@@ -11,6 +11,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "PanTauAlgs/HelperFunctions.h"
 #include "PanTauAlgs/ITool_InformationStore.h"
@@ -38,19 +39,15 @@ namespace PanTau {
     virtual StatusCode initialize();
         
     virtual StatusCode GetTauConstituents(const xAOD::TauJet* tauJet,
-					  std::vector<TauConstituent*>& outputList,
-					  const std::string& algName) const;
+					  std::vector<TauConstituent*>& outputList) const;
         
         
   protected:
         
     //member variables 
-    PanTau::HelperFunctions   m_HelperFunctions;
-    ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore;
-    ToolHandle<PanTau::ITool_InputConverter>    m_Tool_InputConverter;
+    ToolHandle<PanTau::ITool_InputConverter>    m_Tool_InputConverter{this, "Tool_InputConverter", "PanTau::Tool_InputConverter/Tool_InputConverter", "Link to tool to convert into TauConstituents"};
 
-    std::string m_Tool_InformationStoreName;
-    std::string m_Tool_InputConverterName;
+    Gaudi::Property<std::string> m_Tool_InputConverterName{this, "Tool_InputConverterName", "", "Link to tool to convert into TauConstituents"};
 
     bool m_init=false;
 

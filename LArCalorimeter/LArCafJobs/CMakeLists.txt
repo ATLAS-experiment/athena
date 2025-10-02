@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArCafJobs )
@@ -62,5 +62,5 @@ atlas_install_scripts( share/LArHistMerge_trf.py share/LArMerge_tf.py share/LArC
 atlas_add_test( LArCellsEmpty_test
 		SCRIPT share/LArCellsEmpty_test.sh
 		POST_EXEC_SCRIPT noerror.sh 
-		PROPERTIES_TIMEOUT 500 )
+		PROPERTIES TIMEOUT 500 )
 		

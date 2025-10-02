@@ -1,24 +1,23 @@
 IOVSvc_test
 
 
-Initializing Gaudi ApplicationMgr using job opts ../share/IOVSvc_test.txt
-JobOptionsSvc        INFO # =======> /home/sss/atlas/dvtest/build/../tests/../share/IOVSvc_test.txt
+Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/rootaccess/../share/IOVSvc_test.txt
+JobOptionsSvc        INFO # =======> /home/sss/atlas/rootaccess/../share/IOVSvc_test.txt
 JobOptionsSvc        INFO # (1,1): ApplicationMgr.CreateSvc += ["StoreGateSvc/DetectorStore"]
-JobOptionsSvc        INFO Job options successfully read in from ../share/IOVSvc_test.txt
+JobOptionsSvc        INFO Job options successfully read in from /home/sss/atlas/rootaccess/../share/IOVSvc_test.txt
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Mon Oct 29 16:20:22 2018
+                                          running on karma on Mon May 12 22:43:51 2025
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO  getRegistryEntries: read 1617 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 1702 CLIDRegistry entries for module ALL
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
-HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 test1
-ClassIDSvc           INFO  getRegistryEntries: read 426 CLIDRegistry entries for module ALL
 IOVSvc               INFO No IOVSvcTool associated with store "StoreGateSvc"
 IOVSvc.IOVSvcTool    INFO IOVRanges will be checked at every Event
-IOVSvc              ERROR unable to get range from db for 932847540 key
+ClassIDSvc           INFO getRegistryEntries: read 379 CLIDRegistry entries for module ALL
+IOVSvc              ERROR unable to get range from db for time [10,25:4294967299294967295] clid 932847540 key

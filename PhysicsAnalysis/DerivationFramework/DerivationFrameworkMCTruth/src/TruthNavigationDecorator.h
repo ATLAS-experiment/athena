@@ -24,7 +24,7 @@
 
 namespace DerivationFramework {
 
-  class TruthNavigationDecorator : public AthAlgTool, public IAugmentationTool {
+  class TruthNavigationDecorator : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthNavigationDecorator(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthNavigationDecorator();

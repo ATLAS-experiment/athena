@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/src/hexdump.cxx
@@ -112,7 +112,12 @@ void safeHexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*=
     n += nadj;
   }
 
-  size_t pagesize = sysconf (_SC_PAGESIZE);
+  long pagesize_ret = sysconf (_SC_PAGESIZE);
+  if (pagesize_ret < 0 || pagesize_ret >= 1024*1024*1024) {
+    std::abort();
+  }
+  size_t pagesize = pagesize_ret;
+  
 
   procmaps m;
 

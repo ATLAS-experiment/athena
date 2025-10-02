@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/src/Tile_Base_ID.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -30,8 +28,10 @@ using namespace LArNeighbours;
 
 
 
-Tile_Base_ID::Tile_Base_ID (const std::string& name, bool supercell)
-  : CaloIDHelper (name)
+Tile_Base_ID::Tile_Base_ID (const std::string& name,
+                            const std::string& group,
+                            bool supercell)
+  : CaloIDHelper (name, group)
     , m_supercell (supercell ? 1 : 0)
     , m_tile_region_index(0)
     , m_SYSTEM_INDEX(999)
@@ -1038,37 +1038,37 @@ IdentifierHash  Tile_Base_ID::cell_hash  (const Identifier& id) const
 }
 
 IdContext	
-Tile_Base_ID::region_context  (void)  const
+Tile_Base_ID::region_context  ()  const
 {
     return {0, m_SIDE_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::module_context  (void)  const
+Tile_Base_ID::module_context  ()  const
 {
     return {0, m_MODULE_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::tower_context   (void)  const
+Tile_Base_ID::tower_context   ()  const
 {
     return {0, m_TOWER_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::cell_context    (void)  const
+Tile_Base_ID::cell_context    ()  const
 {
     return {0, m_SAMPLE_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::pmt_context     (void)  const
+Tile_Base_ID::pmt_context     ()  const
 {
     return {0, m_PMT_INDEX};
 }
 
 IdContext	
-Tile_Base_ID::adc_context     (void)  const
+Tile_Base_ID::adc_context     ()  const
 {
     return {0, m_ADC_INDEX};
 }
@@ -1209,7 +1209,7 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   int tileField   = -1;
   if (atlasDict->get_label_value("subdet", "TileCalorimeter", tileField)) {
     log << MSG::ERROR << "Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
-        << atlasDict->m_name
+        << atlasDict->name()
         << endmsg;
     return (1);
   }
@@ -1231,7 +1231,7 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   int tilehwField   = -1;
   if (dict()->get_label_value("section", "Online", tilehwField)) {
     log << MSG::ERROR << "Could not get value for label 'Online' of field 'section' in dictionary " 
-        << dict()->m_name
+        << dict()->name()
         << endmsg;
   } else {
     // remove online ID from all ranges
@@ -1249,11 +1249,11 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   int tiletbField = -1;
   if (dict()->get_label_value("section", "Testbeam", tiletbField)) {
     log << MSG::ERROR << "Could not get value for label 'Testbeam' of field 'section' in dictionary " 
-        << dict()->m_name
+        << dict()->name()
         << endmsg;
   } else {
     // remove testbeam ID from all ranges
-    reg_id = tile_id;
+    reg_id = std::move(tile_id);
     reg_id.add(tiletbField);
     m_full_adc_range.remove_range(reg_id);
     m_full_pmt_range.remove_range(reg_id);
@@ -1295,42 +1295,42 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   return 0;
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::region_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::region_hash_max () const
 {
   return regions().hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::module_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::module_hash_max () const
 {
   return m_modules.hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::tower_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::tower_hash_max () const
 {
   return m_towers.hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::cell_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::cell_hash_max () const
 {
   return channels().hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::pmt_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::pmt_hash_max () const
 {
   return m_pmts.hash_max();
 }
 
-Tile_Base_ID::size_type     Tile_Base_ID::adc_hash_max (void) const
+Tile_Base_ID::size_type     Tile_Base_ID::adc_hash_max () const
 {
   return m_adcs.hash_max();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::reg_begin       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::reg_begin       () const
 {
   return regions().begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::reg_end         (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::reg_end         () const
 {
   return regions().end();
 }
@@ -1340,12 +1340,12 @@ Tile_Base_ID::id_range Tile_Base_ID::reg_range() const
   return regions().range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::module_begin    (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::module_begin    () const
 {
   return m_modules.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::module_end      (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::module_end      () const
 {
   return m_modules.end();
 }
@@ -1355,12 +1355,12 @@ Tile_Base_ID::id_range Tile_Base_ID::module_range() const
   return m_modules.range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::tower_begin     (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::tower_begin     () const
 {
   return m_towers.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::tower_end       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::tower_end       () const
 {
   return m_towers.end();
 }
@@ -1370,12 +1370,12 @@ Tile_Base_ID::id_range Tile_Base_ID::tower_range() const
   return m_towers.range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::cell_begin      (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::cell_begin      () const
 {
   return channels().begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::cell_end        (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::cell_end        () const
 {
   return channels().end();
 }
@@ -1385,12 +1385,12 @@ Tile_Base_ID::id_range Tile_Base_ID::cell_range() const
   return channels().range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::pmt_begin       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::pmt_begin       () const
 {
   return m_pmts.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::pmt_end         (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::pmt_end         () const
 {
   return m_pmts.end();
 }
@@ -1400,12 +1400,12 @@ Tile_Base_ID::id_range Tile_Base_ID::pmt_range() const
   return m_pmts.range();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::adc_begin       (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::adc_begin       () const
 {
   return m_adcs.begin();
 }
 
-Tile_Base_ID::id_iterator Tile_Base_ID::adc_end         (void) const
+Tile_Base_ID::id_iterator Tile_Base_ID::adc_end         () const
 {
   return m_adcs.end();
 }
@@ -1602,10 +1602,10 @@ int Tile_Base_ID::get_expanded_id  (const Identifier& id,
   }
   else if ( 0 == begin) {
     ExpandedIdentifier empty;
-    result = dict()->unpack(id, empty, end, exp_id);
+    result = dict()->unpack(group(), id, empty, end, exp_id);
   }
   else {
-    result = dict()->unpack(id, context->prefix_id(), end, exp_id);
+    result = dict()->unpack(group(), id, context->prefix_id(), end, exp_id);
   }
   return result;
 }
@@ -1637,13 +1637,13 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
         << " group' field " << endmsg;
   }
   else {
-	m_tile_region_index = group->regions()[0]->m_index;
+	m_tile_region_index = group->regions()[0]->index();
   }
 
   // Fing a Tile region
   IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
-    m_SYSTEM_INDEX = field->m_index ;
+    m_SYSTEM_INDEX = field->index();
   }
   else {
     log << MSG::ERROR << "initLevelsFromDict - unable to find 'subdet' field "
@@ -1653,7 +1653,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("section") ;
   if (field) {
-    m_SECTION_INDEX = field->m_index ;
+    m_SECTION_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'section' field "
@@ -1663,7 +1663,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("side") ;
   if (field) {
-    m_SIDE_INDEX = field->m_index ;
+    m_SIDE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'side' field "
@@ -1673,7 +1673,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("module") ;
   if (field) {
-    m_MODULE_INDEX = field->m_index ;
+    m_MODULE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'module' field "
@@ -1683,7 +1683,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("tower") ;
   if (field) {
-    m_TOWER_INDEX = field->m_index ;
+    m_TOWER_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'tower' field "
@@ -1693,7 +1693,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("sampling") ;
   if (field) {
-    m_SAMPLE_INDEX = field->m_index ;
+    m_SAMPLE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'sampling' field "
@@ -1703,7 +1703,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("pmt") ;
   if (field) {
-    m_PMT_INDEX = field->m_index ;
+    m_PMT_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'pmt' field "
@@ -1713,7 +1713,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("adc") ;
   if (field) {
-    m_ADC_INDEX = field->m_index ;
+    m_ADC_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'adc' field "
@@ -1721,16 +1721,16 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     return (1);
   }
 
-  const IdDictRegion& region = *dict()->m_regions[m_tile_region_index];
+  const IdDictRegion& region = dict()->region(m_tile_region_index);
 
-  m_system_impl  = region.m_implementation[m_SYSTEM_INDEX]; 
-  m_section_impl = region.m_implementation[m_SECTION_INDEX];
-  m_side_impl    = region.m_implementation[m_SIDE_INDEX]; 
-  m_module_impl  = region.m_implementation[m_MODULE_INDEX]; 
-  m_tower_impl   = region.m_implementation[m_TOWER_INDEX]; 
-  m_sample_impl  = region.m_implementation[m_SAMPLE_INDEX]; 
-  m_pmt_impl     = region.m_implementation[m_PMT_INDEX]; 
-  m_adc_impl     = region.m_implementation[m_ADC_INDEX]; 
+  m_system_impl  = region.implementation(m_SYSTEM_INDEX);
+  m_section_impl = region.implementation(m_SECTION_INDEX);
+  m_side_impl    = region.implementation(m_SIDE_INDEX);
+  m_module_impl  = region.implementation(m_MODULE_INDEX);
+  m_tower_impl   = region.implementation(m_TOWER_INDEX);
+  m_sample_impl  = region.implementation(m_SAMPLE_INDEX);
+  m_pmt_impl     = region.implementation(m_PMT_INDEX);
+  m_adc_impl     = region.implementation(m_ADC_INDEX);
 
   if (!m_quiet) {
     log << MSG::DEBUG << "initLevelsFromDict decode index and bit fields for each level: "              << endmsg ;
@@ -1747,7 +1747,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
   return(0) ;
 }
 
-int Tile_Base_ID::init_hashes(void) 
+int Tile_Base_ID::init_hashes()
 {
   if (regions().init (*this, "regions", m_full_region_range,
                        &Tile_Base_ID::region_id,

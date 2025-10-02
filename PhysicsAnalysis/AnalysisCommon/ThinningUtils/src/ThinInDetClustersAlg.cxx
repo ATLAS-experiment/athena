@@ -34,7 +34,7 @@ ThinInDetClustersAlg::ThinInDetClustersAlg(
   const std::string& name,
   ISvcLocator* pSvcLocator): 
 
-  ExpressionParserUser< ::AthAlgorithm>( name, pSvcLocator )
+  ExpressionParserUser< ::AthReentrantAlgorithm>( name, pSvcLocator )
 {
 }
 
@@ -114,28 +114,28 @@ StatusCode ThinInDetClustersAlg::finalize()
 }
 
 // The thinning itself
-StatusCode ThinInDetClustersAlg::execute()
+StatusCode ThinInDetClustersAlg::execute(const EventContext& ctx) const
 {
 
   // Retrieve main TrackParticle collection
-  SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_inDetSGKey);
+  SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_inDetSGKey, ctx);
   ATH_CHECK( importedTrackParticles.isValid() );
 
   ////////////////////////
   if (m_thinPixelHitsOnTrack && !m_measurementsPixSGKey.empty()) {
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(m_measurementsPixSGKey);
+    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(m_measurementsPixSGKey, ctx);
     ATH_CHECK( importedMeasurements.isValid() );
     unsigned int size_measurements = importedMeasurements->size();
     m_ntot_pix_measurements += size_measurements;
   }
   if (m_thinSCTHitsOnTrack && !m_measurementsSctSGKey.empty()) {
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(m_measurementsSctSGKey);
+    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(m_measurementsSctSGKey, ctx);
     ATH_CHECK( importedMeasurements.isValid() );
     unsigned int size_measurements = importedMeasurements->size();
     m_ntot_sct_measurements += size_measurements;
   }
   if (m_thinTRTHitsOnTrack && !m_measurementsTrtSGKey.empty()) {
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(m_measurementsTrtSGKey);
+    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(m_measurementsTrtSGKey, ctx);
     ATH_CHECK( importedMeasurements.isValid() );
     unsigned int size_measurements = importedMeasurements->size();
     m_ntot_trt_measurements += size_measurements;
@@ -178,7 +178,8 @@ StatusCode ThinInDetClustersAlg::execute()
                                 m_measurementsPixSGKey,
                                 m_ntot_pix_states,
                                 m_npass_pix_states,
-                                m_npass_pix_measurements) );
+                                m_npass_pix_measurements,
+                                ctx) );
   }
   if (m_thinSCTHitsOnTrack) {
     ATH_CHECK( filterTrackHits (
@@ -189,7 +190,8 @@ StatusCode ThinInDetClustersAlg::execute()
                                 m_measurementsSctSGKey,
                                 m_ntot_sct_states,
                                 m_npass_sct_states,
-                                m_npass_sct_measurements) );
+                                m_npass_sct_measurements,
+                                ctx) );
   }
   if (m_thinTRTHitsOnTrack) {
     ATH_CHECK( filterTrackHits (
@@ -200,7 +202,8 @@ StatusCode ThinInDetClustersAlg::execute()
                                 m_measurementsTrtSGKey,
                                 m_ntot_trt_states,
                                 m_npass_trt_states,
-                                m_npass_trt_measurements) );
+                                m_npass_trt_measurements,
+                                ctx) );
   }
   
   return StatusCode::SUCCESS;
@@ -212,9 +215,10 @@ StatusCode ThinInDetClustersAlg::filterTrackHits
  const std::vector<bool>& inputMask,
  const SG::ThinningHandleKey<xAOD::TrackStateValidationContainer>& statesKey,
  const SG::ThinningHandleKey<xAOD::TrackMeasurementValidationContainer>& measurementsKey,
- unsigned int& ntot_states,
- unsigned int& npass_states,
- unsigned int& npass_measurements) const
+ std::atomic<unsigned int>& ntot_states,
+ std::atomic<unsigned int>& npass_states,
+ std::atomic<unsigned int>& npass_measurements,
+ const EventContext& ctx) const
 {
   std::vector<bool> maskStates;
   std::vector<bool> maskMeasurements;
@@ -228,7 +232,7 @@ StatusCode ThinInDetClustersAlg::filterTrackHits
   npass_measurements += count (maskMeasurements);
 
   if (!statesKey.empty()) {
-    SG::ThinningHandle<xAOD::TrackStateValidationContainer> importedStates(statesKey);
+    SG::ThinningHandle<xAOD::TrackStateValidationContainer> importedStates(statesKey, ctx);
     ATH_CHECK( importedStates.isValid() );
     unsigned int size_states = importedStates->size();
     if (size_states == 0) {
@@ -246,7 +250,7 @@ StatusCode ThinInDetClustersAlg::filterTrackHits
   }
 
   if (!measurementsKey.empty()) {
-    SG::ThinningHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(measurementsKey);
+    SG::ThinningHandle<xAOD::TrackMeasurementValidationContainer> importedMeasurements(measurementsKey, ctx);
     ATH_CHECK( importedMeasurements.isValid() );
     unsigned int size_measurements = importedMeasurements->size();
     if (size_measurements == 0) {

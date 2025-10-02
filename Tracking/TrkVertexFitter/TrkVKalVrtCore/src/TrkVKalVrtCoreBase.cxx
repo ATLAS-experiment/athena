@@ -31,7 +31,8 @@ namespace Trk {
       m_vrtMassError(-1),
       m_cascadeEvent(nullptr),
       vk_forcft(),
-      m_frozenVersionForBTagging(false)
+      m_frozenVersionForBTagging(false),
+      m_allowUltraDisplaced(false)
   {
   }
   VKalVrtControl::VKalVrtControl(const VKalVrtControl & src)
@@ -40,7 +41,8 @@ namespace Trk {
       m_vrtMassError(src.m_vrtMassError),
       m_cascadeEvent(src.m_cascadeEvent),
       vk_forcft(src.vk_forcft),
-      m_frozenVersionForBTagging(src.m_frozenVersionForBTagging)
+      m_frozenVersionForBTagging(src.m_frozenVersionForBTagging),
+      m_allowUltraDisplaced(src.m_allowUltraDisplaced)
   {
   }
 
@@ -287,7 +289,7 @@ namespace Trk {
     int Ntrk=std::min((int)Index.size(),NtrkTot);
     for(int it=0; it<Ntrk; it++) sumM +=   vk_forcft.wm[Index[it]];                 //sum of particle masses
     if(sumM<Mass) {
-      vk_forcft.wmfit[0]=Mass;
+      vk_forcft.wmfit[vk_forcft.nmcnst]=Mass;
       for(int it=0; it<Ntrk; it++) vk_forcft.indtrkmc[vk_forcft.nmcnst][Index[it]-1]=1;  //Set participating particles
       vk_forcft.nmcnst++;
     }
@@ -299,6 +301,13 @@ namespace Trk {
     if(a+b+c+d == 0.){  vk_forcft.usePlaneCnst = 0;
     }else{              vk_forcft.usePlaneCnst = 1; }
     vk_forcft.Ap = a; vk_forcft.Bp = b; vk_forcft.Cp = c; vk_forcft.Dp = d;
+  }
+  void VKalVrtControl::setUseRadiusCnst(double R, double RefP[2])   {
+    if(R == 0.){  vk_forcft.useRadiusCnst = 0;
+    }else{        vk_forcft.useRadiusCnst = 1; }
+    vk_forcft.RC = R;
+    vk_forcft.radiusRefP[0]=RefP[0];
+    vk_forcft.radiusRefP[1]=RefP[1];
   }
   void VKalVrtControl::setUseThetaCnst() { vk_forcft.useThetaCnst = 1;}
   void VKalVrtControl::setUseAprioriVrt(){ vk_forcft.useAprioriVrt = 1;}

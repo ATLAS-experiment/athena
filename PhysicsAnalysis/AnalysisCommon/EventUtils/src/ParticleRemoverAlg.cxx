@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventUtils includes
@@ -26,43 +26,8 @@
 #include "xAODParticleEvent/CompositeParticleContainer.h"
 
 ParticleRemoverAlg::ParticleRemoverAlg( const std::string& name, ISvcLocator* pSvcLocator )
-  : AthAlgorithm( name, pSvcLocator ),
-  m_inCont(""),
-  m_separator("___"),
-  m_outCont(""),
-  m_suffixes(),
-  m_viewContNames(),
-  m_resetViewConts(true),
-  m_outPrefix(""),
-  m_inContNameList(),
-  m_outContNameList(),
-  m_inContList(),
-  m_outContList(),
-  m_inViewContNameListList(),
-  m_outViewContNameListList(),
-  m_contType(UNKNOWN)
+  : AthAlgorithm( name, pSvcLocator )
 {
-  //
-  // Property declaration
-  //
-  declareProperty("Input",  m_inCont, "Input container name" );
-  declareProperty("Output", m_outCont,
-                  "The name of the output container with the deep copy of input objects" );
-
-  declareProperty("Separator", m_separator,
-                  "The string seperator between the output container name and the sytematic variation (default='___')" );
-
-  declareProperty("Suffixes", m_suffixes,
-                  "The names of all suffixes for the input and output container names" );
-
-  declareProperty("SelectedViewContainers", m_viewContNames,
-                  "The names of all view containers that contain particles that we want to retain" );
-
-  declareProperty("RemapViewContainers", m_resetViewConts,
-                  "Boolean to decide if the existing view containers should be re-mapped (default: true)" );
-
-  declareProperty("OutputViewContainerPrefix", m_outPrefix,
-                  "Prefix to be used for all created output view containers" );
 }
 
 

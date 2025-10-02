@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,11 +40,16 @@ class BinUtility final
 
 public:
   /** Constructor for equidistant */
-  BinUtility()
-    : m_binningData()
+  BinUtility() : m_binningData()
   {
     m_binningData.reserve(3);
   }
+
+  BinUtility(const BinUtility& sbu) = default;
+  BinUtility(BinUtility&& sbu) = default;
+  BinUtility& operator=(const BinUtility& sbu) = default;
+  BinUtility& operator=(BinUtility&& sbu) = default;
+  ~BinUtility() = default;
 
   /** Constructor for equidistant - the substep is for phi binning offsets  */
   BinUtility(size_t bins, float min, float max, BinningOption opt = open, BinningValue value = binR, float sStep = 0.)
@@ -100,31 +105,16 @@ public:
     m_binningData.emplace_back(Trk::open, phiRef, bValues);
   }
 
-  /** Copy constructor */
-  BinUtility(const BinUtility& sbu)
-    : m_binningData(sbu.m_binningData)
-  {}
-
-  /** Assignment operator Constructor */
-  BinUtility& operator=(const BinUtility& sbu)
-  {
-    if (this != &sbu)
-      m_binningData = sbu.m_binningData;
-    return (*this);
-  }
-
   /** Operator++ to make multidimensional BinUtility */
   BinUtility& operator+=(const BinUtility& gbu)
   {
     const std::vector<BinningData>& bData = gbu.binningData();
-    if (m_binningData.size() + bData.size() > 3)
+    if (m_binningData.size() + bData.size() > 3){
       throw GaudiException("BinUtility does not support dim > 3", "FATAL", StatusCode::FAILURE);
+    }
     m_binningData.insert(m_binningData.end(), bData.begin(), bData.end());
     return (*this);
   }
-
-  /** Destructor */
-  ~BinUtility() {}
 
   /** Implizit Constructor */
   BinUtility* clone() const { return new BinUtility(*this); }
@@ -135,8 +125,9 @@ public:
   /** Bin from a 3D vector (already in binning frame) */
   size_t bin(const Amg::Vector3D& position, size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     size_t bEval = m_binningData[ba].searchGlobal(position);
     return (bEval > bins(ba) - 1 ? bins(ba) - 1 : bEval); // ST additional protection : DEBUG source
   }
@@ -144,16 +135,18 @@ public:
   /** Bin from a 3D vector (already in binning frame) */
   size_t entry(const Amg::Vector3D& position, size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     return m_binningData[ba].entry(position);
   }
 
   /** Bin from a 3D vector (already in binning frame) */
   size_t next(const Amg::Vector3D& position, const Amg::Vector3D& direction, size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     return m_binningData[ba].next(position, direction);
   }
 
@@ -162,16 +155,18 @@ public:
                                           const Amg::Vector3D& direction,
                                           size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     return m_binningData[ba].distanceToNext(position, direction);
   }
 
   /** Return the oder direciton for fast interlinking */
   LayerOrder orderDirection(const Amg::Vector3D& position, const Amg::Vector3D& direction, size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     return m_binningData[ba].orderDirection(position, direction);
   }
 
@@ -181,8 +176,9 @@ public:
   */
   size_t bin(const Amg::Vector2D& lposition, size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     return m_binningData[ba].searchLocal(lposition);
   }
 
@@ -203,8 +199,9 @@ public:
     return true;
     std::vector<BinningData>::const_iterator bdIter = m_binningData.begin();
     for (; bdIter != m_binningData.end(); ++bdIter)
-      if (!(*bdIter).inside(lposition))
+      if (!(*bdIter).inside(lposition)){
         return false;
+      }
     return true;
   }
 
@@ -214,32 +211,36 @@ public:
   /** First bin maximal value */
   size_t max(size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       return 0;
+    }
     return (m_binningData[ba].bins - 1);
   }
 
   /** Number of bins */
   size_t bins(size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       return 0;
+    }
     return (m_binningData[ba].bins);
   }
 
   /** The type/value of the binning */
   BinningValue binningValue(size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     return (m_binningData[ba].binvalue);
   }
 
   /** bin->BinningValue navigation : pos=+-1. edges/ 0. bin center */
   float binPosition(size_t bin, float pos, size_t ba = 0) const
   {
-    if (ba >= m_binningData.size())
+    if (ba >= m_binningData.size()){
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
+    }
     return (m_binningData[ba].binPosition(bin, pos));
   }
 

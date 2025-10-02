@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -650,7 +650,7 @@ bool ALFA_GeometryReader::Initialize(const PGEOMETRYCONFIGURATION pConfig, eFibe
 			else if(m_eMetrologyType==EMT_METROLOGY) {
 				SetupCurrentLVDT(pConfig);
 
-				if(pConfig->strRPMetrologyConnString==std::string("")) FilePath = PathResolver::find_file(METROLOGYFILE,"DATAPATH", PathResolver::RecursiveSearch);
+				if(pConfig->strRPMetrologyConnString.empty()) FilePath = PathResolverFindDataFile(METROLOGYFILE);
 				else FilePath=pConfig->strRPMetrologyConnString;
 				LogStream<<MSG::INFO<<"Metrology data loaded from file "<<FilePath<<endmsg;
 				bRes=ParseRPMetrology(EGST_FILE,FilePath.c_str());
@@ -950,8 +950,8 @@ bool ALFA_GeometryReader::ReadSource(const eGeoSourceType eSourceType, const eRP
 		break;
 	case EGST_FILE:
 
-		GeomFile=std::string("geom_")+strDetType+std::string("_")+std::string(GetRPotLabel(eRPName))+std::string(".dat");
-		if(szDataSource==nullptr || !strcmp(szDataSource,"")) FilePath = PathResolver::find_file(GeomFile,"DATAPATH", PathResolver::RecursiveSearch);
+		GeomFile="ALFA_Geometry/geom_"+strDetType+"_"+std::string(GetRPotLabel(eRPName))+".dat";
+		if(szDataSource==nullptr || !strcmp(szDataSource,"")) FilePath = PathResolverFindDataFile(GeomFile);
 		else FilePath=std::string(szDataSource);
 
 		LogStream<<MSG::INFO<<"The "<<strDetType<<" fiber geometry will be loaded from FILE "<<FilePath.c_str()<<" for RP "<<GetRPotLabel(eRPName)<<endmsg;

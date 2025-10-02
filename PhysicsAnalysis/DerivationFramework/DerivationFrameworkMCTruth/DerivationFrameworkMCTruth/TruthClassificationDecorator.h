@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHCLASSIFICATIONDECORATOR_H
@@ -18,7 +18,7 @@ class IMCTruthClassifier;
 
 namespace DerivationFramework {
 
-  class TruthClassificationDecorator : public AthAlgTool, public IAugmentationTool {
+  class TruthClassificationDecorator : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthClassificationDecorator(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthClassificationDecorator();
@@ -31,8 +31,6 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey 
          {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
       // Decorator keys
-      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_linkDecoratorKey
-         {this, "originalTruthParticle", m_particlesKey, "originalTruthParticle", "Link to the original truth particle"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_originDecoratorKey
          {this, "classifierParticleOrigin", m_particlesKey, "classifierParticleOrigin", "Particle origin decoration"};
       SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_typeDecoratorKey

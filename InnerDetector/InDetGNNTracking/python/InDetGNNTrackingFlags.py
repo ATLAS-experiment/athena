@@ -3,6 +3,7 @@
 #
 from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags
 from TrkConfig.TrkConfigFlags import TrackingComponent
+from InDetGNNTracking.InDetGNNTrackingConfigFlags import GNNTrackFinderToolType
 
 
 def createGNNTrackingPassFlags():
@@ -27,13 +28,18 @@ def gnnReaderValidation(flags):
     """flags for Reco_tf with CA used in CI tests: use GNNChain during reconstruction"""
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.GNNChain]
-    flags.Tracking.GNN.useTrackReader = True
-    flags.Tracking.GNN.useTrackFinder = False
+    flags.Tracking.GNN.ToolType = GNNTrackFinderToolType.TrackReader
 
 
 def gnnFinderValidation(flags):
     """flags for Reco_tf with CA used in CI tests: use GNNChain during reconstruction"""
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.GNNChain]
-    flags.Tracking.GNN.useTrackReader = False
-    flags.Tracking.GNN.useTrackFinder = True
+    flags.Tracking.GNN.ToolType = GNNTrackFinderToolType.TrackFinder
+
+
+def gnnTritonValidation(flags):
+    """flags for Reco_tf with CA. Use GNNTrackFinderTritonTool for track finding."""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Tracking.recoChain = [TrackingComponent.GNNChain]
+    flags.Tracking.GNN.ToolType = GNNTrackFinderToolType.Triton

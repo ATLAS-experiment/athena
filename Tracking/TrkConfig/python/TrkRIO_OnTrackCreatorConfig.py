@@ -193,6 +193,49 @@ def MuonRotCreatorCfg(flags, name="MuonRotCreator", **kwargs):
     result.setPrivateTools(CompFactory.Trk.RIO_OnTrackCreator(name, **kwargs))
     return result
 
+### ROT creator for combined ID & Muon fit useage
+def CombinedRotCreatorCfg(flags, name="TrkRotCreator", **kwargs):
+    result = ComponentAccumulator()
+    #### Inner detector part
+    if flags.Detector.GeometryITk:
+        from InDetConfig.SiClusterOnTrackTool_PixelConfig import ITkPixelClusterOnTrackToolCfg
+        kwargs.setdefault("ToolPixelCluster", result.popToolsAndMerge(ITkPixelClusterOnTrackToolCfg(flags)))
+        from InDetConfig.SiClusterOnTrackTool_SCTStripConfig import ITkStripClusterOnTrackToolCfg
+        kwargs.setdefault("ToolSCT_Cluster", result.popToolsAndMerge(ITkStripClusterOnTrackToolCfg(flags)))
+    elif flags.Detector.GeometryID:
+        if flags.Tracking.useBroadPixClusterErrors:
+            from InDetConfig.SiClusterOnTrackTool_PixelConfig import InDetBroadPixelClusterOnTrackToolCfg
+            kwargs.setdefault("ToolPixelCluster", 
+                              result.popToolsAndMerge(InDetBroadPixelClusterOnTrackToolCfg(flags)))
+        else:
+            from InDetConfig.SiClusterOnTrackTool_PixelConfig import InDetPixelClusterOnTrackToolCfg
+            kwargs.setdefault("ToolPixelCluster", 
+                              result.popToolsAndMerge(InDetPixelClusterOnTrackToolCfg(flags)))
+        if flags.Tracking.useBroadSCTClusterErrors:
+            from InDetConfig.SiClusterOnTrackTool_SCTStripConfig import InDetBroadSCT_ClusterOnTrackToolCfg
+            kwargs.setdefault("ToolSCT_Cluster", 
+                             result.popToolsAndMerge(InDetBroadSCT_ClusterOnTrackToolCfg(flags)))
+        else:
+            from InDetConfig.SiClusterOnTrackTool_SCTStripConfig import InDetSCT_ClusterOnTrackToolCfg
+            kwargs.setdefault("ToolSCT_Cluster", result.popToolsAnsMerge(InDetSCT_ClusterOnTrackToolCfg(flags)))
+    else: ### Just take the muon calibrator
+        result.setPrivateTools(result.popToolsAndMerge(MuonRotCreatorCfg(flags, name=name, **kwargs)))
+        return result
+    #### TRT part
+    if flags.Detector.GeometryTRT:
+        from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackToolCfg
+        kwargs.setdefault("ToolTRT_DriftCircle", result.popToolsAndMerge(TRT_DriftCircleOnTrackToolCfg(flags)))
+    #### Muon part
+    if flags.Detector.GeometryMuon:
+        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg
+        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
+        kwargs.setdefault("ToolMuonDriftCircle", result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
+        kwargs.setdefault("ToolMuonCluster", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))    
+    else:
+        result.setPrivateTools(result.popToolsAndMerge(InDetRotCreatorCfg(flags,name=name, **kwargs)))
+        return result
+    result.setPrivateTools(CompFactory.Trk.RIO_OnTrackCreator(name, **kwargs))
+    return result
 
 def RIO_OnTrackErrorScalingCondAlgCfg(flags,
                                       name='RIO_OnTrackErrorScalingCondAlg',

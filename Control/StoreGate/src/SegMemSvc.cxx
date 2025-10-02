@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/SegMemSvc.h"
@@ -16,7 +16,7 @@ using namespace std;
 //
 
 SegMemSvc::SegMemSvc( const std::string& name, ISvcLocator* svc )
-  : Service( name, svc ), p_incSvc("IncidentSvc",name),
+  : base_class( name, svc ), p_incSvc("IncidentSvc",name),
     m_arena_job("sms_job",&m_ahead_job), 
     m_arena_evt("sms_evt",&m_ahead_evt), 
     m_arena_inc("sms_inc",&m_ahead_inc) 
@@ -32,22 +32,6 @@ SegMemSvc::~SegMemSvc() {
 }
 
 
-StatusCode SegMemSvc::queryInterface( const InterfaceID& riid, 
-                                      void** ppvInterface ) {
-  StatusCode sc = StatusCode::FAILURE;
-  if ( ppvInterface ) {
-    *ppvInterface = 0;
-    
-    if ( SegMemSvc::interfaceID().versionMatch(riid) )    {
-      *ppvInterface = static_cast<SegMemSvc*>(this);
-      sc = StatusCode::SUCCESS;
-      addRef();
-    }
-    else
-      sc = Service::queryInterface( riid, ppvInterface );    
-  }
-  return sc;
-}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,24 +47,6 @@ SegMemSvc::initialize() {
   
   p_incSvc->addListener( this, "EndEvent" );
   p_incSvc->addListener( this, "DefragMemory" );
-
-  return StatusCode::SUCCESS;
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode
-SegMemSvc::reinitialize() {
-
-  return StatusCode::SUCCESS;
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode
-SegMemSvc::finalize() {
 
   return StatusCode::SUCCESS;
 

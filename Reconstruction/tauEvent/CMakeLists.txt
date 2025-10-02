@@ -13,7 +13,7 @@ atlas_add_library( tauEvent
                    PUBLIC_HEADERS tauEvent
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers CaloEvent CaloIdentifier AthLinks Navigation AthenaKernel EventKernel FourMom NavFourMom GaudiKernel ParticleEvent JetEvent Particle VxVertex )
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers CaloEvent CaloIdentifier AthLinks Navigation AthenaKernel EventKernel FourMom NavFourMom GaudiKernel ParticleEvent JetEvent Particle VxVertex TruthUtils )
 
 atlas_add_dictionary( tauEventDict
                       tauEvent/tauEventDict.h

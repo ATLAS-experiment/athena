@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictReference.h"
@@ -10,10 +10,17 @@
 
 #include <iostream>
 
-IdDictReference::IdDictReference ()
+IdDictReference::IdDictReference (const std::string& subregion_name)
   :
-  m_subregion(0),
+  m_subregion_name(subregion_name),
+  m_subregion(nullptr),
   m_resolved_references(false) {
+}
+
+IdDictReference::IdDictReference (IdDictSubRegion* subregion)
+  :
+  m_subregion(subregion),
+  m_resolved_references(true) {
 }
 
 IdDictReference::~IdDictReference () {

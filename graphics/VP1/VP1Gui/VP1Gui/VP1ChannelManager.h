@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -32,35 +32,35 @@ public:
   VP1ChannelManager(VP1ExecutionScheduler*,VP1MainWindow*);
   ~VP1ChannelManager();
 
-  QString loadPluginFile(QString filename);
+  QString loadPluginFile(const QString & filename);
   //This does not actually instantiate any channel widgets - it merely
   //instantiates the widget factory from the plugin file (if possible,
   //otherwise it returns an error messages), and notices which
   //channels are provided by this factor (if 0 channels are provided,
   //it also returns an error message). If an empty string was
   //returned, there were no errors.
-  bool unloadPluginFile(QString filename);
+  bool unloadPluginFile(const QString & filename);
 
   QStringList currentPluginFiles() const;
 
-  QStringList channelsInPluginFile(QString filename) const;//An empty returned stringlist is probably because 'filename' never was loaded succesfully.
+  QStringList channelsInPluginFile(const QString & filename) const;//An empty returned stringlist is probably because 'filename' never was loaded succesfully.
 
-  QStringList basename2UniqueNames(QString basename) const;
+  QStringList basename2UniqueNames(const QString & basename) const;
 
-  bool deleteChannel(QString channeluniquename);
+  bool deleteChannel(const QString & channeluniquename);
 
   IVP1ChannelWidget * getChannel( const QString& channelbasename, QString& err );//returns 0 if unsuccesful. Otherwise, 'err' contains an error message.
-  unsigned nActive( QString channelbasename ) const;
+  unsigned nActive( const QString & channelbasename ) const;
 
-  IVP1ChannelWidget* uniqueName2Channel(QString uniquename) const;
+  IVP1ChannelWidget* uniqueName2Channel(const QString & uniquename) const;
 
-  bool hasRefreshingSystem(const QString& uniquename) const;
+  bool hasRefreshingSystem(const QString & uniquename) const;
 
   QStringList uniquenames() const;
 
-  bool uniqueNameExists(QString) const;
-  bool baseNameExists(QString) const;
-  bool channelWithBasenameIsLoaded(QString basename) const;
+  bool uniqueNameExists(const QString &) const;
+  bool baseNameExists(const QString &) const;
+  bool channelWithBasenameIsLoaded(const QString & basename) const;
 
   QStringList serializePluginInfo() const;
 
@@ -71,9 +71,9 @@ public:
   QStringList availableChannelList();
 
 signals:
-  void uniquename_channelListChanged(QStringList);//gives a list of channel unique_name's.
-  void availableChannelListChanged(QStringList);//gives a list of channel base_name's.
-  void availableUnusedChannelListChanged(QStringList);//gives a list of channel base_name's (only the one's that dont appear anywhere).
+  void uniquename_channelListChanged(const QStringList & );//gives a list of channel unique_name's.
+  void availableChannelListChanged(const QStringList & );//gives a list of channel base_name's.
+  void availableUnusedChannelListChanged(const QStringList &);//gives a list of channel base_name's (only the one's that dont appear anywhere).
   void newChannelCreated(IVP1ChannelWidget*);
   void channelUncreated(IVP1ChannelWidget*);
 

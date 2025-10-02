@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -7,13 +7,8 @@
 // G4 includes
 #include "G4FastStep.hh"
 
-SimpleFastKiller::SimpleFastKiller(const std::string& name)
-  : G4VFastSimulationModel(name)
-{
-}
-
 void SimpleFastKiller::DoIt(const G4FastTrack&, G4FastStep& fastStep)
 {
   fastStep.KillPrimaryTrack();
-  fastStep.SetPrimaryTrackPathLength(0.0);
+  fastStep.ProposePrimaryTrackPathLength(0.0);
 }

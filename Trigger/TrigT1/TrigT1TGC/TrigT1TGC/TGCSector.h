@@ -1,20 +1,19 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCSector_h
 #define TGCSector_h
 
-#include "TrigT1TGC/TGCArguments.h"
-#include "TrigT1TGC/TGCTimingManager.h"
-#include "TrigT1TGC/TGCReadoutIndex.h"
 
+#include "TrigT1TGC/TGCTimingManager.h"
 #include "TrigT1TGC/TGCTMDB.h"
 #include "TrigT1TGC/TGCNSW.h"
 #include "TrigT1TGC/TGCBIS78.h"
+#include <memory>
 
 namespace LVL1TGCTrigger {
-
+class TGCArguments;
 class TGCDatabaseManager;
 class TGCConnectionPPToSL;
 class TGCConnectionHPBToSL;

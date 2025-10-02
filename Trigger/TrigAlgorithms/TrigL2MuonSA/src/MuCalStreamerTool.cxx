@@ -205,7 +205,7 @@ bool TrigL2MuonSA::MuCalStreamerTool::isStreamOpen() {return m_circ!=nullptr;}
    if ( tgcHits.size() > 0 ) {    
      LVL2_MUON_CALIBRATION::TgcCalibFragment tgcFragment;
 
-     if ( createTgcFragment(robIdList_TGC,tgcFragment) != StatusCode::SUCCESS ) {
+     if ( createTgcFragment(robIdList_TGC, tgcFragment, ctx) != StatusCode::SUCCESS ) {
        ATH_MSG_ERROR("Could not create the Tgc fragment of the calibration stream");
      }
      else {
@@ -391,7 +391,8 @@ StatusCode TrigL2MuonSA::MuCalStreamerTool::createRpcFragment(const xAOD::MuonRo
 //
 ////////////////////////////////////////////////////////////////////////////////
 StatusCode TrigL2MuonSA::MuCalStreamerTool::createTgcFragment(std::vector<uint32_t>& robIdList_TGC,
-							      LVL2_MUON_CALIBRATION::TgcCalibFragment& tgcFragment) const
+                                  LVL2_MUON_CALIBRATION::TgcCalibFragment& tgcFragment,
+                                  const EventContext& ctx) const
 {
 
 
@@ -411,7 +412,7 @@ StatusCode TrigL2MuonSA::MuCalStreamerTool::createTgcFragment(std::vector<uint32
   tgcFragment = LVL2_MUON_CALIBRATION::TgcCalibFragment(systemId,subSystemId,rdoId,roiNumber);
 
   // retrieve the tgcrdo container
-  SG::ReadHandle<TgcRdoContainer> rdoRH(m_tgcRdoKey);
+  SG::ReadHandle<TgcRdoContainer> rdoRH(m_tgcRdoKey, ctx);
   if (!rdoRH.isValid()) {
     ATH_MSG_ERROR( "No TGC RDO container found!"  );
     return StatusCode::FAILURE;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArEndcapPresamplerCalculator.hh
@@ -14,6 +14,7 @@
 
 #include "globals.hh"
 #include "G4ThreeVector.hh"
+#include "LArG4Code/LArG4BirksLaw.h"
 #include "LArG4Code/LArG4Identifier.h"
 #include "LArG4Code/LArCalculatorSvcImp.h"
 #include "LArG4Code/LArVG4DetectorParameters.h"
@@ -30,9 +31,9 @@ class LArEndcapPresamplerCalculator : public LArCalculatorSvcImp {
 public:
 
   LArEndcapPresamplerCalculator(const std::string& name, ISvcLocator *pSvcLocator);
-
+  LArEndcapPresamplerCalculator (const LArEndcapPresamplerCalculator&) = delete;
+  LArEndcapPresamplerCalculator& operator= (const LArEndcapPresamplerCalculator&) = delete;
   virtual StatusCode initialize() override final;
-  virtual StatusCode finalize() override final;
 
   /////////////////////////////////////////////
 
@@ -48,14 +49,10 @@ public:
 
 
 private:
-
   // Pointer to geometry routine.
-  ServiceHandle<LArG4::IECPresamplerGeometry> m_geometry;
+  ServiceHandle<LArG4::IECPresamplerGeometry> m_geometry{this, "GeometryCalculator", "EMECPresamplerGeometry"};
 
-  LArG4BirksLaw *m_birksLaw;
-
-  LArEndcapPresamplerCalculator (const LArEndcapPresamplerCalculator&);
-  LArEndcapPresamplerCalculator& operator= (const LArEndcapPresamplerCalculator&);
+  std::unique_ptr<LArG4BirksLaw> m_birksLaw{};
 };
 
 #endif

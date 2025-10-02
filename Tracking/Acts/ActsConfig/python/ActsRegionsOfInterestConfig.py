@@ -54,3 +54,16 @@ def ActsRegionsOfInterestCreatorAlgCfg(flags,
     kwargs.setdefault('RoIs', f"{flags.Tracking.ActiveConfig.extension}RegionOfInterest")
     acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags, name, **kwargs))
     return acc
+
+def ActsInDetRegionsOfInterestCreatorAlgCfg(flags,
+                                       name: str = "ActsInDetRegionsOfInterestCreatorAlg",
+                                       **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # Set proper RoI creation tool
+    if 'RoICreatorTool' not in kwargs:
+        kwargs.setdefault('RoICreatorTool', acc.popToolsAndMerge(ActsFullScanRoICreatorToolCfg(flags)))
+
+    kwargs.setdefault('RoIs', "RegionOfInterest")
+    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags, name, **kwargs))
+    return acc

@@ -183,7 +183,7 @@ namespace Trig {
             ATH_MSG_WARNING("Issue in combination sizes for chain " << chain  
                         << " using Run 2 navigation " << run2.size() 
                         << " Run 3 navigation " << run3.size());
-            ATH_MSG_ERROR("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details), this may be a false positive if chain is incorrectly decoded");    
+            ATH_MSG_WARNING("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details), this may be a false positive if chain is incorrectly decoded");    
             if ( m_failOnDifference ) {
                 return StatusCode::FAILURE;
             }

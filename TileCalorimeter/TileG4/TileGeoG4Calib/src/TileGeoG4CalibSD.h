@@ -21,8 +21,6 @@
 #include "G4VSensitiveDetector.hh"
 
 // Output collections
-#include "StoreGate/WriteHandle.h"
-#include "TileSimEvent/TileHitVector.h"
 #include "CaloSimEvent/CaloCalibrationHit.h"
 
 // Member variables
@@ -65,6 +63,7 @@ class TileCalibHitCntNtup;
 class ITileCalculator;
 class TileGeoG4LookupBuilder;
 class TileGeoG4DMLookupBuilder;
+class TileHitVectorDMBuilder;
 
 class TileGeoG4Section;
 class TileGeoG4Cell;
@@ -97,7 +96,7 @@ public:
   //SD MAIN METHODS FOR A STEP PROCESSING
   void Initialize(G4HCofThisEvent*) override final;
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-  void EndOfAthenaEvent();
+  void EndOfEvent(G4HCofThisEvent*) override final;
 
   //METHOD FOR CLASSIFYING STEP ENERGY AND THE METHODS,
   //WHICH CALCULATE IDENTIFIER FOR CELL OR DEAD MATERIAL
@@ -142,6 +141,9 @@ protected:
   double GetVisibleEnergy();
   double GetInvisibleEnergy();
 
+  // Retrieve the hit collection for the current Athena event
+  TileHitVectorDMBuilder* GetHitCollection();
+
   void EnergiesSimpleCounter();
   void DebugEnergies();
 
@@ -149,11 +151,10 @@ private:
   TileGeoG4CalibSD(const TileGeoG4CalibSD&);
   TileGeoG4CalibSD& operator=(const TileGeoG4CalibSD&);
 
-  //CALIBRATION HIT CONTAINERS
-  SG::WriteHandle<CaloCalibrationHitContainer> m_tileActiveCellCalibHits;
-  SG::WriteHandle<CaloCalibrationHitContainer> m_tileInactiveCellCalibHits;
-  SG::WriteHandle<CaloCalibrationHitContainer> m_tileDeadMaterialCalibHits;
-  SG::WriteHandle<TileHitVector> m_tileHits;
+  std::string m_tileHits;
+  std::string m_tileActiveCellCalibHits;
+  std::string m_tileInactiveCellCalibHits;
+  std::string m_tileDeadMaterialCalibHits;
 
   // Handles for later use
   const CaloCell_ID* m_caloCell_ID;
@@ -161,6 +162,7 @@ private:
 
   ServiceHandle<IRDBAccessSvc> m_rdbSvc;
   ServiceHandle<IGeoModelSvc> m_geoModSvc;
+  ServiceHandle<StoreGateSvc> m_detStoreSvc;
 
   //FLAGS FROM JOBOPTIONS
   bool m_tileTB;
@@ -173,8 +175,6 @@ private:
 
   //ORDINARY AND CALIBRATION LOOKUP BUILDERS
   ITileCalculator* m_calc;
-  TileGeoG4LookupBuilder* m_lookup;
-  TileGeoG4DMLookupBuilder* m_lookupDM;
 
   //CALIBRATION ENERGY CLASSIFYER
   CaloG4::SimulationEnergies* m_simEn;

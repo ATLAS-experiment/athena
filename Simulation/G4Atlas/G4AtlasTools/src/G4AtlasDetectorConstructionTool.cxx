@@ -3,6 +3,11 @@
 */
 
 // Include files
+#include <type_traits>
+
+#include "G4LogicalVolumeStore.hh"
+#include "G4PhysicalVolumeStore.hh"
+#include "G4Version.hh"
 
 // local
 #include "G4AtlasTools/G4AtlasDetectorConstructionTool.h"
@@ -41,6 +46,9 @@ StatusCode G4AtlasDetectorConstructionTool::initialize( )
   ATH_MSG_DEBUG( "Initializing sensitive detectors in " << name() );
   ATH_CHECK( m_senDetTool.retrieve() );
 
+  ATH_MSG_DEBUG( "Initializing fastsim in " << name() );
+  ATH_CHECK( m_fastSimTool.retrieve() );
+
   ATH_MSG_DEBUG( "Setting up G4 physics regions" );
   for (auto& it: m_regionCreators)
   {
@@ -69,34 +77,40 @@ std::vector<std::string>& G4AtlasDetectorConstructionTool::GetParallelWorldNames
   return m_parallelWorldNames;
 }
 
+auto G4AtlasDetectorConstructionTool::GetDetectorConstruction()
+    -> UPDetectorConstruction {
+  static_assert(std::has_virtual_destructor_v<G4VUserDetectorConstruction>,
+                "G4VUserDetectorConstruction must have a virtual destructor");
+  return {
+      new G4AtlasDetectorConstruction(this),
+      [](G4VUserDetectorConstruction* ptr) { delete ptr; }};
+}
+
 //=================================
 // G4VUserDetectorConstruction method overrides
 //=================================
-G4VPhysicalVolume* G4AtlasDetectorConstructionTool::Construct()
-{
-  ATH_MSG_DEBUG( "Detectors " << m_detTool.name() <<" being set as World" );
-  m_detTool->SetAsWorld();
-  m_detTool->Build();
+G4VPhysicalVolume*
+G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::Construct() {
+  ATH_MSG_DEBUG("Detectors " << m_detConstructionTool->m_detTool.name()
+                             << " being set as World");
+  m_detConstructionTool->m_detTool->SetAsWorld();
+  m_detConstructionTool->m_detTool->Build();
 
   ATH_MSG_DEBUG( "Setting up G4 physics regions" );
-  for (auto& it: m_regionCreators)
-  {
+  for (auto& it : m_detConstructionTool->m_regionCreators) {
     it->Construct();
   }
 
-  if (m_activateParallelWorlds)
-  {
+  if (m_detConstructionTool->m_activateParallelWorlds) {
     ATH_MSG_DEBUG( "Setting up G4 parallel worlds" );
-    for (auto& it: m_parallelWorlds)
-    {
-      m_parallelWorldNames.push_back(it.name());
+    for (auto& it : m_detConstructionTool->m_parallelWorlds) {
+      m_detConstructionTool->m_parallelWorldNames.push_back(it.name());
       this->RegisterParallelWorld(it->GetParallelWorld());
     }
   }
 
   ATH_MSG_DEBUG( "Running geometry post-configuration tools" );
-  for (auto it: m_configurationTools)
-  {
+  for (auto it : m_detConstructionTool->m_configurationTools) {
     StatusCode sc = it->postGeometryConfigure();
     if (!sc.isSuccess())
     {
@@ -104,20 +118,34 @@ G4VPhysicalVolume* G4AtlasDetectorConstructionTool::Construct()
     }
   }
 
-  return m_detTool->GetWorldVolume();
+  // Build world volume and rebuild LV/PV stores if Geant4 is 11 or newer
+  // - Rebuild necessary because Athena may install LV/PV notifiers that change
+  //   volume names, which invalidates store maps.
+  G4VPhysicalVolume* wv = m_detConstructionTool->m_detTool->GetWorldVolume();
+#if G4VERSION_NUMBER > 1079
+  G4LogicalVolumeStore::GetInstance()->SetMapValid(false);
+  G4LogicalVolumeStore::GetInstance()->UpdateMap();
+  G4PhysicalVolumeStore::GetInstance()->SetMapValid(false);
+  G4PhysicalVolumeStore::GetInstance()->UpdateMap();
+#endif
+
+  return wv;
 }
 
-void G4AtlasDetectorConstructionTool::ConstructSDandField()
-{
+void G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
+    ConstructSDandField() {
   ATH_MSG_DEBUG( "Setting up sensitive detectors" );
-  if (m_senDetTool->initializeSDs().isFailure())
-  {
+  if (m_detConstructionTool->m_senDetTool->initializeSDs().isFailure()) {
     ATH_MSG_FATAL("Failed to initialize SDs for worker thread");
   }
 
+  if(!m_detConstructionTool->m_fastSimTool->initializeFastSims().isSuccess()) {
+    ATH_MSG_FATAL("Failed to initialize Fast Simulation Tool for worker thread");
+    return;
+  }
+
   ATH_MSG_DEBUG( "Setting up field managers" );
-  for (auto& fm : m_fieldManagers)
-  {
+  for (auto& fm : m_detConstructionTool->m_fieldManagers) {
     StatusCode sc = fm->initializeField();
     if (!sc.isSuccess())
     {
@@ -126,10 +154,10 @@ void G4AtlasDetectorConstructionTool::ConstructSDandField()
     }
   }
 
-  if (m_G4CaloTransportTool.isEnabled()){
+  if (m_detConstructionTool->m_G4CaloTransportTool.isEnabled()) {
     ATH_MSG_DEBUG("Setting up G4CaloTransportTool");
-    if (m_G4CaloTransportTool->initializePropagator().isFailure())
-    {
+    if (m_detConstructionTool->m_G4CaloTransportTool->initializePropagator()
+            .isFailure()) {
       ATH_MSG_FATAL("Failed to initialize G4CaloTransportTool for worker thread.");
       return;
     }

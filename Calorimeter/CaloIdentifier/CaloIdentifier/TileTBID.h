@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -71,7 +71,7 @@ public:
   /** 
    * @brief Default constructor
    */
-  TileTBID(void);
+  TileTBID();
 
   /** 
    * @brief Default destructor
@@ -97,7 +97,7 @@ public:
   /**
    * @brief identifer for all Tile testbeam detectors
    */
-  Identifier          tiletb_id               ( void )                        const;
+  Identifier          tiletb_id               (  )                        const;
   /**
    * @brief identifer for Tile testbeam detectors of a give type
    */
@@ -185,15 +185,15 @@ public:
   /**
    * @brief idContext for TYPEs
    */
-  IdContext    type_context     (void) const;
+  IdContext    type_context     () const;
   /**
    * @brief idContext for modules
    */
-  IdContext    module_context   (void) const;
+  IdContext    module_context   () const;
   /**
    * @brief idContext for channels
    */
-  IdContext    channel_context  (void) const;
+  IdContext    channel_context  () const;
 
 
   /**
@@ -214,42 +214,42 @@ public:
   /**
    * @brief TYPE hash table max size
    */
-  inline size_type      type_hash_max   (void) const    { return m_type_hash_max; }
+  inline size_type      type_hash_max   () const    { return m_type_hash_max; }
   /**
    * @brief module hash table max size
    */
-  inline size_type      module_hash_max (void) const    { return m_module_hash_max; }
+  inline size_type      module_hash_max () const    { return m_module_hash_max; }
   /**
    * @brief channel hash table max size
    */
-  inline size_type      channel_hash_max(void) const    { return m_channel_hash_max; }
+  inline size_type      channel_hash_max() const    { return m_channel_hash_max; }
 
   /**
    * @brief begin iterator for TYPE Identifiers
    */
-  std::vector<Identifier>::const_iterator type_begin     (void) const   { return(m_type_vec.begin()); }
+  std::vector<Identifier>::const_iterator type_begin     () const   { return(m_type_vec.begin()); }
   /**
    * @brief end iterator for TYPE Identifiers
    */
-  std::vector<Identifier>::const_iterator type_end       (void) const   { return(m_type_vec.end()); }
+  std::vector<Identifier>::const_iterator type_end       () const   { return(m_type_vec.end()); }
 
   /**
    * @brief begin iterator for moulde Identifiers
    */
-  std::vector<Identifier>::const_iterator module_begin  (void) const    { return(m_module_vec.begin()); }
+  std::vector<Identifier>::const_iterator module_begin  () const    { return(m_module_vec.begin()); }
   /**
    * @brief end iterator for moulde Identifiers
    */
-  std::vector<Identifier>::const_iterator module_end    (void) const    { return(m_module_vec.end()); }
+  std::vector<Identifier>::const_iterator module_end    () const    { return(m_module_vec.end()); }
 
   /**
    * @brief begin iterator for channel Identifiers
    */
-  std::vector<Identifier>::const_iterator channel_begin (void) const    { return(m_channel_vec.begin()); }
+  std::vector<Identifier>::const_iterator channel_begin () const    { return(m_channel_vec.begin()); }
   /**
    * @brief begin iterator for channel Identifiers
    */
-  std::vector<Identifier>::const_iterator channel_end   (void) const    { return(m_channel_vec.end()); }
+  std::vector<Identifier>::const_iterator channel_end   () const    { return(m_channel_vec.end()); }
 
   enum {NOT_VALID_HASH = 64000};
 
@@ -266,9 +266,9 @@ private:
   int                   get_field               ( const Identifier & id,
                                                   size_type index )             const;
 
-  int         initLevelsFromDict(void) ;
+  int         initLevelsFromDict();
 
-  int         init_hashes(void) ;
+  int         init_hashes();
 
   bool        module_id  (const Identifier& type_id,    int module,              Identifier& module_id  );
   bool        channel_id (const Identifier& type_id,    int module, int channel, Identifier& channel_id );

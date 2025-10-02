@@ -88,7 +88,7 @@ run "NTUP_PHYSVAL" Derivation_tf.py \
   --CA \
   --inputDAOD_PHYSVALFile "DAOD_PHYSVAL.OUT.root" \
   --outputNTUP_PHYSVALFile "NTUP_PHYSVAL.root" \
-  --validationFlags doInDet, doMET, doEgamma, doTau, doJet, doTopoCluster, doPFlow, doMuon \
+  --validationFlags doInDet, doMET, doEgamma, doTau, doJet, doTopoCluster, doPFlow, doMuon, doLLPSecVtx \
   --format NTUP_PHYSVAL \
   --maxEvents ${number_of_events}
 

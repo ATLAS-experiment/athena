@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,110 +31,64 @@ namespace Trk {
 template<class T>
 class CompactBinnedArray1D final : public CompactBinnedArray<T>
 {
-
 public:
-  /**Default Constructor - needed for inherited classes */
-  CompactBinnedArray1D()
-    : CompactBinnedArray<T>()
-    , m_binUtility(nullptr)
-  {}
 
-  /**Constructor with std::vector and a BinUtility */
-  CompactBinnedArray1D(const std::vector<T*>& tclassvector,
-                       const std::vector<size_t>& indexvector,
-                       BinUtility* bingen)
-    : CompactBinnedArray<T>()
-    , m_array(indexvector)
-    , m_arrayObjects(tclassvector)
-    , m_binUtility(bingen)
-  {
-    // check compatibility
-    // size of the index vector must correspond to the number of bins in the
-    // BinUtility
-    if (indexvector.size() != bingen->bins())
-      std::cout << " problem in construction of CompactBinnedArray1D: number "
-                   "of indexes not compatible with BinUtility:"
-                << indexvector.size() << "!=" << bingen->bins() << std::endl;
-    // maximal index must stay within the range of available objects
-    unsigned int iMax = 0;
-    for (unsigned int i = 0; i < indexvector.size(); i++)
-      if (indexvector[i] > iMax)
-        iMax = indexvector[i];
-    if (iMax > tclassvector.size() - 1)
-      std::cout
-        << " problem in construction of CompactBinnedArray1D:runaway index:"
-        << iMax << "," << tclassvector.size() << std::endl;
-  }
+ //Rule of 0 for default ctors
 
-  /**Copy Constructor - copies only pointers !*/
-  CompactBinnedArray1D(const CompactBinnedArray1D& barr)
-    : CompactBinnedArray<T>()
-    , m_binUtility(nullptr)
-  {
-    m_binUtility = (barr.m_binUtility) ? barr.m_binUtility->clone() : 0;
+ /**Constructor with arguents. Note that we do not take ownership
+  of pointersy */
+ CompactBinnedArray1D(const std::vector<T*>& tclassvector,
+                      const std::vector<size_t>& indexvector,
+                      const BinUtility& bingen)
+     : CompactBinnedArray<T>(),
+       m_array(indexvector),
+       m_arrayObjects(tclassvector),
+       m_binUtility(bingen) {}
 
-    m_array = barr.m_array;
-    m_arrayObjects = barr.m_arrayObjects;
-  }
-  /**Assignment operator*/
-  CompactBinnedArray1D& operator=(const CompactBinnedArray1D& barr)
-  {
-    if (this != &barr) {
+ CompactBinnedArray1D(const std::vector<T*>& tclassvector,
+                      std::vector<size_t>&& indexvector,
+                      BinUtility&& bingen)
+     : CompactBinnedArray<T>(),
+       m_array(std::move(indexvector)),
+       m_arrayObjects(tclassvector),
+       m_binUtility(std::move(bingen)) {}
 
-      delete m_binUtility;
-      // now refill
-      m_binUtility = (barr.m_binUtility) ? barr.m_binUtility->clone() : 0;
-      // --------------------------------------------------------------------------
-      if (m_binUtility) {
-        m_array = barr.m_array;
-        m_arrayObjects = barr.m_arrayObjects;
-      }
-    }
-    return *this;
-  }
-  /** Implicit Constructor */
-  CompactBinnedArray1D* clone() const
-  {
-    return new CompactBinnedArray1D(
-      m_arrayObjects, m_array, m_binUtility->clone());
-  }
+ /** Implicit Constructor */
+ CompactBinnedArray1D* clone() const
+ {
+   return new CompactBinnedArray1D(m_arrayObjects, m_array, m_binUtility);
+ }
 
-  CompactBinnedArray1D* clone(const std::vector<T*>& ptrs) const
-  {
-    assert(ptrs.size() == m_arrayObjects.size());
-    return new CompactBinnedArray1D(ptrs, m_array, m_binUtility->clone());
-  }
-
-  /**Virtual Destructor*/
-  ~CompactBinnedArray1D() { delete m_binUtility; }
+ CompactBinnedArray1D* clone(const std::vector<T*>& ptrs) const
+ {
+   assert(ptrs.size() == m_arrayObjects.size());
+   return new CompactBinnedArray1D(ptrs, m_array, m_binUtility);
+ }
 
   /** Returns the pointer to the templated class object from the BinnedArray,
-      it returns 0 if not defined;
+      it returns nullptr  if not defined;
    */
   T* object(const Amg::Vector2D& lp) const
   {
-    if (m_binUtility->inside(lp))
-      return m_arrayObjects[m_array[m_binUtility->bin(lp, 0)]];
+    if (m_binUtility.inside(lp)){
+      return m_arrayObjects[m_array[m_binUtility.bin(lp, 0)]];
+    }
     return nullptr;
   }
 
   /** Returns the pointer to the templated class object from the BinnedArray
-      it returns 0 if not defined;
+      it returns nullptr if not defined;
    */
   T* object(const Amg::Vector3D& gp) const
   {
-    if (m_binUtility)
-      return m_arrayObjects[m_array[m_binUtility->bin(gp, 0)]];
-    return nullptr;
+    return m_arrayObjects[m_array[m_binUtility.bin(gp, 0)]];
   }
 
   /** Returns the pointer to the templated class object from the BinnedArray -
    * entry point*/
   T* entryObject(const Amg::Vector3D& gp) const
   {
-    if (m_binUtility)
-      return (m_arrayObjects[m_array[m_binUtility->entry(gp, 0)]]);
-    return nullptr;
+    return (m_arrayObjects[m_array[m_binUtility.entry(gp, 0)]]);
   }
 
   /** Returns the pointer to the templated class object from the BinnedArray
@@ -143,50 +97,46 @@ public:
                 const Amg::Vector3D& mom,
                 bool associatedResult = true) const
   {
-    if (!m_binUtility)
-      return nullptr;
     // the bins
-    size_t bin = associatedResult ? m_binUtility->bin(gp, 0)
-                                  : m_binUtility->next(gp, mom, 0);
+    size_t bin = associatedResult ? m_binUtility.bin(gp, 0)
+                                  : m_binUtility.next(gp, mom, 0);
     return m_arrayObjects[m_array[bin]];
   }
 
   /** Return all objects of the Array non const T*/
-  BinnedArraySpan<T* const> arrayObjects()
+  std::span<T* const> arrayObjects()
   {
-    return BinnedArraySpan<T* const>(m_arrayObjects.data(),
-                                     m_arrayObjects.data() + m_arrayObjects.size());
+    return std::span<T* const>(m_arrayObjects.begin(),m_arrayObjects.end());
   }
 
   /** Return all objects of the Array const T*/
-  BinnedArraySpan<T const * const> arrayObjects() const
+  std::span<T const * const> arrayObjects() const
   {
-    return BinnedArraySpan<T const * const>(m_arrayObjects.data(),
-                                            m_arrayObjects.data() + m_arrayObjects.size());
+    return std::span<T const * const>(m_arrayObjects.begin(),m_arrayObjects.end());
   }
 
   /** Number of Entries in the Array */
   unsigned int arrayObjectsNumber() const { return m_arrayObjects.size(); }
 
   /** Return the BinUtility*/
-  const BinUtility* binUtility() const { return (m_binUtility); }
+  const BinUtility* binUtility() const { return &m_binUtility; }
 
   /** Return the BinUtility*/
   const BinUtility* layerBinUtility(const Amg::Vector3D&) const
   {
-    return (m_binUtility);
+    return &m_binUtility;
   }
 
   /** Return the layer bin*/
   size_t layerBin(const Amg::Vector3D& pos) const
   {
-    return (m_binUtility->bin(pos));
+    return m_binUtility.bin(pos);
   }
 
 private:
-  std::vector<size_t> m_array;       //!< vector of indices to objects
-  std::vector<T*> m_arrayObjects;    //!< objects
-  BinUtility* m_binUtility;          //!< binUtility
+  std::vector<size_t> m_array{};    //!< vector of indices to objects
+  std::vector<T*> m_arrayObjects{}; //!< not owning pointers to objects
+  BinUtility m_binUtility{};        //!< binUtility
 };
 
 } // end of namespace Trk

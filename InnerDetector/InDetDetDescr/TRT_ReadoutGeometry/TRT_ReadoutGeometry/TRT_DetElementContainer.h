@@ -19,12 +19,12 @@ class TRT_BarrelElement;
 class TRT_EndcapElement;
 class TRT_Numerology;
 
-/// Class to hold different TRT detector elements structures. 
+/// Class to hold different TRT detector elements structures.
 
 class TRT_DetElementContainer : public AthMessaging
 {
 
- public:  
+ public:
 
   TRT_DetElementContainer();
   ~TRT_DetElementContainer();
@@ -44,6 +44,7 @@ class TRT_DetElementContainer : public AthMessaging
   void manageEndcapElement(TRT_EndcapElement *endcap, const TRT_ID* idHelper);
 
   const TRT_DetElementCollection* getElements() const;
+  TRT_DetElementCollection* getElements();
 
   const TRT_Numerology* getTRTNumerology() const;
 
@@ -71,7 +72,7 @@ class TRT_DetElementContainer : public AthMessaging
 
  private:
 
-  TRT_DetElementCollection m_trtcoll;
+  TRT_DetElementCollection m_trtcoll; //This is a DataVector so owns its elements
   const TRT_Numerology  *m_trtnum;
 
   enum {NMODMAX=3};
@@ -82,7 +83,7 @@ class TRT_DetElementContainer : public AthMessaging
 
   TRT_BarrelElement *m_baArray[2][NMODMAX][NPHIMAX][NSTRAWLAYMAXBR]{};
   TRT_EndcapElement *m_ecArray[2][NWHEELMAX][NSTRAWLAYMAXEC][NPHIMAX]{};
-  
+
 };
 
 } // namespace InDetDD

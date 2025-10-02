@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -26,6 +26,7 @@ def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
     ### Enable this to recreate the geometry XML files for Atlantis
     kwargs.setdefault("WriteGeometry", False)
     kwargs.setdefault("StreamToServerTool", None)
+    kwargs.setdefault("Ready4PhysicsAtStart", flags.OnlineEventDisplays.Ready4PhysicsAtStart)
 
     # This next bit sets the data types, then we set the associated public tools
     readAOD = False  # FIXME - set this properly

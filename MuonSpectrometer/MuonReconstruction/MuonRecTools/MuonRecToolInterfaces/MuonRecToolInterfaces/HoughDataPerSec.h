@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRECTOOLINTERFACES_HOUGHDATAPERSEC_H
@@ -24,39 +24,42 @@ namespace Muon {
         using MaximumVec = std::vector<std::shared_ptr<MuonHough::MuonLayerHough::Maximum>>;
         using PhiMaximumVec =  std::vector<std::shared_ptr<MuonHough::MuonPhiLayerHough::Maximum>>;
         
-        typedef std::vector<HitVec> RegionHitVec;
-        typedef std::vector<PhiHitVec> RegionPhiHitVec;
-        typedef std::map<MuonHough::MuonLayerHough::Maximum*, MaximumVec> MaximumAssociationMap;
-        typedef std::vector<MaximumVec> RegionMaximumVec;
-        typedef std::vector<PhiMaximumVec> RegionPhiMaximumVec;
+        using RegionHitVec = std::vector<HitVec>;
+        using RegionMaximumVec = std::vector<MaximumVec>;
 
+        static constexpr int detRegMax = MuonStationIndex::toInt(MuonStationIndex::DetectorRegionIndex::DetectorRegionIndexMax);
+
+        using RegionPhiHitVec = std::vector<PhiHitVec>;
+        using MaximumAssociationMap =  std::map<MuonHough::MuonLayerHough::Maximum*, MaximumVec> ;
+        using RegionPhiMaximumVec = std::vector<PhiMaximumVec>;
+
+        /** @brief Default constructor */
         HoughDataPerSec() {
-            sector = -1;
             hitVec.resize(MuonStationIndex::sectorLayerHashMax());
             maxVec.resize(MuonStationIndex::sectorLayerHashMax());
-            phiHitVec.resize(MuonStationIndex::DetectorRegionIndexMax);
-            phiMaxVec.resize(MuonStationIndex::DetectorRegionIndexMax);
-            nlayersWithMaxima.resize(MuonStationIndex::DetectorRegionIndexMax);
-            nphilayersWithMaxima.resize(MuonStationIndex::DetectorRegionIndexMax);
-            nmaxHitsInRegion.resize(MuonStationIndex::DetectorRegionIndexMax);
-            nphimaxHitsInRegion.resize(MuonStationIndex::DetectorRegionIndexMax);
+            phiHitVec.resize(detRegMax);
+            phiMaxVec.resize(detRegMax);
         }
+
+        HoughDataPerSec(HoughDataPerSec&& other) = default;
+
+        HoughDataPerSec& operator=(HoughDataPerSec&& other) = default;
 
         ~HoughDataPerSec() = default;
         
 
-        int sector;
-        RegionHitVec hitVec;            // Owns the contained objects
-        RegionPhiHitVec phiHitVec;      // Owns the contained objects
-        RegionMaximumVec maxVec;        // Owns the contained objects
-        RegionPhiMaximumVec phiMaxVec;  // Owns the contained objects
-        std::vector<int> nlayersWithMaxima;
-        std::vector<int> nphilayersWithMaxima;
-        std::vector<int> nmaxHitsInRegion;
-        std::vector<int> nphimaxHitsInRegion;
-        MaximumAssociationMap maxAssociationMap;  // stores association of a given maximium with other maxima in neighbouring sectors
+        int sector{-1};
+        RegionHitVec hitVec{};            // Owns the contained objects
+        RegionPhiHitVec phiHitVec{};      // Owns the contained objects
+        RegionMaximumVec maxVec{};        // Owns the contained objects
+        RegionPhiMaximumVec phiMaxVec{};  // Owns the contained objects
+        std::array<int, detRegMax> nlayersWithMaxima{};
+        std::array<int, detRegMax> nphilayersWithMaxima{};
+        std::array<int, detRegMax> nmaxHitsInRegion{};
+        std::array<int, detRegMax> nphimaxHitsInRegion{};
+        MaximumAssociationMap maxAssociationMap{};  // stores association of a given maximium with other maxima in neighbouring sectors
         std::set<MuonHough::MuonLayerHough::Maximum*>
-            associatedToOtherSector;  // used to flagged maxima that were already associated to another sector
+            associatedToOtherSector{};  // used to flagged maxima that were already associated to another sector
         // returns the number of phi and eta hits in the region with most eta hits
         // regions with phi hits are always prefered over regions without
         int maxEtaHits() const { return std::max(nmaxHitsInRegion[0], std::max(nmaxHitsInRegion[1], nmaxHitsInRegion[2])); }

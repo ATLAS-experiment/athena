@@ -115,6 +115,7 @@ int main(int argc, char** argv) {
   std::cout << "========================================" << std::endl;
   std::cout << ">>>>>>>>>> SUSY Properties <<<<<<<<<<" << std::endl;
   TEST_FUNCTION(isGaugino)
+  TEST_FUNCTION(isMSSMHiggs)
   TEST_FUNCTION(isRBaryon)
   TEST_FUNCTION(isRGlueball)
   TEST_FUNCTION(isRHadron)
@@ -131,10 +132,12 @@ int main(int argc, char** argv) {
   TEST_FUNCTION(isExcited)
   TEST_FUNCTION(isGenericMultichargedParticle)
   TEST_FUNCTION(isGraviton)
+  TEST_FUNCTION(isHeavyBoson)
   TEST_FUNCTION(isHiddenValley)
   TEST_FUNCTION(isKK)
   TEST_FUNCTION(isLeptoQuark)
   TEST_FUNCTION(isMonopole)
+  TEST_FUNCTION(isNeutrinoRH)
   TEST_FUNCTION(isTechnicolor)
   std::cout << "========================================" << std::endl;
   std::cout << ">>>>>>>>>> Nuclear Properties <<<<<<<<<<" << std::endl;

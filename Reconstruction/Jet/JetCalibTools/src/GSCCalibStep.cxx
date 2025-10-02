@@ -24,10 +24,8 @@ GSCCalibStep::GSCCalibStep(const std::string& name)
 StatusCode GSCCalibStep::initialize() {
   ATH_MSG_DEBUG ("Initializing " << name() );
 
-  ATH_CHECK( m_vartool1.retrieve() );
-  ATH_CHECK( m_vartool2.retrieve() );
- 
-  ATH_CHECK( m_histTool2D.retrieve() );
+  ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
+
   ATH_CHECK( m_histTool_EM3.retrieve());
   ATH_CHECK( m_histTool_ChargedFraction.retrieve());
   ATH_CHECK( m_histTool_Tile0.retrieve());
@@ -121,11 +119,13 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     }
     jc.setValue("Nsegments", Nsegments);
 
-    ATH_MSG_DEBUG("Jet pt original:" << jet->pt()*1e-3);
-
     float getGSCCorrection = 1.0;
     int etabin = fabs(detectorEta)/0.1;// m_binSize in old version
-    xAOD::JetFourMom_t startingP4 = jet->jetP4();
+
+    const xAOD::JetFourMom_t startingP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
+    jet->setJetP4(startingP4);
+
+    ATH_MSG_DEBUG("Jet pt original ("<<m_jetInScale<<"): " << jet->pt()*1e-3);
 
     ATH_MSG_DEBUG("ChargedFraction Response: " << getChargedFractionResponse(*jet, jc, etabin));
     ATH_MSG_DEBUG("Tile0 Response: " <<getTile0Response(*jet, jc, etabin));
@@ -145,7 +145,7 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
     ATH_MSG_DEBUG("GSC full correction: " << getGSCCorrection);
 
-    jet->setAttribute<xAOD::JetFourMom_t>("JetGSCScaleMomentum",startingP4*getGSCCorrection);
+    jet->setAttribute<xAOD::JetFourMom_t>(m_jetOutScale,startingP4*getGSCCorrection);
     jet->setJetP4( startingP4*getGSCCorrection );
 
     ATH_MSG_DEBUG("Jet pt calibrated:" << jet->pt()*1e-3);

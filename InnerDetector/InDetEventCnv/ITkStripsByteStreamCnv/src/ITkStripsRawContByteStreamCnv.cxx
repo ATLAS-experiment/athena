@@ -4,7 +4,7 @@
 
 #include "ITkStripsRawContByteStreamCnv.h"
 
-#include "ITkStripsByteStreamCnv/IITkStripsRawContByteStreamTool.h"
+#include "SCT_RawDataByteStreamCnv/ISCTRawContByteStreamTool.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
 #include "ByteStreamData/RawEvent.h" 
 

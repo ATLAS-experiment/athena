@@ -51,11 +51,22 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs, 'outputHEPMCFile'):
        if ('.tar' in runArgs.outputHEPMCFile):
           index = re.search(".tar",runArgs.outputHEPMCFile).span()[0]
-          my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.hepmc'
+          if hasattr(runArgs, 'extension') and ('events' in runArgs.extension):
+               my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.events'
+          else:
+               my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.hepmc'
        else:
           log.error('Output should be a tar.gz file but it is '+runArgs.outputHEPMCFile)
     else:
         log.error('OutputHEPMCFile required for POOLtoHEPMC')
+
+    hepMCFormat = 'hepmc2'
+    if hasattr(runArgs, 'hepmcFormat'):
+       hepMCFormat = runArgs.hepmcFormat
+
+    hepMCUnits = 'GEVMM'
+    if hasattr(runArgs, 'hepmcUnits'):
+       hepMCUnits = runArgs.hepmcUnits
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
@@ -81,12 +92,20 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    # Use the WriteHepMC AlgTool from TruthIO to do the conversion
+    # We need the component factory to build the job up
     from AthenaConfiguration.ComponentFactory import CompFactory
+
+    # Add FixHepMC to remove loops here
+    # This is a work-around for AGENE-2342, which needs a HepMC patch to fix
+    cfg.addEventAlgo(CompFactory.FixHepMC("FixHepMC"))
+
+    # Use the WriteHepMC AlgTool from TruthIO to do the conversion
     cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
                       OutputFile = my_output_HepMCFile,
+                      Format = hepMCFormat,
+                      Units = hepMCUnits,
                       McEventKey = McEventKey ) )
-
+    # Here one should set the output format
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 

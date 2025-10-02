@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // $Id$
 /*
@@ -24,7 +24,7 @@ template <class DOBJ>
 template <typename... ARGS>
 RecyclableDataObject<DOBJ>::RecyclableDataObject (std::shared_ptr<queue_t> queue, ARGS&&... args)
   : DOBJ (std::forward<ARGS>(args)...),
-    m_queue (queue)
+    m_queue (std::move(queue))
 {
   // Bump reference count by one so that these objects won't be deleted by StoreGate.
   this->addRef();
@@ -87,6 +87,7 @@ RecyclableDataQueue<DOBJ>::~RecyclableDataQueue()
   DOBJ* obj = nullptr;
   while (m_queue->try_pop (obj)) {
     delete obj;
+    obj = nullptr;
   }
 }
 

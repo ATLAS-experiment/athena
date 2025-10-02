@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MARSPARTICLE_H
@@ -33,7 +33,7 @@ class MarsShowerPrimary {
     @author W. H. Bell <W.Bell@cern.ch>
     
     @brief A class to describe the beam gas interaction that produced
-    a iven MARS particle.
+    a given MARS particle.
 */
 class MarsBeamGasInteraction {
  public:
@@ -96,7 +96,7 @@ class MarsParticle {
 
   /** A function to return the shower primary infomation for this
       particle. */
-  MarsShowerPrimary showerPrimary() const { return m_showerPrimary; }
+  const MarsShowerPrimary & showerPrimary() const { return m_showerPrimary; }
 
   /** A function to return the beam gas interaction information for
       this particle. */

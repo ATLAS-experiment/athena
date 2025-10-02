@@ -6,26 +6,54 @@
 #include "AthContainers/exceptions.h"
 
 #include "DataModelRoot/RootType.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO.h"
 #include "RNTupleAuxDynReader.h"
 #include "RNTupleAuxDynWriter.h"
 #include "TBranchAuxDynReader.h"
 #include "TBranchAuxDynWriter.h"
 
-#include "TFile.h"
 #include "TBranch.h"
 #include "TClass.h"
 #include "TROOT.h"
-#include "TDictAttributeMap.h"
-
 
 #include <ROOT/RNTuple.hxx>
 
 namespace RootAuxDynIO
 {
 
+   AuxDynAttrAccess::AuxDynAttrAccess(TClass& tc)
+      : m_holderType( tc ),
+        m_ioStoreOffset( auxStoreOffset(tc) )
+   { }
+
+   int AuxDynAttrAccess::auxStoreOffset(TClass &tc)
+   {
+      TClass *storeTClass = tc.GetBaseClass("SG::IAuxStoreIO");
+      if( storeTClass ) {
+         // This is a class implementing SG::IAuxStoreIO
+         // Find IAuxStoreIO interface offset
+         return tc.GetBaseClassOffset( storeTClass );
+      }
+      return -1;
+   }
+
+   bool AuxDynAttrAccess::hasAuxDynStore() const
+   {
+      return m_ioStoreOffset >= 0;
+   }
+
+   SG::IAuxStoreIO* AuxDynAttrAccess::castIOStore(void *object) {
+      return ( hasAuxDynStore()?
+               reinterpret_cast<SG::IAuxStoreIO*>( (char*)object + m_ioStoreOffset )
+               : nullptr);
+   }
+
+
+   //  ---------------------  Dynamic Aux Attribute Writers
+
    bool
-   hasAuxStore(std::string_view fieldname, TClass *tc) {
+   FactoryTool::hasAuxStore(std::string_view fieldname, TClass *tc) const
+   {
       // check the name first, and only if it does not match AUX_POSTFIX ask TClass
       return endsWithAuxPostfix(fieldname)
          or ( tc and ( tc->GetBaseClass("SG::IAuxStore")
@@ -34,28 +62,15 @@ namespace RootAuxDynIO
    }
 
 
-   std::string
-   getKeyFromBranch(TBranch* branch)
+   bool
+   FactoryTool::hasAuxStoreIO(TClass *tc) const
    {
-      TClass *tc = 0;
-      EDataType type;
-      if( branch->GetExpectedType(tc, type) == 0  && tc != nullptr) {
-         const char* brname = branch->GetName();
-         const char* clname = tc->GetName();
-         size_t namelen = strlen (clname);
-         std::string key = brname;
-         if( strncmp(brname, clname, namelen) == 0 && brname[namelen] == '_' ) {
-            key.erase (0, namelen+1);
-         }
-         removeAuxPostfix(key);
-         return key;
-      }
-      return "";
+      return tc and tc->GetBaseClass("SG::IAuxStoreIO");
    }
 
 
    bool
-   isAuxDynBranch(TBranch *branch)
+   FactoryTool::isAuxDynBranch(TBranch *branch) const
    {
       const std::string bname = branch->GetName();
       TClass *tc = 0;
@@ -72,30 +87,38 @@ namespace RootAuxDynIO
       return false;
    }
 
-   //  ---------------------  Dynamic Aux Attribute Readers
-
-   std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
-   getBranchAuxDynReader(TTree* tree, TBranch* branch) {
-      return std::make_unique<TBranchAuxDynReader>(tree, branch);
-   }
-
-   std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
-   getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader) {
-      return std::make_unique<RNTupleAuxDynReader>(field_name, field_type, reader);
-   }
-
    //  ---------------------  Dynamic Aux Attribute Writers
 
    /// generate TBranchAuxDynWriter
    /// tree -> destination tree
    /// do_branch_fill -> flag telling to Fill each TBranch immediately
    std::unique_ptr<RootAuxDynIO::IRootAuxDynWriter>
-   getBranchAuxDynWriter(TTree* tree, int bufferSize, int splitLevel, int offsettab_len,  bool do_branch_fill) {
-      return std::make_unique<TBranchAuxDynWriter>(tree, bufferSize, splitLevel, offsettab_len, do_branch_fill);
+   FactoryTool::getBranchAuxDynWriter(TTree& tree, TClass& cl, int bufferSize, int splitLevel,
+                                      int offsettab_len,  bool do_branch_fill) const {
+      return std::make_unique<TBranchAuxDynWriter>(tree, cl, bufferSize, splitLevel,
+                                                   offsettab_len, do_branch_fill);
    }
 
    std::unique_ptr<RootAuxDynIO::IRNTupleAuxDynWriter>
-   getNTupleAuxDynWriter() {
-      return std::make_unique<RNTupleAuxDynWriter>();
+   FactoryTool::getNTupleAuxDynWriter(TClass &tc) const {
+      return std::make_unique<RNTupleAuxDynWriter>(tc);
    }
+
+
+   //  ---------------------  Dynamic Aux Attribute Readers
+
+   std::unique_ptr<IRootAuxDynReader>
+   FactoryTool::getBranchAuxDynReader(TTree* tree, TBranch* branch) const {
+      return std::make_unique<TBranchAuxDynReader>(tree, branch);
+   }
+
+   std::unique_ptr<IRootAuxDynReader>
+   FactoryTool::getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type,
+                                      ROOT::RNTupleReader* reader) const {
+      return std::make_unique<RNTupleAuxDynReader>(field_name, field_type, reader);
+   }
+
 }
+
+// declare the component provided by this library (by type)
+DECLARE_COMPONENT(RootAuxDynIO::FactoryTool)

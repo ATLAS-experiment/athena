@@ -205,6 +205,11 @@ namespace ActsTrk {
     m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
     m_navigation[2ul] = m_rBinsCustomLooping.value();
 
+    if (detStore()->retrieve(m_pixelId, "PixelID").isFailure()) {
+        ATH_MSG_ERROR("Could not get PixelID helper !");
+        return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -233,7 +238,7 @@ ATH_FLATTEN
 			   external_iterator_t spEnd,
 			   const Acts::Vector3& beamSpotPos,
 			   const Acts::Vector3& bField,
-			   DataVector< Acts::Seed< typename SeedingTool::external_type, 3ul > >& seedContainer) const
+			   DataVector< ActsTrk::ActsSeed< typename SeedingTool::external_type, 3ul > >& seedContainer) const
   {
     static_assert(std::is_same<typename external_spacepoint< external_iterator_t >::type, const value_type&>::value,
 		  "Inconsistent type");
@@ -300,7 +305,7 @@ ATH_FLATTEN
         
     state.spacePointMutableData.resize(std::distance(spBegin, spEnd));
 
-    for (const auto [bottom, middle, top] : spacePointsGrouping) {
+    for (const auto& [bottom, middle, top] : spacePointsGrouping) {
       m_finder.createSeedsForGroup(finderOpts, state, spacePointsGrouping.grid(), 
           seeds, bottom, middle, top, rMiddleSPRange);
     }
@@ -348,7 +353,10 @@ ATH_FLATTEN
     // Store seeds
     seedContainer.reserve(seeds.size());
     for(const auto& seed: seeds) {
-      const auto [bottom, middle, top] = seed.sp();
+      assert(seed.sp().size() == 3ul);
+      const auto bottom = seed.sp().at(0);
+      const auto middle = seed.sp().at(1);
+      const auto top = seed.sp().at(2);
 
       std::unique_ptr< ActsTrk::Seed > toAdd =
 	std::make_unique< ActsTrk::Seed >(bottom->externalSpacePoint(),
@@ -427,23 +435,24 @@ ATH_FLATTEN
     // manually convert the two types
     for (const auto& vec : m_rRangeMiddleSP) {
 	std::vector<float> convertedVec;
-	
+	convertedVec.reserve(vec.size());
 	for (const auto& val : vec) {
 	    convertedVec.push_back(static_cast<float>(val));
 	}
 	
-	m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
+	m_finderCfg.rRangeMiddleSP.push_back(std::move(convertedVec));
     }
-    
-    // define cuts used for fast tracking configuration
-    if (m_useExperimentCuts) {
 
+
+    // define cuts used for fast tracking configuration
+    if (m_useExperimentCuts) {      
+      
       // This function will be applied to select space points during grid filling
       m_finderCfg.spacePointSelector
-        .connect<itkFastTrackingSPselect>();
+        .connect<&ActsTrk::SeedingTool::spacePointSelectionFunction>(this);
 
       m_finderCfg.experimentCuts
-        .connect<itkFastDoubletCut>();
+        .connect<&ActsTrk::SeedingTool::doubletSelectionFunction>(this);
       
     }
     

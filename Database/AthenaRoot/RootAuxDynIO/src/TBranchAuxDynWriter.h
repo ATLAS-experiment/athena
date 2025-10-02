@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBRANCHAUXDYNWRITER_H
@@ -7,7 +7,8 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthContainers/AuxStoreInternal.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO/IRootAuxDynIO.h"
+#include "RootAuxDynIO.h"
 
 // Forward declarations
 class TFile;
@@ -47,10 +48,10 @@ namespace RootAuxDynIO
    };
 
 
-   class TBranchAuxDynWriter  : public AthMessaging, public IRootAuxDynWriter
+   class TBranchAuxDynWriter : public AthMessaging, public IRootAuxDynWriter, public AuxDynAttrAccess
    {
    public:
-      TBranchAuxDynWriter( TTree* tree, int bufferSize, int splitLevel, int offsettab_len, bool branch_fill );
+      TBranchAuxDynWriter( TTree& tree, TClass& cls, int bufferSize, int splitLevel, int offsettab_len, bool branch_fill );
       virtual ~TBranchAuxDynWriter() { }
       
       /// set Filling mode (true/false) for branch containers
@@ -65,7 +66,7 @@ namespace RootAuxDynIO
       /// called from RootTreeContainer::writeObject()
       //  throws exceptions
       virtual int writeAuxAttributes( const std::string& base_branchname,
-                                      SG::IAuxStoreIO *store,
+                                      void *store,
                                       size_t backfill_nrows )  override final;
 
       virtual bool needsCommit() override final  { return m_needsFill; }

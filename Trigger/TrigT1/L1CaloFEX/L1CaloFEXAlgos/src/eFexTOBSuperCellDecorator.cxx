@@ -12,7 +12,6 @@
 //***************************************************************************/
 #include "eFexTOBSuperCellDecorator.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
-#include "L1CaloFEXSim/eFEXtauAlgo.h"
 
 namespace LVL1 {
 

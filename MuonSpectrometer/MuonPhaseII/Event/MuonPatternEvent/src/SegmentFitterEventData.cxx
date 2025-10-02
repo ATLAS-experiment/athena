@@ -2,6 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternEvent/SegmentFitterEventData.h>
+
 #include <MuonPatternEvent/Segment.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <CxxUtils/sincos.h>
@@ -9,7 +10,7 @@
 #include <array>
 #include <sstream>
 #include <format>
-
+using namespace Acts;
 namespace MuonR4{
     double houghTanTheta(const Amg::Vector3D& v){ 
         constexpr double eps = std::numeric_limits<float>::epsilon();
@@ -24,14 +25,14 @@ namespace MuonR4{
             return Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
         }
         std::pair<Amg::Vector3D, Amg::Vector3D> makeLine(const Parameters& pars) {
-            return std::make_pair(Amg::Vector3D(pars[toInt(ParamDefs::x0)], 
-                                                pars[toInt(ParamDefs::y0)],0.),
-                                  Amg::dirFromAngles(pars[toInt(ParamDefs::phi)],
-                                                     pars[toInt(ParamDefs::theta)]));
+            return std::make_pair(Amg::Vector3D(pars[toUnderlying(ParamDefs::x0)], 
+                                                pars[toUnderlying(ParamDefs::y0)],0.),
+                                  Amg::dirFromAngles(pars[toUnderlying(ParamDefs::phi)],
+                                                     pars[toUnderlying(ParamDefs::theta)]));
         }
         Parameters localSegmentPars(const xAOD::MuonSegment& seg) {
-            static const SG::Accessor<xAOD::MeasVector<toInt(ParamDefs::nPars)>> acc{"localSegPars"};
-            return xAOD::toEigen(xAOD::ConstVectorMap<toInt(ParamDefs::nPars)>{acc(seg).data()});
+            static const SG::Accessor<xAOD::MeasVector<toUnderlying(ParamDefs::nPars)>> acc{"localSegPars"};
+            return xAOD::toEigen(xAOD::ConstVectorMap<toUnderlying(ParamDefs::nPars)>{acc(seg).data()});
         }
         Parameters localSegmentPars(const ActsGeometryContext& gctx,
                                     const Segment& segment) {
@@ -39,53 +40,34 @@ namespace MuonR4{
             const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTrans(gctx);
             const Amg::Vector3D locPos = globToLoc * segment.position();
             const Amg::Vector3D locDir = globToLoc.linear() * segment.direction();
-            pars[toInt(ParamDefs::x0)] = locPos.x();
-            pars[toInt(ParamDefs::y0)] = locPos.y();
-            pars[toInt(ParamDefs::theta)] = locDir.theta();
-            pars[toInt(ParamDefs::phi)] = locDir.phi();
-            pars[toInt(ParamDefs::time)] = segment.segementT0();
+            pars[toUnderlying(ParamDefs::x0)] = locPos.x();
+            pars[toUnderlying(ParamDefs::y0)] = locPos.y();
+            pars[toUnderlying(ParamDefs::theta)] = locDir.theta();
+            pars[toUnderlying(ParamDefs::phi)] = locDir.phi();
+            pars[toUnderlying(ParamDefs::t0)] = segment.segementT0();
             return pars;
         }
 
         std::string makeLabel(const Parameters&pars) {
             std::stringstream sstr{};
-            sstr<<std::format("x_{{0}}={:.2f}", pars[toInt(ParamDefs::x0)])<<", ";
-            sstr<<std::format("y_{{0}}={:.2f}", pars[toInt(ParamDefs::y0)])<<", ";
-            sstr<<std::format("#theta={:.2f}^{{#circ}}", pars[toInt(ParamDefs::theta)] / Gaudi::Units::deg )<<", ";
-            sstr<<std::format("#phi={:.2f}^{{#circ}}", pars[toInt(ParamDefs::phi)] / Gaudi::Units::deg)<<", ";
-            sstr<<std::format("t_{{0}}={:.1f}", pars[toInt(ParamDefs::time)]);
+            sstr<<std::format("x_{{0}}={:.2f}", pars[toUnderlying(ParamDefs::x0)])<<", ";
+            sstr<<std::format("y_{{0}}={:.2f}", pars[toUnderlying(ParamDefs::y0)])<<", ";
+            sstr<<std::format("#theta={:.2f}^{{#circ}}", pars[toUnderlying(ParamDefs::theta)] / Gaudi::Units::deg )<<", ";
+            sstr<<std::format("#phi={:.2f}^{{#circ}}", pars[toUnderlying(ParamDefs::phi)] / Gaudi::Units::deg)<<", ";
+            sstr<<std::format("t_{{0}}={:.1f}", pars[toUnderlying(ParamDefs::t0)]);
             return sstr.str();
         }
         std::string toString(const Parameters& pars) {
             std::stringstream sstr{};
-            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::x0), pars[toInt(ParamDefs::x0)]);
-            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::y0), pars[toInt(ParamDefs::y0)]);
-            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::theta), pars[toInt(ParamDefs::theta)]/Gaudi::Units::deg);
-            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::phi),  pars[toInt(ParamDefs::phi)]/Gaudi::Units::deg);
-            sstr<< std::format("{}={:.2f}",toString(ParamDefs::time), pars[toInt(ParamDefs::time)]);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::x0), pars[toUnderlying(ParamDefs::x0)]);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::y0), pars[toUnderlying(ParamDefs::y0)]);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::theta), pars[toUnderlying(ParamDefs::theta)]/Gaudi::Units::deg);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::phi),  pars[toUnderlying(ParamDefs::phi)]/Gaudi::Units::deg);
+            sstr<< std::format("{}={:.2f}",toString(ParamDefs::t0), pars[toUnderlying(ParamDefs::t0)]);
             return sstr.str();
         }
         std::string toString(const ParamDefs a) {
-            switch (a){
-                case ParamDefs::x0:{
-                    return "x0";
-                    break;
-                } case ParamDefs::y0: {
-                    return "y0";
-                    break;
-                } case ParamDefs::theta: {
-                    return "theta";
-                    break;
-                } case ParamDefs::phi: {
-                    return "phi";
-                    break;
-                } case ParamDefs::time: {
-                    return "time";
-                    break;
-                } case ParamDefs::nPars:
-                    break;
-            }
-            return "";
+           return Acts::Experimental::detail::CompSpacePointAuxiliaries::parName(a);
         }
        
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -28,9 +28,7 @@ namespace Trk {
 
 class IEnvelopeDefSvc;
 
-class ATLAS_NOT_THREAD_SAFE HGTD_TrackingGeometryBuilderCond //not safe indexStaticLayers
-  : public AthAlgTool
-  , virtual public Trk::IGeometryBuilderCond
+class HGTD_TrackingGeometryBuilderCond : public extends<AthAlgTool, Trk::IGeometryBuilderCond>
 {
 
 public:
@@ -42,9 +40,6 @@ public:
 
   /** AlgTool initailize method.*/
   virtual StatusCode initialize() override;
-
-  /** AlgTool finalize method */
-  virtual StatusCode finalize() override;
 
   /** TrackingGeometry Interface method */
   virtual

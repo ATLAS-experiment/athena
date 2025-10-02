@@ -1,11 +1,12 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include <boost/test/tools/old/interface.hpp>
+//#include <boost/test/tools/old/interface.hpp>
 #undef NDEBUG
+#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE MultiTrajectoryBasic_test
 #include <boost/test/data/test_case.hpp>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <Acts/EventData/TrackContainer.hpp>
 
 #include "ActsEvent/MultiTrajectory.h"
@@ -18,6 +19,8 @@
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 
+#include "Acts/Surfaces/ConeSurface.hpp"
+#include "ActsGeoUtils/SurfaceEncoding.h"
 
 BOOST_AUTO_TEST_SUITE(EventDataTrackStorage)
 
@@ -179,7 +182,7 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
 
   BOOST_CHECK_EQUAL(ms->size_impl(), 2);
   
-  auto outSurf = ActsTrk::decodeSurface(surfBackend[0], gctx);
+  auto outSurf = ActsTrk::decodeSurface(surfBackend[0]);
   testSurface(std::move(surf), std::move(outSurf), gctx);
   
 };

@@ -13,15 +13,20 @@ LArRinj2Ntuple::LArRinj2Ntuple(const std::string& name, ISvcLocator* pSvcLocator
 
 }
 
+StatusCode LArRinj2Ntuple::initialize() {
+	ATH_CHECK(m_contKey.initialize() );
+	return LArCond2NtupleBase::initialize();
+}
+
 StatusCode LArRinj2Ntuple::stop() {
   const ILArRinj* LArRinj = nullptr;
-  StatusCode sc=m_detStore->retrieve(LArRinj, m_contKey.key());
+  StatusCode sc;
+  sc=m_detStore->retrieve(LArRinj,m_contKey.key());
   if (sc!=StatusCode::SUCCESS) {
      ATH_MSG_ERROR( "Unable to retrieve ILArRinj with key " 
                << m_contKey << " from DetectorStore try ConditionsStore" );
-
-     ATH_CHECK( m_contKey.initialize() );
-     SG::ReadCondHandle<LArRinjComplete> rinjHdl{m_contKey};
+     const EventContext& ctx = Gaudi::Hive::currentContext();
+     SG::ReadCondHandle<LArRinjComplete> rinjHdl{m_contKey, ctx};
      LArRinj = *rinjHdl;
      if(!LArRinj) {
         ATH_MSG_ERROR( "Unable to retrieve ILArRinj with key " 
@@ -64,7 +69,7 @@ StatusCode LArRinj2Ntuple::stop() {
    return StatusCode::FAILURE;
  }
  else {
-   m_onlineId = (const LArOnlineID_Base*)ll;
+   m_onlineId = static_cast<const LArOnlineID_Base*>(ll);
    ATH_MSG_DEBUG(" Found the LAr cell LArOnlineID helper. ");
  }
    

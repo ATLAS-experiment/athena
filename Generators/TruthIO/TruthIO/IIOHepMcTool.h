@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -10,60 +10,21 @@
 #ifndef MCPARTICLEKERNEL_IIOHEPMCTOOL_H 
 #define MCPARTICLEKERNEL_IIOHEPMCTOOL_H 
 
-// STL includes
-
 // FrameWork includes
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/IProperty.h"
 
-// Forward declaration
 
-static const InterfaceID IID_IIOHepMcTool("IIOHepMcTool", 1, 0);
-
-class IIOHepMcTool : virtual public IAlgTool,
-		     virtual public IProperty
+class IIOHepMcTool : virtual public extend_interfaces<IAlgTool>
 { 
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
+ public:
+  DeclareInterfaceID(IIOHepMcTool, 1, 0);
 
-  /** Destructor: 
-   */
-  virtual ~IIOHepMcTool();
+  virtual ~IIOHepMcTool() {}
 
-  // Athena algorithm's Hooks
-  virtual StatusCode  initialize() = 0;
-  virtual StatusCode  execute()    = 0;
-  virtual StatusCode  finalize()   = 0;
-
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  static const InterfaceID& interfaceID();
-
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
- protected: 
+  virtual StatusCode execute() = 0;
 
 }; 
 
-/// I/O operators
-//////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-/// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-inline const InterfaceID& IIOHepMcTool::interfaceID() 
-{ 
-   return IID_IIOHepMcTool; 
-}
 
 #endif //> MCPARTICLEKERNEL_IIOHEPMCTOOL_H

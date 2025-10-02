@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrkVKalVrtFitter.h
@@ -317,40 +317,45 @@ namespace Trk{
         // ATLAS related code
         //
       private:
-        SimpleProperty<int> m_Robustness;
-        SimpleProperty<double> m_RobustScale;
-        SimpleProperty<double> m_cascadeCnstPrecision;
-        SimpleProperty<double> m_massForConstraint;
-        SimpleProperty<int> m_IterationNumber;
-        SimpleProperty<double> m_IterationPrecision;
-        SimpleProperty<double> m_IDsizeR;
-        SimpleProperty<double> m_IDsizeZ;
-        std::vector<double> m_c_VertexForConstraint;
-        std::vector<double> m_c_CovVrtForConstraint;
-        std::vector<double> m_c_MassInputParticles;
+        Gaudi::Property<int> m_Robustness{this, "Robustness", 0};
+        Gaudi::Property<double> m_RobustScale{this, "RobustScale", 1.0};
+        Gaudi::Property<double> m_cascadeCnstPrecision{this, "CascadeCnstPrecision", 1.e-4};
+        Gaudi::Property<double> m_massForConstraint{this, "MassForConstraint", -1.0};
+        Gaudi::Property<int> m_IterationNumber{this, "IterationNumber", 0};
+        Gaudi::Property<double> m_IterationPrecision{this, "IterationPrecision", 0.0};
+        Gaudi::Property<double> m_IDsizeR{this, "IDsizeR", 1150.0};
+        Gaudi::Property<double> m_IDsizeZ{this, "IDsizeZ", 3000.0};
+        Gaudi::Property<double> m_MSsizeR{this, "MSsizeR", 8000.0};
+        Gaudi::Property<double> m_MSsizeZ{this, "MSsizeZ", 10000.0};
+        Gaudi::Property<std::vector<double>> m_c_VertexForConstraint{this, "VertexForConstraint", {0,0,0}};
+        Gaudi::Property<std::vector<double>> m_c_CovVrtForConstraint{this, "CovVrtForConstraint", {0,0,0,0,0,0}};
+        Gaudi::Property<std::vector<double>> m_c_MassInputParticles{this, "InputParticleMasses", {}, "List of masses of input particles (pions assumed if absent)"};
 
-        ToolHandle<IExtrapolator> m_extPropagator; // External propagator
+        ToolHandle<IExtrapolator> m_extPropagator{this, "Extrapolator", "", "External propagator"};
         // Read handle for conditions object to get the field cache
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj>
           m_fieldCacheCondObjInputKey{ this,
                                        "AtlasFieldCacheCondObj",
                                        "fieldCondObj",
                                        "Name of the Magnetic Field key" };
-        SimpleProperty<bool> m_firstMeasuredPoint;
-        SimpleProperty<bool> m_firstMeasuredPointLimit;
-        SimpleProperty<bool> m_makeExtendedVertex;
-        SimpleProperty<bool> m_useFixedField;
+        Gaudi::Property<bool> m_firstMeasuredPoint{this, "FirstMeasuredPoint", false, "Use FirstMeasuredPoint strategy in fits"};
+        Gaudi::Property<bool> m_firstMeasuredPointLimit{this, "FirstMeasuredPointLimit", false, "Use FirstMeasuredPointLimit strategy"};
+	Gaudi::Property<bool> m_firstMeasuredRadiusLimit{this, "FirstMeasuredRadiusLimit", false,
+	                                "Use radius of FirstMeasuredRadiusLimit as maximal vertex radius"};
+        Gaudi::Property<bool> m_makeExtendedVertex{this, "MakeExtendedVertex", false, "Return VxCandidate with full covariance matrix"};
+        Gaudi::Property<bool> m_useFixedField{this, "useFixedField", false, "Use fixed magnetic field instead of exact Atlas one"};
 
-        bool m_isAtlasField;
+        bool m_isAtlasField{false};  // To allow callback and then field first call only at execute stage
 
-        bool m_useAprioriVertex;
-        bool m_useThetaCnst;
-        bool m_usePhiCnst;
-        bool m_usePointingCnst;
-        bool m_useZPointingCnst;
-        bool m_usePassNear;
-        bool m_usePassWithTrkErr;
-	bool m_frozenVersionForBTagging;
+        Gaudi::Property<bool> m_useAprioriVertex{this, "useAprioriVertexCnst", false, "Use a priori vertex constraint"};
+        Gaudi::Property<bool> m_useThetaCnst{this, "useThetaCnst", false, "Use angle dTheta=0 constraint"};
+        Gaudi::Property<bool> m_usePhiCnst{this, "usePhiCnst", false, "Use angle dPhi=0 constraint"};
+        Gaudi::Property<bool> m_usePointingCnst{this, "usePointingCnst", false, "Use pointing to other vertex constraint"};
+        Gaudi::Property<bool> m_useZPointingCnst{this, "useZPointingCnst", false, "Use ZPointing to other vertex constraint"};
+        Gaudi::Property<bool> m_usePassNear{this, "usePassNearCnst", false, "Use combined particle pass near other vertex constraint"};
+        Gaudi::Property<bool> m_usePassWithTrkErr{this, "usePassWithTrkErrCnst", false, "Use pass near with combined particle errors constraint"};
+        Gaudi::Property<bool> m_frozenVersionForBTagging{this, "FrozenVersionForBTagging", false, "Frozen version for BTagging"};
+        Gaudi::Property<bool> m_allowUltraDisplaced{this, "allowUltraDisplaced", false, "Allow ultra displaced vertices"};
         void initCnstList();
 
         //  Track material effects control
@@ -427,6 +432,7 @@ namespace Trk{
         bool m_usePassNear = false;
         bool m_usePassWithTrkErr = false;
         bool m_frozenVersionForBTagging = false;
+        bool m_allowUltraDisplaced = false;
 
         std::vector<double> m_VertexForConstraint;
         std::vector<double> m_CovVrtForConstraint;
@@ -436,7 +442,11 @@ namespace Trk{
         int m_Robustness = 0;
         double m_RobustScale = 1;
         std::vector<double> m_MassInputParticles;
+        double m_parPlaneCnst[4]{};
+        double m_cnstRadius{};
+        double m_cnstRadiusRef[2]{};
 
+  
         std::unique_ptr<CascadeState> m_cascadeState;
 
         State()
@@ -462,8 +472,8 @@ namespace Trk{
 //  Control variables
 //
 
-      double m_BMAG{};       /* const magnetic field  if needed */
-      double m_CNVMAG{};     /* Conversion constant */
+      double m_BMAG{1.997};          /* const magnetic field  if needed */
+      double m_CNVMAG{0.29979246};   /* conversion constant for MeV and MM */
 
 
       VKalExtPropagator*     m_fitPropagator{};

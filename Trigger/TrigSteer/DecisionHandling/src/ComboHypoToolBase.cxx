@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/ComboHypoToolBase.h"
@@ -45,7 +45,7 @@ StatusCode ComboHypoToolBase::setLegMultiplicity(const Combo::MultiplicityReqMap
   return StatusCode::SUCCESS;
 }
 
-StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*context*/) const {
+StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& ctx) const {
   if (m_legMultiplicities.size() == 0) {
     ATH_MSG_ERROR("ComboHypoTool for " << m_decisionId << " has not been properly configured. setLegMultiplicity should be called by the parent alg in initalize");
     return StatusCode::FAILURE;
@@ -68,7 +68,7 @@ StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const 
       ATH_MSG_DEBUG("Too few features are found for " << m_decisionId << " on leg " << legIndex <<", require:" << m_legMultiplicities.at(legIndex) << " have:" << legDecisions.at(legIndex).size());
       ATH_MSG_DEBUG("This ComboHypoTool cannot run in this event, this chain **REJECTS** this event.");
       eraseFromLegDecisionsMap(passingLegs);
-      ATH_CHECK(printDebugInformation(passingLegs));
+      if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
       return StatusCode::SUCCESS;
     }
   }
@@ -104,7 +104,7 @@ StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const 
     ++iterations;
 
     try {
-      if (executeAlg(combinationToCheck)) {
+      if (executeAlg(combinationToCheck, ctx)) {
         ATH_MSG_DEBUG("Combination " << (iterations - 1) << " decided to be passing");
         passingCombinations.push_back(combinationToCheck);
         if (m_modeOR == true and m_enableOverride) {
@@ -164,7 +164,7 @@ StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const 
     eraseFromLegDecisionsMap(passingLegs);
   }
 
-  ATH_CHECK(printDebugInformation(passingLegs));
+  if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
   return StatusCode::SUCCESS;
 }
 
@@ -261,7 +261,7 @@ void ComboHypoToolBase::eraseFromLegDecisionsMap(Combo::LegDecisionsMap& passing
   }
 }
 
-StatusCode ComboHypoToolBase::printDebugInformation(const Combo::LegDecisionsMap& passingLegs) const {
+void ComboHypoToolBase::printDebugInformation(const Combo::LegDecisionsMap& passingLegs) const {
   ATH_MSG_DEBUG("ComboHypoToolBase: End of " << m_decisionId << ", passing elements are: ");
   for (const auto& [id, ELV] : passingLegs) {
     // Only print for this chain
@@ -272,11 +272,10 @@ StatusCode ComboHypoToolBase::printDebugInformation(const Combo::LegDecisionsMap
       }
     }
   }
-  return StatusCode::SUCCESS;
 }
 
 
-bool ComboHypoToolBase::executeAlg(const std::vector<Combo::LegDecision>& /*combination*/) const {
+bool ComboHypoToolBase::executeAlg(const std::vector<Combo::LegDecision>& /*combination*/, const EventContext& /*ctx*/) const {
   ATH_MSG_ERROR("Do not use ComboHypoToolBase on its own, inherit this class and override executeAlg.");
   return false;
 }

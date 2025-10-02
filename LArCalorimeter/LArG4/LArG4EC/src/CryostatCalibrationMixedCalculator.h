@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationMixedCalculator
@@ -43,6 +43,8 @@ namespace LArG4 {
     public:
 
       CalibrationMixedCalculator(const std::string& name, ISvcLocator *pSvcLocator);
+      CalibrationMixedCalculator (const CalibrationMixedCalculator&) = delete;
+      CalibrationMixedCalculator& operator= (const CalibrationMixedCalculator&) = delete;
       StatusCode initialize() override final;
       virtual ~CalibrationMixedCalculator();
 
@@ -64,16 +66,13 @@ namespace LArG4 {
     private:
 
       // Energy calculator
-      CaloG4::SimulationEnergies m_energyCalculator;
+      CaloG4::SimulationEnergies m_energyCalculator{};
 
       class Parameters;
-      Parameters *m_par;
+      Parameters *m_par{nullptr};
 
       // Define a "backup" calculator.
-      ServiceHandle<ILArCalibCalculatorSvc> m_backupCalculator;
-
-      CalibrationMixedCalculator (const CalibrationMixedCalculator&);
-      CalibrationMixedCalculator& operator= (const CalibrationMixedCalculator&);
+      ServiceHandle<ILArCalibCalculatorSvc> m_backupCalculator{this, "BackupCalculator", "EndcapCryostatCalibrationLArCalculator"};
     };
 
   } // namespace EndcapCryostat

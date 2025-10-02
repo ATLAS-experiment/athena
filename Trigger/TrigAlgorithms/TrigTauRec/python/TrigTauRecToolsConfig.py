@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -86,6 +86,7 @@ def trigTauJetLVNNEvaluatorCfg(flags, tau_id='', use_taujet_rnnscore=True):
 
     acc.setPrivateTools(CompFactory.TauJetRNNEvaluator(
         name                = f'TrigTau_TauJetLVNNEvaluator_{tau_id}{sfx}',
+        useTRT              = flags.Detector.EnableTRT,
 
         # Network config:
         NetworkFile0P       = id_flags.NetworkConfig[0],
@@ -119,6 +120,7 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
 
     acc.setPrivateTools(CompFactory.TauGNNEvaluator(
         name                = f'TrigTau_TauJetONNXEvaluator_{tau_id}',
+        useTRT              = flags.Detector.EnableTRT,
 
         # Network config:
         NetworkFile0P       = id_flags.ONNXConfig[0],
@@ -189,7 +191,7 @@ def trigTauWPDecoratorRNNCfg(flags, tau_id: str, precision_seq_name: str):
 
     return acc
 
-def trigTauWPDecoratorCfg(flags, tau_id: str, precision_seq_name: str):
+def trigTauWPDecoratorCfg(flags, tau_id: str, precision_seq_name: str, tauContainerName: str):
     '''TauJet signal transformed score and ID WPs decorator tool'''
     acc = ComponentAccumulator()
 
@@ -201,6 +203,7 @@ def trigTauWPDecoratorCfg(flags, tau_id: str, precision_seq_name: str):
         flatteningFile0Prong=id_flags.ScoreFlatteningConfig[0],
         flatteningFile1Prong=id_flags.ScoreFlatteningConfig[1],
         flatteningFile3Prong=id_flags.ScoreFlatteningConfig[2],
+        TauContainerName=tauContainerName,
         DecorWPNames=[f'{tau_id}_{wp}' for wp in id_flags.WPNames],
         DecorWPCutEffs0P=id_flags.TargetEff[0],
         DecorWPCutEffs1P=id_flags.TargetEff[1],

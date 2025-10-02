@@ -165,6 +165,7 @@ private:
     std::vector<SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> > m_floatTruthDecor;
     std::vector<SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> > m_intTruthDecor;
     std::vector<SG::ReadDecorHandleKey<xAOD::JetContainer> > m_intJetDecor;
+    std::vector<SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> > m_linkTrkDecor;
 
     ///histograms
     std::unique_ptr< InDetRttPlots > m_monPlots;

@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_JETTRACKFILTERTOOL_H
@@ -9,6 +9,7 @@
 #include "InDetTrackSystematicsTools/IJetTrackFilterTool.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "PATInterfaces/SystematicVariation.h"
 #include "PATInterfaces/SystematicSet.h"
 #include "xAODTracking/TrackParticleFwd.h"
@@ -43,7 +44,6 @@ namespace InDet {
   public:
     // create constructor for standalone Root
     JetTrackFilterTool( const std::string& name );
-    virtual ~JetTrackFilterTool();
 
     //  static const InterfaceID& interfaceID();
     virtual StatusCode initialize() override;
@@ -66,20 +66,29 @@ namespace InDet {
 
     float getNomTrkEff(const xAOD::TrackParticle*) const;
 
-    int m_seed = 0;
-    std::unique_ptr<TRandom3> m_rnd; //!
-    double m_deltaR = 0.1;
-    float m_trkEffSystScale = 1.0;
+    Gaudi::Property<int> m_seed{this, "Seed", 0,
+      "Seed used to initialize the RNG"};
+    std::unique_ptr<TRandom3> m_rnd = nullptr; //!
+    Gaudi::Property<double> m_deltaR{this, "DeltaR", 0.1,
+      "Delta-R cut in which to apply jet-track efficiency rejection"};
+    Gaudi::Property<double> m_minJetPt{this, "minJetPt", 200000.,
+      "Minimum jet pT to apply jet-track efficiency rejection (default is 200 GeV)"};
+    Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0,
+      "Option to scale the effect of the systematic (default 1)"};
 
-    TH2* m_trkNomEff = nullptr; //!
+    std::unique_ptr<TH2> m_trkNomEff = nullptr; //!
 
     // allow the user to configure which calibration file to use if desired
-    std::string m_calibFileNomEff;
+    Gaudi::Property<std::string> m_calibFileNomEff{this, "calibFileNomEff",
+      "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"};
 
-    double m_effUncertTIDE = 0.24;
-    double m_fakeUncertTIDE = 0.35;
+    Gaudi::Property<double> m_effUncertTIDE{this, "FLostUncertainty", 0.24,
+      "Option to set the uncertainty on FLost"};
+    Gaudi::Property<double> m_fakeUncertTIDE{this, "FakeUncertainty", 0.35,
+      "Option to set the fake uncertainty"};
 
-    ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool;
+    ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool
+      {this, "trackOriginTool", "InDet::InDetTrackTruthOriginTool"};
 
   }; // class JetTrackFilterTool
 

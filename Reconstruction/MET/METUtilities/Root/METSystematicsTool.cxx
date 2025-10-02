@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "METUtilities/METSystematicsTool.h"
@@ -742,13 +742,13 @@ namespace met {
 
     switch(type){
     case SOFTCALO   :  configfile += m_configSoftCaloFile.value();
-      configpath  = PathResolverFindCalibFile(m_configPrefix.value()+m_configSoftCaloFile.value());//, "CALIBPATH", PathResolver::RecursiveSearch) ;
+      configpath  = PathResolverFindCalibFile(m_configPrefix.value()+m_configSoftCaloFile.value());
         break;
     case SOFTTRK    :  configfile += m_configSoftTrkFile.value();
-      configpath  = PathResolverFindCalibFile(m_configPrefix.value()+m_configSoftTrkFile.value());//, "CALIBPATH", PathResolver::RecursiveSearch) ;
+      configpath  = PathResolverFindCalibFile(m_configPrefix.value()+m_configSoftTrkFile.value());
         break;
     case JETTRK :   configfile += m_configJetTrkFile.value();
-      configpath = PathResolverFindCalibFile(m_configPrefix.value()+m_configJetTrkFile.value());//, "CALIBPATH", PathResolver::RecursiveSearch) ;
+      configpath = PathResolverFindCalibFile(m_configPrefix.value()+m_configJetTrkFile.value());
       break;
     default     :  configpath = "";
     }
@@ -821,7 +821,7 @@ namespace met {
 
     ATH_MSG_INFO( "Will read histograms from : " << histfile );
     ATH_MSG_DEBUG( "Systpath :" <<  systpath ) ;
-    histpath = PathResolverFindCalibFile(histfile);//, "CALIBPATH", PathResolver::RecursiveSearch) ;
+    histpath = PathResolverFindCalibFile(histfile);
     ATH_MSG_INFO("Extracted histogram path : " << histpath);
 
     if(histfile.empty() || systpath.empty() || histpath.empty() ){
@@ -882,7 +882,7 @@ namespace met {
     return random;
   }
 
-  void METSystematicsTool::setRandomSeed(int seed) const {
+  void METSystematicsTool::setRandomSeed(unsigned long seed) const {
     ATH_MSG_VERBOSE(__PRETTY_FUNCTION__);
     getTLSRandomGen()->SetSeed(seed);
   }

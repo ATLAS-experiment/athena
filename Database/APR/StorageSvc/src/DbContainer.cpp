@@ -15,7 +15,6 @@
 
 // Framework include files
 #include "StorageSvc/DbHeap.h"
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbToken.h"
@@ -149,25 +148,10 @@ IDbContainer* DbContainer::info() {
   return isValid() ? m_ptr->info() : 0;
 }
 
-/// Allow access to the Database implementation
-IOODatabase* DbContainer::db() {
-  return isValid() ? m_ptr->db() : 0;
-}
-
 /// Retrieve persistent type information
 const DbTypeInfo* 
 DbContainer::objectShape(const Guid& guid) {
   return isValid() ? m_ptr->objectShape(guid) : 0;
-}
-
-/// Perform DELETE statement
-DbStatus DbContainer::update(DbSelect& sel)  {
-  return isValid() ? m_ptr->update(sel) : Error;
-}
-
-/// Perform DELETE statement
-DbStatus DbContainer::destroy(DbSelect& sel)  {
-  return isValid() ? m_ptr->destroy(sel) : Error;
 }
 
 /// Perform selection

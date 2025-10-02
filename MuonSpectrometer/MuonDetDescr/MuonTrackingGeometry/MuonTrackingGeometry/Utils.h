@@ -11,10 +11,10 @@
 
 namespace Muon{
 
-    inline Amg::Transform3D* makeTransform(const Amg::Transform3D& trf) {
-        return std::make_unique<Amg::Transform3D>(trf).release();
+    inline std::unique_ptr<Amg::Transform3D> makeTransform(const Amg::Transform3D& trf) {
+        return std::make_unique<Amg::Transform3D>(trf);
     }
-    template <class ObjType> 
+    template <class ObjType>
         std::vector<ObjType *> release(std::vector<std::unique_ptr<ObjType>>& objVec) {
         std::vector<ObjType*> outVec{};
         outVec.reserve(objVec.size());
@@ -25,7 +25,7 @@ namespace Muon{
         return outVec;
     }
     template<class ObjPtr>
-    std::vector<std::vector<ObjPtr*>> 
+    std::vector<std::vector<ObjPtr*>>
         release(std::vector<std::vector<std::unique_ptr<ObjPtr>>>& inVec){
         std::vector<std::vector<ObjPtr*>> outVec{};
         outVec.reserve(inVec.size());
@@ -34,7 +34,7 @@ namespace Muon{
         }
         return outVec;
     }
-    template <class ObjType> 
+    template <class ObjType>
         std::vector<std::unique_ptr<ObjType>> toVec(const std::vector<ObjType*>* vecPtr) {
         std::vector<std::unique_ptr<ObjType>> outVec{};
         outVec.reserve(vecPtr->size());

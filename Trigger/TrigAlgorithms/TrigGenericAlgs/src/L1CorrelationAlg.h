@@ -26,6 +26,10 @@ class L1CorrelationAlg : public AthReentrantAlgorithm {
   SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_l1AKey{this, "l1AKey", "L1CorrelationTrigComposite.l1a_type", "L1 accept type"};
   SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_otherTypeKey{this, "otherTypeKey", "L1CorrelationTrigComposite.other_type", "Other type"};
   SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_beforeAfterKey{this, "beforeAfterKey", "L1CorrelationTrigComposite.beforeafterflag", "flag if BC is before or after nominal"};
+  SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_otherTypeBeforeKey{this, "otherTypeBeforeKey", "L1CorrelationTrigComposite.other_type_before", "Trigger type (1-7) of the first fired BC before the central L1A BCID"};
+  SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_otherTypeAfterKey{this, "otherTypeAfterKey", "L1CorrelationTrigComposite.other_type_after", "Trigger type (1-7) of the first fired BC after the central L1A BCID"};
+  SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_beforeOffsetKey{this, "beforeOffsetKey", "L1CorrelationTrigComposite.offset_before", "Distance (in BCs) from the L1A to the first earlier neighbor trigger"};
+  SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_afterOffsetKey{this, "afterOffsetKey", "L1CorrelationTrigComposite.offset_after", "Distance (in BCs) from the L1A to the first later neighbor trigger"};
   SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_passKey{this, "trigCompPassKey", "L1CorrelationTrigComposite.pass", "Key to indicate TrigComp is passed"};
   SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1MenuKey", "DetectorStore+L1TriggerMenu", "L1 Menu"};
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};

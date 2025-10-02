@@ -81,11 +81,6 @@ CommonSmearingTool::CommonSmearingTool(const std::string& sName)
   , m_tTauCombinedTES("TauCombinedTES", this)
   , m_eCheckTruth(TauAnalysisTools::Unknown)
 {
-  declareProperty("InputFilePath",           m_sInputFilePath           = "" );
-  declareProperty("SkipTruthMatchCheck",     m_bSkipTruthMatchCheck     = false );
-  declareProperty("ApplyFading",             m_bApplyFading             = true );
-  declareProperty("MVATESQualityCheck",      m_bMVATESQualityCheck      = true );
-  declareProperty("ApplyInsituCorrection",   m_bApplyInsituCorrection   = true );
 }
 
 /*
@@ -445,11 +440,9 @@ void CommonSmearingTool::generateSystematicSets()
   std::transform(sTruthType.begin(), sTruthType.end(), sTruthType.begin(), toupper);
   std::string sSystematicBaseString = "TAUS_" + sTruthType + "_SME_" + sEfficiencyType + "_";
 
-  // set truth type to check for in truth matching
+  // set truth type to check for in truth matching - only true hadronic tau is supported at the moment
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
-  if (sTruthType=="TRUEELECTRON") m_eCheckTruth = TauAnalysisTools::TruthElectron;
-  if (sTruthType=="TRUEMUON") m_eCheckTruth = TauAnalysisTools::TruthMuon;
-  if (sTruthType=="TRUEJET") m_eCheckTruth = TauAnalysisTools::TruthJet;
+  
 
   for (auto& mSF : m_mSF)
   {

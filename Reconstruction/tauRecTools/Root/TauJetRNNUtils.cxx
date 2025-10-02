@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNNUtils.h"
-#include "tauRecTools/HelperFunctions.h"
-#include <algorithm>
+
 #define GeV 1000
 
 namespace TauJetRNNUtils {
@@ -109,7 +108,8 @@ void VarCalc::insert(const std::string &name, ClusterCalc func, const std::vecto
 
 std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_vars,
 					const std::vector<std::string>& track_vars,
-					const std::vector<std::string>& cluster_vars) {
+					const std::vector<std::string>& cluster_vars,
+					bool useTRT) {
     auto calc = std::make_unique<VarCalc>();
 
     // Scalar variable calculator functions
@@ -127,13 +127,12 @@ std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_v
     calc->insert("pt", Variables::pt, scalar_vars);
     calc->insert("pt_tau_log", Variables::pt_tau_log, scalar_vars);
     calc->insert("ptDetectorAxis", Variables::ptDetectorAxis, scalar_vars);
-    calc->insert("ptIntermediateAxis", Variables::ptIntermediateAxis, scalar_vars);
     //---added for the eVeto
     calc->insert("ptJetSeed_log",              Variables::ptJetSeed_log, scalar_vars);
     calc->insert("absleadTrackEta",            Variables::absleadTrackEta, scalar_vars);
     calc->insert("leadTrackDeltaEta",          Variables::leadTrackDeltaEta, scalar_vars);
     calc->insert("leadTrackDeltaPhi",          Variables::leadTrackDeltaPhi, scalar_vars);
-    calc->insert("leadTrackProbNNorHT",        Variables::leadTrackProbNNorHT, scalar_vars);
+    calc->insert("leadTrackProbNNorHT", useTRT ? Variables::leadTrackProbNNorHT : Variables::leadTrackProbNNorHT_noTRT, scalar_vars);
     calc->insert("EMFracFixed",                Variables::EMFracFixed, scalar_vars);
     calc->insert("etHotShotWinOverPtLeadTrk",  Variables::etHotShotWinOverPtLeadTrk, scalar_vars);
     calc->insert("hadLeakFracFixed",           Variables::hadLeakFracFixed, scalar_vars);
@@ -160,13 +159,7 @@ std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_v
     calc->insert("nIBLHitsAndExp", Variables::Track::nIBLHitsAndExp, track_vars);
     calc->insert("nPixelHitsPlusDeadSensors", Variables::Track::nPixelHitsPlusDeadSensors, track_vars);
     calc->insert("nSCTHitsPlusDeadSensors", Variables::Track::nSCTHitsPlusDeadSensors, track_vars);
-    //calc->insert("eProbabilityHT", Variables::Track::eProbabilityHT, track_vars);
-    //calc->insert("eProbabilityNN", Variables::Track::eProbabilityNN, track_vars);
-    calc->insert("eProbabilityNNorHT", Variables::Track::eProbabilityNNorHT, track_vars);
-    //calc->insert("chargedScoreRNN", Variables::Track::chargedScoreRNN, track_vars);
-    //calc->insert("isolationScoreRNN", Variables::Track::isolationScoreRNN, track_vars);
-    //calc->insert("conversionScoreRNN", Variables::Track::conversionScoreRNN, track_vars);
-    //calc->insert("fakeScoreRNN", Variables::Track::fakeScoreRNN, track_vars);
+    calc->insert("eProbabilityNNorHT", useTRT ? Variables::Track::eProbabilityNNorHT : Variables::Track::eProbabilityNNorHT_noTRT, track_vars);
 
     // Cluster variable calculator functions
     calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
@@ -280,15 +273,11 @@ bool ptDetectorAxis(const xAOD::TauJet &tau, double &out) {
     return true;
 }
 
-bool ptIntermediateAxis(const xAOD::TauJet &tau, double &out) {
-    out = std::log10(std::min(tau.ptIntermediateAxis() /GeV, 100.0));
-    return true;
-}
-
 bool ptJetSeed_log(const xAOD::TauJet &tau, double &out) {
   out = std::log10(std::max(tau.ptJetSeed(), 1e-3));
   return true;
 }
+
 
 bool absleadTrackEta(const xAOD::TauJet &tau, double &out){
   static const SG::ConstAccessor<float> acc_absEtaLeadTrack("ABS_ETA_LEAD_TRACK");
@@ -333,6 +322,28 @@ bool leadTrackProbNNorHT(const xAOD::TauJet &tau, double &out){
   }
   return true;
 }
+
+bool leadTrackProbNNorHT_noTRT(const xAOD::TauJet &tau, double &out){
+  auto tracks = tau.allTracks();
+
+  // Sort tracks in descending pt order
+  if (!tracks.empty()) {
+    auto cmp_pt = [](const xAOD::TauTrack *lhs, const xAOD::TauTrack *rhs) {
+      return lhs->pt() > rhs->pt();
+    };
+    std::sort(tracks.begin(), tracks.end(), cmp_pt);
+
+    const xAOD::TauTrack* tauLeadTrack = tracks.at(0);
+    // Dummy values for eProbNN = 0.5, eProbHT = 1.
+    out = (tauLeadTrack->pt()>2000.) ? 0.5 : 1.;
+  }
+  else {
+    out = 0.;
+  }
+  return true;
+}
+
+
 
 bool EMFracFixed(const xAOD::TauJet &tau, double &out){
   static const SG::ConstAccessor<float> acc_emFracFixed("EMFracFixed");
@@ -415,13 +426,13 @@ bool pt_jetseed_log(const xAOD::TauJet &tau, const xAOD::TauTrack& /*track*/, do
     return true;
 }
 
-bool d0_abs_log(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-    out = std::log10(std::abs(track.d0TJVA()) + 1e-6);
+bool z0sinThetaTJVA_abs_log(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+    out = std::log10(std::abs(track.z0sinthetaTJVA()) + 1e-6);
     return true;
 }
 
-bool z0sinThetaTJVA_abs_log(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-    out = std::log10(std::abs(track.z0sinthetaTJVA()) + 1e-6);
+bool d0_abs_log(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+    out = std::log10(std::abs(track.d0TJVA()) + 1e-6);
     return true;
 }
 
@@ -501,19 +512,6 @@ bool nSCTHitsPlusDeadSensors(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &
     return success1 && success2;
 }
 
-bool eProbabilityHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-    float eProbabilityHT;
-    const auto success = track.track()->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
-    out = eProbabilityHT;
-    return success;
-}
-
-bool eProbabilityNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {  
-    static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
-    out = acc_eProbabilityNN(track);
-    return true;
-}
-
 bool eProbabilityNNorHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {  
   auto atrack = track.track();
   float eProbabilityHT = atrack->summaryValue(eProbabilityHT, xAOD::eProbabilityHT);
@@ -523,27 +521,10 @@ bool eProbabilityNNorHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track
   return true;
 }
 
-bool chargedScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::ConstAccessor<float> acc_chargedScoreRNN("rnn_chargedScore");
-  out = acc_chargedScoreRNN(track);
-  return true;
-}
-
-bool isolationScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::ConstAccessor<float> acc_isolationScoreRNN("rnn_isolationScore");
-  out = acc_isolationScoreRNN(track);
-  return true;
-}
-
-bool conversionScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::ConstAccessor<float> acc_conversionScoreRNN("rnn_conversionScore");
-  out = acc_conversionScoreRNN(track);
-  return true;
-}
-
-bool fakeScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
-  static const SG::ConstAccessor<float> acc_fakeScoreRNN("rnn_fakeScore");
-  out = acc_fakeScoreRNN(track);
+bool eProbabilityNNorHT_noTRT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+  auto atrack = track.track();
+  // Dummy values for eProbNN = 0.5, eProbHT = 1
+  out = (atrack->pt()>2000.) ? 0.5 : 1.;
   return true;
 }
 

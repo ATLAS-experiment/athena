@@ -9,7 +9,6 @@
  * @author Shaun Roe
  * @author Edson Carquin
  * @author Daniel Torres
- * @date 06 March, 2025
  **/
  
 //this package
@@ -31,12 +30,7 @@ static const std::string file("ITkStrip_Sept08Cabling_svc.dat");
 //invalid identifiers to return in case of error
 static const ITkStripOnlineId invalidId;
 
-// Constructor
-ITkStripCablingTool::ITkStripCablingTool(const std::string& type, const std::string& name, const IInterface* parent) :
-  base_class(type, name, parent)
-{}
 
-//
 StatusCode
 ITkStripCablingTool::initialize() {
   ATH_MSG_DEBUG("Initialize ITkStrip cabling");
@@ -47,11 +41,17 @@ ITkStripCablingTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
+//
+IdentifierHash 
+ITkStripCablingTool::getHashFromOnlineId(const ITkStripOnlineId& /*onlineId*/, const EventContext& /*ctx*/, const bool /*withWarnings*/) const {
+  return 0;
+}
+
 ITkStripOnlineId 
 ITkStripCablingTool::getOnlineIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const {
   const ITkStripCablingData* data{getData(ctx)};
   if (data==nullptr) {
-    ATH_MSG_FATAL("Filling the cabling FAILED");
+    ATH_MSG_ERROR("Filling the cabling FAILED");
     return invalidId;
   }
   
@@ -79,11 +79,17 @@ void
 ITkStripCablingTool::getAllRods(std::vector<std::uint32_t>& usersVector, const EventContext& ctx) const {
   const ITkStripCablingData* data{getData(ctx)};
   if (data==nullptr) {
-    ATH_MSG_FATAL("Filling the cabling FAILED");
+    ATH_MSG_ERROR("Filling the cabling FAILED");
     return;
   }
 
   data->getRods(usersVector);
+  if (msgLvl(MSG::DEBUG)){
+      ATH_MSG_DEBUG("RODs found: " << usersVector.size());
+      for (const auto& rodId : usersVector) {
+         ATH_MSG_DEBUG("ROD ID: 0x" << std::hex << rodId << std::dec);
+      }
+  }    
 }
 
 void
@@ -98,4 +104,3 @@ ITkStripCablingTool::getData(const EventContext& ctx) const {
   ATH_MSG_DEBUG("After getting ITkStripCablindData");
   return condData.retrieve();
 }
-

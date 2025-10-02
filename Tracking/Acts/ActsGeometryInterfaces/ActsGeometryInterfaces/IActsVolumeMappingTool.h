@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRYINTERFACES_IACTSVOLUMEMAPPINGTOOL_H
@@ -12,7 +12,6 @@
 
 #include "Acts/Material/VolumeMaterialMapper.hpp"
 
-class IActsTrackingGeometryTool;
 
 class IActsVolumeMappingTool : virtual public IAlgTool {
   public:
@@ -28,9 +27,6 @@ class IActsVolumeMappingTool : virtual public IAlgTool {
   Acts::VolumeMaterialMapper::State
   mappingState() const = 0;
 
-  virtual
-  const IActsTrackingGeometryTool*
-  trackingGeometryTool() const = 0;
 
 };
 

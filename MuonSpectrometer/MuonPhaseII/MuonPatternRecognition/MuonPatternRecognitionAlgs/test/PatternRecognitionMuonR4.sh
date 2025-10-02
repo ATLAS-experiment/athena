@@ -3,7 +3,7 @@ NTHREADS=${1}
 NEVENTS=${2}
 
 
-python -m MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig  \
+python -m MuonPatternRecognitionTest.MuonHoughTransformTesterConfig  \
        --noSTGC \
        --noMM \
        --nEvents ${NEVENTS} \

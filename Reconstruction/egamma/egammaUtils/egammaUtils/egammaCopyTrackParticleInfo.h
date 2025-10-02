@@ -2,7 +2,7 @@
  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackParticleFwd.h"
 namespace egammaCopyTrackParticleInfo {
 
 struct ToCopy {
@@ -14,9 +14,8 @@ struct ToCopy {
   bool doHGTD = false;
 };
 
-void
-copy(xAOD::TrackParticle& created,
-     const xAOD::TrackParticle& original,
-     const egammaCopyTrackParticleInfo::ToCopy& toCopy);
+void copy(xAOD::TrackParticle& created,
+          const xAOD::TrackParticle& original,
+          const egammaCopyTrackParticleInfo::ToCopy& toCopy);
 
 }  // namespace egammaCopyTrackParticleInfo

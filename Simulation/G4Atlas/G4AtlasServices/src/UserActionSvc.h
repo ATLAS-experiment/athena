@@ -17,6 +17,7 @@
 // G4Atlas includes
 #include "G4AtlasRunAction.h"
 #include "G4AtlasEventAction.h"
+#include "G4AtlasPrimaryGeneratorAction.h"
 #include "G4AtlasStackingAction.h"
 #include "G4AtlasTrackingAction.h"
 #include "G4AtlasSteppingAction.h"
@@ -43,6 +44,9 @@ namespace G4UA
       /// Initialize the service
       StatusCode initialize() override;
 
+      /// Initialize the user run actions for the main thread
+      StatusCode initializeActionsMaster() override final;
+
       /// Initialize the user actions for the current thread
       StatusCode initializeActions() override final;
 
@@ -64,6 +68,8 @@ namespace G4UA
 
       /// Thread-local run action
       ThreadActionHolder<G4AtlasRunAction> m_runActions;
+      /// Thread-local primary generator action
+      ThreadActionHolder<G4AtlasPrimaryGeneratorAction> m_primaryGeneratorActions;
       /// Thread-local event action
       ThreadActionHolder<G4AtlasEventAction> m_eventActions;
       /// Thread-local stacking action

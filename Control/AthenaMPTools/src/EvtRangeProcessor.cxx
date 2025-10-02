@@ -7,6 +7,7 @@
 #include "AthenaInterprocess/ProcessGroup.h"
 
 #include "AthenaKernel/IEvtSelectorSeek.h"
+#include "CxxUtils/xmalloc.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/IFileMgr.h"
@@ -34,26 +35,9 @@ EvtRangeProcessor::EvtRangeProcessor(const std::string& type
 				     , const std::string& name
 				     , const IInterface* parent)
   : AthenaMPToolBase(type,name,parent)
-  , m_rankId(-1)
-  , m_nEventsBeforeFork(0)
-  , m_activeWorkers(0)
-  , m_inpFile("")
   , m_chronoStatSvc("ChronoStatSvc", name)
   , m_incidentSvc("IncidentSvc", name)
-  , m_evtSeek(nullptr)
-  , m_channel2Scatterer("")
-  , m_channel2EvtSel("")
-  , m_sharedRankQueue(0)
-  , m_sharedFailedPidQueue(0)
-  , m_debug(false)
 {
-  declareInterface<IAthenaMPTool>(this);
-
-  declareProperty("EventsBeforeFork",m_nEventsBeforeFork);
-  declareProperty("Channel2Scatterer", m_channel2Scatterer);
-  declareProperty("Channel2EvtSel", m_channel2EvtSel);
-  declareProperty("Debug", m_debug);
-
   m_subprocDirPrefix = "worker_";
 }
 
@@ -71,12 +55,6 @@ StatusCode EvtRangeProcessor::initialize()
   ATH_CHECK(m_chronoStatSvc.retrieve());
   ATH_CHECK(m_incidentSvc.retrieve());
   
-  return StatusCode::SUCCESS;
-}
-
-StatusCode EvtRangeProcessor::finalize()
-{
-  delete m_sharedRankQueue;
   return StatusCode::SUCCESS;
 }
 
@@ -101,7 +79,7 @@ int EvtRangeProcessor::makePool(int, int nprocs, const std::string& topdir)
   // Create rank queue and fill it
   std::ostringstream rankQueueName;
   rankQueueName << "EvtRangeProcessor_RankQueue_" << getpid() << "_" << m_randStr;
-  m_sharedRankQueue = new AthenaInterprocess::SharedQueue(rankQueueName.str(),m_nprocs,sizeof(int));
+  m_sharedRankQueue = std::make_unique<AthenaInterprocess::SharedQueue>(rankQueueName.str(),m_nprocs,sizeof(int));
   for(int i=0; i<m_nprocs; ++i)
     if(!m_sharedRankQueue->send_basic<int>(i)) {
       ATH_MSG_ERROR("Unable to send int to the ranks queue!");
@@ -240,7 +218,6 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
   // ____________________ Step 2: decode worker result (if any) ______________________________
   AthenaInterprocess::ProcessResult* presult = m_processGroup->pullOneResult();
   if(presult) {
-    int res{0};
     if((unsigned)(presult->output.size)>=sizeof(int)) {
       // Decode result
       const AthenaInterprocess::ScheduledWork& output = presult->output;
@@ -250,6 +227,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
       auto itChildState = m_procStates.find(childPid);
       if(itChildState==m_procStates.end()) {
 	ATH_MSG_ERROR("Unable to find PID=" << childPid << " in the Proc States map!");
+        free(presult->output.data);
+	delete presult;
 	return StatusCode::FAILURE;
       }
 
@@ -260,6 +239,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	// Schedule exec_func()
 	if(mapAsyncFlag(AthenaMPToolBase::FUNC_EXEC,childPid)) {
 	  ATH_MSG_ERROR("Problem scheduling execution on PID=" << childPid);
+          free(presult->output.data);
+          delete presult;
 	  return StatusCode::FAILURE;
 	}
 
@@ -286,6 +267,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	if(m_finQueue.size()==1) {
 	  if(mapAsyncFlag(AthenaMPToolBase::FUNC_FIN,childPid)) {
 	    ATH_MSG_ERROR("Problem scheduling finalization on PID=" << childPid);
+            free(presult->output.data);
+            delete presult;
 	    return StatusCode::FAILURE;
 	  }
 	  else {
@@ -305,6 +288,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	  // Set the process free
 	  if(m_processGroup->map_async(0,0,pidFront)) {
 	    ATH_MSG_ERROR("Failed to set the process PID=" << pidFront << " free");
+            free(presult->output.data);
+            delete presult;
 	    return StatusCode::FAILURE;
 	  }
 
@@ -315,6 +300,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	  if(m_finQueue.size()) {
 	    if(mapAsyncFlag(AthenaMPToolBase::FUNC_FIN,m_finQueue.front())) {
 	      ATH_MSG_ERROR("Problem scheduling finalization on PID=" << m_finQueue.front());
+              free(presult->output.data);
+              delete presult;
 	      return StatusCode::FAILURE;
 	    }
 	    else  {
@@ -325,6 +312,8 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
 	else {
 	  // Error: unexpected pid received from presult
 	  ATH_MSG_ERROR("Finalized PID=" << childPid << " while PID=" << pid << " was expected");
+          free(presult->output.data);
+          delete presult;
 	  return StatusCode::FAILURE;
 	}
 
@@ -334,7 +323,6 @@ StatusCode EvtRangeProcessor::wait_once(pid_t& pid)
     }
     free(presult->output.data);
     delete presult;
-    if(res) return StatusCode::FAILURE;
   }
   // ____________________ ______________________________________________ ______________________________
 
@@ -382,7 +370,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::bootstrap_
   if(m_debug) waitForSignal();
 
   std::unique_ptr<AthenaInterprocess::ScheduledWork> outwork(new AthenaInterprocess::ScheduledWork);
-  outwork->data = malloc(sizeof(int));
+  outwork->data = CxxUtils::xmalloc(sizeof(int));
   *(int*)(outwork->data) = 1; // Error code: for now use 0 success, 1 failure
   outwork->size = sizeof(int);
   // ...
@@ -514,7 +502,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::exec_func(
   std::string ping = pidstr.str() + std::string(" ready for event processing");
 
   while(true) {
-    void* message2scatterer = malloc(ping.size());   
+    void* message2scatterer = CxxUtils::xmalloc(ping.size());
     memcpy(message2scatterer,ping.data(),ping.size());   
     socket2Scatterer->send(message2scatterer,ping.size());
     ATH_MSG_INFO("Sent a welcome message to the Scatterer");
@@ -665,7 +653,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::exec_func(
       std::string outputFileReport = outputReportStream.str();
       
       // Report the output
-      message2scatterer = malloc(outputFileReport.size());
+      message2scatterer = CxxUtils::xmalloc(outputFileReport.size());
       memcpy(message2scatterer,outputFileReport.data(),outputFileReport.size());
       socket2Scatterer->send(message2scatterer,outputFileReport.size());
       ATH_MSG_INFO("Reported the output " << outputFileReport);
@@ -685,7 +673,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::exec_func(
 
   // Return value: "ERRCODE|Func_Flag|NEvt"
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = 0; // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_EXEC;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));
@@ -721,7 +709,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeProcessor::fin_func()
 
   // Return value: "ERRCODE|Func_Flag|NEvt"  (Here NEvt=-1)
   int outsize = 2*sizeof(int)+sizeof(AthenaMPToolBase::Func_Flag);
-  void* outdata = malloc(outsize);
+  void* outdata = CxxUtils::xmalloc(outsize);
   *(int*)(outdata) = 0; // Error code: for now use 0 success, 1 failure
   AthenaMPToolBase::Func_Flag func = AthenaMPToolBase::FUNC_FIN;
   memcpy((char*)outdata+sizeof(int),&func,sizeof(func));
@@ -784,7 +772,7 @@ StatusCode EvtRangeProcessor::setNewInputFile(const std::string& newFile)
     }
   }
   std::vector<std::string> vect{newFile,};
-  StringArrayProperty newInputFileList(propertyName, vect);
+  StringArrayProperty newInputFileList(std::move(propertyName), vect);
   if(propertyServer->setProperty(newInputFileList).isFailure()) {
     ATH_MSG_ERROR("Unable to update " << newInputFileList.name() << " property on the Event Selector");
     return StatusCode::FAILURE;
@@ -797,7 +785,7 @@ void EvtRangeProcessor::reportError(yampl::ISocket* socket, AthenaMPToolBase::ES
 {
   pid_t pid = getpid();
   size_t messageSize = sizeof(pid_t)+sizeof(AthenaMPToolBase::ESRange_Status);
-  void* message2scatterer = malloc(messageSize);
+  void* message2scatterer = CxxUtils::xmalloc(messageSize);
   memcpy(message2scatterer,&pid,sizeof(pid_t));
   memcpy((pid_t*)message2scatterer+1,&status,sizeof(AthenaMPToolBase::ESRange_Status));
   socket->send(message2scatterer,messageSize);

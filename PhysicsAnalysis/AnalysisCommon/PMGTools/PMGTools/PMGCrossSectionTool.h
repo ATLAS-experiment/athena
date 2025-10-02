@@ -46,32 +46,32 @@ namespace PMGTools {
     bool readInfosFromDir(const std::string& inputDir);
     
     /// return filter efficiency for DSID
-    double getFilterEff(const int dsid) const;
+    double getFilterEff(const int dsid, const int etag = -1) const;
     
     /// return the sample name for DSID
-    std::string getSampleName(const int dsid) const;
+    std::string getSampleName(const int dsid, const int etag = -1) const;
     
     /// return the AMI cross-section for DSID
-    double getAMIXsection(const int dsid) const;
+    double getAMIXsection(const int dsid, const int etag = -1) const;
 
     /// return the cross-section uncertainty for DSID
-    double getXsectionUncertainty(const int dsid) const;
+    double getXsectionUncertainty(const int dsid, const int etag = -1) const;
 
     /// return the cross-section uncertainty for DSID
-    double getXsectionUncertaintyUP(const int dsid) const;
+    double getXsectionUncertaintyUP(const int dsid, const int etag = -1) const;
 
     /// return the cross-section uncertainty for DSID
-    double getXsectionUncertaintyDOWN(const int dsid) const;
+    double getXsectionUncertaintyDOWN(const int dsid, const int etag = -1) const;
     
     // :: below is for future use?
     /// return the branching ratio for DSID
-    //double getBR(const int dsid) const;
+    //double getBR(const int dsid, const int etag = -1) const;
 
     /// return the k-factor for DSID
-    double getKfactor(const int dsid) const;
+    double getKfactor(const int dsid, const int etag = -1) const;
    
     /// return the sample cross-section for DSID
-    double getSampleXsection(const int dsid) const;
+    double getSampleXsection(const int dsid, const int etag = -1) const;
    
     /// get a list of the DSID for the loaded samples
     std::vector<int> getLoadedDSIDs() const;
@@ -79,7 +79,7 @@ namespace PMGTools {
   private:
       
     // store vector of structures, each structure contains full info for DSID
-    std::map<unsigned, PMGTools::AllSampleInfo> m_fStoreSampleInfo;
+    std::map<std::pair<unsigned, int>, PMGTools::AllSampleInfo> m_fStoreSampleInfo;
     std::string m_InputFileName;
     
   }; // class PMGCrossSectionTool

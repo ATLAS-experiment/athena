@@ -18,7 +18,7 @@ def BPHY18Cfg(flags):
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
 
     acc = ComponentAccumulator()
-    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags)).name
+    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     acc.merge(EGammaCommonCfg(flags))
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -344,5 +344,5 @@ def BPHY18Cfg(flags):
     BPHY18ItemList = BPHY18SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY18", ItemList=BPHY18ItemList, AcceptAlgs=["BPHY18Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY18", AcceptAlgs=["BPHY18Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc

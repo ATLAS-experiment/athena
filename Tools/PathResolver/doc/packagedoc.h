@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -29,9 +29,6 @@
       possibly with symbolic link resolution</li>
 
       <li>it is possible to locate regular files or directories </li>
-
-      <li>the search can be local in every search path or recursive to
-      all subdirectories below every serach path.</li>
 
       <li>it is possible to simply verify a search path against non
       existing entries</li>
@@ -75,27 +72,6 @@ int main ()
   if (name == "")
     {
       std::cerr << "Cannot locate a.dat from ${DATAPATH}" << std::endl;
-    }
-
-  return (0);
-}
-@endcode
-      </li>
-
-      <li> <i>Recursively finding a data file from the DATAPATH search list:</i>
-
-      @code
-#include <PathResolver/PathResolver.h>
-
-int main ()
-{
-  std::string name;
-
-  name = PathResolver::find_file ("a.dat", "DATAPATH", PathResolver::RecursiveSearch);
-
-  if (name == "")
-    {
-      std::cerr << "Cannot locate a.dat from any subdirectory of ${DATAPATH}" << std::endl;
     }
 
   return (0);

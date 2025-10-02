@@ -5,41 +5,34 @@
 #ifndef RNTCOLLECTIONCURSOR_H
 #define RNTCOLLECTIONCURSOR_H
 
-
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionBase/CollectionRowBuffer.h"
 #include "CollectionBase/ICollectionDescription.h"
 #include "CollectionBase/ICollectionCursor.h"
 
-#include "PersistencySvc/IPositionSeek.h"
-#include "AthenaKernel/ICollectionSize.h"
-
 #include <memory>
-#include <map>
 
 #include "RVersion.h"
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   namespace ROOT { class REntry; }
-   namespace ROOT { class RNTupleReader; }
+namespace ROOT {
+   class REntry;
+   class RNTupleReader;
+}
 #else
 namespace ROOT::Experimental {
-   class RNTupleReader;
    class REntry;
+   class RNTupleReader;
+}
+namespace ROOT {
+   using REntry = ROOT::Experimental::REntry;
+   using RNTupleReader = ROOT::Experimental::RNTupleReader;
 }
 #endif
 
 namespace pool {
    namespace RootCollection {
-
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-      using ROOT::REntry;
-      using ROOT::RNTupleReader;
-#else
-      using ROOT::Experimental::REntry;
-      using ROOT::Experimental::RNTupleReader;
-#endif
 
       /** 
        * @class RNTCollectionCursor RNTCollectionCursor.h Rootcollection/RNTCollectionCursor.h
@@ -47,16 +40,14 @@ namespace pool {
        * An interface used to navigate the result of a query on a collection
        * stored in RNTuple
        */
-      class RNTCollectionCursor : public ICollectionCursor,
-                                  virtual public IPositionSeek,
-                                  virtual public implements<ICollectionSize>
+      class RNTCollectionCursor : public ICollectionCursor
       {
       public:
 
          RNTCollectionCursor(
             const pool::ICollectionDescription& description,
             const pool::CollectionRowBuffer& collectionRowBuffer,
-            RNTupleReader* reader );
+            ROOT::RNTupleReader* reader );
 
         
          /// Advances the cursor to the next row of the query result set.
@@ -65,11 +56,11 @@ namespace pool {
          /// Returns the selected Tokens and Attributes for the current row of the query result set.
          virtual const pool::CollectionRowBuffer& currentRow() const override;
 
-         /// Seeks the cursor to a given position in the collection.
-         virtual bool seek(long long int position) override;
-
          /// Return the size of the collection.
-         virtual int size() override;
+         virtual std::size_t size() override;
+
+         /// Seeks the cursor to a given position in the collection.
+         virtual bool seek(std::size_t position) override;
 
          /// Returns the event reference Token for the current row.
          virtual const Token& eventRef() const override;
@@ -83,10 +74,10 @@ namespace pool {
 
          const ICollectionDescription&  m_description;
 
-         RNTupleReader*                 m_RNTReader;
+         ROOT::RNTupleReader*                 m_RNTReader;
 
          /// RNtuple row with Field addresses set to collectionRowBuffer attributes
-         std::unique_ptr< REntry >      m_RNTEntry;
+         std::unique_ptr< ROOT::REntry >      m_RNTEntry;
 
          /// Row buffer containing Tokens and Attributes selected by query.
          pool::CollectionRowBuffer      m_collectionRowBuffer;
@@ -94,7 +85,7 @@ namespace pool {
          /// "Token rowBuffer" for reading Tokens as strings and converting them later
          std::vector< std::pair< Token*, std::string > >  m_tokens;
 
-         int                            m_idx;
+	 std::size_t                    m_idx;
          bool                           m_dummyRef;
       };
    }

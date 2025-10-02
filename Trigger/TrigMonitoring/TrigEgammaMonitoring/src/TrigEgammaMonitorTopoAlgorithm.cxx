@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "TrigEgammaMonitorTopoAlgorithm.h"
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "xAODBase/IParticleContainer.h"
 
 using namespace Trig;

@@ -17,6 +17,7 @@
 #include "xAODTracking/versions/TrackParticle_v1.h"
 #include "xAODTracking/TrackSummaryAccessors_v1.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 namespace xAODTrackParticlePrivate {
@@ -96,14 +97,14 @@ namespace xAOD {
        // lets also check for GSF.
        uint8_t fitter = trackFitter();
        if (fitter == xAOD::GaussianSumFilter) {
-         return 0.510998;
+         return ParticleConstants::electronMassInMeV;
        }
     }
     if (hypo == xAOD::muon) {
-       return 105.658367;
+       return ParticleConstants::muonMassInMeV;
     }
     // default charged pion
-    return 139.570;
+    return ParticleConstants::chargedPionMassInMeV;
   }
 
   double TrackParticle_v1::e() const {

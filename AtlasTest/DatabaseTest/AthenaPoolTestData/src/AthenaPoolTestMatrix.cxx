@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -48,8 +48,8 @@ AthenaPoolTestMatrix::AthenaPoolTestMatrix()
     m1[10] = *m_bigMatrix;
     m2[16] = *m_bigMatrix;
     m2[35] = m_smallMatrix;
-    m_matrixMaps.push_back(m1);
-    m_matrixMaps.push_back(m2);
+    m_matrixMaps.push_back(std::move(m1));
+    m_matrixMaps.push_back(std::move(m2));
 
     // Fill vectors
     m_vint.push_back(6);

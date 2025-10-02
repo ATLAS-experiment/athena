@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -30,69 +30,11 @@ namespace Trk{
 TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
                                     const std::string& name,
                                     const IInterface* parent):
-    base_class(type,name,parent),
-    m_Robustness(0),
-    m_RobustScale(1.),
-    m_cascadeCnstPrecision(1.e-4),
-    m_massForConstraint(-1.),
-    m_IterationNumber(0),
-    m_IterationPrecision(0),
-    m_IDsizeR(1150.),
-    m_IDsizeZ(3000.),
-    m_extPropagator(this),                   // Internal propagator
-    // m_extPropagator("Trk::Extrapolator/InDetExtrapolator"),  // External propagator
-    m_firstMeasuredPoint(false),
-    m_firstMeasuredPointLimit(false),
-    m_makeExtendedVertex(false),
-    m_useFixedField(false),
-    m_useAprioriVertex(false),
-    m_useThetaCnst(false),
-    m_usePhiCnst(false),
-    m_usePointingCnst(false),
-    m_useZPointingCnst(false),
-    m_usePassNear(false),
-    m_usePassWithTrkErr(false),
-    m_frozenVersionForBTagging(false)
+    base_class(type,name,parent)
    {
     declareInterface<IVertexFitter>(this);
     declareInterface<ITrkVKalVrtFitter>(this);
     declareInterface<IVertexCascadeFitter>(this);
-
-    m_BMAG    = 1.997;      /*constant ATLAS magnetic field if no exact map*/
-    m_CNVMAG  = 0.29979246;  /* conversion constant for MeV and MM */
-
-    m_c_VertexForConstraint.clear();
-    for( int i=0; i<3; i++){m_c_VertexForConstraint.push_back(0.);}
-    m_c_CovVrtForConstraint.clear();
-    for( int i=0; i<6; i++){m_c_CovVrtForConstraint.push_back(0.);}
-    m_c_MassInputParticles.clear();
-//
-    declareProperty("Robustness",   m_Robustness);
-    declareProperty("RobustScale",  m_RobustScale);
-    declareProperty("CascadeCnstPrecision", m_cascadeCnstPrecision);
-    declareProperty("MassForConstraint",    m_massForConstraint);
-    declareProperty("IterationNumber",      m_IterationNumber);
-    declareProperty("IterationPrecision",   m_IterationPrecision);
-    declareProperty("IDsizeR",              m_IDsizeR);
-    declareProperty("IDsizeZ",              m_IDsizeZ);
-    declareProperty("VertexForConstraint",  m_c_VertexForConstraint);
-    declareProperty("CovVrtForConstraint",  m_c_CovVrtForConstraint);
-    declareProperty("InputParticleMasses",  m_c_MassInputParticles, "List of masses of input particles (pions assumed if this list is absent)" );
-    declareProperty("Extrapolator",         m_extPropagator);
-    declareProperty("useFixedField",        m_useFixedField, " Use fixed magnetic field instead of exact Atlas one");
-    declareProperty("FirstMeasuredPoint",   m_firstMeasuredPoint);
-    declareProperty("FirstMeasuredPointLimit",   m_firstMeasuredPointLimit);
-    declareProperty("MakeExtendedVertex",   m_makeExtendedVertex, "VKalVrt returns VxCandidate with full covariance matrix");
-//
-    declareProperty("useAprioriVertexCnst",   m_useAprioriVertex);
-    declareProperty("useThetaCnst",           m_useThetaCnst);
-    declareProperty("usePhiCnst",             m_usePhiCnst);
-    declareProperty("usePointingCnst",        m_usePointingCnst);
-    declareProperty("useZPointingCnst",       m_useZPointingCnst);
-    declareProperty("usePassNearCnst",        m_usePassNear);
-    declareProperty("usePassWithTrkErrCnst",  m_usePassWithTrkErr);
-    declareProperty("FrozenVersionForBTagging",  m_frozenVersionForBTagging);
-//
 
 /*--------------------------------------------------------------------------*/
 /*  New propagator object is created. It's provided to VKalVrtCore.         */
@@ -102,8 +44,6 @@ TrkVKalVrtFitter:: TrkVKalVrtFitter(const std::string& type,
 /*--------------------------------------------------------------------------*/
     m_fitPropagator = nullptr;       //Pointer to VKalVrtFitter propagator object to supply to VKalVrtCore (specific interface)
     m_InDetExtrapolator = nullptr;   //Direct pointer to Athena propagator
-
-    m_isAtlasField       = false;   // To allow callback and then field first call only at execute stage
 }
 
 
@@ -177,6 +117,7 @@ StatusCode TrkVKalVrtFitter::initialize()
     if(msgLvl(MSG::DEBUG)){
        msg(MSG::DEBUG)<< "TrkVKalVrtFitter configuration:" << endmsg;
        msg(MSG::DEBUG)<< "   Frozen version for BTagging:          "<< m_frozenVersionForBTagging <<endmsg;
+       msg(MSG::DEBUG)<< "   Allow ultra displaced vertices:       "<< m_allowUltraDisplaced <<endmsg;
        msg(MSG::DEBUG)<< "   A priori vertex constraint:           "<< m_useAprioriVertex <<endmsg;
        msg(MSG::DEBUG)<< "   Angle dTheta=0 constraint:            "<< m_useThetaCnst <<endmsg;
        msg(MSG::DEBUG)<< "   Angle dPhi=0 constraint:              "<< m_usePhiCnst <<endmsg;
@@ -255,6 +196,7 @@ void TrkVKalVrtFitter::initState (const EventContext& ctx, State& state) const
   state.m_RobustScale = m_RobustScale;
   state.m_MassInputParticles = m_c_MassInputParticles;
   state.m_frozenVersionForBTagging = m_frozenVersionForBTagging;
+  state.m_allowUltraDisplaced = m_allowUltraDisplaced;
 }
 
 /** Interface for MeasuredPerigee with starting point */
@@ -743,10 +685,24 @@ xAOD::Vertex * TrkVKalVrtFitter::makeXAODVertex( int Neutrals,
     std::vector<float> floatErrMtx;
     if( m_makeExtendedVertex && covarExist ) {
        floatErrMtx.resize(CovFull.size());
-       for(int i=0; i<(int)CovFull.size(); i++) floatErrMtx[i]=CovFull[i];
+       for(int i=0; i<(int)CovFull.size(); i++) {
+         if( CovFull[i] < std::numeric_limits<float>::max() &&
+             CovFull[i] > std::numeric_limits<float>::lowest() ){
+           floatErrMtx[i]=static_cast<float>(CovFull[i]);
+         } else {
+           floatErrMtx[i]=std::numeric_limits<float>::max();
+         }
+       }
     }else{
        floatErrMtx.resize(fitErrorMatrix.size());
-       for(int i=0; i<(int)fitErrorMatrix.size(); i++) floatErrMtx[i]=fitErrorMatrix[i];
+       for(int i=0; i<(int)fitErrorMatrix.size(); i++) {
+         if( fitErrorMatrix[i] < std::numeric_limits<float>::max() &&
+             fitErrorMatrix[i] > std::numeric_limits<float>::lowest() ){
+           floatErrMtx[i]=static_cast<float>(fitErrorMatrix[i]);
+         } else {
+           floatErrMtx[i]=std::numeric_limits<float>::max();
+         }
+       }
     }
     tmpVertex->setCovariance(floatErrMtx);
 

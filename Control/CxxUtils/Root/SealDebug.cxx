@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -138,16 +138,20 @@ struct ATLAS_NOT_THREAD_SAFE BacktraceInit
       if (pos != std::string::npos) ++pos;
       path.erase (0, pos);
 
-      std::string p1 = dir + "/eu-addr2line";
-      if (access (p1.c_str(), F_OK) == 0) {
-        addr2LinePath = p1;
-        break;
+      {
+        std::string p1 = dir + "/eu-addr2line";
+        if (access (p1.c_str(), F_OK) == 0) {
+          addr2LinePath = std::move (p1);
+          break;
+        }
       }
 
-      std::string p2 = dir + "/addr2line";
-      if (access (p2.c_str(), F_OK) == 0) {
-        addr2LinePath = p2;
-        break;
+      {
+        std::string p2 = dir + "/addr2line";
+        if (access (p2.c_str(), F_OK) == 0) {
+          addr2LinePath = std::move (p2);
+          break;
+        }
       }
     }
   }
@@ -341,6 +345,8 @@ void DebugAids::stacktraceLine ATLAS_NOT_THREAD_SAFE (IOFD fd,
 
   char dembuf[ LINE_MAX ];
   char line[ LINE_MAX ];
+  const int     relbuf_size = 7 + BitTraits<unsigned long>::HexDigits;
+  char	  relbuf [relbuf_size];
 
   if (dladdr ((void*)addr, &info) && info.dli_fname && info.dli_fname[0])
   {
@@ -352,9 +358,6 @@ void DebugAids::stacktraceLine ATLAS_NOT_THREAD_SAFE (IOFD fd,
 
     // RS start
     int length = 0;
-    
-    const int     relbuf_size = 7 + BitTraits<unsigned long>::HexDigits;
-    char	  relbuf [relbuf_size];
     
     // difference of two pointers
     unsigned long libaddr = (unsigned long) info.dli_fbase;
@@ -1048,6 +1051,7 @@ void DebugAids::disableCoreFiles()
 {
   struct rlimit core_limit;
   core_limit.rlim_cur = 0;
+  core_limit.rlim_max = 0;
   setrlimit(RLIMIT_CORE, &core_limit);
 }
 

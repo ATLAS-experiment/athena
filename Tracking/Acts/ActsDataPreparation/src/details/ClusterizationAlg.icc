@@ -23,6 +23,9 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::initialize()
     ATH_CHECK(m_clusterContainerKey.initialize());
     ATH_CHECK(m_roiCollectionKey.initialize());
 
+    ATH_CHECK(m_detEleCollKey.initialize());
+    ATH_CHECK(m_detElStatus.initialize());
+    
     ATH_CHECK(m_clusteringTool.retrieve());
     ATH_CHECK(m_regionSelector.retrieve());
 
@@ -49,80 +52,159 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::finalize()
   
   return StatusCode::SUCCESS;
 }
-  
+
 template <typename IClusteringTool, bool useCache>
 StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventContext& ctx) const
 {
-    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
-    auto mon_nclusters = Monitored::Scalar<int>("NClustersCreated");
-    auto mon = Monitored::Group( m_monTool, timer, mon_nclusters );
+  auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+  auto mon_nclusters = Monitored::Scalar<int>("NClustersCreated");
+  auto mon = Monitored::Group( m_monTool, timer, mon_nclusters );
+    
+  SG::ReadHandle<RDOContainer> rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
+  ATH_CHECK(rdoContainerHandle.isValid());
+  const RDOContainer* rdoContainer = rdoContainerHandle.cptr();
 
-    Cache_WriteHandle cacheHandle;
-    if constexpr (useCache) {
-      cacheHandle = Cache_WriteHandle(m_ClusterCache, ctx);
-      auto updateHandle = Cache_BackendUpdateHandle(m_ClusterCacheBackend, ctx);
-      ATH_CHECK(updateHandle.isValid());
-      ATH_CHECK(cacheHandle.record(std::make_unique<Cache_IDC>(updateHandle.ptr())));
-      ATH_CHECK(cacheHandle.isValid());
+  SG::ReadHandle<TrigRoiDescriptorCollection> roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
+  ATH_CHECK(roiCollectionHandle.isValid());
+  const TrigRoiDescriptorCollection *roiCollection = roiCollectionHandle.cptr();
+
+  SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle = SG::makeHandle( m_detEleCollKey, ctx );
+  ATH_CHECK(detEleHandle.isValid());
+  const InDetDD::SiDetectorElementCollection* elements = detEleHandle.cptr();
+
+  SG::ReadHandle< InDet::SiDetectorElementStatus > detEleStatusHandle = SG::makeHandle(m_detElStatus, ctx);
+  ATH_CHECK(detEleStatusHandle.isValid());
+  const InDet::SiDetectorElementStatus* detEleStatus = detEleStatusHandle.cptr();
+
+  Cache_WriteHandle cacheHandle;
+  if constexpr (useCache) {
+    cacheHandle = Cache_WriteHandle(m_ClusterCache, ctx);
+    auto updateHandle = Cache_BackendUpdateHandle(m_ClusterCacheBackend, ctx);
+    ATH_CHECK(updateHandle.isValid());
+    ATH_CHECK(cacheHandle.record(std::make_unique<Cache_IDC>(updateHandle.ptr())));
+    ATH_CHECK(cacheHandle.isValid());
+  }
+
+  // count number of elements and store some collections
+  std::vector<IdentifierHash> listOfIds;
+  listOfIds.reserve(elements->size());
+
+  std::vector<bool> toBeProcessedIds(elements->size(), false);
+
+  std::vector<const InDetDD::SiDetectorElement*> processedElements {};
+  processedElements.reserve(elements->size());
+  std::vector<typename IClusteringTool::ClusterCollection> clusterCollection {};
+  clusterCollection.reserve(elements->size());
+
+  std::vector<Cache_IDCLock> idclocks;
+
+  Acts::Ccl::ClusteringData data;
+  
+  // loop on ROIs
+  std::size_t nClusters = 0ul;
+  for (const auto* roi : *roiCollection) {
+    // get list of ids
+    listOfIds.clear();    
+    m_regionSelector->lookup(ctx)->HashIDList(*roi, listOfIds);
+
+    // loop on IDs
+    for (const IdentifierHash& id : listOfIds) {      
+      if (not id.is_valid()) {
+	ATH_MSG_ERROR("Id hash is not valid: " << id);
+	return StatusCode::FAILURE;
+      }
+      
+      // check if already considered
+      if (toBeProcessedIds[id]) continue;
+      toBeProcessedIds[id] = true;
+
+      Cache_IDCLock cache_wh;
+      if constexpr (useCache) {
+	//obtain a write handle
+	auto tmp = cacheHandle->getWriteHandle(id);
+	Cache_IDCLock::Swap(cache_wh, tmp);
+	//check if already available
+	if(cache_wh.OnlineAndPresentInAnotherView()) continue;
+      }
+
+      const InDetDD::SiDetectorElement* element = elements->getDetectorElement(id);
+      if (not element) {
+	ATH_MSG_ERROR("Cannot retrieve Detector Element for id hash: " << id);
+	return StatusCode::FAILURE;
+      }          
+
+      // unpack RDOs and store them
+      const RawDataCollection* rdos = rdoContainer->indexFindPtr(id);
+      if (not rdos or rdos->empty()) {
+	continue;
+      }
+
+      if constexpr (useCache) {
+	idclocks.push_back( std::move(cache_wh) );
+      }
+      
+      m_stat[kNRdo] += rdos->size();
+      // make ACTS clusters
+      ATH_CHECK( m_clusteringTool->clusterize(ctx,
+					      *rdos,
+					      *detEleStatus,
+					      *element,
+                data,
+					      clusterCollection) );
+      processedElements.push_back( element );
+      nClusters += clusterCollection.back().size();
+    } // loop on IDs
+  } // loop on ROIs
+
+  mon_nclusters = nClusters;
+  
+  SG::WriteHandle<ClusterContainer> clusterHandle = SG::makeHandle(m_clusterContainerKey, ctx);
+  ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(),
+				  std::make_unique<ClusterAuxContainer>() ));
+  ClusterContainer *clusterContainer = clusterHandle.ptr();
+
+  // Fast Insertion of N elements
+  using xAODCluster_t = typename ClusterContainer::base_value_type;
+  std::vector<xAODCluster_t*> toAddCollection;
+  toAddCollection.reserve(nClusters);
+  for (std::size_t i(0); i<nClusters; ++i)
+    toAddCollection.push_back(new xAODCluster_t());
+  clusterContainer->insert(clusterContainer->end(),
+			   toAddCollection.begin(),
+			   toAddCollection.end());
+  
+  // Fill the collection to xAOD format, computing necessary quantities
+  std::size_t xaodCounter = 0ul;
+  typename ClusterContainer::iterator finalElement = clusterContainer->end();
+  for (std::size_t i(0); i<clusterCollection.size(); ++i) {
+    const InDetDD::SiDetectorElement* element = processedElements[i];
+    typename IClusteringTool::ClusterCollection& actsClusters = clusterCollection[i];
+
+    typename ClusterContainer::iterator itr = clusterContainer->begin() + xaodCounter;
+    if ( std::distance(itr, finalElement) < static_cast<long int>(actsClusters.size()) ) {
+      ATH_MSG_ERROR("Inconsistent size of clusters");
+      return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<RDOContainer> rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
-    ATH_CHECK(rdoContainer.isValid());
+    ATH_CHECK( m_clusteringTool->makeClusters(ctx,
+					      actsClusters,
+					      *element,
+					      itr) );
+    
+    if constexpr (useCache) {
+      // add to the cache
+      ATH_CHECK(Cache::Helper<BaseClusterType>::insert(idclocks[i],
+						       clusterContainer,
+						       xaodCounter,
+						       xaodCounter + actsClusters.size()));
+    }
 
-    SG::WriteHandle<ClusterContainer> clusterHandle = SG::makeHandle(m_clusterContainerKey, ctx);
-    ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(), 
-				    std::make_unique<ClusterAuxContainer>() ));
-    ClusterContainer *clusterContainer = clusterHandle.ptr();
-    // Reserve space, estimate of mean clusters to reduce re-allocations
-    clusterContainer->reserve( m_expectedClustersPerRDO.value() * rdoContainer->size() );
+    xaodCounter += actsClusters.size();
+  }
 
-
-
-    // retrieve the RoI as provided from upstream algos
-    SG::ReadHandle<TrigRoiDescriptorCollection> roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
-    ATH_CHECK(roiCollectionHandle.isValid());      
-    const TrigRoiDescriptorCollection *roiCollection = roiCollectionHandle.cptr(); 
-
-    // Get list of Hash Ids from the RoI
-    std::vector<IdentifierHash> listOfIds;
-    for (const auto* roi : *roiCollection) {
-      listOfIds.clear();
-      m_regionSelector->lookup(ctx)->HashIDList(*roi, listOfIds);
-      // We'd need to first check the id hashes have not already been processed beforehand, and only then
-      // add it to the list of ids to be processed.
-      for (const IdentifierHash id : listOfIds) {      
-        //obtain the write handle directly when we decide to process a given idhash
-        //this will ensure that proper waiting 
-        Cache_IDCLock cache_wh;
-        if constexpr (useCache) {
-          //obtain a write handle
-          auto tmp = cacheHandle->getWriteHandle(id);
-          Cache_IDCLock::Swap(cache_wh, tmp);
-          //check if already available
-          if(cache_wh.OnlineAndPresentInAnotherView()) continue;
-        }
-
-        auto prev_len = clusterContainer->size();
-
-        // If not already processed, do it now
-        const RawDataCollection* rdos = rdoContainer->indexFindPtr(id);
-        if (rdos != nullptr && !rdos->empty()) {
-          m_stat[kNRdo] += rdos->size();
-          ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx,*clusterContainer));
-        }
-
-        if constexpr (useCache) {
-          //add to the cache
-          ATH_CHECK(Cache::Helper<BaseClusterType>::insert(cache_wh, clusterContainer, prev_len, clusterContainer->size()));
-        }
-      } // loop on ids
-    } // loop on rois
-    mon_nclusters = clusterContainer->size();
-
-    m_stat[kNClusters] += clusterContainer->size();
-    ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());    
-    return StatusCode::SUCCESS;
+  m_stat[kNClusters] += clusterContainer->size();
+  ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());
+  return StatusCode::SUCCESS;
 }
-
-
+  
 } // namespace ActsTrk

@@ -14,16 +14,14 @@ atlas_add_library( JetCalibToolsLib
    JetCalibTools/*.h Root/*.cxx src/*.cxx
    PUBLIC_HEADERS JetCalibTools
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo xAODEventShape
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo xAODEventShape xAODMetaData
    xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib JetToolHelpersLib MuonAnalysisInterfacesLib JetAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES xAODMuon PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( JetCalibTools
-      src/components/*.cxx
-      INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} JetCalibToolsLib )
-endif()
+atlas_add_component( JetCalibTools
+   src/components/*.cxx
+   INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} JetCalibToolsLib )
 
 atlas_add_dictionary( JetCalibToolsDict
    JetCalibTools/JetCalibToolsDict.h
@@ -31,9 +29,9 @@ atlas_add_dictionary( JetCalibToolsDict
    LINK_LIBRARIES JetCalibToolsLib )
 
 # Executable(s) in the package:
-set( _extraLibs "POOLRootAccessLib" )
-if( XAOD_STANDALONE )
-   set( _extraLibs )
+set( _extraLibs )
+if( NOT XAOD_STANDALONE )
+   set( _extraLibs "POOLRootAccessLib" )
 endif()
 
 atlas_add_executable( JetCalibTools_Example
@@ -61,3 +59,5 @@ atlas_add_executable( JetCalibTools_SmearingPlots
    xAODCore xAODRootAccess JetCalibToolsLib ${_extraLibs} )
    
 atlas_install_python_modules( python/*.py )
+
+atlas_install_data( data/* )

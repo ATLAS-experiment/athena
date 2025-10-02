@@ -37,19 +37,8 @@ using std::string;
 /// Standard Constructor
 PileUpMergeSvc::PileUpMergeSvc(const std::string& name,ISvcLocator* svc)
   : AthService(name,svc), 
-    p_overStore("StoreGateSvc", "StoreGateSvc"),
-    m_intervals(this),
-    m_pITriggerTime(""),
-    m_returnTimedData(true),
-    m_EventInfoKeyName("OverlayEvent"),
-    m_xAODCnvTool("xAODMaker::EventInfoCnvTool/EventInfoCnvTool", this)
+    p_overStore("StoreGateSvc", "StoreGateSvc")
 {
-  declareProperty("Intervals", m_intervals, "Folders specifying bunch xing intervals for different data objects");
-  declareProperty("TriggerTimeTool", m_pITriggerTime, "allows to apply a trigger time offset");
-  declareProperty("ReturnTimedData", m_returnTimedData, 
-		  "determine whether the TimedData returned by retrieveSubEvts have non trivial PileUpTimeEventIndex. May be set to false for overlay with real events ");
-  declareProperty( "xAODCnvTool", m_xAODCnvTool );
-  declareProperty("EventInfoKeyName", m_EventInfoKeyName, "default name for EventInfo"); 
 }
 
 /// setup PileUpIntervals
@@ -253,32 +242,6 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
    return xAODEventInfo;
 }
 
-
-const InterfaceID& 
-PileUpMergeSvc::interfaceID() {
-  static const InterfaceID IID_IPileUpMergeSvc(9991, 1, 0); //FIXME
-  return IID_IPileUpMergeSvc; 
-} 
-
-  // Query the interfaces.
-  //   Input: riid, Requested interface ID
-  //          ppvInterface, Pointer to requested interface
-  //   Return: StatusCode indicating SUCCESS or FAILURE.
-  // N.B. Don't forget to release the interface after use!!!
-StatusCode 
-PileUpMergeSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  //FIXME
-  if ( interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (PileUpMergeSvc*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
 
 bool
 PileUpMergeSvc::isLive(CLID id, const string& dataKey, int iXing) {

@@ -9,7 +9,7 @@ def _local_apply_core(func, args, q):
         os._exit(1)
 
 def apply(func, args):
-    from six.moves.queue import Empty
+    from queue import Empty
     from multiprocessing import Process
     from multiprocessing.managers import SyncManager
 

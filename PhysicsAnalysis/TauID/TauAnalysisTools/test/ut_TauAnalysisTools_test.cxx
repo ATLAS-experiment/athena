@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_UT_TAUANALYSISTOOLS_TEST_H
@@ -76,17 +76,19 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
   // TauSmearingTool
   // ===========================================================================
   ToolHandle<TauAnalysisTools::ITauSmearingTool> TauSmeTool("TauAnalysisTools::TauSmearingTool/TauSmearingTool");
+  ANA_CHECK(AthAnalysisHelper::setProperty(TauSmeTool, "Campaign", "mc20"));
   ANA_CHECK(TauSmeTool.retrieve());
 
   // ===========================================================================
   // TauEfficiencyCorrectionsTool
   // ===========================================================================
   std::vector<int> efficiency_correction_types;
-  efficiency_correction_types.push_back((int)TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau);
+  efficiency_correction_types.push_back(static_cast<int>(TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau));
 
   ToolHandle<TauAnalysisTools::ITauEfficiencyCorrectionsTool> TauEffCorrTool( "TauAnalysisTools::TauEfficiencyCorrectionsTool/TauEfficiencyCorrectionsTool" );
-  ANA_CHECK(AthAnalysisHelper::setProperty( TauEffCorrTool, "JetIDLevel",  (int)TauAnalysisTools::JetID::JETIDRNNLOOSE));
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauEffCorrTool, "JetIDLevel",  static_cast<int>(TauAnalysisTools::JetID::JETIDRNNLOOSE)));
   ANA_CHECK(AthAnalysisHelper::setProperty( TauEffCorrTool, "EfficiencyCorrectionTypes", efficiency_correction_types));
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauEffCorrTool, "Campaign", "mc20"));
   ANA_CHECK(TauEffCorrTool.retrieve());
 
   // ===========================================================================
@@ -95,12 +97,6 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
   ToolHandle<TauAnalysisTools::ITauTruthMatchingTool> T2MT( "TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool");
   ANA_CHECK(AthAnalysisHelper::setProperty(T2MT, "TruthJetContainerName", "AntiKt4TruthDressedWZJets"));
   ANA_CHECK(T2MT.retrieve());
-
-  // ===========================================================================
-  // TauTruthTrackMatchingTool
-  // ===========================================================================
-  ToolHandle<TauAnalysisTools::ITauTruthTrackMatchingTool> T3MT( "TauAnalysisTools::TauTruthTrackMatchingTool/TauTruthTrackMatchingTool");
-  ANA_CHECK(T3MT.retrieve());
 
   // defining needed Container
   const xAOD::TauJetContainer* xTauJetContainer = nullptr;
@@ -142,7 +138,7 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
         if (xTruthTau->isTau())
         {
           static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
-          if ((bool)accIsHadronicTau(*xTruthTau)) {
+          if (static_cast<bool>(accIsHadronicTau(*xTruthTau))) {
             static const SG::ConstAccessor<size_t> accNumCharged ("numCharged");
             ANA_MSG_INFO( "Tau was matched to a truth hadronic tau, which has " << int(accNumCharged(*xTruthTau))
                           << " prongs and a charge of " << int(xTruthTau->charge()));

@@ -18,7 +18,7 @@ filtSeq.xAODHeavyFlavorBHadronFilter.Request_cQuark=False
 filtSeq.xAODHeavyFlavorBHadronFilter.Request_bQuark=False
 filtSeq.xAODHeavyFlavorBHadronFilter.RequestSpecificPDGID=False
 filtSeq.xAODHeavyFlavorBHadronFilter.RequireTruthJet=False
-filtSeq.xAODHeavyFlavorBHadronFilter.BottomPtMin=0*GeV
+filtSeq.xAODHeavyFlavorBHadronFilter.BottomPtMin=0.
 filtSeq.xAODHeavyFlavorBHadronFilter.BottomEtaMax=4.0
 
 

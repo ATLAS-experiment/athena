@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
@@ -14,11 +14,9 @@ l1seeds = { 'low'  : \
                ['L1_2eEM9',\
                 'L1_eEM12L',\
                 "L1_eTAU20",\
-                #'L1_EM12_XS20',\
                 'L1_jJ40p30ETA49',\
                 'L1_JPSI-1M5-eEM15',\
                 'L1_jJ60',\
-                #'L1_J30p0ETA49_2J20p0ETA49',\
                 'L1_JPSI-1M5-eEM9',\
                 'L1_MU8F',\
                 'L1_ZeroBias',\
@@ -28,19 +26,16 @@ l1seeds = { 'low'  : \
                 'L1_2eEM18',\
                 'L1_2MU3V',\
                 'L1_MU5VF_3MU3V',\
-                'L1_BPH-0DR3-eEM9jJ40_2MU3V',\
-                'L1_BPH-0DR3-eEM9jJ40_MU5VF',\
+                'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',\
                 'L1_BPH-0M9-eEM9-eEM7_MU5VF',\
                 'L1_BPH-2M9-2DR15-2MU5VF',\
                 'L1_BPH-2M9-0DR15-C-MU5VFMU3V',\
                 'L1_BPH-7M11-25DR99-2MU3VF',\
                 'L1_BPH-8M15-0DR22-2MU5VF',\
                 'L1_BPH-8M15-0DR22-MU5VFMU3V-BO',\
-                'L1_BTAG-MU3VjJ40',\
                 'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20',\
                 'L1_DY-BOX-2MU5VF',\
                 'L1_DY-BOX-2MU3VF',\
-                #'L1_EM15_XS30',\
                 'L1_eEM18L',\
                 'L1_eEM24L',\
                 'L1_gXEJWOJ100',\
@@ -51,11 +46,11 @@ l1seeds = { 'low'  : \
                 'L1_LFV-MU5VF',\
                 'L1_MU5VF_jJ80',\
                 'L1_cTAU30M_3DR35-MU8F-eTAU30',\
-                #'L1_MU5VF_J20',\
-                #'L1_MU5VF_J30p0ETA49_2J20p0ETA49',\
                 'L1_eTAU60',\
-                #'L1_XE35',
                 'L1_jXE70',
+                'L1_3jJ40p0ETA25',
+                'L1_2cTAU50M_DPHI-2eTAU50',
+                'L1_ADVAEL',
             ]
 }
 
@@ -70,13 +65,13 @@ def enhancedBiasReco(flags):
     return reco
 
 
-def EnhancedBiasHypoToolGen(chainDict):
-    tool = CompFactory.L1InfoHypoTool(chainDict['chainName'])
-    tool.CTPUnpackingTool.UseTBPBits = True
+def EnhancedBiasHypoToolGen(flags, chainDict):
+    tool = CompFactory.L1InfoHypoTool(chainDict['chainName'],
+                                      CTPUnpackingTool = CompFactory.CTPUnpackingTool(UseTBPBits = True))
 
     key = chainDict['chainParts'][0]['algType']
     if key not in l1seeds:
-        log.error("No configuration exist for EB chain: ", key)
+        log.error("No configuration exist for EB chain: %s", key)
     else:
         tool.L1ItemNames = l1seeds[key]
 

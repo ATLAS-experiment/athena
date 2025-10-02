@@ -18,7 +18,7 @@ namespace JiveXML {
    **/
   CaloClusterRetriever::CaloClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_sgKeyFavourite ("LArClusterEM")
+    m_sgKeyFavourite ("egammaClusters")
   {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // this :
@@ -313,7 +313,7 @@ void SoGL2PSAction::separatorAction(
 //////////////////////////////////////////////////////////////////////////////
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 {
-  SoGL2PSAction* This = (SoGL2PSAction*)aThis;
+  SoGL2PSAction* This = static_cast<SoGL2PSAction*>(aThis);
   if(This->m_file) {
     //SoSeparator may use render caching.
     aNode->doAction(aThis);
@@ -330,9 +330,9 @@ void SoGL2PSAction::drawStyleAction(
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 {
   SoNode::GLRenderS(aThis,aNode);
-  SoGL2PSAction* This = (SoGL2PSAction*)aThis;
+  SoGL2PSAction* This = static_cast<SoGL2PSAction*>(aThis);
   if(This->m_file) {
-    SoDrawStyle* soDrawStyle = (SoDrawStyle*)aNode;
+    SoDrawStyle* soDrawStyle = static_cast<SoDrawStyle*>(aNode);
     if(soDrawStyle->style.getValue()==SoDrawStyle::LINES) {
       float w = soDrawStyle->lineWidth.getValue();
       gl2psLineWidth(w);

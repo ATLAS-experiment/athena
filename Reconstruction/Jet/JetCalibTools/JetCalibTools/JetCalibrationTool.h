@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.h 
@@ -16,7 +16,7 @@
 #include <TString.h>
 #include <TEnv.h>
 
-#include "AsgTools/AsgTool.h"
+#include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AsgToolMacros.h"
 
 #include "xAODEventInfo/EventInfo.h"
@@ -30,7 +30,7 @@
 
 
 class JetCalibrationTool
-  : public asg::AsgTool,
+  : public asg::AsgMetadataTool,
     virtual public IJetCalibrationTool {
 
   ASG_TOOL_CLASS2(JetCalibrationTool, IJetCalibrationTool, IJetModifier)
@@ -77,6 +77,7 @@ private:
   std::string m_originScale;
   bool m_devMode{};
   bool m_isData{true};
+  std::string m_forceCampaign{};
   bool m_timeDependentCalib{};
   bool m_originCorrectedClusters{};
   bool m_useNjetInResidual{};
@@ -89,6 +90,9 @@ private:
   bool m_doSetDetectorEta{};
   bool m_insituCombMassCalib{};
   std::vector<TString> m_insituCombMassConfig;
+  std::string m_forceCalibFile_PtResidual{};
+  std::string m_forceCalibFile_FastSim{};
+  std::string m_forceCalibFile_MC2MC{};
 
   //TEnv to hold the global text config
   TEnv * m_globalConfig{};

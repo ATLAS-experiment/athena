@@ -1,8 +1,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg, PhysicsListSvcCfg
+from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
-from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
+from G4AtlasTools.G4GeometryToolConfig import G4AtlasDetectorConstructionToolCfg
+from G4AtlasTools.G4AtlasToolsConfig import G4ThreadPoolSvcCfg, SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
 from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata, readSimulationParameters
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,7 +24,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
         kwargs.setdefault( "TruthPreselectionTool", result.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
 
-    kwargs.setdefault("DetGeoSvc", result.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)).name)
+    kwargs.setdefault("DetectorConstruction", result.addPublicTool(result.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(flags))))
 
     kwargs.setdefault("InputTruthCollection", "BeamTruthEvent") #tocheck -are these string inputs?
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
@@ -39,6 +40,9 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     from SimulationConfig.SimEnums import LArParameterization
     # Configure fast simulation
     if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        from G4AtlasTools.G4AtlasToolsConfig import PunchThroughG4ToolCfg
+        physics_initialization_tools = kwargs.setdefault("PhysicsInitializationTools", [])
+        physics_initialization_tools.append(result.addPublicTool(result.popToolsAndMerge(PunchThroughG4ToolCfg(flags))))
         # Set the path to the simplified calorimeter geometry for particle transport if provided
         if flags.Sim.SimplifiedGeoPath:
             kwargs.setdefault('SimplifiedGeoPath', flags.Sim.SimplifiedGeoPath)
@@ -62,7 +66,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("AtRndmGenSvc",
-                      result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+                      result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     kwargs.setdefault("RandomGenerator", "athena")
 
@@ -70,16 +74,17 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     is_hive = flags.Concurrency.NumThreads > 0
     kwargs.setdefault("MultiThreading", is_hive)
     if is_hive:
+        result.merge(G4ThreadPoolSvcCfg(flags))
         kwargs.setdefault('Cardinality', flags.Concurrency.NumThreads)
 
-    kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
+    kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
+    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
 
     #input converter
-    kwargs.setdefault("InputConverter", result.getPrimaryAndMerge(InputConverterCfg(flags)).name)
+    kwargs.setdefault("InputConverter", result.getPrimaryAndMerge(InputConverterCfg(flags)))
     if flags.Sim.ISF.Simulator.isQuasiStable():
         from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
-        kwargs.setdefault("QuasiStablePatcher", result.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)).name )
+        kwargs.setdefault("QuasiStablePatcher", result.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
 
     #sensitive detector master tool
     kwargs.setdefault("SenDetMasterTool", result.addPublicTool(result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))))
@@ -92,10 +97,10 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     result.merge(readSimulationParameters(flags))  # for FileMetaData creation
 
     #User action services (Slow...)
-    kwargs.setdefault("UserActionSvc", result.getPrimaryAndMerge(UserActionSvcCfg(flags)).name)
+    kwargs.setdefault("UserActionSvc", result.getPrimaryAndMerge(UserActionSvcCfg(flags)))
 
     #PhysicsListSvc
-    kwargs.setdefault("PhysicsListSvc", result.getPrimaryAndMerge(PhysicsListSvcCfg(flags)).name)
+    kwargs.setdefault("PhysicsListSvc", result.getPrimaryAndMerge(PhysicsListSvcCfg(flags)))
 
     ## G4AtlasAlg verbosities (available domains = Navigator, Propagator, Tracking, Stepping, Stacking, Event)
     ## Set stepper verbose = 1 if the Athena logging level is <= DEBUG

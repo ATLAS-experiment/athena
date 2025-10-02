@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_SILAYERBUILDERCOND_H
@@ -10,10 +10,10 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 // Trk
 #include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkGeometry/TrackingGeometry.h"
 // STL
+#include <memory>
 #include <vector>
 
 namespace Trk {

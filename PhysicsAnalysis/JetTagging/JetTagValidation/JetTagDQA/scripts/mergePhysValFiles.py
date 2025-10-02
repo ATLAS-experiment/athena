@@ -8,7 +8,6 @@
 #Nov 2020
 #----------------------------------------------------------------------
 
-from __future__ import print_function
 import getopt,os,sys,glob,argparse,ROOT,time
 from ROOT import gDirectory
 

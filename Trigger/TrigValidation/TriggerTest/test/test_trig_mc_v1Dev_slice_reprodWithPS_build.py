@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by prescaling
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
@@ -95,17 +95,11 @@ def remove_disabled_counts(counts_file, ps_file_pattern):
 
 def generate_config_steps():
     # athena
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags
-    conditions = defaultConditionsTags.RUN3_MC
+    from TriggerTest.MCExecStep import MCBuildStep
     
-    ex = ExecStep.ExecStep('ConfigOnly')
+    ex = MCBuildStep('ConfigOnly',menu='Dev_pp_run3_v1')
     ex.config_only = True
-    ex.type = 'athena'
-    ex.job_options = 'TriggerJobOpts/runHLT.py'
     ex.input = 'ttbar'
-    ex.threads = 1
-    ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-                'IOVDb.GlobalTag="' + conditions + '"']
     ex.perfmon = False
     # Make a copy of the default prescales file
     copy_ps = CopyStep('CopyPrescales.Default', 'HLTPrescalesSet*.json', 'prescales_Default.json')

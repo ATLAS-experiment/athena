@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TauJetCnvAlg.h 
@@ -16,6 +16,7 @@
 
 // FrameWork includes
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODTauCnv/ITauJetCnvTool.h"
 
@@ -55,11 +56,11 @@ namespace xAODMaker {
     TauJetCnvAlg();
 
     /// Containers
-    std::string m_inputTauJetContainerName;
-    std::string m_xaodTauJetContainerName;
+    Gaudi::Property<std::string> m_inputTauJetContainerName{this, "InputTauJetContainer", "TauRecContainer"};
+    Gaudi::Property<std::string> m_xaodTauJetContainerName{this, "xAODTauJetContainer", "TauRecContainer"};
 
     /** @brief Tool to perform taujet container conversion*/
-    ToolHandle<ITauJetCnvTool>                 m_cnvTool;
+    ToolHandle<ITauJetCnvTool> m_cnvTool{this, "CnvTool", "", "The converter tool for TauJets"};
     
   }; 
 

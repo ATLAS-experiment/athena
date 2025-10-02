@@ -24,8 +24,8 @@ namespace InDet {
    class EmulatedDefects : public std::vector<std::vector< typename T_ModuleHelper::KEY_TYPE> >
    {
    public:
+      static constexpr bool s_needMasking = T_ModuleHelper::RANGE_FLAG_MASK != 0;
       static constexpr unsigned int MASK_FOR_COMPARISON = T_ModuleHelper::CHIP_MASK | T_ModuleHelper::ROW_MASK | T_ModuleHelper::COL_MASK;
-      static constexpr bool s_needMasking = T_ModuleHelper::N_MASKS>0;
       using KEY_TYPE = typename T_ModuleHelper::KEY_TYPE;
 
       EmulatedDefects(const InDetDD::SiDetectorElementCollection &detector_elements)
@@ -33,7 +33,6 @@ namespace InDet {
       {
          resize( m_detectorElements->size() );
       }
-
 
       /** Special greater operator which ignores the column group flag in the comparison
        */
@@ -63,6 +62,19 @@ namespace InDet {
                                  module_defects.end());
       }
 
+      /** Convenience method to find the preceding defect (read only).
+       * @param module_defects the defect list of a particular module
+       * @param key packed hardware coordinates addressing a single pixel or column group defect.
+       * @return pair of the iterator of the preceding element and the end iterator
+       * If there is no preceding defect then both returned iterators will be the end iterator
+       */
+      static std::pair< typename std::vector<KEY_TYPE>::const_iterator,
+                        typename std::vector<KEY_TYPE>::const_iterator> lower_bound(const std::vector<KEY_TYPE> &module_defects,
+                                                                                    KEY_TYPE key) {
+         return std::make_pair(  std::lower_bound( module_defects.begin(),module_defects.end(), key, greater()),
+                                 module_defects.end());
+      }
+
       /** Convenience method to find the preceding defect.
        * @param id_hash a valid ID hash of a module.
        * @param key packed hardware coordinates addressing a single pixel or column group defect.
@@ -77,6 +89,23 @@ namespace InDet {
                                  module_defects.end());
       }
 
+      /** Convenience method to get a range of keys.
+       * @param key_iter a valid iterator to defects
+       * @return a range of defect keys or a pair of identical keys
+       * If the iterator is a range iterator return the start key and the key of the last element of this range
+       * otherwise the given key twice.
+       */
+      static std::pair<KEY_TYPE,KEY_TYPE> getRange(typename std::vector<KEY_TYPE>::const_iterator key_iter) {
+         if (T_ModuleHelper::isRangeKey(*key_iter)) {
+            auto prev = key_iter;
+            --prev;
+            return std::make_pair(*key_iter,*prev);
+         }
+         else {
+            return std::make_pair(*key_iter,*key_iter);
+         }
+      }
+
       /** Test whether a pixel or strip on a certain module is marked as defect.
        * @param helper utility matching this defect data to check whether a defect overlaps with pixel coordinates.
        * @param id_hash a valid ID hash
@@ -86,7 +115,7 @@ namespace InDet {
        */
       bool isDefect(const T_ModuleHelper &helper, unsigned int id_hash, KEY_TYPE key) const {
          auto [defect_iter, end_iter] =lower_bound(id_hash, key);
-         return (defect_iter != end_iter && helper.isMatchingDefect( *defect_iter, key) );
+         return (defect_iter != end_iter) &&  helper.isMatchingDefect(*defect_iter,key);
       }
 
       /** Test whether a pixel on a certain module is marked as defect.

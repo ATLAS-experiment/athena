@@ -15,6 +15,8 @@
 #include "G4TransportationManager.hh"
 #include "G4UImanager.hh"
 #include "G4UserRunAction.hh"
+#include "G4RunManager.hh"
+#include "G4UserWorkerInitialization.hh"
 #include "G4Version.hh"
 
 #include <string>
@@ -23,9 +25,7 @@ G4AtlasRunManager::G4AtlasRunManager()
   : G4RunManager()
   , AthMessaging("G4AtlasRunManager")
   , m_recordFlux(false)
-  , m_fastSimTool("FastSimulationMasterTool")
   , m_physListSvc("PhysicsListSvc", "G4AtlasRunManager")
-  , m_detGeoSvc("DetectorGeometrySvc", "G4AtlasRunManager")
   , m_volumeSmartlessLevel({})
 {  }
 
@@ -47,20 +47,21 @@ void G4AtlasRunManager::Initialize()
   G4RunManager::Initialize();
 }
 
+void G4AtlasRunManager::RunInitialization()
+{
+  G4RunManager::RunInitialization();
+  if(auto* uwi = GetUserWorkerInitialization()) {
+    uwi->WorkerRunStart();
+  }
+}
 
 void G4AtlasRunManager::InitializeGeometry()
 {
   ATH_MSG_DEBUG( "InitializeGeometry()" );
-  if (m_detGeoSvc.retrieve().isFailure()) {
-    ATH_MSG_ERROR ( "Could not retrieve the DetectorGeometrySvc" );
-    G4ExceptionDescription description;
-    description << "InitializeGeometry: Failed to retrieve IDetectorGeometrySvc.";
-    G4Exception("G4AtlasRunManager", "CouldNotRetrieveDetGeoSvc", FatalException, description);
-    abort(); // to keep Coverity happy
-  }
 
   // Create/assign detector construction
-  G4RunManager::SetUserInitialization(m_detGeoSvc->GetDetectorConstruction());
+  G4RunManager::SetUserInitialization(
+      m_detConstruction->GetDetectorConstruction().release());
   if (userDetector) {
     G4RunManager::InitializeGeometry();
   }
@@ -92,21 +93,6 @@ void G4AtlasRunManager::InitializePhysics()
     abort(); // to keep Coverity happy
   }
   m_physListSvc->SetPhysicsOptions();
-
-  // Fast simulations last
-  if (m_fastSimTool.retrieve().isFailure()) {
-    ATH_MSG_ERROR ( "Could not retrieve the FastSim master tool" );
-    G4ExceptionDescription description;
-    description << "InitializePhysics: Failed to retrieve IFastSimulationMasterTool.";
-    G4Exception("G4AtlasRunManager", "CouldNotRetrieveFastSimMaster", FatalException, description);
-    abort(); // to keep Coverity happy
-  }
-  if(m_fastSimTool->initializeFastSims().isFailure()) {
-    G4ExceptionDescription description;
-    description << "InitializePhysics: Call to IFastSimulationMasterTool::initializeFastSims failed.";
-    G4Exception("G4AtlasRunManager", "FailedToInitializeFastSims", FatalException, description);
-    abort(); // to keep Coverity happy
-  }
 
   if (m_recordFlux) {
     m_fluxRecorder->InitializeFluxRecording();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,8 +33,8 @@ public:
   TempInterface (size_t size) : m_size (size) {}
   using AuxVectorData::setStore;
 
-  virtual size_t size_v() const { return m_size; }
-  virtual size_t capacity_v() const { return m_size; }
+  virtual size_t size_v() const override { return m_size; }
+  virtual size_t capacity_v() const override { return m_size; }
 
 private:
   size_t m_size;

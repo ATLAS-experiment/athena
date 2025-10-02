@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/FTagGhostElectronAssociationAlg.h"
 #include "xAODEgamma/ElectronFwd.h"
 #include "xAODTracking/TrackParticleFwd.h"
+#include <cstddef>
 #include <vector>
-#include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include <unordered_map>
 
 namespace FlavorTagDiscriminants {
 
@@ -48,24 +49,25 @@ namespace FlavorTagDiscriminants {
         ATH_MSG_DEBUG( "Retrieved " << jets->size() << " jets..." );
 
         SG::WriteDecorHandle<IPC, IPLV> electrons_out(m_ElectronsOutKey, ctx);
-        std::set<size_t> used_electrons_idx;
-
+        std::unordered_multimap<const xAOD::TrackParticle*, size_t> track_to_electron_map;
+        // Fill the unordered_multimap with track-electron associations
+        for (const auto electron : *electrons) {
+          auto track = xAOD::EgammaHelpers::getOriginalTrackParticle(electron);
+          if (!track)
+            continue;
+          track_to_electron_map.insert({track, electron->index()});
+        }
         for (auto jet : *jets) {
             IPLV electrons_in_jet;
             std::vector<const xAOD::TrackParticle*> jet_tracks;    
             jet_tracks = jet->getAssociatedObjects<const xAOD::TrackParticle>("GhostTrack");
-            for (const auto electron : *electrons){
-              if (used_electrons_idx.count(electron->index())) continue;
-              auto track = xAOD::EgammaHelpers::getOriginalTrackParticle(electron);
-              if(!track) continue;
-              if(xAOD::P4Helpers::deltaR(*jet, *electron) > 0.5) continue;
-              for (unsigned int i = 0; i < jet_tracks.size(); i++){
-                if (track == jet_tracks[i]){
-                  electrons_in_jet.push_back(ElementLink<IPC>(*electrons, electron->index()));
-                  used_electrons_idx.insert(electron->index());
-                  break;
+            for (const auto& track : jet_tracks) {
+                // Find all electrons associated with this track
+                auto range = track_to_electron_map.equal_range(track);
+                for (auto it = range.first; it != range.second; ++it) {
+                    size_t electron_index = it->second;
+                    electrons_in_jet.push_back(ElementLink<IPC>(*electrons, electron_index));
                 }
-              }
             }
             electrons_out(*jet) = electrons_in_jet;
         }

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 #ifndef DITAURECTOOLS_DITAURECTOOLSDICT_H
@@ -9,6 +9,7 @@
 
 #include "DiTauRecTools/DiTauIDVarCalculator.h"
 #include "DiTauRecTools/DiTauDiscriminantTool.h"
+#include "DiTauRecTools/DiTauOnnxDiscriminantTool.h"
 
 #endif // DITAURECTOOLS_TAURECTOOLSDICT_H
 

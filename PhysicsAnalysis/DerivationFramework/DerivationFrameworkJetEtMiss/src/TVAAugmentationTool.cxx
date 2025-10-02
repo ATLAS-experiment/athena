@@ -12,9 +12,8 @@ namespace DerivationFramework {
       const std::string& t,
       const std::string& n,
       const IInterface* p):
-    AthAlgTool(t, n, p)
+    base_class(t, n, p)
   {
-    declareInterface<IAugmentationTool>(this);
     declareProperty("LinkName", m_linkName, "The name of the output links");
     declareProperty("TrackName", m_trackName="InDetTrackParticles");
     declareProperty("VertexName", m_vertexName="PrimaryVertices");

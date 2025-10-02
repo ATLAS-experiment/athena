@@ -78,17 +78,14 @@ namespace pool  {
     /// Check if we can access the container for reading with the given type
     virtual DbStatus checkAccess(DbDatabase& dbH,
                                  const std::string& nam) const override final;
-    /// Ask if a given shape is supported
-    virtual DbStatus isShapeSupported(const DbTypeInfo* /* typ */ ) const override
-    { return true;    }
-    /// Define selection criteria
-    virtual DbStatus select(DbSelect& criteria) override;
+    /// Define selection
+    virtual DbStatus select(DbSelect& sel) override;
     /// Number of entries within the container
     virtual uint64_t size() override;
     /// Number of record in the container
     virtual uint64_t nextRecordId() override;
     /// Fetch next object address of the selection to set token
-    virtual DbStatus fetch(DbSelect&      sel) override;
+    virtual DbStatus fetch(DbSelect& sel) override;
     /// Fetch a column identified by its link in the container
     virtual DbStatus fetch( const Token::OID_t& linkH, Token::OID_t& stmt) override;
 

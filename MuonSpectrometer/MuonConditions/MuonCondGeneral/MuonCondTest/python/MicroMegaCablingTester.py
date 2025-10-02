@@ -2,11 +2,11 @@
 
 def MicroMegaCablingTestAlgCfg(flags, name = "MMCablingTestAlg"):
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
-    result = setupServicesCfg(flags)
-    from MuonConfig.MuonCablingConfig import NswCablingCfg
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from MuonConfig.MuonCablingConfig import MmCablingCfg
     from AthenaCommon.Constants import DEBUG
-    result.merge(NswCablingCfg(flags, JSONFile = "MMGZebraShift.json", OutputLevel = DEBUG ))
+    result = ComponentAccumulator()
+    result.merge(MmCablingCfg(flags, JSONFile = "MMGZebraShift.json", OutputLevel = DEBUG ))
     event_algo = CompFactory.MMCablingTestAlg(name, OutputLevel = DEBUG)
     result.addEventAlgo(event_algo, primary = True)
     return result
@@ -14,27 +14,21 @@ def MicroMegaCablingTestAlgCfg(flags, name = "MMCablingTestAlg"):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA, configureCondTag
     parser = SetupArgParser()
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3Data.ESD.pool.root"])
     args = parser.parse_args()
 
-    import os
-    os.system("python -m MuonMM_Cabling.zebraShift")
-
     flags = initConfigFlags()
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
-    flags.Output.ESDFileName = args.output
-    flags.Input.Files = args.inputFile
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
+    flags.Exec.MaxEvents = 1
+    flags.Input.Files = defaultTestFiles.ESD_RUN3_DATA22
+    configureCondTag(flags)
     flags.lock()   
     
-    cfg = MicroMegaCablingTestAlgCfg(flags)  
-    cfg.printConfig(withDetails=True, summariseProps=True)
+    cfg = SetupMuonStandaloneCA(flags)
+    cfg.merge(MicroMegaCablingTestAlgCfg(flags))
     flags.dump()
    
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
-
-
+    executeTest(cfg)

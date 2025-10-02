@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ### This module contains functions which may need to peek at the input file metadata
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import FlagEnum, ProductionStep
@@ -34,9 +34,6 @@ def fillAtlasMetadata(flags, dbFiller):
                 continue
             if "SimplifiedGeoPath" in flag and not flags.Sim.SimplifiedGeoPath:
                 # This flag is only written to metadata in case the FastCaloSim simplified geometry path is set
-                continue
-            if "FastCalo.doEMECFCS" in flag and not flags.Sim.FastCalo.doEMECFCS:
-                # This flag is only written to metadata in case FCS is used in EMEC region (1.5 < AbsEta < 3.2, Ekin < 8 GeV) is set
                 continue
             if "FastCalo.doPunchThrough" in flag and not flags.Sim.FastCalo.doPunchThrough:
                 # This flag is only written to metadata in case PunchThroughG4Tool is set
@@ -74,6 +71,10 @@ def fillAtlasMetadata(flags, dbFiller):
         # TODO hard-code for now, but set flag properly later
         dbFiller.addSimParam('Simulator', 'AtlasG4')
         dbFiller.addSimParam('SimulationFlavour', 'AtlasG4')
+
+    ## Data overlay
+    if flags.Common.isOverlay and flags.Overlay.DataOverlay:
+        dbFiller.addSimParam('IsDataOverlay', 'True')
 
 
 def writeSimulationParametersMetadata(flags):

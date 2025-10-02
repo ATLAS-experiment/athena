@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from TrkConfig.TrackingPassFlags import createTrackingPassFlags,createITkTrackingPassFlags
@@ -89,7 +89,7 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("trkTracks_IDTrig","")
   flags.addFlag("tracks_FTF",      "")        
   flags.addFlag("tracks_IDTrig",   "")  
-
+  flags.addFlag("useGBTSeedingTool",  False)
 
 def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
 
@@ -170,6 +170,8 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     
     "tauCore"       : tauCore,
     "tauIso"        : tauIso,
+    
+    "diTau"         : diTau,
     
     "bjet"          : bjet,
     
@@ -330,6 +332,24 @@ def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.adaptiveVertex = True
   flags.addSingleTrackVertices = True
   flags.vertex         = "HLT_IDVertex_Tau"
+  flags.electronPID    = False
+  flags.pTmin          = 0.8*Units.GeV
+  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  return flags
+
+@signatureActions
+def diTau(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  
+  flags.input_name = instanceName
+  flags.name     = "diTau"
+  flags.suffix   = "DiTau"
+  flags.roi      = "HLT_Roi_DiTau"
+  flags.etaHalfWidth   = 1.0
+  flags.phiHalfWidth   = 1.0
+  flags.zedHalfWidth   = 7.0
+  flags.adaptiveVertex = True
+  flags.addSingleTrackVertices = True
+  flags.vertex         = "HLT_IDVertex_DiTau"
   flags.electronPID    = False
   flags.pTmin          = 0.8*Units.GeV
   flags.minPT = tsetter(flags.minPT, flags.pTmin)
@@ -847,8 +867,9 @@ def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.PixBSErrCacheKey',        "PixBSErrCache")
   flags.addFlag(f'{category}.TRTRDOCacheKey',          "TrtRDOCache")
   flags.addFlag(f'{category}.TRT_DriftCircleCacheKey', "TRT_DriftCircleCache")
+  flags.addFlag(f'{category}.TRT_DriftCircleKey',      "TRT_TrigDriftCircles")
+  flags.addFlag(f'{category}.PixClustersAmbiMap',      "TrigPixelClusterAmbiguitiesMap")
   flags.addFlag(f'{category}.ClusterAmbiguitiesMap',   "TrigPixelClusterAmbiguitiesMap")
-
   
 import unittest
 

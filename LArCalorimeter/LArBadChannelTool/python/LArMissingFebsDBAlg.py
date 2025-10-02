@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
@@ -58,6 +58,7 @@ if __name__=="__main__":
     parser.add_argument("-o","--output",default="BadFebs.db", help="sqlite output file name")
     parser.add_argument("-f","--folder",default=None, help="database folder to create")
     parser.add_argument("-t","--tag",default=None, help="folder-level tag (or tag-suffix) to create")
+    parser.add_argument("--MC", action='store_true', default=False, help="Work on MC DB")
 
 
     (args,leftover)=parser.parse_known_args(sys.argv[1:])
@@ -71,15 +72,19 @@ if __name__=="__main__":
     flags=initConfigFlags()
     addLArCalibFlags(flags)
 
-    flags.Input.isMC = False
-    flags.IOVDb.DatabaseInstance="CONDBR2"
+    flags.Input.Files=[]
+    flags.Input.isMC = args.MC
+    flags.IOVDb.DatabaseInstance="OFLP200" if args.MC else "CONDBR2"
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=[args.runnumber if args.runnumber>0 else 300000]
-    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
+    flags.IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN3-11" if args.MC else "CONDBR2-ES1PA-2023-02"
+    if args.MC:
+       from Campaigns.Utils import Campaign
+       flags.Input.MCCampaign = Campaign.MC21a
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
-    flags.IOVDb.DBConnection="sqlite://;schema="+args.output+";dbname=CONDBR2"
+    flags.IOVDb.DBConnection="sqlite://;schema="+args.output+";dbname="+flags.IOVDb.DatabaseInstance
 
     if args.loglevel:
         from AthenaCommon import Constants

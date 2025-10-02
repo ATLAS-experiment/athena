@@ -161,8 +161,7 @@ class LogMergeStep(Step):
                     with open(log_name, encoding='utf-8') as log_file:
                         merged_file.write('### {} ###\n'.format(log_name))
                         # temporary workaround to ignore false positives in AOD->DAOD log parsing
-                        # FIXME: drop AODtoDAOD once test_trigAna_AODtoDAOD_run2_build.py is migrated to Derivation_tf
-                        if log_name == 'log.Derivation' or log_name == 'log.AODtoDAOD':
+                        if "Derivation" in log_name:
                             for line in log_file:
                                 merged_file.write(line.replace('Selected dynamic Aux', 'Selected Dynamic Aux'))
                         else:
@@ -523,9 +522,9 @@ class CheckFileStep(InputDependentStep):
     executable and input_file can have multiple comma-separated values
     '''
 
-    def __init__(self, name='CheckFile'):
+    def __init__(self,name='CheckFile',input_file='AOD.pool.root'):
         super(CheckFileStep, self).__init__(name)
-        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root'
+        self.input_file = input_file
         self.executable = 'checkFile.py,checkxAOD.py'
         self.__executables__ = None
         self.__input_files__ = None
@@ -540,7 +539,7 @@ class CheckFileStep(InputDependentStep):
             self.__input_files__ = []
             return
         self.__executables__ = self.executable.split(',')
-        self.__input_files__ = self.input_file.split(',')
+        self.__input_files__ = set(self.input_file.split(','))
         super(CheckFileStep, self).configure(test)
 
     def run(self, dry_run=False):
@@ -712,7 +711,7 @@ def produces_log(step):
            step.output_stream == Step.OutputStream.FILE_AND_STDOUT
 
 
-def default_check_steps(test):
+def default_check_steps(test, checkfile_input='AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root'):
     '''
     Create the default list of check steps for a test. The configuration
     depends on the package name and the type of exec steps (athena or
@@ -818,7 +817,7 @@ def default_check_steps(test):
     check_steps.append(TrigTestJsonStep())
 
     # CheckFile
-    check_steps.append(CheckFileStep())
+    check_steps.append(CheckFileStep(input_file=checkfile_input))
 
     # Zip the merged log (can be large and duplicates information)
     if log_to_zip is not None:

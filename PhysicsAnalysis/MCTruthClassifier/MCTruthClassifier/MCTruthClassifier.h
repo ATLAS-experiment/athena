@@ -125,10 +125,7 @@ public:
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override final;
-
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(HepMC::ConstGenParticlePtr,MCTruthPartClassifier::Info* info = nullptr) const override final;
+  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override final;
 
 #endif
 
@@ -169,31 +166,43 @@ private:
     return std::abs(det);
   }
 
+  // Temporary helper methods for detecting loops in the truth record
+  // Method1: Returns true if the parent particle is in the list of
+  // children of its decay vertex. Otherwise, returns the result of
+  // Method3.
+  bool TruthLoopDetectionMethod1(const xAOD::TruthVertex* childOrigVtx, const xAOD::TruthParticle* parent) const;
+  // Method2: Returns true if the parent production vertex is the
+  // child decay vertex and the child production vertex is the parent
+  // decay vertex.
+  bool TruthLoopDetectionMethod2(const xAOD::TruthParticle* child, const xAOD::TruthParticle* parent) const;
+  // Method3: Returns true if the parent and child production vertices
+  // are the same.
+  bool TruthLoopDetectionMethod3(const xAOD::TruthVertex* childOrigVtx, const xAOD::TruthParticle* parent) const;
 
-  MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer* xTruthParticleContainer,
+  MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info* info) const;
+                                                          MCTruthPartClassifier::Info& info) const;
 
-  MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
+  MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                       const xAOD::TruthParticle*,
                                                       bool& isPrompt,
-                                                      MCTruthPartClassifier::Info* info) const;
+                                                      MCTruthPartClassifier::Info& info) const;
 
-  MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
+  MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                      const xAOD::TruthParticle*,
                                                      int motherPDG,
-                                                     MCTruthPartClassifier::Info* info) const;
+                                                     MCTruthPartClassifier::Info& info) const;
 
-  MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
+  MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                         const xAOD::TruthParticle*,
                                                         bool& isPrompt,
-                                                        MCTruthPartClassifier::Info* info) const;
+                                                        MCTruthPartClassifier::Info& info) const;
 
-  MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
+  MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
-                                                          MCTruthPartClassifier::Info* info) const;
+                                                          MCTruthPartClassifier::Info& info) const;
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   bool genPartToCalo(const EventContext& ctx,

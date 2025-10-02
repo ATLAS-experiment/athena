@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLETRUTHCOLLECTIONCONTCNV_H
@@ -15,9 +15,9 @@
 #include "ParticleTruth/TrackParticleTruthCollectionContainer.h"
 #include "ParticleTruth/TrackParticleTruthVector.h"
 
-class TrackParticleTruthCollectionContainer_tlp2;
+class TrackParticleTruthCollectionContainer_tlp3;
 
-typedef TrackParticleTruthCollectionContainer_tlp2 TrackParticleTruthCollectionContainerPERS;
+typedef TrackParticleTruthCollectionContainer_tlp3 TrackParticleTruthCollectionContainerPERS;
 
 typedef T_AthenaPoolCustomCnv<TrackParticleTruthCollectionContainer, TrackParticleTruthCollectionContainerPERS> TrackParticleTruthCollectionContainerCnvBase;
 

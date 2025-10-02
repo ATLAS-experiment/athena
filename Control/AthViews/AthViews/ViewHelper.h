@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_VIEWHELPER_HH
@@ -147,10 +147,12 @@ namespace ViewHelper
       SG::ReadHandle<T> queryHandle( queryKey, sourceContext );
 
       //Loop over all views
-      for ( SG::View* inputView : viewVector )
+      for ( const SG::View* inputView : viewVector )
       {
+        // setProxyDict only supports non-const stores
+        SG::View* nc_inputView ATLAS_THREAD_SAFE = const_cast< SG::View* >( inputView );
         //Attach the handle to the view
-        StatusCode sc = queryHandle.setProxyDict( inputView );
+        StatusCode sc = queryHandle.setProxyDict( nc_inputView );
         if ( !sc.isSuccess() )
         {
           m_msg << MSG::ERROR <<"Failed to use view " << inputView->name() << " to read " << queryHandle.key() << " resetting output" << endmsg;
@@ -187,10 +189,12 @@ namespace ViewHelper
 
       //Loop over all views
       unsigned int offset = outputData.size(); //allow for existing objects in the container
-      for ( auto inputView : viewVector )
+      for ( const SG::View* inputView : viewVector )
       {
+        // setProxyDict only supports non-const stores
+        SG::View* nc_inputView ATLAS_THREAD_SAFE = const_cast< SG::View* >( inputView );
         //Attach the handle to the view
-        StatusCode sc = queryHandle.setProxyDict( inputView );
+        StatusCode sc = queryHandle.setProxyDict( nc_inputView );
         if ( !sc.isSuccess() )
         {
           m_msg << MSG::ERROR << "Failed to use view " << inputView->name() << " to read " << queryHandle.key() << endmsg;
@@ -198,7 +202,7 @@ namespace ViewHelper
         }
 
         //Nothing to do for empty collections
-        if ( queryHandle->size() == 0 )
+        if ( queryHandle->empty() )
         {
           if (m_msg.level() <= MSG::DEBUG) {
             m_msg << MSG::DEBUG << "Empty collection " << queryHandle.key() <<" in a view " << inputView->name() <<endmsg;
@@ -258,33 +262,41 @@ namespace ViewHelper
 
 
   /**
-   * navigate from the TrigComposite to nearest view and fetch object from it
-   * @return handle (can be invalid)
+   * @brief  Create a view handle from a handle key.
+   * @tparam KEY  Key type
+   * @param  view View object
+   * @param  key  VarHandleKey
+   * @param  ctx  EventContext
+   * @return Handle corresponding to the key type (can be invalid)
    */
-  template<typename T>
-  SG::ReadHandle<T> makeHandle( const SG::View* view , const SG::ReadHandleKey<T>& rhKey, const EventContext& context )
+  template<typename KEY>
+  auto makeHandle( const SG::View* view, const KEY& key, const EventContext& ctx )
   {
-    SG::View* nview ATLAS_THREAD_SAFE = const_cast< SG::View* >( view ); //We need it until reading from const IProxyDict is supported
-
-    auto handle = SG::makeHandle( rhKey, context );
-    if ( handle.setProxyDict( nview ).isFailure() ) {
-      //We ignore it because the handle will be invalid anyway if this call is unsuccessful
-      throw std::runtime_error( "Can't make ReadHandle of key " + rhKey.key() + " type " + ClassID_traits<T>::typeName() + " in view " + view->name() );
-    }
+    // setProxyDict only supports non-const stores
+    SG::View* nview ATLAS_THREAD_SAFE = const_cast< SG::View* >( view );
+    auto handle = SG::makeHandle( key, ctx );
+    handle.setProxyDict( nview ).ignore();  // can never fail
     return handle;
   }
 
 
+  /**
+   * @brief  Create WriteDecorHandle for given view and WriteDecorHandleKey.
+   * @tparam T     Decoration type (e.g. float)
+   * @tparam CONT  Container type
+   * @param  view  View object
+   * @param  dKey  WriteDecorHandleKey for the decoration to be written through the view
+   * @param  ctx   EventContext
+   * @return WriteDecorHandleKey (can be invalid)
+   */
   template<typename T, typename CONT>
-  SG::WriteDecorHandle<CONT, T> makeHandle( const SG::View* view , const SG::WriteDecorHandleKey<CONT>& dKey, const EventContext& context )
+  SG::WriteDecorHandle<CONT, T> makeHandle( const SG::View* view, const SG::WriteDecorHandleKey<CONT>& dKey,
+                                            const EventContext& context )
   {
-    SG::View* nview ATLAS_THREAD_SAFE = const_cast< SG::View* >( view ); //We need it until reading from const IProxyDict is supported
-
+    // setProxyDict only supports non-const stores
+    SG::View* nview ATLAS_THREAD_SAFE = const_cast< SG::View* >( view );
     auto handle = SG::makeHandle<T>(dKey, context );
-    if ( handle.setProxyDict( nview ).isFailure() ) {
-      //We ignore it because the handle will be invalid anyway if this call is unsuccessful
-      throw std::runtime_error( "Can't make WriteDecorHandle of key " + dKey.key() + " type " + ClassID_traits<T>::typeName() + " in view " + view->name() );
-    }
+    handle.setProxyDict( nview ).ignore();   // can never fail
     return handle;
   }
 

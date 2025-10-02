@@ -40,25 +40,23 @@ namespace TrigL2MuonSA {
 
     static const InterfaceID& interfaceID();
 
-  public:
-
     using AthAlgTool::AthAlgTool;
 
     virtual StatusCode initialize() override;
 
-  public:
-
-    StatusCode prepareData(const TrigRoiDescriptor* p_roids,
+    StatusCode prepareData(const EventContext& ctx,
+			    const TrigRoiDescriptor* p_roids,
 			    const TrigL2MuonSA::RpcFitResult& rpcFitResult,
 			    TrigL2MuonSA::MuonRoad&           muonRoad,
 			    TrigL2MuonSA::MdtRegion&          mdtRegion,
-			    TrigL2MuonSA::MdtHits&            mdtHits_normal) const;
+			    TrigL2MuonSA::MdtHits&            mdtHits) const;
 
-    StatusCode prepareData(const TrigRoiDescriptor* p_roids,
+    StatusCode prepareData(const EventContext& ctx,
+			    const TrigRoiDescriptor* p_roids,
 			    const TrigL2MuonSA::TgcFitResult& tgcFitResult,
 			    TrigL2MuonSA::MuonRoad&           muonRoad,
 			    TrigL2MuonSA::MdtRegion&          mdtRegion,
-			    TrigL2MuonSA::MdtHits&            mdtHits_normal) const;
+			    TrigL2MuonSA::MdtHits&            mdtHits) const;
 
     void setRpcGeometry(bool use_rpc) {m_mdtRegionDefiner->setRpcGeometry(use_rpc);};
     void setRoIBasedDataAccess(bool use_RoIBasedDataAccess){m_use_RoIBasedDataAccess = use_RoIBasedDataAccess;};
@@ -66,9 +64,10 @@ namespace TrigL2MuonSA {
   private:
 
     StatusCode getMdtHits(
+        const EventContext& ctx,
         const TrigRoiDescriptor* p_roids,
 			  TrigL2MuonSA::MuonRoad& muonRoad,
-			  TrigL2MuonSA::MdtHits& mdtHits_normal) const;
+			  TrigL2MuonSA::MdtHits& mdtHits) const;
 
     StatusCode collectMdtHitsFromPrepData(const EventContext& ctx,
             const std::vector<IdentifierHash>& v_idHash,
@@ -76,8 +75,6 @@ namespace TrigL2MuonSA {
 					  const TrigL2MuonSA::MuonRoad& muonRoad) const;
 
     void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
-
-  private:
 
     // Geometry Services
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

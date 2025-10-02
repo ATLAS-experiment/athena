@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "SGTools/DataProxy.h"
+#include "SGTools/DataStore.h"
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaKernel/IProxyRegistry.h"
 #include "AthenaKernel/EventContextClid.h"
@@ -20,7 +21,7 @@
 
 #include "ProxyProviderSvc.h"
 
-#include "boost/range/adaptor/reversed.hpp"
+#include <ranges>
 #include "TClass.h"
 
 using namespace std;
@@ -87,7 +88,7 @@ void setProviderOnList (ProxyProviderSvc::TAdList& tList,
                         IAddressProvider* provider,
                         StoreID::type storeID)
 {
-  for (SG::TransientAddress* tad : boost::adaptors::reverse (tList)) {
+  for (SG::TransientAddress* tad : std::views::reverse (tList)) {
     if (tad->provider() != nullptr) break;
     tad->setProvider (provider, storeID);
   }
@@ -158,7 +159,8 @@ StatusCode ProxyProviderSvc::addAddresses(IProxyRegistry& store,
 					  TAdList& tList)
 {
   for (SG::TransientAddress* tad : tList) {
-    SG::DataProxy* proxy = store.proxy_exact(tad->clID(), tad->name());
+    SG::sgkey_t sgkey = tad->sgkey();
+    SG::DataProxy* proxy = sgkey ? store.proxy_exact(tad->sgkey()) : store.proxy_exact(tad->clID(), tad->name());
     /// if proxy exists, simply update the proxy with new TransientAddress, 
     /// else construct a new proxy
     if (0 != proxy) 

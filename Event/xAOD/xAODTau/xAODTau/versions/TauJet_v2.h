@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauJet_v2.h 747258 2016-05-15 02:57:19Z griffith $
@@ -98,16 +98,6 @@ namespace xAOD {
     double etaTauEtaCalib() const;
     double phiTauEtaCalib() const;
     double mTauEtaCalib() const;
-
-    // double ptPanTauEFlowRecProto() const;
-    // double etaPanTauEFlowRecProto() const;
-    // double phiPanTauEFlowRecProto() const;
-    // double mPanTauEFlowRecProto() const;
-
-    // double ptPanTauEFlowRec() const;
-    // double etaPanTauEFlowRec() const;
-    // double phiPanTauEFlowRec() const;
-    // double mPanTauEFlowRec() const;
 
     double ptPanTauCellBasedProto() const;
     double etaPanTauCellBasedProto() const;

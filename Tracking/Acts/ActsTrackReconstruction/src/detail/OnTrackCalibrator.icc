@@ -1,29 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometry/SurfaceOfMeasurementUtil.h"
-#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+
 
 namespace ActsTrk::detail {
   
   template <typename traj_t>
-  OnTrackCalibrator<traj_t> OnTrackCalibrator<traj_t>::NoCalibration(const Acts::TrackingGeometry &trackingGeometry,
-								     const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId)
+  OnTrackCalibrator<traj_t> OnTrackCalibrator<traj_t>::NoCalibration(const ActsTrk::ITrackingGeometryTool* trackGeoTool)
   {
     ToolHandle<IOnTrackCalibratorTool<traj_t>> null(nullptr);
-    return OnTrackCalibrator<traj_t>(trackingGeometry, detectorElementToGeoId, null, null, null);
+    return OnTrackCalibrator<traj_t>(trackGeoTool, null, null, null);
   }
   
   template <typename traj_t>
-  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const Acts::TrackingGeometry &trackingGeometry,
-					       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
-					       const ToolHandle<IOnTrackCalibratorTool<traj_t>>& pixelTool,
-					       const ToolHandle<IOnTrackCalibratorTool<traj_t>>& stripTool,
-					       const ToolHandle<IOnTrackCalibratorTool<traj_t>>& hgtdTool)
-    : m_trackingGeometry(&trackingGeometry),
-      m_detectorElementToGeoId(&detectorElementToGeoId)
-  {
+  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const ActsTrk::ITrackingGeometryTool* trackGeoTool,
+                 const ToolHandle<IOnTrackCalibratorTool<traj_t>>& pixelTool,
+                 const ToolHandle<IOnTrackCalibratorTool<traj_t>>& stripTool,
+                 const ToolHandle<IOnTrackCalibratorTool<traj_t>>& hgtdTool)
+    : m_surfAcc{trackGeoTool} {
     if (pixelTool.isEnabled()) {
       pixelTool->connect(*this);
     } else {
@@ -38,83 +34,59 @@ namespace ActsTrk::detail {
     if (hgtdTool.isEnabled()) {
       hgtdTool->connect(*this);
     } else {
-	// cppcheck-suppress missingReturn; false positive
+  // cppcheck-suppress missingReturn; false positive
         hgtdCalibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<3, xAOD::HGTDCluster>>(this);
     }
   }
   
   template <typename traj_t>
-  void OnTrackCalibrator<traj_t>::calibrate(
-					    const Acts::GeometryContext& geoctx,
-					    const Acts::CalibrationContext& cctx,
-					    const Acts::SourceLink& link,
-					    TrackStateProxy state) const
-  {
-    state.setUncalibratedSourceLink(Acts::SourceLink{link});
-    ATLASUncalibSourceLink sourceLink = link.template get<ATLASUncalibSourceLink>();
-    assert(sourceLink!=nullptr);
-    const xAOD::UncalibratedMeasurement &measurement = getUncalibratedMeasurement(sourceLink);
+  void OnTrackCalibrator<traj_t>::calibrate(const Acts::GeometryContext& geoctx,
+                                            const Acts::CalibrationContext& cctx,
+                                            const Acts::SourceLink& link,
+                                            TrackStateProxy state) const {
+    
+    const xAOD::UncalibratedMeasurement& measurement{*xAODUncalibMeasCalibrator::unpack(link)};
     // @TODO in principle only need to lookup surface for strips
-    const Acts::Surface *surface = getSurfaceOfMeasurement(*m_trackingGeometry, *m_detectorElementToGeoId, measurement);
-    if (!surface) throw std::runtime_error("No surface for measurement.");
     switch (measurement.type()) {
-    case xAOD::UncalibMeasType::PixelClusterType: {
-      assert(pixelCalibrator.connected());
-      auto [pos, cov] = pixelCalibrator(geoctx,
-					cctx,
-					*dynamic_cast<const xAOD::PixelCluster*>(&measurement),
-					state);
-      setState<2>(xAOD::UncalibMeasType::PixelClusterType,
-		  pos,
-		  cov,
-		  surface->bounds().type(),
-		  state);
-      break;
-    }
-    case xAOD::UncalibMeasType::StripClusterType: {
-      assert(stripCalibrator.connected());
-      auto [pos, cov] = stripCalibrator(geoctx,
-					cctx,
-					*dynamic_cast<const xAOD::StripCluster*>(&measurement),
-					state);
-      setState<1>(xAOD::UncalibMeasType::StripClusterType,
-		  pos,
-		  cov,
-		  surface->bounds().type(),
-		  state);
-      break;
-    }
-    case xAOD::UncalibMeasType::HGTDClusterType: {
-      assert(hgtdCalibrator.connected());
-      auto [pos, cov] = hgtdCalibrator(
-        geoctx,
-        cctx,
-	*dynamic_cast<const xAOD::HGTDCluster*>(&measurement),
-        state);
-    setState<3>(
-        xAOD::UncalibMeasType::HGTDClusterType,
-        pos,
-	cov,
-	surface->bounds().type(),
-        state);
-    break;
-    }
-    default:
-      throw std::domain_error("OnTrackCalibrator can only handle Pixel or Strip measurements");
-    }
+        using enum xAOD::UncalibMeasType;
+        using enum ProjectorType;
+        case PixelClusterType: {
+          assert(pixelCalibrator.connected());
+          auto [pos, cov] = pixelCalibrator(geoctx, cctx,
+                                            static_cast<const xAOD::PixelCluster&>(measurement), state);
+          setState<2, traj_t>(e2DimNoTime, pos, cov, link, state);
+          break;
+        } case StripClusterType: {
+          assert(stripCalibrator.connected());
+          auto [pos, cov] = stripCalibrator(geoctx, cctx,
+                                            static_cast<const xAOD::StripCluster&>(measurement), state);
+          const Acts::Surface *surface = m_surfAcc.get(&measurement);
+          if (!surface) {
+            throw std::runtime_error("OnTrackCalibrator<traj_t>::calibrate() -- No surface for measurement.");
+          }
+          setState<1, traj_t>(surface->bounds().type() == Acts::SurfaceBounds::eAnnulus ? e1DimRotNoTime : e1DimNoTime,
+                              pos, cov, link, state);
+          break;
+        } case HGTDClusterType: {
+          assert(hgtdCalibrator.connected());
+          auto [pos, cov] = hgtdCalibrator(geoctx, cctx,
+                                           static_cast<const xAOD::HGTDCluster&>(measurement), state);
+          setState<3, traj_t>(e2DimWithTime, pos, cov, link, state);
+          break;
+        } default:
+            throw std::domain_error("OnTrackCalibrator can only handle Pixel or Strip measurements");
+      }
   }
   
   template <typename traj_t>
   template <std::size_t Dim, typename Cluster>
   std::pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>
   OnTrackCalibrator<traj_t>::passthrough(const Acts::GeometryContext& /*gctx*/,
-					 const Acts::CalibrationContext& /*cctx*/,
-					 const Cluster& cluster,
-					 const TrackStateProxy& /*state*/) const
-  {
+                                         const Acts::CalibrationContext& /*cctx*/,
+                                         const Cluster& cluster,
+                                         const TrackStateProxy& /*state*/) const {
     return std::make_pair(cluster.template localPosition<Dim>(),
-			  cluster.template localCovariance<Dim>());
+                          cluster.template localCovariance<Dim>());
   }
-  
 } // namespace ActsTrk
 

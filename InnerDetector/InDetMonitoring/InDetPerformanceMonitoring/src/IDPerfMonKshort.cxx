@@ -38,6 +38,7 @@
 #include "CLHEP/Vector/LorentzVector.h"
 // ATLAS headers
 #include "GaudiKernel/IInterface.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "InDetPerformanceMonitoring/IDPerfMonKshort.h"
 #include "AthContainers/ConstAccessor.h"
@@ -405,7 +406,7 @@ StatusCode IDPerfMonKshort::fillHistograms()
  }
 
  m_Nevents->Fill(0.);
-  double ksMassPDG = 497.648;
+  double ksMassPDG = ParticleConstants::KZeroMassInMeV;
   ATH_MSG_DEBUG("@todo : masspdf" <<ksMassPDG );
   ATH_MSG_DEBUG("@todo Looping over SecVxContainer name : "<< m_VxContainerName);
   ATH_MSG_DEBUG("@todo >> V0UnconstrVerices container size >> " << SecVxContainer->size());

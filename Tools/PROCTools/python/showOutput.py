@@ -4,7 +4,6 @@
 
 import re
 import sys
-import six
 
 def getOutputDictFromAMI(tag):
     try:
@@ -35,7 +34,7 @@ if __name__=='__main__':
 
     print ("Outputs:")
 
-    for name,outDef in six.iteritems (outDict):
+    for name,outDef in outDict.items():
         if 'ifMatch' in outDef:
             if re.match(outDef['ifMatch'],dsname):
                 print ("\t",name)

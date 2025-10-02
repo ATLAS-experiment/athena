@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM12.py
 #====================================================================
@@ -30,7 +30,8 @@ def JETM12SkimmingToolCfg(flags):
 
     trackRequirements = '(InDetTrackParticles.pt > 6.*GeV && '+tracks+' )'
     trackRequirementsMu = '(InDetTrackParticles.pt > 40.*GeV && '+tracks+' )'
-    jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV && log(BTagging_AntiKt4EMPFlow.DL1dv01_pb/(0.018*BTagging_AntiKt4EMPFlow.DL1dv01_pc+(1.0-0.018)*BTagging_AntiKt4EMPFlow.DL1dv01_pu)) > 0.948)'
+    jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV && log(AntiKt4EMPFlowJets.GN2v01_pb/(0.2*AntiKt4EMPFlowJets.GN2v01_pc + (1.-0.2-0.01)*AntiKt4EMPFlowJets.GN2v01_pu + 0.01*AntiKt4EMPFlowJets.GN2v01_ptau))>=0.844)'
+
     trackRequirementsNoIso = '(InDetTrackParticles.pt > 10.*GeV && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )'
 
     muonsRequirements = '(Muons.pt >= 20.*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonPassPreselection)'
@@ -241,8 +242,8 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
     thinningTools.append(JETM12CaloThinningTool)
 
     if flags.Input.isMC:
-        truth_cond_status    = "( (TruthParticles.status == 1) && (TruthParticles.barcode < 200000) && (TruthParticles.pt > 8*GeV) )"       # high pt pions for E/p
-        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
+        truth_cond_status    = "( (TruthParticles.isGenStable) && (TruthParticles.pt > 8*GeV) )"       # high pt pions for E/p
+        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && !(TruthParticles.isSimulationParticle))" # Leptons
         truth_expression = '('+truth_cond_status+' || '+truth_cond_Lepton +')'
 
         JETM12TruthThinningTool = CompFactory.DerivationFramework.GenericTruthThinning(name = "JETM12TruthThinningTool",
@@ -293,8 +294,7 @@ def JETM12Cfg(flags):
                                              "Electrons", "Photons", "Muons", "TauJets",
                                              "InDetTrackParticles", "PrimaryVertices",
                                              "MET_Baseline_AntiKt4EMPFlow",
-                                             "AntiKt4EMPFlowJets",
-                                             "BTagging_AntiKt4EMPFlow"]
+                                             "AntiKt4EMPFlowJets"]
 
     JETM12SlimmingHelper.AllVariables = ["MuonSegments","InDetTrackParticles",
                                          "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","CaloCalTopoClusters"]

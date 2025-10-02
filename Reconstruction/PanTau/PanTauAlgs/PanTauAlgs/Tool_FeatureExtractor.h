@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_FEATUREEXTRACTOR_H
@@ -12,6 +12,7 @@
 //! ASG
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // PanTau
 #include "PanTauAlgs/HelperFunctions.h"
@@ -43,8 +44,8 @@ namespace PanTau {
         
         //handle to the helper function
         PanTau::HelperFunctions m_HelperFunctions;
-        ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore;
-	std::string m_Tool_InformationStoreName;
+        ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore","Tool handle to the information store tool"};
+        Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Tool handle to the information store tool"};
         	
         //Function to calculate basic features
         StatusCode calculateBasicFeatures(PanTau::PanTauSeed* inSeed) const;
@@ -82,7 +83,6 @@ namespace PanTau {
         //make these configured via python! (super trick ;))
         static const std::string varTypeName_Sum()          {return "Sum";}
         static const std::string varTypeName_Ratio()        {return "Ratio";}
-        static const std::string varTypeName_EtInRing()     {return "EtInRing";}
         static const std::string varTypeName_Isolation()    {return "Isolation";}
         static const std::string varTypeName_Num()          {return "Num";}
         static const std::string varTypeName_Mean()         {return "Mean";}
@@ -92,15 +92,12 @@ namespace PanTau {
         static const std::string varTypeName_DeltaR()       {return "DeltaR";}
         static const std::string varTypeName_JetMoment()    {return "JetMoment";}
         static const std::string varTypeName_Combined()     {return "Combined";}
-        static const std::string varTypeName_JetShape()     {return "JetShape";}
-        static const std::string varTypeName_ImpactParams() {return "ImpactParams";}
         static const std::string varTypeName_Basic()        {return "Basic";}
         static const std::string varTypeName_PID()          {return "PID";}
         static const std::string varTypeName_Shots()        {return "Shots";}
         
         std::string m_varTypeName_Sum;
         std::string m_varTypeName_Ratio;
-        std::string m_varTypeName_EtInRing;
         std::string m_varTypeName_Isolation;
         std::string m_varTypeName_Num;
         std::string m_varTypeName_Mean;
@@ -110,8 +107,6 @@ namespace PanTau {
         std::string m_varTypeName_DeltaR;
         std::string m_varTypeName_JetMoment;
         std::string m_varTypeName_Combined;
-        std::string m_varTypeName_JetShape;
-        std::string m_varTypeName_ImpactParams;
         std::string m_varTypeName_Basic;
         std::string m_varTypeName_PID;
 

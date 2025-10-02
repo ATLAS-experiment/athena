@@ -13,30 +13,28 @@ def NSWDcsAlgTest(flags,alg_name="NSWDcsTestAlg", **kwargs):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from .MdtCablingTester import SetupArgParser, setupServicesCfg
+    from MuonCondTest.MdtCablingTester import SetupArgParser
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA, configureCondTag
     
     parser = SetupArgParser()
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/ESD/data23_cos.00448208.express_express.recon.ESD.x721/73events.data23_cos.00448208.express_express.recon.ESD.x721._lb0003._SFO-ALL._0001.1"])
-    
     parser.add_argument("--LogName", default="LogFile", 
                         help="If the test is run multiple times to ensure reproducibility, then the dump of the test can be resteered")
     args = parser.parse_args()
 
     flags = initConfigFlags()
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
-    flags.Output.ESDFileName = args.output
-    flags.Input.Files = args.inputFile
-    flags.lock()
+    flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA24
    
-    cfg = setupServicesCfg(flags)
-    cfg.merge(NSWDcsAlgTest(flags, LogName = args.LogName))
-    cfg.printConfig(withDetails=True, summariseProps=True)
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
+    flags.Exec.MaxEvents = 1
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
+    configureCondTag(flags)
+    flags.lock()
     flags.dump()
 
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
-
+    cfg = SetupMuonStandaloneCA(flags)    
+    cfg.merge(NSWDcsAlgTest(flags, LogName = args.LogName))
+    
+    executeTest(cfg)

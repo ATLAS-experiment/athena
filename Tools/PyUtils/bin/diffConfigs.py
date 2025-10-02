@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file:    diffConfigs.py
 # @purpose: check that 2 ConfigurationShelves have same content (both in
@@ -12,8 +12,6 @@
 #
 # diffConfigs ref.pkl chk.pkl
 #
-
-from __future__ import print_function
 
 __author__  = "Sebastien Binet"
 

@@ -245,7 +245,7 @@ namespace Muon {
             std::map<MuonStationIndex::PhiIndex, std::pair<int, int> >::iterator pit_end = sit->second.end();
             for (; pit != pit_end; ++pit) {
                 if (pit->second.first != 0) ++hitSummary.nphiLayers;
-                if (pit->second.second != 0 && pit->first != MuonStationIndex::CSC) ++hitSummary.netaTriggerLayers;
+                if (pit->second.second != 0 && pit->first != MuonStationIndex::PhiIndex::CSC) ++hitSummary.netaTriggerLayers;
                 if (pit->second.second != 0 && pit->second.first != 0) ++hitSummary.netaPhiLayers;
             }
         }

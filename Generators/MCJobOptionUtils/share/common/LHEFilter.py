@@ -104,7 +104,7 @@ class LHEFilters(object):
                 athMsgLog.info("input lhe File '{}' is compressed - will look for uncompressed LHE file".format(inFile))
             for inputLhe_file in inputLhe_files:
                 if is_compressed:
-                    lhe_files.append(tarfile.open(compressedFile).getnames()[0]) # retrieve the name of the compressed lhe file
+                    lhe_files.append(tarfile.open(inputLhe_file).getnames()[0]) # retrieve the name of the compressed lhe file
                 else:
                     lhe_files.append(inputLhe_file)
             if len(lhe_files) == 0:

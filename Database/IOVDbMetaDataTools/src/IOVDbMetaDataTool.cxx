@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -25,10 +25,9 @@
 IOVDbMetaDataTool::IOVDbMetaDataTool(const std::string& type, 
                                      const std::string& name, 
                                      const IInterface*  parent)
-  : AthAlgTool(type, name, parent)
+  : base_class(type, name, parent)
   , m_metaDataStore ("StoreGateSvc/MetaDataStore",      name)
   , m_inputStore    ("StoreGateSvc/InputMetaDataStore", name)
-  , m_processedFirstInputFileIncident(false)
   , m_overrideRunNumber(false)
   , m_overrideMinMaxRunNumber(false)
   , m_newRunNumber(0)
@@ -37,19 +36,6 @@ IOVDbMetaDataTool::IOVDbMetaDataTool(const std::string& type,
   , m_maxRunNumber(0)
   , m_modifyFolders(false)
 {
-  // Declare additional interface
-  declareInterface<IIOVDbMetaDataTool>(this);
-  declareInterface<IMetaDataTool>(this);
-
-  // Declare properties
-  declareProperty("MinMaxRunNumbers",  m_minMaxRunNumbers);
-
-  // Folders and attributes to be deleted
-  declareProperty("FoldersToBeModified"
-		  , m_foldersToBeModified = std::vector<std::string>(1, "/Simulation/Parameters"));
-  declareProperty("AttributesToBeRemoved"
-		  , m_attributesToBeRemoved = std::vector<std::string>(1, "RandomSeedOffset"));
-
 }
 
 //--------------------------------------------------------------------------
@@ -97,25 +83,21 @@ void IOVDbMetaDataTool::handle(const Incident& inc)
   const std::string fileName = fileInc->fileName();
   ATH_MSG_DEBUG("handle() " << inc.type() << " for " << fileName);
 
-  m_processedFirstInputFileIncident = true;
   // Check if we need to override run number - only needed for simulation
   checkOverrideRunNumber();
 
   StatusCode sc = processInputFileMetaData(fileName);
   if(!sc.isSuccess()) throw std::runtime_error("Could not process input file meta data");
+  m_filesProcessed.insert(std::move(fileName));
 }
 
 StatusCode IOVDbMetaDataTool::beginInputFile(const SG::SourceID& sid)
 {
-  if(m_processedFirstInputFileIncident) {
-    // We skip the first BeginInputFile incident following the FirstInputFile - both are fired for the first file
-    m_processedFirstInputFileIncident = false;
-    ATH_MSG_DEBUG("The first BeginInputFile incident is fired along with the FirstInputFile incident so we skip the processing of the Input File MetaData ");
-    return StatusCode::SUCCESS;
+  if (!m_filesProcessed.contains(sid)) {
+    ATH_CHECK(processInputFileMetaData(sid));
+    m_filesProcessed.insert(sid);
   }
-  else {
-    return processInputFileMetaData(sid);
-  }
+  return StatusCode::SUCCESS;
 }
 
 StatusCode IOVDbMetaDataTool::endInputFile(const SG::SourceID&)
@@ -175,7 +157,7 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
     }
 
     // Is flag set to override the run number? 
-    BooleanProperty overrideRunNumber = IntegerProperty("OverrideRunNumberFromInput", false);
+    BooleanProperty overrideRunNumber("OverrideRunNumberFromInput", false);
     sc = evtSel->getProperty(&overrideRunNumber);
     if (!sc.isSuccess()) {
         // Not all EventSelectors have this property, so we must be tolerant
@@ -185,7 +167,7 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
     m_overrideRunNumber = overrideRunNumber.value();
     if (m_overrideRunNumber) {
         // New run number
-        IntegerProperty runNumber = IntegerProperty("RunNumber", 0);
+        IntegerProperty runNumber("RunNumber", 0);
         sc = evtSel->getProperty(&runNumber);
         if (!sc.isSuccess()) {
             ATH_MSG_ERROR("checkOverrideRunNumber: unable to get RunNumber from EventSelector: found "
@@ -194,14 +176,14 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
         }
         m_newRunNumber = runNumber.value();
         // Old run number
-        runNumber = IntegerProperty("OldRunNumber", 0);
-        sc = evtSel->getProperty(&runNumber);
+        IntegerProperty oldRunNumber("OldRunNumber", 0);
+        sc = evtSel->getProperty(&oldRunNumber);
         if (!sc.isSuccess()) {
             ATH_MSG_ERROR("checkOverrideRunNumber: unable to get OldRunNumber from EventSelector: found "
-                          << runNumber.value());
+                          << oldRunNumber.value());
             return;
         }
-        m_oldRunNumber = runNumber.value();
+        m_oldRunNumber = oldRunNumber.value();
 
         ATH_MSG_DEBUG("checkOverrideRunNumber: Changing old to new run number:  " << m_oldRunNumber
                       << " " << m_newRunNumber << " obtained from " << eventSelector);

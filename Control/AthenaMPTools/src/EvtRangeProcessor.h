@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_EVTRANGEPROCESSOR_H
@@ -12,6 +12,7 @@
 
 #include <deque>
 #include <map>
+#include <memory>
 
 class IEvtSelectorSeek;
 class IChronoStatSvc;
@@ -31,7 +32,6 @@ class EvtRangeProcessor final : public AthenaMPToolBase
   virtual ~EvtRangeProcessor() override;
   
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
 
   // _________IAthenaMPTool_________   
   virtual int makePool ATLAS_NOT_THREAD_SAFE (int maxevt, int nprocs, const std::string& topdir) override;
@@ -48,9 +48,6 @@ class EvtRangeProcessor final : public AthenaMPToolBase
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:
-  EvtRangeProcessor();
-  EvtRangeProcessor(const EvtRangeProcessor&);
-  EvtRangeProcessor& operator= (const EvtRangeProcessor&);
 
   StatusCode startProcess ATLAS_NOT_THREAD_SAFE();
   StatusCode setNewInputFile(const std::string& newFile);
@@ -63,26 +60,25 @@ class EvtRangeProcessor final : public AthenaMPToolBase
     , PROC_STATE_STOP
   };
 
-  int  m_rankId;          // Each worker has its own unique RankID from the range (0,...,m_nprocs-1) 
-  int  m_nEventsBeforeFork;
-  int  m_activeWorkers;   // Keep track of the number of workers
-  std::string m_inpFile;  // Cached name of the input file. To avoid reopening
+  Gaudi::Property<int>  m_nEventsBeforeFork{this, "EventsBeforeFork", 0, "Number of events before forking"};
+  Gaudi::Property<std::string> m_channel2Scatterer{this, "Channel2Scatterer", {}};
+  Gaudi::Property<std::string> m_channel2EvtSel{this, "Channel2EvtSel", {}};
+  Gaudi::Property<bool> m_debug{this, "Debug", false};
+
+  int  m_rankId{-1};        ///< Each worker has its own unique RankID from the range (0,...,m_nprocs-1)
+  int  m_activeWorkers{0};  ///< Keep track of the number of workers
+  std::string m_inpFile;    ///< Cached name of the input file. To avoid reopening
 
   ServiceHandle<IChronoStatSvc>     m_chronoStatSvc;
   ServiceHandle<IIncidentSvc>       m_incidentSvc;
   SmartIF<IEvtSelectorSeek>         m_evtSeek;
 
-  StringProperty                    m_channel2Scatterer;
-  StringProperty                    m_channel2EvtSel;
-
-  AthenaInterprocess::SharedQueue*  m_sharedRankQueue;          
-  AthenaInterprocess::SharedQueue*  m_sharedFailedPidQueue;          
+  std::unique_ptr<AthenaInterprocess::SharedQueue>  m_sharedRankQueue;
+  AthenaInterprocess::SharedQueue*  m_sharedFailedPidQueue{nullptr};
 
   std::map<pid_t,int>               m_nProcessedEvents; // Number of processed events by PID
   std::deque<pid_t>                 m_finQueue;         // PIDs of processes queued for finalization
   std::map<pid_t,ProcessState>      m_procStates;       // Map for keeping track of states of the subprocesses
-
-  bool m_debug;
 };
 
 #endif

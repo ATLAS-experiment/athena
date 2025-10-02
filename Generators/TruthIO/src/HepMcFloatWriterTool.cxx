@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -33,7 +33,7 @@ static const char * const s_protocolSep = ":";
 HepMcFloatWriterTool::HepMcFloatWriterTool( const std::string& type, 
 					    const std::string& name, 
 					    const IInterface* parent ) : 
-  AthAlgTool( type, name, parent ),
+  base_class( type, name, parent ),
   m_ioBackend( nullptr )
 {
   //
@@ -49,8 +49,6 @@ HepMcFloatWriterTool::HepMcFloatWriterTool( const std::string& type,
   declareProperty( "McEvents",
 		   m_mcEventsName = "GEN_EVENT",
 		   "Input location of the McEventCollection to write out" );
-
-  declareInterface<IIOHepMcTool>(this);
 }
 
 /// Destructor

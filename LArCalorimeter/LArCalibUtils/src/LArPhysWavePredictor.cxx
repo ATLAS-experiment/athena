@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArPhysWavePredictor.h"
@@ -127,20 +127,20 @@ StatusCode LArPhysWavePredictor::initialize()
   if ( m_isSC ) {
     const LArOnline_SuperCellID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG("Found the LArOnlineID helper");
     const CaloCell_SuperCell_ID* scid;
     ATH_CHECK(detStore()->retrieve(scid, "CaloCell_SuperCell_ID" ));
-    m_caloCellId= (const CaloCell_Base_ID*)scid;
+    m_caloCellId= static_cast<const CaloCell_Base_ID*>(scid);
 
   } else { // m_isSC
     const LArOnlineID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnlineID") );
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
      const CaloCell_ID* cid;
     ATH_CHECK(detStore()->retrieve(cid, "CaloCell_ID" ));
-    m_caloCellId= (const CaloCell_Base_ID*)cid;
+    m_caloCellId= static_cast<const CaloCell_Base_ID*>(cid);
   }
 
   ATH_CHECK( m_BCKey.initialize() );
@@ -335,6 +335,10 @@ StatusCode LArPhysWavePredictor::stop()
   FILE* f = nullptr;
   if (m_dumpMphysMcali) {
      f = fopen("MphysOverMcali.dat","w");
+     if (!f) {
+       ATH_MSG_ERROR("Cannot open file `MphysOverMcali.dat' for write");
+       return StatusCode::FAILURE;
+     }
      fprintf(f,"# Region Layer Eta Phi Gain  MphysMcali\n");
   }
   FileCloser fcloser (f);

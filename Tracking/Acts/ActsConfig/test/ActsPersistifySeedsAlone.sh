@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ttbar mu=200 input
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
@@ -11,8 +11,8 @@ Reco_tf.py \
     --inputRDOFile  ${input_rdo} \
     --outputAODFile AOD.acts.pool.root \
     --outputESDFile ESD.acts.pool.root \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=False;flags.Tracking.ITkActsPass.doAthenaSeed=False;flags.Tracking.ITkActsPass.doActsSeed=True" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+    --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkActsLegacyPass.storeTrackSeeds=True;flags.Tracking.ITkActsLegacyPass.storeSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=False;flags.Tracking.ITkActsLegacyPass.doAthenaSeed=False;flags.Tracking.ITkActsLegacyPass.doActsSeed=True" \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; cfg.merge(addToAOD(flags, toAOD))" \
     --maxEvents ${n_events} \
     --multithreaded

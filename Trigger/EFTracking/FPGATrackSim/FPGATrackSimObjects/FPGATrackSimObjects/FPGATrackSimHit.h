@@ -73,25 +73,25 @@ public:
     void setLayerDisk(unsigned v) { m_layer_disk = v; } // ITk layer number
     void setSide(unsigned v) { m_side = v; }
     void setPhysLayer(unsigned v); // Sets using the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
-    void setEtaModule(int v) { m_etaModule = v; }
+    void setEtaModule(int v) { m_etaModule_old = m_etaModule; m_etaModule = v; };
     void setPhiModule(unsigned v) { m_phiModule = v; }
     void setEtaWidth(unsigned v) { m_etaWidth = v; }
     void setPhiWidth(unsigned v) { m_phiWidth = v; }
     unsigned int getIdentifier() const { return m_identifier; } // 32 bit (short) module identifier
     unsigned getIdentifierHash() const { return m_identifierHash; } // TODO note this might break things in the same way as getSide() a few lines below. If so, recomment.
-    unsigned getLayerDisk() const { return m_layer_disk; } // ITk layer number
+    unsigned getLayerDisk(bool old=false) const { if (old && isRemapped()) return m_layer_disk_old; else return m_layer_disk;} // ITk layer number
     unsigned getSide() const { return m_side; } // strip side TODO note this has been uncommented on 4/20/21. If wrappers suddenly break, recomment this. Same for getIdentifierHash above.
-    unsigned getPhysLayer() const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
+    unsigned getPhysLayer(bool old=false) const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
     unsigned getEtaWidth() const { return m_etaWidth; }
     unsigned getPhiWidth() const { return m_phiWidth; }
-    int getEtaModule() const { return m_etaModule; }
+    int getEtaModule(bool old=false) const { if (old && isRemapped()) return m_etaModule_old; else return m_etaModule; }
     unsigned getPhiModule() const { return m_phiModule; }
 
     // --- Mapped Location ---
     // NB: isMapped() should return true to access these members
     void setLayer(unsigned v) { m_layer = v; } // This is the logical layer
     void setSection(unsigned v) { m_section = v; }
-    unsigned getLayer() const;
+    int getLayer() const;
     unsigned getSection() const;
     void setRoadID(int roadID) { m_roadID = roadID; }
 
@@ -110,6 +110,15 @@ public:
     float getCentroidEtaIndex() const { return m_centroidEtaIndex; }
     float getPhiCoord() const { return m_phiCoord; }
     float getEtaCoord() const { return m_etaCoord; }
+
+    void setMaxPhiIndex(int v) { m_maxPhiIndex = v; }
+    void setMinPhiIndex(int v) { m_minPhiIndex = v; }
+    void setMaxEtaIndex(int v) { m_maxEtaIndex = v; }
+    void setMinEtaIndex(int v) { m_minEtaIndex = v; }
+    int getMaxPhiIndex() const { return m_maxPhiIndex; }
+    int getMinPhiIndex() const { return m_minPhiIndex; }
+    int getMaxEtaIndex() const { return m_maxEtaIndex; }
+    int getMinEtaIndex() const { return m_minEtaIndex; }
 
     float getPhiWindow() const { return m_phiWindow; }
 
@@ -212,8 +221,11 @@ protected:
     unsigned int m_identifier = 0; // Global module ID, from offline (32 bit variant)
     unsigned m_identifierHash = 0; // Global module ID hash, from ITk
     unsigned m_layer_disk = 0;     // ITk layer number
+    unsigned m_layer_disk_old = 0;     // ITk layer number
     unsigned m_side = 0;           // Side of the strip module
+    unsigned m_side_old = 0;           // Side of the strip module
     int m_etaModule = 0; // eta index of the module that the hit is located on
+    int m_etaModule_old = 0; // eta index of the module that the hit is located on
     unsigned m_phiModule = 0; // phi index of the module that the hit is located on
     unsigned m_etaWidth = 0;  // clustering width along eta
     unsigned m_phiWidth = 0;  // clustering width in phi direction
@@ -232,6 +244,12 @@ protected:
     float m_centroidEtaIndex = -1; // centroid's eta index for pixel, row for strip
     float m_phiCoord = -999; // local position along phi direction
     float m_etaCoord = -999; // local position along eta direction
+
+    // --- Min/Max Indices used for cluster equivalent to estimate widths ---
+    int m_maxPhiIndex = std::numeric_limits<int>::min();
+    int m_minPhiIndex = std::numeric_limits<int>::max();
+    int m_maxEtaIndex = std::numeric_limits<int>::min();
+    int m_minEtaIndex = std::numeric_limits<int>::max();
 
     // --- Global Coordinates ---
     float m_x = 0;  // Hit position in global coordinates
@@ -288,8 +306,8 @@ protected:
 
     std::vector<unsigned> m_IDhashVec; // for a cluster, when we get the equivalent hit info we want to store all the ID hash containing it
     std::vector<int> m_PhiIndexVec; // for a cluster, all the phi indices in it
-    std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it  
-    ClassDefNV(FPGATrackSimHit, 12);
+    std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it
+    ClassDefNV(FPGATrackSimHit, 14);
 };
 
 // Container of <FPGATrackSimHit const *>

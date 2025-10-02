@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0SELECTOR_H
 #define	TAURECTOOLS_TAUPI0SELECTOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
+
+#include "AsgTools/PropertyWrapper.h"
 
 #include <string>
 
@@ -32,9 +34,12 @@ private:
   /** @brief Get eta bin of Pi0Cluster */
   int getEtaBin(double eta) const;
 
-  std::vector<double> m_clusterEtCut;
-  std::vector<double> m_clusterBDTCut_1prong;
-  std::vector<double> m_clusterBDTCut_mprong;
+  Gaudi::Property<std::vector<double>> m_clusterEtCut{this, "ClusterEtCut", {}};
+  Gaudi::Property<double> m_maxDeltaRNeutral {this, "MaxDeltaRNeutral", 0.2, "max DeltaR for pi0-tau association"};
+  Gaudi::Property<std::vector<double>> m_clusterBDTCut_1prong{this, "ClusterBDTCut_1prong", {}};
+  Gaudi::Property<std::vector<double>> m_clusterBDTCut_mprong{this, "ClusterBDTCut_mprong", {}};
+  
+
 };
 
 #endif	// TAURECTOOLS_TAUPI0SELECTOR_H

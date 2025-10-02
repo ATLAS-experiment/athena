@@ -26,11 +26,11 @@ namespace EL
     StatusCode DirectInputModule ::
     processInputs (ModuleData& /*data*/, IInputModuleActions& actions)
     {
-      Long64_t toSkip = this->skipEvents.value_or (0);
+      Long64_t toSkip = this->skipEvents.value ();
       std::optional<Long64_t> toProcess;
-      if (this->maxEvents.has_value())
+      if (this->maxEvents.value() != -1)
         toProcess = this->maxEvents.value();
-      for (const std::string& fileName : fileList)
+      for (const std::string& fileName : fileList.value())
       {
         // open the input file to inspect it
         ANA_CHECK (actions.openInputFile (fileName));

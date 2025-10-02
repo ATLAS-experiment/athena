@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef LARCLUSTERCELLDUMPER_EVENTREADERBASEALG_H
 #define LARCLUSTERCELLDUMPER_EVENTREADERBASEALG_H
@@ -238,7 +238,7 @@ class ATLAS_NOT_THREAD_SAFE EventReaderBaseAlg: public ::AthAlgorithm
         std::vector < float > *m_mc_part_phi      = nullptr;    
         std::vector < int >   *m_mc_part_pdgId    = nullptr;
         std::vector < int >   *m_mc_part_status   = nullptr;
-        std::vector < int >   *m_mc_part_barcode  = nullptr;
+        std::vector < int >   *m_mc_part_uniqueID  = nullptr;
 
         // ## Vertex Truth ## (MC)
         std::vector < float > *m_mc_vert_x     = nullptr;
@@ -248,7 +248,7 @@ class ATLAS_NOT_THREAD_SAFE EventReaderBaseAlg: public ::AthAlgorithm
         std::vector < float > *m_mc_vert_perp  = nullptr;
         std::vector < float > *m_mc_vert_eta   = nullptr;
         std::vector < float > *m_mc_vert_phi   = nullptr;
-        std::vector < int > *m_mc_vert_barcode = nullptr;
+        std::vector < int > *m_mc_vert_uniqueID = nullptr;
         std::vector < int > *m_mc_vert_status      = nullptr;
 
         // ## Primary Vertex ##

@@ -64,9 +64,13 @@ namespace VKalVrtAthena {
     enum recoStep { kStart, kInitVtxPosition, kImpactParamCheck, kVKalVrtFit, kChi2, kVposCut, kPatternMatch };
     
     const double maxR { 563. };         // r = 563 mm is the TRT inner surface
-    const double roughD0Cut { 100. };
-    const double roughZ0Cut { 50.  };
-    
+    double roughD0Cut = 100.;
+    double roughZ0Cut = 50.;
+    if(m_jp.doDisappearingTrackVertexing){
+      roughD0Cut = 1000.;
+      roughZ0Cut = 1000.;
+    }
+
     // Truth match map
     std::map<const xAOD::TruthVertex*, bool> matchMap;
 
@@ -85,6 +89,31 @@ namespace VKalVrtAthena {
 
         // Attempt to think the combination is incompatible by default
         m_incomp.emplace_back( itrk_id, jtrk_id );
+
+        if(m_jp.doDisappearingTrackVertexing) {
+
+          const auto* cont_i = dynamic_cast<const xAOD::TrackParticleContainer*>( (*itrk)->container() );
+          const auto* cont_j = dynamic_cast<const xAOD::TrackParticleContainer*>( (*jtrk)->container() );          
+        
+          if ( !cont_i || !cont_j ) {
+            ATH_MSG_DEBUG("  one of the track containers is null");
+            continue;
+          }
+        
+          ElementLink<xAOD::TrackParticleContainer> link_i, link_j;
+          link_i.toIndexedElement( *cont_i, (*itrk)->index() );
+          link_j.toIndexedElement( *cont_j, (*jtrk)->index() );
+        
+          if (!link_i.isValid() || !link_j.isValid()) {
+            ATH_MSG_DEBUG("  link itrk (" << (*itrk)->index() << ") or jtrk (" << (*jtrk)->index() << ") is not valid");
+          }
+          else {
+            if( link_i.dataID() == link_j.dataID() ) {
+              continue;
+            }
+          }
+        }
+
         
         if( std::abs( (*itrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut && std::abs( (*jtrk)->d0() ) < m_jp.twoTrkVtxFormingD0Cut ) continue;
 
@@ -107,6 +136,9 @@ namespace VKalVrtAthena {
         if( initVertex.perp() > maxR ) {
           continue;
         }
+        if( m_jp.doDisappearingTrackVertexing && initVertex.perp() <m_jp.twoTrVrtMinRadius){
+          continue;
+        }        
         if( m_jp.FillHist ) m_hists["incompMonitor"]->Fill( kInitVtxPosition );
 
         std::vector<double> impactParameters;
@@ -360,6 +392,11 @@ namespace VKalVrtAthena {
   StatusCode VrtSecInclusive::findNtrackVertices( std::vector<WrkVrt> *workVerticesContainer )
   {
     ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": begin");
+    if(m_jp.doDisappearingTrackVertexing){
+      ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": skip");
+      return StatusCode::SUCCESS;
+    }
+
     
     const auto compSize = m_selectedTracks.size()*(m_selectedTracks.size() - 1)/2 - m_incomp.size();
     if( m_jp.FillHist ) { m_hists["2trkVerticesDist"]->Fill( compSize ); }
@@ -716,7 +753,10 @@ namespace VKalVrtAthena {
   //____________________________________________________________________________________________________
   StatusCode VrtSecInclusive::rearrangeTracks( std::vector<WrkVrt> *workVerticesContainer )
   {
-    
+    if(m_jp.doDisappearingTrackVertexing){
+      ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": skip");
+      return StatusCode::SUCCESS;
+    }    
     //
     //  Rearrangement of solutions
     //
@@ -1777,6 +1817,116 @@ namespace VKalVrtAthena {
                     <<wrkvrt.vertex.perp() <<", "<<wrkvrt.vertex.z() <<", "
                     <<wrkvrt.vertex.phi() <<", mass = "<< sumP4_pion.M() << "," << sumP4_electron.M() );
 
+      // Save the perigee parameters for the first two tracks
+      float perigee_x_trk1 = 0.0;
+      float perigee_y_trk1 = 0.0;
+      float perigee_z_trk1 = 0.0;      
+      float perigee_x_trk2 = 0.0;
+      float perigee_y_trk2 = 0.0;
+      float perigee_z_trk2 = 0.0;      
+      float perigee_px_trk1 = 0.0;
+      float perigee_py_trk1 = 0.0;
+      float perigee_pz_trk1 = 0.0;      
+      float perigee_px_trk2 = 0.0;
+      float perigee_py_trk2 = 0.0;
+      float perigee_pz_trk2 = 0.0;
+      float perigee_cov_xx_trk1 = 0.0;
+      float perigee_cov_xy_trk1 = 0.0;
+      float perigee_cov_xz_trk1 = 0.0;
+      float perigee_cov_yy_trk1 = 0.0;
+      float perigee_cov_yz_trk1 = 0.0;
+      float perigee_cov_zz_trk1 = 0.0;
+      float perigee_cov_xx_trk2 = 0.0;
+      float perigee_cov_xy_trk2 = 0.0;
+      float perigee_cov_xz_trk2 = 0.0;
+      float perigee_cov_yy_trk2 = 0.0;
+      float perigee_cov_yz_trk2 = 0.0;
+      float perigee_cov_zz_trk2 = 0.0;   
+      float perigee_d0_trk1 = 0.0;
+      float perigee_d0_trk2 = 0.0;
+      float perigee_z0_trk1 = 0.0;
+      float perigee_z0_trk2 = 0.0;
+      float perigee_qOverP_trk1 = 0.0;
+      float perigee_qOverP_trk2 = 0.0;
+      float perigee_theta_trk1 = 0.0;
+      float perigee_theta_trk2 = 0.0;
+      float perigee_phi_trk1 = 0.0;
+      float perigee_phi_trk2 = 0.0;
+      int perigee_charge_trk1 = 0;
+      int perigee_charge_trk2 = 0;   
+      float perigee_distance = 9999.0;
+
+      Amg::Vector3D vDist = wrkvrt.vertex - m_thePV->position();
+      float vPos = (vDist.x() * wrkvrt.vertexMom.Px() + vDist.y() * wrkvrt.vertexMom.Py() + vDist.z() * wrkvrt.vertexMom.Pz()) / wrkvrt.vertexMom.Rho();
+      float vPosMomAngT = (vDist.x() * wrkvrt.vertexMom.Px() + vDist.y() * wrkvrt.vertexMom.Py()) / vDist.perp() / wrkvrt.vertexMom.Pt();
+      float vPosMomAng3D = (vDist.x() * wrkvrt.vertexMom.Px() + vDist.y() * wrkvrt.vertexMom.Py() + vDist.z() * wrkvrt.vertexMom.Pz()) / (vDist.norm() * wrkvrt.vertexMom.Rho());      
+      float dphi_trk1 = 0.0;
+      float dphi_trk2 = 0.0; 
+
+      if (m_jp.doDisappearingTrackVertexing){
+        // Process track1
+        const auto* track1 = trackChi2Pairs[0].first;
+        dphi_trk1 = TVector2::Phi_mpi_pi(vDist.phi() - track1->phi());
+        auto sv_perigee1 = m_trackToVertexTool->perigeeAtVertex(ctx, *track1, wrkvrt.vertex);
+        if (sv_perigee1) {
+          perigee_x_trk1 = sv_perigee1->position().x();
+          perigee_y_trk1 = sv_perigee1->position().y();
+          perigee_z_trk1 = sv_perigee1->position().z();      
+          perigee_px_trk1 = sv_perigee1->momentum().x();
+          perigee_py_trk1 = sv_perigee1->momentum().y();
+          perigee_pz_trk1 = sv_perigee1->momentum().z();
+          perigee_cov_xx_trk1 = (*sv_perigee1->covariance())(0, 0);
+          perigee_cov_xy_trk1 = (*sv_perigee1->covariance())(0, 1);
+          perigee_cov_xz_trk1 = (*sv_perigee1->covariance())(0, 2);
+          perigee_cov_yy_trk1 = (*sv_perigee1->covariance())(1, 1);
+          perigee_cov_yz_trk1 = (*sv_perigee1->covariance())(1, 2);
+          perigee_cov_zz_trk1 = (*sv_perigee1->covariance())(2, 2);
+          perigee_d0_trk1 = sv_perigee1->parameters()[Trk::d0];
+          perigee_z0_trk1 = sv_perigee1->parameters()[Trk::z0];
+          perigee_qOverP_trk1 = sv_perigee1->parameters()[Trk::qOverP];
+          perigee_theta_trk1 = sv_perigee1->parameters()[Trk::theta];
+          perigee_phi_trk1 = sv_perigee1->parameters()[Trk::phi];
+          perigee_charge_trk1 = sv_perigee1->parameters()[Trk::qOverP] > 0 ? 1 : -1;
+        }else{
+          ATH_MSG_DEBUG("Failed to obtain perigee for track1 at vertex.");
+        }
+
+        //Process track2
+        const auto* track2 = trackChi2Pairs[1].first;
+        dphi_trk2 = TVector2::Phi_mpi_pi(vDist.phi() - track2->phi());
+        auto sv_perigee2 = m_trackToVertexTool->perigeeAtVertex(ctx, *track2, wrkvrt.vertex);
+        if (sv_perigee2) {
+          perigee_x_trk2 = sv_perigee2->position().x();
+          perigee_y_trk2 = sv_perigee2->position().y();
+          perigee_z_trk2 = sv_perigee2->position().z();      
+          perigee_px_trk2 = sv_perigee2->momentum().x();
+          perigee_py_trk2 = sv_perigee2->momentum().y();
+          perigee_pz_trk2 = sv_perigee2->momentum().z();
+          perigee_cov_xx_trk2 = (*sv_perigee2->covariance())(0, 0);
+          perigee_cov_xy_trk2 = (*sv_perigee2->covariance())(0, 1);
+          perigee_cov_xz_trk2 = (*sv_perigee2->covariance())(0, 2);
+          perigee_cov_yy_trk2 = (*sv_perigee2->covariance())(1, 1);
+          perigee_cov_yz_trk2 = (*sv_perigee2->covariance())(1, 2);
+          perigee_cov_zz_trk2 = (*sv_perigee2->covariance())(2, 2);
+          perigee_d0_trk2 = sv_perigee2->parameters()[Trk::d0];
+          perigee_z0_trk2 = sv_perigee2->parameters()[Trk::z0];
+          perigee_qOverP_trk2 = sv_perigee2->parameters()[Trk::qOverP];
+          perigee_theta_trk2 = sv_perigee2->parameters()[Trk::theta];
+          perigee_phi_trk2 = sv_perigee2->parameters()[Trk::phi];
+          perigee_charge_trk2 = sv_perigee2->parameters()[Trk::qOverP] > 0 ? 1 : -1;
+        }else{
+          ATH_MSG_DEBUG("Failed to obtain perigee for track2 at vertex.");
+        }
+
+        if(sv_perigee1 && sv_perigee2){
+          perigee_distance = sqrt(
+                             (perigee_x_trk1 - perigee_x_trk2) * (perigee_x_trk1 - perigee_x_trk2) +
+                             (perigee_y_trk1 - perigee_y_trk2) * (perigee_y_trk1 - perigee_y_trk2) +
+                             (perigee_z_trk1 - perigee_z_trk2) * (perigee_z_trk1 - perigee_z_trk2)
+                            );
+        }
+        if(perigee_distance > m_jp.twoTrVrtMaxPerigeeDist) continue;
+      } 
 
       //
       // calculate opening angle between all 2-track pairs, and store the minimum
@@ -1879,6 +2029,92 @@ namespace VKalVrtAthena {
       num_selectedTracksAcc(*vertex)      = wrkvrt.selectedTrackIndices.size();
       num_associatedTracksAcc(*vertex)    = wrkvrt.associatedTrackIndices.size();
       dCloseVrtAcc(*vertex)               = wrkvrt.closestWrkVrtValue;
+
+      // Registering the vertex momentum and charge
+      if (m_jp.doDisappearingTrackVertexing){      
+        static const SG::Accessor<float> perigee_x_trk1Acc("perigee_x_trk1");
+        static const SG::Accessor<float> perigee_y_trk1Acc("perigee_y_trk1");
+        static const SG::Accessor<float> perigee_z_trk1Acc("perigee_z_trk1");      
+        static const SG::Accessor<float> perigee_x_trk2Acc("perigee_x_trk2");
+        static const SG::Accessor<float> perigee_y_trk2Acc("perigee_y_trk2");
+        static const SG::Accessor<float> perigee_z_trk2Acc("perigee_z_trk2");      
+        static const SG::Accessor<float> perigee_px_trk1Acc("perigee_px_trk1");
+        static const SG::Accessor<float> perigee_py_trk1Acc("perigee_py_trk1");
+        static const SG::Accessor<float> perigee_pz_trk1Acc("perigee_pz_trk1");      
+        static const SG::Accessor<float> perigee_px_trk2Acc("perigee_px_trk2");
+        static const SG::Accessor<float> perigee_py_trk2Acc("perigee_py_trk2");
+        static const SG::Accessor<float> perigee_pz_trk2Acc("perigee_pz_trk2");
+        static const SG::Accessor<float> perigee_cov_xx_trk1Acc("perigee_cov_xx_trk1");
+        static const SG::Accessor<float> perigee_cov_xy_trk1Acc("perigee_cov_xy_trk1");
+        static const SG::Accessor<float> perigee_cov_xz_trk1Acc("perigee_cov_xz_trk1");
+        static const SG::Accessor<float> perigee_cov_yy_trk1Acc("perigee_cov_yy_trk1");
+        static const SG::Accessor<float> perigee_cov_yz_trk1Acc("perigee_cov_yz_trk1");
+        static const SG::Accessor<float> perigee_cov_zz_trk1Acc("perigee_cov_zz_trk1");
+        static const SG::Accessor<float> perigee_cov_xx_trk2Acc("perigee_cov_xx_trk2");
+        static const SG::Accessor<float> perigee_cov_xy_trk2Acc("perigee_cov_xy_trk2");
+        static const SG::Accessor<float> perigee_cov_xz_trk2Acc("perigee_cov_xz_trk2");
+        static const SG::Accessor<float> perigee_cov_yy_trk2Acc("perigee_cov_yy_trk2");
+        static const SG::Accessor<float> perigee_cov_yz_trk2Acc("perigee_cov_yz_trk2");
+        static const SG::Accessor<float> perigee_cov_zz_trk2Acc("perigee_cov_zz_trk2");
+        static const SG::Accessor<float> perigee_d0_trk1Acc("perigee_d0_trk1");
+        static const SG::Accessor<float> perigee_d0_trk2Acc("perigee_d0_trk2");
+        static const SG::Accessor<float> perigee_z0_trk1Acc("perigee_z0_trk1");
+        static const SG::Accessor<float> perigee_z0_trk2Acc("perigee_z0_trk2");
+        static const SG::Accessor<float> perigee_qOverP_trk1Acc("perigee_qOverP_trk1");
+        static const SG::Accessor<float> perigee_qOverP_trk2Acc("perigee_qOverP_trk2");
+        static const SG::Accessor<float> perigee_theta_trk1Acc("perigee_theta_trk1");
+        static const SG::Accessor<float> perigee_theta_trk2Acc("perigee_theta_trk2");
+        static const SG::Accessor<float> perigee_phi_trk1Acc("perigee_phi_trk1");
+        static const SG::Accessor<float> perigee_phi_trk2Acc("perigee_phi_trk2");
+        static const SG::Accessor<int> perigee_charge_trk1Acc("perigee_charge_trk1");
+        static const SG::Accessor<int> perigee_charge_trk2Acc("perigee_charge_trk2");
+        static const SG::Accessor<float> vPosAcc("vPos");
+        static const SG::Accessor<float> vPosMomAngTAcc("vPosMomAngT");
+        static const SG::Accessor<float> vPosMomAng3DAcc("vPosMomAng3D");
+        static const SG::Accessor<float> dphi_trk1Acc("dphi_trk1");
+        static const SG::Accessor<float> dphi_trk2Acc("dphi_trk2");      
+        perigee_x_trk1Acc(*vertex) = perigee_x_trk1;
+        perigee_y_trk1Acc(*vertex) = perigee_y_trk1;
+        perigee_z_trk1Acc(*vertex) = perigee_z_trk1;      
+        perigee_x_trk2Acc(*vertex) = perigee_x_trk2;
+        perigee_y_trk2Acc(*vertex) = perigee_y_trk2;
+        perigee_z_trk2Acc(*vertex) = perigee_z_trk2;      
+        perigee_px_trk1Acc(*vertex) = perigee_px_trk1;
+        perigee_py_trk1Acc(*vertex) = perigee_py_trk1;
+        perigee_pz_trk1Acc(*vertex) = perigee_pz_trk1;      
+        perigee_px_trk2Acc(*vertex) = perigee_px_trk2;
+        perigee_py_trk2Acc(*vertex) = perigee_py_trk2;
+        perigee_pz_trk2Acc(*vertex) = perigee_pz_trk2;
+        perigee_cov_xx_trk1Acc(*vertex) = perigee_cov_xx_trk1;
+        perigee_cov_xy_trk1Acc(*vertex) = perigee_cov_xy_trk1;
+        perigee_cov_xz_trk1Acc(*vertex) = perigee_cov_xz_trk1;
+        perigee_cov_yy_trk1Acc(*vertex) = perigee_cov_yy_trk1;
+        perigee_cov_yz_trk1Acc(*vertex) = perigee_cov_yz_trk1;
+        perigee_cov_zz_trk1Acc(*vertex) = perigee_cov_zz_trk1;
+        perigee_cov_xx_trk2Acc(*vertex) = perigee_cov_xx_trk2;
+        perigee_cov_xy_trk2Acc(*vertex) = perigee_cov_xy_trk2;
+        perigee_cov_xz_trk2Acc(*vertex) = perigee_cov_xz_trk2;
+        perigee_cov_yy_trk2Acc(*vertex) = perigee_cov_yy_trk2;
+        perigee_cov_yz_trk2Acc(*vertex) = perigee_cov_yz_trk2;
+        perigee_cov_zz_trk2Acc(*vertex) = perigee_cov_zz_trk2;
+        perigee_d0_trk1Acc(*vertex) = perigee_d0_trk1;
+        perigee_d0_trk2Acc(*vertex) = perigee_d0_trk2;
+        perigee_z0_trk1Acc(*vertex) = perigee_z0_trk1;
+        perigee_z0_trk2Acc(*vertex) = perigee_z0_trk2;
+        perigee_qOverP_trk1Acc(*vertex) = perigee_qOverP_trk1;
+        perigee_qOverP_trk2Acc(*vertex) = perigee_qOverP_trk2;
+        perigee_theta_trk1Acc(*vertex) = perigee_theta_trk1;
+        perigee_theta_trk2Acc(*vertex) = perigee_theta_trk2;
+        perigee_phi_trk1Acc(*vertex) = perigee_phi_trk1;
+        perigee_phi_trk2Acc(*vertex) = perigee_phi_trk2;
+        perigee_charge_trk1Acc(*vertex) = perigee_charge_trk1;
+        perigee_charge_trk2Acc(*vertex) = perigee_charge_trk2;        
+        vPosAcc(*vertex) = vPos;
+        vPosMomAngTAcc(*vertex) = vPosMomAngT;
+        vPosMomAng3DAcc(*vertex) = vPosMomAng3D;
+        dphi_trk1Acc(*vertex) = dphi_trk1;
+        dphi_trk2Acc(*vertex) = dphi_trk2;        
+      }
       
       // Registering tracks comprising the vertex to xAOD::Vertex
       // loop over the tracks comprising the vertex

@@ -3,7 +3,10 @@
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: 24.0/Athena
+# art-input: group.trig-hlt.data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
@@ -34,7 +37,7 @@ hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
 hlt.threads = 8
 hlt.concurrent_events = 8
-hlt.input = 'data_Main'
+hlt.input = 'data'
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
              'Trigger.doLVL1=True']
 hlt.args = '-o output'
@@ -64,12 +67,8 @@ tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
 test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [hlt, filter_bs, tlareco]
-test.check_steps = CheckSteps.default_check_steps(test)
-add_analysis_steps(test)
-
-# Overwrite default histogram file name for checks
-for step in [test.get_step(name) for name in ['RootComp']]:
-    step.input_file = 'ExampleMonitorOutput.root'
+test.check_steps = CheckSteps.default_check_steps(test, checkfile_input='DAOD_TLA.pool.root')
+add_analysis_steps(test, input_file='DAOD_TLA.pool.root')
 
 import sys
 sys.exit(test.run())

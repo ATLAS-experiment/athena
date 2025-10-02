@@ -4,7 +4,6 @@ import os
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum, Format, LHCPeriod
-from AthenaCommon.SystemOfUnits import GeV
 from AthenaCommon.Logging import logging
 
 log=logging.getLogger('TriggerConfigFlags')
@@ -507,6 +506,7 @@ def createTriggerRecoFlags():
     flags.addFlagsCategory( 'Trigger.ActsTracking', _idActs )
 
     flags.addFlag('Trigger.useActsTracking', False, help='use ACTS for ITk tracking')
+    flags.addFlag('Trigger.EFTrackPipeline', "",    help='string to specify EFTrack pipeline')
 
     def __trigCalo():
         from TrigCaloRec.TrigCaloConfigFlags import createTrigCaloConfigFlags
@@ -518,61 +518,26 @@ def createTriggerRecoFlags():
         return createTrigMUCTPIConfigFlags()
     flags.addFlagsCategory('Trigger.MUCTPI', __muctpiFlags )
 
+    def __ctpFlags():
+        from TrigT1CTP.CTPSimulationConfigFlags import createTrigCTPConfigFlags
+        return createTrigCTPConfigFlags()
+    flags.addFlagsCategory('Trigger.CTP', __ctpFlags )
+
     def __fpgatracksimFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createFPGATrackSimConfigFlags
         return createFPGATrackSimConfigFlags()
     flags.addFlagsCategory("Trigger.FPGATrackSim", __fpgatracksimFlags, prefix=True )
 
+    def __jet():
+        from TriggerMenuMT.HLT.Jet.TrigJetConfigFlags import createTrigJetConfigFlags
+        return createTrigJetConfigFlags()
+    flags.addFlagsCategory('Trigger.Jet', __jet )
 
-    # NB: Longer term it may be worth moving these into a PF set of config flags, but right now the only ones that exist do not seem to be used in the HLT.
-    # When we use component accumulators for this in the HLT maybe we should revisit this
-    # PFO-muon removal option for the full-scan hadronic signatures.
-    # Options are:
-    #   "None": Do no PFO-muon removal
-    #   "Calo": Use the calo-tagging tools from the muon slice
-    #   "Iso" : Use the mainly isolation-based selections based on the MET associator package
-    flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo",
-                  help='PFO-muon removal option: None, Calo, Iso)')
-
-    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV,
-                  help='minimum pT threshold to use for the muon removal')
-
-    flags.addFlag('Trigger.Jet.doJetSuperPrecisionTracking', False,
-                  help='enable precision tracking in jet super-ROI before fast b-tagging (EMTopo jets)')
-
-    flags.addFlag("Trigger.Jet.fastbtagPFlow", True,
-                  help='enable fast b-tagging for all fully calibrated HLT PFlow jets')
-
-    flags.addFlag("Trigger.Jet.fastbtagVertex", True,
-                  help='enable the addition of the super ROI PV to the b-tagging')
-
-    flags.addFlag("Trigger.Jet.doVRJets", False,
-                  help='enable the addition of the VR track jet reconstruction sequence')
-
-    flags.addFlag("Trigger.FSTrk.doJetRestrictedVertexSort", False,
-                  help='use tracks in jets for computing sumpt2 for vertex sorting')
-
-    # chooses calibration config file for HLT small-R jets
-    # mapping in: Reconstruction/Jet/JetCalibTools/python/JetCalibToolsConfig.py
-    # All calib keys for HLT jets have to start with "Trig" otherwise the JetCalibTool config fails!
-    flags.addFlag("Trigger.Jet.pflowCalibKey", lambda prevFlags: "TrigHIUPC" if 'HI' in prevFlags.Trigger.triggerMenuSetup else "TrigR22Prerec",
-                  help='calibration config file for HLT small-R jets')
-
-    flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2",
-                  help='calibration config file for HLT small-R jets')
-
-    flags.addFlag("Trigger.Jet.pflowLJCalibKey", "TrigSoftDrop",
-                  help='calibration config file for HLT large-R PFlow jets')                  
-
-    flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2,
-                  help='tolerance in STEP Propagator')
-    
-    flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom", # offline default is "Nonprompt_All_MaxWeight"
-                  help='working point for the TVA algorithm')
-
-    flags.addFlag("Trigger.Jet.LowPtFilter", lambda prevFlags: 'HI' in prevFlags.Trigger.triggerMenuSetup,
-                  help='apply low pT filter on antiKt4 jets (used for HI UPC jet reco)')
+    def __fshad():
+        from TriggerMenuMT.HLT.Jet.TrigJetConfigFlags import createTrigFSHadConfigFlags
+        return createTrigFSHadConfigFlags()
+    flags.addFlagsCategory('Trigger.FSHad', __fshad )
 
     return flags
 

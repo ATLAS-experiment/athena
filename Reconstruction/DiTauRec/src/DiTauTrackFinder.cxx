@@ -11,17 +11,9 @@
 DiTauTrackFinder::DiTauTrackFinder(const std::string& type,
 				   const std::string& name,
 				   const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_MaxDrJet(1.0),
-  m_MaxDrSubjet(0.2),
-  m_MaxNTracksSubjet(-1),
-  m_TrackSelectorTool("")
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("MaxDrJet", m_MaxDrJet);
-  declareProperty("MaxDrSubjet", m_MaxDrSubjet);
-  declareProperty("MaxNTracksSubjet", m_MaxNTracksSubjet);
-  declareProperty("TrackSelectorTool", m_TrackSelectorTool);
 }
 
 
@@ -108,6 +100,12 @@ StatusCode DiTauTrackFinder::execute(DiTauCandidateData * data,
 
   data->subjets = vSubjets;
   ATH_MSG_DEBUG("number of subjets  after track association: " << data->subjets.size());
+  // set subjet p4 in xAODDiTau
+  for (unsigned int i = 0; i < vSubjets.size(); i++) {
+    const fastjet::PseudoJet& subjet = vSubjets.at(i);
+    pDiTau->setSubjetPtEtaPhiE(i, subjet.pt(), subjet.eta(), subjet.phi_std(), subjet.e());
+    ATH_MSG_DEBUG("subjet " << i << " pt: " << subjet.pt() << " eta: " << subjet.eta() << " phi: " << subjet.phi_std() << " e: " << subjet.e());
+  }
   vSubjets.clear();
 
 

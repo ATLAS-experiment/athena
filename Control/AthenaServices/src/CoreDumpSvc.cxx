@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,6 +37,7 @@
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IAlgContextSvc.h"
 #include "GaudiKernel/IAlgExecStateSvc.h"
+#include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/System.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -457,15 +458,12 @@ std::string CoreDumpSvc::dump() const
   
   os << "Event counter: " << m_eventCounter << "\n";  
 
-
-  SmartIF<IAlgExecStateSvc> algExecStateSvc;
+  SmartIF<IAlgManager> algMgr{serviceLocator()->as<IAlgManager>()};
   SmartIF<IAlgContextSvc> algContextSvc;
 
-  // Use AlgExecStateSvc in MT, otherwise AlgContextSvc
-  if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 0) {
-    algExecStateSvc = service("AlgExecStateSvc", /*createIf=*/ false);
-  }
-  else {
+
+  // For serial, retrieve AlgContextSvc
+  if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() == 0) {
     algContextSvc = service("AlgContextSvc", /*createIf=*/ false);
   }
 
@@ -474,14 +472,16 @@ std::string CoreDumpSvc::dump() const
 
     // Currently executing algorithm(s)
     std::string currentAlg;
-    if (algExecStateSvc) {
+
+    // Use AlgExecStateSvc in MT, otherwise AlgContextSvc
+    if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 0) {
+      const EventContext ctx(0,t);
       ATH_MSG_DEBUG("Using AlgExecStateSvc to determine current algorithm(s)");
       try {
-        // We copy on purpose to avoid modification while we examine it
-        auto states = algExecStateSvc->algExecStates(EventContext(0,t));
-        for (const auto& kv : states) {
-          if (kv.second.state()==AlgExecState::State::Executing)
-            currentAlg += (kv.first + " ");
+        for (const IAlgorithm* alg : algMgr->getAlgorithms()) {
+          auto aes = alg->execState(ctx);
+          if (aes.state()==AlgExecState::State::Executing)
+            currentAlg += (alg->name() + " ");
         }
       }
       catch (const GaudiException&) {  // can happen if we get called before any algo execution
@@ -571,7 +571,7 @@ void CoreDumpSvc::handle(const Incident& incident)
     // Intentional:
     // cppcheck-suppress selfAssignment
     newstr[0] = newstr[0];
-    currRec.EvId = newstr;
+    currRec.EvId = std::move(newstr);
   }
 
 }

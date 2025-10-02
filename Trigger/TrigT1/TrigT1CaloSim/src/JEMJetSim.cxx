@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // /***************************************************************************
@@ -30,7 +30,7 @@
 #include "TrigT1Interfaces/TrigT1Interfaces_ClassDEF.h"
 #include "xAODTrigL1Calo/JetElementContainer.h"
 #include "TrigT1CaloEvent/JEMTobRoI_ClassDEF.h"
-#include "TrigT1CaloEvent/JetCMXData_ClassDEF.h"
+#include "TrigT1CaloEvent/JetCMXData.h"
 #include "TrigT1CaloEvent/JetInput.h"
 
 

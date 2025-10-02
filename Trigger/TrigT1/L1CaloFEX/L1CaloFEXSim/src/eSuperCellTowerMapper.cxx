@@ -1,14 +1,9 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "CaloEvent/CaloCellContainer.h"
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
-#include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eTowerContainer.h"
-#include "L1CaloFEXSim/eTowerBuilder.h"
-#include "L1CaloFEXSim/eSuperCellTowerMapper.h"
+#include "eSuperCellTowerMapper.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
 

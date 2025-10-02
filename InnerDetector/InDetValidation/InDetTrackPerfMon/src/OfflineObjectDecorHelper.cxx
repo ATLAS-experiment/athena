@@ -41,6 +41,30 @@ namespace IDTPM {
   }
 
 
+  /// getLinkedJet
+  const xAOD::Jet* getLinkedJet( const xAOD::TrackParticle& track,
+                                 const std::string& quality ) {
+    std::string decoName = "LinkedJet_" + quality;
+    return getLinkedObject< xAOD::JetContainer >( track, decoName );
+  }
+
+
+  /// recompute d0 projecting in jet direction w.r.t. origin
+  float getD0TrackInJet( const xAOD::TrackParticle& track,
+                         const std::string& quality ) {
+    const xAOD::Jet* jet = getLinkedJet( track, quality );
+    if( not jet ) return -999.;
+
+    //Amg::Vector3D nullPos( 0, 0, 0 );
+    Amg::Vector3D jetDirection( jet->px(), jet->py(), jet->pz() );
+    Amg::Vector3D unit = jetDirection.unit();
+
+    float vs = std::sin( std::atan2( unit.y(), unit.x() ) - track.phi() ) * track.d0();
+    float signD0 = vs>=0. ? 1. : -1.;
+    return signD0 * std::fabs( track.d0() );
+  }
+
+
   /// isUnlinkedTruth
   bool isUnlinkedTruth( const xAOD::TrackParticle& track ) {
     const xAOD::TruthParticle* truth = getLinkedObject< xAOD::TruthParticleContainer >(
@@ -68,18 +92,17 @@ namespace IDTPM {
         track, "truthParticleLink" );
   }
 
-  /// isReconstructable
-  bool isReconstructable( const xAOD::TruthParticle& truth,
-                          const std::vector<unsigned int>& minSilHits,
-                          const std::vector<float>& etaBins)
-  {
-    // Get eta bin
-    float absEta = std::abs(truth.eta());
+  template < typename PARTICLE >
+  unsigned int getEtaBin (const PARTICLE& p, const std::vector<float>& etaBins)  {
+    float absEta = std::abs(p.eta());
     absEta = std::clamp(absEta, etaBins.front(), etaBins.back());
     const auto pVal =  std::lower_bound(etaBins.begin(), etaBins.end(), absEta);
     const unsigned int bin = std::distance(etaBins.begin(), pVal) - 1;
-    return ( nSiHits(truth) >= minSilHits.at( bin ) );
+    return bin;
   }
+  template unsigned int getEtaBin < xAOD::TruthParticle >(const xAOD::TruthParticle& truth, const std::vector<float>& etaBins);
+  template unsigned int getEtaBin < xAOD::TrackParticle >(const xAOD::TrackParticle& track, const std::vector<float>& etaBins);
+
 
   /// getVertexTracksAndWeights
   bool getVertexTracksAndWeights( const xAOD::Vertex& vtx,

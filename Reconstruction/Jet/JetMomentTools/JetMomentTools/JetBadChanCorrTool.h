@@ -1,7 +1,7 @@
 // this file is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -95,7 +95,7 @@ protected:
   // jet profiles
   class ProfileData {
   public:
-    ProfileData(TH1D* th, int sample,
+    ProfileData(TH1* th, int sample,
     double ptMin=0, double ptMax=9999,
     double etaMin=0, double etaMax=5.0,
     double phiMin=-M_PI, double phiMax=M_PI):
@@ -118,7 +118,7 @@ protected:
       return m_th->GetBinContent(idr);
     }
   private:
-    TH1D* m_th;
+    TH1* m_th;
     int m_sample;
     double m_ptMin;
     double m_ptMax;

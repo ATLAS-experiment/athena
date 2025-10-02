@@ -7,16 +7,15 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/error.h"
 #include "AthContainers/exceptions.h"
+#include "AthContainersRoot/getDynamicAuxID.h"
 #include "RootUtils/Type.h"
 
 #include "RNTupleAuxDynReader.h"
 #include "RNTupleAuxDynStore.h"
-#include "AthContainersRoot/getDynamicAuxID.h"
 
 #include "TClass.h"
 #include "TClassEdit.h"
 #include "TVirtualCollectionProxy.h"
-#include "TROOT.h"
 
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleReader.hxx"
@@ -24,16 +23,13 @@
 
 using std::string;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   using ROOT::RNTupleDescriptor;
-   using ROOT::RFieldDescriptor;
-   using ROOT::DescriptorId_t;
-   using ROOT::kInvalidDescriptorId;
-#else
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+namespace ROOT {
    using ROOT::Experimental::RNTupleDescriptor;
    using ROOT::Experimental::RFieldDescriptor;
    using ROOT::Experimental::DescriptorId_t;
    using ROOT::Experimental::kInvalidDescriptorId;
+}
 #endif
 
 namespace {
@@ -99,7 +95,7 @@ getAuxElementType( bool standalone, std::string& elementTypeName, const std::str
 
 SG::auxid_t
 getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
-                     const RNTupleDescriptor& desc,
+                     const ROOT::RNTupleDescriptor& desc,
                      const std::string& field_prefix,
                      const std::string& attr_name,
                      const std::string& attr_type,
@@ -108,7 +104,7 @@ getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
 
 SG::auxid_t
 getLinkedAuxId (const SG::AuxTypeRegistry& r,
-                const RNTupleDescriptor& desc,
+                const ROOT::RNTupleDescriptor& desc,
                 const std::string& field_prefix,
                 const std::string& attr_name,
                 const std::string& attr_type,
@@ -117,9 +113,9 @@ getLinkedAuxId (const SG::AuxTypeRegistry& r,
   SG::auxid_t linked_auxid = SG::null_auxid;
   if (SG::AuxTypeRegistry::classNameHasLink (attr_type)) {
     std::string linked_attr = SG::AuxTypeRegistry::linkedName (attr_name);
-    DescriptorId_t did = desc.FindFieldId (field_prefix + linked_attr);
-    if (did != kInvalidDescriptorId) {
-      const RFieldDescriptor& linked_f = desc.GetFieldDescriptor (did);
+    ROOT::DescriptorId_t did = desc.FindFieldId (field_prefix + linked_attr);
+    if (did != ROOT::kInvalidDescriptorId) {
+      const ROOT::RFieldDescriptor& linked_f = desc.GetFieldDescriptor (did);
       linked_auxid = getAuxIdForAttribute (r, desc, field_prefix,
                                            linked_attr, linked_f.GetTypeName(), standalone);
     }
@@ -135,7 +131,7 @@ getLinkedAuxId (const SG::AuxTypeRegistry& r,
 
 SG::auxid_t
 getAuxIdForAttribute(const SG::AuxTypeRegistry& r,
-                     const RNTupleDescriptor& desc,
+                     const ROOT::RNTupleDescriptor& desc,
                      const std::string& field_prefix,
                      const std::string& attr_name,
                      const std::string& attr_type,
@@ -164,7 +160,7 @@ namespace RootAuxDynIO
    // stored in the Field 'field_name'
    RNTupleAuxDynReader::RNTupleAuxDynReader(const std::string& field_name,
                                             const std::string& field_type,
-                                            RNTupleReader* reader)
+                                            ROOT::RNTupleReader* reader)
       : AthMessaging( std::string("RNTupleAuxDynReader[")+field_name+"]" ),
         m_storeFieldName( field_name ),
         m_ntupleReader( reader )
@@ -202,7 +198,7 @@ namespace RootAuxDynIO
       const auto& desc = m_ntupleReader->GetDescriptor();
       for( const auto &f : desc.GetTopLevelFields() ) {
          const string field_name = f.GetFieldName();
-         if( field_name.rfind(field_prefix,0) == 0 ) {
+         if( field_name.starts_with(field_prefix) ) {
             const string attr_infile = field_name.substr(field_prefix.size());
             const string attr_name = reg.inputRename(m_key, attr_infile);
             const string field_type = f.GetTypeName();
@@ -212,9 +208,15 @@ namespace RootAuxDynIO
             // add AuxID to the list
             // May still be null if we don't have a dictionary for this field
             if( auxid != SG::null_auxid ) {
-               m_auxids.insert(auxid);
+               addAuxID(auxid);
                m_fieldInfos[auxid].fieldName = field_name;
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
                m_fieldInfos[auxid].view = m_ntupleReader->GetView<void>(field_name, nullptr);
+#else
+               // Can't use type_info because of default template argument in DataVectors ATEAM-1087
+               const std::string& tiname = (standalone and !reg.isLinked(auxid))? reg.getTypeName(auxid) : reg.getVecTypeName(auxid);
+               m_fieldInfos[auxid].view = m_ntupleReader->GetView(field_name, nullptr, tiname);
+#endif
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");
                msg << "Could not find auxid for " << attr_infile << " type: " << field_type

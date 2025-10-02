@@ -46,7 +46,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
     std::vector<const CaloCalibrationHit*> theseCalibrationHits = (*identifierToCaloHitMapIterator).second;
 
     for (const auto *thisCalibrationHit : theseCalibrationHits){
-      const int truthID = HepMC::barcode(thisCalibrationHit); // FIXME barcode-based until xAOD::TruthParticle supports id rather than barcode
+      const int truthID = HepMC::uniqueID(thisCalibrationHit);
       double thisCalHitTruthEnergy = thisCalibrationHit->energyEM() + thisCalibrationHit->energyNonEM();
       if (true == m_fullTruthEnergy) thisCalHitTruthEnergy += (thisCalibrationHit->energyEscaped() + thisCalibrationHit->energyInvisible());
 
@@ -57,9 +57,9 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
       //and also a weight due to pflow reweighting of a cell energy
       if (m_useCellWeights) thisCalHitTruthEnergy *= cellWeight;
 
-      auto iterator = truthIDTruePtMap.find(truthID);
-      if (iterator != truthIDTruePtMap.end()) truthIDTruePtMap[truthID] += thisCalHitTruthEnergy;
-      else truthIDTruePtMap[truthID] = thisCalHitTruthEnergy;
+      if (truthID > HepMC::UNDEFINED_ID) {
+        truthIDTruePtMap[truthID] += thisCalHitTruthEnergy;
+      }
       
     }//calibration hit loop
     

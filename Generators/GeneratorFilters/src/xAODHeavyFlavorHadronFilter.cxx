@@ -1,27 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODHeavyFlavorHadronFilter.h"
 #include "GaudiKernel/SystemOfUnits.h"
-#include "xAODJet/JetContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CxxUtils/BasicTypes.h"
-#include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
 
 
-xAODHeavyFlavorHadronFilter::xAODHeavyFlavorHadronFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name, pSvcLocator),
-    m_NPass(0), m_Nevt(0), m_NbPass(0), 
-    m_NcPass(0), m_NBHadronPass(0), m_NDHadronPass(0), 
-    m_NPDGIDPass(0)
-{
-  
-}
-
-
 StatusCode xAODHeavyFlavorHadronFilter::filterInitialize() {
+  CHECK(m_TruthJetContainerName.initialize(SG::AllowEmpty)); // This only needs to be set if m_RequireTruthJet is true.
+  CHECK(m_truthPartContKey.initialize());
   m_Nevt = 0;
   m_NPass = 0;
   m_NbPass = 0;
@@ -54,29 +44,24 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
 
   m_Nevt++;
 
-  std::vector<xAOD::JetContainer::const_iterator> jets;
+  std::vector<const xAOD::Jet *> jets;
   if (m_RequireTruthJet) {
-    const xAOD::JetContainer* truthjetTES;
-    CHECK(evtStore()->retrieve( truthjetTES, m_TruthJetContainerName));
-    for (xAOD::JetContainer::const_iterator j = truthjetTES->begin(); j != truthjetTES->end() ; ++j) {
-      if ((*j)->pt() > m_jetPtMin && std::abs((*j)->eta()) < m_jetEtaMax) {
-        jets.push_back(j);
+    // Retrieve jet container
+    SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+    CHECK(truthjetTES.isValid());
+    for (const xAOD::Jet* truthJet : *truthjetTES) {
+      if (truthJet->pt() > m_jetPtMin && std::abs(truthJet->eta()) < m_jetEtaMax) {
+        jets.push_back(truthJet);
       }
     }
   }
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
- 
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
       // b-quarks
       // ==========
       // Warning:  Since no navigation is done, the filter does not distinguish
@@ -88,8 +73,8 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
           std::abs(part->rapidity())<m_bEtaMax) {
         if (m_RequireTruthJet) {
           TLorentzVector genpart(part->px(), part->py(), part->pz(), part->e());
-          for (uint i=0; i<jets.size(); i++) {
-            double dR = (*jets[i])->p4().DeltaR(genpart);
+          for (const xAOD::Jet* truthJet : jets) {
+            double dR = truthJet->p4().DeltaR(genpart);
             if (dR<m_deltaRFromTruth) bPass=true;
           }
         } else {
@@ -109,8 +94,8 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
           std::abs(part->rapidity())<m_cEtaMax) {
         if (m_RequireTruthJet) {
           TLorentzVector genpart(part->px(), part->py(), part->pz(), part->e());
-          for (uint i=0; i<jets.size(); i++) {
-            double dR = (*jets[i])->p4().DeltaR(genpart);
+          for (const xAOD::Jet* truthJet : jets) {
+            double dR = truthJet->p4().DeltaR(genpart);
             if (dR<m_deltaRFromTruth) cPass=true;
           }
         } else {
@@ -126,8 +111,8 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
           std::abs(part->rapidity())<m_bottomEtaMax) {
         if (m_RequireTruthJet) {
           TLorentzVector genpart(part->px(), part->py(), part->pz(), part->e());
-          for (uint i=0; i<jets.size(); i++) {
-            double dR = (*jets[i])->p4().DeltaR(genpart);
+          for (const xAOD::Jet* truthJet : jets) {
+            double dR = truthJet->p4().DeltaR(genpart);
             if (dR < m_deltaRFromTruth) BHadronPass=true;
           }
         } else {
@@ -143,8 +128,8 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
           std::abs(part->rapidity())<m_charmEtaMax) {
         if (m_RequireTruthJet) {
           TLorentzVector genpart(part->px(), part->py(), part->pz(), part->e());
-          for (uint i=0; i<jets.size(); i++) {
-            double dR = (*jets[i])->p4().DeltaR(genpart);
+          for (const xAOD::Jet* truthJet : jets) {
+            double dR = truthJet->p4().DeltaR(genpart);
             if (dR < m_deltaRFromTruth) DHadronPass=true;
           }
         } else {
@@ -161,8 +146,8 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
           std::abs(part->rapidity()) < m_PDGEtaMax) {
         if (m_RequireTruthJet) {
           TLorentzVector genpart(part->px(), part->py(), part->pz(), part->e());
-          for (size_t i = 0; i < jets.size(); ++i) {
-            double dR = (*jets[i])->p4().DeltaR(genpart);
+          for (const xAOD::Jet* truthJet : jets) {
+            double dR = truthJet->p4().DeltaR(genpart);
             if (dR < m_deltaRFromTruth) PDGIDPass = true;
           }
         } else {

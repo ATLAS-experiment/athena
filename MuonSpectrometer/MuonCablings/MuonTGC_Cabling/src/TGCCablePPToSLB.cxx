@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCablePPToSLB.h"
@@ -14,53 +14,24 @@ namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
 TGCCablePPToSLB::TGCCablePPToSLB(const std::string& filename)
-  : TGCCable(TGCCable::PPToSLB)
-{
-  m_database[TGCId::Endcap][TGCId::WT] = 
-    new TGCDatabasePPToSL(filename,"PP EWT");
-  m_database[TGCId::Endcap][TGCId::WD] =
-    new TGCDatabasePPToSL(filename,"PP EWD");
-  m_database[TGCId::Endcap][TGCId::ST] = 
-    new TGCDatabasePPToSL(filename,"PP EST");
-  m_database[TGCId::Endcap][TGCId::SD] = 
-    new TGCDatabasePPToSL(filename,"PP ESD");
-  m_database[TGCId::Endcap][TGCId::WI] = 
-    new TGCDatabasePPToSL(filename,"PP EWI");
-  m_database[TGCId::Endcap][TGCId::SI] = 
-    new TGCDatabasePPToSL(filename,"PP ESI");
-  m_database[TGCId::Forward][TGCId::WT] =
-    new TGCDatabasePPToSL(filename,"PP FWT");
-  m_database[TGCId::Forward][TGCId::WD] = 
-    new TGCDatabasePPToSL(filename,"PP FWD");
-  m_database[TGCId::Forward][TGCId::ST] = 
-    new TGCDatabasePPToSL(filename,"PP FST");
-  m_database[TGCId::Forward][TGCId::SD] = 
-    new TGCDatabasePPToSL(filename,"PP FSD");
-  m_database[TGCId::Forward][TGCId::WI] = 
-    new TGCDatabasePPToSL(filename,"PP FWI");
-  m_database[TGCId::Forward][TGCId::SI] = 
-    new TGCDatabasePPToSL(filename,"PP FSI");
+  : TGCCable(TGCCable::PPToSLB) {
+  m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabasePPToSL>(filename,"PP EWT");
+  m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabasePPToSL>(filename,"PP EWD");
+  m_database[TGCId::Endcap][TGCId::ST] = std::make_unique<TGCDatabasePPToSL>(filename,"PP EST");
+  m_database[TGCId::Endcap][TGCId::SD] = std::make_unique<TGCDatabasePPToSL>(filename,"PP ESD");
+  m_database[TGCId::Endcap][TGCId::WI] = std::make_unique<TGCDatabasePPToSL>(filename,"PP EWI");
+  m_database[TGCId::Endcap][TGCId::SI] = std::make_unique<TGCDatabasePPToSL>(filename,"PP ESI");
+  m_database[TGCId::Forward][TGCId::WT] = std::make_unique<TGCDatabasePPToSL>(filename,"PP FWT");
+  m_database[TGCId::Forward][TGCId::WD] = std::make_unique<TGCDatabasePPToSL>(filename,"PP FWD");
+  m_database[TGCId::Forward][TGCId::ST] = std::make_unique<TGCDatabasePPToSL>(filename,"PP FST");
+  m_database[TGCId::Forward][TGCId::SD] = std::make_unique<TGCDatabasePPToSL>(filename,"PP FSD");
+  m_database[TGCId::Forward][TGCId::WI] = std::make_unique<TGCDatabasePPToSL>(filename,"PP FWI");
+  m_database[TGCId::Forward][TGCId::SI] = std::make_unique<TGCDatabasePPToSL>(filename,"PP FSI");
 }
 
-TGCCablePPToSLB::~TGCCablePPToSLB(void)
-  {
-    delete m_database[TGCId::Endcap][TGCId::WT];
-    delete m_database[TGCId::Endcap][TGCId::WD];
-    delete m_database[TGCId::Endcap][TGCId::ST];
-    delete m_database[TGCId::Endcap][TGCId::SD];
-    delete m_database[TGCId::Endcap][TGCId::WI];
-    delete m_database[TGCId::Endcap][TGCId::SI];
-    delete m_database[TGCId::Forward][TGCId::WT];
-    delete m_database[TGCId::Forward][TGCId::WD];
-    delete m_database[TGCId::Forward][TGCId::ST];
-    delete m_database[TGCId::Forward][TGCId::SD];
-    delete m_database[TGCId::Forward][TGCId::WI];
-    delete m_database[TGCId::Forward][TGCId::SI];
-  }
-  
 
 TGCChannelId* TGCCablePPToSLB::getChannel(const TGCChannelId* channelId,
-					  bool orChannel) const {
+                                          bool orChannel) const {
   if(channelId){
     if(channelId->getChannelIdType()==TGCChannelId::ChannelIdType::PPOut)
       return getChannelOut(channelId,orChannel);
@@ -224,8 +195,8 @@ TGCModuleMap* TGCCablePPToSLB::getModuleIn(const TGCModuleId* slb) const {
   if(slb->isValid()==false) return nullptr;
 
   const int slbId = slb->getId();
- 
-  TGCDatabase* databaseP =m_database[slb->getRegionType()][slb->getModuleType()];
+
+  TGCDatabase* databaseP = m_database[slb->getRegionType()][slb->getModuleType()].get();
   TGCModuleMap* mapId = nullptr;
   const int MaxEntry = databaseP->getMaxEntry();
   for(int i=0; i<MaxEntry; i++){
@@ -263,41 +234,40 @@ TGCModuleMap* TGCCablePPToSLB::getModuleOut(const TGCModuleId* pp) const {
 
   const int ppId = pp->getId();
 
-  TGCDatabase* databaseP = m_database[pp->getRegionType()][pp->getModuleType()];
+  TGCDatabase* databaseP = m_database[pp->getRegionType()][pp->getModuleType()].get();
   TGCModuleMap* mapId = nullptr;
   const int MaxEntry = databaseP->getMaxEntry();
   for(int i=0; i<MaxEntry; i++){
-    if(databaseP->getEntry(i,0)==ppId)
-      {
-	int id=-1;
-	TGCModuleSLB* slb=nullptr;
-	mapId = new TGCModuleMap();
+    if(databaseP->getEntry(i,0)==ppId) {
+      int id=-1;
+      TGCModuleSLB* slb=nullptr;
+      mapId = new TGCModuleMap();
 
-	id = databaseP->getEntry(i,1);
-	if(id!=-1){
-	  slb = new TGCModuleSLB(pp->getSideType(),
+      id = databaseP->getEntry(i,1);
+      if(id!=-1){
+        slb = new TGCModuleSLB(pp->getSideType(),
+      			 pp->getModuleType(),
+          	 pp->getRegionType(),
+          	 pp->getSector(),
+             id);
+
+    mapId->insert(0,slb);
+      }
+
+      id = databaseP->getEntry(i,2);
+      if(id!=-1){
+        slb = new TGCModuleSLB(pp->getSideType(),
 				 pp->getModuleType(),
 				 pp->getRegionType(),
 				 pp->getSector(),
 				 id);
-	  
-	  mapId->insert(0,slb);
-	}
 
-	id = databaseP->getEntry(i,2);
-	if(id!=-1){
-	  slb = new TGCModuleSLB(pp->getSideType(),
-				 pp->getModuleType(),
-				 pp->getRegionType(),
-				 pp->getSector(),
-				 id);
-	  
-	  mapId->insert(1,slb);
-	}
-	break;
-      } 
+        mapId->insert(1,slb);
+      }
+      break;
+    }
   }
-  
+
   return mapId;
 }
 

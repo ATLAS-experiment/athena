@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ********************* All Tools/Functions for the TriggerEDM **********************
 # Keeping all functions from the original TriggerEDM.py (Run 2 EDM) in this file
@@ -13,7 +13,10 @@ from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSL
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
 from CLIDComps.clidGenerator import clidGenerator
+from collections import defaultdict
+import itertools
 import re
+
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerEDM')
 
@@ -133,18 +136,22 @@ def getRawTriggerEDMList(flags, runVersion=-1):
     if runVersion == 3:
         edmListCopy = TriggerHLTListRun3.copy()
     elif runVersion == 4:
-        edmListCopy  = TriggerHLTListRun3.copy()
+        edm4ListCopy = TriggerHLTListRun4.copy()
+        edm3ListCopy = TriggerHLTListRun3.copy()
         log.debug("Removing duplicated item between TriggerHLTListRun3 and TriggerHLTListRun4.")
-        for i in range(len(edmListCopy)-1, -1, -1): # Back iterate by index, we might be removing as we go
-            for r4item in TriggerHLTListRun4:
-                if edmListCopy[i][0] == r4item[0]:
-                    del edmListCopy[i]
+        for i in range(len(edm3ListCopy)-1, -1, -1): # Back iterate by index, we might be removing as we go
+            for r4item in edm4ListCopy:
+                if edm3ListCopy[i][0] == r4item[0]:
+                    del edm3ListCopy[i]
                     log.debug(f"- Dupe: {r4item} is removed from TriggerHLTListRun3 to be updated by TriggerHLTListRun4")
                     break
-        lenPreMerge = len(edmListCopy)
-        edmListCopy.extend(TriggerHLTListRun4)
-        lenPostMerge = len(edmListCopy)
+        lenPreMerge = len(edm3ListCopy)
+        edm4ListCopy.extend(edm3ListCopy)
+        lenPostMerge = len(edm4ListCopy)
+        edmListCopy = edm4ListCopy
         log.info(f"Added TriggerHLTListRun4 to TriggerHLTListRun3. EDM entries {lenPreMerge} -> {lenPostMerge}")
+        if testEDMList(edmListCopy, error_on_edmdetails=False):
+            log.error("edmList contains inconsistencies!")
     else:
         errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
         log.error(errMsg)
@@ -251,7 +258,6 @@ def _getRun3TrigObjProducedInView(theKey, trigEDMList):
     (Hence, has the special viewIndex Aux decoration applied by steering)
     """
     from TrigEDMConfig.TriggerEDMRun3 import InViews
-    import itertools
 
     return any(coll for coll in itertools.chain(*trigEDMList) if
                len(coll)>3 and theKey==coll[0].split('#')[1] and
@@ -314,9 +320,7 @@ def _getRun3TrigObjList(destination, trigEDMList):
     Gives back the Python dictionary  with the content of ESD/AOD (dst) which can be inserted in OKS.
     """
     dset = set(destination.split())
-    from collections import OrderedDict
-    toadd = OrderedDict()
-    import itertools
+    toadd = defaultdict(list)
 
     for item in itertools.chain(*trigEDMList):
         if item[1] == '': # no output has been defined
@@ -325,14 +329,10 @@ def _getRun3TrigObjList(destination, trigEDMList):
         confset = set(item[1].split())
 
         if dset & confset: # intersection of the sets
-            t,k = _getTypeAndKey(item[0])
-            colltype = t
+            colltype, k = _getTypeAndKey(item[0])
 
-            if colltype in toadd:
-                if k not in toadd[colltype]:
-                    toadd[colltype] += [k]
-            else:
-                toadd[colltype] = [k]
+            if k not in toadd[colltype]:
+                toadd[colltype] += [k]
 
     return toadd
 
@@ -344,13 +344,10 @@ def _getRun3TrigEDMSlimList(key, HLTList):
     Requires changing the list to have 'Aux.-'
     """
     _edmList = _getRun3TrigObjList(key,[HLTList])
-    from collections import OrderedDict
-    output = OrderedDict()
+
+    output = {}
     for k,v in _edmList.items():
-        newnames = []
-        for el in v:
-            newnames.append( _handleRun3ViewContainers( el, HLTList ) )
-        output[k] = newnames
+        output[k] = [_handleRun3ViewContainers( el, HLTList ) for el in v]
     return output
 
 #************************************************************
@@ -478,7 +475,6 @@ def _getTriggerRun1Run2ObjList(destination, lst):
     dset = set(destination.split())
 
     toadd = {}
-    import itertools
 
     for item in itertools.chain(*lst):
         if item[1] == '':

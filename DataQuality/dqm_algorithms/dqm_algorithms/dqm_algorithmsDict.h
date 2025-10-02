@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DQM_ALGORITHMS_DQM_ALGORITHMSDICT_H
@@ -117,6 +117,7 @@
 #include "dqm_algorithms/KurtosisTest_LessThanAbs.h"
 #include "dqm_algorithms/LastBinThreshold.h"
 #include "dqm_algorithms/L1Calo_OutlierAndFlatnessTest.h"
+#include "dqm_algorithms/L1Calo_BinsDiffFromStripMedian.h"
 #include "dqm_algorithms/MDTADCSpectrum.h"
 #include "dqm_algorithms/MDTChi2.h"
 #include "dqm_algorithms/MDTCluster.h"
@@ -165,6 +166,7 @@
 #include "dqm_algorithms/TRTCheckPeakSimple.h"
 #include "dqm_algorithms/TRTHistogramHasNonZeroEntries.h"
 #include "dqm_algorithms/TRTWeightedAverage.h"
+#include "dqm_algorithms/TileBinsOutRange.h"
 #include "dqm_algorithms/TileTriggerMonitor.h"
 #include "dqm_algorithms/TripleGaussCollFit.h"
 #include "dqm_algorithms/LastBinThresholdAction.h"

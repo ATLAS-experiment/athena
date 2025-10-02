@@ -59,6 +59,7 @@ namespace Trk {
        void setUseMassCnst();
        void setUsePhiCnst();
        void setUsePlaneCnst(double a, double b, double c, double d);
+       void setUseRadiusCnst(double R, double RefP[2]);
        void setUseThetaCnst();
        void setUseAprioriVrt();
        void setUsePointingCnst(int );
@@ -90,6 +91,7 @@ namespace Trk {
      public:
        ForCFT vk_forcft;
        bool m_frozenVersionForBTagging = false;
+       bool m_allowUltraDisplaced = false;
   };
 
 } // end of namespace bracket

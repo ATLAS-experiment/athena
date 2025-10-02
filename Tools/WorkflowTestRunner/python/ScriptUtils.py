@@ -127,7 +127,7 @@ def setup_parser() -> ArgumentParser:
     tests.add_argument("-r", "--reco", action="store_true", dest="reco", default=False,
                        help="Run MC reconstruction (in case the default execution also runs simulation)")                   
     tests.add_argument("-d", "--derivation", action="store_true", dest="derivation", default=False,
-                       help="Run derivation test using Derivation_tf.py")  
+                       help="Run derivation test using Derivation_tf.py")
 
     return parser
 

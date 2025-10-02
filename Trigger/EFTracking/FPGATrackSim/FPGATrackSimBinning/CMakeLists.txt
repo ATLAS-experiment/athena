@@ -16,9 +16,9 @@ atlas_add_library( FPGATrackSimBinningLib
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} FPGATrackSimBanksLib FPGATrackSimConfToolsLib )
 
-#atlas_add_component( FPGATrackSimBinning
-#   src/components/*.cxx
-#   LINK_LIBRARIES FPGATrackSimBanksLib FPGATrackSimBinningLib )
+atlas_add_component( FPGATrackSimBinning
+   src/components/*.cxx
+   LINK_LIBRARIES FPGATrackSimBanksLib FPGATrackSimBinningLib )
 
 # Install files from the package:
 #atlas_install_python_modules( python/*.py )

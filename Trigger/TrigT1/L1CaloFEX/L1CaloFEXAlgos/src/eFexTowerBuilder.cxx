@@ -38,30 +38,33 @@ StatusCode eFexTowerBuilder::initialize() {
     CHECK( m_scellKey.initialize(true) );
     CHECK( m_outKey.initialize(true) );
     CHECK( m_eiKey.initialize(true) );
+    CHECK( m_LArLatomeHeaderContainerKey.initialize(SG::AllowEmpty) );
 
-    if (auto fileName = PathResolverFindCalibFile( m_mappingFile ); !fileName.empty()) {
-        std::unique_ptr<TFile> f( TFile::Open(fileName.c_str()) );
-        if (f) {
-            TTree* t = f->Get<TTree>("mapping");
-            if(t) {
-                unsigned long long scid = 0;
-                std::pair<int,int> coord = {0,0};
-                std::pair<int,int> slot;
-                t->SetBranchAddress("scid",&scid);
-                t->SetBranchAddress("etaIndex",&coord.first);
-                t->SetBranchAddress("phiIndex",&coord.second);
-                t->SetBranchAddress("slot1",&slot.first);
-                t->SetBranchAddress("slot2",&slot.second);
-                for(Long64_t i=0;i<t->GetEntries();i++) {
-                    t->GetEntry(i);
-                    m_scMap[scid] = std::make_pair(coord,slot);
+    if(!m_mappingFile.empty()) {
+        if (auto fileName = PathResolverFindCalibFile(m_mappingFile); !fileName.empty()) {
+            std::unique_ptr <TFile> f(TFile::Open(fileName.c_str()));
+            if (f) {
+                TTree *t = f->Get<TTree>("mapping");
+                if (t) {
+                    unsigned long long scid = 0;
+                    std::pair<int, int> coord = {0, 0};
+                    std::pair<int, int> slot;
+                    t->SetBranchAddress("scid", &scid);
+                    t->SetBranchAddress("etaIndex", &coord.first);
+                    t->SetBranchAddress("phiIndex", &coord.second);
+                    t->SetBranchAddress("slot1", &slot.first);
+                    t->SetBranchAddress("slot2", &slot.second);
+                    for (Long64_t i = 0; i < t->GetEntries(); i++) {
+                        t->GetEntry(i);
+                        m_scMap[scid] = std::make_pair(coord, slot);
+                    }
                 }
             }
-        }
-        if (m_scMap.empty()) {
-            ATH_MSG_WARNING("Failed to load sc -> eFexTower map from " << fileName);
-        } else {
-            ATH_MSG_INFO("Loaded sc -> eFexTower map from " << fileName);
+            if (m_scMap.empty()) {
+                ATH_MSG_WARNING("Failed to load sc -> eFexTower map from " << fileName);
+            } else {
+                ATH_MSG_INFO("Loaded sc -> eFexTower map from " << fileName);
+            }
         }
     }
 
@@ -94,7 +97,9 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     std::map<std::pair<int,int>,std::array<int,11>> towers;
 
     constexpr int INVALID_VALUE = -99999; // use this value to indicate invalid
+    constexpr int MASKED_VALUE = std::numeric_limits<int>::max(); // use this value to indicate masked
     constexpr int SATURATED_VALUE = std::numeric_limits<int>::max()-1; // use this value to indicate saturation
+    constexpr int MISSING_VALUE = -99998; // use this value to indicate missing supercell
 
     for (auto digi: *scells) {
         const auto itr = m_scMap.find(digi->ID().get_compact());
@@ -102,8 +107,9 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
         // note: a val of < -99998 is what is produced if efex was sent an invalid code of 1022 (see LArRawtoSuperCell)
         bool isSaturated = (!isMC) ? (digi->quality()) : false; // not applying saturation codes in MC until the changes to trigger counts has been investigated
-        bool isMasked = m_applyMasking ? ((digi)->provenance()&0x80) : false;
+        bool isMasked = ((digi)->provenance()&0x80);
         bool isInvalid = m_applyMasking ? ((digi)->provenance()&0x40) : false;
+        // note: if debugging, the SCIDs have value: digi->ID().get_compact()>>32
         if(isInvalid) {
             val = INVALID_VALUE;
         }
@@ -111,7 +117,11 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
             val = SATURATED_VALUE;
         }
 
-        auto& tower = towers[itr->second.first];
+        auto towerItr = towers.emplace(itr->second.first,std::array<int,11>{}); // returns pair<itr,bool> with bool indicating if emplaced
+        if(towerItr.second) { // did an emplace
+            towerItr.first->second.fill(MISSING_VALUE); // ensure all slots initialize with missing value
+        }
+        auto& tower = (towerItr.first->second);
         if (itr->second.second.second<11) {
             // doing an energy split between slots ... don't include a masked channel (or invalid channel)
             if (!isMasked && val!=INVALID_VALUE) {
@@ -121,15 +131,15 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
                     tower.at(itr->second.second.second) = SATURATED_VALUE;
                 }
                 if(tower.at(itr->second.second.first)!=(SATURATED_VALUE)) { // don't override saturation
-                    // if the other contribution was masked or invalid, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.first)==std::numeric_limits<int>::max() || tower.at(itr->second.second.first)==INVALID_VALUE) {
+                    // if the other contribution was masked or invalid or missing, revert to 0 before adding this contribution
+                    if (tower.at(itr->second.second.first)==MASKED_VALUE || tower.at(itr->second.second.first)==INVALID_VALUE  || tower.at(itr->second.second.first)==MISSING_VALUE) {
                         tower.at(itr->second.second.first)=0;
                     }
                     tower.at(itr->second.second.first) += val >> 1;
                 }
                 if(tower.at(itr->second.second.second)!=(SATURATED_VALUE)) { // don't override saturation
-                    // if the other contribution was masked or invalid, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.second)==std::numeric_limits<int>::max() || tower.at(itr->second.second.second)==INVALID_VALUE) {
+                    // if the other contribution was masked or invalid or missing, revert to 0 before adding this contribution
+                    if (tower.at(itr->second.second.second)==MASKED_VALUE || tower.at(itr->second.second.second)==INVALID_VALUE || tower.at(itr->second.second.second)==MISSING_VALUE) {
                         tower.at(itr->second.second.second)=0;
                     }
                     tower.at(itr->second.second.second) += (val - (val >> 1)); // HW seems fixed now!
@@ -142,10 +152,11 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
             auto& v = tower.at(itr->second.second.first);
             if (isMasked) {
                 // dont mark it masked if it already has a contribution
-                if(v==0) v = std::numeric_limits<int>::max();
+                if(v==MISSING_VALUE) v = MASKED_VALUE;
             } else if(isSaturated) {
                 v = val;
             } else {
+                if(v==INVALID_VALUE || v==MISSING_VALUE) v = 0;
                 v += val;
             }
         }
@@ -159,7 +170,11 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         if (std::abs(tTower->eta()) > 1.5) continue;
         if (tTower->sampling() != 1) continue;
         double phi = tTower->phi(); if(phi > M_PI) phi -= 2.*M_PI;
-        towers[std::pair(etaIndex(tTower->eta()),phiIndex(phi))][10] = tTower->cpET();
+        auto towerItr = towers.emplace(std::pair(etaIndex(tTower->eta()),phiIndex(phi)),std::array<int,11>{}); // returns pair<itr,bool> with bool indicating if emplaced
+        if(towerItr.second) { // did an emplace
+            towerItr.first->second.fill(MISSING_VALUE); // ensure all slots initialize with missing value
+        }
+        (towerItr.first->second).at(10) = tTower->cpET();
     }
 
 
@@ -167,9 +182,10 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     ATH_CHECK( eTowers.record(std::make_unique<xAOD::eFexTowerContainer>(),std::make_unique<xAOD::eFexTowerAuxContainer>()) );
 
     static const auto calToFex = [](int calEt) {
-        if(calEt == std::numeric_limits<int>::max()) return 0; // indicates masked channel
+        if(calEt == MASKED_VALUE) return 0; // indicates masked channel
         if(calEt == SATURATED_VALUE) return 1023; // saturated channel
         if( calEt == INVALID_VALUE ) return 1022; // invalid channel value
+        if( calEt == MISSING_VALUE ) return 1025; // missing channel value
         if(calEt<448) return std::max((calEt&~1)/2+32,1); // 25 MeV per eFexTower count
         if(calEt<1472) return (calEt-448)/4+256;          // 50 MeV per eFexTower count
         if(calEt<3520) return (calEt-1472)/8+512;         // 100 MeV ...
@@ -177,7 +193,10 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         return 1020;
     };
 
-    // now create the towers
+    // now create the towers. Note that we need a code for "missing" input (1025), because a tower can contain some but not all
+    // inputs, depending on which sources are present in the run (e.g. if tile is present but not LAr).
+    // This is different to e.g. jFex, which creates a separate tower for each source at each location
+    // so jFex doesn't need a "missing" input code.
     for(auto& [coord,counts] : towers) {
         size_t ni = (std::abs(coord.first)<=15) ? 10 : 11; // ensures we skip the tile towers for next line
         for(size_t i=0;i<ni;++i) counts[i] = (scells->empty() ? 1025 : calToFex(counts[i])); // do latome energy scaling to non-tile towers - if had no cells will use code "1025" to indicate
@@ -204,9 +223,25 @@ StatusCode eFexTowerBuilder::fillMap(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not retrieve collection " << m_scellKey.key() );
         return StatusCode::FAILURE;
     }
-    if (scells->size() != 34048) {
+    if (scells->size() != 34048 && !m_mappingFile.empty()) {
         ATH_MSG_FATAL("Cannot fill sc -> eFexTower mapping with an incomplete sc collection");
         return StatusCode::FAILURE;
+    }
+
+    // read the LATOME header if a key is given, so that we can determine LATOME version and get mapping right
+    bool doV6Mapping = m_v6Mapping;
+
+    if(!m_LArLatomeHeaderContainerKey.empty()) {
+        SG::ReadHandle<LArLATOMEHeaderContainer> hdrCont(m_LArLatomeHeaderContainerKey,ctx);
+        if(hdrCont.isValid()) {
+            for (const LArLATOMEHeader* hit : *hdrCont) {
+                doV6Mapping = (hit->FWversion()>1600);
+            }
+            if (doV6Mapping != m_v6Mapping) {
+                ATH_MSG_WARNING("Used LATOME Hardware to determine mapping different to python configuration (use V6 Mapping = " << doV6Mapping << " )");
+            }
+        }
+
     }
     struct TowerSCells {
         std::vector<unsigned long long> ps;
@@ -280,10 +315,10 @@ StatusCode eFexTowerBuilder::fillMap(const EventContext& ctx) const {
         // handle case @ |eta|~1.8-2 with 6 L1 cells
         if (sc.l1.size()==6) {
             m_scMap[sc.l1.at(0).second] = std::pair(coord,std::pair(1,11));
-            m_scMap[sc.l1.at(1).second] = std::pair(coord,std::pair(1,2));
+            m_scMap[sc.l1.at(1).second] = std::pair(coord,(doV6Mapping && coord.first < 0) ? std::pair(2,1) : std::pair(1,2)); // in LATOME v5 FW this was (1,2) for both sides
             m_scMap[sc.l1.at(2).second] = std::pair(coord,std::pair(2,11));
             m_scMap[sc.l1.at(3).second] = std::pair(coord,std::pair(3,11));
-            m_scMap[sc.l1.at(4).second] = std::pair(coord,std::pair(3,4));
+            m_scMap[sc.l1.at(4).second] = std::pair(coord,(doV6Mapping && coord.first < 0) ? std::pair(4,3) : std::pair(3,4)); // in LATOME v5 FW this was (3,4) for both sides
             m_scMap[sc.l1.at(5).second] = std::pair(coord,std::pair(4,11));
             slotVector[1] = eTowerSlots[sc.l1.at(0).second];
             slotVector[2] = eTowerSlots[sc.l1.at(2).second];
@@ -315,24 +350,27 @@ StatusCode eFexTowerBuilder::fillMap(const EventContext& ctx) const {
 //        }
     }
 
-    // save the map to disk
-    TFile f("scToEfexTowers.root","RECREATE");
-    TTree* t = new TTree("mapping","mapping");
-    unsigned long long scid = 0;
-    std::pair<int,int> coord = {0,0};
-    std::pair<int,int> slot = {-1,-1};
-    t->Branch("scid",&scid);
-    t->Branch("etaIndex",&coord.first);
-    t->Branch("phiIndex",&coord.second);
-    t->Branch("slot1",&slot.first);
-    t->Branch("slot2",&slot.second);
-    for(auto& [id,val] : m_scMap) {
-        scid = id; coord = val.first; slot = val.second;
-        t->Fill();
+    // save the map to disk, if required
+    if(!m_mappingFile.empty()) {
+        TFile f(m_mappingFile.value().c_str(), "RECREATE");
+        TTree *t = new TTree("mapping", "mapping");
+        unsigned long long scid = 0;
+        std::pair<int, int> coord = {0, 0};
+        std::pair<int, int> slot = {-1, -1};
+        t->Branch("scid", &scid);
+        t->Branch("etaIndex", &coord.first);
+        t->Branch("phiIndex", &coord.second);
+        t->Branch("slot1", &slot.first);
+        t->Branch("slot2", &slot.second);
+        for (auto &[id, val]: m_scMap) {
+            scid = id;
+            coord = val.first;
+            slot = val.second;
+            t->Fill();
+        }
+        t->Write();
+        f.Close();
     }
-    t->Write();
-    f.Close();
-
     return StatusCode::SUCCESS;
 
 }

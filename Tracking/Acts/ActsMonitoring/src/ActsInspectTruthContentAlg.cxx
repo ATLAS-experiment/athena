@@ -6,6 +6,7 @@
 #include "ActsInterop/TableUtils.h"
 #include "TruthUtils/MagicNumbers.h"
 #include <unordered_map>
+#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk {
 
@@ -108,7 +109,7 @@ namespace ActsTrk {
     }
 
     ATH_CHECK( copyStatTable(clusterStat, m_clusterStat) );
-	
+    
     for (std::size_t i(0); i<m_seeds.size(); ++i) {
       ATH_MSG_DEBUG( "Retrieving seed collection with key: " << m_seeds.at(i).key() );
       SG::ReadHandle<ActsTrk::SeedContainer> seedHandle = SG::makeHandle( m_seeds.at(i), ctx );
@@ -275,7 +276,10 @@ namespace ActsTrk {
   }
 
   ActsInspectTruthContentAlg::SeedType ActsInspectTruthContentAlg::deduceSeedType(const ActsTrk::Seed& seed) const {
-    const auto&	[bottom, middle, top] = seed.sp();
+    assert(seed.sp().size() == 3ul);
+    const auto& bottom = seed.sp().at(0);
+    const auto& middle = seed.sp().at(1);
+    const auto& top = seed.sp().at(2);
     xAOD::UncalibMeasType bottom_type = bottom->measurements().front()->type();
     xAOD::UncalibMeasType middle_type = middle->measurements().front()->type();
     xAOD::UncalibMeasType top_type = top->measurements().front()->type();
@@ -307,7 +311,7 @@ namespace ActsTrk {
 							track_stat_t& trackStat,
 							cluster_stat_t& onTrackStat) const {
     ATH_MSG_DEBUG( "Checking truth for tracks ..." );
-    for (const auto& track : tracks) {
+    for (const auto track : tracks) {
       ++trackStat[to_underlying(EStatTracks::kNTotal)][0];
       std::size_t nHoles = track.nHoles();
       if (nHoles == 0) ++trackStat[to_underlying(EStatTracks::kNTracks0Holes)][0];

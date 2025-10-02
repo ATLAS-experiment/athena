@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -19,6 +19,7 @@
 // Framework includes
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODMuon/MuonContainer.h>
+#include <xAODTau/TauJetContainer.h>
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
@@ -63,6 +64,16 @@ namespace CP {
         this, "muonSelection", "", "the selection on the input muons"
       };
 
+      /// \brief the tau-jet input handle
+      CP::SysReadHandle<xAOD::TauJetContainer> m_tausHandle {
+        this, "taus", "", "the tau-jet container to use"
+      };
+
+      /// \brief the tau-jet selection handle
+      CP::SysReadSelectionHandle m_tauSelection {
+        this, "tauSelection", "", "the selection on the input tau-jets"
+      };
+
       /// \brief the truth electron input handle
       CP::SysReadHandle<xAOD::TruthParticleContainer> m_electronsTruthHandle {
         this, "truthElectrons", "", "the truth electron container to use"
@@ -80,7 +91,17 @@ namespace CP {
 
       /// \brief the truth muon selection handle
       CP::SysReadSelectionHandle m_muonTruthSelection {
-        this, "truthMuonSelection", "", "the selection on the input muons"
+        this, "truthMuonSelection", "", "the selection on the input truth muons"
+      };
+
+      /// \brief the truth tau input handle
+      CP::SysReadHandle<xAOD::TruthParticleContainer> m_tausTruthHandle {
+        this, "truthTaus", "", "the truth tau container to use"
+      };
+
+      /// \brief the truth muon selection handle
+      CP::SysReadSelectionHandle m_tauTruthSelection {
+        this, "truthTauSelection", "", "the selection on the input truth taus"
       };
 
       /// \brief the event info handle

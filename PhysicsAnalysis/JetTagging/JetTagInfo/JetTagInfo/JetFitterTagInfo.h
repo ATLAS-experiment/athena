@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************-*-c++-*-*************************************
@@ -57,7 +57,7 @@ Currently available methods to retrieve information:
     Methods to fill the class with information:
     - set of all the variables above... */
   
-class JetFitterTagInfo : public virtual IJetFitterTagInfo
+class JetFitterTagInfo : public IJetFitterTagInfo
 {
 public:
     /** default constructor */

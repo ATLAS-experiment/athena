@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOSPECIALSHAPES_LARWHEELCALCULATORENUMS_H
@@ -20,6 +20,5 @@ namespace LArG4 {
     InnerLeadWheel, OuterLeadWheel
   };
 
-  struct ROOT6_NamespaceAutoloadHook_WheelCalc{};
 }
 #endif

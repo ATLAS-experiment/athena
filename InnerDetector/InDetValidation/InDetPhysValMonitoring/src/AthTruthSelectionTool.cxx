@@ -107,6 +107,11 @@ AthTruthSelectionTool::initialize() {
       return(std::abs(p.pdgId()) == m_pdgId);
     }, "pdgId"));
   }
+  if (m_vetoPdgId > 0) {
+    m_cutList.add(Accept_t([&m_vetoPdgId = std::as_const(m_vetoPdgId)](const P_t& p) {
+      return(std::abs(p.pdgId()) != m_vetoPdgId);
+    }, "vetoPdgId"));
+  }
   if (m_grandparent) {
     m_cutList.add(Accept_t([](const P_t& p) {
       return((p.nParents() == 0) || ((p.nParents() == 1)and((p.parent(0))->nParents() == 0)));

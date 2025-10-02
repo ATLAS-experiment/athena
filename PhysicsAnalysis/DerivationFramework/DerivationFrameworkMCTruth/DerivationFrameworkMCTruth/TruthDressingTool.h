@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHDRESSINGTOOL_H
@@ -19,7 +19,7 @@
 
 namespace DerivationFramework {
 
-  class TruthDressingTool : public AthAlgTool, public IAugmentationTool {
+  class TruthDressingTool : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthDressingTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthDressingTool();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -100,7 +100,7 @@ void convertDirectory(TDirectory *dir, TFile* in) {
 
       cout << "found top_Eff object" << endl;
 
-      TF1* f = (TF1*)obj;
+      TF1* f = static_cast<TF1*>(obj);
       TF1* fSyst; gDirectory->GetObject("top_Eff_syst", fSyst);
       TMatrixDSym* fStat; gDirectory->GetObject("top_Eff_stat", fStat);
 

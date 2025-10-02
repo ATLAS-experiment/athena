@@ -16,18 +16,18 @@
 
 namespace GlobalSim {
 
-  struct eTauSortSelectCountContainerPortsOut {
+  struct eTauSortSelectCountPortsOut {
 
     //eTauSortSelectCount
 
-    // +1 is spare
-    constexpr static std::size_t NumSort{7};
-    constexpr static std::size_t NumSelect{NumSort+1};
-    constexpr static std::size_t NumNoSort{1};
+    constexpr static std::size_t NumSort{3};
+    // 0:eTaus 1:eTausl 2:eTausm, 3:eTauab, 4:eTauabm
+    constexpr static std::size_t NumSelect{5};
+    constexpr static std::size_t NumNoSort{0};
 
     // no of sorts = No of items to keep for each sort
     constexpr static std::array<std::size_t, NumSort> SortOutWidths {
-      {6UL, 6UL, 6UL, 10UL, 10UL, 10UL, 6UL}
+      {6UL, 10UL, 10UL}
     };
 
     
@@ -36,7 +36,7 @@ namespace GlobalSim {
 		      std::end(SortOutWidths),
 		      0U)};
 
-    constexpr static std::size_t NoSortOutWidth{144};
+    constexpr static std::size_t NoSortOutWidth{0};
 
     constexpr static std::size_t NumTotalTobWidth{SortOutWidth +
 						  NoSortOutWidth};
@@ -53,9 +53,9 @@ namespace GlobalSim {
 	return a;
       }();
 
-    constexpr static std::size_t NumCount{24};
+    constexpr static std::size_t NumCount{14};
     constexpr static std::array<unsigned, NumCount> CountOutWidth {
-      3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+      2,2,2,2,2,2,2,2,2,2,2,2,2,2
     };
 
     // calculate the total width from the individual widths
@@ -102,7 +102,7 @@ namespace GlobalSim {
     BSPtrNumTotalCountWidth
     m_O_Multiplicity{std::make_shared<std::bitset<NumTotalCountWidth>>()};
 
-    eTauSortSelectCountContainerPortsOut(){
+    eTauSortSelectCountPortsOut(){
       for(std::size_t i = 0; i != NumTotalTobWidth; ++i) {
 	m_O_eTauGenTob[i] = std::make_shared<GenericTob>();
       }
@@ -113,8 +113,9 @@ namespace GlobalSim {
 
 std::ostream&
 operator<< (std::ostream&,
-	    const GlobalSim::eTauSortSelectCountContainerPortsOut&);
+	    const GlobalSim::eTauSortSelectCountPortsOut&);
 
-CLASS_DEF( GlobalSim::eTauSortSelectCountContainerPortsOut , 1240458618 , 1 )
+CLASS_DEF( GlobalSim::eTauSortSelectCountPortsOut , 36365390 , 1 )
+
 #endif 
   

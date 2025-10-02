@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H
@@ -53,15 +53,10 @@ namespace xAOD {
       /// Absolute PDG ID code (often useful)
       int absPdgId() const;
 
-      /// Barcode
-      /// @note Meaning of barcode may change -- be careful!
-      int barcode() const;
-      /// Set barcode
-      void setBarcode( int value );
-
       /// Unique ID
-      /// @note For now just an alias to barcode() - this will change in the future
-      int id() const;
+      int uid() const;
+      /// Set unique ID
+      void setUid( int value );
 
       /// Status code
       int status() const;
@@ -307,6 +302,10 @@ namespace xAOD {
       bool isBSM() const;
       /// Check if this is generator stable particle
       bool isGenStable() const;
+      /// Check if this is a stable particle (generator or simulation produced)
+      bool isStable() const;
+      /// Check if this particle was produced during the simulation
+      bool isSimulationParticle() const;
 
       /// @}
 
@@ -398,8 +397,8 @@ namespace xAOD {
 
   inline std::ostream& operator<<(std::ostream& os, const TruthParticle_v1* p) {
     if (!p) { os << "Prt: Empty particle" << std::endl; return os;}
-    os << "Prt: id=";
-    os << p->id() << " pdg_id=";
+    os << "Prt: uid=";
+    os << p->uid() << " pdg_id=";
     os << p->pdg_id() << " (px,py,pz,e)=";
     os << p->px() << ",";
     os << p->py() << ",";

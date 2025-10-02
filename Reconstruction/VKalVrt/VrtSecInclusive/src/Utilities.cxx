@@ -794,6 +794,13 @@ namespace VKalVrtAthena {
     declareProperty("doSelectIDAndGSFTracks",          m_jp.doSelectIDAndGSFTracks          = false                         );
     declareProperty("doRemoveNonLeptonVertices",       m_jp.doRemoveNonLeptonVertices       = false                         );
 
+    // Disappearing track vertices
+    declareProperty("doDisappearingTrackVertexing",   m_jp.doDisappearingTrackVertexing     = false                           );
+    declareProperty("twoTrVrtMaxPerigeeDist",         m_jp.twoTrVrtMaxPerigeeDist           = 50                            ); // in [mm]
+    declareProperty("twoTrVrtMinRadius",              m_jp.twoTrVrtMinRadius                = 50                            ); // in [mm]    
+
+
+
     // Select tracks with additonal LRT Cuts (inspiried by Run 3 LRT optimization studies)
     declareProperty("doSelectTracksWithLRTCuts",     m_jp.doSelectTracksWithLRTCuts     = false                               );
 

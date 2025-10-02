@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_shifter_last
+# art-html: dcube_acts_shifter_last
 # art-athena-mt: 8
 
 lastref_dir=last_results
@@ -42,9 +42,8 @@ run "Reconstruction-acts" \
      --CA \
      --inputRDOFile  ${input_rdo} \
      --outputAODFile AOD.acts.pool.root \
-     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateGbtsSeedsFlags" \
-     --preExec "flags.Tracking.doStoreTrackSeeds=True; \
-flags.Tracking.doTruth=True; \
+     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;flags.Tracking.doStoreTrackSeeds=True; \
 flags.Tracking.doStoreSiSPSeededTracks=True;\
 flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;\
 flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=True; \
@@ -82,3 +81,6 @@ run "dcube-acts-last" \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArOFC: Algorithm to calculate optimal filtering constants.
@@ -38,60 +38,8 @@
 
 
 LArOFCAlg::LArOFCAlg(const std::string& name, ISvcLocator* pSvcLocator) 
-	: AthAlgorithm(name, pSvcLocator),
-	  m_calo_dd_man(nullptr),
-          m_onlineID(nullptr),
-	  m_larPhysWaveBin(nullptr),
-	  m_groupingType("SubDetector") // SubDetector, Single, FeedThrough
-{
-
-  declareProperty("Nsample",m_nSamples = 5);
-  declareProperty("Nphase", m_nPhases  = 50);
-  declareProperty("Dphase", m_dPhases  = 1);
-  declareProperty("Ndelay", m_nDelays  = 24);
-  
-  declareProperty("KeyList",           m_keylist);
-
-  declareProperty("ReadCaliWave",      m_readCaliWave=true); // false == PhysWave
-  declareProperty("FillShape",         m_fillShape=false); 
-  declareProperty("KeyOFC",            m_ofcKey="LArOFC"); 
-  declareProperty("KeyOFCV2",          m_ofcKeyV2="LArOFCV2"); 
-  declareProperty("KeyShape",          m_shapeKey="LArShape"); 
-
-  declareProperty("Normalize",         m_normalize=false);
-  declareProperty("TimeShift",         m_timeShift=false);
-  declareProperty("TimeShiftByIndex",  m_timeShiftByIndex=-1);
-  
-  declareProperty("Verify",            m_verify=true);
-  declareProperty("ErrAmplitude",      m_errAmpl=0.01);
-  declareProperty("ErrTime",           m_errTime=0.01);
-  
-  declareProperty("DumpOFCfile",       m_dumpOFCfile=std::string(""));  
-
-  declareProperty("GroupingType",      m_groupingType);
-  declareProperty("StoreMaxPhase",     m_storeMaxPhase=false);
-  declareProperty("LArOFCBinKey",      m_ofcBinKey="LArOFCPhase");
-
-  declareProperty("LArPhysWaveBinKey", m_larPhysWaveBinKey="");
-
-  declareProperty("AddTimeOffset",     m_addOffset=0.);
-
-  declareProperty("ComputeOFCV2",      m_computeV2=false);
-
-  declareProperty("UseDelta",          m_useDelta=0); // 0= not use Delta, 1=only EMECIW/HEC/FCAL, 2=all , 3 = only EMECIW/HEC/FCAL1+high eta FCAL2-3
-  declareProperty("UseDeltaV2",        m_useDeltaV2=0); // 0= not use Delta, 1=only EMECIW/HEC/FCAL, 2=all , 3 = only EMECIW/HEC/FCAL1+high eta FCAL2-3
-
-  declareProperty("nThreads",          m_nThreads=-1,"-1: No TBB, 0: Let TBB decide, >0 number of threads");
-
-  declareProperty("ReadDSPConfig",     m_readDSPConfig=false);
-  declareProperty("DSPConfigFolder",   m_DSPConfigFolder="/LAR/Configuration/DSPConfiguration");
-
-  declareProperty("ForceShift",        m_forceShift=false);
-  
-  declareProperty("isSC",              m_isSC=false);
-
-  m_nPoints = m_nDelays * ( m_nSamples-1 ) + m_nPhases * m_dPhases ;
-}
+	: AthAlgorithm(name, pSvcLocator)
+{}
 
 
 
@@ -131,7 +79,7 @@ StatusCode LArOFCAlg::initialize(){
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineID = (const LArOnlineID_Base*)ll;
+      m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG("Found the LArOnlineID helper");
     }
   } else { // m_isSC
@@ -142,7 +90,7 @@ StatusCode LArOFCAlg::initialize(){
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineID = (const LArOnlineID_Base*)ll;
+      m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
   }
@@ -586,11 +534,15 @@ void LArOFCAlg::process(perChannelData_t& chanData, const LArOnOffIdMapping* cab
     std::vector<float>& vOFC_a= chanData.ofc_a[iPhase];
     std::vector<float>& vOFC_b= chanData.ofc_b[iPhase];
 
-    if (thisChanUseDelta) {      
-      optFiltDelta(theSamples,theSamplesDer,acInverse,delta,vOFC_a,vOFC_b);  
-    } 
-    else { //don't use Delta
-      optFilt(theSamples,theSamplesDer,acInverse,vOFC_a,vOFC_b);
+    if(m_computePed){
+      optFiltPed(theSamples,theSamplesDer,acInverse,vOFC_a,vOFC_b);
+    } else {
+       if (thisChanUseDelta) {      
+         optFiltDelta(theSamples,theSamplesDer,acInverse,delta,vOFC_a,vOFC_b);  
+       } 
+       else { //don't use Delta
+         optFilt(theSamples,theSamplesDer,acInverse,vOFC_a,vOFC_b);
+       }
     }
     
     // verify OFC consistency
@@ -605,11 +557,15 @@ void LArOFCAlg::process(perChannelData_t& chanData, const LArOnOffIdMapping* cab
       std::vector<float>& vOFCV2_a= chanData.ofcV2_a[iPhase];
       std::vector<float>& vOFCV2_b= chanData.ofcV2_b[iPhase];
       
-      if (thisChanUseDeltaV2) {
-	optFiltDelta(theSamples,theSamplesDer,acInverseV2,delta,vOFCV2_a,vOFCV2_b);
-      } 
-      else { //don't use Delta
-	optFilt(theSamples,theSamplesDer,acInverseV2,vOFCV2_a,vOFCV2_b);
+      if(m_computePed){
+	optFiltPed(theSamples,theSamplesDer,acInverseV2,vOFCV2_a,vOFCV2_b);
+      } else {
+         if (thisChanUseDeltaV2) {
+           optFiltDelta(theSamples,theSamplesDer,acInverseV2,delta,vOFCV2_a,vOFCV2_b);
+         } 
+         else { //don't use Delta
+           optFilt(theSamples,theSamplesDer,acInverseV2,vOFCV2_a,vOFCV2_b);
+         }
       }
 
       // verify OFC consistency
@@ -762,9 +718,56 @@ void  LArOFCAlg::optFilt(const std::vector<float> &gWave, const std::vector<floa
   }
   }
 
+void  LArOFCAlg::optFiltPed(const std::vector<float> &gWave, const std::vector<float>  &gDerivWave, const Eigen::MatrixXd& acInverse, //input variables
+			 std::vector<float>& vecOFCa, std::vector<float>& vecOFCb) { // Output variables;
+  assert(gWave.size()==gDerivWave.size());
+  //assert autoCorr size ....
+  const int optNpt = gWave.size();
+  
+  Eigen::VectorXd gResp(optNpt), gDerivResp(optNpt);
+  for (int i=0;i<optNpt;i++) {
+    gResp[i] = gWave[i];
+    gDerivResp[i] = gDerivWave[i];
+  }
 
+  Eigen::Matrix3d isol;
+  Eigen::Vector3d Kunit(1.,1.,1.);
+  auto s3=(gDerivResp.transpose()*acInverse*gResp)[0];
+  auto s4=(gResp.transpose()*acInverse*Kunit)[0];
+  auto s5=(gDerivResp.transpose()*acInverse*Kunit)[0];
+  isol << 
+    (gResp.transpose()*acInverse*gResp)[0], s3, s4,
+    s3, (gDerivResp.transpose()*acInverse*gResp)[0], s5,
+    s4, s5, (Kunit.transpose()*acInverse*Kunit)[0];
 
+  Eigen::Vector3d Amp; 
+  Eigen::Vector3d Atau;
+  Eigen::Vector3d Ktemp;
+  Eigen::Matrix3d isolInv = isol.inverse();
 
+  //  we solve for the lagrange multiplers
+  Ktemp[0] = 1.;
+  Ktemp[1] = 0.;
+  Ktemp[2] = 0.;
+  Amp = isolInv*Ktemp;
+  
+  Ktemp[0] = 0.; 
+  Ktemp[1] = -1.;
+  Ktemp[2] = 0.;
+  Atau = isolInv*Ktemp;
+
+  // we express the a and b vectors in terms of the lagrange multipliers
+  Eigen::VectorXd OFCa = Amp[0]*acInverse*gResp + Amp[1]*acInverse*gDerivResp + Amp[2]*acInverse*Kunit;
+  Eigen::VectorXd OFCb = Atau[0]*acInverse*gResp + Atau[1]*acInverse*gDerivResp + Atau[2]*acInverse*Kunit;
+  
+  //Convert back to std::vector
+  vecOFCa.resize(optNpt);
+  vecOFCb.resize(optNpt);
+  for (int i=0;i<optNpt;i++) {
+    vecOFCa[i]=OFCa[i];
+    vecOFCb[i]=OFCb[i];
+  }
+  }
 
 
 void  LArOFCAlg::optFiltDelta(const std::vector<float> &gWave, const std::vector<float>  &gDerivWave, 

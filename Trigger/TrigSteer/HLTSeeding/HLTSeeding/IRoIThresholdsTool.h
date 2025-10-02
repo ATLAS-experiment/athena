@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_IROITHRESHOLDSTOOL_H
 #define HLTSEEDING_IROITHRESHOLDSTOOL_H
@@ -73,7 +73,7 @@ public:
     SG::WriteDecorHandle<T_RoIContainer, uint64_t> thresholdPatterns(m_thresholdPatternsKey, eventContext);
     for (const T_RoI* roi: *thresholdPatterns) {
       try {
-        thresholdPatterns(*roi) = getPattern(*roi, menuThresholds.value().get(), menuExtraInfo.value().get());
+        thresholdPatterns(*roi) = getPattern(eventContext, *roi, menuThresholds.value().get(), menuExtraInfo.value().get());
       }
       catch (const std::exception& ex) {
         ATH_MSG_ERROR("getPattern() for " << N_RoIContainer << " failed with exception: " << ex.what());
@@ -85,7 +85,8 @@ public:
   }
 
   /// To be implemented by each template instance
-  virtual uint64_t getPattern(const T_RoI& roi,
+  virtual uint64_t getPattern(const EventContext& ctx,
+                              const T_RoI& roi,
                               const ThrVec& menuThresholds,
                               const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const = 0;
 

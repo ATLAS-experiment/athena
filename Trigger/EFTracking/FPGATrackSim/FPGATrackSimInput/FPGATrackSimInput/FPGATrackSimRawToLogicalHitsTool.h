@@ -39,7 +39,7 @@ private:
  
   // JO configuration
   ServiceHandle<IFPGATrackSimMappingSvc>     m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
-  ServiceHandle<IFPGATrackSimEventSelectionSvc>  m_EvtSel     {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
+  ServiceHandle<IFPGATrackSimEventSelectionSvc>  m_EvtSel     {this, "FPGATrackSimEventSelectionSvc", ""};
   IntegerProperty                       m_saveOptional {this, "SaveOptional", 2, "flag to enable the truth/offline tracking save =0 no optional saved, =1 saved in region, =2 save all "};
   IntegerArrayProperty                  m_towersToMap  {this, "TowersToMap", {}, "Which Towers to map, goes from 0 to 96!"};
 

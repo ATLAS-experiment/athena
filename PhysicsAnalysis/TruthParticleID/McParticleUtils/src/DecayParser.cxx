@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -113,22 +113,14 @@ void DecayParser::parse( const std::string& inputCmd )
 
   PyObject *sc = PyTuple_GET_ITEM (res, 0);
   Py_XINCREF (sc);
-#if PY_MAJOR_VERSION < 3
-  if (!sc || !PyInt_Check (sc)) {
-#else
   if (!sc || !PyLong_Check (sc)) {
-#endif
     Py_XDECREF (sc);
     Py_DECREF  (res);
     std::string error = "corrupted return code";
     throw std::runtime_error (error);
   }
 
-#if PY_MAJOR_VERSION < 3
-  Py_ssize_t status = PyInt_AsSsize_t (sc);
-#else
   Py_ssize_t status = PyLong_AsSsize_t (sc);
-#endif
   if (status != 0) {
     Py_DECREF (sc);
     Py_DECREF (res);

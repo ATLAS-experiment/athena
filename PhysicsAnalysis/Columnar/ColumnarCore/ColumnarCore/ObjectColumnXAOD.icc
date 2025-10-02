@@ -13,14 +13,14 @@
 
 namespace columnar
 {
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   class AccessorTemplate<CI,ObjectColumn,ColumnAccessMode::input,ColumnarModeXAOD> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
+    static_assert (CI::perEventRange || CI::perEventId, "ObjectColumn can only be used with per-event ranges or IDs");
 
     using CM = ColumnarModeXAOD;
 
@@ -31,25 +31,25 @@ namespace columnar
     }
 
     ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const
-      requires (ContainerIdTraits<CI>::perEventRange)
+      requires (CI::perEventRange)
     {
       return ObjectRange<CI,CM> (retrieveObject ());
     }
 
     ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> /*eventRange*/) const
-      requires (ContainerIdTraits<CI>::perEventRange)
+      requires (CI::perEventRange)
     {
       return ObjectRange<CI,CM> (retrieveObject ());
     }
 
     ObjectId<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const
-      requires (ContainerIdTraits<CI>::perEventId)
+      requires (CI::perEventId)
     {
       return ObjectId<CI,CM> (retrieveObject ());
     }
 
     ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> /*eventRange*/) const
-      requires (ContainerIdTraits<CI>::perEventId)
+      requires (CI::perEventId)
     {
       return ObjectRange<CI,CM> (retrieveObject ());
     }
@@ -71,7 +71,7 @@ namespace columnar
     // holding accessors, I use this "non-tracking" version.
     auto& retrieveObject () const
     {
-      typename ContainerIdTraits<CI>::xAODObjectRangeType *container = nullptr;
+      typename CI::xAODObjectRangeType *container = nullptr;
       if (!m_columnBase->eventStore().retrieve (container, m_key).isSuccess())
         throw std::runtime_error ("failed to retrieve " + m_key);
       return *container;

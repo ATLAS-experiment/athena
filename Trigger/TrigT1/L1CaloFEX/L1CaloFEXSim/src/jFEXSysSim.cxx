@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -10,36 +10,21 @@
 //  ***************************************************************************/
 
 
-#include "L1CaloFEXSim/jFEXSysSim.h"
-#include "L1CaloFEXSim/jFEXSim.h"
+#include "jFEXSysSim.h"
+#include "jFEXSim.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
 
-#include "xAODTrigger/jFexSRJetRoI.h"
-#include "xAODTrigger/jFexSRJetRoIContainer.h" 
 #include "xAODTrigger/jFexSRJetRoIAuxContainer.h"
-
-#include "xAODTrigger/jFexLRJetRoI.h"
-#include "xAODTrigger/jFexLRJetRoIContainer.h"
 #include "xAODTrigger/jFexLRJetRoIAuxContainer.h"
-
-#include "xAODTrigger/jFexTauRoI.h"
-#include "xAODTrigger/jFexTauRoIContainer.h" 
 #include "xAODTrigger/jFexTauRoIAuxContainer.h"
-
-#include "xAODTrigger/jFexFwdElRoI.h"
-#include "xAODTrigger/jFexFwdElRoIContainer.h"
 #include "xAODTrigger/jFexFwdElRoIAuxContainer.h"
-
-#include "L1CaloFEXSim/jFEXOutputCollection.h"
+#include "xAODTrigger/jFexMETRoIAuxContainer.h"
+#include "xAODTrigger/jFexSumETRoIAuxContainer.h"
 
 #include <ctime>
 
@@ -973,7 +958,9 @@ namespace LVL1 {
     SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_xTob_jLJ(m_xTobOutKey_jLJ/*, ctx*/);
     ATH_MSG_DEBUG("  write: " << output_xTob_jLJ.key() << " = " << "..." );
     ATH_CHECK(output_xTob_jLJ.record(std::move(xtobContainer_jLJ),std::move(xtobAuxContainer_jLJ)));
-    
+
+    m_allLargeRJetTobs.clear(); // Aug2025: no longer filling the jLJ container, but will still produce the container to avoid EDM changes
+
     // iterate over all LRJEt Tobs and fill EDM with them
     for(auto const& [jfex, fpga] : m_allLargeRJetTobs ) {
         for(auto const& tobs: fpga) {

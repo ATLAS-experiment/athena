@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TransientAddress_test.cxx
@@ -24,21 +24,21 @@ class TestAddress
 public:
   TestAddress (int x) : m_x (x), m_ref(0) {}
   /// Add reference to object
-  virtual unsigned long        addRef     ();
+  virtual unsigned long        addRef     () override;
   /// release reference to object
-  virtual unsigned long        release    ();
+  virtual unsigned long        release    () override;
   /// Retrieve class information from link
-  virtual const CLID&          clID       () const { std::abort(); }
+  virtual const CLID&          clID       () const override { std::abort(); }
   /// Retrieve service type
-  virtual long                 svcType    () const { std::abort(); }
+  virtual long                 svcType    () const override { std::abort(); }
   /// Update branch name
-  virtual IRegistry*           registry   () const { std::abort(); }
+  virtual IRegistry*           registry   () const override { std::abort(); }
   /// Update directory pointer
-  virtual void                 setRegistry(IRegistry* /*r*/) { std::abort(); }
+  virtual void                 setRegistry(IRegistry* /*r*/) override { std::abort(); }
   /// Retrieve String parameters
-  virtual const std::string*   par        () const { std::abort(); }
+  virtual const std::string*   par        () const override { std::abort(); }
   /// Access to generic link parameters
-  virtual const unsigned long* ipar       () const { std::abort(); }
+  virtual const unsigned long* ipar       () const override { std::abort(); }
 
   int m_x;
   int m_ref;
@@ -115,21 +115,21 @@ void test1()
 
   tad2.setAlias ("key2");
   assert (tad2.alias().size() == 1);
-  std::set<std::string> a;
-  a.insert ("key3a");
-  a.insert ("key4a");
+  std::vector<std::string> a;
+  a.push_back ("key3a");
+  a.push_back ("key4a");
   tad2.setAlias (std::move(a));
   assert (a.size() == 0);
   assert (tad2.alias().size() == 2);
-  assert (tad2.alias().count ("key2") == 0);
-  assert (tad2.alias().count ("key3a") == 1);
-  tad2.setAlias (std::set<std::string> {"key3", "key4"});
+  assert (std::ranges::binary_search (tad2.alias(), "key2") == false);
+  assert (std::ranges::binary_search (tad2.alias(), "key3a") == true);
+  tad2.setAlias (std::vector<std::string> {"key3", "key4"});
   assert (tad2.alias().size() == 2);
-  assert (tad2.alias().count ("key2") == 0);
-  assert (tad2.alias().count ("key3") == 1);
+  assert (std::ranges::binary_search (tad2.alias(), "key2") == false);
+  assert (std::ranges::binary_search (tad2.alias(), "key3") == true);
   tad2.removeAlias ("key3");
   assert (tad2.alias().size() == 1);
-  assert (tad2.alias().count ("key3") == 0);
+  assert (std::ranges::binary_search (tad2.alias(), "key3") == false);
 
   TestAddress ad1(1);
   SG::TransientAddress tad3 (123, "key", &ad1);
@@ -205,7 +205,7 @@ void test2()
   assert (tad1.transientID().size() == 2);
   assert (tad1.transientID (123));
   assert (tad1.transientID (124));
-  assert (tad1.alias() == std::set<std::string> {"key2"});
+  assert (tad1.alias() == std::vector<std::string> {"key2"});
   assert (tad1.clearAddress());
   assert (ad1.m_ref == 1);
 
@@ -218,7 +218,7 @@ void test2()
   assert (tad2.transientID().size() == 2);
   assert (tad2.transientID (123));
   assert (tad2.transientID (124));
-  assert (tad2.alias() == std::set<std::string> {"key2"});
+  assert (tad2.alias() == std::vector<std::string> {"key2"});
   assert (tad2.clearAddress());
   assert (ad1.m_ref == 1);
 
@@ -236,7 +236,7 @@ void test2()
   assert (tad1.transientID().size() == 2);
   assert (tad1.transientID (123));
   assert (tad1.transientID (124));
-  assert (tad1.alias() == std::set<std::string> {"key2"});
+  assert (tad1.alias() == std::vector<std::string> {"key2"});
   assert (!tad1.clearAddress());
   assert (ad1.m_ref == 1);
 
@@ -267,7 +267,7 @@ void test3()
   assert (tad1.transientID().size() == 2);
   assert (tad1.transientID (123));
   assert (tad1.transientID (124));
-  assert (tad1.alias() == std::set<std::string> {"key2"});
+  assert (tad1.alias() == std::vector<std::string> {"key2"});
   assert (tad1.clearAddress());
   assert (ad1.m_ref == 1);
 
@@ -280,7 +280,7 @@ void test3()
   assert (tad2.transientID().size() == 2);
   assert (tad2.transientID (123));
   assert (tad2.transientID (124));
-  assert (tad2.alias() == std::set<std::string> {"key2"});
+  assert (tad2.alias() == std::vector<std::string> {"key2"});
   assert (tad2.clearAddress());
   assert (ad1.m_ref == 2);
 
@@ -294,7 +294,7 @@ void test3()
   assert (tad3.transientID().size() == 2);
   assert (tad3.transientID (123));
   assert (tad3.transientID (124));
-  assert (tad3.alias() == std::set<std::string> {"key2"});
+  assert (tad3.alias() == std::vector<std::string> {"key2"});
   assert (tad3.clearAddress());
   assert (ad1.m_ref == 3);
 }

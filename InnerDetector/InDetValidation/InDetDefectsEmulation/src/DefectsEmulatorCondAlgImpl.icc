@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-// Silicon trackers includes
 #include "DefectsEmulatorCondAlgImpl.h"
 
 #include "Identifier/Identifier.h"
@@ -14,10 +13,21 @@
 #include <span>
 #include <algorithm>
 
+
 #include "CLHEP/Random/RandFlat.h"
 
 #include "ModuleIdentifierMatchUtil.h"
 #include "ConnectedModulesUtil.h"
+#include "EmulatedDefectsBuilder.h"
+
+#include <cstdlib>
+#include "nlohmann/json.hpp"
+
+#include "TVirtualRWMutex.h"
+#include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RNTupleReader.hxx"
+#include "ROOT/RNTupleModel.hxx"
+#include "TFile.h"
 
 namespace {
 
@@ -70,7 +80,7 @@ namespace {
 
    template <class T_ModuleHelper>
    void histogramDefects(const T_ModuleHelper &helper,
-                         typename T_ModuleHelper::KEY_TYPE key,
+                         const typename std::pair<typename T_ModuleHelper::KEY_TYPE,typename T_ModuleHelper::KEY_TYPE> &key,
                          TH2 *h2) {
       std::array<unsigned int,4> ranges_row_col = helper.offlineRange(key);
       for (unsigned int row_i=ranges_row_col[0]; row_i<ranges_row_col[1]; ++row_i) {
@@ -144,6 +154,190 @@ namespace {
    inline T sqr(T a) {
       return a*a;
    }
+
+   bool hasExtensions(const std::string &name, const std::string_view &ext) {
+      return name.size()>=ext.size() && name.substr(name.size()-ext.size(),ext.size())==ext;
+   }
+
+   template <typename T_EmulatedDefects>
+   void toJson(const T_EmulatedDefects &defects, const std::string &name) {
+      nlohmann::json data;
+      for (unsigned int id_hash = 0; id_hash < defects.size(); ++id_hash) {
+         if (defects.isModuleDefect(id_hash) || !defects[id_hash].empty()) {
+            nlohmann::json module_data;
+            if (defects.isModuleDefect(id_hash)) {
+               module_data["isDefect"]=true;
+            }
+            else {
+               module_data["defects"]=defects[id_hash];
+            }
+
+            std::stringstream id_hash_name;
+            id_hash_name << id_hash;
+            data[id_hash_name.str()]=module_data;
+         }
+      }
+      std::ofstream out(name.c_str());
+      out << data;
+   }
+
+   template <typename T_EmulatedDefects>
+   void toRoot(const T_EmulatedDefects &defects, const std::string &name) {
+      ROOT::TWriteLockGuard lock (ROOT::gCoreMutex);
+
+      auto model=ROOT::RNTupleModel::Create();
+      auto nt_defects=model->MakeField< std::vector<typename T_EmulatedDefects::KEY_TYPE> >("defects");
+      auto nt_is_defect=model->MakeField<bool>("isDefect");
+      ROOT::RNTupleWriteOptions options;
+      options.SetCompression(ROOT::RCompressionSetting::EAlgorithm::kZSTD, ROOT::RCompressionSetting::ELevel::kDefaultZSTD);
+      auto writer = ROOT::RNTupleWriter::Recreate(std::move(model), "defects", name.c_str(), options);
+      for (unsigned int id_hash = 0; id_hash < defects.size(); ++id_hash) {
+         nt_defects->clear();
+         if (defects.isModuleDefect(id_hash)) {
+           *nt_is_defect =true;
+         }
+         else {
+           *nt_is_defect =false;
+           *nt_defects = defects[id_hash];
+         }
+         writer->Fill();
+      }
+   }
+
+   template <typename KEY_TYPE>
+   class JsonAdapter {
+   public:
+      bool open(const std::string &name)  {
+         std::ifstream input_file(name);
+         if (!input_file) {
+            return false;
+         }
+         input_file >> m_jsDefects;
+         return true;
+      }
+      auto items() {
+         return m_jsDefects.items();
+      }
+      template <typename T>
+      static std::size_t moduleHash(const T &element) {
+         char *ptr;
+         return strtol(element.key().c_str(),&ptr, 10);
+      }
+      template <typename T>
+      static nlohmann::json value(const T &element) {
+         return element.value();
+      }
+      static bool isDefect(const nlohmann::json &value) {
+         return value["isDefect"];
+      }
+      static std::vector<KEY_TYPE> moduleDefects(const nlohmann::json &value) {
+         return value["defects"];
+      }
+   private:
+      nlohmann::json m_jsDefects;
+   };
+
+   template <typename KEY_TYPE>
+   class RootAdapter {
+   public:
+      bool open(const std::string &name) {
+         auto model=ROOT::RNTupleModel::Create();
+         m_defects=model->MakeField< std::vector<KEY_TYPE> >("defects");
+         m_isDefect=model->MakeField<bool>("isDefect");
+         m_reader = ROOT::RNTupleReader::Open(std::move(model), "defects", name.c_str());
+         return m_reader.get() != nullptr;
+      }
+      ROOT::RNTupleReader &items() {
+         return *m_reader;
+      }
+      static auto moduleHash( std::size_t entry_i) {
+         return entry_i;
+      }
+      auto value(std::size_t entry_i) {
+         m_reader->LoadEntry(entry_i);
+         return entry_i;
+      }
+      bool isDefect([[maybe_unused]] std::size_t entry_i) {
+         return *m_isDefect;
+      }
+      const std::vector<KEY_TYPE> &moduleDefects([[maybe_unused]] std::size_t entry_i) {
+         return *m_defects;
+      }
+   private:
+      std::unique_ptr< ROOT::RNTupleReader > m_reader;
+      std::shared_ptr< bool > m_isDefect;
+      std::shared_ptr<std::vector<KEY_TYPE> > m_defects;
+   };
+
+   template <typename T_ModuleHelper, typename T_ReaderAdapter, typename T_EmulatedDefects>
+   void fromFile(const InDetDD::SiDetectorElementCollection &det_ele_coll, T_EmulatedDefects &defects, const std::string &name) {
+      T_ReaderAdapter reader;
+      if (!reader.open(name)) {
+         std::stringstream amsg;
+         amsg << "Failed to read \"" << name << "\"";
+         throw std::runtime_error(amsg.str());
+      }
+
+      for (auto entry_i : reader.items()) {
+         auto module_i = reader.moduleHash(entry_i);
+         assert( module_i < det_ele_coll.size());
+         auto value = reader.value(entry_i);
+         if (reader.isDefect(value)) {
+            defects.setModuleDefect(module_i);
+         }
+         else if (!defects.isModuleDefect(module_i)) {
+            std::vector<typename T_EmulatedDefects::KEY_TYPE> &module_defects = defects.at(module_i);
+            if (module_defects.empty()) {
+               module_defects = reader.moduleDefects(value); // move ?
+            }
+            else {
+               InDetDD::SiDetectorElementCollection::const_value_type det_ele = det_ele_coll[module_i];
+               T_ModuleHelper helper(det_ele->design());
+               auto input_defects = reader.moduleDefects(value);
+               for (typename std::vector<typename T_EmulatedDefects::KEY_TYPE>::const_reverse_iterator iter = input_defects.rbegin();
+                    iter != input_defects.rend();
+                    ++iter) {
+                  auto key = *iter;
+                  if (T_ModuleHelper::isRangeKey(*iter)) {
+                     ++iter;
+                     if (iter == input_defects.rend()) {
+                        break;
+                     }
+                     EmulatedDefectsBuilder::insertKeyRange(helper,
+                                                            module_defects,
+                                                            std::make_pair(key, *iter),
+                                                            T_ModuleHelper::getDefectTypeComponent(key));
+                     if (T_ModuleHelper::getDefectTypeComponent(key) != T_ModuleHelper::getDefectTypeComponent(*iter)) {
+                        auto [end_key_iter, end_iter] =  InDet::EmulatedDefects<T_ModuleHelper>::lower_bound(module_defects, *iter);
+                        if (end_key_iter != end_iter && T_ModuleHelper::makeBaseKey(*iter) == T_ModuleHelper::makeBaseKey(*end_key_iter)) {
+                           *end_key_iter |= T_ModuleHelper::getDefectTypeComponent(*iter);
+                        }
+                     }
+                  }
+                  else {
+                     EmulatedDefectsBuilder::insertKey(helper,
+                                                       module_defects,
+                                                       key,
+                                                       T_ModuleHelper::getDefectTypeComponent(key));
+                  }
+               }
+            }
+         }
+      }
+   }
+
+
+   template <typename T_ModuleHelper, typename T_EmulatedDefects>
+   void fromJson(const InDetDD::SiDetectorElementCollection &det_ele_coll, T_EmulatedDefects &defects, const std::string &name) {
+      fromFile<T_ModuleHelper, JsonAdapter<typename T_ModuleHelper::KEY_TYPE> >(det_ele_coll, defects, name);
+   }
+
+   template <typename T_ModuleHelper, typename T_EmulatedDefects>
+   void fromRoot(const InDetDD::SiDetectorElementCollection &det_ele_coll, T_EmulatedDefects &defects, const std::string &name) {
+      ROOT::TReadLockGuard lock (ROOT::gCoreMutex);
+      fromFile<T_ModuleHelper, RootAdapter<typename T_ModuleHelper::KEY_TYPE> >(det_ele_coll, defects, name);
+   }
+
 }
 
 namespace InDet{
@@ -175,6 +369,16 @@ namespace InDet{
     defectsOut.addDependency(detEleColl);
 
     std::unique_ptr<T_EmulatedDefects> defects = std::make_unique<T_EmulatedDefects>(*(detEleColl.cptr()));
+
+    for (const std::string &input_file : m_inputFiles.value()) {
+       if (hasExtensions(input_file,".json")) {
+          fromJson<T_ModuleHelper>(*(detEleColl.cptr()),*defects, input_file);
+       }
+       else if (hasExtensions(input_file,".root")) {
+          fromRoot<T_ModuleHelper>(*(detEleColl.cptr()), *defects, input_file);
+       }
+    }
+
     // last counts (+1) are counts for entire modules being defect
     std::vector<std::array<unsigned int,kNCounts> > counts(T_ModuleHelper::nMasks()+1, std::array<unsigned int,kNCounts>{});
 
@@ -184,9 +388,26 @@ namespace InDet{
     {
        auto connected_modules = derived().getModuleConnectionMap(*(detEleColl.cptr()));
 
-       ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName);
-       rngWrapper->setSeed( m_rngName, ctx );
-       CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+       std::array<CLHEP::HepRandomEngine *, kMaskDefects + T_ModuleHelper::nMasks() > rndmEngine;
+       if (this->m_rngPerDefectType) {
+          assert (m_rngName.size() == rndmEngine.size());
+          unsigned int idx=0;
+          for (const std::string &a_rngName : m_rngName) {
+             ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, a_rngName );
+             rngWrapper->setSeed( a_rngName, ctx );
+             assert( idx < rndmEngine.size());
+             rndmEngine[idx++]=rngWrapper->getEngine(ctx);
+          }
+       }
+       else{
+          assert( !m_rngName.empty());
+          ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_rngName[0]);
+          rngWrapper->setSeed( m_rngName[0], ctx );
+          CLHEP::HepRandomEngine *a_rndmEngine = rngWrapper->getEngine(ctx);
+          for (CLHEP::HepRandomEngine *&elm : rndmEngine) {
+             elm = a_rndmEngine;
+          }
+       }
 
        ModuleIdentifierMatchUtil::ModuleData_t module_data;
        std::vector<unsigned int> module_pattern_idx;
@@ -198,7 +419,7 @@ namespace InDet{
 
        std::size_t det_ele_sz = detEleColl->size();
        for (unsigned int module_i=0u; module_i < det_ele_sz; ++module_i) {
-          const typename T_DetectorElementCollection::value_type det_ele =   (*detEleColl.cptr())[module_i];
+          typename T_DetectorElementCollection::const_value_type det_ele = (*detEleColl.cptr())[module_i];
           if (defects->isModuleDefect(module_i)) continue;
           if (derived().isModuleDefect(ctx, module_i)) {
              defects->setModuleDefect(module_i);
@@ -237,7 +458,7 @@ namespace InDet{
           // patterns control whether a defect is propagated to all modules connected to the same physical sensor
           // or not.
           makeCumulativeProbabilityDist(module_pattern_idx,kModuleDefectProb, cumulative_prob_dist);
-          float prob=(cumulative_prob_dist.empty() || cumulative_prob_dist.back()<=0.) ? 1. : CLHEP::RandFlat::shoot(rndmEngine,1.);
+          float prob=(cumulative_prob_dist.empty() || cumulative_prob_dist.back()<=0.) ? 1. : CLHEP::RandFlat::shoot(rndmEngine[kModuleDefects],1.);
 
           unsigned int match_i=module_pattern_idx.size();
           assert (match_i>0);
@@ -313,7 +534,11 @@ namespace InDet{
           // e.g. chip-defects, core-column defects, single pixel or strip defects
           unsigned int cells = helper.nCells();
           std::vector<typename T_ModuleHelper::KEY_TYPE> &module_defects=(*defects).at(module_i);
-          module_defects.reserve( throwNumberOfDefects(rndmEngine, module_pattern_idx, T_ModuleHelper::nMasks(),cells, n_mask_defects) );
+          module_defects.reserve( throwNumberOfDefects(std::span(&rndmEngine.data()[kMaskDefects], rndmEngine.size()-kMaskDefects),
+                                                       module_pattern_idx,
+                                                       T_ModuleHelper::nMasks(),
+                                                       cells,
+                                                       n_mask_defects) );
 
           // if histogramming is enabled lock for the entire loop, since it would
           // be rather inefficient to lock for each defect pixel or strip separately and
@@ -326,7 +551,9 @@ namespace InDet{
           // create defects starting from the mask (or group) defect covering the largest area (assuming
           // that masks are in ascending order) e.g. defect chips, core-column defects, individual pixel
           // or strip defects
-          for (unsigned int mask_i = T_ModuleHelper::nMasks(); mask_i-->0; ) {
+          auto masks = helper.masks();
+          for (unsigned int mask_i = masks.size(); mask_i-->0; ) {
+
              assert( mask_i < n_mask_defects.size());
              counts[mask_i][kNElements] += helper.nElements(mask_i);
              unsigned int n_defects = n_mask_defects[mask_i];
@@ -343,7 +570,8 @@ namespace InDet{
                    unsigned int attempt_i=0;
                    for (attempt_i=0; attempt_i<m_maxAttempts.value(); ++attempt_i) {
                        // chose random pixel or strip which defines the defect location
-                      unsigned int cell_idx=CLHEP::RandFlat::shoot(rndmEngine,cells);
+                      assert(kMaskDefects+mask_i < rndmEngine.size() );
+                      unsigned int cell_idx=CLHEP::RandFlat::shoot(rndmEngine[kMaskDefects+mask_i],cells);
 
                       if (m_checkerBoardToggle) {
                          // for debugging
@@ -355,36 +583,18 @@ namespace InDet{
                                                     m_oddColToggle.value() );
                       }
 
-                      // create a key which identifies the particular defect
-                      typename T_ModuleHelper::KEY_TYPE
-                         key = helper.maskedKey( mask_i,
-                                                 helper.hardwareCoordinates(getSensorRow(helper, cell_idx),
-                                                                            getSensorColumn(helper, cell_idx)));
+                      std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE>
+                         key_range( T_ModuleHelper::makeRangeForMask(helper.hardwareCoordinates(getSensorRow(helper, cell_idx),
+                                                                                                getSensorColumn(helper, cell_idx)),
+                                                                     masks[mask_i]));
 
-                      // ... and insert the defect in the list of defects registered for this module
-                      auto [insert_iter,end_iter] = T_EmulatedDefects::lower_bound( module_defects, key);
-                      if (insert_iter == end_iter) {
-                         module_defects.push_back(key);
+                      if (EmulatedDefectsBuilder::insertKeyRange(helper, module_defects, key_range, T_ModuleHelper::makeDefectTypeKey(mask_i))) {
                          if (h2) {
-                            histogramDefects(helper,key,h2);
+                            histogramDefects(helper,key_range,h2);
                          }
                          break;
                       }
-                      else {
-                         if (!helper.isMatchingDefect(*insert_iter, key)) {
-                            module_defects.insert( insert_iter, key);
-                            if (h2) {
-                               histogramDefects(helper,key,h2);
-                            }
-                            break;
-                         }
-                         else if (helper.getMaskIdx(key) < helper.getMaskIdx(*insert_iter)) {
-                            // if smaller defects e.g single pixel defects overlap with a larger defect e.g. a core-column
-                            // defect do not retry, since the total number of defects is not corrected for
-                            // already existing larger area defects.
-                            break;
-                         }
-                      }
+
                       assert( mask_i+1 < counts.size());
                       ++counts[mask_i][ kNRetries ];
                    }
@@ -412,7 +622,7 @@ namespace InDet{
              // chosen in a random range
 
              // throw the number of corners with corner defects.
-             float defect_prob=CLHEP::RandFlat::shoot(rndmEngine,1.);
+             float defect_prob=CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],1.);
              unsigned int n_corners=m_perPatternCornerDefectNCornerCummulativeProb[module_pattern_idx.front() ].size();
              for (;
                   n_corners>0 && defect_prob<m_perPatternCornerDefectNCornerCummulativeProb[module_pattern_idx.front() ][n_corners-1];
@@ -424,17 +634,23 @@ namespace InDet{
 
                 assert( n_corners < n_corner_combinations.size() );
                 // chose the corners which have defects randomly
-                unsigned int the_combination =CLHEP::RandFlat::shoot(rndmEngine,n_corner_combinations[n_corners] );
+                unsigned int the_combination =CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],n_corner_combinations[n_corners] );
                 unsigned char corner_mask = corner_combinations[n_corners][the_combination];
+                // columns, rows and their pitch are already in direction of the hardware columns and rows
+                unsigned int hwa_columns = helper.columns();
+                unsigned int  hwa_rows = helper.rows();
+                float hwa_columnPitch = helper.columnPitch();
+                float hwa_rowPitch = helper.rowPitch();
+
                 for (unsigned int corner_i=0; corner_i<4; ++corner_i) {
                    if (corner_mask & (1u << corner_i)) {
                       // chose random positions at which the circle crosses the edges at the particular corner
                       // and chose a random sagitta defined by the corssings.
                       assert( m_cornerDefectParamsPerPattern[module_pattern_idx.front()].size()==kNCornerDefectParams);
                       float rx=m_cornerDefectParamsPerPattern[module_pattern_idx.front()][kCornerDefectWidthColumnDirectionOffset]
-                         +CLHEP::RandFlat::shoot(rndmEngine,m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectWidthColumnDirection]);
+                         +CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectWidthColumnDirection]);
                       float ry=m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirectionOffset]
-                         +CLHEP::RandFlat::shoot(rndmEngine,m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirection]);
+                         +CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkWidthRowDirection]);
 
                       float sagitta;
                       {
@@ -460,21 +676,21 @@ namespace InDet{
                                                 +  m_cornerDefectParamsPerPattern[module_pattern_idx.front() ][kCornerDefectkSagitta])
                                             << " to " << sagitta_offset << ".." << (sagitta_offset+sagitta_range));
                          }
-                         sagitta=sagitta_offset+CLHEP::RandFlat::shoot(rndmEngine,sagitta_range);
+                         sagitta=sagitta_offset+CLHEP::RandFlat::shoot(rndmEngine[kCornerDefects],sagitta_range);
                       }
 
                       // compute column range with defects
                       double scale_rx=(corner_i==1 || corner_i==2) ? -1.f : 1.f;
                       double scale_ry=(corner_i<=1) ? -1.f : 1.f;
-                      std::array<unsigned int,2>  row_range{0,helper.rows()};
+                      std::array<unsigned int,2>  row_range{0,hwa_rows};
                       unsigned int row_var_idx=(corner_i<=1) ? 0 : 1;
-                      unsigned int col_start=(corner_i==1 || corner_i==2) ? helper.columns() : 0;
+                      unsigned int col_start=(corner_i==1 || corner_i==2) ? hwa_columns : 0;
 
-                      Amg::Vector2D corner_pos{col_start*helper.columnPitch(),row_range[row_var_idx^1]*helper.rowPitch()};
+                      Amg::Vector2D corner_pos{col_start*hwa_columnPitch,row_range[row_var_idx^1]*hwa_rowPitch};
 
                       unsigned int col_end = std::min(static_cast<unsigned int>(std::max(0,static_cast<int>(col_start)
-                                                                                         + static_cast<int>(rx*scale_rx / helper.columnPitch() +.5))),
-                                                      helper.columns());
+                                                                                         + static_cast<int>(rx*scale_rx / hwa_columnPitch +.5))),
+                                                      hwa_columns);
                       if (col_end < col_start) {
                          std::swap(col_start, col_end);
                       }
@@ -482,16 +698,18 @@ namespace InDet{
                       // compute circle parameters
                       Amg::Vector2D c0 = corner_pos + Amg::Vector2D{0.f,ry*scale_ry};
                       Amg::Vector2D c1 = corner_pos + Amg::Vector2D{rx*scale_rx,0.f};
-
-                      double radius = (rx*rx+ry*ry)/(8*sagitta)+0.5*sagitta;
-                      Amg::Vector2D Rc = c0+(c1-c0)*.5 - (scale_ry*scale_rx) * (radius-sagitta)/(sqrt(rx*rx+ry*ry))*Amg::Vector2D{-ry*scale_ry,-rx*scale_rx};
+                      double rho2=sqr(rx) + sqr(ry);
+                      double radius = rho2/(8*sagitta)+0.5*sagitta;
+                      Amg::Vector2D Rc = c0+(c1-c0)*.5 - (scale_ry*scale_rx) * (radius-sagitta)
+                                                        /sqrt(rho2)
+                                                        *Amg::Vector2D{-ry*scale_ry,-rx*scale_rx};
 
                       double ymin=std::min(c0[1],c1[1]);
                       double  ymax=std::max(c0[1],c1[1]);
                       for (unsigned int col_i=col_start; col_i< col_end; ++col_i) {
                          //compute row range with defects per column i.e. the row at which the circle crosses the column
                          // and the corresponding edge row (top or bottom)
-                         double q = sqr(col_i*helper.columnPitch()-Rc[0]) + sqr(Rc[1]) - sqr(radius);
+                         double q = sqr(col_i*hwa_columnPitch-Rc[0]) + sqr(Rc[1]) - sqr(radius);
                          double ph = -Rc[1];
                          double Q=sqr(ph)-q;
                          if (Q>=0.) {
@@ -508,39 +726,27 @@ namespace InDet{
                                   if (d2<d1) {
                                      cx=cx2;
                                   }
-                                  cx = std::clamp( cx, ymin, ymax - helper.rowPitch()*.25);
+                                  cx = std::clamp( cx, ymin, ymax - hwa_rowPitch*.25);
                                }
                                else {
                                   cx=cx2;
                                }
                             }
                             if (cx>=ymin && cx<ymax) {
-                               row_range[row_var_idx]=static_cast<unsigned int>( std::max(0.,cx / helper.rowPitch() + .5));
-                               // create corner defects for one column
-                               for (unsigned int row_i=row_range[0]; row_i<row_range[1]; ++row_i) {
-                                  // create a key which identifies the particular defect
-                                  // @TODO should store as range instead e.g. mark that a key is the beginning of a range
-                                  //       up the the next key
-                                  typename T_ModuleHelper::KEY_TYPE
-                                     key = helper.maskedKey( 0u,
-                                                             helper.swapOfflineRowsColumns()
-                                                             ? helper.hardwareCoordinates(col_i,row_i)
-                                                             : helper.hardwareCoordinates(row_i,col_i));
+                               row_range[row_var_idx]=static_cast<unsigned int>( std::max(0.,cx / hwa_rowPitch + .5));
 
-                                  // ... and insert the defect in the list of defects registered for this module
-                                  auto [insert_iter,end_iter] = T_EmulatedDefects::lower_bound( module_defects, key);
-                                  if (insert_iter == end_iter) {
-                                     module_defects.push_back(key);
+                               if (row_range[0] < row_range[1] && row_range[0] <hwa_rows) {
+                                  // create corner defects for one column
+                                  std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE> key_range{
+                                     helper.swapOfflineRowsColumns() ? helper.hardwareCoordinates(col_i, std::min(row_range[0],helper.nSensorColumns()-1u))
+                                     : helper.hardwareCoordinates(std::min(row_range[0],helper.nSensorRows()-1u),col_i),
+                                     helper.swapOfflineRowsColumns() ? helper.hardwareCoordinates(col_i, std::min(row_range[1]-1, helper.nSensorColumns()-1u))
+                                     : helper.hardwareCoordinates(std::min(row_range[1]-1,helper.nSensorRows()-1u),col_i)
+                                  };
+
+                                  if (EmulatedDefectsBuilder::insertKeyRange(helper, module_defects, key_range, T_ModuleHelper::makeDefectTypeKey(masks.size()>1 ? 1 : 0))) {
                                      if (h2) {
-                                        histogramDefects(helper,key,h2);
-                                     }
-                                  }
-                                  else {
-                                     if (!helper.isMatchingDefect(*insert_iter, key)) {
-                                        module_defects.insert( insert_iter, key);
-                                        if (h2) {
-                                           histogramDefects(helper,key,h2);
-                                        }
+                                        histogramDefects(helper,key_range,h2);
                                      }
                                   }
                                }
@@ -562,6 +768,14 @@ namespace InDet{
        }
     }
     m_modulesWithoutDefectParameters += module_without_matching_pattern;
+    if (!m_outputFile.value().empty()) {
+       if (hasExtensions(m_outputFile.value(),".json")) {
+          toJson(*defects, m_outputFile.value());
+       }
+       else if (hasExtensions(m_outputFile.value(),".root")) {
+          toRoot(*defects, m_outputFile.value());
+       }
+    }
     ATH_CHECK( defectsOut.record (std::move(defects)) );
 
     if (msgLvl(MSG::INFO)) {
@@ -570,4 +784,5 @@ namespace InDet{
 
     return StatusCode::SUCCESS;
   }
+
 }

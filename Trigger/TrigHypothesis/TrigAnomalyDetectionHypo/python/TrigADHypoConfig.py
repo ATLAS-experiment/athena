@@ -2,6 +2,8 @@
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from TrigEDMConfig.TriggerEDM import recordable
 
 log = logging.getLogger('TrigADHypoAlgs')
 
@@ -23,15 +25,15 @@ config_dict = {
     },
     "L":{
         "object_cuts": "default",
-        "adScoreThres": 8.768, # 20 Hz est. w/ v2
+        "adScoreThres": 6.174, # 20 Hz est. w/ v2
     },
     "M":{
         "object_cuts": "default",
-        "adScoreThres": 10.574, # 10 Hz est. w/ v2
+        "adScoreThres": 6.929, # 10 Hz est. w/ v2
     },
     "T":{
         "object_cuts": "default",
-        "adScoreThres": 15.0277, # 5 Hz est. w/ v2
+        "adScoreThres": 8.358, # 5 Hz est. w/ v2
     }
 
 }
@@ -44,17 +46,23 @@ def TrigADGetConfigValue(chainDict, key):
 
     return values[0]
 
-def TrigADComboHypoToolFromDict(chainDict):
+def TrigADComboHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
+    group = chainDict['groups']
 
     log.debug("Inside AD ComboHypoToolFromDict")
-    log.debug("chainDict:", chainDict)
+    log.debug("chainDict: %s", chainDict)
 
     cfg_name = TrigADGetConfigValue(chainDict, "anomdet")
     cfg = config_dict[cfg_name]
     
     obj_cuts = object_cuts_sets[cfg["object_cuts"]]
 
+    if "adWrite" in group:
+        adScoreName = recordable("HLT_AnomDet_ComboHypo")
+    else:
+        adScoreName = ""
+        
     tool = CompFactory.TrigADComboHypoTool(
         name,
         max_jets = obj_cuts["max_jets"],
@@ -62,7 +70,18 @@ def TrigADComboHypoToolFromDict(chainDict):
         max_muons = obj_cuts["max_muons"],
         max_photons = obj_cuts["max_photons"],
         ModelFileName = "TrigAnomalyDetectionHypo/2025-03-12/HLT_AD_v2.onnx",
-        adScoreThres = float(cfg["adScoreThres"])
+        adScoreThres = float(cfg["adScoreThres"]),
+        adScoreKey = adScoreName,
     )
-    
+
+    if "adMon:online" in group:
+        monTool = GenericMonitoringTool(flags, 'MonTool', HistPath='TrigADComboHypoTool/'+name.replace("leg000_",""))
+        monTool.defineHistogram("adScore", path='EXPERT', type='TH1F', title="HLT AD Score;;Entries", xbins=200, xmin=0, xmax=20 )
+        monFlag = True
+        tool.monTool = monTool
+        tool.monFlag = monFlag
+    else:
+        monFlag = False
+        tool.monFlag = monFlag
+
     return tool

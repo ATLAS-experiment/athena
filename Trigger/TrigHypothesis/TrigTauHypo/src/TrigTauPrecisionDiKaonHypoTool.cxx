@@ -17,6 +17,7 @@
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "TrigTauPrecisionDiKaonHypoTool.h"
 
@@ -170,7 +171,7 @@ bool TrigTauPrecisionDiKaonHypoTool::decide(const ITrigTauPrecisionHypoTool::Too
             } 
 
             if(trk) {
-                tmpKaon.SetPtEtaPhiM(trk->pt(), trk->eta(), trk->phi(), 493.677);
+                tmpKaon.SetPtEtaPhiM(trk->pt(), trk->eta(), trk->phi(), ParticleConstants::chargedKaonMassInMeV);
                 my_trks.push_back(trk->p4());
             }
 
@@ -185,11 +186,11 @@ bool TrigTauPrecisionDiKaonHypoTool::decide(const ITrigTauPrecisionHypoTool::Too
         if(my_trks.size() == 2) {
             TLorentzVector tmpKaon;
 
-            tmpKaon.SetPtEtaPhiM(my_trks.at(0).Pt(), my_trks.at(0).Eta(), my_trks.at(0).Phi(), 493.677);
+            tmpKaon.SetPtEtaPhiM(my_trks.at(0).Pt(), my_trks.at(0).Eta(), my_trks.at(0).Phi(), ParticleConstants::chargedKaonMassInMeV);
             TLorentzVector tmpPion = my_trks.at(1);
             float kPiMass1 = (tmpKaon+tmpPion).M();
 
-            tmpKaon.SetPtEtaPhiM(my_trks.at(1).Pt(), my_trks.at(1).Eta(), my_trks.at(1).Phi(), 493.677);
+            tmpKaon.SetPtEtaPhiM(my_trks.at(1).Pt(), my_trks.at(1).Eta(), my_trks.at(1).Phi(), ParticleConstants::chargedKaonMassInMeV);
             tmpPion = my_trks.at(0);
             float kPiMass2 = (tmpKaon+tmpPion).M();
 

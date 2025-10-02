@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "copyRootTree.h"
@@ -23,6 +23,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #include <regex>
 #include <iostream>
 #include <set>
+#include <cmath>
 
 // ______________________________________________________________________
 // Variable buffer classes

@@ -57,9 +57,14 @@ def IOVDbSvcCfg(flags, **kwargs):
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
     # Set up POOLSvc with appropriate catalogs
-    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg, AthenaPoolCnvSvcCfg
+    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
     result.merge(PoolSvcCfg(flags, withCatalogs=True))
-    result.merge(AthenaPoolCnvSvcCfg(flags))
+    if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+        result.merge(AthenaPoolSharedIOCnvSvcCfg(flags))
+    else:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags))
     result.addService(CompFactory.CondSvc())
     result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
@@ -230,12 +235,12 @@ _dblist = {
 }
 
 
-def addOverride(flags, folder, tag, db=None):
-    """Add a tag override for the specified folder"""
+def addOverride(flags, folder, tag, tagType="tag", db=None):
+    """Add xml override for the specified folder (folder-level tag, forceRunNumber, ...)"""
     suffix = ''
     if db:
         suffix = f' <db>{db}</db>'
-    return IOVDbSvcCfg(flags, overrideTags=(f'<prefix>{folder}</prefix> <tag>{tag}</tag>{suffix}',))
+    return IOVDbSvcCfg(flags, overrideTags=(f'<prefix>{folder}</prefix> <{tagType}>{tag}</{tagType}>{suffix}',))
 
 
 def _extractFolder(folderString):
@@ -298,6 +303,28 @@ def getSqliteContent(sqliteInput,takeFolders,databaseInstance):
     for v in sqliteFolders.items():
         msg.info("\t"+str(v))
     return sqliteFolders
+
+
+#post-exec-style helper method to remove a folder from IOVDbSvc.Folders and CondInputLoader.Load
+#To be used in calibration-processing jobs that read the condions from anohter source or produce it in the same job
+def blockFolder(ca,folder):
+        "Block use of specified conditions DB folder so data can be read from elsewhere"
+        msg.info("Trying to remove folder [%s] from IOVDbSvc.Folders",folder)
+        iovdbsvc=ca.getService("IOVDbSvc")
+        oldLen=len(iovdbsvc.Folders)
+        iovdbsvc.Folders=[x for x in iovdbsvc.Folders if x.find(folder)==-1]
+        newLen=len(iovdbsvc.Folders)
+        if (oldLen==newLen):
+            msg.warning("Folder [%s] not found in IOVDbSvc.Folder",folder)
+            return
+        elif (oldLen-newLen>1):
+            msg.warning("Folder string [%s] matched more than one folder, removed %i folders",folder,oldLen-newLen)
+
+
+        condInputLoader=ca.getCondAlgo("CondInputLoader")
+        condInputLoader.Load=set([x for x in condInputLoader.Load if x[1].find(folder)==-1])
+        return
+
 
 
 if __name__ == '__main__':

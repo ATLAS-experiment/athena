@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCELLCORRECTION_CALOCELLNEIGHBORSAVERAGECORR_H
@@ -22,9 +22,7 @@ class CaloCellNeighborsAverageCorr
 
 public:
 
-  CaloCellNeighborsAverageCorr(const std::string& type,
-                       const std::string& name,
-                       const IInterface* parent);
+  using base_class::base_class;
 
   virtual ~CaloCellNeighborsAverageCorr() {};
 
@@ -39,13 +37,13 @@ public:
 
 private:
 
- const CaloCell_ID* m_calo_id;
- const TileID* m_tile_id;
- bool m_testMode;
- bool m_skipDeadFeb;
- bool m_skipDeadLAr;
- bool m_skipDeadDrawer;
- bool m_skipDeadTile;
+ const CaloCell_ID* m_calo_id=nullptr;
+ const TileID* m_tile_id=nullptr;
+ Gaudi::Property<bool> m_testMode{this,"testMode",false};
+ Gaudi::Property<bool> m_skipDeadFeb{this,"skipDeadFeb",true, "Skip already patched LAr-cells (eg dead Febs)"};
+ Gaudi::Property<bool> m_skipDeadLAr{this,"skipDeadLAr",false,"Skip all dead LAr cells"};
+ Gaudi::Property<bool> m_skipDeadDrawer{this,"skipDeadDrawer",false,"Skip dead Tile Drawers"};
+ Gaudi::Property<bool> m_skipDeadTile{this,"skipDeadTile",true,"Skip all dead Tile cells"};
 
 };
 

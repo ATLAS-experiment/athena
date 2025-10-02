@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -29,55 +29,10 @@
 
 #include <sstream>
 
-xAODBSignalFilter::xAODBSignalFilter(const std::string &name, ISvcLocator *pSvcLocator) : GenFilter(name, pSvcLocator)
+StatusCode xAODBSignalFilter::filterInitialize()
 {
-    // ** Declare the algorithm's properties **
-    declareProperty("LVL1MuonCutOn", m_localLVL1MuonCutOn = false);
-    declareProperty("LVL2MuonCutOn", m_localLVL2MuonCutOn = false);
-    declareProperty("LVL2ElectronCutOn", m_localLVL2ElectronCutOn = false);
-    declareProperty("LVL1MuonCutPT", m_localLVL1MuonCutPT = 0.0);
-    declareProperty("LVL1MuonCutEta", m_localLVL1MuonCutEta = 102.5);
-    declareProperty("LVL2MuonCutPT", m_localLVL2MuonCutPT = 0.0);
-    declareProperty("LVL2MuonCutEta", m_localLVL2MuonCutEta = 102.5);
-    declareProperty("LVL2ElectronCutPT", m_localLVL2ElectronCutPT = 0.0);
-    declareProperty("LVL2ElectronCutEta", m_localLVL2ElectronCutEta = 102.5);
-    declareProperty("Cuts_Final_e_switch", m_cuts_f_e_on = false);
-    declareProperty("Cuts_Final_e_pT", m_cuts_f_e_pT = 0.);
-    declareProperty("Cuts_Final_e_eta", m_cuts_f_e_eta = 2.5);
-    declareProperty("Cuts_Final_mu_switch", m_cuts_f_mu_on = false);
-    declareProperty("Cuts_Final_mu_pT", m_cuts_f_mu_pT = 0.);
-    declareProperty("Cuts_Final_mu_eta", m_cuts_f_mu_eta = 102.5);
-    declareProperty("Cuts_Final_hadrons_switch", m_cuts_f_had_on = false);
-    declareProperty("Cuts_Final_hadrons_pT", m_cuts_f_had_pT = 0.);
-    declareProperty("Cuts_Final_hadrons_eta", m_cuts_f_had_eta = 102.5);
-    declareProperty("Cuts_Final_gamma_switch", m_cuts_f_gam_on = false);
-    declareProperty("Cuts_Final_gamma_pT", m_cuts_f_gam_pT = 0.);
-    declareProperty("Cuts_Final_gamma_eta", m_cuts_f_gam_eta = 102.5);
-    declareProperty("Cuts_Final_K0_switch", m_cuts_f_K0_on = false);
-    declareProperty("Cuts_Final_K0_pT", m_cuts_f_K0_pT = 0.);
-    declareProperty("Cuts_Final_K0_eta", m_cuts_f_K0_eta = 102.5);
-    //
-    // ** Declare the signal B-meson/hadron PDGid
-    declareProperty("B_PDGCode", m_B_pdgid = 0);
-    //
-    // ** Declare properties for mass filter **
-    declareProperty("InvMass_switch", m_InvMass_switch = false);
-    declareProperty("InvMass_PartId1", m_InvMass_PartId1 = 13);
-    declareProperty("InvMass_PartId2", m_InvMass_PartId2 = -m_InvMass_PartId1);
-    declareProperty("InvMass_PartFakeMass1", m_InvMass_PartFakeMass1 = -1.);
-    declareProperty("InvMass_PartFakeMass2", m_InvMass_PartFakeMass2 = -1.);
-    declareProperty("InvMassMin", m_InvMassMin = 0.0);
-    declareProperty("InvMassMax", m_InvMassMax = 14000000.0);
-    declareProperty("TotalInvMass_switch", m_TotalInvMass_switch = false);
-    declareProperty("TotalInvMassMin", m_TotalInvMassMin = 0.0);
-    declareProperty("TotalInvMassMax", m_TotalInvMassMax = 14000000.0);
-
-    // ** Initialise event counter **
-    m_EventCnt = 0;
-    m_LVL1Counter = 0;
-    m_LVL2Counter = 0;
-    m_rejectedTrigger = 0;
-    m_rejectedAll = 0;
+    CHECK(m_truthPartContKey.initialize());
+    return StatusCode::SUCCESS;
 }
 
 StatusCode xAODBSignalFilter::filterEvent()
@@ -99,11 +54,8 @@ StatusCode xAODBSignalFilter::filterEvent()
         }
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }    
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    CHECK(xTruthParticleContainer.isValid());
 
 bool acceptEvent = true;
 unsigned int nPart = xTruthParticleContainer->size();  

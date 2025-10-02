@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
@@ -45,10 +45,16 @@ def initConfigFlags():
     acf.addFlag('Exec.MTEventService', False, help='use multi-threaded event service')
     acf.addFlag('Exec.MTEventServiceChannel', 'EventService_EventRanges', help='name of YAMPL communication channel between AthenaMT and pilot')
 
+    #Multi-node with MPI
+    acf.addFlag('Exec.MPI', False, help='run in MPI mode')
+
     #Activate per-event log-output of StoreGate content
     acf.addFlag('Debug.DumpEvtStore', False, help='dump event store on each event')
     acf.addFlag('Debug.DumpDetStore', False, help='dump detector store on each event')
     acf.addFlag('Debug.DumpCondStore', False, help='dump conditions store on each event')
+
+    #Activate NameAuditor
+    acf.addFlag('Debug.NameAuditor',False,help='Activate NameAuditor')
 
     acf.addFlag('ExecutorSplitting.TotalSteps', 0, help='number of steps for pileup overlay')
     acf.addFlag('ExecutorSplitting.Step', -1, help='step number of current pileup overlay job')
@@ -81,6 +87,10 @@ def initConfigFlags():
                return 2000 + int(prevFlags.Input.ProjectName[4:6])
         return 0
 
+    def _keywordsFromFlags(prevFlags):
+        keywords_string = GetFileMD(prevFlags.Input.Files).get("keywords", "")
+        return [keyword.strip() for keyword in keywords_string.split(',') if keyword.strip()]
+
     acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", ""), help='project name')
     acf.addFlag('Input.DataYear', _dataYearFromFlags, help='year of input data')
     acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), type=Campaign, help='Monte Carlo campaign')
@@ -89,6 +99,7 @@ def initConfigFlags():
     acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format, help='input format type')
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []), help='list of stream names in this file')
     acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : getGeneratorsInfo(prevFlags), help='generator version')
+    acf.addFlag('Input.Keywords', _keywordsFromFlags, type=list, help='evtgen keywords')
     acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags), help='special configuration options read from input file metadata')
 
     def _inputCollections(inputFile):
@@ -238,6 +249,9 @@ def initConfigFlags():
                 (25./prevFlags.Beam.BunchSpacing), help='luminosity estimated from pileup')
     acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf, help='source of bunch structure')
 
+    acf.addFlag('Beam.vdMScan.ConfigFile', 'LRAPositioner.root', help='vdM Scan Sim/Reco/BSFit Configuration File')
+    acf.addFlag('Beam.vdMScan.PV.PDF', 'Default', help='vdM Scan Sim/BSFit PV PDF Histogram')
+
     # output
     acf.addFlag('Output.EVNTFileName', '', help='EVNT output file name')
     acf.addFlag('Output.EVNT_TRFileName', '', help='EVNT_TR output file name')
@@ -259,6 +273,7 @@ def initConfigFlags():
     acf.addFlag('Output.doWriteDAOD', False, help='write at least one DAOD file')
     acf.addFlag('Output.doJiveXML', False, help='write JiveXML file')
 
+    acf.addFlag('Output.doGEN_AOD2xAOD', True, help="Configure the AODtoxAOD Truth Conversion")
     acf.addFlag('Output.OneDataHeaderForm', False, help="Write only a single common DataHeaderForm per stream")
     acf.addFlag('Output.TreeAutoFlush', {}, help="dict with auto-flush settings for stream e.g. {'STREAM': 123}")
     acf.addFlag('Output.TemporaryStreams', [], help='list of output streams that are marked temporary')
@@ -507,6 +522,12 @@ def initConfigFlags():
         return createDerivationConfigFlags()
     _addFlagsCategory(acf, "Derivation", __commonDerivation, 'DerivationFrameworkConfiguration' )
 
+#indet derivation flags
+    def __indetDerivation():
+        from DerivationFrameworkInDet.InDetDFConfigFlags import createInDetDFConfigFlags
+        return createInDetDFConfigFlags()
+    _addFlagsCategory(acf, "Derivation.InDet", __indetDerivation, 'DerivationFrameworkInDet' )
+
 #egamma derivation Flags:
     def __egammaDerivation():
         from DerivationFrameworkEGamma.EGammaDFConfigFlags import createEGammaDFConfigFlags
@@ -524,6 +545,18 @@ def initConfigFlags():
         from AthOnnxComps.OnnxRuntimeFlags import createOnnxRuntimeFlags
         return createOnnxRuntimeFlags()
     _addFlagsCategory(acf, "AthOnnx", __onnxruntime, 'AthOnnxComps')
+
+    #EFTracking fpga data prep (F100)
+    def _eftracking_f100():
+        from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
+        return addFPGADataPrepFlags()
+    
+    _addFlagsCategory(acf, "FPGADataPrep", _eftracking_f100, "EFTrackingFPGAPipeline")
+    
+    def __fpga():
+        from AthXRTServices.FPGAConfigFlags import createFPGAMgmtFlags
+        return createFPGAMgmtFlags()
+    _addFlagsCategory(acf, "FPGAMgmt", __fpga, 'AthXRTServices' )
 
     # For AnalysisBase, pick up things grabbed in Athena by the functions above
     if not isGaudiEnv():

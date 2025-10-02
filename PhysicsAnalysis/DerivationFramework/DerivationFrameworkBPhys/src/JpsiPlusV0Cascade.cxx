@@ -4,12 +4,12 @@
 /////////////////////////////////////////////////////////////////
 // JpsiPlusV0Cascade.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/JpsiPlusV0Cascade.h"
+#include "JpsiPlusV0Cascade.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
@@ -365,7 +365,7 @@ namespace DerivationFramework {
     }
 
 
-    JpsiPlusV0Cascade::JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p),
+    JpsiPlusV0Cascade::JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
     m_vertexContainerKey(""),
     m_vertexV0ContainerKey(""),
     m_cascadeOutputsKeys{ "JpsiPlusV0CascadeVtx1", "JpsiPlusV0CascadeVtx2" },

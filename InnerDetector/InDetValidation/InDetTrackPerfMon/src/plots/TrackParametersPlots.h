@@ -25,7 +25,9 @@ namespace IDTPM {
         PlotMgr* pParent,
         const std::string& dirName,
         const std::string& anaTag,
-        const std::string& trackType );
+        const std::string& trackType,
+        bool plotErrors = false,
+        bool recomputeIP = false );
 
     /// Destructor
     virtual ~TrackParametersPlots() = default;
@@ -44,6 +46,8 @@ namespace IDTPM {
   private:
 
     std::string m_trackType;
+    bool m_plotErrors{};
+    bool m_recomputeIP{};
 
     TH1* m_pt{};
     TH1* m_eta{};
@@ -67,6 +71,24 @@ namespace IDTPM {
     TH2* m_eta_vs_phi{};
     TH2* m_z0_vs_d0{};
     TH2* m_z0sin_vs_d0{};
+
+    /// sigma plots
+    TH1* m_sigma_pt{};
+    TH1* m_sigma_eta{};
+    TH1* m_sigma_phi{};
+    TH1* m_sigma_d0{};
+    TH1* m_sigma_z0{};
+    TH1* m_sigma_z0sin{};
+    TH1* m_sigma_theta{};
+
+    /// significance plots
+    TH1* m_significance_pt{};
+    TH1* m_significance_eta{};
+    TH1* m_significance_phi{};
+    TH1* m_significance_d0{};
+    TH1* m_significance_z0{};
+    TH1* m_significance_z0sin{};
+    TH1* m_significance_theta{};
 
   }; // class TrackParametersPlots
 

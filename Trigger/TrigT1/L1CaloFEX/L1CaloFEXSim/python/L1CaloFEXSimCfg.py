@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -108,10 +108,31 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
     if "xAODTriggerTowers" not in flags.Input.Collections:
         acc.merge(TriggerTowersInputCfg(flags))
 
-    if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
-        acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",CaloCellContainerReadKey=sCellType,ApplyMasking=not flags.Input.isMC) ) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+    doV6Mapping=False # latome fex input mapping if different between v5 and v6 ... for now only switching to v6 in data
+    if not flags.Input.isMC and len(flags.Input.RunNumbers)>0: # in HLT reprocessing jobs, the runNumbers list will be empty ... have to default to v5 for now for these jobs
+        from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+        runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+        doV6Mapping = (runinfo.FWversion()==6)
+    
+    if doV6Mapping and len(flags.Input.RunNumbers)>0:
+        # add required dbOverride (don't do in athena HLT where we will rely on LAr/LATOME to have set it to the right thing)
+        from IOVDbSvc.IOVDbSvcConfig import addOverride
+        acc.merge( addOverride(flags,folder="/LAR/Identifier/LatomeMapping",tag="LARIdentifierLatomeMapping-fw6") )
+
 
     if flags.Trigger.L1.doeFex:
+        if 'L1_eFexEmulatedTowers' in eFexTowerInputs and "L1_eFexEmulatedTowers" not in flags.Input.Collections:
+            builderAlg = CompFactory.LVL1.eFexTowerBuilder("L1_eFexEmulatedTowers",UseLATOMEv6Mapping=doV6Mapping,
+                                                           CaloCellContainerReadKey=sCellType,ApplyMasking=not flags.Input.isMC) # builds the emulated towers to use as secondary input to eTowerMaker - name has to match what it gets called in other places to avoid conflict
+        if flags.Input.isMC: builderAlg.LArLatomeHeaderKey=""
+        elif doV6Mapping or len(flags.Input.RunNumbers)==0:
+            builderAlg.MappingFile='' # need to regenerate mapping on-the-fly for v6 or in athena hlt jobs
+            # if regenerating mapping file and this is data, we will need the LATOME headers, otherwise don't use them
+            from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+            acc.merge(LArRawSCDataReadingCfg(flags))
+
+        acc.addEventAlgo( builderAlg )
+
         if eFexTowerInputs==[]:
             # no input specified, so use the old eTowerMaker
             eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells',
@@ -203,7 +224,8 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver',jFEXSysSimTool=CompFactory.LVL1.jFEXSysSim(
                                             'jFEXSysSimTool',jFEXSimTool=CompFactory.LVL1.jFEXSim(
                                               'LVL1::jFEXSim',jFEXFPGATool=CompFactory.LVL1.jFEXFPGA(
-                                                'LVL1::jFEXFPGA',IjFEXFormTOBsTool=CompFactory.LVL1.jFEXFormTOBs(
+                                                'LVL1::jFEXFPGA',jFEXLargeRJetAlgoTool="", # disables jLJ algorithm - will produce empty container
+                                                IjFEXFormTOBsTool=CompFactory.LVL1.jFEXFormTOBs(
                                                  'LVL1::jFEXFormTOBs',IsMC=flags.Input.isMC)))))
         acc.addEventAlgo(jFEXInputs)
         acc.addEventAlgo(jFEX)
@@ -225,17 +247,24 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputgFexTool], MaybeMissingROBs=maybeMissingRobs)
             acc.addEventAlgo(decoderAlg)
 
+        from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
+        acc.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
+
+        gFEXTowerSummer = CompFactory.LVL1.gFexTowerSummer('gFexTowerSummer')
+        gFEXTowerSummer.gFexDataTowers = "L1_gFexEmulatedTowers" if flags.Input.isMC else "L1_gFexDataTowers"
+        gFEXTowerSummer.gTowers200WriteKey = "L1_gFexEmulatedTowers200" if flags.Input.isMC else "L1_gFexDataTowers200"
+        gFEXTowerSummer.gTowers50WriteKey = "L1_gFexEmulatedTowers50" if flags.Input.isMC else "L1_gFexDataTowers50"
+        gFEXTowerSummer.gTowersEMWriteKey = ""
+        gFEXTowerSummer.gTowersHADWriteKey = ""
+        acc.addEventAlgo(gFEXTowerSummer)
+
         gFEXInputs = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers')
-        gFEXInputs.IsMC = flags.Input.isMC
-        gFEXInputs.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
-        gFEXInputs.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
+        gFEXInputs.InputDataTowers =  "L1_gFexEmulatedTowers200" if flags.Input.isMC else "L1_gFexDataTowers200"
+        gFEXInputs.MyGTowers = "gTowerContainer"
 
         gFEXInputs50 = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers50')
-        gFEXInputs50.InputDataTowers = "L1_gFexDataTowers50"
+        gFEXInputs50.InputDataTowers = "L1_gFexEmulatedTowers50" if flags.Input.isMC else "L1_gFexDataTowers50"
         gFEXInputs50.MyGTowers = "gTower50Container"
-        gFEXInputs50.IsMC = flags.Input.isMC
-        gFEXInputs50.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper50', SCell=sCellType)
-        gFEXInputs50.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
 
         from L1CaloFEXCond.L1CaloFEXCondConfig import gFexDBConfig
         acc.merge(gFexDBConfig(flags))

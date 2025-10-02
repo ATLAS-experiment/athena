@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // This is a general-purpose multi-b-jet filter. It can cut on:
 //    - Multiplicity of b-jets (both min and max can be specified)
@@ -14,26 +14,12 @@
 // Other classes used by this class:-
 #include <math.h>
 #include "GaudiKernel/SystemOfUnits.h"
-#include "xAODJet/JetContainer.h"
 #include "CxxUtils/BasicTypes.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "TLorentzVector.h"
 
 #include <fstream>
 
-
-xAODMultiBjetFilter::xAODMultiBjetFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name,pSvcLocator){
-
-  // Local Member Data:-
-
-  m_NPass = 0;
-  m_Nevt = 0;
-  m_SumOfWeights_Pass = 0;
-  m_SumOfWeights_Evt = 0;
-}
-
-xAODMultiBjetFilter::~xAODMultiBjetFilter(){}
 
 StatusCode xAODMultiBjetFilter::filterInitialize() {
 
@@ -42,6 +28,8 @@ StatusCode xAODMultiBjetFilter::filterInitialize() {
   m_SumOfWeights_Pass = 0;
   m_SumOfWeights_Evt = 0;
 
+  CHECK(m_TruthJetContainerName.initialize());
+  CHECK(m_truthPartContKey.initialize());
   ATH_MSG_INFO("Initialized");
   return StatusCode::SUCCESS;
 }
@@ -60,12 +48,9 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
   m_Nevt++;
 
   // Retrieve truth jets
-  const xAOD::JetContainer* truthjetTES = 0;
-  StatusCode sc = evtStore()->retrieve(truthjetTES, m_TruthJetContainerName);
-  if(sc.isFailure() || !truthjetTES) {
-    ATH_MSG_WARNING(
-       "No xAOD::JetContainer found in TDS " << m_TruthJetContainerName \
-      << sc.isFailure() << " "<<   !truthjetTES);
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  if (!truthjetTES.isValid()) {
+    ATH_MSG_WARNING("No xAOD::JetContainer with name " << m_TruthJetContainerName.key() << " found in StoreGate!");
     return StatusCode::SUCCESS;
   }
 
@@ -82,13 +67,10 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
   }
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
-                                  
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
+
   // Apply leading jet pt cut
   if(lead_jet_pt < m_leadJet_ptMin || (lead_jet_pt > m_leadJet_ptMax && m_leadJet_ptMax > 0)) pass = false;
 
@@ -101,10 +83,7 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
  
   // Make a vector containing all the event's b-hadrons
   std::vector< const xAOD::TruthParticle* > bHadrons;  
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
-   
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
       if( !MC::isWeaklyDecayingBHadron(part) ) continue;
       if( part->pt() < m_bottomPtMin ) continue;
       if( std::abs( part->abseta() ) > m_bottomEtaMax) continue;

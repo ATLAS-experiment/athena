@@ -27,6 +27,9 @@ namespace ActsTrk {
     StringArrayProperty m_monitoringGroupNames{this,
       "MonitorNames", {}, "List of names of the monitoring groups"};
 
+    Gaudi::Property< bool > m_doPixel {this, "DoPixel", true};
+    Gaudi::Property< bool > m_doStrip {this, "DoStrip", true};
+
     enum TimeMonitoringType : int {
       StripSeedInitialisation = 0,
       PixelSeedInitialisation,

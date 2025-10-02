@@ -151,7 +151,7 @@ double SiLorentzAngleTool::getValue(const IdentifierHash& elementHash, const Amg
   double depletionDepth{element->thickness()};
   if (deplVoltage==0.0) ATH_MSG_WARNING("Depletion voltage in "<<__FILE__<<" is zero, which might be a bug.");
   if (std::abs(biasVoltage) < std::abs(deplVoltage)) {
-    depletionDepth *= sqrt(std::abs(biasVoltage / deplVoltage));
+    depletionDepth *= std::sqrt(std::abs(biasVoltage / deplVoltage));
   }
   double meanElectricField{0.};
   if (depletionDepth) { 

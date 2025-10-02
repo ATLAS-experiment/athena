@@ -39,7 +39,7 @@ namespace ActsTrk
      ATH_CHECK( m_tracksContainerKey.initialize() );
      ATH_CHECK( m_pixelClustersToTruth.initialize() );
      ATH_CHECK( m_stripClustersToTruth.initialize() );
-
+     if (!m_hgtdClustersToTruth.key().empty()) ATH_CHECK( m_hgtdClustersToTruth.initialize() );
      ATH_CHECK( m_trackToTruthOut.initialize() );
 
      m_elasticDecayUtil.setEnergyLossBinning(m_energyLossBinning.value());
@@ -123,6 +123,7 @@ namespace ActsTrk
        ATH_MSG_ERROR("No strip clusterss for key " << m_stripClustersToTruth.key() );
        return StatusCode::FAILURE;
     }
+   
     SG::ReadHandle<ActsTrk::TrackContainer> tracksContainer = SG::makeHandle( m_tracksContainerKey, ctx);
     if (!tracksContainer.isValid()) {
        ATH_MSG_ERROR("No tracks for key " << m_tracksContainerKey.key() );
@@ -135,10 +136,26 @@ namespace ActsTrk
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
                static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
        measurement_to_truth_association_maps{};
+   
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
-    ATH_MSG_DEBUG("Measurement association entries: "  << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]->size()
-                 << " + " << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]->size()
+
+    if (!m_hgtdClustersToTruth.key().empty()) {
+       SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> hgtdClustersToTruthAssociation = SG::makeHandle(m_hgtdClustersToTruth, ctx);
+         if (!hgtdClustersToTruthAssociation.isValid()) {
+            ATH_MSG_DEBUG("No HGTD clusterss for key " << m_hgtdClustersToTruth.key() );
+         }
+        measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation.cptr();
+    }
+
+    auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
+      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[to_underlying(type)];
+      return assoc ? assoc->size() : 0ul;
+    };
+
+    ATH_MSG_DEBUG("Measurement association entries: "  << assocSize(xAOD::UncalibMeasType::PixelClusterType)
+                 << " + " << assocSize(xAOD::UncalibMeasType::StripClusterType)
+                 << " + " << assocSize(xAOD::UncalibMeasType::HGTDClusterType)
                  );
     unsigned int track_i=0;
     std::array<unsigned int,s_NCounterForAssociatedTruth> tracks_with_associated_truth{};
@@ -151,13 +168,12 @@ namespace ActsTrk
 
     std::vector<unsigned int> counted_truth_particles;
     counted_truth_particles.reserve(10);
-    --track_i; // to have track_i at the begining of the loop
+  
     for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
-       ++track_i;
        const auto lastMeasurementIndex = track.tipIndex();
-
+         
        unsigned int n_measurements=0u;
-
+     
        HitCounterArray &reco_hits = track_association->at(track_i).totalCounts();
        HitCounterArray &noise_hits = track_association->at(track_i).noiseCounts();
        ActsTrk::HitCountsPerTrack::container  &truth_particle_counts = track_association->at(track_i).countsPerTruthParticle();
@@ -177,7 +193,6 @@ namespace ActsTrk
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
               assert( sl != nullptr );
               const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
-
 
               const ActsTrk::MeasurementToTruthParticleAssociation *association_map = measurement_to_truth_association_maps.at(to_underlying(uncalibMeas.type()));
               if (association_map) {
@@ -231,6 +246,7 @@ namespace ActsTrk
                   });
        m_associationCounter.fillStatistics(n_measurements, truth_particle_counts.size());
        ++(tracks_with_associated_truth[std::min(truth_particle_counts.size(),tracks_with_associated_truth.size()-1u)]);
+       ++track_i;
     }
     unsigned int idx=0;
     for (unsigned int elm : tracks_with_associated_truth) {

@@ -105,11 +105,7 @@ PyObject* PyAthenaEventLoopMgr::setManager( PyObject* mgr )
 
 // hand the python side its interfaces
    PyObject* pyself = PyCapsule_New( (void*)static_cast< IEventSeek* >( this ), nullptr, nullptr );
-#if PY_MAJOR_VERSION < 3
-   PyObject* method = PyString_FromString( "_installServices" );
-#else
    PyObject* method = PyUnicode_FromString( "_installServices" );
-#endif
    PyObject* result = PyObject_CallMethodObjArgs( mgr, method, pyself, 0 );
    Py_DECREF( method );
    Py_DECREF( pyself );
@@ -205,21 +201,12 @@ StatusCode PyAthenaEventLoopMgr::executeAlgorithms(const EventContext& ctx)
 	  return StatusCode::FAILURE;
       }
 
-#if PY_MAJOR_VERSION < 3
-      if ( PyInt_Check( result ) || PyLong_Check( result ) )
-      {
-	 StatusCode sc = StatusCode( (int) PyInt_AS_LONG( result ) );
-         Py_DECREF( result );
-         return sc;
-      }
-#else
       if ( PyLong_Check( result ) )
       {
 	 StatusCode sc = StatusCode( (int) PyLong_AS_LONG( result ) );
          Py_DECREF( result );
          return sc;
       }
-#endif
 
    // FIXME: allow python result to be a statuscode
       MsgStream log( msgSvc(), name() );

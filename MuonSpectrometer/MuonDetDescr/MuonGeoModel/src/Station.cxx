@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Station.h"
@@ -396,7 +396,7 @@ namespace MuonGM {
         } else {
             if (m_name[0] == 'T') {
                 AMDBorgTranslation = GeoTrf::Translate3D(GetThickness(mysql) / 2. - getAmdbOrigine_along_thickness(mysql), 0.,
-                                                         GetLength() / 2. - getAmdbOrigine_along_length() + ((TgcComponent *)GetComponent(0))->posy);
+                                                         GetLength() / 2. - getAmdbOrigine_along_length() + static_cast<TgcComponent *>(GetComponent(0))->posy);
             } else {
                 AMDBorgTranslation = GeoTrf::Translate3D(GetThickness(mysql) / 2. - getAmdbOrigine_along_thickness(mysql), 0., GetLength() / 2. - getAmdbOrigine_along_length());
             }

@@ -22,13 +22,15 @@
 
 # Run each Reco_tf in a seperate directory
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA22)")
+
 mkdir Serial
 cd Serial
 
 #####################################################################
 Reco_tf.py --CA True \
            --AMI q449 \
-           --conditionsTag CONDBR2-BLKPA-2022-13 \
+           --conditionsTag $conditions \
            --imf False \
            --postInclude "MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg" \
            --postExec 'cfg.getEventAlgo("RecoValidAlg").doCSCSDO=False;cfg.getEventAlgo("RecoValidAlg").doMuEntry=False;cfg.getEventAlgo("RecoValidAlg").doMDTSDO=False;cfg.getEventAlgo("RecoValidAlg").doRPCSDO=False;cfg.getEventAlgo("RecoValidAlg").doTGCSDO=False;cfg.getEventAlgo("RecoValidAlg").doTruth=False' \
@@ -52,7 +54,7 @@ cd 1thread
 # now run reconstruction with AthenaMT with 1 thread
 Reco_tf.py --CA True \
            --AMI q449 \
-           --conditionsTag CONDBR2-BLKPA-2022-13 \
+           --conditionsTag $conditions \
            --imf False \
            --athenaopts="--threads=1" \
            --outputESDFile OUT_ESD_1thread.root
@@ -74,7 +76,7 @@ cd 5thread
 # now run reconstruction with AthenaMT with 5 threads
 Reco_tf.py --CA True \
            --AMI q449 \
-           --conditionsTag CONDBR2-BLKPA-2022-13 \
+           --conditionsTag $conditions \
            --imf False \
            --athenaopts="--threads=5" \
            --outputESDFile OUT_ESD_5thread.root
@@ -96,7 +98,7 @@ cd 8thread
 # now run reconstruction with AthenaMT with 8 threads
 Reco_tf.py --CA True \
            --AMI q449 \
-           --conditionsTag CONDBR2-BLKPA-2022-13 \
+           --conditionsTag $conditions \
            --imf False \
            --athenaopts="--threads=8" \
            --outputESDFile OUT_ESD_8thread.root

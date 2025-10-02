@@ -4,7 +4,6 @@
 ## available from an online python cookbook (aspn.activestate.com)
 ## Updated to use lockf for actual network atomicity by Peter Onyisi
 ## Using system lock to ensure that lock released even in case of segfault
-from __future__ import print_function
 
 import os
 import socket

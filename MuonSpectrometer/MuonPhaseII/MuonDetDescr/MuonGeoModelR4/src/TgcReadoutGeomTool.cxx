@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcReadoutGeomTool.h"
@@ -14,17 +14,17 @@
 #include <GeoModelKernel/GeoBox.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
 
+#include <format>
 #include <RDBAccessSvc/IRDBRecord.h>
 
 #include <MuonDetDescrUtils/MuonSectorMapping.h>
 
 #ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
 
 using namespace CxxUtils;
@@ -36,10 +36,49 @@ using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 using defineArgs = TgcReadoutElement::defineArgs;
 
 
-TgcReadoutGeomTool::TgcReadoutGeomTool(const std::string& type,
-                                       const std::string& name,
-                                       const IInterface* parent)
-    : base_class{type, name, parent} {}
+
+std::unique_ptr<WireGroupDesign> 
+    TgcReadoutGeomTool::constructWireDesign(const wTgcTable& table,
+                                            const GeoTrd* gapTrd) const {
+    if (table.wireGangs.empty()) {
+        return nullptr;
+    }
+    const double halfMinX = std::min(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
+    const double halfMaxX = std::max(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
+    const double halfY = gapTrd->getZHalfLength();
+    auto design = std::make_unique<WireGroupDesign>();
+    design->defineTrapezoid(halfMinX, halfMaxX, halfY);
+    for (unsigned gang : table.wireGangs) {
+        design->declareGroup(gang); 
+    }
+    const double wireOffSet = -0.5*table.wirePitch * design->nAllWires();
+    design->defineStripLayout(Amg::Vector2D{wireOffSet, 0.},
+                              table.wirePitch, 0., table.wireGangs.size());
+    return design;
+}
+std::unique_ptr<RadialStripDesign> 
+    TgcReadoutGeomTool::constructRadialDesign(const wTgcTable& table,
+                                              const GeoTrd* gapTrd) const {
+    if (table.bottomStripPos.empty()) {
+        return nullptr;
+    }
+    const double halfMinX = std::min(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
+    const double halfMaxX = std::max(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
+    const double halfY = gapTrd->getZHalfLength();
+
+    auto design = std::make_unique<RadialStripDesign>();
+
+    design->defineTrapezoid(halfMinX, halfMaxX, halfY);
+    design->defineStripLayout(Amg::Vector2D{-halfY,0.},
+                              0.,0.,table.bottomStripPos.size());
+    design->flipTrapezoid();
+    for (size_t s = 0; s < table.bottomStripPos.size(); ++s) {
+        design->addStrip(table.bottomStripPos.at(s),
+                         table.topStripPos.at(s));
+    }
+    return design;
+}
+
 StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
@@ -67,87 +106,78 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
             <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
         return StatusCode::FAILURE;
     }
-    unsigned int gasGap{0};
+    unsigned gasGap{0};
+    /// Place the strip-readout into the readout element's sensor layouts
+    auto assignReadoutLayer = [&define, & gasGap, this] (const StripLayerPtr& layerReadout) {
+        if (!layerReadout) {
+            return StatusCode::SUCCESS;
+        }
+        unsigned layerIdx = static_cast<unsigned>(layerReadout->hash());
+        if (layerIdx >= define.sensorLayouts.size()) {
+            ATH_MSG_FATAL("The strip index "<<layerIdx<<" is out of range for gasGap "<<gasGap);
+            return StatusCode::FAILURE;
+        }           
+        define.sensorLayouts[layerIdx] = layerReadout;
+        return StatusCode::SUCCESS;
+    };
     for (const physVolWithTrans& pVolTrans : allGasGaps) {
-        std::stringstream key{};
-        key<<define.chambDesign<<"_"<<(gasGap+1)
-           <<(m_idHelperSvc->stationEta(define.detElId) > 0 ? "A" : "C");
-
-        StripLayerPtr& stripLayout{factoryCache.stripDesigns[key.str()]};
-        StripLayerPtr& wireLayout{factoryCache.wireDesigns[key.str()]};
-        
-        if (!stripLayout || !wireLayout) {
-            const wTgcTable& table{factoryCache.parameterBook[key.str()]};
+        const std::string key = std::format("{:}_{:}{:}",define.chambDesign, gasGap+1,
+                                            (m_idHelperSvc->stationEta(define.detElId) > 0 ? "A" : "C"));
+        StripLayerPtr& wireReadout{factoryCache.wireLayers[key]};
+        StripLayerPtr& stripReadout{factoryCache.stripLayers[key]};
+        if (!wireReadout || !stripReadout) {
+            const wTgcTable& table{factoryCache.parameterBook[key]};
             if (!table.gasGap) {
-                ATH_MSG_FATAL("No wTGC table could be found for "
-                        <<m_idHelperSvc->toStringDetEl(define.detElId)
-                        <<" "<<define.chambDesign<<", gasGap "<<(gasGap+1));
+                ATH_MSG_FATAL("No wTGC table could be found for "<<m_idHelperSvc->toStringDetEl(define.detElId)
+                            <<" "<<define.chambDesign<<", gasGap "<<(gasGap+1));
                 return StatusCode::FAILURE;
             }
             const GeoShape* gapShape = m_geoUtilTool->extractShape(pVolTrans.volume);
             if (gapShape->typeID() != GeoTrd::getClassTypeID()) {
-                ATH_MSG_FATAL("Expected shape "<<m_geoUtilTool->dumpShape(gapShape)
-                            <<" to be a trapezoid");
+                ATH_MSG_FATAL("Expected shape "<<m_geoUtilTool->dumpShape(gapShape)<<" to be a trapezoid");
                 return StatusCode::FAILURE;
             }
             const GeoTrd* gapTrd = static_cast<const GeoTrd*>(gapShape);
-
-            const double halfMinX = std::min(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
-            const double halfMaxX = std::max(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
-            const double halfY = gapTrd->getZHalfLength();
-
-            if (!wireLayout && table.wireGangs.size()) {
-                WireDesignPtr wireGrp = std::make_unique<WireGroupDesign>();
-                wireGrp->defineTrapezoid(halfMinX, halfMaxX, halfY);
-                for (unsigned int gang : table.wireGangs) {
-                    wireGrp->declareGroup(gang); 
-                }
-                const double wireOffSet = -0.5*table.wirePitch * wireGrp->nAllWires();
-                wireGrp->defineStripLayout(Amg::Vector2D{wireOffSet, 0.},
-                                           table.wirePitch, 0., table.wireGangs.size());
-                
+            WireDesignPtr wireDesign = constructWireDesign(table, gapTrd);
+            RadialStripDesignPtr radDesign = constructRadialDesign(table, gapTrd);
+            if (wireDesign) {
+                wireDesign = (*factoryCache.wireLayouts.insert(std::move(wireDesign)).first);
+            }
+            if (radDesign) {
+                radDesign = (*factoryCache.stripReadouts.insert(std::move(radDesign)).first);
+            }
+            /// Wire groups measure eta & radial strips measure phi
+            if (!wireReadout && wireDesign) {
+                const IdentifierHash layHash = TgcReadoutElement::constructHash(0, gasGap+1, false);
+                ATH_MSG_VERBOSE("Wire hash "<<layHash);
                 const Amg::Transform3D trans{pVolTrans.transform 
                                              * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
                                              * Amg::getRotateX3D(180.* Gaudi::Units::deg)};
-                /// Reserve the first bit for the isStrip property
-                const IdentifierHash hash{gasGap << 1};
-                wireLayout = std::make_unique<StripLayer>(trans, (*factoryCache.wireLayouts.insert(std::move(wireGrp)).first), hash);
-            }
-            if (!stripLayout && table.bottomStripPos.size()) {
-                RadialStripDesignPtr radDesign = std::make_unique<RadialStripDesign>();
-                radDesign->defineTrapezoid(halfMinX, halfMaxX, halfY);
-                radDesign->defineStripLayout(Amg::Vector2D{-halfY,0.},
-                                                0.,0.,table.bottomStripPos.size());
-                radDesign->flipTrapezoid();
-                for (size_t s = 0; s < table.bottomStripPos.size(); ++s) {
-                    radDesign->addStrip(table.bottomStripPos.at(s),
-                                        table.topStripPos.at(s));
+                /// Don't absorb the radial strip design into the same transform for the moment
+                /// Acts needs first to support to measurements per surface or SpacePoints will
+                /// become xAOD::UncalibratedMeasurements
+                if (false && radDesign) {
+                    wireReadout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
+                                                                wireDesign, radDesign, layHash);
+                    wireReadout->flipPhiRotation();
+                } else {
+                    wireReadout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
+                                                                wireDesign, layHash);
                 }
-                /// The extra 1 to account for the is Strip true
-                const IdentifierHash hash{gasGap<< 1 | 1};
+            } 
+            if (!stripReadout && radDesign) {
+                const IdentifierHash layHash = TgcReadoutElement::constructHash(0, gasGap+1, true);
+                ATH_MSG_VERBOSE("Radial hash "<<layHash);
                 const Amg::Transform3D trans{pVolTrans.transform 
-                                             * Amg::getRotateZ3D(90.* Gaudi::Units::deg)                                            
+                                             * Amg::getRotateZ3D(90.* Gaudi::Units::deg)
                                              * Amg::getRotateX3D(90.*Gaudi::Units::deg)};
-                stripLayout = std::make_unique<StripLayer>(trans, (*factoryCache.stripLayouts.insert(std::move(radDesign)).first), hash);                
+                stripReadout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
+                                                            radDesign, layHash);
             }
         }
+        ATH_CHECK(assignReadoutLayer(stripReadout));
+        ATH_CHECK(assignReadoutLayer(wireReadout));
         ++gasGap;
-        if (stripLayout) {
-            unsigned int stripIdx = static_cast<unsigned>(stripLayout->hash());
-            if (stripIdx >= define.sensorLayouts.size()) {
-                ATH_MSG_FATAL("The strip index "<<stripIdx<<" is out of range for gasGap "<<gasGap);
-                return StatusCode::FAILURE;
-            }           
-            define.sensorLayouts[stripIdx] = stripLayout;
-        }
-        if (wireLayout) {
-            unsigned int wireIdx = static_cast<unsigned>(wireLayout->hash());
-            if (wireIdx >= define.sensorLayouts.size()) {
-                ATH_MSG_FATAL("The wire index "<<wireIdx<<" is out of range for gasGap "<<gasGap);
-                return StatusCode::FAILURE;
-            }
-            define.sensorLayouts[wireIdx] = wireLayout;
-        }
     }
     define.nGasGaps = gasGap;        
     return StatusCode::SUCCESS;
@@ -166,7 +196,7 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     ATH_CHECK(readParameterBook(facCache));
 
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+    auto layerBounds = std::make_shared<Acts::SurfaceBoundFactory>();
 #endif    
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
     // Get the list of full phys volumes from SQLite, and create detector elements
@@ -235,9 +265,8 @@ StatusCode TgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         const std::vector<std::string> sides = tokenize(record->getString("side"), ";");
         const double wirePitch = record->getDouble("wirePitch");
         for (const std::string& side : sides) {
-            std::stringstream key{};
-            key<<chambType<<"_"<<gasGap<<side;
-            wTgcTable& parBook{cache.parameterBook[key.str()]};
+            const std::string key = std::format("{:}_{:}{:}", chambType, gasGap, side);
+            wTgcTable& parBook{cache.parameterBook[key]};
             parBook.wireGangs.insert(parBook.wireGangs.end(), wireGangs.begin(), wireGangs.end());
             parBook.bottomStripPos = botStrips;
             parBook.topStripPos = topStrips;

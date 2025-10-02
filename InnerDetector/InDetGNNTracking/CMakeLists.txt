@@ -19,7 +19,7 @@ atlas_add_component( InDetGNNTracking
     PixelReadoutGeometryLib SCT_ReadoutGeometry InDetSimData
     InDetPrepRawData TrkTrack TrkRIO_OnTrack InDetSimEvent
     AtlasHepMCLib InDetRIO_OnTrack InDetRawData TrkTruthData
-    SiSPSeededTrackFinderData Boost::graph
+    SiSPSeededTrackFinderData Boost::graph CxxUtils
 )
 
 atlas_install_python_modules( python/*.py )

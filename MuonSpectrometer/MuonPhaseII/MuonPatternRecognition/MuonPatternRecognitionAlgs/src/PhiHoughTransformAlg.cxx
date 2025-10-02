@@ -10,7 +10,6 @@
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h" 
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
-#include "MuonSpacePoint/UtilFunctions.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
 namespace {
@@ -21,7 +20,6 @@ namespace {
 namespace MuonR4{
 using namespace SegmentFit;
 
-
 StatusCode PhiHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_maxima.initialize());
@@ -29,23 +27,6 @@ StatusCode PhiHoughTransformAlg::initialize() {
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
     return StatusCode::SUCCESS;
 }
-
-template <class ContainerType>
-StatusCode PhiHoughTransformAlg::retrieveContainer(const EventContext& ctx, 
-                                                   const SG::ReadHandleKey<ContainerType>& key,
-                                                   const ContainerType*& contToPush) const {
-    contToPush = nullptr;
-    if (key.empty()) {
-        ATH_MSG_VERBOSE("No key has been parsed for object "
-                        << typeid(ContainerType).name());
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle readHandle{key, ctx};
-    ATH_CHECK(readHandle.isPresent());
-    contToPush = readHandle.cptr();
-    return StatusCode::SUCCESS;
-}
-
 void PhiHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     HoughPlaneConfig cfg;
     cfg.nBinsX = m_nBinsTanPhi;
@@ -92,7 +73,7 @@ std::unique_ptr<SegmentSeed>
         // and then add all hits (2D and pure phi) from the phi-extension to it 
         hitsOnMax.insert(hitsOnMax.end(), phiMax.hitIdentifiers.begin(), phiMax.hitIdentifiers.end()); 
         // use this to construct the segment seed
-        SpacePointPerLayerSorter sorter{hitsOnMax.front()->chamber()->idHelperSvc()};
+        SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitsOnMax, sorter);
         return std::make_unique<SegmentSeed>(etaMax.tanTheta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
@@ -111,11 +92,11 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
             continue;
         }
         // find the direction of the IP viewed from the sector frame 
-        const Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit();
+        const Amg::Vector3D extrapDir = (hit->localPosition() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit();
         ATH_MSG_VERBOSE("Direction "<<Amg::toString(extrapDir));
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
-        std::optional<double> dummyIntercept = Amg::intersect<3>(hit->positionInChamber(), extrapDir, Amg::Vector3D::UnitZ(),0); 
-        double x0 = (hit->positionInChamber() + dummyIntercept.value_or(0) * extrapDir).x(); 
+        std::optional<double> dummyIntercept = Amg::intersect<3>(hit->localPosition(), extrapDir, Amg::Vector3D::UnitZ(),0); 
+        double x0 = (hit->localPosition() + dummyIntercept.value_or(0) * extrapDir).x(); 
         // now we can obtain the most likely tan(phi) via the pointing vector from the origin to our hit
         double tanPhi = houghTanPhi(extrapDir); 
         // update our search space with this info 
@@ -159,7 +140,7 @@ std::vector<ActsPeakFinderForMuon::Maximum>
             ATH_MSG_VERBOSE("Hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" does not have a phi measurement");
             continue;
         }
-        ATH_MSG_VERBOSE("Fill hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<", "<<Amg::toString(hit->positionInChamber()));
+        ATH_MSG_VERBOSE("Fill hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<", "<<Amg::toString(hit->localPosition()));
         eventData.houghPlane->fill<HoughHitType>(
             hit, eventData.currAxisRanges,
             HoughHelpers::Phi::houghParamStrip,
@@ -194,7 +175,7 @@ std::unique_ptr<SegmentSeed>
     // recovers cases of a single phi hit assuming a straight 
     // line extrapolation from the beam line to the phi measurement
     std::vector<HoughHitType> hits{maximum.getHitsInMax()};
-    SpacePointPerLayerSorter sorter{hits.front()->chamber()->idHelperSvc()};
+    SpacePointPerLayerSorter sorter{};
     std::ranges::stable_sort(hits, sorter);
     return std::make_unique<SegmentSeed>(maximum.tanTheta(), maximum.interceptY(), 
                         data.searchSpaceTanAngle.first, 
@@ -209,10 +190,10 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
    
     // read the inputs
     const EtaHoughMaxContainer* maxima{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_maxima, maxima));
+    ATH_CHECK(SG::get(maxima, m_maxima, ctx));
 
     const ActsGeometryContext* gctx{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // book the event data object
     HoughEventData eventData{};
@@ -233,7 +214,8 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
             for (const auto& truth : m_visionTool->getLabeledSegments(max->getHitsInMax())) {
                 const Parameters truthPars = localSegmentPars(*truth);
                 ATH_MSG_VERBOSE("Truth parameters "<<toString(truthPars)<<", tanPhi: "
-                            <<houghTanPhi(Amg::dirFromAngles(truthPars[toInt(ParamDefs::phi)],truthPars[toInt(ParamDefs::theta)])));
+                            <<houghTanPhi(Amg::dirFromAngles(truthPars[Acts::toUnderlying(ParamDefs::phi)],
+                                                             truthPars[Acts::toUnderlying(ParamDefs::theta)])));
             }
         }
         preProcessMaximum(*gctx, *max, eventData); 

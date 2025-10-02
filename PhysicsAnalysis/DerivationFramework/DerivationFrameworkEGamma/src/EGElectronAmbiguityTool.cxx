@@ -52,9 +52,8 @@ namespace DerivationFramework {
 EGElectronAmbiguityTool::EGElectronAmbiguityTool(const std::string& t,
                                                  const std::string& n,
                                                  const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   declareProperty("isMC", m_isMC);
 
@@ -363,11 +362,11 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
 
     // To be consistent with the other, use the ID track.
     TLorentzVector ep4;
-    ep4.SetPtEtaPhiM(eletrkP->pt(), eletrkP->eta(), eletrkP->phi(), 0.511);
+    ep4.SetPtEtaPhiM(eletrkP->pt(), eletrkP->eta(), eletrkP->phi(), ParticleConstants::electronMassInMeV);
 
     // Maybe could see if a GSF tp exists for this ID tp and use it if yes ?
     TLorentzVector op4;
-    op4.SetPtEtaPhiM(otrkP->pt(), otrkP->eta(), otrkP->phi(), 0.511);
+    op4.SetPtEtaPhiM(otrkP->pt(), otrkP->eta(), otrkP->phi(), ParticleConstants::electronMassInMeV);
 
     // Simple masses
     mee = (ep4 + op4).M();

@@ -11,9 +11,8 @@
 // from Gaudi
 #include "GaudiKernel/IAlgTool.h"
 
-#include "G4VUserDetectorConstruction.hh"
-
 class G4VPhysicalVolume;
+class G4VUserDetectorConstruction;
 
 /** @class IDetectorConstructionTool IDetectorConstructionTool.h "G4AtlasInterfaces/IDetectorConstructionTool.h"
  *
@@ -23,18 +22,20 @@ class G4VPhysicalVolume;
  *  @date   2015-02-20
  */
 
-class IDetectorConstructionTool : public G4VUserDetectorConstruction, virtual public IAlgTool {
+class IDetectorConstructionTool : virtual public IAlgTool {
  public:
+  // When using the default deleter, std::unique_ptr requires a complete type at
+  // the point where the destructor is called (i.e. when calling std::unique_ptr
+  // destructor, move assignment, and reset()). By having implementers of this
+  // interface provide a custom deleter, clients don't need to have a complete
+  // type for G4VUserDetectorConstruction
+  using Deleter = std::function<void(G4VUserDetectorConstruction*)>;
+  using UPDetectorConstruction =
+      std::unique_ptr<G4VUserDetectorConstruction, Deleter>;
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID(IDetectorConstructionTool, 1, 0);
 
-// from G4VUserDetectorConstruction
-
-  virtual G4VPhysicalVolume* Construct() = 0;
-
-  virtual void ConstructSDandField() =0;
-
-  virtual G4VUserDetectorConstruction* GetDetectorConstruction() = 0;
+  virtual UPDetectorConstruction GetDetectorConstruction() = 0;
 
   virtual std::vector<std::string>& GetParallelWorldNames()  = 0;
 };

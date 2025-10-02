@@ -82,6 +82,10 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     auto EMThreshold2 = Monitored::Scalar<bool>("EMThreshold2",false);
     auto EMThreshold3 = Monitored::Scalar<bool>("EMThreshold3",false);
     auto EMThreshold4 = Monitored::Scalar<bool>("EMThreshold4",false);
+
+    // Declare cutmasks for plots with specific phi selection
+    auto PhiRegion1 = Monitored::Scalar<bool>("PhiRegion1",false);
+    auto PhiRegion2 = Monitored::Scalar<bool>("PhiRegion2",false);
     
     // Access the Clusters via StoreGate
     SG::ReadHandle<xAOD::CaloClusterContainer> clusters(m_CaloClusterContainerKey, ctx);
@@ -129,6 +133,13 @@ StatusCode ClusterMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       // Fill. First argument is the tool name, all others are the variables to be saved.
       fill("ClusterMonitorAllClusters", eta, phi, E, ET);
       fill("ClusterMonitorExpertPlots", nCells, ClusTime, nBadCells, EBadCells, HotRat, HighHotRat, Isolation, BadLARQFrac, EngPos, AveLARQ, AveTileQ, E, eta, phi);
+
+      // NCB specific histograms:
+      PhiRegion1 = std::abs(phi) <= 0.3 || std::abs(phi) >= 2.7;
+      PhiRegion2 = std::abs(phi) > 0.3 && std::abs(phi) < 2.7;
+      if(std::abs(ClusTime) > 1e-6){
+	fill("ClusterMonitorNCBPlots", eta, ClusTime, PhiRegion1, PhiRegion2);
+      }
 
       // cutmasks for cluster energy thresholds
       Threshold1 = E>m_lowEthresh;

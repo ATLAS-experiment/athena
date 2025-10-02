@@ -45,6 +45,7 @@
 
 
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 
@@ -82,8 +83,11 @@ namespace InDetAlignment
 	m_createFreshDB(true),
 	m_MisalignmentMode(0),
 	m_nEvents(0),
-	m_translation(true),
-	m_rotation(true),
+	m_translation{0.1, 0.1, 0.1},
+	m_rotation{0.1, 0.1, 0.1},
+	m_local_translation{0., 0., 0.},
+	m_local_rotation{0., 0., 0.},
+	m_index(""),
 	m_Misalign_maxShift(1*CLHEP::mm),
     m_Misalign_maxShift_Inner(50*CLHEP::micrometer),
     m_ScalePixelIBL(1.),
@@ -105,8 +109,11 @@ namespace InDetAlignment
 		declareProperty("ASCIIFilenameBase"             ,     m_asciiFileNameBase);
 		declareProperty("SQLiteTag"                     ,     m_SQLiteTag);
 		declareProperty("MisalignMode"                  ,     m_MisalignmentMode);
-		declareProperty("Translation"                   ,     m_translation);
-		declareProperty("Rotation"                      ,     m_rotation);
+		declareProperty("Translation_Scale"                   ,     m_translation);
+		declareProperty("Rotation_Scale"                      ,     m_rotation);
+		declareProperty("Local_Translation"                   ,     m_local_translation);
+                declareProperty("Local_Rotation"                      ,     m_local_rotation);
+		declareProperty("Index"                         ,     m_index);
 		declareProperty("MaxShift"                      ,     m_Misalign_maxShift);
         declareProperty("MaxShiftInner"                 ,     m_Misalign_maxShift_Inner);
 		declareProperty("CreateFreshDB"                 ,     m_createFreshDB);
@@ -631,6 +638,12 @@ namespace InDetAlignment
 			else if (m_MisalignmentMode == 2) {
 				
                                 // randomly misalign modules at L3
+                m_RndmMisalignWidth_x = m_translation[0];
+                m_RndmMisalignWidth_y = m_translation[1];
+                m_RndmMisalignWidth_z = m_translation[2];
+		m_RndmMisalignWidth_alpha = m_rotation[0];
+		m_RndmMisalignWidth_beta = m_rotation[1];
+		m_RndmMisalignWidth_gamma = m_rotation[2];
                 Rndm::Numbers RandMisX(randsvc, Rndm::Gauss(m_Misalign_x,m_RndmMisalignWidth_x*ScaleFactor));
                 Rndm::Numbers RandMisY(randsvc, Rndm::Gauss(m_Misalign_y,m_RndmMisalignWidth_y*ScaleFactor));
                 Rndm::Numbers RandMisZ(randsvc, Rndm::Gauss(m_Misalign_z,m_RndmMisalignWidth_z*ScaleFactor));
@@ -653,23 +666,10 @@ namespace InDetAlignment
 				if (ScaleFactor == 0.0)  {
                                   parameterizedTrafo = HepGeom::Transform3D(); // initialized as identity transformation
                                 } else {
-					if (m_translation && m_rotation) {
 						shift = HepGeom::Vector3D<double>(randMisX, randMisY, randMisZ);
 						rot = CLHEP::HepRotationX(randMisaplha) * CLHEP::HepRotationY(randMisbeta) * CLHEP::HepRotationZ(randMisgamma);
 						parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
-					else if (!m_translation && m_rotation) {
-					        shift = HepGeom::Vector3D<double>(0, 0, 0);
-                                                rot = CLHEP::HepRotationX(randMisaplha) * CLHEP::HepRotationY(randMisbeta) * CLHEP::HepRotationZ(randMisgamma);
-                                                parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
-					else if (m_translation && !m_rotation) {
-					        shift = HepGeom::Vector3D<double>(randMisX, randMisY, randMisZ);
-                                                rot = CLHEP::HepRotationX(0) * CLHEP::HepRotationY(0) * CLHEP::HepRotationZ(0);
-                                                parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
-					else {	shift = HepGeom::Vector3D<double>(0, 0, 0);
-                                                rot = CLHEP::HepRotationX(0) * CLHEP::HepRotationY(0) * CLHEP::HepRotationZ(0);
-                                                parameterizedTrafo = HepGeom::Transform3D(rot, shift);}
-                                }
-
+				
 			}
 
                         else if (m_MisalignmentMode==3) {
@@ -688,6 +688,31 @@ namespace InDetAlignment
                           ATH_MSG_DEBUG( "deltaX for this module: "  << deltaX/CLHEP::micrometer << " um" );
                           parameterizedTrafo = HepGeom::Translate3D(deltaX,0,0); // translation in x direction                                          
                         }
+
+ 		else if (m_MisalignmentMode == 7) {
+                 
+
+                 std::string module_str = m_idHelper->show_to_string(ModuleID, nullptr, '/');
+
+                 if (module_str.substr(0, m_index.size()) == m_index) {
+
+                   // Handle translation
+                   HepGeom::Vector3D<double> shift(0, 0, 0);
+                   if (!m_local_translation.empty()) {
+                     shift = HepGeom::Vector3D<double>(m_local_translation[0], m_local_translation[1], m_local_translation[2]);
+                   }
+                   
+                   // Handle rotation
+                   CLHEP::HepRotation rot = CLHEP::HepRotationX(0) * CLHEP::HepRotationY(0) * CLHEP::HepRotationZ(0);
+                   if (!m_local_rotation.empty()) {
+                     rot = CLHEP::HepRotationX(m_local_rotation[0]) * CLHEP::HepRotationY(m_local_rotation[1]) * CLHEP::HepRotationZ(m_local_rotation[2]);
+                   }
+                   
+                   // Assign transformation
+                   parameterizedTrafo = HepGeom::Transform3D(rot, shift);
+                  }
+                }
+	
 			
 			else { // systematic misalignments
 				if (m_MisalignmentMode/10==1) {
@@ -834,7 +859,7 @@ namespace InDetAlignment
 				
 				
 				
-			} else if (m_MisalignmentMode==2 || m_MisalignmentMode==3) //random misalignment in local frame
+			} else if (m_MisalignmentMode==2 || m_MisalignmentMode==3 || m_MisalignmentMode==7) //random misalignment in local frame
 			{
 				alignmentTrafo = parameterizedTrafo;
 			}

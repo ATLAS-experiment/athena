@@ -12,7 +12,7 @@ atlas_add_library( AthenaPoolExampleConverter
                    PUBLIC_HEADERS AthenaPoolExampleConverter
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaPoolExampleData AthenaPoolServicesLib CxxUtils DataModelAthenaPoolLib
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaPoolExampleData CxxUtils DataModelAthenaPoolLib
                    PRIVATE_LINK_LIBRARIES AthenaPoolCnvSvcLib )
 
 atlas_add_poolcnv_library( AthenaPoolExampleConverterPoolCnv

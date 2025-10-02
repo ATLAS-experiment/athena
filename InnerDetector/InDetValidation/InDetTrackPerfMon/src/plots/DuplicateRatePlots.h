@@ -56,6 +56,7 @@ namespace IDTPM {
     
     TEfficiency*  m_duplrate_vs_incl{};
     TEfficiency*  m_duplrate_vs_pt{};
+    TEfficiency*  m_duplrate_vs_logPt{};
     TEfficiency*  m_duplrate_vs_eta{};
     TEfficiency*  m_duplrate_vs_phi{};
     TEfficiency*  m_duplrate_vs_d0{};

@@ -17,10 +17,9 @@ namespace DerivationFramework {
   PFlowAugmentationTool::PFlowAugmentationTool(const std::string& t,
                  const std::string& n,
                  const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_weightPFOTool("CP::WeightPFOTool/WeightPFOTool")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("WeightPFOTool", m_weightPFOTool );
   }
 

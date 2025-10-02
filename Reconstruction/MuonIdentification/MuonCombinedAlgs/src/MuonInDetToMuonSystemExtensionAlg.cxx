@@ -28,8 +28,6 @@ namespace {
 
 }  // namespace
 
-MuonInDetToMuonSystemExtensionAlg::MuonInDetToMuonSystemExtensionAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonInDetToMuonSystemExtensionAlg::initialize() {
     ATH_CHECK(m_muonSystemExtensionTool.retrieve());
@@ -192,11 +190,12 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::findHitSectors(const EventContext&
 
     /// The phi-hit vector has a size of 3 representing
     /// the forward-backward and barrel sections
-    for (int det_region = 0; det_region < Muon::MuonStationIndex::DetectorRegionIndexMax; ++det_region) {
+    using namespace Muon::MuonStationIndex;
+    for (int det_region = 0; det_region < toInt(DetectorRegionIndex::DetectorRegionIndexMax); ++det_region) {
         const RegionIndex region_index = static_cast<RegionIndex>(det_region);
-        for (int layer = 0; layer < Muon::MuonStationIndex::LayerIndexMax; ++layer) {
+        for (int layer = 0; layer < toInt(LayerIndex::LayerIndexMax); ++layer) {
             const LayerIndex layer_index = static_cast<LayerIndex>(layer);
-            const unsigned int hash = Muon::MuonStationIndex::sectorLayerHash(region_index, layer_index);
+            const unsigned int hash = sectorLayerHash(region_index, layer_index);
             /// Hits built into a MuidCo track
             const std::set<Identifier>& masked_hits = output_cache.consumed_hits[hash];
 
@@ -246,7 +245,7 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::findHitSectors(const EventContext&
                         output_cache.eta_seeds[sector].push_back(effect_hits.eta);
                     }
                 }
-                if (count_finished() >= RegionIndex::DetectorRegionIndexMax) {
+                if (count_finished() >= toInt(RegionIndex::DetectorRegionIndexMax)) {
                     ATH_MSG_VERBOSE("The MS is filled up with Hough seeds. We do not need to search for them any longer");
                     break;
                 }
@@ -362,8 +361,8 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::createStaus(const EventContext& ct
         cache.requireSystemExtension = true;
 
         if (!m_muonSystemExtensionTool->muonLayerInterSections(ctx, *idMuidCo.cmb_trk, cache)) {
-            ATH_MSG_FATAL("Could not determine the intersections. Although that should be possible");
-            return StatusCode::FAILURE;
+            ATH_MSG_DEBUG("Could not determine the intersections. Although that should be possible");
+            continue;
         }
         stau_cache.outputContainer->push_back(std::move(cache.candidate));
     }

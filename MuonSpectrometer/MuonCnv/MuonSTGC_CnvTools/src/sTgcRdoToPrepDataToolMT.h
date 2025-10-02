@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_sTgcRdoToPrepDataToolMT
@@ -36,7 +36,7 @@ namespace Muon
     {
     public:
       /** Constructor */
-      sTgcRdoToPrepDataToolMT(const std::string& t, const std::string& n, const IInterface* p);
+      using base_class::base_class;
       
       /** Destructor */
       virtual ~sTgcRdoToPrepDataToolMT()=default;

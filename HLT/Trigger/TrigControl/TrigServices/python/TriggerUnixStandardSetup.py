@@ -12,8 +12,8 @@ def commonServicesCfg(flags):
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     # set ROOT to batch mode (ATR-21890)
-    from PyUtils.Helpers import ROOT6Setup
-    ROOT6Setup(batch=True)
+    from PyUtils.Helpers import ROOTSetup
+    ROOTSetup(batch=True)
 
     # Basic services
     cfg = ComponentAccumulator()

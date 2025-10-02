@@ -59,25 +59,31 @@ bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid( const xAOD::Electron *eg,
         return (bool) this->m_electronIsEMTool[2]->accept(ctx,eg);
     }
     else if (pidname == "lhtight"){
-        return (bool) this->m_electronLHTool[0]->accept(ctx,eg);
+        if (!m_doEffwithDNN) return (bool) this->m_electronLHTool[0]->accept(ctx,eg);
+        else return (bool) this->m_electronDNNTool[0]->accept(ctx,eg);
     }
     else if (pidname == "lhmedium"){
-        return (bool) this->m_electronLHTool[1]->accept(ctx,eg);
+        if (!m_doEffwithDNN) return (bool) this->m_electronLHTool[1]->accept(ctx,eg);
+        else return (bool) this->m_electronDNNTool[1]->accept(ctx,eg);
     }
     else if (pidname == "lhloose"){
-        return (bool) this->m_electronLHTool[2]->accept(ctx,eg);
+        if (!m_doEffwithDNN) return (bool) this->m_electronLHTool[2]->accept(ctx,eg);
+        else return (bool) this->m_electronDNNTool[2]->accept(ctx,eg);
     }
     else if (pidname == "lhvloose"){
         return (bool) this->m_electronLHTool[3]->accept(ctx,eg);
     }
     else if (pidname == "dnntight"){
-        return (bool) this->m_electronDNNTool[0]->accept(ctx,eg);
+        if (!m_doEffwithLH) return (bool) this->m_electronDNNTool[0]->accept(ctx,eg);
+        else return (bool) this->m_electronLHTool[0]->accept(ctx,eg);
     }
     else if (pidname == "dnnmedium"){
-        return (bool) this->m_electronDNNTool[1]->accept(ctx,eg);
+        if (!m_doEffwithLH) return (bool) this->m_electronDNNTool[1]->accept(ctx,eg);
+        else return (bool) this->m_electronLHTool[1]->accept(ctx,eg);
     }
     else if (pidname == "dnnloose"){
-        return (bool) this->m_electronDNNTool[2]->accept(ctx,eg);
+        if (!m_doEffwithLH) return (bool) this->m_electronDNNTool[2]->accept(ctx,eg);
+        else return (bool) this->m_electronLHTool[2]->accept(ctx,eg);
     }
     else ATH_MSG_DEBUG("No Pid tool, continue without PID");
     return false;
@@ -647,7 +653,8 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
                                                     {"lhtight"  , "lhtight"  },
                                                     {"dnnloose" , "dnnloose" },
                                                     {"dnnmedium", "dnnmedium"},
-                                                    {"dnntight" , "dnntight" } };
+                                                    {"dnntight" , "dnntight" },
+                                                    {"nopid"    , "nopid"    } };
 
     std::vector<std::string> isoNames = {"ivarloose","ivarmedium","ivartight","icaloloose","icalomedium","icalotight"};
 
@@ -694,6 +701,9 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     }
     else { // remap online pidname to offline pidname
         ATH_MSG_DEBUG("This is nominal");
+        if (pidMap.count(parts.at(1)) != 1) {
+          ATH_MSG_ERROR("Unknown trigger type: " << parts.at(1) << " (" << trigger << ")");
+        }
         pidname = pidMap.at(parts.at(1));
     }
 

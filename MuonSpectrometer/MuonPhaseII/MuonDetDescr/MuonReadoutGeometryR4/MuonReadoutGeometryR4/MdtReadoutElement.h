@@ -10,12 +10,8 @@
 #ifndef SIMULATIONBASE
 #   include <MuonAlignmentData/BLinePar.h>
 #   include <MuonAlignmentData/MdtAsBuiltPar.h>
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
-
-namespace Acts{
-    class TrapezoidBounds;
-    class LineBounds;
-}
 
 namespace MuonGMR4 {
 
@@ -65,8 +61,7 @@ class MdtReadoutElement : public MuonReadoutElement {
             /// Sets of surface bounds which is shared amongst all readout elements used
             /// to assign the same bound objects if 2 surfaces share the same dimensions.
     #ifndef SIMULATIONBASE
-            ActsTrk::SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds;
-            ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds;
+            std::shared_ptr<Acts::SurfaceBoundFactory> boundFactory;
     #endif
 
         };

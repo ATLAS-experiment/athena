@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Hephaestus/Hephaestus.h"
@@ -53,7 +53,13 @@ struct hhh_MemoryTrace *hhh_MemoryTrace_new() {
       gPoolInUse = 1;             /* indicate to user that trace size can no longer be modified */
       true_size = sizeof( struct hhh_MemoryTrace );
 
-      const long nobj = sysconf( _SC_PAGESIZE ) / true_size;
+      const long pagesize = sysconf( _SC_PAGESIZE );
+      if (pagesize < 1 || pagesize >= 1024*1024*1024) {
+         fprintf( stderr, "Hephaestus ERROR: bad page size\n" );
+         pthread_mutex_unlock( &gPoolLock );
+         return NULL;
+      }
+      const long nobj = pagesize / true_size;
       gPool = (char*)malloc( nobj * true_size );
 
       if ( gPool == NULL ) {

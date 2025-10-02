@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-/* $Id$ */
 /**
  * @file  Hephaestus/test/stackstash_test.cxx
  * @author scott snyder
@@ -46,56 +44,67 @@ void test_cursor()
   assert (STACK_CURSOR_NCHILDREN (cur) == 1);
   STACK_CURSOR_CHILD (cur, 0);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)1);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 2);
   STACK_CURSOR_CHILD (cur, 0);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)2);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 1);
   STACK_CURSOR_CHILD (cur, 0);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)3);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 2);
   STACK_CURSOR_CHILD (cur, 0);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)4);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 0);
   STACK_CURSOR_PARENT (cur);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)3);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 2);
   STACK_CURSOR_CHILD (cur, 1);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)5);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 0);
   STACK_CURSOR_PARENT (cur);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)3);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 2);
   STACK_CURSOR_PARENT (cur);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)2);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 1);
   STACK_CURSOR_PARENT (cur);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)1);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 2);
   STACK_CURSOR_CHILD (cur, 1);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)6);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 0);
   STACK_CURSOR_PARENT (cur);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)1);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 2);
@@ -105,11 +114,13 @@ void test_cursor()
   STACK_CURSOR_INIT_HANDLE (cur, h3);
 
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)6);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 0);
   STACK_CURSOR_PARENT (cur);
   assert (!STACK_CURSOR_IS_ROOT (cur));
+  // cppcheck-suppress intToPointerCast; intentional
   assert (STACK_CURSOR_ELEMENT_ADDR (cur) == (StackElement)1);
 
   assert (STACK_CURSOR_NCHILDREN (cur) == 2);

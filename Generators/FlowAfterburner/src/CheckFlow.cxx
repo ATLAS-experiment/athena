@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// File:  Generators/FlowAfterburnber/CheckFlow.h
+// File:  Generators/FlowAfterburner/CheckFlow.h
 // Description:
 //    This is a simple algorithm to histogram particle properties
 //    for diagnosing of flow generation
@@ -12,6 +12,7 @@
 // Andrzej Olszewski: Converted to ROOT histograms July 2007
 #include "FlowAfterburner/CheckFlow.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "GaudiKernel/ITHistSvc.h"
 
 #include <TH1F.h>
 #include <TH2F.h>
@@ -21,7 +22,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 
-#include "GeneratorObjects/HijingEventParams.h"
+#include <cmath>
 
 
 typedef std::vector<HepMC::ConstGenParticlePtr>  MCparticleCollection ;
@@ -65,8 +66,7 @@ StatusCode CheckFlow::initialize(){
     return StatusCode::FAILURE;
   }
 
-  std::string StreamAndPath="/FlowOutPut/";
-  std::string histPath = StreamAndPath;
+  std::string histPath = "/FlowOutPut/";
   if ( rootHistSvc->regHist(histPath+m_hgenerated->GetName(), 
 			    m_hgenerated).isFailure() )
     msg(MSG::WARNING) << "Can't book "

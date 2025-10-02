@@ -14,8 +14,8 @@
 
 #include "TruthUtils/MagicNumbers.h"
 
-NeutronFastSim::NeutronFastSim(const std::string& name, const std::string& fsSDname, const double etaCut, const double timeCut)
-  : G4VFastSimulationModel(name)
+NeutronFastSim::NeutronFastSim(const std::string& name, G4Region* region, const std::string& fsSDname, const double etaCut, const double timeCut)
+  : G4VFastSimulationModel(name, region)
   , m_Energy(5)
   , m_fsSD(0)
   , m_init(false)

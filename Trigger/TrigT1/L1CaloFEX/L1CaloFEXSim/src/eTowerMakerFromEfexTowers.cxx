@@ -6,7 +6,6 @@
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 #include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eTowerBuilder.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "./eTowerMakerFromEfexTowers.h"
 #include "L1CaloFEXSim/eFEXCompression.h"
@@ -95,7 +94,15 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
   local_eTowerContainerRaw->fillContainerMap();
 
   SG::ReadHandle<xAOD::eFexTowerContainer> eFexTowers(m_eFexTowerContainerSGKey, ctx);
-  if((!eFexTowers.isValid() || eFexTowers->size() < m_minTowersRequired) && !m_eFexTowerContainer2SGKey.empty()) {
+  // we may have DataTowers because of error statuses ... so don't use the primary towers if
+  // they all have errors
+  size_t badTowers = 0;
+  if(eFexTowers.isValid()) {
+      for(auto eFexTower : *eFexTowers) {
+          if(eFexTower->em_status()||eFexTower->had_status()) badTowers++;
+      }
+  }
+  if((!eFexTowers.isValid() || eFexTowers->size() < m_minTowersRequired || eFexTowers->size()==badTowers) && !m_eFexTowerContainer2SGKey.empty()) {
     eFexTowers = SG::ReadHandle<xAOD::eFexTowerContainer>(m_eFexTowerContainer2SGKey, ctx);
       // removing this to avoid breaking frozen tier0 policy
       // bug keeping commented out until sure we've replaced with a good alternative

@@ -9,6 +9,11 @@
         "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "50.0" },
         "yAxis" : { "title" : "Efficiency" }
     },
+    "eff_vs_$TRKTAG_logPt" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "1.0", "high" : "1000.0", "doLogLinBins" : "true" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
     "eff_vs_$TRKTAG_lowPt" : {
         "type" : "TEfficiency",
         "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "10.0" },

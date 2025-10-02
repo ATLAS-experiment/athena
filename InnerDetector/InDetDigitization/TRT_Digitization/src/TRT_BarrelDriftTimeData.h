@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -22,7 +22,7 @@
 class TRT_BarrelDriftTimeData : public ITRT_DriftTimeData {
 
 public:
-  TRT_BarrelDriftTimeData(unsigned int digversion, int strawGasType);
+  TRT_BarrelDriftTimeData(int strawGasType);
 
   //Interface implementation:
 

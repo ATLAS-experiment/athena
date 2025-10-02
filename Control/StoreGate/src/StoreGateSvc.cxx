@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -26,25 +26,9 @@ namespace {
 
 /// Standard Constructor
 StoreGateSvc::StoreGateSvc(const std::string& name,ISvcLocator* svc) : 
-  Service(name,svc), 
-  m_defaultStore(0),
-  m_pPPSHandle("ProxyProviderSvc", name),
-  m_incSvc("IncidentSvc", name),
-  m_storeID (StoreID::findStoreID(name)),
-  m_algContextSvc ("AlgContextSvc", name)
+  base_class(name,svc),
+  m_storeID (StoreID::findStoreID(name))
 {
-  
-
-  //our properties
-  //properties of SGImplSvc
-  declareProperty("Dump", m_DumpStore=false, "Dump contents at EndEvent");
-  declareProperty("ActivateHistory", m_ActivateHistory=false, "record DataObjects history");
-  declareProperty("DumpArena", m_DumpArena=false, "Dump Arena usage stats");
-  declareProperty("ProxyProviderSvc", m_pPPSHandle);
-  declareProperty("IncidentSvc", m_incSvc);
-
-  //add handler for Service base class property
-  //FIXME m_outputLevel.declareUpdateHandler(&SGImplSvc::msg_update_handler, this);
 }
  
 /// Standard Destructor
@@ -53,9 +37,7 @@ StoreGateSvc::~StoreGateSvc()
 
 void 
 StoreGateSvc::setDefaultStore(SGImplSvc* pStore) {
-  if (m_defaultStore) m_defaultStore->release();
   m_defaultStore = pStore;
-  if (m_defaultStore) m_defaultStore->addRef();  
 }
 
 void 
@@ -140,9 +122,7 @@ StatusCode StoreGateSvc::initialize()    {
   std::string implStoreFullName = "SGImplSvc/" + implStoreName;
   debug() << "trying to create store " << implStoreFullName << endmsg;
   
-  ISvcManager* pSM(dynamic_cast<ISvcManager*>(&*serviceLocator()));
-  if (!pSM) std::abort();
-  m_defaultStore = dynamic_cast<SGImplSvc*>( (pSM->createService(implStoreFullName)).get() );
+  m_defaultStore = serviceLocator().as<ISvcManager>()->createService(implStoreFullName);
 
   if (!m_defaultStore) {
     error() << "Could not create store " << implStoreFullName << endmsg;
@@ -150,10 +130,6 @@ StatusCode StoreGateSvc::initialize()    {
   }
   
   if ( m_defaultStore->sysInitialize().isSuccess() ) {
-    // createService returns to us a reference to the service; we shouldn't
-    // increment it again.
-    //m_defaultStore->addRef();
-
     // If this is the default event store (StoreGateSvc), then declare
     // our arena as the default for memory allocations.
     if (name()  == "StoreGateSvc") {
@@ -186,9 +162,7 @@ StatusCode StoreGateSvc::stop()    {
   //by setting an ad-hoc priority for event store(s) we make sure they are finalized and hence cleared first
   // see e.g. https://savannah.cern.ch/bugs/index.php?99993
   if (m_defaultStore->store()->storeID() == StoreID::EVENT_STORE) {
-    ISvcManager* pISM(dynamic_cast<ISvcManager*>(serviceLocator().get()));
-    if (!pISM)
-      return StatusCode::FAILURE;
+    auto pISM = serviceLocator().as<ISvcManager>();
     pISM->setPriority(name(), pISM->getPriority(name())+1).ignore();
     verbose() << "stop: setting service priority to " << pISM->getPriority(name()) 
           << " so that event stores get finalized and cleared before other stores" <<endmsg;
@@ -209,7 +183,6 @@ StoreGateSvc::finalize() {
   if (m_defaultStore) {
     // m_defaultStore is not active, so ServiceManager won't finalize it!
     CHECK( m_defaultStore->finalize());
-    m_defaultStore->release();
   }
 
   printBadList (m_badRetrieves, "retrieve()");
@@ -461,33 +434,6 @@ StoreGateSvc::clearStore(bool forceRemove)
 void
 StoreGateSvc::emptyTrash() {
   _SGVOIDCALL( emptyTrash, () );
-}
-
-const InterfaceID& 
-StoreGateSvc::interfaceID() { 
-  static const InterfaceID IDStoreGateSvc("StoreGateSvc", 1, 0);
-  return IDStoreGateSvc; 
-}
-StatusCode StoreGateSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (StoreGateSvc*)this;
-  }
-  else if ( IProxyDict::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IProxyDict*)this;
-  }
-  else if ( IHiveStore::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IHiveStore*)this;
-  }
-  else if ( IHiveStoreMgr::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IHiveStoreMgr*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// The current store is becoming the active store.  Make this the current

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /* -C++- */
@@ -44,6 +44,11 @@ public:
   PileUpEventInfo(EventID* id, EventType* type, TriggerInfo* trig_info);
 
   virtual ~PileUpEventInfo();
+
+  PileUpEventInfo(const PileUpEventInfo&) = default;
+  PileUpEventInfo(PileUpEventInfo&&) = default;
+  PileUpEventInfo& operator=(const PileUpEventInfo&) = default;
+  PileUpEventInfo& operator=(PileUpEventInfo&&) = default;
   //@}
 
   /** @class SubEvent

@@ -23,7 +23,7 @@
 
 namespace DerivationFramework {
 
-  class SUSYSignalTagger : public AthAlgTool, public IAugmentationTool {
+  class SUSYSignalTagger : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
     SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p);

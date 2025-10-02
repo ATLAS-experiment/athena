@@ -11,7 +11,12 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+#include "Identifier/Identifier.h"
+
 #include <set>
+#include <fstream>
 
 namespace {
 /** \brief assign a quality score to track candidates.
@@ -333,6 +338,10 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
 
         qualitySortedTrackCandidates.insert(std::make_pair(-trackQuality(t), t));
 
+        if (firstTrack && m_doDumpGBTSTrainingDataLRT) {
+          collectGBTSTrainingData(t);
+        }
+
         /// For the first (highest quality) track from each seed, populate the vertex finding histograms
         if (firstTrack and not m_ITKGeometry) {
           fillZHistogram(t, beamPosPerigee, numberHistogram, zWeightedHistogram, ptWeightedHistogram);
@@ -417,6 +426,9 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
        }
     }
     outputTracks->push_back(qualityAndTrack.second);
+    if (m_doDumpGBTSTrainingData) {
+      collectGBTSTrainingData(qualityAndTrack.second);
+    }
   }
 
   m_counterTotal[kNSeeds] += counter[kNSeeds] ;
@@ -713,7 +725,10 @@ StatusCode InDet::SiSPSeededTrackFinder::finalize()
 {
   
     dump(MSG::INFO, &m_counterTotal);
-  
+
+  if (m_doDumpGBTSTrainingData || m_doDumpGBTSTrainingDataLRT) {
+    dumpGBTSTrainingData();
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -1127,4 +1142,179 @@ bool InDet::SiSPSeededTrackFinder::passEtaDepCuts(const Trk::Track* track,
   if(!(*m)->type(Trk::TrackStateOnSurface::Perigee)) return true ;
   if(std::abs(par->localPosition()[0]) > m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(eta)) return false;
   return true;
+}
+
+void InDet::SiSPSeededTrackFinder::collectGBTSTrainingData(const Trk::Track* track) const {
+
+  struct VLM_Data {
+    int vol_id, lay_id, mod_id;
+    float m_x, m_y, m_z;
+  };
+
+  const PixelID* IDp = 0;
+  const SCT_ID* IDs = 0;
+
+  if (detStore()->retrieve(IDp, "PixelID").isFailure()) {
+    ATH_MSG_FATAL("Could not get Pixel ID helper");
+  }
+
+  if (detStore()->retrieve(IDs, "SCT_ID").isFailure()) {
+    ATH_MSG_FATAL("Could not get SCT ID helper");
+  }
+
+  if (!IDs && !IDp) return;
+
+  ++m_numGBTSTrainingData;
+
+  std::vector<VLM_Data> vlm;
+
+  for (const auto* s : *track->trackStateOnSurfaces()) {
+    if (!s->type(Trk::TrackStateOnSurface::Measurement)) continue;
+
+    const Trk::MeasurementBase* mb = s->measurementOnTrack();
+    if (!mb) continue;
+
+    const Trk::RIO_OnTrack* ri = dynamic_cast<const Trk::RIO_OnTrack*>(mb);
+    if (!ri) continue;
+
+    const Trk::PrepRawData* rd = ri->prepRawData();
+    if (!rd) continue;
+
+    const InDet::SiCluster* si = dynamic_cast<const InDet::SiCluster*>(rd);
+    if (!si) continue;
+
+    const Amg::Vector3D& pos = s->trackParameters()->position();
+
+    if (dynamic_cast<const InDet::PixelCluster*>(si)) {  // Pixel
+
+      Identifier id = si->identify();
+
+      int bec = IDp->barrel_ec(id);
+
+      int vol_id = 8;
+
+      if (bec == -2) vol_id = 7;
+      if (bec == 2) vol_id = 9;
+
+      if (bec < -2 || bec > 2) continue;
+
+      int lay_id = IDp->layer_disk(id);
+      int eta_mod = IDp->eta_module(id);
+      int phi_mod = IDp->phi_module(id);
+
+      Identifier wafer_id = IDp->wafer_id(bec, lay_id, phi_mod, eta_mod);
+
+      int mod_id = IDp->wafer_hash(wafer_id);
+
+      int new_vol = 0, new_lay = 0;
+
+      if (vol_id == 7 || vol_id == 9) {
+        new_vol = 10 * vol_id + lay_id;
+        new_lay = eta_mod;
+      } else if (vol_id == 8) {
+        new_lay = 0;
+        new_vol = 10 * vol_id + lay_id;
+      }
+      if (vol_id != 0)
+        vlm.emplace_back(new_vol, new_lay, mod_id, pos.x(), pos.y(), pos.z());
+    }
+
+    if (dynamic_cast<const InDet::SCT_Cluster*>(si)) {  // SCT
+
+      Identifier id = si->identify();
+
+      int bec = IDs->barrel_ec(id);
+
+      int vol_id = 13;
+
+      if (bec < 0) vol_id = 12;
+      if (bec > 0) vol_id = 14;
+
+      int lay_id = IDs->layer_disk(id);
+      int eta_mod = IDs->eta_module(id);
+      int phi_mod = IDs->phi_module(id);
+      int side = IDs->side(id);
+
+      Identifier wafer_id = IDs->wafer_id(bec, lay_id, phi_mod, eta_mod, side);
+
+      int mod_id = IDs->wafer_hash(wafer_id);
+
+      vlm.emplace_back(vol_id, lay_id, mod_id, pos.x(), pos.y(), pos.z());
+    }
+  }
+
+  // remove single-strip cases where no spacepoint exists
+
+  std::vector<VLM_Data> vlm2;
+
+  for (std::size_t it1 = 0; it1 < vlm.size() - 1; it1++) {
+    if (vlm.at(it1).vol_id > 14) {  // Pixels
+      vlm2.push_back(vlm.at(it1));
+      continue;
+    }
+
+    std::size_t it2 = it1 + 1;
+
+    int src = vlm.at(it1).vol_id * 1000 + vlm.at(it1).lay_id;
+    int dst = vlm.at(it2).vol_id * 1000 + vlm.at(it2).lay_id;
+
+    if (src == dst) {  // a spacepoint can be formed
+      vlm2.push_back(vlm.at(it1));
+      vlm2.push_back(vlm.at(it2));
+      it1 = it2;
+      continue;
+    }
+  }
+
+  // remove track segments which are too short
+  if (m_removeShortSegments) {
+
+    constexpr float minDist = 20.0;
+
+    for (auto it = std::next(vlm2.begin()); it != vlm2.end(); ) {
+      auto jt = std::prev(it);
+      float dx = it->m_x - jt->m_x;
+      float dy = it->m_y - jt->m_y;
+      float dz = it->m_z - jt->m_z;
+
+      float dist = std::sqrt(dx*dx + dy*dy + dz*dz);
+
+      if (dist < minDist) it = vlm2.erase(it);
+      else ++it;
+    }
+  }
+
+  std::scoped_lock trainingDataLock(m_GBTSTrainingDataMutex);
+
+  for (std::size_t it1 = 0; it1 < vlm2.size() - 1; ++it1) {
+    std::size_t it2 = it1 + 1;
+
+    int src = vlm2.at(it1).vol_id * 1000 + vlm2.at(it1).lay_id;
+    int dst = vlm2.at(it2).vol_id * 1000 + vlm2.at(it2).lay_id;
+
+    if (src != dst) {  // skip the same layer
+      auto [im1, new1] = m_GBTSTrainingData.insert({src, {}});
+      auto [im2, new2] = im1->second.insert({dst, 1ul});
+      if (!new2) im2->second++;
+    }
+  }
+}
+
+void InDet::SiSPSeededTrackFinder::dumpGBTSTrainingData() const {
+  std::ofstream tableFile(m_GBTSTrainingDataFileName);
+  tableFile << "from,to,probability,flow\n";
+
+  unsigned long nTotal = 0;
+  for (const auto& [src, conns] : m_GBTSTrainingData) {
+    unsigned long nTotalDst = 0;
+    for (const auto& [dst, n] : conns) {
+      nTotalDst += n;
+    }
+    nTotal += nTotalDst;
+    for (const auto& [dst, n] : conns) {
+      double prob = double(n) / double(nTotalDst);
+      tableFile << src << ", " << dst << ", " << std::fixed << std::setprecision(6) << prob << ", " << prob << '\n';
+    }
+  }
+  ATH_MSG_INFO("GBTS training data from " << m_numGBTSTrainingData << " tracks with " << nTotal << " pairs written to " << m_GBTSTrainingDataFileName.value());
 }

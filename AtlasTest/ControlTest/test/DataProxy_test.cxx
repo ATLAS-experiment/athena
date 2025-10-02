@@ -50,7 +50,7 @@ int main() {
 
   assert(pSvcLoc);
 
-  DataProxy emptyProxy;
+  DataProxy emptyProxy{};
   assert( !emptyProxy.isValid() );
 
   //cerr << "Now we expect to see a warning message:" << endl

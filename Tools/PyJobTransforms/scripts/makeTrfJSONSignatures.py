@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ##############################################################################
 
@@ -24,6 +24,7 @@ def _getTransformsFromPATH():
         'ESDtoAOD_tf.py',
         'ExeWrap_tf.py',
         'Sleep_tf.py',
+        # 'NTUPMerge_tf.py'
     ])
 
     ##########################################################################
@@ -152,6 +153,11 @@ def main():
         if not transform_path.endswith('_tf.py'):
             continue
 
+        # Skip _tf.py files which are actually shell scripts
+        # (I'm looking at you, HLTHistMerge_tf.py...)
+        if open(transform_path).readline().strip() == '#!/bin/sh':
+            continue
+
         ######################################################################
 
         transform_name = os.path.basename(transform_path)
@@ -175,6 +181,11 @@ def main():
 
             if 'getTransform' in dir(trfModule):
                 ##############################################################
+
+                # Some transforms look at command-line arguments.
+                # Make sure to clear out the arguments we were given
+                # so that they won't get confused.
+                sys.argv = [transform_module]
 
                 transform = trfModule.getTransform()
 
@@ -222,7 +233,7 @@ def main():
             ##################################################################
 
         except Exception as e:
-            msg.warning('Failed to treate transform {0} ({1}) - ignored'.format(transform_module, e))
+            msg.warning('Failed to create transform {0} ({1}) - ignored'.format(transform_module, e))
             continue
 
     ##########################################################################

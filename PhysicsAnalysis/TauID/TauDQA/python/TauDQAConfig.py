@@ -12,9 +12,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def PhysValTauCfg(flags, **kwargs):
+def PhysValTauCfg(flags, tauContainer="TauJets",**kwargs):
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("TauContainerName", tauContainer)
+   
     from AthenaCommon.Constants import WARNING
     kwargs.setdefault("EnableLumi", False)
     kwargs.setdefault("OutputLevel", WARNING)
@@ -25,6 +27,6 @@ def PhysValTauCfg(flags, **kwargs):
     kwargs.setdefault("NominalTauSelectionTool", TauDQANominalTauSelectionToolCfg(flags))
     kwargs.setdefault("PrimitiveTauSelectionTool", TauDQAPrimitiveTauSelectionToolCfg(flags))
     kwargs.setdefault("TauTruthMatchingTool", TauDQATauTruthMatchingToolCfg(flags))
-    tool = CompFactory.PhysValTau(**kwargs)
+    tool = CompFactory.PhysValTau(name=tauContainer, **kwargs)
     acc.setPrivateTools(tool)
     return acc

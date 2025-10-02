@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_GUID_H
@@ -47,8 +47,7 @@ public:
          if (m_data1 != g.m_data1 ) return false;
          if (m_data2 != g.m_data2 ) return false;
          if (m_data3 != g.m_data3 ) return false;
-         const unsigned int* p = (const unsigned int*)m_data4, *q = (const unsigned int*)g.m_data4;
-         return *p++ == *q++ && *p == *q;
+         return memcmp (m_data4, g.m_data4, sizeof(m_data4)) == 0;
       }
       return true;
    }

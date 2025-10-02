@@ -14,11 +14,9 @@ atlas_add_library( LRTElectronAnalysisToolsLib
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODEgamma xAODEventInfo EgammaAnalysisInterfacesLib PATInterfaces AsgDataHandlesLib
    PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( LRTElectronAnalysisTools
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AsgAnalysisInterfaces AthContainers AthenaBaseComps FourMomUtils GaudiKernel LRTElectronAnalysisToolsLib StoreGateLib xAODJet )
-endif()
+atlas_add_component( LRTElectronAnalysisTools
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES LRTElectronAnalysisToolsLib )
 
 atlas_add_dictionary( LRTElectronAnalysisToolsDict
    LRTElectronAnalysisTools/LRTElectronAnalysisToolsDict.h

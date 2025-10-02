@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LumiBlockMuTool.h"
 #include "StoreGate/ReadDecorHandle.h"
 
 //--------------------------------------------------
-
-LumiBlockMuTool::LumiBlockMuTool(const std::string& type,
-				 const std::string& name,
-				 const IInterface* parent)
-  : base_class(type, name, parent)
-{
-  declareInterface<ILumiBlockMuTool>(this);
-}
 
 StatusCode
 LumiBlockMuTool::initialize()

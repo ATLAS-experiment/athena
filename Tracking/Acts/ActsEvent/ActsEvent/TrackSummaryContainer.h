@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSEVENT_TRACKSUMMARYCONTAINER_H
 #define ACTSEVENT_TRACKSUMMARYCONTAINER_H
@@ -13,7 +13,7 @@
 #include "xAODTracking/TrackSummaryContainer.h"
 #include "xAODTracking/TrackSummaryAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
-#include "ActsEvent/SurfaceEncoding.h"
+#include "xAODTracking/TrackSurfaceAuxContainer.h"
 
 namespace ActsTrk {
 class MutableTrackSummaryContainer;
@@ -104,7 +104,7 @@ class TrackSummaryContainer {
 
   void restoreDecorations();
 
-  void decodeSurfaces(const xAOD::TrackSurfaceContainer* src, const Acts::GeometryContext&);
+  void decodeSurfaces(const xAOD::TrackSurfaceContainer* src);
 
   std::vector<Acts::HashedString> dynamicKeys_impl() const;
 

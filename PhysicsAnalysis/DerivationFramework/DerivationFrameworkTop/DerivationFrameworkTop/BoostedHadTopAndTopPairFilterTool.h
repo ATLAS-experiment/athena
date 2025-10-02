@@ -20,8 +20,6 @@
 
 namespace DerivationFramework{
 
-static const InterfaceID IID_BoostedHadTopAndTopPairFilterTool("BoostedHadTopAndTopPairFilterTool", 1, 0);
-
 class BoostedHadTopAndTopPairFilterTool: public AthAlgTool {
 public:
   BoostedHadTopAndTopPairFilterTool(const std::string& t, const std::string& n, const IInterface* p);
@@ -29,8 +27,6 @@ public:
   virtual StatusCode initialize();
   virtual StatusCode finalize();
   int filterFlag(double, double) const;
-
-  static const InterfaceID& interfaceID() { return IID_BoostedHadTopAndTopPairFilterTool; }
 
 private:
 

@@ -1,5 +1,5 @@
-#include "LArG4ShowerLibSvc/LArG4ShowerLibSvcTest.h"
-#include "LArG4ShowerLibSvc/LArG4ShowerLibSvc.h"
+#include "../LArG4ShowerLibSvcTest.h"
+#include "../LArG4ShowerLibSvc.h"
 
 DECLARE_COMPONENT( LArG4ShowerLibSvcTest )
 

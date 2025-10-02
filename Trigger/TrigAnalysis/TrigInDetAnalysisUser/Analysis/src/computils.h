@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -33,6 +33,7 @@
 #include "TGraphAsymmErrors.h"
 
 #include "TLegend.h"
+#include <cmath>
 
 
 extern bool LINEF;
@@ -185,6 +186,7 @@ public:
       else if  ( keys[i]=="width" ) m_binwidth  = true;
       else if  ( keys[i]=="auto" )  m_autoset   = true;
       else if  ( keys[i]=="trim" )  m_trim      = true;
+      //cppcheck-suppress stlIfStrFind
       else if  ( keys[i].find("offset")==0  )  {
 
 	std::cout << "offset:" << std::endl;
@@ -457,9 +459,9 @@ class tPlotter {
 
 public: 
   
-  tPlotter(T* _htest=0, T* _href=0, const std::string& s="", TGraphAsymmErrors* _tgtest=0, TGraphAsymmErrors* _tgref=0 ) : 
-    m_htest(_htest), m_href(_href),
-    m_tgtest(_tgtest), m_tgref(_tgref),
+  tPlotter(T* htest=0, T* href=0, const std::string& s="", TGraphAsymmErrors* tgtest=0, TGraphAsymmErrors* tgref=0 ) :
+    m_htest(htest), m_href(href),
+    m_tgtest(tgtest), m_tgref(tgref),
     m_plotfilename(s),
     m_max_entries(4),
     m_entries(0), 

@@ -121,6 +121,17 @@ namespace CP {
         Gaudi::Property<std::string> m_inMuonContainer{this, "InMuonContainer", "" , "Name of the muon container parsed to the tool."};
         Gaudi::Property<std::string> m_inElecContainer{this, "InElectronContainer", "" , "Name of the electron container parsed to the tool."};
         Gaudi::Property<std::string> m_inPhotContainer{this, "InPhotonContainer", "", "Name of the photon container parsed to the tool."};
+
+        // Helper function to create a piece wise polinomial function
+        std::string createPieceWisePolinomialFunction(const std::vector<double>& boundaries, const std::vector<std::vector<double>>& parameters, bool isOpen = false) const;
+        // The function returns a piecewise polinomial function, where each segment is defined by a polynomial of the form:
+        // f(x) = p0 + p1*x + p2*x^2 + ... + pn*x^n
+        // where n is the degree of the polynomial, and p0, p1, p2, ..., pn are the coefficients of the polynomial.
+        // The function is defined on the intervals [x0, x1), [x1, x2), ..., [xn-1, xn).
+        // boundaries: {x0, x1, x2, ...}: are the boundaries of the polinomial functions
+        // parameters: {(p0_0, p1_0, p2_0, ...), (p0_1, p1_1, p2_1, ...), ...}: are the parameters of the polinomial functions
+        // isOpen: if true, first and last segments are open, i.e. intervals are  (-inf, x0), [x0, x1), [x1, x2), ..., [xn-1, xn), [xn, +inf)
+        // if isOpen==false, boundaries.size() == parameters.size()+1, else boundaries.size() == parameters.size()-1
     };
 }  // namespace CP
 

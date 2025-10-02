@@ -16,15 +16,15 @@
 namespace InDet {
 
   SiSpacePointForSeed::SiSpacePointForSeed
-  (const Trk::SpacePoint*const& sp,const float* r) 
+  (const Trk::SpacePoint* sp, std::span<float const, 3> r) 
   {
-    set(sp,r); m_param = 0.;  
+    set(sp,r); m_param = 0.;
   }
 
   SiSpacePointForSeed::SiSpacePointForSeed
-  (const Trk::SpacePoint*const& sp,const float* r,const float* sc) 
+  (const Trk::SpacePoint* sp, std::span<float const, 3> r, std::span<float const, 4> sc) 
   {
-    set(sp,r,sc); m_param = 0.; 
+    set(sp,r,sc); m_param = 0.;
   }
 
 
@@ -33,7 +33,7 @@ namespace InDet {
   /////////////////////////////////////////////////////////////////////////////////
 
   void SiSpacePointForSeed::set
-  (const Trk::SpacePoint*const& sp,const float* r)
+  (const Trk::SpacePoint* sp,std::span<float const, 3> r)
   {
     spacepoint = sp  ;
     m_x        = r[0];
@@ -50,17 +50,17 @@ namespace InDet {
       const Amg::MatrixX& v =  c->localCovariance();
       float f22 = float(v(1,1) );
       float wid = float(c->width().z());
-      float cov = wid*wid*.08333; if(cov < f22) cov = f22;
-      if(de->isBarrel()) {m_covz = 9.*cov; m_covr = .06;}
-      else               {m_covr = 9.*cov; m_covz = .06;}
+      float cov = wid*wid*.08333f; if(cov < f22) cov = f22;
+      if(de->isBarrel()) {m_covz = 9.f*cov; m_covr = .06f;}
+      else               {m_covr = 9.f*cov; m_covz = .06f;}
       m_sn = nullptr;
     }
     else                {
 
       const Amg::MatrixX& v = sp->localCovariance();
       float f22 = float(v(1,1));
-      if(de->isBarrel()) {m_covz = 8.*f22; m_covr = .1;} 
-      else               {m_covr = 8.*f22; m_covz = .1;} 
+      if(de->isBarrel()) {m_covz = 8.f*f22; m_covr = .1f;} 
+      else               {m_covr = 8.f*f22; m_covz = .1f;} 
       m_sn =  &sp->clusterList().second->detectorElement()->surface();
     }
     m_su = &sp->clusterList().first->detectorElement()->surface();
@@ -75,7 +75,7 @@ namespace InDet {
   /////////////////////////////////////////////////////////////////////////////////
 
   void SiSpacePointForSeed::set
-  (const Trk::SpacePoint*const& sp,const float* r,const float* sc)
+  (const Trk::SpacePoint* sp,std::span<float const, 3> r,std::span<float const, 4> sc)
   {
     spacepoint = sp  ;
     m_x        = r[0];
@@ -92,50 +92,19 @@ namespace InDet {
       const Amg::MatrixX& v =  c->localCovariance();
       float f22 = float(v(1,1));
       float wid = float(c->width().z());
-      float cov = wid*wid*.08333; if(cov < f22) cov = f22;
-      if(de->isBarrel()) {m_covz = 9.*cov*sc[0]; m_covr = .06;}
-      else               {m_covr = 9.*cov*sc[1]; m_covz = .06;}
+      float cov = wid*wid*.08333f; if(cov < f22) cov = f22;
+      if(de->isBarrel()) {m_covz = 9.f*cov*sc[0]; m_covr = .06f;}
+      else               {m_covr = 9.f*cov*sc[1]; m_covz = .06f;}
       m_sn = nullptr;
     }
     else                {
 
       const Amg::MatrixX& v = sp->localCovariance();
       float f22 = float(v(1,1));
-      if(de->isBarrel()) {m_covz = 8.*f22*sc[2]; m_covr = .1;} 
-      else               {m_covr = 8.*f22*sc[3]; m_covz = .1;} 
+      if(de->isBarrel()) {m_covz = 8.f*f22*sc[2]; m_covr = .1f;} 
+      else               {m_covr = 8.f*f22*sc[3]; m_covz = .1f;} 
       m_sn =  &sp->clusterList().second->detectorElement()->surface();
     }
     m_su = &sp->clusterList().first->detectorElement()->surface();
   }
-
-  void SiSpacePointForSeed::setParam(const float& p)
-  {
-    m_param = p;
-  }
-
-  void SiSpacePointForSeed::setD0(const float& d0)
-  {
-    m_d0 = d0;
-  } 
-
-  void SiSpacePointForSeed::setEta(const float& eta)
-  {
-    m_eta = eta;
-  }
-
-  void  SiSpacePointForSeed::setQuality(float q)
-  {
-    if(q <= m_q) m_q = q;
-  }
-
-  void  SiSpacePointForSeed::setDZDR(const float& dzdr)
-  {
-    m_dzdr = dzdr;
-  }
-
-  void  SiSpacePointForSeed::setPt(const float& pt)
-  {
-    m_pt = pt;
-  }
- 
 } // end of name space

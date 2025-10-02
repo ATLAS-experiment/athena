@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_SUITE(SCT_CalibUtilitiesTest)
   BOOST_AUTO_TEST_CASE(normalizeList_test){
     const std::string testInput{"   my  test list  with spaces  "};
     const std::string expectedResponse{"my test list with spaces"};
-    const auto answer{SCT_CalibAlgs::normalizeList(testInput)};
+    const auto answer{SCT_CalibAlgs::normalizeList(std::move(testInput))};
     BOOST_TEST(answer == expectedResponse);
   }
 BOOST_AUTO_TEST_SUITE_END()

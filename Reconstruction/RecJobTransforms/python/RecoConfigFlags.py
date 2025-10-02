@@ -196,7 +196,7 @@ def printRecoFlags(flags):
 
 
 def recoRunArgsToFlags(runArgs, flags):
-    if hasattr(runArgs, "runNumber") and not flags.Input.isMC and runArgs.runNumber not in flags.Input.RunNumbers:
+    if hasattr(runArgs, "runNumber") and not flags.Input.isMC and not flags.Overlay.DataOverlay and runArgs.runNumber not in flags.Input.RunNumbers:
         flags.Input.RunNumbers = [runArgs.runNumber]
         flags.Input.OverrideRunNumber = True
 

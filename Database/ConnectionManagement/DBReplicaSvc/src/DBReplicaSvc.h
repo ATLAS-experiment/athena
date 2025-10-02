@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DBREPLICASVC_DBREPLICASVC_H
@@ -13,38 +13,30 @@
 #include "DBReplicaSvc/IDBReplicaSvc.h"
 #include "RelationalAccess/IDatabaseServiceDescription.h"
 
-class DBReplicaSvc : public virtual IDBReplicaSvc, public virtual AthService
+class DBReplicaSvc : public extends<AthService, IDBReplicaSvc>
 {
-  template <class TYPE> class SvcFactory;
  public:
-  DBReplicaSvc(const std::string& name, ISvcLocator* svc);
-  virtual ~DBReplicaSvc();
+  using base_class::base_class;
 
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
+  virtual StatusCode initialize() override;
 
-  virtual const InterfaceID& type() const;
-
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-
-  void sort(std::vector<const coral::IDatabaseServiceDescription*>& 
-	    replicaSet);
+  void sort(std::vector<const coral::IDatabaseServiceDescription*>& replicaSet) override;
 
  private:
   StatusCode readConfig();
-  std::string m_configfile;
-  std::string m_testhost;
-  std::string m_coolsqlitepattern;
-  bool m_usecoolsqlite;
-  bool m_usecoolfrontier;
-  bool m_usegeomsqlite;
-  bool m_nofailover;
 
-  bool m_frontiergen;
+  Gaudi::Property<std::string> m_configfile{this, "ConfigFile", "dbreplica.config"};
+  Gaudi::Property<std::string> m_testhost{this, "TestHost", ""};
+  Gaudi::Property<std::string> m_coolsqlitepattern{this, "COOLSQLiteVetoPattern", ""};
+  Gaudi::Property<bool> m_usecoolsqlite{this, "UseCOOLSQLite", true};
+  Gaudi::Property<bool> m_usecoolfrontier{this, "UseCOOLFrontier", true};
+  Gaudi::Property<bool> m_usegeomsqlite{this, "UseGeomSQLite", true};
+  Gaudi::Property<bool> m_nofailover{this, "DisableFailover", false};
+
+  bool m_frontiergen{false};
   std::string m_hostname;
-  typedef std::pair<std::string,int> ServerPair;
-  typedef std::vector< ServerPair > ServerMap;
-  ServerMap m_servermap;
+  typedef std::pair<std::string, int> ServerPair;  //<! (priority, name) pair
+  std::vector<ServerPair> m_servermap;
 };
 
 #endif // DBREPLICASVC_DBREPLICASVC_H

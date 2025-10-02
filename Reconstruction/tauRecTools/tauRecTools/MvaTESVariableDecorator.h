@@ -11,6 +11,7 @@
 #include "xAODEventShape/EventShape.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgTools/PropertyWrapper.h"
 
 class MvaTESVariableDecorator : public TauRecToolBase {
  
@@ -28,7 +29,7 @@ public:
 
 private:
 
-  bool m_doVertexCorrection;
+  Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_aveIntPerXKey {this, 
       "averageInteractionsPerCrossingKey", 

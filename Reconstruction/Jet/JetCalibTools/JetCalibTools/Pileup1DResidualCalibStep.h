@@ -110,7 +110,8 @@ class Pileup1DResidualCalibStep   : public asg::AsgTool,
 
   Gaudi::Property<bool> m_doOnlyResidual {this, "OnlyResidual", false, ""};
 
-  Gaudi::Property<std::string> m_originScale {this, "OriginScale", "", "scale from which correction is applied" };
+  Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetConstitScaleMomentum", "Starting jet scale" };
+  Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetPileupScaleMomentum", "Ending jet scale" };
   
 };
 

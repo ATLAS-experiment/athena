@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSEGMENTMATCHINGTOOL_H
@@ -30,7 +30,7 @@ class MuonSegment;
    - endcap middle/outer combination
    - small/large overlap in one station layer
 */
-class MuonSegmentMatchingTool : virtual public IMuonSegmentMatchingTool, public AthAlgTool {
+class MuonSegmentMatchingTool :  public extends<AthAlgTool, IMuonSegmentMatchingTool> {
   public:
     /** @brief constructor */
     MuonSegmentMatchingTool(const std::string&, const std::string&, const IInterface*);
@@ -144,32 +144,31 @@ class MuonSegmentMatchingTool : virtual public IMuonSegmentMatchingTool, public 
 
     // cuts for matching segments from different stations
     double m_angleABCut{};
-    double m_maxDistSegments;         //!< cut on the maximum distance between the segments
+    double m_maxDistSegments{};         //!< cut on the maximum distance between the segments
     double m_minDistSegmentsCosmics{};  //!< cut on the minimum distance between the segments, if the distance is larger
                                       //!< than the cut the segments are always matched (for cosmics)
-    double m_matchingbibm_lphisec;
-    double m_matchingbibo_lphisec;
-    double m_matchingbmbo_lphisec;
-    double m_matchingeiem_lphisec;
-    double m_matchingeieo_lphisec;
-    double m_matchingemeo_lphisec;
-    double m_matchingbibm_sphisec;
-    double m_matchingbibo_sphisec;
-    double m_matchingbmbo_sphisec;
-    double m_matchingeiem_sphisec;
-    double m_matchingeieo_sphisec;
-    double m_matchingemeo_sphisec;
+    double m_matchingbibm_lphisec{};
+    double m_matchingbibo_lphisec{};
+    double m_matchingbmbo_lphisec{};
+    double m_matchingeiem_lphisec{};
+    double m_matchingeieo_lphisec{};
+    double m_matchingemeo_lphisec{};
+    double m_matchingbibm_sphisec{};
+    double m_matchingbibo_sphisec{};
+    double m_matchingbmbo_sphisec{};
+    double m_matchingeiem_sphisec{};
+    double m_matchingeieo_sphisec{};
+    double m_matchingemeo_sphisec{};
 
     double m_matchingbee_sphisec{};
 
-    bool m_onlySameSectorIfTight;  //!< reject all segments in different sectors if in tight matching
-    bool m_useTightCuts;           //!< only apply tight selection for busy combinations
-    bool m_dumpAngles;             //!< dump matching angle info to screen
+    bool m_onlySameSectorIfTight{};  //!< reject all segments in different sectors if in tight matching
+    bool m_useTightCuts{};           //!< only apply tight selection for busy combinations
 
-    bool   m_useEndcapExtrapolationMatching;
-    double m_drExtrapRMS;
-    double m_drExtrapAlignmentOffset;
-    double m_dthetaExtrapRMS;
+    bool   m_useEndcapExtrapolationMatching{};
+    double m_drExtrapRMS{};
+    double m_drExtrapAlignmentOffset{};
+    double m_dthetaExtrapRMS{};
 };
 
 }  // namespace Muon

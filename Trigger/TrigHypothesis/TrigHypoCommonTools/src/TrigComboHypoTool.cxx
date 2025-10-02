@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigComboHypoTool.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "TrigCompositeUtils/Combinators.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
+
 #include <Math/Vector4D.h>    // for LorentzVector
 #include <Math/Vector4Dfwd.h> // PtEtaPhiM typedef
 #include <Math/Vector2D.h>    // for DisplacementVector
@@ -124,27 +127,223 @@ StatusCode TrigComboHypoTool::initialize()
 }
 
 
-bool TrigComboHypoTool::executeAlg(const Combination& combination) const {
-  //loop over all the hypos
-  bool lastDecision(true);
-  std::vector<float> values;
-  values.reserve(m_varInfo_vec.size());
+StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*context*/) const {
 
-  for (auto varInfo = m_varInfo_vec.cbegin(); varInfo!=m_varInfo_vec.cend() && lastDecision; ++varInfo){
-    lastDecision = executeAlgStep(combination, *varInfo, values);
+  // if no combinations passed, then exit 
+  if (passingLegs.empty()) {
+    return StatusCode::SUCCESS;
   }
 
-  // Monitoring of variables for only accepted events
-  if(lastDecision && !m_monTool_vec.empty()) {
-    for (auto varInfo = m_varInfo_vec.cbegin(); varInfo!=m_varInfo_vec.cend(); ++varInfo){
-      float value = values[varInfo->index];
-      auto varOfAccepted  = Monitored::Scalar(m_varTag_vec[varInfo->index]+"OfAccepted", value );//varInfo->monToolName+"OfAccepted", value );
-      auto monitorIt      = Monitored::Group (m_monTool_vec[varInfo->index], varOfAccepted);
-      ATH_MSG_DEBUG( varInfo->varTag << " = " << value << " is in range " << varInfo->rangeStr() << ".");
-      ATH_MSG_DEBUG("m_varTag_vec = "<< m_varTag_vec<<", values = "<<values << ", valIndex = "<< varInfo->index <<", monToolName = " << varInfo->monToolName << ", monToolVec = "<< m_monTool_vec);
+  ATH_MSG_DEBUG("Looking for legs from " << decisionId() << " in the map. Map contains features for " << passingLegs.size() << " legs, which may be data for many chains.");
+  for(const auto& legpair : passingLegs) {
+    ATH_MSG_DEBUG("  Leg " << legpair.first << " has " << legpair.second.size() << " features");
+  }
+
+  // select the leg decisions from the map with this ID:
+  std::vector<Combination> legDecisions;
+  ATH_CHECK(selectLegs(passingLegs, legDecisions));
+
+  // Track if we have at least 2 objects on the target legs that can be used for variable computation
+  bool hasViableLegs{true};
+  // Determine the functional leg multiplicities for combinations to generate
+  std::vector<size_t> legMultiplicityForComputation(legMultiplicity().size(),0);
+  if (m_skipLegCheck) {
+    // Handle the case where there is exactly one leg and hence the chain ID is used
+    // This implies a multiplicity of 2
+    legMultiplicityForComputation[0] = 2;
+    hasViableLegs = legDecisions[0].size() >= 2;
+  } else {
+    for (const VarInfo& varInfo : m_varInfo_vec){
+      ATH_MSG_DEBUG("Var " << varInfo.varTag << " needs legs " << varInfo.legA << ", " << varInfo.legB);
+      
+      // Assess the leg decisions and extract the relevant ones
+      if (passingLegs.contains(varInfo.legA) && passingLegs.contains(varInfo.legB)) {
+        size_t goodLegA{false}, goodLegB{false};
+        int32_t iLegA = getIndexFromLeg(varInfo.legA);
+        int32_t iLegB = getIndexFromLeg(varInfo.legB);
+        if ((iLegA<0) or (iLegB<0)){
+          ATH_MSG_ERROR("TrigComboHypoTool::decide: Index into array is negative");
+          return StatusCode::FAILURE;
+        }
+        goodLegA = !passingLegs[varInfo.legA].empty();
+        legMultiplicityForComputation[iLegA] = std::max<size_t>(1,legMultiplicityForComputation[iLegA]);
+        ATH_MSG_DEBUG("Leg " << varInfo.legA << " has " << passingLegs[varInfo.legA].size() << " features --> " << (goodLegA ? "pass" : "fail"));
+        if(varInfo.legB != varInfo.legA) {
+          goodLegB = !passingLegs[varInfo.legB].empty();
+          ATH_MSG_DEBUG("Leg " << varInfo.legB << " has " << passingLegs[varInfo.legB].size() << " features --> " << (goodLegB ? "pass" : "fail"));
+          legMultiplicityForComputation[iLegB] = std::max<size_t>(1,legMultiplicityForComputation[iLegB]);
+        } else {
+          goodLegB = goodLegA = passingLegs[varInfo.legA].size() >= 2;
+          ATH_MSG_DEBUG("Leg " << varInfo.legA << " has " << passingLegs[varInfo.legA].size() << " features --> " << (goodLegB ? "pass" : "fail"));
+          // If we do a computation on the same leg, we need to generate a pair of objects here
+          legMultiplicityForComputation[iLegA] = std::max<size_t>(2,legMultiplicityForComputation[iLegA]);
+        }
+        hasViableLegs &= (goodLegA && goodLegB);
+        if (!hasViableLegs) {
+          ATH_MSG_DEBUG("Did not find at least 2 features on the target legs to compute " << varInfo.varTag);
+        }
+      } else {
+        ATH_MSG_DEBUG(
+          "Insufficient passing legs to compute " << varInfo.varTag
+          << ", intended on (" << varInfo.legA << ", " << varInfo.legB << ")"
+        );
+        hasViableLegs = false;
+      }
     }
   }
-  return lastDecision;
+
+  if (!hasViableLegs) {
+    ATH_MSG_DEBUG("This ComboHypoTool cannot run in this event, this chain **REJECTS** this event.");
+    eraseFromLegDecisionsMap(passingLegs);
+    if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
+    return StatusCode::SUCCESS;
+  }
+
+  // Create and initialise the combinations generator for the requirements of this chain, given the objects available in this event.
+  // Extract the features on legs not used for the decision, so they stay in the navigation
+  Combination extraLegs;
+  HLT::NestedUniqueCombinationGenerator nucg;
+  for (size_t legindex = 0; size_t legmult : legMultiplicityForComputation){
+    size_t out_of = legDecisions[legindex].size();
+    if(legmult==0) {
+      extraLegs.insert(extraLegs.end(),legDecisions[legindex].cbegin(),legDecisions[legindex].cend());
+    } else {
+      nucg.add({out_of, legmult});
+      ATH_MSG_DEBUG("For leg index " << legindex << " we will be choosing any " << legmult << " Decision Objects out of " << out_of);
+    }
+    ++legindex;
+  }
+
+  // Iterate over all variable computations
+  std::vector<Combination> passingCombinations;
+  std::vector<float> values;
+  values.reserve(m_varInfo_vec.size());
+  size_t warnings = 0, iterations = 0;
+  // Correct for the legs on which we compute with 2 features
+  auto get_index_offset = [&legMultiplicityForComputation](size_t legindex) {
+    size_t offset{0};
+    for (auto iLeg=legMultiplicityForComputation.cbegin(); iLeg!=legMultiplicityForComputation.cbegin()+legindex; ++iLeg) {
+      offset += (*iLeg)-1;
+    }
+    return offset;
+  };
+  do {
+    bool lastDecision(true);
+    const std::vector<size_t> combination = nucg();
+    ++nucg;
+    ++iterations;
+    values.clear();
+
+    // This collects all the features contributing to any variable computation
+    Combination combinationToRecord;
+    for (auto iVarInfo = m_varInfo_vec.cbegin(); iVarInfo!=m_varInfo_vec.cend() && lastDecision; ++iVarInfo){
+      // Just the features for the current variable evaluation
+      Combination combinationToCheck;
+
+      size_t legA_index = 0;
+      size_t legB_index = 0;
+
+      // For 1-leg chain, the legID is invalid
+      if (!m_skipLegCheck) {
+        legA_index = getIndexFromLeg(iVarInfo->legA);
+        legB_index = getIndexFromLeg(iVarInfo->legB);
+      }
+
+      ATH_MSG_DEBUG(
+        "Computing " << iVarInfo->varTag << " on legs "
+        << iVarInfo->legA << " (" << legA_index << "), "
+        << iVarInfo->legB << " (" << legB_index << ")"
+      );
+      if(iVarInfo->legA==iVarInfo->legB) {
+        // 2 objects on 1 leg
+        // Due to multiplicity checks, a computation like 'dRAA' never overlaps with one like 'dRAB'
+        Combination featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index)+1)]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair.cbegin(),featurePair.cend());
+        combinationToRecord.insert(combinationToRecord.end(),featurePair.cbegin(),featurePair.cend());
+      } else {
+        // 1 object each on 2 legs
+        Combination featurePair = {legDecisions[legA_index][combination.at(legA_index+get_index_offset(legA_index))],legDecisions[legB_index][combination.at(legB_index+get_index_offset(legB_index))]};
+        combinationToCheck.insert(combinationToCheck.end(),featurePair.cbegin(),featurePair.cend());
+        combinationToRecord.insert(combinationToRecord.end(),featurePair.cbegin(),featurePair.cend());
+      }
+
+      try {
+        lastDecision = executeAlgStep(combinationToCheck, *iVarInfo, values);
+        ATH_MSG_DEBUG("Combination " << (iterations - 1) << " decided to be " <<  (lastDecision ? "passing" : "failing") << " " << iVarInfo->varTag);
+      } catch (std::exception& e) {
+        ATH_MSG_ERROR(e.what());
+        return StatusCode::FAILURE;
+      }
+
+      if ((iterations >= m_combinationsThresholdWarn && warnings == 0) or (iterations >= m_combinationsThresholdBreak)) {
+        ATH_MSG_WARNING("Have so far processed " << iterations << " combinations for " << decisionId() << " in this event, " << passingCombinations.size() << " passing.");
+        ++warnings;
+        if (iterations >= m_combinationsThresholdBreak) {
+          ATH_MSG_WARNING("Too many combinations! Breaking the loop at this point.");
+          break;
+        }
+      }
+    }
+
+    // Assess the collective decision on the combination
+    if (lastDecision) {
+      combinationToRecord.insert(combinationToRecord.end(),extraLegs.cbegin(),extraLegs.cend());
+      passingCombinations.push_back(combinationToRecord);
+      if (m_modeOR == true and m_enableOverride) {
+        break;
+      }
+    } else { // the combination failed
+      if (m_modeOR == false and m_enableOverride) {
+        break;
+      }
+    }
+
+    // Monitoring of variables for only accepted events
+    if(lastDecision && !m_monTool_vec.empty()) {
+      for (const VarInfo& varInfo : m_varInfo_vec) {
+        float value = values[varInfo.index];
+        auto varOfAccepted  = Monitored::Scalar(m_varTag_vec[varInfo.index]+"OfAccepted", value );//varInfo->monToolName+"OfAccepted", value );
+        auto monitorIt      = Monitored::Group (m_monTool_vec[varInfo.index], varOfAccepted);
+        ATH_MSG_VERBOSE( varInfo.varTag << " = " << value << " is in range " << varInfo.rangeStr() << ".");
+        ATH_MSG_VERBOSE("m_varTag_vec = "<< m_varTag_vec<<", values = "<<values << ", valIndex = "<< varInfo.index <<", monToolName = " << varInfo.monToolName << ", monToolVec = "<< m_monTool_vec);
+      }
+    }
+  } while (nucg);
+
+  if (m_modeOR) {
+
+    ATH_MSG_DEBUG("Passing " << passingCombinations.size() << " combinations out of " << iterations << ", " 
+      << decisionId() << (passingCombinations.size() ? " **ACCEPTS**" : " **REJECTS**") << " this event based on OR logic.");
+
+    if (m_enableOverride) {
+      ATH_MSG_DEBUG("Note: stopped after the first successful combination due to the EnableOverride flag.");  
+    }
+
+  } else {  // modeAND
+
+    const bool passAll = (passingCombinations.size() == iterations);
+
+    ATH_MSG_DEBUG("Passing " << passingCombinations.size() << " combinations out of " << iterations << ", " 
+      << decisionId() << (passAll ? " **ACCEPTS**" : " **REJECTS**") << " this event based on AND logic.");
+
+    if (m_enableOverride) {
+      ATH_MSG_DEBUG("Note: stopped after the first failed combination due to the EnableOverride flag.");  
+    }
+
+    if (not passAll) {
+      passingCombinations.clear();
+    }
+
+  }
+
+  if (not passingCombinations.empty()) { // need partial erasure of the decsions (only those not present in any combination)
+    updateLegDecisionsMap(passingCombinations, passingLegs);
+  } else { // need complete erasure of input decisions
+    eraseFromLegDecisionsMap(passingLegs);
+  }
+
+  if (msgLvl(MSG::DEBUG)) printDebugInformation(passingLegs);
+  return StatusCode::SUCCESS;
 }
 
 
@@ -157,13 +356,13 @@ bool TrigComboHypoTool::executeAlgStep(const Combination& combination, const Var
     return false;
   }
 
-  if(msgLvl(MSG::DEBUG)) {
+  if(msgLvl(MSG::VERBOSE)) {
     float eta_check, phi_check, pt_check;
     std::tie(eta_check,phi_check,pt_check) = kinepair.first;
-    msg() << MSG::DEBUG << "Test filled legA kinematics: pt " << pt_check*invGeV << ", eta " << eta_check << ", phi " << phi_check << endmsg;
+    msg() << MSG::VERBOSE << "  Test filled legA kinematics: pt " << pt_check*invGeV << ", eta " << eta_check << ", phi " << phi_check << endmsg;
 
     std::tie(eta_check,phi_check,pt_check) = kinepair.second;
-    msg() << MSG::DEBUG << "Test filled legB kinematics: pt " << pt_check*invGeV << ", eta " << eta_check << ", phi " << phi_check << endmsg;
+    msg() << MSG::VERBOSE << "  Test filled legB kinematics: pt " << pt_check*invGeV << ", eta " << eta_check << ", phi " << phi_check << endmsg;
   }
 
   // apply the cut
@@ -175,9 +374,9 @@ bool TrigComboHypoTool::executeAlgStep(const Combination& combination, const Var
   vals.push_back(value);
   bool pass = varInfo.test(value);
 
-  ATH_MSG_DEBUG("Found a combination with " << value);
+  ATH_MSG_DEBUG("  Found a combination with " << value);
   if(!pass) {
-    ATH_MSG_DEBUG("Combination failed var cut: " << varInfo.varTag << " = " << value << " not in range " << varInfo.rangeStr());
+    ATH_MSG_DEBUG("  Combination failed var cut: " << varInfo.varTag << " = " << value << " not in range " << varInfo.rangeStr());
   }
   return pass;
 }
@@ -245,7 +444,7 @@ bool TrigComboHypoTool::fillLegDecisions_diffLeg(std::pair<Combo::LegDecision,Co
 
 
 bool TrigComboHypoTool::fillPairKinematics(std::pair<KineInfo,KineInfo>& kinepair, const Combination& combination, const VarInfo& varInfo) const {
-    ATH_MSG_DEBUG("Decision objects available = "<< combination);
+    ATH_MSG_VERBOSE("  Decision objects available = "<< combination);
     // Check that there are enough features
     size_t nFeatures(combination.size());
     if (nFeatures < 2){
@@ -255,12 +454,12 @@ bool TrigComboHypoTool::fillPairKinematics(std::pair<KineInfo,KineInfo>& kinepai
     std::pair<Combo::LegDecision,Combo::LegDecision> legpair;
     if (varInfo.legsAreEqual) {fillLegDecisions_sameLeg(legpair,combination,varInfo.legA);}
     else {fillLegDecisions_diffLeg(legpair,combination,varInfo.legA,varInfo.legB);}
-    ATH_MSG_DEBUG("Fill leg A kinematics");
+    ATH_MSG_VERBOSE("    Fill leg A kinematics");
     if(!fillKineInfo(kinepair.first,legpair.first,varInfo.legA_is_MET)) {
       ATH_MSG_ERROR("Failed to extract requisite kinematic info from leg " << varInfo.legA << "!");
       return false;
     }
-    ATH_MSG_DEBUG("Fill leg B kinematics");
+    ATH_MSG_VERBOSE("    Fill leg B kinematics");
     if(!fillKineInfo(kinepair.second,legpair.second,varInfo.legB_is_MET)) {
       ATH_MSG_ERROR("Failed to extract requisite kinematic info from leg " << varInfo.legB << "!");
       return false;
@@ -291,7 +490,7 @@ bool TrigComboHypoTool::fillKineInfo(TrigComboHypoTool::KineInfo& kinematics, Co
     phi = (*pLink)->p4().Phi();
     pt  = (*pLink)->p4().Pt();
   }
-  ATH_MSG_DEBUG("Filled kinematics with pt " << pt*invGeV << ", eta " << eta << ", phi " << phi);
+  ATH_MSG_VERBOSE("      Filled kinematics with pt " << pt*invGeV << ", eta " << eta << ", phi " << phi);
   kinematics = std::make_tuple(eta,phi,pt);
   return true;
 }
@@ -302,8 +501,8 @@ float TrigComboHypoTool::compute(const std::pair<KineInfo,KineInfo>& kinepair, C
   const auto& [eta1,phi1,pt1] = legA_kine;
   const auto& [eta2,phi2,pt2] = legB_kine;
 
-  ATH_MSG_DEBUG("Leg A has pt " << pt1*invGeV << ", eta " << eta1 << ", phi " << phi1);
-  ATH_MSG_DEBUG("Leg B has pt " << pt2*invGeV << ", eta " << eta2 << ", phi " << phi2);
+  ATH_MSG_DEBUG("    Leg A has pt " << pt1*invGeV << ", eta " << eta1 << ", phi " << phi1);
+  ATH_MSG_DEBUG("    Leg B has pt " << pt2*invGeV << ", eta " << eta2 << ", phi " << phi2);
 
   float value(0);
   switch(var) {

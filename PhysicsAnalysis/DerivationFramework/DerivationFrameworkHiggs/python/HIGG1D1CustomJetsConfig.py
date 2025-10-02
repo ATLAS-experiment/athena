@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for customs jet reconstruction + decorations
@@ -120,7 +120,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                         infix = "CustomVtx",
                                         context = jetContextName,
                                         ghostdefs = ghostCustomVtx,
-                                        modifiers = modsCustomVtx+("JetPtAssociation","QGTaggingCustomVtx","fJVTCustomVtx","NNJVTCustomVtx","CaloEnergiesClus","JetPileupLabel"),
+                                        modifiers = modsCustomVtx+("JetPtAssociation","QGTaggingCustomVtx","BoostedQGTaggingCustomVtx","fJVTCustomVtx","NNJVTCustomVtx","CaloEnergiesClus","JetPileupLabel"),
                                         ptmin = 10000,
     )
 
@@ -213,6 +213,15 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                              (["mod:JetPtAssociation"] if not jdef._cflags.Input.isMC else []),
                                         JetContainer = CustomPFJetContainerName),
 
+        BoostedQGTaggingCustomVtx =       JetModifier("BoostedJetTaggerTool", "boostedqgtaggingCustomVtx",
+                                        createfn=lambda jdef,_ :JetMomentToolsConfig.getBoostedJetTaggerToolQG(jdef,"CustomVtx"),
+                                        modspec = "CustomVtx",
+                                        prereqs = lambda _,jdef :
+                                             ["input:JetTrackVtxAssocCustomVtx","mod:TrackMomentsCustomVtx"] +
+                                             (["mod:JetPtAssociation"] if not jdef._cflags.Input.isMC else []),
+                                        JetContainer = CustomPFJetContainerName),
+
+
       fJVTCustomVtx =            JetModifier("JetForwardPFlowJvtTool", "fJVTCustomVtx",
                                         createfn=lambda jdef,_ :JetMomentToolsConfig.getPFlowfJVTTool(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
@@ -235,7 +244,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorCustomVtxAlg", jetContainer='AntiKt4EMPFlowCustomVtx'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doLoose=True))
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doRNNLoose=True))
 
     # Decorate if jet passes OR and save decoration DFCommonJets_passOR
     # Use modified OR that does not check overlaps with tauls
@@ -246,9 +255,9 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
     acc.addSequence(CompFactory.AthSequencer('EventCleanLockSeq', Sequential=True))
 
-    outputLabel = 'DFCommonJets_passOR'
+    outputLabel = 'DFCommonJets_passOR_EMPFlowCustomVtx'
     bJetLabel = '' #default
-    tauLabel = 'DFTauLoose'
+    tauLabel = 'DFTauRNNLoose'
     orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags, outputLabel=outputLabel, bJetLabel=bJetLabel))
     algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_CustomVtx',
                                                 JetKey="AntiKt4EMPFlowCustomVtxJets",
@@ -294,6 +303,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
             EventCleaningToolCfg(ConfigFlags, "EventCleaningCustomVtxTool_" + wp, cleaningLevel)
         )
         ecTool.JetCleanPrefix = "DFCommonJets_"
+        ecTool.OrDecorator = "passOR_EMPFlowCustomVtx"
         ecTool.JetContainer = "AntiKt4EMPFlowCustomVtxJets"
         ecTool.JetCleaningTool = jetCleaningTool
         acc.addPublicTool(ecTool)

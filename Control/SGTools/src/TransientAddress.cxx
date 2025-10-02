@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SGTools/TransientAddress.h"
@@ -25,6 +25,8 @@ TransientAddress::TransientAddress()
 TransientAddress::TransientAddress(CLID id, const std::string& key)
   : TransientAddress (id, key, nullptr, true, false)
 { 
+  if (id != CLID_NULL)
+    m_transientID.push_back(id);
 }
 
 // Constructor with CLID, string key and IOpaqueAddress:
@@ -34,9 +36,29 @@ TransientAddress::TransientAddress(CLID id, const std::string& key,
 				   bool clearAddress)
   : TransientAddress (id, key, addr, clearAddress, true)
 {
+  if (id != CLID_NULL)
+    m_transientID.push_back(id);
 }
 
 
+// Constructor giving full list of symlinked IDs
+// --- used from DataHeaderElement::getAddress().
+TransientAddress::TransientAddress(CLID id, const std::string& key, 
+				   IOpaqueAddress* addr,
+                                   const std::vector<CLID>& clids)
+  : TransientAddress (id, key, addr, true, true)
+{
+  m_transientID.reserve (clids.size() + 1);
+  m_transientID = clids;
+  if (id != CLID_NULL) {
+    m_transientID.push_back (id);
+    std::ranges::sort (m_transientID);
+  }
+}
+
+
+// Note: this is a private ctor, only used from other ctors.
+// It does not initialize m_transientID.
 TransientAddress::TransientAddress(CLID id, const std::string& key, 
 				   IOpaqueAddress* addr, 
 				   bool clearAddress,
@@ -52,8 +74,6 @@ TransientAddress::TransientAddress(CLID id, const std::string& key,
   if (!key.empty()) {
     m_name.store (key);
   }
-  if (id != CLID_NULL)
-    m_transientID.push_back(id);
   if (addr) {
     setAddress(addr);
   }
@@ -99,6 +119,8 @@ TransientAddress::~TransientAddress()
 }
 
 
+// cppcheck-suppress operatorEqVarError; false positive ---
+//    m_address is copied by setAddress.
 TransientAddress& TransientAddress::operator= (const TransientAddress& other)
 {
   if (this != &other) {

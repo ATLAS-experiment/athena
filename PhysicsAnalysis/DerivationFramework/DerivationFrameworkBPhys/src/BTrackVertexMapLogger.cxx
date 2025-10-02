@@ -37,7 +37,7 @@
 //============================================================================
 //
 
-#include "DerivationFrameworkBPhys/BTrackVertexMapLogger.h"
+#include "BTrackVertexMapLogger.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 namespace DerivationFramework {
@@ -46,9 +46,7 @@ namespace DerivationFramework {
   BTrackVertexMapLogger::BTrackVertexMapLogger(const std::string& t,
 				       const std::string& n,
 				       const IInterface*  p)
-    : AthAlgTool(t,n,p) {
-    
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+    : base_class(t,n,p) {
     
     // Declare BPhysTrackVertexMapTool handles
     declareProperty("TrackVertexMapTools", m_ttvmTools);

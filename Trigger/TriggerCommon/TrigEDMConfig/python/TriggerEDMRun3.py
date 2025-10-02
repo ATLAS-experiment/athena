@@ -38,38 +38,60 @@ JetVarsToKeep = ['ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'Active
              ]
 JetVars = '.'.join(JetVarsToKeep)
 
+# Tailors the requested dynamic variables according to the string argument
+# which mirrors the expanded reconstruction suffix in the HLT chain, e.g.
+# pf_subresjesgscIS_ftf: [constituents]_[calibration]_[tracking]
+def getJetCopyVars(suffix):
+    JetCopyVars = [
+        'pt', 'eta', 'phi', 'm',
+        # additional variables also stored in TLA stream for jet cleaning studies
+        # stored for calibrated HLT container in the same way as in the TLA streams
+        "N90Constituents", "LArQuality", "FracSamplingMax", "NegativeE", "HECQuality", "AverageLArQF", "BchCorrCell",
+        'Timing',
+    ]
+    if 'sub' in suffix:
+        JetCopyVars += ['JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt']
+    if 'jes' in suffix:
+        JetCopyVars += [
+            'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
+            'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt'
+        ]
+    if '_ftf' in suffix:
+        JetCopyVars += [
+            'Jvt', 'JvtRpt',
+            # NN JVT -- TrkAug version
+            'NNJvtTrkAugV1','NNJvtTrkAugV1Pass',
+        ]
+        if 'TLA' not in suffix:
+            JetCopyVars += ['RPtTrkPt500','DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000']
+        if 'pf_subresjesgscIS' in suffix:
+            discriminants = ['dips20211116','fastDIPS20211215','GN120230331','tlaGN220240122']
+            JetCopyVars += [f'{disc}_p{flavour}' for disc in discriminants for flavour in 'cub']
+            if 'TLA' not in suffix:
+                JetCopyVars += ['TracksForMinimalJetTag']
 
-JetCopyVarsToKeep = ['pt', 'eta', 'phi', 'm',
-                     'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
-                     'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
-                     'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
-                     'Jvt', 'JvtRpt','Timing', 'TracksForMinimalJetTag',
-                     # additional variables also stored in TLA stream for jet cleaning studies
-                     # stored for calibrated HLT container in the same way as in the TLA streams
-                     "N90Constituents", "LArQuality", "FracSamplingMax", "NegativeE", "HECQuality", "AverageLArQF", "BchCorrCell",
-                     # NN JVT -- TrkAug version
-                     'NNJvt','NNJvtPass', 'RPtTrkPt500', 'DTrackWidthPt1000', 'DNumTrkPt1000', 'DRPtTrkPt500', 'SumPtTrkOrderedTrackWidthPt1000', 'SumPtTrkOrderedNumTrkPt1000',
-                    ]
+    if 'fastftag' in suffix:
+        discriminants = ['fastDips','fastGN120230327','fastGN120230331','fastGN220240122',]
+        JetCopyVars += [f'{disc}_p{flavour}' for disc in discriminants for flavour in 'cub']
+        JetCopyVars += [f'fastGNTau20240216_p{flavour}' for disc in discriminants for flavour in ['tau','u']]
+        JetCopyVars += [f'fastUHT120250605_p{x}' for x in ["tau" , "u" , "c" , "b"]]
+        JetCopyVars += ['dipz20231122_z','dipz20231122_negLogSigma2']
+        JetCopyVars += ['TracksForMinimalJetTag']
 
-FastFtagPFlowVarsToKeep = [f'dips20211116_p{x}' for x in 'cub']
-FastFtagPFlowVarsToKeep += [f'fastDIPS20211215_p{x}' for x in 'cub']
-FastFtagPFlowVarsToKeep += [f'GN120230331_p{x}' for x in 'cub']
-FastFtagPFlowVarsToKeep += [f'tlaGN220240122_p{x}' for x in 'cub']
+    TLAJetVarsToKeep = [
+        'ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt',
+        'JetConstitScaleMomentum_eta', 'JetConstitScaleMomentum_m', 'JetConstitScaleMomentum_phi', 'JetConstitScaleMomentum_pt',
+        'DetectorEta', 'DetectorPhi', 'EMFrac', 'HECFrac', 'EnergyPerSampling', 'EnergyPerSamplingCaloBased',
+    ]
+    if 'TLA' in suffix:
+        JetCopyVars += TLAJetVarsToKeep
+        if '_ftf' in suffix:
+            JetCopyVars += ['SumPtChargedPFOPt500', 'NumTrkPt1000', 'SumPtTrkPt500', 'TrackWidthPt1000', 'JVFCorr']
 
-JetCopyVarsToKeep += FastFtagPFlowVarsToKeep
-JetCopyVars = '.'.join(JetCopyVarsToKeep)
-
-JetFastFTagVarsToKeep = JetCopyVarsToKeep
-JetFastFTagVarsToKeep += [f'fastDips_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGN120230327_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGN120230331_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGN220240122_p{x}' for x in 'cub']
-JetFastFTagVarsToKeep += [f'fastGNTau20240216_p{x}' for x in ["tau" , "u"]]
-JetFastFTagVarsToKeep += ['dipz20231122_z']
-JetFastFTagVarsToKeep += ['dipz20231122_negLogSigma2']
-JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
+    return '.'.join(JetCopyVars)
 
 LargeRJetVarsToKeep = [f'GN2Xv01_p{x}' for x in ['hbb', 'top', 'qcd']]
+LargeRJetVarsToKeep += [f'GN2XTrig_p{x}' for x in ['hbb', 'top', 'qcd']]
 LargeRJetVarsToKeep += JetVarsToKeep 
 LargeRJetVars = '.'.join(LargeRJetVarsToKeep)
 
@@ -80,24 +102,6 @@ VSIVarsToKeep = ['vsi_mass', 'vsi_pT', 'vsi_charge', 'vsi_isFake',
                  'vsi_isPassMMV', 'vsi_trkd0cut', 'vsi_twoCircErrcut', 'vsi_twoCircRcut', 'vsi_fastErrcut', 
                  'vsi_fastRcut', 'vsi_fitErrcut', 'vsi_chi2cut']
 VSIVars = '.'.join(VSIVarsToKeep)
-
-
-# ===========
-# === TLA ===
-TLAJetVarsToKeep = [
-                   'pt', 'eta', 'phi', 'm', 'ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt',
-                   'DetectorEta', 'DetectorPhi', 'EMFrac', 'HECFrac', 'EnergyPerSampling', 'EnergyPerSamplingCaloBased',
-                   'JetConstitScaleMomentum_eta', 'JetConstitScaleMomentum_m', 'JetConstitScaleMomentum_phi', 'JetConstitScaleMomentum_pt',
-                   'JetPileupScaleMomentum_eta', 'JetPileupScaleMomentum_m', 'JetPileupScaleMomentum_phi', 'JetPileupScaleMomentum_pt',
-                   'JetEtaJESScaleMomentum_eta', 'JetEtaJESScaleMomentum_m', 'JetEtaJESScaleMomentum_phi', 'JetEtaJESScaleMomentum_pt',
-                   'JetGSCScaleMomentum_eta', 'JetGSCScaleMomentum_m', 'JetGSCScaleMomentum_phi', 'JetGSCScaleMomentum_pt',
-                   'Jvt', 'JVFCorr', 'JvtRpt',
-                   'NNJvt','NNJvtPass',
-                   'SumPtChargedPFOPt500', 'NumTrkPt1000', 'SumPtTrkPt500', 'TrackWidthPt1000', 'N90Constituents',
-                   'LArQuality','FracSamplingMax',  'NegativeE', 'Timing', 'HECQuality','AverageLArQF', 'BchCorrCell',
-                   ]
-TLAJetVarsToKeep+= FastFtagPFlowVarsToKeep
-TLAJetVars='.'.join(TLAJetVarsToKeep)
 
 # ==============
 # === EGAMMA ===
@@ -153,10 +157,12 @@ BTagOutput_highLevelTaggers = [
     *[f'{t}_p{x}' for x in ['b','bb'] for t in b_vs_bb_taggers],
 ]
 
+# !The BTag object will be decommissioned in Run 4, these variables are kept for backward compatibility
 BTagOutput += BTagOutput_IP2D + BTagOutput_IP3D + BTagOutput_SV1 + BTagOutput_JetFitter + BTagOutput_rnnip + BTagOutput_highLevelTaggers
 BTagVars = '.'.join(BTagOutput)
 
-BTagJetOutput = ['btaggingLink', 'Jvt', 'JVFCorr', 'SumPtTrkPt500']
+# !The BTag object will be decommissioned in Run 4, the explicitly listed variables in [] is kept for backward compatibility
+BTagJetOutput = ['btaggingLink', 'Jvt', 'JVFCorr', 'SumPtTrkPt500','NNJvtTrkAugV1','NNJvtTrkAugV1Pass'] + BTagOutput_rnnip + BTagOutput_highLevelTaggers
 BTagJetVars  ='.'.join(BTagJetOutput)
 
 hitDVToKeepBase = ['seed_eta','seed_phi','seed_type','n_track_qual','ly0_sp_frac','ly1_sp_frac','ly2_sp_frac','ly3_sp_frac',
@@ -211,6 +217,10 @@ for var in DisTrkBDTSelToKeepBase:
     DisTrkBDTSelToKeep.append('disTrk_'+var)
 DisTrkBDTSelVars = '.'.join(DisTrkBDTSelToKeep)
 
+
+VtxToKeep = ['chiSquared','numberDoF','x','y','z','covariance','vertexType']
+VtxVars = '.'.join(VtxToKeep)
+
 # ==============
 # === L1Topo ===
 L1TopoErrorFlagVars = '.'.join(['hasGenericRoiError', 'hasGenericDaqError', 'hasCrcTobError', 'hasCrcFibreError',
@@ -227,6 +237,12 @@ TauJet_vars_str = '.'.join(TauJet_vars)
 
 TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
 TauTrack_vars_str = '.'.join(TauTrack_vars)
+
+# ===========
+# == boosted ditau ==
+DiTauJet_vars = ['pt', 'eta', 'phi', 'm', 'TauJetVtxFraction', 'subjet_pt', 'subjet_phi', 'subjet_e', 'subjet_f_core', 'subjet_eta', 'isoTrackLinks', 'jetLink', 'vertexLink', 'trackLinks']
+DiTauJet_vars += ["ditau_pt", "f_core_lead", "f_core_subl", "f_subjet_lead", "f_subjet_subl", "f_subjets", "f_track_lead", "f_track_subl", "R_max_lead", "R_max_subl", "n_track", "n_tracks_lead", "n_tracks_subl", "n_isotrack", "R_track", "R_track_core", "R_track_all", "R_isotrack", "R_core_lead", "R_core_subl", "R_tracks_lead", "R_tracks_subl", "m_track", "m_track_core", "m_core_lead", "m_core_subl", "m_track_all", "m_tracks_lead", "m_tracks_subl", "E_frac_subl", "E_frac_subsubl", "R_subjets_subl", "R_subjets_subsubl", "d0_leadtrack_lead", "d0_leadtrack_subl", "f_isotracks", "omni_score"]
+DiTauJet_vars_str = '.'.join(DiTauJet_vars)
 
 # ===========
 # === LLP ===
@@ -297,7 +313,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeAuxContainer#HLT_TrigCostContainerAux.alg.store.view.thread.thash.slot.roi.start.stop', 'CostMonDS ESD', 'Steer'),
     ('xAOD::TrigCompositeContainer#HLT_TrigCostROSContainer',   'CostMonDS ESD', 'Steer'),
     ('xAOD::TrigCompositeAuxContainer#HLT_TrigCostROSContainerAux.alg_idx.lvl1ID.robs_id.robs_size.robs_history.robs_status.start.stop', 'CostMonDS ESD', 'Steer'),
-
+    
     # PEB RoIs for full-scan chains
     ('TrigRoiDescriptorCollection#HLT_Roi_LArPEBHLT',            'BS ESD AODFULL',  'Calo'),
 
@@ -402,7 +418,8 @@ TriggerHLTListRun3 = [
 
     #L1 mistime monitoring
     ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400', 'BS ESD AODFULL', 'L1'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type', 'BS ESD AODFULL', 'L1'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type.other_type_before.other_type_after.offset_before.offset_after', 'BS ESD AODFULL', 'L1'),
+
 
     # LArPS
     ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloEMClusters',           'BS ESD', 'Egamma', [InViews('LArPS_AllEM_Views')]),
@@ -545,6 +562,11 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_MuonLRT_FTF',                 'BS ESD AODFULL', 'Muon', [InViews('l2muCombLRTViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MuonLRT_FTFAux.',          'BS ESD AODFULL', 'Muon'),
 
+    #Muon DS calibration
+    ('xAOD::TrigCompositeContainer#HLT_MuonCalibrationStream',                    'MuonDS', 'Muon', [InViews('L2MuFastCalibRecoViews')]),
+    ('xAOD::TrigCompositeAuxContainer#HLT_MuonCalibrationStreamAux.muCalibDS',    'MuonDS', 'Muon'),
+
+    
 
 # These extra muon collections have all be removed now, as they all have identical
 # reconstruction as the standard Muon collections so unique collections names should
@@ -601,8 +623,17 @@ TriggerHLTListRun3 = [
     ('xAOD::MuonContainer#HLT_Muons_FS',                                        'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_FSViews')]),
     ('xAOD::MuonAuxContainer#HLT_Muons_FSAux.',                                 'BS ESD AODFULL AODSLIM', 'Muon'),
 
-    ('xAOD::MuonContainer#HLT_MuonsCB_RoI',                                     'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuCBReco_RoIViews')]),
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI',                                     'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuCBReco_RoIViews'),InViews('CosmicEFCBViews')]),
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoIAux.',                              'BS ESD AODFULL AODSLIM', 'Muon'),
+
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_idReuse',                                     'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIidReuseViews')]),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_idReuseAux.',                              'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_IOmode',                                     'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIIOmodeViews')]),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_IOmodeAux.',                              'BS ESD AODFULL', 'Muon'),
+
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_l2mtmode',                                     'BS ESD AODFULL', 'Muon', [InViews('EFMuCBReco_RoIl2mtmodeViews')]),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_l2mtmodeAux.',                              'BS ESD AODFULL', 'Muon'),
 
     ('xAOD::MuonContainer#HLT_MuonsCB_LRT',                                     'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuCBLRTRecoViews')]),
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_LRTAux.',                              'BS ESD AODFULL AODSLIM', 'Muon'),
@@ -651,7 +682,7 @@ TriggerHLTListRun3 = [
     ('xAOD::L2StandAloneMuonContainer#HLT_MuonL2SAInfol2mtmode',        'BS ESD AODFULL', 'Muon', [InViews('L2MuFastRecoViews')]),
     ('xAOD::L2StandAloneMuonAuxContainer#HLT_MuonL2SAInfol2mtmodeAux.', 'BS ESD AODFULL', 'Muon'),
 
-    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfo',          'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews')]),
+    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfo',          'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews'), InViews('CosmicViews')]),
     ('xAOD::L2CombinedMuonAuxContainer#HLT_MuonL2CBInfoAux.',   'BS ESD AODFULL', 'Muon'),
 
     ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfoLRT',          'BS ESD AODFULL', 'Muon', [InViews('l2muCombLRTViews')]),
@@ -704,16 +735,24 @@ TriggerHLTListRun3 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIso_probe',     'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
+    # boosted ditau roi
+    ('TrigRoiDescriptorCollection#HLT_Roi_DiTau',            'BS ESD',          'Tau'),
 
     ('xAOD::JetContainer#HLT_jet_seed',                         '', 'Tau', [InViews('tauCaloMVAViews')]),
     ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  '', 'Tau'),
 
-    # Jet
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesISAux.'+JetCopyVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+    #boosted ditau tracks
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_DiTau_FTF',                      'BS ESD', 'Tau', [InViews('DitauViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DiTau_FTFAux.',               'BS ESD', 'Tau'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_DiTau_IDTrig',                   'BS ESD', 'Tau', [InViews('DitauViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DiTau_IDTrigAux.',            'BS ESD', 'Tau'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftag',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftagAux.'+JetFastFTagVars, 'BS ESD AODFULL', 'Jet'),
+    # Jet
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS',                                       'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesISAux.'+getJetCopyVars('subjesIS'), 'BS ESD AODFULL AODSLIM', 'Jet'),
+
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftag',                                                'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_fastftagAux.'+getJetCopyVars('subjesIS_fastftag'), 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib_ftf',                  'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalib_ftfAux.'+JetVars,   'BS ESD AODFULL AODSLIM', 'Jet'),
@@ -721,26 +760,26 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftf',                  'BS ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftfAux.'+JetVars,   'BS ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftf',                                           '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftfAux.'+getJetCopyVars('subjesIS_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftf',                        'BS ESD', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftfAux.'+JetCopyVars, 'BS ESD', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftf',                                       'BS ESD', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftfAux.'+getJetCopyVars('subjesIS'), 'BS ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',                                              'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.'+getJetCopyVars('subjesgscIS_ftf'), 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftf',                                            'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftfAux.'+getJetCopyVars('subjesgsc_ftf'), 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',                                                 'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux.'+getJetCopyVars('subresjesgscIS_ftf'), 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftf',                                               '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftfAux.'+getJetCopyVars('subresjesgsc_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjes',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjes',                                     '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesAux.'+getJetCopyVars('subjes'), '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib',                      'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalibAux.'+JetVars,       'BS ESD AODFULL AODSLIM', 'Jet'),
@@ -751,8 +790,8 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalib',                  '', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalibAux.'+JetVars,   '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10LCTopoJets_subjes',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt10LCTopoJets_subjesAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10LCTopoJets_subjes',                                     'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt10LCTopoJets_subjesAux.'+getJetCopyVars('subjes'), 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10LCTopoJets_nojcalib',                     'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoJets_nojcalibAux.'+JetVars,      'BS ESD AODFULL', 'Jet'),
@@ -787,32 +826,33 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftf',                'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',                      'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.'+LargeRJetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftf',                                              '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.'+getJetCopyVars('pf_subjesIS_ftf'), '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf',                                                 'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux.'+getJetCopyVars('pf_subjesgscIS_ftf'), 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftf',                                               '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftfAux.'+getJetCopyVars('pf_subjesgsc_ftf'), '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.'+JetFastFTagVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.'+getJetCopyVars('pf_subresjesgscIS_ftf'), 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                                                  '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftfAux.'+getJetCopyVars('pf_subresjesgsc_ftf'), '', 'Jet'),
     
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_jes_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_jes_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_jes_ftf',                                         'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_jes_ftfAux.'+getJetCopyVars('pf_jes_ftf'), 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftf',                '', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars, '', 'Jet'),
+
 
     ## event info
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_jet',                                 'BS ESD AODFULL', 'Jet' ),
@@ -837,24 +877,24 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',                                 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet' ),
     ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',         'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'    ),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLA',                      'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLAAux.'+TLAJetVars,       'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLA',                      'BS PhysicsTLA ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_TLAAux.'+getJetCopyVars('subjesIS_fastftag_TLA'),       'BS PhysicsTLA ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',                      'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.'+TLAJetVars,       'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',                                                             'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.'+getJetCopyVars('pf_subresjesgscIS_ftf_TLA'), 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
 
 
     # TLA Photons
-    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
-    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA EgammaPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA EgammaPEBTLA ESD', 'Egamma'),
 
     # TLA Muons
-    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
-    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.',                                'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
+    ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS ESD', 'Muon'),
+    ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.',                                'BS ESD', 'Muon'),
     
     # FS vertices
-    ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA ESD AODFULL AODSLIM', 'Jet'),
-    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.',           'BS PhysicsTLA ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD AODFULL AODSLIM', 'Jet' ),
+    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.'+VtxVars,   'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD AODFULL AODSLIM', 'Jet'),
 
     ('xAOD::VertexContainer#HLT_IDVertex_FSJet',                  'BS ESD AODFULL', 'Jet'),
     ('xAOD::VertexAuxContainer#HLT_IDVertex_FSJetAux.',           'BS ESD AODFULL', 'Jet'),
@@ -944,8 +984,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigMissingETContainer#HLT_MET_pfsum_vssk',                    'BS ESD AODFULL AODSLIM', 'MET'),
     ('xAOD::TrigMissingETAuxContainer#HLT_MET_pfsum_vsskAux.',             'BS ESD AODFULL AODSLIM', 'MET'),
 
-    ('xAOD::TrigMissingETContainer#HLT_MET_pfopufit',                      'BS ESD AODFULL AODSLIM', 'MET'),
-    ('xAOD::TrigMissingETAuxContainer#HLT_MET_pfopufitAux.',               'BS ESD AODFULL AODSLIM', 'MET'),
+    ('xAOD::TrigMissingETContainer#HLT_MET_pfopufit',                      'BS ESD AODFULL AODSLIM DarkJetPEBTLA', 'MET'),
+    ('xAOD::TrigMissingETAuxContainer#HLT_MET_pfopufitAux.',               'BS ESD AODFULL AODSLIM DarkJetPEBTLA', 'MET'),
 
     ('xAOD::TrigMissingETContainer#HLT_MET_cvfpufit',                      'BS ESD AODFULL AODSLIM', 'MET'),
     ('xAOD::TrigMissingETAuxContainer#HLT_MET_cvfpufitAux.',               'BS ESD AODFULL AODSLIM', 'MET'),
@@ -962,8 +1002,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigMissingETContainer#HLT_MET_mhtpufit_em',       'BS ESD AODFULL AODSLIM', 'MET'),
     ('xAOD::TrigMissingETAuxContainer#HLT_MET_mhtpufit_emAux.', 'BS ESD AODFULL AODSLIM', 'MET'),
 
-    ('xAOD::TrigMissingETContainer#HLT_MET_nn',                'BS ESD AODFULL AODSLIM', 'MET'),
-    ('xAOD::TrigMissingETAuxContainer#HLT_MET_nnAux.',          'BS ESD AODFULL AODSLIM', 'MET'),
+    ('xAOD::TrigMissingETContainer#HLT_MET_nn',                'BS ESD AODFULL AODSLIM DarkJetPEBTLA', 'MET'),
+    ('xAOD::TrigMissingETAuxContainer#HLT_MET_nnAux.',          'BS ESD AODFULL AODSLIM DarkJetPEBTLA', 'MET'),
 
     # ATR-25509 MET Containers needed to test nSigma=3
     ('xAOD::TrigMissingETContainer#HLT_MET_pfopufit_sig30',                'BS ESD AODFULL', 'MET'),
@@ -995,6 +1035,10 @@ TriggerHLTListRun3 = [
     ('xAOD::TauTrackAuxContainer#HLT_tautrack_LLPAux.'+TauTrack_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
     ('xAOD::TauTrackContainer#HLT_tautrack_LRT',                                'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLRTTauViews'), InViews('tauPrecisionReco_LRTViews')]),
     ('xAOD::TauTrackAuxContainer#HLT_tautrack_LRTAux.'+TauTrack_vars_str,       'BS ESD AODFULL AODSLIM', 'Tau'),
+
+    # boosted ditau
+    ('xAOD::DiTauJetContainer#HLT_DiTauJets',                                   'BS ESD AODFULL AODSLIM', 'Tau', [InViews('DitauViews')]),
+    ('xAOD::DiTauJetAuxContainer#HLT_DiTauJetsAux.'+DiTauJet_vars_str,          'BS ESD AODFULL AODSLIM', 'Tau'),
 
     # bjet RoI Descriptor used for EventView creation
     ('TrigRoiDescriptorCollection#HLT_Roi_Bjet',                   'BS ESD AODFULL', 'Bjet'),
@@ -1029,10 +1073,10 @@ TriggerHLTListRun3 = [
     # bjet jets
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_bJets',                        'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars, 'BS ESD AODFULL', 'Bjet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars,     'BS ESD AODFULL', 'Bjet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets',                        'BS ESD AODFULL AODSLIM', 'Bjet', [InViews(BTagViewsEMPFlow)]),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars, 'BS ESD AODFULL AODSLIM', 'Bjet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets',                       'BS ESD AODFULL AODSLIM', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars,    'BS ESD AODFULL AODSLIM', 'Bjet'),
 
     # secvertex for b-jets
     ('xAOD::VertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet'),
@@ -1049,15 +1093,15 @@ TriggerHLTListRun3 = [
     ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   '', 'Bjet'),
 
     # bjet b-tagging
-    ('xAOD::BTaggingContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTagging',                          'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
+    ('xAOD::BTaggingContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTagging',                          'BS ESD AODFULL', 'Bjet'),
     ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingAux.'+BTagVars,          'BS ESD AODFULL', 'Bjet'),
 
-    ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging',                          'BS ESD AODFULL AODSLIM', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging',                          'BS ESD AODFULL AODSLIM', 'Bjet'),
     ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingAux.'+BTagVars,          'BS ESD AODFULL AODSLIM', 'Bjet'),
 
     # TLA bjet b-tagging
-    ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTagging',                      'BS PhysicsTLA ESD', 'Bjet'),
-    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,       'BS PhysicsTLA ESD', 'Bjet'),
+    ('xAOD::BTaggingContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTagging',                      '', 'Bjet'),
+    ('xAOD::BTaggingAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA_BTaggingAux.'+BTagVars,       '', 'Bjet'),
 
     # MinBias
 
@@ -1101,7 +1145,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Cosmic_EFID',                 'BS ESD AODFULL', 'Cosmic'),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Cosmic_EFIDAux.',          'BS ESD AODFULL', 'Cosmic'),
     #And their respective precision tracks
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Cosmic_IDTrig',               'BS ESD AODFULL', 'Cosmic', [InViews('CosmicViewRoIs')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Cosmic_IDTrig',               'BS ESD AODFULL', 'Cosmic', [InViews('CosmicViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Cosmic_IDTrigAux.',        'BS ESD AODFULL', 'Cosmic'),
 
     # UTT
@@ -1136,7 +1180,11 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeContainer#HLT_MuRoICluster_Composites',                      'BS ESD AODFULL AODSLIM', 'Muon'),
     ('xAOD::TrigCompositeAuxContainer#HLT_MuRoICluster_CompositesAux.'+MuRoiVars,     'BS ESD AODFULL AODSLIM', 'Muon'),
 
-     # tau calo clusters (moved as last because of the truncation errors ATR-29142)
+    # Anomaly Detection Trigger
+    ('xAOD::TrigCompositeContainer#HLT_AnomDet_ComboHypo', 'BS ESD AODFULL AODSLIM', 'AnomDet'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_AnomDet_ComboHypoAux.adScore', 'BS ESD AODFULL AODSLIM', 'AnomDet'),
+
+    # tau calo clusters (moved as last because of the truncation errors ATR-29142)
     ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), allowTruncation]),   
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau', [allowTruncation]),
  

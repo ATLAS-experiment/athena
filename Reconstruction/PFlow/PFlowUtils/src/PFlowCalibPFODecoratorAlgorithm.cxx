@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFlowCalibPFODecoratorAlgorithm.h"
@@ -32,13 +32,13 @@ StatusCode PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO(
        ATH_MSG_ERROR("Dynamic cast failed in PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO");
        return StatusCode::FAILURE;
     }
-    std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs; // FIXME barcode-based
-    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *CalibHitReadHandle, newBarCodeTruthPairs); // FIXME barcode-based
+    std::vector<std::pair<unsigned int, double > > newUniqueIDTruthPairs;
+    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *CalibHitReadHandle, newUniqueIDTruthPairs);
     if (sc == StatusCode::FAILURE) return sc;
     
-    for (const auto& thisPair : newBarCodeTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with barcode " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
+    for (const auto& thisPair : newUniqueIDTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with uniqueID " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
     
-    pfoWriteDecorHandle(*thisFE) = newBarCodeTruthPairs; // FIXME barcode-based
+    pfoWriteDecorHandle(*thisFE) = std::move(newUniqueIDTruthPairs);
   }
   return StatusCode::SUCCESS;
 }

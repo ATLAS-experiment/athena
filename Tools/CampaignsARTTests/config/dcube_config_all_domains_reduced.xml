@@ -156,6 +156,23 @@
       <hist1D name="vx_time_diff_pull" plotopts="" tests="KS" type="TH1F"/>
      </TDirectory>
     </TDirectory>
+    <TDirectory name="SecVtx">
+     <TDirectory name="VrtSecInclusive_SecondaryVertices">
+      <hist1D name="x" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="y" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="z" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="r" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="pt" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="eta" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="phi" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="m" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="ntrk" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="chi2" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="charge" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="mind0" plotopts="" tests="KS" type="TH1D"/>
+      <hist1D name="maxd0" plotopts="" tests="KS" type="TH1D"/>
+     </TDirectory>
+    </TDirectory>
    </TDirectory>
    <TDirectory name="MET">
     <TDirectory name="MET_Rebuilt_AntiKt4EMTopo">
@@ -373,17 +390,6 @@
      <hist1D name="Electron_Frwd_n_weighted" plotopts="" tests="KS" type="TH1F"/>
     </TDirectory>
     <TDirectory name="Truth">
-     <TDirectory name="All">
-      <TDirectory name="Iso">
-       <hist1D name="Electron_Truth_All_Iso_et" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Electron_Truth_All_Iso_eta" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="Electron_Truth_All_Iso_phi" plotopts="" tests="KS" type="TH1F"/>
-      </TDirectory>
-      <hist1D name="Electron_Truth_All_et" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Electron_Truth_All_eta" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Electron_Truth_All_phi" plotopts="" tests="KS" type="TH1F"/>
-      <hist2D name="Electron_Truth_All_etvseta" plotopts="" tests="KS" type="TH2F"/>
-     </TDirectory>
      <TDirectory name="Iso">
       <hist1D name="Electron_Truth_Iso_et" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Electron_Truth_Iso_eta" plotopts="" tests="KS" type="TH1F"/>
@@ -802,110 +808,104 @@
     </TDirectory>
    </TDirectory>
    <TDirectory name="Tau">
-    <TDirectory name="Nominal">
+    <TDirectory name="TauJets_Nominal">
      <TDirectory name="Fake">
-      <hist1D name="Tau_Nominal_Fake_Charge" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigVeryLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigVeryLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigMediumHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigTight" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_ptRNNSigTightHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_pt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_eta" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Fake_phi" plotopts="" tests="KS" type="TH1F"/>
-      <hist2D name="Tau_Nominal_Fake_eta_pt" plotopts="" tests="KS" type="TH2F"/>
-      <hist2D name="Tau_Nominal_Fake_eta_phi" plotopts="" tests="KS" type="TH2F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_Charge" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigMediumHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigTight" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_ptRNNSigTightHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_pt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_eta" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_phi" plotopts="" tests="KS" type="TH1F"/>
+      <hist2D name="Tau_TauJets_Nominal_Fake_eta_pt" plotopts="" tests="KS" type="TH2F"/>
+      <hist2D name="Tau_TauJets_Nominal_Fake_eta_phi" plotopts="" tests="KS" type="TH2F"/>
       <TDirectory name="Eff">
-       <TDirectory name="All">	 
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_Pt_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_Pt_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_Pt_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_Pt_jetRNNlooseHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_Pt_jetRNNmedHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_Pt_jetRNNtightHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Fake_Eff_All_Eff_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
+       <TDirectory name="All">
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_Pt_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_Pt_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_Pt_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_Pt_jetRNNlooseHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_Pt_jetRNNmedHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_Pt_jetRNNtightHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Fake_Eff_All_Eff_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
      <TDirectory name="Matched">
-      <hist1D name="Tau_Nominal_Matched_Charge" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigVeryLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigVeryLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigMediumHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigTight" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_ptRNNSigTightHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_pt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_eta" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_Matched_phi" plotopts="" tests="KS" type="TH1F"/>
-      <hist2D name="Tau_Nominal_Matched_eta_pt" plotopts="" tests="KS" type="TH2F"/>
-      <hist2D name="Tau_Nominal_Matched_eta_phi" plotopts="" tests="KS" type="TH2F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_Charge" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigMediumHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigTight" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_ptRNNSigTightHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_pt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_eta" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_phi" plotopts="" tests="KS" type="TH1F"/>
+      <hist2D name="Tau_TauJets_Nominal_Matched_eta_pt" plotopts="" tests="KS" type="TH2F"/>
+      <hist2D name="Tau_TauJets_Nominal_Matched_eta_phi" plotopts="" tests="KS" type="TH2F"/>
       <TDirectory name="Eff">
-       <TDirectory name="All">	 
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_Pt_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_Pt_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_Pt_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_Pt_jetRNNlooseHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_Pt_jetRNNmedHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_Pt_jetRNNtightHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_Matched_Eff_All_Eff_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
+       <TDirectory name="All">
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_Pt_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_Pt_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_Pt_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_Pt_jetRNNlooseHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_Pt_jetRNNmedHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_Pt_jetRNNtightHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_Matched_Eff_All_Eff_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
      <TDirectory name="RecTau">
-      <hist1D name="Tau_Nominal_RecTau_Charge" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigVeryLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigVeryLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigMediumHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigTight" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_ptRNNSigTightHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_pt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_eta" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_Nominal_RecTau_phi" plotopts="" tests="KS" type="TH1F"/>
-      <hist2D name="Tau_Nominal_RecTau_eta_pt" plotopts="" tests="KS" type="TH2F"/>
-      <hist2D name="Tau_Nominal_RecTau_eta_phi" plotopts="" tests="KS" type="TH2F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_Charge" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_RNNJetScore" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_RNNJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigLoose" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigMedium" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigMediumHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigTight" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_ptRNNSigTightHighPt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_pt" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_eta" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_phi" plotopts="" tests="KS" type="TH1F"/>
+      <hist2D name="Tau_TauJets_Nominal_RecTau_eta_pt" plotopts="" tests="KS" type="TH2F"/>
+      <hist2D name="Tau_TauJets_Nominal_RecTau_eta_phi" plotopts="" tests="KS" type="TH2F"/>
       <TDirectory name="Eff">
-       <TDirectory name="All">	 
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNlooseHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNmedHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNtightHightPt" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
-        <hist1D name="Tau_Nominal_RecTau_Eff_All_Eff_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
+       <TDirectory name="All">
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNlooseHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNmedHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_Pt_jetRNNtightHightPt" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_jetRNNloose" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_jetRNNmed" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="Tau_TauJets_Nominal_RecTau_Eff_All_Eff_jetRNNtight" plotopts="" tests="KS" type="TProfile"/>
        </TDirectory>
       </TDirectory>
      </TDirectory> 
-    </TDirectory> 
+    </TDirectory>
    </TDirectory>
    <TDirectory name="Muons">
     <TDirectory name="All">

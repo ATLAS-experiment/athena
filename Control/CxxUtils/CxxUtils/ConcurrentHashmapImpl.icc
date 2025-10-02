@@ -385,7 +385,8 @@ std::pair<typename CHMIMPL::const_iterator, bool>
 CHMIMPL::put (val_t key, size_t hash, val_t val, bool overwrite,
               const typename Updater_t::Context_t& ctx)
 {
-  return put (lock(), key, hash, val, overwrite, ctx);
+  Lock_t l (m_mutex);
+  return put (l, key, hash, val, overwrite, ctx);
 }
 
 

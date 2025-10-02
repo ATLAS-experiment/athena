@@ -8,7 +8,7 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include "L1CaloFEXSim/gFEXFPGA.h"
+#include "gFEXFPGA.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
@@ -302,6 +302,7 @@ namespace LVL1
          calTower = -2048;
       if (calTower > 2047)
          calTower = 2047;
+      if (address == 2047)  calTower = 2047;
 
       *tower = calTower;
    }

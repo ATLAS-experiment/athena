@@ -11,6 +11,9 @@
 #include <TriggerAnalysisAlgorithms/TrigGlobalEfficiencyAlg.h>
 #include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 
 DECLARE_COMPONENT (CP::TrigEventSelectionAlg)
 DECLARE_COMPONENT (CP::TrigPrescalesAlg)

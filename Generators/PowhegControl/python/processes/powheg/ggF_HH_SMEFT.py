@@ -214,10 +214,8 @@ class ggF_HH_SMEFT(PowhegV2):
             logger.info('Now trying to use warmup_smeft.py to create the Virt_full_*.grid file')
             logger.info(f'Parameters are: GF={GF_str}, Lambda={Lambda_str}, CHbox={CHbox_str}, CHD={CHD_str}, CH={CH_str}, CuH={CuH_str}, CHG={CHG_str}, EFTcount={EFTcount}, lhapdfid={lhapdfid_str}, renfac={renfac_str}')
             try:
-                #import creategrid as cg
-                #cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
-                pythoncmd=f"import warmup_smeft as ws; ws.combinegrids_SMEFT({Lambda_str}, {CHbox_str}, {CHD_str}, {CH_str}, {CuH_str}, {CHG_str}, {GF_str}, {EFTcount}, {lhapdfid_str}, {renfac_str})"
-                os.system("python3 -c \""+pythoncmd+"\"")
+                import warmup_smeft as ws
+                ws.combinegrids_SMEFT(Lambda_str, CHbox_str, CHD_str, CH_str, CuH_str, CHG_str, GF_str, EFTcount, lhapdfid_str, renfac_str)
             except RuntimeError:
                 logger.error('Impossible to use warmup_smeft.py to create the Virt_full_*.grid file')
                 raise
@@ -234,10 +232,8 @@ class ggF_HH_SMEFT(PowhegV2):
             logger.info(f'File name: {grid_file_name}')
             logger.info(f'Parameters are: chhh={chhh_str}, ct={ct_str}, ctt={ctt_str}, cggh={cggh_str}, cgghh={cgghh_str}, EFTcount={EFTcount}, usesmeft={usesmeft_str}')
             try:
-                #import creategrid as cg
-                #cg.combinegrids(grid_file_name, chhh_str, ct_str, ctt_str, cggh_str, cgghh_str)
-                pythoncmd=f"import creategrid as cg; cg.combinegrids('{grid_file_name}', {chhh_str}, {ct_str}, {ctt_str}, {cggh_str}, {cgghh_str}, {EFTcount})"
-                os.system("python3 -c \""+pythoncmd+"\"")
+               import creategrid as cg
+               cg.combinegrids(grid_file_name, float(chhh_str), float(ct_str), float(ctt_str), float(cggh_str), float(cgghh_str), EFTcount)
             except RuntimeError:
                 logger.error('Impossible to use creategrid.py to create the Virt_full_*.grid file')
                 raise

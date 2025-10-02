@@ -50,9 +50,11 @@ StatusCode FPGATrackSimMapMakerAlg::initialize()
     m_planes2 = &(m_overridePlanes2.value());
 
     parseKeyString();
-    ATH_CHECK(m_hitInputTool.retrieve());
     ATH_CHECK(m_evtSel.retrieve());
 
+    ATH_CHECK(m_hitSGInputTool.retrieve(EnableTool{!m_hitSGInputTool.empty()}));
+    ATH_CHECK(m_hitInputTool.retrieve(EnableTool{!m_hitInputTool.empty()}));
+    
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     ATH_MSG_DEBUG("initialize() Finished");
 
@@ -94,11 +96,17 @@ StatusCode FPGATrackSimMapMakerAlg::execute()
 StatusCode FPGATrackSimMapMakerAlg::readInputs(bool & done)
 {
     // Read primary input
-    ATH_CHECK(m_hitInputTool->readData(&m_eventHeader, done));
-    if (done)
-    {
-        ATH_MSG_INFO("Cannot read more events from file, returning");
-        return StatusCode::SUCCESS; // end of loop over events
+    if ( !m_hitSGInputTool.empty()) {
+      ATH_CHECK(m_hitSGInputTool->readData(&m_eventHeader, Gaudi::Hive::currentContext()));
+      ATH_MSG_DEBUG("Loaded " << m_eventHeader.nHits() << " hits in event header from SG");
+    }
+    else  {
+      ATH_CHECK(m_hitInputTool->readData(&m_eventHeader, done));
+      if (done)
+	{
+	  ATH_MSG_INFO("Cannot read more events from file, returning");
+	  return StatusCode::SUCCESS; // end of loop over events
+	}
     }
 
     // Ask the event selection service if this event really falls within the region.

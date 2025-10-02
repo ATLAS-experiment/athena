@@ -121,21 +121,52 @@ namespace columnar
     bool isOptional = false;
 
 
-    /// @brief the name of the column we link to (or empty string if we
-    /// don't link to a column)
+    /// @brief for link columns: the name(s) of the container(s) we link
+    /// to
     ///
-    /// Some of our columns contain an index of an object in another
-    /// column.  This is the name of that other column.  This can then
-    /// be used for consistency checks, and could potentially also be
-    /// used to aid in thinning operations to keep the link indices
-    /// consistent.
+    /// Some of our columns contain links to other objects. For those
+    /// columns this will contain the names of the containers we link
+    /// to (i.e. the names of their offset columns).
     ///
-    /// So far we only have links that link to one specific column.  If
-    /// we need columns that link to multiple columns I will need to
-    /// revisit how I do this.  I'd probably turn this into a vector,
-    /// and then have a separate column that contains the index in that
-    /// vector for each index.
-    std::string linkToName {};
+    /// For simple link columns that can only link to a single other
+    /// container, this will be a vector of length one and @ref
+    /// variantLinkKeyColumn will not be set. In that case the link
+    /// column will simply contain the index of the object in the linked
+    /// too container.
+    ///
+    /// For variant link columns (i.e. columns with links that can
+    /// reference objects in more than one container), this will contain
+    /// the list of all linked to columns that this tool will use. In
+    /// that case the most significant bits of the index in this column
+    /// will encode a container key that is matched against @ref
+    /// variantLinkKeyColumn to identify which container is being
+    /// referenced by each link.
+    ///
+    /// Note that a variant link column may contain links to columns
+    /// that are not listed here, but those will not be used by this
+    /// tool. There are also no requirements on the exact values of the
+    /// keys, as long as they match @ref variantLinkKeyColumn. And
+    /// different tools may list the columns in different order. The
+    /// thought behind that is that it allows multiple tools to read the
+    /// same link column as long as they have each a unique key column,
+    /// without having to coordinate the exact list of linked containers
+    /// used.
+    std::vector<std::string> linkTargetNames {};
+
+
+    /// @brief if this is a variant link column, this is the name of the
+    /// column with the container keys
+    ///
+    /// If set, this is the name of another column that should have
+    /// exactly one entry per entry in @ref linkTargetNames, giving the
+    /// container keys for each.
+    ///
+    /// This doesn't have to be set for simple link columns that only
+    /// point to a single container. In that case the link column will
+    /// simply contain indices without keys (a.k.a. all keys are zero).
+    /// That is actually the more common case, which is also simpler to
+    /// handle in columnar code.
+    std::string variantLinkKeyColumn {};
   };
 }
 

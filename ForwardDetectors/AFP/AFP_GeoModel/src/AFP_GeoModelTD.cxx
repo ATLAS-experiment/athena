@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "AFP_GeoModelFactory.h"
+#include "AFP_Geometry/AFP_Geometry.h"
 #include "AFP_Geometry/AFP_constants.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoMaterial.h"
@@ -34,15 +35,10 @@
 #include "GeoModelUtilities/GeoBorderSurfaceContainer.h"
 #include "GeoModelUtilities/GeoMaterialPropertiesTable.h"
 
-#include <iostream>
-#include <fstream>
 #include <string>
 
-#include <algorithm>
 #include <cmath>
 
-#include <list>
-#include <map>
 
 #include <cstdlib>
 
@@ -70,7 +66,7 @@ StatusCode AFP_GeoModelFactory::addTimingDetector(const char* pszStationName, Ge
 	AFPTOF_LBARDIMENSIONS BarDims11=TofCfg.mapBarDims[11];
 	fXShift=-73.5*CLHEP::mm; //FIXME TODO
 	fYShift=(BarDims11.fRadLength+TofCfg.mapTrainInfo[BarDims11.nTrainID].fPerpShiftInPixel-0.5*(BarDims11.fLGuideWidth-TofCfg.mapTrainInfo[BarDims11.nTrainID].fTaperOffset)-0.5*BarDims11.fLBarThickness/std::tan(TofCfg.fAlpha))*std::sin(TofCfg.fAlpha);
-	fZShift=fabs(fYShift)/std::tan(TofCfg.fAlpha)+0.5*BarDims11.fLBarThickness/std::sin(TofCfg.fAlpha);
+	fZShift=std::fabs(fYShift)/std::tan(TofCfg.fAlpha)+0.5*BarDims11.fLBarThickness/std::sin(TofCfg.fAlpha);
     
 	HepGeom::Transform3D TofTransform=TransInMotherVolume*HepGeom::Translate3D(fXShift,fYShift,fZShift)*HepGeom::RotateX3D((90.0*CLHEP::deg-TofCfg.fAlpha))*HepGeom::RotateZ3D(-90.0*CLHEP::deg);
 

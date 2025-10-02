@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/LVL1JetElementRetriever.h"
@@ -50,19 +50,18 @@ namespace JiveXML {
     t_JECollection::const_iterator it ;
 
     for( it  = JEVector->begin(); it < JEVector->end(); ++it ){
-        //  	 log << MSG::DEBUG <<" Lvl1 JE coords ("<<(*it)->phi()<<", "<<(*it)->eta()
-	//	     << " and energies : "<<(*it)->energy()<<endmsg;
         eta.push_back(DataType((*it)->eta()));
         phi.push_back(DataType((*it)->phi()));
         energy.push_back(DataType((*it)->energy()));
     }//end JE iterator JE loop
 
     DataMap myDataMap;
-    myDataMap["energy"] = energy;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
+    const auto nPhi = phi.size();
+    myDataMap["energy"] = std::move(energy);
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi << endmsg;
 
     ////forward data to formating tool
     //return FormatTool->AddToEvent(dataTypeName(), m_sgKey, &myDataMap);

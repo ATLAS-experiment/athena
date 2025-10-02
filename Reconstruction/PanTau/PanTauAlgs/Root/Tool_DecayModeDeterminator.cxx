@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_DecayModeDeterminator.h"
@@ -10,21 +10,8 @@
 
 
 PanTau::Tool_DecayModeDeterminator::Tool_DecayModeDeterminator(const std::string& name) :
-  asg::AsgTool(name),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore"),
-  m_Tool_ModeDiscriminator_1p0n_vs_1p1n("PanTau::Tool_ModeDiscriminator/Tool_ModeDiscriminator"),
-  m_Tool_ModeDiscriminator_1p1n_vs_1pXn("PanTau::Tool_ModeDiscriminator/Tool_ModeDiscriminator"),
-  m_Tool_ModeDiscriminator_3p0n_vs_3pXn("PanTau::Tool_ModeDiscriminator/Tool_ModeDiscriminator")
+  asg::AsgTool(name)
 {
-  declareProperty("Tool_InformationStore",          m_Tool_InformationStore,          "Tool handle to the information store tool");
-  declareProperty("Tool_ModeDiscriminator_1p0n_vs_1p1n",    m_Tool_ModeDiscriminator_1p0n_vs_1p1n,    "Handle to the ModeDiscriminator tool for 1p0n_vs_1p1n");
-  declareProperty("Tool_ModeDiscriminator_1p1n_vs_1pXn",    m_Tool_ModeDiscriminator_1p1n_vs_1pXn,    "Handle to the ModeDiscriminator tool for 1p1n_vs_1pXn");
-  declareProperty("Tool_ModeDiscriminator_3p0n_vs_3pXn",    m_Tool_ModeDiscriminator_3p0n_vs_3pXn,    "Handle to the ModeDiscriminator tool for 3p0n_vs_3pXn");
-
-  declareProperty("Tool_InformationStoreName",          m_Tool_InformationStoreName="",          "Tool handle to the information store tool");
-  declareProperty("Tool_ModeDiscriminator_1p0n_vs_1p1nName",    m_Tool_ModeDiscriminator_1p0n_vs_1p1nName="",    "Handle to the ModeDiscriminator tool for 1p0n_vs_1p1n");
-  declareProperty("Tool_ModeDiscriminator_1p1n_vs_1pXnName",    m_Tool_ModeDiscriminator_1p1n_vs_1pXnName="",    "Handle to the ModeDiscriminator tool for 1p1n_vs_1pXn");
-  declareProperty("Tool_ModeDiscriminator_3p0n_vs_3pXnName",    m_Tool_ModeDiscriminator_3p0n_vs_3pXnName="",    "Handle to the ModeDiscriminator tool for 3p0n_vs_3pXn");
 }
 
 
@@ -62,7 +49,6 @@ StatusCode PanTau::Tool_DecayModeDeterminator::initialize() {
 
 StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSeed) const {
     
-  std::string         inAlgName   = inSeed->getNameInputAlgorithm();
   PanTau::TauFeature* features    = inSeed->getFeatures();
     
   //check for invalid input seed
@@ -77,8 +63,8 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
 
   if(invalidForDecayMode) {
     ATH_MSG_DEBUG("Seed has no constituents assigned and/or input seed has no substructure info - use NotSet mode for this");
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTau", xAOD::TauJetParameters::Mode_NotSet);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTauExtended", PanTau::PanTauSeed::t_ExtModeNotSet);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTau", xAOD::TauJetParameters::Mode_NotSet);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTauExtended", PanTau::PanTauSeed::t_ExtModeNotSet);
     tauJet->setPanTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_DecayModeExtended, decayMode_PanTauExtended);
     return StatusCode::SUCCESS;
   }
@@ -216,13 +202,6 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
     bdtResponse = -4;
     bdtTest     = t_UnknownTest;
   }
-
-  if(inAlgName != "CellBased") {
-    ATH_MSG_WARNING("Name of input algorithm not known - use mode from sub alg!");
-    decayMode_PanTau = decayMode_SubAlg;
-    bdtResponse = -5;
-    bdtTest     = t_UnknownTest;
-  }
     
   // this overrides Pantau BDT 1p1n decision in the following case:
   // if cell based counted 1 charged, 1 pi0neut, and number of hits in EM1 for the pi0neut is 3 or larger, set 1pXn;
@@ -235,7 +214,7 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
       std::vector<PanTau::TauConstituent*> shots = pi0Neut->getShots();
 
       for(unsigned int iShot=0; iShot<shots.size(); iShot++) {
-	nPhotons = nPhotons + (double)(shots.at(iShot)->getNPhotonsInShot());
+	nPhotons = nPhotons + static_cast<double>(shots.at(iShot)->getNPhotonsInShot());
       }
 
       if(nPhotons > 2.) {
@@ -254,31 +233,31 @@ StatusCode PanTau::Tool_DecayModeDeterminator::execute(PanTau::PanTauSeed* inSee
   
   //update mode of seed and store in features
   inSeed->setDecayModeByPanTau(decayMode_PanTau);
-  features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_RecoMode", (double)decayMode_SubAlg);
-  features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTau", (double)decayMode_PanTau);
-  features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTauExtended", (double)decayMode_PanTauExtended);
+  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode", static_cast<double>(decayMode_SubAlg));
+  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTau", static_cast<double>(decayMode_PanTau));
+  features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_RecoMode_PanTauExtended", static_cast<double>(decayMode_PanTauExtended));
 
   tauJet->setPanTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_DecayModeExtended, decayMode_PanTauExtended);
     
   if(bdtTest == t_1p0n_vs_1p1n) {
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", bdtResponse);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", -5.);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", bdtResponse);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", -5.);
   }
   if(bdtTest == t_1p1n_vs_1pXn) {
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", -5.);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", bdtResponse);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", bdtResponse);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", -5.);
   }
   if(bdtTest == t_3p0n_vs_3pXn) {
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", -5.);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", -5.);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", bdtResponse);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", bdtResponse);
   }
   if(bdtTest == t_UnknownTest) {
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", -5.);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", -5.);
-    features->addFeature(inAlgName + "_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p0n_vs_1p1n", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_1p1n_vs_1pXn", -5.);
+    features->addFeature("CellBased_" + m_varTypeName_Prefix_Basic + "_BDTValue_3p0n_vs_3pXn", -5.);
   }
 
   return StatusCode::SUCCESS;    

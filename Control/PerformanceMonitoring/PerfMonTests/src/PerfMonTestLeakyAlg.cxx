@@ -1,7 +1,5 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestLeakyAlg.cxx 
@@ -20,29 +18,6 @@
 
 using namespace PerfMonTest;
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-LeakyAlg::LeakyAlg( const std::string& name, 
-		  ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm   ( name,    pSvcLocator )
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-  declareProperty( "LeakSize",
-                   m_leakSize = 10,
-                   "Size of 'Leak' objects to be leaked each event" );
-
-  declareProperty( "NbrLeaks",
-                   m_nbrLeaks = 1,
-                   "Number of 'Leak' objects to be leaked each event" );
-}
 
 // Destructor
 ///////////////
@@ -69,11 +44,6 @@ StatusCode LeakyAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LeakyAlg::finalize()
-{
-  ATH_MSG_INFO ( "Finalizing " << name() << "..." ) ;
-  return StatusCode::SUCCESS;
-}
 
 StatusCode LeakyAlg::execute()
 {  

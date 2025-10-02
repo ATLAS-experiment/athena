@@ -64,6 +64,27 @@ def CreateTruthJetsCfg(flags, jetR, mods=""):
     return cfg
 
 
+def QCDTruthJetFilterCfg(flags, jetR, mods="", **kwargs):
+    """Default truth jet filter setup
+    """
+    cfg = ComponentAccumulator()
+    cfg.merge(CreateTruthJetsCfg(flags, jetR, mods)) # Algs in prefiltSeq
+    kwargs.setdefault("TruthJetContainer", 'AntiKt{0}Truth{1}Jets'.format(int(jetR*10),mods))
+    kwargs.setdefault("MaxPt", flags.Beam.Energy)
+    # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
+    cfg.addEventAlgo(CompFactory.QCDTruthJetFilter(name="QCDTruthJetFilter", **kwargs)) ## TODO add to filtSeq
+    return cfg
+
+
+def JZSliceCfg(flags,x, jetR, mods="", **kwargs):
+    # Min and max momenta for the slices
+    minDict = {0:-1,1:20,2:60,3:160,4:400,5:800,6:1300,7:1800,8:2500,9:3200,10:3900,11:4600,12:5300}
+    maxDict = {0:20,1:60,2:160,3:400,4:800,5:1300,6:1800,7:2500,8:3200,9:3900,10:4600,11:5300,12:7000}
+    kwargs.setdefault("MinPt", minDict[x]*GeV)
+    kwargs.setdefault("MaxPt", maxDict[x]*GeV)
+    return QCDTruthJetFilterCfg(flags, jetR, mods="", **kwargs)
+
+
 def LeptonPairFilterExampleCfg(flags, name='SS3LFilter', **kwargs):
     """Example configuring LeptonPairFilter to accept SS lepton pairs with
     massive parents, as used in
@@ -247,6 +268,8 @@ def xAODHTFilterCommonCfg(flags, **kwargs):
     """HT filter setup for anti-kT R=0.4 truth jets"""
     cfg = CreatexAODSlimmedContainerCfg(flags, containerName="TruthGen") # Algs in prefiltSeq
     cfg.merge(CreateTruthJetsCfg(flags, 0.4,"WZ")) # Algs in prefiltSeq
+    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
+    cfg.merge(DFCommonMCTruthClassifierCfg(flags)) # FIXME this Cfg method creates a public MCTruthClassifier tool.
     # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
     cfg.addEventAlgo(CompFactory.xAODHTFilter("xAODHTFilter", **kwargs)) # TODO Add to filtSeq
     return cfg
@@ -461,6 +484,15 @@ def xAODSameParticleHardScatteringFilterCommonCfg(flags, **kwargs):
     return cfg
 
 
+def xAODSplitPhotonFilterCommonCfg(flags, **kwargs):
+    """common fragment for xAODSplitPhoton filter conversion to xAOD,
+    connecting the filter"""
+    cfg = CreatexAODSlimmedContainerCfg(flags, containerName="TruthGen") # Algs in prefiltSeq
+    # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
+    cfg.addEventAlgo(CompFactory.xAODSplitPhotonFilter("xAODSplitPhotonFilter", **kwargs)) # TODO Add to filtSeq
+    return cfg
+
+
 def xAODTTbarWToLeptonFilterCommonCfg(flags, **kwargs):
     """common fragment for xAODTTbarWToLepton filter conversion to xAOD,
     connecting the filter"""
@@ -540,16 +572,14 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Constants import DEBUG
-    from AthenaConfiguration.Enums import BeamType
 
     # Test setup
     log.setLevel(DEBUG)
 
     flags = initConfigFlags()
-    flags.Input.SpecialConfiguration = dict() # Used by GEN_EVNT2xAODCfg, so can't allow to be auto-configured
-    flags.Input.isMC = True # Used by JetRecConfig/StandardJetConstits.py
-    flags.Beam.Type = BeamType.Collisions # Used by JetRecConfig/JetRecConfig.py
+    flags.Input.Files = defaultTestFiles.EVNT
     flags.lock()
 
     acc = ComponentAccumulator()
@@ -587,6 +617,7 @@ if __name__ == "__main__":
     acc.merge( xAODParticleFilterCommonCfg(flags))
     acc.merge( xAODPhotonFilterCommonCfg(flags))
     acc.merge( xAODSameParticleHardScatteringFilterCommonCfg(flags))
+    acc.merge( xAODSplitPhotonFilterCommonCfg(flags))
     acc.merge( xAODTTbarWToLeptonFilterCommonCfg(flags))
     acc.merge( xAODTTbarWithJpsimumuFilterCommonCfg(flags))
     acc.merge( xAODTauFilterCommonCfg(flags))

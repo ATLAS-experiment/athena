@@ -12,7 +12,7 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloConditions/CaloNoise.h"
 
-#include "GepCellMap.h"
+#include "TrigGepPerf/GepCellMap.h"
 
 #include <vector>
 #include <map>
@@ -34,11 +34,11 @@ class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
 
 	// At the moment only have a detailed scheme for 6-10 bit readouts, thus rejecting any other value
 	switch(value) {
-		case 6: m_maxCellsPerFEB = 53; break;
-		case 7: m_maxCellsPerFEB = 46; break;
-		case 8: m_maxCellsPerFEB = 41; break;
-		case 9: m_maxCellsPerFEB = 37; break;
-		case 10: m_maxCellsPerFEB = 34; break;
+		case 6: m_maxCellsPerFEB = 62; break;
+		case 7: m_maxCellsPerFEB = 54; break;
+		case 8: m_maxCellsPerFEB = 48; break;
+		case 9: m_maxCellsPerFEB = 43; break;
+		case 10: m_maxCellsPerFEB = 39; break;
                 default: ATH_MSG_FATAL("A GEP energy encoding scheme with " << value << " energy bits is currently not defined");
                 return StatusCode::FAILURE;
 	}
@@ -89,6 +89,9 @@ class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
 
   Gaudi::Property<bool> m_doTruncationOfOverflowingFEBs {this, "TruncationOfOverflowingFEBs", false, 
     "Enabling or disabling the truncation of cells from FEBs with more than the maximum number of cells which can be send"};
+
+  Gaudi::Property<bool> m_writeAllCells {this, "WriteAllCells", false, 
+    "If true, all cells are considered regardless whether they are truncated or below the 2sigma threshold"};
 
   Gaudi::Property<std::string> m_LArCellMap {this, "LArCellMapFile", "UpgradePerformanceFunctions/LAr_Cell_Map_offlineID_0.csv", 
     "File associating LAr cells with readout FEBs and connection technology"};

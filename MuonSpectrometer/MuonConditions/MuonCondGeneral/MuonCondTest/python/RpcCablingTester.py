@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def RpcCablingTestAlgCfg(flags, name = "RpcCablingTestAlg", JSONFile="",**kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -14,34 +14,34 @@ def RpcCablingTestAlgCfg(flags, name = "RpcCablingTestAlg", JSONFile="",**kwargs
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA, configureCondTag
+
+  
     parser = SetupArgParser()
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"])
+
+    parser.set_defaults(inputFile= defaultTestFiles.ESD_RUN3_MC)
     args = parser.parse_args()
 
     flags = initConfigFlags()
     flags.Muon.enableNRPC = True
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
-    flags.Output.ESDFileName = args.output
+    flags.Concurrency.NumThreads = 1 
+    flags.Exec.MaxEvents = 1
+    flags.Concurrency.NumConcurrentEvents = 1
     flags.Input.Files = args.inputFile
-    flags.lock()   
-
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
-    cfg = setupServicesCfg(flags)
+    configureCondTag(flags)
+    flags.lock() 
+    flags.dump()
     
-    cfg.merge( RpcCablingTestAlgCfg(flags))  
+
+    cfg = SetupMuonStandaloneCA(flags)
+    
+    cfg.merge(RpcCablingTestAlgCfg(flags))  
     if len(args.cablingMap):
         cfg.getCondAlgo("MuonNRPC_CablingAlg").JSONFile = args.cablingMap
     cfg.getService("MessageSvc").debugLimit = 2147483647
     cfg.getService("MessageSvc").verboseLimit = 2147483647
     cfg.getService("MessageSvc").infoLimit = 2147483647
-
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    flags.dump()
    
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
-
+    executeTest(cfg)
 

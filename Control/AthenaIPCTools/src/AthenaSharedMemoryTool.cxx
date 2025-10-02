@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* file contains the implementation for the AthenaSharedMemoryTool class.
@@ -35,40 +35,22 @@ struct ShareEventHeader {
 //___________________________________________________________________________
 AthenaSharedMemoryTool::AthenaSharedMemoryTool(const std::string& type,
 	const std::string& name,
-	const IInterface* parent) : AthAlgTool(type, name, parent),
-	        m_maxSize(64 * 1024 * 1024),
-	        m_maxDataClients(256),
-	        m_num(-1),
-	        m_lastClient(-1),
-	        m_dataClients(),
-	        m_payload(nullptr),
-	        m_status(nullptr),
-	        m_fileSeqNumber(0),
-	        m_isServer(false),
-	        m_isClient(false),
-	        m_incidentSvc("IncidentSvc", name) {
-   declareProperty("SharedMemoryName", m_sharedMemory = name);
-   declareInterface<IAthenaIPCTool>(this);
+	const IInterface* parent) :
+  base_class(type, name, parent),
+  m_incidentSvc("IncidentSvc", name) {
+  m_sharedMemory.setValue(name);
 }
 
 //___________________________________________________________________________
 AthenaSharedMemoryTool::~AthenaSharedMemoryTool() {
-   delete m_payload; m_payload = nullptr;
-   delete m_status; m_status = nullptr;
 }
 
 //___________________________________________________________________________
 StatusCode AthenaSharedMemoryTool::initialize() {
    ATH_MSG_INFO("Initializing " << name());
-   if (!::AthAlgTool::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthAlgTool base class.");
-      return(StatusCode::FAILURE);
-   }
-   // Retrieve IncidentSvc
-   if (!m_incidentSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get IncidentSvc");
-      return(StatusCode::FAILURE);
-   }
+
+   ATH_CHECK( m_incidentSvc.retrieve() );
+
    return(StatusCode::SUCCESS);
 }
 
@@ -133,7 +115,7 @@ StatusCode AthenaSharedMemoryTool::makeServer(int num, const std::string& stream
       return StatusCode::FAILURE;
    }
    shm->truncate(m_maxSize);
-   m_payload = new boost::interprocess::mapped_region(*shm, boost::interprocess::read_write, 0, m_maxSize);
+   m_payload = std::make_unique<boost::interprocess::mapped_region>(*shm, boost::interprocess::read_write, 0, m_maxSize);
    const std::string statusName = m_sharedMemory.value() + "_status";
    std::optional<boost::interprocess::shared_memory_object> shm_status;
    try {
@@ -143,7 +125,7 @@ StatusCode AthenaSharedMemoryTool::makeServer(int num, const std::string& stream
       return StatusCode::FAILURE;
    }
    shm_status->truncate(num * sizeof(ShareEventHeader));
-   m_status = new boost::interprocess::mapped_region(*shm_status, boost::interprocess::read_write, 0, num * sizeof(ShareEventHeader));
+   m_status = std::make_unique<boost::interprocess::mapped_region>(*shm_status, boost::interprocess::read_write, 0, num * sizeof(ShareEventHeader));
    ShareEventHeader evtH = { ShareEventHeader::UNLOCKED, -1, -1, 0, 0, 0, "" };
    std::memcpy(evtH.token, streamPortSuffix.c_str(), maxTokenLength - 1);
    evtH.token[maxTokenLength - 1] = 0;
@@ -178,8 +160,8 @@ StatusCode AthenaSharedMemoryTool::makeClient(int num, std::string& streamPortSu
       while (evtH->evtProcessStatus != ShareEventHeader::UNLOCKED) {
          usleep(100);
       }
-      delete m_payload ; m_payload = nullptr;
-      delete m_status ; m_status = nullptr;
+      m_payload.reset();
+      m_status.reset();
       m_isClient = false;
       return(StatusCode::SUCCESS);
    }
@@ -189,11 +171,11 @@ StatusCode AthenaSharedMemoryTool::makeClient(int num, std::string& streamPortSu
          boost::interprocess::shared_memory_object shm_status(boost::interprocess::open_only,
 	         statusName.c_str(),
 	         boost::interprocess::read_write);
-         m_status = new boost::interprocess::mapped_region(shm_status, boost::interprocess::read_write, num * sizeof(ShareEventHeader), sizeof(ShareEventHeader));
+         m_status = std::make_unique<boost::interprocess::mapped_region>(shm_status, boost::interprocess::read_write, num * sizeof(ShareEventHeader), sizeof(ShareEventHeader));
          boost::interprocess::shared_memory_object shm(boost::interprocess::open_only,
 	         m_sharedMemory.value().c_str(),
 	         boost::interprocess::read_write);
-         m_payload = new boost::interprocess::mapped_region(shm, boost::interprocess::read_write, 0, m_maxSize);
+         m_payload = std::make_unique<boost::interprocess::mapped_region>(shm, boost::interprocess::read_write, 0, m_maxSize);
          m_isClient = true;
       } catch (boost::interprocess::interprocess_exception& e) {
          usleep(100000);
@@ -359,17 +341,16 @@ StatusCode AthenaSharedMemoryTool::getObject(void** target, size_t& nbytes, int 
       evtH->evtOffset += sizeof(size_t);
       *target = static_cast<char*>(m_payload->get_address()) + evtH->evtOffset;
       evtH->evtOffset += nbytes;
+      return(StatusCode::SUCCESS); // return object
    }
-   if (evtH->evtOffset == evtSize) {
-      evtH->evtOffset = 0;
-      m_status->flush(num * sizeof(ShareEventHeader), sizeof(ShareEventHeader));
-      while (evtH->evtProcessStatus != ShareEventHeader::FILLED) {
-         usleep(10);
-      }
-      evtH->evtProcessStatus = ShareEventHeader::UNLOCKED;
+   nbytes = 0;
+   evtH->evtOffset = 0;
+   m_status->flush(num * sizeof(ShareEventHeader), sizeof(ShareEventHeader));
+   while (evtH->evtProcessStatus != ShareEventHeader::FILLED) {
+      usleep(10);
    }
-
-   return(StatusCode::SUCCESS);
+   evtH->evtProcessStatus = ShareEventHeader::UNLOCKED;
+   return(StatusCode::SUCCESS); // unlock server
 }
 
 //___________________________________________________________________________

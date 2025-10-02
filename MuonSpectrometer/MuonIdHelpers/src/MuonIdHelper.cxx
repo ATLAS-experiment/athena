@@ -7,8 +7,10 @@
 
 const std::string MuonIdHelper::BAD_NAME = "UNKNOWN";
 
-MuonIdHelper::MuonIdHelper(const std::string& logName) :
-    AtlasDetectorID(logName.empty() ? "MuonIdHelper" : logName) {
+MuonIdHelper::MuonIdHelper(const std::string& logName,
+                           const std::string& group) :
+    AtlasDetectorID(logName.empty() ? "MuonIdHelper" : logName, group)
+{
 }
 
 int MuonIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
@@ -184,11 +186,13 @@ int MuonIdHelper::get_expanded_id_calc(const Identifier& compact_id, ExpandedIde
             result = 0;
         } else if (0 == begin) {
             ExpandedIdentifier empty;
-            result = m_dict->unpack(compact_id, empty, end, id);
+            result = m_dict->unpack(this->group(), compact_id, empty, end, id);
+            // Ensure that the expected number of fields were unpacked.
+            if (id.fields() != end+1) result = 1;
         } else {
             // Non-zero prefix - we assume that the prefix contains
             // the IdDet level
-            result = m_dict->unpack(compact_id, context->prefix_id(), end, id);
+            result = m_dict->unpack(this->group(), compact_id, context->prefix_id(), end, id);
         }
     }
     if (!id.isValid()) {
@@ -265,14 +269,14 @@ int MuonIdHelper::initLevelsFromDict() {
     // Find a Muon region
     IdDictField* field = m_dict->find_field("subdet");
     if (field) {
-        m_MUON_INDEX = field->m_index;
+        m_MUON_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'subdet' field ");
         return 1;
     }
     field = m_dict->find_field("stationName");
     if (field) {
-        m_NAME_INDEX = field->m_index;
+        m_NAME_INDEX = field->index();
 
         if (m_stationIdxToNameMap.empty()) {
             // we only need to fill the vectors and sets once
@@ -303,21 +307,21 @@ int MuonIdHelper::initLevelsFromDict() {
     }
     field = m_dict->find_field("stationEta");
     if (field) {
-        m_ETA_INDEX = field->m_index;
+        m_ETA_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stationEta' field ");
         return 1;
     }
     field = m_dict->find_field("stationPhi");
     if (field) {
-        m_PHI_INDEX = field->m_index;
+        m_PHI_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stationPhi' field ");
         return 1;
     }
     field = m_dict->find_field("technology");
     if (field) {
-        m_TECHNOLOGY_INDEX = field->m_index;
+        m_TECHNOLOGY_INDEX = field->index();
 
         if (m_technologyNameToIdxMap.empty()) {
             for (size_t i = 0; i < field->get_label_number(); ++i) {
@@ -336,16 +340,16 @@ int MuonIdHelper::initLevelsFromDict() {
     m_MODULE_INDEX = m_TECHNOLOGY_INDEX;
 
     // Set the field implementations down to the technology
-    const IdDictRegion& region = *m_dict->m_regions[m_station_region_index];
-    m_muon_impl = region.m_implementation[m_MUON_INDEX];
-    m_sta_impl = region.m_implementation[m_NAME_INDEX];
+    const IdDictRegion& region = m_dict->region(m_station_region_index);
+    m_muon_impl = region.implementation(m_MUON_INDEX);
+    m_sta_impl = region.implementation(m_NAME_INDEX);
 
     // m_stationNameField = m_dict->find_field ("stationName"); // Philipp
     // m_technologyField  = m_dict->find_field ("technology"); // Philipp
     return 0;
 }
 
-int MuonIdHelper::init_hashes(void) {
+int MuonIdHelper::init_hashes() {
     //
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for modules
@@ -391,7 +395,7 @@ int MuonIdHelper::init_hashes(void) {
     return 0;
 }
 
-int MuonIdHelper::init_detectorElement_hashes(void) {
+int MuonIdHelper::init_detectorElement_hashes() {
     //
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for readout channels
@@ -437,7 +441,7 @@ int MuonIdHelper::init_detectorElement_hashes(void) {
     return 0;
 }
 
-int MuonIdHelper::init_channel_hashes(void) {
+int MuonIdHelper::init_channel_hashes() {
     //
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for readout channels
@@ -517,7 +521,7 @@ int MuonIdHelper::get_next_in_eta(const IdentifierHash& id, IdentifierHash& next
     return 1;
 }
 
-int MuonIdHelper::init_neighbors(void) {
+int MuonIdHelper::init_neighbors() {
     //
     // create a vector(s) to retrieve the hashes for compact ids for
     // module neighbors.
@@ -645,7 +649,7 @@ int MuonIdHelper::init_neighbors(void) {
     return 0;
 }
 
-void MuonIdHelper::test_module_packing(void) const {
+void MuonIdHelper::test_module_packing() const {
     if (m_dict) {
         int nids = 0;
         IdContext context = module_context();
@@ -711,10 +715,12 @@ void MuonIdHelper::addStationID(Identifier& id, int stationName, int stationEta,
 int MuonIdHelper::stationRegion(const Identifier& id) const {
     std::string name = stationNameString(stationName(id));
 
-    if ('I' == name[1] || '4' == name[1]) return 0;
-    if ('E' == name[1] || '1' == name[1]) return 1;
-    if ('M' == name[1] || '2' == name[1]) return 2;
-    if ('O' == name[1] || '3' == name[1]) return 3;
+    if (name.size() >= 2) {
+      if ('I' == name[1] || '4' == name[1]) return 0;
+      if ('E' == name[1] || '1' == name[1]) return 1;
+      if ('M' == name[1] || '2' == name[1]) return 2;
+      if ('O' == name[1] || '3' == name[1]) return 3;
+    }
     if (name == "CSS" || name == "CSL") return 0;
     ATH_MSG_ERROR(" MuonId::stationRegion / id = " << show_to_string(id) << " stationnamestring = " << name);
     return -1;
@@ -723,45 +729,45 @@ int MuonIdHelper::stationRegion(const Identifier& id) const {
 /*******************************************************************************/
 Identifier MuonIdHelper::muon() const { return AtlasDetectorID::muon(); }
 /*******************************************************************************/
-IdContext MuonIdHelper::technology_context(void) const {
+IdContext MuonIdHelper::technology_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_TECHNOLOGY_INDEX));
 }
 /*******************************************************************************/
-IdContext MuonIdHelper::module_context(void) const {
+IdContext MuonIdHelper::module_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_MODULE_INDEX));
 }
 /*******************************************************************************/
-IdContext MuonIdHelper::detectorElement_context(void) const {
+IdContext MuonIdHelper::detectorElement_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_DETECTORELEMENT_INDEX));
 }
 /*******************************************************************************/
-IdContext MuonIdHelper::channel_context(void) const {
+IdContext MuonIdHelper::channel_context() const {
     ExpandedIdentifier id;
     return (IdContext(id, 0, m_CHANNEL_INDEX));
 }
 /*******************************************************************************/
-const MultiRange& MuonIdHelper::multiRange(void) const { return m_full_module_range; }
+const MultiRange& MuonIdHelper::multiRange() const { return m_full_module_range; }
 /*******************************************************************************/
-MuonIdHelper::size_type MuonIdHelper::module_hash_max(void) const { return m_module_hash_max; }
+MuonIdHelper::size_type MuonIdHelper::module_hash_max() const { return m_module_hash_max; }
 /*******************************************************************************/
-MuonIdHelper::size_type MuonIdHelper::channel_hash_max(void) const { return m_channel_hash_max; }
+MuonIdHelper::size_type MuonIdHelper::channel_hash_max() const { return m_channel_hash_max; }
 /*******************************************************************************/
-const std::vector<Identifier>& MuonIdHelper::idVector(void) const { return m_module_vec; }
+const std::vector<Identifier>& MuonIdHelper::idVector() const { return m_module_vec; }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::module_begin(void) const { return (m_module_vec.begin()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::module_begin() const { return (m_module_vec.begin()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::module_end(void) const { return (m_module_vec.end()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::module_end() const { return (m_module_vec.end()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_begin(void) const { return (m_detectorElement_vec.begin()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_begin() const { return (m_detectorElement_vec.begin()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_end(void) const { return (m_detectorElement_vec.end()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::detectorElement_end() const { return (m_detectorElement_vec.end()); }
 
-MuonIdHelper::const_id_iterator MuonIdHelper::channel_begin(void) const { return (m_channel_vec.begin()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::channel_begin() const { return (m_channel_vec.begin()); }
 /*******************************************************************************/
-MuonIdHelper::const_id_iterator MuonIdHelper::channel_end(void) const { return (m_channel_vec.end()); }
+MuonIdHelper::const_id_iterator MuonIdHelper::channel_end() const { return (m_channel_vec.end()); }
 /*******************************************************************************/
 // Check common station fields
 bool MuonIdHelper::validStation(int stationName, int technology) const { return validStation(stationName) && validTechnology(technology); }

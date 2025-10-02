@@ -419,7 +419,7 @@ StatusCode AFPSiLayerAlgorithm::fillHistogramsPlaneEff(const xAOD::AFPSiHitConta
 	AFPMon::AFPFastReco fast(&afpHitContainer);
 	fast.reco();
 
-	int min_hits[4] = {2, 3, 3, 2};
+	int min_hits[4] = {3, 3, 3, 3};
 	int numStations = 4;
 	int numPlanes = 4;
 	
@@ -443,10 +443,10 @@ StatusCode AFPSiLayerAlgorithm::fillHistogramsPlaneEff(const xAOD::AFPSiHitConta
 	
 	// Precomputed tag planes
 	std::array<std::set<int>, 4> precomputed_tag_planes = {
-		std::set<int>{0, 2, 3},      
+		std::set<int>{0, 1, 2, 3},      
 		std::set<int>{0, 1, 2, 3},   
 		std::set<int>{0, 1, 2, 3},   
-		std::set<int>{1, 2, 3}       
+		std::set<int>{0, 1, 2, 3}       
 	};
 	
 	// Precomputed clusters by Stations and Planes  
@@ -467,7 +467,7 @@ StatusCode AFPSiLayerAlgorithm::fillHistogramsPlaneEff(const xAOD::AFPSiHitConta
 			tag_planes.erase(iPlane);
 
 			std::vector<int> v_tag_planes(tag_planes.begin(), tag_planes.end());
-			int seed = v_tag_planes[0]; // Take first station as a seed
+			int seed = v_tag_planes[0]; // Take first plane as a seed
 			
 			// Iterate only stations coresponding to the given Station and Layer
 			for (const auto& cluster : clusters_by_station_layer[iStation][seed]) {

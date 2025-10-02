@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -32,8 +32,6 @@
 #include "TauAnalysisTools/TauSelectionTool.h"
 #include "TauAnalysisTools/TauSmearingTool.h"
 #include "TauAnalysisTools/TauTruthMatchingTool.h"
-
-#include "PileupReweighting/PileupReweightingTool.h"
 
 // Smart Slimming include(s):
 #include "xAODCore/tools/IOStats.h"
@@ -118,14 +116,6 @@ int main( int argc, char* argv[] )
   const xAOD::EventInfo* xEventInfo = 0;
   const xAOD::TauJetContainer* xTauJetContainer = 0;
 
-  CP::PileupReweightingTool* m_tPRWTool = new CP::PileupReweightingTool("PileupReweightingTool");
-  if (m_doTrigger){//dont initialize tool if not requested
-    std::vector<std::string> vLumiCalcFiles = {"/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data15_13TeV/20200803/ilumicalc_histograms_None_282026-282457_OflLumi-13TeV-009.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data16_13TeV/20190708/ilumicalc_histograms_None_297730-311481_OflLumi-13TeV-010.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20221025/ilumicalc_histograms_None_428648-436169_OflLumi-Run3-001.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20221025/ilumicalc_histograms_None_430536-436169_OflLumi-Run3-001.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/20190609/ilumicalc_histograms_None_276262-284484_OflLumi-13TeV-010.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/20190609/ilumicalc_histograms_None_325713-340453_OflLumi-13TeV-010.root"};
-    CHECK(m_tPRWTool->setProperty("LumiCalcFiles", vLumiCalcFiles));
-    // CHECK(m_tPRWTool->setProperty("DefaultChannel", "" ));
-    CHECK(m_tPRWTool->initialize());
-  }
-  ToolHandle<CP::IPileupReweightingTool> m_tPRWToolHandle = m_tPRWTool;
   // ===========================================================================
   // TauSelectionTool
   // ===========================================================================
@@ -142,15 +132,13 @@ int main( int argc, char* argv[] )
   CHECK(TauSelTool->setProperty("SelectionCuts", int(CutPt|CutJetIDWP|CutEleIDWP) ));
   CHECK(TauSelTool->initialize());
 
-  ToolHandle<TauAnalysisTools::ITauSelectionTool> TauSelToolHandle = TauSelTool;
-
   // ===========================================================================
   // TauSmearingTool
   // ===========================================================================
   TauAnalysisTools::TauSmearingTool TauSmeTool( "TauSmearingTool" );
   TauSmeTool.msg().setLevel( MSG::DEBUG );
-  CHECK(TauSmeTool.setProperty("RecommendationTag","2022-prerec"));
-  CHECK(TauSmeTool.setProperty("Campaign","mc21"));
+  CHECK(TauSmeTool.setProperty("RecommendationTag","2025-prerec"));
+  CHECK(TauSmeTool.setProperty("Campaign","mc23")); // can be also set to mc20 depending on the mc campaign 
   CHECK(TauSmeTool.initialize());
 
   // restructure all recommended systematic variations for smearing tool
@@ -166,9 +154,10 @@ int main( int argc, char* argv[] )
   // ===========================================================================
   TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffCorrTool( "TauEfficiencyCorrectionsTool" );
   TauEffCorrTool.msg().setLevel( MSG::VERBOSE );
-  CHECK(TauEffCorrTool.setProperty("JetIDLevel", (int)TauAnalysisTools::JetID::JETIDRNNMEDIUM));
-  CHECK(TauEffCorrTool.setProperty("EfficiencyCorrectionTypes", (int)TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau));
-  CHECK(TauEffCorrTool.setProperty("RecommendationTag","2022-prerec"));
+  CHECK(TauEffCorrTool.setProperty("JetIDLevel", static_cast<int>(TauAnalysisTools::JetID::JETIDRNNMEDIUM)));
+  CHECK(TauEffCorrTool.setProperty("EfficiencyCorrectionTypes", static_cast<int>(TauAnalysisTools::EfficiencyCorrectionType::SFJetIDHadTau)));
+  CHECK(TauEffCorrTool.setProperty("RecommendationTag","2025-prerec"));
+  CHECK(TauEffCorrTool.setProperty("Campaign", "mc23")); // can be also set to mc20 depending on the mc campaign 
   CHECK(TauEffCorrTool.initialize());
 
   // restructure all recommended systematic variations for efficiency tools
@@ -183,26 +172,25 @@ int main( int argc, char* argv[] )
   // ===========================================================================
   // TauEfficiencyCorrectionsTriggerTool
   // ===========================================================================
-    TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffTrigTool( "TauEfficiencyCorrectionsTriggerTool" );
-    // restructure all recommended systematic variations for efficiency tools
-    std::vector<CP::SystematicSet> vEfficiencyCorrectionsTriggerSystematicSet;
-    if (m_doTrigger){
+  TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffTrigTool( "TauEfficiencyCorrectionsTriggerTool" );
+  // restructure all recommended systematic variations for efficiency tools
+  std::vector<CP::SystematicSet> vEfficiencyCorrectionsTriggerSystematicSet;
+  if (m_doTrigger){
 
-      TauEffTrigTool.msg().setLevel( MSG::DEBUG );
-      CHECK(TauEffTrigTool.setProperty("EfficiencyCorrectionTypes", std::vector<int>({SFTriggerHadTau}) ));
-      CHECK(TauEffTrigTool.setProperty("TriggerName", "HLT_tau25_medium1_tracktwo" ));
-      CHECK(TauEffTrigTool.setProperty("JetIDLevel", (int)JETIDRNNMEDIUM ));
-      CHECK(TauEffTrigTool.setProperty("PileupReweightingTool", m_tPRWToolHandle ));
-      CHECK(TauEffTrigTool.setProperty("TriggerSFMeasurement", "combined"));
-      CHECK(TauEffTrigTool.initialize());
+    TauEffTrigTool.msg().setLevel( MSG::DEBUG );
+    CHECK(TauEffTrigTool.setProperty("EfficiencyCorrectionTypes", std::vector<int>({SFTriggerHadTau}) ));
+    CHECK(TauEffTrigTool.setProperty("TriggerName", "HLT_tau25_mediumRNN_tracktwoMVA" ));
+    CHECK(TauEffTrigTool.setProperty("JetIDLevel", static_cast<int>(JETIDRNNMEDIUM) ));
+    CHECK(TauEffTrigTool.setProperty("Campaign", "mc23a")); // can be also set to mc23d depending on the mc campaign 
+    CHECK(TauEffTrigTool.initialize());
 
+    vEfficiencyCorrectionsTriggerSystematicSet.push_back(CP::SystematicSet());
+    for (auto SystematicsVariation : TauEffTrigTool.recommendedSystematics())
+    {
       vEfficiencyCorrectionsTriggerSystematicSet.push_back(CP::SystematicSet());
-      for (auto SystematicsVariation : TauEffTrigTool.recommendedSystematics())
-	{
-	  vEfficiencyCorrectionsTriggerSystematicSet.push_back(CP::SystematicSet());
-	  vEfficiencyCorrectionsTriggerSystematicSet.back().insert(SystematicsVariation);
-	}
-    }  
+      vEfficiencyCorrectionsTriggerSystematicSet.back().insert(SystematicsVariation);
+    }
+  }  
   // ===========================================================================
   // TauTruthMatchingTool
   // ===========================================================================
@@ -224,12 +212,6 @@ int main( int argc, char* argv[] )
   // Loop over the events:
   for( Long64_t iEntry = 0; iEntry < iEntries; ++iEntry )
   {
-
-    //Check TauJet Container Name
-    const char * m_tauJetContainerName = "TauJets";
-    
-    
-
     // Tell the object which entry to look at:
     xEvent.getEntry( iEntry );
 
@@ -243,6 +225,9 @@ int main( int argc, char* argv[] )
             static_cast< int >( xEventInfo->runNumber() ),
             static_cast< int >( iEntry ) );
 
+
+    //Check TauJet Container Name
+    const char * m_tauJetContainerName = "TauJets";
     if (xEvent.contains<xAOD::TauJetContainer>(m_tauJetContainerName)){			  
       RETRIEVE(xAOD::TauJetContainer, xTauJetContainer, m_tauJetContainerName);
     }else{
@@ -269,13 +254,12 @@ int main( int argc, char* argv[] )
     {
       // perform truth matching
       auto xTruthTau = T2MT.getTruth(*xTau);
-      // if (xTau->pt() < 25*1000) continue;
 
-      if ((bool)acc_IsTruthMatched(*xTau))
+      if (static_cast<bool>(acc_IsTruthMatched(*xTau)))
       {
         if (xTruthTau->isTau())
         {
-          if ((bool)acc_IsHadronicTau(*xTruthTau))
+          if (static_cast<bool>(acc_IsHadronicTau(*xTruthTau)))
             Info( "TauAnalysisToolsExample",
                   "Tau was matched to a truth hadronic tau, which has %i prongs and a charge of %i",
                   int(acc_numCharged(*xTruthTau)),
@@ -322,7 +306,7 @@ int main( int argc, char* argv[] )
         CHECK( TauSmeTool.applySystematicVariation(sSystematicSet)) ;
         CHECK( TauSmeTool.applyCorrection(*xTau) );
         //Skip TES uncertainty print out for non-had taus
-        if ((bool)acc_IsTruthMatched(*xTau) && xTruthTau->isTau() && (bool)acc_IsHadronicTau(*xTruthTau)){
+        if (static_cast<bool>(acc_IsTruthMatched(*xTau)) && xTruthTau->isTau() && static_cast<bool>(acc_IsHadronicTau(*xTruthTau))){
         Info( "TauAnalysisToolsExample",
               "Smeared tau pt: %g for type %s ",
               xTau->pt(),

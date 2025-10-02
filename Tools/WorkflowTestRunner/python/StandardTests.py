@@ -4,8 +4,8 @@ from typing import List
 from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
 from .Inputs import input_EVNT, input_HITS, \
     input_HITS_unfiltered, \
-    input_RDO_BKG, input_BS_minimum_bias_overlay, \
-    input_HITS_data_overlay, input_BS_SKIM, \
+    input_RDO_BKG, input_RDO_BKG_data, input_BS_minimum_bias_overlay, \
+    input_EVNT_data_overlay, input_HITS_data_overlay, \
     input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino, \
     input_HITS_minbias_low_fulltruth, input_HITS_minbias_high_fulltruth, \
     input_AOD
@@ -135,16 +135,28 @@ class DataOverlayTest(WorkflowTest):
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 10"
 
-        self.command = \
-            (f"Overlay_tf.py --AMIConfig {ID}"
-             f" --inputHITSFile {input_HITS_data_overlay[run]} --inputBS_SKIMFile {input_BS_SKIM[run]} --outputRDOFile myRDO.pool.root"
-             " --triggerConfig 'Overlay=NONE'"  # disable trigger for now
-             f" --imf False {extra_args}")
+        if type is WorkflowType.DataOverlayChain:
+            self.command = \
+                (f"FastChain_tf.py --AMIConfig {ID}"
+                f" --inputEVNTFile {input_EVNT_data_overlay[run]} --inputRDO_BKGFile {input_RDO_BKG_data[run]} --outputHITSFile myHITS.pool.root --outputRDOFile myRDO.pool.root"
+                f" --imf False {extra_args}")
+        else:
+            self.command = \
+                (f"Overlay_tf.py --AMIConfig {ID}"
+                f" --inputHITSFile {input_HITS_data_overlay[run]} --inputRDO_BKGFile {input_RDO_BKG_data[run]} --outputRDOFile myRDO.pool.root"
+                f" --imf False {extra_args}")
 
-        self.output_checks = [
+        self.output_checks = []
+        if type is WorkflowType.DataOverlayChain:
+            self.output_checks.extend([
+                FrozenTier0PolicyCheck(setup, "HITS", 10),
+                MetadataCheck(setup, "HITS"),
+            ])
+
+        self.output_checks.extend([
             FrozenTier0PolicyCheck(setup, "RDO", 10),
             MetadataCheck(setup, "RDO"),
-        ]
+        ])
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -217,6 +229,7 @@ class DerivationTest(WorkflowTest):
             extra_args += f" --maxEvents {events}"
             format_flush = ", ".join([f"\"DAOD_{format}\": {flush}" for format in formats])
             extra_args += f" --preExec 'flags.Output.TreeAutoFlush={{{format_flush}}}'"
+
         if "inputAODFile" not in extra_args:
             extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
 
@@ -237,6 +250,38 @@ class DerivationTest(WorkflowTest):
         for format in formats:
             self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
             self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
+
+        super().__init__(ID, run, type, steps, setup)
+
+class DerivationTestMT(WorkflowTest):
+    """Derivations test with AthenaMT"""
+
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+        test_def = ID.split("_")
+        data_type = test_def[0].lower()
+        formats = [format.upper() for format in test_def[1:-1]]
+        extra_args = extra_args.replace("mtDerivation", "")
+
+        threads = 0
+        if setup.custom_threads is not None:
+            threads = setup.custom_threads
+
+        if "maxEvents" not in extra_args:
+            events = 10
+            extra_args += f" --maxEvents {events}"
+
+        if "inputAODFile" not in extra_args:
+            extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
+
+        self.command = \
+            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
+             f" --athenaopts='--threads=1'"
+             f" --formats {' '.join(formats)}"
+             " --outputDAODFile myOutput.pool.root"
+             f" --imf False {extra_args}")
+
+        # skip performance checks for now
+        self.skip_performance_checks = True
 
         super().__init__(ID, run, type, steps, setup)
 

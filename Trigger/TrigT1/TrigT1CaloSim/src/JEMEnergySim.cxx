@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // /***************************************************************************
@@ -16,8 +16,7 @@
 //
 //
 
-// Utilities
-#include <cmath>
+
 
 // This algorithm includes
 #include "JEMEnergySim.h"
@@ -25,7 +24,7 @@
 
 #include "TrigT1Interfaces/TrigT1Interfaces_ClassDEF.h"
 #include "xAODTrigL1Calo/JetElementContainer.h"
-#include "TrigT1CaloEvent/EnergyCMXData_ClassDEF.h"
+#include "TrigT1CaloEvent/EnergyCMXData.h"
 #include "TrigT1CaloUtils/ModuleEnergy.h"
 
 
@@ -133,15 +132,6 @@ void LVL1::JEMEnergySim::storeJEMEtSums() {
     ATH_MSG_ERROR ( "Error registering JEMEtSums collection in TDS " );
   }
 
-
-  // StatusCode sc = evtStore()->overwrite(JEMRvector, m_jemEtSumsLocation, true);
-  // if (sc != StatusCode::SUCCESS) ATH_MSG_ERROR ( "Error registering JEMEtSums collection in TDS " );
-  // else {
-  //   StatusCode sc2 = evtStore()->setConst(JEMRvector);
-  //   if (sc2 != StatusCode::SUCCESS) ATH_MSG_ERROR ( "error setting JEMResult vector constant" );
-  // }
-  
-  // return;
 }
 
 /** Form EnergyCMXData and put into SG */
@@ -165,11 +155,7 @@ void LVL1::JEMEnergySim::storeBackplaneData() {
   if (sc != StatusCode::SUCCESS) {
     ATH_MSG_ERROR ( "Error registering EnergyCMXData collection in TDS " );
   }
-  
-  // StatusCode sc = evtStore()->overwrite(bpVector, m_energyCMXDataLocation, true);
-  // if (sc != StatusCode::SUCCESS) ATH_MSG_ERROR ( "Error registering EnergyCMXData collection in TDS " );
-  
-  // return;
+ 
 }
 
 

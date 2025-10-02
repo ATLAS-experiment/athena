@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -189,7 +189,7 @@ def IDCalibFTFSequenceGenCfg(flags):
 
     msca = MenuSequence(
         flags, selAcc,
-        HypoToolGen = lambda chainDict: CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
+        HypoToolGen = lambda flags, chainDict: CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
     )
     return msca
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictDictionary_H
@@ -15,7 +15,7 @@
 
 
 class IdDictField;
-struct IdDictLabel;
+class IdDictLabel;
 class IdDictSubRegion;
 class IdDictRegion;
 class IdDictGroup;
@@ -29,12 +29,50 @@ class IdDictDictEntry;
 
 class IdDictDictionary  {  
 public:  
-    typedef Identifier::value_type value_type;
-    typedef Identifier::size_type size_type; 
- 
+    using value_type = Identifier::value_type;
+    using size_type  = Identifier::size_type;
+
+    // ==================================
+    //** @name Constructor/destructor
+    // @{
+
     IdDictDictionary ();  
-    ~IdDictDictionary ();  
-  
+    IdDictDictionary (const std::string& name,
+                      const std::string& version = "",
+                      const std::string& date = "",
+                      const std::string& author = "");
+    ~IdDictDictionary ();
+
+
+    //@}
+    // ==================================
+    //** @name Simple accessors.
+    // @{
+
+    /// Dictionary name
+    const std::string& name() const;
+
+    /// Dictionary version
+    const std::string& version() const;
+
+    /// Number of contained regions.
+    size_t n_regions() const;
+
+    /// Region at index i.
+    const IdDictRegion& region(size_t i) const;
+
+    /// Access to file name
+    const std::string&  file_name() const;
+
+    /// Access to the dictionary tag
+    const std::string&  dict_tag() const;
+
+
+    //@}
+    // ==================================
+    //** @name Search for field/label/region by name.
+    // @{
+
     IdDictField* find_field (const std::string& name) const;  
     IdDictLabel* find_label (const std::string& field, const std::string& label) const;
     int get_label_value (const std::string& field, const std::string& label, int& value) const;  // > 0 == error
@@ -44,25 +82,52 @@ public:
     IdDictGroup* find_group (const std::string& group_name) const;
 
 
+    //@}
+    // ==================================
+    //** @name Find first region that matches id
+    // @{
+
+    int find_region(const ExpandedIdentifier& id, size_type& index) const;
+    IdDictRegion* find_region(const ExpandedIdentifier& id) const;
+    IdDictRegion* find_region(const ExpandedIdentifier& id,const std::string& group_name) const;
+
+
+    //@}
+    // ==================================
+    //** @name Methods used to initialize the object.
+    // @{
+
+    /// Non-const access to vector of all regions.
+    const std::vector<IdDictRegion*>& all_regions();
+
     void add_field (IdDictField* field);  
     void add_subregion (IdDictSubRegion* subregion);  
     void add_dictentry (IdDictDictEntry* entry);
+    void add_region (IdDictRegion* region);
     void add_subdictionary_name (const std::string& name);  
+    void set_parent_dict (IdDictDictionary* parent_dict);
+
+    /// Set file name
+    void                set_file_name    (const std::string& name);
+
+    /// Set the dictionary tag
+    void                set_dict_tag     (const std::string& tag);
+
     void resolve_references (const IdDictMgr& idd);  
     void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");  
     void reset_implementation ();  
     bool verify   () const;
-    void sort     ();  
-    void clear    (); 
+    void sort     ();
+    void clear    ();
 
-
-    /// Find first region that matches id
-    int find_region(const ExpandedIdentifier& id, size_type& index) const;
-    IdDictRegion* find_region(const ExpandedIdentifier& id) const;
-    IdDictRegion* find_region(const ExpandedIdentifier& id,const std::string& group_name) const;
-    
     ///  Set up integral of bits for efficient unpacking
     void integrate_bits ();
+
+
+    //@}
+    // ==================================
+    //** @name Range building
+    // @{
 
     ///  Get MultiRange for full dictionary
     MultiRange build_multirange () const; 
@@ -85,7 +150,13 @@ public:
                                  const std::string& group_name,
                                  const Range& prefix = Range(),
                                  const std::string& last_field = "") const; 
- 
+
+
+    //@}
+    // ==================================
+    //** @name Packing and unpacking
+    // @{
+
     /** 
      *   Pack to 32bits the subset of id between (inclusive) index1
      *   and index2 - this is generic, i.e. not the most efficient
@@ -138,21 +209,27 @@ public:
 
 
     /** 
-     *  Unpack the value_type id to an expanded Identifier, considering
-     *  the provided prefix (result will include the prefix) and up to
-     *  index2 - (index1 is assumed to be 0, i.e. part of prefix). 
+     *  Unpack the value_type id to an expanded Identifier for a given group,
+     *  considering the provided prefix (result will include the prefix)
+     *  and up to index2 - (index1 is assumed to be 0, i.e. part of prefix).
+     *
+     *  Returns 0 on success, nonzero on error.
      */
-    int unpack (const Identifier& id, 
+    int unpack (const std::string& group,
+                const Identifier& id,
                 const ExpandedIdentifier& prefix,
                 size_t index2,
-                ExpandedIdentifier& unpackedId) const; 
+                ExpandedIdentifier& unpackedId) const;
    
     /** 
-     *  Unpack the value_type id to a string, considering the provided
-     *  prefix (result will include the prefix) and up to index2 -
-     *  (index1 is assumed to be 0, i.e. part of prefix).
+     *  Unpack the value_type id to a string for a given group,
+     *  considering the provided prefix (result will include the prefix)
+     *  and up to index2 - (index1 is assumed to be 0, i.e. part of prefix).
+     *
+     *  Returns 0 on success, nonzero on error.
      */
-    int unpack (const Identifier& id, 
+    int unpack (const std::string& group,
+                const Identifier& id,
                 const ExpandedIdentifier& prefix,
                 size_t index2,
                 const std::string& sep,
@@ -188,47 +265,47 @@ public:
               size_t region_index,
               Identifier& idout) const; 
  
+
+    //@}
+    // ==================================
+    //** @name Configuration and diagnostics
+    // @{
+
     /// Checks are performed by default in debug compilation and NOT
     /// in optimized compilation. One can switch or query this mode for
     /// any idHelper with the following methods:
-    bool                do_checks       (void) const;
+    bool                do_checks       () const;
     void                set_do_checks   (bool do_checks);
 
     /// Neighbour initialization is performed by default
     /// One can switch or query this mode for
     /// any idHelper with the following methods:
-    bool                do_neighbours           (void) const;
+    bool                do_neighbours           () const;
     void                set_do_neighbours       (bool do_neighbours);
 
-    /// Access to file name
-    const std::string&  file_name        (void) const;
-    
-    /// Access to the dictionary tag
-    const std::string&  dict_tag         (void) const; 
-
-    /// Set file name
-    void                set_file_name    (const std::string& name);
-   
-    /// Set the dictionary tag
-    void                set_dict_tag     (const std::string& tag);
+    /// Dump regions and trees for each group.
+    void dump() const;
 
 
-    std::string m_name{};  
+    //@}
+
+private:
+    std::string m_name{};
     std::string m_version{};  
     std::string m_date{};  
     std::string m_author{};  
   
-    typedef std::vector<IdDictDictEntry*> entries_type;
-    typedef entries_type::iterator        entries_it;
-    typedef entries_type::const_iterator  entries_const_it;
+    using entries_type = std::vector<IdDictDictEntry*>;
+    using entries_it   = entries_type::iterator;
+    using entries_const_it = entries_type::const_iterator;
 
-    typedef std::vector<IdDictRegion*>    regions_type;
-    typedef regions_type::iterator        regions_it;
-    typedef regions_type::const_iterator  regions_const_it;
+    using regions_type = std::vector<IdDictRegion*>;
+    using regions_it = regions_type::iterator;
+    using regions_const_it = regions_type::const_iterator;
 
-    typedef std::vector<IdDictGroup*>     groups_type;
-    typedef groups_type::iterator         groups_it;
-    typedef groups_type::const_iterator   groups_const_it;
+    using groups_type = std::vector<IdDictGroup*>;
+    using groups_it = groups_type::iterator;
+    using groups_const_it = groups_type::const_iterator;
 
     std::map<std::string, IdDictField*>   m_fields;  
     std::map<std::string, IdDictSubRegion*> m_subregions;  
@@ -238,7 +315,6 @@ public:
     std::vector<std::string>              m_subdictionary_names; 
     IdDictDictionary*                     m_parent_dict{nullptr};
 
-private:
     std::string m_file_name{};  
     std::string m_dict_tag{};  
     bool m_generated_implementation{false};
@@ -249,18 +325,54 @@ private:
 //-------------------
 // inline definitions
 //-------------------
- 
-/// Access to file name
+
+// Dictionary name.
+inline
+const std::string&
+IdDictDictionary::name() const
+{
+    return m_name;
+}
+
+
+// Dictionary version.
+inline
+const std::string&
+IdDictDictionary::version() const
+{
+    return m_version;
+}
+
+
+// Access region by index.
+inline
+const IdDictRegion&
+IdDictDictionary::region(size_t i) const
+{
+    return *m_regions.at(i);
+}
+
+
+// Number of regions
+inline
+size_t
+IdDictDictionary::n_regions() const
+{
+    return m_regions.size();
+}
+
+
+// Access to file name
 inline const std::string&
 IdDictDictionary::file_name() const{
-    return (m_file_name);
+    return m_file_name;
 }
 
     
 /// Access to the dictionary tag
 inline const std::string&
 IdDictDictionary::dict_tag( ) const{
-    return (m_dict_tag);
+    return m_dict_tag;
 }
 
 
@@ -275,6 +387,14 @@ IdDictDictionary::set_file_name(const std::string& name){
 inline void                
 IdDictDictionary::set_dict_tag(const std::string& tag){
     m_dict_tag = tag;
+}
+
+
+/// Non-const access to vector of all regions.
+inline
+const std::vector<IdDictRegion*>& IdDictDictionary::all_regions()
+{
+    return m_all_regions;
 }
 
 

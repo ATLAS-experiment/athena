@@ -20,6 +20,7 @@
 #ifndef XAOD_ANALYSIS
 // #include "TrkParameters/MeasuredPerigee.h"
 #endif
+#include "TruthUtils/ParticleConstants.h"
 
 namespace xAOD {
 
@@ -60,7 +61,7 @@ namespace xAOD {
   }
   
   double Muon_v1::m() const {
-    return 105.6583715;//FIXME - get this from someplace central? How heavy is TDatabasePDG::Instance()->GetParticle(pdg)?
+    return ParticleConstants::muonMassInMeV;
   }
 
   void Muon_v1::setP4(double pt, double eta, double phi)  {

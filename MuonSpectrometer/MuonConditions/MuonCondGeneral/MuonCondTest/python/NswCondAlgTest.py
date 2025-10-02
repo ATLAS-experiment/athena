@@ -13,7 +13,9 @@ def NSWCondAlgTest(flags,alg_name="NSWCondTestAlg", **kwargs):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from MuonCondTest.MdtCablingTester import SetupArgParser, setupServicesCfg
+    from MuonCondTest.MdtCablingTester import SetupArgParser
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA, configureCondTag
     
     parser = SetupArgParser()
     parser.add_argument("--LogName", default="LogFile", 
@@ -22,35 +24,16 @@ if __name__ == "__main__":
     parser.set_defaults(inputFile=[])
     args = parser.parse_args()
 
-    mcInputFile = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"
-    dataInputFile = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3Data.ESD.pool.root"
-
-    if(not args.inputFile):
-        if(args.isMC):
-            args.inputFile = [mcInputFile]
-        else:
-            args.inputFile = [dataInputFile]
-
-
     flags = initConfigFlags()
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
-    flags.Output.ESDFileName = args.output
-    flags.Input.Files = args.inputFile
+    flags.Input.Files = defaultTestFiles.ESD_RUN3_MC if args.isMC else defaultTestFiles.ESD_RUN3_DATA22
+   
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
+    flags.Exec.MaxEvents = 1
     flags.Muon.Calib.applyMmT0Correction = not args.isMC
+    configureCondTag(flags)
     flags.lock()
 
-    cfg = setupServicesCfg(flags)
-    msgService = cfg.getService('MessageSvc')
-    msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
-
+    cfg = SetupMuonStandaloneCA(flags)
     cfg.merge(NSWCondAlgTest(flags, LogName = args.LogName, isMC = flags.Input.isMC))
-    cfg.printConfig(withDetails=True, summariseProps=True)
-
-    flags.dump()
-
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
-
+    executeTest(cfg)

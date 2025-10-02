@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HLTSEEDING_CTPUNPACKINGTOOLBASE_H
@@ -28,7 +28,8 @@ public:
                        const std::string& name,
                        const IInterface* parent);
 
-  virtual StatusCode decode(const ROIB::RoIBResult& /*roib*/,
+  virtual StatusCode decode(const EventContext& ctx,
+                            const ROIB::RoIBResult& /*roib*/,
                             HLT::IDVec& /*enabledChains*/) const override;
 
   virtual StatusCode initialize() override;

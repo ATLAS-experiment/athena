@@ -33,6 +33,7 @@ namespace MuonValR4 {
             Gaudi::Property<bool> m_isMC{this, "isMC", true};
 
             SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EvtInfoKey", "EventInfo"};
+            Gaudi::Property<bool> m_writePileUp{this, "dumpPileUp", false};
 
             /**
              *  @brief Toggle whether the simHit collection of each sub detector shall

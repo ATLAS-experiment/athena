@@ -19,8 +19,8 @@ class BLMSensorSDTool : public SensitiveDetectorBase
   // Constructor
   BLMSensorSDTool(const std::string& type, const std::string& name, const IInterface *parent);
 
-  // Destructor
-  ~BLMSensorSDTool() {}
+  virtual StatusCode SetupEvent(HitCollectionMap&) override;
+  virtual StatusCode Gather(HitCollectionMap&) override;
 
 protected:
   // Make me an SD!

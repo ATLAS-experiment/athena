@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 "exec" "`which python`" "-tt" "$0" "$@"
 
@@ -7,8 +7,6 @@
 
 # This script allows you to run ROOT from python.
 # It has been heavily based (err... stolen) on athena.py from Wim
-
-from __future__ import print_function
 
 __author__  = 'Sebastien Binet (binet@cern.ch)'
 __doc__     = 'For details about pyroot.py, run "less `which pyroot.py`"'
@@ -147,10 +145,9 @@ if command:
    exec (command)
 del command
 
-from past.builtins import execfile
 for script in scripts:
    try:
-      execfile( script )
+      exec (open(script).read(), globals())
    except Exception as e:
       if isinstance(e,SystemExit):
          raise

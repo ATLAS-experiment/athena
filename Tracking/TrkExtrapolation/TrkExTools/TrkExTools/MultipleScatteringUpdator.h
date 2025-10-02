@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -64,17 +64,23 @@ public:
                              double deltaE = 0.) const override;
 
 private:
-  bool m_useTrkUtils;          //!< use eloss parametrisation from TrkUtils MaterialInterAction.h
-  bool m_log_include;          //!< boolean switch to include log term
-  bool m_gaussianMixture;      //!< mainly for Fatras
-  bool m_optGaussianMixtureG4; //!< modifies the Fruehwirth/Regler model to fit with G4
+  BooleanProperty m_useTrkUtils{this, "UseTrkUtils", true,
+      "use eloss parametrisation from TrkUtils MaterialInterAction.h"};
+  BooleanProperty m_log_include{this, "MultipleScatteringLogarithmicTermOn", true,
+    "boolean switch to include log term"};
+  BooleanProperty m_gaussianMixture{this, "GaussianMixtureModel", false,
+    "mainly for Fatras"};
+  BooleanProperty m_optGaussianMixtureG4{this, "G4OptimisedGaussianMixtureModel", true,
+    "modifies the Fruehwirth/Regler model to fit with G4"};
 
   //========== used for Gaussian mixture model =================================================
   /** Random Generator service  */
-  ServiceHandle<IAthRNGSvc> m_rndGenSvc;
+  ServiceHandle<IAthRNGSvc> m_rndGenSvc{this, "RandomNumberService", "AthRNGSvc",
+    "Name of the random number service"};
   /** Random engine  */
-  ATHRNG::RNGWrapper* m_rngWrapper;
-  std::string m_randomEngineName; //!< Name of the random number stream
+  ATHRNG::RNGWrapper* m_rngWrapper = nullptr;
+  StringProperty m_randomEngineName{this, "RandomStreamName", "TrkExRnd",
+    "Name of the random number stream"};
 };
 
 } // end of namespace

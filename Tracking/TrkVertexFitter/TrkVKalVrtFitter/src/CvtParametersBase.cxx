@@ -57,8 +57,8 @@ namespace Trk {
       // Global position of hit
       perGlobalPos = (*i_pbase)->position();
       // Crazy user protection
-      if(std::abs(perGlobalPos.z()) > m_IDsizeZ) return StatusCode::FAILURE;
-      if(perGlobalPos.perp() > m_IDsizeR) return StatusCode::FAILURE;
+      if(!(state.m_allowUltraDisplaced) && std::abs(perGlobalPos.z()) > m_IDsizeZ) return StatusCode::FAILURE;
+      if(!(state.m_allowUltraDisplaced) && perGlobalPos.perp() > m_IDsizeR) return StatusCode::FAILURE;
       tmp_refFrameX += perGlobalPos.x();
       tmp_refFrameY += perGlobalPos.y();
       tmp_refFrameZ += perGlobalPos.z();
@@ -72,7 +72,7 @@ namespace Trk {
       // First measured point strategy
       tmpMat.extrapolationType = m_firstMeasuredPoint ? 0 : 1;
       tmpMat.TrkPnt = (*i_pbase);
-      tmpMat.prtMass = 139.5702;
+      tmpMat.prtMass = ParticleConstants::chargedPionMassInMeV;
       if(counter < (int)state.m_MassInputParticles.size()){
 	tmpMat.prtMass = state.m_MassInputParticles[counter];
       }
@@ -227,7 +227,7 @@ namespace Trk {
       tmpMat.extrapolationType = 0;
       //No reference point for neutral track for the moment !!!
       tmpMat.TrkPnt = nullptr;
-      tmpMat.prtMass = 139.5702;
+      tmpMat.prtMass = ParticleConstants::chargedPionMassInMeV;
       if(counter<(int)state.m_MassInputParticles.size()){
         tmpMat.prtMass = state.m_MassInputParticles[counter];
       }

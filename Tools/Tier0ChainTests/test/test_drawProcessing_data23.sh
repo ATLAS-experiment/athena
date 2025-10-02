@@ -6,6 +6,10 @@
 # art-include: 23.0/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
+# art-output: myDAOD_L1CALO1EGZ.pool.root
+# art-output: myDAOD_ZMUMU.pool.root
+# art-output: myDAOD_L1CALO1ZMM.pool.root
+# art-output: myDESDM_ALLCELLSEGZ.pool.root
 
 # TODO update following ATLASRECTS-8054
 
@@ -13,7 +17,7 @@ conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultC
 Reco_tf.py \
 --AMI f1350  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/DRAW_EGZ/data23_13p6TeV.00456714.physics_Main.merge.DRAW_EGZ.f1370_m2193/312events.data23_13p6TeV.00456714.physics_Main.merge.DRAW_EGZ.f1370_m2193._0602.1" \
---outputDESDM_ALLCELLSFile="myDESDM_EGZ.pool.root" \
+--outputDESDM_ALLCELLSFile="myDESDM_ALLCELLSEGZ.pool.root" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1EGZ.pool.root" \
 --maxEvents 75 \
 --conditionsTag=$conditionsTag \

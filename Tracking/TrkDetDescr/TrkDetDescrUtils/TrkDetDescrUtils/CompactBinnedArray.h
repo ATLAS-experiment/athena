@@ -31,14 +31,7 @@ class CompactBinnedArray : public BinnedArray<T>
 {
 
 public:
-  /**Default Constructor - needed for inherited classes */
-  CompactBinnedArray()
-    : BinnedArray<T>()
-  {}
-
-  /**Virtual Destructor*/
-  virtual ~CompactBinnedArray() {}
-
+  //Rule of 0 for default ctors
   /** Implicit constructor */
   virtual CompactBinnedArray* clone() const = 0;
   virtual CompactBinnedArray* clone(const std::vector<T*>& ptrs) const = 0;

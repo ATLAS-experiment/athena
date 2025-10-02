@@ -20,8 +20,8 @@ atlas_add_citest( Generation_H7_13p6TeV
 atlas_add_citest( Generation_MGPy8_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421107 )
 
-atlas_add_citest( Generation_Sherpa_13p6TeV
-   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421003 )
+atlas_add_citest( Generation_Sherpa_13TeV
+   SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid 421003 )
 
 atlas_add_citest( Generation_ParticleGun_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421119 )
@@ -34,6 +34,9 @@ atlas_add_citest( Generation_PhPy8_13TeV
 
 atlas_add_citest( Generation_PhPy8_14TeV
    SCRIPT RunWorkflowTests_Run4.py --CI -g --dsid 421356 )
+
+atlas_add_citest( Generation_P8B_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421439 )
 
 # CA Config
 atlas_add_citest( Generation_CA_ParticleGun_13p6TeV

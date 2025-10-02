@@ -20,15 +20,13 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 
-class LArHitContainer:public AthenaHitsVector<LArHit>
+class LArHitContainer: public AthenaHitsVector<LArHit>
 
 /** @brief Hit collection */
 {
 public: 
 
   LArHitContainer (const std::string& collectionName="DefaultCollectionName" ); 
-
-  virtual ~LArHitContainer()  ; 
 
     /**
      * Returns a string containing the description of this <br>
@@ -38,7 +36,7 @@ public:
      *
      * Can be used in printouts <br>
      */
-    virtual operator std::string () const ;
+    operator std::string () const ;
 
 };
 

@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 FtagBaseContent.py
 This module contains common configuration used by PHYSVAL, FTAG1 and FTAG2.
@@ -9,8 +9,9 @@ should be added there, not here.
 """
 
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
-    ParentDecoratorCfg
+    ParentDecoratorCfg, trackTruthDecorator
 )
+from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_SmartCollections = [
@@ -48,7 +49,7 @@ PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
     "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink.InclusiveGNNVerticesLink",
     "TruthPrimaryVertices.t.x.y.z",
     "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-    "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
+    "TauChargedParticleFlowObjects.pt.eta.phi.m",
     "MET_Track.sumet",
 ]
 
@@ -133,6 +134,9 @@ def trigger_setup(SlimmingHelper, option=''):
         SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10tclcwsubjesFSAux.')
         SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a10ttclcwjesFS')
         SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10ttclcwjesFSAux.')
+    if option == 'FTAG5':
+        SlimmingHelper.IncludeTriggerNavigation = True
+        SlimmingHelper.IncludeJetTriggerContent = True
 
 
 def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
@@ -157,17 +161,48 @@ def add_baseline_slimming_allvariables(SlimmingHelper):
     SlimmingHelper.AllVariables += PHYSVAL_FTAG1_FTAG2_AllVariables
 
 
+def _int_labels(flags):
+    if not flags.Input.isMC:
+        return []
+    algs = ['HadronConeExcl', 'HadronGhost']
+    types = ['Extended', '']
+    return [f'{a}{e}TruthLabelID' for a in algs for e in types]
+
+
+def _match_vars(flags, source):
+    labels = _int_labels(flags)
+    allvars = [f'{l}From{source}' for l in labels]
+    allvars += [f'delta{v}To{source}' for v in ['R', 'Pt']]
+    return allvars
+
+
 def addCommonAugmentation(flags, cfg, helper):
     """add content common to all ftag derivations"""
 
+    target = "AntiKt4EMPFlowJets"
+
+    cfg.merge(
+        JetMatchingCfg(
+            flags,
+            target=target,
+            ints_to_copy=_int_labels(flags),
+        )
+    )
+    helper.ExtraVariables +=  [
+        '.'.join(['AntiKt4EMPFlowJets'] + _match_vars(flags, target))
+    ]
+
     if not flags.Input.isMC:
         return
+
+    # add track truth info
+    cfg.merge(trackTruthDecorator(flags))
 
     # match jets to the parent particles
     cfg.merge(
         ParentDecoratorCfg(
             flags,
-            targetContainer="AntiKt4EMPFlowJets",
+            targetContainer=target,
             prefix="PFlow",
             matchDeltaR=0.3
         )
@@ -179,3 +214,4 @@ def addCommonAugmentation(flags, cfg, helper):
     ]
 
     helper.ExtraVariables += ['.'.join(['AntiKt4EMPFlowJets'] + truth_labels)]
+

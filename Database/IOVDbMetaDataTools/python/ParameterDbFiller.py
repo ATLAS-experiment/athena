@@ -5,7 +5,6 @@
 #
 #
 
-from __future__ import print_function
 
 __version__ = "$Id: ParameterDbFiller.py,v 1.3 2008-11-13 12:25:23 schaffer Exp $"
 __author__  = "RD Schaffer <R.D.Schaffer@cern.ch>"
@@ -13,7 +12,6 @@ __author__  = "RD Schaffer <R.D.Schaffer@cern.ch>"
 import sys
 import os
 import collections
-import six
 from PyCool import cool
 
 class ParameterDbFillerError(Exception):
@@ -130,9 +128,9 @@ class ParameterDbFiller(object):
 
         # now fill in parameters
         data = cool.Record(spec)
-        for k, v in six.iteritems(params):
+        for k, v in params.items():
             data[k] = v
-        for k, v in six.iteritems(params64):
+        for k, v in params64.items():
             data[k] = v
 
         print ("ParameterDbFiller.genDb:  Recording parameters", data)

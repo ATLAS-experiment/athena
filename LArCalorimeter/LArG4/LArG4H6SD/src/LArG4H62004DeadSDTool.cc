@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H62004DeadSDTool.h"
@@ -13,12 +13,7 @@
 LArG4H62004DeadSDTool::LArG4H62004DeadSDTool(const std::string& type, const std::string& name, const IInterface *parent)
   : LArG4SDTool(type,name,parent)
   , m_HitColl("LArCalibrationHitDeadMaterial")
-  , m_calculator("LArG4H62004DeadCalibrationCalculator", name)
-  , m_deadSD(nullptr)
-  , m_uninstSD(nullptr)
 {
-  declareProperty("doEscapedEnergy",m_do_eep=false);
-  declareProperty("Calculator", m_calculator);
 }
 
 StatusCode LArG4H62004DeadSDTool::initializeCalculators()

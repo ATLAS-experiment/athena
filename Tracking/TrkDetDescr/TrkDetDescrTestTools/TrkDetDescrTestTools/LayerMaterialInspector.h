@@ -32,9 +32,9 @@ namespace Trk {
 
      */
 
-    class ATLAS_NOT_THREAD_SAFE  LayerMaterialInspector :  
+    class ATLAS_NOT_THREAD_SAFE  LayerMaterialInspector : //inherits from unsafe class
       virtual public RecursiveGeometryProcessor {
-     
+
       public:
         /** Constructor */
         LayerMaterialInspector(const std::string&,const std::string&,const IInterface*);
@@ -46,15 +46,15 @@ namespace Trk {
 
         /** Processor Action to work on TrackingVolumes - the level is for the hierachy tree*/
         virtual StatusCode processNode(const TrackingVolume& tvol, size_t level = 0) const;
-       
+
         /** Processor Action to work on Layers */
         virtual StatusCode processNode(const Layer& lay, size_t level = 0) const;
-       
+
         /** Processor Action to work on Surfaces */
         virtual StatusCode processNode(const Surface& surf, size_t level = 0) const;
-     
+
         std::string m_treeFolder;
-        
+
     };
 
 } // end of namespace

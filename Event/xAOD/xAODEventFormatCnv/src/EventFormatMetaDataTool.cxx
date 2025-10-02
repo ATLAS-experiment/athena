@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-/* Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 
 
 // System include(s):
@@ -20,9 +20,7 @@ namespace xAODMaker {
 EventFormatMetaDataTool::EventFormatMetaDataTool(const std::string& type,
                                                  const std::string& name,
                                                  const IInterface* parent):
-    AthAlgTool(type, name, parent) {
-      declareInterface< ::IMetaDataTool >(this);
-    }
+    base_class(type, name, parent) { }
 
 StatusCode
     EventFormatMetaDataTool::initialize() {
@@ -53,12 +51,7 @@ StatusCode
       // Create object to hold information from the new file
       auto format = std::make_unique< xAOD::EventFormat >();
 
-      StatusCode sc = collectMetaData();
-      if (sc.isFailure()) {
-        REPORT_ERROR(sc) << "Failed to collect metadata from the input file";
-        throw std::runtime_error("Failed to collect event format "
-                                 "metadata from the input");
-      }
+      ATH_CHECK(collectMetaData());
 
       return StatusCode::SUCCESS;
     }
@@ -115,12 +108,12 @@ StatusCode
         }
 
         ATH_MSG_VERBOSE("Merging all versions of " << key);
-        for (SG::ObjectWithVersion<xAOD::EventFormat>& version : allVersions) {
-          const xAOD::EventFormat* input = version.dataObject.cptr();
+        for (auto& version : allVersions) {
+          const auto* input = version.dataObject.cptr();
           // Merge the new object into the output one:
-          for (auto itr = input->begin(); itr != input->end(); ++itr) {
-            if (!output->exists(itr->second.hash())) {
-              output->add(itr->second);
+          for (const auto& pair : *input) {
+            if (!output->exists(pair.second.hash())) {
+              output->add(pair.second);
             }
           }
         }

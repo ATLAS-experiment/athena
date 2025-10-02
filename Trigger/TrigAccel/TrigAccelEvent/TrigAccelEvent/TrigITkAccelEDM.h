@@ -6,6 +6,7 @@
 #define TRIGACCELEVENT_TRIGINDETACCELEDM_ITK_H
 
 #include<cstdint>
+#include<memory>
 
 namespace TrigAccel {
 
@@ -104,7 +105,7 @@ namespace ITk {
     float m_pT[MAX_NUMBER_OUTPUT_SEEDS];
   } OUTPUT_SEED_STORAGE;
 
-    //B: Graph-based track seeding algorithm implementation on GPU
+  //B: Graph-based track seeding algorithm implementation on GPU
   
   static constexpr unsigned int GBTS_MAX_NUMBER_SPACEPOINTS  = 350000;
   static constexpr unsigned int GBTS_MAX_SILICON_LAYERS      = 216;
@@ -112,15 +113,23 @@ namespace ITk {
   static constexpr unsigned int GBTS_MAX_ETA_BIN             = 1000;
   static constexpr unsigned int GBTS_MAX_ETA_BIN_PAIR        = 8000;
   static constexpr unsigned int GBTS_NODE_BUFFER_LENGTH      = 250;
-  static constexpr unsigned int GBTS_MAX_NUM_NEIGHBOURS      = 6;
-  
+  static constexpr unsigned int GBTS_MAX_NUM_NEIGHBOURS      = 10;
+  static constexpr unsigned int GBTS_MAX_CCA_ITERATIONS      = 20;
+  static constexpr unsigned int GBTS_MAX_SHARED_STATES       = 544; //544 for 96kb of shared
+ 
+  //offsets for d_output_graph array
+	static constexpr unsigned char node1 = 0;
+	static constexpr unsigned char node2 = 1;
+	static constexpr unsigned char nNei = 2;
+	static constexpr unsigned char nei_idx_start = 3;
+
   typedef struct GraphMakingInputData {
   public:
     
     unsigned int m_nSpacepoints, m_nLayers, m_nEtaBins, m_maxEtaBin, m_nBinPairs, m_nMaxEdges;
     
     float m_params[4*GBTS_MAX_NUMBER_SPACEPOINTS];//x,y,z,cluster width
-    
+  
     int m_layerIdx[GBTS_MAX_SILICON_LAYERS];
 
     //the views for the above storage space assuming float4 packing (x,y,z,w)
@@ -136,23 +145,43 @@ namespace ITk {
     int m_bin_pairs[2*GBTS_MAX_ETA_BIN_PAIR];
 
     float m_algo_params[32];//reserved space for GBTS algoritm parameters
-    
+		
+    int m_minLevel;
+		
+    bool m_useGPUseedExtraction;		
+ 
   } GRAPH_MAKING_INPUT_DATA;
 
   typedef struct CompressedGraph {
   public:
     CompressedGraph() : m_nEdges(0), m_nMaxNeighbours(0), m_nLinks(0), m_graphArray(nullptr) {};
-    ~CompressedGraph() {
-      delete[] m_graphArray;
-      m_graphArray = nullptr;
-    }
     unsigned int m_nEdges;
     unsigned int m_nMaxNeighbours;
     unsigned int m_nLinks;
-    int* m_graphArray;
-  } COMPRESSED_GRAPH;
+    std::unique_ptr<int[]> m_graphArray;
+  
+	} COMPRESSED_GRAPH;
+
+  struct Tracklet {
+    int m_nodes[GBTS_MAX_CCA_ITERATIONS+1];
+    int m_size;
+    float m_Q;
+  };
+
+  typedef struct OutputSeeds {
+  public:
+    OutputSeeds() : m_nSeeds(0), m_seedsArray(nullptr) {};
+		unsigned int m_nSeeds;
+    std::unique_ptr<Tracklet[]> m_seedsArray;
+
+  } OUTPUT_SEEDS;
+
+  typedef struct GraphAndSeedsOutput {
+  public:
+    COMPRESSED_GRAPH m_CompressedGraph;
+    OUTPUT_SEEDS m_OutputSeeds;
+  } GRAPH_AND_SEEDS_OUTPUT;
 
 }
 }
-
 #endif

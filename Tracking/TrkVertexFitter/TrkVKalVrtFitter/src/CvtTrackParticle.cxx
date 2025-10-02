@@ -51,8 +51,8 @@ namespace Trk {
        mPer = &(*i_ntrk)->perigeeParameters();
        if( mPer==nullptr ) continue; // No perigee!!!
        perGlobalPos =  mPer->position();    //Global position of perigee point
-       if(fabs(perGlobalPos.z())   > m_IDsizeZ)return StatusCode::FAILURE;   // Crazy user protection
-       if(     perGlobalPos.perp() > m_IDsizeR)return StatusCode::FAILURE;
+       if(!(state.m_allowUltraDisplaced) && std::abs(perGlobalPos.z())   > m_IDsizeZ)return StatusCode::FAILURE;   // Crazy user protection
+       if(!(state.m_allowUltraDisplaced) && perGlobalPos.perp() > m_IDsizeR)return StatusCode::FAILURE;
        tmp_refFrameX += perGlobalPos.x() ;	// Reference system calculation
        tmp_refFrameY += perGlobalPos.y() ;	// Use hit position itself to get more precise
        tmp_refFrameZ += perGlobalPos.z() ;	// magnetic field
@@ -61,7 +61,7 @@ namespace Trk {
        tmpMat.trkRefGlobPos=Amg::Vector3D( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z());
        tmpMat.extrapolationType=2;                   // Perigee point strategy
        tmpMat.TrkPnt=mPer;
-       tmpMat.prtMass = 139.5702;
+       tmpMat.prtMass = ParticleConstants::chargedPionMassInMeV;
        if(counter<(int)state.m_MassInputParticles.size())tmpMat.prtMass = state.m_MassInputParticles[counter];
        tmpMat.TrkID=counter; state.m_trkControl.push_back(tmpMat);
        counter++;
@@ -158,7 +158,7 @@ namespace Trk {
        tmpMat.trkRefGlobPos=Amg::Vector3D( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z());
        tmpMat.extrapolationType=2;                   // Perigee point strategy
        tmpMat.TrkPnt=nullptr;           //No reference point for neutral particle for the moment
-       tmpMat.prtMass = 139.5702;
+       tmpMat.prtMass = ParticleConstants::chargedPionMassInMeV;
        if(counter<(int)state.m_MassInputParticles.size())tmpMat.prtMass = state.m_MassInputParticles[counter];
        tmpMat.TrkID=counter; state.m_trkControl.push_back(tmpMat);
        counter++;

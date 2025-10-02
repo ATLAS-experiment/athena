@@ -35,4 +35,8 @@ if __name__=="__main__":
     from PFlowUtils.configureRecoForPFlow import configureRecoForPFlowCfg
     cfg.merge(configureRecoForPFlowCfg(cfgFlags))
 
+    #Add containers needed to run jet finding from resultant AOD for pflow CP studies
+    from PFlowUtils.configureRecoForPFlow import addContainersForPFlowCPStudiesCfg
+    cfg.merge(addContainersForPFlowCPStudiesCfg(cfgFlags))
+
     cfg.run()

@@ -18,6 +18,7 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AsgToolMacros.h"
 #include "AsgTools/ToolHandle.h"
+#include <AsgTools/PropertyWrapper.h>
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -40,9 +41,9 @@ public:
   virtual StatusCode calibrate(xAOD::JetContainer&) const override;
 
 private:
-  ToolHandle<JetHelper::IVarTool> m_vartool1 {this, "vartool1", "VarTool", "InputVariable instance" };
-  ToolHandle<JetHelper::IVarTool> m_vartool2 {this, "vartool2", "VarTool", "InputVariable instance" };
-  ToolHandle<JetHelper::IVarTool> m_histTool2D {this, "histTool", "HistoInput2D", "HistoInput2D instance" };
+  Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetEtaJESScaleMomentum", "Starting jet scale"};
+  Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetGSCScaleMomentum", "Ending jet scale"};
+
   ToolHandleArray<JetHelper::IVarTool> m_histTool_EM3 = {this , "histTool_EM3", {}, "EM3 histo reader" };
   ToolHandleArray<JetHelper::IVarTool> m_histTool_ChargedFraction = {this , "histTool_CharFrac", {}, "ChargedFraction histo reader" };
   ToolHandleArray<JetHelper::IVarTool> m_histTool_Tile0 = {this , "histTool_Tile0", {}, "Tile0 histo reader" };

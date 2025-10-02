@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUCOMMONCALCVARS_H
 #define TAURECTOOLS_TAUCOMMONCALCVARS_H
 
 #include "tauRecTools/TauRecToolBase.h"
-
+#include "AsgTools/PropertyWrapper.h"
 
 /**
  * @brief Calculate variables which rely on tracks and precalculated cell/cluster information.
@@ -29,7 +29,9 @@ public:
     virtual StatusCode execute(xAOD::TauJet& pTau) const override;
 
 private:
-    int m_isolationTrackType;
+ 
+    Gaudi::Property<int> m_isolationTrackType{this, "isolationTrackType", xAOD::TauJetParameters::modifiedIsolationTrack};  
+
 };
 
 #endif // TAURECTOOLS_TAUCOMMONCALCVARS_H

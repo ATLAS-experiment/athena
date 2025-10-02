@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -216,31 +216,28 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
 // =============================================================================
 // The main accept method: the actual cuts are applied here 
 // =============================================================================
-CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Egamma* egam, Result& result ) const
+CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( columnar::EgammaId egam, columnar::EventInfoId eventInfo, Result& result ) const
 {
-
-  if ( !egam ) {
-    ATH_MSG_ERROR ( "Did NOT get a valid egamma pointer!" );
-    return CP::CorrectionCode::Error;
-  }
+  const auto& acc = *m_accessors;
 
   // retrieve transverse energy from e/cosh(etaS2)
-  const xAOD::CaloCluster* cluster  = egam->caloCluster();  
-  if (!cluster){
+  auto clusters  = egam(acc.caloClusterAcc);  
+  if (clusters.size()<1||!clusters[0].has_value()){
     ATH_MSG_ERROR("No  cluster associated to the Photon \n"); 
     return  CP::CorrectionCode::Error;
   } 
+  auto cluster = clusters[0].value();
 
   // use et from cluster because it is immutable under syst variations of ele energy scale
-  const double energy = cluster->e();
+  const double energy = cluster(acc.clusterEAcc);
   double et = 0.;
-  if ( std::abs(egam->eta()) < 999.) {
-    const double cosheta = std::cosh(egam->eta());
+  if ( std::abs(egam(acc.etaAcc)) < 999.) {
+    const double cosheta = std::cosh(egam(acc.etaAcc));
     et = (cosheta != 0.) ? energy / cosheta : 0.;
   }
 
   // eta from second layer
-  double eta2 = cluster->etaBE(2);
+  double eta2 = cluster(acc.clusterEtaBEAcc,2);
 
   // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5% 
   // for sub-threshold electrons). This assures that electrons that pass the 
@@ -273,27 +270,16 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
-  // Get the run number
-  const xAOD::EventInfo* eventInfo =
-      evtStore()->retrieve<const xAOD::EventInfo>("EventInfo");
-  if (!eventInfo) {
-    ATH_MSG_ERROR("Could not retrieve EventInfo object!");
-    return CP::CorrectionCode::Error;
-  }
-
-  
   // Retrieve the proper random Run Number
   unsigned int runnumber = m_defaultRandomRunNumber;
   if (m_useRandomRunNumber) {
-    static const SG::AuxElement::Accessor<unsigned int> randomrunnumber(
-        "RandomRunNumber");
-    if (!randomrunnumber.isAvailable(*eventInfo)) {
+    if (!acc.randomRunNumberAcc.isAvailable(eventInfo)) {
       ATH_MSG_WARNING(
           "Pileup tool not run before using PhotonEfficiencyTool! SFs do not "
           "reflect PU distribution in data");
       return CP::CorrectionCode::Error;
     }
-    runnumber = randomrunnumber(*(eventInfo));
+    runnumber = acc.randomRunNumberAcc(eventInfo);
   }
 
   //std::cout<<"Run Number"<<runnumber<<std::endl;
@@ -311,9 +297,26 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
    bool excludeTRT = false;
    if(runnumber >= 410000 && m_removeTRTConversion) excludeTRT = true;
   // check if converted
-  const bool isConv = xAOD::EgammaHelpers::isConvertedPhoton(egam, excludeTRT);
-  //std::cout<<dataType<<std::endl;
-  //std::cout<<"arrived Here"<<std::endl;
+  const auto [isConv, missingLinks] = acc.isConvertedPhotonAcc(egam, excludeTRT);
+  if (missingLinks) { // missing vertex or track links
+    if (!m_allowMissingLinks.value()) {
+      ATH_MSG_ERROR("Missing vertex or track links when trying to calculate the conversion type. missingLinks=" << std::hex << missingLinks);
+      return CP::CorrectionCode::Error;
+    }
+    static std::atomic<bool> warned {false};
+    if (warned.exchange(true) == false) {
+      ATH_MSG_WARNING("Missing vertex or track links when trying to calculate the conversion type. missingLinks=" << std::hex << missingLinks);
+      ATH_MSG_WARNING("This may indicate that the DAOD is incorrectly missing some conversion vertices.");
+      ATH_MSG_WARNING("This is your only warning, repeat occurrences will be reported at the DEBUG level.");
+    } else {
+      ATH_MSG_DEBUG("Missing vertex or track links when trying to calculate the conversion type. missingLinks=" << std::hex << missingLinks);
+    }
+    result.SF = 1;
+    result.Total = 1;
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+
+
   // Call the ROOT tool to get an answer (for photons we need just the total)
   const int status = isConv ? m_rootTool_con->calculate(dataType, runnumber,
                                                         eta2, et, result, false)
@@ -338,9 +341,22 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Ega
 }
 
 CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(const xAOD::Egamma& inputObject, double& efficiencyScaleFactor) const{
+
+  // Get the run number
+  const xAOD::EventInfo* eventInfo =
+      evtStore()->retrieve<const xAOD::EventInfo>("EventInfo");
+  if (!eventInfo) {
+    ATH_MSG_ERROR("Could not retrieve EventInfo object!");
+    return CP::CorrectionCode::Error;
+  }
+
+  return getEfficiencyScaleFactor(columnar::EgammaId{inputObject}, columnar::EventInfoId{*eventInfo}, efficiencyScaleFactor);
+}
+
+CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(columnar::EgammaId inputObject, columnar::EventInfoId eventInfo, double& efficiencyScaleFactor) const{
   
   Result sfresult;
-  CP::CorrectionCode status = calculate(&inputObject, sfresult);
+  CP::CorrectionCode status = calculate(inputObject, eventInfo, sfresult);
 
   if ( status != CP::CorrectionCode::Ok ) {
     return status;
@@ -406,8 +422,21 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(c
 
 CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactorError(const xAOD::Egamma& inputObject, double& efficiencyScaleFactorError) const{   
 
+  // Get the run number
+  const xAOD::EventInfo* eventInfo =
+      evtStore()->retrieve<const xAOD::EventInfo>("EventInfo");
+  if (!eventInfo) {
+    ATH_MSG_ERROR("Could not retrieve EventInfo object!");
+    return CP::CorrectionCode::Error;
+  }
+
+  return getEfficiencyScaleFactorError(columnar::EgammaId{inputObject}, columnar::EventInfoId{*eventInfo}, efficiencyScaleFactorError);
+}
+
+CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactorError(columnar::EgammaId inputObject, columnar::EventInfoId eventInfo, double& efficiencyScaleFactorError) const{   
+
   Result sfresult;
-  CP::CorrectionCode status = calculate(&inputObject, sfresult);
+  CP::CorrectionCode status = calculate(inputObject, eventInfo, sfresult);
 
   if ( status != CP::CorrectionCode::Ok ) {
     return status;
@@ -581,4 +610,37 @@ std::string AsgPhotonEfficiencyCorrectionTool::getFileName(const std::string& is
   
   return value;
 
+}
+
+void AsgPhotonEfficiencyCorrectionTool::callSingleEvent (columnar::EgammaRange photons, columnar::EventInfoId event) const
+{
+  const Accessors& acc = *m_accessors;
+  for (auto photon : photons)
+  {
+    double sf = 0;
+    switch (getEfficiencyScaleFactor(photon, event, sf).code())
+    {
+      using enum CP::CorrectionCode::ErrorCode;
+      case Ok:
+        acc.sfDec(photon) = sf;
+        acc.validDec(photon) = true;
+        break;
+      case OutOfValidityRange:
+        acc.sfDec(photon) = sf;
+        acc.validDec(photon) = false;
+        break;
+      default:
+        throw std::runtime_error("Error in getEfficiencyScaleFactor");
+    }
+  }
+}
+
+void AsgPhotonEfficiencyCorrectionTool::callEvents (columnar::EventContextRange events) const
+{
+  const Accessors& acc = *m_accessors;
+  for (columnar::EventContextId event : events)
+  {
+    auto eventInfo = acc.eventInfoAcc(event);
+    callSingleEvent (acc.photonsAcc(event), eventInfo);
+  }
 }

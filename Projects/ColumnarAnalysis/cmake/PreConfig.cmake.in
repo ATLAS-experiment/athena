@@ -1,0 +1,46 @@
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#
+# File setting up imported targets needed by the exported targets of
+# @CMAKE_PROJECT_NAME@.
+#
+
+# Set the C++ standard to use.
+set( CMAKE_CXX_STANDARD "@CMAKE_CXX_STANDARD@"
+   CACHE STRING "C++ standard used for the build" )
+set( CMAKE_CXX_EXTENSIONS "@CMAKE_CXX_EXTENSIONS@"
+   CACHE STRING "(Dis)Allow the usage of C++ extensions" )
+
+# Use the -pthread flag for the build instead of the -lpthread linker option,
+# if the main project was set up in that way.
+set( THREADS_PREFER_PTHREAD_FLAG @THREADS_PREFER_PTHREAD_FLAG@ CACHE BOOL
+   "Prefer using the -pthread compiler flag over -lpthread" )
+
+# Set up the project's flake8 usage.
+set( ATLAS_FLAKE8 @ATLAS_FLAKE8@
+   CACHE STRING "Default flake8 command" )
+set( ATLAS_PYTHON_CHECKER @ATLAS_PYTHON_CHECKER@
+   CACHE STRING "Python checker command to run during Python module compilation" )
+
+# Child projects should not use the ATLAS CPack install scripts.
+set( ATLAS_USE_CUSTOM_CPACK_INSTALL_SCRIPT FALSE
+   CACHE BOOL "Don't use the custom ATLAS CPack install scripts" )
+
+# Figure out whether to use QUIET in the find_package call(s).
+set( _quietFlag )
+if( @CMAKE_PROJECT_NAME@_FIND_QUIETLY )
+  set( _quietFlag QUIET )
+endif()
+
+# Set up the LCG modules. While AnalysisBaseExternals does this as
+# well, we need to do it explicitly here, to make the following find_package
+# calls find the packages correctly.
+set( LCG_VERSION_POSTFIX @LCG_VERSION_POSTFIX@ )
+find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED ${_quietFlag} )
+
+# Imported target(s) used by the project.
+find_package( Threads ${_quietFlag} )
+find_package( GTest ${_quietFlag} )
+find_package( Boost ${_quietFlag} COMPONENTS ALL )
+
+# Clean up.
+unset( _quietFlag )

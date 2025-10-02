@@ -65,7 +65,7 @@ class ITrackLink;
 
 namespace InDet {
 
-class InDetIterativePriVxFinderTool
+class InDetIterativePriVxFinderTool final
   : public AthAlgTool
   , virtual public IVertexFinder
 {
@@ -88,15 +88,14 @@ public:
   virtual StatusCode initialize() override;
 
   /**
-   * Finding method.
-   * Has as input a track collection and as output
-   * a VxContainer.
+   * Finding method for Trk::Track collection
    */
-  using IVertexFinder::findVertex;
   virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
   findVertex(const EventContext& ctx,
              const TrackCollection* trackTES) const override;
-
+  /**
+   * Finding method for TrackParticle collection
+   */
   virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
   findVertex(const EventContext& ctx,
              const xAOD::TrackParticleContainer* trackParticles) const override;
@@ -171,13 +170,10 @@ private:
   BooleanProperty m_doMaxTracksCut{this, "doMaxTracksCut", false};
   UnsignedIntegerProperty m_maxTracks{this, "MaxTracks", 5000};
 
-  void SGError(const std::string& errService);
-
   /**
    * Internal method to print the parameters setting
    */
-
-  virtual void printParameterSettings();
+  void printParameterSettings();
 
 }; // end of class definitions
 } // end of namespace definitions

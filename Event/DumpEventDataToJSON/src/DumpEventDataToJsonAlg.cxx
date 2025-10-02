@@ -77,7 +77,8 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-nlohmann::json DumpEventDataToJsonAlg::getActsData(const Acts::TrackProxy<ActsTrk::TrackSummaryContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track, const Acts::GeometryContext& gctx) {
+nlohmann::json DumpEventDataToJsonAlg::getActsData(const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
+                                                   const Acts::GeometryContext& gctx) {
   nlohmann::json data;
 
   // ACTS units are GeV, whilst ATLAS is MeV. So we need to convert.
@@ -97,7 +98,7 @@ nlohmann::json DumpEventDataToJsonAlg::getActsData(const Acts::TrackProxy<ActsTr
   ATH_MSG_VERBOSE("Track has " << nTrackStates << " states.");
   // Unfortunately actsTracks are stored in reverse order, so we need to do some gymnastics
   // (There is certainly a more elegant way to do this, but since this will all be changed soon I don't think it matters)
-  std::vector<ActsTrk::MultiTrajectory::ConstTrackStateProxy> trackStates;
+  std::vector<typename ActsTrk::TrackContainer::ConstTrackStateProxy> trackStates;
   trackStates.reserve(nTrackStates);
   for (auto trackstate : track.trackStatesReversed()) {
     trackStates.push_back(trackstate);

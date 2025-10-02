@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/CFitCascade.h"
@@ -113,7 +113,7 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
 //
   bool existPointingCnst=false;
   for(int ic=0; ic<(int)vk->ConstraintList.size(); ic++){
-    if(vk->ConstraintList[ic]->getType() == VKContraintType::Point) { existPointingCnst=true; break; }
+    if(vk->ConstraintList[ic]->getType() == VKConstraintType::Point) { existPointingCnst=true; break; }
   }
 //
 //-------- Then fit
@@ -675,7 +675,7 @@ int restorePreviousPos(CascadeEvent & cascadeEvent_, std::vector<VKVertex> & SV 
     vk = cascadeEvent_.cascadeVertexList[iv].get();
     if(vk->nextCascadeVrt){
        int pntCnst = vk->ConstraintList.size() - 1;  // pointing constraint is always last in the list
-       if(vk->ConstraintList[pntCnst]->getType() != VKContraintType::Point) return -1;
+       if(vk->ConstraintList[pntCnst]->getType() != VKConstraintType::Point) return -1;
        static_cast< VKPointConstraint* >(vk->ConstraintList[pntCnst].get())->setTargetVertex(vk->nextCascadeVrt->refIterV);
     }
   }

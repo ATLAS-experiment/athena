@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
 #define MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
@@ -16,8 +16,8 @@
 #include "MuonPatternHelpers/SegmentAmbiSolver.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
@@ -39,11 +39,6 @@ namespace MuonR4{
 
         private:
             using Parameters = SegmentFit::Parameters;
-            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-            /// Failure is returned in cases, of non-empty keys and failed retrieval
-            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
             /** @brief Executes the segment fit with start parameters. The returned fit result
              *         indicates whether the fit was a success and all relevant output parameters
              *  @brief ctx: Event context needed to access the calibration constants of the hits
@@ -102,7 +97,7 @@ namespace MuonR4{
             /// ReadHandle of the seeds
             SG::ReadHandleKey<SegmentSeedContainer> m_seedKey{this, "ReadKey", "MuonHoughStationSegmentSeeds"};
             // write handle key for the output segment seeds 
-            SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "MuonSegmentContainer", "R4MuonSegments"};
+            SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "OutSegmentContainer", "R4MuonSegments"};
             // access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// IdHelperSvc
@@ -114,6 +109,10 @@ namespace MuonR4{
 
             Gaudi::Property<bool> m_doT0Fit{this, "fitSegmentT0", true};
             Gaudi::Property<bool> m_recalibInFit{this, "recalibInFit" , false};
+            /// @brief Try first to fit the pattern parameters. Then proceed with the straw line tangents
+            Gaudi::Property<bool> m_tryPatternPars{this, "tryPatternPars", false};
+            /// @brief Use the expliciit Hessian in the residual calculation
+            Gaudi::Property<bool> m_hessianResidual{this, "useHessianResidual", false};
             /// Add beamline constraint
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};
@@ -125,14 +124,14 @@ namespace MuonR4{
             /** @brief Toggle seed recalibration. The two seed circles are recalibrated using 
              *         the initial seed */
             Gaudi::Property<bool> m_recalibSeed{this, "SeedRecalibrate", false};
-            /** @brief Toggle seed refit. The segment seed is fastly refitted 
-             *         using the collected seed drift circles */
-            Gaudi::Property<bool> m_refineSeed{this, "SeedRefine", false};
             /** Cut on the segment chi2 / nDoF to launch the outlier removal */
             Gaudi::Property<double> m_outlierRemovalCut{this, "OutlierRemoval", 5.};
             Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 5.};
-
-            std::unique_ptr<SegmentAmbiSolver> m_ambiSolver{};
+            /** @brief Minimum number of precision hits to accept the segment */
+            Gaudi::Property<unsigned> m_precHitCut{this, "PrecHitCut" , 3};
+            /** @brief Use the fast Mdt fitter where possible */
+            Gaudi::Property<bool> m_useFastFitter{this, "useFastFitter", true};
+            std::unique_ptr<SegmentFit::SegmentAmbiSolver> m_ambiSolver{};
 
     };
 }

@@ -30,6 +30,7 @@
 #include <map>
 #include <atomic>
 #include <cstdint>
+#include <memory>
 
 // Forward declarations
 class IIncidentSvc;
@@ -159,7 +160,7 @@ private: // internal member functions
    /// Reinitialize the service when a @c fork() occured/was-issued
    StatusCode reinit() const;
    /// Return pointer to new PoolCollectionConverter
-   PoolCollectionConverter* getCollectionCnv(bool throwIncidents = false) const;
+   std::unique_ptr<PoolCollectionConverter> getCollectionCnv(bool throwIncidents = false) const;
    /// Search for event with number evtNum.
    int findEvent(int evtNum) const;
    /// Fires the EndInputFile incident (if there is an open file) at end of selector
@@ -169,12 +170,12 @@ private: // data
    EventContextAthenaPool*         m_endIter{};
 
 
-   mutable PoolCollectionConverter* m_poolCollectionConverter ATLAS_THREAD_SAFE {};
+   mutable std::unique_ptr<PoolCollectionConverter> m_poolCollectionConverter ATLAS_THREAD_SAFE {};
    mutable pool::ICollectionCursor* m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
    mutable std::map<SG::SourceID, int> m_activeEventsPerSource ATLAS_THREAD_SAFE;
 
-   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "AthenaPoolCnvSvc", "AthenaPoolCnvSvc", ""};
+   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc", ""};
    ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc", ""};
 
 private: // properties
@@ -182,8 +183,8 @@ private: // properties
    Gaudi::Property<bool> m_isSecondary{this, "IsSecondary", false, ""};
    /// ProcessMetadata, switch on firing of FileIncidents which will trigger processing of metadata: default = true.
    Gaudi::Property<bool> m_processMetadata{this, "ProcessMetadata", true, ""};
-   /// CollectionType, type of the collection: default = "ImplicitROOT".
-   Gaudi::Property<std::string> m_collectionType{this, "CollectionType", "ImplicitROOT", ""};
+   /// CollectionType, type of the collection: default = "ImplicitCollection".
+   Gaudi::Property<std::string> m_collectionType{this, "CollectionType", "ImplicitCollection", ""};
    /// CollectionTree, prefix of the collection TTree: default = "POOLContainer".
    Gaudi::Property<std::string> m_collectionTree{this, "CollectionTree", APRDefaults::TTreeNames::DataHeader, ""};
    /// Connection, connection string.

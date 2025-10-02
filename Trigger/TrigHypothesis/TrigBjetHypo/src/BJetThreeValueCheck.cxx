@@ -31,11 +31,11 @@ StatusCode BJetThreeValueCheck::initialize() {
   return StatusCode::SUCCESS;
 }
 
-bool BJetThreeValueCheck::passThreshold(const SG::AuxElement& btag) const
+bool BJetThreeValueCheck::passThreshold(const xAOD::Jet& bjet) const
 {
-  float b = m_acc->b(btag);
-  float c = m_acc->c(btag);
-  float u = m_acc->u(btag);
+  float b = m_acc->b(bjet);
+  float c = m_acc->c(bjet);
+  float u = m_acc->u(bjet);
   float f = m_cFraction;
   float llr = safeLogRatio(b, f*c + (1-f)*u);
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));

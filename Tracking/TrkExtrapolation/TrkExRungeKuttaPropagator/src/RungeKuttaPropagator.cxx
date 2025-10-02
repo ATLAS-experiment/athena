@@ -323,7 +323,7 @@ rungeKuttaStepWithGradient(Cache& cache, double S, double* ATH_RESTRICT P, bool&
 
     // Test approximation quality on give step and possible step reduction
     //
-    double EST = std::abs((A1 + A6) - (A3 + A4)) + std::abs((B1 + B6) - (B3 + B4)) +
+    const double EST = std::abs((A1 + A6) - (A3 + A4)) + std::abs((B1 + B6) - (B3 + B4)) +
                  std::abs((C1 + C6) - (C3 + C4));
     if (EST > cache.m_dlt) {
       S *= .5;
@@ -540,7 +540,7 @@ crossPoint(const Trk::TrackParameters& Tp,
   double* R = &P[0];   // Start coordinates
   double* A = &P[3];   // Start directions
   const double* SA = &P[42]; // d(directions)/dStep
-  double Step = SN.first;
+  const double Step = SN.first;
   int N = SN.second;
 
   double As[3];
@@ -561,7 +561,7 @@ crossPoint(const Trk::TrackParameters& Tp,
   const Amg::Vector3D pos(Rs[0], Rs[1], Rs[2]);
   const Amg::Vector3D dir(As[0], As[1], As[2]);
 
-  Trk::DistanceSolution ds = SU[N].first->straightLineDistanceEstimate(pos, dir, SU[N].second);
+  const Trk::DistanceSolution ds = SU[N].first->straightLineDistanceEstimate(pos, dir, SU[N].second);
   if (ds.currentDistance(false) > .010)
     return nullptr;
 
@@ -615,7 +615,7 @@ stepEstimatorWithCurvature(Cache& cache,
                            bool& Q)
 {
   // Straight step estimation
-  double Step = Trk::RungeKuttaUtils::stepEstimator(kind, Su, P, Q);
+  const double Step = Trk::RungeKuttaUtils::stepEstimator(kind, Su, P, Q);
   if (!Q)
     return 0.;
   const double AStep = std::abs(Step);
@@ -653,8 +653,8 @@ propagateWithJacobian(Cache& cache,
                       double& ATH_RESTRICT W)
 {
   const double Smax = 1000.;     // max. step allowed
-  double Wmax = cache.m_maxPath; // Max way allowed
-  double Wwrong = 500.;          // Max way with wrong direction
+  const double Wmax = cache.m_maxPath; // Max way allowed
+  const double Wwrong = 500.;          // Max way with wrong direction
   double* R = &P[0];             // Start coordinates
   double* A = &P[3];             // Start directions
   double* SA = &P[42];
@@ -770,7 +770,7 @@ bool propagateWithJacobianSwitch(Cache& cache,
                                  double& ATH_RESTRICT Step) {
 
   const Amg::Transform3D& T = Su.transform();
-  Trk::SurfaceType ty = Su.type();
+  const Trk::SurfaceType  ty = Su.type();
 
   switch (ty) {
     case Trk::SurfaceType::Line:
@@ -806,7 +806,7 @@ bool propagateWithJacobianSwitch(Cache& cache,
                      T(0, 2),           T(1, 2),           T(2, 2),
                      cyl->bounds().r(), cache.m_direction, 0.};
 
-      bool status = propagateWithJacobian(cache, useJac, 2, s, P, Step);
+      const bool status = propagateWithJacobian(cache, useJac, 2, s, P, Step);
       // For cylinder we do test for next cross point
       if (status && cyl->bounds().halfPhiSector() < 3.1 &&
           newCrossPoint(*cyl, r0, P)) {
@@ -866,7 +866,7 @@ propagateStraightLine(Cache& cache,
   // Common transformation for all surfaces (angles and momentum)
   //
   if (useJac) {
-    double p = 1. / P[6];
+    const double p = 1. / P[6];
     P[35] *= p;
     P[36] *= p;
     P[37] *= p;
@@ -886,7 +886,7 @@ propagateStraightLine(Cache& cache,
   Trk::RungeKuttaUtils::transformGlobalToLocal(su, uJ, P, p, Jac);
 
   if (B) {
-    Amg::Vector2D L(p[0], p[1]);
+    const Amg::Vector2D L(p[0], p[1]);
     if (!Su.insideBounds(L, 0.))
       return nullptr;
   }
@@ -902,7 +902,7 @@ propagateStraightLine(Cache& cache,
     if (!returnCurv) {
       return Su.createUniqueNeutralParameters(p[0], p[1], p[2], p[3], p[4], std::nullopt);
     } else {
-      Amg::Vector3D gp(P[0], P[1], P[2]);
+      const Amg::Vector3D gp(P[0], P[1], P[2]);
       return std::make_unique<Trk::NeutralCurvilinearParameters>(gp, p[2], p[3], p[4]);
     }
   }
@@ -942,10 +942,10 @@ globalOneSidePositions(Cache& cache,
     Pm[i] = P[i];
 
   double W = 0.;                          // way
-  double R2max = CB.r() * CB.r();         // max. radius**2 of region
-  double Zmax = CB.halflengthZ();         // max. Z         of region
+  const double R2max = CB.r() * CB.r();         // max. radius**2 of region
+  const double Zmax = CB.halflengthZ();         // max. Z         of region
   double R2 = P[0] * P[0] + P[1] * P[1];  // Start radius**2
-  double Dir = P[0] * P[3] + P[1] * P[4]; // Direction
+  const double Dir = P[0] * P[3] + P[1] * P[4]; // Direction
   double S = mS;                          // max step allowed
   double R2m = R2;
 
@@ -957,7 +957,7 @@ globalOneSidePositions(Cache& cache,
   if (std::abs(P[2]) > Zmax || R2 > R2max)
     return;
 
-  Amg::Vector3D g0(P[0], P[1], P[2]);
+  const Amg::Vector3D g0(P[0], P[1], P[2]);
   GP.push_back(g0);
 
   bool per = false;
@@ -991,7 +991,7 @@ globalOneSidePositions(Cache& cache,
       if (InS && std::abs(2. * S) < mS)
         S *= 2.;
 
-      Amg::Vector3D g(p[0], p[1], p[2]);
+      const Amg::Vector3D g(p[0], p[1], p[2]);
       if (!s)
         GP.push_back(g);
       else
@@ -1038,7 +1038,7 @@ globalOneSidePositions(Cache& cache,
 
     cache.m_newfield = true;
 
-    double A = (1. - Pm[5]) * (1. + Pm[5]);
+    const double A = (1. - Pm[5]) * (1. + Pm[5]);
     if (A == 0.)
       break;
     S = -(Pm[0] * Pm[3] + Pm[1] * Pm[4]) / A;
@@ -1055,10 +1055,10 @@ globalOneSidePositions(Cache& cache,
 
   if (per) {
     if (sm) {
-      Amg::Vector3D gf(Pm[0], Pm[1], Pm[2]);
+      const Amg::Vector3D gf(Pm[0], Pm[1], Pm[2]);
       GP.front() = gf;
     } else {
-      Amg::Vector3D gf(Pm[0], Pm[1], Pm[2]);
+      const Amg::Vector3D gf(Pm[0], Pm[1], Pm[2]);
       GP.back() = gf;
     }
   } else {
@@ -1090,8 +1090,8 @@ globalTwoSidePositions(Cache& cache,
   M.magneticFieldMode() != Trk::NoField ? cache.m_mcondition = true : cache.m_mcondition = false;
 
   double W = 0.;                         // way
-  double R2max = CB.r() * CB.r();        // max. radius**2 of region
-  double Zmax = CB.halflengthZ();        // max. Z         of region
+  const double R2max = CB.r() * CB.r();        // max. radius**2 of region
+  const double Zmax = CB.halflengthZ();        // max. Z         of region
   double R2 = P[0] * P[0] + P[1] * P[1]; // Start radius**2
   double S = mS;                         // max step allowed
 
@@ -1103,7 +1103,7 @@ globalTwoSidePositions(Cache& cache,
   if (std::abs(P[2]) > Zmax || R2 > R2max)
     return;
 
-  Amg::Vector3D g0(P[0], P[1], P[2]);
+  const Amg::Vector3D g0(P[0], P[1], P[2]);
   GP.push_back(g0);
 
   bool InS = false;
@@ -1131,7 +1131,7 @@ globalTwoSidePositions(Cache& cache,
       if (InS && std::abs(2. * S) < mS)
         S *= 2.;
 
-      Amg::Vector3D g(p[0], p[1], p[2]);
+      const Amg::Vector3D g(p[0], p[1], p[2]);
       if (!s)
         GP.push_back(g);
       else
@@ -1192,7 +1192,7 @@ propagateRungeKutta(Cache& cache,
   // Common transformation for all surfaces (angles and momentum)
   //
   if (useJac) {
-    double p = 1. / P[6];
+    const double p = 1. / P[6];
     P[35] *= p;
     P[36] *= p;
     P[37] *= p;
@@ -1211,7 +1211,7 @@ propagateRungeKutta(Cache& cache,
   Trk::RungeKuttaUtils::transformGlobalToLocal(su, uJ, P, p, Jac);
 
   if (B) {
-    Amg::Vector2D L(p[0], p[1]);
+    Amg::Vector2D const L(p[0], p[1]);
     if (!Su.insideBounds(L, 0.))
       return nullptr;
   }
@@ -1227,7 +1227,7 @@ propagateRungeKutta(Cache& cache,
       return Su.createUniqueTrackParameters(
         p[0], p[1], p[2], p[3], p[4], std::nullopt);
     } else {
-      Amg::Vector3D gp(P[0], P[1], P[2]);
+      const Amg::Vector3D gp(P[0], P[1], P[2]);
       return std::make_unique<Trk::CurvilinearParameters>(gp, p[2], p[3], p[4]);
     }
   }
@@ -1243,7 +1243,7 @@ propagateRungeKutta(Cache& cache,
     return Su.createUniqueTrackParameters(
       p[0], p[1], p[2], p[3], p[4], std::move(e));
   } else {
-    Amg::Vector3D gp(P[0], P[1], P[2]);
+    const Amg::Vector3D gp(P[0], P[1], P[2]);
     return std::make_unique<Trk::CurvilinearParameters>(
       gp, p[2], p[3], p[4], std::move(e));
   }
@@ -1317,7 +1317,7 @@ propagateRungeKutta(Cache& cache,
   // New simple track parameters production
   //
   if (useJac) {
-    AmgSymMatrix(5) newCov =
+    const AmgSymMatrix(5) newCov =
         Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, *Ta.covariance());
     Tb.setParametersWithCovariance(&Su, p, newCov);
     const AmgSymMatrix(5)& cv = *Tb.covariance();
@@ -1366,7 +1366,7 @@ globalPositionsImpl(
       return;
     }
 
-    Amg::Vector3D gp(P[0], P[1], P[2]);
+    const Amg::Vector3D gp(P[0], P[1], P[2]);
     GP.emplace_back(gp, Step);
   }
 }
@@ -1678,7 +1678,7 @@ Trk::RungeKuttaPropagator::propagate(const ::EventContext& ctx,
 
     if (SN.second >= 0) {
 
-      double Sa = std::abs(SN.first);
+      const double Sa = std::abs(SN.first);
 
       /// Update the number of flips. Reset the counter if the last surface is
       /// not the same as the current one and then check that the step size &
@@ -1800,7 +1800,7 @@ Trk::RungeKuttaPropagator::intersect(const ::EventContext& ctx,
                                      ParticleHypothesis,
                                      const TrackingVolume*) const
 {
-  bool nJ = false;
+  bool const nJ = false;
   const Trk::Surface* su = &Su;
   Cache cache = getInitializedCache(ctx);
   cache.m_direction = 0.;

@@ -17,6 +17,7 @@ def __createIDTPMConfigFlags():
     icf.addFlag( "trkAnaCfgFile", '' )
     icf.addFlag( 'outputFilePrefix','myIDTPM_out')
     icf.addFlag( 'unpackTrigChains', False )
+    icf.addFlag( 'commonTrkAnaFlags', [] )
     return icf
 
 
@@ -41,6 +42,13 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "OfflineVtxKey" , "PrimaryVertices" )
     icf.addFlag( "TruthVtxKey"  , "TruthVertices" )
     icf.addFlag( "pileupSwitch"  , "HardScatter" )
+    # Cluster/space-point collections properties (for offline-type, ITk/ACTS only)
+    icf.addFlag( "doClusterValidation"      , False )
+    icf.addFlag( "PixelClusterKey"          , "" )
+    icf.addFlag( "StripClusterKey"          , "" )
+    icf.addFlag( "PixelSpacePointKey"       , "" )
+    icf.addFlag( "StripSpacePointKey"       , "" )
+    icf.addFlag( "StripOverlapSpacePointKey", "" )
     # Matching properties
     icf.addFlag( "MatchingType"    , "DeltaRMatch" )
     icf.addFlag( "dRmax"           , 0.05 )
@@ -96,7 +104,12 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "offlMaxAbsZ0"   , -9999. )
     icf.addFlag( "offlMinAbsQoPT" , -9999. )
     icf.addFlag( "offlMaxAbsQoPT" , -9999. )
-    icf.addFlag( "offlMinProb",                     -9999. )
+    icf.addFlag( "offlEtaBins"  , [] )
+    icf.addFlag( "offlMinHitsVector" , [] )
+    icf.addFlag( "offlMinPtVector" , [] )
+    icf.addFlag( "offlMaxD0Vector" , [] )
+    icf.addFlag( "offlMaxZ0Vector" , [] )
+    icf.addFlag( "offlMinProb"        ,  -9999. )
     icf.addFlag( "ObjectQuality"      , "Medium" )
     icf.addFlag( "TauType"            , "RNN" )
     icf.addFlag( "TauNprongs"         , 1 )
@@ -126,10 +139,16 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "truthMinAbsQoPT" , -9999., help="Apply minimum |q/pt| cut to truth particle" )
     icf.addFlag( "truthMaxAbsQoPT" , -9999., help="Apply maximum |q/pt| cut to truth particle" )
     icf.addFlag( "truthPdgId"   , -9999., help="Apply pdgId selection to truth particle" )
-    icf.addFlag( "truthIsHadron", False, help="Select hadrons" )
-    icf.addFlag( "truthIsPion", False, help="Select pions" )
+    # Jet-track matching properties
+    icf.addFlag( "JetContainerName", "InTimeAntiKt4TruthJets" )
+    icf.addFlag( "maxTrkJetDR", 0.4 )
+    icf.addFlag( "jetMinAbsEta", -9999. )
+    icf.addFlag( "jetMaxAbsEta", 4.0 )
+    icf.addFlag( "jetMinPt", 1000.0 )
+    icf.addFlag( "jetMaxPt", 5000000.0 )
     # Histogram properties
     icf.addFlag( "plotTrackParameters"      , True )
+    icf.addFlag( "plotTrackParametersErrors", False )
     icf.addFlag( "plotTrackMultiplicities"  , True )
     icf.addFlag( "plotEfficiencies"         , True )
     icf.addFlag( "plotTechnicalEfficiencies", False )
@@ -160,20 +179,42 @@ def initializeIDTPMConfigFlags(flags):
 
 
 ### Create flags category and corresponding set of flags
-def initializeIDTPMTrkAnaConfigFlags(flags):
+def initializeIDTPMTrkAnaConfigFlags( flags ):
     # Set output file names
-    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root'
-    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root'
+    prefix = flags.PhysVal.IDTPM.outputFilePrefix
+    if 'HIST.root' in prefix :
+        flags.PhysVal.OutputFileName = prefix
+        flags.Output.AOD_IDTPMFileName = prefix.replace( 'HIST', 'AOD_IDTPM.pool' )
+    else :
+        flags.PhysVal.OutputFileName = prefix + '.HIST.root'
+        flags.Output.AOD_IDTPMFileName = prefix + '.AOD_IDTPM.pool.root'
 
     # Default TrackAnalysis configuration flags category
     flags.addFlagsCategory( "PhysVal.IDTPM.Default", 
                             __createIDTPMTrkAnaConfigFlags, 
                             prefix=True )
-    
+
+    # Common TrackAnalysis configuration flags category
+    # to override individual flags in all the trkanalyses configurations with a common value
+    flags.addFlagsCategory( "PhysVal.IDTPM.Common",
+                            __createIDTPMTrkAnaConfigFlags,
+                            prefix=True )
+
+    ## adding prefix if necessary
+    commonTrkAnaFlags_new = []
+    for f in flags.PhysVal.IDTPM.commonTrkAnaFlags :
+        if "PhysVal.IDTPM.Common." not in f :
+            commonTrkAnaFlags_new.append( "PhysVal.IDTPM.Common."+f )
+        else : commonTrkAnaFlags_new.append(f)
+
+    # Update PhysVal.IDTPM.Common flags category with values parsed from commonTrkAnaFlags_new
+    # This is used to keep flags values of the correct/consitent type
+    if commonTrkAnaFlags_new :
+        flags.fillFromArgs( listOfArgs=commonTrkAnaFlags_new )
+
     from InDetTrackPerfMon.ConfigUtils import getTrkAnaDicts
     analysesDict = getTrkAnaDicts( flags )
     trkAnaNames = []
-    print (str(analysesDict))
 
     if analysesDict:
         for trkAnaName, trkAnaDict in analysesDict.items():
@@ -190,8 +231,13 @@ def initializeIDTPMTrkAnaConfigFlags(flags):
                 ## skipping comments
                 if fname.startswith( "_comment" ): continue
                 ## updating flags from json items
-                setattr( flags.PhysVal.IDTPM, 
-                        trkAnaName+"."+fname, fvalue )
+                setattr( flags.PhysVal.IDTPM, trkAnaName+"."+fname, fvalue )
+
+            # override flags for this trkAna with common ones from commonTrkAnaFlags
+            for cflag in commonTrkAnaFlags_new :
+                cfname  = cflag.split('=')[0].split('.')[-1] # parsing only the name of the flag
+                cfvalue = getattr( flags.PhysVal.IDTPM.Common, cfname ) # getting its value in the correct type
+                setattr( flags.PhysVal.IDTPM, trkAnaName+"."+cfname, cfvalue )
 
             ## overwrite doTrigNavigation flag if test or reference
             ## is "Trigger" (not "EFTrigger")

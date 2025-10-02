@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -13,7 +13,7 @@
 
 #include "IDC_OverlayCommon.h"
 
-template <bool usePool, typename Type, typename IDC_Container>
+template <bool sortCollections, bool usePool, typename Type, typename IDC_Container>
 StatusCode IDC_OverlayBase::overlayContainerImpl(
     const IDC_Container *bkgContainer,
     const IDC_Container *signalContainer,
@@ -107,8 +107,13 @@ StatusCode IDC_OverlayBase::overlayContainerImpl(
       if constexpr (usePool) {
         bkgCollection = Overlay::copyCollection(
             hashId, bkgContainer->indexFindPtr(hashId), *dataItems);
-        Overlay::mergeCollections(bkgCollection.get(), signalCollection.get(),
-                                  outputCollection.get(), this, *dataItems);
+        if constexpr (sortCollections) {
+          Overlay::mergeSortedCollections(bkgCollection.get(), signalCollection.get(),
+                                          outputCollection.get(), this, *dataItems);
+        } else {
+          Overlay::mergeCollections(bkgCollection.get(), signalCollection.get(),
+                                    outputCollection.get(), this, *dataItems);
+        }
       } else {
         bkgCollection =
             Overlay::copyCollection(hashId, bkgContainer->indexFindPtr(hashId));
@@ -138,8 +143,8 @@ StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
                                              const IDC_Container *signalContainer,
                                              IDC_Container *outputContainer) const
 {
-  return overlayContainerImpl<false, void>(
-      bkgContainer, signalContainer, outputContainer, nullptr);
+  return overlayContainerImpl<false, false, void>(
+    bkgContainer, signalContainer, outputContainer, nullptr);
 }
 
 template <typename IDC_Container, typename Type>
@@ -148,5 +153,16 @@ StatusCode IDC_OverlayBase::overlayContainer(const IDC_Container *bkgContainer,
                                              IDC_Container *outputContainer,
                                              DataPool<Type>& dataItems) const
 {
- return overlayContainerImpl<true>(bkgContainer,signalContainer,outputContainer,&dataItems);
+  return overlayContainerImpl<false, true>(
+    bkgContainer, signalContainer, outputContainer, &dataItems);
+}
+
+template <typename IDC_Container, typename Type>
+StatusCode IDC_OverlayBase::overlayContainerWithSorting(const IDC_Container *bkgContainer,
+                                                        const IDC_Container *signalContainer,
+                                                        IDC_Container *outputContainer,
+                                                        DataPool<Type>& dataItems) const
+{
+  return overlayContainerImpl<true, true>(
+    bkgContainer, signalContainer, outputContainer, &dataItems);
 }

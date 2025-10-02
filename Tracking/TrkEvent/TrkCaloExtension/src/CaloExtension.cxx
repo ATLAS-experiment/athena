@@ -1,23 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkCaloExtension/CaloExtension.h"
 
-namespace Trk {
+Trk::CaloExtension::CaloExtension(std::unique_ptr<TrackParameters> caloEntry,
+                             std::unique_ptr<TrackParameters> muonEntry,
+                             std::vector<CurvilinearParameters>&& caloLayers)
+    : m_caloEntryLayerIntersection(std::move(caloEntry)),
+      m_muonEntryLayerIntersection(std::move(muonEntry)),
+      m_caloLayerIntersections(std::move(caloLayers)) {}
 
-CaloExtension::CaloExtension(
-  const TrackParameters* caloEntry,
-  const TrackParameters* muonEntry,
-  std::vector<CurvilinearParameters>&& caloLayers)
-  : m_caloEntryLayerIntersection(caloEntry)
-  , m_muonEntryLayerIntersection(muonEntry)
-  , m_caloLayerIntersections(std::move(caloLayers))
-{}
-
-CaloExtension::~CaloExtension()
-{
-  delete m_caloEntryLayerIntersection;
-  delete m_muonEntryLayerIntersection;
-}
-}

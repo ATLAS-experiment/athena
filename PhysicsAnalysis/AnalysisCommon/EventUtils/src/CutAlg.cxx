@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CutAlg.cxx
@@ -27,10 +27,8 @@
 CutAlg::CutAlg( const std::string& name,
                 ISvcLocator* pSvcLocator ) :
   ExpressionParserUserWithTrigSupport<::AthFilterAlgorithm>( name, pSvcLocator ),
-  m_cut(""),
   m_nEventsProcessed(0)
 {
-  declareProperty("Cut",              m_cut="",           "The cut expression" );
 }
 
 

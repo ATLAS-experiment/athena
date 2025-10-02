@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
@@ -143,7 +143,7 @@ std::unique_ptr<CaloDetDescrManager> buildCaloDetDescr(ISvcLocator* svcLocator
 					  , embRegion->getRegionIndex());
 
       EMBDescriptor* embDescr = new EMBDescriptor(regId
-						  , (AtlasDetectorID *)cell_id
+						  , static_cast<const AtlasDetectorID *>(cell_id)
 						  , cell_id
 						  , embRegion
 						  , geoAlignStore);
@@ -327,7 +327,7 @@ std::unique_ptr<CaloDetDescrManager> buildCaloDetDescr(ISvcLocator* svcLocator
 					  , emecRegion->getRegionIndex());
 
       EMECDescriptor* emecDescr = new EMECDescriptor(regId
-						     , (AtlasDetectorID *)cell_id
+						     , static_cast<const AtlasDetectorID *>(cell_id)
 						     , cell_id
 						     , emecRegion
 						     , geoAlignStore);
@@ -477,7 +477,7 @@ std::unique_ptr<CaloDetDescrManager> buildCaloDetDescr(ISvcLocator* svcLocator
 					   , hecregion->getRegionIndex());
 
       HECDescriptor* hecDescr = new HECDescriptor(regId
-						  , (AtlasDetectorID *)cell_id
+						  , static_cast<const AtlasDetectorID *>(cell_id)
 						  , cell_id
 						  , hecregion
 						  , geoAlignStore);
@@ -634,7 +634,7 @@ std::unique_ptr<CaloDetDescrManager> buildCaloDetDescr(ISvcLocator* svcLocator
       Identifier regId = fcal_id->module_id(pos_neg,(int)fcalmodule->getModuleIndex());
 
       FCALDescriptor* fcalDescr = new FCALDescriptor(regId
-						     , (AtlasDetectorID *)cell_id
+						     , static_cast<const AtlasDetectorID *>(cell_id)
 						     , cell_id
 						     , fcalmodule
 						     , geoAlignStore);

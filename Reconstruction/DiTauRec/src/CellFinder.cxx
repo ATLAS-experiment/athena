@@ -8,11 +8,9 @@
 CellFinder::CellFinder(const std::string& type,
 		       const std::string& name,
 		       const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_Rsubjet(0.2)
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("Rsubjet", m_Rsubjet);
 }
 
 
@@ -84,6 +82,39 @@ StatusCode CellFinder::execute(DiTauCandidateData * data,
 
   ATH_MSG_DEBUG("subjetCells.size()=" << subjetCells.size());
   data->subjetCells = subjetCells;
+
+  // write f_core
+  float f_core;
+  for (unsigned int i = 0; i < vSubjets.size(); i++) {
+    const fastjet::PseudoJet& subjet = vSubjets.at(i);
+    float ptAll = 0.;
+    float ptCore = 0.;
+
+    TLorentzVector temp_sub_p4;
+    temp_sub_p4.SetPtEtaPhiM(subjet.pt(), subjet.eta(), subjet.phi_std(), subjet.m());
+
+    for (const auto& cc : data->subjetCells) {
+     
+      TLorentzVector temp_cc_p4;
+      temp_cc_p4.SetPtEtaPhiM(cc->pt(), cc->eta(), cc->phi(), cc->m()); 
+
+      if (temp_cc_p4.DeltaR(temp_sub_p4) < data->Rsubjet) {
+	ptAll += cc->pt();
+      }
+
+      if (temp_cc_p4.DeltaR(temp_sub_p4) < data->Rcore) {
+	ptCore += cc->pt();
+      }
+    }
+
+    if (ptAll != 0.)
+      f_core = ptCore/ptAll;
+    else 
+      f_core = -999.;
+
+    ATH_MSG_DEBUG("subjet "<< i << ": f_core=" << f_core);
+    pDiTau->setfCore(i, f_core);
+  }
 
   return StatusCode::SUCCESS;
 }

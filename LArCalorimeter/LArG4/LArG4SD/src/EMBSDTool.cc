@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EMBSDTool.h"
-
-// Project includes
 #include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
@@ -16,14 +14,7 @@ namespace LArG4
   EMBSDTool::EMBSDTool(const std::string& type, const std::string& name,
                        const IInterface* parent)
     : SimpleSDTool(type, name, parent)
-    , m_embcalc("EMBCalculator", name)
-    , m_pscalc("EMBPresamplerCalculator", name)
   {
-    declareProperty("StacVolumes", m_stacVolumes);
-    declareProperty("PresamplerVolumes", m_presVolumes);
-
-    declareProperty("EMBCalculator",m_embcalc);
-    declareProperty("EMBPSCalculator",m_pscalc);
   }
 
   //---------------------------------------------------------------------------

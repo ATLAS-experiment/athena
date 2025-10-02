@@ -19,8 +19,8 @@ namespace MuonR4{
         return StatusCode::SUCCESS; 
     }
     StatusCode SegmentMarkerAlg::execute(const EventContext& ctx) const{ 
-        SG::ReadHandle muons{m_muonKey, ctx};
-        ATH_CHECK(muons.isPresent());
+        const xAOD::MuonContainer* muons{nullptr};
+        ATH_CHECK(SG::get(muons, m_muonKey, ctx));
         
         SG::ReadDecorHandle<xAOD::MuonContainer, bool> selHandle{m_readMarkKey, ctx};
         using namespace DerivationFramework;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -364,6 +364,7 @@ StatusCode LoggedMessageSvc::finalize() {
 
   bool found(false);
 
+  std::lock_guard<std::mutex> lock(m_reportMutex);
   std::map<std::string,MsgAry>::const_iterator itr;
   for (itr=m_sourceMap.begin(); itr!=m_sourceMap.end(); ++itr) {
     for (unsigned int ic = 0; ic < MSG::NUM_LEVELS; ++ic) {
@@ -606,7 +607,7 @@ void LoggedMessageSvc::reportMessage( const Message& msg )    {
 void LoggedMessageSvc::reportMessage (std::string source,
                                       int type,
                                       std::string message) {
-  Message msg( source, type, message);
+  Message msg( std::move(source), type, std::move(message));
   reportMessage( msg );
 }
 
@@ -952,10 +953,18 @@ void LoggedMessageSvc::tee( const std::string& sourceName,
 // Purpose: get all messages of a certain MSG::Level
 // ---------------------------------------------------------------------------
 
-const std::vector< std::pair<std::string, std::string> >& 
-LoggedMessageSvc::getMessages( MSG::Level level) const {
-
+std::vector< std::pair<std::string, std::string> >
+LoggedMessageSvc::getMessages( MSG::Level level) const
+{
+  std::lock_guard<std::mutex> lock(m_reportMutex);
   return m_msgLog[ level ];
+}
 
+
+auto LoggedMessageSvc::getKeyMessages() const
+  -> std::vector< LoggedMessage >
+{
+  std::lock_guard<std::mutex> lock(m_reportMutex);
+  return m_msgKeyLog;
 }
 

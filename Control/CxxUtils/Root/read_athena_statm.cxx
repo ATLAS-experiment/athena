@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <errno.h>
@@ -27,7 +27,10 @@ read_athena_statm()
       return res;
     }
 
-    fscanf(fd, "%80u %80u", &res.vm_pages, &res.rss_pages);
+    if (fscanf(fd, "%80u %80u", &res.vm_pages, &res.rss_pages) < 2) {
+      fprintf(stderr,
+	      "read_statm: problem reading file %s:\n", filename);
+    }
     fclose(fd);
 #else
     int pagesize = getpagesize();

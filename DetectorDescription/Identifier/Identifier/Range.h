@@ -84,9 +84,6 @@ public:
  
   void clear (); 
  
-  /// Add a wild card field. 
-  void add (); 
- 
   /// Add a required value. (ie. low = high = value) 
   void add (element_type value); 
  

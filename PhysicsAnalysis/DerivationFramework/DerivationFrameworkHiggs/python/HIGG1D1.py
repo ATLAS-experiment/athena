@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_HIGG1D1.py
 # This defines DAOD_HIGG1D1, an unskimmed DAOD format for Run 3.
@@ -38,8 +38,8 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
                  acc.getSequence ('EventCleanLockSeq')]
     seq.Members = [a for a in seq.Members if a not in cleanSeqs] + cleanSeqs
 
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMPFlowCustomVtxJets'], ['HggPrimaryVertices'], trackAugmenterPrefix='btagIpHgg_'))
+    from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+    acc.merge(FlavorTaggingCfg(flags, 'AntiKt4EMPFlowCustomVtxJets', 'HggPrimaryVertices', trackAugmenterPrefix='btagIpHgg_'))
 
     #Custom MET
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCustomVtxCfg
@@ -59,7 +59,7 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
                             "((abs(TruthParticles.pdgId) ==  6))",                                       # Top quark
                             "((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 1*GeV))",        # Photon
                             "(abs(TruthParticles.pdgId) >=  1000000)",                                   # BSM
-                            "(TruthParticles.status == 1 && TruthParticles.barcode < 200000)"]           # stable particles
+                            "(TruthParticles.isGenStable)"]           # stable particles
         truth_expression = f'({" || ".join(truth_conditions)})'
 
         HIGG1D1GenericTruthThinningTool   = acc.getPrimaryAndMerge(GenericTruthThinningCfg(
@@ -364,7 +364,7 @@ def HIGG1D1Cfg(flags):
                                                  "Muons.TruthLink",
                                                  "Photons.TruthLink",
                                                  "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                                 "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                                 "AntiKt4EMPFlowJets.QGTransformer_ConstScore.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                                  "TruthPrimaryVertices.t.x.y.z",
                                                  "EventInfo.DFCommonJetsCustomVtx_eventClean_LooseBad.DFCommonJetsCustomVtx_eventClean_TightBad.hardScatterVertexLink.timeStampNSOffset",
                                                  "TauJets.dRmax.etOverPtLeadTrk"]

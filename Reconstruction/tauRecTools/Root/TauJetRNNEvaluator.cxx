@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNNEvaluator.h"
@@ -17,25 +17,8 @@ TauJetRNNEvaluator::TauJetRNNEvaluator(const std::string &name):
   m_net_1p(nullptr),
   m_net_2p(nullptr),
   m_net_3p(nullptr) {
-    
-  declareProperty("NetworkFile0P", m_weightfile_0p = "");
-  declareProperty("NetworkFile1P", m_weightfile_1p = "");
-  declareProperty("NetworkFile2P", m_weightfile_2p = "");
-  declareProperty("NetworkFile3P", m_weightfile_3p = "");
-  declareProperty("OutputVarname", m_output_varname = "RNNJetScore");
-  declareProperty("MaxTracks", m_max_tracks = 10);
-  declareProperty("MaxClusters", m_max_clusters = 6);
-  declareProperty("MaxClusterDR", m_max_cluster_dr = 1.0f);
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
-  declareProperty("TrackClassification", m_doTrackClassification = true);
+}
 
-  // Naming conventions for the network weight files:
-  declareProperty("InputLayerScalar", m_input_layer_scalar = "scalar");
-  declareProperty("InputLayerTracks", m_input_layer_tracks = "tracks");
-  declareProperty("InputLayerClusters", m_input_layer_clusters = "clusters");
-  declareProperty("OutputLayer", m_output_layer = "rnnid_output");
-  declareProperty("OutputNode", m_output_node = "sig_prob");
-  }
 
 TauJetRNNEvaluator::~TauJetRNNEvaluator() {}
 
@@ -99,14 +82,14 @@ StatusCode TauJetRNNEvaluator::initialize() {
   // Load the weights and create the network
   // 0p is for trigger only
   if (!weightfile_0p.empty()) {
-    m_net_0p = std::make_unique<TauJetRNN>(weightfile_0p, config);
+    m_net_0p = std::make_unique<TauJetRNN>(weightfile_0p, config, m_useTRT);
     if (!m_net_0p) {
       ATH_MSG_ERROR("No network configured for 0-prong taus.");
       return StatusCode::FAILURE;
     }
   }
 
-  m_net_1p = std::make_unique<TauJetRNN>(weightfile_1p, config);
+  m_net_1p = std::make_unique<TauJetRNN>(weightfile_1p, config, m_useTRT);
   if (!m_net_1p) {
     ATH_MSG_ERROR("No network configured for 1-prong taus.");
     return StatusCode::FAILURE;
@@ -114,14 +97,14 @@ StatusCode TauJetRNNEvaluator::initialize() {
 
   // 2p is optional
   if (!weightfile_2p.empty()) {
-    m_net_2p = std::make_unique<TauJetRNN>(weightfile_2p, config);
+    m_net_2p = std::make_unique<TauJetRNN>(weightfile_2p, config, m_useTRT);
     if (!m_net_2p) {
       ATH_MSG_ERROR("No network configured for 2-prong taus.");
       return StatusCode::FAILURE;
     }
   }
 
-  m_net_3p = std::make_unique<TauJetRNN>(weightfile_3p, config);      
+  m_net_3p = std::make_unique<TauJetRNN>(weightfile_3p, config, m_useTRT); 
   if (!m_net_3p) {
     ATH_MSG_ERROR("No network configured for 3-prong taus.");
     return StatusCode::FAILURE;
@@ -136,6 +119,11 @@ StatusCode TauJetRNNEvaluator::execute(xAOD::TauJet &tau) const {
 
   // Set default score and overwrite later
   output(tau) = -1111.0f;
+
+  // save CPU when running PHYS derivations
+  if (m_applyLooseTrackSel) {
+    if (tau.nTracks()>5) return StatusCode::SUCCESS;
+  } 
 
   const auto nTracksCharged = tau.nTracksCharged();
 

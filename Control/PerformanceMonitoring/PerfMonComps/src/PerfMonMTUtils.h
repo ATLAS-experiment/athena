@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -403,7 +403,7 @@ inline double PMonMT::get_vmem() {
 
 inline MemoryMap_t operator-(const MemoryMap_t& map1, const MemoryMap_t& map2) {
   MemoryMap_t result_map;
-  for (auto it : map1) {
+  for (const auto& it : map1) {
     result_map[it.first] = map1.at(it.first) - map2.at(it.first);
   }
   return result_map;

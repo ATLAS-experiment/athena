@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -15,19 +15,26 @@
 //
 //************************************************************
 
+#include "TileGeoG4CalibSD.h"
+
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "TruthUtils/MagicNumbers.h"
 
-#include "TileGeoG4CalibSD.h"
-#include "TileGeoG4DMLookupBuilder.h"
 #include "TileEscapedEnergyProcessing.h"
+#include "TileGeoG4DMLookupBuilder.h"
+#include "TileHitVectorDMBuilder.h"
+
 #include "TileG4Interfaces/ITileCalculator.h"
 #include "TileGeoG4SD/TileSDOptions.h"
-#include "TileGeoG4SD/TileGeoG4Lookup.hh"
 #include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
-#include "TileSimEvent/TileHitVector.h"
 #include "PathResolver/PathResolver.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
@@ -49,25 +56,21 @@
 #include "G4SDManager.hh"
 #include "G4ios.hh"
 #include "G4EventManager.hh"
-#include "G4Event.hh"
-#include "G4RunManager.hh"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 
 #include "MCTruth/VTrackInformation.h"
-
-#include <iostream>
-#include <string>
 
 //CONSTRUCTOR
 TileGeoG4CalibSD::TileGeoG4CalibSD(const G4String& name, const std::vector<std::string>& outputCollectionNames, ITileCalculator* tileCalculator,
                                    const ServiceHandle<StoreGateSvc> &detStore)
 : G4VSensitiveDetector(name),
+  m_tileHits(outputCollectionNames[0]),
   m_tileActiveCellCalibHits(outputCollectionNames[1]),
   m_tileInactiveCellCalibHits(outputCollectionNames[2]),
   m_tileDeadMaterialCalibHits(outputCollectionNames[3]),
-  m_tileHits(outputCollectionNames[0]),
   m_rdbSvc(tileCalculator->GetOptions()->rDBAccessSvcName, name),
   m_geoModSvc(tileCalculator->GetOptions()->geoModelSvcName, name),
+  m_detStoreSvc(detStore),
   m_tileTB(tileCalculator->GetOptions()->tileTB),
   m_doCalibHitParticleID(tileCalculator->GetOptions()->doCalibHitParticleID),
 #ifdef HITSINFO    //added by Sergey
@@ -75,7 +78,6 @@ TileGeoG4CalibSD::TileGeoG4CalibSD(const G4String& name, const std::vector<std::
   m_ntupleCnt("TileCalibHitCntNtup/TileCalibHitCntNtup"),
 #endif
   m_calc(tileCalculator),
-  m_lookupDM(0),
   m_simEn(0),
   m_tile_eep(0),
   m_E_tot(0.0),
@@ -165,20 +167,9 @@ TileGeoG4CalibSD::TileGeoG4CalibSD(const G4String& name, const std::vector<std::
     G4cout << "FATAL: Could not retrieve the geo model svc" << G4endl;
     abort();
   }
-
-  //BUILD TILECAL ORDINARY AND CALIBRATION LOOK-UP TABLES
-  m_lookup = m_calc->GetLookupBuilder();
-  m_lookupDM = new TileGeoG4DMLookupBuilder(m_lookup, m_rdbSvc, m_geoModSvc, detStore, verboseLevel);
-  m_lookupDM->BuildLookup(m_tileTB,m_calc->GetOptions()->plateToCell);
-  if (verboseLevel >= 5) G4cout << "Lookup built for Tile" << G4endl;
-
-  m_plateToCell = m_lookupDM->GetPlateToCell();
-  G4cout << "Using plateToCell = " << (m_plateToCell ? "true" : "false") << G4endl;
-
-  // current settings for AddToCell and AddToGirder are controlled just by one flag
+  m_plateToCell = false;
   m_addToCell = m_plateToCell;
   m_addToGirder = !m_plateToCell;
-
   m_atlasG4EvtUserInfo = 0;
   m_aStep = 0;
 }
@@ -186,7 +177,19 @@ TileGeoG4CalibSD::TileGeoG4CalibSD(const G4String& name, const std::vector<std::
 //DESTRUCTOR
 TileGeoG4CalibSD::~TileGeoG4CalibSD() {
   delete m_simEn;
-  delete m_lookupDM;
+}
+
+TileHitVectorDMBuilder* TileGeoG4CalibSD::GetHitCollection()
+{
+  // Check that the event manager is available, ISF will call this before the Geant4 run starts
+  if(auto* eventManager = G4EventManager::GetEventManager())
+  {
+    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation()))
+    {
+      return eventInfo->GetHitCollectionMap()->Find<TileHitVectorDMBuilder>(m_tileHits);
+    }
+  }
+  return nullptr;
 }
 
 //-----------------------------------------------------
@@ -195,10 +198,25 @@ TileGeoG4CalibSD::~TileGeoG4CalibSD() {
 void TileGeoG4CalibSD::Initialize(G4HCofThisEvent* /*HCE*/) {
   if (verboseLevel >= 5) G4cout << "Initializing SD" << G4endl;
 
-  if (!m_tileActiveCellCalibHits.isValid()) m_tileActiveCellCalibHits = std::make_unique<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits.name());
-  if (!m_tileInactiveCellCalibHits.isValid()) m_tileInactiveCellCalibHits = std::make_unique<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits.name());
-  if (!m_tileDeadMaterialCalibHits.isValid()) m_tileDeadMaterialCalibHits = std::make_unique<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits.name());
-  if (!m_tileHits.isValid()) m_tileHits = std::make_unique<TileHitVector>(m_tileHits.name());
+  //BUILD TILECAL ORDINARY AND CALIBRATION LOOK-UP TABLES FOR CURRENT EVENT
+  TileHitVectorDMBuilder* hitColl = GetHitCollection();
+  // if the DMLookupBuilder is not set this is a new Athena event, build a new DMLookupBuilder
+  if(hitColl && !hitColl->GetDMLookupBuilder())
+  {
+    auto lookupDM = std::make_unique<TileGeoG4DMLookupBuilder>(hitColl->GetLookupBuilder(), m_rdbSvc, m_geoModSvc, m_detStoreSvc, verboseLevel);
+    lookupDM->BuildLookup(m_tileTB,m_calc->GetOptions()->plateToCell);
+    m_plateToCell = lookupDM->GetPlateToCell();
+    if (verboseLevel >= 5) {
+      G4cout << "Lookup built for Tile" << G4endl;
+      G4cout << "Using plateToCell = " << (m_plateToCell ? "true" : "false") << G4endl;
+    }
+
+    // current settings for AddToCell and AddToGirder are controlled just by one flag
+    m_addToCell = m_plateToCell;
+    m_addToGirder = !m_plateToCell;
+
+    hitColl->SetDMLookupBuilder(std::move(lookupDM));
+  }
 
   //TILECAL IDENTIFIER NUMBER - ALWAYS FIXED
   m_subCalo = 3;
@@ -238,7 +256,7 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
   }
 
   if (!m_atlasG4EvtUserInfo)
-    m_atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
+    m_atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetUserInformation());
 
   // Update the event information to note that this step has been dealt with
   if ( m_atlasG4EvtUserInfo ) {
@@ -431,36 +449,32 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
 //-----------------------------------------------------
 //    EndOfEvent - CALLED AT THE END OF EACH EVENT
 //-----------------------------------------------------
-void TileGeoG4CalibSD::EndOfAthenaEvent() {
+void TileGeoG4CalibSD::EndOfEvent(G4HCofThisEvent*) {
   if (verboseLevel >= 10) G4cout << "Store Hits" << G4endl;
 
   //CREATE CALIBHITS FROME THEIR VECTORS AND
   //STORE THEM IN THE RESPECTIEVE CONTAINERS
-  m_calibrationHits_ptr_t it;
+  auto hitCollections = static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetUserInformation())->GetHitCollectionMap();
 
-  // Cell Active Material Container
-  m_tileActiveCellCalibHits->reserve(m_activeCalibrationHits.size());
-  for( auto &it : m_activeCalibrationHits ) {
-    m_tileActiveCellCalibHits->push_back(std::move(it));
-  }
-
-  // Cell Inactive Material Container
-  m_tileInactiveCellCalibHits->reserve(m_inactiveCalibrationHits.size());
-  for( auto &it : m_inactiveCalibrationHits ) {
-    m_tileInactiveCellCalibHits->push_back(std::move(it));
-  }
-
-  // Tile Dead Material Container
-  m_tileDeadMaterialCalibHits->reserve(m_deadCalibrationHits.size());
-  for( auto &it : m_deadCalibrationHits ) {
-    m_tileDeadMaterialCalibHits->push_back(std::move(it));
-  }
-
-  // copy ordinary hits to tileHits vector and reset all pointers
-  m_lookup->ResetCells(&*m_tileHits);
+  auto score_hits = [&hitCollections](const std::string& collectionName, auto const& hits) {
+    auto hitCol = hitCollections->Find<CaloCalibrationHitContainer>(collectionName);
+    // Cell Active Material Container
+    m_calibrationHits_ptr_t it;
+    hitCol->reserve(hits.size());
+    for( auto& it : hits ) {
+      hitCol->push_back(std::move(it));
+    }
+  };
+  
+  score_hits(m_tileActiveCellCalibHits, m_activeCalibrationHits);
+  score_hits(m_tileInactiveCellCalibHits, m_inactiveCalibrationHits);
+  score_hits(m_tileDeadMaterialCalibHits, m_deadCalibrationHits);
 
 #ifdef HITSINFO  // added by Sergey
-    if(m_ntupleCnt->StoreCNT(&*m_tileActiveCellCalibHits,&*m_tileInactiveCellCalibHits,&*m_tileDeadMaterialCalibHits).isFailure()) {
+    auto tileActiveCellHits = hitCollections->Find<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits);
+    auto tileInactiveCellHits = hitCollections->Find<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits);
+    auto tileDeadMaterialHits = hitCollections->Find<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits);
+    if(m_ntupleCnt->StoreCNT(tileActiveCellHits,tileInactiveCellHits,tileDeadMaterialHits).isFailure()) {
       G4cout << "Failed to store calib hit info in ntuple" << G4endl;
     }
 #endif
@@ -475,10 +489,6 @@ void TileGeoG4CalibSD::EndOfAthenaEvent() {
   m_activeCalibrationHits.clear();
   m_inactiveCalibrationHits.clear();
   m_deadCalibrationHits.clear();
-
-  //RESET CELL, GIRDER CELL AND
-  //PLATE CELL HITS COUNTER VECTORS
-  m_lookupDM->ResetCells();
 
 #ifdef HITSINFO  //INCREMENT OF EVENT COUNTER -- added by Sergey
   if (doHitsNTup || doHitsTXT) m_nEvent++;

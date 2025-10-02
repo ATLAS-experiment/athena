@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p5.cxx
@@ -11,6 +11,7 @@
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModelTPCnv/DataHeaderCnv_p5.h"
 #include "CxxUtils/sgkey_t.h"
+#include <algorithm>
 
 DataHeaderElementCnv_p5::DataHeaderElementCnv_p5() {}
 DataHeaderElementCnv_p5::~DataHeaderElementCnv_p5() {}
@@ -75,20 +76,25 @@ void DataHeaderElementCnv_p5::persToTrans(const DataHeaderElement_p5& pers,
       token.setTechnology(tech);
       token.setOid(Token::OID_t(oid1, pers.m_oid2));
    }
-   unsigned int aliasCur = 0U, clidCur = 0U;
-   trans.m_key = form.map()[keyIdx];
+
+   auto aliasBeg = form.map().begin() + keyIdx;
+   trans.m_key = *aliasBeg++;
    trans.m_alias.clear();
-   for (std::set<std::string>::const_iterator lastAlias = trans.m_alias.begin();
-		   aliasCur < aliasNum; ++aliasCur) {
-      lastAlias = trans.m_alias.insert(lastAlias, form.map()[keyIdx + aliasCur + 1]);
+   trans.m_alias.assign (aliasBeg, aliasBeg+aliasNum);
+   if (!std::ranges::is_sorted (trans.m_alias)) {
+     // Should really be sorted, but just in case...
+     std::ranges::sort (trans.m_alias);
+     auto ret = std::ranges::unique (trans.m_alias);
+     trans.m_alias.erase (ret.begin(), ret.end());
    }
+
    trans.m_pClid = *intIter; ++intIter;
-   trans.m_clids.clear();
    const std::vector<unsigned int>::const_iterator intLast = form.params(entry).end();
-   for (std::set<CLID>::const_iterator lastClid = trans.m_clids.begin();
-		   intIter != intLast && clidCur < clidNum; ++intIter, ++clidCur) {
-      lastClid = trans.m_clids.insert(lastClid, *intIter);
+   if (intIter+clidNum > intLast) {
+     clidNum = intLast - intIter;
    }
+   trans.m_clids.assign (intIter, intIter+clidNum);
+   intIter += clidNum;
    trans.m_hashes.clear();
    for (; intIter != intLast; ++intIter) {
       trans.m_hashes.push_back(*intIter);
@@ -193,14 +199,12 @@ void DataHeaderElementCnv_p5::transToPers(const DataHeaderElement& trans,
       form.insertParam(keyIdx * 0x00010000U + aliasNum * 0x00000100U + clidNum, entry);
    }
    form.insertMap(trans.m_key);
-   for (std::set<std::string>::const_iterator iter = trans.m_alias.begin(),
-		   last = trans.m_alias.end(); iter != last; ++iter) {
-      form.insertMap(*iter);
+   for (const std::string& a : trans.m_alias) {
+      form.insertMap(a);
    }
    form.insertParam(trans.m_pClid, entry);
-   for (std::set<CLID>::const_iterator iter = trans.m_clids.begin(),
-		   last = trans.m_clids.end(); iter != last; ++iter) {
-      form.insertParam(*iter, entry);
+   for (CLID clid : trans.m_clids) {
+      form.insertParam(clid, entry);
    }
    for (std::vector<SG::sgkey_t>::const_iterator iter = trans.m_hashes.begin(),
 		   last = trans.m_hashes.end(); iter != last; ++iter) {

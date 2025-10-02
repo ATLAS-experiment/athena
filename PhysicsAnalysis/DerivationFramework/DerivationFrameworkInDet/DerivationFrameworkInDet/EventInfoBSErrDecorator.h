@@ -30,7 +30,7 @@ class SCT_ID;
 
 namespace DerivationFramework {
 
-  class EventInfoBSErrDecorator : public AthAlgTool, public IAugmentationTool {
+  class EventInfoBSErrDecorator : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       EventInfoBSErrDecorator(const std::string& type, const std::string& name, const IInterface* parent);
 

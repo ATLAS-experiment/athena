@@ -13,23 +13,37 @@
 
 namespace columnar
 {
-  template<ContainerId CI> requires (CI == ContainerId::particle0 || CI == ContainerId::particle1)
-  struct ContainerIdTraits<CI> final
+  namespace ContainerId
   {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+    struct particle : regularCIBase<xAOD::IParticle,xAOD::IParticleContainer>
+    {
+      static constexpr std::string_view idName = "particle";
+    };
+    using particle0 = particle;
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::IParticle;
+    struct particle1 : particle
+    {
+      static constexpr std::string_view idName = "particle1";
+    };
+  }
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::IParticleContainer;
+  using ParticleRange = ObjectRange<ContainerId::particle>;
+  using ParticleId = ObjectId<ContainerId::particle>;
+  using OptParticleId = OptObjectId<ContainerId::particle>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ParticleAccessor  = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ParticleDecorator = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::IParticleContainer;
- };
+  using Particle0Range = ObjectRange<ContainerId::particle0>;
+  using Particle0Id = ObjectId<ContainerId::particle0>;
+  using OptParticle0Id = OptObjectId<ContainerId::particle0>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Accessor  = AccessorTemplate<ContainerId::particle0,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Decorator = AccessorTemplate<ContainerId::particle0,CT,ColumnAccessMode::output,CM>;
+
+  using Particle1Range = ObjectRange<ContainerId::particle1>;
+  using Particle1Id = ObjectId<ContainerId::particle1>;
+  using OptParticle1Id = OptObjectId<ContainerId::particle1>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Accessor  = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Decorator = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

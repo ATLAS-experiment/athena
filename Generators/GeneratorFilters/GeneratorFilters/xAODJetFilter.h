@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_xAODJetFilter_H
@@ -7,8 +7,7 @@
 
 #include "GeneratorModules/GenFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
 #include <cmath>
 
 
@@ -16,20 +15,10 @@
 /// @author I Hinchliffe, May 2002
 class xAODJetFilter : public GenFilter {
 public:
+  using GenFilter::GenFilter;
 
-  xAODJetFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterInitialize() override;
-  virtual StatusCode filterEvent() override;
-   
-   Gaudi::Property<double> m_userEta{this, "EtaRange", 2.7, " "}; //range over which triggers are searched for
-   Gaudi::Property<double> m_userThresh{this, "JetThreshold", 17000., " "}; // lowest et jet
-   Gaudi::Property<double> m_stop{this, "SeedThreshold", 1000., " "}; //seed tower threshold 
-   Gaudi::Property<double> m_cone{this, "ConeSize", 0.4, " "};  //cone sixe
-   Gaudi::Property<int> m_gride{this, "GridSizeEta",2, " "}; //how many cells in eta 
-   Gaudi::Property<int> m_gridp{this, "GridSizePhi",2, " "}; //how many cells in phi
-   Gaudi::Property<int> m_userNumber{this, "JetNumber",1, " "}; //how many are we looking for
-   Gaudi::Property<bool> m_type{this, "JetType",true, " "}; // cone or grid to define jet
-   
+  virtual StatusCode filterInitialize() override final;
+  virtual StatusCode filterEvent() override final;
 
   struct McObj {
     // Constructors and destructor
@@ -62,6 +51,15 @@ public:
 
 
 private:
+   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthPartContKey{this, "TruthParticleContainerKey", "TruthGen"};
+   Gaudi::Property<double> m_userEta{this, "EtaRange", 2.7, " "}; //range over which triggers are searched for
+   Gaudi::Property<double> m_userThresh{this, "JetThreshold", 17000., " "}; // lowest et jet
+   Gaudi::Property<double> m_stop{this, "SeedThreshold", 1000., " "}; //seed tower threshold
+   Gaudi::Property<double> m_cone{this, "ConeSize", 0.4, " "};  //cone sixe
+   Gaudi::Property<int> m_gride{this, "GridSizeEta",2, " "}; //how many cells in eta
+   Gaudi::Property<int> m_gridp{this, "GridSizePhi",2, " "}; //how many cells in phi
+   Gaudi::Property<int> m_userNumber{this, "JetNumber",1, " "}; //how many are we looking for
+   Gaudi::Property<bool> m_type{this, "JetType",true, " "}; // cone or grid to define jet
 
   static const int m_grphi = 105 ; // -CLHEP::pi to CLHEP::pi in units of 0.06 (approx)
   static const int m_greta = 200 ; // -6.0 to 6.0 in units 0.06 {approx}
@@ -76,10 +74,7 @@ private:
   int m_nphicell2{}; // number of phi cells inside full cone
   int m_netacell2{}; // number of eta cells inside full cone
   std::vector<McObj> m_Jets; //store jets
-  
 
-    
 };
 
 #endif
-

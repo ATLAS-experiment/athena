@@ -7,7 +7,6 @@
 
 #include "FlavorTagInference/GNN.h"
 #include "FlavorTagInference/GNNOptions.h"
-#include "xAODBTagging/BTaggingFwd.h"
 #include "xAODJet/JetContainerFwd.h"
 
 #include <vector>
@@ -33,10 +32,8 @@ namespace FlavorTagInference {
     MultifoldGNN(MultifoldGNN&&);
     MultifoldGNN(const MultifoldGNN&);
     ~MultifoldGNN();
-    void decorate(const xAOD::BTagging& btag) const;
-    void decorate(const xAOD::Jet& jet) const;
-    void decorateWithDefaults(const SG::AuxElement& jet) const;
-    void decorateWithDefaults(const xAOD::BTagging& btag) const;
+    void decorate(const xAOD::IParticle& i_jet) const;
+    void decorateWithDefaults(const xAOD::IParticle& i_jet) const;
 
     std::set<std::string> getDecoratorKeys() const;
     std::set<std::string> getAuxInputKeys() const;

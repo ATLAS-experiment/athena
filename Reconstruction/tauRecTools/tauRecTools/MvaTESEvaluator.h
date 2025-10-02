@@ -9,6 +9,8 @@
 #include "tauRecTools/TauRecToolBase.h"
 #include "tauRecTools/BDTHelper.h"
 
+#include "AsgTools/PropertyWrapper.h"
+
 #include <map>
 
 class MvaTESEvaluator
@@ -68,8 +70,8 @@ class MvaTESEvaluator
   std::unique_ptr<tauRecTools::BDTHelper> m_bdtHelper0p;
 
   // Configurable properties
-  std::string m_sWeightFileName;
-  std::string m_sWeightFileName0p;
+  Gaudi::Property<std::string> m_sWeightFileName{this, "WeightFileName", ""};
+  Gaudi::Property<std::string> m_sWeightFileName0p{this, "WeightFileName0p", ""};
 
 };
 

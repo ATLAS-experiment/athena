@@ -61,7 +61,7 @@ def ITkStripDigitizationToolCfg(flags, name="ITkStripDigitizationTool", **kwargs
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(ITkStripRangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
@@ -81,7 +81,7 @@ def ITkStripDigitizationHSToolCfg(flags, name="ITkStripDigitizationHSTool", **kw
     """Return ComponentAccumulator with hard scatter configured SCT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(ITkStripRangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("OutputObjectName", "ITkStripRDOs")
     kwargs.setdefault("OutputSDOName", "ITkStripSDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 1)
@@ -94,7 +94,7 @@ def ITkStripDigitizationPUToolCfg(flags, name="ITkStripDigitizationPUTool",**kwa
     """Return ComponentAccumulator with pileup configured SCT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(ITkStripRangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("OutputObjectName", "ITkStrip_PU_RDOs")
     kwargs.setdefault("OutputSDOName", "ITkStrip_PU_SDO_Map")
     kwargs.setdefault("HardScatterSplittingMode", 2)
@@ -119,7 +119,7 @@ def ITkStripDigitizationToolSplitNoMergePUCfg(flags, name="ITkStripDigitizationT
     """Return ComponentAccumulator with merged pileup configured SCT digitization tool"""
     acc = ComponentAccumulator()
     rangetool = acc.popToolsAndMerge(ITkStripRangeCfg(flags))
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)))
     kwargs.setdefault("InputObjectName", "PileupITkStripHits")
     kwargs.setdefault("HardScatterSplittingMode", 0)
     kwargs.setdefault("OutputObjectName", "ITkStrip_PU_RDOs")
@@ -203,8 +203,8 @@ def ITkStripFrontEndCfg(flags, name="ITkStripFrontEnd", **kwargs):
     log = logging.getLogger("ITkStripFrontEndCfg")
     log.info("ITkStripDigitization:::: Turned off Noise in ITkStripFrontEnd")
     log.info("ITkStripDigitization:::: Overriding Digitization.DoInnerDetectorNoise flag")
-    kwargs.setdefault("NoiseOn", False)
-    kwargs.setdefault("AnalogueNoiseOn", False)
+    kwargs.setdefault("NoiseOn", flags.Digitization.DoITkStripDetectorNoise)
+    kwargs.setdefault("AnalogueNoiseOn", flags.Digitization.DoITkStripDetectorNoise)
     #else:
     #    kwargs.setdefault("NoiseOn", True)
     #    kwargs.setdefault("AnalogueNoiseOn", True)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -25,19 +25,13 @@ namespace Trk {
   class TrkExUnitTestBase: public AthAlgorithm  {
   public:
     /** Standard Athena-Algorithm Constructor */
-    TrkExUnitTestBase(const std::string& name, ISvcLocator* pSvcLocator);
-
-    /** Default Destructor */
-    virtual ~TrkExUnitTestBase();
+    using AthAlgorithm::AthAlgorithm;
 
     /** standard Athena-Algorithm method */
     StatusCode initialize();
 
     /** standard Athena-Algorithm method */
     StatusCode execute();
-
-    /** standard Athena-Algorithm method */
-    StatusCode finalize();
 
     /* specify the test here */
     virtual StatusCode runTest() = 0;
@@ -57,10 +51,10 @@ namespace Trk {
     std::unique_ptr<Rndm::Numbers>            m_landauDist;
 
     /** number of tests */
-    size_t m_numTests;
+    UnsignedIntegerProperty m_numTests{this, "NumberOfTestsPerEvent", 100};
 
     /** enable scan mode */
-    bool m_scanMode;
+    BooleanProperty m_scanMode{this, "ScanMode", false};
   };
 }
 

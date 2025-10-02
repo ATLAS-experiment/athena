@@ -5,7 +5,7 @@
 #ifndef ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
 #define ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsGeometry/ATLASSourceLink.h"
 
@@ -18,7 +18,6 @@
 #include "Acts/SpacePointFormation/SpacePointBuilder.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "InDetIdentifier/SCT_ID.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include <string>
 
@@ -37,73 +36,66 @@ namespace ActsTrk {
 
   class CoreStripSpacePointFormationTool: public extends<AthAlgTool, ActsTrk::IStripSpacePointFormationTool> {
   public:
-    CoreStripSpacePointFormationTool(const std::string& type,
-				     const std::string& name,
-				     const IInterface* parent);
-
+    using base_class::base_class;
     virtual ~CoreStripSpacePointFormationTool() = default;
 
     virtual StatusCode initialize() override;
 
     virtual StatusCode produceSpacePoints( const EventContext& ctx,
-					   const xAOD::StripClusterContainer& clusterContainer,
-					   const InDet::SiElementPropertiesTable& properties,
-					   const InDetDD::SiDetectorElementCollection& elements,
-					   const Amg::Vector3D& beamSpotVertex,
-					   std::vector<StripSP>& spacePoints,
-					   std::vector<StripSP>& overlapSpacePoints,
-					   bool processOverlaps,
-					   const std::vector<IdentifierHash>& hashesToProcess,
-					   const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor ) const override;
+                                            const xAOD::StripClusterContainer& clusterContainer,
+                                            const InDet::SiElementPropertiesTable& properties,
+                                            const InDetDD::SiDetectorElementCollection& elements,
+                                            const Amg::Vector3D& beamSpotVertex,
+                                            std::vector<StripSP>& spacePoints,
+                                            std::vector<StripSP>& overlapSpacePoints,
+                                            bool processOverlaps,
+                                            const std::vector<IdentifierHash>& hashesToProcess,
+                                            const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor ) const override;
 
   private:
 
     StatusCode fillSpacePoints(const EventContext& ctx,
-			      std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
-			      const std::array<const InDetDD::SiDetectorElement*,nNeighbours>& neighbourElements,
-			      const std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours>& neighbourSourceLinks,
-			      const std::array<double, 14>& overlapExtents,
-			      const Amg::Vector3D& beamSpotVertex,
-			      std::vector<StripSP>& spacePoints,
-			      std::vector<StripSP>& overlapSpacePoints ) const;
+                               std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
+                               const std::array<const InDetDD::SiDetectorElement*,nNeighbours>& neighbourElements,
+                               const std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours>& neighbourSourceLinks,
+                               const std::array<double, 14>& overlapExtents,
+                               const Amg::Vector3D& beamSpotVertex,
+                               std::vector<StripSP>& spacePoints,
+                               std::vector<StripSP>& overlapSpacePoints ) const;
 
     StatusCode makeSpacePoint(const EventContext& ctx,
-			     std::vector<StripSP>& collection,
-			     std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
-			     const ATLASUncalibSourceLink& currentSlink,
-			     const ATLASUncalibSourceLink& anotherSlink,
-			     const InDetDD::SiDetectorElement* currentElement,
-			     const InDetDD::SiDetectorElement* anotherElement,
-			     const double limit,
-			     const double slimit,
-			     const Acts::Vector3& vertex) const;
+                              std::vector<StripSP>& collection,
+                              std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
+                              const ATLASUncalibSourceLink& currentSlink,
+                              const ATLASUncalibSourceLink& anotherSlink,
+                              const InDetDD::SiDetectorElement* currentElement,
+                              const InDetDD::SiDetectorElement* anotherElement,
+                              const double limit,
+                              const double slimit,
+                              const Acts::Vector3& vertex) const;
 
     void updateRange(const InDetDD::SiDetectorElement& element1,
-		     const InDetDD::SiDetectorElement& element2,
-		     double& stripLengthGapTolerance, double& min, double& max) const;
+                     const InDetDD::SiDetectorElement& element2,
+                     double& stripLengthGapTolerance, double& min, double& max) const;
 
     double computeOffset(const InDetDD::SiDetectorElement& element1,
-		  const InDetDD::SiDetectorElement& element2,
-		  double& stripLengthGapTolerance) const;
+                         const InDetDD::SiDetectorElement& element2,
+                         double& stripLengthGapTolerance) const;
 
     void correctPolarRange(const InDetDD::SiDetectorElement* element,
-			   double& min, double& max,
-			   size_t& minStrip, size_t& maxStrip) const;
+                           double& min, double& max,
+                           size_t& minStrip, size_t& maxStrip) const;
 
     std::pair<Amg::Vector3D, Amg::Vector3D > getStripEnds(const xAOD::StripCluster* cluster,
-							  const InDetDD::SiDetectorElement* element,
-							  size_t& stripIndex) const;
+                                                          const InDetDD::SiDetectorElement* element,
+                                                          size_t& stripIndex) const;
     std::pair<Amg::Vector3D, Amg::Vector3D > getStripEnds(const ATLASUncalibSourceLink &sourceLink,
-							  const InDetDD::SiDetectorElement* element,
-							  size_t& stripIndex) const;
+                                                          const InDetDD::SiDetectorElement* element,
+                                                          size_t& stripIndex) const;
     const SCT_ID* m_stripId{};
 
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "", "Tool to retreive Lorentz angle of SCT"};
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-
-    SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
-       {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
-       "Map which associates detector elements to Acts Geometry IDs"};
+    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
     Gaudi::Property<bool> m_allClusters{this, "AllClusters", false, "Process all clusters without limits."};
     Gaudi::Property<float> m_overlapLimitOpposite{this, "OverlapLimitOpposite", 2.8, "Overlap limit for opposite-neighbour."};

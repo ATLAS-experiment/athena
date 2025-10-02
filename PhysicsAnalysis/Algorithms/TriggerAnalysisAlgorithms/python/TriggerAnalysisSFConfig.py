@@ -5,7 +5,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
-from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period
 
 
 def is_mc_from(config: ConfigAccumulator, campaign_list: Union[Campaign, Iterable[Campaign]]) -> bool:
@@ -47,10 +47,16 @@ def get_input_years(config: ConfigAccumulator) -> list[int]:
         years = [2017]
     elif config.campaign() is Campaign.MC20e or is_data_from(config, 2018):
         years = [2018]
-    elif config.campaign() in [Campaign.MC21a, Campaign.MC23a] or is_data_from(config, 2022):
+    elif config.campaign() is Campaign.MC23a or is_data_from(config, 2022):
         years = [2022]
-    elif config.campaign() in [Campaign.MC23c, Campaign.MC23d] or is_data_from(config, 2023):
+    elif config.campaign() is Campaign.MC23d or is_data_from(config, 2023):
         years = [2023]
+    elif config.campaign() is Campaign.MC23e or is_data_from(config, 2024):
+        years = [2024]
+    elif config.campaign() is Campaign.MC23g or is_data_from(config, 2025):
+        years = [2025]
+    else:
+        raise ValueError('TriggerAnalysisConfig: unable to deduce data taking year for input file')
 
     return years
 
@@ -100,6 +106,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addOption ('taus', '', type=str,
             info="the input tau container, with a possible selection, in "
             "the format container or container.selection.")
+        self.addOption ('numberOfToys', 0, type=int,
+            info="Number of toy experiments to run to estimate the trigger efficiencies, "
+            "instead of using explicit formulas. The default is 0 (not using toys).")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -109,12 +118,14 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="disables the global trigger efficiency tool (including "
             "matching), which is only suited for electron/muon/photon "
             "trigger legs. The default is False.")
+        self.addOption ('separateChainMatching', False, type=bool,
+            info="Store the matching status for each trigger separately")
         self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
-        self.addOption("includeAllYears", False, type=bool,
+        self.addOption("includeAllYearsPerRun", False, type=bool,
             info="if True, trigger matching will include all configured years "
-            "in all jobs. The default is False.")
+            "in the LHC run in all jobs. The default is False.")
         self.addOption ('postfix', '', type=str,
             info="a unique identifier for the trigger matching decorations. Only "
             "useful when defining multiple setups. The default is '' (empty string).")
@@ -132,10 +143,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2023)]
             alg.triggers_2024 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2024)]
             alg.triggers_2025 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in get_year_data(self.triggerChainsPerYear, 2025)]
-            if is_mc_from(config, [Campaign.MC21a, Campaign.MC23a]) or is_data_from(config, 2022):
+            if is_mc_from(config, Campaign.MC23a) or is_data_from(config, 2022):
                 if not alg.triggers_2022:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2022!')
-            elif is_mc_from(config, [Campaign.MC23c, Campaign.MC23d]) or is_data_from(config, 2023):
+            elif is_mc_from(config, Campaign.MC23d) or is_data_from(config, 2023):
                 if not alg.triggers_2023:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2023!')
         else:
@@ -159,8 +170,17 @@ class TriggerAnalysisSFBlock(ConfigBlock):
                 if not alg.triggers_2018:
                     raise ValueError('TriggerAnalysisConfig: you must provide a set of triggers for the year 2018!')
 
+        triggerMatchingChains = set()
+        if self.separateChainMatching:
+            for year in get_input_years(config):
+                for trig in get_year_data(self.triggerChainsPerYear, year):
+                    triggerMatchingChains.update(trig.replace(' || ', '_OR_').split('_OR_'))
+        alg.separateMatchingTriggers = list(triggerMatchingChains)
+        alg.separateMatchingDecorationSuffix = triggerSuffix + self.postfix
+
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
+        alg.numberOfToys = self.numberOfToys
         alg.scaleFactorDecoration = 'globalTriggerEffSF' + triggerSuffix + self.postfix + '_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_%SYS%'
         alg.eventDecisionOutputDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_dontsave_%SYS%'
@@ -182,6 +202,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         if config.dataType() is not DataType.Data and not alg.doMatchingOnly:
             config.addOutputVar('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF' + triggerSuffix + self.postfix)
         config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch' + triggerSuffix + self.postfix, noSys=False)
+
+        for trig in triggerMatchingChains:
+            var = f'triggerMatch_{trig.replace("-", "_").replace(".", "p")}{alg.separateMatchingDecorationSuffix}'
+            config.addOutputVar('EventInfo', f'{var}_%SYS%', var, noSys=False)
 
         return
 
@@ -226,9 +250,11 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             for trig in get_year_data(self.triggerMatchingChainsPerYear, year):
                 trig = trig.replace(' || ', '_OR_')
                 triggerMatchingChains.update(trig.split('_OR_'))
-        if self.includeAllYears:
+        if self.includeAllYearsPerRun:
             triggerMatchingChainsAll = set()
             for year in self.triggerMatchingChainsPerYear:
+                if not is_year_in_current_period(config, year):
+                    continue
                 for trig in get_year_data(self.triggerMatchingChainsPerYear, year):
                     trig = trig.replace(' || ', '_OR_')
                     triggerMatchingChainsAll.update(trig.split('_OR_'))

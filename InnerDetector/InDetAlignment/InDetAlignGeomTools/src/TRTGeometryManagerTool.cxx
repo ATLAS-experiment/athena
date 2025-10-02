@@ -402,8 +402,6 @@ void TRTGeometryManagerTool::buildL0()
    m_alignModuleListPtr->push_back(trt);
 
    ATH_MSG_DEBUG("TRT L0 module successfully added to the list");
-
-   return;
 }
 
 //_______________________________________________________________________
@@ -695,7 +693,7 @@ void TRTGeometryManagerTool::buildL2Barrel()
          std::vector<std::vector<const Trk::TrkDetElementBase *> *> centralLayersVec;
          centralLayersVec.push_back(&centralLayers);
 
-         Amg::Translation3D translation(mod->centerOfGravity(centralLayersVec));
+         Amg::Translation3D translation(Trk::AlignModule::centerOfGravity(centralLayersVec));
          // for the rotation, we choose the element on the '-1' side.
          Amg::RotationMatrix3D rotation = ( m_idHelper->barrel_ec(centralLayers.front()->identify()) == -1 ) ?
             centralLayers.front()->transform().rotation() : centralLayers.back()->transform().rotation();
@@ -713,8 +711,7 @@ void TRTGeometryManagerTool::buildL2Barrel()
       }
    }
 
-   return;
-}
+   }
 
 
 //_______________________________________________________________________
@@ -943,8 +940,7 @@ void TRTGeometryManagerTool::buildL2EndcapsOLD()
       }
    }
 
-   return;
-}
+   }
 
 
 //_______________________________________________________________________
@@ -1050,8 +1046,7 @@ void TRTGeometryManagerTool::buildL3Barrel()
       }
    }
 
-   return;
-}
+   }
 
 //_______________________________________________________________________
 void TRTGeometryManagerTool::buildL3Endcap()
@@ -1168,8 +1163,7 @@ void TRTGeometryManagerTool::buildL3Endcap()
      }// Wheel
    }// Endcap
 
-   return;
-}
+   }
 
 //________________________________________________________________________
 void TRTGeometryManagerTool::addModuleParameters(Trk::AlignModule * module, DataVector< DataVector<Trk::AlignPar> > * allFullModPars, DataVector< DataVector<Trk::AlignPar> > * allActiveModPars)
@@ -1322,7 +1316,7 @@ bool TRTGeometryManagerTool::moduleSelected(Trk::AlignModule * mod)
 bool TRTGeometryManagerTool::moduleSelectedBarrel(unsigned int ilayer, unsigned int iphi)
 {
    bool select = true;
-   if(m_barrelLayers.size()) {
+   if(!m_barrelLayers.empty()) {
       select = false;
       for(unsigned int i=0;i<m_barrelLayers.size();i++) {
          if(m_barrelLayers[i] == (int)ilayer) {
@@ -1335,7 +1329,7 @@ bool TRTGeometryManagerTool::moduleSelectedBarrel(unsigned int ilayer, unsigned 
    if(!select)
       return false;
 
-   if(m_barrelPhiSectors.size()) {
+   if(!m_barrelPhiSectors.empty()) {
       select = false;
       for(unsigned int i=0;i<m_barrelPhiSectors.size();i++) {
          if(m_barrelPhiSectors[i] == (int)iphi) {
@@ -1352,7 +1346,7 @@ bool TRTGeometryManagerTool::moduleSelectedBarrel(unsigned int ilayer, unsigned 
 bool TRTGeometryManagerTool::moduleSelectedEndcap(unsigned int iwheel, unsigned int iphi)
 {
   bool select = true;
-  if(m_endcapWheels.size()) {
+  if(!m_endcapWheels.empty()) {
     select = false;
     for(unsigned int i=0;i<m_endcapWheels.size();++i) {
       if(m_endcapWheels[i] == (int)iwheel) {
@@ -1365,7 +1359,7 @@ bool TRTGeometryManagerTool::moduleSelectedEndcap(unsigned int iwheel, unsigned 
   if(!select)
     return false;
 
-  if(m_endcapPhiSectors.size()) {
+  if(!m_endcapPhiSectors.empty()) {
     select = false;
     for(unsigned int i=0;i<m_endcapPhiSectors.size();i++) {
       if(m_endcapPhiSectors[i] == (int)iphi) {

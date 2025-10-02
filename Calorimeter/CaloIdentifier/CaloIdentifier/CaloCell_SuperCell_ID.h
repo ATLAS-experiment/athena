@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/CaloCell_SuperCell_ID.h
  * @author scott snyder <snyder@bnl.gov>
@@ -58,7 +55,7 @@ public:
                         const LArMiniFCAL_ID*        minifcal_id,
                         const Tile_SuperCell_ID*     tile_id) ;
         
-  ~CaloCell_SuperCell_ID(void);
+  ~CaloCell_SuperCell_ID();
 
 
     /** access to EM idHelper 

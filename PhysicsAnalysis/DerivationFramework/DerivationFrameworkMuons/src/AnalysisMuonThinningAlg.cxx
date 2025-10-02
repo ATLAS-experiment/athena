@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <DerivationFrameworkMuons/AnalysisMuonThinningAlg.h>
+#include "AnalysisMuonThinningAlg.h"
 #include <StoreGate/ThinningHandle.h>
 namespace {
     using TrkThinKey = SG::ThinningHandleKey<xAOD::TrackParticleContainer>;
@@ -67,7 +67,7 @@ namespace DerivationFramework {
         }
         std::vector<bool> keep_muo(MuonContainer->size(), false);
 
-        /// Initialize the decorators whitelisting the muon to be written to the output
+        /// Initialize the decorators allowing each muon to be written to the output
         std::vector<MuonPassDecor> mu_passFlags;
         for (const SG::ReadDecorHandleKey<xAOD::MuonContainer>& pass_key : m_MuonPassKeys) { mu_passFlags.emplace_back(pass_key, ctx); }
 
@@ -164,7 +164,7 @@ namespace DerivationFramework {
                 ATH_MSG_WARNING("The container " << key.fullKey() << " is not part of the current thinning scheme. Please check");
                 continue;
             }
-            /// Put the tracks on the white list
+            /// Put the tracks on the list for inclusion
             for (const xAOD::TrackParticle* trk : *trks) {
                 if (handle(*trk)) trk_thin[trk->index()] = true;
             }

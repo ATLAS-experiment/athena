@@ -17,46 +17,30 @@
 // STD
 #include <iostream>
 
-// Default constructor
-Trk::Volume::Volume()
-  : m_transform(nullptr)
-  , m_center(nullptr)
-  , m_volumeBounds()
+
+// constructor with Amg::Transform3D
+Trk::Volume::Volume(std::unique_ptr<Amg::Transform3D> htrans,
+                    std::shared_ptr<Trk::VolumeBounds> volbounds)
+  : m_transform(std::move(htrans))
+  , m_center(m_transform ? m_transform->translation() : Trk::s_origin)
+  , m_volumeBounds(std::move(volbounds))
 {}
 
-// constructor with HepGeom::Transform3D
-Trk::Volume::Volume(Amg::Transform3D* htrans, Trk::VolumeBounds* volbounds)
-  : m_transform(htrans)
-  , m_center(nullptr)
-  , m_volumeBounds(volbounds)
-{}
-
-// copy constructor - will up to now not copy the sub structure!
+// copy constructor
 Trk::Volume::Volume(const Trk::Volume& vol)
-  : m_transform(
-      vol.m_transform ? std::make_unique<Amg::Transform3D>(*(vol.m_transform))
-                      : nullptr)
-  , m_center(
-      (vol.m_center) ? std::make_unique<Amg::Vector3D>(*(vol.m_center))
-                     : nullptr)
-  , m_volumeBounds(vol.m_volumeBounds)
-{}
+    : m_transform(vol.m_transform
+                      ? std::make_unique<Amg::Transform3D>(*(vol.m_transform))
+                      : nullptr),
+      m_center(vol.m_center),
+      m_volumeBounds(vol.m_volumeBounds) {}
 
 // copy constructor with shift
 Trk::Volume::Volume(const Trk::Volume& vol, const Amg::Transform3D& shift)
-  : m_transform(
-      vol.m_transform
-        ? std::make_unique<Amg::Transform3D>(shift * (*(vol.m_transform)))
-        : std::make_unique<Amg::Transform3D>(shift))
-  , m_center(
-      (vol.m_center)
-        ? std::make_unique<Amg::Vector3D>(shift * (*(vol.m_center)))
-        : nullptr)
-  , m_volumeBounds(vol.m_volumeBounds)
-{}
-
-// destructor
-Trk::Volume::~Volume() = default;
+    : m_transform(vol.m_transform ? std::make_unique<Amg::Transform3D>(
+                                        shift * (*(vol.m_transform)))
+                                  : std::make_unique<Amg::Transform3D>(shift)),
+      m_center(shift * vol.m_center),
+      m_volumeBounds(vol.m_volumeBounds) {}
 
 // assignment operator
 Trk::Volume&
@@ -66,9 +50,7 @@ Trk::Volume::operator=(const Trk::Volume& vol)
     m_transform = vol.m_transform
                     ? std::make_unique<Amg::Transform3D>(*vol.m_transform)
                     : nullptr;
-    m_center = vol.m_center
-                 ? std::make_unique<const Amg::Vector3D>(*(vol.m_center))
-                 : nullptr;
+    m_center = vol.m_center;
     m_volumeBounds = vol.m_volumeBounds;
   }
   return *this;

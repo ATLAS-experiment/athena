@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
@@ -15,27 +15,35 @@ class ParticleLevelTausBlock(ConfigBlock):
                        ' which applies the selection to all truth taus.')
         self.addOption('isolated', True, type=bool,
                        info='select only truth taus that are isolated.')
+        self.addOption('saveUID', False, type=bool,
+                       info='save unique ID in output')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        name = self.containerName
+        if self.selectionName: name = name + '_' + self.selectionName
+        return name
 
     def makeAlgs(self, config):
         config.setSourceName (self.containerName, self.containerName)
 
         # decorate the missing elements of the 4-vector so we can save it later
         alg = config.createAlgorithm('CP::ParticleLevelPtEtaPhiDecoratorAlg',
-                                     'ParticleLevelPtEtaPhiDecoratorTaus' + self.selectionName,
+                                     'ParticleLevelPtEtaPhiDecoratorTaus',
                                      reentrant=True)
         alg.particles = self.containerName
 
         # decorate the charge so we can save it later
         alg = config.createAlgorithm('CP::ParticleLevelChargeDecoratorAlg',
-                                     'ParticleLevelChargeDecoratorTaus' + self.selectionName,
+                                     'ParticleLevelChargeDecoratorTaus',
                                      reentrant=True)
         alg.particles = self.containerName
 
         # check for prompt isolation and possible origin from tau decays
         alg = config.createAlgorithm('CP::ParticleLevelIsolationAlg',
-                                     'ParticleLevelIsolationTaus' + self.selectionName,
+                                     'ParticleLevelIsolationTaus',
                                      reentrant=True)
         alg.particles    = self.containerName
         alg.isolation    = 'isIsolated' + self.selectionName if self.isolated else 'isIsolatedButNotRequired' + self.selectionName
@@ -46,16 +54,15 @@ class ParticleLevelTausBlock(ConfigBlock):
             config.addSelection (self.containerName, self.selectionName, alg.isolation+',as_char')
 
         # output branches to be scheduled only once
-        if ParticleLevelTausBlock.get_instance_count() == 1:
+        if ParticleLevelTausBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
                 ['pt', 'pt'],
                 ['eta', 'eta'],
                 ['phi', 'phi'],
                 ['e', 'e'],
                 ['charge', 'charge'],
-                ['IsHadronicTau', 'IsHadronicTau'],
-                ['classifierParticleType', 'type'],
-                ['classifierParticleOrigin', 'origin'],
             ]
+            if self.saveUID:
+                outputVars += [['uid', 'uid']]
             for decoration, branch in outputVars:
                 config.addOutputVar (self.containerName, decoration, branch, noSys=True)

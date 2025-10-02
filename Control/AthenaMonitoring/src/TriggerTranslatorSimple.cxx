@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerTranslatorSimple.h"
@@ -24,7 +24,7 @@ StatusCode TriggerTranslatorToolSimple::initialize() {
     ATH_MSG_DEBUG( "Key " << item.first << " Value " << item.second );
     std::vector<std::string> triggers;
     boost::split(triggers, item.second, boost::is_any_of(","));
-    m_trigmap[item.first] = triggers;
+    m_trigmap[item.first] = std::move(triggers);
   }
   return StatusCode::SUCCESS;
 }

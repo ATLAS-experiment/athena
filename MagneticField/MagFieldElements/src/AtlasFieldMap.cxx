@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -273,7 +273,7 @@ MagField::AtlasFieldMap::buildLUT()
   // build LUT for edge finding
   for (int j = 0; j < 3; j++) { // z, r, phi
     // find the size of the smallest interval
-    double width = m_edge[j].back() - m_edge[j].front();
+    const double width = m_edge[j].back() - m_edge[j].front();
     double q(width);
     for (unsigned i = 0; i < m_edge[j].size() - 1; i++) {
       q = std::min(q, m_edge[j][i + 1] - m_edge[j][i]);
@@ -302,11 +302,11 @@ MagField::AtlasFieldMap::buildLUT()
   m_nphi = m_edge[2].size() - 1;
   m_zoneLUT.reserve(m_nz * m_nr * m_nphi);
   for (int iz = 0; iz < m_nz; iz++) {
-    double z = 0.5 * (m_edge[0][iz] + m_edge[0][iz + 1]);
+    const double z = 0.5 * (m_edge[0][iz] + m_edge[0][iz + 1]);
     for (int ir = 0; ir < m_nr; ir++) {
-      double r = 0.5 * (m_edge[1][ir] + m_edge[1][ir + 1]);
+      const double r = 0.5 * (m_edge[1][ir] + m_edge[1][ir + 1]);
       for (int iphi = 0; iphi < m_nphi; iphi++) {
-        double phi = 0.5 * (m_edge[2][iphi] + m_edge[2][iphi + 1]);
+        const double phi = 0.5 * (m_edge[2][iphi] + m_edge[2][iphi + 1]);
         const BFieldZone* zone = findZoneSlow(z, r, phi);
         m_zoneLUT.push_back(zone);
       }

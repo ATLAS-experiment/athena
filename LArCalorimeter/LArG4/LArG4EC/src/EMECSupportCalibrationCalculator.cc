@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EMECSupportCalibrationCalculator
@@ -147,10 +147,7 @@ namespace LArG4 {
 
   EMECSupportCalibrationCalculator::EMECSupportCalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator)
     : LArCalibCalculatorSvcImp(name, pSvcLocator)
-    , m_par(nullptr)
-    , m_backupCalculator("EndcapCryostatCalibrationLArCalculator",name)
   {
-   declareProperty("BackupCalculator",m_backupCalculator);
   }
 
   StatusCode EMECSupportCalibrationCalculator::initialize() {
@@ -158,7 +155,6 @@ namespace LArG4 {
     m_par = new Parameters();
     return StatusCode::SUCCESS;
   }
-
 
   EMECSupportCalibrationCalculator::~EMECSupportCalibrationCalculator()
   {

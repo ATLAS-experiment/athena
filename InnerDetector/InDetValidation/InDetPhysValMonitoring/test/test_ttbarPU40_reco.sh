@@ -17,7 +17,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r25.0.26"
+relname="r25.0.39"
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
@@ -79,3 +79,5 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "art-result: $? shifter_plots_lrt_last"
 fi
 
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

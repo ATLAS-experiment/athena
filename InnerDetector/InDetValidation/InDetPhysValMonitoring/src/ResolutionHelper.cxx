@@ -12,6 +12,7 @@
 #include "TH1.h"
 #include "TH1D.h"
 #include "TH2.h"
+#include "TF1.h"
 #include "TFitResultPtr.h"
 #include "TFitResult.h"
 #include <cmath>
@@ -191,6 +192,95 @@ namespace IDPVM {
     return(ntries_max-ntries);
   }
 
+  // return # remaining gaus fit iterations before hitting the max. allowed
+  int ResolutionHelper::setIterativeGaussFitConvergence(TH1* p_input_hist) {
+    /// First intialise mean and RMS to 0
+    double mean       = 0.;
+    double meanError  = 0.;
+    double RMS        = 0.;
+    double RMSError   = 0.;
+
+    /// iteration parameters:
+    /// max iteration steps
+    unsigned int ntries_max = 50;
+    /// width of cutting range in [RMS]
+    double nRMS_width = 2.0;
+
+    /// first perform a single Gauss fit across full range of histogram or in a specified range
+    double xmin = p_input_hist->GetBinLowEdge(1);
+    double xmax = ( p_input_hist->GetBinLowEdge( p_input_hist->GetNbinsX() ) ) +
+                  ( p_input_hist->GetBinWidth( p_input_hist->GetNbinsX() ) );
+    std::shared_ptr<TF1> fitA = std::make_shared<TF1>( "fitA", "gaus", xmin, xmax );
+    p_input_hist->Fit( "fitA", "ORQN", "same" );
+    mean      = fitA->GetParameter(1);
+    meanError = fitA->GetParError(1);
+    RMS       = fitA->GetParameter(2);
+    RMSError  = fitA->GetParError(2);
+
+    /// performs a second fit with range determined by first fit
+    /// i.e. mean +/- nRMS_width * RMS
+    xmin = mean - ( RMS * nRMS_width );
+    xmax = mean + ( RMS * nRMS_width );
+    std::shared_ptr<TF1> fitB = std::make_shared<TF1>( "fitB", "gaus", xmin, xmax );
+    p_input_hist->Fit( "fitB", "ORQN", "same" );
+    mean      = fitB->GetParameter(1);
+    meanError = fitB->GetParError(1);
+    RMS       = fitB->GetParameter(2);
+    RMSError  = fitB->GetParError(2);
+
+    /// now iteratively perform gaus fits until recomputed mean and RMS stabilise (differ by <= 0.0005 )
+    xmin = mean - ( RMS * nRMS_width );
+    xmax = mean + ( RMS * nRMS_width );
+    std::shared_ptr<TF1> fit = std::make_shared<TF1>( "fit", "gaus", xmin, xmax );
+    double mean_new       = 99999.;
+    double meanError_new  = 99999.;
+    double RMS_new        = 99999.;
+    double RMSError_new   = 99999.;
+    unsigned int ntries = 0;
+    while( std::abs( mean - mean_new ) > 0.0005 or std::abs( RMS - RMS_new ) > 0.0005 ) {
+      if( ntries > 0 ) {
+        /// update fit results
+        mean      = mean_new;
+        meanError = meanError_new;
+        RMS       = RMS_new;
+        RMSError  = RMSError_new;
+      }
+
+      /// refitting adjusting new range
+      xmin = mean - ( RMS * nRMS_width );
+      xmax = mean + ( RMS * nRMS_width );
+      fit->SetRange( xmin, xmax );
+      /// refitting
+      p_input_hist->Fit( "fit", "ORQN", "same" );
+      mean_new      = fit->GetParameter(1);
+      meanError_new = fit->GetParError(1);
+      RMS_new       = fit->GetParameter(2);
+      RMSError_new  = fit->GetParError(2);
+
+      if( ntries > 50 ) {
+        ATH_MSG_WARNING( "terminate iterative gaus fit because of convergence problems" );
+        break;
+      }
+      ntries++;
+    } // end while
+
+    /// set the iteration results that are accessible to clients:
+    m_RMS       = RMS;
+    m_RMSError  = RMSError;
+    m_mean      = mean;
+    m_meanError = meanError;
+
+    /// get fraction of excluded events + its ~ uncertainty
+    double nSig = p_input_hist->Integral( p_input_hist->GetXaxis()->FindBin(xmin),
+					 p_input_hist->GetXaxis()->FindBin(xmax) );
+    /// disregard under- and over- flow
+    double nTot = p_input_hist->Integral( 1, p_input_hist->GetNbinsX() );
+    setFout( nSig, nTot );
+
+    /// return number of remaining allowed iteration steps
+    return( ntries_max - ntries );
+  }
+
   // evaluate results for input histogram
   // * mean and RMS and fraction of events in tails
   // * call one of alternative ways of evaluation
@@ -213,6 +303,10 @@ namespace IDPVM {
       if ( !setIterativeConvergence(p_input_hist) &&
 	   !setGaussFit(p_input_hist) ) 
 	m_warnings.push_back("\t\t\t* ResolutionHelper::fusion_iterRMS_Gaussfit both methods failed for "+ m_inHistName);
+    }
+    else if ( iterGaussFit_convergence == p_method ) {
+      if ( !setIterativeGaussFitConvergence( p_input_hist ) ) 
+	m_warnings.push_back("\t\t\t* ResolutionHelper::setIterativeGaussFitConvergence: iter gauss fit did not converge for "+ m_inHistName);
     }
     else {
       m_errors.push_back("\t\t\t* ResolutionHelper::setResults: method not supported. No evaluation for "+ m_inHistName);

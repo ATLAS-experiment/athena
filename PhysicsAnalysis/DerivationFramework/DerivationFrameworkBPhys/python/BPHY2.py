@@ -221,6 +221,6 @@ def BPHY2Cfg(flags):
     BPHY2ItemList = BPHY2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY2", ItemList=BPHY2ItemList, AcceptAlgs=["BPHY2Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY2", AcceptAlgs=["BPHY2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc
 

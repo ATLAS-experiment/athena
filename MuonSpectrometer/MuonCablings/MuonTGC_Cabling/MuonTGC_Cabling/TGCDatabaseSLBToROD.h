@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCDATABASESLBTOROD_HH
@@ -17,7 +17,7 @@ public:
   TGCDatabaseSLBToROD(const std::string& filename,
                       const std::string& blockname);
 
-  TGCDatabaseSLBToROD(const TGCDatabaseSLBToROD& );
+  TGCDatabaseSLBToROD(const TGCDatabaseSLBToROD&) = default;
 
   virtual ~TGCDatabaseSLBToROD(void);
 

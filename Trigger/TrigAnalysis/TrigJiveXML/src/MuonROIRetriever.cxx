@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/MuonROIRetriever.h"
@@ -58,24 +58,25 @@ namespace JiveXML {
         thrNumber.push_back(DataType( itMU->getThrNumber()));
 
      // prevent empty threshold name list
-	std::string thisThrName = itMU->getThrName();
-        if (thisThrName ==""){ thisThrName = "empty"; };
-        thrName.push_back(DataType( thisThrName ));
+	       std::string thisThrName = itMU->getThrName();
+        if (thisThrName.empty()){ thisThrName = "empty"; };
+        thrName.push_back(DataType( std::move(thisThrName) ));
 
         thrValue.push_back(DataType( itMU->getThrValue()));
         energy.push_back(DataType( itMU->getThrValue()/CLHEP::GeV));
     }
 
     DataMap myDataMap;
+    const auto nPhi = phi.size();
     myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["roiWord"] = roiWord;
-    myDataMap["thrNumber"] = thrNumber;
-    myDataMap["thrName"] = thrName;
-    myDataMap["thrValue"] = thrValue;
-    myDataMap["energy"] = energy;
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["roiWord"] = std::move(roiWord);
+    myDataMap["thrNumber"] = std::move(thrNumber);
+    myDataMap["thrName"] = std::move(thrName);
+    myDataMap["thrValue"] = std::move(thrValue);
+    myDataMap["energy"] = std::move(energy);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi << endmsg;
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey, &myDataMap);

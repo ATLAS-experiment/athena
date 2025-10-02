@@ -4,6 +4,30 @@ import AnaAlgorithm.DualUseConfig as DualUseConfig
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
 import re
 
+import warnings
+import functools
+
+# warn about deprecations with a FutureWarning instead of a
+# DeprecationWarning, because DeprecatedWarning is not shown by default
+deprecationWarningCategory = FutureWarning
+def deprecated(reason: str = ""):
+    def decorator(func):
+        message = f"{func.__qualname__} is deprecated."
+        if reason:
+            message += " " + reason
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            warnings.warn(
+                message,
+                category=deprecationWarningCategory,
+                stacklevel=2,
+            )
+            return func(*args, **kwargs)
+
+        return wrapper
+    return decorator
+
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
     Data = 'data'
@@ -42,7 +66,8 @@ class OutputConfig :
         self.noSys = noSys
         self.enabled = enabled
 
-
+    def __repr__ (self):
+        return f'OutputConfig("{self.outputContainerName}.{self.variableName}" [enabled={self.enabled}])'
 
 class ContainerConfig :
     """all the auto-generated meta-configuration data for a single container
@@ -50,11 +75,10 @@ class ContainerConfig :
     This tracks the naming of all temporary containers, as well as all the
     selection decorations."""
 
-    def __init__ (self, name, sourceName, *, originalName = None, calibMode = None, isMet = False, noSysSuffix) :
+    def __init__ (self, name, sourceName, *, originalName = None, isMet = False, noSysSuffix) :
         self.name = name
         self.sourceName = sourceName
         self.originalName = originalName
-        self.calibMode = calibMode
         self.noSysSuffix = noSysSuffix
         self.index = 0
         self.maxIndex = None
@@ -62,6 +86,7 @@ class ContainerConfig :
         self.isMet = isMet
         self.selections = []
         self.outputs = {}
+        self.meta = {}
 
     def currentName (self) :
         if self.index == 0 :
@@ -88,6 +113,7 @@ class ContainerConfig :
         self.viewIndex = 1
         self.selections = []
         self.outputs = {}
+        self.meta = {}
 
 
 
@@ -108,34 +134,59 @@ class ConfigAccumulator :
     used.
     """
 
-    def __init__ (self, algSeq, dataType=None, isPhyslite=False, geometry=None, dsid=0,
-            campaign=None, runNumber=None, autoconfigFromFlags=None, noSysSuffix=False,
-            noSystematics=None, dataYear=0):
-        self._autoconfigFlags = autoconfigFromFlags
+    def __init__ (self, *, flags=None, algSeq=None, noSysSuffix=False, noSystematics=None, dataType=None, isPhyslite=None, geometry=None, dsid=0, campaign=None, runNumber=None, autoconfigFromFlags=None, dataYear=0):
+
+        # Historically we have used the identifier
+        # `autoconfigFromFlags`, but in the rest of the code base
+        # `flags` is used. So for now we allow either, and can hopefully
+        # at some point remove the former (21 Aug 25).
         if autoconfigFromFlags is not None:
-            if autoconfigFromFlags.Input.isMC:
-                if autoconfigFromFlags.Sim.ISF.Simulator.usesFastCaloSim():
+            if flags is not None:
+                raise ValueError("Cannot pass both flags and autoconfigFromFlags arguments")
+            flags = autoconfigFromFlags
+            warnings.warn ('Using autoconfigFromFlags parameter is deprecated, use flags instead', category=deprecationWarningCategory, stacklevel=2)
+        self._flags = flags
+
+        # Historically the user was expected to pass in meta-data
+        # manually, which was a complete underestimate of the amount of
+        # meta-data needed. The current recommendation is to pass in a
+        # configuration flags object instead. The code below will raise
+        # an error if both are done, and if no configuration flags are
+        # passed in, it will try to create a flags object from the
+        # passed in parameters.
+        if self._flags is not None:
+            if dataType is not None:
+                raise ValueError("Cannot pass both dataType and flags/autoconfigFromFlags arguments")
+            if isPhyslite is not None:
+                raise ValueError("Cannot pass both isPhyslite and flags/autoconfigFromFlags arguments")
+            if geometry is not None:
+                raise ValueError("Cannot pass both geometry and flags/autoconfigFromFlags arguments")
+            if dsid != 0:
+                raise ValueError("Cannot pass both dsid and flags/autoconfigFromFlags arguments")
+            if campaign is not None:
+                raise ValueError("Cannot pass both campaign and flags/autoconfigFromFlags arguments")
+            if runNumber is not None:
+                raise ValueError("Cannot pass both runNumber and flags/autoconfigFromFlags arguments")
+            if dataYear != 0:
+                raise ValueError("Cannot pass both dataYear and flags/autoconfigFromFlags arguments")
+
+            if self._flags.Input.isMC:
+                if self._flags.Sim.ISF.Simulator.usesFastCaloSim():
                     dataType = DataType.FastSim
                 else:
                     dataType = DataType.FullSim
             else:
                 dataType = DataType.Data
-            isPhyslite = 'StreamDAOD_PHYSLITE' in autoconfigFromFlags.Input.ProcessingTags
-            if geometry is None:
-                geometry = autoconfigFromFlags.GeoModel.Run
-            if dsid == 0 and dataType is not DataType.Data:
-                dsid = autoconfigFromFlags.Input.MCChannelNumber
-            if campaign is None:
-                campaign = autoconfigFromFlags.Input.MCCampaign
-            if runNumber is None:
-                runNumber = int(autoconfigFromFlags.Input.RunNumbers[0])
-            if dataYear == 0:
-                dataYear = autoconfigFromFlags.Input.DataYear
-            generatorInfo = autoconfigFromFlags.Input.GeneratorsInfo
+            isPhyslite = 'StreamDAOD_PHYSLITE' in self._flags.Input.ProcessingTags
             from TrigDecisionTool.TrigDecisionToolHelpers import (
                 getRun3NavigationContainerFromInput_forAnalysisBase)
-            hltSummary = getRun3NavigationContainerFromInput_forAnalysisBase(autoconfigFromFlags)
+            hltSummary = getRun3NavigationContainerFromInput_forAnalysisBase(self._flags)
         else:
+            warnings.warn ('it is deprecated to configure meta-data for analysis configuration manually, please read the configuration flags via the meta-data reader', category=deprecationWarningCategory, stacklevel=2)
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+            flags = initConfigFlags()
+            if dataType is None:
+                raise ValueError ("need to specify dataType if flags are not set")
             # legacy mappings of string arguments
             if isinstance(dataType, str):
                 if dataType == 'mc':
@@ -144,26 +195,44 @@ class ConfigAccumulator :
                     dataType = DataType.FastSim
                 else:
                     dataType = DataType(dataType)
-            generatorInfo = None
-            hltSummary = 'HLTNav_Summary_DAODSlimmed'
+            if isPhyslite is None:
+                isPhyslite = False
+            if geometry is not None:
+                # allow possible string argument for `geometry` and convert it to enum
+                geometry = LHCPeriod(geometry)
+                if geometry is LHCPeriod.Run1:
+                    raise ValueError ("invalid Run geometry: %s" % geometry.value)
+                flags.GeoModel.Run = geometry
+            if dsid != 0:
+                flags.Input.MCChannelNumber = dsid
+            if campaign is not None:
+                flags.Input.MCCampaign = campaign
+            if dataYear != 0:
+                flags.Input.DataYear = dataYear
             if runNumber is None:
+                # not sure if we should just use a default run number
+                # here, or just report nothing
                 runNumber = 284500
-        # allow possible string argument for `geometry` and convert it to enum
-        geometry = LHCPeriod(geometry)
-        if geometry is LHCPeriod.Run1:
-            raise ValueError ("invalid Run geometry: %s" % geometry.value)
-        # store also the data year for data
+            flags.Input.RunNumbers = [runNumber]
+            hltSummary = 'HLTNav_Summary_DAODSlimmed'
+            flags.lock()
+            self._flags = flags
+
+        # These don't seem to have a direct equivalent in the
+        # configuration flags. For now I'm keeping them (21 Aug 25), but
+        # they might be replaced with something that is more directly in
+        # the configuration flags in the future.
         self._dataType = dataType
         self._isPhyslite = isPhyslite
-        self._geometry = geometry
-        self._dsid = dsid
-        self._campaign = campaign
-        self._runNumber = runNumber
-        self._dataYear = dataYear
-        self._generatorInfo = generatorInfo
+        self._hltSummary = hltSummary
+
+        # From here on, we are no longer dealing with flags or
+        # meta-data, but actual internal variables we need to manage the
+        # creation of components.
         self._algSeq = algSeq
         self._noSystematics = noSystematics
         self._noSysSuffix = noSysSuffix
+        self._algPostfix = ''
         self._containerConfig = {}
         self._outputContainers = {}
         self._pass = 0
@@ -172,7 +241,6 @@ class ConfigAccumulator :
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
         self._eventcutflow = {}
-        self._hltSummary = hltSummary
 
         # If we are in an Athena environment with ComponentAccumulator configuration
         # then the AlgSequence, which is Gaudi.AthSequencer, does not support '+=',
@@ -185,15 +253,27 @@ class ConfigAccumulator :
             # in a sequence, but if they do let's add it
             if algSeq :
                 self.CA.addSequence(algSeq)
+        else :
+            if algSeq is None :
+                raise ValueError ("need to pass algSeq if not using ComponentAccumulator")
 
 
     def noSystematics (self) :
         """noSystematics flag used by CommonServices block"""
         return self._noSystematics
 
+    @property
+    def flags (self) :
+        """Athena configuration flags"""
+        return self._flags
+
+    @deprecated("use the flags property instead")
     def autoconfigFlags (self) :
-        """auto configuration flags"""
-        return self._autoconfigFlags
+        """Athena configuration flags
+        
+        This is a backward compatibility version of the flags property,
+        which is preferred."""
+        return self._flags
 
     def dataType (self) :
         """the data type we run on (data, fullsim, fastsim)"""
@@ -205,37 +285,73 @@ class ConfigAccumulator :
 
     def geometry (self) :
         """the LHC Run period we run on"""
-        return self._geometry
+        return self._flags.GeoModel.Run
 
     def dsid(self) :
         """the mcChannelNumber or DSID of the sample we run on"""
-        return self._dsid
+        return self._flags.Input.MCChannelNumber
 
     def campaign(self) :
         """the MC campaign we run on"""
-        return self._campaign
+        return self._flags.Input.MCCampaign
 
     def runNumber(self) :
         """the MC runNumber"""
-        return self._runNumber
+        return int(self._flags.Input.RunNumbers[0])
 
     def dataYear(self) :
         """for data, the corresponding year; for MC, zero"""
-        return self._dataYear
+        return self._flags.Input.DataYear
 
     def generatorInfo(self) :
         """the dictionary of MC generators and their versions for the sample we run on"""
-        return self._generatorInfo
+        return self._flags.Input.GeneratorsInfo
 
     def hltSummary(self) :
         """the HLTSummary configuration to be used for the trigger decision tool"""
         return self._hltSummary
+    
+    def algPostfix (self) :
+        """the current postfix to be appended to algorithm names
+        
+        Blocks should not call this directly, but rather implement the
+        instanceName method, which will be used to generate the postfix
+        automatically."""
+        return self._algPostfix
+    
+    def setAlgPostfix (self, postfix : str) :
+        """set the current postfix to be appended to algorithm names
+
+        Blocks should not call this directly, but rather implement the
+        instanceName method, which will be used to generate the postfix
+        automatically."""
+        # make sure the postfix matches the expected format ([_a-zA-Z0-9]*)
+        if re.compile ('^[_a-zA-Z0-9]*$').match (postfix) is None :
+            raise ValueError ('invalid algorithm postfix: ' + postfix)
+        if postfix == '' :
+            self._algPostfix = ''
+        elif postfix[0] != '_' :
+            self._algPostfix = '_' + postfix
+        else :
+            self._algPostfix = postfix
+
+    def getAlgorithm (self, name : str):
+        """get the algorithm with the given name
+        
+        Despite the name this will also return services and tools. It is
+        mostly meant for internal use, particularly for the property
+        overrides."""
+        name = name + self._algPostfix
+        if name not in self._algorithms:
+            return None
+        return self._algorithms[name]
 
     def createAlgorithm (self, type, name, reentrant=False) :
         """create a new algorithm and register it as the current algorithm"""
+        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
-                raise Exception ('duplicate algorithms: ' + name)
+                raise Exception ('duplicate algorithms: ' + name + ' with algPostfix=' + self._algPostfix)
             if reentrant:
                 alg = DualUseConfig.createReentrantAlgorithm (type, name)
             else:
@@ -262,6 +378,7 @@ class ConfigAccumulator :
 
     def createService (self, type, name) :
         '''create a new service and register it as the "current algorithm"'''
+        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate service: ' + name)
@@ -286,6 +403,7 @@ class ConfigAccumulator :
 
     def createPublicTool (self, type, name) :
         '''create a new public tool and register it as the "current algorithm"'''
+        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate public tool: ' + name)
@@ -315,7 +433,7 @@ class ConfigAccumulator :
 
 
     def setSourceName (self, containerName, sourceName,
-                       *, originalName = None, calibMode = None, isMet = False) :
+                       *, originalName = None, isMet = False) :
         """set the (default) name of the source/original container
 
         This is essentially meant to allow using e.g. the muon
@@ -328,12 +446,9 @@ class ConfigAccumulator :
         is mostly/exclusively used for jet containers, so that
         subsequent configurations know which jet container they
         operate on.
-
-        CalibMode can also be configured to pass it down to some algs which use this
-        information to be configured, like the METSignificance
         """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, calibMode = calibMode, isMet = isMet)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName, isMet = isMet)
 
 
     def writeName (self, containerName, *, isMet=None) :
@@ -397,15 +512,31 @@ class ConfigAccumulator :
             raise Exception ("no original name for: " + containerName)
         return result
 
-    def calibMode (self, containerName) :
-        """get the calibration mode of the given container
+    def getContainerMeta (self, containerName, metaField, defaultValue=None, *, failOnMiss=False) :
+        """get the meta information for the given container
+
+        This is used to pass down meta-information from the
+        configuration to the algorithms.
         """
         if containerName not in self._containerConfig :
             raise Exception ("container unknown: " + containerName)
-        result = self._containerConfig[containerName].calibMode
-        if result is None :
-            raise Exception ("no calibration mode for: " + containerName)
-        return result
+        if metaField in self._containerConfig[containerName].meta :
+            return self._containerConfig[containerName].meta[metaField]
+        if failOnMiss :
+            raise Exception ('unknown meta-field' + metaField + ' on container ' + containerName)
+        return defaultValue
+
+    def setContainerMeta (self, containerName, metaField, value, *, allowOverwrite=False) :
+        """set the meta information for the given container
+
+        This is used to pass down meta-information from the
+        configuration to the algorithms.
+        """
+        if containerName not in self._containerConfig :
+            raise Exception ("container unknown: " + containerName)
+        if not allowOverwrite and metaField in self._containerConfig[containerName].meta :
+            raise Exception ('duplicate meta-field' + metaField + ' on container ' + containerName)
+        self._containerConfig[containerName].meta[metaField] = value
 
     def isMetContainer (self, containerName) :
         """whether the given container is registered as a MET container
@@ -493,6 +624,9 @@ class ConfigAccumulator :
         excludeFrom --- a set of string names of selection sources to exclude
                         e.g. to exclude OR selections from MET
         """
+        if "." in containerName:
+            raise ValueError (f'invalid containerName argument: {containerName} , it contains a "." '
+            'which is used to indicate container+selection. You should only pass the container.')
         if containerName not in self._containerConfig :
             return ""
 
@@ -525,7 +659,7 @@ class ConfigAccumulator :
             subresult = self.getFullSelection (containerName, '', excludeFrom=excludeFrom)
             if subresult != '' :
                 result = subresult + '&&(' + result + ')'
-            return result
+            return '(' + result + ')' if result !='' else ''
 
         config = self._containerConfig[containerName]
         decorations = []
@@ -609,6 +743,11 @@ class ConfigAccumulator :
         if outputContainerName in self._outputContainers :
             raise KeyError ("duplicate output container name: " + outputContainerName)
         self._outputContainers[outputContainerName] = containerName
+
+
+    def checkOutputContainer (self, containerName) :
+        """check whether a given container has been registered in outputs"""
+        return containerName in self._outputContainers.values()
 
 
     def getOutputContainerOrigin (self, outputContainerName) :

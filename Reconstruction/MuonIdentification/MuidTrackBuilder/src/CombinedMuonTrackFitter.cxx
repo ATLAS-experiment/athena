@@ -46,12 +46,6 @@
 
 namespace Rec {
     CombinedMuonTrackFitter::~CombinedMuonTrackFitter() = default;
-    CombinedMuonTrackFitter::CombinedMuonTrackFitter(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<ICombinedMuonTrackFitter>(this);
-
-
-    }
 
     StatusCode CombinedMuonTrackFitter::initialize() {
         ATH_MSG_DEBUG("Initializing CombinedMuonTrackFitter.");
@@ -188,7 +182,7 @@ namespace Rec {
         std::unique_ptr<Trk::Track> fittedTrack = std::make_unique<Trk::Track>(track);
         if (isCombined && particleHypothesis == Trk::muon && !m_trackQuery->isCaloAssociated(*fittedTrack, ctx)) {
             // about to add the TSOS's describing calorimeter association to a combined muon;
-            m_messageHelper->printWarning(30);
+            ATH_MSG_VERBOSE( "fit:: about to add the TSOS's describing calorimeter association to a combined muon" );
 
             auto combinedTSOS = std::make_unique<Trk::TrackStates>();
 
@@ -565,29 +559,20 @@ namespace Rec {
             bool isMdt = m_idHelperSvc->isMdt(id);
             if (!isMdt) continue;
 
-            Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
+            using namespace Muon::MuonStationIndex;
+ 
+            const ChIndex chIdx = m_idHelperSvc->chamberIndex(id);
+            const bool isSmall = m_idHelperSvc->isSmallChamber(id);
+            nBarrel += isBarrel(chIdx);
+            nEndcap += !isBarrel(chIdx);
+            nSmall+= isSmall;
+            nLarge += !isSmall;
 
-            if (stIndex == Muon::MuonStationIndex::BE) { optimize = 1; }
-
-            if (stIndex == Muon::MuonStationIndex::BI && m_idHelperSvc->chamberIndex(id) == Muon::MuonStationIndex::BIS &&
+            if (chIdx == ChIndex::BIS &&
                 std::abs(m_idHelperSvc->stationEta(id)) > 6) {
                 optimize = 2;
-            }
-
-            if (stIndex == Muon::MuonStationIndex::BI || stIndex == Muon::MuonStationIndex::BM || stIndex == Muon::MuonStationIndex::BO ||
-                stIndex == Muon::MuonStationIndex::BE) {
-                nBarrel++;
-            }
-
-            if (stIndex == Muon::MuonStationIndex::EI || stIndex == Muon::MuonStationIndex::EM || stIndex == Muon::MuonStationIndex::EO ||
-                stIndex == Muon::MuonStationIndex::EE) {
-                nEndcap++;
-            }
-
-            if (m_idHelperSvc->isSmallChamber(id)) {
-                nSmall++;
-            } else {
-                nLarge++;
+            } else if (chIdx == ChIndex::BEE) {
+                optimize = 1;
             }
         }
 

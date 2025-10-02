@@ -5,7 +5,8 @@
 #include "TechnologyDispatcher.h"
 #include "MicroSessionManager.h"
 #include "StorageSvc/DbType.h"
-#include "PersistencySvc/PersistencySvcException.h"
+
+#include <exception>
 
 pool::PersistencySvc::TechnologyDispatcher::TechnologyDispatcher( pool::PersistencySvc::DatabaseRegistry& registry,
                                                                   pool::ITransaction& transaction ):
@@ -54,8 +55,7 @@ pool::PersistencySvc::TechnologyDispatcher::microSessionManager( long technology
   std::map< long, pool::PersistencySvc::MicroSessionManager* >::const_iterator iManager = m_technologyTypes.find( majorType );
   if ( iManager == m_technologyTypes.end()  ){
     // Technology does not exist. Throw an exception !
-    throw pool::PersistencySvcException( "Unregistered technology",
-                                         "PersistencySvc::TechnologyDispatcher::microSessionManager");
+    throw std::runtime_error( "Unregistered technology (APR: \" TechnologyDispatcher::microSessionManager \" from \" PersistencySvc");
   }
   return *(iManager->second);
 }

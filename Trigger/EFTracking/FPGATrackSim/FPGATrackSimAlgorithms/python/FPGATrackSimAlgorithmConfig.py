@@ -244,6 +244,7 @@ def addLRTDoubletFPGATrackSimool(algo_tag):
 
 
 def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
+    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import getPhiRange,getEtaRange
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -255,15 +256,13 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
         nbin=100
         high=99.5
 
-    etamins={0:0.1, 1:0.7, 2:1.2, 3: 2.0, 4: 3.2, 5: 0.1, 6: 0.1, 7: 0.1, 8: 2.8}
-    etamaxs={0:0.3, 1:0.9, 2:1.4, 3: 2.2, 4: 3.4, 5: 0.3, 6: 0.3, 7: 0.3, 8: 3.0}
-    etamin=etamins.get(flags.Trigger.FPGATrackSim.region,0.1) ### default to region 0 if we don't find the value
-    etamax=etamaxs.get(flags.Trigger.FPGATrackSim.region,0.3) ### default to region 0 if we don't find the value
 
-    phimins={0:0.3, 1:0.3, 2:0.3, 3: 0.3, 4: 0.3, 5: 1.1, 6: 1.9, 7: 3.4, 8: 0.3}
-    phimaxs={0:0.5, 1:0.5, 2:0.5, 3: 0.5, 4: 0.5, 5: 1.3, 6: 2.1, 7: 3.6, 8: 0.5}
-    phimin=phimins.get(flags.Trigger.FPGATrackSim.region,0.3) ### default to region 0 if we don't find the value
-    phimax=phimaxs.get(flags.Trigger.FPGATrackSim.region,0.5) ### default to region 0 if we don't find the value
+    phis=getPhiRange(flags)
+    etas=getEtaRange(flags)
+    phimin=phis[0]
+    phimax=phis[1]
+    etamin=etas[0]
+    etamax=etas[1]
 
     phimin = phimin-flags.Trigger.FPGATrackSim.phiShift
     phimax = phimax-flags.Trigger.FPGATrackSim.phiShift    
@@ -302,7 +301,21 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
 
     return result
 
+def FPGATrackSimOverlapRemovalToolMonitoringCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+
+    monTool.defineHistogram('ntrack_passOR', path='EXPERT', type='TH1I', title='ntrack_passOR', xbins=20, xmin=0, xmax=10)
+    monTool.defineHistogram('barcodeFrac_passOR', path='EXPERT', type='TH1I', title='barcodeFrac_passOR', xbins=20, xmin=0, xmax=1.5)
+  
+    result.setPrivateTools(monTool)
+
+    return result
+
 def FPGATrackSimSecondStageAlgMonitoringCfg(flags):
+    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import getPhiRange,getEtaRange    
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -311,19 +324,16 @@ def FPGATrackSimSecondStageAlgMonitoringCfg(flags):
     low=-0.5
     high=99.5
 
-    etamins={0:0.1, 1:0.7, 2:1.2, 3: 2.0, 4: 3.2, 5: 0.1, 6: 0.1, 7: 0.1, 8: 2.8}
-    etamaxs={0:0.3, 1:0.9, 2:1.4, 3: 2.2, 4: 3.4, 5: 0.3, 6: 0.3, 7: 0.3, 8: 3.0}
-    etamin=etamins.get(flags.Trigger.FPGATrackSim.region,0.1) ### default to region 0 if we don't find the value
-    etamax=etamaxs.get(flags.Trigger.FPGATrackSim.region,0.3) ### default to region 0 if we don't find the value
-
-    phimins={0:0.3, 1:0.3, 2:0.3, 3: 0.3, 4: 0.3, 5: 1.1, 6: 1.9, 7: 3.4, 8: 0.3}
-    phimaxs={0:0.3, 1:0.5, 2:0.5, 3: 0.5, 4: 0.5, 5: 1.3, 6: 2.1, 7: 3.6, 8: 0.5}
-    phimin=phimins.get(flags.Trigger.FPGATrackSim.region,0.3) ### default to region 0 if we don't find the value
-    phimax=phimaxs.get(flags.Trigger.FPGATrackSim.region,0.5) ### default to region 0 if we don't find the value
+    phis=getPhiRange(flags)
+    etas=getEtaRange(flags)
+    phimin=phis[0]
+    phimax=phis[1]
+    etamin=etas[0]
+    etamax=etas[1]
 
     phimin = phimin-flags.Trigger.FPGATrackSim.phiShift
-    phimax = phimax-flags.Trigger.FPGATrackSim.phiShift
-    
+    phimax = phimax-flags.Trigger.FPGATrackSim.phiShift    
+
     monTool.defineHistogram('nHits_2nd', path='EXPERT', type='TH1I', title='nHits_2nd', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('nHits_2nd_unmapped', path='EXPERT', type='TH1I', title='nHits_2nd_unmapped', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('nroads_2nd', path='EXPERT', type='TH1I', title='nroads_2nd', xbins=nbin, xmin=low, xmax=high)

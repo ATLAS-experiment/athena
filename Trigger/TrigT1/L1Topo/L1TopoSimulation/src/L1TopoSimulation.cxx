@@ -58,18 +58,26 @@ L1TopoSimulation::initialize ATLAS_NOT_THREAD_SAFE () {
    ATH_MSG_DEBUG("retrieving " << m_histSvc);
    CHECK( m_histSvc.retrieve() );
 
-   ATH_MSG_DEBUG("retrieving " << m_emtauInputProvider);
-   CHECK( m_emtauInputProvider.retrieve() );
-
-   ATH_MSG_DEBUG("retrieving " << m_jetInputProvider);
-   CHECK( m_jetInputProvider.retrieve() );
-
-   ATH_MSG_DEBUG("retrieving " << m_energyInputProvider);
-   CHECK( m_energyInputProvider.retrieve() );
-
-   ATH_MSG_DEBUG("retrieving " << m_muonInputProvider);
-   CHECK( m_muonInputProvider.retrieve(DisableTool{m_isLegacyTopo}) );
-
+   if (m_emtauInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_emtauInputProvider);
+      CHECK( m_emtauInputProvider.retrieve() );
+   }
+   
+   if (m_jetInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_jetInputProvider);
+      CHECK( m_jetInputProvider.retrieve() );
+   }
+   
+   if (m_energyInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_energyInputProvider);
+      CHECK( m_energyInputProvider.retrieve() );
+   }
+   
+   if (m_muonInputProvider.isEnabled()) {
+      ATH_MSG_DEBUG("retrieving " << m_muonInputProvider);
+      CHECK( m_muonInputProvider.retrieve(DisableTool{m_isLegacyTopo}) );
+   }
+   
    ATH_MSG_DEBUG("retrieving " << m_ControlHistSvc);
    CHECK( m_ControlHistSvc.retrieve());
 
@@ -178,14 +186,17 @@ L1TopoSimulation::execute() {
                            ctx.eventID().bunch_crossing_id());
 
    // EM TAU
-   CHECK(m_emtauInputProvider->fillTopoInputEvent(inputEvent));
-
+   if (m_emtauInputProvider.isEnabled()) {
+      CHECK(m_emtauInputProvider->fillTopoInputEvent(inputEvent));
+   }
    // JET
-   CHECK(m_jetInputProvider->fillTopoInputEvent(inputEvent));
-
+   if (m_jetInputProvider.isEnabled()) {
+      CHECK(m_jetInputProvider->fillTopoInputEvent(inputEvent));
+   }
    // ET sum, ET miss
-   CHECK(m_energyInputProvider->fillTopoInputEvent(inputEvent));
-
+   if (m_energyInputProvider.isEnabled()) {
+      CHECK(m_energyInputProvider->fillTopoInputEvent(inputEvent));
+   }
    // Muon
    if (m_muonInputProvider.isEnabled()) {
       CHECK(m_muonInputProvider->fillTopoInputEvent(inputEvent));
@@ -264,10 +275,10 @@ L1TopoSimulation::execute() {
      std::string conn2 = l1menu->board("Topo3").connectorNames()[0];
      for(unsigned int clock=0; clock<2; ++clock) {
        ATH_MSG_DEBUG("Word 1 " << conn1 << " clock " << clock << "  " << globalOutput.decision_field( conn1, clock) );
-       topoOutput2CTP->setCableWord1( clock, globalOutput.decision_field( conn1, clock) );  // TOPO 0
+       topoOutput2CTP->setCableWord1( clock, globalOutput.decision_field( conn1, clock) | globalOutput.overflow_field(conn1, clock) );  // TOPO 0
        WriteEDM(outputHandle,conn1,clock,globalOutput.decision_field( conn1, clock));
        ATH_MSG_DEBUG("Word 2 " << conn2 << " clock " << clock << "  " << globalOutput.decision_field( conn2, clock) );
-       topoOutput2CTP->setCableWord2( clock, globalOutput.decision_field( conn2, clock) );  // TOPO 1
+       topoOutput2CTP->setCableWord2( clock, globalOutput.decision_field( conn2, clock) | globalOutput.overflow_field(conn2, clock) );  // TOPO 1
        WriteEDM(outputHandle,conn2,clock,globalOutput.decision_field( conn2, clock));
        
        topoOverflow2CTP->setCableWord0( clock, 0 ); // ALFA

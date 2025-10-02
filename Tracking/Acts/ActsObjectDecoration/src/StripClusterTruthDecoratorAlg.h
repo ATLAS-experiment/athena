@@ -16,8 +16,10 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadHandleKeyArray.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
 
@@ -42,31 +44,46 @@ namespace ActsTrk {
     virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
+    // This function is used to mark the clusters and decide which one to keep
+    // and which one to skip. It does so by filling a std::vector<bool>, which
+    // size is the same as the cluster collection.
+    StatusCode labelMeasurementToKeep(const EventContext& ctx,
+				      const xAOD::StripClusterContainer& clusters,
+				      std::vector<bool>& labels) const;
+    
+  private:
     SG::ReadHandleKey<xAOD::StripClusterContainer> m_clustercontainer_key{this,"ClusterContainer", "", "Input Strip Cluster container"};
     SG::ReadHandleKey<MeasurementToTruthParticleAssociation> m_associationMap_key{this,"AssociationMapOut", "", "Association map between measurements and truth particles"};
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetectorElements", "ITkStripDetectorElementCollection"};
+
+    SG::ReadHandleKeyArray< xAOD::TrackParticleContainer > m_trackParticlesKey {this, "TrackParticles", {}, "Input xAOD::TrackParticles"};
     
     SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key{this,"MeasurementContainer","", "Output Strip Validation Clusters"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_indices {this, "MeasurementTruthIndices", "truth_index"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_barcodes {this, "MeasurementTruthBarcode", "truth_barcode"};
 
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_detectorElementID {this, "MeasurementDetectorElementID", "detectorElementID"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_waferID {this, "MeasurementWaferID", "waferID"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_bec {this, "MeasurementBEC", "bec"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_layer {this, "MeasurementLayer", "layer"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_sizePhi {this, "MeasurementSizePhi", "sizePhi"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_sizeZ {this, "MeasurementSizeZ", "sizeZ"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_SiWidth {this, "MeasurementSiWidth", "SiWidth"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_eta_module {this, "MeasurementEtaModule", "eta_module"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_phi_module {this, "MeasurementPhiModule", "phi_module"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_omegax {this, "MeasurementOmegaX", "omegax"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_omegay {this, "MeasurementOmegaY", "omegay"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_LorentzShift {this, "MeasurementLorentzShift", "LorentzShift"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_centroid_xphi {this, "MeasurementCentroidXphi", "centroid_xphi"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_centroid_xeta {this, "MeasurementCentroidXeta", "centroid_xeta"};
-    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_side {this, "MeasurementSide", "side"};
+    SG::WriteDecorHandleKey< xAOD::StripClusterContainer > m_trackMeasurement_link {this, "MeasurementLink", m_clustercontainer_key, "validationMeasurementLink"};
+    
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_indices {this, "MeasurementTruthIndices", m_write_xaod_key, "truth_index"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_truth_barcodes {this, "MeasurementTruthBarcode", m_write_xaod_key, "truth_barcode"};
+
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_detectorElementID {this, "MeasurementDetectorElementID", m_write_xaod_key, "detectorElementID"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_waferID {this, "MeasurementWaferID", m_write_xaod_key, "waferID"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_bec {this, "MeasurementBEC", m_write_xaod_key, "bec"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_layer {this, "MeasurementLayer", m_write_xaod_key, "layer"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_sizePhi {this, "MeasurementSizePhi", m_write_xaod_key, "sizePhi"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_sizeZ {this, "MeasurementSizeZ", m_write_xaod_key, "sizeZ"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_SiWidth {this, "MeasurementSiWidth", m_write_xaod_key, "SiWidth"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_eta_module {this, "MeasurementEtaModule", m_write_xaod_key, "eta_module"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_phi_module {this, "MeasurementPhiModule", m_write_xaod_key, "phi_module"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_omegax {this, "MeasurementOmegaX", m_write_xaod_key, "omegax"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_omegay {this, "MeasurementOmegaY", m_write_xaod_key, "omegay"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_LorentzShift {this, "MeasurementLorentzShift", m_write_xaod_key, "LorentzShift"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_centroid_xphi {this, "MeasurementCentroidXphi", m_write_xaod_key, "centroid_xphi"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_centroid_xeta {this, "MeasurementCentroidXeta", m_write_xaod_key, "centroid_xeta"};
+    SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_side {this, "MeasurementSide", m_write_xaod_key, "side"};
     
     Gaudi::Property<bool> m_useTruthInfo {this, "UseTruthInfo", true};
+    Gaudi::Property<bool> m_keepOnlyOnTrackMeasurements {this, "KeepOnlyOnTrackMeasurements", false, "Keep on on-track measurements instead of the full collection"};
+
     const SCT_ID* m_stripHelper {nullptr};
   };
 }

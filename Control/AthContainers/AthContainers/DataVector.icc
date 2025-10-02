@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.icc
@@ -105,15 +105,15 @@ protected:
 
   // We need these here to prevent ambiguities,
   // but they shouldn't actually be called.
-  virtual const std::type_info& dv_typeid() const
+  virtual const std::type_info& dv_typeid() const override
   {
     return typeid(VirtBases);
   }
-  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const
+  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const override
   {
     return DataVector<B1>::dvlinfo();
   }
-  virtual void setMostDerived()
+  virtual void setMostDerived() override
   {
     std::abort();
   }
@@ -186,15 +186,15 @@ protected:
 
   // We need these here to prevent ambiguities,
   // but they shouldn't actually be called.
-  virtual const std::type_info& dv_typeid() const
+  virtual const std::type_info& dv_typeid() const override
   {
     return typeid(VirtBases);
   }
-  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const
+  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const override
   {
     return DataVector<B1>::dvlinfo();
   }
-  virtual void setMostDerived()
+  virtual void setMostDerived() override
   {
     std::abort();
   }
@@ -275,15 +275,15 @@ protected:
 
   // We need these here to prevent ambiguities,
   // but they shouldn't actually be called.
-  virtual const std::type_info& dv_typeid() const
+  virtual const std::type_info& dv_typeid() const override
   {
     return typeid(VirtBases);
   }
-  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const
+  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const override
   {
     return DataVector<B1>::dvlinfo();
   }
-  virtual void setMostDerived()
+  virtual void setMostDerived() override
   {
     std::abort();
   }
@@ -548,10 +548,12 @@ DataVector<T, BASE>& DataVector<T, BASE>::operator= (const DataVector& rhs)
  * @param rhs The container from which to move.
  *
  * Any auxiliary data will be moved along with the container contents.
+ *
+ * (Can't be noexcept because testInsert() can throw.)
  */
 template <class T, class BASE>
 DataVector<T, BASE>&
-DataVector<T, BASE>::operator= (DataVector<T, BASE>&& rhs) noexcept
+DataVector<T, BASE>::operator= (DataVector<T, BASE>&& rhs)
 {
   if (this != &rhs) {
     // Ensure we're not being called via a base class.
@@ -2164,6 +2166,9 @@ DATAVECTOR::DataVector(DataVector&& rhs) noexcept
   rhs.m_deleter = nullptr;
 
   // Need to reset the container pointer on elements.
+  // Functions called from here can throw GaudiException.
+  // However, logically that should not actually happen; so leave this
+  // declared as noexcept.
   this->setIndices (this->begin(), this->end());
 
   // This doesn't get called from derived classes.
@@ -2245,6 +2250,7 @@ DATAVECTOR& DATAVECTOR::operator= (const DataVector& rhs)
 {
   if (&rhs != this) {
     // Ensure we're not being called via a base class.
+    // This can throw an exception, so this method should not be noexcept.
     testInsert ("assignment operator");
     clear();                // Release any currently-owned elements.
     m_ownPolicy = SG::VIEW_ELEMENTS;
@@ -2264,10 +2270,11 @@ DATAVECTOR& DATAVECTOR::operator= (const DataVector& rhs)
  * Any auxiliary data will be moved along with the container contents.
  */
 template <class T>
-DATAVECTOR& DATAVECTOR::operator= (DATAVECTOR&& rhs) noexcept
+DATAVECTOR& DATAVECTOR::operator= (DATAVECTOR&& rhs)
 {
   if (this != &rhs) {
     // Ensure we're not being called via a base class.
+    // This can throw an exception, so this method should not be noexcept.
     testInsert ("assignment operator");
 
     this->clear();                // Release any currently-owned elements.

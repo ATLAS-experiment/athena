@@ -109,15 +109,17 @@ BeamSpot::Event InDet::InDetBeamSpotFinder::readEvent(const xAOD::EventInfo & ev
   event.eventNumber  = eventInfo.eventNumber();
   const EventInfo* BSeventInfo; 
   //This is required for pseudo lumiblocks 
- 
-  if( evtStore()->retrieve(BSeventInfo) != StatusCode::SUCCESS){
-    ATH_MSG_ERROR("Cannot get event info.");
-    return event;
-  }
-  if (event.lumiBlock != BSeventInfo->event_ID()->lumi_block())
-  {
-    event.lumiBlock = BSeventInfo->event_ID()->lumi_block(); 
-  }
+
+  if(!eventInfo.eventType(xAOD::EventInfo::EventType::IS_SIMULATION))
+    {
+      if( evtStore()->retrieve(BSeventInfo) != StatusCode::SUCCESS){
+	ATH_MSG_ERROR("Cannot get event info.");
+	return event;
+      }
+
+      // Remove the redundent logic, event.lumiBlock != BSeventInfo->event_ID()->lumi_block()
+      event.lumiBlock = BSeventInfo->event_ID()->lumi_block();
+    };
 
   for(const xAOD::Vertex* vtx:vertexContainer) {
     if (vtx->vertexType() == xAOD::VxType::NoVtx) continue; 
@@ -261,6 +263,10 @@ StatusCode InDet::InDetBeamSpotFinder::performFits(){
 
   for( auto & eventList: m_sortedEventList){
     verticesToFit.clear();
+    if(eventList.size() > 0) {
+      BeamSpot::Event ev = *eventList.begin();
+      ATH_MSG_INFO( "Event list size/LB/bcid: " << eventList.size() << " " << ev.lumiBlock << " " << ev.bcid);
+    }
     for( const auto & thisEvent: eventList){
       for( const auto & thisVertex: thisEvent.vertices){
         if( thisVertex.passed ) { 

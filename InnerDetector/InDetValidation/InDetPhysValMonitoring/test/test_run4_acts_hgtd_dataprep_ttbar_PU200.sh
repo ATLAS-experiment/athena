@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_shifter_last
+# art-html: dcube_acts_shifter_last
 # art-athena-mt: 8
 
 lastref_dir=last_results
@@ -172,3 +172,6 @@ run "dcube-acts-space-timed" \
     -R "Space_Matching" \
     -M "Space_And_Time_Matching" \
     idpvm.acts.timed.root
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

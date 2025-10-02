@@ -25,6 +25,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimGNNEdge.h"
 #include "FPGATrackSimObjects/FPGATrackSimGNNHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "TTree.h"
@@ -60,6 +61,7 @@ class FPGATrackSimGNNRootOutputTool : public AthAlgTool
         // Handles
 
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
+        Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience
@@ -122,6 +124,7 @@ class FPGATrackSimGNNRootOutputTool : public AthAlgTool
         std::vector<size_t> m_road_nLayers{};
         std::vector<std::vector<std::vector<HepMcParticleLink::barcode_type>>> m_road_hit_uniqueID{};
         std::vector<std::vector<std::vector<HepMcParticleLink::barcode_type>>> m_road_hit_barcode{};
+        std::vector<std::vector<std::vector<long>>> m_road_hit_eventIndex{};
         std::vector<std::vector<std::vector<float>>> m_road_hit_z{};
         std::vector<std::vector<std::vector<float>>> m_road_hit_r{};
 };

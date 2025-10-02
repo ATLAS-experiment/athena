@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nello Bruscino
@@ -32,8 +32,8 @@ namespace CP {
 
   StatusCode FakeBkgCalculatorAlg::execute() {
 
-    static const SG::AuxElement::Decorator<char> dec_lepton_tight("TightForFakeBkgCalculation");
-    static const SG::AuxElement::Accessor<char> flagAcc("TightForFakeBkgCalculation");
+    static const SG::Decorator<char> dec_lepton_tight("TightForFakeBkgCalculation");
+    static const SG::Accessor<char> flagAcc("TightForFakeBkgCalculation");
 
     ANA_MSG_DEBUG(" ----> FakeBkgCalculatorAlg::execute()");
     for (const auto &sys : m_systematicsList.systematicsVector()) {

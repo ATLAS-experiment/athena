@@ -27,9 +27,7 @@
 
 namespace DerivationFramework {
 
-class EGSelectionToolWrapper
-  : public AthAlgTool
-  , public IAugmentationTool
+class EGSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   EGSelectionToolWrapper(const std::string& t,

@@ -10,7 +10,6 @@
 
 #include "TrackParticlePerigeeAtPVAssociationTool.h"
 
-#include "Particle/TrackParticle.h"
 #include "TrkParameters/TrackParameters.h"
 #include "xAODTracking/VertexContainer.h"
 #include "AthenaKernel/errorcheck.h"
@@ -42,44 +41,6 @@ StatusCode TrackParticlePerigeeAtPVAssociationTool::initialize(){
   CHECK( m_trackToVertexTool.retrieve() );
 
   return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Return the target object.
- * @param track The source object for the association.
- *
- * Return the target of the association, or 0.
- */
-const Trk::TrackParameters*
-TrackParticlePerigeeAtPVAssociationTool::get (const Rec::TrackParticle& track)
-{
-  m_resolver.initialize<VxContainer>().ignore();
-  const VxContainer* vxContainer = 0;
-  StatusCode sc = evtStore()->retrieve(vxContainer, m_resolver.key());
-  if (sc.isFailure() || !vxContainer) {
-    REPORT_MESSAGE (MSG::WARNING) << "Could not retrieve primary vertex container: " << m_vxCandidate;
-    return 0;
-  }
-
-  if(vxContainer->size()<1){
-    REPORT_MESSAGE (MSG::WARNING) << "No primary vertices reconstructed";
-    return 0;
-  }
-
-  if (track.measuredPerigee()->covariance() && track.measuredPerigee()->covariance()->rows() == 0)
-  {
-    REPORT_MESSAGE (MSG::WARNING) << "Bad track; can't find perigee at vertex.";
-    return 0;
-  }
-
-  const Trk::VxCandidate* vxI = PrimaryVertexSelector(*vxContainer);
-  if (!vxI){
-      REPORT_MESSAGE (MSG::WARNING) << "No primary vertices reconstructed";
-      return 0;
-  }
-  
-  return m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, vxI->recVertex().position()).release();
 }
 
 

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ValgrindAuditor.cxx,v 1.4 2008-10-14 12:31:40 fwinkl Exp $
 
 // Package includes
 #include "ValgrindAuditor.h"
@@ -162,24 +160,18 @@ void ValgrindAuditor::handle( const Incident& inc )
 /********************************************************************************
  * Gaudi auditor hooks
  */
-void ValgrindAuditor::before (StandardEventType evt, const std::string& name)
+void ValgrindAuditor::before (const std::string& event, const std::string& name,
+                              const EventContext&)
 {
-  if ( evt == IAuditor::Execute ) do_beforeExecute(name);
-  else {
-    std::ostringstream os;
-    os << evt;
-    do_before(name, boost::to_lower_copy(os.str()));
-  }
+  if ( event == IAuditor::Execute ) do_beforeExecute(name);
+  else do_before(name, boost::to_lower_copy(event));
 }
 
-void ValgrindAuditor::after (StandardEventType evt, const std::string& name, const StatusCode&)
+void ValgrindAuditor::after(const std::string& event, const std::string& name,
+                            const EventContext&, const StatusCode&)
 {
-  if ( evt == IAuditor::Execute ) do_afterExecute(name);
-  else {
-    std::ostringstream os;
-    os << evt;
-    do_after(name, boost::to_lower_copy(os.str()));
-  }
+  if ( event == IAuditor::Execute ) do_afterExecute(name);
+  else do_after(name, boost::to_lower_copy(event));
 }
 
 
@@ -310,7 +302,7 @@ StatusCode ValgrindAuditor::decodeIntervals()
     }
 
     std::pair<NameEvt,NameEvt> p(ne1,ne2);
-    m_hooks.push_back(p);    
+    m_hooks.emplace_back(std::move(p));
   }
 
   return StatusCode::SUCCESS;

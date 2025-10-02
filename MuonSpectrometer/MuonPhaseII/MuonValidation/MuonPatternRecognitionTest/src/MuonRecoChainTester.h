@@ -11,6 +11,9 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "MuonSpacePoint/SpacePointContainer.h"
 #include "MuonTesterTree/MuonTesterTreeDict.h"
+#include "xAODMuon/MuonSegmentContainer.h"
+#include "MuonPRDTest/SegmentVariables.h"
+
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
@@ -20,7 +23,7 @@ namespace MuonValR4{
   class MuonRecoChainTester : public AthHistogramAlgorithm {
     	public:
             using AthHistogramAlgorithm::AthHistogramAlgorithm;
-            virtual ~MuonRecoChainTester()  = default;
+            virtual ~MuonRecoChainTester() = default;
 
             virtual StatusCode initialize() override;
             virtual StatusCode execute() override;
@@ -61,33 +64,38 @@ namespace MuonValR4{
         Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
         /** @brief Keys to the segment collections */
-        
+
         /** @brief Segment made from the full legacy chain */
         Gaudi::Property<std::string> m_legacySegmentKey{this, "LegacySegmentKey", "LegacyChainSegments"};
         /** @brief Segments seeded from the R4 pattern but made with the legacy segment maker */
         Gaudi::Property<std::string> m_r4PatternSegmentKey{this, "SegmentFromR4HoughKey", "MuonSegmentsFromHoughR4"};
         /** @brief Segments made from the R4 segment maker */
-        Gaudi::Property<std::string> m_segmentKeyR4{this, "R4SegmentKey", "MuonSegmentsFromR4"};
+        Gaudi::Property<std::string> m_segmentKeyR4{this, "R4SegmentKey", "MuonSegmentsFromR4"};        
+       
+        using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
         /** @brief Segment from the truth hits */
-        Gaudi::Property<std::string> m_truthSegmentKey{this, "TruthSegmentKey", "TruthSegmentsR4"};
+        SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "TruthSegmentsR4"};
         /** @brief Key to the track collections */
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackKeyHoughR4{this, "TrackKeyHoughR4", "MuonSpectrometerTrackParticlesFromHoughR4"};
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackKeyR4{this, "TrackKeyR4", "MuonSpectrometerTrackParticlesR4"};
+        using TrackKey_t = SG::ReadHandleKey<xAOD::TrackParticleContainer>; 
+        TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
+        TrackKey_t m_TrackKeyHoughR4{this, "TrackKeyHoughR4", "MuonSpectrometerTrackParticlesFromHoughR4"};
+        TrackKey_t m_TrackKeyR4{this, "TrackKeyR4", "MuonSpectrometerTrackParticlesR4"};
 
         /** @brief Key to the truth particle collection */
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthKey{this, "TruthKey", "MuonTruthParticles"};
         /** @brief Decoration dependency to the MS truth track links */
-        SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkTruthLinks{this, "TruthTrackLinks", {}};
+        SG::ReadDecorHandleKeyArray<SG::AuxVectorBase> m_trkTruthLinks{this, "TruthTrackLinks", {}};
         /** @brief Key to the space point container */
         SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
   
-        std::shared_ptr<MuonVal::IParticleFourMomBranch> m_legacyTrks{};
-        std::shared_ptr<MuonVal::IParticleFourMomBranch> m_TrksHoughR4{};
-        std::shared_ptr<MuonVal::IParticleFourMomBranch> m_TrksSegmentR4{};
-        
-        std::shared_ptr<MuonVal::IParticleFourMomBranch> m_truthTrks{};
-  
+        using ParticleBranchPtr_t = std::shared_ptr<MuonVal::IParticleFourMomBranch>;
+        ParticleBranchPtr_t m_legacyTrks{};
+        ParticleBranchPtr_t m_TrksHoughR4{};
+        ParticleBranchPtr_t m_TrksSegmentR4{};        
+        ParticleBranchPtr_t m_truthTrks{};
+
+        using SegmentBranchPtr_t = std::shared_ptr<MuonPRDTest::SegmentVariables>;
+        SegmentBranchPtr_t m_truthSegs{};
   };
 }
 

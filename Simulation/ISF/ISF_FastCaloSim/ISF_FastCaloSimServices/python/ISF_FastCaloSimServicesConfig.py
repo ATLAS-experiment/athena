@@ -38,7 +38,7 @@ def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
     kwargs.setdefault("FullCorrelationEnergy"   , [ 100000., 100000., 100000., 100000.,      0., 100000., 100000., 100000., 100000.]    )
     kwargs.setdefault("MinEnergy"               , [   938.3,   135.6,     50.,     50.,   105.7,   939.6, 493.7,   497.6,   497.6 ]    )
     kwargs.setdefault("MaxNumParticles"         , [      -1,      -1,      -1,      -1,      -1,    -1,     -1,     -1,     -1 ]    )
-    kwargs.setdefault("EnvelopeDefSvc", acc.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("EnvelopeDefSvc", acc.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)))
     kwargs.setdefault("BeamPipeRadius", 500.)
     acc.setPrivateTools(CompFactory.ISF.PunchThroughTool(name, **kwargs))
     return acc
@@ -144,15 +144,15 @@ def FastCaloSimV2ToolCfg(flags, name="ISF_FastCaloSimV2Tool", **kwargs):
     kwargs.setdefault("CaloCellMakerTools_release",  [acc.addPublicTool(acc.popToolsAndMerge(CaloCellContainerFCSFinalizerToolCfg(flags))),
                                                       acc.addPublicTool(acc.popToolsAndMerge(FastHitConvertToolCfg(flags)))])
     kwargs.setdefault("FastCaloSimCaloExtrapolation", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimCaloExtrapolationCfg(flags))))
-    kwargs.setdefault("ParamSvc", acc.getPrimaryAndMerge(FastCaloSimV2ParamSvcCfg(flags)).name)
-    kwargs.setdefault("RandomSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("ParamSvc", acc.getPrimaryAndMerge(FastCaloSimV2ParamSvcCfg(flags)))
+    kwargs.setdefault("RandomSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     kwargs.setdefault("RandomStream", "FastCaloSimRnd")
 
     if "PunchThroughTool" not in kwargs:
         kwargs.setdefault("PunchThroughTool", acc.popToolsAndMerge(PunchThroughToolCfg(flags)))
 
     if "ParticleTruthSvc" not in kwargs:
-        kwargs.setdefault("ParticleTruthSvc", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
+        kwargs.setdefault("ParticleTruthSvc", acc.getPrimaryAndMerge(TruthServiceCfg(flags)))
 
     acc.setPrivateTools(CompFactory.ISF.FastCaloSimV2Tool(name, **kwargs))
     return acc
@@ -188,7 +188,7 @@ def DNNCaloSimSvcCfg(flags, name="ISF_DNNCaloSimSvc", **kwargs):
     kwargs.setdefault("FastCaloSimCaloExtrapolation", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimCaloExtrapolationCfg(flags))))
     kwargs.setdefault("RandomStream", "FastCaloSimRnd")
     kwargs.setdefault("RandomSvc",
-                      acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+                      acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     acc.addService(CompFactory.ISF.DNNCaloSimSvc(name, **kwargs), primary = True)
     return acc

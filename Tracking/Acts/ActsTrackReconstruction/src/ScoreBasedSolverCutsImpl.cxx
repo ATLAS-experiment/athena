@@ -2,9 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ScoreBasedSolverCutsImpl.h"
-
-#include "ScoreBasedAmbiguityResolutionAlg.h"
+#include "src/ScoreBasedSolverCutsImpl.h"
 
 // ACTS
 #include "Acts/AmbiguityResolution/ScoreBasedAmbiguityResolution.hpp"
@@ -12,18 +10,8 @@
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/Utilities/HashedString.hpp"
-#include "Acts/Utilities/Logger.hpp"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/TrackSummaryContainer.h"
-#include "ActsInterop/Logger.h"
-
-// Athena
-#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "AthenaMonitoringKernel/Monitored.h"
-
-// Gaudi
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 unsigned int remapLayer(unsigned int iVolume, unsigned int iLayer) {
 
@@ -74,19 +62,26 @@ namespace ActsTrk {
 namespace ScoreBasedSolverCutsImpl {
 // Add the summary information to the track container for OptionalCuts, This
 // likely needs to be moved outside ambiguity resolution
-ActsTrk::MutableTrackContainer addSummaryInformation(
-    ActsTrk::TrackContainer trackContainer) {
-
-  ActsTrk::MutableTrackContainer updatedTracks;
-  updatedTracks.ensureDynamicColumns(trackContainer);
-
-  updatedTracks.addColumn<unsigned int>("nInnermostPixelLayerHits");
-  updatedTracks.addColumn<unsigned int>("nSCTDoubleHoles");
-  updatedTracks.addColumn<unsigned int>("nContribPixelLayers");
+trackContainer_t
+addSummaryInformation(const ActsTrk::TrackContainer& trackContainer)
+{
+  Acts::VectorTrackContainer updatedTrackBackend;
+  Acts::VectorMultiTrajectory updatedTrackStateBackend;
+  Acts::TrackContainer<Acts::VectorTrackContainer,
+                       Acts::VectorMultiTrajectory,
+                       Acts::detail::ValueHolder> updatedTracksContainer( std::move(updatedTrackBackend),
+                                                                          std::move(updatedTrackStateBackend) );
+  
+  // need centralized function here
+  updatedTracksContainer.ensureDynamicColumns(trackContainer);
+    
+  updatedTracksContainer.addColumn<unsigned int>("nInnermostPixelLayerHits");
+  updatedTracksContainer.addColumn<unsigned int>("nSCTDoubleHoles");
+  updatedTracksContainer.addColumn<unsigned int>("nContribPixelLayers");
 
   for (auto track : trackContainer) {
     auto iTrack = track.index();
-    auto destProxy = updatedTracks.getTrack(updatedTracks.addTrack());
+    auto destProxy = updatedTracksContainer.getTrack(updatedTracksContainer.addTrack());
     destProxy.copyFrom(trackContainer.getTrack(iTrack));
   }
 
@@ -95,7 +90,7 @@ ActsTrk::MutableTrackContainer addSummaryInformation(
   unsigned int innermostPixelVolumeID = 9;
   unsigned int innermostPixelLayerID = 2;
 
-  for (auto track : updatedTracks) {
+  for (auto track : updatedTracksContainer) {
     bool doubleFlag = false;
     int nDoubleHoles = 0;
     int nInnermostPixelLayerHits = 0;
@@ -154,7 +149,7 @@ ActsTrk::MutableTrackContainer addSummaryInformation(
         Acts::hashString("nContribPixelLayers")) = nContribPixelLayers;
   }
 
-  return updatedTracks;
+  return updatedTracksContainer;
 }
 
 // This optionalCut removes tracks that have a number of SCT double holes

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARONLINEID_H
@@ -25,11 +25,11 @@ class LArOnlineID : public LArOnlineID_Base
   /** 
    * @brief Default constructor
    */
-  LArOnlineID(void);    
+  LArOnlineID();
   /** 
    * @brief Default destructor
    */
-  ~LArOnlineID(void);
+  ~LArOnlineID();
   
   int initialize_from_dictionary(const IdDictMgr&) override final;
   
@@ -59,10 +59,8 @@ private:
   bool  isLArCalibOnline(const HWIdentifier id) const;
 
   // Check methods
-  int  init_hashes(void) ;
-  int  init_H8Hashes(void) ;
-  int  init_H6Hashes(void) ;
-
+  int  init_H8Hashes();
+  int  init_H6Hashes();
 };
 
 

@@ -1,21 +1,17 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
-#include <array>
-#include <vector>
+
 
 #include "FPGATrackSimSpacePointsTool.h"
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "TH1.h"
+#include <array>
+#include <vector>
 
-FPGATrackSimSpacePointsTool::FPGATrackSimSpacePointsTool(const std::string &algname, const std::string &name, const IInterface *ifc)
-    : base_class(algname, name, ifc)
-{
-    declareInterface<FPGATrackSimSpacePointsToolI>(this);
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimSpacePointsTool::initialize()
@@ -68,7 +64,7 @@ StatusCode FPGATrackSimSpacePointsTool::fillMaps(std::vector<FPGATrackSimHit>& h
     m_pixel.clear();
 
     int strip_hits = 0;
-    for (auto hit : hits) {
+    for (const auto & hit : hits) {
 
         if (hit.isPixel()) {
             // just save them so we can put them back
@@ -191,7 +187,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 nextphimod[2]-=1; // increment phi module counter
                 auto entry3 = m_map.find(nextphimod);
                 if (entry3!=m_map.end()) {
-                    for (auto hit_in : entry3->second.first) {
+                    for (const auto & hit_in : entry3->second.first) {
                         if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                             foundPair=true;
                             m_adjacent_phi_sp++;
@@ -258,7 +254,7 @@ void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATra
 {
     // Make a spacepoint
     //------------------
-    float x,y,z;
+    float x{},y{},z{};
     calcPosition(hit_in, hit_out, x, y, z);
 
     float phi_window = abs(hit_in.getGPhi()-hit_out.getGPhi());

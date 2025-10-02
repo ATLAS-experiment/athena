@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 from PyCool import cool
 from CoolConvUtilities.MagFieldUtils import getTimeForLB
 from CoolConvUtilities.AtlCoolLib import indirectOpen
-from os import environ
 
 def bunchSpacingOfRun(runnumber,LB,verbose=False):
     if (runnumber<236107):
@@ -14,7 +12,7 @@ def bunchSpacingOfRun(runnumber,LB,verbose=False):
 
     tdaqDBName="COOLONL_TDAQ/CONDBR2"
     folder="/TDAQ/OLC/LHC/FILLPARAMS"
-    iovtime=getTimeForLB(runnumber,LB,readOracle="DBRELEASE" not in environ)
+    iovtime=getTimeForLB(runnumber,LB)
 
     if iovtime==0:
         print ("ERROR, can't get start time of run %i, LB %i" % (runnumber,LB))

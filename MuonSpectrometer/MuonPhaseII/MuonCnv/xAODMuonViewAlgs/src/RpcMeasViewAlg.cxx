@@ -17,27 +17,12 @@ namespace MuonR4{
         ATH_CHECK(m_writeKey.initialize());
         return StatusCode::SUCCESS;
     }
-    template <class ContainerType>
-        StatusCode RpcMeasViewAlg::retrieveContainer(const EventContext& ctx, 
-                                                      const SG::ReadHandleKey<ContainerType>& key,
-                                                      const ContainerType*& contToPush) const {
-        contToPush = nullptr;
-        if (key.empty()) {
-            ATH_MSG_VERBOSE("No key has been parsed for object " << typeid(ContainerType).name());
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadHandle<ContainerType> readHandle{key, ctx};
-        ATH_CHECK(readHandle.isPresent());
-        contToPush = readHandle.cptr();
-        return StatusCode::SUCCESS;
-    }
-
 
     StatusCode RpcMeasViewAlg::execute(const EventContext& ctx) const {
         const xAOD::RpcStripContainer* legacyStrips{nullptr};
         const xAOD::RpcStrip2DContainer* bilStrips{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_readKey1D, legacyStrips));
-        ATH_CHECK(retrieveContainer(ctx, m_readKeyBI, bilStrips));
+        ATH_CHECK(SG::get(legacyStrips, m_readKey1D, ctx));
+        ATH_CHECK(SG::get(bilStrips, m_readKeyBI, ctx));
 
         ConstDataVector<xAOD::RpcMeasurementContainer> outContainer{SG::VIEW_ELEMENTS};
         if (legacyStrips) {

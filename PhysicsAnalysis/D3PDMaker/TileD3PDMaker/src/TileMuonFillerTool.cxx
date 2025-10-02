@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -27,6 +27,14 @@
 //xAOD tools
 #include "xAODPrimitives/IsolationType.h"
 using namespace xAOD;
+
+namespace{
+  uint8_t *
+  uint8Ptr(auto * pv){
+    return reinterpret_cast<uint8_t *>(pv);
+  }
+
+}
 
 // ADD TILEMUONTRACKFILLERTOOL TO D3PD NAMESPACE
 namespace D3PD{
@@ -250,22 +258,22 @@ StatusCode TileMuonFillerTool::fill(const xAOD::Muon& p){
 
     if(m_LevelOfDetails > 1){
 
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfBLayerHits), xAOD::numberOfInnermostPixelLayerHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfPixelHits), xAOD::numberOfPixelHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfSCTHits), xAOD::numberOfSCTHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfTRTHits), xAOD::numberOfTRTHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfPixelDeadSensors), xAOD::numberOfPixelDeadSensors );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfSCTDeadSensors), xAOD::numberOfSCTDeadSensors );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfSCTHoles), xAOD::numberOfSCTHoles );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfTRTHighThresholdHits), xAOD::numberOfTRTHighThresholdHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfBLayerSharedHits), xAOD::numberOfInnermostPixelLayerSharedHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfPixelSharedHits), xAOD::numberOfPixelSharedHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfTRTOutliers), xAOD::numberOfTRTOutliers );
-        muonPointer->summaryValue( *((uint8_t*)m_numberOfTRTHighThresholdOutliers), xAOD::numberOfTRTHighThresholdOutliers );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfBLayerHits), xAOD::numberOfInnermostPixelLayerHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfPixelHits), xAOD::numberOfPixelHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfSCTHits), xAOD::numberOfSCTHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfTRTHits), xAOD::numberOfTRTHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfPixelDeadSensors), xAOD::numberOfPixelDeadSensors );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfSCTDeadSensors), xAOD::numberOfSCTDeadSensors );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfSCTHoles), xAOD::numberOfSCTHoles );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfTRTHighThresholdHits), xAOD::numberOfTRTHighThresholdHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfBLayerSharedHits), xAOD::numberOfInnermostPixelLayerSharedHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfPixelSharedHits), xAOD::numberOfPixelSharedHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfPixelHoles), xAOD::numberOfPixelHoles );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfSCTSharedHits), xAOD::numberOfSCTSharedHits );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfTRTOutliers), xAOD::numberOfTRTOutliers );
+        muonPointer->summaryValue( *uint8Ptr(m_numberOfTRTHighThresholdOutliers), xAOD::numberOfTRTHighThresholdOutliers );
 
 /*      //THIS NEEDS TO BE CONVERTED FOR xAODs AS IT IS ABOVE
         // NUMBER OF HITS IN SUBDETECTORS

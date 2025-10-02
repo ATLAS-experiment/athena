@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArOnline_SuperCellID.h"
@@ -15,15 +15,13 @@
 
 /* See comments in Base class */
 
-LArOnline_SuperCellID::LArOnline_SuperCellID(void) :
-    LArOnlineID_Base()
+LArOnline_SuperCellID::LArOnline_SuperCellID() :
+  LArOnlineID_Base("LArOnline_SuperCellID", "LArOnline_SuperCell", true)
 {
-  m_this_is_slar=true;
 }
 
 
-LArOnline_SuperCellID::~LArOnline_SuperCellID(void) 
-= default;
+LArOnline_SuperCellID::~LArOnline_SuperCellID() = default;
 
 /* =================================================================== */
 int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
@@ -69,8 +67,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     AtlasDetectorID::setDictVersion(dict_mgr, "LArCalorimeter");
 
     /* Initialize the field indices */
-    std::string group_name("LArOnline_SuperCell");
-    if(LArOnlineID_Base::initLevelsFromDict(group_name)) return (1);
+    if(LArOnlineID_Base::initLevelsFromDict(group())) return (1);
 
     if(m_msgSvc) {
        log << MSG::INFO << "Finished initLevelsFromDict" << endmsg;
@@ -84,7 +81,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
         std::stringstream strm;
-        strm << atlasDict->m_name;
+        strm << atlasDict->name();
         strg= " Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -99,7 +96,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     int larOnlineField   = -4;
     if (m_dict->get_label_value("part", "LArOnline", larOnlineField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         strg = "Could not get value for label 'LArOnline' of field 'part' in dictionary "+strm.str(); 
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -114,7 +111,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     int larOnlineCalibField   = -5;
     if (m_dict->get_label_value("part", "LArOnlineCalib", larOnlineCalibField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         strg = "Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -132,9 +129,9 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     Range prefix;
 
     /*Full range for all channels*/
-    m_full_laronline_range = m_dict->build_multirange( region_id, group_name,  prefix); 
-    m_full_feb_range       = m_dict->build_multirange( region_id, group_name, prefix, "slar_slot"); 
-    m_full_feedthrough_range = m_dict->build_multirange( region_id , group_name, prefix, "slar_feedthrough");
+    m_full_laronline_range = m_dict->build_multirange( region_id, group(),  prefix);
+    m_full_feb_range       = m_dict->build_multirange( region_id, group(), prefix, "slar_slot");
+    m_full_feedthrough_range = m_dict->build_multirange( region_id , group(), prefix, "slar_feedthrough");
 
     std::string strg0= " initialize_from_dictionary :";
     std::string strg1= " feedthrough range -> " + (std::string)m_full_feedthrough_range;

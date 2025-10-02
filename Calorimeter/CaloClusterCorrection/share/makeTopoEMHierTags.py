@@ -10,7 +10,6 @@
 # Tags the generation string as an optional second argument.
 #
 
-from __future__ import print_function
 from CaloClusterCorrection.CaloTopoEMCorrections import CaloTopoEMCorrections
 from CaloClusterCorrection.MakeHierTags          import MakeHierTags
 import sys

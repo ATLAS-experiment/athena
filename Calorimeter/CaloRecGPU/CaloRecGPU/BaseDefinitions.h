@@ -9,7 +9,6 @@
 
 namespace CaloRecGPU
 {
-  constexpr inline int NMaxNeighbours = 34;
   constexpr inline int NCaloCells = 187652;
   //Max index will be 0x0002 DD03
   
@@ -60,6 +59,10 @@ namespace CaloRecGPU
   //nextSuperCalo  = 0x0800   -> starts at NeighOffset.get_number(10)
   //            end           ->           NeighOffset.get_number(11)
 
+  constexpr inline int NMaxNeighbours      = 34;
+  constexpr inline int NMaxAll2DNeighbours = 12;
+  //Possible to-do: provide this static information for all options?
+  //(Constexpr geometry look-ups would be interesting in general...)
 }
 
 #endif

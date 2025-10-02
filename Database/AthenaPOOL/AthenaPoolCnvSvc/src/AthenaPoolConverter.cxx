@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolConverter.cxx
@@ -18,6 +18,7 @@
 #include "PersistentDataModel/TokenAddress.h"
 #include "StorageSvc/DbType.h"
 #include "RootUtils/APRDefaults.h"
+#include <format>
 
 //__________________________________________________________________________
 AthenaPoolConverter::~AthenaPoolConverter() {
@@ -35,7 +36,7 @@ StatusCode AthenaPoolConverter::initialize() {
    StringProperty containerPrefixProp("PoolContainerPrefix", "CollectionTree");
    StringProperty containerNameHintProp("TopLevelContainerName", "");
    StringProperty branchNameHintProp("SubLevelBranchName", "<type>/<key>");
-   if (propertyServer != nullptr) {
+   if (propertyServer) {
       propertyServer->getProperty(&containerPrefixProp).ignore();
       propertyServer->getProperty(&containerNameHintProp).ignore();
       propertyServer->getProperty(&branchNameHintProp).ignore();
@@ -43,7 +44,7 @@ StatusCode AthenaPoolConverter::initialize() {
    m_containerPrefix = containerPrefixProp.value();
    m_containerNameHint = containerNameHintProp.value();
    m_branchNameHint = branchNameHintProp.value();
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::finalize() {
@@ -76,7 +77,9 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    }
    if( tokAddr->ipar()[0] > 0 and tokAddr->getToken()->auxString().empty() ) {
       char text[32];
-      ::sprintf(text, "[CTXT=%08X]", static_cast<int>(*(pAddr->ipar())));
+      const std::string contextStr = std::format("[CTXT={:08X}]", static_cast<int>(*(pAddr->ipar())));
+      std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
+      text[sizeof(text) - 1] = '\0';
       tokAddr->getToken()->setAuxString(text);
    }
    ATH_MSG_VERBOSE("createObj: " << tokAddr->getToken()->toString() << ", CTX=" << tokAddr->ipar()[0]
@@ -101,26 +104,26 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    }
    m_i_poolToken = nullptr;
    if (pObj == nullptr) {
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAddr) {
    const SG::DataProxy* proxy = dynamic_cast<SG::DataProxy*>(pObj->registry());
    if (proxy == nullptr) {
       ATH_MSG_ERROR("AthenaPoolConverter CreateRep failed to cast DataProxy, key = " << pObj->name());
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    try {
       std::lock_guard<CallMutex> lock(m_conv_mut);
       if (!DataObjectToPers(pObj, pAddr).isSuccess()) {
          ATH_MSG_ERROR("CreateRep failed, key = " << pObj->name());
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
    } catch (std::exception& e) {
       ATH_MSG_ERROR("createRep - caught exception: " << e.what());
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    const CLID clid = proxy->clID();
    if (pAddr == nullptr) {
@@ -132,7 +135,7 @@ StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAd
          gAddr->setSvcType(this->storageType());
       }
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::fillRepRefs(IOpaqueAddress* pAddr, DataObject* pObj) {
@@ -140,13 +143,13 @@ StatusCode AthenaPoolConverter::fillRepRefs(IOpaqueAddress* pAddr, DataObject* p
    try {
       if (!DataObjectToPool(pAddr, pObj).isSuccess()) {
          ATH_MSG_ERROR("FillRepRefs failed, key = " << pObj->name());
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
    } catch (std::exception& e) {
       ATH_MSG_ERROR("fillRepRefs - caught exception: " << e.what());
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
 long AthenaPoolConverter::storageType() {
@@ -159,7 +162,7 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
 		::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
                                name ? name : "AthenaPoolConverter"),
 	m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
-	m_athenaPoolCnvSvc("AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
+	m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
 	m_classDesc(),
 	m_className(),
 	m_classDescs(),
@@ -200,15 +203,15 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
       const std::string::size_type pos3 = output.find(']', pos2);
       const std::string value = output.substr(pos2 + 1, pos3 - pos2 - 1);
       if (thisKey == "OutputCollection") {
-         dhContainerPrefix = value;
+         dhContainerPrefix = std::move(value);
       } else if (thisKey == "PoolContainerPrefix") {
-         containerPrefix = value;
+         containerPrefix = std::move(value);
       } else if (thisKey == "TopLevelContainerName") {
-         containerNameHint = value;
+        containerNameHint = std::move(value);
       } else if (thisKey == "SubLevelBranchName") {
-         branchNameHint = value;
+         branchNameHint = std::move(value);
       } else if (thisKey == "PoolContainerFriendPostfix") {
-         containerFriendPostfix = value;
+         containerFriendPostfix = std::move(value);
       }
       pos1 = output.find('[', pos3);
    }
@@ -273,5 +276,5 @@ bool AthenaPoolConverter::compareClassGuid(const Guid &guid) const {
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::cleanUp(const std::string& /*output*/) {
    ATH_MSG_DEBUG("AthenaPoolConverter cleanUp called for base class.");
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }

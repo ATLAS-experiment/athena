@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -31,7 +31,7 @@
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 
 //typedef to the latest top level persistent class
-typedef TrigInDetTrackTruthMap_tlp2  TrigInDetTrackTruthMap_PERS;
+typedef TrigInDetTrackTruthMap_tlp4  TrigInDetTrackTruthMap_PERS;
 
 typedef T_AthenaPoolCustomCnv<TrigInDetTrackTruthMap, TrigInDetTrackTruthMap_PERS > TrigInDetTrackTruthMapCnvBase;
 

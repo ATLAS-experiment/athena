@@ -13,6 +13,11 @@
 #include <MuonEfficiencyCorrections/MuonEfficiencyType.h>
 #include <PATInterfaces/ISystematicsTool.h>
 
+#include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/ColumnarTool.h>
+#include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarMuon/MuonDef.h>
+
 // further ROOT includes
 #include <TFile.h>
 #include <TDirectory.h>
@@ -29,10 +34,10 @@
 namespace CP {
 
     //Interface class to retrieve the Muon dependent systematics
-    class IKinematicSystHandler {
+    class IKinematicSystHandler : public columnar::ColumnarTool<> {
         public:
             /// Add an additional uncertainty to the muon depending on its kinematics.
-            virtual CorrectionCode GetKineDependent(const xAOD::Muon &mu, float& Eff) const = 0;
+            virtual CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const = 0;
             /// Set's the absolute scaling of the systematic. For daily puposes it's usually
             /// either 1 or -1 indicating if the instance is an upwards or downwards variation.
             virtual void SetSystematicWeight(float SystWeight) = 0;
@@ -42,14 +47,17 @@ namespace CP {
             virtual ~IKinematicSystHandler() =default;
             
             /// Typedef to prepare function pointers to the muon
-            typedef float (IKinematicSystHandler::*KinVariable)(const xAOD::Muon &mu) const;
+            typedef float (IKinematicSystHandler::*KinVariable)(columnar::MuonId mu) const;
             KinVariable GetMuonVariableToUse(const std::string &name);
 
-            float Eta(const xAOD::Muon &mu) const;
-            float Pt(const xAOD::Muon &mu) const;
-            float PtGeV(const xAOD::Muon &mu) const;
-            float AbsEta(const xAOD::Muon &mu) const;
+            float Eta(columnar::MuonId mu) const;
+            float Pt(columnar::MuonId mu) const;
+            float PtGeV(columnar::MuonId mu) const;
+            float AbsEta(columnar::MuonId mu) const;
 
+            columnar::MuonAccessor<columnar::ObjectColumn> muonsHandle {*this, "Muons"};
+            columnar::MuonAccessor<float> ptAcc {*this, "pt"};
+            columnar::MuonAccessor<float> etaAcc {*this, "eta"};
     };
     ///     Z->mumu reconstruction scale-factors are delivered in eta-phi maps integrating out any pt-dependence.
     ///     However, the scale-factors as a function of pt show a slight dependence on that variable. An extra binning
@@ -64,7 +72,7 @@ namespace CP {
     ///     is smaller than the total value of the latter itself.
     class PtKinematicSystHandler : public IKinematicSystHandler {
         public:
-             CorrectionCode GetKineDependent(const xAOD::Muon& mu, float& eff) const override;
+             CorrectionCode GetKineDependent(columnar::MuonId mu, float& eff) const override;
             
             void SetSystematicWeight(float syst_weight) override;
             
@@ -83,7 +91,7 @@ namespace CP {
     
     class PrimodialPtSystematic: public IKinematicSystHandler {
         public:
-            CorrectionCode GetKineDependent(const xAOD::Muon &mu, float& Eff) const override;
+            CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
     
             void SetSystematicWeight(float SystWeight) override;
 
@@ -102,7 +110,7 @@ namespace CP {
             
             void SetSystematicWeight( float SystWeight) override;
             bool initialize() override;
-            CorrectionCode GetKineDependent(const xAOD::Muon&mu, float& Eff) const override;
+            CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
         private:
             std::unique_ptr<HistHandler> m_Handler;
             float m_SystWeight;
@@ -110,7 +118,7 @@ namespace CP {
 
     class BadMuonVetoSystHandler: public IKinematicSystHandler {
         public:
-             CorrectionCode GetKineDependent(const xAOD::Muon &mu, float& Eff) const override;
+             CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
              void SetSystematicWeight(float SystWeight)override;
 
             bool initialize() override;

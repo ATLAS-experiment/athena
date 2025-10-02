@@ -38,16 +38,7 @@ SolenoidalIntersector::Constants::Constants (const SolenoidParametrization& solp
 SolenoidalIntersector::SolenoidalIntersector(const std::string& type,
                                              const std::string& name,
                                              const IInterface* parent)
-    : base_class(type, name, parent),
-      m_rungeKuttaIntersector(
-          "Trk::RungeKuttaIntersector/RungeKuttaIntersector", this),
-      m_deltaPhiTolerance(0.01),  // upper limit for small angle approx
-      m_surfaceTolerance(2.0 * Gaudi::Units::micrometer),
-      m_countExtrapolations(0),
-      m_countRKSwitches(0) {
-  declareProperty("RungeKuttaIntersector", m_rungeKuttaIntersector);
-  declareProperty("SurfaceTolerance", m_surfaceTolerance);
-}
+  : base_class(type, name, parent) {}
 
 StatusCode
 SolenoidalIntersector::initialize()

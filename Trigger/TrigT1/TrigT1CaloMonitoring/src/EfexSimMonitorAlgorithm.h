@@ -18,6 +18,7 @@
 #include "FourMomUtils/P4Helpers.h"
 
 #include "LArRecConditions/LArBadChannelCont.h"
+#include "CaloEvent/CaloCellContainer.h"
 
 class EfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
 public:EfexSimMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
@@ -27,7 +28,6 @@ public:EfexSimMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocato
 
 private:
 
-  StringProperty m_packageName{this,"PackageName","EfexSimMonitor","group name for histograming"};
 
   // these maps hold the binlabels (in form of LBN:FirstEventNum) to use for each lb
   mutable std::map<int,std::string> m_firstEvents_DataTowers ATLAS_THREAD_SAFE;
@@ -40,7 +40,16 @@ private:
   SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eFexEmSimContainerKey{this,"eFexEMRoISimContainer","L1_eEMRoISim","SG key of the simulated eFex Em RoI container"};
   SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFexTauSimContainerKey{this,"eFexTauSimRoIContainer","L1_eTauRoISim","SG key of the simulated eFex Tau RoI container"};
 
-  // SG::ReadDecorHandleKey<xAOD::EventInfo> m_decorKey;
+  // same again for xTOBs
+    SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eFexEmxContainerKey{this,"eFexEMxRoIContainer","","SG key of the data eFex Em RoI container"};
+    SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFexTauxContainerKey{this,"eFexTauxRoIContainer","","SG key of the data eFex Tau RoI container"};
+    SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eFexEmxSimContainerKey{this,"eFexEMxRoISimContainer","","SG key of the simulated eFex Em RoI container"};
+    SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFexTauxSimContainerKey{this,"eFexTauxSimRoIContainer","","SG key of the simulated eFex Tau RoI container"};
+
+    // need to check how many supercells there are, as expect mismatches when any are missing:
+    SG::ReadHandleKey<CaloCellContainer> m_scellKey { this, "CaloCellContainerReadKey", "SCell", "Read handle key for the supercells"};
+
+    // SG::ReadDecorHandleKey<xAOD::EventInfo> m_decorKey;
   SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerKey{this,"eFexTowerContainer","L1_eFexDataTowers","SG key of the primary eFex tower container, which should be populated if fex readout occurring"};
 
   SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArMaskedChannelKey", "LArMaskedSC", "Key of the OTF-Masked SC" };

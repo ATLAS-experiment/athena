@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/RD53SimTool.h
@@ -14,7 +14,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "FrontEndSimTool.h"
 #include "InDetRawData/PixelRDO_Collection.h" //typedef
-#include "PixelConditionsData/PixelModuleData.h"  //ReadCondHandleKey template param
+#include "PixelConditionsData/ITkPixSimulationParameters.h" 
+
 
 class SiChargedDiodeCollection;
 
@@ -30,12 +31,10 @@ public:
   virtual StatusCode finalize();
   virtual ~RD53SimTool();
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
-                       CLHEP::HepRandomEngine* rndmEngine);
+                       CLHEP::HepRandomEngine* rndmEngine) const;
 private:
-
-   SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey{
-    this, "PixelModuleData", "PixelModuleData", "Pixel module data"
-  };
+  
+   ITkPixSimulationParameters m_chipSim{};
 
   RD53SimTool();
   Gaudi::Property<bool> m_doTimeWalk {

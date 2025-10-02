@@ -30,9 +30,7 @@
 
 namespace DerivationFramework {
 
-class EGElectronAmbiguityTool
-  : public AthAlgTool
-  , public IAugmentationTool
+class EGElectronAmbiguityTool : public extends<AthAlgTool, IAugmentationTool>
 {
 
 public:

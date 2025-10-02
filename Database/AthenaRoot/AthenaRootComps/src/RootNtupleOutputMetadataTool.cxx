@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootNtupleOutputMetadataTool.cxx 
@@ -40,8 +40,8 @@ RootNtupleOutputMetadataTool::RootNtupleOutputMetadataTool(const std::string& ty
                                            const std::string& name,
                                            const IInterface* parent) : 
   base_class(type, name, parent),
-  m_imetaStore("InputMetaDataStore", name),
-  m_ometaStore("MetaDataStore", name),
+  m_imetaStore("StoreGateSvc/InputMetaDataStore", name),
+  m_ometaStore("StoreGateSvc/MetaDataStore", name),
   m_clidSvc("ClassIDSvc", name), 
   m_metaWritten(false)
 {
@@ -214,7 +214,8 @@ RootNtupleOutputMetadataTool::writeMetadata()
   if (pc.isSuccess()) {
     for (; titer != tend; ++titer) {
       std::string key = titer.key();
-      if (m_treesWritten.find(key) == m_treesWritten.end()) {
+      if (!m_treesWritten.emplace(key).second) {
+        // Not aready in the set.
         const TTree* x = (TTree*)titer->tree(); 
         try { 
           if (this->addMetadata(key,x,typeid(TTree)).isFailure()) failure=true; 
@@ -222,7 +223,6 @@ RootNtupleOutputMetadataTool::writeMetadata()
         catch (...) { 
           ATH_MSG_INFO("Error adding metadata for TTree " << key); 
         } 
-        m_treesWritten.insert(key);
       }
       else {ATH_MSG_WARNING("Tree " << key << " already written");}
     }

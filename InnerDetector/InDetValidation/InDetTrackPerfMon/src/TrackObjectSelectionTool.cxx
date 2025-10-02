@@ -33,7 +33,7 @@ StatusCode IDTPM::TrackObjectSelectionTool::initialize() {
 
   ATH_CHECK( asg::AsgTool::initialize() );
 
-  ATH_MSG_INFO( "Initializing " << name() << "..." );
+  ATH_MSG_DEBUG( "Initializing " << name() << "..." );
 
   return StatusCode::SUCCESS;
 }
@@ -141,6 +141,20 @@ bool IDTPM::TrackObjectSelectionTool::accept(
                    " hadronic " << m_tauNprongs.value() << "prong " <<
                    m_tauType.value() << " Tau with transverse energy = " <<
                    eT( *tau ) );
+
+    return true;
+  }
+
+  /// Jet
+  if( m_objectType.value().find("Jet") != std::string::npos ) {
+    const xAOD::Jet* jet = getLinkedJet(
+        offTrack, m_objectQuality.value() );
+
+    if( not jet ) return false;
+
+    ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
+                   " is linked to a " << m_objectQuality.value() <<
+                   " jet with pT = " << jet->pt() );
 
     return true;
   }

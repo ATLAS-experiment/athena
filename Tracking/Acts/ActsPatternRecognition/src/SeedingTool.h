@@ -12,6 +12,20 @@
 # pragma GCC diagnostic ignored "-Wstringop-overread"
 #endif
 
+// Super-nasty hack to work round explicit uses of Acts::Seed in Acts Core Seeding.
+// A better fix would be to change Acts::Seed to the templates that are used elsewhere in Acts Core.
+// The even better fix would be to change Acts::Seed to support more than 3 SPs/seed.
+#include "Acts/EventData/Seed.hpp"
+#include "ActsEvent/Seed.h"
+namespace Acts {
+  template <typename external_spacepoint_t, std::size_t N = 3ul>
+  using AthenaSeed = typename ActsTrk::ActsSeed<external_spacepoint_t, N>;
+}
+
+#define Seed AthenaSeed
+#include "Acts/Seeding/SeedFinder.hpp"
+#include "Acts/Seeding/SeedFilter.hpp"
+#undef Seed
 
 // ATHENA
 #include "ActsToolInterfaces/ISeedingTool.h"
@@ -28,9 +42,9 @@
 #include "Acts/Seeding/BinnedGroup.hpp"
 #include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Seeding/SeedFilterConfig.hpp"
-#include "Acts/Seeding/SeedFilter.hpp"
-#include "Acts/Seeding/SeedFinder.hpp"
 #include "Acts/EventData/Seed.hpp"
+
+#include "InDetIdentifier/PixelID.h"
 
 #include <numbers>
 
@@ -40,7 +54,7 @@ namespace ActsTrk {
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
   public:
     using value_type = typename Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>::SpacePointProxyType;
-    using seed_type = Acts::Seed< value_type, 3ul >;
+    using seed_type = ActsTrk::ActsSeed< value_type, 3ul >;
     using external_type = typename std::conditional< 
       std::is_const< typename value_type::ValueType >::value,
       typename std::remove_const< typename value_type::ValueType >::type,
@@ -79,7 +93,7 @@ namespace ActsTrk {
 		   external_iterator_t spEnd,
 		   const Acts::Vector3& beamSpotPos,
 		   const Acts::Vector3& bField,
-		   DataVector< Acts::Seed< external_type, 3ul > >& seeds ) const;
+		   DataVector< ActsTrk::ActsSeed< external_type, 3ul > >& seeds ) const;
     
     StatusCode prepareConfiguration();
 
@@ -87,6 +101,9 @@ namespace ActsTrk {
     // *********************************************************************
 
   protected:
+
+    const PixelID* m_pixelId{ nullptr };
+
     Acts::SeedFinder< value_type, Acts::CylindricalSpacePointGrid<value_type> > m_finder;
     Acts::SeedFinderConfig< value_type > m_finderCfg;
     Acts::CylindricalSpacePointGridConfig m_gridCfg;
@@ -285,42 +302,96 @@ namespace ActsTrk {
 
     // A conservative guess of the size of the vectors needed for seeding
     
+    Gaudi::Property<float> m_ExpCutrMin {this, "SpSelectionExpCutrMin", 45. * Acts::UnitConstants::mm};
     
-    static constexpr float m_ExpCutrMin = 45.;
-    
-    static inline bool itkFastTrackingSPselect(const value_type& sp) {
-      // At small r we remove points beyond |z| > 200.
+    inline bool spacePointSelectionFunction(const value_type& sp) const {
+
       float r = sp.radius();
       float zabs = std::abs(sp.z());
+      float absCotTheta = zabs / r;
+      
+      // checking configuration to remove pixel space points
+      Identifier identifier = m_pixelId->wafer_id(sp.externalSpacePoint().elementIdList().at(0));
+      if (m_pixelId->is_barrel(identifier)) {
+	if (zabs > 200 and
+	    r < 40)
+	  return false;
+	
+      	return true;
+      }
+      
+      // Inner layers
+      // Below 1.20 - accept all
+      static constexpr float cotThetaEta120 = 1.5095;
+      if (absCotTheta < cotThetaEta120)
+      	return true;
+      
+      // Below 3.40 - remove if too close to beamline
+      static constexpr float cotThetaEta340 = 14.9654;
+      if (absCotTheta < cotThetaEta340 and
+	  r < m_ExpCutrMin)
+	return false;	
 
-      if (zabs > 200. && r < m_ExpCutrMin) {
+      
+      // Outer layers
+      // Above 2.20
+      static constexpr float cotThetaEta220 = 4.4571;
+      if (absCotTheta > cotThetaEta220 and
+	  r > 260.)
 	return false;
-      }
-            
-      /// Remove space points beyond eta=4 if their z is
-      /// larger than the max seed z0 (150.)
-      float cotTheta = 27.2899;  // corresponds to eta=4
-      if ((zabs - 150.) > cotTheta * r) {
+      
+      // Above 2.60
+      static constexpr float cotThetaEta260 = 6.6947;
+      if (absCotTheta > cotThetaEta260 and
+          r > 200.)
 	return false;
-      }
+
+      // Above 3.20
+      static constexpr float cotThetaEta320 = 12.2459;
+      if (absCotTheta > cotThetaEta320 and
+          r > 140.)
+	return false;
+
+      // Above 4.00
+      static constexpr float cotThetaEta400 = 27.2899;
+      if (absCotTheta > cotThetaEta400)
+	return false;
+      
       return true;
     }
 
-    static inline bool itkFastDoubletCut(float bottomRadius, float cotTheta) {
-      //float fastTrackingRMin = m_ExpCutrMin;
-      float fastTrackingCotThetaMax = 1.5;
-      
-      //if (bottomRadius < fastTrackingRMin and
-      if (bottomRadius < m_ExpCutrMin and
-	  (cotTheta > fastTrackingCotThetaMax or
-	   cotTheta < -fastTrackingCotThetaMax)) {
-	return false;
+    inline bool doubletSelectionFunction(
+      const value_type& middle,
+      const value_type& other,
+      float cotTheta, bool isBottomCandidate) const {
+      // We remove some doublets that have the middle space point in some specific areas
+      // This should eventually be moved inside ACTS and allow a veto mechanism according
+      // to the user desire.
+      // As of now we cannot really do this since we define a range of validity of the middle
+      // candidate, and if we want to veto some sub-regions inside it, we need to do it here.
+      if (std::abs(middle.z()) > 1500 and
+          middle.radius() > 100 and middle.radius() < 150) {
+        return false;
       }
+      
+      // We remove here some seeds, in case the bottom space point radius is
+      // too small (i.e. < fastTrackingRMin)
+      
+      // This operation is done only within a specific eta window
+      // Instead of eta we use the doublet cottheta      
+      static constexpr float cotThetaEta120 = 1.5095;
+      static constexpr float cotThetaEta360 = 18.2855;
+      
+      float absCotTheta = std::abs(cotTheta);
+      if (isBottomCandidate and other.radius() < m_ExpCutrMin and
+          absCotTheta > cotThetaEta120 and
+          absCotTheta < cotThetaEta360) {
+        return false;
+      }
+      
       return true;
     }
   };
-
-  
   
 } // namespace
 

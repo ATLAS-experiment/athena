@@ -1,6 +1,6 @@
 /**
  *
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.cxx
  * @brief Class for ditau efficiency correction scale factors and uncertainties
@@ -28,14 +28,7 @@ DiTauEfficiencyCorrectionsTool::DiTauEfficiencyCorrectionsTool( const std::strin
   , m_bIsData(false)
   , m_bIsConfigured(false)
 {
-  declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
-  declareProperty( "InputFilePathJetIDHadTau",     m_sInputFilePathJetIDHadTau     = "" );
-  declareProperty( "VarNameJetIDHadTau",           m_sVarNameJetIDHadTau           = "" );
-  declareProperty( "RecommendationTag",            m_sRecommendationTag            = "2017-moriond" );
-  declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDBDTTIGHT );
-  declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
 }
-
 
 //______________________________________________________________________________
 DiTauEfficiencyCorrectionsTool::~DiTauEfficiencyCorrectionsTool()
@@ -53,11 +46,6 @@ StatusCode DiTauEfficiencyCorrectionsTool::initialize()
 
   if (m_bSkipTruthMatchCheck)
     ATH_MSG_WARNING("Truth match check will be skipped. This is ONLY FOR TESTING PURPOSE!");
-
-  // configure default set of variations if not set by the constructor using TauSelectionTool or the user
-  if ((m_sRecommendationTag== "2017-moriond") and m_vEfficiencyCorrectionTypes.empty())
-    m_vEfficiencyCorrectionTypes = {SFJetIDHadTau
-                                   };
 
   if (m_sRecommendationTag == "2017-moriond")
     ATH_CHECK(initializeTools_2017_moriond());
@@ -116,7 +104,7 @@ void DiTauEfficiencyCorrectionsTool::printConfig() const
 
 //______________________________________________________________________________
 CP::CorrectionCode DiTauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau,
-    double& eff, unsigned int /*iRunNumber*/, unsigned int /*iMu*/ )
+    double& eff )
 {
   eff = 1.;
 
@@ -135,15 +123,14 @@ CP::CorrectionCode DiTauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( con
 }
 
 //______________________________________________________________________________
-CP::CorrectionCode DiTauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau, 
-  unsigned int iRunNumber, unsigned int iMu)
+CP::CorrectionCode DiTauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau )
 {
   if (m_bIsData)
     return CP::CorrectionCode::Ok;
 
   for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
   {
-    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xDiTau, iRunNumber, iMu);
+    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xDiTau);
     if (tmpCorrectionCode != CP::CorrectionCode::Ok)
     {
       return tmpCorrectionCode;
@@ -206,7 +193,10 @@ StatusCode DiTauEfficiencyCorrectionsTool::initializeTools_2017_moriond()
     if (iEfficiencyCorrectionType == SFJetIDHadTau)
     {
       // only set vars if they have been configured by the user
-      if (m_sInputFilePathJetIDHadTau.empty()) m_sInputFilePathJetIDHadTau = sDirectory+"JetID_TrueHadDiTau_2017-fall.root";
+      if (m_sInputFilePathJetIDHadTau.empty()) {
+         sDirectory = "TauAnalysisTools/00-04-00/EfficiencyCorrections/"; 	      
+         m_sInputFilePathJetIDHadTau = sDirectory+"JetID_TrueHadDiTau_2017-fall.root";
+      }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "DiTauScaleFactorJetIDHadTau";
 
       asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>("JetIDHadTauTool", this);

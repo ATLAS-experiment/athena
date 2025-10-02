@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CONDPROXYPROVIDER_H
@@ -14,6 +14,8 @@
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaBaseComps/AthService.h"
+#include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
+#include <memory>
 
 // Forward declarations
 namespace pool {
@@ -22,7 +24,6 @@ namespace pool {
 class ISvcLocator;
 class PoolCollectionConverter;
 class StoreGateSvc;
-class IAthenaPoolCnvSvc;
 
 /** @class CondProxyProvider
  *  @brief This class is the AddressProvider for conditions data.
@@ -54,21 +55,18 @@ public: // Constructor and Destructor
                                     const EventContext& ctx) override;
 
 private: // data
-   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc;
-
-   mutable PoolCollectionConverter* m_poolCollectionConverter ATLAS_THREAD_SAFE;
+   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc"};
    unsigned int m_contextId;
 
 private: // properties
    /// InputCollections, vector with names of the input collections.
    StringArrayProperty m_inputCollectionsProp
    { this, "InputCollections", {}, "Files to read", "OrderedSet<std::string>" };
-   mutable std::vector<std::string>::const_iterator m_inputCollectionsIterator ATLAS_THREAD_SAFE;
+   std::vector<std::string>::const_iterator m_inputCollectionsIterator{};
 
 private: // internal helper functions
    /// Return pointer to new PoolCollectionConverter
-   PoolCollectionConverter* getCollectionCnv();
-
+  std::unique_ptr<PoolCollectionConverter> getCollectionCnv();
 };
 
 #endif

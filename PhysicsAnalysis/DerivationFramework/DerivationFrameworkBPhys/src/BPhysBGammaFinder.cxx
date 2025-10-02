@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkBPhys/BPhysBGammaFinder.h"
+#include "BPhysBGammaFinder.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -18,7 +18,7 @@ using VertexLink = ElementLink<xAOD::VertexContainer>;
 namespace DerivationFramework {
 
 BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t,n,p),
+    : base_class(t,n,p),
       m_v0Tools("Trk::V0Tools"),
       m_vertexFitter("Trk::TrkVKalVrtFitter"),
       m_vertexEstimator("InDet::VertexPointEstimator"),
@@ -33,7 +33,6 @@ BPhysBGammaFinder::BPhysBGammaFinder(const std::string& t, const std::string& n,
       m_Chi2Cut(20.0),
       m_maxGammaMass(100.0) {
 
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   // Declare user-defined properties
   declareProperty("BVertexContainers", m_BVertexCollectionsToCheck);

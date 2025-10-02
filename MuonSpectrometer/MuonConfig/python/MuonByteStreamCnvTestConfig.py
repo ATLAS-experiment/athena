@@ -247,7 +247,7 @@ def CscDigitToCscRDOToolCfg(flags, name="CscDigitToCscRDOTool", **kwargs):
         kwargs.setdefault("OutputObjectName", "CSCRDO")
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.CscDigitToCscRDOTool("CscDigitToCscRDOTool", **kwargs))
     return acc
 

@@ -66,13 +66,13 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
                         help='Run %(metavar)s before all else')
     parser.add_argument('--athena', group = 'Athena', type=argFactory(trfArgClasses.argString, runarg=False), metavar='ATHENA',
                         help='Use %(metavar)s as the athena executable')
-    parser.add_argument('--preExec', group = 'Athena', type=argFactory(trfArgClasses.argSubstepList), nargs='+',
+    parser.add_argument('--preExec', group = 'Athena', type=argFactory(trfArgClasses.argSubstepList), nargs='+', action='extend', 
                         metavar='substep:PREEXEC',
                         help='Python code to execute before main job options are included (can be optionally limited to a single substep)')
     parser.add_argument('--preInclude', group = 'Athena', type=argFactory(trfArgClasses.argSubstepList, splitter=','), nargs='+',
                         metavar='substep:PREINCLUDE',
                         help='Python configuration fragment to include before main job options (can be optionally limited to a single substep). Will split on commas: frag1.py,frag2.py is understood.')
-    parser.add_argument('--postExec', group = 'Athena', type=argFactory(trfArgClasses.argSubstepList), nargs='+',
+    parser.add_argument('--postExec', group = 'Athena', type=argFactory(trfArgClasses.argSubstepList), nargs='+', action='extend', 
                         metavar='substep:POSTEXEC',
                         help='Python code to execute after main job options are included (can be optionally limited to a single substep)')
     parser.add_argument('--postInclude', group = 'Athena', type=argFactory(trfArgClasses.argSubstepList, splitter=','), nargs='+',
@@ -123,6 +123,8 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
     parser.add_argument('--multithreaded', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Multithreaded mode active')
+    parser.add_argument("--mpi", type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True), nargs="?",
+                        const=trfArgClasses.argBool("True"), help="MPI mode active",)
     parser.add_argument('--multiprocess', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Multiprocess mode active')
@@ -496,7 +498,7 @@ def addFileValidationArguments(parser):
                         group='File Validation', help='Use multithreaded ROOT file validation if True')
 
 def addParallelJobProcessorArguments(parser):
-    parser.defineArgGroup('Parallel Job Processor', 'Parallel Job Processor arguments')
+    parser.defineArgGroup('pool', 'Parallel Job Processor arguments')
     parser.add_argument('----parallelProcessPool', group='pool', type=argFactory(trfArgClasses.argInt, runarg=False), help='Number of processes in pool requested (int)')
 
 def addValidationArguments(parser):

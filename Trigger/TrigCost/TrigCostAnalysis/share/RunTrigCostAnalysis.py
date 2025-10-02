@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -10,7 +10,7 @@ log = logging.getLogger('RunTrigCostAnalysis.py')
 
 
 # Configure Cost Analysis algorithm
-def trigCostAnalysisCfg(flags, args, isMC=False):
+def trigCostAnalysisCfg(flags, args):
   from TrigCostAnalysis.ROSToROB import ROSToROBMap
 
   acc = ComponentAccumulator()
@@ -22,8 +22,8 @@ def trigCostAnalysisCfg(flags, args, isMC=False):
   enhancedBiasWeighter = CompFactory.EnhancedBiasWeighter()
   enhancedBiasWeighter.RunNumber = flags.Input.RunNumbers[0]
   enhancedBiasWeighter.UseBunchCrossingData = False
-  enhancedBiasWeighter.IsMC = isMC
-  if isMC:
+  enhancedBiasWeighter.IsMC = flags.Input.isMC
+  if flags.Input.isMC:
     MCpayload = readMCpayload(args)
     enhancedBiasWeighter.MCCrossSection = MCpayload.get('MCCrossSection')
     enhancedBiasWeighter.MCFilterEfficiency = MCpayload.get('MCFilterEfficiency')
@@ -31,18 +31,18 @@ def trigCostAnalysisCfg(flags, args, isMC=False):
     enhancedBiasWeighter.MCIgnoreGeneratorWeights = MCpayload.get('MCIgnoreGeneratorWeights')
 
   trigCostAnalysis = CompFactory.TrigCostAnalysis()
-  trigCostAnalysis.OutputLevel = args.loglevel
+  trigCostAnalysis.OutputLevel = flags.Exec.OutputLevel
   trigCostAnalysis.BaseEventWeight = args.baseWeight
   trigCostAnalysis.EnhancedBiasTool = enhancedBiasWeighter
   trigCostAnalysis.AlgToChainTool = CompFactory.getComp("TrigCompositeUtils::AlgToChainTool")()
   trigCostAnalysis.UseEBWeights = args.useEBWeights
   trigCostAnalysis.MaxFullEventDumps = 100
   trigCostAnalysis.FullEventDumpProbability = 1 # X. Where probability is 1 in X
-  trigCostAnalysis.UseSingleTimeRange = isMC or args.useEBWeights
+  trigCostAnalysis.UseSingleTimeRange = flags.Input.isMC or args.useEBWeights
   trigCostAnalysis.ROSToROBMap = ROSToROBMap().get_mapping()
   trigCostAnalysis.DoMonitorChainAlgorithm = args.monitorChainAlgorithm
 
-  if not isMC:
+  if not flags.Input.isMC:
     trigCostAnalysis.AdditionalHashList = readHashesFromHLTJO(args.joFile, args.smk, args.dbAlias)
   else:
     log.debug("Hashes from the HLTJO won't be retrieved for MC job")
@@ -194,9 +194,12 @@ def getHltMenu():
 
 
 if __name__=='__main__':
-  import sys
-  from argparse import ArgumentParser
-  parser = ArgumentParser()
+  # Set the Athena configuration flags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+
+  # Add specific command-line arguments
+  parser = flags.getArgumentParser()
   parser.add_argument('--outputHist', type=str, default='TrigCostRoot_Results.root', help='Histogram output ROOT file')
   parser.add_argument('--monitorChainAlgorithm', action='store_true', help='Turn on Chain Algorithm monitoring')
   parser.add_argument('--baseWeight', type=float, default=1.0, help='Base events weight')
@@ -212,20 +215,7 @@ if __name__=='__main__':
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')
   parser.add_argument('--MCIgnoreGeneratorWeights', action='store_true', help='For MC input: Flag to disregard any generator weights.')
 
-  parser.add_argument('--maxEvents', type=int, help='Maximum number of events to process')
-  parser.add_argument('--skipEvents',type=int, help='Number of events to skip')
-  parser.add_argument('--loglevel', type=int, default=3, help='Verbosity level: 1 - VERBOSE, 2 - DEBUG, 3 - INFO')
-  parser.add_argument('flags', nargs='*', help='Config flag overrides')  
-  args = parser.parse_args()
-
-  log.level = args.loglevel
-
-  # Set the Athena configuration flags
-  from AthenaConfiguration.AllConfigFlags import initConfigFlags
-  # verbosity defined in Control/AthenaCommon/python/Constants.py
-  flags = initConfigFlags()
-  flags.Exec.OutputLevel = args.loglevel
-  flags.fillFromArgs(args.flags)
+  args = flags.fillFromArgs(parser=parser)
   flags.lock()
 
   # Initialize configuration object, add accumulator, merge, and run.
@@ -249,10 +239,11 @@ if __name__=='__main__':
     (args.smk, args.dbAlias) = readConfigFromCool(flags, args.smk, args.dbAlias)
 
   cfg.merge(hltConfigSvcCfg(flags, args.smk, args.dbAlias))
-  cfg.merge(trigCostAnalysisCfg(flags, args, flags.Input.isMC))
+  cfg.merge(trigCostAnalysisCfg(flags, args))
 
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
   cfg.printConfig(withDetails=False) # set True for exhaustive info
-  sc = cfg.run(args.maxEvents)
+  sc = cfg.run(flags.Exec.MaxEvents)
+  import sys
   sys.exit(0 if sc.isSuccess() else 1)

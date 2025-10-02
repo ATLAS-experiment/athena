@@ -174,7 +174,7 @@ namespace MuonCalib {
                                                          tubeId.mdtTubeLayer(),
                                                          tubeId.mdtTube());
                 ret->setFit(std::move(tubeFit), thisId, msg());
-                ret->setCalib(std::make_unique<MdtTubeFitContainer::SingleTubeCalib>(calibs[tubeId]), thisId, msg());
+                ret->setCalib(calibs[tubeId], thisId, msg());
             }
             ret->setGroupBy(tb_grp);
             ret->setImplementation(alg_flg);

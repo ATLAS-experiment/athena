@@ -15,9 +15,7 @@
 #define TRKTOOLS_RIOONTRACKCREATOR_H
 
 // Athena
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
 // Trk
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "TrkParameters/TrackParameters.h"
@@ -50,16 +48,14 @@ namespace Trk {
       @author Wolfgang Liebig <http://consult.cern.ch/xwho/people/54608>
    */
 
-  class RIO_OnTrackCreator final : public AthAlgTool,
-                                   virtual public IRIO_OnTrackCreator {
+  class RIO_OnTrackCreator final : public extends<AthAlgTool, IRIO_OnTrackCreator> {
    public:
     ///////////////////////////////////////////////////////////////////
     // Public methods:
     ///////////////////////////////////////////////////////////////////
 
     //! standard AlgTool constructor
-    RIO_OnTrackCreator(const std::string&,const std::string&,
-		       const IInterface*);
+    using base_class::base_class;
     //! virtual destructor
     virtual ~RIO_OnTrackCreator();
 
@@ -67,47 +63,28 @@ namespace Trk {
     virtual StatusCode initialize() override;
 
     //! the master method for going from RIO to ROT.
-    RIO_OnTrack* correct(const PrepRawData&,
-                         const TrackParameters&,
-                         const EventContext& ctx) const override;
+    RIO_OnTrack* correct(const PrepRawData& rio,
+                         const TrackParameters& pars,
+                         const EventContext& ctx) const override final;
 
    private:
-    ///////////////////////////////////////////////////////////////////
-    // Private data:
-    ///////////////////////////////////////////////////////////////////
-
-    //! Helper to detect type of sub-detector from PRD->identify().
-    const AtlasDetectorID*           m_idHelper{nullptr};
     //! Detector-specific helper tool, performing the actual calibration corrections for every InDet::PixelCluster
-    ToolHandle<IRIO_OnTrackCreator> m_pixClusCor{
-        this, "ToolPixelCluster",
-        "InDet::PixelClusterOnTrackTool/PixelClusterOnTrackTool"};
+    ToolHandle<IRIO_OnTrackCreator> m_pixClusCor{this, "ToolPixelCluster", ""};
     //! Detector-specific helper tool, performing the actual calibration
     //! corrections for every InDet::SCT_Cluster
-    ToolHandle<IRIO_OnTrackCreator> m_sctClusCor{
-        this, "ToolSCT_Cluster",
-        "InDet::SCT_ClusterOnTrackTool/SCT_ClusterOnTrackTool"};
+    ToolHandle<IRIO_OnTrackCreator> m_sctClusCor{this, "ToolSCT_Cluster", ""};
     //! Detector-specific helper tool, performing the actual calibration
     //! corrections for every InDet::TRT::DriftCircle
-    ToolHandle<IRIO_OnTrackCreator> m_trt_Cor{
-        this, "ToolTRT_DriftCircle",
-        "InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool"};
+    ToolHandle<IRIO_OnTrackCreator> m_trt_Cor{this, "ToolTRT_DriftCircle", ""};
     //! Detector-specific helper tool, performing the actual calibration
     //! corrections for every Muon::MdtPrepData
-    ToolHandle<IRIO_OnTrackCreator> m_muonDriftCircleCor{
-        this, "ToolMuonDriftCircle",
-        "Muon::MdtDriftCircleOnTrackCreator/MdtDriftCircleOnTrackTool"};
+    ToolHandle<IRIO_OnTrackCreator> m_muonDriftCircleCor{this, "ToolMuonDriftCircle", ""};
     //! Detector-specific helper tool, performing the actual calibration
     //! corrections for the remaining muon detector technologies: RPC, TGC, CSC,
     //! MM, sTGC.
-    ToolHandle<IRIO_OnTrackCreator> m_muonClusterCor{
-        this, "ToolMuonCluster",
-        "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackTool"};
+    ToolHandle<IRIO_OnTrackCreator> m_muonClusterCor{this, "ToolMuonCluster",""};
 
     Gaudi::Property<std::string>m_mode{this, "Mode" ,"all" };   //!< flag: can be 'all', 'indet' or 'muon'
-    bool                             m_doPixel{true}; //!< Load Pixel IRIO_OnTrackCreator
-    bool                             m_doSCT{true};   //!< Load SCT IRIO_OnTrackCreator
-    bool                             m_doTRT{true};   //!< Load TRT IRIO_OnTrackCreator
     //emum for the flag
     enum struct Mode {
       all = 0,

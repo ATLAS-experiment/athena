@@ -59,7 +59,7 @@ class TrigEgammaMonAlgBuilder:
                                       onlyHLT = False,
                                       derivation=False,
                                       detailedHistograms = False,
-                                      basePath = 'HLT/EgammaMon'):
+                                      basePath = 'HLT/EgammaMon', ComputeEffLH = False, ComputeEffDNN = False):
  
     from AthenaCommon.Logging import logging
     self.__logger = logging.getLogger( 'TrigEgammaMonAlgBuilder' )
@@ -71,6 +71,8 @@ class TrigEgammaMonAlgBuilder:
     self.detailedHistograms = detailedHistograms 
     self.moniAccess = moniAccess
     self.onlyHLT = onlyHLT
+    self.computeEffLH = ComputeEffLH
+    self.computeEffDNN = ComputeEffDNN
     self.configureMode()
     
 
@@ -192,11 +194,6 @@ class TrigEgammaMonAlgBuilder:
         self.electronList = mongroups['monitoring_electron_cosmic'] 
         self.photonList   = mongroups['monitoring_photon_cosmic']
         self.bootstrapMap = mongroups['monitoring_bootstrap_cosmic']
-    elif self.HI_mode or self.pPb_mode:
-        self.electronList = mongroups['monitoring_electron_hi']
-        self.tpList       = mongroups['monitoring_electron_TP_hi']
-        self.photonList   = mongroups['monitoring_photon_hi']
-        self.bootstrapMap = mongroups['monitoring_bootstrap_hi']
     else:
         self.electronList = mongroups['monitoring_electron']
         self.photonList   = mongroups['monitoring_photon']
@@ -271,9 +268,9 @@ class TrigEgammaMonAlgBuilder:
       TightLHSelector.ConfigFile        = "ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodTightOfflineConfig2017_Smooth.conf"
       VeryLooseLHSelector.ConfigFile    = "ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth.conf"
       # DNN
-      LooseDNNElectronSelector.ConfigFile   = "ElectronPhotonSelectorTools/offline/mc16_20210430/ElectronDNNMulticlassLoose.conf"
-      MediumDNNElectronSelector.ConfigFile  = "ElectronPhotonSelectorTools/offline/mc16_20210430/ElectronDNNMulticlassMedium.conf"
-      TightDNNElectronSelector.ConfigFile   = "ElectronPhotonSelectorTools/offline/mc16_20210430/ElectronDNNMulticlassTight.conf"
+      LooseDNNElectronSelector.ConfigFile   = "ElectronPhotonSelectorTools/offline/mc20_20240628/ElectronDNNMulticlassLoose.conf"
+      MediumDNNElectronSelector.ConfigFile  = "ElectronPhotonSelectorTools/offline/mc20_20240628/ElectronDNNMulticlassMedium.conf"
+      TightDNNElectronSelector.ConfigFile   = "ElectronPhotonSelectorTools/offline/mc20_20240628/ElectronDNNMulticlassTight.conf"
       # cutbased for photons
       TightPhotonSelector.ConfigFile    = "ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMTightSelectorCutDefs.conf"
       MediumPhotonSelector.ConfigFile   = "ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMMediumSelectorCutDefs.conf"
@@ -417,6 +414,8 @@ class TrigEgammaMonAlgBuilder:
       self.elMonAlg.TriggerList=self.electronList
       self.elMonAlg.DetailedHistograms=self.detailedHistograms
       self.elMonAlg.DoEmulation = False
+      self.elMonAlg.ComputeEffLH = self.computeEffLH
+      self.elMonAlg.ComputeEffDNN = self.computeEffDNN
 
       if self.emulator:
         self.elMonAlg.DoEmulation = True

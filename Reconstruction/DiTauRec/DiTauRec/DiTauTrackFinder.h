@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_DITAUTRACKFINDER_H
 #define DITAUREC_DITAUTRACKFINDER_H
 
 #include "DiTauToolBase.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODTracking/Vertex.h"
@@ -58,12 +59,15 @@ class DiTauTrackFinder : public DiTauToolBase {
 
 
  private:
-  float m_MaxDrJet;
-  float m_MaxDrSubjet;
-  int m_MaxNTracksSubjet;
+
+  Gaudi::Property<float> m_MaxDrJet{this, "MaxDrJet", 1.0};
+  Gaudi::Property<float> m_MaxDrSubjet{this, "MaxDrSubjet", 0.2};
+  Gaudi::Property<int> m_MaxNTracksSubjet{this, "MaxNTracksSubjet", -1}; 
+
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackParticleContainerName
     { this, "TrackParticleContainer", "InDetTrackParticles", "" };
-  ToolHandle<Trk::ITrackSelectorTool> m_TrackSelectorTool;
+
+  ToolHandle<Trk::ITrackSelectorTool> m_TrackSelectorTool{this, "TrackSelectorTool", ""};
 
 };
 

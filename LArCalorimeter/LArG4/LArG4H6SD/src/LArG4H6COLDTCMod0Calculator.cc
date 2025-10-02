@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H6COLDTCMod0Calculator.h"
@@ -17,7 +17,6 @@
 #include "G4StepPoint.hh"
 #include "G4Step.hh"
 #include "globals.hh"
-#include "AthenaKernel/Units.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -26,30 +25,10 @@
 #include <cmath>
 #include <limits>
 
-
-namespace Units = Athena::Units;
-
-
 // constructor
 LArG4H6COLDTCMod0Calculator::LArG4H6COLDTCMod0Calculator(const std::string& name, ISvcLocator* pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-  , m_FCalSampling(3)
-  , m_phiModuleStart(90.*Units::deg)
-  , m_phiModuleEnd(180.*Units::deg)
-  , m_fullModuleDepth(3.5*8*Units::cm)
-  , m_fullActiveDepth(0.2*Units::cm)
-  , m_innerActiveRadius(8.6*Units::cm)
-  , m_outerActiveRadius(45.05*Units::cm)
-  , m_areaActive(95.994*Units::cm2)
 {
-  declareProperty("FCalSampling"       , m_FCalSampling);
-  declareProperty("phiModuleStart"     , m_phiModuleStart);
-  declareProperty("phiModuleEnd"       , m_phiModuleEnd);
-  declareProperty("fullModuleDepth"    , m_fullModuleDepth);
-  declareProperty("fullActiveDepth"    , m_fullActiveDepth);
-  declareProperty("innerActiveRadius"  , m_innerActiveRadius);
-  declareProperty("outerActiveRadius"  , m_outerActiveRadius);
-  declareProperty("areaActive"         , m_areaActive);
 }
 
 StatusCode LArG4H6COLDTCMod0Calculator::initialize()
@@ -92,15 +71,6 @@ G4bool LArG4H6COLDTCMod0Calculator::Process(const G4Step* a_step, std::vector<LA
   larhit.time = timeOfFlight/Units::ns - p.mag()/Units::c_light/Units::ns;
 
   // get local coordinates
-  /*
-  G4Navigator* theNavigator =
-    G4TransportationManager::GetTransportationManager()->
-    GetNavigatorForTracking();
-
-  G4ThreeVector theLocalPoint = theNavigator->
-    GetGlobalToLocalTransform().
-    TransformPoint(p);
-    */
   G4ThreeVector theLocalPoint =  pre_step_point->GetTouchable()->GetHistory()->GetTopTransform().TransformPoint(p);
 
   /////////////////////////////////////
@@ -135,8 +105,6 @@ G4bool LArG4H6COLDTCMod0Calculator::Process(const G4Step* a_step, std::vector<LA
   }else if (hitVolume == "Electrode") {
       volnum = pre_step_point->GetTouchable()->GetVolume(1)->GetCopyNo()-1;
   }
-//   std::cout<<"LArCOLDTCMod0Calculator::Process: vol: "<<pre_step_point->GetTouchable()->GetVolume(0)->GetName()<<" local: "<<theLocalPoint<<" gap num: "<<volnum<<std::endl;
-
 
   G4int etaIndex = m_channelMap.getRBin(theLocalPoint);
   G4int phiIndex = m_channelMap.getPhiBin(theLocalPoint);
@@ -145,7 +113,6 @@ G4bool LArG4H6COLDTCMod0Calculator::Process(const G4Step* a_step, std::vector<LA
   } else {
       etaIndex = int(etaIndex/4) + 8;
   }
-//  std::cout<<" etaIndex: "<<etaIndex<<" phiIndex: "<<phiIndex<<std::endl;
   // zSide is negative if z<0.
   G4int zSide = p.z() < 0 ? -2 : 2;
   G4int sampling = m_FCalSampling;
@@ -167,19 +134,14 @@ G4bool LArG4H6COLDTCMod0Calculator::Process(const G4Step* a_step, std::vector<LA
     return false;
   } else {
 
-  // Append the values to the empty identifier.
-//  if(hitVolume == "Active") {
-     larhit.id << 4          // LArCalorimeter  (same for cold TC)
-                  << 3          // LArFCAL         (same for cold TC)
-                  << zSide      // EndCap          (same for cold TC)
-                  << sampling   // FCal Module #   (3 for cold TC)
-                  << etaIndex   //                   (see above)
-                  << phiIndex;  //                   (see above)
-//  } else { // DeadM id.
-//     larhit.id << 10
-//                << ;
-//  }
-     hdata.push_back(larhit);
-     return true;
+    // Append the values to the empty identifier.
+    larhit.id << 4          // LArCalorimeter  (same for cold TC)
+	      << 3          // LArFCAL         (same for cold TC)
+	      << zSide      // EndCap          (same for cold TC)
+	      << sampling   // FCal Module #   (3 for cold TC)
+	      << etaIndex   //                   (see above)
+	      << phiIndex;  //                   (see above)
+    hdata.push_back(larhit);
+    return true;
   }
 }

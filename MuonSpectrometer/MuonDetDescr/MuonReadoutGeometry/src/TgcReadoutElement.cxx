@@ -125,22 +125,28 @@ namespace MuonGM {
         if (!validStrip(gasGap, strip)) THROW_EXCEPT("Invalid gasGap "<<gasGap<<" & strip "<<strip<<" given.");
 #endif
         const auto [flip, pickStrip] = stripNumberToFetch(gasGap, strip);
-        return flip * stripLocalX(pickStrip, z, m_readoutParams->stripCenter(pickStrip)); 
+        return flip * stripLocalX(gasGap, pickStrip, z, m_readoutParams->stripCenter(pickStrip, gasGap)); 
     }
     double TgcReadoutElement::stripLowEdgeLocX(int gasGap, int strip, double z) const {
 #ifndef NDEBUG
         if (!validStrip(gasGap, strip)) THROW_EXCEPT("Invalid gasGap "<<gasGap<<" & wire strip "<<strip<<" given.");
 #endif
-        const auto [flip, pickStrip] = stripNumberToFetch(gasGap, strip-1);
-        return flip * stripLocalX(pickStrip, z, 0.5*(stripPosOnLargeBase(pickStrip) + stripPosOnShortBase(pickStrip)));
+        const auto [flip, pickStrip] = stripNumberToFetch(gasGap, strip);
+        ATH_MSG_VERBOSE(__func__<<"() "<<idHelperSvc()->toStringDetEl(identify())
+                      <<", gasGap: "<<gasGap<<", strip: "<<strip<<", pickStrip: "<<pickStrip);
+        return flip * stripLocalX(gasGap,  pickStrip, z, 0.5*(stripPosOnLargeBase(pickStrip, gasGap) + stripPosOnShortBase(pickStrip, gasGap)));
     }
 
     double TgcReadoutElement::stripHighEdgeLocX(int gasGap, int strip, double z) const {
 #ifndef NDEBUG
         if (!validStrip(gasGap, strip)) THROW_EXCEPT("Invalid gasGap "<<gasGap<<" & strip "<<strip<<" given.");
 #endif
-        const auto [flip, pickStrip] = stripNumberToFetch(gasGap, strip+1);
-        return flip * stripLocalX(pickStrip, z, 0.5*(stripPosOnLargeBase(pickStrip) + stripPosOnShortBase(pickStrip)));
+        const int nextStrip = strip +1;
+        auto [flip, pickStrip] = stripNumberToFetch(gasGap, nextStrip);
+        pickStrip += (nextStrip != pickStrip);
+        ATH_MSG_VERBOSE(__func__<<"() "<<idHelperSvc()->toStringDetEl(identify())
+                      <<", gasGap: "<<gasGap<<", strip: "<<strip<<", pickStrip: "<<pickStrip);
+        return flip * stripLocalX(gasGap, pickStrip, z, 0.5*(stripPosOnLargeBase(pickStrip, gasGap) + stripPosOnShortBase(pickStrip, gasGap)));
     }
 
     double TgcReadoutElement::stripWidth(int gasGap, int strip) const {
@@ -152,10 +158,10 @@ namespace MuonGM {
 #ifndef NDEBUG
         if (!validStrip(gasGap, strip)) THROW_EXCEPT("Invalid gasGap "<<gasGap<<" & strip "<<strip<<" given.");
 #endif
-        if ((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1)) {
-            return stripPosOnShortBase(strip + 1) - stripPosOnShortBase(strip);
+        if ((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1) || m_readoutParams->nStripLayers() > 1) {
+            return stripPosOnShortBase(strip + 1, gasGap) - stripPosOnShortBase(strip, gasGap);
         } else {
-            return -(stripPosOnShortBase(33 - strip) - stripPosOnShortBase(33 - (strip - 1)));
+            return -(stripPosOnShortBase(33 - strip, gasGap) - stripPosOnShortBase(33 - (strip - 1), gasGap));
         }
     }
 
@@ -165,10 +171,10 @@ namespace MuonGM {
         if (!validStrip(gasGap, strip)) THROW_EXCEPT("Invalid gasGap "<<gasGap<<" & strip "<<strip<<" given.");
 #endif
 
-        if ((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1)) {
-            return stripPosOnLargeBase(strip + 1) - stripPosOnLargeBase(strip);
+        if ((getStationEta() > 0 && gasGap == 1) || (getStationEta() < 0 && gasGap != 1) || m_readoutParams->nStripLayers() > 1) {
+            return stripPosOnLargeBase(strip + 1, gasGap) - stripPosOnLargeBase(strip, gasGap);
         } else {
-            return -(stripPosOnLargeBase(33 - strip) - stripPosOnLargeBase(33 - (strip - 1)));
+            return -(stripPosOnLargeBase(33 - strip, gasGap) - stripPosOnLargeBase(33 - (strip - 1), gasGap));
         }
     }
 

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <dqm_algorithms/EfficiencyRefComp.h>
@@ -111,7 +111,7 @@ dqm_core::Result* dqm_algorithms::EfficiencyRefComp::execute(const std::string& 
   }
 
   result->tags_["NBins"] = count;
-  result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);
+  result->object_ =  boost::shared_ptr<TObject>(resulthisto);
 
   double rthreshold = dqm_algorithms::tools::GetFromMap( "NBins", config.getRedThresholds() );
   double gthreshold = dqm_algorithms::tools::GetFromMap( "NBins", config.getGreenThresholds() );

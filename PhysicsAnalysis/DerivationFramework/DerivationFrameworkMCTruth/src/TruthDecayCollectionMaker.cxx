@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 
 #include "DerivationFrameworkMCTruth/TruthDecayCollectionMaker.h"
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "AthContainers/ConstAccessor.h"
@@ -29,9 +30,8 @@
 DerivationFramework::TruthDecayCollectionMaker::TruthDecayCollectionMaker(const std::string& t,
                                                                           const std::string& n,
                                                                           const IInterface* p)
-  : AthAlgTool(t,n,p)
+  : base_class(t,n,p)
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 }
 
 // Destructor
@@ -47,15 +47,15 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
     ATH_CHECK( m_particlesKey.initialize() );
     ATH_MSG_INFO("Using " << m_particlesKey.key() << " as the input truth container key");
 
+    // Accessors (ReadDecorHandleKeys) TODO Convert these to SG::ConstAccessor?
+    ATH_CHECK(m_originAccessorKey.initialize());
+    ATH_CHECK(m_typeAccessorKey.initialize());
+    ATH_CHECK(m_outcomeAccessorKey.initialize());
+    ATH_CHECK(m_classificationAccessorKey.initialize());
+
     // Output particle/vertex containers
-    if (m_collectionName.empty()) {
-        ATH_MSG_FATAL("No base name provided for the new truth particle/vertex containers");
-        return StatusCode::FAILURE;
-    } else {ATH_MSG_INFO("Base name for new truth particle/vertex containers: " << m_collectionName );}
-    m_outputParticlesKey = m_collectionName + "Particles";
     ATH_CHECK(m_outputParticlesKey.initialize());
     ATH_MSG_INFO("New truth particles container key: " << m_outputParticlesKey.key() );
-    m_outputVerticesKey = m_collectionName + "Vertices"; 
     ATH_CHECK(m_outputVerticesKey.initialize());
     ATH_MSG_INFO("New truth vertices container key: " << m_outputVerticesKey.key() );
 
@@ -64,18 +64,12 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
         return StatusCode::FAILURE;
     }
 
-    // Decorators
-    m_originDecoratorKey = m_outputParticlesKey.key()+".classifierParticleOrigin";
+    // Decorators TODO Convert these to SG::Accessor?
     ATH_CHECK(m_originDecoratorKey.initialize());
-    m_typeDecoratorKey = m_outputParticlesKey.key()+".classifierParticleType";
     ATH_CHECK(m_typeDecoratorKey.initialize());
-    m_outcomeDecoratorKey = m_outputParticlesKey.key()+".classifierParticleOutCome";
     ATH_CHECK(m_outcomeDecoratorKey.initialize());
-    m_classificationDecoratorKey = m_outputParticlesKey.key()+".Classification";
     ATH_CHECK(m_classificationDecoratorKey.initialize());
-    m_motherIDDecoratorKey = m_outputParticlesKey.key()+".motherID";
     ATH_CHECK(m_motherIDDecoratorKey.initialize());
-    m_daughterIDDecoratorKey = m_outputParticlesKey.key()+".daughterID";
     ATH_CHECK(m_daughterIDDecoratorKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -87,7 +81,7 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
 {
     // Event context for AthenaMT
     const EventContext& ctx = Gaudi::Hive::currentContext();
-     
+
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
     if (!truthParticles.isValid()) {
@@ -121,9 +115,9 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
 }
 
 int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const EventContext& ctx,
-                                                                      const xAOD::TruthParticle& old_part, 
-                                                                      xAOD::TruthParticleContainer* part_cont, 
-                                                                      xAOD::TruthVertexContainer* vert_cont, 
+                                                                      const xAOD::TruthParticle& old_part,
+                                                                      xAOD::TruthParticleContainer* part_cont,
+                                                                      xAOD::TruthVertexContainer* vert_cont,
                                                                       std::vector<int>& seen_particles,
                                                                       const int generations) const {
     // See if we've seen it - note, could also do this with a unary function on the container itself
@@ -137,7 +131,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     // Now we have seen it
     seen_particles.push_back(HepMC::uniqueID(&old_part));
     // Set up decorators
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);  
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
@@ -148,7 +142,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     part_cont->push_back( xTruthParticle );
     // Fill with numerical content
     xTruthParticle->setPdgId(old_part.pdgId());
-    xTruthParticle->setBarcode(HepMC::barcode(&old_part)); // FIXME barcode-based
+    xTruthParticle->setUid(HepMC::uniqueID(&old_part));
     xTruthParticle->setStatus(old_part.status());
     xTruthParticle->setM(old_part.m());
     xTruthParticle->setPx(old_part.px());
@@ -171,24 +165,24 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
         (*vert_cont)[vert_index]->addIncomingParticleLink( eltp );
     }
     // Copy over the decorations if they are available
-    static const SG::ConstAccessor<unsigned int> classifierParticleTypeAcc("classifierParticleType");
-    static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
-    static const SG::ConstAccessor<unsigned int> classifierParticleOutComeAcc("classifierParticleOutCome");
-    static const SG::ConstAccessor<unsigned int> ClassificationAcc("Classification");
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classifierParticleTypeAcc(m_typeAccessorKey, ctx);
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classifierParticleOriginAcc(m_originAccessorKey, ctx);
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classifierParticleOutcomeAcc(m_outcomeAccessorKey, ctx);
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > ClassificationAcc(m_classificationAccessorKey, ctx);
 
     typeDecorator(*xTruthParticle) = classifierParticleTypeAcc.withDefault (old_part, 0);
     originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault (old_part, 0);
-    outcomeDecorator(*xTruthParticle) = classifierParticleOutComeAcc.withDefault (old_part, 0);
+    outcomeDecorator(*xTruthParticle) = classifierParticleOutcomeAcc.withDefault (old_part, 0);
     classificationDecorator(*xTruthParticle) = ClassificationAcc.withDefault (old_part, 0);
 
     // Return a link to this particle
     return my_index;
 }
 
-int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventContext& ctx, 
-                                                                    const xAOD::TruthVertex& old_vert, 
-                                                                    xAOD::TruthParticleContainer* part_cont, 
-                                                                    xAOD::TruthVertexContainer* vert_cont, 
+int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventContext& ctx,
+                                                                    const xAOD::TruthVertex& old_vert,
+                                                                    xAOD::TruthParticleContainer* part_cont,
+                                                                    xAOD::TruthVertexContainer* vert_cont,
                                                                     std::vector<int>& seen_particles,
                                                                     const int generations) const {
     // Make a new vertex and add it to the container
@@ -198,8 +192,8 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventC
     int my_index = vert_cont->size()-1;
     ElementLink<xAOD::TruthVertexContainer> eltv(*vert_cont, my_index);
     // Set properties
-    xTruthVertex->setId(HepMC::status(old_vert));
-    xTruthVertex->setBarcode(HepMC::barcode(&old_vert)); // FIXME barcode-based
+    xTruthVertex->setStatus(HepMC::status(old_vert));
+    xTruthVertex->setUid(HepMC::uniqueID(old_vert));
     xTruthVertex->setX(old_vert.x());
     xTruthVertex->setY(old_vert.y());
     xTruthVertex->setZ(old_vert.z());

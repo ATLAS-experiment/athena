@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRecValidationNtuples/MuonInsideOutAnalysis.h"
@@ -15,6 +15,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 
 namespace Muon {
+  using namespace MuonStationIndex;
 
   MuonInsideOutAnalysis::MuonInsideOutAnalysis( TDirectory* dir ) {
     m_plots.book(dir,"");

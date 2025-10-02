@@ -94,47 +94,46 @@ Trk::PrismVolumeBounds::operator=(const Trk::PrismVolumeBounds& trabo)
   return *this;
 }
 
-const std::vector<const Trk::Surface*>*
+std::vector<std::unique_ptr<Trk::Surface>>
   Trk::PrismVolumeBounds::decomposeToSurfaces
-  (const Amg::Transform3D& transform) 
+  (const Amg::Transform3D& transform)
 {
-  std::vector<const Trk::Surface*>* retsf =
-    new std::vector<const Trk::Surface*>;
+  auto retsf = std::vector<std::unique_ptr<Trk::Surface>>();
 
   // face surfaces xy
   //  (1) - at positive local z
-  Trk::PlaneSurface* xyPlane = new Trk::PlaneSurface(
+  auto xyPlane = std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform * Amg::Translation3D(Amg::Vector3D(0., 0., m_halfZ))),
-    new Trk::TriangleBounds(m_xyVtx));
-  retsf->push_back(xyPlane);
+      std::make_shared<Trk::TriangleBounds>(m_xyVtx));
+  retsf.push_back(std::move(xyPlane));
   //  (2) - at negative local z
-  Trk::PlaneSurface* xymPlane = new Trk::PlaneSurface(
+  auto xymPlane = std::make_unique<Trk::PlaneSurface>(
     Amg::Transform3D(
       transform * Amg::Translation3D(Amg::Vector3D(0., 0., -m_halfZ)) *
       Amg::AngleAxis3D(180 * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.))),
-    new Trk::TriangleBounds(mirror_xyVtx()));
-  retsf->push_back(xymPlane);
+      std::make_shared<Trk::TriangleBounds>(mirror_xyVtx()));
+  retsf.push_back(std::move(xymPlane));
   // loop over xy vertices
   //  (3)
   for (unsigned int iv = 0; iv < m_xyVtx.size(); iv++) {
     if (iv != m_xyVtx.size() - 1)
-      retsf->push_back(sideSurf(transform, iv, iv + 1));
+      retsf.push_back(sideSurf(transform, iv, iv + 1));
     else
-      retsf->push_back(sideSurf(transform, iv, 0));
+      retsf.push_back(sideSurf(transform, iv, 0));
   }
 
   return retsf;
 }
 
 // faces in xy
-Trk::PlaneSurface*
+std::unique_ptr<Trk::PlaneSurface>
 Trk::PrismVolumeBounds::sideSurf(
   const Amg::Transform3D& transform,
   unsigned int iv1,
   unsigned int iv2) const
 {
-  Trk::PlaneSurface* plane = nullptr;
+  std::unique_ptr<Trk::PlaneSurface> plane = nullptr;
 
   double xdif = m_xyVtx[iv2].first - m_xyVtx[iv1].first;
   double ydif = m_xyVtx[iv2].second - m_xyVtx[iv1].second;
@@ -159,8 +158,7 @@ Trk::PrismVolumeBounds::sideSurf(
     transform * Amg::Translation3D(pos) *
     Amg::AngleAxis3D(phi, Amg::Vector3D(0., 0., 1.)) *
     Amg::AngleAxis3D(-ori * 90 * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.)));
-  plane =
-    new Trk::PlaneSurface(tr, new Trk::RectangleBounds(0.5 * xsize, m_halfZ));
+    plane = std::make_unique<Trk::PlaneSurface>(tr, std::make_shared<Trk::RectangleBounds>(0.5 * xsize, m_halfZ));
 
   // verify position of vertices - uncomment for debugging
   // if
@@ -182,14 +180,13 @@ Trk::PrismVolumeBounds::sideSurf(
 
   // protect against wrong orientation
   if (d.dot(plane->normal()) > 0.) {
-    delete plane;
     tr = Amg::Transform3D(
       transform * Amg::Translation3D(pos) *
       Amg::AngleAxis3D(phi + M_PI, Amg::Vector3D(0., 0., 1.)) *
       Amg::AngleAxis3D(
         -ori * 90 * Gaudi::Units::deg, Amg::Vector3D(1., 0., 0.)));
     plane =
-      new Trk::PlaneSurface(tr, new Trk::RectangleBounds(0.5 * xsize, m_halfZ));
+      std::make_unique<Trk::PlaneSurface>(tr, std::make_shared<Trk::RectangleBounds>(0.5 * xsize, m_halfZ));
   }
 
   return plane;

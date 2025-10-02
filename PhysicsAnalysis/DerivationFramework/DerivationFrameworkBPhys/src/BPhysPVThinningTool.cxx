@@ -9,7 +9,7 @@
 // This is a trivial example of an implementation of a thinning tool
 // which removes all ID tracks which do not pass a user-defined cut
 
-#include "DerivationFrameworkBPhys/BPhysPVThinningTool.h"
+#include "BPhysPVThinningTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "StoreGate/ThinningHandle.h"
@@ -26,13 +26,12 @@ using namespace xAOD;
 DerivationFramework::BPhysPVThinningTool::BPhysPVThinningTool(const std::string& t,
         const std::string& n,
         const IInterface* p ) :
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_TrackContainerName("InDetTrackParticles"),
     m_PVContainerName("PrimaryVertices"),
     m_ntot(0),
     m_npass(0), m_tracks_kept(0), m_keepTracks(false)
 {
-    declareInterface<DerivationFramework::IThinningTool>(this);
     declareProperty("CandidateCollections" , m_BPhyCandList);
     declareProperty("KeepPVTracks", m_keepTracks);
     declareProperty("TrackParticleContainerName", m_TrackContainerName);

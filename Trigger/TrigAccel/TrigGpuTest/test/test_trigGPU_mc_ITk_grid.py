@@ -4,6 +4,8 @@
 # art-description: Trigger AthenaMT test running new-style job options
 # art-type: grid
 # art-include: main/Athena
+# art-input: group.trig-hlt.mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
 # If you create a grid version, check art-output in existing grid tests.
@@ -15,7 +17,8 @@
 # art-output: *.log.tar.gz
 # art-output: *.new
 # art-output: *.json
-# art-output: *.root
+# art-output: expert-monitoring.root
+# art-output: rootcomp.root
 # art-output: *.pmon.gz
 # art-output: *perfmon*
 # art-output: prmon*
@@ -33,7 +36,6 @@ run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             'Trigger.enableL1CaloPhase1=False',
              'Trigger.InDetTracking.doGPU=True',
              'Trigger.enabledSignatures=[\\\"Muon\\\"]']
 

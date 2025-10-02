@@ -29,7 +29,6 @@ DerivationFramework::JetCaloClusterThinning::JetCaloClusterThinning(
   , m_npassTopo(0)
   , m_selectionString("")
 {
-  declareInterface<DerivationFramework::IThinningTool>(this);
   declareProperty("SelectionString", m_selectionString);
 }
 

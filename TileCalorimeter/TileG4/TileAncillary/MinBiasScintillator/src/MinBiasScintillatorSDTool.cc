@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -15,17 +15,20 @@
 MinBiasScintillatorSDTool::MinBiasScintillatorSDTool(const std::string& type, const std::string& name, const IInterface *parent)
   : SensitiveDetectorBase( type , name , parent )
 {
-  declareProperty( "DeltaTHit" , m_options.deltaTHit );
-  declareProperty( "TimeCut" , m_options.timeCut );
-  declareProperty( "TileTB" , m_options.tileTB );
-  declareProperty( "DoBirk" , m_options.doBirk );
-  declareProperty( "Birk1", m_options.birk1 );
-  declareProperty( "Birk2", m_options.birk2 );
-  declareProperty( "DoTOFCorrection" , m_options.doTOFCorrection );
-
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+StatusCode MinBiasScintillatorSDTool::initialize()
+{
+  m_options.deltaTHit = m_deltaTHit.value();
+  m_options.timeCut = m_timeCut.value();
+  m_options.tileTB = m_tileTB.value();
+  m_options.doBirk = m_doBirk.value();
+  m_options.birk1 = m_birk1.value();
+  m_options.birk2 = m_birk2.value();
+  m_options.doTOFCorrection = m_doTOFCorrection.value();
+
+  return StatusCode::SUCCESS;
+}
 
 G4VSensitiveDetector* MinBiasScintillatorSDTool::makeSD() const
 {
@@ -33,8 +36,6 @@ G4VSensitiveDetector* MinBiasScintillatorSDTool::makeSD() const
 
   return new MinBiasScintillatorSD(name(), m_outputCollectionNames[0], m_options);
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 StatusCode MinBiasScintillatorSDTool::Gather()
 {

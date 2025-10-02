@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -27,7 +27,7 @@
 #endif
 
 //____________________________________________________________________
-bool VP1Floor::calcParsFromExtentAndSpacing( VP1HelperClassBase*helper,const double& extent, const double& spacing, const int& nmaxlimit, int& nmax, double& distmax )
+bool VP1Floor::calcParsFromExtentAndSpacing( const VP1HelperClassBase*helper,const double& extent, const double& spacing, const int& nmaxlimit, int& nmax, double& distmax )
 {
   if (extent<0.0||spacing<=0.0)
     return false;

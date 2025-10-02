@@ -233,7 +233,7 @@ StatusCode AthenaRootSharedWriterSvc::share(int numClients, bool motherClient) {
          if (socket != nullptr && socket != (TSocket*)-1) {
             ATH_MSG_DEBUG("ROOT Monitor got: " << socket);
             if (socket->IsA() == TServerSocket::Class()) {
-               TSocket* client = ((TServerSocket*)socket)->Accept();
+               TSocket* client = (static_cast<TServerSocket*>(socket))->Accept();
                client->Send(m_rootClientIndex, 0);
                client->Send(1, 1);
                ++m_rootClientIndex;

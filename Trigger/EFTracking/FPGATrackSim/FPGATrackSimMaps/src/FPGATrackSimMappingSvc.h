@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TRIGFPGATrackSimMAPPINGSVC_H
 #define TRIGFPGATrackSimMAPPINGSVC_H
@@ -33,28 +33,35 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         virtual const FPGATrackSimRegionMap* SubRegionMap()         const override { return m_subrmap.get();  }
         virtual const FPGATrackSimRegionMap* SubRegionMap_2nd()     const override { return m_subrmap_2nd.get(); }
         virtual std::string getFakeNNMapString() const override;
+        virtual std::string getFakeNNMap2ndString() const override;
         virtual std::string getExtensionNNHitMapString() const override;
         virtual std::string getExtensionNNVolMapString() const override;
         virtual std::string getParamNNMapString() const override;
+        virtual std::string getParamNNMap2ndString() const override;
+        virtual std::string getGNNModuleMapString() const override;
 
     private:
 
-        // Handles
-        ServiceHandle<IFPGATrackSimEventSelectionSvc>  m_EvtSel;
-
         // Configuration
-
+        Gaudi::Property<unsigned int> m_regionID { this, "regionID", 0, "current region under processing"};  // Current region of interest
         Gaudi::Property<std::string> m_mappingType {this, "mappingType", "FILE", "for now should be FILE only, DB for the future"};
         Gaudi::Property<std::string> m_rmap_path {this, "rmap", "", "path of the region-map file"};
         Gaudi::Property<std::string> m_subrmap_path {this, "subrmap", "", "path of the region-map file for subregions"};
         Gaudi::Property<std::string> m_pmap_path {this, "pmap", "", "path of the PMAP file"};
         Gaudi::Property<std::string> m_modulelut_path {this, "modulemap", "", "path of the ModuleLUT file"};
-        Gaudi::Property<std::string> m_NNmap_path_fake {this, "FakeNNonnx", "", "path of the NN weighting file"};
+        Gaudi::Property<std::string> m_NNmap_path_fake {this, "FakeNNonnx1st", "", "path of the NN weighting file for 1st stage"};
+        Gaudi::Property<std::string> m_NNmap2nd_path_fake {this, "FakeNNonnx2nd", "", "path of the NN weighting file for 2nd stage"};
         Gaudi::Property<std::string> m_NNmap_path_extension_vol {this, "ExtensionNNVolonnx", "", "path of the NN weighting file"};
         Gaudi::Property<std::string> m_NNmap_path_extension_hit {this, "ExtensionNNHitonnx", "", "path of the NN weighting file"};
-        Gaudi::Property<std::string> m_NNmap_path_param {this, "ParamNNonnx", "", "path of the NN weighting file"};
+        Gaudi::Property<std::string> m_NNmap_path_param {this, "ParamNNonnx1st", "", "path of the NN weighting file for 1st stage"};
+        Gaudi::Property<std::string> m_NNmap2nd_path_param {this, "ParamNNonnx2nd", "", "path of the NN weighting file for 2nd stage"};
+        Gaudi::Property<std::string> m_GNNmap_path_moduleMap {this, "GNNModuleMap", "", "path of the GNN Module Map file"};
         Gaudi::Property<std::string> m_radii_path {this, "radiiFile", "", "path of the average radius file" };
+        Gaudi::Property<std::string> m_radii2nd_path {this, "radiiFile2nd", "", "path of the average radius file for 2nd stage" };
         Gaudi::Property<std::vector <int> > m_layerOverrides {this, "layerOverride", {}, "Overrides the selection of the 1st stage logical layers in the plane map. Each entry declares a detector layer to use as a logical layer. Specify a detector layer with { SiliconTech * 1000 + DetectorZone * 100 + PhysicalLayer }"};
+        Gaudi::Property<bool> m_loadRadii {this, "loadRadii", true, "Whether or not to attempt to read in the idealized radii files" };
+        Gaudi::Property<bool> m_loadRegionMap {this, "loadRegionMap", true, "Whether or not to attempt to loda the region maps; if false, isInRegion will always return true" };
+        Gaudi::Property<bool> m_doGNNTrack {this, "DoGNNTrack", false, "flag to do NN tracking models for GNN tracking" };
 
             // Map unique pointers
         //vector of pmaps
@@ -68,8 +75,12 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap_2nd = nullptr;
         std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_fake = nullptr;
         std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_param = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap2nd_fake = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_NNmap2nd_param = nullptr;
         std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_extension_vol = nullptr;
         std::unique_ptr<FPGATrackSimNNMap>     m_NNmap_extension_hit = nullptr;
+        std::unique_ptr<FPGATrackSimNNMap>     m_GNNmap_moduleMap = nullptr;
+
 
         size_t m_numberOfPmaps = 0;
         // Helpers

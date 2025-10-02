@@ -6,6 +6,10 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetMeasurementUtilities/Helpers.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "ActsEvent/TrackContainer.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk {
   
@@ -21,32 +25,16 @@ namespace ActsTrk {
     ATH_CHECK(m_clustercontainer_key.initialize());
     ATH_CHECK(m_associationMap_key.initialize(m_useTruthInfo));
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
+
+    // Tracks only needed if we want on track clusters only
+    ATH_CHECK(m_trackParticlesKey.initialize(m_keepOnlyOnTrackMeasurements));
     
     // Write keys
     ATH_CHECK(m_write_xaod_key.initialize());
 
     // Decorators
-    m_measurement_truth_indices = m_write_xaod_key.key() + "." + m_measurement_truth_indices.key();
-    m_measurement_truth_barcodes = m_write_xaod_key.key() + "." + m_measurement_truth_barcodes.key();
+    ATH_CHECK(m_trackMeasurement_link.initialize());
 
-    m_measurement_detectorElementID = m_write_xaod_key.key() + "." + m_measurement_detectorElementID.key();
-    m_measurement_waferID = m_write_xaod_key.key() + "." + m_measurement_waferID.key();
-    m_measurement_bec = m_write_xaod_key.key() + "." + m_measurement_bec.key();
-    m_measurement_layer = m_write_xaod_key.key() + "." + m_measurement_layer.key();
-    m_measurement_sizePhi = m_write_xaod_key.key() + "." + m_measurement_sizePhi.key();
-    m_measurement_sizeZ = m_write_xaod_key.key() + "." + m_measurement_sizeZ.key();
-    m_measurement_SiWidth = m_write_xaod_key.key() + "." + m_measurement_SiWidth.key();
-    m_measurement_eta_module = m_write_xaod_key.key() + "." + m_measurement_eta_module.key();
-    m_measurement_phi_module = m_write_xaod_key.key() + "." + m_measurement_phi_module.key();
-    m_measurement_omegax = m_write_xaod_key.key() + "." + m_measurement_omegax.key();
-    m_measurement_omegay = m_write_xaod_key.key() + "." + m_measurement_omegay.key();
-    m_measurement_LorentzShift = m_write_xaod_key.key() + "." + m_measurement_LorentzShift.key();
-    m_measurement_centroid_xphi = m_write_xaod_key.key() + "." + m_measurement_centroid_xphi.key();
-    m_measurement_centroid_xeta = m_write_xaod_key.key() + "." + m_measurement_centroid_xeta.key();
-    m_measurement_side = m_write_xaod_key.key() + "." + m_measurement_side.key();
-
-    m_measurement_tots = m_write_xaod_key.key() + "." + m_measurement_tots.key();
-    
     ATH_CHECK(m_measurement_truth_indices.initialize(m_useTruthInfo));
     ATH_CHECK(m_measurement_truth_barcodes.initialize(m_useTruthInfo));
 
@@ -100,6 +88,9 @@ namespace ActsTrk {
                         std::make_unique<xAOD::TrackMeasurementValidationAuxContainer>()));
 
   // Decorations
+  SG::WriteDecorHandle<xAOD::PixelClusterContainer,
+		       ElementLink< xAOD::TrackMeasurementValidationContainer > > decorator_measurement_link( m_trackMeasurement_link, ctx );  
+    
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::uint64_t> decor_detectorElementID ( m_measurement_detectorElementID, ctx );
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, int> decor_waferID ( m_measurement_waferID, ctx );
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, int> decor_bec ( m_measurement_bec, ctx );
@@ -119,18 +110,22 @@ namespace ActsTrk {
   SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<int>> decor_tots ( m_measurement_tots, ctx );
   
   // Create output collection
+  std::vector<bool> keepClusterCollection {};
+  ATH_CHECK( labelMeasurementToKeep(ctx, *clusters, keepClusterCollection) );
   xAOD::TrackMeasurementValidationContainer *measurements = xaod.ptr();
-  std::vector<xAOD::TrackMeasurementValidation*> toAdd(clusters->size(), nullptr);
-  for (std::size_t i(0); i<toAdd.size(); ++i) {
-    toAdd[i] = new xAOD::TrackMeasurementValidation();
-  }
-  measurements->insert(measurements->end(), toAdd.begin(), toAdd.end());
-
   
   // loop over collection and convert to xAOD::TrackMeasurementValidation
   for (std::size_t i(0); i<clusters->size(); ++i) {
+    if (not keepClusterCollection[i]) continue;    
     const xAOD::PixelCluster* cluster = clusters->at(i);
-    xAOD::TrackMeasurementValidation* measurement = measurements->at(i);
+    
+    measurements->push_back( new xAOD::TrackMeasurementValidation() );
+    xAOD::TrackMeasurementValidation* measurement = measurements->back();    
+    ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( measurements,
+								    measurements->back()->index() );
+
+    ATH_CHECK( mlink.isValid() );    
+    decorator_measurement_link(*cluster) = std::move(mlink);
     
     xAOD::DetectorIdentType clusterId = cluster->identifier();
     xAOD::DetectorIDHashType hashId = cluster->identifierHash();
@@ -186,6 +181,9 @@ namespace ActsTrk {
     auto localCov = cluster->localCovariance<2>();
     measurement->setLocalPositionError( localCov(0,0), localCov(1,1), localCov(0,1) );
 
+    const auto& [omegax, omegay] = TrackingUtilities::computeOmegas(*cluster,
+								    *m_PixelHelper);
+    
     const Identifier waferId = m_PixelHelper->wafer_id(hashId);
     decor_detectorElementID(*measurement) = hashId;
     decor_waferID(*measurement) = waferId.get_compact();
@@ -196,8 +194,8 @@ namespace ActsTrk {
     decor_SiWidth(*measurement) = cluster->channelsInPhi();
     decor_eta_module(*measurement) = m_PixelHelper->eta_module(waferId);
     decor_phi_module(*measurement) = m_PixelHelper->phi_module(waferId);
-    decor_omegax(*measurement) = cluster->omegaX();
-    decor_omegay(*measurement) = cluster->omegaY();
+    decor_omegax(*measurement) = omegax;
+    decor_omegay(*measurement) = omegay;
     decor_LorentzShift(*measurement) = static_cast<float>( m_lorentzAngleTool->getLorentzShift(cluster->identifierHash(), ctx) );
     decor_centroid_xphi(*measurement) = centroid.xPhi();
     decor_centroid_xeta(*measurement) = centroid.xEta();
@@ -210,11 +208,20 @@ namespace ActsTrk {
   if (m_useTruthInfo) {
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<unsigned int>> decor_truth_indices( m_measurement_truth_indices, ctx );
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, std::vector<unsigned int>> decor_truth_barcode( m_measurement_truth_barcodes, ctx );
-  
-    for (std::size_t i(0); i<clusters->size(); ++i) {
-      const xAOD::PixelCluster* cluster = clusters->at(i);
-      xAOD::TrackMeasurementValidation* measurement = measurements->at(i);
 
+    // reset measurement counter
+    std::size_t measurementIndex = 0;
+    for (std::size_t i(0); i<clusters->size(); ++i) {
+      if (not keepClusterCollection[i]) continue;
+      const xAOD::PixelCluster* cluster = clusters->at(i);
+      xAOD::TrackMeasurementValidation* measurement = measurements->at(measurementIndex);
+
+      // check the two match
+      if (cluster->identifier() != measurement->identifier()) {
+	ATH_MSG_ERROR("Cluster and Measurement are not matching!");
+	return StatusCode::FAILURE;
+      }
+      
       // Use the MultiTruth Collection 
       // to get a list of all true particle contributing to the cluster      
       if (cluster->index() >= measToTruth->size()) {
@@ -228,13 +235,13 @@ namespace ActsTrk {
       std::vector<unsigned int> tp_barcodes;
       for (const auto& tp : tps) {
         tp_indices.push_back(tp->index());
-        tp_barcodes.push_back(HepMC::barcode(tp));
+        tp_barcodes.push_back(HepMC::uniqueID(tp));
       }
       
       // decorate
       decor_truth_indices(*measurement) = std::move(tp_indices);
       decor_truth_barcode(*measurement) = std::move(tp_barcodes);
-      
+      ++measurementIndex;      
     } // loop on clusters/measurements
   } // if do truth
 
@@ -242,6 +249,61 @@ namespace ActsTrk {
   return StatusCode::SUCCESS;
 }
 
+StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventContext& ctx,
+								 const xAOD::PixelClusterContainer& clusters,
+								 std::vector<bool>& labels) const
+{
+  labels.clear();
+  if (not m_keepOnlyOnTrackMeasurements) {
+    labels.resize(clusters.size(), true);
+    return StatusCode::SUCCESS;
+  }
+  labels.resize(clusters.size(), false);
+
+  static const SG::ConstAccessor< ElementLink<ActsTrk::TrackContainer> > decorator_trackLink("actsTrack");
+  
+  // get the tracks
+  for (const SG::ReadHandleKey<xAOD::TrackParticleContainer>& trackParticleKey : m_trackParticlesKey) {
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleHandle = SG::makeHandle( trackParticleKey, ctx );
+    ATH_CHECK(trackParticleHandle.isValid());
+    const xAOD::TrackParticleContainer* trackParticles = trackParticleHandle.cptr();
+    
+    for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
+      // Get the ACTS track object
+      ATH_CHECK( decorator_trackLink.isAvailable(*trackParticle) );
+      ElementLink<ActsTrk::TrackContainer> trackLink = decorator_trackLink(*trackParticle);
+      ATH_CHECK(trackLink.isValid());
+      
+      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *trackLink;
+      if ( not optional_track.has_value() ) {
+	ATH_MSG_ERROR("Invalid track link for particle  " << trackParticle->index());
+	return StatusCode::FAILURE;
+      }
+      ActsTrk::TrackContainer::ConstTrackProxy track = optional_track.value();
+      
+      // loop on track states
+      track.container().trackStateContainer()
+	.visitBackwards(track.tipIndex(),
+			[&labels]
+			(const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state)
+			{
+			  auto flags = state.typeFlags();
+			  if (not flags.test(Acts::TrackStateFlag::MeasurementFlag) and
+			      not flags.test(Acts::TrackStateFlag::OutlierFlag)) return;
+			  
+			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+			  if (sl == nullptr) return;
+			  
+			  const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);    
+			  if (cluster.type() != xAOD::UncalibMeasType::PixelClusterType) return;
+			  labels.at(cluster.index()) = true;
+			});
+    } // loop on tracks
+  } // loop on read handle keys
+  
+  return StatusCode::SUCCESS;
+}
+  
 }
 
 

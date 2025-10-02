@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL include files
@@ -238,6 +238,8 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         data.b_PadL1A_bcid_rel.push_back(link->getBcidRels());
         data.b_PadL1A_bcid_status.push_back(link->getBcidStatuses());
         data.b_PadL1A_bcid_multzero.push_back(link->getBcidMultZeros());
+        data.b_PadL1A_CRC.push_back(link->getCRC());
+        data.b_PadL1A_CRC_ok.push_back(link->isCRCValid());
       }
     }
     if (robType == "MML1A") {
@@ -852,7 +854,7 @@ int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics)
         break;
       }
 
-      eformat::read::FullEventFragment p((unsigned int*)(buf));
+      eformat::read::FullEventFragment p(reinterpret_cast<unsigned int*>(buf));
 
       data = outBranches();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONDIGITIZATIONR4_MUONDIGITIZER_H
@@ -11,8 +11,7 @@
 class MuonDigitizer : public AthAlgorithm {
 public:
     /** Constructor with parameters */
-    MuonDigitizer(const std::string& name, ISvcLocator* pSvcLocator);
-
+    using AthAlgorithm::AthAlgorithm;
     /** Destructor */
     virtual ~MuonDigitizer() = default;
 

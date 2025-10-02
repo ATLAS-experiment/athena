@@ -46,6 +46,9 @@ class LArHVCorrToSCHVCorr
 
   StringProperty m_weightsName{this, "PhysicsWeights", "TrigT1CaloCalibUtils/HVcorrPhysicsWeights.txt", "File with layer weights"};
 
+  BooleanProperty m_isHI{this, "IsHeavyIons", false, "are we computing for HI ?"};
+  FloatProperty m_patchHI{this, "PatchInHeavyIons", 1.2, " value to patch "};
+
   ToolHandle<ICaloSuperCellIDTool> m_scidTool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool"};
 
   float getWeight(const LArHEC_ID *hecID, const Identifier &id, std::map<int,std::vector<float> > &wmap);

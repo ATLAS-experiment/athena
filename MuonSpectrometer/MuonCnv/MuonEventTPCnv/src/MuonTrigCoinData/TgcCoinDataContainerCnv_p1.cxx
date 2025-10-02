@@ -35,8 +35,8 @@ StatusCode Muon::TgcCoinDataContainerCnv_p1::initialize(MsgStream &log) {
 
    // Get the helper from the detector store
     CHECK( detStore->retrieve(m_TgcId) );
+    CHECK( m_eventCnvTool.retrieve() );
 
-    CHECK( detStore->retrieve(m_muonDetMgr) );
 
     log << MSG::DEBUG << "Converter initialized." << endmsg;
     return StatusCode::SUCCESS;
@@ -140,12 +140,12 @@ void  Muon::TgcCoinDataContainerCnv_p1::persToTrans(const Muon::MuonCoinDataCont
             const TPObjRef pchan = persCont->m_CoinData[ichan + pcoll.m_begin];
             Muon::TgcCoinData* chan = dynamic_cast<Muon::TgcCoinData*>(createTransFromPStore((CONV**)nullptr, pchan, log ) );
 	    if(chan->type()!=Muon::TgcCoinData::TYPE_TRACKLET_EIFI) {
-	      const MuonGM::TgcReadoutElement * deOut = m_muonDetMgr->getTgcReadoutElement(Identifier(chan->channelIdOut()));
+	      const MuonGM::TgcReadoutElement * deOut = getReadOutElement(Identifier(chan->channelIdOut()));
 	      chan->m_detElOut = deOut;
 	    }
 	    if(chan->type()==Muon::TgcCoinData::TYPE_TRACKLET || chan->type()==Muon::TgcCoinData::TYPE_HIPT || 
 	       chan->type()==Muon::TgcCoinData::TYPE_TRACKLET_EIFI) {
-	      const MuonGM::TgcReadoutElement * deIn = m_muonDetMgr->getTgcReadoutElement(Identifier(chan->channelIdIn()));
+	      const MuonGM::TgcReadoutElement * deIn = getReadOutElement(Identifier(chan->channelIdIn()));
 	      chan->m_detElIn = deIn;
 	    }
 	    else {
@@ -184,4 +184,9 @@ Muon::TgcCoinDataContainer* Muon::TgcCoinDataContainerCnv_p1::createTransient(co
     return(trans.release());
 }
 
+const MuonGM::TgcReadoutElement* Muon::TgcCoinDataContainerCnv_p1::getReadOutElement(const Identifier& id ) const {
+    const Trk::ITrkEventCnvTool* cnv_tool = m_eventCnvTool->getCnvTool(id);
+    if (!cnv_tool) return nullptr; 
+    return dynamic_cast<const MuonGM::TgcReadoutElement*>(cnv_tool->getDetectorElement(id));
+}
 

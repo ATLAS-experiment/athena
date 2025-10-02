@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -49,12 +49,7 @@ namespace LArG4 {
     Geometry::Geometry(const std::string& name, ISvcLocator *pSvcLocator)
       : base_class(name, pSvcLocator)
     {
-      declareProperty("DetectorName",m_detectorName);
-      declareProperty("TestBeam", m_testbeam);
     }
-
-    //=====================================================================================
-    Geometry::~Geometry() {;}
 
     // ==================================================================
     /** initialize geometry parameters

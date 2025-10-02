@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSEEDING_SEEDINGALG_H
@@ -13,8 +13,8 @@
 
 // Tools
 #include "ActsToolInterfaces/ISeedingTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 
 // Athena
 #include "BeamSpotConditionsData/BeamSpotData.h"

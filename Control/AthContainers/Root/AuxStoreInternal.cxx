@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/AuxStoreInternal.cxx
@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <atomic>
 
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
@@ -47,11 +48,12 @@ AuxStoreInternal::~AuxStoreInternal()
  * @brief Copy constructor.
  */
 AuxStoreInternal::AuxStoreInternal (const AuxStoreInternal& other)
-  : m_standalone (other.m_standalone),
-    m_decorations (other.m_decorations),
-    m_auxids (other.m_auxids),
-    m_locked (other.m_locked)
 {
+  guard_t guard (other.m_mutex);
+  m_standalone = other.m_standalone;
+  m_decorations = other.m_decorations;
+  m_auxids = other.m_auxids;
+  m_locked = other.m_locked;
   size_t size = other.m_vecs.size();
   m_vecs.resize (size);
   for (size_t i = 0; i < size; i++) {
@@ -166,10 +168,14 @@ AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
 
   // Add it to the store.
   m_vecs[auxid] = std::move (vec);
-  addAuxID (auxid);
+
+  // Need to be sure that the addition to the decoration bitset is visible
+  // to other threads before the addition to the variable bitset.
   if (isDecoration) {
     m_decorations.insert (auxid);
+    std::atomic_thread_fence (std::memory_order_seq_cst);
   }
+  addAuxID (auxid);
 }
 
 
@@ -203,19 +209,24 @@ AuxStoreInternal::getDecoration (auxid_t auxid, size_t size, size_t capacity)
   }
   if (m_vecs[auxid] == 0) {
     m_vecs[auxid] = AuxTypeRegistry::instance().makeVector (auxid, size, capacity);
-    addAuxID (auxid);
     std::unique_ptr<IAuxTypeVector> linked = m_vecs[auxid]->linkedVector();
     auxid_t linked_id = null_auxid;
     if (linked) {
       linked_id = linked->auxid();
       m_vecs[linked_id] = std::move (linked);
-      addAuxID (linked_id);
     }
     if (m_locked) {
+      // Need to be sure that the addition to the decoration bitset is visible
+      // to other threads before the addition to the variable bitset.
       m_decorations.insert (auxid);
       if (linked_id != null_auxid) {
         m_decorations.insert (linked_id);
       }
+      std::atomic_thread_fence (std::memory_order_seq_cst);
+    }
+    addAuxID (auxid);
+    if (linked_id != null_auxid) {
+      addAuxID (linked_id);
     }
   }
   if (m_locked && !m_decorations.test (auxid)) {
@@ -377,8 +388,8 @@ bool AuxStoreInternal::insertMove (size_t pos,
           if (sz < other_size) sz = other_size + pos;
           IAuxTypeVector* v = getVectorInternal_noLock (id, sz, sz, false);
           v->resize (sz - other_size);
-          v->insertMove (pos, src_ptr, 0, other_size,
-                         other);
+          (void)v->insertMove (pos, src_ptr, 0, other_size,
+                               other);
           nomove = false;
         }
       }

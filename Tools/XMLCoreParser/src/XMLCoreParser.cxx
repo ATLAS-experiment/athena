@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "XMLCoreParser/XMLCoreParser.h" 
@@ -196,12 +196,8 @@ XMLCoreFactory::get_token (const XMLCoreNode& node, const std::string& name) {
   while ((result.length () > 0) &&  
          (result.at(result.length () - 1) == ' ')) result.erase (result.length () - 1, 1); 
   // Convert to upper case 
-  for (std::string::size_type i = 0; i < result.length (); ++i){ 
-    static const std::string uc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
-    static const std::string lc = "abcdefghijklmnopqrstuvwxyz"; 
-    char c = result[i]; 
-    std::string::size_type p = lc.find (c); 
-    if (p != std::string::npos) result[i] = lc[p]; 
+  for (std::string::size_type i = 0; i < result.length (); ++i){
+    result[i] = std::toupper (result[i]);
   } 
   return (result); 
 } 

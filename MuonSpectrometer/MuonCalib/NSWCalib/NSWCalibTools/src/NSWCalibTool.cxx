@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NSWCalibTool.h"
@@ -8,6 +8,9 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 
+#include "xAODMuonPrepData/MMCluster.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
+#include <cfloat>
 namespace {
   constexpr double toRad = M_PI/180;
   constexpr double pitchErr = 0.425 * 0.425 / 12;
@@ -42,12 +45,6 @@ namespace {
                                    {"ArCo2_8020", 16.15 / 5.}, {"ArCo2iC4H10_9352", 16.15 / 5.}};
 
 }
-
-Muon::NSWCalibTool::NSWCalibTool(const std::string& t, const std::string& n, const IInterface* p) :
-  AthAlgTool(t,n,p) {
-  declareInterface<INSWCalibTool>(this);
-}
-
 
 StatusCode Muon::NSWCalibTool::initialize()
 {
@@ -136,6 +133,47 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon
   }
   return StatusCode::SUCCESS;
 }
+
+
+StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster& prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
+
+  double lorentzAngle {0.};
+  if(m_applyMmBFieldCalib){
+    /// magnetic field
+    MagField::AtlasFieldCache fieldCache;
+    if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;
+    Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
+    fieldCache.getField(globalPos.data(), magneticField.data());
+
+    /// get the component parallel to to the eta strips (same used in digitization)
+    double phi    = globalPos.phi();
+    double bfield = (magneticField.x()*std::sin(phi)-magneticField.y()*std::cos(phi))*1000.;
+
+    /// swap sign depending on the readout side
+    int gasGap = m_idHelperSvc->mmIdHelper().gasGap(prepData.identify());
+    bool changeSign = ( globalPos.z() < 0. ? (gasGap==1 || gasGap==3) : (gasGap==2 || gasGap==4) );
+    if (changeSign) bfield = -bfield;
+
+    //// sign of the lorentz angle matches digitization - angle is in radians
+    lorentzAngle = (bfield>0. ? 1. : -1.)*m_lorentzAngleFunction(std::abs(bfield)) * toRad;
+  }
+
+  /// loop over prepData strips
+  for (unsigned int i = 0; i < prepData.stripNumbers().size(); ++i){
+    Identifier id =  m_idHelperSvc->mmIdHelper().channelID(prepData.identify(), m_idHelperSvc->mmIdHelper().multilayer(prepData.identify()), m_idHelperSvc->mmIdHelper().gasGap(prepData.identify()),prepData.stripNumbers().at(i));
+    double time = prepData.stripTimes().at(i);
+    double charge = prepData.stripCharges().at(i);
+    //Retrieve pointing constraint
+    const Amg::Vector3D& globPos{prepData.readoutElement()->localToGlobalTrans(gctx, prepData.layerHash()) * (prepData.localPosition<1>()[0]*Amg::Vector3D::UnitX())};
+    NSWCalib::CalibratedStrip calibStrip;
+    ATH_CHECK(calibrateStrip(ctx, id, time, charge, (globPos.theta() / toRad) , lorentzAngle, calibStrip));
+
+    calibClus.push_back(std::move(calibStrip));
+  }
+  return StatusCode::SUCCESS;
+}
+
+
 
 StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Identifier& id, const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const {
 

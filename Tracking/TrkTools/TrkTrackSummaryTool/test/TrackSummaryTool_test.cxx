@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file TrkTrackSummaryUpdater/test/TrackSummaryUpdater_test.cxx
  * @author Shaun Roe
@@ -123,7 +121,7 @@ BOOST_AUTO_TEST_SUITE(TrackSummaryUpdaterTest)
     parser.register_external_entity ("MuonSpectrometer","IdDictMuonSpectrometer_S.02.xml");
     parser.register_external_entity ("Calorimeter","IdDictCalorimeter_L1Onl.xml");
         IdDictMgr& idDict = parser.parse ("IdDictParser/ATLAS_IDS.xml");
-    auto atlasId = std::make_unique<AtlasDetectorID>();
+    auto atlasId = std::make_unique<AtlasDetectorID>("AtlasDetectorID", "");
     atlasId->initialize_from_dictionary (idDict);
     if (pDetStore and (not pDetStore->contains<AtlasDetectorID>("AtlasID"))) {
       BOOST_TEST ( pDetStore->record (std::move (atlasId), "AtlasID").isSuccess() );

@@ -43,23 +43,31 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     return acc
 
 
-def ITkActsPrepDataToxAODCfg(
-        flags, PixelMeasurementContainer = "ITkPixelMeasurements",
-        StripMeasurementContainer = "ITkStripMeasurements") -> ComponentAccumulator:
+def ITkActsPrepDataToxAODCfg(flags,
+                             *,
+                             PixelClusterContainer: str = "ITkPixelClusters",
+                             StripClusterContainer: str = "ITkStripClusters",
+                             PixelMeasurementContainer: str = "ITkPixelMeasurements",
+                             StripMeasurementContainer: str = "ITkStripMeasurements",
+                             TrackParticles: list[str] = None) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # need to decorate truth particles and clusters with same unique identified
     # which is the origin truth particle index
-    if not flags.Input.isMC:
+    if not flags.Tracking.doTruth:
         return acc
 
     acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
 
     from ActsConfig.ActsObjectDecorationConfig import ActsPixelClusterTruthDecoratorAlgCfg,ActsStripClusterTruthDecoratorAlgCfg
-    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(
-        flags, MeasurementContainer=PixelMeasurementContainer))
-    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(
-        flags, MeasurementContainer=StripMeasurementContainer))
+    acc.merge(ActsPixelClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = PixelClusterContainer,
+                                                   MeasurementContainer = PixelMeasurementContainer,
+                                                   TrackParticles = TrackParticles))
+    acc.merge(ActsStripClusterTruthDecoratorAlgCfg(flags,
+                                                   ClusterContainer = StripClusterContainer,
+                                                   MeasurementContainer = StripMeasurementContainer,
+                                                   TrackParticles = TrackParticles))
 
     return acc
 
@@ -97,8 +105,11 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
+    kwargs.setdefault("PixelReadoutManager", acc.getPrimaryAndMerge(ITkPixelReadoutManagerCfg(flags)))
+
     kwargs.setdefault("WriteExtendedPRDinformation", True)
-    kwargs.setdefault("PixelReadoutManager", "ITkPixelReadoutManager")
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
     kwargs.setdefault("PixelDCSStateCondData", "ITkPixelDCSStateCondData")
     kwargs.setdefault("PixelDCSStatusCondData", "ITkPixelDCSStatusCondData")

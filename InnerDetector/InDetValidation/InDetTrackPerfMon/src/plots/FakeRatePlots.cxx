@@ -43,6 +43,7 @@ StatusCode IDTPM::FakeRatePlots::bookPlots()
 
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_incl, "fakerate_vs_"+m_trackType+"_inclusive" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_pt,   "fakerate_vs_"+m_trackType+"_pt" ) );
+  ATH_CHECK( retrieveAndBook( m_fakerate_vs_logPt,"fakerate_vs_"+m_trackType+"_logPt" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_eta,  "fakerate_vs_"+m_trackType+"_eta" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_phi,  "fakerate_vs_"+m_trackType+"_phi" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_d0,   "fakerate_vs_"+m_trackType+"_d0" ) );
@@ -72,6 +73,7 @@ StatusCode IDTPM::FakeRatePlots::fillPlots(
   /// Fill the histograms
   ATH_CHECK( fill( m_fakerate_vs_incl,  1,  isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_pt,  ppt,  isFake, weight ) );
+  ATH_CHECK( fill( m_fakerate_vs_logPt,  ppt,  isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_eta, peta, isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_phi, pphi, isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_d0,  pd0,  isFake, weight ) );

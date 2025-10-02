@@ -1,3 +1,6 @@
 #include "TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h"
 
-DECLARE_COMPONENT( TrigGlobalEfficiencyCorrectionTool )
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
+DECLARE_COMPONENT(TrigGlobalEfficiencyCorrectionTool)

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackPATHFINDEREXTENSION_H
 #define FPGATrackPATHFINDEREXTENSION_H
@@ -57,7 +57,7 @@
       for (unsigned layer = 0; layer < m_hits.size(); layer++) {
 	std::vector<std::shared_ptr<const FPGATrackSimHit>> thislayerVec;
 	thislayerVec.push_back(m_hits[layer]);
-	vecHits[layer] = thislayerVec;
+	vecHits[layer] = std::move(thislayerVec);
       }
       return vecHits;
     }
@@ -125,8 +125,8 @@
 class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPGATrackSimTrackExtensionTool>
 {
     public:
-
-        FPGATrackSimNNPathfinderExtensionTool(const std::string&, const std::string&, const IInterface*);
+        /// Constructor
+        using base_class::base_class;
 
         virtual StatusCode initialize() override;
 
@@ -145,8 +145,8 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
 
-        // We'll definitely need properties, but I don't know which ones.
-        Gaudi::Property<int> m_threshold  { this, "threshold", 10, "Minimum number of hits to fire a road"};
+        Gaudi::Property<unsigned> m_maxMiss { this, "threshold", 2, "Maximum number of missing hits to reject a road"};
+        Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
 
         // Options only needed for sector assignment.
         // The eta pattern option here should probably be dropped, because we're not using it
@@ -154,34 +154,34 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         // and then running the eta pattern filter a second time.
         Gaudi::Property<std::vector<float>> m_windowR { this, "windowR", {20.0}, "Window Size to search in for r, either pass one value for all layers or use the number of layers"};
         Gaudi::Property<std::vector<float>> m_windowZ { this, "windowZ", {20.0}, "Window Size to search in for z, either pass one value for all layers or use the number of layers"};
+        Gaudi::Property<std::vector<float>> m_windowPhi { this, "windowPhi", {0.4}, "Window Size to search in for phi, either pass one value for all layers or use the number of layers"};
+        Gaudi::Property<std::vector<int>> m_windowFineID { this, "windowFineID", {0}, "Fine ID indexing for windows"};
         Gaudi::Property <float> m_lowPtValueForWindowRScaling { this, "lowPtValueWindowR", -1, "Value in MeV below which we scale the r window size"};
         Gaudi::Property <float> m_lowPtWindowRScaling {this, "lowPtRScaling", 1.0, "Scaling factor for low pt in R"};
         Gaudi::Property <float> m_lowPtValueForWindowZScaling { this, "lowPtValueWindowZ", -1, "Value in MeV below which we scale the r window size"};
         Gaudi::Property <float> m_lowPtWindowZScaling {this, "lowPtZScaling", 1.0, "Scaling factor for low pt in Z"};
+        Gaudi::Property <float> m_lowPtValueForWindowPhiScaling { this, "lowPtValueWindowPhi", -1, "Value in MeV below which we scale the phi window size"};
+        Gaudi::Property <float> m_lowPtWindowPhiScaling {this, "lowPtPhiScaling", 1.0, "Scaling factor for low pt in Phi"};
+
         Gaudi::Property <float> m_missedHitRScaling {this, "missedHitRScaling", -1, "Amount to scale R window if previous hit was missed. Negative means this is disabled"};
-        Gaudi::Property <float> m_missedHitZScaling {this, "missedHitZScaling", -1, "Amount to scale Z window if previous hit was missed. Negative means this is disabled"};  
+        Gaudi::Property <float> m_missedHitZScaling {this, "missedHitZScaling", -1, "Amount to scale Z window if previous hit was missed. Negative means this is disabled"};
+        Gaudi::Property <float> m_missedHitPhiScaling {this, "missedHitPhiScaling", -1, "Amount to scale Phi window if previous hit was missed. Negative means this is disabled"};    
         Gaudi::Property <int> m_maxBranches { this, "maxBranches", -1, "Max number of branches before we stop, if negative this is disabled"};
         Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
         Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};
+        Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
 
-        StatusCode bookTree();
-        TTree *m_tree = nullptr; // output tree
-        std::vector<unsigned long> m_NcompletedRoads;
-        std::vector<unsigned int> m_missingHitsOnRoad;
-        std::vector<std::vector<unsigned long>> m_predictedHitsFineID;
-        std::vector<std::vector<unsigned int>> m_foundHitITkLayer;
-        std::vector<unsigned int> m_nHitsInSearchWindow;
-        std::vector<std::vector<float>> m_distanceOfPredictedHitToFoundHit;
-        std::vector<std::vector<bool>> m_foundHitIsSP;
 
         std::vector<FPGATrackSimRoad> m_roads;
         unsigned m_nLayers_1stStage = 0;
         unsigned m_nLayers_2ndStage = 0;
-        unsigned m_maxMiss = 0;
 
         static float getXScale() { return 1015.;};
         static float getYScale() { return 1015.;};
         static float getZScale() { return 3000.;};
+        static float getRScale() {return 1015.;};
+        static float getPhiScale() {return 3.15;};
+  
         bool m_debugEvent = false;
 
         // Internal storage for the sliced hits (implemented as a LogicalEventInputHeader,

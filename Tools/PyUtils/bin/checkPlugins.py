@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @author: Sebastien Binet
 ## @file : checkPlugins.py
 ## @brief: A script to check the definitions of plugins across multiple
 ##           so-called 'rootmap' files
-
-from __future__ import print_function
 
 __author__  = "Sebastien Binet"
 

@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
 
-#include <cmath>
-#include <iostream>
+
 
 #include <TH1.h>
 #include <TH2.h>
 #include <TList.h>
+#include <cmath>
+#include <iostream>
+#include <stdexcept>
 
 namespace {
 Bool_t IsBinOverflow(const TH1& hist, Int_t bin)
@@ -507,6 +509,34 @@ void MonitoringFile::merge_Rebinned( TH1& a, TH1& b )
   // of bins and different limits, BUT the largest bin width must be
   // a multiple of the smallest bin width and the upper limit must also
   // be a multiple of the bin width.
+
+  // if the axes were all extendable, try to match the number of bins between the histograms
+  // this is only needed for TProfile2D ... 
+  if(a.InheritsFrom("TProfile2D") && b.InheritsFrom("TProfile2D") && a.GetDimension()==b.GetDimension()) {
+    auto binsFunc = [](TH1& h, int ax) {
+      if(ax==0) return h.GetNbinsX();
+      if(ax==1) return h.GetNbinsY();
+      if(ax==2) return h.GetNbinsZ();
+      return 0;
+    };
+    for(int i=0;i<a.GetDimension();i++) {                                                                                                       
+      int n1 = binsFunc(a,i);
+      int n2 = binsFunc(b,i);
+      if ((n1 == 0) or (n2 == 0)) {
+        throw std::runtime_error("MonitoringFile::merge_Rebinned; nbins is zero.");
+      }
+      if((n2 % n1 == 0) && std::bitset<sizeof(int)>(n2/n1).count()==1) { //n2 is a 2^N times bigger than n1
+        while(binsFunc(a,i) != binsFunc(b,i)) {
+          a.LabelsInflate((i==0) ? "x" : ( (i==1) ? "y" : "z"));
+        }
+      } else if((n1 % n2 == 0) && std::bitset<sizeof(int)>(n1/n2).count()==1) { //n1 is a 2^N times bigger than n2
+        while(binsFunc(a,i) != binsFunc(b,i)) {
+          b.LabelsInflate((i==0) ? "x" : ( (i==1) ? "y" : "z"));
+        }
+      }
+    }
+  }
+
 
   TList *list = new TList;
   list->Add(&b);

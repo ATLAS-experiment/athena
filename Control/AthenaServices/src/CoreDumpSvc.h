@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_COREDUMPSVC_H
@@ -95,7 +95,7 @@ private:
   
   ///@{ Properties
 
-  Gaudi::Property<std::vector<int>> m_signals{this, "Signals", {SIGSEGV,SIGBUS,SIGILL,SIGFPE,SIGALRM},
+  Gaudi::Property<std::vector<int>> m_signals{this, "Signals", {SIGSEGV,SIGBUS,SIGILL,SIGABRT,SIGFPE,SIGALRM},
       "List of signals to catch"};
 
   Gaudi::Property<bool> m_callOldHandler{this, "CallOldHandler", true,

@@ -8,7 +8,7 @@
 
 #include "GeneratorObjects/McEventCollection.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+#include <charconv>
 
 // calls to fortran routines
 #include "AthenaKernel/RNGWrapper.h"
@@ -78,6 +78,7 @@ Pythia8_i::Pythia8_i(const std::string &name, ISvcLocator *pSvcLocator)
   m_particleIDs["ANTIMUON"]    = ANTIMUON;
   m_particleIDs["LEAD"]        = LEAD;
   m_particleIDs["OXYGEN"]      = OXYGEN;
+  m_particleIDs["HELIUM"]      = HELIUM;
 
 }
 
@@ -130,6 +131,12 @@ StatusCode Pythia8_i::genInitialize() {
 
   // Add flag to switch off from JO the Pythia8ToHepMC::print_inconsistency internal variable
   m_pythia->settings.addFlag("AthenaPythia8ToHepMC:print_inconsistency",true);
+  
+  // Revert the recoil strategy to the old default of 1, ie. 'recoil to color'
+  // In 8.314, the default option was changed to 0, 'recoil to top' and we 
+  // revert it back unless 'recoil to top' 
+  // is explicitly needed for the samples 
+  if (m_version > 8.313) m_pythia->readString("TimeShower:recoilStrategyRF = 1");
 
   // Add UserHooks first because these potentially add new settings that must exist prior to parsing commands
 
@@ -264,7 +271,11 @@ StatusCode Pythia8_i::genInitialize() {
 
     for(std::vector<std::string>::const_iterator sId = resonanceIds.begin();
         sId != resonanceIds.end(); ++sId){
-      int idResIn = boost::lexical_cast<int>(*sId);
+      int idResIn = 0;
+      auto result = std::from_chars(sId->data(), sId->data() + sId->size(), idResIn);
+      if (result.ec != std::errc()) {
+          ATH_MSG_ERROR("Invalid resonance ID: " + *sId);
+      }
       m_userResonancePtrs.push_back(Pythia8_UserResonance::UserResonanceFactory::create(resonanceArgs.front(), idResIn));
     }
 

@@ -16,7 +16,7 @@
 #define POOL_DBITER_H
 
 // Framework include files
-#include "StorageSvc/DbObject.h"
+#include "StorageSvc/DbObjectHandle.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbTypeInfo.h"
 

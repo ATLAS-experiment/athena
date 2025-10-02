@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_RAWDATABYTESTREAMCNV_SCTRAWCONTBYTESTREAMCNV_H
@@ -13,6 +13,8 @@
 #include "AthenaBaseComps/AthConstConverter.h"
 
 #include "GaudiKernel/ServiceHandle.h"
+
+#include "SCT_RawDataByteStreamCnv/ISCTRawContByteStreamToolProviderTool.h"
 
 class DataObject;
 class ISCTRawContByteStreamTool;
@@ -66,7 +68,9 @@ class SCTRawContByteStreamCnv : public AthConstConverter
  private: 
 
   /** Tool to do coversion from SCT RDO container to ByteStream */
-  ToolHandle<ISCTRawContByteStreamTool> m_rawContByteStreamTool;
+  PublicToolHandle<ISCTRawContByteStreamToolProviderTool> m_rawContByteStreamToolProvider;
+  const ISCTRawContByteStreamTool *m_rawContByteStreamTool;
+  
 
   /** Interface for accessing raw data */
   ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess; 

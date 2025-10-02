@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #define TRKDETDESCRUTILS_BINNEDARRAY_H
 
 #include "TrkDetDescrUtils/BinUtility.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 // GaudiKernel
 #include "GaudiKernel/GaudiException.h"
 // Eigen
@@ -19,6 +18,7 @@
 // STL
 #include <span>
 #include <vector>
+#include <memory>
 
 class MsgStream;
 
@@ -30,19 +30,19 @@ namespace Trk {
    @author Andreas.Salzburger@cern.ch
    @author Christos Anastopoulos (AthenaMT)
    */
-template<class T>
-using BinnedArraySpan = std::span<T>;
 
 template<class T>
 class BinnedArray
 {
 
 public:
-  /**Default Constructor - needed for inherited classes */
-  BinnedArray() {}
-
-  /**Virtual Destructor*/
-  virtual ~BinnedArray() {}
+  //Make sure derived classes can get everything
+  BinnedArray() = default;
+  BinnedArray(const BinnedArray&) = default;
+  BinnedArray(BinnedArray&&) = default;
+  BinnedArray& operator=(const BinnedArray&) = default;
+  BinnedArray& operator=(BinnedArray&&) = default;
+  virtual ~BinnedArray() = default;
 
   /** Implicit constructor */
   virtual BinnedArray* clone() const = 0;
@@ -67,10 +67,10 @@ public:
 
   /** Return all objects of the Array non-const
    * we can still modify the T*/
-  virtual BinnedArraySpan<T* const> arrayObjects() = 0;
+  virtual std::span<T* const> arrayObjects() = 0;
 
   /** Return all objects of the Array const */
-  virtual BinnedArraySpan<T const * const> arrayObjects() const = 0;
+  virtual std::span<T const * const> arrayObjects() const = 0;
 
   /** Number of Entries in the Array */
   virtual unsigned int arrayObjectsNumber() const = 0;

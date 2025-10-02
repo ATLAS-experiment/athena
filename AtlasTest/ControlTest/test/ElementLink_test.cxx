@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestTools/FLOATassert.h"
@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
   std::cout << " Test2: test of contained Element " << std::endl;
   ElementLink< std::vector<std::string> > strLink1;
   std::string x = "foo"; // note that you cannot pass foo directly.
-  strLink1.toContainedElement(strVec, x);
+  strLink1.toContainedElement(strVec, std::move(x));
   // note that the call to .index() itself calls toPersistent()
   assert (strLink1.index() == 0);
   assert (*strLink1=="foo");

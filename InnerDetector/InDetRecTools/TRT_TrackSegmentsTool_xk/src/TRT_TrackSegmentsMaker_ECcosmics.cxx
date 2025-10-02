@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -1346,7 +1346,7 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
   count=0;
   for(;vit!=vitE;++vit){
-    const Trk::StraightLineSurface* line = (const Trk::StraightLineSurface*)
+    const Trk::StraightLineSurface* line = static_cast<const Trk::StraightLineSurface*>
       (&((*vit)->detectorElement())->surface( (*vit)->identify()));
 
 

@@ -13,6 +13,7 @@
 #include "xAODTrigMuon/versions/L2CombinedMuon_v1.h"
 #include "xAODTrigMuon/L2StandAloneMuon.h"
 #include "xAODTrigMuon/L2StandAloneMuonContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 
 namespace xAOD {
 
@@ -35,7 +36,7 @@ namespace xAOD {
 
    double L2CombinedMuon_v1::m() const {
 
-      return 105.6583715;
+      return ParticleConstants::muonMassInMeV;
    }
 
    double L2CombinedMuon_v1::e() const {

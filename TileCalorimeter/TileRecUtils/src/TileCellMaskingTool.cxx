@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -179,7 +179,7 @@ StatusCode TileCellMaskingTool::process (CaloCellContainer* theCont,
       bool bit1 = m_includedCellsMap.test(hash1); // true - good channel
       bool bit2 = m_includedCellsMap.test(hash2); // false - channel should be masked
 
-      TileCell* pCell = (TileCell*) aCell;
+      TileCell* pCell = static_cast<TileCell*>(aCell);
       int gain1 = pCell->gain1();
       int gain2 = pCell->gain2();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -28,10 +28,10 @@ class TTree;
 class TLeaf;
 class TClass;
 
-namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO {
    class IRootAuxDynWriter;
    class IRootAuxDynReader;
+   class IFactoryTool;
 }
      
 
@@ -87,7 +87,6 @@ namespace pool  {
 
       BranchDesc& operator=(BranchDesc const& other) = delete;
       BranchDesc& operator=(BranchDesc && other) = default;
-      SG::IAuxStoreIO* getIOStorePtr();
     };
 
     /// Definition of the branch container
@@ -112,6 +111,9 @@ namespace pool  {
     /// flag set when a branch container was updated (but the branch was not Filled)
     bool               m_isDirty;
 
+    /// Factory object from AuxDynIO plugin that creates AuxDyn readers and writers
+    std::unique_ptr<RootAuxDynIO::IFactoryTool>       m_auxDynTool;
+
   private:
 
     /// Add item branch
@@ -127,11 +129,6 @@ namespace pool  {
                         int splitLevel,
                         int bufferSize,
                         int branchOffsetTabLen);
-
-    /// Find entry identified by his number (=primary key) in the Database
-    DbStatus selectRow( const DataCallBack* call,
-                        const Token::OID_t& linkH,
-                        DbAccessMode        mode);
 
     // Routine needed for TRANSACT_FLUSH, if branch is specified by user.
     DbStatus finishTransAct();
@@ -176,11 +173,8 @@ namespace pool  {
       */
     virtual DbStatus setOption(const DbOption& opt) override;
 
-    /// Ask if a given shape is supported
-    virtual DbStatus isShapeSupported(const DbTypeInfo* typ) const override;
-
-    /// Define selection criteria
-    virtual DbStatus select(DbSelect& criteria) override;
+    /// Define selection
+    virtual DbStatus select(DbSelect& sel) override;
 
     /// Number of entries within the container
     virtual uint64_t size() override;

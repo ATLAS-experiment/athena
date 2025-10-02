@@ -3,7 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AnalysisAlgorithmsConfig.ConfigSequence import filter_dsids
+from AnalysisAlgorithmsConfig.ConfigBlock import filter_dsids
 from AthenaCommon.Logging import logging
 import copy, re
 
@@ -34,6 +34,11 @@ class OutputAnalysisConfig (ConfigBlock):
             info="a dictionary mapping prefixes (key) to container names "
             "(values) to be used when saving to the output tree. Branches "
             "are then of the form prefix_decoration.")
+        self.addOption ('containersFullMET', {}, type=None,
+            info="same as containers, but for MET containers that should be "
+            "saved with all terms (as opposed to just the final term). This "
+            "is useful for special studies.  A container can appear both here and "
+            "in containers (with different prefixes).")
         self.addOption ('containersOnlyForMC', {}, type=None,
             info="same as containers, but for MC-only containers so as to avoid "
             "a crash when running on data.")
@@ -69,6 +74,18 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('alwaysAddNosys', False, type=bool,
             info="If set to True, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
+        self.addOption ('skipRedundantSelectionFlags', True, type=bool,
+            info="remove the redundant 'outputSelect' branches created by the Thinning step. "
+            "These could however be used to simplify downstream workflows, as in Easyjet. "
+            "The default is True.")
+        # helper to protect for second pass
+        self.validated = False
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None and self.postfix != '':
+            return self.postfix
+        return self.treeName
 
     @staticmethod
     def branchSortOrder (rule):
@@ -90,36 +107,63 @@ class OutputAnalysisConfig (ConfigBlock):
 
         log = logging.getLogger('OutputAnalysisConfig')
 
-        self.vars = set(self.vars)
-        self.varsOnlyForMC = set(self.varsOnlyForMC)
-        self.metVars = set(self.metVars)
-        self.truthMetVars = set(self.truthMetVars)
+        # do some transformations of the options we should only do once
+        if not self.validated:
 
-        # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
-        if config.dataType() is not DataType.Data:
-            self.vars |= self.varsOnlyForMC
+            self.containers = dict(self.containers)
+            self.vars = set(self.vars)
+            self.varsOnlyForMC = set(self.varsOnlyForMC)
+            self.metVars = set(self.metVars)
+            self.truthMetVars = set(self.truthMetVars)
 
-            # protect 'containers' against being overwritten
-            # find overlapping keys
-            overlapping_keys = set(self.containers.keys()).intersection(self.containersOnlyForMC.keys())
+            # check for overlaps between containers and containersFullMET
+            overlapping_keys = set(self.containers.keys()).intersection(self.containersFullMET.keys())
             if overlapping_keys:
                 # convert the set of overlapping keys to a list of strings for the message (represents the empty string too!)
                 keys_message = [repr(key) for key in overlapping_keys]
-                raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
+                raise KeyError(f"containersFullMET would overwrite the following container keys: {', '.join(keys_message)}")
+            # move items in self.containersFullMET to containers
+            self.containers.update(self.containersFullMET)
 
-            # move items in self.containersOnlyForMC to self.containers
-            self.containers.update(self.containersOnlyForMC)
-            # clear the dictionary to avoid overlapping key error during the second pass
-            self.containersOnlyForMC.clear()
+            # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
+            if config.dataType() is not DataType.Data:
+                self.vars |= self.varsOnlyForMC
 
-        # now filter the containers depending on DSIDs
-        for container,dsid_filters in self.containersOnlyForDSIDs.items():
-            if container not in self.containers:
-                log.warning(f"Skipping unrecognised container {container} for DSID-filtering in OutputAnalysisConfig...")
-                continue
-            if not filter_dsids (dsid_filters, config):
-                # if current DSID is not allowed for this container, remove it
-                self.containers.pop (container)
+                # protect 'containers' against being overwritten
+                # find overlapping keys
+                overlapping_keys = set(self.containers.keys()).intersection(self.containersOnlyForMC.keys())
+                if overlapping_keys:
+                    # convert the set of overlapping keys to a list of strings for the message (represents the empty string too!)
+                    keys_message = [repr(key) for key in overlapping_keys]
+                    raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
+
+                # move items in self.containersOnlyForMC to self.containers
+                self.containers.update(self.containersOnlyForMC)
+                # clear the dictionary to avoid overlapping key error during the second pass
+                self.containersOnlyForMC.clear()
+
+                # now filter the containers depending on DSIDs
+                if self.containersOnlyForDSIDs:
+                    for container, dsid_filters in self.containersOnlyForDSIDs.items():
+                        if container not in self.containers:
+                            log.warning("Skipping unrecognised container prefix '%s' for DSID-filtering in OutputAnalysisConfig...", container)
+                            continue
+                        if not filter_dsids (dsid_filters, config):
+                            # if current DSID is not allowed for this container, remove it
+                            log.info("Skipping container prefix '%s' due to DSID filtering...", container)
+                            # filter branches for validated containers
+                            for var in set(self.vars):  # make a copy of the list to avoid modifying it while iterating
+                                var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
+                                if var_container == self.containers[container]:
+                                    self.vars.remove(var)
+                                    log.info("Skipping branch definition '%s' for excluded container %s...", var, var_container)
+                            # remove the container from the list at the end
+                            self.containers.pop (container)
+                    # clear the dictionary to avoid warnings during the second pass
+                    self.containersOnlyForDSIDs.clear()
+
+            # at this point we are OK
+            self.validated = True
 
         if self.storeSelectionFlags:
             self.createSelectionFlagBranches(config)
@@ -130,10 +174,15 @@ class OutputAnalysisConfig (ConfigBlock):
             outputDict = config.getOutputVars (containerName)
             for outputName in outputDict :
                 outputConfig = copy.deepcopy (outputDict[outputName])
-                if containerName != outputConfig.origContainerName :
+                if containerName != outputConfig.origContainerName or config.checkOutputContainer(containerName):
                     outputConfig.outputContainerName = containerName + '_%SYS%'
-                else :
-                    outputConfig.outputContainerName = config.readName (containerName)
+                else:
+                    outputConfig.outputContainerName = config.readName(containerName)
+                outputConfig.prefix = prefix
+                # if the container is a MET container with all terms, we
+                # also need to write out the name of each MET term
+                if prefix in self.containersFullMET and outputConfig.variableName == 'name':
+                    outputConfig.enabled = True
                 outputConfigs[prefix + outputName] = outputConfig
 
         # check for DSID-specific commands
@@ -141,10 +190,14 @@ class OutputAnalysisConfig (ConfigBlock):
             if filter_dsids([dsid], config):
                 self.commands += dsid_commands
 
+        outputConfigsRename = {}
         for command in self.commands :
             words = command.split (' ')
             if len (words) == 0 :
                 raise ValueError ('received empty command for "commands" option')
+            optional = words[0] == 'optional'
+            if optional :
+                words = words[1:]  # remove the 'optional' keyword
             if words[0] == 'enable' :
                 if len (words) != 2 :
                     raise ValueError ('enable takes exactly one argument: ' + command)
@@ -153,7 +206,7 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = True
                         used = True
-                if not used and config.dataType() is not DataType.Data:
+                if not used and not optional and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for enable: ' + words[1])
             elif words[0] == 'disable' :
                 if len (words) != 2 :
@@ -163,18 +216,32 @@ class OutputAnalysisConfig (ConfigBlock):
                     if re.match (words[1], name) :
                         outputConfigs[name].enabled = False
                         used = True
-                if not used and config.dataType() is not DataType.Data:
+                if not used and not optional and config.dataType() is not DataType.Data:
                     raise KeyError ('unknown branch pattern for disable: ' + words[1])
+            elif words[0] == 'rename' :
+                if len (words) != 3 :
+                    raise ValueError ('rename takes exactly two arguments: ' + command)
+                used = False
+                for name in outputConfigs :
+                    if re.match (words[1], name) :
+                        new_name = re.sub (words[1], words[2], name)
+                        outputConfigsRename[new_name] = copy.deepcopy(outputConfigs[name])
+                        outputConfigs[name].enabled = False
+                        used = True
+                if not used and not optional and config.dataType() is not DataType.Data:
+                    raise KeyError ('unknown branch pattern for rename: ' + words[1])
             else :
                 raise KeyError ('unknown command for "commands" option: ' + words[0])
+
+        # update the outputConfigs with renamed branches
+        outputConfigs.update(outputConfigsRename)
 
         autoVars = set()
         autoMetVars = set()
         autoTruthMetVars = set()
-        for outputName in outputConfigs :
-            outputConfig = outputConfigs[outputName]
+        for outputName, outputConfig in outputConfigs.items():
             if outputConfig.enabled :
-                if config.isMetContainer (outputConfig.origContainerName):
+                if config.isMetContainer (outputConfig.origContainerName) and outputConfig.prefix not in self.containersFullMET:
                     if "Truth" in outputConfig.origContainerName:
                         myVars = autoTruthMetVars
                     else:
@@ -190,30 +257,25 @@ class OutputAnalysisConfig (ConfigBlock):
                     outputName += '_%SYS%'
                 myVars.add(f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}")
 
-        if self.postfix:
-            postfix = self.postfix
-        else:
-            postfix = self.treeName
-
         # Add an ntuple dumper algorithm:
-        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', f'TreeMaker{postfix}' )
+        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
         treeMaker.TreeName = self.treeName
         treeMaker.RootStreamName = self.streamName
         # the auto-flush setting still needs to be figured out
         #treeMaker.TreeAutoFlush = 0
 
         if self.vars or autoVars:
-            ntupleMaker = self.createOutputAlgs(config, f'NTupleMaker{postfix}', self.vars | autoVars)
+            ntupleMaker = self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            ntupleMaker = self.createOutputAlgs(config, f'MetNTupleMaker{postfix}', self.metVars | autoMetVars, isMet=True)
+            ntupleMaker = self.createOutputAlgs(config, 'MetNTupleMaker', self.metVars | autoMetVars, isMet=True)
             ntupleMaker.termName = self.metTermName
 
         if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            ntupleMaker = self.createOutputAlgs(config, f'TruthMetNTupleMaker{postfix}', self.truthMetVars | autoTruthMetVars, isMet=True)
+            ntupleMaker = self.createOutputAlgs(config, 'TruthMetNTupleMaker', self.truthMetVars | autoTruthMetVars, isMet=True)
             ntupleMaker.termName = self.truthMetTermName
 
-        treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
+        treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
         treeFiller.TreeName = self.treeName
         treeFiller.RootStreamName = self.streamName
 
@@ -243,6 +305,9 @@ class OutputAnalysisConfig (ConfigBlock):
             for selectionName in selectionNames:
                 # skip default selection
                 if selectionName == '':
+                    continue
+                # skip selection coming from the Thinning block
+                if self.skipRedundantSelectionFlags and "outputSelect" in selectionName:
                     continue
                 self.makeSelectionSummaryAlg(config, containerName, selectionName)
 

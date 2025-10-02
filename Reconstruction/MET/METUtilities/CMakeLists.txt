@@ -30,10 +30,10 @@ atlas_add_library( METUtilitiesLib
    METUtilities/*.h Root/*.cxx
    PUBLIC_HEADERS METUtilities
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}  ${GTEST_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODEgamma xAODJet xAODMissingET
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODEgamma ColumnarJetLib xAODMissingET
    xAODMuon xAODTau xAODTracking InDetTrackSelectionToolLib PATInterfaces
    EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib tauRecToolsLib
-   METInterface AsgDataHandlesLib JetAnalysisInterfacesLib
+   METInterface AsgDataHandlesLib JetAnalysisInterfacesLib ColumnarMetLib
    PRIVATE_LINK_LIBRARIES EventPrimitives FourMomUtils xAODCore PathResolver )
 
 if( NOT XAOD_STANDALONE )
@@ -42,6 +42,10 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES GaudiKernel AthenaBaseComps METInterface xAODEgamma
       xAODMuon xAODTau xAODMissingET xAODJet JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib MuonSelectorToolsLib tauRecToolsLib
       TauAnalysisToolsLib METUtilitiesLib  )
+else()
+   atlas_add_component( METUtilities
+      src/components/*.cxx
+      LINK_LIBRARIES METUtilitiesLib  )
 endif()
 
 atlas_add_dictionary( METUtilitiesDict
@@ -87,6 +91,12 @@ if( XAOD_ANALYSIS )
           POST_EXEC_SCRIPT nopost.sh )
   endforeach()
 endif()
+
+atlas_add_test( gt_ColumnarToolTests
+   SOURCES test/gt_ColumnarToolTests.cxx
+   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+   LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib METUtilitiesLib
+   POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

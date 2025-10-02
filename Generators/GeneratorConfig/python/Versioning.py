@@ -22,10 +22,10 @@ def legacyReleaseData():
             data[line[1]] = item
     return data
 
-def legacyReleaseDataSampleOverrides():
+def legacyReleaseDataSampleTagOverrides():
     from pathlib import Path
     from PathResolver import PathResolver
-    filePath = Path(PathResolver.FindCalibFile("GeneratorConfig/Legacy_SampleOverrides.txt"))
+    filePath = Path(PathResolver.FindCalibFile("GeneratorConfig/Legacy_SampleTagOverrides.txt"))
     data = {}
     with filePath.open() as f:
         f.readline() # skip header
@@ -35,6 +35,24 @@ def legacyReleaseDataSampleOverrides():
                 continue
             line = line.split(",")
             data[int(line[0])] = line[1]
+    return data
+
+def legacyReleaseDataSampleGeneratorOverrides():
+    from pathlib import Path
+    from PathResolver import PathResolver
+    filePath = Path(PathResolver.FindCalibFile("GeneratorConfig/Legacy_SampleGeneratorOverrides.txt"))
+    data = {}
+    with filePath.open() as f:
+        f.readline() # skip header
+        for line in f:
+            line = line.strip()
+            if line[0] == "#":
+                continue
+            line = line.split(",")
+            versions = {}
+            for i in range(1, len(line), 2):
+                versions[line[i]] = line[i+1] if line[i+1] != "None" else None
+            data[int(line[0])] = versions
     return data
 
 def generatorsGetInitialVersionedDictionary(generators):
@@ -93,17 +111,35 @@ def GeneratorVersioningFixCfg(flags):
     if tags and tags[0].startswith("e"):
         tag = tags[0]
 
-    # Fix specific samples
-    releaseDataSampleOverridesDict = legacyReleaseDataSampleOverrides()
-    if flags.Input.MCChannelNumber and flags.Input.MCChannelNumber in releaseDataSampleOverridesDict:
-        log.warning(f"Overriding e-tag for sample {flags.Input.MCChannelNumber} to {releaseDataSampleOverridesDict[flags.Input.MCChannelNumber]}.")
-        tag = releaseDataSampleOverridesDict[flags.Input.MCChannelNumber]
+    # Fix specific samples directly
+    releaseDataSampleGeneratorOverridesDict = legacyReleaseDataSampleGeneratorOverrides()
+    if flags.Input.MCChannelNumber and flags.Input.MCChannelNumber in releaseDataSampleGeneratorOverridesDict:
+        overrides = releaseDataSampleGeneratorOverridesDict[flags.Input.MCChannelNumber]
+        log.warning(f"Overriding generators to {'+'.join(overrides.keys())}.")
+        generatorsData = {}
+        for generator, version in overrides.items():
+            if version is not None:
+                log.warning(f"Overriding version for {generator} to {version}.")
+            generatorsData[generator] = version
 
+        outputStringList = generatorsVersionedStringList(generatorsData)
+
+        from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+        return TagInfoMgrCfg(flags, tagValuePairs={"generators": generatorsVersionedString(outputStringList)})
+
+    # Fix specific samples' e-tag
+    releaseDataSampleTagOverridesDict = legacyReleaseDataSampleTagOverrides()
+    if flags.Input.MCChannelNumber and flags.Input.MCChannelNumber in releaseDataSampleTagOverridesDict:
+        log.warning(f"Overriding e-tag for sample {flags.Input.MCChannelNumber} to {releaseDataSampleTagOverridesDict[flags.Input.MCChannelNumber]}.")
+        tag = releaseDataSampleTagOverridesDict[flags.Input.MCChannelNumber]
+
+    # Retrieve generators release data
     releaseDataDict = legacyReleaseData()
     if tag not in releaseDataDict:
         log.warning(f"Could not find release data for tag {tag}.")
         return ComponentAccumulator()
 
+    # Apply release data to missing generators
     releaseData = releaseDataDict[tag]
     for k, v in generatorsData.items():
         if v is None and k not in ignoredGenerators and k in releaseData:

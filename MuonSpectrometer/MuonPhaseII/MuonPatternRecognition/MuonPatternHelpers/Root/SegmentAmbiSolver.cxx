@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/SegmentAmbiSolver.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <Acts/Utilities/Enumerate.hpp>
 
-namespace MuonR4 {
-    using namespace SegmentFit;
+namespace MuonR4::SegmentFit {
     using SegmentVec = SegmentAmbiSolver::SegmentVec;
 
     SegmentAmbiSolver::SegmentAmbiSolver(const std::string& name, Config&& cfg):
@@ -42,14 +41,14 @@ namespace MuonR4 {
             /// Fetch first the Prds 
             MeasurementSet testMeas{extractPrds(*resolveMe)};
             Resolution reso{Resolution::noOverlap};
-            unsigned int resolvedIdx{0};
+            unsigned resolvedIdx{0};
             for (std::unique_ptr<Segment>& goodSeg : resolved) {
                 ATH_MSG_VERBOSE("Test against segment "<<toString(localSegmentPars(gctx, *goodSeg))
                         <<" redChi2: "<<redChi2(*goodSeg)<<" nDoF: "<<goodSeg->nDoF());
                 MeasurementSet& resolvedM = segMeasurements[resolvedIdx];
                 std::vector<int>& existSigns{segmentSigns[resolvedIdx++]};
                 /// Check whether the two segments share hits at all
-                unsigned int shared = countShared(resolvedM, testMeas);
+                unsigned shared = countShared(resolvedM, testMeas);
                 if (shared < m_cfg.sharedPrecHits) {
                     ATH_MSG_VERBOSE("Too few shared measurements "<<shared<<" (Required: "<<m_cfg.sharedPrecHits<<").");
                     continue;
@@ -57,8 +56,8 @@ namespace MuonR4 {
                 /// Re-evaluate the drift signs of the accepted measurement w.r.t. good one
                 const std::vector<int> reEvaluatedSigns{driftSigns(gctx, *resolveMe, goodSeg->measurements())};
 
-                unsigned int sameSides{0};
-                for (unsigned int s =0 ; s < existSigns.size(); ++s) {
+                unsigned sameSides{0};
+                for (unsigned s =0 ; s < existSigns.size(); ++s) {
                     sameSides += (reEvaluatedSigns[s] == existSigns[s]);
                 }
                 /// Left-right solutions differ & the two segments have the same nDOF
@@ -80,6 +79,7 @@ namespace MuonR4 {
                     std::swap(goodSeg, resolveMe);
                     std::swap(resolvedM, testMeas);
                     existSigns = driftSigns(gctx, *resolveMe, resolveMe->measurements());
+                    break;
                 } else if (reso == Resolution::subSet) {
                     break;
                 }
@@ -96,10 +96,12 @@ namespace MuonR4 {
     std::vector<int> SegmentAmbiSolver::driftSigns(const ActsGeometryContext& gctx,
                                                    const Segment& segment,
                                                    const Segment::MeasVec& measurements) const {
-        const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, segment));
-        ATH_MSG_VERBOSE("Fetch drift signs for segment "<<segment.msSector()->identString()<<" -- "<<Amg::toString(locPos)
-                        <<Amg::toString(locDir));
-        return SegmentFitHelpers::driftSigns(locPos, locDir, measurements,  msg());
+        Line_t line{};
+        line.updateParameters(spatialLinePars(localSegmentPars(gctx, segment)));
+        
+        ATH_MSG_VERBOSE("Fetch drift signs for segment "<<segment.msSector()->identString()<<" -- "<<Amg::toString(line.position())
+                        <<Amg::toString(line.direction()));
+        return SeedingAux::strawSigns(line, measurements);
     }
     SegmentAmbiSolver::MeasurementSet 
         SegmentAmbiSolver::extractPrds(const Segment& segment) const {
@@ -116,7 +118,7 @@ namespace MuonR4 {
         }
         return meas;
     }
-    unsigned int SegmentAmbiSolver::countShared(const MeasurementSet& measSet1, 
+    unsigned SegmentAmbiSolver::countShared(const MeasurementSet& measSet1, 
                                                 const MeasurementSet& measSet2) const {
         if (measSet1.size() > measSet2.size()) {
             return std::count_if(measSet2.begin(),measSet2.end(),[&measSet1](const xAOD::UncalibratedMeasurement* meas){

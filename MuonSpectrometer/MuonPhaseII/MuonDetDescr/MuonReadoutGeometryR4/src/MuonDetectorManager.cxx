@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
@@ -13,12 +13,13 @@
 #include <limits>
 
 namespace {
+    using ChIndex = Muon::MuonStationIndex::ChIndex;
     template <class T>
-    using ElementStorage = MuonGMR4::MuonDetectorManager::ElementStorage<T>;
+    using ElementStorage_t = MuonGMR4::MuonDetectorManager::ElementStorage_t<T>;
     /// Helper function to copy the radout elements from a technology into the 
     /// vector of all readout elements.
     template <class ReadOutEleStoreType,
-              class ReadoutEleReturnType> void insert(const ElementStorage<ReadOutEleStoreType>& eleStore,
+              class ReadoutEleReturnType> void insert(const ElementStorage_t<ReadOutEleStoreType>& eleStore,
                                                       std::vector<ReadoutEleReturnType>& returnVec) {
         returnVec.reserve(returnVec.capacity() + eleStore.size());
         for (const auto& ele : eleStore) {
@@ -32,19 +33,28 @@ namespace {
                         std::make_move_iterator(eleStore.begin()),
                         std::make_move_iterator(eleStore.end()));
     }
+#ifndef SIMULATIONBASE
+    inline unsigned msSectorIdHash(const ChIndex chIndex, const int sector, const int side) {
+        constexpr unsigned chIdxMax = static_cast<unsigned>(ChIndex::ChIndexMax);
+        const unsigned secMax = Muon::MuonStationIndex::numberOfSectors()/2;
+        const unsigned stationPhi = (sector + sector%2) / 2 - 1;
+        return stationPhi + static_cast<unsigned>(chIndex)* secMax + (side <0) * chIdxMax * secMax;
+    }
+#endif
 }
 
 #define WRITE_SETTER(ELE_TYPE, SETTER, STORAGE_VEC)                                 \
-    StatusCode MuonDetectorManager::SETTER(ElementPtr<ELE_TYPE> element) {          \
+    StatusCode MuonDetectorManager::SETTER(ElementPtr_t<ELE_TYPE> element) {          \
         if (!element) {                                                             \
             ATH_MSG_FATAL(__func__ << " -- nullptr is given.");                     \
             return StatusCode::FAILURE;                                             \
         }                                                                           \
         ATH_CHECK(element->initElement());                                          \
         element->releaseUnAlignedTrfs();                                            \
-        size_t idx = static_cast<unsigned int>(element->identHash());               \
-        if (idx >= STORAGE_VEC.size())                                              \
+        size_t idx = static_cast<size_t>(element->identHash());                     \
+        if (idx >= STORAGE_VEC.size()) {                                            \
             STORAGE_VEC.resize(idx + 1);                                            \
+        }                                                                           \
         std::unique_ptr<ELE_TYPE>& new_element = STORAGE_VEC[idx];                  \
         if (new_element) {                                                          \
             ATH_MSG_FATAL("The detector element "                                   \
@@ -81,16 +91,25 @@ namespace {
         insert(getAllsTgcReadoutElements(), allEles);                                         \
         return allEles;                                                                       \
     }                                                                                         \
-    TYPE MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) TYPE { \
-    if (m_idHelperSvc->isMdt(id)) return getMdtReadoutElement(id);                               \
-    else if (m_idHelperSvc->isRpc(id)) return getRpcReadoutElement(id);                          \
-    else if (m_idHelperSvc->isTgc(id)) return getTgcReadoutElement(id);                          \
-    else if (m_idHelperSvc->issTgc(id)) return getsTgcReadoutElement(id);                        \
-    else if (m_idHelperSvc->isMM(id)) return getMmReadoutElement(id);                            \
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "                     \
-                    <<m_idHelperSvc->toString(id));                                              \
-    return nullptr;                                                                              \
-}
+    TYPE MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) TYPE {  \
+        switch(m_idHelperSvc->technologyIndex(id)) {                                              \
+            using enum Muon::MuonStationIndex::TechnologyIndex;                                   \
+            case MDT:                                                                             \
+                return getMdtReadoutElement(id);                                                  \
+            case RPC:                                                                             \
+                return getRpcReadoutElement(id);                                                  \
+            case TGC:                                                                             \
+                return getTgcReadoutElement(id);                                                  \
+            case STGC:                                                                            \
+                return getsTgcReadoutElement(id);                                                 \
+            case MM:                                                                              \
+                return getMmReadoutElement(id);                                                   \
+            default:                                                                              \
+                ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "          \
+                    <<m_idHelperSvc->toString(id));                                               \
+        }                                                                                         \
+        return nullptr;                                                                           \
+    }
 
 
 namespace MuonGMR4 {
@@ -151,10 +170,30 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
 }
 
 #ifndef SIMULATIONBASE
-       /** @brief Add a spectrometer enevelope object to the manager
-     *  @param chSector: Unique_ptr to the sector */
-    void MuonDetectorManager::addSpectrometerSector(ElementPtr<SpectrometerSector>&& chSector) {
+    void MuonDetectorManager::addSpectrometerSector(ElementPtr_t<SpectrometerSector>&& chSector) {
+        const unsigned hash = msSectorIdHash(chSector->chamberIndex(), chSector->sector(), chSector->side());
+        ATH_MSG_DEBUG("Add new sector "<<(*chSector)<<", hash: "<<hash);
+        const auto [element, isNew] = m_envelopesById.insert(std::make_pair(hash, chSector.get()));
+        if (!isNew) {
+            ATH_MSG_DEBUG("Conflicting hash: "<<hash<<", inserted: "<<element->second->chambers().size()
+                           <<", "<<chSector->chambers().size());
+            if (element->second->chambers().size() < chSector->chambers().size()) {
+                element->second = chSector.get();
+            }
+        }
         m_secEnvelopes.push_back(std::move(chSector));
+    }
+    const SpectrometerSector* MuonDetectorManager::getSectorEnvelope(const Muon::MuonStationIndex::ChIndex chIdx,
+                                                                     const unsigned sector,
+                                                                     const int side) const {
+        const unsigned hash = msSectorIdHash(chIdx, sector, side);
+        EnvelopeMap_t::const_iterator itr = m_envelopesById.find(hash);
+        if (itr != m_envelopesById.end()) {
+            return itr->second;
+        }
+        ATH_MSG_WARNING("Failed to fetch valid envelope for "<<Muon::MuonStationIndex::chName(chIdx)
+                        <<", sector: "<<sector<<", side: "<<side);
+        return nullptr;
     }
     const SpectrometerSector* MuonDetectorManager::getSectorEnvelope(const Identifier& channelId) const {
         return getReadoutElement(channelId)->msSector();
@@ -168,7 +207,7 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
     MuonSectorSet MuonDetectorManager::getAllSectors() const{
         MuonSectorSet sectors{};
         std::ranges::for_each(m_secEnvelopes,
-                [&sectors](const ElementPtr<SpectrometerSector>& ms){ 
+                [&sectors](const ElementPtr_t<SpectrometerSector>& ms){ 
                     sectors.insert(ms.get());
                 });
         return sectors;
@@ -176,7 +215,7 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
     MuonChamberSet MuonDetectorManager::getAllChambers() const {
         MuonChamberSet chambers{};
         std::ranges::for_each(m_secEnvelopes,
-                             [&chambers](const ElementPtr<SpectrometerSector>& ms){
+                             [&chambers](const ElementPtr_t<SpectrometerSector>& ms){
                                 std::ranges::for_each(ms->chambers(),
                                     [&chambers](const SpectrometerSector::ChamberPtr& ch){
                                         chambers.insert(ch.get());
@@ -186,11 +225,11 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
     }
 #endif
 
-template <class MuonDetectorType> void MuonDetectorManager::linkElements(ElementStorage<MuonDetectorType>& detStore,
+template <class MuonDetectorType> void MuonDetectorManager::linkElements(ElementStorage_t<MuonDetectorType>& detStore,
                                                                          MuonDetectorType* reEle) {
         ATH_MSG_VERBOSE("No inter-linking for "<<ActsTrk::to_string(reEle->detectorType())<<" "<<detStore.size());
 }
-template <> void MuonDetectorManager::linkElements(ElementStorage<MdtReadoutElement>& detStore,
+template <> void MuonDetectorManager::linkElements(ElementStorage_t<MdtReadoutElement>& detStore,
                                                    MdtReadoutElement* refEle) {
         const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
         const int complMl = refEle->multilayer() == 2 ? 1 : idHelper.multilayerMax(refEle->identify());

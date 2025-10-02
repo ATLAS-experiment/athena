@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODInDetMeasurement/versions/PixelClusterAuxContainer_v1.h"
@@ -16,8 +16,6 @@ PixelClusterAuxContainer_v1::PixelClusterAuxContainer_v1()
     AUX_VARIABLE(channelsInPhi);
     AUX_VARIABLE(channelsInEta);
     AUX_VARIABLE(widthInEta);
-    AUX_VARIABLE(omegaX);
-    AUX_VARIABLE(omegaY);
     AUX_VARIABLE(totList);
     AUX_VARIABLE(totalToT);
     AUX_VARIABLE(chargeList);

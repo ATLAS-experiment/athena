@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::HEC::LocalGeometry
-#include "LArG4HEC/LocalGeometry.h"
+#include "LocalGeometry.h"
 
 #include "LArG4Code/LArG4Identifier.h"
 
@@ -14,7 +14,6 @@
 #include "G4LogicalVolumeStore.hh"
 #include "G4TouchableHistory.hh"
 
-
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
@@ -23,9 +22,7 @@
 #include <cmath>
 #include <stdexcept>
 
-
 namespace Units = Athena::Units;
-
 
 #undef DEBUG_HEC
 #undef DEBUG_HEC_OLD_DIAGNOSTIC
@@ -97,17 +94,11 @@ namespace LArG4 {
 
     LocalGeometry::LocalGeometry(const std::string& name, ISvcLocator * pSvcLocator)
       : base_class(name, pSvcLocator)
-      , m_geoModel("GeoModelSvc", name)
-      , m_geoDbTagSvc("GeoDbTagSvc",name)
-      , m_isX(false)
     {
-      declareProperty("GeoModelSvc",m_geoModel);
-      declareProperty("isX", m_isX);
     }
 
     StatusCode LocalGeometry::initialize()
     {
-
       // Access the GeoModelSvc:
       ATH_CHECK(m_geoModel.retrieve());
 

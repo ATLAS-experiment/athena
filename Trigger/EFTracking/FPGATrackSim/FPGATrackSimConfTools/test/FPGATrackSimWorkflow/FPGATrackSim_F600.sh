@@ -28,14 +28,15 @@ run_InsideOut(){
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
         Trigger.FPGATrackSim.runCKF=$RUN_CKF \
-        Trigger.FPGATrackSim.region=34 \
+        Trigger.FPGATrackSim.regionList="34,98,162,226,290,354,418,482,546,610,674,738,802,866,930,994,1058,1122,1186,1250" \
         Trigger.FPGATrackSim.pipeline='F-600' \
         Trigger.FPGATrackSim.tracking=True \
         Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
-        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.Hough.secondStage=True \
         Trigger.FPGATrackSim.writeToAOD=True \
+        Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
         Output.AODFileName=$xAODOutput
@@ -53,7 +54,7 @@ if [ -z "$ArtJobType" ];then # skip file check for ART (this has already been do
     echo "... analysis output verification"
 cat << EOF > checkHist.C
 {
-    _file0->cd("FPGATrackSimLogicalHitsProcessAlg");
+    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34");
     TH1* h = (TH1*)gDirectory->Get("nroads_1st");
     if ( h == nullptr )
         throw std::runtime_error("oh dear, after all of this there is no roads histogram");

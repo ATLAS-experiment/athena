@@ -6,6 +6,10 @@
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
 #include "ZdcAnalysis/RpdSubtractCentroidTool.h"
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
+#include "AthContainers/ConstAccessor.h"
+#include <sstream>     // for std::ostringstream
+#include <utility>     // for std::pair (if not already included indirectly)
+
 
 ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator){
@@ -15,6 +19,10 @@ ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* 
 
 ZdcMonitorAlgorithm::~ZdcMonitorAlgorithm() {}
 
+
+bool ZdcMonitorAlgorithm::check_equal_within_rounding(float a, float b, float epsilon) const {
+    return std::fabs(a - b) < epsilon;
+}
 
 void ZdcMonitorAlgorithm::calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges) {
     // Clear the vector to ensure it's empty
@@ -151,12 +159,16 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
     std::vector<std::string> sides = {"C","A"};
     std::vector<std::string> modules = {"0","1","2","3"};
     std::vector<std::string> channels = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"};
+
     m_ZDCModuleToolIndices = buildToolMap<std::map<std::string,int>>(m_tools,"ZdcModuleMonitor",sides,modules);
     if (m_enableZDCPhysics || m_enableRPDAmp || m_enableCentroid){ // none is true for injector pulse --> no Per-side monitoring tool
         m_ZDCSideToolIndices = buildToolMap<int>(m_tools,"ZdcSideMonitor",sides);
     }
     if (m_enableRPDAmp){
         m_RPDChannelToolIndices = buildToolMap<std::map<std::string,int>>(m_tools,"RpdChannelMonitor",sides,channels);
+    }
+    if (m_isInjectedPulse && (!m_isStandalone) && (!m_isOnline)) {
+        m_LucrodResponseSingleVoltageToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"LucrodResponseSingleVoltageMonitor",sides,modules,m_injPulseVoltageStepsStr.value());
     }
 
     //---------------------------------------------------
@@ -172,7 +184,7 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
         else {
             unsigned int startLB = m_zdcInjPulserAmpMap->getFirstLumiBlock(m_injMapRunToken);
             unsigned int nsteps = m_zdcInjPulserAmpMap->getNumSteps(m_injMapRunToken);
-            ATH_MSG_DEBUG("Successfully obtained injector pulse steps for run " << m_runNumber
+            ATH_MSG_INFO("Successfully obtained injector pulse steps for run " << m_runNumber
                 << ", first LB = " << startLB << ", number of steps = " << nsteps);
         }
     }
@@ -202,6 +214,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     // declaring & obtaining event-level information of interest 
 // ______________________________________________________________________________
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
+
     // already checked in fillHistograms that eventInfo is valid
     auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
     auto bcid = Monitored::Scalar<unsigned int>("bcid", eventInfo->bcid());
@@ -234,8 +247,11 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     fill(zdcTool, decodingErrorBits, lumiBlock);
 
 // ______________________________________________________________________________
-    // does event pass trigger selection?
+    // does event pass trigger selections?
 // ______________________________________________________________________________
+
+
+//  ----------------------- ZDC single-sided triggers -----------------------
 
     auto passTrigSideA = Monitored::Scalar<bool>("passTrigSideA",false); // if trigger isn't enabled (e.g, MC) the with-trigger histograms are never filled (cut mask never satisfied)
     auto passTrigSideC = Monitored::Scalar<bool>("passTrigSideC",false);
@@ -247,6 +263,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         if (passTrigSideA) ATH_MSG_DEBUG("passing trig on side A!");    
         if (passTrigSideC) ATH_MSG_DEBUG("passing trig on side C!");    
     }
+
+//  ----------------------- UCC triggers -----------------------
     
     auto passUCCTrig_HELT15 = Monitored::Scalar<bool>("passUCCTrig_HELT15",false);
     auto passUCCTrig_HELT20 = Monitored::Scalar<bool>("passUCCTrig_HELT20",false);
@@ -293,6 +311,67 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto uccTrigBits = Monitored::Collection("uccTrigBits", uccTrigBitsArr);
     fill(zdcTool, uccTrigBits, lumiBlock);
 
+//  ----------------------- OOpO triggers -----------------------
+    int nOOpOTriggers = m_OOpOtriggerChains.size();
+    int nOOpOL1TriggersFromCTP = m_OOpOL1TriggerFromCTPIDMap.size();
+    std::vector<float> oopoTrigBitsArr(nOOpOTriggers+2, 0.); // enabled, trigger bits, disabled
+
+    std::vector<Monitored::Scalar<bool>> oopoTrigPassBoolVec;
+    oopoTrigPassBoolVec.reserve(nOOpOTriggers);
+
+    if(m_EnableOOpOTriggers && m_enableZDCPhysics) { // if not enable trigger, the pass-trigger booleans will still be defined but with value always set to false
+        oopoTrigBitsArr[0] += 1; // OOpO trigger enabled
+        
+        const auto &trigDecTool = getTrigDecisionTool();
+
+        for (int i = 0; i < nOOpOTriggers - nOOpOL1TriggersFromCTP; ++i) {
+            const bool pass = (trigDecTool->isPassed( m_OOpOtriggerChains[i] ));
+
+            // Histogram variable name:  “pass<L1-name>”
+            std::string varName = "pass" + m_OOpOtriggerChains[i];
+            //  *Optionally sanitise if you have funky characters*
+            std::replace_if( varName.begin(), varName.end(),
+                             [](char c){ return c=='-'; }, '_' );
+
+            oopoTrigPassBoolVec.emplace_back( varName, pass );
+            oopoTrigBitsArr[i+1] += pass;
+        }
+
+        try {
+            const xAOD::TrigDecision* trigDecision = nullptr;
+            ANA_CHECK(evtStore()->retrieve( trigDecision, "xTrigDecision"));
+
+            if (!trigDecision){
+                throw std::runtime_error("Trigger decision NOT retrieved for PEB stream!");
+            }
+            std::vector<uint32_t> tbp = trigDecision->tbp();
+
+            for (const auto& [ctp_id, trig_name] : m_OOpOL1TriggerFromCTPIDMap) {
+                int ind = ctp_id / 32; // index in vector tbp
+                int bit = ctp_id % 32; // bit in tax[ind]
+                const bool pass = ((tbp.at(ind) >> bit) & 1);
+                ATH_MSG_INFO("what's the size of xAOD::TrigDecision::tbp()? " << tbp.size());
+                std::string varName = "pass" + trig_name;
+                oopoTrigPassBoolVec.emplace_back( varName, pass );
+                oopoTrigBitsArr.at(oopoTrigPassBoolVec.size()) += pass;
+            }
+        } catch (const std::out_of_range& e) {
+            ATH_MSG_WARNING("Out of range error captured when fetching L1 trigger bits from CTP ID: " << e.what());
+        } catch (const std::runtime_error& e) {
+            ATH_MSG_WARNING("Runtime error captured when fetching L1 trigger bits from CTP ID: " << e.what());
+        } catch (const std::exception& e) {
+            ATH_MSG_WARNING("Other std::exception captured when fetching L1 trigger bits from CTP ID: " << e.what());
+        } catch (...) {
+            ATH_MSG_WARNING("Error captured when fetching L1 trigger bits from CTP ID. Likely either no L1 trigger looked at or no L1 trigger will show to be passed.");
+        }
+    }else{
+        oopoTrigBitsArr[nOOpOTriggers + 1] += 1; // OOpO trigger disabled
+    }
+
+    auto oopoTrigBits = Monitored::Collection("OOpOTrigBits", oopoTrigBitsArr);
+
+    fill(zdcTool, oopoTrigBits, lumiBlock);
+
 // ______________________________________________________________________________
     // declaring & obtaining variables of interest for the ZDC sums
     // including the RPD x,y positions, reaction plane and status
@@ -308,7 +387,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto rpdCosDeltaReactionPlaneAngle = Monitored::Scalar<float>("rpdCosDeltaReactionPlaneAngle",-1000.0);
     auto bothReactionPlaneAngleValid = Monitored::Scalar<bool>("bothReactionPlaneAngleValid",true);
     auto bothHasCentroid = Monitored::Scalar<bool>("bothHasCentroid",true); // the looser requirement that both centroids were calculated (ignore valid)
-    
+
     std::array<bool, 2> centroidSideValidArr;
     std::array<bool, 2> rpdSideValidArr = {false, false};
     std::array<std::vector<float>,2> rpdSubAmpVecs;
@@ -555,7 +634,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
     std::array<float, m_nZdcStatusBits> zdcStatusBitsCount;
     std::array<float, m_nRpdStatusBits> rpdStatusBitsCount;
-    
+
     if (! zdcModules.isValid() ) {
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcModuleContainerKey);
        return StatusCode::SUCCESS;
@@ -569,9 +648,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
         }
           
         injectedPulseInputVoltage = m_zdcInjPulserAmpMap->getPulserAmplitude(m_injMapRunToken, lumiBlock);
-        if (injectedPulseInputVoltage > 0){ // LB > startLB
-            ATH_MSG_DEBUG("Lumi block: " << lumiBlock << "; pulser amplitude: " << injectedPulseInputVoltage);        
-        }
     }
 
     // first loop over zdcModules - read ZDC-module information & fill in ZDC histograms
@@ -609,7 +685,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         zdcModuleMaxADC = zdcModuleMaxADCHandle(*zdcMod);
                         zdcModuleMaxADCHG = zdcModuleMaxADCHGHandle(*zdcMod);
                         zdcModuleMaxADCLG = zdcModuleMaxADCLGHandle(*zdcMod);
-                        zdcModuleAmpToMaxADCRatio = (zdcModuleMaxADC == 0)? -1000. : zdcModuleAmp / zdcModuleMaxADC;
+                        zdcModuleAmpToMaxADCRatio = (zdcModuleMaxADC == 0)? -1000. : zdcModuleFitAmp / zdcModuleMaxADC; // use fit amplitude: no gain factor applied to either
                         zdcModuleTime = zdcModuleTimeHandle(*zdcMod);
                         zdcModuleFitT0 = zdcModuleFitT0Handle(*zdcMod);
                         zdcModuleChisq = zdcModuleChisqHandle(*zdcMod);
@@ -656,73 +732,133 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         else            zdcHadronicEnergySumTwoSidesTeV += zdcModuleCalibAmp / 1000.; // hadronic module energy
 
 
-                        // ------------ throw away the first few seconds of each LB ------------
-                        // get the start + end time of the event LB from the cool data
-                        // copied from Trigger/TrigT1/TrigT1CTMonitoring/src/BSMonitoringAlg.cxx
-                        if (!m_isSim && !m_isOnline && m_isInjectedPulse) {
-                            uint64_t lb_stime = 0; // LB POSIX start time in seconds
-                            uint64_t lb_etime = 0; // LB POSIX end time in seconds
-                            bool retrievedLumiBlockTimes = false;
-
-                            SG::ReadCondHandle<AthenaAttributeList> lblb(m_LBLBFolderInputKey, ctx);
-                            const AthenaAttributeList* lblbattrList{*lblb};
-                            if (lblbattrList==nullptr) {
-                                ATH_MSG_WARNING("Failed to retrieve /TRIGGER/LUMI/LBLB " << m_LBLBFolderInputKey.key() << " not found");
-                            }
-                            else {
-                                retrievedLumiBlockTimes = true;
-                                auto lb_stime_loc = (*lblbattrList)["StartTime"].data<cool::UInt63>();
-                                auto lb_etime_loc = (*lblbattrList)["EndTime"].data<cool::UInt63>();
-                                lb_stime = lb_stime_loc;
-                                lb_etime = lb_etime_loc;
-                                ATH_MSG_DEBUG("lb_stime: " << lb_stime << " lb_etime: " << lb_etime );
-                            }
-
-                            lb_stime /= 1000000000;
-                            lb_etime /= 1000000000;
-
-                            if (lb_etime <= lb_stime || !retrievedLumiBlockTimes){
-                                ATH_MSG_WARNING("The LB start + end time for current event is not retrieved.");
-                                ATH_MSG_WARNING("No event rejection at beginning of LB is implemented.");
-                            }else if(eventTime < lb_stime){
-                                ATH_MSG_WARNING("Event time is before the start time of the current LB");
-                                ATH_MSG_WARNING("Event time: " << eventTime << "; current LB: " << lumiBlock << "; start time of current LB: " << lb_stime);
-                            }else if (eventTime > lb_etime){
-                                ATH_MSG_WARNING("Event time is after the end time of the current LB");
-                                ATH_MSG_WARNING("Event time: " << eventTime << "; current LB: " << lumiBlock << "; end time of current LB: " << lb_etime);
-                            }else{ // require event time to be at least X seconds after start time of the current LB
-                                zdcHGInjPulseValid &= (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);
-                                zdcLGInjPulseValid &= (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);                            
-                            }
-                        }
-
-                        // ------------ impose the rest of HG/LG injector-pulse validity requirements ------------
-
-                        zdcHGInjPulseValid &= zdcModuleHG;
-                        zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit);
-                        zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::preExpTailBit);
-                        zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadChisqBit);
-                        zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FailBit);
-                        zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FitMinAmpBit);
-                        if (m_minVInjToImposeAmpRequirementHGInjectorPulse > 0 && injectedPulseInputVoltage >= m_minVInjToImposeAmpRequirementHGInjectorPulse){
-                            zdcHGInjPulseValid &= (zdcModuleAmp > m_minAmpRequiredHGInjectorPulse);
-                        }
-                        zdcHGInjPulseValid &= (zdcModuleFitT0 >= m_timingCutsInjectorPulse[iside][imod][0] && zdcModuleFitT0 <= m_timingCutsInjectorPulse[iside][imod][1]);
-
-                        zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::LGOverflowBit);
-                        zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit);
-                        zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::preExpTailBit);
-                        zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadChisqBit);
-                        zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FailBit);
-                        zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FitMinAmpBit);
-                        if (m_minVInjToImposeAmpRequirementLGInjectorPulse > 0 && injectedPulseInputVoltage >= m_minVInjToImposeAmpRequirementLGInjectorPulse){
-                            zdcLGInjPulseValid &= (zdcModuleLGFitAmp > m_minAmpRequiredLGInjectorPulse);
-                        }
-                        zdcLGInjPulseValid &= (zdcModuleFitT0 >= m_timingCutsInjectorPulse[iside][imod][0] && zdcModuleFitT0 <= m_timingCutsInjectorPulse[iside][imod][1]);
-
+                        
                         if (m_isInjectedPulse){
+
+                            zdcHGInjPulseValid = true;
+                            zdcLGInjPulseValid = true;
+
+                            bool pass_first3s = true;
+
+                            // ------------ throw away the first few seconds of each LB ------------
+                            // get the start + end time of the event LB from the cool data
+                            // copied from Trigger/TrigT1/TrigT1CTMonitoring/src/BSMonitoringAlg.cxx
+
+                            if (!m_isSim && !m_isOnline) {
+                                uint64_t lb_stime = 0; // LB POSIX start time in seconds
+                                uint64_t lb_etime = 0; // LB POSIX end time in seconds
+                                bool retrievedLumiBlockTimes = false;
+
+                                SG::ReadCondHandle<AthenaAttributeList> lblb(m_LBLBFolderInputKey, ctx);
+                                const AthenaAttributeList* lblbattrList{*lblb};
+                                if (lblbattrList==nullptr) {
+                                    ATH_MSG_WARNING("Failed to retrieve /TRIGGER/LUMI/LBLB " << m_LBLBFolderInputKey.key() << " not found");
+                                }
+                                else {
+                                    retrievedLumiBlockTimes = true;
+                                    auto lb_stime_loc = (*lblbattrList)["StartTime"].data<cool::UInt63>();
+                                    auto lb_etime_loc = (*lblbattrList)["EndTime"].data<cool::UInt63>();
+                                    lb_stime = lb_stime_loc;
+                                    lb_etime = lb_etime_loc;
+                                    ATH_MSG_DEBUG("lb_stime: " << lb_stime << " lb_etime: " << lb_etime );
+                                }
+
+                                lb_stime /= 1000000000;
+                                lb_etime /= 1000000000;
+
+                                if (lb_etime <= lb_stime || !retrievedLumiBlockTimes){
+                                    ATH_MSG_WARNING("The LB start + end time for current event is not retrieved.");
+                                    ATH_MSG_WARNING("No event rejection at beginning of LB is implemented.");
+                                }else if(eventTime < lb_stime){
+                                    ATH_MSG_WARNING("Event time is before the start time of the current LB");
+                                    ATH_MSG_WARNING("Event time: " << eventTime << "; current LB: " << lumiBlock << "; start time of current LB: " << lb_stime);
+                                }else if (eventTime > lb_etime){
+                                    ATH_MSG_WARNING("Event time is after the end time of the current LB");
+                                    ATH_MSG_WARNING("Event time: " << eventTime << "; current LB: " << lumiBlock << "; end time of current LB: " << lb_etime);
+                                }else{ // require event time to be at least X seconds after start time of the current LB
+                                    pass_first3s = (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);
+                                    zdcHGInjPulseValid &= (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);
+                                    zdcLGInjPulseValid &= (eventTime > lb_stime + m_nSecondsRejectStartofLBInjectorPulse);                            
+                                }
+                            }
+
+                            // ------------ impose the rest of HG/LG injector-pulse validity requirements ------------
+
+                            zdcHGInjPulseValid &= zdcModuleHG;
+                            zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit);
+                            zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadChisqBit);
+                            zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FailBit);
+                            zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FitMinAmpBit);
+                            zdcHGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadT0Bit);
+                            if (m_minVInjToImposeAmpRequirementHGInjectorPulse > 0 && injectedPulseInputVoltage >= m_minVInjToImposeAmpRequirementHGInjectorPulse){
+                                zdcHGInjPulseValid &= (zdcModuleAmp > m_minAmpRequiredHGInjectorPulse);
+                            }
+
+                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::LGOverflowBit);
+                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit);
+                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadChisqBit);
+                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FailBit);
+                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::FitMinAmpBit);
+                            zdcLGInjPulseValid &= !(status & 1 << ZDCPulseAnalyzer::BadT0Bit);
+                            if (m_minVInjToImposeAmpRequirementLGInjectorPulse > 0 && injectedPulseInputVoltage >= m_minVInjToImposeAmpRequirementLGInjectorPulse){
+                                zdcLGInjPulseValid &= (zdcModuleLGFitAmp > m_minAmpRequiredLGInjectorPulse);
+                            }
+
+                            if (injectedPulseInputVoltage > 0){ // LB > startLB
+                                if (injectedPulseInputVoltage > 1 && !zdcLGInjPulseValid &&pass_first3s){ // problematic range && LG not valid && not failing first 3s
+
+                                    std::ostringstream fails;
+                                    std::vector<std::pair<std::string, bool>> checks = {
+                                        {"LGOverflowBit",        !(status & (1 << ZDCPulseAnalyzer::LGOverflowBit))},
+                                        {"ExcludeEarlyLGBit",    !(status & (1 << ZDCPulseAnalyzer::ExcludeEarlyLGBit))},
+                                        {"BadChisqBit",          !(status & (1 << ZDCPulseAnalyzer::BadChisqBit))},
+                                        {"FailBit",              !(status & (1 << ZDCPulseAnalyzer::FailBit))},
+                                        {"FitMinAmpBit",         !(status & (1 << ZDCPulseAnalyzer::FitMinAmpBit))},
+                                        {"BadT0Bit",             !(status & (1 << ZDCPulseAnalyzer::BadT0Bit))}
+                                    };
+
+                                    for (const auto& [name, pass] : checks) {
+                                        if (!pass) fails << "fail " << name << "; ";
+                                    }
+
+                                    ATH_MSG_DEBUG("[LG NOT valid] Lumi block: " << lumiBlock
+                                        << "; input voltage: " << injectedPulseInputVoltage
+                                        << "; LG amp: " << zdcModuleLGFitAmp
+                                        << "; side" << side_str << ", mod" << module_str
+                                        << "; " << fails.str());
+
+                                }
+                            } else if (lumiBlock > m_zdcInjPulserAmpMap->getFirstLumiBlock(m_injMapRunToken)){ // LB > startLB but injectedPulseInputVoltage < 0!
+                                ATH_MSG_WARNING("Lumi block: " << lumiBlock << ", yet input voltage is negative!! input voltage: " << injectedPulseInputVoltage);
+                            }
+
+
+                            // ------------ find the voltage index & fill per-voltage HG&LG cut masks ------------
+
+                            std::vector<float> injPulseVoltageSteps = m_injPulseVoltageSteps.value();
+
+                            int voltage_index = -1;
+                            auto voltage_iter = std::find_if(injPulseVoltageSteps.begin(), injPulseVoltageSteps.end(), 
+                                                   [&](float num) { return check_equal_within_rounding(num, injectedPulseInputVoltage); });
+
+                            if (voltage_iter != injPulseVoltageSteps.end()) {
+                                voltage_index = std::distance(injPulseVoltageSteps.begin(), voltage_iter);
+                                ATH_MSG_DEBUG("Found injected-pulse input voltage " << injectedPulseInputVoltage << " at index " << std::distance(injPulseVoltageSteps.begin(), voltage_iter));
+                            } else {
+                                ATH_MSG_WARNING("Injected-pulse input voltage " << injectedPulseInputVoltage << "(Lumi block: " << lumiBlock << ")  NOT found in voltage steps read from json.");
+                                ATH_MSG_WARNING("Possibly a problem with json file reading.");
+                                ATH_MSG_WARNING("Single-voltage lucrod response histograms NOT filled.");
+                            }
+
+                            // ------------ fill the histograms ------------
+
+                            auto VoltageIndex = Monitored::Scalar<float>("VoltageIndex", voltage_index+0.5);
+
                             if (m_isStandalone) injectedPulseInputVoltage = zdcModuleAmp * 1. / 25000.; // no LB in standalone --> fill dummy histograms 
-                            fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], zdcModuleAmp, zdcModuleFitAmp, zdcModuleMaxADC, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleLGFitAmp, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGAmpRatioNoNonlinCorr, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, injectedPulseInputVoltage, zdcHGInjPulseValid, zdcLGInjPulseValid, lumiBlock, bcid);
+                            fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], VoltageIndex, zdcModuleAmp, zdcModuleFitAmp, zdcModuleMaxADC, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleLGFitAmp, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGAmpRatioNoNonlinCorr, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, injectedPulseInputVoltage, zdcHGInjPulseValid, zdcLGInjPulseValid, lumiBlock, bcid);
+                            if (voltage_index >= 0 && (!m_isOnline)){
+                                fill(m_tools[m_LucrodResponseSingleVoltageToolIndices.at(side_str).at(module_str).at(m_injPulseVoltageStepsStr.value().at(voltage_index))], zdcModuleFitAmp, zdcModuleLGFitAmp, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcHGInjPulseValid, zdcLGInjPulseValid);
+                            }
                         }else{
                             fill(m_tools[m_ZDCModuleToolIndices.at(side_str).at(module_str)], zdcModuleAmp, zdcModuleMaxADC, zdcModuleMaxADCHG, zdcModuleMaxADCLG, zdcModuleAmpToMaxADCRatio, zdcModuleFract, zdcUncalibSumCurrentSide, zdcEnergySumCurrentSide, zdcAbove20NCurrentSide, zdcEnergyAboveModuleFractCut, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleAmpLGRefit, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGAmpRatioNoNonlinCorr, zdcModuleHGtoLGT0Diff, zdcModuleFractionValid, zdcModuleTimeValid, zdcModuleHGTimeValid, zdcModuleLGTimeValid, lumiBlock, bcid);
                         }
@@ -798,6 +934,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     // obtaining fCalEt on A,C side
 // ______________________________________________________________________________
 
+    auto totalEt24 = Monitored::Scalar<double>("totalEt24", 0.0); // total ET within |eta| < 2.4
     auto fcalEtA = Monitored::Scalar<double>("fcalEtA", 0.0);
     auto fcalEtC = Monitored::Scalar<double>("fcalEtC", 0.0);
     auto fcalEtSumTwoSides = Monitored::Scalar<double>("fcalEtSumTwoSides", 0.0);
@@ -813,7 +950,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 int layer = eventShape->layer();
                 float eta = eventShape->etaMin();
                 float et = eventShape->et();
-                if (layer == 21 || layer == 22 || layer == 23){
+                if (layer == 21 || layer == 22 || layer == 23){ // FCal
                     fcalEtSumTwoSides += et / 1000000.;
                     if (eta > 0){
                         fcalEtA += et / 1000000.;
@@ -824,11 +961,13 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                         fcalEtArr[0] += et / 1000000.;
                     }
                 }
+
+                if (TMath::Abs(eta) < 2.4) {
+                    totalEt24 += et / 1000000.;
+                }
             }
         }
-
     }
-
 
 // ______________________________________________________________________________
     // give warning if there is missing aux data but no decoding error
@@ -851,20 +990,48 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     // filling generic ZDC monitoring tool for A-C side correlations & cos(reaction plane angle)
 // ______________________________________________________________________________
 
-    if ((m_enableZDCPhysics && cur_event_ZDC_available) || (m_enableCentroid && cur_event_RPD_available)){
+    if ((m_enableZDCPhysics && cur_event_ZDC_available) || (m_enableCentroid && cur_event_RPD_available)) {
 
         if (m_enableZDCPhysics && cur_event_ZDC_available){
+            // ZDC-only global variables
+            std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> vars_global = {
+                std::ref(lumiBlock),
+                std::ref(bcid), 
+                std::ref(passTrigSideA), 
+                std::ref(passTrigSideC), 
+                std::ref(zdcEnergySumA), 
+                std::ref(zdcEnergySumC), 
+                std::ref(zdcUncalibSumA), 
+                std::ref(zdcUncalibSumC), 
+                std::ref(zdcEnergySumTwoSidesTeV),
+            };
+
+            // calo-based global variables
             if (m_CalInfoOn){ // calorimeter information is turned on
-                fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, fcalEtA, fcalEtC);
-                if (m_EnableUCCTriggers){
-                    ATH_MSG_DEBUG("zdcEnergySumTwoSidesTeV: " << zdcEnergySumTwoSidesTeV << "; fcalEtSumTwoSides: " << fcalEtSumTwoSides);
-                    fill(zdcTool, lumiBlock, bcid, zdcEnergySumTwoSidesTeV, zdcHadronicEnergySumTwoSidesTeV, fcalEtSumTwoSides, passUCCTrig_HELT15, passUCCTrig_HELT20, passUCCTrig_HELT25, passUCCTrig_HELT35, passUCCTrig_HELT50);
-                }else{
-                    fill(zdcTool, lumiBlock, bcid, zdcEnergySumTwoSidesTeV, zdcHadronicEnergySumTwoSidesTeV, fcalEtSumTwoSides);
-                }
-            } else{
-                fill(zdcTool, lumiBlock, bcid, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC);
+                vars_global.insert(vars_global.end(), {
+                    std::ref(fcalEtA), 
+                    std::ref(fcalEtC),
+                    std::ref(zdcHadronicEnergySumTwoSidesTeV),
+                    std::ref(fcalEtSumTwoSides),
+                    std::ref(totalEt24)
+                });
             }
+
+            if (m_EnableUCCTriggers){
+                vars_global.insert(vars_global.end(), {
+                    std::ref(passUCCTrig_HELT15), 
+                    std::ref(passUCCTrig_HELT20), 
+                    std::ref(passUCCTrig_HELT25), 
+                    std::ref(passUCCTrig_HELT35), 
+                    std::ref(passUCCTrig_HELT50)
+                });
+            }
+
+            if (m_EnableOOpOTriggers){
+                for (auto& m : oopoTrigPassBoolVec) vars_global.push_back( std::ref(m) );
+            }
+
+            auto monitor_globals = Monitored::Group(zdcTool, vars_global);
         }
 
         if (m_enableCentroid && cur_event_RPD_available){
@@ -934,8 +1101,8 @@ StatusCode ZdcMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     ATH_MSG_DEBUG("calling the fillHistograms function");
 
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
-    if (! eventInfo.isValid() ) {
-        ATH_MSG_WARNING("cannot retrieve event info from evtStore()!");
+    if (! eventInfo.isValid() || eventInfo.cptr() == nullptr) {
+        ATH_MSG_WARNING("EventInfo handle is not valid or has null pointer!");
         return StatusCode::SUCCESS;
     }
     

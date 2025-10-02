@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArBarrelCalculator.hh
@@ -56,39 +56,39 @@ public:
   virtual G4float OOTcut() const override final { return m_OOTcut; }
 
 private:
-
-  ServiceHandle<ILArBarrelGeometry> m_geometry;
-  const AccMap*   m_accmap;
-  std::unique_ptr<MapEta>   m_etamap1;
-  std::unique_ptr<MapEta>   m_etamap2;
-  std::unique_ptr<MapEta>   m_etamap3;
+  
+  ServiceHandle<ILArBarrelGeometry> m_geometry{this, "GeometryCalculator", "LArBarrelGeometry"};
+  const AccMap*   m_accmap{nullptr};
+  std::unique_ptr<MapEta>   m_etamap1{};
+  std::unique_ptr<MapEta>   m_etamap2{};
+  std::unique_ptr<MapEta>   m_etamap3{};
 
   // RUN Options
-  bool m_IflCur;
-  bool m_IflMapTrans;
-  bool m_IflXtalk;
+  Gaudi::Property<bool> m_IflCur{this, "EMBCurr", true};
+  Gaudi::Property<bool> m_IflMapTrans{this, "EMBEtaTrans", true};
+  Gaudi::Property<bool> m_IflXtalk{this, "EMBXtalk", true};
 
-  double m_dstep;
+  Gaudi::Property<double> m_dstep{this, "EMBdstep", .2*CLHEP::mm};
 
-  const LArG4BirksLaw *m_birksLaw;
-  bool  m_doHV;
+  const LArG4BirksLaw* m_birksLaw{nullptr};
+  Gaudi::Property<bool>  m_doHV{this, "EMBHVEnable", false};
 
   // global EMBarrel dimensions
-  double m_etaMaxBarrel;
-  double m_zMinBarrel;
-  double m_zMaxBarrel;
+  double m_etaMaxBarrel{0.};
+  double m_zMinBarrel{0.};
+  double m_zMaxBarrel{0.};
   // global Accordion dimensions
-  double m_rMinAccordion;
-  double m_rMaxAccordion;
+  double m_rMinAccordion{0.};
+  double m_rMaxAccordion{0.};
   // half thickness of absorber and electrode
-  double m_ThickAbs;
-  double m_ThickEle;
+  double m_ThickAbs{0.};
+  double m_ThickEle{0.};
   // GU 11/06/2003  total number of cells in phi
-  int m_NCellTot;
-  int m_NCellMax;
+  int m_NCellTot{0};
+  int m_NCellMax{0};
   // to handle small difference (mostly phi wrapping and +-z symmetry)
   // between atlas and test beam
-  bool m_testbeam;
+  bool m_testbeam{false};
 
 
   // Hv values

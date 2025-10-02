@@ -38,7 +38,7 @@ StatusCode PLRDetectorTool::create()
 
   std::string node{"InnerDetector"};
   std::string table{"PLRXDD"};
-  
+
   //
   // Check the availability
   //
@@ -56,13 +56,13 @@ StatusCode PLRDetectorTool::create()
   GeoPhysVol *world = &*theExpt->getPhysVol();
   auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName, "PLR_ID");
   manager->addFolder(m_alignmentFolderName);
-  // Load the geometry, create the volume, 
+  // Load the geometry, create the volume,
   // node,table are the location in the DB to look for the clob
   // empty strings are the (optional) containing detector and envelope names
   // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
   InDetDD::PLRGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);
 
-  const GeoVPhysVol * topVol = createTopVolume(world, gmxInterface, node, table, m_containingDetectorName, m_envelopeVolumeName,sqlreader); 
+  const GeoVPhysVol * topVol = createTopVolume(world, gmxInterface, node, table, m_containingDetectorName, m_envelopeVolumeName,sqlreader);
   if(topVol){
     manager->addTreeTop(topVol);
     manager->initNeighbours();
@@ -126,7 +126,8 @@ StatusCode PLRDetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE ()
 }
 
 
-StatusCode PLRDetectorTool::align(IOVSVC_CALLBACK_ARGS_P(I, keys))
+StatusCode PLRDetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I, keys))
+//Not thread safe as the call m_manager->align will invalidateAllElements it holds
 {
   //
   // The call-back routine, which just calls the real call-back routine from the manager.
@@ -136,7 +137,7 @@ StatusCode PLRDetectorTool::align(IOVSVC_CALLBACK_ARGS_P(I, keys))
     return StatusCode::FAILURE;
   }
   if (m_alignable) {
-    return m_detManager->align(I, keys);
+    return const_cast<InDetDD::PixelDetectorManager*>(m_detManager)->align(I, keys);
   } else {
     ATH_MSG_DEBUG("Alignment disabled. No alignments applied");
     return StatusCode::SUCCESS;

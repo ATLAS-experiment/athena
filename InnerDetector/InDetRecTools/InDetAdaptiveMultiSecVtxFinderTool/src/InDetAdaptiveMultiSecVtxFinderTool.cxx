@@ -621,7 +621,7 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
 
         std::vector<double> Pv(ntrk);
         double vx = 0., vy = 0., vz = 0., eK0 = 0.;
-        double pi2 = 139.57018 * 139.57018;  // Pion in MeV
+        double pi2 = ParticleConstants::chargedPionMassInMeV * ParticleConstants::chargedPionMassInMeV;  // Pion in MeV
 
         for (int t = 0; t < ntrk; t++) {
             Amg::Vector3D trk = momenta[t];
@@ -658,18 +658,18 @@ for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_ba
         // 1 eV^(-1) of time = hbar / eV = 6.582173*10^(-16) second,  for energy-time in natural unit
         //  double planck = 6.582173 ;
 
-        double eGam = std::sqrt(Pv[0] + 0.511 * 0.511) + std::sqrt(Pv[1] + 0.511 * 0.511);
+        double eGam = std::sqrt(Pv[0] + ParticleConstants::electronMassInMeV * ParticleConstants::electronMassInMeV) + std::sqrt(Pv[1] + ParticleConstants::electronMassInMeV * ParticleConstants::electronMassInMeV);
         double mGam = eGam * eGam - mnt2;
 
-        double prtn2 = 938.27205 * 938.27205;
+        double prtn2 = ParticleConstants::protonMassInMeV * ParticleConstants::protonMassInMeV;
         double eLam = Pv[0] > Pv[1] ? std::sqrt(Pv[0] + prtn2) + std::sqrt(Pv[1] + pi2) : std::sqrt(Pv[0] + pi2) + std::sqrt(Pv[1] + prtn2);
         double mLam = eLam * eLam - mnt2;
 
         ATH_MSG_DEBUG(" V0 masses : " << mass << " " << std::sqrt(std::abs(mGam)) << " " << std::sqrt(std::abs(mLam)));
 
-        return ((fabs(mass - 497.614) < 100.)                                 // K short
+        return ((fabs(mass - ParticleConstants::KZeroMassInMeV) < 100.)                                 // K short
                 || (mGam > 0 && std::sqrt(mGam) < 40.)                        // gamma conversion ;
-                || (mLam > 0 && std::abs(std::sqrt(mLam) - 1115.683) < 200.)  //  Lambda
+                || (mLam > 0 && std::abs(std::sqrt(mLam) - ParticleConstants::lambdaMassInMeV) < 200.)  //  Lambda
         );
     }
 

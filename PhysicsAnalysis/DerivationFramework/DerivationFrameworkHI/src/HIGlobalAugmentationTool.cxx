@@ -17,9 +17,8 @@ namespace DerivationFramework
 {
   HIGlobalAugmentationTool::HIGlobalAugmentationTool( 	const std::string& t,
 								const std::string& n,
-								const IInterface* p ) :   AthAlgTool(t,n,p)
+								const IInterface* p ) :   base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("InDetTrackParticlesKey", m_TP_key="InDetTrackParticles");
     declareProperty("TrackSelectionTools", m_trkSelTools, "Track selection tools" );
     declareProperty("cutLevels", m_cutLevels, "Cut levels");
@@ -167,11 +166,40 @@ namespace DerivationFramework
 	        }
         }
     } 
+
+    // Setup the decorator for TopoCaloCluster cut
+    // If this is true, the event is not compatible with UPC topologies in the FCal 
+    SG::AuxElement::Decorator< bool > decTopoClusterFCalCut("passUPCTopoCaloCut");
+    //Default decoration set to false
+    decTopoClusterFCalCut(*eventInfo) = false; 
+    
+    //access topoClusters
+    const xAOD::CaloClusterContainer *topos = 0;
+    ATH_CHECK(evtStore()->retrieve(topos, "CaloCalTopoClusters"));
+    bool hasTowerA{false};
+    bool hasTowerC{false};
+    for (const auto topo : *topos) {
+      float topo_eta = topo->eta();
+      if (abs(topo_eta) > 3.2 && abs(topo_eta) < 4.9) {
+        float topo_pt = topo->pt() * 1e-3;
+        if (topo_pt > 0.4) {
+          if (topo_eta > 0) {
+            hasTowerA = true;
+          } else {
+            hasTowerC = true;
+          }
+        }
+      }
+    }
+
+ 
     //decorate
     decFCalEtA(*eventInfo) = FCalEtA;
     decFCalEtC(*eventInfo) = FCalEtC;
     decHalfFCalEtA(*eventInfo) = HalfFCalEtA;
     decHalfFCalEtC(*eventInfo) = HalfFCalEtC;
+    decTopoClusterFCalCut(*eventInfo) = (hasTowerA && hasTowerC);
+
     for (int vn = 0; vn < m_nHarmonic; ++vn){ 
       (m_decFCalEtA_Qnx[vn])(*eventInfo) = FCalEtA_Qnx.at(vn);
       (m_decFCalEtA_Qny[vn])(*eventInfo) = FCalEtA_Qny.at(vn);

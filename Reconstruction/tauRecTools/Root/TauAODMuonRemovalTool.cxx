@@ -1,8 +1,10 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauAODMuonRemovalTool.h"
+
+#define GeV 1000
 
 TauAODMuonRemovalTool::TauAODMuonRemovalTool(const std::string& name):
     TauRecToolBase(name) {
@@ -123,7 +125,7 @@ template<typename Tlep, typename Tlinks> std::vector<Tlep> TauAODMuonRemovalTool
                     auto where = std::find_if(tracks_and_leps.cbegin(), tracks_and_leps.cend(),
                         [&](auto track_and_lep){ return tau_trk == track_and_lep.first; });
                     if(where != tracks_and_leps.cend()) {
-                        ATH_MSG_DEBUG("track with pt " << tau_trk->pt()/1000 << " GeV removed");
+                        ATH_MSG_DEBUG("track with pt " << tau_trk->pt()/GeV << " GeV removed");
                         ret.push_back(where->second);
                         match = true;
                     }
@@ -147,7 +149,7 @@ template<typename Tlep, typename Tlinks> std::vector<Tlep> TauAODMuonRemovalTool
                     auto where = std::find_if(clusters_and_leps.cbegin(), clusters_and_leps.cend(),
                         [&](auto cluster_and_lep){ return tau_cls == cluster_and_lep.first; });
                     if(where != clusters_and_leps.cend()) {
-                        ATH_MSG_DEBUG("cluster with pt " << tau_cls->pt()/1000 << " GeV removed");
+                        ATH_MSG_DEBUG("cluster with pt " << tau_cls->pt()/GeV << " GeV removed");
                         ret.push_back(where->second);
                         match = true;
                     }

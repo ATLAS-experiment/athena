@@ -29,6 +29,12 @@
 #include "ZdcEvent/ZdcDigitsCollection.h"
 #include "ZdcRec/ZdcRecNoiseTool.h"
 
+namespace{
+  char * 
+  charAddress(auto &v){
+    return reinterpret_cast<char *>(&v);
+  }
+}
 
 
 //==================================================================================================
@@ -92,11 +98,11 @@ int ZdcRecNoiseTool::readPedestals()
 		int sz = sizeof(int)*nsamples;
 		i = 0;
 		while (infile.good()) {
-			infile.read ((char *)&id,sizeof(id));
-			infile.read ((char *)&fadc00[0],sz);
-			infile.read ((char *)&fadc01[0],sz);
-			infile.read ((char *)&fadc10[0],sz);
-			infile.read ((char *)&fadc11[0],sz);
+			infile.read (charAddress(id),sizeof(id));
+			infile.read (charAddress(fadc00[0]),sz);
+			infile.read (charAddress(fadc01[0]),sz);
+			infile.read (charAddress(fadc10[0]),sz);
+			infile.read (charAddress(fadc11[0]),sz);
 
 			ZdcDigits* digits_p = new ZdcDigits(Identifier(id));
 			digits_p->set_digits_gain0_delay0(fadc00);
@@ -144,16 +150,16 @@ int ZdcRecNoiseTool::writePedestals()
 
 			for (const ZdcDigits* p : *m_pedestalData) {
 				id = p->identify().get_identifier32().get_compact();
-				outfile.write((char *)&id, sizeof(id));
+				outfile.write(charAddress(id), sizeof(id));
 
 				fadc00 = p->get_digits_gain0_delay0();
 				fadc01 = p->get_digits_gain0_delay1();
 				fadc10 = p->get_digits_gain1_delay0();
 				fadc11 = p->get_digits_gain1_delay1();
-				outfile.write ((char *)&fadc00, sz);
-				outfile.write ((char *)&fadc01, sz);
-				outfile.write ((char *)&fadc10, sz);
-				outfile.write ((char *)&fadc11, sz);
+				outfile.write (charAddress(fadc00), sz);
+				outfile.write (charAddress(fadc01), sz);
+				outfile.write (charAddress(fadc10), sz);
+				outfile.write (charAddress(fadc11), sz);
 				i++;
 			}
 		}

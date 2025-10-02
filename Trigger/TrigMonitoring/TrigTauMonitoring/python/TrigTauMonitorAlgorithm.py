@@ -1,24 +1,68 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-def TrigTauMonConfig(inputFlags):
+def TrigTauMonConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    acc = ComponentAccumulator()
 
-    # The following class will make a sequence, configure algorithms, and link
-    # them to GenericMonitoringTools
+    # We need the TauID inference to run first
+    from AthenaCommon.CFElements import seqAND
+    seq_name = 'TrigTauMonitoringSeq'
+    acc.addSequence(seqAND(seq_name))
+
+
+    # Schedule the offline GNTau inference when running from AOD (GNTau is now transiently available in RAWtoALL)
+    if flags.DQ.Environment == 'AOD':
+        TauContainerCopy = 'TTMTauJets'
+
+        from tauRec.TauToolHolder import TauVertexedClusterDecoratorCfg, TauGNNEvaluatorCfg, TauWPDecoratorGNNCfg
+        tool_accs = [
+            TauVertexedClusterDecoratorCfg(flags),
+            TauGNNEvaluatorCfg(flags, 0, tauContainerName=TauContainerCopy),
+            TauWPDecoratorGNNCfg(flags, 0, TauContainerCopy),
+        ]
+
+        tools = []
+        for tool_acc in tool_accs:
+            tools.append(tool_acc.popPrivateTools())
+            tools[-1].inAOD = True
+            acc.merge(tool_acc, seq_name)
+            acc.addPublicTool(tools[-1])
+
+            from AthenaConfiguration.ComponentFactory import CompFactory
+            acc.addEventAlgo(CompFactory.TauAODRunnerAlg(
+                name='TrigTauMonitoring_TauJets_TauIDDecorator',
+                Key_tauContainer='TauJets',
+                Key_pi0ClusterInputContainer='',
+                Key_tauOutputContainer=TauContainerCopy,
+                Key_pi0OutputContainer='',
+                Key_neutralPFOOutputContainer='',
+                Key_chargedPFOOutputContainer='',
+                Key_hadronicPFOOutputContainer='',
+                Key_tauTrackOutputContainer='',
+                Key_vertexOutputContainer='',
+                officialTools=tools,
+            ), sequenceName=seq_name)
+
+
+    # The following class will make a sequence, configure the base monitoring infrastructure
+    # and algorithms, and link them to GenericMonitoringTools
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'TrigTauAthMonitorCfg')
+    helper = AthMonitorCfgHelper(flags, 'TrigTauAthMonitorCfg')
 
+    # Configure the actual TrigTauMonitoring algorithm(s)
     from TrigTauMonitoring.TrigTauMonitoringConfig import TrigTauMonAlgBuilder
-    monAlgCfg = TrigTauMonAlgBuilder( helper ) 
-    # build monitor and book histograms
+    monAlgCfg = TrigTauMonAlgBuilder(helper)
+    if flags.DQ.Environment == 'AOD':
+        monAlgCfg.offline_taujets = 'TTMTauJets'
+    else:
+        monAlgCfg.offline_taujets = 'TauJets'
+    monAlgCfg.offline_GNTau_WP = flags.Tau.GNTauDecorWPNames[0][2]
     monAlgCfg.configure()
+    acc.merge(helper.result(), seq_name)
 
-    ### STEP 6 ###
-    # Finalize. The return value should be a tuple of the ComponentAccumulator
-    # and the sequence containing the created algorithms. If we haven't called
-    # any configuration other than the AthMonitorCfgHelper here, then we can 
-    # just return directly (and not create "result" above)
-    return helper.result()
+    return acc
+
 
 if __name__=='__main__':
     # Setup logs

@@ -134,7 +134,7 @@ namespace CP{
                                             xAOD::MuonContainer* outputCol) const{
         // loop over muons, accept them and add them into association tool
         if(muonCol.empty()) {return StatusCode::SUCCESS;}
-        static const SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> originalMuonLink("originalMuonLink");
+        static const SG::Decorator<ElementLink<xAOD::MuonContainer>> originalMuonLink("originalMuonLink");
         for(const xAOD::Muon* muon : muonCol){
             // add muon into output
             if (writeMuon.at(muon->index())){
@@ -143,7 +143,7 @@ namespace CP{
               myLink.toIndexedElement(muonCol, muon->index());
               originalMuonLink(*newMuon) = myLink;
               setOriginalObjectLink(*muon, *newMuon);
-              static const SG::AuxElement::Accessor <char> isLRT("isLRT");
+              static const SG::Accessor <char> isLRT("isLRT");
               isLRT(*newMuon) = isLRT(*muon);
               outputCol->push_back(newMuon);
             }

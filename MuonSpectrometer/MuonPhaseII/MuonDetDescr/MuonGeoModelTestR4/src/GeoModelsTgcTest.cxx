@@ -87,8 +87,8 @@ StatusCode GeoModelsTgcTest::finalize() {
 StatusCode GeoModelsTgcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    SG::ReadHandle geoContextHandle{m_geoCtxKey, ctx};
-    ATH_CHECK(geoContextHandle.isPresent());
+    const ActsGeometryContext* geoContextHandle{nullptr};
+    ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
     const ActsGeometryContext& gctx{*geoContextHandle};
 
 
@@ -226,61 +226,63 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                     m_firstPadPhiDiv.push_back(reElement->padDesign(layID).firstPadPhiDiv());
                     m_anglePadPhi = reElement->anglePadPhi(layID);
                     m_beamlineRadius = reElement->beamlineRadius(layID);
-                    for (unsigned int pad = 1; pad <= reElement->numChannels(layID); ++pad) {
-                        bool isValidPad{false};
-                        const Identifier padID = id_helper.channelID(reElement->identify(), 
+
+                    for (unsigned int phiIndex = 1; phiIndex <= reElement->numPadPhi(layID); ++phiIndex) {
+                        for(unsigned int etaIndex = 1; etaIndex <= reElement->numPadEta(layID); ++etaIndex) {                       
+                            bool isValidPad{false};
+                            const Identifier padID = id_helper.padID(reElement->identify(), 
                                                                    reElement->multilayer(),
-                                                                    layer, chType, pad, isValidPad);
-                        if (!isValidPad) {
-                            ATH_MSG_WARNING("Invalid Identifier detected for readout element "
-                                       <<m_idHelperSvc->toStringDetEl(reElement->identify())
-                                       <<" layer: "<<layer<<" pad: "<<pad<<" channelType: "<<chType);
-                            continue;
+                                                                    layer, chType, etaIndex, phiIndex, isValidPad);
+                            if (!isValidPad) {
+                                ATH_MSG_WARNING("Invalid Identifier detected for readout element "
+                                        <<m_idHelperSvc->toStringDetEl(reElement->identify())
+                                        <<" layer: "<<layer<<" pad: ("<<etaIndex << ", " << phiIndex<<") channelType: "<<chType);
+                                continue;
+                            }
+                            if (etaIndex == 1 && phiIndex == 1) {
+                                m_firstPadHeight.push_back(reElement->padHeight(padID));                    
+                            }
+                            else if (etaIndex == 2 && phiIndex == 1) {
+                                m_padHeight.push_back(reElement->padHeight(padID));
+                            }
+                            Amg::Vector2D localPadPos(Amg::Vector2D::Zero());
+                            std::array<Amg::Vector2D,4> localPadCorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
+                            Amg::Vector3D globalPadPos(Amg::Vector3D::Zero());
+                            std::array<Amg::Vector3D,4> globalPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
+
+                            localPadPos = reElement->localChannelPosition(padID);
+                            localPadCorners = reElement->localPadCorners(padID);
+
+                            m_localPadPos.push_back(localPadPos);
+                            m_localPadCornerBL.push_back(localPadCorners[0]);
+                            m_localPadCornerBR.push_back(localPadCorners[1]);
+                            m_localPadCornerTL.push_back(localPadCorners[2]);
+                            m_localPadCornerTR.push_back(localPadCorners[3]);
+
+                            Amg::Vector2D hitCorrection{-.1, -.1};
+                            Amg::Vector2D hitPos = localPadCorners[3] + hitCorrection;
+                            m_hitPosition.push_back(hitPos);
+                            m_padNumber.push_back(reElement->padNumber(hitPos, padID));
+
+                            globalPadPos = reElement->globalChannelPosition(gctx, padID);
+                            globalPadCorners = reElement->globalPadCorners(gctx, padID);
+                    
+                            m_globalPadPos.push_back(globalPadPos);
+                            m_globalPadCornerBR.push_back(globalPadCorners[0]);
+                            m_globalPadCornerBL.push_back(globalPadCorners[1]);
+                            m_globalPadCornerTR.push_back(globalPadCorners[2]);
+                            m_globalPadCornerTL.push_back(globalPadCorners[3]);
+    
+                            m_padEta.push_back(reElement->padEta(padID));
+                            m_padPhi.push_back(reElement->padPhi(padID));
+                            m_padGasGap.push_back(layer);
+
+                            if (!(etaIndex == 1 && phiIndex == 1)) continue;
+                            const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, padID);
+                            ATH_MSG_DEBUG("The local to global transformation on layers is: " << Amg::toString(locToGlob));
+                            m_padRot.push_back(locToGlob);
+                            m_padRotGasGap.push_back(layer);
                         }
-                        if (pad == 1) {
-                            m_firstPadHeight.push_back(reElement->padHeight(padID));                    
-                        }
-                        else if (pad == 2) {
-                            m_padHeight.push_back(reElement->padHeight(padID));
-                        }
-                        Amg::Vector2D localPadPos(Amg::Vector2D::Zero());
-                        std::array<Amg::Vector2D,4> localPadCorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
-                        Amg::Vector3D globalPadPos(Amg::Vector3D::Zero());
-                        std::array<Amg::Vector3D,4> globalPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
-
-                        localPadPos = reElement->localChannelPosition(padID);
-                        localPadCorners = reElement->localPadCorners(padID);
-
-                        m_localPadPos.push_back(localPadPos);
-                        m_localPadCornerBL.push_back(localPadCorners[0]);
-                        m_localPadCornerBR.push_back(localPadCorners[1]);
-                        m_localPadCornerTL.push_back(localPadCorners[2]);
-                        m_localPadCornerTR.push_back(localPadCorners[3]);
-
-                        Amg::Vector2D hitCorrection{-.1, -.1};
-                        Amg::Vector2D hitPos = localPadCorners[3] + hitCorrection;
-                        m_hitPosition.push_back(hitPos);
-                        m_padNumber.push_back(reElement->padNumber(hitPos, padID));
-
-                        globalPadPos = reElement->globalChannelPosition(gctx, padID);
-                        globalPadCorners = reElement->globalPadCorners(gctx, padID);
-                   
-                        m_globalPadPos.push_back(globalPadPos);
-                        m_globalPadCornerBR.push_back(globalPadCorners[0]);
-                        m_globalPadCornerBL.push_back(globalPadCorners[1]);
-                        m_globalPadCornerTR.push_back(globalPadCorners[2]);
-                        m_globalPadCornerTL.push_back(globalPadCorners[3]);
- 
-                        m_padEta.push_back(reElement->padEta(padID));
-                        m_padPhi.push_back(reElement->padPhi(padID));
-                        m_padGasGap.push_back(layer);
-
-                        if (pad != 1) continue;
-                        const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, padID);
-                        ATH_MSG_DEBUG("The local to global transformation on layers is: " << Amg::toString(locToGlob));
-                        m_padRot.push_back(locToGlob);
-                        m_padRotGasGap.push_back(layer);
-
                     }
                     break;
 

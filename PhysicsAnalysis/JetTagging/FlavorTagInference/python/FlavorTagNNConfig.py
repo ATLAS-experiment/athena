@@ -97,14 +97,27 @@ NONZERO_TRACKS = 'nonzeroTracks'
 
 def FlavorTagNNCfg(
         flags,
-        BTaggingCollection,
+        JetCollection,
         TrackCollection,
         NNFile,
+        BTaggingCollection=None,
         FlipConfig="STANDARD",
         variableRemapping={}):
-
-    FTD = CompFactory.FlavorTagDiscriminants
-    alg = FTD.BTagDecoratorAlg
+    
+    if BTaggingCollection is not None:
+        warn('BTaggingCollection is deprecated, use JetCollection instead',
+             stacklevel=2)
+    if JetCollection is None:
+        raise ValueError(
+            'JetCollection is required,'
+            f' {BTaggingCollection=}, {JetCollection=}'
+        )
+    
+    tp_assoc = 'BTagTrackToJetAssociator'
+    ip_assoc = 'TracksForBTagging'
+    variableRemapping.setdefault(tp_assoc, ip_assoc)
+    FTI = CompFactory.FlavorTagInference
+    alg = FTI.JetTagDecoratorAlg
 
     acc = ComponentAccumulator()
 
@@ -112,7 +125,9 @@ def FlavorTagNNCfg(
     nn_opts = dict(
         NNFile=NNFile,
         flipTagConfig=FlipConfig,
-        variableRemapping=variableRemapping)
+        variableRemapping=variableRemapping
+    )
+
     if NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
         nn_opts["defaultZeroTracks"] = True
@@ -120,7 +135,7 @@ def FlavorTagNNCfg(
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
-    name = '_'.join(['FtagNN', nn_name.lower(), BTaggingCollection])
+    name = '_'.join(['FtagNN', nn_name.lower(), JetCollection])
 
     # Ensure different names for standard and flip taggers
     if FlipConfig != "STANDARD":
@@ -130,7 +145,7 @@ def FlavorTagNNCfg(
 
     decorAlg = alg(
         name=name,
-        container=BTaggingCollection,
+        container=JetCollection,
         constituentContainer=TrackCollection,
         decorator=decorator,
         undeclaredReadDecorKeys=veto_list,
@@ -154,14 +169,16 @@ def MultifoldGNNCfg(
         tag_requirements=set(),
         defaultOutputValues={},
         foldHashName='jetFoldRankHash',
+        dz_suffix='',
 ):
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
-    algname = 'FtagMultifoldNN_{jc}_{tc}_{nn}_{fc}'.format(
+    algname = 'FtagNN_{jc}_{tc}_{nn}_{fc}{dz}'.format(
         jc=JetCollection,
         tc=TrackCollection,
         nn=nn_name,
         fc=FlipConfig,
+        dz=dz_suffix,
     )
 
     default_zero_tracks = NONZERO_TRACKS in tag_requirements
@@ -176,30 +193,25 @@ def MultifoldGNNCfg(
         )
     )
 
-    tp_assoc = 'BTagTrackToJetAssociator'
-    ip_assoc = 'TracksForBTagging'
-
-    FTD = CompFactory.FlavorTagDiscriminants
-
-    if BTaggingCollection is not None:
-        Alg = FTD.BTagDecoratorAlg
-        trackLinkType = 'TRACK_PARTICLE'
-        container = BTaggingCollection
-    elif JetCollection is not None:
-        remapping.setdefault(tp_assoc, ip_assoc)
-        Alg = FTD.JetTagDecoratorAlg
-        trackLinkType = 'IPARTICLE'
-        algname += '_Jet'
-        container = JetCollection
-    else:
+    FTI = CompFactory.FlavorTagInference
+    if JetCollection is None:
         raise ValueError(
-            'b-tagging or jet collection is required,'
+            'jet collection is required,'
             f' {BTaggingCollection=}, {JetCollection=}' )
-
+    if BTaggingCollection is not None:
+        warn('BTaggingCollection is deprecated,'
+             ' use JetCollection instead', stacklevel=2)
     # we don't remove this outright because it will complicate
     # sweeping between branches.
     if useBTaggingObject is not None:
         warn(f'the option {useBTaggingObject=} is deprecated', stacklevel=2)
+
+    tp_assoc = 'BTagTrackToJetAssociator'
+    ip_assoc = 'TracksForBTagging'
+    remapping.setdefault(tp_assoc, ip_assoc)
+    Alg = FTI.JetTagDecoratorAlg
+    algname += '_Jet'
+    container = JetCollection
 
     acc.addEventAlgo(
         Alg(
@@ -207,13 +219,12 @@ def MultifoldGNNCfg(
             container=container,
             constituentContainer=TrackCollection,
             decorator=CompFactory.FlavorTagInference.MultifoldGNNTool(
-                name=f'{algname}_tool',
+                name='multifold',
                 foldHashName=foldHashName,
                 nnFiles=nnFilePaths,
                 flipTagConfig=FlipConfig,
                 variableRemapping=remapping,
                 nnSharingService=addAndReturnSharingSvc(flags, acc),
-                trackLinkType=trackLinkType,
                 defaultOutputValues=defaultOutputValues,
                 perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
                 defaultZeroTracks=default_zero_tracks,

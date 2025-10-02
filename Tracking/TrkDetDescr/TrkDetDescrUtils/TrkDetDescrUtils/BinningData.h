@@ -43,7 +43,7 @@ enum LayerOrder
      @author Andreas.Salzburger @ cern.ch, Sharka.Todorova @ cern.ch
 */
 
-class BinningData
+class BinningData final
 {
 public:
   /** holding all the data for binning calculatuion */
@@ -65,7 +65,7 @@ public:
   BinningData& operator=(const BinningData&) = default;
   BinningData& operator=(BinningData&&) = default;
   ~BinningData() = default;
-  
+
   /** Constructor with arguments*/
   BinningData(BinningType bType,
               BinningOption bOption,

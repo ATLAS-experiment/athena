@@ -17,7 +17,7 @@ def LArBadChannel2AsciiCfg(flags,OutputFile,dbname="LAR_OFL",folder=None,tag=Non
 
     
     if folder is None:
-        if dbname in ("LAR","LAR_ONL"):
+        if dbname in ("LAR","LAR_ONL") or flags.Input.isMC:
             folder="/LAR/BadChannels/BadChannels"
         else: 
             folder="/LAR/BadChannelsOfl/BadChannels"
@@ -72,6 +72,7 @@ if __name__=="__main__":
     parser.add_argument("-t","--tag",default=None, help="folder-level tag to read")
     parser.add_argument("-s","--summary",default="", help="Executive summary file")
     parser.add_argument("--SC", action='store_true', help="Work on SuperCells")
+    parser.add_argument("--MC", action='store_true', default=False, help="Work on MC DB")
 
     (args,leftover)=parser.parse_known_args(sys.argv[1:])
 
@@ -83,12 +84,16 @@ if __name__=="__main__":
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     flags=initConfigFlags()
     addLArCalibFlags(flags)
-
-    flags.Input.isMC = False
-    flags.IOVDb.DatabaseInstance="CONDBR2"
+    flags.Input.Files = []
+    flags.Input.isMC = args.MC
+    flags.IOVDb.DatabaseInstance="OFLP200" if args.MC else "CONDBR2"
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=[args.runnumber]
-    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2023-02"
+    flags.IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN3-11" if args.MC else "CONDBR2-ES1PA-2023-02"
+    if args.MC:
+       from Campaigns.Utils import Campaign
+       flags.Input.MCCampaign = Campaign.MC21a
+
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     flags.LArCalib.isSC=args.SC

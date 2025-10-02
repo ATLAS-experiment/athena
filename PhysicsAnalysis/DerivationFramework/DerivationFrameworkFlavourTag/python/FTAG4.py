@@ -18,7 +18,7 @@ def FTAG4KernelCfg(flags, name='FTAG4Kernel', **kwargs):
     
 
     from DerivationFrameworkPhys.PHYS import PHYSKernelCfg
-    acc.merge(PHYSKernelCfg(flags, name, StreamName = kwargs['StreamName'], TriggerListsHelper = kwargs['TriggerListsHelper'], TauJets_EleRM_in_input=kwargs['TauJets_EleRM_in_input']))
+    acc.merge(PHYSKernelCfg(flags, name, StreamName = kwargs['StreamName'], TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # augmentation tools
     augmentationTools = []
@@ -70,19 +70,11 @@ def FTAG4Cfg(flags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     PHYSTriggerListsHelper = TriggerListsHelper(flags)
 
-    # for AOD produced before 24.0.17, the electron removal tau is not available
-    TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
-    #if TauJets_EleRM_in_input:
-    #    logFTAG4.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
-    #else:
-    #    logFTAG4.info("TauJets_EleRM is Not in the input AOD. No relevant containers will be written")
-
     # Common augmentations
     acc.merge(FTAG4KernelCfg(flags,
         name= FTAG4_name_tag + "Kernel", 
         StreamName = 'StreamDAOD_'+FTAG4_name_tag,
         TriggerListsHelper = PHYSTriggerListsHelper,
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
         ))
     
     # PHYS content
@@ -91,7 +83,6 @@ def FTAG4Cfg(flags):
         FTAG4_name_tag,
         StreamName = 'StreamDAOD_'+FTAG4_name_tag,
         TriggerListsHelper = PHYSTriggerListsHelper,
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
         ))
 
     return acc

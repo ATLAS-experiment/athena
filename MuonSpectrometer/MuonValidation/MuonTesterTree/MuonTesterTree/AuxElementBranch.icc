@@ -10,7 +10,7 @@
 //########################################################################################
 namespace MuonVal {
 template <class T> void AuxElementBranch<T>::setAccessor(const std::string& name) {
-    if (!initialized()) m_acc = SG::AuxElement::ConstAccessor<T>(name);
+    if (!initialized()) m_acc = SG::ConstAccessor<T>(name);
 }
 template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement* p) {
     if (p != nullptr) push_back(*p);
@@ -33,6 +33,22 @@ template <class T>
 AuxElementBranch<T>::AuxElementBranch(MuonTesterTree& t, const std::string& var_name, const std::string& acc) :
     VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc) {}
 
+//########################################################################################
+//                      GenericAuxDecorationBranch
+//########################################################################################
+template <class T>
+    GenericAuxDecorationBranch<T>::GenericAuxDecorationBranch(TTree* t, const std::string& var_name, const FuncType_t& func):
+        VectorBranch<T>(t, var_name),
+        m_func{func}{}
+template <class T>
+    GenericAuxDecorationBranch<T>::GenericAuxDecorationBranch(MuonTesterTree& t, const std::string& var_name, const FuncType_t& func):
+        VectorBranch<T>(t, var_name),
+        m_func{func}{}
+
+template <class T> void GenericAuxDecorationBranch<T>::push_back(const SG::AuxElement* p) { push_back(m_func(p)); }
+template <class T> void GenericAuxDecorationBranch<T>::push_back(const SG::AuxElement& p) { push_back(&p); }
+template <class T> void GenericAuxDecorationBranch<T>::operator+=(const SG::AuxElement* p) { push_back(p); }
+template <class T> void GenericAuxDecorationBranch<T>::operator+=(const SG::AuxElement& p) { push_back(p); }
 //########################################################################################
 //                      ParticleVariableBranch
 //########################################################################################

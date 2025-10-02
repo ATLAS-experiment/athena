@@ -52,10 +52,6 @@ public:
   { std::abort(); }
   virtual StatusCode decodeOutputSpec(std::string& /*connectionSpec*/, int& /*outputTech*/) const override
   { std::abort(); }
-  virtual StatusCode makeServer(int /*num*/) override
-  { std::abort(); }
-  virtual StatusCode makeClient(int /*num*/) override
-  { std::abort(); }
   virtual StatusCode cleanUp(const std::string& /*connection*/) override
   { std::abort(); }
   virtual StatusCode setInputAttributes(const std::string& /*fileName*/) override
@@ -104,10 +100,6 @@ public:
   virtual IConverter* converter(const CLID& /*clid*/) override
   { std::abort(); }
   virtual StatusCode connectOutput(const std::string& /*outputFile*/) override
-  { std::abort(); }
-  virtual StatusCode readData() override
-  { std::abort(); }
-  virtual StatusCode commitCatalog() override
   { std::abort(); }
   virtual const std::string& name() const override
   { return m_name; }

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PFLOWCALIBPFODECORATORALGORITHM_H
@@ -48,7 +48,7 @@ private:
   /** ReadHandleKey for the map between Identifiers and sets of calibration hits */
   SG::ReadHandleKey<std::map<Identifier,std::vector<const CaloCalibrationHit*> > > m_mapIdentifierToCalibHitsReadHandleKey{this,"IdentifierToCalibHitsMapName","IdentifierToCalibHitsMap","ReadHandleKey for the map between Identifieirs and sets of calibration hits"};
 
-  /** Write handle key to decorate PFO with threeN leading truth particle barcode and energy */
+  /** Write handle key to decorate PFO with threeN leading truth particle uniqueID and energy */
   SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_pfoWriteDecorHandleKeyNLeadingTruthParticles{this,"PFOWriteDecorHandleKey_NLeadingTruthParticles","JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"};
   
   /** ToolHandle to a tool to create the calibration hit truth information that we need for the decoration */

@@ -37,16 +37,15 @@ namespace FlavorTagInference {
     class HitsLoader : public IConstituentsLoader {
       public:
         HitsLoader(const ConstituentsInputConfig&, const FTagOptions& options);
-        std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
-          const xAOD::Jet& jet, 
-          [[maybe_unused]] const SG::AuxElement& btag) const override ;
+        std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(
+          const xAOD::IParticle& jet ) const override ;
         const FTagDataDependencyNames& getDependencies() const override;
         const std::set<std::string>& getUsedRemap() const override;
         const std::string& getName() const override;
         const ConstituentsType& getType() const override;
       protected:
         // typedefs
-        typedef xAOD::Jet Jet;
+        typedef xAOD::IParticle Jet;
         typedef std::pair<std::string, double> NamedVar;
         typedef std::pair<std::string, std::vector<double> > NamedSeq;
         // hit typedefs
@@ -62,7 +61,7 @@ namespace FlavorTagInference {
         using TMVV = std::vector<const xAOD::TrackMeasurementValidation*>;
 
         
-        std::vector<const xAOD::TrackMeasurementValidation*> getHitsFromJet(const xAOD::Jet& jet) const;
+        std::vector<const xAOD::TrackMeasurementValidation*> getHitsFromJet(const xAOD::IParticle& jet) const;
 
         getter_utils::SeqGetter<xAOD::TrackMeasurementValidation> m_seqGetter;        
         std::function<TMVV(const Jet&)> m_associator;

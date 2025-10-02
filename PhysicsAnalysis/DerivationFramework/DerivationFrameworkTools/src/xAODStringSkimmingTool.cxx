@@ -24,7 +24,6 @@ namespace DerivationFramework {
     ExpressionParserUserWithTrigSupport<AthAlgTool>(t,n,p),
     m_expression("true")
   {
-    declareInterface<DerivationFramework::ISkimmingTool>(this);
     declareProperty("expression", m_expression);
   }
 

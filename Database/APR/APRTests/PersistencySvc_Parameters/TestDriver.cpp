@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -68,7 +68,7 @@ pool::TestDriver::write()
   }
 
   // Opening again a database
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
+  auto db = persistencySvc->session().databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -97,7 +97,6 @@ pool::TestDriver::write()
   }
 
   catalog.commit();
-  delete db;
 }
 
 
@@ -116,8 +115,8 @@ pool::TestDriver::read()
   }
 
   // Opening the database for reading
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
-  if ( ! db ) {
+  auto db = persistencySvc->session().databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
+  if( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
 
@@ -168,5 +167,4 @@ pool::TestDriver::read()
   }
 
   catalog.commit();
-  delete db;
 }

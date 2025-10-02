@@ -15,9 +15,12 @@
 #include "xAODTruth/TruthVertexFwd.h"
 #include "xAODTruth/TruthVertexContainer.h"
 #include "InDetSecVtxTruthMatchTool/IInDetSecVtxTruthMatchTool.h"
+#include "InDetTrackSystematicsTools/IInDetTrackTruthOriginTool.h"
+
 
 // standard includes
 #include<vector>
+#include <bitset>
 
 namespace InDetSecVtxTruthMatchUtils {
 
@@ -34,6 +37,30 @@ namespace InDetSecVtxTruthMatchUtils {
     Fake,      // highest contribution is fake (if pile-up MC info not present those tracks end up as "fakes")
     Other
   };
+
+  //type codes for optional SM origin matching
+  //used to determine the content of "other" type vertices above for in-depth studies
+  //should only be used where extended truth info is available -- e.g when LLP1 has been run with saveFullTruth=True
+  //NOTE: types are NOT exclusive -- vertex can be both from B and D decay, signal and hadronic interation, etc
+enum VertexMatchOriginType {
+  // Must match InDet::TrkOrigin::OriginType values!
+  FakeOrigin = 0,
+  Pileup,
+  KshortDecay,
+  StrangeMesonDecay,
+  LambdaDecay,
+  StrangeBaryonDecay,
+  TauDecay,
+  GammaConversion,
+  OtherDecay,
+  HadronicInteraction,
+  OtherSecondary,
+  BHadronDecay,
+  DHadronDecay,
+  Fragmentation,
+  OtherOrigin,
+  Signal
+};
 
   //type codes for truth vertices
   //NOTE: types are subsets of subsequent types
@@ -86,6 +113,13 @@ namespace InDetSecVtxTruthMatchUtils {
     if (matchInfo & (0x1 << ReconstructedSplit)) return true;
     return false;
   }
+
+  inline bool isOriginType(int matchInfo, VertexMatchOriginType type) {
+    if (type < 0 || type > Signal) { // Signal is the last valid value
+      return false;
+    }
+    return matchInfo & (0x1 << type);
+  }
 }
 
 /** Class for vertex truth matching.
@@ -112,6 +146,10 @@ class InDetSecVtxTruthMatchTool : public virtual IInDetSecVtxTruthMatchTool,
   Gaudi::Property<float> m_vxMatchWeight{this, "vertexMatchWeight", 0.5, "Relative weight threshold to consider vertex matched"};
   Gaudi::Property<float> m_trkPtCut{this, "trackPtCut", 1000., "pt cut to apply on tracks"};
   Gaudi::Property<std::string> m_selectedTrackFlag{this, "selectedTrackFlag", "is_selected", "Aux decoration on tracks for seeding efficiencies"};
+  Gaudi::Property<bool> m_doMuSA{this, "doMuSA", false, "Combination flag for special MuSA logic" };
+  Gaudi::Property<bool> m_doSMOrigin{this, "doSMOrigin", false, "Enable decoration of SM origin types"};
+
+  ToolHandle<InDet::IInDetTrackTruthOriginTool> m_trackTruthOriginTool{this, "TrackTruthOriginTool", "InDet::InDetTrackTruthOriginTool/TrackTruthOriginTool"};
 
   //private methods to check if particles are good to use
   //returns barcode of LLP production truth vertex
@@ -119,6 +157,8 @@ class InDetSecVtxTruthMatchTool : public virtual IInDetSecVtxTruthMatchTool,
   void countReconstructibleDescendentParticles(const xAOD::TruthVertex& signalTruthVertex,
                                                std::vector<const xAOD::TruthParticle*>& set, int counter) const;
   std::vector<int> checkParticle( const xAOD::TruthParticle& part, const xAOD::TrackParticleContainer* tkCont ) const;
+  bool isFrom(const xAOD::TruthParticle& truth, int flav) const;
+  int checkSMProduction( const xAOD::TruthParticle& truthPart) const;
 };
 
 #endif

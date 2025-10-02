@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -63,7 +63,7 @@ StatusCode TileRawCorrelatedNoise::initialize() {
   m_alphaMatrix = std::make_unique<AlphaMatrix>();
 
   // read alpha matrix
-  FILE* AlphaMatrixFile[4][64];
+  FILE* AlphaMatrixFile[4][64]{};
   char Rosstr[10];
   char buff[1000];
   // Cycle over 4 partitions and 64 modules

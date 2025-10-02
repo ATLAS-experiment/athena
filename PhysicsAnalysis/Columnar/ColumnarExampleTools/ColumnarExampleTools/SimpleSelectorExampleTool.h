@@ -45,6 +45,9 @@ namespace columnar
   {
   public:
 
+    // Create a proper constructor for Athena
+    ASG_TOOL_CLASS( SimpleSelectorExampleTool, asg::IAsgTool )
+
     SimpleSelectorExampleTool (const std::string& name);
 
     virtual StatusCode initialize () override;

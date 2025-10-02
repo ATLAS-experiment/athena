@@ -246,48 +246,57 @@ namespace CP
                 // The value is chosen in an arbitrary fashion. To be replaced and fixed, once we have a better idea of 
                 double corr = 0;
                 double deltas = 0.00002;
-                if (eta > 2 || (eta > -2 && eta < -1.05)) {
-                    if (pT > 450.0)
-                        corr += std::abs(450.0 - 45) / 100 * deltas;  // Above 450 GeV flat
-                    else
-                        corr += std::abs(pT - 45) / 100 * deltas;
-                }
-                if (eta < -2 || (eta < 2 && eta> 1.5)) {
-                    if (pT > 450.0)
-                        corr += std::abs(450.0 - 45) / 200 * deltas;  // Above 450 GeV flat
-                    else
-                        corr += std::abs(pT - 45) / 200 * deltas;
-                }
-                // additional uncertainties for 2022 data
-                if (m_release.value().find("Recs2023") != std::string::npos) {
-                  if ( (trk.year==MCP::DataYear::Data22) && pT > 100.0) {
-                    if (eta < 0 && eta> -0.5) corr += 2.1*deltas;
-                    else if (eta < -1.05) corr += 1.1*deltas;
-                    else if (eta > 0.5 ) corr += 0.8*deltas;
-                  }
+               
+                if (corrMap->at(MCP::SagittaCorrection::PtExtra__1up)->mapExist()) {
+                  deltas = corrMap->at(MCP::SagittaCorrection::PtExtra__1up)->getCalibConstant(trk);
+                  if (pT > 450.0)
+                    corr += std::abs(450.0 - 45) * deltas;  // Above 450 GeV flat
+                  else
+                    corr += std::abs(pT - 45) * deltas;
                 } else {
-                  if ( trk.year==MCP::DataYear::Data22 ) {
-                    if (eta > -2 && eta < -1.05) corr = corr*2.5;
-                    if (eta < -2) corr = corr*6;
-                    if (eta > 1.5 && eta < 2) {
+                  // old style uncertainty for Run2 and early Run3 recommendations 
+                  if (eta > 2 || (eta > -2 && eta < -1.05)) {
                       if (pT > 450.0)
-                        corr += std::abs(450.0 - 45) / 80 * deltas;  // Above 450 GeV flat
+                          corr += std::abs(450.0 - 45) / 100 * deltas;  // Above 450 GeV flat
                       else
-                        corr += std::abs(pT - 45) / 80 * deltas;
+                          corr += std::abs(pT - 45) / 100 * deltas;
+                  }
+                  if (eta < -2 || (eta < 2 && eta> 1.5)) {
+                      if (pT > 450.0)
+                          corr += std::abs(450.0 - 45) / 200 * deltas;  // Above 450 GeV flat
+                      else
+                          corr += std::abs(pT - 45) / 200 * deltas;
+                  }
+                  // additional uncertainties for 2022 data
+                  if (m_release.value().find("Recs2023") != std::string::npos) {
+                    if ( (trk.year==MCP::DataYear::Data22) && pT > 100.0) {
+                      if (eta < 0 && eta> -0.5) corr += 2.1*deltas;
+                      else if (eta < -1.05) corr += 1.1*deltas;
+                      else if (eta > 0.5 ) corr += 0.8*deltas;
                     }
-                    if (eta > 1.05 && eta < 1.5) {
-                      if (pT > 450.0)
-                        corr += std::abs(450.0 - 45) / 40 * deltas;  // Above 450 GeV flat
-                      else
-                        corr += std::abs(pT - 45) / 40 * deltas;
+                  } else {
+                    if ( trk.year==MCP::DataYear::Data22 ) {
+                      if (eta > -2 && eta < -1.05) corr = corr*2.5;
+                      if (eta < -2) corr = corr*6;
+                      if (eta > 1.5 && eta < 2) {
+                        if (pT > 450.0)
+                          corr += std::abs(450.0 - 45) / 80 * deltas;  // Above 450 GeV flat
+                        else
+                          corr += std::abs(pT - 45) / 80 * deltas;
+                      }
+                      if (eta > 1.05 && eta < 1.5) {
+                        if (pT > 450.0)
+                          corr += std::abs(450.0 - 45) / 40 * deltas;  // Above 450 GeV flat
+                        else
+                          corr += std::abs(pT - 45) / 40 * deltas;
+                      }
                     }
                   }
+                  // done for old style uncertainty for Run2 and early Run3 recommendations 
                 }
-                ATH_MSG_VERBOSE("Deltas corr: "<<deltas);
-
 
                 corrections.push_back(corr*scale);
-                ATH_MSG_VERBOSE("final corr: "<<corr);
+                ATH_MSG_VERBOSE("High pT variation for pT "<<pT<<" deltas "<<deltas<<"  final corr: "<<corr);
 
             }
             else if(m_currentParameters->SagittaDataStat != MCP::SystVariation::Default)

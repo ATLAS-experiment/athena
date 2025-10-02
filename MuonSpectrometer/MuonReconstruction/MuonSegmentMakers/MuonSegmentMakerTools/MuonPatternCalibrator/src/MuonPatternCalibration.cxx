@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPatternCalibrator/MuonPatternCalibration.h"
@@ -38,7 +38,7 @@ MuonPatternCalibration::initialize()
 
 
 StatusCode MuonPatternCalibration::calibrate(const EventContext& ctx, const MuonPatternCombination& pattern, ROTsPerRegion& hitsPerRegion) const {
-    Muon::MuonPatternCalibration::RegionMap regionMap;
+    MuonPatternCalibration::RegionMap regionMap;
     bool hasPhiMeasurements = checkForPhiMeasurements(pattern);
     ATH_CHECK(createRegionMap(ctx, pattern, regionMap, hasPhiMeasurements));
     // calibrate hits
@@ -51,7 +51,8 @@ int MuonPatternCalibration::getRegionId(const Identifier& id) const{
 
     // simple division of MuonSpectrometer in regions using barrel/endcap seperation plus
     // inner/middle/outer seperation
-    return m_idHelperSvc->stationIndex(id)* (  m_idHelperSvc->stationEta(id) > 0 ? 1 : -1);
+    using namespace MuonStationIndex;
+    return toInt(m_idHelperSvc->stationIndex(id)) * (m_idHelperSvc->stationEta(id) > 0 ? 1 : -1);
 }
 
 
@@ -79,8 +80,8 @@ MuonPatternCalibration::createRegionMap(const EventContext& ctx,const MuonPatter
         ATH_MSG_DEBUG("No phi measurements using center tubes");
 
     
-    const Muon::TgcPrepDataContainer* tgcPrdCont{nullptr};
-    const Muon::RpcPrepDataContainer* rpcPrdCont{nullptr};
+    const TgcPrepDataContainer* tgcPrdCont{nullptr};
+    const RpcPrepDataContainer* rpcPrdCont{nullptr};
     ATH_CHECK(loadFromStoreGate(ctx, m_keyRpc, rpcPrdCont));
     ATH_CHECK(loadFromStoreGate(ctx, m_keyTgc, tgcPrdCont)); 
    
@@ -170,23 +171,23 @@ MuonPatternCalibration::createRegionMap(const EventContext& ctx,const MuonPatter
             if ((hits.neta > 0 && hits.nphi == 0) || (hits.nphi > 0 && hits.neta == 0)) {
                 if (m_idHelperSvc->isRpc(id) && rpcPrdCont) {
 
-                    const Muon::RpcPrepDataCollection* prd_coll = rpcPrdCont->indexFindPtr(coll_hash);
+                    const RpcPrepDataCollection* prd_coll = rpcPrdCont->indexFindPtr(coll_hash);
                     if (!prd_coll) {
                         ATH_MSG_VERBOSE("RpcPrepDataCollection not found in container!!"<< m_keyRpc);
                         continue;
                     }                   
-                    for (const Muon::RpcPrepData* rpc_prd : *prd_coll) {
+                    for (const RpcPrepData* rpc_prd : *prd_coll) {
                         if (!clusterIds.insert(rpc_prd->identify()).second) continue;
                         insertCluster(*rpc_prd, regionMap, patpose, patdire, hasPhiMeasurements);
                     }                    
                 } else if (m_idHelperSvc->isTgc(id) && tgcPrdCont) {
-                     const Muon::TgcPrepDataCollection* prd_coll = tgcPrdCont->indexFindPtr(coll_hash);
+                     const TgcPrepDataCollection* prd_coll = tgcPrdCont->indexFindPtr(coll_hash);
                      if (!prd_coll) {
                         ATH_MSG_DEBUG("TgcPrepDataCollection not found in container!! "<< m_keyTgc);
                         continue;
                     }
                    
-                    for (const Muon::TgcPrepData* tgc_prd : *prd_coll) {
+                    for (const TgcPrepData* tgc_prd : *prd_coll) {
                         if (!clusterIds.insert(tgc_prd->identify()).second) continue;
                         insertCluster(*tgc_prd, regionMap, patpose, patdire, hasPhiMeasurements);                        
                     }                    
@@ -357,36 +358,29 @@ MuonPatternCalibration::insertMdt(const MdtPrepData& mdt, RegionMap& regionMap, 
     // enter hit in map
     Identifier elId = m_idHelperSvc->mdtIdHelper().elementID(id);
 
-    MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(elId);
-    int                       chFlag  = elId.get_identifier32().get_compact();
+    using ChIndex = MuonStationIndex::ChIndex;
+    ChIndex chIndex = m_idHelperSvc->chamberIndex(elId);
+    int chFlag  = elId.get_identifier32().get_compact();
     if (m_doMultiAnalysis) {
-        if (m_idHelperSvc->isSmallChamber(id)) {
+        if (isSmall(chIndex)) {
             ATH_MSG_VERBOSE(" Small chamber " << m_idHelperSvc->toString(elId));
             chFlag = 0;
-            if (chIndex == MuonStationIndex::BIS) {
-                int eta = m_idHelperSvc->stationEta(elId);
-                if (std::abs(eta) == 8) {
-                    ATH_MSG_VERBOSE(" BIS8 chamber " << m_idHelperSvc->toString(elId));
-                    chFlag = 3;
-                }
+            if (chIndex == ChIndex::BIS && std::abs(m_idHelperSvc->stationEta(elId)) == 8) {
+                ATH_MSG_VERBOSE(" BIS8 chamber " << m_idHelperSvc->toString(elId));
+                chFlag = 3;
             }
         } else {
             ATH_MSG_VERBOSE(" Large chamber " << m_idHelperSvc->toString(elId));
             chFlag = 1;
-            if (chIndex == MuonStationIndex::BIL) {
-                std::string stName = m_idHelperSvc->chamberNameString(id);
-                if (stName[2] == 'R') {
-                    ATH_MSG_VERBOSE(" BIR chamber " << m_idHelperSvc->toString(elId));
-                    chFlag = 2;
-                }
-            } else if (chIndex == MuonStationIndex::BOL) {
-                if (std::abs(m_idHelperSvc->stationEta(id)) == 7) {
-                    ATH_MSG_VERBOSE(" BOE chamber " << m_idHelperSvc->toString(elId));
-                    chFlag = 4;
-                }
+            if (chIndex == ChIndex::BIL && m_idHelperSvc->stationNameString(id)[2] == 'R') {
+                ATH_MSG_VERBOSE(" BIR chamber " << m_idHelperSvc->toString(elId));
+                chFlag = 2;
+            } else if (chIndex == ChIndex::BOL && std::abs(m_idHelperSvc->stationEta(id)) == 7) {
+                ATH_MSG_VERBOSE(" BOE chamber " << m_idHelperSvc->toString(elId));
+                chFlag = 4;
             }
         }
-        int phi = m_idHelperSvc->mdtIdHelper().stationPhi(id);
+        int phi = m_idHelperSvc->stationPhi(id);
 
         chFlag += 10 * phi;
     }

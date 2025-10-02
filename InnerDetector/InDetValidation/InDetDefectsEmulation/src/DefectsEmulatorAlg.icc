@@ -1,12 +1,14 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 #include "Identifier/Identifier.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "EventContainers/IdentifiableContainerBase.h"
 #include "InDetRawData/InDetRawDataCollection.h"
 #include "InDetRawData/SCT3_RawData.h"
 #include "InDetRawData/Pixel1RawData.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandPoisson.h"

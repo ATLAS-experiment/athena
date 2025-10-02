@@ -3,4 +3,4 @@
 #include "ControlTest/StoreGateTestCommon.txt"
 #include "ToyConversion/ToyConversionOpts.txt"
 
-MessageSvc.setVerbose = ["DataProxy", "EventPersistencySvc", "ToyConversionSvc", "StoreGateSvc", "ProxyProviderSvc"];
+MessageSvc.setVerbose = ["ToyConversionSvc", "StoreGateSvc"];

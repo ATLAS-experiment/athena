@@ -64,7 +64,7 @@ AnnulusBounds::insideLoc2(const Amg::Vector2D& locpo, double tol2) const
 }
 // MW Fix it
 
-inline const std::vector<TDD_real_t>& AnnulusBounds::getBoundsValues() {
+inline const std::vector<TDD_real_t>& AnnulusBounds::getBoundsValues() const{
     return m_boundValues;
 }
 

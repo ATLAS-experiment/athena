@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of tools needed by the Extrapolator
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,8 +24,12 @@ def AtlasMaterialEffectsUpdatorCfg(flags,
                                    name='AtlasMaterialEffectsUpdator',
                                    **kwargs):
     result = ComponentAccumulator()
+
     kwargs.setdefault("EnergyLossUpdator", result.popToolsAndMerge(
         AtlasEnergyLossUpdatorCfg(flags)))
+    kwargs.setdefault("MultipleScatteringUpdator", result.popToolsAndMerge(
+        AtlasMultipleScatteringUpdatorCfg(flags)))
+
     result.setPrivateTools(
         CompFactory.Trk.MaterialEffectsUpdator(name, **kwargs))
     return result
@@ -97,7 +101,7 @@ def FastSimNavigatorCfg(flags,
         from TrkConfig.AtlasTrackingGeometrySvcConfig import (
             TrackingGeometrySvcCfg)
         acc = TrackingGeometrySvcCfg(flags)
-        kwargs.setdefault("TrackingGeometrySvc", acc.getPrimary().name)
+        kwargs.setdefault("TrackingGeometrySvc", acc.getPrimary())
         kwargs.setdefault("TrackingGeometryKey", '')
         result.merge(acc)
 
@@ -152,7 +156,7 @@ def fatrasMultipleScatteringUpdatorCfg(flags,
 
     from ISF_FatrasServices.ISF_FatrasConfig import TrkExRndSvcMTCfg
     kwargs.setdefault("RandomNumberService",
-                      result.getPrimaryAndMerge(TrkExRndSvcMTCfg(flags)).name)
+                      result.getPrimaryAndMerge(TrkExRndSvcMTCfg(flags)))
     kwargs.setdefault("RandomStreamName",
                       flags.Sim.Fatras.TrkExRandomStreamName)
     kwargs.setdefault("GaussianMixtureModel",
@@ -165,5 +169,9 @@ def fatrasMultipleScatteringUpdatorCfg(flags,
 
 def NIMatEffUpdatorCfg(flags, name="NIMatEffUpdator", **kwargs):
     result = ComponentAccumulator()
+
+    kwargs.setdefault("MaterialEffectsUpdator", result.popToolsAndMerge(
+        AtlasMaterialEffectsUpdatorCfg(flags)))
+
     result.setPrivateTools(CompFactory.Trk.NIMatEffUpdator(name, **kwargs))
     return result

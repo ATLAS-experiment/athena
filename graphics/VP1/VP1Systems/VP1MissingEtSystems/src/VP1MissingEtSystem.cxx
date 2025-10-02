@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -80,10 +80,9 @@ QWidget * VP1MissingEtSystem::buildController()
 {
   //Updated: replaced to predefined controller
   m_d->controller = new missingEtController(this);
-  m_d->collWidget = (VP1MissingEtCollWidget*)m_d->controller->collWidget();
+  m_d->collWidget = static_cast<VP1MissingEtCollWidget*>(m_d->controller->collWidget());
   return m_d->controller;
-  //m_d->collWidget = new VP1MissingEtCollWidget;
-  //return m_d->collWidget;
+ 
 }
 
 //_____________________________________________________________________________________
@@ -105,7 +104,7 @@ QByteArray VP1MissingEtSystem::saveState()
   ensureBuildController();
   VP1Serialise serialise(1/*version*/, this);
   serialise.save(IVP13DSystemSimple::saveState());
-  serialise.save((VP1CollectionWidget*)m_d->collWidget);
+  serialise.save(static_cast<VP1CollectionWidget*>(m_d->collWidget));
   serialise.save(m_d->controller->saveSettings());
   serialise.warnUnsaved(controllerWidget());
   return serialise.result();
@@ -121,7 +120,7 @@ void VP1MissingEtSystem::restoreFromState(QByteArray ba)
   }
   ensureBuildController();
   IVP13DSystemSimple::restoreFromState(state.restoreByteArray());
-  state.restore((VP1CollectionWidget*)m_d->collWidget);
+  state.restore(static_cast<VP1CollectionWidget*>(m_d->collWidget));
 
   if (state.version() >= 1)
    m_d->controller->restoreSettings(state.restoreByteArray());

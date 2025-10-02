@@ -17,6 +17,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s):
 #include "xAODTau/TauxAODHelpers.h"
@@ -44,12 +45,16 @@ public:
   virtual StatusCode initialize() override;
 
   // calculate ID variables depricated
-  virtual StatusCode calculateIDVariables(const xAOD::DiTauJet& xDiTau);
+  virtual StatusCode calculateIDVariables(const xAOD::DiTauJet& xDiTau) const;
 
   // calculate ID variables
-  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) override;
+  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) const override;
   
 private:
+
+  Gaudi::Property<float> m_dDefault{this, "DefaultValue", -1234};
+  Gaudi::Property<float> m_Rsubjet{this, "R_subjet", 0.2};
+  Gaudi::Property<float> m_Rcore{this, "R_core", 0.1};
 
   static float n_subjets(const xAOD::DiTauJet& xDiTau) ;
   float ditau_pt(const xAOD::DiTauJet& xDiTau) const;
@@ -77,14 +82,12 @@ private:
   float R_subjets(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float f_isotracks(const xAOD::DiTauJet& xDiTau) const;
-
-  // steering variables
-  // float m_dMaxDeltaR;
-  float m_dDefault;
   
-  static StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau);
+  StatusCode decorNtracks (const xAOD::DiTauJet& xDiTau) const;
 }; // class DiTauIDVarCalculator
 
 }
 
 #endif // TAURECTOOLS_DITAUIDVARCALCULATOR_H
+
+

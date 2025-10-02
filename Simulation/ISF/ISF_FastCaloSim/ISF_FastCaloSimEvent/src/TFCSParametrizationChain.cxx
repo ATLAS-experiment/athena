@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSParametrizationChain.h"
@@ -211,7 +211,7 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
       TObject *parent = R__b.GetParent();
       if (R__b.GetParent()) {
         if (parent->InheritsFrom(TDirectory::Class())) {
-          dir = (TDirectory *)parent;
+          dir = static_cast<TDirectory *>(parent);
         }
       }
 
@@ -260,7 +260,7 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
       TObject *parent = R__b.GetParent();
       if (R__b.GetParent()) {
         if (parent->InheritsFrom(TDirectory::Class())) {
-          dir = (TDirectory *)parent;
+          dir = static_cast<TDirectory *>(parent);
         }
       }
     }

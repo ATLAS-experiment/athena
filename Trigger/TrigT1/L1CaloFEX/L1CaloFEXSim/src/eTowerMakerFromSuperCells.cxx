@@ -6,10 +6,10 @@
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 #include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eTowerBuilder.h"
+#include "eTowerBuilder.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "L1CaloFEXSim/eTowerMakerFromSuperCells.h"
-#include "L1CaloFEXSim/eSuperCellTowerMapper.h"
+#include "eTowerMakerFromSuperCells.h"
+#include "eSuperCellTowerMapper.h"
 
 #include "StoreGate/WriteHandle.h"
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -19,17 +19,19 @@
 #ifndef TILEGEOG4SD_TILEGEOG4SDCALC_H
 #define TILEGEOG4SD_TILEGEOG4SDCALC_H
 
-
 #include "TileG4Interfaces/ITileCalculator.h"
 #include "AthenaBaseComps/AthService.h"
 
 // package headers
 #include "TileGeoG4SD/TileSDOptions.h"
+#include "TileGeoG4SD/TileGeoG4Lookup.hh"
 
 // athena headers
 #include "CaloIdentifier/TileID.h"
 #include "CaloIdentifier/TileTBID.h"
 #include "CxxUtils/checker_macros.h"
+#include "StoreGate/StoreGateSvc.h"
+#include "GeoModelInterfaces/IGeoModelSvc.h"
 
 // Geant4 headers
 #include "G4Types.hh"
@@ -46,17 +48,13 @@ ATLAS_CHECK_FILE_THREAD_SAFETY;
 class TileGeoG4LookupBuilder;
 class G4Step;
 
-class TileRow;
 class TileGeoG4Section;
 class TileGeoG4Cell;
-
-class StoreGateSvc;
-class IGeoModelSvc;
 
 class TileGeoG4SDCalc: public extends<AthService, ITileCalculator> {
 public:
   TileGeoG4SDCalc(const std::string& name, ISvcLocator * pSvcLocator);
-  virtual ~TileGeoG4SDCalc();
+  virtual ~TileGeoG4SDCalc() = default;
 
   virtual StatusCode initialize() override final;
 
@@ -68,8 +66,8 @@ public:
   virtual G4bool ManageScintHit(TileHitData& hitData, double deltaTime) const override final;
   /// Used by FastCaloSimParamAction
   virtual TileMicroHit GetTileMicroHit(const G4Step*, TileHitData& hitData) const override final;
-  ///
-  virtual TileGeoG4LookupBuilder* GetLookupBuilder() const override final;
+  /// Create a lookup builder for the client TileGeoG4SDTool
+  virtual std::unique_ptr<TileGeoG4LookupBuilder> GetLookupBuilder() const override final;
   /// pointer to class with all options
   virtual const TileSDOptions* GetOptions() const override final;
 
@@ -100,20 +98,36 @@ private:
   // the default function which is used in simulation in the case Ushape=1
 #define Tile_1D_profile Tile_1D_profileRescaled
 
-  ServiceHandle<StoreGateSvc> m_detStore; // used by TileGeoG4CalibSD.cc
-  ServiceHandle<IGeoModelSvc> m_geoModSvc;
+  ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"}; // used by TileGeoG4CalibSD.cc
+  ServiceHandle<IGeoModelSvc> m_geoModSvc{this, "GeoModelSvc", "GeoModelSvc"};
 
   Identifier m_invalid_id{}; /// FIXME just a default-constructed Identifier???
 
   TileMicroHit m_microHit{};
 
   TileSDOptions m_options{};
+  Gaudi::Property<std::vector<double>> m_deltaTHit{this, "DeltaTHit", {0.5 , -75.25 , 75.25 , 5.}};
+  Gaudi::Property<double> m_timeCut{this, "TimeCut", 350.5};
+  Gaudi::Property<bool> m_tileTB{this, "TileTB", false};
+  Gaudi::Property<int> m_uShape{this, "Ushape", -1};
+  Gaudi::Property<bool> m_doBirk{this, "DoBirk", true};
+  Gaudi::Property<bool> m_doTileRow{this, "DoTileRow", false};
+  Gaudi::Property<bool> m_doTOFCorrection{this, "DoTOFCorrection", true};
+
+  Gaudi::Property<int> m_plateToCell{this, "PlateToCell", -1};
+  Gaudi::Property<bool> m_doCalibHitParticleID{this, "DoCalibHitParticleID", false};
+  Gaudi::Property<std::string> m_rDBAccessSvcName{this, "RDBAccessSvcName", "RDBAccessSvc"};
+  Gaudi::Property<std::string> m_geoModelSvcName{this, "GeoModelSvcName", "GeoModelSvc"};
+
+  Gaudi::Property<int> m_verboseLevel{this, "VerboseLevel", 0};
 
   Gaudi::Property<double> m_birk1{this, "birk1",0.02002 * CLHEP::g / (CLHEP::MeV * CLHEP::cm2), "value updated for G4 10.6.p03"};
   Gaudi::Property<double> m_birk2{this, "birk2",0.0 * CLHEP::g / (CLHEP::MeV * CLHEP::cm2) * CLHEP::g / (CLHEP::MeV * CLHEP::cm2), "value updated for G4 10.6.p03"};
 
+  Gaudi::Property<std::vector<std::string> > m_outputCollectionNames{this, "OutputCollectionNames", {}};
+
   /** @brief Keep hit time */
-  bool m_keepHitTime{};
+  bool m_keepHitTime{false};
 
   /** @brief Structure holding the attenuation lengths */
   std::unique_ptr<TileRow> m_row;

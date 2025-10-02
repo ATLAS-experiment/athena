@@ -12,11 +12,10 @@ DerivationFramework::CellsInConeThinning::CellsInConeThinning(
   const std::string& type,
   const std::string& name,
   const IInterface* parent)
-  : ExpressionParserUser<AthAlgTool>(type, name, parent)
+  : base_class(type, name, parent)
   , m_selectionString("")
   , m_dr(0.5)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("deltaR", m_dr = 0.5);
 }
 

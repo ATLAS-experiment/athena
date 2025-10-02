@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_DETAILSARRANGER_H
@@ -10,10 +10,12 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "xAODTau/TauJet.h"
 #include "xAODParticleEvent/ParticleContainer.h"
 #include "xAODPFlow/PFOContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "PanTauAlgs/ITool_DetailsArranger.h"
 #include "PanTauAlgs/ITool_InformationStore.h"
@@ -55,8 +57,9 @@ namespace PanTau {
         
     protected:
         
-        ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore;
-	std::string m_Tool_InformationStoreName;
+        ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore", "Tool handle to the information store tool"};
+
+        Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Tool handle to the information store tool"};
         
         void addPanTauDetailToTauJet(PanTauSeed* inSeed,
 				     const std::string& featName,
@@ -65,9 +68,9 @@ namespace PanTau {
 	
         StatusCode arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const;
 
-        static void SetHLVTau(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) ;
+        static void SetHLVTau(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& varTypeName_Basic) ;
 
-	bool HasMultPi0sInOneCluster(const xAOD::PFO* pfo, int decayModeProto, const std::string& inputAlg) const ;
+	bool HasMultPi0sInOneCluster(const xAOD::PFO* pfo, int decayModeProto) const ;
 
 	static void SetNeutralConstituentMass(xAOD::PFO* neutral_pfo, double mass) ;
 
@@ -79,7 +82,7 @@ namespace PanTau {
 
 	static void createPi0Vectors(xAOD::TauJet* tauJet, std::vector<TLorentzVector>& vPi0s, std::vector< std::vector< ElementLink<xAOD::PFOContainer> > > &vec_pi0pfos) ;
 	
-	static const constexpr float MASS_PI0 = 134.98; // in MeV
+	static const constexpr float MASS_PI0 = ParticleConstants::piZeroMassInMeV;
         
         double m_CoreCone = 0.0;
         std::vector<double> m_EtaBinEdges;
@@ -87,7 +90,6 @@ namespace PanTau {
         
         std::string m_varTypeName_Sum;
         std::string m_varTypeName_Ratio;
-        std::string m_varTypeName_EtInRing;
         std::string m_varTypeName_Isolation;
         std::string m_varTypeName_Num;
         std::string m_varTypeName_Mean;
@@ -97,8 +99,6 @@ namespace PanTau {
         std::string m_varTypeName_DeltaR;
         std::string m_varTypeName_JetMoment;
         std::string m_varTypeName_Combined;
-        std::string m_varTypeName_JetShape;
-        std::string m_varTypeName_ImpactParams;
         std::string m_varTypeName_Basic;
         std::string m_varTypeName_PID;
         std::string m_varTypeName_Shots;

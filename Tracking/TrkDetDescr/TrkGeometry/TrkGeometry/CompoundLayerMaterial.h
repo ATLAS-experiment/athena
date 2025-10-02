@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 
 // Trk
 #include "TrkDetDescrUtils/BinUtility.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkGeometry/ElementTable.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/Material.h"
@@ -102,7 +102,7 @@ class CompoundLayerMaterial final: public LayerMaterialProperties {
                                              size_t bin1) const override final;
 
   /** Update the ElementTable */
-  void updateElementTable(const SharedObject<const ElementTable>& set);
+  void updateElementTable(const std::shared_ptr<const ElementTable>& set);
 
   /** Get the ElementTable */
   const ElementTable* elementTable() const;
@@ -132,7 +132,7 @@ class CompoundLayerMaterial final: public LayerMaterialProperties {
   std::vector<std::vector<MaterialComposition> >
       m_composition;       //!< composition matrix
   bool m_fullComposition{false}; //!< full composition calculation
-  SharedObject<const ElementTable>
+  std::shared_ptr<const ElementTable>
       m_elementTable;  // the ElementTable (filled/synchronised)
 };
 
@@ -141,7 +141,7 @@ inline const BinUtility* CompoundLayerMaterial::binUtility() const {
 }
 
 inline void CompoundLayerMaterial::updateElementTable(
-    const SharedObject<const ElementTable>& set) {
+    const std::shared_ptr<const ElementTable>& set) {
   m_elementTable = set;
 }
 

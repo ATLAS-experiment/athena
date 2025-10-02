@@ -17,20 +17,14 @@ squarksl = []
 for anum in [1,2,3,4]:
     squarks += [str(1000000+anum),str(-1000000-anum),str(2000000+anum),str(-2000000-anum)]
     squarksl += [str(1000000+anum),str(-1000000-anum)]
-dict_index_syst = {0:'scalefactup',
-                   1:'scalefactdown',
-                   2:'alpsfactup',
-                   3:'alpsfactdown',
-                   4:'moreFSR',
-                   5:'lessFSR',
-                   6:'qup',
-                   7:'qdown'}
 
 # Basic settings for production and filters
-syst_mod = None
 ktdurham = None # Only set if you want a non-standard setting (1/4 heavy mass)
 madspin_card = None
 param_card = None # Only set if you *can't* just modify the default param card to get your settings (e.g. pMSSM)
+
+# In case someone wants to set a systematic variation in their job options fragment
+syst_mod = None
 
 # Default run settings
 run_settings = {'event_norm':'average',
@@ -76,7 +70,7 @@ define_pj_5FS = True # Defines p and j to include b in process string with 5FS
 force_nobmass_5FS = True # Forces massless b with 5FS
 finalStateB = False # Used with 4FS
 
-from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
+from MCJobOptionUtils.JOsupport import get_physics_short
 phys_short = get_physics_short()
 if 'py1up' in phys_short:
     include("Pythia8_i/Pythia8_A14_NNPDF23LO_Var1Up_EvtGen_Common.py")

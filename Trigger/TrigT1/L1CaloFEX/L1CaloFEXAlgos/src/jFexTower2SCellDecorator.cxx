@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -186,6 +186,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 return StatusCode::FAILURE;
             }
 
+            bool invalid=true;
             for (auto const& SCellID : it_TTower2SCells->second ) {
 
                 //check that the SCell Identifier exists in the map
@@ -198,27 +199,29 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                     scPhi.push_back(-99);
                     // bit shifting to get only a 32 bit number
                     scID.push_back( SCellID >> 32 );
-                    scMask.push_back(0);
+                    scMask.push_back(1); // treat missing cells as masked, so that if all missing will get a 0 not an invalid code
 
                 }
                 else{
                     const CaloCell* myCell = it_ScellID2ptr->second;
 
-                    float et = myCell->et();
-                    bool masked = 0;
+                    int val =  std::round(myCell->energy()/(12.5*std::cosh(myCell->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
+                    bool isMasked = m_apply_masking ? ((myCell)->provenance()&0x80) : false;
+                    bool isInvalid = m_apply_masking ? ((myCell)->provenance()&0x40) : false;
 
-                    if( (myCell->provenance() >> 7 & 0x1) and m_apply_masking ) {
-                        //if masked then Et = 0
-                        et = 0.0;
-                        masked = 1;
+                    invalid &= isInvalid;
+                    //masked &= isMasked;
+
+                    if( isMasked || isInvalid ) {
+                        val = 0;
                     }
 
-                    scEt.push_back(et);
+                    scEt.push_back(val);
                     scEta.push_back(myCell->eta());
                     scPhi.push_back(myCell->phi());
                     // bit shifting to get only a 32 bit number
                     scID.push_back( SCellID >> 32 );
-                    scMask.push_back( masked );
+                    scMask.push_back( isMasked );
                 }
             }
 
@@ -234,8 +237,16 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 if(masked) count_scMask++;
             }
 
-            SCellEt = tmpSCellEt;
-            jFexEtencoded = jFEXCompression::Compress( tmpSCellEt, count_scMask == scMask.size() ? true : false );
+            SCellEt = tmpSCellEt*12.5;
+            // now must convert Total_Et int value into fex value: multi-level encoding
+            if(count_scMask==scMask.size()) {
+                jFexEtencoded = 0; // no data
+            } else if(invalid) {
+                jFexEtencoded = 4095; // invalid
+            } else {
+                jFexEtencoded = jFEXCompression::Compress( tmpSCellEt*12.5, false );
+            }
+
             jFexEt        = jFEXCompression::Expand( jTower->jTowerEt() );
         }
         else if(source == 1){
@@ -275,11 +286,11 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         // Decorating the tower with the corresponding information
         //Setup Decorator Handlers
         if(m_save_extras) {
-            (*jTowerSCellEt)   (*jTower) = scEt;
-            (*jTowerSCellEta)  (*jTower) = scEta;
-            (*jTowerSCellPhi)  (*jTower) = scPhi;
-            (*jTowerSCellID)   (*jTower) = scID;
-            (*jTowerSCellMask) (*jTower) = scMask;
+            (*jTowerSCellEt)   (*jTower) = std::move(scEt);
+            (*jTowerSCellEta)  (*jTower) = std::move(scEta);
+            (*jTowerSCellPhi)  (*jTower) = std::move(scPhi);
+            (*jTowerSCellID)   (*jTower) = std::move(scID);
+            (*jTowerSCellMask) (*jTower) = std::move(scMask);
             (*jTowerTileEt)    (*jTower) = static_cast<int>( TileEt );
             (*jTowerTileEta)   (*jTower) = TileEta;
             (*jTowerTilePhi)   (*jTower) = TilePhi;
@@ -355,8 +366,8 @@ StatusCode  jFexTower2SCellDecorator::ReadSCfromFile(const std::string& fileName
             }
         }
 
-        m_map_TTower2SCellsEM[TTID] = SCellvectorEM;
-        m_map_TTower2SCellsHAD[TTID] = SCellvectorHAD;
+        m_map_TTower2SCellsEM[TTID] = std::move(SCellvectorEM);
+        m_map_TTower2SCellsHAD[TTID] = std::move(SCellvectorHAD);
 
     }
     myfile.close();

@@ -30,8 +30,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/ConstAccessor.h"
 
-#include <iostream>
-
 #include "TruthUtils/HepMCHelpers.h"
 
 using CLHEP::GeV;
@@ -140,8 +138,6 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           MC::isStable(truthParticle) && HepMC::generations(truthParticle) < 1) {
         m_oElectronValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                          *eventInfo);
-        m_oElectronValidationPlots.m_oTruthPromptElecPlots.fill(*truthParticle,
-                                                           *eventInfo);
       } //-- end electrons
 
       //--photons
@@ -152,8 +148,6 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
         //-- filling conversions
         const xAOD::TruthParticle* tmp =
           xAOD::TruthHelpers::getTruthParticle(*truthParticle); // 20.7.0.1
-        //      const xAOD::TruthParticle* tmp =
-        //      xAOD::EgammaHelpers::getTruthParticle( truthParticle );
         bool isTrueConv = false;
         float trueR = -999;
         float truthEta = -999;
@@ -222,76 +216,6 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
         }   //--  end recoPhoton
       }     //-- end Photons
     }       // -- end fill histos iso particles
-    // filling all truth particles from TruthParticles container (possibly will
-    // be deleted, also possibly to fill only prompt particles)
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthallParticles(
-      m_truthParticleContainerKey, ctx);
-    ATH_CHECK(truthallParticles.isValid());
-
-    MCTruthPartClassifier::Info info;
-    bool elecPrompt = false;
-    bool photonPrompt = false;
-
-    for (const auto* const truthallParticle :
-         *truthallParticles) { // Electrons and photons from standard
-                               // TruthParticle container
-
-      //--electrons
-      if (std::abs(truthallParticle->pdgId()) == 11 &&
-          MC::isStable(truthallParticle) &&
-          HepMC::generations(truthallParticle) == 0) {
-
-        auto type = m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
-        if (type.first == IsoElectron)
-          elecPrompt = true;
-
-        m_oElectronValidationPlots.m_oTruthAllPlots.fill(*truthallParticle,
-                                                         *eventInfo);
-          if (elecPrompt) {
-              m_oElectronValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle,
-                                                                  *eventInfo);
-              m_oElectronValidationPlots.m_oTruthAllPromptPlots.fill(*truthallParticle,
-                                                                  *eventInfo);
-          }
-      } //-- end electrons
-
-      //--photons
-      if (std::abs(truthallParticle->pdgId()) == 22 &&
-          MC::isStable(truthallParticle) &&
-          HepMC::generations(truthallParticle) == 0) {
-
-        auto type = m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
-        if (type.first == IsoPhoton)
-          photonPrompt = true;
-
-
-        m_oPhotonValidationPlots.m_oTruthAllPlots.fill(*truthallParticle,
-                                                       *eventInfo);
-
-        if (!photonPrompt)
-          continue;
-        if (truthallParticle->pt() / GeV > 20. &&
-            fabs(truthallParticle->eta()) < 2.47) {
-          m_oPhotonValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle, *eventInfo);
-          m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
-          ParticleOutCome photOutCome = info.particleOutCome;
-
-          float convTruthR = 9999.;
-          if (truthallParticle->decayVtx())
-            convTruthR = truthallParticle->decayVtx()->perp();
-          // std::cout<<"Truth Conversion R "<<convTruthR<<std::endl;
-          // m_oPhotonValidationPlots.convTruthR->Fill(convTruthR);
-
-          // fill only iso photon for conv and not converted
-          if (photOutCome == Converted && convTruthR < 800.)
-            m_oPhotonValidationPlots.m_oTruthAllIsoConvPlots.fill(
-              *truthallParticle, *eventInfo);
-          else
-            m_oPhotonValidationPlots.m_oTruthAllIsoUncPlots.fill(
-              *truthallParticle, *eventInfo);
-        } // end cuts on truth
-      }   // -- end photons
-    }
 
     //---------Electrons----------------------
     if (!fillRecoElecHistograms(truthParticles.ptr(), eventInfo.ptr())) {
@@ -509,7 +433,6 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
   ATH_CHECK(Photons.isValid());
   
   int numofPhot=0;
-  int numofTopo=0;
   int numofAmb=0; 
   int numPhotAll=0; 
   int numofCnv=0;
@@ -523,10 +446,9 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
           if (!PhotonHelpers::passOQquality(*photon)) continue;
         }
         
-        if(photon->author()&xAOD::EgammaParameters::AuthorPhoton&&photon->pt()/GeV>7.)           numofPhot++;
-        else if(photon->pt()*0.001<7.)  numofTopo++;
-        else if(photon->author()&xAOD::EgammaParameters::AuthorAmbiguous&&photon->pt()/GeV>7.)   numofAmb++;
-        if(xAOD::EgammaHelpers::isConvertedPhoton(photon)&&photon->pt()/GeV>7.)                  numofCnv++;
+        if(photon->author())           numofPhot++;
+        else if(photon->author()&xAOD::EgammaParameters::AuthorAmbiguous)   numofAmb++;
+        if(xAOD::EgammaHelpers::isConvertedPhoton(photon))                  numofCnv++;
         if(!m_isMC) m_oPhotonValidationPlots.fill(*photon,*eventInfo, isPhotPrompt);
         else {
             static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
@@ -546,7 +468,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
                             m_oPhotonValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
                         }
                     }else {
-                        cout<<"Truth particle associated not in egamma truth collection"<<endl;
+  		        ATH_MSG_INFO("Truth particle associated not in egamma truth collection");
                     }
                 }
                 
@@ -556,16 +478,14 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
             
         }
     }
-  numPhotAll = numofPhot+numofTopo+numofAmb;
+  numPhotAll = numofPhot+numofAmb;
   m_oPhotonValidationPlots.m_oAllPlots.m_nParticles->Fill(numPhotAll);
   m_oPhotonValidationPlots.m_oPhotPlots.m_nParticles->Fill(numofPhot);
-  m_oPhotonValidationPlots.m_oTopoPhotPlots.m_nParticles->Fill(numofTopo);    
   m_oPhotonValidationPlots.m_oAmbPhotPlots.m_nParticles->Fill(numofAmb);
   m_oPhotonValidationPlots.m_oConvPhotPlots.m_nParticles->Fill(numofCnv);
 
   m_oPhotonValidationPlots.m_oAllPlots.m_nParticles_weighted->Fill(numPhotAll,weight);
   m_oPhotonValidationPlots.m_oPhotPlots.m_nParticles_weighted->Fill(numofPhot,weight);
-  m_oPhotonValidationPlots.m_oTopoPhotPlots.m_nParticles_weighted->Fill(numofTopo,weight);    
   m_oPhotonValidationPlots.m_oAmbPhotPlots.m_nParticles_weighted->Fill(numofAmb,weight);
   m_oPhotonValidationPlots.m_oConvPhotPlots.m_nParticles_weighted->Fill(numofCnv,weight);
  

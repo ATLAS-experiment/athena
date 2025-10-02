@@ -14,7 +14,6 @@
 //CxxUtils
 #include "CxxUtils/inline_hints.h"
 // STD
-#include <cassert>
 #include <iomanip>
 #include <iostream>
 
@@ -48,7 +47,7 @@ Trk::CylinderSurface::CylinderSurface(const Amg::Transform3D& htrans,
                                       double radius,
                                       double hlength)
   : Trk::Surface(htrans)
-  , m_bounds(std::make_shared<Trk::CylinderBounds>(radius, hlength))
+  , m_bounds(std::make_shared<const Trk::CylinderBounds>(radius, hlength))
   , m_referencePoint(nullptr)
   , m_rotSymmetryAxis(nullptr)
 {}
@@ -66,13 +65,12 @@ Trk::CylinderSurface::CylinderSurface(const Amg::Transform3D& htrans,
 
 // constructor by CylinderBounds
 Trk::CylinderSurface::CylinderSurface(const Amg::Transform3D& htrans,
-                                      Trk::CylinderBounds* cbounds)
+                                      std::shared_ptr<const Trk::CylinderBounds> cbounds)
   : Trk::Surface(htrans)
-  , m_bounds(cbounds)
+  , m_bounds(std::move(cbounds))
   , m_referencePoint(nullptr)
   , m_rotSymmetryAxis(nullptr)
 {
-  if (!cbounds) throw std::runtime_error("Cannot pass null CylinderBounds");
 }
 
 // constructor from transform
@@ -102,13 +100,12 @@ Trk::CylinderSurface::CylinderSurface(double radius,
 {}
 
 // constructor by CylinderBounds
-Trk::CylinderSurface::CylinderSurface(Trk::CylinderBounds* cbounds)
+Trk::CylinderSurface::CylinderSurface(std::shared_ptr<const Trk::CylinderBounds> cbounds)
   : Trk::Surface()
-  , m_bounds(cbounds)
+  , m_bounds(std::move(cbounds))
   , m_referencePoint(nullptr)
   , m_rotSymmetryAxis(nullptr)
 {
-  assert(cbounds);
 }
 
 Trk::CylinderSurface&

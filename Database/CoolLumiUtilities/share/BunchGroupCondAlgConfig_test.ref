@@ -3,11 +3,12 @@ Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/TRIGGER/LVL1/BunchGroupContent')}
 Py:ComponentAccumulator    INFO  \__ BunchGroupCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * BunchGroupFolderInputKey: /TRIGGER/LVL1/BunchGroupContent
-Py:ComponentAccumulator    INFO      * BunchGroupOutputKey: BunchGroupCondData
+Py:ComponentAccumulator    INFO      * BunchGroupFolderInputKey: '/TRIGGER/LVL1/BunchGroupContent'
+Py:ComponentAccumulator    INFO      * BunchGroupOutputKey: 'BunchGroupCondData'
 IOVDbSvc: ['/TagInfo<metaOnly/>', '<db>COOLONL_TRIGGER/COMP200</db> /TRIGGER/LVL1/BunchGroupContent<tag>HEAD</tag>']
 --- default
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ BunchGroupCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * BunchGroupOutputKey: BunchGroupCondData
+Py:ComponentAccumulator    INFO      * BunchGroupFolderInputKey: ''
+Py:ComponentAccumulator    INFO      * BunchGroupOutputKey: 'BunchGroupCondData'
 IOVDbSvc: []

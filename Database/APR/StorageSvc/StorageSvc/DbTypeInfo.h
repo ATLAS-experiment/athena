@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DbTypeInfo.h 726071 2016-02-25 09:23:05Z krasznaa $
@@ -80,21 +80,21 @@ namespace pool  {
     void destroy() {  delete this; }
     /// Create type information using name
     /** Note: Existence of reflection class is Mandatory!  */
-    static DbTypeInfo* create(const std::string& cl_name);
+    static const DbTypeInfo* create(const std::string& cl_name);
     /// Create type information using name
-    static DbTypeInfo* create(const std::string& cl_name, Columns& cols);
+    static const DbTypeInfo* create(const std::string& cl_name, Columns& cols);
     /// Create type information using Guid only Class must already be registered.
     /** Note: Existence of reflection class is Mandatory!  */
-    static DbTypeInfo* create(const Guid& guid);
+    static const DbTypeInfo* create(const Guid& guid);
     /// Create type information using Guid only Class must already be registered.
     /** Note: Existence of reflection class is Mandatory!  */
-    static DbTypeInfo* create(const Guid& guid, Columns& cols);
+    static const DbTypeInfo* create(const Guid& guid, Columns& cols);
     /// Create type information using Guid only Class must already be registered.
     /** Note: Existence of reflection class is NOT mandatory!  */
-    static DbTypeInfo* createEx(const Guid& guid);
+    static const DbTypeInfo* createEx(const Guid& guid);
     /// Create type information using Guid only Class must already be registered.
     /** Note: Existence of reflection class is NOT mandatory!  */
-    static DbTypeInfo* createEx(const Guid& guid, Columns& cols);
+    static const DbTypeInfo* createEx(const Guid& guid, Columns& cols);
     /// Load type information object from string representation
     static const DbTypeInfo* fromString(const std::string& string_rep);
     /// Access type name by type identifier from RTTI

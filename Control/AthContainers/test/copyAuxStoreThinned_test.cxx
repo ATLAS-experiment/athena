@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -38,7 +38,7 @@ public:
       m_selected.erase (supid);
   }
 
-  virtual SG::auxid_set_t getSelectedAuxIDs() const
+  virtual SG::auxid_set_t getSelectedAuxIDs() const override
   {
     if (m_suppressed.empty()) return getAuxIDs();
     return m_selected;

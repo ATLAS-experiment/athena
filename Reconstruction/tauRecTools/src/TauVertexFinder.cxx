@@ -67,9 +67,6 @@ StatusCode TauVertexFinder::executeVertexFinder(xAOD::TauJet& pTau,
   if (vxContainer->empty()) return StatusCode::SUCCESS;
 
   // find default PrimaryVertex (needed if TJVA is switched off or fails)
-  // see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/VertexReselectionOnAOD
-  // code adapted from
-  // https://svnweb.cern.ch/trac/atlasoff/browser/Tracking/TrkEvent/VxVertex/trunk/VxVertex/PrimaryVertexSelector.h
   const xAOD::Vertex* primaryVertex = nullptr;
   if (inTrigger()) { // trigger: find default PrimaryVertex (highest sum pt^2)
     primaryVertex = (*vxContainer)[0];
@@ -80,12 +77,6 @@ StatusCode TauVertexFinder::executeVertexFinder(xAOD::TauJet& pTau,
         primaryVertex = vertex;
         break;
       }
-    }
-    
-    // FIXME: this is kept for consistency but can probably be dropped
-    // cases where we would have a non-empty PrimaryVertices container but no vertex of type xAOD::VxType::PriVtx, is that even possible?
-    if(primaryVertex==nullptr && pTau.jet()!=nullptr) {
-      primaryVertex = tauRecTools::getJetVertex(*pTau.jet());
     }
   }
 
@@ -129,7 +120,6 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
 {
   const xAOD::Jet* pJetSeed = pTau.jet();
   std::vector<const xAOD::TrackParticle*> tracksForTJVA;
-  const double dDeltaRMax(0.2);
 
   // the implementation follows closely the example given in modifyJet(...) in https://svnweb.cern.ch/trac/atlasoff/browser/Reconstruction/Jet/JetMomentTools/trunk/Root/JetVertexFractionTool.cxx#15
 
@@ -144,7 +134,7 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
   // Maybe not as efficient as deleting unwanted tracks from assocTrack but quicker and safer for now.
   float sumTrackAll = 0.0;
   for ( auto xTrack : assocTracks ) {
-    if ( (xTrack->p4().DeltaR(pJetSeed->p4())<dDeltaRMax) && m_TrackSelectionToolForTJVA->accept(*xTrack) ) {
+    if ( (xTrack->p4().DeltaR(pJetSeed->p4())<m_dDeltaRMax) && m_TrackSelectionToolForTJVA->accept(*xTrack) ) {
       if (!inEleRM()) { 
           tracksForTJVA.push_back(xTrack); 
       } 

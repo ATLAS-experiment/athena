@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: draw_obj.py
@@ -35,7 +35,7 @@ functionality is added:
   - The option NORM draws the histogram normalized to 1.
 
   - The option LOGY draws the histogram using a logarithmic
-    y-axis.
+    y-axis, and LOGX draws it with a logarithmic x-axis.
 
   - The line type will recycle after four histograms have
     been superimposed.  If the LINECOLORS option is given, then
@@ -51,7 +51,6 @@ printeps(fname) is a shortcut to print an eps file from the current canvas.
 get_canvas() returns the canvas currently being used for drawing.
 get_pad() returns the pad currently being used for drawing.
 """
-from __future__ import division
 
 
 from ROOT import gROOT, TCanvas, TVirtualPad, TH1, TH2, TObject
@@ -78,6 +77,7 @@ class _options(object):
         self.merge = 0
         self.same = 0
         self.norm = 0
+        self.logx = 0
         self.logy = 0
         self.fill = -1 
         self.linetype = -1
@@ -88,7 +88,7 @@ class _options(object):
         options = options.replace (',', ' ')
         for o in options.split():
             lo = o.lower()
-            if lo in ["merge", "same", "norm", "logy", 'linecolors']:
+            if lo in ["merge", "same", "norm", "logx", "logy", 'linecolors']:
                 setattr (self, lo, 1)
             elif (self._optmatch (lo, "fill") or
                   self._optmatch (lo, "linetype") or
@@ -168,6 +168,7 @@ Returns:
         pad = get_pad (advance_p, padnum)
 
     if not op.merge and not op.same:
+        pad.SetLogx (not not op.logx)
         pad.SetLogy (not not op.logy)
 
     if isinstance (obj, TH1) and not isinstance (obj, TH2):
@@ -280,6 +281,7 @@ Create it if it doesn't exist.
         _canvas = TCanvas (cname, cname, 700, 600)
         _canvas.SetLeftMargin (0.15)
         _canvas.SetBottomMargin (0.15)
+        _canvas.SetLogx (0)
         _canvas.SetLogy (0)
     return _canvas
 

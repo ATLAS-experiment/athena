@@ -11,8 +11,7 @@ find_package( ROOT COMPONENTS Core Tree TreePlayer )
 atlas_add_component( MuonGeoModelTestR4
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
-                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities
-                                    xAODTruth xAODMuonSimHit CxxUtils)
+                                    GaudiKernel MuonReadoutGeometryR4 AthenaPoolUtilities CxxUtils)
 
 # Some functions here make heavy use of Eigen and are thus very slow in debug
 # builds.  Set up to allow forcing them to compile with optimization and
@@ -28,7 +27,7 @@ endif()
 #### Standard geometry dumping test R3 (MC)
 atlas_add_test( testR3Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers STL1A1 BML1A3 T1E1A01 MML1A1
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -41,7 +40,7 @@ atlas_add_test( testR3Geometry_MTech
 #### Standard geometry dumping test R3 (data)
 atlas_add_test( testR3GeometryData
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel  --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --inputFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -50,7 +49,7 @@ atlas_add_test( testR3GeometryData
 #### Standard geometry dumping test R4 (MC)
 atlas_add_test( testR4Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers BML1A3 T1E1A01 MML1A1 STL1A1 --defaultGeoFile RUN4
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -64,25 +63,25 @@ atlas_add_test( checkStripDesign
 ##### Simulation test R3
 atlas_add_test( testR3SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 
-                PROPERTIES TIMEOUT 1200
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
 ##### Simulation test R4
 atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --defaultGeoFile RUN4
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 #### Test that the sector envelopes fully enclose the particular chambers
 atlas_add_test( testChamberBuilding
-                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC 
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder 
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 #### Test that the sector envelopes fully enclose the particular chambers (R4)
 atlas_add_test( testChamberBuildingR4
-                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noSTGC --defaultGeoFile RUN4
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4
                 PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)

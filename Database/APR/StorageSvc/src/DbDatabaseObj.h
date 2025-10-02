@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -94,7 +94,7 @@ namespace pool    {
     /// Collection of retired database containers
     Containers                    m_retiredConts;
     /// Internal string representation type
-    DbTypeInfo*             m_string_t;
+    const DbTypeInfo*             m_string_t;
     /// Physical Database login
     std::string                   m_logon;
     /// File age counter

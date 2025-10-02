@@ -11,30 +11,25 @@ namespace utf = boost::unit_test;
 
 BOOST_AUTO_TEST_SUITE(IdDictRegionTest)
 BOOST_AUTO_TEST_CASE(IdDictRegionConstructors){
-  BOOST_CHECK_NO_THROW(IdDictRegion());
-  IdDictRegion i1;
+  BOOST_CHECK_NO_THROW(IdDictRegion("", "", ""));
+  IdDictRegion i1("", "", "");
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictRegion i2(i1));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictRegion i3(std::move(i1)));
   
 }
 
 BOOST_AUTO_TEST_CASE(EmptyIdDictRegionAccessors){
-  IdDictRegion f;
+  IdDictRegion f("", "", "");
   BOOST_TEST(f.group_name() == "");
   BOOST_TEST(f.verify() == true);
 }
 
 BOOST_AUTO_TEST_CASE(IdDictRegionModifyMembers){
-  IdDictRegion f;
-  f.m_name = "sroe";
-  f.m_group = "groupName";
+  IdDictRegion f("sroe", "groupName", "");
   BOOST_TEST(f.group_name() == "groupName");
   //IdDictRange _isa_ IdDictRegionEntry
-  IdDictRange * dRange= new  IdDictRange;
   //by minmax
-  dRange->m_specification = IdDictRange::by_minmax;
-  dRange->m_minvalue = -1;
-  dRange->m_maxvalue = 5;
+  IdDictRange * dRange= new  IdDictRange ("", -1, 5);
   BOOST_CHECK_NO_THROW(f.add_entry(dRange));//what is the ownership policy?
   BOOST_CHECK(f.size() == 1);
   BOOST_TEST(f.fieldSize() == 0);

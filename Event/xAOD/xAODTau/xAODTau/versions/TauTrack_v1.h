@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTAU_VERSIONS_TAUTRACK_V1_H
@@ -64,7 +64,6 @@ namespace xAOD {
 
     // additional bdt input variables
     float z0sinThetaTJVA(const xAOD::IParticle&) const;
-    //    void setZ0sinThetaTJVA(float z0sinThetaTJVA);
 
     // track IP w.r.t. TJVA vertex
     float d0TJVA() const;
@@ -73,11 +72,8 @@ namespace xAOD {
     float z0sinthetaSigTJVA() const;
 
     float rConv() const;
-    //    void setRConv(float rConv);
     float rConvII() const;
-    //    void setRConvII(float rConvII);
     float dRJetSeedAxis(const xAOD::IParticle&) const;
-    //    void setDRJetSeedAxis(float dRJetSeedAxis);
       
     //bdt decision
     const std::vector<float>& bdtScores() const;
@@ -87,15 +83,6 @@ namespace xAOD {
     size_t nBdtScores() const;
     void addBdtScore( const float score);
     void clearBdtScores();
-
-      
-    // //name accessors for trackEtaStrip
-    // float etaStrip() const;
-    // void setEtaStrip(float eta);
-
-    // //name accessors for trackPhiStrip
-    // float phiStrip() const;
-    // void setPhiStrip(float phi);
 
     bool detail( TauJetParameters::TrackDetail detail, float& value ) const;
     void setDetail( TauJetParameters::TrackDetail detail, float value );

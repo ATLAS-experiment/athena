@@ -2,10 +2,6 @@
 #ifndef XAODROOTACCESS_RAUXSTORE_H
 #define XAODROOTACCESS_RAUXSTORE_H
 
-// Framework include(s).
-#include "AsgMessaging/StatusCode.h"
-#include "AthContainersInterfaces/IAuxStoreIO.h"
-
 // Local include(s).
 #include "xAODRootAccess/tools/AuxStoreBase.h"
 
@@ -20,6 +16,17 @@
 #include <memory>
 #include <string_view>
 
+// Make the RNTuple types available in the ROOT namespace
+// with all versions of ROOT.
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 1)
+namespace ROOT {
+using Experimental::RNTupleReader;
+using Experimental::RNTupleWriter;
+using Experimental::REntry;
+}  // namespace ROOT
+#endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 36, 0)
+
+
 namespace xAOD {
 
 /// @short "ROOT @c RNTuple implementation" of @c IAuxStore
@@ -31,13 +38,6 @@ namespace xAOD {
 class RAuxStore : public details::AuxStoreBase {
 
  public:
-  /// The RNTuple reader type
-  using RNTupleReader = ROOT::Experimental::RNTupleReader;
-  /// The RNTuple writer type
-  using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
-  /// The RNTuple entry type
-  using REntry = ROOT::Experimental::REntry;
-
   /// Constructor
   RAuxStore(std::string_view prefix = "", bool topStore = true,
             EStructMode mode = EStructMode::kUndefinedStore);
@@ -48,14 +48,14 @@ class RAuxStore : public details::AuxStoreBase {
   virtual void setPrefix(std::string_view prefix) override;
 
   /// Connect the object to an input RNTuple
-  StatusCode readFrom(RNTupleReader& reader);
+  StatusCode readFrom(ROOT::RNTupleReader& reader);
   /// Add the variables of the store to an output RNTuple
-  StatusCode writeTo(RNTupleWriter& writer);
+  StatusCode writeTo(ROOT::RNTupleWriter& writer);
 
   /// Get entry from the input RNTuple
   StatusCode getEntry(std::int64_t entry, int getall = 0);
   /// Commit a new entry to the output RNTuple
-  StatusCode commitTo(REntry& entry);
+  StatusCode commitTo(ROOT::REntry& entry);
 
   /// @name Functions implementing functionality for @c AuxStoreBase
   /// @{

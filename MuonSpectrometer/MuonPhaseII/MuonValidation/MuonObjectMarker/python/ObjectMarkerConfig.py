@@ -20,7 +20,7 @@ def TruthMeasMarkerAlgCfg(flags, name = "TruthMeasMarkerAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
     kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
-    kwargs.setdefault("SegmentLinkKey", "truthSegLinks")
+    kwargs.setdefault("SegmentLinkKey", "truthSegmentLinks")
     the_alg = CompFactory.MuonR4.TruthMeasMarkerAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

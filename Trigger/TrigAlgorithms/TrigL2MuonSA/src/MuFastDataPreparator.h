@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MUFASTDATAPREPARATOR_H
@@ -49,84 +49,48 @@ class MuFastDataPreparator: public AthAlgTool {
 
  public:
 
-  StatusCode prepareData(const LVL1::RecMuonRoI*     p_roi,
+  StatusCode prepareData(const EventContext& ctx,
+			 const xAOD::MuonRoI*        p_roi,
 			 const TrigRoiDescriptor*    p_roids,
 			 const bool                  insideOut,
 			 TrigL2MuonSA::RpcHits&      rpcHits,
 			 TrigL2MuonSA::MuonRoad&     muonRoad,
 			 TrigL2MuonSA::MdtRegion&    mdtRegion,
 			 TrigL2MuonSA::RpcFitResult& rpcFitResult,
-			 TrigL2MuonSA::MdtHits&      mdtHits_normal,
-			 TrigL2MuonSA::MdtHits&      mdtHits_overlap,
+			 TrigL2MuonSA::MdtHits&      mdtHits,
 			 const bool                  dynamicDeltaRpc) const;
 
-  StatusCode prepareData(const xAOD::MuonRoI*        p_roi,
-			 const TrigRoiDescriptor*    p_roids,
-			 const bool                  insideOut,
-			 TrigL2MuonSA::RpcHits&      rpcHits,
-			 TrigL2MuonSA::MuonRoad&     muonRoad,
-			 TrigL2MuonSA::MdtRegion&    mdtRegion,
-			 TrigL2MuonSA::RpcFitResult& rpcFitResult,
-			 TrigL2MuonSA::MdtHits&      mdtHits_normal,
-			 TrigL2MuonSA::MdtHits&      mdtHits_overlap,
-			 const bool                  dynamicDeltaRpc) const;
-
-  StatusCode prepareData(const LVL1::RecMuonRoI*     p_roi,
+  StatusCode prepareData(const EventContext& ctx,
+			 const xAOD::MuonRoI*        p_roi,
 			 const TrigRoiDescriptor*    p_roids,
 			 const bool                  insideOut,
 			 TrigL2MuonSA::TgcHits&      tgcHits,
 			 TrigL2MuonSA::MuonRoad&     muonRoad,
 			 TrigL2MuonSA::MdtRegion&    mdtRegion,
 			 TrigL2MuonSA::TgcFitResult& tgcFitResult,
-			 TrigL2MuonSA::MdtHits&      mdtHits_normal,
-			 TrigL2MuonSA::MdtHits&      mdtHits_overlap,
-			 TrigL2MuonSA::CscHits&      cscHits,
-			 TrigL2MuonSA::StgcHits&     stgcHits,
-			 TrigL2MuonSA::MmHits&       mmHits) const;
-
-  StatusCode prepareData(const xAOD::MuonRoI*        p_roi,
-			 const TrigRoiDescriptor*    p_roids,
-			 const bool                  insideOut,
-			 TrigL2MuonSA::TgcHits&      tgcHits,
-			 TrigL2MuonSA::MuonRoad&     muonRoad,
-			 TrigL2MuonSA::MdtRegion&    mdtRegion,
-			 TrigL2MuonSA::TgcFitResult& tgcFitResult,
-			 TrigL2MuonSA::MdtHits&      mdtHits_normal,
-			 TrigL2MuonSA::MdtHits&      mdtHits_overlap,
+			 TrigL2MuonSA::MdtHits&      mdtHits,
 			 TrigL2MuonSA::CscHits&      cscHits,
 			 TrigL2MuonSA::StgcHits&     stgcHits,
 			 TrigL2MuonSA::MmHits&       mmHits) const;
 
   //for multi-track mode
-  StatusCode prepareData(const LVL1::RecMuonRoI*              p_roi,
-			 const TrigRoiDescriptor*             p_roids,
+  StatusCode prepareData(const EventContext& ctx,
+                         const xAOD::MuonRoI*                 p_roi,
+                         const TrigRoiDescriptor*             p_roids,
                          std::vector<TrigL2MuonSA::MuonRoad>& clusterRoad,
                          std::vector<TrigL2MuonSA::RpcFitResult>&  clusterFitResults,
-                         TrigL2MuonSA::MdtHits&               mdtHits_normal,
-                         TrigL2MuonSA::MdtHits&               mdtHits_overlap,
+                         TrigL2MuonSA::MdtHits&               mdtHits,
                          std::vector<TrigL2MuonSA::MdtHits>&  mdtHits_cluster_normal,
                          const bool                           dynamicDeltaRpc) const;
 
-  StatusCode prepareData(const xAOD::MuonRoI*                 p_roi,
-			 const TrigRoiDescriptor*             p_roids,
-                         std::vector<TrigL2MuonSA::MuonRoad>& clusterRoad,
-                         std::vector<TrigL2MuonSA::RpcFitResult>&  clusterFitResults,
-                         TrigL2MuonSA::MdtHits&               mdtHits_normal,
-                         TrigL2MuonSA::MdtHits&               mdtHits_overlap,
-                         std::vector<TrigL2MuonSA::MdtHits>&  mdtHits_cluster_normal,
-                         const bool                           dynamicDeltaRpc) const;
-
-  void setOptions(const TrigL2MuonSA::MuFastDataPreparatorOptions& options);
 
   void setRoadWidthForFailure(double rWidth_RPC_Failed, double rWidth_TGC_Failed);
 
-  StatusCode setGeometry(bool use_new_geometry);
   void setRpcGeometry(bool use_rpc);
-  
   void setStgcGeometry(bool use_stgc){ m_use_stgc = use_stgc; };
   void setMmGeometry(bool use_mm){ m_use_mm = use_mm; };
 
-  StatusCode setMCFlag(const BooleanProperty&  use_mcLUT);
+  StatusCode setMCFlag(bool use_mcLUT);
   void setRoIBasedDataAccess(bool use_RoIBasedDataAccess_MDT,
 			     bool use_RoIBasedDataAccess_RPC,
 			     bool use_RoIBasedDataAccess_TGC,
@@ -137,7 +101,6 @@ class MuFastDataPreparator: public AthAlgTool {
   void setExtrapolatorTool(ToolHandle<ITrigMuonBackExtrapolator>* backExtrapolator);
 
  private:
-  TrigL2MuonSA::MuFastDataPreparatorOptions m_options;
 
   ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_recRPCRoiTool{this, "TrigT1RPCRecRoiTool", "LVL1::TrigT1RPCRecRoiTool/TrigT1RPCRecRoiTool"};
   ToolHandle<RpcDataPreparator>   m_rpcDataPreparator{this, "RPCDataPreparator", "TrigL2MuonSA::RpcDataPreparator"};

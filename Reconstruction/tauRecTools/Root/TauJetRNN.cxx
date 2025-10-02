@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNN.h"
@@ -14,8 +14,8 @@
 #include "tauRecTools/TauJetRNNUtils.h"
 
 
-TauJetRNN::TauJetRNN(const std::string &filename, const Config &config)
-    : asg::AsgMessaging("TauJetRNN"), m_config(config), m_graph(nullptr) {
+TauJetRNN::TauJetRNN(const std::string &filename, const Config &config, bool useTRT)
+  : asg::AsgMessaging("TauJetRNN"), m_config(config), m_graph(nullptr), m_useTRT(useTRT) {
     // Load the json file defining the network
     std::ifstream input_file(filename);
     lwt::GraphConfig lwtnn_config;
@@ -83,7 +83,7 @@ TauJetRNN::TauJetRNN(const std::string &filename, const Config &config)
     }
 
     // Load the variable calculator
-    m_var_calc = TauJetRNNUtils::get_calculator(m_scalar_inputs, m_track_inputs, m_cluster_inputs);
+    m_var_calc = TauJetRNNUtils::get_calculator(m_scalar_inputs, m_track_inputs, m_cluster_inputs, m_useTRT);
 }
 
 TauJetRNN::~TauJetRNN() {}

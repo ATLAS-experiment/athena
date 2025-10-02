@@ -3,6 +3,5 @@
 <!-- Enums -->
 <enum pattern="SCT_ByteStreamErrors::*" />
 <variable pattern="SCT_ByteStreamErrors::*" />
-<class name="SCT_ByteStreamErrors::ROOT6_NamespaceAutoloadHook" />
 
 </lcgdict>

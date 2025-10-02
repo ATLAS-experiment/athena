@@ -29,6 +29,9 @@ namespace LargeRJetTruthLabel
     HtautauEl,    // fully-contained H->tautau,  el
     HtautauMu,    // fully-contained H->tautau,  mu
     HtautauHad,   // fully-contained H->tautau, had
+    ZtautauEl,    // fully-contained Z->tautau,  el
+    ZtautauMu,    // fully-contained Z->tautau,  mu
+    ZtautauHad,   // fully-contained Z->tautau, had
   };
 
   inline int enumToInt(const TypeEnum type)
@@ -50,6 +53,9 @@ namespace LargeRJetTruthLabel
       case HtautauEl:    return 14;
       case HtautauMu:    return 15;
       case HtautauHad:   return 16;
+      case ZtautauEl:    return 17;
+      case ZtautauMu:    return 18;
+      case ZtautauHad:   return 19;
       default:           return 0;
       }
   }
@@ -73,6 +79,9 @@ namespace LargeRJetTruthLabel
       case 14: return HtautauEl;
       case 15: return HtautauMu;
       case 16: return HtautauHad;
+      case 17: return ZtautauEl;
+      case 18: return ZtautauMu;
+      case 19: return ZtautauHad;
       default: return UNKNOWN;
     }
 
@@ -97,6 +106,9 @@ namespace LargeRJetTruthLabel
     TRY(HtautauEl);
     TRY(HtautauMu);
     TRY(HtautauHad);
+    TRY(ZtautauEl);
+    TRY(ZtautauMu);
+    TRY(ZtautauHad);
 #undef TRY
     return UNKNOWN;
   }

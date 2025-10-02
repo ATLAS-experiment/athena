@@ -106,7 +106,10 @@ namespace EL
       Worker *m_worker {nullptr};
 
       /// \brief the list of output files
-      std::map<std::string,Detail::OutputStreamData> m_outputs;
+      std::map<std::string,std::shared_ptr<Detail::OutputStreamData>> m_outputs;
+
+      /// \brief the BatchJob configuration (if used)
+      BatchJob *m_batchJob = nullptr;
 
 
 

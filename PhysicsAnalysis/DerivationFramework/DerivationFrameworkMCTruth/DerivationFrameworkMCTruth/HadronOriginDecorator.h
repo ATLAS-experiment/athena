@@ -22,7 +22,7 @@ namespace DerivationFramework {
   
   class HadronOriginClassifier;
   
-  class HadronOriginDecorator : public AthAlgTool, public IAugmentationTool {
+  class HadronOriginDecorator : public extends<AthAlgTool, IAugmentationTool> {
     
     
   public:

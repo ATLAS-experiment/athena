@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2023-2025 CERN for the benefit of the ATLAS collaboration
 
 
 #include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
@@ -7,7 +7,7 @@
 using namespace std;
 using namespace htt;
 
-FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(std::string geokey, bool remapModules) :
+FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(const std::string & geokey, bool remapModules) :
     AthMessaging("FPGATrackSimModuleRelabel"),
     m_geoKey(geokey),
     m_remapModules(remapModules)
@@ -23,6 +23,7 @@ FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(std::string geokey, bool re
 }
 
 bool FPGATrackSimModuleRelabel::remap(FPGATrackSimHit& hit) const {
+
     if(hit.isRemapped()){
         return false;
     }
@@ -42,13 +43,20 @@ bool FPGATrackSimModuleRelabel::remap(FPGATrackSimHit& hit) const {
             if (m_remapModules) {
                 hit.setEtaModule(newmodule);
             }
+            else {
+                hit.setEtaModule(hit.getEtaModule()); // allows us to save the old value
+            }
         }
         else {
             ATH_MSG_ERROR("Error: requesting "<< hit.getPhysLayer() << " element in m_ringIndex which is of size " << m_ringIndex->size());
             return false;
         }
-
     }
+    else {  // allows us to save the old value
+        hit.setEtaModule(hit.getEtaModule());
+        hit.setPhysLayer(hit.getPhysLayer());
+    }
+
     hit.setRemap();
     return true;
 }

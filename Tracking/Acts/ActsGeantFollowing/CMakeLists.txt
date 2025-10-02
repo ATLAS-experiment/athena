@@ -15,7 +15,7 @@ atlas_add_library( ActsGeantFollowing
                      src/components/*.cxx
                      PRIVATE_INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}
                      PRIVATE_LINK_LIBRARIES  ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES}
-                     ActsCore
+                     Acts::Core
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
                      ActsInteropLib

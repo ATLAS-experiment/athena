@@ -28,12 +28,9 @@
 
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 
+#include <functional>
 #include <string>
 
-// Use IdxSet and ParSet from FPGATrackSimUtil
-using FPGATrackSimBinUtil::IdxSet;
-using FPGATrackSimBinUtil::ParSet;
-using FPGATrackSimBinUtil::StoredHit;
 class FPGATrackSimBinStep;
 
 //-------------------------------------------------------------------------------------------------------
@@ -61,21 +58,32 @@ public:
   virtual const std::string &parNames(unsigned i) const = 0;
 
   // convert back and forth from pT, eta, phi, d0, z0 and internal paramater set
-  virtual const ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const = 0;
-  virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const = 0;
+  virtual const FPGATrackSimBinUtil::ParSet trackParsToParSet(const FPGATrackSimTrackPars &pars) const = 0;
+  virtual const FPGATrackSimTrackPars parSetToTrackPars(const FPGATrackSimBinUtil::ParSet &parset) const = 0;
 
   // calculate the distance in phi or eta from a track defined by parset to a hit
   // these can be implemented as any variable in the r-phi or r-eta plane (not necessarily eta and phi).
-  virtual double phiResidual(const ParSet &parset, FPGATrackSimHit const *hit) const = 0;
-  virtual double etaResidual(const ParSet &parset,  FPGATrackSimHit const *hit) const = 0;
+  virtual double phiResidual(const FPGATrackSimBinUtil::ParSet &parset, FPGATrackSimHit const *hit) const = 0;
+  virtual double etaResidual(const FPGATrackSimBinUtil::ParSet &parset,  FPGATrackSimHit const *hit) const = 0;
 
   // idx should be with the definition specifed in the step
   // NOTE: the stored hit may be modified!
-  virtual bool hitInBin(const FPGATrackSimBinStep &step, const IdxSet &idx,
-                        StoredHit& storedhit) const = 0;
+  virtual bool hitInBin(const FPGATrackSimBinStep &step,
+                        const FPGATrackSimBinUtil::IdxSet &idx,
+                        FPGATrackSimBinUtil::StoredHit &storedhit) const = 0;
 
-private:
-  
+  // Write the relevant LUT tables for firmware
+  // Implementation is optional. This is not needed for operation,
+  // but to generate constants for the firmware
+  virtual void writeLUTs([[maybe_unused]] const FPGATrackSimBinStep &step) const {}
+
+  // Set truthbin for debugging
+  // This does not need to be set but can be useful for debuging
+  void setTruthBin(const std::vector<FPGATrackSimBinUtil::IdxSet>& truthbin){ m_truthbin=truthbin;}
+
+protected:
+  std::vector<FPGATrackSimBinUtil::IdxSet> m_truthbin{};
+
 };
 
 #endif // IFPGATrackSimBinDesc_H

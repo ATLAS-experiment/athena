@@ -43,7 +43,7 @@ def FixedArrayBMCfg(flags, name="FixedArrayBM", **kwargs):
 def ArrayBMCfg(flags, name="ArrayBM", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("IntensityPattern", flags.Digitization.PU.BeamIntensityPattern)
-    kwargs.setdefault("RandomSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RandomSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     acc.addService(CompFactory.ArrayBM(name, **kwargs), primary=True)
     return acc
 
@@ -91,9 +91,9 @@ def MinBiasCacheCfg(flags, name="MinBiasCache", **kwargs):
     kwargs.setdefault("PileUpEventType", PileUpEventType.MinimumBias)
     if flags.Digitization.DoXingByXingPileUp or flags.Digitization.PU.SignalPatternForSteppingCache:
         kwargs.setdefault("Cache1ReadDownscaleFactor", 1)
-    kwargs.setdefault("Cache1EventSelector", acc.getPrimaryAndMerge(LowPtMinBiasEventSelectorCfg(flags)).name)
+    kwargs.setdefault("Cache1EventSelector", acc.getPrimaryAndMerge(LowPtMinBiasEventSelectorCfg(flags)))
     kwargs.setdefault("Cache2ReadDownscaleFactor", 1)
-    kwargs.setdefault("Cache2EventSelector", acc.getPrimaryAndMerge(HighPtMinBiasEventSelectorCfg(flags)).name)
+    kwargs.setdefault("Cache2EventSelector", acc.getPrimaryAndMerge(HighPtMinBiasEventSelectorCfg(flags)))
 
     kwargs.setdefault("OccupationFraction", (float(flags.Digitization.PU.BunchSpacing)/
                                              float(flags.Beam.BunchSpacing)))
@@ -115,7 +115,7 @@ def LowPtMinBiasCacheCfg(flags, name="LowPtMinBiasCache", **kwargs):
     kwargs.setdefault("PileUpEventType", PileUpEventType.MinimumBias)
     if flags.Digitization.DoXingByXingPileUp or flags.Digitization.PU.SignalPatternForSteppingCache:
         kwargs.setdefault("ReadDownscaleFactor", 1)
-    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(LowPtMinBiasEventSelectorCfg(flags)).name)
+    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(LowPtMinBiasEventSelectorCfg(flags)))
     kwargs.setdefault("OccupationFraction", (float(flags.Digitization.PU.BunchSpacing)/
                                              float(flags.Beam.BunchSpacing)))
 
@@ -141,7 +141,7 @@ def HighPtMinBiasCacheCfg(flags, name="HighPtMinBiasCache", **kwargs):
     # may need to have a separate type in the future
     kwargs.setdefault("PileUpEventType", PileUpEventType.HighPtMinimumBias)
     kwargs.setdefault("ReadDownscaleFactor", 1)
-    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(HighPtMinBiasEventSelectorCfg(flags)).name)
+    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(HighPtMinBiasEventSelectorCfg(flags)))
     kwargs.setdefault("OccupationFraction", (float(flags.Digitization.PU.BunchSpacing)/
                                              float(flags.Beam.BunchSpacing)))
 
@@ -176,7 +176,7 @@ def CavernCacheCfg(flags, name="CavernCache", **kwargs):
         if flags.Digitization.PU.CavernIgnoresBeamInt:
             OccupationFraction = 1.0
     kwargs.setdefault("OccupationFraction", OccupationFraction)
-    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(CavernEventSelectorCfg(flags)).name)
+    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(CavernEventSelectorCfg(flags)))
 
     RndmStreamName = "PileUpCollXingStream"
     acc.merge(PileUpConfigdSFMT(RndmStreamName))
@@ -201,7 +201,7 @@ def BeamGasCacheCfg(flags, name="BeamGasCache", **kwargs):
     kwargs.setdefault("CollDistribution", "Poisson")
     kwargs.setdefault("ReadDownscaleFactor", 1)
 
-    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(BeamGasEventSelectorCfg(flags)).name)
+    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(BeamGasEventSelectorCfg(flags)))
 
     RndmStreamName = "PileUpCollXingStream"
     acc.merge(PileUpConfigdSFMT(RndmStreamName))
@@ -227,7 +227,7 @@ def BeamHaloCacheCfg(flags, name="BeamHaloCache", **kwargs):
     kwargs.setdefault("CollDistribution", "Poisson")
     kwargs.setdefault("ReadDownscaleFactor",  1)
 
-    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(BeamHaloEventSelectorCfg(flags)).name)
+    kwargs.setdefault("EventSelector", acc.getPrimaryAndMerge(BeamHaloEventSelectorCfg(flags)))
 
     RndmStreamName = "PileUpCollXingStream"
     acc.merge(PileUpConfigdSFMT(RndmStreamName))
@@ -254,13 +254,13 @@ def PileUpEventLoopMgrCfg(flags, name="PileUpEventLoopMgr", **kwargs):
     if flags.Digitization.PU.BeamIntensityPattern:
         if flags.Digitization.PU.SignalPatternForSteppingCache:
             # Simulate Bunch Structure with events sliding backwards on a conveyor belt
-            kwargs.setdefault("BeamInt", acc.getPrimaryAndMerge(StepArrayBMCfg(flags)).name)
+            kwargs.setdefault("BeamInt", acc.getPrimaryAndMerge(StepArrayBMCfg(flags)))
         elif flags.Digitization.PU.FixedT0BunchCrossing:
             # Simulate Bunch Structure using a fixed point for the central bunch crossing
-            kwargs.setdefault("BeamInt", acc.getPrimaryAndMerge(FixedArrayBMCfg(flags)).name)
+            kwargs.setdefault("BeamInt", acc.getPrimaryAndMerge(FixedArrayBMCfg(flags)))
         else:
             # Simulate Bunch Structure and allow the central bunch crossing to vary
-            kwargs.setdefault("BeamInt", acc.getPrimaryAndMerge(ArrayBMCfg(flags)).name)
+            kwargs.setdefault("BeamInt", acc.getPrimaryAndMerge(ArrayBMCfg(flags)))
 
     # define inputs
     assert not flags.Input.SecondaryFiles, ("Found ConfigFlags.Input.SecondaryFiles = %r; "
@@ -289,10 +289,10 @@ def PileUpEventLoopMgrCfg(flags, name="PileUpEventLoopMgr", **kwargs):
 
     if flags.Input.RunAndLumiOverrideList:
         kwargs.setdefault("MaxMinBiasCollPerXing", maxNevtsPerXing(flags))
-        kwargs.setdefault("BeamLuminosity", acc.getPrimaryAndMerge(LumiProfileSvcCfg(flags)).name)
+        kwargs.setdefault("BeamLuminosity", acc.getPrimaryAndMerge(LumiProfileSvcCfg(flags)))
     else:
         kwargs.setdefault("MaxMinBiasCollPerXing", flags.Digitization.PU.NumberOfCollisions)
-        kwargs.setdefault("BeamLuminosity", acc.getPrimaryAndMerge(NoProfileSvcCfg(flags)).name)
+        kwargs.setdefault("BeamLuminosity", acc.getPrimaryAndMerge(NoProfileSvcCfg(flags)))
 
     from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
     kwargs.setdefault("EvtIdModifierSvc", acc.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))) # TODO make configurable?

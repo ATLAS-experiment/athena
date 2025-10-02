@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/IdentifierField.h"
@@ -114,7 +114,7 @@ IdentifierField::get_previous(element_type current, element_type& previous) cons
           previous = m_maximum;
           return (true); 
       }
-      if (has_previous == m_continuation_mode) {
+      if (has_previous == m_continuation_mode || has_both == m_continuation_mode) {
           previous = m_previous;
           return (true); 
       }
@@ -131,7 +131,7 @@ IdentifierField::get_previous(element_type current, element_type& previous) cons
         previous = values.back();
         return (true); 
     }
-    if (has_previous == m_continuation_mode) {
+    if (has_previous == m_continuation_mode || has_both == m_continuation_mode) {
         previous = m_previous;
         return (true); 
     }
@@ -158,7 +158,7 @@ IdentifierField::get_next(element_type current, element_type& next) const{
           next = m_minimum;
           return (true); 
       }
-      if (has_next == m_continuation_mode) {
+      if (has_next == m_continuation_mode || has_both == m_continuation_mode) {
           next = m_next;
           return (true); 
       }
@@ -175,7 +175,7 @@ IdentifierField::get_next(element_type current, element_type& next) const{
         next = values.front();
         return (true); 
     }
-    if (has_next == m_continuation_mode) {
+    if (has_next == m_continuation_mode || has_both == m_continuation_mode) {
         next = m_next;
         return (true); 
     }
@@ -355,8 +355,14 @@ IdentifierField::operator std::string () const {
           result += prefix+std::to_string(get_value_at(i));
           prefix = ",";
         } 
-      } else { 
-        result = std::format("{}:{}", minimum, maximum);
+      } else {
+        try {
+          result = std::format("{}:{}", minimum, maximum);
+        }
+        catch (const std::format_error& e) {
+          result = "ERROR ";
+          result += e.what();
+        }
       } 
     } 
   } 

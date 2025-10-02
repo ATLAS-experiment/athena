@@ -24,10 +24,11 @@ if __name__=='__main__':
    parser.add_argument('-w','--ofcwsqlite', dest='ofcwsql', default="", help='Input sqlite file for OFC weights', type=str)
    parser.add_argument('-t','--ofcwtag', dest='ofcwtag', default="", help='Tag for OFC weights', type=str)
    parser.add_argument('--poolcat', dest='poolcat', default="PoolFileCatalog.xml", help='Catalog of POOL files', type=str)
-   parser.add_argument('-p','--ofcphasesqlite', dest='ofcphsql', default="/afs/cern.ch/user/p/pavol/w0/public/DB_update_22/fillDB/SCOFCPhase.db", help='Input sqlite file for OFC phases', type=str)
-   parser.add_argument('-u','--ofcphasetag', dest='ofcphtag', default="LARElecCalibOflSCOFCBinPhysShift-08", help='Tag for OFC phases', type=str)
+   parser.add_argument('-p','--ofcphasesqlite', dest='ofcphsql', default="", help='Input sqlite file for OFC phases', type=str)
+   parser.add_argument('-u','--ofcphasetag', dest='ofcphtag', default="", help='Tag for OFC phases', type=str)
    parser.add_argument('--Ncoll',dest='Ncoll', default=60, help='Number of MinBias collision assumed for OFCs folder', type=int)
    parser.add_argument('--isCalib', dest='caliofc', action='store_true', default=False, help='is caliOFCs ?')
+   parser.add_argument('--Nsamples',dest='Nsamples', default=4, help='Number of samples for OFC folder', type=int)
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -66,6 +67,9 @@ if __name__=='__main__':
 
    # pileup normalisation
    flags.LArCalib.OFC.Ncoll = args.Ncoll
+
+   # number of OFC samples
+   flags.LArCalib.OFC.Nsamples = args.Nsamples
 
    # others flags settings
    flags.LArCalib.isSC = args.supercells

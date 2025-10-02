@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/ComboHypo.h"
@@ -161,9 +161,8 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
 
 
   // loop over all chains in the mult-map
-  for ( const auto& m : m_multiplicitiesReqMap ) { 
-    const HLT::Identifier chainId = HLT::Identifier(m.first);
-    const std::vector<int>& multiplicityPerLeg = m.second;
+  for ( const auto& [chainName, multiplicityPerLeg] : m_multiplicitiesReqMap ) {
+    const HLT::Identifier chainId = HLT::Identifier(chainName);
     const DecisionID requiredDecisionID = chainId.numeric();
 
     DecisionIDContainer allDecisionIds;
@@ -195,7 +194,7 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
       // If there is only one leg, then we just use the chain's name.
       if (multiplicityPerLeg.size() > 1) {
         ATH_MSG_DEBUG(chainId << " has multiplicityPerLeg.size() > 1, so we use legXXX_HLT_YYY, instead of HLT_YYY");
-        legId = TrigCompositeUtils::createLegName(chainId, legIndex);
+        legId = TrigCompositeUtils::createLegName(chainName, legIndex);
       }
 
       const DecisionID requiredDecisionIDLeg = legId.numeric();
@@ -471,15 +470,12 @@ StatusCode ComboHypo::fillDecisionsMap( Combo::LegDecisionsMap &  dmap, const Ev
     for ( const Decision* decision : *inputHandle ) {
       ATH_MSG_DEBUG( "-- -- Input Decision #"<< decision->index() <<" with "<< decisionIDs( decision ).size() << " active IDs. Populating the multiplicity map:" );
       for ( const DecisionID id: decisionIDs( decision ) ) {
-        HLT::Identifier chainID = HLT::Identifier(id);
-        int32_t chainLeg = 0; // Assume initially that the chain is not multi-leg, and update these two values if it is.
-        if (isLegId(id)) {
-          chainID = getIDFromLeg(id);
-          chainLeg = getIndexFromLeg(id);
-        }
 
-        // We need to check if we are configured to accept DecisionObjects passing 'chainID' ...
-        Combo::LegMap::const_iterator it = m_legToInputCollectionMap.find(chainID.name());
+        // Handles regular and multi-leg case
+        const auto& [chainName, chainLeg] = getNameAndIndexFromLeg(HLT::Identifier(id).name());
+
+        // We need to check if we are configured to accept DecisionObjects passing 'chainName' ...
+        Combo::LegMap::const_iterator it = m_legToInputCollectionMap.find(chainName);
         if (it == m_legToInputCollectionMap.end()) {
           ATH_MSG_VERBOSE("-- -- -- Ignoring the DecsionID " << id << " on leg " << chainLeg << " as it does not correspond to any of the " << m_legToInputCollectionMap.size() << " chains this Alg is processing.");
           continue;
@@ -489,7 +485,7 @@ StatusCode ComboHypo::fillDecisionsMap( Combo::LegDecisionsMap &  dmap, const Ev
         const std::vector<int>& legToInputCollectionIndex = it->second;
         const size_t requiredInputContainerIndex = static_cast<size_t>(legToInputCollectionIndex.at(chainLeg));
         if (requiredInputContainerIndex != inputContainerIndex) {
-          ATH_MSG_VERBOSE("-- -- -- Ignoring the DecisionID " << id << " on leg " << chainLeg << " as we are only permitted to accept passing objects on leg #" << chainLeg << " of " << chainID.name()
+          ATH_MSG_VERBOSE("-- -- -- Ignoring the DecisionID " << id << " on leg " << chainLeg << " as we are only permitted to accept passing objects on leg #" << chainLeg << " of " << chainName
             << " which come from input collection index " << requiredInputContainerIndex << " (which is " << m_inputs.at(requiredInputContainerIndex).key() << ")"
             << ". Not the current index " << inputContainerIndex << " (which is " << m_inputs.at(inputContainerIndex).key() << ")");    
           continue;

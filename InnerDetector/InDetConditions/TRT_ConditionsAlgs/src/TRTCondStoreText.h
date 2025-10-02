@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTCONDITIONSALGS_TRTCONDSTORETEXT_H
@@ -35,8 +35,8 @@ public:
 
   /** constructor **/
   TRTCondStoreText(const std::string& name, ISvcLocator* pSvcLocator);
-  /** destructor **/
-  ~TRTCondStoreText();
+
+  virtual ~TRTCondStoreText() override = default;
 
   virtual StatusCode  initialize(void) override;    
   virtual StatusCode  execute(void) override;
@@ -54,15 +54,15 @@ public:
 
 
  private:
+    
+    Gaudi::Property<std::string> m_par_errcontainerkey   {this,"ErrorFolderName"     ,"/TRT/Calib/errors2d",""};
+    Gaudi::Property<std::string> m_par_slopecontainerkey {this,"ErrorSlopeFolderName","/TRT/Calib/slopes",""};
+    Gaudi::Property<std::string> m_par_rtcontainerkey    {this,"RtFolderName"        ,"/TRT/Calib/RT",""};
+    Gaudi::Property<std::string> m_par_t0containerkey    {this,"T0FolderName"        ,"/TRT/Calib/T0",""};
+    Gaudi::Property<std::string> m_par_caltextfile       {this,"CalibInputFile"      ,"dbconst.txt",""};
+    Gaudi::Property<std::string> m_streamer              {this,"StreamTool"          ,"AthenaOutputStreamTool/CondStream1",""};
 
-  std::string m_par_rtcontainerkey;        //"/TRT/Calib/RT"
-  std::string m_par_errcontainerkey;       //"/TRT/Calib/errors2d"
-  std::string m_par_slopecontainerkey;     //"/TRT/Calib/slopes"
-  std::string m_par_t0containerkey;        //"/TRT/Calib/T0"
-  std::string m_par_caltextfile;           //!< calibration text file specified in jobOptions
-  const TRT_ID* m_trtid;                   //!< trt id helper
-  std::string m_streamer;                  //"AthenaOutputStreamTool/CondStream1"
-  ServiceHandle<StoreGateSvc> m_detstore;
+    const TRT_ID* m_trtid{};                   //!< trt id helper
  
 };
  

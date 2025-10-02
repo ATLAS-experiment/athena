@@ -69,7 +69,7 @@ float HTcalculator::getProbHT(float pTrk, Trk::ParticleHypothesis hypothesis,
   }
 
   // Jared -- Change this ugly check, use hypothesis!
-  if (fabs(mass - 0.511) < 0.1) {  // Electron! OK, ugly way but works...
+  if (std::fabs(mass - ParticleConstants::electronMassInMeV) < 0.1) {  // Electron! OK, ugly way but works...
     correctionSL = m_CpHT_B_Zee_SL_new[GasType][TrtPart].GetValue(StrawLayer);
     correctionZR = m_CpHT_B_Zee_ZR_new[GasType][TrtPart].GetValue(ZR);
     correctionTW = m_CpHT_B_Zee_TW_new[GasType][TrtPart].GetValue(rTrkWire);

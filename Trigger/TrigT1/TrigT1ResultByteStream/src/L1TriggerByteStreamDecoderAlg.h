@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1RESULTBYTESTREAM_L1TRIGGERBYTESTREAMDECODERALG_H
@@ -51,7 +51,7 @@ private:
     this, "MaybeMissingROBs", {},
     "List of ROB IDs allowed to be missing. If a decoder tool requests one of these "
     "and it is not available in the event, no errors will be reported",
-    "appendList<T>"
+    "OrderedSet<T>"
   };
   /// Set behaviour for non-zero ROB status words
   Gaudi::Property<std::string> m_robStatusCheckLevel {

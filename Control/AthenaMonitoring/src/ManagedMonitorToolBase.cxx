@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_CXX
@@ -193,8 +193,7 @@ regHist( TH1* h )
 {
    if( m_tool != 0 ) {
       std::string hName( h->GetName() );
-      HistMap_t::value_type valToInsert( hName, h );
-      m_map.insert( valToInsert );
+      m_map.emplace( hName, h );
       return m_tool->regHist( h, *this );
    }
 
@@ -695,7 +694,7 @@ initialize()
    const std::string client( m_managerNameProp + "Properties" );
    ATH_MSG_DEBUG("  --> Asking for properties " << client);
 
-   auto getProp = [this,joSvc](std::string& var, const std::string& name) {
+   auto getProp = [this,&joSvc](std::string& var, const std::string& name) {
      if (joSvc->has(name))
        var = joSvc->get(name);
      else
@@ -960,8 +959,7 @@ registerMetadata(const std::string& streamName, const std::string& hName,
       if (! metadata) return StatusCode::FAILURE;
       StatusCode scmd = m_THistSvc->regTree( mdStreamName, metadata );
       if (scmd == StatusCode::FAILURE) return StatusCode::FAILURE;
-      MDMap_t::value_type valToInsert( mdStreamName, new OutputMetadata(metadata) );
-      i = m_metadataMap.insert( valToInsert ).first;
+      i = m_metadataMap.emplace( mdStreamName, new OutputMetadata(metadata) ).first;
     }
     
     i->second->fill( hName,  group.interval(), group.chain(), group.merge() );
@@ -2148,7 +2146,7 @@ updateTriggersForGroups(std::vector<std::string>& vTrigChainNames) {
       // replace with new value
       std::string newval = oss.str();
       ATH_MSG_DEBUG("Replaced with " << newval);
-      vTrigChainNames[i] = newval;
+      vTrigChainNames[i] = std::move(newval);
     }
   }
 }

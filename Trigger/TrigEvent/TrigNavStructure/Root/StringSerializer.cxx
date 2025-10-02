@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstring>
@@ -46,15 +46,11 @@ namespace StringSerializer {
 	ostream << delimiter;
     }
     ostream.flush();
-  
-    char * carray = new char [sizeToReserve];
-    strncpy(carray, ostream.str().c_str(), sizeToReserve);
-    const uint32_t * uarray = (const uint32_t*) carray;
 
+    std::string s (ostream.str());
+    const uint32_t* udata = reinterpret_cast<const uint32_t*> (s.data());
     storage.push_back(strings.size()); // put number of strings first
-    storage.insert(storage.end(), &uarray[0], &uarray[sizeToReserve/sizeof(uint32_t)]);
-  
-    delete[] carray;
+    storage.insert(storage.end(), udata, udata+sizeToReserve/sizeof(uint32_t));
   }
 
   void serialize (const std::string& str, std::vector<uint32_t>& storage ) {
@@ -72,14 +68,8 @@ namespace StringSerializer {
     if ( storageSize <= 1 ) return storageSize;
     unsigned int numOfStrings = *first;
 
-    // Copy storage into array of uint32_t
-    uint32_t * uarray = new uint32_t[storageSize-1];
-    std::vector<uint32_t>::const_iterator itBegin = first; 
-    advance(itBegin, 1);
-    copy(itBegin, last, &uarray[0]);
-  
-    const char * carray = (const char*)uarray;
-    std::string whole(carray, (storageSize-1)*sizeof(uint32_t));
+    std::string whole(reinterpret_cast<const char*>(&*(first+1)),
+                      (storageSize-1)*sizeof(uint32_t));
     std::istringstream istream;
 
     istream.clear();  // istream reset
@@ -95,7 +85,6 @@ namespace StringSerializer {
       readInStrings++;
       nChars += one.size() + 1;
     }
-    delete[] uarray;
   
     return 1 + (nChars+getPadding(nChars))/sizeof(uint32_t);  // # uint32_t words (incl. header)
   }

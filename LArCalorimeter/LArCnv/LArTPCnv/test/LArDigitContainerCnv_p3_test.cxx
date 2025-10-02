@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArTPCnv/test/LArDigitContainerCnv_p3_test.cxx
@@ -22,6 +22,7 @@
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 #include "AthAllocators/DataPool.h"
 #include "AthAllocators/ArenaHeader.h"
@@ -135,6 +136,11 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
-  test1();
+  try{
+    test1();
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in LArDigitContainerCnv_p3_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }

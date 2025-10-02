@@ -21,15 +21,12 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 
-class CaloCalibrationHitContainer:public AthenaHitsVector<CaloCalibrationHit>
+class CaloCalibrationHitContainer: public AthenaHitsVector<CaloCalibrationHit>
 {
 public:
 
   /** Constructor of CaloCalibrationHitContainer */
   CaloCalibrationHitContainer (const std::string& collectionName="DefaultCollectionName" );
-
-  /** Destructor */
-  virtual ~CaloCalibrationHitContainer()  ;
 
   /**
      Returns a string containing the description of this <br>
@@ -37,7 +34,7 @@ public:
      that it contains<br>
      Can be used in printouts <br>
   */
-  virtual operator std::string () const;
+  operator std::string () const;
 
 };
 

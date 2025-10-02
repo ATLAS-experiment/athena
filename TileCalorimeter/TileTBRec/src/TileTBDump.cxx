@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -2050,7 +2050,7 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
 
   while (offset < size && nfrag < MAX_ROD_FRAG) {
     //std::cout << "nfrag="<<(nfrag) << " offset="<<offset<<" data[offset]="<<data[offset]<<std::endl;
-    frag[nfrag] = (const T_RodDataFrag *) (data + offset);
+    frag[nfrag] = reinterpret_cast<const T_RodDataFrag *> (data + offset);
 
     if (frag[nfrag]->size < m_sizeOverhead
         || frag[nfrag]->size > size - offset + m_sizeOverhead - 2) {
@@ -2238,7 +2238,7 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
 
 
 
-          const uint16_t* sample = (const uint16_t *) (++data);
+          const uint16_t* sample = reinterpret_cast<const uint16_t *> (++data);
 
           size_t start_channel(miniDrawer * Tile::MAX_MINIDRAWER_CHAN);
           size_t end_channel(start_channel + Tile::MAX_MINIDRAWER_CHAN);
@@ -2272,21 +2272,21 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
     }
   }
 
-  digitsMetaData.push_back(bcid);
-  digitsMetaData.push_back(l1id);
-  digitsMetaData.push_back(moduleID);
-  digitsMetaData.push_back(runType);
-  digitsMetaData.push_back(runNumber);
-  digitsMetaData.push_back(pedestalHi);
-  digitsMetaData.push_back(pedestalLo);
-  digitsMetaData.push_back(chargeInjected);
-  digitsMetaData.push_back(timeInjected);
-  digitsMetaData.push_back(capacitor);
-  digitsMetaData.push_back(ecr);
+  digitsMetaData.push_back(std::move(bcid));
+  digitsMetaData.push_back(std::move(l1id));
+  digitsMetaData.push_back(std::move(moduleID));
+  digitsMetaData.push_back(std::move(runType));
+  digitsMetaData.push_back(std::move(runNumber));
+  digitsMetaData.push_back(std::move(pedestalHi));
+  digitsMetaData.push_back(std::move(pedestalLo));
+  digitsMetaData.push_back(std::move(chargeInjected));
+  digitsMetaData.push_back(std::move(timeInjected));
+  digitsMetaData.push_back(std::move(capacitor));
+  digitsMetaData.push_back(std::move(ecr));
   if (version) {
-    digitsMetaData.push_back(bcr);
-    digitsMetaData.push_back(packetVersion);
-    digitsMetaData.push_back(fragmentID);
+    digitsMetaData.push_back(std::move(bcr));
+    digitsMetaData.push_back(std::move(packetVersion));
+    digitsMetaData.push_back(std::move(fragmentID));
   }
 }
 
@@ -2971,27 +2971,23 @@ unsigned int TileTBDump::tile_check_CRC(const unsigned int *frame, int framelen,
   static const unsigned int error[3] = { CRC_error_0, CRC_error_1, CRC_do_not_match };
 
   int i, j, k, length;
-  unsigned int *data, word, CRC_word;
+  unsigned int word, CRC_word;
   unsigned short bit_in, bit_out, reg, reg1, reg2;
 
   /* put all the data in one array with empty word at the end */
 
+  std::vector<unsigned int> data;
   if (delta != 0) { /* low gain and high gain in different places */
     length = 2 * framelen + 1;
-    data = (unsigned int *) malloc(length * sizeof(int));
-    if (delta > 0) {
-      memcpy(data, frame, framelen * sizeof(int));
-      memcpy(data + framelen, frame + delta, framelen * sizeof(int));
-      CRC_word = frame[framelen + delta]; /* after second part of the data */
-    } else {
-      memcpy(data, frame + delta, framelen * sizeof(int));
-      memcpy(data + framelen, frame, framelen * sizeof(int));
-      CRC_word = frame[framelen]; /* just after the data */
-    }
+    data.resize (length);
+    int xdelta = std::max (delta, 0);
+    auto pos = std::copy_n (frame, framelen, data.begin());
+    std::copy_n (frame+delta, framelen, pos);
+    CRC_word = frame[framelen + xdelta]; /* after second part of the data */
   } else {
     length = framelen + 1;
-    data = (unsigned int *) malloc(length * sizeof(int));
-    memcpy(data, frame, framelen * sizeof(int));
+    data.resize (length);
+    std::copy_n (frame, framelen, data.begin());
     CRC_word = frame[framelen]; /* just after the data */
   }
 
@@ -3034,7 +3030,6 @@ unsigned int TileTBDump::tile_check_CRC(const unsigned int *frame, int framelen,
     if (reg1 != reg2) CRC_error |= error[i];
   }
 
-  free(data);
   return CRC_error;
 }
 

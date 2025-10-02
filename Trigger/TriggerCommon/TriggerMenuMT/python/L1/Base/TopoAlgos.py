@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-
-from collections import OrderedDict as odict
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 import re
@@ -58,8 +56,9 @@ class TopoAlgo(object):
         return self
 
     def json(self):
-        confObj = odict()
-        confObj["klass"] = self.classtype
+        confObj = {
+            "klass": self.classtype
+        }
         return confObj
 
     def getScaleToCountsEM(self):  # legacy Et conversion!!
@@ -102,10 +101,10 @@ class SortingAlgo(TopoAlgo):
         confObj = super(SortingAlgo, self).json()
         confObj["input"] = self.inputvalue
         confObj["output"] = self.outputs
-        confObj["fixedParameters"] = odict()
-        confObj["fixedParameters"]["generics"] = odict()
+        confObj["fixedParameters"] = {}
+        confObj["fixedParameters"]["generics"] = {}
         for (pos, genParm) in enumerate(self.generics):
-            confObj["fixedParameters"]["generics"][genParm.name] = odict([("value", genParm.value), ("position", pos)]) 
+            confObj["fixedParameters"]["generics"][genParm.name] = {"value": genParm.value, "position": pos}
 
         confObj["variableParameters"] = list()
         _emscale_for_decision = self.getScaleToCountsEM() # for legacy algos
@@ -120,7 +119,7 @@ class SortingAlgo(TopoAlgo):
                     variable.value *= _emscale_for_decision
                 if "MU" in self.outputs:
                     variable.value = ((variable.value - _mu_for_decision ) if variable.value>0 else variable.value)
-            confObj["variableParameters"].append(odict([("name", variable.name),("value", variable.value)]))
+            confObj["variableParameters"].append({"name": variable.name, "value": variable.value})
 
             if type(variable.value) is float:
                 raise RuntimeError("In algorithm %s the variable %s with value %r is of type float but must be int" % (self.name,variable.name,variable.value))
@@ -142,10 +141,10 @@ class DecisionAlgo(TopoAlgo):
         confObj["input"] = self.inputs # list of input names
         confObj["output"] = self.outputs # list of output names
         # fixed parameters
-        confObj["fixedParameters"] = odict()
-        confObj["fixedParameters"]["generics"] = odict()
+        confObj["fixedParameters"] = {}
+        confObj["fixedParameters"]["generics"] = {}
         for (pos, genParm) in enumerate(self.generics):
-            confObj["fixedParameters"]["generics"][genParm.name] = odict([("value", genParm.value), ("position", pos)]) 
+            confObj["fixedParameters"]["generics"][genParm.name] = {"value": genParm.value, "position": pos}
 
         # variable parameters
         confObj["variableParameters"] = list()
@@ -172,9 +171,9 @@ class DecisionAlgo(TopoAlgo):
                 raise RuntimeError("In algorithm %s the variable %s with value %r is of type float but must be int" % (self.name,variable.name,variable.value))
 
             if variable.selection >= 0:
-                confObj["variableParameters"].append(odict([("name", variable.name), ("selection",variable.selection), ("value", variable.value)]))
+                confObj["variableParameters"].append({"name": variable.name, "selection": variable.selection, "value": variable.value})
             else:
-                confObj["variableParameters"].append(odict([("name", variable.name), ("value", variable.value)]))
+                confObj["variableParameters"].append({"name": variable.name, "value": variable.value})
 
         return confObj
 
@@ -222,7 +221,7 @@ class TauMultiplicityAlgo(MultiplicityAlgo):
         mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[HLMT]*)",threshold).groupdict()
         self.input = mres["type"].replace('SPARE','')
 
-# jJ and jLJ, gJ and gLJ
+# jJ, gJ and gLJ
 class JetMultiplicityAlgo(MultiplicityAlgo):
     def __init__(self, name, threshold, nbits, classtype ):
         super(JetMultiplicityAlgo, self).__init__(classtype=classtype, name=name, 

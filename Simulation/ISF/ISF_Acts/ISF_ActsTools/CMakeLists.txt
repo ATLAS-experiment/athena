@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_ActsTools )
 
-find_package( Acts CONFIG COMPONENTS Core PluginJson )
+find_package( Acts CONFIG COMPONENTS Core PluginJson Fatras )
 find_package( CLHEP )
 
 # Component(s) in the package:
@@ -12,11 +12,11 @@ atlas_add_component( ISF_ActsTools
                      src/components/*.cxx
 		             INCLUDE_DIRS
                      ${CLHEP_INCLUDE_DIRS} ${Acts_INCLUDE_DIR}
-                     LINK_LIBRARIES ActsCore ActsFatras AthenaBaseComps CxxUtils
+                     LINK_LIBRARIES Acts::Core Acts::Fatras AthenaBaseComps CxxUtils
                      TrkTrack ISF_Event AthenaKernel AtlasDetDescr GeoPrimitives
                      GaudiKernel GeneratorObjects ISF_Event StoreGateLib
                      GeoModelUtilities ActsInteropLib ActsGeometryLib TruthUtils
-                     ISF_InterfacesLib ActsPluginJson
+                     ISF_InterfacesLib Acts::PluginJson
                      InDetSimEvent)
 
 # Install files from the package:

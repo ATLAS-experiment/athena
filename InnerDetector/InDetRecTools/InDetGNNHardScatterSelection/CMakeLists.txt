@@ -34,6 +34,7 @@ atlas_add_library( InDetGNNHardScatterSelectionLib
     FourMomUtils
     TruthUtils
     InDetPhysValMonitoringLib
+    PhotonVertexSelectionLib
     TrackVertexAssociationToolLib
 )
 

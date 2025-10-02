@@ -19,7 +19,6 @@
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExInterfaces/HelperStructs.h"
 #include "TrkExUtils/ExtrapolationCache.h"
-#include "TrkExUtils/TargetSurfaces.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/ComponentParameters.h"
@@ -37,6 +36,7 @@ class CylinderBounds;
 class MagneticFieldProperties;
 class TransportJacobian;
 class TrackStateOnSurface;
+class TrackingVolume;
 
 /** typedef for return type TrackParameters, pathlength */
 typedef std::pair<const TrackParameters*, double> TrackParametersWithPath;
@@ -132,7 +132,7 @@ public:
     const MagneticFieldProperties& mprop,
     ParticleHypothesis particle,
     std::vector<unsigned int>& solutions,
-    std::vector<const Trk::TrackStateOnSurface*>*& matstates,
+    std::vector<const Trk::TrackStateOnSurface*>* matstates,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*
       intersections,
     double& path,
@@ -221,14 +221,6 @@ public:
                                double stepSize,
                                ParticleHypothesis particle = pion,
                                const TrackingVolume* tVol = nullptr) const = 0;
-
-  /** Propagation method needed for StepEngine
-  */
-  virtual Trk::ExtrapolationCode propagate(
-    const EventContext& ctx,
-    Trk::ExCellCharged& eCell,
-    Trk::TargetSurfaces& sfs,
-    Trk::TargetSurfaceVector& solutions) const = 0;
 
 };
 

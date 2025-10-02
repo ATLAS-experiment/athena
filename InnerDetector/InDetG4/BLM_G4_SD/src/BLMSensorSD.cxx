@@ -11,9 +11,11 @@
 #include "BLMSensorSD.h"
 
 // Athena headers
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 // Geant4 headers
+#include <G4EventManager.hh>
 #include "G4Step.hh"
 #include "G4ThreeVector.hh"
 #include "G4Geantino.hh"
@@ -23,19 +25,23 @@
 #include "CLHEP/Geometry/Transform3D.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
-#include <memory> // For make unique
 
 BLMSensorSD::BLMSensorSD(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
-  , m_HitColl( hitCollectionName )
+  , m_HitCollName( hitCollectionName )
 {
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// Initialize from G4 - necessary to new the write handle for now
+// Initialize from G4 - cache the hit collection for the current event
 void BLMSensorSD::Initialize(G4HCofThisEvent *)
 {
-  if (!m_HitColl.isValid()) m_HitColl = std::make_unique<SiHitCollection>();
+  // ISF calls G4SDManager::PrepareNewEvent() before the Geant4 event loop starts...
+  if(auto* eventManger = G4EventManager::GetEventManager()){
+    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
+      m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
+    }
+  }
 }
 
 G4bool BLMSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)

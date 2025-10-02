@@ -40,13 +40,13 @@ def JfexSimMonitoringConfig(flags):
                            ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
                            opt=['kCanRebin','kAlwaysCreate'],merge="merge")
     helper.defineHistogram('LBN,Signature;h_mismatched_SimReady',
-                           fillGroup="mismatches_count",
+                           fillGroup="mismatches",
                            paths=['Shifter/Sim'],
                            hanConfig={"algorithm":"Histogram_Empty","description":"Number of events with a mismatch, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready","display":"SetPalette(55)"},
-                           type='TH2I', cutmask='SimulationReady',
+                           type='TH2I', cutmask='SimulationReadyMismatch',
                            title='Mismatched Simulation-Ready Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
-                           ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
+                           ylabels=["gJ","gLJ","jJ","jTAU","jEM","jXE","jTE","eTAU","eEM"],
                            opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('LBN,Signature,tobMismatched;h_mismatched_SimReadyRate',
                            fillGroup="mismatches",
@@ -55,7 +55,7 @@ def JfexSimMonitoringConfig(flags):
                            type='TProfile2D', cutmask='SimulationReady',
                            title='Mismatched Rate for Simulation-Ready Signatures;LB;Signature;Event Rate (%)',
                            xbins=1,xmin=0,xmax=1,
-                           ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
+                           ylabels=["gJ","gLJ","jJ","jTAU","jEM","jXE","jTE","eTAU","eEM"],
                            opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('LBNString,Signature;h_mismatched_DataTowerEvts',
                            fillGroup="mismatches",
@@ -71,7 +71,7 @@ def JfexSimMonitoringConfig(flags):
                            xbins=1,xmin=0,xmax=1,
                            ybins=1,ymin=0,ymax=1,
                            opt=['kCanRebin','kAlwaysCreate','kAddBinsDynamically'],merge='merge')
-    helper.defineTree('LBN,Signature,LBNString,EventNumber,EventType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+    helper.defineTree('LBN,SignatureEventType,LBNString,EventNumber,EventType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
                       "lbn/l:Signature/string:lbnString/string:eventNumber/l:EventType/string:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
                       title="mismatched;LBN;Signature",fillGroup="mismatches")
 

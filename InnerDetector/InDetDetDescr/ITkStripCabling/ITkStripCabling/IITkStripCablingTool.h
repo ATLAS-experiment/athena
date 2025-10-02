@@ -41,6 +41,9 @@ class IITkStripCablingTool: virtual public IAlgTool {
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID(IITkStripCablingTool, 1, 0);
 
+  /// return offline hash, given the online Id (used by decoders)  
+  virtual IdentifierHash getHashFromOnlineId(const ITkStripOnlineId& onlineId, const EventContext& ctx, const bool withWarnings = true) const = 0;  
+
   /// return the online Id, given a hash (used by simulation encoders)
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash) const = 0;
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const = 0;

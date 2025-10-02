@@ -329,7 +329,6 @@ namespace CaloRecGPU
     int number;
     float clusterEnergy[NMaxClusters];
     float clusterEt[NMaxClusters];
-    //Also used, as an intermediate value, to store AbsE
     float clusterEta[NMaxClusters];
     float clusterPhi[NMaxClusters];
     ///Invalid(ated) clusters have seedCellID < 0
@@ -342,7 +341,9 @@ namespace CaloRecGPU
   {
     float energyPerSample     [NumSamplings][NMaxClusters];
     float maxEPerSample       [NumSamplings][NMaxClusters];
+    alignas(double[NumSamplings][NMaxClusters])
     float maxPhiPerSample     [NumSamplings][NMaxClusters];
+    alignas(double[NumSamplings][NMaxClusters])
     float maxEtaPerSample     [NumSamplings][NMaxClusters];
     float etaPerSample        [NumSamplings][NMaxClusters];
     float phiPerSample        [NumSamplings][NMaxClusters];
@@ -416,9 +417,13 @@ namespace CaloRecGPU
     float engCalibTileG3      [NMaxClusters];
     float engCalibDeadTot     [NMaxClusters];
     float engCalibDeadEMB0    [NMaxClusters];
+    alignas(double[NMaxClusters])
     float engCalibDeadTile0   [NMaxClusters];
+    alignas(double[NMaxClusters])
     float engCalibDeadTileG3  [NMaxClusters];
+    alignas(double[NMaxClusters])
     float engCalibDeadEME0    [NMaxClusters];
+    alignas(double[NMaxClusters])
     float engCalibDeadHEC0    [NMaxClusters];
     float engCalibDeadFCAL    [NMaxClusters];
     float engCalibDeadLeakage [NMaxClusters];

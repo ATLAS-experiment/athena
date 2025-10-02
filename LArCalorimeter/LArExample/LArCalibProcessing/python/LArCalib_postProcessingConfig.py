@@ -17,7 +17,7 @@ def finalOFCShapeCfg(flags):
     result.merge(LArOFCPhysCfg(flags,loadPhysAC=False))
     
     #Pick OFC-Phase + shape correction
-    result.merge(LArOFPhasePickerCfg(flags,loadInputs=False))
+    result.merge(LArOFPhasePickerCfg(flags,InputSCOFCPhaseDb = "LAR_OFL", SCOFCPhaseTag="LARElecCalibOflSCOFCBinPhysShift-UPD3-00", loadInputs=False))
     
     return result
 
@@ -33,15 +33,20 @@ if __name__=="__main__":
     parser.add_argument('--poolfile', dest='poolfile', default="freshConstants_pp.pool.root", help='Output pool file', type=str)
     parser.add_argument('--rootfile', dest='rootfile', default="freshConstants_pp.root", help='Output ROOT file', type=str)
     parser.add_argument('--iovstart',dest="iovstart", default=0, help="IOV start (run-number)", type=int)
-    parser.add_argument('--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
+    parser.add_argument('--isSC', dest='supercells', default=False, help='is SC data ?', action="store_true")
     parser.add_argument('--poolcat', dest='poolcat', default="freshConstants.xml", help='Catalog of POOL files', type=str)
     parser.add_argument('--Ncoll',dest='Ncoll', default=60, help='Number of MinBias collision assumed for pile-up OFCs', type=int)
+    parser.add_argument('--Nsamp',dest='Nsamp', default=4, help='Number of samples used for physics OFCs', type=int)
+    parser.add_argument('--usePed',dest='pedcons', default=False, help='use additional pedestal constraint ?', action="store_true")
+
     args = parser.parse_args()
     if help in args and args.help is not None and args.help:
         parser.print_help()
         sys.exit(0)
 
-
+    for _, value in args._get_kwargs():
+      if value is not None:
+        print(_,":",value)
 
     
     #Import the MainServices (boilerplate)
@@ -58,7 +63,12 @@ if __name__=="__main__":
     flags.LArCalib.Input.RunNumbers = [int(args.run),]
     flags.LArCalib.Input.Database = args.insql
     flags.IOVDb.SqliteInput=args.insql
-    flags.IOVDb.SqliteFolders=("/LAR/ElecCalibOfl/PhysWaves/RTM","/LAR/ElecCalibOfl/AutoCorrs/AutoCorr","/LAR/ElecCalibOfl/AutoCorrs/PhysicsAutoCorr")
+    if args.supercells:
+       flags.IOVDb.SqliteFolders=("/LAR/ElecCalibOflSC/PhysWaves/RTM","/LAR/ElecCalibOflSC/AutoCorrs/AutoCorr")
+       flags.LArCalib.OFC.ShapeCorrection=False
+    else:    
+       flags.IOVDb.SqliteFolders=("/LAR/ElecCalibOfl/PhysWaves/RTM","/LAR/ElecCalibOfl/AutoCorrs/AutoCorr")
+       flags.LArCalib.OFC.ShapeCorrection=True
        
     flags.LArCalib.Output.ROOTFile = args.rootfile
     flags.LArCalib.Output.POOLFile = args.poolfile
@@ -74,15 +84,15 @@ if __name__=="__main__":
     flags.Input.Files=[]
     flags.LArCalib.Input.Files = [ ]
     flags.LArCalib.OFC.Ncoll = args.Ncoll
+    flags.LArCalib.OFC.Nsamples = args.Nsamp
+    flags.LArCalib.OFC.usePed = args.pedcons
     flags.LArCalib.IOVStart = args.iovstart
 
     flags.LArCalib.PhysACuseHG=True
-    flags.LArCalib.OFC.ShapeCorrection=True
     flags.LArCalib.OFC.UsePhysCalibTDiff = False
 
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=flags.LArCalib.Input.RunNumbers
-
 
     flags.lock()
    

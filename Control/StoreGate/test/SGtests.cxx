@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -17,8 +17,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <atomic>
-
-#include <boost/config.hpp>
 
 #include "StoreGate/SGtests.h"
 #include "TestTools/SGassert.h"
@@ -208,11 +206,13 @@ namespace Athena_test
     expCLIDs.insert (ClassID_traits<Foo>::ID());
     checkCLIDs (rSG, expCLIDs);
     //can't record with same key
-    SGASSERTERROR(rSG.record(new Foo(3), "pFoo1", LOCKED).isSuccess());
+    auto pFoo3 = new Foo(3);
+    SGASSERTERROR(rSG.record(pFoo3, "pFoo1", LOCKED).isSuccess());
     //can't record same object twice
     SGASSERTERROR(rSG.record(pFoo, "pFoo2", !LOCKED).isSuccess());
     //check we haven't left any trace of "pFoo2" in DataStore
-    assert(rSG.record(new Foo(2), "pFoo2", !LOCKED).isSuccess());
+    StatusCode sc;
+    sc = rSG.record(new Foo(2), "pFoo2", !LOCKED);  assert(sc.isSuccess());
 
     const Foo* cpFoo = new Foo;
     assert(rSG.record(cpFoo, "cpFoo").isSuccess());
@@ -223,43 +223,47 @@ namespace Athena_test
     assert(1 == ids.size());
     
     SillyKey key("silly");
-    assert(rSG.record(new Foo(4), key).isSuccess());
+    sc = rSG.record(new Foo(4), key);  assert (sc.isSuccess());
     //can't record with same key
-    SGASSERTERROR(rSG.record(new Foo(5), key).isSuccess());
-    SGASSERTERROR(rSG.record(new Foo(6), key, LOCKED).isSuccess());
+    auto pFoo5 = new Foo(5);
+    SGASSERTERROR(rSG.record(pFoo5, key).isSuccess());
+    auto pFoo6 = new Foo(6);
+    SGASSERTERROR(rSG.record(pFoo6, key, LOCKED).isSuccess());
     std::unique_ptr<Foo> foo5 (new Foo(5));
     SGASSERTERROR(rSG.record(std::move(foo5), key).isSuccess());
     assert (foo5.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
-    assert(rSG.record(new Foo(7), "UnLocked", !LOCKED).isSuccess());
-    assert(rSG.record(new Foo(8), "Locked", LOCKED).isSuccess());
-    assert(rSG.record(new Foo(9), "LockedReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(new Foo(10), "UnLockedReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(new Foo(11), "LockedDelete", LOCKED, DELETE).isSuccess());
+    sc = rSG.record(new Foo(7), "UnLocked", !LOCKED);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(8), "Locked", LOCKED);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(9), "LockedReset", LOCKED, RESET);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(10), "UnLockedReset", !LOCKED, RESET);  assert (sc.isSuccess());
+    sc = rSG.record(new Foo(11), "LockedDelete", LOCKED, DELETE);  assert (sc.isSuccess());
 
     std::unique_ptr<Foo> foo12 (new Foo(12));
     assert(rSG.record(std::move(foo12),
                       "UnLockedDelete", !LOCKED, DELETE).isSuccess());
     assert(foo12.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
-    assert(rSG.record(cpFoo=new Foo(13), "Const").isSuccess());
+    cpFoo = new Foo(13);
+    assert(rSG.record(cpFoo, "Const").isSuccess());
 
     std::unique_ptr<const Foo> foo13a (new Foo(130));
     assert(rSG.record(std::move(foo13a), "Const2").isSuccess());
     assert(foo13a.get() == 0);  // cppcheck-suppress accessMoved; deliberate
 
     //FIXME!!! assert(rSG.record(cpFoo=new Foo(14), "ConstUnLocked", !LOCKED).isSuccess());
-    SGASSERTERROR(rSG.record(cpFoo=new Foo(15), "Const").isSuccess());
+    cpFoo = new Foo(15);
+    SGASSERTERROR(rSG.record(cpFoo, "Const").isSuccess());
 
 
     /// Test overwriting.
-    assert (rSG.record(new Foo(101), "ow").isSuccess());
-    assert (rSG.overwrite(new Foo(102), "ow").isSuccess());
-    assert (rSG.overwrite(make_unique<Foo>(103), "ow").isSuccess());
+    sc = rSG.record(new Foo(101), "ow");  assert (sc.isSuccess());
+    sc = rSG.overwrite(new Foo(102), "ow");  assert (sc.isSuccess());
+    sc = rSG.overwrite(make_unique<Foo>(103), "ow");  assert (sc.isSuccess());
 
-    assert (rSG.record(new Foo(104), "ow2", LOCKED).isSuccess());
-    assert (rSG.overwrite(new Foo(105), "ow2", LOCKED).isSuccess());
-    assert (rSG.overwrite(make_unique<Foo>(106), "ow2", LOCKED).isSuccess());
+    sc = rSG.record(new Foo(104), "ow2", LOCKED);  assert (sc.isSuccess());
+    sc = rSG.overwrite(new Foo(105), "ow2", LOCKED);  assert (sc.isSuccess());
+    sc = rSG.overwrite(make_unique<Foo>(106), "ow2", LOCKED);  assert (sc.isSuccess());
 
     /// 14 Foo objects recorded above : check it
     assert(rSG.typeCount<Foo>() == 14);
@@ -481,34 +485,34 @@ namespace Athena_test
     : public implements<IConversionSvc>
   {
   public:
-    virtual StatusCode addConverter(IConverter*) { abort(); }
-    virtual StatusCode addConverter(const CLID&) { abort(); }
-    virtual StatusCode removeConverter(const CLID&) { abort(); }
-    virtual IConverter* converter(const CLID&) { abort(); }
-    virtual StatusCode connectOutput(const std::string&) { abort(); }
+    virtual StatusCode addConverter(IConverter*) override { abort(); }
+    virtual StatusCode addConverter(const CLID&) override { abort(); }
+    virtual StatusCode removeConverter(const CLID&) override { abort(); }
+    virtual IConverter* converter(const CLID&) override { abort(); }
+    virtual StatusCode connectOutput(const std::string&) override { abort(); }
     virtual StatusCode connectOutput(const std::string&,
-                                     const std::string&) { abort(); }
+                                     const std::string&) override { abort(); }
     virtual StatusCode commitOutput(const std::string&,
-                                    bool) { abort(); }
-    virtual StatusCode initialize() { abort(); }
-    virtual StatusCode finalize() { abort(); }
-    virtual const CLID& objType() const { abort(); }
-    virtual long repSvcType() const { abort(); }
-    virtual StatusCode setDataProvider(IDataProviderSvc*) { abort(); }
-    virtual SmartIF<IDataProviderSvc>& dataProvider() const { abort(); }
-    virtual StatusCode setConversionSvc(IConversionSvc*) { abort(); }
-    virtual SmartIF<IConversionSvc>& conversionSvc()    const { abort(); }
-    virtual StatusCode setAddressCreator(IAddressCreator*) { abort(); }
-    virtual SmartIF<IAddressCreator>& addressCreator()    const { abort(); }
-    virtual StatusCode fillObjRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateObj(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateObjRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode createRep(DataObject*, IOpaqueAddress*&) { abort(); }
-    virtual StatusCode fillRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode updateRep(IOpaqueAddress*, DataObject*)  { abort(); }
-    virtual StatusCode updateRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
+                                    bool) override { abort(); }
+    virtual StatusCode initialize() override { abort(); }
+    virtual StatusCode finalize() override { abort(); }
+    virtual const CLID& objType() const override { abort(); }
+    virtual long repSvcType() const override { abort(); }
+    virtual StatusCode setDataProvider(IDataProviderSvc*) override { abort(); }
+    virtual SmartIF<IDataProviderSvc>& dataProvider() const override { abort(); }
+    virtual StatusCode setConversionSvc(IConversionSvc*) override { abort(); }
+    virtual SmartIF<IConversionSvc>& conversionSvc()    const override { abort(); }
+    virtual StatusCode setAddressCreator(IAddressCreator*) override { abort(); }
+    virtual SmartIF<IAddressCreator>& addressCreator()    const override { abort(); }
+    virtual StatusCode fillObjRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateObj(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateObjRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode createRep(DataObject*, IOpaqueAddress*&) override { abort(); }
+    virtual StatusCode fillRepRefs(IOpaqueAddress*, DataObject*) override { abort(); }
+    virtual StatusCode updateRep(IOpaqueAddress*, DataObject*)  override { abort(); }
+    virtual StatusCode updateRepRefs(IOpaqueAddress*, DataObject*) override { abort(); }
 
-    virtual StatusCode createObj(IOpaqueAddress*, DataObject*&);
+    virtual StatusCode createObj(IOpaqueAddress*, DataObject*&) override;
   };
 
 
@@ -525,14 +529,14 @@ namespace Athena_test
     : public IOpaqueAddress
   {
   public:
-    virtual unsigned long        addRef     () { return 0; }
-    virtual unsigned long        release    () { return 0; }
-    virtual const CLID&          clID       () const { abort(); }
-    virtual long                 svcType    () const { abort(); }
-    virtual IRegistry*           registry   () const { abort(); }
-    virtual void                 setRegistry(IRegistry*) { abort(); }
-    virtual const std::string*   par        () const { abort(); }
-    virtual const unsigned long* ipar       () const { abort(); }
+    virtual unsigned long        addRef     () override { return 0; }
+    virtual unsigned long        release    () override { return 0; }
+    virtual const CLID&          clID       () const override { abort(); }
+    virtual long                 svcType    () const override { abort(); }
+    virtual IRegistry*           registry   () const override { abort(); }
+    virtual void                 setRegistry(IRegistry*) override { abort(); }
+    virtual const std::string*   par        () const override { abort(); }
+    virtual const unsigned long* ipar       () const override { abort(); }
   };
 } // namespace Athena_test
 
@@ -733,11 +737,10 @@ namespace Athena_test {
 
   void testClear(::StoreGateSvc& rSG) {
 
-    Foo* pFoo;    
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     Bar* pBar = new Bar();
     Base* bDum(0);
     assert(rSG.record(pBar, "aBar", LOCKED, DELETE).isSuccess());
@@ -777,19 +780,21 @@ namespace Athena_test {
   {  
     cout << "\n*** StoreGateSvcClient_test VersionedKey BEGINS ***" << endl;
     //start by creating an unversioned object to test handling of legacy keys
-    assert(rSG.record(new Foo(11), "aVersObj").isSuccess());
+    StatusCode sc;
+    sc = rSG.record(new Foo(11), "aVersObj"); assert(sc.isSuccess());
     const Foo* pFoo(0);
     assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
     assert(pFoo->i() == 11);
     
     //try to put a VersionedKey on top
     VersionedKey myKey("aVersObj", 77);
-    assert(rSG.record(new Foo(77), (std::string)myKey).isSuccess());
-    const Foo* pFoo77(0);
-    assert(0 != (pFoo77 = rSG.retrieve<Foo>(myKey)));
+    sc = rSG.record(new Foo(77), (std::string)myKey); assert(sc.isSuccess());
+    const Foo* pFoo77 = rSG.retrieve<Foo>(myKey);
+    assert(0 != pFoo77);
     assert(pFoo77->i() == 77);
     //test that we can retrieve the same object with an unversioned key
-    assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
+    pFoo = rSG.retrieve<Foo>("aVersObj");
+    assert(0 != pFoo);
     assert(pFoo->i() == 77);
     
     //check we can retrieve the old object with a default unversioned key
@@ -800,12 +805,13 @@ namespace Athena_test {
 
     const std::string baseKey("aVersObj");
     VersionedKey my2Key(baseKey, 88);
-    assert(rSG.record(new Foo(88), (std::string)my2Key).isSuccess());
-    const Foo* pFoo88(0);
-    assert(0 != (pFoo88 = rSG.retrieve<Foo>(my2Key)));
+    sc = rSG.record(new Foo(88), (std::string)my2Key); assert(sc.isSuccess());
+    const Foo* pFoo88 = rSG.retrieve<Foo>(my2Key);
+    assert(0 != pFoo88);
     assert(pFoo88->i() == 88);
 
-    SGASSERTERROR(rSG.record(new Foo(66), (std::string)my2Key).isSuccess());
+    auto foo66 = new Foo(66);
+    SGASSERTERROR(rSG.record(foo66, (std::string)my2Key).isSuccess());
     VersionedKey my3Key(baseKey, 66);
     assert(rSG.record(new Foo(66), (std::string)my3Key).isSuccess());
 
@@ -831,11 +837,11 @@ namespace Athena_test {
     cout << "\n*** StoreGateSvcClient_test Keys BEGINS ***" << endl;
     rSG.clearStore().ignore();
 
-    Foo* pFoo;    
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, RESET).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    Foo* pFoo = new Foo;
+    assert(rSG.record(pFoo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     assert (rSG.setAlias(pFoo, "fooAlias").isSuccess());
 
     std::vector<std::string> keys;
@@ -862,10 +868,10 @@ namespace Athena_test {
     //get rid of the two RESET dobjs
     rSG.clearStore(/*force=*/true).ignore();
 
-    assert(rSG.record(pFoo=new Foo, "LockReset", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockReset", !LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
-    assert(rSG.record(pFoo=new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockReset", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockReset", !LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
+    assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     rSG.clearStore().ignore();
     rSG.keys<Foo>(keys);
     //    copy(keys.begin(), keys.end(),ostream_iterator<string>(cout," - "));
@@ -916,12 +922,14 @@ namespace Athena_test {
 
     assert(rSG.retrieve(pVec,"BVec").isSuccess());    
     //second retrieve does not trigger retrieve of AuxStore
-    assert( 0 != (pVec=rSG.retrieve<TestVector<BX> >("BVec")) );
+    pVec = rSG.retrieve<TestVector<BX> >("BVec");
+    assert( 0 != pVec );
 
     const TestVector<BX>* cpVec(0);
     assert(rSG.retrieve(cpVec, "CVec").isSuccess());    
     // a regular retrieve ignores a missing aux store
-    assert( 0 != (cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec")) );
+    cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec");
+    assert( 0 != cpVec );
     
     //deprecated but we need to test it nonetheless...
 #ifdef TEST_DEPRECATED
@@ -935,14 +943,14 @@ namespace Athena_test {
     TestAuxStore* pAux_b = new TestAuxStore;
     assert(rSG.record(pAux_b, "BStandAux.").isSuccess());
 
-    assert( 0 != (pb=rSG.retrieve<BX>("BStand")) );
+    pb = rSG.retrieve<BX>("BStand");
+    assert( 0 != pb );
     //assert (pb->usingStandAloneStore());
     //assert (pb->getStore() == pAux_b);
     
     cout << "*** StoreGateSvcClient_test retrieveAux OK ***\n\n" <<endl;
   }
 
-#ifndef BOOST_NO_CXX11_VARIADIC_TEMPLATES
   void testCreate(::StoreGateSvc& rSG) 
   {  
     cout << "\n*** StoreGateSvcClient_test testCreate BEGINS ***" << endl;
@@ -962,12 +970,6 @@ namespace Athena_test {
 
     cout << "*** StoreGateSvcClient_test testCreate OK ***\n\n" <<endl;
   }
-#else
-  void testCreate(::StoreGateSvc&) 
-  {  
-  }
-#endif
-
 
   void testBoundReset(StoreGateSvc& rSG)
   {

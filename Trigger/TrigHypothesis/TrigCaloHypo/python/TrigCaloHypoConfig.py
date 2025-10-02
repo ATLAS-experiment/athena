@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -43,7 +43,7 @@ def TrigLArNoiseBurstRecoAlgCfg(flags, cells_name):
     return cfg
 
 
-def TrigLArNoiseBurstHypoToolGen(chainDict):
+def TrigLArNoiseBurstHypoToolGen(flags, chainDict):
     return CompFactory.TrigLArNoiseBurstHypoTool(chainDict['chainName'])
 
 
@@ -54,5 +54,5 @@ def TrigL2CaloLayersHypo_PreS_080Cfg(name="TrigL2CaloLayersHypo_PreS_080"):
          AcceptAll = False)
 
 
-def TrigL2CaloLayersHypoToolGen(chainDict):
+def TrigL2CaloLayersHypoToolGen(flags, chainDict):
     return TrigL2CaloLayersHypo_PreS_080Cfg(chainDict['chainName'])

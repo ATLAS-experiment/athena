@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -1271,7 +1271,7 @@ Int_t CP::TPileupReweighting::Initialize() {
             m_triggerObjs["None"]->triggerHists[period.second->id][0]->Add(hist);
          } else if(hist->GetDimension()==2) {
             period.second->secondaryHists[-1]->Add(hist);
-            TH1* proj = ((TH2*)hist)->ProjectionX();
+            TH1* proj = static_cast<TH2*>(hist)->ProjectionX();
             period.second->primaryHists[-1]->Add(proj);
             m_triggerObjs["None"]->triggerHists[period.second->id][0]->Add(proj);
             delete proj;
@@ -2003,7 +2003,7 @@ void CP::TPileupReweighting::normalizeHistogram(TH1* hist){
       else if(hist->InheritsFrom("TH2")) {
          bool skipNorm=false;
          //normalize each bin according to the projection in x
-         TH1D* proj = ((TH2*)hist)->ProjectionX();
+         TH1D* proj = static_cast<TH2*>(hist)->ProjectionX();
          Int_t bin,binx,biny,binz;
          for(binz=1; binz<=hist->GetNbinsZ(); binz++) {
             for(biny=1; biny<=hist->GetNbinsY(); biny++) {

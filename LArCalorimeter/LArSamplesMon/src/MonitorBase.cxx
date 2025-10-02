@@ -36,6 +36,11 @@ const History* MonitorBase::getCellHistory(unsigned int i) const
   return interface().getCellHistory(i); 
 }
 
+const History* MonitorBase::getSCHistory(unsigned int i) const 
+{ 
+  return interface().getSCHistory(i); 
+}
+
 const CellInfo* MonitorBase::getCellInfo(unsigned int i) const 
 { 
   return interface().getCellInfo(i);

@@ -51,11 +51,11 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
 
         if (len(seqArray)>0):                                
             if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                
-                # Bind flags to comboHypo generator if needed
+                # Bind flags to comboHypo generator if needed                
                 if 'flags' in inspect.signature(comboHypoCfg).parameters:
                     comboHypoCfg = functools.partial(comboHypoCfg, flags)
-                # Be carefull: custom ComboHpos are passed as partial functions, others no
-                # TODO: make uniform way to pass ComboHypo to the step (all partial functions)
+                else:
+                    comboHypoCfg = functools.partial(comboHypoCfg)                
                 return ChainStep(stepName, seqArray, 
                                  [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools)
 

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file SGComps/test/AddressRemappingSvc_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -236,8 +234,8 @@ void checkTADList (const IAddressProvider::tadList& tads,
       assert (tad->transientID() ==
               SG::TransientAddress::TransientClidSet { fooclid });
       assert (tad->alias() ==
-              (SG::TransientAddress::TransientAliasSet { "foo3.x1",
-                                                         "foo3.d2" }));
+              (SG::TransientAddress::TransientAliasSet { "foo3.d2",
+                                                         "foo3.x1" }));
     }
     else if (i == 3) {
       assert (tad->clID() == fooclid);

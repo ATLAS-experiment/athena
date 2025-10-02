@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -22,8 +22,6 @@
 #include "xAODTrigMuon/L2CombinedMuonAuxContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "AthenaMonitoringKernel/Monitored.h"
-
-#include "GaudiKernel/ThreadLocalContext.h"
 
 class ISvcLocator;
 
@@ -128,12 +126,10 @@ int muComb::drptMatch(double pt, double eta, double phi, double id_pt, double id
 
 // get extrapolated muon properties
 // status 0 --> OK,  1/2 --> no extrapolation (muon pt zero, muon angle zero)
-ExtrapolationResult muComb::getExtrapolatedMuon(const xAOD::L2StandAloneMuon* feature) const
+ExtrapolationResult muComb::getExtrapolatedMuon(const EventContext& ctx, const xAOD::L2StandAloneMuon* feature) const
 {
    ATH_MSG_DEBUG("in getExtrapolatedMuon");
    ExtrapolationResult result{};
-
-   const EventContext& ctx = Gaudi::Hive::currentContext();
 
    //muFast parameters (in MeV!)
    double phi    = feature->phiMS();
@@ -686,7 +682,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      // but only once per SA muon
      ExtrapolationResult extr{};
      if (usealgo <= 0 && m_useBackExtrapolatorG4) {//Std match
-       extr = getExtrapolatedMuon(muonSA);
+       extr = getExtrapolatedMuon(ctx, muonSA);
      }
 
      for(const auto trkit:(*idTrackParticles)) {

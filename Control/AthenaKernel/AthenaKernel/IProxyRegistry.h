@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @class IProxyRegistry   
  * @brief a proxy registry (a read/write dictionary)
  *
  * @author Paolo Calafiura - ATLAS
- *  $Id: IProxyRegistry.h,v 1.11 2006-08-29 18:17:09 srini Exp $
  ***************************************************************************/
 
 #ifndef ATHENAKERNEL_IPROXYREGISTRY_H
@@ -16,6 +15,7 @@
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/ClassID.h"
 #include "AthenaKernel/StoreID.h"
+#include "CxxUtils/sgkey_t.h"
 #include <string>
 
 //<<<<<< CLASS FORWARD DECLARATIONS                                      >>>>>>
@@ -43,6 +43,10 @@ public:
   /// the key must match exactly (no wildcarding for the default key)
   virtual SG::DataProxy* proxy_exact(const CLID& id,
                                      const std::string& key) const = 0;
+
+  /// get proxy with given key. Returns 0 to flag failure
+  /// the key must match exactly (no wild carding for the default key)
+  virtual SG::DataProxy* proxy_exact (SG::sgkey_t sgkey) const = 0;
 
   virtual ~IProxyRegistry() {}
 };

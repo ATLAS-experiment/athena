@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
@@ -7,11 +7,12 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/error.h"
 #include "AthContainers/exceptions.h"
+#include "AthContainersRoot/getDynamicAuxID.h"
 #include "RootUtils/Type.h"
 
 #include "TBranchAuxDynReader.h"
 #include "TBranchAuxDynStore.h"
-#include "AthContainersRoot/getDynamicAuxID.h"
+#include "RootAuxDynIO.h"
 
 #include "TTree.h"
 #include "TBranch.h"
@@ -98,7 +99,6 @@ getAuxElementType( TClass *expectedClass, EDataType expectedType, bool standalon
 }
 
 
-
 SG::auxid_t
 getAuxIdForAttribute(const std::string& attr, TClass *tclass, EDataType edt, bool standalone,
                      SG::auxid_t linked_auxid)
@@ -117,6 +117,24 @@ getAuxIdForAttribute(const std::string& attr, TClass *tclass, EDataType edt, boo
 
    return SG::getDynamicAuxID (*ti, attr, elemen_type_name, branch_type_name, standalone,
                                linked_auxid);
+}
+
+
+std::string
+getKeyFromBranch(TBranch* branch)
+{
+   TClass *tc = nullptr;
+   EDataType type;
+   if( branch->GetExpectedType(tc, type) == 0  && tc ) {
+      std::string key = branch->GetName();
+      const std::string clname_pfx = std::string(tc->GetName()) + '_';
+      if( key.starts_with( clname_pfx ) ) {
+         key.erase(0, clname_pfx.size());
+      }
+      RootAuxDynIO::removeAuxPostfix(key);
+      return key;
+   }
+   return "";
 }
 
 } // anonymous namespace
@@ -152,13 +170,13 @@ void TBranchAuxDynReader::BranchInfo::setAddress(void* data)
 // Find all dynamic attribute branches that share the base name
 TBranchAuxDynReader::TBranchAuxDynReader(TTree *tree, TBranch *base_branch)
    : m_baseBranchName( base_branch->GetName() ),
-     m_key( RootAuxDynIO::getKeyFromBranch(base_branch) ),
+     m_key( getKeyFromBranch(base_branch) ),
      m_tree( tree )
 {
    // The Branch here is the object (AuxContainer) branch, not the attribute branch
    TClass *tc = nullptr, *storeTC = nullptr;
    EDataType type;
-   base_branch->GetExpectedType(tc, type);    //MN: Errors would be coaught in isAuxDynBranch() earlier
+   (void)base_branch->GetExpectedType(tc, type);    //MN: Errors would be caught in isAuxDynBranch() earlier
    if( tc ) storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
    if( storeTC ) m_storeHolderOffset = tc->GetBaseClassOffset( storeTC );
    if( m_storeHolderOffset < 0 ) {
@@ -214,7 +232,7 @@ SG::auxid_t TBranchAuxDynReader::initBranch(bool standalone,
   // add AuxID to the list
   // May still be null if we don't have a dictionary for the branch.
   if (auxid != SG::null_auxid) {
-    m_auxids.insert(auxid);
+     addAuxID(auxid);
   } else {
     errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "TBranchAuxDynReader::initBranch");
     msg << "Could not find auxid for " << branch->GetName()

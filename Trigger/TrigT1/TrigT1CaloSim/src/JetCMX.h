@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  /***************************************************************************
@@ -18,7 +18,7 @@
 
  // STL
  #include <string>
- #include <vector>
+
 
  // Athena/Gaudi
  #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -35,7 +35,7 @@
  #include "TrigT1Interfaces/TrigT1CaloDefs.h"
  #include "TrigT1CaloEvent/CMXJetHits_ClassDEF.h"
  #include "TrigT1CaloEvent/CMXJetTob_ClassDEF.h"
- #include "TrigT1CaloEvent/JetCMXData_ClassDEF.h"
+ #include "TrigT1CaloEvent/JetCMXData.h"
  #include "TrigT1CaloEvent/JetCMXTopoData_ClassDEF.h"
 
  namespace LVL1 {

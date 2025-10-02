@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -10,7 +10,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgTools/ToolHandle.h>
-#include <AthContainers/AuxElement.h>
 #include <EventBookkeeperTools/FilterReporterParams.h>
 #include <TrigDecisionInterface/ITrigDecisionTool.h>
 #include <TrigDecisionInterface/Conditions.h>
@@ -45,7 +44,7 @@ namespace CP
     Gaudi::Property<bool> m_noL1 {this, "noL1", false, "whether to not require L1 decision"};
 
     /// \brief the accessors for \ref m_selectionDecoration and \ref m_trigList combination
-    std::vector<SG::AuxElement::Decorator<bool>> m_selectionAccessors;
+    std::vector<SG::Decorator<bool>> m_selectionAccessors;
 
     /// \brief the filter reporter params
     FilterReporterParams m_filterParams {this, "TriggerEventSelection", "trigger event selection"};

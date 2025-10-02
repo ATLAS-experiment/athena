@@ -310,26 +310,26 @@ namespace VKalVrtAthena {
         m_ntupleVars->get< vector<double> >( "SVTrk_ZIP" )  .emplace_back(perigee.parameters()[Trk::z0]);
       
         double matchProb = -1;
-        int barcode = HepMC::UNDEFINED_ID; // FIXME barcode-based
+        int uniqueID = HepMC::UNDEFINED_ID;
         if(m_jp.doTruth) 
           {  
             const xAOD::TruthParticle* aTemp_truth = getTrkGenParticle( trk );
             if( aTemp_truth )
               {
-                barcode = HepMC::barcode(aTemp_truth); // FIXME barcode-based
+                uniqueID = HepMC::uniqueID(aTemp_truth);
                 static const SG::ConstAccessor<float> truthMatchProbabilityAcc( "truthMatchProbability" ); 
                 matchProb= truthMatchProbabilityAcc( *trk );
               }
           }
       
-        m_ntupleVars->get< vector<int>    >( "SVTrk_barcode" ) .emplace_back( barcode ); // FIXME barcode-based
+        m_ntupleVars->get< vector<int>    >( "SVTrk_barcode" ) .emplace_back( uniqueID );
         m_ntupleVars->get< vector<double> >( "SVTrk_matchPr" ) .emplace_back( matchProb );
       
         ATH_MSG_DEBUG(" > fillAANT_SelectedBaseTracks: Sel Trk d0/pT/eta/match bc/pr "
                       << d0      << ","
                       << pT      << ","
                       << trketa  << ","
-                      << barcode << "," // FIXME barcode-based
+                      << uniqueID << ","
                       << matchProb );
       
         double errp = ptrk*ptrk*errqOverP;

@@ -49,6 +49,8 @@ def addPhysicsP1Chains(chains):
     chainsP1['Jet'] = [
         # L1 item is not in MC menu
         ChainProp(name='HLT_j0_perf_L1jJ30_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:online']),
+        # ATR-31286 Higher Threshold Duplicate
+        ChainProp(name='HLT_j0_perf_L1jJ60_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:online']),
 
     ]
 
@@ -94,7 +96,6 @@ def addPhysicsP1Chains(chains):
         ChainProp(name='HLT_noalg_L1jJ140',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+JetPhaseIStreamersGroup, monGroups=['jetMon:online']),
         ChainProp(name='HLT_noalg_L1jJ180',         l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+JetPhaseIStreamersGroup),
 
-        ChainProp(name='HLT_noalg_L1jLJ180',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+JetPhaseIStreamersGroup),
 
         # Exotics support streamers
         ChainProp(name='HLT_noalg_L1MU14FCH_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportGroup+MuonXStreamersGroup),

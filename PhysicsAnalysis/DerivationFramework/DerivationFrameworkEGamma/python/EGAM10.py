@@ -33,6 +33,7 @@ photonRequirements = " && ".join(
     ["(DFCommonPhotons_et >= 15*GeV)", "(abs(DFCommonPhotons_eta) < 2.5)"]
 )
 
+decorateCells = True
 
 def EGAM10SkimmingToolCfg(flags):
     """Configure the EGAM10 skimming tool"""
@@ -42,7 +43,7 @@ def EGAM10SkimmingToolCfg(flags):
     photonSelection = "(count(" + photonRequirements + ") >= 1)"
     print("EGAM10 offline skimming expression: ", photonSelection)
     EGAM10_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM10_OfflineSkimmingTool", expression=photonSelection
+        name="EGAM10_OfflineSkimmingTool", expression=photonSelection, TrigDecisionTool="",
     )
 
     # trigger-based selection
@@ -51,32 +52,34 @@ def EGAM10SkimmingToolCfg(flags):
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
+    if MenuType:
+        allTriggers = (
+            singlePhotonTriggers[MenuType]
+            + diPhotonTriggers[MenuType]
+            + triPhotonTriggers[MenuType]
+            + noalgTriggers[MenuType]
+        )
+        # remove duplicates
+        allTriggers = list(set(allTriggers))
+        print("EGAM10 trigger skimming list (OR): ", allTriggers)
+        EGAM10_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name="EGAM10_TriggerSkimmingTool", TriggerListOR=allTriggers
+        )
+
+        # do the AND of trigger-based and offline-based selection
+        print("EGAM10 skimming is logical AND of previous selections")
+        EGAM10_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
+            name="EGAM10_SkimmingTool",
+            FilterList=[EGAM10_OfflineSkimmingTool, EGAM10_TriggerSkimmingTool],
+        )
+
+        acc.addPublicTool(EGAM10_OfflineSkimmingTool)
+        acc.addPublicTool(EGAM10_TriggerSkimmingTool)
+        acc.addPublicTool(EGAM10_SkimmingTool, primary=True)
     else:
-        MenuType = ""
-    allTriggers = (
-        singlePhotonTriggers[MenuType]
-        + diPhotonTriggers[MenuType]
-        + triPhotonTriggers[MenuType]
-        + noalgTriggers[MenuType]
-    )
-    # remove duplicates
-    allTriggers = list(set(allTriggers))
-
-    print("EGAM10 trigger skimming list (OR): ", allTriggers)
-    EGAM10_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name="EGAM10_TriggerSkimmingTool", TriggerListOR=allTriggers
-    )
-
-    # do the AND of trigger-based and offline-based selection
-    print("EGAM10 skimming is logical AND of previous selections")
-    EGAM10_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
-        name="EGAM10_SkimmingTool",
-        FilterList=[EGAM10_OfflineSkimmingTool, EGAM10_TriggerSkimmingTool],
-    )
-
-    acc.addPublicTool(EGAM10_OfflineSkimmingTool)
-    acc.addPublicTool(EGAM10_TriggerSkimmingTool)
-    acc.addPublicTool(EGAM10_SkimmingTool, primary=True)
+        print("Unknown Trigger.EDMVersion ", flags.Trigger.EDMVersion)
+        print("Will not apply trigger-based skimming")
+        acc.addPublicTool(EGAM10_OfflineSkimmingTool, primary=True)
 
     return acc
 
@@ -109,8 +112,9 @@ def EGAM10KernelCfg(flags, name="EGAM10Kernel", **kwargs):
     # Common calo decoration tools
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        CaloDecoratorKernelCfg)
+        CaloDecoratorKernelCfg, CaloCellDecoratorKernelCfg)
     acc.merge(CaloDecoratorKernelCfg(flags))
+    acc.merge(CaloCellDecoratorKernelCfg(flags))
 
     # thinning tools
     thinningTools = []
@@ -229,7 +233,9 @@ def EGAM10Cfg(flags):
     # -------------------------------------------
 
     # baseline
-    EGAM10SlimmingHelper.AllVariables = ["CaloCalTopoClusters"]
+    EGAM10SlimmingHelper.AllVariables = [
+        "CaloCalTopoClusters"
+    ]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -285,7 +291,7 @@ def EGAM10Cfg(flags):
 
     # egamma clusters
     EGAM10SlimmingHelper.ExtraVariables += [
-        "egammaClusters.PHI2CALOFRAME.ETA2CALOFRAME.phi_sampl"
+        "egammaClusters.PHI2CALOFRAME.ETA2CALOFRAME.phi_sampl",
     ]
 
     # photons
@@ -333,6 +339,17 @@ def EGAM10Cfg(flags):
     clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(acc, "EGAM10Kernel")
     print("EGAM10 cluster energy decorations: ", clusterEnergyDecorations)
     EGAM10SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
+
+    # photons: cell decorations
+    if decorateCells:
+        EGAM10SlimmingHelper.ExtraVariables += [
+            "Photons.cells_E.cells_time.cells_onlId",
+            "Photons.cells_eta.cells_phi.cells_layer",
+            "Photons.cells_x.cells_y.cells_z",
+            "Photons.cells_gain",
+            "Photons.cells_quality",
+            "Photons.ncells",
+        ] 
 
     # energy density
     EGAM10SlimmingHelper.ExtraVariables += [

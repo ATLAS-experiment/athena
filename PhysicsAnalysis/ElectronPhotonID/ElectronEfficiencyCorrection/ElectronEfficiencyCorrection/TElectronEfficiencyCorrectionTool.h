@@ -1,10 +1,10 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __TELECTRONEFFICIENCYCORRECTIONTOOL__
-#define __TELECTRONEFFICIENCYCORRECTIONTOOL__
+#ifndef ELECTRONEFFICIENCYCORRECTION_TELECTRONEFFICIENCYCORRECTIONTOOL_H
+#define ELECTRONEFFICIENCYCORRECTION_TELECTRONEFFICIENCYCORRECTIONTOOL_H
 
 /**
   @class TElectronEfficiencyCorrectionTool
@@ -130,15 +130,15 @@ private:
     const std::vector<TH1*>& uncorr,
     const std::vector<std::vector<TH1*>>& corr);
 
-  std::vector<TH2*> buildSingleToyMC(const TH2* sf,
-                                     const TH2* stat,
-                                     const TH2* uncorr,
+  std::vector<TH2*> buildSingleToyMC(const TH1* sf,
+                                     const TH1* stat,
+                                     const TH1* uncorr,
                                      const std::vector<TH1*>& corr,
                                      int& randomCounter);
 
-  TH2* buildSingleCombToyMC(const TH2* sf,
-                            const TH2* stat,
-                            const TH2* uncorr,
+  TH2* buildSingleCombToyMC(const TH1* sf,
+                            const TH1* stat,
+                            const TH1* uncorr,
                             const std::vector<TH1*>& corr,
                             const int nSys,
                             int& randomCounter);

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHEXXRT_VECTORMULTXRTEXAMPLEALG_H
 #define ATHEXXRT_VECTORMULTXRTEXAMPLEALG_H
@@ -9,6 +9,7 @@
 
 // AthXRT include(s).
 #include "AthXRTInterfaces/IDeviceMgmtSvc.h"
+#include "AthXRTInterfaces/StateHandler.h"
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -25,14 +26,19 @@ namespace AthExXRT {
 ///
 /// @author Quentin Berthet <quentin.berthet@cern.ch>
 ///
-class VectorMultXRTExampleAlg : public AthReentrantAlgorithm {
+class VectorMultXRTExampleAlg : public AthReentrantAlgorithm, public AthXRT::StateHandler {
 
  public:
   // Inherit the base class's constructor(s).
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   /// Function initialising the algorithm
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override {
+      return StateHandler::initialize();
+  }
+
+  virtual StatusCode initialize_global() override;
+  virtual StatusCode initialize_worker() override;
 
   /// Function executing the algorithm
   virtual StatusCode execute(const EventContext& ctx) const override;
@@ -45,6 +51,9 @@ class VectorMultXRTExampleAlg : public AthReentrantAlgorithm {
 
   // Kernel name string
   static constexpr char s_krnl_name[] = "krnl_VectorMult";
+
+  // list of found accelerator devices
+  std::vector<std::shared_ptr<xrt::device>> m_devices;
 
   // Kernel arguments indexes
   // Must match the kernel arguments order.

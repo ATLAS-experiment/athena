@@ -72,10 +72,10 @@ StatusCode PunchThroughG4Classifier::initializeScaler(const std::string & scaler
                 //Get min and max values that we normalise values to
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "ScalerValues" )) {
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "min")) != nullptr) {
-                        m_scalerMin = atof((const char*)xmlBuff);
+                        m_scalerMin = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "max")) != nullptr) {
-                        m_scalerMax = atof((const char*)xmlBuff);
+                        m_scalerMax = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
                 }
 
@@ -85,13 +85,13 @@ StatusCode PunchThroughG4Classifier::initializeScaler(const std::string & scaler
                     double min=-1, max=-1;
 
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "name")) != nullptr) {
-                        name = (const char*)xmlBuff;
+                        name = reinterpret_cast<const char*>(xmlBuff);
                     }
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "min")) != nullptr) {
-                        min = atof((const char*)xmlBuff);
+                        min = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "max")) != nullptr) {
-                        max = atof((const char*)xmlBuff);
+                        max = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
 
                     // Insert into maps
@@ -146,10 +146,10 @@ StatusCode PunchThroughG4Classifier::initializeCalibrator(const std::string & ca
                 //get lower and upper bounds of isotonic regressor
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "LimitValues" )) {
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "min")) != nullptr) {
-                        m_calibrationMin = atof((const char*)xmlBuff);
+                        m_calibrationMin = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "max")) != nullptr) {
-                        m_calibrationMax = atof((const char*)xmlBuff);
+                        m_calibrationMax = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
                 }
 
@@ -158,10 +158,10 @@ StatusCode PunchThroughG4Classifier::initializeCalibrator(const std::string & ca
                     double orig = -1;
                     double norm = -1;
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "orig")) != nullptr) {
-                        orig = atof((const char*)xmlBuff);
+                        orig = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
                     if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "norm")) != nullptr) {
-                        norm = atof((const char*)xmlBuff);
+                        norm = atof(reinterpret_cast<const char*>(xmlBuff));
                     }
 
                     // Insert into maps

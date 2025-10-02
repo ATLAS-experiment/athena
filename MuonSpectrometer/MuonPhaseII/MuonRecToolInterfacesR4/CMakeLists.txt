@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonRecToolInterfacesR4 )
@@ -7,14 +7,14 @@ atlas_subdir( MuonRecToolInterfacesR4 )
 set( extra_libs )
 if( NOT SIMULATIONBASE )
     find_package( Acts COMPONENTS Core )
-    set( extra_libs ActsCore TrkGeometry)
+    set( extra_libs Acts::Core TrkGeometry)
 endif()
 
 # Component(s) in the package:
 atlas_add_library( MuonRecToolInterfacesR4
                    INTERFACE
                    PUBLIC_HEADERS MuonRecToolInterfacesR4
-                   LINK_LIBRARIES ${extra_libs} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities 
-                                  GeoPrimitives Identifier TrkEventPrimitives MuonSpacePoint MuonPatternEvent )
+                   LINK_LIBRARIES ${extra_libs} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities ActsEventLib
+                                  GeoPrimitives Identifier TrkEventPrimitives MuonSpacePoint MuonPatternEvent)
 
 

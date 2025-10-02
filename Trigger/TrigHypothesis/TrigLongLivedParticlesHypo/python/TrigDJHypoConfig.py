@@ -160,7 +160,7 @@ def TrigDJHypoDispToolFromDict(flags, chainDict):
 
     return tool
 
-def TrigDJComboHypoToolFromDict(chainDict):
+def TrigDJComboHypoToolFromDict(flags, chainDict):
     name = chainDict['chainName']
 
     from AthenaConfiguration.ComponentFactory import CompFactory

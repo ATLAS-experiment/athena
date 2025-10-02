@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCondData/DigitEffiData.h"
 #include "GeoModelKernel/throwExcept.h"
@@ -21,7 +21,7 @@ namespace Muon{
                 lookUpId = m_idHelperSvc->layerId(channelId);
                 break;
             case TechIndex::TGC:
-            case TechIndex::CSCI:
+            case TechIndex::CSC:
                 lookUpId = m_idHelperSvc->gasGapId(channelId);
                 break;
             case TechIndex::MM:

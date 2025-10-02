@@ -1123,7 +1123,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	 } //count number of 2-track vertices
 
 	 for(const auto& VertexNumber : (*TrkInVrt)[it]){
-	    WrkVrt vrt = (*wrkVrtSet).at(VertexNumber);
+	    const WrkVrt& vrt = (*wrkVrtSet).at(VertexNumber);
 	    if(!vrt.Good) continue;
 	    int NTrkInVrt = vrt.selTrk.size();
 	    if( NTrkInVrt <= 1) continue;                               // one track vertex - nothing to do
@@ -1156,8 +1156,8 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
       if( (*TrkInVrt)[selectedTrack].size() == 2){
           int v1 = (*TrkInVrt)[selectedTrack][0];
 	  int v2 = (*TrkInVrt)[selectedTrack][1];
-	  WrkVrt vrt1 = (*wrkVrtSet)[v1];
-	  WrkVrt vrt2 = (*wrkVrtSet)[v2];
+	  const WrkVrt& vrt1 = (*wrkVrtSet)[v1];
+	  const WrkVrt& vrt2 = (*wrkVrtSet)[v2];
           double prb1 = TMath::Prob(vrt1.chi2, 2*vrt1.selTrk.size()-3);
 	  double prb2 = TMath::Prob(vrt2.chi2, 2*vrt2.selTrk.size()-3);
 	  double dst1 = vrt1.projectedVrt;
@@ -1315,7 +1315,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
      double foundMinVrtDst = 1000000.;
 
      for(unsigned int iv = 0; iv<wrkVrtSet->size()-1; iv++) {
-        WrkVrt vrt_i = (*wrkVrtSet)[iv];
+        const WrkVrt& vrt_i = (*wrkVrtSet)[iv];
         if(vrt_i.selTrk.size()< 2) continue;   // Bad vertex
         if(vrt_i.nCloseVrt==-1)    continue;   // Used vertex
 

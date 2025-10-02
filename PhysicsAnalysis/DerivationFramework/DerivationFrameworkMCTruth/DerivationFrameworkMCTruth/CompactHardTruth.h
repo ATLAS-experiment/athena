@@ -39,7 +39,6 @@
 
 // fwd declares
 class IMcVtxFilterTool;
-class TH1F;
 
 
 namespace DerivationFramework {

@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "Identifier/RangeIterator.h"
 
-MdtIdHelper::MdtIdHelper() : MuonIdHelper("MdtIdHelper") {
+MdtIdHelper::MdtIdHelper() : MuonIdHelper("MdtIdHelper", "mdt") {
     //m_detectorElement_hashes
     m_module_hashes.fill(-1);
     m_detectorElement_hashes.fill(-1);
@@ -42,7 +42,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     IdDictField* field = m_dict->find_field("multiLayer");
     if (field) {
-        m_DETECTORELEMENT_INDEX = field->m_index;
+        m_DETECTORELEMENT_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'multiLayer' field ");
         status = 1;
@@ -50,7 +50,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("tubeLayer");
     if (field) {
-        m_TUBELAYER_INDEX = field->m_index;
+        m_TUBELAYER_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'tubeLayer' field ");
         status = 1;
@@ -58,7 +58,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("tube");
     if (field) {
-        m_CHANNEL_INDEX = field->m_index;
+        m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'tube' field ");
         status = 1;
@@ -70,16 +70,16 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     if (!mdtGroup) {
         ATH_MSG_ERROR("Cannot find mdt group");
     } else {
-        m_GROUP_INDEX = mdtGroup->regions()[0]->m_index;
+        m_GROUP_INDEX = mdtGroup->regions()[0]->index();
     }
 
-    const IdDictRegion& region = *m_dict->m_regions[m_GROUP_INDEX];
-    m_eta_impl = region.m_implementation[m_ETA_INDEX];
-    m_phi_impl = region.m_implementation[m_PHI_INDEX];
-    m_tec_impl = region.m_implementation[m_TECHNOLOGY_INDEX];
-    m_mla_impl = region.m_implementation[m_DETECTORELEMENT_INDEX];
-    m_lay_impl = region.m_implementation[m_TUBELAYER_INDEX];
-    m_tub_impl = region.m_implementation[m_CHANNEL_INDEX];
+    const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
+    m_eta_impl = region.implementation(m_ETA_INDEX);
+    m_phi_impl = region.implementation(m_PHI_INDEX);
+    m_tec_impl = region.implementation(m_TECHNOLOGY_INDEX);
+    m_mla_impl = region.implementation(m_DETECTORELEMENT_INDEX);
+    m_lay_impl = region.implementation(m_TUBELAYER_INDEX);
+    m_tub_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" MDT decode index and bit fields for each level: " << std::endl
                                                                       << " muon        " << m_muon_impl.show_to_string() << std::endl
@@ -101,7 +101,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
     if (atlasDict->get_label_value("subdet", "MuonSpectrometer", muonField)) {
         ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field "
-                      << "'subdet' in dictionary " << atlasDict->m_name);
+                      << "'subdet' in dictionary " << atlasDict->name());
         return 1;
     }
 

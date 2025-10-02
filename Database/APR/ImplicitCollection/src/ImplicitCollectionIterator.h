@@ -5,14 +5,10 @@
 #ifndef IMPLICITCOLLECTION_COLLECTIONITERATOR_H
 #define IMPLICITCOLLECTION_COLLECTIONITERATOR_H
 
-//#include "CollectionBase/ICollectionDescription.h"
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
-
 #include "CollectionBase/CollectionRowBuffer.h"
 
-#include "PersistencySvc/IPositionSeek.h"
-#include "AthenaKernel/ICollectionSize.h"
 #include "CxxUtils/checker_macros.h"
 
 class Token;
@@ -35,9 +31,7 @@ namespace pool {
     * to simplify backward compatibility
     */
    class ATLAS_NOT_THREAD_SAFE ImplicitCollectionIterator : public ICollectionQuery,
-                                                            public ICollectionCursor,
-                                                            virtual public IPositionSeek,
-                                                            virtual public implements<ICollectionSize>
+                                                            public ICollectionCursor
    {
   public:
      /// Constructor
@@ -46,19 +40,6 @@ namespace pool {
 
      // ------------------- Query interface
      
-     /**
-      * Sets the query.
-      * @param whereClause The query.
-      * @param attributeBindData  - unused
-      * @param tokenBindData  - unused
-      */
-     virtual void setCondition( const std::string& whereClause,
-                                coral::AttributeList* attributeBindData = 0,
-                                TokenList* tokenBindData = 0 ) ;
-
-     /// Returns the where clause of the query.
-     virtual const std::string& whereClause() const;
-
      /// Processes the query and returns a cursor over the query result.
      /// this method returns self
      virtual pool::ICollectionCursor& execute();
@@ -83,12 +64,12 @@ namespace pool {
       * @param position  The position to which to seek.
       * @returns True if successful, false otherwise.
       */
-     virtual bool seek (long long int position);
+     virtual bool seek(std::size_t position);
 
      /**
       * @brief Return the size of the collection.
       */
-     virtual int size ();
+     virtual std::size_t size();
 
      
      //------------------------------------------
@@ -99,15 +80,9 @@ namespace pool {
 
      // ------------------- Unimplemented methods
 
-     virtual void addToOutputList( const std::string& ) {}
-     virtual void addToOutputList( const std::vector<std::string>& ) {}
      virtual void selectAllAttributes() {}
      virtual void selectAllTokens() {}
      virtual void selectAll() {}
-     virtual void addToCollectionFragmentList( const std::string& ) {}
-     virtual void addToCollectionFragmentList( const std::vector< std::string >& ) {}
-     virtual void addAllCollectionFragments() {}
-     virtual void setRowCacheSize( int ) {}
 
      virtual void close() {}
 
@@ -118,8 +93,6 @@ namespace pool {
      Token*             m_token;
 
      mutable CollectionRowBuffer        m_rowBuffer;
-
-     std::string                m_whereClause;
    };
 
 }

@@ -44,6 +44,15 @@ namespace {
             in.setClosestApproach(measurePos);
         }
     }
+    inline std::string print(const Muon::MdtPrepData& prd) {
+        const auto* idHelperSvc = prd.detectorElement()->idHelperSvc();
+        std::stringstream sstr{};
+        sstr<<" PrepData "<<idHelperSvc->toString(prd.identify())
+            <<" radius: "<<prd.localPosition()[Trk::locR]<<" pm "
+            <<std::sqrt(prd.localCovariance()(Trk::locR, Trk::locR))<<
+            ", tdc: "<<prd.tdc()<<", adc: "<<prd.adc()<<", status: "<<prd.status();
+        return sstr.str();
+    }
 }  // namespace
 
 namespace Muon {
@@ -141,9 +150,6 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    MdtRdoToPrepDataToolMT::MdtRdoToPrepDataToolMT(const std::string& t, const std::string& n, const IInterface* p) :
-        base_class(t, n, p) {}
-
     StatusCode MdtRdoToPrepDataToolMT::initialize() {
         ATH_CHECK(m_calibrationTool.retrieve());
         ATH_MSG_VERBOSE("MdtCalibrationTool retrieved with pointer = " << m_calibrationTool);
@@ -202,12 +208,8 @@ namespace Muon {
     }
 
     StatusCode MdtRdoToPrepDataToolMT::decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const {
-        SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey, ctx};
-        const MuonMDT_CablingMap* readCdo{*readHandle};
-        if (!readCdo) {
-            ATH_MSG_ERROR("nullptr to the read conditions object");
-            return StatusCode::FAILURE;
-        }
+        const MuonMDT_CablingMap* readCdo{nullptr};
+        ATH_CHECK(SG::get(readCdo, m_readKey, ctx));
         return decode(ctx, readCdo->getMultiLayerHashVec(robIds, msgStream()));
     }
 
@@ -326,7 +328,7 @@ namespace Muon {
                                             calibOutput.status());
     }
 
-    StatusCode MdtRdoToPrepDataToolMT::processCsm(const EventContext& ctx, ConvCache& cache,  const MdtCsm* rdoColl) const {
+    StatusCode MdtRdoToPrepDataToolMT::processCsm(const EventContext& ctx, ConvCache& cache, const MdtCsm* rdoColl) const {
         const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
         // first handle the case of twin tubes
         if (m_useTwin) {
@@ -348,9 +350,10 @@ namespace Muon {
 
         // for each Csm, loop over AmtHit, converter AmtHit to digit
         // retrieve/create digit collection, and insert digit into collection
-        int mc = 0;
+        unsigned mc{0};
+
         for (const MdtAmtHit* amtHit : *rdoColl) {
-            mc++;
+            ++mc;
 
             // FIXME: Still use the digit class.
             ATH_MSG_VERBOSE("Amt Hit n. " << mc << " tdcId = " << amtHit->tdcId());
@@ -391,10 +394,28 @@ namespace Muon {
             const MdtCalibOutput calibResult{m_calibrationTool->calibrate(ctx, calibIn, false)};
 
             std::unique_ptr<MdtPrepData> newPrepData = createPrepData(calibIn, calibResult, cache);
-            if (newPrepData) {
-                newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
-                driftCircleColl->push_back(std::move(newPrepData));
+            if (!newPrepData) {
+                continue;
             }
+            if (driftCircleColl->size()) {
+                MdtPrepData* prevPrd = driftCircleColl->at(driftCircleColl->size()-1);
+                if (prevPrd->identify() == channelId) {
+                    std::stringstream sstr{};
+                    ATH_MSG_VERBOSE("Duplicated prep data object detected: "<<std::endl
+                        <<"  **** "<<print(*prevPrd)<<std::endl
+                        <<"  **** "<<print(*newPrepData));
+                    if (prevPrd->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        ATH_MSG_VERBOSE("Prd is already good");
+                    } else if (newPrepData->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        (*prevPrd) = std::move(*newPrepData);
+                        prevPrd->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size()-1);
+                    }
+                    continue;
+                }
+            }
+            ATH_MSG_VERBOSE("New prd created "<<print(*newPrepData));
+            newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
+            driftCircleColl->push_back(std::move(newPrepData));
         }
         return StatusCode::SUCCESS;
     }

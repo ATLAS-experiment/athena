@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM8.py
 # This defines DAOD_EGAM8, a skimmed DAOD format for Run 3.
@@ -156,6 +156,17 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         CaloDecoratorKernelCfg)
     acc.merge(CaloDecoratorKernelCfg(flags))
 
+    from DerivationFrameworkEGamma.EGammaToolsConfig import (
+        EGammaCookieCutClusterToolCfg)
+    cookieCutTool = acc.popToolsAndMerge(
+        EGammaCookieCutClusterToolCfg(flags,
+                                      name,
+                                      StoreInputMoments=True,
+                                      StoreCookedMoments=True,
+                                      OutputLevel = 3))
+    acc.addPublicTool(cookieCutTool)
+    augmentationTools.append(cookieCutTool)
+
     # thinning tools
     thinningTools = []
     streamName = kwargs["StreamName"]
@@ -305,11 +316,11 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         truth_cond_top = "(abs(TruthParticles.pdgId) ==  6)"
         # Photon
         truth_cond_gam = " && ".join(
-            ["(abs(TruthParticles.pdgId) == 22)", "(TruthParticles.pt > 1*GeV)"]
+            ["(TruthParticles.isPhoton)", "(TruthParticles.pt > 1*GeV)"]
         )
         # stable particles
         truth_cond_finalState = " && ".join(
-            ["(TruthParticles.status == 1)", "(TruthParticles.barcode<200000)"]
+            ["(TruthParticles.isGenStable)", "(!TruthParticles.isSimulationParticle)"]
         )
         truth_expression = (
             "( "
@@ -525,6 +536,8 @@ def EGAM8Cfg(flags):
         "CaloCellContainer#AllCalo",
         "CaloClusterCellLinkContainer#egammaClusters_links",
         "CaloClusterCellLinkContainer#ForwardElectronClusters_links",
+        "xAOD::CaloClusterContainer#ForwardElectronCookieCutClusters",
+        "xAOD::CaloClusterAuxContainer#ForwardElectronCookieCutClustersAux.",
     ]
 
     EGAM8ItemList = EGAM8SlimmingHelper.GetItemList()

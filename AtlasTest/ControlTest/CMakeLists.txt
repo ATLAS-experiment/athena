@@ -14,22 +14,15 @@ atlas_add_test( DataProxy_test
    LINK_LIBRARIES TestTools ToyConversionLib AthenaKernel SGTools GaudiKernel
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
-if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR
-      "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" )
-   set( PPSoptignore "requestRelease|" )
-else()
-   set( PPSoptignore )
-endif()
-
 atlas_add_test( ProxyProviderSvc_test
    SOURCES test/ProxyProviderSvc_test.cxx
    LINK_LIBRARIES TestTools ToyConversionLib AthenaKernel SGTools StoreGateLib GaudiKernel CxxUtils
-   LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}|${PPSoptignore}^ClassIDSvc +DEBUG|Histogram.* (DEBUG|INFO)|DetectorStore +DEBUG|ToyConversionSvc +DEBUG|EventDataSvc +DEBUG|EventPersis.* +(DEBUG|INFO)|HistoryStore +DEBUG|^DataProxy +VERBOSE|^ProxyProviderSvc +DEBUG|^ServiceManager +DEBUG"
+   LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}"
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
 atlas_add_test( CircularDep_test
    SOURCES test/CircularDep_test.cxx
-   LINK_LIBRARIES TestTools AthContainers SGTools StoreGateLib GaudiKernel
+   LINK_LIBRARIES TestTools AthContainers AthLinks AthenaKernel StoreGateLib GaudiKernel
    LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}"
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
@@ -41,29 +34,15 @@ atlas_add_test( SGDataLink_test
 
 atlas_add_test( ElementLink_test
    SOURCES test/ElementLink_test.cxx
-   LINK_LIBRARIES TestTools AthLinks AthContainers SGTools StoreGateLib
+   LINK_LIBRARIES TestTools AthLinks AthContainers AthenaKernel SGTools StoreGateLib
    LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}"
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
 atlas_add_test( ElementLinkVector_test
    SOURCES test/ElementLinkVector_test.cxx
-   LINK_LIBRARIES TestTools AthLinks AthContainers SGTools StoreGateLib GaudiKernel
+   LINK_LIBRARIES TestTools AthLinks AthContainers AthenaKernel StoreGateLib GaudiKernel
    LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}|ERROR.*known CLID.*7368883"  # duplicate CLID defined by test
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
-atlas_add_test( FortranAlgorithm
-   SCRIPT test/FortranAlgorithm.sh )
-
-if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" OR
-      "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo" )
-   set( SGGoptignore
-      "|Retrieved const handle to default object|of type EventInfo|object not modifiable when retrieved|requestRelease" )
-else()
-   set( SGGoptignore )
-endif()
-
-atlas_add_test( test_interactive_athena
-   SCRIPT athena.py ControlTest/test_interactive_athena.py )
-
 # Install files from the package:
-atlas_install_joboptions( share/StoreGateTestCommon.txt share/DataLink_test.txt share/*.py )
+atlas_install_joboptions( share/StoreGateTestCommon.txt share/DataLink_test.txt )

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictRegion.h"
@@ -9,20 +9,119 @@
 #include "src/Debugger.h"
 #include <iostream>
 
+IdDictRegion::IdDictRegion (const std::string& name,
+                            const std::string& group,
+                            const std::string& tag)
+  : m_name (name),
+    m_group (group),
+    m_tag (tag)
+{
+}
+
+
 std::string
 IdDictRegion::group_name() const {
   return(m_group);
 }
+
+
+size_t IdDictRegion::n_implementation() const
+{
+    return m_implementation.size();
+}
+
+
+const IdDictFieldImplementation& IdDictRegion::implementation(size_t i) const
+{
+    return m_implementation.at(i);
+}
+
 
 void
 IdDictRegion::set_index(size_t index) {
   m_index = index;
 }
 
+/// Add entry to the end of the list.
 void
 IdDictRegion::add_entry(IdDictRegionEntry* entry) {
   m_entries.push_back(entry);
 }
+
+/// Add entry to the start of the list.
+void
+IdDictRegion::prepend_entry(IdDictRegionEntry* entry) {
+  m_entries.insert(m_entries.begin(), entry);
+}
+
+
+/// Non-const access to implementation objects.
+IdDictFieldImplementation& IdDictRegion::implementation(size_t i)
+{
+    return m_implementation.at(i);
+}
+
+
+IdDictFieldImplementation& IdDictRegion::new_implementation()
+{
+  m_implementation.resize (m_implementation.size() + 1);
+  return m_implementation.back();
+}
+
+
+/// Set the name for next_abs_eta.
+void IdDictRegion::set_next_abs_eta_name (const std::string& name)
+{
+  m_next_abs_eta_name = name;
+}
+
+
+/// Add a previous sample name.
+void IdDictRegion::add_prev_samp_name (const std::string& name)
+{
+  m_prev_samp_names.push_back (name);
+
+}
+
+
+/// Add a next sample name.
+void IdDictRegion::add_next_samp_name (const std::string& name)
+{
+  m_next_samp_names.push_back (name);
+}
+
+
+/// Add a previous subdetector name.
+void IdDictRegion::add_prev_subdet_name (const std::string& name)
+{
+  m_prev_subdet_names.push_back (name);
+}
+
+
+/// Add a next subdetector name.
+void IdDictRegion::add_next_subdet_name (const std::string& name)
+{
+  m_next_subdet_names.push_back (name);
+}
+
+
+/// Set eta/phi variables.
+void IdDictRegion::set_etaphi (double eta0, double deta,
+                               double phi0, double dphi)
+{
+  m_eta0 = eta0;
+  m_deta = deta;
+  m_phi0 = phi0;
+  m_dphi = dphi;
+}
+
+
+/// Set is_empty flag.
+void IdDictRegion::set_is_empty()
+{
+  m_is_empty = true;
+}
+
 
 void
 IdDictRegion::resolve_references(const IdDictMgr& idd, IdDictDictionary& dictionary) {
@@ -141,6 +240,25 @@ IdDictRegion::fieldSize() const {
 size_t
 IdDictRegion::size() const {
   return m_entries.size();
+}
+
+void
+IdDictRegion::integrate_bits() {
+  // For each region, loop over its levels and set the bit offset
+  // for each FieldImplementation
+
+  size_t bits_offset = 0;
+  for (IdDictFieldImplementation& impl : m_implementation) {
+    impl.optimize(); // optimize for decoding
+    impl.set_bits_offset(bits_offset);
+    bits_offset += impl.bits();
+
+    // Set whether or not to decode index
+    Range::field field = impl.ored_field();
+    if ((not field.isBounded()) || (0 != field.get_minimum())) {
+      impl.set_decode_index(true);
+    }
+  }
 }
 
 Range

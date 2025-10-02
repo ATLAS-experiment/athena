@@ -85,6 +85,7 @@ private:
   Gaudi::Property<bool> m_processPixel {this, "ProcessPixel", false};
   Gaudi::Property<bool> m_processStrip {this, "ProcessStrip", false};
   Gaudi::Property<bool> m_processHgtd {this, "ProcessHgtd", false};
+  Gaudi::Property<bool> m_isITk {this, "isITk", true, "True if running in ITk"};
 };
 
 }

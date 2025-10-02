@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-from __future__ import with_statement
 
 from DCSCalculator2.subdetectors import LAr, Lucid, MDT, Pixels, RPC, SCT, TDQ, Tile, TGC, TRT
 

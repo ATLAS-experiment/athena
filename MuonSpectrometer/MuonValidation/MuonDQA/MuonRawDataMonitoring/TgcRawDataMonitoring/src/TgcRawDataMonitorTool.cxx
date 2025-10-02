@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcRawDataMonitorTool.h"
 #include "TVector2.h"
@@ -60,7 +60,7 @@ std::set<std::string> TgcRawDataMonitorTool::getPassedChambers(const Amg::Vector
      if (!isValid) continue;
 	
 	const MuonGM::TgcReadoutElement* detEle = muonMgr->getTgcReadoutElement(id);
-	const Trk::TrapezoidBounds* tb = (const Trk::TrapezoidBounds*)&detEle->bounds();
+	const Trk::TrapezoidBounds* tb = static_cast<const Trk::TrapezoidBounds*>(&detEle->bounds());
 	Amg::Vector3D trkLocVec3D = detEle->transform().inverse() * Amg::Vector3D(ext_x,ext_y,ext_z);
 	if(std::abs(trkLocVec3D.x())>1000.)continue;
 	if(std::abs(trkLocVec3D.y())>1500.)continue;

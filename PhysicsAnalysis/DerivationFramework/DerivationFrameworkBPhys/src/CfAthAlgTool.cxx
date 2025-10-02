@@ -23,7 +23,7 @@
 // Example:
 //
 //   // Bmumu_reco_mumu.h:
-//  class Bmumu_reco_mumu : public CfAthAlgTool, public IAugmentationTool {
+//  class Bmumu_reco_mumu : public extends<CfAthAlgTool, IAugmentationTool> {
 //    public: 
 //      Bmumu_reco_mumu(const std::string& t, const std::string& n,
 //                      const IInterface* p);
@@ -33,7 +33,7 @@
 //  Bmumu_reco_mumu::Bmumu_reco_mumu(const std::string& t,
 //      const std::string& n,
 //      const IInterface* p) : 
-//    CfAthAlgTool(t,n,p),
+//    base_class(t,n,p),
 //    ...
 //
 //   // inside a method like Bmumu_reco_mumu::addBranches():
@@ -58,7 +58,7 @@
 //
 //============================================================================
 //
-#include "DerivationFrameworkBPhys/CfAthAlgTool.h"
+#include "CfAthAlgTool.h"
 
 namespace DerivationFramework {
 

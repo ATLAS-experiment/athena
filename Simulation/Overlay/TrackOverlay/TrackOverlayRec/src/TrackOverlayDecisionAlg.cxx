@@ -1,5 +1,5 @@
 /*
- *  *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *   *   */
 //
 #include <fstream>
@@ -12,8 +12,6 @@
 //
 #include "GaudiKernel/SystemOfUnits.h"
 #include "Gaudi/Property.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthPileupEvent.h"
 #include "xAODTruth/TruthPileupEventAuxContainer.h"

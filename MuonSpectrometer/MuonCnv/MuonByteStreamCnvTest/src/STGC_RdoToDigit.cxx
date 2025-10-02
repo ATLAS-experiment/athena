@@ -32,13 +32,13 @@ StatusCode STGC_RdoToDigit::execute(const EventContext& ctx) const {
     sTgcDigitCollection* collection = nullptr;
     // now decode RDO into digits
     for (const Muon::STGC_RawDataCollection* coll : *rdoContainer) {
-        ATH_CHECK(this->decodeSTGC(coll, wh_stgcDigit.ptr(), collection, oldId));
+        ATH_CHECK(this->decodeSTGC(ctx, coll, wh_stgcDigit.ptr(), collection, oldId));
     }
 
     return StatusCode::SUCCESS;
 }
 
-StatusCode STGC_RdoToDigit::decodeSTGC(const Muon::STGC_RawDataCollection* rdoColl, sTgcDigitContainer* stgcContainer,
+StatusCode STGC_RdoToDigit::decodeSTGC(const EventContext& ctx, const Muon::STGC_RawDataCollection* rdoColl, sTgcDigitContainer* stgcContainer,
                                        sTgcDigitCollection*& collection, Identifier& oldId) const {
     const IdContext stgcContext = m_idHelperSvc->stgcIdHelper().module_context();
 
@@ -48,7 +48,7 @@ StatusCode STGC_RdoToDigit::decodeSTGC(const Muon::STGC_RawDataCollection* rdoCo
         // for each RDO, loop over RawData, converter RawData to digit
         // retrieve/create digit collection, and insert digit into collection
         for (const Muon::STGC_RawData* data : *rdoColl) {
-            sTgcDigit* newDigit = m_stgcRdoDecoderTool->getDigit(data);
+            sTgcDigit* newDigit = m_stgcRdoDecoderTool->getDigit(ctx, data);
             if (!newDigit) {
                 ATH_MSG_ERROR("Error in sTGC RDO decoder");
                 continue;

@@ -1,8 +1,9 @@
 /*
-	Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Calibration/AFP_DeadPixelTool.h"
+#include <cmath>
 
 int AFP_DeadPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<TH2F>& output) const
 {
@@ -40,7 +41,7 @@ int AFP_DeadPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<T
 					if(input->GetBinContent(legpix.first, legpix.second)<1) ++inactive_pixels_around;
 				}
 	
-				if(inactive_pixels_around<4 && round(sum_neighbours/nNeighbours)>=m_range*maxHitValue)
+				if(inactive_pixels_around<4 && std::round(sum_neighbours/nNeighbours)>=m_range*maxHitValue)
 				{
 					deadpixels_output.Fill(row_ID, col_ID);
 					tmp_dead_pixels.SetBinContent(row_ID,col_ID, 1);
@@ -76,7 +77,7 @@ int AFP_DeadPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<T
 					}
 
 				
-					if(dead_pixels_around>0 && inactive_pixels_around>3 && round(sum_neighbours/nNeighbours)>=m_range*maxHitValue)
+					if(dead_pixels_around>0 && inactive_pixels_around>3 && std::round(sum_neighbours/nNeighbours)>=m_range*maxHitValue)
 					{
 						deadpixels_output.Fill(row_ID, col_ID);
 						tmp_dead_pixels.SetBinContent(row_ID,col_ID, 1);

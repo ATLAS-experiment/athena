@@ -286,8 +286,8 @@ void createAndFillNtuple(const char* ntupleName, const char* fileName) {
   std::vector<float> var1{1, 2, 3, 4, 5};
   std::vector<float> var2{11, 12, 13, 14, 15};
 
-  *var1Field = var1;
-  *var2Field = var2;
+  *var1Field = std::move(var1);
+  *var2Field = std::move(var2);
   ntuple->Fill();
 }
 
@@ -309,8 +309,8 @@ int main() {
   ::Info(APP_NAME, "Created input RNTuple for the test");
 
   // Read the RNTuple
-  auto inputNtuple = ROOT::Experimental::RNTupleReader::Open(INPUT_NTUPLE_NAME,
-                                                             INPUT_FILE_NAME);
+  auto inputNtuple = ROOT::RNTupleReader::Open(INPUT_NTUPLE_NAME,
+                                                                       INPUT_FILE_NAME);
   inputNtuple->PrintInfo();
 
   // Create the store and tell it to load entry 0

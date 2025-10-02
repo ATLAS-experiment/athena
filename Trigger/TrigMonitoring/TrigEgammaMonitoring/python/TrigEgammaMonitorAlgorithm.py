@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigEgammaMonitorAlgorithm.py
@@ -30,7 +30,7 @@ def TrigEgammaMonConfig(inputFlags, emulator=None, onlyHLT = False):
 
     # configure alg and ana tools
     from TrigEgammaMonitoring.TrigEgammaMonitoringConfig import TrigEgammaMonAlgBuilder
-    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator, onlyHLT = onlyHLT ) # Using 2018 e/g tunings
+    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator, onlyHLT = onlyHLT, ComputeEffLH = inputFlags.Trigger.egamma.monitorEffLH, ComputeEffDNN = inputFlags.Trigger.egamma.monitorEffDNN ) # Using 2018 e/g tunings
     # build monitor and book histograms
     monAlgCfg.configure()
 
@@ -44,10 +44,6 @@ def TrigEgammaMonConfig(inputFlags, emulator=None, onlyHLT = False):
 
 
 if __name__=='__main__':
-
-    # ATR-11839 to fix the egammaPid import
-    from PyUtils.Helpers import ROOT6Setup
-    ROOT6Setup()
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

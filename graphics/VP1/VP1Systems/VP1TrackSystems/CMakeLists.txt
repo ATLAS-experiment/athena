@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TrackSystems )
@@ -24,5 +24,7 @@ atlas_add_library( VP1TrackSystems VP1TrackSystems/*.h src/*.cxx
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${COIN3D_LIBRARIES} ActsEventLib AthContainers AtlasDetDescr EventPrimitives ForwardRegion_SimEv InDetIdentifier InDetPrepRawData InDetRIO_OnTrack InDetReadoutGeometry InDetSimEvent MuonChamberT0s MuonIdHelpersLib MuonPrepRawData MuonRIO_OnTrack MuonReadoutGeometry MuonRecHelperToolsLib MuonSegment MuonSimEvent Particle PixelReadoutGeometryLib SCT_ReadoutGeometry StoreGateLib TRT_ReadoutGeometry TrkCompetingRIOsOnTrack TrkDetElementBase TrkExInterfaces TrkFitterInterfaces TrkMaterialOnTrack TrkMeasurementBase TrkPrepRawData TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkSegment TrkTrack TrkTrackSummary TrkVolumes VP1GuideLineSystems VP1HEPVis VP1PRDSystems )
 
 # Enable Qt support for cppcheck:
-set_property( TARGET VP1TrackSystems
-   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1TrackSystems
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()

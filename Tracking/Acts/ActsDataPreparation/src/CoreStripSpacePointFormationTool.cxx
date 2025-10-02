@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CoreStripSpacePointFormationTool.h"
@@ -12,26 +12,21 @@
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Acts/SpacePointFormation/SpacePointBuilderConfig.hpp"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
 #include "StoreGate/WriteHandle.h"
 namespace ActsTrk
 {
 
-  CoreStripSpacePointFormationTool::CoreStripSpacePointFormationTool(const std::string &type,
-                                                                     const std::string &name,
-                                                                     const IInterface *parent)
-      : base_class(type, name, parent)
-  {}
-
+ 
   StatusCode CoreStripSpacePointFormationTool::initialize(){
 
     ATH_CHECK(detStore()->retrieve(m_stripId, "SCT_ID"));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
-
+ 
     if(m_useSCTLayerDep_OverlapCuts)
       ATH_MSG_INFO("Use SCT SP overlap cuts based on layer number parity");
     
@@ -39,15 +34,15 @@ namespace ActsTrk
   }
 
   StatusCode CoreStripSpacePointFormationTool::produceSpacePoints(const EventContext &ctx,
-								  const xAOD::StripClusterContainer &clusterContainer,
-								  const InDet::SiElementPropertiesTable &properties,
-								  const InDetDD::SiDetectorElementCollection &elements,
-								  const Amg::Vector3D &beamSpotVertex,
-								  std::vector<StripSP>& spacePoints,
-								  std::vector<StripSP>& overlapSpacePoints,
-								  bool processOverlaps,
-								  const std::vector<IdentifierHash>& hashesToProcess,
-								  const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const
+                  const xAOD::StripClusterContainer &clusterContainer,
+                  const InDet::SiElementPropertiesTable &properties,
+                  const InDetDD::SiDetectorElementCollection &elements,
+                  const Amg::Vector3D &beamSpotVertex,
+                  std::vector<StripSP>& spacePoints,
+                  std::vector<StripSP>& overlapSpacePoints,
+                  bool processOverlaps,
+                  const std::vector<IdentifierHash>& hashesToProcess,
+                  const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const
   {
     /// Production of ActsTrk::SpacePoint from strip clusters
     /// Strip space points involves a more complex logic since
@@ -92,47 +87,38 @@ namespace ActsTrk
     /// via the ContainerAccessor.
 
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
-    const Acts::TrackingGeometry *acts_tracking_geometry=m_trackingGeometryTool->trackingGeometry().get();
-    ATH_CHECK(acts_tracking_geometry != nullptr);
-    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
-    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-    ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ *acts_tracking_geometry, **detectorElementToGeometryIdMap };
-
-    spBuilderConfig->slSurfaceAccessor
-      .connect<&ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
-
-    const std::shared_ptr<const Acts::TrackingGeometry> trkGeometry = m_trackingGeometryTool->trackingGeometry();
-    spBuilderConfig->trackingGeometry = trkGeometry;
+    detail::xAODUncalibMeasSurfAcc surfaceAccessor{m_trackingGeometryTool.get()};
+    spBuilderConfig->slSurfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&surfaceAccessor);
+    spBuilderConfig->trackingGeometry = m_trackingGeometryTool->trackingGeometry();
 
     
     auto spConstructor = [this, &clusterContainer, &elements](const Acts::Vector3 &pos,
-                    std::optional<double> /*t*/,
-							      const Acts::Vector2 &cov,
-                    std::optional<double> /*varT*/,
-							      const boost::container::static_vector<Acts::SourceLink, 2> &slinks)
-      -> StripSP{
-      std::vector<std::size_t> measIndices;
+                                                              std::optional<double> /*t*/,
+                                                              const Acts::Vector2 &cov,
+                                                              std::optional<double> /*varT*/,
+                                                              const boost::container::static_vector<Acts::SourceLink, 2> &slinks)
+      -> StripSP {
+      std::array<std::size_t,2> measIndices{ std::numeric_limits<std::size_t>::max(), std::numeric_limits<std::size_t>::max()};
       std::array<StripInformationHelper, 2> stripInfos; 
       size_t idx = 0;
       for (const auto& slink : slinks){
-	const auto& atlasSourceLink = slink.get<ATLASUncalibSourceLink>();
-	const xAOD::UncalibratedMeasurement *hit = &getUncalibratedMeasurement(atlasSourceLink);
-
-	// Check if the cluster is in the cluster container
-	const auto it = std::find(clusterContainer.begin(), clusterContainer.end(), dynamic_cast<const xAOD::StripCluster*>(hit));
-	if (it != clusterContainer.end()){
-	  const auto cluster_index = it - clusterContainer.begin();
-	  const auto id = hit->identifierHash();
-	  const auto &element = elements.getDetectorElement(id);
-	  size_t stripIndex = 0;
-	  auto ends = this->getStripEnds(atlasSourceLink, element, stripIndex);
-	  auto vertex = Amg::Vector3D(0,0,0);
-	  StripInformationHelper stripInfo(id,ends.first, ends.second, vertex, ActsTrk::localXFromSourceLink(atlasSourceLink), cluster_index, stripIndex);
-	  measIndices.push_back(cluster_index);
-	  stripInfos[idx++] = std::move(stripInfo);
-	}
+          const xAOD::UncalibratedMeasurement *hit =detail::xAODUncalibMeasCalibrator::unpack(slink);
+          // Check if the cluster is in the cluster container
+          const auto it = std::ranges::find(clusterContainer, dynamic_cast<const xAOD::StripCluster*>(hit));
+          if (it != clusterContainer.end()){
+            const auto cluster_index = std::distance(clusterContainer.begin(), it);
+            const auto id = hit->identifierHash();
+            const auto &element = elements.getDetectorElement(id);
+            size_t stripIndex = 0;
+            auto ends = this->getStripEnds(hit, element, stripIndex);
+            auto vertex = Amg::Vector3D::Zero();
+            StripInformationHelper stripInfo(id,ends.first, ends.second, vertex, ActsTrk::localXFromSourceLink(hit), cluster_index, stripIndex);
+            assert( idx < measIndices.size() && idx < stripInfos.size());
+            measIndices[idx] = cluster_index;
+            stripInfos[idx] = std::move(stripInfo);
+            ++idx;
+          }
       }
       const auto& [firstInfo, secondInfo] = stripInfos;
       const auto topHalfStripLength = 0.5*firstInfo.stripDirection().norm();
@@ -162,141 +148,142 @@ namespace ActsTrk
     auto spBuilder = std::make_shared<Acts::SpacePointBuilder<StripSP>>(*spBuilderConfig, spConstructor);
 
     const auto hashesProc = (hashesToProcess.size() > 0 ? hashesToProcess : stripAccessor.allIdentifiers());
-    for (auto &idHash : hashesProc)
-      {
-	const InDetDD::SiDetectorElement *thisElement = elements.getDetectorElement(idHash);
-	if (thisElement->isStereo())
-	  continue;
+    for (auto &idHash : hashesProc) {
+      const InDetDD::SiDetectorElement *thisElement = elements.getDetectorElement(idHash);
+      if (thisElement->isStereo()) {
+        continue;
+      }
+      // Retrieve the neighbours of the detector element
+      const std::vector<IdentifierHash>& others = *properties.neighbours(idHash);
+  
+      if (others.empty()) {
+        continue;
+      }
+      // This flag is use to trigger if the search should be performed.
+      // In case there are no clusters on the neighbours of the selected
+      // detector element, the flag stays false.
+      bool search = false;
+      size_t neighbour = 0;
+      while (not search and neighbour < others.size()){
+        search = stripAccessor.isIdentifierPresent( others.at(neighbour) );
+        neighbour++;
+      }
+      if (not search) {
+        continue;
+      }
+      // prepare clusters, indices and modules for space point formation
+      std::array<std::vector<std::pair<const xAOD::StripCluster *, size_t>>, static_cast<size_t>(nNeighbours)> neighbourClusters{};
+      std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>, static_cast<size_t>(nNeighbours)> neighbourSourceLinks{};
+      std::array<const InDetDD::SiDetectorElement *, static_cast<size_t>(nNeighbours)> neighbourElements{};
 
-	// Retrieve the neighbours of the detector element
-	const std::vector<IdentifierHash>& others = *properties.neighbours(idHash);
-	
-	if ( others.empty()) continue;
+      auto groupStart = clusterContainer.begin();
+      // Get the detector element and range for the idHash
+      neighbourElements[0] = thisElement;
+      for (auto &this_range : stripAccessor.rangesForIdentifierDirect(idHash)){
+        for (auto start = this_range.first; start != this_range.second; ++start){
+          size_t position = std::distance(groupStart, start);
+          neighbourClusters[0].push_back(std::make_pair(*start, position));
+                if ((*start)->identifierHash() != thisElement->identifyHash()) {
+                  throw std::logic_error("Identifier mismatch.");
+                }
+          auto slink = makeATLASUncalibSourceLink(&clusterContainer, (*start)->index());
+          neighbourSourceLinks[0].emplace_back(std::make_pair(slink, position));
+        }
+  }
 
-	// This flag is use to trigger if the search should be performed.
-	// In case there are no clusters on the neighbours of the selected
-	// detector element, the flag stays false.
-	bool search = false;
-	size_t neighbour = 0;
-	while (not search and neighbour < others.size()){
-	  search = stripAccessor.isIdentifierPresent( others.at(neighbour) );
-	  neighbour++;
-	}
-	if (not search) continue;
+  Identifier thisId = thisElement->identify();
 
-	// prepare clusters, indices and modules for space point formation
-	std::array<std::vector<std::pair<const xAOD::StripCluster *, size_t>>, static_cast<size_t>(nNeighbours)> neighbourClusters{};
-	std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>, static_cast<size_t>(nNeighbours)> neighbourSourceLinks{};
-	std::array<const InDetDD::SiDetectorElement *, static_cast<size_t>(nNeighbours)> neighbourElements{};
+  // define overlap extends before building space points
+  std::array<double, 14> overlapExtents{};
+  //   Default case: you test the opposite element and the overlapping in phi (total 3 elements)
+  int Nmax = 4;
 
-	auto groupStart = clusterContainer.begin();
-	// Get the detector element and range for the idHash
-	neighbourElements[0] = thisElement;
-	for (auto &this_range : stripAccessor.rangesForIdentifierDirect(idHash)){
-	  for (auto start = this_range.first; start != this_range.second; ++start){
-	    size_t position = std::distance(groupStart, start);
-	    neighbourClusters[0].push_back(std::make_pair(*start, position));
-            if ((*start)->identifierHash() != thisElement->identifyHash()) {
-               throw std::logic_error("Identifier mismatch.");
-            }
-	    auto slink = makeATLASUncalibSourceLink(&clusterContainer, (*start)->index());
-	    neighbourSourceLinks[0].emplace_back(std::make_pair(slink, position));
-	  }
-	}
+  // In the barrel, test the eta overlaps as well (total 5 elements)
+  if (m_stripId->is_barrel(thisId))
+    Nmax = 6;
 
-	Identifier thisId = thisElement->identify();
+  // You can remove all the overlaps if requested.
+  // Here you test only the opposite element
+  if (not processOverlaps)
+    Nmax = 2;
 
-	// define overlap extends before building space points
-	std::array<double, 14> overlapExtents{};
-	//   Default case: you test the opposite element and the overlapping in phi (total 3 elements)
-	int Nmax = 4;
+  float hwidth(properties.halfWidth(idHash));
+  int n = 0;
 
-	// In the barrel, test the eta overlaps as well (total 5 elements)
-	if (m_stripId->is_barrel(thisId))
-	  Nmax = 6;
+  // The order of the elements in others is such that you first get the opposite element,
+  // the overlapping in phi and then the overlapping in eta
+  // For this reason you need to re-order the indices, since the SiSpacePointMakerTool will process
+  // first the eta overlaps and then the phi ones
+  const std::array<size_t, nNeighbours> neigbourIndices{ThisOne, Opposite, EtaMinus, EtaPlus, PhiMinus, PhiPlus};
 
-	// You can remove all the overlaps if requested.
-	// Here you test only the opposite element
-	if (not processOverlaps)
-	  Nmax = 2;
+  for (const auto &otherHash : others){
+    if (++n == Nmax) break;
 
-	float hwidth(properties.halfWidth(idHash));
-	int n = 0;
+    if (not stripAccessor.isIdentifierPresent(otherHash))
+      continue;
 
-	// The order of the elements in others is such that you first get the opposite element,
-	// the overlapping in phi and then the overlapping in eta
-	// For this reason you need to re-order the indices, since the SiSpacePointMakerTool will process
-	// first the eta overlaps and then the phi ones
-	const std::array<size_t, nNeighbours> neigbourIndices{ThisOne, Opposite, EtaMinus, EtaPlus, PhiMinus, PhiPlus};
+    const InDetDD::SiDetectorElement *otherElement = elements.getDetectorElement(otherHash);
 
-	for (const auto &otherHash : others){
-	  if (++n == Nmax) break;
-
-	  if (not stripAccessor.isIdentifierPresent(otherHash))
-	    continue;
-
-	  const InDetDD::SiDetectorElement *otherElement = elements.getDetectorElement(otherHash);
-
-	  neighbourElements[neigbourIndices[n]] = otherElement;
-	  for (auto &this_range : stripAccessor.rangesForIdentifierDirect(otherHash)){
-	    for (auto start = this_range.first; start != this_range.second; ++start){
-	      size_t position = std::distance(groupStart, start);
-	      neighbourClusters[neigbourIndices[n]].push_back(std::make_pair(*start, position));
+    neighbourElements[neigbourIndices[n]] = otherElement;
+    for (auto &this_range : stripAccessor.rangesForIdentifierDirect(otherHash)){
+      for (auto start = this_range.first; start != this_range.second; ++start){
+        size_t position = std::distance(groupStart, start);
+        neighbourClusters[neigbourIndices[n]].push_back(std::make_pair(*start, position));
               if ((*start)->identifierHash() != otherElement->identifyHash()) {
                  throw std::logic_error("Identifier mismatch.");
               }
               auto slink = makeATLASUncalibSourceLink(&clusterContainer, (*start)->index());
-	      neighbourSourceLinks[neigbourIndices[n]].emplace_back(std::make_pair(slink, position));
-	    }
-	  }
+        neighbourSourceLinks[neigbourIndices[n]].emplace_back(std::make_pair(slink, position));
+      }
+    }
 
-	  switch (n){
-	  case Opposite:
-	    {
-	      overlapExtents[0] = -m_overlapLimitOpposite;
-	      overlapExtents[1] = m_overlapLimitOpposite;
-	      break;
-	    }
-	  case PhiMinus:
-	    {
-	      overlapExtents[6] = -hwidth;
-	      overlapExtents[7] = -hwidth + m_overlapLimitPhi;
-	      overlapExtents[8] = hwidth - m_overlapLimitPhi;
-	      overlapExtents[9] = hwidth;
-	      break;
-	    }
-	  case PhiPlus:
-	    {
-	      overlapExtents[10] = hwidth - m_overlapLimitPhi;
-	      overlapExtents[11] = hwidth;
-	      overlapExtents[12] = -hwidth;
-	      overlapExtents[13] = -hwidth + m_overlapLimitPhi;
-	      break;
-	    }
-	  case EtaMinus:
-	    {
-	      overlapExtents[ 2] = m_overlapLimitEtaMin;
-	      overlapExtents[ 3] = m_overlapLimitEtaMax;
-	      if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) != 0) {
-		overlapExtents[2] = -m_overlapLimitEtaMax;
-		overlapExtents[3] = -m_overlapLimitEtaMin;
-	      }
-	      break;
-	    }
-	  default:
-	    {
-	      overlapExtents[ 4] = m_overlapLimitEtaMin;
-	      overlapExtents[ 5] = m_overlapLimitEtaMax;
-	      if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) == 0) {
-		overlapExtents[4] = -m_overlapLimitEtaMax;
-		overlapExtents[5] = -m_overlapLimitEtaMin;
-	      }
-	      break;
-	    }
-	  }
-	}
+    switch (n){
+    case Opposite:
+      {
+        overlapExtents[0] = -m_overlapLimitOpposite;
+        overlapExtents[1] = m_overlapLimitOpposite;
+        break;
+      }
+    case PhiMinus:
+      {
+        overlapExtents[6] = -hwidth;
+        overlapExtents[7] = -hwidth + m_overlapLimitPhi;
+        overlapExtents[8] = hwidth - m_overlapLimitPhi;
+        overlapExtents[9] = hwidth;
+        break;
+      }
+    case PhiPlus:
+      {
+        overlapExtents[10] = hwidth - m_overlapLimitPhi;
+        overlapExtents[11] = hwidth;
+        overlapExtents[12] = -hwidth;
+        overlapExtents[13] = -hwidth + m_overlapLimitPhi;
+        break;
+      }
+    case EtaMinus:
+      {
+        overlapExtents[ 2] = m_overlapLimitEtaMin;
+        overlapExtents[ 3] = m_overlapLimitEtaMax;
+        if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) != 0) {
+    overlapExtents[2] = -m_overlapLimitEtaMax;
+    overlapExtents[3] = -m_overlapLimitEtaMin;
+        }
+        break;
+      }
+    default:
+      {
+        overlapExtents[ 4] = m_overlapLimitEtaMin;
+        overlapExtents[ 5] = m_overlapLimitEtaMax;
+        if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) == 0) {
+    overlapExtents[4] = -m_overlapLimitEtaMax;
+    overlapExtents[5] = -m_overlapLimitEtaMin;
+        }
+        break;
+      }
+    }
+  }
 
-	ATH_CHECK( fillSpacePoints(ctx, spBuilder, neighbourElements, neighbourSourceLinks, overlapExtents, beamSpotVertex,
+  ATH_CHECK( fillSpacePoints(ctx, spBuilder, neighbourElements, neighbourSourceLinks, overlapExtents, beamSpotVertex,
                                    spacePoints, overlapSpacePoints) );
       }
 
@@ -304,13 +291,13 @@ namespace ActsTrk
   }
 
   StatusCode CoreStripSpacePointFormationTool::fillSpacePoints(const EventContext &ctx,
-							       std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
-							       const std::array<const InDetDD::SiDetectorElement *,nNeighbours>& elements,
-							       const std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours>& sourceLinks,
-							       const std::array<double, 14>& overlapExtents,
-							       const Amg::Vector3D &beamSpotVertex,
-							       std::vector<StripSP>& spacePoints,
-							       std::vector<StripSP>& overlapSpacePoints ) const
+                     std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
+                     const std::array<const InDetDD::SiDetectorElement *,nNeighbours>& elements,
+                     const std::array<std::vector<std::pair<ATLASUncalibSourceLink, size_t>>,nNeighbours>& sourceLinks,
+                     const std::array<double, 14>& overlapExtents,
+                     const Amg::Vector3D &beamSpotVertex,
+                     std::vector<StripSP>& spacePoints,
+                     std::vector<StripSP>& overlapSpacePoints ) const
   {
     // This function is called once all the needed quantities are collected.
     // It is used to build space points checking the compatibility of clusters on pairs of detector elements.
@@ -345,7 +332,7 @@ namespace ActsTrk
     // Same the number of elements in nElements to loop on the later on
     for (int n = 1; n != nNeighbours; ++n) {
       if (elements[n]){
-	elementIndex[nElements++] = n;
+  elementIndex[nElements++] = n;
       }
     }
     // return if all detector elements are nullptr
@@ -372,109 +359,109 @@ namespace ActsTrk
       // Start processing the opposite side and the eta overlapping elements
       int n = 0;
       for (; n < nElements; ++n){
-	int currentIndex = elementIndex[n];
-	if (currentIndex > maxEtaIndex)
-	  break;
+  int currentIndex = elementIndex[n];
+  if (currentIndex > maxEtaIndex)
+    break;
 
-	// get the detector element and the IdentifierHash
-	const InDetDD::SiDetectorElement *currentElement = elements[currentIndex];
+  // get the detector element and the IdentifierHash
+  const InDetDD::SiDetectorElement *currentElement = elements[currentIndex];
 
-	// retrieve the range
-	double min = overlapExtents[currentIndex * 2 - 2];
-	double max = overlapExtents[currentIndex * 2 - 1];
+  // retrieve the range
+  double min = overlapExtents[currentIndex * 2 - 2];
+  double max = overlapExtents[currentIndex * 2 - 1];
 
-	size_t minStrip, maxStrip = 0;
+  size_t minStrip, maxStrip = 0;
 
-	if (m_stripGapParameter != 0.){
-	  updateRange(*triggerElement, *currentElement, slimit, min, max);
-	  correctPolarRange(triggerElement, min, max, minStrip, maxStrip);
-	}
+  if (m_stripGapParameter != 0.){
+    updateRange(*triggerElement, *currentElement, slimit, min, max);
+    correctPolarRange(triggerElement, min, max, minStrip, maxStrip);
+  }
 
-	StripInformationHelper currentStripInfo;
-	for (auto &sourceLink_index : sourceLinks[currentIndex]){
+  StripInformationHelper currentStripInfo;
+  for (auto &sourceLink_index : sourceLinks[currentIndex]){
           float source_local_x = ActsTrk::localXFromSourceLink( sourceLink_index.first );
-	  const auto currentSlink = sourceLink_index.first;
-	  for (auto triggerSlink : triggerSlinks){
+    const auto currentSlink = sourceLink_index.first;
+    for (auto triggerSlink : triggerSlinks){
 
       double diff = source_local_x - ActsTrk::localXFromSourceLink( triggerSlink );
       // In negative endcap, local z is opposite of positive endcap
       // need to invert the difference for proper comparison
       if( m_stripId->barrel_ec(currentElement->identify())<0 ) diff = -diff;
 
-	    if (diff < min || diff > max)
-	      continue;
-	    if (currentIndex == otherSideIndex){
-	      ATH_CHECK( makeSpacePoint(ctx, spacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
-					     currentElement, limit, slimit, vertex));
+      if (diff < min || diff > max)
+        continue;
+      if (currentIndex == otherSideIndex){
+        ATH_CHECK( makeSpacePoint(ctx, spacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
+               currentElement, limit, slimit, vertex));
 
-	    } else {
-	      ATH_CHECK(makeSpacePoint(ctx, overlapSpacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
-					    currentElement, limit, slimit, vertex));
-	    }
-	  }
-	}
+      } else {
+        ATH_CHECK(makeSpacePoint(ctx, overlapSpacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
+              currentElement, limit, slimit, vertex));
+      }
+    }
+  }
       }
       // process the phi overlapping elements
       // if possible n starts from 4
       for (; n < nElements; ++n){
-	int currentIndex = elementIndex[n];
-	const InDetDD::SiDetectorElement *currentElement = elements[currentIndex];
-	double min = overlapExtents[4 * currentIndex - 10];
-	double max = overlapExtents[4 * currentIndex - 9];
+  int currentIndex = elementIndex[n];
+  const InDetDD::SiDetectorElement *currentElement = elements[currentIndex];
+  double min = overlapExtents[4 * currentIndex - 10];
+  double max = overlapExtents[4 * currentIndex - 9];
 
-	size_t minStrip, maxStrip = 0;
+  size_t minStrip, maxStrip = 0;
 
-	if (m_stripGapParameter != 0.){
-	  updateRange(*triggerElement, *currentElement, slimit, min, max);
-	  correctPolarRange(triggerElement, min, max, minStrip, maxStrip);
-	}
+  if (m_stripGapParameter != 0.){
+    updateRange(*triggerElement, *currentElement, slimit, min, max);
+    correctPolarRange(triggerElement, min, max, minStrip, maxStrip);
+  }
 
-	std::vector<ATLASUncalibSourceLink> triggerPhiSlinks;
-	triggerSlinks.reserve(triggerSlinks.size());
-	for (auto triggerSlink : triggerSlinks){
-	  auto centralValue = ActsTrk::localXFromSourceLink( triggerSlink );
-	  auto minValue = min;
-	  auto maxValue = max;
-	  if (isEndcap){
-	    size_t stripIndex = 0;
-	    getStripEnds(triggerSlink, triggerElement, stripIndex);
-	    centralValue = stripIndex;
-	    minValue = minStrip;
-	    maxValue = maxStrip;
-	  }
-	  if (minValue <= centralValue and centralValue <= maxValue){
-	    triggerPhiSlinks.emplace_back(triggerSlink);
-	  }
-	}
-	if (triggerPhiSlinks.empty())
-	  continue;
-	min = overlapExtents[4 * currentIndex - 8];
-	max = overlapExtents[4 * currentIndex - 7];
-	if (m_stripGapParameter != 0.){
-	  updateRange(*triggerElement, *currentElement, slimit, min, max);
-	  correctPolarRange(currentElement, min, max, minStrip, maxStrip);
-	}
+  std::vector<ATLASUncalibSourceLink> triggerPhiSlinks;
+  triggerSlinks.reserve(triggerSlinks.size());
+  for (auto triggerSlink : triggerSlinks){
+    auto centralValue = ActsTrk::localXFromSourceLink( triggerSlink );
+    auto minValue = min;
+    auto maxValue = max;
+    if (isEndcap){
+      size_t stripIndex = 0;
+      getStripEnds(triggerSlink, triggerElement, stripIndex);
+      centralValue = stripIndex;
+      minValue = minStrip;
+      maxValue = maxStrip;
+    }
+    if (minValue <= centralValue and centralValue <= maxValue){
+      triggerPhiSlinks.emplace_back(triggerSlink);
+    }
+  }
+  if (triggerPhiSlinks.empty())
+    continue;
+  min = overlapExtents[4 * currentIndex - 8];
+  max = overlapExtents[4 * currentIndex - 7];
+  if (m_stripGapParameter != 0.){
+    updateRange(*triggerElement, *currentElement, slimit, min, max);
+    correctPolarRange(currentElement, min, max, minStrip, maxStrip);
+  }
 
-	for (auto &sourceLink_index : sourceLinks[currentIndex]){
-	  const auto currentSlink = sourceLink_index.first;
+  for (auto &sourceLink_index : sourceLinks[currentIndex]){
+    const auto currentSlink = sourceLink_index.first;
 
-	  size_t currentStripIndex = 0;
-	  getStripEnds(currentSlink, currentElement, currentStripIndex);
-	  auto centralValue = ActsTrk::localXFromSourceLink( sourceLink_index.first );
-	  auto minValue = min;
-	  auto maxValue = max;
-	  if (isEndcap) {
-	    centralValue = currentStripIndex;
-	    minValue = minStrip;
-	    maxValue = maxStrip;
-	  }
-	  if (centralValue < minValue or centralValue > maxValue)
-	    continue;
-	  for (auto &triggerSlink : triggerPhiSlinks) {
-	    ATH_CHECK(makeSpacePoint(ctx, overlapSpacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
-					  currentElement, limit, slimit, vertex));
-	  }
-	}
+    size_t currentStripIndex = 0;
+    getStripEnds(currentSlink, currentElement, currentStripIndex);
+    auto centralValue = ActsTrk::localXFromSourceLink( sourceLink_index.first );
+    auto minValue = min;
+    auto maxValue = max;
+    if (isEndcap) {
+      centralValue = currentStripIndex;
+      minValue = minStrip;
+      maxValue = maxStrip;
+    }
+    if (centralValue < minValue or centralValue > maxValue)
+      continue;
+    for (auto &triggerSlink : triggerPhiSlinks) {
+      ATH_CHECK(makeSpacePoint(ctx, overlapSpacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
+            currentElement, limit, slimit, vertex));
+    }
+  }
       }
       return StatusCode::SUCCESS;
 
@@ -486,23 +473,23 @@ namespace ActsTrk
       const InDetDD::SiDetectorElement *currentElement = elements[currentIndex];
 
       if (m_stripGapParameter != 0.){
-	computeOffset(*triggerElement, *currentElement, slimit);
+  computeOffset(*triggerElement, *currentElement, slimit);
       }
 
       for (auto &sourceLink_index : sourceLinks[currentIndex]){
-	size_t currentStripIndex = 0;
-	getStripEnds(sourceLink_index.first, triggerElement, currentStripIndex);
-	const auto currentSlink = sourceLink_index.first;
-	  
-	for (auto triggerSlink : triggerSlinks){
-	  if (currentIndex == otherSideIndex){
-	    ATH_CHECK(makeSpacePoint(ctx, spacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
-					  currentElement, limit, slimit, vertex));
-	  }else{
-	    ATH_CHECK(makeSpacePoint(ctx, overlapSpacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
-					  currentElement, limit, slimit, vertex));
-	  }
-	}
+  size_t currentStripIndex = 0;
+  getStripEnds(sourceLink_index.first, triggerElement, currentStripIndex);
+  const auto currentSlink = sourceLink_index.first;
+    
+  for (auto triggerSlink : triggerSlinks){
+    if (currentIndex == otherSideIndex){
+      ATH_CHECK(makeSpacePoint(ctx, spacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
+            currentElement, limit, slimit, vertex));
+    }else{
+      ATH_CHECK(makeSpacePoint(ctx, overlapSpacePoints, spBuilder, triggerSlink, currentSlink, triggerElement,
+            currentElement, limit, slimit, vertex));
+    }
+  }
       }
     }
     return StatusCode::SUCCESS;
@@ -510,15 +497,15 @@ namespace ActsTrk
 
 
   StatusCode CoreStripSpacePointFormationTool::makeSpacePoint(const EventContext &ctx,
-							      std::vector<StripSP>& collection,
-							      std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
-							      const ATLASUncalibSourceLink& currentSlink,
-							      const ATLASUncalibSourceLink& anotherSlink,
-							      const InDetDD::SiDetectorElement *currentElement,
-							      const InDetDD::SiDetectorElement *anotherElement,
-							      const double limit,
-							      const double slimit,
-							      const Acts::Vector3& vertex) const
+                    std::vector<StripSP>& collection,
+                    std::shared_ptr<Acts::SpacePointBuilder<StripSP>> spBuilder,
+                    const ATLASUncalibSourceLink& currentSlink,
+                    const ATLASUncalibSourceLink& anotherSlink,
+                    const InDetDD::SiDetectorElement *currentElement,
+                    const InDetDD::SiDetectorElement *anotherElement,
+                    const double limit,
+                    const double slimit,
+                    const Acts::Vector3& vertex) const
   {
 
     auto tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
@@ -572,8 +559,8 @@ namespace ActsTrk
   }
 
 double CoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDetectorElement& element1,
-						       const InDetDD::SiDetectorElement& element2,
-						       double& stripLengthGapTolerance) const
+                   const InDetDD::SiDetectorElement& element2,
+                   double& stripLengthGapTolerance) const
 {
     // Get transformation matrices and center positions of detector elements
     const Amg::Transform3D& t1 = element1.transform();
@@ -657,8 +644,8 @@ double CoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDetector
 
   std::pair<Amg::Vector3D, Amg::Vector3D>
   CoreStripSpacePointFormationTool::getStripEnds(const ATLASUncalibSourceLink &sourceLink,
-						 const InDetDD::SiDetectorElement *element,
-						 size_t &stripIndex) const
+             const InDetDD::SiDetectorElement *element,
+             size_t &stripIndex) const
   {
     const xAOD::UncalibratedMeasurement &measurement = getUncalibratedMeasurement(sourceLink);
     auto cluster = dynamic_cast<const xAOD::StripCluster *>(&measurement);

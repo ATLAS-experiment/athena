@@ -66,6 +66,7 @@ LArBadChanSCBitPacking::LArBadChanSCBitPacking():LArBadChanSCBitPackingBase()
   addBit( LArBadChannel::LArBadChannelSCEnum::OffScaleBit, "OffScale", independent);
   addBit( LArBadChannel::LArBadChannelSCEnum::lowLightFibreBit, "lowLightFibre", independent);
   addBit( LArBadChannel::LArBadChannelSCEnum::transmissionErrorFibreBit, "transmissionErrorFibre", independent);
+  addBit( LArBadChannel::LArBadChannelSCEnum::pedestalJumpBit, "pedestalJump", independent);
   addBit( LArBadChannel::LArBadChannelSCEnum::unflaggedByLADIeSBit, "unflaggedByLADIeS", independent);
   addBit( LArBadChannel::LArBadChannelSCEnum::reflaggedByLADIeSBit, "reflaggedByLADIeS", independent);
   for (unsigned int i=0; i<m_enumVec.size(); i++) {

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( tauEventAthenaPool )
@@ -19,7 +19,7 @@ find_package( AthenaPoolUtilitiesTest )
 
 if( ATHENAPOOLUTILITIESTEST_FOUND )
    set( TAUEVENTATHENAPOOL_REFERENCE_TAG
-        tauEventAthenaPoolReference-02-00-01 )
+        tauEventAthenaPoolReference-02-00-03 )
   run_tpcnv_test( tauEventTPCnv_15.0.0    AOD-15.0.0-full
                    REFERENCE_TAG ${TAUEVENTATHENAPOOL_REFERENCE_TAG} )
   run_tpcnv_test( tauEventTPCnv_15.6.9    AOD-15.6.9-full

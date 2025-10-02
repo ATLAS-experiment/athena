@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
   */
 #ifndef ATLASUNCALIBSROUCELINACCESOR_H
 #define ATLASUNCALIBSROUCELINACCESOR_H
@@ -38,14 +38,21 @@ namespace ActsTrk::detail {
       return value & ELEMENT_IDX_MASK;
     }
     bool isConsistentRange() const {
-       return    extractContainerIndex(this->first)  == extractContainerIndex(this->second)
-              && extractElementIndex(this->first) <= extractElementIndex(this->second);
+       return     extractContainerIndex(this->first)  == extractContainerIndex(this->second)
+              && (    extractElementIndex(this->first) <= extractElementIndex(this->second)
+                  || (extractElementIndex(this->first)==ELEMENT_IDX_MASK && extractElementIndex(this->second)==0));
     }
 
     MeasurementRange() : std::pair<unsigned int, unsigned int>(std::numeric_limits<unsigned int>::max(), std::numeric_limits<unsigned int>::max()) {}
     MeasurementRange(unsigned int container_idx, unsigned int start_element_idx, unsigned int end_element_idx)
        : std::pair<unsigned int, unsigned int>( createRangeValue(container_idx, start_element_idx),
                                                 createRangeValue(container_idx, end_element_idx) ) {
+    }
+
+    static MeasurementRange noMeasurementExpected() {
+       return MeasurementRange(CONTAINER_IDX_MASK >> CONTAINER_IDX_SHIFT,
+                               ELEMENT_IDX_MASK,
+                               0);
     }
 
     void updateEnd(std::size_t container_idx, unsigned int end_element_idx) {
@@ -69,6 +76,7 @@ namespace ActsTrk::detail {
       return extractElementIndex(this->second);
     }
     bool empty() const { assert(isConsistentRange()); return this->first == this->second; }
+    bool isMeasurementExpected() const { assert(isConsistentRange()); return this->first <= this->second; }
   };
 
    // List of measurement ranges and the measurement container targeted by the ranges.
@@ -77,6 +85,7 @@ namespace ActsTrk::detail {
    {
    public:
       using MeasurementContainer = typename T_MeasurementContainerList::measurement_container_variant_t;
+      using MeasurementRangeContainer = std::unordered_map<std::size_t, MeasurementRange>;
    private:
       T_MeasurementContainerList m_measurementContainerList;
 
@@ -94,6 +103,45 @@ namespace ActsTrk::detail {
       std::size_t numContainers() const { return m_measurementContainerList.size(); }
 
       const MeasurementContainer &container(unsigned index) const { return m_measurementContainerList.at(index); }
+   };
+
+   // List of measurement ranges and the measurement container targeted by the ranges.
+   template <typename T_MeasurementContainerList >
+   class GenMeasurementRangeListFlat : public std::vector<std::pair<std::size_t, MeasurementRange>>
+   {
+   public:
+      using MeasurementContainer = typename T_MeasurementContainerList::measurement_container_variant_t;
+      using MeasurementRangeContainer = std::vector<std::pair<std::size_t, MeasurementRange>>;
+   private:
+      T_MeasurementContainerList m_measurementContainerList;
+
+   public:
+
+      const std::vector< MeasurementContainer > &measurementContainerList() const { return  m_measurementContainerList.containerList(); }
+
+      // set container, resizing if necessary. That is just in case we call addMeasurements out of order or not for 2 types of measurements
+      void setContainer(unsigned int container_index, const xAOD::UncalibratedMeasurementContainer *container) {
+         if (container) {
+            // @TODO allow for container == nullprt ?
+            m_measurementContainerList.setContainer(container_index, *container);
+         }
+      }
+      std::size_t numContainers() const { return m_measurementContainerList.size(); }
+
+      const MeasurementContainer &container(unsigned index) const { return m_measurementContainerList.at(index); }
+
+      // required std::unordered_map methods compatible with GenMeasurementRangeList
+      MeasurementRangeContainer::const_iterator find(const MeasurementRangeContainer::value_type::first_type &key) const {
+        return std::find_if(begin(), end(),
+                            [&key](const auto &c) {
+                              return c.first == key;
+                            });
+      }
+
+      std::pair<MeasurementRangeContainer::iterator, bool> insert(MeasurementRangeContainer::value_type&& value) {
+        emplace_back(std::forward<MeasurementRangeContainer::value_type>(value));
+        return {std::prev(end()), true};
+      }
    };
 
   /// Accessor for the above source link container
@@ -202,6 +250,7 @@ namespace ActsTrk::detail {
   };
 
   using MeasurementRangeList = GenMeasurementRangeList< AtlasMeasurementContainerList >;
+  using MeasurementRangeListFlat = GenMeasurementRangeListFlat< AtlasMeasurementContainerList >;
   using UncalibSourceLinkAccessor = GenUncalibSourceLinkAccessor< MeasurementRangeList >;
 
 }

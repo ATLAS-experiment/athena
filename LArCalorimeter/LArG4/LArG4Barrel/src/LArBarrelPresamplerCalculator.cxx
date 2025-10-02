@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Prepared 05-Dec-2002 Bill Seligman
@@ -40,18 +40,7 @@ namespace Units = Athena::Units;
 //=============================================================================
 LArBarrelPresamplerCalculator::LArBarrelPresamplerCalculator(const std::string& name, ISvcLocator *pSvcLocator)
  : LArCalculatorSvcImp(name, pSvcLocator)
- , m_geometry("LArBarrelPresamplerGeometry", name)
- , m_psmap(nullptr)
- , m_IflCur(true)
- , m_birksLaw(nullptr)
- , m_detectorName("LArMgr")
- , m_testbeam(false)
- , m_volname("LArMgr::LAr::Barrel::Presampler")
 {
-  declareProperty("GeometryCalculator", m_geometry);
-  declareProperty("IflCur",m_IflCur);
-  declareProperty("DetectorName",m_detectorName);
-  declareProperty("isTestbeam",m_testbeam);
 }
 
 StatusCode LArBarrelPresamplerCalculator::initialize()

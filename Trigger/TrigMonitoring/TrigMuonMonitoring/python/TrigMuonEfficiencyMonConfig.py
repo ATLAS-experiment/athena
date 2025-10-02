@@ -63,13 +63,19 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
 
     ### determine what's the HLT chain to be used to select events and for the tag muon
     singlemu_chains_sorted = get_singlemu_chain_closest_to(MonitoredChains, 24, 'ivarmedium', 14)
-    tagandprobe_chain = singlemu_chains_sorted[0]
-    log.info(f'Using {tagandprobe_chain} as tag and event trigger in ttbar tag&probe')
+    if not singlemu_chains_sorted:
+        log.warning('No suitable single-muon trigger chain found as tag for ttbar tag&probe')
+        return  
+    else:
+        tagandprobe_chain = singlemu_chains_sorted[0]
+        log.info(f'Using {tagandprobe_chain} as tag and event trigger in ttbar tag&probe')        
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from .MuonMatchingToolConfig import MuonMatchingToolConfig
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ttbar_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
+                                     MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
         monAlg.EventTrigger = tagandprobe_chain
         monAlg.TagTrigger = tagandprobe_chain
@@ -106,13 +112,20 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
 
     ### determine what's the HLT chain to be used to select events and for the tag muon
     singlemu_chains_sorted = get_singlemu_chain_closest_to(MonitoredChains, 24, 'ivarmedium', 14)
-    tagandprobe_chain = singlemu_chains_sorted[0]
-    log.info(f'Using {tagandprobe_chain} as tag and event trigger in Z tag&probe')
+    if not singlemu_chains_sorted:
+        log.warning('No suitable single-muon trigger chain found as tag for Z tag&probe.')
+        return 
+    else:
+        tagandprobe_chain = singlemu_chains_sorted[0]
+        log.info(f'Using {tagandprobe_chain} as tag and event trigger in Z tag&probe')
+
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from .MuonMatchingToolConfig import MuonMatchingToolConfig
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ZTP_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
+                                     MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
         monAlg.EventTrigger = tagandprobe_chain
         monAlg.TagTrigger = tagandprobe_chain

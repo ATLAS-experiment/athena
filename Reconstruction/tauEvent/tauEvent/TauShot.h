@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -42,7 +42,7 @@ namespace Analysis
 {
   class TauShot :
       virtual public INavigable4Momentum,
-      public P4PtEtaPhiM,  
+      public P4EEtaPhiM,
       public NavigableTerminalNode
 
   {

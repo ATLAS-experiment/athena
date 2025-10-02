@@ -95,14 +95,13 @@ Trk::BevelledCylinderVolumeBounds::operator=(
   return *this;
 }
 
-const std::vector<const Trk::Surface*>*
+std::vector<std::unique_ptr<Trk::Surface>>
   Trk::BevelledCylinderVolumeBounds::decomposeToSurfaces
   (const Amg::Transform3D& transform)
 {
-  std::vector<const Trk::Surface*>* retsf =
-    new std::vector<const Trk::Surface*>;
+  auto retsf = std::vector<std::unique_ptr<Trk::Surface>>();
   // memory optimisation (reserve a save number of 20)
-  retsf->reserve(6);
+  retsf.reserve(6);
 
   Amg::RotationMatrix3D discRot(transform.rotation());
   Amg::Vector3D cylCenter(transform.translation());
@@ -114,7 +113,7 @@ const std::vector<const Trk::Surface*>*
 
   // bottom Ellipse/Disc (negative z)
   if (m_type < 0)
-    retsf->push_back(new Trk::PlaneSurface(
+    retsf.push_back(std::make_unique<Trk::PlaneSurface>(
       Amg::Transform3D(
         (discRot *
          Amg::AngleAxis3D(-m_thetaMinus + M_PI, Amg::Vector3D(0., 1., 0.))) *
@@ -124,25 +123,25 @@ const std::vector<const Trk::Surface*>*
       bottomEllipseBounds()));
   else {
     if (m_subtractedVolume) {
-      Trk::Volume* subtrVol = new Trk::Volume(*m_subtractedVolume);
+      auto subtrVol = std::make_unique<Trk::Volume>(*m_subtractedVolume);
       Trk::DiscSurface bottomDisc(
-        Amg::Transform3D(
-          transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
-          Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
-        discBounds());
-      retsf->push_back(new Trk::SubtractedDiscSurface(
-        bottomDisc, new Trk::VolumeExcluder(subtrVol), false));
+          Amg::Transform3D(
+              transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
+              Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
+          discBounds());
+      retsf.push_back(std::make_unique<Trk::SubtractedDiscSurface>(
+          bottomDisc, std::make_shared<Trk::VolumeExcluder>(std::move(subtrVol)), false));
     } else
-      retsf->push_back(new Trk::DiscSurface(
-        Amg::Transform3D(
-          transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
-          Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
-        discBounds()));
+      retsf.push_back(std::make_unique<Trk::DiscSurface>(
+          Amg::Transform3D(
+              transform * Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)) *
+              Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
+          discBounds()));
   }
 
   // top Ellipse/Disc (positive z)
   if (m_type < 0)
-    retsf->push_back(new Trk::PlaneSurface(
+    retsf.push_back(std::make_unique<Trk::PlaneSurface>(
       Amg::Transform3D(
         discRot * Amg::AngleAxis3D(m_thetaPlus, Amg::Vector3D(0., 1., 0.)) *
         Amg::Translation3D(
@@ -151,15 +150,15 @@ const std::vector<const Trk::Surface*>*
       topEllipseBounds()));
   else {
     if (m_subtractedVolume) {
-      Trk::Volume* subtrVol = new Trk::Volume(*m_subtractedVolume);
+      auto subtrVol = std::make_unique<Trk::Volume>(*m_subtractedVolume);
       Trk::DiscSurface topDisc(
         Amg::Transform3D(
           transform * Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
         discBounds());
-      retsf->push_back(new Trk::SubtractedDiscSurface(
-        topDisc, new Trk::VolumeExcluder(subtrVol), false));
+      retsf.push_back(std::make_unique<Trk::SubtractedDiscSurface>(
+        topDisc, std::make_shared<Trk::VolumeExcluder>(std::move(subtrVol)), false));
     } else
-      retsf->push_back(new Trk::DiscSurface(
+      retsf.push_back(std::make_unique<Trk::DiscSurface>(
         Amg::Transform3D(
           transform * Amg::Translation3D(Amg::Vector3D(0., 0., halflengthZ()))),
         discBounds()));
@@ -167,13 +166,13 @@ const std::vector<const Trk::Surface*>*
 
   // outer BevelledCylinder/Plane
   if (m_type < 0)
-    retsf->push_back(new Trk::CylinderSurface(
+    retsf.push_back(std::make_unique<Trk::CylinderSurface>(
       Amg::Transform3D(transform), outerBevelledCylinderBounds()));
   else if (m_type < 2)
-    retsf->push_back(new Trk::CylinderSurface(
+    retsf.push_back(std::make_unique<Trk::CylinderSurface>(
       Amg::Transform3D(transform), outerCylinderBounds()));
   else
-    retsf->push_back(new Trk::PlaneSurface(
+    retsf.push_back(std::make_unique<Trk::PlaneSurface>(
       Amg::Transform3D(
         transform *
         Amg::Translation3D(Amg::Vector3D(this->outerRadius(), 0., 0.)) *
@@ -184,13 +183,13 @@ const std::vector<const Trk::Surface*>*
   // inner BevelledCylinder/Plane
   if (innerRadius() > s_numericalStable) {
     if (m_type < 1)
-      retsf->push_back(new Trk::CylinderSurface(
+      retsf.push_back(std::make_unique<Trk::CylinderSurface>(
         Amg::Transform3D(transform), innerBevelledCylinderBounds()));
     else if (m_type == 2)
-      retsf->push_back(new Trk::CylinderSurface(
+      retsf.push_back(std::make_unique<Trk::CylinderSurface>(
         Amg::Transform3D(transform), innerCylinderBounds()));
     else
-      retsf->push_back(new Trk::PlaneSurface(
+      retsf.push_back(std::make_unique<Trk::PlaneSurface>(
         Amg::Transform3D(
           transform *
           Amg::Translation3D(Amg::Vector3D(this->innerRadius(), 0., 0.)) *
@@ -203,7 +202,7 @@ const std::vector<const Trk::Surface*>*
   if (std::abs(halfPhiSector() - M_PI) > s_numericalStable) {
     if (m_type < 0) {
       // sectorPlane 1 (negative phi)
-      retsf->push_back(new Trk::PlaneSurface(
+      retsf.push_back(std::make_unique<Trk::PlaneSurface>(
         Amg::Transform3D(
           transform *
           Amg::AngleAxis3D(-halfPhiSector(), Amg::Vector3D(0., 0., 1.)) *
@@ -211,7 +210,7 @@ const std::vector<const Trk::Surface*>*
           Amg::AngleAxis3D(M_PI / 2, Amg::Vector3D(1., 0., 0.))),
         sectorTrdBounds()));
       // sectorPlane 2 (positive phi)
-      retsf->push_back(new Trk::PlaneSurface(
+      retsf.push_back(std::make_unique<Trk::PlaneSurface>(
         Amg::Transform3D(
           transform *
           Amg::AngleAxis3D(halfPhiSector(), Amg::Vector3D(0., 0., 1.)) *
@@ -226,7 +225,7 @@ const std::vector<const Trk::Surface*>*
         ri *= 1. / cos(halfPhiSector());
       if (m_type > 1)
         ro *= 1. / cos(halfPhiSector());
-      retsf->push_back(new Trk::PlaneSurface(
+      retsf.push_back(std::make_unique<Trk::PlaneSurface>(
         Amg::Transform3D(
           transform *
           Amg::AngleAxis3D(-halfPhiSector(), Amg::Vector3D(0., 0., 1.)) *
@@ -234,7 +233,7 @@ const std::vector<const Trk::Surface*>*
           Amg::AngleAxis3D(M_PI / 2, Amg::Vector3D(1., 0., 0.))),
         sectorPlaneBounds()));
       // sectorPlane 2 (positive phi)
-      retsf->push_back(new Trk::PlaneSurface(
+      retsf.push_back(std::make_unique<Trk::PlaneSurface>(
         Amg::Transform3D(
           transform *
           Amg::AngleAxis3D(halfPhiSector(), Amg::Vector3D(0., 0., 1.)) *
@@ -430,42 +429,34 @@ Trk::BevelledCylinderVolumeBounds::boundarySurfaceAccessor(
       Trk::StandardSectoralBevelledTube)};
 }
 
-Trk::CylinderBounds*
+std::shared_ptr<Trk::CylinderBounds>
 Trk::BevelledCylinderVolumeBounds::innerBevelledCylinderBounds() const
 {
-  //    return new Trk::BevelledCylinderBounds(m_innerRadius, m_halfPhiSector,
-  //    m_halfZ-(m_outerRadius-m_innerRadius)*tan(m_thetaPlus), m_thetaMinus,
-  //    m_thetaPlus);
-  return new Trk::CylinderBounds(m_innerRadius, m_halfPhiSector, m_halfZ);
+  return std::make_shared<Trk::CylinderBounds>(m_innerRadius, m_halfPhiSector, m_halfZ);
 }
 
-Trk::CylinderBounds*
+std::shared_ptr<Trk::CylinderBounds>
 Trk::BevelledCylinderVolumeBounds::outerBevelledCylinderBounds() const
 {
-  //    return new Trk::BevelledCylinderBounds(m_outerRadius, m_halfPhiSector,
-  //    m_halfZ, m_thetaMinus, m_thetaPlus);
-  return new Trk::CylinderBounds(m_outerRadius, m_halfPhiSector, m_halfZ);
+  return std::make_shared<Trk::CylinderBounds>(m_outerRadius, m_halfPhiSector, m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::BevelledCylinderVolumeBounds::outerBevelledPlaneBounds() const
 {
-  return new Trk::RectangleBounds(
-    m_outerRadius * tan(m_halfPhiSector), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_outerRadius * tan(m_halfPhiSector), m_halfZ);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::BevelledCylinderVolumeBounds::innerBevelledPlaneBounds() const
 {
-  return new Trk::RectangleBounds(
-    m_innerRadius * tan(m_halfPhiSector), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(m_innerRadius * tan(m_halfPhiSector), m_halfZ);
 }
 
-Trk::EllipseBounds*
+std::shared_ptr<Trk::EllipseBounds>
 Trk::BevelledCylinderVolumeBounds::bottomEllipseBounds() const
 {
-  //    return new Trk::EllipseBounds();
-  return new Trk::EllipseBounds(
+  return std::make_shared<Trk::EllipseBounds>(
     m_innerRadius / cos(m_thetaMinus),
     m_innerRadius,
     m_outerRadius / cos(m_thetaMinus),
@@ -473,11 +464,10 @@ Trk::BevelledCylinderVolumeBounds::bottomEllipseBounds() const
     m_halfPhiSector);
 }
 
-Trk::EllipseBounds*
+std::shared_ptr<Trk::EllipseBounds>
 Trk::BevelledCylinderVolumeBounds::topEllipseBounds() const
 {
-  //    return new Trk::EllipseBounds();
-  return new Trk::EllipseBounds(
+  return std::make_shared<Trk::EllipseBounds>(
     m_innerRadius / cos(m_thetaPlus),
     m_innerRadius,
     m_outerRadius / cos(m_thetaPlus),
@@ -485,35 +475,36 @@ Trk::BevelledCylinderVolumeBounds::topEllipseBounds() const
     m_halfPhiSector);
 }
 
-Trk::CylinderBounds*
+std::shared_ptr<Trk::CylinderBounds>
 Trk::BevelledCylinderVolumeBounds::innerCylinderBounds() const
 {
-  return new Trk::CylinderBounds(m_innerRadius, m_halfPhiSector, m_halfZ);
+  return std::make_shared<Trk::CylinderBounds>(m_innerRadius, m_halfPhiSector, m_halfZ);
 }
 
-Trk::CylinderBounds*
+std::shared_ptr<Trk::CylinderBounds>
 Trk::BevelledCylinderVolumeBounds::outerCylinderBounds() const
 {
-  return new Trk::CylinderBounds(m_outerRadius, m_halfPhiSector, m_halfZ);
+  return std::make_shared<Trk::CylinderBounds>(m_outerRadius, m_halfPhiSector, m_halfZ);
 }
 
-Trk::DiscBounds*
+std::shared_ptr<Trk::DiscBounds>
 Trk::BevelledCylinderVolumeBounds::discBounds() const
 {
   // adjust radius to make sure all surface covered
   double outerRadius =
     (m_type > 1) ? m_outerRadius / cos(m_halfPhiSector) : m_outerRadius;
-  return new Trk::DiscBounds(m_innerRadius, outerRadius, m_halfPhiSector);
+  return std::make_shared<Trk::DiscBounds>(m_innerRadius, outerRadius, m_halfPhiSector);
 }
 
-Trk::TrapezoidBounds*
+std::shared_ptr<Trk::TrapezoidBounds>
 Trk::BevelledCylinderVolumeBounds::sectorTrdBounds() const
 {
-  return new Trk::TrapezoidBounds(
-    0.5 * (outerRadius() - innerRadius()), m_halfZ, m_thetaMinus, m_thetaPlus);
+  return std::make_shared<Trk::TrapezoidBounds>(
+      0.5 * (outerRadius() - innerRadius()), m_halfZ, m_thetaMinus,
+      m_thetaPlus);
 }
 
-Trk::RectangleBounds*
+std::shared_ptr<Trk::RectangleBounds>
 Trk::BevelledCylinderVolumeBounds::sectorPlaneBounds() const
 {
   double ri = innerRadius();
@@ -522,7 +513,7 @@ Trk::BevelledCylinderVolumeBounds::sectorPlaneBounds() const
     ri *= 1. / cos(halfPhiSector());
   if (m_type > 1)
     ro *= 1. / cos(halfPhiSector());
-  return new Trk::RectangleBounds(0.5 * (ro - ri), m_halfZ);
+  return std::make_shared<Trk::RectangleBounds>(0.5 * (ro - ri), m_halfZ);
 }
 
 Trk::Volume*
@@ -532,28 +523,28 @@ Trk::BevelledCylinderVolumeBounds::subtractedVolume() const
     return nullptr;
 
   double tp = tan(m_halfPhiSector);
-  Trk::Volume* volIn = nullptr;
-  Trk::Volume* volOut = nullptr;
+  std::unique_ptr<Trk::Volume> volIn;
+  std::unique_ptr<Trk::Volume> volOut;
   if (m_type == 1 || m_type == 3) { // cut inner cylinder
-    volIn = new Trk::Volume(
-      nullptr,
-      new Trk::CuboidVolumeBounds(
-        m_innerRadius, m_innerRadius * tp + 0.1, m_halfZ + 0.1));
+    volIn = std::make_unique<Trk::Volume>(
+        nullptr,
+        std::make_shared<Trk::CuboidVolumeBounds>(m_innerRadius, m_innerRadius * tp + 0.1, m_halfZ + 0.1));
   }
   if (m_type > 1) {
     double hz = m_outerRadius * (1. / cos(m_halfPhiSector) - 1.);
-    volOut = new Trk::Volume(
-      new Amg::Transform3D(
-        Amg::Translation3D(Amg::Vector3D(m_outerRadius + hz, 0., 0.))),
-      new Trk::CuboidVolumeBounds(hz, m_outerRadius * tp + 0.1, m_halfZ + 0.1));
+    volOut = std::make_unique<Trk::Volume>(
+        std::make_unique<Amg::Transform3D>(Amg::Translation3D(Amg::Vector3D(m_outerRadius + hz, 0., 0.))),
+        std::make_shared<Trk::CuboidVolumeBounds>(hz, m_outerRadius * tp + 0.1, m_halfZ + 0.1));
   }
 
-  if (!volIn)
-    return volOut;
-  else if (!volOut)
-    return volIn;
+  if (!volIn){
+    return volOut.release();
+  }
+  else if (!volOut){
+    return volIn.release();
+  }
   return new Trk::Volume(
-    nullptr, new Trk::CombinedVolumeBounds(volIn, volOut, false));
+    nullptr, std::make_shared<Trk::CombinedVolumeBounds>(std::move(volIn), std::move(volOut), false));
 }
 
 // ostream operator overload

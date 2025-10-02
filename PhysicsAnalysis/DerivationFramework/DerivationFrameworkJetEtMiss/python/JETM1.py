@@ -237,7 +237,7 @@ def JETM1Cfg(flags):
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.zg.rg.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
                                            "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
 
-    JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "EventInfo",
+    JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "UnAssocMuonSegments", "EventInfo",
                                          "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
                                          "AntiKt4EMPFlowJets"]
     
@@ -253,7 +253,7 @@ def JETM1Cfg(flags):
         JETM1SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
         JETM1SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
-        JETM1SlimmingHelper.ExtraVariables += ["TruthVertices.barcode.z"]
+        JETM1SlimmingHelper.ExtraVariables += ["TruthVertices.uid.z"]
 
     JETM1SlimmingHelper.AppendToDictionary.update({'Kt4UFOCSSKEventShape':'xAOD::EventShape',
                                                    'Kt4UFOCSSKEventShapeAux':'xAOD::EventShapeAuxInfo',
@@ -275,6 +275,11 @@ def JETM1Cfg(flags):
         triggerNames = ["a4tcemsubjesFS", "a4tcemsubjesISFS", "a10tclcwsubjesFS", "a10tclcwsubFS", "a10ttclcwjesFS", "GSCJet"]
         for trigger in triggerNames:
             JETM1SlimmingHelper.FinalItemList.append('xAOD::AuxContainerBase!#HLT_xAOD__JetContainer_'+trigger+'Aux.pt.eta.phi.m')
+    
+    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    if getDataYear(flags) >= 2024:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper
+        AddjFexRoIsToSlimmingHelper(SlimmingHelper = JETM1SlimmingHelper)
 
     jetOutputList = ["AntiKt4PV0TrackJets", "AntiKt4UFOCSSKJets"]
     if flags.Input.isMC:

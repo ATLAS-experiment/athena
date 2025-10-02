@@ -377,6 +377,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // if not set, derive the MCType from the simulation type and MC campaign
     if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? (isAtlfast() ? "MC23AF3" : "MC23") : (isAtlfast() ? "AF3" : "MC20");
 
+    // large-R jets use MC20AF3 instead of AF3
+    m_fatJetUncertaintiesMCType = m_jetUncertaintiesMCType;
+    if (m_fatJetUncertaintiesMCType == "AF3") {
+        m_fatJetUncertaintiesMCType = "MC20AF3";
+    }
+
     if (!m_jetUncertaintiesTool.isUserConfigured()) {
       std::string jetdef("AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType)));
 
@@ -446,7 +452,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_fatjetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
 
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("JetDefinition", fatjetcoll) );
-      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("MCType", m_fatJetUncertaintiesMCType) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("IsData", isData()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("ConfigFile", m_fatJetUncConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
@@ -489,7 +495,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("JetDefinition", fatjetcoll) );
-      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("MCType", m_jetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("MCType", m_fatJetUncertaintiesMCType) );
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("PseudoDataJERsmearingMode", true) );
       ATH_CHECK( m_fatjetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_fatJetUncConfig) );
@@ -510,8 +516,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_fatjetFFSmearingTool.setTypeAndName("CP::FFJetSmearingTool/"+toolName);
 
       ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MassDef", "UFO") );
-      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MCType", m_jetUncertaintiesMCType) );
-      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("ConfigFile", "rel22/Fall2024_PreRec/R10_FullJMR.config") );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("MCType", m_fatJetUncertaintiesMCType) );
+      ATH_CHECK( m_fatjetFFSmearingTool.setProperty("ConfigFile", "rel22/Spring2025_PreRec/R10_FullJMR.config") );
       ATH_CHECK( m_fatjetFFSmearingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_fatjetFFSmearingTool.retrieve() );
     } else if (m_fatjetFFSmearingTool.isUserConfigured()) ATH_CHECK(m_fatjetFFSmearingTool.retrieve());
@@ -730,7 +736,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (m_isRun3) ATH_CHECK( m_muonCalibTool.setProperty("IsRun3Geo", true ));
       ATH_CHECK( m_muonCalibTool.setProperty("calibMode", m_muCalibrationMode) );
       ATH_CHECK( m_muonCalibTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_muonCalibTool.setProperty("release", "Recs2024_05_06_Run2Run3" ));
+      ATH_CHECK( m_muonCalibTool.setProperty("release", "Recs2025_03_26_Run2Run3" ));
       int IdBaselineInt = m_muIdBaseline;
       if (IdBaselineInt == 4) {
         ATH_CHECK( m_muonCalibTool.setProperty("do2StationsHighPt", true) );
@@ -830,7 +836,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
-      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
     } else if (m_muonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
@@ -855,7 +861,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonTTVAEfficiencyScaleFactors";
       m_muonTTVAEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("WorkingPoint", "TTVA") );
-      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
     } else if (m_muonTTVAEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
@@ -887,7 +893,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       m_muonIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonIsolationSFTool.setProperty("WorkingPoint", tmp_muIso_WP + "Iso") );
-      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonIsolationSFTool.retrieve() );
 
@@ -918,7 +924,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonHighPtIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       // Use for the low-pt WP a dedicated set of isolation scale-factors having an extra uncertainty in place
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("WorkingPoint", tmp_muIsoHighPt_WP + "Iso") );
-      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "240711_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonHighPtIsolationSFTool.retrieve() );
 
@@ -1522,7 +1528,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_egammaCalibTool.isUserConfigured()) {
       m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool");
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2023_R22_Run2_v1") );
+      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2024_Run3_v0" : "es2023_R22_Run2_v1") );
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
       // allows to bypass (intended) abort from of egamma calibration tool when configured for fastSim
       if (m_eleForceFullSimCalib) {
@@ -1604,7 +1610,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_tauEffTool.isUserConfigured() && !isData()) {
       toolName = "TauEffTool_" + m_tauId;
       m_tauEffTool.setTypeAndName("TauAnalysisTools::TauEfficiencyCorrectionsTool/"+toolName);
-      ATH_CHECK( m_tauEffTool.setProperty("PileupReweightingTool",m_prwTool.getHandle()) );
 
       std::vector<int> correction_types;
       // Read out the tau ID from the config file and map into the enum from tau CP
@@ -1644,6 +1649,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_tauEffTool.setProperty("EfficiencyCorrectionTypes", correction_types) );
       ATH_CHECK( m_tauEffTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauEffTool.setProperty("useFastSim", isAtlfast()) );
+      ATH_CHECK( m_tauEffTool.setProperty("RecommendationTag", m_tauEffToolRecommendationTag) );
+      if (m_isRun3){ ATH_CHECK( m_tauEffTool.setProperty("Campaign", "mc23") );}
+      else         { ATH_CHECK( m_tauEffTool.setProperty("Campaign", "mc20") );}
       ATH_CHECK( m_tauEffTool.retrieve() );
     } else if (m_tauEffTool.isUserConfigured()) ATH_CHECK( m_tauEffTool.retrieve() );
 
@@ -1675,19 +1683,23 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         {"HLT_tau160L1TAU100_medium1_tracktwo", "HLT_tau160_medium1_tracktwo_L1TAU100"},
         // whole 2018 data taking period
         {"HLT_tau25_medium1_tracktwoEF", "HLT_tau25_medium1_tracktwoEF"},
-        {"HLT_tau35L1TAU12IM_medium1_tracktwoEF", "HLT_tau35_medium1_tracktwoEF_L1TAU12IM"},
         {"HLT_tau35_medium1_tracktwoEF", "HLT_tau35_medium1_tracktwoEF"},
         {"HLT_tau60_medium1_tracktwoEF", "HLT_tau60_medium1_tracktwoEF"},
         {"HLT_tau80L1TAU60_medium1_tracktwoEF", "HLT_tau80_medium1_tracktwoEF_L1TAU60"},
         {"HLT_tau160L1TAU100_medium1_tracktwoEF", "HLT_tau160_medium1_tracktwoEF_L1TAU100"},
-        // 2018 data after TS1, run >= 355261
-        {"HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau25_medium1_tracktwoEF,HLT_tau25_mediumRNN_tracktwoMVA"},
-        {"HLT_tau35L1TAU12IM_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau35_medium1_tracktwoEF_L1TAU12IM,HLT_tau35_mediumRNN_tracktwoMVA_L1TAU12IM"},
-        {"HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau35_medium1_tracktwoEF,HLT_tau35_mediumRNN_tracktwoMVA"},
-        {"HLT_tau60_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau60_medium1_tracktwoEF,HLT_tau60_mediumRNN_tracktwoMVA"},
-        {"HLT_tau80L1TAU60_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau80_medium1_tracktwoEF_L1TAU60,HLT_tau80_mediumRNN_tracktwoMVA_L1TAU60"},
-        {"HLT_tau160L1TAU100_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA", "HLT_tau160_medium1_tracktwoEF_L1TAU100,HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100"}
       };
+
+      if (m_isRun3){
+          m_tau_trig_support = {
+            // 2022, 2023
+            {"HLT_tau25_mediumRNN_tracktwoMVA", "HLT_tau25_mediumRNN_tracktwoMVA"},
+            {"HLT_tau35_mediumRNN_tracktwoMVA", "HLT_tau35_mediumRNN_tracktwoMVA"},
+            // 2022, 2023 75-1800 bunches
+            {"HLT_tau160_mediumRNN_tracktwoMVA", "HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100"},
+            // 2023 from 400 bunches
+            {"HLT_tau160_mediumRNN_tracktwoMVA", "HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU140"}
+          };
+      }
 
       for(auto const& trigger : m_tau_trig_support) {
         toolName = "TauTrigEffTool_" + m_tauId + "_" + trigger.first;
@@ -1695,9 +1707,11 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( tau_trigSF->setProperty("EfficiencyCorrectionTypes", std::vector<int>({TauAnalysisTools::SFTriggerHadTau})) );
         ATH_CHECK( tau_trigSF->setProperty("TriggerName", trigger.first) );
         ATH_CHECK( tau_trigSF->setProperty("JetIDLevel", iTauID) );
-        ATH_CHECK( tau_trigSF->setProperty("PileupReweightingTool", m_prwTool.getHandle()) );
         ATH_CHECK( tau_trigSF->setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( tau_trigSF->setProperty("useFastSim", isAtlfast()) );
+        ATH_CHECK( tau_trigSF->setProperty("RecommendationTag", m_tauEffToolRecommendationTag) );
+        if (m_isRun3){ ATH_CHECK( tau_trigSF->setProperty("Campaign", m_mcCampaign) );}
+        else         { ATH_CHECK( tau_trigSF->setProperty("Campaign", "mc20") );}
         ATH_CHECK( tau_trigSF->initialize() );
       }
     }
@@ -1709,9 +1723,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_tauSmearingTool.isUserConfigured()) {
       m_tauSmearingTool.setTypeAndName("TauAnalysisTools::TauSmearingTool/TauSmearingTool");
       ATH_CHECK( m_tauSmearingTool.setProperty("RecommendationTag", m_tauSmearingToolRecommendationTag) );
-      if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc21") );}
+      if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc23") );}
       else         { ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc20") );}
       ATH_CHECK( m_tauSmearingTool.setProperty("Generator", m_tauSmearingToolGenerator) );
+      ATH_CHECK( m_tauSmearingTool.setProperty("MVATESQualityCheck", m_ApplyMVATESQualityCheck) );
       ATH_CHECK( m_tauSmearingTool.setProperty("useFastSim", isAtlfast()) );
       ATH_CHECK( m_tauSmearingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauSmearingTool.retrieve() );
@@ -1763,6 +1778,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagSelTool.setProperty("JetAuthor",      jetcollBTag   ) );
       ATH_CHECK( m_btagSelTool.setProperty("MinPt",          m_BtagMinPt   ) );
       ATH_CHECK( m_btagSelTool.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
+      // Read from BTagging object. This will be needed until the input file is produced from
+      // a derivation release that includes !80336.
+      ATH_CHECK( m_btagSelTool.setProperty("readFromBTaggingObject", true ) );  
       ATH_CHECK( m_btagSelTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_btagSelTool.retrieve() );
     } else if (m_btagSelTool.isUserConfigured()) ATH_CHECK( m_btagSelTool.retrieve() );
@@ -1781,6 +1799,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagSelTool_OR.setProperty("JetAuthor",      jetcollBTag   ) );
       ATH_CHECK( m_btagSelTool_OR.setProperty("MinPt",          m_BtagMinPt   ) );
       ATH_CHECK( m_btagSelTool_OR.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
+      // Read from BTagging object. This will be needed until the input file is produced from
+      // a derivation release that includes !80336.
+      ATH_CHECK( m_btagSelTool_OR.setProperty("readFromBTaggingObject", true ) );  
       ATH_CHECK( m_btagSelTool_OR.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_btagSelTool_OR.retrieve() );
     } else if (m_btagSelTool_OR.isUserConfigured()) ATH_CHECK( m_btagSelTool_OR.retrieve() );
@@ -1809,6 +1830,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("JetAuthor",      BTagColl_TrkJet   ) );
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("MinPt",          m_BtagMinPt_trkJet ) );
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("FlvTagCutDefinitionsFileName",  m_bTaggingCalibrationFilePath) );
+        // Read from BTagging object. This will be needed until the input file is produced from
+        // a derivation release that includes !80336.
+        ATH_CHECK( m_btagSelTool_trkJet.setProperty("readFromBTaggingObject", true ) );  
         ATH_CHECK( m_btagSelTool_trkJet.setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( m_btagSelTool_trkJet.retrieve() );
       } else if (m_btagSelTool_trkJet.isUserConfigured()) ATH_CHECK( m_btagSelTool_trkJet.retrieve() );
@@ -1847,8 +1871,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else if (m_BtagTagger=="GN2v01"){
       if(!m_isRun3){
         MCshowerID= "default";                              // PowhegPythia8EvtGen (410470)
-        if (m_showerType == 1)      MCshowerID = "410480";  // PYTHIA8EVTGEN517 (410480)
-        else if (m_showerType == 2) MCshowerID = "411233";  // POWHEGHERWIG7 - 411233
+        if (m_showerType == 2) MCshowerID = "411233";  // POWHEGHERWIG7 - 411233
         else if (m_showerType == 3) MCshowerID = "600666";  // PhH7EG_H7UE - 600666
         else if (m_showerType == 4) MCshowerID = "700660"; // Sh_2210 FTAGAnalysisConfig uses this, but docs say only 11-16 can be used
         else if (m_showerType == 5) MCshowerID = "700660"; // Sh_2211
@@ -1864,8 +1887,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       }
       else {
         MCshowerID= "default";                              // PowhegPythia8EvtGen (601229)
-        if (m_showerType == 1)      MCshowerID = "601398";  // PYTHIA8EVTGEN517 (601398)
-        else if (m_showerType == 3) MCshowerID = "601414";  // PhH7EG_H7UE - 601414 
+        if (m_showerType == 3) MCshowerID = "601414";  // PhH7EG_H7UE - 601414 
         else if (m_showerType == 5) MCshowerID = "700808"; // Sh_2211
         else if (m_showerType == 6) MCshowerID = "700808"; // Sh_2212
         else if (m_showerType == 7) MCshowerID = "700808"; // Sh_2214
@@ -1895,6 +1917,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_btagEffTool.setProperty("ScaleFactorFileName",  m_bTaggingCalibrationFilePath) );
       ATH_CHECK( m_btagEffTool.setProperty("OperatingPoint", m_BtagWP ) );
       ATH_CHECK( m_btagEffTool.setProperty("JetAuthor",      jetcollBTag ) );
+      // Read from BTagging object. This will be needed until the input file is produced from
+      // a derivation release that includes !80336.
+      ATH_CHECK( m_btagEffTool.setProperty("readFromBTaggingObject", true) );
       ATH_CHECK( m_btagEffTool.setProperty("MinPt",          m_BtagMinPt ) );
       ATH_CHECK( m_btagEffTool.setProperty("SystematicsStrategy", m_BtagSystStrategy ) );
       ATH_CHECK( m_btagEffTool.setProperty("EfficiencyBCalibrations",     MCshowerID   ));
@@ -2015,7 +2040,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.IsRun3Geo", true));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.calibMode", m_muCalibrationMode));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.OutputLevel",this->msg().level()));
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2024_05_06_Run2Run3"));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2025_03_26_Run2Run3"));
       int IdBaselineInt = m_muIdBaseline;
       if (IdBaselineInt == 4)
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));

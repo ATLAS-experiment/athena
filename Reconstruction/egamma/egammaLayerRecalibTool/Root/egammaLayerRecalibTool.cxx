@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -18,8 +18,6 @@
 #include "PathResolver/PathResolver.h"
 
 #include "egammaLayerRecalibTool/egammaLayerRecalibTool.h"
-#include "xAODEgamma/EgammaxAODHelpers.h"
-
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
 namespace {
@@ -250,6 +248,9 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   std::string tune = resolve_alias(tuneIn);
 
   if (tune.empty()) { }
+  else if ("es2024_run3_extrapolate_v0" == tune) {
+    add_scale("run3_partial_ofc_extrapolate_v0");
+  }
   // R22 layer tune with fixed E1E2 and repeated acc
   else if ("es2022_22.0_Precision_v1" == tune) {
     add_scale("run2_alt_with_layer2_r22_Precision_v1");
@@ -278,6 +279,12 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE1(InputModifier::SUBTRACT), new GetAmountPileupE1(m_pileup_tool));
     add_scale(new ScaleE2(InputModifier::SUBTRACT), new GetAmountPileupE2(m_pileup_tool));
     add_scale(new ScaleE3(InputModifier::SUBTRACT), new GetAmountPileupE3(m_pileup_tool));
+  }
+  // Run3 2022+2023
+  else if ("run3_partial_ofc_extrapolate_v0" == tune) {
+    add_scale("layer2_run3_ofc_extrapolate_v0");
+    add_scale("ps_run3_ofc_extrapolate_v0");
+    if(m_doSaccCorrections) add_scale("acc_zee_run3_v0");
   }
   //Run 2 release 22 with fixed E1E2 and repeated acc 
   else if ("run2_alt_with_layer2_r22_Precision_v1"==tune) {
@@ -512,6 +519,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE0(InputModifier::ZEROBASED), new GetAmountHisto1D(h_presampler));
     add_scale(new ScaleE1(InputModifier::ZEROBASED), new GetAmountFixed(0.01));
   }
+  else if ("acc_zee_run3_v0" == tune){
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v13/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel23"));
+    assert(histo_acc);
+    add_scale(new ScaleEaccordion(InputModifier::ZEROBASED_ALPHA),
+              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));    
+  }
   // repeated acc scale based on layer2_alt_el_mu_comb_r21_v0_fix 
   else if ("acc_zee_r22_v1" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
@@ -655,6 +670,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     TH1* histo = checked_cast<TH1*>(f.Get("hE1E2ave_2010"));
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo));
+  }
+  else if ("layer2_run3_ofc_extrapolate_v0"==tune){
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_emu_run2_rel21_v1_run3ofc"));
+    assert(histo);
+    add_scale(new ScaleE2(InputModifier::ONEBASED),
+         new GetAmountHisto1D(*histo));    
   }
   // fix E1E2 scale from R21 precision model
   else if("layer2_alt_el_mu_comb_r21_v0_fix"==tune) {
@@ -817,6 +840,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v5/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
     TH1* histo_ps_tot_error = checked_cast<TH1*>(f.Get("hPS_2016_rel21"));
+    add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
+              new GetAmountHisto1D(*histo_ps_tot_error));
+  }
+  else if ("ps_run3_ofc_extrapolate_v0" == tune){
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
+    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_MuonLowMu_rel21_run3ofc"));
+    assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
               new GetAmountHisto1D(*histo_ps_tot_error));
   }

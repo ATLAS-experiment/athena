@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,12 +16,10 @@
 
 #include "TLorentzVector.h"
 
-#define GeV 1000
 const float TauIDVarCalculator::LOW_NUMBER = -1111.;
 
 TauIDVarCalculator::TauIDVarCalculator(const std::string& name):
   TauRecToolBase(name) {
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
 }
 
 

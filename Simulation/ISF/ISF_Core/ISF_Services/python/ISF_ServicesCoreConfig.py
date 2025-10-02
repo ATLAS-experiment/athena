@@ -14,7 +14,7 @@ from ISF_Tools.ISF_ToolsConfig import ParticleKillerToolCfg
 def ISFEnvelopeDefSvcCfg(flags, name="ISF_ISFEnvelopeDefSvc", **kwargs):
     # ATLAS common envlope definitions
     result = ComponentAccumulator()
-    kwargs.setdefault("ATLASEnvelopeDefSvc", result.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("ATLASEnvelopeDefSvc", result.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)))
     result.addService(CompFactory.ISF.ISFEnvelopeDefSvc(name, **kwargs), primary = True)
     return result
 
@@ -22,7 +22,7 @@ def ISFEnvelopeDefSvcCfg(flags, name="ISF_ISFEnvelopeDefSvc", **kwargs):
 def GeoIDSvcCfg(flags, name="ISF_GeoIDSvc", **kwargs):
     result = ComponentAccumulator()
     # with ISF volume definitions
-    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(flags)))
     result.addService(CompFactory.ISF.GeoIDSvc(name, **kwargs), primary = True)
     return result
 
@@ -30,7 +30,7 @@ def GeoIDSvcCfg(flags, name="ISF_GeoIDSvc", **kwargs):
 def ATLFAST_EnvelopeDefSvcCfg(flags, name="ISF_ATLFAST_EnvelopeDefSvc", **kwargs):
     result = ComponentAccumulator()
     # ATLAS common envlope definitions
-    kwargs.setdefault("ISFEnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("ISFEnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(flags)))
     kwargs.setdefault("InDetMaxExtentZ", 3549.5*mm)
     result.addService(CompFactory.ISF.ATLFAST_EnvelopeDefSvc(name, **kwargs), primary = True)
     return result
@@ -38,7 +38,7 @@ def ATLFAST_EnvelopeDefSvcCfg(flags, name="ISF_ATLFAST_EnvelopeDefSvc", **kwargs
 
 def ATLFAST_GeoIDSvcCfg(flags, name="ISF_ATLFAST_GeoIDSvc", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(ATLFAST_EnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(ATLFAST_EnvelopeDefSvcCfg(flags)))
     result.addService(CompFactory.ISF.GeoIDSvc(name, **kwargs), primary = True)
     return result
 

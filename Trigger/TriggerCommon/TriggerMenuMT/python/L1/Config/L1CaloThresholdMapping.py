@@ -20,6 +20,7 @@ threshold_mapping = {
         12:10,
         15:13,
         18:16,
+        20:18,
         22:20,
         24:22,
         26:25,
@@ -29,10 +30,11 @@ threshold_mapping = {
     'jEM': {
         20:14,
         25:20,
+        35:30, # prospective Run 4 L1 item, ATR-30180
     },
     'eTAU': {
         # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eTAU1
-        1:1.4,
+        1:0.8,
         12:7.7,
         20:10.1,
         30:17.7,
@@ -79,11 +81,12 @@ threshold_mapping = {
         500:400,
     },
     'CjJ': { # 0ETA2[1,3,5]
-        20:21,
+        20:15,
         30:22,
         40:25,
         50:33,
         55:39,
+        56:40, # prospective Run 4 L1 item, ATR-30180
         60:56,
         70:54,
         80:64,
@@ -92,7 +95,7 @@ threshold_mapping = {
         100:98,
     },
     'SCjJ': { # 0ETA2[1,3,5], mostly a copy of CjJ but decoupled to allow for independent configuration of L1Topo's SimpleCone algorithm
-        10:10,
+        10:15,
         20:21,
         30:22,
         40:25,
@@ -126,20 +129,10 @@ threshold_mapping = {
         160:160,
         400:400,
     },
-    'jLJ':
-    {
-        60:60,
-        80:80,
-        100:100,
-        120:120,
-        140:140,
-        160:160,
-        180:180,
-        200:200,
-    },
     'gLJ':
     {
         80:50,
+        90:60, # prospective Run 4 L1 item, ATR-30180
         100:70,
         140:110,
         160:130,

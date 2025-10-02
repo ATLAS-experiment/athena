@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_EVENTID_H
@@ -62,6 +62,11 @@ public:
           number_type detector_mask3 = 0);
   // Use default copy constructor.
   virtual ~EventID();
+
+  EventID(const EventID&) = default;
+  EventID(EventID&&) = default;
+  EventID& operator=(const EventID&) = default;
+  EventID& operator=(EventID&&) = default;
   //@}
 
   /// detector mask0 - bit field indicating which TTC zones have been built into the event, one

@@ -14,6 +14,7 @@
 #include "FourMom/P4PtEtaPhiMBase.h"
 #include "Navigation/NavigableTerminalNode.h"
 #include "AthLinks/ElementLink.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // STL include(s):
 #include <vector>
@@ -69,7 +70,7 @@ public:
 
    double eta(void) const;
    double phi(void) const;
-   double m(void)   const {return 105.658367;}
+   double m(void)   const {return ParticleConstants::muonMassInMeV;}
 
 
 private:

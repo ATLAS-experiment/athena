@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DECISIONHANDLING_RORSEQFILTER_H
 #define DECISIONHANDLING_RORSEQFILTER_H 1
@@ -68,7 +68,8 @@ class RoRSeqFilter
 
   Gaudi::Property<std::vector<std::string> > m_chainsProperty{ this, "Chains", {}, "Chains of which this filter is concerned" };
   std::set<HLT::Identifier> m_chains;
-  
+  std::vector<std::string> m_monInputNames;
+
   Gaudi::Property<std::vector <std::vector<std::string>> > m_chainsPerInputProperty{ this, "ChainsPerInput", {}, "Chains of which this filter is concerned" };
   std::vector<std::set<HLT::Identifier>> m_chainsPerInput;
   

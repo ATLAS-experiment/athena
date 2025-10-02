@@ -15,8 +15,8 @@
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
-#include "GNN_FasTrackConnector.h"
-#include "GNN_Geometry.h"
+#include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
+#include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "GNN_DataStorage.h"
 
 class AtlasDetectorID;
@@ -54,15 +54,25 @@ class SeedingToolBase: public AthAlgTool {
   UnsignedIntegerProperty m_nMaxPhiSlice{this, "nMaxPhiSlice", 53};
   BooleanProperty m_doubletFilterRZ{this, "Doublet_FilterRZ", true};
   BooleanProperty m_useEtaBinning{this, "UseEtaBinning", true};
+  BooleanProperty m_matchBeforeCreate{this, "MatchBeforeCreate", false};
   FloatProperty m_minPt{this, "pTmin", 1000.0};
+  FloatProperty m_etaBinOverride{this, "etaBin", 0.0f, "specify non-zero to override eta bin width from connection file (default 0.2 in createLinkingScheme.py)"};
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
+  IntegerProperty m_nBufferEdges{this, "BufferEdges", 200000};
   StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
+  StringProperty  m_lutFile{this, "MLpredictorLutFileName", "gbts_ml_pixel_barrel_loose.lut"};
+
+  BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
+  BooleanProperty m_useOldTunings{this, "UseOldTunings", false};
+
+  FloatProperty m_tau_ratio_cut{this, "tau_ratio_cut", 0.007};
 
   float m_phiSliceWidth = 0.;
 
   std::unique_ptr<GNN_FasTrackConnector> m_connector = nullptr;
   std::vector<TrigInDetSiLayer> m_layerGeometry;
   std::unique_ptr<const TrigFTF_GNN_Geometry> m_geo = nullptr;
+  std::vector<std::array<float, 5> > m_mlLUT;
 };
 
 #endif

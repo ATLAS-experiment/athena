@@ -1,11 +1,11 @@
 """Define a function to configure PixelConditionsSummaryCfg
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import Format, ProductionStep
 
 from PixelConditionsAlgorithms.PixelConditionsConfig import (
     PixelDCSCondStateAlgCfg, PixelDCSCondStatusAlgCfg, PixelDeadMapCondAlgCfg
@@ -22,8 +22,13 @@ def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
     acc.merge(PixelDeadMapCondAlgCfg(flags))
 
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
-    kwargs.setdefault("UseByteStreamFEI4", not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS)
-    kwargs.setdefault("UseByteStreamFEI3", not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS)
+    kwargs.setdefault("UseByteStreamFEI4", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
+    kwargs.setdefault("UseByteStreamFEI3", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
+    if (flags.Overlay.DataOverlay and
+        flags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and
+        not flags.Overlay.ByteStream):
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, ["IDCInDetBSErrContainer#PixelByteStreamErrs"]))
 
     if flags.InDet.usePixelDCS:
         pixel_states_active =  [ 'READY', 'ON' ]     # 'UNKNOWN', 'TRANSITION', 'UNDEFINED', 'DISABLED', 'LOCKED_OUT', 'OFF' states should be masked.
@@ -53,7 +58,7 @@ def PixelActiveDetectorElementStatusToolCfg(flags,name = "PixelActiveDetectorEle
 
 def PixelByteStreamErrorDetectorElementStatusToolCfg(flags, name = "PixelByteStreamErrorDetectorElementStatusTool",**kwargs) :
     acc = ComponentAccumulator()
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS :
+    if (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay:
         kwargs.setdefault("PixelByteStreamErrs", "PixelByteStreamErrs")
         kwargs.setdefault("UseByteStreamFEI4",   True)
         kwargs.setdefault("UseByteStreamFEI3",   True)

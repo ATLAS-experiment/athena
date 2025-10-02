@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RegionSelectionSvc_H
@@ -38,14 +38,8 @@ public:
     RegionSelectionSvc(const std::string &name, ISvcLocator *svc_locator);
     /**destructor */
     virtual ~RegionSelectionSvc();
-    static const InterfaceID &interfaceID() {
-        static const InterfaceID IID_IRegionSelectionSvc("RegionSelectionSvc", 1, 0);
-        return IID_IRegionSelectionSvc;
-    }
-    /** just some crazy atheta function */
-    virtual StatusCode queryInterface(const InterfaceID &riid, void **ppvUnknown);
     /**initialize */
-    StatusCode initialize();
+    virtual StatusCode initialize() override;
     /** debug print */
     void Print(std::ostream &os) const;
     /** return true if id is in selected region */

@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum, HIMode, ProductionStep
 import AthenaCommon.SystemOfUnits as Units
 from Campaigns.Utils import Campaign
 
@@ -24,7 +24,7 @@ class ITkPrimaryPassConfig(FlagEnum):
     FastTracking = 'ITkFast'
     HeavyIon = 'ITkHeavyIon'
     Acts = 'ITkActs'
-    ActsFast = 'ITkActsFast'
+    ActsLegacy = 'ITkActsLegacy'
     ActsHeavyIon = 'ITkActsHeavyIon'
     Default = 'ITkMain'
 
@@ -48,7 +48,7 @@ class PixelClusterSplittingType(FlagEnum):
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
     ActsChain = "ActsChain"  # full Acts Chain
-    ActsFastChain = "ActsFastChain" # fast tracking Acts Chain
+    ActsLegacyChain = "ActsLegacyChain" # Acts Chain - legacy like
     ActsHeavyIon = "ActsHeavyIon"
     # Validation options
     ActsValidateClusters = "ActsValidateClusters"
@@ -56,19 +56,24 @@ class TrackingComponent(FlagEnum):
     ActsValidateSeeds = "ActsValidateSeeds"
     ActsValidateConversionSeeds = "ActsValidateConversionSeeds"
     ActsValidateLargeRadiusSeeds = "ActsValidateLargeRadiusSeeds"
+    ActsValidateLargeRadiusStandalone = "ActsValidateLargeRadiusStandalone"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
         
     # GNN
     GNNChain = "GNNChain"
+    
     # FPGA
     FPGAChain = "FPGAChain"
+    ActsValidateF100 = "ActsValidateF100"
+    ActsValidateF150 = "ActsValidateF150"
 
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
 
     # Turn running of truth matching on and off (by default on for MC off for data)
-    icf.addFlag("Tracking.doTruth", lambda prevFlags: prevFlags.Input.isMC)
+    icf.addFlag("Tracking.doTruth", lambda prevFlags: prevFlags.Input.isMC or 
+        (prevFlags.Overlay.DataOverlay and prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing))
 
     # control which fitter to be used
     icf.addFlag("Tracking.trackFitterType",
@@ -179,7 +184,8 @@ def createTrackingConfigFlags():
     # Save xAOD TrackMeasurementValidation + TrackStateValidation containers
     icf.addFlag("Tracking.writeExtendedSi_PRDInfo", False)
     icf.addFlag("Tracking.writeExtendedTRT_PRDInfo", False)
-
+    icf.addFlag("Tracking.PRDInfo.KeepOnlyOnTrackMeasurements", False)
+    
     # Only keep entries in xAOD TrackMeasurementValidation + TrackStateValidation containers for tracks passing user cut
     # Indicate detector technology from which clusters should be thinned
     icf.addFlag("Tracking.thinPixelClustersOnTrack", False)
@@ -540,8 +546,8 @@ def createTrackingConfigFlags():
             return ITkPrimaryPassConfig.FTF
         elif TrackingComponent.ActsChain in flags.Tracking.recoChain:
             return ITkPrimaryPassConfig.Acts
-        elif TrackingComponent.ActsFastChain in flags.Tracking.recoChain:
-            return ITkPrimaryPassConfig.ActsFast
+        elif TrackingComponent.ActsLegacyChain in flags.Tracking.recoChain:
+            return ITkPrimaryPassConfig.ActsLegacy
         elif TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
             return ITkPrimaryPassConfig.ActsHeavyIon
         elif flags.Tracking.doITkFastTracking:
@@ -576,7 +582,7 @@ def createTrackingConfigFlags():
     # Acts
     from ActsConfig.ActsTrackingPassFlags import (
         createActsTrackingPassFlags,
-        createActsFastTrackingPassFlags,
+        createActsLegacyTrackingPassFlags,
         createActsLargeRadiusTrackingPassFlags,
         createActsConversionTrackingPassFlags,
         createActsLowPtTrackingPassFlags,
@@ -585,15 +591,18 @@ def createTrackingConfigFlags():
         createActsValidateSeedsTrackingPassFlags,
         createActsValidateConversionSeedsTrackingPassFlags,
         createActsValidateLargeRadiusSeedsTrackingPassFlags,
+        createActsValidateLargeRadiusStandaloneTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
-        createActsHeavyIonTrackingPassFlags
+        createActsHeavyIonTrackingPassFlags,
+        createEFValidateF100TrackingPassFlags,
+        createEFValidateF150TrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsFastPass",
-                          createActsFastTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsLegacyPass",
+                          createActsLegacyTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLargeRadiusPass",
                           createActsLargeRadiusTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsConversionPass',
@@ -610,18 +619,28 @@ def createTrackingConfigFlags():
                           createActsValidateConversionSeedsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusSeedsPass",
                           createActsValidateLargeRadiusSeedsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusStandalonePass",
+                          createActsValidateLargeRadiusStandaloneTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",
                           createActsValidateTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
+    
+    # Acts F100 validation pass
+    icf.addFlagsCategory ("Tracking.ITkActsValidateF100Pass",
+                          createEFValidateF100TrackingPassFlags, prefix=True)
+
+    # Acts F150 validation pass
+    icf.addFlagsCategory ("Tracking.ITkActsValidateF150Pass",
+                          createEFValidateF150TrackingPassFlags, prefix=True)
 
     # GNN
     from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags
     icf.addFlagsCategory ("Tracking.ITkGNNPass",
                           createGNNTrackingPassFlags, prefix=True)
-    #FPGA 
+    # FPGA 
     from TrkConfig.InDetFPGATrackingFlags import createFPGATrackingPassFlags 
     icf.addFlagsCategory ("Tracking.ITkFPGAPass",
                           createFPGATrackingPassFlags, prefix=True)    
@@ -641,5 +660,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doV0Finder", False)
     
     icf.addFlag('Tracking.TruthClusterSplittingEff', 0.9)
+
+    # Dump GBTS training data: 0=no dump, 1=standard tracking, 2=LRT
+    icf.addFlag("Tracking.dumpGBTSTrainingData", 0)
 
     return icf

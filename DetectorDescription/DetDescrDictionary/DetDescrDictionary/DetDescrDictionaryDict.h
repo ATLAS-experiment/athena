@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,7 +9,7 @@
 #include <map>
 
 
-namespace DetDescrDictionaryDict 
+struct DetDescrDictionaryDict
 {
     DataVector<Identifier>                    idvec;
     std::vector<Identifier>                   idvec1;
@@ -23,4 +23,4 @@ namespace DetDescrDictionaryDict
     std::pair < IdentifierHash, int >         idhpairInt;
     DataVector<std::pair<IdentifierHash, int> >    dvidhpairInt;
     std::vector<std::pair<IdentifierHash, int>* >  vidhpairInt;
-}
+};

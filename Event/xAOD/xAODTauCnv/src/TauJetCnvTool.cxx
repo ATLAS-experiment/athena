@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TauJetCnvTool.cxx 
@@ -31,15 +31,8 @@ namespace xAODMaker {
 				const std::string& name, 
 				const IInterface* parent ) : 
     ::AthAlgTool( type, name, parent )
-    , m_inDetTrackParticles("InDetTrackParticles")
-    , m_jets("AntiKt4LCTopoJets")
   {
     declareInterface< ITauJetCnvTool > (this);
-    //
-    // Property declaration
-    // 
-    declareProperty( "TrackContainerName", m_inDetTrackParticles );
-    declareProperty( "JetContainerName", m_jets );
   }
 
   // Destructor
@@ -110,12 +103,6 @@ namespace xAODMaker {
 	//trying to set element links
 	ATH_MSG_DEBUG( "trying to set element links for tau with  numTrack=" << tau->numTrack() );    
 
-	// this method leads to a segfault when converting Run 1 BS to xAOD.
-	// It was decided that the links are not needed in the reprocessed files
-	// (for data analysis), therefore is disabled (ATR-13562)
-	// 
-	// setLinks((*tau), (*xtaujet));
-
 	ATH_MSG_DEBUG( "converted xaod tau with numTrack=" << xtaujet->nTracks() );    
 
 
@@ -134,10 +121,7 @@ namespace xAODMaker {
 	ATH_MSG_DEBUG( "converted xaod tau with BDTEleScore=" <<  xtaujet->discriminant(xAOD::TauJetParameters::BDTEleScore ) );
 
 	xtaujet->setDiscriminant(xAOD::TauJetParameters::BDTJetScoreSigTrans    , tau->tauID()->discriminant(TauJetParameters::BDTJetScoreSigTrans) );
-	//	xtaujet->setDiscriminant(xAOD::TauJetParameters::BDTJetScoreBkgTrans    , tau->tauID()->discriminant(TauJetParameters::BDTJetScoreBkgTrans) );
 	xtaujet->setDiscriminant(xAOD::TauJetParameters::BDTJetScore    , tau->tauID()->discriminant(TauJetParameters::BDTJetScore) );
-	// xtaujet->setDiscriminant(xAOD::TauJetParameters::Likelihood     , tau->tauID()->discriminant(TauJetParameters::Likelihood) );
-	// xtaujet->setDiscriminant(xAOD::TauJetParameters::SafeLikelihood , tau->tauID()->discriminant(TauJetParameters::SafeLikelihood) );
 
 	ATH_MSG_DEBUG( "trying to convert tau with  MuonVeto=" << tau->tauID()->isTau(TauJetParameters::MuonVeto)   );
 	xtaujet->setIsTau(xAOD::TauJetParameters::MuonVeto           ,   tau->tauID()->isTau(TauJetParameters::MuonVeto) );
@@ -176,39 +160,15 @@ namespace xAODMaker {
 	    xtaujet->setTrackFilterQuality(      commonDetails->TrackFilterQuality() );			  
 	    ATH_MSG_DEBUG( "converted xaod tau with trackFilterQuality " << xtaujet->trackFilterQuality() );
 
-
-	    // for (unsigned int i = 0; i < commonDetails->TrackFilterPass().size(); ++i) 
-	    //   {
-
-	    // 	ATH_MSG_DEBUG( " tau with trackFilterPass " << commonDetails->TrackFilterPass().at(i) << " for track " << i );
-
-	    // 	xtaujet->setTrackFlag(*getNewTrackLink(tau->conversionTrackLinkVector().at(i), m_inDetTrackParticles), xAOD::TauJetParameters::failTrackFilter, commonDetails->TrackFilterPass().at(i) );
-	    // 	// xtaujet->setTrackFilterPass(  i,     static_cast<int> (commonDetails->TrackFilterPass().at(i)) );			  
-
-	    // 	// ATH_MSG_DEBUG( "converted xaod tau with trackFilterPass " << xtaujet->trackFlag(tau->track(i), xAOD::TauJetParameters::failTrackFilter )  << " for track " << i  );
-
-	    //   }
-
-
-
 	    ATH_MSG_DEBUG( "found details container for this tau with SeedCalo_EMRadius " << commonDetails->seedCalo_EMRadius() );
 
 	    xtaujet->setDetail(xAOD::TauJetParameters::ipZ0SinThetaSigLeadTrk ,      static_cast<float>( commonDetails->ipZ0SinThetaSigLeadTrk() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::etOverPtLeadTrk        ,      static_cast<float>( commonDetails->etOverPtLeadTrk() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::leadTrkPt              ,      static_cast<float>( commonDetails->leadTrkPt() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::ipSigLeadTrk           ,      static_cast<float>( commonDetails->ipSigLeadTrk() ) );				  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::ipSigLeadLooseTrk      ,      static_cast<float>( commonDetails->ipSigLeadLooseTrk() ) );			  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::etOverPtLeadLooseTrk   ,      static_cast<float>( commonDetails->etOverPtLeadLooseTrk() ) );			  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::leadLooseTrkPt         ,      static_cast<float>( commonDetails->leadLooseTrkPt() ) );				  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::chrgLooseTrk           ,      static_cast<float>( commonDetails->chrgLooseTrk() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::massTrkSys             ,      static_cast<float>( commonDetails->massTrkSys() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::trkWidth2              ,      static_cast<float>( commonDetails->trkWidth2() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::trFlightPathSig        ,      static_cast<float>( commonDetails->trFlightPathSig() ) );				  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::etEflow                ,      static_cast<float>( commonDetails->etEflow() ) );					  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::mEflow		      ,      static_cast<float>( commonDetails->mEflow() ) );					  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::ele_E237E277           ,      static_cast<float>( commonDetails->ele_E237E277() ) );				  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::ele_PresamplerFraction ,      static_cast<float>( commonDetails->ele_PresamplerFraction() ) );			  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::ele_ECALFirstFraction  ,      static_cast<float>( commonDetails->ele_ECALFirstFraction() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::numCells        ,      static_cast<int>( commonDetails->numCells() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::numTopoClusters        ,      static_cast<int>( commonDetails->numTopoClusters() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::numEffTopoClusters     ,      static_cast<float>( commonDetails->numEffTopoClusters() ) );			  
@@ -231,11 +191,6 @@ namespace xAODMaker {
 	    xtaujet->setDetail(xAOD::TauJetParameters::centFrac ,	      static_cast<float>( commonDetails->seedCalo_centFrac() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::stripWidth2 ,	      static_cast<float>( commonDetails->seedCalo_stripWidth2() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::nStrip ,	      static_cast<int>( commonDetails->seedCalo_nStrip() ) );				  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::etEMCalib ,	      static_cast<float>( commonDetails->seedCalo_etEMCalib() ) );			  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::etHadCalib ,	      static_cast<float>( commonDetails->seedCalo_etHadCalib() ) );			  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::seedCalo_eta ,		      static_cast<float>( commonDetails->seedCalo_eta() ) );				  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::seedCalo_phi ,		      static_cast<float>( commonDetails->seedCalo_phi() ) );				  
-	    // xtaujet->setDetail(xAOD::TauJetParameters::nIsolLooseTrk ,      static_cast<float>( commonDetails->seedCalo_nIsolLooseTrk() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::trkAvgDist ,	      static_cast<float>( commonDetails->seedCalo_trkAvgDist() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::trkRmsDist ,	      static_cast<float>( commonDetails->seedCalo_trkRmsDist() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::lead2ClusterEOverAllClusterE , static_cast<float>( commonDetails->seedCalo_lead2ClusterEOverAllClusterE() ) );	  
@@ -247,8 +202,6 @@ namespace xAODMaker {
 	    xtaujet->setDetail(xAOD::TauJetParameters::sumEMCellEtOverLeadTrkPt  ,   static_cast<float>( commonDetails->seedTrk_sumEMCellEtOverLeadTrkPt() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::hadLeakEt  ,	              static_cast<float>( commonDetails->seedTrk_hadLeakEt() ) );				  
 
-	    // xtaujet->setDetail(xAOD::TauJetParameters::EM_TES_scale ,		      static_cast<float>( commonDetails->EM_TES_scale() ) );				  
-	    //	    xtaujet->setDetail(xAOD::TauJetParameters::LC_TES_precalib ,	      static_cast<float>( commonDetails->LC_TES_precalib() ) );				  
 	    xtaujet->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing1 ,	      static_cast<float>( commonDetails->cellBasedEnergyRing1() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing2 ,	      static_cast<float>( commonDetails->cellBasedEnergyRing2() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing3 ,	      static_cast<float>( commonDetails->cellBasedEnergyRing3() ) );			  
@@ -257,15 +210,9 @@ namespace xAODMaker {
 	    xtaujet->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing6 ,	      static_cast<float>( commonDetails->cellBasedEnergyRing6() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing7 ,	      static_cast<float>( commonDetails->cellBasedEnergyRing7() ) );			  
 	    xtaujet->setDetail(xAOD::TauJetParameters::TRT_NHT_OVER_NLT ,	      static_cast<float>( commonDetails->TRT_NHT_OVER_NLT() ) );			  
-	    // xtaujet->setTauJetVtxFraction(           commonDetails->tauJetVtxFraction() );                         
 	  } else {
 	  ATH_MSG_WARNING( "there was no TauDetails container found" );
 	}
-
-	//copy pantau details
-	ATH_MSG_DEBUG( "go looking for pantau details container " );
-
-	copyPanTauDetails((*tau), (*xtaujet));
 
       }
   
@@ -281,45 +228,6 @@ namespace xAODMaker {
       {
 	ATH_MSG_DEBUG( "track number : " << i << " has pt: " << (aodtau.track(i) ? aodtau.track(i)->pt() : -1111.) );    
       }
-  
-    //set track links
-    //ElementLinkVector<Rec::TrackParticleContainer>::const_iterator trackit  = aodtau.trackLinkVector().begin();
-    //ElementLinkVector<Rec::TrackParticleContainer>::const_iterator trackitE = aodtau.trackLinkVector().end();
-
-
-    // for( ; trackit!= trackitE; ++trackit)
-    //   {
-    // 	xaodtau.addTrackLink(getNewTrackLink((*trackit), m_inDetTrackParticles) );
-    //   }
-
-
-    // for (unsigned int i = 0; i != xaodtau.nTracks(); ++i) 
-    //   {
-    // 	ATH_MSG_DEBUG( "xtau track number : " << i << " has pt: " << xaodtau.track(i)->pt() );    
-    //   }
-
-
-    // for (unsigned int i = 0; i != aodtau.numConversionTrack(); ++i) 
-    //   {
-    // 	ATH_MSG_DEBUG( "conversion track number : " << i << " has pt: " << aodtau.conversionTrack(i)->pt() );    
-    //   }
-
-    // //set conversion track links
-    // ElementLinkVector<Rec::TrackParticleContainer>::const_iterator convTrackit  = aodtau.conversionTrackLinkVector().begin();
-    // ElementLinkVector<Rec::TrackParticleContainer>::const_iterator convTrackitE = aodtau.conversionTrackLinkVector().end();
-
-    // for( ; convTrackit!= convTrackitE; ++convTrackit)
-    //   {
-    // 	xaodtau.setTrackFlag( *getNewTrackLink((*convTrackit), m_inDetTrackParticles), xAOD::TauJetParameters::isConversion, true);
-    // 	// xaodtau.addConversionTrackLink(getNewTrackLink((*convTrackit), m_inDetTrackParticles) );
-    //   }
-
-    //Blake, fix me!!!
-    // for (unsigned int i = 0; i != xaodtau.nConversionTracks(); ++i) {
-    //   // ATH_MSG_DEBUG( "xtau conversion track number : " << i << " has pt: " << xaodtau.conversionTrack(i)->pt() );    
-    // }
-
-
 
     //get common details member, because wide and other tracks are stored there
     const Analysis::TauCommonDetails* commonDetails(aodtau.details<Analysis::TauCommonDetails>());
@@ -329,41 +237,6 @@ namespace xAODMaker {
       {
 	ATH_MSG_DEBUG( "wide track number : " << i << " has pt: " << commonDetails->seedCalo_wideTrk(i)->pt() );    
       }
-
-    // //set wide track links
-    // ElementLinkVector<Rec::TrackParticleContainer>::const_iterator wideTrackit  = commonDetails->seedCalo_wideTrk().begin();
-    // ElementLinkVector<Rec::TrackParticleContainer>::const_iterator wideTrackitE = commonDetails->seedCalo_wideTrk().end();
-
-    // for( ; wideTrackit!= wideTrackitE; ++wideTrackit)
-    //   {
-    // 	xaodtau.addWideTrackLink(getNewTrackLink((*wideTrackit), m_inDetTrackParticles) );
-    //   }
-
-    // for (unsigned int i = 0; i != xaodtau.nWideTracks(); ++i) 
-    //   {
-    // 	ATH_MSG_DEBUG( "xtau wide track number : " << i << " has pt: " << xaodtau.wideTrack(i)->pt() );    
-    //   }
-
-
-    // for (unsigned int i = 0; i != commonDetails->nOtherTrk(); ++i) 
-    //   {
-    // 	ATH_MSG_DEBUG( "other track number : " << i << " has pt: " << commonDetails->otherTrk(i)->pt() );    
-    //   }
-
-    // //set other track links
-    // ElementLinkVector<Rec::TrackParticleContainer>::const_iterator otherTrackit  = commonDetails->otherTrk().begin();
-    // ElementLinkVector<Rec::TrackParticleContainer>::const_iterator otherTrackitE = commonDetails->otherTrk().end();
-
-    // for( ; otherTrackit!= otherTrackitE; ++otherTrackit)
-    //   {
-    // 	xaodtau.addOtherTrackLink(getNewTrackLink((*otherTrackit), m_inDetTrackParticles) );
-    //   }
-
-
-    // for (unsigned int i = 0; i != xaodtau.nOtherTracks(); ++i) {
-    //   ATH_MSG_DEBUG( "xtau other track number : " << i << " has pt: " << xaodtau.otherTrack(i)->pt() );    
-    // }
-  
 
     ATH_MSG_DEBUG( "trying to set jet link " );
   
@@ -387,72 +260,6 @@ namespace xAODMaker {
     newLink.resetWithKeyAndIndex( name, oldLink.index() );
     return newLink;
   }
-
-  void TauJetCnvTool::copyPanTauDetails(const Analysis::TauJet& /*aodtau*/, xAOD::TauJet& /*xaodtau*/) const {
-  
-    // const PanTau::PanTauDetails* cellBasedDetails_PanTau(0);
-    // cellBasedDetails_PanTau  = aodtau.details<const PanTau::PanTauDetails>("PanTau_SeedDetailsCellBased");
-    // //with details_SGKey being
-    // //   PanTau_SeedDetailsCellBased
-    // //or PanTau_SeedDetailseflowRec 
-  
-    // int tempint = 0;
-    // float tempfloat = 0;
-  
-    // if (!cellBasedDetails_PanTau)
-    //   {
-    // 	ATH_MSG_DEBUG( "TauJet has no associated cellBased PanTauDetails --- This must not be bad - if PanTau rejected a tauRec seed, that tauRec seed will not have PanTauDetails");
-    //   }
-    // else
-    //   {
-    // 	ATH_MSG_DEBUG( "trying to convert tau with cellBased isPanTauCandidate =" << cellBasedDetails_PanTau->isPanTauCandidate() );
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_isPanTauCandidate, cellBasedDetails_PanTau->isPanTauCandidate() ) ;
-    // 	if( xaodtau.panTauDetail(xAOD::TauJetParameters::PanTau_isPanTauCandidate, tempint ) )
-    // 	  {
-    // 	    ATH_MSG_DEBUG( "converted xaod tau with cellBased isPanTauCandidate =" <<  tempint);
-    // 	  }
-    // 	else
-    // 	  {
-    // 	    ATH_MSG_DEBUG( "something went wrong in setting xAOD tau's cellBased isPanTauCandidate ");
-    // 	  }
-      
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_DecayModeProto,    cellBasedDetails_PanTau->RecoModeSubAlg() ) ;	
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_DecayMode, 	cellBasedDetails_PanTau->RecoModePanTau() ) ;		 
-      
-    // 	ATH_MSG_DEBUG( "trying to convert tau with cellBased BDTValue_1p0n_vs_1p1n =" << cellBasedDetails_PanTau->BDTValue_1p0n_vs_1p1n() );
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTValue_1p0n_vs_1p1n, static_cast<float>(cellBasedDetails_PanTau->BDTValue_1p0n_vs_1p1n() ) ) ;		  
-      
-    // 	if( xaodtau.panTauDetail(xAOD::TauJetParameters::PanTau_BDTValue_1p0n_vs_1p1n, tempfloat ) )
-    // 	  {
-    // 	    ATH_MSG_DEBUG( "converted xaod tau with cellBased BDTValue_1p0n_vs_1p1n =" <<  tempfloat);
-    // 	  }
-    // 	else
-    // 	  {
-    // 	    ATH_MSG_DEBUG( "something went wrong in setting xAOD tau's cellBased BDTValue_1p0n_vs_1p1n ");
-    // 	  }
-      
-      
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTValue_1p1n_vs_1pXn, 			 static_cast<float>(cellBasedDetails_PanTau->BDTValue_1p1n_vs_1pXn() ) ) ;	  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTValue_3p0n_vs_3pXn, 			 static_cast<float>(cellBasedDetails_PanTau->BDTValue_3p0n_vs_3pXn() ) ) ;		  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Basic_NNeutralConsts, 		 cellBasedDetails_PanTau->CellBased_Basic_NNeutralConsts() ) ;		  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Charged_JetMoment_EtDRxTotalEt, 	 static_cast<float>(cellBasedDetails_PanTau->CellBased_Charged_JetMoment_EtDRxTotalEt() ) ) ; 
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Charged_StdDev_Et_WrtEtAllConsts, 	 static_cast<float>(cellBasedDetails_PanTau->CellBased_Charged_StdDev_Et_WrtEtAllConsts() ) ) ; 
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Neutral_HLV_SumM, 			 static_cast<float>(cellBasedDetails_PanTau->CellBased_Neutral_HLV_SumM() ) ) ;	  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Neutral_PID_BDTValues_BDTSort_1, 	 static_cast<float>(cellBasedDetails_PanTau->CellBased_Neutral_PID_BDTValues_BDTSort_1() ) ) ;  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Neutral_PID_BDTValues_BDTSort_2, 	 static_cast<float>(cellBasedDetails_PanTau->CellBased_Neutral_PID_BDTValues_BDTSort_2() ) ) ;  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Ratio_1stBDTEtOverEtAllConsts, static_cast<float>(cellBasedDetails_PanTau->CellBased_Neutral_Ratio_1stBDTEtOverEtAllConsts() ) ) ;  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Ratio_EtOverEtAllConsts, 	 static_cast<float>(cellBasedDetails_PanTau->CellBased_Neutral_Ratio_EtOverEtAllConsts() ) ) ;  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Shots_NPhotonsInSeed, 	 static_cast<float>(cellBasedDetails_PanTau->CellBased_Neutral_Shots_NPhotonsInSeed() ) ) ;	  
-    // 	xaodtau.setPanTauDetail( xAOD::TauJetParameters::PanTau_BDTVar_Combined_DeltaR1stNeutralTo1stCharged, static_cast<float>(cellBasedDetails_PanTau->CellBased_Combined_DeltaR1stNeutralTo1stCharged() ) ) ;  
-      
-    //   }
-  
-  
-    
-  
-  }
-  
-
 
 }
 

@@ -17,7 +17,7 @@ namespace Muon {
     MuonIntersectGeoData::MuonIntersectGeoData() = default;
     MuonIntersectGeoData::MuonIntersectGeoData(MsgStream& log, const MuonGM::MuonDetectorManager* detMgr,
                                                const IMuonIdHelperSvc* idHelperSvc, const MdtCondDbData* dbData) :
-        m_idHelperSvc{idHelperSvc}, m_detMgr{detMgr}, m_dbData{dbData} {
+        m_idHelperSvc{idHelperSvc}, m_dbData{dbData} {
         m_geometry.resize(m_idHelperSvc->mdtIdHelper().detectorElement_hash_max());
         for (unsigned int n = 0; n < m_geometry.size(); ++n) {
             IdentifierHash id_hash{n};
@@ -50,13 +50,14 @@ namespace Muon {
          return hash < m_geometry.size() ? m_geometry[hash] : nullptr;
     }
 
-    Muon::MuonStationIntersect MuonIntersectGeoData::tubesCrossedByTrack(const Identifier& id, const Amg::Vector3D& pos,
+    Muon::MuonStationIntersect MuonIntersectGeoData::tubesCrossedByTrack(const MuonGM::MuonDetectorManager* detMgr,
+                                                                         const Identifier& id, const Amg::Vector3D& pos,
                                                                          const Amg::Vector3D& dir) const {
         std::vector<std::shared_ptr<const Muon::MdtIntersectGeometry>> stations = getStationGeometry(id);
 
         Muon::MuonStationIntersect::TubeIntersects tubeIntersects;
         for (std::shared_ptr<const Muon::MdtIntersectGeometry>& it : stations) {
-            Muon::MuonStationIntersect intersect = it->intersection(pos, dir);
+            Muon::MuonStationIntersect intersect = it->intersection(detMgr, pos, dir);
             tubeIntersects.insert(tubeIntersects.end(), intersect.tubeIntersects().begin(), intersect.tubeIntersects().end());
         }
 
@@ -83,10 +84,11 @@ namespace Muon {
         // chamber with largest eta
         if (chEtaRight > stEtaMax) chEtaRight = -999;
 
-        Muon::MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
+        using namespace MuonStationIndex;
+        ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
 
         // special treatment of EOS chambers
-        if (chIndex == Muon::MuonStationIndex::EOS) {
+        if (chIndex == ChIndex::EOS) {
             chEtaRight = -999;
             chEtaLeft = -999;
         }
@@ -102,18 +104,18 @@ namespace Muon {
         }
 
         // no neighbours for BIS8
-        if (chIndex == Muon::MuonStationIndex::BIS && std::abs(stEta) == 8) {
+        if (chIndex == ChIndex::BIS && std::abs(stEta) == 8) {
             chEtaLeft = -999;
             chEtaRight = -999;
         }
 
         // BIS 8 never neighbour of a chamber
-        if (chIndex == Muon::MuonStationIndex::BIS) {
+        if (chIndex == ChIndex::BIS) {
             if (std::abs(chEtaLeft) == 8) chEtaLeft = -999;
             if (std::abs(chEtaRight) == 8) chEtaRight = -999;
         }
         
-        if ((chIndex == Muon::MuonStationIndex::EIS || chIndex == Muon::MuonStationIndex::EIL) && !m_idHelperSvc->hasCSC()) {
+        if ((chIndex == ChIndex::EIS || chIndex == ChIndex::EIL) && !m_idHelperSvc->hasCSC()) {
             //Chambers can only be -5, -4, 4, 5
             if( std::abs(chEtaLeft) != 5 && std::abs(chEtaLeft) != 4 ) chEtaLeft = -999;
             if( std::abs(chEtaRight) != 5 && std::abs(chEtaRight) != 4 ) chEtaRight = -999;

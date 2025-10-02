@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimGenScanMonitoring_H
 #define FPGATrackSimGenScanMonitoring_H
@@ -16,6 +16,7 @@
  * 
  **/
 
+#include "FPGATrackSimBinning/FPGATrackSimBinnedHits.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -28,7 +29,8 @@ class TH2D;
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
 
-#include "FPGATrackSimGenScanBinning.h"
+#include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
+
 #include "FPGATrackSimGenScanTool.h"
 
 
@@ -45,8 +47,7 @@ class TH2D;
 
     // This is done at the start of execution to create all the graphs
     // ... also stores some of the configuration parameters for later use
-    StatusCode registerHistograms(unsigned nLayers,const FPGATrackSimGenScanBinningBase  *binning,
-                                 double rin, double rout);
+    StatusCode registerHistograms(const FPGATrackSimBinnedHits* binnedhits);
     void allocateDataFlowCounters();
     void resetDataFlowCounters();
 
@@ -58,42 +59,31 @@ class TH2D;
 
     // Takes the truthtracks as input and parses it into a useful form for later use
     // (e.g. stores which bin the true track is in)
-    void parseTruthInfo(std::vector<FPGATrackSimTruthTrack> const * truthtracks, bool isSingleParticle,
-                              const FPGATrackSimGenScanArray<int>& validBin);
+    void parseTruthInfo(std::vector<FPGATrackSimTruthTrack> const * truthtracks, bool isSingleParticle);
 
-    
     // Fill methods
     void fillHitLevelInput(const FPGATrackSimHit* hit);
     void fillBinLevelOutput(
-        const FPGATrackSimGenScanBinningBase::IdxSet &idx,
-        const FPGATrackSimGenScanTool::BinEntry &data);
+        const FPGATrackSimBinUtil::IdxSet &idx,
+        const FPGATrackSimBinnedHits::BinEntry &data);
     void fillHitsByLayer(const std::vector<
-            std::vector<const FPGATrackSimGenScanTool::StoredHit *>>
+            std::vector<const FPGATrackSimBinUtil::StoredHit *>>
             &hitsByLayer);
-    void fillPairingHits(std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlyr,
-                         std::vector<const FPGATrackSimGenScanTool::StoredHit *> const *lastlastlyr);
-    void fillPairFilterCuts(const FPGATrackSimGenScanTool::HitPair &pair);
+    void fillPairingHits(std::vector<const FPGATrackSimBinUtil::StoredHit *> const *lastlyr,
+                         std::vector<const FPGATrackSimBinUtil::StoredHit *> const *lastlastlyr);
+    void fillPairFilterCuts(const FPGATrackSimGenScanTool::HitPair &pair, double r_in, double r_out);
     void fillPairSetFilterCut(std::vector<TH1D *> &histset, double val,
                                     const FPGATrackSimGenScanTool::HitPair &pair,
                                     const FPGATrackSimGenScanTool::HitPair &lastpair, 
                                     bool nminus1);
 
     
-    void fillInputSummary(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
-                                const FPGATrackSimGenScanArray<int> &validSlice,
-                                const FPGATrackSimGenScanArray<int> &validScan);
-    void fillOutputSummary(const FPGATrackSimGenScanArray<int>& validSlice,
-                                 const FPGATrackSimGenScanArray<int>& validSliceAndScan);
+    void fillBinningSummary(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
 
     void fillBuildGroupsWithPairs(const std::vector<FPGATrackSimGenScanTool::IntermediateState>& states, unsigned allowed_misses);
     
-    // Counter Increments
-    void incrementInputPerSlice(const std::vector<unsigned>& sliceidx) { m_inputhitsperslice[sliceidx]++; }
-    void incrementInputPerScan(const FPGATrackSimGenScanBinningBase::IdxSet& idx, 
-        const std::pair<unsigned, unsigned>& rowRange, const FPGATrackSimHit* hit);
-
     // Error Checks
-    void sliceCheck(const std::vector<unsigned>& sliceidx);
+    void sliceCheck();
     void pairFilterCheck(const FPGATrackSimGenScanTool::HitPairSet& pairs, 
                                const FPGATrackSimGenScanTool::HitPairSet& filteredpairs, 
                                bool passedPairFilter);
@@ -101,10 +91,6 @@ class TH2D;
         const FPGATrackSimGenScanTool::HitPairSet &filteredpairs,
         const std::vector<FPGATrackSimGenScanTool::HitPairSet> &pairsets,
         unsigned threshold);
-
-    bool isTruthBin(FPGATrackSimGenScanBinningBase::IdxSet idx) const {
-      return idx==m_truthbin;
-    }
 
    private:
     ///////////////////////////////////////////////////////////////////////
@@ -114,13 +100,14 @@ class TH2D;
     ///////////////////////////////////////////////////////////////////////
     // Properties
     Gaudi::Property<std::string> m_dir{this, "dir", {"/GENSCAN/"}, "String name of output directory"};
+    Gaudi::Property<double> m_phiScale{this, "phiScale", {}, "Scale for Delta Phi variable"};
+    Gaudi::Property<double> m_etaScale{this, "etaScale", {}, "Scale for Delta Eta variable"};
+    Gaudi::Property<double> m_drScale{this, "drScale", {}, "Scale for radius differences"};
 
     ///////////////////////////////////////////////////////////////////////
-    // Other configuration  
-    unsigned m_nLayers = 0; 
-    const FPGATrackSimGenScanBinningBase *m_binning{nullptr};
-    double m_rin=0.0;
-    double m_rout=0.0;
+    // Pointer to binned hits 
+    const FPGATrackSimBinnedHits *m_binnedhits{nullptr};
+    
 
     ///////////////////////////////////////////////////////////////////////
     // Parsed truth/info
@@ -128,27 +115,20 @@ class TH2D;
     bool m_isSingleParticle = false;
     bool m_truthIsValid = false;
     FPGATrackSimTrackPars m_truthpars;
-    FPGATrackSimGenScanBinningBase::IdxSet m_truthbin;
-    FPGATrackSimGenScanBinningBase::ParSet m_truthparset;
+    std::vector<FPGATrackSimBinUtil::IdxSet> m_truthbin;
+    FPGATrackSimBinUtil::ParSet m_truthparset;
     
     // plots are only filled for the truth bin if single particle sample
     // this gives the distributions of the cut variables when they are 
     // reconstructed in the right bin
-    void setBinPlotsActive(const FPGATrackSimGenScanBinningBase::IdxSet &idx) { 
-        m_binPlotsActive = ((m_truthbin == idx) || (!m_isSingleParticle));}        
+    void setBinPlotsActive(const FPGATrackSimBinUtil::IdxSet &idx) { 
+        m_binPlotsActive = ((m_truthbin.back() == idx) || (!m_isSingleParticle));}        
     // this flag governs if pair filter and pairset filter plots filled
     bool m_binPlotsActive = false;
     
     ///////////////////////////////////////////////////////////////////////
     // Data Flow Counters
     std::vector<unsigned> m_hitsCntByLayer;
-
-    FPGATrackSimGenScanArray<int> m_inputhitsperslice;
-    FPGATrackSimGenScanArray<int> m_inputhitsperrow;
- 
-    FPGATrackSimGenScanArray<int> m_outputhitsperslice;
-    FPGATrackSimGenScanArray<int> m_outputhitsperrow;
-    FPGATrackSimGenScanArray<int> m_outputroadsperrow;
 
     ///////////////////////////////////////////////////////////////////////
     // Histograms
@@ -160,25 +140,20 @@ class TH2D;
     std::vector<TH1D *> m_etaTrueBinShift;
 
     TH1D *m_inputHits = 0;
-    TH1D *m_inputHitsPerSlice = 0;
-    TH1D *m_outputHitsPerSlice = 0;
 
-    TH1D *m_inputHitsPerRow = 0;
-    TH1D *m_outputHitsPerRow = 0;
-    TH1D *m_outputRoadsPerRow = 0;
-    TH1D *m_outputHitsPerBin = 0;
+    // step-by-step plot
+    std::vector<TH1D *> m_hitsPerStepBin;    
+    TH1D * m_hitsPerLayer = 0;    
+    TH2D * m_hitsPerLayer2D = 0;    
+    TH1D * m_numLyrsPerBin = 0;
 
-    TH2D *m_hitsPerLayer2D = 0;
-    TH1D *m_hitsPerLayer = 0;
-    TH1D *m_hitsLoadedPerLayer = 0; // loaded in row
-
-    TH1D *m_hitLyrsAllBins = 0;
+    TH2D *m_hitsPerLayer_bin = 0;
 
     TH1D *m_phiShift_road = 0;
     TH1D *m_etaShift_road = 0;
     TH2D *m_phiShift2D_road = 0;
     TH2D *m_etaShift2D_road = 0;
-    TH2D *m_hitsPerLayer_road = 0;
+    
 
     TH1D *m_pairs = 0;
     TH1D *m_filteredpairs = 0;
@@ -250,20 +225,20 @@ class TH2D;
     // to show the distance from the bin's center to the hit
     struct eventDispSet {
       eventDispSet(std::string name, int maxevts)
-          : m_name(name), m_maxEvts(maxevts) {}
+          : m_name(std::move(name)), m_maxEvts(maxevts) {}
 
       TGraph *initGraph(const std::string &name);
       void AddPoint(TGraph *g, double x, double y);
 
       void addEvent(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
-      void addEvent(const std::vector<FPGATrackSimGenScanTool::StoredHit> &hits);
-      void addEvent(const std::vector<const FPGATrackSimGenScanTool::StoredHit *> &hits);
+      void addEvent(const std::vector<FPGATrackSimBinUtil::StoredHit> &hits);
+      void addEvent(const std::vector<const FPGATrackSimBinUtil::StoredHit *> &hits);
 
       StatusCode registerGraphs(FPGATrackSimGenScanMonitoring* parent);
 
       private:
       const std::string m_name;
-      const unsigned m_maxEvts;
+      const unsigned m_maxEvts{};
 
       std::vector<TGraph *> m_rZ;    // detector coordinates
       std::vector<TGraph *> m_xY;    // detector coordinates
@@ -298,16 +273,17 @@ class TH2D;
     //////////////////////////////////////////////////////////////////////
     // make and register histogram or vector of histograms in one line...
     template <typename HistType, typename... HistDef>
-    StatusCode makeAndRegHist(HistType *&ptr, HistDef... histargs)
+    StatusCode makeAndRegHist(HistType *&ptr, const HistDef & ... histargs)
     {   
         ptr = new HistType(histargs...);
+        ATH_MSG_INFO("Booking Hist: " << ptr->GetName() << " min=" << ptr->GetXaxis()->GetXmin() << " max=" << ptr->GetXaxis()->GetXmax());
         ATH_CHECK(m_tHistSvc->regHist(m_dir + ptr->GetName(), ptr));
         return StatusCode::SUCCESS;
     }
 
 
     template <typename HistType, typename... HistDef>
-    StatusCode makeAndRegHistVector(std::vector<HistType*>& vec, unsigned len, const std::vector<std::string>* namevec, const char* namebase, HistDef... histargs)
+    StatusCode makeAndRegHistVector(std::vector<HistType*>& vec, unsigned len, const std::vector<std::string>* namevec, const char* namebase,  const HistDef & ... histargs)
     {
         if (vec.size()==0){
             for (unsigned i = 0; i < len; i++) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBECOuterModuleTool.h"
@@ -14,28 +14,7 @@ TBECOuterModuleTool::TBECOuterModuleTool(const std::string& type, const std::str
   , m_HitColl_gap_se("LArHitEMEC_gap_se")
   , m_HitColl_chcoll("LArHitEMEC_chcoll")
   , m_HitColl_ropt("LArHitEMEC_ropt")
-  , m_emecoutergadjcalc("EMECPosOuterWheel_ECOR_GADJCalculator", name)
-  , m_emecoutergadjoldcalc("EMECPosOuterWheel_ECOR_GADJ_OLDCalculator", name)
-  , m_emecoutergadjecalc("EMECPosOuterWheel_ECOR_GADJ_ECalculator", name)
-  , m_emecoutergadjscalc("EMECPosOuterWheel_ECOR_GADJ_SCalculator", name)
-  , m_emecoutergadjsecalc("EMECPosOuterWheel_ECOR_GADJ_SECalculator", name)
-  , m_emecouterchclcalc("EMECPosOuterWheel_ECOR_CHCLCalculator", name)
-  , m_emecoutercalc("EMECPosOuterWheelCalculator", name)
-  , m_gapadjSD(nullptr)
-  , m_gapoldSD(nullptr)
-  , m_gap_eSD(nullptr)
-  , m_gap_sSD(nullptr)
-  , m_gap_seSD(nullptr)
-  , m_chcollSD(nullptr)
-  , m_roptSD(nullptr)
 {
-  declareProperty("EMECPosOuterWheel_ECOR_GADJCalculator", m_emecoutergadjcalc);
-  declareProperty("EMECPosOuterWheel_ECOR_GADJ_OLDCalculator", m_emecoutergadjoldcalc);
-  declareProperty("EMECPosOuterWheel_ECOR_GADJ_ECalculator", m_emecoutergadjecalc);
-  declareProperty("EMECPosOuterWheel_ECOR_GADJ_SCalculator", m_emecoutergadjscalc);
-  declareProperty("EMECPosOuterWheel_ECOR_GADJ_SECalculator", m_emecoutergadjsecalc);
-  declareProperty("EMECPosOuterWheel_ECOR_CHCLCalculator", m_emecouterchclcalc);
-  declareProperty("EMECPosOuterWheelCalculator", m_emecoutercalc);
 }
 
 StatusCode TBECOuterModuleTool::initializeCalculators()

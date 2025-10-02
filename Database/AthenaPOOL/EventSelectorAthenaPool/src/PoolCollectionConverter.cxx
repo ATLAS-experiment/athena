@@ -19,7 +19,6 @@
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionDescription.h"
-#include "CollectionBase/CollectionRowBuffer.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
@@ -32,7 +31,7 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 	const std::string& inputCollection,
 	unsigned int contextId,
 	const IPoolSvc* svc) :
-	m_collectionType(),
+	m_collectionType(collectionType),
 	m_connection(),
 	m_inputCollection(inputCollection),
 	m_contextId(contextId),
@@ -40,20 +39,6 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 	m_poolCollection(nullptr),
 	m_collectionQuery(nullptr),
 	m_inputContainer() {
-   // Find out if the user specified a container
-   std::string::size_type p_colon = collectionType.rfind(':');
-   if (p_colon != std::string::npos) {
-      m_inputContainer = collectionType.substr(p_colon + 1);
-      m_collectionType = collectionType.substr(0, p_colon);
-   } else {
-      // The user didn't specify any container. Using the default one.
-      m_inputContainer = "POOLContainer";
-      m_collectionType = collectionType;
-   }
-   std::string::size_type p_slash = m_inputContainer.find('/');
-   if (p_slash != std::string::npos) {
-      m_inputContainer.resize(p_slash);
-   }
 }
 //______________________________________________________________________________
 PoolCollectionConverter::~PoolCollectionConverter() {
@@ -65,15 +50,14 @@ PoolCollectionConverter::~PoolCollectionConverter() {
 }
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::initialize() {
-   std::string collectionTypeString;
-   if (m_collectionType == "ExplicitROOT") {
-      collectionTypeString = "RootCollection";
-   } else if (m_collectionType == "ImplicitROOT") {
-      collectionTypeString = "ImplicitCollection";
-   } else {
-      return(StatusCode::FAILURE);
+   // Find out if the user specified a container
+   const std::string collectionType = m_collectionType;
+   std::string::size_type p_colon = collectionType.rfind(':');
+   if (p_colon != std::string::npos) {
+      m_inputContainer = collectionType.substr(p_colon + 1);
+      m_collectionType = collectionType.substr(0, p_colon);
    }
-   if (collectionTypeString == "ImplicitCollection") {
+   if (m_collectionType == "ImplicitCollection") {
       // Check if already prefixed
       if (m_inputCollection.starts_with( "PFN:")
 	      || m_inputCollection.starts_with( "LFN:")
@@ -96,11 +80,11 @@ StatusCode PoolCollectionConverter::initialize() {
    }
    try {
       if (m_poolCollection == nullptr) {
-         m_poolCollection = m_poolSvc->createCollection(collectionTypeString, m_connection, m_inputCollection, m_contextId);
+         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
       }
-      if (m_poolCollection == nullptr && collectionTypeString == "ImplicitCollection") {
+      if (m_poolCollection == nullptr && m_collectionType == "ImplicitCollection") {
          m_inputCollection = m_inputContainer + "_DataHeader";
-         m_poolCollection = m_poolSvc->createCollection(collectionTypeString, m_connection, m_inputCollection, m_contextId);
+         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
       }
    } catch (std::exception &e) {
       return(StatusCode::RECOVERABLE);
@@ -123,34 +107,8 @@ StatusCode PoolCollectionConverter::isValid() const {
 }
 //______________________________________________________________________________
 pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
-   assert(m_poolCollection);
    delete m_collectionQuery; m_collectionQuery = nullptr;
    m_collectionQuery = m_poolCollection->newQuery();
    m_collectionQuery->selectAll();
-   m_collectionQuery->setRowCacheSize(100);   //MN: FIXME - just an arbitrary number
    return(m_collectionQuery->execute());
-}
-//______________________________________________________________________________
-std::string PoolCollectionConverter::retrieveToken(const pool::ICollectionCursor* cursor,
-		const std::string& refName) const {
-// Retrieve the DataHeader Token from POOL.
-// If header name is non-zero, then search the attibute list for
-// the corresponding ref. Otherwise, use the main token
-   std::string tokenStr;
-   if (!refName.empty()) {
-      std::string attrName = refName + "_ref";
-      try {
-	 tokenStr = cursor->currentRow().tokenList()[attrName].toString();
-      } catch (...) {
-	 // check also in attributes, for backward compatibility
-	 try {
-            tokenStr = cursor->currentRow().attributeList()[attrName].data<std::string>();
-	 } catch (std::exception& e) {
-	    return("");
-	 }
-      }
-   } else {
-      tokenStr = cursor->eventRef().toString();
-   }
-   return(tokenStr);
 }

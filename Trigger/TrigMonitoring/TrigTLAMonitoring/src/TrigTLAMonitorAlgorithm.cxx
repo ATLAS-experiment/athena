@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTLAMonitorAlgorithm.h"
@@ -180,8 +180,7 @@ StatusCode TrigTLAMonitorAlgorithm::fillDeltaRHistograms(const xAOD::IParticle* 
 }
 
 
-StatusCode TrigTLAMonitorAlgorithm::fillJetPtCalibStatesHistograms(SG::ReadHandle<xAOD::JetContainer> jets,  const std::string& calibState,  const std::string& prefix,  const std::string& trigName) const {
-
+StatusCode TrigTLAMonitorAlgorithm::fillJetPtCalibStatesHistograms(SG::ReadHandle<xAOD::JetContainer>& jets,  const std::string& calibState,  const std::string& prefix,  const std::string& trigName) const {
   Monitored::Scalar<float> ptCalibScale  (prefix+calibState+"_"+trigName,-1.0);
 
   unsigned cnt(0);

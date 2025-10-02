@@ -40,7 +40,7 @@ namespace MuonR4 {
         DigiCache digitCache{};
         /// Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData* efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get(efficiencyMap, m_effiDataKey, ctx));
 
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};

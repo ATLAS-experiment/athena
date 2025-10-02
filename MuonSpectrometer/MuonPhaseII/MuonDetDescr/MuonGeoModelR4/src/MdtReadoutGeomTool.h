@@ -14,12 +14,12 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
 namespace MuonGMR4 {
-
+/** @brief Implementation of the IMuonReadoutGeomTool to construct MdtReadoutElements from the list 
+ *         of published full physical volumes and the WMDT meta data table. */
 class MdtReadoutGeomTool : public extends<AthAlgTool,IMuonReadoutGeomTool> {
    public:
     // Constructor
-    MdtReadoutGeomTool(const std::string &type, const std::string &name,
-                       const IInterface *parent);
+    using base_class::base_class;
 
 
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;

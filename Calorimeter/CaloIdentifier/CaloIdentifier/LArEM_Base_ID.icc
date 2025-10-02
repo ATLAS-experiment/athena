@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/LArEM_Base_ID.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -153,37 +151,37 @@ inline IdentifierHash LArEM_Base_ID::channel_hash_binary_search  (Identifier cha
 }
 
 //----------------------------------------------------------------------------
-inline LArEM_Base_ID::id_iterator LArEM_Base_ID::reg_begin    (void) const
+inline LArEM_Base_ID::id_iterator LArEM_Base_ID::reg_begin    () const
 {
   return regions().begin();
 }
 
 //----------------------------------------------------------------------------
-inline LArEM_Base_ID::id_iterator LArEM_Base_ID::reg_end      (void) const
+inline LArEM_Base_ID::id_iterator LArEM_Base_ID::reg_end      () const
 {
   return regions().end();
 }
 
 //----------------------------------------------------------------------------
-inline LArEM_Base_ID::id_range LArEM_Base_ID::reg_range      (void) const
+inline LArEM_Base_ID::id_range LArEM_Base_ID::reg_range      () const
 {
   return regions().range();
 }
 
 //----------------------------------------------------------------------------
-inline LArEM_Base_ID::id_iterator LArEM_Base_ID::em_begin    (void) const
+inline LArEM_Base_ID::id_iterator LArEM_Base_ID::em_begin    () const
 {
   return channels().begin();
 }
 
 //----------------------------------------------------------------------------
-inline LArEM_Base_ID::id_iterator LArEM_Base_ID::em_end      (void) const
+inline LArEM_Base_ID::id_iterator LArEM_Base_ID::em_end      () const
 {
   return channels().end();
 }
 
 //----------------------------------------------------------------------------
-inline LArEM_Base_ID::id_range LArEM_Base_ID::em_range      (void) const
+inline LArEM_Base_ID::id_range LArEM_Base_ID::em_range      () const
 {
   return channels().range();
 }

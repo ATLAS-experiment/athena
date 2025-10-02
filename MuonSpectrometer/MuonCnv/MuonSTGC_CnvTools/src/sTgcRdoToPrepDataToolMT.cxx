@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcRdoToPrepDataToolMT.h"
@@ -19,10 +19,6 @@ using namespace Muon;
 namespace {
     std::atomic<bool> hitNegativeCharge{false};
 }
-//============================================================================
-Muon::sTgcRdoToPrepDataToolMT::sTgcRdoToPrepDataToolMT(const std::string& t, const std::string& n, const IInterface* p) 
-: base_class(t,n,p){}
-
 
 //============================================================================
 StatusCode Muon::sTgcRdoToPrepDataToolMT::initialize()
@@ -98,11 +94,8 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
     
   
     // MuonDetectorManager from the conditions store
-    SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonDetMgr{m_muDetMgrKey,ctx};
-    if(!muonDetMgr.isValid()){
-        ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
-        return StatusCode::FAILURE;
-    }
+    const MuonGM::MuonDetectorManager* muonDetMgr{nullptr};
+    ATH_CHECK(SG::get(muonDetMgr,m_muDetMgrKey,ctx));
     // convert the RDO collection to a PRD collection
     for ( const STGC_RawData* rdo : * rdoColl) {
 
@@ -110,14 +103,8 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
 
         const Identifier  rdoId = rdo->identify();
 
-        if (!m_idHelperSvc->issTgc(rdoId)) {
-            ATH_MSG_WARNING("The given Identifier "<<rdoId.get_compact()<<" ("<<m_idHelperSvc->toString(rdoId)<<") is no sTGC Identifier, continuing");
-            continue;
-        }
-
-        std::vector<Identifier> rdoList;
-        rdoList.push_back(rdoId);
-
+        std::vector<Identifier> rdoList{rdoId};
+    
         // get the local and global positions
         const MuonGM::sTgcReadoutElement* detEl = muonDetMgr->getsTgcReadoutElement(rdoId);
         Amg::Vector2D localPos{Amg::Vector2D::Zero()};
@@ -127,9 +114,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
             ATH_MSG_ERROR("Unknown sTGC channel type");
             return StatusCode::FAILURE;
         }
-
-        bool getLocalPos = detEl->stripPosition(rdoId, localPos);
-        if ( !getLocalPos ) {
+        if (!detEl->stripPosition(rdoId, localPos)) {
             ATH_MSG_ERROR("Could not get the local strip position for "<<m_idHelperSvc->toString(rdoId));
             return StatusCode::FAILURE;
         } 
@@ -144,7 +129,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
         int calibratedCharge = static_cast<int>(calibStrip.charge);
         if (calibratedCharge < 0 && channelType == 1) { // we only want to protect against negatively charged strips and we should not lose wire or pad hits because of bad calibrations since charge does not matter for them in reco. 
             if (!hitNegativeCharge) {
-                ATH_MSG_WARNING("One sTGC RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibratedCharge << "). Skipping these RDOs");
+                ATH_MSG_DEBUG("One sTGC RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibratedCharge << "). Skipping these RDOs");
                 hitNegativeCharge = true; 
             }
             continue;

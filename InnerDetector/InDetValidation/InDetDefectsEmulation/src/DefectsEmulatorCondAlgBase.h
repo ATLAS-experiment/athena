@@ -20,6 +20,9 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 #include "TH2.h"
+
+#include <span>
+
 namespace CLHEP {
    class HepRandomEngine;
 }
@@ -65,6 +68,9 @@ namespace InDet {
       std::vector<std::vector<std::vector<float> > > m_perPatternAndMaskFractions;
       std::vector<std::vector<float> > m_perPatternCornerDefectNCornerCummulativeProb;
 
+      Gaudi::Property<bool> m_rngPerDefectType
+         {this, "RngPerDefectType",  false, "One RNG per defect type to decorrelate randomness of defects."};
+
       // Properties to add a checker board like pattern to the defects
       // for debugging
       Gaudi::Property<bool> m_oddRowToggle
@@ -84,7 +90,18 @@ namespace InDet {
       Gaudi::Property<bool> m_fillEtaPhiHistogramsPerPattern
          {this, "FillEtaPhiHistogramsPerPattern",  false, "If true, histogram per eta, phi amd z, R are filled separately per pattern."};
 
-      std::string m_rngName;
+      Gaudi::Property<std::string> m_outputFile
+         {this,"DefectsOutputFile","", "Empty or file name to write out conditions data (.json or .root)."};
+      Gaudi::Property<std::vector<std::string> > m_inputFiles
+         {this,"DefectsInputFiles",{}, "Empty or file name to write out conditions data (.json or .root)."};
+
+      std::vector<std::string> m_rngName;
+
+      enum DefectTypes {
+         kModuleDefects,
+         kCornerDefects,
+         kMaskDefects
+      };
 
       enum EProbabilities {
          kModuleDefectProb,
@@ -150,7 +167,7 @@ namespace InDet {
       };
 
       // Get number of cell, and group defects and return total number of defects.
-      // @param rndmEngine random engine which will be used to throw the random number of defects.
+      // @param rndmEngine random engine which will be used to throw the random number of defects one per mask.
       // @param module_pattern_idx list of pattern indices which match the module.
       // @param n_masks the number of defect categories e.g. individual pixel, core-column, chip defect.
       // @param n_cels the number cells per module e.g. total number of pixel or strips.
@@ -158,7 +175,7 @@ namespace InDet {
       // @return total number of defects i.e. the sum of the number of defects per category.
       // n_mask_defects will be resized to n_masks and filled with number of defects per category, where the first element
       // will be the number of individual cell defects.
-      unsigned int throwNumberOfDefects(CLHEP::HepRandomEngine *rndmEngine,
+      unsigned int throwNumberOfDefects(std::span<CLHEP::HepRandomEngine *> rndmEngine,
                                         const std::vector<unsigned int> &module_pattern_idx,
                                         unsigned int n_masks,
                                         unsigned int n_cells,

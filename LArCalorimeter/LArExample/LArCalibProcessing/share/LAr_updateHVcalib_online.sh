@@ -94,7 +94,7 @@ echo "Found current global tag $globalTag"
 
 echo " "
 echo "Running athena to read current HV scale factor correction in database for comparison"
-python -m LArCalibTools.LArCalib_HVScale2NtupleConfig $time  > readhv.log 2>&1
+python -m LArCalibTools.LArCalib_HVScale2NtupleConfig $time hvcorr_read.root $globalTag  > readhv.log 2>&1
 if [ $? -ne 0 ];  then
       echo "Athena reported an error ! Please check readhv.log!"
       exit

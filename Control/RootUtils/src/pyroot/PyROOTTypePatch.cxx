@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file RootUtils/src/pyroot/PyROOTTypePatch.cxx
@@ -147,10 +147,13 @@ void PyROOTTypePatch::initialize()
   TInitBehavior* ib =
     const_cast<TInitBehavior*>(DefineBehavior(0,0));
   assert (sizeof(TDefaultInitBehavior) == sizeof (TypePatchInitBehavior));
-  memcpy ((char*)&TypePatchInitBehavior::oldBehavior, (char*)ib,
+  memcpy (static_cast<void*>(&TypePatchInitBehavior::oldBehavior),
+          static_cast<void*>(ib),
           sizeof(TDefaultInitBehavior));
   static TypePatchInitBehavior sfaib;
-  memcpy ((char*)ib, (char*)&sfaib, sizeof(TDefaultInitBehavior));
+  memcpy (static_cast<void*>(ib),
+          static_cast<void*>(&sfaib),
+          sizeof(TDefaultInitBehavior));
 
   // Make sure the TClass's for these are built.
   // Otherwise, CreateClass can get called while global dtors are running.

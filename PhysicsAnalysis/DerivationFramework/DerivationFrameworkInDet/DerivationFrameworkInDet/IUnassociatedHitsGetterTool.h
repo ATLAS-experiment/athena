@@ -10,13 +10,10 @@
 #include "DerivationFrameworkInDet/MinBiasPRDAssociation.h"
 
 
-static const InterfaceID IID_IUnassociatedHitsGetterTool("IUnassociatedHitsGetterTool", 1 , 0);
-
 class IUnassociatedHitsGetterTool : virtual public IAlgTool
 {
  public:
-  
-  static const InterfaceID& interfaceID() { return IID_IUnassociatedHitsGetterTool; }
+  DeclareInterfaceID(IUnassociatedHitsGetterTool, 1, 0); 
 
   /**
    * @brief Type-safe wrapper for @c get.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -39,6 +39,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // STL includes
 #include <cstdlib> // quick_exit
@@ -49,13 +50,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 namespace ISFTesting {
 
 // Athena Tool to emulate a GenParticleFilter
-class MockFilterTool : public AthAlgTool,
-                       public ISF::IGenParticleFilter {
+class MockFilterTool : public extends<AthAlgTool, ISF::IGenParticleFilter> {
 
  public:
-  MockFilterTool(const std::string& type, const std::string& name, const IInterface* parent)
-    : AthAlgTool(type,name,parent)
-  { declareInterface<ISF::IGenParticleFilter>(this); };
+  using base_class::base_class;
 
   virtual ~MockFilterTool() {};
 
@@ -288,7 +286,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
 
   ISF::ISFParticle expected(expectedPos,
                             expectedMom,
-                            0.51099891/Gaudi::Units::MeV, // from particle
+                            ParticleConstants::electronMassInMeV, // from particle
                             -1., // charge
                             11, // pdg id
                             1, ///status

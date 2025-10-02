@@ -6,6 +6,8 @@ from pathlib import Path
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from InDetGNNTracking.InDetGNNTrackingConfigFlags import GNNTrackFinderToolType
+
 
 def DumpObjectsCfg(
         flags, name="DumpObjects", outfile="Dump_GNN4Itk.root", **kwargs):
@@ -66,6 +68,24 @@ def GNNTrackFinderToolCfg(flags, name='GNNTrackFinderTool', **kwargs):
     return acc
 
 
+def GNNTrackFinderTritonToolCfg(flags, name='GNNTrackFinderTritonTool', **kwargs):
+    """Sets up a GNNTrackFinderTritonTool tool and returns it."""
+    from AthTritonComps.TritonToolConfig import TritonToolCfg
+
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("TritonTool", acc.popToolsAndMerge(
+        TritonToolCfg(flags, model_name=flags.Tracking.GNN.Triton.model, 
+                      url=flags.Tracking.GNN.Triton.url,
+                      port=flags.Tracking.GNN.Triton.port,
+                      ))
+    )
+    kwargs.setdefault("SpacepointFeatureTool", acc.popToolsAndMerge(SpacepointFeatureToolCfg(flags)))
+    
+    acc.setPrivateTools(CompFactory.InDet.GNNTrackFinderTritonTool(name, **kwargs))
+    return acc  
+
+
 def SeedFitterToolCfg(flags, name="SeedFitterTool", **kwargs):
     """Sets up a SeedFitter tool and returns it."""
     acc = ComponentAccumulator()
@@ -123,14 +143,18 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
             "TrackSummaryTool", acc.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
         )
 
-    if flags.Tracking.GNN.useTrackFinder:
+    if flags.Tracking.GNN.ToolType == GNNTrackFinderToolType.TrackFinder:
         InDetGNNTrackFinderTool = acc.popToolsAndMerge(GNNTrackFinderToolCfg(flags))
         kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
         kwargs.setdefault("GNNTrackReaderTool", None)
-    elif flags.Tracking.GNN.useTrackReader:
+    elif flags.Tracking.GNN.ToolType == GNNTrackFinderToolType.TrackReader:
         InDetGNNTrackReader = acc.popToolsAndMerge(GNNTrackReaderToolCfg(flags))
         kwargs.setdefault("GNNTrackReaderTool", InDetGNNTrackReader)
         kwargs.setdefault("GNNTrackFinderTool", None)
+    elif flags.Tracking.GNN.ToolType == GNNTrackFinderToolType.Triton:
+        InDetGNNTrackFinderTool = acc.popToolsAndMerge(GNNTrackFinderTritonToolCfg(flags))
+        kwargs.setdefault("GNNTrackReaderTool", None)
+        kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
     else:
         raise RuntimeError("GNNTrackFinder or GNNTrackReader must be enabled!")
 

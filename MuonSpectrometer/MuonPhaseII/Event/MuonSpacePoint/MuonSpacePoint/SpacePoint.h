@@ -1,13 +1,18 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINT_SPACEPOINT_H
 #define MUONSPACEPOINT_SPACEPOINT_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
+#include "Acts/EventData/CompositeSpacePoint.hpp"
+#include "Acts/Seeding/detail/CompSpacePointAuxiliaries.hpp"
+#include "Acts/Utilities/ArrayHelpers.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 namespace MuonR4 {
     /**
      *  @brief The muon space point is the combination of two uncalibrated measurements one of them 
@@ -15,18 +20,58 @@ namespace MuonR4 {
      *          the spacepoint just represents the single measurement and hence has a uncertainty into the other
      *          direction corresponding to the half-length of the measurement channel
     */
+   
     class SpacePoint {
         public:
+            /** @brief Abrivation of the covariance type */
+            using Cov_t = std::array<double, 3>;
+            /** @brief Enum to define the components of the covariance array */
+            using SeedingAux = Acts::Experimental::detail::CompSpacePointAuxiliaries;
+            enum class CovIdx: std::uint8_t {
+                phiCov = Acts::toUnderlying(SeedingAux::ResidualIdx::nonBending),
+                etaCov = Acts::toUnderlying(SeedingAux::ResidualIdx::bending),
+                timeCov = Acts::toUnderlying(SeedingAux::ResidualIdx::time)
+            };
             /*** @brief: Constructor of the SpacePoint
-             *   @param gctx: Geometry context needed to derive the local positions
              *   @param primaryMeas: Primary measurement of the spacepoint by convention that shall be the eta one
              *                       if both measurements are available
-             *   @param secondaryMeas: The complementary phi measurement if availbe
-            */
-            SpacePoint(const ActsGeometryContext& gctx,
-                       const xAOD::UncalibratedMeasurement* primMeas,
+             *   @param secondaryMeas: The complementary phi measurement if available */
+            SpacePoint(const xAOD::UncalibratedMeasurement* primMeas,
                        const xAOD::UncalibratedMeasurement* secondMeas = nullptr);
-            
+            /*** @brief: Position of the space point inside the chamber */
+            const Amg::Vector3D& localPosition() const;
+            /*** @brief: Returns the direction parallel to the primary channel, i.e. the strip or the wire */
+            const Amg::Vector3D& sensorDirection() const;
+            /*** @brief: Returns the vector pointing to the adjacent channel in the chamber */
+            const Amg::Vector3D& toNextSensor() const;
+            /** @brief Returns the vector pointing out of the measurement plane */
+            const Amg::Vector3D& planeNormal() const;
+            /** @brief Returns the measurement's recorded time */
+            double time() const;
+            /** @brief Returns whether the measurement is a Mdt */
+            bool isStraw() const;
+            /** @brief Returns whether the measurement carries time information */
+            bool hasTime() const;
+            /** @brief Returns whether the measurement constains the non-bending direction*/
+            bool measuresLoc0() const;
+            /** @brief Returns whether the measurement constains the bending direction */
+            bool measuresLoc1() const;
+            /** @brief: Returns the size of the drift radius */
+            double driftRadius() const;
+            /** @brief Returns the covariance array */
+            const Cov_t& covariance() const; 
+            /*** @brief  Setter for the measurement covariance */
+
+
+            void setCovariance(Cov_t&& cov);
+            /** @brief  Setter for the direction of the measurement channel in the sector frame
+             *  @param sensorDir: Direction of the sensor
+             *  @param toNextSensor: Vector pointing to the next sensor inside the plane */
+            void setDirection(const Amg::Vector3D& sensorDir,
+                              const Amg::Vector3D& toNextSensor);
+            /*** @brief  Setter for the position of the uncalibrated muon measurement in the sector frame */
+            void setPosition(Amg::Vector3D&& pos);
+
             /*** @brief: Pointer to the primary measurement */
             const xAOD::UncalibratedMeasurement* primaryMeasurement() const;
             /*** @brief: Pointer to the secondary measurement */
@@ -35,14 +80,7 @@ namespace MuonR4 {
             const MuonGMR4::SpectrometerSector* msSector() const;
             /** @brief: Pointer to the associated chamber */
             const MuonGMR4::Chamber* chamber() const;
-            /*** @brief: Position of the space point inside the chamber */
-            const Amg::Vector3D& positionInChamber() const;
-            /*** @brief: Returns the direction parallel to the primary channel, i.e. the strip or the wire */
-            const Amg::Vector3D& directionInChamber() const;
-            /*** @brief: Returns the vector pointing to the adjacent channel in the chamber */
-            const Amg::Vector3D& normalInChamber() const;
-            /** @brief Returns the vector pointing out of the measurement plane */
-            Amg::Vector3D planeNormal() const;
+
             /*** @brief: Returns the measurement type of the primary measurement */
             xAOD::UncalibMeasType type() const;
             /** @brief: Does the space point contain a phi measurement */
@@ -51,11 +89,6 @@ namespace MuonR4 {
             bool measuresEta() const;
             /** @brief: Identifier of the primary measurement */
             const Identifier& identify() const;
-            /** @brief: Returns the size of the drift radius */
-            double driftRadius() const;
-            /** @brief: Returns the uncertainties on the space point */
-            Amg::Vector2D uncertainty() const;
-            const AmgSymMatrix(2)& covariance() const; 
             /** @brief: Equality check by checking the prd pointers */
             bool operator==(const SpacePoint& other) const {
                 return primaryMeasurement() == other.primaryMeasurement() &&
@@ -65,33 +98,44 @@ namespace MuonR4 {
             void setInstanceCounts(std::shared_ptr<unsigned> etaCounts,
                                    std::shared_ptr<unsigned> phiCounts);
             /** @brief How many space points have been built in total with the same eta prd */
-            unsigned int nEtaInstanceCounts() const;
+            unsigned nEtaInstanceCounts() const;
             /** @brief How many space points have been built in total with the same phi prd  */
-            unsigned int nPhiInstanceCounts() const;
+            unsigned nPhiInstanceCounts() const;
             /** @brief Is the space point a 1D or combined 2D measurement */
-            unsigned int dimension() const;
+            unsigned dimension() const;
+            /** @brief The print-out operator */
+            friend std::ostream& operator<<(std::ostream& ostr, const SpacePoint& sp) {
+                    sp.print(ostr);
+                    return ostr;
+            }
         private:
+            void print(std::ostream& ostr) const;
             const xAOD::UncalibratedMeasurement* m_primaryMeas{nullptr};
             const xAOD::UncalibratedMeasurement* m_secondaryMeas{nullptr};
 
-            const MuonGMR4::Chamber* m_chamber{xAOD::readoutElement(m_primaryMeas)->chamber()};
+            const MuonGMR4::Chamber* m_chamber{xAOD::muonReadoutElement(m_primaryMeas)->chamber()};
             const MuonGMR4::SpectrometerSector* m_msSector{m_chamber->parent()};
             /** @brief Flag indicating that the measurement is an eta measurement */
             bool m_measEta{!m_msSector->idHelperSvc()->measuresPhi(identify())};
+            /** @brief Local position inside the msSector */
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
+            /** @brief Local sensor direction */
             Amg::Vector3D m_dir{Amg::Vector3D::Zero()};
+            /** @brief Direction to the next sensor */
+            Amg::Vector3D m_toNext{Amg::Vector3D::Zero()};
+            /** @brief Direction vector pointing outside the sensor plane*/
             Amg::Vector3D m_normal{Amg::Vector3D::Zero()};
-            /** @brief: Measurement covariance 
-             *          If the spacePoint represents an 1D measurement the second coordinate is the length of the
-             *          channel (e.g halfLength of the wire or of the associated strip)
-             *          the uncertainty of the other coordinate, otherwise
-            */
-            AmgSymMatrix(2) m_measCovariance{AmgSymMatrix(2)::Identity()}; 
+            /** @brief Measurement covariance. The first index represents the uncertainty in the 
+             *         phi-direction, the second the uncerainty in the precision direction and 
+             *         the last component is the time covariance. By convention a pure 1D measurement
+             *         has the strip half-length filled in the complementary component */
+            Cov_t m_measCovariance{Acts::filledArray<double, 3>(0.)}; 
             /// In how many space points is the eta measurement used
             std::shared_ptr<const unsigned> m_etaInstances{std::make_shared<unsigned>(1)};
             /// In how many space points is the phi measurement used
             std::shared_ptr<const unsigned> m_phiInstances{std::make_shared<unsigned>(1)};
     };
+    static_assert(Acts::Experimental::CompositeSpacePoint<SpacePoint>);
 }
 
 

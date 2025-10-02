@@ -13,4 +13,4 @@ atlas_add_component( TrkExAlgs
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthContainers GeoPrimitives EventPrimitives GaudiKernel TrkSurfaces TrkParameters TrkParametersBase TrkGeometry TrkVolumes TrkEventPrimitives TrkTrack TrkExInterfaces ActsGeometryInterfacesLib ActsInteropLib ActsGeometryLib ActsCore )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthContainers GeoPrimitives EventPrimitives GaudiKernel TrkSurfaces TrkParameters TrkParametersBase TrkGeometry TrkVolumes TrkEventPrimitives TrkTrack TrkExInterfaces ActsGeometryInterfacesLib ActsInteropLib ActsGeometryLib Acts::Core )

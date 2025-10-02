@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthAnalysisAlgorithm.cxx 
@@ -174,11 +174,11 @@ TFile* AthAnalysisAlgorithm::currentFile(const char* evtSelName) {
             //strip everything except stuff either side of last /
             TString s(g->GetName());
             TObjArray* tokens = s.Tokenize("/");
-            TObjString* lastToken = dynamic_cast<TObjString*>(tokens->Last());
+            TObjString* lastToken = static_cast<TObjString*>(tokens->Last());
             TString sToCompare("");
             bool shortComparison(false);
             if(tokens->GetEntries()>1) {
-                TString beforeSlash((dynamic_cast<TObjString*>(tokens->At(tokens->GetEntries()-2)))->GetString());
+                TString beforeSlash((static_cast<TObjString*>(tokens->At(tokens->GetEntries()-2)))->GetString());
                 if(beforeSlash.Length()>0) sToCompare += beforeSlash;
                 sToCompare += "/";
             } else {
@@ -198,10 +198,19 @@ TFile* AthAnalysisAlgorithm::currentFile(const char* evtSelName) {
                 }
                 TObjArray* tokens = t.Tokenize("/");
                 TObjString* lastToken = dynamic_cast<TObjString*>(tokens->Last());
+                if (!lastToken) {
+                  ATH_MSG_ERROR("Cannot cast token string to TObjString");
+                  return nullptr;
+                }
                 TString tToCompare = "";
                 bool shortComparison2(false);
                 if(tokens->GetEntries()>1) {
-                  TString beforeSlash((dynamic_cast<TObjString*>(tokens->At(tokens->GetEntries()-2)))->GetString());
+                  TObjString* beforeSlashStr = dynamic_cast<TObjString*>(tokens->At(tokens->GetEntries()-2));
+                  if (!beforeSlashStr) {
+                    ATH_MSG_ERROR("Cannot cast token string to TObjString");
+                    return nullptr;
+                  }
+                  TString beforeSlash(beforeSlashStr->GetString());
                   if(beforeSlash.Length()>0) tToCompare += beforeSlash;
                   tToCompare += "/";
                 } else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file Bins_Diff_FromAvg.cxx calculates average bin value; finds bins more than N Sigma away from average and returns dqm_core::Result
@@ -154,7 +154,7 @@ dqm_algorithms::Bins_Diff_FromAvg::execute(const std::string &  name,
   }
   
   result->tags_["NBins"] = count;
-  result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);
+  result->object_ =  boost::shared_ptr<TObject>(resulthisto);
 
   ERS_DEBUG(1,"Number of bins " << bin_threshold << " Sigma away from average of "<< avg << " is " << count);
   ERS_DEBUG(1,"Green threshold: "<< gthreshold << " bin(s);   Red threshold : " << rthreshold << " bin(s) ");

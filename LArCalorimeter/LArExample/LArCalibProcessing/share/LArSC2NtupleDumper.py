@@ -45,6 +45,12 @@ if __name__=='__main__':
   parser.add_argument('--addTT', dest='TT', default=False, help='Add info from LArTriggerTowers to output ntuple', action='store_true')
   parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
   parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
+  parser.add_argument('--FTs', dest='ft', default=[], nargs="+", type=int, help='list of FT which will be read out (space separated).')
+  parser.add_argument('--posneg', dest='posneg', default=[], nargs="+", help='side to read out (-1 means both), can give multiple arguments (space separated). Default %(default)s.', type=int,choices=range(-1,2))
+  parser.add_argument('--barrel_ec', dest='be', default=[], nargs="+", help='subdet to read out (-1 means both), can give multiple arguments (space separated) Default %(default)s.', type=int,choices=range(-1,2))
+  parser.add_argument('--ETThresh', dest='etthresh', default=-1., help='ET threshold to dump info', type=float)
+  parser.add_argument('--ETThreshMain', dest='etthreshmain', default=-1., help='ET threshold from Main to dump info', type=float)
+  parser.add_argument('--ADCThresh', dest='adcthresh', default=-1, help='ADC threshold to dump info', type=int)
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -61,6 +67,12 @@ if __name__=='__main__':
   if args.accsamples or args.acccalibsamples:
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(flags, True)
+    if len(args.posneg) >= 0:
+       flags.LArCalib.Preselection.Side = args.posneg
+    if len(args.be) >=0:
+       flags.LArCalib.Preselection.BEC = args.be
+    if len(args.ft) > 0:
+       flags.LArCalib.Preselection.FT = args.ft   
   #add SC dumping specific flags
   from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
   addSCDumpFlags(flags)
@@ -98,28 +110,31 @@ if __name__=='__main__':
   else:   
      flags.LArSCDump.acccalibdigitsKey=""
 
+  flags.LArSCDump.doBC = args.bc
+  bckey='LArBadChannel'
+
   flags.LArSCDump.digitsKey=""
   CKeys=[]
+  fwversion=5
 
-  if not (args.accsamples or args.acccalibsamples):   
-     #  autoconfig
-     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
-     try:
-        runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
-     except Exception:
-        log.warning("Could not get DT run info, using defaults !")
-        flags.LArSCDump.doEt=True
-        if args.nsamp > 0:
-           flags.LArSCDump.nSamples=args.nsamp
-        else:   
-           flags.LArSCDump.nSamples=5
-        flags.LArSCDump.nEt=1
-        if args.samples:
-           flags.LArSCDump.digitsKey="SC"
-        CKeys=["SC_ET"]
-        log.debug(runinfo.streamTypes(), ' ',runinfo.streamLengths())
-     else:
-        CKeys=[]
+  #  autoconfig
+  from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+  try:
+     runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+  except Exception:
+     log.warning("Could not get DT run info, using defaults !")
+     flags.LArSCDump.doEt=True
+     if args.nsamp > 0:
+        flags.LArSCDump.nSamples=args.nsamp
+     else:   
+        flags.LArSCDump.nSamples=5
+     flags.LArSCDump.nEt=1
+     if args.samples:
+        flags.LArSCDump.digitsKey="SC"
+     CKeys=["SC_ET"]
+  else:
+     fwversion=runinfo.FWversion()   
+     if not (args.accsamples or args.acccalibsamples):   
         flags.LArSCDump.digitsKey=""
         for i in range(0,len(runinfo.streamTypes())):
            if args.EtId and runinfo.streamTypes()[i] ==  "SelectedEnergy":
@@ -204,6 +219,12 @@ if __name__=='__main__':
      flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
     
+  if args.etthresh > 0.:
+     flags.LArSCDump.ETThresh = args.etthresh
+
+  if args.etthreshmain > 0.:
+     flags.LArSCDump.ETThreshMain = args.etthreshmain
+
   flags.lock()
   flags.dump('LArSCDump.*')
 
@@ -231,14 +252,18 @@ if __name__=='__main__':
      tdt = None
 
 
-  if args.fw6:
+  if args.fw6 or fwversion==6:
      # addition for new firmware
      from IOVDbSvc.IOVDbSvcConfig import addOverride
-     acc.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
+     if args.emf:
+        acc.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-emf-fw6"))
+     else:   
+        acc.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
   if args.bc:
      from LArBadChannelTool.LArBadChannelConfig import  LArBadFebCfg, LArBadChannelCfg
      acc.merge(LArBadChannelCfg(flags,None,True))
      acc.merge(LArBadFebCfg(flags))
+     bckey+='SC'
 
   if args.geom:
      acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
@@ -247,11 +272,12 @@ if __name__=='__main__':
 
   from LArCalibTools.LArSC2NtupleConfig import LArSC2NtupleCfg
   acc.merge(LArSC2NtupleCfg(flags, isEmf = args.emf, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
-                            OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, # from LArCond2NtupleBase 
+                            OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, BadChanKey=bckey, # from LArCond2NtupleBase 
                             NSamples=flags.LArSCDump.nSamples, FTlist=[], FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey, AccContainerKey=flags.LArSCDump.accdigitsKey, AccCalibContainerKey=flags.LArSCDump.acccalibdigitsKey,# from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
                             FillRODEnergy = flags.LArSCDump.doRawChan,
                             FillLB=args.evtree, FillTriggerType = args.evtree,
+                            ETThreshold = flags.LArSCDump.ETThresh, ETThresholdMain = flags.LArSCDump.ETThreshMain, ADCThreshold=args.adcthresh,
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
                             TrigDecisionTool=tdt, FillTriggerTowers = args.TT,
                             OutputLevel=args.olevel

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -95,7 +95,7 @@ StatusCode LArRampAdHocPatchingAlg::stop()
     m_contOut->setGroupingType((LArConditionsContainerBase::GroupingType)m_contIn->groupingType());
     ATH_CHECK( m_contOut->initialize() );
     ATH_CHECK( detStore()->record(m_contOut,m_newContainerKey) );
-    ATH_CHECK( detStore()->symLink(m_contOut,(ILArRamp*)m_contOut) );
+    ATH_CHECK( detStore()->symLink(m_contOut,static_cast<ILArRamp*>(m_contOut)) );
     ATH_MSG_INFO ( "Loaded input container " << m_containerKey 
                    << ", write to new container " << m_newContainerKey );
   }

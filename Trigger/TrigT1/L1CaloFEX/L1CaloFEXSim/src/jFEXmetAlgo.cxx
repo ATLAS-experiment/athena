@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXmetAlgo - Algorithm for MET Algorithm in jFEX
@@ -7,18 +7,12 @@
 //     begin                : 14 05 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
-#include <iostream>
 #include <vector>
 #include <stdio.h>
 #include <math.h>
-#include "L1CaloFEXSim/jFEXmetAlgo.h"
+#include "jFEXmetAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1{

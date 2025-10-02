@@ -2,7 +2,6 @@
 # version modified by Richard Hawkings from COOl1.3.2 distribution
 # original by Sven Schmitt (Abstracture/Mainz)
 
-from __future__ import print_function
 import sys
 import code
 import readline
@@ -178,7 +177,7 @@ class AtlCoolConsole( HistoryConsole ):
     def command_less( self, argumentString ):
         if argumentString is None:
             raise Exception( "usage: less <folder>" )
-        argumentString.strip()
+        argumentString = argumentString.strip()
         nodes = argumentString.split()
         cmds = []
         for node in nodes:
@@ -188,7 +187,7 @@ class AtlCoolConsole( HistoryConsole ):
     def command_more( self, argumentString ):
         if argumentString is None:
             raise Exception( "usage: more <folder>" )
-        argumentString.strip()
+        argumentString = argumentString.strip()
         nodes = argumentString.split()
         cmds = []
         for node in nodes:
@@ -198,7 +197,7 @@ class AtlCoolConsole( HistoryConsole ):
 
     def command_ls( self, argumentString, doCount=False ):
         if argumentString is None: argumentString = '.'
-        argumentString.strip()
+        argumentString = argumentString.strip()
         if argumentString == '': argumentString = '.'
         nodes = argumentString.split()
         cmds = []
@@ -216,7 +215,7 @@ class AtlCoolConsole( HistoryConsole ):
 
     def command_lstags( self, argumentString ):
         if argumentString is None: argumentString = '.'
-        argumentString.strip()
+        argumentString = argumentString.strip()
         if argumentString is None: argumentString = '.'
         nodes = argumentString.split()
         cmds = []
@@ -226,7 +225,7 @@ class AtlCoolConsole( HistoryConsole ):
 
     def command_filtertags(self,argumentString):
         if argumentString is None or argumentString=="": argumentString = '.'
-        argumentString.strip()
+        argumentString = argumentString.strip()
         if argumentString is None: argumentString = '.'
         args = argumentString.split()
         node=args[0]
@@ -240,7 +239,7 @@ class AtlCoolConsole( HistoryConsole ):
     
     def command_listchans( self, argumentString ):
         if argumentString is None: argumentString = '.'
-        argumentString.strip()
+        argumentString = argumentString.strip()
         if argumentString is None: argumentString = '.'
         nodes = argumentString.split()
         cmds = []
@@ -250,7 +249,7 @@ class AtlCoolConsole( HistoryConsole ):
 
     def command_listinfo( self, argumentString ):
         if argumentString is None: argumentString = '.'
-        argumentString.strip()
+        argumentString = argumentString.strip()
         if argumentString is None: argumentString = '.'
         nodes = argumentString.split()
         cmds = []
@@ -259,26 +258,26 @@ class AtlCoolConsole( HistoryConsole ):
         return ';'.join( cmds )
 
     def command_rmdir(self, argumentString ):
-        argumentString.strip()
+        argumentString = argumentString.strip()
         cmds=[]
         cmds.append('this.rmdir("%s")' % argumentString)
         return ';'.join( cmds )
 
     def command_usetag(self, argumentString ):
-        argumentString.strip()
+        argumentString = argumentString.strip()
         cmds=[]
         cmds.append('this.usetag("%s")' % argumentString)
         return ';'.join( cmds )
 
     def command_usechan(self, argumentString ):
-        argumentString.strip()
+        argumentString = argumentString.strip()
         cmds=[]
         cmds.append('this.usechan("%s")' % argumentString)
         return ';'.join( cmds )
         
     def command_cd( self, argumentString ):
         if argumentString is None: argumentString ='/'
-        argumentString.strip()
+        argumentString = argumentString.strip()
         if argumentString == '': argumentString = '/'
         cmds=[]
         cmds.append('this.cd("%s")' % argumentString)

@@ -13,24 +13,17 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // ACTS
+#include "src/ScoreBasedSolverCutsImpl.h"
 #include "Acts/AmbiguityResolution/ScoreBasedAmbiguityResolution.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsEvent/TrackContainer.h"
 
 // Athena
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetRecToolInterfaces/IInDetEtaDependentCutsSvc.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "xAODInDetMeasurement/StripClusterContainer.h"
 
 // Handle Keys
-#include <memory>
-#include <string>
-
-#include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -42,17 +35,15 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
                                    ISvcLocator *pSvcLocator);
 
   virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   virtual StatusCode execute(const EventContext &ctx) const override;
 
  private:
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "",
                                               "Monitoring tool"};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", ""};
 
   SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey{
       this, "TracksLocation", "", "Input track collection"};
-  ActsTrk::MutableTrackContainerHandlesHelper m_resolvedTracksBackendHandles;
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_resolvedTracksKey{
       this, "ResolvedTracksLocation", "",
       "Ambiguity resolved output track collection"};
@@ -85,6 +76,17 @@ class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
   /** ITk eta-dependent cuts*/
   ServiceHandle<InDet::IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{
       this, "InDetEtaDependentCutsSvc", ""};
+
+  public:
+    enum EStat {
+      kNInputTracks,
+      kNResolvedTracks,
+      kNSharedHits,
+      kNStat
+    };
+
+  private:
+    mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE{};
 };
 
 }  // namespace ActsTrk

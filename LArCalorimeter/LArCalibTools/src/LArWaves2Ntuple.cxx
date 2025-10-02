@@ -123,7 +123,7 @@ bool LArWaves2Ntuple::fillWave(const HWIdentifier chid, const LArWaveCumul& wave
     m_tmaxAmp  = m_dt * m_waveHelper.getMax(wave);
     m_width    = m_dt * m_waveHelper.getWidth(wave);
     m_rT0      = m_dt * m_waveHelper.getT0(wave);
-    m_posLobe  = m_dt * m_waveHelper.getSumRegion(wave,0,m_waveHelper.getZeroCross(wave))/m_maxAmp;
+    m_posLobe  = (m_maxAmp != 0.)? (m_dt * m_waveHelper.getSumRegion(wave,0,m_waveHelper.getZeroCross(wave))/m_maxAmp): 0.;
   }
   return true;
 }

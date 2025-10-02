@@ -212,6 +212,87 @@ BOOST_AUTO_TEST_CASE(EnumeratedIdentiferFieldProperties){
   BOOST_CHECK(e2 == 6);
 }
 
+BOOST_AUTO_TEST_CASE(NextPreviousBounded){
+  IdentifierField f1 (0, 10);
+  IdentifierField f2 (0, 10);
+  f2.set_next (7);
+  IdentifierField f3 (0, 10);
+  f3.set_previous (3);
+  IdentifierField f4 (0, 10);
+  f4.set_next (7);
+  f4.set_previous (3);
+  IdentifierField f5 (0, 10);
+  f5.set (true);
+
+  // Nothing set -- next/previous from the ends fail.
+  IdentifierField::element_type e = -1;
+  BOOST_CHECK (!f1.get_next (10, e));
+  BOOST_CHECK (!f1.get_previous (0, e));
+
+  // Next set.
+  BOOST_CHECK (f2.get_next (10, e));
+  BOOST_CHECK (e == 7);
+  BOOST_CHECK (!f2.get_previous (0, e));
+
+  // Previous set.
+  BOOST_CHECK (!f3.get_next (10, e));
+  BOOST_CHECK (f3.get_previous (0, e));
+  BOOST_CHECK (e == 3);
+
+  // Both set.
+  BOOST_CHECK (f4.get_next (10, e));
+  BOOST_CHECK (e == 7);
+  BOOST_CHECK (f4.get_previous (0, e));
+  BOOST_CHECK (e == 3);
+
+  // Wraparound.
+  BOOST_CHECK (f5.get_next (10, e));
+  BOOST_CHECK (e == 0);
+  BOOST_CHECK (f5.get_previous (0, e));
+  BOOST_CHECK (e == 10);
+}
+
+BOOST_AUTO_TEST_CASE(NextPreviousEnum){
+  IdentifierField::element_vector elts {0, 3, 5, 7, 10};
+  IdentifierField f1 (elts);
+  IdentifierField f2 (elts);
+  f2.set_next (7);
+  IdentifierField f3 (elts);
+  f3.set_previous (3);
+  IdentifierField f4 (elts);
+  f4.set_next (7);
+  f4.set_previous (3);
+  IdentifierField f5 (elts);
+  f5.set (true);
+
+  // Nothing set -- next/previous from the ends fail.
+  IdentifierField::element_type e = -1;
+  BOOST_CHECK (!f1.get_next (10, e));
+  BOOST_CHECK (!f1.get_previous (0, e));
+
+  // Next set.
+  BOOST_CHECK (f2.get_next (10, e));
+  BOOST_CHECK (e == 7);
+  BOOST_CHECK (!f2.get_previous (0, e));
+
+  // Previous set.
+  BOOST_CHECK (!f3.get_next (10, e));
+  BOOST_CHECK (f3.get_previous (0, e));
+  BOOST_CHECK (e == 3);
+
+  // Both set.
+  BOOST_CHECK (f4.get_next (10, e));
+  BOOST_CHECK (e == 7);
+  BOOST_CHECK (f4.get_previous (0, e));
+  BOOST_CHECK (e == 3);
+
+  // Wraparound.
+  BOOST_CHECK (f5.get_next (10, e));
+  BOOST_CHECK (e == 0);
+  BOOST_CHECK (f5.get_previous (0, e));
+  BOOST_CHECK (e == 10);
+}
+
 BOOST_AUTO_TEST_CASE(IdentifierFieldOperators){
   //start with a virgin field
   IdentifierField f1;

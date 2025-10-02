@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRdoToPrepDataToolMT.h"
@@ -2914,8 +2914,7 @@ Muon::TgcRdoToPrepDataToolMT::getCabling() const
 
   // get TGC Cabling Svc
   CablingInfo cinfo;
-  cinfo.m_tgcCabling = service("MuonTGC_CablingSvc");
-  if (!cinfo.m_tgcCabling) {
+  if (cinfo.m_tgcCabling.retrieve().isFailure()) {
     ATH_MSG_ERROR( "Could not get MuonTGC_CablingSvc!" );
     return nullptr;
   }

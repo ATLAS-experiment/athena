@@ -11,7 +11,6 @@
 # ----------------------------------------------------------------
 #
 
-from __future__ import with_statement, print_function
 from CoolRunQuery.utils.AtlRunQueryTimer import timer
 
 import sys, os, time, re, calendar
@@ -731,7 +730,7 @@ class XMLReader(object):
 
 
     def __init__(self,filename):
-        import xml.etree.cElementTree as ET
+        import xml.etree.ElementTree as ET
         self.doc = ET.parse(filename)
         root = XMLReader.XMLElement(self.doc.getroot())
         self.__filename = filename

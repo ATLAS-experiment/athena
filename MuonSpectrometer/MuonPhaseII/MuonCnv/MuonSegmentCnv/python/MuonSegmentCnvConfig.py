@@ -21,6 +21,15 @@ def MuonR4SegmentCnvAlgCfg(flags, name="MuonR4SegmentCnvAlg", **kwargs):
     kwargs.setdefault("CompetingRotCreator", result.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
     from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
     kwargs.setdefault("printerTool", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
-    the_alg = CompFactory.MuonR4.SegmentCnvAlg(name, **kwargs)
+    the_alg = CompFactory.MuonR4.TrkSegmentCnvAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def xAODSegmentCnvAlgCfg(flags, name="MuonR4xAODSegmentCnvAlg", **kwargs):
+    result = ComponentAccumulator()
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
+
+    the_alg = CompFactory.MuonR4.xAODSegmentCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

@@ -1,12 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimPrototrackFitterAlg.h"
 
+#include "ActsCalibBase/CalibrationContext.h"
 
-FPGATrackSim::FPGATrackSimPrototrackFitterAlg::FPGATrackSimPrototrackFitterAlg (const std::string& name, ISvcLocator* pSvcLocator ) : AthReentrantAlgorithm( name, pSvcLocator ){
-}
+constexpr bool enableBenchmark = 
+#ifdef BENCHMARK_FPGATRACKSIM
+    true;
+#else
+    false;
+#endif
 
 StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::initialize() {
   ATH_CHECK(m_trackContainerKey.initialize());
@@ -15,8 +20,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ProtoTrackCollectionFromFPGAKey.initialize());
-  ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
-
+  ATH_CHECK(m_chrono.retrieve());
   return StatusCode::SUCCESS;
 }
 
@@ -42,26 +46,22 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
-  SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
-     detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
-  ATH_CHECK(detectorElementToGeometryIdMap.isValid());
-
-  Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-  Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  // CalibrationContext converter not implemented yet.
-  Acts::CalibrationContext calContext = Acts::CalibrationContext();
+  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+  const Acts::CalibrationContext calContext{ActsTrk::getCalibrationContext(ctx)};
 
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
-  ActsTrk::MutableTrackContainer trackContainer;
-
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::MutableTrackContainer trackContainer( std::move(trackBackend),
+                                                 std::move(trackStateBackend) );
+  
+  if constexpr (enableBenchmark) m_chrono->chronoStart("FPGATrackSimPrototrackFitterAlg: ACTS KF");
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
-    auto res = m_actsFitter->fit(ctx, proto.measurements, *proto.parameters,
-      m_trackingGeometryTool->getGeometryContext(ctx).context(),
-      m_extrapolationTool->getMagneticFieldContext(ctx),
-      Acts::CalibrationContext(),
-      **detectorElementToGeometryIdMap);
+    auto res = m_actsFitter->fit(proto.measurements, *proto.parameters,
+                                 tgContext, mfContext, calContext);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;
@@ -73,10 +73,16 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
       continue;
     }
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
-    destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
+    destProxy.copyFrom(trackProxy);
   }
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
-    m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
+  if constexpr (enableBenchmark) m_chrono->chronoStop("FPGATrackSimPrototrackFitterAlg: ACTS KF");
+
+  // convert to const
+  Acts::ConstVectorTrackContainer ctrackBackend( std::move(trackContainer.container()) );
+  Acts::ConstVectorMultiTrajectory ctrackStateBackend( std::move(trackContainer.trackStateContainer()) );
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = std::make_unique<ActsTrk::TrackContainer>( std::move(ctrackBackend),
+                                                                                                             std::move(ctrackStateBackend) );
+
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
   return StatusCode::SUCCESS;

@@ -46,7 +46,7 @@ private:
     /// for simulation and recorded data
     struct RunMetaData {
         ~RunMetaData() = default;
-        RunMetaData(unsigned int __run, const std::string& __stream) : run_number{__run}, trigger_stream{__stream} {}
+        RunMetaData(unsigned int run, const std::string& stream) : run_number{run}, trigger_stream{stream} {}
         bool operator<(const RunMetaData& other) const { return run_number < other.run_number; }
         /// run number of the current file
         unsigned int run_number{0};
@@ -65,7 +65,7 @@ private:
     };
     struct SimMetaData {
         ~SimMetaData() = default;
-        SimMetaData(int __dsid, unsigned int __prw) : mc_channel{__dsid}, prw_channel{__prw} {}
+        SimMetaData(int dsid, unsigned int prw) : mc_channel{dsid}, prw_channel{prw} {}
         bool operator<(const SimMetaData& other) const {
             if (other.mc_channel != mc_channel) return mc_channel < other.mc_channel;
             if (other.prw_channel != prw_channel) return prw_channel < other.prw_channel;

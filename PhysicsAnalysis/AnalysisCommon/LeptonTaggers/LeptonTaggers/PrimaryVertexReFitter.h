@@ -30,7 +30,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "StoreGate/WriteDecorHandle.h"
 
 // xAOD
 #include "xAODTracking/VertexContainer.h"
@@ -55,15 +54,12 @@ namespace Prompt
     private:
 
         using accessorFloat_t = SG::Accessor<float>;
-        using decoratorHandElemVtx_t = SG::WriteDecorHandle<xAOD::IParticleContainer, ElementLink<xAOD::VertexContainer> >;
 
 
         bool decorateLepWithReFitPrimaryVertex(const FittingInput &input,
             const xAOD::TrackParticle* tracklep,
-            const xAOD::IParticle *lep,
             const std::vector<const xAOD::TrackParticle*> &tracks,
-            xAOD::VertexContainer &refitVtxContainer,
-            decoratorHandElemVtx_t& lepRefittedRMVtxLinkDec);
+            xAOD::VertexContainer &refitVtxContainer);
 
 
     private:

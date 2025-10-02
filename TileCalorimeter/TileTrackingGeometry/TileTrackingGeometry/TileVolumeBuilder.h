@@ -33,7 +33,6 @@ class StoreGateSvc;
 
 namespace Trk {
 class ILayerArrayCreator;
-class ITrackingVolumeHelper;
 class ITrackingVolumeCreator;
 class TrackingVolume;
 class Volume;
@@ -68,12 +67,13 @@ public:
   /** AlgTool initialize method */
   virtual StatusCode initialize() override final;
 
-  /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(
-    const CaloDetDescrManager& caloDDM
-    , const GeoAlignmentStore* geoAlign) const override final;
+  /** TrackingVolumeBuilder interface method - returns vector of ptrs
+   * to volumes. The caller assumes ownership of the pointers*/
+  virtual std::vector<Trk::TrackingVolume*> trackingVolumes(
+      const CaloDetDescrManager& caloDDM,
+      const GeoAlignmentStore* geoAlign) const override final;
 
-private:
+ private:
   static void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) ;
 
   void printInfo(const GeoPVConstLink& pv) const;
@@ -84,7 +84,6 @@ private:
   const TileDetDescrManager* m_tileMgr; //!< Calo DetDescrMgr
   std::string m_tileMgrLocation;        //!< Location of the CaloDetDescrMgr
 
-  ToolHandle<Trk::ITrackingVolumeHelper> m_trackingVolumeHelper;   //!< Helper Tool to create TrackingVolumes
   ToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator; //!< Second helper for volume creation
 
   double m_tileBarrelEnvelope; //!< envelope Cover of the Barrel
@@ -96,8 +95,6 @@ private:
 
   bool m_forceSymmetry; //!< forces volume symmetry between negative/positive part
 
-  mutable std::mutex m_garbageMutex;
-  mutable std::vector<std::unique_ptr<Trk::Material>> m_garbage ATLAS_THREAD_SAFE;
 };
 
 } // end of namespace

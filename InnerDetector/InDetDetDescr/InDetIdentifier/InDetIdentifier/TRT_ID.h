@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_TRT_ID_H
@@ -15,8 +15,6 @@
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
  */
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/Identifier.h"
@@ -92,8 +90,8 @@ public:
 
   /// @name strutors
   //@{
-  TRT_ID(void);
-  ~TRT_ID(void);
+  TRT_ID();
+  ~TRT_ID();
   //@}
 
   /// @name Check whether TRT_ID is valid for the current layour
@@ -179,30 +177,30 @@ public:
   //@{
   /// The init will use up ~2 MB of memory, so one should do init,
   /// use straw_id and then reset
-  void init_straw_hash_vector(void);
-  void reset_straw_hash_vector(void);
+  void init_straw_hash_vector();
+  void reset_straw_hash_vector();
   //@}
 
   /// @name Hash table maximum sizes
   //@{
-  size_type module_hash_max(void) const;
-  size_type straw_layer_hash_max(void) const;
-  size_type straw_hash_max(void) const;
+  size_type module_hash_max() const;
+  size_type straw_layer_hash_max() const;
+  size_type straw_hash_max() const;
   //@}
 
 
   /// @name Access to all ids
   //@{
   /// Iterators over full set of module ids. Module ids are sorted
-  const_id_iterator module_begin(void) const;
-  const_id_iterator module_end(void) const;
+  const_id_iterator module_begin() const;
+  const_id_iterator module_end() const;
   /// Iterators over full set of straw_layer ids. Straw_layer ids are sorted
-  const_id_iterator straw_layer_begin(void) const;
-  const_id_iterator straw_layer_end(void) const;
+  const_id_iterator straw_layer_begin() const;
+  const_id_iterator straw_layer_end() const;
   /// For straw ids, only expanded id iterators are available. Use
   /// "straw_id" method to obtain a compact identifier
-  const_expanded_id_iterator straw_begin(void) const;
-  const_expanded_id_iterator straw_end(void) const;
+  const_expanded_id_iterator straw_begin() const;
+  const_expanded_id_iterator straw_end() const;
   //@}
 
   /// @name Optimized accessors
@@ -235,13 +233,13 @@ public:
   /// @name contexts to distinguish between different ids
   //@{
   /// barrel_ec id
-  IdContext barrel_context(void) const;
+  IdContext barrel_context() const;
   /// module id
-  IdContext module_context(void) const;
+  IdContext module_context() const;
   /// straw_layer id
-  IdContext straw_layer_context(void) const;
+  IdContext straw_layer_context() const;
   /// straw id
-  IdContext straw_context(void) const;
+  IdContext straw_context() const;
   //@}
 
 
@@ -281,7 +279,7 @@ public:
                        const IdContext* context = 0) const;
 
   /// Tests of packing
-  void test_trt_ids(void);
+  void test_trt_ids();
   //@}
 
 
@@ -310,9 +308,9 @@ private:
                        int layer_or_wheel,
                        int straw_layer) const;
 
-  int initLevelsFromDict(void);
+  int initLevelsFromDict();
 
-  void init_hashes(void);
+  void init_hashes();
   // Private access only for hash from binary search - must have
   // done init_straw_hashes for this to work
   IdentifierHash straw_hash_bin(Identifier straw_id) const;
@@ -376,10 +374,6 @@ private:
 };
 
 
-
-/////////////////////////////////////////////////////////////////////////////
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-/////////////////////////////////////////////////////////////////////////////
 
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
@@ -690,7 +684,7 @@ TRT_ID::straw_id(IdentifierHash straw_hash) const {
 
 //----------------------------------------------------------------------------
 inline IdContext
-TRT_ID::barrel_context(void) const {
+TRT_ID::barrel_context() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -700,7 +694,7 @@ TRT_ID::barrel_context(void) const {
 
 //----------------------------------------------------------------------------
 inline IdContext
-TRT_ID::module_context(void) const {
+TRT_ID::module_context() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -710,7 +704,7 @@ TRT_ID::module_context(void) const {
 
 //----------------------------------------------------------------------------
 inline IdContext
-TRT_ID::straw_layer_context(void) const {
+TRT_ID::straw_layer_context() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -720,7 +714,7 @@ TRT_ID::straw_layer_context(void) const {
 
 //----------------------------------------------------------------------------
 inline IdContext
-TRT_ID::straw_context(void) const {
+TRT_ID::straw_context() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -908,7 +902,7 @@ TRT_ID::straw(const Identifier& id)  const {
 
 //----------------------------------------------------------------------------
 inline TRT_ID::size_type
-TRT_ID::module_hash_max(void) const {
+TRT_ID::module_hash_max() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -917,7 +911,7 @@ TRT_ID::module_hash_max(void) const {
 
 //----------------------------------------------------------------------------
 inline TRT_ID::size_type
-TRT_ID::straw_layer_hash_max(void) const {
+TRT_ID::straw_layer_hash_max() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -926,7 +920,7 @@ TRT_ID::straw_layer_hash_max(void) const {
 
 //----------------------------------------------------------------------------
 inline TRT_ID::size_type
-TRT_ID::straw_hash_max(void) const {
+TRT_ID::straw_hash_max() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -934,7 +928,7 @@ TRT_ID::straw_hash_max(void) const {
 }
 
 //----------------------------------------------------------------------------
-inline TRT_ID::const_id_iterator TRT_ID::module_begin(void) const {
+inline TRT_ID::const_id_iterator TRT_ID::module_begin() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -942,7 +936,7 @@ inline TRT_ID::const_id_iterator TRT_ID::module_begin(void) const {
 }
 
 //----------------------------------------------------------------------------
-inline TRT_ID::const_id_iterator TRT_ID::module_end(void) const {
+inline TRT_ID::const_id_iterator TRT_ID::module_end() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -950,7 +944,7 @@ inline TRT_ID::const_id_iterator TRT_ID::module_end(void) const {
 }
 
 //----------------------------------------------------------------------------
-inline TRT_ID::const_id_iterator TRT_ID::straw_layer_begin(void) const {
+inline TRT_ID::const_id_iterator TRT_ID::straw_layer_begin() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -958,7 +952,7 @@ inline TRT_ID::const_id_iterator TRT_ID::straw_layer_begin(void) const {
 }
 
 //----------------------------------------------------------------------------
-inline TRT_ID::const_id_iterator TRT_ID::straw_layer_end(void) const {
+inline TRT_ID::const_id_iterator TRT_ID::straw_layer_end() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -966,7 +960,7 @@ inline TRT_ID::const_id_iterator TRT_ID::straw_layer_end(void) const {
 }
 
 //----------------------------------------------------------------------------
-inline TRT_ID::const_expanded_id_iterator TRT_ID::straw_begin(void) const {
+inline TRT_ID::const_expanded_id_iterator TRT_ID::straw_begin() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -974,7 +968,7 @@ inline TRT_ID::const_expanded_id_iterator TRT_ID::straw_begin(void) const {
 }
 
 //----------------------------------------------------------------------------
-inline TRT_ID::const_expanded_id_iterator TRT_ID::straw_end(void) const {
+inline TRT_ID::const_expanded_id_iterator TRT_ID::straw_end() const {
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 

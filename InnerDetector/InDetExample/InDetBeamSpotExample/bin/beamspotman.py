@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 beamspotman is a command line utility to do typical beam spot related tasks.
@@ -68,13 +67,10 @@ from InDetBeamSpotExample import BeamSpotPostProcessing
 from InDetBeamSpotExample import COOLUtils
 from InDetBeamSpotExample import DiskUtils
 
-from future import standard_library
-standard_library.install_aliases()
-import subprocess
 
 from optparse import Option, OptionParser, OptionGroup
 def check_commsep(option, opt, value):
-    return re.split('\s*,\s*|\s+', value)
+    return re.split(r'\s*,\s*|\s+', value)
 class BeamSpotOption(Option):
     TYPES = Option.TYPES + ('commsep',)
     TYPE_CHECKER = copy(Option.TYPE_CHECKER)
@@ -87,7 +83,7 @@ g_input.add_option('', '--eos', dest='eos', default=False, action='store_true', 
 g_input.add_option('-e', '--eospath', dest='eospath', default='/eos/atlas/atlastier0/rucio', help='eos path (excluding project and stream name)')
 g_input.add_option('-p', '--project', dest='project', default='data17_13TeV', help='project name')
 g_input.add_option('-s', '--stream', dest='stream', default='calibration_BeamSpot', help='stream name')
-g_input.add_option('-f', '--filter', dest='filter', default='.*\.AOD\..*', help='regular expression to filter input files')
+g_input.add_option('-f', '--filter', dest='filter', default=r'.*\.AOD\..*', help='regular expression to filter input files')
 g_input.add_option('', '--lbfilemap', dest='lbfilemap', default='', help='text file with mapping between filename and lumi blocks')
 g_input.add_option('', '--rucio', dest='rucio', action='store_true', default=False, help='rucio directory structure')
 g_input.add_option('', '--dpdinput', dest='dpdinput', action='store_true', default=False, help='Run over DPD for runaod')
@@ -987,7 +983,7 @@ if cmd=='archive' and len(args)==3:
                     sys.exit('\n**** ERROR: Unexpected number of tasks modified: %i instead of 1 (DSNAME=%s,TASKNAME=%s)' % (n,dsname,taskname))
 
                 if options.resultsondisk:
-                    oscmd = "find %s ! \( -name '%s' \) -type f -exec rm  {} \;" % (dir, "' -or -name '".join(exceptList))
+                    oscmd = r"find %s ! \( -name '%s' \) -type f -exec rm  {} \;" % (dir, "' -or -name '".join(exceptList))
                     os.system(oscmd)
                 else:
                     os.system('rm -rf %s' % dir)

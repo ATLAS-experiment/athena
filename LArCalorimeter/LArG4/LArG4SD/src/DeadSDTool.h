@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4SD_DEADSDTOOL_H
@@ -17,68 +17,61 @@ namespace LArG4
 
   class DeadSDTool : public CalibSDTool
   {
+  public:
+    // Constructor
+    DeadSDTool(const std::string& type, const std::string& name,
+	       const IInterface* parent);
 
-    public:
+  private:
+    /// Initialize Calculator Services
+    StatusCode initializeCalculators() override final;
 
-      // Constructor
-      DeadSDTool(const std::string& type, const std::string& name,
-                 const IInterface* parent);
+    /// Create the SD wrapper for current worker thread
+    G4VSensitiveDetector* makeSD() const override final;
 
-    private:
+    /// Hit collection name
+    Gaudi::Property<std::string> m_hitCollName{this, "HitCollectionName", "LArCalibrationHitDeadMaterial"};
 
-      /// Initialize Calculator Services
-      StatusCode initializeCalculators() override final;
+    /// Do we add the escaped energy processing?
+    /// This is only in "mode 1" (Tile+LAr), not in "DeadLAr" mode
+    Gaudi::Property<bool> m_do_eep{this, "doEscapedEnergy", false};
 
-      /// Create the SD wrapper for current worker thread
-      G4VSensitiveDetector* makeSD() const override final;
+    Gaudi::Property<std::vector<std::string>> m_barCryVolumes{this, "BarrelCryVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_barCryLArVolumes{this, "BarrelCryLArVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_barCryMixVolumes{this, "BarrelCryMixVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_DMVolumes{this, "DeadMaterialVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_barPresVolumes{this, "BarrelPresVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_barVolumes{this, "BarrelVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_ECCryVolumes{this, "ECCryVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_ECCryLArVolumes{this, "ECCryLArVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_ECCryMixVolumes{this, "ECCryMixVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_ECSupportVolumes{this, "ECSupportVolumes"};
+    Gaudi::Property<std::vector<std::string>> m_HECWheelVolumes{this, "HECWheelVolumes"};
 
-      /// Hit collection name
-      std::string m_hitCollName;
-
-      /// Do we add the escaped energy processing?
-      /// This is only in "mode 1" (Tile+LAr), not in "DeadLAr" mode
-      bool m_do_eep;
-
-      // The volumes per SD, and the corresponding SDs
-      std::vector<std::string> m_barCryVolumes;
-      std::vector<std::string> m_barCryLArVolumes;
-      std::vector<std::string> m_barCryMixVolumes;
-      std::vector<std::string> m_DMVolumes;
-      std::vector<std::string> m_barPresVolumes;
-      std::vector<std::string> m_barVolumes;
-      std::vector<std::string> m_ECCryVolumes;
-      std::vector<std::string> m_ECCryLArVolumes;
-      std::vector<std::string> m_ECCryMixVolumes;
-      std::vector<std::string> m_ECSupportVolumes;
-      std::vector<std::string> m_HECWheelVolumes;
-      //LArG4CalibSD* m_barCrySD;
-      //LArG4CalibSD* m_barCryLArSD;
-      //LArG4CalibSD* m_barCryMixSD;
-      //LArG4CalibSD* m_DMSD;
-      //LArG4CalibSD* m_barPresSD;
-      //LArG4CalibSD* m_barSD;
-      //LArG4CalibSD* m_ECCrySD;
-      //LArG4CalibSD* m_ECCryLArSD;
-      //LArG4CalibSD* m_ECCryMixSD;
-      //LArG4CalibSD* m_ECSupportSD;
-      //LArG4CalibSD* m_HECWheelSD;
-      //LArG4CalibSD* m_uninstSD;
-
-      ServiceHandle<ILArCalibCalculatorSvc> m_embccalc; //BarrelCryostat::CalibrationCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_embclarcalc; //BarrelCryostat::CalibrationLArCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_mixcalc; //BarrelCryostat::CalibrationMixedCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_dmcalc; //DM::CalibrationCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_embpscalc; //BarrelPresampler::CalibrationCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_embcalc; //Barrel::CalibrationCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_emeccalc; //EndcapCryostat::CalibrationCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_emecclarcalc; //EndcapCryostat::CalibrationLArCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_ememixcalc; //EndcapCryostat::CalibrationMixedCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_emesupcalc; //EMECSupportCalibrationCalculator()
-      ServiceHandle<ILArCalibCalculatorSvc> m_heccalc; //HEC::LArHECCalibrationWheelCalculator(HEC::kWheelDead)
-      ServiceHandle<ILArCalibCalculatorSvc> m_defcalc; //CalibrationDefaultCalculator()
-
+    ServiceHandle<ILArCalibCalculatorSvc> m_embccalc{this, "EMBCryoCalibrationCalculator"
+      , "BarrelCryostatCalibrationCalculator"}; //BarrelCryostat::CalibrationCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_embclarcalc{this, "EMBCryoLArCalibrationCalculator"
+      , "BarrelCryostatCalibrationLArCalculator"}; //BarrelCryostat::CalibrationLArCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_mixcalc{this, "EMBCryoMixCalibrationCalculator"
+      , "BarrelCryostatCalibrationMixedCalculator"}; //BarrelCryostat::CalibrationMixedCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_dmcalc{this, "DMCalibrationCalculator"
+      , "DMCalibrationCalculator"}; //DM::CalibrationCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_embpscalc{this, "EMBPSCalibrationCalculator"
+      , "BarrelPresamplerCalibrationCalculator"}; //BarrelPresampler::CalibrationCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_embcalc{this, "EMBCalibrationCalculator"
+      , "BarrelCalibrationCalculator"}; //Barrel::CalibrationCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_emeccalc{this, "ECCryoCalibrationCalculator"
+      , "EndcapCryostatCalibrationCalculator"}; //EndcapCryostat::CalibrationCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_emecclarcalc{this, "ECCryoLArCalibrationCalculator"
+      , "EndcapCryostatCalibrationLArCalculator"}; //EndcapCryostat::CalibrationLArCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_ememixcalc{this, "ECCryoMixCalibrationCalculator"
+      , "EndcapCryostatCalibrationMixedCalculator"}; //EndcapCryostat::CalibrationMixedCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_emesupcalc{this, "EMECSuppCalibrationCalculator"
+      , "EMECSupportCalibrationCalculator"}; //EMECSupportCalibrationCalculator()
+    ServiceHandle<ILArCalibCalculatorSvc> m_heccalc{this, "HECWheelDeadCalculator"
+      , "HECCalibrationWheelDeadCalculator"}; //HEC::LArHECCalibrationWheelCalculator(HEC::kWheelDead)
+    ServiceHandle<ILArCalibCalculatorSvc> m_defcalc{this, "DefaultCalibrationCalculator"
+      , "CalibrationDefaultCalculator"}; //CalibrationDefaultCalculator()
   };
-
 } // namespace LArG4
-
 #endif

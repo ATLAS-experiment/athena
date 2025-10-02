@@ -1,0 +1,48 @@
+# This is a test configuration that tests our ability to schedule
+# multiple muon blocks and adding overrides to some of them.
+
+CommonServices: {}
+
+PileupReweighting: {}
+
+Muons:
+  - containerName: AnaMuons0
+    calibMode: 'correctData_CB'
+    recalibratePhyslite: False
+    decorateTruth: true
+    writeTrackD0Z0: True
+    WorkingPoint:
+      - selectionName: medium
+        quality: Medium
+        isolation: Loose_VarRad
+    IFFClassification: {}
+    MCTCClassification:
+      prefix: truth_
+  - containerName: AnaMuons2
+    calibMode: 'notCorrectData_IDMS'
+    recalibratePhyslite: False
+    decorateTruth: true
+    writeTrackD0Z0: True
+    WorkingPoint:
+      - selectionName: medium
+        quality: Medium
+        isolation: Loose_VarRad
+    IFFClassification: {}
+    MCTCClassification:
+      prefix: truth_
+  - containerName: AnaMuons3Override
+    propertyOverrides:
+      # overriding a property I know is there. in practice this is a
+      # property you should not override, because other algorithms will
+      # depend on the value and won't get updated.
+      MuonCalibrationAndSmearingAlg.calibrationAndSmearingTool.calibMode: 3
+    recalibratePhyslite: False
+    decorateTruth: true
+    writeTrackD0Z0: True
+    WorkingPoint:
+      - selectionName: medium
+        quality: Medium
+        isolation: Loose_VarRad
+    IFFClassification: {}
+    MCTCClassification:
+      prefix: truth_

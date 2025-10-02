@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetCaloEnergies.h"
@@ -67,6 +67,9 @@ StatusCode JetCaloEnergies::initialize() {
     m_effNClustsFracClusterKey = m_jetContainerName + "." + m_effNClustsFracClusterKey.key();
     m_fracSamplingMaxClusterKey = m_jetContainerName + "." + m_fracSamplingMaxClusterKey.key();
     m_fracSamplingMaxIndexClusterKey = m_jetContainerName + "." + m_fracSamplingMaxIndexClusterKey.key();
+    m_lambdaLeadingClusterKey = m_jetContainerName + "." + m_lambdaLeadingClusterKey.key();
+    m_meanRadialDistanceSquaredKey = m_jetContainerName + "." + m_meanRadialDistanceSquaredKey.key();
+    m_meanLongitudinalDistanceSquaredKey = m_jetContainerName + "." + m_meanLongitudinalDistanceSquaredKey.key();
   }
 
   // Init calo based variables if necessary
@@ -93,6 +96,9 @@ StatusCode JetCaloEnergies::initialize() {
   ATH_CHECK(m_effNClustsFracKey.initialize( isInVector(m_effNClustsFracKey.key(), m_calculationNames) ));
   ATH_CHECK(m_fracSamplingMaxKey.initialize(m_doFracSamplingMax));
   ATH_CHECK(m_fracSamplingMaxIndexKey.initialize(m_doFracSamplingMax));
+  ATH_CHECK(m_lambdaLeadingClusterKey.initialize());
+  ATH_CHECK(m_meanRadialDistanceSquaredKey.initialize());
+  ATH_CHECK(m_meanLongitudinalDistanceSquaredKey.initialize());
   
   return StatusCode::SUCCESS;
 }
@@ -484,8 +490,11 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
   float tile0Tot = 0.;
   float eTot = 0.;
   float e2Tot = 0.;
+  float sumRadialDistanceSquared = 0;
+  float sumLongitudinalDistanceSquared = 0;
   size_t numConstit = jet.numConstituents();
   std::unique_ptr<std::vector<const xAOD::CaloCluster*> > constitV_tot = std::make_unique<std::vector<const xAOD::CaloCluster*>>();
+  const xAOD::CaloCluster* leadingCluster = nullptr;
 
   for ( size_t i=0; i<numConstit; i++ ) {
     if(jet.rawConstituent(i)->type()!=xAOD::Type::FlowElement) {
@@ -515,6 +524,11 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
       }
       if(!cluster) continue;
 
+      if (!leadingCluster || (cluster->rawE() > leadingCluster->rawE())){
+        leadingCluster = cluster;
+      }
+      
+      
       if(std::find(constitV_tot->begin(), constitV_tot->end(), cluster) == constitV_tot->end()){
         for ( size_t s= CaloSampling::PreSamplerB; s< CaloSampling::Unknown; s++ ) {
           ePerSampling[s] += cluster->eSample( (xAOD::CaloCluster::CaloSample) s );
@@ -536,6 +550,9 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
         em3Tot += (cluster->eSample( CaloSampling::EMB3) + cluster->eSample( CaloSampling::EME3));
 
         tile0Tot += (cluster->eSample( CaloSampling::TileBar0) + cluster->eSample( CaloSampling::TileExt0));
+
+        sumRadialDistanceSquared += cluster->rawE() * getMoment(cluster, xAOD::CaloCluster::SECOND_R);
+        sumLongitudinalDistanceSquared += cluster->rawE() * getMoment(cluster, xAOD::CaloCluster::SECOND_LAMBDA);
          
         constitV_tot->push_back(cluster);
       }
@@ -584,4 +601,22 @@ void JetCaloEnergies::fillEperSamplingFEClusterBased(const xAOD::Jet& jet, std::
     }
   }
 
+  SG::WriteDecorHandle<xAOD::JetContainer, float> lambdaLeadingClusterHandle(m_lambdaLeadingClusterKey);
+  lambdaLeadingClusterHandle(jet) = getMoment(leadingCluster, xAOD::CaloCluster::CENTER_LAMBDA);
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> meanRadialDistanceSquaredHandle(m_meanRadialDistanceSquaredKey);
+  meanRadialDistanceSquaredHandle(jet) = eTot != 0. ? sumRadialDistanceSquared/eTot  : 0.;
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> meanLongitudinalDistanceSquaredHandle(m_meanLongitudinalDistanceSquaredKey);
+  meanLongitudinalDistanceSquaredHandle(jet) = eTot != 0. ? sumLongitudinalDistanceSquared/eTot  : 0.;
+}
+
+float JetCaloEnergies::getMoment(const xAOD::CaloCluster* cluster, const xAOD::CaloCluster::MomentType& momentType) const {
+    if (cluster){
+        double moment = 0.0;
+        bool isRetrieved = cluster->retrieveMoment(momentType, moment);
+        if (isRetrieved) return (float) moment;
+    }
+    ATH_MSG_DEBUG("Can not retrieve moment from cluster");
+    return 0.0;
 }

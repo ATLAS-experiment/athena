@@ -12,6 +12,7 @@
 //! ASG
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "PanTauAlgs/ITool_InformationStore.h"
 #include "PanTauAlgs/ITool_TauConstituentSelector.h"
@@ -37,25 +38,17 @@ namespace PanTau {
   protected:
         
     virtual bool    passesSelection_NeutralConstituent(TauConstituent* tauConstituent) const;
-    virtual bool    passesSelection_Pi0NeutConstituent(TauConstituent* tauConstituent) const;
-    virtual bool    passesSelection_ChargedConstituent(TauConstituent* tauConstituent) const;
-    virtual bool    passesSelection_OutNeutConstituent(TauConstituent* TauConstituent) const;
-    virtual bool    passesSelection_OutChrgConstituent(TauConstituent* TauConstituent) const;
         
     virtual double  getEtCut(double eta, PanTau::TauConstituent::Type constituentType) const;
         
         
     //member variables 
-    ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore;
-    std::string  m_Tool_InformationStoreName;
+    ToolHandle<PanTau::ITool_InformationStore> m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore","Link to tool with all information"};
+    Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Link to tool with all information"};
         
     double                  m_MaxEta = 0.0;
     std::vector<double>     m_BinEdges_Eta;
     std::vector<double>     m_Selection_Neutral_EtaBinned_EtCut;
-    std::vector<double>     m_Selection_Pi0Neut_EtaBinned_EtCut;
-    std::vector<double>     m_Selection_Charged_EtaBinned_EtCut;
-    std::vector<double>     m_Selection_OutNeut_EtaBinned_EtCut;
-    std::vector<double>     m_Selection_OutChrg_EtaBinned_EtCut;
 
     bool m_init=false;
 

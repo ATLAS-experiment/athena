@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MmIdHelper.h"
@@ -9,7 +9,7 @@
 
 /*******************************************************************************/
 // Constructor/Destructor
-MmIdHelper::MmIdHelper() : MuonIdHelper("MmIdHelper") {
+MmIdHelper::MmIdHelper() : MuonIdHelper("MmIdHelper", "mm") {
     m_module_hashes.fill(-1);
     m_detectorElement_hashes.fill(-1);
 }
@@ -50,7 +50,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     IdDictField* field = m_dict->find_field("mmMultilayer");
     if (field) {
-        m_DETECTORELEMENT_INDEX = field->m_index;
+        m_DETECTORELEMENT_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'mmMultilayer' field ");
         status = 1;
@@ -58,7 +58,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("mmGasGap");
     if (field) {
-        m_GASGAP_INDEX = field->m_index;
+        m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'mmGasGap' field ");
         status = 1;
@@ -66,7 +66,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     field = m_dict->find_field("mmChannel");
     if (field) {
-        m_CHANNEL_INDEX = field->m_index;
+        m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find mmChannel' field ");
         status = 1;
@@ -80,16 +80,16 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     if (!mmGroup) {
         ATH_MSG_ERROR("Cannot find mm group");
     } else {
-        m_GROUP_INDEX = mmGroup->regions()[0]->m_index;
+        m_GROUP_INDEX = mmGroup->regions()[0]->index();
     }
 
-    const IdDictRegion& region = *m_dict->m_regions[m_GROUP_INDEX];
-    m_eta_impl = region.m_implementation[m_ETA_INDEX];
-    m_phi_impl = region.m_implementation[m_PHI_INDEX];
-    m_tec_impl = region.m_implementation[m_TECHNOLOGY_INDEX];
-    m_mplet_impl = region.m_implementation[m_DETECTORELEMENT_INDEX];
-    m_gap_impl = region.m_implementation[m_GASGAP_INDEX];
-    m_cha_impl = region.m_implementation[m_CHANNEL_INDEX];
+    const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
+    m_eta_impl = region.implementation(m_ETA_INDEX);
+    m_phi_impl = region.implementation(m_PHI_INDEX);
+    m_tec_impl = region.implementation(m_TECHNOLOGY_INDEX);
+    m_mplet_impl = region.implementation(m_DETECTORELEMENT_INDEX);
+    m_gap_impl = region.implementation(m_GASGAP_INDEX);
+    m_cha_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" MicroMegas decode index and bit fields for each level: " << std::endl
                                                                              << " muon        " << m_muon_impl.show_to_string() << std::endl
@@ -110,7 +110,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     int muonField = -1;
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
     if (atlasDict->get_label_value("subdet", "MuonSpectrometer", muonField)) {
-        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->m_name);
+        ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->name());
         return 1;
     }
 

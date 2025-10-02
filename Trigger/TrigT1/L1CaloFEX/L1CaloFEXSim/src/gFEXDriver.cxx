@@ -3,7 +3,7 @@
 */
 
 
-#include "L1CaloFEXSim/gFEXDriver.h"
+#include "gFEXDriver.h"
 #include "L1CaloFEXSim/gFEXOutputCollection.h"
 #include "StoreGate/WriteHandle.h"
 

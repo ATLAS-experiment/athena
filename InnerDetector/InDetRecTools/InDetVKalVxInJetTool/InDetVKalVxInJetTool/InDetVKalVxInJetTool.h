@@ -268,11 +268,11 @@ namespace InDet {
     const InDetDD::PixelDetectorManager* m_pixelManager = nullptr;
     std::unique_ptr<TH2D> m_ITkPixMaterialMap;
 
-    const double m_massPi  = 139.5702 ;
-    const double m_massP   = 938.272  ;
-    const double m_massE   =   0.511  ;
-    const double m_massK0  = 497.648  ;
-    const double m_massLam =1115.683  ;
+    const double m_massPi  = ParticleConstants::chargedPionMassInMeV ;
+    const double m_massP   = ParticleConstants::protonMassInMeV  ;
+    const double m_massE   = ParticleConstants::electronMassInMeV  ;
+    const double m_massK0  = ParticleConstants::KZeroMassInMeV  ;
+    const double m_massLam = ParticleConstants::lambdaMassInMeV  ;
     const double m_massB   =5279.400  ;
 
 //-------------------------------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FourMomUtils/FoxWolfram.h"
@@ -80,7 +80,7 @@ foxWolfram( const I4MomIter_t& iBeg, const I4MomIter_t& iEnd,
   N0=N0*N0;
 
   // and normalize
-  const double inv_N0 = 1. / N0;
+  const double inv_N0 = N0!=0 ? (1. / N0) : 1;
   for ( unsigned int loop=5; loop<order; ++loop ) {
     H[loop] *= inv_N0;
   }

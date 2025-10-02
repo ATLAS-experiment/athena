@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //! This class implements a tool to calculate ID input variables and add them to the tau aux store
@@ -13,7 +13,7 @@
 #define TAURECTOOLS_TAUIDVARCALCULATOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
-
+#include "AsgTools/PropertyWrapper.h"
 
 class TauIDVarCalculator: public TauRecToolBase {
 
@@ -31,7 +31,8 @@ public:
 
 private:
 
-  bool m_doVertexCorrection;
+  Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true}; 
+
 };
 
 #endif // TAURECTOOLS_TAUIDVARCALCULATOR_H

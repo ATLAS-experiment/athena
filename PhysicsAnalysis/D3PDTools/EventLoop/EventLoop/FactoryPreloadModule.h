@@ -12,6 +12,7 @@
 #include <EventLoop/Global.h>
 
 #include <EventLoop/Module.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace EL
 {
@@ -29,7 +30,8 @@ namespace EL
 
     public:
 
-      std::string preloader;
+      Gaudi::Property<std::string> preloader {this, "preloader", "",
+        "the preloader configuration to use"};
 
       using Module::Module;
 

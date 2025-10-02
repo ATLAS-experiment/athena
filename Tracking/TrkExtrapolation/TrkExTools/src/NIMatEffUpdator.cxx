@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #include "TrkExTools/NIMatEffUpdator.h"
 
 // Trk include
-#include "TrkExInterfaces/IMaterialEffectsUpdator.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkGeometry/Layer.h"
@@ -18,11 +17,8 @@
 
 // constructor
 Trk::NIMatEffUpdator::NIMatEffUpdator(const std::string &t, const std::string &n, const IInterface *p) :
-  AthAlgTool(t, n, p),
-  m_matUpdator("Trk::MaterialEffectsUpdator/MaterialEffectsUpdator") {
+  AthAlgTool(t, n, p) {
   declareInterface<ITimedMatEffUpdator>(this);
-  // the tool parameters -----------------------------------------------------
-  declareProperty("MaterialEffectsUpdator", m_matUpdator);
 }
 
 // destructor

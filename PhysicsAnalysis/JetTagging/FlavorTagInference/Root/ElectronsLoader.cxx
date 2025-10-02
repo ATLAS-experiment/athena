@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/ElectronsLoader.h"
@@ -15,7 +15,7 @@ namespace FlavorTagInference {
         ConstituentsSortOrder config) 
     {
       typedef xAOD::Electron Ip;
-      typedef xAOD::Jet Jet;
+      typedef xAOD::IParticle Jet;
       switch(config) {
         case ConstituentsSortOrder::PT_DESCENDING:
           return [](const Ip* p, const Jet&) {return p->pt();};
@@ -43,7 +43,7 @@ namespace FlavorTagInference {
         switch (config){
           case ConstituentsSelection::R22_DEFAULT:
             return {
-                [iso_pt](const xAOD::Jet& jet, const xAOD::Electron* el) {
+                [iso_pt](const xAOD::IParticle& jet, const xAOD::Electron* el) {
                   TLorentzVector jet_4vec = jet.p4();
                   TLorentzVector el_4vec = el->p4();
 
@@ -58,8 +58,6 @@ namespace FlavorTagInference {
                       el_dpop = 1 - track->qOverP() / (refittedTrack_LMqoverp);
                   }
                   
-                  if (jet_4vec.DeltaR(el_4vec) > 0.4) return false;
-
                   float el_ptrel = el_4vec.Vect().Perp(jet_4vec.Vect());
                   // Get shower shapes
                   float el_rhad1 = el->showerShapeValue(xAOD::EgammaParameters::Rhad1);
@@ -101,7 +99,7 @@ namespace FlavorTagInference {
           cfg.inputs, options))
     {
         SG::AuxElement::ConstAccessor<PartLinks> acc(options.electron_link_name);
-        m_associator = [acc](const xAOD::Jet& jet) -> IPV {
+        m_associator = [acc](const xAOD::IParticle& jet) -> IPV {
           IPV electrons;
           for (const ElementLink<IPC>& link : acc(jet)){
             if (!link.isValid()) {
@@ -121,7 +119,7 @@ namespace FlavorTagInference {
     }
 
     ElectronsLoader::Electrons ElectronsLoader::getElectronsFromJet(
-        const xAOD::Jet& jet
+        const xAOD::IParticle& jet
     ) const
     {
         std::vector<std::pair<double, const xAOD::Electron*>> electrons;
@@ -139,13 +137,11 @@ namespace FlavorTagInference {
         return only_electrons;
     }
 
-    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> ElectronsLoader::getData(
-      const xAOD::Jet& jet, 
-      [[maybe_unused]] const SG::AuxElement& btag) const {
+    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> ElectronsLoader::getData(const xAOD::IParticle& jet) const {
         Electrons sorted_electrons = getElectronsFromJet(jet);
 
         // We return a dummy vector of IParticles as we don't decorate flow elements
-        return {m_config.output_name, m_seqGetter.getFeats(jet, sorted_electrons), std::vector<const xAOD::IParticle*>{}};
+        return {m_seqGetter.getFeats(jet, sorted_electrons), std::vector<const xAOD::IParticle*>{}};
     }
 
     const FTagDataDependencyNames& ElectronsLoader::getDependencies() const {

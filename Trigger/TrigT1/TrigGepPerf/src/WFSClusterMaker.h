@@ -16,7 +16,7 @@ namespace Gep{
 public:
 
     WFSClusterMaker() {}
-    ~WFSClusterMaker() {}
+    virtual ~WFSClusterMaker() = default;
 
     std::vector<Gep::Cluster>
     makeClusters(const pGepCellMap&) const override;

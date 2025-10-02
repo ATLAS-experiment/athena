@@ -1,19 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "UserPhotonFlux.h"
 
-  UserPhotonFlux::UserPhotonFlux(const std::string& type, const std::string& name, const IInterface* parent) :
-    AthAlgTool(type, name, parent)
- {
-    declareInterface<IPythia8Custom>(this);
-    declareProperty("Process", m_process=1);
-    declareProperty("NuclearCharge", m_flux_Z=82.);
-    declareProperty("MinimumB", m_flux_min_b=13.24);
-    declareProperty("MinimumX", m_flux_min_x=-1);//default applies no cut since sampled x's always >0.
-  }
-  
-  
   StatusCode UserPhotonFlux::initialize() {
     ATH_MSG_INFO( "Initialisation of " << name() << " was successful" );
     return StatusCode::SUCCESS;

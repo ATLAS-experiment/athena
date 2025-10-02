@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUSMEARINGTOOL_H
@@ -17,6 +17,7 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AnaToolHandle.h"
 #include "AsgTools/AsgMetadataTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "TauAnalysisTools/Enums.h"
@@ -64,15 +65,16 @@ public:
 
 private:
   asg::AnaToolHandle<ITauSmearingTool> m_tCommonSmearingTool;
-  std::string m_sInputFilePath;
-  std::string m_sRecommendationTag;
-  std::string m_sGenerator;
-  std::string m_sCampaign;
-  bool m_useFastSim;
-  bool m_bSkipTruthMatchCheck;
-  bool m_bApplyFading;
-  bool m_bMVATESQualityCheck;
-  bool m_bApplyInsituCorrection;
+
+  Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
+  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2025-prerec"};
+  Gaudi::Property<std::string> m_sCampaign{this, "Campaign", "mc21"};
+  Gaudi::Property<std::string> m_sGenerator{this, "Generator", "PoPy"};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
+  Gaudi::Property<bool> m_bApplyFading{this, "ApplyFading", true};
+  Gaudi::Property<bool> m_bMVATESQualityCheck{this, "MVATESQualityCheck", true};
+  Gaudi::Property<bool> m_bApplyInsituCorrection{this, "ApplyInsituCorrection", true};
+  Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false}; 
 
 }; // class TauSmearingTool
 

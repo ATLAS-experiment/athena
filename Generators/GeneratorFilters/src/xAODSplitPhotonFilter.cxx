@@ -1,32 +1,28 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/xAODSplitPhotonFilter.h"
+#include "xAODTruth/TruthVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 
-xAODSplitPhotonFilter::xAODSplitPhotonFilter(const std::string &name, ISvcLocator *pSvcLocator)
-    : GenFilter(name, pSvcLocator){ }
+StatusCode xAODSplitPhotonFilter::filterInitialize()
+{
+    CHECK(m_truthPartContKey.initialize());
+    return StatusCode::SUCCESS;
+}
 
 StatusCode xAODSplitPhotonFilter::filterEvent()
 {
   int NPhotons = 0;
   bool GoodFlav = m_dauPdg.size() == 0 ? true : false;
 
-  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and duplicated barcode ones
-  const xAOD::TruthParticleContainer *xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure())
-  {
-    ATH_MSG_ERROR("No TruthParticle collection with name "
-                  << "TruthGen"
-                  << " found in StoreGate!");
-    return StatusCode::FAILURE;
-  }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
   // Check for a photon with desired kinematics
-  unsigned int nParticles = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nParticles; ++iPart)
-  {
-    const xAOD::TruthParticle *part = (*xTruthParticleContainer)[iPart];
-
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
     if ((MC::isPhoton(part)))
     {
 

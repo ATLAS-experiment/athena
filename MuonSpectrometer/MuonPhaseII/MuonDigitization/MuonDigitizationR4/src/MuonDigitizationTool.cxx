@@ -8,12 +8,6 @@
 #include <GeoModelKernel/throwExcept.h>
 
 namespace MuonR4{
-
-    MuonDigitizationTool::MuonDigitizationTool(const std::string& type, 
-                                               const std::string& name, 
-                                               const IInterface* pIID):
-            PileUpToolBase{type,name, pIID} {}
-
     StatusCode MuonDigitizationTool::initialize(){
         ATH_MSG_INFO("SimHitKey "<<m_simHitKey.key()<<", "<<m_streamName<<", SDO container: "<<m_sdoKey.key());
         if (m_simHitKey.empty() && m_inputObjectName.empty()) {
@@ -80,7 +74,7 @@ namespace MuonR4{
         /// In case of single hits container just load the collection using read handles    
         if (!m_onlyUseContainerName) {            
             const xAOD::MuonSimHitContainer* hitCollection{nullptr};
-            ATH_CHECK(retrieveContainer(ctx, m_simHitKey, hitCollection));
+            ATH_CHECK(SG::get(hitCollection, m_simHitKey, ctx));
             hitCollList.emplace_back(PileUpTimeEventIndex(0), hitCollection);
          } else {
             ATH_CHECK(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList));
@@ -140,7 +134,7 @@ namespace MuonR4{
     }
     const ActsGeometryContext& MuonDigitizationTool::getGeoCtx(const EventContext& ctx) const {
         const ActsGeometryContext* gctx{};
-        if (!retrieveContainer(ctx, m_geoCtxKey, gctx).isSuccess()) {
+        if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             THROW_EXCEPTION("Failed to retrieve the geometry context "<<m_geoCtxKey.fullKey());
         }
         return *gctx;

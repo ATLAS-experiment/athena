@@ -1,6 +1,6 @@
 
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONMEASVIEWALGS_MDTMEASVIEWALG_H
 #define XAODMUONMEASVIEWALGS_MDTMEASVIEWALG_H
@@ -10,7 +10,6 @@
 #include <xAODMuonPrepData/MdtDriftCircleContainer.h>
 #include <xAODMuonPrepData/MdtTwinDriftCircleContainer.h>
 
-#include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
 
 

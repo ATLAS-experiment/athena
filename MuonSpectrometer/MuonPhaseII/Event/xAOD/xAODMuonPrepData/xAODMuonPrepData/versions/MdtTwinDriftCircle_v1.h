@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_MDTTWINDRIFTCIRCLE_V1_H
 #define XAODMUONPREPDATA_VERSION_MDTTWINDRIFTCIRCLE_V1_H

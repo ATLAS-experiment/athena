@@ -60,18 +60,18 @@ public:
     float getCluster1Phi() const { return m_cluster1_phi; }
     float getCluster1Eta() const { return m_cluster1_eta; }
 
-    void setCluster2X(float v) { m_cluster1_x = v; }
-    void setCluster2Y(float v) { m_cluster1_y = v; }
-    void setCluster2Z(float v) { m_cluster1_z = v; }
-    void setCluster2R(float v) { m_cluster1_r = v; }
-    void setCluster2Phi(float v) { m_cluster1_phi = v; }
-    void setCluster2Eta(float v) { m_cluster1_eta = v; }
-    float getCluster2X() const { return m_cluster1_x; }
-    float getCluster2Y() const { return m_cluster1_y; }
-    float getCluster2Z() const { return m_cluster1_z; }
-    float getCluster2R() const { return m_cluster1_r; }
-    float getCluster2Phi() const { return m_cluster1_phi; }
-    float getCluster2Eta() const { return m_cluster1_eta; }
+    void setCluster2X(float v) { m_cluster2_x = v; }
+    void setCluster2Y(float v) { m_cluster2_y = v; }
+    void setCluster2Z(float v) { m_cluster2_z = v; }
+    void setCluster2R(float v) { m_cluster2_r = v; }
+    void setCluster2Phi(float v) { m_cluster2_phi = v; }
+    void setCluster2Eta(float v) { m_cluster2_eta = v; }
+    float getCluster2X() const { return m_cluster2_x; }
+    float getCluster2Y() const { return m_cluster2_y; }
+    float getCluster2Z() const { return m_cluster2_z; }
+    float getCluster2R() const { return m_cluster2_r; }
+    float getCluster2Phi() const { return m_cluster2_phi; }
+    float getCluster2Eta() const { return m_cluster2_eta; }
 
 protected:
 

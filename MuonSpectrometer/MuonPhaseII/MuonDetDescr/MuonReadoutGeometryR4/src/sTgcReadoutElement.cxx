@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
@@ -36,9 +35,10 @@ StatusCode sTgcReadoutElement::initElement() {
    ATH_CHECK(createGeoTransform());
 #ifndef SIMULATIONBASE
 
-      ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.sHalfChamberLength, 
-                                                                                        m_pars.lHalfChamberLength, 
-                                                                                        m_pars.halfChamberHeight)));
+      ATH_CHECK(planeSurfaceFactory(geoTransformHash(), 
+                     m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(m_pars.sHalfChamberLength, 
+                                                                           m_pars.lHalfChamberLength, 
+                                                                           m_pars.halfChamberHeight)));
 #endif
 
    if (m_pars.stripLayers.empty() || m_pars.wireGroupLayers.empty()) {
@@ -56,10 +56,10 @@ StatusCode sTgcReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
       const StripDesign& design{m_pars.stripLayers[layer].design()};
       ATH_CHECK(planeSurfaceFactory(m_pars.stripLayers[layer].hash(), 
-                                    m_pars.layerBounds->make_bounds(design.shortHalfHeight(), 
-                                                                    design.longHalfHeight(), 
-                                                                    design.halfWidth(),
-                                                                    90.*Gaudi::Units::deg)));
+                                    m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(design.shortHalfHeight(), 
+                                                                                          design.longHalfHeight(), 
+                                                                                          design.halfWidth(),
+                                                                                          90.*Gaudi::Units::deg)));
 #endif
 
    }
@@ -73,9 +73,9 @@ StatusCode sTgcReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
       const StripDesign& design{m_pars.wireGroupLayers[layer].design()};
       ATH_CHECK(planeSurfaceFactory(m_pars.wireGroupLayers[layer].hash(), 
-                                    m_pars.layerBounds->make_bounds(design.shortHalfHeight(), 
-                                                                    design.longHalfHeight(), 
-                                                                    design.halfWidth())));
+                                    m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(design.shortHalfHeight(), 
+                                                                                          design.longHalfHeight(), 
+                                                                                          design.halfWidth())));
 #endif
    }
    for (unsigned int layer = 0; layer < m_pars.padLayers.size(); ++layer) {
@@ -88,9 +88,9 @@ StatusCode sTgcReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
       const StripDesign& design{m_pars.padLayers[layer].design()};
       ATH_CHECK(planeSurfaceFactory(m_pars.padLayers[layer].hash(), 
-                                    m_pars.layerBounds->make_bounds(design.shortHalfHeight(), 
-                                                                    design.longHalfHeight(), 
-                                                                    design.halfWidth())));
+                                    m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(design.shortHalfHeight(), 
+                                                                                          design.longHalfHeight(), 
+                                                                                          design.halfWidth())));
 #endif
 
    }
@@ -213,7 +213,8 @@ Amg::Vector3D sTgcReadoutElement::chamberStripPos(const IdentifierHash& measHash
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    if (layIdx < m_pars.stripLayers.size()) {
-      return  m_pars.stripLayers[layIdx].stripPosition(channelNumber(measHash));
+      const StripLayer& layout{m_pars.stripLayers[layIdx]};
+      return layout.toOrigin() * layout.localStripPosition(channelNumber(measHash));
    }
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());

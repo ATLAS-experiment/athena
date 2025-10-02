@@ -1,32 +1,31 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkGeometry/BinnedMaterial.h"
 
 /** Constructor with averaged material and binning in 1D*/
 Trk::BinnedMaterial::BinnedMaterial(
-    const Trk::Material* mat, Trk::BinUtility*& bu,
+    const Trk::Material& mat, const Trk::BinUtility& bu,
     const std::vector<size_t>& index,
     const std::vector<Trk::IdentifiedMaterial>& detailedMat)
-    : Trk::Material(*mat),
+    : Trk::Material(mat),
       m_matVec(detailedMat),
-      m_matBins(std::make_unique<
-                Trk::CompactBinnedArray1D<const Trk::IdentifiedMaterial> >(
-          ptrs(), index, bu)) {}
+      m_matBins(std::make_unique<Trk::CompactBinnedArray1D<const Trk::IdentifiedMaterial> >(ptrs(), index, bu))
+     {}
 
 /** Constructor with averaged material and binning in 2D*/
 Trk::BinnedMaterial::BinnedMaterial(
-    const Trk::Material* mat, Trk::BinUtility*& bu,
-    std::vector<Trk::BinUtility*>& bVec,
+    const Trk::Material& mat, const Trk::BinUtility& bu,
+    const std::vector<Trk::BinUtility>& bVec,
     const std::vector<std::vector<size_t> >& index,
     const std::vector<Trk::IdentifiedMaterial>& detailedMat)
-    : Trk::Material(*mat),
+    : Trk::Material(mat),
       m_matVec(detailedMat),
-      m_matBins(std::make_unique<
-                Trk::CompactBinnedArray2D<const Trk::IdentifiedMaterial> >(
-          ptrs(), index, bu, bVec)) {}
+      m_matBins(std::make_unique<Trk::CompactBinnedArray2D<const Trk::IdentifiedMaterial> >(ptrs(), index, bu, bVec))
+     {}
 
+//copy
 Trk::BinnedMaterial::BinnedMaterial(const BinnedMaterial& amc)
     : Material(amc), m_matVec(amc.m_matVec) {
   if (amc.m_matBins) {
@@ -41,13 +40,7 @@ Trk::BinnedMaterial::BinnedMaterial(const BinnedMaterial& amc)
 /** Assignment operator */
 Trk::BinnedMaterial& Trk::BinnedMaterial::operator=(const BinnedMaterial& amc) {
   if (this != &amc) {
-    X0 = amc.X0;
-    L0 = amc.L0;
-    A = amc.A;
-    Z = amc.Z;
-    rho = amc.rho;
-    dEdX = amc.dEdX;
-    zOaTr = amc.zOaTr;
+    Material::operator=(amc);
     m_matVec = amc.m_matVec;
     m_matBins.reset();
     if (amc.m_matBins) {
@@ -78,6 +71,7 @@ const Trk::IdentifiedMaterial* Trk::BinnedMaterial::materialNext(
   return mat;
 }
 
+//utility to return pointers to the elements of m_matVec
 std::vector<const Trk::IdentifiedMaterial*> Trk::BinnedMaterial::ptrs() const {
   std::vector<const Trk::IdentifiedMaterial*> p;
   p.reserve(m_matVec.size());

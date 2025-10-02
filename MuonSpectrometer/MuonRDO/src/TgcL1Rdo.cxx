@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/TgcL1Rdo.h"
 #include "AthenaKernel/errorcheck.h"
+#include <bit>
+#include <string.h>  // memset
 
 // Default constructor
 TgcL1Rdo::TgcL1Rdo() : DataVector<TgcL1RawData>()
@@ -80,9 +82,9 @@ stream& dump(stream& sl, const TgcL1Rdo& coll)
     << ", triggerType=" << (int16_t)coll.triggerType()
     << ", bcId=" << coll.bcId()
     << ", l1Id=" << coll.l1Id()
-    << ", errors=" << std::hex << *((uint16_t*)&coll.errors())
-    << ", srodStatus=" << *((uint32_t*)&coll.srodStatus())
-    << ", localStatus=" << *((uint32_t*)&coll.localStatus()) << std::dec
+    << ", errors=" << std::hex << std::bit_cast<unsigned>(coll.errors())
+    << ", srodStatus=" << std::bit_cast<unsigned>(coll.srodStatus())
+    << ", localStatus=" << std::bit_cast<unsigned>(coll.localStatus()) << std::dec
     << ", orbit=" << coll.orbit()
     << std::endl << "TgcL1RawData: [" << std::endl;
     int iRaw = 0;

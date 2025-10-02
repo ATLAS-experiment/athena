@@ -1,18 +1,19 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 import collections
 
 AthSequencer = CompFactory.AthSequencer  # cache lookup
 
-def parAND(name, subs=[]):
+def parAND(name, subs=[], invert=False):
     """parallel AND sequencer"""
     return AthSequencer( name,
                          ModeOR = False,
                          Sequential = False,
                          StopOverride = True,
+                         Invert = invert,
                          Members = subs.copy() )
 
-def parOR(name, subs=[]):
+def parOR(name, subs=[], invert=False):
     """parallel OR sequencer
     This is the default sequencer and lets the DataFlow govern the execution entirely.
     """
@@ -20,17 +21,19 @@ def parOR(name, subs=[]):
                          ModeOR = True,
                          Sequential = False,
                          StopOverride = True,
+                         Invert = invert,
                          Members = subs.copy() )
 
-def seqAND(name, subs=[]):
+def seqAND(name, subs=[], invert=False):
     """sequential AND sequencer"""
     return AthSequencer( name,
                          ModeOR = False,
                          Sequential = True,
                          StopOverride = False,
+                         Invert = invert,
                          Members = subs.copy() )
 
-def seqOR(name, subs=[]):
+def seqOR(name, subs=[], invert=False):
     """sequential OR sequencer
     Used when a barrier needs to be set by all subs reached irrespective of the decision
     """
@@ -38,6 +41,7 @@ def seqOR(name, subs=[]):
                          ModeOR = True,
                          Sequential = True,
                          StopOverride = True,
+                         Invert = invert,
                          Members = subs.copy() )
 
 
@@ -47,23 +51,6 @@ def getSequenceChildren(comp):
         return comp.Members
     except AttributeError:
         return []
-
-
-def getAllSequenceNames(seq, depth=0):
-    """ Generate a list of sequence names and depths in the graph, e.g.
-    [('AthAlgSeq', 0), ('seq1', 1), ('seq2', 1), ('seq1', 2)]
-    represents
-    \\__ AthAlgSeq (seq: PAR AND)
-        \\__ seq1 (seq: SEQ AND)
-           \\__ seq2 (seq: SEQ AND)
-    """
-
-    seqNameList = [(seq.getName(), depth)]
-    for c in getSequenceChildren(seq):
-      if isSequence(c):
-        seqNameList +=  getAllSequenceNames(c, depth+1)
-
-    return seqNameList
 
 
 def checkSequenceConsistency( seq ):
@@ -82,15 +69,6 @@ def checkSequenceConsistency( seq ):
                 __noSubSequenceOfName( c, n, seen )
 
     __noSubSequenceOfName( seq, seq.getName() )
-    for c in getSequenceChildren( seq ):
-        checkSequenceConsistency(c)
-
-
-def stepSeq(name, filterAlg, rest):
-    """ elementary HLT step sequencer, filterAlg is gating, rest is anything that needs to happen within the step """
-    stepReco = parOR(name+"_reco", rest)
-    stepAnd = seqAND(name, [ filterAlg, stepReco ])
-    return stepAnd
 
 
 def isSequence( obj ):

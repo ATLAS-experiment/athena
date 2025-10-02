@@ -63,6 +63,13 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
         use_parallel_compression = jp.AthenaMPFlags.UseParallelCompression()
         unique_id = f"{str(os.getpid())}-{uuid.uuid4().hex}"
 
+        # For e.g. event generation, if we use SharedQueue the job does not complete correctly
+        if strategy == 'SharedQueue':
+            from AthenaCommon.AthenaCommonFlags import jobproperties as ajp
+            if (not ajp.AthenaCommonFlags.FilesInput.statusOn) or ajp.AthenaCommonFlags.FilesInput == []:
+                msg.info('MP strategy "SharedQueue" will not work without input files when maxEvents=-1. Switching to "RoundRobin" just in case')
+                strategy = 'RoundRobin'
+
         if strategy=='SharedQueue' or strategy=='RoundRobin':
             if use_shared_reader:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
@@ -76,7 +83,7 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
                 if 'AthenaPoolCnvSvc.WriteAthenaPool' in sys.modules:
                     from AthenaIPCTools.AthenaIPCToolsConf import AthenaSharedMemoryTool
                     svcMgr.AthenaPoolCnvSvc.OutputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool", SharedMemoryName=f"OutputStream{unique_id}")
-                svcMgr.AthenaPoolCnvSvc.ParallelCompression=use_parallel_compression
+                    svcMgr.AthenaPoolCnvSvc.ParallelCompression=use_parallel_compression
 
             if strategy=='SharedQueue':
                 from AthenaMPTools.AthenaMPToolsConf import SharedEvtQueueProvider
@@ -108,11 +115,6 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
                 self.Tools += [ SharedWriterTool(MotherProcess=(events_before_fork>0),
                                                  IsPileup=pileup,
                                                  Debug=debug_worker) ]
-
-            # Enable seeking
-            if not use_shared_reader:
-                setupEvtSelForSeekOps()
-
         elif strategy=='EventService':
             channelScatterer2Processor = "AthenaMP_Scatterer2Processor"
             channelProcessor2EvtSel = "AthenaMP_Processor2EvtSel"
@@ -127,48 +129,8 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
                                               Channel2Scatterer = channelScatterer2Processor,
                                               Channel2EvtSel = channelProcessor2EvtSel,
                                               Debug=debug_worker) ]
-            # Enable seeking
-            setupEvtSelForSeekOps()
-
         else:
             msg.warning("Unknown strategy. No MP tools will be configured")
-
-def setupEvtSelForSeekOps() -> None:
-   """ try to install seek-stuff on the EventSelector side """
-   #import sys
-   #from AthenaCommon.Logging import log as msg
-   msg.debug("setupEvtSelForSeekOps:")
-   if 'AthenaRootComps.ReadAthenaRoot' in  sys.modules:
-       # athenarootcomps has seeking enabled by default
-       msg.info('=> Seeking enabled.')
-       return
-   
-   if 'AthenaPoolCnvSvc.ReadAthenaPool' not in sys.modules:
-      ## user did not import that module so we give up
-      msg.info( "Cannot enable 'seeking' b/c module "
-                "[AthenaPoolCnvSvc.ReadAthenaPool] hasn't been imported..." )
-      msg.info( "Modify your jobOptions to import that module "
-                "(or just ignore this message)" )
-      return
-
-   from AthenaCommon.AppMgr import theApp, AthAppMgr
-   if theApp.state() != AthAppMgr.State.OFFLINE:
-      msg.info( "C++ ApplicationMgr already instantiated, probably seeking "
-                "will be ill-configured..." )
-      msg.info( "EventSelector writers should implement updateHandlers" )
-   
-   from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-   from AthenaCommon.Configurable import Configurable
-   collectionType = svcMgr.EventSelector.properties()["CollectionType"]
-
-   if collectionType in ( "ImplicitROOT", Configurable.propertyNoValue, ):
-      msg.info   ( "=> Seeking enabled." )
-
-   else:
-      msg.warning( "Input seeking is not compatible with collection type of %s",
-                   svcMgr.EventSelector.properties()["CollectionType"] )
-      msg.warning( "=> Seeking disabled." )
-   return
 
 def getChunkSize() -> int :
     from .AthenaMPFlags import jobproperties as jp

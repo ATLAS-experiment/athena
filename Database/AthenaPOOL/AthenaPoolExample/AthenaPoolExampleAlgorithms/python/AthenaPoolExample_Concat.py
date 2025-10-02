@@ -32,6 +32,9 @@ flags.lock()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg( flags )
 
+from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+acc.merge( EventInfoCnvAlgCfg( flags, disableBeamSpot=True ) )
+
 acc.addEventAlgo( CompFactory.AthPoolEx.WriteData("WriteData", OutputLevel = DEBUG) )
 acc.addEventAlgo( CompFactory.AthPoolEx.ReWriteData("ReWriteData", OutputLevel = DEBUG) )
 

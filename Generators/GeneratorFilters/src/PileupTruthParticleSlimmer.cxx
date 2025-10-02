@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -64,7 +64,7 @@ StatusCode PileupTruthParticleSlimmer::execute() {
     ATH_MSG_DEBUG( "Recorded TruthPileupParticleContainer with key: " << m_xaodTruthPileupParticleContainerName );
 
     // Retrieve full TruthParticle container
-    const xAOD::TruthParticleContainer* xTruthParticleContainer;
+    const xAOD::TruthParticleContainer* xTruthParticleContainer = nullptr;
     if (evtStore()->retrieve(xTruthParticleContainer, m_xaodTruthParticleContainerName).isFailure()) {
         ATH_MSG_ERROR("No TruthParticle collection with name " << m_xaodTruthParticleContainerName << " found in StoreGate!");
         return StatusCode::FAILURE;

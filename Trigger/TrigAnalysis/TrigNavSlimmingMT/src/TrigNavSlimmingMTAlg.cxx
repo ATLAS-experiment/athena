@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigNavSlimmingMTAlg.h"
@@ -37,6 +37,19 @@ StatusCode TrigNavSlimmingMTAlg::doRepack(TrigCompositeUtils::Decision* decision
       << decision->name() << "' node, the link is invalid.");
     ATH_MSG_DEBUG("Dump of DecisionObject: " << *decision);
     return StatusCode::SUCCESS;
+  }
+
+  if (not m_repackFeaturesExclusionList.empty()) {
+    // Check the feature's StoreGate key against the exclusion list. If it is on the list, then we don't repack the feature.
+    // We instead leave it pointing to its current online physics object. It is assumed that this online physics object will 
+    // be kept in the DAOD via signature specific logic.
+    const std::string featureStoreGateKey = currentEL.dataID();
+    for (const std::string& exclusionEntry : m_repackFeaturesExclusionList) {
+      if (featureStoreGateKey == exclusionEntry) {
+        ATH_MSG_VERBOSE("Will not repack this feature " << currentEL.index() << " from " <<  currentEL.dataID() << ", as this container is on the exclusion list");
+        return StatusCode::SUCCESS;
+      }
+    }
   }
 
   (**writeHandle).push_back( new xAOD::Particle() ); // Need to do this before performing the copy to assign with the Aux store
@@ -179,7 +192,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   // We also want to restrict the search to exclude the output collections of any other TrigNavSlimminMTAlg instances
   // and let the function know what the primary input collection is - from the name of this we can tell if we need to search one or many containers.
   if (m_keepFailedBranches) {
-    std::vector<const Decision*> rejectedNodes = TrigCompositeUtils::getRejectedDecisionNodes(&*evtStore(), m_primaryInputCollection.key(), chainIDs, m_allOutputContainersSet);
+    std::vector<const Decision*> rejectedNodes = TrigCompositeUtils::getRejectedDecisionNodes(&*evtStore(), ctx, m_primaryInputCollection.key(), chainIDs, m_allOutputContainersSet);
     for (const Decision* rejectedNode : rejectedNodes) {
       // We do *not* enforce that a member of chainIDs must be present in the starting node (rejectedNode)
       // specifically because we know that at least one of chainIDs was _rejected_ here, but is active in the rejected
@@ -480,6 +493,7 @@ StatusCode TrigNavSlimmingMTAlg::repackLinks(
 
     // Do any IParticle repacking
     ATH_CHECK( doRepack<xAOD::ParticleContainer>(output, outputContainers.particles, featureString()) );
+    ATH_CHECK( doRepack<xAOD::ParticleContainer>(output, outputContainers.particles, "subfeature") );
 
     // Debug printing. Look at the four-momentum of any feature after the repacking (the stored link is re-written)
     printIParticleRepackingDebug(output, " After");

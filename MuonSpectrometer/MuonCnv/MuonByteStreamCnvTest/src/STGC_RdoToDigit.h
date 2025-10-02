@@ -21,7 +21,7 @@ public:
     virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-    StatusCode decodeSTGC(const Muon::STGC_RawDataCollection*, sTgcDigitContainer*, sTgcDigitCollection*&, Identifier&) const;
+    StatusCode decodeSTGC(const EventContext& ctx, const Muon::STGC_RawDataCollection*, sTgcDigitContainer*, sTgcDigitCollection*&, Identifier&) const;
 
     ToolHandle<Muon::ISTGC_RDO_Decoder> m_stgcRdoDecoderTool{this, "sTgcRdoDecoderTool", "Muon::STGC_RDO_Decoder", ""};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -365,7 +365,7 @@ bool AFP_TDSensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
         // including the scattering from the top edge of the bar (perfect absorber now)
         if (cosTheta>=0)
           {
-            Y0 = ((G4ReflectedSolid *)(myTouch->GetSolid()))->DistanceToOut(PhotonPos, normnY);
+            Y0 = static_cast<G4ReflectedSolid *>(myTouch->GetSolid())->DistanceToOut(PhotonPos, normnY);
             Y0 = Y0/cosTheta/cosPhi;
           }
         else

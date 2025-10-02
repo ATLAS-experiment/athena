@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::HEC::HECGeometry
 #include "LArG4Code/LArG4Identifier.h"
-#include "LArG4HEC/HECGeometry.h"
+#include "HECGeometry.h"
 
 #include "G4Version.hh"
 #include "G4ThreeVector.hh"

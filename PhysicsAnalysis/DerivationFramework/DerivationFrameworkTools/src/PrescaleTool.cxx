@@ -18,9 +18,8 @@ namespace DerivationFramework {
   PrescaleTool::PrescaleTool(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p)
+    base_class(t,n,p)
   {
-    declareInterface<DerivationFramework::ISkimmingTool>(this);
   }
 
   StatusCode PrescaleTool::initialize()

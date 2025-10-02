@@ -38,7 +38,9 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("enableTrigger",  enableTrigger = true, "comment");
   declareProperty("enableTracks",  enableTracks = false, "comment");
   declareProperty("trackLimit",  trackLimit = 500, "comment");
-  declareProperty("enableClusters",  enableClusters = true, "comment");
+  declareProperty("enableID",  enableID = false, "turn on to enable ID tracks & vertices for physics streams");
+  declareProperty("enableCalo",  enableCalo = false, "turn on to enable calorimeter energy info for physics streams");
+  declareProperty("enableClusters",  enableClusters = false, "turn on to enable calo topo cluster info for physics streams");
   declareProperty("writeOnlyTriggers",  writeOnlyTriggers = false, "comment");
   declareProperty("useGRL",  useGRL = true, "comment");
   declareProperty("grlFilename",  grlFilename = "$ROOTCOREBIN/data/ZdcNtuple/data16_hip8TeV.periodAllYear_DetStatus-v86-pro20-19_DQDefects-00-02-04_PHYS_HeavyIonP_All_Good.xml", "comment");
@@ -158,6 +160,8 @@ StatusCode ZdcNtuple :: initialize ()
 	m_outputTree->Branch("zdc_ZdcAmpErr", &t_ZdcAmpErr, "zdc_ZdcAmpErr[2]/F");
 	m_outputTree->Branch("zdc_ZdcEnergy", &t_ZdcEnergy, "zdc_ZdcEnergy[2]/F");
 	m_outputTree->Branch("zdc_ZdcEnergyErr", &t_ZdcEnergyErr, "zdc_ZdcEnergyErr[2]/F");
+	m_outputTree->Branch("zdc_ZdcNLEnergy", &t_ZdcNLEnergy, "zdc_ZdcNLEnergy[2]/F");
+	m_outputTree->Branch("zdc_ZdcNLEnergyErr", &t_ZdcNLEnergyErr, "zdc_ZdcNLEnergyErr[2]/F");
 	m_outputTree->Branch("zdc_ZdcTime", &t_ZdcTime, "zdc_ZdcTime[2]/F");
 	m_outputTree->Branch("zdc_ZdcStatus", &t_ZdcStatus, "zdc_ZdcStatus[2]/S");
 	m_outputTree->Branch("zdc_ZdcTrigEff", &t_ZdcTrigEff, "zdc_ZdcTrigEff[2]/F");
@@ -420,6 +424,8 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("reprocZdc = " << reprocZdc);
   ANA_MSG_INFO("auxSuffix = " << auxSuffix );
   ANA_MSG_INFO("zdcLowGainMode = " << zdcLowGainMode);
+  ANA_MSG_INFO("enableID = " << enableID);
+  ANA_MSG_INFO("enableCalo = " << enableCalo);
   ANA_MSG_INFO("enableClusters = " << enableClusters);
   ANA_MSG_INFO("trackLimit = " << trackLimit);
   ANA_MSG_INFO("trackLimitReject = " << trackLimitReject);
@@ -544,7 +550,7 @@ StatusCode ZdcNtuple :: execute ()
 
   m_trackParticles = 0;
 
-  if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
+  if ((!(zdcCalib || zdcLaser || zdcOnly || zdcInj)) && enableID)
   {
     ANA_MSG_DEBUG("Trying to extract InDetTrackParticles from evtStore()=" << evtStore());
     ANA_CHECK(evtStore()->retrieve( m_trackParticles, "InDetTrackParticles") );
@@ -582,14 +588,15 @@ StatusCode ZdcNtuple :: execute ()
     // PLEASE NOTE: the commented sections here will be restored once we have a better sense of the Run 3 HI data
 
     // Global E_T quantities for centrality
+    if (enableCalo){
+	    ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
+	    ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
 
-    //ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
-    //ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
+	    m_lvl1EnergySumRoI = 0;
+	    ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
 
-    m_lvl1EnergySumRoI = 0;
-    //ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
-
-    //processFCal();
+    	processFCal();
+    } 
 
     // MBTS quantities, but may require a derivation to be accessible (required STDM6 in pp)
     //ANA_CHECK(evtStore()->retrieve( m_mbtsInfo, "MBTSForwardEventInfo") );
@@ -598,12 +605,16 @@ StatusCode ZdcNtuple :: execute ()
     //ANA_CHECK(evtStore()->retrieve( m_trigT2MbtsBits, "HLT_xAOD__TrigT2MbtsBitsContainer_T2Mbts") );
     //processMBTS();
 
-    ANA_CHECK(evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
-    processInDet();
+    if (enableID){
+	    ANA_CHECK(evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
+	    processInDet();    	
+    }
 
 
-    ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
-    processClusters();
+    if (enableClusters){
+	    ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
+	    processClusters();    	
+    }
 
     // Gaps will require some evaluation of Run 3 performance of the clusters
     //processGaps();
@@ -652,7 +663,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
   
   for (size_t iside = 0; iside < 2; iside++)
     {
-      t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
+      t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcEnergyErr[iside] = 0;t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
+      t_ZdcNLEnergy[iside] = 0;t_ZdcNLEnergyErr[iside] = 0;
       t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0; t_ZdcLucrodTriggerSideAmpLG[iside] = 0; t_ZdcTruthTotal[iside] = 0;
       t_ZdcTruthInvis[iside] = 0; t_ZdcTruthEM[iside] = 0; t_ZdcTruthNonEM[iside] = 0;
       t_ZdcTruthEscaped[iside] = 0;
@@ -751,6 +763,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
   static const SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix);
   static const SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy"+auxSuffix);
   static const SG::ConstAccessor<float> CalibEnergyErrAcc("CalibEnergyErr"+auxSuffix);
+  static const SG::ConstAccessor<float> NLCalibEnergyAcc("NLCalibEnergy"+auxSuffix);
+  static const SG::ConstAccessor<float> NLCalibEnergyErrAcc("NLCalibEnergyErr"+auxSuffix);
   static const SG::ConstAccessor<float> UncalibSumAcc("UncalibSum"+auxSuffix);
   static const SG::ConstAccessor<float> UncalibSumErrAcc("UncalibSumErr"+auxSuffix);
   static const SG::ConstAccessor<float> AverageTimeAcc("AverageTime"+auxSuffix);
@@ -868,6 +882,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    {
 	      t_ZdcEnergy[iside] = CalibEnergyAcc(*zdcSum);
 	      t_ZdcEnergyErr[iside] = CalibEnergyErrAcc(*zdcSum);
+	      t_ZdcNLEnergy[iside] = NLCalibEnergyAcc(*zdcSum);
+	      t_ZdcNLEnergyErr[iside] = NLCalibEnergyErrAcc(*zdcSum);
 	      
 	      t_ZdcAmp[iside] = UncalibSumAcc(*zdcSum);
 	      t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);

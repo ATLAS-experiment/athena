@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from decorators import DecoratorFromDefault, DecoratorFromPowheg
+from .decorators import DecoratorFromDefault, DecoratorFromPowheg
 
 def decorate( hto4l_controller, decorator, **kwargs ) :
   ## Initialise correct decorator for Hto4l configurable

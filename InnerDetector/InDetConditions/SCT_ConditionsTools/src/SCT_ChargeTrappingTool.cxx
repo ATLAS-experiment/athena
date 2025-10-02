@@ -130,7 +130,7 @@ SCT_ChargeTrappingCondData SCT_ChargeTrappingTool::calculate(const IdentifierHas
   // We take absolute values just in case voltages are signed .
   double depletionDepth{element->thickness()};
   if (std::abs(biasVoltage) < std::abs(deplVoltage)) {
-    depletionDepth *= sqrt(std::abs(biasVoltage / deplVoltage));
+    depletionDepth *= std::sqrt(std::abs(biasVoltage / deplVoltage));
     // -- if this was the case would need to re-calculate the Ramo Potential and other parameters.
   }
   

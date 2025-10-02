@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4H62004SD_H62004FCALSDTOOL_H
@@ -41,16 +41,16 @@ namespace LArG4
     G4VSensitiveDetector* makeSD() const override final;
 
     /// Hit collection name
-    std::string m_hitCollName;
+    std::string m_hitCollName {"LArHitFCAL"};
 
-    ServiceHandle<ILArCalculatorSvc> m_fcal1calc;
-    ServiceHandle<ILArCalculatorSvc> m_fcal2calc;
-    ServiceHandle<ILArCalculatorSvc> m_fcalcoldcalc;
+    ServiceHandle<ILArCalculatorSvc> m_fcal1calc {this, "FCAL1Calculator", "FCAL1Calculator"};
+    ServiceHandle<ILArCalculatorSvc> m_fcal2calc {this, "FCAL2Calculator", "FCAL2Calculator"};
+    ServiceHandle<ILArCalculatorSvc> m_fcalcoldcalc {this, "FCALColdCalculator", "FCALColdCalculator"};
     /// @name SD volumes
     /// @{
-    std::vector<std::string> m_fcal1Volumes;
-    std::vector<std::string> m_fcal2Volumes;
-    std::vector<std::string> m_fcalColdVolumes;
+    Gaudi::Property<std::vector<std::string>> m_fcal1Volumes {this, "FCAL1Volumes"};
+    Gaudi::Property<std::vector<std::string>> m_fcal2Volumes {this, "FCAL2Volumes"};
+    Gaudi::Property<std::vector<std::string>> m_fcalColdVolumes {this, "FCALColdVolumes"};
     /// @}
 
   }; // class H62004FCALSDTool

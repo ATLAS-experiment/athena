@@ -3,6 +3,7 @@
 """Define method to construct configured Tile Cell maker algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import BeamType
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TileConfiguration.TileConfigFlags import TileRunType
 from CaloCellCorrection.CaloCellCorrectionConfig import CaloCellNeighborsAverageCorrCfg
@@ -89,9 +90,9 @@ def TileCellMakerCfg(flags, mergeChannels=True, **kwargs):
         caloCellNeighborsAverageCorrection = acc.popToolsAndMerge( CaloCellNeighborsAverageCorrCfg(flags) )
         cellMakerTools += [caloCellNeighborsAverageCorrection]
 
-
-    caloCellContainerChecker = acc.popToolsAndMerge( CaloCellContainerCheckerToolCfg(flags) )
-    cellMakerTools += [caloCellContainerChecker]
+    if flags.Beam.Type is not BeamType.TestBeam:
+        caloCellContainerChecker = acc.popToolsAndMerge( CaloCellContainerCheckerToolCfg(flags) )
+        cellMakerTools += [caloCellContainerChecker]
 
     cellMakerAlg = CaloCellMaker(name = name, CaloCellMakerToolNames = cellMakerTools,
                                  CaloCellsOutputName = caloCellsOutputName)

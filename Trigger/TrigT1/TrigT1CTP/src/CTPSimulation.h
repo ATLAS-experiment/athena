@@ -31,7 +31,8 @@
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODTrigger/EmTauRoIContainer.h"
-#include "TrigT1Result/CTP_RDO.h"
+#include "TrigT1Result/CTP_RDO.h"// TODO obsolete it in favour of xAOD::CTPResult - see line below
+#include "xAODTrigger/CTPResult.h"
 #include "TrigT1Interfaces/CTPSLink.h"
 #include "TrigT1Interfaces/ZdcCTP.h"
 #include "TrigT1Interfaces/TrtCTP.h"
@@ -110,7 +111,7 @@ namespace LVL1CTP {
       // Needed services and tools
       ServiceHandle<ITHistSvc> m_histSvc { this, "THistSvc", "THistSvc/THistSvc", "Histogramming svc" };
 
-      ToolHandle<LVL1CTP::ResultBuilder> m_resultBuilder { this, "ResultBuilder", "LVL1CTP__ResultBuilder/ResultBuilder", "Builds the CTP result" };
+      ToolHandle<LVL1CTP::ResultBuilder> m_resultBuilder { this, "ResultBuilder", "LVL1CTP::ResultBuilder/ResultBuilder", "Builds the CTP result" };
 
       // random engine for calculating prescales
       ATHRNG::RNGWrapper m_RNGEngines;
@@ -149,6 +150,7 @@ namespace LVL1CTP {
 
       // outputs
       SG::WriteHandleKey<CTP_RDO>  m_oKeyRDO  {this, "RDOOutput", LVL1CTP::DEFAULT_RDOOutputLocation, "Output of CTP RDO object (sim)"};
+      SG::WriteHandleKey<xAOD::CTPResult>  m_oKeyCTPResult  {this, "CTPResultOutput", LVL1CTP::DEFAULT_CTPResultOutputLocation, "Output of CTPResult (sim)"};
       SG::WriteHandleKey<CTPSLink> m_oKeySLink{this, "ROIOutput", LVL1CTP::DEFAULT_CTPSLinkLocation, "Output of CTP SLink object (sim)"};
 
 
@@ -164,6 +166,8 @@ namespace LVL1CTP {
       Gaudi::Property<bool> m_doL1Topo       { this, "DoL1Topo",       false, "Use L1Topo" };
       Gaudi::Property<bool> m_doL1TopoLegacy { this, "DoL1TopoLegacy", false, "Use L1Topo Legacy" };
       Gaudi::Property<bool> m_muonRun2Format { this, "MuonMultiplicityRun2Format", false, "Interpret muon multiplicity in Run 2 format (bit 0 unused)" };
+     
+      Gaudi::Property<bool> m_useEDMxAOD       { this, "UseEDMxAOD", false, "Use EDM based on xAOD class" };
 
       SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bgKey{this, "L1BunchGroup", "L1BunchGroup", "L1BunchGroupSet key name"};
    };

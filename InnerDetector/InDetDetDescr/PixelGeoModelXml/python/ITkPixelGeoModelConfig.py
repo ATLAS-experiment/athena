@@ -21,7 +21,7 @@ def ITkPixelGeoModelCfg(flags):
 
 
 def ITkPixelAlignmentCfg(flags):
-    if flags.GeoModel.Align.LegacyConditionsAccess:  # revert to old style CondHandle in case of simulation
+    if flags.GeoModel.Align.LegacyConditionsAccess and not flags.ITk.Align.useLocalDatabase:  # revert to old style CondHandle in case of simulation
         from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
         return addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", flags.ITk.Geometry.alignmentFolder)
     else:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenAlgs/SelectEventNumber.h"
@@ -11,24 +11,10 @@
 namespace Trk {
 
 //___________________________________________________________________________
-SelectEventNumber::SelectEventNumber(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm (name, pSvcLocator)
-  , m_lastGoodEvt(0)
-{
-
-  declareProperty("EventList", m_eventListName = "goodEvents.txt");
-
-}
-
-//___________________________________________________________________________
-SelectEventNumber::~SelectEventNumber() 
-= default;
-
-//___________________________________________________________________________
 StatusCode SelectEventNumber::initialize() 
 {
   ATH_MSG_DEBUG("in SelectEventNumber::initialize()");
-  std::ifstream input(m_eventListName.c_str());
+  std::ifstream input(m_eventListName.value().c_str());
   int run,event;
   if (input.is_open()) {
     while (input>>run>>event) {
@@ -77,13 +63,6 @@ StatusCode SelectEventNumber::execute()
   setFilterPassed(goodevt);
   
   ATH_MSG_DEBUG("goodevt "<<goodevt);
-  return StatusCode::SUCCESS;
-}
-  
-  
-//___________________________________________________________________________
-StatusCode SelectEventNumber::finalize() 
-{
   return StatusCode::SUCCESS;
 }
 

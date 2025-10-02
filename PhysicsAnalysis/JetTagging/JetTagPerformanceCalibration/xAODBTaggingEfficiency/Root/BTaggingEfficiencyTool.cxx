@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyTool.h"
@@ -9,8 +9,6 @@
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataContainer.h"
 #include "CalibrationDataInterface/CDIReader.h"
-
-#include "xAODBTaggingEfficiency/ToolDefaults.h"
 
 // for the onnxtool
 #include "xAODBTaggingEfficiency/SaltModel.h"
@@ -126,53 +124,6 @@ namespace {
 }
 
 BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg::AsgTool( name ), m_selectionTool("") {
-  namespace def = ftag::defaults;
-  declareProperty("TaggerName",                          m_taggerName=def::tagger,               "tagging algorithm name as specified in CDI file");
-  declareProperty("OperatingPoint",                      m_OP=def::pcbt_op,                       "operating point as specified in CDI file");
-  declareProperty("JetAuthor",                           m_jetAuthor=def::jet_collection,                "jet collection & JVF/JVT specification in CDI file");
-  declareProperty("MinPt",                               m_minPt=0,                    "minimum jet pT cut");
-  declareProperty("ScaleFactorFileName",                 m_SFFile=def::cdi_path,                 "name of the official scale factor calibration CDI file (uses PathResolver)");
-  declareProperty("UseDevelopmentFile",                  m_useDevFile = false,          "specify whether or not to use the (PathResolver) area for temporary scale factor calibration CDI files");
-  declareProperty("EfficiencyFileName",                  m_EffFile = "",                "name of optional user-provided MC efficiency CDI file");
-  declareProperty("EfficiencyConfig",                    m_EffConfigFile = "",           "name of config file specifying which efficiency map to use with a given samples DSID");
-  declareProperty("ScaleFactorBCalibration",             m_SFNames["B"] = "default",    "name of b-jet scale factor calibration object");
-  declareProperty("ScaleFactorCCalibration",             m_SFNames["C"] = "default",    "name of c-jet scale factor calibration object");
-  declareProperty("ScaleFactorTCalibration",             m_SFNames["T"] = "default",    "name of tau-jet scale factor calibration object");
-  declareProperty("ScaleFactorLightCalibration",         m_SFNames["Light"] = "default","name of light-flavour jet scale factor calibration object");
-  declareProperty("EigenvectorReductionB",               m_EVReduction["B"] = "Loose",  "b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
-  declareProperty("EigenvectorReductionC",               m_EVReduction["C"] = "Loose",  "c-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
-  declareProperty("EigenvectorReductionLight",           m_EVReduction["Light"] = "Loose", "light-flavour jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
-  declareProperty("EfficiencyCalibrations",             m_effName = "default",   "default for all flavors");
-  declareProperty("EfficiencyBCalibrations",             m_EffNames["B"] = "",   "(semicolon-separated) name(s) of b-jet efficiency object(s)");
-  declareProperty("EfficiencyCCalibrations",             m_EffNames["C"] = "",   "(semicolon-separated) name(s) of c-jet efficiency object(s)");
-  declareProperty("EfficiencyTCalibrations",             m_EffNames["T"] = "",   "(semicolon-separated) name(s) of tau-jet efficiency object(s)");
-  declareProperty("EfficiencyLightCalibrations",         m_EffNames["Light"] = "", "(semicolon-separated) name(s) of light-flavour-jet efficiency object(s)");
-  declareProperty("UncertaintyBSuffix",                  m_uncertaintySuffixes["B"] = "","optional suffix for b-jet uncertainty naming");
-  declareProperty("UncertaintyCSuffix",                  m_uncertaintySuffixes["C"] = "","optional suffix for c-jet uncertainty naming");
-  declareProperty("UncertaintyTSuffix",                  m_uncertaintySuffixes["T"] = "","optional suffix for tau-jet uncertainty naming");
-  declareProperty("UncertaintyLightSuffix",              m_uncertaintySuffixes["Light"] = "","optional suffix for light-flavour-jet uncertainty naming");
-  declareProperty("ExcludeFromEigenVectorTreatment",     m_excludeFromEV = "",          "(semicolon-separated) names of uncertainties to be excluded from all eigenvector decompositions (if used)");
-  declareProperty("ExcludeFromEigenVectorBTreatment",    m_excludeFlvFromEV["B"] = "",  "(semicolon-separated) names of uncertainties to be excluded from b-jet eigenvector decomposition (if used)");
-  declareProperty("ExcludeFromEigenVectorCTreatment",    m_excludeFlvFromEV["C"] = "",  "(semicolon-separated) names of uncertainties to be excluded from c-jet eigenvector decomposition (if used)");
-  declareProperty("ExcludeFromEigenVectorLightTreatment",m_excludeFlvFromEV["Light"] = "", "(semicolon-separated) names of uncertainties to be excluded from light-flavour-jet eigenvector decomposition (if used)");
-  declareProperty("ExcludeRecommendedFromEigenVectorTreatment", m_useRecommendedEVExclusions = false, "specify whether or not to add recommended lists to the user specified eigenvector decomposition exclusion lists");
-  // declareProperty("ExcludeJESFromEVTreatment",        m_excludeJESFromEV = true,     "specify whether or not to exclude JES uncertainties from eigenvector decomposition (if used)");
-  declareProperty("SystematicsStrategy",                 m_systStrategy=def::strategy,    "name of systematics model; presently choose between 'SFEigen' and 'Envelope'");
-  declareProperty("ConeFlavourLabel",                    m_coneFlavourLabel = true,     "specify whether or not to use the cone-based flavour labelling instead of the default ghost association based labelling");
-  declareProperty("ExtendedFlavourLabel",                m_extFlavourLabel = false,     "specify whether or not to use an 'extended' flavour labelling (allowing for multiple HF hadrons or perhaps partons)");
-  declareProperty("IgnoreOutOfValidityRange",            m_ignoreOutOfValidityRange = false, "ignore out-of-extrapolation-range errors as returned by the underlying tool");
-  declareProperty( "useCTagging",                        m_useCTag=false,       "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
-  declareProperty( "readFromBTaggingObject",             m_readFromBTaggingObject=true,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
-  // if it is empty, the onnx tool won't be initialised
-  declareProperty( "pathToONNX",                         m_pathToONNX = "",             "path to the onnx file that will be used for inference");
-  // experimental options
-  declareProperty("useFlexibleConfig",                   m_useFlex = false,                "Setup the flexible configuration of the xAODBTaggingEfficiencyTool with alternate labeling");
-  declareProperty("FlexibleScaleFactorCalibrations",     m_SFName_flex = "",          "(semicolon-separated) name of scale factor calibration object for (0,1,2..) indexed flavour labels, e.g. '0:default;1:default;2:default;3:default' ");
-  declareProperty("FlexibleEfficiencyCalibrations",      m_EffNames_flex = "",          "(semicolon-separated) name(s) of efficiency object(s) names for (0,1,2..) indexed flavour labels, e.g. '0:default;1:default;2:default;3:default' ");
-  declareProperty("FlexibleEigenvectorReduction",        m_EVReduction_flex = "",         "(semicolon-separated) list of eigenvector reduction strategy for (0,1,2..) indexed flavour labels; choose between 'Loose', 'Medium', 'Tight' for different labels, e.g. '0:Loose;1:Loose;2:Loose' ");
-  declareProperty("FlexibleUncertaintySuffix",           m_uncertaintySuffixes_flex = "",   "optional (semicolon-separated) list of suffixes for (0,1,2..) indexed flavour label uncertainty naming, e.g. '0:;1:;2:;3:' ");
-  declareProperty("FlexibleExcludeFromEVTreatment",      m_excludeFlvFromEV_flex = "",        "(semicolon-separated) names of uncertainties to be excluded from (0,1,2..) indexed flavour eigenvector decompositions (if used), e.g. '0:;1:;2:;3:' ");
-  
   // initialise some variables needed for caching
   // TODO : add configuration of the mapIndices - rather than just using the default of 0
   //m_mapIndices["Light"] = m_mapIndices["T"] = m_mapIndices["C"] = m_mapIndices["B"] = 0;
@@ -181,6 +132,7 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   m_isContinuous   = false;
   m_isContinuous2D = false;
   m_using_conventional_labels = false;
+
   // declare the selection tool to be private (not absolutely sure this is needed?)
   m_selectionTool.declarePropertyFor(this, "BTaggingSelectionTool", "selection tool to be used internally");
 }
@@ -191,11 +143,36 @@ BTaggingEfficiencyTool::~BTaggingEfficiencyTool() {
 
 StatusCode BTaggingEfficiencyTool::initialize() {
 
-
   ATH_MSG_INFO( " Hello BTaggingEfficiencyTool user... initializing");
   ATH_MSG_INFO( " TaggerName = " << m_taggerName);
   ATH_MSG_INFO( " OP = " << m_OP);
   ATH_MSG_INFO( " m_systStrategy is " << m_systStrategy);
+
+  m_SFNames["B"] = m_SFNamesB;
+  m_SFNames["C"] = m_SFNamesC;
+  m_SFNames["T"] = m_SFNamesT;
+  m_SFNames["Light"] = m_SFNamesLight;
+
+  m_EVReduction["B"] = m_EVReductionB;
+  m_EVReduction["C"] = m_EVReductionC;
+  m_EVReduction["Light"] = m_EVReductionLight;
+
+  m_EffNames["B"] = m_EffNamesB;
+  m_EffNames["C"] = m_EffNamesC;
+  m_EffNames["T"] = m_EffNamesT;
+  m_EffNames["Light"] = m_EffNamesLight;
+
+  m_uncertaintySuffixes["B"] = m_uncertaintySuffixesB;
+  m_uncertaintySuffixes["C"] = m_uncertaintySuffixesC;
+  m_uncertaintySuffixes["T"] = m_uncertaintySuffixesT;
+  m_uncertaintySuffixes["Light"] = m_uncertaintySuffixesLight;
+
+  m_excludeFlvFromEV["B"] = m_excludeFlvFromEVB;
+  m_excludeFlvFromEV["C"] = m_excludeFlvFromEVC;
+  m_excludeFlvFromEV["Light"] = m_excludeFlvFromEVLight;
+
+  if(m_SelectionCDIFile.empty()) m_SelectionCDIFile = m_SFFile;
+  if(m_selectionTaggerName.empty()) m_selectionTaggerName = m_taggerName;
 
   // set default MCMC map if they haven't been specified
   for (auto& [k, v]: m_EffNames) {
@@ -243,12 +220,6 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_MSG_ERROR( "BTaggingEfficiencyTool configuration is invalid - follow the above suggestions to correct your config!");
     return StatusCode::FAILURE;
   };
-  if (msgLvl(MSG::INFO)) {
-    ATH_MSG_INFO( " --- Calibration file configuration options ---" );
-    Reader.printTaggers();
-    Reader.printJetCollections();
-    Reader.printWorkingPoints();
-  }
 
   std::vector<std::string> config_labels = Reader.getLabels(); // the labels compatible with this configuration
   std::vector<std::string> flavours;
@@ -428,7 +399,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     excludeFromEVCov["T"] = excludeFromEVCov["C"];
 
     //high pt extrapolation uncertainties
-    if(m_OP.find("Continuous") != std::string::npos){
+    if(m_OP.value().find("Continuous") != std::string::npos){
       excludeFromEVCov["B"].push_back("extrapolation_pt_b_Eigen*");
       excludeFromEVCov["C"].push_back("extrapolation_pt_c_Eigen*");
       excludeFromEVCov["Light"].push_back("extrapolation_pt_l_Eigen*");
@@ -444,7 +415,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     //    CalibrationDataInterfaceROOT::getScaleFactor() must be used
     m_isContinuous = true;
   }
-  else if  (m_OP.find("Continuous2D")  != std::string::npos) {
+  else if (m_OP.value().find("Continuous2D")  != std::string::npos) {
     m_isContinuous2D = true;
   }
   // Note that the instantiation below does not leave a choice: the Eigenvector variations and generator-specific scale factors are always used
@@ -452,7 +423,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   m_CDI = std::shared_ptr<Analysis::CalibrationDataInterfaceROOT>( new Analysis::CalibrationDataInterfaceROOT(
                  m_taggerName,                              // tagger name: always needed
 						     m_SFFileFull.c_str(),                          // full pathname of the SF calibration file: always needed
-						     (m_EffFile == "") ? 0 : m_EffFile.c_str(), // full pathname of optional efficiency file
+		                                     (m_EffFile == "") ? 0 : m_EffFile.value().c_str(), // full pathname of optional efficiency file
 						     jetAliases,                                // since we configure the jet "collection name" by hand, we don't need this
 						     m_SFNames,                                 // names of the scale factor calibrations to be used
 						     EffNames,                                  // names of the efficiency calibrations to be used (can be multiple per flavour)
@@ -692,10 +663,12 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 
   // Finally, also initialise the selection tool, if needed (for now this is the case only for DL1 tag weight computations,
   // so we do this only when DL1 is specified)
-  if (m_taggerName.find("DL1") != std::string::npos || m_taggerName.find("GN1") != std::string::npos || m_taggerName.find("GN2") != std::string::npos) {
+  if (m_taggerName.value().find("DL1") != std::string::npos ||
+      m_taggerName.value().find("GN1") != std::string::npos ||
+      m_taggerName.value().find("GN2") != std::string::npos) {
     m_selectionTool.setTypeAndName("BTaggingSelectionTool/" + name() + "_selection");
-    ATH_CHECK( m_selectionTool.setProperty("FlvTagCutDefinitionsFileName", m_SFFile) );
-    ATH_CHECK( m_selectionTool.setProperty("TaggerName",                   m_taggerName) );
+    ATH_CHECK( m_selectionTool.setProperty("FlvTagCutDefinitionsFileName", m_SelectionCDIFile) );
+    ATH_CHECK( m_selectionTool.setProperty("TaggerName",                   m_selectionTaggerName) );
     ATH_CHECK( m_selectionTool.setProperty("OperatingPoint",               m_OP) );
     ATH_CHECK( m_selectionTool.setProperty("JetAuthor",                    m_jetAuthor) );
     ATH_CHECK( m_selectionTool.setProperty("MinPt",                        m_minPt) );
@@ -1298,7 +1271,9 @@ BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVar
         if (!tagInfo) return false;
     }
     // For now, we defer the tag weight computation to the selection tool only in the case of DL1* (this is likely to be revisited)
-    if (m_taggerName.find("DL1") != std::string::npos || m_taggerName.find("GN1") != std::string::npos || m_taggerName.find("GN2") != std::string::npos) {
+    if (m_taggerName.value().find("DL1") != std::string::npos ||
+	m_taggerName.value().find("GN1") != std::string::npos ||
+	m_taggerName.value().find("GN2") != std::string::npos) {
       return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight, m_useCTag) == CP::CorrectionCode::Ok);
     } else {
       ATH_MSG_ERROR("BTaggingEfficiencyTool doesn't support tagger: "+m_taggerName);

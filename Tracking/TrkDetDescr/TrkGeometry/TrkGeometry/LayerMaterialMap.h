@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "TrkDetDescrUtils/LayerIndex.h"
-#include "TrkDetDescrUtils/SharedObject.h"
+#include <memory>
 #include "TrkGeometry/ElementTable.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
 
@@ -34,10 +34,10 @@ class LayerMaterialMap
   /** Default constructor */
   LayerMaterialMap()
       : std::map<Trk::LayerIndex, const Trk::LayerMaterialProperties*>(),
-        m_elementTable(SharedObject<const ElementTable>(0)) {}
+        m_elementTable(std::shared_ptr<const ElementTable>(0)) {}
 
   /** Default constructor */
-  LayerMaterialMap(const Trk::SharedObject<const ElementTable>& eTable)
+  LayerMaterialMap(const std::shared_ptr<const ElementTable>& eTable)
       : std::map<Trk::LayerIndex, const Trk::LayerMaterialProperties*>(),
         m_elementTable(eTable) {}
 
@@ -63,7 +63,7 @@ class LayerMaterialMap
   const ElementTable* elementTable() const { return m_elementTable.get(); }
 
   /** update method*/
-  void updateElementTable(const SharedObject<const ElementTable>& eTable) {
+  void updateElementTable(const std::shared_ptr<const ElementTable>& eTable) {
     m_elementTable = eTable;
     synchronizeElementTable();
   }
@@ -72,7 +72,7 @@ class LayerMaterialMap
   void synchronizeElementTable();
 
  private:
-  SharedObject<const ElementTable> m_elementTable;
+  std::shared_ptr<const ElementTable> m_elementTable;
 };
 
 inline LayerMaterialMap::~LayerMaterialMap() {
@@ -89,7 +89,7 @@ inline void LayerMaterialMap::synchronizeElementTable() {
     if (eTableLM) (*eTable) += (*eTableLM);
   }
   // loop 2 - set the updated ElementTable
-  m_elementTable = SharedObject<const ElementTable>(eTable);
+  m_elementTable = std::shared_ptr<const ElementTable>(eTable);
   for (auto& it : (*this)) it.second->updateElementTable(m_elementTable);
 }
 

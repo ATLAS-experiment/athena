@@ -2,16 +2,16 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkMuons/AnalysisMuonThinningAlg.h"
-#include "DerivationFrameworkMuons/IDTrackCaloDepositsDecoratorAlg.h"
-#include "DerivationFrameworkMuons/TrackIsolationDecorAlg.h"
-#include "DerivationFrameworkMuons/CaloIsolationDecorAlg.h"
-#include "DerivationFrameworkMuons/PflowIsolationDecorAlg.h"
-#include "DerivationFrameworkMuons/MuonJetDrTool.h"
-#include "DerivationFrameworkMuons/MuonTPExtrapolationAlg.h"
-#include "DerivationFrameworkMuons/MuonTruthClassifierFallback.h"
-#include "DerivationFrameworkMuons/MuonTruthIsolationDecorAlg.h"
-#include "DerivationFrameworkMuons/DiMuonTaggingAlg.h"
+#include "../AnalysisMuonThinningAlg.h"
+#include "../IDTrackCaloDepositsDecoratorAlg.h"
+#include "../TrackIsolationDecorAlg.h"
+#include "../CaloIsolationDecorAlg.h"
+#include "../PflowIsolationDecorAlg.h"
+#include "../MuonJetDrTool.h"
+#include "../MuonTPExtrapolationAlg.h"
+#include "../MuonTruthClassifierFallback.h"
+#include "../MuonTruthIsolationDecorAlg.h"
+#include "../DiMuonTaggingAlg.h"
 
 DECLARE_COMPONENT(DerivationFramework::MuonTruthClassifierFallback)
 DECLARE_COMPONENT(DerivationFramework::MuonTruthIsolationDecorAlg)

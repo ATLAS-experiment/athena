@@ -167,7 +167,7 @@ def PFRun3ConfigTest(flags=None):
   
   from eflowRec.PFRun3Remaps import ListRemaps
 
-  list_remaps=ListRemaps(cfg, 'AOD')
+  list_remaps=ListRemaps(cfg, 'AOD' if flags.Output.doWriteAOD else [])
   for mapping in list_remaps:
       cfg.merge(mapping)    
 

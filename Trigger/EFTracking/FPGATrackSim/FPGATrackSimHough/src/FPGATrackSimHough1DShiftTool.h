@@ -84,11 +84,8 @@
 class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
     public:
-
-        ///////////////////////////////////////////////////////////////////////
-        // AthAlgTool
-
-        FPGATrackSimHough1DShiftTool(const std::string&, const std::string&, const IInterface*);
+        /// Constructor
+        using base_class::base_class;
 
         virtual StatusCode initialize() override;
         virtual StatusCode finalize() override;
@@ -102,7 +99,7 @@ class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRo
 
         ///////////////////////////////////////////////////////////////////////
         // Handles
-        ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
+        ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", ""};
         ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
 	ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
 

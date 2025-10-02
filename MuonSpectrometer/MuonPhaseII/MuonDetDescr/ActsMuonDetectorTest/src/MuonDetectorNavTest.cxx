@@ -28,13 +28,15 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "ActsInterop/LoggerUtils.h"
 #include <fstream>
 #include <format>
+#include <cmath>
 
 using namespace Acts::UnitLiterals;
+using namespace Muon::MuonStationIndex;
 
 namespace {
 
 using SegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
-static const SG::ConstAccessor<SegLink_t> segAcc{"truthSegLinks"};
+static const SG::ConstAccessor<SegLink_t> segAcc{"truthSegmentLinks"};
 static const Amg::Vector3D dummyPos{100.*Gaudi::Units::m, 100.*Gaudi::Units::m, 100.*Gaudi::Units::m};
 struct PropagatorRecorder{
     /// @brief Position obtained by the ACTS propagator
@@ -106,20 +108,19 @@ StatusCode MuonDetectorNavTest::finalize() {
 StatusCode MuonDetectorNavTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
     ATH_MSG_DEBUG("Execute in event "<<ctx.eventID().event_number());
-    m_event = ctx.eventID().event_number();
-    SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles{m_truthParticleKey, ctx};
-    SG::ReadCondHandle<AtlasFieldCacheCondObj> magFieldHandle{m_fieldCacheCondObjInputKey, ctx};
-    if (!gctx.isValid() or !truthParticles.isValid() or !magFieldHandle.isValid()) {
-        ATH_MSG_FATAL("Failed to retrieve either the geometry context, truth particles or magnetic field");
-        return StatusCode::FAILURE;
-    }
-    SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
+    const ActsGeometryContext* gctx{nullptr};
+    const xAOD::TruthParticleContainer* truthParticles{nullptr};
+    const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
+    const MuonGM::MuonDetectorManager* detMgr{nullptr};
+    
+    ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
+    ATH_CHECK(SG::get(truthParticles, m_truthParticleKey, ctx));
+    ATH_CHECK(SG::get(fieldCondObj, m_fieldCacheCondObjInputKey, ctx));
+    ATH_CHECK(SG::get(detMgr, m_detMgrKey, ctx));
 
 
     const Acts::GeometryContext geoContext = gctx->context();
-    const AtlasFieldCacheCondObj* fieldCondObj{*magFieldHandle};
-    Acts::MagneticFieldContext mfContext = Acts::MagneticFieldContext(fieldCondObj);
+    const Acts::MagneticFieldContext mfContext = Acts::MagneticFieldContext(fieldCondObj);
 
 
     using Stepper = Acts::EigenStepper<>;
@@ -164,8 +165,8 @@ StatusCode MuonDetectorNavTest::execute() {
     for(const xAOD::TruthParticle* truthParticle : *truthParticles){
         
         ATH_MSG_DEBUG("Consider truth particle "<<truthParticle->pt()<<", "<<truthParticle->p4().P()<<", "<<truthParticle->eta()<<", "<<truthParticle->phi()
-                        <<", pdgId: "<<truthParticle->pdgId()<<", status: "<<truthParticle->status()
-                    <<", unique id:"<<truthParticle->id());
+                        <<", pdgId: "<<truthParticle->pdgId()<<", status: "<< HepMC::status(truthParticle)
+                    <<", unique id:"<< HepMC::uniqueID(truthParticle));
         
             //propagated and truth hits expressed in the local frame of the measurement layer           
         std::vector<PropagatorRecorder> propagatedHits;
@@ -174,7 +175,7 @@ StatusCode MuonDetectorNavTest::execute() {
         //the particle hypothesis
         Acts::ParticleHypothesis particleHypothesis(static_cast<Acts::PdgParticle>(truthParticle->absPdgId()),
         truthParticle->m(),
-        Acts::AnyCharge(truthParticle->charge()));
+        Acts::AnyCharge(std::abs(truthParticle->charge())));
 
         
         std::vector<std::pair<const xAOD::MuonSegment*, std::vector<const xAOD::MuonSimHit*>>> muonSegmentWithSimHits;
@@ -346,7 +347,7 @@ StatusCode MuonDetectorNavTest::execute() {
                 const Amg::Vector3D globalPos = toGlobalTrf(*gctx, simHit->identify())*xAOD::toEigen(simHit->localPosition());
                 const Amg::Vector3D localDir = localTrf.linear()*xAOD::toEigen(simHit->localDirection());
                 m_detId.push_back(ID);
-                m_techIdx.push_back(m_idHelperSvc->technologyIndex(ID));
+                m_techIdx.push_back(toInt(m_idHelperSvc->technologyIndex(ID)));
                 m_gasGapId.push_back(layerHash(ID));
 
                 m_truthLoc.push_back(localPos);
@@ -402,9 +403,8 @@ StatusCode MuonDetectorNavTest::execute() {
         }
         m_matchedTruthFraction = 1.f*nMatchedTruth / nTruth;
         m_matchedPropFraction = 1.f*nMatchedProp / propHitsSize;
-
+        m_event = ctx.eventID().event_number();
         m_tree.fill(ctx); 
-        
     }
 
     return StatusCode::SUCCESS;

@@ -8,6 +8,7 @@
 #include "../CaloCellCalcEnergyCorr.h"
 #include "../CaloCellEnergyCorr2Ntuple.h"
 #include "../LArMinBiasAlg.h"
+#include "../CaloNoiseCompCondAlg.h"
 
 DECLARE_COMPONENT( CaloCellNoiseAlg )
 DECLARE_COMPONENT( CaloNoise2Ntuple )
@@ -19,5 +20,6 @@ DECLARE_COMPONENT( FCAL_HV_Energy_Rescale )
 DECLARE_COMPONENT( CaloCellCalcEnergyCorr )
 DECLARE_COMPONENT( CaloCellEnergyCorr2Ntuple )
 DECLARE_COMPONENT( LArMinBiasAlg )
+DECLARE_COMPONENT( CaloNoiseCompCondAlg )
   
 

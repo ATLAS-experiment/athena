@@ -112,6 +112,15 @@ const History* Interface::getCellHistory(unsigned int i) const
   return history;
 }
 
+const History* Interface::getSCHistory(unsigned int i) const 
+{ 
+  const History* history = accessor().getSCHistory(i);
+  if (history) {
+    history->setInterface(this);
+  }
+  return history;
+}
+
 
 const History* Interface::cellHistory(unsigned int i) const 
 { 

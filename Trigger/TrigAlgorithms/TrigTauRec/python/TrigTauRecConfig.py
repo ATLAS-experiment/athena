@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigTauRecConfig')
@@ -111,7 +111,7 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
             acc.addPublicTool(idtools[-1])
 
             # ID score flattening and WPs
-            idtools.append(acc.popToolsAndMerge(trigTauWPDecoratorCfg(flags, tau_id=tau_id, precision_seq_name=name)))
+            idtools.append(acc.popToolsAndMerge(trigTauWPDecoratorCfg(flags, tau_id=tau_id, precision_seq_name=name, tauContainerName=trigTauJetOutputContainer)))
             acc.addPublicTool(idtools[-1])
 
 
@@ -141,7 +141,7 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
                 acc.addPublicTool(idtools[-1])
             else:
                 from TrigTauRec.TrigTauRecToolsConfig import trigTauWPDecoratorCfg
-                idtools.append(acc.popToolsAndMerge(trigTauWPDecoratorCfg(flags, tau_id=tau_id, precision_seq_name=name)))
+                idtools.append(acc.popToolsAndMerge(trigTauWPDecoratorCfg(flags, tau_id=tau_id, precision_seq_name=name, tauContainerName=trigTauJetOutputContainer)))
                 acc.addPublicTool(idtools[-1])
 
         id_score_monitoring[tau_id] = getTauIDScoreVariables(tau_id, precision_sequence=name)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -18,9 +18,8 @@
 DerivationFramework::TruthNavigationDecorator::TruthNavigationDecorator(const std::string& t,
         const std::string& n,
         const IInterface* p ) :
-    AthAlgTool(t,n,p)
+    base_class(t,n,p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 }
 
 // Destructor
@@ -36,7 +35,7 @@ StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
 
   // Decorations - dependent on the name of the input keys 
   // Loop over the container names provided by the user
-  for (auto key : m_inputKeys) {
+  for (const auto& key : m_inputKeys) {
     m_parentLinksDecorKeys.emplace_back(key.key()+".parentLinks");   
     m_childLinksDecorKeys.emplace_back(key.key()+".childLinks");  
   }

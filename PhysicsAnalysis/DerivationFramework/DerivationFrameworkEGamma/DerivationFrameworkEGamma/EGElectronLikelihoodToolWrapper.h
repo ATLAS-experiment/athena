@@ -33,9 +33,7 @@
 
 namespace DerivationFramework {
 
-class EGElectronLikelihoodToolWrapper
-  : public AthAlgTool
-  , public IAugmentationTool
+class EGElectronLikelihoodToolWrapper : public extends<AthAlgTool, IAugmentationTool> 
 {
 public:
   EGElectronLikelihoodToolWrapper(const std::string& t,

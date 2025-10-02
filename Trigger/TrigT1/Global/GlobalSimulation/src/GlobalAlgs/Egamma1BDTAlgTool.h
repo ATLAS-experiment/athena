@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EGAMMA1BDTALGTOOL_H
@@ -12,8 +12,9 @@
 #include "../IGlobalSimAlgTool.h"
 #include "../IO/LArStripNeighborhoodContainer.h"
 
-#include "../NumericTypes/ap_int.h"
-#include "../NumericTypes/ap_fixed.h"
+#include "ap_int.h"
+#include "ap_fixed.h"
+#include "Digitizer.h"
 
 #include "Egamma1BDT/BDT.h"
 
@@ -56,7 +57,6 @@ namespace GlobalSim {
       "key to read inLArNeighborhoodReadKeys"};
 
     std::vector<double> combine_phi(const LArStripNeighborhood*) const;
-    std::vector<ap_int<10>> digitize(const std::vector<double>&) const;
 
     // a neighborhood has 3 vectors of strip energies (phi_low, phi_center.
     // phi_high). Provide the length thes vectors must have for the BDT to be

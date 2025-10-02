@@ -7,7 +7,7 @@
  */
 #ifndef TRKVKALVRTCORE_DERCLC2_H
 #define TRKVKALVRTCORE_DERCLC2_H
-#include <array>
+
 
 namespace Trk {
 class VKPointConstraint;

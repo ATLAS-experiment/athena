@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "SensorSimPlanarTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -33,10 +32,6 @@ using namespace InDetDD;
 //===============================================
 SensorSimPlanarTool::SensorSimPlanarTool(const std::string& type, const std::string& name, const IInterface* parent) :
   SensorSimTool(type, name, parent) {
-
-  // This is a waste in some cases, but we need at most 3x3 elements
-  // Reserving 9 removes the need to allocate new memory multipe time thus speeding up the code a bit
-  m_centrePixelNNEtaPhi.resize(9);
 }
 
 SensorSimPlanarTool::~SensorSimPlanarTool() = default;
@@ -264,7 +259,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
                                              std::vector< std::pair<double, double> >& trfHitRecord,
                                              std::vector<double>& initialConditions,
                                              CLHEP::HepRandomEngine* rndmEngine,
-                                             const EventContext &ctx) {
+                                             const EventContext &ctx) const {
 
   bool isITk(false);
   if (p_design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) {
@@ -307,13 +302,14 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double eleholePairEnergy = 0;
   double smearRand = 0;
 
+  double diffusionConstant;
   if (Module.isDBM()) {
     eleholePairEnergy = 1. / (13. * CLHEP::eV); // was 3.62 eV.
-    m_diffusionConstant = .00265;
+    diffusionConstant = .00265;
     smearRand = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
   } else {
     eleholePairEnergy = siProperties.electronHolePairsPerEnergy();
-    m_diffusionConstant = .007;
+    diffusionConstant = .007;
   }
 
   double collectionDist = 0.2 * CLHEP::mm;
@@ -398,6 +394,8 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
       const auto pixel_eta = pixel_i.etaIndex();
       const auto pixel_phi = pixel_i.phiIndex();
 
+      // According to a comment: need at most 3x3 elements
+      std::array<std::pair<double,double>,9 > centrePixelNNEtaPhi;
       for (int p = nnLoop_pixelEtaMin; p <= nnLoop_pixelEtaMax; p++) {
         const std::size_t ieta = p - nnLoop_pixelEtaMin;
         // scale factors accounting for different pixel sizes
@@ -417,8 +415,8 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
                                                                                    pixel_phi - q);
           const std::size_t iphi = q - nnLoop_pixelPhiMin;
           const std::size_t index = iphi + ieta*sizePhi;
-          m_centrePixelNNEtaPhi[index].first  = centreOfPixel_nn.xEta();
-          m_centrePixelNNEtaPhi[index].second = centreOfPixel_nn.xPhi();
+          centrePixelNNEtaPhi.at(index).first  = centreOfPixel_nn.xEta();
+          centrePixelNNEtaPhi[index].second = centreOfPixel_nn.xPhi();
         }
       }
 
@@ -450,14 +448,14 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
         double phiRand = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
 
         //Apply diffusion. rdif is teh max. diffusion
-        const double rdif_e = this->m_diffusionConstant * std::sqrt(dz_e * coLorentz_e / 0.3);
+        const double rdif_e = diffusionConstant * std::sqrt(dz_e * coLorentz_e / 0.3);
         const double phi_f_e = phi_i + dz_e * tanLorentz_e + rdif_e * phiRand;
         double etaRand = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
         double eta_f_e = eta_i + rdif_e * etaRand;
 
         phiRand = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
         const double coLorentz_h = std::sqrt(1.0 + (tanLorentz_h*tanLorentz_h));
-        const double rdif_h = this->m_diffusionConstant * std::sqrt(dz_h * coLorentz_h / 0.3);
+        const double rdif_h = diffusionConstant * std::sqrt(dz_h * coLorentz_h / 0.3);
         const double phi_f_h = phi_i + dz_h * tanLorentz_h + rdif_h * phiRand;
         etaRand = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
         double eta_f_h = eta_i + rdif_h * etaRand;
@@ -494,7 +492,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
             const std::size_t index = iphi + ieta*sizePhi;
             //What is the displacement of the nn pixel from the primary pixel.
             //This is to index the correct entry in the Ramo weighting potential map
-            const std::pair<double,double>& centrePixelNN = m_centrePixelNNEtaPhi[index];
+            const std::pair<double,double>& centrePixelNN = centrePixelNNEtaPhi.at(index);
             const double dPhi_nn_centre = centrePixelNN.second - centreOfPixel_i.xPhi(); //in mm
             const double dEta_nn_centre = centrePixelNN.first  - centreOfPixel_i.xEta(); //in mm
 
@@ -613,7 +611,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
         // amount of energy to be converted into charges at current step
         double energy_per_step = oneOverNchargesTimes1e6 * iHitRecord.second;
         // diffusion sigma
-        double rdif = this->m_diffusionConstant * std::sqrt(dist_electrode * coLorentz / 0.3);
+        double rdif = diffusionConstant * std::sqrt(dist_electrode * coLorentz / 0.3);
 
         // position at the surface
         double phiRand = CLHEP::RandGaussZiggurat::shoot(rndmEngine);
@@ -678,7 +676,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
         // amount of energy to be converted into charges at current step
         double energy_per_step = oneOverNchargesTimes1e6 * iHitRecord.second;
         // diffusion sigma
-        double rdif = this->m_diffusionConstant * std::sqrt(dist_electrode * coLorentz / 0.3);
+        double rdif = diffusionConstant * std::sqrt(dist_electrode * coLorentz / 0.3);
 
         // position at the surface
         double phiRand = CLHEP::RandGaussZiggurat::shoot(rndmEngine);

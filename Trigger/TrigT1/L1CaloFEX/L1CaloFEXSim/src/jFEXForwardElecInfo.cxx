@@ -8,19 +8,9 @@
 //     email                : ulla.blumenschein@cern.ch
 //***************************************************************************  
 
-#include <iostream>
 #include <vector>
-#include <string>
-#include <map>
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 
 
 void LVL1::jFEXForwardElecInfo::setup(int jfex, uint ttid, int neta, int nphi){
@@ -300,5 +290,3 @@ std::unique_ptr<LVL1::jFEXForwardElecTOB> LVL1::jFEXForwardElecInfo::getFwdElTOB
   tob->setSat(m_sat);
   return tob;
 }
-
-

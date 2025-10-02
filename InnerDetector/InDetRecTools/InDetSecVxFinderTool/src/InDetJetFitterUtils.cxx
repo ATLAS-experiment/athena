@@ -696,7 +696,7 @@ namespace InDet
   {
     
  
-    const double s_pion=139.57018;
+    const double s_pion=ParticleConstants::chargedPionMassInMeV;
     //hard coded pion mass
  
     CLHEP::HepLorentzVector massVector(0,0,0,0);

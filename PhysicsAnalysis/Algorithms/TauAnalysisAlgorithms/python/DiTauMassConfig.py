@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
@@ -44,6 +44,12 @@ class DiTauMassBlock(ConfigBlock):
                    info='whether to save additional output information from the MMC. The default is `False`.')
     self.addOption('floatStopCriterion', True, type=bool,
                    info='whether to activate the floating stopping criterion. The default is `True`.')
+    self.addOption('floatStopCriterionMinIter', 10000, type=int,
+                   info='minimum number of iteration to activate the floating stopping criterion. The default is 10000.')
+    self.addOption('floatStopCriterionCheckFreq', 1000, type=int,
+                   info='event frequency for floating stopping criterion to be checked after minimum number of iteration. The default is 1000.')
+    self.addOption('floatStopCriterionComp', 0.05, type=float,
+                   info='percentage used to assess compatibility for floating stopping criterion to be applied. The default is 5%.') 
     self.addOption('calibration', '2019', type=str,
                    info='the calibration set (string) to use. The default is `2019` (recommended).')
     self.addOption('nSigmaMet', -1, type=int,
@@ -73,9 +79,16 @@ class DiTauMassBlock(ConfigBlock):
     self.addOption('saveLlhHisto', False, type=bool,
                    info='save likelihood histograms for debugging purpose. If enabled, it can slow down MMC running time.')
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.algName:
+            return self.taus.replace('.', '_') + self.algName
+        else:
+            return self.taus.replace('.', '_')
+
   def makeAlgs(self, config):
 
-    alg = config.createAlgorithm('CP::DiTauMassCalculatorAlg', 'DiTauMMCAlg' + self.algName)
+    alg = config.createAlgorithm('CP::DiTauMassCalculatorAlg', 'DiTauMMCAlg')
 
     alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
     alg.muons,     alg.muonSelection     = config.readNameAndSelection(self.muons)
@@ -84,20 +97,23 @@ class DiTauMassBlock(ConfigBlock):
     alg.met                              = config.readName(self.met)
 
     config.addPrivateTool( 'mmcTool', 'DiTauMassTools::MissingMassTool' )
-    alg.mmcTool.Decorate              = False # this sets decorations on EventInfo that are not compatible with systematics
-    alg.mmcTool.FloatStoppingCrit     = self.floatStopCriterion
-    alg.mmcTool.CalibSet              = self.calibration
-    alg.mmcTool.NsigmaMET             = self.nSigmaMet
-    alg.mmcTool.UseTailCleanup        = self.useTailCleanup
-    alg.mmcTool.NiterFit2             = self.niterFit2
-    alg.mmcTool.NiterFit3             = self.niterFit3
-    alg.mmcTool.UseTauProbability     = self.useTauProbability
-    alg.mmcTool.UseMnuProbability     = self.useMnuProbability
-    alg.mmcTool.UseDefaults           = self.useDefaultSettings
-    alg.mmcTool.UseEfficiencyRecovery = self.useEfficiencyRecovery
-    alg.mmcTool.UseMETDphiLL          = self.useMETdphiLL
-    alg.mmcTool.ParamFilePath         = self.paramFilePath
-    alg.mmcTool.SaveLlhHisto          = self.saveLlhHisto
+    alg.mmcTool.Decorate                   = False # this sets decorations on EventInfo that are not compatible with systematics
+    alg.mmcTool.FloatStoppingCrit          = self.floatStopCriterion
+    alg.mmcTool.FloatStoppingCritMinIter   = self.floatStopCriterionMinIter
+    alg.mmcTool.FloatStoppingCritCheckFreq = self.floatStopCriterionCheckFreq
+    alg.mmcTool.FloatStoppingCritCheckComp = self.floatStopCriterionComp 
+    alg.mmcTool.CalibSet                   = self.calibration
+    alg.mmcTool.NsigmaMET                  = self.nSigmaMet
+    alg.mmcTool.UseTailCleanup             = self.useTailCleanup
+    alg.mmcTool.NiterFit2                  = self.niterFit2
+    alg.mmcTool.NiterFit3                  = self.niterFit3
+    alg.mmcTool.UseTauProbability          = self.useTauProbability
+    alg.mmcTool.UseMnuProbability          = self.useMnuProbability
+    alg.mmcTool.UseDefaults                = self.useDefaultSettings
+    alg.mmcTool.UseEfficiencyRecovery      = self.useEfficiencyRecovery
+    alg.mmcTool.UseMETDphiLL               = self.useMETdphiLL
+    alg.mmcTool.ParamFilePath              = self.paramFilePath
+    alg.mmcTool.SaveLlhHisto               = self.saveLlhHisto
 
     if config.geometry() is LHCPeriod.Run2:
       alg.mmcTool.BeamEnergy = 6500.0

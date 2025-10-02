@@ -4,12 +4,12 @@
 /////////////////////////////////////////////////////////////////
 // PsiPlusPsiSingleVertex.cxx, (c) ATLAS Detector software
 /////////////////////////////////////////////////////////////////
-#include "DerivationFrameworkBPhys/PsiPlusPsiSingleVertex.h"
+#include "PsiPlusPsiSingleVertex.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVCascadeTools.h"
+#include "BPhysPVTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "HepPDT/ParticleDataTable.hh"
@@ -22,7 +22,7 @@ namespace DerivationFramework {
   typedef ElementLink<xAOD::TrackParticleContainer> TrackParticleLink;
   typedef std::vector<TrackParticleLink> TrackParticleLinkVector;
 
-  PsiPlusPsiSingleVertex::PsiPlusPsiSingleVertex(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
+  PsiPlusPsiSingleVertex::PsiPlusPsiSingleVertex(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
     m_vertexPsi1ContainerKey(""),
     m_vertexPsi2ContainerKey(""),
     m_outputsKeys({"Psi1Vtx", "Psi2Vtx", "MainVtx"}),

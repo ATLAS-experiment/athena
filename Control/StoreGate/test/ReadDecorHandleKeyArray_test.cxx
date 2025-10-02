@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ReadDecorHandleKeyArrau_test.cxx
@@ -87,7 +87,8 @@ void test1()
   k1 = {"bbb.foo1", "bbb.foo2", "bbb.foo3"};
   assert (k1[2].key() == "bbb.foo3");
 
-  assert (k1.assign ({"ccc.fee1", "ccc.fee2", "ccc.fee3"}).isSuccess());
+  std::vector<std::string> vv {"ccc.fee1", "ccc.fee2", "ccc.fee3"};
+  assert (k1.assign (vv).isSuccess());
   assert (k1[1].key() == "ccc.fee2");
 }
 
@@ -108,7 +109,8 @@ void test1a()
   k1 = {"bbb.foo1", "bbb.foo2", "bbb.foo3"};
   assert (k1[2].key() == "bbb.foo3");
 
-  assert (k1.assign ({"ccc.fee1", "ccc.fee2", "ccc.fee3"}).isSuccess());
+  std::vector<std::string> vv {"ccc.fee1", "ccc.fee2", "ccc.fee3"};
+  assert (k1.assign (vv).isSuccess());
   assert (k1[1].key() == "ccc.fee2");
 
 }

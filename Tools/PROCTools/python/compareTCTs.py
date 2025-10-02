@@ -7,7 +7,6 @@ from PROCTools.getFileLists import tctPath, findTCTFiles
 sys.argv += [ '-b' ] # tell ROOT to not use graphics
 from ROOT import TFile,TTree
 from PROCTools.diffTAGTree import diffTTree
-import six
 
 os.environ['STAGE_SVCCLASS']="atlascerngroupdisk"
 os.environ['STAGE_HOST']="castoratlast3"
@@ -233,7 +232,7 @@ if __name__ == "__main__":
         print ("Comparing files matching [%s]" % pattern)
         Summary += "Comparing files matching [%s]\n" % pattern
         #for (tctName,r,v) in filesToCompare:
-        for name,rv in six.iteritems (filesToCompare):
+        for name,rv in filesToCompare.items():
             #print ("TCT:",name,":",len(rv))
             print ("Chain %s: Found %i files matching [%s]" % (name,len(rv),pattern))
             for (r,v) in rv:
@@ -287,7 +286,7 @@ if __name__ == "__main__":
     #print (tctlist)
     #Check log,mem & cpu,
     complain=""
-    for (name,info) in six.iteritems (tctlist):
+    for (name,info) in tctlist.items():
         #print (name,info,len(info))
         if len(info)<2: continue
         print ("\n"+name+":")
@@ -348,7 +347,7 @@ if __name__ == "__main__":
                     print (ln)
     
     isok=True
-    for f,s in six.iteritems (statPerChain):
+    for f,s in statPerChain.items():
         if s:
             print ("%-70s CHANGED" % f)
             isok=False
@@ -357,7 +356,7 @@ if __name__ == "__main__":
 
     if sumFileName is not None:
         sumFile=open(sumFileName,"w")
-        for f,s in six.iteritems (statPerChain):
+        for f,s in statPerChain.items():
             line = "%-70s" % f
             if s:
                 line += "CHANGED\n"

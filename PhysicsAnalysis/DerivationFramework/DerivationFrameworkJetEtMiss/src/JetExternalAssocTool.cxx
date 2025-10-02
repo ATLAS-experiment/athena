@@ -12,7 +12,7 @@ namespace DerivationFramework{
 //**********************************************************************
 
 JetExternalAssocTool::JetExternalAssocTool(const std::string& t, const std::string& n, const IInterface* p):
-  AthAlgTool(t,n,p),
+  base_class(t,n,p),
   m_momentPrefix(""),
   m_containerName(""),
   m_ExternalJetCollectionName(""),
@@ -21,7 +21,6 @@ JetExternalAssocTool::JetExternalAssocTool(const std::string& t, const std::stri
   m_dRMatch(false),
   m_dRCut(0.01)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 
   declareProperty("MomentPrefix"             , m_momentPrefix);
   declareProperty("InputJets"                , m_containerName);

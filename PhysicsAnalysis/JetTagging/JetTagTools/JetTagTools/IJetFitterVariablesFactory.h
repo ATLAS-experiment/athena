@@ -28,6 +28,21 @@ namespace Trk {
 
 namespace Analysis {
 
+  struct JetFitterVariables {
+    float massUncorr = 0.;
+    float chi2 = 0.;
+    int ndof = 0;
+    float dRFlightDir = 0.;
+    int nVTX = 0;
+    int nSingleTracks = 0;
+    int nTracksAtVtx = 0;
+    float mass = 0.;
+    float energyFraction = 0.;
+    float significance3d = 0.;
+    float deltaeta = 0.;
+    float deltaphi = 0.;
+  };
+
   static const InterfaceID IID_IJetFitterVariablesFactory
   ("Analysis::IJetFitterVariablesFactory", 1, 0);
 
@@ -42,7 +57,7 @@ namespace Analysis {
     virtual StatusCode finalize() = 0;
     
     virtual StatusCode fillJetFitterVariables(const xAOD::Jet &, xAOD::BTagging* BTag, const Trk::VxJetFitterVertexInfo* myJetFitterInfo, std::string basename) const = 0;
-
+    virtual StatusCode computeJetFitterVariables(const xAOD::Jet &, const Trk::VxJetFitterVertexInfo* myJetFitterInfo, const std::string& basename, JetFitterVariables &vars) const = 0;
 
     static const InterfaceID& interfaceID() { return IID_IJetFitterVariablesFactory; };
 

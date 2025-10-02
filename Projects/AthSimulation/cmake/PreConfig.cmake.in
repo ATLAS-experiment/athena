@@ -45,6 +45,7 @@ find_package( nlohmann_json ${_quietFlag} )
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
 find_package( Boost ${_quietFlag} COMPONENTS ALL )
+find_package( SQLite3 ${_quietFlag} )
 
 # Clean up.
 unset( _quietFlag )

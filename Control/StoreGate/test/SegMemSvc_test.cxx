@@ -1,41 +1,31 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#undef NDEBUG
 #include "TestTools/initGaudi.h"
 #include "StoreGate/SegMemSvc.h"
 
 #include <cassert>
 #include <iostream>
 
-namespace Athena_test {
 
-  void segmem_test (ISvcLocator *psvc) {
+void segmem_test () {
+  ServiceHandle<SegMemSvc> p_sms{"SegMemSvc", "segmem_test"};
+  assert ( p_sms.isValid() );
 
-    SmartIF<SegMemSvc> p_sms{psvc->service("SegMemSvc")};
-    assert ( p_sms.isValid() );
+  int* p_int = new ( p_sms->allocate<int>(SegMemSvc::EVENT) ) int(1001);
 
-    int* p_int = new ( p_sms->allocate<int>(SegMemSvc::EVENT) ) int(1001);
-
-    // cppcheck doesn't seem to understand placement new.
-    // cppcheck-suppress uninitdata
-    assert ( *p_int == 1001 );
-
-  }
-
-
+  // cppcheck doesn't seem to understand placement new.
+  // cppcheck-suppress uninitdata
+  assert ( *p_int == 1001 );
 }
 
 
-using namespace Athena_test;
-
-//#include "Reflex/PluginService.h"
-
-int main() { 
-  //  ROOT::Reflex::PluginService::SetDebug(8);
-  ISvcLocator* pDum;
-  initGaudi(pDum); //need MessageSvc
-  segmem_test(pDum);
+int main() {
+  ISvcLocator* svcLoc;
+  Athena_test::initGaudi(svcLoc);
+  segmem_test();
   std::cout << "*** SegMemSvc_test OK ***" << std::endl;
   return 0; 
 }

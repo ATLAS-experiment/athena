@@ -10,4 +10,4 @@ xAOD::TEvent::getEvent... WARNING Can't find EventFormatElement for hashed SG ke
 xAOD::TEvent::proxy_exact WARNING Can't find BranchInfo for 946497385.
 xAOD::TEvent::getEvent... WARNING Can't find EventFormatElement for hashed SG key 886873592
 xAOD::TEvent::proxy_exact WARNING Can't find BranchInfo for 886873592.
-ElectronsPt entries = 321274
+ElectronsPt entries = 340835

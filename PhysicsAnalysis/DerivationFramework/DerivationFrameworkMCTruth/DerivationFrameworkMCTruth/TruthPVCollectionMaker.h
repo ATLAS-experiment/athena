@@ -15,7 +15,7 @@
 
 namespace DerivationFramework {
 
-  class TruthPVCollectionMaker : public AthAlgTool, public IAugmentationTool {
+  class TruthPVCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthPVCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthPVCollectionMaker();

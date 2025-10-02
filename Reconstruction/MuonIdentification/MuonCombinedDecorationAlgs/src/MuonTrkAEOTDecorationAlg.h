@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDALGS_MUONAEOTDECORATIONALG_H
@@ -18,7 +18,8 @@
 
 class MuonTrkAEOTDecorationAlg: public AthReentrantAlgorithm {
    public:
-        MuonTrkAEOTDecorationAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
+
         ~MuonTrkAEOTDecorationAlg() = default;
 
         virtual StatusCode initialize() override;
@@ -27,14 +28,19 @@ class MuonTrkAEOTDecorationAlg: public AthReentrantAlgorithm {
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkContainer{this, "TrackContainer",
-                                                                              "", "Track particles to use for the decoration"};
+                                                                        "Trks", "Track particles to use for the decoration"};
 
-        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_chIdKey{this, "ChambedIds", "", "alignEffectChId decoration key"};
-        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_deltaTransKey{this, "deltaTrans", "", "alignEffectDeltaTrans decoration"};
-        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_sigmaDeltaTransKey{this, "sigmaDeltaTrans", "", "alignEffectSigmaDeltaTrans decoration key"};
+        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_chIdKey{this, "ChambedIds", m_TrkContainer, 
+                                                                        "alignEffectChId", "alignEffectChId decoration key"};
+        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_deltaTransKey{this, "deltaTrans", m_TrkContainer,
+                                                                              "alignEffectDeltaTrans", "alignEffectDeltaTrans decoration"};
+        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_sigmaDeltaTransKey{this, "sigmaDeltaTrans",m_TrkContainer,
+                                                                                   "alignEffectSigmaDeltaTrans", "alignEffectSigmaDeltaTrans decoration key"};
         
-        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_deltaAngleKey{this, "deltaAngle", "" , "alignEffectDeltaAngle decoration"};
-        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_sigmaDeltaAngleKey{this, "sigmaDeltaAngle", "" , "alignEffectSigmaDeltaAngle decoration"};
+        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_deltaAngleKey{this, "deltaAngle", m_TrkContainer,
+                                                                              "alignEffectDeltaAngle" , "alignEffectDeltaAngle decoration"};
+        SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_sigmaDeltaAngleKey{this, "sigmaDeltaAngle", m_TrkContainer, 
+                                                                                   "alignEffectSigmaDeltaAngle" , "alignEffectSigmaDeltaAngle decoration"};
 
 };
 #endif

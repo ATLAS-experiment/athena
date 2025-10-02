@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IHLLGAMREPEATTIMESHOWER_H
@@ -13,13 +13,13 @@
 
 /** Tool that will repeatedly perform  time showering on the intial photons
  * from a Higgs decay until at least one is offshell */
-class HllgamRepeatTimeShower: public AthAlgTool, virtual public IPythia8Custom {
+class HllgamRepeatTimeShower: public extends<AthAlgTool, IPythia8Custom> {
   
   public:
   
   /** AlgTool style constructor */
-  HllgamRepeatTimeShower(const std::string&,const std::string&,const IInterface*);
-  
+  using base_class::base_class;
+
   /** Destructor */
   virtual ~HllgamRepeatTimeShower(){};
   
@@ -37,8 +37,8 @@ class HllgamRepeatTimeShower: public AthAlgTool, virtual public IPythia8Custom {
   
   private:
   
-  mutable unsigned long m_nPass;
-  mutable unsigned long m_nVetos;
+  mutable unsigned long m_nPass{0};
+  mutable unsigned long m_nVetos{0};
   
 };
 

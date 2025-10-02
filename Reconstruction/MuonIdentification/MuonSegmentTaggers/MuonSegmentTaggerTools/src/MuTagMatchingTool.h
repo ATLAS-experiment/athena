@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuTagMatchingTool_H
@@ -35,7 +35,7 @@ namespace Trk {
     class Track;
 }  // namespace Trk
 
-class MuTagMatchingTool : virtual public IMuTagMatchingTool, public AthAlgTool {
+class MuTagMatchingTool : virtual public extends<AthAlgTool, IMuTagMatchingTool> {
 public:
     MuTagMatchingTool(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~MuTagMatchingTool() = default;

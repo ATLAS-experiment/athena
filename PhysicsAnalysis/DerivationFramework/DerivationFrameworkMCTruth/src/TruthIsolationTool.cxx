@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,14 +12,14 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <cmath>
 
 // Constructor
 DerivationFramework::TruthIsolationTool::TruthIsolationTool(const std::string& t,
         const std::string& n,
         const IInterface* p ) :
-  AthAlgTool(t,n,p)
+  base_class(t,n,p)
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 }
 
 // Destructor
@@ -89,13 +89,13 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
     //All isolation must filled for all Particles. 
     ///Even if this is with some dummy value 
     for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
-      for (const auto part : *isoTruthParticles) {
+      for (const auto* part : *isoTruthParticles) {
         decorator_iso.at(icone)(*part) = -1;
       }
     }
 
     // Standard particle loop over final state particles of interest
-    for (const auto& part : listOfParticlesForIso) {
+    for (const auto* part : listOfParticlesForIso) {
       std::vector<float> isolationsCalcs(m_coneSizesSort.size(), 0.0);
       calcIsos(part, candidateParticlesList, isolationsCalcs);
       for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
@@ -116,7 +116,7 @@ void DerivationFramework::TruthIsolationTool::calcIsos(const xAOD::TruthParticle
 
     float part_eta = particle->eta();
     float part_phi = particle->phi();
-    for (const auto& cand_part : candidateParticlesList) {
+    for (const auto* cand_part : candidateParticlesList) {
       if (find(m_excludeFromCone.begin(), m_excludeFromCone.end(), cand_part->pdgId()) != m_excludeFromCone.end()) {
         //skip if we find a particle in the exclude list
         continue;
@@ -149,8 +149,8 @@ float DerivationFramework::TruthIsolationTool::calculateDeltaR2(const xAOD::IPar
   //calculate dR^2 this way to hopefully do fewer sqrt and TVector3::Pseudorapidity calls
   float phi1 = p1->phi();
   float eta1 = p1->eta();
-  float deltaPhi = fabs(phi1-phi2);
-  if (deltaPhi>TMath::Pi()) deltaPhi = 2.0*TMath::Pi() - deltaPhi;
+  float deltaPhi = std::abs(phi1-phi2);
+  if (deltaPhi>M_PI) deltaPhi = 2.0*M_PI - deltaPhi;
   float deltaPhiSq = deltaPhi * deltaPhi;
   float deltaEtaSq = (eta1-eta2)*(eta1-eta2);
   return deltaPhiSq+deltaEtaSq;

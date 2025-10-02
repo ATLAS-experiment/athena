@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimNNTRACKTOOL_H
 #define FPGATrackSimNNTRACKTOOL_H
@@ -46,30 +46,39 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	FPGATrackSimNNTrackTool(const std::string&, const std::string&, const IInterface*);
 
 	virtual StatusCode initialize() override;
-	StatusCode getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_GNN(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+        StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max);
 
 	static float getXScale() { return 1015.;};
 	static float getYScale() { return 1015.;};
 	static float getZScale() { return 3000.;};
-
+        static float getQoverPtScale() { return 0.001;};
+        static float getEtaScale() { return 5.0;};
+        static float getPhiScale() { return 3.15;};
+        static float getD0Scale() { return 2.0;};
+        static float getZ0Scale() { return 200.;};        
+        static float getRScale() {return 1015.;};
+  
 	// Flags
-
-	Gaudi::Property <double> m_NNCut{ this, "NNCut", 0.2, " NN output value to cut on when selecting good tracks" };
-	Gaudi::Property <double> m_chi2_scalefactor{ this, "Chi2ScaleFactor", 40 / (1 - 0.1), "Scale factor to use in converting to a chi2, Nominal chi2ndof cut is 40 and we want to use NN>0.0075 (or NN<(1-0.0075)" };
 	Gaudi::Property <unsigned int> m_minNumberOfRealHitsInATrack{ this, "MinNumberOfRealHitsInATrack", 4, "Minimum number of real hits in a track candidate to process" };
-
+	Gaudi::Property <bool> m_doGNNTracking{ this, "doGNNTracking", false, "Flag to turn on GNN Tracking configuration for road-to-track" };
+	Gaudi::Property <int> m_nInputsGNN{ this, "nInputsGNN", 9, "Number of Hit Inputs for NN for GNN configuration. Depends on which model is chosen."};
+        Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
 
   private:
 
-	ServiceHandle<IFPGATrackSimMappingSvc>   m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc","FPGATrackSimMappingSvc"};
+	ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc", ""};
 	ServiceHandle<ITHistSvc> m_tHistSvc{this, "THistSvc","THistSvc"};
 
-	OnnxRuntimeBase m_paramNN;
-	OnnxRuntimeBase m_fakeNN;
+	OnnxRuntimeBase m_paramNN_1st;
+	OnnxRuntimeBase m_paramNN_2nd;
+	OnnxRuntimeBase m_fakeNN_1st;
+	OnnxRuntimeBase m_fakeNN_2nd;
 
-	bool m_useParamNN = true;
-
-	void setTrackParameters(FPGATrackSimTrack& track, std::vector<float> inputTensorValues);
+	bool m_useParamNN_1st = true;
+	bool m_useParamNN_2nd = true;
 
 	std::vector<float> m_x; // x position of hit in road
 	std::vector<float> m_y; // y pos

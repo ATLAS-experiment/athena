@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TEVENT_H
 #define XAODROOTACCESS_TEVENT_H
@@ -180,6 +180,11 @@ namespace xAOD {
       template< typename T >
       ::Bool_t transientContains( const std::string& key ) const;
 
+      /// Provide a list of all keys associated with a specific type
+      template< typename T >
+      void keys( std::vector< std::string >& vkeys,
+                 bool metadata = false ) const;
+
       /// Retrieve either an input or an output object from the event
       template< typename T >
       StatusCode retrieve( const T*& obj, const std::string& key );
@@ -299,11 +304,6 @@ namespace xAOD {
                                   const std::type_info& ti,
                                   bool silent = false ) override;
 
-      /// Function determining the list keys associated with a type name
-      void getNames(const std::string& targetClassName,
-                    std::vector<std::string>& vkeys,
-                    bool metadata = false) const override;
-
       /// @}
 
       /// @name Functions implementing the IProxyDict interface
@@ -402,6 +402,10 @@ namespace xAOD {
       ::Bool_t transientContains( const std::string& key,
                                   const std::type_info& ti,
                                   ::Bool_t metadata = kFALSE ) const;
+      /// Function determining the list keys associated with a type name
+      void getNames( const std::string& targetClassName,
+                     std::vector<std::string>& vkeys,
+                     bool metadata = false ) const;
 
       /// Definition of the internal data structure type
       typedef std::unordered_map< std::string,

@@ -23,9 +23,9 @@ namespace TRTCond
     double rho = m_cal[1];
     double v = m_cal[2];
     double t_const = m_cal[3]; // tw-t0
-    double r_squared = (4*rho*rho*sin(v*(time-t_const)/(2*rho))-rmin0*rmin0)/(1-0.25*rmin0*rmin0); 
+    double r_squared = (4*rho*rho*std::sin(v*(time-t_const)/(2*rho))-rmin0*rmin0)/(1-0.25*rmin0*rmin0); 
     double r = 0;
-    if (r_squared>0) r = sqrt(r_squared);
+    if (r_squared>0) r = std::sqrt(r_squared);
 
     return r;
   }
@@ -39,10 +39,10 @@ namespace TRTCond
 
     
     double drdt = 
-      0.5/sqrt((4*rho*rho*sin(v*(time-t_const)/(2*rho))*sin(v*(time-t_const)/(2*rho))-rmin0*rmin0)/(1-0.25*rmin0*rmin0))*
+      0.5/std::sqrt((4*rho*rho*std::sin(v*(time-t_const)/(2*rho))*std::sin(v*(time-t_const)/(2*rho))-rmin0*rmin0)/(1-0.25*rmin0*rmin0))*
       4*rho*rho/(1-0.25*rmin0*rmin0)*
-      2*sin(v*(time-t_const)/(2*rho))*
-      cos(v*(time-t_const)/(2*rho))*
+      2*std::sin(v*(time-t_const)/(2*rho))*
+      std::cos(v*(time-t_const)/(2*rho))*
       v/(2*rho);
 
     return drdt;
@@ -55,7 +55,7 @@ namespace TRTCond
     double rho = m_cal[1];
     double v = m_cal[2];
     double t_const = m_cal[3];// tw-t0
-    double t = t_const + 2*rho/v*asin(sqrt(rmin0*rmin0*(1-0.25*r*r)+r*r)/(2*rho)); 
+    double t = t_const + 2*rho/v*std::asin(std::sqrt(rmin0*rmin0*(1-0.25*r*r)+r*r)/(2*rho)); 
 
     return t;
   }

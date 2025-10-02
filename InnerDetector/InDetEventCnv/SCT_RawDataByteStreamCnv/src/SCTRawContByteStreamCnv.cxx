@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTRawContByteStreamCnv.h"
+#include "SCTRawContByteStreamToolProviderTool.h"
 
 #include "SCT_RawDataByteStreamCnv/ISCTRawContByteStreamTool.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
@@ -18,8 +19,9 @@
 
 SCTRawContByteStreamCnv::SCTRawContByteStreamCnv(ISvcLocator* svcLoc) :
   AthConstConverter(storageType(), classID(), svcLoc, "SCTRawContByteStreamCnv"),
-  m_rawContByteStreamTool{"SCTRawContByteStreamTool"},
-  m_byteStreamEventAccess{"ByteStreamCnvSvc", "SCTRawContByteStreamCnv"}
+  m_rawContByteStreamToolProvider{"SCTRawContByteStreamToolProviderTool"},
+  m_rawContByteStreamTool(nullptr), // {"SCTRawContByteStreamTool"},  
+  m_byteStreamEventAccess{"ByteStreamCnvSvc", "SCTRawContByteStreamCnv"}  
 {
 }
 
@@ -30,13 +32,16 @@ StatusCode SCTRawContByteStreamCnv::initialize()
   ATH_CHECK(AthConstConverter::initialize());
   ATH_MSG_DEBUG( " initialize " );
 
+  ATH_CHECK(m_rawContByteStreamToolProvider.retrieve());
+  m_rawContByteStreamTool = &(m_rawContByteStreamToolProvider->getTool());
+  if (!m_rawContByteStreamTool) {
+     ATH_MSG_FATAL("Failed to get SCTRawContByteStreamTool");
+     return StatusCode::FAILURE;
+  }  
+
   // Retrieve ByteStreamCnvSvc
   ATH_CHECK(m_byteStreamEventAccess.retrieve());
   ATH_MSG_INFO( "Retrieved service " << m_byteStreamEventAccess );
-
-  // Retrieve byte stream tool
-  ATH_CHECK(m_rawContByteStreamTool.retrieve());
-  ATH_MSG_INFO( "Retrieved tool " << m_rawContByteStreamTool );
 
   return StatusCode::SUCCESS;
 }

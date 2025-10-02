@@ -30,7 +30,8 @@
 #include "TrigDecisionTool/Feature.h"
 #include "TrigDecisionTool/FeatureContainer.h"
 #include "TrigDecisionTool/ChainGroup.h"
-#include "TrigDecisionTool/FeatureRequestDescriptor.h"
+
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 

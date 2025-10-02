@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/src/LArEM_SuperCell_ID.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -26,13 +24,12 @@
 
 
 
-LArEM_SuperCell_ID::LArEM_SuperCell_ID(void) :
-  LArEM_Base_ID("LArEM_SuperCell_ID", 1)
+LArEM_SuperCell_ID::LArEM_SuperCell_ID() :
+  LArEM_Base_ID("LArEM_SuperCell_ID", "slar_em", 1)
 {
 }
 
-LArEM_SuperCell_ID::~LArEM_SuperCell_ID(void) 
-= default;
+LArEM_SuperCell_ID::~LArEM_SuperCell_ID() = default;
 
 int  LArEM_SuperCell_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /*=================================================================*/
@@ -51,8 +48,7 @@ int  LArEM_SuperCell_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   }
 
   // init base object
-  if (LArEM_Base_ID::initialize_base_from_dictionary(dict_mgr,
-                                                     "slar_em"))
+  if (LArEM_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
     return (1);
 
   return 0;

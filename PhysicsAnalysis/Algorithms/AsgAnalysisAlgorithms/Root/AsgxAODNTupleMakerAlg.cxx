@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s):
 #include "AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h"
@@ -694,7 +694,7 @@ namespace CP {
       m_branchName = branchName;
 
       // Create the accessor.
-      m_acc.reset( new SG::AuxElement::TypelessConstAccessor( auxName ) );
+      m_acc.reset( new SG::TypelessConstAccessor( auxName ) );
 
       // Get a pointer to the vector factory.
       const SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
@@ -935,7 +935,7 @@ namespace CP {
       m_branchName = branchName;
 
       // Create the accessor.
-      m_acc.reset( new SG::AuxElement::TypelessConstAccessor( auxName ) );
+      m_acc.reset( new SG::TypelessConstAccessor( auxName ) );
 
       // Get a pointer to the vector factory.
       const SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();

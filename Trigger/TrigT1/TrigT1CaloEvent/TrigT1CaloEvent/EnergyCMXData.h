@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
  //***************************************************************************
@@ -12,8 +12,8 @@
   
   #ifndef ENERGYCMXDATA_H
   #define ENERGYCMXDATA_H
+  #include <vector>
   
-  #include "AthenaKernel/CLASS_DEF.h"
 
   namespace LVL1 {
   
@@ -52,8 +52,6 @@
     };
   } // end of namespace
 
-#ifndef EnergyCMXData_ClassDEF_H
 #include "TrigT1CaloEvent/EnergyCMXData_ClassDEF.h"
-#endif
 
 #endif

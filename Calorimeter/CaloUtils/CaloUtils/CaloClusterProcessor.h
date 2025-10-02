@@ -56,14 +56,6 @@ public:
 
 
   /**
-   * @brief Execute on a single cluster.
-   * @param cluster The cluster to process.
-   * (deprecated)
-   */
-  virtual StatusCode execute (xAOD::CaloCluster* cluster) final;
-
-
-  /**
    * @brief Execute on an entire collection of clusters.
    * @param collection The container of clusters.
    *

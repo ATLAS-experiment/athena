@@ -29,12 +29,11 @@
 DerivationFramework::TruthCollectionMaker::TruthCollectionMaker(const std::string& t,
                                                                 const std::string& n,
                                                                 const IInterface* p)
-  : ExpressionParserUser<AthAlgTool>(t,n,p)
+  : base_class(t,n,p)
   , m_ntotpart(0)
   , m_npasspart(0)
   , m_metaStore( "MetaDataStore", n )
 {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("MetaDataStore", m_metaStore );
 }
 
@@ -253,7 +252,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                                 // Set with what makes sense here
                                 xTruthParticle->setPdgId(pdg_id);
                                 // Set dummy values
-                                xTruthParticle->setBarcode(HepMC::INVALID_PARTICLE_ID);
+                                xTruthParticle->setUid(HepMC::INVALID_PARTICLE_ID);
                                 xTruthParticle->setStatus(3);
                                 // Use the sum of the momenta
                                 xAOD::IParticle::FourMom_t new_mom = boson[0]->p4()+boson[1]->p4();

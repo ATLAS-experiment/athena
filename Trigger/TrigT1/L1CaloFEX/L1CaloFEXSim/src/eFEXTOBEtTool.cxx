@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -10,7 +10,7 @@
 //  ***************************************************************************/
 #include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
-#include "L1CaloFEXSim/eFEXtauAlgo.h"
+#include "eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include <vector>
 
@@ -21,7 +21,7 @@ namespace LVL1 {
 eFEXTOBEtTool::eFEXTOBEtTool(const std::string& type,const std::string& name,const IInterface* parent):
   AthAlgTool(type,name,parent)
 {
-  declareInterface<IeFEXTOBEtTool>(this);
+  declareInterface<eFEXTOBEtTool>(this);
 }
  
     
@@ -88,7 +88,7 @@ StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int Un
 
 }
 
-StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs){
+StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) const {
 	
 	  /// Form grid of 3x3 tower IDs for this window
   int tobtable[3][3];
@@ -223,7 +223,7 @@ unsigned int eFEXTOBEtTool::eTowerID(float eta, float phi) const
 
 
 // Find eFEX and FPGA numbers and eta index within FPGA
-void eFEXTOBEtTool::location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& etaIndex)
+void eFEXTOBEtTool::location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& etaIndex) const
 {
   // indices of central tower within a 0->49, 0->63 eta,phi map
   int ieta = (etaTOB + 2.5)/m_detaTower;

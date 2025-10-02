@@ -13,5 +13,5 @@ HeavyFlavorCHadronFilter.Request_cQuark=False
 HeavyFlavorCHadronFilter.Request_bQuark=False
 HeavyFlavorCHadronFilter.RequestSpecificPDGID=False
 HeavyFlavorCHadronFilter.RequireTruthJet=False
-HeavyFlavorCHadronFilter.CharmPtMin=0*GeV
+HeavyFlavorCHadronFilter.CharmPtMin=0.
 HeavyFlavorCHadronFilter.CharmEtaMax=4.0

@@ -18,9 +18,8 @@ namespace {}
 DerivationFramework::MaxCellDecorator::MaxCellDecorator(const std::string& t,
                                                         const std::string& n,
                                                         const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 }
 
 // Destructor
@@ -288,35 +287,65 @@ DerivationFramework::MaxCellDecorator::addBranches() const
 
     const xAOD::JetContainer* importedJets = jetContainer.ptr();
     for (const auto* jet : *importedJets) {
+      if (jet->numConstituents() == 0) continue;
+
       DerivationFramework::MaxCellDecorator::calculation res;
       res.maxEcell_energy = -9999.;
       std::vector<const xAOD::CaloCluster*> clusterList;
       clusterList.clear();
-      for (auto part : jet->getConstituents()) {
-        // get particle
-        if ( not part ) {
-          ATH_MSG_WARNING("Jet particle link invalid");
-          continue;
+
+      xAOD::Type::ObjectType ctype = jet->rawConstituent( 0 )->type();
+
+      if (ctype  == xAOD::Type::FlowElement) {
+        // Particle Flow jets
+        for (size_t i=0;i<jet->numConstituents();++i) {
+          if(jet->rawConstituent(i)->type() != xAOD::Type::FlowElement) {
+            ATH_MSG_WARNING("Tried to call fillEperSamplingFE with a jet constituent that is not a FlowElement!");
+            continue;
+          }
+
+          const xAOD::FlowElement* constit = static_cast<const xAOD::FlowElement*>(jet->rawConstituent(i));
+          if (constit) {
+            const SG::AuxElement::ConstAccessor< ElementLink<xAOD::IParticleContainer> > originalObject("originalObjectLink");
+            auto originalFE = dynamic_cast<const xAOD::FlowElement*>(*originalObject(*constit));
+            if(originalFE && !originalFE->isCharged()){
+              const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(originalFE->otherObject(0));
+              if (cluster) {
+                clusterList.push_back(cluster);
+              }
+            }
+          }
         }
-        
-        const xAOD::CaloCluster* cluster=dynamic_cast<const xAOD::CaloCluster*> (part->rawConstituent());
-        if ( cluster) {
-          clusterList.push_back(cluster);
-        } else {
-          const xAOD::IParticle* ipart = dynamic_cast<const xAOD::IParticle*> (part->rawConstituent());
-          if ( ipart ) {
-            const xAOD::PFO* iPFO = dynamic_cast<const xAOD::PFO*>(ipart);
-            if ( iPFO ) {
-              for (unsigned int cidx=0;cidx<iPFO->nCaloCluster();++cidx) {
-                  if ( iPFO->cluster(cidx) ) {
-                      clusterList.push_back(iPFO->cluster(cidx));
-                  }
+      } else if (ctype  == xAOD::Type::CaloCluster) {
+        // Topo jets
+        for (size_t i=0;i<jet->numConstituents();++i) {
+          if(jet->rawConstituent(i)->type() != xAOD::Type::CaloCluster) {
+            ATH_MSG_WARNING("Tried to call fillEperSamplingCluster with a jet constituent that is not a cluster!");
+            continue;
+          }
+
+          const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(jet->rawConstituent(i));
+          if (cluster) {
+            clusterList.push_back(cluster);
+          }
+        }
+      } else {
+        // PFlow (old)
+        for (size_t i=0;i<jet->numConstituents();++i) {
+          if(jet->rawConstituent(i)->type() != xAOD::Type::ParticleFlow) {
+            continue;
+          }
+          const xAOD::PFO* iPFO = static_cast<const xAOD::PFO*>(jet->rawConstituent(i));
+          if ( iPFO ) {
+            for (unsigned int cidx=0;cidx<iPFO->nCaloCluster();++cidx) {
+              if ( iPFO->cluster(cidx) ) {
+                clusterList.push_back(iPFO->cluster(cidx));
               }
             }
           }
         }
       }
-
+      
       for (auto cluster : clusterList) {
         DerivationFramework::MaxCellDecorator::calculation resCand =
           decorateObject(cluster, ctx);
@@ -324,7 +353,7 @@ DerivationFramework::MaxCellDecorator::addBranches() const
           res = resCand;
         }
       }
-      
+                    
       decorationJet0(*jet) = res.maxEcell_time;
       decorationJet1(*jet) = res.maxEcell_energy;
       decorationJet2(*jet) = res.maxEcell_gain;

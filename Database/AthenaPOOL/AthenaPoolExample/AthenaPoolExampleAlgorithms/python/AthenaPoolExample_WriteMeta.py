@@ -32,6 +32,9 @@ flags.lock()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg( flags )    
 
+from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+acc.merge( EventInfoCnvAlgCfg( flags, disableBeamSpot=True ) )
+
 from AthenaPoolExampleAlgorithms.AthenaPoolExampleConfig import AthenaPoolExampleWriteCfg
 acc.merge( AthenaPoolExampleWriteCfg( flags, outputStreamName,
                                       writeCatalog = "file:Catalog2.xml",

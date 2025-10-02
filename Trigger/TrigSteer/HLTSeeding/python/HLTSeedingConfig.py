@@ -322,7 +322,8 @@ def HLTSeedingCfg(flags, seqName = None):
         L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else "",
         HLTSeedingSummaryKey = "HLTSeedingSummary", # Transient, consumed by DecisionSummaryMakerAlg
         ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.forceEnableAllChains,
-                                                    MonTool = CTPUnpackingMonitoring(flags, 512, 400) )
+                                                    MonTool = CTPUnpackingMonitoring(flags, 512, 400),
+                                                    UseEDMxAOD = flags.Trigger.CTP.UseEDMxAOD )
     )
 
     # Add L1DataConsistencyChecker unless we forceEnableAllChains which always results in missing TOBs
@@ -398,11 +399,11 @@ def HLTSeedingCfg(flags, seqName = None):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
 
     flags = initConfigFlags()
     flags.Trigger.forceEnableAllChains= True
-    flags.Input.Files= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1",]
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()
     acc = HLTSeedingCfg( flags )

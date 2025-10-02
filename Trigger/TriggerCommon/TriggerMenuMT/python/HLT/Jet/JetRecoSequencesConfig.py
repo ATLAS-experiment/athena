@@ -57,7 +57,7 @@ def JetRecoDataDeps(flags, **jetRecoDict):
 
     jetalg, jetradius, extra = interpretRecoAlg(jetRecoDict["recoAlg"])
 
-    if jetRecoDict['ionopt']=='ion':
+    if jetRecoDict['ionopt'] in ['ion', 'ionp']:
         jetDefDict = HeavyIonJetRecoDataDeps(
             flags, **jetRecoDict
         )
@@ -339,6 +339,7 @@ def StandardJetBuildCfg(flags, jetDef):
     pj_alg = JetRecConfig.getConstitPJGAlg(jetDef.inputdef)
     acc.addEventAlgo(pj_alg,seqname)
 
+    jra_extra_outputs = []
     if jetDef.context=='ftf':
         pj_name = pj_alg.OutputContainer.Path
         # Make sure that the jets are constructed with the ghost tracks included
@@ -347,12 +348,15 @@ def StandardJetBuildCfg(flags, jetDef):
             InputPJContainers=[pj_name, trackColls["GhostTracks"]],
             OutputContainer=f"{pj_name}MergedWithGhostTracks",
         )
+        jra_extra_outputs.append(('xAOD::JetContainer',f"{jetDef.fullname()}.{trackColls['GhostTracksLabel']}"))
         # update the pseudo jet name
         acc.addEventAlgo(merge_alg,seqname)
 
     acc.addEventAlgo(
         JetRecConfig.getJetRecAlg(
-            jetDef,JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetDef.fullname()}/")
+            jetDef,
+            JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetDef.fullname()}/"),
+            extraOutputs=jra_extra_outputs,
         ),
         seqname,
     )
@@ -497,9 +501,13 @@ def GroomedJetRecoCfg(flags, **jetDefDict):
     )
     acc.merge(build_acc,seqname)
 
+    groom_extraoutputs = []
+    if '_ftf' in jetDefStr:
+        groom_extraoutputs.append(('xAOD::JetContainer',f'{groomedJets}.GhostTrack_ftf'))
     acc.addEventAlgo( JetRecConfig.getJetRecGroomAlg(
         groomDef,
         monTool=JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{groomedJets}/"),
+        extraOutputs=groom_extraoutputs,
         ),
         seqname
     )

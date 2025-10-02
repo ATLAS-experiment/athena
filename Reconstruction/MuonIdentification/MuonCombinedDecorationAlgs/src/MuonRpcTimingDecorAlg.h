@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDDECORALGS_MUONRPCTIMINGDECORALG_H
@@ -39,10 +39,10 @@ class MuonRpcTimingDecorAlg: public AthReentrantAlgorithm {
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_timeKey{this, "TimeKey", "", "rpcHitTime decoration key"};
       
       struct RpcInfo{
-        RpcInfo(const Amg::Vector3D& _pos,
-                const float _time,
-                const unsigned int _id):
-            pos{_pos},time{_time},id{_id}{}
+        RpcInfo(const Amg::Vector3D& pos_,
+                const float time_,
+                const unsigned int id_):
+            pos{pos_},time{time_},id{id_}{}
         Amg::Vector3D pos{0.,0.,0.};
         float time{0.f};
         unsigned int id{0};

@@ -1,5 +1,3 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
@@ -20,38 +18,6 @@
 
 using namespace PerfMonTest;
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-ErroneousAlg::ErroneousAlg( const std::string& name, 
-			    ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm( name,    pSvcLocator )
-{ }
-
-// Destructor
-///////////////
-ErroneousAlg::~ErroneousAlg()
-{ 
-  ATH_MSG_DEBUG ( "Calling destructor" ) ;
-}
-
-// Athena Algorithm's Hooks
-////////////////////////////
-StatusCode ErroneousAlg::initialize()
-{
-  ATH_MSG_INFO ( "Initializing " << name() << "..." ) ;
-  return StatusCode::SUCCESS;
-}
-
-StatusCode ErroneousAlg::finalize()
-{
-  ATH_MSG_INFO ( "Finalizing " << name() << "..." ) ;
-
-  return StatusCode::SUCCESS;
-}
 
 StatusCode ErroneousAlg::execute()
 {  

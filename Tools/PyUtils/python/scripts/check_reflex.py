@@ -1,12 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.check_reflex
 # @purpose a script to check the definitions of (reflex) plugins
 #          across multiple so-called 'rootmap' files
 # @author Sebastien Binet
 # @date February 2010
-
-from __future__ import print_function
 
 __doc__ = """
 a script to check the definitions of (reflex) plugins across multiple so-called 'rootmap' files

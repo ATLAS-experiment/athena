@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCELL_ID_H
@@ -44,7 +44,7 @@ public:
               const LArMiniFCAL_ID*   minifcal_id,
               const TileID*           tile_id) ;
         
-  ~CaloCell_ID(void);
+  ~CaloCell_ID();
 
   // SUBCALO enumeration moved to CaloCell_Base_ID.
   typedef CaloCell_Base_ID::SUBCALO SUBCALO;
@@ -86,8 +86,8 @@ public:
 
 private:    
   // Avoid coverity warnings.
-  CaloCell_ID (const CaloCell_ID&);
-  CaloCell_ID& operator= (const CaloCell_ID&);
+  CaloCell_ID (const CaloCell_ID&) = delete;
+  CaloCell_ID& operator= (const CaloCell_ID&) = delete;
 };
 
 //This is required and checked at compile time when you try to record/retrieve

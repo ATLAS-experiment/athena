@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_TGCDATAPREPARATOR_H
@@ -39,19 +39,13 @@ class TgcDataPreparator: public AthAlgTool
 
    public:
 
-      TgcDataPreparator(const std::string& type, 
-			const std::string& name,
-			const IInterface*  parent);
+      using AthAlgTool::AthAlgTool;
     
       virtual StatusCode initialize() override;
-    
-      StatusCode prepareData(const LVL1::RecMuonRoI*  p_roi,
-			     TrigL2MuonSA::TgcHits&   tgcHits) const;
 
-      StatusCode prepareData(const xAOD::MuonRoI*     p_roi,
-			     TrigL2MuonSA::TgcHits&   tgcHits) const;
-
-      void setOptions(const TrigL2MuonSA::TgcDataPreparatorOptions& options) { m_options = options; };
+      StatusCode prepareData(const EventContext& ctx,
+                             const xAOD::MuonRoI*     p_roi,
+                             TrigL2MuonSA::TgcHits&   tgcHits) const;
 
       void setRoIBasedDataAccess(bool use_RoIBasedDataAccess){ m_use_RoIBasedDataAccess = use_RoIBasedDataAccess; };
 

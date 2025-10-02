@@ -1,11 +1,10 @@
 
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtMeasViewAlg.h"
 
-#include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
 #include <AthContainers/ConstDataVector.h>
 
@@ -17,11 +16,11 @@ namespace MuonR4 {
         return StatusCode::SUCCESS;
     }
     StatusCode MdtMeasViewAlg::execute(const EventContext& ctx) const {
-        
-        SG::ReadHandle driftCircles{m_readKey1D, ctx};
-        ATH_CHECK(driftCircles.isPresent());
-        SG::ReadHandle twinCircles{m_readKey2D, ctx};
-        ATH_CHECK(twinCircles.isPresent());
+        const xAOD::MdtDriftCircleContainer* driftCircles{nullptr};
+        const xAOD::MdtTwinDriftCircleContainer* twinCircles{nullptr};
+
+        ATH_CHECK(SG::get(driftCircles, m_readKey1D, ctx));
+        ATH_CHECK(SG::get(twinCircles, m_readKey2D, ctx));
 
         ConstDataVector<xAOD::MdtDriftCircleContainer> outContainer{SG::VIEW_ELEMENTS};
         outContainer.insert(outContainer.end(), driftCircles->begin(), driftCircles->end());

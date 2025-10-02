@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -322,7 +322,6 @@ pool::TestDriver::read()
       throw std::runtime_error( error.str() );
     }
     delete object_testClassVectors;
-    ++j;
 
     // Commit and hold the transaction
     if ( ( i + 1 ) % m_eventsToCommitAndHold == 0 ) {
@@ -358,7 +357,7 @@ pool::TestDriver::readCollections()
   }
 
   // Opening again a database
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
+  auto db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -373,7 +372,7 @@ pool::TestDriver::readCollections()
       throw std::runtime_error( "Could not retrieve the container" );
     }
     std::cout << "Container : " << container->name() << std::endl;
-    pool::ITokenIterator* tokenIterator = container->tokens( "" );
+    pool::ITokenIterator* tokenIterator = container->tokens();
     if ( ! tokenIterator ) {
       throw std::runtime_error( "Could not obtain a token iterator" );
     }
@@ -396,8 +395,6 @@ pool::TestDriver::readCollections()
     delete tokenIterator;
     delete container;
   }
-
-  delete db;
 
   std::cout << "Committing the transaction." << std::endl;
   if ( ! persistencySvc->session().transaction().commit() ) {
@@ -423,7 +420,7 @@ pool::TestDriver::readBackUpdatedObjects()
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  pool::IDatabase* db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
+  auto db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -435,13 +432,13 @@ pool::TestDriver::readBackUpdatedObjects()
     throw std::runtime_error( "Could not retrieve the container" );
   }
 
-  pool::ITokenIterator* tokenIterator = container->tokens( "" );
+  pool::ITokenIterator* tokenIterator = container->tokens();
   if ( ! tokenIterator ) {
     throw std::runtime_error( "Could not obtain a token iterator" );
   }
 
   int i = 0;
-  std::vector< SimpleTestClass* > v_simpleTestClass;
+
   Token* token = tokenIterator->next();
   while ( token ) {
     void* data_simpleTestClass = persistencySvc->readObject( *token );
@@ -468,7 +465,6 @@ pool::TestDriver::readBackUpdatedObjects()
 
   delete tokenIterator;
   delete container;
-  delete db;
 
   // Committing
   std::cout << "Committing the transaction." << std::endl;

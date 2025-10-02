@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -183,10 +183,10 @@ class GenericMonitoringArray:
 #  @param name string to check
 #  @return set of forbidden characters found
 def _invalidName(flags, name):
-    blacklist = '/\\'
+    blocklist = '/\\'
     if flags.Common.isOnline:
-        blacklist += '=,:.()'
-    return set(name).intersection(blacklist)
+        blocklist += '=,:.()'
+    return set(name).intersection(blocklist)
 
 
 ## Generate an alias for a set of variables
@@ -339,30 +339,37 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
     settings['alias'] = alias
 
     # Variable names
-    if len(varList)>0:
+    nVars = len(varList)
+    if nVars>0:
         settings['xvar'] = varList[0]
-    if len(varList)>1:
+    if nVars>1:
         settings['yvar'] = varList[1]
-    if len(varList)>2:
+    if nVars>2:
         settings['zvar'] = varList[2]
     settings['allvars'] = varList
-    nVars = len(varList)
 
     # Type
     if flags.Common.isOnline and type in ['TTree']:
         log.warning('Object %s of type %s is not supported for online running and '
                     'will not be added.', varname, type)
         return ''
-    # Check that the histogram's dimension matches the number of monitored variables
-    # Add TTree to the lists, it can have any number of vars
-    hist2D = ['TH2','TProfile','TEfficiency', 'TTree']
-    hist3D = ['TProfile2D','TEfficiency', 'TTree']
-    if nVars==2:
-        assert any([valid2D in type for valid2D in hist2D]),'Attempting to use two '
-        'monitored variables with a non-2D histogram.'
-    elif nVars==3:
-        assert any([valid3D in type for valid3D in hist3D]),'Attempting to use three '
-        'monitored variables with a non-3D histogram.'
+
+    # Allowed histogram dimensions
+    if type.startswith('TH1'):
+        dims = {1}
+    elif type.startswith('TH2'):
+        dims = {2}
+    elif type=='TProfile':
+        dims = {2}
+    elif type=='TProfile2D':
+        dims = {3}
+    elif type=='TEfficiency':
+        dims = {2, 3}
+
+    assert type=='TTree' or nVars in dims,\
+        f'Number of monitored variables {varList} for "{path}/{alias}" '\
+        f'does not match histogram dimension for {type}'
+
     settings['type'] = type
 
     # Path

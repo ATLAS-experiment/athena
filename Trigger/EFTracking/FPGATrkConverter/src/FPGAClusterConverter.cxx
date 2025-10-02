@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGAClusterConverter.h"
 
@@ -29,7 +29,8 @@ StatusCode FPGAClusterConverter::initialize() {
   ATH_CHECK(detStore()->retrieve(m_SCTId, "SCT_ID"));
   ATH_CHECK(detStore()->retrieve(m_pixelManager));
   ATH_CHECK(detStore()->retrieve(m_SCTManager));
-  ATH_CHECK(m_lorentzAngleTool.retrieve());
+  ATH_CHECK(m_lorentzAngleToolPixel.retrieve());
+  ATH_CHECK(m_lorentzAngleToolStrip.retrieve());
 
   ATH_CHECK( m_FPGAClusterKey.initialize() );
   ATH_CHECK(m_beamSpotKey.initialize());
@@ -292,7 +293,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
 
   //TODO: understand if shift is needed
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolPixel->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -304,8 +305,15 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
   Amg::MatrixX cov(2,2);
   cov.setZero();
 
-  cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
-  cov(1,1) = siWidth.z()*siWidth.z()/12;
+  if (m_broadErrors) {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
+    cov(1,1) = siWidth.z()*siWidth.z()/12;
+  }
+  else {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/(12*siWidth.colRow().x()*siWidth.colRow().x()); 
+    cov(1,1) = siWidth.z()*siWidth.z()/(12*siWidth.colRow().y()*siWidth.colRow().y());
+  }
+  
   float dummy_omegax = 0.5; 
   float dummy_omegay = 0.5;
   bool split = false;
@@ -321,11 +329,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   ATH_MSG_DEBUG("\tCreate xAOD::PixelCluster from FPGATrackSimHit");
 
   IdentifierHash hash = h.getIdentifierHash();
-  
-  float etaWidth = h.getEtaWidth();
-  float phiWidth = h.getPhiWidth();
-  int phiIndex = h.getPhiIndex();
-  int etaIndex = h.getEtaIndex();
 
   const InDetDD::SiDetectorElement* pDE = m_pixelManager->getDetectorElement(hash);
 
@@ -336,7 +339,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
  
   // *** Get cell from id
   Identifier wafer_id = m_pixelId->wafer_id(hash);
-  Identifier hit_id = m_pixelId->pixel_id(wafer_id, phiIndex, etaIndex); 
+  Identifier hit_id = m_pixelId->pixel_id(wafer_id, h.getPhiIndex(), h.getEtaIndex()); 
   InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(hit_id);
   if(!cell.isValid()) {
     ATH_MSG_DEBUG("\t\tcell not valid");
@@ -345,26 +348,50 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   const InDetDD::PixelModuleDesign* design (dynamic_cast<const InDetDD::PixelModuleDesign*>(&pDE->design()));
 
   // **** Get InDet::SiWidth
+  int rowmin = h.getMinPhiIndex();
+  int rowmax = h.getMaxPhiIndex();
+  int colmin = h.getMinEtaIndex();
+  int colmax = h.getMaxEtaIndex();
 
-  int colMin = static_cast<int>(etaIndex-0.5*etaWidth);
-  int colMax = colMin+etaWidth;
+  // Quick test to check that none of these 4 hit some number limits
+  // Check for uninitialized values (still at int min/max)
+  if (colmin == std::numeric_limits<int>::max() || colmax == std::numeric_limits<int>::min() ||
+    rowmin == std::numeric_limits<int>::max() || rowmax == std::numeric_limits<int>::min()) {
+    ATH_MSG_ERROR("Pixel cluster indices appear uninitialized: colmin=" << colmin << ", colmax=" << colmax
+          << ", rowmin=" << rowmin << ", rowmax=" << rowmax);
+    return StatusCode::FAILURE;
+  }
+  // Check for negative indices
+  if (colmin < 0 || colmax < 0 || rowmin < 0 || rowmax < 0) {
+    ATH_MSG_ERROR("Pixel cluster indices out of range: colmin=" << colmin << ", colmax=" << colmax
+          << ", rowmin=" << rowmin << ", rowmax=" << rowmax);
+    return StatusCode::FAILURE;
+  }
+  // Check for max < min
+  if (colmax < colmin || rowmax < rowmin) {
+    ATH_MSG_ERROR("Pixel cluster index max < min: colmin=" << colmin << ", colmax=" << colmax
+          << ", rowmin=" << rowmin << ", rowmax=" << rowmax);
+    return StatusCode::FAILURE;
+  }
 
-  int rowMin = static_cast<int>(phiIndex-0.5*phiWidth);
-  int rowMax = rowMin+phiWidth;
+  double zWidth = design->widthFromColumnRange(colmin, colmax);
+  double phiRWidth = design->widthFromRowRange(rowmin, rowmax);
+  
+  InDet::SiWidth siWidth(Amg::Vector2D(h.getPhiWidth(),h.getEtaWidth()), Amg::Vector2D(phiRWidth,zWidth));
 
-  double etaW = design->widthFromColumnRange(colMin, colMax-1); 
-  double phiW = design->widthFromRowRange(rowMin, rowMax-1); 
-
-  InDet::SiWidth siWidth(Amg::Vector2D(phiWidth,etaWidth),Amg::Vector2D(phiW,etaW));
 
   // **** Get SiLocalPosition from cell id and define Amg::Vector2D position
   InDetDD::SiLocalPosition silPos(pDE->rawLocalPositionOfCell(cell)); 
   Amg::Vector2D localPos(silPos);
 
+  if(m_useInherentLocalCoordinates){
+    // replace localPos with the one stored in the FPGATrackSimHit
+    localPos(0,0) = h.getPhiCoord();
+    localPos(1,0) = h.getEtaCoord();
+  }
   //TODO: understand if shift is needed
-
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolPixel->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -373,12 +400,16 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
 
   Amg::MatrixX cov(2,2); 
   cov.setZero();
+  
+  if (m_broadErrors) {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/12;
+    cov(1,1) = siWidth.z()*siWidth.z()/12;
+  }
+  else {
+    cov(0,0) = siWidth.phiR()*siWidth.phiR()/(12*siWidth.colRow().x()*siWidth.colRow().x());
+    cov(1,1) = siWidth.z()*siWidth.z()/(12*siWidth.colRow().y()*siWidth.colRow().y());
+  }
 
-  cov(0,0) = siWidth.phiR()*siWidth.phiR()/12; 
-  cov(1,1) = siWidth.z()*siWidth.z()/12; 
-
-  float omegax = 0.5; 
-  float omegay = 0.5;
   bool split = false;
   float splitProb1 = 0;
   float splitProb2 = 0;
@@ -398,7 +429,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   cl.globalPosition() = globalPosition; 
   cl.setChannelsInPhiEta(siWidth.colRow()[0], siWidth.colRow()[1]);
   cl.setWidthInEta(static_cast<float>(siWidth.widthPhiRZ()[1]));
-  cl.setOmegas(omegax, omegay);
   cl.setIsSplit(split);
   cl.setSplitProbabilities(splitProb1, splitProb2);
   ATH_MSG_DEBUG("\t\txaod width in eta " << cl.widthInEta());
@@ -456,7 +486,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tStrip length: " << stripLength );
   ATH_MSG_DEBUG("\t\tlocal position before shift: " << localPos.x() << " phi: " << localPos.y());
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolStrip->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -507,37 +537,37 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   float phiWidth = h.getPhiWidth();
   int strip = static_cast<int>(h.getPhiIndex());
   ATH_CHECK(strip >= 0);
-  const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
-  ATH_CHECK(pDE != nullptr);
+  const InDetDD::SiDetectorElement* sDE = m_SCTManager->getDetectorElement(hash);
+  ATH_CHECK(sDE != nullptr);
 
   Identifier wafer_id = m_SCTId->wafer_id(hash);
   Identifier strip_id = m_SCTId->strip_id(wafer_id, strip);
-  InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(strip_id);
+  InDetDD::SiCellId cell =  sDE->cellIdFromIdentifier(strip_id);
   ATH_MSG_DEBUG("\t\tcell: " << cell);
   ATH_MSG_DEBUG("\t\tstrip_id " << strip_id);
   ATH_MSG_DEBUG("\t\tstrip: " << cell);
   ATH_MSG_DEBUG("\t\tStrip from idHelper: " << m_SCTId->strip(strip_id) );
 
   const InDetDD::SCT_ModuleSideDesign* design; 
-  if (pDE->isBarrel()){ 
-    design = (static_cast<const InDetDD::SCT_ModuleSideDesign*>(&pDE->design())); 
+  if (sDE->isBarrel()){ 
+    design = (static_cast<const InDetDD::SCT_ModuleSideDesign*>(&sDE->design())); 
   } else{ 
-    design = (static_cast<const InDetDD::StripStereoAnnulusDesign*>(&pDE->design())); 
+    design = (static_cast<const InDetDD::StripStereoAnnulusDesign*>(&sDE->design())); 
   }  
 
   const int firstStrip = m_SCTId->strip(rdoList.front());
   const int lastStrip = m_SCTId->strip(rdoList.back());
   const int row = m_SCTId->row(rdoList.front());
-  const int firstStrip1D = design->strip1Dim (firstStrip, row );
-  const int lastStrip1D = design->strip1Dim( lastStrip, row );
+  const int firstStrip1D = design->strip1Dim (firstStrip, row);
+  const int lastStrip1D = design->strip1Dim(lastStrip, row);
   const InDetDD::SiCellId cell1(firstStrip1D);
   const InDetDD::SiCellId cell2(lastStrip1D);
   if (cell2 != design->cellIdInRange(cell2) || cell1 != design->cellIdInRange(cell1)) { // this seems to solve EFTRACK-743
     ATH_MSG_WARNING("Cell ID out of range. Skip making this Strip cluster");
     return StatusCode::SUCCESS;
   }
-  const InDetDD::SiLocalPosition firstStripPos( pDE->rawLocalPositionOfCell(cell1 ));
-  const InDetDD::SiLocalPosition lastStripPos( pDE->rawLocalPositionOfCell(cell2) );
+  const InDetDD::SiLocalPosition firstStripPos( sDE->rawLocalPositionOfCell(cell1 ));
+  const InDetDD::SiLocalPosition lastStripPos( sDE->rawLocalPositionOfCell(cell2) );
   const InDetDD::SiLocalPosition centre( (firstStripPos+lastStripPos) * 0.5 );
   const double width = design->stripPitch() * ( lastStrip - firstStrip + 1 );
 
@@ -546,12 +576,16 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
 
   InDet::SiWidth siWidth(Amg::Vector2D(phiWidth,1), Amg::Vector2D(width,stripLength) ); //TODO: ok??
   Amg::Vector2D localPos(centre.xPhi(),  centre.xEta()); 
+  if(m_useInherentLocalCoordinates){
+    // replace localPos with the one stored in the FPGATrackSimHit
+    localPos(0,0) = h.getPhiCoord();
+  }
   ATH_MSG_DEBUG("\t\tcentre eta: " << centre.xEta() << " phi: " << centre.xPhi());
   ATH_MSG_DEBUG("\t\tStrip length: " << stripLength );
   ATH_MSG_DEBUG("\t\tlocal position before shift: " << localPos.x() << " phi: " << localPos.y());
-
+  
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
+    double shift =  m_lorentzAngleToolStrip->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -563,18 +597,45 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   Eigen::Matrix<float,1,1> localCovariance;
   localCovariance.setZero();
 
-  if (pDE->isBarrel()) {
+  if (sDE->isBarrel()) {
     localPosition(0, 0) = localPos.x();
-    localCovariance(0, 0) = pDE->phiPitch() * pDE->phiPitch() * (1./12.);
-  } else {
-    InDetDD::SiCellId cellId = pDE->cellIdOfPosition(localPos);
-    const InDetDD::StripStereoAnnulusDesign *designNew = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&pDE->design());
-    if ( designNew == nullptr ) return StatusCode::FAILURE;
-    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCellPC(cellId);
+    localCovariance(0, 0) = sDE->phiPitch() * sDE->phiPitch() * (1. / 12.);
+  }
+  else {
+    InDetDD::SiCellId cellId = sDE->cellIdOfPosition(localPos);
+    const InDetDD::StripStereoAnnulusDesign* designNew = dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&sDE->design());
+    
+    if (!cellId.isValid() || cellId != designNew->cellIdInRange(cellId)) {
+      std::ostringstream msg;
+      msg << "Original cellId: " << cellId << " (strip=" << cellId.strip() << ")\n";
+      msg << "Cell ID invalid or out of range. Resetting to the closest cell of the active area.\n";
+      const InDetDD::SiCellId minCell = InDetDD::SiCellId(0); // get the first cell of the module
+      const Amg::Vector2D localPosMin = sDE->rawLocalPositionOfCell(minCell); // get raw local coordinates in Vector2D of the first cell
+      const InDetDD::SiCellId maxCell = InDetDD::SiCellId(designNew->cells() - 1); // get the last cell of the module
+      const Amg::Vector2D localPosMax = sDE->rawLocalPositionOfCell(maxCell); // get raw local coordinates in Vector2D of the last cell
+      msg << "Active area boundaries [eta,phi]: min [" << localPosMin.x() << ", " << localPosMin.y() << "] , " <<
+                                               "max [" << localPosMax.x() << ", " << localPosMax.y() << "]\n";
+      msg << "Compared to localPos of invalid cell: [" << localPos.x() << ", " << localPos.y() << "]\n";
+
+      // find the closest cell of the active area and assign it to cellId
+      // this ignores the Lorentz corrections but re-positions the cluster within the active area
+      if (std::abs(localPos[Trk::locR] - localPosMin[Trk::locR]) < std::abs(localPos[Trk::locR] - localPosMax[Trk::locR])) {
+        // this check should suffice instead of something like the following:
+        // (std::sqrt(std::pow(localPos.x() - localPosMin.x(), 2) + std::pow(localPos.y() - localPosMin.y(), 2)) <
+        // std::sqrt(std::pow(localPos.x() - localPosMax.x(), 2) + std::pow(localPos.y() - localPosMax.y(), 2)))
+        msg << "   \\___ resetting to minCell [" << localPosMin.x() << ", " << localPosMin.y() << "]";
+        cellId = minCell;
+      } else {
+        msg << "   \\___ resetting to maxCell [" << localPosMax.x() << ", " << localPosMax.y() << "]";
+        cellId = maxCell;
+      }
+      ATH_MSG_WARNING(msg.str());
+    }
+    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCell(cellId);
     localPosition(0, 0) = localInPolar.xPhi();
     localCovariance(0, 0) = designNew->phiPitchPhi() * designNew->phiPitchPhi() * (1./12.);
   }
-
+  
   Eigen::Matrix<float,3,1> globalPosition(h.getX(),h.getY(),h.getZ()); 
   ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPosition.x() << " y=" << globalPosition.y()  << " z=" << globalPosition.z() );
 
@@ -638,15 +699,12 @@ StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixel
     const float & cov_r = p_cl->localCovariance<2>()(0,0);
     const float & cov_z = p_cl->localCovariance<2>()(1,0);
 
-    // measurement list
-    std::vector< const xAOD::UncalibratedMeasurement* > measurementLinks({ p_cl });
-
     pixelSPs.back()->setSpacePoint(
       p_cl->identifierHash(),
       globalPos,
       cov_r,
       cov_z,
-      measurementLinks
+      std::vector< const xAOD::UncalibratedMeasurement* >({ p_cl }) // measurement list
     );
   }
 
@@ -718,11 +776,11 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
 
   // Fill xAOD::SpacePoint
   sp.setSpacePoint(
-    idHashList, 
+    std::move(idHashList),
     globalPos, 
     cov_r, 
     cov_z, 
-    measurements,
+    std::move(measurements),
     topHalfStripLength,
     bottomHalfStripLength,
     topStripDirection.cast<float>(),
@@ -785,14 +843,14 @@ StatusCode FPGAClusterConverter::getStripsInfo(const xAOD::StripCluster& cl, flo
   const int &strip = m_SCTId->strip(cl.rdoList().front());
   const IdentifierHash &hash = cl.identifierHash();
 
-  const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
+  const InDetDD::SiDetectorElement* sDE = m_SCTManager->getDetectorElement(hash);
 
   const Identifier &wafer_id = m_SCTId->wafer_id(hash);
   const Identifier &strip_id = m_SCTId->strip_id(wafer_id, strip);
-  const InDetDD::SiCellId & cell =  pDE->cellIdFromIdentifier(strip_id);
+  const InDetDD::SiCellId & cell =  sDE->cellIdFromIdentifier(strip_id);
 
-  const InDetDD::SiLocalPosition localPos( pDE->rawLocalPositionOfCell(cell ));
-  std::pair<Amg::Vector3D, Amg::Vector3D> end = (pDE->endsOfStrip(localPos));
+  const InDetDD::SiLocalPosition localPos( sDE->rawLocalPositionOfCell(cell ));
+  std::pair<Amg::Vector3D, Amg::Vector3D> end = (sDE->endsOfStrip(localPos));
   stripCenter = 0.5 * (end.first + end.second);
   Amg::Vector3D stripDir = end.first - end.second;
   

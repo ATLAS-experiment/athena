@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from enum import Enum
@@ -148,7 +148,7 @@ def selName(recoSequenceName, hypoType=JetHypoAlgType.STANDARD):
 
 def hypoToolGenerator(hypoType):
     """returns function (that in turn returns hypo tool) for menu sequence"""
-    def trigStreamerHypoTool(chainDict):
+    def trigStreamerHypoTool(flags, chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"])
     return {
         JetHypoAlgType.STANDARD:    trigJetHypoToolFromDict,
@@ -318,6 +318,10 @@ def jetRoITrackJetTagSelCfg(flags, preselJetDef, isPresel=True):
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
     reco.mergeReco(ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.inputMaker().name))
 
+    # Decorate EventInfo with online beamspot info in global context -- avoid multiple executes
+    from ..Bjet.BjetFlavourTaggingConfig import OnlineBeamspotAugmenterCfg
+    reco.mergeReco(OnlineBeamspotAugmenterCfg(flags))
+
     # Add to top-level serial sequence to ensure it is ready for in-view reco
     from .JetRecoSequencesConfig import (
         FastFtaggedJetCopyAlgCfg, JetRoITrackJetTagSequenceCfg, JetViewAlgCfg, formatFilteredJetsName, JET_DEFAULT_VIEW_PT_MIN_GEV
@@ -334,6 +338,12 @@ def jetRoITrackJetTagSelCfg(flags, preselJetDef, isPresel=True):
     # Explicitly add the sequence here that is to run in the super-RoI view
     seqname = f"JetRoITrackJetTag_{trkopt}_RecoSequence"
     reco.addSequence(parOR(seqname),primary=True)
+    verifier = CompFactory.AthViews.ViewDataVerifier("roiftf_ftag_ViewDataVerifier")
+    verifier.DataObjects = [
+        ('SG::AuxElement',f'EventInfo.{dec}')
+        for dec in ['onlineBeamPosSigmaXY','onlineBeamPosX','onlineBeamPosY','onlineBeamPosZ']
+    ]
+    reco.addEventAlgo(verifier,seqname)
     reco.merge(track_acc,seqname)
     reco.inputMaker().ViewNodeName = seqname
 

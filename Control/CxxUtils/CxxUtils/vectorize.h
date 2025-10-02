@@ -1,18 +1,33 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/vectorize.h
  * @author scott snyder <snyder@bnl.gov>
  * @date May, 2019
- * @brief Helper to enable auto-vectorization.
+ * @brief Helper to enable (more agressive) auto-vectorization.
  *
- * Athena is usually built with -O2, which doesn't fully enable
- * autovectorization in gcc (it does in clang).
+ * Athena is usually built with -O2.
+ * From gcc 12 and onwards this results to
+ * (gcc -O2  -Q --help=optimizers)
+ * -ftree-loop-vectorize       		[enabled]
+ * -ftree-slp-vectorize        		[enabled]
+ * -ftree-vectorize            		[disabled]
+ * -fvect-cost-model=[unlimited|dynamic|cheap|very-cheap] 	very-cheap
+ * (clang uses a more agressive default model in -O2)
+ *
+ * There are cases where we prefer to use the gcc cheap model
+ * rather than the very cheap.
+ * This can be achieved by enabling tree-vectorize
+ * (gcc -O2  -ftree-vectorize -Q --help=optimizers)
+ * -ftree-loop-vectorize       		[enabled]
+ * -ftree-slp-vectorize        		[enabled]
+ * -ftree-vectorize            		[enabled]
+ * -fvect-cost-model=[unlimited|dynamic|cheap|very-cheap]  cheap
  *
  * Add
- * ATH_ENABLE_VECTORIZATION;
+ * ATH_ENABLE_TREE_VECTORIZATION;
  * at the start of a compilation unit
  * to enable it for this file.
  *
@@ -20,17 +35,21 @@
  * ATH_ENABLE_FUNCTION_VECTORIZATION
  * before a function to enable it for just
  * this function
+ *
+ * We disable the functionality for gcc 14
+ * and later. Since spot tests do not show
+ * any noticeable difference.
  */
+#include "CxxUtils/features.h"
 
 #ifndef CXXUTILS_VECTORIZE_H
 #define CXXUTILS_VECTORIZE_H
 
-#if defined(__GNUC__) && (__GNUC__ < 14) & !defined(__clang__) && \
-    !defined(__ICC) && !defined(__COVERITY__) && !defined(__CUDACC__)
-# define ATH_ENABLE_VECTORIZATION                     \
-  _Pragma("GCC optimize (\"tree-vectorize\")") class ATH_ENABLE_VECTORIZATION_SWALLOW_SEMICOLON
+#if HAVE_GCC_CLANG_EXTENSIONS && !defined(__clang__)
+# define ATH_ENABLE_TREE_VECTORIZATION                     \
+  _Pragma("GCC optimize (\"tree-vectorize\")") class ATH_ENABLE_TREE_VECTORIZATION_SWALLOW_SEMICOLON
 #else
-# define ATH_ENABLE_VECTORIZATION class ATH_ENABLE_VECTORIZATION_SWALLOW_SEMICOLON
+# define ATH_ENABLE_TREE_VECTORIZATION class ATH_ENABLE_TREE_VECTORIZATION_SWALLOW_SEMICOLON
 #endif
 
 #endif  // not CXXUTILS_VECTORIZE_H

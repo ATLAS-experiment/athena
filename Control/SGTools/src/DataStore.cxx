@@ -1,18 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SGTools/DataStore.h"
 #include "SGTools/DataProxy.h"
 #include "SGTools/exceptions.h"
 #include "AthenaKernel/IStringPool.h"
+#include "AthenaKernel/ISGAudSvc.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "SGAudCore/ISGAudSvc.h"
 #include "CxxUtils/ConcurrentPtrSet.h"
-#include "CxxUtils/SimpleUpdater.h"
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 
@@ -279,7 +278,6 @@ DataStore::removeProxyImpl (DataProxy* proxy, int index)
     ProxyMap& pmap = storeIter->second;
 
     // first remove the alias key:
-    SG::DataProxy::AliasCont_t alias_set = proxy->alias();
     for (const std::string& alias : alias_set) {
       if (1 == pmap.erase(alias)) proxy->release();
     }

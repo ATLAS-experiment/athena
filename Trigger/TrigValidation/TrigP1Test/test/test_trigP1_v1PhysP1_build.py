@@ -3,7 +3,7 @@
 
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu, then running BS decoding follows the athenaHLT process
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, PyStep
@@ -23,6 +23,7 @@ ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
             'Trigger.doLVL1=True',
+            'Trigger.doRuntimeNaviVal=True',
             'Trigger.L1MuonSim.NSWVetoMode=False',
             'Trigger.L1MuonSim.doMMTrigger=False',
             'Trigger.L1MuonSim.doPadTrigger=False',

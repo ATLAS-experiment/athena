@@ -11,15 +11,16 @@
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+
 #include "ActsEvent/TrackParametersContainer.h"
-#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL includes
 #include <string>
@@ -32,22 +33,20 @@ namespace ActsTrk {
  **/
 class SeedToTrackCnvAlg : public AthReentrantAlgorithm {
 public:
-  SeedToTrackCnvAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   virtual ~SeedToTrackCnvAlg() override = default;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
 
 private:
-  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+  detail::xAODUncalibMeasSurfAcc m_surfAcc{};
+  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
   SG::ReadHandleKeyArray<ActsTrk::SeedContainer> m_seedContainerKey{this, "SeedContainerKey", {}, "Seed containers"};
   SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_actsTrackParamsKey {this, "EstimatedTrackParametersKey", {}, "Track Parameters Key"};
-  SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
-     {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
-      "Map which associates detector elements to Acts Geometry IDs"};
-
+ 
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 };
 
 } // namespace ActsTrk

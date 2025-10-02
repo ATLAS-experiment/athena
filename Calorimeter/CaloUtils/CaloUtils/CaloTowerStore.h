@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOTOWERSTORE_H
@@ -278,14 +278,14 @@ private:
 
 
   private:
-    std::vector<double>::const_iterator m_weights;
-    std::vector<Entry>::const_iterator m_it;
-    unsigned int m_hash;
-    unsigned int m_nleft;
-    unsigned int m_n1;
-    unsigned int m_offs;
-    unsigned int m_offs2;
-    unsigned int m_stride;
+    std::vector<double>::const_iterator m_weights{};
+    std::vector<Entry>::const_iterator m_it{};
+    unsigned int m_hash{};
+    unsigned int m_nleft{};
+    unsigned int m_n1{};
+    unsigned int m_offs{};
+    unsigned int m_offs2{};
+    unsigned int m_stride{};
   };
 
   class tower_iterator

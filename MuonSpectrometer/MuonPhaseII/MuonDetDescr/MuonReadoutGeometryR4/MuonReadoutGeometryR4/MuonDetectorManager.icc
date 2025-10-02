@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_ICC
 #define MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_ICC
@@ -13,11 +13,16 @@
 #define WRITE_GETTERS(ELE_TYPE, GETTER_FUNC, STORAGE_VEC, ATTR)                                \
     inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(const Identifier& id) ATTR {        \
         ATTR ELE_TYPE* reEle = GETTER_FUNC(m_idHelperSvc->detElementHash(id));                 \
-        if (!reEle) ATH_MSG_WARNING(#GETTER_FUNC << ": Failed to retrieve "<<m_idHelperSvc->toStringDetEl(id) << " hash: " << m_idHelperSvc->detElementHash(id) << " storage vec size: " << STORAGE_VEC.size()); \
+        if (!reEle) {                                                                          \
+            ATH_MSG_WARNING(#GETTER_FUNC << ": Failed to retrieve "                            \
+                            <<m_idHelperSvc->toStringDetEl(id) << " hash: "                    \
+                            << m_idHelperSvc->detElementHash(id)                               \
+                            << " storage vec size: " << STORAGE_VEC.size());                   \
+        }                                                                                      \
         return reEle;                                                                          \
     }                                                                                          \
     inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(const IdentifierHash& hash) ATTR {  \
-        const size_t idx = static_cast<unsigned int>(hash);                                    \
+        const size_t idx = static_cast<size_t>(hash);                                          \
         return idx < STORAGE_VEC.size() ? STORAGE_VEC[idx].get() : nullptr;                    \
     }
 #define ADD_DETECTOR(ELE_TYPE, STORAGE_VEC)                       \

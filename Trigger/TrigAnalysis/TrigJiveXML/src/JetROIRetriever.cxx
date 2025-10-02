@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/JetROIRetriever.h"
@@ -118,14 +118,15 @@ namespace JiveXML {
    }//end if readJEM
 
     DataMap myDataMap;
+    const auto nPhi = phi.size() ;
     myDataMap["energy"] = energy;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["energy"] = energy;
-    myDataMap["roiWord"] = roiWord;
-    myDataMap["thrPattern"] = thrPattern;
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["energy"] = std::move(energy);
+    myDataMap["roiWord"] = std::move(roiWord);
+    myDataMap["thrPattern"] = std::move(thrPattern);
   
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() 
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi 
            << " from: " << m_sgKey << endmsg;
 
     //forward data to formating tool

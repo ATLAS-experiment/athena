@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentStrToValMap_test.cxx
@@ -102,16 +102,21 @@ public:
     };
 
     swap_atomic (m_p, other.m_p);
+    std::lock_guard<std::mutex> g (m_mutex);
+    std::lock_guard<std::mutex> gother (other.m_mutex);
     m_garbage.swap (other.m_garbage);
     std::swap (m_inGrace, other.m_inGrace);
   }
 
 
-  unsigned int inGrace() const { return m_inGrace; }
+  unsigned int inGrace() const {
+    std::lock_guard<std::mutex> g (m_mutex);
+    return m_inGrace;
+  }
 
 
 private:
-  std::mutex m_mutex;
+  mutable std::mutex m_mutex;
   std::atomic<T*> m_p;
   std::vector<T*> m_garbage;
   unsigned int m_inGrace;

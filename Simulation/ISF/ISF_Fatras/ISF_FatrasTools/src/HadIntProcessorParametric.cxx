@@ -394,7 +394,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
     if (chargedist<3*pif+nef) {
       charge[i]=0.;
       childType[i]=Trk::neutron;
-      newm[i]=939.565; // MeV
+      newm[i]=ParticleConstants::neutronMassInMeV; // MeV
       pdgid[i]=2112; // neutron
       continue;
     }

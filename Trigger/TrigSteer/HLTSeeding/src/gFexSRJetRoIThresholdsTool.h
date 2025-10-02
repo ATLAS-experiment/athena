@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_GFEXSRJETROITHRESHOLDSTOOL_H
 #define HLTSEEDING_GFEXSRJETROITHRESHOLDSTOOL_H
@@ -13,7 +13,8 @@ public:
   gFexSRJetRoIThresholdsTool(const std::string& type, const std::string& name, const IInterface* parent)
   : HLTSeedingRoIToolDefs::gFexSRJet::ThresholdBaseClass(type, name, parent) {}
 
-  virtual uint64_t getPattern(const xAOD::gFexJetRoI& roi,
+  virtual uint64_t getPattern(const EventContext& ctx,
+                              const xAOD::gFexJetRoI& roi,
                               const ThrVec& menuThresholds,
                               const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const override;
 };

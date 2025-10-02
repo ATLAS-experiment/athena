@@ -472,7 +472,7 @@ def _compareComponent(compRef, compChk, prefix, args, component, propname, color
             if not (component == "IOVDbSvc" and prop == "Folders"):
                 print(f"{prefix}{color.property}{prop} = {color.first} {refVal} {color.reset} vs {color.second} {chkVal} {color.reset} {diffmarker}")
 
-            if refVal and ( isinstance(refVal, list) or isinstance(refVal, dict) ):
+            if refVal and ( isinstance(refVal, (list, dict)) ):
                 if component == "IOVDbSvc" and prop == "Folders":
                     countDifferent += _compareIOVDbFolders(refVal, chkVal, "\t", args, color)
                 else:

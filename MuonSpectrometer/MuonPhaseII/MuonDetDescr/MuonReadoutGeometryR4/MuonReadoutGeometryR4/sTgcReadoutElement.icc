@@ -86,8 +86,20 @@ inline double sTgcReadoutElement::anglePadPhi(const IdentifierHash& measHash) co
 
 inline unsigned int sTgcReadoutElement::maxPadEta(const Identifier& measId) const { return maxPadEta(measurementHash(measId)); }
 inline unsigned int sTgcReadoutElement::maxPadEta(const IdentifierHash& measHash) const { return padDesign(measHash).anglePadPhi(); }
-inline unsigned int sTgcReadoutElement::padNumber(const Identifier& measId) const { return padNumber(measurementHash(measId)); }
-inline unsigned int sTgcReadoutElement::padNumber(const IdentifierHash& measHash) const { return padDesign(measHash).padNumber(channelNumber(measHash)); }
+inline unsigned int sTgcReadoutElement::padNumberSeq(const Identifier& measId) const { return padNumberSeq(measurementHash(measId)); }
+inline unsigned int sTgcReadoutElement::padNumberSeq(const IdentifierHash& measHash) const { 
+    int padEta = padEtaPhi(measHash).first;
+    int padPhi = padEtaPhi(measHash).second;
+    int numPadEta = padDesign(measHash).numPadEta();
+    int numPadPhi = padDesign(measHash).numPadPhi();
+    if((padEta > numPadEta) || (padPhi > numPadPhi)) {
+        ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Pad Channel: "<< idHelperSvc()->toString(measurementId(measHash))
+                        << " resulted in invalid (eta, phi): ("<<padEta<< ", " <<padPhi <<"), (maxEta, maxPhi): "<<numPadEta<<", "<<numPadPhi
+                        <<"). total pads available: "<<padDesign(measHash).numPads());
+        return 0;
+    }
+    return (padPhi - 1) * numPadEta + padEta; 
+}
 
 inline std::pair<uint, uint> sTgcReadoutElement::padEtaPhi(const Identifier& measId) const { return padEtaPhi(measurementHash(measId)); }
 inline std::pair<uint, uint> sTgcReadoutElement::padEtaPhi(const IdentifierHash& measHash) const { return padDesign(measHash).padEtaPhi(channelNumber(measHash)); }

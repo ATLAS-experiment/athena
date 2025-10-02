@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_TrigCompositeUtils_h
@@ -8,14 +8,12 @@
 #include <set>
 #include <memory>
 #include <functional>
-#include <iostream>
 
 #include "AthLinks/ElementLink.h"
 #include "AsgDataHandles/WriteHandle.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteHandleKey.h"
 #include "AsgDataHandles/ReadHandleKey.h"
-#include "AsgTools/CurrentContext.h"
 #include "AsgTools/EventStoreType.h"
 #include "AsgMessaging/MsgStream.h"
 #include "AsgMessaging/MessageCheck.h"
@@ -54,26 +52,23 @@ namespace TrigCompositeUtils {
    * @brief Creates and right away records the Container CONT with the key.
    * Returns the WriteHandle. 
    * No Aux store.
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
    **/
   template<class CONT>
-    SG::WriteHandle<CONT> createAndStoreNoAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx = Gaudi::Hive::currentContext());
+    SG::WriteHandle<CONT> createAndStoreNoAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx );
 
   /**
    * @brief Creates and right away records the Container CONT with the key.
    * Returns the WriteHandle. 
    * With Aux store.
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
    **/
   template<class CONT, class AUX>
-    SG::WriteHandle<CONT> createAndStoreWithAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx = Gaudi::Hive::currentContext());
+    SG::WriteHandle<CONT> createAndStoreWithAux( const SG::WriteHandleKey<CONT>& key, const EventContext& ctx );
 
   /**
    * @brief Creates and right away records the DecisionContainer with the key.
    * Returns the WriteHandle. 
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
    **/
-  SG::WriteHandle<DecisionContainer> createAndStore( const SG::WriteHandleKey<DecisionContainer>& key, const EventContext& ctx = Gaudi::Hive::currentContext() );
+  SG::WriteHandle<DecisionContainer> createAndStore( const SG::WriteHandleKey<DecisionContainer>& key, const EventContext& ctx );
 
   /**
    * @brief Creates and right away records the DecisionContainer using the provided WriteHandle.
@@ -89,18 +84,17 @@ namespace TrigCompositeUtils {
    * output->push_back(d);    
    * If provided, the name is assigned to the TC object
    * Note that the supplied DecisionContainer must have been recorded in the event store.
-   * If possible provide the context that comes via an argument to execute otherwise it will default to looking it up which is slower.
-   **/  
+   **/
   Decision* newDecisionIn ( DecisionContainer* dc, const std::string& name = "" );
 
   /**
    * @brief Helper method to create a Decision object, place it in the container and return a pointer to it. RoI, view and feature links will be copied from the previous to the new decision and a "seed" link made between them
    * @arg the container in which to place the new Decision
    * @arg the previous decision to which the new one should be connected
-   * If provided, the name is assigned to the TC object
+   * @arg the name is assigned to the TC object
    * Note that the supplied DecisionContainer must have been recorded in the event store.
    **/ 
-  Decision* newDecisionIn( DecisionContainer* dc, const Decision* dOld, const std::string& name = "", const EventContext& ctx = Gaudi::Hive::currentContext() );
+  Decision* newDecisionIn( DecisionContainer* dc, const Decision* dOld, const std::string& name, const EventContext& ctx );
 
   /**
    * @brief Appends the decision (given as ID) to the decision object
@@ -175,7 +169,7 @@ namespace TrigCompositeUtils {
   /**
    * @brief Takes a raw pointer to a Decision and returns an ElementLink to the Decision. The Decision must already be in a container in SG.
    **/
-  ElementLink<DecisionContainer> decisionToElementLink(const Decision* d, const EventContext& ctx = Gaudi::Hive::currentContext());
+  ElementLink<DecisionContainer> decisionToElementLink(const Decision* d, const EventContext& ctx);
   
   /**
    * @brief Links to the previous object, location of previous 'seed' decision supplied by hand
@@ -185,7 +179,7 @@ namespace TrigCompositeUtils {
   /**
    * @brief Links to the previous object, 'seed' decision provided explicitly.
    **/
-  void linkToPrevious(Decision* d, const Decision* dOld, const EventContext& ctx = Gaudi::Hive::currentContext());
+  void linkToPrevious(Decision* d, const Decision* dOld, const EventContext& ctx);
 
   /**
    * @brief checks if there is at least one 'seed' link to previous object
@@ -212,6 +206,14 @@ namespace TrigCompositeUtils {
    **/
   HLT::Identifier createLegName(const HLT::Identifier& chainIdentifier, size_t counter);
 
+  /**
+   * @brief Generate the HLT::Identifier which corresponds to a specific leg of a given chain. This can be queried for its DecisionID.
+   * @param name The chain name.
+   * @param counter The numeral of the leg.
+   * @return HLT::Identifier corresponding to the specified leg. Call .numeric() on this to get the DecisionID.
+   **/
+  HLT::Identifier createLegName(const std::string& name, size_t counter);
+
  /**
    * @brief Generate the HLT::Identifier which corresponds to the chain name from the leg name. This can be queried for its DecisionID.
    * @param legIdentifier The HLT::Identifier corresponding to the specific leg.
@@ -232,7 +234,15 @@ namespace TrigCompositeUtils {
    * @return Index of the leg, e.g. leg002_HLT_mu50_L1MU20 would return 2. Returns -1 if not a leg identifier or 0 if a chain identifier.
    **/
   int32_t getIndexFromLeg(const std::string& name);
- 
+
+  /**
+   * @brief Extract the name and numeric index of a leg identifier.
+   * @param name The name of the HLT::Identifier corresponding to the specific leg.
+   * @return Name and index of the leg, e.g. leg002_HLT_mu50_L1MU20 would return {HLT_mu50_L1MU20, 2}.
+             If not a leg, returns {chainName, 0}. Throws if neither leg nor chain.
+   **/
+  std::pair<std::string, int32_t> getNameAndIndexFromLeg(const std::string& name);
+
 /**
    * @brief Recognise whether the chain ID is a leg ID
    * @param legIdentifier The HLT::Identifier corresponding to the specific ID.
@@ -333,12 +343,14 @@ namespace TrigCompositeUtils {
   /**
    * @brief Query all DecisionCollections in the event store, locate all Decision nodes in the graph where an object failed selection for a given chain.
    * @param[in] eventStore Pointer to event store within current event context
+   * @param[in] ctx EventContext
    * @param[in] summaryCollectionKey The primary source of navigation data in the event (i.e the collection which contains the navigation terminus node).
    * @param[in] ids IDs of chain (if multi-leg chain, include all legs) to located failed decision nodes for. Passing an empty set returns all decision nodes which failed at least one chain.
    * @param[in] keysToIgnore Set of SG keys of containers which should not be explored by getRejectedDecisionNodes.
    * @return Vector of Decision nodes whose attached feature failed the trigger chain logic for chain with DecisionID id
    **/
   std::vector<const Decision*> getRejectedDecisionNodes(const asg::EventStoreType* eventStore,
+    const EventContext& ctx,
     const std::string& summaryCollectionKey,
     const DecisionIDContainer& ids = {},
     const std::set<std::string>& keysToIgnore = std::set<std::string>());
@@ -399,25 +411,24 @@ namespace TrigCompositeUtils {
     const std::vector<std::string>& nodesToDrop);
 
 
-
   /// @name Constant string literals used within the HLT
   /// @{
-  const std::string& initialRoIString();
-  const std::string& initialRecRoIString();
-  const std::string& roiString();
-  const std::string& viewString();
-  const std::string& featureString();
-  const std::string& seedString();
+  inline const std::string& initialRoIString() { return Decision::s_initialRoIString; }
+  inline const std::string& initialRecRoIString() { return Decision::s_initialRecRoIString; }
+  inline const std::string& roiString() { return Decision::s_roiString; }
+  inline const std::string& viewString() { return Decision::s_viewString; }
+  inline const std::string& featureString() { return Decision::s_featureString; }
+  inline const std::string& seedString() { return Decision::s_seedString; }
 
-  const std::string& hltSeedingNodeName();
-  const std::string& filterNodeName();
-  const std::string& inputMakerNodeName();
-  const std::string& hypoAlgNodeName();
-  const std::string& comboHypoAlgNodeName();
-  const std::string& summaryFilterNodeName();
-  const std::string& summaryPassNodeName();
-  const std::string& summaryPassExpressNodeName();
-  const std::string& summaryPrescaledNodeName();
+  inline const std::string& hltSeedingNodeName() { return Decision::s_hltSeedingNodeNameString; }
+  inline const std::string& filterNodeName() { return Decision::s_filterNodeNameString; }
+  inline const std::string& inputMakerNodeName() { return Decision::s_inputMakerNodeNameString; }
+  inline const std::string& hypoAlgNodeName() { return Decision::s_hypoAlgNodeNameString; }
+  inline const std::string& comboHypoAlgNodeName() { return Decision::s_comboHypoAlgNodeNameString; }
+  inline const std::string& summaryFilterNodeName() { return Decision::s_summaryFilterNodeNameString; }
+  inline const std::string& summaryPassNodeName() { return Decision::s_summaryPassNodeNameString; }
+  inline const std::string& summaryPassExpressNodeName() { return Decision::s_summaryPassExpressNodeNameString; }
+  inline const std::string& summaryPrescaledNodeName() { return Decision::s_summaryPrescaledNodeNameString; }
   /// @}
 
   /**
@@ -431,7 +442,10 @@ namespace TrigCompositeUtils {
   /**
    * @brief Extract features from the supplied linkVector (obtained through recursiveGetDecisions).
    * @param[in] navPaths Sub-graph of the trigger navigation which is to be considered.
-   * @param[in] lastFeatureOfType True for TrigDefs::lastFeatureOfType. stops at the first feature (of the correct type) found per path through the navigation.
+   * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
+                          way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
    * @param[in] featureName Optional name of feature link as saved online. The "feature" link is enforced, others may have been added. 
    * @param[in] chains Optional set of Chain IDs which features are being requested for. Used to set the ActiveState of returned LinkInfo objects.
    * @return Typed vector of LinkInfo. Each LinkInfo wraps an ElementLink to a feature and a pointer to the feature's Decision object in the navigation.
@@ -440,7 +454,7 @@ namespace TrigCompositeUtils {
   const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType( 
     const NavGraph& navGraph, 
     const std::string& containerSGKey = "",
-    const bool lastFeatureOfType = true,
+    const unsigned int behaviour = TrigDefs::lastFeatureOfType,
     const std::string& navElementLinkKey = featureString(),
     const DecisionIDContainer& chainIDs = DecisionIDContainer());
 
@@ -457,7 +471,7 @@ namespace TrigCompositeUtils {
     std::set<const NavGraphNode*>& fullyExploredFrom,
     const NavGraphNode* navGraphNode, 
     const std::string& containerSGKey,
-    const bool lastFeatureOfType,
+    const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer& chainIDs);
 
@@ -480,10 +494,11 @@ namespace TrigCompositeUtils {
    * Populates provided vector with all located links to T of the corresponding linkName. 
    * @param[in] start the Decision Object from where recursive search should begin
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
-   * @param[inout] links Reference to vector, this will be populated with the found links. 
+   * @param[inout] links Reference to vector, this will be populated with the found links.
    * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
-                          branch once a link has been located and collected. 
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
    * @param[inout] fullyExploredFrom Optional cache used by the recursive algorithm to avoid exploring each node multiple times. 
    */
   template<typename T>
@@ -501,8 +516,9 @@ namespace TrigCompositeUtils {
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
    * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
-                          branch once a link has been located and collected. 
-   * @return Vector with the found links. 
+                          branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
+                          to fill the decisions storage in LinkInfo.
+   * @return Vector with the found links.
    */
   template<typename T>
   std::vector<LinkInfo<T>>

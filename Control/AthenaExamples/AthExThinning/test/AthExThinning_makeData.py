@@ -1,10 +1,11 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 flags = initConfigFlags()
 flags.Common.MsgSuppression = False
+flags.Input.Files = []
 flags.Input.RunNumbers = [1]  # avoid input file peeking
 flags.Input.TypedCollections = []
 flags.Exec.MaxEvents = 5

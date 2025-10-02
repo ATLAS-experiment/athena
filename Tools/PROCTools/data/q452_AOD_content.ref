@@ -279,7 +279,6 @@ FileMetaDataAuxDyn.beamType
 FileMetaDataAuxDyn.conditionsTag
 FileMetaDataAuxDyn.generatorsInfo
 FileMetaDataAuxDyn.geometryVersion
-FileMetaDataAuxDyn.isDataOverlay
 FileMetaDataAuxDyn.mcCampaign
 FileMetaDataAuxDyn.mcProcID
 FileMetaDataAuxDyn.simFlavour
@@ -923,6 +922,7 @@ MuonTruthParticlesAuxDyn.recoMuonLinkLRT
 MuonTruthParticlesAuxDyn.truthCscHits
 MuonTruthParticlesAuxDyn.truthMdtHits
 MuonTruthParticlesAuxDyn.truthOrigin
+MuonTruthParticlesAuxDyn.truthParticleLink
 MuonTruthParticlesAuxDyn.truthRpcHits
 MuonTruthParticlesAuxDyn.truthTgcHits
 MuonTruthParticlesAuxDyn.truthType

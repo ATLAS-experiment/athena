@@ -24,12 +24,17 @@ class JetReclusteringBlock(ConfigBlock):
                         info='radius parameter of the reclustering algorithm. The default is 1.0.')
         self.addOption ('minPt', 200*GeV, type=float,
                         info='minimum pT requirement (in MeV) on the reclustered jets, creating the selection `passed_sel`. The default is 200 GeV.')
-        self.addOption ('maxEta', 2.5, type=float,
-                        info='maximum eta requirement on the reclustered jets, creating the selection `passed_sel`. The default is 2.5.')
-
+        self.addOption ('maxEta', 0., type=float,
+                        info='maximum eta requirement on the reclustered jets, creating the selection `passed_sel`. The default is 0.')
+        self.addOption ('maxRapidity', 2.5, type=float,
+                        info='maximum rapidity requirement on the reclustered jets, creating the selection `passed_sel`. The default is 2.5')
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+                        
     def makeAlgs(self, config):
 
-        alg = config.createAlgorithm('CP::JetReclusteringAlg', 'JetReclusteringAlg' + self.containerName)
+        alg = config.createAlgorithm('CP::JetReclusteringAlg', 'JetReclusteringAlg')
 
         alg.jets, alg.jetSelection = config.readNameAndSelection(self.jets)
         alg.reclusteredJets = config.writeName(self.containerName)
@@ -39,12 +44,13 @@ class JetReclusteringBlock(ConfigBlock):
         alg.reclusteredJetsRadius = self.reclusteredJetsRadius
 
         # prepare selection algorithm
-        if self.minPt > 0 or self.maxEta > 0 :
-            selAlg = config.createAlgorithm('CP::AsgSelectionAlg', 'RCJetsMinPtAlg' + self.containerName)
+        if self.minPt > 0 or self.maxEta > 0 or self.maxRapidity > 0 :
+            selAlg = config.createAlgorithm('CP::AsgSelectionAlg', 'RCJetsMinPtAlg')
             selAlg.selectionDecoration = 'passed_sel,as_bits'
             config.addPrivateTool('selectionTool', 'CP::AsgPtEtaSelectionTool')
             selAlg.selectionTool.minPt = self.minPt
             selAlg.selectionTool.maxEta = self.maxEta
+            selAlg.selectionTool.maxRapidity = self.maxRapidity
             selAlg.particles = config.readName(self.containerName)
             selAlg.preselection = config.getPreselection(self.containerName, '')
             config.addSelection(self.containerName, 'passed_sel', selAlg.selectionDecoration)

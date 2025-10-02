@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBmumuxComboHypoTool.h"
@@ -121,7 +121,7 @@ StatusCode TrigBmumuxComboHypoTool::decideOnSingleObject(Decision* decision, con
 }
 
 
-bool TrigBmumuxComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>&) const {
+bool TrigBmumuxComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>&, const EventContext&) const {
   ATH_MSG_ERROR("executeAlg not supported for TrigBmumuxComboHypoTool.");
   return true;
 }

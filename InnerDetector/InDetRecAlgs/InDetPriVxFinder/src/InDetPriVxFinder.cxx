@@ -64,7 +64,7 @@ InDetPriVxFinder::InDetPriVxFinder
       m_VertexCollectionSortingTool.disable();
     }
     if (!m_monTool.empty()) CHECK(m_monTool.retrieve());
-   
+
     ATH_CHECK(m_trkTracksName.initialize(!m_useTrackParticles));
     ATH_CHECK(m_tracksName.initialize(m_useTrackParticles));
     ATH_CHECK(m_vxCandidatesOutputName.initialize());
@@ -79,37 +79,37 @@ InDetPriVxFinder::InDetPriVxFinder
 
     xAOD::VertexContainer*    vertexContainer = nullptr;
     xAOD::VertexAuxContainer* vertexAuxContainer = nullptr;
-    std::pair< xAOD::VertexContainer*, xAOD::VertexAuxContainer* > vertexContainerPair
-  = std::make_pair( vertexContainer, vertexAuxContainer );
+    auto vertexContainerPair = std::make_pair(vertexContainer, vertexAuxContainer);
 
-    if(m_useTrackParticles){
+    if (m_useTrackParticles) {
       SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleCollection(m_tracksName, ctx);
-      if(trackParticleCollection.isValid()){
-
-   vertexContainerPair = m_VertexFinderTool->findVertex ( trackParticleCollection.cptr() );
-      }
-      else{
-        ATH_MSG_ERROR("No TrackParticle Collection with key "<<m_tracksName.key()<<" exists in StoreGate. No Vertexing Possible");
+      if (trackParticleCollection.isValid()) {
+        vertexContainerPair = m_VertexFinderTool->findVertex(ctx, trackParticleCollection.cptr());
+      } else {
+        ATH_MSG_ERROR("No TrackParticle Collection with key "
+                      << m_tracksName.key()
+                      << " exists in StoreGate. No Vertexing Possible");
         return StatusCode::FAILURE;
       }
     } else {
       SG::ReadHandle<TrackCollection> trackCollection(m_trkTracksName, ctx);
-      if(trackCollection.isValid()){
-        vertexContainerPair = m_VertexFinderTool->findVertex ( trackCollection.cptr() );
+      if (trackCollection.isValid()) {
+        vertexContainerPair = m_VertexFinderTool->findVertex(ctx, trackCollection.cptr());
       } else {
-        ATH_MSG_ERROR("No Trk::Track Collection with key "<<m_trkTracksName.key()<<" exists in StoreGate. No Vertexing Possible");
+        ATH_MSG_ERROR("No Trk::Track Collection with key "
+                      << m_trkTracksName.key()
+                      << " exists in StoreGate. No Vertexing Possible");
         return StatusCode::FAILURE;
       }
     }
 
     // now  re-merge and resort the vertex container and store to SG
-    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*  > 
-      myVertexContainerPair{nullptr, nullptr};
+    std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer* > myVertexContainerPair{nullptr, nullptr};
     auto deletePair = [](std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*  > &p){
       delete p.first; p.first = nullptr;
       delete p.second; p.second = nullptr;
     };
-        
+
     if (vertexContainerPair.first) {
       //sort xAOD::Vertex container
       if(m_doVertexMerging && vertexContainerPair.first->size() > 1) {
@@ -117,26 +117,29 @@ InDetPriVxFinder::InDetPriVxFinder
         deletePair(vertexContainerPair); //also cleans up the aux store
         vertexContainerPair = myVertexContainerPair;
       }
-      
-      if (m_doVertexSorting) { 
+
+      if (m_doVertexSorting) {
         myVertexContainerPair = m_VertexCollectionSortingTool->sortVertexContainer(*vertexContainerPair.first);
-        deletePair(vertexContainerPair); 
+        deletePair(vertexContainerPair);
       }
-      
+
       if (myVertexContainerPair.first == nullptr) {
         ATH_MSG_ERROR("Vertex container has no associated store.");
         return StatusCode::FAILURE;
       }
-      
+
       if (not myVertexContainerPair.first->hasStore()) {
         ATH_MSG_ERROR("Vertex container has no associated store.");
         return StatusCode::FAILURE;
       }
-      
-      ATH_MSG_DEBUG("Successfully reconstructed " << myVertexContainerPair.first->size()-1 << " vertices (excluding dummy)");
+      ATH_MSG_DEBUG("Successfully reconstructed "
+                    << myVertexContainerPair.first->size() - 1
+                    << " vertices (excluding dummy)");
     }
 
-    ATH_CHECK(outputVertices.record(std::unique_ptr<xAOD::VertexContainer>(myVertexContainerPair.first),std::unique_ptr<xAOD::VertexAuxContainer>(myVertexContainerPair.second)));
+    ATH_CHECK(outputVertices.record(
+        std::unique_ptr<xAOD::VertexContainer>(myVertexContainerPair.first),
+        std::unique_ptr<xAOD::VertexAuxContainer>(myVertexContainerPair.second)));
 
     auto NVertices = Monitored::Scalar<int>( "NVertices" , 0 );
     for ( xAOD::VertexContainer::iterator vertexIter = myVertexContainerPair.first->begin();
@@ -152,7 +155,7 @@ InDetPriVxFinder::InDetPriVxFinder
 
     return StatusCode::SUCCESS;
   }
-  
+
   StatusCode InDetPriVxFinder::finalize()
   {
     return StatusCode::SUCCESS;
@@ -160,11 +163,11 @@ InDetPriVxFinder::InDetPriVxFinder
 
   void InDetPriVxFinder::monitor_vertex( const std::string &prefix, const xAOD::Vertex& vertex ) const {
      if (prefix == "allVertex"){
-         auto x        = Monitored::Scalar<double>( "allVertexX",       vertex.x()               ); 
-         auto y        = Monitored::Scalar<double>( "allVertexY",       vertex.y()               ); 
-         auto z        = Monitored::Scalar<double>( "allVertexZ",       vertex.z()               ); 
-         auto chi2     = Monitored::Scalar<double>( "allVertexChi2",    vertex.chiSquared()      ); 
-         auto nDoF     = Monitored::Scalar<double>( "allVertexnDoF",    vertex.numberDoF()       ); 
+         auto x        = Monitored::Scalar<double>( "allVertexX",       vertex.x()               );
+         auto y        = Monitored::Scalar<double>( "allVertexY",       vertex.y()               );
+         auto z        = Monitored::Scalar<double>( "allVertexZ",       vertex.z()               );
+         auto chi2     = Monitored::Scalar<double>( "allVertexChi2",    vertex.chiSquared()      );
+         auto nDoF     = Monitored::Scalar<double>( "allVertexnDoF",    vertex.numberDoF()       );
          auto NTracks  = Monitored::Scalar<int>   ( "allVertexNTracks", vertex.nTrackParticles() );
          auto mon = Monitored::Group(m_monTool,  x, y, z, chi2, nDoF, NTracks );
      }
@@ -178,5 +181,5 @@ InDetPriVxFinder::InDetPriVxFinder
          auto mon = Monitored::Group(m_monTool,  x, y, z, chi2, nDoF, NTracks );
      }
   }
-  
+
 } // end namespace InDet

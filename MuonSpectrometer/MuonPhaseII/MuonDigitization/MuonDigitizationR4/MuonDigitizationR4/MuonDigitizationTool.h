@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONDIGITIZATIONR4_MUONDIGITIZATIONTOOL_H
 #define MUONDIGITIZATIONR4_MUONDIGITIZATIONTOOL_H
@@ -7,12 +7,10 @@
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "PileUpTools/PileUpToolBase.h"
 
+
 #include "CLHEP/Random/RandomEngine.h"
 #include "AthenaKernel/IAthRNGSvc.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 
-#include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
@@ -20,29 +18,18 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
+
+#include "Acts/Utilities/PointerTraits.hpp"
 #include "HitManagement/TimedHitPtr.h"
 
 
-namespace std{
-    template<> class remove_pointer<TimedHitPtr<xAOD::MuonSimHit>>{
-        public:
-          using type = xAOD::MuonSimHit;
-    };
-      template<> class remove_pointer<TimedHitPtr<const xAOD::MuonSimHit>>{
-        public:
-          using type = xAOD::MuonSimHit;
-    };
-}
 
 namespace MuonR4 {
-     /** @brief Barebone implementation of the I/O infrastructure for all MuonDigitizationTools.
-      *         
-     */
+     /** @brief Barebone implementation of the I/O infrastructure for all MuonDigitizationTools. */
+     static_assert(Acts::PointerConcept<TimedHitPtr<xAOD::MuonSimHit>>);
      class MuonDigitizationTool: public PileUpToolBase {
         public:
-            MuonDigitizationTool(const std::string& type, 
-                                const std::string& name, 
-                                const IInterface* pIID);
+            using PileUpToolBase::PileUpToolBase;
 
             StatusCode initialize() override;
 
@@ -86,22 +73,6 @@ namespace MuonR4 {
             /** @brief Returns the reference to the ActsGeometryContext needed to fetch global positions from the Readout geometry*/
             const ActsGeometryContext& getGeoCtx(const EventContext& ctx) const;
 
-
-            /** @brief Helper function to retrieve a container from StoreGate. If the readHandleKey is empty, the container is assigned 
-             *         to be a nullptr and the operation is marked as success. Otherwise, a failure is returned if the Container cannot be fetched
-             *         from StoreGate
-            */
-            template <class Container> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                    const SG::ReadHandleKey<Container>& key,
-                                                                    const Container* & contPtr) const;
-            /** @brief Helper function to access the conditions data. If the key is empty, the conditions object is assigned to be a nullptr
-             *         Otherwise, a failure is returned if the Conditions data are not available in the event.
-            */            
-            template <class Container> StatusCode retrieveConditions(const EventContext&ctx,
-                                                                     const SG::ReadCondHandleKey<Container>& key,
-                                                                     const Container* & contPtr) const;
-
-            
             /** @brief DigitContainers are sorted by DigitCollections which are the ensemble of all hits in a given
              *         MuonChamber. To fill the final DigitContainer thread-safely, the DigitCollections shall be cached
              *         pre cached in a OutDigitCache_t vector which is later moved to the final DigitContainer

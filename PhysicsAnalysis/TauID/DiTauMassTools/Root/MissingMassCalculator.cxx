@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=8 sw=2
@@ -30,6 +30,13 @@
 #include <TVectorD.h>
 #include "Math/VectorUtil.h"
 
+#include "TruthUtils/ParticleConstants.h"
+
+namespace {
+  constexpr double GEV = 1000.0;
+}
+
+
 using namespace DiTauMassTools;
 using ROOT::Math::PtEtaPhiMVector;
 using ROOT::Math::PxPyPzMVector;
@@ -39,8 +46,8 @@ using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 //______________________________constructor________________________________
 MissingMassCalculator::MissingMassCalculator(
-    MMCCalibrationSet::e aset, std::string m_paramFilePath)
-    : m_randomGen(), Prob(new MissingMassProb(aset, m_paramFilePath)) {
+    MMCCalibrationSet::e aset, std::string paramFilePath)
+    : m_randomGen(), Prob(new MissingMassProb(aset, paramFilePath)) {
   m_mmcCalibrationSet = aset;
   preparedInput.m_fUseVerbose = 0;
   preparedInput.m_beamEnergy = 6500.0; // for now LHC default is sqrt(S)=7 TeV
@@ -85,10 +92,13 @@ MissingMassCalculator::MissingMassCalculator(
                                   // if need to study various options
   m_fUseEfficiencyRecovery = 0;     // no re-fit by default
   m_fUseFloatStopping = 0;
+  m_fUseFloatStoppingMinIter = 10000;
+  m_fUseFloatStoppingCheckFreq = 1000;
+  m_fUseFloatStoppingComp = 0.05;
 
   preparedInput.m_METScanScheme = 1; // MET-scan scheme: 0- use JER; 1- use simple sumEt & missingHt
                                    // for Njet=0 events in (lep-had winter 2012)
-  //  MnuScanRange=1.777; // range of M(nunu) scan
+  //  MnuScanRange=ParticleConstants::tauMassInMeV / GEV; // range of M(nunu) scan
   m_MnuScanRange = 1.5;         // better value (sacha)
   preparedInput.m_LFVmode = -1; // by default consider case of H->mu+tau(->ele)
   preparedInput.ClearInput();
@@ -751,7 +761,7 @@ int MissingMassCalculator::NuPsolutionLFV(const XYVector &met_vec,
   PxPyPzMVector nu(met_vec.X(), met_vec.Y(), 0.0, l_nu);
   PxPyPzMVector nu2(met_vec.X(), met_vec.Y(), 0.0, l_nu);
 
-  const double Mtau = 1.777;
+  const double Mtau = ParticleConstants::tauMassInMeV / GEV;
   //   double msq = (Mtau*Mtau-tau.M()*tau.M())/2;
   double msq = (Mtau * Mtau - tau.M() * tau.M() - l_nu * l_nu) /
                2; // to take into account the fact that 2-nu systema has mass
@@ -936,8 +946,8 @@ int MissingMassCalculator::DitauMassCalculatorV9walk() {
 
     //---- setting 4-vecs
     PxPyPzMVector fulltau1, fulltau2;
-    fulltau1.SetCoordinates(Px1, Py1, Pz1, 1.777);
-    fulltau2.SetCoordinates(Px2, Py2, Pz2, 1.777);
+    fulltau1.SetCoordinates(Px1, Py1, Pz1, ParticleConstants::tauMassInMeV / GEV);
+    fulltau2.SetCoordinates(Px2, Py2, Pz2, ParticleConstants::tauMassInMeV / GEV);
     //    PtEtaPhiMVector fulltau1(_fulltau1.Pt(), _fulltau1.Eta(), _fulltau1.Phi(), _fulltau1.M());
     //PtEtaPhiMVector fulltau2(_fulltau2.Pt(), _fulltau2.Eta(), _fulltau2.Phi(), _fulltau2.M());
     
@@ -1016,7 +1026,7 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv(bool refit) {
   //------- Settings -------------------------------
   int NiterMET = m_niter_fit2; // number of iterations for each MET scan loop
   int NiterMnu = m_niter_fit3; // number of iterations for Mnu loop
-  const double Mtau = 1.777;
+  const double Mtau = ParticleConstants::tauMassInMeV / GEV;
   double Mnu_binSize = m_MnuScanRange / NiterMnu;
 
   double METresX = preparedInput.m_METsigmaL; // MET resolution in direction parallel to
@@ -1444,11 +1454,11 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv(bool refit) {
     PxPyPzMVector nu2_tmp(0.0, 0.0, 0.0, 0.0);
     if (preparedInput.m_type_visTau1 == 8) {
       nu1_tmp = preparedInput.m_vistau1;
-      nu2_tmp.SetCoordinates(Px1, Py1, Pz1, 1.777);
+      nu2_tmp.SetCoordinates(Px1, Py1, Pz1, ParticleConstants::tauMassInMeV / GEV);
     }
     if (preparedInput.m_type_visTau2 == 8) {
       nu2_tmp = preparedInput.m_vistau2;
-      nu1_tmp.SetCoordinates(Px1, Py1, Pz1, 1.777);
+      nu1_tmp.SetCoordinates(Px1, Py1, Pz1, ParticleConstants::tauMassInMeV / GEV);
     }
     m_fDitauStuffHisto.nutau1 = nu1_tmp - preparedInput.m_vistau1;
     m_fDitauStuffHisto.nutau2 = nu2_tmp - preparedInput.m_vistau2;
@@ -2016,7 +2026,6 @@ int MissingMassCalculator::TailCleanUp(const PtEtaPhiMVector &vis1,
   {
 
     if (m_mmcCalibrationSet == MMCCalibrationSet::MMC2015HIGHMASS ||
-	m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
         m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
 	m_mmcCalibrationSet == MMCCalibrationSet::MMC2024 ||
         m_mmcCalibrationSet == MMCCalibrationSet::UPGRADE)
@@ -2352,7 +2361,7 @@ void MissingMassCalculator::SpaceWalkerInit() {
   m_Mnu10 = 0.;
   m_Mnu20 = 0.;
 
-  m_mTau = 1.777;
+  m_mTau = ParticleConstants::tauMassInMeV / GEV;
 
   // seeds the random generator in a reproducible way from the phi of both tau;
   double aux = std::abs(m_tauVec1Phi + double(m_tauVec2Phi) / 100. / TMath::Pi()) * 100;
@@ -2521,23 +2530,23 @@ bool MissingMassCalculator::SpaceWalkerWalk() {
     return false; // for now simple stopping criterion on number of iteration
 
   // floating stopping criterion, reduces run-time for lh, hh by a factor ~2 and ll by roughly
-  // factor ~3 check if every scanned variable and resulting mass thermalised after 10k iterations
-  // and then every 1k iterations do this by checking that the means of the split distributions is
-  // comparable within 5% of their sigma
-  if (m_iter0 >= 10000 && (m_iter0 % 1000) == 0 && m_fUseFloatStopping) {
-    if (std::abs(m_fMEtP_split1->GetMean() - m_fMEtP_split2->GetMean()) <= 0.05 * m_fMEtP_split1->GetRMS()) {
+  // factor ~3 check if every scanned variable and resulting mass thermalised after N (default 10k) iterations
+  // and then every M (default 1k) iterations do this by checking that the means of the split distributions is
+  // comparable within X% (default 5%) of their sigma
+  if (m_iter0 >= m_fUseFloatStoppingMinIter && (m_iter0 % m_fUseFloatStoppingCheckFreq) == 0 && m_fUseFloatStopping) {
+    if (std::abs(m_fMEtP_split1->GetMean() - m_fMEtP_split2->GetMean()) <= m_fUseFloatStoppingComp * m_fMEtP_split1->GetRMS()) {
       if (std::abs(m_fMEtL_split1->GetMean() - m_fMEtL_split2->GetMean()) <=
-          0.05 * m_fMEtL_split1->GetRMS()) {
+          m_fUseFloatStoppingComp * m_fMEtL_split1->GetRMS()) {
         if (std::abs(m_fMnu1_split1->GetMean() - m_fMnu1_split2->GetMean()) <=
-            0.05 * m_fMnu1_split1->GetRMS()) {
+            m_fUseFloatStoppingComp * m_fMnu1_split1->GetRMS()) {
           if (std::abs(m_fMnu2_split1->GetMean() - m_fMnu2_split2->GetMean()) <=
-              0.05 * m_fMnu2_split1->GetRMS()) {
+              m_fUseFloatStoppingComp * m_fMnu2_split1->GetRMS()) {
             if (std::abs(m_fPhi1_split1->GetMean() - m_fPhi1_split2->GetMean()) <=
-                0.05 * m_fPhi1_split1->GetRMS()) {
+                m_fUseFloatStoppingComp * m_fPhi1_split1->GetRMS()) {
               if (std::abs(m_fPhi2_split1->GetMean() - m_fPhi2_split2->GetMean()) <=
-                  0.05 * m_fPhi2_split1->GetRMS()) {
+                  m_fUseFloatStoppingComp * m_fPhi2_split1->GetRMS()) {
                 if (std::abs(m_fMmass_split1->GetMean() - m_fMmass_split2->GetMean()) <=
-                    0.05 * m_fMmass_split1->GetRMS()) {
+                    m_fUseFloatStoppingComp * m_fMmass_split1->GetRMS()) {
                   return false;
                 }
               }
@@ -2632,7 +2641,7 @@ inline bool MissingMassCalculator::precomputeCache() {
   same = updateDouble(m_tauVec1.P(), m_tauVec1P) && same;
   same = updateDouble(m_tauVec2.P(), m_tauVec2P) && same;
 
-  same = updateDouble(1.777, m_mTau) && same;
+  same = updateDouble(ParticleConstants::tauMassInMeV / GEV, m_mTau) && same;
   same = updateDouble(std::pow(m_mTau, 2), m_mTau2) && same;
   same = updateDouble(cos(preparedInput.m_METcovphi), m_metCovPhiCos) && same;
   same = updateDouble(sin(preparedInput.m_METcovphi), m_metCovPhiSin) && same;
@@ -2818,7 +2827,6 @@ void MissingMassCalculator::FinalizeSettings(const xAOD::IParticle *part1,
                                                         const xAOD::IParticle *part2,
                                                         const xAOD::MissingET *met,
                                                         const int &njets) {
-  const double GEV = 1000.;
   int mmcType1 = mmcType(part1);
   if (mmcType1 < 0)
     return; // return CP::CorrectionCode::Error;
@@ -3002,8 +3010,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
    
       // T. Davidek: hack for lep-lep -- subtract lepton pT both for muon and
       //  electron
-    if ((m_mmcCalibrationSet == MMCCalibrationSet::MMC2016MC15C ||
-	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
+    if ((m_mmcCalibrationSet == MMCCalibrationSet::MMC2019 ||
 	 m_mmcCalibrationSet == MMCCalibrationSet::MMC2024) &&
         preparedInput.m_vistau1.M() < 0.12 && preparedInput.m_vistau2.M() < 0.12) { // lep-lep channel
       if (preparedInput.m_SumEt > preparedInput.m_vistau1.Pt())

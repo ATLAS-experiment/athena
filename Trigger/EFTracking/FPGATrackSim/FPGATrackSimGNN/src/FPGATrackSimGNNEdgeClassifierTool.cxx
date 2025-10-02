@@ -2,6 +2,8 @@
 
 #include "FPGATrackSimGNNEdgeClassifierTool.h"
 
+#include "FourMomUtils/P4Helpers.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // AthAlgTool
 
@@ -26,7 +28,7 @@ StatusCode FPGATrackSimGNNEdgeClassifierTool::scoreEdges(const std::vector<std::
 
     std::vector<float> gNodeFeatures = getNodeFeatures(hits);
     std::vector<int64_t> edgeList = getEdgeList(edges);
-    std::vector<float> gEdgeFeatures = getEdgeFeatures(edges);
+    std::vector<float> gEdgeFeatures = getEdgeFeatures(edges, gNodeFeatures);
     
     std::vector<Ort::Value> gInputTensor;
     ATH_CHECK( m_GNNInferenceTool->addInput(gInputTensor, gNodeFeatures, 0, hits.size()) );
@@ -95,11 +97,13 @@ std::vector<int64_t> FPGATrackSimGNNEdgeClassifierTool::getEdgeList(const std::v
     return edgesList;
 }
 
-std::vector<float> FPGATrackSimGNNEdgeClassifierTool::getEdgeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges)
+std::vector<float> FPGATrackSimGNNEdgeClassifierTool::getEdgeFeatures(std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, const std::vector<float> & gNodeFeatures)
 {
     std::vector<float> gEdgeFeatures;
 
-    for(const auto& edge : edges) {
+    for (auto& edge : edges) {
+        computeEdgeFeatures(edge, edge->getEdgeIndex1(), edge->getEdgeIndex2(), gNodeFeatures);
+
         gEdgeFeatures.push_back(edge->getEdgeDR());
         gEdgeFeatures.push_back(edge->getEdgeDPhi());
         gEdgeFeatures.push_back(edge->getEdgeDZ());
@@ -109,4 +113,31 @@ std::vector<float> FPGATrackSimGNNEdgeClassifierTool::getEdgeFeatures(const std:
     }
 
     return gEdgeFeatures;
+}
+
+void FPGATrackSimGNNEdgeClassifierTool::computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const int& hit1_index, const int& hit2_index, const std::vector<float>& gNodeFeatures)
+{
+    size_t num_features = m_gnnFeatureNamesVec.size();
+
+    std::map<std::string, float> hit1_features;
+    std::map<std::string, float> hit2_features;
+
+    for(size_t i = 0; i < num_features; i++){
+        hit1_features[m_gnnFeatureNamesVec[i]] = gNodeFeatures[hit1_index * num_features + i];
+        hit2_features[m_gnnFeatureNamesVec[i]] = gNodeFeatures[hit2_index * num_features + i];
+    }
+
+    float deta = hit2_features["eta"] - hit1_features["eta"];
+    float dz = hit2_features["z"] - hit1_features["z"];
+    float dr = hit2_features["r"] - hit1_features["r"];
+    float dphi = P4Helpers::deltaPhi(hit2_features["phi"],hit1_features["phi"]);
+    float phislope = dr==0. ? 0. : dphi / dr;
+    float rphislope = 0.5 * (hit2_features["r"] + hit1_features["r"]) * phislope;
+    
+    edge->setEdgeDR(dr);
+    edge->setEdgeDPhi(dphi);
+    edge->setEdgeDZ(dz);
+    edge->setEdgeDEta(deta);
+    edge->setEdgePhiSlope(phislope);
+    edge->setEdgeRPhiSlope(rphislope);
 }

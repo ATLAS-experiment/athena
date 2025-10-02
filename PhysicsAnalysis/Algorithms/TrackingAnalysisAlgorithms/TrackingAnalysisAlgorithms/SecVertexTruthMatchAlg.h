@@ -50,12 +50,14 @@ namespace CP {
     Gaudi::Property<std::vector<int>> m_targetPDGIDs{this, "TargetPDGIDs", {}, "List of PDGIDs to select for matching"};
 
     Gaudi::Property<bool> m_writeHistograms{this, "WriteHistograms", true, "Write histograms"};
-
+    
     ToolHandle<IInDetSecVtxTruthMatchTool> m_matchTool{this, "MatchTool", "InDetSecVtxTruthMatchTool"};
+    Gaudi::Property<bool> m_doMuSA{this, "doMuSA", false, "MuSA mode for wider histogram ranges"};
+    Gaudi::Property<bool> m_doSMOrigin{this, "doSMOrigin", false, "Enable SM origin categorization"};
 
     void fillRecoHistograms(const xAOD::Vertex* secVtx, const std::string& matchType);
     void fillTruthHistograms(const xAOD::TruthVertex* truthVtx, const std::string& truthType);
-
+    void fillOriginHistograms(const xAOD::Vertex* secVtx, const std::string& originType);
   };
 } // namespace CP
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ namespace InDet
         SG::ReadHandleKey<xAOD::VertexContainer> m_vxContainerKey{this,"VxContainerKey","PrimaryVertices","RHK to retrieve VX Primary candidates"};
 
       void clear();	
-      void reportResults();
+      StatusCode reportResults();
       void printDetailedInformation();
 	
       /** function that returns straw index (in range 0-5481; 0-1641 for barrel, the rest for endcap) 
@@ -111,7 +111,7 @@ namespace InDet
 
       /** accumulate hits, last index: 0 - all hits, 1 - hits on track, 2 - all HT (TR) hits, 3 - HT (TR) hits on track */	 
       typedef std::array<std::array<std::array<std::array<int,6>,5482>,32>,2> ACCHITS_t;
-      ACCHITS_t *m_accumulateHits;
+      std::unique_ptr<ACCHITS_t> m_accumulateHits;
 
       const TRT_ID *m_TRTHelper;
       mutable std::atomic<int> m_printStatusCount{0};

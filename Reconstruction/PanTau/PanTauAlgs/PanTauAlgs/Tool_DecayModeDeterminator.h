@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_DECAYMODEDETERMINATOR_H
@@ -9,6 +9,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 #include "PanTauAlgs/ITool_PanTauTools.h"
 #include "PanTauAlgs/ITool_ModeDiscriminator.h"
@@ -48,16 +49,15 @@ namespace PanTau {
         
     private:
         
-        ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore;        
-        ToolHandle<PanTau::ITool_ModeDiscriminator> m_Tool_ModeDiscriminator_1p0n_vs_1p1n;
-        ToolHandle<PanTau::ITool_ModeDiscriminator> m_Tool_ModeDiscriminator_1p1n_vs_1pXn;
-        ToolHandle<PanTau::ITool_ModeDiscriminator> m_Tool_ModeDiscriminator_3p0n_vs_3pXn;
+        ToolHandle<PanTau::ITool_InformationStore>  m_Tool_InformationStore{this, "Tool_InformationStore", "PanTau::Tool_InformationStore/Tool_InformationStore", "Tool handle to the information store tool"};        
+        ToolHandle<PanTau::ITool_ModeDiscriminator> m_Tool_ModeDiscriminator_1p0n_vs_1p1n{this, "Tool_ModeDiscriminator_1p0n_vs_1p1n", "PanTau::Tool_ModeDiscriminator/Tool_ModeDiscriminator", "Handle to the ModeDiscriminator tool for 1p0n_vs_1p1n"};
+        ToolHandle<PanTau::ITool_ModeDiscriminator> m_Tool_ModeDiscriminator_1p1n_vs_1pXn{this, "Tool_ModeDiscriminator_1p1n_vs_1pXn", "PanTau::Tool_ModeDiscriminator/Tool_ModeDiscriminator", "Handle to the ModeDiscriminator tool for 1p1n_vs_1pXn"};
+        ToolHandle<PanTau::ITool_ModeDiscriminator> m_Tool_ModeDiscriminator_3p0n_vs_3pXn{this, "Tool_ModeDiscriminator_3p0n_vs_3pXn", "PanTau::Tool_ModeDiscriminator/Tool_ModeDiscriminator", "Handle to the ModeDiscriminator tool for 3p0n_vs_3pXn"};
 
-	std::string m_Tool_InformationStoreName;
-
-	std::string m_Tool_ModeDiscriminator_1p0n_vs_1p1nName;
-	std::string m_Tool_ModeDiscriminator_1p1n_vs_1pXnName;
-	std::string m_Tool_ModeDiscriminator_3p0n_vs_3pXnName;
+        Gaudi::Property<std::string> m_Tool_InformationStoreName{this, "Tool_InformationStoreName", "", "Tool handle to the information store tool"};
+	Gaudi::Property<std::string> m_Tool_ModeDiscriminator_1p0n_vs_1p1nName{this, "Tool_ModeDiscriminator_1p0n_vs_1p1nName", "", "Handle to the ModeDiscriminator tool for 1p0n_vs_1p1n"};
+        Gaudi::Property<std::string> m_Tool_ModeDiscriminator_1p1n_vs_1pXnName{this, "Tool_ModeDiscriminator_1p1n_vs_1pXnName", "", "Handle to the ModeDiscriminator tool for 1p1n_vs_1pXn"};
+	Gaudi::Property<std::string> m_Tool_ModeDiscriminator_3p0n_vs_3pXnName{this, "Tool_ModeDiscriminator_3p0n_vs_3pXnName", "", "Handle to the ModeDiscriminator tool for 3p0n_vs_3pXn"};
                 
         //configurables to be retrieved from information store
         

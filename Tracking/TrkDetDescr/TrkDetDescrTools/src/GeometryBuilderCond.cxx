@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkGeometry/GlueVolumesDescriptor.h"
 
-#ifdef TRKDETDESCR_MEMUSAGE                            
+#ifdef TRKDETDESCR_MEMUSAGE
 #include <unistd.h>
 #endif
 
@@ -36,9 +36,9 @@
 Trk::GeometryBuilderCond::GeometryBuilderCond(const std::string& t, const std::string& n, const IInterface* p)
 : AthAlgTool(t,n,p),
   TrackingVolumeManipulator(),
-#ifdef TRKDETDESCR_MEMUSAGE      
+#ifdef TRKDETDESCR_MEMUSAGE
   m_memoryLogger(),
-#endif 
+#endif
   m_createWorld(true),
   m_navigationLevel(2),
   m_worldDimension(),
@@ -85,10 +85,10 @@ StatusCode Trk::GeometryBuilderCond::initialize()
 {
 
     // Retrieve the volume array creator  ----------------------------------------------------
-    ATH_CHECK(m_trackingVolumeArrayCreator.retrieve()); 
+    ATH_CHECK(m_trackingVolumeArrayCreator.retrieve());
 
-    // Retrieve the tracking volume helper  --------------------------------------------------    
-    ATH_CHECK (m_trackingVolumeHelper.retrieve()); 
+    // Retrieve the tracking volume helper  --------------------------------------------------
+    ATH_CHECK (m_trackingVolumeHelper.retrieve());
     // Geometries =============================================================================
     // (I) Inner Detector ---------------------------------------------------------------------
     if (!m_inDetGeometryBuilderCond.empty()) {
@@ -101,11 +101,11 @@ StatusCode Trk::GeometryBuilderCond::initialize()
             return StatusCode::FAILURE;
         } else
             ATH_MSG_INFO( "Retrieved tool " << m_hgtdGeometryBuilderCond );
-    }    
+    }
     // (C) Calorimeter --------------------------------------------------------------------------
     if (!m_caloGeometryBuilderCond.empty()) {
         ATH_CHECK (m_caloGeometryBuilderCond.retrieve());
-    }        
+    }
     // (M) Muon System -------------------------------------------------------------------------
     if (!m_muonGeometryBuilderCond.empty()) {
         ATH_CHECK(m_muonGeometryBuilderCond.retrieve());
@@ -115,8 +115,8 @@ StatusCode Trk::GeometryBuilderCond::initialize()
     if (m_worldDimension.empty())
         m_worldDimension = std::vector<double>{0.*Gaudi::Units::meter, 10.*Gaudi::Units::meter, 15.*Gaudi::Units::meter};
 
-    // if no world materials are declared, take default ones - set vacuum 
-    if (m_worldMaterialProperties.size() < 5) 
+    // if no world materials are declared, take default ones - set vacuum
+    if (m_worldMaterialProperties.size() < 5)
         m_worldMaterialProperties = std::vector<double>{10.e10,10.e10,1e-10, 0., 0.};
 
     m_worldMaterial = Trk::Material(m_worldMaterialProperties[0],
@@ -142,7 +142,7 @@ Trk::GeometryBuilderCond::trackingGeometry(const EventContext& ctx,
 
         ATH_MSG_VERBOSE( "Configured to only create world TrackingVolume." );
 
-        Trk::VolumeBounds* worldBounds = new Trk::CylinderVolumeBounds(m_worldDimension[0],
+        auto worldBounds = std::make_shared<Trk::CylinderVolumeBounds>(m_worldDimension[0],
                                                                        m_worldDimension[1],
                                                                        m_worldDimension[2]);
 
@@ -162,7 +162,7 @@ Trk::GeometryBuilderCond::trackingGeometry(const EventContext& ctx,
 }
 
 
-std::unique_ptr<Trk::TrackingGeometry> 
+std::unique_ptr<Trk::TrackingGeometry>
 Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
                                                 SG::WriteCondHandle<TrackingGeometry>& whandle) const
 {
@@ -180,11 +180,11 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
     // mark the highest volume
     Trk::TrackingVolume* highestVolume  = nullptr;
 
-#ifdef TRKDETDESCR_MEMUSAGE       
+#ifdef TRKDETDESCR_MEMUSAGE
     m_memoryLogger.refresh(getpid());
-    ATH_MSG_INFO( "[ memory usage ] Start of TrackingGeometry building: "  );    
-    ATH_MSG_INFO( m_memoryLogger );                     
-#endif  
+    ATH_MSG_INFO( "[ memory usage ] Start of TrackingGeometry building: "  );
+    ATH_MSG_INFO( m_memoryLogger );
+#endif
 
     // ========================== INNER DETECTOR PART =================================================
     if (!m_inDetGeometryBuilderCond.empty()) {
@@ -207,20 +207,20 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
                 atlasTrackingGeometry = std::move(inDetTrackingGeometry);
         }
 
-#ifdef TRKDETDESCR_MEMUSAGE            
+#ifdef TRKDETDESCR_MEMUSAGE
         m_memoryLogger.refresh(getpid());
         ATH_MSG_INFO( "[ memory usage ] After InDet TrackingGeometry building: "  );
         ATH_MSG_INFO( m_memoryLogger );
 #endif
 
-    }    
-    
+    }
+
     // ========================== HGTD PART =================================================
     // if a HGTD Geometry Builder is present -> wrap it around the ID
     if (!m_hgtdGeometryBuilderCond.empty()) {
         if (inDetVolume)
             ATH_MSG_VERBOSE( "HGTD Tracking Geometry is going to be built with enclosed ID." );
-        else 
+        else
             ATH_MSG_VERBOSE( "HGTD Tracking Geometry is going to be built stand-alone." );
         // get the InnerDetector TrackingGeometry
         std::unique_ptr<Trk::TrackingGeometry> hgtdTrackingGeometry =
@@ -238,7 +238,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
                 atlasTrackingGeometry = std::move(hgtdTrackingGeometry);
         }
 
-#ifdef TRKDETDESCR_MEMUSAGE            
+#ifdef TRKDETDESCR_MEMUSAGE
         m_memoryLogger.refresh(getpid());
         ATH_MSG_INFO( "[ memory usage ] After Calo TrackingGeometry building: "  );
         ATH_MSG_INFO( m_memoryLogger );
@@ -253,14 +253,14 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         if (inDetVolume and hgtdVolume)
             enclosed = "with encloded ID/HGTD.";
         else if (inDetVolume or hgtdVolume)
-            enclosed = (inDetVolume) ? "with encloded ID." : "with encloded HGTD.";                  
+            enclosed = (inDetVolume) ? "with encloded ID." : "with encloded HGTD.";
         ATH_MSG_VERBOSE( "Calorimeter Tracking Geometry is going to be built "<< enclosed );
 
         // get the InnerDetector TrackingGeometry or the HGTD tracking geometry
         std::unique_ptr<Trk::TrackingGeometry> caloTrackingGeometry;
         if (inDetVolume and not hgtdVolume)
           caloTrackingGeometry = m_caloGeometryBuilderCond->trackingGeometry(ctx, inDetVolume, whandle);
-        else 
+        else
           caloTrackingGeometry = m_caloGeometryBuilderCond->trackingGeometry(ctx, hgtdVolume, whandle);
         // if you have to create world or there is a Muon geometry builder ...
         if (caloTrackingGeometry) {
@@ -275,7 +275,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
                 atlasTrackingGeometry = std::move(caloTrackingGeometry);
         }
 
-#ifdef TRKDETDESCR_MEMUSAGE            
+#ifdef TRKDETDESCR_MEMUSAGE
         m_memoryLogger.refresh(getpid());
         ATH_MSG_INFO( "[ memory usage ] After Calo TrackingGeometry building: "  );
         ATH_MSG_INFO( m_memoryLogger );
@@ -320,7 +320,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         if (atlasTrackingGeometry)
             atlasTrackingGeometry->sign(m_muonGeometryBuilderCond->geometrySignature());
 
-#ifdef TRKDETDESCR_MEMUSAGE            
+#ifdef TRKDETDESCR_MEMUSAGE
         m_memoryLogger.refresh(getpid());
         ATH_MSG_INFO( "[ memory usage ] After Muon TrackingGeometry building: "  );
         ATH_MSG_INFO( m_memoryLogger );
@@ -358,16 +358,14 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         // B -------------- BUILD WORLD AROUND for ID stand alone applications
 
         double innerCylinderSectorHalflengthZ = 0.5*(m_worldDimension[2] - innerVolumeHalflengthZ);
-        Trk::CylinderVolumeBounds* innerCylinderSectorBounds =
-                new Trk::CylinderVolumeBounds(0., innerVolumeOuterR, innerCylinderSectorHalflengthZ);
+        auto innerCylinderSectorBounds = std::make_shared<Trk::CylinderVolumeBounds>(0., innerVolumeOuterR, innerCylinderSectorHalflengthZ);
 
         double innerCylinderSectorPositionZ = fabs(m_worldDimension[2]-innerCylinderSectorHalflengthZ);
 
         // the AtlasInnerNegativeSector
-        Amg::Transform3D* atlasInnerNegativeSectorTransf = new Amg::Transform3D;
-                        (*atlasInnerNegativeSectorTransf) = Amg::Translation3D(0.,0.,-innerCylinderSectorPositionZ);
+        auto atlasInnerNegativeSectorTransf = std::make_unique<Amg::Transform3D>(Amg::Translation3D(0.,0.,-innerCylinderSectorPositionZ));
         Trk::TrackingVolume* atlasInnerNegativeSector = new Trk::TrackingVolume(
-                               atlasInnerNegativeSectorTransf,
+                               std::move(atlasInnerNegativeSectorTransf),
                                innerCylinderSectorBounds,
                                m_worldMaterial,
                                nullptr,
@@ -375,11 +373,10 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
                                "AtlasInnerNegativeSector");
 
         // the AtlasInnerPositiveSector
-        Amg::Transform3D* atlasInnerPositiveSectorTransf = new Amg::Transform3D;
-                        (*atlasInnerPositiveSectorTransf) = Amg::Translation3D(0.,0.,innerCylinderSectorPositionZ);
+        auto atlasInnerPositiveSectorTransf = std::make_unique<Amg::Transform3D>(Amg::Translation3D(0.,0.,innerCylinderSectorPositionZ));
         Trk::TrackingVolume* atlasInnerPositiveSector = new Trk::TrackingVolume(
-                               atlasInnerPositiveSectorTransf,
-                               innerCylinderSectorBounds->clone(),
+                               std::move(atlasInnerPositiveSectorTransf),
+                               std::make_shared<Trk::CylinderVolumeBounds>(*innerCylinderSectorBounds),
                                m_worldMaterial,
                                nullptr,
                                nullptr,
@@ -388,27 +385,27 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         ATH_MSG_VERBOSE( "Inner Negative/Positive Sectors built successfully." );
 
         // create the subvolume Array
-        auto atlasInnerSectorVolumes = std::vector<Trk::TrackingVolume*>{atlasInnerNegativeSector,highestVolume,atlasInnerPositiveSector}; 
+        auto atlasInnerSectorVolumes = std::vector<Trk::TrackingVolume*>{atlasInnerNegativeSector,highestVolume,atlasInnerPositiveSector};
 
         ATH_MSG_VERBOSE( "Create the Atlas Inner Sector volumes. " );
-        Trk::BinnedArray<Trk::TrackingVolume>* atlasInnerSectorVolumeArray = m_trackingVolumeArrayCreator ?
+        std::unique_ptr<Trk::BinnedArray<Trk::TrackingVolume>> atlasInnerSectorVolumeArray = m_trackingVolumeArrayCreator ?
                 m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(atlasInnerSectorVolumes) : nullptr;
 
 
         // Atlas inner Sector bounds
-        Trk::CylinderVolumeBounds* innerSectorBounds =
-                new Trk::CylinderVolumeBounds(0., innerVolumeOuterR, m_worldDimension[2]);
+        auto innerSectorBounds =
+                std::make_shared<Trk::CylinderVolumeBounds>(0., innerVolumeOuterR, m_worldDimension[2]);
         // build the Tracking volumes
         Trk::TrackingVolume* atlasInnerSector = new Trk::TrackingVolume(nullptr,
                                                                         innerSectorBounds,
                                                                         m_worldMaterial,
                                                                         nullptr,
-                                                                        atlasInnerSectorVolumeArray,
+                                                                        std::move(atlasInnerSectorVolumeArray),
                                                                         "AtlasInnerSector");
 
         // Atlas outer Sector
-        Trk::CylinderVolumeBounds* outerSectorBounds =
-                new Trk::CylinderVolumeBounds(innerVolumeOuterR, m_worldDimension[1], m_worldDimension[2]);
+        auto outerSectorBounds =
+                std::make_shared<Trk::CylinderVolumeBounds>(innerVolumeOuterR, m_worldDimension[1], m_worldDimension[2]);
         Trk::TrackingVolume* atlasOuterSector = new Trk::TrackingVolume(nullptr,
                                                                         outerSectorBounds,
                                                                         m_worldMaterial,
@@ -421,18 +418,18 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         // create the array of Inner and Outer sector
         auto atlasVolumes =  std::vector<Trk::TrackingVolume*>{atlasInnerSector, atlasOuterSector};
 
-        Trk::BinnedArray<Trk::TrackingVolume>* atlasVolumeArray = m_trackingVolumeArrayCreator ?
+        std::unique_ptr<Trk::BinnedArray<Trk::TrackingVolume>> atlasVolumeArray = m_trackingVolumeArrayCreator ?
                 m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(atlasVolumes) : nullptr;
 
         // create the Atlas volume bounds
-        Trk::CylinderVolumeBounds* atlasBounds = new Trk::CylinderVolumeBounds(0., m_worldDimension[1], m_worldDimension[2]);
+        auto atlasBounds = std::make_shared<Trk::CylinderVolumeBounds>(0., m_worldDimension[1], m_worldDimension[2]);
 
         // create the Atlas TrackingVolume
         Trk::TrackingVolume* atlasVolume = new Trk::TrackingVolume(nullptr,
                                                                    atlasBounds,
                                                                    m_worldMaterial,
                                                                    nullptr,
-                                                                   atlasVolumeArray,
+                                                                   std::move(atlasVolumeArray),
                                                                    "Atlas");
 
         ATH_MSG_VERBOSE( "Atlas Tracking World volume built successfully." );
@@ -470,10 +467,10 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         ATH_MSG_VERBOSE( "Atlas TrackingGeometry built with following parameters : ");
         //ATH_MSG_VERBOSE( " - TrackingVolume containers            : " << atlasTrackingGeometry->numberOfContainerVolumes() );
         //ATH_MSG_VERBOSE( " - TrackingVolume at navigation level   : " << atlasTrackingGeometry->numberOfContainerVolumes() );
-        //ATH_MSG_VERBOSE( " - Contained static layers              : " << atlasTrackingGeometry->boundaryLayers().size());        
-        ATH_MSG_VERBOSE( " - Unique material layers on boundaries : " << atlasTrackingGeometry->boundaryLayers().size());        
+        //ATH_MSG_VERBOSE( " - Contained static layers              : " << atlasTrackingGeometry->boundaryLayers().size());
+        ATH_MSG_VERBOSE( " - Unique material layers on boundaries : " << atlasTrackingGeometry->boundaryLayers().size());
 
-#ifdef TRKDETDESCR_MEMUSAGE            
+#ifdef TRKDETDESCR_MEMUSAGE
         m_memoryLogger.refresh(getpid());
         ATH_MSG_INFO( "[ memory usage ] After Outer Sector TrackingGeometry building: "  );
         ATH_MSG_INFO( m_memoryLogger );
@@ -487,10 +484,10 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
     }
     else ATH_MSG_WARNING( "atlasTrackingGeometry() ... atlasTrackingGeometry = 0, could not call registerNavigationLevel and propagateMagneticFieldProperties" );
 
-#ifdef TRKDETDESCR_MEMUSAGE            
+#ifdef TRKDETDESCR_MEMUSAGE
     m_memoryLogger.refresh(getpid());
-    ATH_MSG_INFO( "[ memory usage ] End of TrackingGeometry building: "  );    
-    ATH_MSG_INFO( m_memoryLogger );                     
+    ATH_MSG_INFO( "[ memory usage ] End of TrackingGeometry building: "  );
+    ATH_MSG_INFO( m_memoryLogger );
 #endif
 
     // synchronize the layers
@@ -501,4 +498,4 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
       if (m_compactify) atlasTrackingGeometry->compactify(msg());
     }
     return atlasTrackingGeometry;
-} 
+}

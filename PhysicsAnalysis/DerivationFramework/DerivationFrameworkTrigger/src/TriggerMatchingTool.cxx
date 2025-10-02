@@ -43,9 +43,8 @@ namespace DerivationFramework {
       const std::string& type,
       const std::string& name,
       const IInterface* pSvcLocator) :
-    AthAlgTool(type, name, pSvcLocator)
+    base_class(type, name, pSvcLocator)
   {
-    declareInterface<IAugmentationTool>(this);
     declareProperty("ChainNames", m_chainNames, 
         "The list of trigger chains to match.");
     declareProperty("OnlineParticleTool", m_trigParticleTool,

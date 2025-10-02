@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -284,10 +284,10 @@ void IdDictDetDescrCnv::printDicts(const IdDictManager *dictMgr) {
     for (it = dm.begin(); it != dm.end(); ++it, ++n) {
         const IdDictDictionary &dictionary = *((*it).second);
         std::string version =
-            ("" != dictionary.m_version) ? dictionary.m_version : "default";
-        msg(MSG::INFO) << "Dictionary " << dictionary.m_name;
-        if (dictionary.m_name.size() < 20) {
-            std::string space(20 - dictionary.m_name.size(), ' ');
+          ("" != dictionary.version()) ? dictionary.version() : "default";
+        msg(MSG::INFO) << "Dictionary " << dictionary.name();
+        if (dictionary.name().size() < 20) {
+            std::string space(20 - dictionary.name().size(), ' ');
             msg(MSG::INFO) << space;
         }
         msg(MSG::INFO) << " version " << version;
@@ -351,7 +351,7 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
       ATH_MSG_WARNING("Unable to determine RDBAccessSvc backend. Using default dictionaries");
       // Get Calo Neighbor tables from Oracle and return
       IRDBRecordset_ptr caloNeighborTable = m_rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", "CaloNeighborTable-00");
-      collectCaloNeighbors(caloNeighborTable);
+      collectCaloNeighbors(std::move(caloNeighborTable));
       return StatusCode::SUCCESS;
     }
 
@@ -396,7 +396,7 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
         dictFile << dictString;
         dictFile.close();
 
-        fileName = dictFileName;
+        fileName = std::move(dictFileName);
         dictTag.clear();   // This may change in the future if we also write dict tags into SQLite
 
         ATH_MSG_DEBUG(dictName << " read from the SQLite database as a BLOB");
@@ -505,7 +505,7 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     }
     // Size == 0 if not found
     if (caloNeighborTable->size()) {
-        collectCaloNeighbors(caloNeighborTable);
+        collectCaloNeighbors(std::move(caloNeighborTable));
     }
 
     // Get Muon

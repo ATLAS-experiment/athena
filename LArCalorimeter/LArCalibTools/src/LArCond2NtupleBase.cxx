@@ -347,7 +347,14 @@ bool LArCond2NtupleBase::fillFromIdentifier(const HWIdentifier& hwid) {
  if(m_addCalib) {
    m_calibLine=NOT_VALID;
    const std::vector<HWIdentifier>& calibLineV=clCont->calibSlotLine(hwid);
-   if(!calibLineV.empty()) m_calibLine = m_onlineId->channel(calibLineV[0]);
+   if(!calibLineV.empty()) {
+     if(m_isSC) {
+         //FIXME - that is hacky, but do not have legacy helper in case of SC
+         m_calibLine = ((hwid.get_identifier32().get_compact())>>8)&0x7F;
+      } else {
+         m_calibLine = m_onlineId->channel(calibLineV[0]);
+      }
+   }
  }
  
 

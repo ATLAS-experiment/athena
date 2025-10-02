@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonTrackCleaner.h"
 
@@ -33,11 +33,7 @@
 #include "CxxUtils/trapping_fp.h"
 
 namespace Muon {
-
-    MuonTrackCleaner::MuonTrackCleaner(const std::string& ty, const std::string& na, const IInterface* pa) : AthAlgTool(ty, na, pa) {
-        declareInterface<IMuonTrackCleaner>(this);
-    }
-
+    using namespace MuonStationIndex;
     StatusCode MuonTrackCleaner::initialize() {
         ATH_CHECK(m_trackFitter.retrieve());
         ATH_CHECK(m_slTrackFitter.retrieve());
@@ -329,7 +325,7 @@ namespace Muon {
             bool hasLarge = false;
             MCTBCleaningInfo* firstPhi = nullptr;
             MCTBCleaningInfo* lastPhi = nullptr;
-            std::map<MuonStationIndex::StIndex, std::pair<bool, bool> > slCountsPerStationLayer;
+            std::map<StIndex, std::pair<bool, bool> > slCountsPerStationLayer;
             // loop over hits
             InfoIt hit = state.measInfo.begin();
             InfoIt hit_end = state.measInfo.end();
@@ -371,11 +367,11 @@ namespace Muon {
                         }
 
                         if (hit->id.is_valid() && m_idHelperSvc->isMdt(hit->id)) {
-                            MuonStationIndex::StIndex stIndex = MuonStationIndex::toStationIndex(hit->chIndex);
+                            StIndex stIndex = toStationIndex(hit->chIndex);
                             bool isSmall = m_idHelperSvc->isSmallChamber(hit->id);
                             bool isLarge = !isSmall;
                             // look for layer
-                            std::map<MuonStationIndex::StIndex, std::pair<bool, bool> >::iterator pos =
+                            std::map<StIndex, std::pair<bool, bool> >::iterator pos =
                                 slCountsPerStationLayer.find(stIndex);
 
                             // if not found add current
@@ -573,7 +569,7 @@ namespace Muon {
         init(ctx, *finalResultTrackClone, state);
 
         // now finally check whether the removed layer now is recoverable (happens sometimes if the segment has one or more bad hits)
-        MuonStationIndex::ChIndex removedChamberIndex = m_idHelperSvc->chamberIndex(finalResult.chId);
+        ChIndex removedChamberIndex = m_idHelperSvc->chamberIndex(finalResult.chId);
         std::unique_ptr<Trk::Track> recoveredTrack = outlierRecovery(ctx, std::move(finalResult.track), state, &removedChamberIndex);
         if (!recoveredTrack) return finalResultTrackClone;
         init(ctx, *recoveredTrack, state);
@@ -667,17 +663,13 @@ namespace Muon {
         }
 
         ATH_MSG_VERBOSE("  outlierRecovery: ");
-        if (currentIndex) ATH_MSG_VERBOSE(" layer " << MuonStationIndex::chName(*currentIndex));
+        if (currentIndex) ATH_MSG_VERBOSE(" layer " << chName(*currentIndex));
         ATH_MSG_VERBOSE("  printing chamber statistics ");
 
+        std::set<ChIndex> recoverableLayers;
         for (auto [stationIndex, layer] : state.chamberLayerStatistics) {
-            if (stationIndex == MuonStationIndex::ChUnknown) continue;
+            if (stationIndex == ChIndex::ChUnknown) continue;
             ATH_MSG_VERBOSE(print(layer));
-        }
-
-        std::set<MuonStationIndex::ChIndex> recoverableLayers;
-        for (auto [stationIndex, layer] : state.chamberLayerStatistics) {
-            if (stationIndex == MuonStationIndex::ChUnknown) continue;
 
             // skip all chamber layers except the requested one
             if (currentIndex && *currentIndex != stationIndex) continue;
@@ -693,7 +685,7 @@ namespace Muon {
                 if (nhits + nrecoverableOutliers > 2 &&
                     ((noutBounds == 0 && noutliers == 0) || (nrecoverableOutliers != 0 && noutliers < 2))) {
                     recoverableLayers.insert(stationIndex);
-                    ATH_MSG_DEBUG("   found recoverable layer " << MuonStationIndex::chName(statistics.chIndex));
+                    ATH_MSG_DEBUG("   found recoverable layer " << chName(statistics.chIndex));
                 }
             }
         }
@@ -938,7 +930,7 @@ namespace Muon {
                 inBounds = meas->associatedSurface().insideBounds(locPos, tol1, tol2);
             }
 
-            MuonStationIndex::ChIndex chIndex = !pseudo ? m_idHelperSvc->chamberIndex(id) : MuonStationIndex::ChUnknown;
+            ChIndex chIndex = !pseudo ? m_idHelperSvc->chamberIndex(id) : ChIndex::ChUnknown;
 
             // pointer to resPull: workaround because a const pointer is returned
             std::optional<Trk::ResidualPull> resPull{m_pullCalculator->residualPull(
@@ -1030,10 +1022,10 @@ namespace Muon {
                     bool isRpc = m_idHelperSvc->isRpc(id);
                     if (isRpc) {
                         int layer = 0;
-                        MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
-                        if (stIndex == Muon::MuonStationIndex::BM && m_idHelperSvc->rpcIdHelper().doubletR(id) == 1)
+                        StIndex stIndex = m_idHelperSvc->stationIndex(id);
+                        if (stIndex == StIndex::BM && m_idHelperSvc->rpcIdHelper().doubletR(id) == 1)
                             layer = 1;
-                        else if (stIndex == Muon::MuonStationIndex::BO)
+                        else if (stIndex == StIndex::BO)
                             layer = 2;
                         rpcLayers.insert(layer);
                     }
@@ -1041,8 +1033,8 @@ namespace Muon {
                     bool isTgc = m_idHelperSvc->isTgc(id);
                     if (isTgc) {
                         int layer = 0;
-                        MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
-                        if (stIndex == Muon::MuonStationIndex::EM) {
+                        StIndex stIndex = m_idHelperSvc->stationIndex(id);
+                        if (stIndex == StIndex::EM) {
                             std::string stName = m_idHelperSvc->chamberNameString(id);
                             if (stName[1] == '1')
                                 layer = 1;
@@ -1318,7 +1310,7 @@ namespace Muon {
             bool isPrec = m_idHelperSvc->isMdt(chit->first) || m_idHelperSvc->isCsc(chit->first) || m_idHelperSvc->isMM(chit->first) ||
                           m_idHelperSvc->issTgc(chit->first);
             if (isPrec) {
-                MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(chit->first);
+                StIndex stIndex = m_idHelperSvc->stationIndex(chit->first);
                 state.stations.insert(stIndex);
             }
 
@@ -1377,8 +1369,7 @@ namespace Muon {
             } else {
                 if (noutBounds.nphi != 0) ATH_MSG_DEBUG("   --> Some phi hits out of bounds ");
                 if (nhits.nphi > 0) {
-                    MuonStationIndex::PhiIndex phiIndex = m_idHelperSvc->phiIndex(chit->first);
-                    state.phiLayers.insert(phiIndex);
+                    state.phiLayers.insert(m_idHelperSvc->phiIndex(chit->first));
                 }
             }
         }
@@ -1507,7 +1498,7 @@ namespace Muon {
         unsigned int nrecoverableOutliers = statistics.nrecoverableOutliers;
         unsigned int noutBounds = statistics.noutBounds;
 
-        sout << MuonStationIndex::chName(statistics.chIndex) << " hits " << std::setw(6) << nhits << " outliers " << std::setw(6)
+        sout << chName(statistics.chIndex) << " hits " << std::setw(6) << nhits << " outliers " << std::setw(6)
              << noutliers << " deltas " << std::setw(6) << ndeltas << " recoverableOutliers " << std::setw(6) << nrecoverableOutliers
              << " outBounds " << std::setw(6) << noutBounds;
 
@@ -1528,7 +1519,7 @@ namespace Muon {
     bool MuonTrackCleaner::checkInnerConstraint(CleaningState& state) const {
         unsigned int nstations = state.stations.size();
         if (nstations == 1 ||
-            (nstations == 2 && (state.stations.count(MuonStationIndex::EM) && state.stations.count(MuonStationIndex::EO)))) {
+            (nstations == 2 && (state.stations.count(StIndex::EM) && state.stations.count(StIndex::EO)))) {
             ATH_MSG_DEBUG(" Momentum measurement lost, cleaning given up ");
             return false;
         }

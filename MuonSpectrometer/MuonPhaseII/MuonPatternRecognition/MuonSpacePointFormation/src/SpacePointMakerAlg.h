@@ -1,13 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 #define MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadHandleKey.h"
+
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "MuonSpacePoint/SpacePoint.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/ReadCondHandleKey.h"
+
 
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -23,7 +26,7 @@
 namespace MuonR4{
     class SpacePointMakerAlg: public AthReentrantAlgorithm {
         public:
-            SpacePointMakerAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthReentrantAlgorithm::AthReentrantAlgorithm; 
 
             ~SpacePointMakerAlg() = default;
 
@@ -36,34 +39,31 @@ namespace MuonR4{
              *         in various detector regions. The SpacePointStatistics split the counts per muon station layer,
              *         i.e., BarrelInner, BarrelMiddle, EndCapInner, etc. are distinct categoriges. Each category
              *         is further subdivided into the indivudal stationEtas of the chambers and finally also into
-             *         the technology type of the hit.
-             */
+             *         the technology type of the hit. */
             class SpacePointStatistics{
                 public:
                     /** @brief Standard constructor
                      *  @param idHelperSvc: Pointer to the MuonIdHelperSvc needed to sort each hit into
                      *                      a counting category. */
                     SpacePointStatistics(const Muon::IMuonIdHelperSvc* idHelperSvc);
-                
                     /** @brief Adds the vector of space points to the overall statistics. */
                     void addToStat(const std::vector<SpacePoint>& spacePoints);
                     /** @brief Print the statistics table of the built space points per category 
                      *         into the log-file / console */
                     void dumpStatisics(MsgStream& msg) const;
-
                 private:
                     /** @brief Helper struct to count the space-points in each 
                      *          detector category. */
                     struct StatField{
                         /** @brief Number of space points measuring eta & phi */
-                        unsigned int measEtaPhi{0};
+                        unsigned measEtaPhi{0};
                         /** @brief Number of space points measuring eta only */
-                        unsigned int measEta{0};
+                        unsigned measEta{0};
                         /** @brief Number of space points measuring phi only*/
-                        unsigned int measPhi{0};
+                        unsigned measPhi{0};
                         /** @brief Helper method returning the sum of the three
                          *         space point type counts */
-                        unsigned int allHits() const;
+                        unsigned allHits() const;
                     };
                     /** @brief Helper struct to define the counting categories. */
                     struct FieldKey{
@@ -91,8 +91,9 @@ namespace MuonR4{
             };
             /** @brief Container abrivation of the presorted space point container per MuonChambers */
             using PreSortedSpacePointMap = std::unordered_map<const MuonGMR4::SpectrometerSector*, SpacePointsPerChamber>;
-
-  
+            
+            /** @brief Abrivation of a MuonSapcePoint bucket vector */
+            using SpacePointBucketVec = std::vector<SpacePointBucket>;
             /** @brief Retrieve an uncalibrated measurement container <ContType> and fill the hits into the
              *         presorted space point map. Per associated MuonChamber, hits from Tgc, Rpc, sTgcs are 
              *         grouped by their gasGap location and then divided into eta & phi measurements. If both
@@ -100,16 +101,27 @@ namespace MuonR4{
              *         In any other case, the measurements are just transformed into a SpacePoint.
              *  @param ctx: Event context of the current event
              *  @param key: ReadHandleKey to access the container of data type <ContType>
-             *  @param fillContainer: Global container into which all space points are filled.
-             */
+             *  @param fillContainer: Global container into which all space points are filled. */
             template <class ContType> 
                 StatusCode loadContainerAndSort(const EventContext& ctx,
                                                 const SG::ReadHandleKey<ContType>& key,
                                                 PreSortedSpacePointMap& fillContainer) const;
-                                                    
-            /** @brief Abrivation of a MuonSapcePoint bucket vector */
-            using SpacePointBucketVec = std::vector<SpacePointBucket>;
-
+            /** @brief: Check whether the occupancy cuts of hits in a gasGap are surpassed.
+             *          The method is specified for each of the 3 strip technologies, 
+             *          Rpc, Tgc, sTgc and applies a technology-dependent upper bound on the 
+             *          number of phi & eta hits. If the threshold is surpassed, only 1D space
+             *          points are built intsead of 2D ones
+             * @param etaHits: List of all presorted eta measurements in a gas gap
+             * @param phiHits: List of all presorted phi measurements in a gas gap */
+            template <class PrdType>
+                bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
+                                     const std::vector<const PrdType*>& phiHits) const;
+            /** @brief Fills all space points that are beloni */
+            template <class PrdType> 
+                void fillUncombinedSpacePoints(const ActsGeometryContext& gctx,
+                                               const Amg::Transform3D& sectorTrans,
+                                               const std::vector<const PrdType*>& prdsToFill,
+                                               std::vector<SpacePoint>& outColl) const;          
             /** @brief Distribute the premade spacepoints per chamber into their individual SpacePoint
              *         buckets. A new bucket is created everytime if the hit to fill is along the z-axis 
              *         farther away from the first point in the bucket than the <spacePointWindowSize>.
@@ -118,27 +130,36 @@ namespace MuonR4{
              *         Muon space points and then consumes the phi hits.
              * @param ctx: Event context of the current event
              * @param hitsPerChamber: List of all premade space points which have to be sorted
-             * @param finalContainer: Output SpacePoint bucket container.
-             *  */
-            void distributePointsAndStore(
-                                          SpacePointsPerChamber&& hitsPerChamber,
+             * @param finalContainer: Output SpacePoint bucket container. */
+            void distributePointsAndStore(SpacePointsPerChamber&& hitsPerChamber,
                                           SpacePointContainer& finalContainer) const;
+            /** @brief Distributes the vector of primary eta or eta + phi space points and fills them into the
+             *         buckets. The buckets are dynamically created based on the distance of the new space point
+             *         to sort to the previous or the first space point in the bucket.
+             *  @param spacePoints: Vector of space points to sort into the buckets
+             *  @param splittedContainer: Output vector containing all defined bucket */
+            void distributePrimaryPoints(std::vector<SpacePoint>&& spacePoints,
+                                         SpacePointBucketVec& splittedContainer) const;
+            /** @brief Distributs the vector phi space points into the buckets. In contrast to the primary distribution
+             *         no new buckets are created and the points are distributed into the existing ones instead.
+             *  @param spacePoint: Vecotr of phi space points to sort into the buckets
+             *  @param splittedContainer: Output vector containing all defined bucket */
+            void distributePhiPoints(std::vector<SpacePoint>&& spacePoints,
+                                     SpacePointBucketVec& splittedContainer) const;
 
-            void distributePointsAndStore(
-                                          std::vector<SpacePoint>&& spacePoints,
-                                          SpacePointBucketVec& splittedContainer) const;
+            /** @brief Returns whether the space point is beyond the bucket boundary.
+             *  @param spacePoint: Space point candidate to add to the bucket
+             *  @param sortedPoints: Container of all defined buckets in the chamber */
+            bool splitBucket(const SpacePoint& spacePoint,
+                             const double firstSpPos,
+                             const SpacePointBucketVec& sortedPoints) const;
+            /** @brief Closes the current processed bucket and creates a new one. Space points of the previous bucket
+             *         within the overlap region to the first space point of the new bucket are copied over
+             * @param refSp: First new space point which will be added to the new bucket.
+             * @param sortedPoints: List of all processed buckets in the chamber. The list is augmented by 1 element */
+            void newBucket(const SpacePoint& refSp,
+                           SpacePointBucketVec& sortedPoints) const;
 
-            /** @brief: Check whether the occupancy cuts of hits in a gasGap are surpassed.
-             *          The method is specified for each of the 3 strip technologies, 
-             *          Rpc, Tgc, sTgc and applies a technology-dependent upper bound on the 
-             *          number of phi & eta hits. If the threshold is surpassed, only 1D space
-             *          points are built intsead of 2D ones
-             * @param etaHits: List of all presorted eta measurements in a gas gap
-             * @param phiHits: List of all presorted phi measurements in a gas gap  
-             */
-            template <class PrdType>
-                bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
-                                     const std::vector<const PrdType*>& phiHits) const;
             
             SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xMdtMeasurements",
                                                                       "Key to the uncalibrated Drift circle measurements"};
@@ -171,10 +192,10 @@ namespace MuonR4{
                                                         "Hits that are within <spacePointOverlap> of the bucket margin. "
                                                         "Are copied to the next bucket"};
     
-            Gaudi::Property<bool> m_doStat{this, "doStats", true, 
+            Gaudi::Property<bool> m_doStat{this, "doStats", false, 
                                            "If enabled the algorithm keeps track how many hits have been made" };
             
-            Gaudi::Property<unsigned int> m_capacityBucket{this,"CapacityBucket" , 50};
+            Gaudi::Property<unsigned> m_capacityBucket{this,"CapacityBucket" , 50};
             std::unique_ptr<SpacePointStatistics> m_statCounter ATLAS_THREAD_SAFE{};
 
             Gaudi::Property<double> m_maxOccRpcEta{this, "maxRpcEtaOccupancy", 0.1, 

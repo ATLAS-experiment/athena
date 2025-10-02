@@ -19,8 +19,7 @@
 #include "SGTools/TestStore.h"
 #include "TestTools/expect_exception.h"
 #ifndef ATHCONTAINERS_NO_THREADS
-#include "boost/thread/shared_mutex.hpp"
-#include "boost/thread/shared_lock_guard.hpp"
+#include <shared_mutex>
 #endif
 #include <iostream>
 #include <sstream>
@@ -37,8 +36,8 @@ public:
   using AuxVectorData::setStore;
   using AuxVectorData::s_minCacheLen;
 
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 20; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 20; }
 };
 
 
@@ -281,7 +280,7 @@ public:
     void operator()()
     {
 #ifndef ATHCONTAINERS_NO_THREADS
-      boost::shared_lock_guard<boost::shared_mutex> guard (m_test.m_sm);
+      std::shared_lock<std::shared_mutex> guard (m_test.m_sm);
 #endif // not ATHCONTAINERS_NO_THREADS
       size_t istart = (m_iworker * 10) % m_test.m_nelt;
       if (m_iworker&1)
@@ -299,7 +298,7 @@ public:
   SG::AuxStoreInternal m_store;
   std::vector<SG::auxid_t> m_ids;
 #ifndef ATHCONTAINERS_NO_THREADS
-  boost::shared_mutex m_sm;
+  std::shared_mutex m_sm;
 #endif // not ATHCONTAINERS_NO_THREADS
 };
 
@@ -473,8 +472,8 @@ public:
   {
     setCache (auxid, ptr);
   }
-  virtual size_t size_v() const { return m_size; }
-  virtual size_t capacity_v() const { return m_size; }
+  virtual size_t size_v() const override { return m_size; }
+  virtual size_t capacity_v() const override { return m_size; }
   size_t m_size;
 };
 void test_setcache()

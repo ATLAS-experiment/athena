@@ -270,6 +270,9 @@
       <graph name="technical_efficiency_vs_z0" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="technical_efficiency_vs_truthMu" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="technical_efficiency_vs_actualMu" plotopts="" tests="KS" type="TEfficiency"/>
+      <graph name="technical_efficiency_vs_R" plotopts="" test="KS" type="TEfficiency"/>
+      <graph name="technical_efficiency_vs_prodR" plotopts="" test="KS" type="TEfficiency"/>
+      <graph name="technical_efficiency_vs_prodR_extended" plotopts="" test="KS" type="TEfficiency"/>
      </TDirectory>
     </TDirectory>
     <TDirectory name="Vertices">

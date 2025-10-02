@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -16,6 +16,7 @@
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
+#include "TrkCaloExtension/CaloExtensionHelpers.h"
 
 namespace TileCal {
 
@@ -535,6 +536,66 @@ double TrackTools::getPath(const CaloCell* cell, const Trk::TrackParameters *ent
 
     return pathl;
 } // TrackTools::getPath
+
+
+
+std::vector<float> TrackTools::getEnergyInCones(const xAOD::TrackParticle* track,
+                                                const xAOD::CaloClusterContainer* clusters,
+                                                const std::set<xAOD::CaloCluster::CaloSample>& samplings,
+                                                const std::vector<double>& drCones,
+                                                const EventContext& ctx) const {
+
+  std::vector<float> energyInCone(drCones.size(), 0.F);
+
+  std::unique_ptr<Trk::CaloExtension> extension = m_caloExtensionTool->caloExtension(ctx, *track);
+
+  if (!extension) {
+    return energyInCone;
+  }
+
+  CaloExtensionHelpers::EntryExitLayerMap entryExitLayerMap;
+  CaloExtensionHelpers::entryExitLayerMap(*extension, entryExitLayerMap);
+
+  for (const xAOD::CaloCluster* cluster : *clusters) {
+
+    // Find the most energetic layer of the cluster
+    xAOD::CaloCluster::CaloSample mostEnergeticLayer = xAOD::CaloCluster::CaloSample::Unknown;
+    double maxLayerClusterEnergy = std::numeric_limits<double>::min();
+    for (unsigned int sampling = 0; sampling < xAOD::CaloCluster::CaloSample::FCAL0; ++sampling) {
+      if(sampling == xAOD::CaloCluster::CaloSample::TileGap3) continue;
+      double clusterLayerEnergy = cluster->eSample(static_cast<xAOD::CaloCluster::CaloSample>(sampling));
+      if(clusterLayerEnergy > maxLayerClusterEnergy) {
+        maxLayerClusterEnergy = clusterLayerEnergy;
+        mostEnergeticLayer = static_cast<xAOD::CaloCluster::CaloSample>(sampling);
+      }
+    }
+
+    if(mostEnergeticLayer == xAOD::CaloCluster::CaloSample::Unknown) continue;
+
+    double clusterEta = cluster->rawEta();
+    double clusterPhi = cluster->rawPhi();
+
+    auto entryExit = entryExitLayerMap.find(mostEnergeticLayer);
+    if (entryExit == entryExitLayerMap.end()) continue;
+    double trackEta = entryExit->second.first.eta();
+    double trackPhi = entryExit->second.first.phi();
+
+    double deltaR = KinematicUtils::deltaR(clusterEta, trackEta, clusterPhi, trackPhi);
+
+    for (unsigned int icone = 0; icone < drCones.size(); ++icone) {
+      if (deltaR < drCones[icone]) {
+        for (xAOD::CaloCluster::CaloSample sampling : samplings) {
+          energyInCone[icone] += cluster->eSample(sampling);
+        }
+      }
+    }
+  }
+
+  return energyInCone;
+}
+
+
+
 
 //=====================================================
 int TrackTools::retrieveIndex(int sampling, float eta) const {

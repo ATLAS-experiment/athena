@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -481,6 +481,7 @@ void BaseInfoBase::add_info (const std::type_info& tinfo,
                              castfn_t* converterTo,
                              bool is_virtual)
 {
+  BaseInfoBaseImpl::lock_t slock (BaseInfoBaseImpl::s_mutex);
   BaseInfoBaseImpl::lock_t lock (m_impl->m_mutex);
   {
     const BaseInfoBaseImpl::info* i = m_impl->findInfo (tinfo);

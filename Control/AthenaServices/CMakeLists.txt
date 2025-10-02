@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaServices )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread unit_test_framework)
+find_package( Boost COMPONENTS thread serialization unit_test_framework)
+find_package( bmpi3 REQUIRED )
 find_package( CLHEP )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS Core )
@@ -17,8 +18,9 @@ atlas_add_component( AthenaServices
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES} ${YAMPL_LIBRARIES}
-   ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
+   ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES}
+   AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
    AthContainers AthContainersInterfaces DataModelRoot SGTools
    StoreGateLib PersistentDataModel EventInfo xAODCore
    xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
@@ -36,7 +38,8 @@ atlas_add_test( AthenaOutputStream_test
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TestTools AthenaKernel AthContainers
                   AthContainersInterfaces CxxUtils SGTools StoreGateLib GaudiKernel AthenaBaseComps
                   PersistentDataModel RootAuxDynIOHeaders xAODCore
-   LOG_SELECT_PATTERN "AthenaOutputStream_test" )
+   LOG_SELECT_PATTERN "AthenaOutputStream_test"
+   LOG_IGNORE_PATTERN "ERROR add: can not find clid 13 in clid db" )
 # Avoid spurious ubsan warnings.
 set_target_properties( AthenaServices_AthenaOutputStream_test PROPERTIES ENABLE_EXPORTS True )
 
@@ -85,6 +88,12 @@ atlas_add_test( AthDictLoaderSvc
 atlas_add_test( ItemListSemanticsTest
    SCRIPT test/OutputStreamItemListTest.py
    POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TimeoutAlgTest
+   SCRIPT test/TimeoutAlg_test.py
+   PROPERTIES PROCESSORS 2
+              PASS_REGULAR_EXPRESSION "ERROR Event timeout"
+   POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py

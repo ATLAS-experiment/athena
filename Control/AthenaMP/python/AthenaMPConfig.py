@@ -57,14 +57,21 @@ def AthenaMPCfg(flags):
     mpevtloop = CompFactory.AthMpEvtLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
     mpevtloop.NWorkers = flags.Concurrency.NumProcs
-    mpevtloop.Strategy = flags.MP.Strategy
+
+    # For e.g. event generation, if we use SharedQueue the job does not complete correctly
+    myStrategy = flags.MP.Strategy
+    if flags.Input.Files == [] and flags.MP.Strategy == 'SharedQueue':
+        msg.info('MP strategy "SharedQueue" will not work without input files when maxEvents=-1. Switching to "RoundRobin" just in case')
+        myStrategy = 'RoundRobin'
+
+    mpevtloop.Strategy = myStrategy
     mpevtloop.WorkerTopDir = flags.MP.WorkerTopDir
     mpevtloop.OutputReportFile = flags.MP.OutputReportFile
     mpevtloop.CollectSubprocessLogs = flags.MP.CollectSubprocessLogs
     mpevtloop.PollingInterval = flags.MP.PollingInterval
     mpevtloop.MemSamplingInterval = flags.MP.MemSamplingInterval
     mpevtloop.IsPileup = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and flags.Digitization.PileUp
-    mpevtloop.EventsBeforeFork = 0 if flags.MP.Strategy == 'EventService' else flags.MP.EventsBeforeFork
+    mpevtloop.EventsBeforeFork = 0 if myStrategy == 'EventService' else flags.MP.EventsBeforeFork
 
     # Configure Gaudi File Manager
     filemgr = CompFactory.FileMgr(LogFile="FileManagerLog")
@@ -88,7 +95,7 @@ def AthenaMPCfg(flags):
     use_shared_writer = flags.MP.UseSharedWriter
     unique_id = f"{str(os.getpid())}-{uuid.uuid4().hex}"
 
-    if flags.MP.Strategy == 'SharedQueue' or flags.MP.Strategy == 'RoundRobin':
+    if myStrategy == 'SharedQueue' or myStrategy == 'RoundRobin':
         if use_shared_reader:
             AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
 
@@ -106,8 +113,8 @@ def AthenaMPCfg(flags):
 
                 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
                 result.merge(PoolReadCfg(flags))
-                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-                result.merge(AthenaPoolCnvSvcCfg(flags, InputStreamingTool=inputStreamingTool))
+                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+                result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, InputStreamingTool=inputStreamingTool))
 
             evSel.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool",
                                                             SharedMemoryName=f"EventStream{unique_id}")
@@ -122,14 +129,15 @@ def AthenaMPCfg(flags):
                 outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool",
                                                              SharedMemoryName=f"OutputStream{unique_id}")
 
-                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-                result.merge(AthenaPoolCnvSvcCfg(flags, OutputStreamingTool=outputStreamingTool))
+                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+                result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, OutputStreamingTool=outputStreamingTool))
 
-        if flags.MP.Strategy == 'SharedQueue':
+        if myStrategy == 'SharedQueue':
             queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
                                                                 IsPileup=mpevtloop.IsPileup,
                                                                 EventsBeforeFork=mpevtloop.EventsBeforeFork,
                                                                 ChunkSize=chunk_size)
+            mpevtloop.Tools += [ queue_provider ]
 
         if flags.Concurrency.NumThreads > 0:
             if mpevtloop.IsPileup:
@@ -143,12 +151,12 @@ def AthenaMPCfg(flags):
             queue_consumer = CompFactory.SharedEvtQueueConsumer(UseSharedReader=use_shared_reader,
                                                                 UseSharedWriter=use_shared_writer,
                                                                 IsPileup=mpevtloop.IsPileup,
-                                                                IsRoundRobin=(flags.MP.Strategy=='RoundRobin'),
+                                                                IsRoundRobin=(myStrategy=='RoundRobin'),
                                                                 EventsBeforeFork=mpevtloop.EventsBeforeFork,
                                                                 ReadEventOrders=flags.MP.ReadEventOrders,
                                                                 EventOrdersFile=flags.MP.EventOrdersFile,
                                                                 Debug=debug_worker)
-        mpevtloop.Tools += [ queue_provider, queue_consumer ]
+        mpevtloop.Tools += [ queue_consumer ]
 
         if use_shared_writer:
             shared_writer = CompFactory.SharedWriterTool(MotherProcess=(mpevtloop.EventsBeforeFork>0),
@@ -156,7 +164,7 @@ def AthenaMPCfg(flags):
                                                          Debug=debug_worker)
             mpevtloop.Tools += [ shared_writer ]
 
-    elif flags.MP.Strategy=='EventService':
+    elif myStrategy=='EventService':
         channelScatterer2Processor = "AthenaMP_Scatterer2Processor"
         channelProcessor2EvtSel = "AthenaMP_Processor2EvtSel"
 
@@ -171,7 +179,7 @@ def AthenaMPCfg(flags):
         from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
         result.merge(OutputStreamSequencerSvcCfg(flags,incidentName="NextEventRange"))
     else:
-        msg.warning("Unknown strategy %s. No MP tools will be configured", flags.MP.Strategy)
+        msg.warning("Unknown strategy %s. No MP tools will be configured", myStrategy)
 
     result.addService(mpevtloop, primary=True)
 

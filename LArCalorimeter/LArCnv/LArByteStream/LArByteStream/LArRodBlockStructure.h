@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -422,7 +422,7 @@ inline void LArRodBlockStructure::LE_setHeader16(const unsigned n, const uint16_
     std::abort();
   }
 #endif
- ((uint16_t*)(&(m_vFragment->front())))[n] = w;
+  reinterpret_cast<uint16_t*>(m_vFragment->data())[n] = w;
 }
 
 inline uint32_t LArRodBlockStructure::getNumberOfWords() const

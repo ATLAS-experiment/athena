@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcTupleWriterTool.h 
@@ -27,7 +27,7 @@ class ITHistSvc;
 class TTree;
 #include "AtlasHepMC/GenEvent_fwd.h"
 
-class HepMcTupleWriterTool : virtual public IIOHepMcTool, public AthAlgTool
+class HepMcTupleWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
   /////////////////////////////////////////////////////////////////// 

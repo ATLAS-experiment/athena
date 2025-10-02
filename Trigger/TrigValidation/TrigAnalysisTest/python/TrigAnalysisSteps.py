@@ -42,9 +42,10 @@ class CheckFileTrigSizeStep(CheckFileStep):
     '''
     Execute checkFileTrigSize.py for POOL files.
     '''
-    def __init__(self, name='CheckFileTrigSize'):
+    # TODO: Avoid rerunning checkFile.py even when *checkFile output already produced.
+    def __init__(self, name='CheckFileTrigSize', input_file='AOD.pool.root'):
         super(CheckFileTrigSizeStep, self).__init__(name)
-        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root'
+        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root,'+input_file
         self.executable = 'checkFileTrigSize.py'
 
 
@@ -54,18 +55,20 @@ class CheckFileTrigSizeStep(CheckFileStep):
 
 def trig_analysis_exec_steps(input_file='AOD.pool.root'):
     # TODO: add TrigNavSlimming test
-    return [
-        TrigDecChecker(in_file=input_file),
-        TrigEDMChecker(in_file=input_file)
-    ]
+    tests = []
+    tests.append(TrigDecChecker(name="TrigDecChecker", in_file=input_file))
+    if 'DAOD' not in input_file: # DAOD won't have full trigger EDM
+        tests.append(TrigEDMChecker(name="TrigEDMChecker",in_file=input_file))
 
-def trig_analysis_check_steps():
-    return [CheckFileTrigSizeStep()]
+    return tests
+
+def trig_analysis_check_steps(input_file):
+    return [CheckFileTrigSizeStep(name='CheckFileTrigSize', input_file=input_file)]
 
 def add_analysis_steps(test, input_file='AOD.pool.root'):
     analysis_exec_steps = trig_analysis_exec_steps(input_file)
     test.exec_steps.extend(analysis_exec_steps)
-    test.check_steps.extend(trig_analysis_check_steps())
+    test.check_steps.extend(trig_analysis_check_steps(input_file))
 
     # Add the analysis exec step logs for merging
     logmerge = test.get_step_by_type(LogMergeStep)

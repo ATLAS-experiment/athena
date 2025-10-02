@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -10,7 +10,6 @@
 from AthenaCommon.Logging import logging
 from subprocess import check_output
 from subprocess import CalledProcessError
-import six
 
 def getInputDirectory(run, stream=None, project=None, suffix=None, year=None):
     """
@@ -103,7 +102,7 @@ def findFiles(run, path=None, filter='.', stream=None, project=None, suffix=None
 
     files = []
     try:
-        files = check_output(listRunFiles, shell = True).splitlines()
+        files = check_output(listRunFiles, shell = True, text = True).splitlines()
     except CalledProcessError:
         log.warning('It seems that there are no such directory: %s', path)
 
@@ -116,7 +115,6 @@ def findFiles(run, path=None, filter='.', stream=None, project=None, suffix=None
                 log.warning('Can not read file with bad data files: %s => It is ignored', badDataFiles)
 
     fullNames = []
-    files = [six.ensure_str(f) for f in files]
     for file_name in (files):
         good = (file_name not in badFiles)
         if good:

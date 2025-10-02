@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_SHAREDHIVEEVTQUEUECONSUMER_H
@@ -8,9 +8,12 @@
 #include "AthenaMPToolBase.h"
 
 #include "AthenaInterprocess/SharedQueue.h"
-#include <queue>
 #include "GaudiKernel/IScheduler.h"
 #include "GaudiKernel/IEvtSelector.h"
+
+#include <memory>
+#include <queue>
+
 
 class IDataShare;
 class IEvtSelectorSeek;
@@ -42,9 +45,6 @@ class SharedHiveEvtQueueConsumer final : public AthenaMPToolBase
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:
-  SharedHiveEvtQueueConsumer();
-  SharedHiveEvtQueueConsumer(const SharedHiveEvtQueueConsumer&);
-  SharedHiveEvtQueueConsumer& operator= (const SharedHiveEvtQueueConsumer&);
 
   StatusCode initHive();
 
@@ -67,7 +67,7 @@ class SharedHiveEvtQueueConsumer final : public AthenaMPToolBase
       "Use SharedWriter to merge worker outputs on-the-fly if true. The default is false."};
 
 
-  int  m_rankId{};          // Each worker has its own unique RankID from the range (0,...,m_nprocs-1) 
+  int  m_rankId{-1};          // Each worker has its own unique RankID from the range (0,...,m_nprocs-1)
 
   ServiceHandle<IChronoStatSvc>  m_chronoStatSvc;
   SmartIF<IDataShare>            m_dataShare;
@@ -75,7 +75,7 @@ class SharedHiveEvtQueueConsumer final : public AthenaMPToolBase
   IEvtSelector::Context*         m_evtContext{};
 
   AthenaInterprocess::SharedQueue*  m_sharedEventQueue{};          
-  AthenaInterprocess::SharedQueue*  m_sharedRankQueue{};          
+  std::unique_ptr<AthenaInterprocess::SharedQueue>  m_sharedRankQueue;
 
   std::map<pid_t,int>               m_nProcessedEvents; // Number of processed events by PID
   std::queue<pid_t>                 m_finQueue;         // PIDs of processes queued for finalization

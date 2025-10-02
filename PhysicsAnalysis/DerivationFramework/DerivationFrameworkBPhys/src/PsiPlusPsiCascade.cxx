@@ -2,13 +2,13 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
-#include "DerivationFrameworkBPhys/PsiPlusPsiCascade.h"
+#include "PsiPlusPsiCascade.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
-#include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
+#include "BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "HepPDT/ParticleDataTable.hh"
@@ -255,7 +255,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  PsiPlusPsiCascade::PsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
+  PsiPlusPsiCascade::PsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
     m_vertexPsi1ContainerKey(""),
     m_vertexPsi2ContainerKey(""),
     m_cascadeOutputsKeys({"PsiPlusPsiCascadeVtx1", "PsiPlusPsiCascadeVtx2", "PsiPlusPsiCascadeVtx3"}),

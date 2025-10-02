@@ -74,6 +74,11 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
    virtual double getEBWeight(const EventContext& context) const override;
 
   /**
+   * @return The bunch crossing rate
+   */
+   virtual double getBunchCrossingRate() const override;
+
+  /**
    * @return The amount of online walltime contributed by this event 
    * For data, this is based on the LB length and the number of events in the LB
    * For MC, this is fixed by the sample cross section, the inelastic cross section and the mu of the current event.
@@ -195,7 +200,8 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
     Gaudi::Property<bool> m_mcIgnoreGeneratorWeights{this, "MCIgnoreGeneratorWeights", false, "If running over MC. Flag to ignore the generator weight."}; 
     Gaudi::Property<double> m_inelasticCrossSection{this, "InelasticCrossSection", 8e-26, "Inelastic cross section in units cm^2. Default 80 mb at 13 TeV."};
     Gaudi::Property<std::string> m_weightsDirectory {this, "EBWeightsDirectory", "", "Path to directory with EB XML weights files, if empty they will be read from calibration area"};  
-
+    Gaudi::Property<bool> m_doMultiSliceDiJet{this, "DoMultiSliceDiJet", false, "Enable the HS-softer-than-PU (HSTP) filter; reweight the Slices according to Jet/ETMiss procedure; recommended by PMG for di-jet slices."};
+    Gaudi::Property<double> m_targetLumi{this, "TargetLuminosity", 2e34, "Targer inst. luminosity, assuming full ring."};
 
     double m_deadtime; //!< Online deadtime to correct for in rate prediction. Currently a constant for the EB period
     uint32_t m_pairedBunches; //!< Online number of paired bunches.

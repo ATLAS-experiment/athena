@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationLArCalculator
@@ -39,12 +39,9 @@ namespace LArG4 {
 
     CalibrationLArCalculator::CalibrationLArCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_parameters(nullptr)
-      , m_defaultCalculator("CalibrationDefaultCalculator",name)
     {
-       declareProperty("DefaultCalculator",m_defaultCalculator);
     }
-
+    
     StatusCode CalibrationLArCalculator::initialize(){
       // Get the default calculator (hopefully a temporary piece of code):
       ATH_CHECK(m_defaultCalculator.retrieve());
@@ -52,14 +49,6 @@ namespace LArG4 {
       // Access source of detector parameters.
       m_parameters = LArVG4DetectorParameters::GetInstance();
       return StatusCode::SUCCESS;
-    }
-
-
-    CalibrationLArCalculator::~CalibrationLArCalculator()
-    {
-      // Cleanup pointers.
-      //delete m_defaultCalculator;
-      //m_defaultCalculator = 0;
     }
 
     G4bool CalibrationLArCalculator::Process(const G4Step* step, LArG4Identifier & identifier,

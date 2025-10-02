@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauVertexedClusterDecorator.h"
-#include "tauRecTools/HelperFunctions.h"
 
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 
 TauVertexedClusterDecorator::TauVertexedClusterDecorator(const std::string& name):
   TauRecToolBase(name) {
-  declareProperty("SeedJet", m_seedJet = ""); 
 }
 
 

@@ -44,17 +44,17 @@ class GeoShapeConverter : public AthMessaging {
    public:
     GeoShapeConverter();
     /** Convert a tubs */
-    static std::unique_ptr<CylinderVolumeBounds> convert(const GeoTubs* gtub);
+    static std::shared_ptr<CylinderVolumeBounds> convert(const GeoTubs* gtub);
 
     /** Convert a tube */
-    static std::unique_ptr<CylinderVolumeBounds> convert(const GeoTube* gtub);
+    static std::shared_ptr<CylinderVolumeBounds> convert(const GeoTube* gtub);
 
     /** Convert a Polygon into a CylinderVolume -> smooth it*/
-    static std::unique_ptr<CylinderVolumeBounds> convert(
+    static std::shared_ptr<CylinderVolumeBounds> convert(
         const GeoPcon* gtub, std::vector<double>& zbounds);
 
     /** Convert a Box */
-    static std::unique_ptr<CuboidVolumeBounds> convert(const GeoBox* gbox);
+    static std::shared_ptr<CuboidVolumeBounds> convert(const GeoBox* gbox);
 
     /** Convert an arbitrary GeoShape into Trk::Volume */
     std::unique_ptr<Volume> translateGeoShape(

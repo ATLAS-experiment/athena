@@ -43,12 +43,10 @@ run "Reconstruction" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --postInclude "InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsSeedingConfig.ActsPixelSeedingAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelSeedsToTrackParamsAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelSeedAnalysisAlgCfg,ActsConfig.ActsAnalysisConfig.ActsPixelEstimatedTrackParamsAnalysisAlgCfg" \
-    --preExec "flags.Tracking.doITkFastTracking=True; \
-               flags.Tracking.doTruth=False; \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preExec "flags.Tracking.doTruth=False; \
                flags.DQ.useTrigger=False; \
-               flags.Acts.doAnalysis=True; \
+	       flags.Acts.doAnalysis=True; \
                flags.Output.HISTFileName=\"ActsMonitoringOutput.root\";" \
     --perfmon fullmonmt \
     --maxEvents 5
@@ -69,3 +67,6 @@ run "dcube-last" \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/ActsMonitoringOutput.root \
     ActsMonitoringOutput.root
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

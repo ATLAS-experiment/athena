@@ -11,6 +11,9 @@
 
 // Gaudi
 #include "GaudiKernel/SystemOfUnits.h"
+
+#include "TruthUtils/ParticleConstants.h"
+
 // define the particle hypotheses
 #define PARTICLEHYPOTHESES 11
 
@@ -52,16 +55,16 @@ namespace Trk {
       /** the array of masses */
      constexpr double mass[PARTICLEHYPOTHESES] =
      { (0.*Gaudi::Units::MeV),// non interacting mass
-       (0.51099891*Gaudi::Units::MeV), // electron mass
-       (105.658367*Gaudi::Units::MeV), // muon mass
-       (139.57018*Gaudi::Units::MeV), // charged pion mass
-       (493.677*Gaudi::Units::MeV),    // kaon mass
-       (938.272013*Gaudi::Units::MeV), // proton mass
-       (0.*Gaudi::Units::MeV),         // photon rest mass
-       (939.565346*Gaudi::Units::MeV), // neutron rest mass
-       (134.9766*Gaudi::Units::MeV),  // pi0 rest mass
-       (497.614*Gaudi::Units::MeV),    // K0 rest mass
-       (105.658367*Gaudi::Units::MeV) // muon mass
+       (ParticleConstants::electronMassInMeV), // electron mass
+       (ParticleConstants::muonMassInMeV), // muon mass
+       (ParticleConstants::chargedPionMassInMeV), // charged pion mass
+       (ParticleConstants::chargedKaonMassInMeV),    // kaon mass
+       (ParticleConstants::protonMassInMeV), // proton mass
+       (ParticleConstants::photonMassInMeV),         // photon rest mass
+       (ParticleConstants::neutronMassInMeV), // neutron rest mass
+       (ParticleConstants::piZeroMassInMeV),  // pi0 rest mass
+       (ParticleConstants::KZeroMassInMeV),    // K0 rest mass
+       (ParticleConstants::muonMassInMeV) // muon mass
      }; 
    };
    

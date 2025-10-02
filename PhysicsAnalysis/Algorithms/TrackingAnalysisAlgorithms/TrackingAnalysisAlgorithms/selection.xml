@@ -1,8 +1,0 @@
-<!-- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration -->
-<lcgdict>
-
-  <class name="CP::VertexSelectionAlg" />
-  <class name="CP::TrackParticleMergerAlg" />
-  <class name="CP::SecVertexTruthMatchAlg" />
-
-</lcgdict>

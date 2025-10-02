@@ -7,6 +7,7 @@
 
 #include <EventLoop/Global.h>
 
+#include <AsgTools/AsgComponentConfig.h>
 #include <EventLoop/IInputModuleActions.h>
 #include <EventLoop/IWorker.h>
 #include <map>
@@ -297,15 +298,6 @@ namespace EL
     void setJobConfig (JobConfig&& jobConfig);
 
 
-    /// \brief add the given module to this worker
-    /// \par Guarantee
-    ///   strong
-    /// \par Failures
-    ///   out of memory I
-  protected:
-    void addModule (std::unique_ptr<Detail::Module> module);
-
-
     /// \brief initialize the worker
     ///
     /// This method ought to be called after the options on the worker
@@ -447,6 +439,11 @@ namespace EL
     /// \brief whether we are still to process the first event
   private:
     bool m_firstEvent {true};
+
+
+    /// \brief the module configurations we use
+  private:
+    std::vector<asg::AsgComponentConfig> m_moduleConfig;
   };
 }
 

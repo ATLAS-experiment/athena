@@ -63,7 +63,14 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
     const double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), 100);
     const double ignoreBelow = dqm_algorithms::tools::GetFirstFromMap( "IgnoreBelow", config.getParameters(), 0);
     const double probThreshold = dqm_algorithms::tools::GetFirstFromMap( "ProbThreshold", config.getParameters(), 0.01);
-    const int publishDetail = dqm_algorithms::tools::GetFirstFromMap( "PublishDetail", config.getParameters(), 0x10/*publish status code - since saw some inconsistencies in webdisplay on local testing. Should plan to set to 0 in future*/);
+    const int publishDetail = dqm_algorithms::tools::GetFirstFromMap( "PublishDetail", config.getParameters(), 0x20/*publish status code - since saw some inconsistencies in webdisplay on local testing. Should plan to set to 0 in future*/);
+    const int nBinsZ = dqm_algorithms::tools::GetFirstFromMap( "NBinsY", config.getParameters(), 0); // if this is specified, plot is interpreted as being temporal ... this is number of bins in the 'y-axis' direction of each time slice
+    const int minDuration = dqm_algorithms::tools::GetFirstFromMap( "MinDuration", config.getParameters(),3); // when in temporal mode, this is the number of consecutive bins in the time axis (x-axis) that an anomaly must exist for to be flagged
+    const int liveMode = dqm_algorithms::tools::GetFirstFromMap( "LiveMode", config.getParameters(), 0); // if non-zero, running in live (p1) mode, will influence how results presented
+    const int printLevel = dqm_algorithms::tools::GetFirstFromMap("OutputLevel",config.getParameters(),3); // controls debugging printout .. follows same outputlevel codes as athena (3=info)
+
+    // use y-axis label to determine convention for temporal plot
+    bool reverseConvention = TString(histogram->GetYaxis()->GetTitle()).EndsWith("+y");
 
     std::map<std::string,std::set<std::pair<int,int>>> knownBins; // bins which are known to be a particular class
 
@@ -110,162 +117,322 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
 
     std::vector<int> range=dqm_algorithms::tools::GetBinRange(histogram, config.getParameters());
 
-    std::set<int> filledRows; // will only look for dead strips once all rows are filled
-
-    // compute medians, means, variances, k-test probabilities
-    std::vector<double> stripsMedian;
-    std::vector<double> stripsAvg;
-    std::vector<double> stripsVariance;
-    std::vector<size_t> stripsN;
-    std::vector<double> stripsProb;
-    TRandom3 r;
-    for ( int i = range[0]; i <= range[1]; ++i ) {
-        std::vector<double> onestrip;
-        double stripSum=0;//, stripSum2=0;
-        for ( int j = range[2]; j <= range[3]; ++j ) {
-            if (histogram->GetBinContent(i,j) < ignoreBelow) continue;
-            float binvalue = histogram->GetBinContent(i,j);
-            if(binvalue>0) filledRows.insert(j); // used to veto running deadstrip tests on sparsely populated plots
-            onestrip.push_back(binvalue);
-            stripSum += binvalue;
-            //stripSum2 += binvalue*binvalue;
-        }
-        stripsAvg.push_back(stripSum/onestrip.size());
-        // traditional variance calculation, not robust to outliers
-        // leaving this commented for reference
-        //stripsVariance.push_back( stripSum2/onestrip.size() - std::pow(stripsAvg.back(),2) );
-
-        std::sort(onestrip.begin(),onestrip.end());
-
-        stripsMedian.push_back( onestrip.at(onestrip.size()/2) );
-        // estimate variance as square of half of the middle ~68% - more robust against outliers than calculating from sumw2
-        stripsVariance.push_back( std::pow((onestrip.at(onestrip.size()*0.84) - onestrip.at(onestrip.size()*0.16))/2.,2) );
-        stripsN.push_back(onestrip.size());
-        // also compute Kolmogorov test probability vs a same-size dataset generated from a gaussian with the strip mean and variance
-        if(stripsVariance.back() > 0) {
-            std::vector<double> stripRef;
-            for (size_t i = 0; i < onestrip.size(); i++) {
-                // use possion for variances less than 100 (corresponding ~ to averages fewer than 100)
-                // otherwise switch to gaussian
-                double nextVal = 0;
-                do {
-                    nextVal = (stripsVariance.back()>=100) ? r.Gaus(stripsAvg.back(), std::sqrt(stripsVariance.back())) : r.Poisson(stripsAvg.back());
-                } while(nextVal<ignoreBelow);
-                stripRef.push_back(nextVal);
-            }
-            std::sort(stripRef.begin(),stripRef.end());
-            stripsProb.push_back(  TMath::KolmogorovTest(onestrip.size(),&onestrip[0],stripRef.size(),&stripRef[0],"")  );
-        } else {
-            stripsProb.push_back(1);
-        }
-    }
-
-    dqm_core::Result* result = new dqm_core::Result();
-    std::map<std::pair<int,int>,bin> bins;
-    for ( int k = range[0]; k <= range[1]; ++k ) {
-        double strip_median = stripsMedian[k - range[0]];
-        double strip_variance = stripsVariance[k - range[0]];
-        for (int l = range[2]; l <= range[3]; ++l) {
-            double binvalue = histogram->GetBinContent(k, l);
-            if (binvalue < ignoreBelow) continue;
-            double residual = (strip_variance) ? ((binvalue - strip_median) / std::sqrt(strip_variance)) : 0;
-            bins[{k,l}] = {histogram->GetXaxis()->GetBinCenter(k), histogram->GetYaxis()->GetBinCenter(l), k, l,
-                          binvalue, residual};
-        }
-    }
-
-
-    bool testDeadStrips = (filledRows.size() == size_t(range[3]-range[2]+1));
-
-
+    std::map<int,dqm_core::Result*> resultsByTimeBin;
     std::map<std::string,int> counts;
-    // ensure all counts defined, even if will end up being 0
-    counts["NDeadStrip"]= (testDeadStrips) ? 0 : -1; // use -1 to flag not running this test
-    counts["NDead"]=0;
-    counts["NWrongKnown"]=0;
-    counts["NConsecUnlikelyStrip"]=0;
-    for(auto& [cut,k] : orderedCuts) {
-        counts["N"+k] = 0;
-    }
+    dqm_core::Result* lastFilledResult = nullptr;
+    //if nBinsZ == 0, this loop executes *once* with t = -1
+    for(int t=(nBinsZ>0 ? range[0] : -1) ; t <= (nBinsZ>0 ? range[1] : -1); t++) {
+        int xmin = range[0], xmax = range[1];
+        int ymin = range[2], ymax = range[3];
+        if(t!=-1) {
+            // need to adjust ranges using y-axis bins and nBinsZ parameter
+            xmin = 1; xmax = histogram->GetNbinsY()/nBinsZ;
+            ymin = 1; ymax = nBinsZ;
+        }
 
-    // publish deadstrips (whole strip is 0), and unlikely strips
-    int nUnlikelyStrips = 0;
-    for(size_t i = 0;i<stripsVariance.size();i++) {
-        if (testDeadStrips && stripsVariance.at(i) == 0 && stripsAvg.at(i) == 0) {
-            // only dead if at least one of the neighbour strips has enough entries in it
-            if( (i>0 && (stripsAvg.at(i-1)*stripsN.at(i-1))>=minstat) || (i<stripsVariance.size()-1 && (stripsAvg.at(i+1)*stripsN.at(i+1))>=minstat)) {
-                result->tags_[TString::Format("_DeadStrip%02ld", i+1).Data()] = histogram->GetXaxis()->GetBinCenter(range[0] + i);
-                counts["NDeadStrip"]++;
-            }
 
-        }
-        if (stripsProb.at(i) < probThreshold) {
-            result->tags_[TString::Format("_UnlikelyStrip%02ld", i+1).Data()] = -log(stripsProb.at(i));
-            nUnlikelyStrips++;
-            if(nUnlikelyStrips > counts["NConsecUnlikelyStrip"]) counts["NConsecUnlikelyStrip"] = nUnlikelyStrips;
-        } else {
-            nUnlikelyStrips=0; // reset counter
-        }
-        if(publishDetail & 0x1) {
-            result->tags_[TString::Format("_Median%02ld", i+1).Data()] = stripsMedian.at(i);
-        }
-        if(publishDetail & 0x2) {
-            result->tags_[TString::Format("_StdDev%02ld", i+1).Data()] = sqrt(stripsVariance.at(i));
-        }
-        if(publishDetail & 0x4) {
-            result->tags_[TString::Format("_Prob%02ld", i+1).Data()] = stripsProb.at(i);
-        }
-        if(publishDetail & 0x8) {
-            // attempt to estimate residual noise, by subtracting off the statistical variance (which equals the average, i.e. poissonian)
-            result->tags_[TString::Format("_Noise%02ld", i+1).Data()] = sqrt(std::abs(stripsVariance.at(i) - stripsMedian.at(i)));
-        }
-    }
+        std::set<int> filledRows; // will only look for dead strips once all rows are filled
 
-    // publish deadspots (anomalous 0s) and other anomalies defined by the cuts
-
-    for(auto& [pos,bin] : bins) {
-        if(bin.m_value==0 && bin.m_outstandingRatio < mostNegativeCut) {
-            // publish if spot is not known
-            if(knownBins["Dead"].find({bin.m_ix,bin.m_iy})==knownBins["Dead"].end()) {
-                result->tags_[TString::Format("_Dead(%d,%d)", bin.m_ix, bin.m_iy).Data()] = bin.m_outstandingRatio;
-                counts["NDead"]++;
-            }
-        } else {
-            if( (publishDetail & 0x10) && bin.m_value==0) {
-                result->tags_[TString::Format("_Zero(%d,%d)",bin.m_ix,bin.m_iy).Data()] = bin.m_outstandingRatio;
-            }
-            // loop through cuts, assign bin to one of the ranges, and report if not a known bin
-            double classCut = 0;
-            for(auto& [cut,k] : orderedCuts) {
-                if( (cut < 0 && bin.m_outstandingRatio < cut) || (cut > 0 && bin.m_outstandingRatio > cut && bin.m_value>=minstat) ) {
-                    classCut = cut;
-                    if(knownBins[k].find({bin.m_ix,bin.m_iy})==knownBins[k].end()) {
-                        result->tags_[TString::Format("_%s(%d,%d)", k.c_str(), bin.m_ix,
-                                                      bin.m_iy).Data()] = bin.m_outstandingRatio;
-                        counts["N"+k]++;
+        // compute medians, means, variances, k-test probabilities
+        std::vector<double> stripsMedian;
+        std::vector<double> stripsAvg;
+        std::vector<double> stripsVariance;
+        std::vector<size_t> stripsN;
+        std::vector<double> stripsProb;
+        TRandom3 r;
+        for ( int i = xmin; i <= xmax; ++i ) {
+            std::vector<double> onestrip;
+            double stripSum=0/*, stripSum2=0*/;
+            for ( int j = ymin; j <= ymax; ++j ) {
+                double binvalue = (nBinsZ<=0) ? histogram->GetBinContent(i,j) : histogram->GetBinContent(t,reverseConvention ? ((ymax-ymin+1)*(i-1)+j) :  ((xmax-xmin+1)*(j-1)+i));
+                if (binvalue < ignoreBelow) continue;
+                if(binvalue>0) filledRows.insert(j); // used to veto running deadstrip tests on sparsely populated plots
+                // don't include known anomalous bins in strip calculations
+                bool knownAnomaly=false;
+                for(auto& [k,v] : knownBins) {
+                    if(v.find({i,j})!=v.end()) {
+                        knownAnomaly = true; break;
                     }
-                    break;
                 }
+                if(!knownAnomaly) {
+                    onestrip.push_back(binvalue);
+                    stripSum += binvalue;
+                }
+                //stripSum2 += binvalue*binvalue;
             }
-            // if this is a known bin in a given cut range, check if we have any evidence it is wrong
-            // start with known dead ... if this bin has an entry, its not dead
-            if(bin.m_value>0 && knownBins["Dead"].find({bin.m_ix,bin.m_iy})!=knownBins["Dead"].end()) {
-                counts["NWrongKnown"]++;
-                result->tags_[TString::Format("_UnDead(%d,%d)", bin.m_ix,
-                                              bin.m_iy).Data()] = bin.m_outstandingRatio;
-            } else if(classCut != 0) {
-                // if class cut is in opposite direction to known bin list, report that too
+            stripsAvg.push_back(stripSum/onestrip.size());
+            // traditional variance calculation, not robust to outliers
+            // leaving this commented for reference
+            //stripsVariance.push_back( stripSum2/onestrip.size() - std::pow(stripsAvg.back(),2) );
+
+            std::sort(onestrip.begin(),onestrip.end());
+
+            stripsMedian.push_back( onestrip.at(onestrip.size()/2) );
+            // estimate variance as square of half of the middle ~68% - more robust against outliers than calculating from sumw2
+            stripsVariance.push_back( std::pow((onestrip.at(onestrip.size()*0.84) - onestrip.at(onestrip.size()*0.16))/2.,2) );
+            stripsN.push_back(onestrip.size());
+            // also compute Kolmogorov test probability vs a same-size dataset generated from a gaussian with the strip mean and variance
+            if(stripsVariance.back() > 0) {
+                std::vector<double> stripRef;
+                for (size_t i = 0; i < onestrip.size(); i++) {
+                    // use possion for variances less than 100 (corresponding ~ to averages fewer than 100)
+                    // otherwise switch to gaussian
+                    double nextVal = 0;
+                    do {
+                        nextVal = (stripsVariance.back()>=100) ? r.Gaus(stripsAvg.back(), std::sqrt(stripsVariance.back())) : r.Poisson(stripsAvg.back());
+                    } while(nextVal<ignoreBelow);
+                    stripRef.push_back(nextVal);
+                }
+                std::sort(stripRef.begin(),stripRef.end());
+                stripsProb.push_back(  TMath::KolmogorovTest(onestrip.size(),&onestrip[0],stripRef.size(),&stripRef[0],"")  );
+            } else {
+                stripsProb.push_back(1);
+            }
+        }
+        if(nBinsZ>0 && filledRows.empty()) {
+            continue; // don't create a result object for empty time slices
+        }
+
+        dqm_core::Result* result = new dqm_core::Result();
+        std::map<std::pair<int,int>,bin> bins;
+        for ( int k = xmin; k <= xmax; ++k ) {
+            double strip_median = stripsMedian[k - xmin];
+            double strip_variance = stripsVariance[k - xmin];
+            for (int l = ymin; l <= ymax; ++l) {
+                double binvalue = (nBinsZ<=0) ? histogram->GetBinContent(k,l) : histogram->GetBinContent(t,reverseConvention ? ((ymax-ymin+1)*(k-1)+l) :  ((xmax-xmin+1)*(l-1)+k));
+                if (binvalue < ignoreBelow) continue;
+                double residual = (strip_variance) ? ((binvalue - strip_median) / std::sqrt(strip_variance)) : 0;
+                bins[{k,l}] = {/*histogram->GetXaxis()->GetBinCenter(k), histogram->GetYaxis()->GetBinCenter(l),*/ k, l,
+                                                                                                                   binvalue, residual};
+            }
+        }
+
+
+        bool testDeadStrips = (filledRows.size() == size_t(ymax-ymin+1));
+
+
+
+        // ensure all counts defined, even if will end up being 0
+        counts["NDeadStrip"]= (testDeadStrips) ? 0 : -1; // use -1 to flag not running this test
+        counts["NDead"]=0;
+        counts["NWrongKnown"]=0;
+        counts["NConsecUnlikelyStrip"]=0;
+        for(auto& [cut,k] : orderedCuts) {
+            counts["N"+k] = 0;
+        }
+
+        // publish deadstrips (whole strip is 0), and unlikely strips
+        int nUnlikelyStrips = 0;
+        for(size_t i = 0;i<stripsVariance.size();i++) {
+            if (testDeadStrips && stripsVariance.at(i) == 0 && stripsAvg.at(i) == 0) {
+                // only dead if at least one of the neighbour strips has enough entries in it
+                if( (i>0 && (stripsAvg.at(i-1)*stripsN.at(i-1))>=minstat) || (i<stripsVariance.size()-1 && (stripsAvg.at(i+1)*stripsN.at(i+1))>=minstat)) {
+                    result->tags_[TString::Format("_DeadStrip%02ld", i+1).Data()] = histogram->GetXaxis()->GetBinCenter(xmin + i);
+                    counts["NDeadStrip"]++;
+                }
+
+            }
+            if (stripsProb.at(i) < probThreshold) {
+                result->tags_[TString::Format("_UnlikelyStrip%02ld", i+1).Data()] = -log(stripsProb.at(i));
+                nUnlikelyStrips++;
+                if(nUnlikelyStrips > counts["NConsecUnlikelyStrip"]) counts["NConsecUnlikelyStrip"] = nUnlikelyStrips;
+            } else {
+                nUnlikelyStrips=0; // reset counter
+            }
+            if(publishDetail & 0x1) {
+                result->tags_[TString::Format("_Median%02ld", i+1).Data()] = stripsMedian.at(i);
+            }
+            if(publishDetail & 0x2) {
+                result->tags_[TString::Format("_StdDev%02ld", i+1).Data()] = sqrt(stripsVariance.at(i));
+            }
+            if(publishDetail & 0x4) {
+                result->tags_[TString::Format("_Prob%02ld", i+1).Data()] = stripsProb.at(i);
+            }
+            if(publishDetail & 0x8) {
+                // attempt to estimate residual noise, by subtracting off the statistical variance (which equals the average, i.e. poissonian)
+                result->tags_[TString::Format("_Noise%02ld", i+1).Data()] = sqrt(std::abs(stripsVariance.at(i) - stripsMedian.at(i)));
+            }
+        }
+
+        // publish deadspots (anomalous 0s) and other anomalies defined by the cuts
+
+        for(auto& [pos,bin] : bins) {
+            if(bin.m_value==0 && bin.m_outstandingRatio < mostNegativeCut) {
+                // publish if spot is not known
+                if(knownBins["Dead"].find({bin.m_ix,bin.m_iy})==knownBins["Dead"].end()) {
+                    result->tags_[TString::Format("_Dead(%d,%d)", bin.m_ix, bin.m_iy).Data()] = bin.m_outstandingRatio;
+                    counts["NDead"]++;
+                }
+            } else {
+                if( (publishDetail & 0x10) && bin.m_value==0) {
+                    result->tags_[TString::Format("_Zero(%d,%d)",bin.m_ix,bin.m_iy).Data()] = bin.m_outstandingRatio;
+                }
+                // loop through cuts, assign bin to one of the ranges, and report if not a known bin
+                double classCut = 0;
                 for(auto& [cut,k] : orderedCuts) {
-                    if(knownBins[k].find({bin.m_ix,bin.m_iy})==knownBins[k].end()) continue;
-                    if(cut*classCut < 0) {
-                        counts["NWrongKnown"]++;
-                        result->tags_[TString::Format("_Un%s(%d,%d)",k.c_str(), bin.m_ix,
-                                                      bin.m_iy).Data()] = bin.m_outstandingRatio;
+                    if( (cut < 0 && bin.m_outstandingRatio < cut) || (cut > 0 && bin.m_outstandingRatio > cut && bin.m_value>=minstat) ) {
+                        classCut = cut;
+                        if(knownBins[k].find({bin.m_ix,bin.m_iy})==knownBins[k].end()) {
+                            if(printLevel<=2) std::cout << " found " << k << " @ " << bin.m_ix << " " << bin.m_iy << " " << t << " : " << bin.m_outstandingRatio << std::endl;
+                            result->tags_[TString::Format("_%s(%d,%d)", k.c_str(), bin.m_ix,
+                                                          bin.m_iy).Data()] = bin.m_outstandingRatio;
+                            counts["N"+k]++;
+                        } else {
+                            // report as a known anomaly
+                            result->tags_[TString::Format("_Known%s(%d,%d)",k.c_str(), bin.m_ix,
+                                                          bin.m_iy).Data()] = bin.m_outstandingRatio;
+                        }
+                        break;
+                    }
+                }
+                // if this is a known bin in a given cut range, check if we have any evidence it is wrong
+                // start with known dead ... if this bin has an entry, its not dead
+                if(bin.m_value>0 && knownBins["Dead"].find({bin.m_ix,bin.m_iy})!=knownBins["Dead"].end()) {
+                    counts["NWrongKnown"]++;
+                    result->tags_[TString::Format("_UnDead(%d,%d)", bin.m_ix,
+                                                  bin.m_iy).Data()] = bin.m_outstandingRatio;
+                } else if(classCut != 0) {
+                    // if class cut is in opposite direction to known bin list, report that too
+                    for(auto& [cut,k] : orderedCuts) {
+                        if(knownBins[k].find({bin.m_ix,bin.m_iy})==knownBins[k].end()) continue;
+                        if(cut*classCut < 0) {
+                            counts["NWrongKnown"]++;
+                            result->tags_[TString::Format("_Un%s(%d,%d)",k.c_str(), bin.m_ix,
+                                                          bin.m_iy).Data()] = bin.m_outstandingRatio;
+                        }
                     }
                 }
             }
         }
+
+        resultsByTimeBin[t] = result;
+        lastFilledResult = result;
+
     }
+
+    dqm_core::Result* result;
+    if(nBinsZ>0) {
+        // ensure all counts defined, even if will end up being 0
+        counts["NDeadStrip"]= 0;
+        counts["NDead"]=0;
+        counts["NWrongKnown"]=0;
+        counts["NConsecUnlikelyStrip"]=0;
+        for(auto& [cut,k] : orderedCuts) {
+            counts["N"+k] = 0;
+        }
+        dqm_core::Result* lastResult = nullptr;
+        result = new dqm_core::Result();
+        // must now analyse results by time slice ... require a result in min number of consecutive slices to count an anomaly
+        std::map<std::string,int> anomalies;
+        for(int t=range[0];t<=range[1]+1;t++) { // go one extra slice to trigger 'empty slice' condition to write active anomalies
+            if(resultsByTimeBin.find(t)==resultsByTimeBin.end()) {
+                // empty slice .. record all sufficiently large anomalies and reset
+                for(auto& [k,v] : anomalies) {
+                    if(v>=minDuration) {
+                        if(printLevel<=2) std::cout << " Got anomaly: " << k << " duration: " << v << " end: " << t << std::endl;
+                        int lbStart = histogram->GetXaxis()->GetBinLowEdge(t-v);
+                        int lbEnd = histogram->GetXaxis()->GetBinLowEdge(t);
+                        // in liveMode (for P1 monitoring), don't put the LBs in the result name, so that we get a consistent history plot
+                        if (lastResult){
+                          if(liveMode) {
+                              result->tags_[k] = lastResult->tags_[k];//lastResult must not be null 
+                          } else {
+                              result->tags_[k +
+                                            TString::Format("_LB%d-%d", lbStart, lbEnd).Data()] = lastResult->tags_[k];
+                          }
+                        }
+                        // increment appropriate counter
+                        if(k.find("_DeadStrip")==0) {
+                            counts["NDeadStrip"]++;
+                        } else if(k.find("_Dead")==0) {
+                            counts["NDead"]++;
+                        } else if(k.find("_UnlikelyStrip")==0) {
+                            // not sure how to handle this one
+                        } else if(k.find("_Un")==0) {
+                            counts["NWrongKnown"]++;
+                        }  else {
+                            for(auto& [cut,k2] : orderedCuts) {
+                                if(k.find("_" + k2)==0) {
+                                    counts["N"+k2]++;
+                                }
+                            }
+                        }
+                    }
+                }
+                anomalies.clear();
+            } else {
+                auto thisResult = resultsByTimeBin[t];
+                if(liveMode && thisResult==lastFilledResult) {
+                    // don't consider the time slice that is currently being filled, statistics not reliable
+                    // can delete this slice because we wont use it
+                    delete thisResult;
+                    continue;
+                }
+                // increase counts on all active anomalies ...
+                for(auto& [k,v] : thisResult->tags_) {
+                    // increment time counter for anomalies
+                    if(k.find("_DeadStrip")==0) {
+                        anomalies[k]++;
+                    } else if(k.find("_Dead")==0) {
+                        anomalies[k]++;
+                    } else if(k.find("_UnlikelyStrip")==0) {
+                        anomalies[k]++;
+                    } else if(k.find("_Un")==0) {
+                        anomalies[k]++;
+                    } else {
+                        for(auto& [cut,k2] : orderedCuts) {
+                            if(k.find("_" + k2)==0) {
+                                anomalies[k]++;
+                            }
+                        }
+                    }
+                }
+
+                // reset counts on all disappeared anomalies (recording to results if was long enough)
+                // empty slice .. record all sufficiently large anomalies and reset
+                for(auto& [k,v] : anomalies) {
+                    if(thisResult->tags_.find(k) != thisResult->tags_.end()) continue;
+                    if(v>=minDuration) {
+                        int lbStart = histogram->GetXaxis()->GetBinLowEdge(t-v);
+                        int lbEnd = histogram->GetXaxis()->GetBinLowEdge(t);
+                        if(liveMode) {
+                            // don't record any result for an anomaly that has disappeared
+                        } else {
+                            result->tags_[k+TString::Format("_LB%d-%d",lbStart,lbEnd).Data()]=lastResult->tags_[k];
+                        }
+
+                        // increment appropriate counter
+                        if(k.find("_DeadStrip")==0) {
+                            counts["NDeadStrip"]++;
+                        } else if(k.find("_Dead")==0) {
+                            counts["NDead"]++;
+                        } else if(k.find("_UnlikelyStrip")==0) {
+                            // not sure how to handle this one
+                        } else if(k.find("_Un")==0) {
+                            counts["NWrongKnown"]++;
+                        } else {
+                            for(auto& [cut,k2] : orderedCuts) {
+                                if(k.find("_" + k2)==0) {
+                                    counts["N"+k2]++;
+                                }
+                            }
+                        }
+                    }
+                    v=0; // reset counter on the anomaly
+                }
+                // delete the lastResult if there is one
+                if(lastResult) delete lastResult;
+                lastResult = thisResult;
+            }
+        }
+        if(lastResult) delete lastResult; // cleans up unneeded results
+
+
+    } else {
+        // not doing a temporal analysis, just use the single result object
+        result = resultsByTimeBin[-1];
+    }
+
 
 
     // determine algorithm status from provided thresholds
@@ -277,6 +444,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
         result->tags_["StatusCode"] = 0;
     }
     for(auto& [k,v] : counts) {
+        if(nBinsZ>0 && k=="NConsecUnlikelyStrip") continue; // not currently counting consecutive unlikely strips in temporal mode
         result->tags_[k] = v;
         if(v>dqm_algorithms::tools::GetFirstFromMap(k, redThresholds, std::numeric_limits<double>::max())||result->status_ == dqm_core::Result::Red) {
             result->status_ = dqm_core::Result::Red;
@@ -314,7 +482,7 @@ void dqm_algorithms::L1Calo_BinsDiffFromStripMedian::printDescription(std::ostre
   out<<"Optional Parameter: MinStat: Minimum histogram statistics needed to perform Algorithm, also min entries for warm/hot spots (cuts > 0), and min entries in neighbour strip to declare a strip dead"<<std::endl;
   out<<"Optional Parameter: IgnoreBelow: values below which the bins wont be considered (default 0)"<<std::endl;
   out<<"Optional Parameter: ProbThreshold: cutoff for strip k-test probabilities for strip to be considered unlikely (default 0.05)"<<std::endl;
-  out<<"Optional Parameter: PublishDetail: Bitmask of what extra info to publish about strips. Starting with MSB: AlgStatusCode,Zeros,Noise,Prob,StdDev,Median (default 000000)"<<std::endl;
+  out<<"Optional Parameter: PublishDetail: Bitmask of what extra info to publish about strips. Starting with MSB: AlgStatusCode,Zeros,Noise,Prob,StdDev,Median (default 100000)"<<std::endl;
   
 }
 

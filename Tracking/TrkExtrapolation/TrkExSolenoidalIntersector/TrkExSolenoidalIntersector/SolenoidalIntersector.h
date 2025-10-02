@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ class SolenoidalIntersector final: public extends<AthAlgTool, IIntersector> {
                          const double endRadius) const;
   bool extrapolateToR(TrackSurfaceIntersection& isect, double& radius2,
                       Constants& com, const double endRadius) const;
- 
+
   static bool extrapolateToZ(TrackSurfaceIntersection& isect, Constants& com,
                              const double endZ);
 
@@ -146,14 +146,16 @@ class SolenoidalIntersector final: public extends<AthAlgTool, IIntersector> {
 
   SG::ReadCondHandleKey<SolenoidParametrization> m_solenoidParametrizationKey{
       this, "SolenoidParameterizationKey", "SolenoidParametrization", ""};
-  ToolHandle<IIntersector> m_rungeKuttaIntersector;
+  ToolHandle<IIntersector> m_rungeKuttaIntersector{this, "RungeKuttaIntersector",
+    "Trk::RungeKuttaIntersector/RungeKuttaIntersector"};
 
-  double m_deltaPhiTolerance;
-  double m_surfaceTolerance;
+  static constexpr double m_deltaPhiTolerance = 0.01; // upper limit for small angle approx
+  DoubleProperty m_surfaceTolerance{this, "SurfaceTolerance",
+    2.0 * Gaudi::Units::micrometer};
 
   // counters
-  mutable std::atomic<unsigned long long> m_countExtrapolations;
-  mutable std::atomic<unsigned long long> m_countRKSwitches;
+  mutable std::atomic<unsigned long long> m_countExtrapolations = 0;
+  mutable std::atomic<unsigned long long> m_countRKSwitches = 0;
 };
 
 // arc length to intersect of 2 circles: circular track and circle at (0,0) with

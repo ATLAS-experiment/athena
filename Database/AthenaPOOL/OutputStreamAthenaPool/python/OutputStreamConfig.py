@@ -10,12 +10,50 @@ def outputStreamName(streamName):
    return f"Stream{streamName}"
 
 
-# keepProvenanceTagsRegEx - RexEx string to match processing tags in the Event provenance. Only matching tags will be copied
-#                           to the new DataHeader. Empty string rejects all tags. Direct provenance is not affected
-#                           (see extendProvenanceRecord)
-def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
-                    disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
-                    extendProvenanceRecord=True, keepProvenanceTagsRegEx=None, AcceptAlgs=[], HelperTools=[]):
+def OutputStreamCfg(
+    flags,
+    streamName,
+    ItemList=None,
+    MetadataItemList=None,
+    disableEventTag=False,
+    trigNavThinningSvc=None,
+    takeItemsFromInput=False,
+    extendProvenanceRecord=True,
+    keepProvenanceTagsRegEx=None,
+    AcceptAlgs=None,
+    HelperTools=None,
+):
+   """Configure an output stream for writing data to POOL files.
+
+   Args:
+       flags: Configuration flags object
+       streamName: Name of the output stream (e.g., 'ESD', 'AOD', 'DAOD_PHYS')
+       ItemList: List of data objects to write to the stream
+       MetadataItemList: List of metadata objects to write
+       disableEventTag: If True, disable event tagging
+       trigNavThinningSvc: Trigger navigation thinning service
+       takeItemsFromInput: If True, take items from input file
+       extendProvenanceRecord: If True, extend provenance record with processing tags
+       keepProvenanceTagsRegEx: RegEx string to match processing tags in the Event provenance.
+                               Only matching tags will be copied to the new DataHeader.
+                               Empty string rejects all tags. Direct provenance is not affected
+                               (see extendProvenanceRecord).
+       AcceptAlgs: List of algorithms that must accept the event for it to be written
+       HelperTools: List of helper tools to attach to the stream
+
+   Returns:
+       ComponentAccumulator: Configured output stream and associated services
+   """
+   # Handle mutable default arguments
+   if ItemList is None:
+      ItemList = []
+   if MetadataItemList is None:
+      MetadataItemList = []
+   if AcceptAlgs is None:
+      AcceptAlgs = []
+   if HelperTools is None:
+      HelperTools = []
+
    eventInfoKey = "EventInfo"
    if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
@@ -43,6 +81,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       DataHeaderKey=outputStreamName(streamName),
       MetaDataPoolContainerPrefix=f"{flags.Output.StorageTechnology.MetaData}:MetaData",
       MetaDataOutputCollection=f"{flags.Output.StorageTechnology.MetaData}:MetaDataHdr",
+      ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc",
    )
 
    # If we're running in augmentation mode, configure the writing tool accordingly

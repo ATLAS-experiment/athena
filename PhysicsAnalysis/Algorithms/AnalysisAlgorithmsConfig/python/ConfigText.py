@@ -8,9 +8,11 @@ import os
 import sys
 import importlib
 import pathlib
+import warnings
 
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
+from AnalysisAlgorithmsConfig.ConfigAccumulator import deprecationWarningCategory
 
 from AnaAlgorithm.Logging import logging
 logCPAlgTextCfg = logging.getLogger('CPAlgTextCfg')
@@ -29,10 +31,16 @@ def printYaml(d, sort=False, jsonFormat=False):
     """Prints a dictionary as YAML"""
     print(yaml.dump(d, default_flow_style=jsonFormat, sort_keys=sort))
 
+class TextConfigWarning(FutureWarning):
+    pass
+
 
 class TextConfig(ConfigFactory):
-    def __init__(self, yamlPath=None, *, addDefaultBlocks=True):
+    def __init__(self, yamlPath=None, *, config=None, addDefaultBlocks=True):
         super().__init__(addDefaultBlocks=False)
+
+        if yamlPath and config:
+            raise ValueError("Cannot specify both yamlPath and config. Use one or the other.")
 
         # Block to add new blocks to this object
         self.addAlgConfigBlock(algName="AddConfigBlocks", alg=self._addNewConfigBlocks,
@@ -44,8 +52,8 @@ class TextConfig(ConfigFactory):
         self._config = {}
         # do not allow for loading multiple yaml files
         self.__loadedYaml = False
-        if yamlPath is not None:
-            self.loadConfig(yamlPath)
+        if yamlPath is not None or config is not None:
+            self.loadConfig(yamlPath, configDict=config)
         # last is used for setOptionValue when using addBlock
         self._last = None
 
@@ -93,7 +101,7 @@ class TextConfig(ConfigFactory):
         for key, value in config.items():
             self.cleanupPlaceholders(value)
 
-    def loadConfig(self, yamlPath):
+    def loadConfig(self, yamlPath=None, *, configDict=None):
         """
         read a YAML file. Will combine with any config blocks added using python
         """
@@ -126,7 +134,11 @@ class TextConfig(ConfigFactory):
             return
 
         logCPAlgTextCfg.info(f'loading {yamlPath}')
-        config = readYaml(yamlPath)
+        if configDict is not None:
+            # if configDict is provided, use it directly
+            config = configDict
+        else:
+            config = readYaml(yamlPath)
         # check if blocks are defined in yaml file
         if "AddConfigBlocks" in config:
            self._configureAlg(self._algs["AddConfigBlocks"], config["AddConfigBlocks"])
@@ -306,10 +318,21 @@ class TextConfig(ConfigFactory):
         return configSeq
 
 
-def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlags=None,
-                 isPhyslite=False, noPhysliteBroken=False, noSystematics=None):
+def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dataType=None, geometry=None, autoconfigFromFlags=None, isPhyslite=None, noPhysliteBroken=False):
     """
     """
+
+    # Historically we have used the identifier
+    # `autoconfigFromFlags`, but in the rest of the code base
+    # `flags` is used. So for now we allow either, and can hopefully
+    # at some point remove the former (21 Aug 25).
+    if autoconfigFromFlags is not None:
+        if flags is not None:
+            raise ValueError("Cannot pass both flags and autoconfigFromFlags arguments")
+        flags = autoconfigFromFlags
+        warnings.warn ('Using autoconfigFromFlags parameter is deprecated, use flags instead', category=deprecationWarningCategory, stacklevel=2)
+    elif flags is None:
+        warnings.warn ('it is deprecated to configure meta-data for analysis configuration manually, please read the configuration flags via the meta-data reader', category=deprecationWarningCategory, stacklevel=2)
 
     from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
 
@@ -329,7 +352,7 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
     config.printConfig()
 
     # compile
-    configAccumulator = ConfigAccumulator(algSeq, dataType, isPhyslite=isPhyslite, geometry=geometry, autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
+    configAccumulator = ConfigAccumulator(algSeq=algSeq, dataType=dataType, isPhyslite=isPhyslite, geometry=geometry, autoconfigFromFlags=autoconfigFromFlags, flags=flags, noSystematics=noSystematics)
     configSeq.fullConfigure(configAccumulator)
 
     # blocks can be reordered during configSeq.fullConfigure
@@ -348,51 +371,90 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
 # See the README for more info on how this works
 #
 def combineConfigFiles(local, config_path, fragment_key="include"):
+    """
+    Recursively combine configuration fragments into `local`.
 
-    # if this isn't an iterable there's nothing to combine
+    - Looks for `fragment_key` at any dict node.
+    - If value is a string/path: merge that fragment.
+    - If value is a list: merge all fragments in order.
+      For conflicts between fragments, the **earlier** file in the list wins. 
+      Local keys still override the merged fragments.
+
+    Returns True if any merging happened below this node.
+    """
+    combined = False
+
+    # If this isn't an iterable there's nothing to combine
     if isinstance(local, dict):
         to_combine = local.values()
     elif isinstance(local, list):
         to_combine = local
     else:
-        return
+        return combined
 
-    # otherwise descend into all the entries here
+    # Recurse first so that nested nodes are resolved
     for sub in to_combine:
-        combineConfigFiles(sub, config_path, fragment_key=fragment_key)
+        combined = combineConfigFiles(sub, config_path, fragment_key=fragment_key) or combined
 
     # if there are no fragments to include we're done
     if fragment_key not in local:
-        return
+        return combined
 
-    fragment_path = _find_fragment(
-        pathlib.Path(local[fragment_key]),
-        config_path)
+    # Only dict nodes can have include keys
+    if not isinstance(local, dict):
+        return combined
 
-    with open(fragment_path) as fragment_file:
-        # once https://github.com/yaml/pyyaml/issues/173 is resolved
-        # pyyaml will support the yaml 1.2 spec, which is compatable
-        # with json. Until then yaml and json behave differently, so
-        # we have this override.
-        if fragment_path.suffix == '.json':
-            fragment = json.load(fragment_file)
-        else:
-            fragment = yaml.safe_load(fragment_file)
+    # Normalize to a list of paths
+    value = local[fragment_key]
+    if isinstance(value, (str, pathlib.Path)):
+        warnings.warn(
+            f"{fragment_key} should be followed with a list of files", 
+            TextConfigWarning,
+            stacklevel=2,
+        )
+        paths = [value]
+    elif isinstance(value, list):
+        paths = value
+    else:
+        raise TypeError(f"'{fragment_key}' must be a string path or a list of paths, got {type(value).__name__}")
 
-    # fill out any sub-fragments, looking in the parent path of the
-    # fragment for local sub-fragments.
-    combineConfigFiles(
-        fragment,
-        fragment_path.parent,
-        fragment_key=fragment_key
-    )
+    # Build an accumulator of all fragments, earlier paths win on conflicts
+    fragments_acc = {}
+    for entry in paths:
+        fragment_path = _find_fragment(pathlib.Path(entry), config_path)
+        fragment = _load_fragment(fragment_path)
 
-    # merge the fragment with this one
-    _merge_dicts(local, fragment)
+        # Allow recursion inside each fragment, using the fragment's directory as base
+        combineConfigFiles(fragment, fragment_path.parent, fragment_key=fragment_key)
 
-    # delete the fragment so we don't stumble over it again
+        # Merge this fragment into the accumulator; earlier entries win
+        _merge_dicts(fragments_acc, fragment)
+
+    # Remove the key before merging to avoid re-processing it
     del local[fragment_key]
 
+    # Merge fragments into local; local values take precedence
+    _merge_dicts(local, fragments_acc)
+
+    return True
+
+
+def _load_fragment(fragment_path: pathlib.Path):
+    """Load a YAML or JSON fragment
+
+    This function is superfluous as of the yaml 1.2 spec (which
+    has not been implemented in ATLAS Yaml dependencies).
+    Once https://github.com/yaml/pyyaml/issues/173 is resolved
+    pyyaml will support yaml 1.2, which is compatable with json. 
+    Until then yaml and json behave differently in some scientific
+    notation edge cases.
+    """
+    
+    with open(fragment_path, 'r') as fragment_file:
+        if fragment_path.suffix.lower() == '.json':
+            return json.load(fragment_file)
+        else:
+            return yaml.safe_load(fragment_file)
 
 def _find_fragment(fragment_path, config_path):
     paths_to_check = [
@@ -408,12 +470,12 @@ def _find_fragment(fragment_path, config_path):
 
 
 def _merge_dicts(local, fragment):
-    # in the list case append the fragment to the local list
+    # In the list case append the fragment to the local list
     if isinstance(local, list):
         local += fragment
         return
     # In the dict case, append only missing values to local: the local
-    # values take precidence over the fragment ones.
+    # values take precedence over the fragment ones.
     if isinstance(local, dict):
         for key, value in fragment.items():
             if key in local:

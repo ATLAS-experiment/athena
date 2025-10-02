@@ -83,7 +83,10 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
       }
 
       // Retrieve mass values and cut values 
-      std::vector<float> mass_values = itr->at("mass").get<std::vector<float>>();
+      std::vector<float> mass_values;
+      for (const auto& m : itr->at("mass")) {
+      mass_values.push_back(BTaggingToolUtil::getExtendedFloat(m));
+      }
       std::vector<float> cut_values = itr->at("cutvalues").get<std::vector<float>>();
 
       // Add the corresponding mass bins and OP cut values information 

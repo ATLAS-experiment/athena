@@ -6,9 +6,10 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def GepCellsHandlerAlgCfg(flags, name='GepCellsHandlerAlg', 
                            outputGepCellsKey='GepCells', 
-                           GEPEnergyEncodingScheme = "6-10-4", 
+                           GEPEnergyEncodingScheme = "6-40-4", 
                            HardwareStyleEnergyEncoding = True, 
                            TruncationOfOverflowingFEBs = True,
+                           WriteAllCells = False,
                            OutputLevel=None):
 
     cfg = ComponentAccumulator()
@@ -18,7 +19,8 @@ def GepCellsHandlerAlgCfg(flags, name='GepCellsHandlerAlg',
         outputGepCellsKey=outputGepCellsKey,
         GEPEnergyEncodingScheme = GEPEnergyEncodingScheme,
         HardwareStyleEnergyEncoding = HardwareStyleEnergyEncoding,
-        TruncationOfOverflowingFEBs = TruncationOfOverflowingFEBs
+        TruncationOfOverflowingFEBs = TruncationOfOverflowingFEBs,
+        WriteAllCells = WriteAllCells
     )
 
     if OutputLevel is not None:

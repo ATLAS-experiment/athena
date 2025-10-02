@@ -103,7 +103,7 @@ Track* FitProcedure::constructTrack(
   const Surface* surface = nullptr;
   std::unique_ptr<TrackParameters> trackParameters{};
   std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
-      defaultPattern;
+      const defaultPattern;
   std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
       typePattern = defaultPattern;
 
@@ -145,7 +145,7 @@ Track* FitProcedure::constructTrack(
           }
         } else {
           // get the MeasuredParameters (with covariance)
-          bool withCovariance = true;
+          bool const withCovariance = true;
           trackParameters.reset(parameters.trackParameters(
               *cache.log, *fitMeasurement, withCovariance));
 
@@ -183,7 +183,7 @@ Track* FitProcedure::constructTrack(
       // (dirty fix for pseudoMeasurements)
       if (measurementBase) {
         // get the MeasuredParameters (with covariance)
-        bool withCovariance = true;
+        bool const withCovariance = true;
         trackParameters.reset(parameters.trackParameters(
             *cache.log, *fitMeasurement, withCovariance));
         if (!trackParameters) {
@@ -280,7 +280,7 @@ Track* FitProcedure::constructTrack(
     // or alignment effects
     else if (m->alignmentEffects()) {
       const AlignmentEffectsOnTrack& AEOT = *m->alignmentEffects();
-      unsigned align = m->alignmentParameter() - 1;
+      unsigned const align = m->alignmentParameter() - 1;
 
       *cache.log << MSG::VERBOSE << " Fitprocedure AEOT input deltaTranslation "
                  << AEOT.deltaTranslation() << " deltaAngle "
@@ -302,7 +302,7 @@ Track* FitProcedure::constructTrack(
   }
 
   // remember the final TSOS !
-  bool withCovariance = true;
+  bool const withCovariance = true;
   trackParameters.reset(
       parameters.trackParameters(*cache.log, *fitMeasurement, withCovariance));
   if (!trackParameters) {
@@ -318,7 +318,7 @@ Track* FitProcedure::constructTrack(
   ++tsos;
 
   // construct track
-  double chiSquared = cache.chiSq * static_cast<double>(cache.numberDoF);
+  const double chiSquared = cache.chiSq * static_cast<double>(cache.numberDoF);
   Track* track = new Track(trackInfo, std::move(trackStateOnSurfaces),
                            std::make_unique<FitQuality>(chiSquared, cache.numberDoF));
 
@@ -380,7 +380,7 @@ const FitProcedureQuality& FitProcedure::execute(
   }
 
   // set requested options and initial values
-  double ptInvCut = 1. / m_minPt;  // protection against trapped particles
+  const double ptInvCut = 1. / m_minPt;  // protection against trapped particles
   cache.cutStep = true;
   cache.convergence = false;
   cache.nearConvergence = false;
@@ -612,7 +612,7 @@ const FitProcedureQuality& FitProcedure::execute(
       cache.fitProbability = 1.;
       if (cache.numberDoF > 0 && cache.chiSq > 0.) {
         if (cache.chiSq < 100.) {
-          double chiSquared =
+          const double chiSquared =
               cache.chiSq * static_cast<double>(cache.numberDoF);
           cache.fitProbability -=
               Genfun::CumulativeChiSquare(cache.numberDoF)(chiSquared);
@@ -712,7 +712,7 @@ void FitProcedure::calculateChiSq(
   }
 
   cache.chiSqOld = cache.chiSqMin;
-  double DChiSq = cache.chiSqOld - cache.chiSq;
+  const double DChiSq = cache.chiSqOld - cache.chiSq;
   if (DChiSq > -dChisqConv) {
     cache.chiSqMin = cache.chiSq;
     cache.nCuts = 0;
@@ -750,7 +750,7 @@ void FitProcedure::calculateChiSq(
                << "----------------------------------" << std::endl
                << "   ";
 
-    (**measurements.begin()).printHeading(*cache.log);
+    Trk::FitMeasurement::printHeading(*cache.log);
     int n = 0;
     for (auto* m : measurements) {
       *cache.log << std::setiosflags(std::ios::fixed) << std::setw(3) << ++n;
@@ -818,10 +818,10 @@ void FitProcedure::reportQuality(
   if (!cache.fitQuality)
     return;
 
-  int fitCode = cache.fitQuality->fitCode();
+  const int fitCode = cache.fitQuality->fitCode();
   if (fitCode) {
     *cache.log << MSG::DEBUG << "failure: fitCode " << fitCode;
-    std::string msg = "";
+    const std::string msg = "";
     switch (fitCode) {
       case 1:
         *cache.log << "  missing Trk::Surface ";

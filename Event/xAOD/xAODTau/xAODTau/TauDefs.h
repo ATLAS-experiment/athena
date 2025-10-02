@@ -423,7 +423,6 @@ namespace TauJetParameters
       CaloSamplingPhiHad = 3,
     };
 
-  struct ROOT6_NamespaceAutoloadHook{};
 }//end namespace TauJetParameters
 
 }

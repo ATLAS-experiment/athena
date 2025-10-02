@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile sampling fraction conditions algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, BeamType
 
 def TileSamplingFractionCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile sampling fraction conditions algorithm
@@ -33,7 +33,10 @@ def TileSamplingFractionCondAlgCfg(flags, **kwargs):
 
         samplingFractionTag = None # Tag connected to global conditions tag is used by default
         from SimulationConfig.SimEnums import LArParameterization
-        if flags.GeoModel.Run >= LHCPeriod.Run4 or flags.Overlay.DataOverlay or flags.Sim.ISF.Simulator.usesFastCaloSim() or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        if flags.Beam.Type is BeamType.TestBeam:
+            # fixed sampling fraction for Geant4 10.6 for all run numbers
+            samplingFractionTag = 'TileOfl02CalibSfr-SIM-06'
+        elif flags.GeoModel.Run >= LHCPeriod.Run4 or flags.Sim.ISF.Simulator.usesFastCaloSim() or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             samplingFractionTag = 'TileOfl02CalibSfr-SIM-07'
 
         from IOVDbSvc.IOVDbSvcConfig import addFolders

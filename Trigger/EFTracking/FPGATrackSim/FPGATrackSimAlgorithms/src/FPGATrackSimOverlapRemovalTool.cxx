@@ -19,6 +19,9 @@ FPGATrackSimOverlapRemovalTool::FPGATrackSimOverlapRemovalTool(const std::string
 StatusCode FPGATrackSimOverlapRemovalTool::initialize()
 {
   ATH_MSG_INFO( "FPGATrackSimOverlapRemovalTool::initialize()" );
+
+  if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
+
   // Check if this is 2nd stage
   if(m_do2ndStage)
   {
@@ -116,7 +119,9 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATra
   // Otherwise, proceed
   ATH_MSG_DEBUG("Beginning runOverlapRemoval()");
 
-  return ::runOverlapRemoval(tracks, m_minChi2, m_NumOfHitPerGrouping, getAlgorithm());
+  ATH_MSG_DEBUG("Tracks in event: " << tracks.size());
+
+  return ::runOverlapRemoval(tracks, m_minChi2.value(), m_NumOfHitPerGrouping, getAlgorithm(), m_monTool, m_compareAllHits);
 }
 
 
@@ -242,7 +247,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval_fast(std::vector<FP
   for (unsigned int i=0; i < tracks.size(); i++) {
 
     // Skip track i if bad chi2.
-    if (tracks.at(i).getChi2ndof() > m_minChi2) {
+    if (tracks.at(i).getChi2ndof() > m_minChi2.value()) {
       tracks.at(i).setPassedOR(0);
       continue;
     }
@@ -257,7 +262,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval_fast(std::vector<FP
       if (!tracks.at(i).passedOR()) break;      
 
       // Ignore j if its chi2 is bad.
-      if (tracks.at(j).getChi2ndof() > m_minChi2) tracks.at(j).setPassedOR(0);
+      if (tracks.at(j).getChi2ndof() > m_minChi2.value()) tracks.at(j).setPassedOR(0);
 
       // If we just set track j to zero for bad chi2,
       // no need to do the comparison.

@@ -120,7 +120,7 @@ namespace ActsTrk {
 
   void
   SiSpacePointsSeedMaker::newSpacePoint(InDet::SiSpacePointsSeedMakerEventData& data,
-                                        const xAOD::SpacePoint* const& sp) const
+                                        const xAOD::SpacePoint* sp) const
   {
     
     data.v_ActsSpacePointForSeed.emplace_back(sp);
@@ -128,8 +128,8 @@ namespace ActsTrk {
     data.nsaz++;
   }
   
-  void SiSpacePointsSeedMaker::pixInform(const Trk::SpacePoint* const& sp,
-					 float *r)
+  void SiSpacePointsSeedMaker::pixInform(const Trk::SpacePoint* sp,
+					 float * ATH_RESTRICT r)
   {
     const InDet::SiCluster *cl = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
     const InDetDD::SiDetectorElement *de = cl->detectorElement();
@@ -141,8 +141,8 @@ namespace ActsTrk {
 
 
   void SiSpacePointsSeedMaker::stripInform(InDet::SiSpacePointsSeedMakerEventData& data,
-					   const Trk::SpacePoint* const& sp, 
-					   float *r)
+					   const Trk::SpacePoint* sp, 
+					   std::span<float,15> r)
   {
     const InDet::SiCluster *c0 = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
     const InDet::SiCluster *c1 = static_cast<const InDet::SiCluster *>(sp->clusterList().second);
@@ -548,7 +548,7 @@ namespace ActsTrk {
     // -- no additional iteration is foreseen for fast tracking case
 
     bool isPixel = (m_fastTracking or data.iteration == 1) and m_pixel;
-    bool isStrip = not m_fastTracking and not m_GbtsSeeding and data.iteration == 0 and m_strip;
+    bool isStrip = not m_fastTracking and data.iteration == 0 and m_strip;
 
     // The Acts Seed tool requires beamspot information for the space points already here
     if (data.iteration == 0) 
@@ -956,7 +956,7 @@ namespace ActsTrk {
       }
 
       for (unsigned int index = 0; index<3; index++) {
-	float r[15];
+	std::array<float, 15> r;
 	r[0] = seed->sp()[index]->x();
 	r[1] = seed->sp()[index]->y();
 	r[2] = seed->sp()[index]->z();
@@ -1073,11 +1073,11 @@ namespace ActsTrk {
 	std::size_t mapped_idx = itr->second;
 	// We added a new element
 	if (outcome) { 
-	  float r[15];
+	  std::array<float, 15> r;
 	  r[0] = seed->sp()[index]->x();
 	  r[1] = seed->sp()[index]->y();
 	  r[2] = seed->sp()[index]->z();
-	  pixInform(spacePoints[index], r);	 
+	  pixInform(spacePoints[index], r.data());	 
 	  data.v_PixelSiSpacePointForSeed.emplace_back( spacePoints[index], r );
 
 	}

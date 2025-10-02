@@ -5,7 +5,29 @@
 # or (with noise 1e-5)
 #  --postExec "from InDetDefectsEmulation.PixelDefectsEmulatorPostInclude import emulateITkPixelDefectsDefault;
 #              emulateITkPixelDefectsDefault(flags,cfg,HistogramFileName='itk_pixel_defects.root',FrontEndCCDefectProb=1e-1,PixelDefectProb=1e-2,ModuleDefectProb=1e-2,CornerDefectProb=15e-2,NoiseProb=1e-5,PropagateDefectsToStatus=True);"
+#
+# NOTES: - Will only work with the athena MT scheduler e.g. --threads=n with n>=1 otherwise the algorithms will not be scheduled in the
+#          correct order by this post include
+#        - accidentally using strip defect input files for pixel may silently "work"
+#
+# Extra arguments:
 #   disable histogramming:  HistogramFileName=None
+#   decorrelate random numbers: RngPerDefectType=True will use one random generator per defect type, however some correlation is still
+#                                                     present because for example pixel defects are not created for dead modules.
+#  persistify defects conditions data:
+#    DefectsOutputFile='defects.root'  Depending on the extension .root or .json, will write all defects into a root RNTuple or json file.
+#                                      These files may get big. ".json" is not recommended unless there are only module defects.
+#  read defects from input files:
+#    DefectsInputFiles=['moduleDefects.root','cellDefects.root'] Read one or multiple defect files and merge defects. The file can be
+#                                                                Either a root RNTuple or a .json file, which can be created by the
+#                                                                conditions algorithm by specifying the option e.g.
+#                                                                DefectsOutputFile='defects.root'
+#                                                                Reading defects from input file(s) will not disable the generation of
+#                                                                random defects. The latter will be added on top unless the corresponding
+#                                                                probabilities are set to zero.
+#                                                                For efficiency files should be ordered by the significance of the
+#                                                                defects i.e. files with more module defects should precede files
+#                                                                with mostly single pixel or CC defects
 
 import math
 from InDetDefectsEmulation.StripDefectsEmulatorConfig import (moduleDefect,
@@ -22,6 +44,9 @@ def emulateITkPixelDefects(flags,
                            NoiseShape=[],
                            CornerDefectParamsPerPattern=[],
                            NCornerDefectFractionsPerPattern=[],
+                           RngPerDefectType=False,
+                           DefectsInputFiles=[],
+                           DefectsOutputFile=None,
                            FillHistogramsPerPattern=False,
                            FillEtaPhiHistogramsPerPattern=False,
                            MaxRandomPositionAttempts: int=10,
@@ -73,6 +98,9 @@ def emulateITkPixelDefects(flags,
                                                  MaxRandomPositionAttempts=MaxRandomPositionAttempts,
                                                  CornerDefectParamsPerPattern=CornerDefectParamsPerPattern,
                                                  NCornerDefectFractionsPerPattern=NCornerDefectFractionsPerPattern,
+                                                 RngPerDefectType=RngPerDefectType,
+                                                 DefectsInputFiles=DefectsInputFiles,
+                                                 DefectsOutputFile=DefectsOutputFile,
                                                  FillHistogramsPerPattern=FillHistogramsPerPattern,
                                                  FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                                  CheckerBoardDefects=False,
@@ -106,6 +134,9 @@ def emulatePixelDefects(flags,
                         ModulePatterns=None,
                         DefectProbabilities=None,
                         NDefectFractionsPerPattern=None,
+                        RngPerDefectType=False,
+                        DefectsInputFiles=[],
+                        DefectsOutputFile=None,
                         FillHistogramsPerPattern=False,
                         FillEtaPhiHistogramsPerPattern=False,
                         HistogramGroupName: str="PixelDefects",
@@ -148,6 +179,9 @@ def emulatePixelDefects(flags,
                                               NDefectFractionsPerPattern = NDefectFractionsPerPattern,
                                               CornerDefectParamsPerPattern=cornerDefectParam,
                                               NCornerDefectFractionsPerPattern=cornerDefectFractions,
+                                              RngPerDefectType=RngPerDefectType,
+                                              DefectsInputFiles=DefectsInputFiles,
+                                              DefectsOutputFile=DefectsOutputFile,
                                               FillHistogramsPerPattern=FillHistogramsPerPattern,
                                               FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                               # to enable histogramming:
@@ -300,6 +334,9 @@ def emulateITkPixelDefectsOneCC(flags,
                                 ModuleDefectProb=0.,
                                 CornerDefectProb=0.,
                                 NoiseProb=0.,
+                                RngPerDefectType=False,
+                                DefectsInputFiles=[],
+                                DefectsOutputFile=None,
                                 PropagateDefectsToStatus=True,
                                 HistogramFileName=None) :
     """
@@ -328,6 +365,9 @@ def emulateITkPixelDefectsOneCC(flags,
                                   NoiseShape=NoiseShape,
                                   CornerDefectParamsPerPattern=cornerDefectParam,
                                   NCornerDefectFractionsPerPattern=cornerDefectFractions,
+                                  RngPerDefectType=RngPerDefectType,
+                                  DefectsInputFiles=DefectsInputFiles,
+                                  DefectsOutputFile=DefectsOutputFile,
                                   FillHistogramsPerPattern=True,
                                   FillEtaPhiHistogramsPerPattern=True,
                                   PropagateDefectsToStatus=PropagateDefectsToStatus,
@@ -341,6 +381,9 @@ def emulateITkPixelDefectsPoisson(flags,
                                   ModuleDefectProb=0.,
                                   CornerDefectProb=0.,
                                   NoiseProb=0.,
+                                  RngPerDefectType=False,
+                                  DefectsInputFiles=[],
+                                  DefectsOutputFile=None,
                                   PropagateDefectsToStatus=True,
                                   HistogramFileName=None) :
     """
@@ -370,6 +413,9 @@ def emulateITkPixelDefectsPoisson(flags,
                                   NoiseShape=NoiseShape,
                                   CornerDefectParamsPerPattern=cornerDefectParam,
                                   NCornerDefectFractionsPerPattern=cornerDefectFractions,
+                                  RngPerDefectType=RngPerDefectType,
+                                  DefectsInputFiles=DefectsInputFiles,
+                                  DefectsOutputFile=DefectsOutputFile,
                                   FillHistogramsPerPattern=True,
                                   FillEtaPhiHistogramsPerPattern=True,
                                   PropagateDefectsToStatus=PropagateDefectsToStatus,
@@ -382,6 +428,9 @@ def emulateITkPixelDefectsDefault(flags,
                                   ModuleDefectProb=1e-2,
                                   CornerDefectProb=15e-2,
                                   NoiseProb=0.,
+                                  RngPerDefectType=False,
+                                  DefectsInputFiles=[],
+                                  DefectsOutputFile=None,
                                   PropagateDefectsToStatus=True,
                                   HistogramFileName=None) :
     """
@@ -393,5 +442,8 @@ def emulateITkPixelDefectsDefault(flags,
                                   ModuleDefectProb,
                                   CornerDefectProb,
                                   NoiseProb,
-                                  PropagateDefectsToStatus,
-                                  HistogramFileName)
+                                  RngPerDefectType=RngPerDefectType,
+                                  DefectsInputFiles=DefectsInputFiles,
+                                  DefectsOutputFile=DefectsOutputFile,
+                                  PropagateDefectsToStatus=PropagateDefectsToStatus,
+                                  HistogramFileName=HistogramFileName)

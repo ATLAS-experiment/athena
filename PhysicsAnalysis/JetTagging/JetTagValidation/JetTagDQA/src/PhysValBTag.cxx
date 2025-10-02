@@ -18,6 +18,7 @@
 // FrameWork includes
 #include "GaudiKernel/IToolSvc.h"
 #include "xAODJet/JetContainer.h"
+#include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODBTagging/BTagging.h"
@@ -40,7 +41,6 @@ namespace JetTagDQA {
                             const std::string& name,
                             const IInterface* parent ) :
     ManagedMonitorToolBase( type, name, parent ),
-    m_muonAugmenter("Muons"),
     m_isData(false),
     m_antiKt4EMTopoPlots                       (0, "BTag/AntiKt4EMTopoJets/"                ,        "antiKt4EMTopoJets"),
     m_antiKt4EMPFlowJetsPlots                  (0, "BTag/AntiKt4EMPFlowJets/"               , 	     "antiKt4EMPFlowJets"),
@@ -143,7 +143,7 @@ namespace JetTagDQA {
 
   StatusCode PhysValBTag::fillHistograms()
   {
-    ATH_MSG_INFO ("Filling hists " << name() << "...");
+    ATH_MSG_DEBUG ("Filling hists " << name() << "...");
     
     if (m_detailLevel < 10) return StatusCode::SUCCESS;
     
@@ -233,17 +233,6 @@ namespace JetTagDQA {
       std::map<std::string, int> nJetsThatPassedWPCuts;
       plot->initializeNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts);
 
-      // check if the muon info is available on the first jet (since isAvailable gives the same result on all jets)
-      bool muon_info_available = false;
-      if(jets->size() > 0){
-        const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( *(jets->at(0)) );
-        static const SG::ConstAccessor< ElementLink<xAOD::MuonContainer> >
-          softMuon_linkAcc("softMuon_link");
-        if(btag && softMuon_linkAcc.isAvailable(*btag) ){
-          muon_info_available = true;
-        }
-      }
-
       float ptCut = (name==m_jetNameR10) ? m_jetPtCutR10 : m_jetPtCut;
       std::string label_name = "HadronConeExclTruthLabelID";
       if(name==m_jetNameR10) label_name = "R10TruthLabel_R22v1";
@@ -279,10 +268,6 @@ namespace JetTagDQA {
 
         // fill the jet, btag & vertex related plots
         if (btag && name!=m_jetNameR10){ //small-R jets
-          // augment with muon information
-          if(! muon_info_available){
-            m_muonAugmenter.augment(*btag);
-          }
 
           // fill other variables
           bool contains_muon;

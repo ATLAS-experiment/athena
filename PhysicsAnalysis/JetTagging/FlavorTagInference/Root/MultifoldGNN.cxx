@@ -1,11 +1,10 @@
 /*
-+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/MultifoldGNN.h"
 #include "FlavorTagInference/GNN.h"
 
-#include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
 
 using namespace FlavorTagInference;
@@ -55,17 +54,11 @@ namespace FlavorTagInference {
   MultifoldGNN::MultifoldGNN(const MultifoldGNN&) = default;
   MultifoldGNN::~MultifoldGNN() = default;
 
-  void MultifoldGNN::decorate(const xAOD::BTagging& btag) const {
-    getFold(**m_jetLink(btag)).decorate(btag);
+  void MultifoldGNN::decorate(const xAOD::IParticle& i_jet) const {
+    getFold(i_jet).decorate(i_jet);
   }
-  void MultifoldGNN::decorate(const xAOD::Jet& jet) const {
-    getFold(jet).decorate(jet);
-  }
-  void MultifoldGNN::decorateWithDefaults(const SG::AuxElement& jet) const {
-    getFold(jet).decorateWithDefaults(jet);
-  }
-  void MultifoldGNN::decorateWithDefaults(const xAOD::BTagging& btag) const {
-    getFold(**m_jetLink(btag)).decorateWithDefaults(btag);
+  void MultifoldGNN::decorateWithDefaults(const xAOD::IParticle& i_jet) const {
+    getFold(i_jet).decorateWithDefaults(i_jet);
   }
 
   // Dependencies
@@ -73,7 +66,9 @@ namespace FlavorTagInference {
     return merged([](const auto& f){ return f.getDecoratorKeys(); }, m_folds);
   }
   std::set<std::string> MultifoldGNN::getAuxInputKeys() const {
-    return merged([](const auto& f){ return f.getAuxInputKeys(); }, m_folds);
+    auto out = merged([](const auto& f){ return f.getAuxInputKeys(); }, m_folds);
+    out.insert(SG::AuxTypeRegistry::instance().getName(m_fold_hash.auxid()));
+    return out;
   }
   std::set<std::string> MultifoldGNN::getConstituentAuxInputKeys() const {
     return merged([](const auto& f){ return f.getConstituentAuxInputKeys(); }, m_folds);

@@ -206,3 +206,6 @@ void dqm_algorithms::LastBinThresholdAction<Exceed, Action>::printDescription(st
 // are only in this file.
 template class dqm_algorithms::LastBinThresholdAction<dqm_algorithms::GreaterThan, dqm_algorithms::TileDQAction>;
 template class dqm_algorithms::LastBinThresholdAction<dqm_algorithms::DifferentThan, dqm_algorithms::TileDQAction>;
+template class dqm_algorithms::LastBinThresholdAction<dqm_algorithms::LessThan, dqm_algorithms::NoAction>;
+template class dqm_algorithms::LastBinThresholdAction<dqm_algorithms::GreaterThan, dqm_algorithms::NoAction>;
+template class dqm_algorithms::LastBinThresholdAction<dqm_algorithms::DifferentThan, dqm_algorithms::NoAction>;

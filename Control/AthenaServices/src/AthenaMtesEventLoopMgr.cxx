@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMtesEventLoopMgr.h"
@@ -12,6 +12,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/EventContextClid.h"
 #include "AthenaKernel/errorcheck.h"
+#include "CxxUtils/xmalloc.h"
 
 #include "GaudiKernel/IAlgorithm.h"
 #include "GaudiKernel/SmartIF.h"
@@ -46,7 +47,6 @@
 #include <fstream>
 #include <iomanip>
 #include <cstdlib>
-#include <memory>
 #include <unistd.h>
 
 namespace {
@@ -1328,7 +1328,7 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
 	  + rangeReport->first + std::string(",CPU:N/A,WALL:N/A");
 	if( not m_inTestMode ) {
 	  // In standalone test mode there is no pilot to talk to
-	  void* message2pilot = malloc(outputFileReport.size());
+	  void* message2pilot = CxxUtils::xmalloc(outputFileReport.size());
 	  memcpy(message2pilot,outputFileReport.data(),outputFileReport.size());
 	  m_socket->send(message2pilot,outputFileReport.size());
 	}
@@ -1407,6 +1407,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
   } else {
      // Signal the Pilot that we are ready for event processing
      void* ready_message = malloc(strReady.size());
+     if (!ready_message) std::abort();
      memcpy(ready_message,strReady.data(),strReady.size());
      socket->send(ready_message,strReady.size());
      void* eventRangeMessage;
@@ -1443,7 +1444,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
     std::string strVal = keyValue.substr(colonPos+1);
     trimRangeStrings(strKey);       
     trimRangeStrings(strVal);
-    eventRangeMap[strKey]=strVal;
+    eventRangeMap[strKey]=std::move(strVal);
     
     // Next iteration
     startpos = endpos+1;
@@ -1457,7 +1458,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
   std::string strVal = keyValue.substr(colonPos+1);
   trimRangeStrings(strKey);
   trimRangeStrings(strVal);
-  eventRangeMap[strKey]=strVal;
+  eventRangeMap[strKey]=std::move(strVal);
 
   // _____________________ Consistency check for range string _____________________________
   // Three checks are performed:
@@ -1495,7 +1496,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
 	else {
 	  std::string strInpuCol("InputCollections");
 	  std::vector<std::string> vectInpCol{eventRangeMap["PFN"],};
-	  StringArrayProperty inputFileList(strInpuCol, vectInpCol);
+	  StringArrayProperty inputFileList(std::move(strInpuCol), vectInpCol);
 	  if(propertyServer->setProperty(inputFileList).isFailure()) {
 	    errorStr = "ERR_ATHENAMP_PARSE \"" + range + "\": Unable to set input file name property to the Event Selector";
 	  }
@@ -1523,7 +1524,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
     warning() << errorStr << endmsg;
     info() << "Ignoring this event range" << endmsg;
     if( not m_inTestMode ) {
-       void* errorMessage = malloc(errorStr.size());
+       void* errorMessage = CxxUtils::xmalloc(errorStr.size());
        memcpy(errorMessage,errorStr.data(),errorStr.size());
        socket->send(errorMessage,errorStr.size());
     }

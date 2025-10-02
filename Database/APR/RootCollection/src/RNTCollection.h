@@ -17,9 +17,10 @@
 #include "Gaudi/PluginService.h"
 
 #include <string>
-#include <vector>
+#include <memory>
 
 #include "RVersion.h"
+
 class TFile;
 class IFileMgr;
 
@@ -36,6 +37,11 @@ namespace ROOT::Experimental {
    class RNTupleWriter;
    class RNTupleReader;
 }
+namespace ROOT {
+   using RNTupleModel = ROOT::Experimental::RNTupleModel;
+   using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
+   using RNTupleReader = ROOT::Experimental::RNTupleReader;
+}
 #endif
 
 namespace pool {
@@ -43,16 +49,6 @@ namespace pool {
    class ISession; 
 
    namespace RootCollection {
-
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-      using RNTupleModel  = ROOT::RNTupleModel;
-      using RNTupleReader = ROOT::RNTupleReader;
-      using RNTupleWriter = ROOT::RNTupleWriter;
-#else
-      using RNTupleModel  = ROOT::Experimental::RNTupleModel;
-      using RNTupleReader = ROOT::Experimental::RNTupleReader;
-      using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
-#endif
       class Attribute;
       class AttributeSpecification;
 
@@ -132,8 +128,8 @@ namespace pool {
         RNTCollection & operator = (const RNTCollection &) = delete;
     
         void delayedFileOpen(const std::string& method);
-        std::unique_ptr< RNTupleReader > getCollectionRNTuple();
-        void addField(RNTupleModel* model, const std::string& field_name, const std::string& field_type);
+        std::unique_ptr<ROOT::RNTupleReader> getCollectionRNTuple();
+        void addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type);
 
         bool fileCatalogRequired() const;
         std::string retrievePFN() const;
@@ -145,9 +141,9 @@ namespace pool {
         void cleanup();
 
         CollectionDescription                m_description;
-        std::unique_ptr< RNTupleReader >     m_reader;
-        std::unique_ptr< RNTupleWriter >     m_rntupleWriter;
-        
+        std::unique_ptr<ROOT::RNTupleReader> m_reader;
+        std::unique_ptr<ROOT::RNTupleWriter> m_rntupleWriter;
+
         std::string                          m_name;
         std::string                          m_fileName;
         ICollection::OpenMode                m_mode;

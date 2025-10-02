@@ -5,6 +5,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 import numpy as np
 
+MaxThreshold = 10
 
 def CalculateTOT(Q,params):
     num = params[1] + Q
@@ -71,8 +72,8 @@ def CheckThresholds(calib,iov,_file):
             fe = FEs[ife]
             if mod_layer == "IBL":
                 
-                bool1, str1 = ValThreshold(mod_layer,"normal",fe[0],5)
-                bool2, str2 = ValThreshold(mod_layer,"long"  ,fe[2],5)
+                bool1, str1 = ValThreshold(mod_layer,"normal",fe[0],MaxThreshold)
+                bool2, str2 = ValThreshold(mod_layer,"long"  ,fe[2],MaxThreshold)
                 if bool1:
                     report[key] += ("\tFE%02u: "% ife) + str1
                 if bool2:
@@ -85,9 +86,9 @@ def CheckThresholds(calib,iov,_file):
                 CalibRMS[mod_layer]["long"].append(fe[3])               
             else:
                 
-                bool1, str1 = ValThreshold(mod_layer,"normal",fe[0],5)
-                bool2, str2 = ValThreshold(mod_layer,"long"  ,fe[4],5)
-                bool3, str3 = ValThreshold(mod_layer,"ganged",fe[8],5)
+                bool1, str1 = ValThreshold(mod_layer,"normal",fe[0],MaxThreshold)
+                bool2, str2 = ValThreshold(mod_layer,"long"  ,fe[4],MaxThreshold)
+                bool3, str3 = ValThreshold(mod_layer,"ganged",fe[8],MaxThreshold)
                 if bool1:
                     report[key] += ("\tFE%02u: "% ife) + str1
                 if bool2:

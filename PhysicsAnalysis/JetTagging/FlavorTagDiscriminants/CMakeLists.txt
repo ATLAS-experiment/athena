@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'dual-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -18,10 +18,6 @@ find_package( nlohmann_json )
 
 # source files, depend on the build
 set(FTDSource
-  Root/BTagJetAugmenter.cxx
-  Root/BTagAugmenterTool.cxx
-  Root/BTagMuonAugmenter.cxx
-  Root/BTagMuonAugmenterTool.cxx
   Root/DL2.cxx
   Root/DL2HighLevel.cxx
   Root/DL2Tool.cxx
@@ -47,7 +43,6 @@ atlas_add_library( FlavorTagDiscriminants
     AthContainers
     AthLinks
     JetInterface
-    xAODBTagging
     xAODEventInfo
     xAODJet
     xAODTracking
@@ -69,24 +64,15 @@ set_target_properties( FlavorTagDiscriminants
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagDiscriminantsLib
-    src/BTagDecoratorAlg.cxx
-    src/JetTagDecoratorAlg.cxx
-    src/BTagToJetLinkerAlg.cxx
-    src/JetToBTagLinkerAlg.cxx
-    src/BTagTrackLinkCopyAlg.cxx
-    src/BTaggingBuilderAlg.cxx
     src/PoorMansIpAugmenterAlg.cxx
     src/HitDecoratorAlg.cxx
     src/JetHitAssociationAlg.cxx
-    src/BTagConditionalDecoratorAlg.cxx
-    src/JetTagConditionalDecoratorAlg.cxx
     src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx
     src/TruthParticleDecoratorAlg.cxx
     src/TrackTruthDecoratorAlg.cxx
     src/SoftElectronDecoratorAlg.cxx
     src/SoftElectronTruthDecoratorAlg.cxx
-    src/FoldDecoratorAlg.cxx
     src/GNNAuxTaskDecoratorAlg.cxx
     src/CountIParticleAlg.cxx
     src/CountTrackParticleAlg.cxx

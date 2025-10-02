@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-__doc__ = "To compute corrected layer energies"
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+""" To compute corrected layer energies """
 
 from glob import glob
 import os.path
 import os
 from array import array
-import sys
 from itertools import izip
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser.add_option("-b", "--branches-to-copy", type='string',
                       action='callback',
                       callback=foo_callback,
-                      help="comma separated list of branches to copy from the input tree, you can use \*, do not use spaces")
+                      help=r"comma separated list of branches to copy from the input tree, you can use \*, do not use spaces")
 
     (options, args) = parser.parse_args()
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     try:
         ROOT.egammaLayerRecalibTool
-    except:
+    except Exception:
         raise AttributeError('You have to load egammaLayerRecalibTool package')
 
     prefix = 'el_' if options.particle == 'electron' else 'ph_'

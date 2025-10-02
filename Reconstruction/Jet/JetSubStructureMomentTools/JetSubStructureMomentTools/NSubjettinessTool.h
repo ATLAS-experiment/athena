@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,6 +22,9 @@
 #include "JetSubStructureMomentTools/JetSubStructureMomentToolsBase.h"
 #include "JetSubStructureMomentTools/NSubjettinessHelper.h"
 
+#include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/WriteDecorHandleKeyArray.h"
+
 class NSubjettinessTool :
   public JetSubStructureMomentToolsBase {
     ASG_TOOL_CLASS(NSubjettinessTool, IJetModifier)
@@ -30,14 +33,38 @@ class NSubjettinessTool :
       // Constructor and destructor
       NSubjettinessTool(const std::string& name);
 
-      StatusCode initialize();
+      StatusCode initialize() override;
 
-      int modifyJet(xAOD::Jet &injet) const;
+      StatusCode modify(xAOD::JetContainer& jets) const override;
 
     private:
+      Gaudi::Property<std::string> m_jetContainerName{
+	this, "JetContainer", "", "SG key for the input jet container"};
 
+      /**
+       * --------------------------------------------------------------------------------
+       * Structure to hold all of the necessary moment information for a single set of
+       * NSubjettiness calculations. This includes the prefix and suffix, alpha, and the
+       * necessary decorators.
+       * --------------------------------------------------------------------------------
+       **/
+  
       /// N-subjettiness moments structure
-      struct moments_t;
+      struct moments_t{
+	/// Prefix for decorations
+	std::string prefix;
+
+	/// Suffix for decorations
+	std::string suffix;
+
+	/// Alpha value for calculations
+	float alpha;
+
+	moments_t (float Alpha, const std::string& Prefix)
+	  : prefix (Prefix),
+	    suffix (GetAlphaSuffix(Alpha)),
+	    alpha (Alpha) {}
+      };
 
       /// Configurable as properties
       float m_Alpha;
@@ -45,73 +72,39 @@ class NSubjettinessTool :
       bool m_doDichroic;
 
       /// Map of decorators using alpha as the key
-      std::map< float, moments_t > m_moments;
+      std::vector<std::pair< float, moments_t >> m_moments;
 
-  };
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau1_Keys{
+	this, "Tau1_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau2_Keys{
+	this, "Tau2_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau3_Keys{
+	this, "Tau3_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau4_Keys{
+	this, "Tau4_Keys", {}};
 
-/**
- * --------------------------------------------------------------------------------
- * Structure to hold all of the necessary moment information for a single set of
- * NSubjettiness calculations. This includes the prefix and suffix, alpha, and the
- * necessary decorators.
- * --------------------------------------------------------------------------------
- **/
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau2_ungroomed_Keys{
+	this, "Tau2_ungroomed_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau3_ungroomed_Keys{
+	this, "Tau3_ungroomed_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau4_ungroomed_Keys{
+	this, "Tau4_ungroomed_Keys", {}};
 
-struct NSubjettinessTool::moments_t {
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau1_wta_Keys{
+	this, "Tau1_wta_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau2_wta_Keys{
+	this, "Tau2_wta_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau3_wta_Keys{
+	this, "Tau3_wta_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau4_wta_Keys{
+	this, "Tau4_wta_Keys", {}};
 
-  /// Prefix for decorations
-  std::string prefix;
-
-  /// Alpha value for calculations
-  float alpha;
-
-  /// NSubjettiness decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau1;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau2;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau3;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau4;
-
-  /// NSubjettiness ungroomed decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau2_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau3_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau4_ungroomed;
-
-  /// WTA NSubjettiness decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau1_wta;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau2_wta;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau3_wta;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau4_wta;
-
-  /// WTA NSubjettiness ungroomed decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau2_wta_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau3_wta_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau4_wta_ungroomed;
-
-  moments_t (float Alpha, const std::string& Prefix)
-    : prefix (Prefix),
-      alpha (Alpha)
-  {
-    std::string suffix = GetAlphaSuffix(alpha);
-
-    dec_Tau1 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau1"+suffix);
-    dec_Tau2 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau2"+suffix);
-    dec_Tau3 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau3"+suffix);
-    dec_Tau4 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau4"+suffix);
-
-    dec_Tau2_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau2_ungroomed"+suffix);
-    dec_Tau3_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau3_ungroomed"+suffix);
-    dec_Tau4_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau4_ungroomed"+suffix);
-
-    dec_Tau1_wta = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau1_wta"+suffix);
-    dec_Tau2_wta = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau2_wta"+suffix);
-    dec_Tau3_wta = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau3_wta"+suffix);
-    dec_Tau4_wta = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau4_wta"+suffix);
-
-    dec_Tau2_wta_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau2_wta_ungroomed"+suffix);
-    dec_Tau3_wta_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau3_wta_ungroomed"+suffix);
-    dec_Tau4_wta_ungroomed = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau4_wta_ungroomed"+suffix);
-
-  }
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau2_wta_ungroomed_Keys{
+	this, "Tau2_wta_ungroomed_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau3_wta_ungroomed_Keys{
+	this, "Tau3_wta_ungroomed_Keys", {}};
+      SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_Tau4_wta_ungroomed_Keys{
+	this, "Tau4_wta_ungroomed_Keys", {}};
 
 };
 

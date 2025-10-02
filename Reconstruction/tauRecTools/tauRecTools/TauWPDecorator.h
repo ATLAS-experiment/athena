@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUWPDECORATOR_H
 #define TAURECTOOLS_TAUWPDECORATOR_H
 
 #include "tauRecTools/TauRecToolBase.h"
-
+#include "AsgTools/PropertyWrapper.h"
+#include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauDefs.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKeyArray.h"
 
 #include <utility>
 #include <memory>
@@ -72,30 +74,32 @@ class TauWPDecorator : public TauRecToolBase {
      */ 
     double transformScore(double score, double cutLow, double effLow, double cutHigh, double effHigh) const;
 
-    bool m_useAbsEta; //!< Whether we are flatterning electron veto WP
-    bool m_defineWPs; //!< Whether to decorate the WPs
-    
-    std::string m_scoreName; //!< Name of the original score
-    std::string m_scoreNameTrans; //!< Name of the transformed score
-
-    std::string m_file0p; //!< Calibration file name of 0-prong taus
-    std::string m_file1p; //!< Calibration file name of 1-prong taus
-    std::string m_file2p; //!< Calibration file name of 2-prong taus
-    std::string m_file3p; //!< Calibration file name of 3-prong taus
-
-    std::vector<int> m_EDMWPs; //!< Vector of WPs in the EDM
-    std::vector<float> m_EDMWPEffs0p; //!< Efficiency of each WP in EDM for 0-prong taus
-    std::vector<float> m_EDMWPEffs1p; //!< Efficiency of each WP in EDM for 1-prong taus
-    std::vector<float> m_EDMWPEffs2p; //!< Efficiency of each WP in EDM for 2-prong taus
-    std::vector<float> m_EDMWPEffs3p; //!< Efficiency of each WP in EDM for 3-prong taus
-
-    std::vector<std::string> m_decorWPs; //!< Vector of WPs not in the EDM (to be decorated)
-    std::vector<SG::Accessor<char>> m_charDecors; //!
-    std::vector<float> m_decorWPEffs0p; //!< Efficiency of each WP to be docorated for 0-prong taus
-    std::vector<float> m_decorWPEffs1p; //!< Efficiency of each WP to be docorated for 1-prong taus
-    std::vector<float> m_decorWPEffs2p; //!< Efficiency of each WP to be docorated for 2-prong taus
-    std::vector<float> m_decorWPEffs3p; //!< Efficiency of each WP to be docorated for 3-prong taus
-    
+    Gaudi::Property<bool> m_useAbsEta{this, "UseAbsEta", false, "Whether we are flatterning electron veto WP"};
+    Gaudi::Property<bool> m_defineWPs{this, "DefineWPs", false, "Whether to decorate the WPs"};
+    Gaudi::Property<std::string> m_scoreName{this, "ScoreName", "", "Name of the original score"};
+    Gaudi::Property<std::string> m_scoreNameTrans{this, "NewScoreName", "", "Name of the transformed score"};  
+    Gaudi::Property<std::string> m_file0p{this, "flatteningFile0Prong", "", "Calibration file name of 0-prong taus"};
+    Gaudi::Property<std::string> m_file1p{this, "flatteningFile1Prong", "", "Calibration file name of 1-prong taus"};
+    Gaudi::Property<std::string> m_file2p{this, "flatteningFile2Prong", "", "Calibration file name of 2-prong taus"};
+    Gaudi::Property<std::string> m_file3p{this, "flatteningFile3Prong", "", "Calibration file name of 3-prong taus"}; 
+    Gaudi::Property<std::vector<int>> m_EDMWPs{this, "CutEnumVals", {}, "Vector of WPs in the EDM"};
+    Gaudi::Property<std::vector<float>> m_EDMWPEffs0p{this, "SigEff0P", {}, "Efficiency of each WP in EDM for 0-prong taus"};
+    Gaudi::Property<std::vector<float>> m_EDMWPEffs1p{this, "SigEff1P", {}, "Efficiency of each WP in EDM for 1-prong taus"};
+    Gaudi::Property<std::vector<float>> m_EDMWPEffs2p{this, "SigEff2P", {}, "Efficiency of each WP in EDM for 2-prong taus"};
+    Gaudi::Property<std::vector<float>> m_EDMWPEffs3p{this, "SigEff3P", {}, "Efficiency of each WP in EDM for 3-prong taus"}; 
+    Gaudi::Property<std::vector<std::string>> m_decorWPs{this, "DecorWPNames", {}, "Name of WPs"};
+    Gaudi::Property<std::vector<float>> m_decorWPEffs0p{this, "DecorWPCutEffs0P", {}, "Efficiency of each WP to be docorated for 0-prong taus"};
+    Gaudi::Property<std::vector<float>> m_decorWPEffs1p{this, "DecorWPCutEffs1P", {}, "Efficiency of each WP to be docorated for 1-prong taus"};
+    Gaudi::Property<std::vector<float>> m_decorWPEffs2p{this, "DecorWPCutEffs2P", {}, "Efficiency of each WP to be docorated for 2-prong taus"};
+    Gaudi::Property<std::vector<float>> m_decorWPEffs3p{this, "DecorWPCutEffs3P", {}, "Efficiency of each WP to be docorated for 3-prong taus"};        
+    // for WPs not implemented in the EDM (i.e. not encoded in IsTauFlag)
+    // use Accessors unless necessary
+    std::vector<SG::AuxElement::Accessor<char>> m_charDecors;
+    // when data handles are required (currently in tau trigger offline monitoring), need to use Write(Read)DecorHandleKeys
+    // redundant with above accessors, will be improved in the future but has implications for DAOD workflow
+    Gaudi::Property<std::string> m_tauContainerName{this, "TauContainerName", "", "Name of TauJetContainer, must be set when using "};
+    SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_decorHandleKeys {this, "DecorHandleKeys",{},"Name of WPs to be decorated"};
+   
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_aveIntPerXKey {this, 
         "averageInteractionsPerCrossingKey", 
         "EventInfo.averageInteractionsPerCrossing",

@@ -9,7 +9,7 @@
 #include "IDependencyReporter.h"
 
 #include "AsgTools/IAsgTool.h"
-#include "xAODJet/JetFwd.h"
+#include "xAODBase/IParticle.h"
 
 class IJetTagDecorator : virtual public asg::IAsgTool,
                          virtual public IDependencyReporter
@@ -22,7 +22,7 @@ public:
   virtual ~IJetTagDecorator() { };
 
   /// Method to decorate a jet.
-  virtual void decorate(const xAOD::Jet& jet) const = 0;
+  virtual void decorate(const xAOD::IParticle& i_jet) const = 0;
 
 };
 

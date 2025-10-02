@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/src/Tile_SuperCell_ID.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -26,7 +24,7 @@
 
 
 Tile_SuperCell_ID::Tile_SuperCell_ID()
-  : Tile_Base_ID ("Tile_SuperCell_ID", true)
+  : Tile_Base_ID ("Tile_SuperCell_ID", "tile_supercell", true)
 {
 }
 
@@ -47,7 +45,7 @@ int Tile_SuperCell_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   }
 
   // init base object
-  if (Tile_Base_ID::initialize_base_from_dictionary(dict_mgr, "tile_supercell"))
+  if (Tile_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
     return (1);
 
   return 0;

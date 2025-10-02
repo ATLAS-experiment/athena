@@ -32,7 +32,10 @@ GaussianSumFitterTool::performFit(const EventContext& ctx,
     return nullptr;
   }
 
-  ActsTrk::MutableTrackContainer tracks;
+  ActsTrk::MutableTrackBackend trackContainerBackEnd;
+  ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
+  ActsTrk::MutableTrackContainer tracks( std::move(trackContainerBackEnd),
+                                         std::move(multiTrajBackEnd));
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
 			      initialParams, gsfOptions, tracks);

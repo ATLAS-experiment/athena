@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPulseShape.h"
@@ -77,7 +77,7 @@ StatusCode LArPulseShape::initialize() {
     const int sampl = m_calo_id->sampling( id );
     m_OffId = (int)(id.get_identifier32().get_compact());
     std::string idoff_str = std::to_string(m_OffId);
-    m_id_char = (idoff_str).c_str();   
+    const char* id_char = (idoff_str).c_str();
    
     if (m_calo_id->is_em(id)) {    // EM calo
       if (m_calo_id->is_em_barrel(id)) { //EMB
@@ -91,28 +91,28 @@ StatusCode LArPulseShape::initialize() {
             SmartDataPtr<NTuple::Directory> dir_EMBA_0(ntupleSvc(),"/NTUPLES/PULSE/EMBA/Presampler");
   	    if ( !dir_EMBA_0 ) dir_EMBA_0 = ntupleSvc()->createDirectory(PULSE,"EMBA/Presampler");
             if ( !dir_EMBA_0 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));
+	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==1){ // if it's EMBA Sampling1
   	    SmartDataPtr<NTuple::Directory> dir_EMBA_1(ntupleSvc(),"/NTUPLES/PULSE/EMBA/Sampling1");
   	    if ( !dir_EMBA_1 ) dir_EMBA_1 = ntupleSvc()->createDirectory(PULSE,"EMBA/Sampling1");
   	    if ( !dir_EMBA_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }	     
 	  
 	  if (sampl==2){ // if it's EMBA Sampling2
   	    SmartDataPtr<NTuple::Directory> dir_EMBA_2(ntupleSvc(),"/NTUPLES/PULSE/EMBA/Sampling2");
   	    if ( !dir_EMBA_2 ) dir_EMBA_2 = ntupleSvc()->createDirectory(PULSE,"EMBA/Sampling2");
   	    if ( !dir_EMBA_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
- 	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==3){ // if it's EMBA Sampling3
   	    SmartDataPtr<NTuple::Directory> dir_EMBA_3(ntupleSvc(),"/NTUPLES/PULSE/EMBA/Sampling3");
   	    if ( !dir_EMBA_3 ) dir_EMBA_3 = ntupleSvc()->createDirectory(PULSE,"EMBA/Sampling3");
   	    if ( !dir_EMBA_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  		  
         } else {  // C-side
@@ -124,28 +124,28 @@ StatusCode LArPulseShape::initialize() {
             SmartDataPtr<NTuple::Directory> dir_EMBC_0(ntupleSvc(),"/NTUPLES/PULSE/EMBC/Presampler");
   	    if ( !dir_EMBC_0 ) dir_EMBC_0 = ntupleSvc()->createDirectory(PULSE,"EMBC/Presampler");
             if ( !dir_EMBC_0 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-            m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));
+            m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==1){ // if it's EMBC Sampling1
   	    SmartDataPtr<NTuple::Directory> dir_EMBC_1(ntupleSvc(),"/NTUPLES/PULSE/EMBC/Sampling1");
   	    if ( !dir_EMBC_1 ) dir_EMBC_1 = ntupleSvc()->createDirectory(PULSE,"EMBC/Sampling1");
   	    if ( !dir_EMBC_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }	     
 	  
 	  if (sampl==2){ // if it's EMBC Sampling2
   	    SmartDataPtr<NTuple::Directory> dir_EMBC_2(ntupleSvc(),"/NTUPLES/PULSE/EMBC/Sampling2");
   	    if ( !dir_EMBC_2 ) dir_EMBC_2 = ntupleSvc()->createDirectory(PULSE,"EMBC/Sampling2");
   	    if ( !dir_EMBC_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
- 	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==3){ // if it's EMBC Sampling3
   	    SmartDataPtr<NTuple::Directory> dir_EMBC_3(ntupleSvc(),"/NTUPLES/PULSE/EMBC/Sampling3");
   	    if ( !dir_EMBC_3 ) dir_EMBC_3 = ntupleSvc()->createDirectory(PULSE,"EMBC/Sampling3");
   	    if ( !dir_EMBC_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  		     
 	} 
@@ -167,28 +167,28 @@ StatusCode LArPulseShape::initialize() {
    
             //stopper++;
 	    //if (stopper<=10) 
-	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));
+	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==1){ // if it's EMECA Sampling1
   	    SmartDataPtr<NTuple::Directory> dir_EMECA_1(ntupleSvc(),"/NTUPLES/PULSE/EMECA/Sampling1");
   	    if ( !dir_EMECA_1 ) dir_EMECA_1 = ntupleSvc()->createDirectory(PULSE,"EMECA/Sampling1");
   	    if ( !dir_EMECA_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }	     
 	  
 	  if (sampl==2){ // if it's EMECA Sampling2
   	    SmartDataPtr<NTuple::Directory> dir_EMECA_2(ntupleSvc(),"/NTUPLES/PULSE/EMECA/Sampling2");
   	    if ( !dir_EMECA_2 ) dir_EMECA_2 = ntupleSvc()->createDirectory(PULSE,"EMECA/Sampling2");
   	    if ( !dir_EMECA_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
- 	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==3){ // if it's EMECA Sampling3
   	    SmartDataPtr<NTuple::Directory> dir_EMECA_3(ntupleSvc(),"/NTUPLES/PULSE/EMECA/Sampling3");
   	    if ( !dir_EMECA_3 ) dir_EMECA_3 = ntupleSvc()->createDirectory(PULSE,"EMECA/Sampling3");
   	    if ( !dir_EMECA_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  		  
         } else {  // C-side
@@ -200,28 +200,28 @@ StatusCode LArPulseShape::initialize() {
             SmartDataPtr<NTuple::Directory> dir_EMECC_0(ntupleSvc(),"/NTUPLES/PULSE/EMECC/Presampler");
   	    if ( !dir_EMECC_0 ) dir_EMECC_0 = ntupleSvc()->createDirectory(PULSE,"EMECC/Presampler");
             if ( !dir_EMECC_0 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-            m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));
+            m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==1){ // if it's EMECC Sampling1
   	    SmartDataPtr<NTuple::Directory> dir_EMECC_1(ntupleSvc(),"/NTUPLES/PULSE/EMECC/Sampling1");
   	    if ( !dir_EMECC_1 ) dir_EMECC_1 = ntupleSvc()->createDirectory(PULSE,"EMECC/Sampling1");
   	    if ( !dir_EMECC_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }	     
 	  
 	  if (sampl==2){ // if it's EMECC Sampling2
   	    SmartDataPtr<NTuple::Directory> dir_EMECC_2(ntupleSvc(),"/NTUPLES/PULSE/EMECC/Sampling2");
   	    if ( !dir_EMECC_2 ) dir_EMECC_2 = ntupleSvc()->createDirectory(PULSE,"EMECC/Sampling2");
   	    if ( !dir_EMECC_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
- 	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  
 	  if (sampl==3){ // if it's EMECC Sampling3
   	    SmartDataPtr<NTuple::Directory> dir_EMECC_3(ntupleSvc(),"/NTUPLES/PULSE/EMECC/Sampling3");
   	    if ( !dir_EMECC_3 ) dir_EMECC_3 = ntupleSvc()->createDirectory(PULSE,"EMECC/Sampling3");
   	    if ( !dir_EMECC_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));			    
+  	    m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
   	  }
 	  		     
 	}       
@@ -243,28 +243,28 @@ StatusCode LArPulseShape::initialize() {
     	  SmartDataPtr<NTuple::Directory> dir_HECA_0(ntupleSvc(),"/NTUPLES/PULSE/HECA/Layer1");
           if ( !dir_HECA_0 ) dir_HECA_0 = ntupleSvc()->createDirectory(PULSE,"HECA/Layer1");
     	  if ( !dir_HECA_0 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         
         if (sampl==1){
           SmartDataPtr<NTuple::Directory> dir_HECA_1(ntupleSvc(),"/NTUPLES/PULSE/HECA/Layer2");
           if ( !dir_HECA_1 ) dir_HECA_1 = ntupleSvc()->createDirectory(PULSE,"HECA/Layer2");
           if ( !dir_HECA_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }	   
         
         if (sampl==2){
           SmartDataPtr<NTuple::Directory> dir_HECA_2(ntupleSvc(),"/NTUPLES/PULSE/HECA/Layer3");
           if ( !dir_HECA_2 ) dir_HECA_2 = ntupleSvc()->createDirectory(PULSE,"HECA/Layer3");
           if ( !dir_HECA_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         
         if (sampl==3){
           SmartDataPtr<NTuple::Directory> dir_HECA_3(ntupleSvc(),"/NTUPLES/PULSE/HECA/Layer4");
           if ( !dir_HECA_3 ) dir_HECA_3 = ntupleSvc()->createDirectory(PULSE,"HECA/Layer4");
           if ( !dir_HECA_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         		
       } else {  // C-side
@@ -276,28 +276,28 @@ StatusCode LArPulseShape::initialize() {
     	  SmartDataPtr<NTuple::Directory> dir_HECC_0(ntupleSvc(),"/NTUPLES/PULSE/HECC/Layer1");
           if ( !dir_HECC_0 ) dir_HECC_0 = ntupleSvc()->createDirectory(PULSE,"HECC/Layer1");
     	  if ( !dir_HECC_0 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-    	  m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" )));
+    	  m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         
         if (sampl==1){
           SmartDataPtr<NTuple::Directory> dir_HECC_1(ntupleSvc(),"/NTUPLES/PULSE/HECC/Layer2");
           if ( !dir_HECC_1 ) dir_HECC_1 = ntupleSvc()->createDirectory(PULSE,"HECC/Layer2");
           if ( !dir_HECC_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }	   
         
         if (sampl==2){ 
           SmartDataPtr<NTuple::Directory> dir_HECC_2(ntupleSvc(),"/NTUPLES/PULSE/HECC/Layer3");
           if ( !dir_HECC_2 ) dir_HECC_2 = ntupleSvc()->createDirectory(PULSE,"HECC/Layer3");
           if ( !dir_HECC_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         
         if (sampl==3){ 
           SmartDataPtr<NTuple::Directory> dir_HECC_3(ntupleSvc(),"/NTUPLES/PULSE/HECC/Layer4");
           if ( !dir_HECC_3 ) dir_HECC_3 = ntupleSvc()->createDirectory(PULSE,"HECC/Layer4");
           if ( !dir_HECC_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         		   
       }       
@@ -314,21 +314,21 @@ StatusCode LArPulseShape::initialize() {
           SmartDataPtr<NTuple::Directory> dir_FCALA_1(ntupleSvc(),"/NTUPLES/PULSE/FCALA/Sampling1");
           if ( !dir_FCALA_1 ) dir_FCALA_1 = ntupleSvc()->createDirectory(PULSE,"FCALA/Sampling1");
           if ( !dir_FCALA_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }	   
         
         if (sampl==2){ // if it's FCALA Sampling2
           SmartDataPtr<NTuple::Directory> dir_FCALA_2(ntupleSvc(),"/NTUPLES/PULSE/FCALA/Sampling2");
           if ( !dir_FCALA_2 ) dir_FCALA_2 = ntupleSvc()->createDirectory(PULSE,"FCALA/Sampling2");
           if ( !dir_FCALA_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         
         if (sampl==3){ // if it's FCALA Sampling3
           SmartDataPtr<NTuple::Directory> dir_FCALA_3(ntupleSvc(),"/NTUPLES/PULSE/FCALA/Sampling3");
           if ( !dir_FCALA_3 ) dir_FCALA_3 = ntupleSvc()->createDirectory(PULSE,"FCALA/Sampling3");
           if ( !dir_FCALA_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         	
       } else {  // C-side
@@ -341,21 +341,21 @@ StatusCode LArPulseShape::initialize() {
           SmartDataPtr<NTuple::Directory> dir_FCALC_1(ntupleSvc(),"/NTUPLES/PULSE/FCALC/Sampling1");
           if ( !dir_FCALC_1 ) dir_FCALC_1 = ntupleSvc()->createDirectory(PULSE,"FCALC/Sampling1");
           if ( !dir_FCALC_1 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }	   
         
         if (sampl==2){ // if it's FCALC Sampling2
           SmartDataPtr<NTuple::Directory> dir_FCALC_2(ntupleSvc(),"/NTUPLES/PULSE/FCALC/Sampling2");
           if ( !dir_FCALC_2 ) dir_FCALC_2 = ntupleSvc()->createDirectory(PULSE,"FCALC/Sampling2");
           if ( !dir_FCALC_2 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
         
         if (sampl==3){ // if it's FCALC Sampling3
           SmartDataPtr<NTuple::Directory> dir_FCALC_3(ntupleSvc(),"/NTUPLES/PULSE/FCALC/Sampling3");
           if ( !dir_FCALC_3 ) dir_FCALC_3 = ntupleSvc()->createDirectory(PULSE,"FCALC/Sampling3");
           if ( !dir_FCALC_3 ) ATH_MSG_ERROR ( " failed to get ntuple directory" );
-          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(m_id_char, m_id_char, 40, -4 , 36, "s" ))); 			  
+          m_cellHistos.insert(std::make_pair(m_OffId, new TProfile(id_char, id_char, 40, -4 , 36, "s" )));
         }
       }     
     } // end FCAL     

@@ -73,7 +73,10 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     
     if (MuonMgrData->mmIdHelper() && MuonMgrData->stgcIdHelper()) {
         BuildNSWReadoutGeometry theBuilder{};
-        bool success=false;
+        if(!theBuilder.BuildReadoutGeometry(MuonMgrData.get())){
+            ATH_MSG_FATAL("unable to add NSW ReadoutGeometry in the MuonDetectorManager in conditions store");
+            return StatusCode::FAILURE;
+        }
         if(m_applyMmPassivation){           
             SG::ReadCondHandle<NswPassivationDbData> readMmPass{m_condMmPassivKey, ctx};
             if(!readMmPass.isValid()){
@@ -81,14 +84,7 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
               return StatusCode::FAILURE;
             }
             writeHandle.addDependency(readMmPass);
-            success = theBuilder.BuildReadoutGeometry(MuonMgrData.get(), readMmPass.cptr());
-        }
-        else {
-            success = theBuilder.BuildReadoutGeometry(MuonMgrData.get(), nullptr);
-        }
-        if(!success){
-            ATH_MSG_FATAL("unable to add NSW ReadoutGeometry in the MuonDetectorManager in conditions store");
-            return StatusCode::FAILURE;
+            MuonMgrData->setMMPassivation(readMmPass.cptr());
         }
     }
 

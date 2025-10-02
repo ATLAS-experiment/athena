@@ -1,7 +1,8 @@
 """Define functions for event bookkeeping configuration using ComponentAccumulator
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
 
@@ -38,6 +39,13 @@ def CutFlowSvcCfg(flags, **kwargs):
     # TODO: different sequence?
     acc.addEventAlgo(CompFactory.AllExecutedEventsCounterAlg())
 
+    return acc
+
+
+def AllWrittenEventsCounterAlgCfg(flags):
+    """AllWrittenEventsCounterAlg configuration"""
+    acc = ComponentAccumulator(CompFactory.AthSequencer("AthOutSeq", StopOverride=True))
+    acc.addEventAlgo(CompFactory.AllWrittenEventsCounterAlg())
     return acc
 
 

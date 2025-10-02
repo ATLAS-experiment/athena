@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // DataHandleBase.cxx 
@@ -137,7 +137,7 @@ DataHandleBase::setState(SG::ConstProxyIterator &itr,
 
   // scan from itr to itrEnd and set m_itr to the first valid iterator:
 
-  for (; itr != itrEnd; itr++) {
+  for (; itr != itrEnd; ++itr) {
     if (itr->second->isValid()) {
       m_itr = itr;
       m_proxy = m_itr->second;

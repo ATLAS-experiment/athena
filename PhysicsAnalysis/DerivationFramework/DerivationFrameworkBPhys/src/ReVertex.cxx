@@ -9,14 +9,14 @@
 //
 // ----------------------------------------------------------------------------
 // ****************************************************************************
-#include "DerivationFrameworkBPhys/ReVertex.h"
+#include "ReVertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
 
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "BPhysPVTools.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
@@ -27,7 +27,7 @@ using namespace DerivationFramework;
 ReVertex::ReVertex(const std::string& t,
                    const std::string& n,
                    const IInterface* p) :
-    AthAlgTool(t,n,p), m_vertexEstimator("InDet::VertexPointEstimator"), m_iVertexFitter("Trk::TrkVKalVrtFitter"),
+    base_class(t,n,p), m_vertexEstimator("InDet::VertexPointEstimator"), m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_massConst(0.),
     m_totalMassConst(0.),
     m_v0Tools("Trk::V0Tools"),
@@ -39,7 +39,6 @@ ReVertex::ReVertex(const std::string& t,
     m_useAdditionalTrack(false)
 {
 
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty("TrackIndices", m_TrackIndices);
     declareProperty("TrkVertexFitterTool", m_iVertexFitter);
     declareProperty("VertexPointEstimator",m_vertexEstimator);
@@ -53,6 +52,7 @@ ReVertex::ReVertex(const std::string& t,
    
     declareProperty("V0Tools"               , m_v0Tools);
     declareProperty("PVRefitter"            , m_pvRefitter);
+    declareProperty("DefaultPVContainerName", m_defaultPVContainerName = "PrimaryVertices");
     declareProperty("PVContainerName"       , m_pvContainerName        = "PrimaryVertices");
     declareProperty("RefPVContainerName"    , m_refPVContainerName     = "RefittedPrimaryVertices");
 
@@ -97,6 +97,7 @@ StatusCode ReVertex::initialize() {
     ATH_CHECK(m_OutputContainerName.initialize());
     ATH_CHECK(m_inputContainerName.initialize());
     ATH_CHECK(m_trackContainer.initialize());
+    ATH_CHECK(m_defaultPVContainerName.initialize());
     ATH_CHECK(m_pvContainerName.initialize());
     ATH_CHECK(m_refPVContainerName.initialize());
     ATH_CHECK(m_eventInfo_key.initialize());
@@ -120,6 +121,9 @@ StatusCode ReVertex::addBranches() const {
     //----------------------------------------------------
     // retrieve primary vertices
     //----------------------------------------------------
+    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_defaultPVContainerName);
+    ATH_CHECK(defaultPVContainer.isValid());
+
     SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_pvContainerName);
     ATH_CHECK(pvContainer.isValid());
 
@@ -187,7 +191,12 @@ StatusCode ReVertex::addBranches() const {
           ATH_CHECK(helper.FillCandwithRefittedVertices(vtxContainer.ptr(), pvContainer.cptr(), refPvContainer.ptr(), &(*m_pvRefitter) ,  m_PV_max, m_DoVertexType));
         }
      }else{
-         if(vtxContainer->size() >0) ATH_CHECK(helper.FillCandExistingVertices(vtxContainer.ptr(), pvContainer.cptr(), m_DoVertexType));
+      if(pvContainer->size()==0) {
+	if(vtxContainer->size() >0) ATH_CHECK(helper.FillCandExistingVertices(vtxContainer.ptr(), defaultPVContainer.cptr(), m_DoVertexType));
+      }
+      else {
+	if(vtxContainer->size() >0) ATH_CHECK(helper.FillCandExistingVertices(vtxContainer.ptr(), pvContainer.cptr(), m_DoVertexType));
+      }
      }
     }
 

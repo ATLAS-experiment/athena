@@ -20,9 +20,9 @@ StatusCode ParticleLevelPtEtaPhiDecoratorAlg::execute(const EventContext &ctx) c
   SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_particlesKey, ctx);
 
   // decorators
-  static const SG::AuxElement::Decorator<float> dec_pt("pt");
-  static const SG::AuxElement::Decorator<float> dec_eta("eta");
-  static const SG::AuxElement::Decorator<float> dec_phi("phi");
+  static const SG::Decorator<float> dec_pt("pt");
+  static const SG::Decorator<float> dec_eta("eta");
+  static const SG::Decorator<float> dec_phi("phi");
 
   for (const auto* particle : *particles) {
 

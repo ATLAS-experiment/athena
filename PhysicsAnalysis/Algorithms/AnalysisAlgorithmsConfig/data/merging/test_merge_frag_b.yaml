@@ -1,0 +1,7 @@
+foo:
+  alpha: 2
+  beta: B
+bar:
+  rate: 0.05
+nums: [3]
+only_in_b: true

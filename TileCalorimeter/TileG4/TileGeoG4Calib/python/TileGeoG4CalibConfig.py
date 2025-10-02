@@ -10,7 +10,7 @@ def TileGeoG4CalibSDCfg(flags, name="TileGeoG4CalibSD", **kwargs):
     kwargs.setdefault("OutputCollectionNames", ["TileHitVec", "TileCalibHitActiveCell", "TileCalibHitInactiveCell", "TileCalibHitDeadMaterial"] )
 
     result = ComponentAccumulator()
-    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileGeoG4SDCalcCfg(flags)).name )
+    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileGeoG4SDCalcCfg(flags, ["TileHitVec"])) )
 
     result.setPrivateTools(CompFactory.TileGeoG4CalibSDTool(name, **kwargs))
     return result
@@ -21,7 +21,7 @@ def TileCTBGeoG4CalibSDCfg(flags, name="TileCTBGeoG4CalibSD", **kwargs):
     kwargs.setdefault("OutputCollectionNames", ["TileHitVec", "TileCalibHitActiveCell", "TileCalibHitInactiveCell", "TileCalibHitDeadMaterial"] )
 
     result = ComponentAccumulator()
-    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileCTBGeoG4SDCalcCfg(flags)).name )
+    kwargs.setdefault("TileCalculator", result.getPrimaryAndMerge(TileCTBGeoG4SDCalcCfg(flags, ["TileHitVec"])) )
 
     result.setPrivateTools(CompFactory.TileGeoG4CalibSDTool(name, **kwargs))
     return result

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 namespace InDet {
 template <RobustTrackingGeometryBuilderImpl::ToolType type,
@@ -255,10 +255,10 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
   // first the beampipe volume
   Trk::TrackingVolume* beamPipeVolume = nullptr;
   // the Volume Bounds
-  Trk::CylinderVolumeBounds* beamPipeBounds =
-      new Trk::CylinderVolumeBounds(overallRmin, overallExtendZ);
+  auto  beamPipeBounds =
+      std::make_shared<Trk::CylinderVolumeBounds>(overallRmin, overallExtendZ);
   // BinnedArray needed
-  Trk::BinnedArray<Trk::Layer>* beamPipeLayerArray = nullptr;
+  std::unique_ptr<Trk::BinnedArray<Trk::Layer>> beamPipeLayerArray = nullptr;
 
   std::unique_ptr<const std::vector<Trk::CylinderLayer*> > beamPipeVecPtr =
       nullptr;
@@ -275,7 +275,7 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
   // create the TrackingVolume
   beamPipeVolume =
       new Trk::TrackingVolume(nullptr, beamPipeBounds, *m_materialProperties,
-                              beamPipeLayerArray, nullptr, "InDet::BeamPipe");
+                              std::move(beamPipeLayerArray), nullptr, "InDet::BeamPipe");
   // set the color code
   beamPipeVolume->registerColorCode(46);
 
@@ -516,7 +516,7 @@ RobustTrackingGeometryBuilderImpl::trackingGeometryImpl(
     idVolumes.push_back(centralEnclosure);
 
   std::string volumeName =
-      enclose ? "InDet::Detectors::BpPixSctTrt" : m_exitVolume;
+      enclose ? "InDet::Detectors::BpPixSctTrt" : m_exitVolume.value();
 
   ATH_MSG_VERBOSE("       -> inserting beam pipe into detectors.");
 

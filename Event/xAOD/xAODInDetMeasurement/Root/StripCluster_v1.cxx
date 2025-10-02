@@ -22,6 +22,10 @@ xAOD::VectorMap<3> xAOD::StripCluster_v1::globalPosition() {
     return VectorMap<3>{values.data()};
 }
 
+void xAOD::StripCluster_v1::setRDOlist(std::vector<Identifier::value_type>&& rdoList) {
+  rdoListAcc(*this) = std::move(rdoList);
+}
+
 void xAOD::StripCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
     std::vector<Identifier::value_type> rdos(rdoList.size());
     for (std::size_t i(0); i < rdos.size(); ++i) {

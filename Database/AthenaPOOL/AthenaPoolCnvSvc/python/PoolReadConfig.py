@@ -1,15 +1,17 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
+import ROOT
 
 
 def EventSelectorAthenaPoolCfg(flags):
     result = ComponentAccumulator()
     evSel = CompFactory.EventSelectorAthenaPool("EventSelector",
                                                 InputCollections=flags.Input.Files,
-                                                SkipEvents=flags.Exec.SkipEvents)
+                                                SkipEvents=flags.Exec.SkipEvents,
+                                                ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
     if flags.Input.OverrideRunNumber:
         if not flags.Input.RunAndLumiOverrideList:
             DataRunNumber = -1
@@ -68,14 +70,29 @@ def EventSelectorAthenaPoolCfg(flags):
 
 def PoolReadCfg(flags):
     """
-    Creates a ComponentAccumulator instance containing the 
+    Creates a ComponentAccumulator instance containing the
     athena services required for POOL file reading
     """
 
     result = ComponentAccumulator()
 
-    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg, AthenaPoolAddressProviderSvcCfg
-    result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
+    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolAddressProviderSvcCfg
+    if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+        result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
+    else:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
+
+    # Suppress ROOT warnings about old I/O classes.
+    from AthenaServices.ROOTMessageFilterSvcConfig import ROOTMessageFilterSvcCfg
+    result.merge(ROOTMessageFilterSvcCfg(flags,
+                                         SuppressionRules=[('TClass::Init',
+                                                            '.*DataHeader.*_p[12].*',
+                                                            ROOT.kWarning),
+                                                            ('TClass::Init',
+                                                            '.*PoolToken_p1.*',
+                                                            ROOT.kWarning)]))
 
     if flags.Input.SecondaryFiles:
         skipEventsPrimary = flags.Exec.SkipEvents
@@ -135,7 +152,7 @@ def PoolReadCfg(flags):
             except ImportError:
                 #Looks like running on AthSimulation or AthAnalysis ... ignore AODFix
                 pass
-                
+
 
 
     result.setAppProperty("EvtSel", evSel.getFullJobOptName())

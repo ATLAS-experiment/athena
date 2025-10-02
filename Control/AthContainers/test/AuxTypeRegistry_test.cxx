@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeRegistry_test.cxx
@@ -73,8 +73,8 @@ class AuxVectorData_test
 public:
   using AuxVectorData::setStore;
 
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 20; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 20; }
 };
 
 
@@ -310,7 +310,7 @@ struct FacTest1DynFac
   : public SG::AuxTypeVectorFactory<FacTest1>
 {
 public:
-  virtual bool isDynamic() const { return true; }
+  virtual bool isDynamic() const override { return true; }
 };
 
 
@@ -347,7 +347,7 @@ struct FacTest2DynFac
   : public SG::AuxTypeVectorFactory<FacTest2>
 {
 public:
-  virtual bool isDynamic() const { return true; }
+  virtual bool isDynamic() const override { return true; }
 };
 
 

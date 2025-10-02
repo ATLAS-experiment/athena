@@ -20,7 +20,7 @@ StatusCode SmearingCalibStep::initialize(){
 
     ATH_MSG_DEBUG ("Initializing " << name() );
 
-    ATH_MSG_INFO("Reading from " << m_jetStartScale << " and writing to " << m_jetOutScale);
+    ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
 
     // Check the specified smearing type    
     if (m_smearType == "")
@@ -120,8 +120,9 @@ StatusCode SmearingCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
     for(const auto jet: jets){
 
-    const xAOD::JetFourMom_t jetStartP4 = jet->jetP4();
-    
+    const xAOD::JetFourMom_t jetStartP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
+    jet->setJetP4(jetStartP4);
+
     double sigmaSmear = 0;
     if (getSigmaSmear(*jet, jc, sigmaSmear).isFailure())
         return StatusCode::FAILURE;

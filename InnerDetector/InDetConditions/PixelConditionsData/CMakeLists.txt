@@ -35,6 +35,18 @@ atlas_add_test( PixelChargeCalibParameters_test
                 LINK_LIBRARIES PixelConditionsData ${Boost_LIBRARIES}
                 POST_EXEC_SCRIPT nopost.sh)
                 
+atlas_add_test( PixelDCSHVData_test
+                SOURCES test/PixelDCSHVData_test.cxx 
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES PixelConditionsData ${Boost_LIBRARIES}
+                POST_EXEC_SCRIPT nopost.sh)
+                
+atlas_add_test( ITkPixSimulationParameters_test
+                SOURCES test/ITkPixSimulationParameters_test.cxx 
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES PixelConditionsData ${Boost_LIBRARIES}
+                POST_EXEC_SCRIPT nopost.sh)
+                
 atlas_install_runtime (test/*.txt)
 
 

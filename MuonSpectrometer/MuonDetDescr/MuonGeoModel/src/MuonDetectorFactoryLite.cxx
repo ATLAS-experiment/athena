@@ -71,7 +71,7 @@ namespace MuonGM {
         std::string vName = pV->getLogVol()->getName();
         if (key.starts_with("sMD")) {
           std::string sName = vName.substr(4,4);
-          std::unique_ptr<MuonGM::MMReadoutElement> re = std::make_unique<MuonGM::MMReadoutElement>(pV, sName, ec*eta,phi,ml,m_manager,nullptr);
+          std::unique_ptr<MuonGM::MMReadoutElement> re = std::make_unique<MuonGM::MMReadoutElement>(pV, sName, ec*eta,phi,ml,m_manager);
           re->initDesign();
           m_manager->addMMReadoutElement(std::move(re));
         }

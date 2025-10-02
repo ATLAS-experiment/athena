@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@
 
 #define SG_GET_VECTOR(RETTYPE, TRYTYPE) do { if (m_evtStore->contains<std::vector<TRYTYPE> >(varname)) { \
   const std::vector<TRYTYPE> *val = nullptr; \
-  StatusCode sc = m_evtStore->retrieve<std::vector<TRYTYPE> >((const std::vector<TRYTYPE>*&)val, varname); \
+  StatusCode sc = m_evtStore->retrieve<std::vector<TRYTYPE> >(val, varname); \
   if (sc.isFailure()) { \
     throw std::runtime_error("Couldn't retrieve (std::vector<" #TRYTYPE ">) " + varname); \
   } \

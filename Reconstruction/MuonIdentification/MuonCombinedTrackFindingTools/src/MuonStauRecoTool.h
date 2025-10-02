@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSTAURECOTOOL_H
@@ -11,11 +11,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
 #include "MuidInterfaces/ICombinedMuonTrackBuilder.h"
-#include "MuonClusterization/RpcHitClustering.h"
 #include "MuonCombinedEvent/MuGirlLowBetaTag.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedInDetExtensionTool.h"
 #include "MuonCombinedToolInterfaces/IMuonLayerSegmentMatchingTool.h"
@@ -42,6 +39,7 @@
 
 namespace Muon {
     class RpcClusterOnTrack;
+    struct RpcClusterObj;
 }
 
 namespace MuonCombined {
@@ -227,7 +225,7 @@ namespace MuonCombined {
         float calculateBeta(const float time, const float dist) const;
 
         /** storegate */
-        SG::ReadHandleKey<Muon::MuonLayerHoughTool::HoughDataPerSectorVec> m_houghDataPerSectorVecKey{
+        SG::ReadHandleKey<Muon::HoughDataPerSectorVec> m_houghDataPerSectorVecKey{
             this, "Key_MuonLayerHoughToolHoughDataPerSectorVec", "HoughDataPerSectorVec", "HoughDataPerSectorVec key"};
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

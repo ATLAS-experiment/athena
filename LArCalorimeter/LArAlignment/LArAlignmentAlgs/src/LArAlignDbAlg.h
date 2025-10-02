@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARALIGNMENTALGS_LARALIGNDBALG_H
@@ -23,9 +23,9 @@ class LArAlignDbAlg: public AthAlgorithm
   LArAlignDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
   ~LArAlignDbAlg();
   
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
   
  private:
 
@@ -36,15 +36,15 @@ class LArAlignDbAlg: public AthAlgorithm
   
   StatusCode registerIOV(const CLID& clid);
   
-  BooleanProperty           m_writeCondObjs;
-  BooleanProperty           m_regIOV;
-  StringProperty            m_streamName;
-  StringProperty            m_inpFile;
-  StringProperty            m_outpFile;
-  StringProperty            m_outpTag;
-  
+  BooleanProperty           m_writeCondObjs{this, "WriteCondObjs", false};
+  BooleanProperty           m_regIOV{this, "RegisterIOV", false};
+  StringProperty            m_streamName{this, "StreamName", "CondStream1"};
+  StringProperty            m_inpFile{this, "InpFile", "LArAlign.inp"};
+  StringProperty            m_outpFile{this, "OutpFile", "LArAlign-TEST.pool.root"};
+  StringProperty            m_outpTag{this, "TagName", "LARAlign-TEST"};
+
   ServiceHandle<IIOVRegistrationSvc>   m_regSvc;
-  ToolHandle<IAthenaOutputStreamTool>  m_streamer;  
+  ToolHandle<IAthenaOutputStreamTool>  m_streamer;
 };
 
 #endif // LARALIGNDBALG_LARALIGNDBALG_H

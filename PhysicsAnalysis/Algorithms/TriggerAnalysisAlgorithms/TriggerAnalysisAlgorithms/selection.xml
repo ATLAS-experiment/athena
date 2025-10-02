@@ -1,8 +1,0 @@
-<lcgdict>
-
-   <class name="CP::TrigEventSelectionAlg" />
-   <class name="CP::TrigPrescalesAlg" />
-   <class name="CP::TrigGlobalEfficiencyAlg" />
-   <class name="CP::TrigMatchingAlg" />
-   
-</lcgdict>

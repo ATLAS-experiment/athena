@@ -39,7 +39,7 @@ namespace MuonHough {
         LayerIdx layer{LayerIdx::LayerUnknown};  /// layer (inner/middle/outer)
         int sublayer{UNINITIALIZED};                                                     /// sublayer within layer
         int pdgId{UNINITIALIZED};                                                        /// pdgId of the associated truth particle (if any)
-        int barcode{UNINITIALIZED};                                                      /// barcode of truth particle - FIXME barcode-based
+        int uniqueID{UNINITIALIZED};                                                      /// uniqueID of truth particle - FIXME uniqueID-based
         int muonIndex{UNINITIALIZED};                                                    /// index of reconstructed muon
         int clusterSize{UNINITIALIZED};                                                  /// cluster size
         int clusterLayers{UNINITIALIZED};                                                /// number of layers in the cluster
@@ -138,7 +138,7 @@ namespace MuonHough {
         static constexpr int UNINITIALIZED = HitDebugInfo::UNINITIALIZED;
 
         int pdgId{UNINITIALIZED};      /// pdgId of the true muon
-        int barcode{UNINITIALIZED};    /// barcode of the true muon
+        int uniqueID{UNINITIALIZED};    /// uniqueID of the true muon
         int muonIndex{UNINITIALIZED};  /// index of the associated track
         float pt{UNINITIALIZED};       /// pt
         float eta{UNINITIALIZED};      /// eta

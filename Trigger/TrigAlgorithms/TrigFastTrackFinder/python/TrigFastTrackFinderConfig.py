@@ -101,7 +101,7 @@ def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
         montool.defineHistogram('trk_nSiHits',    path='EXPERT',type='TH1F',title="Total number of Silicon Hits per Track",xbins = 20, xmin=-0.5, xmax=19.5)
         montool.defineHistogram('trk_nPIXHits',   path='EXPERT',type='TH1F',title="Number of Pixel Hits per Track",xbins = 10, xmin=-0.5, xmax=9.5)
         montool.defineHistogram('trk_nSCTHits',   path='EXPERT',type='TH1F',title="Number of SCT Hits per Track",xbins = 10, xmin=-0.5, xmax=9.5)
-        montool.defineHistogram('trk_seedSize',   path='EXPERT',type='TH1F',title="Number of Spacepoints per Seed",xbins = 10, xmin=-0.5, xmax=9.5)
+        montool.defineHistogram('trk_seedSize',   path='EXPERT',type='TH1F',title="Number of Spacepoints per Seed",xbins = 20, xmin=-0.5, xmax=19.5)
         montool.defineHistogram('trk_chi2dof',    path='EXPERT',type='TH1F',title="ChiSqd / nDoF",xbins = 100, xmin=0.0, xmax=5)
         montool.defineHistogram('trk_pt',         path='EXPERT',type='TH1F',title="pt",xbins = 100, xmin=-2.5e5, xmax=2.5e5)
         montool.defineHistogram('trk_phi0',       path='EXPERT',type='TH1F',title="phi",xbins = 100, xmin=-3.2, xmax=3.2)
@@ -337,7 +337,7 @@ def ITkTrigTrackSeedingToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccu
   kwargs.setdefault("UsePixelSpacePoints", (not flags.Tracking.ActiveConfig.isLRT))
   kwargs.setdefault("UseSctSpacePoints",flags.Tracking.ActiveConfig.isLRT)
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
-  kwargs.setdefault("MaxGraphEdges", 1500000)
+  kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if flags.Tracking.ActiveConfig.isLRT else "binTables_ITK_RUN4.txt")
 
   from RegionSelector.RegSelToolConfig import (regSelTool_ITkStrip_Cfg, regSelTool_ITkPixel_Cfg)

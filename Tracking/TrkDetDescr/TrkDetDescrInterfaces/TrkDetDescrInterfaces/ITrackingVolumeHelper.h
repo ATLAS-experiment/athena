@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,11 +15,11 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/BinningType.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkVolumes/BoundarySurface.h"
 #include "TrkVolumes/BoundarySurfaceFace.h"
 // STL
 #include <string>
+#include <memory>
 
 #include "CxxUtils/checker_macros.h"
 namespace Trk {
@@ -86,17 +86,12 @@ public:
        --- Neccessary as friendship cannot be inherited: your father's friend
      isn't necessary yours ---
       */
-  virtual Trk::TrackingVolume* glueTrackingVolumeArrays(TrackingVolume& firstVol,
-                                                        BoundarySurfaceFace firstFace,
-                                                        TrackingVolume& secondVol,
-                                                        BoundarySurfaceFace secondFace,
-                                                        std::string name) const = 0;
-
-  virtual std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol,
-                                                                        BoundarySurfaceFace firstFace,
-                                                                        std::shared_ptr<TrackingVolume> secondVol,
-                                                                        BoundarySurfaceFace secondFace,
-                                                                        const std::string& name) const = 0;
+  virtual std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(
+      std::shared_ptr<TrackingVolume> firstVol,
+      BoundarySurfaceFace firstFace,
+      std::shared_ptr<TrackingVolume> secondVol,
+      BoundarySurfaceFace secondFace,
+      const std::string& name) const = 0;
 
   /**  Glue Volume method: set inside Volume
      --- Neccessary as friendship cannot be inherited: your father's friend
@@ -108,12 +103,7 @@ public:
   virtual void setInsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    BinnedArray<TrackingVolume>* insidevolarray) const = 0;
-
-  virtual void setInsideTrackingVolumeArray(
-    TrackingVolume& tvol,
-    BoundarySurfaceFace face,
-    SharedObject<BinnedArray<TrackingVolume>> insidevolarray) const = 0;
+    std::shared_ptr<BinnedArray<TrackingVolume>> insidevolarray) const = 0;
 
   /**  Glue Volume method: set outside Volume
        --- Neccessary as friendship cannot be inherited: your father's friend
@@ -130,12 +120,7 @@ public:
   virtual void setOutsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    BinnedArray<TrackingVolume>* outsidevolarray) const = 0;
-
-  virtual void setOutsideTrackingVolumeArray(
-    TrackingVolume& tvol,
-    BoundarySurfaceFace face,
-    SharedObject<BinnedArray<TrackingVolume>> outsidevolarray) const = 0;
+    std::shared_ptr<BinnedArray<TrackingVolume>> outsidevolarray) const = 0;
 
 protected:
   /** Protected method to register the Layer to the Surface */

@@ -70,6 +70,11 @@ void LVL1::eFEXtauBDT::setPointerToMaxETParam(
   m_maxEtThreshold = maxEtThreshold;
 }
 
+void LVL1::eFEXtauBDT::setPointerToMaxETParamFrac(
+        unsigned int *maxEtThreshold) {
+    m_maxEtThresholdFrac = maxEtThreshold;
+}
+
 void LVL1::eFEXtauBDT::setPointerToBDTMinETParam(
     unsigned int *bdtMinEtThreshold) {
   m_bdtMinEtThreshold = bdtMinEtThreshold;
@@ -313,7 +318,7 @@ unsigned int LVL1::eFEXtauBDT::BitLeftShift(unsigned int number, int by,
 void LVL1::eFEXtauBDT::computeFracCondition() {
   int n_multipliers = sizeof(m_fracMultipliers) / sizeof(m_fracMultipliers[0]);
 
-  if ((m_eTEstimate >= *m_maxEtThreshold) or m_eTEstimateOverflow or
+  if ((m_eTEstimate >= *m_maxEtThresholdFrac) or m_eTEstimateOverflow or
       m_HAD_eTEstimateOverflow) {
 
     m_fracCondition = (1 << (n_multipliers - 1)) - 1;

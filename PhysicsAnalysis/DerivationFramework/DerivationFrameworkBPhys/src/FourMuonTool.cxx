@@ -10,8 +10,8 @@
 // ----------------------------------------------------------------------------
 // ****************************************************************************
 
-#include "DerivationFrameworkBPhys/FourMuonTool.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
+#include "FourMuonTool.h"
+#include "BPhysPVTools.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
@@ -72,7 +72,6 @@ namespace DerivationFramework {
     m_iV0VertexFitter("Trk::V0VertexFitter"),
     m_trkSelector("InDet::TrackSelectorTool")
     {
-        declareInterface<FourMuonTool>(this);
         declareProperty("ptCut",m_ptCut);
         declareProperty("etaCut",m_etaCut);
         declareProperty("useV0Fitter",m_useV0Fitter);

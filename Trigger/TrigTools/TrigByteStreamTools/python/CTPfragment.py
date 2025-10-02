@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
 Minimal python module for CTP fragment access/modification
@@ -10,9 +10,6 @@ https://gitlab.cern.ch/atlas-tdaq-software/CTPfragment
 import sys
 import eformat
 import cppyy
-
-from PyUtils.Helpers import ROOT6Setup
-ROOT6Setup()
 
 cppyy.load_library('libTrigByteStreamToolsDict')
 cppyy.load_library('libCTPfragment')

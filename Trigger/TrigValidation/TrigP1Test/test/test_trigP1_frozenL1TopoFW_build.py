@@ -3,7 +3,7 @@
 
 # art-description: Frozen L1Topo Firmware test -- generates the L1 menu and then checks for changes implying L1Topo FW changes
 # art-type: build
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
@@ -22,7 +22,7 @@ menu.input = ''
 topocnvclone = ExecStep.ExecStep('CloneTopoConverter')
 topocnvclone.type = 'other'
 # On updates to the topoconverterph1 package, update the branch here
-topocnvclone.executable = 'git clone --depth 1 --branch art-2024-00-01 https://:@gitlab.cern.ch:8443/atlas-l1calo/l1topo/topoconverterph1.git'
+topocnvclone.executable = 'git clone --depth 1 --branch art-2025-00-00 https://:@gitlab.cern.ch:8443/atlas-l1calo/l1topo/topoconverterph1.git'
 topocnvclone.input = ''
 
 #====================================================================================================

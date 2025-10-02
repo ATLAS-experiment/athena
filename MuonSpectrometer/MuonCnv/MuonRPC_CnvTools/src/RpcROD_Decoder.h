@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_RPCROD_DECODER_H
 #define MUONBYTESTREAM_RPCROD_DECODER_H
 
-#include <stdint.h>
 
-#include <atomic>
-#include <cassert>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/getMessageSvc.h"
@@ -29,6 +26,11 @@
 #include "TrigT1RPChardware/RPCRXRODDecode.h"
 #include "eformat/Issue.h"
 #include "eformat/SourceIdentifier.h"
+
+#include <cstdint>
+
+#include <atomic>
+#include <cassert>
 
 namespace Muon {
 
@@ -1065,7 +1067,7 @@ namespace Muon {
         unsigned int SL_data_size = 500;  // same value used for the size of SLBuff
         unsigned short int SLBuff[500];
 
-        RpcSectorLogic* sl = 0;
+        std::unique_ptr<RpcSectorLogic> sl{};
 
         for (uint16_t i = 0; i < data_size; ++i) {
             // std::cout << "REGISTER: " << i << std::endl;
@@ -1143,13 +1145,13 @@ namespace Muon {
                 // check if the SL already exists
                 if (sectorLogicContainer && !sectorLogicContainer->findSector(sector, 0)) {
                     // Create the new sector logic object
-                    sl = new RpcSectorLogic(sector, 0, 0, errorCode);
+                    sl = std::make_unique<RpcSectorLogic>(sector, 0, 0, errorCode);
 
                 } else if (sectorLogicContainer) {
                     for (RpcSectorLogicContainer::iterator itSL = sectorLogicContainer->begin(); itSL != sectorLogicContainer->end();
                          ++itSL) {
                         if ((*itSL)->sectorId() == sector) {
-                            sl = (*itSL);
+                            sl.reset(*itSL);
                             break;
                         }
                     }
@@ -1246,7 +1248,7 @@ namespace Muon {
                         // Flag the sector as initialized
                         // bool setSector = sectorLogicContainer->setSector(sector,SLindex);
 
-                        if (SLindex == 0 && sectorLogicContainer) { sectorLogicContainer->push_back(sl); }
+                        if (SLindex == 0 && sectorLogicContainer) { sectorLogicContainer->push_back(std::move(sl)); }
                     }
 
                     // increment the SLindex counter of the number of fragments

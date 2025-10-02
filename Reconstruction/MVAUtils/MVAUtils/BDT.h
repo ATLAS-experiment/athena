@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MVAUtils_BDT_H
@@ -11,6 +11,7 @@
 #include <map>
 #include <cassert>
 #include <memory>
+#include <cmath>
 #include "ForestBase.h"
 
 class TTree;

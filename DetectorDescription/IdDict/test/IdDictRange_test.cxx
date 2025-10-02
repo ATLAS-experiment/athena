@@ -11,35 +11,30 @@ namespace utf = boost::unit_test;
 
 BOOST_AUTO_TEST_SUITE(IdDictRangeTest)
 BOOST_AUTO_TEST_CASE(IdDictRangeConstructors){
-  BOOST_CHECK_NO_THROW(IdDictRange());
-  IdDictRange i1;
+  BOOST_CHECK_NO_THROW(IdDictRange(""));
+  IdDictRange i1("");
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictRange i2(i1));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictRange i3(std::move(i1)));
 }
 
 BOOST_AUTO_TEST_CASE(EmptyIdDictRangeAccessors){
-  IdDictRange f;
-  BOOST_TEST(f.m_specification == IdDictRange::unknown);
+  IdDictRange f("");
+  BOOST_TEST(f.specification() == IdDictRange::unknown);
 }
 
 BOOST_AUTO_TEST_CASE(IdDictRangeBuildRange){
   //This is the main workhorse, to build a range according to inputs
   //In practice only two basic types of range are built: enumerated and "both bounded"
-  IdDictRange f;
   //by value or label (single-valued)
-  f.m_specification = IdDictRange::by_value;
-  f.m_value = 455;
-  BOOST_TEST(f.build_range() == Range("455"));
+  IdDictRange f1 ("", 455);
+  BOOST_TEST(f1.build_range() == Range("455"));
   //by minmax
-  f.m_specification = IdDictRange::by_minmax;
-  f.m_minvalue = -1;
-  f.m_maxvalue = 5;
-  BOOST_TEST(f.build_range() == Range("-1:5"));
+  IdDictRange f2 ("", -1, 5);
+  BOOST_TEST(f2.build_range() == Range("-1:5"));
   //enumerated
-  f.m_specification = IdDictRange::by_values;
+  IdDictRange f3 ("", std::vector<int> { 0, 1, 2, 4, 5});
   //note: consecutive value _might_ be optimised to min/max
-  f.m_values = {0,1,2,4,5};
-  BOOST_TEST(f.build_range() == Range("0,1,2,4,5"));
+  BOOST_TEST(f3.build_range() == Range("0,1,2,4,5"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

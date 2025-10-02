@@ -20,9 +20,8 @@ namespace DerivationFramework {
 EGSelectionToolWrapper::EGSelectionToolWrapper(const std::string& t,
                                                const std::string& n,
                                                const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 }
 
 StatusCode

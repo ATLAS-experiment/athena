@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_BLINEPAR_H
@@ -7,7 +7,7 @@
 
 #include "MuonAlignmentData/MuonAlignmentPar.h"
 #include <array>
-#include <climits>
+#include <limits>
 #include <iostream>
 #include <algorithm>
 

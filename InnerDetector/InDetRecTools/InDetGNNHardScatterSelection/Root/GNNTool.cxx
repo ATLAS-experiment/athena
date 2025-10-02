@@ -10,7 +10,7 @@ namespace InDetGNNHardScatterSelection {
   GNNTool::GNNTool(const std::string& name):
           asg::AsgTool(name) {}
 
-  GNNTool::~GNNTool() {}
+  GNNTool::~GNNTool() = default;
 
   StatusCode GNNTool::initialize() {
 

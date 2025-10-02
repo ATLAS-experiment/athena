@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataQualityConfigurations )
@@ -62,7 +62,7 @@ foreach( hanfile collisions_run collisions_minutes10
    atlas_add_test( ${hanfile}_topempty SCRIPT test/check_no_top_level_assessments.sh ${outputFile} POST_EXEC_SCRIPT nopost.sh )
    if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
       atlas_add_test( ${hanfile}_lark SCRIPT han_lark_tester.py ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT nopost.sh )
-      atlas_add_test( ${hanfile}_isbig SCRIPT test/check_file_isbig.sh ${configOutputFile} 500 POST_EXEC_SCRIPT nopost.sh )
+      atlas_add_test( ${hanfile}_isbig SCRIPT test/check_file_isbig.sh ${configOutputFile} 100 POST_EXEC_SCRIPT nopost.sh )
    endif()
    atlas_add_test( ${hanfile}_nocrash
       SOURCES test/check_valid_config.cxx

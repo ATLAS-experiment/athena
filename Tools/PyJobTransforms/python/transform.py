@@ -20,6 +20,7 @@ msg = logging.getLogger(__name__)
 
 import PyJobTransforms.trfValidation as trfValidation
 import PyJobTransforms.trfExceptions as trfExceptions
+import PyJobTransforms.trfMPITools as trfMPITools
 
 from PyJobTransforms.trfSignal import setTrfSignalHandlers, resetTrfSignalHandlers
 from PyJobTransforms.trfArgs import addStandardTrfArgs, addFileValidationArguments, addValidationArguments
@@ -392,7 +393,7 @@ class transform(object):
             # Graph stuff!
             msg.info('Resolving execution graph')
             self._setupGraph()
-            
+
             if 'showSteps' in self._argdict:
                 for exe in self._executors:
                     print("Executor Step: {0} (alias {1})".format(exe.name, exe.substep))
@@ -446,6 +447,13 @@ class transform(object):
             # Do splitting if required
             self.setupSplitting()
 
+            # Error if more than one executor in MPI mode
+            if 'mpi' in self._argdict:
+                if len(self._executorPath) > 1:
+                    msg.error("MPI mode is not supported for jobs with more than one execution step!")
+                    msg.error(f"We have {len(self._executorPath)}: {self._executorPath}")
+                    sys.exit(1)
+
             # Now we can set the final executor configuration properly, with the final dataDictionary
             for executor in self._executors:
                 executor.conf.setFromTransform(self)
@@ -460,6 +468,11 @@ class transform(object):
                     executor.execute()
                     executor.postExecute()
                 finally:
+                    # Swap out the output files for the version with [] lists expanded
+                    if 'mpi' in self._argdict:
+                       new_data_dict = {**self._dataDictionary, **trfMPITools.mpiConfig["outputs"]}
+                       self._dataDictionary = new_data_dict
+                       executor.conf._dataDictionary = new_data_dict
                     executor.validate()
              
             self._processedEvents = self.getProcessedEvents()
@@ -644,6 +657,9 @@ class transform(object):
     #  is used (~everything, plus the Tier0 report at Tier0)
     def generateReport(self, reportType=None, fast=False, fileReport = defaultFileReport):
         msg.debug('Transform report generator')
+        if 'mpi' in self.argdict and not trfMPITools.mpiShouldValidate():
+            msg.debug("Not in rank 0 -- not generating reports")
+            return
 
         if 'reportType' in self._argdict:
             if reportType is not None:
@@ -810,6 +826,8 @@ class transform(object):
             ('outputFileValidation' in self._argdict and self._argdict['outputFileValidation'].value is False)
             ):
             msg.info('Standard output file validation turned off for transform %s.', self.name)
+        elif 'mpi' in self.argdict and not trfMPITools.mpiShouldValidate():
+            msg.info("MPI mode and not in rank 0 ∴ not validating partial outputs")
         else:
             msg.info('Validating output files')
             parparallelMode = False

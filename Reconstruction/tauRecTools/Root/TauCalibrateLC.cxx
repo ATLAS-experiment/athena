@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCalibrateLC.h"
@@ -17,8 +17,6 @@
 /********************************************************************/
 TauCalibrateLC::TauCalibrateLC(const std::string& name) :
   TauRecToolBase(name) {
-  declareProperty("calibrationFile", m_calibrationFile = "");
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
 }
 
 /********************************************************************/
@@ -28,8 +26,7 @@ TauCalibrateLC::~TauCalibrateLC() {
 /********************************************************************/
 StatusCode TauCalibrateLC::initialize() {
 
-  ATH_CHECK( m_aveIntPerXKey.initialize(inTrigger()) );
-  ATH_CHECK( m_vertexInputContainer.initialize(!inTrigger()) );
+  ATH_CHECK( m_vertexInputContainer.initialize() );
   
   std::string fullPath = find_file(m_calibrationFile);
   ATH_MSG_INFO("Using calibration file: " << fullPath);
@@ -125,31 +122,18 @@ StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
   int nVertex = 0;
     
   // Obtain pileup
-  if (inTrigger())  { // online: retrieved from EventInfo 
-    SG::ReadDecorHandle<xAOD::EventInfo, float> eventInfoDecorHandle( m_aveIntPerXKey );
-    if (!eventInfoDecorHandle.isPresent()) {
-      ATH_MSG_WARNING ( "EventInfo decoration not available! Will set nVertex = " << m_averageNPV );
-      nVertex = m_averageNPV;
+  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle( m_vertexInputContainer );
+  if (!vertexInHandle.isValid()) {
+    ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << vertexInHandle.key());
+    return StatusCode::FAILURE;
+  }
+  const xAOD::VertexContainer * vxContainer = vertexInHandle.cptr();
+  for (const auto *const vertex : *vxContainer) {
+    if (vertex->vertexType() == xAOD::VxType::PileUp) {
+      ++nVertex;
     }
-    else {
-      nVertex = eventInfoDecorHandle(0);
-      ATH_MSG_DEBUG("AvgInteractions object in tau candidate = " << nVertex);
-    } 
-  }  
-  else { // offline: pileup vertex multiplicity
-    SG::ReadHandle<xAOD::VertexContainer> vertexInHandle( m_vertexInputContainer );
-    if (!vertexInHandle.isValid()) {
-      ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << vertexInHandle.key());
-      return StatusCode::FAILURE;
-    }
-    const xAOD::VertexContainer * vxContainer = vertexInHandle.cptr();
-    for (const auto *const vertex : *vxContainer) {
-      if (vertex->vertexType() == xAOD::VxType::PileUp) {
-	++nVertex;
-      }
-    } 
-    ATH_MSG_DEBUG("calculated nVertex " << nVertex );           
   } 
+  ATH_MSG_DEBUG("calculated nVertex " << nVertex );           
     
   double calibConst = 1.;
 

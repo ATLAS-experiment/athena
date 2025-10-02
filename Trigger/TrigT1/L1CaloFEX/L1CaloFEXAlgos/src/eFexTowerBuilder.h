@@ -32,6 +32,8 @@
 
 #include "xAODEventInfo/EventInfo.h"
 
+#include "LArRawEvent/LArLATOMEHeaderContainer.h"
+
 class CaloIdManager;
 
 
@@ -71,10 +73,12 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
   SG::WriteHandleKey<xAOD::eFexTowerContainer> m_outKey {this, "eFexContainerWriteKey", "L1_eFexEmulatedTowers", "Name of the output container"};
 
     Gaudi::Property<std::string> m_mappingFile {this, "MappingFile", "L1CaloFEXByteStream/2023-02-13/scToEfexTowers.root", "PathResolver location to mapping file"};
-    ToolHandle<IeFEXSuperCellTowerIdProvider> m_eFEXSuperCellTowerIdProviderTool {this, "eFEXSuperCellTowerIdProviderTool", "LVL1::eFEXSuperCellTowerIdProvider", "Tool that provides tower-FOGA mapping"};
+    ToolHandle<eFEXSuperCellTowerIdProvider> m_eFEXSuperCellTowerIdProviderTool {this, "eFEXSuperCellTowerIdProviderTool", "LVL1::eFEXSuperCellTowerIdProvider", "Tool that provides tower-FOGA mapping"};
 
     Gaudi::Property<bool> m_applyMasking{this,"ApplyMasking",true,"Apply masking of supercells based on provenance bits. Should be set to False for MC"};
 
+    Gaudi::Property<bool> m_v6Mapping{this,"UseLATOMEv6Mapping",false,"If true, will use the LATOME v6 mapping if cannot determine from latome header"};
+    SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LArLatomeHeaderContainerKey { this, "LArLatomeHeaderKey", "SC_LATOME_HEADER" };
 
 };
 

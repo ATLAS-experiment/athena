@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -9,7 +9,7 @@
 //     email                : cecilia.tosciri@cern.ch
 //  ***************************************************************************/
 
-#ifndef GFEXINPUTBYTESTREAMTOOL_H 
+#ifndef GFEXINPUTBYTESTREAMTOOL_H
 #define GFEXINPUTBYTESTREAMTOOL_H
 
 // Trigger includes
@@ -24,7 +24,8 @@
 // Gaudi includes
 #include "Gaudi/Property.h"
 
-#include "gFexPos.h"
+#include "L1CaloFEXByteStream/gFexPos.h"
+#include "PathResolver/PathResolver.h"
 #include <array>
 #include <vector>
 #include <cstdint>
@@ -36,92 +37,96 @@ namespace gPos = LVL1::gFEXPos;
  **/
 
 
-
-
 class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> {
-    public:
-        typedef  std::array<std::array<uint32_t, 7>,  100>        gfiber;
-        typedef  std::array<std::array<int,      6>,   32>        gEngines;
-        typedef  std::array<std::array<int,      12>,  32>        gtFPGA;
-        typedef  std::array<std::array<int,      20>,  100>       gFields;
-        typedef  std::array<std::array<int,      16>,  100>       gCaloTwr;
-        typedef  std::array<std::array<int,      8>,   100>       gSatur;
-        typedef  std::array<std::array<char,     20>,  100>       gFieldsChar;
-        typedef  std::array<std::array<int,      20>,  4>         gType;
-        typedef  std::array<std::array<char,     20>,  4>         gTypeChar;
-        gFexInputByteStreamTool(const std::string& type, const std::string& name, const IInterface* parent);
-        virtual ~gFexInputByteStreamTool() override = default;
+  public:
+    typedef  std::array<std::array<uint32_t, 7>,  100>        gfiber;
+    typedef  std::array<std::array<int,      6>,   32>        gEngines;
+    typedef  std::array<std::array<int,      12>,  32>        gtFPGA;
+    typedef  std::array<std::array<int,      20>,  100>       gFields;
+    typedef  std::array<std::array<int,      16>,  100>       gCaloTwr;
+    typedef  std::array<std::array<int,      8>,   100>       gSatur;
+    typedef  std::array<std::array<char,     20>,  100>       gFieldsChar;
+    typedef  std::array<std::array<int,      20>,  4>         gType;
+    typedef  std::array<std::array<char,     20>,  4>         gTypeChar;
+    gFexInputByteStreamTool(const std::string& type, const std::string& name, const IInterface* parent);
+    virtual ~gFexInputByteStreamTool() override = default;
 
-        // ------------------------- IAlgTool methods --------------------------------
-        virtual StatusCode initialize() override;
+    // ------------------------- IAlgTool methods --------------------------------
+    virtual StatusCode initialize() override;
 
-        // ------------------------- IL1TriggerByteStreamTool methods ----------------------
-        /// BS->xAOD conversion
-        virtual StatusCode convertFromBS(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vrobf, const EventContext& eventContext)const override;
+    // ------------------------- IL1TriggerByteStreamTool methods ----------------------
+    /// BS->xAOD conversion
+    virtual StatusCode convertFromBS(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vrobf, const EventContext& eventContext)const override;
 
-        /// xAOD->BS conversion
-        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf, const EventContext& eventContext) override;
+    /// xAOD->BS conversion
+    virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf, const EventContext& eventContext) override;
 
-        /// Declare ROB IDs for conversion
-        virtual const std::vector<uint32_t>& robIds() const override {
-            return m_robIds.value();
-        }
-
-
-    private:
-        // ------------------------- Properties --------------------------------------
-        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
-        bool m_UseMonitoring = false;        
-                
-        
-        
-        // ROBIDs property required by the interface
-        Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
-
-         //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
-        SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gFexDataTowers","Write gFexEDM Trigger Tower container with 200 MeV resolution (default)"};
-        SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers50WriteKey   {this,"gTowers50WriteKey"  ,"L1_gFexDataTowers50","Write gFexEDM Trigger Tower container with 50 MeV resolution"};
-        
-        // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
-        SG::ReadHandleKey < xAOD::gFexTowerContainer> m_gTowersReadKey    {this,"gTowersReadKey"   ,"L1_gFexDataTowers","Read gFexEDM Trigger Tower container"};
-
-        virtual void a_gtrx_map( const gfiber &inputData, gfiber &jf_lar_rx_data) const;
-
-        virtual void b_gtrx_map( const gfiber &inputData, gfiber &jf_lar_rx_data) const;
-
-        virtual void c_gtrx_map( const gfiber &inputData, gfiber &outputData) const;
-        
-        virtual void gtReconstructABC(  int XFPGA, 
-                                        gfiber Xfiber, 
-                                        int Xin, 
-                                        gtFPGA &XgtF, 
-                                        gtFPGA &Xgt,
-                                        int *BCIDptr,
-                                        int do_lconv, 
-                                        const std::array<int, gPos::MAX_FIBERS> &XMPD_NFI,
-                                        const std::array<int, gPos::MAX_FIBERS> &XCALO_TYPE,
-                                        const gCaloTwr & XMPD_GTRN_ARR,
-                                        const gType & XMPD_DSTRT_ARR,  
-                                        gTypeChar XMPD_DTYP_ARR,
-                                        const std::array<int, gPos::MAX_FIBERS> &XMSK,
-                                        gtFPGA &Xsatur) const;
-
-        virtual int crc9d32(const std::array<uint32_t, 6> &inWords,int numWords,int reverse) const;
-
-        uint32_t crc9d23(uint32_t inword, uint32_t in_crc, int  reverse ) const;
-
-        virtual void undoMLE(int &datumPtr ) const;
-        
-        virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const;
-
-        virtual void signExtend(int *xptr, int upto) const;
-
-        virtual void gtCalib(gtFPGA &gtf, int towerLSB,  int fpga, unsigned int offset) const;
+    /// Declare ROB IDs for conversion
+    virtual const std::vector<uint32_t>& robIds() const override {
+        return m_robIds.value();
+    }
 
 
-        
-        void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
-        
+  private:
+    // ------------------------- Properties --------------------------------------
+    ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
+    bool m_UseMonitoring = false;
+
+    // FiberMapping property required by the interface
+    Gaudi::Property<std::string> m_FiberMapping{
+          this, "gFexFiberTowerMapping",
+          "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gFex_gCaloTowerMap_weighted_v1.txt",
+          "Text file to convert from hardware fiber to eta-phi location"};
+
+    std::unordered_map<unsigned int, std::array<float, 4> > m_Firm2Tower_map;  /// {map index(towerid), {fpga, eta, phi, source}}
+
+    // ROBIDs property required by the interface
+    Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
+
+    //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
+    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gFexDataTowers", "Name of the gFEX Input Data Towers"};  // TODO: This will be the only output of this class in the future
+    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers50WriteKey   {this,"gTowers50WriteKey"  ,"", "Write gFexEDM Trigger Tower container with 50 MeV resolution"};
+    SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers200WriteKey   {this,"gTowers200WriteKey"  ,"", "Write gFexEDM Trigger Tower container with 200 MeV resolution (default)"};
+
+    // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
+    SG::ReadHandleKey < xAOD::gFexTowerContainer> m_gTowersReadKey    {this,"gTowersReadKey"   ,"L1_gFexDataTowers","Read gFexEDM Trigger Tower container"};
+
+    virtual void a_gtrx_map( const gfiber &inputData, gfiber &jf_lar_rx_data) const;
+    virtual void b_gtrx_map( const gfiber &inputData, gfiber &jf_lar_rx_data) const;
+    virtual void c_gtrx_map( const gfiber &inputData, gfiber &outputData) const;
+
+    virtual void gtReconstructABC(  int XFPGA,
+                                    const gfiber & Xfiber,
+                                    int Xin,
+                                    gtFPGA &XgtF,
+                                    gtFPGA &Xgt,
+                                    int *BCIDptr,
+                                    int do_lconv,
+                                    const std::array<int, gPos::MAX_FIBERS> &XMPD_NFI,
+                                    const std::array<int, gPos::MAX_FIBERS> &XCALO_TYPE,
+                                    const gCaloTwr & XMPD_GTRN_ARR,
+                                    const gType & XMPD_DSTRT_ARR,
+                                    gTypeChar XMPD_DTYP_ARR,
+                                    const std::array<int, gPos::MAX_FIBERS> &XMSK,
+                                    gtFPGA &Xsatur,
+                                    std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> &FiberTower,
+                                    std::array<int, (gPos::AB_FIBERS*gPos::MAX_E_FIELDS)> &FiberTowerSatur) const;
+
+    virtual int crc9d32(const std::array<uint32_t, 6> &inWords,int numWords,int reverse) const;
+    uint32_t crc9d23(uint32_t inword, uint32_t in_crc, int  reverse ) const;
+
+    virtual void undoMLE(int &datumPtr ) const;
+
+    virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const;
+
+    virtual void signExtend(int *xptr, int upto) const;
+
+    virtual void gtCalib(gtFPGA &gtf, int towerLSB,  int fpga, unsigned int offset) const;
+
+    StatusCode ReadFibersfromFile(const std::string&);
+
+    void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
+
 };
 
 #endif // GFEXINPUTBYTESTREAMTOOL_H

@@ -138,7 +138,7 @@ namespace Muon {
         entry.clearChambers();  // also clears stations and chamberIds
 
         bool hasEndcap{false}, hasSmall{false}, hasLarge{false}, hassloverlap{false}, previssmall{false};
-        MuonStationIndex::StIndex prevstIndex = MuonStationIndex::StUnknown;
+        MuonStationIndex::StIndex prevstIndex = MuonStationIndex::StIndex::StUnknown;
 
         Trk::MagneticFieldProperties magProps;
 

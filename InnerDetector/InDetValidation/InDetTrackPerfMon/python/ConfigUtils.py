@@ -1,8 +1,20 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import json
+import json, os
 from AthenaCommon.Utils.unixtools import find_datafile
 from AthenaCommon.Logging import logging
+
+def custom_find_datafile( input_file_name ):
+    '''
+    wrapper around AthenaCommon.Utils.unixtools.find_datafile
+    to handle local paths in the same running directory, by
+    returning the absolute path ( thisFile.json -> /path_to/thisFile.json )
+    '''
+    new_file_name = input_file_name
+    if not os.path.dirname( new_file_name ) :
+        new_file_name = os.path.abspath( new_file_name ) # attach absolute path
+    return find_datafile( new_file_name )
+
 
 def getTrkAnaDicts( flags ):
     '''
@@ -11,17 +23,14 @@ def getTrkAnaDicts( flags ):
     '''
     analysesDict = {}
 
-    input_file = flags.PhysVal.IDTPM.trkAnaCfgFile
-    
-    ## Default: use trkAnalysis config flags
-    if input_file == "Default":
+    ## Default: use trkAnalysis default config flags
+    if flags.PhysVal.IDTPM.trkAnaCfgFile == "Default":
         return analysesDict
 
     ## Getting full input json file path
-    dataPath = find_datafile( input_file )
-    if dataPath is None and input_file != "Default":
-        raise Exception(f"Input file with analyses definition: {input_file} could not be found, for files given with absolute path use ./ prefix")
+    dataPath = custom_find_datafile( flags.PhysVal.IDTPM.trkAnaCfgFile )
     if dataPath is None:
+        raise Exception(f"Input file with analyses definition: {dataPath} could not be found")
         return analysesDict
 
     ## Fill temporary analyses config dictionary from input json
@@ -112,7 +121,7 @@ def getPlotsDefList( flags ):
 
     # open the list of json files
     log.debug( "plotsDefFileList : %s", flags.PhysVal.IDTPM.plotsDefFileList ) 
-    listPath = find_datafile( flags.PhysVal.IDTPM.plotsDefFileList )
+    listPath = custom_find_datafile( flags.PhysVal.IDTPM.plotsDefFileList )
     if listPath is None:
         log.error( "plotsDefFileList not found" )
         return None
@@ -125,7 +134,7 @@ def getPlotsDefList( flags ):
     plotsDefDict = {}
 
     for plotsDefFileName in plotsDefFileNames :
-        dataPath = find_datafile( plotsDefFileName )
+        dataPath = custom_find_datafile( plotsDefFileName )
         log.debug( "Reading input plots definitions : %s", dataPath )
         if dataPath is None:
             log.error( "plotsDefFile %s not found", plotsDefFileName )
@@ -177,7 +186,7 @@ def getPlotsDefList( flags ):
             log.error( "Could not get detector geometry for plotsCommonValuesFile" )
             return None
 
-    commonValuesPath = find_datafile( plotsCommonValuesFileName )
+    commonValuesPath = custom_find_datafile( plotsCommonValuesFileName )
     if commonValuesPath is None :
         log.error( "plotsCommonValuesFile not found: %s", plotsCommonValuesFileName )
         return None
@@ -257,6 +266,7 @@ def getLabel( flags, key ) :
         "OfflineElectron"     : [ "offEle",     "Offline e^{#pm} track",    "Offline e^{#pm} vertex"    ],
         "OfflineMuon"         : [ "offMu",      "Offline #mu^{#pm} track",  "Offline #mu^{#pm} vertex"  ],
         "OfflineTau"          : [ "offTau",     "Offline #tau^{#pm} track", "Offline #tau^{#pm} vertex" ],
+        "OfflineJet"          : [ "offlJet",    "Offline track in jet",     "Offline vertex in jet"  ],
         "Truth"               : [ "truth",      "Truth particle",           "Truth vertex"              ],
         "TruthElectron"       : [ "truthEle",   "Truth e^{#pm}",            "Truth e^{#pm} vertex"      ],
         "TruthMuon"           : [ "truthMu",    "Truth #mu^{#pm}",          "Truth #mu^{#pm} vertex"    ],

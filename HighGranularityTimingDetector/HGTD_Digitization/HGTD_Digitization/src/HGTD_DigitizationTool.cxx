@@ -258,7 +258,7 @@ StatusCode HGTD_DigitizationTool::digitizeHitsPerDetectorElement(const EventCont
     IdentifierHash waferHash{m_id_helper->wafer_hash(id)};
 
     // get the det element from the manager
-    const InDetDD::HGTD_DetectorElement *det_elem = elements->getDetectorElement(waferHash);
+    const InDetDD::HGTD_DetectorElement *det_elem = InDetDD::HGTDDetEl::getDetectorElement(waferHash,*elements);
     // FIXME check for null??
     // create a diode collection holding the digitized hits
     // FIXME (init once outside the while loop and use clear and set det elem??)
@@ -274,10 +274,10 @@ StatusCode HGTD_DigitizationTool::digitizeHitsPerDetectorElement(const EventCont
 
       // use the surface charge generator to produce the charged diode
       // and add it to the charged diode collection
-      // 
+      //
       // hits that are too far away in time to be captured by the ASICs
       // are handled internally by the surface charge generator
-      // 
+      //
       m_hgtd_surf_charge_gen->createSurfaceChargesFromHit(
           current_hit, charged_diode_coll.get(), det_elem, rndmEngine, ctx);
 

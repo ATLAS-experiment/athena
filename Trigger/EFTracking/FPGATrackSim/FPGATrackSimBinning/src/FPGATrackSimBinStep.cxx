@@ -13,6 +13,9 @@
 #include <GaudiKernel/StatusCode.h>
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 
+using FPGATrackSimBinUtil::ParSet;
+using FPGATrackSimBinUtil::IdxSet;
+
 StatusCode FPGATrackSimBinStep::initialize()
 {
   // Dump the configuration to make sure it propagated through right
@@ -70,6 +73,8 @@ StatusCode FPGATrackSimBinStep::setRanges(FPGATrackSimBinStep *prev,
     }
   }
 
+  ATH_MSG_DEBUG("Parameters = " << m_pars);
+
   return StatusCode::SUCCESS;
 }
 
@@ -106,7 +111,7 @@ IdxSet FPGATrackSimBinStep::binIdx(const ParSet &pars) const
 
 
 // Convert to previous steps idx
-IdxSet FPGATrackSimBinStep::convertToPrev(const IdxSet &cur) const {
+IdxSet FPGATrackSimBinStep::convertToPrev(const FPGATrackSimBinUtil::IdxSet &cur) const {
   IdxSet retv{};
   if (m_prev) {
     for (unsigned par =0; par < FPGATrackSimTrackPars::NPARS; par++) {
@@ -133,7 +138,7 @@ void FPGATrackSimBinStep::setValidBin(const std::vector<unsigned>& idx) {
 
 void FPGATrackSimBinStep::initValidBins() {
   m_validBinFull.setsize(m_parBins, false);
-  m_validBinLocal.setsize(stepBins(), false);
+  m_validBinLocal.setsize(stepIdx(m_parBins), false);
 }
 
 void FPGATrackSimBinStep::printValidBin() const {
@@ -146,13 +151,13 @@ void FPGATrackSimBinStep::printValidBin() const {
   }
   ATH_MSG_INFO("Step" << name() << "Valid Bins Full: " << validBinsFull);
 
-  // count valid bins
+  // count valid bins local
   int validBinsLocal = 0;
   for (FPGATrackSimBinArray<int>::ConstIterator bin : m_validBinLocal) {
   if (bin.data())
     validBinsLocal++;
   }
   ATH_MSG_INFO("Step" << name() <<  "Valid Bins Local: " << validBinsLocal);
-  
+    
 }
 

@@ -27,7 +27,6 @@ ActsWriteTrackingGeometry::ActsWriteTrackingGeometry(const std::string& name,
 StatusCode ActsWriteTrackingGeometry::initialize() {
   ATH_MSG_INFO("initializing");
 
-  ATH_CHECK(m_objWriterTool.retrieve());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_materialJsonWriterTool.retrieve() );
 
@@ -40,8 +39,7 @@ StatusCode ActsWriteTrackingGeometry::execute(const EventContext& ctx) const {
 
   // Use the geometry context
   const ActsGeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
-  
-  m_objWriterTool->write(gctx, *trackingGeometry);
+
   m_materialJsonWriterTool->write(gctx, *trackingGeometry);
   return StatusCode::SUCCESS;
 }

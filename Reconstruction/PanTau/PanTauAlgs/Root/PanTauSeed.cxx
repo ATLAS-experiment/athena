@@ -13,12 +13,10 @@ PanTau::PanTauSeed::PanTauSeed()
   m_p4(),
   m_IsValidSeed(false),
   m_TechnicalQuality(),
-  m_NameInputAlgorithm("InvalidAlg"),
   m_TauJet(nullptr),
   m_Constituents(),
   m_TypeHLVs(),
   m_ConstituentsList_Core(),
-  m_ConstituentsList_Wide(),
   m_ConstituentsList_AllSelected(),
   m_ConstituentsList_All(),
   m_DecayMode_BySubAlg(0),
@@ -42,7 +40,6 @@ PanTau::PanTauSeed::~PanTauSeed()
   m_ConstituentsList_All.clear();
   m_ConstituentsList_AllSelected.clear();
   m_ConstituentsList_Core.clear();
-  m_ConstituentsList_Wide.clear();
 
   // also clear the constituent matrix
   // dont delete the entries as they point to the (at this point already deleted) constituents in m_ConstituentsList
@@ -61,12 +58,10 @@ PanTau::PanTauSeed::PanTauSeed(const PanTau::PanTauSeed& rhs)
   m_p4(rhs.m_p4),
   m_IsValidSeed(rhs.m_IsValidSeed),
   m_TechnicalQuality(rhs.m_TechnicalQuality),
-  m_NameInputAlgorithm(rhs.m_NameInputAlgorithm),
   m_TauJet(rhs.m_TauJet),
   m_Constituents(rhs.m_Constituents),
   m_TypeHLVs(rhs.m_TypeHLVs),
   m_ConstituentsList_Core(rhs.m_ConstituentsList_Core),
-  m_ConstituentsList_Wide(rhs.m_ConstituentsList_Wide),
   m_ConstituentsList_AllSelected(rhs.m_ConstituentsList_AllSelected),
   m_ConstituentsList_All(rhs.m_ConstituentsList_All),
   m_DecayMode_BySubAlg(rhs.m_DecayMode_BySubAlg),
@@ -89,12 +84,10 @@ PanTau::PanTauSeed& PanTau::PanTauSeed::operator=(const PanTau::PanTauSeed& seed
     this->m_p4 = seed.m_p4;
     m_IsValidSeed           = seed.m_IsValidSeed;
     m_TechnicalQuality      = seed.m_TechnicalQuality;
-    m_NameInputAlgorithm    = seed.m_NameInputAlgorithm;
     m_TauJet                = seed.m_TauJet;
     m_Constituents          = seed.m_Constituents;
     m_TypeHLVs              = seed.m_TypeHLVs;
     m_ConstituentsList_Core = seed.m_ConstituentsList_Core;
-    m_ConstituentsList_Wide = seed.m_ConstituentsList_Wide;
     m_ConstituentsList_AllSelected  = seed.m_ConstituentsList_AllSelected;
     m_ConstituentsList_All          = seed.m_ConstituentsList_All;
     m_decayModeHack_CellBasedShots  = seed.m_decayModeHack_CellBasedShots;
@@ -191,8 +184,7 @@ xAOD::Type::ObjectType PanTau::PanTauSeed::type() const {
 
 
 /** Main constructor to be used */
-PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInputAlgorithm,
-				xAOD::TauJet*                           tauJet,
+PanTau::PanTauSeed::PanTauSeed( xAOD::TauJet*                           tauJet,
 				const std::vector<PanTau::TauConstituent*>&    tauConstituents,
 				const std::vector<PanTau::TauConstituent*>&    tauConstituentsAll,
 				const std::vector<int>&                 pantauSeed_TechnicalQuality
@@ -206,7 +198,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
   m_p4.SetPtEtaPhiM(tauJet->ptIntermediateAxis(), tauJet->etaIntermediateAxis(), tauJet->phiIntermediateAxis(), tauJet->mIntermediateAxis() );
   m_IsValidSeed           = true;
   m_TechnicalQuality      = pantauSeed_TechnicalQuality;
-  m_NameInputAlgorithm    = nameInputAlgorithm;
   m_TauJet                = tauJet;
   m_decayModeHack_CellBasedShots = false;
   m_Features              = new PanTau::TauFeature;
@@ -221,9 +212,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
 
     if(isCoreChrg || isCoreNeut || isCorePi0) m_ConstituentsList_Core.push_back(tauConstituents[iConst]); // Core only contains the currently used objects                                                             
 
-    bool isWideChrg = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_OutChrg);
-    bool isWideNeut = tauConstituents[iConst]->isOfType(PanTau::TauConstituent::t_OutNeut);
-    if(isWideChrg || isWideNeut) m_ConstituentsList_Wide.push_back(tauConstituents[iConst]); // Wide contains objectsin 0.2-0.4                                                                                                
   }
 
   //create the constituents lists                                                                                                                                                                                                                
@@ -233,7 +221,6 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
   }
 
   //assign tauConstituents                                                                                                                                                                                                                       
-  TLorentzVector hlv_SumConstituents_Wide = TLorentzVector(0,0,0,0);
   TLorentzVector hlv_SumConstituents_Core = TLorentzVector(0,0,0,0);
 
   int nCharged = 0;
@@ -246,8 +233,8 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
     for(unsigned int curType=0; curType<curTypes.size(); curType++) {
       if(curTypes.at(curType) == 0) continue;
 
-      if(curType == (int)PanTau::TauConstituent::t_Charged) nCharged++;
-      if(curType == (int)PanTau::TauConstituent::t_Pi0Neut) nPi0Neut++;
+      if(curType == static_cast<int>(PanTau::TauConstituent::t_Charged)) nCharged++;
+      if(curType == static_cast<int>(PanTau::TauConstituent::t_Pi0Neut)) nPi0Neut++;
 
       if((unsigned int)curType >= m_Constituents.size()) {
 	continue;
@@ -259,16 +246,11 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
 
     }//end loop over types                                                                                                                                                                                                                     
 
-    //add each constituent to wide proto momentum                                                                                                                                                                                              
-    hlv_SumConstituents_Wide += curConst->p4();
-
     //add all charged and neutral constituents (i.e. from core region) to core proto momentum                                                                                                                                                  
     if(curConst->isOfType(PanTau::TauConstituent::t_Charged)) {hlv_SumConstituents_Core += curConst->p4(); continue;}
     if(curConst->isOfType(PanTau::TauConstituent::t_Pi0Neut)) {hlv_SumConstituents_Core += curConst->p4(); continue;}
 
   }//end loop over constituents                                                                                                                                                                                                                  
-
-  m_ProtoMomentum_Wide = hlv_SumConstituents_Wide;
   m_ProtoMomentum_Core = hlv_SumConstituents_Core;
 
   //set mode as obtained from subalg                                                                                                                                                                                                             
@@ -283,8 +265,7 @@ PanTau::PanTauSeed::PanTauSeed( const std::string&                      nameInpu
 
 
 /** Constructor for invalid seeds */
-PanTau::PanTauSeed::PanTauSeed(const std::string& nameInputAlgorithm,
-			       xAOD::TauJet* tauJet,
+PanTau::PanTauSeed::PanTauSeed(xAOD::TauJet* tauJet,
 			       const std::vector<int>& pantauSeed_TechnicalQuality)				  
   :
   IParticle(),
@@ -301,7 +282,6 @@ PanTau::PanTauSeed::PanTauSeed(const std::string& nameInputAlgorithm,
   m_p4.SetPtEtaPhiM(tauJet->ptIntermediateAxis(), tauJet->etaIntermediateAxis(), tauJet->phiIntermediateAxis(), tauJet->mIntermediateAxis() );
   m_IsValidSeed           = false;
   m_TechnicalQuality      = pantauSeed_TechnicalQuality;
-  m_NameInputAlgorithm    = nameInputAlgorithm;
   m_TauJet                = tauJet;
   m_Features              = new PanTau::TauFeature;
 }
@@ -312,19 +292,19 @@ int PanTau::PanTauSeed::getDecayMode(int nCharged, int nNeutral) {
   int decayMode;
 
   // 1 Prong modes
-  if(nCharged == 1 && nNeutral == 0) decayMode = (int)xAOD::TauJetParameters::Mode_1p0n;
-  else if(nCharged == 1 && nNeutral == 1) decayMode = (int)xAOD::TauJetParameters::Mode_1p1n;
-  else if(nCharged == 1 && nNeutral >  1) decayMode = (int)xAOD::TauJetParameters::Mode_1pXn;
+  if(nCharged == 1 && nNeutral == 0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_1p0n);
+  else if(nCharged == 1 && nNeutral == 1) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_1p1n);
+  else if(nCharged == 1 && nNeutral >  1) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_1pXn);
   // 3 prong modes
-  else if(nCharged == 3 && nNeutral == 0) decayMode = (int)xAOD::TauJetParameters::Mode_3p0n;
-  else if(nCharged == 3 && nNeutral >  0) decayMode = (int)xAOD::TauJetParameters::Mode_3pXn;
+  else if(nCharged == 3 && nNeutral == 0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_3p0n);
+  else if(nCharged == 3 && nNeutral >  0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_3pXn);
   // other mode
-  else if(nCharged == 2) decayMode = (int)xAOD::TauJetParameters::Mode_Other;
-  else if(nCharged == 4) decayMode = (int)xAOD::TauJetParameters::Mode_Other;
-  else if(nCharged == 5) decayMode = (int)xAOD::TauJetParameters::Mode_Other;
-  else if(nCharged == 0) decayMode = (int)xAOD::TauJetParameters::Mode_NotSet;
-  else if(nCharged >= 6) decayMode = (int)xAOD::TauJetParameters::Mode_NotSet;
-  else decayMode = (int)xAOD::TauJetParameters::Mode_Error;
+  else if(nCharged == 2) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Other);
+  else if(nCharged == 4) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Other);
+  else if(nCharged == 5) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Other);
+  else if(nCharged == 0) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_NotSet);
+  else if(nCharged >= 6) decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_NotSet);
+  else decayMode = static_cast<int>(xAOD::TauJetParameters::Mode_Error);
 
   return decayMode;
 }
@@ -361,7 +341,7 @@ std::vector<PanTau::TauConstituent*> PanTau::PanTauSeed::getConstituentsOfType(i
     return std::vector<TauConstituent*>(0);
   }
   foundit = true;
-  if(tauConstituent_Type == (int)PanTau::TauConstituent::t_NoType) return m_ConstituentsList_AllSelected;
+  if(tauConstituent_Type == static_cast<int>(PanTau::TauConstituent::t_NoType)) return m_ConstituentsList_AllSelected;
   return m_Constituents.at(tauConstituent_Type);
 }
 
@@ -370,7 +350,7 @@ int PanTau::PanTauSeed::getNumberOfConstituentsOfType(int tauConstituent_Type) {
   bool isOK = false;
   std::vector<PanTau::TauConstituent*> consts = this->getConstituentsOfType(tauConstituent_Type, isOK);
   if(isOK) {
-    return (int)consts.size();
+    return static_cast<int>(consts.size());
   }
   return -1;
 }

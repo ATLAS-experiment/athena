@@ -32,6 +32,7 @@ namespace LArSamples {
       virtual const History* cellHistory(unsigned int i) const;
       virtual const CellInfo* cellInfo(unsigned int i) const;
       virtual unsigned int nChannels() const { return Definitions::nChannels; }
+      virtual unsigned int nChannelsSC() const { return Definitions::nChannelsSC; }
 
       virtual void resetCache() const;
 
@@ -40,6 +41,8 @@ namespace LArSamples {
 
       virtual const History* getCellHistory(unsigned int i) const = 0;
       virtual const CellInfo* getCellInfo(unsigned int i) const;
+
+      virtual const History* getSCHistory(unsigned int i) const = 0;
 
       const History* cellCache() const { return m_cellCache; }
       unsigned int cachePos() const { return m_pos; }

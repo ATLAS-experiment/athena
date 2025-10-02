@@ -2,13 +2,13 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkBPhys/AnyVertexSkimmingTool.h"
+#include "AnyVertexSkimmingTool.h"
 #include "xAODTracking/VertexContainer.h"
 #include "Gaudi/Property.h"
 namespace DerivationFramework {
 
 
-AnyVertexSkimmingTool::AnyVertexSkimmingTool(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p)
+AnyVertexSkimmingTool::AnyVertexSkimmingTool(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p)
 {}
 
 AnyVertexSkimmingTool::~AnyVertexSkimmingTool() = default;

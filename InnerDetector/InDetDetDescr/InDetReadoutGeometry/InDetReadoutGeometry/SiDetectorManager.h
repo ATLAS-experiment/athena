@@ -25,9 +25,9 @@
 #include <map>
 #include <memory>
 #include <string>
-  
+
 class StoreGateSvc;
-class Identifier; 
+class Identifier;
 class IdentifierHash;
 class AtlasDetectorID;
 class GeoAlignableTransform;
@@ -42,9 +42,9 @@ class ExtendedAlignableTransform;
 class SiNumerology;
 
   /** @class SiDetectorManager
-  
+
         Base class for Pixel and SCT Detector managers.
-        
+
         The Detector manager has methods to retrieve the Identifier
         helper and methods to retrieve the detector elements.  It also
         manages the alignment with methods to register the call backs
@@ -52,76 +52,78 @@ class SiNumerology;
         the appropriate alignable transform in GeoModel.
         There is also access to the layout (Initial, Final, TestBeam) and
         and version information.
-  
+
        @author: Grant Gorfine
-       - modified and maintained by Nick Styles & Andreas Salzburger 
+       - modified and maintained by Nick Styles & Andreas Salzburger
        */
 
     class SiDetectorManager : public InDetDetectorManager  {
-    
-    
+
+
     public:
-    
+
       // Constructor
       SiDetectorManager(StoreGateSvc * detStore, const std::string & name);
-     
+
       // Destructor
       virtual ~SiDetectorManager();
-    
-    
+
+
       //
       // Access Readout Elements
       //
-    
+
       /** access to individual elements using Identifier or IdentiferHash */
-      virtual SiDetectorElement * getDetectorElement(const Identifier &id) const = 0;
-      virtual SiDetectorElement * getDetectorElement(const IdentifierHash &idHash) const = 0;
-    
+      virtual const SiDetectorElement * getDetectorElement(const Identifier &id) const = 0;
+      virtual const SiDetectorElement * getDetectorElement(const IdentifierHash &idHash) const = 0;
+
       /** access to whole collectiom */
       virtual const SiDetectorElementCollection * getDetectorElementCollection() const = 0;
       virtual SiDetectorElementCollection::const_iterator getDetectorElementBegin() const = 0;
       virtual SiDetectorElementCollection::const_iterator getDetectorElementEnd() const = 0;
-    
-    
+      virtual SiDetectorElementCollection::iterator getDetectorElementBegin() = 0;
+      virtual SiDetectorElementCollection::iterator getDetectorElementEnd() = 0;
+
+
+
       /** Add elememts */
       virtual void addDetectorElement(SiDetectorElement * element) = 0;
-    
+
       /** Initialize the neighbours. This can only be done when all elements are built */
       virtual void initNeighbours() = 0;
-    
+
       /** Get tag used in dictionary */
-      const std::string & tag() const; 
-    
+      const std::string & tag() const;
+
       /** Methods to query which manager we have */
       virtual bool isPixel() const = 0;
       bool isSCT() const {return !isPixel();}
-     
+
       /** Add alignable transforms. No access to these, they will be changed by manager: */
       virtual void addAlignableTransform (int level, const Identifier &id, GeoAlignableTransform *xf) = 0;
-    
+
       /** Invalidate cache for all detector elements */
-      virtual void invalidateAll() const;
-    
+      virtual void invalidateAll();
+
       /** Update all caches */
       virtual void updateAll() const;
-    
-      
+
       /** Helper method to set delta transform from a global delta - Amg interface*/
-      static bool setAlignableTransformGlobalDelta(ExtendedAlignableTransform * extXF, 
+      static bool setAlignableTransformGlobalDelta(ExtendedAlignableTransform * extXF,
                                             const Amg::Transform3D & delta,
                                             GeoVAlignmentStore* alignStore=nullptr) ;
-    
+
       /** Helper method to set delta transform from a local delta - Amg interface */
-      static bool setAlignableTransformLocalDelta(ExtendedAlignableTransform * extXF, 
+      static bool setAlignableTransformLocalDelta(ExtendedAlignableTransform * extXF,
                                            const Amg::Transform3D & localToGlobalXF,
                                            const Amg::Transform3D & delta,
                                            GeoVAlignmentStore* alignStore=nullptr) ;
-    
+
       /** Access to module design; returns an _observer_ pointer */
       const SiDetectorDesign * addDesign(std::unique_ptr<const SiDetectorDesign>&&);
       int numDesigns() const;
       const SiDetectorDesign * getDesign(int i) const;
-    
+
       /** Access Numerology */
       const SiNumerology & numerology() const {return m_numerology;}
       SiNumerology & numerology() {return m_numerology;}
@@ -132,22 +134,22 @@ class SiNumerology;
     private:
       //** Prevent copy and assignment */
       const SiDetectorManager & operator=(const SiDetectorManager &right);
-      SiDetectorManager(const SiDetectorManager &right); 
-    
+      SiDetectorManager(const SiDetectorManager &right);
+
       /** This method is called by the InDetDetectorManager */
-      virtual bool setAlignableTransformDelta(int level, 
-                                              const Identifier & id, 
+      virtual bool setAlignableTransformDelta(int level,
+                                              const Identifier & id,
                                               const Amg::Transform3D & delta,
                                               FrameType frame,
                                               GeoVAlignmentStore* alignStore) const = 0;
-    
-    
-    
+
+
+
       std::string                               m_tag;
       SiNumerology                              m_numerology;
       std::vector<std::unique_ptr<const SiDetectorDesign>> m_designs;
       std::unique_ptr<const SiCommonItems>      m_commonItems;
-    
+
     };
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcWriterTool.h 
@@ -26,7 +26,7 @@
 #include "HepMC3/Writer.h"
 #include "HepMC3/WriterAsciiHepMC2.h"
 #endif 
-class HepMcWriterTool : virtual public IIOHepMcTool, public AthAlgTool
+class HepMcWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
   /////////////////////////////////////////////////////////////////// 

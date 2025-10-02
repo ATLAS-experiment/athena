@@ -16,12 +16,12 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "DiTauRecTools/IDiTauToolBase.h"
 
-// MVAUtils includes
-#include "MVAUtils/BDT.h"
+#include "tauRecTools/BDTHelper.h"
 
 #include <string>
 #include <map>
@@ -52,25 +52,18 @@ public:
   double getJetBDTScore(const xAOD::DiTauJet& xDiTau);
 
   // calculate and decorate BDTJetScore
-  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) override;
+  virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) const override;
   
 private:
 
+  Gaudi::Property<std::string> m_sWeightsFile{this, "WeightsFile", "tauRecTools/R22_preprod/DiTau_JetBDT_winter2024.weights.root"};
+  Gaudi::Property<std::string> m_sBDTScoreName{this, "BDTScoreName", "JetBDT"};
+
   StatusCode parseWeightsFile();
 
-  void setIDVariables(const xAOD::DiTauJet& xDiTau);
+  std::map<TString, float> setIDVariables(const xAOD::DiTauJet& xDiTau) const;
 
-  // steering variables
-  std::string m_sWeightsFile;
-  std::string m_sBDTScoreName;
-  
-  //MVAUtils::BDT* m_bdt; //!
-  std::unique_ptr<MVAUtils::BDT> m_bdt;
-
-  std::map<TString, float*> m_mIDVariables; //!
-  std::map<TString, float*> m_mIDSpectators; //!
-
-  inline float& setVar(const TString& var) { return *(m_mIDVariables[var]); } //!< not-stateless, many such examples need to be fixed for r22
+  std::unique_ptr<tauRecTools::BDTHelper> m_mvaBDT = nullptr;
 
   std::vector<std::string> m_vVarNames;
 

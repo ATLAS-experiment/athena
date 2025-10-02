@@ -25,7 +25,7 @@ class TopoAlgoDefMultiplicity:
         ]
         emVarThresholds_2bits = [
             'eEM24VM',  'eEM26',  'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M',
-            'eEM1', 'eEM2',
+            'eEM1', 'eEM2', 'eEM20M', 'eEM24M',
             'eEM40L',
 
             # spares
@@ -51,10 +51,9 @@ class TopoAlgoDefMultiplicity:
             tm.registerTopoAlgo(alg)
 
         emThresholds_2bits = [ 
-            'jEM25', 'jEM20M', 
-  
-            #spares
-            'jEMSPARE1', 
+            'jEM25', 'jEM20M',
+
+            'jEM35', # prospective Run 4 L1 item, ATR-30180
         ]
         for em in emThresholds_2bits:
             alg = EMMultiplicityAlgo( name = em,
@@ -136,8 +135,7 @@ class TopoAlgoDefMultiplicity:
 
             'jJ5p30ETA49', 'jJ10p30ETA49',
 
-            # spares
-            'jJSPARE1',
+            'jJ56p0ETA49', # prospective Run 4 L1 item, ATR-30180
 
         ]
 
@@ -153,19 +151,6 @@ class TopoAlgoDefMultiplicity:
                                        nbits = 2, classtype='jJetMultiplicity')
             tm.registerTopoAlgo(alg)
 
-        jLJThresholds_2bits = [ 
-            # jLJ thresholds for commissioning
-            'jLJ80', 'jLJ120', 'jLJ140', 'jLJ180',
-
-            # jLJ thresholds for production
-            'jLJ60', 'jLJ100', 'jLJ160', 'jLJ200',
-        ]
-
-        for jLJet in jLJThresholds_2bits:
-            alg = JetMultiplicityAlgo( name = jLJet, 
-                                       threshold = jLJet,
-                                       nbits = 2, classtype='jLJetMultiplicity')
-            tm.registerTopoAlgo(alg)
 
         gJThresholds_3bits = [ 'gJ20p0ETA25', 'gJ20p25ETA49', 'gJSPARE1', ]
         gJThresholds_2bits = [ 'gJ50p0ETA25', 'gJ100p0ETA25', 'gJ400p0ETA25' ]
@@ -185,8 +170,10 @@ class TopoAlgoDefMultiplicity:
         gLJThresholds_2bits = [ 
             'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25', 
 
+            'gLJ90p0ETA25', # prospective Run 4 L1 item, ATR-30180
+
             # spares
-            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3', 'gLJSPARE4',
+            'gLJSPARE1', 'gLJSPARE2', 'gLJSPARE3',
         ]
 
         for gLJet in gLJThresholds_2bits:
@@ -208,15 +195,13 @@ class TopoAlgoDefMultiplicity:
             # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
             'jTE100', 'jTE600', 'jTE1500', 'jTE4000', 'jTE6500', 'jTE8300', 'jTE9000', 'jTE10000', 'jTE12000',
-            'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5',
+            'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5', 'jTEFWD6500',
 
             'gMHT500',
 
             'jXEPerf100',
 
-            # spares (for any energy thresholds)
-            'jXESPARE1', 
-
+            # spares (for any energy thresholds) 
         ]
 
         for XE in XEThresholds:
@@ -269,7 +254,6 @@ class TopoAlgoDefMultiplicity:
             # FPGA 1, Topo1 fiber 2
             multLimits(thrtype='jJ',            conn='Topo1Opt2', nbit=3, startbit=0,  endbit=32),
             multLimits(thrtype='jJ',            conn='Topo1Opt2', nbit=2, startbit=36, endbit=73),
-            multLimits(thrtype='jLJ',           conn='Topo1Opt2', nbit=2, startbit=78, endbit=93),
             
             # FPGA 1, Topo1 fiber 3
             multLimits(thrtype='jTAU',          conn='Topo1Opt3', nbit=3, startbit=0,  endbit=2 ),

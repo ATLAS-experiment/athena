@@ -10,12 +10,13 @@
 //
 // Basic Jpsi->mu mu derivation example
 
-#include "DerivationFrameworkBPhys/Select_onia2mumu.h"
+#include "Select_onia2mumu.h"
 
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
 #include "CxxUtils/checker_macros.h"
+#include "TruthUtils/ParticleConstants.h"
 #include <vector>
 #include <string>
 
@@ -24,10 +25,9 @@ namespace DerivationFramework {
   Select_onia2mumu::Select_onia2mumu(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_v0Tools("Trk::V0Tools")
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
 
     // Declare tools    
     declareProperty("V0Tools", m_v0Tools);
@@ -36,8 +36,8 @@ namespace DerivationFramework {
     
     declareProperty("HypothesisName"       , m_hypoName              = "A");
     declareProperty("InputVtxContainerName", m_inputVtxContainerName = "JpsiCandidates");
-    declareProperty("TrkMasses"            , m_trkMasses             = std::vector<double>(2, 105.658) );    
-    declareProperty("VtxMassHypo"          , m_massHypo              = 3096.916 );                  
+    declareProperty("TrkMasses"            , m_trkMasses             = std::vector<double>(2, ParticleConstants::muonMassInMeV) );    
+    declareProperty("VtxMassHypo"          , m_massHypo              = ParticleConstants::JpsiMassInMeV );                  
     declareProperty("MassMax"              , m_massMax               = 6000);                   
     declareProperty("MassMin"              , m_massMin               = 2000);                   
     declareProperty("Chi2Max"              , m_chi2Max               = 200);

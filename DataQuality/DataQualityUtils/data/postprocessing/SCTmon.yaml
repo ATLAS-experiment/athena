@@ -7,7 +7,7 @@ Input: [
          'SCT/SCT(?P<sec>[A-E]*)/Noise/noiseoccupancymaptrigger(?P<sec2>[ECm,ECp]*)_(?P<L>\d)_(?P<S>\d)',
          'SCT/SCT(?P<sec>[A-E]*)/eff/ineff.*_(?P<L>\d)_(?P<S>\d)',
          'SCT/SCT(?P<sec>[A-E]*)/errors/Errors/SCT_NumberOfErrors(?P=sec)_(?P<L>\d)_(?P<S>\d)',
-         'SCT/GENERAL/errors/Masked\ Links',
+         'SCT/GENERAL/errors/MaskedLinks',
          'SCT/GENERAL/errors/FlaggedWafers'
 ]
 Output: [ 'SCT/GENERAL/Conf/SCTConfNew' ]

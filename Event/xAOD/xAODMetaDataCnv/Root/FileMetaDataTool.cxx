@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -17,14 +17,7 @@
 namespace xAODMaker {
 
 FileMetaDataTool::FileMetaDataTool(const std::string& name)
-    : asg::AsgMetadataTool(name) {
-       declareProperty( "Keys", m_keys = {},
-             "(optional) List of keys to copy. Copy all keys if empty "
-             "(default: empty)");
-#ifndef XAOD_STANDALONE
-      declareInterface< ::IMetaDataTool >(this);
-#endif  // XAOD_STANDALONE
-    }
+      : base_class( name ) { }
 
 StatusCode
     FileMetaDataTool::initialize() {

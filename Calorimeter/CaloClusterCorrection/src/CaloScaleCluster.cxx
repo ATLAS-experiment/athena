@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloScaleCluster.cxx
@@ -49,6 +49,10 @@ void CaloScaleCluster::makeTheCorrection (const Context& myctx,
   const
 {
   const CxxUtils::Array<2> correction = m_correction (myctx);
+  if (correction.size() == 0) {
+    ATH_MSG_ERROR("Empty correction array");
+    return;
+  }
   
   float adj_aeta = std::abs (adj_eta);
   float fac;

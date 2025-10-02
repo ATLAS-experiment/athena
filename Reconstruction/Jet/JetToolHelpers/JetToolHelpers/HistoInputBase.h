@@ -34,7 +34,9 @@ class HistoInputBase :public asg::AsgTool, virtual public IVarTool
         std::string getFileName() const { return m_fileName; };
         /// Return the name of the histogram 
         std::string getHistName() const { return m_histName; };
-   
+	/// Returns the underlying histogram
+        TH1& getHistogram() { return *m_hist; };
+ 
     private:
         /// path to the file with histrograms
         Gaudi::Property< std::string > m_fileName { this, "inputfile", "JetUncertainties/CalibArea-08/rel21/Summer2019/R4_AllComponents.root", "File containing histograms" };

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 # AnaAlgorithm import(s):
@@ -9,11 +9,11 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 class JetJvtAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the JVT sequence"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (JetJvtAnalysisConfig, self).__init__ ()
         self.setBlockName('JVT')
         self.addDependency('OverlapRemoval', required=False)
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
         self.addOption ('postfix', '', type=str,
@@ -22,6 +22,9 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         self.addOption ('enableFJvt', False, type=bool,
             info="whether to enable forward JVT calculations. The default is False.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
 
@@ -32,7 +35,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         # Set up the per-event jet efficiency scale factor calculation algorithm
-        alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' )
         preselection = config.getFullSelection (self.containerName, '')
         alg.preselection = preselection + '&&no_jvt' if preselection else 'no_jvt'
         alg.scaleFactorInputDecoration = 'jvt_effSF_%SYS%'

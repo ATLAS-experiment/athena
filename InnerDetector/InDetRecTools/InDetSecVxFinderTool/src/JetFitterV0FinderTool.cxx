@@ -97,12 +97,12 @@ const Trk::TwoTrackVerticesInJet* JetFitterV0FinderTool::doV0Finding( const xAOD
     const Trk::ITrackLink *secondTrack = vxTrackAtVertex.at(1);
 
     // Second track added first, legacy from old jetfitter
-    bool secondTrackAlreadyStored = m_jetFitterUtils->checkIfTrackIsInVector( secondTrack,tracksToUseInFirstFit );
+    bool secondTrackAlreadyStored = InDet::InDetJetFitterUtils::checkIfTrackIsInVector( secondTrack,tracksToUseInFirstFit );
     if ( not secondTrackAlreadyStored )
       tracksToUseInFirstFit.push_back( secondTrack );
 
     // First track
-    bool firstTrackAlreadyStored = m_jetFitterUtils->checkIfTrackIsInVector( firstTrack,tracksToUseInFirstFit );
+    bool firstTrackAlreadyStored = InDet::InDetJetFitterUtils::checkIfTrackIsInVector( firstTrack,tracksToUseInFirstFit );
     if ( not firstTrackAlreadyStored )
       tracksToUseInFirstFit.push_back( firstTrack );
 
@@ -120,13 +120,13 @@ const Trk::TwoTrackVerticesInJet* JetFitterV0FinderTool::doV0Finding( const xAOD
       continue;
     } 
 
-    bool alreadyUsed = m_jetFitterUtils->checkIfTrackIsInVector( trackLink,tracksToUseInFirstFit );
+    bool alreadyUsed = InDet::InDetJetFitterUtils::checkIfTrackIsInVector( trackLink,tracksToUseInFirstFit );
     if ( alreadyUsed ) {
       ATH_MSG_VERBOSE( "Track was already used" );
       continue;
     }
 
-    bool trackAlreadyStored = m_jetFitterUtils->checkIfTrackIsInVector( trackLink,tracksToUseInSecondFit );
+    bool trackAlreadyStored = InDet::InDetJetFitterUtils::checkIfTrackIsInVector( trackLink,tracksToUseInSecondFit );
     if ( not trackAlreadyStored )
       tracksToUseInSecondFit.push_back( trackLink );
   }

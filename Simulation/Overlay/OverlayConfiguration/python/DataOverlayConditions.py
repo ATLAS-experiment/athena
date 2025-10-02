@@ -1,33 +1,62 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import ProductionStep
 from IOVDbSvc.IOVDbSvcConfig import addOverride
 
 
-def PPTestCfg(flags):
-    """Conditions for p-p test."""
+def DataOverlayConditionsBaseCfg(flags):
+    """Data overlay conditions overrides for data overlay."""
     acc = ComponentAccumulator()
-    
-    # SCT
-    acc.merge(addOverride(flags, "/SCT/DAQ/Calibration/ChipNoise", "SctDaqCalibrationChipNoise-Apr10-01", db="COOLOFL_SCT/OFLP200"))
-    acc.merge(addOverride(flags, "/SCT/DAQ/Calibration/ChipGain", "SctDaqCalibrationChipGain-Apr10-01", db="COOLOFL_SCT/OFLP200"))
 
-    # TRT
-    # TODO: TRTCondDigVers
+    # LAr alignment (common for all substeps)
+    # Used from MC for simplicity
+    acc.merge(addOverride(flags, "/LAR/LArCellPositionShift", tag="LArCellPositionShift-IOVDEP-00", db="COOLOFL_LAR/OFLP200"))
 
-    # LAr
-    acc.merge(addOverride(flags, "/LAR/BadChannels/MissingFEBs", tag="LArBadChannelsMissingFEBs-IOVDEP-04", db="COOLOFL_LAR/OFLP200"))
-    acc.merge(addOverride(flags, "/LAR/LArCellPositionShift", tag="LArCellPositionShift-ideal", db="COOLOFL_LAR/OFLP200"))
-    acc.merge(addOverride(flags, "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/4samples1phase", tag="LARElecCalibOflOFCPhysWaveRTM4samples1phase-RUN2-UPD4-00"))
-    acc.merge(addOverride(flags, "/LAR/ElecCalibOfl/Shape/RTM/4samples1phase", tag="LARElecCalibOflShapeRTM4samples1phase-RUN2-UPD4-00"))
-    acc.merge(addOverride(flags, "/LAR/ElecCalibMC/fSampl", tag="LARElecCalibMCfSampl-G496-19213-FTFP_BERT_BIRK"))
+    # Some conditions are split by fast chain (sim+digi+overlay) and reco steps
+    if flags.Common.ProductionStep is not ProductionStep.Reconstruction:
+        # SCT
+        # Only for digitization, not reconstruction
+        # Available only in OFLP200 (not in CONDBR2).
+        acc.merge(addOverride(flags, "/SCT/DAQ/Calibration/ChipNoise", "SctDaqCalibrationChipNoise-MC-01", db="COOLOFL_SCT/OFLP200"))
+        acc.merge(addOverride(flags, "/SCT/DAQ/Calibration/ChipGain", "SctDaqCalibrationChipGain-MC-01", db="COOLOFL_SCT/OFLP200"))
 
-    # Tile
-    # TODO: Tile sampling fraction
+        # LAr
+        # Sampling fractions only for simulation+digitization, not reconstruction
+        # Available only in OFLP200 (not in CONDBR2).
+        acc.merge(addOverride(flags, "/LAR/ElecCalibMC/fSampl", tag="LARElecCalibMCfSampl-G4106-22056-v2"))
 
-    # TGC
-    # TODO: /TGC/DIGIT/* folders are available only in OFLP200 (not in CONDBR2).
-    acc.merge(addOverride(flags, "/TGC/DIGIT/ASDPOS", tag="TgcDigitAsdPos-00-01", db="COOLOFL_TGC/OFLP200"))
-    acc.merge(addOverride(flags, "/TGC/DIGIT/TOFFSET", tag="TgcDigitTimeOffset-00-01", db="COOLOFL_TGC/OFLP200"))
-    acc.merge(addOverride(flags, "/TGC/DIGIT/XTALK", tag="TgcDigitXTalk-00-01", db="COOLOFL_TGC/OFLP200"))
+        # Tile
+        # Sampling fractions only for simulation+digitization, not reconstruction
+        # Available only in OFLP200 (not in CONDBR2).
+        acc.merge(addOverride(flags, "/TILE/OFL02/CALIB/SFR", tag="TileOfl02CalibSfr-SIM-07"))
+
+        # TGC
+        # Only for digitization, not reconstruction
+        # Available only in OFLP200 (not in CONDBR2).
+        acc.merge(addOverride(flags, "/TGC/DIGIT/ASDPOS", tag="TgcDigitAsdPos-00-01"))
+        acc.merge(addOverride(flags, "/TGC/DIGIT/TOFFSET", tag="TgcDigitTimeOffset-00-01"))
+        acc.merge(addOverride(flags, "/TGC/DIGIT/XTALK", tag="TgcDigitXTalk-00-01"))
+
+    else:
+        # TRT
+        # Only for reconstruction
+        # TODO: Include in a global tag
+        acc.merge(addOverride(flags, "/TRT/Calib/MC/RT", tag="TrtCalibRt-MC-run2-run3-01"))
+        acc.merge(addOverride(flags, "/TRT/Calib/MC/T0", tag="TrtCalibT0-MC-run2-run3-01"))
 
     return acc
+
+
+def DataOverlay2023Cfg(flags):
+    """Conditions for 2023 data overlay."""
+    return DataOverlayConditionsBaseCfg(flags)
+
+
+def DataOverlay2024Cfg(flags):
+    """Conditions for 2024 data overlay."""
+    return DataOverlayConditionsBaseCfg(flags)
+
+
+def DataOverlay2025OOCfg(flags):
+    """Conditions for 2025 OO data overlay."""
+    return DataOverlayConditionsBaseCfg(flags)

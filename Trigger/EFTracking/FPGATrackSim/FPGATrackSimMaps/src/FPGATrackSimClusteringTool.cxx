@@ -3,6 +3,7 @@
    */
 
 #include "FPGATrackSimClusteringTool.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include "CxxUtils/trapping_fp.h"
@@ -21,6 +22,11 @@ FPGATrackSimClusteringTool::FPGATrackSimClusteringTool(const std::string& algnam
 {
 }
 
+StatusCode FPGATrackSimClusteringTool::initialize() {
+    ATH_CHECK(m_lorentzAngleTool.retrieve(EnableTool{m_LorentzAngleShift >=0}));
+    return StatusCode::SUCCESS;
+}
+
 
 StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInputHeader &header, std::vector<FPGATrackSimCluster> &clusters) const
 {
@@ -28,18 +34,22 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
     {
         // Retreive the hits from the tower
         FPGATrackSimTowerInputHeader& tower = *header.getTower(i);
-        std::vector<FPGATrackSimHit> hits = tower.hits();
+        HitPtrCollection hits;
+        hits.reserve(tower.hits().size());
+        for (auto& hit : tower.hits()) {
+            hits.push_back(std::make_unique<FPGATrackSimHit>(hit));
+        }
 
-        std::vector<std::vector<FPGATrackSimHit>> hitsPerModule;
+        HitPtrContainer hitsPerModule;
         std::vector<FPGATrackSimCluster> towerClusters;
 
         if (m_reduceCoordPrecision) {
             for (auto &hit : hits)
-                reduceGlobalCoordPrecision(hit);
+                reduceGlobalCoordPrecision(*hit);
         }
 
-        splitAndSortHits(hits, hitsPerModule);
-        SortedClustering(hitsPerModule, towerClusters);
+        splitAndSortHits(std::move(hits), hitsPerModule);
+        SortedClustering(std::move(hitsPerModule), towerClusters);
         normaliseClusters(towerClusters);
 
         //remove the old hits from the tower...
@@ -54,6 +64,7 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
         unsigned int pixelCounter =  0;
         unsigned int stripCounter = 0;
         for ( auto &cluster: towerClusters){
+            SetMinMaxIndicies(cluster);
             if (m_reduceCoordPrecision)
                 reduceGlobalCoordPrecision(cluster);
 
@@ -71,8 +82,11 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
               cluster_as_FPGATrackSimhit.setCluster1ID(stripCounter);
               stripCounter++;
             }
+            if(m_LorentzAngleShift>= 0){
+	            ATH_CHECK(m_lorentzAngleTool->updateHitPosition(cluster_as_FPGATrackSimhit, m_LorentzAngleShift));
+            }
             tower.addHit(cluster_as_FPGATrackSimhit);
-
+            cluster.setClusterEquiv(cluster_as_FPGATrackSimhit);
             //send back a copy for monitoring and to check when writing out hits in each road
             clusters.push_back(cluster);
             cluster_count++;
@@ -82,13 +96,31 @@ StatusCode FPGATrackSimClusteringTool::DoClustering(FPGATrackSimLogicalEventInpu
     return StatusCode::SUCCESS;
 }
 
+void FPGATrackSimClusteringTool::SetMinMaxIndicies(FPGATrackSimCluster &cluster) const {
+    //Set the min and max indices for the cluster equivalent
+    FPGATrackSimHit clusterEquiv = cluster.getClusterEquiv();
+    int maxPhiIdx{-std::numeric_limits<int>::max()}, maxEtaIdx{-std::numeric_limits<int>::max()};
+    int minPhiIdx{std::numeric_limits<int>::max()}, minEtaIdx{std::numeric_limits<int>::max()};
+    for (const FPGATrackSimHit& hit : cluster.getHitList()){
+         maxPhiIdx = std::max(maxPhiIdx, static_cast<int>(hit.getPhiIndex()));
+         minPhiIdx = std::min(minPhiIdx, static_cast<int>(hit.getPhiIndex()));
+         maxEtaIdx = std::max(maxEtaIdx, static_cast<int>(hit.getEtaIndex()));
+         minEtaIdx = std::min(minEtaIdx, static_cast<int>(hit.getEtaIndex()));
+    }
+    clusterEquiv.setMinPhiIndex(minPhiIdx);
+    clusterEquiv.setMaxPhiIndex(maxPhiIdx);
+    clusterEquiv.setMinEtaIndex(minEtaIdx);
+    clusterEquiv.setMaxEtaIndex(maxEtaIdx);
+    cluster.setClusterEquiv(clusterEquiv);
+}
+
 //Attempt to implement clustering using FPGATrackSim objects.
-void FPGATrackSimClusteringTool::SortedClustering(const std::vector<std::vector<FPGATrackSimHit> >& sorted_hits, std::vector<FPGATrackSimCluster> &clusters) const {
+void FPGATrackSimClusteringTool::SortedClustering(HitPtrContainer&& sorted_hits, std::vector<FPGATrackSimCluster> &clusters) const {
     std::vector<FPGATrackSimCluster> moduleClusters;
     //Loop over the sorted modules that we have
-    for( auto& moduleHits:sorted_hits){
+    for( HitPtrCollection & moduleHits: sorted_hits){
         //Make the clusters for this module
-        Clustering(moduleHits, moduleClusters);
+        Clustering(std::move(moduleHits), moduleClusters);
         //Put these clusters into the output list
         clusters.insert(clusters.end(), moduleClusters.begin(), moduleClusters.end());
         //Clear the vector or this will get messy
@@ -96,251 +128,229 @@ void FPGATrackSimClusteringTool::SortedClustering(const std::vector<std::vector<
     }
 }
 
-void FPGATrackSimClusteringTool::Clustering(std::vector<FPGATrackSimHit> moduleHits, std::vector<FPGATrackSimCluster> &moduleClusters) const {
-    std::vector<FPGATrackSimCluster> tempClusters;
+
+void FPGATrackSimClusteringTool::Clustering(HitPtrCollection &&moduleHits, std::vector<FPGATrackSimCluster> &moduleClusters) const {
     FPGATrackSimHit clusterEquiv;
-    bool newCluster, newHit;
+    bool newHit;
 
     //To hold the current cluster vars for comparison
     //loop over the hits that we have been passed for this module
     for( auto& hit: moduleHits){
         bool is_clustered_hit = false;
+        std::vector<FPGATrackSimCluster>::iterator it_added_clus;
 
         //Loop over the clusters we have already made, check if this hit should be added to them?
-        for( auto& cluster: tempClusters){
-            if(hit.isPixel()){
-                if (FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, false, m_digitalClustering))
-                    is_clustered_hit = true;
+        for(std::vector<FPGATrackSimCluster>::iterator it = moduleClusters.begin(); it != moduleClusters.end(); ++it) {
+            if(hit->isPixel()) {
+                if (FPGATrackSimCLUSTERING::updatePixelCluster(*it, *hit, false, m_digitalClustering)) {
+                    if (!is_clustered_hit) {
+                        is_clustered_hit = true;
+                        it_added_clus = it;
+                    } else {
+                        int cPhi = it->getClusterEquiv().getPhiIndex();
+                        int cPhiWidth = it->getClusterEquiv().getPhiWidth();
+                        int cEta = it->getClusterEquiv().getEtaIndex();
+                        int cEtaWidth = it->getClusterEquiv().getEtaWidth();
+                        int fCPhi = it_added_clus->getClusterEquiv().getPhiIndex();
+                        int fCPhiWidth = it_added_clus->getClusterEquiv().getPhiWidth();
+                        int fCEta = it_added_clus->getClusterEquiv().getEtaIndex();
+                        int fCEtaWidth = it_added_clus->getClusterEquiv().getEtaWidth();
+
+                        clusterEquiv = it_added_clus->getClusterEquiv();
+
+                        // set new phi & phi width
+                        if (cPhi < fCPhi) {
+                            clusterEquiv.setPhiIndex(cPhi);
+                            if (cPhi + cPhiWidth < fCPhi + fCPhiWidth)
+                                clusterEquiv.setPhiWidth(fCPhiWidth + (fCPhi - cPhi));
+                            else
+                                clusterEquiv.setPhiWidth(cPhiWidth);
+                        } else {
+                            clusterEquiv.setPhiIndex(fCPhi);
+                            if (!(cPhi + cPhiWidth < fCPhi + fCPhiWidth))
+                                clusterEquiv.setPhiWidth(cPhiWidth + (cPhi - fCPhi));
+                            else
+                                clusterEquiv.setPhiWidth(fCPhiWidth);
+                        }
+
+                        // set new eta & eta width
+                        if (cEta < fCEta) {
+                            clusterEquiv.setEtaIndex(cEta);
+                            if (cEta + cEtaWidth < fCEta + fCEtaWidth)
+                                clusterEquiv.setEtaWidth(fCEtaWidth + (fCEta - cEta));
+                            else
+                                clusterEquiv.setEtaWidth(cEtaWidth);
+                        } else {
+                            clusterEquiv.setEtaIndex(fCEta);
+                            if (!(cEta + cEtaWidth < fCEta + fCEtaWidth))
+                                clusterEquiv.setEtaWidth(cEtaWidth + (cEta - fCEta));
+                            else
+                                clusterEquiv.setEtaWidth(fCEtaWidth);
+                        }
+
+                        it_added_clus->setClusterEquiv(clusterEquiv);
+
+                        for (auto& hit : it->getHitList()) {
+                            newHit = true;
+                            for (auto& finalHit : it_added_clus->getHitList()) {
+                                if (hit.getEtaIndex() == finalHit.getEtaIndex() &&
+                                        hit.getPhiIndex() == finalHit.getPhiIndex())
+                                    newHit = false;
+                            }
+                            if (newHit) {
+                                CXXUTILS_TRAPPING_FP;
+                                clusterEquiv = it_added_clus->getClusterEquiv();
+                                float xOld = clusterEquiv.getX();
+                                float yOld = clusterEquiv.getY();
+                                float zOld = clusterEquiv.getZ();
+                                float xPhiOld = clusterEquiv.getPhiCoord();
+                                float xEtaOld = clusterEquiv.getEtaCoord();
+                                float cPhiOld = clusterEquiv.getCentroidPhiIndex();
+                                float cEtaOld = clusterEquiv.getCentroidEtaIndex();
+                                float xNew = hit.getX();
+                                float yNew = hit.getY();
+                                float zNew = hit.getZ();
+                                float xPhiNew = hit.getPhiCoord();
+                                float xEtaNew = hit.getEtaCoord();
+                                float cPhiNew = hit.getPhiIndex();
+                                float cEtaNew = hit.getEtaIndex();
+                                int tot = clusterEquiv.getToT();
+                                int totNew = hit.getToT();
+                                if (m_digitalClustering) {
+                                    // n+1 because that is old + new now
+                                    int n = it_added_clus->getHitList().size();
+                                    clusterEquiv.setX((xOld*n + xNew) / (n+1));
+                                    clusterEquiv.setY((yOld*n + yNew) / (n+1));
+                                    clusterEquiv.setZ((zOld*n + zNew) / (n+1));
+                                    clusterEquiv.setPhiCoord((xPhiOld*n + xPhiNew) / (n+1));
+                                    clusterEquiv.setEtaCoord((xEtaOld*n + xEtaNew) / (n+1));
+                                    clusterEquiv.setCentroidPhiIndex((cPhiOld*n + cPhiNew) / (n+1));
+                                    clusterEquiv.setCentroidEtaIndex((cEtaOld*n + cEtaNew) / (n+1));
+                                } else {
+                                    clusterEquiv.setX((xOld*tot + xNew*totNew) / (tot+totNew));
+                                    clusterEquiv.setY((yOld*tot + yNew*totNew) / (tot+totNew));
+                                    clusterEquiv.setZ((zOld*tot + zNew*totNew) / (tot+totNew));
+                                    clusterEquiv.setPhiCoord((xPhiOld*tot + xPhiNew*totNew) / (tot+totNew));
+                                    clusterEquiv.setEtaCoord((xEtaOld*tot + xEtaNew*totNew) / (tot+totNew));
+                                    clusterEquiv.setCentroidPhiIndex((cPhiOld*tot + cPhiNew*totNew) / (tot+totNew));
+                                    clusterEquiv.setCentroidEtaIndex((cEtaOld*tot + cEtaNew*totNew) / (tot+totNew));
+                                }
+                                clusterEquiv.setToT(tot + totNew);
+                                it_added_clus->setClusterEquiv(clusterEquiv);
+                                it_added_clus->push_backHitList(hit);
+                            }
+                        }
+
+                        // move the last cluster to the newly freed spot in the cluster array if the merged cluster was not
+                        // already the last cluster, decrease loop counter by one, so that this cluster gets also checked
+                        // against the current hit
+                        if (it != moduleClusters.end() - 1) {
+                            *it = moduleClusters.back();
+                            moduleClusters.pop_back();
+                            it -= 1;
+                        } else {
+                            moduleClusters.pop_back();
+                            break;
+			}
+                    }
+                }
             }
-            if(hit.isStrip()){
-                if (FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, false, m_digitalClustering))
+            if(hit->isStrip()){
+                if (FPGATrackSimCLUSTERING::updateStripCluster(*it, *hit, false, m_digitalClustering))
                     is_clustered_hit = true;
             }
         }
 
         //If it is the first hit or a not clustered hit, then start a new cluster and add it to the output vector
-        if((is_clustered_hit==0) or (tempClusters.size()==0)){
+        if((!is_clustered_hit) || (moduleClusters.size() == 0)){
             FPGATrackSimCluster cluster;
-            if(hit.isPixel()){
+            if(hit->isPixel()){
                 // No need to check the return code here
-                FPGATrackSimCLUSTERING::updatePixelCluster(cluster, hit, true, m_digitalClustering);
-            } else if(hit.isStrip()){
-                FPGATrackSimCLUSTERING::updateStripCluster(cluster, hit, true, m_digitalClustering);
+                FPGATrackSimCLUSTERING::updatePixelCluster(cluster, *hit, true, m_digitalClustering);
+            } else if(hit->isStrip()){
+                FPGATrackSimCLUSTERING::updateStripCluster(cluster, *hit, true, m_digitalClustering);
             }
             //Put this cluster into the output hits. Will update it in place.
-            tempClusters.push_back(cluster);
-        }
-    }
-
-    // Merge overlapping clusters
-    for (auto& cluster : tempClusters) {
-        newCluster = true;
-
-        for (auto& finalCluster : moduleClusters) {
-            int cPhi = cluster.getClusterEquiv().getPhiIndex();
-            int cPhiWidth = cluster.getClusterEquiv().getPhiWidth();
-            int cEta = cluster.getClusterEquiv().getEtaIndex();
-            int cEtaWidth = cluster.getClusterEquiv().getEtaWidth();
-            int fCPhi = finalCluster.getClusterEquiv().getPhiIndex();
-            int fCPhiWidth = finalCluster.getClusterEquiv().getPhiWidth();
-            int fCEta = finalCluster.getClusterEquiv().getEtaIndex();
-            int fCEtaWidth = finalCluster.getClusterEquiv().getEtaWidth();
-
-            // check for overlap in phi
-            if ((fCPhi > cPhi + cPhiWidth - 1) ||
-                    (cPhi > fCPhi + fCPhiWidth - 1))
-                continue;
-
-            // check for overlap in eta
-            if ((fCEta > cEta + cEtaWidth - 1) ||
-                    (cEta > fCEta + fCEtaWidth - 1))
-                continue;
-
-            // remaining clusters are overlapping, check if clusters share hits
-            unsigned int sharedhits = 0;
-            for (auto & hit : cluster.getHitList()) {
-                newHit = true;
-                for (auto & finalHit : finalCluster.getHitList()) {
-                    if (hit.getEtaIndex() == finalHit.getEtaIndex() &&
-                            hit.getPhiIndex() == finalHit.getPhiIndex())
-                        newHit = false;
-                }
-                if (!newHit) {
-                    sharedhits++;
-                }
-            }
-
-            if (sharedhits == 0)
-                continue;
-
-            // Merge the clusters
-            newCluster = false;
-
-            clusterEquiv = finalCluster.getClusterEquiv();
-
-            // set new phi & phi width
-            if (cPhi < fCPhi) {
-                clusterEquiv.setPhiIndex(cPhi);
-                if (cPhi + cPhiWidth < fCPhi + fCPhiWidth)
-                    clusterEquiv.setPhiWidth(fCPhiWidth + (fCPhi - cPhi));
-                else
-                    clusterEquiv.setPhiWidth(cPhiWidth);
-            } else {
-                clusterEquiv.setPhiIndex(fCPhi);
-                if (!(cPhi + cPhiWidth < fCPhi + fCPhiWidth))
-                    clusterEquiv.setPhiWidth(cPhiWidth + (cPhi - fCPhi));
-                else
-                    clusterEquiv.setPhiWidth(fCPhiWidth);
-            }
-
-            // set new eta & eta width
-            if (cEta < fCEta) {
-                clusterEquiv.setEtaIndex(cEta);
-                if (cEta + cEtaWidth < fCEta + fCEtaWidth)
-                    clusterEquiv.setEtaWidth(fCEtaWidth + (fCEta - cEta));
-                else
-                    clusterEquiv.setEtaWidth(cEtaWidth);
-            } else {
-                clusterEquiv.setEtaIndex(fCEta);
-                if (!(cEta + cEtaWidth < fCEta + fCEtaWidth))
-                    clusterEquiv.setEtaWidth(cEtaWidth + (cEta - fCEta));
-                else
-                    clusterEquiv.setEtaWidth(fCEtaWidth);
-            }
-
-            finalCluster.setClusterEquiv(clusterEquiv);
-
-            for (auto & hit : cluster.getHitList()) {
-                newHit = true;
-                for (auto & finalHit : finalCluster.getHitList()) {
-                    if (hit.getEtaIndex() == finalHit.getEtaIndex() &&
-                            hit.getPhiIndex() == finalHit.getPhiIndex())
-                        newHit = false;
-                }
-                if (newHit) {
-                    CXXUTILS_TRAPPING_FP;
-                    clusterEquiv = finalCluster.getClusterEquiv();
-                    float xOld = clusterEquiv.getX();
-                    float yOld = clusterEquiv.getY();
-                    float zOld = clusterEquiv.getZ();
-                    float xPhiOld = clusterEquiv.getPhiCoord();
-                    float xEtaOld = clusterEquiv.getEtaCoord();
-                    float cPhiOld = clusterEquiv.getCentroidPhiIndex();
-                    float cEtaOld = clusterEquiv.getCentroidEtaIndex();
-                    float xNew = hit.getX();
-                    float yNew = hit.getY();
-                    float zNew = hit.getZ();
-                    float xPhiNew = hit.getPhiCoord();
-                    float xEtaNew = hit.getEtaCoord();
-                    float cPhiNew = hit.getPhiIndex();
-                    float cEtaNew = hit.getEtaIndex();
-                    int tot = clusterEquiv.getToT();
-                    int totNew = hit.getToT();
-                    if (m_digitalClustering) {
-                        // n+1 because that is old + new now
-                        int n = finalCluster.getHitList().size();
-                        clusterEquiv.setX((xOld*n + xNew) / (n+1));
-                        clusterEquiv.setY((yOld*n + yNew) / (n+1));
-                        clusterEquiv.setZ((zOld*n + zNew) / (n+1));
-                        clusterEquiv.setPhiCoord((xPhiOld*n + xPhiNew) / (n+1));
-                        clusterEquiv.setEtaCoord((xEtaOld*n + xEtaNew) / (n+1));
-                        clusterEquiv.setCentroidPhiIndex((cPhiOld*n + cPhiNew) / (n+1));
-                        clusterEquiv.setCentroidEtaIndex((cEtaOld*n + cEtaNew) / (n+1));
-                    } else {
-                        clusterEquiv.setX((xOld*tot + xNew*totNew) / (tot+totNew));
-                        clusterEquiv.setY((yOld*tot + yNew*totNew) / (tot+totNew));
-                        clusterEquiv.setZ((zOld*tot + zNew*totNew) / (tot+totNew));
-                        clusterEquiv.setPhiCoord((xPhiOld*tot + xPhiNew*totNew) / (tot+totNew));
-                        clusterEquiv.setEtaCoord((xEtaOld*tot + xEtaNew*totNew) / (tot+totNew));
-                        clusterEquiv.setCentroidPhiIndex((cPhiOld*tot + cPhiNew*totNew) / (tot+totNew));
-                        clusterEquiv.setCentroidEtaIndex((cEtaOld*tot + cEtaNew*totNew) / (tot+totNew));
-                    }
-                    clusterEquiv.setToT(tot + totNew);
-                    finalCluster.setClusterEquiv(clusterEquiv);
-                    finalCluster.push_backHitList(hit);
-                }
-            }
-        }
-
-        if (newCluster)
             moduleClusters.push_back(cluster);
+        }
     }
+    moduleHits.clear();
 }
 
-void FPGATrackSimClusteringTool::splitAndSortHits(std::vector<FPGATrackSimHit> &hits, std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule, int &eta_phi) const {
-    splitHitsToModules(hits, hitsPerModule);
+void FPGATrackSimClusteringTool::splitAndSortHits(HitPtrCollection &&hits, HitPtrContainer &hitsPerModule, int &eta_phi) const {
+    splitHitsToModules(std::move(hits), hitsPerModule);
     sortHitsOnModules(hitsPerModule, eta_phi);
 }
 
-void FPGATrackSimClusteringTool::splitAndSortHits(std::vector<FPGATrackSimHit> &hits, std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule) const{
-    splitHitsToModules(hits, hitsPerModule);
+
+void FPGATrackSimClusteringTool::splitAndSortHits(HitPtrCollection &&hits, HitPtrContainer &hitsPerModule) const{
+    splitHitsToModules(std::move(hits), hitsPerModule);
     sortHitsOnModules(hitsPerModule);
 }
 
 /*Temporarilly sort the hits into module by module packets
 */
-void FPGATrackSimClusteringTool::splitHitsToModules(std::vector<FPGATrackSimHit> &hits, std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule) const{
+void FPGATrackSimClusteringTool::splitHitsToModules(HitPtrCollection &&hits, HitPtrContainer &hitsPerModule) const{
     //To hold the current module
-    std::vector<FPGATrackSimHit> currentModule;
+    HitPtrCollection currentModule;
     uint hashing = 0;
     //Split the incoming hits into hits by module
     for ( auto& hit:hits){
         if(hashing == 0){
-            currentModule.push_back(hit);
-            hashing = hit.getIdentifierHash();
-        } else if (hit.getIdentifierHash() == hashing) {
-            currentModule.push_back(hit);
+            hashing = hit->getIdentifierHash();
+            currentModule.push_back(std::move(hit));
+        } else if (hit->getIdentifierHash() == hashing) {
+            currentModule.push_back(std::move(hit));
         } else {
-            hitsPerModule.push_back(currentModule);
-            currentModule.clear();
-            hashing = hit.getIdentifierHash();
-            currentModule.push_back(hit);
+            hitsPerModule.push_back(std::exchange(currentModule, HitPtrCollection{}));
+            hashing = hit->getIdentifierHash();
+            currentModule.push_back(std::move(hit));
         }
     }
 
     // Now push that last one
-    if (currentModule.size() > 0) hitsPerModule.push_back(currentModule);
+    if (currentModule.size() > 0) hitsPerModule.push_back(std::move(currentModule));
 }
 
-void FPGATrackSimClusteringTool::sortHitsOnModules(std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule, int &eta_phi) const{
+void FPGATrackSimClusteringTool::sortHitsOnModules(HitPtrContainer &hitsPerModule, int &eta_phi) const{
     //Loop over the module separated hits
     for ( auto& module:hitsPerModule){
         //Work out if columns are ETA (1) || PHI (0)
-        if(etaOrPhi(module.at(0)) == true){
+        if(etaOrPhi(*module.at(0)) == true){
             //Sort by ETA first
             eta_phi = ETA;
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
             }
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
             }
         } else {
             //Sort by PHI first
             eta_phi = PHI;
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
             }
             if (module.size() > 1) {
-                if (module.at(0).isStrip())
+                if (module.at(0)->isStrip())
                     std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
             }
         }
     }
 }
 
-void FPGATrackSimClusteringTool::sortHitsOnModules(std::vector<std::vector<FPGATrackSimHit> > &hitsPerModule) const{
+void FPGATrackSimClusteringTool::sortHitsOnModules(HitPtrContainer &hitsPerModule) const{
     //Loop over the module separated hits
     for ( auto& module:hitsPerModule){
         if (module.size() > 1) {
-            if (module.at(0).isStrip())
+            if (module.at(0)->isStrip())
                 std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputEta);
         }
         if (module.size() > 1) {
-            if (module.at(0).isStrip())
+            if (module.at(0)->isStrip())
                 std::stable_sort(module.begin(), module.end(), FPGATrackSimCLUSTERING::sortITkInputPhi);
         }
     }
@@ -357,7 +367,7 @@ void FPGATrackSimClusteringTool::normaliseClusters(std::vector<FPGATrackSimClust
         if(clusterEquiv.isStrip()){
             //Clear the groupsize, set this to be one as we are only clustering one row.
             clusterEquiv.setEtaWidth(1);
-            clusterEquiv.setPhiIndex(clusterEquiv.getPhiIndex()/fpgatracksim::scaleHitFactor);
+            clusterEquiv.setCentroidPhiIndex(clusterEquiv.getCentroidPhiIndex()/fpgatracksim::scaleHitFactor);
             clusterEquiv.setPhiWidth(clusterEquiv.getPhiWidth()+1);
         } else {
             // Nothing to normalise for pixel clusters
@@ -543,7 +553,7 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
 
     // Shift initial widths 1->0, 2->2, 3->4, 4->6 etc...
     //The groupSize is stored in the EtaWidth
-    int tempWidth = (incomingHit.getEtaWidth()*fpgatracksim::scaleHitFactor)-fpgatracksim::scaleHitFactor;
+    int tempWidth = (incomingHit.getPhiWidth()*fpgatracksim::scaleHitFactor)-fpgatracksim::scaleHitFactor;
     // Now shift to pixel width equivalents, 0->0, 2->1, 4->2, 6->3 etc...
     if(tempWidth > 0) tempWidth = tempWidth/fpgatracksim::scaleHitFactor;
     if(newCluster){
@@ -551,7 +561,8 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
         //Double the precision of the strip positions.
         int tempCentroid = incomingHit.getPhiIndex()*fpgatracksim::scaleHitFactor;
         // Now shift the centroid phi+phiWidth, and store the width (put it back in the PhiWidth)
-        newHit.setPhiIndex(tempCentroid+tempWidth);
+        newHit.setPhiIndex(incomingHit.getPhiIndex());
+        newHit.setCentroidPhiIndex(tempCentroid+tempWidth);
         newHit.setPhiWidth(tempWidth);
         //Set the initial clusterEquiv to be the incoming hit with double precision
         currentCluster.setClusterEquiv(newHit);
@@ -567,7 +578,7 @@ bool FPGATrackSimCLUSTERING::updateStripCluster(FPGATrackSimCluster &currentClus
         FPGATrackSimHit clusterEquiv = currentCluster.getClusterEquiv();
         int clusterRow = clusterEquiv.getEtaIndex();
         int clusterRowWidth = clusterEquiv.getEtaWidth();
-        int clusterCol = clusterEquiv.getPhiIndex();
+        int clusterCol = clusterEquiv.getCentroidPhiIndex();
         int clusterColWidth = clusterEquiv.getPhiWidth();
 
         //Looking for a neighbour to the right. i.e. find the end of the current cluster (Col+width) and look in the next cell (+2). Compare this to the start of the new cluster. This is unlikely/impossible(?) to happen due to preclustering.
@@ -624,7 +635,7 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
     } else {
         clusterEquiv.setEtaIndex(clusterRow);
         clusterEquiv.setEtaWidth(clusterRowWidth);
-        clusterEquiv.setPhiIndex(clusterCol);
+        clusterEquiv.setCentroidPhiIndex(clusterCol);
         clusterEquiv.setPhiWidth(clusterColWidth);
     }
 
@@ -673,6 +684,7 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
         //Phi width of an incoming strip is the width of the cluster
         int newN = incomingHit.getPhiWidth();
         //Now as above, N+newN
+        clusterEquiv.setPhiCoord((xPhiOld*N + xPhiNew*newN) / (N+newN));
         clusterEquiv.setX((xOld*N + xNew*newN) / (N+newN));
         clusterEquiv.setY((yOld*N + yNew*newN) / (N+newN));
         clusterEquiv.setZ((zOld*N + zNew*newN) / (N+newN));
@@ -690,20 +702,20 @@ bool FPGATrackSimCLUSTERING::updateClusterContents(FPGATrackSimCluster &currentC
 
 /* Sort for the ordering of ITk modules: Sort by ETA.
 */
-bool FPGATrackSimCLUSTERING::sortITkInputEta(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB)
+bool FPGATrackSimCLUSTERING::sortITkInputEta(const std::unique_ptr<FPGATrackSimHit>& hitA, const std::unique_ptr<FPGATrackSimHit>& hitB)
 {
-    if (hitA.getIdentifierHash() != hitB.getIdentifierHash())
-        return hitA.getIdentifierHash() < hitB.getIdentifierHash();
-    return hitA.getEtaIndex() < hitB.getEtaIndex();
+    if (hitA->getIdentifierHash() != hitB->getIdentifierHash())
+        return hitA->getIdentifierHash() < hitB->getIdentifierHash();
+    return hitA->getEtaIndex() < hitB->getEtaIndex();
 }
 
 /* Sort for the ordering of ITk modules: Sort by PHI.
 */
-bool FPGATrackSimCLUSTERING::sortITkInputPhi(const FPGATrackSimHit& hitA, const FPGATrackSimHit& hitB)
+bool FPGATrackSimCLUSTERING::sortITkInputPhi(const std::unique_ptr<FPGATrackSimHit>& hitA, const std::unique_ptr<FPGATrackSimHit>& hitB)
 {
-    if (hitA.getIdentifierHash() != hitB.getIdentifierHash())
-        return hitA.getIdentifierHash() < hitB.getIdentifierHash();
-    return hitA.getPhiIndex() < hitB.getPhiIndex();
+    if (hitA->getIdentifierHash() != hitB->getIdentifierHash())
+        return hitA->getIdentifierHash() < hitB->getIdentifierHash();
+    return hitA->getPhiIndex() < hitB->getPhiIndex();
 }
 
 /* Cap precision of the global coordinates in r, phi, z */

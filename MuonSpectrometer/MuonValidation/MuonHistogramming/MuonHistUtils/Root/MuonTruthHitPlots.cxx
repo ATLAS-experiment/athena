@@ -109,28 +109,27 @@ PlotBase(pParent, sDir)
       if (!acc.isAvailable(muon)) return;
       std::vector<unsigned int> vec=acc(muon);
       for (unsigned int i=0;i<vec.size();i++) {
-	hitPlots->Fill(vec[i], weight);
+	      hitPlots->Fill(vec[i], weight);
       }	     
 }
 
   void MuonTruthHitPlots::fillPlot(TH1* hitPlots, const std::string& sInfo, const Muon::MuonStationIndex::ChIndex& index, const xAOD::Muon& muon, float weight){
   //protection
-  if (muon.author()!=xAOD::Muon::MuidCo && muon.author()!=xAOD::Muon::MuidSA &&  muon.author()!=xAOD::Muon::MuGirl)  return;
-
-      SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
-      if (!acc.isAvailable(muon)) return;
-      std::vector<unsigned int> vec=acc(muon);
-      hitPlots->Fill(vec[index], weight);
-           
+    if (muon.author()!=xAOD::Muon::MuidCo && muon.author()!=xAOD::Muon::MuidSA &&  muon.author()!=xAOD::Muon::MuGirl)  return;
+    using namespace Muon::MuonStationIndex;
+    SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
+    if (!acc.isAvailable(muon)) return;
+    const std::vector<unsigned int>& vec=acc(muon);
+    if (vec.size()) hitPlots->Fill(vec[toInt(index)], weight);
 }
   void MuonTruthHitPlots::fillPlot(TH1* hitPlots, const std::string& sInfo, const Muon::MuonStationIndex::PhiIndex& index, const xAOD::Muon& muon, float weight){
   //protection
   if (muon.author()!=xAOD::Muon::MuidCo && muon.author()!=xAOD::Muon::MuidSA &&  muon.author()!=xAOD::Muon::MuGirl)  return;
-
-      SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
-      if (!acc.isAvailable(muon)) return;
-      std::vector<unsigned int> vec=acc(muon);
-      hitPlots->Fill(vec[index], weight);
+  using namespace Muon::MuonStationIndex;
+  SG::ConstAccessor<std::vector<unsigned int> > acc (sInfo);
+  if (!acc.isAvailable(muon)) return;
+  const std::vector<unsigned int>& vec=acc(muon);
+  if (vec.size()) hitPlots->Fill(vec[toInt(index)], weight);
            
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -267,9 +267,9 @@ writeNtuple::writeNtuple(TTree *tree)
 
 
    tree2 = new TChain("Validation/PixelRIOs");
-   TIter next( ((TChain*)tree)->GetListOfFiles());
+   TIter next(static_cast<TChain*>(tree)->GetListOfFiles());
    TObject *obj;
-   while( ( obj = (TChainElement*) next() ) ) {
+   while( ( obj = static_cast<TChainElement*> (next()) ) ) {
      tree2->Add(obj->GetTitle());
    }
    
@@ -304,7 +304,7 @@ Long64_t writeNtuple::LoadTree(Long64_t entry)
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;
    if (!fChain->InheritsFrom(TChain::Class()))  return centry;
-   TChain *chain = (TChain*)fChain;
+   TChain *chain = static_cast<TChain*>(fChain);
    if (chain->GetTreeNumber() != fCurrent) {
       fCurrent = chain->GetTreeNumber();
       Notify();

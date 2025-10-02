@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 __doc__ = """Configure the AsgForwardElectronIsEMSelector with the quality cuts
@@ -34,6 +34,7 @@ def AsgForwardElectronIsEMSelectorCfg(flags,
 
     # Create and instance of the tool
     tool = AsgForwardElectronIsEMSelector(name)
+    tool.usePVContainer = flags.Tracking.doVertexFinding
 
     # Call the function and configure it with the standard configuration
     ntuple[1](tool)

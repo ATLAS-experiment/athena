@@ -6,9 +6,7 @@ from AthenaCommon.Constants import INFO
 
 def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
     """Mininmal basic config, just good enough for HelloWorld and alike"""
-    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence,
-                                                        Sequential=True,
-                                                        TimeOut=flags.Exec.EventTimeOut))
+    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence, Sequential=True))
     cfg.setAsTopLevel()
     cfg.setAppProperty('TopAlg',['AthSequencer/'+masterSequence])
     cfg.setAppProperty('MessageSvcType', 'MessageSvc')
@@ -19,6 +17,8 @@ def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='Ath
     cfg.setAppProperty('JobOptionsPostAction', '')
     cfg.setAppProperty('JobOptionsPreAction', '')
     cfg.setAppProperty('PrintAlgsSequence', flags.Exec.PrintAlgsSequence)
+    if flags.Debug.NameAuditor:
+        cfg.addAuditor(CompFactory.NameAuditor())
     return cfg
 
 
@@ -66,7 +66,7 @@ def AthenaEventLoopMgrCfg(flags):
     elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge( EvtIdModifierSvcCfg(flags) ).name
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge( EvtIdModifierSvcCfg(flags) )
 
     if flags.Common.isOverlay:
         if not flags.Overlay.DataOverlay:
@@ -77,6 +77,56 @@ def AthenaEventLoopMgrCfg(flags):
 
     return cfg
 
+
+def MPIHiveEventLoopMgrCfg(flags):
+    """Sets up an MPIHive EventLoopMgr along with it's dependencies"""
+    from SQLiteDBSvc.SQLiteDBSvcConfig import SQLiteDBSvcCfg
+    cfg = ComponentAccumulator()
+    nConcurrentEvents = flags.Concurrency.NumConcurrentEvents
+    nThreads = flags.Concurrency.NumThreads
+
+    hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc", NSlots=nConcurrentEvents)
+    cfg.addService(hivesvc)
+
+    arp = CompFactory.AlgResourcePool(
+        TopAlg=["AthMasterSeq"]
+    )  # this should enable control flow
+    cfg.addService(arp)
+
+    scheduler = cfg.getPrimaryAndMerge(
+        AvalancheSchedulerSvcCfg(flags, ThreadPoolSize=nThreads)
+    )
+
+    cfg.merge(SQLiteDBSvcCfg(flags, name="LogDBSvc", dbPath="mpilog.db"))
+    cfg.addService(CompFactory.MPIClusterSvc("ClusterSvc", LogDatabaseSvc="LogDBSvc"))
+    elmgr = CompFactory.MPIHiveEventLoopMgr(
+        MPIClusterSvc="ClusterSvc",
+        WhiteboardSvc="EventDataSvc",
+        SchedulerSvc=scheduler.getName(),
+        FirstEventIndex=flags.Exec.SkipEvents,
+    )
+
+    from AthenaServices.OutputStreamSequencerSvcConfig import (
+        OutputStreamSequencerSvcCfg,
+    )
+
+    cfg.merge(
+        OutputStreamSequencerSvcCfg(
+            flags, incidentName="BeginInputFile", reportingOn=False, replaceRangeMode=True
+        )
+    )
+    if flags.Input.OverrideRunNumber:
+        from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
+
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+
+    if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+        elmgr.RequireInputAttributeList = True
+        elmgr.UseSecondaryEventNumber = True
+
+    cfg.addService(elmgr)
+
+    return cfg
 
 def AthenaHiveEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
@@ -96,7 +146,7 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
 
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         elmgr.RequireInputAttributeList = True
@@ -141,7 +191,7 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
 
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         elmgr.RequireInputAttributeList = True
@@ -248,13 +298,13 @@ def addMainSequences(flags, cfg):
 
 def addEvgenSequences(flags, cfg):
     from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Generator), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Fix), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.PreFilter), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Test), parentName="AthAlgSeq")
-    # TODO: needs to setup proper filtering sequence
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Filter), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Main), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Generator), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Fix), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.PreFilter), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Test), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Filter), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName=EvgenSequence.Main.value)
 
 
 def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
@@ -273,6 +323,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
                                 "which will not process events!")
             if flags.Exec.MTEventService:
                 LoopMgr = "AthenaMtesEventLoopMgr"
+            elif flags.Exec.MPI:
+                LoopMgr = "MPIHiveEventLoopMgr"
             else:
                 LoopMgr = "AthenaHiveEventLoopMgr"
 
@@ -323,10 +375,20 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     if flags.Concurrency.NumProcs > 0:
         cfg.merge(AthenaMpEventLoopMgrCfg(flags))
 
+    # Timeout
+    if flags.Exec.EventTimeOut > 0:
+        timeoutAlg = CompFactory.TimeoutAlg(
+            Timeout = flags.Exec.EventTimeOut,
+            AbortJob = True,
+            DumpSchedulerState = False)
+        cfg.addEventAlgo(timeoutAlg, sequenceName='AthBeginSeq')
+
     # Additional components needed for threaded jobs only:
     if flags.Concurrency.NumThreads > 0:
         if flags.Exec.MTEventService:
             cfg.merge(AthenaMtesEventLoopMgrCfg(flags,True,flags.Exec.MTEventServiceChannel))
+        elif flags.Exec.MPI:
+            cfg.merge(MPIHiveEventLoopMgrCfg(flags))
         else:
             cfg.merge(AthenaHiveEventLoopMgrCfg(flags))
         # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute
@@ -359,8 +421,9 @@ def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr", withSequences=True
     attempted auto-configuration from an input file.
     """
     cfg = MainServicesCfg(flags, LoopMgr)
-    from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge(McEventSelectorCfg(flags))
+    if not flags.Input.Files:
+        from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+        cfg.merge(McEventSelectorCfg(flags))
 
     if withSequences:
         addEvgenSequences(flags, cfg)

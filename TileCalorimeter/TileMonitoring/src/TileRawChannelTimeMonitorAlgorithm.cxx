@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRawChannelTimeMonitorAlgorithm.h"
@@ -29,14 +29,13 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::initialize() {
 
   using Tile = TileCalibUtils;
   using namespace Monitored;
-  const int nDigitizers = 8;
 
   m_timeGroups = buildToolMap<int>(m_tools, "TileAverageTime", Tile::MAX_ROS - 1);
   m_uncorrTimeGroups = buildToolMap<int>(m_tools, "TileAverageUncorrectedTime", Tile::MAX_ROS - 1);
   m_timeLBGroups = buildToolMap<int>(m_tools, "TileAverageTimeLB", Tile::MAX_ROS - 1);
   m_timeDiffLBGroups = buildToolMap<int>(m_tools, "TileAverageTimeDifferenceLB", m_partitionTimeDifferencePairs.size());
   m_digiTimeLBGroups = buildToolMap<std::vector<std::vector<int>>>(m_tools, "TileDigitizerTimeLB",
-                                                                   Tile::MAX_ROS - 1, Tile::MAX_DRAWER, nDigitizers);
+                                                                   Tile::MAX_ROS - 1, Tile::MAX_DRAWER, s_nDigitizers);
 
   m_amplitudeGroups = buildToolMap<int>(m_tools, "TileAverageAmplitude", Tile::MAX_ROS - 1);
 
@@ -109,6 +108,17 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
 
   TileRawChannelUnit::UNIT rawChannelUnit = rawChannelContainer->get_unit();
 
+  static const int channel2digitizer[48] = {7, 7, 7,  7, 7, 7,
+                                            6, 6, 6,  6, 6, 6,
+                                            5, 5, 5,  5, 5, 5,
+                                            4, 4, 4,  4, 4, 4,
+                                            3, 3, 3,  3, 3, 3,
+                                            2, 2, 2,  2, 2, 2,
+                                            1, 1, 1,  1, 1, 1,
+                                            0, 0, 0,  0, 0, 0};
+
+  int signalState[Tile::MAX_ROS - 1][Tile::MAX_DRAWER][s_nDigitizers] = {{{SIGNAL_NOT_EXPECTED}}};
+
   for (const TileRawChannelCollection* rawChannelCollection : *rawChannelContainer) {
     if (rawChannelCollection->empty() ) continue;
 
@@ -146,10 +156,16 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
         continue;
       }
 
+      if (signalState[partition][drawer][channel2digitizer[channel]] != SIGNAL_PRESENT) {
+        signalState[partition][drawer][channel2digitizer[channel]] = SIGNAL_EXPECTED;
+      }
+
       if (rawChannel->amplitude() < m_energyThresholds[adc]) {
         ATH_MSG_VERBOSE(m_tileHWID->to_string(adc_id) << ": Energy is below threshold => skipping!");
         continue;
       }
+
+      signalState[partition][drawer][channel2digitizer[channel]] = SIGNAL_PRESENT;
 
       drawers[partition].push_back(drawer);
       channels[partition].push_back(channel);
@@ -192,15 +208,6 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
     }
   }
 
-  static const int channel2digitizer[48] = {7, 7, 7,  7, 7, 7,
-                                            6, 6, 6,  6, 6, 6,
-                                            5, 5, 5,  5, 5, 5,
-                                            4, 4, 4,  4, 4, 4,
-                                            3, 3, 3,  3, 3, 3,
-                                            2, 2, 2,  2, 2, 2,
-                                            1, 1, 1,  1, 1, 1,
-                                            0, 0, 0,  0, 0, 0};
-
 
   for (unsigned int partition = 0; partition < Tile::MAX_ROS - 1; ++partition) {
     if (!channelTimes[partition].empty()) {
@@ -225,6 +232,16 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
         fill(m_tools[m_digiTimeLBGroups[partition][drawer][digitizer]], monLumiBlock, monTime);
       }
 
+      if (m_fillFakeTime) {
+        for (unsigned int drawer = 0; drawer < Tile::MAX_DRAWER; ++drawer) {
+          for (unsigned int digitizer = 0; digitizer < s_nDigitizers; ++digitizer) {
+            if (signalState[partition][drawer][digitizer] == SIGNAL_EXPECTED) {
+              auto monTime = Monitored::Scalar<double>("time", m_fakeTime);
+              fill(m_tools[m_digiTimeLBGroups[partition][drawer][digitizer]], monLumiBlock, monTime);
+            }
+          }
+        }
+      }
     }
   }
 

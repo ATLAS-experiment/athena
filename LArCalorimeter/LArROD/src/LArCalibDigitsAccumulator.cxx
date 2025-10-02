@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibDigitsAccumulator.h"
@@ -47,7 +47,7 @@ StatusCode LArCalibDigitsAccumulator::initialize(){
         ATH_MSG_ERROR( "Could not get LArOnline_SuperCellID helper !" );
         return sc;
      } else {
-        m_onlineHelper = (const LArOnlineID_Base*)scid;
+        m_onlineHelper = static_cast<const LArOnlineID_Base*>(scid);
         ATH_MSG_DEBUG("Found the LArOnlineID helper");
      }
      ATH_CHECK( m_sc2ccMappingTool.retrieve() );
@@ -60,7 +60,7 @@ StatusCode LArCalibDigitsAccumulator::initialize(){
         ATH_MSG_ERROR( "Could not get LArOnlineID helper !" );
         return sc;
      } else {
-        m_onlineHelper = (const LArOnlineID_Base*)ll;
+        m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
         ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
      }
   } //m_isSC
@@ -80,16 +80,21 @@ StatusCode LArCalibDigitsAccumulator::execute()
   ++m_event_counter;
   
   const LArCalibLineMapping *clcabling = nullptr;
-  if(m_isSC) {
-     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
-     clcabling =*clHdl;
-  } else {
-     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
-     clcabling =*clHdl;
-  }
+  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
+  clcabling =*clHdl;
   if(!clcabling) {
     ATH_MSG_WARNING( "Do not have calib line mapping from key " << m_calibMapKey.key() );
     return StatusCode::FAILURE;
+  }
+
+  const LArCalibLineMapping *clcablingSC = nullptr;
+  if(m_isSC) {
+     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapSCKey};
+     clcablingSC =*clHdl;
+     if(!clcablingSC) {
+         ATH_MSG_WARNING( "Do not have calib line mapping from key " << m_calibMapSCKey.key() );
+         return StatusCode::FAILURE;
+     }
   }
   
   // new here ====
@@ -200,6 +205,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
           for (HWIdentifier calibLineHWID : calibLineLeg) {// loop legacy calib lines
 	    if ( calibParams->isPulsed(eventNb,calibLineHWID) ){
 	      numPulsedLeg += 1;
+	      ATH_MSG_DEBUG("SC "<< chid << " constituent cell "<< cellLegHWID << " calib line "<< calibLineHWID<< " not pulsed");
 	    }else{
 	      if ( digit->isPulsed() ) ATH_MSG_WARNING("SC "<< chid << " constituent cell "<< cellLegHWID << " calib line "<< calibLineHWID<< " not pulsed");}
 	  }//end calib line Leg loop
@@ -219,7 +225,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
 
       // BELOW: DIRTY HACK BECAUSE THERE SEEMS TO BE A BUG IN THE CABLINGSVC CONCERNING THE CALIBLINES.
       // get calibration settings
-      const std::vector<HWIdentifier>& calibLineID=clcabling->calibSlotLine(chid);
+      const std::vector<HWIdentifier>& calibLineID = m_isSC ? clcablingSC->calibSlotLine(chid) :  clcabling->calibSlotLine(chid);
       HWIdentifier calibModuleID;
       if(!calibLineID.empty()){
 	calibModuleID=m_onlineHelper->calib_module_Id(calibLineID[0]);

@@ -3,8 +3,10 @@
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the electron/b-physics slice in Dev_pp_run3_v1 menu (input: mix of dielectron samples)
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-input: group.trig-hlt.mc21a.mixedDielectronSample.digit.RDO.s3873_s3874_r13829
+# art-input-nfiles: 1
 # art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
@@ -14,26 +16,18 @@
 # art-output: *.log.tar.gz
 # art-output: *.new
 # art-output: *.json
-# art-output: *.root
+# art-output: expert-monitoring.root
+# art-output: rootcomp.root
 # art-output: *.pmon.gz
 # art-output: *perfmon*
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from TriggerTest.MCExecStep import MCGridStep
+from TrigValTools.TrigValSteering import Test, CheckSteps
 
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
-
-ex = ExecStep.ExecStep()
-ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex = MCGridStep(menu='Dev_pp_run3_v1',signatures=['Egamma'])
 ex.input = 'bphysics_ee'
-ex.threads = 8
-ex.concurrent_events = 8
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-            'IOVDb.GlobalTag="' + conditions + '"',
-            'Trigger.enabledSignatures=[\\\"Egamma\\\"]']
 
 test = Test.Test()
 test.art_type = 'grid'

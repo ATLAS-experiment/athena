@@ -4,20 +4,19 @@
 atlas_subdir( MuonEventAthenaPool )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_tpcnv_library( MuonEventAthenaPoolLib
    MuonEventAthenaPool/*.h src/*Cnv_p*.h src/*Cnv_p*.cxx
    PUBLIC_HEADERS MuonEventAthenaPool
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaPoolUtilities
    MuonRDO MuonRIO_OnTrack MuonSegment AthAllocators
    AthContainers AthenaKernel StoreGateLib AthenaPoolCnvSvcLib
    Identifier GaudiKernel CscCalibEvent MuonEventTPCnv RPC_CondCablingLib
    MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonChamberT0s
-   MuonPrepRawData MuonTrigCoinData MuonSimData AthenaPoolServicesLib )
+   MuonPrepRawData MuonTrigCoinData MuonSimData )
 
 atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
    MuonEventAthenaPool/*.h src/*Cnv.h src/*Cnv.cxx
@@ -65,7 +64,7 @@ atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
 atlas_add_dictionary( MuonRDOCnvDict
    MuonEventAthenaPool/MuonRDOCnvDict.h
    MuonEventAthenaPool/selection.xml
-   LINK_LIBRARIES CxxUtils AthenaPoolServicesLib MuonRDO MuonRIO_OnTrack
+   LINK_LIBRARIES CxxUtils MuonRDO MuonRIO_OnTrack
    MuonSegment )
 
 # Install files from the package:

@@ -27,7 +27,8 @@ class LArSC2Ntuple : public LArDigits2Ntuple
 
   typedef std::map<HWIdentifier, const LArRawChannel*> rawChanMap_t;
   void fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, 
-                     const LArOnOffIdMapping* cabling, const LArOnOffIdMapping* cablingROD); 
+                     const LArOnOffIdMapping* cabling, const LArOnOffIdMapping* cablingROD,
+                     bool &acceptMain); 
 
  private:
 
@@ -38,6 +39,9 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   Gaudi::Property< bool > m_fillTType{this, "FillTriggerType", false, "Trying to fill trigger type word"};
   Gaudi::Property< std::vector<std::string> > m_trigNames{ this, "TrigNames", {"L1_EM3","L1_EM7","L1_EM15"},"which triggers to dump"};
   Gaudi::Property< bool > m_fillCaloTT{this, "FillTriggerTowers", false, "Trying to fill also TriggerTowers from ByteStream"};
+  Gaudi::Property< float > m_ETThresh{this, "ETThreshold", -1., "Threshold for ET to fill info"};
+  Gaudi::Property< float > m_ETThreshMain{this, "ETThresholdMain", -1., "Threshold for ET from Main to fill info"};
+  Gaudi::Property< float > m_ADCThresh{this, "ADCThreshold", -1., "Threshold for ADCmax-ADC(0) to fill info"};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeyAdditional{this,"CablingKeyAdditional","LArOnOffIdMap","SG Key of LArOnOffIdMapping object for standard cells"};
   ToolHandle<ICaloSuperCellIDTool>   m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
@@ -48,6 +52,10 @@ class LArSC2Ntuple : public LArDigits2Ntuple
 
   SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LArLatomeHeaderContainerKey { this, "LArLatomeHeaderKey", "SC_LATOME_HEADER" };
   Gaudi::Property< std::string > m_triggerTowerKey{this, "TriggerTowerKey", "TriggerTowers", "Trigger Tower container"};
+
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSCMgrKey{this, "CaloSCDetDescrManager", "CaloSuperCellDetDescrManager",
+                                                                            "SG key of the resulting CaloSuperCellDetDescrManager" };
+  const CaloSuperCellDetDescrManager* m_caloMgrSC;
 
   NTuple::Item<short> m_latomeChannel;
 

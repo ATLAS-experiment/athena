@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -14,7 +14,6 @@
 
 #include "TRT_SimDriftTimeTool.h"
 #include "TRT_BarrelDriftTimeData.h"
-#include "TRT_ScaledDriftTimeData.h"
 #include "GaudiKernel/MsgStream.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -30,7 +29,6 @@ TRT_SimDriftTimeTool::TRT_SimDriftTimeTool( const std::string& type,
   , m_maxField ( -999 )
   , m_maxFieldSquaredLimit(999)
   , m_invMaxFieldSquared(0.0)
-  , m_digversion(0)
   , m_nTabulatedDistances(4000)//4000 means resolution of 0.5micron and 96KB of memory.
   , m_invDeltaTabulatedDistances( (m_nTabulatedDistances-1)/(m_maxDistance-m_minDistance) )
 {
@@ -56,14 +54,6 @@ StatusCode TRT_SimDriftTimeTool::initialize()
   ATH_CHECK(detStore()->retrieve(detmgr,"TRT"));
   ATH_MSG_INFO("Retrieved TRT_DetectorManager with version " << detmgr->getVersion().majorNum());
 
-  m_digversion = detmgr->digitizationVersion();
-
-  if (m_digversion<11)
-    {
-      ATH_MSG_FATAL("digversion < 11 (" << m_digversion << ") is no longer supported. The job will die now :(");
-      return StatusCode::FAILURE;
-    }
-
   /////////////////////////////////////////////////////
   /////////////////////////////////////////////////////
   //              Select DriftTime Data              //
@@ -72,9 +62,9 @@ StatusCode TRT_SimDriftTimeTool::initialize()
   /////////////////////////////////////////////////////
 
   std::vector<std::unique_ptr<ITRT_DriftTimeData>> pDTData;
-  pDTData.emplace_back(std::make_unique<TRT_BarrelDriftTimeData>(m_digversion,0)); // Xe straws
-  pDTData.emplace_back(std::make_unique<TRT_BarrelDriftTimeData>(m_digversion,1)); // Kr straws
-  pDTData.emplace_back(std::make_unique<TRT_BarrelDriftTimeData>(m_digversion,2)); // Ar straws
+  pDTData.emplace_back(std::make_unique<TRT_BarrelDriftTimeData>(0)); // Xe straws
+  pDTData.emplace_back(std::make_unique<TRT_BarrelDriftTimeData>(1)); // Kr straws
+  pDTData.emplace_back(std::make_unique<TRT_BarrelDriftTimeData>(2)); // Ar straws
 
   /////////////////////////////////////////////////////
   /////////////////////////////////////////////////////

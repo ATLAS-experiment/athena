@@ -21,33 +21,33 @@
 #include "StoreGate/StoreGateSvc.h"
 
 /** Constructor **/
-Trk::TrackingVolumesSvc::TrackingVolumesSvc(const std::string& a_name,ISvcLocator* svc) : 
+Trk::TrackingVolumesSvc::TrackingVolumesSvc(const std::string& a_name,ISvcLocator* svc) :
     base_class(a_name,svc),
     m_pDetStore("DetectorStore",name())
-{ 
-    
+{
+
     //set defaults
     m_volumeNames.reserve(Trk::ITrackingVolumesSvc::NumIdentifiers);
     m_volumeNames.emplace_back("CalorimeterEntryLayer");
     m_volumeNames.emplace_back("MuonSpectrometerEntryLayer");
     m_volumeNames.emplace_back("MuonSpectrometerExitLayer");
-    
+
     // For the moment, assuming volumes are at 0,0,0 and perfectly aligned (i.e. passing 0)
-    // Adding values by hand - this should be changed (i.e. retrieved from a database?) 
+    // Adding values by hand - this should be changed (i.e. retrieved from a database?)
     // EJWM
-    
+
     m_volumes.resize(Trk::ITrackingVolumesSvc::NumIdentifiers);
-    m_volumes[Trk::ITrackingVolumesSvc::CalorimeterEntryLayer] 
-        = new Trk::Volume(nullptr, new Trk::CylinderVolumeBounds(1100.0, 3200.0));
-    m_volumes[Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer] 
-        = new Trk::Volume(nullptr, new Trk::CylinderVolumeBounds(4250.0, 6779.0));
+    m_volumes[Trk::ITrackingVolumesSvc::CalorimeterEntryLayer]
+        = new Trk::Volume(nullptr, std::make_shared<Trk::CylinderVolumeBounds>(1100.0, 3200.0));
+    m_volumes[Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer]
+        = new Trk::Volume(nullptr, std::make_shared<Trk::CylinderVolumeBounds>(4250.0, 6779.0));
     m_volumes[Trk::ITrackingVolumesSvc::MuonSpectrometerExitLayer]
-        = new Trk::Volume(nullptr, new Trk::CylinderVolumeBounds(15000.0, 21000.0)); // FIXME! Put in correct values. EJWM
-    
+        = new Trk::Volume(nullptr, std::make_shared<Trk::CylinderVolumeBounds>(15000.0, 21000.0)); // FIXME! Put in correct values. EJWM
+
   // the name of the TrackingVolume to be built --------------------------------
-  //declareProperty( "VolumeNames",       m_volumeNames, "The names of the TrackingVolume to be built"); 
-  // EJWM - no point configuring this if the volume dimensions can't be configured. EJWM. 
-  
+  //declareProperty( "VolumeNames",       m_volumeNames, "The names of the TrackingVolume to be built");
+  // EJWM - no point configuring this if the volume dimensions can't be configured. EJWM.
+
 }
 
 
@@ -65,14 +65,14 @@ StatusCode Trk::TrackingVolumesSvc::initialize()
 
   // record the volumes
   for (unsigned int id=0 ; id!=ITrackingVolumesSvc::NumIdentifiers; id++){
-    // create Volume.   
+    // create Volume.
     StatusCode result = m_pDetStore->record(m_volumes[id], m_volumeNames[id]);
     if (result.isFailure()){
       ATH_MSG_FATAL ( "Couldn't write Volume "<<m_volumeNames[id]<<" to DetectorStore."  );
       return result;
     } else {
       ATH_MSG_INFO ( "initialize() successful: TrackingVolume '" << m_volumeNames[id] << "' built and written to DetectorStore."  );
-    }    
+    }
   }
 
   ATH_MSG_INFO ( "initialize() successful! "  );

@@ -13,7 +13,7 @@
 Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t remaining):
   NSWTriggerElink(bs, remaining)
 {
-  const std::vector<uint32_t> words(bs, bs + remaining);
+  std::vector<uint32_t> words(bs, bs + remaining);
 
   if (checkSize(words)) {
     return;
@@ -47,6 +47,39 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
   ERS_DEBUG(1, "l1id:    " << m_decoded.l1id);
   ERS_DEBUG(1, "orbitid: " << m_decoded.orbitid);
   ERS_DEBUG(1, "orbit1:  " << m_decoded.orbit1);
+
+  // CRC is in the last 16b of data, if it's there, but need to consider that swROD can do 0 padding
+  // NB: the rest of the bystream decoder has been design before the CRC was introduced
+  //     this means that if CRC is there, we need to read it and remove it from the bitstream
+  //     so that the rest of the decoder can work as usual
+  if (m_decoded.spare & 0x1) {
+    std::span<const std::uint32_t> data{bs, remaining};
+    bool hasPadding = (data[data.size()-1] & 0xFFFF)==0; // unsafe if the CRC can be 0x0000 but it should never be the case
+    std::size_t bitIndex;
+    if (hasPadding) {
+      // we have to read the first 16b of the last word of the data: XXXX0000
+      bitIndex = (remaining-1) * Muon::nsw::Constants::N_BITS_IN_WORD32;
+    } else {
+      // we have to read the last 16b of the last word of the data: 0000XXXX
+      bitIndex = remaining * Muon::nsw::Constants::N_BITS_IN_WORD32 - 16;
+    }
+    m_decoded.crc = Muon::nsw::decode_and_advance<uint64_t>(data, bitIndex, 16);
+    m_computedCRC = computeCRC(bs, remaining);
+    ERS_DEBUG(1, "CRC:          " << m_decoded.crc);
+    ERS_DEBUG(1, "Computed CRC: " << m_computedCRC);
+    ERS_DEBUG(1, "CRC ok:       " << (m_decoded.crc == m_computedCRC));
+
+    // now we have to rebuild "words" so that it does not contain the CRC (handling the padding eventually)
+    // is the CRC was present and there was padding, we simply have to remove the last word of "words"
+    // if the CRC was present and there was no padding, we have to replace the last 16b of the last word with 0x0000
+    // if the CRC was not present, do nothing
+    if (hasPadding) {
+      words.pop_back();
+    } else {
+      words.back() &= 0xFFFF0000; // set the last 16b to 0
+    }
+  }
+
 
   // null
   if (isNullPayload(words)) {
@@ -642,3 +675,7 @@ Muon::nsw::NSWPadTriggerL1a::getTdsChannels(const std::vector< std::vector<uint8
   return tdschannels;
 }
 
+uint16_t Muon::nsw::NSWPadTriggerL1a::computeCRC(const uint32_t* bs, const uint32_t remaining)
+{
+  return Muon::nsw::get_16bxor_crc(bs+2, remaining-2);
+}

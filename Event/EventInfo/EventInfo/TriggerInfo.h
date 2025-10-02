@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_TRIGGERINFO_H
@@ -137,8 +137,12 @@ public:
               const std::vector<number_type>& eventFilterInfo,
               const std::vector<StreamTag>& streamTags);
 
-  // Default copy constructor.
   virtual ~TriggerInfo();
+
+  TriggerInfo(const TriggerInfo&) = default;
+  TriggerInfo(TriggerInfo&&) = default;
+  TriggerInfo& operator=(const TriggerInfo&) = default;
+  TriggerInfo& operator=(TriggerInfo&&) = default;
   //@}
 
 

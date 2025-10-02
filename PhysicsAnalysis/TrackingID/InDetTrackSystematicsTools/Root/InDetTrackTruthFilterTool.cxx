@@ -53,26 +53,6 @@ namespace InDet {
 
     m_rnd = std::make_unique<TRandom3>(m_seed);
 
-    bool anyEffSystActive = isActive(TRK_EFF_LOOSE_GLOBAL) || isActive(TRK_EFF_LOOSE_IBL) || isActive(TRK_EFF_LOOSE_PP0) || 
-                isActive(TRK_EFF_LOOSE_PHYSMODEL) || isActive(TRK_EFF_TIGHT_GLOBAL) || isActive(TRK_EFF_TIGHT_IBL) || 
-                isActive(TRK_EFF_TIGHT_PP0) || isActive(TRK_EFF_TIGHT_PHYSMODEL ) || isActive(TRK_EFF_LOOSE_COMBINED) || isActive(TRK_EFF_TIGHT_COMBINED);
-
-    bool anyFakeRateActive = isActive(TRK_FAKE_RATE_LOOSE) || isActive(TRK_FAKE_RATE_TIGHT);
-
-    if (anyEffSystActive) {
-      if (m_calibFileNomEff.empty()) {
-      ATH_MSG_ERROR("No calibration file for requested track efficiency set. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
-      return StatusCode::FAILURE;
-      }
-    }
-
-    if (anyFakeRateActive) {
-      if (m_fFakeLoose == -1.0 && m_fFakeTight == -1.0) {
-      ATH_MSG_ERROR("Requested fake rate is unavailable. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
-      return StatusCode::FAILURE;
-      }
-    }
-
     ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
            m_trkEffHistLooseGlobal,
            m_calibFileNomEff,
@@ -109,14 +89,14 @@ namespace InDet {
     ATH_MSG_INFO( "Using for nominal track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileNomEff) );
 
      m_histMap = {
-      {"TRK_EFF_LOOSE_GLOBAL", m_trkEffHistLooseGlobal},
-      {"TRK_EFF_LOOSE_IBL", m_trkEffHistLooseIBL},
-      {"TRK_EFF_LOOSE_PP0", m_trkEffHistLoosePP0},
-      {"TRK_EFF_LOOSE_PHYSMODEL", m_trkEffHistLoosePhysModel},
-      {"TRK_EFF_TIGHT_GLOBAL", m_trkEffHistTightGlobal},
-      {"TRK_EFF_TIGHT_IBL", m_trkEffHistTightIBL},
-      {"TRK_EFF_TIGHT_PP0", m_trkEffHistTightPP0},
-      {"TRK_EFF_TIGHT_PHYSMODEL", m_trkEffHistTightPhysModel}
+      {"TRK_EFF_LOOSE_GLOBAL", m_trkEffHistLooseGlobal.get()},
+      {"TRK_EFF_LOOSE_IBL", m_trkEffHistLooseIBL.get()},
+      {"TRK_EFF_LOOSE_PP0", m_trkEffHistLoosePP0.get()},
+      {"TRK_EFF_LOOSE_PHYSMODEL", m_trkEffHistLoosePhysModel.get()},
+      {"TRK_EFF_TIGHT_GLOBAL", m_trkEffHistTightGlobal.get()},
+      {"TRK_EFF_TIGHT_IBL", m_trkEffHistTightIBL.get()},
+      {"TRK_EFF_TIGHT_PP0", m_trkEffHistTightPP0.get()},
+      {"TRK_EFF_TIGHT_PHYSMODEL", m_trkEffHistTightPhysModel.get()}
     };
 
     ATH_CHECK ( InDetTrackSystematicsTool::initialize() );
@@ -124,29 +104,26 @@ namespace InDet {
     return StatusCode::SUCCESS;
   }
 
-
-  InDetTrackTruthFilterTool::~InDetTrackTruthFilterTool() {
-
-    delete m_trkEffHistLooseGlobal;
-    delete m_trkEffHistLooseIBL;
-    delete m_trkEffHistLoosePP0;
-    delete m_trkEffHistLoosePhysModel;
-    delete m_trkEffHistTightGlobal;
-    delete m_trkEffHistTightIBL;
-    delete m_trkEffHistTightPP0;
-    delete m_trkEffHistTightPhysModel;
-    
-    m_trkEffHistLooseGlobal = nullptr;
-    m_trkEffHistLooseIBL = nullptr;
-    m_trkEffHistLoosePP0 = nullptr;
-    m_trkEffHistLoosePhysModel = nullptr;
-    m_trkEffHistTightGlobal = nullptr;
-    m_trkEffHistTightIBL = nullptr;
-    m_trkEffHistTightPP0 = nullptr;
-    m_trkEffHistTightPhysModel = nullptr;
-  }
-
   bool InDetTrackTruthFilterTool::accept(const xAOD::TrackParticle* track) const {
+
+    // these checks shouldn't occur because the config should prevent this from being reached -- but just in case!
+    bool anyEffSystActive = isActive(TRK_EFF_LOOSE_GLOBAL) || isActive(TRK_EFF_LOOSE_IBL) || isActive(TRK_EFF_LOOSE_PP0) || 
+                isActive(TRK_EFF_LOOSE_PHYSMODEL) || isActive(TRK_EFF_TIGHT_GLOBAL) || isActive(TRK_EFF_TIGHT_IBL) || 
+                isActive(TRK_EFF_TIGHT_PP0) || isActive(TRK_EFF_TIGHT_PHYSMODEL ) || isActive(TRK_EFF_LOOSE_COMBINED) || isActive(TRK_EFF_TIGHT_COMBINED);
+
+    bool anyFakeRateActive = isActive(TRK_FAKE_RATE_LOOSE) || isActive(TRK_FAKE_RATE_TIGHT);
+
+    if (anyEffSystActive) {
+      if (m_calibFileNomEff.empty()) {
+      ATH_MSG_ERROR("No calibration file for requested track efficiency set. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
+      }
+    }
+
+    if (anyFakeRateActive) {
+      if (m_fFakeLoose == -1.0 && m_fFakeTight == -1.0) {
+      ATH_MSG_ERROR("Requested fake rate is unavailable. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
+      }
+    }
 
     float pt = track->pt();
     float eta = track->eta();
@@ -222,7 +199,7 @@ namespace InDet {
     return true;
   }
 
-  StatusCode InDetTrackTruthFilterTool::initTrkEffSystHistogram(float scale, TH2 *&histogram, std::string rootFileName, std::string histogramName) const {
+  StatusCode InDetTrackTruthFilterTool::initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, std::string rootFileName, std::string histogramName) const {
 
     ATH_CHECK( initObject<TH2>(histogram, rootFileName, histogramName) );
 
@@ -241,7 +218,7 @@ namespace InDet {
     return StatusCode::SUCCESS;
   }
 
-  float InDetTrackTruthFilterTool::getFractionDropped(float fDefault, const TH2 *histogram, float x, float y, bool xAxisIspT) const {
+  float InDetTrackTruthFilterTool::getFractionDropped(float fDefault, const std::unique_ptr<TH2>& histogram, float x, float y, bool xAxisIspT) const {
 
     if(histogram==nullptr) {
       return fDefault;

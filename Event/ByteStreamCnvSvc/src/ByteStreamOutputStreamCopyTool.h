@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMOUTPUTSTREAMCOPYTOOL_H
@@ -39,7 +39,7 @@ class ByteStreamOutputStreamCopyTool : public extends<AthAlgTool, IAthenaOutputS
 
 public:
    /// Constructor
-   ByteStreamOutputStreamCopyTool(const std::string& type, const std::string& name, const IInterface* parent);
+   using base_class::base_class;
 
    /// Initialize
    virtual StatusCode initialize() override;
@@ -73,10 +73,10 @@ public:
 
 private:
    /// Handle for BS output Svc
-   ServiceHandle<IByteStreamOutputSvc> m_outputSvc;
+   ServiceHandle<IByteStreamOutputSvc> m_outputSvc{this, "ByteStreamOutputSvc", "ByteStreamEventStorageOutputSvc"};
 
    /// Handle for BS input Svc
-   ServiceHandle<IByteStreamInputSvc> m_inputSvc;
+   ServiceHandle<IByteStreamInputSvc> m_inputSvc{this, "ByteStreamInputSvc", "ByteStreamEventStorageInputSvc"};
 };
 
 #endif

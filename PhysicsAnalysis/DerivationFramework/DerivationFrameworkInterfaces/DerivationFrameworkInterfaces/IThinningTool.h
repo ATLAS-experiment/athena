@@ -13,23 +13,19 @@
 
 namespace DerivationFramework {
 
-  static const InterfaceID IID_IThinningTool("IThinningTool", 1, 0);
-   
   /**
    @class IThinningTool
        
    @author James.Catmore-at-cern.ch
    */
      
-  class IThinningTool : virtual public IAlgTool {
+  class IThinningTool : virtual public extend_interfaces<IAlgTool> {
      public:
-     
+       DeclareInterfaceID(IThinningTool, 1, 0);
+
        /** Virtual destructor */
        virtual ~IThinningTool(){}
 
-       /** AlgTool interface methods */
-       static const InterfaceID& interfaceID() { return IID_IThinningTool; }
-       
        /** Pass the thinning service  */
        virtual StatusCode doThinning() const = 0;  	
   };

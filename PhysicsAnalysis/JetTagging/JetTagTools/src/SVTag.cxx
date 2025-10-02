@@ -25,7 +25,6 @@ namespace Analysis
 
   SVTag::SVTag(const std::string& t, const std::string& n, const IInterface* p)
     : base_class(t,n,p),
-      m_likelihoodTool("Analysis::NewLikelihoodTool", this),
       m_histoHelper(0),
       m_secVxFinderName("SV1"),
       m_isFlipped(false)

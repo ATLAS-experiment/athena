@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -13,16 +13,7 @@ using namespace TauAnalysisTools;
 
 TauAnalysisToolsExampleAthena::TauAnalysisToolsExampleAthena( const std::string& name, ISvcLocator* svcLoc )
   : AthAlgorithm( name, svcLoc )
-  , m_selTool( "TauAnalysisTools::TauSelectionTool/TauSelectionTool", this )
-  , m_smearTool( "TauAnalysisTools::TauSmearingTool/TauSmearingTool", this )
-  , m_effTool( "TauAnalysisTools::TauEfficiencyCorrectionsTool/TauEfficiencyCorrectionsTool", this )
 {
-  declareProperty( "SGKey", m_sgKey_TauJets        = "TauJets" );
-  declareProperty( "SGKey_MuonRM", m_sgKey_TauJets_MuonRM = "TauJets_MuonRM" );
-  declareProperty( "UseMuonRemovalTaus", m_useMuonRemovalTaus = false );
-  declareProperty( "TauSelectionTool", m_selTool );
-  declareProperty( "TauSmearingTool", m_smearTool );
-  declareProperty( "TauEfficiencyTool", m_effTool );
 }
 
 StatusCode TauAnalysisToolsExampleAthena::initialize()

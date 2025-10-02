@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p7.cxx
@@ -131,7 +131,7 @@ void McEventCollectionCnv_p7::persToTrans( const McEventCollection_p7* persObj,
        ri_read.attribute_string = persEvt.m_r_attribute_string;
        auto ri = std::make_shared<HepMC3::GenRunInfo>();
        ri->read_data(ri_read);
-       genEvt->set_run_info(ri);
+       genEvt->set_run_info(std::move(ri));
      }
     // cross-section restore
 
@@ -142,7 +142,7 @@ void McEventCollectionCnv_p7::persToTrans( const McEventCollection_p7* persObj,
         cs->set_cross_section(xsection[2],xsection[1]);
       else
         cs->set_cross_section(-1.0, -1.0);
-      genEvt->set_cross_section(cs);
+      genEvt->set_cross_section(std::move(cs));
     }
 
     // heavyIon restore
@@ -164,7 +164,7 @@ void McEventCollectionCnv_p7::persToTrans( const McEventCollection_p7* persObj,
          hIon[2],                  // event_plane_angle
          hIon[1],                  // eccentricity
          hIon[0]         );         // sigma_inel_NN
-      genEvt->set_heavy_ion(hi);
+      genEvt->set_heavy_ion(std::move(hi));
     }
 
 
@@ -183,7 +183,7 @@ void McEventCollectionCnv_p7::persToTrans( const McEventCollection_p7* persObj,
               pdf[0],                   // pdf2
               static_cast<int>(pdf[6]), // pdf_id1
               static_cast<int>(pdf[5]));// pdf_id2
-      genEvt->set_pdf_info(pi);
+      genEvt->set_pdf_info(std::move(pi));
     }
     transObj->push_back( genEvt );
 
@@ -199,7 +199,7 @@ void McEventCollectionCnv_p7::persToTrans( const McEventCollection_p7* persObj,
     const unsigned int endVtx = persEvt.m_verticesEnd;
     for ( unsigned int iVtx = persEvt.m_verticesBegin; iVtx != endVtx; ++iVtx ) {
        auto vtx = createGenVertex( *persObj, persObj->m_genVertices[iVtx], partToEndVtx, datapools, genEvt );
-       brc_to_vertex[persObj->m_genVertices[iVtx].m_barcode] = vtx;
+       brc_to_vertex[persObj->m_genVertices[iVtx].m_barcode] = std::move(vtx);
     } //> end loop over vertices
 
     // set the signal process vertex
@@ -404,6 +404,15 @@ void McEventCollectionCnv_p7::transToPers( const McEventCollection* transObj,
       auto A_filterHT=genEvt->attribute<HepMC3::DoubleAttribute>("filterHT");
       auto A_filterMET=genEvt->attribute<HepMC3::DoubleAttribute>("filterMET");
       auto signal_process_vertex = HepMC::signal_process_vertex(genEvt);
+
+      // If signal vertex not found on the vertices, look on the event (Sherpa)
+      if (!signal_process_vertex) {
+        auto event_spv = genEvt->attribute<HepMC3::IntAttribute>("signal_process_vertex");
+
+        // If the attribute exists, get the vertex
+        if (event_spv) signal_process_vertex = genEvt->vertices().at(-event_spv->value()-1);
+      }
+
       auto A_random_states=genEvt->attribute<HepMC3::VectorLongIntAttribute>("random_states");
       auto beams=genEvt->beams();
       persObj->m_genEvents.
@@ -447,7 +456,7 @@ void McEventCollectionCnv_p7::transToPers( const McEventCollection* transObj,
          att.second->to_string(st);
          /// bool status = att.second->to_string(st);
          /// One can add here checks for the status
-         persEvt.m_e_attribute_string.push_back(st);
+         persEvt.m_e_attribute_string.push_back(std::move(st));
        }
      }
      persEvt.m_r_attribute_name.clear();

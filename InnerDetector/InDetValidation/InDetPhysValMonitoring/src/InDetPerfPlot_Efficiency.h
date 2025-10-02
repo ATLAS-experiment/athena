@@ -70,6 +70,9 @@ private:
   TEfficiency* m_technical_efficiency_vs_z0{};
   TEfficiency* m_technical_efficiency_vs_truthMu{};
   TEfficiency* m_technical_efficiency_vs_actualMu{};
+  TEfficiency* m_technical_efficiency_vs_R{};
+  TEfficiency* m_technical_efficiency_vs_prodR{};
+  TEfficiency* m_technical_efficiency_vs_prodR_extended{};
 
   TEfficiency* m_extended_efficiency_vs_d0{};
   TEfficiency* m_extended_efficiency_vs_d0_abs{};

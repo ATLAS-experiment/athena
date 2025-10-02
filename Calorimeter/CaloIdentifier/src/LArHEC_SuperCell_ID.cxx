@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/LArHEC_SuperCell_ID.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -15,7 +13,7 @@
 
 
 LArHEC_SuperCell_ID::LArHEC_SuperCell_ID()
-  : LArHEC_Base_ID ("LArHEC_SuperCell_ID", true)
+  : LArHEC_Base_ID ("LArHEC_SuperCell_ID", "slar_hec", true)
 {
 }
 
@@ -36,7 +34,7 @@ int  LArHEC_SuperCell_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   }
 
   // init base object
-  if (LArHEC_Base_ID::initialize_base_from_dictionary(dict_mgr, "slar_hec"))
+  if (LArHEC_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
     return (1);
 
   return 0;

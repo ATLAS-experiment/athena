@@ -13,22 +13,26 @@
 
 namespace columnar
 {
-  template<> struct ContainerIdTraits<ContainerId::eventInfo> final
+  namespace ContainerId
   {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = false;
-    static constexpr bool perEventId = true;
+    struct eventInfo : regularCIBase<xAOD::EventInfo,xAOD::EventInfo>
+    {
+      // this is hard-coded in the ColumnarTool implementation, if you
+      // change it here, you need to change it there as well
+      static constexpr std::string_view idName = "eventInfo";
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::EventInfo;
+      // redefine this to be per-event ObjectId instead of per-event
+      // ObjectRange
+      static constexpr bool perEventRange = false;
+      static constexpr bool perEventId = true;
+    };
+  }
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::EventInfo;
-
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::EventInfo;
-  };
+  using EventInfoRange = ObjectRange<ContainerId::eventInfo>;
+  using EventInfoId = ObjectId<ContainerId::eventInfo>;
+  using OptEventInfoId = OptObjectId<ContainerId::eventInfo>;
+  template<typename CT,typename CM=ColumnarModeDefault> using EventInfoAccessor  = AccessorTemplate<ContainerId::eventInfo,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using EventInfoDecorator = AccessorTemplate<ContainerId::eventInfo,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

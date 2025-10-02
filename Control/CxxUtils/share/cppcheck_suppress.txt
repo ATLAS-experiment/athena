@@ -20,3 +20,6 @@ normalCheckLevelMaxBranches
 
 # The recommended use of readdir_r is actually deprecated.
 readdirCalled
+
+# nanobind ships its own robin_map lib that cppcheck doesn't see
+preprocessorErrorDirective:*/nanobind/src/nb_internals.h

@@ -35,7 +35,7 @@ def commonPixelFastDigitizationCfg(flags, name,**kwargs):
     kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     kwargs.setdefault("RndmEngine", "FastPixelDigitization")
 
     if flags.Digitization.DoXingByXingPileUp:
@@ -58,7 +58,7 @@ def commonSCT_FastDigitizationCfg(flags, name,**kwargs):
     kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
 
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     kwargs.setdefault("RndmEngine", "FastSCT_Digitization")
 
     if flags.Digitization.DoXingByXingPileUp:
@@ -78,7 +78,7 @@ def PixelFastDigitizationToolCfg(flags, name="PixelFastDigitizationTool", **kwar
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastPixelRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("HardScatterSplittingMode", 0)
     acc.setPrivateTools(commonPixelFastDigitizationCfg(flags, name, **kwargs))
     return acc
@@ -90,7 +90,7 @@ def PixelFastDigitizationToolHSCfg(flags, name="PixelFastDigitizationToolHS", **
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastPixelRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("HardScatterSplittingMode", 1)
     acc.setPrivateTools(commonPixelFastDigitizationCfg(flags, name, **kwargs))
     return acc
@@ -102,7 +102,7 @@ def PixelFastDigitizationToolPUCfg(flags, name="PixelFastDigitizationToolPU", **
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastPixelRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("PixelClusterContainerName", "Pixel_PU_Clusters")
     kwargs.setdefault("TruthNamePixel", "PRD_MultiTruthPixel_PU")
     kwargs.setdefault("HardScatterSplittingMode", 2)
@@ -116,7 +116,7 @@ def PixelFastDigitizationToolSplitNoMergePUCfg(flags, name="PixelFastDigitizatio
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastPixelRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("InputObjectName", "PileupPixelHits")
     kwargs.setdefault("PixelClusterContainerName", "PixelFast_PU_Clusters")
     kwargs.setdefault("TruthNamePixel", "PRD_MultiTruthPixel_PU")
@@ -132,7 +132,7 @@ def SCT_FastDigitizationToolCfg(flags, name="SCT_FastDigitizationTool", **kwargs
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastSCTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("HardScatterSplittingMode", 0)
     acc.setPrivateTools(commonSCT_FastDigitizationCfg(flags, name, **kwargs))
     return acc
@@ -145,7 +145,7 @@ def SCT_FastDigitizationToolHSCfg(flags, name="SCT_FastDigitizationToolHS",**kwa
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastSCTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("HardScatterSplittingMode", 1)
     acc.setPrivateTools(commonSCT_FastDigitizationCfg(flags, name, **kwargs))
     return acc
@@ -157,7 +157,7 @@ def SCT_FastDigitizationToolPUCfg(flags, name="SCT_FastDigitizationToolPU",**kwa
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastSCTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("SCT_ClusterContainerName", "SCT_PU_Clusters")
     kwargs.setdefault("TruthNameSCT", "PRD_MultiTruthSCT_PU")
     kwargs.setdefault("HardScatterSplittingMode", 2)
@@ -171,7 +171,7 @@ def SCT_FastDigitizationToolSplitNoMergePUCfg(flags, name="SCT_FastDigitizationT
     intervals = []
     if not flags.Digitization.DoXingByXingPileUp:
         intervals += [acc.popToolsAndMerge(FastSCTRangeCfg(flags))]
-    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     kwargs.setdefault("InputObjectName", "PileupSCT_Hits")
     kwargs.setdefault("SCT_ClusterContainerName", "SCT_PU_Clusters")
     kwargs.setdefault("TruthNameSCT", "PRD_MultiTruthSCT_PU")

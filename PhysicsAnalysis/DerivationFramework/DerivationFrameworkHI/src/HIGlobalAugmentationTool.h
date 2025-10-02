@@ -19,12 +19,13 @@
 #include <string>
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 
 class IThinningSvc;
 
 namespace DerivationFramework {
 
-  class HIGlobalAugmentationTool : public AthAlgTool, public IAugmentationTool {
+  class HIGlobalAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
     
   public: 
     HIGlobalAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);

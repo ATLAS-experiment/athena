@@ -10,32 +10,30 @@ atlas_add_component( ActsPatternRecognition
                      src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES
-		       ActsCore
-		       ActsEventLib
-		       ActsEventCnvLib
-		       ActsGeometryInterfacesLib
-		       ActsInteropLib
-		       ActsToolInterfacesLib
-		       AthenaBaseComps
-		       AthenaMonitoringKernelLib
-		       BeamSpotConditionsData
-		       CxxUtils
-		       GaudiKernel
-		       InDetPrepRawData
-		       InDetReadoutGeometry
-		       InDetRecToolInterfaces
-		       MagFieldConditions
-		       MagFieldElements
-		       PixelReadoutGeometryLib
-		       SiSPSeededTrackFinderData
-		       SiSpacePoint
-		       StoreGateLib
-		       TrkEventUtils
-		       TrkParameters
-		       TrkSpacePoint
-		       xAODInDetMeasurement )
+               Acts::Core
+               ActsEventLib
+               ActsGeometryInterfacesLib
+               ActsInteropLib
+               ActsToolInterfacesLib
+               AthenaBaseComps
+               AthenaMonitoringKernelLib
+               BeamSpotConditionsData
+               CxxUtils
+               GaudiKernel
+               InDetPrepRawData
+               InDetReadoutGeometry
+               InDetRecToolInterfaces
+               MagFieldConditions
+               MagFieldElements
+               PixelReadoutGeometryLib
+               SiSPSeededTrackFinderData
+               SiSpacePoint
+               StoreGateLib
+               TrkEventUtils
+               TrkParameters
+               TrkSpacePoint
+               xAODInDetMeasurement )
 
-atlas_install_data( share/*.txt )
 
 
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )

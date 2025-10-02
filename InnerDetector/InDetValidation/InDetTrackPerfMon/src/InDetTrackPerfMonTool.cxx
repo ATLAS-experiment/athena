@@ -123,7 +123,7 @@ StatusCode InDetTrackPerfMonTool::initialize() {
 ///------------------------------
 StatusCode InDetTrackPerfMonTool::bookHistograms()
 {
-  ATH_MSG_INFO( "Booking plots" );
+  ATH_MSG_DEBUG( "Booking plots" );
 
   for( size_t iAna=0 ; iAna < m_trkAnaPlotsMgrVec.size() ; iAna++ ) {
 
@@ -154,7 +154,7 @@ StatusCode InDetTrackPerfMonTool::bookHistograms()
 /// ------------------------------
 StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
-  ATH_MSG_INFO( "Filling hists " << name() << " ..." );
+  ATH_MSG_DEBUG("Filling hists " << name() << " ...");
 
   /// Output TrackAnalysisInfo container writing
   SG::WriteHandle< xAOD::BaseContainer > outTrkAnaInfoContHandle( m_trkAnaInfoKey );
@@ -329,7 +329,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 ///------------------------------
 StatusCode InDetTrackPerfMonTool::procHistograms() {
 
-  ATH_MSG_INFO( "Finalizing plots" );
+  ATH_MSG_DEBUG( "Finalizing plots" );
 
   if( endOfRunFlag() ) {
     for( size_t iAna=0 ; iAna < m_trkAnaPlotsMgrVec.size() ; iAna++ ) {
@@ -337,7 +337,7 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
     }
   }
 
-  ATH_MSG_INFO( "Successfully finalized hists" );
+  ATH_MSG_DEBUG( "Successfully finalized hists" );
 
   return StatusCode::SUCCESS;
 }
@@ -348,7 +348,7 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
 ///---------------------------
 StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
 
-  ATH_MSG_INFO( "Loading collections" );
+  ATH_MSG_DEBUG( "Loading collections" );
 
   /// Events
   ATH_CHECK( trkAnaColls.fillEventInfo(

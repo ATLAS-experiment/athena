@@ -27,7 +27,7 @@ Py:SortEvents     VERBOSE ([2, 'testString_2', 0.6666666666666666, True, 65536],
 Py:SortEvents     VERBOSE ([1, 'testString_1', 0.3333333333333333, True, 1], '[DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]')
 Py:SortEvents     VERBOSE ([0, 'testString_0', 0.0, False, 0], '[DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]')
 Py:SortEvents     VERBOSE ================================================================================
-Py:SortEvents        INFO Writing Event collection PFN:sorted.root.root 
+Py:SortEvents        INFO Writing Event collection PFN:sorted.root
 Py:SortEvents        INFO Executing SortedCollectionCreator, inputs=test_collection.rntup, output='PFN:sorted.rntup' (RNTCollection), sort by: attr1, order: Descending
 Py:SortEvents       DEBUG Opening test_collection.rntup
 Py:SortEvents       DEBUG test_collection.rntup opened
@@ -57,4 +57,4 @@ Py:SortEvents     VERBOSE ([2, 'testString_2', 0.6666666666666666, True, 65536],
 Py:SortEvents     VERBOSE ([1, 'testString_1', 0.3333333333333333, True, 1], '[DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]')
 Py:SortEvents     VERBOSE ([0, 'testString_0', 0.0, False, 0], '[DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]')
 Py:SortEvents     VERBOSE ================================================================================
-Py:SortEvents        INFO Writing Event collection PFN:sorted.rntup.root 
+Py:SortEvents        INFO Writing Event collection PFN:sorted.rntup

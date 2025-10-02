@@ -62,5 +62,24 @@ Read back string: This is my test DbString #9
 Closing the session
 [OVAL] ...done
 
+[OVAL] Testing StorageSvc functionality for ROOT_RNTuple storage technology
+[OVAL] Testing the writing operations
+createStorageSvc
+startSession
+Session connect
+[OVAL] ...done
+[OVAL] Testing the reading operations
+Read back string: This is my test DbString #0
+Read back string: This is my test DbString #1
+Read back string: This is my test DbString #2
+Read back string: This is my test DbString #3
+Read back string: This is my test DbString #4
+Read back string: This is my test DbString #5
+Read back string: This is my test DbString #6
+Read back string: This is my test DbString #7
+Read back string: This is my test DbString #8
+Read back string: This is my test DbString #9
+Closing the session
+[OVAL] ...done
 [OVAL] Number of floating tokens : 0
 [OVAL] Exiting...

@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from collections import namedtuple, OrderedDict as odict
+from collections import namedtuple
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -77,24 +77,24 @@ def createMergerBoard(legacyBoard0, legacyBoard1):
                 raise RuntimeError("Mapping doesn't match LegacyBoard definition")
 
 
-    board = odict()
-    board["connectors"] = []
-    board["type"] = "merger"
-    board["connectors"].append({
-        "name" : "LegacyTopoMerged",
-        "format" : "simple",
-        "nbitsDefault" : 1,
-        "type" : "electrical",
-        "legacy" : False,
-        "signalGroups" : [
-            {
-                "clock" : 0,
-                "signals" : signals[0]
-            },
-            {
-                "clock" : 1,
-                "signals" : signals[1]
-            }
-        ]
-    })
-    return odict( [("LegacyTopoMerger", board)] )
+    board = {
+        "type": "merger",
+        "connectors": [{
+            "name" : "LegacyTopoMerged",
+            "format" : "simple",
+            "nbitsDefault" : 1,
+            "type" : "electrical",
+            "legacy" : False,
+            "signalGroups" : [
+                {
+                    "clock" : 0,
+                    "signals" : signals[0]
+                },
+                {
+                    "clock" : 1,
+                    "signals" : signals[1]
+                }
+            ]
+        }]
+    }
+    return {"LegacyTopoMerger": board}

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONEFFICIENCYSCALEFACTORS_H_
@@ -15,62 +15,70 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 
+#include "ColumnarCore/ColumnarTool.h"
+#include "ColumnarCore/ColumnAccessor.h"
+#include "ColumnarCore/ObjectColumn.h"
+#include "ColumnarEventInfo/EventInfoHelpers.h"
+#include "ColumnarMuon/MuonDef.h"
+
 #include <string>
 #include <memory>
 #include <map>
 #include <unordered_map>
 namespace CP {
-    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool {
+    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool, public columnar::ColumnarTool<>{
 
         public:
             MuonEfficiencyScaleFactors(const std::string& name);
 
-            virtual ~MuonEfficiencyScaleFactors() = default;
+            virtual ~MuonEfficiencyScaleFactors();
             //Proper constructor for Athena
             ASG_TOOL_CLASS3( MuonEfficiencyScaleFactors, CP::IMuonEfficiencyScaleFactors, CP::ISystematicsTool, CP::IReentrantSystematicsTool )
 
             /// initialize the tool once all settings are in place!
-            virtual StatusCode initialize();
+            virtual StatusCode initialize() override;
 
             /// Retrieve the Scale factor and decorate the muon
-            virtual CorrectionCode getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info = 0) const;
-            virtual CorrectionCode applyEfficiencyScaleFactor(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const;
+            virtual CorrectionCode getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info = 0) const override;
+            CorrectionCode getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId info) const;
+            virtual CorrectionCode applyEfficiencyScaleFactor(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
             /// replica generation
-            virtual CorrectionCode getEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
-            virtual CorrectionCode applyEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const;
+            virtual CorrectionCode getEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const override;
+            virtual CorrectionCode applyEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const override;
 
             /// returns: whether this tool is affected by the given systematis
-            virtual bool isAffectedBySystematic(const SystematicVariation& systematic) const;
+            virtual bool isAffectedBySystematic(const SystematicVariation& systematic) const override;
 
             /// returns: the list of all systematics this tool can be affected by
-            virtual SystematicSet affectingSystematics() const;
+            virtual SystematicSet affectingSystematics() const override;
 
             /// returns: the list of all systematics this tool recommends to use
-            virtual SystematicSet recommendedSystematics() const;
+            virtual SystematicSet recommendedSystematics() const override;
 
-            virtual StatusCode applySystematicVariation(const SystematicSet& systConfig);
+            virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override;
 
             /// Obtain the muon efficiency measured using the data
-            virtual CorrectionCode getDataEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const;
-            virtual CorrectionCode applyDataEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const;
+            virtual CorrectionCode getDataEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const override;
+            virtual CorrectionCode applyDataEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
 
             virtual CorrectionCode getDataEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
             virtual CorrectionCode applyDataEfficiencyReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const;
 
             /// Obtain the muon efficiency measured using the MC
-            virtual CorrectionCode getMCEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const;
-            virtual CorrectionCode applyMCEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const;
+            virtual CorrectionCode getMCEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const override;
+            virtual CorrectionCode applyMCEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
 
             virtual CorrectionCode getMCEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
             virtual CorrectionCode applyMCEfficiencyReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const;
 
-            virtual int getUnCorrelatedSystBin(const xAOD::Muon& mu) const;
-            virtual std::string getUncorrelatedSysBinName(unsigned int Bin) const;
-            virtual std::string getUncorrelatedSysBinName(const SystematicSet& systConfig) const;
+            virtual int getUnCorrelatedSystBin(const xAOD::Muon& mu) const override;
+            virtual std::string getUncorrelatedSysBinName(unsigned int Bin) const override;
+            virtual std::string getUncorrelatedSysBinName(const SystematicSet& systConfig) const override;
 
 
         private:
             unsigned int getRandomRunNumber(const xAOD::EventInfo* info) const;
+            unsigned int getRandomRunNumber(columnar::EventInfoId info) const;
             /// load the SF histos
             StatusCode LoadInputs();
 
@@ -202,6 +210,16 @@ namespace CP {
             bool m_useLRT;
 
             CP::MuonEfficiencyType m_Type;
+
+            // a struct holding all columnar accessors, as those interfere
+            // with the root dictionaries.
+            struct Accessors;
+            std::unique_ptr<Accessors> m_accessors;
+
+    public:
+
+            void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
+            virtual void callEvents (columnar::EventContextRange events) const override;
     };
 
 } /* namespace CP */

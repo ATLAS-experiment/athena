@@ -147,7 +147,7 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
     /** Private method to retrieve h partition */
     void getHParts(LocalVariablesContainer& aLVC) const;
     /** Private method to retrieve shield partition */
-    void getShieldParts(LocalVariablesContainer& aLVC) const;
+    static void getShieldParts(LocalVariablesContainer& aLVC) ;
     /** Private method to blend the inert material */
     void blendMaterial(LocalVariablesContainer& aLVC) const;
 

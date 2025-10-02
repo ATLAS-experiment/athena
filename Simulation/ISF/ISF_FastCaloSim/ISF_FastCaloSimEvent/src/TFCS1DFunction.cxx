@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
@@ -9,6 +9,7 @@
 #include "TRandom.h"
 #include <string>
 #include <iostream>
+#include <cmath>
 
 //=============================================
 //======= TFCS1DFunction =========
@@ -35,7 +36,7 @@ double TFCS1DFunction::get_maxdev(TH1 *h_input1, TH1 *h_approx1) {
   double ymax = h_approx->GetBinContent(h_approx->GetNbinsX()) -
                 h_approx->GetBinContent(h_approx->GetMinimumBin());
   for (int i = 1; i <= h_input->GetNbinsX(); i++) {
-    double val = fabs(h_approx->GetBinContent(
+    double val = std::abs(h_approx->GetBinContent(
                           h_approx->FindBin(h_input->GetBinCenter(i))) -
                       h_input->GetBinContent(i)) /
                  ymax;
@@ -61,7 +62,7 @@ double TFCS1DFunction::CheckAndIntegrate1DHistogram(
     if (binval < 0) {
       // Can't work if a bin is negative, forcing bins to 0 in this case
       double fraction = binval / hist->Integral();
-      if (TMath::Abs(fraction) > 1e-5) {
+      if (std::abs(fraction) > 1e-5) {
         ATH_MSG_NOCLASS(logger, "Warning: bin content is negative in histogram "
                                     << hist->GetName() << " : "
                                     << hist->GetTitle() << " binval=" << binval

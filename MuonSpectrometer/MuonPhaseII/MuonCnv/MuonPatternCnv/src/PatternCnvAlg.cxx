@@ -29,21 +29,6 @@ namespace MuonR4{
         ATH_CHECK(m_geoCtxKey.initialize());
         return StatusCode::SUCCESS;
     }
-    template <class ContainerType>
-        StatusCode PatternCnvAlg::retrieveContainer(const EventContext& ctx, 
-                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                        const ContainerType*& contToPush) const {
-            contToPush = nullptr;
-            if (key.empty()) {
-                ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-                return StatusCode::SUCCESS;
-            }
-            SG::ReadHandle<ContainerType> readHandle{key, ctx};
-            ATH_CHECK(readHandle.isPresent());
-            contToPush = readHandle.cptr();
-            return StatusCode::SUCCESS;
-    }
-
 
     StatusCode PatternCnvAlg::execute(const EventContext& ctx) const {
 
@@ -53,7 +38,7 @@ namespace MuonR4{
 
         for (const SG::ReadHandleKey<SegmentSeedContainer>& key : m_readKeys) {
             const SegmentSeedContainer* translateMe{nullptr};
-            ATH_CHECK(retrieveContainer(ctx, key, translateMe));
+            ATH_CHECK(SG::get(translateMe, key, ctx));
             ATH_CHECK(convertSeed(ctx, *translateMe, * translatedPatterns, *translatedHough));
 
         }
@@ -77,15 +62,14 @@ namespace MuonR4{
         const Muon::TgcPrepDataContainer* tgcPrds{nullptr};
         const Muon::sTgcPrepDataContainer* stgcPrds{nullptr};
         const Muon::MMPrepDataContainer* mmPrds{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_keyMdt, mdtPrds));
-        ATH_CHECK(retrieveContainer(ctx, m_keyRpc, rpcPrds));
-        ATH_CHECK(retrieveContainer(ctx, m_keyTgc, tgcPrds));
-    
-        ATH_CHECK(retrieveContainer(ctx, m_keysTgc, stgcPrds));
-        ATH_CHECK(retrieveContainer(ctx, m_keyMM, mmPrds));
+        ATH_CHECK(SG::get(mdtPrds, m_keyMdt, ctx));
+        ATH_CHECK(SG::get(rpcPrds, m_keyRpc, ctx));
+        ATH_CHECK(SG::get(tgcPrds, m_keyTgc, ctx));
+        ATH_CHECK(SG::get(stgcPrds, m_keysTgc, ctx));
+        ATH_CHECK(SG::get(mmPrds, m_keyMM, ctx));
 
         const ActsGeometryContext* gctx{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
        
     
@@ -128,8 +112,8 @@ namespace MuonR4{
                 ATH_MSG_ERROR("Errors during the Prd conversion occured");
                 return StatusCode::FAILURE;
             }
-            const Amg::Vector3D maxPos{seed->positionInChamber()};
-            const Amg::Vector3D locDir{seed->directionInChamber()};
+            const Amg::Vector3D maxPos{seed->localPosition()};
+            const Amg::Vector3D locDir{seed->localDirection()};
 
             Trk::TrackSurfaceIntersection isect{localToGlobal * maxPos, localToGlobal.linear()*locDir,0.};
             ATH_MSG_VERBOSE("Intersection at "<<m_idHelperSvc->toStringChamber(trkHits[0]->identify())<<" "<<Amg::toString(isect.position())<<" "<<Amg::toString(isect.direction())

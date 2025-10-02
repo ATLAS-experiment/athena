@@ -3,7 +3,7 @@
 */
 // Runs on muons without a truth particle link.
 // Finds the nearest stable truth particle and adds its info to the muon.
-#include "DerivationFrameworkMuons/MuonTruthClassifierFallback.h"
+#include "MuonTruthClassifierFallback.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -25,8 +25,7 @@ namespace {
 // Constructor
 DerivationFramework::MuonTruthClassifierFallback::MuonTruthClassifierFallback(const std::string& t, const std::string& n,
                                                                               const IInterface* p) :
-    AthAlgTool(t, n, p) {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
+    base_class(t, n, p) {
 }
 
 // Athena initialize and finalize

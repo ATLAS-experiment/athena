@@ -53,7 +53,7 @@ namespace columnar
   // This is one of the more tricky accessors, as it need to connect to
   // two underlying columns.  The first column is the offset column, the
   // second is the data column.
-  template<ContainerId CI,typename CT>
+  template<RegularContainerIdConcept CI,typename CT>
     requires (ColumnTypeTraits<CT,ColumnarModeArray>::isNativeType)
   class AccessorTemplate<CI,std::vector<CT>,ColumnAccessMode::input,ColumnarModeArray> final
   {
@@ -70,13 +70,13 @@ namespace columnar
     AccessorTemplate (ColumnarTool<CM>& columnarTool, const std::string& name, ColumnInfo&& info = {})
     {
       auto myinfo = info;
-      myinfo.offsetName = columnarTool.objectName (CI);
+      myinfo.offsetName = columnarTool.containerStoreName (CI::idName);
       myinfo.isOffset = true;
-      info.offsetName = columnarTool.objectName (CI) + "." + name + ".offset";
+      info.offsetName = columnarTool.containerStoreName (CI::idName) + "." + name + ".offset";
       m_offsetData = std::make_unique<ColumnAccessorDataArray> (&m_offsetIndex, &m_offsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnarTool.addColumn (info.offsetName, m_offsetData.get(), std::move (myinfo));
       m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (ElementType), ColumnAccessMode::input);
-      columnarTool.addColumn (columnarTool.objectName(CI) + "." + name + ".data", m_dataData.get(), std::move (info));
+      columnarTool.addColumn (columnarTool.containerStoreName(CI::idName) + "." + name + ".data", m_dataData.get(), std::move (info));
     }
 
     AccessorTemplate (AccessorTemplate&& that)
@@ -128,7 +128,7 @@ namespace columnar
   /// Furthermore, since some conversions need a data pointer and others
   /// don't, I need to have two different implementations of the view
   /// and iterator.
-  template<ContainerId CI,typename CT,typename CM>
+  template<ContainerIdConcept CI,typename CT,typename CM>
     requires (ColumnTypeTraits<CT,CM>::useConvertInput || ColumnTypeTraits<CT,CM>::useConvertWithDataInput)
   class AccessorTemplate<CI,std::vector<CT>,ColumnAccessMode::input,CM> final
   {

@@ -33,8 +33,8 @@ StatusCode Muon::MuonInertMaterialBuilderImpl::initialize() {
 }
 
 Muon::MuonInertMaterialBuilderImpl::DetachedVolVec
-    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumesImpl(const PVConstLink treeTop, bool blend) const {
-    
+    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumesImpl(const PVConstLink& treeTop, bool blend) const {
+
     if (!treeTop) {
         throw std::runtime_error("No tree top has been parsed");
     }
@@ -44,7 +44,7 @@ Muon::MuonInertMaterialBuilderImpl::DetachedVolVec
     auto msTypes = buildDetachedTrackingVolumeTypes(treeTop, blend);
     ATH_MSG_DEBUG(" obtained " << msTypes.size() << " prototypes");
 
-    
+
     for (auto& [msTV, transforms]: msTypes) {
         std::string msTypeName = msTV->name();
         for (Amg::Transform3D&  combTr : transforms) {
@@ -59,8 +59,8 @@ Muon::MuonInertMaterialBuilderImpl::DetachedVolVec
 
 
 Muon::MuonInertMaterialBuilderImpl::DetachedVolumeVecWithTrfs
-    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(const PVConstLink top, bool blend) const {
-  
+    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(const PVConstLink& top, bool blend) const {
+
     DetachedVolumeVecWithTrfs objs{};
     /// link to top tree
     GeoVolumeCursor vol(top);
@@ -138,7 +138,7 @@ Muon::MuonInertMaterialBuilderImpl::DetachedVolumeVecWithTrfs
                         if (simpleTree) {
                             obj.second.push_back(vol.getTransform());
                         } else {
-                            obj.second.insert(obj.second.end(), 
+                            obj.second.insert(obj.second.end(),
                                               std::make_move_iterator(physVolTrfs.begin()),
                                               std::make_move_iterator(physVolTrfs.end()));
                         }
@@ -149,10 +149,10 @@ Muon::MuonInertMaterialBuilderImpl::DetachedVolumeVecWithTrfs
                 }
                 // envelope creation & simplification done with
                 // TrkDetDescrGeoModelCnv helpers
-                auto newType = m_volumeConverter.translate(physVol, m_simplify, blend, m_blendLimit);              
+                auto newType = m_volumeConverter.translate(physVol, m_simplify, blend, m_blendLimit);
                 if (newType) {
                     const std::string volName = newType->volumeName();
-                    auto typeDet = std::make_unique<Trk::DetachedTrackingVolume>(volName, newType.release());
+                    auto typeDet = std::make_unique<Trk::DetachedTrackingVolume>(volName, std::move(newType));
                     objs.emplace_back(std::move(typeDet), std::move(physVolTrfs));
                 } else {
                     ATH_MSG_WARNING("volume not translated: " << vname);

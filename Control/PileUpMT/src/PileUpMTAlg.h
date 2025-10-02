@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022, 2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2022, 2023, 2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPMT_PILEUPMTALG_H
@@ -7,13 +7,13 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaKernel/IAthRNGSvc.h"
+#include <BeamSpotConditionsData/BeamSpotData.h>
 #include "PileUpMT/IMinbiasSvc.h"
 #include "PileUpTools/IBeamIntensity.h"
 #include "PileUpTools/IBeamLuminosity.h"
 #include "PileUpTools/IPileUpTool.h"
 #include "StoreGate/ActiveStoreSvc.h"
 #include "src/ISkipEventIdxSvc.h"
-#include "xAODCnvInterfaces/IEventInfoCnvTool.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "xAODEventInfo/EventInfoContainer.h"
@@ -21,13 +21,11 @@
 // Example ROOT Includes
 // #include "TTree.h"
 // #include "TH1D.h"
-#include <fmt/chrono.h>
-#include <fmt/compile.h>
-#include <fmt/format.h>
 
 #include <atomic>
 #include <chrono>
 #include <cstdio>
+#include <format>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -39,16 +37,21 @@ class atomic_output {
 
  public:
   atomic_output() = default;
-  void init(const std::string& filename) {
+  bool init(const std::string& filename) {
     using namespace std::chrono;
     std::lock_guard lck{m_mtx};
     if (m_file != nullptr) {
-      return;
+      return true;
     }
     m_file = std::fopen(filename.c_str(), "a");
-    auto time = fmt::localtime(system_clock::to_time_t(system_clock::now()));
-    fmt::print(m_file, ("FILE CREATED ON {:%Y-%m-%d} at {:%H:%M:%S %Z}\n"),
-               time, time);
+    if (m_file == nullptr) {
+      return false;
+    }
+    auto time = system_clock::now();
+    auto header = std::format("FILE CREATED ON {:%Y-%m-%d} at {:%H:%M:%S %Z}\n",
+                              time, time);
+    std::fputs(header.c_str(), m_file);
+    return true;
   }
   ~atomic_output() {
     std::lock_guard lck{m_mtx};
@@ -58,9 +61,9 @@ class atomic_output {
     }
   }
 
-  void print(const fmt::memory_buffer& str) {
+  void print(const std::string& str) {
     std::lock_guard lck{m_mtx};
-    std::fwrite(str.data(), sizeof(char), str.size(), m_file);
+    std::fputs(str.c_str(), m_file);
     std::fflush(m_file);
   }
 };
@@ -107,9 +110,6 @@ class PileUpMTAlg : public AthAlgorithm {
       this, "BeamLumiSvc", "LumiProfileSvc", "Beam luminosity service"};
   ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGSvc", "AthRNGSvc/PileupRNG",
                                      "RNG service for pile-up digitization"};
-  ToolHandle<xAODMaker::IEventInfoCnvTool> m_xAODEICnvTool{
-      this, "xAODCnvTool", "xAODMaker::EventInfoCnvTool/EventInfoCnvTool",
-      "xAOD EventInfo conversion tool"};
   ToolHandleArray<IPileUpTool> m_puTools{
       this, "PileUpTools", {}, "Pileup tools"};
   Gaudi::Property<bool> m_writeTrace{this, "WriteTrace", false, "Write trace of pileup events used"};
@@ -137,8 +137,10 @@ class PileUpMTAlg : public AthAlgorithm {
   ServiceHandle<ISkipEventIdxSvc> m_skipEventIdxSvc{
       this, "SkipEvtIdxSvc", "SkipEventIdxSvc",
       "Skipped event index (run / lb num) provider"};
-  SG::WriteHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EventInfoKey", "OverlayEvent",
-                                                   "Overlay EventInfo key"};
+  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{
+      this, "BeamSpotKey", "BeamSpotData", "Beam spot info key"};
+  SG::WriteHandleKey<xAOD::EventInfo> m_evtInfoKey{
+      this, "EventInfoKey", "OverlayEvent", "Overlay EventInfo key"};
   SG::WriteHandleKey<xAOD::EventInfoContainer> m_evtInfoContKey{""};
   // Utilities
   StatusCode get_ei(StoreGateSvc& sg,

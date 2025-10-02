@@ -1,17 +1,18 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonSelectorTools )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Hist RIO TMVA )
+find_package( onnxruntime REQUIRED )
 
 # Libraries in the package:
 atlas_add_library( MuonSelectorToolsLib
    MuonSelectorTools/*.h Root/*.cxx
    PUBLIC_HEADERS MuonSelectorTools
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODEventInfo PATCoreLib MuonAnalysisInterfacesLib AsgDataHandlesLib
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo PATCoreLib MuonAnalysisInterfacesLib AsgDataHandlesLib AthOnnxInterfaces AthOnnxUtilsLib
    PRIVATE_LINK_LIBRARIES xAODTracking PathResolver )
 
 if( NOT XAOD_STANDALONE )
@@ -19,6 +20,10 @@ if( NOT XAOD_STANDALONE )
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES AthenaBaseComps GaudiKernel xAODCore xAODMuon MuonAnalysisInterfacesLib
       MuonSelectorToolsLib PATCoreLib )
+else()
+   atlas_add_component( MuonSelectorTools
+      src/components/*.cxx
+      LINK_LIBRARIES MuonSelectorToolsLib )
 endif()
 
 atlas_add_dictionary( MuonSelectorToolsDict

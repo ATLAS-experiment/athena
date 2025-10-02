@@ -25,27 +25,8 @@ namespace ActsTrk {
 
 class StripClusteringTool : public extends<AthAlgTool, IStripClusteringTool> {
 public:
-
     using StripRDORawData = SCT_RDORawData;
     using StripID = SCT_ID;
-
-    struct Cell {
-	size_t index;
-	Identifier id;
-	std::bitset<3> timeBits;
-	Acts::Ccl::Label label{Acts::Ccl::NO_LABEL}; // required by ACTS
-
-	Cell(size_t i, Identifier id, const std::bitset<3>& timeBits)
-	    : index(i), id(id), timeBits(timeBits) {}
-    };
-
-    struct Cluster {
-	std::vector<Identifier> ids;
-	uint16_t hitsInThirdTimeBin{0};
-    };
-
-    using CellCollection = std::vector<Cell>;
-    using ClusterCollection = std::vector<Cluster>;
 
     StripClusteringTool(const std::string& type,
 			const std::string& name,
@@ -54,22 +35,29 @@ public:
     virtual StatusCode initialize() override;
 
     virtual StatusCode
-    clusterize(const InDetRawDataCollection<StripRDORawData>& RDOs,
-	       const StripID& stripID,
-	       const EventContext& ctx,
-	       xAOD::StripClusterContainer& container) const override;
+    clusterize(const EventContext& ctx,
+	       const InDetRawDataCollection<StripRDORawData>& RDOs,
+	       const InDet::SiDetectorElementStatus& stripDetElStatus,
+	       const InDetDD::SiDetectorElement& element,
+         Acts::Ccl::ClusteringData& data,
+	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
+    virtual StatusCode
+    makeClusters(const EventContext& ctx,
+		 typename IStripClusteringTool::ClusterCollection& cluster,
+		 const InDetDD::SiDetectorElement& element,
+		 typename ClusterContainer::iterator itrContainer) const override;
+      
 private:
-
+    std::optional<std::pair<typename IStripClusteringTool::CellCollection, bool>>
+    unpackRDOs(const EventContext& ctx,
+	       const RawDataCollection& RDOs,
+	       const InDet::SiDetectorElementStatus& stripDetElStatus,
+	       const InDetDD::SiDetectorElement& element) const;
+  
     bool passTiming(const std::bitset<3>& timePattern) const;
     
     StatusCode decodeTimeBins();
-
-    std::optional<std::pair<std::vector<Cell>, bool>>
-    unpackRDOs(const InDetRawDataCollection<StripRDORawData>& RDOs,
-	       const StripID& idHelper,
-	       const InDet::SiDetectorElementStatus *sctDetElStatus,
-         const EventContext& ctx) const;
 
     bool isBadStrip(const EventContext& ctx,
         const InDet::SiDetectorElementStatus *sctDetElStatus,
@@ -78,15 +66,13 @@ private:
 		    Identifier stripId) const;
 
     // N.B. the cluster is added to the container
-    StatusCode makeCluster(const StripClusteringTool::Cluster &cluster,
+    StatusCode makeCluster(StripClusteringTool::Cluster &cluster,
 			   double LorentzShift,
 			   Eigen::Matrix<float,1,1>& localCov,
 			   const StripID& stripID,
-			   const InDetDD::SiDetectorElement* element,
+			   const InDetDD::SiDetectorElement& element,
 			   const InDetDD::SiDetectorDesign& design,
 			   xAOD::StripCluster& container) const;
-
-    const InDet::SiDetectorElementStatus *getStripDetElStatus(const EventContext& ctx) const;
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 
@@ -110,8 +96,13 @@ private:
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "StripDetEleCollKey", "ITkStripDetectorElementCollection",
       "SiDetectorElementCollection key for strip"};
 
+    Gaudi::Property<bool> m_isITk {this, "isITk", true,
+      "True if running in ITk"};
+
     int m_timeBinBits[3]{-1, -1, -1};
 
+
+  const StripID* m_stripID {nullptr};
 };
 
 } // namespace ActsTrk

@@ -34,10 +34,6 @@
 #include <string>
 #include <vector>
 
-// Use IdxSet and ParSet from FPGATrackSimUtil
-using FPGATrackSimBinUtil::ParSet;
-using FPGATrackSimBinUtil::IdxSet;
-
 //-------------------------------------------------------------------------------------------------------
 // 
 //-------------------------------------------------------------------------------------------------------
@@ -55,6 +51,7 @@ public:
   //
   //--------------------------------------------------------------------------------------------------
   const IFPGATrackSimBinDesc* binDesc() const {return m_binDesc.get();}
+  IFPGATrackSimBinDesc* binDesc() {return m_binDesc.get();}
   const ToolHandleArray<FPGATrackSimBinStep>& steps() const { return m_steps;}
   FPGATrackSimBinStep* lastStep() { return (--m_steps.end())->get(); }
   const FPGATrackSimBinStep* lastStep() const { return (--m_steps.end())->get(); }
@@ -67,16 +64,22 @@ public:
   //--------------------------------------------------------------------------------------------------
 
   // center of whole region
-  ParSet center() const;
+  FPGATrackSimBinUtil::ParSet center() const;
 
   // range of whole region
   double parRange(unsigned par) const { return m_parMax[par]-m_parMin[par];}
+  double parCenter(unsigned par) const { return (m_parMax[par]+m_parMin[par])/2.0;}
   double parMin(unsigned par) const { return m_parMin[par];}
   double parMax(unsigned par) const { return m_parMax[par];}
+  
+  // Getters for the entire ranges
+  const FPGATrackSimBinUtil::ParSet& parMin() const { return m_parMin;}
+  const FPGATrackSimBinUtil::ParSet& parMax() const { return m_parMax;}
+
 
   // check if 1-d or 5-d parameter is within the range of the binning
   bool inRange(unsigned par, double val) const { return ((val < m_parMax[par]) && (val > m_parMin[par])); }
-  bool inRange(const ParSet &pars) const;
+  bool inRange(const FPGATrackSimBinUtil::ParSet &pars) const;
   
   //--------------------------------------------------------------------------------------------------
   //
@@ -87,6 +90,9 @@ public:
   void computeValidBins(const IFPGATrackSimEventSelectionSvc* evtSel);
   void setValidBin(const std::vector<unsigned>& idx); // also sets SubBins
   void printValidBin() const; // dump an output to log for x-checks
+
+  // Write Firmware LUTs (constants)
+  void writeLUTs() const;
 
 private:
   //--------------------------------------------------------------------------------------------------
@@ -110,8 +116,8 @@ private:
   //
 
   // These indicate the range of the full binning
-  ParSet m_parMin{};
-  ParSet m_parMax{};
+  FPGATrackSimBinUtil::ParSet m_parMin{};
+  FPGATrackSimBinUtil::ParSet m_parMax{};
 
   // A list of the step names for convienience
   std::vector<std::string> m_stepNames;

@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COPYTRUTHJETPARTICLES_H
 #define COPYTRUTHJETPARTICLES_H
 
+#include "AsgDataHandles/ReadDecorHandleKeyArray.h"
 #include "ParticleJetTools/CopyTruthParticles.h"
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/PropertyWrapper.h"
@@ -70,8 +71,8 @@ private:
   bool comesFrom( const xAOD::TruthParticle* tp, const int pdgID, std::vector<int>& used_vertices ) const;
 
   /// Name of the decoration to be used for identifying FSR (dressing) photons
-  Gaudi::Property<std::string> m_dressingName{this, "DressingDecorationName", "",
-              "Name of the dressed photon decoration (if one should be used)"};
+  SG::ReadDecorHandleKeyArray<xAOD::TruthParticleContainer> m_dressingNames{this, "DressingDecorationNames", {}, 
+  "Name of the dressed photon decoration (if one should be used)"};
 
   /// Handle on MCTruthClassifier for finding prompt leptons
   ToolHandle<IMCTruthClassifier> m_classif{this, "MCTruthClassifier", ""};

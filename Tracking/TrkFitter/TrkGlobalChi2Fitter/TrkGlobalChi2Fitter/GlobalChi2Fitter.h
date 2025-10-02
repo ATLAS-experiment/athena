@@ -684,10 +684,10 @@ namespace Trk {
      * @param[in, out] cache General cache object to fill with first/last.
      * @param[in, out] trajectory The trajectory, we want to analyse.
      */
-    void fillFirstLastMeasurement(
+    static void fillFirstLastMeasurement(
       Cache & cache,
       GXFTrajectory & trajectory
-    ) const;
+    ) ;
 
     /*
      * @brief Fill the b-vector with the residual information from the measurements.
@@ -703,11 +703,11 @@ namespace Trk {
      * @param[in, out] trajectory The trajectory, we want to analyse.
      * @param[in, out] b The b-vector of the system.
      */
-    void fillBfromMeasurements(
+    static void fillBfromMeasurements(
       const Cache & cache,
       GXFTrajectory & trajectory,
       Amg::VectorX & b
-    ) const;
+    ) ;
 
     /*
      * @brief Fill the [a]-matrix with the derivative information from the measurements.
@@ -721,11 +721,11 @@ namespace Trk {
      * @param[in, out] trajectory The trajectory, we want to analyse.
      * @param[in, out] a The [a]-matrix of the system.
      */
-    void fillAfromMeasurements(
+    static void fillAfromMeasurements(
       const Cache & cache,
       GXFTrajectory & trajectory,
       Amg::SymMatrixX & a
-    ) const;
+    ) ;
 
     /*
      * @brief Fill the [a]-matrix with the derivative information from the scatterers.
@@ -740,10 +740,10 @@ namespace Trk {
      * @param[in, out] trajectory The trajectory, we want to analyse.
      * @param[in, out] a The [a]-matrix of the system.
      */
-    void fillAfromScatterers(
+    static void fillAfromScatterers(
       GXFTrajectory & trajectory,
       Amg::SymMatrixX & a
-    ) const;
+    ) ;
 
     /*
      * @brief Update [a]-matrix with material effects by weighting some elements.
@@ -764,7 +764,7 @@ namespace Trk {
      *
      * @note prefit == 1 does not do a lot, maybe changes weightChanged. Could be wrong behaviour?
      */
-    bool tryToWeightAfromMaterial(
+    static bool tryToWeightAfromMaterial(
       Cache & cache,
       GXFTrajectory & trajectory,
       Amg::SymMatrixX & a,
@@ -772,7 +772,7 @@ namespace Trk {
       const int it,
       const double oldRedChi2,
       const double newRedChi2
-    ) const;
+    ) ;
 
     /*
      * @brief Effectively removes the phi weights from the [a]-matrix.
@@ -785,11 +785,11 @@ namespace Trk {
      * @param[in, out] trajectory The trajectory, we want to analyse.
      * @param[in, out] a The [a]-matrix of the system.
      */
-    void compensatePhiWeights(
+    static void compensatePhiWeights(
       Cache & cache,
       GXFTrajectory & trajectory,
       Amg::SymMatrixX & a
-    ) const;
+    ) ;
 
     /*
      * @brief Performs the main work of the GX2F iteration.

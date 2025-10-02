@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeader.cxx
@@ -13,6 +13,7 @@
 #include "SGTools/TransientAddress.h"
 #include "SGTools/DataProxy.h"
 #include "AthenaKernel/IStringPool.h"
+#include "CxxUtils/ranges.h"
 
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement() : m_pClid(0), m_clids(), m_key(), m_alias(), m_hashes() {
@@ -31,7 +32,7 @@ DataHeaderElement::DataHeaderElement(const SG::TransientAddress* sgAddress, IOpa
   : DataHeaderElement (sgAddress->clID(),
                        sgAddress->name(),
                        sgAddress->transientID(),
-                       SG::DataProxy::AliasCont_t (sgAddress->alias()),
+                       std::vector<std::string>(sgAddress->alias()),
                        sgAddress->address(),
                        tokAddress, pTag)
 {
@@ -51,17 +52,20 @@ DataHeaderElement::DataHeaderElement(const SG::DataProxy* proxy, IOpaqueAddress*
 DataHeaderElement::DataHeaderElement(CLID clid,
                                      const std::string& name,
                                      const std::vector<CLID>& tClids,
-                                     std::set<std::string>&& alias,
+                                     std::vector<std::string>&& alias,
                                      IOpaqueAddress* tadAddress,
                                      IOpaqueAddress* tokAddress,
                                      const std::string& pTag)
   : m_pClid(clid),
-    m_clids(tClids.begin(), tClids.end()),
+    m_clids(tClids),
     m_key((pTag.empty()) ? name : pTag),
     m_alias(std::move(alias)),
     m_hashes()
 {
-  m_clids.erase(m_pClid);
+  std::ranges::sort (m_clids);
+  const auto ret = std::ranges::unique (m_clids);
+  m_clids.erase (ret.begin(), ret.end());
+  std::erase (m_clids, m_pClid);
   TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(tokAddress);
   if (tokAddr != 0 && tokAddr->getToken() != 0) {
     tokAddr->getToken()->setData (&m_token);
@@ -101,11 +105,11 @@ CLID DataHeaderElement::getPrimaryClassID() const {
    if (m_pClid > 0) {
       return(m_pClid);
    }
-   return(*(m_clids.begin()));
+   return(m_clids.front());
 }
 //______________________________________________________________________________
 const std::set<CLID> DataHeaderElement::getClassIDs() const {
-  std::set<CLID> allClids (m_clids);
+  std::set<CLID> allClids (m_clids.begin(), m_clids.end());
   allClids.insert(m_pClid);
   return(allClids);
 }
@@ -114,7 +118,7 @@ const std::string& DataHeaderElement::getKey() const {
    return(m_key);
 }
 //______________________________________________________________________________
-const std::set<std::string>& DataHeaderElement::getAlias() const {
+const std::vector<std::string>& DataHeaderElement::getAlias() const {
    return(m_alias);
 }
 //_____________________________________________________________________________
@@ -149,10 +153,22 @@ SG::TransientAddress* DataHeaderElement::getAddress(const std::string& key,
 	unsigned long contextId) const {
    CLID primaryClID = getPrimaryClassID();
    TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , &m_token);
-   SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd);
-   for (std::set<CLID>::const_iterator iter = m_clids.begin(), last = m_clids.end();
-	   iter != last; ++iter) {
-      sgAddress->setTransientID(*iter);
+   SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd, m_clids);
+   if (!m_hashes.empty()) {
+     // If we have the sgkey corresponding to the primary clid, record
+     // it in the address.  This will allow us to do lookups later by sgkey
+     // rather than by name.
+     // But be careful: the key for the primary clid is not necessarily
+     // the first one in m_hashes.  The keys in m_hashes correspond to
+     // all the CLIDs in ascending order.  m_clids holds all CLIDs
+     // _except_ for the primary one, in sorted order.
+     // So we want to find the index at which the primary CLID would
+     // be inserted into m_clids to keep it sorted.  We could do this
+     // using std::upper_bound.  However, in the common cases, we only
+     // have about 2 entries in m_clids.  In that case, it's faster
+     // to just do a linear search.
+     auto it = std::ranges::find_if (m_clids, std::bind_front(std::less<int>{}, primaryClID));
+     sgAddress->setSGKey (m_hashes[it - m_clids.begin()]);
    }
    sgAddress->setAlias(m_alias);
    return(sgAddress);
@@ -170,7 +186,7 @@ void DataHeaderElement::dump(std::ostream& ostr) const
    ostr << std::endl;
    if( getAlias().size() > 0 ) {
       ostr << "Alias: ";
-      for( auto& a : getAlias() ) ostr << " " << a;
+      for( const std::string& a : getAlias() ) ostr << " " << a;
       ostr << endl;
    }
    ostr << "Token: " << m_token.toString() << endl;

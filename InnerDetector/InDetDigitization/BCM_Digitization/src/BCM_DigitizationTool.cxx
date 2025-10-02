@@ -116,13 +116,7 @@ void BCM_DigitizationTool::processSiHit(const SiHit &currentHit, double eventTim
   m_timeVect[moduleNo].push_back(hitTime);
   // Create new deposit and add to vector
   const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(currentHit.particleLink(), evtIndex, ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
-  const int barcode = HepMC::barcode(particleLink); // FIXME barcode-based
-  if (
-      (barcode == 0 && particleLink.id() == 0) // delta-ray
-      || MC::isSingleParticle(particleLink) 
-      ) {
-    return;
-  }
+  if (HepMC::no_truth_link(particleLink)) return;
   m_depositVect[moduleNo].emplace_back(particleLink,currentHit.energyLoss());
 }
 

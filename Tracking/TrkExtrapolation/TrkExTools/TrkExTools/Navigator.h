@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -110,20 +110,25 @@ namespace Trk {
     ServiceHandle<Trk::ITrackingGeometrySvc> m_trackingGeometrySvc{
         this, "TrackingGeometrySvc", ""};
     /// Name of the TrackingGeometry as given in Detector Store
-    std::string m_trackingGeometryName;
+    std::string m_trackingGeometryName = "AtlasTrackingGeometry";
+
     /******************************************************************/
-    /// Tolerance for inside() method of Volumes
-    double m_insideVolumeTolerance;
-    /// Tolerance for isOnSurface() method of BoundarySurfaces
-    double m_isOnSurfaceTolerance;
+    DoubleProperty m_insideVolumeTolerance{
+      this, "InsideVolumeTolerance", 1. * Gaudi::Units::mm,
+      "Tolerance for inside() method of Volumes"};
+    DoubleProperty m_isOnSurfaceTolerance{
+      this, "IsOnSurfaceTolerance", 0.005 * Gaudi::Units::mm,
+      "Tolerance for isOnSurface() method of BoundarySurfaces"};
     bool m_useConditions{};
     Trk::MagneticFieldProperties m_fieldProperties;
-    /// use the straight line approximation for the next boundary sf
-    bool m_useStraightLineApproximation;
+    BooleanProperty m_useStraightLineApproximation{
+      this, "UseStraightLineApproximation", false,
+      "use the straight line approximation for the next boundary sf"};
     /// search with new distanceToSurface() method
-    bool m_searchWithDistance;
-    //------------ Magnetic field properties
-    bool m_fastField;
+    BooleanProperty m_searchWithDistance{
+      this, "SearchWithDistanceToSurface", true,
+      "search with new distanceToSurface() method"};
+    BooleanProperty m_fastField{this, "MagneticFieldProperties", false};
   };
 
 } // end of namespace

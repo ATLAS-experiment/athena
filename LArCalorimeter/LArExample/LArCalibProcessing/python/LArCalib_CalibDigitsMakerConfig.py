@@ -41,11 +41,13 @@ def patternToVars( Pattern):
 def LArCalibDigitsMakerCfg(flags,DigitsKey=""):
     
     result = ComponentAccumulator()
-    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg,LArCalibIdMappingCfg
     result.merge(LArOnOffIdMappingCfg(flags))
+    result.merge(LArCalibIdMappingCfg(flags))
     if flags.LArCalib.isSC:
-       from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+       from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg,LArCalibIdMappingSCCfg
        result.merge(LArOnOffIdMappingSCCfg(flags))
+       result.merge(LArCalibIdMappingSCCfg(flags))
 
 
     BoardIDs = {}

@@ -11,6 +11,7 @@
 
 #include <EventLoop/Global.h>
 
+#include <AsgTools/PropertyWrapper.h>
 #include <EventLoop/Module.h>
 
 namespace EL
@@ -32,6 +33,10 @@ namespace EL
 
       virtual StatusCode onNewInputFile (ModuleData& data) override;
       virtual StatusCode onCloseInputFile (ModuleData& data) override;
+
+      Gaudi::Property<std::int64_t> cacheSize {this, "cacheSize", 0};
+      Gaudi::Property<std::int64_t> cacheLearnEntries {this, "cacheLearnEntries", 0};
+      Gaudi::Property<bool> printPerFileStats {this, "printPerFileStats", false};
     };
   }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -94,7 +94,7 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
   }
   DbString s;
   DbTypeInfo::Columns c;
-  c.push_back(new DbColumn("db_string",DbColumn::STRING,size_t((std::string*)&s)-size_t(&s),0,1,0));
+  c.push_back(new DbColumn("db_string",DbColumn::STRING,size_t(static_cast<std::string*>(&s))-size_t(&s),0,1,0));
   m_string_t = DbTypeInfo::create(std::string("pool::DbString"), c);
   if ( m_string_t ) m_string_t->addRef();
 }
@@ -455,7 +455,7 @@ DbStatus DbDatabaseObj::open()   {
                 log << "--->Reading Param:" << n << "=[" << v << ']' 
                     << DbPrint::endmsg;
                 m_paramMap[n] = v;
-                if (n == "FID") fids.push_back(v);
+                if (n == "FID") fids.emplace_back(std::move(v));
               }
             }
             it.object()->~DbString(); m_params.free(it.object());
@@ -662,7 +662,7 @@ DbStatus DbDatabaseObj::getLink(const Token::OID_t& oid, Token* pTok)
       pTok->oid() = oid;
       if( !(pTok->type() & DbToken::TOKEN_FULL_KEY) )  {
          if( typeid(*pTok) == typeid(DbToken) )  {
-	    DbToken* pdbTok = (DbToken*)pTok;
+            DbToken* pdbTok = static_cast<DbToken*>(pTok);
 	    pdbTok->setKey(DbToken::TOKEN_FULL_KEY);
          }
       }
@@ -727,7 +727,7 @@ DbStatus DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
 
       if( cntH.open( dbd, containerName, typ_info, token.technology(), mode() ).isSuccess() )  {
          if ( typ_info && typ_info == shape ) {
-            return DbObjectAccessor::read(object, shape, cntH, oid );
+            return cntH.load(object, shape, oid);
          }
          DbPrint log( name() );
          log << DbPrintLvl::Error << "Token ClassID " << token.classID().toString()

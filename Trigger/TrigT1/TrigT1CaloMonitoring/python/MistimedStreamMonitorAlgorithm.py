@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -58,18 +58,14 @@ def MistimedStreamMonitorConfig(flags, Legacy, PhaseI):
     phimin = 0
 
     
-    NumberOfGlobalErrors=11
+    NumberOfGlobalErrors=7
     globalStatus_xlabels = [
         "All",
         "unsuitable readout",
         "HLT_mistimemonj400",
         "L1_Trigger",
-        "<= 4 bad peak TT",
-        "<= 4 bad central TT",
-        "<= 4 bad late TT",
         ">= 2 late TT",
         "<= 3 in-time",
-        ">= 1 significant TT in EM layer",
         "spatial overlap"
     ]
 
@@ -97,19 +93,19 @@ def MistimedStreamMonitorConfig(flags, Legacy, PhaseI):
 
     groupMapsEfexin = helper.addGroup(MistimedMonAlg,  'Efex_maxTOB_in', mainDir)
     groupMapsEfexin.defineHistogram('TOBEta_max, TOBPhi_max;Efex_2d_etaPhi_in_mistimedStreamAna', title='#eta - #phi Map of max Efex TOBs (in-time) ;#eta;#phi'  , xbins=100,xmin=-5.0,xmax=5.0,ybins=64,ymin=0.,ymax=2*math.pi, type='TH2D', path=trigPath)
-    groupMapsEfexin.defineHistogram('TOBTransverseEnergy;Efex_TOBenergy_in_mistimedStreamAna', title='Energy of Efex TOBs (in-time);TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
+    groupMapsEfexin.defineHistogram('TOBTransverseEnergy_max;Efex_TOBenergy_in_mistimedStreamAna', title='Energy of Efex TOBs (in-time);TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
     
     groupMapsEfexout = helper.addGroup(MistimedMonAlg,  'Efex_maxTOB_out', mainDir)
     groupMapsEfexout.defineHistogram('TOBEta_max, TOBPhi_max;Efex_2d_etaPhi_out_mistimedStreamAna', title='#eta - #phi Map of max Efex TOBs  (out-of-time) ;#eta;#phi'  , xbins=100,xmin=-5.0,xmax=5.0,ybins=64,ymin=0.,ymax=2*math.pi, type='TH2D', path=trigPath)
-    groupMapsEfexout.defineHistogram('TOBTransverseEnergy;Efex_TOBenergy_out_mistimedStreamAna', title='Energy of Efex TOBs (out-of-time);TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
+    groupMapsEfexout.defineHistogram('TOBTransverseEnergy_max;Efex_TOBenergy_out_mistimedStreamAna', title='Energy of Efex TOBs (out-of-time);TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
 
     groupMapsJfex = helper.addGroup(MistimedMonAlg,  'Jfex_maxTOB', mainDir)
     groupMapsJfex.defineHistogram('TOBEta_max, TOBPhi_max;Jfex_2d_etaPhi_mistimedStreamAna', title='#eta - #phi Map of max Jfex TOBs;#eta;#phi'  , xbins=100,xmin=-5.0,xmax=5.0,ybins=64,ymin=0.,ymax=2*math.pi, type='TH2D', path=trigPath)
-    groupMapsJfex.defineHistogram('jFexEt;Jfex_TOBenergy_mistimedStreamAna', title='Energy of Jfex TOBs;TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
+    groupMapsJfex.defineHistogram('TOBTransverseEnergy_max;Jfex_TOBenergy_mistimedStreamAna', title='Energy of Jfex TOBs;TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
 
     groupMapsGfex = helper.addGroup(MistimedMonAlg,  'Gfex_maxTOB', mainDir)
     groupMapsGfex.defineHistogram('TOBEta_max, TOBPhi_max;Gfex_2d_etaPhi_mistimedStreamAna', title='#eta - #phi Map of max Gfex TOBs;#eta;#phi'  , xbins=50,xmin=-5.0,xmax=5.0,ybins=32,ymin=0.,ymax=2*math.pi, type='TH2D', path=trigPath)
-    groupMapsGfex.defineHistogram('gFexEt;Gfex_TOBenergy_mistimedStreamAna', title='Energy of Gfex TOBs;TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
+    groupMapsGfex.defineHistogram('TOBTransverseEnergy_max;Gfex_TOBenergy_mistimedStreamAna', title='Energy of Gfex TOBs;TOB E_T [GeV];Entries', xbins=90,xmin=0.0,xmax=450.0, type='TH1D', path=trigPath)
 
     # add monitoring algorithm to group, with group name and main directory
     histPath = trigPath+'/EventofInterest'
@@ -184,7 +180,7 @@ if __name__=='__main__':
     acc = MainServicesCfg(flags)
     acc.merge(PoolReadCfg(flags))
     
-    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, legacy=False, phaseI=True)
+    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, Legacy=False, PhaseI=True)
     acc.merge(MistimedStreamMonitorCfg)
 
     MistimedStreamMonitorCfg.getEventAlgo('MistimedStreamMonitorAlg').OutputLevel = 2 # 1/2 INFO/DEBUG

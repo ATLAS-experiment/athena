@@ -29,7 +29,7 @@ acc.merge(PoolReadCfg(flags))
 
 from TauDQA.TauDQAConfig import PhysValTauCfg
 from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
-acc.merge(PhysValMonitoringCfg(flags, tools=[acc.popToolsAndMerge(PhysValTauCfg(flags))]))
+acc.merge(PhysValMonitoringCfg(flags, tools=[acc.popToolsAndMerge(PhysValTauCfg(flags, tauContainer="TauJets"))]))
 
 acc.printConfig(withDetails=True)
 

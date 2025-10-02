@@ -5,9 +5,7 @@ atlas_subdir( JiveXML )
 
 # External package(s).
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-if( ( "${ATLAS_OS_ID}" STREQUAL "centos9" ) OR ( "${ATLAS_OS_ID}" STREQUAL "el9" ) )
-   find_package( RPC )
-endif()
+find_package( RPC )
 
 # Component(s) in the package:
 if ( RPC_FOUND )

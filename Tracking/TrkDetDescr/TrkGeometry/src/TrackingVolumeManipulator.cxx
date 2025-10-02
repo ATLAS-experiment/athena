@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ Trk::TrackingVolumeManipulator::glueVolumes(
 void
 Trk::TrackingVolumeManipulator::setBoundarySurface(
   Trk::TrackingVolume& tvol,
-  Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>> bsurf,
+  std::shared_ptr<Trk::BoundarySurface<Trk::TrackingVolume>> bsurf,
   Trk::BoundarySurfaceFace face)
 {
   (tvol.m_boundarySurfaces)[face] = std::move(bsurf);
@@ -61,18 +61,7 @@ void
 Trk::TrackingVolumeManipulator::setInsideVolumeArray(
   Trk::TrackingVolume& tvol,
   Trk::BoundarySurfaceFace face,
-  Trk::BinnedArray<Trk::TrackingVolume>* insidevolarray)
-{
-
-  (tvol.m_boundarySurfaces)[face]->setInsideVolumeArray(
-    Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(insidevolarray));
-}
-
-void
-Trk::TrackingVolumeManipulator::setInsideVolumeArray(
-  Trk::TrackingVolume& tvol,
-  Trk::BoundarySurfaceFace face,
-  const Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>&
+  const std::shared_ptr<Trk::BinnedArray<Trk::TrackingVolume>>&
     insidevolarray)
 {
   (tvol.m_boundarySurfaces)[face]->setInsideVolumeArray(insidevolarray);
@@ -91,18 +80,7 @@ void
 Trk::TrackingVolumeManipulator::setOutsideVolumeArray(
   Trk::TrackingVolume& tvol,
   Trk::BoundarySurfaceFace face,
-  Trk::BinnedArray<Trk::TrackingVolume>* outsidevolarray)
-{
-
-  (tvol.m_boundarySurfaces)[face]->setOutsideVolumeArray(
-    Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(outsidevolarray));
-}
-
-void
-Trk::TrackingVolumeManipulator::setOutsideVolumeArray(
-  Trk::TrackingVolume& tvol,
-  Trk::BoundarySurfaceFace face,
-  const Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>&
+  const std::shared_ptr<Trk::BinnedArray<Trk::TrackingVolume>>&
     outsidevolarray)
 {
   (tvol.m_boundarySurfaces)[face]->setOutsideVolumeArray(outsidevolarray);

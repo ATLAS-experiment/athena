@@ -12,6 +12,7 @@
 
 #include <EventLoop/Global.h>
 
+#include <AsgTools/PropertyWrapper.h>
 #include <EventLoop/Module.h>
 #include <Rtypes.h>
 
@@ -35,7 +36,11 @@ namespace EL
       virtual StatusCode onWorkerEnd (ModuleData& data) override;
       virtual StatusCode postFinalize (ModuleData& data) override;
 
-
+      Gaudi::Property<int> absResidentLimit {this, "absResidentLimit", 10000};
+      Gaudi::Property<int> absVirtualLimit {this, "absVirtualLimit", 0};
+      Gaudi::Property<int> perEvResidentLimit {this, "perEvResidentLimit", 10};
+      Gaudi::Property<int> perEvVirtualLimit {this, "perEvVirtualLimit", 0};
+      Gaudi::Property<bool> failOnLeak {this, "failOnLeak", false};
 
       //
       // private interface

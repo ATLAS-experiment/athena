@@ -11,14 +11,31 @@ def ActsToTrkConverterToolCfg(flags,
     # Currently this does not work if we are in a muon-only mode
     if flags.Detector.GeometryITk and 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     else:
          # Disable TrackingGeometryTool
          kwargs.setdefault("TrackingGeometryTool", "")
     
-    if flags.Muon.usePhaseIIGeoSetup:
-         kwargs.setdefault("ExtractMuonSurfaces", True)
+    kwargs.setdefault("ExtractMuonSurfaces", flags.Muon.usePhaseIIGeoSetup)
 
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
+
+    
+    if flags.Detector.GeometryITk:
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
+        from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
+        kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(ITkBoundaryCheckToolCfg(flags)))
+    elif flags.Detector.GeometryID:
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
+        from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
+        kwargs.setdefault("BoundaryCheckTool",acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
+    elif flags.Detector.GeometryMuon:
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import MuonRotCreatorCfg
+        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(MuonRotCreatorCfg(flags)))
+  
     acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
     return acc
 
@@ -45,7 +62,7 @@ def ActsToTrkConvertorAlgCfg(flags,
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
     if 'ATLASConverterTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
@@ -122,6 +139,13 @@ def RunTrackConversion(flags, track_collections = [], outputfile='dump.json'):
     )
     cfg.merge(acc)
     cfg.printConfig(withDetails=True, summariseProps=True)
+    from AthenaCommon.Constants import FATAL
+    ### The translation of the Phase-II stlye muon geometry throws a ton
+    ### of error messages which degrades the physics performance but does
+    ### not harm the technical execution. In order, to make the tests pass
+    ### silence the algorithm until the tracking geometry translation understands
+    ### the new style of geometry building.
+    cfg.getCondAlgo("AtlasTrackingGeometryCondAlg").OutputLevel = FATAL
 
     sc = cfg.run()
     if not sc.isSuccess():

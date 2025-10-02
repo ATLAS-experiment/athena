@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 #include "GfexSimMonitorAlgorithm.h"
 
@@ -87,8 +87,8 @@ StatusCode GfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 	compareJetRoI("gLJRho",m_data_gFexRho,m_simu_gFexRho,ctx);
 	compareGlobalRoI("gTEJWOJ",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx,0xff000fff); // wont compare MET value in scalarE tob
 	compareGlobalRoI("gXEJWOJ",m_data_gMETComponentsJwoj,m_simu_gMETComponentsJwoj,ctx);
-	compareGlobalRoI("gXEJWOJ",m_data_gMHTComponentsJwoj,m_simu_gMHTComponentsJwoj,ctx);
-	compareGlobalRoI("gXEJWOJ",m_data_gMSTComponentsJwoj,m_simu_gMSTComponentsJwoj,ctx);
+	compareGlobalRoI("gXEJWOJMHT",m_data_gMHTComponentsJwoj,m_simu_gMHTComponentsJwoj,ctx);
+	compareGlobalRoI("gXEJWOJMST",m_data_gMSTComponentsJwoj,m_simu_gMSTComponentsJwoj,ctx);
 	compareGlobalRoI("gXENC",m_data_gMETComponentsNoiseCut,m_simu_gMETComponentsNoiseCut,ctx);
 	compareGlobalRoI("gXERHO",m_data_gMETComponentsRms,m_simu_gMETComponentsRms,ctx);
 	compareGlobalRoI("gTENC",m_data_gScalarENoiseCut,m_simu_gScalarENoiseCut,ctx,0xff000fff);
@@ -116,8 +116,10 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 	auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
 	auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
 
-
+	//sorting mismatched data/sim TOB
     std::set<const xAOD::gFexJetRoI*> mismatchedTOBs;
+	std::set<const xAOD::gFexJetRoI*> DataMismatchedTOBs;
+
 	for (auto tob1 : *tobs1Cont) {
 		bool isMatched = false;
 		//bool isPartMatched = false;
@@ -136,6 +138,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		}
 		if(!isMatched) {
             mismatchedTOBs.insert(tob1);
+			DataMismatchedTOBs.insert(tob1); //saving only the mismatched data tob
 		}
 	}
 
@@ -161,6 +164,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		// fill the debugging tree with all the words for this signature
 		auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
 		auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
+		auto l1id = Monitored::Scalar<unsigned int>("L1ID",GetEventInfo(ctx)->extendedLevel1ID());
 		{
 			std::scoped_lock lock(m_firstEventsMutex);
 			auto itr = m_firstEvents.find(lbn);
@@ -170,34 +174,40 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 			}
 			lbnString = itr->second;
 		}
-		std::vector<float> detas{};std::vector<float> setas{};
-		std::vector<float> dphis{};std::vector<float> sphis{};
-		std::vector<unsigned int> dword0s{};std::vector<unsigned int> sword0s{};
-		auto dtobEtas = Monitored::Collection("dataEtas", detas);
-		auto dtobPhis = Monitored::Collection("dataPhis", dphis);
-		auto dtobWord0s = Monitored::Collection("dataWord0s", dword0s);
-		auto stobEtas = Monitored::Collection("simEtas", setas);
-		auto stobPhis = Monitored::Collection("simPhis", sphis);
-		auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
-		fillVectors(tobs1Key,ctx,detas,dphis,dword0s);
-		fillVectors(tobs2Key,ctx,setas,sphis,sword0s);
-		if(msgLvl(MSG::DEBUG)) {
+		std::vector<SortableTob> sortedDataTobs;
+		std::vector<SortableTob> sortedSimTobs;
+
+		// Fill your sorted TOB vectors
+		fillVectors(tobs1Key, ctx, sortedDataTobs);
+		fillVectors(tobs2Key, ctx, sortedSimTobs);
+
+		auto dtobEtas    = Monitored::Collection("dataEtas", sortedDataTobs, [](const auto& t) { return t.eta; });
+		auto dtobPhis    = Monitored::Collection("dataPhis", sortedDataTobs, [](const auto& t) { return t.phi; });
+		auto dtobEts     = Monitored::Collection("dataEts",  sortedDataTobs, [](const auto& t) { return t.et; });
+		auto dtobWord0s  = Monitored::Collection("dataWord0s", sortedDataTobs, [](const auto& t) { return t.word0; });
+
+		auto stobEtas    = Monitored::Collection("simEtas", sortedSimTobs, [](const auto& t) { return t.eta; });
+		auto stobPhis    = Monitored::Collection("simPhis", sortedSimTobs, [](const auto& t) { return t.phi; });
+		auto stobEts     = Monitored::Collection("simEts",  sortedSimTobs, [](const auto& t) { return t.et; });
+		auto stobWord0s  = Monitored::Collection("simWord0s", sortedSimTobs, [](const auto& t) { return t.word0; });
+
+		/*if(msgLvl(MSG::DEBUG)) {
 			std::cout << "LBN: " << ULong64_t(lbn) << " EventNumber: " << ULong64_t(evtNumber) << " L1ID: " << GetEventInfo(ctx)->extendedLevel1ID() << " signature: " << label << std::endl;
 			std::cout << "  data : " << std::hex;
 			for (const auto w: dword0s) std::cout << w << " ";
 			std::cout << std::endl << "  sim  : ";
 			for (const auto w: sword0s) std::cout << w << " ";
 			std::cout << std::endl << std::dec;
-		}
+		}*/
         tobMismatched=100;
-		fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady,eventType);
-        fill("mismatches_count",lbn,Signature,simReady,eventType);
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
+		fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,l1id,evtNumber,dtobEtas,dtobPhis,dtobEts,dtobWord0s,stobEtas,stobPhis,stobEts,stobWord0s,Signature,simReady,eventType);		
 		if (label=="gJ" || label=="gLJ") {
             auto locIdx = Monitored::Scalar<std::string>("locIdx","");
-            for(auto tob : mismatchedTOBs) {
-                locIdx = std::to_string(tob->iEta()) + ":" + std::to_string(tob->iPhi());
-                fill("mismatches"+label,lbn,locIdx);
-            }
+			for(auto tob : DataMismatchedTOBs) {
+				locIdx = std::to_string(tob->iEta()) + ":" + std::to_string(tob->iPhi());
+                fill("mismatches"+label,lbn,locIdx); //only recording data eta,phi vs LBN
+			}
 		}
 	} else {
         tobMismatched=0;
@@ -240,7 +250,6 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 					break;
 				}
 			}
-
 		}
 		if(!isMatched) {
 			mismatches = true;
@@ -252,6 +261,7 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 		// fill the debugging tree with all the words for this signature
 		auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
 		auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
+		auto l1id = Monitored::Scalar<unsigned int>("L1ID",GetEventInfo(ctx)->extendedLevel1ID());
 		{
 			std::scoped_lock lock(m_firstEventsMutex);
 			auto itr = m_firstEvents.find(lbn);
@@ -261,32 +271,25 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 			}
 			lbnString = itr->second;
 		}
-		std::vector<float> detas{};std::vector<float> setas{}; // will be empty, b.c. meaningless for global TOBs
-		std::vector<float> dphis{};std::vector<float> sphis{};
-		std::vector<unsigned int> dword0s{};std::vector<unsigned int> sword0s{};
-		for(const auto tob1 : *tobs1Cont) {
-			dword0s.push_back(tob1->word());
-		}
-		for(const auto tob2 : *tobs2Cont) {
-			sword0s.push_back(tob2->word());
-		}
-		auto dtobEtas = Monitored::Collection("dataEtas", detas);
-		auto dtobPhis = Monitored::Collection("dataPhis", dphis);
-		auto dtobWord0s = Monitored::Collection("dataWord0s", dword0s);
-		auto stobEtas = Monitored::Collection("simEtas", setas);
-		auto stobPhis = Monitored::Collection("simPhis", sphis);
-		auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
-		if(msgLvl(MSG::DEBUG)) {
+		auto dtobMet1 = Monitored::Collection("dataTOB1", *tobs1Cont,[](const auto& tob) { return tob->METquantityOne(); });
+		auto dtobMet2 = Monitored::Collection("dataTOB2", *tobs1Cont,[](const auto& tob) { return tob->METquantityTwo(); });
+		auto dtobWord0s = Monitored::Collection("dataWord0s", *tobs1Cont,[](const auto& tob) { return tob->word(); });
+		auto stobMet1 = Monitored::Collection("simTOB1", *tobs2Cont,[](const auto& tob) { return tob->METquantityOne(); });
+		auto stobMet2 = Monitored::Collection("simTOB2", *tobs2Cont,[](const auto& tob) { return tob->METquantityTwo(); });
+		auto stobWord0s = Monitored::Collection("simWord0s", *tobs2Cont,[](const auto& tob) { return tob->word(); });
+
+		/*if(msgLvl(MSG::DEBUG)) {
 			std::cout << "LBN: " << ULong64_t(lbn) << " EventNumber: " << ULong64_t(evtNumber) << " L1ID: " << GetEventInfo(ctx)->extendedLevel1ID() << " signature: " << label << std::endl;
 			std::cout << "  data : " << std::hex;
 			for (const auto w: dword0s) std::cout << w << " ";
 			std::cout << std::endl << "  sim  : ";
 			for (const auto w: sword0s) std::cout << w << " ";
 			std::cout << std::endl << std::dec;
-		}
+		}*/
         tobMismatched=100;
-		fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,tobMismatched,eventType);
-        fill("mismatches_count",lbn,Signature,eventType);
+		
+        auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",false/* global RoI not sim ready yet*/);
+        fill("mismatches",simReadyMismatch,lbn,lbnString,evtNumber,l1id,dtobMet1,dtobMet2,dtobWord0s,stobMet1,stobMet2,stobWord0s,Signature,tobMismatched,eventType);
 	} else {
         tobMismatched=0;
         fill("mismatches",lbn,Signature,tobMismatched,eventType);

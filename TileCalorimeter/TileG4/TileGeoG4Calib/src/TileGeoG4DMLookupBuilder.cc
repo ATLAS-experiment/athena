@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -17,6 +17,10 @@
 //
 //************************************************************
 
+#include "TileGeoG4DMLookupBuilder.h"
+
+#include <mutex>
+
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/DataHandle.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -26,7 +30,6 @@
 #include "TileGeoG4SD/TileGeoG4Lookup.hh"
 
 //Calibration Look-up & its Builder
-#include "TileGeoG4DMLookupBuilder.h"
 #include "TileGeoG4DMLookup.h"
 
 //DB Manager
@@ -64,9 +67,7 @@ TileGeoG4DMLookupBuilder::TileGeoG4DMLookupBuilder(TileGeoG4LookupBuilder* looku
   rGapMin(0),
   rCrMax(0),
   rCrMin(0),
-  m_dbManager(0),
   m_lookup_builder(lookup_builder),
-  m_sectionMap(0),
   m_tdbManager(0),
   m_verboseLevel(verboseLevel),
   m_plateToCell(false)
@@ -92,28 +93,28 @@ TileGeoG4DMLookupBuilder::TileGeoG4DMLookupBuilder(TileGeoG4LookupBuilder* looku
   std::string versionNode = (geo_svc->tileVersionOverride()).empty() ? "ATLAS" : "TileCal";
 
   //m_dbManager = new TileCalibDddbManager(raccess,"ATLAS-00","ATLAS");
-  m_dbManager = new TileCalibDddbManager(raccess, versionTag, versionNode, verboseLevel);
-}
-
-TileGeoG4DMLookupBuilder::~TileGeoG4DMLookupBuilder() {
-  delete m_dbManager;
+  m_dbManager = std::make_unique<TileCalibDddbManager>(raccess, versionTag, versionNode, verboseLevel);
 }
 
 ///////////////// B U I L D E R
 
 void TileGeoG4DMLookupBuilder::BuildLookup(bool is_tb, int plateToCell) {
   // initializations
-  m_sectionMap = new TileGeoG4CalibSectionMap();
-  
-  // Building Section Look-up tables for Calibration Hits
-  CreateGeoG4CalibSections(is_tb, plateToCell);
+  m_sectionMap = std::make_unique<TileGeoG4CalibSectionMap>();
+  {
+    std::scoped_lock lock(TileGeoG4LookupBuilder::GetDbManagerMutex());
+    // Building Section Look-up tables for Calibration Hits
+    CreateGeoG4CalibSections(is_tb, plateToCell);
+  }
 }
 
 //////////////////// G E T   S E C T I O N
 
 TileGeoG4CalibSection* TileGeoG4DMLookupBuilder::GetSection(TileCalibDddbManager::TileCalibSections key) const {
-  if (m_sectionMap && std::as_const(m_sectionMap)->find(key) != m_sectionMap->cend())
-    return std::as_const(m_sectionMap)->at(key);
+  // make the thread checker happy
+  auto const* sectionMap = m_sectionMap.get();
+  if (sectionMap && sectionMap->find(key) != sectionMap->cend())
+    return sectionMap->at(key);
   else
     return 0;
 }
@@ -171,10 +172,14 @@ void TileGeoG4DMLookupBuilder::CreateGeoG4CalibSections(bool is_tb, int plateToC
   //plateToCell parameter
   if (plateToCell == -1) {
     m_plateToCell = m_dbManager->GetSwitchPlateToCell();
-    G4cout << "Using plateToCell flag from GeoModel" << G4endl;
+    if (m_verboseLevel >= 5) {
+      G4cout << "Using plateToCell flag from GeoModel" << G4endl;
+    }
   } else {
     m_plateToCell = (plateToCell>0);
-    G4cout << "Using plateToCell flag from jobOptions" << G4endl;
+    if (m_verboseLevel >= 5) {
+      G4cout << "Using plateToCell flag from jobOptions" << G4endl;
+    }
   }
 
   //geometry

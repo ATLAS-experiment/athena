@@ -51,7 +51,7 @@ namespace JiveXML{
       StatusCode initialize();
 
     private:
-      SG::ReadHandleKey<xAOD::CaloClusterContainer> m_sgKeyFavourite{this, "StoreGateKey", "LArClusterEM", "Name of the CaloClusterContainer"};
+      SG::ReadHandleKey<xAOD::CaloClusterContainer> m_sgKeyFavourite{this, "StoreGateKey", "egammaClusters", "Name of the CaloClusterContainer"};
       std::vector<std::string> m_otherKeys;
       bool m_doWriteHLT;
   };

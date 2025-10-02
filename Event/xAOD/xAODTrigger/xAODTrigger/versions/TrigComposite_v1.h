@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRIGGER_VERSIONS_TRIGCOMPOSITE_V1_H
@@ -45,9 +45,6 @@ namespace xAOD {
    /// @author Tomasz Bold <Tomasz.Bold@cern.ch>
    /// @author Camille Belanger-Champagne <Camille.Belanger-Champagne@cern.ch>
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-   ///
-   /// $Revision: 784388 $
-   /// $Date: 2016-11-15 18:08:58 +0100 (Tue, 15 Nov 2016) $
    ///
    class TrigComposite_v1 : public SG::AuxElement {
 
@@ -94,7 +91,7 @@ namespace xAOD {
       template< typename TYPE >
       bool getDetail( const std::string& name, TYPE& value ) const;
 
-      /// Get a detail by name, missing detail will result on std::runtime_error exception
+      /// Get a detail by name, missing detail will throw SG::ExcBadAuxVar
       template<typename TYPE>
       TYPE getDetail( const std::string& name ) const;
 

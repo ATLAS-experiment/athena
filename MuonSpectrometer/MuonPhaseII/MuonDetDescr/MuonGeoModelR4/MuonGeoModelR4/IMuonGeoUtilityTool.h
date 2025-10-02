@@ -25,17 +25,18 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
          /// Gaudi interface ID
         DeclareInterfaceID(IMuonGeoUtilityTool, 1, 0);
 
-        /// Returns the next Geo alignable transform in the GeoModelTree upstream
+        /** @brief Returns the first alignable transform in the root subtree upstream the volume
+         *         the volume must not be shared, otherwise exception is thrown
+         *  @param physVol: Reference to the GeoVPhysVol to find the associated alignable trf */
         virtual const GeoAlignableTransform* findAlignableTransform(const PVConstLink& physVol) const = 0;
-                                                             
-        
-        /// Navigates throughs the volume to find a Box / Prd shape
+        /** @brief Navigates through the volume shape hiearchy to return the first shape 
+         *         which is neither a shift or in case of subtractions, the overall envelope shape
+         *  @param physVol: Reference to the GeoVPhysVol to extract the shape from */
         virtual const GeoShape* extractShape(const PVConstLink& physVol) const = 0;
+        /** @brief Navigates through the shape hiarchy to return the first shape which is neither a shift
+         *         or in case of a subtraction, the overall envelope shape
+         *  @param inShape: Pointer to the shape to navigate through */
         virtual const GeoShape* extractShape(const GeoShape* inShape) const = 0;
-    
-        // Navigates through the volume to find the shifts / rotations etc. from the geo shape
-        virtual Amg::Transform3D extractShifts(const PVConstLink& physVol) const = 0;
-        virtual Amg::Transform3D extractShifts(const GeoShape* inShape) const = 0;
 
         /// Helper struct to cache a PhysVolume pointer together with the transformation to go from the volume to
         /// the given parent node in the tree

@@ -92,7 +92,8 @@ The tool can be used to retrieve scale factors for a specific
    * - ``RecommendationTag``
      - ``std::string``
      - ``"2022-prerec"``
-     
+     - ``"2025-prerec"``
+
 For the default ``RecommendationTag`` "2022-prerec" the following properties
 are available for tool steering:
 
@@ -130,6 +131,48 @@ are available for tool steering:
      - ``"combined"``
      - ``"Ztautau"``, ``"ttbar"``, 
 
+For the ``RecommendationTag`` "2025-prerec" the following properties
+are available for tool steering:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 10 45 35
+
+   * - property name
+     - type
+     - default value
+     - other sensible values
+
+   * - ``Campaign``
+     - ``std::string``
+     - ``""``
+     - ``mc20 (for Run2), mc23 (for Run3)``  
+
+   * - ``EfficiencyCorrectionTypes``
+     - ``std::vector<int>``
+     - ``{SFRecoHadTau, SFJetIDHadTau}``
+     - ``std::vector<int>({SFEleIDHadTau, SFEleIDElectron, SFTriggerHadTau, SFDecayModeHadTau})``
+
+   * - ``JetIDLevel``
+     - ``int``
+     - ``JETIDNONE``
+     - ``JETIDRNNLOOSE``, ``JETIDRNNMEDIUM``, ``JETIDRNNTIGHT``
+
+   * - ``EleIDLevel``
+     - ``int``
+     - ``ELEIDNONE``
+     - ``ELEIDRNNLOOSE``, ``ELEIDRNNMEDIUM``
+   
+   * - ``TriggerName``
+     - ``std::string``
+     - ``""``
+     - ``"HLT_tau25_mediumRNN_tracktwoMVA"``, ``"HLT_tau35_mediumRNN_tracktwoMVA"``,``"HLT_tau40_mediumRNN_tracktwoMVA"``,``"HLT_tau60_mediumRNN_tracktwoMVA"``,``"HLT_tau80_mediumRNN_tracktwoMVA"``,``"HLT_tau160_mediumRNN_tracktwoMVA"``,``"HLT_tau80L1TAU60_medium1_tracktwoEF"``,``HLT_tau35_medium1_tracktwoEF"``,``"HLT_tau25_medium1_tracktwoEF"``,``"HLT_tau160L1TAU100_medium1_tracktwoEF"``,``HLT_tau80L1TAU60_medium1_tracktwo"``,``HLT_tau50L1TAU12_medium1_tracktwo"``,``"HLT_tau35_medium1_tracktwo"``,``HLT_tau25_medium1_tracktwo"``,``HLT_tau160_medium1_tracktwo"``
+
+   * - ``TriggerSFMeasurement``
+     - ``std::string``
+     - ``"combined"``
+     - ``""``
+
 In addition the following properties are available for further configurations:
      
 .. list-table::
@@ -139,52 +182,22 @@ In addition the following properties are available for further configurations:
    * - property name
      - type
      - default value
-     
-   * - ``PileupReweightingTool``
-     - ``ToolHandle<CP::PileupReweightingTool>``
-     - empty
-
-   * - ``MCCampaign``
-     - ``std::string``
-     - ``""``
 
    * - ``InputFilePathRecoHadTau``
      - ``std::string``
-     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/Reco_TrueHadTau_2019-summer_v2.root"``
+     - ``""``  
 
    * - ``InputFilePathJetIDHadTau``
      - ``std::string``
-     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/RNNID_TrueHadTau_2022-prerecommendation_v2.root"``
+     - ``""``  
 
    * - ``InputFilePathEleIDHadTau``
      - ``std::string``
-     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EfficiencyCorrections/EleOLR_TrueHadTau_2016-ichep.root"``
+     - ``""``  
 
-    * - ``InputFilePathEleIDElectron``
+   * - ``InputFilePathEleIDElectron``
      - ``std::string``
-     - ``"TauAnalysisTools/"+ <SharedFilesVersion> +"EleRNN_TrueElectron_2022-mc20-prerec-v2.root"``   
-  
-   * - ``VarNameRecoHadTau``
-     - ``std::string``
-     - ``"TauScaleFactorReconstructionHadTau"``
-
-   * - ``VarNameEleIDHadTau``
-     - ``std::string``
-     - ``"TauScaleFactorEleIDHadTau"``
-
-   * - ``VarNameEleIDElectron``
-     - ``std::string``
-     - ``"TauScaleFactorEleIDElectron"``
-
-   * - ``VarNameJetIDHadTau``
-     - ``std::string``
-     - ``"TauScaleFactorJetIDHadTau"``
-
-   * - ``VarNameTriggerHadTau``
-     - ``std::string``
-     - ``"TauScaleFactorTriggerHadTau"``
-
-
+     - ``""``  
 
 Details
 =======
@@ -234,7 +247,7 @@ Jet ID scale factors are provided for a couple of working points:
 
 These can be accessed, for example via::
 
-  TauEffTool.setProperty("IDLevel", (int)JETIDRNNLOOSE);
+  TauEffTool.setProperty("IDLevel", static_cast<int>(JETIDRNNLOOSE));
 
 SFEleIDElectron
 ----------------
@@ -260,7 +273,7 @@ points:
 
 These can be accessed, for example via::
 
-  TauEffTool.setProperty("EleIDLevel", (int)ELEIDRNNLOOSE);
+  TauEffTool.setProperty("EleIDLevel", static_cast<int>(ELEIDRNNLOOSE));
 
 ---
 FAQ
@@ -300,7 +313,7 @@ FAQ
      TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffTool( "TauEfficiencyCorrectionsTool" );
 
      // set the IDLevel property to the loose working point
-     TauEffTool.setProperty("IDLevel",(int)JETIDRNNLOOSE)
+     TauEffTool.setProperty("IDLevel",static_cast<int>(JETIDRNNLOOSE))
 
      // initialize the tool
      TauEffTool.initialize();

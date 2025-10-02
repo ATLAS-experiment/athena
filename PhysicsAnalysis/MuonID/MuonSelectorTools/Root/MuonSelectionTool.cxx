@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSelectorTools/MuonSelectionTool.h"
@@ -19,6 +19,7 @@ namespace {
         // a reordering could be considered for a rel. 22 retuning, which can then easily be achieved by
         // swapping around the elements in the below initialization.
         using ChIdx = Muon::MuonStationIndex::ChIndex;
+        using namespace Muon::MuonStationIndex;
         const std::vector<ChIdx> orderedChIndices{
             ChIdx::CSS, ChIdx::CSL, ChIdx::BIS, ChIdx::BIL,
             ChIdx::BMS, ChIdx::BML, ChIdx::BOS, ChIdx::BOL,
@@ -31,7 +32,7 @@ namespace {
         std::vector<int> chamberIndexOrder(orderedChIndices.size());
 
         for (unsigned int i = 0; i < orderedChIndices.size(); i++) {
-            chamberIndexOrder[static_cast<int>(orderedChIndices[i])] = i;
+            chamberIndexOrder[toInt(orderedChIndices[i])] = i;
         }
         return chamberIndexOrder;
     }
@@ -39,8 +40,8 @@ namespace {
     // This is the comparison function for the sorting of segments according to the chamber index
     bool chamberIndexCompare(const xAOD::MuonSegment* first, const xAOD::MuonSegment* second) {
         static const std::vector<int> chamberIndexOrder = initializeChamberIdxOrder();
-        return (chamberIndexOrder[static_cast<int>(first->chamberIndex())] < 
-                chamberIndexOrder[static_cast<int>(second->chamberIndex())]);
+        return (chamberIndexOrder[toInt(first->chamberIndex())] < 
+                chamberIndexOrder[toInt(second->chamberIndex())]);
     }
 
     static const SG::AuxElement::Accessor<float> mePt_acc("MuonSpectrometerPt");
@@ -52,7 +53,11 @@ namespace {
 
 namespace CP {
 
-    MuonSelectionTool::MuonSelectionTool(const std::string& tool_name) : asg::AsgTool(tool_name), m_acceptInfo("MuonSelection"){}
+    MuonSelectionTool::MuonSelectionTool(const std::string& tool_name) : asg::AsgTool(tool_name), m_acceptInfo("MuonSelection"){
+
+        if (!m_calculateTightNNScore) m_onnxTool.setTypeAndName("");
+
+    }
 
     MuonSelectionTool::~MuonSelectionTool() = default;
 
@@ -61,7 +66,7 @@ namespace CP {
         // Greet the user:
         ATH_MSG_INFO("Initialising...");
         
-        m_geoOnTheFly ? ATH_MSG_INFO("Is Run-3 geometry: On-the-fly determination") 
+        m_geoOnTheFly ? ATH_MSG_INFO("Is Run-3 geometry: On-the-fly determination. THIS OPTION IS DEPRECATED AND WILL BE REMOVED SOON. Use IsRun3Geo property instead.") 
                       : ATH_MSG_INFO("Is Run-3 geometry: " << m_isRun3.value());
         ATH_MSG_INFO("Maximum muon |eta|: " << m_maxEta.value());
         ATH_MSG_INFO("Muon quality: "<< m_quality.value());
@@ -219,8 +224,23 @@ namespace CP {
                 m_reader_MUTAGIMO_etaBin3 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin3, true);
             }
         }
-        ATH_CHECK(m_eventInfo.initialize());
+        
+        ATH_MSG_INFO("TightNNScore calculation is " << (m_calculateTightNNScore ? "enabled." : "disabled."));
 
+        if (m_calculateTightNNScore) {
+            if (m_onnxTool.empty()) {
+                ATH_MSG_ERROR("Cannot calculate TightNNScore: ONNX tool not configured! "
+                            "Please set the ORTInferenceTool property to a valid AthOnnx::OnnxRuntimeInferenceTool instance.");
+                return StatusCode::FAILURE;
+            }
+
+            ATH_MSG_INFO("Retrieving ONNX tool: " << m_onnxTool.name());
+            ATH_CHECK(m_onnxTool.retrieve());
+        } else ATH_MSG_INFO("ONNX tool not configured — skipping retrieval.");
+
+        ATH_MSG_INFO("Finished ONNX tool setup");
+        
+        ATH_CHECK(m_eventInfo.initialize());
         // Return gracefully:
         return StatusCode::SUCCESS;
     }
@@ -838,8 +858,9 @@ namespace CP {
         if (mu.author() == xAOD::Muon::MuTagIMO && muonSegments.size() == 0)
             ATH_MSG_WARNING("passedLowPtEfficiencyMVACut - found segment-tagged muon with no segments!");
 
-        seg1ChamberIdx = (!muonSegments.empty()) ? muonSegments[0]->chamberIndex() : -9;
-        seg2ChamberIdx = (muonSegments.size() > 1) ? muonSegments[1]->chamberIndex() : -9;
+        using namespace Muon::MuonStationIndex;
+        seg1ChamberIdx = (!muonSegments.empty())   ? toInt(muonSegments[0]->chamberIndex()) : -9;
+        seg2ChamberIdx = (muonSegments.size() > 1) ? toInt(muonSegments[1]->chamberIndex()) : -9;
 
         // these variables are only used for MuTagIMO
         if (mu.author() == xAOD::Muon::MuTagIMO) {
@@ -854,7 +875,11 @@ namespace CP {
 
         // get event number from event info
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
-
+	//overwrite event number
+	unsigned long long eventNumber = 0;
+        if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
+        else eventNumber = eventInfo->eventNumber();
+	
         // variables for the BDT
         std::vector<float> var_vector;
         if (mu.author() == xAOD::Muon::MuidCo || mu.author() == xAOD::Muon::MuGirl) {
@@ -871,7 +896,7 @@ namespace CP {
 
         // use different trainings for even/odd numbered events
         TMVA::Reader *reader_MUID, *reader_MUGIRL;
-        if (eventInfo->eventNumber() % 2 == 1) {
+        if (eventNumber % 2 == 1) {
             reader_MUID = m_readerE_MUID.get();
             reader_MUGIRL = m_readerE_MUGIRL.get();
         } else {
@@ -982,10 +1007,10 @@ namespace CP {
 
             //::: BIS78
             if (isBIS78(etaMS, phiMS)) {
-                if (!isRun3() || !(m_developMode && m_useBEEBISInHighPtRun3)) {
-		            ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
+                if (!isRun3() || !m_useBEEBISInHighPtRun3) {
+                    ATH_MSG_VERBOSE("Muon is in BIS7/8 eta/phi region - fail high-pT");
                     return false;
-	    	    }	
+                }	
             }
             
             //// tentatively removed for r22, to be rechecked
@@ -1000,7 +1025,7 @@ namespace CP {
             //::: BEE
             if (isBEE(etaMS, phiMS)) {
                 // in Run3, large mis-alignment on the BEE chamber was found. temporarily mask the BEE region
-                if (isRun3() && !(m_developMode && m_useBEEBISInHighPtRun3)) {
+                if (isRun3() && !m_useBEEBISInHighPtRun3) {
                     ATH_MSG_VERBOSE("Muon is in BEE eta/phi region - fail high-pT");
                     return false;
                 }
@@ -1299,6 +1324,7 @@ namespace CP {
         // fakes rejection as function of pT in Z->mumu MC
 
         // Extract the relevant score variable (NN discriminant)
+       
         float CaloMuonScore{-999.0};
         retrieveParam(mu, CaloMuonScore, xAOD::Muon::CaloMuonScore);
         
@@ -1529,11 +1555,15 @@ namespace CP {
         static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
 
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
+	//overwrite run number
+        unsigned int runNumber = 0;
+        if(m_expertMode_RunNumber.value()!=0) runNumber=m_expertMode_RunNumber.value();
+        else runNumber = eventInfo->runNumber();
 
         // Case of data
         if (!eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
             ATH_MSG_DEBUG("The current event is a data event. Return runNumber.");
-            return eventInfo->runNumber();
+            return runNumber;
         }
  
         // Case of MC 
@@ -1551,27 +1581,27 @@ namespace CP {
 
         // otherwise return a dummy run number
         if (needOnlyCorrectYear) {
-            if (eventInfo->runNumber() < 300000) {        // mc16a (2016): 284500
+            if (runNumber < 300000) {        // mc16a (2016): 284500
                 ATH_MSG_DEBUG("Random run number not available and this is mc16a or mc20a, returning dummy 2016 run number.");
                 return 311071;
                     
-            } else if (eventInfo->runNumber() < 310000) { // mc16d (2017): 300000
+            } else if (runNumber < 310000) { // mc16d (2017): 300000
                 ATH_MSG_DEBUG("Random run number not available and this is mc16d or mc20d, returning dummy 2017 run number.");
                 return 340072;
                     
-            } else if (eventInfo->runNumber() < 320000) { // mc16e (2018): 310000
+            } else if (runNumber < 320000) { // mc16e (2018): 310000
                 ATH_MSG_DEBUG("Random run number not available and this is mc16e or mc20e, returning dummy 2018 run number.");
                 return 351359;
 
-            } else if (eventInfo->runNumber() < 500000) { //mc21: 330000, mc23a: 410000, mc23c: 450000
+            } else if (runNumber < 600000) { //mc21: 330000, mc23a: 410000, mc23c: 450000
                 ATH_MSG_DEBUG("Random run number not available and this is mc21/mc23, for the time being we're returing a dummy run number.");
                 return 399999;
             } else {
-                ATH_MSG_DEBUG("Detected some run 4 / phase II runnumber "<<eventInfo->runNumber()<<". ");
+                ATH_MSG_DEBUG("Detected some run 4 / phase II runnumber "<<runNumber<<". ");
                 return 666666;
             }
 
-            ATH_MSG_FATAL("Random run number not available, fallback option of using runNumber failed since "<<eventInfo->runNumber()<<" cannot be recognised");
+            ATH_MSG_FATAL("Random run number not available, fallback option of using runNumber failed since "<<runNumber<<" cannot be recognised");
             throw std::runtime_error("MuonSelectionTool() - need RandomRunNumber decoration by the PileupReweightingTool");
         }
 
@@ -1629,6 +1659,153 @@ namespace CP {
         }
 
         return false;
+    }
+
+    float MuonSelectionTool::getTightNNScore(const xAOD::Muon& mu) const {
+        if (!m_calculateTightNNScore)
+        {
+            ATH_MSG_ERROR("TightNNScore calculation is disabled. Please set the property CalculateTightNNScore to true.");
+            throw std::runtime_error("cannot calculate TightNNScore");  
+        }
+        //this score currently only can be calculated for combined muons
+        if (mu.muonType() != xAOD::Muon::Combined) return -999;
+        const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+            const xAOD::TrackParticle* metrack = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+        if(!idtrack || !metrack) return -999;
+        //the score is only calculated for muons which pass the Medium WP
+        if (getQuality(mu) > xAOD::Muon::Medium) return -999;
+        //only muons with pt > 4 GeV and |eta|<2.5 are considered
+        if (std::abs(mu.eta())>2.5) return -999;
+        if(mu.pt()<4000.) return -999;
+
+        std::vector<float> input_features;
+        // 1. Fill input features
+        int mu_author=mu.author();
+        float mu_rhoPrime=rhoPrime(mu);
+        float mu_scatteringCurvatureSignificance=0.;
+        retrieveParam(mu, mu_scatteringCurvatureSignificance, xAOD::Muon::scatteringCurvatureSignificance);
+        float mu_scatteringNeighbourSignificance=0.;
+        retrieveParam(mu, mu_scatteringNeighbourSignificance, xAOD::Muon::scatteringNeighbourSignificance);
+        float mu_momentumBalanceSignificance=0.;
+        retrieveParam(mu, mu_momentumBalanceSignificance, xAOD::Muon::momentumBalanceSignificance);
+        float mu_qOverPSignificance=qOverPsignificance(mu);
+        float mu_reducedChi2=mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
+        float mu_reducedChi2_ID=idtrack->chiSquared() / idtrack->numberDoF();
+        float mu_reducedChi2_ME=metrack->chiSquared() / metrack->numberDoF();
+        float mu_spectrometerFieldIntegral=0.;
+        retrieveParam(mu, mu_spectrometerFieldIntegral, xAOD::Muon::spectrometerFieldIntegral);
+        float mu_segmentDeltaEta=0;
+        retrieveParam(mu, mu_segmentDeltaEta, xAOD::Muon::segmentDeltaEta);
+        uint8_t mu_numberOfPixelHits=0;
+        retrieveSummaryValue(mu, mu_numberOfPixelHits, xAOD::SummaryType::numberOfPixelHits);
+        uint8_t mu_numberOfPixelDeadSensors=0;
+        retrieveSummaryValue(mu, mu_numberOfPixelDeadSensors, xAOD::SummaryType::numberOfPixelDeadSensors);
+        uint8_t mu_innerLargeHits=0;
+        retrieveSummaryValue(mu, mu_innerLargeHits, xAOD::MuonSummaryType::innerLargeHits);
+        uint8_t mu_innerSmallHits=0;
+        retrieveSummaryValue(mu, mu_innerSmallHits, xAOD::MuonSummaryType::innerSmallHits);
+        uint8_t mu_middleLargeHits=0;
+        retrieveSummaryValue(mu, mu_middleLargeHits, xAOD::MuonSummaryType::middleLargeHits);
+        uint8_t mu_middleSmallHits=0;
+        retrieveSummaryValue(mu, mu_middleSmallHits, xAOD::MuonSummaryType::middleSmallHits);
+        uint8_t mu_outerLargeHits=0;
+        retrieveSummaryValue(mu, mu_outerLargeHits, xAOD::MuonSummaryType::outerLargeHits);
+        uint8_t mu_outerSmallHits=0;
+        retrieveSummaryValue(mu, mu_outerSmallHits, xAOD::MuonSummaryType::outerSmallHits);
+
+        if(!isRun3())
+        {
+            input_features =     {(float)mu_author,
+                                mu_rhoPrime,
+                                mu_scatteringCurvatureSignificance,
+                                mu_scatteringNeighbourSignificance,
+                                mu_momentumBalanceSignificance,
+                                mu_qOverPSignificance,
+                                mu_reducedChi2,
+                                mu_reducedChi2_ID,
+                                mu_reducedChi2_ME,
+                                mu_spectrometerFieldIntegral,
+                                mu_segmentDeltaEta,
+                                (float)mu_numberOfPixelHits,
+                                (float)mu_numberOfPixelDeadSensors,
+                                (float)mu_innerLargeHits,
+                                (float)mu_innerSmallHits,
+                                (float)mu_middleLargeHits,
+                                (float)mu_middleSmallHits,
+                                (float)mu_outerLargeHits,
+                                (float)mu_outerSmallHits};
+        }
+        else
+        {
+            uint8_t mu_phiLayer1STGCHits=0;
+            retrieveSummaryValue(mu, mu_phiLayer1STGCHits, xAOD::MuonSummaryType::phiLayer1STGCHits);
+            uint8_t mu_phiLayer2STGCHits=0;
+            retrieveSummaryValue(mu, mu_phiLayer2STGCHits, xAOD::MuonSummaryType::phiLayer2STGCHits);
+            uint8_t mu_etaLayer1STGCHits=0;
+            retrieveSummaryValue(mu, mu_etaLayer1STGCHits, xAOD::MuonSummaryType::etaLayer1STGCHits);
+            uint8_t mu_etaLayer2STGCHits=0;
+            retrieveSummaryValue(mu, mu_etaLayer2STGCHits, xAOD::MuonSummaryType::etaLayer2STGCHits);
+            uint8_t mu_MMHits=0;
+            retrieveSummaryValue(mu, mu_MMHits, xAOD::MuonSummaryType::MMHits);
+            input_features =     {(float)mu_author,
+                                mu_rhoPrime,
+                                mu_scatteringCurvatureSignificance,
+                                mu_scatteringNeighbourSignificance,
+                                mu_momentumBalanceSignificance,
+                                mu_qOverPSignificance,
+                                mu_reducedChi2,
+                                mu_reducedChi2_ID,
+                                mu_reducedChi2_ME,
+                                mu_spectrometerFieldIntegral,
+                                mu_segmentDeltaEta,
+                                (float)mu_numberOfPixelHits,
+                                (float)mu_numberOfPixelDeadSensors,
+                                (float)mu_innerLargeHits,
+                                (float)mu_innerSmallHits,
+                                (float)mu_middleLargeHits,
+                                (float)mu_middleSmallHits,
+                                (float)mu_outerLargeHits,
+                                (float)mu_outerSmallHits,
+                                (float)mu_phiLayer1STGCHits,
+                                (float)mu_phiLayer2STGCHits,
+                                (float)mu_etaLayer1STGCHits,
+                                (float)mu_etaLayer2STGCHits,
+                                (float)mu_MMHits};
+        }
+
+        float score=-999.;
+        std::vector<int64_t> inputShape = {1, static_cast<int64_t>(input_features.size())};
+
+        AthInfer::InputDataMap inputData;
+        inputData["flatten_input"] = std::make_pair(
+            inputShape, std::move(input_features)
+        );
+
+        AthInfer::OutputDataMap outputData;
+        outputData["TightNNScore"] = std::make_pair(
+            std::vector<int64_t>{1, 1}, std::vector<float>{}
+        );
+
+        if (!m_onnxTool->inference(inputData, outputData).isSuccess()) {
+            ATH_MSG_WARNING("ONNX inference failed!");
+            return -999.;
+        }
+        const auto& variant = outputData["TightNNScore"].second;
+        if (std::holds_alternative<std::vector<float>>(variant)) {
+            const auto& vec = std::get<std::vector<float>>(variant);
+            if (!vec.empty()) score = vec[0];
+            else {
+                ATH_MSG_WARNING("ONNX output vector is empty!");
+                return -999.;
+            }
+        } else {
+            ATH_MSG_WARNING("ONNX output is not a float vector!");
+            return -999.;
+        }
+        
+        ATH_MSG_DEBUG("TightNNScore for muon with pT " << mu.pt() << " GeV, eta " << mu.eta() << " is " << score);
+
+        return score;
     }
 
 }  // namespace CP

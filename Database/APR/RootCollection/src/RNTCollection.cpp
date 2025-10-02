@@ -7,7 +7,6 @@
 #include "CollectionCommon.h"
 
 #include "PersistentDataModel/Token.h"
-#include "POOLCore/Exception.h"
 #include "RootUtils/APRDefaults.h"
 
 #include "CollectionBase/ICollectionColumn.h"
@@ -16,7 +15,6 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IFileMgr.h"
-#include "GaudiKernel/IService.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
@@ -31,24 +29,18 @@
 #include "ROOT/RNTupleWriter.hxx"
 #include "ROOT/RNTupleWriteOptions.hxx"
 
+#include <exception>
 #include <map>
-#include <vector>
-#include <ctype.h>
-
-#include <iostream>
 
 using namespace std;
 using namespace pool::RootCollection;
 using namespace pool::CollectionBaseNames;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   using REntry = ROOT::REntry;
-   using RFieldBase = ROOT::RFieldBase;
-   using RNTupleWriteOptions = ROOT::RNTupleWriteOptions;
-#else
-   using REntry = ROOT::Experimental::REntry;
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
+namespace ROOT {
    using RFieldBase = ROOT::Experimental::RFieldBase;
    using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
+}
 #endif
 
 RNTCollection::RNTCollection(
@@ -86,19 +78,17 @@ void  RNTCollection::delayedFileOpen( const std::string& method )
    if( m_open && !m_file && m_session && m_mode != ICollection::READ ) {
       m_file = TFile::Open(m_fileName.c_str(), poolOptToRootOpt[m_mode] );
       if(!m_file || m_file->IsZombie()) {
-         throw pool::Exception( string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName,
-                                std::string("RNTCollection::") + method,
-                                "RNTCollection" );
+         throw std::runtime_error( string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RNTCollection::" + method +" \" from \" RNTCollection \")");
       }
       m_poolOut << coral::Info << "File " << m_fileName << " opened in " << method <<  coral::MessageStream::endmsg;
 // (Write Schema)
    }
 }
 
-std::unique_ptr< RNTupleReader > RNTCollection::getCollectionRNTuple()
+std::unique_ptr< ROOT::RNTupleReader > RNTCollection::getCollectionRNTuple()
 {
    if( m_file ) {
-      auto reader = RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
+      auto reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
       if( reader )
          m_poolOut << coral::Debug << "Retrieved Collection RNTuple  \""
                    << reader->GetDescriptor().GetName() << "\" from file " << m_fileName
@@ -112,7 +102,7 @@ std::unique_ptr< RNTupleReader > RNTCollection::getCollectionRNTuple()
 void RNTCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
 {
    if( m_mode == pool::ICollection::READ ) {
-      throw pool::Exception( "Cannot modify data of a collection in READ open mode.", "RNTCollection::insertRow", MODULE_NAME );
+      throw std::runtime_error( std::string("Cannot modify data of a collection in READ open mode.") + " (APR: \" RNTCollection::insertRow \" from \" RNTCollection \")");
    }
    // MN: TODO: migrate to a const REntry API once ROOT delivers it.
    auto entry = m_rntupleWriter->GetModel().CreateBareEntry();
@@ -128,7 +118,7 @@ void RNTCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
    }
    auto wbytes = m_rntupleWriter->Fill(*entry);
    if( wbytes <= 0 )
-      throw pool::Exception( "Fill() failed", "RNTCollection::insertRow", MODULE_NAME );
+      throw std::runtime_error( std::string("Fill() failed.") + " (APR: \" RNTCollection::insertRow \" from \" RNTCollection \")");
 }
 
 
@@ -213,9 +203,7 @@ void RNTCollection::open()  try
       if( m_mode == ICollection::CREATE ){
          string fid = retrieveFID();
          if(fid!="")
-            throw pool::Exception( "Cannot CREATE already registered collections",
-                                   "RNTCollection::open", 
-                                   "RNTCollection");
+            throw std::runtime_error( std::string("Cannot CREATE already registered collections") + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
          else{
             m_fileName = retrievePFN();
             FileCatalog::FileID dummy;
@@ -243,9 +231,7 @@ void RNTCollection::open()  try
          if(fid!="")
             m_fileName = retrieveUniquePFN(fid);
          else
-            throw pool::Exception( "Cannot UPDATE non registered collections",
-                                   "RNTCollection::open", 
-                                   "RNTCollection");
+            throw std::runtime_error( std::string("Cannot CREATE non registered collections") + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
       }
 
       else if(m_mode == ICollection::READ) {
@@ -256,9 +242,7 @@ void RNTCollection::open()  try
             m_fileCatalog->getFirstPFN(fid, dummy, dummy);
             m_fileCatalog->commit();
          }else
-            throw pool::Exception( "Cannot READ non registered collections",
-                                   "RNTCollection::open", 
-                                   "RNTCollection");
+            throw std::runtime_error( std::string("Cannot READ non registered collections") + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
       }
    }
 
@@ -320,10 +304,7 @@ void RNTCollection::open()  try
          }
       }
       if (!m_file || m_file->IsZombie()) {
-         throw pool::Exception(string("ROOT cannot \"") +
-                               poolOptToRootOpt[m_mode] + "\" file " +
-                               m_fileName,
-                               "RNTCollection::open", "RNTCollection");
+         throw std::runtime_error(  string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
       }
       m_poolOut << coral::Info << "File " << m_fileName << " opened"
                 << coral::MessageStream::endmsg;
@@ -343,16 +324,14 @@ void RNTCollection::open()  try
          if (n == 0)
             delete m_file;
          m_file = 0;
-         throw pool::Exception(
-            string("RNTuple Collection not found in file ") + m_fileName,
-            "RNTCollection::open", "RNTCollection");
+         throw std::runtime_error(  string("RNTuple Collection not found in file ") + m_fileName + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
       }
       // Read Schema 
       CollectionDescription desc( m_description.name(),
                                   m_description.type(),
                                   m_description.connection() );
       // clear the description
-      m_description = desc;
+      m_description = std::move(desc);
       bool      foundToken = false;
    
       const auto& rntdesc = m_reader->GetDescriptor();
@@ -383,9 +362,7 @@ void RNTCollection::open()  try
    
          if( (field_name == defaultEventReferenceColumnName || field_name == m_description.eventReferenceColumnName())
              and foundToken ) {
-            throw pool::Exception( "can't reconstruct Description if more than one Token column",
-                                   "pool::RNTCollection::readSchema",
-                                   "RNTCollection" );
+           throw std::runtime_error(  "can't reconstruct Description if more than one Token column (APR: \" RNTCollection::open \" from \" RNTCollection \")");
          }
          if( field_name ==  m_description.eventReferenceColumnName() ) {
             foundToken = true;
@@ -412,7 +389,7 @@ void RNTCollection::open()  try
          m_file->Delete( (rntupleName+";*").c_str() );
       }
       // (Create Schema)
-      auto model { RNTupleModel::Create() };
+      auto model { ROOT::RNTupleModel::Create() };
       model->SetDescription( rntupleName );
       for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
          std::string columnName = m_description.tokenColumn(col_id).name();
@@ -423,11 +400,11 @@ void RNTCollection::open()  try
          addField( model.get(), column.name(), column.type() );
       }
 
-      RNTupleWriteOptions opts;
+      ROOT::RNTupleWriteOptions opts;
       opts.SetCompression( m_file->GetCompressionSettings() );
       opts.SetUseBufferedWrite( true );
       // MN: TODO : add support for OVERWRITE?
-      m_rntupleWriter = RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
+      m_rntupleWriter = ROOT::RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
 
       m_poolOut << coral::Debug
                 << "Created RNTCollection, collection file will be "
@@ -463,12 +440,12 @@ void RNTCollection::open()  try
 }
 
 
-void RNTCollection::addField(RNTupleModel* model, const std::string& field_name, const std::string& field_type)
+void RNTCollection::addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type)
 {
    m_poolOut << coral::Debug << "Adding new column: name=" << field_name
              << " of type " << field_type << corENDL;
    const std::string actual_type = (field_type == tokenTypeName? "std::string" : field_type);
-   auto field = RFieldBase::Create(field_name, actual_type).Unwrap();
+   auto field = ROOT::RFieldBase::Create(field_name, actual_type).Unwrap();
    model->AddField( std::move(field) );
 }
 
@@ -496,9 +473,7 @@ bool RNTCollection::fileCatalogRequired() const
 string RNTCollection::retrievePFN() const
 {
    if (m_name.substr (0, 4) != "PFN:")
-      throw pool::Exception( "In CREATE mode a PFN has to be provided",
-                             "RNTCollection::open", 
-                             "RNTCollection");
+      throw std::runtime_error(  "In CREATE mode a PFN has to be provided (APR: \" RNTCollection::open \" from \" RNTCollection \")");
    return m_name.substr(4,string::npos);
 }
 
@@ -523,9 +498,7 @@ string  RNTCollection::retrieveFID()
    else if (m_name.substr (0, 4) == "FID:") {
       fid = m_name.substr(4,string::npos);
    }else
-      throw pool::Exception( "A FID, PFN or and LFN has to be provided",
-                             "RNTCollection::retrieveFID", 
-                             "RNTCollection");
+      throw std::runtime_error(  "A FID, PFN or and LFN has to be provided (APR: \" RNTCollection::retrieveFID \" from \" RNTCollection \")");
    return fid;
 }
 
@@ -537,13 +510,9 @@ string RNTCollection::retrieveUniquePFN(const FileCatalog::FileID& fid)
    m_fileCatalog->getPFNs(fid, pfns);
    m_fileCatalog->commit();
    if( pfns.empty() )
-      throw pool::Exception( "This exception should never have been thrown, please send a bug report",
-                             "RNTCollection::retrieveUniquePFN", 
-                             "RNTCollection"); 
+      throw std::runtime_error(  "This exception should never have been thrown, please send a bug report (APR: \" RNTCollection::retrieveUniquePFN \" from \" RNTCollection \")");
    if( pfns.size() > 1 )
-      throw pool::Exception( "Cannot UPDATE or CREATE_AND_OVERWRITE since there are replicas",
-                             "RNTCollection::retrieveUniquePFN", 
-                             "RNTCollection");
+      throw std::runtime_error(  "Cannot UPDATE or CREATE_AND_OVERWRITE since there are replicas (APR: \" RNTCollection::retrieveUniquePFN \" from \" RNTCollection \")");
    return pfns[0].first;
 }
 
@@ -557,7 +526,7 @@ const pool::ICollectionDescription& RNTCollection::description() const
 pool::ICollectionQuery* RNTCollection::newQuery()
 {
    if( !isOpen() ) {
-      throw pool::Exception( "Attempt to query a closed collection.", "RNTCollection::newQuery", "RNTCollection" );
+      throw std::runtime_error(  "Attempt to query a closed collection. (APR: \" RNTCollection::newQuery \" from \" RNTCollection \")");
    }
    return new RNTCollectionQuery( m_description, m_reader.get() );
 }

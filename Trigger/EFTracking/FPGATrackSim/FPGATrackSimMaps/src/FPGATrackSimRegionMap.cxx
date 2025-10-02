@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimRegionMap.h
@@ -26,9 +26,22 @@ using namespace asg::msgUserCode;
 ///////////////////////////////////////////////////////////////////////////////
 
 
-FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath ) :
-    m_pmaps(pmaps)
+FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath, bool inclusive ) :
+    m_pmaps(pmaps),
+    m_inclusive(inclusive)
 {
+    // If the region map is loaded in "inclusive" mode, don't actually do anything.
+    if (m_inclusive) {
+        ANA_MSG_INFO("Region map set to inclusive mode; will always treat hits as being in region");
+        m_map.clear();
+        m_radii_map.clear();
+        // In inclusive mode assume there is one region.
+        m_nregions = 1;
+        m_map.resize(m_nregions);
+        m_radii_map.resize(m_nregions, std::vector<double>(m_pmaps.at(0)->getNLogiLayers()));
+        return;
+    }
+
     // Open the file
     ifstream fin(filepath);
     if (!fin.is_open())
@@ -45,7 +58,12 @@ FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::unique_ptr<F
     for (int region = 0; region < m_nregions; region++){
         readRegion(fin, region);
     }
+
+    // Resize the radius structure  appropriately.
+    m_radii_map.clear();
+    m_radii_map.resize(m_nregions, std::vector<double>(m_pmaps.at(0)->getNLogiLayers()));
 }
+
 // Reads the header of the file to resize all the vector members
 void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
 {
@@ -154,12 +172,11 @@ void FPGATrackSimRegionMap::loadModuleIDLUT(std::string const & filepath)
 }
 
 // Copied from the 1D Hough bitstream tool.
-void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
+void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath, unsigned layer_offset = 0, unsigned layer_max = 0)
 {
 
-    // Resize the radius structure  appropriately.
-    m_radii_map.clear();
-    m_radii_map.resize(m_nregions, std::vector<double>(m_pmaps.at(0)->getNLogiLayers()));
+    // If layer_max is 0, then set it equal to the number of layers in the configured plane map, minus the offset.
+    layer_max = (layer_max == 0) ? m_pmaps.at(0)->getNLogiLayers() - layer_offset: layer_max - layer_offset;
 
     // Open the file
     std::ifstream fin(filepath);
@@ -194,17 +211,20 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
             continue;
         }
 
-        for (unsigned layer = 0; layer < m_pmaps.at(0)->getNLogiLayers(); layer++) {
+        // Read up to layer_max layers out of the radii file. This is set by the mapping service when loading these files.
+        for (unsigned layer = 0; layer < layer_max; layer++) {
             ok = ok && (sline >> r);
             if (!ok) break;
+            unsigned eff_layer = layer + layer_offset;
+            ANA_MSG_DEBUG("Reading average radius at effective (actual) layer = " << eff_layer << " (" << layer << ") = " << r);
             if (r<=0) {
-                ANA_MSG_WARNING("Radius in radiiFile is "<< r <<" for layer: " << layer << " setting to dummy value!");
+                ANA_MSG_WARNING("Radius in radiiFile is "<< r <<" for layer: " << eff_layer << " setting to dummy value!");
                 r = 500.0; // dummy value that won't cause a crash, but won't work anywhere.
             }
             if (subregion == -1) {
-                m_radii_map[0][layer] = r;
+                m_radii_map[0][eff_layer] = r;
             } else {
-                m_radii_map[subregion][layer] = r;
+                m_radii_map[subregion][eff_layer] = r;
             }
         }
 
@@ -224,6 +244,9 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
 
 bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &hit) const
 {
+    // In inclusive mode, always return true.
+    if (m_inclusive) return true;
+
     // Always assume that the hit's "layer" might not correspond to what's in the pmap
     // Also, to avoid confusion and double-counting, by convention, always use the coordinates of the inner hit
     // when testing if a spacepoint is in a (sub)region.
@@ -236,7 +259,8 @@ bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &h
     } else {
         ls = m_pmaps.at(region)->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     }
-    layer = ls.layer;
+    if (ls.layer<0) return false;
+    layer = static_cast<uint32_t>(ls.layer); //explicit cast to unsigned
     section = ls.section;
 
     int etamod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedEtaModule() : hit.getEtaModule();
@@ -247,6 +271,9 @@ bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &h
 
 bool FPGATrackSimRegionMap::isInRegion(uint32_t region, uint32_t layer, uint32_t section, int eta, int phi) const
 {
+    // In inclusive mode, always return true.
+    if (m_inclusive) return true;
+
     if (    region  >= m_map.size()
          || layer   >= m_map[region].size()
          || section >= m_map[region][layer].size() )

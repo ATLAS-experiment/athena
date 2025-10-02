@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Run this file in order to print out the empty slots
 
@@ -45,6 +45,7 @@ def defineMenu():
 
         ##
         # Combined lepton, new calo (for ATR-24182)
+        'L1_2eEM10L',  # prospective Run 4 L1 item, ATR-30180
         'L1_2eEM18', 'L1_2eEM18L', 'L1_2eEM18M', 'L1_2eEM24L', 'L1_3eEM12L', 'L1_eEM24L_3eEM12L',
         'L1_eEM18L_MU8F', 'L1_2eEM10L_MU8F',
         # ATR-27156
@@ -82,6 +83,9 @@ def defineMenu():
         'L1_MU8F_cTAU20M_jXE70',
         'L1_eTAU60_2cTAU20M_jXE80',
 
+         # ATR-31097
+        'L1_TeAsymmetry-jTENoSort',
+        'L1_TeATIME-jTENoSort',
 
         # ATR-28761 Phase1 combined em - jet
         'L1_eEM22M_3jJ50',
@@ -95,10 +99,7 @@ def defineMenu():
         'L1_BTAG-MU3VFjJ40_2jJ40p0ETA25',
         'L1_BTAG-MU3VFjJ40_2jJ40p0ETA25_jJ50p0ETA25',
 
-        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25',
-        'L1_BTAG-MU5VFjJ40_2jJ30p0ETA25_jJ50p0ETA25',
-        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25',
-        'L1_BTAG-MU5VFjJ40_2jJ40p0ETA25_jJ50p0ETA25',
+        'L1_BTAG-MU5VFjJ20_2jJ40p0ETA25_jJ50p0ETA25',
 
         #ATR-13743 J,XE thershold change for ATR-19376 
         'L1_MU8F_2jJ50','L1_MU8F_3jJ50', 'L1_MU8F_2jJ40_jJ50',
@@ -119,8 +120,7 @@ def defineMenu():
         'L1_jJ55', 'L1_jJ55p0ETA23', 'L1_jJ55p0ETA23_2jJ40p30ETA49', 
 
         'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY','L1_jJ60p30ETA49',  
-        'L1_jJ60p30ETA49_EMPTY', 'L1_jJ60p30ETA49_UNPAIRED_ISO', 'L1_jJ60p30ETA49_UNPAIRED_NONISO',
-
+        'L1_jJ60p30ETA49_EMPTY',
         'L1_jJ70p0ETA23', 
 
         'L1_jJ80', 
@@ -150,17 +150,17 @@ def defineMenu():
         'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ80',  
         #Kept as Phase-1 ATR-28761 
   
-        # jLJ
-        'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
 
         # jEM
-        'L1_jEM25', 'L1_jEM20M',   
+        'L1_jEM25', 'L1_jEM20M',
+        'L1_jEM35', # prospective Run 4 L1 item, ATR-30180
 
         # gJ
         'L1_gJ20p0ETA25', 'L1_gJ20p0ETA25_EMPTY', 'L1_gJ20p25ETA49', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25',
 
         # gLJ
         'L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25',
+        'L1_gLJ90p0ETA25', # prospective Run 4 L1 item, ATR-30180
 
         # LAr saturation
         'L1_LArSaturation',
@@ -171,7 +171,8 @@ def defineMenu():
         'L1_2jJ90_jXE80', 
         'L1_2jJ40_jXE110',
         'L1_3jJ40p0ETA25_jXE80',
-        
+
+        'L1_2jJ56p0ETA49', # prospective Run 4 L1 item, ATR-30180
         #ATR-29523
         'L1_3jJ40p0ETA25',
         # new calo
@@ -226,7 +227,7 @@ def defineMenu():
         'L1_MBTS_1_A', 'L1_MBTS_1_C',
         'L1_MBTS_1_A_EMPTY', 'L1_MBTS_1_C_EMPTY',
         # For VdM
-        'L1_MBTS_2_BGRP11', 'L1_MBTS_1_1_BGRP11', 
+        'L1_MBTS_2_BGRP11', 'L1_MBTS_1_1_BGRP11', 'L1_TRT_BGRP11',
 
         # extra MBTS 
         # TODO: to be removed for high-mu pp        
@@ -243,7 +244,6 @@ def defineMenu():
         'L1_JPSI-1M5-eEM9',
         'L1_JPSI-1M5-eEM15',
         'L1_BPH-0M9-eEM9-eEM7', 'L1_BPH-0M9-eEM9-eEM7_MU5VF', 'L1_BPH-0M9-eEM9-eEM7_2MU3V',
-        'L1_BPH-0DR3-eEM9jJ40', 'L1_BPH-0DR3-eEM9jJ40_MU5VF', 'L1_BPH-0DR3-eEM9jJ40_2MU3V',
         'L1_LLP-RO-eEM', 'L1_LLP-NOMATCH-eEM',
         #'L1_DPHI-2eEM5', 
         'L1_HT150-jJ50s5pETA32_jMJJ-400-CF',
@@ -253,6 +253,9 @@ def defineMenu():
         #ATR-30618
         'L1_ADVAET',
         'L1_ADVAEL',
+        #ATR-31154 - BDT AD with muons
+        'L1_ADBDTT',
+        'L1_ADBDTL',
 
         # tau 
         'L1_cTAU30M_2cTAU20M',
@@ -314,11 +317,6 @@ def defineMenu():
         'L1_BPH-7M14-2MU3V', 
         'L1_BPH-7M14-2MU3VF',
 
-        # INVM + DPHI 
-        'L1_jMJJ-400-NFF-0DPHI22',
-        'L1_jMJJ-400-NFF-0DPHI24',
-        'L1_jMJJ-400-NFF-0DPHI26',
-
         'L1_LATE-MU8F_jXE70', 'L1_LATE-MU8F_jJ90',
 
         # INVM + DR, TLA 
@@ -340,10 +338,6 @@ def defineMenu():
         'L1_DPHI-M70-2eEM12M', 'L1_DPHI-M70-2eEM15M', #ATR-19302
         'L1_DPHI-M70-2eEM9', 'L1_DPHI-M70-2eEM9L', # ATR-21637 (no or loose shower shape cuts)
                 
-        #ATR-17320
-        'L1_CEP-CjJ100',
-        'L1_CEP-CjJ90',
-        'L1_AFP_A_AND_C_TOF_CEP-CjJ100','L1_AFP_A_AND_C_TOF_T0T1_CEP-CjJ100',
 
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',

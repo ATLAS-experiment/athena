@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef LARG4H6SD_LArG4H6COLDTCMod0CalibCalculator_H
-#define LARG4H6SD_LArG4H6COLDTCMod0CalibCalculator_H
-
+#ifndef LARG4H6SD_LARG4H6COLDTCMOD0CALIBCALCULATOR_H
+#define LARG4H6SD_LARG4H6COLDTCMOD0CALIBCALCULATOR_H
 
 #include "LArG4Code/LArCalibCalculatorSvcImp.h"
 #include "LArG4Code/LArG4Identifier.h"
@@ -21,17 +20,15 @@ public:
 
   LArG4H6COLDTCMod0CalibCalculator(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override final;
-  virtual ~LArG4H6COLDTCMod0CalibCalculator();
+  virtual ~LArG4H6COLDTCMod0CalibCalculator() = default;
 
   virtual G4bool Process(const G4Step*, LArG4Identifier & identifier,
                          std::vector<G4double> & energies,
                          const LArG4::eCalculatorProcessing p = LArG4::kEnergyAndID) const override final;
 
 private:
-  ServiceHandle<ILArCalculatorSvc> m_Calculator; //LArG4H6COLDTCMod0Calculator
-
-  CaloG4::SimulationEnergies m_energyCalculator;
-
+  ServiceHandle<ILArCalculatorSvc> m_Calculator{this, "Calculator", "LArG4H6COLDTCMod0Calculator"}; //LArG4H6COLDTCMod0Calculator
+  CaloG4::SimulationEnergies m_energyCalculator{};
 };
 
 #endif

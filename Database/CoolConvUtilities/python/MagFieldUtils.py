@@ -5,7 +5,6 @@
 # Routines to read magnetic field information from COOL
 # Richard Hawkings 25/9/08
 
-from __future__ import print_function
 
 from PyCool import cool
 from CoolConvUtilities.AtlCoolLib import indirectOpen

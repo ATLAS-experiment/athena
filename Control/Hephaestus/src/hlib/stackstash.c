@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-/* $Id$ */
 /**
  * @file  Hephaestus/src/stackstash.c
  * @author scott snyder
@@ -260,8 +258,10 @@ StackHandle* hhh_stackstash_store1 (const StackElement *addresses,
   if (!current) {
     int i;
     stash_root = stack_stash_new_node (0, n_addresses, 0);
-    for (i=0; i < n_addresses; i++)
+    for (i=0; i < n_addresses; i++) {
+      // cppcheck-suppress intToPointerCast; intentional
       STACK_NODE_SET_ELEMENT (stash_root, i, addresses[n_addresses-1-i]);
+    }
     return stack_stash_find_handle (stash_root, n_addresses-1);
   }
 
@@ -269,6 +269,7 @@ StackHandle* hhh_stackstash_store1 (const StackElement *addresses,
      against traces already stored. */
 
   while (n_addresses) {
+    // cppcheck-suppress intToPointerCast; intentional
     StackElement address = STACK_ELEMENT_NONNULL (addresses[n_addresses - 1]);
     if (curelt < current->nelts) {
       /* There are more elementes in the current node.
@@ -329,9 +330,11 @@ StackHandle* hhh_stackstash_store1 (const StackElement *addresses,
       memcpy (&STACK_NODE_NTH_ELEMENT(newnode, 0),
               &STACK_NODE_NTH_ELEMENT(current, 0),
               current->nelts * sizeof(StackElement));
-      for (i=0; i < n_addresses; i++)
+      for (i=0; i < n_addresses; i++) {
+        // cppcheck-suppress intToPointerCast; intentional
         STACK_NODE_SET_ELEMENT (newnode, current->nelts + i, 
                                 addresses[n_addresses-1-i]);
+      }
       stack_stash_replace_node (current, newnode);
       return stack_stash_find_handle (newnode, newnode->nelts - 1);
     }
@@ -351,12 +354,15 @@ StackHandle* hhh_stackstash_store1 (const StackElement *addresses,
       StackNode* newchild = stack_stash_new_node (newnode,
                                                   n_addresses,
                                                   0);
-      for (i=0; i < n_addresses; i++)
+      for (i=0; i < n_addresses; i++) {
+        // cppcheck-suppress intToPointerCast; intentional
         STACK_NODE_SET_ELEMENT (newchild, i, addresses[n_addresses-1-i]);
+      }
 
       old_child = &STACK_NODE_NTH_CHILD(current, 0);
       new_child = &STACK_NODE_NTH_CHILD(newnode, 0);
       n_children = current->nkids;
+      // cppcheck-suppress intToPointerCast; intentional
       topaddr = STACK_ELEMENT_NONNULL (addresses[n_addresses - 1]);
 
       while (n_children && STACK_NODE_NTH_ELEMENT(*old_child, 0) < topaddr) {
@@ -404,8 +410,10 @@ StackHandle* hhh_stackstash_store1 (const StackElement *addresses,
     child2 = stack_stash_new_node (newnode,
                                    n_addresses,
                                    0);
-    for (i=0; i < n_addresses; i++)
+    for (i=0; i < n_addresses; i++) {
+      // cppcheck-suppress intToPointerCast; intentional
       STACK_NODE_SET_ELEMENT (child2, i, addresses[n_addresses-1-i]);
+    }
 
     if (STACK_NODE_NTH_ELEMENT (child1, 0) <
         STACK_NODE_NTH_ELEMENT (child2, 0))

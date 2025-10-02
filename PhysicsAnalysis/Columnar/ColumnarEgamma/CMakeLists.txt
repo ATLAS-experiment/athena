@@ -9,4 +9,4 @@ atlas_add_library (ColumnarEgammaLib
   ColumnarEgamma/*.h
   INTERFACE
   PUBLIC_HEADERS ColumnarEgamma
-  LINK_LIBRARIES ColumnarCoreLib xAODEgamma)
+  LINK_LIBRARIES ColumnarCoreLib xAODEgamma ColumnarTrackingLib)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,46 +14,27 @@
 #include <iomanip>
 #include <iostream>
 
-// default constructor
-Trk::SubtractedDiscSurface::SubtractedDiscSurface()
-  : Trk::DiscSurface()
-  , m_subtrVol()
-  , m_shared(true)
-{}
+
+// constructor
+Trk::SubtractedDiscSurface::SubtractedDiscSurface(
+    const Trk::DiscSurface& ps,
+    std::shared_ptr<const AreaExcluder> vol,
+    bool shared)
+    : Trk::DiscSurface(ps), m_subtrVol(std::move(vol)), m_shared(shared) {}
 
 // copy constructor
-Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf)
-   
-= default;
+Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf) = default;
 
 // copy constructor with shift
 Trk::SubtractedDiscSurface::SubtractedDiscSurface(const SubtractedDiscSurface& psf, const Amg::Transform3D& shift)
   : Trk::DiscSurface(psf, shift)
-  , m_subtrVol(psf.m_subtrVol)
+  , m_subtrVol{psf.m_subtrVol}
   , m_shared(psf.m_shared)
 {}
 
-// constructor
-Trk::SubtractedDiscSurface::SubtractedDiscSurface(const Trk::DiscSurface& ps, AreaExcluder* vol, bool shared)
-  : Trk::DiscSurface(ps)
-  , m_subtrVol(Trk::SharedObject<AreaExcluder>(vol))
-  , m_shared(shared)
-{}
-
-// destructor (will call destructor from base class which deletes objects)
-Trk::SubtractedDiscSurface::~SubtractedDiscSurface() = default;
-
+//Assignment
 Trk::SubtractedDiscSurface&
-Trk::SubtractedDiscSurface::operator=(const Trk::SubtractedDiscSurface& psf)
-{
-
-  if (this != &psf) {
-    Trk::DiscSurface::operator=(psf);
-    m_subtrVol = psf.m_subtrVol;
-    m_shared = psf.m_shared;
-  }
-  return *this;
-}
+Trk::SubtractedDiscSurface::operator=(const Trk::SubtractedDiscSurface& psf) = default;
 
 bool
 Trk::SubtractedDiscSurface::operator==(const Trk::Surface& sf) const

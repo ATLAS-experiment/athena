@@ -17,7 +17,7 @@ AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
   m_initialized = true;
 
-  AtlasDetectorID atlas_id;
+  AtlasDetectorID atlas_id ("", "");
 
   const IdDictDictionary* dict = dict_mgr.find_dictionary("InnerDetector");
   
@@ -37,7 +37,7 @@ AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         regionIdx = UNDEFINED;
         return;
     }
-    regionIdx = group->regions().front()->m_index;
+    regionIdx = group->regions().front()->index();
     ATH_MSG_VERBOSE("Region index for "<<grp<<" will be assigned to "<<regionIdx);
 
   };
@@ -49,7 +49,7 @@ AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         regionIdx = UNDEFINED;
         return;
     }
-    regionIdx = region->m_index;
+    regionIdx = region->index();
     ATH_MSG_VERBOSE("Region index for "<<grp<<" will be assigned to "<<regionIdx);
   };
   
@@ -60,7 +60,7 @@ AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   } 
 
   // Check if this is High Luminosity LHC layout
-  if (dict->m_version == "ITkHGTD" || dict->m_version == "ITkHGTDPLR" || dict->m_version == "P2-RUN4") {
+  if (dict->version() == "ITkHGTD" || dict->version() == "ITkHGTDPLR" || dict->version() == "P2-RUN4") {
     m_isHighLuminosityLHC = true;
   }
   assignRegionFromAtlasID(atlas_id.pixel_exp(), m_pixel_region_index, "pixel");
@@ -108,7 +108,7 @@ AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     ATH_MSG_WARNING("initialize_from_dictionary - cannot access stationName field");
     return 1;
   } else {
-    m_muon_station_index = m_station_field->m_index;
+    m_muon_station_index = m_station_field->index();
   }
   assignRegionIdxFromGrp("mdt", m_mdt_region_index);
   assignRegionIdxFromGrp("csc", m_csc_region_index);

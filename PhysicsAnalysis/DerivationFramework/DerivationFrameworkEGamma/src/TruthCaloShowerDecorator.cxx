@@ -15,9 +15,8 @@ namespace DerivationFramework {
 TruthCaloShowerDecorator::TruthCaloShowerDecorator(const std::string& t,
                                                    const std::string& n,
                                                    const IInterface* p)
-  : AthAlgTool(t, n, p)
+  : base_class(t, n, p)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
 }
 
 StatusCode
@@ -115,7 +114,7 @@ TruthCaloShowerDecorator::addBranches() const
   ATH_MSG_DEBUG("Decorating truth parts with truth cluster energy");
   for (const auto* const truthPart : *truthPartContainer) {
     if (!truthPart) continue;
-    if (!MC::isSingleParticle(truthPart)) continue;
+    if (!MC::isGenStable(truthPart)) continue;
     linkDecoratorClusterEtot(*truthPart) = truthClusterEtot;
     linkDecoratorClusterEvis(*truthPart) = truthClusterEvis;
     linkDecoratorClusterEem(*truthPart) = truthClusterEem;

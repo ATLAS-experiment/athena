@@ -15,11 +15,9 @@ atlas_add_library( TrigGlobalEfficiencyCorrectionLib
    LINK_LIBRARIES ${Boost_LIBRARIES} AsgMessagingLib AsgTools AthContainers EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib TriggerAnalysisInterfaces TriggerMatchingToolLib xAODBase xAODEgamma
    PRIVATE_LINK_LIBRARIES PathResolver xAODEventInfo )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( TrigGlobalEfficiencyCorrection
-      src/components/*.cxx
-      LINK_LIBRARIES TrigGlobalEfficiencyCorrectionLib )
-endif()
+atlas_add_component( TrigGlobalEfficiencyCorrection
+   src/components/*.cxx
+   LINK_LIBRARIES TrigGlobalEfficiencyCorrectionLib )
 
 atlas_add_dictionary( TrigGlobalEfficiencyCorrectionDict
    TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionDict.h

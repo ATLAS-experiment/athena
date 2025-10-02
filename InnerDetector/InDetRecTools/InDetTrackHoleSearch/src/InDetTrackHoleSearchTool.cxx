@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +17,6 @@
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkEventUtils/TrackStateOnSurfaceComparisonFunction.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "Identifier/Identifier.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -26,6 +25,8 @@
 #include "TrkVolumes/Volume.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
+
+#include <memory>
 #include <set>
 
 //================ Constructor =================================================
@@ -487,7 +488,7 @@ bool InDet::InDetTrackHoleSearchTool::getMapOfHits(const EventContext& ctx,
     ATH_MSG_DEBUG("Search for dead modules after the last Si measurement");
     if (m_extendedListOfHoles || m_cosmic) ATH_MSG_DEBUG("Search for extended list of holes");
 
-    Trk::CylinderVolumeBounds* cylinderBounds = new Trk::CylinderVolumeBounds(560, 2750);
+    auto cylinderBounds = std::make_shared<Trk::CylinderVolumeBounds>(560, 2750);
     // don't delete the cylinderBounds -> it's taken care of by Trk::VOlume (see Trk::SharedObject)
     Trk::Volume* boundaryVol = new Trk::Volume(nullptr, cylinderBounds);
     // extrapolate this parameter blindly to search for more Si hits (not very fast, I know)

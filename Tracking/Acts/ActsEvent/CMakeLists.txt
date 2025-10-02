@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsEvent )
@@ -13,8 +13,7 @@ atlas_add_library( ActsEventLib
    INCLUDE_DIRS
    ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES
-   ${Boost_LIBRARIES}
-   ActsCore
+   Acts::Core
    ActsGeometryLib
    ActsGeometryInterfacesLib
    AthContainers
@@ -28,6 +27,9 @@ atlas_add_library( ActsEventLib
    xAODMeasurementBase
    xAODTracking
    xAODTruth
+   xAODAuxiliaryMeasurement
+   PRIVATE_LINK_LIBRARIES
+      ActsGeoUtils
 )
 
 atlas_add_dictionary( ActsEventDict
@@ -38,19 +40,23 @@ atlas_add_dictionary( ActsEventDict
 atlas_add_test( MultiTrajectoryBasic_test
 				SOURCES test/MultiTrajectoryBasic_test.cxx
 				LINK_LIBRARIES ActsEventLib
+                                Boost::unit_test_framework
 				POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MultiTrajectorySE_test
 				SOURCES test/MultiTrajectorySE_test.cxx
-				LINK_LIBRARIES ActsEventLib
+				LINK_LIBRARIES ActsEventLib ActsGeoUtils
+                                Boost::unit_test_framework
 				POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MultiTrajectoryACTS_test
 				SOURCES test/MultiTrajectoryACTS_test.cxx
 				LINK_LIBRARIES ActsEventLib
+                                Boost::unit_test_framework
 				POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TrackSummaryContainer_test
 				SOURCES test/TrackSummaryContainer_test.cxx
 				LINK_LIBRARIES ActsEventLib
+                                Boost::unit_test_framework
 				POST_EXEC_SCRIPT nopost.sh)

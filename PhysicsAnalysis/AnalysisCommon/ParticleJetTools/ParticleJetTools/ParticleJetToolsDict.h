@@ -15,8 +15,10 @@
 #include "ParticleJetTools/JetParticleAssociation.h"
 #include "ParticleJetTools/JetParticleCenterOfMassAssociation.h"
 #include "ParticleJetTools/JetParticleShrinkingConeAssociation.h"
+#include "ParticleJetTools/JetParticleOriginVertexAssociation.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "ParticleJetTools/JetPileupLabelingTool.h"
+#include "ParticleJetTools/JetQuarkChargeLabelingTool.h"
 #include "ParticleJetTools/JetPartonTruthLabel.h"
 
 #endif

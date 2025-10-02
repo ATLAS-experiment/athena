@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for el_singlee_7-80_pu40
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.901968.PG_e_Et7to80.recon.RDO.e8544_e8528_s4369_s4370_r16083_tid42190395_00
 # art-input-nfiles: 10
@@ -35,7 +35,6 @@ Events  = 20000
 Threads = 8 
 Slots   = 8
 Input   = 'Single_el_pu40'    # defined in TrigValTools/share/TrigValInputs.json
-GridFiles=True
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]

@@ -4,7 +4,6 @@ TreePlotter.py
 Created by Andreas Salzburger on 2009-04-16.
 
 """
-from __future__ import print_function
 
 import sys
 import os

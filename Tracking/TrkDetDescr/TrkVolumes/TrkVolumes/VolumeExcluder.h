@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,72 +9,71 @@
 #ifndef TRKVOLUMES_VOLUMEEXCLUDER_H
 #define TRKVOLUMES_VOLUMEEXCLUDER_H
 
-//Trk
+// Trk
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkDetDescrUtils/AreaExcluder.h"
 #include "TrkVolumes/Volume.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 
 class MsgStream;
 
 namespace Trk {
 
-  class AreaExcluder;
+class AreaExcluder;
 
 /** @class VolumeExcluder
-    removes explicit dependence of Subtracted*Surface on TrkVolumes          
+    removes explicit dependence of Subtracted*Surface on TrkVolumes
 
-   @author sarka.todorova@cern.ch 
+   @author sarka.todorova@cern.ch
+   @author Christos Anastopoulos (Athena MT modifications)
   */
-   
-   class VolumeExcluder: public AreaExcluder {
-        
-      public:
-        /** Default constructor */
-        VolumeExcluder();
-        
-        /** Explicit constructor with volume */
-        VolumeExcluder(Volume* vol);
-        
-        /** copy constructor */
-        VolumeExcluder(const VolumeExcluder& ex);
-        
-        /** Destructor */
-        virtual ~VolumeExcluder();
-        
-        /** Assignment operator */
-        VolumeExcluder& operator=(const VolumeExcluder &vol);
-        
-        /** Pseudo-constructor */
-        VolumeExcluder* clone() const;
-         
-        /** First bin from global position */
-        bool inside(const Amg::Vector3D& gp, double tol=0.) const;
 
-        /** Acces the subtracted volume */
-        const Volume* volume() const;
-        Volume* volume();
-        /** Output Method for MsgStream, to be overloaded by child classes */
-        MsgStream& dump(MsgStream& sl) const ;
-        
-        /** Output Method for std::ostream, to be overloaded by child classes */
-        std::ostream& dump(std::ostream& sl) const;
- 
-     private:
-        Volume* m_vol;
+class VolumeExcluder final : public AreaExcluder {
 
-   };      
+ public:
+  /** Defaults. Copies are special due to unique ptr */
+  VolumeExcluder();
+  VolumeExcluder(VolumeExcluder&&) = default;
+  VolumeExcluder& operator=(VolumeExcluder&&) = default;
+  virtual ~VolumeExcluder() = default;
 
-   inline bool VolumeExcluder::inside(const Amg::Vector3D& gp, double tol) const
-    {  return( m_vol->inside(gp,tol) ); }
+  /** Explicit constructor with volume */
+  VolumeExcluder(std::unique_ptr<Volume> vol);
+  /** copy constructor */
+  VolumeExcluder(const VolumeExcluder& ex);
+  /** Assignment operator */
+  VolumeExcluder& operator=(const VolumeExcluder& vol);
+  /** Polymorphic constructor*/
+  VolumeExcluder* clone() const;
 
-   inline const Volume* VolumeExcluder::volume() const
-    {  return( m_vol ); }
+  /** First bin from global position */
+  bool inside(const Amg::Vector3D& gp, double tol = 0.) const;
 
-   inline Volume* VolumeExcluder::volume()
-    {  return( m_vol ); }
+  /** Acces the subtracted volume */
+  const Volume* volume() const;
+  Volume* volume();
+  /** Output Method for MsgStream, to be overloaded by child classes */
+  MsgStream& dump(MsgStream& sl) const;
 
+  /** Output Method for std::ostream, to be overloaded by child classes */
+  std::ostream& dump(std::ostream& sl) const;
 
-} // end of namespace Trk
+ private:
+  std::unique_ptr<Volume> m_vol;
+};
 
-#endif // TRKVOLUMES_VOLUMEEXCLUDER
+inline bool VolumeExcluder::inside(const Amg::Vector3D& gp, double tol) const {
+  return (m_vol->inside(gp, tol));
+}
+
+inline const Volume* VolumeExcluder::volume() const {
+  return (m_vol.get());
+}
+
+inline Volume* VolumeExcluder::volume() {
+  return (m_vol.get());
+}
+
+}  // end of namespace Trk
+
+#endif  // TRKVOLUMES_VOLUMEEXCLUDER
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -110,7 +110,6 @@
 
 FixLArElecCalib::FixLArElecCalib(const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
-  m_fixFlag(0),
   m_em_idhelper(nullptr),
   m_hec_idhelper(nullptr),
   m_fcal_idhelper(nullptr),

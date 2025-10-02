@@ -7,7 +7,6 @@
 
 // Base class header
 #include "FCS_StepInfoSD.h"
-
 #include "LArG4Code/LArG4Identifier.h"
 
 // Forward declarations
@@ -26,10 +25,8 @@ class ILArCalculatorSvc;
 /// This SD implementation saves the standard LArHits.
 /// See LArG4CalibSD for an SD that handles calibration hits.
 ///
-class LArFCS_StepInfoSD : public FCS_StepInfoSD
-{
-public:
-
+class LArFCS_StepInfoSD : public FCS_StepInfoSD {
+ public:
   /// Constructor
   LArFCS_StepInfoSD(G4String a_name, const FCS_Param::Config& config);
 
@@ -39,12 +36,12 @@ public:
   /// Main processing method
   G4bool ProcessHits(G4Step* a_step, G4TouchableHistory*) override;
 
-private:
+ private:
   /// Helper function for making "real" identifiers from LArG4Identifiers
   Identifier ConvertID(const LArG4Identifier& a_ident) const;
 
   /// Member variable - the calculator we'll use
-  ILArCalculatorSvc * m_calculator;
+  ILArCalculatorSvc* m_calculator;
 };
 
-#endif // ISF_FASTCALOSIM_LARFCS_STEPINFOSD_H
+#endif  // ISF_FASTCALOSIM_LARFCS_STEPINFOSD_H

@@ -18,10 +18,7 @@ namespace pool  {
 
   // Forward declarations
   class DbStorageExplorer;
-  class DbClassMap;
-  class DbModule;
   class DbOption;
-  class DbSelect;
 
   /** @class DbStorageSvc DbStorageSvc.h POOLCore/DbStorageSvc.h
     *
@@ -62,7 +59,7 @@ namespace pool  {
     DbStorageSvc();
 
     /// Initializing Constructor: Constructs an object of type DbStorageSvc.
-    DbStorageSvc(const std::string& name);
+    explicit DbStorageSvc(const std::string& name);
 
     /// Standard destructor.
     virtual ~DbStorageSvc();

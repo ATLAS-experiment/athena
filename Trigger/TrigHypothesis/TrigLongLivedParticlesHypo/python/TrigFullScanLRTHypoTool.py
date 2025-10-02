@@ -3,7 +3,7 @@
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigLRTHypoTool')
 
-def TrigLRTHypoToolFromDict( chainDict ):
+def TrigLRTHypoToolFromDict( flags, chainDict ):
     """ Use menu decoded chain dictionary to configure the tool """
 
     name = chainDict['chainName']

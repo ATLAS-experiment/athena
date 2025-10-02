@@ -9,6 +9,8 @@
 #define COLUMNAR_TEST_FIXTURES__COLUMNAR_PHYS_LITE_TEST_H
 
 #include <AsgTools/AsgTool.h>
+#include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarInterfaces/IColumnarTool.h>
 
 #include <gtest/gtest.h>
 
@@ -21,21 +23,22 @@ class TTree;
 
 namespace columnar
 {
-  namespace PhysliteTestHelpers
+  class ToolColumnVectorMap;
+
+  namespace TestUtils
   {
     class IColumnData;
   }
 
-  class ColumnarToolWrapper;
 
   struct ColumnarPhysLiteTest : testing::Test
   {
     std::unique_ptr<TFile> file;
     TTree *tree = nullptr;
 
-    std::vector<std::shared_ptr<PhysliteTestHelpers::IColumnData>> knownColumns;
-    std::vector<std::shared_ptr<PhysliteTestHelpers::IColumnData>> usedColumns;
-    std::unordered_map<std::string,const PhysliteTestHelpers::IColumnData*> sizeColumns;
+    std::vector<std::shared_ptr<TestUtils::IColumnData>> knownColumns;
+    std::vector<std::shared_ptr<TestUtils::IColumnData>> usedColumns;
+    std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*> offsetColumns;
 
     ColumnarPhysLiteTest ();
     ~ColumnarPhysLiteTest ();
@@ -48,7 +51,7 @@ namespace columnar
 
     void setupKnownColumns ();
 
-    void setupColumns (ColumnarToolWrapper& toolWrapper);
+    void setupColumns (ToolColumnVectorMap& toolWrapper);
 
     /// the arguments for the function calling in xAOD mode
     struct XAODArgs

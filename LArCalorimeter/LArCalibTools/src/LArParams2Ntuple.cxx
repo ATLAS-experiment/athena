@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArParams2Ntuple.h"
@@ -621,7 +621,7 @@ StatusCode LArParams2Ntuple::scanCalibChannels( const DATA*& data_object ) {
 
     for ( unsigned ichan=0 ; ichan<nchan ; ichan++ ) { // loop through channels in a CB
       if ( !m_isSC ) {
-      HWIdentifier chid =  ((LArOnlineID*)m_onlineId)->calib_channel_Id(cb_HWid , ichan) ;
+      HWIdentifier chid = m_onlineId->calib_channel_Id(cb_HWid , ichan) ;
       ATH_MSG_VERBOSE("    ... calib channel " << chid);
       if ( LArParamsProperties::isValid( data_object->get(chid) ) ) {
 	for ( unsigned g=0 ; g<3 ; g++ ) {

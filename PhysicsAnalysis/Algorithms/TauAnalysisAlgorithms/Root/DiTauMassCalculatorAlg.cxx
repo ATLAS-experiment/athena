@@ -202,11 +202,4 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode DiTauMassCalculatorAlg::finalize()
-  {
-    ANA_CHECK(m_mmc->finalize());
-
-    return StatusCode::SUCCESS;
-  }
-
 } // namespace

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -19,7 +19,7 @@
 #include <stdexcept>
 
 //______________________________________________________________________________
-TRT_BarrelDriftTimeData::TRT_BarrelDriftTimeData(unsigned int digversion, int strawGasType) {
+TRT_BarrelDriftTimeData::TRT_BarrelDriftTimeData(int strawGasType) {
 
   ////////////////////////////////////////////////////////////////////////////
   // The data made available by Peter Cwetanski by detailed gas simulations //
@@ -33,12 +33,6 @@ TRT_BarrelDriftTimeData::TRT_BarrelDriftTimeData(unsigned int digversion, int st
 
   m_tabdists_nofield.resize(0);  m_tabdrifttime_nofield.resize(0);
   m_tabdists_maxfield.resize(0);  m_tabdrifttime_maxfield.resize(0);
-
-  if (digversion<11) {
-    std::cout << "FATAL TRT_BarrelDriftTimeData::TRT_BarrelDriftTimeData digversion < 11 ("
-              << digversion << ") is no longer supported. The job will die now :(" << std::endl;
-    throw std::runtime_error("TRT_BarrelDriftTimeData: unsupported digversion");
-  }
 
   if (m_strawGas==0) {
 

@@ -11,7 +11,6 @@
 # ----------------------------------------------------------------
 
 
-from __future__ import print_function
 from collections.abc import Iterable
 
 
@@ -136,7 +135,7 @@ def _getConnectionServicesForAlias(alias):
         connectionServices = [str(s.attributes['name'].value) for s in ls.getElementsByTagName('service')]
     doc.unlink()
 
-    log.info( "For alias '%s' found list of connections %r", (alias,connectionServices) )
+    log.info( "For alias '%s' found list of connections %r", alias, connectionServices )
     if connectionServices is None:
         print("ERROR: Trigger connection alias '%s' is not defined in %s" % (alias,dblookupfilename))
     return connectionServices

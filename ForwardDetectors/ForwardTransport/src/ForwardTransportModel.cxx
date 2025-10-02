@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTransportModel.h"
@@ -23,8 +23,8 @@
 #include "ISF_Event/TruthBinding.h"
 #include "ISF_Event/ISFParticle.h"
 
-ForwardTransportModel::ForwardTransportModel(const std::string& name, const int verboseLevel, const std::string& FwdTrSvcName)
-  : G4VFastSimulationModel(name)
+ForwardTransportModel::ForwardTransportModel(const std::string& name, G4Region* region, const int verboseLevel, const std::string& FwdTrSvcName)
+  : G4VFastSimulationModel(name, region)
   , m_fwdSvc(FwdTrSvcName, "ForwardTransportModel")
   , m_verboseLevel(verboseLevel)
 {
@@ -207,7 +207,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
     abort(); // to keep Coverity happy
   }
   fastStep.ProposePrimaryTrackFinalPosition(postTransportPosition, false); // position in global coordinates
-  fastStep.SetPrimaryTrackFinalMomentum(postTransportMomentum, false);
+  fastStep.ProposePrimaryTrackFinalMomentumDirection(postTransportMomentum, false); // FIXME This only sets the normalised direction of the momentum - possible use ProposePrimaryTrackFinalKineticEnergyAndDirection instead?
   fastStep.KillPrimaryTrack();
 }
 

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file TruthD3PDMaker/src/TruthParticleChildAssociationTool.cxx
  * @author Ryan Reece  <ryan.reece@cern.ch>
@@ -51,10 +49,10 @@ StatusCode
 TruthParticleChildAssociationTool::reset (const xAOD::TruthParticle& p)
 {
   m_i = 0;
+  m_xaod_children.clear();
 
   const xAOD::TruthVertex* vx = p.decayVtx();
   if (!vx) {
-    m_xaod_children.clear();
     return StatusCode::SUCCESS;
   }
 
@@ -63,7 +61,7 @@ TruthParticleChildAssociationTool::reset (const xAOD::TruthParticle& p)
   for (unsigned int i = 0; i < sz; i++) {
     const xAOD::TruthParticle* p2 = vx->outgoingParticle (i);
     if (p2)
-      m_xaod_children[i] =  p2;
+      m_xaod_children.push_back(p2);
   }
   std::sort (m_xaod_children.begin(), m_xaod_children.end(), [](const auto & a, const auto & b) -> bool{ return HepMC::uniqueID(a) < HepMC::uniqueID(b); }); // FIXME barcode-based - NB ordering may change when this function switches to return id rather than barcode
   return StatusCode::SUCCESS;

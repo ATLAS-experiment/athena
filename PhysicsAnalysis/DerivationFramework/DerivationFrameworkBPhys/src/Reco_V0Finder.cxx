@@ -5,7 +5,7 @@
 // Reco_V0Finder.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Author: Adam Barton
-#include "DerivationFrameworkBPhys/Reco_V0Finder.h"
+#include "Reco_V0Finder.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 
@@ -14,10 +14,9 @@ namespace DerivationFramework {
   Reco_V0Finder::Reco_V0Finder(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
+    base_class(t,n,p),
     m_v0FinderTool("InDet::V0FinderTool", this)
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare user-defined properties
     declareProperty("CheckVertexContainers", m_CollectionsToCheck);

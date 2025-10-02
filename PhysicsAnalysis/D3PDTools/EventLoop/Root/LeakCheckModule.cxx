@@ -86,20 +86,6 @@ namespace EL
       if (m_skippedEvents > 0 &&
           data.m_eventsProcessed > m_skippedEvents) {
 
-        // Extract the limits for producing an error.
-        const int absResidentLimit =
-          data.m_metaData->castInteger (Job::optMemResidentIncreaseLimit,
-                                   10000);
-        const int absVirtualLimit =
-          data.m_metaData->castInteger (Job::optMemVirtualIncreaseLimit,
-                                   0);
-        const int perEvResidentLimit =
-          data.m_metaData->castInteger (Job::optMemResidentPerEventIncreaseLimit,
-                                   10);
-        const int perEvVirtualLimit =
-          data.m_metaData->castInteger (Job::optMemVirtualPerEventIncreaseLimit,
-                                   0);
-
         // Calculate and print the memory increase of the job.
         const Long_t resLeak = memIncreaseResident();
         const Double_t resLeakPerEv =
@@ -116,13 +102,13 @@ namespace EL
                       << virtLeak << " kB total)");
 
         // Decide if this acceptable or not.
-        if ((resLeak > absResidentLimit) &&
-            (resLeakPerEv > perEvResidentLimit) &&
-            (virtLeak > absVirtualLimit) &&
-            (virtLeakPerEv > perEvVirtualLimit)) {
+        if ((resLeak > absResidentLimit.value()) &&
+            (resLeakPerEv > perEvResidentLimit.value()) &&
+            (virtLeak > absVirtualLimit.value()) &&
+            (virtLeakPerEv > perEvVirtualLimit.value())) {
 
           // If not, decide what to do about it.
-          if (data.m_metaData->castBool (Job::optMemFailOnLeak, false)) {
+          if (failOnLeak.value()) {
             ANA_MSG_ERROR ("A significant memory leak was detected");
             return StatusCode::FAILURE;
           } else {

@@ -17,7 +17,6 @@
 #include "boost/lexical_cast.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/erase.hpp>
 using namespace std;
 using namespace TrigConf;
 
@@ -35,12 +34,6 @@ void
 TrigConf::strip(std::string& str) {
   boost::algorithm::trim(str);
 }
-
-// helper method: remove all spaces in string
-void TrigConf::removeAllSpaces(std::string& str) {
-   boost::algorithm::erase_all(str, " ");
-}
-
 
 // helper method: replace tabs by single space
 void TrigConf::replaceTabs(std::string& str) {
@@ -96,7 +89,7 @@ namespace {
             typeFromChar = TriggerItemNode::typeFromChar(expr[pos]);
          } else {
             throw std::logic_error(string("Unexpected character '") + expr[pos] + "' in expression '" + expr
-                                   + "' at position" + boost::lexical_cast<std::string,int>(pos) + " [b]");
+                                   + "' at position" + std::to_string(pos) + " [b]");
          }
 
 
@@ -107,7 +100,7 @@ namespace {
             // check that current character matches the type of the node
             if(newNode->type() != typeFromChar) {
                throw std::logic_error(string("Unexpected character '") + expr[pos] + "' in expression '" + expr 
-                                      + "' at position" + boost::lexical_cast<std::string,int>(pos) + " [c] Expected "
+                                      + "' at position" + std::to_string(pos) + " [c] Expected "
                                       + TriggerItemNode::typeAsString(newNode->type()) );
             }
          }
@@ -194,7 +187,7 @@ namespace {
          {
             std::string errMsg = "Unexpected character '";
             errMsg += logic[pos];
-            errMsg += "' in expression '" + logic + "' at position" + boost::lexical_cast<std::string,int>(pos) + " [a]";
+            errMsg += "' in expression '" + logic + "' at position" + std::to_string(pos) + " [a]";
             throw std::logic_error(errMsg);
          }
          break;

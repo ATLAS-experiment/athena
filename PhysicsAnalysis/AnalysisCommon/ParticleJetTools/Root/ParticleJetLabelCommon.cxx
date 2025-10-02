@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
@@ -104,7 +104,7 @@ namespace ParticleJetTools {
     CHECK(pdgId);
     CHECK(positionDPhi);
     CHECK(positionDEta);
-    CHECK(barcode); // FIXME barcode-based
+    CHECK(uniqueID);
     CHECK(childLxy);
     CHECK(childPt);
     CHECK(childPdgId);
@@ -122,7 +122,7 @@ namespace ParticleJetTools {
     pdgId(n.pdgId),
     positionDPhi(n.positionDPhi),
     positionDEta(n.positionDEta),
-    barcode(n.barcode), // FIXME barcode-based
+    uniqueID(n.uniqueID),
     childLxy(n.childLxy),
     childPt(n.childPt),
     childPdgId(n.childPdgId),
@@ -201,7 +201,7 @@ namespace ParticleJetTools {
       decs.pdgId(jet) = 0;
       decs.positionDPhi(jet) = NAN;
       decs.positionDEta(jet) = NAN;
-      decs.barcode(jet) = HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
+      decs.uniqueID(jet) = HepMC::INVALID_PARTICLE_ID;
       decs.childLxy(jet) = NAN;
       decs.childPt(jet) = NAN;
       decs.childPdgId(jet) = 0;
@@ -214,8 +214,8 @@ namespace ParticleJetTools {
       decs.pdgId(jet) = partPdgId(labelling_particle);
       decs.positionDPhi(jet) = positionDPhi(labelling_particle, jet, origin);
       decs.positionDEta(jet) = positionDEta(labelling_particle, jet, origin);
-      decs.barcode(jet) = labelling_particle ?
-        HepMC::barcode(labelling_particle) : HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
+      decs.uniqueID(jet) = labelling_particle ?
+        HepMC::uniqueID(labelling_particle) : HepMC::INVALID_PARTICLE_ID;
       decs.childLxy(jet) = partLxy(child_particle, origin);
       decs.childPt(jet) = partPt(child_particle);
       decs.childPdgId(jet) = partPdgId(child_particle);

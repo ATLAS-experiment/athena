@@ -1,9 +1,9 @@
 #include "../LArHECLocalCalculator.h"
 #include "../LocalCalibrationCalculator.h"
-#include "LArG4HEC/LocalGeometry.h"
+#include "../LocalGeometry.h"
 #include "../LArHECWheelCalculator.h"
 #include "../LArHECCalibrationWheelCalculator.h"
-#include "LArG4HEC/HECGeometry.h"
+#include "../HECGeometry.h"
 
 DECLARE_COMPONENT( LArHECLocalCalculator )
 DECLARE_COMPONENT( LArG4::HEC::LocalCalibrationCalculator )

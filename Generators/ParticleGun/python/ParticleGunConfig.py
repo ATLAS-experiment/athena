@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
@@ -121,10 +121,10 @@ def ParticleGun_TestBeam_SingleParticleCfg(flags):
 
     pg.sampler.pid = flags.TestBeam.BeamPID
     pg.sampler.pos = PG.PosSampler(
-        x=-27500,
+        x=flags.TestBeam.Xbeam,
         y=flags.TestBeam.Ybeam,
         z=flags.TestBeam.Zbeam,
-        t=-27500)
+        t=flags.TestBeam.Tbeam)
     pg.sampler.mom = PG.EEtaMPhiSampler(
         energy=flags.TestBeam.BeamEnergy,
         eta=0,

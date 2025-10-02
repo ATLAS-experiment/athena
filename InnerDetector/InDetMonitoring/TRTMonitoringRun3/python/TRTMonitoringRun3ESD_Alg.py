@@ -30,6 +30,11 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
     if not flags.DQ.triggerDataAvailable:
         algTRTMonitoringRun3ESD.TrigDecisionObjectName = ''
 
+    #  In Online TRTViewer expects some histograms to be created regardles if they filled or not. It is not needed for Offline
+    TRTViewer_opt='' #Offline Case
+    if flags.DQ.Environment in ('online'):
+            TRTViewer_opt='kAlwaysCreate'  #Online Case
+        
     from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
     result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/errors2d","/TRT/Calib/errors2d",className="TRTCond::RtRelationMultChanContainer"))
@@ -102,11 +107,11 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
                     nBarrelModules = i + 1 - 32
                     oss = 'TRT/EndcapC/Sector{0}'.format(nBarrelModules)
 
-            trackGroup.defineHistogram('ValidRawDriftTimeonTrkS_x,ValidRawDriftTimeonTrkS_y;hValidRawDriftTimeonTrkS',type='TProfile',title='Valid Raw Drift Time on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
-            trackGroup.defineHistogram('HitTronTwEPCMapS_x,HitTronTwEPCMapS_y;hHitTronTwEPCMapS',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt='kAlwaysCreate')
+            trackGroup.defineHistogram('ValidRawDriftTimeonTrkS_x,ValidRawDriftTimeonTrkS_y;hValidRawDriftTimeonTrkS',type='TProfile',title='Valid Raw Drift Time on Track: Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt=TRTViewer_opt)
+            trackGroup.defineHistogram('HitTronTwEPCMapS_x,HitTronTwEPCMapS_y;hHitTronTwEPCMapS',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Straws;Straw Number in Stack;Time (ns)',path=oss,xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],duration='run',opt=TRTViewer_opt)
 
-            trackGroup.defineHistogram('ValidRawDriftTimeonTrkC_x,ValidRawDriftTimeonTrkC_y;hValidRawDriftTimeonTrkC',type='TProfile',title='Valid Raw Drift Time on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
-            trackGroup.defineHistogram('HitTronTwEPCMapC_x,HitTronTwEPCMapC_y;hHitTronTwEPCMapC',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt='kAlwaysCreate')
+            trackGroup.defineHistogram('ValidRawDriftTimeonTrkC_x,ValidRawDriftTimeonTrkC_y;hValidRawDriftTimeonTrkC',type='TProfile',title='Valid Raw Drift Time on Track: Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt=TRTViewer_opt)
+            trackGroup.defineHistogram('HitTronTwEPCMapC_x,HitTronTwEPCMapC_y;hHitTronTwEPCMapC',type='TProfile',title='Mean Trailing Edge on Track (with Event Phase Correction): Chips;Chip Number in Stack;Time (ns)',path=oss,xbins=iChipMax[ibe],xmin=0,xmax=iChipMax[ibe],duration='run',opt=TRTViewer_opt)
 
     # Arrays for Aging
     gas = ('in_A', 'in_B', 'out_A', 'out_B')
@@ -129,7 +134,7 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
             shiftTrackGroup.defineHistogram('DriftTimeonTrkDist_B_Ar;hDriftTimeonTrkDist_Ar',type='TH1F',title='Drift Time Distribution on Track for Argon Straws{0};Drift Time (ns);Entries'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=32,xmin=0,xmax=100,duration='run',opt='kAlwaysCreate')
             shiftTrackGroup.defineHistogram('TronTDist_B_Ar;hTronTDist_Ar',type='TH1F',title='Trailing Edge Distribution on Track for Argon Straws{0};Trailing Edge (ns);Entries'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=26,xmin=-0.5,xmax=80.75,duration='run',opt='kAlwaysCreate')
             shiftTrackGroup.defineHistogram('RtRelation_B_Ar_x,RtRelation_B_Ar_y;hrtRelation_Ar',type='TH2F',title='R(t) Relation for Argon Straws{0};Measured Leading Edge (ns);Track-to-Wire Distance (mm)'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=30,xmin=-12.5,xmax=81.25,ybins=50,ymin=0,ymax=2.5,duration='run',opt='kAlwaysCreate')
-            shiftTrackGroup.defineHistogram('Pull_Biased_Barrel;hPull_Biased_Barrel',type='TH1F',title='Biased Track Pulls for Barrel Hits;Pulls;Entries',path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=200,xmin=-2.5,xmax=2.5,duration='run',opt='kAlwaysCreate')
+            shiftTrackGroup.defineHistogram('Pull_Biased_Barrel;hPull_Biased_Barrel',type='TH1F',title='Biased Track Pulls for Barrel Hits;Pulls;Entries',path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=200,xmin=-4,xmax=4,duration='run',opt='kAlwaysCreate')
             shiftTrackGroup.defineHistogram('Residual_B_Ar;hResidual_Ar',type='TH1F',title='Residuals for Argon Straws{0};Hit-to-Track Distance (mm);Entries'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=200,xmin=-2.5,xmax=2.5,duration='lowStat',opt='kAlwaysCreate')
             shiftTrackGroup.defineHistogram('Residual_B_Ar;hResidual_Ar',type='TH1F',title='Residuals for Argon Straws{0};Hit-to-Track Distance (mm);Entries'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=200,xmin=-2.5,xmax=2.5,duration='run',opt='kAlwaysCreate')
             shiftTrackGroup.defineHistogram('Residual_noTubeHits_B_Ar;hResidual_noTubeHits_Ar',type='TH1F',title='Residuals for Argon Straws{0} (no tube hits);Hit-to-Track Distance (mm);Entries'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=200,xmin=-2.5,xmax=2.5,duration='lowStat',opt='kAlwaysCreate')
@@ -153,7 +158,7 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
             shiftTrackGroup.defineHistogram('AvgTroTDetPhi_B_x,AvgTroTDetPhi_B_y;hAvgTroTDetPhi',type='TProfile',title='Avg. Trailing Edge on Track vs #phi (2D) for Xenon{0};#phi (deg);Trailing Edge (ns)'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=nPhiBins,xmin=0,xmax=360,duration='run',opt='kAlwaysCreate')
             shiftTrackGroup.defineHistogram('NTrksperLB_x,NTrksperLB_y;hNTrksperLB',type='TProfile',title='Avg. Number of Reconstructed Tracks per Event{0};Luminosity Block;Number of Tracks'.format(regionTag),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=maxLumiblock+1,xmin=-0.5,xmax=maxLumiblock+0.5,duration='run',opt='kAlwaysCreate')
         elif ibe == 1:
-            shiftTrackGroup.defineHistogram('Pull_Biased_EndCap;hPull_Biased_EndCap',type='TH1F',title='Biased Track Pulls for EndCap Hits;Pulls;Entries',path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=200,xmin=-2.5,xmax=2.5,duration='run',opt='kAlwaysCreate')
+            shiftTrackGroup.defineHistogram('Pull_Biased_EndCap;hPull_Biased_EndCap',type='TH1F',title='Biased Track Pulls for EndCap Hits;Pulls;Entries',path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=200,xmin=-4.0,xmax=4.0,duration='run',opt='kAlwaysCreate')
 
             for iside in range(2):
                 regionTag = ' (' + beId[ibe] + sideId[iside] + ')'

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //PrintPhotonSF.cxx  - print SF for a given input
 //michael.pitt@cern.ch
@@ -16,6 +16,7 @@
 #include "TList.h"
 #include "TKey.h"
 #include "TH2F.h"
+#include "TMath.h"
 
 // Local include(s):
 #include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"

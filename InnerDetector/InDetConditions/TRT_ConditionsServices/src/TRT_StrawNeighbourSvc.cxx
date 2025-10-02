@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_StrawNeighbourSvc.cxx
@@ -10,10 +10,7 @@
 
 #include "TRT_StrawNeighbourSvc.h"
 
-#include <cstdio>
-#include <fstream>
-#include <iostream>
-#include <sstream>
+
 
 #include "StoreGate/StoreGateSvc.h"
 
@@ -37,6 +34,11 @@
 //Geomodel
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
+
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 
 TRT_StrawNeighbourSvc::TRT_StrawNeighbourSvc( const std::string& name,
@@ -198,18 +200,18 @@ StatusCode TRT_StrawNeighbourSvc::initialize()
       m_m1.push_back(pad_rel_mod);
       if (pad==previous_pad) dummy12.push_back(stnm);
       else if (pad != previous_pad) {
-	previous_pad=pad;
-	dummy1.push_back(dummy12);
-	dummy12.clear();
-	dummy12.push_back(stnm);
+        previous_pad=pad;
+        dummy1.push_back(dummy12);
+        dummy12.clear();
+        dummy12.push_back(stnm);
       }
       chip=(RDBVars__TRTElec->getDouble("CHIPRELSTRAW"));
       m_chip_vector1.push_back(chip);
       (dumdumdum1[(int)chip]).push_back(straw+1);
       straw++;
     }
-    m_pad_to_straw.push_back(dummy1);
-    m_chip_to_straw.push_back(dumdumdum1);
+    m_pad_to_straw.push_back(std::move(dummy1));
+    m_chip_to_straw.push_back(std::move(dumdumdum1));
     
     
     dummy2.clear();
@@ -225,18 +227,18 @@ StatusCode TRT_StrawNeighbourSvc::initialize()
       m_m2.push_back(pad_rel_mod);
       if (pad==previous_pad) dummy22.push_back(stnm);
       else if (pad != previous_pad) {
-	previous_pad=pad;
-	dummy2.push_back(dummy22);
-	dummy22.clear();
-	dummy22.push_back(stnm);
+        previous_pad=pad;
+        dummy2.push_back(dummy22);
+        dummy22.clear();
+        dummy22.push_back(stnm);
       }
       chip=(RDBVars__TRTElec->getDouble("CHIPRELSTRAW"));
       m_chip_vector2.push_back(chip);
       (dumdumdum2[(int)chip]).push_back(straw+1-329);
       straw++;
     }
-    m_pad_to_straw.push_back(dummy2);
-    m_chip_to_straw.push_back(dumdumdum2);
+    m_pad_to_straw.push_back(std::move(dummy2));
+    m_chip_to_straw.push_back(std::move(dumdumdum2));
    
     
     
@@ -265,8 +267,8 @@ StatusCode TRT_StrawNeighbourSvc::initialize()
       straw++;
       
     }
-    m_pad_to_straw.push_back(dummy3);
-    m_chip_to_straw.push_back(dumdumdum3);
+    m_pad_to_straw.push_back(std::move(dummy3));
+    m_chip_to_straw.push_back(std::move(dumdumdum3));
     
   
 
@@ -560,13 +562,13 @@ void TRT_StrawNeighbourSvc::getPin(Identifier offlineID, int& pin ){
   int layer_or_wheel =  m_trtid->layer_or_wheel(offlineID);
   if (abs((m_trtid->barrel_ec(offlineID)))==1 ) {
     if (layer_or_wheel == 0) {
-      pin = (int)(100*fmod(m_chip_vector1[getRunningNumbering(offlineID)-1],1.)+0.1);
+      pin = (int)(100*std::fmod(m_chip_vector1[getRunningNumbering(offlineID)-1],1.)+0.1);
     }
     else if (layer_or_wheel == 1) {
-      pin = (int)(100*fmod(m_chip_vector2[getRunningNumbering(offlineID)-1],1.)+0.1);
+      pin = (int)(100*std::fmod(m_chip_vector2[getRunningNumbering(offlineID)-1],1.)+0.1);
     }
     else if (layer_or_wheel == 2){
-      pin = (int)(100*fmod(m_chip_vector3[getRunningNumbering(offlineID)-1],1.)+0.1);
+      pin = (int)(100*std::fmod(m_chip_vector3[getRunningNumbering(offlineID)-1],1.)+0.1);
     }
     else { msg(MSG::ERROR) << "Something is very wrong: According to identifier, straw belongs to a barrel module which is not of type 1,2 or 3 (corresponding to offline numbering: layer_or_wheel = 0,1 or 2) " << endmsg;}
     

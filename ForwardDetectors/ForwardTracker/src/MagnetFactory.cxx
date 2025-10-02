@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/MagnetFactory.h"
@@ -52,6 +52,6 @@ namespace ForwardTracker {
     
     IBender::ConstPtr_t bender(benderFactory(type, side, length, strength, beamEnergy));
     
-    return Magnet::ConstPtr_t(new Magnet(x, y, z, length, aperType, aper1, aper2, aper3, aper4, side, bender, label(type)));
+    return Magnet::ConstPtr_t(new Magnet(x, y, z, length, aperType, aper1, aper2, aper3, aper4, side, bender.get(), label(type)));
   }  
 }

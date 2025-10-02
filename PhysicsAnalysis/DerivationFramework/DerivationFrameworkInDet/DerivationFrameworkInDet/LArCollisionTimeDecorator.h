@@ -27,7 +27,7 @@
 
 namespace DerivationFramework {
 
-  class LArCollisionTimeDecorator : public AthAlgTool, public IAugmentationTool {
+  class LArCollisionTimeDecorator : public extends<AthAlgTool, IAugmentationTool> {
     public:
       LArCollisionTimeDecorator(const std::string& type, const std::string& name, const IInterface* parent);
 

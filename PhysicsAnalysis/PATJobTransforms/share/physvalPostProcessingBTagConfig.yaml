@@ -1,0 +1,82 @@
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
+# ROC curve: b-jet efficiency (true positive rate) on the x-axis vs. light-jet rejection (inverse of false positive rate) on the y-axis.
+# It tells how well a tagger can separate b-jets (signal) from light-flavor jets (background).
+roc_curves:
+  # Signal: b-jets, Background: u/light-jets (main b vs light ROC)
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_u_matched_weight", output: "BTag/ROC/IP3D"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_u_matched_weight", output: "BTag/ROC/DIPS"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_u_matched_weight", output: "BTag/ROC/SV1"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_matched_weight", output: "BTag/ROC/DL1dv01"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_u_matched_weight", output: "BTag/ROC/GN2v01"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_u_matched_weight", output: "BTag/ROC/GN2Xv01"}
+
+  # Signal: b-jets, Background: Charm (c) jets (c vs b rejection ROC)
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_c_matched_weight", output: "BTag/ROC/IP3D_cVsb"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_c_matched_weight", output: "BTag/ROC/DIPS_cVsb"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_c_matched_weight", output: "BTag/ROC/SV1_cVsb"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_matched_weight", output: "BTag/ROC/DL1dv01_cVsb"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_c_matched_weight", output: "BTag/ROC/GN2v01_cVsb"}
+  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_c_matched_weight", output: "BTag/ROC/GN2Xv01_cVsb"}
+
+efficiencies:
+  # IP3D tagger efficiencies for b, c, u jets (Lxy)
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_b_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_IP3D_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_c_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_IP3D_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_u_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_l", output: "BTag/Efficiency/eff_vs_Lxy_IP3D_u-jets_70_WP"}
+
+  # DIPS tagger efficiencies (Lxy)
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_b_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_DIPS_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_c_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_DIPS_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_u_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_l", output: "BTag/Efficiency/eff_vs_Lxy_DIPS_u-jets_70_WP"}
+
+  # SV1 tagger efficiencies (Lxy)
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_b_60_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_SV1_b-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_c_60_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_SV1_c-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_u_60_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_l", output: "BTag/Efficiency/eff_vs_Lxy_SV1_u-jets_60_WP"}
+
+  # DL1dv01 tagger efficiencies (Lxy)
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_DL1dv01_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_DL1dv01_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_l", output: "BTag/Efficiency/eff_vs_Lxy_DL1dv01_u-jets_70_WP"}
+
+  # GN2v01 tagger efficiencies (Lxy)
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_GN2v01_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_c_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_GN2v01_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_u_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_l", output: "BTag/Efficiency/eff_vs_Lxy_GN2v01_u-jets_70_WP"}
+
+  # GN2Xv01 tagger efficiencies (Lxy)
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_b_60_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_GN2Xv01_b-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_c_60_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_GN2Xv01_c-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_u_60_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_l", output: "BTag/Efficiency/eff_vs_Lxy_GN2Xv01_u-jets_60_WP"}
+
+  # IP3D tagger efficiencies vs pt_ttbar
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_b_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_b_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_IP3D_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_c_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_c_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_IP3D_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_IP3D_u_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_l_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_IP3D_u-jets_70_WP"}
+
+  # DIPS tagger efficiencies vs pt_ttbar
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_b_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_b_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_DIPS_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_c_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_c_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_DIPS_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DIPS_u_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_l_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_DIPS_u-jets_70_WP"}
+
+  # SV1 tagger efficiencies vs pt_ttbar
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_b_60_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_b_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_SV1_b-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_c_60_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_c_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_SV1_c-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_SV1_u_60_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_l_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_SV1_u-jets_60_WP"}
+
+  # DL1dv01 tagger efficiencies vs pt_ttbar
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_b_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_DL1dv01_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_c_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_DL1dv01_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_l_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_DL1dv01_u-jets_70_WP"}
+
+  # GN2v01 tagger efficiencies vs pt_ttbar
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_b_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2v01_b-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_c_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_c_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2v01_c-jets_70_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_u_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_l_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2v01_u-jets_70_WP"}
+
+  # GN2Xv01 tagger efficiencies vs pt_ttbar
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_b_60_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_b_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2Xv01_b-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_c_60_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_c_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2Xv01_c-jets_60_WP"}
+  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2Xv01_u_60_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_jet_pt_l_ttbar", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2Xv01_u-jets_60_WP"}
+

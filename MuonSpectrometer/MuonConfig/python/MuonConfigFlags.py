@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep, Project, FlagEnum
@@ -52,6 +52,7 @@ def createMuonConfigFlags():
     # 1. Digitization
     mcf.addFlag("Muon.doDigitization",True)
     mcf.addFlag("Muon.doFastMMDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
 
     
     # 2. Reco MuonRecFlags    
@@ -136,7 +137,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)) and not \
                                                            (prevFlags.IOVDb.DatabaseInstance == 'COMP200' or \
                                                             'HLT' in prevFlags.IOVDb.GlobalTag or prevFlags.Common.isOnline) )
-    mcf.addFlag("Muon.Align.UsesTGCAsBuild",False)
+    mcf.addFlag("Muon.Align.UsesTGCAsBuild", lambda prevFlags: (_muonAlignMode(prevFlags)) and not prevFlags.Common.isOnline and prevFlags.GeoModel.Run == LHCPeriod.Run3)
 
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 
@@ -144,7 +145,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.disableNSWForL2SA", True)
 
     mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
-                                                      and (flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
+                                                      and not (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] or flags.Overlay.DataOverlay)))
     mcf.addFlag("Muon.enableTrigIDtrackReuse", False)
     # configuration of the DESDM_MCP output format 
 
@@ -159,7 +160,7 @@ def createMuonConfigFlags():
     #Use charge weighted only for trigger and 2022 where not sure if the t0 calibrations that we have are ok dor the commissioning phase of the NSW in 2022
     mcf.addFlag("Muon.MMClusterCalibRecoTool", lambda prevFlags: MMClusterBuilderEnum.Centroid if (prevFlags.Common.isOnline or prevFlags.Input.DataYear == 2022 or prevFlags.Beam.Type is not BeamType.Collisions) else MMClusterBuilderEnum.ClusterTimeProjection, type=MMClusterBuilderEnum)
 
-    mcf.addFlag("Muon.writexAODPRD", False) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
+    mcf.addFlag("Muon.writexAODPRD", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
     # use the MDT DCS data to determine if a chamber is alive or not. This is used in the hole search and the region selector. Needs to be false if the job is running online or is the reconstruction of the MDT calib stream
     mcf.addFlag("Muon.useMdtDcsData", lambda prevFlags : not prevFlags.Common.isOnline)
 

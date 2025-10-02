@@ -6,7 +6,7 @@ def addStdEvgenArgs(parser):
     parser.defineArgGroup("Evgen", "Event generator options")
 
     parser.add_argument("--ecmEnergy", "--EcmEnergy", group="Evgen",
-                        default=trfArgClasses.argFloat(13000, runarg=True),
+                        default=trfArgClasses.argFloat(13600, runarg=True),
                         help="centre-of-mass energy parameter in GeV",
                         type=trfArgClasses.argFactory(trfArgClasses.argFloat, runarg=True))
 
@@ -67,6 +67,28 @@ def addStdEvgenArgs(parser):
                         help="Name of HepMC output file",
                         type=trfArgClasses.argFactory(trfArgClasses.argHepEvtAsciiFile, type='hepmc', io='output', runarg=True))
 
+    parser.add_argument("--hepmcFormat", group="Evgen",
+                        help="Format to use when writing HepMC files",
+                        default=trfArgClasses.argString("hepmc2", runarg=True),
+                        choices=[trfArgClasses.argString("hepmc2", runarg=True),
+                                 trfArgClasses.argString("hepmc3", runarg=True)],
+                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
+
+    parser.add_argument("--hepmcUnits", group="Evgen",
+                        help="Unitst to use when writing HepMC files",
+                        default=trfArgClasses.argString("GEVMM", runarg=True),
+                        choices=[trfArgClasses.argString("GEVCM", runarg=True),
+                                 trfArgClasses.argString("MEVCM", runarg=True),
+                                 trfArgClasses.argString("MEVMM", runarg=True)],
+                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
+
+    parser.add_argument("--extension", group="Evgen",
+                        help="Extension to use when writing HepMC files",
+                        default=trfArgClasses.argString("hepmc", runarg=True),
+                        choices=[trfArgClasses.argString("hepmc", runarg=True),
+                                 trfArgClasses.argString("events", runarg=True)],
+                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
+
     parser.add_argument("--rivetAnas", group="Evgen",
                         help="a comma-separated list of Rivet analyses to run on the resulting events",
                         type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True))
@@ -117,3 +139,10 @@ def addStdEvgenArgs(parser):
                         help = 'ignore Blacklist - allows to run a test in a blacklisted release',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         default=trfArgClasses.argBool('False'))
+ 
+    parser.add_argument('--allowOldFilter', '--allowOldFilter', group='Evgen',
+                        help = 'useOldFilter - allows to use old (not xAOD based) filters',
+                        type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+                        default=trfArgClasses.argBool('False'))
+
+

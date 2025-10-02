@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile OFC conditions tool and algorithm"""
 
@@ -40,9 +40,12 @@ def TileOFCCondAlgCfg(flags, **kwargs):
         ofcType = ofcType + '/' + runType.getCommonType().value
         
         runNumber = flags.Input.RunNumbers[0]
+        runSplitMC = 470000 # Use OFC stored in OFL02 folder since this run for MC
         runSplitOnline = 314449 #Use OFC stored in online folder for all runs before 2017
-        if flags.IOVDb.DatabaseInstance  == 'CONDBR2' and runType is TileRunType.PHY and runNumber > runSplitOnline:
+        if flags.IOVDb.DatabaseInstance  == 'CONDBR2' and runType.getCommonType() is TileRunType.PHY and runNumber > runSplitOnline:
             ofcFolder = folders.addSplitOnline('/TILE/ONL01/FILTER/' + ofcType, '/TILE/OFL02/FILTER/' + ofcType)
+        elif runNumber >= runSplitMC:
+            ofcFolder = folders.addSplitMC('/TILE/ONL01/FILTER/' + ofcType, '/TILE/OFL02/FILTER/' + ofcType)
         else:
             ofcFolder = folders.addSplitMC('/TILE/ONL01/FILTER/' + ofcType, '/TILE/ONL01/FILTER/' + ofcType)
 

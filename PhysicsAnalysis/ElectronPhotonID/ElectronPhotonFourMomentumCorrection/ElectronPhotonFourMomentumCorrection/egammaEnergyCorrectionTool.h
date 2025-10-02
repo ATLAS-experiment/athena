@@ -224,10 +224,10 @@ namespace Scale {
     L1GainDown,
     L2GainUp,
     L2GainDown,
-    L2MediumGainDown,
     L2MediumGainUp,
-    L2LowGainDown,
+    L2MediumGainDown,
     L2LowGainUp,
+    L2LowGainDown,
   
     // ... Pedestal
     PedestalUp,
@@ -241,7 +241,7 @@ namespace Scale {
     MatPP0Up,
     MatPP0Down,
   
-    // AF2 systematics
+    // AF2 or AF3 systematics
     afUp,
     afDown,
   
@@ -269,6 +269,16 @@ namespace Scale {
     EXTRARUN3PREUp,
     EXTRARUN3PREDown,
   
+    // extra Run 2->3 systematic for PS, E1/E2, L2Gain
+    PSEXTRARUN3Up,
+    PSEXTRARUN3Down,
+    S12EXTRARUN3Up,
+    S12EXTRARUN3Down,
+    L2MediumGainEXTRARUN3Up,
+    L2MediumGainEXTRARUN3Down,
+    L2LowGainEXTRARUN3Up,
+    L2LowGainEXTRARUN3Down,
+
     AllUp,
     AllDown,
     AllCorrelatedUp,
@@ -330,7 +340,7 @@ enum ESModel {
   es2023_R22_Run2_v1,  // fix E1E2 for es2023_R22_Run2_v0
   es2024_Run3_ofc0_v0,  // for run 3 data recorded with LAR OFC(mu=0), based on es2017_R21_ofc0_v1 
                         //  with extra uncertainty   (preliminary recommendation)
-
+  es2024_Run3_v0,       // Run3 intermediate recommendation (based on 2022 and 2023 high mu data)
   UNDEFINED
 
 };
@@ -464,6 +474,8 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   std::unique_ptr<egGain::GainTool> m_gain_tool;  // run 1
   std::unique_ptr<egGain::GainUncertainty>
       m_gain_tool_run2;  // based on special run for run2
+  std::unique_ptr<egGain::GainUncertainty>
+      m_gain_tool_run3_extra;  // OFC extrapolation for run3
   std::shared_ptr<LinearityADC> m_ADCLinearity_tool;  // run 2
   std::unique_ptr<eg_resolution> m_resolution_tool;
   std::unique_ptr<get_MaterialResolutionEffect> m_getMaterialDelta;
@@ -533,7 +545,7 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
       egEnergyCorr::Scale::Variation var = egEnergyCorr::Scale::Nominal,
       double varSF = 1.) const;
 
-  static double getE4Uncertainty(double eta);
+  double getE4Uncertainty(double eta) const;
   double getE4NonLinearity(double cl_eta, double meanE,
                            PATCore::ParticleType::Type) const;
 
@@ -599,8 +611,8 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   double get_OFCSyst(double eta) const;
   static bool isInCrack(double cl_eta);
   static double nearestEtaBEC(double cl_eta);
-  double getInterpolateConvSyst2D(const TH2& conv_hist, double aeta,
-                                  double ET) const;
+  static double getInterpolateConvSyst2D(const TH2& conv_hist, double aeta,
+                                  double ET) ;
 
   /** @brief get resolution and its uncertainty)
       @brief particle type : 0=electron, 1=reco unconverted photon, 2=reco
@@ -647,6 +659,10 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   std::unique_ptr<TH1> m_zeeNom_data2016;
   std::unique_ptr<TH1> m_zeeNom_data2017;
   std::unique_ptr<TH1> m_zeeNom_data2018;
+  std::unique_ptr<TH1> m_zeeNom_data2022;
+  std::unique_ptr<TH1> m_zeeNom_data2023;
+  std::unique_ptr<TH1> m_zeeNom_data2024;
+  
   std::unique_ptr<const TH1> m_zeeFwdk;
   std::unique_ptr<const TH1> m_zeeFwdb;
 
@@ -789,6 +805,14 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
   std::unique_ptr<TH2> m_G4OverAFII_resolution_electron;
   std::unique_ptr<TH2> m_G4OverAFII_resolution_unconverted;
   std::unique_ptr<TH2> m_G4OverAFII_resolution_converted;
+
+  // Atlfast -> Fullsim corrections extra systematic for 1.3<eta<1.35
+  std::unique_ptr<TH1> m_G4OverAF_electron_scale_extra_sys;
+  std::unique_ptr<TH1> m_G4OverAF_converted_scale_extra_sys;
+  std::unique_ptr<TH1> m_G4OverAF_unconverted_scale_extra_sys;
+  std::unique_ptr<TH1> m_G4OverAF_electron_resolution_extra_sys;
+  std::unique_ptr<TH1> m_G4OverAF_converted_resolution_extra_sys;
+  std::unique_ptr<TH1> m_G4OverAF_unconverted_resolution_extra_sys;
 
   // Main ES model switch
 

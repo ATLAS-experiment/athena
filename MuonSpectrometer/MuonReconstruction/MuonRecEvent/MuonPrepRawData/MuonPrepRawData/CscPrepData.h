@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -106,10 +106,9 @@ class CscPrepData final:   public MuonCluster
   The pointer will be zero if the det el is not defined (i.e. it was not passed in by the ctor) */
   virtual const MuonGM::CscReadoutElement* detectorElement() const override final;
 
-  /** Interface method checking the type*/
-  virtual bool type(Trk::PrepRawDataType type) const override final
-  {
-    return type == Trk::PrepRawDataType::CscPrepData;
+  /** @brief Interface method returning the prdType */
+  virtual Trk::PrepRawDataType prdType() const override final {
+    return Trk::PrepRawDataType::CscPrepData;
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////

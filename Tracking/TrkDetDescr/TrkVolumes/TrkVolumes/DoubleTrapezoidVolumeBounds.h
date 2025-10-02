@@ -92,7 +92,7 @@ class DoubleTrapezoidVolumeBounds final: public VolumeBounds {
   bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into Surfaces */
-  const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */
@@ -132,25 +132,25 @@ class DoubleTrapezoidVolumeBounds final: public VolumeBounds {
  private:
   /** This method returns the associated DoubleTrapezoidBounds of the face
    * PlaneSurface parallel to local xy plane */
-  DiamondBounds* faceXYDiamondBounds() const;
+  std::shared_ptr<DiamondBounds> faceXYDiamondBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * attached to alpha (negative local x)*/
-  RectangleBounds* faceAlpha1RectangleBounds() const;
-  RectangleBounds* faceAlpha2RectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceAlpha1RectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceAlpha2RectangleBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * attached to beta (positive local x)*/
-  RectangleBounds* faceBeta1RectangleBounds() const;
-  RectangleBounds* faceBeta2RectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceBeta1RectangleBounds() const;
+  std::shared_ptr<RectangleBounds> faceBeta2RectangleBounds() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * parallel to local zx plane, negative local y */
-  RectangleBounds* faceZXRectangleBoundsBottom() const;
+  std::shared_ptr<RectangleBounds> faceZXRectangleBoundsBottom() const;
 
   /** This method returns the associated RecantleBounds of the face PlaneSurface
    * parallel to local zx plane, positive local y */
-  RectangleBounds* faceZXRectangleBoundsTop() const;
+  std::shared_ptr<RectangleBounds> faceZXRectangleBoundsTop() const;
 
 #ifdef TRKDETDESCR_USEFLOATPRECISON
 #define double float

@@ -63,7 +63,7 @@ namespace xAODMaker {
     virtual StatusCode execute(const EventContext& ctx) const;
 
   private:
-  
+
     /// toggle on adding truth links
     Gaudi::Property<bool> m_addTruthLink{this,"AddTruthLink", false };
     /// The key for the input TrackParticleTruthCollection
@@ -95,21 +95,17 @@ namespace xAODMaker {
 
 
     SG::WriteHandleKey<xAOD::TrackParticleContainer> m_xaodTrackParticlesout{this, "xAODContainerName", "ConvertedTrackParticleCandidate" };
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_xaodTruthOriginKey{this,"truthOriginKey", "" , "Key to declare that the alg will write truthOrigin. Will be overwritten during init"};
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_xaodTruthTypeKey{this, "truthTypeKey", "" , "Key to declare that the alg will write truthType. Will be overwritten during init" };
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_xaodTruthLinkKey{this, "truthLinkKey", "", "Key to declare that the alg will writhe the truthParticleLink. Will be overwritten during init."};
-    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_xaodTruthMatchProbKey{this, "truthMatchProbKey", "", "Key to declare that the alg will writhe the truthParticleLink. Will be overwritten during init."};
 
 
     SG::ReadHandleKey<xAODTruthParticleLinkVector> m_truthParticleLinkVec{this, "xAODTruthLinkVector", "xAODTruthLinks"};
     SG::ReadHandleKey<TrackParticleTruthCollection> m_aodTruth{this, "AODTruthContainerName" , ""};
     SG::ReadHandleKey<TrackTruthCollection> m_trackTruth{this, "TrackTruthContainerName", ""};
-  
+
     // Allow monitoring of track parameters during conversion
     Gaudi::Property<bool> m_doMonitoring{this, "DoMonitoring", false};
     ToolHandle<ITrackParticleMonitoring> m_trackMonitoringTool{ this, "TrkMonTool", "", "Tracking Monitoring tool" };
 
-    //for timing we need a handle to the MonTool in the alg 
+    //for timing we need a handle to the MonTool in the alg
     ToolHandle<GenericMonitoringTool > m_monTool { this, "MonTool", "", "Monitoring tool" };
 
     // Augment observed tracks with information from track observer tool map

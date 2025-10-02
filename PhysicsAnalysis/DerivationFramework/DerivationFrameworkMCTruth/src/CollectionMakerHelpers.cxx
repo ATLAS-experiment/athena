@@ -32,8 +32,8 @@ int DerivationFramework::CollectionMakerHelpers::addTruthVertex( const xAOD::Tru
     int myIndex = vertCont->size()-1;
     ElementLink<xAOD::TruthVertexContainer> eltv(*vertCont, myIndex);
     // Set properties
-    xTruthVertex->setId(HepMC::status(oldVert));
-    xTruthVertex->setBarcode(HepMC::barcode(&oldVert)); // FIXME barcode-based
+    xTruthVertex->setStatus(HepMC::status(oldVert));
+    xTruthVertex->setUid(HepMC::uniqueID(oldVert));
     xTruthVertex->setX(oldVert.x());
     xTruthVertex->setY(oldVert.y());
     xTruthVertex->setZ(oldVert.z());
@@ -98,7 +98,7 @@ xAOD::TruthParticle* DerivationFramework::CollectionMakerHelpers::setupTruthPart
     partCont->push_back( xTruthParticle );
     // Fill with numerical content
     xTruthParticle->setPdgId(oldPart.pdgId());
-    xTruthParticle->setBarcode(HepMC::barcode(&oldPart)); // FIXME barcode-based
+    xTruthParticle->setUid(HepMC::uniqueID(&oldPart));
     xTruthParticle->setStatus(oldPart.status());
     xTruthParticle->setM(oldPart.m());
     xTruthParticle->setPx(oldPart.px());

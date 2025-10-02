@@ -16,7 +16,7 @@
 #include "xAODPFlow/PFOAuxContainer.h"
 #include "xAODPFlow/PFO.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 
 
@@ -94,10 +94,10 @@ StatusCode TauShotFinder::executeShotFinder(xAOD::TauJet& tau, xAOD::CaloCluster
       float phi = cell->phi()+dPhi*ratio;
       float pt = cell->pt()*m_caloWeightTool->wtCell(cell)+phiNeigCell->pt()*m_caloWeightTool->wtCell(phiNeigCell);
 
-      shot->setP4( (float) pt, (float) cell->eta(), (float) phi, (float) cell->m());
+      shot->setP4( static_cast<float>(pt), static_cast<float>(cell->eta()), static_cast<float>(phi), static_cast<float>(cell->m()));
     }
     else {
-      shot->setP4( (float) cell->pt()*m_caloWeightTool->wtCell(cell), (float) cell->eta(), (float) cell->phi(), (float) cell->m()); 
+      shot->setP4( static_cast<float>(cell->pt()*m_caloWeightTool->wtCell(cell)), static_cast<float>(cell->eta()), static_cast<float>(cell->phi()), static_cast<float>(cell->m())); 
     }
 
     // -- Set the Attribute 
@@ -205,7 +205,7 @@ StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
   // -- TODO: change the hardcoded 0.4
   std::vector<CaloCell_ID::SUBCALO> emSubCaloBlocks;
   emSubCaloBlocks.push_back(CaloCell_ID::LAREM);
-  boost::scoped_ptr<CaloCellList> cellList(new CaloCellList(detMgr, &cellContainer,emSubCaloBlocks)); 
+  std::unique_ptr<CaloCellList> cellList = std::make_unique<CaloCellList>(detMgr, &cellContainer, emSubCaloBlocks);
   // -- FIXME: tau p4 is corrected to point at tau vertex, but the cells are not 
   cellList->select(tau.eta(), tau.phi(), 0.4); 
 

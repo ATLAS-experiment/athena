@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/TRT_LayerBuilderImpl.h"
@@ -10,9 +10,10 @@
 #include "TrkGeometry/BinnedLayerMaterial.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
-#include "TrkDetDescrUtils/BinnedArrayArray.h"
 #include "TrkDetDescrUtils/BinnedArray1D.h"
 #include "TrkDetDescrUtils/BinnedArray2D.h"
+#include "TrkDetDescrUtils/BinnedArrayArray2D.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 // GeoPrimitives
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 // InDetDD
@@ -161,7 +162,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
       Trk::BinnedLayerMaterial* layerMaterial = nullptr;
       // -- material with 1D binning
       Trk::BinUtility layerBinUtility1DZ(m_barrelLayerBinsZ,-layerHalflength, layerHalflength, Trk::open, Trk::binZ);
-      if (m_barrelLayerBinsPhi==1){
+      if (m_barrelLayerBinsPhi==1u){
         // no binning in phi
         layerMaterial =new Trk::BinnedLayerMaterial(layerBinUtility1DZ);
       } else { // -- material with 2D binning : Rphi*Z optimized for cylinder layer
@@ -174,10 +175,11 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         layerMaterial =new Trk::BinnedLayerMaterial(layerBinUtility2DRPhiZ);
       }
       // Barrel layers are centered around (0,0,0) by definition
-      barrelLayers->push_back(new Trk::CylinderLayer(new Trk::CylinderBounds(*layerRadiusIter,layerHalflength),
-                                                     *layerMaterial,
-                                                     m_layerThickness));
-      ATH_MSG_VERBOSE( " --> Creating a layer at radius : " << *layerRadiusIter );
+      barrelLayers->push_back(
+          new Trk::CylinderLayer(std::make_shared<Trk::CylinderBounds>(
+                                     *layerRadiusIter, layerHalflength),
+                                 *layerMaterial, m_layerThickness));
+      ATH_MSG_VERBOSE(" --> Creating a layer at radius : " << *layerRadiusIter);
       delete layerMaterial;
     }
   } else {
@@ -213,11 +215,11 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         double layerPhiMax         = -10;
 
         // per phi sector we make a 2D binnin in phi-z
-        std::vector< std::pair<Trk::BinnedArray<Trk::Surface>*, Amg::Vector3D >  > layerSectorArrays;
+        std::vector< std::pair<Trk::BinnedArray2D<Trk::Surface>, Amg::Vector3D >  > layerSectorArrays;
         Amg::Vector3D layerSectorPosition(0.,0.,0.);
 
         // the sector approaching surfaces
-        std::vector< std::pair< Trk::SharedObject<const Trk::ApproachSurfaces>, Amg::Vector3D > > layerApproachSurfaces;
+        std::vector< std::pair< std::shared_ptr<const Trk::ApproachSurfaces>, Amg::Vector3D > > layerApproachSurfaces;
 
         // layer sector arrays
         for (int phisec=0; phisec < nBarrelPhiSectors; phisec++){
@@ -262,7 +264,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
             aSurfaces->push_back(new Trk::PlaneSurface(Amg::Transform3D(Amg::getTransformFromRotTransl(elementRotation, outerCenter))));
 
             // now register it to for building the array
-            layerApproachSurfaces.emplace_back( Trk::SharedObject<const Trk::ApproachSurfaces>(aSurfaces),elementCenter);
+            layerApproachSurfaces.emplace_back( std::shared_ptr<const Trk::ApproachSurfaces>(aSurfaces),elementCenter);
             // screen output
             ATH_MSG_VERBOSE("---> Sector " << phisec << " - posneg - " << posneg << " - with central phi = " << elementSurface->center().phi() );
             // sector phi centers
@@ -289,7 +291,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
                  * now that SharedObject is a shared_ptr typedef do the same with empty deleter
                  */
                 // Something like
-                // Trk::SharedObject<Trk::Surface>  =
+                // std::shared_ptr<Trk::Surface>  =
                 // std::make_shared<Trk::Surface>(.....)) could be fine
                 //
                 // As things are now
@@ -300,7 +302,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
                 // 2) The const_cast here make the
                 // code non MT safe. For now we handle this by being careful
                 // on lifetimes and non-re-entrant TG construction.
-                Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
+                std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
                                                               Trk::do_not_delete<Trk::Surface>);
                 strawsPerPhiSecLayer.emplace_back(sharedSurface, strawOrderPos);
                 // and record
@@ -321,13 +323,13 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           phiMax += 0.5*phiStep;
           // correct for the +pi/-pi module
           // now create the BinUtility
-          Trk::BinUtility* layerStrawPhiZUtility     = new Trk::BinUtility(sectorStraws/2,phiMin,phiMax,Trk::open, Trk::binPhi);
-          (*layerStrawPhiZUtility)  += Trk::BinUtility(2,-layerZmax, layerZmax, Trk::open, Trk::binZ);
+          auto layerStrawPhiZUtility = Trk::BinUtility(sectorStraws/2,phiMin,phiMax,Trk::open, Trk::binPhi);
+          layerStrawPhiZUtility  += Trk::BinUtility(2,-layerZmax, layerZmax, Trk::open, Trk::binZ);
           // create the 2D BinnedArray
-          Trk::BinnedArray2D<Trk::Surface>* layerStrawPhiSector = new Trk::BinnedArray2D<Trk::Surface>(strawsPerPhiSecLayer,layerStrawPhiZUtility);
+          Trk::BinnedArray2D<Trk::Surface> layerStrawPhiSector(strawsPerPhiSecLayer,layerStrawPhiZUtility);
           ATH_MSG_VERBOSE("---> Sector " << phisec << " - BinnedArray for straws prepared for " << strawsPerPhiSecLayer.size() << " straws.");
           // fill the array
-          layerSectorArrays.emplace_back(layerStrawPhiSector, layerSectorPosition);
+          layerSectorArrays.emplace_back(std::move(layerStrawPhiSector), layerSectorPosition);
           // ---------------- enf of phi sector ----------------------------------------------------
         } // loop over PhiSectors done
 
@@ -343,7 +345,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           ATH_MSG_VERBOSE( "--> Creating a straw          layer at radius  : " << layerRadius );
 
         // now order the plane layers to sit on cylindrical layers
-        Trk::CylinderBounds* barrelLayerBounds = new Trk::CylinderBounds(layerRadius, layerHalflength);
+        auto  barrelLayerBounds = std::make_shared<Trk::CylinderBounds>(layerRadius, layerHalflength);
 
         // ---- correct phi -------------------------------------------------------------------
         ATH_MSG_VERBOSE("    prepare approach description with " << nBarrelPhiSectors << " barrel sectors.");
@@ -358,23 +360,23 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
         ATH_MSG_VERBOSE("    min phi / max phi corrected : " << layerPhiMinCorrected << " / " << layerPhiMaxCorrected );
 
         // the sector surfaces
-        Trk::BinUtility* layerSectorBinUtility = new Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
-        auto strawArray = std::make_unique<Trk::BinnedArrayArray<Trk::Surface>>(layerSectorArrays, layerSectorBinUtility );
+        auto layerSectorBinUtility = Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
+        auto strawArray = std::make_unique<Trk::BinnedArrayArray2D<Trk::Surface>>(std::move(layerSectorArrays), layerSectorBinUtility );
 
         ATH_MSG_VERBOSE("--> Layer " << layer << " has been built with " << strawArray->arrayObjects().size() << " straws.");
 
         // ApproachDescriptor
         // build a BinUtility for the ApproachDescritptor
-        Trk::BinUtility* aDescriptorBinUtility = new Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
-        (*aDescriptorBinUtility) += Trk::BinUtility(2,-layerHalflength,layerHalflength,Trk::open, Trk::binZ);
+        auto aDescriptorBinUtility = Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
+        aDescriptorBinUtility += Trk::BinUtility(2,-layerHalflength,layerHalflength,Trk::open, Trk::binZ);
 
         auto aDescriptorBinnedArray = std::make_unique<Trk::BinnedArray2D<const Trk::ApproachSurfaces>> (layerApproachSurfaces, aDescriptorBinUtility);
 
         // build an approach surface
-        auto approachSurface = std::make_unique<Trk::CylinderSurface> (barrelLayerBounds->clone());
-        Trk::ApproachDescriptor* aDescritpor =
-          new Trk::ApproachDescriptor(std::move(aDescriptorBinnedArray),
-                                      std::move( approachSurface));
+        auto approachSurface = std::make_unique<Trk::CylinderSurface>(
+            std::make_shared<Trk::CylinderBounds>(*barrelLayerBounds));
+        Trk::ApproachDescriptor* aDescritpor = new Trk::ApproachDescriptor(
+            std::move(aDescriptorBinnedArray), std::move(approachSurface));
 
         // do not give every layer material properties
         if (assignMaterial) {
@@ -382,7 +384,7 @@ InDet::TRT_LayerBuilderImpl::cylindricalLayersImpl(const InDetDD::TRT_DetElement
           Trk::BinnedLayerMaterial* layerMaterial = nullptr;
           // -- material with 1D binning
           Trk::BinUtility layerBinUtilityZ(m_barrelLayerBinsZ, -layerHalflength, layerHalflength, Trk::open, Trk::binZ );
-          if (m_barrelLayerBinsPhi==1){
+          if (m_barrelLayerBinsPhi==1u){
             layerMaterial =new Trk::BinnedLayerMaterial(layerBinUtilityZ);
           } else { // -- material with 2D binning: RPhiZ binning
             Trk::BinUtility layerBinUtilityRPhiZ(m_barrelLayerBinsPhi,
@@ -487,7 +489,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                                    fullDiscBounds->rMax(),
                                    Trk::open,
                                    Trk::binR);
-  if (m_barrelLayerBinsPhi==1)
+  if (m_barrelLayerBinsPhi==1u)
     layerMaterial = std::make_unique<Trk::BinnedLayerMaterial>(layerBinUtilityR);
   else { // -- material with 2D binning
     Trk::BinUtility layerBinUtilityPhi(m_barrelLayerBinsPhi,
@@ -535,7 +537,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
         Amg::Transform3D zPosTrans =
           Amg::Transform3D(Amg::Translation3D(0., 0., (*zPosIter)));
         endcapLayers->push_back(new Trk::DiscLayer(zPosTrans,
-                                                   fullDiscBounds->clone(),
+                                                   std::make_shared<Trk::DiscBounds>(*fullDiscBounds),
                                                    *layerMaterial,
                                                    m_layerThickness));
       }
@@ -600,7 +602,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                   takeSmaller(zMin,zPos);
                   takeBigger(zMax,zPos);
                   // Something like
-                  // Trk::SharedObject<Trk::Surface>  =
+                  // std::shared_ptr<Trk::Surface>  =
                   // std::make_shared<Trk::Surface>(currentElement)) could be fine
                   //
                   // As things are now
@@ -611,7 +613,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                   // 2) The const_cast here make the
                   // code non MT safe. For now we handle this by being careful
                   // on lifetimes and non-re-entrant TG construction.
-                  Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
+                  std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
                                                                 [](Trk::Surface*) {});
                   strawPerEndcapLayer.emplace_back(sharedSurface, strawOrderPos);
                   ++numberOfStraws;
@@ -621,7 +623,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               if (!numberOfStraws){
                 return nullptr;
               }
-              Trk::BinUtility* currentBinUtility = new Trk::BinUtility(numberOfStraws, -M_PI, M_PI, Trk::closed, Trk::binPhi);
+              auto currentBinUtility = Trk::BinUtility(numberOfStraws, -M_PI, M_PI, Trk::closed, Trk::binPhi);
               auto strawArray = std::make_unique<Trk::BinnedArray1D<Trk::Surface>>(strawPerEndcapLayer, currentBinUtility);
               Trk::DiscLayer* currentLayer = nullptr;
 
@@ -642,11 +644,11 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               Amg::Transform3D  aspTransform = Amg::Transform3D(Amg::Translation3D(aspPosition));
               // order in an optimised way for collision direction
               if (discZ > 0.){
-                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, fullDiscBounds->clone()) );
-                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, fullDiscBounds->clone()) );
+                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)));
+                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)) );
               } else {
-                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, fullDiscBounds->clone()) );
-                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, fullDiscBounds->clone()) );
+                aSurfaces->push_back( new Trk::DiscSurface(aspTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)) );
+                aSurfaces->push_back( new Trk::DiscSurface(asnTransform, std::make_shared<Trk::DiscBounds>(*fullDiscBounds)) );
               }
               // approach descriptor
               Trk::ApproachDescriptor* aDescriptor = new Trk::ApproachDescriptor(std::move(aSurfaces),false);
@@ -654,7 +656,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
               // do not give every layer material properties
               if (assignMaterial)
                 currentLayer = new Trk::DiscLayer(fullDiscTransform,
-                                                  fullDiscBounds->clone(),
+                                                  std::make_shared<Trk::DiscBounds>(*fullDiscBounds),
                                                   std::move(strawArray),
                                                   *layerMaterial,
                                                   m_layerThickness,
@@ -662,7 +664,7 @@ InDet::TRT_LayerBuilderImpl::discLayersImpl(const InDetDD::TRT_DetElementContain
                                                   aDescriptor);
               else if (!m_modelGeometry)
                 currentLayer = new Trk::DiscLayer(fullDiscTransform,
-                                                  fullDiscBounds->clone(),
+                                                  std::make_shared<Trk::DiscBounds>(*fullDiscBounds),
                                                   std::move(strawArray),
                                                   m_layerThickness,
                                                   std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),

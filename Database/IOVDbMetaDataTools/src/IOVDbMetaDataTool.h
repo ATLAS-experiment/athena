@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVDBMETADATATOOLS_IOVDBMETADATATOOL_H
@@ -36,9 +36,8 @@ class IOVMetaDataContainer;
  *
  **/
 
-class IOVDbMetaDataTool : virtual public AthAlgTool,
-                          virtual public IIncidentListener,
-                          virtual public IIOVDbMetaDataTool
+class IOVDbMetaDataTool : public extends<AthAlgTool,
+                                         IIncidentListener, IIOVDbMetaDataTool>
 {
 public:    
     // Constructor
@@ -115,10 +114,6 @@ private:
     StoreGateSvc_t   m_metaDataStore;
     StoreGateSvc_t   m_inputStore;
 
-    // Has the FirstInputFileIncident fired? Used to skip the first
-    // BeginInputFile incident
-    bool             m_processedFirstInputFileIncident;
-
     // Flag to check whether we need to override run number for MC
     // events in incoming file meta data. This is needed for example
     // for incoming simulation or digitization parameters.
@@ -135,12 +130,9 @@ private:
     // Files already processed, maintain a set
     std::set<std::string> m_filesProcessed;
 
-    // Min/max run numbers for overriding meta data IOV  
-    UnsignedIntegerArrayProperty m_minMaxRunNumbers;
-
-    // Folders and attributes to be deleted
-    StringArrayProperty  m_foldersToBeModified;
-    StringArrayProperty  m_attributesToBeRemoved;
+    UnsignedIntegerArrayProperty m_minMaxRunNumbers{this, "MinMaxRunNumbers", {}, "Min/max run numbers for overriding meta data IOV"};
+    StringArrayProperty  m_foldersToBeModified{this, "FoldersToBeModified", {"/Simulation/Parameters"}};
+    StringArrayProperty  m_attributesToBeRemoved{this, "AttributesToBeRemoved", {"RandomSeedOffset"}};
     bool                 m_modifyFolders;
 
     // mutex for R/W locking of the entire tool (and supposedly all metadata objects it works with)

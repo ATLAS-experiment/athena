@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CondProxyProvider.cxx
@@ -11,7 +11,6 @@
 #include "PoolCollectionConverter.h"
 #include "registerKeys.h"
 
-#include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PoolSvc/IPoolSvc.h"
@@ -27,12 +26,11 @@
 #include "CollectionBase/ICollectionCursor.h"
 
 #include <vector>
+#include <list>
 
 //________________________________________________________________________________
 CondProxyProvider::CondProxyProvider(const std::string& name, ISvcLocator* pSvcLocator) :
     base_class(name, pSvcLocator),
-	m_athenaPoolCnvSvc("AthenaPoolCnvSvc", name),
-	m_poolCollectionConverter(0),
 	m_contextId(IPoolSvc::kInputStream)
 	{
 }
@@ -59,19 +57,10 @@ StatusCode CondProxyProvider::initialize() {
    }
    // Initialize
    m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
-   // Create an m_poolCollectionConverter to read the objects in
-   m_poolCollectionConverter = getCollectionCnv();
-   if (m_poolCollectionConverter == 0) {
-      return(StatusCode::FAILURE);
-   }
    return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________
 StatusCode CondProxyProvider::finalize() {
-   if (m_poolCollectionConverter != 0) {
-      m_poolCollectionConverter->disconnectDb().ignore();
-      delete m_poolCollectionConverter; m_poolCollectionConverter = 0;
-   }
    // Release AthenaPoolCnvSvc
    if (!m_athenaPoolCnvSvc.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release AthenaPoolCnvSvc.");
@@ -88,25 +77,27 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
    // Retrieve DetectorStoreSvc
    ATH_CHECK( detectorStoreSvc.retrieve() );
 
-   if (m_poolCollectionConverter == nullptr) {
+   // Create an poolCollectionConverter to read the objects in
+   std::unique_ptr<PoolCollectionConverter> poolCollectionConverter = getCollectionCnv();
+   if (!poolCollectionConverter) {
      return StatusCode::FAILURE;
    }
-   
    // Create DataHeader iterators
-   pool::ICollectionCursor* headerIterator = &m_poolCollectionConverter->selectAll();
+   pool::ICollectionCursor* headerIterator = &poolCollectionConverter->selectAll();
+
    for (int verNumber = 0; verNumber < 100; verNumber++) {
       if (!headerIterator->next()) {
-         m_poolCollectionConverter->disconnectDb().ignore();
-         delete m_poolCollectionConverter; m_poolCollectionConverter = 0;
+         poolCollectionConverter->disconnectDb().ignore();
+         poolCollectionConverter.reset();
          ++m_inputCollectionsIterator;
          if (m_inputCollectionsIterator != m_inputCollectionsProp.value().end()) {
             // Create PoolCollectionConverter for input file
-            m_poolCollectionConverter = getCollectionCnv();
-            if (m_poolCollectionConverter == 0) {
+            poolCollectionConverter = getCollectionCnv();
+            if (!poolCollectionConverter) {
                return(StatusCode::FAILURE);
             }
             // Get DataHeader iterator
-            headerIterator = &m_poolCollectionConverter->selectAll();
+            headerIterator = &poolCollectionConverter->selectAll();
             if (!headerIterator->next()) {
                return(StatusCode::FAILURE);
             }
@@ -119,6 +110,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
       token->fromString(headerIterator->eventRef().toString());
       TokenAddress* tokenAddr = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", myVersKey, m_contextId, std::move(token));
       if (!detectorStoreSvc->recordAddress(tokenAddr).isSuccess()) {
+         delete tokenAddr;
          ATH_MSG_ERROR("Cannot record DataHeader.");
          return(StatusCode::FAILURE);
       }
@@ -143,7 +135,6 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
          EventSelectorAthenaPoolUtil::registerKeys(element, &*detectorStoreSvc);
       }
    }
-
    return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________
@@ -158,15 +149,15 @@ StatusCode CondProxyProvider::updateAddress(StoreID::type /*storeID*/,
    return(StatusCode::FAILURE);
 }
 //__________________________________________________________________________
-PoolCollectionConverter* CondProxyProvider::getCollectionCnv() {
+std::unique_ptr<PoolCollectionConverter> CondProxyProvider::getCollectionCnv() {
    ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
-   PoolCollectionConverter* pCollCnv = new PoolCollectionConverter(std::string("ImplicitROOT:") + APRDefaults::TTreeNames::DataHeader,
+   auto pCollCnv = std::make_unique<PoolCollectionConverter>(std::string("ImplicitCollection:") + APRDefaults::TTreeNames::DataHeader,
 	   *m_inputCollectionsIterator,
 	   m_contextId,
 	   m_athenaPoolCnvSvc->getPoolSvc());
    if (!pCollCnv->initialize().isSuccess()) {
       // Close previous collection.
-      delete pCollCnv; pCollCnv = 0;
+      pCollCnv.reset();
       ATH_MSG_ERROR("Unable to open: " << *m_inputCollectionsIterator);
    }
    return(pCollCnv);

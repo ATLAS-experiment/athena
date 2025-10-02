@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsGeometry )
 
 # External dependencies:
-find_package( Acts COMPONENTS Core PluginJson )
+find_package( Acts COMPONENTS Core PluginJson PluginGeoModel )
 find_package( Boost )
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
@@ -20,15 +20,17 @@ atlas_add_library( ActsGeometryLib
                    src/ActsTrackingGeometrySvc.cxx
                    src/DetectorVolumeSvc.cxx
                    src/SimpleCylinderDetBuilderTool.cxx
+                   src/ItkBlueprintNodeBuilder.cxx                  
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES}
-                   ActsCore
+                   Acts::Core
                    ActsGeometryInterfacesLib
                    ActsGeoUtils
                    ActsInteropLib
-                   ActsPluginJson
+                   Acts::PluginJson
+                   Acts::PluginGeoModel
                    AthenaBaseComps
                    AthenaKernel
                    CaloDetDescrLib
@@ -68,7 +70,7 @@ atlas_add_component( ActsGeometry
                      src/ActsTrackingGeometryTool.cxx
                      src/ActsPropStepRootWriterSvc.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
-                     src/DetectorElementToActsGeometryIdMappingAlg.cxx
+                     src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES}
@@ -87,7 +89,9 @@ atlas_add_component( ActsGeometry
                      TRT_ReadoutGeometry
                      TrkGeometry
                      TrkParameters
-                     TrkSurfaces )
+                     TrkSurfaces
+                     Acts::PluginGeoModel
+                      )
 
 # Install files from the package:
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

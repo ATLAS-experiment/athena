@@ -11,7 +11,7 @@ from ISF_Tools.ISF_ToolsConfig import EntryLayerFilterCfg
 
 def EntryLayerToolCfg(flags, name="ISF_EntryLayerTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name
+    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(GeoIDSvcCfg(flags))
 
     if not flags.Sim.RecordStepInfo:
         # No filtering for FCS Parameterization input samples
@@ -34,7 +34,7 @@ def EntryLayerToolCfg(flags, name="ISF_EntryLayerTool", **kwargs):
 
 def EntryLayerToolMTCfg(flags, name="ISF_EntryLayerToolMT", **kwargs):
     result = ComponentAccumulator()
-    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name
+    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(GeoIDSvcCfg(flags))
 
     if not flags.Sim.RecordStepInfo:
         # No filtering for FCS Parameterization input samples
@@ -52,7 +52,7 @@ def EntryLayerToolMTCfg(flags, name="ISF_EntryLayerToolMT", **kwargs):
 
 def ATLFAST_EntryLayerToolCfg(flags, name="ISF_ATLFAST_EntryLayerTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)).name
+    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags))
     kwargs.setdefault("ParticleFilters", [result.addPublicTool(result.popToolsAndMerge(EntryLayerFilterCfg(flags)))])
 
     if flags.GeoModel.Run < LHCPeriod.Run4:
@@ -72,7 +72,7 @@ def ATLFAST_EntryLayerToolCfg(flags, name="ISF_ATLFAST_EntryLayerTool", **kwargs
 
 def ATLFAST_EntryLayerToolMTCfg(flags, name="ISF_ATLFAST_EntryLayerToolMT", **kwargs):
     result = ComponentAccumulator()
-    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)).name
+    kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags))
 
     filt = result.popToolsAndMerge(EntryLayerFilterCfg(flags))
     kwargs.setdefault("ParticleFilters", [filt])

@@ -110,17 +110,17 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
         dynamic_cast<const TrapezoidBounds*>(&m_surface->bounds())) {
       m_numberDoF = 1;
       m_type = trapezoidCluster;
-      double aa = measurementBase->localCovariance()(locX, locX);
-      double ab = measurementBase->localCovariance()(locX, locY);
-      double bb = measurementBase->localCovariance()(locY, locY);
-      double sum = aa + bb;
-      double diff = std::sqrt(sum * sum - 4. * (aa * bb - ab * ab));
+      const double aa = measurementBase->localCovariance()(locX, locX);
+      const double ab = measurementBase->localCovariance()(locX, locY);
+      const double bb = measurementBase->localCovariance()(locY, locY);
+      const double sum = aa + bb;
+      const double diff = std::sqrt(sum * sum - 4. * (aa * bb - ab * ab));
       // used by obsolete scaling
       // double lengthSq	= 0.5*(sum + diff);
-      double widthSq = 0.5 * (sum - diff);
+      const double widthSq = 0.5 * (sum - diff);
       sigma = std::sqrt(widthSq);
-      double term = 0.5 * (aa - bb) / diff;
-      double cosStereo = std::sqrt(0.5 - term);
+      const double term = 0.5 * (aa - bb) / diff;
+      const double cosStereo = std::sqrt(0.5 - term);
       double sinStereo = 0.0;
       if (term > -0.5) {
         sinStereo = std::sqrt(0.5 + term);
@@ -157,7 +157,7 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
       // pseudomeasurement - minimize along wire direction
       m_minimizationDirection =
           Amg::Vector3D(m_surface->transform().rotation().col(2));
-      double mag = m_surface->center().mag();
+      const double mag = m_surface->center().mag();
       m_normal = mag > 1e-6 ? Amg::Vector3D(m_surface->center() / mag)
                             : Amg::Vector3D(m_surface->normal());
       m_position = measurementBase->globalPosition();
@@ -363,7 +363,7 @@ FitMeasurement::FitMeasurement(double radiationThickness, double deltaE,
   else if (std::abs(direction(2)) < 0.5)
     m_type = barrelScatterer;
   if (!m_surface) {
-    CurvilinearUVT uvt(direction);
+    const CurvilinearUVT uvt(direction);
     m_surface = new PlaneSurface(position, uvt);
   }
 
@@ -494,9 +494,9 @@ FitMeasurement::FitMeasurement(const TrackSurfaceIntersection& intersection,
       m_weight(0.),
       m_weight2(0.) {
   // plane surface with normal along input direction and shift wrt position
-  Amg::Vector3D offset = intersection.direction() * shift;
+  const Amg::Vector3D offset = intersection.direction() * shift;
   m_position += offset;
-  CurvilinearUVT uvt(intersection.direction());
+  const CurvilinearUVT uvt(intersection.direction());
   m_surface = new PlaneSurface(m_position, uvt);
 
   m_intersection[FittedTrajectory] = std::make_optional<TrackSurfaceIntersection>(
@@ -623,7 +623,7 @@ FitMeasurement::FitMeasurement(int hitIndex, HitOnTrack* hitOnTrack,
   if (m_numberDoF == 1 && std::abs(m_normal.z()) > 0.99 &&
       std::abs(sinStereo) < 0.5)  // end-cap projective geometry
   {
-    double cosStereo = std::sqrt(1. - sinStereo * sinStereo);
+    const double cosStereo = std::sqrt(1. - sinStereo * sinStereo);
     m_sensorDirection =
         Amg::Vector3D(position(0) * cosStereo + position(1) * sinStereo,
                       -position(0) * sinStereo + position(1) * cosStereo, 0.);
@@ -776,9 +776,9 @@ FitMeasurement::FitMeasurement(const TrackParameters& perigee)
     // perigeeParameters as HepVector
     Amg::Vector3D momentum = perigee.momentum();
     double ptInv0 = 1. / momentum.perp();
-    double cosPhi = ptInv0 * momentum(0);
-    double sinPhi = ptInv0 * momentum(1);
-    double cotTheta = ptInv0 * momentum(2);
+    const double cosPhi = ptInv0 * momentum(0);
+    const double sinPhi = ptInv0 * momentum(1);
+    const double cotTheta = ptInv0 * momentum(2);
     ptInv0 *= perigee.charge();
 
     Amg::VectorX parameters(6);
@@ -922,7 +922,7 @@ void FitMeasurement::print(MsgStream& log) const {
         << 1. / std::abs(m_qOverP * Gaudi::Units::GeV) << std::setw(12)
         << std::setprecision(4) << m_energyLoss / Gaudi::Units::GeV;
     if (m_type < barrelInert || m_scatteringAngle > 0.) {
-      double totScat = sqrt(m_scatteringAngle * std::abs(m_qOverP) *
+      const double totScat = sqrt(m_scatteringAngle * std::abs(m_qOverP) *
                                 m_scatteringAngle * std::abs(m_qOverP) +
                             m_scatteringAngleOffSet * m_scatteringAngleOffSet);
       log << std::setw(16) << std::setprecision(6) << totScat << std::setw(13)
@@ -955,7 +955,7 @@ void FitMeasurement::qOverP(double value) {
   if ((m_type == barrelScatterer || m_type == endcapScatterer ||
        m_type == calorimeterScatterer) &&
       m_scatteringAngle > 0.) {
-    double pSquare = 1. / (value * value);
+    const double pSquare = 1. / (value * value);
     m_betaSquared = pSquare / (pSquare + m_particleMassSquared);
     m_weight = std::sqrt(m_betaSquared * pSquare) / m_scatteringAngle;
   }
@@ -977,7 +977,7 @@ void FitMeasurement::scatteringAngle(double angle,
   if (m_scatteringAngle == 0. && m_scatteringAngleOffSet > 0 &&
       m_qOverP != 0.) {
     //
-    double angle_iPat = angle * std::abs(m_qOverP);
+    const double angle_iPat = angle * std::abs(m_qOverP);
 
     //      std::cout << " scatteringAngle type " <<  m_type << " angle_iPat "
     //      << angle_iPat << " m_scatteringAngleOffSet " <<
@@ -1003,7 +1003,7 @@ void FitMeasurement::scatteringAngle(double angle,
   }
 
   if (m_qOverP != 0.) {
-    double pSquare = 1. / (m_qOverP * m_qOverP);
+    const double pSquare = 1. / (m_qOverP * m_qOverP);
     m_betaSquared = pSquare / (pSquare + m_particleMassSquared);
     m_weight = std::sqrt(m_betaSquared * pSquare) / m_scatteringAngle;
     if (m_type == calorimeterScatterer && m_scatteringAngleOffSet > 0) {
@@ -1019,7 +1019,7 @@ void FitMeasurement::scatteringAngle(double angle,
 }
 
 void FitMeasurement::setSigmaSymmetric(void) {
-  double sigma = std::sqrt(
+  const double sigma = std::sqrt(
       0.5 * (m_sigmaPlus * m_sigmaPlus + m_sigmaMinus * m_sigmaMinus));
   m_weight = 1. / sigma;
 }

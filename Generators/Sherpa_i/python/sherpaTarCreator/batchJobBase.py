@@ -5,12 +5,15 @@ import os, stat
 class batchJobBase:
   """A class containing all information necessary to run given bash commands in an arbitrary batch system."""
 
-  def __init__(self, name, hours=0, nCores=1, memMB=0, basedir=""):
+  def __init__(self, name, hours=0, nCores=1, account=None, queue=None, memMB=0, mounts=[], basedir=""):
     self.name = name
     self.cmds = []
     self.hours = hours
     self.nCores = nCores
+    self.account = account
+    self.queue = queue
     self.memMB = memMB
+    self.mounts = mounts
     if self.memMB == 1:
       self.memMB = 1499
     if self.memMB == 2:
@@ -21,7 +24,7 @@ class batchJobBase:
     self.dependsOnOk = []
     self.dependsOnAny = []
 
-  def write(self, useSingularity=True, extraDirs=[]):
+  def write(self, useSingularity=True, useApptainer=False, extraDirs=[]):
     executable =  "#!/bin/sh -\n"
 
     # COMPILER_PATH
@@ -38,13 +41,38 @@ class batchJobBase:
       executable += "export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase\n"
       executable += "source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh\n"
 
-    executable += "ulimit -f 1000000;\n"
-    executable += "cd "+self.basedir+"\n\n"
-    executable += "echo 'ncores="+str(self.nCores)+" nhours="+str(self.hours)+" "+self.basedir+"/"+self.name+".sh';\n"
-    for cmd in self.cmds:
-      executable += cmd+"\n"
-    executable += "exit 0\n"
-
+    if useApptainer:
+      wrapper = ''
+      wrapperfilename = self.basedir+"/"+self.name+"_wrapper.sh"
+      platform = str(os.environ['COMPILER_PATH']).split('/')[-1].replace('el9', 'almalinux9')
+      executable += 'export ALRB_CONT_SWTYPE="apptainer"\n'
+      executable += 'export ALRB_CONT_PRESETUP="hostname -f; date; id -a"\n'
+      executable += 'export ALRB_testPath=",,,,,,,,,,,,,,,,,,,,,,,,"\n'
+      executable += 'export ALRB_CONT_RUNPAYLOAD="'+wrapperfilename+'"\n'
+      wrapper += "ulimit -f 1000000;\n"
+      wrapper += "cd "+self.basedir+";\n\n"
+      wrapper += "echo 'ncores="+str(self.nCores)+" nhours="+str(self.hours)+" "+self.basedir+"/"+self.name+".sh';\n"
+      for cmd in self.cmds:
+        wrapper += cmd+'\n'
+      with open(wrapperfilename, 'w') as f:
+        f.write(wrapper)
+      st = os.stat(wrapperfilename)
+      os.chmod(wrapperfilename, st.st_mode | stat.S_IEXEC)
+      executable += "export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase\n"
+      executable += "source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh -c "+platform+" -b -q"
+      if self.mounts != []:
+        executable += "-m"+" ".join(self.mounts)
+      else:
+        executable += "\n"
+      executable += "exit $?\n"
+      
+    else:
+      executable += "ulimit -f 1000000;\n"
+      executable += "cd "+self.basedir+"\n\n"
+      executable += "echo 'ncores="+str(self.nCores)+" nhours="+str(self.hours)+" "+self.basedir+"/"+self.name+".sh';\n"
+      for cmd in self.cmds:
+        executable += cmd+"\n"
+      executable += "exit 0\n"
 
     filename = self.basedir+"/"+self.name+".sh"
     with open(filename, 'w') as f:

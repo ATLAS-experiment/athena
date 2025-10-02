@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -13,6 +13,7 @@
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 
 #include <xAODEgamma/Egamma.h>
+#include <xAODJet/Jet.h>
 #include <xAODBase/IParticle.h>
 #include <cmath>
 
@@ -26,9 +27,9 @@ namespace CP
   StatusCode AsgPtEtaSelectionTool ::
   initialize ()
   {
-    if (m_useDressedProperties && m_useClusterEta)
+    if (bool{m_useDressedProperties} + bool{m_useClusterEta} + bool{m_useConstituentMomentum} > 1)
     {
-      ATH_MSG_ERROR ("both 'useClusterEta' and 'useDressedProperties' can not be used at the same time");
+      ATH_MSG_ERROR ("only one of 'useDressedProperties', 'useClusterEta' and 'useConstituentMomentum' can be used at the same time");
       return StatusCode::FAILURE;
     }
     if (m_minPt < 0 || !std::isfinite (m_minPt))
@@ -76,12 +77,33 @@ namespace CP
       ATH_MSG_ERROR ("etaGapHigh=" << m_etaGapHigh << " >= maxEta=" << m_maxEta);
       return StatusCode::FAILURE;
     }
+    if (m_minRapidity < 0 || !std::isfinite (m_minRapidity))
+    {
+      ATH_MSG_ERROR ("invalid value of minRapidity: " << m_minRapidity);
+      return StatusCode::FAILURE;
+    }
+    if (m_maxRapidity < 0 || !std::isfinite (m_maxRapidity))
+    {
+      ATH_MSG_ERROR ("invalid value of maxRapidity: " << m_maxRapidity);
+      return StatusCode::FAILURE;
+    }
+    if ((m_minRapidity > 0 && m_maxRapidity > 0) &&
+        (m_minRapidity >= m_maxRapidity))
+    {
+      ATH_MSG_ERROR ("invalid rapidity range: " << m_minRapidity << " to " << m_maxRapidity);
+      return StatusCode::FAILURE;
+    }
+    if ((m_minEta > 0 || m_maxEta > 0) && (m_minRapidity > 0 || m_maxRapidity > 0))
+    {
+      ATH_MSG_ERROR ("cannot use both eta and rapidity cuts at the same time");
+      return StatusCode::FAILURE;
+    }
 
     if (m_useDressedProperties) {
        ATH_MSG_DEBUG( "Performing pt and eta cuts on the dressed properties" );
        m_dressedPropertiesIndex = m_accept.addCut ("dressedProperties", "has dressed properties");
-       m_dressedPtAccessor = std::make_unique<SG::AuxElement::ConstAccessor<float>> ("pt_dressed");
-       m_dressedEtaAccessor = std::make_unique<SG::AuxElement::ConstAccessor<float>> ("eta_dressed");
+       m_dressedPtAccessor = std::make_unique<SG::ConstAccessor<float>> ("pt_dressed");
+       m_dressedEtaAccessor = std::make_unique<SG::ConstAccessor<float>> ("eta_dressed");
     }
     if (m_minPt > 0) {
        ATH_MSG_DEBUG( "Performing pt >= " << m_minPt << " MeV selection" );
@@ -96,6 +118,10 @@ namespace CP
        m_egammaCastCutIndex = m_accept.addCut ("castEgamma", "cast to egamma");
        m_egammaClusterCutIndex = m_accept.addCut ("caloCluster", "egamma object has cluster");
     }
+    if (m_useConstituentMomentum) {
+       ATH_MSG_DEBUG( "Performing eta/rapidity cut on the jet constituent momentum" );
+       m_jetCastCutIndex = m_accept.addCut ("castJet", "cast to jet");
+    }
     if (m_minEta > 0) {
        ATH_MSG_DEBUG( "Performing |eta| >= " << m_minEta << " selection");
        m_minEtaCutIndex = m_accept.addCut ("minEta", "minimum eta cut");
@@ -108,6 +134,14 @@ namespace CP
        ATH_MSG_DEBUG( "Performing !( " << m_etaGapLow << " < |eta| < "
                       << m_etaGapHigh << " ) selection" );
        m_etaGapCutIndex = m_accept.addCut ("etaGap", "eta gap cut");
+    }
+    if (m_minRapidity > 0) {
+       ATH_MSG_DEBUG( "Performing |rapidity| >= " << m_minRapidity << " selection");
+       m_minRapidityCutIndex = m_accept.addCut ("minRapidity", "minimum eta cut");
+    }
+    if (m_maxRapidity > 0) {
+       ATH_MSG_DEBUG( "Performing |rapidity| < " << m_maxRapidity << " selection" );
+       m_maxRapidityCutIndex = m_accept.addCut ("maxRapidity", "maximum eta cut");
     }
     m_shouldPrintCastWarning = m_printCastWarning;
     m_shouldPrintClusterWarning = m_printClusterWarning;
@@ -192,6 +226,19 @@ namespace CP
       } else if (m_useDressedProperties)
       {
         absEta = std::abs ((*m_dressedEtaAccessor) (*particle));
+      } else if (m_useConstituentMomentum == true)
+      {
+        const xAOD::Jet *jet
+          = dynamic_cast<const xAOD::Jet*>(particle);
+        if (jet == nullptr)
+        {
+          if (m_shouldPrintCastWarning)
+            ANA_MSG_ERROR ("failed to cast input particle to jet");
+          m_shouldPrintCastWarning = false;
+          return accept;
+        }
+        accept.setCutResult (m_jetCastCutIndex, true);
+        absEta = std::abs (jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum").eta());
       } else
       {
         absEta = std::abs (particle->eta());
@@ -206,6 +253,37 @@ namespace CP
       if (m_etaGapCutIndex >= 0) {
         accept.setCutResult (m_etaGapCutIndex, (absEta < m_etaGapLow ||
                                                   absEta > m_etaGapHigh));
+      }
+    }
+
+    // Perform the rapdity cut(s).
+    if (m_minRapidityCutIndex >= 0 || m_maxRapidityCutIndex >= 0)
+    {
+      float absRapidity = 0;
+
+      if (m_useConstituentMomentum == true)
+      {
+        const xAOD::Jet *jet
+          = dynamic_cast<const xAOD::Jet*>(particle);
+        if (jet == nullptr)
+        {
+          if (m_shouldPrintCastWarning)
+            ANA_MSG_ERROR ("failed to cast input particle to jet");
+          m_shouldPrintCastWarning = false;
+          return accept;
+        }
+        accept.setCutResult (m_jetCastCutIndex, true);
+        absRapidity = std::abs (jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum").Rapidity());
+      } else
+      {
+        absRapidity = std::abs (particle->rapidity());
+      }
+
+      if (m_minRapidityCutIndex >= 0) {
+        accept.setCutResult (m_minRapidityCutIndex, absRapidity > m_minRapidity);
+      }
+      if (m_maxRapidityCutIndex >= 0) {
+        accept.setCutResult (m_maxRapidityCutIndex, absRapidity <= m_maxRapidity);
       }
     }
 

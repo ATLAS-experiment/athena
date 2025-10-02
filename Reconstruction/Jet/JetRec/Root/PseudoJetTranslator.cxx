@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "JetRec/PseudoJetTranslator.h"
 
@@ -50,7 +50,7 @@ xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
   if ( parentCont == nullptr ) { return jet ;}  // can this happen? if so THIS IS an ERROR ! should do something
 
   ElementLink<xAOD::JetContainer> el(*parentCont, parent.index());
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent"); 
+  static const SG::AuxElement::Accessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent_TEMP");
   parentELacc(jet) =el;
 
   jet.setInputType(parent.getInputType());

@@ -38,11 +38,8 @@
 class FPGATrackSimGNNPatternRecoTool : public extends <AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
     public:
-
-        ///////////////////////////////////////////////////////////////////////
-        // AthAlgTool
-
-        FPGATrackSimGNNPatternRecoTool(const std::string&, const std::string&, const IInterface*);
+        /// Constructor
+        using base_class::base_class;
 
         virtual StatusCode initialize() override;
 
@@ -58,14 +55,16 @@ class FPGATrackSimGNNPatternRecoTool : public extends <AthAlgTool, IFPGATrackSim
         // Properties
 
         Gaudi::Property<bool> m_doGNNRootOutput { this, "doGNNRootOutput", false, "Flag for GNN Root Output Tool" };
+        Gaudi::Property<int> m_regionNum { this, "regionNum", -1, "region number"};
         
         ///////////////////////////////////////////////////////////////////////
         // Handles
-        ToolHandle<FPGATrackSimGNNGraphHitSelectorTool>   m_GNNGraphHitSelectorTool {this, "GNNGraphHitSelector", "FPGATrackSimGNNGraphHitSelectorTool", "Graph HitSelector Tool"};
-        ToolHandle<FPGATrackSimGNNGraphConstructionTool>  m_GNNGraphConstructionTool {this, "GNNGraphConstruction", "FPGATrackSimGNNGraphConstructionTool", "Graph Construction Tool"};
-        ToolHandle<FPGATrackSimGNNEdgeClassifierTool>     m_GNNEdgeClassifierTool {this, "GNNEdgeClassifier", "FPGATrackSimGNNEdgeClassifierTool", "Edge Classifier Tool"};
-        ToolHandle<FPGATrackSimGNNRoadMakerTool>          m_GNNRoadMakerTool {this, "GNNRoadMaker", "FPGATrackSimGNNRoadMakerTool", "Road Maker Tool"};
-        ToolHandle<FPGATrackSimGNNRootOutputTool>         m_GNNRootOutputTool {this, "GNNRootOutput", "FPGATrackSimGNNRootOutputTool", "GNN ROOT Output Tool"};
+        ToolHandle<FPGATrackSimGNNGraphHitSelectorTool>    m_GNNGraphHitSelectorTool {this, "GNNGraphHitSelector", "FPGATrackSimGNNGraphHitSelectorTool", "Graph HitSelector Tool"};
+        ToolHandle<FPGATrackSimGNNGraphConstructionTool>   m_GNNGraphConstructionTool {this, "GNNGraphConstruction", "FPGATrackSimGNNGraphConstructionTool", "Graph Construction Tool"};
+        ToolHandleArray<FPGATrackSimGNNEdgeClassifierTool> m_GNNEdgeClassifierTools {this, "GNNEdgeClassifiers", {}, "One GNNEdgeClassifierTool per region"};
+        ToolHandle<FPGATrackSimGNNEdgeClassifierTool>      m_selectedGNNEdgeClassifierTool;
+        ToolHandle<FPGATrackSimGNNRoadMakerTool>           m_GNNRoadMakerTool {this, "GNNRoadMaker", "FPGATrackSimGNNRoadMakerTool", "Road Maker Tool"};
+        ToolHandle<FPGATrackSimGNNRootOutputTool>          m_GNNRootOutputTool {this, "GNNRootOutput", "FPGATrackSimGNNRootOutputTool", "GNN ROOT Output Tool"};
 };
 
 

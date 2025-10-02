@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -12,147 +12,6 @@
 // Gaudi
 #include "GaudiKernel/ITHistSvc.h"
 
-Trk::ExtrapolationEngineTest::ExtrapolationEngineTest(const std::string& name, ISvcLocator* pSvcLocator) :
-  Trk::TrkExUnitTestBase(name, pSvcLocator),
-  m_extrapolationEngine(""),
-  m_idHelper(nullptr),
-  m_pixel_ID(nullptr),
-  m_sct_ID(nullptr),
-  m_hgtd_ID(nullptr),
-  m_useHGTD(false),
-  m_parametersMode(1),
-  m_particleHypothesis(2),
-  m_smearProductionVertex(false),
-  m_smearFlatOriginT(false),
-  m_smearFlatOriginZ(false),
-  m_sigmaOriginT(0.),
-  m_sigmaOriginZ(0.),
-  m_d0Min(0.),
-  m_d0Max(0.),
-  m_z0Min(0.),
-  m_z0Max(0.),
-  m_etaMin(-3.),
-  m_etaMax(3.),
-  m_phiMin(-M_PI),
-  m_phiMax(M_PI),
-  m_ptMin(100.),
-  m_ptMax(100000.),
-  m_pathLimit(10e10),
-  m_collectSensitive(false),
-  m_collectPassive(false),
-  m_collectBoundary(false),
-  m_collectMaterial(false),
-  m_backExtrapolation(false),
-  m_stepwiseExtrapolation(false),
-  m_stepsPhi(1),
-  m_currentPhiStep(0),
-  m_currentEta(0.),
-  m_currentPhi(0.),
-  m_splitCharge(false),
-  m_writeTTree(true),
-  m_treeName("ExtrapolationEngineTest"),
-  m_treeFolder("/val/"),
-  m_treeDescription("ExtrapolationEngine test setup"),
-  m_charge(-1.0),
-  m_backPhi(0.),
-  m_backTheta(0.),
-  m_backEta(0.),
-  m_backP(0.),
-  m_backPt(0.),
-  m_sensitiveLayerIndex(nullptr),
-  m_sensitiveLocalPosX(nullptr),
-  m_sensitiveLocalPosY(nullptr),
-  m_sensitiveCenterPosX(nullptr),
-  m_sensitiveCenterPosY(nullptr),
-  m_sensitiveCenterPosZ(nullptr),
-  m_sensitiveCenterPosR(nullptr),
-  m_sensitiveCenterPosPhi(nullptr),
-  m_materialThicknessInX0(0.),
-  m_materialThicknessInL0(0.),
-  m_materialThicknessZARho(0.),
-  m_materialEmulatedIonizationLoss(0.),
-  m_materialThicknessInX0Bwd(0.),
-  m_materialThicknessInL0Bwd(0.),
-  m_materialThicknessInX0Sensitive(0.),
-  m_materialThicknessInX0Passive(0.),
-  m_materialThicknessInX0Boundary(0.),
-  m_materialThicknessInX0Cylinder(0.),
-  m_materialThicknessInX0Disc(0.),
-  m_materialThicknessInX0Plane(0.),
-  m_materialThicknessInX0Accumulated(nullptr),
-  m_materialThicknessInX0Steps(nullptr),
-  m_materialThicknessInL0Steps(nullptr),
-  m_materialPositionX(nullptr),
-  m_materialPositionY(nullptr),
-  m_materialPositionZ(nullptr),
-  m_materialPositionR(nullptr),
-  m_materialPositionP(nullptr),
-  m_materialPositionPt(nullptr),
-  m_materialScaling(nullptr),
-  m_stepDirection(nullptr),
-  m_endStepSuccessful(0),
-  m_endStepPositionX(0.),
-  m_endStepPositionY(0.),
-  m_endStepPositionZ(0.),
-  m_endStepPositionR(0.),
-  m_endStepPhi(0.),
-  m_endStepTheta(0.),
-  m_endStepEta(0.),
-  m_endStepP(0.),
-  m_endStepPt(0.),
-  m_endStepPathLength(0.),
-  m_endStepThicknessInX0(0.) {
-  // the extrapolation engine
-  declareProperty("ExtrapolationEngine", m_extrapolationEngine);
-  // validation ttree for writing
-  declareProperty("PositionMomentumWriter", m_posmomWriter);
-  // charged / neutral & other stuff
-  declareProperty("ParametersMode", m_parametersMode);
-  declareProperty("ParticleHypothesis", m_particleHypothesis);
-  declareProperty("BackExtrapolation", m_backExtrapolation);
-  declareProperty("StepwiseExtrapolation", m_stepwiseExtrapolation);
-  // configuration
-  declareProperty("PathLimit", m_pathLimit);
-  declareProperty("CollectSensitive", m_collectSensitive);
-  declareProperty("CollectPassive", m_collectPassive);
-  declareProperty("CollectBoundary", m_collectBoundary);
-  declareProperty("CollectMaterial", m_collectMaterial);
-  declareProperty("UseHGTD", m_useHGTD);
-  // Mode for scanning in steps
-  declareProperty("ScanMode", m_scanMode);
-  declareProperty("EtaScans", m_etaScans);
-  declareProperty("PhiSteps", m_stepsPhi);
-  declareProperty("PhiScans", m_phiScans);
-  declareProperty("SplitCharge", m_splitCharge);
-  // production vertices
-  declareProperty("SmearOrigin", m_smearProductionVertex);
-  declareProperty("SmearFlatOriginD0", m_smearFlatOriginT);
-  declareProperty("SmearFlatOriginZ0", m_smearFlatOriginZ);
-  declareProperty("SimgaOriginD0", m_sigmaOriginT);
-  declareProperty("SimgaOriginZ0", m_sigmaOriginZ);
-  // d0 min / max values for flat smearing
-  declareProperty("D0Min", m_d0Min);
-  declareProperty("D0Max", m_d0Max);
-  // z0 min / max values for flat smearing
-  declareProperty("Z0Min", m_z0Min);
-  declareProperty("Z0Max", m_z0Max);
-  declareProperty("Z0Values", m_z0Values);
-  // eta min / max values
-  declareProperty("EtaMin", m_etaMin);
-  declareProperty("EtaMax", m_etaMax);
-  // phi min / max values
-  declareProperty("PhiMin", m_phiMin);
-  declareProperty("PhiMax", m_phiMax);
-  // pt min / max values
-  declareProperty("PtMin", m_ptMin);
-  declareProperty("PtMax", m_ptMax);
-  // the properties
-  declareProperty("NumTestsPerEvent", m_numTests = 100);
-  declareProperty("WriteTTree", m_writeTTree);
-  declareProperty("TreeName", m_treeName);
-  declareProperty("TreeFolder", m_treeFolder);
-  declareProperty("TreeDescription", m_treeDescription);
-}
 
 StatusCode Trk::ExtrapolationEngineTest::finalize() {
   // memory clean up
@@ -251,7 +110,7 @@ StatusCode Trk::ExtrapolationEngineTest::bookTree() {
   ATH_MSG_VERBOSE("Booking the Extrapolation test Tree.");
 
   // ------------------------------> OUTPUT NTUPLE (geometry validation)
-  m_tree = new TTree(m_treeName.c_str(), m_treeDescription.c_str());
+  m_tree = new TTree(m_treeName.value().c_str(), m_treeDescription.value().c_str());
   // add the Branches
   m_tree->Branch("StartPosX", &m_startPositionX);
   m_tree->Branch("StartPosY", &m_startPositionY);
@@ -427,7 +286,7 @@ StatusCode Trk::ExtrapolationEngineTest::bookTree() {
     delete m_tree;
     m_tree = nullptr;
   }
-  if (tHistSvc && ((tHistSvc->regTree(m_treeFolder + m_treeName, m_tree)).isFailure())) {
+  if (tHistSvc && ((tHistSvc->regTree(m_treeFolder.value() + m_treeName.value(), m_tree)).isFailure())) {
     ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching Tree output off !");
     delete m_tree;
     m_tree = nullptr;
@@ -452,7 +311,7 @@ StatusCode Trk::ExtrapolationEngineTest::runScan() {
   } else {
     ATH_MSG_VERBOSE("Running in scan mode: Phi scans given.");
     if (m_currentPhiStep >= int(m_phiScans.size())) m_currentPhiStep = 0;
-    m_currentPhi = m_phiScans.at(m_currentPhiStep);
+    m_currentPhi = m_phiScans[m_currentPhiStep];
   }
   m_currentPhiStep++;
 

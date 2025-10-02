@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-#coding: UTF8
 """
 Prints out a table, padded to make it pretty.
 
@@ -25,8 +24,6 @@ __author__ = "Ryan Ginstrom"
 import sys
 
 from DQUtils.ext.thousands import splitThousands
-
-from six import print_
 
 def format_num(num):
     """Format a number according to given places.
@@ -59,14 +56,14 @@ def pprint_table_to(out, table, header_loc=1):
 
     for i, row in enumerate(table):
         if i == header_loc:
-            print_("-" * (sum(col_paddings) + (len(col_paddings)*3-1)), end='', file=out)
+            print("-" * (sum(col_paddings) + (len(col_paddings)*3-1)), end='', file=out)
         # left col
-        print_(row[0].ljust(col_paddings[0] + 2), end='', file=out)
+        print(row[0].ljust(col_paddings[0] + 2), end='', file=out)
         # rest of the cols
         for i in range(1, len(row)):
             col = format_num(row[i]).rjust(col_paddings[i] + 2)
-            print_(col, end='', file=out)
-        print_(file=out)
+            print(col, end='', file=out)
+        print(file=out)
 
 def pprint_table(table, header_loc=1):
     pprint_table_to(sys.stdout, table, header_loc)

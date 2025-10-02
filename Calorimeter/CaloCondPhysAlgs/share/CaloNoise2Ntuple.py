@@ -30,10 +30,10 @@ if __name__=="__main__":
     parser.add_argument("-l","--lbnumber",default=1, type=int, help="LB number to query the DB")
     parser.add_argument("-d","--database",default=None, help="Database name or sqlite file name")
     parser.add_argument("-o","--output",default="caloNoise.root", help="output file name")
-    parser.add_argument("-f","--folder",default=None, help="database folder to read")
     parser.add_argument("-t","--tag",default=None, help="folder-level tag to read")
     parser.add_argument("-m","--mc", action='store_true', help="data or MC?")
-
+    parser.add_argument("-p", "--pileup", default=-1., type=float, help="if positive, calculate the noise for a fixed <mu> = specified value")
+    parser.add_argument("--online", action='store_true', help="online noise calculation and conditions")
 
     (args,leftover)=parser.parse_known_args(sys.argv[1:])
 
@@ -43,6 +43,7 @@ if __name__=="__main__":
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags=initConfigFlags()
+    flags.Input.Files = []
     flags.Input.isMC = args.mc
     flags.IOVDb.DatabaseInstance= "OFLP200" if args.mc else "CONDBR2"
     from Campaigns.Utils import Campaign
@@ -53,8 +54,9 @@ if __name__=="__main__":
     from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
     flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_MC if args.mc else defaultConditionsTags.RUN3_DATA
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
-
-    
+    flags.Common.isOnline = args.online
+    if args.pileup >= 0.:
+        flags.Calo.Noise.fixedLumiForNoise = args.pileup
     if args.loglevel:
         from AthenaCommon import Constants
         if hasattr(Constants,args.loglevel):
@@ -84,7 +86,8 @@ if __name__=="__main__":
                                   
     if args.tag or args.database:
         from IOVDbSvc.IOVDbSvcConfig import addOverride
-        cfg.merge(addOverride(flags,"/LAR/NoiseOfl/CellNoise",args.tag,dbstr))
+        folder = "/CALO/Noise/CellNoise" if flags.Common.isOnline else "/LAR/NoiseOfl/CellNoise"
+        cfg.merge(addOverride(flags, folder, tag=args.tag, db=dbstr))
         
 
     sc=cfg.run(1)

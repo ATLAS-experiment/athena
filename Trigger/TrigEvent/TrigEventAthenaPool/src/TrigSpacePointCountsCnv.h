@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -34,15 +34,15 @@ class TrigSpacePointCountsCnv : public TrigSpacePointCountsCnvBase {
 
   friend class CnvFactory<TrigSpacePointCountsCnv>;
 
-  virtual StatusCode initialize();
+  virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE() override;
 
 public:
   TrigSpacePointCountsCnv(ISvcLocator *svcloc);
   ~TrigSpacePointCountsCnv();
 
 protected:
-  virtual TrigSpacePointCounts_PERS  *createPersistent(TrigSpacePointCounts *transObj);
-  virtual TrigSpacePointCounts       *createTransient();
+  virtual TrigSpacePointCounts_PERS  *createPersistent(TrigSpacePointCounts *transObj) override;
+  virtual TrigSpacePointCounts       *createTransient() override;
 
 private:
   TrigSpacePointCountsCnv_p1 m_converter_p1;

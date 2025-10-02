@@ -43,8 +43,8 @@ def JetHitAssociationCfg(flags, name="JetHitAssociation", **kwargs):
     acc.addEventAlgo(
       CompFactory.JetHitAssociation(
         "JetHitAssociation",
-        inputPixHitCollectionName = ("ITk" if flags.Detector.GeometryITk else "") + "PixelClusters",
-        inputSCTHitCollectionName = "ITkStripClusters" if flags.Detector.GeometryITk else "SCT_Clusters",
+        inputPixHitCollectionName = ("ITkPixelMeasurements" if flags.Detector.GeometryITk else "PixelClusters"),
+        inputSCTHitCollectionName = "ITkStripMeasurements" if flags.Detector.GeometryITk else "SCT_Clusters",
         jetCollectionName = flags.BTagging.Trackless_JetCollection,
         jetPtThreshold = flags.BTagging.Trackless_JetPtMin,
         dRmatchHitToJet = flags.BTagging.Trackless_dR

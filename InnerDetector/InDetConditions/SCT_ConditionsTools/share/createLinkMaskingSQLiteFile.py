@@ -1,6 +1,5 @@
 #!/bin/env python
 
-from __future__ import print_function
 
 # Taken from InnerDetector/InDetRecTools/TRT_ElectronPidTools/DatabaseTools/WritePyCoolAll.py
 # https://twiki.cern.ch/twiki/bin/view/Atlas/ConditionsSimpleExample

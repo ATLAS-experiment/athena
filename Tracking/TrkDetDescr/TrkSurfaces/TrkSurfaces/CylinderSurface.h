@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 #define TRKSURFACES_CYLINDERSURFACE_H
 
 // Trk
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkParametersBase/ParametersT.h"
@@ -20,6 +19,7 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include <memory>
 class MsgStream;
 template<class SURFACE, class BOUNDS_CNV>
 class BoundSurfaceCnv_p1;
@@ -87,9 +87,8 @@ public:
                   double hphi,
                   double hlength);
 
-  /**Constructor from EigenTransform and CylinderBounds
-    - ownership of the bounds is passed */
-  CylinderSurface(const Amg::Transform3D& htrans, CylinderBounds* cbounds);
+  /**Constructor from EigenTransform and CylinderBounds*/
+  CylinderSurface(const Amg::Transform3D& htrans, std::shared_ptr<const CylinderBounds> cbounds);
 
   /**Constructor from EigenTransform from unique_ptr.
      - bounds is not set */
@@ -106,7 +105,7 @@ public:
   /**Constructor from EigenTransform and CylinderBounds
       - ownership of the bounds is passed
       - speed optimized fron concentric volumes */
-  CylinderSurface(CylinderBounds* cbounds);
+  CylinderSurface(std::shared_ptr<const CylinderBounds> cbounds);
 
    /**Copy constructor with shift */
   CylinderSurface(const CylinderSurface& csf, const Amg::Transform3D& transf);
@@ -287,7 +286,7 @@ protected: //!< data members
   friend class ::BoundSurfaceCnv_p2;
 
   //!< bounds (shared)
-  SharedObject<const CylinderBounds> m_bounds;
+  std::shared_ptr<const CylinderBounds> m_bounds;
   //!< The global reference point (== a point on the  surface)
   CxxUtils::CachedUniquePtr<Amg::Vector3D> m_referencePoint;
   //!< The rotational symmetry axis

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ExpressionParsing_PlainAccessor_h_
 #define ExpressionParsing_PlainAccessor_h_
@@ -115,16 +115,15 @@ namespace ExpressionParsing {
                                   std::vector<Gaudi::DataHandle *> &new_input_handles,
                                   bool verbose) {
          SG::ReadHandleKey< T_Cont > key(var_name);
-         std::pair<std::unordered_map<std::string, std::any >::iterator, bool> ret = read_keys.insert(std::make_pair(var_name, std::move(key)));
-         if (!ret.second) {
-            if (ret.first != read_keys.end()
-                && ret.first->first == var_name
-                && ret.first->second.type().hash_code() == typeid(key).hash_code()) {
+         const auto &[mapIterator, inserted] = read_keys.try_emplace(var_name, std::move(key));
+         if (!inserted) {
+            if ( mapIterator->first == var_name
+                && mapIterator->second.type().hash_code() == typeid(key).hash_code()) {
                return true;
             }
             PlainAccessorFactory::throwFailedToAddHandle(var_name);
          }
-         SG::ReadHandleKey< T_Cont > *key_final( std::any_cast<SG::ReadHandleKey< T_Cont > >( &ret.first->second));
+         SG::ReadHandleKey< T_Cont > *key_final( std::any_cast<SG::ReadHandleKey< T_Cont > >( &mapIterator->second));
          if (!key_final) {
             PlainAccessorFactory::throwFailedToAddHandle(var_name);
          }

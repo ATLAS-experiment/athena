@@ -10,7 +10,6 @@
 #+ ForwardDetectors/ZDC/ZdcNtuple
 #+ PhysicsAnalysis/BPhys/BPhysTools
 #+ PhysicsAnalysis/DerivationFramework/DerivationFrameworkAnalysisTests
-#+ Trigger/TriggerSimulation/TrigBtagEmulationTool
 
 
 
@@ -48,6 +47,7 @@
 - Event/xAOD/.*Cnv
 - Event/xAOD/xAODInDetMeasurement
 - Event/xAOD/xAODMuonRDO
+- Event/xAOD/xAODAuxiliaryMeasurement
 + Event/xAOD/.*
 + ForwardDetectors/ZDC/ZdcAnalysis
 + ForwardDetectors/ZDC/ZdcUtils
@@ -125,6 +125,7 @@
 + Trigger/TrigAnalysis/TrigAnalysisInterfaces
 + Trigger/TrigAnalysis/TrigBunchCrossingTool
 + Trigger/TrigAnalysis/TrigDecisionTool
++ Trigger/TrigAnalysis/TrigAnalysisHelpers
 + Trigger/TrigAnalysis/TrigGlobalEfficiencyCorrection
 + Trigger/TrigAnalysis/TriggerMatchingTool
 + Trigger/TrigConfiguration/TrigConfBase
@@ -140,6 +141,7 @@
 + Trigger/TrigEvent/TrigSteeringEvent
 + Trigger/TrigSteer/TrigCompositeUtils
 + Trigger/TrigT1/TrigT1MuctpiBits
++ Trigger/TrigEmulation/TrigBtagEmulationTool
 #+ Trigger/TrigValidation/TrigAnalysisTest
 
 #

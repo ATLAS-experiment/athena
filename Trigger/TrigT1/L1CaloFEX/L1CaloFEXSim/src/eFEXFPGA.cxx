@@ -8,12 +8,12 @@
 //     begin                : 15 10 2019
 //     email                : jacob.julian.kempster@cern.ch
 //  ***************************************************************************/
-#include "L1CaloFEXSim/eFEXFPGA.h"
+#include "eFEXFPGA.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
-#include "L1CaloFEXSim/eFEXtauAlgo.h"
+#include "eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include <vector>
 #include "StoreGate/ReadHandle.h"
@@ -30,7 +30,7 @@ namespace LVL1 {
 eFEXFPGA::eFEXFPGA(const std::string& type,const std::string& name,const IInterface* parent):
   AthAlgTool(type,name,parent)
 {
-  declareInterface<IeFEXFPGA>(this);
+  declareInterface<eFEXFPGA>(this);
 }
  
     
@@ -337,7 +337,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       threshBDT.push_back(iso_loose.rCore_fw());
       threshBDT.push_back(iso_medium.rCore_fw());
       threshBDT.push_back(iso_tight.rCore_fw());
-      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau, bdtMinEtCounts);
+      // in tau algoVersion 2, the autopass threshold for rhad frac (last parameter) is hardcoded
+      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau, bdtMinEtCounts, (tauAlgoVersion==2) ? 0x0ff0 : maxEtCountsTau);
       // Re-compute after setting thresholds. 
       // Threshold bits in the BDT algorithm's implementation are computed inside the algorithm class
       m_eFEXtauBDTAlgoTool->compute();

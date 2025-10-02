@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef DITAURECTOOLS_IDITAUTOOLBASE_H
@@ -20,11 +20,11 @@ namespace DiTauRecTools
   {
 
     /// Declare the interface that the class provides
-    ASG_TOOL_INTERFACE( tauRecTools::IDiTauToolBase )
+    ASG_TOOL_INTERFACE( DiTauRecTools::IDiTauToolBase )
 
     public:
     // calculate ID variables
-    virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) = 0;
+    virtual StatusCode execute(const xAOD::DiTauJet& xDiTau) const = 0;
   }; // class IDiTauToolBase
 
 } // namespace DiTauRecTools

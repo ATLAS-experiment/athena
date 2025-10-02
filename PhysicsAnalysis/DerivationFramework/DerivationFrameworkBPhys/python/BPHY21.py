@@ -167,5 +167,5 @@ def BPHY21Cfg(flags):
     BPHY21_SlimmingHelper.StaticContent = BPHY21_StaticContent
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY21", ItemList=BPHY21_SlimmingHelper.GetItemList(), AcceptAlgs=["BPHY21Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY21", AcceptAlgs=["BPHY21Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
-    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True)
     return acc

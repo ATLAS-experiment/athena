@@ -31,7 +31,6 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
                                            const std::string& name,
                                            const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_SV2T_BDT(nullptr),
     m_instanceName(name),
     m_is_selected("is_selected"),
     m_is_svtrk_final("is_svtrk_final"),
@@ -54,7 +53,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     m_massP   =  Trk::ParticleMasses::mass[Trk::proton];
     m_massE   =  Trk::ParticleMasses::mass[Trk::electron];
     m_massK0  =  Trk::ParticleMasses::mass[Trk::k0];
-    m_massLam =  1115.683  ;
+    m_massLam =  ParticleConstants::lambdaMassInMeV  ;
 
    }
 
@@ -68,9 +67,10 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
      ATH_MSG_DEBUG( "Initialising NewVrtSecInclusiveTool" );
      ATH_CHECK( m_extrapolator.retrieve() );
      ATH_CHECK( m_trackToVertexTool.retrieve() );
-     ATH_CHECK(m_beamSpotKey.initialize());
+     ATH_CHECK( m_beamSpotKey.initialize() );
      ATH_CHECK( m_fitSvc.retrieve() );
-     ATH_MSG_DEBUG("NewVrtSecInclusiveTool TrkVKalVrtFitter found");
+     ATH_CHECK( m_ini_v2trselector.retrieve() );
+     ATH_CHECK( m_fin_v2trselector.retrieve() );
 
      m_is_selected = SG::AuxElement::Decorator<char>("is_selected"+m_augString);
      m_is_svtrk_final = SG::AuxElement::Decorator<char>("is_svtrk_final"+m_augString);
@@ -104,18 +104,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
        m_w_1 = 1.;
      }
 
-//--------------------------------------------------------
-     //std::string fileName="NewVrtSecInclusiveTool/Fake2TrVertexReject.MVA.v01.root";   ///For local calibration file
-     //std::string rootFilePath = PathResolver::find_file(fileName, "DATAPATH");         ///
-     std::string rootFilePath = PathResolver::find_calib_file("NewVrtSecInclusiveTool/"+m_calibFileName);
-     TFile* rootFile = TFile::Open(rootFilePath.c_str(), "READ");    
-     if (!rootFile) {
-        ATH_MSG_FATAL("Could not retrieve root file: " << m_calibFileName);
-        return StatusCode::FAILURE;
-     }
-     TTree * training = (TTree*)rootFile->Get("BDT");
-     m_SV2T_BDT = std::make_unique<MVAUtils::BDT>(training);
-//--------------------------------------------------------
+
      return StatusCode::SUCCESS;
 
    }
@@ -197,7 +186,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     m_tuple->Branch("idHF",       &m_curTup->idHF,    "idHF[ntrk]/I");
     m_tuple->Branch("trkTRT",     &m_curTup->trkTRT,  "trkTRT[ntrk]/I");
     m_tuple->Branch("etatrk",     &m_curTup->etatrk,  "etatrk[ntrk]/F");
-
+    m_tuple->Branch("displaced",  &m_curTup->displaced,"displaced[ntrk]/I");
     m_tuple->Branch("n2Vrt",      &m_curTup->n2Vrt,      "n2Vrt/I");
     m_tuple->Branch("VrtTrkHF",   &m_curTup->VrtTrkHF,   "VrtTrkHF[n2Vrt]/I");
     m_tuple->Branch("VrtTrkI",    &m_curTup->VrtTrkI,    "VrtTrkI[n2Vrt]/I");
@@ -221,7 +210,12 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     m_tuple->Branch("VrtBDT",     &m_curTup->VrtBDT,     "VrtBDT[n2Vrt]/F");
     m_tuple->Branch("VrtDZ",      &m_curTup->VrtDZ,      "VrtDZ[n2Vrt]/F");
     m_tuple->Branch("VrtDisk",    &m_curTup->VrtDisk,    "VrtDisk[n2Vrt]/I");
+    m_tuple->Branch("VrtTrueBar", &m_curTup->VrtTrueBar, "VrtTrueBar[n2Vrt]/I");  //Truth vertex barcode based ident.
+    m_tuple->Branch("VrtTrueNear",&m_curTup->VrtTrueNear,"VrtTrueNear[n2Vrt]/I"); //Truth vertex closeness based ident.
     m_tuple->Branch("VSigMat",    &m_curTup->VSigMat,    "VSigMat[n2Vrt]/F");
+    m_tuple->Branch("VrtIT",      &m_curTup->VrtIT,      "VrtIT[n2Vrt]/I");
+    m_tuple->Branch("VrtJT",      &m_curTup->VrtJT,      "VrtJT[n2Vrt]/I");
+
 
     m_tuple->Branch("nNVrt",       &m_curTup->nNVrt,       "nNVrt/I");
     m_tuple->Branch("NVrtTrk",     &m_curTup->NVrtTrk,     "NVrtTrk[nNVrt]/I");

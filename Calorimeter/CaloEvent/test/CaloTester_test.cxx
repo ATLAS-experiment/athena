@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file CaloEvent/test/CaloTester_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -18,6 +16,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include <iostream>
 #include <cassert>
+#include <memory>
 
 
 void test1 (CaloTester& tester)
@@ -62,8 +61,8 @@ int main (int /*argc*/, char** argv)
 {
   std::cout << "CaloEvent/CaloTester_test\n";
   Athena_test::setupStoreGate (argv[0]);
-  CaloTester tester;
-  assert( tester.record_mgr().isSuccess() );
-  test1 (tester);
+  auto tester = std::make_unique<CaloTester>();
+  assert( tester->record_mgr().isSuccess() );
+  test1 (*tester);
   return 0;
 }

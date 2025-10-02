@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Defines the shared tools used in muon identification
 # Based on :
@@ -318,6 +318,11 @@ def MuonCombinedFitTagToolCfg(flags, name="MuonCombinedFitTagTool", **kwargs):
     kwargs.setdefault("TrackScoringTool", result.popToolsAndMerge(
         MuonTrackScoringToolCfg(flags)))
 
+
+    #When both solenoid and toriod are off (e.g. cosmic runs) this cut is likely to kill the combined muon -> loosen up for cosmics
+    if flags.Beam.Type is BeamType.Cosmics and (not flags.BField.endcapToroidOn and not flags.BField.solenoidOn):
+        kwargs.setdefault("MomentumBalanceCut", 1e6)
+
     tool = CompFactory.MuonCombined.MuonCombinedFitTagTool(name, **kwargs)
     result.setPrivateTools(tool)
     return result
@@ -426,8 +431,6 @@ def iPatFitterCfg(flags, name='iPatFitter', **kwargs):
         from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
         kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(
             MuonCombinedTrackSummaryToolCfg(flags)))
-    # This is only to match old-style config. Does nothing.
-    kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
 
     tool = CompFactory.Trk.iPatFitter(name, **kwargs)
     result.setPrivateTools(tool)

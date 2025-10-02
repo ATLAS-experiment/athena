@@ -5,7 +5,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "TrkToActsConvertorAlg.h"
 
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
@@ -25,8 +25,12 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
     const EventContext& ctx) const {
 
   ATH_MSG_VERBOSE("About to create trackContainer");
-  ActsTrk::MutableTrackContainer tc;
-  SG::ReadHandle<ActsGeometryContext> gcx(m_geometryContextKey, ctx);
+  Acts::VectorTrackContainer trackBackend;
+  Acts::VectorMultiTrajectory trackStateBackend;
+  ActsTrk::MutableTrackContainer tc( std::move(trackBackend),
+                                     std::move(trackStateBackend) );
+
+  SG::ReadHandle<ActsGeometryContext> gcx = SG::makeHandle(m_geometryContextKey, ctx);
   ATH_CHECK(gcx.isPresent());
   Acts::GeometryContext tgContext = gcx->context();
 
@@ -41,11 +45,11 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
     ATH_MSG_VERBOSE("multiTraj has  " << tc.trackStateContainer().size() << " states");
   }
 
-  // // Let's dump some information for debugging (will be removed later)
-  ATH_MSG_VERBOSE("TrackStateContainer has  " << tc.trackStateContainer().trackStatesAux()->size() << " states");
-  ATH_MSG_VERBOSE("TrackParametersContainer has  " << tc.trackStateContainer().trackParametersAux()->size() << " parameters");
-
-  std::unique_ptr<ActsTrk::TrackContainer> constTrackContainer = m_trackContainerBackendsHelper.moveToConst(std::move(tc), tgContext, ctx);
+  Acts::ConstVectorTrackContainer ctrackBackend( std::move(tc.container()) );
+  Acts::ConstVectorMultiTrajectory ctrackStateBackend( std::move(tc.trackStateContainer()) );
+  std::unique_ptr< ActsTrk::TrackContainer > constTrackContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(ctrackBackend),
+                                                                                                                std::move(ctrackStateBackend) );
+  
   auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
   ATH_MSG_VERBOSE("Saving " << constTrackContainer->size() << " tracks to "<< trackContainerHandle.key());
   ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));

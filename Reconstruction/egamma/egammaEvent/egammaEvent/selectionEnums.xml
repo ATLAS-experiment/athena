@@ -6,7 +6,6 @@
 
  <enum pattern="egammaParameters::*"/>
  <variable pattern="egammaParameters::*"/>
- <class name="egammaParameters::ROOT6_NamespaceAutoloadHook" />
 
  <enum pattern="EMTrackMatch::*"/>
 

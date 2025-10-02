@@ -11,7 +11,6 @@
 # Documentation: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/DataQualityDemo
 #############################################################################################
 
-from __future__ import print_function
 import os,sys
 import argparse
 

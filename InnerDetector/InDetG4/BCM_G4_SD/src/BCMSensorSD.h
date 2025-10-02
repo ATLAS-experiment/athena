@@ -18,20 +18,15 @@ class G4Step;
 
 // use of the hits
 #include "InDetSimEvent/SiHitCollection.h"
-#include "StoreGate/WriteHandle.h"
 #include <gtest/gtest_prod.h>
 
 class BCMSensorSD : public G4VSensitiveDetector
 {
- FRIEND_TEST( BCMSensorSDtest, Initialize );
  FRIEND_TEST( BCMSensorSDtest, ProcessHits );
  FRIEND_TEST( BCMSensorSDtest, AddHit );
  public:
   // Constructor
   BCMSensorSD(const std::string& name, const std::string& hitCollectionName);
-
-  // Destructor
-  ~BCMSensorSD() { /* I don't own myHitColl if all has gone well */ }
 
   // Process the hits from G4
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
@@ -43,10 +38,9 @@ class BCMSensorSD : public G4VSensitiveDetector
    could get rather tricky, but the idea is to allow fast simulations to use the very
    same SD classes as the standard simulation. */
   template <class... Args> void AddHit(Args&&... args){ m_HitColl->Emplace( args... ); }
-
  private:
-  // The hits collection
-  SG::WriteHandle<SiHitCollection> m_HitColl;
+  std::string m_HitCollName; //!< Name of the hit collection
+  SiHitCollection* m_HitColl{nullptr}; //!< Pointer to the hit collection
 };
 
 #endif

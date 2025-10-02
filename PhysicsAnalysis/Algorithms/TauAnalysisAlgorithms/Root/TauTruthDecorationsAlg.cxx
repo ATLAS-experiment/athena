@@ -14,7 +14,6 @@
 
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
-#include <AthContainers/AuxElement.h>
 #include <xAODTruth/TruthParticleContainer.h>
 #include <TauAnalysisTools/HelperFunctions.h>
 
@@ -33,23 +32,23 @@ namespace CP
     ANA_CHECK(m_tausKey.initialize());
 
     for (const auto& decorationName : m_doubleDecorations) {
-      auto [it, added] = m_doubleWriteHandleKeys.emplace(std::make_unique<SG::AuxElement::ConstAccessor<double>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
+      auto [it, added] = m_doubleWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<double>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
     }
     for (const auto& decorationName : m_floatDecorations) {
-      auto [it, added] = m_floatWriteHandleKeys.emplace(std::make_unique<SG::AuxElement::ConstAccessor<float>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
+      auto [it, added] = m_floatWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<float>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
     }
     for (const auto& decorationName : m_intDecorations) {
-      auto [it, added] = m_intWriteHandleKeys.emplace(std::make_unique<SG::AuxElement::ConstAccessor<int>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
+      auto [it, added] = m_intWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<int>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
     }
     for (const auto& decorationName : m_unsignedIntDecorations) {
-      auto [it, added] = m_unsignedIntWriteHandleKeys.emplace(std::make_unique<SG::AuxElement::ConstAccessor<unsigned int>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
+      auto [it, added] = m_unsignedIntWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<unsigned int>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
     }
     for (const auto& decorationName : m_charDecorations) {
-      auto [it, added] = m_charWriteHandleKeys.emplace(std::make_unique<SG::AuxElement::ConstAccessor<char>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
+      auto [it, added] = m_charWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<char>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
     }
 
@@ -80,11 +79,11 @@ namespace CP
   {
     SG::ReadHandle<xAOD::TauJetContainer> taus(m_tausKey, ctx);
 
-    std::unordered_map<SG::AuxElement::ConstAccessor<double> *, SG::WriteDecorHandle<xAOD::TauJetContainer, float>> doubleWriteHandles;
-    std::unordered_map<SG::AuxElement::ConstAccessor<float> *, SG::WriteDecorHandle<xAOD::TauJetContainer, float>> floatWriteHandles;
-    std::unordered_map<SG::AuxElement::ConstAccessor<int> *, SG::WriteDecorHandle<xAOD::TauJetContainer, int>> intWriteHandles;
-    std::unordered_map<SG::AuxElement::ConstAccessor<unsigned int> *, SG::WriteDecorHandle<xAOD::TauJetContainer, unsigned int>> unsignedIntWriteHandles;
-    std::unordered_map<SG::AuxElement::ConstAccessor<char> *, SG::WriteDecorHandle<xAOD::TauJetContainer, char>> charWriteHandles;
+    std::unordered_map<SG::ConstAccessor<double> *, SG::WriteDecorHandle<xAOD::TauJetContainer, float>> doubleWriteHandles;
+    std::unordered_map<SG::ConstAccessor<float> *, SG::WriteDecorHandle<xAOD::TauJetContainer, float>> floatWriteHandles;
+    std::unordered_map<SG::ConstAccessor<int> *, SG::WriteDecorHandle<xAOD::TauJetContainer, int>> intWriteHandles;
+    std::unordered_map<SG::ConstAccessor<unsigned int> *, SG::WriteDecorHandle<xAOD::TauJetContainer, unsigned int>> unsignedIntWriteHandles;
+    std::unordered_map<SG::ConstAccessor<char> *, SG::WriteDecorHandle<xAOD::TauJetContainer, char>> charWriteHandles;
     for (auto &[acc, writeHandleKey] : m_doubleWriteHandleKeys) {
       doubleWriteHandles.emplace(acc.get(), SG::WriteDecorHandle<xAOD::TauJetContainer, float>(writeHandleKey, ctx));
     }
@@ -130,7 +129,7 @@ namespace CP
       truthDecayModeHandle(*tau) = truthParticle ? TauAnalysisTools::getTruthDecayMode(*truthParticle) : xAOD::TauJetParameters::Mode_Error;
       truthParticleTypeHandle(*tau) = static_cast<int>(TauAnalysisTools::getTruthParticleType(*tau));
 
-      static const SG::AuxElement::ConstAccessor<int> acc_PartonTruthLabelID("PartonTruthLabelID");
+      static const SG::ConstAccessor<int> acc_PartonTruthLabelID("PartonTruthLabelID");
       const xAOD::Jet *truthJet = xAOD::TauHelpers::getLink<xAOD::Jet>(tau, "truthJetLink");
       if (truthJet != nullptr) {
         partonTruthLabelIDHandle(*tau) = acc_PartonTruthLabelID(*truthJet);

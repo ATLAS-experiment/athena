@@ -38,7 +38,7 @@ public:
   virtual const std::vector< Amg::Vector3D > * provide_pathInfoPoints();
 
   ActsTrk::TrackContainer::ConstTrackProxy track() const { return m_track; }
-  const std::vector<ActsTrk::MultiTrajectory::ConstTrackStateProxy>& trackStates() const { return m_trackStates; }
+  const std::vector<ActsTrk::TrackContainer::ConstTrackStateProxy>& trackStates() const { return m_trackStates; }
 
   virtual bool containsDetElement(const QString&) const;
 
@@ -55,13 +55,13 @@ private:
   void currentMaterialChanged();
   virtual void ensureInitTSOSs(std::vector<AssociatedObjectHandleBase*>*& ascobjs); //!< Ensure that the TSOSs are initialized. This is called by update3DObjects() and should be called by any method that needs to access the TSOSs.
   void ensureInitTrackStateCache(); //!< Ensure that the track state cache is initialized. 
-  void addTrackState(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state, std::vector<AssociatedObjectHandleBase*>* ascobjs, unsigned int index);
+  void addTrackState(const typename ActsTrk::TrackContainer::ConstTrackStateProxy &state, std::vector<AssociatedObjectHandleBase*>* ascobjs, unsigned int index);
   TrkObjToString::MeasurementType measurementType(const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const;
-  QString measurementText(const ActsTrk::TrackStateBackend::ConstTrackStateProxy& state) const;
+  QString measurementText(const ActsTrk::TrackContainer::ConstTrackStateProxy& state) const;
 protected:
   ActsTrk::TrackContainer::ConstTrackProxy m_track;
   const ActsTrk::TrackContainer& m_container;
-  std::vector<ActsTrk::MultiTrajectory::ConstTrackStateProxy> m_trackStates;
+  std::vector<ActsTrk::TrackContainer::ConstTrackStateProxy> m_trackStates;
 
 };
 

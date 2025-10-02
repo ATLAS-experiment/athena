@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-#include "L1CaloFEXSim/eFEXtauBDTAlgo.h"
+#include "eFEXtauBDTAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 #include "L1CaloFEXSim/eTower.h"
 #include <stdio.h> /* defines FILENAME_MAX */
@@ -105,6 +105,7 @@ void LVL1::eFEXtauBDTAlgo::setThresholdPointers() {
   }
 
   m_bdtAlgoImpl->setPointerToMaxETParam(&m_maxEtThreshold);
+  m_bdtAlgoImpl->setPointerToMaxETParamFrac(&m_maxEtThresholdFrac);
   m_bdtAlgoImpl->setPointerToETThresholdParam(&m_etThreshold);
   m_bdtAlgoImpl->setPointerToBDTMinETParam(&m_bdtMinEtThreshold);
 }
@@ -161,12 +162,13 @@ bool LVL1::eFEXtauBDTAlgo::isBDT() const { return true; }
 void LVL1::eFEXtauBDTAlgo::setThresholds(
     const std::vector<unsigned int> &rHadThreshold,
     const std::vector<unsigned int> &bdtThreshold, unsigned int etThreshold,
-    unsigned int maxEtThreshold, unsigned int bdtMinEtThreshold) {
+    unsigned int maxEtThreshold, unsigned int bdtMinEtThreshold, unsigned int maxEtThresholdFrac) {
   for (int i = 0; i < 3; i++) {
     m_hadFracMultipliers[i] = rHadThreshold[i];
     m_bdtThresholds[i] = bdtThreshold[i];
   }
   m_etThreshold = etThreshold;
   m_maxEtThreshold = maxEtThreshold;
+  m_maxEtThresholdFrac = maxEtThresholdFrac;
   m_bdtMinEtThreshold = bdtMinEtThreshold;
 }

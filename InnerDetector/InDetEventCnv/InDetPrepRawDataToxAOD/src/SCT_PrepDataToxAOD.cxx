@@ -267,12 +267,12 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
              // @TODO provide possibility to move tp_indices to its final destination
              AUXDATA(xprd, std::vector<unsigned int>, truth_index) = tp_indices;
           }
-          std::vector<unsigned int> barcodes; // FIXME  barcode-based - requires xAOD::TrackMeasurementValidation to be migrated away from barcodes
+          std::vector<int> uniqueIDs;
           for (auto& i{range.first}; i!=range.second; ++i) {
-            barcodes.push_back(HepMC::barcode(i->second));
+            uniqueIDs.push_back(HepMC::uniqueID(i->second));
           }
           // @TODO move vector
-          AUXDATA(xprd, std::vector<unsigned int>, truth_barcode) = barcodes;
+          AUXDATA(xprd, std::vector<int>, truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
         }
       }
 
@@ -306,27 +306,27 @@ void SCT_PrepDataToxAOD::addSDOInformation(xAOD::TrackMeasurementValidation* xpr
                                            const InDetSimDataCollection* sdoCollection) const
 {
   std::vector<int> sdo_word;
-  std::vector<std::vector<int>> sdo_depositsBarcode;
+  std::vector<std::vector<int>> sdo_depositsUniqueID;
   std::vector<std::vector<float>> sdo_depositsEnergy;
   // find hit
   for (const auto& hitIdentifier: prd->rdoList()) {
     auto pos{sdoCollection->find(hitIdentifier)};
     if (pos == sdoCollection->end()) continue;
     sdo_word.push_back(pos->second.word());
-    std::vector<int> sdoDepBC(pos->second.getdeposits().size(), -1);
+    std::vector<int> sdoDepUniqueID(pos->second.getdeposits().size(), HepMC::INVALID_PARTICLE_ID);
     std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
     unsigned int nDepos{0};
     for (auto& deposit: pos->second.getdeposits()) {
-      if (deposit.first) sdoDepBC[nDepos] = HepMC::barcode(deposit.first);
+      if (deposit.first) sdoDepUniqueID[nDepos] = HepMC::uniqueID(deposit.first);
       ATH_MSG_DEBUG(" SDO Energy Deposit " << deposit.second);
       sdoDepEnergy[nDepos] = deposit.second;
       nDepos++;
     }
-    sdo_depositsBarcode.push_back(sdoDepBC);
+    sdo_depositsUniqueID.push_back(sdoDepUniqueID);
     sdo_depositsEnergy.push_back(sdoDepEnergy);
   }
   AUXDATA(xprd, std::vector<int>, sdo_words) = sdo_word;
-  AUXDATA(xprd, std::vector<std::vector<int>>, sdo_depositsBarcode) = sdo_depositsBarcode;
+  AUXDATA(xprd, std::vector<std::vector<int>>, sdo_depositsBarcode) = sdo_depositsUniqueID; // TODO rename variable to be consistent?
   AUXDATA(xprd, std::vector<std::vector<float>>, sdo_depositsEnergy) = sdo_depositsEnergy;
 }
 
@@ -342,7 +342,7 @@ void SCT_PrepDataToxAOD::addSiHitInformation(xAOD::TrackMeasurementValidation* x
 
   std::vector<float> sihit_energyDeposit(numHits, 0.);
   std::vector<float> sihit_meanTime(numHits, 0.);
-  std::vector<int> sihit_barcode(numHits, 0);
+  std::vector<int> sihit_uniqueID(numHits, HepMC::UNDEFINED_ID);
   
   std::vector<float> sihit_startPosX(numHits, 0.);
   std::vector<float> sihit_startPosY(numHits, 0.);
@@ -358,7 +358,7 @@ void SCT_PrepDataToxAOD::addSiHitInformation(xAOD::TrackMeasurementValidation* x
     for (const SiHit& sihit : matchingHits) {
       sihit_energyDeposit[hitNumber] = sihit.energyLoss();
       sihit_meanTime[hitNumber] = sihit.meanTime();
-      sihit_barcode[hitNumber] = HepMC::barcode(sihit.particleLink());
+      sihit_uniqueID[hitNumber] = HepMC::uniqueID(sihit.particleLink());
     
       // Convert Simulation frame into reco frame
       const HepGeom::Point3D<double>& startPos{sihit.localStartPosition()};
@@ -379,7 +379,7 @@ void SCT_PrepDataToxAOD::addSiHitInformation(xAOD::TrackMeasurementValidation* x
 
   AUXDATA(xprd, std::vector<float>, sihit_energyDeposit) = sihit_energyDeposit;
   AUXDATA(xprd, std::vector<float>, sihit_meanTime) = sihit_meanTime;
-  AUXDATA(xprd, std::vector<int>, sihit_barcode) = sihit_barcode;
+  AUXDATA(xprd, std::vector<int>, sihit_barcode) = sihit_uniqueID; // TODO rename variable to be consistent?
   
   AUXDATA(xprd, std::vector<float>, sihit_startPosX) = sihit_startPosX;
   AUXDATA(xprd, std::vector<float>, sihit_startPosY) = sihit_startPosY;
@@ -435,10 +435,10 @@ void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Clust
     ajoiningHits.push_back(*siHitIter);
   
     siHitIter2 = siHitIter+1;
-    auto bc = HepMC::barcode((*siHitIter)->particleLink());
+    auto uniqueID = HepMC::uniqueID((*siHitIter)->particleLink());
     while (siHitIter2 != multiMatchingHits.end()) {
       // Need to come from the same truth particle
-      if ( bc != HepMC::barcode((*siHitIter2)->particleLink())) {
+      if ( uniqueID != HepMC::uniqueID((*siHitIter2)->particleLink())) {
         ++siHitIter2;
         continue;
       }
@@ -482,16 +482,16 @@ void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Clust
       }
       time /= static_cast<float>(ajoiningHits.size());
       matchingHits.emplace_back(lowestXPos->localStartPosition(), 
-            highestXPos->localEndPosition(),
-            energyDep,
-            time,
-            HepMC::barcode((*siHitIter)->particleLink()),
-            1, // 0 for pixel 1 for SCT
-            (*siHitIter)->getBarrelEndcap(),
-            (*siHitIter)->getLayerDisk(),
-            (*siHitIter)->getEtaModule(),
-            (*siHitIter)->getPhiModule(),
-            (*siHitIter)->getSide());
+                                highestXPos->localEndPosition(),
+                                energyDep,
+                                time,
+                                (*siHitIter)->particleLink(),
+                                1, // 0 for pixel 1 for SCT
+                                (*siHitIter)->getBarrelEndcap(),
+                                (*siHitIter)->getLayerDisk(),
+                                (*siHitIter)->getEtaModule(),
+                                (*siHitIter)->getPhiModule(),
+                                (*siHitIter)->getSide());
     }
   }
 }

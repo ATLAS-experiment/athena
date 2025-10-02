@@ -1,8 +1,11 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+""" Configure egammaTruthAssociation
+"""
+
+
 from MCTruthClassifier.MCTruthClassifierConfig import (
     MCTruthClassifierCaloTruthMatchCfg)
-__doc__ = "Configure egammaTruthAssociation"
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -44,6 +47,9 @@ def egammaTruthAssociationCfg(flags, name='egammaTruthAssociation',
     kwargs.setdefault(
         "MatchForwardElectrons",
         flags.Egamma.doForward)
+    kwargs.setdefault(
+        "UPCmode",
+        flags.Egamma.doLowMu)
 
     egtruthAlg = CompFactory.egammaTruthAssociationAlg(name, **kwargs)
 

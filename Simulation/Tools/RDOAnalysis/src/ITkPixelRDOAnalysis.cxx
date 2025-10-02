@@ -19,11 +19,6 @@
 namespace ITk
 {
 
-PixelRDOAnalysis::PixelRDOAnalysis(const std::string& name, ISvcLocator *pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-{
-}
-
 StatusCode PixelRDOAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing ITkPixelRDOAnalysis" );
 
@@ -37,61 +32,54 @@ StatusCode PixelRDOAnalysis::initialize() {
   ATH_CHECK(detStore()->retrieve(m_pixelID, m_pixelIDName.value()));
   ATH_CHECK(detStore()->retrieve(m_pixelManager, m_detectorName.value()));
 
-  // Grab Ntuple and histogramming service for tree
-  ATH_CHECK(m_thistSvc.retrieve());
-
+  
   m_tree = new TTree(m_ntupleName.value().c_str(), "ITkPixelRDOAnalysis");
-  ATH_CHECK(m_thistSvc->regTree(m_ntuplePath.value() + m_ntupleName.value(), m_tree));
-  if (m_tree) {
+  ATH_CHECK(histSvc()->regTree(m_ntuplePath.value() + m_ntupleName.value(), m_tree));
     // PIXEL RDO
-    m_tree->Branch("rdoID", &m_rdoID);
-    m_tree->Branch("rdoWord", &m_rdoWord);
-    m_tree->Branch("barrelEndcap", &m_barrelEndcap);
-    m_tree->Branch("layerDisk", &m_layerDisk);
-    m_tree->Branch("phiModule", &m_phiModule);
-    m_tree->Branch("etaModule", &m_etaModule);
-    m_tree->Branch("phiIndex", &m_phiIndex);
-    m_tree->Branch("etaIndex", &m_etaIndex);
-    m_tree->Branch("isInnermost", &m_isInnermost);
-    m_tree->Branch("isNextToInnermost", &m_isNextToInnermost);
-    m_tree->Branch("ToT", &m_ToT); // time over threshold value (0-255)
-    m_tree->Branch("BCID", &m_BCID); // beam crossing ID
-    m_tree->Branch("LVL1A", &m_LVL1A); // Level1 accept (0-15)
-    m_tree->Branch("LVL1ID", &m_LVL1ID); // ATLAS LVL1 (0-255)
-    // Global coordinates
-    if (m_doPosition) {
-      m_tree->Branch("globalX", &m_globalX);
-      m_tree->Branch("globalY", &m_globalY);
-      m_tree->Branch("globalZ", &m_globalZ);
-      m_tree->Branch("localX", &m_localX);
-      m_tree->Branch("localY", &m_localY);
-      m_tree->Branch("localZ", &m_localZ);
-    }
-
-    // PIXEL SDO DEPOSITS
-    m_tree->Branch("sdoID", &m_sdoID);
-    m_tree->Branch("sdoWord", &m_sdoWord);
-    m_tree->Branch("barrelEndcap_sdo", &m_barrelEndcap_sdo);
-    m_tree->Branch("layerDisk_sdo", &m_layerDisk_sdo);
-    m_tree->Branch("phiModule_sdo", &m_phiModule_sdo);
-    m_tree->Branch("etaModule_sdo", &m_etaModule_sdo);
-    m_tree->Branch("phiIndex_sdo", &m_phiIndex_sdo);
-    m_tree->Branch("etaIndex_sdo", &m_etaIndex_sdo);
-    m_tree->Branch("noise", &m_noise);
-    m_tree->Branch("belowThresh", &m_belowThresh);
-    m_tree->Branch("disabled", &m_disabled);
-    m_tree->Branch("badTOT", &m_badTOT);
-    m_tree->Branch("barcode", &m_barcode);
-    m_tree->Branch("eventIndex", &m_eventIndex);
-    m_tree->Branch("charge", &m_charge);
-    m_tree->Branch("barcode_vec", &m_barcode_vec);
-    m_tree->Branch("eventIndex_vec", &m_eventIndex_vec);
-    m_tree->Branch("charge_vec", &m_charge_vec);
-  }
-  else {
-    ATH_MSG_ERROR("No tree found!");
+  m_tree->Branch("rdoID", &m_rdoID);
+  m_tree->Branch("rdoWord", &m_rdoWord);
+  m_tree->Branch("barrelEndcap", &m_barrelEndcap);
+  m_tree->Branch("layerDisk", &m_layerDisk);
+  m_tree->Branch("phiModule", &m_phiModule);
+  m_tree->Branch("etaModule", &m_etaModule);
+  m_tree->Branch("phiIndex", &m_phiIndex);
+  m_tree->Branch("etaIndex", &m_etaIndex);
+  m_tree->Branch("isInnermost", &m_isInnermost);
+  m_tree->Branch("isNextToInnermost", &m_isNextToInnermost);
+  m_tree->Branch("ToT", &m_ToT); // time over threshold value (0-255)
+  m_tree->Branch("BCID", &m_BCID); // beam crossing ID
+  m_tree->Branch("LVL1A", &m_LVL1A); // Level1 accept (0-15)
+  m_tree->Branch("LVL1ID", &m_LVL1ID); // ATLAS LVL1 (0-255)
+  // Global coordinates
+  if (m_doPosition) {
+    m_tree->Branch("globalX", &m_globalX);
+    m_tree->Branch("globalY", &m_globalY);
+    m_tree->Branch("globalZ", &m_globalZ);
+    m_tree->Branch("localX", &m_localX);
+    m_tree->Branch("localY", &m_localY);
+    m_tree->Branch("localZ", &m_localZ);
   }
 
+  // PIXEL SDO DEPOSITS
+  m_tree->Branch("sdoID", &m_sdoID);
+  m_tree->Branch("sdoWord", &m_sdoWord);
+  m_tree->Branch("barrelEndcap_sdo", &m_barrelEndcap_sdo);
+  m_tree->Branch("layerDisk_sdo", &m_layerDisk_sdo);
+  m_tree->Branch("phiModule_sdo", &m_phiModule_sdo);
+  m_tree->Branch("etaModule_sdo", &m_etaModule_sdo);
+  m_tree->Branch("phiIndex_sdo", &m_phiIndex_sdo);
+  m_tree->Branch("etaIndex_sdo", &m_etaIndex_sdo);
+  m_tree->Branch("noise", &m_noise);
+  m_tree->Branch("belowThresh", &m_belowThresh);
+  m_tree->Branch("disabled", &m_disabled);
+  m_tree->Branch("badTOT", &m_badTOT);
+  m_tree->Branch("barcode", &m_barcode);
+  m_tree->Branch("eventIndex", &m_eventIndex);
+  m_tree->Branch("charge", &m_charge);
+  m_tree->Branch("barcode_vec", &m_barcode_vec);
+  m_tree->Branch("eventIndex_vec", &m_eventIndex_vec);
+  m_tree->Branch("charge_vec", &m_charge_vec);
+  
   // HISTOGRAMS
 
     /// global histograms
@@ -153,210 +141,210 @@ StatusCode PixelRDOAnalysis::initialize() {
 
 
   m_h_rdoID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_rdoID->GetName(), m_h_rdoID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_rdoID->GetName(), m_h_rdoID));
 
   m_h_rdoWord->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_rdoWord->GetName(), m_h_rdoWord));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_rdoWord->GetName(), m_h_rdoWord));
 
   m_h_barrelEndcap->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_barrelEndcap->GetName(), m_h_barrelEndcap));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_barrelEndcap->GetName(), m_h_barrelEndcap));
 
   m_h_layerDisk->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_layerDisk->GetName(), m_h_layerDisk));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_layerDisk->GetName(), m_h_layerDisk));
 
   m_h_phiModule->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_phiModule->GetName(), m_h_phiModule));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_phiModule->GetName(), m_h_phiModule));
 
   m_h_etaModule->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_etaModule->GetName(), m_h_etaModule));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_etaModule->GetName(), m_h_etaModule));
 
   m_h_phiIndex->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_phiIndex->GetName(), m_h_phiIndex));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_phiIndex->GetName(), m_h_phiIndex));
 
   m_h_etaIndex->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_etaIndex->GetName(), m_h_etaIndex));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_etaIndex->GetName(), m_h_etaIndex));
 
   m_h_ToT->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ToT->GetName(), m_h_ToT));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ToT->GetName(), m_h_ToT));
 
   m_h_BCID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_BCID->GetName(), m_h_BCID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_BCID->GetName(), m_h_BCID));
 
   m_h_LVL1A->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_LVL1A->GetName(), m_h_LVL1A));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_LVL1A->GetName(), m_h_LVL1A));
 
   m_h_LVL1ID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_LVL1ID->GetName(), m_h_LVL1ID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_LVL1ID->GetName(), m_h_LVL1ID));
 
   m_h_brlLayer->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlLayer->GetName(), m_h_brlLayer));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlLayer->GetName(), m_h_brlLayer));
 
   m_h_brlPhiMod->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlPhiMod->GetName(), m_h_brlPhiMod));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlPhiMod->GetName(), m_h_brlPhiMod));
 
   m_h_brlEtaMod->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlEtaMod->GetName(), m_h_brlEtaMod));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlEtaMod->GetName(), m_h_brlEtaMod));
 
   m_h_brlPhiIndex->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlPhiIndex->GetName(), m_h_brlPhiIndex));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlPhiIndex->GetName(), m_h_brlPhiIndex));
 
   m_h_brlEtaIndex->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlEtaIndex->GetName(), m_h_brlEtaIndex));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlEtaIndex->GetName(), m_h_brlEtaIndex));
 
   m_h_brlToT->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlToT->GetName(), m_h_brlToT));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlToT->GetName(), m_h_brlToT));
 
   m_h_brlBCID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlBCID->GetName(), m_h_brlBCID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlBCID->GetName(), m_h_brlBCID));
 
   m_h_brlLVL1A->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlLVL1A->GetName(), m_h_brlLVL1A));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlLVL1A->GetName(), m_h_brlLVL1A));
 
   m_h_brlLVL1ID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlLVL1ID->GetName(), m_h_brlLVL1ID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlLVL1ID->GetName(), m_h_brlLVL1ID));
 
   m_h_ecDisk->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecDisk->GetName(), m_h_ecDisk));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecDisk->GetName(), m_h_ecDisk));
 
   m_h_ecPhiMod->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecPhiMod->GetName(), m_h_ecPhiMod));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecPhiMod->GetName(), m_h_ecPhiMod));
 
   m_h_ecEtaMod->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecEtaMod->GetName(), m_h_ecEtaMod));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecEtaMod->GetName(), m_h_ecEtaMod));
 
   m_h_ecPhiIndex->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecPhiIndex->GetName(), m_h_ecPhiIndex));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecPhiIndex->GetName(), m_h_ecPhiIndex));
 
   m_h_ecEtaIndex->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecEtaIndex->GetName(), m_h_ecEtaIndex));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecEtaIndex->GetName(), m_h_ecEtaIndex));
 
   m_h_ecToT->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecToT->GetName(), m_h_ecToT));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecToT->GetName(), m_h_ecToT));
 
   m_h_ecBCID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecBCID->GetName(), m_h_ecBCID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecBCID->GetName(), m_h_ecBCID));
 
   m_h_ecLVL1A->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecLVL1A->GetName(), m_h_ecLVL1A));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecLVL1A->GetName(), m_h_ecLVL1A));
 
   m_h_ecLVL1ID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecLVL1ID->GetName(), m_h_ecLVL1ID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecLVL1ID->GetName(), m_h_ecLVL1ID));
 
   m_h_sdoID->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_sdoID->GetName(), m_h_sdoID));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_sdoID->GetName(), m_h_sdoID));
 
   m_h_sdoWord->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_sdoWord->GetName(), m_h_sdoWord));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_sdoWord->GetName(), m_h_sdoWord));
 
   m_h_barrelEndcap_sdo->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_barrelEndcap_sdo->GetName(), m_h_barrelEndcap_sdo));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_barrelEndcap_sdo->GetName(), m_h_barrelEndcap_sdo));
 
   m_h_layerDisk_sdo->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_layerDisk_sdo->GetName(), m_h_layerDisk_sdo));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_layerDisk_sdo->GetName(), m_h_layerDisk_sdo));
 
   m_h_phiModule_sdo->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_phiModule_sdo->GetName(), m_h_phiModule_sdo));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_phiModule_sdo->GetName(), m_h_phiModule_sdo));
 
   m_h_etaModule_sdo->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_etaModule_sdo->GetName(), m_h_etaModule_sdo));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_etaModule_sdo->GetName(), m_h_etaModule_sdo));
 
   m_h_phiIndex_sdo->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_phiIndex_sdo->GetName(), m_h_phiIndex_sdo));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_phiIndex_sdo->GetName(), m_h_phiIndex_sdo));
 
   m_h_etaIndex_sdo->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_etaIndex_sdo->GetName(), m_h_etaIndex_sdo));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_etaIndex_sdo->GetName(), m_h_etaIndex_sdo));
 
   m_h_barcode->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_barcode->GetName(), m_h_barcode));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_barcode->GetName(), m_h_barcode));
 
   m_h_eventIndex->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_eventIndex->GetName(), m_h_eventIndex));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_eventIndex->GetName(), m_h_eventIndex));
 
   m_h_charge->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_charge->GetName(), m_h_charge));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_charge->GetName(), m_h_charge));
 
   m_h_belowThresh_brl->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_belowThresh_brl->GetName(), m_h_belowThresh_brl));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_belowThresh_brl->GetName(), m_h_belowThresh_brl));
 
   m_h_belowThresh_ec->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_belowThresh_ec->GetName(), m_h_belowThresh_ec));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_belowThresh_ec->GetName(), m_h_belowThresh_ec));
 
   m_h_disabled_brl->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_disabled_brl->GetName(), m_h_disabled_brl));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_disabled_brl->GetName(), m_h_disabled_brl));
 
   m_h_disabled_ec->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_disabled_ec->GetName(), m_h_disabled_ec));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_disabled_ec->GetName(), m_h_disabled_ec));
 
   for (unsigned int layer=0; layer<33; layer++) {
     m_h_brlflatPhiIndex_perLayer.emplace_back(new TH1F(("h_brlflatPhiIndex_perLayer"+std::to_string(layer)).c_str(), ("Phi index - Barrel Flat - Layer "+std::to_string(layer)).c_str(), 820, 0, 820));
     m_h_brlflatPhiIndex_perLayer.back()->StatOverflows();
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlflatPhiIndex_perLayer.back()->GetName(), m_h_brlflatPhiIndex_perLayer.back()));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlflatPhiIndex_perLayer.back()->GetName(), m_h_brlflatPhiIndex_perLayer.back()));
 
     m_h_brlflatEtaIndex_perLayer.emplace_back(new TH1F(("h_brlflatEtaIndex_perLayer"+std::to_string(layer)).c_str(), ("Eta index - Barrel Flat - Layer "+std::to_string(layer)).c_str(), 820, 0, 820));
     m_h_brlflatEtaIndex_perLayer.back()->StatOverflows();
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlflatEtaIndex_perLayer.back()->GetName(), m_h_brlflatEtaIndex_perLayer.back()));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlflatEtaIndex_perLayer.back()->GetName(), m_h_brlflatEtaIndex_perLayer.back()));
 
     m_h_brlinclPhiIndex_perLayer.emplace_back(new TH1F(("h_brlinclPhiIndex_perLayer"+std::to_string(layer)).c_str(), ("Phi index - Barrel Inclined - Layer "+std::to_string(layer)).c_str(), 820, 0, 820));
     m_h_brlinclPhiIndex_perLayer.back()->StatOverflows();
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlinclPhiIndex_perLayer.back()->GetName(), m_h_brlinclPhiIndex_perLayer.back()));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlinclPhiIndex_perLayer.back()->GetName(), m_h_brlinclPhiIndex_perLayer.back()));
 
     m_h_brlinclEtaIndex_perLayer.emplace_back(new TH1F(("h_brlinclEtaIndex_perLayer"+std::to_string(layer)).c_str(), ("Eta index - Barrel Inclined - Layer "+std::to_string(layer)).c_str(), 820, 0, 820));
     m_h_brlinclEtaIndex_perLayer.back()->StatOverflows();
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_brlinclEtaIndex_perLayer.back()->GetName(), m_h_brlinclEtaIndex_perLayer.back()));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_brlinclEtaIndex_perLayer.back()->GetName(), m_h_brlinclEtaIndex_perLayer.back()));
 
     m_h_ecPhiIndex_perLayer.emplace_back(new TH1F(("h_ecPhiIndex_perLayer"+std::to_string(layer)).c_str(), ("Phi index - Endcap - Layer "+std::to_string(layer)).c_str(), 820, 0, 820));
     m_h_ecPhiIndex_perLayer.back()->StatOverflows();
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecPhiIndex_perLayer.back()->GetName(), m_h_ecPhiIndex_perLayer.back()));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecPhiIndex_perLayer.back()->GetName(), m_h_ecPhiIndex_perLayer.back()));
 
     m_h_ecEtaIndex_perLayer.emplace_back(new TH1F(("h_ecEtaIndex_perLayer"+std::to_string(layer)).c_str(), ("Eta index - Endcap - Layer "+std::to_string(layer)).c_str(), 820, 0, 820));
     m_h_ecEtaIndex_perLayer.back()->StatOverflows();
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_ecEtaIndex_perLayer.back()->GetName(), m_h_ecEtaIndex_perLayer.back()));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_ecEtaIndex_perLayer.back()->GetName(), m_h_ecEtaIndex_perLayer.back()));
   }
 
   m_h_phiIndexInnermost = new TH1F("h_PhiIndexInnermost", "Phi index - Innermost Layer ", 820, 0, 820);
   m_h_phiIndexInnermost->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_phiIndexInnermost->GetName(), m_h_phiIndexInnermost));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_phiIndexInnermost->GetName(), m_h_phiIndexInnermost));
 
   m_h_etaIndexInnermost = new TH1F("h_EtaIndexInnermost", "Eta index - Innermost Layer ", 820, 0, 820);
   m_h_etaIndexInnermost->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_etaIndexInnermost->GetName(), m_h_etaIndexInnermost));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_etaIndexInnermost->GetName(), m_h_etaIndexInnermost));
 
   m_h_phiIndexNextToInnermost = new TH1F("h_PhiIndexNextToInnermost", "Phi index - Next To Innermost Layer ", 820, 0, 820);
   m_h_phiIndexNextToInnermost->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_phiIndexNextToInnermost->GetName(), m_h_phiIndexNextToInnermost));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_phiIndexNextToInnermost->GetName(), m_h_phiIndexNextToInnermost));
 
   m_h_etaIndexNextToInnermost = new TH1F("h_EtaIndexNextToInnermost", "Eta index - Next To Innermost Layer ", 820, 0, 820);
   m_h_etaIndexNextToInnermost->StatOverflows();
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_etaIndexNextToInnermost->GetName(), m_h_etaIndexNextToInnermost));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_etaIndexNextToInnermost->GetName(), m_h_etaIndexNextToInnermost));
 
   m_h_globalXY = new TH2F("h_globalXY","h_globalXY; x [mm]; y [mm]",700,-350.,350,700,-350.,350);
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalXY->GetName(), m_h_globalXY));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_globalXY->GetName(), m_h_globalXY));
   m_h_globalZR = new TH2F("h_globalZR","h_globalZR; z [mm]; r [mm]",6800,-3400.,3400,350,0.,350);
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalZR->GetName(), m_h_globalZR));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_globalZR->GetName(), m_h_globalZR));
   m_h_globalX = new TH1F("h_globalX","h_globalX; x [mm]",700,-350.,350.);
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalX->GetName(), m_h_globalX));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_globalX->GetName(), m_h_globalX));
   m_h_globalY = new TH1F("h_globalY","h_globalY; y [mm]",700,-350.,350.);
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalY->GetName(), m_h_globalY));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_globalY->GetName(), m_h_globalY));
   m_h_globalZ = new TH1F("h_globalZ","h_globalZ; z [mm]",6800,-3400.,3400.);
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_globalZ->GetName(), m_h_globalZ));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_globalZ->GetName(), m_h_globalZ));
 
   // Special shared ITk histograms
   std::string xy_name = "h_ITk_xy";
   auto xy = std::make_unique<TH2D>(xy_name.c_str(), xy_name.c_str(), 2200, -1100, 1100, 2200, -1100, 1100);
   xy->StatOverflows();
-  ATH_CHECK(m_thistSvc->regShared(m_sharedHistPath + xy_name, std::move(xy), m_h_globalXY_shared));
+  ATH_CHECK(histSvc()->regShared(m_sharedHistPath + xy_name, std::move(xy), m_h_globalXY_shared));
 
   std::string zr_name = "h_ITk_zr";
   auto zr = std::make_unique<TH2D>(zr_name.c_str(), zr_name.c_str(), 6800, -3400, 3400, 1100, 0, 1100);
   zr->StatOverflows();
-  ATH_CHECK(m_thistSvc->regShared(m_sharedHistPath + zr_name, std::move(zr), m_h_globalZR_shared));
+  ATH_CHECK(histSvc()->regShared(m_sharedHistPath + zr_name, std::move(zr), m_h_globalZR_shared));
 
   m_h_truthMatchedRDOs = new TH1F("h_TruthMatchedPixelRDOs", "h_TruthMatchedPixelRDOs", 4, 1, 5);
   TString truthMatchBinLables[4] = { "All RDOs", "Truth Matched", "HS Matched", "Unmatched" };
   for(unsigned int ibin = 1; ibin < 5; ibin++) {
     m_h_truthMatchedRDOs->GetXaxis()->SetBinLabel(ibin, truthMatchBinLables[ibin-1]);
   }
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_truthMatchedRDOs->GetName(), m_h_truthMatchedRDOs));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_truthMatchedRDOs->GetName(), m_h_truthMatchedRDOs));
   return StatusCode::SUCCESS;
 }
 
@@ -404,10 +392,15 @@ StatusCode PixelRDOAnalysis::execute() {
     m_localZ->clear();
   }
   // Raw Data
-  SG::ReadHandle<PixelRDO_Container> p_pixelRDO_cont (m_inputKey);
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
+
+  const PixelRDO_Container* p_pixelRDO_cont{nullptr};
+  ATH_CHECK(SG::get(p_pixelRDO_cont, m_inputKey, ctx));
   //Adding SimMap and McEvent here for added truthMatching checks
-  SG::ReadHandle<InDetSimDataCollection> simDataMapPixel (m_inputTruthKey);
-  SG::ReadHandle<McEventCollection> mcEventCollection (m_inputMcEventCollectionKey);
+  const InDetSimDataCollection* simDataMapPixel{nullptr};
+  ATH_CHECK(SG::get(simDataMapPixel, m_inputTruthKey, ctx));
+  const McEventCollection* mcEventCollection{nullptr};
+  ATH_CHECK(SG::get(mcEventCollection, m_inputMcEventCollectionKey, ctx));
   bool doTruthMatching = true;
   const HepMC::GenEvent* hardScatterEvent(nullptr);
 
@@ -417,7 +410,7 @@ StatusCode PixelRDOAnalysis::execute() {
   }
   if(doTruthMatching) hardScatterEvent = mcEventCollection->at(0);
 
-  if(p_pixelRDO_cont.isValid()) {
+  if(p_pixelRDO_cont) {
     // loop over RDO container
     PixelRDO_Container::const_iterator rdoCont_itr(p_pixelRDO_cont->begin());
     const PixelRDO_Container::const_iterator rdoCont_end(p_pixelRDO_cont->end());
@@ -443,7 +436,7 @@ StatusCode PixelRDOAnalysis::execute() {
         if(doTruthMatching){
           m_h_truthMatchedRDOs->Fill(1.5);
           bool findMatch = false;
-          if(simDataMapPixel.isValid()){
+          if(simDataMapPixel){
             InDetSimDataCollection::const_iterator iter = (*simDataMapPixel).find((*rdo_itr)->identify());
 
             if ( iter != (*simDataMapPixel).end() ) {
@@ -575,7 +568,7 @@ StatusCode PixelRDOAnalysis::execute() {
   }
 
   // Sim Data
-  if(simDataMapPixel.isValid()) {
+  if(simDataMapPixel) {
     // loop over SDO container
     InDetSimDataCollection::const_iterator sdo_itr(simDataMapPixel->begin());
     const InDetSimDataCollection::const_iterator sdo_end(simDataMapPixel->end());
@@ -667,9 +660,7 @@ StatusCode PixelRDOAnalysis::execute() {
     }
   }
 
-  if (m_tree) {
-    m_tree->Fill();
-  }
+  m_tree->Fill();
 
   return StatusCode::SUCCESS;
 }

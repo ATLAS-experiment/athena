@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM2.py
 #====================================================================
@@ -124,6 +124,7 @@ def JETM2Cfg(flags):
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoNoPtCutJets","AntiKt4EMPFlowJets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+                                            "AntiKt4EMPFlowJets_FTAG",
                                             "BTagging_AntiKt4EMPFlow",
                                             "BTagging_AntiKtVR30Rmax4Rmin02Track"]
 
@@ -157,7 +158,7 @@ def JETM2Cfg(flags):
 
     JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
                                            "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter",
+                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter.GhostTrack",
                                            "GSFTrackParticles.particleHypothesis.vx.vy.vz",
                                            "PrimaryVertices.x.y.z.covariance.trackWeights",
                                            "TauJets.clusterLinks",

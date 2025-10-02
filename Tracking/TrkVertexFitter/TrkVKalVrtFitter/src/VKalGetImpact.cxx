@@ -112,10 +112,12 @@ namespace Trk{
         ImpactError.assign(3,1.e20);
         return 1.e10;
     }
-    if(std::abs(Vertex.z())>m_IDsizeZ || Vertex.perp()>m_IDsizeR){  // Crazy user request
-        Impact.assign(5,1.e10);
-        ImpactError.assign(3,1.e20);
-        return 1.e10;
+    double sizeR = state.m_allowUltraDisplaced ? m_MSsizeR : m_IDsizeR;
+    double sizeZ = state.m_allowUltraDisplaced ? m_MSsizeZ : m_IDsizeZ;
+    if (std::abs(Vertex.z()) > sizeZ || Vertex.perp() > sizeR) {
+      Impact.assign(5, 1.e10);
+      ImpactError.assign(3, 1.e20);
+      return 1.e10;
     }
     long int vkCharge=state.m_ich[0];
     if(Charge==0)vkCharge=0;

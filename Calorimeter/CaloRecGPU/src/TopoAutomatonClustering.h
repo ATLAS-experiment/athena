@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -34,7 +34,7 @@
  
 
 class TopoAutomatonClustering :
-  public AthAlgTool, virtual public CaloClusterGPUProcessor, public CaloGPUTimed, public CaloGPUCUDAInitialization
+  public extends<AthAlgTool, CaloClusterGPUProcessor>, public CaloGPUTimed, public CaloGPUCUDAInitialization
 {
  public:
 

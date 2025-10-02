@@ -24,7 +24,6 @@ const float TauSubstructureVariables::DEFAULT = -1111.;
 
 TauSubstructureVariables::TauSubstructureVariables( const std::string& name )
   : TauRecToolBase(name) {
-  declareProperty("VertexCorrection", m_doVertexCorrection = true);
 }
 
 

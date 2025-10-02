@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibTools/L1CaloCells2TriggerTowers.h"
@@ -161,7 +161,7 @@ namespace LVL1{
       const CaloLVL1_ID* lvl1_id = 0;
       sc = detStore()->retrieve(lvl1_id, "CaloLVL1_ID");
       if(sc.isFailure()){ATH_MSG_ERROR("Failed to get CaloLVL1_ID");return sc;}
-      m_lvl1Helper = (CaloLVL1_ID*) lvl1_id;
+      m_lvl1Helper = static_cast<const CaloLVL1_ID*> (lvl1_id);
 
       sc = detStore()->retrieve(m_tileID, "TileID") ;
       if(sc.isFailure()){ATH_MSG_ERROR("Failed to get Tile_ID");return sc;}

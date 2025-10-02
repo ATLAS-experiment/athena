@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -115,10 +115,10 @@ void ElectronCollectionSettingsButton::setMaterialText(const QString& t)
 }
 
 //____________________________________________________________________
-ElectronCollectionSettingsButton::ElectronCollectionSettingsButton(QWidget * parent,int _dim)
+ElectronCollectionSettingsButton::ElectronCollectionSettingsButton(QWidget * parent,int dim)
   : VP1MaterialButtonBase(parent,0,"VP1MaterialButton"), m_d(new Imp)
 {
-  m_d->dim = _dim;
+  m_d->dim = dim;
   
   m_d->theclass = this;
   m_d->initEditWindow();

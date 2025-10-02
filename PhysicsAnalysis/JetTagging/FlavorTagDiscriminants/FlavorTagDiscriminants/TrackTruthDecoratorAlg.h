@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_TRUTH_DECORATOR_ALG_HH
@@ -48,9 +48,9 @@ namespace FlavorTagDiscriminants {
     RDHK m_acc_vertex_index {
       this, "acc_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Accessor for the vertex index of the truth particle"};
-    RDHK m_acc_parent_barcode {
-      this, "acc_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
-        "Accessor for the barcode of the parent of linked truth particle"};
+    RDHK m_acc_parent_uniqueID {
+      this, "acc_ftagTruthParentBarcode", "ftagTruthParentBarcode",
+        "Accessor for the uniqueID of the parent of linked truth particle"};
 
     // Decorators for tracks
     using WDHK = SG::WriteDecorHandleKey< xAOD::TrackParticleContainer >;
@@ -66,12 +66,12 @@ namespace FlavorTagDiscriminants {
     WDHK m_dec_vertex_index {
       this, "dec_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "ftagTruth vertex index of the track"};
-    WDHK m_dec_barcode {
-      this, "dec_ftagTruthBarcode", "ftagTruthBarcode", 
-        "Barcode of linked truth particle"};
-    WDHK m_dec_parent_barcode {
-      this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
-        "Barcode of parent of linked truth particle"};
+    WDHK m_dec_uniqueID {
+      this, "dec_ftagTruthBarcode", "ftagTruthBarcode",
+        "UniqueID of linked truth particle"};
+    WDHK m_dec_parent_uniqueID {
+      this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode",
+        "UniqueID of parent of linked truth particle"};
     WDHK m_dec_muon_origin_label {
       this, "dec_ftagTruthMuonOriginLabel", "ftagTruthMuonOriginLabel", 
         "Exclusive origin label of the muon"};

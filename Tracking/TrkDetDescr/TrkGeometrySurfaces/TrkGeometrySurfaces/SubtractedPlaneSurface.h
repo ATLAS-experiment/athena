@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,8 +31,11 @@ namespace Trk {
 class SubtractedPlaneSurface : public PlaneSurface
 {
 public:
-  /** Default Constructor - needed for persistency*/
-  SubtractedPlaneSurface();
+  /** Defaults. Copies need care due to unique_ptr*/
+  SubtractedPlaneSurface() = default;
+  SubtractedPlaneSurface(SubtractedPlaneSurface&&) = default;
+  SubtractedPlaneSurface& operator=(SubtractedPlaneSurface&&) = default;
+  virtual ~SubtractedPlaneSurface() = default;
 
   /** Copy Constructor*/
   SubtractedPlaneSurface(const SubtractedPlaneSurface& psf);
@@ -43,11 +46,8 @@ public:
 
   /** Constructor */
   SubtractedPlaneSurface(const PlaneSurface& ps,
-                         AreaExcluder* vol,
+                         std::shared_ptr<const AreaExcluder> vol,
                          bool shared);
-
-  /**Destructor*/
-  virtual ~SubtractedPlaneSurface();
 
   /**Assignment operator*/
   SubtractedPlaneSurface& operator=(const SubtractedPlaneSurface& psf);
@@ -64,7 +64,7 @@ public:
                             double tol2 = 0.) const override final;
 
   /**This method allows access to the subtracted part*/
-  SharedObject<AreaExcluder> subtractedVolume() const;
+  const AreaExcluder* subtractedVolume() const;
 
   /** Return properly formatted class name for screen output */
   virtual std::string name() const override final
@@ -73,8 +73,8 @@ public:
   }
 
 protected:
-  SharedObject<AreaExcluder> m_subtrVol;
-  bool m_shared;
+  std::shared_ptr<const AreaExcluder> m_subtrVol;
+  bool m_shared{true};
 };
 
 } // end of namespace

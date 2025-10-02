@@ -1,20 +1,27 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAMRPCRDODECODER_H
 #define MUONBYTESTREAMRPCRDODECODER_H
 
-#include <inttypes.h>
 
-#include <string>
-#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRPC_CnvTools/IRPC_RDO_Decoder.h"
-#include "RPC_CondCabling/RpcCablingCondData.h"
+
+
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
+
+class RpcCablingCondData;
+class RpcFiredChannel;
+class RpcDigit;
+class Identifier;
 
 // Decoder class for conversion from RPC RDOs to RPC digits
 namespace Muon {

@@ -16,7 +16,7 @@ from ISF_Geant4Services.ISF_Geant4ServicesConfig import (
 def DefaultParticleKillerSelectorCfg(flags, name="ISF_DefaultParticleKillerSelector", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ParticleKillerSvcCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ParticleKillerSvcCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.ParticleKiller)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -26,7 +26,7 @@ def DefaultGeant4SelectorCfg(flags, name="ISF_DefaultGeant4Selector", **kwargs):
     acc = ComponentAccumulator()
     if "Simulator" not in kwargs:
         if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-            kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(Geant4SimCfg(flags)).name)
+            kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(Geant4SimCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Geant4)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -45,7 +45,7 @@ def DefaultATLFAST_Geant4SelectorCfg(flags, name="ISF_DefaultATLFAST_Geant4Selec
 def FullGeant4SelectorCfg(flags, name="ISF_FullGeant4Selector", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FullGeant4SimCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FullGeant4SimCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Geant4)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -54,7 +54,7 @@ def FullGeant4SelectorCfg(flags, name="ISF_FullGeant4Selector", **kwargs):
 def PassBackGeant4SelectorCfg(flags, name="ISF_PassBackGeant4Selector", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(PassBackGeant4SimCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(PassBackGeant4SimCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Geant4)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -64,7 +64,7 @@ def DefaultFastCaloSimSelectorCfg(flags, name="ISF_DefaultFastCaloSimSelector", 
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimSvcCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimSvcCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSim)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -74,7 +74,7 @@ def DefaultFastCaloSimV2SelectorCfg(flags, name="ISF_DefaultFastCaloSimV2Selecto
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimV2SvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimV2SvcCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimV2SvcCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSimV2)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -84,7 +84,7 @@ def DefaultDNNCaloSimSelectorCfg(flags, name="ISF_DefaultDNNCaloSimSelector", **
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import DNNCaloSimSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(DNNCaloSimSvcCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(DNNCaloSimSvcCfg(flags)))
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
 
@@ -93,7 +93,7 @@ def FastHitConvAlgFastCaloSimSelectorCfg(flags, name="ISF_FastHitConvAlgFastCalo
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastHitConvAlgFastCaloSimSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastHitConvAlgFastCaloSimSvcCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastHitConvAlgFastCaloSimSvcCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSim)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -103,7 +103,7 @@ def DefaultFatrasSelectorCfg(flags, name="ISF_DefaultFatrasSelector", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FatrasServices.ISF_FatrasConfig import fatrasSimServiceIDCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(fatrasSimServiceIDCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(fatrasSimServiceIDCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Fatras)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -134,7 +134,7 @@ def BaseKinematicGeant4SelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
 def BaseKinematicATLFAST_Geant4SelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ATLFAST_Geant4SimCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ATLFAST_Geant4SimCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Geant4)
     acc.setPrivateTools(CompFactory.ISF.KinematicSimSelector(name, **kwargs))
     return acc
@@ -144,7 +144,7 @@ def BaseKinematicFatrasSelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FatrasServices.ISF_FatrasConfig import fatrasSimServiceIDCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(fatrasSimServiceIDCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(fatrasSimServiceIDCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Fatras)
     acc.setPrivateTools(CompFactory.ISF.KinematicSimSelector(name, **kwargs))
     return acc
@@ -154,7 +154,7 @@ def BaseKinematicFastCaloSimSelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimSvcCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimSvcCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSim)
     acc.setPrivateTools(CompFactory.ISF.KinematicSimSelector(name, **kwargs))
     return acc
@@ -163,7 +163,7 @@ def BaseKinematicFastCaloSimSelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs
 def BaseKinematicParticleKillerSimSelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ParticleKillerSvcCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ParticleKillerSvcCfg(flags)))
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.ParticleKiller)
     acc.setPrivateTools(CompFactory.ISF.KinematicSimSelector(name, **kwargs))
     return acc

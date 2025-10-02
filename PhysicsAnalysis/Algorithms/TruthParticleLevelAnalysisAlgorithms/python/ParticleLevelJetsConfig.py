@@ -15,18 +15,22 @@ class ParticleLevelJetsBlock(ConfigBlock):
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs(self, config):
         config.setSourceName (self.containerName, self.containerName)
 
         # count the number of heavy-flavour jets for normalisation of e.g. V+HF samples
         if "AntiKt4" in self.containerName:
             alg = config.createAlgorithm('CP::ParticleLevelJetsAlg',
-                                         'ParticleLevelJetsAlg' + self.containerName,
+                                         'ParticleLevelJetsAlg',
                                          reentrant=True)
             alg.jets = self.containerName
 
         # decorate the energy so we can save it later
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'ParticleLevelEnergyDecorator' + self.containerName )
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'ParticleLevelEnergyDecorator' )
         alg.particles = self.containerName
 
         outputVars = [

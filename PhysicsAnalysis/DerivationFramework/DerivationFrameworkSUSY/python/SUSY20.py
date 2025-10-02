@@ -148,11 +148,6 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	# PHYS common augmentations
 	from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 	acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
-
-	# EvtCleaning: instantiate our own version of EventCleaningAlg to
-	# add TightBad flags to EventInfo and AntiKt4EMTopoJets collections
-	from DerivationFrameworkSUSY.SUSYToolsConfig import SUSY20EventCleaningToolCfg
-	acc.merge(SUSY20EventCleaningToolCfg(flags, cleaningLevel = "TightBad"))
 	
 	# Track selection augmentation need for InDetTrackParticles thinning
 	from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
@@ -347,7 +342,6 @@ def SUSY20Cfg(flags):
 		"InDetTrackParticles",
 		"PrimaryVertices",
 		"TauJets",
-		"AntiKt4EMTopoJets",
 		"AntiKt4EMPFlowJets",
 		"BTagging_AntiKt4EMPFlow",
 		"MET_Baseline_AntiKt4EMPFlow",
@@ -400,6 +394,7 @@ def SUSY20Cfg(flags):
 			'TruthTausWithDecayParticles',
 			'TruthTausWithDecayVertices',
 			'AntiKt4TruthJets',
+			'AntiKt4TruthDressedWZJets'
 		]
 		SUSY20SlimmingHelper.ExtraVariables += [
 			"Electrons.TruthLink",

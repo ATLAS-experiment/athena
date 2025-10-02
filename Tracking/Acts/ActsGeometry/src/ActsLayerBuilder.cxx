@@ -24,11 +24,11 @@
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/Utilities/BinningType.hpp"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
-
+#include "Acts/Surfaces/SurfaceArray.hpp"
 #include "Acts/Visualization/GeometryView3D.hpp"
 #include "Acts/Visualization/ObjVisualization3D.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
 
-#include <Acts/Utilities/AxisDefinitions.hpp>
 #include <iterator>
 #include <unordered_map>
 #include <fstream>
@@ -92,7 +92,7 @@ ActsLayerBuilder::getDetectorElements() const {
   for (iter = siDetMng->getDetectorElementBegin();
        iter != siDetMng->getDetectorElementEnd(); ++iter) {
     const InDetDD::SiDetectorElement *siDetElement =
-        dynamic_cast<InDetDD::SiDetectorElement *>(*iter);
+        dynamic_cast<const InDetDD::SiDetectorElement *>(*iter);
     if (siDetElement == nullptr) {
       ACTS_ERROR("Detector element was nullptr");
       throw std::runtime_error{"Corrupt detector element collection"};
@@ -287,19 +287,15 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
       } else {
         f = 2.0; // two rows per module
       }
-      size_t nBinsPhi = nModPhi / f;
+      size_t nBinsPhi = nModPhi;
       size_t nBinsZ = nModZ / f;
       layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
                                                 nBinsZ, pl, transform,
                                                 std::move(approachDescriptor));
     } else if (m_cfg.mode == Mode::ITkPixelInner ||
                m_cfg.mode == Mode::ITkPixelOuter) {
-      double f = 1.0;
-      if (key == 0) {
-        f = 2.0;
-      }
-      size_t nBinsPhi = nModPhi / f;
-      size_t nBinsZ = nModZ / f;
+      size_t nBinsPhi = nModPhi;
+      size_t nBinsZ = nModZ;
       layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
                                                 nBinsZ, pl, transform,
                                                 std::move(approachDescriptor));
@@ -508,12 +504,12 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     if(layerThickness > 2_mm) {
       ACTS_VERBOSE("Wide disc layer ("<< layerThickness << ") => adding cylinder like approach surfaces");
       Acts::Transform3 trf{Translation3{0, 0, layerZ}};
-      auto cylinderInner = 
+      auto cylinderInner =
         Acts::Surface::makeShared<Acts::CylinderSurface>(
           trf, pl.min(AxisR), layerHalfZ);
         aSurfaces.push_back(cylinderInner);
 
-      auto cylinderOuter = 
+      auto cylinderOuter =
         Acts::Surface::makeShared<Acts::CylinderSurface>(
           trf, pl.max(AxisR), layerHalfZ);
         aSurfaces.push_back(cylinderOuter);
@@ -610,7 +606,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
                    [](const auto &s) { return s->getSharedPtr(); });
 
     auto layer = m_cfg.layerCreator->discLayer(gctx, ownedSurfaces, nBinsR,
-                                               nBinsPhi, pl, transformNominal,
+                                               nBinsPhi, pl, Transform3::Identity(),
                                                std::move(approachDescriptor));
 
     layersOutput.push_back(layer);
@@ -621,25 +617,25 @@ std::ostream& operator<<(std::ostream& os, const ActsLayerBuilder::Mode& mode) {
 
   using Mode = ActsLayerBuilder::Mode;
   switch(mode) {
-    case Mode::Undefined: 
+    case Mode::Undefined:
       os << "Undefined";
       break;
-    case Mode::Pixel: 
+    case Mode::Pixel:
       os << "Pixel";
       break;
-    case Mode::SCT: 
+    case Mode::SCT:
       os << "SCT";
       break;
-    case Mode::TRT: 
+    case Mode::TRT:
       os << "TRT";
       break;
-    case Mode::ITkPixelInner: 
+    case Mode::ITkPixelInner:
       os << "ITkPixelInner";
       break;
-    case Mode::ITkPixelOuter: 
+    case Mode::ITkPixelOuter:
       os << "ITkPixelOuter";
       break;
-    case Mode::ITkStrip: 
+    case Mode::ITkStrip:
       os << "ITkStrip";
       break;
   }

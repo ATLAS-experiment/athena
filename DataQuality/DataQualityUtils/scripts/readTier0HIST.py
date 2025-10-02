@@ -16,7 +16,7 @@
 
 import os, sys  
 import argparse
-from six.moves import xmlrpc_client as xmlrpclib
+from xmlrpc import client as xmlrpclib
 
 from DataQualityUtils import pathExtract
 

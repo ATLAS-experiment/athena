@@ -22,9 +22,8 @@ def fromRunArgs(runArgs):
     import time
     timeStart = time.time()
 
-    log.info('**** executing ROOT6Setup')
-    from PyUtils.Helpers import ROOT6Setup
-    ROOT6Setup(batch=True)
+    from PyUtils.Helpers import ROOTSetup
+    ROOTSetup(batch=True)
 
     log.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

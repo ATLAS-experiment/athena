@@ -24,7 +24,7 @@ public:
 
   virtual StatusCode clear() override {return StatusCode::SUCCESS;}
   virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override {return StatusCode::FAILURE;}
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override {return StatusCode::SUCCESS;}
+  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override {return StatusCode::SUCCESS;}
 
 protected:
   GeoVDetectorManager*   m_detector{nullptr};

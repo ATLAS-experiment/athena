@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FtfRoadDefiner.h"
@@ -25,8 +25,9 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* idtrack,
-						    TrigL2MuonSA::MuonRoad&    muonRoad) const
+StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const EventContext& ctx,
+                                                    const xAOD::TrackParticle* idtrack,
+                                                    TrigL2MuonSA::MuonRoad&    muonRoad) const
 {
   ATH_MSG_DEBUG("FtfRoadDefiner::defineRoad");
 
@@ -51,7 +52,7 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* i
     outerCylinderZ = -outerCylinderZ;
   }
 
-  auto extFtfInner = extTrack( CylinderFirst, idtrack, 4700., innerCylinderZ, muonRoad.ext_ftf_flag[0][0]);
+  auto extFtfInner = extTrack( ctx, CylinderFirst, idtrack, 4700., innerCylinderZ, muonRoad.ext_ftf_flag[0][0]);
   if( !extFtfInner ) {
     ATH_MSG_DEBUG("extrapolated track parameters on BarrelInner is null");
   } else {
@@ -72,7 +73,7 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* i
     else
       CylinderFirst = false;
 
-    auto extFtfMiddle = extTrack( CylinderFirst, *extFtfInner, 7300., middleCylinderZ, muonRoad.ext_ftf_flag[1][0]);
+    auto extFtfMiddle = extTrack( ctx, CylinderFirst, *extFtfInner, 7300., middleCylinderZ, muonRoad.ext_ftf_flag[1][0]);
     if( !extFtfMiddle ) {
       ATH_MSG_DEBUG("extrapolated track parameters on BarrelMiddle is null");
     } else {
@@ -93,7 +94,7 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* i
       else
 	CylinderFirst = false;
 
-      auto extFtfOuter = extTrack( CylinderFirst, *extFtfMiddle, 9800., outerCylinderZ, muonRoad.ext_ftf_flag[2][0]);
+      auto extFtfOuter = extTrack( ctx, CylinderFirst, *extFtfMiddle, 9800., outerCylinderZ, muonRoad.ext_ftf_flag[2][0]);
       if( !extFtfOuter ) {
 	ATH_MSG_DEBUG("extrapolated track parameters on BarrelOuter is null");
       } else {
@@ -168,10 +169,9 @@ StatusCode TrigL2MuonSA::FtfRoadDefiner::defineRoad(const xAOD::TrackParticle* i
 // --------------------------------------------------------------------------------
 
 // extrapolate a FTF track to MS in order to define FTF Road
-std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTrack( const bool CylinderFirst, const xAOD::TrackParticle* trk, const double R, const double Z, int& extFlag ) const
+std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTrack( const EventContext& ctx, const bool CylinderFirst, const xAOD::TrackParticle* trk, const double R, const double Z, int& extFlag ) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const bool boundaryCheck = true;
 
   // Cylinder
@@ -232,10 +232,9 @@ std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTra
 }
 
 // extrapolate a FTF track to MS in order to define FTF Road
-std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTrack( const bool CylinderFirst, const Trk::TrackParameters& param, const double R, const double Z, int& extFlag ) const
+std::unique_ptr<const Trk::TrackParameters> TrigL2MuonSA::FtfRoadDefiner::extTrack( const EventContext& ctx, const bool CylinderFirst, const Trk::TrackParameters& param, const double R, const double Z, int& extFlag ) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const bool boundaryCheck = true;
 
   // Cylinder

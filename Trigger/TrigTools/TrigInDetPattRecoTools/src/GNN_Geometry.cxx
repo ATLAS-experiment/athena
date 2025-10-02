@@ -3,7 +3,7 @@
 */
 
 
-#include "GNN_Geometry.h"
+#include "TrigInDetPattRecoTools/GNN_Geometry.h"
 
 #include<cmath>
 #include<cstring>

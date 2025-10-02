@@ -7,7 +7,6 @@
 @brief Python configuration of TileCalCellMonAlg algorithm for the Run III
 '''
 
-from __future__ import print_function
 
 def TileCalCellMonAlgConfig(flags, **kwargs):
     ''' Function to configure TileCalCellMonAlg algorithm in the monitoring system.'''

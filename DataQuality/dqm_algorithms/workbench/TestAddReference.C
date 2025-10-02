@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 void TestAddReference()
@@ -31,7 +31,7 @@ void TestAddReference()
   dqm_core::Result* result = algorithm->execute("test",*hin,*aconfig);
   std::cout<<"Result "<<result->status_<<std::endl;
   TObject* o = result->getObject();
-  std::cout<<o->GetName()<<" "<<((TObjArray*)o)->GetEntries()<<std::endl;
+  std::cout<<o->GetName()<<" "<<static_cast<TObjArray*>(o)->GetEntries()<<std::endl;
   //TH1* modifiedhisto = (TH1*)result->getObject();
   //modifiedhisto->SetLineColor(kBlue);
   //modifiedhisto->Draw("same");

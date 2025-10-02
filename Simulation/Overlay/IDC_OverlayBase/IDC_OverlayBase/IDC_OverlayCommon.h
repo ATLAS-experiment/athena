@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -62,6 +62,13 @@ void mergeCollections(Collection *bkgCollection,
                       const Alg *algorithm,
                       DataPool<Type>& dataItems);
 
+template <typename Type, typename Collection, typename Alg>
+void mergeSortedCollections(Collection *bkgCollection,
+                            Collection *signalCollection,
+                            Collection *outputCollection,
+                            const Alg *algorithm,
+                            DataPool<Type>& dataItems);
+
 /*
  * We have a dummy implementation of this.
  * Algorithms have to specialize this.
@@ -71,6 +78,11 @@ void mergeChannelData(Datum &baseDatum,
                       const Datum &additionalDatum,
                       const Alg *algorithm);
 
+/*
+ * Algorithms have to specialize this if used.
+ */
+template <typename Collection>
+void sortCollection(Collection *collection);
 
 } // namespace Overlay
 

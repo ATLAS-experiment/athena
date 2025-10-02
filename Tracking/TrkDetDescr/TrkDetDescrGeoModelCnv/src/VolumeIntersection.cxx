@@ -30,8 +30,8 @@
 // STL
 #include <iostream>
 namespace{
-    Amg::Transform3D* makeTransform(const Amg::Transform3D& trf) {
-        return std::make_unique<Amg::Transform3D>(trf).release();
+std::unique_ptr<Amg::Transform3D> makeTransform(const Amg::Transform3D& trf) {
+        return std::make_unique<Amg::Transform3D>(trf);
     }
 }
 std::pair<bool, std::unique_ptr<Trk::Volume>>
@@ -94,10 +94,10 @@ Trk::VolumeIntersection::intersect(const Volume& volA,
         Trk::PolygonCache result = intersectPgon(pgA, pgB);
         std::unique_ptr<Trk::Volume> overlap;
         if (result.nVtx > 0) {
-            auto spb = std::make_unique<Trk::SimplePolygonBrepVolumeBounds>(result.xyVertices, 0.5 * (result.maxZ - result.minZ));
+            auto spb = std::make_shared<Trk::SimplePolygonBrepVolumeBounds>(result.xyVertices, 0.5 * (result.maxZ - result.minZ));
             Amg::Transform3D transf = trf.inverse() *
                                       Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ));
-            overlap = std::make_unique<Trk::Volume>(makeTransform(transf), spb.release());
+            overlap = std::make_unique<Trk::Volume>(makeTransform(transf), spb);
         }
         return std::make_pair(true, std::move(overlap));
     }  // end shifted polygons
@@ -420,7 +420,8 @@ Trk::VolumeIntersection::intersectApproximative(const Volume& volA,
     Trk::PolygonCache pgA = polygonXY(volA);
     Trk::PolygonCache pgB = polygonXY(volB);
 
-    const Trk::CylinderVolumeBounds *cylA{nullptr}, *cylB{nullptr};
+    const Trk::CylinderVolumeBounds *cylA{nullptr};
+    const Trk::CylinderVolumeBounds *cylB{nullptr};
     if (pgA.nVtx == 0)
         cylA = dynamic_cast<const Trk::CylinderVolumeBounds*>(
             &(volA.volumeBounds()));
@@ -489,11 +490,11 @@ Trk::VolumeIntersection::intersectApproximative(const Volume& volA,
         Trk::PolygonCache result = intersectPgon(pgA, pgB);
         std::unique_ptr<Trk::Volume> overlap{};
         if (result.nVtx > 0) {
-            auto spb = std::make_unique<Trk::SimplePolygonBrepVolumeBounds>(result.xyVertices, 
+            auto spb = std::make_shared<Trk::SimplePolygonBrepVolumeBounds>(result.xyVertices,
                                                                             0.5 * (result.maxZ - result.minZ));
             Amg::Transform3D transf = trf.inverse() *
                                       Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ));
-            overlap = std::make_unique<Trk::Volume>(makeTransform(transf), spb.release());
+            overlap = std::make_unique<Trk::Volume>(makeTransform(transf), spb);
         }
         return std::make_pair(true, std::move(overlap));
     }  // end shifted polygons

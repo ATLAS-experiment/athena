@@ -75,6 +75,13 @@ private:
   std::array<float, 2> m_calibModuleSumErrSq{};
   std::array<float, 2> m_calibModSumBkgdFrac{};
 
+  bool m_haveNLcalib{};
+  std::array< std::array< std::array<float,6>, 3>, 2> m_NLcalibFactors{}; // 3 POL5s for each side
+  
+  std::array<float, 2> m_NLcalibModuleSum{};
+  std::array<float, 2> m_NLcalibModuleSumErrSq{};
+  std::array<float, 2> m_NLcalibModSumBkgdFrac{};
+
   std::array<float, 2> m_averageTime{};
   std::array<bool, 2> m_fail{};
 
@@ -113,6 +120,10 @@ public:
   float GetCalibModuleSum(size_t side) const {return m_calibModuleSum.at(side);}
   float GetCalibModuleSumErr(size_t side) const {return std::sqrt(m_calibModuleSumErrSq.at(side));}
   float GetSideCalibBkgdFrac(size_t side) const {return m_calibModSumBkgdFrac.at(side);}
+
+  void DoNLcalibModuleSum();
+  float GetNLcalibModuleSum(size_t side) const {return m_NLcalibModuleSum.at(side);}
+  float GetNLcalibModuleSumErr(size_t side) const {return std::sqrt(m_NLcalibModuleSumErrSq.at(side));}
 
   float GetModuleSumPreSample(size_t side) const {return m_moduleSumPreSample.at(side);}
 
@@ -172,6 +183,8 @@ public:
 			   const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams,
 			   const std::array<std::array<std::vector<float>, 4>, 2>& LHGNonlinCorrParams);
 
+  void SetNLcalibParams(std::array< std::array< std::array<float,6>, 3>, 2>& nlcalibParams);
+  
   void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
 
 
@@ -185,7 +198,7 @@ public:
 
   void disableFADCCorrections();
 
-  void LoadEnergyCalibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& calibSplines)
+  void LoadEnergyCalibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>&& calibSplines)
   {
     (*m_msgFunc_p)(ZDCMsg::Verbose, "Loading energy calibrations");
 
@@ -193,8 +206,8 @@ public:
     m_haveECalib = true;
   }
 
-  void LoadT0Calibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& T0HGOffsetSplines,
-                          std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& T0LGOffsetSplines)
+  void LoadT0Calibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>&& T0HGOffsetSplines,
+                          std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>&& T0LGOffsetSplines)
   {
     (*m_msgFunc_p)(ZDCMsg::Verbose, "Loading timing calibrations");
 

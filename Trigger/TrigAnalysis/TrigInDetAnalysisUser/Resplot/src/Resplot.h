@@ -13,7 +13,7 @@
  **
  **   @date         Mon Jun 21 18:35:22 BST 2004
  **
- **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -158,7 +158,7 @@ public:
     skip(m_Nentries);
   }
 
-  Resplot(const std::string& name, const TH2* hin, const bool flip=false) :
+  Resplot(const std::string& name, TH2* hin, const bool flip=false) :
     m_Set(false),  m_name(name),
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL),  
@@ -171,7 +171,7 @@ public:
     TH2D* h = 0;
 
     if ( flip ) h = rotate( hin ); 
-    else        h = (TH2D*)hin;
+    else        h = static_cast<TH2D*>(hin);
 
     // get the major bin edges
     std::vector<double> a1;

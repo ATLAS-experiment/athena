@@ -57,12 +57,12 @@
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
-#include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 
-#include "FPGATrackSimGenScanBinning.h"
-#include "FPGATrackSimGenScanArray.h"
+// new binnning classes
+#include "FPGATrackSimBinning/FPGATrackSimBinnedHits.h"
+
 
 #include <string>
 #include <vector>
@@ -74,10 +74,12 @@ class FPGATrackSimGenScanMonitoring;
 class FPGATrackSimGenScanTool : public extends<AthAlgTool, IFPGATrackSimRoadFinderTool>
 {
 public:
-  ///////////////////////////////////////////////////////////////////////
-  // AthAlgTool
-  
-    FPGATrackSimGenScanTool(const std::string &, const std::string &, const IInterface *);
+    using StoredHit = FPGATrackSimBinUtil::StoredHit;
+    using BinEntry = FPGATrackSimBinnedHits::BinEntry;
+
+    /// Constructor
+    using base_class::base_class;
+    FPGATrackSimGenScanTool(const std::string& algname, const std::string &name, const IInterface *ifc);
 
     virtual StatusCode initialize() override;
 
@@ -93,30 +95,15 @@ protected:
     ///////////////////////////////////////////////////////////////////////
     // Handles
 
-    ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
-    ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc{this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
+    ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this, "FPGATrackSimEventSelectionSvc", ""};
     ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
     ToolHandle<FPGATrackSimGenScanMonitoring> m_monitoring {this, "Monitoring", "FPGATrackSimGenScanMonitoring", "Monitoring Tool"};
-    ToolHandle<FPGATrackSimGenScanBinningBase> m_binning {this, "Binning", "FPGATrackSimGenScanBinningBase", "Gen Scan Binning Tool"};
+    ToolHandle<FPGATrackSimBinnedHits> m_binnedhits {this, "BinnedHits", "FPGATrackSimBinnedHits", "Binned Hits Class"};
 
     ///////////////////////////////////////////////////////////////////////
     // Properties
-    Gaudi::Property<std::string> m_parSet{this, "parSet", {}, "String name of parameter set"};
-    Gaudi::Property<std::vector<float>> m_parMin{this, "parMin", {}, "Vector of minimum bounds of parameters (expect 5"};
-    Gaudi::Property<std::vector<float>> m_parMax{this, "parMax", {}, "Vector of maximum bounds of parameters (expect 5"};
-    Gaudi::Property<std::vector<unsigned>> m_parBins{this, "parBins", {}, "Vector of number of bins for each parameter (expect 5)"};
-
     Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for extrapolations and keylayer definition"};
     Gaudi::Property<double> m_rout{this, "rout", {-1.0}, "Radius of outer layer for extrapolations and keylayer definition"};
-
-    Gaudi::Property<std::string> m_lyrmapFile{this, "layerMapFile",{""}, "use externally defined layer map"};
-
-    Gaudi::Property<double> m_d0FractionalPadding{this, "d0FractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
-    Gaudi::Property<double> m_z0FractionalPadding{this, "z0FractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
-    Gaudi::Property<double> m_etaFractionalPadding{this, "etaFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
-    Gaudi::Property<double> m_phiFractionalPadding{this, "phiFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
-    Gaudi::Property<double> m_qOverPtFractionalPadding{this, "qOverPtFractionalPadding", {}, "Fractional padding used when calculating the valid range of bins"};
-
 
     
     Gaudi::Property<unsigned> m_threshold{this, "threshold", {}, "Minimum value to accept as a road (inclusive)"};
@@ -141,28 +128,16 @@ protected:
     Gaudi::Property<double> m_pairSetDeltaPhiCurvatureCut{this, "pairSetDeltaPhiCurvatureCut", {}, "Pair Set Delta Phi Curvature Cut Value"};
     Gaudi::Property<double> m_pairSetDeltaEtaCurvatureCut{this, "pairSetDeltaEtaCurvatureCut", {}, "Pair Set Delta Eta Curvature Cut Value"};
     Gaudi::Property<std::vector<double>> m_pairSetPhiExtrapCurvedCut{this, "pairSetPhiExtrapCurvedCut", {}, "Pair Set Phi Extrap Curved Cut Value(in/out pair)"};
+    Gaudi::Property<double> m_phiWeight{this, "phiChi2Weight", 1.0, "Weight for phi component of chi2 in genscan fit"};
+    Gaudi::Property<double> m_etaWeight{this, "etaChi2Weight", 1.0, "Weight for eta component of chi2 in genscan fit"};
+    Gaudi::Property<bool> m_inBinFiltering {this, "inBinFiltering", true, "Filter roads that appear to be outside their bin"};
+    Gaudi::Property<int> m_keepHitsStrategy {this, "keepHitsStrategy", -1, "If this is less than 0, do nothing. If 1, pick 3 hits furthest apart. If 2, pick 3 inner hits. If 3, pick 3 outer hits. If 4, drop only middle hit for 5/5 otherwise keep all 4 hits for 4/5"};
 
     ///////////////////////////////////////////////////////////////////////
     // Core
 
-    // These are forwards for the internal data storage so you can read
-    // the core elements before getting the clutter of details
-    struct StoredHit;  // stores hit, plus offsets from nominal bin trajectory
-    struct BinEntry; // stores list of StoredHit for a bin
     class HitPair; // pair of StoredHit with methods to make variables to cut on
     struct HitPairSet; // group of HitPair with methods to make variables to cut on
-
-    // Which bins are consistent with the (pT, eta, pho, d0, z0)
-    // ranges computed from region definition defined in the eventselection
-    // service or set by the layer map
-    void initValidBins();
-    void computeValidBins();
-    void setValidBin(std::vector<unsigned> idx);// reuse setting all the different idx types
-    void printValidBin();// dump an output to log for x-checks
-
-    // Put hits in all track parameter bins they could be a part of (binning is defined
-    // by m_binning object)
-    StatusCode fillImage(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
 
     // Filter the bins above threshold into pairsets which output roads (2 options)
     //
@@ -193,35 +168,14 @@ protected:
     bool pairMatchesPairSet(const HitPairSet &pairset, const HitPair &pair, bool verbose);
 
     // format final pairsets into expected output of getRoads
-    void addRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimGenScanBinningBase::IdxSet &idx);
+    void addRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx);
 
-    ///////////////////////////////////////////////////////////////////////
-    // Internal Storage Classes
+    // Experimental fit
+    bool fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2) const;
 
-    // Stores hit plus the phi/etashift from the nominal bin center
-    struct StoredHit
-    {
-        std::shared_ptr<const FPGATrackSimHit> hitptr;
-        double phiShift;
-        double etaShift; // note this might be eta or z depending on m_binning
-        int layer;
-        double rzrad() const { return sqrt(hitptr->getR()*hitptr->getR()+hitptr->getZ()*hitptr->getZ());}
-    };
-    friend std::ostream &operator<<(std::ostream &os, const StoredHit &hit);
+    std::vector<unsigned> PickHitsToUse(layer_bitmask_t) const;
 
-    // each bin contains a list of StoredHit objects 
-    struct BinEntry
-    {
-        BinEntry() {}
-        void reset();
-        void addHit(StoredHit hit);
-        unsigned int lyrCnt() { return std::popcount(lyrhit); };
-        unsigned int hitCnt = 0;
-        layer_bitmask_t lyrhit = 0;
-        std::vector<StoredHit> hits{};
-    };
-
-    ///////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
     // HitPair and HitPairSet Storage Classes
 
     // Pair of hits, methods gives variable you might want to cut on
@@ -312,26 +266,8 @@ protected:
     ///////////////////////////////////////////////////////////////////////
     // Event Storage
     int m_evtsProcessed = 0;
-    unsigned m_nLayers = 0; // copy of m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
-    std::vector<unsigned int> m_pairingLayers; 
+    std::vector<unsigned int> m_pairingLayers;
     
-    // The implementation of the binning base class that defines the binning to be used
-    // FPGATrackSimGenScanBinningBase *m_binning{nullptr};
-
-    // Main image (up to 5d) with the hits binned according to m_binning
-    FPGATrackSimGenScanArray<BinEntry> m_image;
-
-    // Tells which bins/slices/scans actually correspond to track parameters in the specified region
-    FPGATrackSimGenScanArray<int> m_validBin;
-    FPGATrackSimGenScanArray<int> m_validSlice;
-    FPGATrackSimGenScanArray<int> m_validScan;
-    FPGATrackSimGenScanArray<int> m_validSliceAndScan;
-
-    // structure is indexed on bin, then layer, then a set of modules
-    void readLayerMap(const std::string & filename);
-    FPGATrackSimGenScanArray< std::vector <std::set<unsigned> > > m_lyr_to_mod_map;
-    FPGATrackSimGenScanArray< std::map<unsigned,unsigned> > m_mod_to_lyr_map;
-
     // output roads
     std::vector<std::unique_ptr<FPGATrackSimRoad>> m_roads{};
 };

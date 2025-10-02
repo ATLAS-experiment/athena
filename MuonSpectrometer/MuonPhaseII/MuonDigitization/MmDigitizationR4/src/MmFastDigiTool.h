@@ -46,6 +46,7 @@ namespace MuonR4{
 
             Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false, 
                                                      "If set to true hit with pdgId != 13 are skipped"};
+            Gaudi::Property<double> m_energyThreshold{this, "EnergyThreshold", 50, "Minimal energy to process an electron sim hit"};
     };
 }
 #endif

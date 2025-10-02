@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from collections import OrderedDict as odict
 from dataclasses import dataclass
 from enum import Enum
 
@@ -117,8 +116,6 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
         return getConfig_jTAU(do_HI_tob_thresholds)
     if ttype == ThrType.jJ:
         return getConfig_jJ(do_HI_tob_thresholds)
-    if ttype == ThrType.jLJ:
-        return getConfig_jLJ()
     if ttype == ThrType.gJ:
         return getConfig_gJ()
     if ttype == ThrType.gLJ:
@@ -139,27 +136,31 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
         return getConfig_JET()
     if ttype == ThrType.XS:
         return getConfig_XS()    
-    return odict()
+    return {}
 
 
 def getConfig_MU():
-    confObj = odict()
-    confObj["exclusionLists"] = odict()
-    confObj["exclusionLists"]["rpcFeet"] = []
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B21"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B22"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B25"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B26"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B53"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B54"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B57"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
-    confObj["exclusionLists"]["rpcFeet"].append( odict([("sectorName", "B58"), ("rois",[8,9,10,11,16,17,18,19,20,21,22,23,28,29,30,31])]) )
+    confObj = {
+        "exclusionLists": {
+            "rpcFeet": [
+                {"sectorName": "B21", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+                {"sectorName": "B22", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+                {"sectorName": "B25", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+                {"sectorName": "B26", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+                {"sectorName": "B53", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+                {"sectorName": "B54", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+                {"sectorName": "B57", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+                {"sectorName": "B58", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
+            ]
+        }
+    }
 
     
     # roads from https://indico.cern.ch/event/1011425/contributions/4272884/
-    confObj["roads"] = odict()
-    confObj["roads"]["rpc"] = odict([(0,0), (4,1), (6,2), (8,3), (10,4), (12,5), (14,6)])
-    confObj["roads"]["tgc"] = odict([(0,0)] + list(zip([3,4,5,6,7,8,9,10,11,12,13,14,15,18,20],list(range(1,16)))))
+    confObj["roads"] = {
+        "rpc": {0: 0, 4: 1, 6: 2, 8: 3, 10: 4, 12: 5, 14: 6},
+        "tgc": {0: 0, **dict(zip([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 20], range(1, 16)))}
+    }
 
     # check that there is a unique assignment between roads and pt values
     for muonDet in ("rpc","tgc"):
@@ -182,8 +183,7 @@ def getConfig_MU():
 
 
 def getConfig_eEM(do_HI_tob_thresholds):
-    confObj = odict()
-    confObj["workingPoints"] = odict()
+    confObj = {"workingPoints": {}}
     bitshift_reta = 3
     bitshift_rhad = 3
     bitshift_wstot = 5   
@@ -198,49 +198,58 @@ def getConfig_eEM(do_HI_tob_thresholds):
     wstot_fw_tight = 29 
     # based on https://indico.cern.ch/event/1035198/contributions/4378014/attachments/2251846/3820098/20210526_l1calo_TGM.pdf
     confObj["workingPoints"]["Loose"] = [
-        odict([("reta_fw", reta_fw_loose), ("reta", eFEXfwToFloatConversion(reta_fw_loose,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_loose), ("rhad", eFEXfwToFloatConversion(rhad_fw_loose,bitshift_rhad)), 
-               ("etamin", -49), ("etamax", -24), ("priority", 0)]),
-        odict([("reta_fw", reta_fw_loose), ("reta", eFEXfwToFloatConversion(reta_fw_loose,bitshift_reta)), 
-               ("wstot_fw", wstot_fw_loose), ("wstot", eFEXfwToFloatConversion_wstot(wstot_fw_loose,bitshift_wstot)), 
-               ("rhad_fw", rhad_fw_loose), ("rhad", eFEXfwToFloatConversion(rhad_fw_loose,bitshift_rhad)), 
-               ("etamin", -24), ("etamax", 24), ("priority", 0)]),
-        odict([("reta_fw", reta_fw_loose), ("reta", eFEXfwToFloatConversion(reta_fw_loose,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_loose), ("rhad", eFEXfwToFloatConversion(rhad_fw_loose,bitshift_rhad)), 
-               ("etamin",  24), ("etamax", 49), ("priority", 0)]),
+        {"reta_fw": reta_fw_loose, "reta": eFEXfwToFloatConversion(reta_fw_loose, bitshift_reta),
+         "wstot_fw": 0, "wstot": 0,
+         "rhad_fw": rhad_fw_loose, "rhad": eFEXfwToFloatConversion(rhad_fw_loose, bitshift_rhad),
+         "etamin": -49, "etamax": -24,
+         "priority": 0},
+        {"reta_fw": reta_fw_loose, "reta": eFEXfwToFloatConversion(reta_fw_loose, bitshift_reta),
+         "wstot_fw": wstot_fw_loose, "wstot": eFEXfwToFloatConversion_wstot(wstot_fw_loose, bitshift_wstot),
+         "rhad_fw": rhad_fw_loose, "rhad": eFEXfwToFloatConversion(rhad_fw_loose, bitshift_rhad),
+         "etamin": -24, "etamax": 24,
+         "priority": 0},
+        {"reta_fw": reta_fw_loose, "reta": eFEXfwToFloatConversion(reta_fw_loose, bitshift_reta),
+         "wstot_fw": 0, "wstot": 0,
+         "rhad_fw": rhad_fw_loose, "rhad": eFEXfwToFloatConversion(rhad_fw_loose, bitshift_rhad),
+         "etamin": 24, "etamax": 49,
+         "priority": 0},
         # More granular cuts from -24 to 25 are specified in FexThresholdParameters
         # with priority 2
     ]
     confObj["workingPoints"]["Medium"] = [
-        odict([("reta_fw", reta_fw_medium), ("reta", eFEXfwToFloatConversion(reta_fw_medium,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_medium), ("rhad", eFEXfwToFloatConversion(rhad_fw_medium,bitshift_rhad)), 
-               ("etamin", -49), ("etamax", -24), ("priority", 0)]),
-        odict([("reta_fw", reta_fw_medium), ("reta", eFEXfwToFloatConversion(reta_fw_medium,bitshift_reta)), 
-               ("wstot_fw", wstot_fw_medium), ("wstot", eFEXfwToFloatConversion_wstot(wstot_fw_medium,bitshift_wstot)), 
-               ("rhad_fw", rhad_fw_medium), ("rhad", eFEXfwToFloatConversion(rhad_fw_medium,bitshift_rhad)), 
-               ("etamin", -24), ("etamax", 24), ("priority", 0)]),
-        odict([("reta_fw", reta_fw_medium), ("reta", eFEXfwToFloatConversion(reta_fw_medium,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_medium), ("rhad", eFEXfwToFloatConversion(rhad_fw_medium,bitshift_rhad)), 
-               ("etamin",  24), ("etamax", 49), ("priority", 0)]),
+        {"reta_fw": reta_fw_medium, "reta": eFEXfwToFloatConversion(reta_fw_medium, bitshift_reta),
+         "wstot_fw": 0, "wstot": 0,
+         "rhad_fw": rhad_fw_medium, "rhad": eFEXfwToFloatConversion(rhad_fw_medium, bitshift_rhad),
+         "etamin": -49, "etamax": -24,
+         "priority": 0},
+        {"reta_fw": reta_fw_medium, "reta": eFEXfwToFloatConversion(reta_fw_medium, bitshift_reta),
+         "wstot_fw": wstot_fw_medium, "wstot": eFEXfwToFloatConversion_wstot(wstot_fw_medium, bitshift_wstot),
+         "rhad_fw": rhad_fw_medium, "rhad": eFEXfwToFloatConversion(rhad_fw_medium, bitshift_rhad),
+         "etamin": -24, "etamax": 24,
+         "priority": 0},
+        {"reta_fw": reta_fw_medium, "reta": eFEXfwToFloatConversion(reta_fw_medium, bitshift_reta),
+         "wstot_fw": 0, "wstot": 0,
+         "rhad_fw": rhad_fw_medium, "rhad": eFEXfwToFloatConversion(rhad_fw_medium, bitshift_rhad),
+         "etamin": 24, "etamax": 49,
+         "priority": 0},
         # More granular cuts from -24 to 25 are specified in FexThresholdParameters
     ]
     confObj["workingPoints"]["Tight"] = [
-        odict([("reta_fw", reta_fw_tight), ("reta", eFEXfwToFloatConversion(reta_fw_tight,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_tight), ("rhad", eFEXfwToFloatConversion(rhad_fw_tight,bitshift_rhad)), 
-               ("etamin", -49), ("etamax", -24), ("priority", 0)]),
-        odict([("reta_fw", reta_fw_tight), ("reta", eFEXfwToFloatConversion(reta_fw_tight,bitshift_reta)), 
-               ("wstot_fw", wstot_fw_tight), ("wstot", eFEXfwToFloatConversion_wstot(wstot_fw_tight,bitshift_wstot)), 
-               ("rhad_fw", rhad_fw_tight), ("rhad", eFEXfwToFloatConversion(rhad_fw_tight,bitshift_rhad)), 
-               ("etamin", -24), ("etamax", 24), ("priority", 0)]),
-        odict([("reta_fw", reta_fw_tight), ("reta", eFEXfwToFloatConversion(reta_fw_tight,bitshift_reta)), 
-               ("wstot_fw", 0), ("wstot", 0), 
-               ("rhad_fw", rhad_fw_tight), ("rhad", eFEXfwToFloatConversion(rhad_fw_tight,bitshift_rhad)), 
-               ("etamin",  24), ("etamax", 49), ("priority", 0)]),
+        {"reta_fw": reta_fw_tight, "reta": eFEXfwToFloatConversion(reta_fw_tight, bitshift_reta),
+         "wstot_fw": 0, "wstot": 0,
+         "rhad_fw": rhad_fw_tight, "rhad": eFEXfwToFloatConversion(rhad_fw_tight, bitshift_rhad),
+         "etamin": -49, "etamax": -24,
+         "priority": 0},
+        {"reta_fw": reta_fw_tight, "reta": eFEXfwToFloatConversion(reta_fw_tight, bitshift_reta),
+         "wstot_fw": wstot_fw_tight, "wstot": eFEXfwToFloatConversion_wstot(wstot_fw_tight, bitshift_wstot),
+         "rhad_fw": rhad_fw_tight, "rhad": eFEXfwToFloatConversion(rhad_fw_tight, bitshift_rhad),
+         "etamin": -24, "etamax": 24,
+         "priority": 0},
+        {"reta_fw": reta_fw_tight, "reta": eFEXfwToFloatConversion(reta_fw_tight, bitshift_reta),
+         "wstot_fw": 0, "wstot": 0,
+         "rhad_fw": rhad_fw_tight, "rhad": eFEXfwToFloatConversion(rhad_fw_tight, bitshift_rhad),
+         "etamin": 24, "etamax": 49,
+         "priority": 0},
         # More granular cuts from -24 to 25 are specified in FexThresholdParameters
     ]
     confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 3
@@ -265,12 +274,13 @@ def getConfig_eEM(do_HI_tob_thresholds):
                 reta_cut  = eEM_eta_cuts[wp]["reta"][ieta]
                 rhad_cut  = eEM_eta_cuts[wp]["rhad"][ieta]
                 wstot_cut = eEM_eta_cuts[wp]["wstot"][ieta]
-                confObj["workingPoints"][wp].append(
-                    odict([("reta_fw", reta_cut), ("reta", eFEXfwToFloatConversion(reta_cut,bitshift_reta)), 
-                    ("wstot_fw", wstot_cut), ("wstot", wstot_cut),
-                    ("rhad_fw", rhad_cut), ("rhad", eFEXfwToFloatConversion(rhad_cut,bitshift_rhad)), 
-                    ("etamin", etalow), ("etamax", etalow+stride), ("priority", 2)])
-                )
+                confObj["workingPoints"][wp].append( {
+                    "reta_fw": reta_cut, "reta": eFEXfwToFloatConversion(reta_cut,bitshift_reta),
+                    "wstot_fw": wstot_cut, "wstot": wstot_cut,
+                    "rhad_fw": rhad_cut, "rhad": eFEXfwToFloatConversion(rhad_cut,bitshift_rhad),
+                    "etamin": etalow, "etamax": etalow+stride,
+                    "priority": 2
+                } )
 
     # Check that FW values are integers
     for wp in confObj["workingPoints"]:
@@ -299,34 +309,47 @@ def getConfig_jEM():
     frac2_medium_float = 0.08
     frac2_tight_float = 0.04
 
-    confObj = odict()
-    confObj["workingPoints"] = odict()
-    confObj["workingPoints"]["Loose"] = [
-        odict([("iso_fw", jFEXfloatToFWConversion(iso_loose_float)), ("iso", iso_loose_float),
-               ("frac_fw", jFEXfloatToFWConversion(frac_loose_float)), ("frac", frac_loose_float), 
-               ("frac2_fw", jFEXfloatToFWConversion(frac2_loose_float)), ("frac2", frac2_loose_float), 
-               ("etamin", -49), ("etamax", 49), ("priority", 0)]),
-    ]
+    confObj = {
+        "workingPoints": {
+            "Loose": [
+                {
+                    "iso_fw": jFEXfloatToFWConversion(iso_loose_float), "iso": iso_loose_float,
+                    "frac_fw": jFEXfloatToFWConversion(frac_loose_float), "frac": frac_loose_float,
+                    "frac2_fw": jFEXfloatToFWConversion(frac2_loose_float), "frac2": frac2_loose_float,
+                    "etamin": -49, "etamax": 49,
+                    "priority": 0,
+                }
+            ]
+        }
+    }
     confObj["workingPoints"]["Medium"] = [
-        odict([("iso_fw", jFEXfloatToFWConversion(iso_medium_float)), ("iso", iso_medium_float), 
-               ("frac_fw", jFEXfloatToFWConversion(frac_medium_float)), ("frac", frac_medium_float), 
-               ("frac2_fw", jFEXfloatToFWConversion(frac2_medium_float)), ("frac2", frac2_medium_float), 
-               ("etamin", -49), ("etamax", 49), ("priority", 0)]),
+        {
+            "iso_fw": jFEXfloatToFWConversion(iso_medium_float), "iso": iso_medium_float,
+            "frac_fw": jFEXfloatToFWConversion(frac_medium_float), "frac": frac_medium_float,
+            "frac2_fw": jFEXfloatToFWConversion(frac2_medium_float), "frac2": frac2_medium_float,
+            "etamin": -49, "etamax": 49,
+            "priority": 0,
+        }
     ]
     confObj["workingPoints"]["Tight"] = [
-        odict([("iso_fw", jFEXfloatToFWConversion(iso_tight_float)), ("iso", iso_tight_float), 
-               ("frac_fw", jFEXfloatToFWConversion(frac_tight_float)), ("frac", frac_tight_float), 
-               ("frac2_fw", jFEXfloatToFWConversion(frac2_tight_float)), ("frac2", frac2_tight_float), 
-               ("etamin", -49), ("etamax", 49), ("priority", 0)]),
+        {
+            "iso_fw": jFEXfloatToFWConversion(iso_tight_float), "iso": iso_tight_float,
+            "frac_fw": jFEXfloatToFWConversion(frac_tight_float), "frac": frac_tight_float,
+            "frac2_fw": jFEXfloatToFWConversion(frac2_tight_float), "frac2": frac2_tight_float,
+            "etamin": -49, "etamax": 49,
+            "priority": 0,
+        }
     ]
-    confObj["ptMinToTopo1"] = 5 # PLACEHOLDER
-    confObj["ptMinToTopo2"] = 5 # PLACEHOLDER
-    confObj["ptMinToTopo3"] = 5 # PLACEHOLDER
-    confObj["ptMinxTOB1"] = 5 # PLACEHOLDER
-    confObj["ptMinxTOB2"] = 5 # PLACEHOLDER
-    confObj["ptMinxTOB3"] = 5 # PLACEHOLDER
-    confObj["maxEt"] = 50 # PLACEHOLDER
-    confObj["resolutionMeV"] = 200
+    confObj.update({
+        "ptMinToTopo1": 5,  # PLACEHOLDER
+        "ptMinToTopo2": 5,  # PLACEHOLDER
+        "ptMinToTopo3": 5,  # PLACEHOLDER
+        "ptMinxTOB1": 5,    # PLACEHOLDER
+        "ptMinxTOB2": 5,    # PLACEHOLDER
+        "ptMinxTOB3": 5,    # PLACEHOLDER
+        "maxEt": 50,        # PLACEHOLDER
+        "resolutionMeV": 200
+    })
 
     # Check that FW values are integers
     for wp in confObj["workingPoints"]:
@@ -383,35 +406,45 @@ class L1Config_eTAU:
     bitshift_rHad = 3
 
 
-    def __call__(self, do_eFex_BDT_Tau=True, do_HI_tob_thresholds=False) -> odict:
+    def __call__(self, do_eFex_BDT_Tau=True, do_HI_tob_thresholds=False) -> dict:
         # Load either RCore or BDT cut thresholds
         rCore_fw_loose = self.BDT_fw_loose if do_eFex_BDT_Tau else self.rCore_fw_loose
         rCore_fw_medium = self.BDT_fw_medium if do_eFex_BDT_Tau else self.rCore_fw_medium
         rCore_fw_tight = self.BDT_fw_tight if do_eFex_BDT_Tau else self.rCore_fw_tight
 
-        confObj = odict()
-        confObj["workingPoints"] = odict()
-        confObj["workingPoints"]["Loose"] = [
-            odict([("rCore", eTAUfwToFloatConversion_bdt(rCore_fw_loose) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_loose, self.bitshift_rCore)), ("rCore_fw", rCore_fw_loose), 
-                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_loose, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_loose),
-                  ]), 
-        ]
-        confObj["workingPoints"]["Medium"] = [
-            odict([("rCore", eTAUfwToFloatConversion_bdt(rCore_fw_medium) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_medium, self.bitshift_rCore)), ("rCore_fw", rCore_fw_medium), 
-                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_medium, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_medium), 
-                 ]),
-        ]
-        confObj["workingPoints"]["Tight"] = [
-            odict([("rCore", eTAUfwToFloatConversion_bdt(rCore_fw_tight) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_tight, self.bitshift_rCore)), ("rCore_fw", rCore_fw_tight), 
-                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
-                 ]),
-        ]
-        confObj["ptMinToTopo"] = 0.6 if do_HI_tob_thresholds else 5
-        confObj["resolutionMeV"] = 100
-        confObj["minIsoEt"] = 12 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
-        confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
-        confObj["algoVersion"] = 2 if do_eFex_BDT_Tau else 0 # For BDT based selection, algoVersion 1 corresponds to the 2024 v16 BDT and algoVersion 2 corresponds to the 2025 v17 BDT.
-
+        confObj = {
+            "workingPoints": {
+                "Loose": [
+                    {
+                        "rCore": eTAUfwToFloatConversion_bdt(rCore_fw_loose) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_loose, self.bitshift_rCore),
+                        "rCore_fw": rCore_fw_loose,
+                        "rHad": eFEXfwToFloatConversion(self.rHad_fw_loose, self.bitshift_rHad),
+                        "rHad_fw": self.rHad_fw_loose,
+                    }
+                ],
+                "Medium": [
+                    {
+                        "rCore": eTAUfwToFloatConversion_bdt(rCore_fw_medium) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_medium, self.bitshift_rCore),
+                        "rCore_fw": rCore_fw_medium,
+                        "rHad": eFEXfwToFloatConversion(self.rHad_fw_medium, self.bitshift_rHad),
+                        "rHad_fw": self.rHad_fw_medium,
+                    }
+                ],
+                "Tight": [
+                    {
+                        "rCore": eTAUfwToFloatConversion_bdt(rCore_fw_tight) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_tight, self.bitshift_rCore),
+                        "rCore_fw": rCore_fw_tight,
+                        "rHad": eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad),
+                        "rHad_fw": self.rHad_fw_tight,
+                    }
+                ],
+            },
+            "ptMinToTopo": 0.6 if do_HI_tob_thresholds else 5,
+            "resolutionMeV": 100,
+            "minIsoEt": 12,  # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
+            "maxEt": 50,     # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
+            "algoVersion": 2 if do_eFex_BDT_Tau else 0 # For BDT based selection, algoVersion 1 corresponds to the 2024 v16 BDT and algoVersion 2 corresponds to the 2025 v17 BDT.
+        }
         # Check that FW values are integers
         for wp in confObj["workingPoints"]:
             for ssthr in confObj["workingPoints"][wp]:
@@ -516,9 +549,9 @@ class L1Config_cTAU:
                 setattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}', getattr(self, f'eTAU_rCoreMin_WP_fw_{default_wp.lower()}'))
                 setattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}', getattr(self, f'eTAU_rHadMin_WP_fw_{default_wp.lower()}'))
 
-    def __call__(self, do_eFex_BDT_Tau=True) -> odict:
-        confObj = odict()
-        confObj['workingPoints'] = odict()
+    def __call__(self, do_eFex_BDT_Tau=True) -> dict:
+        confObj = {}
+        confObj['workingPoints'] = {}
 
         for wp in [f'{wp}{thr}' for wp in ('Loose', 'Medium', 'Tight') for thr in ('', 12, 20, 30, 35, 50, 55)]:
             confObj['workingPoints'][wp] = [{
@@ -557,20 +590,17 @@ class L1Config_jTAU:
     isolation_fw_tight: int = 307
 
 
-    def __call__(self,do_HI_tob_thresholds=False) -> odict:
-        confObj = odict()
-        confObj["workingPoints"] = odict()
+    def __call__(self,do_HI_tob_thresholds=False) -> dict:
+        confObj = {}
+        confObj["workingPoints"] = {}
         confObj["workingPoints"]["Loose"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_loose)), ("isolation_fw", self.isolation_fw_loose), 
-                  ]),
+            {"isolation": cTAUfwToFlowConversion(self.isolation_fw_loose), "isolation_fw": self.isolation_fw_loose},
         ]
         confObj["workingPoints"]["Medium"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_medium)), ("isolation_fw", self.isolation_fw_medium), 
-                  ]),
+            {"isolation": cTAUfwToFlowConversion(self.isolation_fw_medium), "isolation_fw": self.isolation_fw_medium},
         ]
         confObj["workingPoints"]["Tight"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_tight)), ("isolation_fw", self.isolation_fw_tight), 
-                  ]),
+            {"isolation": cTAUfwToFlowConversion(self.isolation_fw_tight), "isolation_fw": self.isolation_fw_tight},
         ]
         confObj["ptMinToTopo1"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
         confObj["ptMinToTopo2"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
@@ -602,7 +632,7 @@ getConfig_jTAU = L1Config_jTAU()
 
 
 def getConfig_jJ(do_HI_tob_thresholds):
-    confObj = odict()
+    confObj = {}
     confObj["ptMinToTopo1"] = 5 if do_HI_tob_thresholds else 10
     confObj["ptMinToTopo2"] = 5 if do_HI_tob_thresholds else 10
     confObj["ptMinToTopo3"] = 5 if do_HI_tob_thresholds else 10
@@ -615,26 +645,16 @@ def getConfig_jJ(do_HI_tob_thresholds):
     confObj["seedThreshold3"] = 3 
     return confObj
 
-def getConfig_jLJ():
-    confObj = odict()
-    confObj["ptMinToTopo1"] = 15 # PLACEHOLDER
-    confObj["ptMinToTopo2"] = 15 # PLACEHOLDER
-    confObj["ptMinToTopo3"] = 15 # PLACEHOLDER
-    confObj["ptMinxTOB1"] = 15 # PLACEHOLDER
-    confObj["ptMinxTOB2"] = 15 # PLACEHOLDER
-    confObj["ptMinxTOB3"] = 15 # PLACEHOLDER
-    confObj["resolutionMeV"] = 200
-    return confObj
 
 def getConfig_gJ():
-    confObj = odict()
+    confObj = {}
     confObj["ptMinToTopo1"] = 0 
     confObj["ptMinToTopo2"] = 0 
     confObj["resolutionMeV"] = 200
     return confObj
 
 def getConfig_gLJ():
-    confObj = odict()
+    confObj = {}
     confObj["ptMinToTopo1"] = 6 
     confObj["ptMinToTopo2"] = 6 
     confObj["seedThrA"] = 20
@@ -655,8 +675,9 @@ def getConfig_gLJ():
     return confObj
 
 def getConfig_jXE():
-    confObj = odict()
-    confObj["resolutionMeV"] = 200
+    confObj = {
+        "resolutionMeV": 200
+    }
     return confObj
 
 def getConfig_jTE():
@@ -678,65 +699,72 @@ def getConfig_jTE():
     module2 = 4
     module3 = 4
 
-    confObj = odict()
-    confObj["etaBoundary1"] = convertTowerToEta(module1,1)
-    confObj["etaBoundary1_fw"] = module1
-    confObj["etaBoundary2"] = convertTowerToEta(module2,2)
-    confObj["etaBoundary2_fw"] = module2
-    confObj["etaBoundary3"] = convertTowerToEta(module3,3)
-    confObj["etaBoundary3_fw"] = module3
-    confObj["resolutionMeV"] = 200
+    confObj = {
+        "etaBoundary1": convertTowerToEta(module1,1),
+        "etaBoundary1_fw": module1,
+        "etaBoundary2": convertTowerToEta(module2,2),
+        "etaBoundary2_fw": module2,
+        "etaBoundary3": convertTowerToEta(module3,3),
+        "etaBoundary3_fw": module3,
+        "resolutionMeV": 200
+    }
     return confObj
 
 def getConfig_gXE(do_HI_tob_thresholds):
-    confObj = odict()
-    confObj["seedThrA"] = 8 if do_HI_tob_thresholds else 80 #must be a multiple of 4
-    confObj["seedThrB"] = 8 if do_HI_tob_thresholds else 80 #must be a multiple of 4
-    confObj["seedThrC"] = 8 if do_HI_tob_thresholds else 80 #must be a multiple of 4
-    confObj["XERHO_sigmaPosA"] = 3 
-    confObj["XERHO_sigmaPosB"] = 3 
-    confObj["XERHO_sigmaPosC"] = 3 
-    confObj["XERHO_sigmaNegA"] = 8 
-    confObj["XERHO_sigmaNegB"] = 8 
-    confObj["XERHO_sigmaNegC"] = 8 
-    confObj["XEJWOJ_a_A"] = 1003 
-    confObj["XEJWOJ_a_B"] = 1003 
-    confObj["XEJWOJ_a_C"] = 1003 
-    confObj["XEJWOJ_b_A"] = 409 
-    confObj["XEJWOJ_b_B"] = 409 
-    confObj["XEJWOJ_b_C"] = 0 
-    confObj["XEJWOJ_c_A"] = 0 
-    confObj["XEJWOJ_c_B"] = 0 
-    confObj["XEJWOJ_c_C"] = 0 
-    confObj["resolutionMeV"] = 200
+    confObj = {
+        "seedThrA": 8 if do_HI_tob_thresholds else 80, #must be a multiple of 4
+        "seedThrB": 8 if do_HI_tob_thresholds else 80, #must be a multiple of 4
+        "seedThrC": 8 if do_HI_tob_thresholds else 80, #must be a multiple of 4
+        "XERHO_sigmaPosA": 3,
+        "XERHO_sigmaPosB": 3,
+        "XERHO_sigmaPosC": 3,
+        "XERHO_sigmaNegA": 8,
+        "XERHO_sigmaNegB": 8,
+        "XERHO_sigmaNegC": 8,
+        "XEJWOJ_a_A": 1003,
+        "XEJWOJ_a_B": 1003,
+        "XEJWOJ_a_C": 1003,
+        "XEJWOJ_b_A": 409,
+        "XEJWOJ_b_B": 409,
+        "XEJWOJ_b_C": 0,
+        "XEJWOJ_c_A": 0,
+        "XEJWOJ_c_B": 0,
+        "XEJWOJ_c_C": 0,
+        "resolutionMeV": 200
+    }
     return confObj
 
 def getConfig_gTE():
-    confObj = odict()
-    confObj["resolutionMeV"] = 200
+    confObj = {
+        "resolutionMeV": 200
+    }
     return confObj
 
 
 # LEGACY
 
 def getConfig_EM(do_HI_tob_thresholds):
-    confObj = odict()
-    confObj["isolation"] = odict()
-    confObj["isolation"]["HAIsoForEMthr"] = odict([ ( "thrtype", "HAIsoForEMthr" ), ("Parametrization", []) ])
-    confObj["isolation"]["HAIsoForEMthr"]["Parametrization"] += [
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 1), ("mincut", 10), ("offset", -2), ("priority", 0), ("slope", 230), ("upperlimit", 50)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 2), ("mincut",  0), ("offset",  0), ("priority", 0), ("slope",   0), ("upperlimit",  0)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 3), ("mincut", 10), ("offset", -2), ("priority", 0), ("slope", 230), ("upperlimit", 50)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 4), ("mincut", 10), ("offset", -2), ("priority", 0), ("slope", 230), ("upperlimit", 50)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 5), ("mincut", 10), ("offset", -2), ("priority", 0), ("slope", 230), ("upperlimit", 50)]),
-    ]
-    confObj["isolation"]["EMIsoForEMthr"] = odict([ ("thrtype", "EMIsoForEMthr" ), ("Parametrization", []) ])
+    confObj = {
+        "isolation": {
+            "HAIsoForEMthr": {
+                "thrtype": "HAIsoForEMthr",
+                "Parametrization": [
+                    {"etamax": 49, "etamin": -49, "isobit": 1, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
+                    {"etamax": 49, "etamin": -49, "isobit": 2, "mincut": 0, "offset": 0, "priority": 0, "slope": 0, "upperlimit": 0},
+                    {"etamax": 49, "etamin": -49, "isobit": 3, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
+                    {"etamax": 49, "etamin": -49, "isobit": 4, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
+                    {"etamax": 49, "etamin": -49, "isobit": 5, "mincut": 10, "offset": -2, "priority": 0, "slope": 230, "upperlimit": 50},
+                ],
+            }
+        }
+    }
+    confObj["isolation"]["EMIsoForEMthr"] = {"thrtype": "EMIsoForEMthr", "Parametrization": []}
     confObj["isolation"]["EMIsoForEMthr"]["Parametrization"] += [
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 1), ("mincut",  0), ("offset",   0), ("priority", 0), ("slope",  0), ("upperlimit",  0)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 2), ("mincut", 20), ("offset", -18), ("priority", 0), ("slope", 80), ("upperlimit", 50)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 3), ("mincut", 20), ("offset", -18), ("priority", 0), ("slope", 80), ("upperlimit", 50)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 4), ("mincut", 10), ("offset", -20), ("priority", 0), ("slope", 80), ("upperlimit", 50)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 5), ("mincut", 20), ("offset", -18), ("priority", 0), ("slope", 80), ("upperlimit", 50)]),
+        {"etamax": 49, "etamin": -49, "isobit": 1, "mincut": 0, "offset": 0, "priority": 0, "slope": 0, "upperlimit": 0},
+        {"etamax": 49, "etamin": -49, "isobit": 2, "mincut": 20, "offset": -18, "priority": 0, "slope": 80, "upperlimit": 50},
+        {"etamax": 49, "etamin": -49, "isobit": 3, "mincut": 20, "offset": -18, "priority": 0, "slope": 80, "upperlimit": 50},
+        {"etamax": 49, "etamin": -49, "isobit": 4, "mincut": 10, "offset": -20, "priority": 0, "slope": 80, "upperlimit": 50},
+        {"etamax": 49, "etamin": -49, "isobit": 5, "mincut": 20, "offset": -18, "priority": 0, "slope": 80, "upperlimit": 50},
     ]
     confObj["ptMinToTopo"] = 8 if do_HI_tob_thresholds else 3
     confObj["resolutionMeV"] = 500
@@ -744,15 +772,15 @@ def getConfig_EM(do_HI_tob_thresholds):
 
 
 def getConfig_TAU(do_HI_tob_thresholds):
-    confObj = odict()
-    confObj["isolation"] = odict()
-    confObj["isolation"]["EMIsoForTAUthr"] =  odict([ ( "thrtype", "EMIsoForTAUthr" ), ("Parametrization", []) ])
+    confObj = {}
+    confObj["isolation"] = {}
+    confObj["isolation"]["EMIsoForTAUthr"] = {"thrtype": "EMIsoForTAUthr", "Parametrization": []}
     confObj["isolation"]["EMIsoForTAUthr"]["Parametrization"] += [
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 1), ("mincut", 0), ("offset", 30), ("priority", 0), ("slope", 100), ("upperlimit",  60)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 2), ("mincut", 0), ("offset", 20), ("priority", 0), ("slope", 100), ("upperlimit",  60)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 3), ("mincut", 0), ("offset", 15), ("priority", 0), ("slope", 100), ("upperlimit",  60)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 4), ("mincut", 0), ("offset", 40), ("priority", 0), ("slope",   0), ("upperlimit", 124)]),
-        odict([ ("etamax", 49), ("etamin", -49), ("isobit", 5), ("mincut", 0), ("offset", 30), ("priority", 0), ("slope", 100), ("upperlimit",  60)])
+        {"etamax": 49, "etamin": -49, "isobit": 1, "mincut": 0, "offset": 30, "priority": 0, "slope": 100, "upperlimit": 60},
+        {"etamax": 49, "etamin": -49, "isobit": 2, "mincut": 0, "offset": 20, "priority": 0, "slope": 100, "upperlimit": 60},
+        {"etamax": 49, "etamin": -49, "isobit": 3, "mincut": 0, "offset": 15, "priority": 0, "slope": 100, "upperlimit": 60},
+        {"etamax": 49, "etamin": -49, "isobit": 4, "mincut": 0, "offset": 40, "priority": 0, "slope": 0, "upperlimit": 124},
+        {"etamax": 49, "etamin": -49, "isobit": 5, "mincut": 0, "offset": 30, "priority": 0, "slope": 100, "upperlimit": 60}
     ]
     confObj["ptMinToTopo"] = 1 if do_HI_tob_thresholds else 8
     confObj["resolutionMeV"] = 500
@@ -760,20 +788,21 @@ def getConfig_TAU(do_HI_tob_thresholds):
 
 
 def getConfig_JET():
-    confObj = odict()
+    confObj = {}
     confObj["ptMinToTopoLargeWindow"] = 12
     confObj["ptMinToTopoSmallWindow"] = 12
     return confObj
 
 
 def getConfig_XS():
-    confObj = odict()
-    confObj["significance"] = odict()
-    confObj["significance"]["xeMin"] = 11
-    confObj["significance"]["xeMax"] = 63
-    confObj["significance"]["teSqrtMin"] = 4
-    confObj["significance"]["teSqrtMax"] = 63
-    confObj["significance"]["xsSigmaScale"] = 1150
-    confObj["significance"]["xsSigmaOffset"] = 1640
+    confObj = {
+        "significance": {
+            "xeMin": 11,
+            "xeMax": 63,
+            "teSqrtMin": 4,
+            "teSqrtMax": 63,
+            "xsSigmaScale": 1150,
+            "xsSigmaOffset": 1640
+        }
+    }
     return confObj
-

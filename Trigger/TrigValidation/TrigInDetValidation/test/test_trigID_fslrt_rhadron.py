@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for fslrt_rhadron
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
 # art-input: valid1.545836.MGPy8EG_A14NNPDF23LO_TT_RPVdirectBL_2400_tau_3ns.recon.RDO.e8582_e8528_s4418_s4370_r16083_tid42189726_00
 # art-input-nfiles: 4
@@ -35,7 +35,6 @@ Events  = 8000
 Threads = 8
 Slots   = 8
 Input   = 'RHadron'    # defined in TrigValTools/share/TrigValInputs.json
-GridFiles = True
 ExtraAna = ' --LRT=True '
 Release = "current"
 

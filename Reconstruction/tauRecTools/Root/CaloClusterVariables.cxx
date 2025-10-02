@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/CaloClusterVariables.h"
-#include "tauRecTools/HelperFunctions.h"
 
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 
@@ -16,8 +15,8 @@ const double CaloClusterVariables::DEFAULT = -1111.;
 //****************************************
 
 CaloClusterVariables::CaloClusterVariables() :
-  m_numConstit((int) DEFAULT),
-  m_effNumConstit_int((int) DEFAULT),
+  m_numConstit(static_cast<int>(DEFAULT)),
+  m_effNumConstit_int(static_cast<int>(DEFAULT)),
   m_effNumConstit(DEFAULT),
   m_aveRadius(DEFAULT),
   m_aveEffRadius(DEFAULT),
@@ -42,7 +41,7 @@ bool CaloClusterVariables::update(const xAOD::TauJet& pTau) {
     clusterP4Vector.push_back(vertexedCluster.p4());
   }
 
-  this->m_numConstit = (int) clusterP4Vector.size();
+  this->m_numConstit = std::ssize(clusterP4Vector);
 
   // Order constituents by energy
   sort(clusterP4Vector.begin(), clusterP4Vector.end(), CaloClusterCompare());

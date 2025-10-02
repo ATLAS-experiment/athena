@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Tgc.h"
@@ -34,7 +34,7 @@
 namespace MuonGM {
 
     Tgc::Tgc(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name) {
-        TgcComponent *s = (TgcComponent *)ss;
+        TgcComponent *s = static_cast<TgcComponent *>(ss);
         m_component = s;
         width = s->dx1;
         longWidth = s->dx2;

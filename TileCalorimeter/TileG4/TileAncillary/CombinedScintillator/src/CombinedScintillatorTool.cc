@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //class header
@@ -21,24 +21,8 @@
 
 CombinedScintillatorTool::CombinedScintillatorTool(const std::string& type, const std::string& name,
                                                    const IInterface* parent)
-    : DetectorGeometryBase(type, name, parent),
-      m_rMin(0),
-      m_rMax(0),
-      m_dzSci(0),
-      m_phiPos(0),
-      m_phiNeg(0)
+    : DetectorGeometryBase(type, name, parent)
 {
-  ATH_MSG_DEBUG("CombinedScintillatorTool constructor for " << name);
-  declareProperty("RMin", m_rMin, "");
-  declareProperty("RMax", m_rMax, "");
-  declareProperty("DZSci", m_dzSci, "");
-  declareProperty("PhiPos", m_phiPos, "");
-  declareProperty("PhiNeg", m_phiNeg, "");
-
-}
-
-CombinedScintillatorTool::~CombinedScintillatorTool() {
-
 }
 
 void CombinedScintillatorTool::BuildGeometry() {

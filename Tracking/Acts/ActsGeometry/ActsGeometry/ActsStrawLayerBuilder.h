@@ -17,7 +17,12 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 
 class TRT_ID;
-class TRT_DetectorManager;
+
+namespace InDetDD {
+  class TRT_DetectorManager;
+}
+
+
 class ActsDetectorElement;
 
 namespace Acts {

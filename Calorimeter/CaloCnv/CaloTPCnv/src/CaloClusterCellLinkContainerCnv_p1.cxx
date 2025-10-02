@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTPCnv/CaloClusterCellLinkContainerCnv_p1.h" 
@@ -63,20 +63,22 @@ CaloClusterCellLinkContainerCnv_p1::transToPersWithKey (const CaloClusterCellLin
   const SG::ThinningDecisionBase* dec_cells = nullptr;
   const SG::ThinningDecisionBase* dec_clusts = tcache ? tcache->thinning (key) : nullptr;
 
-  const size_t nClusters=trans->size();
-  if (nClusters>0) {
-    //we assume here all clusters in a container are built from the same cell container
-    m_linkCnv.transToPers((*trans)[0]->getCellContainerLink(),pers->m_cellCont,msg);
-    if (tcache) {
-      dec_cells = SG::getThinningDecision ((*trans)[0]->getCellContainerLink().dataID());
-    }
-  }
- 
+  bool firstCluster = true;
   size_t minCapacity=0;
+  const size_t nClusters=trans->size();
   pers->m_nCellsPerCluster.reserve(nClusters);
   size_t icluster = 0;
   for(const CaloClusterCellLink* cccl: *trans) {
     if (!dec_clusts || !dec_clusts->thinned (icluster)) {
+      if (firstCluster) {
+	 //we assume here all clusters in a container are built from the same cell container
+	m_linkCnv.transToPers((*trans)[0]->getCellContainerLink(),pers->m_cellCont,msg);
+	if (tcache) {
+	  dec_cells = SG::getThinningDecision ((*trans)[0]->getCellContainerLink().dataID());
+	}
+	firstCluster = false;
+      }
+
       const size_t nCells=cccl->size();
       pers->m_nCellsPerCluster.push_back(nCells);
       minCapacity+=nCells;

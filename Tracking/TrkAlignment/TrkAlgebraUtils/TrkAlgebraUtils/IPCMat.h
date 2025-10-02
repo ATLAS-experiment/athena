@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALGS_IPCMAT_H
@@ -75,7 +75,7 @@ class IPCMat {
 
   struct MsgBuf {
     long mtype;
-  MsgBuf(): mtype(255){}
+    MsgBuf(): mtype(255), data{} {}
     union
     {
       char fname[100];

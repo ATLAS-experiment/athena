@@ -5,24 +5,26 @@
 #ifndef TRIGBPHYSHYPO_CONSTANTS_H
 #define TRIGBPHYSHYPO_CONSTANTS_H
 
+#include "TruthUtils/ParticleConstants.h"
+
 // PDG'2020
 struct PDG20 {
   static constexpr double
-    mElectron   =    0.5109989461,
-    mMuon       =  105.6583745,
-    mPion       =  139.57039,
-    mPion0      =  134.9768,
-    mKaon       =  493.677,
-    mK_S0       =  497.611,
+    mElectron   = ParticleConstants::electronMassInMeV,
+    mMuon       = ParticleConstants::muonMassInMeV,
+    mPion       = ParticleConstants::chargedPionMassInMeV,
+    mPion0      = ParticleConstants::piZeroMassInMeV,
+    mKaon       = ParticleConstants::chargedKaonMassInMeV,
+    mK_S0       = ParticleConstants::KZeroMassInMeV,
     mPhi1020    = 1019.461,
-    mD0         = 1864.83,
-    mProton     =  938.2720813,
-    mLambda0    = 1115.683,
-    mJpsi       = 3096.900,
+    mD0         = ParticleConstants::DZeroMassInMeV,
+    mProton     = ParticleConstants::protonMassInMeV,
+    mLambda0    = ParticleConstants::lambdaMassInMeV,
+    mJpsi       = ParticleConstants::JpsiMassInMeV,
     mPsi2S      = 3686.097,
-    mB          = 5279.32,
-    mB0         = 5279.63,
-    mB_s0       = 5366.89,
+    mB          = ParticleConstants::BPlusMassInMeV,
+    mB0         = ParticleConstants::BZeroMassInMeV,
+    mB_s0       = ParticleConstants::BsMassInMeV,
     mB_c        = 6274.9,
     mLambda_b0  = 5619.60;
 };

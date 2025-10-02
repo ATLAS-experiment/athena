@@ -55,9 +55,9 @@ namespace CP {
             return;
         }
         // now we can read our three mean histograms Histos
-        m_eff = ReadHistFromFile("Eff", f.get(), time_unit);
-        m_mc_eff = ReadHistFromFile("MC_Eff", f.get(), time_unit);
-        m_sf = ReadHistFromFile("SF", f.get(), time_unit);
+        m_eff = ReadHistFromFile(this, "Eff", f.get(), time_unit);
+        m_mc_eff = ReadHistFromFile(this, "MC_Eff", f.get(), time_unit);
+        m_sf = ReadHistFromFile(this, "SF", f.get(), time_unit);
         /// Nominal set loaded nothing needs to be done further      
         if (syst_name.empty()) return;
         
@@ -71,7 +71,7 @@ namespace CP {
         }
         std::function<void(std::unique_ptr<HistHandler>&, const std::string& )> syst_loader = [this, &f, &time_unit, &syst_type_bitmap] (std::unique_ptr<HistHandler>& nominal, const std::string& hist_type) {
             if(!nominal) return;
-            std::unique_ptr<HistHandler> sys = ReadHistFromFile(Form("%s_%s_%s", hist_type.c_str() ,
+            std::unique_ptr<HistHandler> sys = ReadHistFromFile(this, Form("%s_%s_%s", hist_type.c_str() ,
                                                                                  m_syst_name.c_str(), 
                                                                                  (syst_type_bitmap & EffiCollection::Symmetric ? "SYM" : (m_is_up ? "1UP" : "1DN")) ), 
                                                                 f.get(), time_unit);
@@ -87,7 +87,7 @@ namespace CP {
             /// does not support the asymmetric break-down yet. Let's try the good old approach
             /// and load the total sys histogram
             if (m_syst_name == "SYS"){
-                std::unique_ptr<HistHandler> old_sys = ReadHistFromFile(hist_type +"_sys", f.get(), time_unit);
+                std::unique_ptr<HistHandler> old_sys = ReadHistFromFile(this, hist_type +"_sys", f.get(), time_unit);
                 /// Not even the old approach lead to something fruitful... Lets forget it and reset everything
                 if (!old_sys){
                     nominal.reset();
@@ -149,26 +149,31 @@ namespace CP {
                 Error("EfficiencyScaleFactor()", "Pt dependent systematic could not be loaded");
                 m_sf_KineDepsys.reset();
             }           
+            if (m_sf_KineDepsys)
+                addSubtool (*m_sf_KineDepsys);
             return;
         } else if (m_measurement == CP::MuonEfficiencyType::TTVA){
-            m_sf_KineDepsys = std::make_unique<TTVAClosureSysHandler>(ReadHistFromFile("SF_NonClosure_sys",f.get(),time_unit));
+            m_sf_KineDepsys = std::make_unique<TTVAClosureSysHandler>(ReadHistFromFile(this,"SF_NonClosure_sys",f.get(),time_unit));
             if (!m_sf_KineDepsys->initialize()){
                 Error("EfficiencyScaleFactor()", "TTVA non closure systematic could not be loaded.");
                 m_sf_KineDepsys.reset();
             }
             else
               m_sf_KineDepsys->SetSystematicWeight( IsUpVariation() ? 1 : -1);
+            if (m_sf_KineDepsys)
+                addSubtool (*m_sf_KineDepsys);
             return;
         
         }
         /// That one needs to be named properly in the future        
-        m_sf_KineDepsys = std::make_unique<PtKinematicSystHandler>(ReadHistFromFile(Form("SF_PtFlatness_1%s", m_is_up?"UP" :"DN"), f.get(), time_unit), ReadHistFromFile("SF_PtDep_sys", f.get(), time_unit));
+        m_sf_KineDepsys = std::make_unique<PtKinematicSystHandler>(ReadHistFromFile(this, Form("SF_PtFlatness_1%s", m_is_up?"UP" :"DN"), f.get(), time_unit), ReadHistFromFile(this, "SF_PtDep_sys", f.get(), time_unit));
       
         /// Use the approach from the old sacle-factor file
         if(!m_sf_KineDepsys->initialize()){    
-            m_sf_KineDepsys = std::make_unique<PrimodialPtSystematic>(ReadHistFromFile("SF_PtDep_sys", f.get(), time_unit));
+            m_sf_KineDepsys = std::make_unique<PrimodialPtSystematic>(ReadHistFromFile(this, "SF_PtDep_sys", f.get(), time_unit));
         }
-        m_sf_KineDepsys->SetSystematicWeight( IsUpVariation() ? 1 : -1);            
+        m_sf_KineDepsys->SetSystematicWeight( IsUpVariation() ? 1 : -1);     
+        addSubtool (*m_sf_KineDepsys);
     }
     EfficiencyScaleFactor::EfficiencyScaleFactor(const MuonEfficiencyScaleFactors& ref_tool,
                                   const std::string &file, 
@@ -249,7 +254,7 @@ namespace CP {
         }
         return true;
     }
-    std::unique_ptr<HistHandler> EfficiencyScaleFactor::ReadHistFromFile(const std::string& name, TFile* f, const std::string& time_unit) {
+    std::unique_ptr<HistHandler> EfficiencyScaleFactor::ReadHistFromFile(columnar::ColumnarTool<>* parent, const std::string& name, TFile* f, const std::string& time_unit) {
         
         TH1* hist_from_file =  nullptr;
         
@@ -262,20 +267,20 @@ namespace CP {
         if (!hist_from_file) {
             return std::unique_ptr<HistHandler>();
         }
-        return package_histo(hist_from_file);
+        return package_histo(parent, hist_from_file);
     }
-    std::unique_ptr<HistHandler> EfficiencyScaleFactor::package_histo(TH1* h) {
+    std::unique_ptr<HistHandler> EfficiencyScaleFactor::package_histo(columnar::ColumnarTool<>* parent, TH1* h) {
         // make sure that the correct type of histo is used
         // Dynamic cast for TH2 Poly otherwise we can rely on the GetDimension() ,ethod
         if (!h) return std::unique_ptr<HistHandler>();
         if (dynamic_cast<TH2Poly*>(h)) {
-            return std::make_unique<HistHandler_TH2Poly>(dynamic_cast<TH2Poly*>(h));
+            return std::make_unique<HistHandler_TH2Poly>(parent, dynamic_cast<TH2Poly*>(h));
         }else if (h->GetDimension() == 3) {
-            return std::make_unique<HistHandler_TH3>(h);
+            return std::make_unique<HistHandler_TH3>(parent, h);
         }else if (h->GetDimension() == 2) {
-            return std::make_unique<HistHandler_TH2>(h);
+            return std::make_unique<HistHandler_TH2>(parent, h);
         } else if (h->GetDimension() == 1) {
-            return std::make_unique<HistHandler_TH1>(h);
+            return std::make_unique<HistHandler_TH1>(parent, h);
         } 
         Error("EfficiencyScaleFactor", "Unable to package histo %s (%s) in a known HistHandler", h->GetName(), h->IsA()->GetName());
         return std::unique_ptr<HistHandler>();
@@ -290,6 +295,9 @@ namespace CP {
         return m_sf ? m_sf->isOverFlowBin(b) : true;
     }
     CorrectionCode EfficiencyScaleFactor::ScaleFactor(const xAOD::Muon& mu, float & SF) const {
+        return ScaleFactor (columnar::MuonId (mu), SF);
+    }   
+    CorrectionCode EfficiencyScaleFactor::ScaleFactor(columnar::MuonId mu, float & SF) const {
         if (m_separateBinSyst && m_NominalFallBack) {
             int bin = -1;
             CorrectionCode cc = m_sf->FindBin(mu, bin);
@@ -337,17 +345,20 @@ namespace CP {
     }
 
     CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & Eff, bool add_kine_syst) const {
+        return GetContentFromHist (Hist, columnar::MuonId (mu), Eff, add_kine_syst);
+    }
+    CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & Eff, bool add_kine_syst) const {
         Eff = m_default_eff;
         if (!Hist) {
             if (m_warnsPrinted < m_warningLimit){
-                Warning("EfficiencyScaleFactor", "Could not find histogram for variation %s and muon with pt=%.4f, eta=%.2f and phi=%.2f, returning %.1f", sysname().c_str(), mu.pt(), mu.eta(), mu.phi(), m_default_eff);
+                Warning("EfficiencyScaleFactor", "Could not find histogram for variation %s and muon with pt=%.4f, eta=%.2f and phi=%.2f, returning %.1f", sysname().c_str(), ptAcc(mu), etaAcc(mu), phiAcc(mu), m_default_eff);
                 ++m_warnsPrinted;
             }
             return CorrectionCode::OutOfValidityRange;
         }
-        if (m_measurement == CP::MuonEfficiencyType::TTVA && std::abs(mu.eta()) > 2.5 && std::abs(mu.eta()) <= 2.7 && mu.muonType() == xAOD::Muon::MuonType::MuonStandAlone) {
+        if (m_measurement == CP::MuonEfficiencyType::TTVA && std::abs(etaAcc(mu)) > 2.5 && std::abs(etaAcc(mu)) <= 2.7 && muonTypeAcc(mu) == xAOD::Muon::MuonType::MuonStandAlone) {
             if (m_warnsPrinted < m_warningLimit){
-                Info("EfficiencyScaleFactor", "No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation %s and muon with pt=%.4f, eta=%.2f and phi=%.2f, returning %.1f", sysname().c_str(), mu.pt(), mu.eta(), mu.phi(), m_default_eff_ttva);
+                Info("EfficiencyScaleFactor", "No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation %s and muon with pt=%.4f, eta=%.2f and phi=%.2f, returning %.1f", sysname().c_str(), ptAcc(mu), etaAcc(mu), phiAcc(mu), m_default_eff_ttva);
                 ++m_warnsPrinted;
             }
             Eff = m_default_eff_ttva;
@@ -449,7 +460,7 @@ namespace CP {
         replicas.reserve(nrep);
         int nBins = h->nBins();
         for (int t = 0; t < nrep; t++) {
-            replicas.push_back(package_histo(h->GetHist()));
+            replicas.push_back(package_histo(this, h->GetHist()));
             HistHandler* replica = replicas.back().get();
             for (int bin = 0; bin < nBins; bin++) {
                 replica->SetBinContent(bin, Rndm.Gaus(h->GetBinContent(bin), h->GetBinError(bin)));

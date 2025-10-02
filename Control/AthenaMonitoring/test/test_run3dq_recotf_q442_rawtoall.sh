@@ -1,14 +1,18 @@
 #!/bin/bash
-# art-description: new DQ in Reco_tf, RAWtoALL, Run 2 data q431
+# art-description: new DQ in Reco_tf, Run 2 data q442
 # art-type: grid
 # art-memory: 6144
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-output: myHIST.root
 # art-output: log*
 # art-athena-mt: 3
 
-Reco_tf.py --athenaopts='--threads=1' --AMI=q442 --steering doRAWtoALL --imf False > log.HIST_Creation 2>&1
+Reco_tf.py --athenaopts='--threads=1' \
+--AMI=q442 \
+--CA "True" \
+--preExec "all:flags.DQ.Steering.doHLTMon=False" \
+--imf False
 
 echo "art-result: $? HIST_Creation"
 rm -rf ref-*

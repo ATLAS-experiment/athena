@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 import sys
 from MuonCalibDbOperations.CalibrationSourceConfig import MuonCalib__gCalibrationSourceConfigs, MuonCalib__CalibrationSourceConfig

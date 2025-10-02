@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -251,7 +251,7 @@ StatusCode LArAutoCorrMaker::stop()
     }
   
   // Make symlink
-  sc = detStore()->symLink(larAutoCorrComplete, (ILArAutoCorr*)larAutoCorrComplete);
+  sc = detStore()->symLink(larAutoCorrComplete, static_cast<ILArAutoCorr*>(larAutoCorrComplete));
   if (sc != StatusCode::SUCCESS)  {
       ATH_MSG_ERROR( " Cannot make link for Data Object " );
       return sc;

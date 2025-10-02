@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold, ZeroBiasThresholdTopo
+from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold, ZeroBiasThresholdTopo
 from .L1CaloThresholdMapping import get_threshold_cut
 
 # Max thresholds for SPARE triggers, corresponding to maximum value in L1Topo
@@ -137,7 +137,7 @@ class ThresholdDef:
             eEMThreshold('eEM%iL' % thrV, 'eEM').addThrValue(get_threshold_cut('eEM',thrV)).setIsolation( reta = "Loose", wstot = "Loose", rhad = "Loose" )
 
         # M section (used to be VHI in Run2)
-        eEM_cuts = [10, 18, 22, 26, 28]
+        eEM_cuts = [10, 18, 20, 22, 24, 26, 28]
         for thrV in eEM_cuts:
             eEMThreshold('eEM%iM' % thrV, 'eEM').addThrValue(get_threshold_cut('eEM',thrV)).setIsolation( reta = "Medium", wstot = "Medium", rhad = "Medium" )
 
@@ -153,7 +153,7 @@ class ThresholdDef:
                                               thr=eEMVarThreshold( 'eEM%iVM' % thrV, 'eEM').setIsolation( reta = "Medium", wstot = "Medium", rhad = "Medium" ) )
 
         # jEM
-        jEM_cuts = [25]
+        jEM_cuts = [25, 35]
         for thrV in jEM_cuts:
             jEMThreshold('jEM%i' % thrV, 'jEM').addThrValue(get_threshold_cut('jEM',thrV))
 
@@ -224,7 +224,7 @@ class ThresholdDef:
             ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%i' % thrV, 'jJ'), pt=max(get_threshold_cut('jJ', thrV),ptMin), shift_set=0, rangemin=0, rangemax=32 )
 
         # jJET central
-        jJ_cuts = [(30,25), (40,25), (50,25), (55,23), (70,23), (80,25), (85,21)]
+        jJ_cuts = [(30,25), (40,25), (50,25), (56,49), (55,23), (70,23), (80,25), (85,21)]
         for thrV, etamax in jJ_cuts:
             ThresholdDef.addJetVaryingThrValues( jJetThreshold( 'jJ%ip0ETA%i'  % (thrV, etamax), 'jJ'), pt=get_threshold_cut('CjJ', thrV), shift_set=0, rangemin=0, rangemax=etamax )
 
@@ -240,13 +240,6 @@ class ThresholdDef:
         for thrV in range(1,2):
             jJetThreshold('jJSPARE%i' % thrV, 'jJ').addThrValue(thrVal_SPARE)
 
-        # jLJET (default range)
-        for thrV in [60, 80, 100, 120, 140, 160, 180, 200]:
-            ThresholdDef.addJetVaryingThrValues( jLJetThreshold('jLJ%i' % thrV, 'jLJ'), pt=get_threshold_cut('jLJ', thrV), shift_set=0, rangemin=0, rangemax=32 )
-
-        # jLJET SPARES
-        for thrV in range(1,5):
-            jLJetThreshold('jLJSPARE%i' % thrV, 'jLJ').addThrValue(thrVal_SPARE)
 
         # gJET (default range)
         for thrV in [20, 50, 100, 400]:
@@ -262,7 +255,7 @@ class ThresholdDef:
 
 
         # gLJET (default range)
-        for thrV in [80, 100, 140, 160]:
+        for thrV in [80, 90, 100, 140, 160]:
             ThresholdDef.addJetVaryingThrValues( gLJetThreshold('gLJ%ip0ETA25' % thrV, 'gLJ'), pt=get_threshold_cut('gLJ', thrV), shift_set=0, rangemin=0, rangemax=25)  
 
         # gLJET SPARES
@@ -317,7 +310,7 @@ class ThresholdDef:
         for thrV in [200,]:
             TEThreshold('jTEC%i' % thrV, 'jTE').setTE(thrV)
 
-        for thrV in [100,]:
+        for thrV in [100,6500]:
             TEThreshold('jTEFWD%i' % thrV, 'jTE').setTE(thrV)
 
         for thrV in [100,5,1]:

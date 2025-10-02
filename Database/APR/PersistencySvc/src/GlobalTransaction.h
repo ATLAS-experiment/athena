@@ -20,7 +20,7 @@ namespace pool {
     class GlobalTransaction : virtual public ITransaction {
     public:
       /// Constructor
-      GlobalTransaction( DatabaseRegistry& registry );
+      explicit GlobalTransaction( DatabaseRegistry& registry );
 
       /// Destructor
       virtual ~GlobalTransaction();

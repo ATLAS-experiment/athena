@@ -14,7 +14,7 @@
 #include "D3PDMakerUtils/SingleAssociationTool.h"
 #include "ITrackToVertex/ITrackToVertex.h"
 #include "TrkParameters/TrackParameters.h"
-#include "xAODTracking/TrackParticle.h" 
+#include "xAODTracking/TrackParticle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include <vector>
 #include "BeamSpotConditionsData/BeamSpotData.h"
@@ -29,24 +29,15 @@ namespace D3PD {
  * @brief Associate from a VxCandidate to its perigee at the beam spot.
  */
 class TrackParticlePerigeeAtBSAssociationTool
-  : public SingleAssociationTool<Types<Rec::TrackParticle, xAOD::TrackParticle>, Trk::TrackParameters>
+  : public SingleAssociationTool<Types<xAOD::TrackParticle>, Trk::TrackParameters>
 {
 public:
-  typedef SingleAssociationTool<Types<Rec::TrackParticle, xAOD::TrackParticle>, Trk::TrackParameters> Base;
+  typedef SingleAssociationTool<Types<xAOD::TrackParticle>, Trk::TrackParameters> Base;
 
   using Base::Base;
 
 
   virtual StatusCode initialize() override;
-  
-
-  /**
-   * @brief Return the target object.
-   * @param p The source object for the association.
-   *
-   * Return the target of the association, or 0.
-   */
-  virtual const Trk::TrackParameters* get (const Rec::TrackParticle& p) override;
 
 
   /**

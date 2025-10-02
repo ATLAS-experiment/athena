@@ -117,7 +117,7 @@ namespace ActsTrk::detail {
       std::cout << "----------------------------------------------" << std::endl;
       std::size_t nTotalSeeds = pixelSeeds.size() + stripSeeds.size();
       std::cout << "Starting checks on DuplicateSeedDetector running on " << nTotalSeeds << " seeds" << std::endl;
-      DuplicateSeedDetector duplicateSeedDetector(nTotalSeeds, true);
+      DuplicateSeedDetector duplicateSeedDetector(nTotalSeeds, 0, true);
 
       std::cout << "----------------------------------------------" << std::endl;
       std::cout << "Checks pre-fill ..." << std::endl;

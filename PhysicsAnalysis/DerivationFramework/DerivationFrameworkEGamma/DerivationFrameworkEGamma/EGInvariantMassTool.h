@@ -28,9 +28,7 @@ enum EEGInvariantMassToolParser
   kParser2,
   kNumEGInvariantMassToolParser
 };
-class EGInvariantMassTool
-  : public ExpressionParserUser<AthAlgTool, kNumEGInvariantMassToolParser>
-  , public IAugmentationTool
+class EGInvariantMassTool : public extends<ExpressionParserUser<AthAlgTool, kNumEGInvariantMassToolParser>, IAugmentationTool>
 {
 public:
   EGInvariantMassTool(const std::string& t,

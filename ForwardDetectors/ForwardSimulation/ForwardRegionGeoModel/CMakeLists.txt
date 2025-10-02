@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ForwardRegionGeoModel )
@@ -21,5 +21,4 @@ atlas_add_component( ForwardRegionGeoModel
                      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ForwardRegionGeoModelLib AthenaKernel  GeoModelUtilities GeoModelInterfaces PathResolver StoreGateLib )
 
 # Install files from the package:
-atlas_install_runtime( share/*.csv )
-
+atlas_install_data( share/*.csv )

@@ -10,7 +10,7 @@
 # Otherwise we can get inconsistent resolution of a static std::string,
 # leading to a free() failure during exit().
 import ROOT
-if ROOT.gSystem.FindDynamicLibrary ("libGaudiKernel", True):
+if ROOT.gSystem.FindDynamicLibrary (cppyy.gbl.TString ("libGaudiKernel"), True):
     ROOT.gSystem.Load("libGaudiKernel")
 
 import cppyy

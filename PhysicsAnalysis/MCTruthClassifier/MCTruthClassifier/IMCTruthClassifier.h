@@ -69,7 +69,7 @@ namespace MCTruthPartClassifier {
     const xAOD::TruthParticle* PhotonMother() const { return photonMother;}
     const xAOD::TruthParticle* photonMother = nullptr;
 
-#ifndef GENERATIONBASE /*Disable when no recostruction packages are expected*/
+#ifndef GENERATIONBASE /*Disable when no reconstruction packages are expected*/
     float deltaRMatch = -999;
     float deltaPhi = -999;
     float probTrkToTruth = 0;
@@ -115,10 +115,7 @@ public:
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const = 0;
-
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(HepMC::ConstGenParticlePtr, MCTruthPartClassifier::Info* info = nullptr) const = 0;
+  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const = 0;
 #endif
 
 #ifndef GENERATIONBASE

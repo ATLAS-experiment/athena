@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1LocalEvtRetriever.h"
@@ -11,7 +11,7 @@
 #include <QMutexLocker>
 
 VP1LocalEvtRetriever::VP1LocalEvtRetriever(VP1AvailEvtsLocalDir* availEvts
-					   , QString sourcedir
+					   , const QString & sourcedir
 					   , QObject* parent)
   : QThread(parent)
   , m_availEvts(availEvts)
@@ -130,6 +130,6 @@ void VP1LocalEvtRetriever::setSourceDir(QString dir)
   }
 
   //Now change directory
-  m_sourcedir = dir;
+  m_sourcedir = std::move(dir);
   updateLocalDir();
 }

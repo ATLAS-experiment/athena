@@ -17,7 +17,7 @@ def HIRecCfg(flags):
     if flags.HeavyIon.doJet:
         from HIJetRec.HIJetRecConfigCA import HIJetRecCfg
         acc.merge(HIJetRecCfg(flags))
-        if flags.Input.isMC:
+        if flags.Input.isMC or flags.Overlay.DataOverlay:
             from JetRecConfig.JetRecConfig import JetRecCfg
             from JetRecConfig.JetRecoSteering import addJetsToOutputCfg
             from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt2Truth

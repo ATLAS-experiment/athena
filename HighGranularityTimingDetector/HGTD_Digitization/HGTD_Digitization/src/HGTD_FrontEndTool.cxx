@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Digitization/src/HGTD_FrontEndTool.cxx
  *
@@ -21,8 +21,7 @@
 HGTD_FrontEndTool::HGTD_FrontEndTool(const std::string& type,
                                      const std::string& name,
                                      const IInterface* parent)
-    : AthAlgTool(type, name, parent) {
-  declareInterface<IFrontEnd>(this);
+    : base_class(type, name, parent) {
 }
 
 void HGTD_FrontEndTool::process(

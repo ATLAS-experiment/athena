@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasHepMC/GenEvent.h"
@@ -98,6 +98,10 @@ StatusCode Sherpa_i::genInitialize(){
   for (auto& inputfile : m_inputfiles) {
     // write input content to file in working directory
     FILE *file = fopen(inputfile.first.c_str(),"w");
+    if (!file) {
+      ATH_MSG_ERROR("Cannot open " << inputfile.first);
+      return StatusCode::FAILURE;
+    }
     fputs(inputfile.second.c_str(),file);
     fclose(file);
     ATH_MSG_INFO("Sherpa_i using the following settings in "+inputfile.first);
@@ -118,21 +122,7 @@ StatusCode Sherpa_i::genInitialize(){
   #endif
 
 
-  /***
-      translate ATOOLS:SignalHandler
-  ***/
-  std::set_terminate(ATOOLS::Terminate);
-  std::set_unexpected(ATOOLS::Terminate);
   #ifdef IS_SHERPA_3
-  signal(SIGSEGV,ATOOLS::HandleSignal);
-  signal(SIGINT,ATOOLS::HandleSignal);
-  signal(SIGPIPE,ATOOLS::HandleSignal);
-  signal(SIGBUS,ATOOLS::HandleSignal);
-  signal(SIGFPE,ATOOLS::HandleSignal);
-  signal(SIGABRT,ATOOLS::HandleSignal);
-  signal(SIGTERM,ATOOLS::HandleSignal);
-  signal(SIGXCPU,ATOOLS::HandleSignal);
-  signal(SIGUSR1,ATOOLS::HandleSignal);
 
   try {
     p_sherpa->InitializeTheRun();
@@ -150,13 +140,6 @@ StatusCode Sherpa_i::genInitialize(){
     return StatusCode::FAILURE;
   }
   #else 
-  signal(SIGSEGV,ATOOLS::SignalHandler);
-  signal(SIGINT,ATOOLS::SignalHandler);
-  signal(SIGBUS,ATOOLS::SignalHandler);
-  signal(SIGFPE,ATOOLS::SignalHandler);
-  signal(SIGABRT,ATOOLS::SignalHandler);
-  signal(SIGTERM,ATOOLS::SignalHandler);
-  signal(SIGXCPU,ATOOLS::SignalHandler);
 
   try {
     int argc;
@@ -280,7 +263,6 @@ StatusCode Sherpa_i::genFinalize() {
   std::cout << *p_sherpa->GetInitHandler()->GetVariations() << std::endl;
 
   p_sherpa->SummarizeRun();
-  delete p_sherpa;
 
   if (m_cleanup) {
     ATH_MSG_INFO("Deleting left-over files from working directory.");
@@ -326,8 +308,13 @@ void Sherpa_i::getParameters(int &argc, char** &argv) {
   // create Run.dat file if runcard explicitely given
   if (m_runcard != "") {
     FILE *file = fopen("Run.dat","w");
-    fputs(m_runcard.value().c_str(),file);
-    fclose(file);
+    if (!file) {
+      ATH_MSG_ERROR("Cannot open Run.dat");
+    }
+    else {
+      fputs(m_runcard.value().c_str(),file);
+      fclose(file);
+    }
   }
 
   /***
@@ -354,8 +341,13 @@ void Sherpa_i::getParameters(int &argc, char** &argv) {
 void Sherpa_i::compilePlugin(const std::string& pluginCode) {
   // TODO: not very pretty, should we eventually do this in Python instead (base fragment)
   FILE *file = fopen("Sherpa_iPlugin.C","w");
-  fputs(pluginCode.c_str(),file);
-  fclose(file);
+  if (!file) {
+    ATH_MSG_ERROR("Cannot open Sherpa_iPlugin.C");
+  }
+  else {
+    fputs(pluginCode.c_str(),file);
+    fclose(file);
+  }
   std::string command;
   // Python -> C++ string conversion seems to add quote character as first
   // and last line if the string contains quotes (like always in a plugin)

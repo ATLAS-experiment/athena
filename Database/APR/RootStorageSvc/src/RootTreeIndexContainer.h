@@ -39,7 +39,7 @@ namespace pool {
       RootTreeIndexContainer& operator= (const RootTreeIndexContainer&) = delete;
 
       /// Standard destructor
-      virtual ~RootTreeIndexContainer() {}
+      virtual ~RootTreeIndexContainer() override {}
 
       /// Open the container
       virtual DbStatus open(DbDatabase&, const std::string&, const DbTypeInfo*, DbAccessMode) override final;

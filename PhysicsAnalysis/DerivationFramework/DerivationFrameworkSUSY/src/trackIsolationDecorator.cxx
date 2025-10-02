@@ -18,11 +18,10 @@
 DerivationFramework::trackIsolationDecorator::trackIsolationDecorator(const std::string& t,
 							    const std::string& n,
 							    const IInterface* p):
-  AthAlgTool(t, n, p),
+  base_class(t, n, p),
   m_trackIsolationTool(),
   m_decorators(xAOD::Iso::numIsolationTypes, 0)
 {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
   declareProperty("TrackIsolationTool", m_trackIsolationTool);
   declareProperty("TargetContainer",    m_containerName = "InDetTrackParticles");
   declareProperty("ptcones",            m_ptcones);

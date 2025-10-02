@@ -20,9 +20,8 @@ using namespace MuonGM;
 
 BuildNSWReadoutGeometry::BuildNSWReadoutGeometry() = default;
 
-bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr, const NswPassivationDbData* passivData) {
-    bool geoBuilt = true;
-
+bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* mgr) {
+    bool geoBuilt = true;    
     ServiceHandle<IAGDDtoGeoSvc> svc("AGDDtoGeoSvc", "MMDetectorHelper");
     if (svc.retrieve().isFailure()) { std::abort(); }
     IAGDDtoGeoSvc::LockedController c = svc->getController();
@@ -53,7 +52,7 @@ bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* 
             std::string sName = vName.substr(vName.find('-') + 1);
                 
             if (chTag.substr(0, 3) == "sMD") {
-                std::unique_ptr<MMReadoutElement> re = std::make_unique<MMReadoutElement>(vol, sName, etaIndex, phiIndex, mLayer, mgr, passivData);
+                std::unique_ptr<MMReadoutElement> re = std::make_unique<MMReadoutElement>(vol, sName, etaIndex, phiIndex, mLayer, mgr);
                 re->initDesign();
                 re->fillCache();
                 mgr->addMMReadoutElement(std::move(re));

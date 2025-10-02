@@ -11,7 +11,7 @@
 #include "TObject.h"
 #include "TF1.h"
 
-#include "egammaUtils/ShowerDepthTool.h"
+#include "egammaUtils/ShowerDepthUtil.h"
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleFwd.h"
@@ -77,7 +77,7 @@ class IsolationCorrection : public asg::AsgMessaging{
     bool m_useLogLogFit;
     bool m_forcePartType;
 
-    CP::ShowerDepthTool* m_shower;
+    CP::ShowerDepthUtil* m_shower;
 
     std::string m_previousYear;
     bool m_corrInitialized[3][2]{};

@@ -263,7 +263,6 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
     }
   } 
   
-  
   cout << "Merging cells" << endl;
   for (unsigned int i = 0; i < Definitions::nChannels; i++) {
     if (i % 10000 == 0) {
@@ -297,9 +296,10 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
     newAcc->add(newHistory);
     delete newHistory;
   }
-  
+
 
   cout << "Merging SC" << endl;
+  size=0;
   for (unsigned int i = 0; i < Definitions::nChannelsSC; i++) {
     if (i % 10000 == 0) {
       cout << "Merging channel " << i << "/" << Definitions::nChannelsSC << " (current size = " << size << ")" << endl;
@@ -332,6 +332,7 @@ PersistentAccessor* PersistentAccessor::merge(const std::vector<const Persistent
     newAcc->addSC(newHistory);
     delete newHistory;
   }
+
 
   cout << "Merging done, final size = " << size << endl;
   newAcc->save();

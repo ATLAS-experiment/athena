@@ -65,13 +65,14 @@ using namespace CLHEP;
 
 ////////////////////////////////////////////////////////////////////////
 //
-// Private enum: Not for external use - used by distanceToOut
+// Private enum: Not for external use
+namespace {
+  // used by distanceToOut
+  enum ESide {kNull,kRMin,kRMax,kSPhi,kEPhi,kPZ,kMZ};
 
-enum ESide {kNull,kRMin,kRMax,kSPhi,kEPhi,kPZ,kMZ};
-
-// used by normal
-
-enum ENorm {kNRMin,kNRMax,kNSPhi,kNEPhi,kNZ};
+  // used by normal
+  enum ENorm {kNRMin,kNRMax,kNSPhi,kNEPhi,kNZ};
+}
 
 //////////////////////////////////////////////////////////////////////////
 //

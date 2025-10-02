@@ -15,6 +15,7 @@ MergedElectronContainer = "StdWithLRTElectrons"
 MergedMuonContainer = "StdWithLRTMuons"
 MergedMuonContainer_wZPH = "StdWithLRTMuons_wZPH"
 MergedTrackCollection = "InDetWithLRTTrackParticles"
+MergedTrackletCollection = "InDetDisappearingWithLRTTrackParticles"
 MergedGSFTrackCollection = "InDetWithLRTGSFTrackParticles"
 LLP1VrtSecInclusiveSuffixes = []
 LLP1NewVSISuffixes = []
@@ -32,6 +33,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
     acc.merge(InDetLRTMergeCfg(flags))
     acc.merge(InDetLRTMergeCfg(flags, name="GSFTrackMergerAlg", InputTrackParticleLocations = ["GSFTrackParticles", "LRTGSFTrackParticles"], OutputTrackParticleLocation = MergedGSFTrackCollection, OutputTrackParticleLocationCopy = MergedGSFTrackCollection))
+    acc.merge(InDetLRTMergeCfg(flags, name="InDetDisappearingLRTMerge",InputTrackParticleLocations = ["InDetDisappearingTrackParticles", "InDetLargeD0TrackParticles"],OutputTrackParticleLocation = MergedTrackletCollection))    
 
     # LRT muons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
@@ -311,11 +313,14 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     acc.merge(RecoverZeroPixelHitMuonsCfg(flags))
     
     # flavor tagging
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMTopoJets']))
+    from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+    acc.merge(FlavorTaggingCfg(flags, 'AntiKt4EMTopoJets'))
 
     # VrtSecInclusive
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg
+
+    # MuSAVtxFitter
+    from MuSAVtxFitter.MuSAVtxFitterConfig import MuSAVtxFitterConfig, MuSAVtxJPsiValidationAlgCfg, MuSAVtxFitterValidationConfig
 
     acc.merge(VrtSecInclusiveCfg(flags,
                                  name = "VrtSecInclusive",
@@ -333,6 +338,31 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  TrackLocation               = MergedTrackCollection,
                                  twoTrkVtxFormingD0Cut       = 1.0))
     LLP1VrtSecInclusiveSuffixes.append(shortLifetimeSuffix)
+
+    # disappearing track + LRT VSI 
+    dissapearingSuffix = "_disappearing"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_"+dissapearingSuffix,
+                                 AugmentingVersionString     = dissapearingSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackletCollection,
+                                 doReassembleVertices        = True,
+                                 doMergeByShuffling          = False,
+                                 doMergeFinalVerticesDistance= False,
+                                 doAssociateNonSelectedTracks= False,
+                                 DoPVcompatibility           = True,
+                                 RemoveFake2TrkVrt           = False,
+                                 PassThroughTrackSelection   = True,
+                                 TruncateListOfWorkingVertices = False,
+                                 twoTrkVtxFormingD0Cut       = 0.0,
+                                 SelVrtChi2Cut               = 1000000.0,
+                                 twoTrVrtMaxPerigeeDist      = 50.0,
+                                 twoTrVrtMinRadius           = 50.0,
+                                 doDisappearingTrackVertexing= True
+    ))
+    LLP1VrtSecInclusiveSuffixes.append(dissapearingSuffix)    
+
+
     
     if flags.Input.isMC and flags.Derivation.LLP.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
@@ -348,7 +378,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                      FillIntermediateVertices = False,
                                      TrackLocation            = f"{MergedTrackCollection}{TrackSystSuffix}"))
         LLP1VrtSecInclusiveSuffixes.append(TrackSystSuffix)
-
+    
         TrackSystSuffixShortLifetime = "_TRK_EFF_LARGED0_GLOBAL__1down_shortLifetime"
         acc.merge(TrackSystematicsAlgCfg(
             flags,
@@ -419,6 +449,47 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  associatePtCut              = 500.))
     LLP1VrtSecInclusiveSuffixes.append(BoostedMuonsSuffix)
 
+
+    # Small-d0 Electrons VSI
+    BoostedElectronsSuffix = "_BoostedElectrons"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_InDet"+BoostedElectronsSuffix,
+                                 AugmentingVersionString     = BoostedElectronsSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 twoTrkVtxFormingD0Cut       = 0.0,
+                                 doSelectTracksFromMuons     = False,
+                                 doSelectTracksFromElectrons = True,
+                                 ElectronLocation            = MergedElectronContainer,
+                                 do_PVvetoCut                = False,
+                                 DoTwoTrSoftBtag             = True,
+                                 TwoTrVrtMinDistFromPVCut    = 0.5,
+                                 associatePtCut              = 500.))
+    LLP1VrtSecInclusiveSuffixes.append(BoostedElectronsSuffix)
+
+
+    # MuSA Vertices
+    acc.merge(MuSAVtxFitterConfig(flags, 
+                                      MuonContainerName=MergedMuonContainer))
+
+    if flags.Derivation.LLP.doMuSAValidation:
+        #Create JPsi tagged muon container
+        acc.merge(MuSAVtxJPsiValidationAlgCfg(flags, 
+                                           MuonContainer=MergedMuonContainer,
+                                           JPsiMuonContainer="JPsiMuons"))
+        
+        # JPsi validation MuSA Vertices
+        acc.merge(MuSAVtxFitterValidationConfig(flags,
+                                                name="MuSAVtxFitterValidationJPsi",
+                                                MuonContainerName="JPsiMuons"))
+        # all MSTPs validation MuSA Vertices
+        acc.merge(MuSAVtxFitterValidationConfig(flags,
+                                                MuonContainerName=MergedMuonContainer,
+                                                MuSAVtxContainerName="ValidationMuSAVertices",
+                                                MuSAExtrapolatedTracksName="ValidationMuSAExtrapolatedTrackParticles",
+                                                MSTPContainerName="MuonSpectrometerTrackParticles"))
+                                            
+
     # NewVSI: LepTrack variation
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import NewVrtSecInclusiveAlgLLPCfg
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import DVFinderToolCfg
@@ -455,6 +526,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                            "LLP1EventCleanSuperLLP",
                                                                            jet_clean_level))
     LLP1EventCleanSuperLLPTool.JetCleanPrefix = jet_clean_prefix
+    LLP1EventCleanSuperLLPTool.OrDecorator = "passOR_EMTopo"
     LLP1EventCleanSuperLLPTool.JetContainer = jet_clean_container
     LLP1EventCleanSuperLLPTool.JetCleaningTool = LLP1JetCleanSuperLLPTool
     acc.addPublicTool(LLP1EventCleanSuperLLPTool)
@@ -471,6 +543,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     # See comments in JetCommonConfig.AddEventCleanFlagsCfg.
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
     acc.addEventAlgo(LLP1EventCleanAlg, 'EventCleanSeq')
+
 
 
     from DerivationFrameworkLLP.LLPToolsConfig import AugmentationToolLeadingJetsCfg
@@ -533,7 +606,17 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "MuonsLRT",
         InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
-
+    # GSF tracks associated to photons
+    LLP1PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1PhotonTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                   = "Photons",
+        InDetTrackParticlesKey  = "",
+        GSFConversionVerticesKey = "GSFConversionVertices",
+        GSFTrackParticlesKey    = "GSFTrackParticles",
+        BestMatchOnly            = True,
+        BestVtxMatchOnly         = True)) 
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD}"
     LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(TauThinningCfg(
@@ -665,7 +748,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                      StreamName            = kwargs['StreamName'],
                                                                      SGKey                   = "AntiKt4EMTopoJets",
                                                                      TopoClCollectionSGKey   = "CaloCalTopoClusters",
-                                                                     SelectionString         = "(AntiKt4EMTopoJets.DFDecoratorLeadingJets)",
                                                                      AdditionalClustersKey = ["EMOriginTopoClusters","LCOriginTopoClusters"] 
                                                                      ))
                                                                      
@@ -679,6 +761,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1ElectronTPThinningTool,
                      LLP1LRTElectronTPThinningTool,
                      LLP1MuonTPThinningTool,
+                     LLP1PhotonTPThinningTool,
                      LLP1LRTMuonTPThinningTool,
                      LLP1TauJetsThinningTool,
                      LLP1TauTPThinningTool,
@@ -838,6 +921,7 @@ def LLP1Cfg(flags):
                                            "InDetLargeD0TrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
+                                           "AntiKt4EMPFlowJets_FTAG",
                                            "BTagging_AntiKt4EMTopo",
                                            "BTagging_AntiKt4EMPFlow",
                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
@@ -888,6 +972,7 @@ def LLP1Cfg(flags):
                                         "SCT_MSOSs",
                                         "DisappearingSCT_MSOSs",
                                         "LowPtRoISCT_MSOSs",
+                                        "LVL1MuonRoIs",
                                         ]
 
 
@@ -900,7 +985,6 @@ def LLP1Cfg(flags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::JetContainer#AntiKt10EMTopoRCJets","xAOD::JetAuxContainer#AntiKt10EMTopoRCJetsAux.-PseudoJet"]
-    StaticContent += ["CaloClusterCellLinkContainer#CaloCalTopoClusters_links"]
 
     for wp in LLP1VrtSecInclusiveSuffixes:
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
@@ -909,6 +993,25 @@ def LLP1Cfg(flags):
     for wp in LLP1NewVSISuffixes:
         StaticContent += ["xAOD::VertexContainer#NewVrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#NewVrtSecInclusive_SecondaryVertices" + wp + "Aux." + excludedVertexAuxData]
+
+    StaticContent += ["xAOD::VertexContainer#MuSAVertices"]
+    StaticContent += ["xAOD::VertexAuxContainer#MuSAVerticesAux."]
+    StaticContent += ["xAOD::TrackParticleContainer#MuSAExtrapolatedTrackParticles"]
+    StaticContent += ["xAOD::TrackParticleAuxContainer#MuSAExtrapolatedTrackParticlesAux."]
+
+    if flags.Derivation.LLP.doMuSAValidation:
+        StaticContent += ["xAOD::VertexContainer#JPsiMuSAVertices"]
+        StaticContent += ["xAOD::VertexAuxContainer#JPsiMuSAVerticesAux."]
+        StaticContent += ["xAOD::VertexContainer#JPsiVertices"]
+        StaticContent += ["xAOD::VertexAuxContainer#JPsiVerticesAux."]
+        StaticContent += ["xAOD::TrackParticleContainer#JPsiVerticesTracks"]
+        StaticContent += ["xAOD::TrackParticleAuxContainer#JPsiVerticesTracksAux."]
+        StaticContent += ["xAOD::TrackParticleContainer#JPsiMuSAExtrapolatedTrackParticles"]
+        StaticContent += ["xAOD::TrackParticleAuxContainer#JPsiMuSAExtrapolatedTrackParticlesAux."]
+        StaticContent += ["xAOD::VertexContainer#ValidationMuSAVertices"]
+        StaticContent += ["xAOD::VertexAuxContainer#ValidationMuSAVerticesAux."]
+        StaticContent += ["xAOD::TrackParticleContainer#ValidationMuSAExtrapolatedTrackParticles"]
+        StaticContent += ["xAOD::TrackParticleAuxContainer#ValidationMuSAExtrapolatedTrackParticlesAux."]
 
     LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
                                           "Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
@@ -967,10 +1070,10 @@ def LLP1Cfg(flags):
         LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
 
-    LLP1SlimmingHelper.ExtraVariables.append('CaloCalTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME')
+    LLP1SlimmingHelper.ExtraVariables.append('CaloCalTopoClusters.e_samplCaloCalTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME.time.CENTER_LAMBDA.rawE.rawM.rawPhi.rawEta.clusterSize.eta0.phi0.altE.altEta.altPhi.altM.AVG_LAR_Q.AVG_TILE_Q.BADLARQ_FRAC.EM_PROBABILITY.ENG_BAD_CELLS.ENG_POS.ISOLATION.N_BAD_CELLS.SECOND_LAMBDA.SECOND_R')
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClusters"]='xAOD::CaloClusterContainer'
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
-    LLP1SlimmingHelper.ExtraVariables.append('EMOriginTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME')
+    LLP1SlimmingHelper.ExtraVariables.append('EMOriginTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME.time.CENTER_LAMBDA.rawE.rawM.rawPhi.rawEta.clusterSize.eta0.phi0.altE.altEta.altPhi.altM.AVG_LAR_Q.AVG_TILE_Q.BADLARQ_FRAC.EM_PROBABILITY.ENG_BAD_CELLS.ENG_POS.ISOLATION.N_BAD_CELLS.SECOND_LAMBDA.SECOND_R')
 
     
     # Truth containers
@@ -1050,4 +1153,3 @@ def LLP1Cfg(flags):
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_LLP1", AcceptAlgs=["LLP1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
-

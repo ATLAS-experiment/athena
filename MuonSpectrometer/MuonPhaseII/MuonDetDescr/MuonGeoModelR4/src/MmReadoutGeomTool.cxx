@@ -4,7 +4,6 @@
 
 #include "MmReadoutGeomTool.h"
 
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
@@ -19,8 +18,9 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
+
 #ifndef SIMULATIONBASE
-#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#   include "Acts/Utilities/BoundFactory.hpp"
 #endif
 
 using namespace ActsTrk;
@@ -83,7 +83,6 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
     
     define.readoutSide = paramBook.readoutSide;
 
-
     for (std::size_t gap = 0; gap < allGasGaps.size(); ++gap) {
 
         auto& gapVol = allGasGaps[gap];
@@ -137,7 +136,8 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
 
 
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
-        auto stripLayer = std::make_unique<StripLayer>(stripLayerRotation, stripDesign, 
+        auto stripLayer = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(stripLayerRotation), 
+                                                       stripDesign, 
                                                        IdentifierHash{static_cast<unsigned int>(gap)});
         define.layers.push_back(*factoryCache.stripLayers.emplace(std::move(stripLayer)).first);
     } //end of gas gap loop
@@ -163,7 +163,7 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     /// Retrieve the list of full physical volumes & alignable nodes and connect them together afterwards
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
 #ifndef SIMULATIONBASE
-    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds= std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+    auto layerBounds= std::make_shared<Acts::SurfaceBoundFactory>();
 #endif 
 
     for (auto& [key, pv] : mapFPV) {

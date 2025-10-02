@@ -14,11 +14,9 @@ atlas_add_library( JetJvtEfficiencyLib
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODEventInfo JetInterface JetAnalysisInterfacesLib PATInterfaces JetMomentToolsLib PATCoreLib
    PRIVATE_LINK_LIBRARIES PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( JetJvtEfficiency
-      src/components/*.cxx
-      LINK_LIBRARIES JetJvtEfficiencyLib )
-endif()
+atlas_add_component( JetJvtEfficiency
+   src/components/*.cxx
+   LINK_LIBRARIES JetJvtEfficiencyLib )
 
 atlas_add_dictionary( JetJvtEfficiencyDict
    JetJvtEfficiency/JetJvtEfficiencyDict.h

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentMap_test.cxx
@@ -1229,10 +1229,12 @@ void Tester<CONT>::test()
 template <class CONT>
 void perftest_one()
 {
-  Tester<CONT> tester;
-  std::cout << tester.name() << "\n";
-  tester.test();
-  tester.report();
+  // Tester<> is large... allocate it from the heap rather than
+  // from the stack.
+  auto tester = std::make_unique<Tester<CONT >>();
+  std::cout << tester->name() << "\n";
+  tester->test();
+  tester->report();
 }
 
 

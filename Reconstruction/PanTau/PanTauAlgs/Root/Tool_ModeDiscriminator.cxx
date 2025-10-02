@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_ModeDiscriminator.h"
@@ -15,16 +15,8 @@
 
 PanTau::Tool_ModeDiscriminator::Tool_ModeDiscriminator(const std::string& name) :
   asg::AsgTool(name),
-  m_Name_InputAlg("InvalidInputAlg"),
-  m_Name_ModeCase("InvalidModeCase"),
-  m_Tool_InformationStore("PanTau::Tool_InformationStore/Tool_InformationStore"),
   m_MVABDT_List()
 {
-  declareProperty("calibFolder",              m_calib_path,               "Location of calib files in cvmfs");//sync'd with tauRecFlags.tauRecToolsCVMFSPath()
-  declareProperty("Name_InputAlg",            m_Name_InputAlg,            "Name of the input algorithm for this instance");
-  declareProperty("Name_ModeCase",            m_Name_ModeCase,            "Name of the two modes to be distinguished for this instance");
-  declareProperty("Tool_InformationStore",    m_Tool_InformationStore,    "Handle to the information store tool");
-  declareProperty("Tool_InformationStoreName",m_Tool_InformationStoreName,"Handle to the information store tool");
 }
 
 
@@ -45,10 +37,10 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("ModeDiscriminator_TMVAMethod", m_MethodName) );
     
   // build the name of the variable that contains the variable list for this discri tool
-  std::string varNameList_Full    = "ModeDiscriminator_BDTVariableNames_" + m_Name_InputAlg + "_" + m_Name_ModeCase;
+  std::string varNameList_Full    = "ModeDiscriminator_BDTVariableNames_CellBased_" + m_Name_ModeCase;
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecString(varNameList_Full, m_List_BDTVariableNames) );
     
-  std::string varDefaultValueList_Full    = "ModeDiscriminator_BDTVariableDefaults_" + m_Name_InputAlg + "_" + m_Name_ModeCase;
+  std::string varDefaultValueList_Full    = "ModeDiscriminator_BDTVariableDefaults_CellBased_" + m_Name_ModeCase;
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble(varDefaultValueList_Full, m_List_BDTVariableDefaultValues) );
     
     
@@ -67,9 +59,9 @@ StatusCode PanTau::Tool_ModeDiscriminator::initialize() {
     std::string curPtBin        = "ET_" + bin_lowerStr + "_" + bin_upperStr;
     
     // weight files
-    std::string curWeightFile = m_calib_path + (m_calib_path.length() ? "/" : "");
+    std::string curWeightFile = m_calib_path + (!m_calib_path.empty() ? "/" : "");
     curWeightFile += "TrainModes_";
-    curWeightFile += m_Name_InputAlg + "_";
+    curWeightFile += "CellBased_";
     curWeightFile += curPtBin + "_";
     curWeightFile += m_Name_ModeCase + "_";
     curWeightFile += m_MethodName + ".weights.root";
@@ -107,7 +99,7 @@ void PanTau::Tool_ModeDiscriminator::updateReaderVariables(PanTau::PanTauSeed* i
   PanTau::TauFeature* seedFeatures = inSeed->getFeatures();
 
   for (unsigned int iVar=0; iVar<m_List_BDTVariableNames.size(); iVar++) {
-    std::string curVar = m_Name_InputAlg + "_" + m_List_BDTVariableNames[iVar];
+    std::string curVar = "CellBased_" + m_List_BDTVariableNames[iVar];
         
     bool isValid;
     double newValue = seedFeatures->value(curVar, isValid);

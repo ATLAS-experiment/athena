@@ -19,15 +19,85 @@
         "xAxis" : { "title" : "N. Matched $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" },
         "yAxis" : { "title" : "Entries" }
     },
+    "num_$TRKTAG_all_vs_truthMu" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+    },
     "num_$TRKTAG_selected_vs_truthMu" : {
         "type" : "TH2F",
         "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
         "yAxis" : { "title" : "N. Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
     },
-    "num_$TRKTAG_selected_vs_actualMu" : {
+    "num_$TRKTAG_selectedInRoI_vs_truthMu" : {
         "type" : "TH2F",
         "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. Selected in RoI $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "num_$TRKTAG_matched_vs_truthMu" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. Matched $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "num_$TRKTAG_all_vs_actualMu" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+    },
+    "num_$TRKTAG_selected_vs_actualMu" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
         "yAxis" : { "title" : "N. Selected $TRKTYPEs", "nBins" : "200", "low" : "0", "high" : "2000" }
+    },
+    "num_$TRKTAG_selectedInRoI_vs_actualMu" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. Selected in RoI $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "num_$TRKTAG_matched_vs_actualMu" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "N. Matched $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "avgNum_$TRKTAG_all_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
+    },
+    "avgNum_$TRKTAG_selected_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. Selected $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
+    },
+    "avgNum_$TRKTAG_selectedInRoI_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. Selected in RoI $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "avgNum_$TRKTAG_matched_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. Matched $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "avgNum_$TRKTAG_all_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
+    },
+    "avgNum_$TRKTAG_selected_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. Selected $TRKTYPEs", "nBins" : "350", "low" : "0", "high" : "3500" }
+    },
+    "avgNum_$TRKTAG_selectedInRoI_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. Selected in RoI $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
+    },
+    "avgNum_$TRKTAG_matched_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average N. Matched $TRKTYPEs", "nBins" : "100", "low" : "0", "high" : "100" }
     },
     "num_$TRKTAG_all_vs_num_vtx_$VTXTAG_all" : {
         "type" : "TH2F",

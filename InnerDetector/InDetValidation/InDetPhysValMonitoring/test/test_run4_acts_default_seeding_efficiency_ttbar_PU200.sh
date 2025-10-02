@@ -5,7 +5,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_shifter_last
+# art-html: dcube_acts_shifter_last
 # art-athena-mt: 8
 
 lastref_dir=last_results
@@ -43,7 +43,9 @@ run "Reconstruction-athena" \
      --inputRDOFile  ${input_rdo} \
      --outputAODFile AOD.athena.pool.root \
      --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-     --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" \
+     --preExec "flags.Tracking.doStoreTrackSeeds=True; \
+		flags.Tracking.doStoreSiSPSeededTracks=True; \
+		flags.Tracking.writeExtendedSi_PRDInfo=True;" \
      --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD;toAOD=['xAOD::TrackParticleContainer#SiSPSeedSegments*','xAOD::TrackParticleAuxContainer#SiSPSeedSegments*'];cfg.merge(addToAOD(flags,toAOD));" \
      --maxEvents ${n_events} \
      --multithreaded
@@ -73,8 +75,12 @@ run "Reconstruction-acts" \
      --inputRDOFile  ${input_rdo} \
      --outputAODFile AOD.acts.pool.root \
      --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSeedsFlags" \
-     --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;flags.Tracking.ITkActs\
-ValidateSeedsPass.storeSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" "flags.Tracking.ITkActsValidateSeedsPass.extension=\"\";"\
+     --preExec "flags.Tracking.doStoreTrackSeeds=True; \
+		flags.Tracking.doStoreSiSPSeededTracks=True; \
+		flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;\
+		flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=True; \
+		flags.Tracking.writeExtendedSi_PRDInfo=True; \
+		flags.Tracking.ITkActsValidateSeedsPass.extension=\"\";"\
      --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD;toAOD=['xAOD::TrackParticleContainer#SiSPSeedSegments*','xAOD::TrackParticleAuxContainer#SiSPSeedSegments*'];cfg.merge(addToAOD(flags,toAOD))" \
      --maxEvents ${n_events} \
      --multithreaded
@@ -124,3 +130,6 @@ run "dcube-athena-acts" \
     -M "acts" \
     -R "athena" \
     idpvm.acts.root
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

@@ -20,7 +20,7 @@ class IMCTruthClassifier;
 
 namespace DerivationFramework {
 
-  class Truth3CollectionMaker : public ExpressionParserUser<AthAlgTool>, public IAugmentationTool {
+  class Truth3CollectionMaker : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
     public: 
       Truth3CollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~Truth3CollectionMaker();

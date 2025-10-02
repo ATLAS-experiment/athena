@@ -27,13 +27,10 @@ namespace GlobalSim {
     Et_bits() const;
 
     const std::bitset<AlgoConstants::eFexDiscriminantBitWidth>&
-    REta_bits() const;
+    RCore_bits() const;
     
     const std::bitset<AlgoConstants::eFexDiscriminantBitWidth>&
     RHad_bits() const;
-    
-    const std::bitset<AlgoConstants::eFexDiscriminantBitWidth>&
-    WsTot_bits() const;
     
     const std::bitset<AlgoConstants::eFexEtaBitWidth>&
     Eta_bits() const;
@@ -42,16 +39,15 @@ namespace GlobalSim {
     Phi_bits() const;
     
     const std::bitset<1>&
-    Overflow_bits () const;
+    Overflow_bit () const;
 
  
   private:
     // vhdl type: record
     
     std::bitset<AlgoConstants::eFexEtBitWidth> m_Et;
-    std::bitset<AlgoConstants::eFexDiscriminantBitWidth> m_REta;
+    std::bitset<AlgoConstants::eFexDiscriminantBitWidth> m_RCore;
     std::bitset<AlgoConstants::eFexDiscriminantBitWidth> m_RHad;
-    std::bitset<AlgoConstants::eFexDiscriminantBitWidth> m_WsTot;
     std::bitset<AlgoConstants::eFexEtaBitWidth> m_Eta;
     std::bitset<AlgoConstants::eFexPhiBitWidth> m_Phi;
     std::bitset<1> m_Overflow;
@@ -62,13 +58,10 @@ namespace GlobalSim {
   eTauTob::Et_bits() const {return m_Et;}
 
   inline const std::bitset<AlgoConstants::eFexDiscriminantBitWidth>&
-  eTauTob::eTauTob::REta_bits() const {return m_REta;}
-    
-  inline const std::bitset<AlgoConstants::eFexDiscriminantBitWidth>&
   eTauTob::RHad_bits() const {return m_RHad;}
     
   inline const std::bitset<AlgoConstants::eFexDiscriminantBitWidth>&
-  eTauTob::WsTot_bits() const {return m_WsTot;}
+  eTauTob::RCore_bits() const {return m_RCore;}
     
   inline const std::bitset<AlgoConstants::eFexEtaBitWidth>&
   eTauTob::Eta_bits() const {return m_Eta;}
@@ -77,7 +70,7 @@ namespace GlobalSim {
   eTauTob::Phi_bits() const {return m_Phi;}
     
   inline const std::bitset<1>&
-  eTauTob::Overflow_bits () const {return m_Overflow;}
+  eTauTob::Overflow_bit () const {return m_Overflow;}
 
   using eTauTobPtr = std::shared_ptr<eTauTob>;
 }

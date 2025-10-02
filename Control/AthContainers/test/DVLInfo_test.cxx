@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DVLInfo_test.cxx 508150 2012-06-29 10:25:42Z ssnyder $
 /**
  * @file AthContainers/test/DVLInfo_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -32,15 +31,15 @@ class DVLInfoTest
 {
 public:
   DVLInfoTest() : DVLInfoBase (typeid(Foo), typeid(double)) {}
-  virtual void* make (size_t nreserve) const;
-  virtual void  push (void* cont_p, void* elt_p) const;
-  virtual size_t size (void* cont_p) const;
-  virtual void clear (void* cont_p) const;
-  virtual void  del (void* cont_p) const;
-  virtual void* clone (void* cont_p) const;
+  virtual void* make (size_t nreserve) const override;
+  virtual void  push (void* cont_p, void* elt_p) const override;
+  virtual size_t size (void* cont_p) const override;
+  virtual void clear (void* cont_p) const override;
+  virtual void  del (void* cont_p) const override;
+  virtual void* clone (void* cont_p) const override;
   virtual DataModel_detail::DVLIteratorBase*
-  iterator (const void* cont_p) const;
-  SG::AuxVectorBase* base (void* /*cont_p*/) const { return 0; }
+  iterator (const void* cont_p) const override;
+  SG::AuxVectorBase* base (void* /*cont_p*/) const override { return 0; }
 };
 
 
@@ -156,8 +155,8 @@ public:
   myvec2 (SG::OwnershipPolicy pol = SG::VIEW_ELEMENTS) : myvec (pol) {}
   myvec2 (const myvec2&) : myvec (SG::VIEW_ELEMENTS), SG::AuxVectorBase() {}
   myvec2& operator= (const myvec2&) = delete;
-  virtual size_t capacity_v() const { return 0; }
-  virtual size_t size_v() const { return 0; }
+  virtual size_t capacity_v() const override { return 0; }
+  virtual size_t size_v() const override { return 0; }
 };
 
 

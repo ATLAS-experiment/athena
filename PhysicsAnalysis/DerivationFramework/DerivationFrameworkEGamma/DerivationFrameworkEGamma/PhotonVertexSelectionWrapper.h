@@ -27,9 +27,7 @@
 
 namespace DerivationFramework {
 
-class PhotonVertexSelectionWrapper
-  : public AthAlgTool
-  , public IAugmentationTool
+class PhotonVertexSelectionWrapper : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   PhotonVertexSelectionWrapper(const std::string& t,

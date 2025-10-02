@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -25,12 +25,11 @@ namespace DerivationFramework {
   */
 
   ClassifyAndCalculateHFAugmentation::ClassifyAndCalculateHFAugmentation(const std::string& t, const std::string& n, const IInterface* p) : 
-  AthAlgTool(t,n,p),                 // Athena tool.
+  base_class(t,n,p),                 // Athena tool.
   m_JetMatchingTool_Tool(""),        // Hadron-jet matching tool.
   m_HFClassification_tool(""),       // HF classifier tool.
   m_HadronOriginClassifier_Tool("")  // HF hadron origin tool.
   {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
     
     // Declare a set of tool properties to set them exertanally:
     //  -m_HFClassification_tool:       The tool to compute the HF classifier.
@@ -58,6 +57,7 @@ namespace DerivationFramework {
     ATH_MSG_INFO("Truth Particles Container Name " << m_truthParticlesKey.key());
     ATH_MSG_INFO("HF Classifier Name "             << m_hfDecorationName);
     ATH_MSG_INFO("Simple HF Classifier Name "      << m_SimplehfDecorationName);
+    ATH_MSG_INFO("Jet Origin ID Decoration Name "  << m_jetIDDecorationName);
 
     ATH_CHECK( m_truthParticlesKey.initialize() );
     ATH_CHECK( m_jetCollectionKey.initialize() );
@@ -66,6 +66,8 @@ namespace DerivationFramework {
     ATH_CHECK( m_hfDecorKey.initialize() );
     ATH_CHECK( m_SimplehfDecorKey.assign(m_eventInfoKey.key()+"."+m_SimplehfDecorationName) );
     ATH_CHECK( m_SimplehfDecorKey.initialize() );
+    ATH_CHECK( m_jetIDDecorationKey.assign(m_jetCollectionKey.key()+"."+m_jetIDDecorationName) );
+    ATH_CHECK( m_jetIDDecorationKey.initialize() );
 
     // Retrieve the necessary tools
     if(m_HFClassification_tool.retrieve().isFailure()){
@@ -144,6 +146,17 @@ namespace DerivationFramework {
 
     SG::WriteDecorHandle<xAOD::EventInfo, int> decorator_SimpleHFClassification(m_SimplehfDecorKey, ctx);
     decorator_SimpleHFClassification(*EventInfo) = simpleclassif;
+
+    // Decorate truth jets with origin ID
+    SG::WriteDecorHandle<xAOD::JetContainer, int> jetIdDecorator(m_jetIDDecorationKey, ctx);
+    for (const auto jet : *JetCollection) {
+      int id = -999;
+      SG::ConstAccessor<int> hfidAcc(m_hfDecorationName + "_id");
+      if(hfidAcc.isAvailable(*jet)){
+        id = hfidAcc(*jet);
+      }
+      jetIdDecorator(*jet) = id;
+    }
 
     return StatusCode::SUCCESS;
   }

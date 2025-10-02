@@ -9,14 +9,15 @@
 ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="Release"
-ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=107
-                        -DLCG_VERSION_POSTFIX="a_ATLAS_3"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v39r4.000/Gaudi-v39r4.000.tar.gz;URL_MD5;abe78ac62447548328d563201e0018d4"
-                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v40.0.1.tar.gz;URL_HASH;SHA256=90829f0b650ca3828828f69e4a9c4d764caa52eca04e9bd48ea7727c430a6694"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.10.0/GeoModel-6.10.0.tar.bz2;URL_MD5;b5c2368db049c1a8dee223789cca03c0"
-                        -DATLAS_VECMEM_SOURCE="URL;http://cern.ch/atlas-software-dist-eos/externals/vecmem/v1.13.0.tar.gz;https://github.com/acts-project/vecmem/archive/refs/tags/v1.13.0.tar.gz;URL_MD5;02fe327552c21779f501c224b8c95e87"
+ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=108
+                        -DLCG_VERSION_POSTFIX="_ATLAS_5"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r0.003/Gaudi-v40r0.003.tar.gz;URL_MD5;c24aec64b186d4a3aec3a1c87a3e5eef"
+                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v43.3.0/acts-v43.3.0.tar.gz;URL_HASH;SHA256=e31133bb406de3398b8b3381a4b0cc748a76031e090c7a09473639648654ce0c"
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.19.0/GeoModel-6.19.0.tar.bz2;URL_MD5;873cacbd5e1e89819b50894599e19a12"
                         -DATLAS_GEANT4_USE_LTO=TRUE
-                        -DATLAS_VECGEOM_USE_LTO=TRUE)
+                        -DATLAS_VECGEOM_USE_LTO=TRUE
+                        -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE
+                        -DATLAS_GAUDI_USE_CUDA=TRUE)
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.

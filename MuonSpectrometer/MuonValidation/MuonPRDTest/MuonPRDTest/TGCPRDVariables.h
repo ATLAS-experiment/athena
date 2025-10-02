@@ -28,7 +28,7 @@ namespace MuonPRDTest{
         TwoVectorBranch m_TGC_PRD_localPos{parent(), "PRD_TGC_localPos"};
         TgcIdentifierBranch m_TGC_PRD_id{parent(), "PRD_TGC"};
         VectorBranch<uint8_t>& m_TGC_PRD_bcId{parent().newVector<uint8_t>("PRD_TGC_bcId")};
-        VectorBranch<float>& m_TGC_PRD_cov{parent().newVector<float>("PRD_TGC_cov")};
+        VectorBranch<float>& m_TGC_PRD_error{parent().newVector<float>("PRD_TGC_error")};
     };
 };
 

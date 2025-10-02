@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,20 +10,20 @@
 #define HGTD_TRACKINGGEOMETRY_HGTDLAYERBUILDERCOND_H
 
 // Athena
-// Athena
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CxxUtils/checker_macros.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElementCollection.h"
 
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
 #include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
-#include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkGeometry/TrackingGeometry.h"
 // STL
+#include <memory>
 #include <vector>
+//
+#include "CxxUtils/checker_macros.h"
 
 class HGTD_ID;
 class HGTD_DetectorManager;
@@ -34,19 +34,21 @@ namespace Trk {
   class DiscLayer;
   class PlaneLayer;
   class BinnedLayerMaterial;
-  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< std::shared_ptr<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 /** @class HGTD_LayerBuilderCond
 
    The HGTD_LayerBuilderCond parses the senstive detector elments and orders them onto a
-   Disc surface; no cylindrical layers are expected. 
+   Disc surface; no cylindrical layers are expected.
    This implementation is based on what done in the SiLayerBuilderCond, adapted to the HGTD use case.
 
    */
 
-class ATLAS_NOT_THREAD_SAFE HGTD_LayerBuilderCond :
-public AthAlgTool, virtual public Trk::ILayerBuilderCond {
+//This class in not thread safe although the checker does nor readily see this.
+//The issue is that the input is still modifiable. For details see discussion in
+//https://gitlab.cern.ch/atlas/athena/-/merge_requests/79401#note_9399034
+class ATLAS_NOT_THREAD_SAFE  HGTD_LayerBuilderCond : public extends<AthAlgTool, Trk::ILayerBuilderCond> {
 
   public:
 
@@ -79,11 +81,11 @@ public AthAlgTool, virtual public Trk::ILayerBuilderCond {
 
   private:
     SG::ReadCondHandle<InDetDD::HGTD_DetectorElementCollection> retrieveHGTDdetElements(const EventContext& ctx) const;
-    //!< helper method to construct HGTD materia 
+    //!< helper method to construct HGTD materia
     const Trk::BinnedLayerMaterial discLayerMaterial(double rMin, double rMax) const;
 
     //!< layer association
-    void registerSurfacesToLayer( Trk::BinnedArraySpan<Trk::Surface * const>& surfaces,const Trk::Layer& layer) const;
+    void registerSurfacesToLayer( std::span<Trk::Surface * const>& surfaces,const Trk::Layer& layer) const;
 
     static void evaluateBestBinning(std::vector<Trk::SurfaceOrderPosition>& surfaces,
                              std::vector<float>& rBins,
@@ -92,17 +94,17 @@ public AthAlgTool, virtual public Trk::ILayerBuilderCond {
 
     const HGTD_DetectorManager*           m_hgtdMgr;                        //!< the HGTD Detector Manager
     const HGTD_ID*                        m_hgtdHelper;                     //!< HGTD Id Helper
-                                          
+
     bool                                  m_setLayerAssociation;            //!< Set Layer Association
-                                          
-    std::string                           m_identification;                 //!< string identification        
-    
+
+    std::string                           m_identification;                 //!< string identification
+
     int                                   m_rBins;                          //!< set the number of bins
     int                                   m_phiBins;                        //!< set the number of bins
-    
+
     float                                 m_discEnvelopeR;                  //!< set disc envelope
     float                                 m_discThickness;                  //!< set disc thickness
-    
+
     bool                                  m_runGeometryValidation;          //!< run geometry validation
 
     SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection>

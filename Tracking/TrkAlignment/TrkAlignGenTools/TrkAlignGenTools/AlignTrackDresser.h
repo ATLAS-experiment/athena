@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENDRESSERS_ALIGN_TRACK_DRESSER_H
@@ -9,6 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "TrkAlignInterfaces/IAlignTrackDresser.h"
+#include "TrkAlignInterfaces/IDerivCalcTool.h"
 
 /**
    @file AlignTrackDresser.h
@@ -27,14 +28,12 @@ namespace CLHEP {
 }
 
 namespace Trk {
-  class IDerivCalcTool;
   class AlignTrack;
 
   class AlignTrackDresser : virtual public IAlignTrackDresser, public AthAlgTool {
 
   public:
     AlignTrackDresser(const std::string & type, const std::string & name, const IInterface * parent);
-    virtual ~AlignTrackDresser();
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
@@ -51,9 +50,11 @@ namespace Trk {
   private:
 
     // private variables
-    ToolHandle <IDerivCalcTool>  m_derivCalcTool; //!< tool for calculating derivatives of residuals wrt. alignment parameters
+    ToolHandle <IDerivCalcTool>  m_derivCalcTool{
+      this, "DerivCalcTool", "Trk::AnalyticalDerivCalcTool",
+	"tool for calculating derivatives of residuals wrt. alignment parameters"};
 
-    unsigned int m_numBadCovWMatrix; //!< number of tracks with invalid weight matrix from the deriv.calc.tool
+    unsigned int m_numBadCovWMatrix = 0; //!< number of tracks with invalid weight matrix from the deriv.calc.tool
 
   }; // end class
 

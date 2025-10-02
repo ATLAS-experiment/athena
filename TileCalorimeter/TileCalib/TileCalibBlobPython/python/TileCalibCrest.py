@@ -3,13 +3,14 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # TileCalibCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
-#
+# Laura Sargsyan <Laura.Sargsyan@cern.ch>, 2025-09-16
+# Siarhei Harkusha <Siarhei.Harkusha@cern.ch>, 2025-05-19
 ################################################################
 """
 Python helper module for managing CREST DB connections and TileCalibBlobs.
 """
 
-import os, cppyy, base64, json
+import os, cppyy, base64, json, time, datetime
 
 from PyCool import cool # noqa: F401
 Blob = cppyy.gbl.coral.Blob
@@ -51,7 +52,7 @@ class TileBlobReaderCrest(TileCalibLogger):
     """
 
     #____________________________________________________________________
-    def __init__(self, db, folder='', tag='', run=None, lumi=0, modmin=0, modmax=275):
+    def __init__(self, db, folder='', tag='', run=None, lumi=0, modmin=0, modmax=275, copyBlob=False):
         """
         Input:
         - db    : server connection string or file name
@@ -61,13 +62,15 @@ class TileBlobReaderCrest(TileCalibLogger):
         - lumi  : Lumi block number
         - modmin: Minimal module (COOL channel number)
         - modmax: Maximal module (COOL channel number)
+        - copyBlob: save payload from CREST (Default:False, True to copy payload to json file)
         """
-        #=== initialize base class
+          #=== initialize base class
         TileCalibLogger.__init__(self,"TileBlobReader")
-
+        self.payload = {}
         self.__db = db
         self.__folder = folder
         self.__tag = tag
+        self.__copyBlob = copyBlob
 
         self.__iovList = []
         self.__iov = (-1,0)
@@ -172,8 +175,9 @@ class TileBlobReaderCrest(TileCalibLogger):
         else:
             for i in range(iovs['size']):
                 iov=iovs['resources'][i]
-                runS=iov['since']>>32
-                lumiS=iov['since']&0xFFFFFFFF
+                since=int(iov['since'])
+                runS=since>>32
+                lumiS=since&0xFFFFFFFF
                 iovList.append((runS,lumiS))
         return iovList
 
@@ -187,7 +191,7 @@ class TileBlobReaderCrest(TileCalibLogger):
             raise Exception( "IOV for tag %s run,lumi (%s,%s) not found" % (self.__tag,runlumi[0],runlumi[1]) )
         else:
             iov=iovs1['resources'][0]
-            since=iov['since']
+            since=int(iov['since'])
             runS=since>>32
             lumiS=since&0xFFFFFFFF
             until=MAXRUNLUMI if iovs2['size']==0 else iovs2['resources'][0]['since']
@@ -204,9 +208,9 @@ class TileBlobReaderCrest(TileCalibLogger):
             #with open("payload.json", 'w') as the_file:
             #    the_file.write(payload)
             #    the_file.write('\n')
-            #with open("dump.json", 'w') as the_file:
-            #    json.dump(jdata,the_file)
-            #    the_file.write('\n')
+            if self.__copyBlob:
+                self.payload = jdata
+                return
             self.__iovList.append(((runS,lumiS),(runU, lumiU)))
             self.__iov = self.__runlumi2iov(self.__iovList[-1])
             for chan in range(self.__modmin,self.__modmax):
@@ -357,3 +361,148 @@ class TileBlobReaderCrest(TileCalibLogger):
             drawer1=0
 
         return (0,drawer1)
+
+class TileBlobWriterCrest(TileCalibLogger):
+    """
+    TileBlobWriterCrest is a helper class, managing the details of
+    CREST interactions for the user of TileCalibBlobs.
+    """
+
+    #____________________________________________________________________
+    def __init__(self, db, folderPath, calibDrawerType, isMultiVersionFolder=True):
+        """
+        Input:
+        - db        : db should be a database connection
+        - folderPath: full folder path to create or update
+        """
+
+        #=== initialize base class
+        TileCalibLogger.__init__(self, "TileBlobWriter")
+
+        #=== store db
+        self.__db = db
+        self.__folderPath = folderPath
+
+        #=== create default vectors based on calibDrawerType
+        self.__calibDrawerType = calibDrawerType
+        if calibDrawerType in ['TileCalibDrawerFlt', 'Flt']:
+            self.__TileCalibDrawer = TileCalibDrawerFlt
+            self.__defVec = cppyy.gbl.std.vector('std::vector<float>')()
+        elif calibDrawerType in ['TileCalibDrawerBch', 'Bch']:
+            self.__TileCalibDrawer = TileCalibDrawerBch
+            self.__defVec = cppyy.gbl.std.vector('std::vector<unsigned int>')()
+        elif calibDrawerType in ['TileCalibDrawerInt', 'Int']:
+            self.__TileCalibDrawer = TileCalibDrawerInt
+            self.__defVec = cppyy.gbl.std.vector('std::vector<unsigned int>')()
+        else:
+            raise Exception("Unknown calibDrawerType: %s" % calibDrawerType)
+
+        # Always all drawers should be written
+        self.__drawerBlob = {drawerIdx:Blob() for drawerIdx in range(0, TileCalibUtils.max_draweridx())}
+        self.__drawer = {}
+    #____________________________________________________________________
+    def register(self, since=(MINRUN,MINLBK), tag=""):
+        """
+        Registers the folder in the database.
+        - since: lower limit of IOV
+        - tag  : The tag to write to
+
+        The interpretation of the 'since' inputs depends on their type:
+        - tuple(int,int) : run and lbk number
+        """
+
+        jdata = {}
+        for drawerIdx,blob in self.__drawerBlob.items():
+            b64string = str(base64.b64encode(blob.read()), 'ascii')
+            jdata[drawerIdx] = [b64string]
+
+        (sinceRun, sinceLumi) = since
+
+        if not self.__db or (self.__db and self.__db.endswith('.json')):
+            # Writting into the json file
+            fullTag = tag
+            if self.__folderPath and not (tag.startswith('Tile') or tag.startswith('Calo')):
+                fullTag = TileCalibUtils.getFullTag(self.__folderPath, tag)
+            fileName = f"{fullTag}.{sinceRun}.{sinceLumi}.json"
+            if self.__db:
+                fileName = f'{self.__db[:-5]}.{fileName}'
+
+            with open(fileName, 'w') as the_file:
+                json.dump(jdata, the_file)
+                the_file.write('\n')
+
+        #=== print info
+        self.log().info( 'Writting tag "%s"', fullTag)
+        self.log().info( '... since             : [%s,%s]' , sinceRun, sinceLumi)
+        self.log().info( '... with comment field: "%s"', self.getComment())
+        self.log().info( '... into file         : %s' , fileName)
+
+    #____________________________________________________________________
+    def setComment(self, author, comment=None):
+        """
+        Sets a general comment in the comment channel.
+        """
+        drawerIdx = TileCalibUtils.getCommentChannel()
+        commentBlob = self.__drawer.get(drawerIdx, None)
+        if not commentBlob:
+            commentBlob = Blob()
+            self.__drawerBlob[drawerIdx] = commentBlob
+
+        if isinstance(author, tuple) and len(author) == 3:
+            tm = time.mktime(datetime.datetime.strptime(author[2], "%a %b %d %H:%M:%S %Y").timetuple())
+            self.__drawer[drawerIdx] = TileCalibDrawerCmt.getInstance(commentBlob, author[0], author[1], int(tm))
+        else:
+            self.__drawer[drawerIdx] = TileCalibDrawerCmt.getInstance(commentBlob, author, comment)
+
+    #____________________________________________________________________
+    def getComment(self, split=False):
+        """
+        Returns the general comment (default if none is set)
+        """
+        drawerIdx = TileCalibUtils.getCommentChannel()
+        comment = self.__drawer.get(drawerIdx, None)
+        if comment:
+            if split:
+                return (comment.getAuthor(), self.__comment.getComment(), self.__comment.getDate())
+            else:
+                return comment.getFullComment()
+        else:
+            return "<No general comment!>"
+
+    #____________________________________________________________________
+    def getDrawer(self, ros, drawer, calibDrawerTemplate=None):
+        """
+        Returns a TileCalibDrawer object of requested type
+        for the given ROS and drawer.
+        """
+
+        try:
+            drawerIdx = TileCalibUtils.getDrawerIdx(ros, drawer)
+            calibDrawer = self.__drawer.get(drawerIdx, None)
+
+            if not calibDrawer:
+                calibDrawer = self.__TileCalibDrawer.getInstance(self.__drawerBlob[drawerIdx], self.__defVec,0,0)
+                self.__drawer[drawerIdx] = calibDrawer
+
+            #=== clone if requested
+            if calibDrawerTemplate:
+                calibDrawer.clone(calibDrawerTemplate)
+
+            return calibDrawer
+
+        except Exception as e:
+            self.log().critical( e )
+            return None
+
+    #____________________________________________________________________
+    def zeroBlob(self, ros, drawer):
+        """
+        Resets blob size to zero
+        """
+        try:
+            drawerIdx = TileCalibUtils.getDrawerIdx(ros, drawer)
+            blob = self.__drawerBlob[drawerIdx]
+            blob.resize(0)
+        except Exception as e:
+            self.log().critical( e )
+            return None

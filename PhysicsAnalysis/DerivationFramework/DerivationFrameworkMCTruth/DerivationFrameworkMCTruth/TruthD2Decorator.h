@@ -19,7 +19,7 @@
 
 namespace DerivationFramework {
 
-  class TruthD2Decorator : public AthAlgTool, public IAugmentationTool {
+  class TruthD2Decorator : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TruthD2Decorator(const std::string& t, const std::string& n, const IInterface* p);
       StatusCode initialize();

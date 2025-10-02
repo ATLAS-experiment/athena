@@ -6,16 +6,21 @@
 #include "PileUpMTAlg.h"
 
 #include <CxxUtils/XXH.h>
-#include <fmt/chrono.h>
-#include <fmt/format.h>
-#include <fmt/ostream.h>
 #include <unistd.h>
 
 #include <boost/core/demangle.hpp>
-#include <chrono>
 #include <range/v3/all.hpp>
-#include "EventInfo/EventInfo.h"
 
+#include <chrono>
+#include <format>
+
+#include "BeamSpotConditionsData/BeamSpotData.h"
+#include "EventInfo/EventInfo.h"
+#include <tuple>
+
+#include "AthenaKernel/RNGWrapper.h"
+#include "CLHEP/Random/RandPoisson.h"
+#include "CLHEP/Random/RandomEngine.h"
 #include "PileUpTools/PileUpHashHelper.h"
 #include "PileUpTools/PileUpMisc.h"
 #include "xAODEventInfo/EventAuxInfo.h"
@@ -41,23 +46,17 @@ StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg,
                                std::unique_ptr<xAOD::EventAuxInfo>& ei_aux_,
                                bool pileup) const {
   std::string key = pileup ? "EventInfo" : "HSEventInfo";
-  xAOD::EventInfo* newEi = new xAOD::EventInfo();
-  xAOD::EventAuxInfo* eiAux = new xAOD::EventAuxInfo();
-  newEi->setStore(eiAux);
+  auto newEi = std::make_unique<xAOD::EventInfo>();
+  auto eiAux = std::make_unique<xAOD::EventAuxInfo>();
+  newEi->setStore(eiAux.get());
   SG::ReadHandle<xAOD::EventInfo> ei_h(key, sg.name());
   const xAOD::EventInfo* ei = ei_h.get();
   if (ei != nullptr) {
     *newEi = *ei;
   } else {
-    SG::ReadHandle<::EventInfo> ei2_h(key, sg.name());
-    const ::EventInfo* ei2 = ei2_h.get();
-    if (ei2 == nullptr) {
-      // Just in case
-      ATH_MSG_ERROR("Got null ::EventInfo from " << sg.name());
-      ATH_MSG_ERROR(sg.dump());
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK(m_xAODEICnvTool->convert(ei2, newEi, true));
+    ATH_MSG_ERROR("Couldn't find xAOD::EventInfo. " << sg.name());
+    ATH_MSG_ERROR(sg.dump());
+    return StatusCode::FAILURE;
   }
   // Use attribute list if EventInfo doesn't have event numbers set
   if (newEi->eventNumber() == 0) {
@@ -81,8 +80,8 @@ StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg,
     }
   }
   newEi->setEvtStore(&sg);
-  ei_.reset(newEi);
-  ei_aux_.reset(eiAux);
+  ei_ = std::move(newEi);
+  ei_aux_ = std::move(eiAux);
   return StatusCode::SUCCESS;
 }
 
@@ -118,10 +117,13 @@ StatusCode PileUpMTAlg::initialize() {
   using namespace std::chrono;
   ATH_MSG_DEBUG("Initializing " << name() << "...");
   if (m_writeTrace) {
-    m_pileupTrace.init(
-        fmt::format("pileup_trace_skipping-{}_{:%Y-%m-%dT%H%M}.txt",
-                    m_skippedHSEvents.value(),
-                    fmt::localtime(system_clock::to_time_t(system_clock::now()))));
+    std::string filename = std::format("pileup_trace_skipping-{}_{:%Y-%m-%dT%H%M}.txt",
+                                       m_skippedHSEvents.value(),
+                                       system_clock::now());
+    if (!m_pileupTrace.init(filename)) {
+      ATH_MSG_ERROR("Cannot append to file " << filename);
+      return StatusCode::FAILURE;
+    }
   }
   ATH_CHECK(m_skipEventIdxSvc.retrieve());
   ATH_CHECK(m_rngSvc.retrieve());
@@ -142,21 +144,21 @@ StatusCode PileUpMTAlg::initialize() {
   }
   ATH_CHECK(m_beamInt.retrieve());
   ATH_CHECK(m_beamLumi.retrieve());
-  ATH_CHECK(m_xAODEICnvTool.retrieve());
   ATH_CHECK(m_puTools.retrieve());
 
   m_evtInfoContKey = "PileUpEventInfo";
   ATH_CHECK(m_evtInfoKey.initialize());
   ATH_CHECK(m_evtInfoContKey.initialize());
+  ATH_CHECK(m_beamSpotKey.initialize());
 
   // Trace skipped events
   if (m_writeTrace) {
     auto handler = [](ISkipEventIdxSvc::EvtIter it,
                       ISkipEventIdxSvc::EvtIter end) -> StatusCode {
-      fmt::memory_buffer trace_buf{};
+      std::string trace_buf{};
       auto trace = std::back_inserter(trace_buf);
       for (; it != end; ++it) {
-        fmt::format_to(trace, "SKIPPING Run: {} LB: {} EVT: {} HS ID: {}\n",
+        std::format_to(trace, "SKIPPING Run: {} LB: {} EVT: {} HS ID: {}\n",
                        it->runNum, it->lbNum, it->evtNum, it->evtIdx);
       }
       m_pileupTrace.print(trace_buf);
@@ -181,7 +183,7 @@ StatusCode PileUpMTAlg::finalize() {
 
 StatusCode PileUpMTAlg::execute() {
   using PUType = xAOD::EventInfo::PileUpType;
-  fmt::memory_buffer trace_buf{};  // Hold trace of events.
+  std::string trace_buf{};  // Hold trace of events.
   auto trace = std::back_inserter(trace_buf);
   ATH_MSG_DEBUG("Executing " << name() << "...");
   const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -212,6 +214,24 @@ StatusCode PileUpMTAlg::execute() {
   overlaidEvt->setBCID(evtID.bunch_crossing_id());
   overlaidEvt->setTimeStamp(evtID.time_stamp());
   overlaidEvt->setTimeStampNSOffset(evtID.time_stamp_ns_offset());
+  // Set beam spot info
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle{m_beamSpotKey, ctx};
+  if (!beamSpotHandle.isValid()) {
+    ATH_MSG_ERROR("Beam spot information not valid");
+    return StatusCode::FAILURE;
+  }
+
+  overlaidEvt->setBeamPos(beamSpotHandle->beamPos()[Amg::x],
+                          beamSpotHandle->beamPos()[Amg::y],
+                          beamSpotHandle->beamPos()[Amg::z]);
+  overlaidEvt->setBeamPosSigma(beamSpotHandle->beamSigma(0),
+                               beamSpotHandle->beamSigma(1),
+                               beamSpotHandle->beamSigma(2));
+  overlaidEvt->setBeamPosSigmaXY(beamSpotHandle->beamSigmaXY());
+  overlaidEvt->setBeamTiltXZ(beamSpotHandle->beamTilt(0));
+  overlaidEvt->setBeamTiltYZ(beamSpotHandle->beamTilt(1));
+  overlaidEvt->setBeamStatus(beamSpotHandle->beamStatus());
+
   // Pileup container
   SG::WriteHandle<xAOD::EventInfoContainer> puCont(m_evtInfoContKey, ctx);
   ATH_CHECK(puCont.record(std::make_unique<xAOD::EventInfoContainer>(),
@@ -236,7 +256,7 @@ StatusCode PileUpMTAlg::execute() {
 
   // Trace
   if (m_writeTrace) {
-    fmt::format_to(trace,
+    std::format_to(trace,
                    "Idx: {} Run: {} LB: {} EVT: {} "
                    "HS ID: {}\n",
                    ctx.evt(), evtID.run_number(), evtID.lumi_block(),
@@ -251,12 +271,22 @@ StatusCode PileUpMTAlg::execute() {
         rv::group_by(std::equal_to{}) |
 #endif
         rv::transform([](const auto& rng) {
-          return fmt::format("{}{}", rng.size(), rng[0] == 0 ? 'E' : 'F');
+          return std::format("{}{}", rng.size(), rng[0] == 0 ? 'E' : 'F');
         }) |
         ranges::to<std::vector<std::string>>;
-    fmt::format_to(trace, "mu = {}, central BCID = {}, bunch pattern = [{}]\n",
+    // Manual join using std::ostringstream as std::format does not support ranges
+    std::string joined_pattern;
+    for (size_t i = 0; i < bunch_pattern.size(); ++i) {
+      joined_pattern += bunch_pattern[i];
+      if (i + 1 < bunch_pattern.size()) {
+        joined_pattern += " ";
+      }
+    }
+
+    std::format_to(trace,
+                   "mu = {}, central BCID = {}, bunch pattern = [{}]\n",
                    cur_avg_mu, m_beamInt->getCurrentT0BunchCrossing(),
-                   fmt::join(bunch_pattern, " "));
+                   joined_pattern);
   }
   // Copy subevents
   if (!hsEvt->subEvents().empty()) {
@@ -316,7 +346,7 @@ StatusCode PileUpMTAlg::execute() {
     std::vector<std::uint64_t> subevts_vec{};
     if (m_fracLowPt != 0) {
       if (m_writeTrace) {
-        fmt::format_to(trace, "\tBC {:03} : LOW PT {} ", bc,
+        std::format_to(trace, "\tBC {:03} : LOW PT {} ", bc,
                        m_lowptMBSvc->getNumForBunch(ctx, bc));
       }
       for (std::size_t i = 0; i < m_lowptMBSvc->getNumForBunch(ctx, bc); ++i) {
@@ -328,7 +358,7 @@ StatusCode PileUpMTAlg::execute() {
     }
     if (m_fracHighPt != 0) {
       if (m_writeTrace) {
-        fmt::format_to(trace, "HIGH PT {} | ",
+        std::format_to(trace, "HIGH PT {} | ",
                        m_highptMBSvc->getNumForBunch(ctx, bc));
       }
       for (std::size_t i = 0; i < m_highptMBSvc->getNumForBunch(ctx, bc); ++i) {
@@ -340,7 +370,7 @@ StatusCode PileUpMTAlg::execute() {
     }
     if (m_numCavern != 0) {
       if (m_writeTrace) {
-        fmt::format_to(trace, "CAVERN {} | ",
+        std::format_to(trace, "CAVERN {} | ",
                        m_cavernMBSvc->getNumForBunch(ctx, bc));
       }
       for (std::size_t i = 0; i < m_cavernMBSvc->getNumForBunch(ctx, bc); ++i) {
@@ -352,7 +382,7 @@ StatusCode PileUpMTAlg::execute() {
     }
     if (m_numBeamHalo != 0) {
       if (m_writeTrace) {
-        fmt::format_to(trace, "BEAM HALO {} | ",
+        std::format_to(trace, "BEAM HALO {} | ",
                        m_beamhaloMBSvc->getNumForBunch(ctx, bc));
       }
       for (std::size_t i = 0; i < m_beamhaloMBSvc->getNumForBunch(ctx, bc);
@@ -365,7 +395,7 @@ StatusCode PileUpMTAlg::execute() {
     }
     if (m_numBeamGas != 0) {
       if (m_writeTrace) {
-        fmt::format_to(trace, "BEAM GAS {} | ",
+        std::format_to(trace, "BEAM GAS {} | ",
                        m_beamgasMBSvc->getNumForBunch(ctx, bc));
       }
       for (std::size_t i = 0; i < m_beamgasMBSvc->getNumForBunch(ctx, bc);
@@ -377,12 +407,12 @@ StatusCode PileUpMTAlg::execute() {
       }
     }
     if (m_writeTrace) {
-      fmt::format_to(trace, "TOTAL {} | HASH {:08X}\n", subevts_vec.size(),
+      std::format_to(trace, "TOTAL {} | HASH {:08X}\n", subevts_vec.size(),
                      xxh3::hash64(subevts_vec));
     }
   }
   if (m_writeTrace) {
-    fmt::format_to(trace, "\n");
+    std::format_to(trace, "\n");
     m_pileupTrace.print(trace_buf);
   }
 
@@ -399,7 +429,7 @@ StatusCode PileUpMTAlg::execute() {
       setFilterPassed(false);
     }
   }
-  ATH_MSG_DEBUG(fmt::format("***** Took {:%OMm %OSs} to process all subevents",
+  ATH_MSG_DEBUG(std::format("***** Took {:%OMm %OSs} to process all subevents",
                             std::chrono::high_resolution_clock::now() - now));
   //
   // Save hash (direct copy from PileUpEventLoopMgr)

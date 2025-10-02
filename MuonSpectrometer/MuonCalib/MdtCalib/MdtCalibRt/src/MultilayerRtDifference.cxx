@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MultilayerRtDifference.h"
@@ -53,7 +53,7 @@ namespace MuonCalib {
 
     inline MultilayerRtDifference_Histograms::MultilayerRtDifference_Histograms(TDirectory *control_histogram_dir) :
         m_control_histogram_dir(control_histogram_dir) {
-        for (auto & m_current_residual : m_current_residuals) { m_current_residual = nullptr; }
+        for (auto & current_residual : m_current_residuals) { current_residual = nullptr; }
     }
 
     // copy constructor to keep Coverity happy

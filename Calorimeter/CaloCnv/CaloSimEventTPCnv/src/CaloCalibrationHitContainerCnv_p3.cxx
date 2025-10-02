@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloSimEvent/CaloCalibrationHit.h"
@@ -80,7 +80,7 @@ void CaloCalibrationHitContainerCnv_p3::transToPers(const CaloCalibrationHitCont
     Compressor A; A.setNrBits(18);	
     A.reduce(tempE,persCont->m_energy); // packs energy
     persCont->m_name = transCont->Name(); //stores name
-    persCont->m_particleID = tempPID;
+    persCont->m_particleID = std::move(tempPID);
 
 //	ev++;
 }

@@ -211,7 +211,7 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
   ToolHandle<IBTaggingEfficiencyTool> m_btagging_eff_tool{
       this, "btagEffTool", "", "the b-tagging efficiency tool"};
 
-  std::unique_ptr<SG::AuxElement::ConstAccessor<char>> m_bTagDecoAcc;
+  std::unique_ptr<SG::ConstAccessor<char>> m_bTagDecoAcc;
 };
 }  // namespace EventReco
 

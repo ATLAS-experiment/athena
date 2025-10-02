@@ -7,7 +7,6 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
 
-#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
@@ -29,7 +28,8 @@ namespace MuonR4{
     /// for downstream use. 
     class EtaHoughTransformAlg: public AthReentrantAlgorithm{
         public:
-            using AthReentrantAlgorithm::AthReentrantAlgorithm;
+            using AthReentrantAlgorithm::AthReentrantAlgorithm;    
+
             virtual ~EtaHoughTransformAlg() = default;
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
@@ -37,12 +37,6 @@ namespace MuonR4{
         private:
             
             using HoughSetupForBucket = HoughEventData::HoughSetupForBucket;
-            /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-            /// Failure is returned in cases, of non-empty keys and failed retrieval
-            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                                        const SG::ReadHandleKey<ContainerType>& key,
-                                                                        const ContainerType* & contToPush) const;
-
             /// @brief pre-processing method called once per event. 
             /// Populates the event data with the space points for each
             /// bucket and identifies the optimal search space in each bucket.
@@ -87,7 +81,7 @@ namespace MuonR4{
             // target resolution in the angle
             DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.05};
             // target resolution in the y intercept
-            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10};
+            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
             // minimum search window half width, tan(theta) 
             // - in multiples of the target resolution
             DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 2.0};

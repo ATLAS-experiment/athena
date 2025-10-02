@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MULTIFOLD_GNN_TOOL_H
@@ -9,13 +9,11 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgServices/ServiceHandle.h"
 #include "FlavorTagInference/INNSharingSvc.h"
-#include "FlavorTagInference/IBTagConditionalDecorator.h"
 #include "FlavorTagInference/IJetTagConditionalDecorator.h"
 
 #include "FlavorTagInference/GNNToolifiers.h"
 
 // EDM includes
-#include "xAODBTagging/BTaggingFwd.h"
 #include "xAODJet/JetFwd.h"
 
 #include <memory>
@@ -34,13 +32,11 @@ namespace FlavorTagInference {
   // Tool to to flavor tag jet/btagging object
   // using GNN based taggers
   class MultifoldGNNTool : public asg::AsgTool,
-                           virtual public IBTagConditionalDecorator,
                            virtual public IJetTagConditionalDecorator
   {
 
-    ASG_TOOL_CLASS2(
+    ASG_TOOL_CLASS(
       MultifoldGNNTool,
-      IBTagConditionalDecorator,
       IJetTagConditionalDecorator)
     public:
       MultifoldGNNTool(const std::string& name);
@@ -48,10 +44,8 @@ namespace FlavorTagInference {
 
       StatusCode initialize() override;
 
-      virtual void decorate(const xAOD::BTagging& btag) const override;
-      virtual void decorate(const xAOD::Jet& jet) const override;
-      virtual void decorateWithDefaults(const SG::AuxElement& jet) const override;
-      virtual void decorateWithDefaults(const xAOD::BTagging& btag) const override;
+      virtual void decorate(const xAOD::IParticle& i_jet) const override;
+      virtual void decorateWithDefaults(const xAOD::IParticle& i_jet) const override;
 
       virtual std::set<std::string> getDecoratorKeys() const override;
       virtual std::set<std::string> getAuxInputKeys() const override;

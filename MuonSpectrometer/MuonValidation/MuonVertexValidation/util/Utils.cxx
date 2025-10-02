@@ -64,8 +64,9 @@ bool inFiducialVolBarrel(const Amg::Vector3D &vtx){
 
 bool inFiducialVolEndcaps(const Amg::Vector3D &vtx){
     bool eta = inEndcaps(vtx);
+    bool Lxy = vtx.perp() < fidVol_endcaps_Lxy_up;
     bool z = std::abs(vtx.z()) > fidVol_z_low && std::abs(vtx.z()) < fidVol_z_up;
-    return eta && z;
+    return eta && Lxy && z;
 }
 
 

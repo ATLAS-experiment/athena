@@ -59,6 +59,9 @@ class MuonTrackMonitorAlgorithm : public AthMonitorAlgorithm
     /// Function to get the primary vertex
     const xAOD::Vertex* getPrimaryVertex(const xAOD::VertexContainer& Vertices) const;
 
+    /// Function to get the track category ID for the given identifier
+    int getTrackCategoryID(const std::string& sIdentifier) const;
+
     /// Function to create performance plots for all combined muons that lead to a Z Boson Candidate event
     StatusCode analyseResonanceCandidates(const xAOD::MuonContainer& Muons, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const;
 

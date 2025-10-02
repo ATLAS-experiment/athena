@@ -1,6 +1,7 @@
 #!/bin/bash
 # art-description: Nightly test to compare C-230 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
+# art-memory: 6144
 # art-include: main/Athena
 # art-output: IDTPM.*.root
 # art-output: *.json
@@ -33,11 +34,15 @@ cwd=$(pwd)
 run () {
     name="${1}"
     cmd="${@:2}"
-    echo "Running ${name}..."
+    echo -e "\n\n--------------\nRunning ${name}..."
     echo -e "\n---> ${name}" >> "${cwd}/commands.log"
     echo "${cmd}" >> "${cwd}/commands.log"
-    time ${cmd}
+    echo "#!/bin/bash" >> step_${name}.sh
+    echo "${cmd} &> step_${name}.log" >> step_${name}.sh
+    chmod 777 step_${name}.sh
+    time $(pwd)/step_${name}.sh
     rc=$?
+    rm step_${name}.sh
     echo "art-result: $rc ${name}"
     ## if _skipRC is in name skip exit condition
     if [[ "${name}" =~ "_skipRC" ]]; then
@@ -102,9 +107,43 @@ run "dcube_skipRC" \
     -R "ref=${refLabel}" -M "mon=${testLabel}" \
     IDTPM.${OutSampleName}.HIST.root
 
+## reading json keys from IDTPM config
+allTrkAna=""
+for key in $( jq 'keys | .[]' ${cwd}/IDTPMconfig.json ); do
+  if [ "x${allTrkAna}" == "x" ]; then
+    allTrkAna="$( echo $key | sed 's|\"||g' )"
+  else
+    allTrkAna="${allTrkAna},$( echo $key | sed 's|\"||g' )"
+  fi
+done
+
 ## Printing summary
 run "PrintSummaryTable_skipRC" \
   PrintTrkAnaSummary.py \
     -t IDTPM.${OutSampleName}.HIST.root \
     -r ${referenceName_absPath} \
-    -R "${refLabel}" -T "${testLabel}"
+    -R "${refLabel}" -T "${testLabel}" \
+    -a "${allTrkAna}"
+
+## Now monitor vs the last ART results
+echo "download latest result..."
+lastref_dir=last_results
+art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
+ls -la "$lastref_dir"
+
+## dcube last step
+run "dcube_last_skipRC" \
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_last \
+    -c ${dcubeXmlIDTPMconfig_absPath} \
+    -r ${lastref_dir}/IDTPM.${OutSampleName}.HIST.root \
+    IDTPM.${OutSampleName}.HIST.root
+
+## Printing last summary
+run "PrintSummaryTable_last_skipRC" \
+  PrintTrkAnaSummary.py \
+    -t IDTPM.${OutSampleName}.HIST.root \
+    -r ${referenceName_absPath} \
+    -R "last_nightly" -T "new_nightly" \
+    -o "TrkAnaSummary_last_&TrkAnaName&.html" \
+    -a "${allTrkAna}"

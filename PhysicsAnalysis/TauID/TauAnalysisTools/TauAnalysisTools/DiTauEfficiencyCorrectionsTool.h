@@ -1,12 +1,11 @@
 /**
  *
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.h
  * @author Guillermo Hamity (ghamity@cern.ch)
  * @author David Kirchmeier
  * @brief Efficiency scale factors and uncertainties for ditau jets
- * @date 2021-02-18
  *
  */
 
@@ -17,6 +16,7 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
 #include "TauAnalysisTools/IDiTauEfficiencyCorrectionsTool.h"
@@ -50,24 +50,19 @@ public:
    * 
    * @param xDiTau : reco DiTauJet
    * @param eff : reference to output variable where efficiency is returned
-   * @param iRunNumber : run number
-   * @param iMu : number of interactions
    * @return CP::CorrectionCode 
    */
   virtual CP::CorrectionCode getEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau,
-      double& eff, unsigned int iRunNumber = 0, unsigned int iMu = 0);
+      double& eff);
 
 
   /**
    * @brief decorate the ditau jet with eff scale factor
    * 
    * @param xDiTau : reco DiTauJet
-   * @param iRunNumber : run number
-   * @param iMu : number of interactions
    * @return CP::CorrectionCode 
    */
-  virtual CP::CorrectionCode applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau,
-      unsigned int iRunNumber = 0, unsigned int iMu = 0);
+  virtual CP::CorrectionCode applyEfficiencyScaleFactor( const xAOD::DiTauJet& xDiTau);
 
 
   /**
@@ -110,15 +105,16 @@ private:
 
 private:
 
-  std::vector<int> m_vEfficiencyCorrectionTypes;
+  Gaudi::Property<std::string> m_sInputFilePathJetIDHadTau{this, "InputFilePathJetIDHadTau", ""};
+  Gaudi::Property<std::string> m_sVarNameJetIDHadTau{this, "VarNameJetIDHadTau", ""};
+  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2017-moriond"};
+  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDBDTTIGHT)};
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};   
+  Gaudi::Property<std::vector<int>> m_vEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {SFJetIDHadTau}};
+
   std::vector< asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
-  std::string m_sInputFilePathJetIDHadTau;
-  std::string m_sVarNameJetIDHadTau;
-  std::string m_sRecommendationTag;
-  bool m_bSkipTruthMatchCheck;
   bool m_bIsData;
   bool m_bIsConfigured;
-  int m_iJetIDLevel;
 
 }; // class DiTauEfficiencyCorrectionsTool
 

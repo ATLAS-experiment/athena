@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Specialist reconstruction and bytestream transforms
 #  @author atlas-comp-jt-dev@cern.ch
@@ -28,8 +28,9 @@ class skimRawExecutor(scriptExecutor):
         # For best lookup speed, we store the runnumber/eventnumber in a dictionary (set would also
         # be fast)
         rawEventList = {} 
+        longlist = subprocess.check_output(listEvtCommand).decode('utf-8')
         try:
-            for line in subprocess.check_output(listEvtCommand).split("\n"):
+            for line in longlist.split("\n"):
                 if line.startswith("Index="):
                     try:
                         splitStrings = line.split(" ")
@@ -37,7 +38,7 @@ class skimRawExecutor(scriptExecutor):
                         evtprefix, evtstr = splitStrings[2].split("=")
                         # Check sanity
                         if runprefix != "Run" or evtprefix != "Event":
-                            msg.warning("Failed to understand this line from AtlListBSEvents: %s", line)
+                            msg.warning("Failed to understand this line from AtlListBSEvents (1): %s", line)
                         else:
                             runnumber = int(runstr)  # noqa: F841
                             evtnumber = int(evtstr)  # noqa: F841
@@ -46,7 +47,7 @@ class skimRawExecutor(scriptExecutor):
                             rawEventList[runstr + "-" + evtstr] = True
                             msg.debug("Identified run %s, event %s in input RAW files", runstr, evtstr)
                     except ValueError:
-                        msg.warning("Failed to understand this line from AtlListBSEvents: %s", line)
+                        msg.warning("Failed to understand this line from AtlListBSEvents (2): %s", line)
         except subprocess.CalledProcessError as e:
             errMsg = "Call to AtlListBSEvents failed: {0}".format(e)
             msg.error(errMsg)
@@ -59,10 +60,10 @@ class skimRawExecutor(scriptExecutor):
             count = 0
             for line in masterFF:
                 try:
-                    runstr, evtstr = line.split()
+                    runstr, evtstr = str(line).split()
                     if runstr + "-" + evtstr in rawEventList:
                         msg.debug("Found run %s, event %s in master filter list", runstr, evtstr)
-                        os.write(slimFF.fileno(), line)
+                        os.write(slimFF.fileno(), line.encode('utf-8'))
                         count += 1
                 except ValueError as e:
                     msg.warning("Failed to understand this line from master filter file: %s %s", line, e)
@@ -70,14 +71,20 @@ class skimRawExecutor(scriptExecutor):
                 # If there are no matched events, create a bogus request for run and event 0 to keep
                 # AtlCopyBSEvent.exe CLI
                 msg.info("No events matched in this input file - empty RAW file output will be made")
-                os.write(slimFF.fileno(), "0 0\n")
+                os.write(slimFF.fileno(), b"0 0\n")
         msg.info("Matched %d lines from the master filter file against input events; wrote these to %s", count, slimmedFilterFile)
         
-        # Build up the right command line for acmd.py
-        self._cmd = ['acmd.py', 'filter-files']
+        # Build up the right command line for AtlCopyBSEvent
+
+        events = ''
+        for line in open(slimmedFilterFile):
+            events += '%s,' % line.split()[-1]
+        events = events[:-1]
+
+        self._cmd = ['AtlCopyBSEvent']
         
+        self._cmd.extend(('-e', events))
         self._cmd.extend(('-o', self.conf.argdict['outputBS_SKIMFile'].value[0]))
-        self._cmd.extend(('-s', slimmedFilterFile))
         self._cmd.extend(self.conf.argdict['inputBSFile'].value)
 
         super(skimRawExecutor, self).preExecute()

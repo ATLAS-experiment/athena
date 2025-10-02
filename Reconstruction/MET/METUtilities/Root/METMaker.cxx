@@ -222,7 +222,7 @@ namespace met {
                                   xAOD::MissingETContainer* metCont,
                                   const xAOD::IParticleContainer* collection,
                                   xAOD::MissingETAssociationHelper& helper,
-                                  MissingETBase::UsageHandler::Policy objScale)
+                                  MissingETBase::UsageHandler::Policy objScale) const
   {
     MissingETBase::Types::bitmask_t metSource;
     switch(metType) {
@@ -268,7 +268,7 @@ namespace met {
   StatusCode METMaker::rebuildMET(xAOD::MissingET* met,
                                   const xAOD::IParticleContainer* collection,
                                   xAOD::MissingETAssociationHelper& helper,
-                                  MissingETBase::UsageHandler::Policy objScale)
+                                  MissingETBase::UsageHandler::Policy objScale) const
   {
     MissingETBase::UsageHandler::Policy p = MissingETBase::UsageHandler::OnlyCluster;
     bool removeOverlap = true;
@@ -289,7 +289,7 @@ namespace met {
                                   xAOD::MissingETAssociationHelper& helper,
                                   MissingETBase::UsageHandler::Policy p,
                                   bool removeOverlap,
-                                  MissingETBase::UsageHandler::Policy objScale) {
+                                  MissingETBase::UsageHandler::Policy objScale) const {
     if(!met || !collection) {
       ATH_MSG_ERROR("Invalid pointer supplied for "
                       << "MET (" << met << ") or "
@@ -450,7 +450,7 @@ namespace met {
                                      const xAOD::JetContainer* jets,
                                      const xAOD::MissingETContainer* metCoreCont,
                                      xAOD::MissingETAssociationHelper& helper,
-                                     bool doJetJVT)
+                                     bool doJetJVT) const
   {
     ATH_MSG_VERBOSE("Rebuild jet term: " << metJetKey << " and soft term: " << softKey);
 
@@ -498,7 +498,7 @@ namespace met {
                                        const xAOD::JetContainer* jets,
                                        const xAOD::MissingETContainer* metCoreCont,
                                        xAOD::MissingETAssociationHelper& helper,
-                                       bool doJetJVT)
+                                       bool doJetJVT) const
   {
     ATH_MSG_VERBOSE("Rebuild jet term: " << metJetKey << " and soft term: " << softKey);
 
@@ -536,7 +536,7 @@ namespace met {
                                      const xAOD::JetContainer* jets,
                                      const xAOD::MissingETContainer* metCoreCont,
                                      xAOD::MissingETAssociationHelper& helper,
-                                     bool doJetJVT)
+                                     bool doJetJVT) const
   {
 
     ATH_MSG_VERBOSE("Create Jet MET " << metJetKey);
@@ -584,7 +584,7 @@ namespace met {
                                      const xAOD::MissingET* coreSoftTrk,
                                      bool doJetJVT,
                                      bool tracksForHardJets,
-                                     std::vector<const xAOD::IParticle*>* softConst) {
+                                     std::vector<const xAOD::IParticle*>* softConst) const {
     if(!metJet || !jets) {
       ATH_MSG_ERROR("Invalid pointer supplied for "
                       << "MET (" << metJet << ") or "
@@ -1158,14 +1158,14 @@ namespace met {
                                        xAOD::MissingETAssociationHelper& helper,
                                        xAOD::MissingET* metSoftTrk,
                                        const xAOD::MissingET* coreSoftTrk,
-                                       bool doJetJVT) {
+                                       bool doJetJVT) const {
     return rebuildJetMET(metJet,jets,helper,nullptr,nullptr,metSoftTrk,coreSoftTrk,doJetJVT,true);
   }
 
   // **** Remove objects and any overlaps from MET calculation ****
   StatusCode METMaker::markInvisible(const xAOD::IParticleContainer* collection,
                                      xAOD::MissingETAssociationHelper& helper,
-                                     xAOD::MissingETContainer* metCont)
+                                     xAOD::MissingETContainer* metCont) const
   {
     MissingET* met = nullptr;
     if( fillMET(met,metCont, "Invisibles" , invisSource) != StatusCode::SUCCESS) {

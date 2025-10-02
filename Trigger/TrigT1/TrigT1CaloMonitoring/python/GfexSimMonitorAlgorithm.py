@@ -15,13 +15,13 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                              )
 
     helper.defineHistogram('LBN,Signature;h_mismatched_SimReady',
-                           fillGroup="mismatches_count",
+                           fillGroup="mismatches",
                            paths=['Shifter/Sim'],
                            hanConfig={"algorithm":"Histogram_Empty","description":"Number of events with a mismatch, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready","display":"SetPalette(55)"},
-                           type='TH2I', cutmask='SimulationReady',
+                           type='TH2I', cutmask='SimulationReadyMismatch',
                            title='Mismatched Simulation-Ready Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
-                           ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
+                           ylabels=["gJ","gLJ","jJ","jTAU","jEM","jXE","jTE","eTAU","eEM"],
                            opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('LBN,Signature,tobMismatched;h_mismatched_SimReadyRate',
                            fillGroup="mismatches",
@@ -30,7 +30,7 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                            type='TProfile2D', cutmask='SimulationReady',
                            title='Mismatched Rate for Simulation-Ready Signatures;LB;Signature;Event Rate (%)',
                            xbins=1,xmin=0,xmax=1,
-                           ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
+                           ylabels=["gJ","gLJ","jJ","jTAU","jEM","jXE","jTE","eTAU","eEM"],
                            opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('EventType,Signature,tobMismatched;h_simSummary',title='Sim-HW Mismatches (percentage);Event Type;Signature',
                            fillGroup="mismatches",
@@ -54,9 +54,15 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                                opt=['kAddBinsDynamically'])
 
 
-    helper.defineTree('LBN,Signature,LBNString,EventNumber,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
-                      "lbn/l:Signature/string:lbnString/string:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
+    helper.defineTree('LBN,Signature,LBNString,L1ID,EventNumber,dataEtas,dataPhis,dataEts,dataWord0s,simEtas,simPhis,simEts,simWord0s;mismatched_jet',
+                      "lbn/l:Signature/string:lbnString/string:L1ID/i:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataEts/vector<int>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simEts/vector<int>:simWord0s/vector<unsigned int>",
                       title="mismatched;LBN;Signature",fillGroup="mismatches")
+
+    helper.defineTree('LBN,Signature,LBNString,L1ID,EventNumber,dataTOB1,dataTOB2,dataWord0s,simTOB1,simTOB2,simWord0s;mismatched_global',
+                      "lbn/l:Signature/string:lbnString/string:L1ID/i:eventNumber/l:dataTOB1/vector<float>:dataTOB2/vector<float>:dataWord0s/vector<unsigned int>:simTOB1/vector<float>:simTOB2/vector<float>:simWord0s/vector<unsigned int>",
+                      title="mismatched;LBN;Signature",fillGroup="mismatches")
+
+
 
     return helper.result()
 

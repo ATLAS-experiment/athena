@@ -61,7 +61,7 @@ def HGTD_DigitizationBasicToolCfg(flags, name="HGTD_DigitizationBasicTool", **kw
         kwargs.setdefault("FirstXing", HGTD_FirstXing())
         kwargs.setdefault("LastXing", HGTD_LastXing())
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     acc.setPrivateTools(CompFactory.HGTD_DigitizationTool(name, **kwargs))
     return acc
@@ -74,7 +74,7 @@ def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
             intervals += [acc.popToolsAndMerge(HGTD_RangeCfg(flags))]
-        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)))
     else:
         kwargs.setdefault("MergeSvc", "")
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)

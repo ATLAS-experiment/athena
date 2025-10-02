@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSELECTORTOOLS_MUONSELECTIONTOOL_H
@@ -8,6 +8,7 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
+#include "AsgTools/ToolHandle.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "TF1.h"
@@ -16,6 +17,9 @@
 #include "TMVA/Reader.h"
 #include "TSystem.h"  // Replace with PathResolver
 #include "xAODEventInfo/EventInfo.h"
+#include "AthOnnxInterfaces/IAthInferenceTool.h"
+
+
 namespace CP {
 
     /// Implementation of the muon selector tool
@@ -155,6 +159,9 @@ namespace CP {
         /// functions that fills a hitSummary for a muon
         void fillSummary(const xAOD::Muon& muon, hitSummary& summary) const;
 
+        /// Returns the TightNNscore of the muon, an experimental ML-based score for the identification of muons from HF hadron decays
+        virtual float getTightNNScore(const xAOD::Muon& muon) const override;
+
     private:
         bool passedLowPtEfficiencyMVACut(const xAOD::Muon&) const;
 
@@ -193,8 +200,11 @@ namespace CP {
         Gaudi::Property<bool> m_geoOnTheFly{this, "AllowSettingGeometryOnTheFly", false,"avoids crash if run2/run3 geo is wrongly set"};
         Gaudi::Property<bool> m_doBadMuonVetoMimic{this, "DoBadMuonVetoMimic", false}; // switch to cut away the tail of very large smearing in MC to mimic the effect of the bad muon veto for 2-station muons in the high-pT selection
         Gaudi::Property<bool> m_allowComm{this, "AcceptCommChain", true, "Accepts muons from the EMEO chain if set to true"};
-        Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", false, "Include BEE and BIS7/8 in high-pT WP in Run3"};        
+        Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", true, "Include BEE and BIS7/8 in high-pT WP in Run3"};        
 
+        Gaudi::Property<int> m_expertMode_RunNumber{this, "expertMode_RunNumber", 0, "Expert only option. Overwrites RunNumber"};
+        Gaudi::Property<unsigned long long> m_expertMode_EvtNumber{this, "expertMode_EvtNumber", 0, "Expert only option. Overwrites EventNumber"};
+	
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
 
         // MVA configs for low-pT working point. Expert use only!
@@ -270,6 +280,11 @@ namespace CP {
         }
         
         void retrieveParam(const xAOD::Muon& muon, float& value, const xAOD::Muon::ParamDef param) const;
+
+        //ONNX
+        Gaudi::Property<bool> m_calculateTightNNScore{this, "CalculateTightNNScore", false};
+        ToolHandle< AthInfer::IAthInferenceTool >  m_onnxTool{this, "ORTInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"};
+
     };  // class MuonSelectionTool
 
 }  // namespace CP

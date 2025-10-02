@@ -70,15 +70,6 @@ namespace MC
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
 
-  /// @brief Identify a particlegun particle
-  template <class T> inline bool isSingleParticle(const T&  p) { 
-#if defined(HEPMC3)  
-    return HepMC::barcode(p)  == 3 ||  HepMC::barcode(p)  == 10001;
-#else
-    return HepMC::barcode(p)  == 10001;
-#endif
-  }
-
   /// @brief Identify a special non-interacting particles.
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
     const int apid = std::abs(p->pdg_id());
@@ -127,10 +118,20 @@ namespace MC
   template <class C, class T>  T findMatching(C TruthContainer, T p) {
     T ptrPart = nullptr;
     if (!p) return ptrPart;
-    for (T truthParticle : *TruthContainer) {
-      if (HepMC::is_sim_descendant(p,truthParticle)) {
-        ptrPart = truthParticle;
-        break;
+    if constexpr (std::is_pointer_v<C> || HepMC::is_smart_ptr_v<C>){ //C is ptr
+      for (T truthParticle : *TruthContainer) {
+        if (HepMC::is_sim_descendant(p,truthParticle)) {
+          ptrPart = truthParticle;
+          break;
+        }
+      }
+    }
+    else {
+      for (T truthParticle : TruthContainer) {
+        if (HepMC::is_sim_descendant(p,truthParticle)) {
+          ptrPart = truthParticle;
+          break;
+        }
       }
     }
     return ptrPart;

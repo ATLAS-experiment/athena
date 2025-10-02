@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTBH6TriggerTimeTool.h"
@@ -10,12 +10,8 @@
 LArTBH6TriggerTimeTool::LArTBH6TriggerTimeTool(const std::string& type,
                                                const std::string& name,
                                                const IInterface* parent) :
-  base_class(type,name,parent), m_time(0), m_newEvent(true),
-  m_fixed(true)
+  base_class(type,name,parent)
 {
-  declareProperty("isFixed",m_fixed);
-  declareProperty("FixedTime",m_time);
-
   m_hitcoll.push_back( SG::ReadHandle< LArHitContainer >("LArHitEMEC") );
   m_hitcoll.push_back( SG::ReadHandle< LArHitContainer >("LArHitHEC") );
   m_hitcoll.push_back( SG::ReadHandle< LArHitContainer >("LArHitFCAL") );

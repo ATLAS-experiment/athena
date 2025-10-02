@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONRPC_CNVTOOLSR4_RPCRDOTOPREPDATACNVTOOL_H
 #define MUONRPC_CNVTOOLSR4_RPCRDOTOPREPDATACNVTOOL_H
@@ -23,9 +23,8 @@
 namespace MuonR4{
     class RpcRdoToRpcPrepDataTool: public extends<AthAlgTool, Muon::IMuonRdoToPrepDataTool> {
         public:
-            RpcRdoToRpcPrepDataTool(const std::string& n, 
-                                    const std::string& p,
-                                    const IInterface* iface);
+
+            using base_class::base_class;
 
             ~RpcRdoToRpcPrepDataTool() = default;
 
@@ -42,9 +41,6 @@ namespace MuonR4{
 
         private:
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_rdoKey{this, "RpcRdoContainer", "NRPCRDO"};
 

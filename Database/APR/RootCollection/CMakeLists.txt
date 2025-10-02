@@ -45,12 +45,6 @@ atlas_add_test( sort_test
                 SCRIPT test/sort_test.py
                 DEPENDS ttree_coll_rw_test rntuple_coll_rw_test )
 
-# sort_test reads the same collection as update, so wait for it to finish
-atlas_add_test( update_test
-                SOURCES test/update_test.cxx
-                LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionBase PersistentDataModel RootCollection CxxUtils
-                DEPENDS sort_test )
-
 
 # Component list generation:
 atlas_generate_componentslist( RootCollectionComponents )

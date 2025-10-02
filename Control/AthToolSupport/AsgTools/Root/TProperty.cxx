@@ -168,7 +168,7 @@ namespace asg
           if (input[pos] == '\'' || input[pos] == '"')
           {
             ANA_CHECK (make_string_token (input, pos, token));
-          } else if (isdigit (input[pos]))
+          } else if (isdigit (input[pos]) || (input[pos]=='-'))
           {
             ANA_CHECK (make_number_token (input, pos, token));
           } else if (isspace (input[pos]))

@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from collections import OrderedDict as odict
 from itertools import groupby
 
 from AthenaCommon.Logging import logging
@@ -84,13 +83,12 @@ class BunchGroupSet(object):
                 self.normalized += [ (train[0][1], len(train)) ]
             return self
         def json(self):
-            confObj = odict()
-            confObj["name"]  = self.name
-            confObj["id"]    = self.internalNumber
-            confObj["info"] = "%i bunches, %i groups" % (len(self), len(self.normalized))
-            confObj["bcids"] = []
-            for first, length in self.normalized:
-                confObj["bcids"] += [ odict( [ ("first", first), ("length", length) ] ) ]
+            confObj = {
+                "name":  self.name,
+                "id":    self.internalNumber,
+                "info":  f"{len(self)} bunches, {len(self.normalized)} groups",
+                "bcids": [ {"first": first, "length": length} for first, length in self.normalized ]
+            }
             return confObj
         
 
@@ -135,17 +133,16 @@ class BunchGroupSet(object):
 
 
     def json(self):
-        confObj = odict()
-        for bg in self.bunchGroups:
-            confObj["BGRP%i" % bg.internalNumber] = bg.json()
+        confObj = {f"BGRP{bg.internalNumber}": bg.json() for bg in self.bunchGroups}
         return confObj
 
     def writeJSON(self, outputFile, destdir="./", pretty=True):
         outputFile = destdir.rstrip('/') + '/' + outputFile
-        confObj = odict()
-        confObj["name"] = self.name
-        confObj["filetype"] = "bunchgroupset"
-        confObj["bunchGroups"] = self.json()
+        confObj = {
+            "name": self.name,
+            "filetype": "bunchgroupset",
+            "bunchGroups": self.json()
+        }
         with open( outputFile, mode="wt" ) as fh:
             import json
             json.dump(confObj, fh, indent = 4 if pretty else None, separators=(',', ': '))

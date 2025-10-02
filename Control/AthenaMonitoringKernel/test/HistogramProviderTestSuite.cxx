@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(test_shouldCreateNewHistogramWithUpdatedLumiBlock) {
 
     m_gmTool->mock_lumiBlock = [lumiBlock]() { return lumiBlock; };
     m_gmTool->mock_runNumber = [runNumber]() { return runNumber; };
-    m_histogramFactory->mock_create = [&histogram, expectedTld](const HistogramDef& def) mutable {
+    m_histogramFactory->mock_create = [&histogram, &expectedTld](const HistogramDef& def) mutable {
       BOOST_TEST( def.tld == expectedTld );
       return &histogram;
     };

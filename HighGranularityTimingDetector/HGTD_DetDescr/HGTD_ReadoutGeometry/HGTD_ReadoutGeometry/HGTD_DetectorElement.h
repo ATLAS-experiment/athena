@@ -45,7 +45,7 @@ class HGTD_DetectorElement final : public SolidStateDetectorElementBase {
 public:
 
     /// Constructor:
-    HGTD_DetectorElement(const Identifier &id, 
+    HGTD_DetectorElement(const Identifier &id,
                          const HGTD_ModuleDesign *design,
                          const GeoVFullPhysVol *geophysvol,
                          const SiCommonItems * commonItems,
@@ -63,7 +63,7 @@ public:
 
     /// Identifier from SiCellId (ie pixel eta_index,phi_index)
     Identifier identifierFromCellId(const SiCellId & cellId) const override final;
-    
+
     /// SiCellId from Identifier
     SiCellId   cellIdFromIdentifier(const Identifier & identifier) const override final;
 
@@ -79,9 +79,9 @@ public:
     ///////////////////////////////////////////////////////////////////
     //
     /// @name Element Extent
-    /// Methods to get extent of element in r,phi and z.  
+    /// Methods to get extent of element in r,phi and z.
     ///////////////////////////////////////////////////////////////////
-    
+
     //@{
     double get_rz() const override final;
     //@}
@@ -92,7 +92,7 @@ public:
     //
     ///////////////////////////////////////////////////////////////////
     //@{
-    
+
     /// access to the local description:
     const HGTD_ModuleDesign &design() const override final;
 

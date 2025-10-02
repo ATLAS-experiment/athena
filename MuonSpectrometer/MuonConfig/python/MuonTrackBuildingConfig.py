@@ -520,12 +520,11 @@ if __name__=="__main__":
     # python -m MuonConfig.MuonTrackBuildingConfig --run --threads=
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
     
-    args, flags = SetupMuonStandaloneConfigFlags()
+    flags = SetupMuonStandaloneConfigFlags()
     cfg = SetupMuonStandaloneCA(flags)
 
     # Run the actual test.
-    acc = MuonTrackBuildingCfg(args, flags)
-    cfg.merge(acc)
+    cfg.merge(MuonTrackBuildingCfg(flags))
 
             
     # This is a temporary fix - it should go someplace central as it replaces the functionality of addInputRename from here:
@@ -548,9 +547,6 @@ if __name__=="__main__":
     cfg.store(f)
     f.close()
     
-    if not args.config_only:
-        sc = cfg.run(20)
-        if not sc.isSuccess():
-            import sys
-            sys.exit("Execution failed")
+    from MuonConfig.MuonConfigUtils import executeTest
+    executeTest(cfg)
         

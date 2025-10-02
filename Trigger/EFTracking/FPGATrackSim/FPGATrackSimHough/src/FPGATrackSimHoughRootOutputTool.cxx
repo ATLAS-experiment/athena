@@ -34,7 +34,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::initialize()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
 {
-  m_tree = new TTree("FPGATrackSimHoughRootOutput","FPGATrackSimHoughRootOutput");
+  std::string tree_str = "FPGATrackSimHoughRootOutput_reg" + m_region.value();
+  m_tree = new TTree(tree_str.c_str(), tree_str.c_str());
+
   m_tree->Branch("x",&m_x);
   m_tree->Branch("y",&m_y);
   m_tree->Branch("z",&m_z);
@@ -43,6 +45,13 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
 
   m_tree->Branch("layerID",&m_layerID);
   m_tree->Branch("etaID",&m_etaID);
+
+  m_tree->Branch("associated_truth_d0",&m_associated_truth_d0);
+  m_tree->Branch("associated_truth_z0",&m_associated_truth_z0);
+  m_tree->Branch("associated_truth_pt",&m_associated_truth_pt);
+  m_tree->Branch("associated_truth_q",&m_associated_truth_q);
+  m_tree->Branch("associated_truth_eta",&m_associated_truth_eta);
+  m_tree->Branch("associated_truth_phi",&m_associated_truth_phi);
 
   m_tree->Branch("gphi",&m_gphi);
   m_tree->Branch("zIdeal",&m_zIdeal);
@@ -78,7 +87,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
 
   m_treeindex = 0;
 
-  m_truthtree = new TTree("FPGATrackSimTruthTree","FPGATrackSimTruthTree");
+  std::string truthtree_str = "FPGATrackSimTruthTree_reg" + m_region.value();
+  m_truthtree = new TTree(truthtree_str.c_str(), truthtree_str.c_str());
+
   m_truthtree->Branch("truth_d0",&m_truth_d0);
   m_truthtree->Branch("truth_z0",&m_truth_z0);
   m_truthtree->Branch("truth_pt",&m_truth_pt);
@@ -107,7 +118,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_truthtree->Branch("truth_track_hit_volumeID", &m_track_hit_volumeID);
   m_truthtree->Branch("truth_track_hit_isMapped", &m_track_hit_isMapped);
 
-  m_offlinetree = new TTree("FPGATrackSimOfflineTree","FPGATrackSimOfflineTree");
+  std::string offltree_str = "FPGATrackSimOfflineTree_reg" + m_region.value();
+  m_offlinetree = new TTree(offltree_str.c_str(), offltree_str.c_str());
+
   m_offlinetree->Branch("offline_d0",&m_offline_d0);
   m_offlinetree->Branch("offline_z0",&m_offline_z0);
   m_offlinetree->Branch("offline_pt",&m_offline_pt);
@@ -140,9 +153,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
   m_tracknumber = 0;
   ResetVectors();
 
-  if (roadsAreSecondStage) {
-    m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap_2nd();
-  }
+  if (roadsAreSecondStage) m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap_2nd();
+  else m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap();
 
 
   std::vector<float> tmp_hits_x;
@@ -259,7 +271,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
         tmp_hits_z.push_back(hit->getZ());
         tmp_hits_R.push_back(hit->getR());
         tmp_hits_phi.push_back(hit->getGPhi());
-        tmp_hits_layer_disk.push_back(hit->getLayerDisk());
+        tmp_hits_layer_disk.push_back(hit->getLayerDisk(true));
         tmp_hits_volumeID.push_back(getVolumeID(*hit));
         tmp_hits_mapped.push_back(hit->isMapped());
         tmp_hits_isPixel.push_back(hit->isPixel());
@@ -452,8 +464,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       m_z.push_back(hit.getZ());
       m_volumeID.push_back(getVolumeID(*hit_ptr));
       m_custom_layerID.push_back(getFineID(*hit_ptr));
-      m_layerID.push_back(hit.getLayerDisk());
-      m_etaID.push_back(hit.getEtaModule());
+      m_layerID.push_back(hit.getLayerDisk(true));
+      m_etaID.push_back(hit.getEtaModule(true));
 
       m_gphi.push_back(hit.getGPhi());
       m_zIdeal.push_back(idealized_coords[0]);
@@ -463,10 +475,10 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       m_isBarrel.push_back(hit.isBarrel() ? 1 : 0);
       m_etawidth.push_back(hit.getEtaWidth());
       m_phiwidth.push_back(hit.getPhiWidth());
-      m_etamodule.push_back(hit.getEtaModule());
+      m_etamodule.push_back(hit.getEtaModule(true));
       m_phimodule.push_back(hit.getPhiModule());
       m_ID.push_back(hit.getIdentifierHash());
-      m_diskLayer.push_back(hit.getLayerDisk());
+      m_diskLayer.push_back(hit.getLayerDisk(true));
     }
 
     // done looping over hits, now we do the truth calculation for this track candidate
@@ -490,6 +502,20 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       m_candidate_barcodefrac = 0;
       m_fakelabel = 2;
     }
+
+    for (const auto & track : truthTracks) {
+      if (!m_EvtSel->passCuts(track)) continue;
+      if (track.getStatus() != 1) continue;
+
+      m_associated_truth_d0 = track.getD0();
+      m_associated_truth_z0 = track.getZ0();
+      m_associated_truth_pt = track.getPt();
+      m_associated_truth_q = track.getQ();
+      m_associated_truth_eta = track.getEta();
+      m_associated_truth_phi = track.getPhi();
+      break;
+    }
+
     m_tree->Fill();
 
     mtv.clear();
@@ -561,7 +587,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     }
   }
 
-  ATH_CHECK(runOverlapRemoval(track_cands, minChi2, maxOverlappingHits, m_algo));
+  ATH_CHECK(runOverlapRemoval(track_cands, minChi2, maxOverlappingHits, m_algo, m_monTool));
   unsigned long passed = 0;
   for (auto const &cand : track_cands) {
     if (cand.passedOR()) {

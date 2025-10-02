@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: D3PDMakerTest/python/difftuple.py
@@ -7,7 +7,6 @@
 # Purpose: Diff two root tuple files.
 #
 
-from __future__ import print_function
 
 # Always run in batch mode.
 import os
@@ -18,8 +17,6 @@ import ROOT
 import types
 import os
 from fnmatch import fnmatch
-from PyUtils.Helpers import ROOT6Setup
-ROOT6Setup()
 
 # new : old
 renames = {

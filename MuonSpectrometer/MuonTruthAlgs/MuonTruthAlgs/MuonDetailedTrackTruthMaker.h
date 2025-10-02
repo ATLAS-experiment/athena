@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONDETAILEDTRACKTRUTHMAKER_H
@@ -25,7 +25,7 @@
 
 class MuonDetailedTrackTruthMaker : public AthReentrantAlgorithm {
 public:
-    MuonDetailedTrackTruthMaker(const std::string &name, ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;

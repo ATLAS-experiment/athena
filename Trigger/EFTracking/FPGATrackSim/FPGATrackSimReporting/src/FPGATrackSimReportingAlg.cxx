@@ -16,9 +16,9 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::initialize()
     ATH_CHECK(m_FPGARoadsKey.initialize(!m_isDataPrep));
     ATH_CHECK(m_FPGAProtoTrackCollections.initialize(!m_isDataPrep));
     ATH_CHECK(m_FPGATracksKey.initialize(!m_isDataPrep));
-    ATH_CHECK(m_ActsTrackCollections.initialize(!m_isDataPrep));
-    ATH_CHECK(m_ActsSeedCollections.initialize(!m_isDataPrep));
-    ATH_CHECK(m_ActsSeedParamCollections.initialize(!m_isDataPrep));
+    ATH_CHECK(m_ActsTrackCollections.initialize());
+    ATH_CHECK(m_ActsSeedCollections.initialize());
+    ATH_CHECK(m_ActsSeedParamCollections.initialize());
 
     ATH_CHECK(m_ActsInspectionTool.retrieve());
     return StatusCode::SUCCESS;
@@ -81,68 +81,67 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
             }
             processFPGAPrototracks(prototrackContainer);
         }
-
-        // Process Acts tracks
-        std::vector<SG::ReadHandle<ActsTrk::TrackContainer>> FPGAActsTracks = m_ActsTrackCollections.makeHandles(ctx);
-        for (SG::ReadHandle<ActsTrk::TrackContainer>& actsTrackContainer : FPGAActsTracks)
-        {
-            if (actsTrackContainer.cptr()) ATH_MSG_DEBUG("Proccessing " << actsTrackContainer.key());
-            else continue;
-            // initialize the ReadHandle pair if necessarys
-            m_allActsTracks.try_emplace(actsTrackContainer.key(), std::vector<FPGATrackSimActsEventTracks>{});
-
-            // fetch acts tracks
-            m_allActsTracks[actsTrackContainer.key()].push_back(m_ActsInspectionTool->getActsTracks(*(actsTrackContainer.cptr())));
-
-            // initialize ReadHandle stats map for all tracks if necessary
-            m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<uint32_t, std::vector<uint32_t>>{});
-
-            m_actsTrackStats[actsTrackContainer.key()].emplace(
-                Acts::TrackStateFlag::OutlierFlag, std::vector<uint32_t>{});
-            m_actsTrackStats[actsTrackContainer.key()].emplace(
-                Acts::TrackStateFlag::HoleFlag, std::vector<uint32_t>{});
-            m_actsTrackStats[actsTrackContainer.key()].emplace(
-                Acts::TrackStateFlag::MeasurementFlag, std::vector<uint32_t>{});
-
-            for (const auto& track : m_allActsTracks[actsTrackContainer.key()].back()) {
-                uint32_t t_nOutliers = 0, t_nMeasurements = 0, t_nHoles = 0;
-                for (const auto& measurement : track->trackMeasurements)
-                {
-                    if (measurement->outlierFlag) ++t_nOutliers;
-                    if (measurement->measurementFlag) ++t_nMeasurements;
-                    if (measurement->holeFlag) ++t_nHoles;
-                }
-                m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::OutlierFlag].push_back(t_nOutliers);
-                m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::HoleFlag].push_back(t_nHoles);
-                m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::MeasurementFlag].push_back(t_nMeasurements);
-            }
-            if (m_printoutForEveryEvent) ATH_MSG_INFO(m_ActsInspectionTool->getPrintoutActsEventTracks(m_allActsTracks[actsTrackContainer.key()].back()));
-        }
-    
-        std::vector<SG::ReadHandle<ActsTrk::SeedContainer>> FPGAActsSeeds = m_ActsSeedCollections.makeHandles(ctx);
-
-        for (SG::ReadHandle<ActsTrk::SeedContainer>& actsTrackContainer : FPGAActsSeeds)
-        {
-            if (!actsTrackContainer.isValid()) {
-                ATH_MSG_WARNING("SG key not available " << actsTrackContainer.key());
-                continue;
-            }
-            processFPGASeeds(actsTrackContainer);
-        }
-
-
-        std::vector<SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>> FPGAActsSeedsParam = m_ActsSeedParamCollections.makeHandles(ctx);
-
-        for (SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>& actsTrackContainer : FPGAActsSeedsParam)
-        {
-            if (!actsTrackContainer.isValid()) {
-                ATH_MSG_WARNING("SG key not available " << actsTrackContainer.key());
-                continue;
-            }
-            processFPGASeedsParam(actsTrackContainer);
-        }
-    
     } // if it's not the data preparation chain
+        // Process Acts tracks
+    std::vector<SG::ReadHandle<ActsTrk::TrackContainer>> FPGAActsTracks = m_ActsTrackCollections.makeHandles(ctx);
+    for (SG::ReadHandle<ActsTrk::TrackContainer>& actsTrackContainer : FPGAActsTracks)
+    {
+        if (actsTrackContainer.cptr()) ATH_MSG_DEBUG("Proccessing " << actsTrackContainer.key());
+        else continue;
+        // initialize the ReadHandle pair if necessarys
+        m_allActsTracks.try_emplace(actsTrackContainer.key(), std::vector<FPGATrackSimActsEventTracks>{});
+
+        // fetch acts tracks
+        m_allActsTracks[actsTrackContainer.key()].push_back(m_ActsInspectionTool->getActsTracks(*(actsTrackContainer.cptr())));
+
+        // initialize ReadHandle stats map for all tracks if necessary
+        m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<uint32_t, std::vector<uint32_t>>{});
+
+        m_actsTrackStats[actsTrackContainer.key()].emplace(
+            Acts::TrackStateFlag::OutlierFlag, std::vector<uint32_t>{});
+        m_actsTrackStats[actsTrackContainer.key()].emplace(
+            Acts::TrackStateFlag::HoleFlag, std::vector<uint32_t>{});
+        m_actsTrackStats[actsTrackContainer.key()].emplace(
+            Acts::TrackStateFlag::MeasurementFlag, std::vector<uint32_t>{});
+
+        for (const auto& track : m_allActsTracks[actsTrackContainer.key()].back()) {
+            uint32_t t_nOutliers = 0, t_nMeasurements = 0, t_nHoles = 0;
+            for (const auto& measurement : track->trackMeasurements)
+            {
+                if (measurement->outlierFlag) ++t_nOutliers;
+                if (measurement->measurementFlag) ++t_nMeasurements;
+                if (measurement->holeFlag) ++t_nHoles;
+            }
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::OutlierFlag].push_back(t_nOutliers);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::HoleFlag].push_back(t_nHoles);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::MeasurementFlag].push_back(t_nMeasurements);
+        }
+        if (m_printoutForEveryEvent) ATH_MSG_INFO("ACTS tracks in " << actsTrackContainer.key() << m_ActsInspectionTool->getPrintoutActsEventTracks(m_allActsTracks[actsTrackContainer.key()].back()));
+    }
+
+    std::vector<SG::ReadHandle<ActsTrk::SeedContainer>> FPGAActsSeeds = m_ActsSeedCollections.makeHandles(ctx);
+
+    for (SG::ReadHandle<ActsTrk::SeedContainer>& actsTrackContainer : FPGAActsSeeds)
+    {
+        if (!actsTrackContainer.isValid()) {
+            ATH_MSG_WARNING("SG key not available " << actsTrackContainer.key());
+            continue;
+        }
+        processFPGASeeds(actsTrackContainer);
+    }
+
+
+    std::vector<SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>> FPGAActsSeedsParam = m_ActsSeedParamCollections.makeHandles(ctx);
+
+    for (SG::ReadHandle<ActsTrk::BoundTrackParametersContainer>& actsTrackContainer : FPGAActsSeedsParam)
+    {
+        if (!actsTrackContainer.isValid()) {
+            ATH_MSG_WARNING("SG key not available " << actsTrackContainer.key());
+            continue;
+        }
+        processFPGASeedsParam(actsTrackContainer);
+    }
+    
     return StatusCode::SUCCESS;
 }
 

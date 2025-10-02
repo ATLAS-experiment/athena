@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2023, 2025 CERN for the benefit of the ATLAS collaboration.
  */
 #include "SkipEventIdxSvc.h"
 
@@ -35,7 +35,7 @@ getProp(SmartIF<T>& iface, const std::string& name)
       if_name = iface.template as<INamedInterface>()->name();
     } catch (...) {
     }
-    const std::string what = fmt::format(
+    const std::string what = std::format(
         "The {} object's {} property has type {} not Gaudi::Property<{}>",
         if_name, name, boost::core::demangled_name(typeid(prop)),
         boost::core::demangled_name(typeid(propType)));
@@ -70,7 +70,7 @@ StatusCode SkipEventIdxSvc::initialize() {
   }
   auto sg = serviceLocator()->service<StoreGateSvc>("StoreGateSvc/StoreGateSvc",
                                                     false);
-  auto evtSel = serviceLocator()->service<IEvtSelector>(evt_sel_name, false);
+  auto evtSel = serviceLocator()->service<IEvtSelector>(std::move(evt_sel_name), false);
   if (!sg.isValid() || !evtSel.isValid()) {
     ATH_MSG_WARNING("Event selector or storegate is invalid");
     return StatusCode::FAILURE;
@@ -106,7 +106,7 @@ StatusCode SkipEventIdxSvc::initialize() {
             const std::uint64_t lbNum = mod_lb_num ? rec[3] : 0;
             const std::uint64_t numEvts = rec[4];
 
-            fmt::format_to(config_str_iter,
+            std::format_to(config_str_iter,
                            "Run: {} [{:c}] LB: {} [{:c}] EVT: {} [{:c}] "
                            "NumEvts: {}\n",
                            runNum, mod_run_num ? 'Y' : 'N', lbNum,
@@ -133,7 +133,12 @@ StatusCode SkipEventIdxSvc::initialize() {
   ATH_CHECK(evtSel->createContext(ctx));
 
   std::uint64_t idx = 0;
-  ATH_CHECK(dynamic_cast<Service*>(evtSel.get())->start());
+  Service* evtSelSvc = dynamic_cast<Service*>(evtSel.get());
+  if (!evtSelSvc) {
+    ATH_MSG_FATAL("Cannot cast to Service");
+    return StatusCode::FAILURE;
+  }
+  ATH_CHECK(evtSelSvc->start());
   while (evtSel->next(*ctx).isSuccess()) {
     EvtId evt_id{};
     // Load event
@@ -147,8 +152,6 @@ StatusCode SkipEventIdxSvc::initialize() {
     // if that doesn't exist, and xAOD::EventInfo
     std::vector<std::string> attr_lists;
     sg->keys<AthenaAttributeList> (attr_lists);
-    ATH_MSG_DEBUG(
-        "Attr lists are: " << fmt::format("[{}]", fmt::join(attr_lists, ", ")));
     const auto* attr_list_p =
         sg->tryConstRetrieve<AthenaAttributeList>("Input");
     if (attr_list_p != nullptr && attr_list_p->size() > 6) {
@@ -184,7 +187,7 @@ StatusCode SkipEventIdxSvc::initialize() {
   ATH_MSG_INFO("Setting SkipEvents back to " << m_initial_skip_events
                                              << " and rewinding");
   ATH_CHECK(
-      setProp(evtSel, "SkipEvents", fmt::format("{}", m_initial_skip_events)));
+      setProp(evtSel, "SkipEvents", std::format("{}", m_initial_skip_events)));
   ATH_CHECK(evtSel->rewind(*ctx));
   ATH_MSG_INFO("Recorded a total of " << m_events.size() << " events");
 

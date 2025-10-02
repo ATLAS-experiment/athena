@@ -123,7 +123,7 @@ double rms95(TH1 const * h);
 
 // The Hough transform magnetic field correction.
 // Apply correction due to B != 2T everywhere. This correction should be ADDED to track phi.
-double fieldCorrection(unsigned region, double qpt, double r);
+double fieldCorrection(unsigned region, double qoverpt, double r);
 
 std::vector<float> computeIdealCoords(const FPGATrackSimHit &hit, const double hough_x, const double hough_y, const double target_r, const bool doDeltaGPhis, const TrackCorrType trackCorrType);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,6 +16,8 @@
 
 // Eigen
 #include "GeoPrimitives/GeoPrimitives.h"
+//
+#include <memory>
 
 class MsgStream;
 
@@ -45,7 +47,9 @@ class CombinedVolumeBounds final : public VolumeBounds {
   CombinedVolumeBounds();
 
   /**Constructor - the box boundaries */
-  CombinedVolumeBounds(Volume* first, Volume* second, bool intersection);
+  CombinedVolumeBounds(std::unique_ptr<Volume> first,
+                       std::unique_ptr<Volume> second,
+                       bool intersection);
 
   /**Copy Constructor */
   CombinedVolumeBounds(const CombinedVolumeBounds& bobo);
@@ -64,7 +68,7 @@ class CombinedVolumeBounds final : public VolumeBounds {
   virtual bool inside(const Amg::Vector3D&, double tol = 0.) const override final;
 
   /** Method to decompose the Bounds into boundarySurfaces */
-  virtual const std::vector<const Trk::Surface*>* decomposeToSurfaces
+  virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces
   (const Amg::Transform3D& transform) override final;
 
   /** Provide accessor for BoundarySurfaces */
@@ -92,29 +96,33 @@ class CombinedVolumeBounds final : public VolumeBounds {
 
  private:
   static Trk::Volume* createSubtractedVolume(const Amg::Transform3D& transf,
-                                      Trk::Volume* subtrVol) ;
+                                             const Trk::Volume* subtrVol);
 
-  Volume* m_first;
-  Volume* m_second;
-  bool m_intersection;
-  EightObjectsAccessor m_objectAccessor;
-  std::vector<bool> m_boundsOrientation;
+  std::unique_ptr<Volume> m_first{};
+  std::unique_ptr<Volume> m_second{};
+  bool m_intersection{};
+  EightObjectsAccessor m_objectAccessor{};
+  std::vector<bool> m_boundsOrientation{};
 };
 
 inline CombinedVolumeBounds* CombinedVolumeBounds::clone() const {
   return new CombinedVolumeBounds(*this);
 }
 
-inline bool CombinedVolumeBounds::inside(const Amg::Vector3D& pos,
-                                         double tol) const {
-  if (m_intersection)
+inline bool CombinedVolumeBounds::inside(const Amg::Vector3D& pos, double tol) const {
+  if (m_intersection) {
     return (m_first->inside(pos, tol) && m_second->inside(pos, tol));
+  }
   return (m_first->inside(pos, tol) || m_second->inside(pos, tol));
 }
 
-inline const Volume* CombinedVolumeBounds::first() const { return m_first; }
+inline const Volume* CombinedVolumeBounds::first() const {
+  return m_first.get();
+}
 
-inline const Volume* CombinedVolumeBounds::second() const { return m_second; }
+inline const Volume* CombinedVolumeBounds::second() const {
+  return m_second.get();
+}
 
 inline bool CombinedVolumeBounds::intersection() const {
   return m_intersection;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONR4_MUONPATTERNEVENT_MUONHOUGHDEFS__H 
@@ -7,15 +7,20 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 ///
-#include "Acts/Seeding/HoughTransformUtils.hpp"
+
 #include "MuonPatternEvent/HoughMaximum.h"
+
+#include "Acts/Seeding/detail/CompSpacePointAuxiliaries.hpp"
+#include "Acts/Seeding/HoughTransformUtils.hpp"
+#include "Acts/Utilities/Helpers.hpp"
+
 /// This header ties the generic definitions in this package 
 //  to concrete types for representations of the hit, 
 /// the accumulator, and the peak finder. 
 
 namespace MuonR4{
   // representation of hits in the hough via space points
-  using HoughHitType = HoughMaximum::HitType;
+  using HoughHitType = const SpacePoint*;
  // ACTS representation of the hough accumulator
   using HoughPlane = Acts::HoughTransformUtils::HoughPlane<HoughHitType> ; 
   // configuration class for the accumulator
@@ -26,27 +31,19 @@ namespace MuonR4{
   using ActsPeakFinderForMuonCfg = Acts::HoughTransformUtils::PeakFinders::IslandsAroundMaxConfig;
 
   namespace SegmentFit {
-        enum class ParamDefs{
-            y0 = 0,
-            theta = 1,
-            x0 = 2,
-            phi = 3,
-            time = 4,
-            nPars
-        };
-        enum class AxisDefs{
-            phi = 0,
-            eta = 1,
-            t0 = 2,
-        };
-        constexpr int toInt(const ParamDefs p) {
-            return static_cast<int>(p);
-        }
-        constexpr int toInt(const AxisDefs a) {
-          return static_cast<int>(a);
-        }
-        using Parameters = AmgVector(toInt(ParamDefs::nPars));
-        using Covariance = AmgSymMatrix(toInt(ParamDefs::nPars));
+        /** @brief Abrivation of the CompSpacePointAuxiliaries */
+        using SeedingAux = SpacePoint::SeedingAux;
+        /** @brief Use the same parameter indices as used by the CompSpacePointAuxiliaries*/
+        using ParamDefs = SeedingAux::FitParIndex;
+        /** @brief Abrivation of the line with partial derivatives */
+        using Line_t = SeedingAux::Line_t;
+        /** @brief Use the same mapping of the covariance space indicies as used by 
+         *         the SpacePoint */
+        using AxisDefs = SpacePoint::CovIdx;
+        
+
+        using Parameters = AmgVector(Acts::toUnderlying(ParamDefs::nPars));
+        using Covariance = AmgSymMatrix(Acts::toUnderlying(ParamDefs::nPars));
   }
 
 }

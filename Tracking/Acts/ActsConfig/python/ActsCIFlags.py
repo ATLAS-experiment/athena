@@ -1,23 +1,23 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Flags used in CI tests
 
 from TrkConfig.TrkConfigFlags import TrackingComponent
 
-def actsWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: add Acts workflow to reco sequence"""
+def actsLegacyWorkflowFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
+    flags.Tracking.recoChain = [TrackingComponent.ActsLegacyChain]
+
+def actsWorkflowFlags(flags) -> None:
+    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Acts.doAmbiguityResolution = False
+    flags.Tracking.doITkFastTracking = True
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
 
-def actsFastWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
-    flags.Reco.EnableHGTDExtension = False
-    flags.Acts.doAmbiguityResolution = True
-    flags.Tracking.doITkFastTracking = True
-    flags.Tracking.recoChain = [TrackingComponent.ActsFastChain]
-
 def actsScoreBasedAmbiguityWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
-    actsWorkflowFlags(flags)
+    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS (legacy like) workflow to reco sequence"""
+    actsLegacyWorkflowFlags(flags)
     from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy
     flags.Acts.AmbiguitySolverStrategy = AmbiguitySolverStrategy.ScoreBased
         
@@ -25,6 +25,12 @@ def actsHeavyIonFlags(flags) -> None:
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
+
+def actsValidateLargeRadiusStandaloneFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: use legacy primary pass and Acts LRT pass"""
+    flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
+                                TrackingComponent.ActsValidateLargeRadiusStandalone]
+    flags.Tracking.writeSeedValNtuple = True
 
 
 # Validation workflows
@@ -36,16 +42,20 @@ def actsValidateClustersFlags(flags) -> None:
 def actsValidateSpacePointsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use for validating Athena-based space point formation"""
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateSpacePoints]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Default
 
 def actsCoreValidateSpacePointsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use for validating ACTS-based space point formation"""
     from ActsConfig.ActsConfigFlags import SpacePointStrategy
-    flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore
+    flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore    
     actsValidateSpacePointsFlags(flags)
     
 def actsValidateSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateSeeds]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Default
     flags.Tracking.writeSeedValNtuple = True
 
 def actsValidateConversionSeedsFlags(flags) -> None:
@@ -103,9 +113,18 @@ def actsGSFEgammaFlags(flags) -> None:
     flags.Acts.doAnalysis =  False
     flags.Acts.doMonitoring = False
     flags.Acts.doAmbiguityResolution = True
-    flags.Tracking.recoChain = [ TrackingComponent.ActsChain]
+    flags.Tracking.recoChain = [ TrackingComponent.ActsLegacyChain]
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.doITkConversion = False
     flags.Acts.GsfRefitActs = True
     flags.Acts.GsfDirectNavigation = True
     
+def actsValidateF100Flags(flags) -> None:
+    actsWorkflowFlags(flags)
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateF100]
+    
+def actsValidateF150Flags(flags) -> None:
+    actsValidateF100Flags(flags)
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateF150]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.F150

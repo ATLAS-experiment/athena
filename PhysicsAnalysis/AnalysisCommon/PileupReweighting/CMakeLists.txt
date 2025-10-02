@@ -31,6 +31,10 @@ if( NOT XAOD_STANDALONE )
       src/components/*.cxx
       LINK_LIBRARIES AsgAnalysisInterfaces AthenaBaseComps xAODEventInfo
       PATInterfaces GaudiKernel PileupReweightingLib )
+else()
+   atlas_add_component( PileupReweighting
+      src/components/*.cxx
+      LINK_LIBRARIES PileupReweightingLib )
 endif()
 
 atlas_add_dictionary( PileupReweightingDict

@@ -114,7 +114,7 @@ def PixelCablingCondAlgCfg(flags, name="PixelCablingCondAlg", **kwargs):
 
     from AthenaConfiguration.Enums import LHCPeriod
 
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay and not flags.GeoModel.Run < LHCPeriod.Run2 :
+    if not flags.Input.isMC and not flags.GeoModel.Run < LHCPeriod.Run2:
         acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/CablingMap","/PIXEL/CablingMap", className="AthenaAttributeList"))
         kwargs.setdefault("ReadKey", "/PIXEL/CablingMap")
         if flags.Input.RunNumbers and flags.Input.RunNumbers[0]<222222:
@@ -177,7 +177,7 @@ def PixelDCSCondHVAlgCfg(flags, name="PixelDCSCondHVAlg", **kwargs):
 def PixelDCSCondStateAlgCfg(flags, name="PixelDCSCondStateAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDCSCondStateAlg"""
     acc = ComponentAccumulator()
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.InDet.usePixelDCS:
+    if not flags.Input.isMC and flags.InDet.usePixelDCS:
         acc.merge(addFolders(flags, "/PIXEL/DCS/FSMSTATE", "DCS_OFL", className="CondAttrListCollection"))
         kwargs.setdefault("ReadKeyState", "/PIXEL/DCS/FSMSTATE")
     else:
@@ -189,7 +189,7 @@ def PixelDCSCondStateAlgCfg(flags, name="PixelDCSCondStateAlg", **kwargs):
 def PixelDCSCondStatusAlgCfg(flags, name="PixelDCSCondStatusAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDCSCondStatusAlg"""
     acc = ComponentAccumulator()
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.InDet.usePixelDCS:
+    if not flags.Input.isMC and flags.InDet.usePixelDCS:
         acc.merge(addFolders(flags, "/PIXEL/DCS/FSMSTATUS", "DCS_OFL", className="CondAttrListCollection"))
         kwargs.setdefault("ReadKeyStatus", "/PIXEL/DCS/FSMSTATUS")
     else:
@@ -265,7 +265,7 @@ def PixelDistortionAlgCfg(flags, name="PixelDistortionAlg", **kwargs):
     kwargs.setdefault("ReadKey", "/Indet/PixelDist")
     kwargs.setdefault("WriteKey", "PixelDistortionData")
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     acc.addCondAlgo(CompFactory.PixelDistortionAlg(name, **kwargs))
     return acc
 

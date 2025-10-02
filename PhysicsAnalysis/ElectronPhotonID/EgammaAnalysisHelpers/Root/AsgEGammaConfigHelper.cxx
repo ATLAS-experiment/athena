@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EgammaAnalysisHelpers/AsgEGammaConfigHelper.h"
@@ -7,6 +7,7 @@
 #include "TEnv.h"
 #include <iostream>
 #include <sstream>
+#include <limits>
 
 namespace AsgConfigHelper {
 

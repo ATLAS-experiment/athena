@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTUTILS_TRIGGERSELECTIONALG_H
@@ -36,13 +36,13 @@ class TriggerSelectionAlg
     virtual ~TriggerSelectionAlg();
 
     /// Athena algorithm's initalize hook
-    virtual StatusCode  initialize();
+    virtual StatusCode  initialize() override;
 
     /// Athena algorithm's execute hook
-    virtual StatusCode  execute();
+    virtual StatusCode  execute() override;
 
     /// Athena algorithm's finalize hook
-    virtual StatusCode  finalize();
+    virtual StatusCode  finalize() override;
 
 
   private:
@@ -51,22 +51,28 @@ class TriggerSelectionAlg
     /// @{
 
     /// The ToolHandle for the TrigDecisionTool
-    ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool;
+    ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool{ this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool",
+      "The TrigDecisionTool" };
 
     /// The list of triggers to cut on
-    StringArrayProperty m_triggerList;
+    StringArrayProperty m_triggerList{ this, "TriggerList", {},
+      "The list of triggers to cut on" };
 
     /// Decide if we also want to decorate the xAOD::EventInfo object with the pass/fail information
-    BooleanProperty m_decoEvtInfo;
+    BooleanProperty m_decoEvtInfo{ this, "DecorateEventInfo", true,
+      "Decide if we also want to decorate the xAOD::EventInfo object with the pass/fail information" };
 
     /// Name of the xAOD::EventInfo object that we want to decorate
-    StringProperty m_evtInfoName;
+    StringProperty m_evtInfoName{ this, "EventInfoName", "EventInfo",
+      "Name of the xAOD::EventInfo object that we want to decorate" };
 
     /// Prefix used for the decoration variables
-    StringProperty m_varPrefix;
+    StringProperty m_varPrefix{ this, "VarNamePrefix", "pass_",
+      "Prefix used for the decoration variables" };
 
     /// Decide if we also want to decorate the xAOD::EventInfo object with the (full-chain) prescale information
-    BooleanProperty m_storePrescaleInfo;
+    BooleanProperty m_storePrescaleInfo{ this, "StorePrescaleInfo", false,
+      "Decide if we also want to decorate the xAOD::EventInfo object with the full-chain prescale information" };
 
     /// @}
 

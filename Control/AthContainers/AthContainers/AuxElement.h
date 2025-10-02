@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxElement.h
@@ -1086,6 +1086,58 @@ private:
   /// Should be null if this object is not within a container,
   /// except that it may also point at a private store.
   SG::AuxVectorData* m_container;
+#endif
+
+
+  /**
+   * @brief Clear all aux data associated with an element.
+   * @param container Container of the element.
+   * @param index Index of this element within the container.
+   *
+   * If the associated aux data is const, this throws @c ExcConstAuxData.
+   */
+  static void clearAuxHelper (AuxVectorData& container, size_t index);
+
+
+  /**
+   * @brief Copy aux data from another object.
+   * @param container Container of the element.
+   * @param index Index of this element within the container.
+   * @param other The object from which to copy.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
+   *
+   * If the associated aux data is const, this throws @c ExcConstAuxData.
+   *
+   * All aux data items from @c other are copied to this object.
+   * Any aux data items associated with this object that are not present
+   * in @c other are cleared.  (If @c other has no aux data, then all
+   * aux data items for this object are cleared.)
+   */
+  static void copyAuxHelper (AuxVectorData& container,
+                             size_t index,
+                             const ConstAuxElement& other,
+                             bool warnUnlocked);
+
+
+#ifdef ATHCONTAINERS_R21_COMPAT
+  /**
+   * @brief Copy aux data from another object.
+   * @param container Container of the element.
+   * @param index Index of this element within the container.
+   * @param other The object from which to copy.
+   * @param warnUnlocked If true, then warn when we skip unlocked decorations.
+   *
+   * If the associated aux data is const, this throws @c ExcConstAuxData.
+   *
+   * All aux data items from @c other are copied to this object.
+   * Any aux data items associated with this object that are not present
+   * in @c other are cleared.  (If @c other has no aux data, then all
+   * aux data items for this object are cleared.)
+   */
+  static void copyAuxHelper (AuxVectorData& container,
+                             size_t index,
+                             const AuxElement& other,
+                             bool warnUnlocked);
 #endif
 };
 

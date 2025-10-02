@@ -15,10 +15,11 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "ITkPixelRDO_Container.h"
-#include "ITkPixelHitSortingTool.h"
-#include "ITkPixelEncodingTool.h"
-#include "ITkPixelDataPackingTool.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "ITkPixelCabling/ITkPixelCablingData.h"
+
+class ITkPixelHitSortingTool;
+class ITkPixelEncodingTool;
 
 /**
  * @class ITkPixelCnvTool
@@ -34,7 +35,8 @@ class ITkPixelCnvTool : public AthAlgTool {
 
         virtual StatusCode initialize() override;
 
-        StatusCode convertToByteStream(const ITkPixelRDO_Container* cont) const;
+        template<class ContainerType>
+        StatusCode convertToByteStream(const ContainerType* cont) const;
 
     private:
 
@@ -42,10 +44,9 @@ class ITkPixelCnvTool : public AthAlgTool {
 
         ToolHandle<ITkPixelEncodingTool> m_encodingTool;
 
-        ToolHandle<ITkPixelDataPackingTool> m_packingTool;
-
         ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
-
+        
+        SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "ITkPixelCablingData", "Cond Key of Pixel Cabling"};
 
 };
 

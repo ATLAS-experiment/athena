@@ -57,7 +57,7 @@ namespace DerivationFramework {
 
   // Declare the class that adds the HF classifier in the output derivation file.
 
-  class ClassifyAndCalculateHFAugmentation : public AthAlgTool, public IAugmentationTool {
+  class ClassifyAndCalculateHFAugmentation : public extends<AthAlgTool, IAugmentationTool> {
 
     /*
     -------------------------------------------------------------------------------------------------------------------------------------
@@ -90,11 +90,12 @@ namespace DerivationFramework {
     private:
 
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticlesKey {this, "TruthParticleContainerName", "TruthParticles", "Name of the truth particles collection that is used to compute the HF Classification"};
-      SG::ReadHandleKey<xAOD::JetContainer> m_jetCollectionKey {this, "jetCollectionName", "AntiKt4TruthWZJets", "Name of the jet collection that is used to compute the HF Classification"};
+      SG::ReadHandleKey<xAOD::JetContainer> m_jetCollectionKey {this, "jetCollectionName", "AntiKt4TruthDressedWZJets", "Name of the jet collection that is used to compute the HF Classification"};
       SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfo", "EventInfo", ""};
 
       SG::WriteDecorHandleKey<xAOD::EventInfo> m_hfDecorKey {this, "EventInfoHFDecorName", "", "Name that is used to store the HF Classification."};
       SG::WriteDecorHandleKey<xAOD::EventInfo> m_SimplehfDecorKey {this, "EventInfoSimpleHFDecorName", "", "Name that is used to store the simple HF Classification."};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetIDDecorationKey{this, "JetOriginIDDecorationKey", "", "jet origin ID decoration key"};
 
       // Declare a set of strings variables:
       //  -m_hfDecorationName:           It contains the name used to save the HF classifier.
@@ -102,6 +103,7 @@ namespace DerivationFramework {
 
       Gaudi::Property<std::string> m_hfDecorationName{this, "hfDecorationName", "HF_Classification", "Name that is used to store the HF Classification."};
       Gaudi::Property<std::string> m_SimplehfDecorationName{this, "SimplehfDecorationName", "SimpleHFClassification", "Name that is used to store the simple HF Classification."};
+      Gaudi::Property<std::string> m_jetIDDecorationName{this, "HadronOriginIDDecorationName", "HFHadronOriginID", "Name that is used to store the jet origin ID."};
       
       // Add the necessary tools:
       //  -m_JetMatchingTool_Tool:        It matches the hadrons to jets. 

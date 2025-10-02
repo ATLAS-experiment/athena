@@ -23,29 +23,33 @@ def LArDTMonitoringConfig(flags,STREAM):
     from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
     acc.merge(LArBadChannelCfg(flags, isSC=True))
 
-    larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey="SC", isADCBas=False)
-    acc.addEventAlgo(larLATOMEBuilderAlg)
-
     from AthenaCommon.Logging import logging
     mlog = logging.getLogger( 'RecoPT_Phase1' )
 
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     mlog.info("Run number: "+str(flags.Input.RunNumbers[0]))
 
-    #if 'PEB' in STREAM:
     try:
         runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
-        streams=runinfo.streamTypes()
-        nsamples=int(runinfo.streamLengths()[0])
+        if 'PEB' in STREAM:
+           streams=runinfo.streamTypesPEB()
+           nsamples=int(runinfo.streamLengthsPEB()[0])
+        else:
+           streams=runinfo.streamTypes()
+           nsamples=int(runinfo.streamLengths()[0])
     except Exception as e:
         mlog.warning("Could not get DT run info")
         mlog(e)
-        streams=[]
+        streams=["ADC","SelectedEnergy"]
         nsamples=32
-    #else:       
-    #    streams=["ADC","SelectedEnergy"]
-    #    nsamples=2
 
+    if nsamples >= 4:
+        nenergies=1
+    else:
+        nenergies=0
+
+    larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg",LArDigitKey="SC", isADCBas=False, nEnergies=nenergies)
+    acc.addEventAlgo(larLATOMEBuilderAlg)
 
     from LArMonitoring.LArDigitalTriggMonAlg import LArDigitalTriggMonConfig
     acc.merge(LArDigitalTriggMonConfig(flags, larLATOMEBuilderAlg, nsamples, streams))

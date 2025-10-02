@@ -2,6 +2,6 @@
 
 from .PostIncludes import VolumeDebuggerAtlas, VolumeDebuggerAtlasDumpOnly, VolumeDebuggerITk, VolumeDebuggerITkPixel, VolumeDebuggerITkStrip, VolumeDebuggerHGTD
 
-from .PreIncludes import DebugAMSB, DebugGMSB, DebugMonopole, DebugSleptonsLLP
+from .PreIncludes import DebugAMSB, DebugGMSB, DebugMonopole, DebugSleptonsLLP, DebugRHadrons
 
-__all__ = ['DebugAMSB', 'DebugGMSB', 'DebugMonopole', 'DebugSleptonsLLP', 'VolumeDebuggerAtlas','VolumeDebuggerAtlasDumpOnly','VolumeDebuggerITk','VolumeDebuggerITkPixel','VolumeDebuggerITkStrip','VolumeDebuggerHGTD']
+__all__ = ['DebugAMSB', 'DebugGMSB', 'DebugMonopole', 'DebugSleptonsLLP', 'DebugRHadrons', 'VolumeDebuggerAtlas','VolumeDebuggerAtlasDumpOnly','VolumeDebuggerITk','VolumeDebuggerITkPixel','VolumeDebuggerITkStrip','VolumeDebuggerHGTD']

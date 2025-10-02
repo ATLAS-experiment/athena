@@ -61,7 +61,7 @@ getSCT_ID(StoreGateSvc const * const detStore)
 } // end anonymous namespace
 
 InDet::DiscOverlapDescriptor::DiscOverlapDescriptor(const Trk::BinnedArray<Trk::Surface>* bin_array,
-                                                    std::vector<Trk::BinUtility*>* singleBinUtils,
+                                                    const std::vector<Trk::BinUtility>& singleBinUtils,
                                                     bool isPixel):
   m_bin_array(bin_array),
   m_singleBinUtils(singleBinUtils),
@@ -110,7 +110,7 @@ bool InDet::DiscOverlapDescriptor::reachableSurfaces(std::vector<Trk::SurfaceInt
     // 3 -> If it is smaller than the number of rings (i.e. the surface doen't belong to the outermost ring),
     // look for the surfaces in the ring with bigger eta value (it returns 2 or 3 surfaces)//
 
-    if (m_bin_array && !m_singleBinUtils->empty()){
+    if (m_bin_array && !m_singleBinUtils.empty()){
 
       const Trk::Surface* samePhi_PrevEta     = nullptr;
       const Trk::Surface* samePhi_NextEta     = nullptr;
@@ -121,9 +121,9 @@ bool InDet::DiscOverlapDescriptor::reachableSurfaces(std::vector<Trk::SurfaceInt
       const Trk::Surface* previousPhi_NextEta = nullptr;
       const Trk::Surface* nextPhi_NextEta     = nullptr;
 
-      Trk::BinnedArraySpan<Trk::Surface const * const> surf = m_bin_array->arrayObjects();
+      std::span<Trk::Surface const * const> surf = m_bin_array->arrayObjects();
       size_t offset = 0;
-      for (unsigned int bin = 0; bin < m_singleBinUtils->size(); bin++) {
+      for (unsigned int bin = 0; bin < m_singleBinUtils.size(); bin++) {
         int etamod =
           m_pixelCase
             ? pixIdHelper->eta_module(
@@ -133,13 +133,13 @@ bool InDet::DiscOverlapDescriptor::reachableSurfaces(std::vector<Trk::SurfaceInt
 
         if (etamod == etaModule || etamod < (etaModule - 1) ||
             etamod > (etaModule + 1)) {
-          offset += (std::as_const(*m_singleBinUtils).at(bin))->bins();
+          offset += (std::as_const(m_singleBinUtils).at(bin)).bins();
           continue;
         }
 
         double PrevDeltaPhi = 9999.;
         double NextDeltaPhi = -9999.;
-        for (unsigned int ss = offset; ss < (offset+(std::as_const(*m_singleBinUtils).at(bin))->bins()); ss++ ) {
+        for (unsigned int ss = offset; ss < (offset+(std::as_const(m_singleBinUtils).at(bin)).bins()); ss++ ) {
           if (etamod == (etaModule-1) ) {
             if( tsf.center().phi() == (*(surf[ss])).center().phi() )
               samePhi_PrevEta = surf[ss];
@@ -167,7 +167,7 @@ bool InDet::DiscOverlapDescriptor::reachableSurfaces(std::vector<Trk::SurfaceInt
             }
           }
         }
-        offset += (std::as_const(*m_singleBinUtils).at(bin))->bins();
+        offset += (std::as_const(m_singleBinUtils).at(bin)).bins();
       }
 
       if (samePhi_PrevEta) {

@@ -13,6 +13,7 @@
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
 #include <IRegionSelector/IRegSelTool.h>
 #include "src/Cache.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 namespace ActsTrk {
 
@@ -50,6 +51,9 @@ private:
     ToolHandle<IRegSelTool> m_regionSelector {this, "RegSelTool", "",
       "Region selector tool"};
 
+    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_detEleCollKey {this, "DetEleCollKey", ""};
+    SG::ReadHandleKey<InDet::SiDetectorElementStatus> m_detElStatus {this, "DetElStatus", ""};
+  
     SG::ReadHandleKey<RDOContainer> m_rdoContainerKey {this, "RDOContainerKey", "",
       "Input RDO container key"};
 
@@ -61,14 +65,6 @@ private:
 
     Cache_WriteHandleKey m_ClusterCache{this,"ClusterCache",""};
     Cache_BackendUpdateHandleKey m_ClusterCacheBackend{this,"ClusterCacheBackend",""};
-
-    // expected number of clusters for RDO
-    // This values is used for reserving enough memory of the cluster container
-    // reserve = m_expectedClustersPerRDO * nRDOs
-    // The default values has been computed on a tt-bar PU200 sample
-    // comparing the memory usage and the container capacity
-    Gaudi::Property<int> m_expectedClustersPerRDO {this, "expectedClustersPerRDO", 32,
-      "Expected number of clusters for RDO"};
 
     Gaudi::Property<std::string> m_idHelperName {this, "IDHelper", "",
       "Name of ID helper to fetch from detstore" };

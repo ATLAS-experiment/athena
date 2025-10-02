@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "PrepDataToSimHitAssocAlg.h"
 
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
@@ -11,22 +10,8 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonViews/ChamberViewer.h"
+#include <span>
 namespace MuonR4{
-    template <class ContainerType>
-        StatusCode PrepDataToSimHitAssocAlg::retrieveContainer(const EventContext& ctx, 
-                                                               const SG::ReadHandleKey<ContainerType>& key,
-                                                               const ContainerType*& contToPush) const {
-        contToPush = nullptr;
-        if (key.empty()) {
-            ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadHandle readHandle{key, ctx};
-        ATH_CHECK(readHandle.isPresent());
-        contToPush = readHandle.cptr();
-        return StatusCode::SUCCESS;
-    }
-
     StatusCode PrepDataToSimHitAssocAlg::initialize() {
         ATH_CHECK(m_simHitsKey.initialize());
         ATH_CHECK(m_prdHitKey.initialize());
@@ -39,38 +24,72 @@ namespace MuonR4{
         const ActsGeometryContext* gctx{nullptr};
         const xAOD::MuonSimHitContainer* simHits{nullptr};
         const xAOD::UncalibratedMeasurementContainer* measurements{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
-        ATH_CHECK(retrieveContainer(ctx, m_simHitsKey, simHits));
-        ATH_CHECK(retrieveContainer(ctx, m_prdHitKey, measurements));
-        
-        
+        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
+        ATH_CHECK(SG::get(simHits, m_simHitsKey, ctx));
+        ATH_CHECK(SG::get(measurements, m_prdHitKey, ctx));
+
+        xAOD::ChamberViewer prdViewer{*measurements};
+        xAOD::ChamberViewer simHitViewer{*simHits, m_idHelperSvc.get(), xAOD::ChamberView::Mode::DetElement};
         SG::WriteDecorHandle<xAOD::UncalibratedMeasurementContainer, LinkType> decorHandle{m_decorKey, ctx};
+        if (measurements->empty()){
+            return StatusCode::SUCCESS;
+        }
         /** Loop over the measurements */
-        for (const xAOD::UncalibratedMeasurement* measurement : *measurements){
-            /** Define the place holder for the closest simHit */
-            const xAOD::MuonSimHit* bestSimHit{nullptr};
+        do {
+            const Identifier chambId = xAOD::identify(prdViewer.at(0));
+            const IdentifierHash viewHash = m_idHelperSvc->detElementHash(chambId);
+            /** Setup a default empty link */
+            decorHandle(*prdViewer.at(0)) = LinkType{};
 
-            switch (measurement->type()) {
-                /** Drift circles can be directly matched via Identifier */
-                case xAOD::UncalibMeasType::MdtDriftCircleType: {
+            ///
+            if ((simHitViewer.size() == 0 || m_idHelperSvc->detElementHash(simHitViewer.at(0)->identify()) > viewHash)  && 
+                 !simHitViewer.loadView(chambId)) {
+                ATH_MSG_DEBUG("No simHit view for " << m_idHelperSvc->toStringDetEl(chambId));
+                continue;
+            } else if (m_idHelperSvc->detElementHash(simHitViewer.at(0)->identify())  < viewHash \
+                      && !simHitViewer.next([viewHash, this](const xAOD::MuonSimHit* hit){
+                        return m_idHelperSvc->detElementHash(hit->identify()) == viewHash;
+                      })) {
+                continue;
+            }
+            ATH_MSG_VERBOSE("Container size "<<simHits->size()<<" viewer size: "<<simHitViewer.size()<<" view hash: "<<viewHash);
+            std::unordered_set<Identifier> prds{};
+            for (const xAOD::UncalibratedMeasurement* measurement : prdViewer) {
+                /** Define the place holder for the closest simHit */
+                const xAOD::MuonSimHit* bestSimHit{nullptr};
+                switch (measurement->type()) {
+                    /** Drift circles can be directly matched via Identifier */
+                    case xAOD::UncalibMeasType::MdtDriftCircleType: {
+                        const Identifier prdId{xAOD::identify(measurement)};                
+                        xAOD::MuonSimHitContainer::const_iterator matching_itr = 
+                            std::ranges::find_if(simHitViewer,[&prdId](const xAOD::MuonSimHit* hit){
+                                return hit->identify() == prdId;
+                            });
+                        if (matching_itr != simHitViewer.end()) {
+                            bestSimHit =(*matching_itr);
+                        }
+                        break;
+                    } case xAOD::UncalibMeasType::MMClusterType: {
+                        prds.clear();
+                        const auto* mmHit = static_cast<const xAOD::MMCluster*>(measurement);
+                        const MmIdHelper& mmIdHelper{m_idHelperSvc->mmIdHelper()};
+                        const int ml = mmIdHelper.multilayer(mmHit->identify());
+                        for (const uint16_t strip : mmHit->stripNumbers()) {
+                            prds.insert(mmIdHelper.channelID(mmHit->identify(), ml, mmHit->gasGap(), strip));
+                        }
+                        xAOD::MuonSimHitContainer::const_iterator matching_itr = 
+                            std::ranges::find_if(simHitViewer,[&prds](const xAOD::MuonSimHit* hit){
+                                return prds.count(hit->identify());
+                            });
+                        if (matching_itr != simHitViewer.end()) {
+                            bestSimHit =(*matching_itr);
+                        }
+                        break;
+                    } case xAOD::UncalibMeasType::RpcStripType:
+                      case xAOD::UncalibMeasType::TgcStripType:
+                      case xAOD::UncalibMeasType::sTgcStripType: {
                     const Identifier prdId{xAOD::identify(measurement)};
-                    xAOD::MuonSimHitContainer::const_iterator mdt_matching = 
-                        std::ranges::find_if(*simHits,[&prdId](const xAOD::MuonSimHit* hit){
-                            return hit->identify() == prdId;
-                        });
-                    if (mdt_matching != simHits->end()){
-                        bestSimHit =(*mdt_matching);
-                    }
-                    break;
-                }
-                /** The other detectors we need to find the closest hit in the gasGap */
-                case xAOD::UncalibMeasType::RpcStripType:
-                case xAOD::UncalibMeasType::TgcStripType:
-                case xAOD::UncalibMeasType::MMClusterType:
-                case xAOD::UncalibMeasType::sTgcStripType: {
-
-                    const Identifier prdId{xAOD::identify(measurement)};
-                    const MuonGMR4::MuonReadoutElement* readOutEle = xAOD::readoutElement(measurement);
+                    const MuonGMR4::MuonReadoutElement* readOutEle = xAOD::muonReadoutElement(measurement);
                     const Amg::Transform3D& locToGlob{readOutEle->localToGlobalTrans(*gctx, readOutEle->layerHash(prdId))};
                     
                     const Identifier gasGapId = m_idHelperSvc->gasGapId(prdId);
@@ -82,15 +101,7 @@ namespace MuonR4{
                         locPos.block<2,1>(0,0) = xAOD::toEigen(measurement->localPosition<2>());
                     }
                     double closestDistance{m_PullCutOff};
-
-                    /** Fetch a range of candidate hits */
-                    xAOD::ChamberViewer chambViewer{*simHits, m_idHelperSvc.get(), 
-                                                    xAOD::ChamberView::Mode::DetElement};
-
-                    if (!chambViewer.loadView(gasGapId)) {
-                        break;
-                    }
-                    for ( const xAOD::MuonSimHit* simHit : chambViewer) {
+                    for ( const xAOD::MuonSimHit* simHit : simHitViewer) {
                         if (gasGapId != m_idHelperSvc->gasGapId(simHit->identify())) {
                             continue; 
                         }
@@ -111,7 +122,7 @@ namespace MuonR4{
                             closestDistance = dist;
                             bestSimHit = simHit;
                         }
-                    }                    
+                    }
                     break;
                 } default: {
                     ATH_MSG_FATAL("Non muon measurement is parsed");
@@ -122,7 +133,11 @@ namespace MuonR4{
                 continue;
             }
             decorHandle(*measurement) = LinkType{*simHits, bestSimHit->index()};
-        }
+            }
+
+        } while (prdViewer.next());
+        
         return StatusCode::SUCCESS;
     }
 }
+

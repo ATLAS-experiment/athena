@@ -8,11 +8,11 @@
 #define XAODTRUTH_TRUTHPARTICLEAUXCONTAINER_H
 
 // Local include(s):
-#include "xAODTruth/versions/TruthParticleAuxContainer_v1.h"
+#include "xAODTruth/versions/TruthParticleAuxContainer_v2.h"
 
 namespace xAOD {
    /// Declare the latest version of the truth particle auxiliary container
-   typedef TruthParticleAuxContainer_v1 TruthParticleAuxContainer;
+   typedef TruthParticleAuxContainer_v2 TruthParticleAuxContainer;
 }
 
 // Declare a CLID for the class

@@ -15,9 +15,10 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODTracking/TrackParticleContainerFwd.h"
 #include "xAODTracking/TrackParticleFwd.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 /**
  * @class ActsEMBremCollectionBuilder
@@ -68,15 +69,17 @@ class ActsEMBremCollectionBuilder : public AthReentrantAlgorithm {
           this, "SelectedTrackParticleContainerName",
           "egammaSelectedTrackParticles", "Input of Selected TrackParticles"};
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
 
-  ActsTrk::MutableTrackContainerHandlesHelper m_refittedTracksBackendHandles;
+  ActsTrk::MutableTrackContainerHandlesHelper m_refittedTracksBackendHandles{this};
 
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_refittedTracksKey{
       this, "RefittedTracksLocation", "",
       "Ambiguity resolved output track collection"};
 
+  SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
+  
   mutable std::atomic_uint m_nInputTracks{0};
   mutable std::atomic_uint m_nRefittedTracks{0};
 };

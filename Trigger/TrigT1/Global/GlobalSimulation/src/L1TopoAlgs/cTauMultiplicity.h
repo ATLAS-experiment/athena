@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -76,7 +76,6 @@ namespace GlobalSim {
      std::string m_name{};
      unsigned int m_nbits{0};
      
-     unsigned int m_numberOutputBits{0};
      const TrigConf::L1Threshold_cTAU& m_threshold;
 
      // data to be monitored

@@ -13,6 +13,7 @@
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "L1CaloFEXToolInterfaces/IeTowerBuilder.h"
 
 namespace LVL1 {
 

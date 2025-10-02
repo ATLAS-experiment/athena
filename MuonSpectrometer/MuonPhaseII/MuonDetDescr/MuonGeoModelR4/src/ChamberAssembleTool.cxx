@@ -12,14 +12,18 @@
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 #include <sstream>
 
+#include <Acts/Geometry/CuboidVolumeBounds.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
-#include <Acts/Plugins/GeoModel/GeoModelToDetectorVolume.hpp>
+#include <Acts/Surfaces/RectangleBounds.hpp>
+#include <Acts/Surfaces/TrapezoidBounds.hpp>
+#include <Acts/Surfaces/PlaneSurface.hpp>
+
+#include <Acts/Geometry/Volume.hpp>
+
 #include <GeoModelHelpers/TransformToStringConverter.h>
 #include <GeoModelKernel/GeoDefinitions.h>
-
 
 namespace {
    constexpr int sign(int numb) { 
@@ -72,40 +76,40 @@ double ChamberAssembleTool::trapezoidEdgeDist(const Amg::Vector3D& linePos,
    return normal.dot(testMe - closest);  
 }
 
-std::shared_ptr<ChamberAssembleTool::BoundType> 
+ChamberAssembleTool::VolBoundPtr_t
       ChamberAssembleTool::boundingBox(const MuonReadoutElement* chambEle,
-                                       ActsTrk::SurfaceBoundSet<BoundType>& boundSet) {
+                                       Acts::VolumeBoundFactory& volBoundSet) {
 
    switch(chambEle->detectorType()) {
       case ActsTrk::DetectorType::Mdt: {
          const auto* techEle = static_cast<const MdtReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.shortHalfX, pars.longHalfX, 
-                                     pars.halfY, pars.halfHeight );
+         return volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(pars.shortHalfX, pars.longHalfX, 
+                                                                 pars.halfY, pars.halfHeight );
          break;
       } case ActsTrk::DetectorType::Rpc: {
          const auto* techEle = static_cast<const RpcReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.halfWidth, pars.halfWidth, 
-                                     pars.halfLength, pars.halfThickness );
+         return volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(pars.halfWidth, pars.halfWidth, 
+                                                                 pars.halfLength, pars.halfThickness);
          break;
       } case ActsTrk::DetectorType::Tgc: {
          const auto* techEle = static_cast<const TgcReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.halfWidthShort, pars.halfWidthLong, 
-                                     pars.halfHeight, pars.halfThickness );
+         return volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(pars.halfWidthShort, pars.halfWidthLong, 
+                                                                 pars.halfHeight, pars.halfThickness );
          break;
       } case ActsTrk::DetectorType::sTgc: {
          const auto* techEle = static_cast<const sTgcReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.sHalfChamberLength, pars.lHalfChamberLength, 
-                                     pars.halfChamberHeight, pars.halfChamberTck );
+         return volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(pars.sHalfChamberLength, pars.lHalfChamberLength, 
+                                                                 pars.halfChamberHeight, pars.halfChamberTck );
          break;
       } case ActsTrk::DetectorType::Mm: {
          const auto* techEle = static_cast<const MmReadoutElement*>(chambEle);
          const auto& pars = techEle->getParameters();
-         return boundSet.make_bounds(pars.halfShortWidth, pars.halfLongWidth, 
-                                     pars.halfHeight, pars.halfThickness );
+         return volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(pars.halfShortWidth, pars.halfLongWidth, 
+                                                                 pars.halfHeight, pars.halfThickness );
          break;
       } default:
          THROW_EXCEPTION("Unsupported detector type "<<to_string(chambEle->detectorType()));
@@ -115,7 +119,7 @@ std::shared_ptr<ChamberAssembleTool::BoundType>
 
 
 std::array<Amg::Vector3D, 4> ChamberAssembleTool::cornerPointsPlane(const Amg::Transform3D& localToGlob, 
-                                                                    const BoundType& bounds) {
+                                                                    const TrapVolBound_t& bounds) {
    std::array<Amg::Vector3D,4> planePoints{
             localToGlob * Amg::Vector3D(-bounds.get(BoundEnum::eHalfLengthXnegY), -bounds.get(BoundEnum::eHalfLengthY), 0. ),
             localToGlob * Amg::Vector3D(-bounds.get(BoundEnum::eHalfLengthXposY), bounds.get(BoundEnum::eHalfLengthY), 0. ),
@@ -125,7 +129,7 @@ std::array<Amg::Vector3D, 4> ChamberAssembleTool::cornerPointsPlane(const Amg::T
    return planePoints;
 }
 std::array<Amg::Vector3D, 8> ChamberAssembleTool::cornerPoints(const Amg::Transform3D& localToGlob, 
-                                                               const BoundType& bounds) {
+                                                               const TrapVolBound_t& bounds) {
    std::array<Amg::Vector3D, 8> toRet{make_array<Amg::Vector3D,8>(Amg::Vector3D::Zero())};
    std::array<Amg::Vector3D, 4> plane = cornerPointsPlane(localToGlob, bounds);
    for (unsigned int z : {0, 1}){
@@ -153,21 +157,22 @@ Amg::Transform3D ChamberAssembleTool::centerTrapezoid(const std::array<Amg::Vect
 }
 
 
-ChamberAssembleTool::BoundTrfPair 
+ChamberAssembleTool::TrfWithBounds 
       ChamberAssembleTool::boundingBox(const ActsGeometryContext& gctx,
                                        const std::vector<const MuonReadoutElement*>& readoutEles,
                                        const Amg::Transform3D& toCenter,
-                                       ActsTrk::SurfaceBoundSet<BoundType>& boundSet,
+                                       Acts::VolumeBoundFactory& volBoundSet,
+                                       Acts::SurfaceBoundFactory& surfBoundSet,
                                        const double margin) const {
 
-      std::shared_ptr<BoundType> envelopeBounds{};
+      VolBoundPtr_t envelopeBounds{};
      
       Amg::Transform3D newCentreTrf{Amg::Transform3D::Identity()};
       for (const MuonReadoutElement* chambEle :  readoutEles) {
             Amg::Transform3D trf = newCentreTrf * toCenter * 
                                    chambEle->localToGlobalTrans(gctx) * 
                                    axisRotation(chambEle->detectorType()).inverse();
-            std::shared_ptr<BoundType> bounds = boundingBox(chambEle, boundSet);
+            VolBoundPtr_t bounds = boundingBox(chambEle, volBoundSet);
             if (!envelopeBounds) {
                envelopeBounds = bounds;
                newCentreTrf = centerTrapezoid(cornerPoints(trf, *bounds)) * newCentreTrf;
@@ -191,7 +196,7 @@ ChamberAssembleTool::BoundTrfPair
             if (std::ranges::find_if(corners, [&volume](const Amg::Vector3D& v) {
                               return !volume.inside(v);}) == corners.end()) {
                ATH_MSG_VERBOSE("Readout element "<<m_idHelperSvc->toStringDetEl(chambEle->identify())<<" "
-                           <<(*boundingBox(chambEle, boundSet))<<" fully contained. ");
+                           <<(*boundingBox(chambEle, volBoundSet))<<" fully contained. ");
                continue;
             }
             if (msgLvl(MSG::VERBOSE)) {
@@ -265,7 +270,7 @@ ChamberAssembleTool::BoundTrfPair
             const double lHalfX = 0.5*(newTrapBounds[3].x() - newTrapBounds[1].x());
             const double sHalfX = 0.5*(newTrapBounds[2].x() - newTrapBounds[0].x());
             const double halfZ  = 0.5*(newTrapBounds[4].z() - newTrapBounds[0].z());
-            envelopeBounds = boundSet.make_bounds(sHalfX, lHalfX, halfY, halfZ);
+            envelopeBounds = volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(sHalfX, lHalfX, halfY, halfZ);
             ATH_MSG_VERBOSE(m_idHelperSvc->toStringDetEl(chambEle->identify())<<" "<<(*envelopeBounds));
          
             /// Finally re-center the trapezoid 
@@ -275,11 +280,23 @@ ChamberAssembleTool::BoundTrfPair
                            <<Amg::toString(newCentreTrf));
       }
       
-      envelopeBounds = boundSet.make_bounds(envelopeBounds->get(BoundEnum::eHalfLengthXnegY)+margin,
-                                            envelopeBounds->get(BoundEnum::eHalfLengthXposY)+margin,
-                                            envelopeBounds->get(BoundEnum::eHalfLengthY)+margin,
-                                            envelopeBounds->get(BoundEnum::eHalfLengthZ)+margin);
-      return std::make_pair(envelopeBounds, newCentreTrf.inverse());               
+      VolBoundPtr_t volToReturn = 
+            volBoundSet.makeBounds<Acts::TrapezoidVolumeBounds>(envelopeBounds->get(BoundEnum::eHalfLengthXnegY)+margin,
+                                                                envelopeBounds->get(BoundEnum::eHalfLengthXposY)+margin,
+                                                                envelopeBounds->get(BoundEnum::eHalfLengthY)+margin,
+                                                                envelopeBounds->get(BoundEnum::eHalfLengthZ)+margin);
+      SurfBoundPtr_t surfToReturn{};
+      if (std::abs(envelopeBounds->get(BoundEnum::eHalfLengthXnegY) - 
+                  envelopeBounds->get(BoundEnum::eHalfLengthXposY)) > margin) {
+         surfToReturn = surfBoundSet.makeBounds<Acts::TrapezoidBounds>(envelopeBounds->get(BoundEnum::eHalfLengthXposY),
+                                                                       envelopeBounds->get(BoundEnum::eHalfLengthXnegY),
+                                                                       envelopeBounds->get(BoundEnum::eHalfLengthY)); 
+      } else {
+         const double maxX = std::max(envelopeBounds->get(BoundEnum::eHalfLengthXnegY), 
+                                      envelopeBounds->get(BoundEnum::eHalfLengthXposY));
+         surfToReturn = surfBoundSet.makeBounds<Acts::RectangleBounds>(maxX, envelopeBounds->get(BoundEnum::eHalfLengthY)); 
+      }
+      return std::make_tuple(newCentreTrf.inverse(), volToReturn, surfToReturn);               
 }
 
 StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
@@ -316,8 +333,9 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                             const MuonReadoutElement* refEle = args.detEles.front();
                             const Identifier refId = refEle->identify();
                             const Identifier testId = readOutEle->identify();
-                            /// Check that the two readout elements are on the same side
-                            if (sign(refEle->stationEta()) != sign(readOutEle->stationEta())) {
+                            /// Check that the two readout elements are on the same side.
+                            /// Exception BOG eta 0 -> attributes to positive sectors
+                            if (sign(refEle->stationEta()) * sign(readOutEle->stationEta()) <0) {
                                  return false;
                             }
                             /// The two readout elements shall be located in the same sector
@@ -331,7 +349,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                             }
                             /// Summarize all readout element in the same sector & layer
                             /// into a single chamber
-                            if (readOutEle->stationName() == refEle->stationName()) {
+                            if (readOutEle->chamberIndex() == refEle->chamberIndex()) {
                                  return true;
                             }
                             /// sTgcs && Micromegas should belong to the same chamber
@@ -346,7 +364,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                 stIndicesEIL.count(refEle->stationName())) {
                                  return true;    
                             }
-                            return false;// readOutEle->chamberIndex() == refEle->chamberIndex();
+                            return false;
                          });
       /// If no chamber has been found, then create a new one
       if (exist == envelopeCandidates.end()) {
@@ -361,18 +379,20 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
     ActsGeometryContext gctx{};    
 
 
-   ActsTrk::SurfaceBoundSet<BoundType> boundSet{};    
+   Acts::VolumeBoundFactory volBoundSet{};
+   Acts::SurfaceBoundFactory surfBoundSet{};    
    for (chamberArgs& candidate : envelopeCandidates) {
          std::unordered_set<Identifier> reIds{};
          const MuonReadoutElement* refEle = candidate.detEles.front();
          const Amg::Transform3D toCenter = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
          ATH_MSG_VERBOSE("New envelope candidate ");
-         const auto [envelopeBox, envelopeCentre] = boundingBox(gctx, candidate.detEles, toCenter, boundSet);
+         const auto [envelopeCentre, envelopeBox, envelopePlane] = boundingBox(gctx, candidate.detEles, toCenter, 
+                                                                               volBoundSet, surfBoundSet);
        
          /// Define the spectrometer sector
          SpectrometerSector::defineArgs sectorArgs{};
          sectorArgs.bounds = envelopeBox;
-         sectorArgs.locToGlobTrf = toCenter.inverse() * envelopeCentre;
+         sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toCenter.inverse() * envelopeCentre, envelopePlane);
          
          if (!isNsw(candidate.detEles.front())) {
             /** Define the chamber envelopes */
@@ -386,11 +406,12 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                const MuonReadoutElement* refEle = detEles.front();
                const Amg::Transform3D toChambCentre = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
                ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
-               const auto[chamberBox, chamberCentre] = boundingBox(gctx, detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
+               const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, detEles, toChambCentre, volBoundSet, 
+                                                                                surfBoundSet, 0.1*Gaudi::Units::cm);
                chamberArgs chambArgs{};
                chambArgs.detEles =std::move(detEles);
                chambArgs.bounds = chamberBox;
-               chambArgs.locToGlobTrf = toChambCentre.inverse() * chamberCentre;
+               chambArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toChambCentre.inverse() * chamberCentre, planeBounds);
                const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
                for (const MuonReadoutElement* re : newChamber->readoutEles()) {
                   reIds.insert(re->identify());
@@ -398,14 +419,15 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                }
             }
          } else {
-               const MuonReadoutElement* refEle = candidate.detEles.front();
+            const MuonReadoutElement* refEle = candidate.detEles.front();
             const Amg::Transform3D toChambCentre = axisRotation(refEle->detectorType()) * refEle->globalToLocalTrans(gctx);
             ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
-            const auto[chamberBox, chamberCentre] = boundingBox(gctx, candidate.detEles, toChambCentre, boundSet, 0.1*Gaudi::Units::cm);
+            const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, candidate.detEles, toChambCentre, 
+                                                                             volBoundSet, surfBoundSet, 0.1*Gaudi::Units::cm);
             chamberArgs chambArgs{};
             chambArgs.detEles = candidate.detEles;
             chambArgs.bounds = chamberBox;
-            chambArgs.locToGlobTrf = toChambCentre.inverse() * chamberCentre;
+            chambArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toChambCentre.inverse() * chamberCentre, planeBounds);
             const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
             for (const MuonReadoutElement* re : newChamber->readoutEles()) {
                reIds.insert(re->identify());
@@ -416,49 +438,17 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                    const SpectrometerSector::ChamberPtr& b) {
                                                       return (*a) < (*b);
                                                    });
-         auto globalToSector = sectorArgs.locToGlobTrf.inverse(); 
+         const Amg::Transform3D globalToSector = sectorArgs.surface->transform(gctx.context()).inverse();
 
          /// now, build simplified 2D representations of the sorted chambers we collected. 
          for (auto & chamber : sectorArgs.chambers){
             // split by readout elements - MDT multilayers and trigger chambers 
             for (auto & RE : chamber->readoutEles()){
                // get the center of the element in the sector frame 
-               auto chamberToGlobal = RE->localToGlobalTrans(gctx); 
-               Amg::Vector3D origin {0, 0,  0}; 
-               origin = globalToSector * chamberToGlobal * origin;
+               const Amg::Transform3D& chamberToGlobal{RE->localToGlobalTrans(gctx)}; 
+               const Amg::Vector3D origin = (globalToSector * chamberToGlobal).translation();
                // and then add the bounds of the element - this is technology dependent 
-               if (RE->detectorType()==ActsTrk::DetectorType::Mdt){
-                     const MuonGMR4::MdtReadoutElement* MDT = dynamic_cast<const MuonGMR4::MdtReadoutElement*>(RE); 
-                     sectorArgs.detectorLocs.emplace_back(origin.y() - MDT->getParameters().halfY, 
-                                                         origin.y() + MDT->getParameters().halfY, 
-                                                         origin.z() - MDT->getParameters().halfHeight, 
-                                                         origin.z() + MDT->getParameters().halfHeight, 
-                                                         RE); 
-               }
-               else if (RE->detectorType()==ActsTrk::DetectorType::Rpc){
-                     const MuonGMR4::RpcReadoutElement* RPC = dynamic_cast<const MuonGMR4::RpcReadoutElement*>(RE);
-                     sectorArgs.detectorLocs.emplace_back(origin.y() - RPC->getParameters().halfLength, 
-                                                         origin.y() + RPC->getParameters().halfLength, 
-                                                         origin.z() - RPC->getParameters().halfThickness, 
-                                                         origin.z() + RPC->getParameters().halfThickness, 
-                                                         RE); 
-               }
-               else if (RE->detectorType()==ActsTrk::DetectorType::Tgc){
-                     const MuonGMR4::TgcReadoutElement* TGC = dynamic_cast<const MuonGMR4::TgcReadoutElement*>(RE);
-                     sectorArgs.detectorLocs.emplace_back(origin.y() - TGC->getParameters().halfHeight, 
-                                                         origin.y() + TGC->getParameters().halfHeight, 
-                                                         origin.z() - TGC->getParameters().halfThickness, 
-                                                         origin.z() + TGC->getParameters().halfThickness, 
-                                                         RE); 
-               }
-               else if (RE->detectorType() == ActsTrk::DetectorType::Mm){
-                   const MuonGMR4::MmReadoutElement* MM = dynamic_cast<const MuonGMR4::MmReadoutElement*>(RE);
-                   sectorArgs.detectorLocs.emplace_back(origin.y() - MM->getParameters().halfHeight,
-                                                       origin.y() + MM->getParameters().halfHeight,
-                                                       origin.z() - MM->getParameters().halfThickness,
-                                                       origin.z() + MM->getParameters().halfThickness,
-                                                       RE);
-               }
+               sectorArgs.detectorLocs.emplace_back(origin, RE, boundingBox(RE, volBoundSet));
             }
          }
          auto newSector = std::make_unique<SpectrometerSector>(std::move(sectorArgs));

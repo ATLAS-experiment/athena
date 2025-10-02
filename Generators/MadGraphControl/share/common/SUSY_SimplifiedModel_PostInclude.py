@@ -1,6 +1,7 @@
 # This comes after all Simplified Model setup files
-from MadGraphControl.MadGraphUtils import SUSY_Generation,modify_param_card,check_reset_proc_number
-from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
+from MadGraphControl.MadGraphUtils import modify_param_card,check_reset_proc_number
+from MadGraphControl.SUSY_Helpers import SUSY_Generation
+from MCJobOptionUtils.JOsupport import get_physics_short
 
 phys_short = get_physics_short()
 
@@ -29,14 +30,14 @@ if flavourScheme == 4:
     run_settings.update({
         'pdgs_for_merging_cut': '1, 2, 3, 4, 21' # Terrible default in MG
     })
-    _nQuarksMerge = 5 if finalStateB else 4
+    PYTHIA8_nQuarksMerge = 5 if finalStateB else 4
 else:
     run_settings.update({
         'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21',
         'asrwgtflavor': 5,
         'maxjetflavor': 5
     })
-    _nQuarksMerge = 5
+    PYTHIA8_nQuarksMerge = 5
     if define_pj_5FS:
         # Add the 5FS p and j definition to the beginning of the process string
         process = "define p = g u c d s b u~ c~ d~ s~ b~\ndefine j = g u c d s b u~ c~ d~ s~ b~\n" + process
@@ -53,18 +54,12 @@ else:
         masses['5'] = 0.0
 
 # systematic variation
-if 'scup' in phys_short:
-    syst_mod=dict_index_syst[0]
-elif 'scdw' in phys_short:
-    syst_mod=dict_index_syst[1]
-elif 'alup' in phys_short:
-    syst_mod=dict_index_syst[2]
-elif 'aldw' in phys_short:
-    syst_mod=dict_index_syst[3]
-elif 'qcup' in phys_short:
-    syst_mod=dict_index_syst[6]
-elif 'qcdw' in phys_short:
-    syst_mod=dict_index_syst[7]
+if '_msup' in phys_short:
+    syst_mod='msup'
+elif '_msdw' in phys_short:
+    syst_mod='msdw'
+if syst_mod not in ['msup','msdw',None]:
+    raise RuntimeError(f'Systematic variation {syst_mod=} unknown; allowed values are "msup" or "msdw" for matching scale up/down variations')
 
 # Pass arguments as a dictionary: the "decays" argument is not accepted in older versions of MadGraphControl
 if 'mass' in [x.lower() for x in param_blocks]:
@@ -134,16 +129,26 @@ else:
 check_reset_proc_number(opts)
 
 # Pythia8 setup for matching if necessary
-njets=max([l.count('j') for l in process.split('\n')])
+PYTHIA8_nJetMax=max([l.count('j') for l in process.split('\n')])
 njets_min=min([l.count('j') for l in process.split('\n') if 'generate ' in l or 'add process' in l])
-if njets>0 and njets!=njets_min and hasattr(genSeq,'Pythia8'):
-    genSeq.Pythia8.Commands += ["Merging:mayRemoveDecayProducts = on",
-                                "Merging:nJetMax = "+str(njets),
-                                "Merging:doKTMerging = on",
-                                "Merging:TMS = "+str(ktdurham),
-                                "Merging:ktType = 1",
-                                "Merging:Dparameter = 0.4",
-                                "Merging:nQuarksMerge = {0:d}".format(_nQuarksMerge)]
+if PYTHIA8_nJetMax>0 and PYTHIA8_nJetMax!=njets_min and hasattr(genSeq,'Pythia8'):
+    # Matching was necessary, put things in the right places
+    PYTHIA8_TMS = ktdurham
+    PYTHIA8_Dparameter = 0.4
+    # If they didn't already define the variable, then go fishing
+    if 'PYTHIA8_Process' not in dir():
+        for acommand in genSeq.Pythia8.Commands:
+            if acommand.startswith('Merging:Process'):
+                PYTHIA8_Process = acommand.split('=')[1].strip()
+                break
+        else:
+            # If it _really_ wasn't defined by now, we're going for "guess"
+            PYTHIA8_Process = 'guess'
+    # The old command can stay, in the worst case - it just does the same thing twice
+
+    include('Pythia8_i/Pythia8_CKKWL_kTMerge.py')
+    # This is not included by the standard include, but is part of the SUSY standard
+    genSeq.Pythia8.Commands += ["Merging:mayRemoveDecayProducts = on"]
 
 # Configuration for EvgenJobTransforms
 #--------------------------------------------------------------

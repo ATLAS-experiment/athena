@@ -28,15 +28,6 @@ static inline double unquant(double min, double max, unsigned nSteps, int step);
 template <typename T>
 static inline std::string to_string(const std::vector<T> &v);
 
-///////////////////////////////////////////////////////////////////////////////
-// AthAlgTool
-
-FPGATrackSimHoughTransformTool::FPGATrackSimHoughTransformTool(const std::string& algname, const std::string &name, const IInterface *ifc) :
-  base_class(algname, name, ifc)
-{
-  declareInterface<IFPGATrackSimRoadFinderTool>(this);
-}
-
 
 StatusCode FPGATrackSimHoughTransformTool::initialize()
 {
@@ -289,6 +280,10 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
           ATH_MSG_FATAL("Debug: something wrong! layer: " << hit->getLayer());
           break;
       }
+      if (LUT_layer <0){
+        ATH_MSG_ERROR("FPGATrackSimHoughTransformTool: array index is negative");
+        return image;
+      }
       int phi_L_bin = m_h_rfix.at(LUT_layer)->FindBin(hit->getGPhi());
       int MSB = (phi_L_bin >> (m_bitlength -6));
       if(MSB >= 64) MSB = 63;//for barrel, MSB should be up to 63, but this line force it to not crash
@@ -315,7 +310,7 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
   std::vector<std::vector<int>> hitLineQAPtPhi0(input_bins_vector_size);
   hitLineQAPtPhi0 = lineGenLay(hit);
   
-	for (auto it_base : hitLineQAPtPhi0) {   	         
+	for (const std::vector<int>& it_base : hitLineQAPtPhi0) {
 	    if (it_base[0] != -1 && it_base[1] != -1) {   
 		      image(it_base[0] , it_base[1]).first++;
 		      if (m_traceHits) {
@@ -524,8 +519,6 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
     int64_t phi0_ht_pre = -1;
     int64_t qApt_ht_sector = 0;
     int64_t phi0_ht_sector = 0;
-    int64_t one_over_r_by_const = 0;   
-    int64_t phi_conv_over_DBinQApt = 0; 
     int64_t Delta_phi0_after_first_sector = 0;
 
     std::vector<double> d_qApt_ht_array;
@@ -555,8 +548,6 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                 hitLineQAPtPhi0.push_back(zeros); 
             } 
             //formula first sector
-            one_over_r_by_const = m_one_r_const_twoexp / r_bit; 
-            phi_conv_over_DBinQApt = phi_bit * m_tot_bitwise_conv / m_DBinQApt_bit_int; 
                 
             d_one_over_r_by_const = m_one_r_const_twoexp / r_bit;
             d_phi_conv_over_DBinQApt = phi_bit * m_tot_bitwise_conv / m_DBinQApt_bit_int;
@@ -566,51 +557,48 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                 unsigned end_phi0_bins_first_sector = m_phi0_bins_first_sector + static_cast <unsigned>(pp * m_phi0Bins_bit / m_pipes_phi0);
 
                 for (unsigned j = start_phi0_bins_first_sector; j < end_phi0_bins_first_sector; j++) {
-		    int64_t c1 = m_bitwise_qApt_conv * bins_x_new[j] / m_DBinQApt_bit_int;
-                    int64_t c2 = (c1 - phi_conv_over_DBinQApt) * one_over_r_by_const / m_one_r_const_twoexp_post_conv;
-                    int64_t c3 = (c1 - phi_conv_over_DBinQApt) * one_over_r_by_const;
-                    
                     double d_c1 = m_bitwise_qApt_conv * bins_x_new[j] / m_DBinQApt_bit_int;
+                    int64_t c2 = (static_cast<int64_t>(d_c1) - static_cast<int64_t>(d_phi_conv_over_DBinQApt)) * static_cast<int64_t>(d_one_over_r_by_const) / m_one_r_const_twoexp_post_conv;
+                    int64_t c3 = (static_cast<int64_t>(d_c1) - static_cast<int64_t>(d_phi_conv_over_DBinQApt)) * static_cast<int64_t>(d_one_over_r_by_const);
+                    
                     double d_c2 = (d_c1 - d_phi_conv_over_DBinQApt) * d_one_over_r_by_const / m_one_r_const_twoexp_post_conv;
                     double d_c3 = (d_c1 - d_phi_conv_over_DBinQApt) * d_one_over_r_by_const;
-                    double d_c5 = m_qApt_min_bit;
-                    double d_c4 = m_bitwise_phi0_conv * d_c5 / (m_bitwise_phi0_conv * m_DBinQApt_bit_int);
+                    double d_c4 = m_bitwise_phi0_conv * m_qApt_min_bit / (m_bitwise_phi0_conv * m_DBinQApt_bit_int);
 
-                    if (c1 <= phi_conv_over_DBinQApt) {
-			qApt_ht_pre = c2 - m_qApt_min_post_conv;
-		    }else{
-			qApt_ht_pre = 1 + c2 - m_qApt_min_post_conv;
-		    }
+                    if (static_cast<int64_t>(d_c1) <= static_cast<int64_t>(d_phi_conv_over_DBinQApt)) {
+                      qApt_ht_pre = c2 - m_qApt_min_post_conv;
+                    }else{
+                      qApt_ht_pre = 1 + c2 - m_qApt_min_post_conv;
+                    }
                     qApt_ht_sector = c3;
                     d_qApt_ht_sector = d_c3;
                     qApt_ht_array[j - start_phi0_bins_first_sector] = qApt_ht_sector;
                     d_qApt_ht_array[j - start_phi0_bins_first_sector] = d_qApt_ht_sector;
                     
-                    if (c1 <= phi_conv_over_DBinQApt && (d_c2 - m_qApt_min_post_conv - d_c4) >= 0) {
+                    if (static_cast<int64_t>(d_c1) <= static_cast<int64_t>(d_phi_conv_over_DBinQApt) && (d_c2 - m_qApt_min_post_conv - d_c4) >= 0) {
                         qApt_ht = qApt_ht_pre;
                     }
-                    if (c1 > phi_conv_over_DBinQApt && 1 + (d_c2 - m_qApt_min_post_conv - d_c4) >= 0) {
+                    if (static_cast<int64_t>(d_c1) > static_cast<int64_t>(d_phi_conv_over_DBinQApt) && 1 + (d_c2 - m_qApt_min_post_conv - d_c4) >= 0) {
                         qApt_ht = qApt_ht_pre;
                     }
                     
                     if (qApt_ht >= 0 && qApt_ht <= m_imageSize_y -1) {
                         hitLineQAPtPhi0[j] = {static_cast<int>(qApt_ht), static_cast<int>(j)};
                     }
-		    qApt_ht = -1;
-		    qApt_ht_pre = -1;
+                    qApt_ht = -1;
                 }
                 if (m_phi0_sectors > 1) { //formula after first sector
                     for (int ps = 0; ps < m_phi0_sectors -1; ps++) {
-                        int64_t c6 = (m_DBinPhi0_bit_int * ((ps + 1) * m_phi0_bins_first_sector) * m_bitwise_qApt_conv) / m_DBinQApt_bit_int;
-                        double d_c6 = (m_DBinPhi0_bit_int * ((ps + 1) * m_phi0_bins_first_sector) * m_bitwise_qApt_conv) / m_DBinQApt_bit_int;
+                        //note: this is integer division, e.g. 3/2 = 1
+                        int64_t d_c6 = (m_DBinPhi0_bit_int * ((ps + 1) * m_phi0_bins_first_sector) * m_bitwise_qApt_conv) / m_DBinQApt_bit_int;
 
-                        Delta_phi0_after_first_sector = c6 * one_over_r_by_const;
-                        d_Delta_phi0_after_first_sector = d_c6 * d_one_over_r_by_const;
+                        Delta_phi0_after_first_sector = d_c6 * static_cast<int64_t>(d_one_over_r_by_const);
+                        //want a double here
+                        d_Delta_phi0_after_first_sector = static_cast<double>(d_c6) * d_one_over_r_by_const;
                         for (unsigned psi = start_phi0_bins_first_sector; psi < end_phi0_bins_first_sector; psi++) {
                             int64_t c7 = (qApt_ht_array[psi - start_phi0_bins_first_sector] + Delta_phi0_after_first_sector) / m_one_r_const_twoexp_post_conv;
                             
-                            double d_c8 = m_qApt_min_bit;
-                            double d_c9 = m_bitwise_phi0_conv * d_c8 / (m_bitwise_phi0_conv * m_DBinQApt_bit_int);
+                            double d_c9 = m_bitwise_phi0_conv * m_qApt_min_bit / (m_bitwise_phi0_conv * m_DBinQApt_bit_int);
 
                             if (-qApt_ht_array[psi - start_phi0_bins_first_sector] < Delta_phi0_after_first_sector) {
 				qApt_ht = 1 + c7 - m_qApt_min_post_conv;
@@ -633,10 +621,8 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
             for (unsigned i = 0; i < m_imageSize_y; i++) {
                 hitLineQAPtPhi0.push_back(zeros);
             }
-            int64_t d1 = m_phi0_min_bit;
-            double d_d1 = m_phi0_min_bit; 
-            phi_conv_offseted = (m_bitwise_phi0_conv * phi_bit - d1) * m_bitwise_qApt_conv / m_DBinPhi0_bit_int;
-            d_phi_conv_offseted = (m_bitwise_phi0_conv * phi_bit - d_d1) * m_bitwise_qApt_conv / m_DBinPhi0_bit_int;
+            phi_conv_offseted = (m_bitwise_phi0_conv * phi_bit - static_cast<int64_t>(m_phi0_min_bit)) * m_bitwise_qApt_conv / m_DBinPhi0_bit_int;
+            d_phi_conv_offseted = (m_bitwise_phi0_conv * phi_bit - m_phi0_min_bit) * m_bitwise_qApt_conv / m_DBinPhi0_bit_int;
 
             for (int pq = 0; pq < m_pipes_qApt; pq++) { //loop over pipes alongside qA/Pt axis 
 
@@ -645,13 +631,13 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
               
                 for (unsigned n = start_qApt_bins_first_sector; n < end_qApt_bins_first_sector; n++) {
                   //formula for first sector
-                  int64_t d2 = m_bitwise_phi0_conv * static_cast<int>(bins_y_new[n]) / m_DBinPhi0_bit_int;
-                  //why repeat this calculation, which results in an int which will be cast to a double?
-                  double d_d2 =m_bitwise_phi0_conv * static_cast<int>(bins_y_new[n]) / m_DBinPhi0_bit_int;
+                  //note: this is integer division e.g. 3/2 = 1
+                  int64_t d2 =m_bitwise_phi0_conv * bins_y_new[n] / m_DBinPhi0_bit_int;
 
                   phi0_ht_sector = phi_conv_offseted + r_bit * d2; 
                   phi0_ht_array[n - start_qApt_bins_first_sector] = phi0_ht_sector;
-                  d_phi0_ht_sector = d_phi_conv_offseted + r_bit * d_d2;
+                  //want a double result here
+                  d_phi0_ht_sector = d_phi_conv_offseted + r_bit * static_cast<double>(d2);
                   d_phi0_ht_array[n - start_qApt_bins_first_sector] = d_phi0_ht_sector;
 
                   if (phi0_ht_sector >= 0) {
@@ -663,10 +649,11 @@ std::vector<std::vector<int>> FPGATrackSimHoughTransformTool::lineGenLay(const s
                   if (phi0_ht_sector >= 0 && phi0_ht_pre >= 0 && (phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
                       phi0_ht = phi0_ht_pre;
                   }
+                  /** This condition is never true
                   if (phi0_ht_sector < 0 && phi0_ht_pre >= 0 && (-1 + phi0_ht_sector >= m_bitwise_qApt_conv - m_imageSize_x)) {
                       phi0_ht = phi0_ht_pre;
                   }
-
+                  **/
                   if (phi0_ht <= m_imageSize_x - 1 && phi0_ht >= 0){
                       hitLineQAPtPhi0[n] = {static_cast<int>(n), static_cast<int>(phi0_ht)};
                   }
@@ -845,7 +832,7 @@ void FPGATrackSimHoughTransformTool::makeLUT(std::vector<std::vector<std::vector
       LUT_i.input_end = in_max;
       LUT_i.layer = ri;
       LUT_i.output.push_back({xi, yi, ri});
-      v_LUT.at(ri).at(MSB).push_back(LUT_i);
+      v_LUT.at(ri).at(MSB).push_back(std::move(LUT_i));
     }
     //process for max range
     int MSB2 = (in_max >> (m_bitlength -6));

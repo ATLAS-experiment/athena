@@ -49,6 +49,10 @@ atlas_add_executable (asg_tools_test_init util/asg_tools_test_init.cxx
 
 # Test(s) in the package:
 if( XAOD_STANDALONE )
+   atlas_add_executable(asg_component_factory_scanner
+      util/asg_component_factory_scanner.cxx
+      LINK_LIBRARIES AsgTools)
+
    atlas_add_test( BaseToolInit
       SCRIPT $<TARGET_FILE:asg_tools_test_init> "asg::AsgTool"
       POST_EXEC_SCRIPT nopost.sh )

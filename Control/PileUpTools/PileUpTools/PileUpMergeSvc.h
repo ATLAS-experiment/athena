@@ -1,14 +1,13 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PileUpMergeSvc.h
   @brief the preferred mechanism to access information from the different event
   stores in a pileup job.
   @author Paolo Calafiura
-  $Id: PileUpMergeSvc.h,v 1.17 2008-04-19 00:31:09 calaf Exp $
 */
 #ifndef PILEUPTOOLS_PILEUPMERGESVC_H
 #define PILEUPTOOLS_PILEUPMERGESVC_H
@@ -52,7 +51,6 @@ class IToolSvc;
   collections) to be merged attaching sub-evt time offsets 
 
   @author Paolo Calafiura
-  $Id: PileUpMergeSvc.h,v 1.17 2008-04-19 00:31:09 calaf Exp $
 */
 
 class PileUpMergeSvc : public AthService {
@@ -63,7 +61,7 @@ public:
         
   virtual ~PileUpMergeSvc() {}
 
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   ///generate the types of the timed data objects
   template <typename DATA>
@@ -112,17 +110,14 @@ public:
   /// PileUpXingFolder CacheRefreshFrequency property)
   StatusCode clearDataCaches();
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID();
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
-
   /// get EventInfo from SG, by default using p_overStore
   const xAOD::EventInfo* getPileUpEvent( StoreGateSvc* sg,
                                          const std::string& einame ) const;
 
 private:
   ServiceHandle<StoreGateSvc> p_overStore;      ///< overlaid SG (default)
-  ToolHandleArray<IPileUpXingFolder> m_intervals; ///< Property: bunch xing intervals
+  ToolHandleArray<IPileUpXingFolder> m_intervals{this, "Intervals", {},
+    "Folders specifying bunch xing intervals for different data objects"};
 
   // Protect against multiple threads trying to make EventInfo
   // for the same slot.
@@ -175,17 +170,23 @@ private:
   typedef std::map<std::pair<CLID, std::string>, Range> RangeContainer;
   RangeContainer m_ranges;
 
-  ToolHandle<ITriggerTime> m_pITriggerTime; ///< allows to apply a trigger time offset
+  ToolHandle<ITriggerTime> m_pITriggerTime{this, "TriggerTimeTool", "",
+    "allows to apply a trigger time offset"};
+
   ///< controls PileUpTimedEventIndex for TimedData returned by retrieveSubEvts
-  BooleanProperty m_returnTimedData; 
+  BooleanProperty m_returnTimedData{this, "ReturnTimedData", true,
+    "determine whether the TimedData returned by retrieveSubEvts have non trivial "
+    "PileUpTimeEventIndex. May be set to false for overlay with real events"};
 
   bool doRefresh(const Range& r, int iXing);
 
   //Default name for EventInfo
-  std::string m_EventInfoKeyName;
+  StringProperty m_EventInfoKeyName{this, "EventInfoKeyName", "OverlayEvent",
+    "default name for EventInfo"};
 
   /// property: Handle to the EventInfo -> xAOD::EventInfo converter tool
-  ToolHandle< xAODMaker::IEventInfoCnvTool > m_xAODCnvTool;
+  ToolHandle< xAODMaker::IEventInfoCnvTool > m_xAODCnvTool{
+    this, "xAODCnvTool", "xAODMaker::EventInfoCnvTool/EventInfoCnvTool"};
 };
 #include "PileUpTools/PileUpMergeSvc.icc"
 #endif /* PILEUPTOOLS_PILEUPMERGESVC_H */

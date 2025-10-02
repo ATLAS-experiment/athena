@@ -18,6 +18,12 @@ namespace Muon {
         ///    x-axis : Parallell to the radial direction of the detector centre
         ///    y-axis : Pependicular to the x-axis in the transverse plane
         ///    z-axis : Points to the big wheel
+        inline Amg::Vector3D toLocal(const Amg::Transform3D& toLocalTrans, const Amg::Vector3D& dir) {
+            Amg::Rotation3D rotMat{toLocalTrans.linear()};
+            const Amg::Vector3D rotDir = rotMat * dir;
+            return Amg::Vector3D{rotDir.x(), rotDir.y(), std::abs(rotDir.z())};
+        }
+
         inline Amg::Vector3D toLocal(const Trk::Surface& surf, const Amg::Vector3D& dir){
             Amg::Rotation3D rotMat{surf.transform().inverse().linear()};
             const Amg::Vector3D rotDir = rotMat * dir;

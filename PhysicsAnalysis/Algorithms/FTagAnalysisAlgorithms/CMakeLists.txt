@@ -13,15 +13,8 @@ atlas_add_library( FTagAnalysisAlgorithmsLib
    TrigCompositeUtilsLib TrigDecisionToolLib
    AnaAlgorithmLib FTagAnalysisInterfacesLib )
 
-atlas_add_dictionary( FTagAnalysisAlgorithmsDict
-   FTagAnalysisAlgorithms/FTagAnalysisAlgorithmsDict.h
-   FTagAnalysisAlgorithms/selection.xml
+atlas_add_component( FTagAnalysisAlgorithms
+   src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES FTagAnalysisAlgorithmsLib )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( FTagAnalysisAlgorithms
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel FTagAnalysisAlgorithmsLib )
-endif()
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

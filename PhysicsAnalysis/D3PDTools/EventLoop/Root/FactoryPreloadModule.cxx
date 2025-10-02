@@ -27,7 +27,7 @@ namespace EL
     StatusCode FactoryPreloadModule::onInitialize (ModuleData& /*data*/)
     {
       std::vector<std::string> preloaderList;
-      boost::split (preloaderList, preloader, boost::is_any_of (","));
+      boost::split (preloaderList, preloader.value(), boost::is_any_of (","));
 
       if (preloaderList.size() % 2 != 0)
       {

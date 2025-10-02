@@ -1,10 +1,25 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
+
+def gFexEmulatedTowersCfg(flags, name="L1_gFexEmulatedTowers", writeKey="L1_gFexEmulatedTowers"):
+    """
+    Config for emulating gFex input data from LATOME readout
+    """
+    acc=ComponentAccumulator()
+
+    acc.addEventAlgo( CompFactory.LVL1.gFexTowerBuilder(name=name,
+                                                             SCell=flags.Trigger.L1.L1CaloSuperCellContainerName,
+                                                             gTowersWriteKey = writeKey,
+                                                             isDATA = not flags.Input.isMC,
+                                                             gFEX2SCmapping = "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gCaloTowers_to_scells_v1.txt",
+                                                             gFEX2Tilemapping = "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gCaloTowers_to_tile_v1.txt",
+                                                             gFexFiberTowerMapping = "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gFex_gCaloTowerMap_weighted_v1.txt") )
+    return acc
 
 def jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMaker",writeKey="L1_jFexEmulatedTowers"):
     """
@@ -14,7 +29,7 @@ def jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMaker",writeKey="L1_jFex
     
     emulator = CompFactory.LVL1.jFexEmulatedTowers(name)
     emulator.SCell = flags.Trigger.L1.L1CaloSuperCellContainerName 
-    emulator.jTowersWriteKey = writeKey 
+    emulator.jTowersWriteKey = writeKey
     emulator.isDATA = not flags.Input.isMC 
     acc.addEventAlgo(emulator)
 

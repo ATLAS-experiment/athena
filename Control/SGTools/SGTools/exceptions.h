@@ -52,7 +52,7 @@ public:
   /**
    * @brief Return the message for this exception.
    */
-  virtual const char* what() const throw();
+  virtual const char* what() const noexcept override;
 
 
 private:

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,13 +9,9 @@
 // Trk include
 #include "TrkExTools/MaterialEffectsUpdator.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "TrkDetDescrInterfaces/IMaterialMapper.h"
 #include "TrkEventPrimitives/DefinedParameter.h"
 #include "TrkEventPrimitives/ParamDefs.h"
-#include "TrkExInterfaces/IEnergyLossUpdator.h"
-#include "TrkExInterfaces/IMultipleScatteringUpdator.h"
 #include "TrkGeometry/AssociatedMaterial.h"
-#include "TrkGeometry/CompoundLayer.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/TrackingVolume.h"
@@ -34,52 +30,17 @@
 #include <functional>
 #include <cmath>
 
+#define TRKEXTOOLS_MAXUPDATES 100
+#ifndef COVARIANCEUPDATEWITHCHECK
+#define COVARIANCEUPDATEWITHCHECK(cov, sign, value)                            \
+  cov += (sign > 0 ? value : (value > cov ? 0 : sign * value))
+#endif
 
 // constructor
 Trk::MaterialEffectsUpdator::MaterialEffectsUpdator(const std::string& t, const std::string& n, const IInterface* p)
   : AthAlgTool(t, n, p)
-  ,
-  //  TrkParametersManipulator(),
-  m_doCompoundLayerCheck(false)
-  , m_doEloss(true)
-  , m_doMs(true)
-  , m_forceMomentum(false)
-  , m_xKalmanStraggling(false)
-  , m_useMostProbableEloss(false)
-  , m_msgOutputValidationDirection(true)
-  , m_msgOutputCorrections(false)
-  , m_validationMode(false)
-  , m_validationIgnoreUnmeasured(true)
-  , m_landauMode(false)
-  , m_validationDirection(1)
-  , m_momentumCut(50. * Gaudi::Units::MeV)
-  , m_momentumMax(10. * Gaudi::Units::TeV)
-  , m_forcedMomentum(2000. * Gaudi::Units::MeV)
-  , m_eLossUpdator("Trk::EnergyLossUpdator/AtlasEnergyLossUpdator")
-  , m_msUpdator("Trk::MultipleScatteringUpdator/AtlasMultipleScatteringUpdator")
-  , m_materialMapper("Trk::MaterialMapper/AtlasMaterialMapper")
 {
   declareInterface<IMaterialEffectsUpdator>(this);
-  // configuration (to be changed to new genconf style)
-  declareProperty("CheckForCompoundLayers", m_doCompoundLayerCheck);
-  declareProperty("EnergyLoss", m_doEloss);
-  declareProperty("EnergyLossUpdator", m_eLossUpdator);
-  declareProperty("MultipleScattering", m_doMs);
-  declareProperty("MultipleScatteringUpdator", m_msUpdator);
-  // the momentum cut for particle interactions
-  declareProperty("MinimalMomentum", m_momentumCut);
-  declareProperty("MaximalMomentum", m_momentumMax);
-  declareProperty("ForceMomentum", m_forceMomentum);
-  declareProperty("ForcedMomentumValue", m_forcedMomentum);
-  declareProperty("MostProbableEnergyLoss", m_useMostProbableEloss);
-  declareProperty("ScreenOutputValidationDirection", m_msgOutputValidationDirection);
-  declareProperty("ScreenOutputCorrections", m_msgOutputCorrections);
-  // run vaidation mode true/false
-  declareProperty("ValidationMode", m_validationMode);
-  declareProperty("ValidationIgnoreUnmeasured", m_validationIgnoreUnmeasured);
-  declareProperty("ValidationDirection", m_validationDirection);
-  declareProperty("ValidationMaterialMapper", m_materialMapper);
-  declareProperty("LandauMode", m_landauMode);
 }
 
 // destructor
@@ -159,7 +120,7 @@ Trk::MaterialEffectsUpdator::updateImpl(
 
   // get the real pathlength
   double pathCorrection = std::abs(lay.surfaceRepresentation().pathCorrection(parm->position(), parm->momentum()));
-  
+
   // --------------------------------------------------------------------------------------------------
   if (m_validationMode) {
     cache.validationLayer = &lay;
@@ -185,7 +146,7 @@ Trk::MaterialEffectsUpdator::updateImpl(
 
   // get the kinematics
   double p = parm->momentum().mag();
-  double updateMomentum = (m_forceMomentum) ? m_forcedMomentum : p;
+  double updateMomentum = m_forceMomentum ? m_forcedMomentum.value() : p;
   double m = Trk::ParticleMasses::mass[particle];
   double E = std::sqrt(p * p + m * m);
   double beta = p / E;
@@ -278,14 +239,11 @@ Trk::MaterialEffectsUpdator::updateImpl(
       // check for non-zero covariance matrix
       COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::phi, Trk::phi), sign, sigmaDeltaPhiSq);
       COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::theta, Trk::theta), sign, sigmaDeltaThetaSq);
-      if (!m_xKalmanStraggling && !m_landauMode) {
+      if (!m_landauMode) {
         COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::qOverP, Trk::qOverP), sign, sigmaQoverPSq);
-      } else if (m_xKalmanStraggling) { /* to be filled in*/
       } else if (m_landauMode) {
         // subtract what we added up till now and add what we should add up till now
         // Landau's 68% limit is approx 1.6*sigmaParameter
-
-        /* Get the TLS to a local here once and use it for calculation*/
         (*updatedCovariance)(Trk::qOverP, Trk::qOverP) -=
           sign * std::pow(1.6 * (cache.accumulatedElossSigma - p * p * sigmaQoverP) / (p * p), 2);
         (*updatedCovariance)(Trk::qOverP, Trk::qOverP) +=
@@ -296,9 +254,6 @@ Trk::MaterialEffectsUpdator::updateImpl(
         // the covariance is invalid
         return nullptr;
       }
-
-      // create the ErrorMatrix
-      // updatedError = new Trk::ErrorMatrix(updatedCovariance);
       // -------------------------------------- screen output --------------------------------------
       if (m_msgOutputCorrections) {
         double sigmaAngle = std::sqrt(angularVariation);
@@ -477,7 +432,7 @@ Trk::MaterialEffectsUpdator::updateImpl(
 
   // get the kinematics
   double p = parm->momentum().mag();
-  double updateMomentum = (m_forceMomentum) ? m_forcedMomentum : p;
+  double updateMomentum = m_forceMomentum ? m_forcedMomentum.value() : p;
   double m = Trk::ParticleMasses::mass[particle];
   double E = std::sqrt(p * p + m * m);
   double beta = p / E;
@@ -547,12 +502,8 @@ Trk::MaterialEffectsUpdator::updateImpl(
         // checks will only be done in the removeNoise mode
         COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::phi, Trk::phi), sign, sigmaDeltaPhiSq);
         COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::theta, Trk::theta), sign, sigmaDeltaThetaSq);
-        if (!m_xKalmanStraggling && !m_landauMode) {
+        if (!m_landauMode) {
           COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::qOverP, Trk::qOverP), sign, sigmaQoverP * sigmaQoverP);
-        } else if (m_xKalmanStraggling) {
-          double q = parm->charge();
-          COVARIANCEUPDATEWITHCHECK(
-            (*updatedCovariance)(Trk::qOverP, Trk::qOverP), sign, 0.2 * deltaP * deltaP * q * q * q * q);
         } else if (m_landauMode) {
           // subtract what we added up till now and add what we should add up till now
           // Landau's 68% limit is approx 1.6*sigmaParameter
@@ -567,8 +518,6 @@ Trk::MaterialEffectsUpdator::updateImpl(
           return nullptr;
         }
 
-        // create the ErrorMatrix
-
         // -------------------------------------- screen output --------------------------------------
         if (outputFlag && m_msgOutputCorrections) {
           double sigmaAngle = std::sqrt(angularVariation);
@@ -580,7 +529,7 @@ Trk::MaterialEffectsUpdator::updateImpl(
       }
       // ----------------------------------------- validation section ----------------------------------
       // validation if configured
-      if (m_validationMode && dir == Trk::PropDirection(m_validationDirection) && updatedCovariance) {
+      if (m_validationMode && dir == Trk::PropDirection(m_validationDirection.value()) && updatedCovariance) {
 
         if (cache.validationLayer) {
           // all you have from MaterialProperties
@@ -654,7 +603,7 @@ Trk::MaterialEffectsUpdator::updateImpl(
 
   // get the kinematics
   double p = parm.momentum().mag();
-  double updateMomentum = (m_forceMomentum) ? m_forcedMomentum : p;
+  double updateMomentum = m_forceMomentum ? m_forcedMomentum.value() : p;
   double m = Trk::ParticleMasses::mass[particle];
   double E = std::sqrt(p * p + m * m);
   double beta = p / E;
@@ -719,9 +668,8 @@ Trk::MaterialEffectsUpdator::updateImpl(
       // checks will only be done in the removeNoise mode
       COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::phi, Trk::phi), sign, sigmaDeltaPhiSq);
       COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::theta, Trk::theta), sign, sigmaDeltaThetaSq);
-      if (!m_xKalmanStraggling && !m_landauMode) {
+      if (!m_landauMode) {
         COVARIANCEUPDATEWITHCHECK((*updatedCovariance)(Trk::qOverP, Trk::qOverP), sign, sigmaQoverP * sigmaQoverP);
-      } else if (m_xKalmanStraggling) { /* to be filled in*/
       } else if (m_landauMode) {
         // subtract what we added up till now and add what we should add up till now
         // Landau's 68% limit is best modeled by 1.6*sigmaParameter
@@ -730,14 +678,12 @@ Trk::MaterialEffectsUpdator::updateImpl(
         (*updatedCovariance)(Trk::qOverP, Trk::qOverP) +=
           sign * std::pow(1.6 * cache.accumulatedElossSigma / ((p + deltaP) * (p + deltaP)), 2);
       }
-
       // the checks for the remove Noise mode -----------------------------------------------------
       if (matupmode == Trk::removeNoise && !checkCovariance(*updatedCovariance)) {
         // the covariance is invalid
         return nullptr;
       }
-
-      // create the ErrorMatrix         // -------------------------------------- screen output
+      // -------------------------------------- screen output
       // --------------------------------------
       if (outputFlag && m_msgOutputCorrections) {
         double sigmaAngle = std::sqrt(angularVariation);
@@ -747,7 +693,7 @@ Trk::MaterialEffectsUpdator::updateImpl(
       }
       // ----------------------------------------- validation section ----------------------------------
       // validation if configured
-      if (m_validationMode && dir == Trk::PropDirection(m_validationDirection)) {
+      if (m_validationMode && dir == Trk::PropDirection(m_validationDirection.value())) {
 
         if (cache.validationLayer) {
           // all you have from MaterialProperties
@@ -799,11 +745,12 @@ Trk::MaterialEffectsUpdator::updateImpl(
         std::move(updatedCovariance)
     );
   }
+  //default if we have not returned before
   return parm.uniqueClone();
 }
 
 void
-Trk::MaterialEffectsUpdator::validationActionImpl(ICache& cache) 
+Trk::MaterialEffectsUpdator::validationActionImpl(ICache& cache)
 {
   cache.validationEta = 0.;
   cache.validationPhi = 0.;
@@ -811,7 +758,7 @@ Trk::MaterialEffectsUpdator::validationActionImpl(ICache& cache)
 }
 
 void
-Trk::MaterialEffectsUpdator::modelActionImpl(ICache& cache, const Trk::TrackParameters* /*parm*/) 
+Trk::MaterialEffectsUpdator::modelActionImpl(ICache& cache, const Trk::TrackParameters* /*parm*/)
 {
   cache.accumulatedElossSigma = 0;
 }

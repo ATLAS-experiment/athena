@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   This class is used in conjunction with SaltModel to run inference on a GNN model.
   Whereas SaltModel handles the interfacing with the ONNX runtime, this class handles
@@ -8,29 +8,26 @@
   back to ATLAS EDM.
 */
 
-#ifndef GNN_H
-#define GNN_H
+#ifndef FLAVORTAGINFERENCE_GNN_H
+#define FLAVORTAGINFERENCE_GNN_H
 
 // Tool includes
-#include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/AssociationEnums.h"
-#include "FlavorTagInference/FTagDataDependencyNames.h"
-#include "FlavorTagInference/GNNOptions.h"
-
 #include "FlavorTagInference/DataPrepUtilities.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
+#include "FlavorTagInference/FlipTagEnums.h"
+#include "FlavorTagInference/GNNDataLoader.h"
+#include "FlavorTagInference/GNNOptions.h"
+#include "FlavorTagInference/ISaltModel.h"
 
 // EDM includes
-#include "xAODBTagging/BTaggingFwd.h"
-#include "xAODJet/JetContainer.h"
+#include "xAODBase/IParticle.h"
 
-#include <memory>
 #include <string>
 #include <map>
 
 namespace FlavorTagInference {
 
     struct GNNOptions;
-    class SaltModel;
 
   //
   // Tool to to flavor tag jet/btagging object
@@ -46,25 +43,21 @@ namespace FlavorTagInference {
     GNN(const std::string& nnFile,
         const FlipTagConfig& flip_config = FlipTagConfig::STANDARD,
         const std::map<std::string, std::string>& variableRemapping = {},
-        const TrackLinkType trackLinkType = TrackLinkType::TRACK_PARTICLE,
         float defaultOutputValue = NAN);
     GNN(GNN&&);
     GNN(const GNN&);
     virtual ~GNN();
 
-    virtual void decorate(const xAOD::BTagging& btag) const;
-    virtual void decorate(const xAOD::Jet& jet) const;
-    virtual void decorateWithDefaults(const SG::AuxElement& jet) const;
-    void decorate(const xAOD::Jet& jet, const SG::AuxElement& decorated) const;
+    virtual void decorate(const xAOD::IParticle& i_jet) const;
+    virtual void decorateWithDefaults(const xAOD::IParticle& jet) const;
 
     virtual std::set<std::string> getDecoratorKeys() const;
     virtual std::set<std::string> getAuxInputKeys() const;
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
-    std::shared_ptr<const SaltModel> m_saltModel;
   private:
     // private constructor, delegate of the above public ones
-    GNN(std::shared_ptr<const SaltModel>, const GNNOptions& opts);
+    GNN(ISaltModelPtr, const GNNOptions& opts);
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
     using TrackLinks = std::vector<ElementLink<TPC>>;
@@ -86,17 +79,15 @@ namespace FlavorTagInference {
 
     /* create all decorators */
     std::tuple<FTagDataDependencyNames, std::set<std::string>>
-    createDecorators(const SaltModel::OutputConfig& outConfig, const FTagOptions& options);
+    createDecorators(const OutputConfig& outConfig, const FTagOptions& options);
 
+    ISaltModelPtr m_saltModel;
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
-    std::vector<internal::VarFromBTag> m_varsFromBTag;
-    std::vector<internal::VarFromJet> m_varsFromJet;
-    std::vector<std::shared_ptr<IConstituentsLoader>> m_constituentsLoaders;
+    GNNDataLoader m_dataLoader;
 
     Decorators m_decorators;
     std::vector<std::pair<Dec<float>, float>> m_defaultValues;
-    FTagDataDependencyNames m_dataDependencyNames;
     bool m_defaultZeroTracks;
   };
 } // end namespace FlavorTagInference

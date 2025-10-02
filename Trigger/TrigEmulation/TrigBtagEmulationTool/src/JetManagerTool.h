@@ -1,15 +1,18 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Jet_Manager_H
 #define Jet_Manager_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
 #include "src/TrigBtagEmulationJet.h"
 
-#include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/ReadHandleKey.h"
+#include "AsgMessaging/AsgMessaging.h"
+#include "AsgTools/AsgTool.h"
+#include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
+#include "AsgTools/CurrentContext.h"
+#include "AsgDataHandles/ReadHandleKey.h"
 
 #include "xAODJet/JetAttributes.h"
 #include "xAODJet/JetContainer.h"
@@ -27,11 +30,10 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 namespace Trig {
 
   class JetManagerTool : 
-    public AthAlgTool {
+    public asg::AsgTool {
+      ASG_TOOL_CLASS0(JetManagerTool)
   public:
-    JetManagerTool(const std::string& type, 
-		   const std::string& name, 
-		   const IInterface* parent);
+    JetManagerTool(const std::string& name);
     virtual ~JetManagerTool() = default;
     
     virtual StatusCode initialize() override;
@@ -49,9 +51,13 @@ namespace Trig {
     // These are set in the initialize method given JetContainerName
     SG::ReadHandleKey< xAOD::JetContainer > m_jetInputKey {this, "InputJets", "", "Input Jet Collection Key, retrieved from reconstructed jets"};
     SG::ReadHandleKey< xAOD::JetContainer > m_bjetInputKey {this, "InputBJets", "", "Input b-Jet Collection Key, retrieved from reconstructed jets"};
+    SG::ReadHandleKey< xAOD::BTaggingContainer > m_btagInputKey {this, "InputBTag", "HLT_xAOD__BTaggingContainer_HLTBjetFex", "Run2 input b-tag Collection Key"};
 
     Gaudi::Property<std::string> m_btagging_link {this, "BTaggingLink", "btaggingLink"};    
     Gaudi::Property<std::string> m_jetcontainer {this, "JetContainerName", "", "Jet Container"};
+    Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", 3, "LHC Period Run2 or Run3"};
+
+    bool matchedSPLITjet(const xAOD::Jet*, const xAOD::Jet*) const;
   };
 
   inline const std::string& JetManagerTool::jetContainerName() const { return m_jetInputKey.key(); }

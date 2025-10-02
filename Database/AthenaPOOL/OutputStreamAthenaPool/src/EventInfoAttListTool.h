@@ -13,34 +13,26 @@ Purpose : Tool to buid the Global Event Tags
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODEventInfo/EventInfo.h" //typedef
 
-#include <string>
-#include <memory> //unique_ptr
+#include <memory>
 
 class AthenaAttributeList;
 namespace coral{
  class AttributeListSpecification;
 }
 
-/** Interface ID for EventInfoAttListTool */  
-static const InterfaceID IID_EventInfoAttListTool("EventInfoAttListTool", 1, 0);
 
 class EventInfoAttListTool : public AthAlgTool  {
 
 public:
   
   /** Standard Constructor */
-  EventInfoAttListTool(const std::string& type, 
-                   const std::string& name, 
-                   const IInterface* parent);
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID( ) { return IID_EventInfoAttListTool; };
+  using AthAlgTool::AthAlgTool;
 
   /** Overriding initialize, finalize and execute */
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
 
-  // interface 
+  // interface
   bool isValid() const;
   const coral::AttributeListSpecification& getAttributeSpecification() const;
   std::unique_ptr<AthenaAttributeList> getAttributeListPtr(const xAOD::EventInfo& einfo) const;

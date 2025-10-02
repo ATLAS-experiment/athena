@@ -5,9 +5,11 @@
 #ifndef MCTRUTH_ATLASG4EVENTUSERINFO_H
 #define MCTRUTH_ATLASG4EVENTUSERINFO_H
 
+#include <memory>
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "G4VUserEventInformation.hh"
+#include "HitManagement/HitCollectionMap.h"
 
 /** @class AtlasG4EventUserInfo
 
@@ -99,12 +101,26 @@ public:
    */
   void SetLastProcessedStep(int stepNumber) { m_lastProcessedStep = stepNumber; }
 
+  /**
+   * @brief Get the HitCollectionMap object with shared ownership. Geant4 deleting this UserInfo
+   * object will not delete the HitCollectionMap.
+   */
+  std::shared_ptr<HitCollectionMap> GetHitCollectionMap() const { return m_hitCollectionMap; }
+
+  /**
+   * @brief Set the HitCollectionMap object
+   */
+  void SetHitCollectionMap(std::shared_ptr<HitCollectionMap> hitCollections) {  m_hitCollectionMap = hitCollections; }
+
   void Print() const {}
 
 private:
   HepMC::GenEvent *m_theEvent{};
   HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
   HepMC::GenParticlePtr m_currentGenParticle{};
+
+  std::shared_ptr<HitCollectionMap> m_hitCollectionMap{std::make_shared<HitCollectionMap>()};
+
   // These next two variables are used by the CaloCalibrationHit
   // recording code as event-level flags They correspond to the Track
   // ID and step number of the last G4Step processed by a

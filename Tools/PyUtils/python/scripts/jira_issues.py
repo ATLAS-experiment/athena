@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.jira
 # @purpose Interface with CERN JIRA instance
 # @author Edward Moyse
 # @date July 2016
-
-from __future__ import print_function
 
 __doc__ = "Interface with CERN JIRA instance."
 __author__ = "Edward Moyse"

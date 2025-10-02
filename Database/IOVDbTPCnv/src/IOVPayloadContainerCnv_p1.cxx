@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IOVDbDataModel/IOVPayloadContainer.h"
@@ -297,7 +297,7 @@ IOVPayloadContainerCnv_p1::transToPers(const IOVPayloadContainer* transObj,
             // Add in name
             std::string name = tColl->chanName(chan);
             if (name.size()) {
-                entry.m_name = name;
+                entry.m_name = std::move(name);
             }
 
             // Add in each attribute value and save indexes
@@ -376,7 +376,7 @@ IOVPayloadContainerCnv_p1::fillPersAttrSpec(const IOVPayloadContainer* transObj,
                 std::string typeName = attr.specification().typeName();
 
                 // Fill map of names for future lookup for conversion
-                names.insert(name);
+                names.insert(std::move(name));
             }
         }
 
@@ -587,7 +587,11 @@ IOVPayloadContainerCnv_p1::fillAttributeData(const IOVPayloadContainer_p1* persO
      */
 
     unsigned int objIndex = index.objIndex();
-    unsigned int & offset = m_objIndexOffset[index.typeIndex()];
+    unsigned int itype = index.typeIndex();
+    if (itype >= std::size(m_objIndexOffset)) {
+      std::abort();
+    }
+    unsigned int & offset = m_objIndexOffset[itype];
     if(offset == 1) {
         offset = 0;
     } else {

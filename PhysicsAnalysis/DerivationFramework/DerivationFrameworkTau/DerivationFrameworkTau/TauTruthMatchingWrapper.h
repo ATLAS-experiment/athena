@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@
 
 namespace DerivationFramework {
 
-  class TauTruthMatchingWrapper : public AthAlgTool, public IAugmentationTool {
+  class TauTruthMatchingWrapper : public extends<AthAlgTool, IAugmentationTool> {
     public: 
       TauTruthMatchingWrapper(const std::string& t, const std::string& n, const IInterface* p);
 
@@ -37,8 +37,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauKey
          {this, "TauContainerName", "TauJets", "ReadHandleKey for input TauJetContainer"};
 
-
-      ToolHandle < TauAnalysisTools::ITauTruthMatchingTool > m_tTauTruthMatchingTool;
+      ToolHandle < TauAnalysisTools::ITauTruthMatchingTool > m_tTauTruthMatchingTool{this, "TauTruthMatchingTool", "TauAnalysisTools::TauTruthMatchingTool"};
 
   }; 
 }

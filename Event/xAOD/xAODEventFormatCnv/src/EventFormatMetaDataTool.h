@@ -1,7 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
-/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 
-// $Id: EventFormatMetaDataTool.h 651874 2015-03-05 14:16:19Z krasznaa $
 #ifndef XAODEVENTFORMATCNV_EVENTFORMATMETADATATOOL
 #define XAODEVENTFORMATCNV_EVENTFORMATMETADATATOOL
 
@@ -33,10 +32,7 @@ namespace xAODMaker {
 /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
 /// @author Frank Berghaus <fberghaus@anl.gov>
 ///
-/// $Revision: 651874 $
-/// $Date: 2015-03-05 15:16:19 +0100 (Thu, 05 Mar 2015) $
-///
-class EventFormatMetaDataTool : public virtual ::IMetaDataTool, public ::AthAlgTool {
+class EventFormatMetaDataTool : public extends<::AthAlgTool, IMetaDataTool> {
  public:
   /// Regular AlgTool constructor
   EventFormatMetaDataTool(const std::string& type,
@@ -44,13 +40,13 @@ class EventFormatMetaDataTool : public virtual ::IMetaDataTool, public ::AthAlgT
                           const IInterface* parent);
 
   /// Function initialising the tool
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   /// Function collecting the metadata from a new input file
-  virtual StatusCode beginInputFile(const SG::SourceID&) {return beginInputFile();}
+  virtual StatusCode beginInputFile(const SG::SourceID&) override {return beginInputFile();}
 
   /// Function collecting the metadata from a new input file
-  virtual StatusCode endInputFile(const SG::SourceID&) {return endInputFile();}
+  virtual StatusCode endInputFile(const SG::SourceID&) override {return endInputFile();}
 
   /// Wait for metadata write operations to finish, then returns SUCCESS
   virtual StatusCode metaDataStop(const SG::SourceID&) {return metaDataStop();}
@@ -63,7 +59,7 @@ class EventFormatMetaDataTool : public virtual ::IMetaDataTool, public ::AthAlgT
   virtual StatusCode endInputFile() {return StatusCode::SUCCESS;}
 
   /// Wait for metadata write operations to finish, then return SUCCESS
-  virtual StatusCode metaDataStop();
+  virtual StatusCode metaDataStop() override;
 
  private:
   /// Function collecting the event format metadata from the input file

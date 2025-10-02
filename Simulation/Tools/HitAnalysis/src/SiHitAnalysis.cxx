@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiHitAnalysis.h"
 
+
+#include "StoreGate/ReadHandle.h"
 #include "GeoAdaptors/GeoSiHit.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AtlasHepMC/GenVertex.h"
@@ -13,10 +15,6 @@
 #include "TH2.h"
 #include "TTree.h"
 
-SiHitAnalysis::SiHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
-   : AthAlgorithm(name, pSvcLocator)
-{
-}
 
 StatusCode SiHitAnalysis::initialize()
 {
@@ -61,9 +59,6 @@ StatusCode SiHitAnalysis::initialize()
     ATH_MSG_ERROR("SiHitsAnalysis for " << m_hitsContainerKey.key() << " not supported!!!");
     return StatusCode::FAILURE;
   }
-
-  // Grab the Ntuple and histogramming service for the tree
-  ATH_CHECK(m_thistSvc.retrieve());
 
   /** Histograms**/
   float bin_down = -600;
@@ -152,48 +147,46 @@ StatusCode SiHitAnalysis::initialize()
   m_h_module_phi = new TH1D(("h_"+detName+"_module_phi").c_str(), ("h_"+detName+ " module in #phi").c_str(), 100, 0, 100);
   m_h_module_phi->StatOverflows();
 
-  ATH_CHECK(m_thistSvc.retrieve());
-
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_x->GetName(), m_h_hits_x));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_y->GetName(), m_h_hits_y));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_z->GetName(), m_h_hits_z));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_r->GetName(), m_h_hits_r));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_xy->GetName(), m_h_xy));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_zr->GetName(), m_h_zr));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_time->GetName(), m_h_hits_time));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_eloss->GetName(), m_h_hits_eloss));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_step->GetName(), m_h_hits_step));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_hits_barcode->GetName(), m_h_hits_barcode));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_x->GetName(), m_h_hits_x));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_y->GetName(), m_h_hits_y));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_z->GetName(), m_h_hits_z));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_r->GetName(), m_h_hits_r));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_xy->GetName(), m_h_xy));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_zr->GetName(), m_h_zr));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_time->GetName(), m_h_hits_time));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_eloss->GetName(), m_h_hits_eloss));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_step->GetName(), m_h_hits_step));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_hits_barcode->GetName(), m_h_hits_barcode));
 
   //To be filled only when the expert mode is on.
   if (m_expert.value()) {
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_time_eloss->GetName(), m_h_time_eloss));
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_z_eloss->GetName(), m_h_z_eloss));
-    ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_r_eloss->GetName(), m_h_r_eloss));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_time_eloss->GetName(), m_h_time_eloss));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_z_eloss->GetName(), m_h_z_eloss));
+    ATH_CHECK(histSvc()->regHist(m_histPath + m_h_r_eloss->GetName(), m_h_r_eloss));
   }
 
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_barrel_endcap->GetName(), m_h_barrel_endcap));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_layer_disk->GetName(), m_h_layer_disk));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_module_eta->GetName(), m_h_module_eta));
-  ATH_CHECK(m_thistSvc->regHist(m_histPath + m_h_module_phi->GetName(), m_h_module_phi));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_barrel_endcap->GetName(), m_h_barrel_endcap));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_layer_disk->GetName(), m_h_layer_disk));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_module_eta->GetName(), m_h_module_eta));
+  ATH_CHECK(histSvc()->regHist(m_histPath + m_h_module_phi->GetName(), m_h_module_phi));
 
   // Special shared ITk histograms
   if (detName.find("ITk") != std::string::npos) {
     std::string xy_name = "h_ITk_xy";
     auto xy = std::make_unique<TH2D>(xy_name.c_str(), xy_name.c_str(), 2200, -1100, 1100, 2200, -1100, 1100);
     xy->StatOverflows();
-    ATH_CHECK(m_thistSvc->regShared(m_histPath + xy_name, std::move(xy), m_h_xy_shared));
+    ATH_CHECK(histSvc()->regShared(m_histPath + xy_name, std::move(xy), m_h_xy_shared));
 
     std::string zr_name = "h_ITk_zr";
     auto zr = std::make_unique<TH2D>(zr_name.c_str(), zr_name.c_str(), 6800, -3400, 3400, 1100, 0, 1100);
     zr->StatOverflows();
-    ATH_CHECK(m_thistSvc->regShared(m_histPath + zr_name, std::move(zr), m_h_zr_shared));
+    ATH_CHECK(histSvc()->regShared(m_histPath + zr_name, std::move(zr), m_h_zr_shared));
   }
 
   /** now add branches and leaves to the tree */
   m_tree = new TTree(ntupName.c_str(), ntupName.c_str());
   std::string fullNtupleName =  "/" + m_ntuplePath + "/" + detName;
-  ATH_CHECK(m_thistSvc->regTree(fullNtupleName,m_tree));
+  ATH_CHECK(histSvc()->regTree(fullNtupleName,m_tree));
 
   if (m_tree){
     m_tree->Branch((detName+"_x").c_str(), &m_hits_x);
@@ -257,9 +250,10 @@ StatusCode SiHitAnalysis::execute()
   m_module_eta->clear();
   m_module_phi->clear();
 
-  SG::ReadHandle<SiHitCollection> hitCollection(m_hitsContainerKey);
-  if (hitCollection.isValid()) {
-    ATH_MSG_INFO("Event contains " << hitCollection->size() << " entries in " << m_hitsContainerKey.key());
+  const EventContext&ctx {Gaudi::Hive::currentContext()};
+  const SiHitCollection* hitCollection{nullptr};
+  ATH_CHECK(SG::get(hitCollection, m_hitsContainerKey, ctx));
+  ATH_MSG_INFO("Event contains " << hitCollection->size() << " entries in " << m_hitsContainerKey.key());
     for (const SiHit &hit : *hitCollection) {
       GeoSiHit ghit(hit);
       HepGeom::Point3D<double> p = ghit.getGlobalPosition();
@@ -331,13 +325,9 @@ StatusCode SiHitAnalysis::execute()
       m_layer_disk->push_back(hit.getLayerDisk());
       m_module_eta->push_back(hit.getEtaModule());
       m_module_phi->push_back(hit.getPhiModule());
-    } // End while hits
-  } else { // End statuscode success upon retrieval of hits
-    ATH_MSG_ERROR("Invalid collection");
-    return StatusCode::FAILURE;
-  }
-
-  if (m_tree != nullptr) m_tree->Fill();
+  } // End while hits
+  
+  m_tree->Fill();
 
   return StatusCode::SUCCESS;
 }

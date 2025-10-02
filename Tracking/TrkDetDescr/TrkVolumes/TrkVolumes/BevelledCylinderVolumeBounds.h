@@ -122,7 +122,7 @@ namespace Trk {
     bool inside(const Amg::Vector3D& , double tol=0.) const override;
 
     /** Method to decompose the Bounds into boundarySurfaces */
-    const std::vector<const Trk::Surface*>* decomposeToSurfaces (const Amg::Transform3D& transform) override;
+    virtual std::vector<std::unique_ptr<Trk::Surface>> decomposeToSurfaces (const Amg::Transform3D& transform) override;
 
     /** Provide accessor for BoundarySurfaces */
     ObjectAccessor boundarySurfaceAccessor(const Amg::Vector3D& gp,
@@ -164,28 +164,28 @@ namespace Trk {
 
   private:
     /** This method returns the associated BevelledCylinderBounds of the inner BevelledCylinderSurfaces. */
-    CylinderBounds* innerBevelledCylinderBounds() const;
+    std::shared_ptr<CylinderBounds> innerBevelledCylinderBounds() const;
     /** This method returns the associated BevelledCylinderBounds of the outer BevelledCylinderSurfaces. */
-    CylinderBounds* outerBevelledCylinderBounds() const;
+    std::shared_ptr<CylinderBounds> outerBevelledCylinderBounds() const;
     /** This method returns the associated plane surface bounds of the inner bevelled surface*/
-    RectangleBounds* innerBevelledPlaneBounds() const;
+    std::shared_ptr<RectangleBounds> innerBevelledPlaneBounds() const;
     /** This method returns the associated BevelledCylinderBounds of the outer BevelledCylinderSurfaces. */
-    RectangleBounds* outerBevelledPlaneBounds() const;
+    std::shared_ptr<RectangleBounds> outerBevelledPlaneBounds() const;
     /** This method returns the associated EllipseBounds for the bottom/top EllipseSurface. */
-    EllipseBounds* bottomEllipseBounds() const;
+    std::shared_ptr<EllipseBounds> bottomEllipseBounds() const;
     /** This method returns the associated EllipseBounds for the bottom/top EllipseSurface. */
-    EllipseBounds* topEllipseBounds() const;
+    std::shared_ptr<EllipseBounds> topEllipseBounds() const;
     /** This method returns the associated CylinderBounds of the inner CylinderSurfaces. */
-    CylinderBounds* innerCylinderBounds() const;
+    std::shared_ptr<CylinderBounds> innerCylinderBounds() const;
     /** This method returns the associated CylinderBounds of the outer CylinderSurfaces. */
-    CylinderBounds* outerCylinderBounds() const;
+    std::shared_ptr<CylinderBounds> outerCylinderBounds() const;
     /** This method returns the associated DiscBounds for the bottom/top DiscSurface. */
-    DiscBounds* discBounds() const;
+    std::shared_ptr<DiscBounds> discBounds() const;
     /** This method returns the bevelled area volume. */
     Volume* subtractedVolume() const;
     /** This method returns the associated PlaneBounds limiting a sectoral BevelledCylinderVolume. */
-    TrapezoidBounds* sectorTrdBounds() const;
-    RectangleBounds* sectorPlaneBounds() const;
+    std::shared_ptr<TrapezoidBounds> sectorTrdBounds() const;
+    std::shared_ptr<RectangleBounds> sectorPlaneBounds() const;
     /** Private method to construct the accessors */
     void createBoundarySurfaceAccessors();
 
@@ -244,8 +244,6 @@ namespace Trk {
  inline double BevelledCylinderVolumeBounds::thetaPlus() const { return m_thetaPlus; }
  inline int BevelledCylinderVolumeBounds::type() const { return m_type; }
 
-// inline EllipseBounds* BevelledCylinderVolumeBounds::topEllipseBounds() const { return this->topEllipseBounds(); }
-// inline EllipseBounds* BevelledCylinderVolumeBounds::bottomEllipseBounds() const { return this->bottomEllipseBounds(); }
 
 }
 

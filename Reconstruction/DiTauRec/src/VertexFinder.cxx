@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/VertexFinder.h"
@@ -9,11 +9,9 @@
 VertexFinder::VertexFinder(const std::string& type,
 			   const std::string& name,
 			   const IInterface * parent) :
-  DiTauToolBase(type, name, parent),
-  m_assocTracksName("GhostTrack")
+  DiTauToolBase(type, name, parent)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("AssociatedTracks", m_assocTracksName);
 }
 
 
@@ -63,21 +61,23 @@ StatusCode VertexFinder::execute(DiTauCandidateData * data,
   pDiTau->setVertex(vxContainer.get(), vxPrimary);
        
 
-  // try to find new PV with TJVA
-  ATH_MSG_DEBUG("TJVA enabled -> try to find new PV for the tau candidate");
+  if(m_useTJVA){
+    // try to find new PV with TJVA
+    ATH_MSG_DEBUG("TJVA enabled -> try to find new PV for the tau candidate");
 
-  float maxJVF = -100.;
-  ElementLink<xAOD::VertexContainer> newPrimaryVertexLink = getPV_TJVA(pDiTau, vxContainer.get(), maxJVF, ctx);
-  if (newPrimaryVertexLink.isValid()) {
-    // set new primary vertex
-    // will overwrite default one which was set above
-    pDiTau->setVertexLink(newPrimaryVertexLink);
-    // save highest JVF value
-    pDiTau->setDetail(xAOD::DiTauJetParameters::TauJetVtxFraction,static_cast<float>(maxJVF));
-    ATH_MSG_DEBUG("TJVA vertex found and set");
-  }
-  else {
-    ATH_MSG_DEBUG("couldn't find new PV for TJVA");
+    float maxJVF = -100.;
+    ElementLink<xAOD::VertexContainer> newPrimaryVertexLink = getPV_TJVA(pDiTau, vxContainer.get(), maxJVF, ctx);
+    if (newPrimaryVertexLink.isValid()) {
+      // set new primary vertex
+      // will overwrite default one which was set above
+      pDiTau->setVertexLink(newPrimaryVertexLink);
+      // save highest JVF value
+      pDiTau->setDetail(xAOD::DiTauJetParameters::TauJetVtxFraction,static_cast<float>(maxJVF));
+      ATH_MSG_DEBUG("TJVA vertex found and set");
+    }
+    else {
+      ATH_MSG_DEBUG("couldn't find new PV for TJVA");
+    }
   }
 
   return StatusCode::SUCCESS;

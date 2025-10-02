@@ -19,14 +19,10 @@ namespace ActsTrk {
   StatusCode SpacePointAnalysisAlg::initialize() {
     ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
 
-    m_clusterDecoration = m_spacePointContainerKey.key() + "." + m_clusterDecoration.key();
-
     ATH_MSG_DEBUG("Properties:");
     ATH_MSG_DEBUG(m_spacePointContainerKey);
-    ATH_MSG_DEBUG(m_clusterDecoration);
     
     ATH_CHECK( m_spacePointContainerKey.initialize() );
-    ATH_CHECK( m_clusterDecoration.initialize() );
 
     if (m_usePixel and m_useOverlap)
       ATH_MSG_INFO("No overlap collection when enabled for pixel space points! Check your configuration if needed.");
@@ -55,18 +51,14 @@ namespace ActsTrk {
     }
     const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     // Early exit if no input collection
-    if (inputSpacePointCollection->size() == 0) {
+    if ( inputSpacePointCollection->empty() ) {
       return StatusCode::SUCCESS;
     }
     
     ATH_MSG_DEBUG("Reading decoration to space point collection: bare pointers to clusters");
-    ATH_MSG_DEBUG("Decoration name: " << m_clusterDecoration.key());
     using decoration_type = std::vector<const xAOD::UncalibratedMeasurement*>;
-    SG::ReadDecorHandle< xAOD::SpacePointContainer,
-			 decoration_type > barePointersToClusters( m_clusterDecoration, ctx );
     static const SG::ConstAccessor<decoration_type> measurementsAcc ("measurements");
-    if ( not barePointersToClusters.isAvailable() and
-	 not measurementsAcc.isAvailable (*inputSpacePointCollection->front()) ) {
+    if ( not measurementsAcc.isAvailable (*inputSpacePointCollection->front()) ) {
       ATH_MSG_ERROR("Space Point Collection does not have decoration 'measurements', which should contain a vector of bare pointes to clusters");
       return StatusCode::FAILURE;
     }

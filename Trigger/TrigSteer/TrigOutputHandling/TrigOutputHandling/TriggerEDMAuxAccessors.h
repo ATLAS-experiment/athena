@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBase/IParticleContainer.h"
@@ -35,7 +35,7 @@ auto charAccessors = initAccessors<char>(
   "vsi_isFake", "vsi_isPassMMV", "vsi_trkd0cut", "vsi_twoCircErrcut", "vsi_twoCircRcut", "vsi_fastErrcut", "vsi_fastRcut", "vsi_fitErrcut", "vsi_chi2cut",
   "overflow",
   "GNTau_VeryLoose", "GNTau_Loose", "GNTau_Medium", "GNTau_Tight",
-  "NNJvtPass"
+  "NNJvtTrkAugV1Pass"
   );
 
 auto intAccessors = initAccessors<int>(
@@ -52,7 +52,14 @@ auto intAccessors = initAccessors<int>(
   "dEdxTrk_id","dEdxTrk_dedx_n_usedhits",
   "dEdxTrk_n_hits_innermost","dEdxTrk_n_hits_inner","dEdxTrk_n_hits_pix","dEdxTrk_n_hits_sct",
   "dEdxHit_trkid","dEdxHit_iblovfl","dEdxHit_loc","dEdxHit_layer","NumPV", "nRoIs",
-  "l1a_type", "other_type", "beforeafterflag","pass");
+  "l1a_type", "other_type", "beforeafterflag","pass",
+  "other_type_before", "other_type_after",
+  "offset_before", "offset_after",  
+  "n_isotrack",
+  "n_track",
+  "n_tracks_lead",
+  "n_tracks_subl"
+  );
 
 auto int16Accessors = initAccessors<int16_t>("view",
   "HPtdEdxTrk_n_hdedx_hits_1p45","HPtdEdxTrk_n_hdedx_hits_1p50","HPtdEdxTrk_n_hdedx_hits_1p55","HPtdEdxTrk_n_hdedx_hits_1p60",
@@ -73,7 +80,7 @@ auto uint64Accessors = initAccessors<uint64_t>("start", "stop", "thresholdPatter
 auto sizeAccessors = initAccessors<size_t>("alg_idx");
 
 auto floatAccessors = initAccessors<float>(
-  "EBWeight", "Jvt", "JvtRpt", "NNJvt", "IP2D_bc", "IP2D_bu", "IP2D_cu", "IP3D_bc", "IP3D_bu", "IP3D_cu",
+  "EBWeight", "Jvt", "JvtRpt", "NNJvtTrkAugV1", "IP2D_bc", "IP2D_bu", "IP2D_cu", "IP3D_bc", "IP3D_bu", "IP3D_cu",
   "ActiveArea", "ActiveArea4vec_eta", "ActiveArea4vec_m", "ActiveArea4vec_phi", "ActiveArea4vec_pt",
   "JetEtaJESScaleMomentum_eta", "JetEtaJESScaleMomentum_m", "JetEtaJESScaleMomentum_phi", "JetEtaJESScaleMomentum_pt",
   "JetGSCScaleMomentum_eta", "JetGSCScaleMomentum_m", "JetGSCScaleMomentum_phi", "JetGSCScaleMomentum_pt",
@@ -147,8 +154,15 @@ auto floatAccessors = initAccessors<float>(
   "GN2Xv01_phbb",
   "GN2Xv01_ptop",
   "GN2Xv01_pqcd",
+  "GN2XTrig_phbb",
+  "GN2XTrig_ptop",
+  "GN2XTrig_pqcd",
   "fastGNTau20240216_ptau",
   "fastGNTau20240216_pu",
+  "fastUHT120250605_ptau",
+  "fastUHT120250605_pu",
+  "fastUHT120250605_pc",
+  "fastUHT120250605_pb",
   "DetectorEta", "DetectorPhi",
   "EMFrac", "HECFrac", "JVFCorr", "seed_eta", "seed_phi", "trk_a0beam",
   "btagIp_d0", "btagIp_d0Uncertainty", "btagIp_z0SinTheta", "btagIp_z0SinThetaUncertainty",
@@ -187,7 +201,41 @@ auto floatAccessors = initAccessors<float>(
   "ClusterEta", "ClusterPhi",
   "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA",
   "GNTau_Score", "GNTau_ScoreSigTrans", 
-  "pixQ2mod"
+  "pixQ2mod",
+  "adScore",
+  "E_frac_subl",
+  "E_frac_subsubl",
+  "R_core_lead",
+  "R_core_subl",
+  "R_isotrack",
+  "R_max_lead",
+  "R_max_subl",
+  "R_subjets_subl",
+  "R_subjets_subsubl",
+  "R_track",
+  "R_track_all",
+  "R_track_core",
+  "R_tracks_lead",
+  "R_tracks_subl",
+  "d0_leadtrack_lead",
+  "d0_leadtrack_subl",
+  "ditau_pt",
+  "f_core_lead",
+  "f_core_subl",
+  "f_isotracks",
+  "f_subjet_lead",
+  "f_subjet_subl",
+  "f_subjets",
+  "f_track_lead",
+  "f_track_subl",
+  "m_core_lead",
+  "m_core_subl",
+  "m_track",
+  "m_track_all",
+  "m_track_core",
+  "m_tracks_lead",
+  "m_tracks_subl",
+  "omni_score"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",
@@ -202,7 +250,7 @@ auto vushortAccessors = initAccessors<std::vector<unsigned short>>("robs_status"
 
 auto vuintAccessors = initAccessors<std::vector<unsigned>>("robs_history");
 
-auto vuint32Accessors = initAccessors<std::vector<uint32_t>>("robs_id", "robs_size", "PEBROBList", "PEBSubDetList");
+auto vuint32Accessors = initAccessors<std::vector<uint32_t>>("robs_id", "robs_size", "PEBROBList", "PEBSubDetList", "muCalibDS");
 
 auto vuint8Accessors = initAccessors<std::vector<uint8_t>>("parameterPosition");
 

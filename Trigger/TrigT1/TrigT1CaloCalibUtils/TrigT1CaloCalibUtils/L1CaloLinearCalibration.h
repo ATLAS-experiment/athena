@@ -9,7 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include <string>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 // forward declrations
 class L1CaloEnergyScanResultsContainer;
@@ -39,8 +39,8 @@ class L1CaloLinearCalibration : public AthAlgorithm
  private:
     std::string m_l1CaloRampDataContainerKey;
 
-    boost::scoped_ptr<L1CaloEnergyScanResultsContainer> m_energyScanResultsContainer;
-    boost::scoped_ptr<L1CaloEnergyScanRunInfoContainer> m_energyScanRunInfoContainer;
+    std::unique_ptr<L1CaloEnergyScanResultsContainer> m_energyScanResultsContainer;
+    std::unique_ptr<L1CaloEnergyScanRunInfoContainer> m_energyScanRunInfoContainer;
 };
 
 #endif // L1CALOLINEARCALIBRATION_H

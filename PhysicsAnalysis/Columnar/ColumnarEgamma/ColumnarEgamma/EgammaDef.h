@@ -9,61 +9,54 @@
 #define COLUMNAR_EGAMMA_EGAMMA_DEF_H
 
 #include <ColumnarCore/ContainerId.h>
+#include <xAODEgamma/EgammaContainer.h>
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
 
 namespace columnar
 {
-  template<> struct ContainerIdTraits<ContainerId::electron> final
+  namespace ContainerId
   {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+    struct electron : regularCIBase<xAOD::Electron,xAOD::ElectronContainer>
+    {
+      static constexpr std::string_view idName = "electron";
+    };
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::Electron;
+    struct photon : regularCIBase<xAOD::Photon,xAOD::PhotonContainer>
+    {
+      static constexpr std::string_view idName = "photon";
+    };
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::ElectronContainer;
+    struct egamma : regularCIBase<xAOD::Egamma,xAOD::EgammaContainer>
+    {
+      static constexpr std::string_view idName = "egamma";
+    };
+    using mutableEgamma = mutableCI<egamma>;
+  }
 
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::ElectronContainer;
-  };
+  using ElectronRange = ObjectRange<ContainerId::electron>;
+  using ElectronId = ObjectId<ContainerId::electron>;
+  using OptElectronId = OptObjectId<ContainerId::electron>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ElectronAccessor  = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ElectronDecorator = AccessorTemplate<ContainerId::electron,CT,ColumnAccessMode::output,CM>;
 
-  template<> struct ContainerIdTraits<ContainerId::photon> final
-  {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+  using PhotonRange = ObjectRange<ContainerId::photon>;
+  using PhotonId = ObjectId<ContainerId::photon>;
+  using OptPhotonId = OptObjectId<ContainerId::photon>;
+  template<typename CT,typename CM=ColumnarModeDefault> using PhotonAccessor  = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using PhotonDecorator = AccessorTemplate<ContainerId::photon,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::Photon;
+  using EgammaRange = ObjectRange<ContainerId::egamma>;
+  using EgammaId = ObjectId<ContainerId::egamma>;
+  using OptEgammaId = OptObjectId<ContainerId::egamma>;
+  template<typename CT,typename CM=ColumnarModeDefault> using EgammaAccessor  = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using EgammaDecorator = AccessorTemplate<ContainerId::egamma,CT,ColumnAccessMode::output,CM>;
 
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::PhotonContainer;
-
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::PhotonContainer;
-  };
-
-  template<> struct ContainerIdTraits<ContainerId::egamma> final
-  {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
-
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::Egamma;
-
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::EgammaContainer;
-
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::EgammaContainer;
-  };
+  using MutableEgammaRange = ObjectRange<ContainerId::mutableEgamma>;
+  using MutableEgammaId = ObjectId<ContainerId::mutableEgamma>;
+  using OptMutableEgammaId = OptObjectId<ContainerId::mutableEgamma>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaAccessor  = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using MutableEgammaDecorator = AccessorTemplate<ContainerId::mutableEgamma,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

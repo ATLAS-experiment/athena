@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,10 +16,11 @@ class MsgStream;
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkParameters/TrackParameters.h"
+#include "TrkSurfaces/Surface.h"
+
+#include <memory>
 
 namespace Trk {
-
-class Surface;
 class BinUtility;
 
 /**
@@ -33,27 +34,21 @@ class BinUtility;
  volume.
 
  @author Andreas.Salzburger@cern.ch
+ @author Christos Anastopoulos (Athena MT modification)
 
  */
 
 class NavigationLayer final : public Layer {
  public:
-  /**Constructor - the surface representation is given by pointer (ownership
-   * passed)*/
-  NavigationLayer(Surface* surfaceRepresentation, Layer* previous = nullptr,
-                  Layer* next = nullptr, BinUtility* binUtil = nullptr);
-
-  /**Constructor - the surface representation is given by pointer (ownership
-     passed)
-      - spacer layer if needed
-                  */
-  NavigationLayer(Surface* surfaceRepresentation, double thickness);
+  /**Constructor*/
+  NavigationLayer(std::unique_ptr<Surface> surfaceRepresentation);
+  NavigationLayer(std::unique_ptr<Trk::Surface> surfaceRepresentation, double thickness);
 
   /**Copy Constructor - */
   NavigationLayer(const NavigationLayer& lay);
 
   /**Destructor*/
-  virtual ~NavigationLayer() override;
+  virtual ~NavigationLayer() override = default;
 
   /** Assignment operator */
   NavigationLayer& operator=(const NavigationLayer& lay);
@@ -98,12 +93,8 @@ class NavigationLayer final : public Layer {
                                         double) override final {}
 
  protected:
-  Surface* m_surfaceRepresentation;  //!< for the navigation Volume the
-                                     //!< surface is a private member */
+  std::unique_ptr<Surface> m_surfaceRepresentation;
 
- private:
-  /**Default Constructor*/
-  NavigationLayer() {}
 };
 
 inline const Surface&
@@ -118,8 +109,7 @@ NavigationLayer::surfaceRepresentation()
   return (*m_surfaceRepresentation);
 }
 
-inline const MaterialProperties* NavigationLayer::fullUpdateMaterialProperties()
-    const {
+inline const MaterialProperties* NavigationLayer::fullUpdateMaterialProperties() const {
   return nullptr;
 }
 

@@ -29,6 +29,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 
+
 #include "FPGATrackSimKeyLayerTool.h"
 
 #include <cmath>
@@ -36,41 +37,43 @@
 #include <string>
 #include <vector>
 
-// Use IdxSet and ParSet from FPGATrackSimUtil
-using FPGATrackSimBinUtil::IdxSet;
-using FPGATrackSimBinUtil::ParSet;
-using FPGATrackSimBinUtil::StoredHit;
+#include"FPGATrackSimObjects/FPGATrackSimFunctions.h"
 
 class FPGATrackSimKeyLayerBinDesc : public  extends<AthAlgTool, IFPGATrackSimBinDesc> {
 
 public:
-    FPGATrackSimKeyLayerBinDesc(const std::string& algname, const std::string &name, const IInterface *ifc) :
-    base_class(algname, name, ifc), m_parNames({"zR1", "zR2", "phiR1", "phiR2", "xm"})
-    {
-      declareInterface<IFPGATrackSimBinDesc>(this);
-    }
+    /// Constructor
+    using base_class::base_class;
 
     virtual StatusCode initialize() override;
 
     virtual const std::string &parNames(unsigned i) const override { return m_parNames[i]; }
 
     // convert back and forth from pT, eta, phi, d0, z0 and internal paramater set
-    virtual const ParSet
-    trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {
-      return keyparsToParSet(m_keylyrtool.trackParsToKeyPars(pars));
+    virtual const FPGATrackSimBinUtil::ParSet
+    trackParsToParSet(const FPGATrackSimTrackPars &pars) const override {   
+      FPGATrackSimKeyLayerTool::KeyLyrPars keypars = m_keylyrtool.trackParsToKeyPars(pars);
+      if (m_fieldCorrection) {
+        keypars.phi1+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R1());
+        keypars.phi2+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R2());
+      }
+      return keyparsToParSet(keypars);
     }
-    virtual const FPGATrackSimTrackPars parSetToTrackPars(const ParSet &parset) const override {
+
+    
+
+    virtual const FPGATrackSimTrackPars parSetToTrackPars(const FPGATrackSimBinUtil::ParSet &parset) const override {
       return m_keylyrtool.keyParsToTrackPars(parSetToKeyPars(parset));
     }
 
     // calculate the distance in phi or eta from a track defined by parset to a
     // hit these can be implemented as any variable in the r-phi or r-eta plane
     // (not necessarily eta and phi).
-    virtual double phiResidual(const ParSet &parset, FPGATrackSimHit const *hit) const override {
+    virtual double phiResidual(const FPGATrackSimBinUtil::ParSet &parset, FPGATrackSimHit const *hit) const override {
         return m_keylyrtool.deltaX(parSetToKeyPars(parset), hit);
     }
   
-    virtual double etaResidual(const ParSet &parset, FPGATrackSimHit const *hit) const override {
+    virtual double etaResidual(const FPGATrackSimBinUtil::ParSet &parset, FPGATrackSimHit const *hit) const override {
       return hit->getZ()- m_keylyrtool.zExpected(parSetToKeyPars(parset),hit->getR());
     }
 
@@ -80,29 +83,50 @@ public:
     
     // idx should be with the definition specifed in the step
     // NOTE: the stored hit may be modified!
-    virtual bool hitInBin(const FPGATrackSimBinStep &step, const IdxSet &idx,
-                          StoredHit &storedhit) const override;
+    virtual bool hitInBin(const FPGATrackSimBinStep &step, const FPGATrackSimBinUtil::IdxSet &idx,
+                          FPGATrackSimBinUtil::StoredHit &storedhit) const override;
 
+    // Write the relevant LUT tables for firmware    
+    virtual void writeLUTs(const FPGATrackSimBinStep &step) const override;
+    
   private:
     // Configurable Properties
     Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for keylayer definition"};
     Gaudi::Property<double> m_rout{this, "rout", {-1.0}, "Radius of outer layer for keylayer definition"};
     Gaudi::Property<bool> m_approxMath{this, "approxMath", {false}, "Use approximate math to emulate possible firmware"};
+    Gaudi::Property<double> m_d0pad{this, "D0Pad", 0.0, "Extra phi padding from d0 resolution"};
+    Gaudi::Property<double> m_phipad{this, "PhiPad", 0.0, "Extra phi padding from phi resolution"};
+    Gaudi::Property<double> m_qptpad{this, "QPtPad", 0.0, "Extra phi padding from q/pT resolution"};
+    Gaudi::Property<double> m_z0pad{this, "Z0Pad", 0.0, "Extra eta padding from z0 resolution"};
+    Gaudi::Property<double> m_etapad{this, "EtaPad", 0.0, "Extra eta padding from eta resolution"};
+    Gaudi::Property<unsigned> m_region{this, "region", 0, "Region number, needed to write out lookup tables for test vectors"};
+    Gaudi::Property<std::vector<double>> m_slPerEtaMod{
+    this,
+        "slPerEtaMod",
+        std::vector<double>{19.0, 24.0, 29.0, 32.0, 18.1, 27.1, 24.1, 15.1, 30.8,
+                            30.8, 26.2, 32.2, 32.2, 26.2, 54.6, 54.6, 40.2, 60.2},
+        "Strip length per eta eta mod"
+    };
 
+
+    Gaudi::Property<unsigned> m_fieldCorRegion  { this, "fieldCorRegion", 2, "region for fieldCorrection"};
+    Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};
+        
+  
     // convert to/from the KeyLyrPars struct and the ParSet
-    ParSet keyparsToParSet(const FPGATrackSimKeyLayerTool::KeyLyrPars& keypars) const {
-      return ParSet({keypars.z1,keypars.z2,keypars.phi1,keypars.phi2,keypars.xm});
+    FPGATrackSimBinUtil::ParSet keyparsToParSet(const FPGATrackSimKeyLayerTool::KeyLyrPars& keypars) const {
+      return FPGATrackSimBinUtil::ParSet({keypars.z1,keypars.z2,keypars.phi1,keypars.phi2,keypars.xm});
     }
-    FPGATrackSimKeyLayerTool::KeyLyrPars parSetToKeyPars(const ParSet &parset) const {
+    FPGATrackSimKeyLayerTool::KeyLyrPars parSetToKeyPars(const FPGATrackSimBinUtil::ParSet &parset) const {
       return FPGATrackSimKeyLayerTool::KeyLyrPars(parset);
     }
 
     // Internal
     FPGATrackSimKeyLayerTool m_keylyrtool;
-    const std::vector<std::string> m_parNames;
+    const std::vector<std::string> m_parNames{"zR1", "zR2", "phiR1", "phiR2", "xm"};
 
     const std::vector<unsigned> m_phipars{2, 3, 4};
-    const std::vector<unsigned> m_etapars{1, 2};
+    const std::vector<unsigned> m_etapars{0, 1};
     
 };
 

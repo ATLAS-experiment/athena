@@ -7,7 +7,7 @@ makeTrains=True
 
 formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "LLP1","HIGG1D1","HIGG1D2",
-              "JETM1","JETM2","JETM3","JETM4","JETM5","JETM6","JETM10","JETM11","JETM12","JETM14",
+              "JETM1","JETM2","JETM3","JETM4","JETM5","JETM12",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
               "FTAG1","FTAG2","FTAG3",
@@ -34,7 +34,7 @@ data18File = com_dir+"data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r1
 data22File = com_dir+"data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"
 data23File = com_dir+"data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1"
 data23CosFile = com_dir+"data23_cos/AOD/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195._lb0124-lb0126._0001.1"
-
+data24File = com_dir+"data24/AOD/data24_13p6TeV.00486658.physics_Main.recon.AOD.f1522_m2262_r16385_r16377/AOD.43718985._000221.pool.root.1"
 
 def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
    add_str = ""
@@ -43,8 +43,6 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
    outputFile.write("#!/bin/sh"+"\n")
    outputFile.write("\n")
    outputFile.write("# art-include: main/Athena"+"\n")
-   if (formatName.find("EGAM")!=-1 or formatName.find("JETM")!=-1 or formatName.find("FTAG")!=-1 or formatName.find("IDTR")!=-1 or formatName.find("TRIG")!=-1 or (formatName.find("PHYS")!=-1 and formatName.find("PHYSLITE")==-1)):
-      outputFile.write("# art-include: main/Athena"+"\n")
    outputFile.write("# art-description: DAOD building "+formatName+" "+label+"\n")
    outputFile.write("# art-type: grid"+"\n")
    outputFile.write("# art-output: *.pool.root"+"\n")
@@ -127,7 +125,8 @@ if (makeDataDAODs or makeMCDAODs):
       if makeDataDAODs: 
          generateText(formatName,"data18",data18File,False,False,"-1")
          generateText(formatName,"data22",data22File,False,False,"-1")
-         generateText(formatName,"data23",data23File,False,False,"-1") 
+         generateText(formatName,"data23",data23File,False,False,"-1")
+         generateText(formatName,"data24",data24File,False,False,"-1")
       if makeMCDAODs:
          generateText(formatName,"mc20",mc20File,False,True,"-1")
          generateText(formatName,"mc23",mc23File,False,True,"-1")
@@ -142,6 +141,7 @@ if makeTrains:
          generateTrains(train,"data18",data18File,False,"-1")
          generateTrains(train,"data22",data22File,False,"-1")
          generateTrains(train,"data23",data23File,False,"-1")
+         generateTrains(train,"data24",data24File,False,"-1")
       if makeMCDAODs:
          generateTrains(train,"mc20",mc20File,True,"-1")
          generateTrains(train,"mc23",mc23File,True,"-1")

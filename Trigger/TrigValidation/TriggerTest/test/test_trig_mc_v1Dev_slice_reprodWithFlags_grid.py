@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by doXYZFlag=False
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00
+# art-input-nfiles: 1
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -27,20 +30,12 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 def generate_exec_steps(slice_name = None):
     name = slice_name or 'FullMenu'
 
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags
-    conditions = defaultConditionsTags.RUN3_MC
+    from TriggerTest.MCExecStep import MCGridStep
     
     # athena
-    ex = ExecStep.ExecStep(name)
-    ex.type = 'athena'
-    ex.job_options = 'TriggerJobOpts/runHLT.py'
+    ex = MCGridStep(name,menu='Dev_pp_run3_v1',signatures=[slice_name] if slice_name else None)
     ex.input = 'ttbar'
-    ex.threads = 1
     ex.max_events = 100
-    ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
-                'IOVDb.GlobalTag="' + conditions + '"']
-    if slice_name:
-        ex.flags += [f'Trigger.enabledSignatures=[\\\"{slice_name}\\\"]']
     # rename histogram file
     hist_file_name = 'expert-monitoring_{:s}.root'.format(name)
     mv = ExecStep.ExecStep('RenameHist' + name)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONBASE_ICOLLECTIONDESCRIPTION_H
@@ -24,6 +24,12 @@ namespace pool {
   class ICollectionDescription
   {
   public:
+    ICollectionDescription() = default;
+    ICollectionDescription (const ICollectionDescription&) = default;
+    ICollectionDescription& operator= (const ICollectionDescription&) = default;
+    ICollectionDescription (ICollectionDescription&&) = default;
+    ICollectionDescription& operator= (ICollectionDescription&&) = default;
+
     /// Returns the name of the collection
     virtual const std::string& name() const = 0;
 

@@ -26,6 +26,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -70,6 +71,9 @@ namespace ActsTrk
 
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool
        {this, "ExtrapolationTool", ""};
+   
+   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+
 
     SG::ReadHandleKeyArray<ActsTrk::TrackContainer> m_tracksContainerKey
        {this, "ACTSTracksLocation", {},"Track collection (ActsTrk variant)"};
@@ -95,16 +99,18 @@ namespace ActsTrk
        {this, "ExtrapolationPathLimit",std::numeric_limits<double>::max(), "PathLimit for extrapolating track parameters." }; // @TODO (unit?mm?)
     Gaudi::Property<bool>  m_firstAndLastParamOnly
        {this, "FirstAndLastParameterOnly",true, "Only convert the first and the last parameter." };
+    Gaudi::Property<bool>  m_computeExpectedLayerPattern
+       {this, "ComputeExpectedLayerPattern",true, "Compute the expected layer pattern. CPU expensive" };
     Gaudi::Property<bool>  m_expectIfPixelContributes
        {this, "expectIfPixelContribution",true, "Only expect pixel hits if there are pixel hits on track." };
 
      Gaudi::Property<double>  m_pixelExpectLayerPathLimitInMM
        {this, "PixelExpectLayerPathLimitInMM",1000,
         "PathLimit for extrapolating to get the expected pixel layer pattern in mm." };
+    
+      Gaudi::Property<std::string> m_perigeeExpression{this, "PerigeeExpression", "DontRecalculate"};
 
-      Gaudi::Property<std::string> m_perigeeExpression{this, "PerigeeExpression", "BeamLine"};
-
-    enum class expressionStrategy {BeamLine, Vertex};
+    enum class expressionStrategy {DontRecalculate, BeamLine, Vertex};
     expressionStrategy m_expression_strategy {expressionStrategy::BeamLine};
     
      std::unique_ptr<Propagator> m_propagator;

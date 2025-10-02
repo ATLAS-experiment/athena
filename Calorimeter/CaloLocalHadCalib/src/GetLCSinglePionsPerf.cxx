@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -931,7 +931,7 @@ int GetLCSinglePionsPerf::fill_reco (const xAOD::CaloClusterContainer& clusColl,
   /* ********************************************
   filling histograms for reco energy spectras
   ******************************************** */
-  if(m_doEngRecSpect){
+  if(m_doEngRecSpect && m_mc_ener > 0){
     for(int i_coll=0; i_coll<m_ncluscoll; i_coll++){
       double enom = engClusSum[i_coll];
       if(i_coll != kTOPO) {
@@ -1144,7 +1144,7 @@ int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusCo
         ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Not implemented for " << (*im).first << " " << (*im).second);
         break;
     }
-    if(m_doClusMoments && xnorm > m_mc_ener*0.0001) {
+    if(m_doClusMoments && xnorm > m_mc_ener*0.0001 && xnorm > 0) {
       // moments assigned to first 3 maximum clusters
       const double inv_xnorm = 1. / xnorm;
       for(unsigned int i_cls=0; i_cls<clusColl.size(); i_cls++){

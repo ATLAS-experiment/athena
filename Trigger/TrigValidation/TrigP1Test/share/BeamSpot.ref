@@ -139,4 +139,3 @@ BeamSpotCondAlg                                      DEBUG Initializing BeamSpot
 BeamSpotCondAlg                                      DEBUG input handles: 1
 BeamSpotCondAlg                                      DEBUG output handles: 1
 BeamSpotCondAlg                                      DEBUG data dependencies:
-BeamSpotCondAlg                              0   0   DEBUG Calling destructor

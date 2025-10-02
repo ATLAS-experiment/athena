@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //======================================================================
@@ -26,14 +26,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 //  ignore the "demonstrate Xcheck" lines unless necessary
 // #define DEMOXCHECK true
-#include <fstream>
-#include <iostream>
-#include <iterator>
-#include <string>
-#include <sstream>
-#include <utility>
-#include <map>
-#include <array>
+
 #include "TFile.h"
 #include "TDirectory.h"
 #include "TDirectoryFile.h"
@@ -52,6 +45,15 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "TRandom3.h"
 #include "ChargeCalibration/common/PixelMapping.h"
 #include "PathResolver/PathResolver.h"
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <sstream>
+#include <utility>
+#include <map>
+#include <array>
 
 using namespace std;
 using pix::PixelMapping;
@@ -109,12 +111,12 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     // creating the object for the pixel mapping 
     PixelMapping pixmap(PathResolver::find_file("PixelCalibAlgs/mapping.csv", "DATAPATH"));
 
-    const bool run3 = true; // new series of injection charges (22) and new format
+    constexpr bool run3 = true; // new series of injection charges (22) and new format
     const float badRDfracCut = 0.2; // Cut on the fraction of bad read out per frontend
     float HDCshift = 2;
 
     // Shall we try this later ?
-    const int finerToT = 1; //  smaller bin size for ToT if doing fit
+    constexpr int finerToT = 1; //  smaller bin size for ToT if doing fit
     constexpr bool moreFE = false;
     constexpr int npsFEs = moreFE ? 8 : 2;
 
@@ -204,7 +206,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     Double_t IBLchrgs[numChrgs] = {1400., 1500., 1750., 2000., 2500., 3000., 3500., 4000., 5000., 6000., 8000., 10000.,
                                    12000., 14000., 16000., 18000., 20000., 22000., 24000., 26000., 28000., 30000.};
 
-    const Int_t nchargeIBL = (run3 ? 22 : 19);
+    constexpr Int_t nchargeIBL = (run3 ? 22 : 19); //run3 is constexpr
 
     int skip = numChrgs - nchargeIBL;
     Double_t chrgAbaciIBL[nchargeIBL], chargeErrArrIBL[nchargeIBL];
@@ -222,7 +224,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     chrgsbins[nchargeIBL] = chrgAbaciIBL[nchargeIBL - 1] + 0.5 * (chrgAbaciIBL[nchargeIBL - 1] - chrgAbaciIBL[nchargeIBL - 2]);
 
     //  please note extra +1  for ending bins.
-    const Int_t nToTibl = 16 * finerToT + 1;
+    constexpr Int_t nToTibl = 16 * finerToT + 1;
 
     Double_t totAbaci[nToTibl], totbins[nToTibl + 1];
 
@@ -538,11 +540,9 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     std::map<float, std::pair<vector<TString>, vector<Double_t>>> ModuDataToPrint;
 
 #if defined(DEMOXCHECK)
-    vector<TH1F *> h1_ChrgEntry;
-    h1_ChrgEntry.reserve(nToTibl);
+    vector<TH1F *> h1_ChrgEntry(nToTibl, nullptr);
 
-    vector<TH1F *> h1d_totSprdAll;
-    h1d_totSprdAll.reserve(nToTibl - 1);
+    vector<TH1F *> h1d_totSprdAll(nToTibl-1, nullptr);
 
     for (int t = 0; t < nToTibl; t++)
     {
@@ -558,14 +558,20 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     }
 #endif
 
-    const Int_t totFE = 14 * 16 * npsFEs; //  16 modules on each of 14 ReadOutDisk
-    Double_t TotArray[totFE][nchargeIBL], TotErrArray[totFE][nchargeIBL];
-    Double_t TotSigArray[totFE][nchargeIBL], TotSigErrArray[totFE][nchargeIBL];
-    Double_t ChrgArray[totFE][nToTibl], ChrgErrArray[totFE][nToTibl];
+    constexpr Int_t totFE = 14 * 16 * npsFEs; //  16 modules on each of 14 ReadOutDisk
+    using Row = Double_t[nchargeIBL];
+    using Row2 = Double_t[nToTibl];
+    //avoid stack overflow, create on heap
+    std::unique_ptr<Row[]> TotArray{ new Row[totFE]{} };
+    std::unique_ptr<Row[]> TotErrArray{ new Row[totFE]{} };
+    std::unique_ptr<Row[]> TotSigArray { new Row[totFE]{} };
+    std::unique_ptr<Row[]> TotSigErrArray{ new Row[totFE]{} };
+    std::unique_ptr<Row2[]> ChrgArray{ new Row2[totFE]{} };
+    std::unique_ptr<Row[]> ChrgErrArray{ new Row[totFE]{} };
 
     gRandom = new TRandom3(2203);
-
-    float occuPhiEta[nchargeIBL][totFE];
+    using Column = Double_t[totFE];
+    std::unique_ptr<Column[]> occuPhiEta{new Column[nchargeIBL]{}};
 
     Int_t cntRod = 0;
     std::map<float, TString> devChrg_Order;
@@ -607,8 +613,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
         TString feName_maxDevChrg = "", feName_maxDevToT = "";
         float maxDevChrg = -9., maxDevToT = -9., avgDevChrg = 0., avgDevToT = 0.;
 
-        vector<TH1F *> h1d_totSprd;
-        h1d_totSprd.reserve(nToTibl - 1);
+        vector<TH1F *> h1d_totSprd(nToTibl - 1, nullptr);
 
         for (int t = 0; t < nToTibl - 1; t++)
         {
@@ -695,10 +700,15 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 TDirectoryFile* totHistDir(static_cast<TDirectoryFile*> (rodDir->Get(totHistDirPath)));
                 if(!totHistDir){
                     std::cout<<" Missing totHistDir in : " << totHistDirPath << endl;
+                    abort();
                 }
                 else {
                   h2dTot.reset(static_cast<TH2F*> ((static_cast<TKey*>(totHistDir->GetListOfKeys()->First()))->ReadObj()));
-                  h2dTot->SetDirectory(0);
+                  if (h2dTot) h2dTot->SetDirectory(0);
+                }
+                if (not h2dTot){
+                    std::cout<<" Unrecoverable error in  : " <<__LINE__ <<" of CalibrateIBL.cxx\n";
+                    abort();
                 }
 
                 unique_ptr<TH2F> h2dTotAux;
@@ -707,12 +717,17 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 {
                     std::cout<<" Missing totHistDir in : " << totHistDirPath << endl;
                     logout << " Missing totHistDir in : " << totHistDirPath << endl;
+                    abort();
                 }
                 else {
                   h2dTotAux.reset(static_cast<TH2F*> ((static_cast<TKey*>(totHistDirAux->GetListOfKeys()->First())->ReadObj())));
-                  h2dTotAux->SetDirectory(0);
+                  
+                  if(h2dTotAux) h2dTotAux->SetDirectory(0);
                 }
-                
+                if (not h2dTotAux){
+                    std::cout<<" Unrecoverable error in  : " <<__LINE__ <<" of CalibrateIBL.cxx\n";
+                    abort();
+                }
                 TString totSigHistDirPath = modName + "/" + totSigHistName + "/A0/B0/C";
                 totSigHistDirPath += std::to_string(c);
                 TDirectoryFile* totSigHistDir (static_cast<TDirectoryFile*>(rodDir->Get(totSigHistDirPath)));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaBlock_test.cxx
@@ -73,12 +73,12 @@ const size_t elt_size = sizeof (Payload);
 
 int& word (SG::ArenaBlock* bl, size_t i=0)
 {
-  return *(int*)bl->index (i, elt_size);
+  return *reinterpret_cast<int*>(bl->index (i, elt_size));
 }
 
 Payload& payload (SG::ArenaBlock* bl, size_t i=0)
 {
-  return *(Payload*)bl->index (i, elt_size);
+  return *reinterpret_cast<Payload*>(bl->index (i, elt_size));
 }
 
 void test1()

@@ -3,11 +3,11 @@ Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/LAR/ElecCalibFlat/Pedestal'), ('CondAttrListCollection', '/LAR/ElecCalibFlat/Ramp')}
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LArRampFlat> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/Ramp
-Py:ComponentAccumulator    INFO      * WriteKey: LArRamp
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/Ramp'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArRamp'
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LArPedestalFlat> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/Pedestal
-Py:ComponentAccumulator    INFO      * WriteKey: LArPedestal
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/Pedestal'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArPedestal'
 --- run1
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
@@ -17,9 +17,9 @@ Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'), ('LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'), ('LArRampMC', '/LAR/ElecCalibMC/Ramp')}
 Py:ComponentAccumulator    INFO  \__ LArOnOffMappingAlg (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: /LAR/Identifier/OnOffIdMap
+Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/Identifier/OnOffIdMap'
 Py:ComponentAccumulator    INFO  \__ LArMCSymCondAlg (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: LArOnOffIdMap
+Py:ComponentAccumulator    INFO      * ReadKey: 'LArOnOffIdMap'
 Py:ComponentAccumulator    INFO  \__ LArSymConditionsAlg<LArRampMC, LArRampSym> (cond alg)
-Py:ComponentAccumulator    INFO      * ReadKey: LArRamp
-Py:ComponentAccumulator    INFO      * WriteKey: LArRampSym
+Py:ComponentAccumulator    INFO      * ReadKey: 'LArRamp'
+Py:ComponentAccumulator    INFO      * WriteKey: 'LArRampSym'

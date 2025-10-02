@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUCLUSTER_H
@@ -22,7 +22,6 @@ DATE:		October 17th, 2005
 
 ******************************************************/
 // includes section
-#include <math.h>
 #include "AthLinks/ElementLink.h"
 #include "TrigCaloEvent/TrigCaloCluster.h"
 #include "TrigCaloEvent/TrigTauClusterDetailsContainer.h"
@@ -214,5 +213,4 @@ void diff(const TrigTauCluster& left, const TrigTauCluster& right, std::map<std:
 // CLIDSvc is already loaded in base class
 CLASS_DEF ( TrigTauCluster, 213051884, 1)
 
-#include "TrigCaloEvent/TrigTauClusterContainer.h"
 #endif

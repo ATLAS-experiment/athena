@@ -13,7 +13,7 @@
 
 // Make the RNTuple types available in the ROOT namespace
 // with all versions of ROOT.
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 36, 0)
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 0)
 namespace ROOT {
 using Experimental::REntry;
 using Experimental::RNTupleInspector;
@@ -21,13 +21,11 @@ using Experimental::RNTupleModel;
 using Experimental::RNTupleReader;
 using Experimental::RNTupleView;
 using Experimental::RNTupleWriter;
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 1)
 using Experimental::DescriptorId_t;
 using Experimental::RException;
 using Experimental::RFieldBase;
 using Experimental::RFieldDescriptor;
-#endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 1)
 }  // namespace ROOT
-#endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 36, 0)
+#endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 0)
 
 #endif  // XAODROOTACCESS_ROOTTYPES_H

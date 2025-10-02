@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTPCnv/CaloClusterContainerCnv_p1.h" 
@@ -53,7 +53,7 @@ void CaloClusterContainerCnv_p1::persToTrans(const CaloClusterContainer_p1::Calo
   trans->m_phi0=pers->m_phi0;   
 
   //Convert base class
-  m_P4EEtaPhiMCnv.persToTrans(&pers->m_P4EEtaPhiM,(P4EEtaPhiM*)trans,log);
+  m_P4EEtaPhiMCnv.persToTrans(&pers->m_P4EEtaPhiM,static_cast<P4EEtaPhiM*>(trans),log);
   m_caloSamplingDataCnv.persToTrans(&pers->m_dataStore,&trans->m_dataStore);
   m_caloMomentStoreCnv.persToTrans(&pers->m_momentStore,&trans->m_momentStore);
   m_showerElementLinkCnv.persToTrans(&pers->m_dataLink,&trans->m_dataLink,log);

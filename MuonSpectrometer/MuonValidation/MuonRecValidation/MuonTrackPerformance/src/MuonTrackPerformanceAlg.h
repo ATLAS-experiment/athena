@@ -108,8 +108,9 @@ public:
         std::set<Muon::MuonStationIndex::StIndex> wrongLayersTrigger;
 
         bool isEndcapSLTrack() const {
-            if (layers.size() == 1 && layers.count(Muon::MuonStationIndex::EM)) return true;
-            if (layers.size() == 2 && layers.count(Muon::MuonStationIndex::EM) && layers.count(Muon::MuonStationIndex::EO)) return true;
+            if (layers.size() == 1 && layers.count(Muon::MuonStationIndex::StIndex::EM)) return true;
+            if (layers.size() == 2 && layers.count(Muon::MuonStationIndex::StIndex::EM) && 
+                                      layers.count(Muon::MuonStationIndex::StIndex::EO)) return true;
             return false;
         }
 
@@ -126,12 +127,14 @@ public:
         bool hasWrongLayersTrigger() const { return !wrongLayersTrigger.empty(); }
 
         bool isMissingInner() const {
-            if (missingLayers.count(Muon::MuonStationIndex::EI) || missingLayers.count(Muon::MuonStationIndex::BI)) return true;
+            if (missingLayers.count(Muon::MuonStationIndex::StIndex::EI) || 
+                missingLayers.count(Muon::MuonStationIndex::StIndex::BI)) return true;
             return false;
         }
 
         bool hasWrongInner() const {
-            if (wrongLayers.count(Muon::MuonStationIndex::EI) || wrongLayers.count(Muon::MuonStationIndex::BI)) return true;
+            if (wrongLayers.count(Muon::MuonStationIndex::StIndex::EI) || 
+                wrongLayers.count(Muon::MuonStationIndex::StIndex::BI)) return true;
             return false;
         }
 

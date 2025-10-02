@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -12,7 +12,6 @@
 //====================================================================
 
 // Framework include files
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbDatabase.h"
@@ -23,6 +22,8 @@
 #include "StorageSvc/Transaction.h"
 #include "StorageSvc/DbReflex.h"
 #include "CxxUtils/checker_macros.h"
+
+#include "Gaudi/PluginService.h"
 
 // Local implementation files
 #include "RootTreeContainer.h"
@@ -36,9 +37,8 @@
 #include "TLeaf.h"
 #include "TBranch.h"
 #include "RootUtils/TBranchElementClang.h"
-#include "TTreeFormula.h"
 
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO/IRootAuxDynIO.h"
 
 using namespace pool;
 using namespace std;
@@ -124,12 +124,6 @@ RootTreeContainer::BranchDesc::BranchDesc( TClass* cl, TBranch* b, TLeaf* l, voi
    : clazz(cl), branch(b), leaf(l), object(nullptr), buffer(o), column(c)
 {}
 
-SG::IAuxStoreIO*
-RootTreeContainer::BranchDesc::getIOStorePtr() {
-   return ( aux_iostore_IFoffset >= 0 ?
-            reinterpret_cast<SG::IAuxStoreIO*>( (char*)object + aux_iostore_IFoffset) : nullptr );
-}
-
 
 RootTreeContainer::RootTreeContainer()
 : m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
@@ -141,11 +135,6 @@ RootTreeContainer::RootTreeContainer()
 /// Standard destructor
 RootTreeContainer::~RootTreeContainer()   {
    RootTreeContainer::close();
-}
-
-/// Ask if a given shape is supported
-DbStatus RootTreeContainer::isShapeSupported(const DbTypeInfo* typ) const  {
-  return typ == m_type;
 }
 
 uint64_t RootTreeContainer::size()    {
@@ -189,8 +178,8 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
           p.ptr      = &dsc.object;
           try {
              if( dsc.auxdyn_writer ) {
-                num_bytes += dsc.auxdyn_writer->writeAuxAttributes
-                   ( dsc.branch->GetName(), dsc.getIOStorePtr(), dsc.rows_written );
+                num_bytes += dsc.auxdyn_writer->writeAuxAttributes( dsc.branch->GetName(),
+                                                                    dsc.object, dsc.rows_written );
                 aux_needs_fill = aux_needs_fill || dsc.auxdyn_writer->needsCommit();
              }
           } catch(const std::exception& exc) {
@@ -294,43 +283,8 @@ DbStatus RootTreeContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)
 
 // Fetch next object address of the selection to set token
 DbStatus RootTreeContainer::fetch(DbSelect& sel)  {
-  if ( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-    sel.link().second++;
-    return DbContainerImp::fetch(sel.link(), sel.link());
-  }
-  DbSelect::Ptr<TTreeFormula>* stmt =
-    dynamic_cast<DbSelect::Ptr<TTreeFormula>* >(sel.statement());
-  if ( stmt ) {
-    TTreeFormula* selStmt = stmt->m_ptr;
-    if ( selStmt )  {
-      std::lock_guard<std::recursive_mutex>   lock( m_rootDb->ioMutex() );
-      Branches::iterator k;
-      long long cur  = sel.link().second;
-      Long64_t last = m_tree->GetEntries();
-      for(k=m_branches.begin(); k != m_branches.end(); ++k)  {
-        BranchDesc& dsc = (*k);
-        int typ = dsc.column->typeID();
-        switch ( typ )    {
-        case DbColumn::POINTER:
-        case DbColumn::BLOB:
-          dsc.branch->SetAddress(&dsc.buffer);
-        default:
-          break;
-        }
-      }
-      selStmt->SetTree(m_tree);
-      // loop on all selected entries
-      for( ++cur; cur < last; ++cur) {
-        m_tree->LoadTree(cur);
-        selStmt->GetNdata();
-        if ( selStmt->EvalInstance(0) != 0 ) {
-          sel.link().second = cur;
-          return Success;
-        }
-      }
-    }
-  }
-  return Error;
+  sel.link().second++;
+  return DbContainerImp::fetch(sel.link(), sel.link());
 }
 
 
@@ -501,6 +455,11 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
       m_rootDb = dynamic_cast<RootDatabase*>(idb);
       if (m_rootDb)
          m_tree = m_rootDb->file()->Get<TTree>(treeName.c_str());
+      m_auxDynTool = Gaudi::PluginService::Factory< RootAuxDynIO::IFactoryTool*() >::create("RootAuxDynIO::FactoryTool");
+      if( !m_auxDynTool ) {
+         log << DbPrintLvl::Warning << "Could NOT load RootAuxDynIO::FactoryTool. Dynamic attributes support disabled"
+             << DbPrint::endmsg;
+      }
 
       bool hasBeenCreated = (m_branchName.empty()
                              ? m_tree != nullptr
@@ -534,7 +493,6 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                BranchDesc& dsc = m_branches[count];
                TClass* cl = nullptr;
                TLeaf* leaf = pBranch->GetLeaf( (*i)->name().c_str() );
-               // cout << "GetLeaf for "<<  (*i)->name().c_str()  << " = " << leaf << endl;
                switch ( (*i)->typeID() )    {
                 case DbColumn::ANY:
                 case DbColumn::BLOB:
@@ -548,8 +506,8 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                       return Error;
                    }
                    dsc = BranchDesc(cl, pBranch, leaf, cl->New(), c);
-                   if( RootAuxDynIO::isAuxDynBranch(pBranch) ) {
-                      dsc.auxdyn_reader = RootAuxDynIO::getBranchAuxDynReader( m_tree, pBranch );
+                   if( m_auxDynTool and m_auxDynTool->isAuxDynBranch(pBranch) ) {
+                      dsc.auxdyn_reader = m_auxDynTool->getBranchAuxDynReader( m_tree, pBranch );
                       if( !dsc.auxdyn_reader ) {
                          log << DbPrintLvl::Error << "Failed to locate dynamic attribute storage for container "
                              << m_name << " of type " << ROOTTREE_StorageType.storageName()
@@ -634,7 +592,8 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
             opt5._getValue(containerSplitLevel);
             opt6._getValue(auxSplitLevel);
             if (containerSplitLevel == defSplitLevel) {
-               if( RootAuxDynIO::hasAuxStore( string_view(m_name).substr(0, m_name.size()-1), info->clazz().Class() ) ) {
+               const std::string_view br_name = string_view(m_name).substr(0, m_name.size()-1);
+               if( m_auxDynTool and m_auxDynTool->hasAuxStore( br_name, info->clazz().Class() ) ) {
                   containerSplitLevel = auxSplitLevel;
                }
             }
@@ -742,19 +701,11 @@ DbStatus RootTreeContainer::checkAccess(DbDatabase& dbH,
 }
 
 
-// Define selection criteria
+// Define selection
 DbStatus  RootTreeContainer::select(DbSelect& sel)    {
   if ( nullptr != m_tree )  {
-    if( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-      sel.link().second = -1;
-      return Success;
-    }
-    else  {
-      TTreeFormula* stmt = new TTreeFormula("RootSelect", sel.criteria().c_str(), m_tree);
-      sel.setStatement(new DbSelect::Ptr<TTreeFormula>(stmt));
-      sel.link().second = -1;
-      return Success;
-    }
+    sel.link().second = -1;
+    return Success;
   }
   return Error;
 }
@@ -798,23 +749,19 @@ DbStatus  RootTreeContainer::addObject(DbDatabase& dbH,
                setBranchOffsetTabLen( dsc.branch, branchOffsetTabLen );
 
                // AUX STORE specifics
-               if( RootAuxDynIO::hasAuxStore(nam, dsc.clazz) ) {
-                  TClass *storeTClass = dsc.clazz->GetBaseClass("SG::IAuxStoreIO");
-                  if( storeTClass ) {
-                     // Default splitting for dynamic attributes, one level less than aux store (since attributes are already separated).
-                     int dynSplitLevel = splitLevel ? splitLevel - 1 : 0;
-                     DbOption opt1("CONTAINER_SPLITLEVEL", RootAuxDynIO::AUXDYN_POSTFIX);
-                     dbH.getOption(opt1);
-                     opt1._getValue(dynSplitLevel);
-                     // Default buffer size for dynamic attributes, one quarter of other branches (since attrbutes hold less data).
-                     int dynBufferSize = bufferSize / 4;
-                     // This is a class implementing SG::IAuxStoreIO
-                     // Provide writers for its dynamic attibutes
-                     dsc.aux_iostore_IFoffset = dsc.clazz->GetBaseClassOffset( storeTClass );
-                     // TBranch Writer
-                     bool do_branch_fill = isBranchContainer() && !m_treeFillMode;
-                     dsc.auxdyn_writer = RootAuxDynIO::getBranchAuxDynWriter(m_tree, dynBufferSize, dynSplitLevel, branchOffsetTabLen, do_branch_fill);
-                  }
+               if( m_auxDynTool and m_auxDynTool->hasAuxStore(nam, dsc.clazz) and m_auxDynTool->hasAuxStoreIO(dsc.clazz) ) {
+                  // Default splitting for dynamic attributes, one level less than aux store (since attributes are already separated).
+                  int dynSplitLevel = splitLevel ? splitLevel - 1 : 0;
+                  DbOption opt1("CONTAINER_SPLITLEVEL", RootAuxDynIO::AUXDYN_POSTFIX);
+                  dbH.getOption(opt1);
+                  opt1._getValue(dynSplitLevel);
+                  // Default buffer size for dynamic attributes, one quarter of other branches (since attrbutes hold less data).
+                  int dynBufferSize = bufferSize / 4;
+                  // TBranch Writer
+                  bool do_branch_fill = isBranchContainer() && !m_treeFillMode;
+                  dsc.auxdyn_writer = m_auxDynTool->getBranchAuxDynWriter(*m_tree, *dsc.clazz,
+                                                                          dynBufferSize, dynSplitLevel,
+                                                                          branchOffsetTabLen, do_branch_fill);
                }
                return Success;
             }

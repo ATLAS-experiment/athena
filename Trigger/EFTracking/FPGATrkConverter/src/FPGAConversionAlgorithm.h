@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrkConverter_CONVERSIONALGORITHM_H
@@ -39,7 +39,6 @@ public:
   /// Athena algorithm's Hooks
   virtual StatusCode  initialize() override;
   virtual StatusCode  execute(const EventContext& ctx) const override;
-  virtual StatusCode  finalize() override;
   
 protected: // was private 
 
@@ -69,18 +68,16 @@ protected: // was private
   SG::WriteHandleKey<InDet::SCT_ClusterContainer> m_outputStripClusterContainerKey {this, "FPGAOutputStripClustersName", "FPGAInDetStripsClusterContainer", "fname of the output FPGA InDet strip cluster container"};
 
   Gaudi::Property<bool> m_doClusters {this, "doClusters", true, "Convert FPGATrackSimCluster"};
-  Gaudi::Property<bool> m_doHits {this, "doHits", true, "Convert FPGATrackSimHit"};
+  Gaudi::Property<bool> m_doHits {this, "doHits", false, "Convert FPGATrackSimHit"};
   Gaudi::Property<bool> m_doActsTrk {this, "doActsTrk", false, "Run Acts ProtoTrack finding"};
   Gaudi::Property<bool> m_doSP {this, "doSP", false, "Convert SPs"};
   Gaudi::Property<bool> m_doIndet {this, "doInDet", false, "Perform also to InDet convertion. This is obsolete and not needed anymore. By default disabled to save execution time"};
   Gaudi::Property<bool> m_useRoads {this, "useRoads", false, "If set to truth it will generate prototracks based on FPGA roads instead of FPGA tracks"};
 
   private:
-  typedef std::chrono::high_resolution_clock clock_type;
-  mutable std::chrono::nanoseconds m_totalClusterConversionTime ATLAS_THREAD_SAFE = std::chrono::nanoseconds(0);
-  mutable std::chrono::nanoseconds m_totalSpConversionTime ATLAS_THREAD_SAFE = std::chrono::nanoseconds(0);
-  mutable unsigned m_nEvents ATLAS_THREAD_SAFE = 0;
 
+  // chrono service
+  ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 }; 
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFastShower.h"
@@ -34,9 +34,9 @@
 #undef _INFO_FSM_
 
 
-LArFastShower::LArFastShower(const std::string& name, const FastShowerConfigStruct& config,
+LArFastShower::LArFastShower(const std::string& name, G4Region* region, const FastShowerConfigStruct& config,
                              IFastSimDedicatedSD* fastSimDedicatedSD):
-  G4VFastSimulationModel(name),
+  G4VFastSimulationModel(name, region),
   m_configuration(config),
   m_fastSimDedicatedSD(fastSimDedicatedSD),
   m_showerLibSvc(nullptr),
@@ -216,7 +216,7 @@ void LArFastShower::KillParticle(const G4FastTrack&, G4FastStep& fastStep)
 
   // Kill the particle
   fastStep.KillPrimaryTrack();
-  fastStep.SetPrimaryTrackPathLength(0.0);
+  fastStep.ProposePrimaryTrackPathLength(0.0);
 
   return;
 }

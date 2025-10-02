@@ -28,15 +28,16 @@ def Egamma1_LArStrip_FexCfg(
     else:
         logger.debug("Cell fetcher " + caloCellProducer + " not supported")
         return cfg
-    
+
+    roiAlgTool = CompFactory.GlobalSim.eFexRoIAlgTool()
+            
+    alg.caloCellProducer = caloCellProducer
+    alg.roiAlgTool = roiAlgTool
+
     if OutputLevel is not None:
         alg.OutputLevel = OutputLevel
         caloCellProducer.OutputLevel = OutputLevel
-        alg.caloCellProducer = caloCellProducer
-
-    roiAlgTool = CompFactory.GlobalSim.eFexRoIAlgTool()
-    roiAlgTool.OutputLevel = OutputLevel
-    alg.roiAlgTool = roiAlgTool
+        roiAlgTool.OutputLevel = OutputLevel
     
     alg.dump = dump
     alg.dumpTerse = dumpTerse

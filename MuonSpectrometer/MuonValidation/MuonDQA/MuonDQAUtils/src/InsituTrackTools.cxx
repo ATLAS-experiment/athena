@@ -4,6 +4,7 @@
 
 #include "MuonDQAUtils/InsituTrackTools.h"
 #include "EventKernel/INavigable4Momentum.h"
+#include "TruthUtils/ParticleConstants.h"
 #include <cmath>
 
 namespace Muon {
@@ -58,8 +59,8 @@ namespace Muon {
   {
     TLorentzVector tvec1;
     TLorentzVector tvec2;
-    tvec1.SetPtEtaPhiM(track1->pt(), track1->eta(), track1->phi(), 105.65);
-    tvec2.SetPtEtaPhiM(track2->pt(), track2->eta(), track2->phi(), 105.65);
+    tvec1.SetPtEtaPhiM(track1->pt(), track1->eta(), track1->phi(), ParticleConstants::muonMassInMeV);
+    tvec2.SetPtEtaPhiM(track2->pt(), track2->eta(), track2->phi(), ParticleConstants::muonMassInMeV);
     return (tvec1+tvec2).M();
   }
 

@@ -87,7 +87,7 @@ StatusCode TauTruthTrackMatchingTool::checkTrackType(const xAOD::TauTrack& xTrac
 
   static const SG::ConstAccessor< char > accIsHadronicTrack("IsHadronicTrack");
   static const SG::ConstAccessor< int > accIsHadronicTrackDecayDepth("IsHadronicTrackDecayDepth");
-  if ((bool)accIsHadronicTrack(xTrackParticle) and accIsHadronicTrackDecayDepth(xTrackParticle) == 0)
+  if (static_cast<bool>(accIsHadronicTrack(xTrackParticle)) and accIsHadronicTrackDecayDepth(xTrackParticle) == 0)
   {
     decTruthType(xTrackParticle) = TauAnalysisTools::TauTrack;
     return StatusCode::SUCCESS;

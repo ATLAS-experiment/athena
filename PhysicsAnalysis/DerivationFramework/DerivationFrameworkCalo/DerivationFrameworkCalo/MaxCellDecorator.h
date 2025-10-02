@@ -24,12 +24,12 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODJet/Jet.h"
+#include "xAODPFlow/PFO.h"
+#include "xAODPFlow/FlowElement.h"
 
 namespace DerivationFramework {
 
-class MaxCellDecorator
-  : public AthAlgTool
-  , public IAugmentationTool
+class MaxCellDecorator : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
   MaxCellDecorator(const std::string& t,

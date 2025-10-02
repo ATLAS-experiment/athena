@@ -7,6 +7,9 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
+// Forward declaration
+class HitCollectionMap;
+
 /** @class ISensitiveDetectorMasterTool ISensitiveDetectorMasterTool.h "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
  *
  *  Abstract interface to service for Geant4 sensitive detector classes
@@ -34,13 +37,13 @@ class ISensitiveDetectorMasterTool : virtual public IAlgTool {
    framework, somewhere.  Eventually it may be done via a Gaudi function.  This ensures
    a simple call when we have multiple G4 events per athena event.  The function calls
    the SetupEvent() method for all the SD handles that it owns. */
-  virtual StatusCode BeginOfAthenaEvent() = 0;
+  virtual StatusCode BeginOfAthenaEvent(HitCollectionMap&) = 0;
 
   /** End of athena event method.  This should get called once per athena event by the
    framework, somewhere.  Eventually it may be done via a Gaudi function.  This ensures
    a simple call when we have multiple G4 events per athena event.  The function calls
    the Gather() method for all the SD handles that it owns. */
-  virtual StatusCode EndOfAthenaEvent() = 0;
+  virtual StatusCode EndOfAthenaEvent(HitCollectionMap&) = 0;
 };
 
 #endif

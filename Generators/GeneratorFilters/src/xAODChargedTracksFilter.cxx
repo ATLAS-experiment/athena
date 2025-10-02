@@ -1,36 +1,29 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODChargedTracksFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 
-xAODChargedTracksFilter::xAODChargedTracksFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenFilter(name, pSvcLocator)
+StatusCode xAODChargedTracksFilter::filterInitialize()
 {
-  /// @todo Document
-  declareProperty("Ptcut", m_Ptmin = 50.0);
-  declareProperty("Etacut", m_EtaRange = 2.5);
-  declareProperty("NTracks", m_NTracks = 40);
+    CHECK(m_truthPartContKey.initialize());
+    return StatusCode::SUCCESS;
 }
 
 
 StatusCode xAODChargedTracksFilter::filterEvent() {
 
-  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
-// duplicated barcode ones
-  const xAOD::TruthParticleContainer* xTruthParticleContainer;
-  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
-      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
-      return StatusCode::FAILURE;
-  }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+  // duplicated barcode ones
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  CHECK(xTruthParticleContainer.isValid());
 
 
-    int nChargedTracks = 0;
-  unsigned int nPart = xTruthParticleContainer->size();
-  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
+  int nChargedTracks = 0;
+  // Loop over all particles in the event
+  for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
             // We only care about stable particles
             if (!part->isGenStable()) continue;
 

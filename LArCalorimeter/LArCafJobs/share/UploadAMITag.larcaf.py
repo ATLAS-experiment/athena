@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 #Example command: UploadAMITag.larcaf.py wlampl xxx create_c909 AtlasProduction_20.1.5.6 noisebursts
  

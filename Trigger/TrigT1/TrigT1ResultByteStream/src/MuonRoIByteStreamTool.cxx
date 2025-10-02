@@ -126,6 +126,8 @@ StatusCode MuonRoIByteStreamTool::initialize() {
 // -----------------------------------------------------------------------------
 StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vrobf,
                                                 const EventContext& eventContext) const {
+
+if(m_writeDecodedMuonRoIs){
   // Create and record the RoI containers
   std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>> roiHandles = m_roiWriteKeys.makeHandles(eventContext);
   for (auto& roiHandle : roiHandles) {
@@ -316,6 +318,164 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
   }
 
   return StatusCode::SUCCESS;
+ }
+
+ else{ //Just decode the MUCTPI
+ 
+  // Create a WriteHandle for L1Topo output
+  std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>> topoHandles;
+  if (m_doTopo.value()) {
+    topoHandles = m_MuCTPIL1TopoKeys.makeHandles(eventContext);
+    for (auto& topoHandle : topoHandles) {
+      ATH_CHECK(topoHandle.record(std::make_unique<xAOD::MuonRoIContainer>(),
+                               std::make_unique<xAOD::MuonRoIAuxContainer>()));
+      ATH_MSG_DEBUG("Recorded MuCTPIL1Topo with key " << topoHandle.key());
+    }
+  }
+
+  // Find the ROB fragment to decode
+  const eformat::helper::SourceIdentifier sid(m_robIds.value().at(0));
+  auto it = std::find_if(vrobf.begin(), vrobf.end(), [&sid](const ROBF* rob){return rob->rob_source_id() == sid.code();});
+  if (it == vrobf.end()) {
+    ATH_MSG_DEBUG("No MUCTPI ROB fragment with ID 0x" << std::hex << sid.code() << std::dec
+                  << " was found, MuonRoIContainer will be empty");
+    return StatusCode::SUCCESS;
+  }
+
+  // Retrieve the ROD data
+  const ROBF* rob = *it;
+  ATH_MSG_DEBUG("MUCTPI ROB for BCID " << rob->rod_bc_id());
+  const uint32_t ndata = rob->rod_ndata();
+  const uint32_t* const data = rob->rod_data();
+
+  // Initialise monitoring variables
+  Monitored::Scalar<uint32_t> monNumWords{"NumWordsInROD", ndata};
+  std::array<size_t,static_cast<size_t>(LVL1::MuCTPIBits::WordType::MAX)> wordTypeCounts{}; // zero-initialised
+  auto monWordTypeCount = Monitored::Collection("WordTypeCount", wordTypeCounts);
+  auto monWordType = Monitored::Collection("WordType", s_wordTypes);
+  std::vector<int> bcidOffsetsWrtROB; // diffs between BCID in timeslice header and BCID in ROB header
+  auto monBCIDOffsetsWrtROB = Monitored::Collection("BCIDOffsetsWrtROB", bcidOffsetsWrtROB);
+
+  // Check for empty data
+  if (ndata==0) {
+    ATH_MSG_ERROR("Empty ROD data in MUCTPI ROB 0x" << std::hex << sid.code() << std::dec);
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("Starting to decode " << ndata << " ROD words");
+
+  // We don't assume the window size at this point. Instead, we collect the start and size of candidate list for
+  // each time slice and decode them later directly into the right time slice output container.
+  std::vector<std::pair<size_t,size_t>> roiSlices; // v of {start, length}
+  std::vector<std::pair<size_t,size_t>> topoSlices; // v of {start, length}
+
+  // Iterate over ROD words and decode
+  size_t iWord{0};
+  for (const uint32_t word : CxxUtils::span{data, ndata}) {
+    ATH_MSG_DEBUG("MUCTPI raw word " << iWord << ": 0x" << std::hex << word << std::dec);
+    LVL1::MuCTPIBits::WordType wordType = LVL1::MuCTPIBits::getWordType(word);
+    ++wordTypeCounts[static_cast<size_t>(wordType)];
+
+    switch (wordType) {
+      case LVL1::MuCTPIBits::WordType::Timeslice: {
+        const auto header = LVL1::MuCTPIBits::timesliceHeader(word);
+        ATH_MSG_DEBUG("This is a timeslice header word with BCID=" << header.bcid
+                      << ", NTOB=" << header.tobCount << ", NCAND=" << header.candCount);
+        // create new RoI words slice
+        roiSlices.emplace_back(0,0);
+        // create new Topo words slice
+        topoSlices.emplace_back(0,0);
+        // monitor BCID offset
+        bcidOffsetsWrtROB.push_back(bcidDiff(header.bcid, rob->rod_bc_id()));
+        break;
+      }
+      case LVL1::MuCTPIBits::WordType::Multiplicity: {
+        uint32_t tmNum = LVL1::MuCTPIBits::multiplicityWordNumber(word);
+        ATH_MSG_DEBUG("This is a multiplicity word #" << tmNum);
+        break;
+      }
+      case LVL1::MuCTPIBits::WordType::Candidate: {
+        ATH_MSG_DEBUG("This is a RoI candidate word");
+        if (roiSlices.empty()) {
+          ATH_MSG_ERROR("Unexpected data format - found candidate word before any timeslice header");
+          return StatusCode::FAILURE;
+        }
+        // advance slice edges
+        std::pair<size_t,size_t>& slice = roiSlices.back();
+        if (slice.first==0) slice.first = iWord;
+        slice.second = iWord - slice.first + 1;
+        break;
+      }
+      case LVL1::MuCTPIBits::WordType::Topo: {
+        ATH_MSG_DEBUG("This is a Topo TOB word");
+        if (not m_doTopo.value()) {break;}
+        if (topoSlices.empty()) {
+          ATH_MSG_ERROR("Unexpected data format - found Topo TOB word before any timeslice header");
+          return StatusCode::FAILURE;
+        }
+        // advance slice edges
+        std::pair<size_t,size_t>& slice = topoSlices.back();
+        if (slice.first==0) slice.first = iWord;
+        slice.second = iWord - slice.first + 1;
+        break;
+      }
+      case LVL1::MuCTPIBits::WordType::Status: {
+        ATH_MSG_DEBUG("This is a status word");
+        std::vector<size_t> errorBits = LVL1::MuCTPIBits::getDataStatusWordErrors(word);
+        // TODO: Decide on the action in case of errors, ATR-25069
+        if (!errorBits.empty()) {
+          ATH_MSG_DEBUG("MUCTPI ROD data flagged with errors. The data status word is 0x" << std::hex << word << std::dec);
+          for (size_t bit : errorBits) {
+            ATH_MSG_DEBUG("Error bit " << bit << ": " << LVL1::MuCTPIBits::DataStatusWordErrors.at(bit));
+          }
+          auto monErrorBits = Monitored::Collection("DataStatusWordErrors", errorBits);
+        }
+        break;
+      }
+      default: {
+        ATH_MSG_ERROR("The MUCTPI word 0x" << std::hex << word << std::dec << " does not match any known word type");
+        return StatusCode::FAILURE;
+      }
+    }
+    ++iWord;
+  } // Loop over all ROD words
+
+  // Validate the number of slices and decode the RoI candidate words in each time slice
+  const size_t nSlices{roiSlices.size()};
+  const size_t nOutputSlices{static_cast<size_t>(m_readoutWindow)};
+  if (nSlices > nOutputSlices) {
+    ATH_MSG_ERROR("Found " << nSlices << " time slices, but only " << m_readoutWindow << " outputs are configured");
+    return StatusCode::FAILURE;
+  } else if (nSlices != static_cast<size_t>(rob->rod_detev_type())) {
+    ATH_MSG_ERROR("Found " << nSlices << " time slices, but Detector Event Type word indicates there should be "
+                  << rob->rod_detev_type());
+    return StatusCode::FAILURE;
+  } else if (nSlices!=1 && nSlices!=3 && nSlices!=5) {
+    ATH_MSG_ERROR("Expected 1, 3 or 5 time slices but found " << nSlices);
+    return StatusCode::FAILURE;
+  }
+
+  // Validate the number of slices and decode the Topo TOB words in each time slice
+  if (m_doTopo.value()) {
+    const size_t nTopoSlices{topoSlices.size()};
+    const size_t nTopoOutputSlices{static_cast<size_t>(m_readoutWindow)};
+    if (nTopoSlices > nTopoOutputSlices) {
+      ATH_MSG_ERROR("Found " << nTopoSlices << " TOPO TOB time slices, but only " << m_readoutWindow << " outputs are configured");
+      return StatusCode::FAILURE;
+    } else if (nTopoSlices != static_cast<size_t>(rob->rod_detev_type())) {
+      ATH_MSG_ERROR("Found " << nTopoSlices << " time slices, but Detector Event Type word indicates there should be "
+                    << rob->rod_detev_type());
+      return StatusCode::FAILURE;
+    } else if (nTopoSlices!=1 && nTopoSlices!=3 && nTopoSlices!=5) {
+      ATH_MSG_ERROR("Expected 1, 3 or 5 time slices but found " << nTopoSlices);
+      return StatusCode::FAILURE;
+    }
+    const size_t topoOutputOffset = nTopoOutputSlices/2 - nTopoSlices/2;
+    ATH_CHECK(decodeTopoSlices(data, topoSlices, topoHandles, topoOutputOffset, eventContext));
+  }
+
+  return StatusCode::SUCCESS;
+ }
+
 }
 
 // -----------------------------------------------------------------------------

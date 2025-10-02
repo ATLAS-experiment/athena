@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DeadMaterialShower.h"
@@ -16,8 +16,8 @@
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
 
-DeadMaterialShower::DeadMaterialShower(const std::string& name, const double& highEnergy, const double& lowEnergy, const double& zcutoff)
-  : G4VFastSimulationModel(name),
+DeadMaterialShower::DeadMaterialShower(const std::string& name, G4Region* region, const double& highEnergy, const double& lowEnergy, const double& zcutoff)
+  : G4VFastSimulationModel(name, region),
     m_highEnergy(highEnergy),
     m_lowEnergy(lowEnergy),
     m_zcutoff(zcutoff)
@@ -68,5 +68,5 @@ G4bool DeadMaterialShower::ModelTrigger(const G4FastTrack& fastTrack)
 void DeadMaterialShower::DoIt(const G4FastTrack&, G4FastStep& fastStep)
 {
   fastStep.KillPrimaryTrack();
-  fastStep.SetPrimaryTrackPathLength(0.0);
+  fastStep.ProposePrimaryTrackPathLength(0.0);
 }

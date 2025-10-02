@@ -49,9 +49,9 @@ if( LCG_NIGHTLY )
     set( TDAQ_VERSION "99-00-00" CACHE STRING
        "The version of tdaq to use for the build" )
 else()
-    set( TDAQ-COMMON_VERSION "12-01-01" CACHE STRING
+    set( TDAQ-COMMON_VERSION "12-02-00" CACHE STRING
        "The version of tdaq-common to use for the build" )
-    set( TDAQ_VERSION "12-01-01" CACHE STRING
+    set( TDAQ_VERSION "12-02-00" CACHE STRING
        "The version of tdaq to use for the build" )
 endif()
 
@@ -104,7 +104,7 @@ find_package( tdaq )
 
 # Set up CppCheck.
 if( ATLAS_USE_CPPCHECK )
-   find_package( Cppcheck 2.14 )
+   find_package( Cppcheck 2.17 )
 
    # Find ATLAS-specific wrapper:
    find_program( CPPCHECK_ATLAS cppcheck_atlas

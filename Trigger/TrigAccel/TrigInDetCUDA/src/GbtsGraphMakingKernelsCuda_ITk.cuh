@@ -6,294 +6,309 @@
 #define TRIGINDETCUDA_GBTSGRAPHMAKINGKERNELSCUDA_ITK_CUH
 
 #include <cuda_runtime.h>
+#include <cuda_fp16.h>
+
+#include "GbtsDeviceSideDataStructures_ITk.cuh"
 
 __global__ static void graphEdgeMakingKernel_ITk(const uint4* d_bin_pair_views, const float* d_bin_pair_dphi, const float* d_node_params, const float* d_algo_params,
-                                                 unsigned int* d_counters, int2* d_edge_nodes, float4* d_edge_params, unsigned int* d_num_outgoing_edges, 
+                                                 unsigned int* d_counters, int2* d_edge_nodes, half4* d_edge_params, unsigned int* d_num_outgoing_edges, 
                                                  unsigned int nMaxEdges) {
-    __shared__ unsigned int begin_bin1; 
-    __shared__ unsigned int begin_bin2; 
-    __shared__ unsigned int num_nodes1;
-    __shared__ unsigned int num_nodes2;
-    __shared__ float deltaPhi;
-    
-    __shared__ float minDeltaRad;
-    __shared__ float min_z0;
-    __shared__ float max_z0;
-    __shared__ float maxOuterRad;
-    __shared__ float min_zU;
-    __shared__ float max_zU;
-    __shared__ float max_kappa_high;
-    __shared__ float max_kappa_low;
+	__shared__ unsigned int begin_bin1; 
+	__shared__ unsigned int begin_bin2; 
+	__shared__ unsigned int num_nodes1;
+	__shared__ unsigned int num_nodes2;
+	__shared__ float deltaPhi;
 
-    __shared__ float tau_min[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
-    __shared__ float tau_max[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
-    __shared__ float phi[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
-    __shared__ float r[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
-    __shared__ float z[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
+	__shared__ float minDeltaRad;
+	__shared__ float min_z0;
+	__shared__ float max_z0;
+	__shared__ float maxOuterRad;
+	__shared__ float min_zU;
+	__shared__ float max_zU;
+	__shared__ float max_kappa;
 
-    if(threadIdx.x == 0) {
-        uint4 views    = d_bin_pair_views[blockIdx.x];
-        deltaPhi       = d_bin_pair_dphi[blockIdx.x];
-        
-        begin_bin1     = views.x; 
-        begin_bin2     = views.z;
-        
-        num_nodes1 = views.y - begin_bin1;
-        num_nodes2 = views.w - begin_bin2;
-        
-        minDeltaRad    = d_algo_params[2];
-        min_z0         = d_algo_params[3];
-        max_z0         = d_algo_params[4];
-        maxOuterRad    = d_algo_params[5];
-        min_zU         = d_algo_params[6];
-        max_zU         = d_algo_params[7];
-        max_kappa_low  = d_algo_params[8];
-        max_kappa_high = d_algo_params[9];
+	__shared__ float tau_min[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
+	__shared__ float tau_max[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
+	__shared__ float phi[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
+	__shared__ float r[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
+	__shared__ float z[TrigAccel::ITk::GBTS_NODE_BUFFER_LENGTH];
 
-    }
+	if(threadIdx.x == 0) {
+		uint4 views    = d_bin_pair_views[blockIdx.x];
+		deltaPhi       = d_bin_pair_dphi[blockIdx.x];
+		
+		begin_bin1     = views.x; 
+		begin_bin2     = views.z;
+		
+		num_nodes1 = views.y - begin_bin1;
+		num_nodes2 = views.w - begin_bin2;
+		
+		minDeltaRad    = d_algo_params[4];
+		min_z0         = d_algo_params[5];
+		max_z0         = d_algo_params[6];
+		maxOuterRad    = d_algo_params[7];
+		min_zU         = d_algo_params[8];
+		max_zU         = d_algo_params[9];
+		max_kappa  = d_algo_params[10];
+	}
 
-    __syncthreads();
-    for(int idx = threadIdx.x; idx < num_nodes1; idx += blockDim.x) {//loading a chunk of nodes1 into shared mem buffers
-        int offset = 5*(idx + begin_bin1);
-        tau_min[idx] = d_node_params[offset];
-        tau_max[idx] = d_node_params[offset+1];
-        phi[idx]     = d_node_params[offset+2];
-        r[idx]       = d_node_params[offset+3];
-        z[idx]       = d_node_params[offset+4];
-    }
+	__syncthreads();
+	for(int idx = threadIdx.x; idx < num_nodes1; idx += blockDim.x) {//loading a chunk of nodes1 into shared mem buffers
+		int offset = 5*(idx + begin_bin1);
+		tau_min[idx] = d_node_params[offset];
+		tau_max[idx] = d_node_params[offset+1];
+		phi[idx]     = d_node_params[offset+2];
+		r[idx]       = d_node_params[offset+3];
+		z[idx]       = d_node_params[offset+4];
+	}
 
-    __syncthreads();
+	__syncthreads();
 
-    int last_n1 = 0;//initial value for the sliding window
+	int last_n1 = 0;//initial value for the sliding window
 
-    float phi_bin_width = 2.0f * CUDART_PI_F / TrigAccel::ITk::GBTS_MAX_PHI_BIN;
+	float phi_bin_width = 2.0f * CUDART_PI_F / TrigAccel::ITk::GBTS_MAX_PHI_BIN;
 
-    for(int n2Idx = threadIdx.x; n2Idx < num_nodes2; n2Idx += blockDim.x) {
-        
-        int globalIdx2 = begin_bin2 + n2Idx;
-        int o2 = 5*globalIdx2;
-        
-        float phi2 = d_node_params[2 + o2];
-        
-        float min_phi1 = phi2 - deltaPhi;
-        float max_phi1 = phi2 + deltaPhi;
-        
-        if (min_phi1 < -CUDART_PI_F) min_phi1 += 2.0f * CUDART_PI_F;
-        if (max_phi1 >  CUDART_PI_F) max_phi1 -= 2.0f * CUDART_PI_F;
-                
-        bool boundary = max_phi1 < min_phi1;// +/- pi wraparound
+	for(int n2Idx = threadIdx.x; n2Idx < num_nodes2; n2Idx += blockDim.x) {
+			
+		int n1Idx = last_n1;
 
-        float max_phi1_bin = max_phi1 + phi_bin_width;
-        float min_phi1_bin = min_phi1 - phi_bin_width;
-        
-        if(!boundary) {
-            if(phi[0] > max_phi1_bin) continue;
-            if(phi[num_nodes1-1] < min_phi1_bin) continue;
-        }
-        else {
-            if(phi[num_nodes1 - 1] < min_phi1_bin && phi[0] > max_phi1_bin) continue;
-        }        
-        
-        if(boundary) last_n1 = 0;//reset the sliding window if we hit the boundary
+		int globalIdx2 = begin_bin2 + n2Idx;
+		int o2 = 5*globalIdx2;
+		
+		float phi2 = d_node_params[2 + o2];
+		
+		float min_phi1 = phi2 - deltaPhi;
+		float max_phi1 = phi2 + deltaPhi;
+		
+		if (min_phi1 < -CUDART_PI_F) min_phi1 += 2.0f * CUDART_PI_F;
+		if (max_phi1 >  CUDART_PI_F) max_phi1 -= 2.0f * CUDART_PI_F;
+						
+		bool boundary = max_phi1 < min_phi1;// +/- pi wraparound
 
-        float r2       = d_node_params[3 + o2];
-        float z2       = d_node_params[4 + o2];
-        float tau_min2 = d_node_params[    o2];
-        float tau_max2 = d_node_params[1 + o2];
-        
-        for(int n1Idx = last_n1; n1Idx < num_nodes1; n1Idx++) {
-		float phi1 = phi[n1Idx];
-        
-                if(!boundary) {
-		   if(phi1 > max_phi1_bin) break;
-		   if(phi1 < min_phi1_bin) continue;
-		   last_n1 = n1Idx;
+		//expand over nearest bin boundary
+		max_phi1 += phi_bin_width;
+		min_phi1 -= phi_bin_width;
+		
+		if(!boundary) {
+			if(phi[0] > max_phi1) continue;
+			if(phi[num_nodes1-1] < min_phi1) {
+				if(phi[0] > deltaPhi+phi_bin_width-CUDART_PI_F) break; //if bin1 can't be part of a wraparound from a high-phi node skip it
+				continue;
+			}
 		}
-                else {
-                   if(phi1 > max_phi1_bin && phi1 < min_phi1_bin) continue;
+		else {
+			if(phi[0] < max_phi1) n1Idx = 0; //if not to large for lower wraparound don't skip it
+			else if(phi[num_nodes1 - 1] < min_phi1 ) continue;
+		}        
+		
+		float tau_min2 = d_node_params[    o2];		
+		float tau_max2 = d_node_params[1 + o2];		
+		float r2       = d_node_params[3 + o2];
+		float z2       = d_node_params[4 + o2];
+		
+		for(; n1Idx < num_nodes1; n1Idx++) {
+			float phi1 = phi[n1Idx];
+
+			if(!boundary) {
+				if(phi1 > max_phi1) break;
+				if(phi1 < min_phi1) continue;
+				last_n1 = n1Idx;
+			}
+			else {
+				if(phi1 > max_phi1 && phi1 < min_phi1) {
+					if(n1Idx < last_n1) n1Idx = last_n1 - 1; // skip to high wraparound after the lower part is done
+					continue;
+				}
+			}
+
+			float r1 = r[n1Idx];
+			float dr = r2-r1;
+ 
+			if(dr < minDeltaRad) continue;
+															
+			float z1 = z[n1Idx];
+			float dz = z2 - z1;
+			float tau = dz/dr;
+			float ftau = fabsf(tau);
+
+			if(ftau > 36.0f) continue; //detector acceptance
+
+			if((ftau < tau_min2) || (ftau > tau_max2)) continue;
+
+			if((ftau < tau_min[n1Idx]) || (ftau > tau_max[n1Idx])) continue;
+
+			//RZ doublet filter cuts
+
+			float z0 = z1 - r1*tau;
+							
+			if((z0 < min_z0) || (z0 > max_z0)) continue;
+
+			float zouter = z0 + maxOuterRad*tau;
+
+			if(zouter < min_zU || zouter > max_zU) continue;
+
+			float dphi = phi2 - phi1;
+
+			if(boundary) {
+				if (dphi < -CUDART_PI_F) dphi += 2.0f * CUDART_PI_F;
+				else if (dphi >  CUDART_PI_F) dphi -= 2.0f * CUDART_PI_F;
+			}
+
+			//needed for sliding phi window consistancy
+			if(fabsf(dphi) > deltaPhi) continue;
+
+			float curv = dphi/dr;
+			float d0_for_max_curv = r1*r2*(fabsf(curv) - max_kappa);
+			if(ftau < 4.0f) {
+				if(d0_for_max_curv > 0.2f) continue;
+			}
+			else if(d0_for_max_curv > 1.0f) continue;
+			
+			int nEdges = atomicAdd(&d_counters[0], 1);
+
+			if(nEdges < nMaxEdges) {
+				__half exp_eta = __float2half(sqrtf(1 + tau*tau) - tau);
+				atomicAdd(&d_num_outgoing_edges[globalIdx2], 1);
+				d_edge_nodes[nEdges]  = make_int2(begin_bin1 + n1Idx, globalIdx2);
+				d_edge_params[nEdges] = make_half4(exp_eta, __float2half(curv), __float2half(phi1 + curv*r1), __float2half(phi2 + curv*r2));
+			}
 		}
-
-                float r1 = r[n1Idx];
-                float dr = r2-r1;
-           
-                if(dr < minDeltaRad) continue;
-                                        
-                float z1 = z[n1Idx];
-                float dz = z2 - z1;
-                float tau = dz/dr;
-                float ftau = fabsf(tau);
-        
-                if(ftau > 36.0) continue; //detector acceptance
-        
-                if((ftau < tau_min2) || (ftau > tau_max2)) continue;
-        
-                if((ftau < tau_min[n1Idx]) || (ftau > tau_max[n1Idx])) continue;
-        
-                //RZ doublet filter cuts
-
-                float z0 = z1 - r1*tau;
-                        
-                if((z0 < min_z0) || (z0 > max_z0)) continue;
-        
-                float zouter = z0 + maxOuterRad*tau;
-        
-                if(zouter < min_zU || zouter > max_zU) continue;
-
-                float dphi = phi2 - phi1;
-
-                if(boundary) {
-                   if (dphi < -CUDART_PI_F) dphi += 2.0f * CUDART_PI_F;
-		   else if (dphi >  CUDART_PI_F) dphi -= 2.0f * CUDART_PI_F;
-                }
-
-                if(fabsf(dphi) > deltaPhi) continue;
-        
-                float curv = dphi/dr;
-
-                float abs_curv = fabsf(curv);
-           
-                if(ftau < 4.0) {//for eta < 2.1
-                   if(abs_curv > max_kappa_low) continue;
-                }
-                else { 
-                   if(abs_curv > max_kappa_high) continue;
-                }
-        
-                int nEdges = atomicAdd(&d_counters[0], 1);
-
-                if(nEdges < nMaxEdges) {
-                   float exp_eta = sqrtf(1 + tau*tau) - tau;
-                   atomicAdd(&d_num_outgoing_edges[globalIdx2], 1);
-                   d_edge_nodes[nEdges]  = make_int2(begin_bin1 + n1Idx, globalIdx2);
-                   d_edge_params[nEdges] = make_float4(exp_eta, curv, phi1 + curv*r1, phi2 + curv*r2);
-		}
-        }
-    }
+	}
 }
 
-__global__ static void graphEdgeLinkingKernel_ITk(const int2* d_edge_nodes, const unsigned int* d_link_ends, int* d_edge_links, int* d_link_counters, int nEdges) {
+__global__ static void graphEdgeLinkingKernel_ITk(const int2* d_edge_nodes, int* d_edge_links, unsigned int* d_num_outgoing_edges, int nEdges) {
 
-    int edge_idx = blockIdx.x * blockDim.x + threadIdx.x;
+	int edge_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if(edge_idx >= nEdges) return;
+	if(edge_idx >= nEdges) return;
+	int n2Idx = d_edge_nodes[edge_idx].y;//global index of n2
 
-    int n2Idx = d_edge_nodes[edge_idx].y;//global index of n2
-
-    int link_end = d_link_ends[n2Idx] - 1;
-
-    int k = atomicAdd(&d_link_counters[n2Idx], 1);
-
-    d_edge_links[link_end - k] = edge_idx; //this edge starts from n2, matching will check edge's n1 and then loop over edges outgoing from that node
-
+	unsigned int pos = atomicSub(&d_num_outgoing_edges[n2Idx], 1); //this converts num_outgoing_edges to the start postion for each node in d_edge_links
+	
+	d_edge_links[pos-1] = edge_idx; //this edge starts from n2, matching will check edge's n1 and then loop over edges outgoing from that node
 }
 
-__global__ static void graphEdgeMatchingKernel_ITk(const float* d_algo_params, const float4* d_edge_params, const int2* d_edge_nodes, 
-                                                   const int* d_link_counters, const unsigned int* d_link_ends, const int* d_edge_links, 
-                                                   int* d_num_neighbours, int* d_neighbours, int* d_reIndexer, unsigned int* d_counters, int nEdges) {
+__global__ static void graphEdgeMatchingKernel_ITk(const float* d_algo_params, const half4* d_edge_params, const int2* d_edge_nodes, 
+                                                   const unsigned int* d_num_outgoing_edges, const int* d_edge_links, 
+                                                   unsigned char* d_num_neighbours, int* d_neighbours, int* d_reIndexer, unsigned int* d_counters, int nEdges) {
+	__shared__ __half cut_dphi_max;
+	__shared__ __half cut_dcurv_max;
+	__shared__ __half cut_tau_ratio_max;
+	__shared__ __half PI_h;
+	__shared__ __half PI_2_h;
+	__shared__ __half ONE_h;
+	if(threadIdx.x == 0) {
+		cut_dphi_max      = __float2half(d_algo_params[11]);
+		cut_dcurv_max     = __float2half(d_algo_params[12]);	
+		cut_tau_ratio_max = __float2half(d_algo_params[13]);
+		
+		PI_h   = __float2half(CUDART_PI_F);
+		PI_2_h = __float2half(2*CUDART_PI_F);
+		ONE_h  = __float2half(1.0f);
+	}
+	__syncthreads();
 
+	int edge1_idx = blockIdx.x * blockDim.x + threadIdx.x;
 
+	if (edge1_idx >= nEdges) return;
 
-    int edge1_idx = blockIdx.x * blockDim.x + threadIdx.x;
+	int n1Idx = d_edge_nodes[edge1_idx].x;//global index of n1 node of the edge1
 
-    if (edge1_idx >= nEdges) return;
+	int link_begin = d_num_outgoing_edges[n1Idx];
+	int nLinks = d_num_outgoing_edges[n1Idx+1] - link_begin;//the number of edges which has n1 as their starting node (n2)
+	if (nLinks == 0) return;
 
-    int n1Idx = d_edge_nodes[edge1_idx].x;//global index of n1 node of the edge1
+	half4 params1 = d_edge_params[edge1_idx]; // [exp_eta, curv, Phi1, Phi2]
 
-    int nLinks = d_link_counters[n1Idx];//the number of edges which has n1 as their starting node (n2)
+	__half uat_2  = ONE_h/params1.x;
+	__half Phi2   = params1.z;
+	__half curv2  = params1.y;
 
-    if (nLinks == 0) return;
+	int nei_pos  = TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS*edge1_idx;
 
-    float4 params1 = d_edge_params[edge1_idx]; // [exp_eta, curv, Phi1, Phi2]
+	unsigned char num_nei  = 0;
 
-    int link_end = d_link_ends[n1Idx] - 1;
+	for(int k=0;k<nLinks;k++) {//loop over potential neighbours
 
-    float uat_2  = 1.0f/params1.x;
-    float Phi2   = params1.z;
-    float curv2  = params1.y;
+		if (num_nei == TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS-1) break;
+		
+		int edge2_idx = d_edge_links[link_begin + k];
+		
+		half4 params2 = d_edge_params[edge2_idx];
+				
+		__half tau_ratio = params2.x*uat_2 - ONE_h;
+				
+		if(__habs(tau_ratio) > cut_tau_ratio_max) {//bad match
+			continue;
+		}
+					
+		__half dPhi =  Phi2 - params2.w;//Phi2
+					
+		if (dPhi < -PI_h) dPhi += PI_2_h;
+		else if (dPhi > PI_h) dPhi -= PI_2_h;
+		if(__habs(dPhi) > cut_dphi_max) {
+			continue;
+		}
+				
+		__half dcurv = curv2 - params2.y;
+				
+		if(__habs(dcurv) > cut_dcurv_max) {
+			continue;
+		}
+		
+		d_neighbours[nei_pos + num_nei] = edge2_idx;
+		d_reIndexer[edge2_idx] = 1;
+				
+		++num_nei;
+	}
 
-    int nei_pos  = TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS*edge1_idx;
+	d_num_neighbours[edge1_idx] = num_nei;
 
-    int num_nei  = 0;
-
-    for(int k=0;k<nLinks;k++) {//loop over potential neighbours
-
-        if (num_nei == TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS-1) break;
-
-        int edge2_idx = d_edge_links[link_end - k];
-
-        float4 params2 = d_edge_params[edge2_idx];
-            
-        float tau_ratio = params2.x*uat_2 - 1.0f;
-              
-        if(fabsf(tau_ratio) > d_algo_params[12]) {//bad match
-           continue;
-        }
-              
-        float dPhi =  Phi2 - params2.w;//Phi2
-              
-        if (dPhi < -CUDART_PI_F) dPhi += 2.0f * CUDART_PI_F;
-        else if (dPhi > CUDART_PI_F) dPhi -= 2.0f * CUDART_PI_F;
-        if(fabsf(dPhi) > d_algo_params[10]) {
-            continue;
-        }
-            
-        float dcurv = curv2 - params2.y;
-            
-        if(fabsf(dcurv) > d_algo_params[11]) {
-            continue;
-        }
-        
-        d_neighbours[nei_pos + num_nei] = edge2_idx;
-        d_reIndexer[edge2_idx] = 1;
-        
-        ++num_nei;
-            
-        atomicAdd(&d_counters[1], 1);
-    }
-
-    d_num_neighbours[edge1_idx] = num_nei;
-
-    if(num_nei!=0) d_reIndexer[edge1_idx] = 1;
+	if(num_nei!=0) {
+		d_reIndexer[edge1_idx] = 1;
+		atomicAdd(&d_counters[1], num_nei);
+	}
 }
 
 __global__ void edgeReIndexingKernel_ITk(int* d_reIndexer, unsigned int* d_counters, int nEdges) {
 
-        //each thread gets an edge      
-        
-        int edge_idx = threadIdx.x + blockIdx.x*blockDim.x;
-        
-        if(edge_idx >= nEdges) return;
+	//each thread gets an edge      
 
-        if(d_reIndexer[edge_idx] == -1) return;
+	int edge_idx = threadIdx.x + blockIdx.x*blockDim.x;
 
-        d_reIndexer[edge_idx] = atomicAdd(&d_counters[2], 1);
+	if(edge_idx >= nEdges) return;
 
+	if(d_reIndexer[edge_idx] == -1) return;
+
+	d_reIndexer[edge_idx] = atomicAdd(&d_counters[2], 1);
 }
 
-__global__ static void graphCompressionKernel_ITk(const int* d_orig_node_index, const int* d_edge_nodes, const int* d_num_neighbours, const int* d_neighbours, 
-                                                  const int* d_reIndexer, int* d_output_array, int nEdgesPerBlock, int nEdges) {
+__global__ static void graphCompressionKernel_ITk(float4* d_sp_params, const int* d_orig_node_index, 
+                                                  const int* d_edge_nodes, const unsigned char* d_num_neighbours, const int* d_neighbours, 
+                                                  const int* d_reIndexer, int* d_output_graph, int nEdgesPerBlock, int nEdges) {
            
-    int begin_edge = blockIdx.x * nEdgesPerBlock;
-    int edge_size  = 2 + 1 + TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;
+	int begin_edge = blockIdx.x * nEdgesPerBlock;
+	int edge_size  = 2 + 1 + TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS;
 
-    for(int idx = threadIdx.x + begin_edge;idx < begin_edge + nEdgesPerBlock; idx += blockDim.x) {
+	for(int idx = threadIdx.x + begin_edge;idx < begin_edge + nEdgesPerBlock; idx += blockDim.x) {
 
-       if (idx >= nEdges) continue;
+		if (idx >= nEdges) continue;
 
-       int newIdx = d_reIndexer[idx];
-       if (newIdx == -1) continue;
-       
-       int pos = edge_size*newIdx;
-       d_output_array[pos]     = d_orig_node_index[d_edge_nodes[2*idx]];
-       d_output_array[pos + 1] = d_orig_node_index[d_edge_nodes[2*idx + 1]];
-       int nNei = d_num_neighbours[idx];
-       d_output_array[pos + 2] = nNei;
-       if(nNei == 0) continue;
-       int nei_pos = TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS*idx;
-       for(int k=0;k<nNei;k++) {
-          d_output_array[pos + 3 + k] = d_reIndexer[d_neighbours[nei_pos + k]];
-       }
-    }
+		int newIdx = d_reIndexer[idx];
+		if (newIdx == -1) continue;
+		int pos = edge_size*newIdx;
+		int node1_idx = d_orig_node_index[d_edge_nodes[2*idx]];
+		d_output_graph[pos + TrigAccel::ITk::node1] = node1_idx;
+		int node2_idx = d_orig_node_index[d_edge_nodes[2*idx + 1]];
+		d_output_graph[pos + TrigAccel::ITk::node2] = node2_idx;
+
+		unsigned char nNei = d_num_neighbours[idx];
+		d_output_graph[pos + TrigAccel::ITk::nNei] = nNei;
+		int nei_pos = TrigAccel::ITk::GBTS_MAX_NUM_NEIGHBOURS*idx;
+		for(int k=0;k<nNei;k++) {
+			d_output_graph[pos + TrigAccel::ITk::nei_idx_start + k] = d_reIndexer[d_neighbours[nei_pos + k]];
+		}	
+	}
 }
 
 #endif

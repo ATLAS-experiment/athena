@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TAUANALYSISTOOLS_BUILDTRUTHTAUS_H
@@ -13,11 +13,16 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 // Core include(s):
-#include "MCTruthClassifier/IMCTruthClassifier.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // EDM include(s):
 #include "xAODJet/JetContainer.h"
@@ -94,7 +99,7 @@ private:
   };
 
 
-  StatusCode buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent) const;
+  StatusCode buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent, const EventContext& ctx) const;
   StatusCode examineTruthTau(const xAOD::TruthParticle& xTruthParticle) const;
   StatusCode examineTruthTauDecay(const xAOD::TruthParticle& xTruthParticle,
                                   TauTruthInfo& truthInfo) const;
@@ -109,6 +114,13 @@ protected:
 
 private:
 
+  // properties
+  Gaudi::Property<bool> m_bWriteInvisibleFourMomentum{ this, "WriteInvisibleFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteVisibleChargedFourMomentum{ this, "WriteVisibleChargedFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteVisibleNeutralFourMomentum{ this, "WriteVisibleNeutralFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteDecayModeVector{ this, "WriteDecayModeVector", true};
+  Gaudi::Property<bool> m_bWriteVertices{ this, "WriteVertices", true}; 
+
   // input containers
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthTauInputContainer { this, "TruthTauContainerName", "TruthTaus", "Truth tau input container name (truth matching mode)" };
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainer { this, "TruthParticleContainerName", "TruthParticles", "Truth particles input container name" };
@@ -118,14 +130,19 @@ private:
   // output container
   SG::WriteHandleKey<xAOD::TruthParticleContainer> m_truthTauOutputContainer { this, "NewTruthTauContainerName", "TruthTaus", "Truth tau output container name" };
 
-  bool m_truthMatchingMode = false;
-  bool m_bWriteInvisibleFourMomentum{};
-  bool m_bWriteVisibleChargedFourMomentum{};
-  bool m_bWriteVisibleNeutralFourMomentum{};
-  bool m_bWriteDecayModeVector{};
-  bool m_bWriteVertices{};
+  // decorations to be read from TruthParticles and copied onto TruthTaus
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_originReadDecorKey {this, "inputClassifierParticleOrigin", "TruthParticles.classifierParticleOrigin", "Particle origin"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_typeReadDecorKey {this, "inputClassifierParticleType", "TruthParticles.classifierParticleType", "Particle type"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeReadDecorKey {this, "inputClassifierParticleOutCome", "TruthParticles.classifierParticleOutCome", "Particle outcome"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_classificationReadDecorKey {this, "inputClassification", "TruthParticles.Classification", "Classification code"};
 
-  asg::AnaToolHandle<IMCTruthClassifier> m_tMCTruthClassifier;
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_linkDecoratorKey {this, "originalTruthParticle", "TruthTaus.originalTruthParticle", "Name of the decoration linking to the original truth particle"};
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_originDecoratorKey {this, "classifierParticleOrigin", "TruthTaus.classifierParticleOrigin", "Name of the decoration which records the particle origin"};
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_typeDecoratorKey {this, "classifierParticleType", "TruthTaus.classifierParticleType", "Name of the decoration which records the particle type"};
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey {this, "classifierParticleOutCome", "TruthTaus.classifierParticleOutCome", "Name of the decoration which records the particle outcome"};
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey {this, "Classification", "TruthTaus.Classification", "Name of the decoration which records the particle classification"};
+
+  bool m_truthMatchingMode = false;
 
 }; // class BuildTruthTaus
 

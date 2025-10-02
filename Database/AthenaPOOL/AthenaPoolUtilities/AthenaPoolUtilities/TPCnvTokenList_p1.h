@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TPCnvTokenList_p1_h
@@ -27,6 +27,7 @@ public:
       @param [in] cnvID ID of the TP converter for the object
       @param [in] token token referencing the extending object
   */
+  explicit
   TPCnvToken_p1(unsigned short cnvID=0, const std::string& token="")
 	: m_converterID(cnvID), m_token(token) {}
 

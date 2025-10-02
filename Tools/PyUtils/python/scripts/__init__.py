@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # hook for PyUtils.scripts package
 
@@ -9,6 +9,7 @@ acmdlib.register('chk-rflx', 'PyUtils.scripts.check_reflex')
 acmdlib.register('diff-pool', 'PyUtils.scripts.diff_pool_files')
 acmdlib.register('diff-root', 'PyUtils.scripts.diff_root_files')
 acmdlib.register('dump-root', 'PyUtils.scripts.dump_root_file')
+acmdlib.register('list-events', 'PyUtils.scripts.list_events')
 acmdlib.register('gen-klass', 'PyUtils.scripts.gen_klass')
 
 acmdlib.register('cmake.depends', 'PyUtils.scripts.cmake_depends')

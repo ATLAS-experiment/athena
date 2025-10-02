@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2muCombMon.h"
 
 #include "xAODTrigMuon/TrigMuonDefs.h"
 #include "MuonMatchingTool.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 
 L2muCombMon :: L2muCombMon(const std::string& name, ISvcLocator* pSvcLocator )
   : TrigMuonMonitorAlgorithm(name, pSvcLocator)

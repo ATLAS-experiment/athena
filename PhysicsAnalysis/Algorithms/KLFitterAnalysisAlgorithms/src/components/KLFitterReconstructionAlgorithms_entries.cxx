@@ -8,5 +8,8 @@
 #include <KLFitterAnalysisAlgorithms/RunKLFitterAlg.h>
 #include <KLFitterAnalysisAlgorithms/KLFitterFinalizeOutputAlg.h>
 
-DECLARE_COMPONENT (EventReco::KLFitterFinalizeOutputAlg)
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (EventReco::RunKLFitterAlg)
+DECLARE_COMPONENT (EventReco::KLFitterFinalizeOutputAlg)

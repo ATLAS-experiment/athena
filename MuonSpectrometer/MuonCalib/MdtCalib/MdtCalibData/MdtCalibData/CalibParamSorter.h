@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #pragma once
 
@@ -13,7 +13,7 @@ namespace MuonCalib{
         using SingleTubeCalib = MdtTubeCalibContainer::SingleTubeCalib;
         using SingleTubeCalibPtr = MdtTubeCalibContainer::SingleTubeCalibPtr;
 
-        CalibParamSorter(double _tol);
+        CalibParamSorter(double tol);
 
         bool operator()(const CalibFunc* a, const CalibFunc* b) const;
 

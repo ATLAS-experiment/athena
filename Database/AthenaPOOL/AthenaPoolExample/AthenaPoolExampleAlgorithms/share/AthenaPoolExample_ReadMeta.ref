@@ -1,48 +1,20 @@
-Wed May 22 11:14:00 CEST 2024
-Preloading tcmalloc_minimal.so
 Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking into 'SimplePoolFile5.root'
 Py:MetaReader        INFO Current mode used: lite
 Py:MetaReader        INFO Current filenames: ['SimplePoolFile5.root']
 Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v38r0)
-                                          running on aibuild16-024.cern.ch on Wed May 22 11:14:06 2024
-====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
-CoreDumpSvc                                          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 14(Alarm clock) 
 AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
-ClassIDSvc                                           INFO getRegistryEntries: read 4484 CLIDRegistry entries for module ALL
-ReadData                                            DEBUG Property update for OutputLevel : new value = 2
 ReadData                                             INFO in initialize()
-AthenaPoolAddressProviderSvc                        DEBUG Service base class initialized successfully
 MetaDataSvc                                          INFO Initializing MetaDataSvc
-PoolSvc                                             DEBUG Service base class initialized successfully
-PoolSvc                                              INFO io_register[PoolSvc](xmlcatalog_file:PoolFileCatalog.xml) [ok]
-PoolSvc                                              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
-PoolSvc                                              INFO Frontier compression level set to 5
-DBReplicaSvc                                         INFO Frontier server at (serverurl=http://atlasfrontier-local.cern.ch:8000/atlr)(serverurl=http://atlasfrontier-ai.cern.ch:8000/atlr)(proxyurl=http://ca-proxy-atlas.cern.ch:3128)(proxyurl=http://ca-proxy-meyrin.cern.ch:3128)(proxyurl=http://ca-proxy.cern.ch:3128)(proxyurl=http://atlasbpfrontier.cern.ch:3127) will be considered for COOL data
-DBReplicaSvc                                         INFO Read replica configuration from /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-05-20T2101/Athena/25.0.6/InstallArea/x86_64-el9-gcc13-opt/share/dbreplica.config
-DBReplicaSvc                                         INFO Total of 10 servers found for host aibuild16-024.cern.ch [ATLF ATLAS_COOLPROD atlas_dd ATLAS_CONFIG INT8R INTR ATONR_COOL ATONR_CONF DEVDB11 ATLF ]
-PoolSvc                                              INFO Successfully setup replica sorting algorithm
 PoolSvc                                             DEBUG OutputLevel is 2
-PoolSvc                                              INFO Setting up APR FileCatalog and Streams
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog2.xml
-PoolSvc                                              INFO POOL WriteCatalog is xmlcatalog_file:PoolFileCatalog.xml
-DbSession                                            INFO     Open     DbSession    
-Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 ToolSvc.AthPoolEx::ReadMeta                          INFO in initialize()
-MetaDataSvc                                          INFO Found MetaDataTools = PublicToolHandleArray(['xAODMaker::FileMetaDataTool/xAODMaker::FileMetaDataTool','AthPoolEx::ReadMeta'])
 EventSelector                                       DEBUG Initializing EventSelector
-EventSelector                                       DEBUG Service base class initialized successfully
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "SimplePoolFile5.root" from the collection list.
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile5.root, name=SimplePoolFile5.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile5.root, name=POOLContainer(DataHeader), contextID=0
-PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: SimplePoolFile5.root returned FID: 'C949FD2E-3B8E-9343-AAE0-1E2306911C43' tech=ROOT_All
-Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] C949FD2E-3B8E-9343-AAE0-1E2306911C43
-Domain[ROOT_All]                                     INFO                           SimplePoolFile5.root
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -52,19 +24,23 @@ SimplePoolFile5.root                                DEBUG --->Reading Shape[0 , 
 SimplePoolFile5.root                                DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile5.root                                DEBUG --->Reading Shape[1 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[2 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[2 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile5.root                                DEBUG --->Reading Shape[3 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile5.root                                DEBUG --->Reading Shape[4 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[3 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[5 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[4 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[6 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[5 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[7 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[6 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[8 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[7 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[9 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-##Shapes                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Shapes                                            DEBUG No objects passing selection criteria... Container has 10 Entries in total.
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
 ##Links                                             DEBUG Opening
 ##Links                                             DEBUG    attributes# = 1
@@ -75,33 +51,35 @@ SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949
 SimplePoolFile5.root                                DEBUG ---->ClassID:C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7
 SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(ExampleHitContainer_p1/MyHits) [202]  (4 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainer(DataHeader) [202]  (5 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (5 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(xAOD::EventInfo_v1/EventInfo) [202]  (6 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainer(DataHeader) [202]  (7 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainerForm(DataHeaderForm) [202]  (6 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainerForm(DataHeaderForm) [202]  (8 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (7 , ffffffffffffffff)
-SimplePoolFile5.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(ExampleHitContainer_p1/PedestalWriteData) [202]  (8 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(ExampleHitContainer_p1/PedestalWriteData) [202]  (9 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(EventStreamInfo_p3/StreamExampleMeta) [202]  (9 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (a , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(EventStreamInfo_p3/StreamExampleMeta) [202]  (b , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (a , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (c , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (b , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (d , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdr(DataHeader) [202]  (c , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdr(DataHeader) [202]  (e , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdrForm(DataHeaderForm) [202]  (d , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdrForm(DataHeaderForm) [202]  (f , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-##Links                                             DEBUG No objects passing selection criteria... Container has 12 Entries in total.
+##Links                                             DEBUG No objects passing selection criteria... Container has 14 Entries in total.
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
 ##Params                                            DEBUG Opening
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile5.root                                DEBUG --->Reading Param:FID=[C949FD2E-3B8E-9343-AAE0-1E2306911C43]
 SimplePoolFile5.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile5.root]
-SimplePoolFile5.root                                DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile5.root                                DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
@@ -115,8 +93,6 @@ MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-ClassIDSvc                                           INFO getRegistryEntries: read 1637 CLIDRegistry entries for module ALL
-EventPersistencySvc                                  INFO Added successfully Conversion service:AthenaPoolCnvSvc
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
@@ -126,10 +102,6 @@ MetaDataSvc                                         DEBUG Loaded input meta data
 MetaDataSvc                                         DEBUG Registering all Tools in ToolHandleArray MetaDataTools
 MetaDataSvc                                         DEBUG Adding public ToolHandle tool ToolSvc.xAODMaker::FileMetaDataTool (xAODMaker::FileMetaDataTool)
 MetaDataSvc                                         DEBUG Adding public ToolHandle tool ToolSvc.AthPoolEx::ReadMeta (AthPoolEx::ReadMeta)
-MetaDataSvc                                          INFO   AlgTool: ToolSvc.xAODMaker::FileMetaDataTool
-MetaDataSvc                                          INFO   AlgTool: ToolSvc.AthPoolEx::ReadMeta
-ReadData                                            DEBUG input handles: 3
-ReadData                                            DEBUG output handles: 0
 ReadData                                            DEBUG data dependencies:
   + INPUT   ( 'DataHeader' , 'StoreGateSvc+EventSelector' ) 
   + INPUT   ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
@@ -139,16 +111,9 @@ ApplicationMgr                                       INFO Application Manager In
 StorageSvc                                          DEBUG Disconnect request for database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43 PFN=SimplePoolFile5.root
 StorageSvc                                          DEBUG Closing database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43
 RootDatabase.close                                  DEBUG Closing DB SimplePoolFile5.root
-Domain[ROOT_All]                                     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] C949FD2E-3B8E-9343-AAE0-1E2306911C43
-Domain[ROOT_All]                                     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 EventSelector                                       DEBUG Try item: "SimplePoolFile5.root" from the collection list.
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile5.root, name=SimplePoolFile5.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile5.root, name=POOLContainer(DataHeader), contextID=0
-PersistencySvc::UserDB::fid()                       DEBUG lookupPFN: SimplePoolFile5.root returned FID: 'C949FD2E-3B8E-9343-AAE0-1E2306911C43' tech=ROOT_All
-DbSession                                            INFO     Open     DbSession    
-Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]                                     INFO ->  Access   DbDatabase   READ      [ROOT_All] C949FD2E-3B8E-9343-AAE0-1E2306911C43
-Domain[ROOT_All]                                     INFO                           SimplePoolFile5.root
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -158,19 +123,23 @@ SimplePoolFile5.root                                DEBUG --->Reading Shape[0 , 
 SimplePoolFile5.root                                DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile5.root                                DEBUG --->Reading Shape[1 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[2 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[2 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile5.root                                DEBUG --->Reading Shape[3 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile5.root                                DEBUG --->Reading Shape[4 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[3 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[5 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[4 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[6 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[5 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[7 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[6 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[8 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --->Reading Shape[7 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
+SimplePoolFile5.root                                DEBUG --->Reading Shape[9 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
 SimplePoolFile5.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-##Shapes                                            DEBUG No objects passing selection criteria... Container has 8 Entries in total.
+##Shapes                                            DEBUG No objects passing selection criteria... Container has 10 Entries in total.
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
 ##Links                                             DEBUG Opening
 ##Links                                             DEBUG    attributes# = 1
@@ -181,33 +150,35 @@ SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949
 SimplePoolFile5.root                                DEBUG ---->ClassID:C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7
 SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(ExampleHitContainer_p1/MyHits) [202]  (4 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainer(DataHeader) [202]  (5 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (5 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/CollectionTree(xAOD::EventInfo_v1/EventInfo) [202]  (6 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainer(DataHeader) [202]  (7 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainerForm(DataHeaderForm) [202]  (6 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/POOLContainerForm(DataHeaderForm) [202]  (8 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (7 , ffffffffffffffff)
-SimplePoolFile5.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(ExampleHitContainer_p1/PedestalWriteData) [202]  (8 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(ExampleHitContainer_p1/PedestalWriteData) [202]  (9 , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(EventStreamInfo_p3/StreamExampleMeta) [202]  (9 , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (a , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(EventStreamInfo_p3/StreamExampleMeta) [202]  (b , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (a , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (c , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (b , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (d , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdr(DataHeader) [202]  (c , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdr(DataHeader) [202]  (e , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdrForm(DataHeaderForm) [202]  (d , ffffffffffffffff)
+SimplePoolFile5.root                                DEBUG --->Reading Assoc:C949FD2E-3B8E-9343-AAE0-1E2306911C43/MetaDataHdrForm(DataHeaderForm) [202]  (f , ffffffffffffffff)
 SimplePoolFile5.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-##Links                                             DEBUG No objects passing selection criteria... Container has 12 Entries in total.
+##Links                                             DEBUG No objects passing selection criteria... Container has 14 Entries in total.
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
 ##Params                                            DEBUG Opening
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 SimplePoolFile5.root                                DEBUG --->Reading Param:FID=[C949FD2E-3B8E-9343-AAE0-1E2306911C43]
 SimplePoolFile5.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile5.root]
-SimplePoolFile5.root                                DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile5.root                                DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
@@ -219,7 +190,6 @@ RootDatabase.setOption                              DEBUG Request tree cache
 RootDatabase.setOption                              DEBUG File name SimplePoolFile5.root
 RootDatabase.setOption                              DEBUG Got tree CollectionTree read entry -1
 RootDatabase.setOption                              DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
-AthenaPoolCnvSvc                                    DEBUG setAttribute TREE_CACHE to -1 for db: SimplePoolFile5.root and cont: CollectionTree
 MetaDataSvc                                         DEBUG handle() BeginInputFile for SimplePoolFile5.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name SimplePoolFile5.root
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdr(DataHeader)
@@ -227,7 +197,6 @@ MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-ClassIDSvc                                           INFO getRegistryEntries: read 2 CLIDRegistry entries for module ALL
 MetaDataSvc                                         DEBUG Loaded input meta data store proxies
 MetaDataSvc                                         DEBUG  calling beginInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "C949FD2E-3B8E-9343-AAE0-1E2306911C43"
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(xAOD::FileMetaData_v1/FileMetaData)
@@ -240,7 +209,6 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-ClassIDSvc                                           INFO getRegistryEntries: read 11 CLIDRegistry entries for module ALL
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaData_v1 ClassID: 178309087
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaDataAuxInfo_v1 ClassID: 73252552
 ToolSvc.xAODMaker::FileMetaDataTool                  INFO Copied "FileMetaData" to MetaDataStore
@@ -253,24 +221,24 @@ MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Opened container MetaD
 ToolSvc.AthPoolEx::ReadMeta                          INFO Pedestal x = 56568 y = 7209.89 z = -47603.9 string = <..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o>
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000000].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000000].
-ClassIDSvc                                           INFO getRegistryEntries: read 6 CLIDRegistry entries for module ALL
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000000]
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000000].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000000].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000000]
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] POOLContainerForm(DataHeaderForm)
 POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
 POOLContainerForm(DataHeaderForm)                   DEBUG Opened container POOLContainerForm(DataHeaderForm) of type ROOT_Tree
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] CollectionTree(EventInfo_p4/McEventInfo)
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opening
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG    attributes# = 1
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'EventInfo_p4_McEventInfo'
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
-AthenaPoolConverter                                  INFO massageEventInfo: unable to get OverrideRunNumberFromInput property from EventSelector 
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 0 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
@@ -283,12 +251,16 @@ ReadData                                             INFO EventStreamInfo: Numbe
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000000]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000000]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000000]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000000]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000000]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000000]
 ReadData                                             INFO EventInfo event: 4294967297 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -310,25 +282,30 @@ ReadData                                             INFO Hit x = 130.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000001].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000001].
-ClassIDSvc                                           INFO getRegistryEntries: read 7 CLIDRegistry entries for module ALL
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000001]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000001].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000001].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000001]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967298, run #1 1 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000001]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000001]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000001]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000001]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000001]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000001]
 ReadData                                             INFO EventInfo event: 4294967298 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -345,24 +322,30 @@ ReadData                                             INFO Hit x = 230.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967298, run #1 2 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000002].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000002].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000002]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000002].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000002].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000002]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967299, run #1 2 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000002]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000002]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000002]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000002]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000002]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000002]
 ReadData                                             INFO EventInfo event: 4294967299 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -379,24 +362,30 @@ ReadData                                             INFO Hit x = 330.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967299, run #1 3 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000003].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000003].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000003]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000003].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000003].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000003]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #, run #1 3 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000003]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000003]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000003]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000003]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000003]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000003]
 ReadData                                             INFO EventInfo event:  run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -413,24 +402,30 @@ ReadData                                             INFO Hit x = 430.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #, run #1 4 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000004].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000004].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000004]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000004].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000004].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000004]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 4 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000004]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000004]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000004]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000004]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000004]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000004]
 ReadData                                             INFO EventInfo event: 1 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -447,24 +442,30 @@ ReadData                                             INFO Hit x = 530.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 5 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000005].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000005].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000005]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000005].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000005].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000005]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #2, run #1 5 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000005]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000005]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000005]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000005]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000005]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000005]
 ReadData                                             INFO EventInfo event: 2 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -481,24 +482,30 @@ ReadData                                             INFO Hit x = 630.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #2, run #1 6 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000006].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000006].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000006]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000006].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000006].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000006]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #3, run #1 6 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000006]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000006]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000006]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000006]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000006]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000006]
 ReadData                                             INFO EventInfo event: 3 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -515,24 +522,30 @@ ReadData                                             INFO Hit x = 730.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #3, run #1 7 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000007].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000007].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000007]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000007].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000007].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000007]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4, run #1 7 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000007]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000007]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000007]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000007]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000007]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000007]
 ReadData                                             INFO EventInfo event: 4 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -549,24 +562,30 @@ ReadData                                             INFO Hit x = 830.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 8 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000008].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000008].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000008]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000008].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000008].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000008]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #5, run #1 8 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000008]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000008]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000008]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000008]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000008]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000008]
 ReadData                                             INFO EventInfo event: 5 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -583,24 +602,30 @@ ReadData                                             INFO Hit x = 930.125 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #5, run #1 9 events processed so far  <<<===
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000009].
-EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000009].
-EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000009]
-AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 3 objects
+EventSelector                                       DEBUG record AthenaAttribute, name = Token = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000009].
+EventSelector                                       DEBUG record AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000009].
+EventSelector                                       DEBUG found AthenaAttribute, name = eventRef = [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000009]
+AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
+AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #6, run #1 9 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
 ReadData                                             INFO EventStreamInfo: Number of events = 10
 ReadData                                             INFO EventStreamInfo: ItemList:
 ReadData                                             INFO CLID = 2101, key = McEventInfo
 ReadData                                             INFO CLID = 9102, key = MyHits
+ReadData                                             INFO CLID = 38853911, key = EventInfoAux.
+ReadData                                             INFO CLID = 45903698, key = EventInfo
 ReadData                                             INFO CLID = 222376821, key = StreamExampleMeta
 ReadData                                             INFO EventType: Event type: sim/data -  is sim , testbeam/atlas -  is atlas , calib/physics -  is physics 
 ReadData                                             INFO TagInfo: 
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(EventInfo_p4/McEventInfo)][CLID=C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7][TECH=00000202][OID=00000003-00000009]
 ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(ExampleHitContainer_p1/MyHits)][CLID=6BB89FA1-EB62-4641-97CA-3F8DB6588053][TECH=00000202][OID=00000004-00000009]
-ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000005-00000009]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)][CLID=0D6FFB22-1BCB-49B9-BBFB-66B6DF352067][TECH=00000202][OID=00000005-00000009]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=CollectionTree(xAOD::EventInfo_v1/EventInfo)][CLID=AE8BED6D-1D41-4CAF-994B-42613FC91A0A][TECH=00000202][OID=00000006-00000009]
+ReadData                                             INFO DataHeader (Event Content) [DB=C949FD2E-3B8E-9343-AAE0-1E2306911C43][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000202][OID=00000007-00000009]
 ReadData                                             INFO EventInfo event: 6 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
@@ -619,12 +644,9 @@ MetaDataSvc                                         DEBUG handle() EndInputFile 
 MetaDataSvc                                         DEBUG retireMetadataSource: FID:C949FD2E-3B8E-9343-AAE0-1E2306911C43
 MetaDataSvc                                         DEBUG  calling endInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "C949FD2E-3B8E-9343-AAE0-1E2306911C43"
 MetaDataSvc                                         DEBUG  calling endInputFile on ToolSvc.AthPoolEx::ReadMeta for GUID "C949FD2E-3B8E-9343-AAE0-1E2306911C43"
-EventSelector                                        INFO Disconnecting input sourceID: C949FD2E-3B8E-9343-AAE0-1E2306911C43
 StorageSvc                                          DEBUG Disconnect request for database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43 PFN=SimplePoolFile5.root
 StorageSvc                                          DEBUG Closing database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43
 RootDatabase.close                                  DEBUG Closing DB SimplePoolFile5.root
-Domain[ROOT_All]                                     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] C949FD2E-3B8E-9343-AAE0-1E2306911C43
-Domain[ROOT_All]                                     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 AthenaEventLoopMgr                                   INFO No more events in event selection 
 MetaDataSvc                                         DEBUG MetaDataSvc::stop()
 PoolSvc                                             DEBUG Disconnect request for contextId=0
@@ -632,15 +654,7 @@ PoolSvc                                             DEBUG Disconnected Persisten
 PoolSvc                                             DEBUG Disconnect request for contextId=1
 ApplicationMgr                                       INFO Application Manager Stopped successfully
 ReadData                                             INFO in finalize()
-ReadData                                            DEBUG Calling destructor
 ToolSvc                                              INFO Removing all tools created by ToolSvc
-ToolSvc.AthPoolEx::ReadMeta                          INFO in finalize()
-AthenaPoolCnvSvc                                     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc                                     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
-AthenaPoolCnvSvc                                     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc                                     INFO PerfStats | cObjR_ALL       |             228 ms |
-AthenaPoolCnvSvc                                     INFO PerfStats | cObj_ALL        |             251 ms |
-AthenaPoolCnvSvc                                     INFO PerfStats ----------------------------------------
 FPEAuditor                                           INFO FPE summary for this job
 FPEAuditor                                           INFO  FPE OVERFLOWs  : 0
 FPEAuditor                                           INFO  FPE INVALIDs   : 0

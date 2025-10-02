@@ -19,6 +19,7 @@ namespace MuonR4{
     class Segment{
         public: 
             
+            /** @brief Calibrated space point type */
             using MeasType = std::unique_ptr<CalibratedSpacePoint>;
             using MeasVec = std::vector<MeasType>;
             /** @brief Segment constructor
@@ -33,14 +34,7 @@ namespace MuonR4{
                     const SegmentSeed* parent,
                     MeasVec&& constMeas,
                     double chi2,
-                    unsigned int nDoF):
-                m_globPos{std::move(globPos)},
-                m_globDir{std::move(globDir)},
-                m_parent{parent},
-                m_measurements{std::move(constMeas)},
-                m_chi2{chi2}, 
-                m_nDoF{nDoF}{}
-
+                    unsigned int nDoF);
             /** @brief Returns the associated MS sector */
             const MuonGMR4::SpectrometerSector* msSector() const { return m_parent->msSector(); }
             /** @brief Returns the global segment position */
@@ -62,23 +56,29 @@ namespace MuonR4{
             /** @brief has the time been fitted */
             bool hasTimeFit() const { return m_t0 != std::nullopt; }
             /** @brief Returns the fitted segment time, if there's any */
-            double segementT0() const {
-                return m_t0.value_or(0);
-            }
+            double segementT0() const { return m_t0.value_or(0); }
+            /** @brief Helper struct to summarize the hit count  */
+            struct HitSummary{
+                /** @brief Number of good Mdt / Mm / sTgc eta hits */
+                unsigned nPrecHits{0};
+                /** @brief Number of good Rpc / Tgc eta hits */
+                unsigned nEtaTrigHits{0};
+                /** @brief Number of good Rpc / Tgc / sTgc phi hits */
+                unsigned nPhiHits{0};
+                /** @brief Number of Mdt / Mm / sTGC eta outliers */
+                unsigned nPrecOutlier{0};
+                /** @brief Precision technology */
+                xAOD::UncalibMeasType tech{xAOD::UncalibMeasType::Other};
+            };   
+            /** @brief Returns the hit summary */
+            const HitSummary& summary() const { return m_summary; }
+            
             /** @brief Sets the fitted segment time */
-            void setSegmentT0(double t0) {
-                m_t0 = std::make_optional<double>(t0);             
-            }
+            void setSegmentT0(double t0);
             /** @brief Set how many iteration the fitter needed to reach convergence */
-            void setCallsToConverge(unsigned int nCalls) {
-                m_nCalls = nCalls;
-            }
+            void setCallsToConverge(unsigned int nCalls);
             /** @brief Set the uncertainties from the fit */
-            void setParUncertainties(SegmentFit::Covariance&& cov){
-                m_cov = std::move(cov);
-            }
-
-
+            void setParUncertainties(SegmentFit::Covariance&& cov);
         private: 
             /** @brief Global position of the segment at the chamber centre */
             Amg::Vector3D m_globPos{Amg::Vector3D::Zero()};
@@ -98,6 +98,8 @@ namespace MuonR4{
             unsigned int m_nCalls{0};
             /** @brief Covariance matrix of the fit  */
             SegmentFit::Covariance m_cov{SegmentFit::Covariance::Identity()};
+            /** @brief Calculate the hit summary */
+            HitSummary m_summary{};
     };
 }
 

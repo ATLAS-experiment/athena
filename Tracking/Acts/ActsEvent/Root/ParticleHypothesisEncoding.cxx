@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
@@ -23,6 +23,37 @@ xAOD::ParticleHypothesis convert(Acts::ParticleHypothesis h) {
           "ActsTrk::ParticleHypothesis conversion to xAOD does not handle particle of abs(pdg)" + std::to_string(h.absolutePdg()));
   }
   return xAOD::undefined;
+}
+
+Acts::ParticleHypothesis convert(Trk::ParticleHypothesis h) {
+  switch (h) {
+      using enum Trk::ParticleHypothesis;
+      case pion:                             
+        return Acts::ParticleHypothesis::pion();
+      case geantino:
+        return Acts::ParticleHypothesis::chargedGeantino();
+      case electron:
+        return Acts::ParticleHypothesis::electron();
+      case muon:
+        return Acts::ParticleHypothesis::muon();
+      case kaon:
+        throw std::domain_error("ActsTrk::ParticleHypothesis conversion to Acts does not handle kaon");
+      case proton:
+        return Acts::ParticleHypothesis(Acts::PdgParticle::eProton);
+      case photon:
+        return Acts::ParticleHypothesis::photon();
+      case neutron: 
+         return Acts::ParticleHypothesis(Acts::PdgParticle::eNeutron);
+       case pi0:
+        return Acts::ParticleHypothesis::pion0();
+      case k0:
+        throw std::domain_error("ActsTrk::ParticleHypothesis conversion to Acts does not handle k0");
+      case nonInteractingMuon: 
+        throw std::domain_error("ActsTrk::ParticleHypothesis conversion to Acts does not handle nonInteractingMuon");
+      default:
+          break;
+   }
+   throw std::domain_error("ActsTrk::ParticleHypothesis conversion to Acts failed for" +std::to_string(h));
 }
 
 Acts::ParticleHypothesis convert(xAOD::ParticleHypothesis h) {

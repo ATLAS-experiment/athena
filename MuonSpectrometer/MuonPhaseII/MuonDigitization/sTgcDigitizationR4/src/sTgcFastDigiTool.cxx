@@ -42,9 +42,9 @@ namespace MuonR4 {
         DigiCache digitCache{};
         /// Fetch the conditions for efficiency calculations
         const Muon::DigitEffiData* efficiencyMap{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
+        ATH_CHECK(SG::get(efficiencyMap, m_effiDataKey, ctx));
         const NswErrorCalibData* nswUncertDB{nullptr};
-        ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, nswUncertDB));
+        ATH_CHECK(SG::get(nswUncertDB, m_uncertCalibKey, ctx));
         
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
@@ -53,6 +53,19 @@ namespace MuonR4 {
                 /// ignore radiation for now
                 if (m_digitizeMuonOnly && !MC::isMuon(simHit)){
                     continue;
+                }
+
+                if (simHit->energyDeposit() < m_energyDepositThreshold){
+                ATH_MSG_VERBOSE("Hit with Energy Deposit of " << simHit->energyDeposit()
+                << " less than " << m_energyDepositThreshold << ". Skip this hit." );
+                continue;
+                }
+
+                const double hitKineticEnergy = simHit->kineticEnergy();
+                if (hitKineticEnergy < m_limitElectronKineticEnergy && MC::isElectron(simHit)) {
+                  ATH_MSG_DEBUG("Skip electron hit with kinetic energy " << hitKineticEnergy
+                              << ", which is less than the lower limit of " << m_limitElectronKineticEnergy);
+                  continue;
                 }
                 sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
                 const bool digitizedStrip = digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
@@ -109,6 +122,7 @@ namespace MuonR4 {
             return false;
         }
 
+
         bool isValid{false};
         const Identifier stripId = idHelper.channelID(hitId, readOutEle->multilayer(),
                                                       gasGap, channelType::Strip, stripNum, isValid);
@@ -117,7 +131,7 @@ namespace MuonR4 {
             ATH_MSG_WARNING("Failed to deduce a valid identifier from "
                             <<m_idHelperSvc->toStringGasGap(hitId)<<" strip: "<<stripNum);
             return false;
-        } 
+        }
 
         /// Check efficiencies
         bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), stripPos);
@@ -176,9 +190,10 @@ namespace MuonR4 {
         const double w1 = CLHEP::RandFlat::shoot(rndEngine, 0., 0.5 *(1. - pull)); 
         const double w2 = 1. - pull -2.*w1;
         const double w3 = pull + w1;
-        const Identifier stripIdB = idHelper.channelID(hitId, readOutEle->multilayer(),
-                                                       gasGap, channelType::Strip, digitStrip -1, isValid);
-        if (isValid) {
+        
+        if (digitStrip> 1) {
+            const Identifier stripIdB = idHelper.channelID(hitId, readOutEle->multilayer(),
+                                                       gasGap, channelType::Strip, digitStrip -1);
             outCollection.push_back(std::make_unique<sTgcDigit>(stripIdB,
                                                                 associateBCIdTag(ctx, timedHit), 
                                                                 hitTime(timedHit), dummyCharge * w1, false, false));
@@ -187,9 +202,10 @@ namespace MuonR4 {
                                                             associateBCIdTag(ctx, timedHit), 
                                                             hitTime(timedHit), dummyCharge * w2, false, false));
         
-        const Identifier stripIdA = idHelper.channelID(hitId, readOutEle->multilayer(),
-                                                       gasGap, channelType::Strip, digitStrip + 1, isValid);
-        if (isValid) {
+        if (digitStrip + 1 <= design.numStrips()) {
+            const Identifier stripIdA = idHelper.channelID(hitId, readOutEle->multilayer(),
+                                                           gasGap, channelType::Strip, digitStrip + 1);
+
             outCollection.push_back(std::make_unique<sTgcDigit>(stripIdA,
                                                                 associateBCIdTag(ctx, timedHit), 
                                                                 hitTime(timedHit), dummyCharge * w3, false, false));
@@ -243,7 +259,7 @@ namespace MuonR4 {
             return false;
         }
 
-        const MuonGMR4::WireGroupDesign& design{readOutEle->wireDesign(gasGap)};
+        const MuonGMR4::WireGroupDesign& design{readOutEle->wireDesign(wireLayHash)};
         
         const int wireGrpNum = design.stripNumber(wirePos);
         if (wireGrpNum < 0) {
@@ -315,7 +331,7 @@ namespace MuonR4 {
         
         const Amg::Vector2D padPos{(toPad*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
         /// 
-        const MuonGMR4::PadDesign& design{readOutEle->padDesign(gasGap)};
+        const MuonGMR4::PadDesign& design{readOutEle->padDesign(padLayerHash)};
         
         const auto [padEta, padPhi] = design.channelNumber(padPos);
         if (padEta < 0 || padPhi < 0) {

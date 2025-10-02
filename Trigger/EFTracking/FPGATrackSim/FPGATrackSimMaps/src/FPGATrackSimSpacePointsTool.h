@@ -1,25 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimSPACEPOINTSTOOL_H
 #define FPGATrackSimSPACEPOINTSTOOL_H
 
-#include <array>
-#include <vector>
-#include <map>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimMaps/FPGATrackSimSpacePointsToolI.h"
+#include <array>
+#include <vector>
+#include <map>
 
 class TH1I;
 
 class FPGATrackSimSpacePointsTool : public extends<AthAlgTool, FPGATrackSimSpacePointsToolI> {
  public:
-    FPGATrackSimSpacePointsTool(const std::string &, const std::string &, const IInterface *);
-    virtual ~FPGATrackSimSpacePointsTool() {}
+    /// Constructor
+    using base_class::base_class;
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
@@ -31,7 +31,7 @@ class FPGATrackSimSpacePointsTool : public extends<AthAlgTool, FPGATrackSimSpace
     StatusCode makeSpacePoints(FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
     void calcPosition(FPGATrackSimHit &hit_in, FPGATrackSimHit &hit_out, float &x, float &y, float &z);
     bool searchForMatch(FPGATrackSimHit& hit_in,std::vector<FPGATrackSimHit>& hits_outer,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
-    void addSpacePoints(FPGATrackSimHit hit_in, FPGATrackSimHit hit_out ,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
+    void addSpacePoints(FPGATrackSimHit  hit_in, FPGATrackSimHit  hit_out ,FPGATrackSimTowerInputHeader &tower, std::vector<FPGATrackSimCluster> &spacepoints);
     void reduceGlobalCoordPrecision(FPGATrackSimHit &hit) const;
 
     //----------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUTRACKRNNCLASSIFIER_H
@@ -8,6 +8,7 @@
 // ASG include(s)
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandleArray.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 
 // xAOD include(s)
@@ -64,7 +65,8 @@ public:
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey {this, "Key_vertexInputContainer", "PrimaryVertices", "Vertex container key"};
 
-  bool m_classifyLRT;
+  Gaudi::Property<bool> m_classifyLRT{this, "classifyLRT", true}; 
+  Gaudi::Property<bool> m_classifyOnlyCoreTracks{this, "ClassifyOnlyCoreTracks", false};
 
 }; // class TauTrackRNNClassifier
   
@@ -91,6 +93,7 @@ class TrackRNN
   StatusCode classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
 			    xAOD::TauJet& xTau,
 			    const xAOD::VertexContainer* vertexContainer,
+			    const xAOD::TauTrackContainer& tauTrackContainer,
 			    bool skipTracks=false) const;
   
 private:
@@ -100,9 +103,10 @@ private:
 			   const xAOD::VertexContainer* vertexContainer,
 			   VectorMap& valueMap) const;
 
-  // configurable variables
-  std::string m_inputWeightsPath; 
-  unsigned int m_nMaxNtracks;
+  // properties
+  Gaudi::Property<std::string> m_inputWeightsPath{this, "InputWeightsPath", ""};
+  Gaudi::Property<unsigned int> m_nMaxNtracks{this, "MaxNtracks", 0};
+  Gaudi::Property<bool> m_removeDuplicateChargedTracks {this, "removeDuplicateChargedTracks", false};
 
   std::unique_ptr<lwtDev::LightweightGraph> m_RNNClassifier; //!
 

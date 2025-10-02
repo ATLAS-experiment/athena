@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/DerclcAng.h"
@@ -21,7 +21,7 @@ namespace Trk {
 
 void calcPhiConstraint( VKPhiConstraint * cnst)
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     int i,j;
@@ -60,7 +60,7 @@ void calcPhiConstraint( VKPhiConstraint * cnst)
 
 void calcThetaConstraint( VKThetaConstraint * cnst)
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     int i,j;
@@ -98,7 +98,7 @@ void calcThetaConstraint( VKThetaConstraint * cnst)
 
 void calcPlaneConstraint( VKPlaneConstraint * cnst)
 {
-    VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
+    VKConstraintBase * base_cnst = static_cast<VKConstraintBase*>( cnst);
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     double curV[3] = {vk->refIterV[0]+vk->cnstV[0], vk->refIterV[1]+vk->cnstV[1],vk->refIterV[2]+vk->cnstV[2]};
@@ -114,8 +114,25 @@ void calcPlaneConstraint( VKPlaneConstraint * cnst)
        base_cnst->f0t[i][numCNST].Z = 0.;
     }
     base_cnst->aa[numCNST]=cnst->getA()*curV[0]+cnst->getB()*curV[1]+cnst->getC()*curV[2] - cnst->getD() ;
-//std::cout.precision(11);
 //std::cout<<" new plane="<<base_cnst->aa[numCNST]<<'\n';
+//std::cout<<(*cnst)<<'\n';
+}
+void calcRadiusConstraint( VKRadiusConstraint * cnst)
+{
+    VKConstraintBase * base_cnst = dynamic_cast<VKConstraintBase*>( cnst);
+    const VKVertex * vk=cnst->getOriginVertex();
+    int NTRK = vk->TrackList.size();
+    double curV[3] = {vk->refIterV[0]+vk->cnstV[0], vk->refIterV[1]+vk->cnstV[1],vk->refIterV[2]+vk->cnstV[2]};
+    int numCNST=0;   //constraint number. Single constraint in this case
+    base_cnst->h0t[numCNST].X = 2.*(curV[0]-cnst->getRefX());
+    base_cnst->h0t[numCNST].Y = 2.*(curV[1]-cnst->getRefY());
+    base_cnst->h0t[numCNST].Z = 0;
+    for(int i=0; i<NTRK; i++){
+       base_cnst->f0t[i][numCNST].X = 0.;
+       base_cnst->f0t[i][numCNST].Y = 0.;
+       base_cnst->f0t[i][numCNST].Z = 0.;
+    }
+    base_cnst->aa[numCNST]=cnst->getRC()*cnst->getRC() - std::pow(curV[0]-cnst->getRefX(),2.) - std::pow(curV[1]-cnst->getRefY(),2.);
 }
 
 } /* End of namespace */

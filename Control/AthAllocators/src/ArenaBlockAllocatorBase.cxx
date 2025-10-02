@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/src/ArenaBlockAllocatorBase.cxx
@@ -174,6 +174,17 @@ void ArenaBlockAllocatorBase::erase()
   if (m_protected) {
     throw SG::ExcProtected();
   }
+  eraseUnprotected();
+}
+
+
+/**
+ * @brief Free all allocated elements and release memory back to the system.
+ *
+ * Assumes that the blocks are already unprotected.
+ */
+void ArenaBlockAllocatorBase::eraseUnprotected()
+{
   // Do we need to run clear() on the allocated elements?
   // If so, do so via reset().
   if (m_params.mustClear && m_params.clear) {

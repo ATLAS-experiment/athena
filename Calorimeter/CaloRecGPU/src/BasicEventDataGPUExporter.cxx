@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -20,10 +20,9 @@
 using namespace CaloRecGPU;
 
 BasicEventDataGPUExporter::BasicEventDataGPUExporter(const std::string & type, const std::string & name, const IInterface * parent):
-  AthAlgTool(type, name, parent),
+  base_class(type, name, parent),
   CaloGPUTimed(this)
 {
-  declareInterface<ICaloClusterGPUInputTransformer> (this);
 }
 
 StatusCode BasicEventDataGPUExporter::initialize()
@@ -78,7 +77,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
     
     if (CaloRecGPU::GeometryArr::is_tile(cell_index))
       {
-        const TileCell * tile_cell = (TileCell *) cell;
+        const TileCell * tile_cell = static_cast<const TileCell *> (cell);
 
         ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
                                                                           tile_cell->qual2(),

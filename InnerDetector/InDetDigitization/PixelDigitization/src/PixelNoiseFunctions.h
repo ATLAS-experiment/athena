@@ -13,6 +13,7 @@ class SiChargedDiodeCollection;
 class SiTotalCharge;
 class PixelModuleData;
 class PixelChargeCalibCondData;
+class ITkPixSimulationParameters;
 
 namespace CLHEP{
   class HepRandomEngine;
@@ -35,11 +36,22 @@ namespace PixelDigitization{
     const std::vector<float> &noiseShape, float overflowToT,
     const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
     InDetDD::IPixelReadoutManager * pixelReadout);
+    
+  void 
+  randomNoise(SiChargedDiodeCollection& chargedDiodes, const ITkPixSimulationParameters & chipData,
+    int nBcid,
+    const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
+    InDetDD::IPixelReadoutManager * pixelReadout);
   
   //randomly disables certain elements, using moduleData to get probability
   void 
   randomDisable(SiChargedDiodeCollection& chargedDiodes,
     const PixelModuleData *moduleData,
+    CLHEP::HepRandomEngine* rndmEngine);
+    
+  void 
+  randomDisable(SiChargedDiodeCollection& chargedDiodes,
+    const ITkPixSimulationParameters & chipData,
     CLHEP::HepRandomEngine* rndmEngine);
   
   //randomly disables certain elements, probability as a parameter          

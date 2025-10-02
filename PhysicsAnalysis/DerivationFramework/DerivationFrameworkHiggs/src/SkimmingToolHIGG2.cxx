@@ -17,18 +17,18 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 // Constructor
 DerivationFramework::SkimmingToolHIGG2::SkimmingToolHIGG2(const std::string& t,
 							  const std::string& n,
 							  const IInterface* p) : 
-  AthAlgTool(t, n, p),
+  base_class(t, n, p),
   m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool"),
   m_ntot(0),
   m_npass(0)
 {
-  declareInterface<DerivationFramework::ISkimmingTool>(this);
 
   declareProperty("SkipTriggerRequirement", m_skipTriggerRequirement=false);
 
@@ -823,5 +823,5 @@ double DerivationFramework::SkimmingToolHIGG2::getDeltaR(const double eta1, cons
   return dR;
 }
 
-const double DerivationFramework::SkimmingToolHIGG2::s_MZ(91187.6*CLHEP::MeV); 
-const double DerivationFramework::SkimmingToolHIGG2::s_MKplus(493.677*CLHEP::MeV); 
+const double DerivationFramework::SkimmingToolHIGG2::s_MZ(ParticleConstants::ZMassInMeV); 
+const double DerivationFramework::SkimmingToolHIGG2::s_MKplus(ParticleConstants::chargedKaonMassInMeV); 
