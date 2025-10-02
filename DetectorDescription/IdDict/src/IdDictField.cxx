@@ -15,15 +15,6 @@ IdDictField::IdDictField (const std::string& name)
 }
 
 
-void IdDictField::resolve_references(const IdDictMgr& /*idd*/) {
-}
-
-void IdDictField::generate_implementation(const IdDictMgr& /*idd*/,
-                                          const std::string& /*tag*/) {
-}
-
-void IdDictField::reset_implementation() {
-}
 
 bool IdDictField::verify() const {
   return(true);
@@ -44,8 +35,7 @@ IdDictField::add_label(IdDictLabel* label) {
 }
 
 void
-IdDictField::set_index (size_t index)
-{
+IdDictField::set_index (size_t index){
   m_index = index;
 }
 

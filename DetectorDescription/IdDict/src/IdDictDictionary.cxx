@@ -152,14 +152,6 @@ void IdDictDictionary::add_region(IdDictRegion* region) {
 
 void IdDictDictionary::resolve_references(const IdDictMgr& idd) {
   {
-    std::map<std::string, IdDictField*>::iterator it;
-
-    for (it = m_fields.begin(); it != m_fields.end(); ++it) {
-      IdDictField* field = (*it).second;
-      field->resolve_references(idd);
-    }
-  }
-  {
     std::map<std::string, IdDictSubRegion*>::iterator it;
 
     for (it = m_subregions.begin(); it != m_subregions.end(); ++it) {
