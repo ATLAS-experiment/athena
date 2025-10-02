@@ -185,7 +185,8 @@ def JetBTagginglessByVertexAlgCfg(
                                       'GN2v01_ptau': 'GN2v01' + dz_suffix + "ptau",
                                       'GN2v01_TrackOrigin': 'GN2v01' + dz_suffix + 'TrackOrigin',
                                       'GN2v01_VertexIndex': 'GN2v01' + dz_suffix + 'VertexIndex',
-                                      'GN2v01_TrackLinks': 'GN2v01' + dz_suffix + 'TrackLinks'}
+                                      'GN2v01_TrackLinks': 'GN2v01' + dz_suffix + 'TrackLinks',
+                                      'btagIp_': 'btagIp_ByVertex1_'}
 
                 if '/GN2v01/' in dirname:
                     args['tag_requirements'] = {'nonzeroTracks'}

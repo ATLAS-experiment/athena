@@ -169,7 +169,7 @@ AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
 
 AntiKt4EMPFlowByVertex = JetDefinition("AntiKt", 0.4, cst.GPFlowByVtx,
                                         ghostdefs = standardghosts+flavourghosts,
-                                        modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
+                                        modifiers = calibmods+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
                                         ptmin = 7000,
                                         lock = True,
                                         byVertex = True
