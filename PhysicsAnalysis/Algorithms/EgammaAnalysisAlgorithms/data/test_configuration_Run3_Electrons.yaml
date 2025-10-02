@@ -16,7 +16,6 @@ Electrons:
   WorkingPoint:
   - selectionName: loose
     forceFullSimConfig: True
-    noEffSF: True
     identificationWP: LooseBLayerLH
     isolationWP: Loose_VarRad
   PtEtaSelection:

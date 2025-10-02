@@ -39,6 +39,11 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.fixDAODTruthRecord', False)
     configSeq += subConfig
 
+    # Disable expert-mode warnings
+    import warnings
+    from AnalysisAlgorithmsConfig.ConfigAccumulator import ExpertModeWarning
+    warnings.simplefilter('ignore', ExpertModeWarning)
+
     # Create a pile-up analysis config
     if flags.Input.isMC:
         # setup config and lumicalc files for pile-up tool

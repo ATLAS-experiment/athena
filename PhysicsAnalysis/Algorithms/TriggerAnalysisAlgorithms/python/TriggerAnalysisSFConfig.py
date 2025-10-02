@@ -113,7 +113,8 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. Still performs the global trigger "
-            "matching (same behaviour as on data). The default is False.")
+            "matching (same behaviour as on data). The default is False.",
+            expertMode=True)
         self.addOption ('noGlobalTriggerEff', False, type=bool,
             info="disables the global trigger efficiency tool (including "
             "matching), which is only suited for electron/muon/photon "
