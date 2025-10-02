@@ -136,6 +136,10 @@ bool check_unpack (const IdDictDictionary& dictionary,
 {
   Identifier::value_type val = 0;
   const IdDictRegion* r = dictionary.find_region ("dummy");
+  if (not r){
+    std::cerr << "region 'dummy' not found in IdDictGroup_test\n";
+    return false;
+  }
   std::vector<size_t> vindices (indices);
   size_t nimpl = r->n_implementation();
   for (size_t ifield = 0; ifield < nimpl; ++ifield)
