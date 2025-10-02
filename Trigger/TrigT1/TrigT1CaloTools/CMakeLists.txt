@@ -4,15 +4,14 @@
 atlas_subdir( TrigT1CaloTools )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
 atlas_add_component( TrigT1CaloTools
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaBaseComps CaloIdentifier 
+                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaBaseComps CaloIdentifier 
                      CaloTriggerToolLib CxxUtils GaudiKernel PathResolver StoreGateLib LumiBlockData
                      TrigConfInterfaces TrigConfData TrigConfL1Data TrigT1CaloCalibConditions
                      TrigT1CaloCalibToolInterfaces TrigT1CaloCondSvcLib TrigT1CaloEventLib TrigT1CaloToolInterfaces 
