@@ -42,10 +42,6 @@ public:
 
     void add_label (IdDictLabel* label);
     void set_index (size_t index);
-
-    void resolve_references (const IdDictMgr& idd);  
-    void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");  
-    void reset_implementation ();  
     bool verify () const;  
     void clear ();
 
