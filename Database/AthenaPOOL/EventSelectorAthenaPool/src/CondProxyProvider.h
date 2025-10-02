@@ -15,6 +15,7 @@
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
+#include <memory>
 
 // Forward declarations
 namespace pool {
@@ -61,11 +62,11 @@ private: // properties
    /// InputCollections, vector with names of the input collections.
    StringArrayProperty m_inputCollectionsProp
    { this, "InputCollections", {}, "Files to read", "OrderedSet<std::string>" };
-   mutable std::vector<std::string>::const_iterator m_inputCollectionsIterator ATLAS_THREAD_SAFE {};
+   std::vector<std::string>::const_iterator m_inputCollectionsIterator{};
 
 private: // internal helper functions
    /// Return pointer to new PoolCollectionConverter
-   PoolCollectionConverter* getCollectionCnv();
+  std::unique_ptr<PoolCollectionConverter> getCollectionCnv();
 };
 
 #endif

@@ -17,6 +17,7 @@ def createDiTauConfigFlags():
     ditau_cfg.addFlag("DiTau.Rsubjet", 0.2)
     ditau_cfg.addFlag("DiTau.Rcore", 0.1)
     ditau_cfg.addFlag("DiTau.doTJVA", True)
+    ditau_cfg.addFlag("DiTau.doExtraVariables", False)
     ditau_cfg.addFlag("DiTau.doRunDiTauDiscriminant", False)
      
     return ditau_cfg

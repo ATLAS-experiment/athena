@@ -3,6 +3,8 @@
 // Local include(s).
 #include "xAODTruthCnv/TruthVertexFixerAlg.h"
 
+#include "removePrefix.h"
+
 // Framework include(s).
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteHandle.h"
@@ -10,6 +12,7 @@
 
 // EDM include(s).
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODTruth/TruthParticleContainer.h"
 
 // System include(s).
 #include <cassert>
@@ -62,6 +65,50 @@ StatusCode TruthVertexFixerAlg::execute(const EventContext& ctx) const {
           "One or both of xAOD::TruthVertex barcode and id are not available. "
           "This algorithm should not be run with these inputs.");
       warningPrinted = true;
+    }
+
+    // Fix the truth particle links on it if needed.
+    for (const std::string& linkName : m_particleLinks.value()) {
+      // Access the link in question.
+      SG::Accessor<std::vector<ElementLink<xAOD::TruthParticleContainer>>>
+          linkAcc(linkName);
+      if (!linkAcc.isAvailable(*output)) {
+        ANA_MSG_ERROR("TruthParticle link \"" << linkName
+                                              << "\" is not available on "
+                                                 "container \""
+                                              << m_inputContainerKey.key()
+                                              << "\"");
+        return StatusCode::FAILURE;
+      }
+      auto& links = linkAcc(*output);
+      // Update the name of the container that it's pointing to.
+      for (auto& link : links) {
+        link.resetWithKeyAndIndex(
+            Details::removePrefix(link.dataID(), m_linkPrefixToRemove.value()),
+            link.index());
+      }
+    }
+
+    // Fix the truth vertex links on it if needed.
+    for (const std::string& linkName : m_vertexLinks.value()) {
+      // Access the link in question.
+      SG::Accessor<std::vector<ElementLink<xAOD::TruthVertexContainer>>>
+          linkAcc(linkName);
+      if (!linkAcc.isAvailable(*output)) {
+        ANA_MSG_ERROR("TruthParticle link \"" << linkName
+                                              << "\" is not available on "
+                                                 "container \""
+                                              << m_inputContainerKey.key()
+                                              << "\"");
+        return StatusCode::FAILURE;
+      }
+      auto& links = linkAcc(*output);
+      // Update the name of the container that it's pointing to.
+      for (auto& link : links) {
+        link.resetWithKeyAndIndex(
+            Details::removePrefix(link.dataID(), m_linkPrefixToRemove.value()),
+            link.index());
+      }
     }
   }
 

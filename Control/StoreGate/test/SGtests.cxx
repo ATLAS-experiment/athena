@@ -18,8 +18,6 @@
 #include <stdexcept>
 #include <atomic>
 
-#include <boost/config.hpp>
-
 #include "StoreGate/SGtests.h"
 #include "TestTools/SGassert.h"
 
@@ -953,7 +951,6 @@ namespace Athena_test {
     cout << "*** StoreGateSvcClient_test retrieveAux OK ***\n\n" <<endl;
   }
 
-#ifndef BOOST_NO_CXX11_VARIADIC_TEMPLATES
   void testCreate(::StoreGateSvc& rSG) 
   {  
     cout << "\n*** StoreGateSvcClient_test testCreate BEGINS ***" << endl;
@@ -973,12 +970,6 @@ namespace Athena_test {
 
     cout << "*** StoreGateSvcClient_test testCreate OK ***\n\n" <<endl;
   }
-#else
-  void testCreate(::StoreGateSvc&) 
-  {  
-  }
-#endif
-
 
   void testBoundReset(StoreGateSvc& rSG)
   {

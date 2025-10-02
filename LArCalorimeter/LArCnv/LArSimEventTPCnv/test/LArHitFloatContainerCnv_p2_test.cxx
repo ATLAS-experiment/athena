@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArSimEventTPCnv/test/LArHitFloatContainerCnv_p2_test.cxx
@@ -20,6 +20,7 @@
 #include "TestTools/leakcheck.h"
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 
 void compare (const LArHitFloat& p1,
@@ -115,8 +116,13 @@ int main ATLAS_NOT_THREAD_SAFE ()
 {
   ISvcLocator* svcLoc = nullptr;
   (void)Athena_test::initGaudi ("DetStoreTest_jobOptions.txt", svcLoc);
-  const CaloCell_ID& idhelper = make_dd (svcLoc);
+  try{
+    const CaloCell_ID& idhelper = make_dd (svcLoc);
   
-  test1 (idhelper);
+    test1 (idhelper);
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in LArHitFloatContainerCnv_p2_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }

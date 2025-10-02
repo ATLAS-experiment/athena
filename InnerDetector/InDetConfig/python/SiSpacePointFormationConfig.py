@@ -14,6 +14,34 @@ def InDetToXAODSpacePointConversionCfg(flags,
     acc.addEventAlgo( CompFactory.InDet.InDetToXAODSpacePointConversion(name, **kwargs) )
     return acc
 
+def IDInDetToXAODSpacePointConversionCfg(flags,
+                                       name: str = "IDInDetToXAODSpacePointConversion",
+                                       **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('ProcessPixel', flags.Detector.EnablePixel)
+    kwargs.setdefault('ProcessStrip', flags.Detector.EnableSCT)
+
+    kwargs.setdefault('PixelDetEleCollKey', "PixelDetectorElementCollection")
+    kwargs.setdefault('StripDetEleCollKey', "SCT_DetectorElementCollection")
+
+    kwargs.setdefault("InputPixelSpacePointsName", "PixelSpacePoints")
+    kwargs.setdefault("InputStripSpacePointsName", "SCT_SpacePoints")
+    kwargs.setdefault("InputStripOverlapSpacePointsName", "OverlapSpacePoints")
+
+    kwargs.setdefault("OutputPixelClustersName", "PixelClustersSP")
+    kwargs.setdefault("OutputStripClustersName", "SCT_ClustersSP")
+
+    kwargs.setdefault("OutputPixelSpacePointsName", "PixelSpacePoints")
+    kwargs.setdefault("OutputStripSpacePointsName", "SCT_SpacePoints")
+    kwargs.setdefault("OutputStripOverlapSpacePointsName", "OverlapSpacePoints")
+
+    kwargs.setdefault('PixelDetEleCollKey', "PixelDetectorElementCollection")
+    kwargs.setdefault('StripDetEleCollKey', "SCT_DetectorElementCollection")
+
+    acc.addEventAlgo( CompFactory.InDet.InDetToXAODSpacePointConversion(name, **kwargs) )
+    return acc
+
 def InDetSiElementPropertiesTableCondAlgCfg(
         flags, name="InDetSiElementPropertiesTableCondAlg", **kwargs):
     # For SCT DetectorElementCollection used

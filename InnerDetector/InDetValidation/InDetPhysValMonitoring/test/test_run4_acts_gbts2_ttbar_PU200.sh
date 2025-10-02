@@ -139,3 +139,6 @@ if [ $reco_rc = 0 -o $reco_rc = 68 ]; then
       -R "acts" \
       idpvm.gbts.root
 fi
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

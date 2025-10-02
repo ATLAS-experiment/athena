@@ -6,9 +6,7 @@ from AthenaCommon.Constants import INFO
 
 def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
     """Mininmal basic config, just good enough for HelloWorld and alike"""
-    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence,
-                                                        Sequential=True,
-                                                        TimeOut=flags.Exec.EventTimeOut))
+    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence, Sequential=True))
     cfg.setAsTopLevel()
     cfg.setAppProperty('TopAlg',['AthSequencer/'+masterSequence])
     cfg.setAppProperty('MessageSvcType', 'MessageSvc')
@@ -300,13 +298,13 @@ def addMainSequences(flags, cfg):
 
 def addEvgenSequences(flags, cfg):
     from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Generator), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Fix), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.PreFilter), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Test), parentName="AthAlgSeq")
-    # TODO: needs to setup proper filtering sequence
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Filter), parentName="AthAlgSeq")
-    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Main), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Generator), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Fix), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.PreFilter), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Test), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Filter), parentName=EvgenSequence.Main.value)
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName=EvgenSequence.Main.value)
 
 
 def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
@@ -377,6 +375,14 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     if flags.Concurrency.NumProcs > 0:
         cfg.merge(AthenaMpEventLoopMgrCfg(flags))
 
+    # Timeout
+    if flags.Exec.EventTimeOut > 0:
+        timeoutAlg = CompFactory.TimeoutAlg(
+            Timeout = flags.Exec.EventTimeOut,
+            AbortJob = True,
+            DumpSchedulerState = False)
+        cfg.addEventAlgo(timeoutAlg, sequenceName='AthBeginSeq')
+
     # Additional components needed for threaded jobs only:
     if flags.Concurrency.NumThreads > 0:
         if flags.Exec.MTEventService:
@@ -415,8 +421,9 @@ def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr", withSequences=True
     attempted auto-configuration from an input file.
     """
     cfg = MainServicesCfg(flags, LoopMgr)
-    from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge(McEventSelectorCfg(flags))
+    if not flags.Input.Files:
+        from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+        cfg.merge(McEventSelectorCfg(flags))
 
     if withSequences:
         addEvgenSequences(flags, cfg)

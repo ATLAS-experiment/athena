@@ -368,7 +368,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
         std::stringstream strm;
-        strm << atlasDict->m_name;
+        strm << atlasDict->name();
         std::string strg= " Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -383,7 +383,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineField   = -4;
     if (m_dict->get_label_value("part", "LArOnline", larOnlineField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnline' of field 'part' in dictionary "+strm.str(); 
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -398,7 +398,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineCalibField   = -5;
     if (m_dict->get_label_value("part", "LArOnlineCalib", larOnlineCalibField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -874,7 +874,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   IdDictRegion* reg = m_dict->find_region("laronline-barrel");
   if (reg) 
     {
-      m_laronlineRegion_index = reg->m_index;
+      m_laronlineRegion_index = reg->index();
     }
   else 
     {
@@ -893,7 +893,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) 
     {
-      m_lar_index = field->m_index ;
+      m_lar_index = field->index();
     }
   else 
     {
@@ -913,7 +913,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("part") ;
   if (field) 
     {
-      m_laronline_index = field->m_index ;
+      m_laronline_index = field->index();
     }
   else 
     {
@@ -933,7 +933,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("barrel-ec") ;
   if (field) 
     {
-      m_bec_index = field->m_index ;
+      m_bec_index = field->index();
     }
   else 
     {
@@ -953,7 +953,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("pos_neg") ;
   if (field) 
     {
-      m_side_index = field->m_index ;
+      m_side_index = field->index();
     }
   else 
     {
@@ -978,7 +978,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   }
   field = m_dict->find_field(feedthrough_name) ;
   if (field) {
-    m_feedthrough_index = field->m_index ;
+    m_feedthrough_index = field->index();
   }
   else 
     {
@@ -1004,7 +1004,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field(slot_name) ;
   if (field) 
     {
-      m_slot_index = field->m_index ;
+      m_slot_index = field->index();
     }
   else 
     {
@@ -1030,7 +1030,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field(channel_name) ;
   if (field) 
     {
-      m_channel_in_slot_index = field->m_index ;
+      m_channel_in_slot_index = field->index();
     }
   else 
     {
@@ -1051,7 +1051,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("is-slar") ;
   if (field)
     {
-      m_slar_index = field->m_index ;
+      m_slar_index = field->index();
     }
   else
     {
@@ -1075,20 +1075,20 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
         log << MSG::ERROR << "initLevelsFromDict - cannot find "
                 << group_name << endmsg;
   } else {
-        m_laronlineRegion_index = group->regions()[0]->m_index;
+        m_laronlineRegion_index = group->regions()[0]->index();
   }
 
-  const IdDictRegion& region = *m_dict->m_regions[m_laronlineRegion_index];
+  const IdDictRegion& region = m_dict->region(m_laronlineRegion_index);
 
-  m_lar_impl            = region.m_implementation[m_lar_index]; 
-  m_laronline_impl      = region.m_implementation[m_laronline_index]; 
-  m_bec_impl            = region.m_implementation[m_bec_index]; 
-  m_side_impl           = region.m_implementation[m_side_index]; 
-  m_feedthrough_impl    = region.m_implementation[m_feedthrough_index]; 
-  m_slot_impl           = region.m_implementation[m_slot_index]; 
-  m_channel_in_slot_impl= region.m_implementation[m_channel_in_slot_index]; 
+  m_lar_impl            = region.implementation(m_lar_index);
+  m_laronline_impl      = region.implementation(m_laronline_index);
+  m_bec_impl            = region.implementation(m_bec_index);
+  m_side_impl           = region.implementation(m_side_index);
+  m_feedthrough_impl    = region.implementation(m_feedthrough_index);
+  m_slot_impl           = region.implementation(m_slot_index);
+  m_channel_in_slot_impl= region.implementation(m_channel_in_slot_index);
   if ( m_this_is_slar ) 
-   m_slar_impl           = region.m_implementation[m_slar_index];
+   m_slar_impl           = region.implementation(m_slar_index);
 
   if (!m_quiet) {
     if(m_msgSvc) {

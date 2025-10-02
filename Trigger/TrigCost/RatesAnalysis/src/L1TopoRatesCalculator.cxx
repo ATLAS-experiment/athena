@@ -682,8 +682,7 @@ StatusCode L1TopoRatesCalculator::ratesFinalize() {
 
             double dfdA  = (B * (A + B - AB) - A * B) / (AB * pow(A + B - AB, 2));
             double dfdB  = (A * (A + B - AB) - A * B) / (AB * pow(A + B - AB, 2));
-            double dfdAB = -A * B * (A + B) / (pow(AB, 2) * pow(A + B - AB, 2));
-
+            double dfdAB = -(A + B - 2 * AB) / (pow(AB, 2) * pow(A + B - AB, 2));
             double sigma2 = pow(dfdA * sigma_A, 2)
                           + pow(dfdB * sigma_B, 2)
                           + pow(dfdAB * sigma_AB, 2);

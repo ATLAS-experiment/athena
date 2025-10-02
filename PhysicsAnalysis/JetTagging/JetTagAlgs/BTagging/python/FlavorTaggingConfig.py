@@ -37,9 +37,9 @@ def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAc
         An accumulator containing the additional algorithms based on the dirname.
     """
     acc = ComponentAccumulator()
-    if "GN3V01" in dirname or "Muon" in dirname:
+    if "GN3EPCLV01" in dirname or "Muon" in dirname:
         acc.merge(TrackLeptonDecorationCfg(cfgFlags))
-    if "GN3V01" in dirname or "Electrons" in dirname:
+    if "GN3EPCLV01" in dirname or "Electrons" in dirname:
         acc.merge(FTagElectronAssociationCfg(
             cfgFlags,
             jetCollection=jetCollection,
@@ -74,15 +74,14 @@ def FlavorTaggingCfg(
           JetCollection,
           pv_col='PrimaryVertices',
           trackAugmenterPrefix=None,
-          fast=False):
+          fast=False,
+          JetTrackAssociator='TracksForBTagging',
+          trackCollection='InDetTrackParticles',
+          ):
 
     """
     Run flavour tagging on jet collection in derivations.
     """
-
-    JetTrackAssociator = 'TracksForBTagging'
-    trackCollection='InDetTrackParticles'
-
 
     acc = ComponentAccumulator()
     if fast:
@@ -150,7 +149,6 @@ def FlavorTaggingCfg(
         if cfgFlags.BTagging.RunFlipTaggers and networks.get('flip', True):
             for flip_config in _get_flip_config(dirname):
                 acc.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
-             
 
     return acc
 
@@ -170,7 +168,7 @@ def JetBTagginglessByVertexAlgCfg(
     trackCollection='InDetTrackParticles'
 
     acc = ComponentAccumulator()
-         
+
     acc.merge(BTagTrackAugmenterByVertexAlgCfg(
         cfgFlags,
         TrackCollection='InDetTrackParticles',
@@ -178,7 +176,7 @@ def JetBTagginglessByVertexAlgCfg(
         prefix=trackAugmenterPrefix,
         dzCut=max(dzCut_vec),
     ))        
-              
+
     for networks in cfgFlags.BTagging.NNs.get(JetCollection, []):
         assert isinstance(networks['folds'], list)
         dirnames = [Path(path).parent for path in networks['folds']]
@@ -208,13 +206,13 @@ def JetBTagginglessByVertexAlgCfg(
                     dzCut = dzCut,
                     useMinZ0Vertex = useMinZ0Vertex,
                 ))
-               
+
                 if useMinZ0Vertex:
                     dz_suffix = '_' + str(dzCut) + '_' + 'exclusive_'
-                  
+
                 else:
                     dz_suffix = '_' + str(dzCut) + '_' + 'inclusive_'
-                
+
                 # Remap variables
                 args["remapping"] = {'BTagTrackToJetAssociator':'TracksForBTagging' + dz_suffix + "assoc",
                                       'GN2v01_pb': 'GN2v01' + dz_suffix + "pb",
@@ -227,7 +225,7 @@ def JetBTagginglessByVertexAlgCfg(
 
                 if '/GN2v01/' in dirname:
                     args['tag_requirements'] = {'nonzeroTracks'}
-                    
+
                 acc.merge(MultifoldGNNCfg(**args, dz_suffix=dz_suffix))
 
     return acc

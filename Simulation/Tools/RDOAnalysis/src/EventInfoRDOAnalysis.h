@@ -5,7 +5,7 @@
 #ifndef EVENT_INFO_RDO_ANALYSIS_H
 #define EVENT_INFO_RDO_ANALYSIS_H
 
-#include <AthenaBaseComps/AthAlgorithm.h>
+#include <AthenaBaseComps/AthHistogramAlgorithm.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <GaudiKernel/ITHistSvc.h>
 #include <StoreGate/ReadHandleKey.h>
@@ -17,12 +17,12 @@
 class TH1;
 class TTree;
 
-class EventInfoRDOAnalysis : public AthAlgorithm
-{
+class EventInfoRDOAnalysis : public AthHistogramAlgorithm {
 
 public:
-  EventInfoRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
+  ~EventInfoRDOAnalysis() = default;
+  
   virtual StatusCode initialize() override final;
   virtual StatusCode execute() override final;
 

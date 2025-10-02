@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -36,21 +36,17 @@ namespace dqutils {
   void
   MonitoringFile::
    fitMergedFile_IDPerfMonManager(const std::string& inFilename, bool /* isIncremental */) {
-    //std::cout << "\n";
-    //std::cout << "Running Inner-Detector performance-monitoring analysis\n";
-    //std::cout << "\nWarning messages from fitting and histogram updating follow:\n\n";
+   
 
     TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
 
     if (f == 0 || !f->IsOpen()) {
-      //std::cerr << "MonitoringFile::fitMergedFile_IDPerfMonManager(): "
-      //<< "Input file not opened\n";
+      
       delete f;
       return;
     }
     if (f->GetSize() < 1000.) {
-      //std::cerr << "MonitoringFile::fitMergedFile_IDPerfMonManager(): "
-      //<< "MonitoringFile empty\n";
+      
       delete f;
       return;
     }
@@ -63,8 +59,7 @@ namespace dqutils {
       if (tdir_run != 0) {
         std::string tdir_run_name(tdir_run->GetName());
         if (tdir_run_name.find("run") != std::string::npos) {
-          run_dir = tdir_run_name;
-          // std::cout<<"Run_directory: "<<run_dir<<std::endl;
+          run_dir = std::move(tdir_run_name);
           TIter next_perf(tdir_run->GetListOfKeys());
           TKey* key_perf(0);
           while ((key_perf = dynamic_cast<TKey*>(next_perf())) != 0) {
@@ -87,7 +82,6 @@ namespace dqutils {
                       TKey* key_trigger(0);
                       while ((key_trigger = dynamic_cast<TKey*>(next_trigger())) != 0) {
                         std::string TriggerName = key_trigger->GetName();
-                        // std::cout<<"Find Module: "<<module_name<<" Trigger: "<<TriggerName<<std::endl;
                         fitMergedFile_IDPerfMonKshort(f, run_dir, TriggerName);
                       }
                     } else {

@@ -122,9 +122,9 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "reftrk_eta",   path=mypath, type="TH1F", title="Reference track Eta",               xbins=25,   xmin=-2.5,     xmax=2.5   )
     
     if "LRT" in chain:
-            defineHisto( monTool,  "reftrk_d0",    path=mypath, type="TH1F", title="Reference track d0",                xbins=201,  xmin=-100.0,   xmax=100.0 ) 
+            defineHisto( monTool,  "reftrk_d0",    path=mypath, type="TH1F", title="Reference track d0",     xbins=201,  xmin=-100.0,   xmax=100.0 ) 
     else:
-            defineHisto( monTool,  "reftrk_d0",    path=mypath, type="TH1F", title="Reference track d0",                xbins=101,  xmin=-5.0,     xmax=5.0   ) 
+            defineHisto( monTool,  "reftrk_d0",    path=mypath, type="TH1F", title="Reference track d0",     xbins=201,  xmin=-0.5,     xmax=0.5   ) 
 
     defineHisto( monTool,  "reftrk_z0",    path=mypath, type="TH1F", title="Reference track z0",                xbins=50,   xmin=-225.,    xmax=225.  )
     defineHisto( monTool,  "reftrk_dd0",   path=mypath, type="TH1F", title="Reference track sigma(d0)",         xbins=50,   xmin=0,        xmax=0.5 )
@@ -140,7 +140,7 @@ def createMonTool( flags, slicetag, chain ) :
     if "LRT" in chain:
             defineHisto( monTool,  "testtrk_d0",    path=mypath, type="TH1F", title="Test track d0",              xbins=201,  xmin=-100.0, xmax=100.0 ) 
     else:
-            defineHisto( monTool,  "testtrk_d0",    path=mypath, type="TH1F", title="Test track d0",              xbins=101,  xmin=-5.0,   xmax=5.0   )
+            defineHisto( monTool,  "testtrk_d0",    path=mypath, type="TH1F", title="Test track d0",              xbins=201,  xmin=-0.5,   xmax=0.5   )
 
     defineHisto( monTool,  "testtrk_z0",    path=mypath, type="TH1F", title="Test track z0",              xbins=50,   xmin=-225.,  xmax=225.  )
     defineHisto( monTool,  "testtrk_dd0",   path=mypath, type="TH1F", title="Test track sigma(d0)",       xbins=50,   xmin=0,      xmax=0.5 )
@@ -154,10 +154,10 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "residual_ipT",  path=mypath, type="TH1F", title="track ipT residual",        xbins=55,    xmin=-5.5,   xmax=5.5   )
     defineHisto( monTool,  "residual_phi",  path=mypath, type="TH1F", title="track Phi residual",        xbins=50,    xmin=-0.02,  xmax=0.02  )
     defineHisto( monTool,  "residual_eta",  path=mypath, type="TH1F", title="track Eta residual",        xbins=50,    xmin=-0.02,  xmax=0.02  )
-    defineHisto( monTool,  "residual_d0",   path=mypath, type="TH1F", title="track d0 residual ",        xbins=251,   xmin=-2.5,   xmax=2.5   )
-    defineHisto( monTool,  "residual_z0",   path=mypath, type="TH1F", title="track z0 residual",         xbins=401,   xmin=-20.0,  xmax=20.0  )
+    defineHisto( monTool,  "residual_d0",   path=mypath, type="TH1F", title="track d0 residual ",        xbins=251,   xmin=-0.25,  xmax=2.5   )
+    defineHisto( monTool,  "residual_z0",   path=mypath, type="TH1F", title="track z0 residual",         xbins=401,   xmin=-2.0,   xmax=2.0  )
     defineHisto( monTool,  "residual_dd0",  path=mypath, type="TH1F", title="track sigma d0 residual ",  xbins=251,   xmin=-0.5,   xmax=0.5  )
-    defineHisto( monTool,  "residual_dz0",  path=mypath, type="TH1F", title="track sigma z0 residual",   xbins= 401,  xmin=-1.0,   xmax=1.0  )
+    defineHisto( monTool,  "residual_dz0",  path=mypath, type="TH1F", title="track sigma z0 residual",   xbins=401,   xmin=-1.0,   xmax=1.0  )
     
     defineHisto( monTool,  "npix",          path=mypath, type="TH1F", title="npix",                 xbins=26,    xmin=-0.5,   xmax=25.5  )
     defineHisto( monTool,  "npix_rec",      path=mypath, type="TH1F", title="npix_rec",             xbins=26,    xmin=-0.5,   xmax=25.5  )
@@ -273,7 +273,7 @@ def createMonTool( flags, slicetag, chain ) :
             defineHisto( monTool, "vx_y_rec",     path=mypath, type="TH1F", title=";vtx y [mm]",           xbins=200, xmin=-1.2,  xmax=1.2   )
             defineHisto( monTool, "vx_ntrax_rec", path=mypath, type="TH1F", title=";number of tracks",     xbins=vnbins )
             
-            defineHisto( monTool, "vx_zed_res",   path=mypath, type="TH1F", title="Delta z [mm]", xbins=400, xmin=-5,  xmax=5  )
+            defineHisto( monTool, "vx_zed_res",   path=mypath, type="TH1F", title="Delta z [mm]", xbins=400, xmin=-1.0,  xmax=1.0  )
             defineHisto( monTool, "vx_x_res",     path=mypath, type="TH1F", title="Delta x [mm]", xbins=400, xmin=-0.1, xmax=0.1 )
             defineHisto( monTool, "vx_y_res",     path=mypath, type="TH1F", title="Delta y [mm]", xbins=400, xmin=-0.1, xmax=0.1 )
             

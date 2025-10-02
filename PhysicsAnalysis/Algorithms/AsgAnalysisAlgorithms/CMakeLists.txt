@@ -32,30 +32,34 @@ atlas_install_python_modules( python/*.py )
 find_package( GTest )
 find_package( GMock )
 
-atlas_add_test( gt_BootstrapGenerator
-   SOURCES test/gt_BootstrapGenerator.cxx
-   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-   LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTestingLib AsgAnalysisAlgorithmsLib CxxUtils
-   POST_EXEC_SCRIPT nopost.sh )
+if (NOT COLUMNAR_ANALYSIS)
 
-if( NOT XAOD_STANDALONE )
+   atlas_add_test( gt_BootstrapGenerator
+      SOURCES test/gt_BootstrapGenerator.cxx
+      INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+      LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTestingLib AsgAnalysisAlgorithmsLib CxxUtils
+      POST_EXEC_SCRIPT nopost.sh )
 
-   atlas_install_scripts(share/test*)
+   if( NOT XAOD_STANDALONE )
 
-   atlas_add_test( PMGTruthWeightsAlg
-    SCRIPT testPMGTruthWeightsAlg.py --max-events 10
-    POST_EXEC_SCRIPT nopost.sh )
+      atlas_install_scripts(share/test*)
 
-   atlas_add_test( PileupReweightingAlg
-    SCRIPT testPileupReweightingAlgConfig.py --max-events 10
-    POST_EXEC_SCRIPT nopost.sh )
+      atlas_add_test( PMGTruthWeightsAlg
+      SCRIPT testPMGTruthWeightsAlg.py --max-events 10
+      POST_EXEC_SCRIPT nopost.sh )
+
+      atlas_add_test( PileupReweightingAlg
+      SCRIPT testPileupReweightingAlgConfig.py --max-events 10
+      POST_EXEC_SCRIPT nopost.sh )
+
+   endif()
+
+   # a test job that includes both the Final MET terms and all MET terms
+   # in the output file
+   atlas_add_test( TestFullTermsOutput
+      SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_full_terms_output.yaml -e 150
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 400
+      )
 
 endif()
-
-# a test job that includes both the Final MET terms and all MET terms
-# in the output file
-atlas_add_test( TestFullTermsOutput
-   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AsgAnalysisAlgorithms/test_full_terms_output.yaml -e 150
-   POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 400
-   )

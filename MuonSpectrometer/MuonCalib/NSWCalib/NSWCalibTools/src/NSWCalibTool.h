@@ -37,7 +37,7 @@ namespace Muon {
     StatusCode distToTime(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, const std::vector<double>& driftDistances, std::vector<double>& driftTimes) const override;
 
 
-    StatusCode calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
+    StatusCode calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster& prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
 
 
 

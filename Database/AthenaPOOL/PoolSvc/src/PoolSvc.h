@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_H
@@ -20,6 +20,7 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include <memory>
 
 // Forward declarations
 namespace pool {

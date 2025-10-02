@@ -29,7 +29,7 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc",  
                                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Input segment container key */
-            SG::ReadHandleKey<SegmentContainer> m_readKey{this, "InSegmentKey", "R4MuonSegments"};
+            SG::ReadHandleKeyArray<SegmentContainer> m_readKeys{this, "InSegmentKeys", {"R4MuonSegments"}};
             /** @brief Output segment container key */
             SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_writeKey{this, "OutSegmentKey", "MuonSegmentsFromR4"};
             /** @brief Alignment container key */            

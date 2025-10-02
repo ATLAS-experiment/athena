@@ -5,7 +5,29 @@
 # or (with noise 1e-3)
 #  --postExec "from InDetDefectsEmulation.StripDefectsEmulatorPostInclude import emulateITkStripDefectsDefault;
 #              emulateITkStripDefectsDefault(flags,cfg,HistogramFileName='itk_strip_defects.root',StripDefectProb=1e-2,ModuleDefectProb=1e-2,NoiseProb=1e-3,PropagateDefectsToStatus=True);"
+#
+# NOTES: - Will only work with the athena MT scheduler e.g. --threads=n with n>=1 otherwise the algorithms will not be scheduled in the
+#          correct order by this post include
+#        - accidentally using pixel defect input files for strips may result in an obscure range exception.
+#
+# Extra arguments:
 #   disable histogramming:  HistogramFileName=None
+#   decorrelate random numbers: RngPerDefectType=True will use one random generator per defect type, however some correlation is still
+#                                                     present because for example strip defects are not created for dead modules.
+#  persistify defects conditions data:
+#    DefectsOutputFile='defects.root'  Depending on the extension .root or .json, will write all defects into a root RNTuple or json file.
+#                                      These files may get big. ".json" is not recommended unless there are only module defects.
+#  read defects from input files:
+#    DefectsInputFiles=['moduleDefects.root','cellDefects.root'] Read one or multiple defect files and merge defects. The file can be
+#                                                                Either a root RNTuple or a .json file, which can be created by the
+#                                                                conditions algorithm by specifying the option e.g.
+#                                                                DefectsOutputFile='defects.root'
+#                                                                Reading defects from input file(s) will not disable the generation of
+#                                                                random defects. The latter will be added on top unless the corresponding
+#                                                                probabilities are set to zero.
+#                                                                For efficiency files should be ordered by the significance of the
+#                                                                defects i.e. files with more module defects should precede files
+#                                                                with mostly single strip defects
 
 def emulateITkStripDefects(flags,
                            cfg,
@@ -13,6 +35,9 @@ def emulateITkStripDefects(flags,
                            ModuleDefectProb: float=1e-2,
                            NoiseProb: float=0.,
                            MaxRandomPositionAttempts: int=10,
+                           RngPerDefectType=False,
+                           DefectsInputFiles=[],
+                           DefectsOutputFile=None,
                            FillHistogramsPerPattern: bool=True,
                            FillEtaPhiHistogramsPerPattern: bool=True,
                            HistogramGroupName: str="ITkStripDefects",
@@ -103,6 +128,9 @@ def emulateITkStripDefects(flags,
                                                  DefectProbabilities=module_defect_prob,
                                                  CornerDefectParamsPerPattern=[],
                                                  NCornerDefectFractionsPerPattern=[],
+                                                 RngPerDefectType=RngPerDefectType,
+                                                 DefectsInputFiles=DefectsInputFiles,
+                                                 DefectsOutputFile=DefectsOutputFile,
                                                  FillHistogramsPerPattern=FillHistogramsPerPattern,
                                                  FillEtaPhiHistogramsPerPattern=FillEtaPhiHistogramsPerPattern,
                                                  WriteKey="ITkStripEmulatedDefects", # the default should match the key below
@@ -133,11 +161,17 @@ def emulateITkStripDefectsDefault(flags,
                                   StripDefectProb: float=1e-2,
                                   ModuleDefectProb: float=1e-2,
                                   NoiseProb: float=0.,
+                                  RngPerDefectType=False,
+                                  DefectsInputFiles=[],
+                                  DefectsOutputFile=None,
                                   HistogramFileName: str=None,
                                   PropagateDefectsToStatus=True) :
             emulateITkStripDefects(flags,cfg,
                                StripDefectProb=StripDefectProb,
                                ModuleDefectProb=ModuleDefectProb,
                                NoiseProb=NoiseProb,
+                               RngPerDefectType=RngPerDefectType,
+                               DefectsInputFiles=DefectsInputFiles,
+                               DefectsOutputFile=DefectsOutputFile,
                                HistogramFileName=HistogramFileName,
                                PropagateDefectsToStatus=PropagateDefectsToStatus)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -172,10 +172,14 @@ void TileGeoG4DMLookupBuilder::CreateGeoG4CalibSections(bool is_tb, int plateToC
   //plateToCell parameter
   if (plateToCell == -1) {
     m_plateToCell = m_dbManager->GetSwitchPlateToCell();
-    G4cout << "Using plateToCell flag from GeoModel" << G4endl;
+    if (m_verboseLevel >= 5) {
+      G4cout << "Using plateToCell flag from GeoModel" << G4endl;
+    }
   } else {
     m_plateToCell = (plateToCell>0);
-    G4cout << "Using plateToCell flag from jobOptions" << G4endl;
+    if (m_verboseLevel >= 5) {
+      G4cout << "Using plateToCell flag from jobOptions" << G4endl;
+    }
   }
 
   //geometry

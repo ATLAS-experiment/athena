@@ -16,7 +16,7 @@
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
-#include <ColumnarToolWrapper/ColumnarToolWrapper.h>
+#include <ColumnarTestFixtures/ToolWrapper.h>
 #include <PATInterfaces/ISystematicsTool.h>
 #include <TruthUtils/ParticleConstants.h>
 #include <xAODJet/JetContainer.h>
@@ -99,7 +99,7 @@ namespace columnar
     };
   }
 
-  namespace PhysliteTestHelpers
+  namespace TestUtils
   {
     // I never figured out how the keys get calculated, so I looked
     // at what's in the input file, and hard-coded it here.
@@ -292,10 +292,10 @@ namespace columnar
 
       virtual void getEntry (Long64_t entry) = 0;
 
-      virtual void setData (ColumnarToolWrapperData& tool) = 0;
+      virtual void setData (TestUtils::ToolWrapperData& tool) = 0;
     };
 
-    struct ColumnDataEventCount final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataEventCount final : public TestUtils::IColumnData
     {
       std::array<ColumnarOffsetType, 2> data = {0, 0};
 
@@ -326,7 +326,7 @@ namespace columnar
         data[1] += 1;
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, data.size(), data.data());
@@ -334,7 +334,7 @@ namespace columnar
     };
   
     template<typename T>
-    struct ColumnDataScalar final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataScalar final : public TestUtils::IColumnData
     {
       BranchReader<T> branchReader;
       Benchmark benchmarkUnpack;
@@ -375,7 +375,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
@@ -383,7 +383,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataVector final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataVector final : public TestUtils::IColumnData
     {
       BranchReader<std::vector<T>> branchReader;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
@@ -446,7 +446,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
@@ -463,7 +463,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataOutVector final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataOutVector final : public TestUtils::IColumnData
     {
       T defaultValue;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
@@ -507,7 +507,7 @@ namespace columnar
         outData.resize (offsetColumn->back(), defaultValue);
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
@@ -515,7 +515,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataVectorVector final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataVectorVector final : public TestUtils::IColumnData
     {
       BranchReader<std::vector<std::vector<T>>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
@@ -573,7 +573,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -583,7 +583,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataVectorVectorLink final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataVectorVectorLink final : public TestUtils::IColumnData
     {
       using CM = ColumnarModeArray;
       BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
@@ -614,13 +614,15 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        targetContainerName = iter->second.linkToName;
+        if (iter->second.linkTargetNames.size() != 1)
+          throw std::runtime_error ("expected exactly one link target name for: " + outputColumns.at(0).name);
+        targetContainerName = iter->second.linkTargetNames.at(0);
         if (auto keyIter = knownKeys.find (targetContainerName); keyIter != knownKeys.end())
           targetKey = keyIter->second;
-        if (auto offsetIter = offsetColumns.find (iter->second.linkToName); offsetIter != offsetColumns.end())
+        if (auto offsetIter = offsetColumns.find (iter->second.linkTargetNames.at(0)); offsetIter != offsetColumns.end())
           targetOffsetColumn = offsetIter->second;
         else
-          throw std::runtime_error ("missing offset column: " + iter->second.linkToName);
+          throw std::runtime_error ("missing offset column: " + iter->second.linkTargetNames.at(0));
 
         requestedColumns.erase (iter);
 
@@ -677,7 +679,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -687,7 +689,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataVectorVectorVector final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataVectorVectorVector final : public TestUtils::IColumnData
     {
       std::string columnName;
       BranchReader<std::vector<std::vector<std::vector<T>>>> branchReader;
@@ -764,7 +766,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -776,7 +778,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataVectorLink final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataVectorLink final : public TestUtils::IColumnData
     {
       using CM = ColumnarModeArray;
       BranchReader<std::vector<ElementLink<T>>> branchReader;
@@ -808,13 +810,15 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        targetContainerName = iter->second.linkToName;
+        if (iter->second.linkTargetNames.size() != 1)
+          throw std::runtime_error ("expected exactly one link target name for: " + outputColumns.at(0).name);
+        targetContainerName = iter->second.linkTargetNames.at(0);
         if (auto keyIter = knownKeys.find (targetContainerName); keyIter != knownKeys.end())
           targetKey = keyIter->second;
-        if (auto targetOffsetIter = offsetColumns.find (iter->second.linkToName); targetOffsetIter != offsetColumns.end())
+        if (auto targetOffsetIter = offsetColumns.find (iter->second.linkTargetNames.at(0)); targetOffsetIter != offsetColumns.end())
           targetOffsetColumn = targetOffsetIter->second;
         else
-          throw std::runtime_error ("missing offset column: " + iter->second.linkToName);
+          throw std::runtime_error ("missing offset column: " + iter->second.linkTargetNames.at(0));
 
         requestedColumns.erase (iter);
 
@@ -879,7 +883,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -889,7 +893,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataVectorSplitLink final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataVectorSplitLink final : public TestUtils::IColumnData
     {
       using CM = ColumnarModeArray;
       BranchReader<Int_t> branchReaderSize;
@@ -926,17 +930,7 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        auto linkContainers = iter->second.variantLinkContainers;
-        if (linkContainers.empty())
-        {
-          if (iter->second.linkToName.empty())
-            throw std::runtime_error ("missing link container for: " + outputColumns.at(0).name);
-          linkContainers.push_back (iter->second.linkToName);
-        } else
-        {
-          if (!iter->second.linkToName.empty())
-            throw std::runtime_error ("link container and variant link containers both set for: " + outputColumns.at(0).name);
-        }
+        const auto& linkContainers = iter->second.linkTargetNames;
         for (const auto& container : linkContainers)
         {
           if (auto keyIter = knownKeys.find (container); keyIter != knownKeys.end())
@@ -1038,7 +1032,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -1050,7 +1044,7 @@ namespace columnar
     };
 
     template<typename T>
-    struct ColumnDataVectorVectorVariantLink final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataVectorVectorVariantLink final : public TestUtils::IColumnData
     {
       using CM = ColumnarModeArray;
       BranchReader<std::vector<std::vector<ElementLink<T>>>> branchReader;
@@ -1102,7 +1096,7 @@ namespace columnar
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
-        containers = iter->second.variantLinkContainers;
+        containers = iter->second.linkTargetNames;
         if (containers.empty() || iter->second.variantLinkKeyColumn.empty())
           throw std::runtime_error ("no variant link containers for: " + outputColumns.at(0).name);
         if (iter->second.variantLinkKeyColumn != outputColumns.at(2).name)
@@ -1196,7 +1190,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -1207,7 +1201,7 @@ namespace columnar
       } 
     };
 
-    struct ColumnDataMetNames final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataMetNames final : public TestUtils::IColumnData
     {
       BranchReader<std::vector<std::string>> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
@@ -1278,7 +1272,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -1289,7 +1283,7 @@ namespace columnar
       } 
     };
 
-    struct ColumnDataOutputMet final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataOutputMet final : public TestUtils::IColumnData
     {
       std::vector<std::string> termNames;
       const std::vector<ColumnarOffsetType>* offsetColumns = nullptr;
@@ -1365,7 +1359,7 @@ namespace columnar
         offsets.push_back (namesHash.size());
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, offsets.size(), offsets.data());
@@ -1378,7 +1372,7 @@ namespace columnar
       }
     };
 
-    struct ColumnDataSamplingPattern final : public PhysliteTestHelpers::IColumnData
+    struct ColumnDataSamplingPattern final : public TestUtils::IColumnData
     {
       BranchReader<xAOD::CaloClusterContainer> branchReader;
       std::vector<ColumnarOffsetType> offsets = {0};
@@ -1438,7 +1432,7 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (ColumnarToolWrapperData& tool) override
+      virtual void setData (TestUtils::ToolWrapperData& tool) override
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
@@ -1489,7 +1483,7 @@ namespace columnar
 
   void ColumnarPhysLiteTest :: setupKnownColumns ()
   {
-    using namespace PhysliteTestHelpers;
+    using namespace TestUtils;
 
     knownColumns.push_back (std::make_shared<ColumnDataEventCount> ());
 
@@ -1641,12 +1635,12 @@ namespace columnar
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<MissingETBase::Types::bitmask_t>> ("METAssoc_AnalysisMET.useObjectFlags", 0));
   }
 
-  void ColumnarPhysLiteTest :: setupColumns (ColumnarToolWrapper& toolWrapper)
+  void ColumnarPhysLiteTest :: setupColumns (ToolColumnVectorMap& toolWrapper)
   {
     using namespace asg::msgUserCode;
 
     std::unordered_map<std::string,ColumnInfo> requestedColumns;
-    for (auto& column : toolWrapper.getColumnInfo())
+    for (auto& column : toolWrapper.getTool().getColumnInfo())
       requestedColumns[column.name] = std::move (column);
 
     for (auto& name : toolWrapper.getColumnNames())
@@ -1671,7 +1665,7 @@ namespace columnar
       const auto& info = requestedColumns.at (columnName);
       if (info.accessMode != ColumnAccessMode::output || !info.fixedDimensions.empty())
         return false;
-      auto offsetIter = std::find_if (usedColumns.begin(), usedColumns.end(), [&] (const std::shared_ptr<PhysliteTestHelpers::IColumnData>& column)
+      auto offsetIter = std::find_if (usedColumns.begin(), usedColumns.end(), [&] (const std::shared_ptr<TestUtils::IColumnData>& column)
       {
         for (auto& output : column->outputColumns)
         {
@@ -1682,15 +1676,15 @@ namespace columnar
       });
       if (offsetIter == usedColumns.end())
         return false;
-      std::shared_ptr<PhysliteTestHelpers::IColumnData> myColumn;
+      std::shared_ptr<TestUtils::IColumnData> myColumn;
       if (*info.type == typeid(float))
-        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<float>> (info.name, 0);
+        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<float>> (info.name, 0);
       else if (*info.type == typeid(char))
-        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<char>> (info.name, 0);
+        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<char>> (info.name, 0);
       else if (*info.type == typeid(std::uint16_t))
-        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<std::uint16_t>> (info.name, 0);
+        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint16_t>> (info.name, 0);
       else if (*info.type == typeid(std::uint64_t))
-        myColumn = std::make_shared<PhysliteTestHelpers::ColumnDataOutVector<std::uint64_t>> (info.name, 0);
+        myColumn = std::make_shared<TestUtils::ColumnDataOutVector<std::uint64_t>> (info.name, 0);
       else
       {
         ANA_MSG_WARNING ("unhandled column type: " << info.name << " " << info.type->name());
@@ -1732,12 +1726,14 @@ namespace columnar
       auto *myTool = dynamic_cast<ColumnarTool<ColumnarModeArray>*>(&tool);
       if (!containerRenames.empty())
         renameContainers (*myTool, containerRenames);
-      ColumnarToolWrapper toolWrapper (myTool);
+      ColumnVectorHeader columnHeader;
+      ToolColumnVectorMap toolWrapper (columnHeader, *myTool);
 
       setupKnownColumns ();
       setupColumns (toolWrapper);
 
       Benchmark benchmark (name);
+      Benchmark benchmarkCheck (name + "(column check)");
 
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       if (!container.empty())
@@ -1753,7 +1749,8 @@ namespace columnar
       Long64_t entry = 0;
       for (; benchmark.getTotalTime() < targetTime; ++entry)
       {
-        ColumnarToolWrapperData columnData (&toolWrapper);
+        ColumnVectorData columnData (&columnHeader);
+        TestUtils::ToolWrapperData toolColumnData (&columnData, &toolWrapper);
         for (auto& column : usedColumns)
           column->getEntry (entry % numberOfEvents);
         if (offsetColumn)
@@ -1766,9 +1763,12 @@ namespace columnar
           if (offsetColumn)
             totalSize += offsetColumn->back();
           for (auto& column : usedColumns)
-            column->setData (columnData);
+            column->setData (toolColumnData);
+          benchmarkCheck.startTimer ();
+          columnData.checkData ();
+          benchmarkCheck.stopTimer ();
           benchmark.startTimer ();
-          columnData.call ();
+          columnData.callNoCheck (*myTool);
           benchmark.stopTimer ();
           for (auto& column : usedColumns)
             column->clearColumns ();
@@ -1798,7 +1798,7 @@ namespace columnar
       const auto numberOfEvents = event.getEntries();
 #ifdef XAOD_STANDALONE
       std::cout << "known container keys:" << std::endl;
-      for (auto& [container, key] : columnar::PhysliteTestHelpers::knownKeys)
+      for (auto& [container, key] : columnar::TestUtils::knownKeys)
       {
         std::cout << std::format ("  {} -> 0x{:x}, 0x{:x} -> {}", container, event.getHash (container), key, event.getName (key)) << std::endl;
       }

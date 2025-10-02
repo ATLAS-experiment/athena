@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 # should choose a better default ??
@@ -47,7 +47,9 @@ flags = initConfigFlags()
 flags.Input.Files = args.filesIn.split(",")
 flags.Exec.OutputLevel = msgLvl
 
-
+# Allows to remove modifiers when e.g. corresponding
+# input container is not present
+flags.Jet.strictMode = False
 
 # Flags relating to multithreaded execution
 flags.Concurrency.NumThreads = args.nThreads

@@ -19,7 +19,7 @@
 #include "Identifier/Identifier.h"
 #include "CLHEP/Geometry/Transform3D.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "boost/range/iterator_range.hpp"
+#include <ranges>
 
 class AlignableTransform {
  public:
@@ -44,12 +44,12 @@ class AlignableTransform {
 
   // const and non-const iterator definitions
   typedef std::vector<AlignTransMember>::const_iterator AlignTransMem_citr;
-  typedef boost::iterator_range<AlignTransMem_citr> AlignTransMem_crange;
+  typedef std::ranges::subrange<AlignTransMem_citr> AlignTransMem_crange;
   AlignTransMem_citr begin() const;
   AlignTransMem_citr end() const;
   AlignTransMem_crange range() const;
   typedef std::vector<AlignTransMember>::iterator AlignTransMem_itr;
-  typedef boost::iterator_range<AlignTransMem_itr> AlignTransMem_range;
+  typedef std::ranges::subrange<AlignTransMem_itr> AlignTransMem_range;
   AlignTransMem_itr mbegin();
   AlignTransMem_itr mend();
   AlignTransMem_range mrange();

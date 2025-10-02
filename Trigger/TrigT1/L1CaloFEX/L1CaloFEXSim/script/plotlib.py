@@ -7,7 +7,6 @@
 #     begin                : 28 03 2020
 #     email                : tong.qiu@cern.ch
 #  **************************************************************************
-from __future__ import division
 import matplotlib
 matplotlib.use('Agg')
 import math

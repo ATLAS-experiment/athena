@@ -355,8 +355,14 @@ IdentifierField::operator std::string () const {
           result += prefix+std::to_string(get_value_at(i));
           prefix = ",";
         } 
-      } else { 
-        result = std::format("{}:{}", minimum, maximum);
+      } else {
+        try {
+          result = std::format("{}:{}", minimum, maximum);
+        }
+        catch (const std::format_error& e) {
+          result = "ERROR ";
+          result += e.what();
+        }
       } 
     } 
   } 

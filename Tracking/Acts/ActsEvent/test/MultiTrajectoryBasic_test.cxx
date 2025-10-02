@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "Acts/Definitions/TrackParametrization.hpp"
 #include "Acts/EventData/SubspaceHelpers.hpp"
 #include "Acts/EventData/Types.hpp"
 #undef NDEBUG
+#define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE MultiTrajectoryBasic_test
 #include <boost/test/data/test_case.hpp>
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"

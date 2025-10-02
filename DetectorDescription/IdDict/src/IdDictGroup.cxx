@@ -51,19 +51,16 @@ MultiRange
 IdDictGroup::build_multirange() const {
   MultiRange result;
 
-  IdDictDictionary::regions_const_it it;
-
-  for (it = m_regions.begin(); it != m_regions.end(); ++it) {
-    const IdDictRegion& region = *(*it);
+  for (const IdDictRegion* region : m_regions) {
 
     // skip regions created from parents
-    if ("dummy" == region.m_name) continue;
+    if ("dummy" == region->name()) continue;
 
     // skip empty regions - may arise from alternate_regions
     // where a tag selects an empty region
-    if (region.m_is_empty) continue;
+    if (region->is_empty()) continue;
 
-    Range r = region.build_range();
+    Range r = region->build_range();
     result.add(std::move(r));
   }
 
@@ -79,12 +76,11 @@ void
 IdDictGroup::resolve_references(const IdDictMgr& idd,
                                 IdDictDictionary& dictionary,
                                 size_t& index) {
-  IdDictDictionary::entries_it it;
-  for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-    (*it)->set_index(index);
+  for (IdDictDictEntry* ent : m_entries) {
+    ent->set_index(index);
     index++;
 
-    (*it)->resolve_references(idd, dictionary);
+    ent->resolve_references(idd, dictionary);
   }
 }
 
@@ -99,17 +95,16 @@ IdDictGroup::generate_implementation(const IdDictMgr& idd,
   if (!m_generated_implementation) {
     // Loop over entries and fill regions vec with selected region
     // (AltRegions have a selection)
-    IdDictDictionary::entries_it it;
-    for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-      (*it)->generate_implementation(idd, dictionary, tag);
+    for (IdDictDictEntry* ent : m_entries) {
+      ent->generate_implementation(idd, dictionary, tag);
       // Get region and save in m_regions
-      IdDictRegion* region = dynamic_cast<IdDictRegion*> (*it);
+      IdDictRegion* region = dynamic_cast<IdDictRegion*> (ent);
       if (region) {
         m_regions.push_back(region);
       } else {
-        IdDictAltRegions* altregions = dynamic_cast<IdDictAltRegions*> (*it);
+        IdDictAltRegions* altregions = dynamic_cast<IdDictAltRegions*> (ent);
         if (altregions) {
-          m_regions.push_back(altregions->m_selected_region);
+          m_regions.push_back(altregions->selected_region());
         }
       }
     }
@@ -128,9 +123,8 @@ void
 IdDictGroup::reset_implementation() {
   if (m_generated_implementation) {
     m_regions.clear();
-    IdDictDictionary::entries_it it;
-    for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-      (*it)->reset_implementation();
+    for (IdDictDictEntry* ent : m_entries) {
+      ent->reset_implementation();
     }
     m_generated_implementation = false;
   }
@@ -154,16 +148,13 @@ IdDictGroup::verify() const {
 void IdDictGroup::sort() {
   std::map< ExpandedIdentifier, IdDictDictEntry* > regions;
 
-  IdDictDictionary::regions_it it;
-
-  for (it = m_regions.begin(); it != m_regions.end(); ++it) {
-    const IdDictRegion& region = *(*it);
-    Range range = region.build_range();
+  for (IdDictRegion* region : m_regions) {
+    Range range = region->build_range();
     RangeIterator itr(range);
     auto first = itr.begin();
     auto last = itr.end();
     if (first != last) {
-      regions[*first] = *it;
+      regions[*first] = region;
     } else {
       std::cout << "IdDictDictionary::sort - WARNING empty region cannot sort "
                 << std::endl;
@@ -185,10 +176,7 @@ void IdDictGroup::sort() {
 
 void
 IdDictGroup::clear() {
-  IdDictDictionary::entries_it it;
-
-  for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-    IdDictDictEntry* region = *it;
+  for (IdDictDictEntry* region : m_entries) {
     region->clear();
     delete region;
   }
@@ -389,7 +377,7 @@ void IdDictGroup::add_tree_field (const IdDictRegion& re,
   };
 
   // This will be the field we're matching.
-  const IdDictFieldImplementation& prev_impl = re.m_implementation[ifield-1];
+  const IdDictFieldImplementation& prev_impl = re.implementation(ifield-1);
 
   {
     // Get the children for the current node.
@@ -398,7 +386,7 @@ void IdDictGroup::add_tree_field (const IdDictRegion& re,
 
     // If we're looking at the last field, fill in the node pointersj
     // with END; then we're done.
-    if (ifield == re.m_implementation.size()) {
+    if (ifield == re.n_implementation()) {
       index_vector indices = get_field_indices (n, prev_impl);
       for (size_t idx : indices) {
         children.at (idx) = IdDictRegionTreeNode::END;
@@ -435,7 +423,7 @@ void IdDictGroup::add_tree_field (const IdDictRegion& re,
 
   // Indices we want to store.
   index_vector indices = get_field_indices (m_region_tree[inode], prev_impl);
-  const IdDictFieldImplementation& impl = re.m_implementation[ifield];
+  const IdDictFieldImplementation& impl = re.implementation(ifield);
 
   // Children for the node.
   auto children = [&]() -> std::vector<unsigned>& { return std::get<0> (m_region_tree[inode].m_children); };
@@ -493,14 +481,14 @@ IdDictGroup::build_region_tree()
   [[maybe_unused]] unsigned iregion = 0; // Region index, really only for debugging.
   for (const IdDictRegion* re : m_regions) {
     // Skip dummy/empty regions.
-    if (re->fieldSize() == 0 || re->m_name == "dummy") {
+    if (re->fieldSize() == 0 || re->name() == "dummy") {
       ++iregion;
       continue;
     }
 
     // Add an initial node if we haven't done so already.
     if (m_region_tree.empty()) {
-      m_region_tree.emplace_back (re->m_implementation.at(0));
+      m_region_tree.emplace_back (re->implementation(0));
     }
 
     // Add nodes for the current region, starting at field 1.
@@ -534,8 +522,11 @@ void IdDictGroup::dump_regions() const
 {
   std::cout << "Regions:\n";
   for (unsigned iregion = 0; const IdDictRegion* re : m_regions) {
-    std::cout << "  " << iregion++ << " " << re->m_name << " " << re->m_group << " " << re->m_tag << "\n";
-    for (bool first = true; const IdDictFieldImplementation& impl : re->m_implementation) {
+    std::cout << "  " << iregion++ << " " << re->name() << " " << re->group_name() << " " << re->tag() << "\n";
+    size_t nimpl = re->n_implementation();
+    bool first = true;
+    for (size_t i = 0; i < nimpl; ++i) {
+      const IdDictFieldImplementation& impl = re->implementation(i);
       std::cout << (first ? "    " : "; ") << impl.field() << " " << impl.ored_field() << " " << impl.bits() << "/" << impl.bits_offset();
       first = false;
     }

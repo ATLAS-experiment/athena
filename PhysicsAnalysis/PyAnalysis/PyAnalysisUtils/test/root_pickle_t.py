@@ -6,7 +6,6 @@
 # Purpose: Regression tests for root_pickle.py
 #
 
-from __future__ import print_function
 
 
 def _regr_basic():

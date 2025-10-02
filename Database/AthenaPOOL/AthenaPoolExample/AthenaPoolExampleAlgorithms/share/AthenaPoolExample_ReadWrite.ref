@@ -116,7 +116,6 @@ WriteTag                                            DEBUG  name RunNumber type u
 WriteTag                                            DEBUG  name EventNumber type unsigned int
 WriteTag                                            DEBUG data dependencies:
   + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+RunEventTag' ) 
-  + OUTPUT  ( 'TagAthenaAttributeList' , 'StoreGateSvc+RunEventTag' ) 
 MagicWriteTag                                        INFO in initialize()
 MagicWriteTag                                       DEBUG Defining the attribute list specification.
 MagicWriteTag                                       DEBUG Printing out attribute list specification:
@@ -125,7 +124,6 @@ MagicWriteTag                                       DEBUG  name EventNumber type
 MagicWriteTag                                       DEBUG  name MagicNumber type unsigned int
 MagicWriteTag                                       DEBUG data dependencies:
   + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+MagicTag' ) 
-  + OUTPUT  ( 'TagAthenaAttributeList' , 'StoreGateSvc+MagicTag' ) 
 EventInfoCnvAlg                                      INFO Initializing EventInfoCnvAlg
 AthenaPoolAddressProviderSvc                        DEBUG Cannot retrieve DataHeader from DetectorStore.
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available

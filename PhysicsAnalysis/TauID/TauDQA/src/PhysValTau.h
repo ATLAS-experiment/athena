@@ -21,7 +21,8 @@
 #include "TauAnalysisTools/ITauSelectionTool.h"
 
 // Local includes
-#include "TauValidationPlots.h"
+#include "TauValidationPlotsNominal.h"
+#include "TauValidationPlotsNoCuts.h"
 
 class PhysValTau
   : public ManagedMonitorToolBase
@@ -53,7 +54,8 @@ private:
 
   //Histograms
   // general tau all prongs plots
-  std::unique_ptr<TauValidationPlots> m_oTauValidationPlots;
+  std::unique_ptr<TauValidationPlotsNominal> m_oTauValidationPlotsNominal;
+  std::unique_ptr<TauValidationPlotsNoCuts> m_oTauValidationPlotsNoCuts;
   
 }; 
 

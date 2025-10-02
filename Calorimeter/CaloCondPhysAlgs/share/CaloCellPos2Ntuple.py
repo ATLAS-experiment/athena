@@ -38,6 +38,7 @@ if __name__=="__main__":
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags=initConfigFlags()
+    flags.Input.Files = []
     flags.Input.isMC = args.mc
     flags.IOVDb.DatabaseInstance= "OFLP200" if args.mc else "CONDBR2"
     from Campaigns.Utils import Campaign

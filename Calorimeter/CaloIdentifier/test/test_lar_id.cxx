@@ -1691,7 +1691,7 @@ static void check_lar_neighbour(IdDictMgr& idd)
     IdentifierHash hash_min = 999999 ;
     IdentifierHash hash_max = 0 ;
     for (unsigned int iCell = 0 ; iCell < em_id.channel_hash_max(); ++iCell){
-      /*Identifier cellId =*/ em_id.channel_id(iCell);
+      [[maybe_unused]] Identifier cellId = em_id.channel_id(iCell);
 
       em_id.get_neighbours(iCell, LArNeighbours::all3D, neighbourList);
 

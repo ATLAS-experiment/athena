@@ -1209,7 +1209,7 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   int tileField   = -1;
   if (atlasDict->get_label_value("subdet", "TileCalorimeter", tileField)) {
     log << MSG::ERROR << "Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
-        << atlasDict->m_name
+        << atlasDict->name()
         << endmsg;
     return (1);
   }
@@ -1231,7 +1231,7 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   int tilehwField   = -1;
   if (dict()->get_label_value("section", "Online", tilehwField)) {
     log << MSG::ERROR << "Could not get value for label 'Online' of field 'section' in dictionary " 
-        << dict()->m_name
+        << dict()->name()
         << endmsg;
   } else {
     // remove online ID from all ranges
@@ -1249,7 +1249,7 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   int tiletbField = -1;
   if (dict()->get_label_value("section", "Testbeam", tiletbField)) {
     log << MSG::ERROR << "Could not get value for label 'Testbeam' of field 'section' in dictionary " 
-        << dict()->m_name
+        << dict()->name()
         << endmsg;
   } else {
     // remove testbeam ID from all ranges
@@ -1637,13 +1637,13 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
         << " group' field " << endmsg;
   }
   else {
-	m_tile_region_index = group->regions()[0]->m_index;
+	m_tile_region_index = group->regions()[0]->index();
   }
 
   // Fing a Tile region
   IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
-    m_SYSTEM_INDEX = field->m_index ;
+    m_SYSTEM_INDEX = field->index();
   }
   else {
     log << MSG::ERROR << "initLevelsFromDict - unable to find 'subdet' field "
@@ -1653,7 +1653,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("section") ;
   if (field) {
-    m_SECTION_INDEX = field->m_index ;
+    m_SECTION_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'section' field "
@@ -1663,7 +1663,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("side") ;
   if (field) {
-    m_SIDE_INDEX = field->m_index ;
+    m_SIDE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'side' field "
@@ -1673,7 +1673,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("module") ;
   if (field) {
-    m_MODULE_INDEX = field->m_index ;
+    m_MODULE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'module' field "
@@ -1683,7 +1683,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("tower") ;
   if (field) {
-    m_TOWER_INDEX = field->m_index ;
+    m_TOWER_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'tower' field "
@@ -1693,7 +1693,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("sampling") ;
   if (field) {
-    m_SAMPLE_INDEX = field->m_index ;
+    m_SAMPLE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'sampling' field "
@@ -1703,7 +1703,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("pmt") ;
   if (field) {
-    m_PMT_INDEX = field->m_index ;
+    m_PMT_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'pmt' field "
@@ -1713,7 +1713,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
 
   field = dict()->find_field("adc") ;
   if (field) {
-    m_ADC_INDEX = field->m_index ;
+    m_ADC_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'adc' field "
@@ -1721,16 +1721,16 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     return (1);
   }
 
-  const IdDictRegion& region = *dict()->m_regions[m_tile_region_index];
+  const IdDictRegion& region = dict()->region(m_tile_region_index);
 
-  m_system_impl  = region.m_implementation[m_SYSTEM_INDEX]; 
-  m_section_impl = region.m_implementation[m_SECTION_INDEX];
-  m_side_impl    = region.m_implementation[m_SIDE_INDEX]; 
-  m_module_impl  = region.m_implementation[m_MODULE_INDEX]; 
-  m_tower_impl   = region.m_implementation[m_TOWER_INDEX]; 
-  m_sample_impl  = region.m_implementation[m_SAMPLE_INDEX]; 
-  m_pmt_impl     = region.m_implementation[m_PMT_INDEX]; 
-  m_adc_impl     = region.m_implementation[m_ADC_INDEX]; 
+  m_system_impl  = region.implementation(m_SYSTEM_INDEX);
+  m_section_impl = region.implementation(m_SECTION_INDEX);
+  m_side_impl    = region.implementation(m_SIDE_INDEX);
+  m_module_impl  = region.implementation(m_MODULE_INDEX);
+  m_tower_impl   = region.implementation(m_TOWER_INDEX);
+  m_sample_impl  = region.implementation(m_SAMPLE_INDEX);
+  m_pmt_impl     = region.implementation(m_PMT_INDEX);
+  m_adc_impl     = region.implementation(m_ADC_INDEX);
 
   if (!m_quiet) {
     log << MSG::DEBUG << "initLevelsFromDict decode index and bit fields for each level: "              << endmsg ;

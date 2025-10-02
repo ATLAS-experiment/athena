@@ -18,7 +18,6 @@
 #include "DbStorageExplorer.h"
 #include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbReflex.h"
-#include "StorageSvc/DbObject.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/Transaction.h"

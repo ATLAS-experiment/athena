@@ -22,7 +22,9 @@ bool compressBlob(const char* in, coral::Blob& out) {
     coral::Blob blob;
     blob.resize(comprLen);
     unsigned char* ptr = static_cast<unsigned char*>(blob.startingAddress());
-    compress(ptr, &comprLen, reinterpret_cast<const unsigned char*>(in), strlen(in));
+    if (compress(ptr, &comprLen, reinterpret_cast<const unsigned char*>(in), strlen(in)) != Z_OK) {
+      return false;
+    }
     blob.resize(comprLen);
     out = blob;
     return true;

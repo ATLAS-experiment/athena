@@ -21,8 +21,7 @@
 // ATH_MSG macros
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 //boost
-#include <boost/iterator/transform_iterator.hpp>
-#include <boost/range.hpp>
+#include <ranges>
 
 #include "CxxUtils/checker_macros.h"
 
@@ -71,24 +70,8 @@ class TrackingGeometry
 
   friend class GeometryBuilderCond;
 
-
-  class constTransformLayerMap
-  {
-  public:
-    std::pair<const Trk::Layer*, int> operator()(
-      const std::pair<Trk::Layer*, int>& in) const
-    {
-      return std::pair<const Trk::Layer*, int>{ in.first, in.second };
-    }
-  };
-
-  using iterator_convert_const_t =
-    boost::transform_iterator<constTransformLayerMap,
-                              std::map<Trk::Layer*, int>::const_iterator>;
-
 public:
 
-  using constMapRange_t = boost::iterator_range<iterator_convert_const_t>;
   /** Constructor */
   TrackingGeometry(TrackingVolume* highestVolume,
                    NavigationLevel navlevel = globalSearch);
@@ -142,7 +125,7 @@ public:
 
   /** Return the unique BoundarySurfaces with MaterialInformation */
   const std::map<Layer*, int>& boundaryLayers() ;
-  constMapRange_t  boundaryLayers() const;
+  auto  boundaryLayers() const;
 
   size_t  numBoundaryLayers() const;
   /** Return the Navigation Level - only one TrackingGeometry can have full

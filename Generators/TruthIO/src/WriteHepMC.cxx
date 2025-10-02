@@ -48,13 +48,13 @@ StatusCode WriteHepMC::initialize() {
 StatusCode WriteHepMC::execute() {
   // Just write out the first (i.e. signal) event in the collection
 #ifdef HEPMC3
-  auto ev = std::make_shared<HepMC3::GenEvent>(*(event_const()));
-  ev->set_units(m_momentumunit,m_lengthunit);
-  m_hepmcio->write_event(*(ev.get()));
+  HepMC3::GenEvent ev (*event_const());
+  ev.set_units(m_momentumunit,m_lengthunit);
+  m_hepmcio->write_event(ev);
 #else
-  auto ev = std::make_shared<HepMC::GenEvent>(*(event_const()));
-  ev->use_units(m_momentumunit,m_lengthunit);
-  m_hepmcio->write_event(*(ev.get()));
+  HepMC::GenEvent ev (*event_const());
+  ev.use_units(m_momentumunit,m_lengthunit);
+  m_hepmcio->write_event(&ev);
 #endif
   return StatusCode::SUCCESS;
 }

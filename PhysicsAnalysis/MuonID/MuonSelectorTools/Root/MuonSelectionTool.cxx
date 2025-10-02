@@ -875,7 +875,11 @@ namespace CP {
 
         // get event number from event info
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
-
+	//overwrite event number
+	unsigned long long eventNumber = 0;
+        if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
+        else eventNumber = eventInfo->eventNumber();
+	
         // variables for the BDT
         std::vector<float> var_vector;
         if (mu.author() == xAOD::Muon::MuidCo || mu.author() == xAOD::Muon::MuGirl) {
@@ -892,7 +896,7 @@ namespace CP {
 
         // use different trainings for even/odd numbered events
         TMVA::Reader *reader_MUID, *reader_MUGIRL;
-        if (eventInfo->eventNumber() % 2 == 1) {
+        if (eventNumber % 2 == 1) {
             reader_MUID = m_readerE_MUID.get();
             reader_MUGIRL = m_readerE_MUGIRL.get();
         } else {
@@ -1551,11 +1555,15 @@ namespace CP {
         static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
 
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
+	//overwrite run number
+        unsigned int runNumber = 0;
+        if(m_expertMode_RunNumber.value()!=0) runNumber=m_expertMode_RunNumber.value();
+        else runNumber = eventInfo->runNumber();
 
         // Case of data
         if (!eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
             ATH_MSG_DEBUG("The current event is a data event. Return runNumber.");
-            return eventInfo->runNumber();
+            return runNumber;
         }
  
         // Case of MC 
@@ -1573,27 +1581,27 @@ namespace CP {
 
         // otherwise return a dummy run number
         if (needOnlyCorrectYear) {
-            if (eventInfo->runNumber() < 300000) {        // mc16a (2016): 284500
+            if (runNumber < 300000) {        // mc16a (2016): 284500
                 ATH_MSG_DEBUG("Random run number not available and this is mc16a or mc20a, returning dummy 2016 run number.");
                 return 311071;
                     
-            } else if (eventInfo->runNumber() < 310000) { // mc16d (2017): 300000
+            } else if (runNumber < 310000) { // mc16d (2017): 300000
                 ATH_MSG_DEBUG("Random run number not available and this is mc16d or mc20d, returning dummy 2017 run number.");
                 return 340072;
                     
-            } else if (eventInfo->runNumber() < 320000) { // mc16e (2018): 310000
+            } else if (runNumber < 320000) { // mc16e (2018): 310000
                 ATH_MSG_DEBUG("Random run number not available and this is mc16e or mc20e, returning dummy 2018 run number.");
                 return 351359;
 
-            } else if (eventInfo->runNumber() < 600000) { //mc21: 330000, mc23a: 410000, mc23c: 450000
+            } else if (runNumber < 600000) { //mc21: 330000, mc23a: 410000, mc23c: 450000
                 ATH_MSG_DEBUG("Random run number not available and this is mc21/mc23, for the time being we're returing a dummy run number.");
                 return 399999;
             } else {
-                ATH_MSG_DEBUG("Detected some run 4 / phase II runnumber "<<eventInfo->runNumber()<<". ");
+                ATH_MSG_DEBUG("Detected some run 4 / phase II runnumber "<<runNumber<<". ");
                 return 666666;
             }
 
-            ATH_MSG_FATAL("Random run number not available, fallback option of using runNumber failed since "<<eventInfo->runNumber()<<" cannot be recognised");
+            ATH_MSG_FATAL("Random run number not available, fallback option of using runNumber failed since "<<runNumber<<" cannot be recognised");
             throw std::runtime_error("MuonSelectionTool() - need RandomRunNumber decoration by the PileupReweightingTool");
         }
 

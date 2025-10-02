@@ -309,7 +309,7 @@ AthenaSummarySvc::handle(const Incident &inc) {
   } else if (inc.type() == "BeginOutputFile") {
     m_outputFiles.emplace_back( std::move(fileName) );
   } else if (inc.type() == "FailOutputFile") {
-    m_outputFilesError.push_back( fileName );
+    m_outputFilesError.push_back( std::move(fileName) );
   } else if (inc.type() == "BeginEvent") {
     m_eventsRead ++;
   } else if (inc.type() == "SkipEvent") {

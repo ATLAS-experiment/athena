@@ -23,9 +23,6 @@
 //Geant4
 #include "G4ParticleTable.hh"
 
-// CLHEP
-#include "CLHEP/Random/RandFlat.h"
-
 // HepMCHelpers include
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -46,15 +43,6 @@ FastCaloSim::FastCaloSim(const std::string& name,
                          const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
                          const std::string& CaloCellContainerSDName,
                          bool doG4Transport,
-                         bool doPhotons,
-                         bool doElectrons,
-                         bool doHadrons,
-                         float AbsEtaMin,
-                         float AbsEtaMax,
-                         float EkinMinPhotons,
-                         float EkinMaxPhotons,
-                         float EkinMinElectrons,
-                         float EkinMaxElectrons,
                          bool doPunchThrough,
                          FastCaloSimTool * FastCaloSimTool)
 
@@ -67,19 +55,9 @@ FastCaloSim::FastCaloSim(const std::string& name,
   m_FastCaloSimSvc(FastCaloSimSvc),
   m_CaloCellContainerSDName(CaloCellContainerSDName),
   m_doG4Transport(doG4Transport),
-  m_doPhotons(doPhotons),
-  m_doElectrons(doElectrons),
-  m_doHadrons(doHadrons),
-  m_AbsEtaMin(AbsEtaMin),
-  m_AbsEtaMax(AbsEtaMax),
-  m_EkinMinPhotons(EkinMinPhotons),
-  m_EkinMaxPhotons(EkinMaxPhotons),
-  m_EkinMinElectrons(EkinMinElectrons),
-  m_EkinMaxElectrons(EkinMaxElectrons),
   m_doPunchThrough(doPunchThrough),
   m_FastCaloSimTool(FastCaloSimTool)
 {
-
 }
 
 void FastCaloSim::StartOfAthenaEvent(const EventContext& ctx ){
@@ -105,7 +83,7 @@ G4bool FastCaloSim::IsApplicable(const G4ParticleDefinition& particleType)
   bool isHadron   = MC::isHadron(particleType.GetPDGEncoding());
 
   // FastCaloSim is applicable if it is photon, electron, positron or any hadron
-  bool isApplicable = (isPhoton && m_doPhotons) || (isElectron && m_doElectrons) || (isPositron && m_doElectrons) || (isHadron && m_doHadrons);
+  bool isApplicable = isPhoton || isElectron || isPositron || isHadron;
 
   #ifdef FCS_DEBUG
     const std::string pName = particleType.GetParticleName();
@@ -135,33 +113,6 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
                                     <<G4endl;
   #endif
 
-  // Get particle definition 
-  const G4ParticleDefinition * G4Particle = fastTrack.GetPrimaryTrack() -> GetDefinition();
-  // Get particle kinetic energy
-  const float Ekin = fastTrack.GetPrimaryTrack() -> GetKineticEnergy();
-  // Get particle position eta
-  const float eta_pos = (fastTrack.GetPrimaryTrack() -> GetPosition()).eta();
-  
-  // Check particle type
-  bool isPhoton    = G4Particle == G4Gamma::Definition();
-  bool isElectron  = G4Particle == G4Electron::Definition();
-  bool isPositron  = G4Particle == G4Positron::Definition();
-  bool isPionPlus  = G4Particle == G4PionPlus::Definition();
-  bool isPionMinus = G4Particle == G4PionMinus::Definition();
-
-
-  // Check if there is a configuration for this PID
-  bool withinEtaRange = (std::abs(eta_pos) > m_AbsEtaMin) && (std::abs(eta_pos) < m_AbsEtaMax);
-  bool withinEkinRangePhotons = isPhoton && (Ekin > m_EkinMinPhotons) && (Ekin < m_EkinMaxPhotons);
-  bool withinEkinRangeElectrons = (isElectron || isPositron) && (Ekin > m_EkinMinElectrons) && (Ekin < m_EkinMaxElectrons);
-
-  
-  if (!(withinEtaRange && (withinEkinRangePhotons || withinEkinRangeElectrons))) {
-    #ifdef FCS_DEBUG
-      G4cout<<"[FastCaloSim::ModelTrigger] Model not triggered"<<G4endl;
-    #endif
-    return false;
-  }
 
   // Simulate particles below 50 keV with Geant4 to have same config as ISF implementation 
   if (fastTrack.GetPrimaryTrack() -> GetKineticEnergy() < 0.05) {
@@ -182,6 +133,18 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
   // Set minimum kinetic energy of pions and other hadrons required to be passed to FastCaloSim
   float minEkinPions = 200;
   float minEkinOtherHadrons = 400;
+
+  // Get particle definition 
+  const G4ParticleDefinition * G4Particle = fastTrack.GetPrimaryTrack() -> GetDefinition();
+  // Get particle kinetic energy
+  const float Ekin = fastTrack.GetPrimaryTrack() -> GetKineticEnergy();
+  
+  // Check particle type
+  bool isPhoton    = G4Particle == G4Gamma::Definition();
+  bool isElectron  = G4Particle == G4Electron::Definition();
+  bool isPositron  = G4Particle == G4Positron::Definition();
+  bool isPionPlus  = G4Particle == G4PionPlus::Definition();
+  bool isPionMinus = G4Particle == G4PionMinus::Definition();
 
   // Pass all photons, electrons and positrons to FastCaloSim
   if (isPhoton || isElectron || isPositron){

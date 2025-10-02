@@ -570,7 +570,10 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
       for (IdentifierHash nId : theNeighbors) {
         CaloCell_ID::SUBCALO otherSubDet =
           (CaloCell_ID::SUBCALO)m_calo_id->sub_calo(nId);
-	if ( otherSubDet != CaloCell_ID::NSUBCALO && m_subcaloUsed[otherSubDet] ) {
+	if ( otherSubDet != CaloCell_ID::NSUBCALO &&
+             otherSubDet != CaloCell_ID::NOT_VALID &&
+             m_subcaloUsed[otherSubDet] )
+        {
 	  HashCell neighborCell = hashCells[nId];
 	  if ( neighborCell.getCaloTopoTmpClusterCell() ) {
 	    CaloTopoTmpClusterCell* pNCell =

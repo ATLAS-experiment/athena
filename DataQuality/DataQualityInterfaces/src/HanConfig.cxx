@@ -985,7 +985,7 @@ Visit( const MiniConfigTreeNode* node )
     if( dqreg != 0 ) {
       dqreg->AddAssessor( dqpar );
     }
-    defined.insert( strFullHistName );
+    defined.insert( std::move(strFullHistName) );
   }
 
   for( std::set<std::string>::const_iterator h = histAtt.begin(); h != histAttEnd; ++h ) {
@@ -1429,7 +1429,7 @@ ChangeOutputDir( TFile* file, const std::string& path, DirMap_t& directories )
 	std::cout << "Failed to make directory " << dirName.c_str() << std::endl;
       }
       DirMap_t::value_type dirVal( subPath, dir );
-      directories.insert( dirVal );
+      directories.insert( std::move(dirVal) );
       return dir;
     }
   }

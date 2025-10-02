@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
-#print ("Stonjek jetzt sag mal ob du den file findest")
 if __name__ == "__main__":
     from MuonGeoModelTestR4.testGeoModel import SetupArgParser
     parser = SetupArgParser()
@@ -13,8 +12,8 @@ if __name__ == "__main__":
                                     "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
                                     ])
     args = parser.parse_args()
-    #print ( "Stonjek du sollst ein script ausfueheren")
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, executeTest, setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True

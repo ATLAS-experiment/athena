@@ -634,7 +634,7 @@ int  TileHWID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int tileField   = -1;
   if (atlasDict->get_label_value("subdet", "TileCalorimeter", tileField)) {
     log << MSG::ERROR << "Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
-        << atlasDict->m_name
+        << atlasDict->name()
         << endmsg;
     return (1);
   }
@@ -643,7 +643,7 @@ int  TileHWID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int tilehwField   = -1;
   if (m_dict->get_label_value("section", "Online", tilehwField)) {
     log << MSG::ERROR << "Could not get value for label 'Online' of field 'section' in dictionary " 
-        << m_dict->m_name
+        << m_dict->name()
         << endmsg;
     return (1);
   }
@@ -730,7 +730,7 @@ int TileHWID::initLevelsFromDict()
   // Fing a Tile region
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_SYSTEM_INDEX = field->m_index ;
+    m_SYSTEM_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'subdet' field "
@@ -740,7 +740,7 @@ int TileHWID::initLevelsFromDict()
 
   field = m_dict->find_field("section") ;
   if (field) {
-    m_SECTION_INDEX = field->m_index ;
+    m_SECTION_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'section' field "
@@ -750,7 +750,7 @@ int TileHWID::initLevelsFromDict()
 
   field = m_dict->find_field("ros") ;
   if (field) {
-    m_ROS_INDEX = field->m_index ;
+    m_ROS_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'ros' field "
@@ -760,7 +760,7 @@ int TileHWID::initLevelsFromDict()
 
   field = m_dict->find_field("drawer") ;
   if (field) {
-    m_DRAWER_INDEX = field->m_index ;
+    m_DRAWER_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'drawer' field "
@@ -770,7 +770,7 @@ int TileHWID::initLevelsFromDict()
 
   field = m_dict->find_field("channel") ;
   if (field) {
-    m_CHANNEL_INDEX = field->m_index ;
+    m_CHANNEL_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'channel' field "
@@ -780,7 +780,7 @@ int TileHWID::initLevelsFromDict()
 
   field = m_dict->find_field("gain") ;
   if (field) {
-    m_ADC_INDEX = field->m_index ;
+    m_ADC_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'gain' field "
@@ -789,14 +789,14 @@ int TileHWID::initLevelsFromDict()
   }
 
    /* Set the field implementations */
-  const IdDictRegion& region = *m_dict->m_regions[m_tile_region_index];
+  const IdDictRegion& region = m_dict->region(m_tile_region_index);
 
-  m_system_impl  = region.m_implementation[m_SYSTEM_INDEX]; 
-  m_section_impl = region.m_implementation[m_SECTION_INDEX]; 
-  m_ros_impl     = region.m_implementation[m_ROS_INDEX]; 
-  m_drawer_impl  = region.m_implementation[m_DRAWER_INDEX]; 
-  m_channel_impl = region.m_implementation[m_CHANNEL_INDEX]; 
-  m_adc_impl     = region.m_implementation[m_ADC_INDEX]; 
+  m_system_impl  = region.implementation(m_SYSTEM_INDEX);
+  m_section_impl = region.implementation(m_SECTION_INDEX);
+  m_ros_impl     = region.implementation(m_ROS_INDEX);
+  m_drawer_impl  = region.implementation(m_DRAWER_INDEX);
+  m_channel_impl = region.implementation(m_CHANNEL_INDEX);
+  m_adc_impl     = region.implementation(m_ADC_INDEX);
 
   m_base_tile_ros=HWIdentifier (0);
   m_system_impl.pack  (tile_field_value(),m_base_tile_ros);

@@ -11,7 +11,7 @@
 #include "dqm_core/AlgorithmManager.h"
 
 #include <iostream>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include <TCollection.h>
 #include <TDirectory.h>
@@ -117,7 +117,7 @@ execute( const std::string& name, const TObject& data, const dqm_core::Algorithm
   AlgVec_t::const_iterator subAlgsEnd = m_subAlgs.end();
   AlgVec_t::const_iterator subAlgsIter = m_subAlgs.begin();
   for( ; subAlgsIter != subAlgsEnd; ++subAlgsIter ) {
-    boost::scoped_ptr<HanAlgorithmConfig> subConfig(ConfigureSubAlg(config, subAlgsIter->second));
+    std::unique_ptr<HanAlgorithmConfig> subConfig(ConfigureSubAlg(config, subAlgsIter->second));
 
     dqm_core::Algorithm* alg = subAlgsIter->first;
     dqm_core::Result* subResult = alg->execute( name, data, *subConfig );
@@ -130,7 +130,7 @@ execute( const std::string& name, const TObject& data, const dqm_core::Algorithm
     std::map<std::string,double>::const_iterator tagsIter = subResult->tags_.begin();
     for( ; tagsIter != tagsEnd; ++tagsIter ) {
       std::map<std::string,double>::value_type tagVal( subAlgsIter->second + std::string("|") + tagsIter->first, tagsIter->second );
-      tags.insert( tagVal );
+      tags.insert( std::move(tagVal) );
     }
     delete subResult;
   }

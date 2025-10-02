@@ -449,6 +449,25 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  associatePtCut              = 500.))
     LLP1VrtSecInclusiveSuffixes.append(BoostedMuonsSuffix)
 
+
+    # Small-d0 Electrons VSI
+    BoostedElectronsSuffix = "_BoostedElectrons"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_InDet"+BoostedElectronsSuffix,
+                                 AugmentingVersionString     = BoostedElectronsSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 twoTrkVtxFormingD0Cut       = 0.0,
+                                 doSelectTracksFromMuons     = False,
+                                 doSelectTracksFromElectrons = True,
+                                 ElectronLocation            = MergedElectronContainer,
+                                 do_PVvetoCut                = False,
+                                 DoTwoTrSoftBtag             = True,
+                                 TwoTrVrtMinDistFromPVCut    = 0.5,
+                                 associatePtCut              = 500.))
+    LLP1VrtSecInclusiveSuffixes.append(BoostedElectronsSuffix)
+
+
     # MuSA Vertices
     acc.merge(MuSAVtxFitterConfig(flags, 
                                       MuonContainerName=MergedMuonContainer))
@@ -587,7 +606,17 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "MuonsLRT",
         InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
-
+    # GSF tracks associated to photons
+    LLP1PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1PhotonTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                   = "Photons",
+        InDetTrackParticlesKey  = "",
+        GSFConversionVerticesKey = "GSFConversionVertices",
+        GSFTrackParticlesKey    = "GSFTrackParticles",
+        BestMatchOnly            = True,
+        BestVtxMatchOnly         = True)) 
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD}"
     LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(TauThinningCfg(
@@ -719,7 +748,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                      StreamName            = kwargs['StreamName'],
                                                                      SGKey                   = "AntiKt4EMTopoJets",
                                                                      TopoClCollectionSGKey   = "CaloCalTopoClusters",
-                                                                     SelectionString         = "(AntiKt4EMTopoJets.DFDecoratorLeadingJets)",
                                                                      AdditionalClustersKey = ["EMOriginTopoClusters","LCOriginTopoClusters"] 
                                                                      ))
                                                                      
@@ -733,6 +761,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1ElectronTPThinningTool,
                      LLP1LRTElectronTPThinningTool,
                      LLP1MuonTPThinningTool,
+                     LLP1PhotonTPThinningTool,
                      LLP1LRTMuonTPThinningTool,
                      LLP1TauJetsThinningTool,
                      LLP1TauTPThinningTool,
@@ -943,6 +972,7 @@ def LLP1Cfg(flags):
                                         "SCT_MSOSs",
                                         "DisappearingSCT_MSOSs",
                                         "LowPtRoISCT_MSOSs",
+                                        "LVL1MuonRoIs",
                                         ]
 
 
@@ -955,7 +985,6 @@ def LLP1Cfg(flags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::JetContainer#AntiKt10EMTopoRCJets","xAOD::JetAuxContainer#AntiKt10EMTopoRCJetsAux.-PseudoJet"]
-    StaticContent += ["CaloClusterCellLinkContainer#CaloCalTopoClusters_links"]
 
     for wp in LLP1VrtSecInclusiveSuffixes:
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
@@ -1041,10 +1070,10 @@ def LLP1Cfg(flags):
         LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
 
-    LLP1SlimmingHelper.ExtraVariables.append('CaloCalTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME')
+    LLP1SlimmingHelper.ExtraVariables.append('CaloCalTopoClusters.e_samplCaloCalTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME.time.CENTER_LAMBDA.rawE.rawM.rawPhi.rawEta.clusterSize.eta0.phi0.altE.altEta.altPhi.altM.AVG_LAR_Q.AVG_TILE_Q.BADLARQ_FRAC.EM_PROBABILITY.ENG_BAD_CELLS.ENG_POS.ISOLATION.N_BAD_CELLS.SECOND_LAMBDA.SECOND_R')
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClusters"]='xAOD::CaloClusterContainer'
     LLP1SlimmingHelper.AppendToDictionary["EMOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
-    LLP1SlimmingHelper.ExtraVariables.append('EMOriginTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME')
+    LLP1SlimmingHelper.ExtraVariables.append('EMOriginTopoClusters.e_sampl.calM.calE.calEta.calPhi.CENTER_MAG.SECOND_TIME.time.CENTER_LAMBDA.rawE.rawM.rawPhi.rawEta.clusterSize.eta0.phi0.altE.altEta.altPhi.altM.AVG_LAR_Q.AVG_TILE_Q.BADLARQ_FRAC.EM_PROBABILITY.ENG_BAD_CELLS.ENG_POS.ISOLATION.N_BAD_CELLS.SECOND_LAMBDA.SECOND_R')
 
     
     # Truth containers

@@ -71,7 +71,7 @@ def JfexSimMonitoringConfig(flags):
                            xbins=1,xmin=0,xmax=1,
                            ybins=1,ymin=0,ymax=1,
                            opt=['kCanRebin','kAlwaysCreate','kAddBinsDynamically'],merge='merge')
-    helper.defineTree('LBN,Signature,LBNString,EventNumber,EventType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+    helper.defineTree('LBN,SignatureEventType,LBNString,EventNumber,EventType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
                       "lbn/l:Signature/string:lbnString/string:eventNumber/l:EventType/string:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
                       title="mismatched;LBN;Signature",fillGroup="mismatches")
 

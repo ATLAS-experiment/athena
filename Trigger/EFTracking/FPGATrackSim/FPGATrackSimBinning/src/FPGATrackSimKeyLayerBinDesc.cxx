@@ -160,14 +160,16 @@ void FPGATrackSimKeyLayerBinDesc::writeLUTs(const FPGATrackSimBinStep &step) con
   
   // write the keylayer definition
   if (step.isFirstStep()) {
-    FPGATrackSimBinUtil::StreamManager sm("KeyLayer");
+    std::string keylayerName = "reg_" + std::to_string(m_region.value()) + "_KeyLayer";
+    FPGATrackSimBinUtil::StreamManager sm(keylayerName);
     sm.writeVar("r_in",r_in);
     sm.writeVar("r_out",r_out);
   }
 
   if (stepIsRPhi(step)) {
 
-    FPGATrackSimBinUtil::StreamManager sm(step.stepName());
+    std::string stepName = "reg_" + std::to_string(m_region.value()) + "_" + step.stepName();
+    FPGATrackSimBinUtil::StreamManager sm(stepName);
     int nbins = 0;
     for (FPGATrackSimBinArray<int>::ConstIterator &bin : step.validBinsLocal()) {
       if (!bin.data())
@@ -208,7 +210,8 @@ void FPGATrackSimKeyLayerBinDesc::writeLUTs(const FPGATrackSimBinStep &step) con
 
   if (stepIsREta(step)) {
 
-    FPGATrackSimBinUtil::StreamManager sm(step.stepName());
+    std::string stepName = "reg_" + std::to_string(m_region.value()) + "_" + step.stepName();
+    FPGATrackSimBinUtil::StreamManager sm(stepName);
 
     int nbins = 0;
     for (FPGATrackSimBinArray<int>::ConstIterator &bin : step.validBinsLocal()) {

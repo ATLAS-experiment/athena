@@ -558,7 +558,7 @@ void TConvertingBranchElement::BuildConvertedElisions()
         
         // Find all branches that are a part of this class and
         // move them from @c branches to the dummy node
-        for (unsigned i=0; i < branches.size(); i++) {
+        for (unsigned i=0; i < branches.size(); ) {
           TString bname = branches[i]->GetName();
           if (bname.Index (namedot) == 0 &&
               (dum->fType == 2 ||
@@ -574,7 +574,9 @@ void TConvertingBranchElement::BuildConvertedElisions()
               be->fParentClass = cl;
             }
             branches.erase (branches.begin()+i);
-            --i;
+          }
+          else {
+            ++i;
           }
         }
       }

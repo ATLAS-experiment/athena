@@ -25,13 +25,8 @@ BOOST_AUTO_TEST_CASE(EmptyIdDictDictionaryAccessors){
   BOOST_TEST(d.find_group ("group_name") == nullptr);
 }
 BOOST_AUTO_TEST_CASE(IdDictDictionaryExposedMemberAccess){
-  IdDictDictionary d;
+  IdDictDictionary d("someName", "1.0", "32/9/2024", "sroe");
   //just checking this compiles, really
-  d.m_name = "someName";
-  d.m_version = "1.0";
-  d.m_date = "32/9/2024";
-  d.m_author = "sroe";
-  BOOST_TEST_MESSAGE("m_name, m_version, m_date, m_author are exposed members");
 }
 
 

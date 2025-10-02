@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EvtIdModifierSvc.cxx
@@ -21,7 +21,7 @@
 
 // EventInfo includes
 #include "EventInfo/EventID.h"
-#include "EventInfo/EventInfo.h"
+
 
 namespace {
 constexpr int prop_per_nplet{6};
@@ -55,7 +55,7 @@ EvtIdModifierSvc::EvtIdModifierSvc(const std::string& name,
                   "Name of the event store whose EventIDs will be modified.");
 
   declareProperty("SkipEvents", m_firstEvtIdx = 0,
-                  "Number of events to skip before modifying EventInfos.");
+                  "Number of events to skip before modifying EventIDs.");
   declareProperty("SkippedEvents", m_skippedEvents = 0,
                   "Number of events skipped in the EventSelector.");
 }

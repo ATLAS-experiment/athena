@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// File:  Generators/FlowAfterburnber/AddFlowByShifting.h
+// File:  Generators/FlowAfterburner/AddFlowByShifting.h
 // Description:
 //    This code is used to introduce particle flow
 //    to particles from generated events
@@ -23,20 +23,17 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-
-#include <CLHEP/Random/RandomEngine.h>
+//
 #include "AthenaKernel/IAthRNGSvc.h"
-#include "GeneratorObjects/McEventCollection.h"
-#include "AtlasHepMC/Relatives.h"
-#include "GeneratorObjects/HijingEventParams.h"
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_roots.h>
+#include "AtlasHepMC/GenParticle.h" //typedef GenParticlePtr
+#include "AtlasHepMC/GenVertex.h" //GenParticlePtr
 
 
 
-
+class HijingEventParams;
+namespace CLHEP{
+  class HepRandomEngine;
+}
 class TGraph;
 
 class AddFlowByShifting:public AthAlgorithm {

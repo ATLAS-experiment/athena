@@ -109,24 +109,38 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
 
     if (calibData) {
+      if (m_isITk){
+        if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
+    ATH_MSG_ERROR("Chip type is not recognized!");
+    return StatusCode::FAILURE;
+        }
 
-      if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
-	ATH_MSG_ERROR("Chip type is not recognized!");
-	return StatusCode::FAILURE;
+        // The calibration strategy is updated for each element
+        // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
+        // Single FE modules could have an optimized getCharge function where the calib constants are cached
+        std::uint32_t feValue = design.getFE(si_param);
+        auto diode_type = design.getDiodeType(si_param);
+
+        charge = calibData->getCharge(diode_type,
+              calibStrategy,
+              moduleHash,
+              feValue,
+              tot);
+        chargeList.push_back(charge);
+      } else {
+        Identifier moduleID = m_pixelID->wafer_id(id);
+        IdentifierHash moduleHash = m_pixelID->wafer_hash(moduleID);
+        charge = calibData->getCharge(m_pixelReadout->getDiodeType(id),
+                                      moduleHash,
+                                      m_pixelReadout->getFE(id, moduleID),
+                                      tot);
+
+        // These numbers are taken from the Cluster Maker Tool
+        if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash < 12 or moduleHash > 2035)) {
+          charge = tot/8.0*(8000.0-1200.0)+1200.0;
+        }
+        chargeList.push_back(charge);
       }
-
-      // The calibration strategy is updated for each element
-      // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
-      // Single FE modules could have an optimized getCharge function where the calib constants are cached
-      std::uint32_t feValue = design.getFE(si_param);
-      auto diode_type = design.getDiodeType(si_param);
-
-      charge = calibData->getCharge(diode_type,
-				    calibStrategy,
-				    moduleHash,
-				    feValue,
-				    tot);
-      chargeList.push_back(charge);
     }
     
     const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];

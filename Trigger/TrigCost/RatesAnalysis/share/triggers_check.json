@@ -1,0 +1,13 @@
+{
+  "_comment": "Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration",
+  "L1_items": [
+    "L1_ADVAET",
+    "L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20",
+    "L1_jJ160",
+    "L1_jXE100",
+    "L1_eEM26M"
+  ],
+  "userDefinedL1items": [
+
+  ]
+}

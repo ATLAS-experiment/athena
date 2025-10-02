@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: TTreePatch_t.py
@@ -68,6 +68,12 @@ def dump_chain (names):
     for n in names:
         t.Add (n)
     #t.SetBranchStatus ('*', 0)
+    # Older versions of ROOT may read through all files the first time
+    # GetEntries() is called, generating Notify() calls in the process.
+    # This is changed in newer versions.
+    # In order to have consistent output across versions, make a call
+    # to GetEntries() before setting the Notify() callback.
+    t.GetEntries()
     n = Notifier()
     t.SetNotify(n)
     dump_tree1 (t)
@@ -105,8 +111,6 @@ def _test1():
     209 209.5 219 219.5 [219.5 229.5 239.5]
     210 210.5 220 220.5 [220.5 230.5 240.5]
     >>> dump_chain (['tree1.root', 'tree2.root'])
-    Notify ()
-    Notify ()
     101 101.5 111 111.5 [111.5 121.5 131.5]
     102 102.5 112 112.5 [112.5 122.5 132.5]
     103 103.5 113 113.5 [113.5 123.5 133.5]

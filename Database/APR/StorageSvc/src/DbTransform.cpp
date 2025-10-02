@@ -51,7 +51,7 @@ namespace {
 
 /// debug function for unit tests
 const ShapeVector allShapes() {
-   shared_lock_t lock(shapesMutex); 
+   shared_lock_t lock(shapesMutex);
    ShapeVector sv;
    for( const auto& map_entry : _Init::shapes() ) {
       for( const DbTypeInfo* info : map_entry.second ) {
@@ -66,7 +66,7 @@ const ShapeVector allShapes() {
 /// Access shape registry
 DbStatus DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shape)
 {
-   shared_lock_t lock(shapesMutex); 
+   shared_lock_t lock(shapesMutex);
    ShapeVector& v = _Init::shape(shape_Guid);
    if ( v.size() > 0 ) {
       shape = *(v.begin());
@@ -79,7 +79,7 @@ DbStatus DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shape)
 /// Access shape registry
 const DbTypeInfo* DbTransform::getShape(const Guid& shape_Guid, const std::string& rep)
 {
-   shared_lock_t lock(shapesMutex); 
+   shared_lock_t lock(shapesMutex);
    for( auto shape: _Init::shape(shape_Guid) ) {
       if( shape->toString() == rep )
          return shape;

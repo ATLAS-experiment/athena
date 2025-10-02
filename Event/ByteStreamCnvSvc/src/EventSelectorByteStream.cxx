@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventSelectorByteStream.h"
@@ -1085,7 +1085,7 @@ StatusCode EventSelectorByteStream::io_reinit() {
       [] (Gaudi::Details::PropertyBase&) {}
    );
    m_inputCollectionsProp = inputCollections;
-   m_inputCollectionsProp.declareUpdateHandler (old_cb);;
+   m_inputCollectionsProp.declareUpdateHandler (std::move(old_cb));
 
    return(this->reinit(lock));
 }

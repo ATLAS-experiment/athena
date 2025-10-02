@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/src/proxyDictFromEventContext.cxx
@@ -28,7 +28,11 @@ namespace Atlas {
 IProxyDict* proxyDictFromEventContext ()
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  return Atlas::getExtendedEventContext(ctx).proxy();
+  const Atlas::ExtendedEventContext* ectx = Atlas::tryGetExtendedEventContext(ctx);
+  if (ectx) {
+    return ectx->proxy();
+  }
+  return nullptr;
 }
 
 
@@ -38,7 +42,11 @@ IProxyDict* proxyDictFromEventContext ()
  */
 IProxyDict* proxyDictFromEventContext (const EventContext& ctx)
 {
-  return Atlas::getExtendedEventContext(ctx).proxy();
+  const Atlas::ExtendedEventContext* ectx = Atlas::tryGetExtendedEventContext(ctx);
+  if (ectx) {
+    return ectx->proxy();
+  }
+  return nullptr;
 }
 
 

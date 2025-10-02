@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -56,16 +56,16 @@ void EventBookkeeperCollection::UpdateFromColl( const EventBookkeeperCollection*
 
 EventBookkeeperCollection* EventBookkeeperCollection::GetCopyWithFlatStructure(){
   //Just a simple vector of pointers, nothing new is constructed, but now with a flat structure
-  EventBookkeeperCollection* PtrFLAT = new EventBookkeeperCollection();
-  for(unsigned int i=0; i<this->size(); i++){ 
-    PtrFLAT->push_back(this->at(i));
-    this->at(i)->fillWithWholeFamily( PtrFLAT ); //family does not include topParent
+  EventBookkeeperCollection PtrFLAT (SG::VIEW_ELEMENTS);
+  for (EventBookkeeper* bk : *this) {
+    PtrFLAT.push_back(bk);
+    bk->fillWithWholeFamily( &PtrFLAT ); //family does not include topParent
   }
 
   //Now a make a flat-structure collection with new objects
-  EventBookkeeperCollection* CopyFLAT = new EventBookkeeperCollection();
-  for(unsigned int i=0; i<PtrFLAT->size(); i++){ 
-    EventBookkeeper* tmp = PtrFLAT->at(i)->DeepCopyForFlatStructure( PtrFLAT );
+  auto CopyFLAT = std::make_unique<EventBookkeeperCollection>();
+  for (EventBookkeeper* bk : PtrFLAT) {
+    EventBookkeeper* tmp = bk->DeepCopyForFlatStructure( &PtrFLAT );
     CopyFLAT->push_back( tmp );
   }
 
@@ -79,13 +79,7 @@ EventBookkeeperCollection* EventBookkeeperCollection::GetCopyWithFlatStructure()
       }
     }
   }
-  //finally, delete the temporary collection (but not its content)
-  //PROBLEM! destructor of EventBookkeeperCollection deletes all its elements... which are double-deleted.
-  //But not deleting PtrFLAT should result in a (small) memory leak
-  //Maybe use an std::vector for PtrFLAT instead? 
-  //delete PtrFLAT;
-
   //The caller now owns CopyFLAT and its content
-  return CopyFLAT;
+  return CopyFLAT.release();
 }
 

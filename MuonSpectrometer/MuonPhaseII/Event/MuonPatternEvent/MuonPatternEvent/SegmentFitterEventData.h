@@ -54,8 +54,6 @@ namespace MuonR4{
         
         /** @brief Was the time fitted */
         bool timeFit{false};
-        /** @brief Does the candidate have phi measurements */
-        bool hasPhi{false};
         /** @brief Final segment parameters */
         Parameters segmentPars{Parameters::Zero()};
         /** @brief Uncertainties on the segment parameters */

@@ -16,6 +16,7 @@
 #include <TF1.h>
 #include <TClass.h>
 #include <cmath>
+#include <format>
 
 #include <iostream>
 #include <string>
@@ -135,6 +136,7 @@ dqm_algorithms::BinsDiffFromStripMedian::execute(const std::string &  name,
       double phi = histogram->GetYaxis()->GetBinCenter(l); 
       bin onebin = {eta,phi,k,l,binvalue,outstandingRatio};
       Allbins.push_back(onebin);
+      if (maxInMap == 0) continue;
       if(std::abs(outstandingRatio) > rthreshold ) {
         if( VisualMode  && (binvalue / maxInMap < suppressRedFactor) )
                 continue;
@@ -158,7 +160,7 @@ if(ClusterResult){
      colorbin oneColorBin = {static_cast<double>(k), static_cast<double>(l), -1, -1, -1, green, 1};
      oneColorStrip.push_back(oneColorBin);
    }
-   ColorBinMap.push_back(oneColorStrip);
+   ColorBinMap.push_back(std::move(oneColorStrip));
  } 
 
 // map redbins and yellowbins to ColorBinMap
@@ -206,16 +208,27 @@ if(ClusterResult){
 
  // publish clusters here:
   for(unsigned int i=0;i<clusterArray.size();i++){
-    char tmp[500];
+    std::string tag;
     if(clusterArray[i].m_color==red){
-      sprintf(tmp,"CR%i-(eta,phi)(r)(size)=(%0.3f,%0.3f)(%0.3f)(%i)",count_red_c,clusterArray[i].m_eta,clusterArray[i].m_phi,clusterArray[i].m_radius,clusterArray[i].m_size);
+      tag = std::format(
+        "CR{}-(eta,phi)(r)(size)=({:.3f},{:.3f})({:.3f})({})",
+        count_red_c,
+        clusterArray[i].m_eta,
+        clusterArray[i].m_phi,
+        clusterArray[i].m_radius,
+        clusterArray[i].m_size);      
       count_red_c++;
     }
     else if(clusterArray[i].m_color==yellow){
-      sprintf(tmp,"CY%i-(eta,phi)(r)(size)=(%0.3f,%0.3f)(%0.3f)(%i)",count_yellow_c,clusterArray[i].m_eta,clusterArray[i].m_phi,clusterArray[i].m_radius,clusterArray[i].m_size);
+      tag = std::format(
+        "CY{}-(eta,phi)(r)(size)=({:.3f},{:.3f})({:.3f})({})",
+        count_yellow_c,
+        clusterArray[i].m_eta,
+        clusterArray[i].m_phi,
+        clusterArray[i].m_radius,
+        clusterArray[i].m_size);
       count_yellow_c++;
     }
-      std::string tag = tmp;
       result->tags_[tag] = clusterArray[i].m_value;
   }
   result->tags_["NRedClusters"] = count_red_c;  

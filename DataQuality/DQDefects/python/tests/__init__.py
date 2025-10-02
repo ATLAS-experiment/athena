@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # -*- coding: utf-8 -*-
 # flake8: noqa
 #  unicode characters embedded below confuse flake8
@@ -12,8 +12,6 @@ from logging import getLogger; log = getLogger("DQDefects.tests")
 from DQUtils import init_logger
 from DQDefects import DefectsDB
 from DQDefects.exceptions import DefectExistsError, DefectUnknownError
-
-import six
 
 TEST_DATABASE = "test_defects.db/COMP200"
 
@@ -56,7 +54,7 @@ def test_database_creation():
 @with_setup(create_database, teardown_database)
 def test_database_creation_unicode():
     assert exists("test_defects.db")
-    log.info("Created database %s", six.ensure_text(TEST_DATABASE))
+    log.info("Created database %s", TEST_DATABASE)
     
 @with_setup(create_database, teardown_database)
 def test_database_retrieval():
@@ -564,7 +562,7 @@ def test_tagging_unicode():
                            
     what = {"channels": [u"DQD_TEST_VIRTUAL_DEFECT"]}
 
-    orig_iovs = DefectsDB((TEST_DATABASE), tag=six.ensure_text(original_htag)).retrieve(**what)
+    orig_iovs = DefectsDB((TEST_DATABASE), tag=original_htag).retrieve(**what)
     
     assert len(orig_iovs) == 2
     assert (orig_iovs[0].since, orig_iovs[0].until) == (  0, 100)

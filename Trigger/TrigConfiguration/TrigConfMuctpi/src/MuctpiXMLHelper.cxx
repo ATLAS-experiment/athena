@@ -3,7 +3,8 @@
 */
 
 #include "TrigConfMuctpi/MuctpiXMLHelper.h"
-#include <boost/lexical_cast.hpp>
+#include <charconv>
+#include <string_view>
 #include <iostream>
 
 using namespace std;
@@ -88,11 +89,10 @@ MuctpiXMLHelper::getIntAttribute(const ptree & tree, const string & attr) {
    }
 
    int ret_value{0};
-   try {
-      ret_value = boost::lexical_cast<int, string>(readAttribute(tree,attr));
-   }
-   catch(const boost::bad_lexical_cast & bc) {
-      TRG_MSG_ERROR("attribute '" << attr << "' is not an int (it is '" << readAttribute(tree,attr) << "')");
+   std::string attr_value = readAttribute(tree, attr);
+   auto [ptr, ec] = std::from_chars(attr_value.data(), attr_value.data() + attr_value.size(), ret_value);
+   if (ec != std::errc()) {
+     TRG_MSG_ERROR("attribute '" << attr << "' is not an int (it is '" << attr_value << "')");
    }
    return ret_value;
 }
@@ -102,11 +102,10 @@ MuctpiXMLHelper::getIntAttribute(const ptree & tree, const string & attr, int de
    if( ! hasAttribute(tree, attr) )
       return defval;
    int ret_value{0};
-   try {
-      ret_value = boost::lexical_cast<int, string>(readAttribute(tree,attr));
-   }
-   catch(const boost::bad_lexical_cast & bc) {
-     TRG_MSG_ERROR("attribute '" << attr << "' is not an int (it is '" << readAttribute(tree,attr) << "')");
+   std::string attr_value = readAttribute(tree, attr);
+   auto [ptr, ec] = std::from_chars(attr_value.data(), attr_value.data() + attr_value.size(), ret_value);
+   if (ec != std::errc()) {
+     TRG_MSG_ERROR("attribute '" << attr << "' is not an int (it is '" << attr_value << "')");
    }
    return ret_value;
 }
@@ -119,11 +118,10 @@ MuctpiXMLHelper::getUIntAttribute(const ptree & tree, const string & attr) {
       return 0;
    }
    unsigned int ret_value{0};
-   try {
-      ret_value = boost::lexical_cast<unsigned int, string>(readAttribute(tree,attr));
-   }
-   catch(const boost::bad_lexical_cast & bc) {
-      TRG_MSG_ERROR("attribute '" << attr << "' is not an unsigned int (it is " << readAttribute(tree,attr) << ")");
+   std::string attr_value = readAttribute(tree, attr);
+   auto [ptr, ec] = std::from_chars(attr_value.data(), attr_value.data() + attr_value.size(), ret_value);
+   if (ec != std::errc()) {
+     TRG_MSG_ERROR("attribute '" << attr << "' is not an unsigned int (it is " << attr_value << ")");
    }
    return ret_value;
 }
@@ -132,7 +130,13 @@ unsigned int
 MuctpiXMLHelper::getUIntAttribute(const ptree & tree, const string & attr, unsigned int & defval) {
    if( ! hasAttribute(tree, attr) )
       return defval;
-   return boost::lexical_cast<unsigned int, string>(readAttribute(tree,attr));
+   unsigned int ret_value{0};
+   std::string attr_value = readAttribute(tree, attr);
+   auto [ptr, ec] = std::from_chars(attr_value.data(), attr_value.data() + attr_value.size(), ret_value);
+   if (ec != std::errc()) {
+     TRG_MSG_ERROR("attribute '" << attr << "' is not an unsigned int (it is " << attr_value << ")");
+   }
+   return ret_value;
 }
 
 
@@ -143,12 +147,11 @@ MuctpiXMLHelper::getFloatAttribute(const ptree & tree, const string & attr) {
       return 0;
    }
    float ret_value{0};
-   try {
-      ret_value = boost::lexical_cast<float, string>(readAttribute(tree,attr));
-   }
-   catch(const boost::bad_lexical_cast & bc) {
-      TRG_MSG_ERROR("attribute '" << attr << "' is not an float (it is " << readAttribute(tree,attr) << ")");
-      printAttributes(tree);
+   std::string attr_value = readAttribute(tree, attr);
+   auto [ptr, ec] = std::from_chars(attr_value.data(), attr_value.data() + attr_value.size(), ret_value, std::chars_format::general);
+   if (ec != std::errc()) {
+     TRG_MSG_ERROR("attribute '" << attr << "' is not a float (it is " << attr_value << ")");
+     printAttributes(tree);
    }
    return ret_value;
 }
@@ -157,5 +160,12 @@ float
 MuctpiXMLHelper::getFloatAttribute(const ptree & tree, const string & attr, float & defval) {
    if( ! hasAttribute(tree, attr) )
       return defval;
-   return boost::lexical_cast<float, string>(readAttribute(tree,attr));
+   float ret_value{0};
+   std::string attr_value = readAttribute(tree, attr);
+   auto [ptr, ec] = std::from_chars(attr_value.data(), attr_value.data() + attr_value.size(), ret_value, std::chars_format::general);
+   if (ec != std::errc()) {
+     TRG_MSG_ERROR("attribute '" << attr << "' is not a float (it is " << attr_value << ")");
+     printAttributes(tree);
+   }
+   return ret_value;
 }

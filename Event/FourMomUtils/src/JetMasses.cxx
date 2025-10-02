@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FourMomUtils/JetMasses.h"
@@ -41,7 +41,7 @@ jetMasses( const I4MomIter_t& iBeg, const I4MomIter_t& iEnd,
         }
     }
 
-  const double inv_Q2 = 1. / (Q*Q);
+  const double inv_Q2 = Q!=0 ? (1. / (Q*Q)) : 0;
   lightJetMass=down.mag2()*inv_Q2;
   heavyJetMass=up.mag2()*inv_Q2;
   if ( lightJetMass > heavyJetMass )

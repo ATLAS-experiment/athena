@@ -93,7 +93,7 @@ DbStatus DbColumn::fromString( const string& string_rep)  {
         std::string s (pp1, p2-pp1);
         switch(i)   {
         case 0:
-          m_colName = s;
+          m_colName = std::move(s);
           nread += 1;
           break;
         case 1:

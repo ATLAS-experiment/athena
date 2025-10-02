@@ -216,3 +216,6 @@ if [[ $ambi_rc == 0 && $ambi_scored_rc == 0 ]]; then
 fi
 
 exit $exit_rc
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

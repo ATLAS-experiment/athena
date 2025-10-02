@@ -570,7 +570,8 @@ StatusCode LArShapeDumper::execute()
       if (satur[i]) continue;
   
       scEne = energies[i]; 
-      if (m_energyCutSC > 0 && scEne < m_energyCutSC) continue;
+      if (m_energyCutSC > 0 && TMath::Abs(scEne) < m_energyCutSC) continue;
+      if (m_bcMaskSC.cellShouldBeMasked(bcCont,rawSC->hardwareID())) continue;
  
       IdentifierHash hash = m_onlineHelperSC->channel_Hash(rawSC->hardwareID());
       

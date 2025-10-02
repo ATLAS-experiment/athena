@@ -17,8 +17,7 @@
 #include "AthContainers/tools/threading.h"
 #include "TestTools/expect_exception.h"
 #ifndef ATHCONTAINERS_NO_THREADS
-#include "boost/thread/shared_mutex.hpp"
-#include "boost/thread/shared_lock_guard.hpp"
+#include <shared_mutex>
 #endif
 #include <iostream>
 #include <sstream>
@@ -661,7 +660,7 @@ public:
     void operator()()
     {
 #ifndef ATHCONTAINERS_NO_THREADS
-      boost::shared_lock_guard<boost::shared_mutex> guard (m_test.m_sm);
+      std::shared_lock<std::shared_mutex> guard (m_test.m_sm);
 #endif // not ATHCONTAINERS_NO_THREADS
       m_test.worker();
     }
@@ -670,7 +669,7 @@ public:
   };
 
 #ifndef ATHCONTAINERS_NO_THREADS
-  boost::shared_mutex m_sm;
+  std::shared_mutex m_sm;
 #endif // not ATHCONTAINERS_NO_THREADS
   std::vector<SG::auxid_t> m_ids;
   SG::AuxStoreInternal m_store;

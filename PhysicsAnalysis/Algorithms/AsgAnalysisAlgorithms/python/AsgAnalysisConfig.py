@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from enum import Enum
@@ -101,6 +102,11 @@ class CommonServicesConfig (ConfigBlock) :
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
 
 
+@groupBlocks
+def CommonServices(seq):
+    seq.append(CommonServicesConfig())
+    from AsgAnalysisAlgorithms.TruthCollectionsFixerConfig import TruthCollectionsFixerBlock
+    seq.append(TruthCollectionsFixerBlock())
 
 class IOStatsBlock(ConfigBlock):
     """Print what branches are used in analysis"""

@@ -215,7 +215,7 @@ int  JGTowerBase_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   int caloValue   = -1;
   if (m_dict->get_label_value("subdet", "Calorimeter", caloValue)) 
     {
-      strm << m_dict->m_name;
+      strm << m_dict->name();
       strg= "Could not get value for label 'Calorimeter' of field 'subdet' in dictionary "+strm.str(); 
       if(m_msgSvc)
 	{
@@ -234,7 +234,7 @@ int  JGTowerBase_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   // positive half  FLG 12 Jul 07: negative side -> problem for test beam
   if (m_dict->get_label_value("DetZside", "positive_lvl1_side", jgtowerCaloValue)) 
     {
-      strm << m_dict->m_name;
+      strm << m_dict->name();
       //	strg = " Could not get value for label 'negative_jgtower_side' of field 'DetZside in dictionary"+strm.str();
       strg = " Could not get value for label positive_lvl1_side of field 'DetZside in dictionary"+strm.str();
       if(m_msgSvc)
@@ -488,28 +488,28 @@ float JGTowerBase_ID::etaGranularity(const Identifier regId) const
 {
   IdentifierHash regHash = calo_region_hash(regId);
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return m_vecOfDictRegions[regHash]->m_deta;
+  return m_vecOfDictRegions[regHash]->deta();
 }
 
 float JGTowerBase_ID::phiGranularity(const Identifier regId) const
 {
   IdentifierHash regHash = calo_region_hash(regId);
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return m_vecOfDictRegions[regHash]->m_dphi;
+  return m_vecOfDictRegions[regHash]->dphi();
 }
 
 float JGTowerBase_ID::eta0(const Identifier regId) const
 {
   IdentifierHash regHash = calo_region_hash(regId);
-    if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return m_vecOfDictRegions[regHash]->m_eta0;
+  if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
+  return m_vecOfDictRegions[regHash]->eta0();
 }
 
 float JGTowerBase_ID::phi0(const Identifier regId) const
 {
   IdentifierHash regHash = calo_region_hash(regId);
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return m_vecOfDictRegions[regHash]->m_phi0;
+  return m_vecOfDictRegions[regHash]->phi0();
 }
 
 int             
@@ -672,7 +672,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
   IdDictRegion* reg = m_dict->find_region(t_pre+"ower_0");
   if (reg) 
     {
-      m_jgtower_region_index = reg->m_index;
+      m_jgtower_region_index = reg->index();
     }
   else 
     {
@@ -690,7 +690,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
   // Fing a JGTOWER region
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_CALO_INDEX = field->m_index ;
+    m_CALO_INDEX = field->index();
   }
   else 
     {
@@ -708,7 +708,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
   
   field = m_dict->find_field("DetZside") ;
   if (field) {
-    m_DETZSIDE_INDEX = field->m_index ;
+    m_DETZSIDE_INDEX = field->index();
   }
   else 
     {
@@ -726,7 +726,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
 
   field = m_dict->find_field(t_pre+"sampling") ;
   if (field) {
-    m_SAMPLING_INDEX = field->m_index ;
+    m_SAMPLING_INDEX = field->index();
   }
   else 
     {
@@ -745,7 +745,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
 
   field = m_dict->find_field(t_pre+"region") ;
   if (field) {
-    m_REGION_INDEX = field->m_index ;
+    m_REGION_INDEX = field->index();
   }
   else 
     {
@@ -766,7 +766,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
 
   field = m_dict->find_field(t_pre+"eta") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else 
     {
@@ -784,7 +784,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
   
   field = m_dict->find_field(t_pre+"phi") ;
   if (field) {
-    m_PHI_INDEX = field->m_index ;
+    m_PHI_INDEX = field->index();
   }
   else 
     {
@@ -802,14 +802,14 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
     }
   // Set the field implementations
 
-  const IdDictRegion& region = *m_dict->m_regions[m_jgtower_region_index];
+  const IdDictRegion& region = m_dict->region(m_jgtower_region_index);
 
-  m_calo_impl     = region.m_implementation[m_CALO_INDEX]; 
-  m_jgtower_impl     = region.m_implementation[m_DETZSIDE_INDEX];
-  m_sampling_impl = region.m_implementation[m_SAMPLING_INDEX]; 
-  m_region_impl   = region.m_implementation[m_REGION_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX]; 
+  m_calo_impl     = region.implementation(m_CALO_INDEX);
+  m_jgtower_impl  = region.implementation(m_DETZSIDE_INDEX);
+  m_sampling_impl = region.implementation(m_SAMPLING_INDEX);
+  m_region_impl   = region.implementation(m_REGION_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
 
   strm1 << m_calo_impl.show_to_string();
   strm2 << m_jgtower_impl.show_to_string();

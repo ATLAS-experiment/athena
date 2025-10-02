@@ -27,6 +27,7 @@
 #include "Acts/Geometry/VolumeResizeStrategy.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
+#include <Acts/Surfaces/SurfaceArray.hpp>
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
 

@@ -18,8 +18,6 @@ import glob
 from math import floor
 from cgi import escape
 
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
 
 cmdoutput = """\

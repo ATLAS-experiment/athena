@@ -142,18 +142,14 @@ CaloEstimatedGainTool::estimatedLArGain (const EventContext& ctx,
     //    HighGain  <---  MediumGain  --->  LowGain
 
     float adc=0.;
-    
-    //Cells (with E scale and weights from LArG3Escale)
-    if (step == Step::CELLS)  {
+
+    if (step == Step::CELLS ||     //Cells (with E scale and weights from LArG3Escale)
+        step == Step::RAWCHANNELS) //RawChannels
+    {
       float fac = adc2mev (ctx, caloDDE, CaloGain::LARMEDIUMGAIN);
       if (fac != 0) {
         adc = energy / fac + 1000;
       }
-    }
-    //RawChannels    
-    else if (step == Step::RAWCHANNELS)
-    {
-      adc = energy / (adc2mev (ctx, caloDDE, CaloGain::LARMEDIUMGAIN)) + 1000;
     }
     else 
     {

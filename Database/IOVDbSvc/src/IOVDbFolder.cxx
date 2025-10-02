@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
@@ -827,7 +827,7 @@ IOVDbFolder::overrideOptionsFromParsedDescription(const IOVDbParser & parsedDesc
   // check for key, giving a different key to the foldername
   if (auto newkey=parsedDescription.key(); not newkey.empty() and not m_jokey) {
     ATH_MSG_DEBUG( "Key for folder " << m_foldername << " set to "<< newkey << " from description string" );
-    m_key=newkey;
+    m_key=std::move(newkey);
   }
   // check for 'cache' but only if not already found in joboptions
   if (m_cachepar.empty()) m_cachepar=parsedDescription.cache();
@@ -838,7 +838,7 @@ IOVDbFolder::overrideOptionsFromParsedDescription(const IOVDbParser & parsedDesc
    // get addressHeader
   if (auto newAddrHeader = parsedDescription.addressHeader();not newAddrHeader.empty()){
     IOVDbNamespace::replaceServiceType71(newAddrHeader);
-    m_addrheader=newAddrHeader;
+    m_addrheader=std::move(newAddrHeader);
   }
   //get clid, if it exists (set to zero otherwise)
   m_clid=parsedDescription.classId(msg());
@@ -1016,7 +1016,7 @@ IOVDbFolder::resolveTag(const cool::IFolderPtr& fptr,const std::string& globalTa
       ATH_MSG_INFO( "HVS tag " << tag << " resolved to "<< restag << " for folder " << m_foldername );
       // HVS tag may itself be magic
       if (IOVDbNamespace::looksLikeMagicTag(restag) and not magicTag(restag)) return false;
-      tag=restag;
+      tag=std::move(restag);
     }catch (cool::Exception& e) {
       ATH_MSG_ERROR( "Tag " << tag <<" cannot be resolved for folder " << m_foldername );
       return false;
@@ -1185,8 +1185,10 @@ std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestObjects(cool::ValidityK
     else {
       ATH_MSG_INFO("Cache boundaries outside available IOVs for the folder "+ m_foldername);
     }
+    if(m_crestCoolToFile)
+      dumpFile("crest_dump",vkey,nullptr,false,&m_crest_mng.value(),vkey);
     return iovHashVect;
-      }
+  }
   unsigned indIOVStart = 0;
   for(const auto& iovhash : iovHashVect) {
     if(vkey>=iovhash.first.first && vkey<iovhash.first.second)

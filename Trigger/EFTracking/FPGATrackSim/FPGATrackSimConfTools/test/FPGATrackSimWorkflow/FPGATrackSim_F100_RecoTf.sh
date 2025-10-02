@@ -73,7 +73,8 @@ if [ "$doClusters" == "1" ]; then
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
     --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
-              flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
+              flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;\
+              flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;"\
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \
     --outputAODFile ${outputAOD}
@@ -84,7 +85,8 @@ else
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
     --preExec "flags.Tracking.doPixelDigitalClustering=True;\
                flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
-               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";"\
+               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
+               flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;"\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \

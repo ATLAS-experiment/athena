@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -18,12 +18,11 @@
 
 //Gaudi includes
 #include "GaudiKernel/INTupleSvc.h"
-#include "GaudiKernel/IDataProviderSvc.h"
-#include "GaudiKernel/SmartDataPtr.h"
 
 //Atlas include
 #include "AthenaKernel/errorcheck.h"
 #include "EventContainers/SelectAllObject.h"
+#include "StoreGate/ReadHandle.h"
 
 // Calo include
 #include "CaloIdentifier/TileID.h"
@@ -35,28 +34,6 @@
 #include "TileRec/TileDigitsToNtuple.h"
 #include "TileIdentifier/TileHWID.h"
 
-
-TileDigitsToNtuple::TileDigitsToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-  , m_tileID(0)
-  , m_tileHWID(0)
-  , m_tileTBID(0)
-  , m_ntuplePtr(0)
-  , m_nSamples(7)
-{
-  declareProperty("TileDigitsContainer", m_digitsContainer = "TileDigitsFlt");    
-  declareProperty("NTupleLoc", m_ntupleLoc = "/TILE/TileRec");
-  declareProperty("NTupleID", m_ntupleID = "h40");
-  declareProperty("CommitNtuple", m_commitNtuple = true);
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
-  declareProperty("SaveMaxChannels", m_saveMaxChannels = 12288);
-  declareProperty("SaveAll", m_saveAll = true);
-  declareProperty("SaveE4prAndMBTS", m_saveE4prAndMBTS = true);
-}
-
-TileDigitsToNtuple::~TileDigitsToNtuple()
-{
-}
 
 //****************************************************************************
 //* Initialization
@@ -86,7 +63,7 @@ StatusCode TileDigitsToNtuple::initialize() {
     m_ntuplePtr = ntupleSvc()->book(ntupleCompleteID, CLID_ColumnWiseTuple, "TileDigits-Ntuple");
     if (m_ntuplePtr) {
       
-      CHECK( m_ntuplePtr->addItem("TileDigits/n_channels", m_nChannel, 0, m_saveMaxChannels) );
+      CHECK( m_ntuplePtr->addItem("TileDigits/n_channels", m_nChannel, 0, m_saveMaxChannels.value()) );
 
       CHECK( m_ntuplePtr->addItem("TileDigits/ros", m_nChannel, m_ros, 0, 4) );
       CHECK( m_ntuplePtr->addItem("TileDigits/drawer", m_nChannel, m_drawer, 0, 63) );
@@ -113,6 +90,8 @@ StatusCode TileDigitsToNtuple::initialize() {
     ATH_MSG_INFO( "Finished booking ntuple " << ntupleCompleteID );
   }
 
+  ATH_CHECK(m_digitsContainerKey.initialize());
+
   ATH_MSG_INFO( "Initialization completed" );
   return StatusCode::SUCCESS;
 }
@@ -124,12 +103,12 @@ StatusCode TileDigitsToNtuple::initialize() {
 StatusCode TileDigitsToNtuple::execute() {
 
   // step1: read TileDigitss from TDS
-  const TileDigitsContainer* digitsContainer = nullptr;
-  CHECK( evtStore()->retrieve(digitsContainer, m_digitsContainer) );
+  SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey);
+  ATH_CHECK( digitsContainer.isValid() );
 
   m_nChannel = 0;
 
-  SelectAllObject<TileDigitsContainer> allTileDigits(digitsContainer);
+  SelectAllObject<TileDigitsContainer> allTileDigits(digitsContainer.cptr());
 
   for (const TileDigits* tile_digits : allTileDigits) {
 
@@ -151,10 +130,17 @@ StatusCode TileDigitsToNtuple::execute() {
         m_phi[m_nChannel] = m_tileTBID->phi(adc_id);
         m_eta[m_nChannel] = m_tileTBID->eta(adc_id);
       } else {
-        m_section[m_nChannel] = m_tileID->section(adc_id);
-        m_side[m_nChannel] = m_tileID->side(adc_id);
-        m_phi[m_nChannel] = m_tileID->module(adc_id);
-        m_eta[m_nChannel] = m_tileID->tower(adc_id);
+        if (adc_id.is_valid()) {
+          m_section[m_nChannel] = m_tileID->section(adc_id);
+          m_side[m_nChannel] = m_tileID->side(adc_id);
+          m_phi[m_nChannel] = m_tileID->module(adc_id);
+          m_eta[m_nChannel] = m_tileID->tower(adc_id);
+        } else {
+          m_section[m_nChannel] = std::numeric_limits<short>::min();
+          m_side[m_nChannel] = std::numeric_limits<short>::min();
+          m_phi[m_nChannel] = std::numeric_limits<short>::min();
+          m_eta[m_nChannel] = std::numeric_limits<short>::min();
+        }
       }
 
       for (int i = 0; i < n_samples && i < m_nSamples; ++i) m_samples[m_nChannel][i] = samples[i];
@@ -184,14 +170,26 @@ StatusCode TileDigitsToNtuple::execute() {
         m_channel[m_nChannel] = m_tileHWID->channel(adc_hwid);
         m_gain[m_nChannel] = m_tileHWID->adc(adc_hwid);
 
-        m_section[m_nChannel] = m_tileID->section(adc_id);
-        m_side[m_nChannel] = m_tileID->side(adc_id);
-        m_phi[m_nChannel] = m_tileID->module(adc_id);
-        m_eta[m_nChannel] = m_tileID->tower(adc_id);
+        if (adc_id.is_valid()) {
+          m_section[m_nChannel] = m_tileID->section(adc_id);
+          m_side[m_nChannel] = m_tileID->side(adc_id);
+          m_phi[m_nChannel] = m_tileID->module(adc_id);
+          m_eta[m_nChannel] = m_tileID->tower(adc_id);
 
-        m_sample[m_nChannel] = m_tileID->sample(adc_id);
-        m_pmt[m_nChannel] = m_tileID->pmt(adc_id);
-        m_adc[m_nChannel] = m_tileID->adc(adc_id);
+          m_sample[m_nChannel] = m_tileID->sample(adc_id);
+          m_pmt[m_nChannel] = m_tileID->pmt(adc_id);
+          m_adc[m_nChannel] = m_tileID->adc(adc_id);
+
+        } else {
+          m_section[m_nChannel] = std::numeric_limits<short>::min();
+          m_side[m_nChannel] = std::numeric_limits<short>::min();
+          m_phi[m_nChannel] = std::numeric_limits<short>::min();
+          m_eta[m_nChannel] = std::numeric_limits<char>::min();
+
+          m_sample[m_nChannel] =std::numeric_limits<short>::min();
+          m_pmt[m_nChannel] = std::numeric_limits<short>::min();
+          m_adc[m_nChannel] = std::numeric_limits<short>::min();
+        }
 
         for (int i = 0; i < n_samples && i < m_nSamples; ++i) m_samples[m_nChannel][i] = samples[i];
 

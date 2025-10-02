@@ -112,7 +112,9 @@ class MetAnalysisConfig (ConfigBlock):
         if self.invisible:
             if isinstance(self.invisible, str):
                 self.invisible = [self.invisible]
-            alg.invisible, alg.invisibleSelection = [config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible]
+            invisibleContainers, invisibleSelections = zip(*[config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible])
+            alg.invisible = list(invisibleContainers)
+            alg.invisibleSelection = list(invisibleSelections)
         alg.met = config.writeName (self.containerName, isMet = True)
 
 

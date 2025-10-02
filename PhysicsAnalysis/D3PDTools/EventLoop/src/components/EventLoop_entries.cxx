@@ -19,6 +19,7 @@
 #include <EventLoop/StopwatchModule.h>
 #include <EventLoop/PostClosedOutputsModule.h>
 #include <EventLoop/TEventModule.h>
+#include <EventLoop/TreeCacheModule.h>
 #include <EventLoop/WorkerConfigModule.h>
 
 // Project include(s).
@@ -38,4 +39,5 @@ DECLARE_COMPONENT(EL::Detail::MemoryMonitorModule)
 DECLARE_COMPONENT(EL::Detail::StopwatchModule)
 DECLARE_COMPONENT(EL::Detail::PostClosedOutputsModule)
 DECLARE_COMPONENT(EL::Detail::TEventModule)
+DECLARE_COMPONENT(EL::Detail::TreeCacheModule)
 DECLARE_COMPONENT(EL::Detail::WorkerConfigModule)

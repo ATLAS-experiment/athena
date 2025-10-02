@@ -41,8 +41,9 @@ StatusCode InDetToXAODClusterConversion::initialize() {
 
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
   ATH_CHECK(detStore()->retrieve(m_stripID,"SCT_ID"));
-  ATH_CHECK(detStore()->retrieve(m_hgtdID,"HGTD_ID"));
-
+  if (m_processHgtd)
+  {ATH_CHECK(detStore()->retrieve(m_hgtdID,"HGTD_ID"));}
+  
   ATH_CHECK( m_pixelDetEleCollKey.initialize(m_processPixel) );
   ATH_CHECK( m_stripDetEleCollKey.initialize(m_processStrip) );
   ATH_CHECK( m_HGTDDetEleCollKey.initialize(m_processHgtd) );
@@ -153,8 +154,8 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
 
       xAOD::StripCluster * stripCl = new xAOD::StripCluster();
       outputStripClusterContainer->push_back(stripCl);
-      ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *stripCl) );
-
+      ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *stripCl, m_isITk) );
+      
       // Create auxiliary branches accessors
       ElementLink<InDet::SCT_ClusterCollection> stripLink(theCluster, *clusterCollection);
       stripLinkAcc( *stripCl ) = stripLink;

@@ -39,9 +39,9 @@ private:
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetMgr", "MuonDetectorManager", ""};
 
 
-    Gaudi::Property<double> m_clusterDensity{this, "ClusterDensity" , 8.5};
+    Gaudi::Property<double> m_clusterDensity{this, "ClusterDensity" , 10.};
     Gaudi::Property<double> m_threshold{this, "Threshold" , 20.};
-    Gaudi::Property<double> m_attenuationLength{this, "AttenuationLength", 16000};
+    Gaudi::Property<double> m_attenuationLength{this, "AttenuationLength", 30000};
     Gaudi::Property<bool> m_DoQballGamma{this, "DoQballGamma", false};
 };
 

@@ -10,7 +10,6 @@
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h" 
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
-#include "MuonSpacePoint/UtilFunctions.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
 namespace {
@@ -93,11 +92,11 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
             continue;
         }
         // find the direction of the IP viewed from the sector frame 
-        const Amg::Vector3D extrapDir = (hit->positionInChamber() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit();
+        const Amg::Vector3D extrapDir = (hit->localPosition() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit();
         ATH_MSG_VERBOSE("Direction "<<Amg::toString(extrapDir));
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
-        std::optional<double> dummyIntercept = Amg::intersect<3>(hit->positionInChamber(), extrapDir, Amg::Vector3D::UnitZ(),0); 
-        double x0 = (hit->positionInChamber() + dummyIntercept.value_or(0) * extrapDir).x(); 
+        std::optional<double> dummyIntercept = Amg::intersect<3>(hit->localPosition(), extrapDir, Amg::Vector3D::UnitZ(),0); 
+        double x0 = (hit->localPosition() + dummyIntercept.value_or(0) * extrapDir).x(); 
         // now we can obtain the most likely tan(phi) via the pointing vector from the origin to our hit
         double tanPhi = houghTanPhi(extrapDir); 
         // update our search space with this info 
@@ -141,7 +140,7 @@ std::vector<ActsPeakFinderForMuon::Maximum>
             ATH_MSG_VERBOSE("Hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" does not have a phi measurement");
             continue;
         }
-        ATH_MSG_VERBOSE("Fill hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<", "<<Amg::toString(hit->positionInChamber()));
+        ATH_MSG_VERBOSE("Fill hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<", "<<Amg::toString(hit->localPosition()));
         eventData.houghPlane->fill<HoughHitType>(
             hit, eventData.currAxisRanges,
             HoughHelpers::Phi::houghParamStrip,
@@ -215,7 +214,8 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
             for (const auto& truth : m_visionTool->getLabeledSegments(max->getHitsInMax())) {
                 const Parameters truthPars = localSegmentPars(*truth);
                 ATH_MSG_VERBOSE("Truth parameters "<<toString(truthPars)<<", tanPhi: "
-                            <<houghTanPhi(Amg::dirFromAngles(truthPars[toInt(ParamDefs::phi)],truthPars[toInt(ParamDefs::theta)])));
+                            <<houghTanPhi(Amg::dirFromAngles(truthPars[Acts::toUnderlying(ParamDefs::phi)],
+                                                             truthPars[Acts::toUnderlying(ParamDefs::theta)])));
             }
         }
         preProcessMaximum(*gctx, *max, eventData); 

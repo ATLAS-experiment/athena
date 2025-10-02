@@ -127,8 +127,8 @@ namespace MuonGM {
         double stripCenterLocX(int gasGap, int strip, double radialPos) const;
 
         double physicalDistanceFromBase() const;
-        double stripPosOnLargeBase(int strip) const;
-        double stripPosOnShortBase(int strip) const;
+        double stripPosOnLargeBase(int strip, int gasGap) const;
+        double stripPosOnShortBase(int strip, int gasGap) const;
 
         
         double stripDeltaPhi() const;
@@ -259,7 +259,8 @@ namespace MuonGM {
         /// Returns the local X given the reference point 
         ///   E.g. left edge, center, an external position along
         ///   the radial coordinate [-R/2; R/2], and the strip number
-        double stripLocalX(const int stripNum,
+        double stripLocalX(const int gasGap,
+                           const int stripNum,
                            const double locY,
                            const double refPoint) const;
         

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <regex>
 #include <format>
+#include <chrono>
 
 /// Default bin numbers
 enum BINS {
@@ -214,14 +215,19 @@ StatusCode TrigSignatureMoni::stop() {
 }
 
 StatusCode TrigSignatureMoni::fillHistogram(const TrigCompositeUtils::DecisionIDContainer& dc, int row, LockedHandle<TH2>& histogram) const {
+
+  // This locks the histogram handle for the entire duration of the function,
+  // which is faster than (un)locking the handle many times during the loop.
+  auto lockedHist = *histogram;
+
   for (TrigCompositeUtils::DecisionID id : dc)  {
     auto id2bin = m_chainIDToBinMap.find( id );
-    if ( id2bin == m_chainIDToBinMap.end() ) {
-      if ( !HLT::Identifier(id).name().starts_with("leg") ) {
+    if ( id2bin != m_chainIDToBinMap.end() ) {
+      lockedHist->Fill( id2bin->second, static_cast<double>(row) );
+    }
+    else {
+      if ( !TrigCompositeUtils::isLegId(HLT::Identifier(id)) )
         ATH_MSG_WARNING( "HLT chain " << HLT::Identifier(id) << " not configured to be monitored" );
-      }
-    } else {
-      histogram->Fill( id2bin->second, static_cast<double>(row) );
     }
   }
   return StatusCode::SUCCESS;
@@ -508,7 +514,7 @@ LockedHandle<TH2> & TrigSignatureMoni::RateHistogram::getBuffer ATLAS_NOT_CONST_
   return m_bufferHistogram;
 }
 
-std::unique_ptr<Athena::AlgorithmTimer> & TrigSignatureMoni::RateHistogram::getTimer() {
+std::unique_ptr<Gaudi::Utils::PeriodicAction> & TrigSignatureMoni::RateHistogram::getTimer() {
   return m_timer;
 }
 
@@ -519,7 +525,9 @@ void TrigSignatureMoni::RateHistogram::fill(const double x, const double y) cons
 void TrigSignatureMoni::RateHistogram::startTimer(unsigned int duration, unsigned int intervals) {
   m_duration = duration;
   m_timeDivider = std::make_unique<TimeDivider>(intervals, duration, TimeDivider::seconds);
-  m_timer = std::make_unique<Athena::AlgorithmTimer>(duration*50, std::bind(&RateHistogram::callback, this));
+  // Periodic timer with 1/20 of the integration period
+  m_timer = std::make_unique<Gaudi::Utils::PeriodicAction>(std::bind(&RateHistogram::callback, this),
+                                                           std::chrono::milliseconds(duration*1000/20));
 }
 
 void TrigSignatureMoni::RateHistogram::stopTimer() {
@@ -545,11 +553,7 @@ void TrigSignatureMoni::RateHistogram::callback() {
   time_t t = time(0);
   unsigned int newinterval;
   unsigned int oldinterval;
-
   if (m_timeDivider->isPassed(t, newinterval, oldinterval)) {
     updatePublished(m_duration);
   }
-
-  // Schedule itself in another 1/20 of the integration period in milliseconds
-  if (m_timer) m_timer->start(m_duration*50);
 }

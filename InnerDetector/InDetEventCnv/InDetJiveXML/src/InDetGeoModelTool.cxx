@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGeoModelTool.h"
@@ -67,7 +67,7 @@ namespace JiveXML {
 	return StatusCode::RECOVERABLE;
       }else{
 	//	if (dict->file_name().find("SLHC")!=std::string::npos) isSLHC=true;
-	if (dict->m_version.find("SLHC")!=std::string::npos) isSLHC=true;
+	if (dict->version().find("SLHC")!=std::string::npos) isSLHC=true;
       }
     }
  

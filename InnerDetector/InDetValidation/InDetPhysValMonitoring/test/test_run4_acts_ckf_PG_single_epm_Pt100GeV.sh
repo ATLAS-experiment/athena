@@ -12,3 +12,6 @@ rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P
 script=test_run4_acts_ckf_epm_reco.sh
 echo "Executing script ${script} "
 bash ${script} ${rdo} 
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

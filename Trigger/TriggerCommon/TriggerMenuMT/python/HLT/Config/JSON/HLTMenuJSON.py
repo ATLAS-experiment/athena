@@ -154,14 +154,15 @@ def __validateGlobalAlgs(menuDict):
     """
     algToStep = {}
     import re
+    from AthenaConfiguration.ComponentFactory import CompFactory
     inError = False
     for seqName, seqeuncer in menuDict["sequencers"].items():
         stepNumber = int(re.search(r'\d+', seqName).group()) # Obtain first number from string
         fullEventMode = False
         for alg in seqeuncer:
-            if "EventViewCreatorAlgorithm" in alg:
+            if isinstance(alg, CompFactory.EventViewCreatorAlgorithm):
                 fullEventMode = False
-            elif "InputMakerForRoI" in alg:
+            elif isinstance(alg, CompFactory.InputMakerForRoI):
                 fullEventMode = True
             if not fullEventMode:
                 continue

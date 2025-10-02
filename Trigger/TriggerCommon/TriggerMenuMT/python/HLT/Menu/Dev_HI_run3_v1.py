@@ -145,7 +145,7 @@ def getDevHISignatures():
 
 
     chains['HeavyIon'] += [
-        ChainProp(name='HLT_hi_uccTh1_L1jTEFWD8300', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_hi_uccTh1_L1jTEFWD6500', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
     ]
 
     chains['Streaming'] += [

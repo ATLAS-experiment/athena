@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -63,15 +63,25 @@ FilterReporter ::
   m_params.m_total += 1;
 
 #ifndef XAOD_STANDALONE
-  if (m_passed && m_params.m_cutID != 0)
-  {
-    SG::ReadHandle<xAOD::EventInfo> evtInfo (m_params.m_eventInfoKey, *m_eventContext);
-    // Only try to access the mcEventWeight if we are running on Monte Carlo
-    if (evtInfo.isValid() && evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
-      m_params.m_cutFlowSvc->addEvent (m_params.m_cutID, evtInfo->mcEventWeights());
-    } else {
-      m_params.m_cutFlowSvc->addEvent (m_params.m_cutID, 1.0);
+  try {
+    if (m_passed && m_params.m_cutID != 0)
+    {
+      SG::ReadHandle<xAOD::EventInfo> evtInfo (m_params.m_eventInfoKey, *m_eventContext);
+      // Only try to access the mcEventWeight if we are running on Monte Carlo
+      if (evtInfo.isValid() && evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
+        m_params.m_cutFlowSvc->addEvent (m_params.m_cutID, evtInfo->mcEventWeights());
+      } else {
+        m_params.m_cutFlowSvc->addEvent (m_params.m_cutID, 1.0);
+      }
     }
+  }
+  catch (const SG::ExcBadVarName& e) {
+    std::cerr << e.what() << "\n";
+    std::abort();
+  }
+  catch (const GaudiException& e) {
+    std::cerr << e.what() << "\n";
+    std::abort();
   }
 #endif
 }

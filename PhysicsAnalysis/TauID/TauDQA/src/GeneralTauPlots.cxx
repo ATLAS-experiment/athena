@@ -11,7 +11,7 @@ namespace Tau{
 
 GeneralTauPlots::GeneralTauPlots(PlotBase* pParent, const std::string& sDir, const std::string& sTauJetContainerName):
    PlotBase(pParent, sDir),
-   m_oParamPlots(this, "", sTauJetContainerName),
+   m_oTauKinematicPlots(this, "", sTauJetContainerName),
    m_sTauJetContainerName(sTauJetContainerName)
 {	
 }
@@ -52,7 +52,7 @@ void GeneralTauPlots::initializePlots(){
 }
   
 void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
-  m_oParamPlots.fill(tau, weight);
+  m_oTauKinematicPlots.fill(tau, weight);
   m_tauCharge->Fill(tau.charge(), weight); 
   m_tauNChargedTracks->Fill(tau.nTracks(), weight);
   m_tauNIsolatedTracks->Fill(tau.nTracks(xAOD::TauJetParameters::classifiedIsolation), weight);

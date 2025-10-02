@@ -10,6 +10,7 @@ PACKAGE:  offline/Calorimeter/CaloRec
 ********************************************************************/
 
 #include "LArCellMaskingTool.h"
+#include "LArIdentifier/LArOnlID_Exception.h"
 #include "CaloEvent/CaloCellContainer.h"
 
 

@@ -110,7 +110,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
             ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromRoads, *FPGAHitsInRoadsCont, *FPGARoadColl));
             if constexpr (enableBenchmark) m_chrono->chronoStop("FPGAConversion: Prototrack formation (from roads)");
           }
-          else{	    
+          else{
             SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle(m_FPGATrackKey, ctx);
             if (!FPGATracksHandle.isValid()) {
               ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
@@ -161,7 +161,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     }  
 
     if (m_doHits) {
-
       SG::ReadHandle<FPGATrackSimHitCollection> FPGAHitsHandle (m_FPGAHitKey, ctx);
 
       if (FPGAHitsHandle.isValid()) {
@@ -183,6 +182,20 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       SG::WriteHandle<xAOD::StripClusterContainer> xAODStripClusterFromFPGAHitHandle (m_xAODStripClusterFromFPGAHitKey, ctx);
       ATH_CHECK( xAODPixelClusterFromFPGAHitHandle.record (std::move(PixelContFromHits),std::move(PixelAuxContFromHits)));
       ATH_CHECK( xAODStripClusterFromFPGAHitHandle.record (std::move(SCTContFromHits),std::move(SCTAuxContFromHits)));
+
+      // Also do the tracks
+      if (m_doActsTrk && !m_useRoads) {
+	SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle(m_FPGATrackKey, ctx);
+	if (!FPGATracksHandle.isValid()) {
+	  ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
+	  return StatusCode::FAILURE;
+	}
+	const FPGATrackSimTrackCollection* FPGATrackColl = FPGATracksHandle.cptr();
+	
+	if constexpr (enableBenchmark) m_chrono->chronoStart("FPGAConversion: Prototrack formation (from tracks)");
+	ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
+	if constexpr (enableBenchmark) m_chrono->chronoStop("FPGAConversion: Prototrack formation (from tracks)");
+      }    
     }
     
     return StatusCode::SUCCESS;

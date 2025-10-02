@@ -23,3 +23,6 @@ script=test_MC_mu0_simreco.sh
 echo "Executing script ${script}"
 echo " "
 "$script" ${dcuberef_sim} ${dcuberef_rdo} ${dcuberef_rec}
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

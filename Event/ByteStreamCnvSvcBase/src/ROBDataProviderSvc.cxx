@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -219,10 +219,10 @@ void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEve
 
    // get all the ROBFragments
    const size_t MAX_ROBFRAGMENTS = 4096;
-   OFFLINE_FRAGMENTS_NAMESPACE::PointerType robF[MAX_ROBFRAGMENTS];
+   std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> robF(MAX_ROBFRAGMENTS);
    OFFLINE_FRAGMENTS_NAMESPACE::PointerType rePointer;
    re->start(rePointer);
-   size_t robcount = re->children(robF, MAX_ROBFRAGMENTS);
+   size_t robcount = re->children(robF.data(), MAX_ROBFRAGMENTS);
    if (robcount == MAX_ROBFRAGMENTS) {
       ATH_MSG_ERROR("ROB buffer overflow");
    }

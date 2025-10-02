@@ -1,0 +1,7 @@
+include:
+  - test_merge_mid.yaml
+bar:
+  size: 32      # local override of frag_a's 64
+local_only: true
+nested:
+  x: 999

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootBranchAddress.cxx 
@@ -205,7 +205,7 @@ RootBranchAddress::setBranchAddress(const RootType& rflx_type)
       if (t != rflx_type && !t.Id()) {
         t = rflx_type;
       }
-      m_type = t;
+      m_type = std::move(t);
       m_ptr = addr;
       // std::cerr << "-->ptr: [" << m_type.Name() << "]\n";
     }

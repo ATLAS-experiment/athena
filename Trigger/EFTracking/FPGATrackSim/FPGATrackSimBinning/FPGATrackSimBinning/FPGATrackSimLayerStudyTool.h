@@ -88,7 +88,8 @@ class TH2D;
     Gaudi::Property<double> m_qptpad{this, "QPtPad", 0.0, "Extra phi padding from q/pT resolution"};
     Gaudi::Property<double> m_z0pad{this, "Z0Pad", 0.0, "Extra eta padding from z0 resolution"};
     Gaudi::Property<double> m_etapad{this, "EtaPad", 0.0, "Extra eta padding from eta resolution"};
-
+    Gaudi::Property<std::string> m_layerStudyTreeName{this, "LayerStudyTreeName", "LayerStudy", "Name of the LayerStudy TTree"};
+    Gaudi::Property<std::string> m_truthTreeName{this,"TruthTreeName","TruthTree","Name of the Truth TTree"};
     ///////////////////////////////////////////////////////////////////////
     // Pointer to binned hits
     const FPGATrackSimBinnedHits *m_binnedhits{nullptr};

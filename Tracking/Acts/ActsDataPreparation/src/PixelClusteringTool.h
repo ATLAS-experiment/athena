@@ -76,7 +76,7 @@ private:
   Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false};
   Gaudi::Property<bool> m_broadErrors {this, "UseBroadErrors", false};
   Gaudi::Property<bool> m_checkGanged {this, "CheckGanged", false};
-
+  Gaudi::Property<bool> m_isITk {this, "isITk", true, "True if running in ITk"};
   const PixelID* m_pixelID {nullptr};
 };
   

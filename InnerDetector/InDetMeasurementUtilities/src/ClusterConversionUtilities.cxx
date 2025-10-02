@@ -18,22 +18,13 @@ constexpr static double one_over_twelve = 1. / 12.;
 
 namespace TrackingUtilities {
 
-  StatusCode convertInDetToXaodCluster(const HGTD_Cluster& indetCluster,
-				       const InDetDD::HGTD_DetectorElement& element,
-				       xAOD::HGTDCluster& xaodCluster)
-  {
-    IdentifierHash idHash = element.identifyHash();
+  std::pair<xAOD::MeasVector<3>, xAOD::MeasMatrix<3>> convertHGTD_LocalPosCov(const HGTD_Cluster &cluster) {
+    auto localPos = cluster.localPosition();
+    auto localCov = cluster.localCovariance();
 
-    auto localPos = indetCluster.localPosition();
-    auto localCov = indetCluster.localCovariance();
+    const float time = cluster.time();
+    const float timeResolution = cluster.timeResolution();
 
-    const float time = indetCluster.time();
-    const float timeResolution = indetCluster.timeResolution();
-    
-    const auto& RDOs = indetCluster.rdoList();
-    const auto& ToTs = indetCluster.totList();
-
-    // Time to fill the xaod cluster
     Eigen::Matrix<float,3,1> localPosition = Eigen::Matrix<float,3,1>::Zero();
     localPosition(0, 0) = localPos.x();
     localPosition(1, 0) = localPos.y();
@@ -44,6 +35,20 @@ namespace TrackingUtilities {
     localCovariance(1, 1) = localCov(1, 1);
     localCovariance(2, 2) = timeResolution * timeResolution;
 
+    return {localPosition, localCovariance}; 
+  }
+
+  StatusCode convertInDetToXaodCluster(const HGTD_Cluster& indetCluster,
+				       const InDetDD::HGTD_DetectorElement& element,
+				       xAOD::HGTDCluster& xaodCluster)
+  {
+    IdentifierHash idHash = element.identifyHash();
+
+    const auto [localPosition, localCovariance] = convertHGTD_LocalPosCov(indetCluster);
+        
+    const auto& RDOs = indetCluster.rdoList();
+    const auto& ToTs = indetCluster.totList();
+
     xaodCluster.setMeasurement<3>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier( indetCluster.identify().get_compact() );
     xaodCluster.setRDOlist(RDOs);
@@ -51,15 +56,10 @@ namespace TrackingUtilities {
     
     return StatusCode::SUCCESS;
   }
-  
-  StatusCode convertInDetToXaodCluster(const InDet::PixelCluster& indetCluster,
-				       const InDetDD::SiDetectorElement& element,
-				       xAOD::PixelCluster& xaodCluster)
-  {
-    IdentifierHash idHash = element.identifyHash();
 
-    auto localPos = indetCluster.localPosition();
-    auto localCov = indetCluster.localCovariance();
+  std::pair<xAOD::MeasVector<2>, xAOD::MeasMatrix<2>> convertPix_LocalPosCov(const InDet::PixelCluster &cluster) {
+    auto localPos = cluster.localPosition();
+    auto localCov = cluster.localCovariance();
 
     Eigen::Matrix<float,2,1> localPosition(localPos.x(), localPos.y());
 
@@ -67,6 +67,17 @@ namespace TrackingUtilities {
     localCovariance.setZero();
     localCovariance(0, 0) = localCov(0, 0);
     localCovariance(1, 1) = localCov(1, 1);
+
+    return {localPosition, localCovariance}; 
+  }
+  
+  StatusCode convertInDetToXaodCluster(const InDet::PixelCluster& indetCluster,
+				       const InDetDD::SiDetectorElement& element,
+				       xAOD::PixelCluster& xaodCluster)
+  {
+    IdentifierHash idHash = element.identifyHash();
+    
+    const auto [localPosition, localCovariance] = convertPix_LocalPosCov(indetCluster);
 
     auto globalPos = indetCluster.globalPosition();
     Eigen::Matrix<float, 3, 1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z());
@@ -96,19 +107,19 @@ namespace TrackingUtilities {
     return StatusCode::SUCCESS;
   }
 
- std::pair<xAOD::MeasVector<1>, xAOD::MeasMatrix<1>> convertSCT_LocalPosCov(const InDet::SCT_Cluster &cluster) {
+ std::pair<xAOD::MeasVector<1>, xAOD::MeasMatrix<1>> convertSCT_LocalPosCov(const InDet::SCT_Cluster &cluster, bool isITk) {
     const InDetDD::SiDetectorElement& element{*cluster.detectorElement()};
     auto localPos = cluster.localPosition();
 
     float localPosition = 0.f, localCovariance = 0.f;
-    if (element.isBarrel()) {
+    if (element.isBarrel() or (not isITk)) {
       localPosition = localPos.x();
       localCovariance = element.phiPitch() * element.phiPitch() * one_over_twelve;
     } else {
       InDetDD::SiCellId cellId = element.cellIdOfPosition(localPos);
       const auto* design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element.design());
       if ( design == nullptr ) {
-         THROW_EXCEPTION("Invalid bounds from "<<cluster);
+        THROW_EXCEPTION("Invalid bounds from "<<cluster);
       }
       InDetDD::SiLocalPosition localInPolar = design->localPositionOfCellPC(cellId);
       localPosition = localInPolar.xPhi();
@@ -121,11 +132,12 @@ namespace TrackingUtilities {
 
   StatusCode convertInDetToXaodCluster(const InDet::SCT_Cluster& indetCluster,
 				       const InDetDD::SiDetectorElement& element,
-				       xAOD::StripCluster& xaodCluster)
+				       xAOD::StripCluster& xaodCluster,
+               bool isITk)
   {
     IdentifierHash idHash = element.identifyHash();
 
-    const auto [localPosition, localCovariance] = convertSCT_LocalPosCov(indetCluster);
+    const auto [localPosition, localCovariance] = convertSCT_LocalPosCov(indetCluster, isITk);
    
     auto globalPos = indetCluster.globalPosition();
     Eigen::Matrix<float, 3, 1> globalPosition(globalPos.x(), globalPos.y(), globalPos.z());

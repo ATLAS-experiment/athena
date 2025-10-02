@@ -6,9 +6,14 @@
 #include "AnaAlgorithm/AnaReentrantAlgorithm.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteHandleKey.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s).
 #include "xAODTruth/TruthVertexContainer.h"
+
+// System include(s).
+#include <string>
+#include <vector>
 
 namespace xAODMaker {
 
@@ -39,6 +44,18 @@ class TruthVertexFixerAlg final : public EL::AnaReentrantAlgorithm {
   SG::WriteHandleKey<xAOD::TruthVertexContainer> m_outputContainerKey{
       this, "OutputContainer", "TruthVertices",
       "Output TruthVertices container"};
+
+  /// Names of the truth particle links to fix
+  Gaudi::Property<std::vector<std::string>> m_particleLinks{
+      this, "ParticleLinks", {}, "Names of the truth particle links to fix"};
+
+  /// Names of the truth vertex links to fix
+  Gaudi::Property<std::vector<std::string>> m_vertexLinks{
+      this, "VertexLinks", {}, "Names of the truth vertex links to fix"};
+
+  /// Prefix to remove from the link names
+  Gaudi::Property<std::string> m_linkPrefixToRemove{
+      this, "LinkPrefixToRemove", "", "Prefix to remove from the link names"};
 
 };  // class TruthVertexFixerAlg
 

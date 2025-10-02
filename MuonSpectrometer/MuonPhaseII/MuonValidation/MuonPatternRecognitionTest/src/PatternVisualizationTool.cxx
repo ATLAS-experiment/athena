@@ -455,11 +455,11 @@ namespace MuonValR4 {
             const Amg::Transform3D trf{segment.msSector()->globalToLocalTrans(*geoCtx)};
             const Amg::Vector3D locPos = trf * segment.position();
             const Amg::Vector3D locDir = trf.linear() * segment.direction();
-            segPars[toInt(ParamDefs::x0)] = locPos.x();
-            segPars[toInt(ParamDefs::y0)] = locPos.y();
-            segPars[toInt(ParamDefs::theta)] = locDir.theta();
-            segPars[toInt(ParamDefs::phi)] = locDir.phi();
-            segPars[toInt(ParamDefs::time)] = segment.segementT0();
+            segPars[Acts::toUnderlying(ParamDefs::x0)] = locPos.x();
+            segPars[Acts::toUnderlying(ParamDefs::y0)] = locPos.y();
+            segPars[Acts::toUnderlying(ParamDefs::theta)] = locDir.theta();
+            segPars[Acts::toUnderlying(ParamDefs::phi)] = locDir.phi();
+            segPars[Acts::toUnderlying(ParamDefs::t0)] = segment.segementT0();
         }
         
         std::array<double, 4> canvasDim{};
@@ -519,18 +519,16 @@ namespace MuonValR4 {
                                               std::array<double, 4>& canvasDim, const unsigned int view,
                                               unsigned int fillStyle) const {
         
-        static_assert(std::is_same_v<SpacePointType, SpacePoint> ||
-                      std::is_same_v<SpacePointType, CalibratedSpacePoint>, "Only usual & calibrated space points are supported");
         /// Don't draw any hit which is not participating in the view
         if ((view == objViewEta && !hit.measuresEta()) || (view == objViewPhi && !hit.measuresPhi())) {
             return nullptr;
         }
         
         if (hit.type() != xAOD::UncalibMeasType::Other) {
-            canvasDim[Edges::yLow] = std::min(canvasDim[Edges::yLow], hit.positionInChamber()[view] - hit.driftRadius());
-            canvasDim[Edges::yHigh] = std::max(canvasDim[Edges::yHigh], hit.positionInChamber()[view] + hit.driftRadius());
-            canvasDim[Edges::zLow] = std::min(canvasDim[Edges::zLow], hit.positionInChamber().z() - hit.driftRadius());
-            canvasDim[Edges::zHigh] = std::max(canvasDim[Edges::zHigh], hit.positionInChamber().z() + hit.driftRadius());
+            canvasDim[Edges::yLow] = std::min(canvasDim[Edges::yLow], hit.localPosition()[view] - hit.driftRadius());
+            canvasDim[Edges::yHigh] = std::max(canvasDim[Edges::yHigh], hit.localPosition()[view] + hit.driftRadius());
+            canvasDim[Edges::zLow] = std::min(canvasDim[Edges::zLow], hit.localPosition().z() - hit.driftRadius());
+            canvasDim[Edges::zHigh] = std::max(canvasDim[Edges::zHigh], hit.localPosition().z() + hit.driftRadius());
         }
 
         const SpacePoint* underlyingSp{nullptr};
@@ -557,31 +555,31 @@ namespace MuonValR4 {
         switch(hit.type()) {
             case xAOD::UncalibMeasType::MdtDriftCircleType: {
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(underlyingSp->primaryMeasurement());
-                primitives.push_back(drawDriftCircle(hit.positionInChamber(), dc->readoutElement()->innerTubeRadius(), 
+                primitives.push_back(drawDriftCircle(hit.localPosition(), dc->readoutElement()->innerTubeRadius(), 
                                                      kBlack, hollowFilling));
 
                 const int circColor = isLabeled(*dc) ? truthColor : kBlue;                    
-                primitives.push_back(drawDriftCircle(hit.positionInChamber(), hit.driftRadius(), circColor, fillStyle));
+                primitives.push_back(drawDriftCircle(hit.localPosition(), hit.driftRadius(), circColor, fillStyle));
                 break;
             } case xAOD::UncalibMeasType::RpcStripType: {
                 const auto* meas{static_cast<const xAOD::RpcMeasurement*>(underlyingSp->primaryMeasurement())};
                 const int boxColor = isLabeled(*meas) ? truthColor : kGreen +2;
-                const double boxWidth = 0.5*std::sqrt(12)*underlyingSp->uncertainty()[view];
-                primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                const double boxWidth = 0.5*std::sqrt(12)*std::sqrt(underlyingSp->covariance()[view]);
+                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
                                              boxColor, fillStyle));
                 break; 
             } case xAOD::UncalibMeasType::TgcStripType: {
                 const auto* meas{static_cast<const xAOD::TgcStrip*>(underlyingSp->primaryMeasurement())};
                 const int boxColor = isLabeled(*meas) ? truthColor : kCyan + 2;
-                const double boxWidth = 0.5*std::sqrt(12)*underlyingSp->uncertainty()[view];
-                primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                const double boxWidth = 0.5*std::sqrt(12)*std::sqrt(underlyingSp->covariance()[view]);
+                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
                                              boxColor, fillStyle));
                 break; 
             } case xAOD::UncalibMeasType::MMClusterType: {
                 const auto* meas{static_cast<const xAOD::MMCluster*>(underlyingSp->primaryMeasurement())};
                 const int boxColor = isLabeled(*meas) ? truthColor : kAquamarine;
                 const double boxWidth = 0.5*Gaudi::Units::mm;
-                primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 10.*Gaudi::Units::mm,
+                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm,
                                              boxColor, fillStyle));
                 break; 
             }  case xAOD::UncalibMeasType::Other :{
@@ -647,26 +645,27 @@ namespace MuonValR4 {
                                                  const double legX, double startLegY, 
                                                  const double endLegY) const {
         
-        const auto [locPos, locDir] = makeLine(pars);
+        
+        
+        const auto [pos, dir] = makeLine(pars);
+     
         for (const SpacePointType& hit : hits) { 
             const SpacePoint* underlyingSp{nullptr};
-            double chi2{0.};
             bool displayChi2{true};
             if constexpr(std::is_same_v<SpacePointType, Segment::MeasType>) {
                 underlyingSp = hit->spacePoint();
-                displayChi2 = (hit->fitState() == CalibratedSpacePoint::State::Valid );
-                chi2 = SegmentFitHelpers::chiSqTerm(locPos, locDir, pars[toInt(AxisDefs::t0)], 
-                                                    std::nullopt, *hit, msgStream());
+                displayChi2 = (hit->fitState() == CalibratedSpacePoint::State::Valid);               
             } else {
                 underlyingSp = hit;
-                chi2  = SegmentFitHelpers::chiSqTerm(locPos, locDir, *hit, msgStream());
             }
             
+
+
             const Identifier hitId =  underlyingSp ? underlyingSp->identify(): Identifier{};
             std::string legendstream{};
             switch(hit->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                    const int driftSign{SegmentFitHelpers::driftSign(locPos, locDir, *hit, msgStream())};
+                    const int driftSign{SeedingAux::strawSign(pos, dir, *hit)};
                     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
                     legendstream = std::format("ML: {:1d}, TL: {:1d}, T: {:3d}, {:}",
                                                 idHelper.multilayer(hitId), idHelper.tubeLayer(hitId),
@@ -704,6 +703,7 @@ namespace MuonValR4 {
                     break;
             }
             if (displayChi2) {
+                const double chi2 = SeedingAux::chi2Term(pos, dir,*hit);                
                 legendstream+=std::format(", #chi^{{2}}: {:.2f}", chi2);
             } else {
                 legendstream+=", #chi^{2}: ---";

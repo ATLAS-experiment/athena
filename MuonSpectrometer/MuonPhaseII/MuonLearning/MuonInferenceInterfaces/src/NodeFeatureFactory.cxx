@@ -36,19 +36,20 @@ namespace MuonML {
 
     namespace Factory {
         Feature_t makeFeature(const std::string& featName, MsgStream& log) {
+            using CovIdx = MuonR4::SpacePoint::CovIdx;
             static const std::set<Feature_t, std::less<>> featurePool{
                 std::make_unique<NodeFeature>("localX", 
                     [](const Bucket_t& bucket, size_t index) {
-                        return bucket[index]->positionInChamber().x();
+                        return bucket[index]->localPosition().x();
                     }),
                 std::make_unique<NodeFeature>("localY", 
                     [](const Bucket_t& bucket, size_t index) {
-                        return bucket[index]->positionInChamber().y();
-                        bucket[index]->positionInChamber().y();
+                        return bucket[index]->localPosition().y();
+                        bucket[index]->localPosition().y();
                     }),
                 std::make_unique<NodeFeature>("localZ", 
                     [](const Bucket_t& bucket, size_t index) {
-                        return bucket[index]->positionInChamber().z();
+                        return bucket[index]->localPosition().z();
                     }),
                 std::make_unique<NodeFeature>("stationIndex", 
                     [](const Bucket_t& bucket, size_t index) {
@@ -76,7 +77,7 @@ namespace MuonML {
                         constexpr double radCut2 =  (50.*Gaudi::Units::cm * 50.*Gaudi::Units::cm);
                         unsigned int n =0;
                         for (size_t other =0 ; other < bucket.size(); ++ other){
-                            n+= index != other && (bucket[index]->positionInChamber() - bucket[other]->positionInChamber()).perp2() < radCut2;
+                            n+= index != other && (bucket[index]->localPosition() - bucket[other]->localPosition()).perp2() < radCut2;
                         }
                         return n;
                     }),
@@ -90,24 +91,21 @@ namespace MuonML {
                         unsigned int  neighbors = 0;
                         constexpr double radCut2 =  (50.*Gaudi::Units::cm * 50.*Gaudi::Units::cm);
                         for (size_t other =0 ; other < bucket.size(); ++ other){
-                            neighbors+= index != other && (bucket[index]->positionInChamber() - bucket[other]->positionInChamber()).perp2() < radCut2;
+                            neighbors+= index != other && (bucket[index]->localPosition() - bucket[other]->localPosition()).perp2() < radCut2;
                         }
                     
                         float bucket_density = 1.f*bucket.size() / std::max(bucket.coveredMax() - bucket.coveredMin(), 1. * Gaudi::Units::cm);
                         return neighbors / bucket_density;
                     }), 
+
                 std::make_unique<NodeFeature>("covX", 
                     [](const Bucket_t& bucket, size_t index) {
-                        return bucket[index]->covariance()(Amg::x, Amg::x);
+                        return bucket[index]->covariance()[Acts::toUnderlying(CovIdx::phiCov)];
                     }),
                 std::make_unique<NodeFeature>("covY", 
                     [](const Bucket_t& bucket, size_t index) {
-                        return bucket[index]->covariance()(Amg::y, Amg::y);
-                    }),
-                std::make_unique<NodeFeature>("covXY", 
-                    [](const Bucket_t& bucket, size_t index) {
-                        return bucket[index]->covariance()(Amg::x, Amg::y);
-                    }),
+                        return bucket[index]->covariance()[Acts::toUnderlying(CovIdx::etaCov)];
+                    }),              
             }; 
             const auto feat_itr = featurePool.find(featName);
             if(feat_itr != featurePool.end()){

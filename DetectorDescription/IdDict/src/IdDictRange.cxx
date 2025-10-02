@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 #include "IdDict/IdDictRange.h"
 #include "IdDict/IdDictField.h"
@@ -12,14 +12,129 @@
 #include <iostream>
 
 
+/// Set name only; no range information.
+IdDictRange::IdDictRange (const std::string& field_name)
+  : m_field_name (field_name)
+{
+}
+
+
+/// By label.
+IdDictRange::IdDictRange (const std::string& field_name,
+                          const std::string& label)
+  : m_field_name (field_name)
+{
+  set_range (label);
+}
+
+
+/// By value.
+IdDictRange::IdDictRange (const std::string& field_name,
+                          int value)
+  : m_field_name (field_name)
+{
+  set_range (value);
+}
+
+
+/// By minmax.
+IdDictRange::IdDictRange (const std::string& field_name,
+                          int minvalue, int maxvalue)
+  : m_field_name (field_name)
+{
+  set_range (minvalue, maxvalue);
+}
+
+
+/// By list of values.
+IdDictRange::IdDictRange (const std::string& field_name,
+                          const std::vector<int>& values)
+  : m_field_name (field_name)
+{
+  set_range (values);
+}
+
+
+/// By list of labels.
+IdDictRange::IdDictRange (const std::string& field_name,
+                          const std::vector<std::string>& labels)
+  : m_field_name (field_name)
+{
+  set_range (labels);
+}
+
+
+/// By label.
+void IdDictRange::set_range (const std::string& label)
+{
+  m_specification = by_label;
+  m_label = label;
+}
+
+
+/// By value.
+void IdDictRange::set_range (int value)
+{
+  m_specification = by_value;
+  m_value = value;
+}
+
+
+/// By minmax.
+void IdDictRange::set_range (int minvalue, int maxvalue)
+{
+  m_specification = by_minmax;
+  m_minvalue = minvalue;
+  m_maxvalue = maxvalue;
+}
+
+
+/// By list of values.
+void IdDictRange::set_range (const std::vector<int>& values)
+{
+  m_specification = by_values;
+  m_values = values;
+}
+
+
+/// By list of labels.
+void IdDictRange::set_range (const std::vector<std::string>& labels)
+{
+  m_specification = by_labels;
+  m_labels = labels;
+}
+
+
+/// Set previous value and adjust continuation mode.
+void IdDictRange::set_prev(int prev)
+{
+  m_prev_value = prev;
+  m_continuation_mode = (m_continuation_mode == has_next) ? has_both : has_previous;
+}
+
+
+/// Set next value and adjust continuation mode.
+void IdDictRange::set_next(int next)
+{
+  m_next_value = next;
+  m_continuation_mode = (m_continuation_mode == has_previous) ? has_both : has_next;
+}
+
+
+/// Enable wraparound.
+void IdDictRange::set_wrap_around()
+{
+  m_continuation_mode = wrap_around;
+}
+
+
 void
 IdDictRange::resolve_references(const IdDictMgr& /*idd*/,
                                 IdDictDictionary& dictionary, IdDictRegion& /*region*/) {
   if (!m_resolved_references) {
     m_field = dictionary.find_field(m_field_name);
     if (m_field == nullptr) {
-      m_field = new IdDictField;
-      m_field->m_name = m_field_name;
+      m_field = new IdDictField (m_field_name);
       dictionary.add_field(m_field);
     }
 
@@ -73,24 +188,23 @@ IdDictRange::generate_implementation(const IdDictMgr& /*idd*/,
     std::cout << "IdDictRange::generate_implementation>" << std::endl;
   }
 
-  region.m_implementation.resize(region.m_implementation.size() + 1);
-  IdDictFieldImplementation& impl = region.m_implementation.back();
+  IdDictFieldImplementation& impl = region.new_implementation();
   impl.set_range(this);
-  if (m_field->m_index == 0) {
-    m_field->m_index = region.fieldSize() - 1;
-  } else if (m_field->m_index != (region.fieldSize() - 1)) {
+  if (m_field->index() == 0) {
+    m_field->set_index(region.fieldSize() - 1);
+  } else if (m_field->index() != (region.fieldSize() - 1)) {
     std::cout << "Bad field index for " << m_field_name
-              << " index " << m_field->m_index
-              << " in dictionary " << dictionary.m_name
-              << " region #" << region.m_index
-              << " group " << region.m_group
-              << " tag " << region.m_tag
-              << " size " << (region.m_implementation.size() - 1)
+              << " index " << m_field->index()
+              << " in dictionary " << dictionary.name()
+              << " region #" << region.index()
+              << " group " << region.group_name()
+              << " tag " << region.tag()
+              << " size " << (region.n_implementation() - 1)
               << std::endl;
   }
 
-  size_t index = region.m_implementation.size() - 1;
-  if (region.m_implementation.size() <= index) {
+  size_t index = region.n_implementation() - 1;
+  if (region.n_implementation() <= index) {
     std::cout << "IdDictRange::generate_implementation: index >= impl size - "
               << index << " " << region.fieldSize()
               << std::endl;

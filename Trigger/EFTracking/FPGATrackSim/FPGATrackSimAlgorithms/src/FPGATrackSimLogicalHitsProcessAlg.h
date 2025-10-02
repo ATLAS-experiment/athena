@@ -108,6 +108,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doHoughRootOutput1st {this, "DoHoughRootOutput1st", false, "Dump output from the Hough Transform to flat ntuples"};
         Gaudi::Property<bool> m_doNNTrack  {this, "DoNNTrack_1st", false, "Run NN track filtering for 1st stage"};
         Gaudi::Property<bool> m_doGNNTrack {this, "DoGNNTrack", false, "Run tracking algorithm for GNN" };
+        Gaudi::Property<bool> m_doGNNPixelSeeding {this, "DoGNNPixelSeeding", false, "Flag to configure for GNN Pixel Seeding" };
         Gaudi::Property<bool> m_doLRT {this, "doLRT", false, "Enable Large Radius Tracking"};
         Gaudi::Property<bool> m_doLRTHitFiltering {this, "LRTHitFiltering", false, "flag to enable hit/cluster filtering for LRT"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
@@ -172,6 +173,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey","FPGASpacePoints_1st","FPGATrackSim SpacePoints key"};
 
         // Write out roads, hits in roads, and tracks.
+        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_1st{this, "FPGATrackSimHitKey_1st","FPGAHits_1st","FPGATrackSim 1st stage hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd","FPGAHits_2nd","FPGATrackSim 2nd stage hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads1stKey","FPGAHitsInRoads_1st","FPGATrackSim Hits in 1st stage roads key"};

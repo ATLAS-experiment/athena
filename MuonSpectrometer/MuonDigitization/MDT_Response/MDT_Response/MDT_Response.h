@@ -77,7 +77,7 @@ class MDT_Response {
  
   double m_clusterDensity = 0.0;          // clusters per mm
   std::vector<double> m_gammaFactorVec; // gamma	
-  std::vector<double> m_numberOfClustersPerCmVec; // clusters per cm 
+  std::vector<double> m_numberOfClustersPerMmVec; // clusters per mm 
 
   double m_attLength = 0.0;               // attenuation length of tube
   double m_signalSpeed = 0.0;             // propagation speed along wire

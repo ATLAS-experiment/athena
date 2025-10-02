@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventAthenaPool/test/CscRawDataCollectionCnv_p3_test.cxx
@@ -17,7 +17,7 @@
 #include "muIdHelper.icc"
 #include <cassert>
 #include <iostream>
-
+#include <stdexcept>
 
 void compare (const CscRawData& p1,
               const CscRawData& p2)
@@ -118,7 +118,12 @@ int main ATLAS_NOT_THREAD_SAFE ()
     return 0;
   }
   IdDictParser parser;
-  Muon::MuonIdHelperSvc* muIdSvc = muIdHelperSvc (parser);
-  test1(muIdSvc);
+  try{
+    Muon::MuonIdHelperSvc* muIdSvc = muIdHelperSvc (parser);
+    test1(muIdSvc);
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in CscRawDataCollectionCnv_p3_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }

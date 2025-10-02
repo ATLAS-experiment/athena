@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: root_pickle.py
@@ -72,8 +72,6 @@ The following additional notes apply.
 import pickle
 import ROOT
 import sys
-import six
-from six.moves import intern
 
 def _getdir():
     if hasattr (ROOT.TDirectory, 'CurrentDirectory'):
@@ -104,139 +102,95 @@ def _setdir (d):
 # for compatibility with existing pickles.
 # 
 
+class Write_Wrapper:
+    def __init__ (self):
+        self.reopen()
 
-if six.PY2:
-    from StringIO import StringIO
-    def _protect (s):
-        return s.replace ('\377', '\377\376').replace ('\000', '\377\001')
-    def _restore (s):
-        return s.replace ('\377\001', '\000').replace ('\377\376', '\377')
+    def write (self, s):
+        ss = self._str
+        log = []
+        for c in s:
+            code = c
+            if code == 0xff:
+                ss.Append (0xff)
+                ss.Append (0xfe)
+                log.append (0xff)
+                log.append (0xfe)
+            elif code == 0x00:
+                ss.Append (0xff)
+                ss.Append (0x01)
+                log.append (0xff)
+                log.append (0x01)
+            else:
+                ss.Append (code)
+                log.append (code)
+        return
 
+    def getvalue (self):
+        return self._s
 
-    class Write_Wrapper:
-        def __init__ (self):
-            self.reopen()
-
-        def write (self, s):
-            return self.__s.write (_protect (s))
-
-        def getvalue (self):
-            return ROOT.TObjString (self.__s.getvalue())
-
-        def reopen (self):
-            self.__s = StringIO()
-            return
-
-
-    class Read_Wrapper:
-        def __init__ (self):
-            self.reopen()
-
-        def read (self, i):
-            return self.__s.read (i)
-
-        def readline (self):
-            return self.__s.readline ()
-
-        def setvalue (self, s):
-            self.__s = StringIO (_restore (s.GetName()))
-            return
-
-        def reopen (self):
-            self.__s = StringIO()
-            return
+    def reopen (self):
+        self._s = ROOT.TObjString()
+        self._str = self._s.String()
+        return
 
 
-else:
-    class Write_Wrapper:
-        def __init__ (self):
-            self.reopen()
-
-        def write (self, s):
-            ss = self._str
-            log = []
-            for c in s:
-                code = c
-                if code == 0xff:
-                    ss.Append (0xff)
-                    ss.Append (0xfe)
-                    log.append (0xff)
-                    log.append (0xfe)
-                elif code == 0x00:
-                    ss.Append (0xff)
-                    ss.Append (0x01)
-                    log.append (0xff)
-                    log.append (0x01)
-                else:
-                    ss.Append (code)
-                    log.append (code)
-            return
-
-        def getvalue (self):
-            return self._s
-
-        def reopen (self):
-            self._s = ROOT.TObjString()
-            self._str = self._s.String()
-            return
+class Read_Wrapper:
+    def __init__ (self):
+        self.reopen()
 
 
-    class Read_Wrapper:
-        def __init__ (self):
-            self.reopen()
-
-
-        def read (self, i):
-            out = []
-            slen = len(self._str)
-            while i != 0 and self._pos < slen:
-                c = ord(self._str[self._pos])
-                if c == 0xff:
-                    self._pos += 1
-                    if self._pos >= slen:
-                        break
-                    c = ord(self._str[self._pos])
-                    if c == 0x01:
-                        c = 0x00
-                    elif c == 0xfe:
-                        c = 0xff
-                out.append (c)
+    def read (self, i):
+        out = []
+        slen = len(self._str)
+        while i != 0 and self._pos < slen:
+            c = ord(self._str[self._pos])
+            if c == 0xff:
                 self._pos += 1
-                i -= 1
-            return bytes(out)
-
-
-        def readline (self):
-            out = []
-            slen = len(self._str)
-            while self._pos < slen:
-                c = ord(self._str[self._pos])
-                if c == 0xff:
-                    self._pos += 1
-                    if self._pos >= slen:
-                        break
-                    c = ord(self._str[self._pos])
-                    if c == 0x01:
-                        c = 0x00
-                    elif c == 0xfe:
-                        c = 0xff
-                out.append (c)
-                self._pos += 1
-                if c == 10:
+                if self._pos >= slen:
                     break
-            return bytes(out)
+                c = ord(self._str[self._pos])
+                if c == 0x01:
+                    c = 0x00
+                elif c == 0xfe:
+                    c = 0xff
+            out.append (c)
+            self._pos += 1
+            i -= 1
+        return bytes(out)
 
 
-        def setvalue (self, s):
-            self._s = s
-            self._str = self._s.String()
-            self._pos = 0
-            return
+    def readline (self):
+        out = []
+        slen = len(self._str)
+        while self._pos < slen:
+            c = ord(self._str[self._pos])
+            if c == 0xff:
+                self._pos += 1
+                if self._pos >= slen:
+                    break
+                c = ord(self._str[self._pos])
+                if c == 0x01:
+                    c = 0x00
+                elif c == 0xfe:
+                    c = 0xff
+            out.append (c)
+            self._pos += 1
+            if c == 10:
+                break
+        return bytes(out)
 
 
-        def reopen (self):
-            self.setvalue (ROOT.TObjString())
-            return
+    def setvalue (self, s):
+        self._s = s
+        self._str = self._s.String()
+        self._pos = 0
+        return
+
+
+    def reopen (self):
+        self.setvalue (ROOT.TObjString())
+        return
 
 
 class Pickler(object):
@@ -338,7 +292,7 @@ class Root_Proxy (object):
     __slots__ = ('__f', '__pid', '__o')
     def __init__ (self, f, pid):
         self.__f = f
-        self.__pid = intern(pid)
+        self.__pid = sys.intern(pid)
         self.__o = None
         return
     def __getattr__ (self, a):

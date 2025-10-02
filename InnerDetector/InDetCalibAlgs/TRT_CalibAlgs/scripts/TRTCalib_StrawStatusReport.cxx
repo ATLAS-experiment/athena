@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     initializeDeadStrawsList();
 
     int run = atoi(argv[1]);
-
+    //coverity[tainted_data]
     std::string filename = "straws." + std::to_string(run) + ".txt";
     std::cout << filename << std::endl;
     std::cout << "Created output/ folder.\n";
@@ -147,6 +147,7 @@ void initializeDeadStrawsList()
         strawMap map(tmp[0], tmp[1], tmp[4], tmp[3], tmp[2]);
         if (tmp[5] > 0)
         {
+            //coverity[tainted_data]
             deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][map.straw()] = tmp[5];
             count++;
         }
@@ -195,7 +196,7 @@ void simpleAnalysis(const std::string& filename)
 
             if (tmp[3] == 0         ) skip = 12; // 0 hits
         }
-
+        //coverity[tainted_data]
         if (deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]] == 1)
         {
             if (!onlyMaskBoards)
@@ -409,6 +410,7 @@ void reportResults(const std::string & filename, int run)
         int j = int(tmp[1]);
         int k = int(tmp[2]);
         strawMap map(side, j, k);
+        //coverity[tainted_data]
         fprintf(fout, "%d %d %d %d %d %lf %lf %lf %2d\n", tmp[0], tmp[1], tmp[2], deadStraws[(tmp[0] > 0) ? 0 : 1][tmp[1]][tmp[2]], tmp[4], occupancy, HToccupancy, efficiency, map.layer());
     }
 

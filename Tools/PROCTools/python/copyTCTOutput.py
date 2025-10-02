@@ -5,8 +5,6 @@
 import sys,os,shutil
 from PROCTools.getFileLists import findTCTFiles
 
-from future import standard_library
-standard_library.install_aliases()
 import subprocess
 
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimRegionMap.h
@@ -259,7 +259,8 @@ bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &h
     } else {
         ls = m_pmaps.at(region)->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     }
-    layer = ls.layer;
+    if (ls.layer<0) return false;
+    layer = static_cast<uint32_t>(ls.layer); //explicit cast to unsigned
     section = ls.section;
 
     int etamod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedEtaModule() : hit.getEtaModule();

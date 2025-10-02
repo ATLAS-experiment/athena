@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
@@ -19,12 +19,16 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
                        info='variable to use in isolation cuts of the form "var/pT < cut".')
         self.addOption('isolationCut', -1, type=float,
                        info='threshold to use in isolation cuts of the form "var/pT < cut".')
+        self.addOption('saveUID', False, type=bool,
+                       info='save unique ID in output')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.containerName + '_' + self.selectionName
+        name = self.containerName
+        if self.selectionName: name = name + '_' + self.selectionName
+        return name
 
     def makeAlgs(self, config):
         config.setSourceName (self.containerName, self.containerName)
@@ -60,5 +64,7 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
                 ['classifierParticleType', 'type'],
                 ['classifierParticleOrigin', 'origin'],
             ]
+            if self.saveUID:
+                outputVars += [['uid', 'uid']]
             for decoration, branch in outputVars:
                 config.addOutputVar (self.containerName, decoration, branch, noSys=True)

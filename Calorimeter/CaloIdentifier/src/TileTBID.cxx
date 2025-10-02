@@ -431,7 +431,7 @@ int  TileTBID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int tileField   = -1;
   if (atlasDict->get_label_value("subdet", "TileCalorimeter", tileField)) {
     log << MSG::ERROR << "Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
-        << atlasDict->m_name
+        << atlasDict->name()
         << endmsg;
     return (1);
   }
@@ -440,7 +440,7 @@ int  TileTBID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int tiletbField   = -1;
   if (m_dict->get_label_value("section", "Testbeam", tiletbField)) {
     log << MSG::ERROR << "Could not get value for label 'Testbeam' of field 'section' in dictionary " 
-        << m_dict->m_name
+        << m_dict->name()
         << endmsg;
     return (1);
   }
@@ -526,7 +526,7 @@ int TileTBID::initLevelsFromDict()
   // Fing a Tile region
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_SYSTEM_INDEX = field->m_index ;
+    m_SYSTEM_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'subdet' field "
@@ -536,7 +536,7 @@ int TileTBID::initLevelsFromDict()
 
   field = m_dict->find_field("section") ;
   if (field) {
-    m_SECTION_INDEX = field->m_index ;
+    m_SECTION_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'section' field "
@@ -546,7 +546,7 @@ int TileTBID::initLevelsFromDict()
 
   field = m_dict->find_field("type") ;
   if (field) {
-    m_TYPE_INDEX = field->m_index ;
+    m_TYPE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'type' field "
@@ -556,7 +556,7 @@ int TileTBID::initLevelsFromDict()
 
   field = m_dict->find_field("tbmodule") ;
   if (field) {
-    m_MODULE_INDEX = field->m_index ;
+    m_MODULE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'tbmodule' field "
@@ -566,7 +566,7 @@ int TileTBID::initLevelsFromDict()
 
   field = m_dict->find_field("tbchannel") ;
   if (field) {
-    m_CHANNEL_INDEX = field->m_index ;
+    m_CHANNEL_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'tbchannel' field "
@@ -575,13 +575,13 @@ int TileTBID::initLevelsFromDict()
   }
 
    /* Set the field implementations */
-  const IdDictRegion& region = *m_dict->m_regions[m_tile_region_index];
+  const IdDictRegion& region = m_dict->region(m_tile_region_index);
 
-  m_system_impl  = region.m_implementation[m_SYSTEM_INDEX]; 
-  m_section_impl = region.m_implementation[m_SECTION_INDEX]; 
-  m_type_impl    = region.m_implementation[m_TYPE_INDEX]; 
-  m_module_impl  = region.m_implementation[m_MODULE_INDEX]; 
-  m_channel_impl = region.m_implementation[m_CHANNEL_INDEX]; 
+  m_system_impl  = region.implementation(m_SYSTEM_INDEX);
+  m_section_impl = region.implementation(m_SECTION_INDEX);
+  m_type_impl    = region.implementation(m_TYPE_INDEX);
+  m_module_impl  = region.implementation(m_MODULE_INDEX);
+  m_channel_impl = region.implementation(m_CHANNEL_INDEX);
 
   m_base_tile_type=Identifier (0);
   m_system_impl.pack  (tile_field_value(),m_base_tile_type);

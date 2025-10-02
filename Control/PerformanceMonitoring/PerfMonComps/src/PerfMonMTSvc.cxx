@@ -173,6 +173,15 @@ void PerfMonMTSvc::handle(const Incident& inc) {
   }
   return;
 }
+
+namespace {
+  /* Workaround to avoid gcchecker warning about calling currentContext in
+     functions that have an EventContext argument. */
+  const EventContext& getCurrentContext() {
+    return Gaudi::Hive::currentContext();
+  }
+}
+
 /*
  * Start Auditing
  */
@@ -185,8 +194,8 @@ void PerfMonMTSvc::startAud(const std::string& stepName, const std::string& comp
    * By default we don't monitor a set of common components.
    */
   if (m_doComponentLevelMonitoring && !m_exclusionSet.contains(compName)) {
-    // Start component auditing
-    startCompAud(stepName, compName, ctx);
+    // Start component auditing (for tools/services we have to resort to thread-local context)
+    startCompAud(stepName, compName, ctx.valid() ? ctx : getCurrentContext());
   }
 }
 
@@ -199,8 +208,8 @@ void PerfMonMTSvc::stopAud(const std::string& stepName, const std::string& compN
 
   // Check if we should monitor this component
   if (m_doComponentLevelMonitoring && !m_exclusionSet.contains(compName)) {
-    // Stop component auditing
-    stopCompAud(stepName, compName, ctx);
+    // Stop component auditing (for tools/services we have to resort to thread-local context)
+    stopCompAud(stepName, compName, ctx.valid() ? ctx : getCurrentContext());
   }
 }
 
@@ -307,7 +316,13 @@ void PerfMonMTSvc::stopCompAud(const std::string& stepName, const std::string& c
 
   // Store
   data_map_unique_t& compLevelDataMap = m_compLevelDataMapVec[ithread];
-  compLevelDataMap[currentState]->addPointStop(meas, doMem);
+  auto itr = compLevelDataMap.find(currentState);
+
+  // This can happen if we never got the startCompAud call.
+  // Usually because Gaudi's AuditorSvc was not fully initialized yet.
+  if (itr==compLevelDataMap.end()) return;
+
+  itr->second->addPointStop(meas, doMem);
 
   // Once the first time IncidentProcAlg3 is excuted, toggle m_isFirstEvent to false.
   // Doing it this way, instead of at EndAlgorithms incident, makes sure there is no

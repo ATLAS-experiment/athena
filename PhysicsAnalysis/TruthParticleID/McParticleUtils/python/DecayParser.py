@@ -4,7 +4,6 @@
 # @purpose: implement the parsing/tokenization of decay-patterns' strings
 # @author:  Sebastien Binet <binet@cern.ch>
 
-from __future__ import print_function
 
 import re
 

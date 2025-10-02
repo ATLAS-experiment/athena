@@ -80,7 +80,7 @@ std::vector<const xAOD::TruthParticle*> getStableChildrenRecursive(const xAOD::T
 }
 
 
-std::vector<const xAOD::TruthParticle*> getStableChildren( const xAOD::TruthParticle* particle, bool findOnlyGenStable){
+std::vector<const xAOD::TruthParticle*> getStableChildren(const xAOD::TruthParticle* particle, bool findOnlyGenStable){
     // Finds the stable decay products of a given particle. Can either find all stable particles or only those that are generator stable only.
     // Interface to the recursive function that traverses the decay chain of the particle.
     std::unordered_set<const xAOD::TruthParticle*> visited; // keeps track of visited particles to avoid infinite loops in decay chains
@@ -88,21 +88,36 @@ std::vector<const xAOD::TruthParticle*> getStableChildren( const xAOD::TruthPart
 }
 
 
-JetVtxApprox getJetVtxApprox(const xAOD::Jet* jet, const xAOD::TruthParticleContainer& truthParticles){
-    // Finds the vertex in the ancestry tree Truth particles close to the jet 
-    // The vertex is selected to have to most secondary particles associated to it (and the most displaced from the beam line in case of tie)
+std::vector<const xAOD::TruthParticle*> getDecayProducts(const xAOD::TruthVertex* vtx){
+    // Returns the decay products of a given vertex. Use this instead of vtx->particles_out() to remove null pointers. 
+    std::vector<const xAOD::TruthParticle*> decayProducts;
+    if (!vtx) return decayProducts;
+
+    for (size_t i = 0; i < vtx->nOutgoingParticles(); ++i) {
+        const xAOD::TruthParticle* tp = vtx->outgoingParticle(i);
+        if (!tp) continue;
+        decayProducts.push_back(tp);
+    }
+
+    return decayProducts;
+}
+    
+
+
+std::vector<ActiveVertex> getActiveVertices(const xAOD::Jet* jet, const xAOD::TruthParticleContainer& truthParticles){
+    // Finds active vertices in the ancestry tree of the Truth particles close to the jet 
+    // Production vertices passing the minimal activity requirements are stored as ActiveVertex objects 
     
     std::set<const xAOD::TruthVertex*> seenVertices; // vertices already seen in the ancestry tree
-    const xAOD::TruthVertex* mostActiveVertex = nullptr;
+    std::vector<ActiveVertex> actVertices; // holds all the active vertices associated with the jet
+    std::vector<const xAOD::TruthParticle*> children; // decay products of the current vertex
     size_t nChildren{0};        
-    size_t maxChildren{0};
-    size_t maxDecayDepth{0};
 
     for (const xAOD::TruthParticle* tp : truthParticles){
         if (!tp || !tp->isStable() || jet->p4().DeltaR(tp->p4()) > 0.4) continue; // only final state particles close to the jet axis will pass
         if (!HepMC::is_simulation_particle(tp)) continue; // only simulated particles will pass.
 
-        int decayDepth{0};
+        size_t decayDepth{0};
         const xAOD::TruthParticle* current = tp;
         while (current) {
             if (decayDepth > 200) break; // safety break 
@@ -114,20 +129,24 @@ JetVtxApprox getJetVtxApprox(const xAOD::Jet* jet, const xAOD::TruthParticleCont
             if (prodVtx->v4().Mag2() < 0) break; // minimal requirements on the vertex: physical spacetime interval
             seenVertices.insert(prodVtx);
             decayDepth++;
-            // update the mostActiveVertex is one with more children is found. Need at least two children. 
-            // if there is a tie in the number of children, precedence is given to the more displaced vertex 
-            nChildren = prodVtx->nOutgoingParticles();                
-            if ((nChildren >= 2) && ((nChildren > maxChildren) || (mostActiveVertex && nChildren == maxChildren && prodVtx->v4().Vect().Mag2() > mostActiveVertex->v4().Vect().Mag2()))) { 
-                mostActiveVertex = prodVtx;
-                maxChildren = nChildren;
-                maxDecayDepth = decayDepth;
+
+            children = getDecayProducts(prodVtx);
+            nChildren = children.size();
+            // requirements for an active vertex
+            if (nChildren >= 2) {
+                TLorentzVector vtx4Vec;
+                float scalarPtSum{0.};
+                for (const xAOD::TruthParticle* child : children) {
+                    vtx4Vec += child->p4();
+                    scalarPtSum += child->p4().Pt();
+                }
+                actVertices.push_back({prodVtx, vtx4Vec.E(), vtx4Vec.M(), vtx4Vec.Pt(), scalarPtSum, nChildren, decayDepth});
             }
             current = prodVtx->incomingParticle(0); // move up one level in the ancestor tree
         }
     }
-    JetVtxApprox jetVtx{mostActiveVertex, maxChildren, maxDecayDepth};
 
-    return jetVtx;
+    return actVertices;
 }
 
 

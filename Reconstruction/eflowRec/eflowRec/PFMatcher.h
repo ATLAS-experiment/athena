@@ -44,9 +44,6 @@ public:
                                          std::vector<ClusterType*>& clusters,
                                          int nMatches,
                                          double energyThreshold) const;
-  template<class ClusterType>
-  double getDRCutSquared(ClusterType* theCluster) const;
-
 private:
 
   std::unique_ptr<IDistanceProvider> m_distanceProvider;
@@ -148,35 +145,6 @@ std::vector<MatchDistance> TrackClusterMatcher::bestMatches(ITrack* track, std::
   return result;
 
  }
-
-template<class ClusterType>
- double TrackClusterMatcher::getDRCutSquared( ClusterType* theCluster) const {
-
-    double m_coneRSq = 1.64*1.64;
-    double coneRSq = m_coneRSq;
-  int ieta = -1;
-  double clusEta;
-
-  clusEta = theCluster->eta();
-
-  if (std::abs(clusEta)<0.6) ieta=0;
-  if (std::abs(clusEta)>=0.6 && std::abs(clusEta)<1.6) ieta = 1 + int((std::abs(clusEta) - 0.6)/0.2) ;
-  if (std::abs(clusEta)>=1.6 && std::abs(clusEta)<2.0) ieta = 6 ;
-  if (std::abs(clusEta)>=2.0 && std::abs(clusEta)<2.5) ieta = 7 ;
-  if (std::abs(clusEta)>=2.5) ieta = 8 ;
-
-  double clusterEnergy = theCluster->e()/1000.0;
-
-  double drcut = m_drcut_par[ieta][0]+m_drcut_par[ieta][1]*exp(m_drcut_par[ieta][2]*clusterEnergy);
-  coneRSq = drcut*drcut;
-
- if (coneRSq>m_coneRSq) coneRSq = m_coneRSq;
-  double conemin = m_drcut_par[ieta][0]+m_drcut_par[ieta][1]*exp(m_drcut_par[ieta][2]*10);
-
-  if (coneRSq<conemin*conemin) coneRSq = conemin*conemin;
-  return coneRSq;
-
-  }
 
 }
 

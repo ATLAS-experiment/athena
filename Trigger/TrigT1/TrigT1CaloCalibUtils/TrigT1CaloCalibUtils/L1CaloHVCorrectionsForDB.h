@@ -12,7 +12,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include <string>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 // forward declrations
 class L1CaloRxLayersContainer;
@@ -50,8 +50,8 @@ class L1CaloHVCorrectionsForDB : public AthAlgorithm
     SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey
     { this, "CablingKey", "LArOnOffIdMap", "SG Key of LArOnOffIdMapping object" };
 
-    boost::scoped_ptr<L1CaloRxLayersContainer> m_rxLayersContainer;
-    boost::scoped_ptr<L1CaloHVCorrectionsContainer> m_hvCorrectionsContainer;
+    std::unique_ptr<L1CaloRxLayersContainer> m_rxLayersContainer;
+    std::unique_ptr<L1CaloHVCorrectionsContainer> m_hvCorrectionsContainer;
 
     bool m_firstEvent;
 };

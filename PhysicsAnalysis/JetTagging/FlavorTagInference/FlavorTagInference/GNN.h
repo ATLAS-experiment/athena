@@ -8,28 +8,26 @@
   back to ATLAS EDM.
 */
 
-#ifndef GNN_H
-#define GNN_H
+#ifndef FLAVORTAGINFERENCE_GNN_H
+#define FLAVORTAGINFERENCE_GNN_H
 
 // Tool includes
-#include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/FTagDataDependencyNames.h"
-#include "FlavorTagInference/GNNOptions.h"
-#include "FlavorTagInference/GNNDataLoader.h"
-
 #include "FlavorTagInference/DataPrepUtilities.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
+#include "FlavorTagInference/FlipTagEnums.h"
+#include "FlavorTagInference/GNNDataLoader.h"
+#include "FlavorTagInference/GNNOptions.h"
+#include "FlavorTagInference/ISaltModel.h"
 
 // EDM includes
 #include "xAODBase/IParticle.h"
 
-#include <memory>
 #include <string>
 #include <map>
 
 namespace FlavorTagInference {
 
     struct GNNOptions;
-    class SaltModel;
 
   //
   // Tool to to flavor tag jet/btagging object
@@ -57,10 +55,9 @@ namespace FlavorTagInference {
     virtual std::set<std::string> getAuxInputKeys() const;
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
-    std::shared_ptr<const SaltModel> m_saltModel;
   private:
     // private constructor, delegate of the above public ones
-    GNN(std::shared_ptr<const SaltModel>, const GNNOptions& opts);
+    GNN(ISaltModelPtr, const GNNOptions& opts);
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
     using TrackLinks = std::vector<ElementLink<TPC>>;
@@ -82,8 +79,9 @@ namespace FlavorTagInference {
 
     /* create all decorators */
     std::tuple<FTagDataDependencyNames, std::set<std::string>>
-    createDecorators(const SaltModel::OutputConfig& outConfig, const FTagOptions& options);
+    createDecorators(const OutputConfig& outConfig, const FTagOptions& options);
 
+    ISaltModelPtr m_saltModel;
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     GNNDataLoader m_dataLoader;

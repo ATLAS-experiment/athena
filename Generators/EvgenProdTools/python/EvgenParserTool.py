@@ -30,6 +30,10 @@ class evgenParserTool:
     def processLine( self, line ):
         ''' Function to process a log line and keep what's needed for final reporting'''
 
+        # Skip PerfMonMTSvc report
+        if "PerfMonMTSvc" in line:
+            return
+
         # First check for lines from FixHepMC
         if 'FixHepMC' in line and 'INFO Removed' in line:
             # Use the loops line to count the denominator

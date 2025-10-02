@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # STDM16.py for c-fragmentation analysi 
@@ -47,14 +47,10 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg,
             AddTruthCollectionNavigationDecorationsCfg)
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
-        STDM16CommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
+        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
+        STDM16CommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,
-            name                    = "STDM16CommonTruthCharmTool",
-            NewCollectionName       = "TruthCharm",
-            KeepNavigationInfo      = False,
-            ParticleSelectionString = "(abs(TruthParticles.pdgId) == 4)",
-            Do_Compress             = True)) 
+            name = "STDM16CommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
         acc.addEventAlgo(CommonAugmentation("STDM16CommonTruthCharmKernel",AugmentationTools=[STDM16CommonTruthCharmTool]))
 

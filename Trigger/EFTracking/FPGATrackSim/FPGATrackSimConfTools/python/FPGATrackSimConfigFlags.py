@@ -9,6 +9,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', [])
     cf.addFlag('wrapperFileName2', [])
+    cf.addFlag('runOnPreProducedHeaderFiles', False)
     cf.addFlag('secondInputToolN', 0)
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('loadRegionMap', True)
@@ -17,6 +18,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('sampleType', 'singleMuons')
     cf.addFlag('doMultiTruth', True)
     cf.addFlag('SetTruthParametersForTracks', -1)
+    cf.addFlag('FPGATrackSimTestFiles', '')
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
@@ -382,7 +384,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMin', [-1000, -1000, 0.0, 0.0, -10])
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
-    cf.addFlag('keepNInnerHits', -1)
+    cf.addFlag('keepHitsStrategy', -1)
     return cf
 
 def createSecondStageFPGATrackSimConfigFlags():
@@ -404,6 +406,7 @@ class moduleMapFunc(FlagEnum):
 
 class roadMakerTool(FlagEnum):
     ConnectedComponents = 'ConnectedComponents'
+    JunctionAwareCC = 'JunctionAwareCC'
 
 def createGNNFPGATrackSimConfigFlags():
     cf = createBasicFPGATrackSimConfigFlags()
@@ -422,6 +425,7 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("edgeScoreCut",0.8)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
+    cf.addFlag("doGNNPixelSeeding",False)
     cf.addFlag("nInputsGNN",13)
     
     return cf

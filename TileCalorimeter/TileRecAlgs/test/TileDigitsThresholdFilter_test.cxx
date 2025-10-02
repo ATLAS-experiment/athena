@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -24,7 +24,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "CxxUtils/checker_macros.h"
 
-//#include "GaudiKernel/DeclareFactoryEntries.h"
 
 #include <algorithm>
 #include <cassert>
@@ -32,6 +31,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 
 static const float THRESHOLD = 5;
@@ -198,9 +198,12 @@ int main ATLAS_NOT_THREAD_SAFE (int /*argc*/, char** argv) {
 
   IdDictParser parser;
   TileCablingSvc::init_idhelpers(parser);
-
-  test1();
-
+  try{
+    test1();
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in TileDigitsThresholdFilter_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }
 

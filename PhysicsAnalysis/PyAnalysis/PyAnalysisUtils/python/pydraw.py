@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: pydraw.py
@@ -6,7 +6,6 @@
 # Purpose: Interactive python commands for plotting from a tuple-like object.
 #
 
-from __future__ import print_function
 
 """Interactive python commands for plotting from a tuple-like object.
 This module provides in python functionality similar to TTree::Draw
@@ -328,11 +327,7 @@ import token
 import copy
 import ROOT
 import cppyy # noqa: F401
-import six
-if six.PY2:
-    from StringIO import StringIO #pragma: NO COVER
-else:
-    from io import StringIO #pragma: NO COVER
+from io import StringIO #pragma: NO COVER
 from PyAnalysisUtils.draw_obj import draw_obj, get_canvas
 
 
@@ -397,11 +392,7 @@ def _untokenize (tokens):
 
     Examples:
     >>> from tokenize import generate_tokens, untokenize
-    >>> import six
-    >>> if six.PY2:
-    ...     from StringIO import StringIO
-    ... else:
-    ...     from io import StringIO
+    >>> from io import StringIO
     >>> def untokenize1(tt):
     ...   tt=list(tt)
     ...   if tt[-1][0]==0: tt=tt[:-1]
@@ -1202,7 +1193,7 @@ def _scan_print (i, *args):
     
     s = '%6d' % i
     for a in args:
-        if isinstance(a, six.integer_types):
+        if isinstance(a, int):
             s += ' %8d' % a
         else:
             s += ' %8g' % a

@@ -19,7 +19,6 @@ skip_files=(
   "physval_lrt.ntuple.root"
   "physval_idtide.ntuple.root"
   "HitValid.root"
-  "SiHitValid.root"
   "RDOAnalysis.root"
   "idpvm.root"
   "idpvm.acts.root"
@@ -36,7 +35,7 @@ skip_files=(
 )
 
 if [[ $rmOutput == true ]]; then
-    for item in {art_core,dcube*,*.root,*.xml}; do
+    for item in {art_core,*.root}; do
         [[ -e "$item" ]] || continue
         remove=true
         for pat in "${skip_files[@]}"; do

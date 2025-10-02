@@ -1,197 +1,293 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_VIEW_H
 #define ATHVIEWS_VIEW_H
 
+#include "GaudiKernel/ServiceHandle.h"
+
+#include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/IProxyDict.h"
-#include "AthViews/SimpleView.h"
-#include "AthViews/DebugView.h"
+#include "AthContainers/DataVector.h"
 #include "AthLinks/ElementLink.h"
+#include "CxxUtils/sgkey_t.h"
+#include "CxxUtils/sgkey_utilities.h"
+#include "SGTools/transientKey.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
-// DECLARATIONS
+#include <set>
+#include <vector>
+
+// Forward declarations
 namespace SG {
   class DataProxy;
 }
 class DataObject;
 
-// rewire implementations in the constructor
-// this is PIMPL for now
+
 namespace SG {
-class View : public implements<IProxyDict> {
-public:
-  View () = delete;
-  View (const std::string& name, const int index, const bool AllowFallThrough = true, std::string const& storeName = "StoreGateSvc");
-  virtual ~View ();
-  View (const View&) = delete;
-  View& operator= (const View&) = delete;
-
-   /**
-    * @brief Construct a key as used in the parent store.
-    * @brief key The key as used in the view.
-    */
-   std::string viewKey (const std::string& key) const
-   {
-     return m_implementation->viewKey (key);
-   }
-
-
-#ifdef ATHVIEWS_DEBUG
-  void impl ( DebugView* impl ) { m_implementation = impl; }
-  DebugView* impl (void ) { return m_implementation; }
-  const DebugView* impl ( void ) const { return m_implementation; }
-#else
-  void impl ( SimpleView* impl ) { m_implementation = impl; }
-  SimpleView* impl (void ) { return m_implementation; }
-  const SimpleView* impl ( void ) const { return m_implementation; }
-#endif
-  size_t viewID() const{ return m_index; }
 
   /**
-   * for printing the content of the view
-   * @warning - expensive call
-   **/
-  std::string dump( const std::string& indent = "" ) const {
-    return m_implementation->dump( indent );
-  }
+   * @brief A "view" of the event store (IProxyDict).
+   *
+   * This class provides a view of the event store by mangling (prefixing) the key name
+   * with a fixed string (see @c viewKey()). Usually the view is carried by the (extended)
+   * @c EventContext and automatically applied for algorithms running within a view.
+   * For creating/accessing objects from outside the view, the view needs to be explicitly
+   * set via @c VarHandleBase::setProxyDict() on the handle (see AthViews/ViewHelper.h).
+   *
+   * The lookup of an object proceeds in the following order:
+   *   1. the current view
+   *   2. the parent view if linked
+   *   3. the full store if @c allowFallThrough is set
+   */
+  class View final : public implements<IProxyDict> {
+  public:
+    /**
+     * @brief Create a new View instance
+     * @param name Name of the view
+     * @param index Index of the view (gets appended to the name if index >= 0)
+     * @param allowFallThrough Allow fall-back to default store if object not found within the view
+     * @param storeName Store name
+     */
+    View( const std::string& name, int index, bool allowFallThrough = true,
+          const std::string& storeName = "StoreGateSvc" );
 
-  /*virtual SG::DataProxy* proxy(const CLID& id) const { 
-    return m_implementation->proxy(id); 
-  }*/
+    View() = delete;
+    virtual ~View() = default;
+    View (const View&) = delete;
+    View& operator= (const View&) = delete;
 
-  void linkParent( const IProxyDict* parent) {
-    m_implementation->linkParent( parent );
-  }
+    /**
+     * @brief Return view index.
+     */
+    size_t viewID() const {
+      return m_index;
+    }
 
-  const std::set< const View* >& getParentLinks() const {
-    return m_implementation->getParentLinks();
-  }
+    /**
+     * @brief Link to the previously used views.
+     */
+    void linkParent( const IProxyDict* parent );
 
-  void setFilter( std::vector< std::string > const& inputFilter ) {
-    m_implementation->setFilter( inputFilter );
-  }
-  
-  virtual SG::DataProxy* deep_proxy(const void* const pTransient) const { 
-    return m_implementation->proxy (pTransient); 
-  }
+    /**
+     * @brief Returns the links to the previously used views.
+     */
+    const std::set< const SG::View* >& getParentLinks() const {
+      return m_parents;
+    }
 
-  virtual SG::DataProxy* proxy_exact (SG::sgkey_t sgkey) const {
-    return m_implementation->proxy_exact(sgkey);
-  }
+    /**
+     * @brief Set a filtering rule for anything loaded via fall-through.
+     * @param inputFilter Only allow keys containing one these strings to fall-through.
+     */
+    void setFilter( std::vector< std::string > const& inputFilter ) {
+      m_fallFilter = inputFilter;
+    }
 
-  virtual SG::DataProxy* proxy(const CLID& id, const std::string& key) const {
-    return m_implementation->proxy(id, key);
-  }
+    /**
+     * @brief Associated RoI with this view.
+     */
+    void setROI(const ElementLink<TrigRoiDescriptorCollection>& roi) {
+      m_roi = roi;
+    }
 
-  virtual SG::DataProxy* proxy(const void* const pTransient) const {
-    return m_implementation->proxy(pTransient);
-  }
+    /**
+     * @brief Return associated RoI.
+     */
+    const ElementLink<TrigRoiDescriptorCollection>& getROI() const {
+      return m_roi;
+    }
 
-
-  virtual std::vector<const SG::DataProxy*> proxies() const {
-    return m_implementation->proxies();
-  }
-
-
-  virtual StatusCode addToStore(CLID id, SG::DataProxy* proxy) {
-    return m_implementation->addToStore(id, proxy);
-  }
-
-
-  /*virtual SG::DataProxy* recordObject (std::unique_ptr<DataObject> obj,
-				       const std::string& key,
-				       bool allowMods) {
-    return m_implementation->recordObject( std::move( obj ), key, allowMods );
-  }*/
-  virtual SG::DataProxy* recordObject (SG::DataObjectSharedPtr<DataObject> obj,
-                                       const std::string& key,
-                                       bool allowMods,
-                                       bool returnExisting) {
-    return m_implementation->recordObject( obj, key, allowMods, returnExisting );
-  }
-  
-
-  
-  virtual void boundHandle (IResetable* handle) {
-    return m_implementation->boundHandle(handle);
-  }
-  
-  virtual void unboundHandle (IResetable* handle) {
-    return m_implementation->unboundHandle(handle);
-  }
-
-  virtual bool tryELRemap (sgkey_t sgkey_in, size_t index_in,
-			   sgkey_t& sgkey_out, size_t& index_out) {
-    return m_implementation->tryELRemap(sgkey_in, index_in, sgkey_out, index_out);
-  }
-
-  virtual const std::string& name() const { return m_implementation->name(); }
-
-  //IStringPool
-  virtual IStringPool::sgkey_t stringToKey( const std::string& str, CLID clid ){ return m_implementation->stringToKey( str, clid ); }
-  virtual const std::string* keyToString( IStringPool::sgkey_t key ) const{ return m_implementation->keyToString( key ); }
-  virtual const std::string* keyToString( IStringPool::sgkey_t key, CLID& clid ) const{ return m_implementation->keyToString( key, clid ); }
-  virtual void registerKey( IStringPool::sgkey_t key, const std::string& str, CLID clid ){ m_implementation->registerKey( key, str, clid ); }
-
-  void setROI(const ElementLink<TrigRoiDescriptorCollection>& roi) { m_implementation->setROI(roi); };
-  const ElementLink<TrigRoiDescriptorCollection>& getROI() const { return m_implementation->getROI(); };
-
-private:
-
-#ifdef ATHVIEWS_DEBUG
-  DebugView *m_implementation;
-#else
-  SimpleView *m_implementation;
-#endif
-  size_t m_index;
-};
-} // EOF SG namespace
+    /**
+     * @brief Print content of the view.
+     */
+    std::string dump( const std::string& indent = "" ) const;
 
 
-#include "AthenaKernel/CLASS_DEF.h"
+    /**
+     * @{ @name IProxyDict interface
+     */
 
-// Do we need to do this?
-class ViewContainer {
-  typedef std::vector<SG::View*> T;
-  T m_data;
-public:
+    /**
+     * @brief Name of the view
+     */
+    virtual const std::string& name() const override {
+      return m_name;
+    }
 
-  typedef T::const_iterator const_iterator;
-  typedef T::iterator iterator;
-  typedef T::reverse_iterator reverse_iterator;
-  typedef T::const_reference const_reference;
-  typedef T::reference reference;
-  typedef T::value_type value_type;
+    /**
+     * @brief Get proxy given a hashed key+clid.
+     * @param sgkey Hashed key to look up.
+     *
+     * Find an exact match; no handling of aliases, etc.
+     * Returns 0 to flag failure.
+     */
+    virtual SG::DataProxy* proxy_exact(SG::sgkey_t sgkey) const override;
+
+    /**
+     * @brief Get proxy with given id and key.
+     * @param id The @c CLID of the desired object.
+     * @param key The key of the desired object.
+     *
+     * If the key is a null string, then it is a @em default key.
+     * Finding a proxy via the default key should succeed only if there
+     * is exactly one object with the given @c CLID in the store.
+     * Finding a proxy via a default key is considered deprecated
+     * for the case of the event store.
+     *
+     * Returns 0 to flag failure
+     */
+    virtual SG::DataProxy* proxy(const CLID& id, const std::string& key) const override;
+
+    /**
+     * @brief Get a proxy referencing a given transient object.
+     * @param pTransient The object to find.
+     *
+     * Returns 0 to flag failure
+     */
+    virtual SG::DataProxy* proxy(const void* const pTransient) const override {
+      return m_store->proxy( pTransient );
+    }
+
+    /**
+     * @brief Return the list of all current proxies in store.
+     */
+    virtual std::vector<const SG::DataProxy*> proxies() const override {
+      return m_store->proxies();
+    }
+
+    /**
+     * @brief Add a new proxy to the store.
+     * @param id CLID as which the proxy should be added.
+     * @param proxy The proxy to add.
+     *
+     * Simple addition of a proxy to the store.  The key is taken as the
+     * primary key of the proxy.  Does not handle things
+     * like overwrite, history, symlinks, etc.  Should return failure
+     * if there is already an entry for this clid/key.
+     */
+    virtual StatusCode addToStore(CLID id, SG::DataProxy* proxy) override {
+      return m_store->addToStore( id, proxy );
+    }
+
+    /**
+     * @brief Record an object in the store.
+     * @param obj The data object to store.
+     * @param key The key as which it should be stored.
+     * @param allowMods If false, the object will be recorded as const.
+     *
+     * Full-blown record.  @c obj should usually be something
+     * deriving from @c SG::DataBucket.
+     *
+     * Returns the proxy for the recorded object; nullptr on failure.
+     */
+    virtual SG::DataProxy* recordObject ( SG::DataObjectSharedPtr<DataObject> obj,
+                                          const std::string& key,
+                                          bool allowMods,
+                                          bool returnExisting) override;
+
+    /**
+     * @brief Tell the store that a handle has been bound to a proxy.
+     * @param handle The handle that was bound.
+     */
+    virtual void boundHandle (IResetable* handle) override {
+      return m_store->boundHandle( handle );
+    }
+
+    /**
+     * @brief Tell the store that a handle has been unbound from a proxy.
+     * @param handle The handle that was unbound.
+     */
+    virtual void unboundHandle (IResetable* handle) override {
+      return m_store->unboundHandle( handle );
+    }
+
+    /**
+     * @brief Test to see if the target of an ElementLink has moved.
+     * @param sgkey_in Original hashed key of the EL.
+     * @param index_in Original index of the EL.
+     * @param sgkey_out[out] New hashed key for the EL.
+     * @param index_out[out] New index for the EL.
+     * @return True if there is a remapping; false otherwise.
+     *
+     * Not supported. Will throw std::runtime_error.
+     */
+    virtual bool tryELRemap ( sgkey_t sgkey_in,   size_t index_in,
+                              sgkey_t& sgkey_out, size_t& index_out) override;
+    /**@}*/
 
 
-  ~ViewContainer() { 
-    std::for_each(m_data.begin(), m_data.end(), [](SG::View* v){ delete v; } ); 
-  }
-  void push_back( SG::View* ptr ) { m_data.push_back( ptr ); }
-  size_t size() const { return m_data.size(); }
-  bool empty() const { return m_data.empty(); }
-  void clear() {     
-    std::for_each(m_data.begin(), m_data.end(), [](SG::View* v){ delete v; } );   m_data.clear(); 
-  }
-  const_iterator begin() const { return m_data.begin(); }
-  const_iterator end() const { return m_data.end(); }
-  iterator begin() { return m_data.begin(); }
-  iterator end() { return m_data.end(); }
-  reverse_iterator rbegin() { return m_data.rbegin(); }
-  reverse_iterator rend() { return m_data.rend(); }
+    /**
+     * @{ @name IStringPool interface
+     */
 
-  const_reference at(size_t pos) const { return m_data.at(pos); }
-  reference at(size_t pos) { return m_data.at(pos); }
-  const_reference back() const { return m_data.back(); }
-  reference back() { return m_data.back(); }
-};
+    /**
+     * @brief Find the string and CLID corresponding to a given key.
+     *
+     * Not supported. Will throw std::runtime_error.
+     */
+    virtual const std::string* keyToString( IStringPool::sgkey_t key ) const override;
 
-#include "AthLinks/DeclareIndexingPolicy.h"
-CONTAINER_IS_SEQUENCE(ViewContainer)
+    /**
+     * @brief Find the string corresponding to a given key.
+     *
+     * Not supported. Will throw std::runtime_error.
+     */
+    virtual const std::string* keyToString( IStringPool::sgkey_t key, CLID& clid ) const override;
+
+    /**
+     * @brief Find the key for a string/CLID pair.
+     */
+    virtual IStringPool::sgkey_t stringToKey( const std::string& str, CLID clid ) override {
+      return m_store->stringToKey( viewKey(str), clid );
+    }
+
+    /**
+     * @brief Remember an additional mapping from key to string/CLID.
+     */
+    virtual void registerKey( IStringPool::sgkey_t key, const std::string& str, CLID clid ) override {
+      m_store->registerKey( key, viewKey(str), clid );
+    }
+    /**@}*/
+
+
+  private:
+    /**
+     * @brief Internal implementation of proxy()
+     */
+    SG::DataProxy* findProxy( const CLID& id, const std::string& key, bool allowFallThrough ) const;
+
+    /**
+     * @brief Construct a key as used in the parent store.
+     * @param key The key as used in the view.
+     */
+    std::string viewKey (const std::string& key) const {
+      return SG::transientKey (m_name + "_" + key);
+    }
+
+    ServiceHandle< StoreGateSvc > m_store;
+    ElementLink<TrigRoiDescriptorCollection> m_roi;
+
+    using KeyMap_t = SG::ConcurrentSGKeyMap<sgkey_t>;
+    KeyMap_t m_keyMap;
+
+    std::set< const SG::View* > m_parents;
+    std::vector< std::string > m_fallFilter;
+
+    std::string m_name;
+    size_t m_index{0};
+    bool m_allowFallThrough{true};
+  };
+}  // namespace SG
+
+
+/**
+ * @brief View container for recording in StoreGate
+ */
+typedef DataVector<SG::View> ViewContainer;
 
 CLASS_DEF( ViewContainer , 1160627009 , 1 )
 

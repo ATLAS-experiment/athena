@@ -1,21 +1,22 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HITANALYSIS_CALOHITANALYSIS_H
 #define HITANALYSIS_CALOHITANALYSIS_H
 
 // Base class
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
 // Members
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadHandleKeyArray.h"
+#include "TileSimEvent/TileHitVector.h"
+#include "LArSimEvent/LArHitContainer.h"
+#include "CaloSimEvent/CaloCalibrationHitContainer.h"
 
-// STL includes
-#include <string>
 
 class TileID;
 class TileDetDescrManager;
@@ -24,11 +25,11 @@ class TH2;
 class TTree;
 
 
-class CaloHitAnalysis : public AthAlgorithm {
+class CaloHitAnalysis : public AthHistogramAlgorithm {
 
 public:
 
-  CaloHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
   ~CaloHitAnalysis() = default;
 
   virtual StatusCode initialize() override;
@@ -89,12 +90,17 @@ private:
   TTree* m_tree{};
   StringProperty m_ntupleFileName{this, "NtupleFileName", "/CaloHitAnalysis/"};
   StringProperty m_path{this, "HistPath", "/CaloHitAnalysis/"};
-  ServiceHandle<ITHistSvc> m_thistSvc{this, "THitSvc", "THistSvc"};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this
     , "CaloDetDescrManager"
     , "CaloDetDescrManager"
     , "SG Key for CaloDetDescrManager in the Condition Store" };
+  SG::ReadHandleKey<TileHitVector> m_tileKey{this, "TileKey", "TileHitVec" };
+  SG::ReadHandleKeyArray<LArHitContainer> m_caloKeys{this, "CaloKeys",    
+                                          {"LArHitEMB", "LArHitEMEC", "LArHitFCAL", "LArHitHEC"} };
 
+
+  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_caloCalibKeys{this, "CaloCalibKeys",
+                                                                      {"LArCalibrationHitActive", "LArCalibrationHitInactive","LArCalibrationHitDeadMaterial"}};
 };
 
 #endif // CALO_HIT_ANALYSIS_H

@@ -1,9 +1,8 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cstdlib>
-#include <vector>
+
 
 #include "TrigConfIO/JsonFileLoader.h"
 #include "TrigConfIO/JsonFileWriterL1.h"
@@ -20,6 +19,10 @@
 #include "TrigConfData/L1PrescalesSet.h"
 #include "TrigConfData/HLTPrescalesSet.h"
 #include "TrigConfData/L1BunchGroupSet.h"
+
+#include <cstdlib>
+#include <vector>
+#include <format> //for format error
 
 using namespace std;
 
@@ -125,7 +128,7 @@ Config::parseProgramOptions(int argc, char* argv[]) {
          if(paramName == "w" || paramName == "write" ) { write = true; }
          if(paramName == "W" || paramName == "Write" ) { writeFromDataStructure = true; }
          if(paramName == "c" || paramName == "ctp" ) { doCtp = true; }
-         currentParameter = paramName;
+         currentParameter = std::move(paramName);
          continue;
       }
 
@@ -133,7 +136,7 @@ Config::parseProgramOptions(int argc, char* argv[]) {
 
       // inputs
       if(currentParameter == "file" || currentParameter == "f") {
-         inputFiles.push_back(currentWord);
+         inputFiles.push_back(std::move(currentWord));
          continue; 
       }
       if(currentParameter == "smk") { 
@@ -153,24 +156,24 @@ Config::parseProgramOptions(int argc, char* argv[]) {
          continue;
       }
       if(currentParameter == "db") { 
-         dbalias = currentWord;
+         dbalias = std::move(currentWord);
          continue; 
       }
       if(currentParameter == "crest-db") { 
-         crestDb = currentWord;
+         crestDb = std::move(currentWord);
          continue; 
       }
       if(currentParameter == "crest-server") { 
-         crestServer = currentWord;
+         crestServer = std::move(currentWord);
          continue; 
       }
       if(currentParameter == "crest-api") { 
-         crestApi = currentWord;
+         crestApi = std::move(currentWord);
          continue; 
       }
       // output
       if(currentParameter == "write" || currentParameter == "w" || currentParameter == "Write" || currentParameter == "W") {
-         base = currentWord;
+         base = std::move(currentWord);
          continue; 
       }
 
@@ -412,7 +415,12 @@ int main(int argc, char** argv) {
    if( cfg.smk != 0 && cfg.doCtp ) {
       TrigConf::TrigDBCTPFilesLoader dbloader(cfg.dbalias);
       TrigConf::L1CTPFiles ctpfiles;
-      dbloader.loadHardwareFiles(cfg.smk, ctpfiles, 0x0F, outputFileName("CTPFiles", cfg));
+      try{
+        dbloader.loadHardwareFiles(cfg.smk, ctpfiles, 0x0F, outputFileName("CTPFiles", cfg));
+      } catch (std::format_error & e){
+        cout << " format_error "<<e.what()<<" thrown in TriggerMenuRW.\n";
+        return 1;
+      }
       ctpfiles.print();
    }
 

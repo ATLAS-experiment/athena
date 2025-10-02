@@ -172,3 +172,6 @@ run "dcube-acts-space-timed" \
     -R "Space_Matching" \
     -M "Space_And_Time_Matching" \
     idpvm.acts.timed.root
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

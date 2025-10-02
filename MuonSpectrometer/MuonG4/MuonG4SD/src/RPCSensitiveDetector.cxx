@@ -74,11 +74,14 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   double     globalTime    = aStep->GetPreStepPoint()->GetGlobalTime();
   Amg::Vector3D localPosition = Amg::Hep3VectorToEigen( trans.TransformPoint(position) );
   Amg::Vector3D localPostPosition = Amg::Hep3VectorToEigen( trans.TransformPoint(postPosition) );
-
-  /// Reject hits that are parallel through the gas gap 
-  if (std::abs(std::abs(Amg::angle(localPostPosition - localPosition, Amg::Vector3D::UnitX())) 
-              - 90.*Gaudi::Units::deg) < 0.0001* Gaudi::Units::deg) {
-    return true;
+  {
+    const Amg::Vector3D stepVector = localPostPosition - localPosition;
+    /// Reject hits that are parallel through the gas gap
+    if (stepVector.mag()>std::numeric_limits<float>::epsilon() &&
+        std::abs(std::abs(Amg::angle(stepVector, Amg::Vector3D::UnitX()))
+                 - 90.*Gaudi::Units::deg) < 0.0001* Gaudi::Units::deg) {
+      return true;
+    }
   }
   int mydbZ=0;
   int mydbPMod=0;

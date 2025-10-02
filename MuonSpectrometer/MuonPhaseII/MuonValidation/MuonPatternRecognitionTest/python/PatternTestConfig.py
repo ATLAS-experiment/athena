@@ -35,6 +35,7 @@ def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwar
         segmentKeys+=["R4MuonSegments"]
     if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
         seedKeys+=["MuonHoughNswSegmentSeeds"]
+        segmentKeys+=["R4MuonSegmentsNsw"]
     kwargs.setdefault("SegmentSeedKeys", seedKeys)
     kwargs.setdefault("SegmentKeys", segmentKeys)
 

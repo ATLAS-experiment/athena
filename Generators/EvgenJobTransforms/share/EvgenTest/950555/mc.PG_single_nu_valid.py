@@ -7,7 +7,7 @@ from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
 class Sample(EvgenConfig):
 
     def setupFlags(self, flags):
-        self.description = ["Single neutrinos with fixed eta and E: purely for pile-up/lumi testing"]
+        self.description = "Single neutrinos with fixed eta and E: purely for pile-up/lumi testing"
         self.keywords = ["singleParticle", "neutrino"]
         self.contact = ["dhirsch@mail.cern.ch"]
         self.nEventsPerJob = 100

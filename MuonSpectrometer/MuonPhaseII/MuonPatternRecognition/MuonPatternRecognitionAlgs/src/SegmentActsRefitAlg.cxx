@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 #include "SegmentActsRefitAlg.h"
 
 #include "ActsCalibBase/CalibrationContext.h"
@@ -27,6 +28,7 @@ namespace{
     constexpr double pseudoSurfDist = 5.*Gaudi::Units::cm;
     using ProjectorType = ActsTrk::detail::MeasurementCalibratorBase::ProjectorType;
 }
+
 
 namespace MuonR4{
     using namespace SegmentFit;
@@ -59,7 +61,7 @@ namespace MuonR4{
             if (precPar == ParamDefs::x0 && !segment.summary().nPhiHits) {
                 break;
             }
-            const unsigned idx = toInt(precPar);           
+            const unsigned idx = Acts::toUnderlying(precPar);           
             segPars[idx] = CLHEP::RandGaussZiggurat::shoot(engine, segPars[idx], 
                                                            m_smearRange*Amg::error(segment.covariance(), idx));
         }
@@ -96,7 +98,7 @@ namespace MuonR4{
         using Link_t = ElementLink<xAOD::MuonSegmentContainer>;
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, Link_t> dec_segLink{m_linkKey, ctx};
         using ParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, 
-                                                xAOD::MeasVector<toInt(ParamDefs::nPars)>>;
+                                                xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>>;
         
         ParDecor_t dec_locPars{m_localParsKey, ctx};
         ParDecor_t dec_seedPars{m_seedParsKey, ctx};
@@ -161,8 +163,7 @@ namespace MuonR4{
                          <<Amg::toString(surfAcc.get(meas)->transform(tgContext).translation())
                          <<", "<<surfAcc.get(meas)->geometryId()<<", "
                          <<(calib_sp != reFitMe->measurements().end() ? 
-                                SegmentFitHelpers::chiSqTerm(locPos, locDir,0., std::nullopt, 
-                                                             **calib_sp, msgStream()) : 0.)
+                                SeedingAux::chi2Term(locPos, locDir,**calib_sp) : 0.)
                          <<std::endl;
                 }
                 sstr<<" Target surf: "<<Amg::toString(trf)<<", firstSurf: "<< Amg::toString(trf.inverse()*firstSurfPos)
@@ -232,17 +233,17 @@ namespace MuonR4{
             
             newSegment->setFitQuality(track.chi2(), track.nDoF());
             newSegment->setNHits(summary.nPrecHits, summary.nPhiHits, summary.nEtaTrigHits);
-            dec_locPars(*newSegment)[toInt(ParamDefs::x0)] = refitSeg.x();
-            dec_locPars(*newSegment)[toInt(ParamDefs::y0)] = refitSeg.y();
-            dec_locPars(*newSegment)[toInt(ParamDefs::theta)] = refitDir.theta();
-            dec_locPars(*newSegment)[toInt(ParamDefs::phi)] = refitDir.phi();
+            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::x0)] = refitSeg.x();
+            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::y0)] = refitSeg.y();
+            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::theta)] = refitDir.theta();
+            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::phi)] = refitDir.phi();
             /// Seed paramters
             const Amg::Vector3D locSeedPos = globToLoc * pos;
             const Amg::Vector3D locSeedDir = globToLoc.linear() * dir;
-            dec_seedPars(*newSegment)[toInt(ParamDefs::x0)] = locSeedPos.x();
-            dec_seedPars(*newSegment)[toInt(ParamDefs::y0)] = locSeedPos.y();
-            dec_seedPars(*newSegment)[toInt(ParamDefs::theta)] = locSeedDir.theta();
-            dec_seedPars(*newSegment)[toInt(ParamDefs::phi)] = locSeedDir.phi();
+            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::x0)] = locSeedPos.x();
+            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::y0)] = locSeedPos.y();
+            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::theta)] = locSeedDir.theta();
+            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::phi)] = locSeedDir.phi();
 
         }
         return StatusCode::SUCCESS;

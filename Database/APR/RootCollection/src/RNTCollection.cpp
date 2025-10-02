@@ -331,7 +331,7 @@ void RNTCollection::open()  try
                                   m_description.type(),
                                   m_description.connection() );
       // clear the description
-      m_description = desc;
+      m_description = std::move(desc);
       bool      foundToken = false;
    
       const auto& rntdesc = m_reader->GetDescriptor();

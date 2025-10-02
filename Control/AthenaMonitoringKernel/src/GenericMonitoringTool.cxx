@@ -188,7 +188,7 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
             filler->fill({&var.get()});
           }
           if (matchedFillerList) {
-            matchedFillerList->push_back(filler);
+            matchedFillerList->push_back(std::move(filler));
           }
           break;
         }

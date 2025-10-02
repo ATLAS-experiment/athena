@@ -511,7 +511,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = None, 
             stepName += '_' + currentStepName
 
         theChainStep = ChainStep(stepName, chainDicts = stepDicts, isEmpty = True) 
-        log.debug("[makeCombinedStep] Merged empty step: \n %s", theChainStep)
+        log.debug("[makeCombinedStep] Merged empty step: %s", theChainStep.name)
         return theChainStep
 
     stepSeq = []    
@@ -561,16 +561,14 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = None, 
         else:
             # Standard step, append it to the combined step
             log.debug("[makeCombinedStep] step %s with nLegs  = %s", step.name, str(step.nLegs))
-            if len(step.sequenceGens):                
-                log.debug("[makeCombinedStep]    with sequences = %s", ' '.join(map(str, [seq.func.__name__ for seq in step.sequenceGens])))
+            if len(step.sequenceGens):                                
+                log.debug("[makeCombinedStep]    with sequences = [%s]", ', '.join(map(str, [seq.func.__name__ for seq in step.sequenceGens])))
 
             # this function only works if the input chains are single-object chains (one menu seuqnce)
             if len(step.sequenceGens) > 1:
                 log.debug("[makeCombinedStep] combining in an already combined chain")
-
-            if ( comboHypo is None or
-                 (hasattr(step.comboHypoCfg, '__name__') and step.comboHypoCfg.__name__ != "ComboHypoCfg") ):
-                comboHypo = step.comboHypoCfg
+           
+            comboHypo = step.comboHypoCfg
             currentStepName = step.name
             #remove redundant instances of StepN_ and merged_ (happens when merging already merged chains)
             if currentStepName.startswith('merged_'):
@@ -646,7 +644,7 @@ def build_empty_sequences(emptyChainDicts, step_mult, caller, L1decisions, seqNa
         
             
     log.verbose("[%s] emptyChainDicts %s", caller, emptyChainDicts)
-    log.debug("[%s] %s has number of empty sequences %d and empty legs in stepDicts %d",
+    log.debug("[%s] %s has %d empty sequences and %d empty legs in stepDicts",
               caller, chainName, len(emptySequences), len(emptyChainDicts))
     if len(emptySequences) != len(emptyChainDicts):
         log.error("[%s] %s has a different number of empty sequences/legs %d than stepDicts %d",

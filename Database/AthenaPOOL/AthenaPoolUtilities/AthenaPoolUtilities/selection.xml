@@ -1,6 +1,5 @@
 <lcgdict>
   <class name="AthenaAttributeList" id="A1E7E1EE-3E88-4689-8EE8-8D8A627564EE" />
-  <class name="TagAthenaAttributeList" id="6F6A12A0-FEEF-484B-9691-94B82B90CDBA" />
   <class name="AthenaAttributeListSpecification" />
   <class name="std::vector< AthenaAttributeSpecification* >" />
   <class name="AthenaAttributeSpecification" />

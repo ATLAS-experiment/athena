@@ -1,3 +1,5 @@
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
 /**
  * @file FPGATrackSimRegionMap_test.cxx
  * @brief Unit tests for FPGATrackSimRegionMap
@@ -6,14 +8,15 @@
  */
 
 #undef NDEBUG
-#include <cassert>
-#include <string>
-#include <iostream>
-#include <filesystem>
+
 
 #include "TestTools/initGaudi.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
+#include <cassert>
+#include <string>
+#include <iostream>
+#include <filesystem>
 
 using namespace std;
 
@@ -58,9 +61,13 @@ int main(int, char**)
     finTest.open(pmap_path);
 
     std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  test_pmaps;
-    for (int i = 0; i<6; i++)
-    {
-        test_pmaps.push_back(std::unique_ptr< FPGATrackSimPlaneMap> (new FPGATrackSimPlaneMap(finTest, 0, 1,overrides))); 
+    try{
+      for (int i = 0; i<6; i++) {
+          test_pmaps.push_back(std::unique_ptr< FPGATrackSimPlaneMap> (new FPGATrackSimPlaneMap(finTest, 0, 1,overrides))); 
+      }
+    } catch (std::exception & e){
+      std::cerr<<"Exception "<<e.what()<<" in FPGATrackSimRegionMap_test"<<std::endl;
+      return 1;
     }
 
     FPGATrackSimRegionMap rmap(test_pmaps, rmap_path, false);

@@ -76,12 +76,12 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         if (timeUntil>=0 && timeUntil<=5) {
             EventType += "+JustBeforeOTF";
         }
-    }
 
-    // check if any supercells are missing, there should be 34048
-    SG::ReadHandle<CaloCellContainer> scells(m_scellKey,ctx);
-    if (!scells.isValid() || scells->size() != 34048) {
-        EventType += "+MissingSCells";
+        // check if any supercells are missing, there should be 34048
+        SG::ReadHandle<CaloCellContainer> scells(m_scellKey,ctx);
+        if (!scells.isValid() || scells->size() != 34048) {
+            EventType += "+MissingSCells";
+        }
     }
 
 
@@ -122,6 +122,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
 
     auto eventType = Monitored::Scalar<std::string>("EventType",evenType);
     auto Signature = Monitored::Scalar<std::string>("Signature",label);
+    auto signatureEventType = Monitored::Scalar<std::string>("SignatureEventType",label+":"+evenType);
     auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
     auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
     auto IsDataTowers = Monitored::Scalar<bool>("IsDataTowers",evenType=="DataTowers");
@@ -228,7 +229,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
         }
         tobMismatched=100;
         auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
-        fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType,IsDataTowers,IsEmulatedTowers,simReady,eventType);
+        fill("mismatches",simReadyMismatch,tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType,IsDataTowers,IsEmulatedTowers,simReady,signatureEventType);
     } else {
         tobMismatched=0;
         fill("mismatches",lbn,Signature,tobMismatched,simReady,eventType);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file MakeInputDataHeader.cxx
@@ -27,7 +27,7 @@ StatusCode MakeInputDataHeader::initialize() {
 
    ATH_CHECK( m_streamName.initialize() );
    ATH_CHECK( m_aliasName.initialize() );
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //___________________________________________________________________________
 StatusCode MakeInputDataHeader::execute (const EventContext& ctx) const

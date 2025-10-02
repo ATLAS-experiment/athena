@@ -116,6 +116,8 @@ def OfflineTauRNN3prongDecoratorAlgCfg( flags, name="OfflineTauRNN3prongDecorato
 def OfflineJetDecoratorAlgCfg( flags, name="OfflineJetDecoratorAlg", **kwargs ):
     acc = ComponentAccumulator()
     kwargs.setdefault( "Prefix", "LinkedJet_" )
+    kwargs.setdefault( "OfflineTrkParticleContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.OfflineTrkKey )
     kwargs.setdefault( "JetContainerName", flags.PhysVal.IDTPM.currentTrkAna.JetContainerName )
     kwargs.setdefault( "maxTrkJetDR", flags.PhysVal.IDTPM.currentTrkAna.maxTrkJetDR )
     kwargs.setdefault( "JetAbsEtaMin", flags.PhysVal.IDTPM.currentTrkAna.jetMinAbsEta )

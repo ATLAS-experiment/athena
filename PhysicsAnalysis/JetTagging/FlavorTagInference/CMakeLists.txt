@@ -10,7 +10,6 @@
 atlas_subdir( FlavorTagInference )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core MathCore )
 find_package( onnxruntime )
 find_package( nlohmann_json )
@@ -53,9 +52,9 @@ atlas_add_library( FlavorTagInference
   ${FTISource}
   PUBLIC_HEADERS FlavorTagInference
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+  INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils nlohmann_json::nlohmann_json
-  LINK_LIBRARIES ${Boost_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
+  LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} 
     AsgTools
     AsgServicesLib
     AthContainers

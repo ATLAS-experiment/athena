@@ -35,11 +35,14 @@ FPGATrackSim_F610.sh -m -n 200 -c -o $OUTPUT_AOD_FILE
 echo "validating output AOD from F-610"
 python -m FPGATrackSimConfTools.FPGATrackSimValidateAODOutput $OUTPUT_AOD_FILE
 
+echo "Running F-150 in Reco_tf mode for a few single-mu events"
+FPGATrackSim_F150_RecoTf.sh -w -n 10
+
+echo "Running F-150 GNN in Reco_tf mode for a few single-mu events"
+FPGATrackSim_F150_RecoTf.sh -j -n 10
+
 echo "Running F-100 in Reco_tf mode for a few single-mu events"
 FPGATrackSim_F100_RecoTf.sh -n 10
-
-echo "Running F-150 in Reco_tf mode for a few single-mu events"
-FPGATrackSim_F150_RecoTf.sh -n 10
 
 echo "Running F-100 standalone for a few ttbar events"
 FPGATrackSim_F100.sh -t -n 1 -c -o $OUTPUT_AOD_FILE

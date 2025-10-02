@@ -1,5 +1,5 @@
 
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def LArIdCablingTestCfg(flags,isSC=False):
@@ -39,6 +39,7 @@ if __name__=="__main__":
     flags=initConfigFlags()
 
     flags.Input.isMC = False
+    flags.Input.Files=[]
     flags.IOVDb.DatabaseInstance="CONDBR2"
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=[args.runnumber]

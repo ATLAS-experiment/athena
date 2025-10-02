@@ -95,6 +95,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
     ATH_CHECK( m_FPGAHitKey.initialize() );
+    ATH_CHECK( m_FPGAHitKey_1st.initialize() );
     ATH_CHECK( m_FPGAHitKey_2nd.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
@@ -130,10 +131,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Set up write handles.
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey_1st,ctx);
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
     SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
 
+    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
     ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
     ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
     ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
@@ -149,7 +152,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
-        return StatusCode::SUCCESS;
+
+      // Potentially write the output data, now it's empty and reset, but this keeps things synchronized over trees
+      if (m_writeOutputData)  {
+       std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
+       std::vector<FPGATrackSimTrack> tracks_1st;
+       auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
+       ATH_CHECK(writeOutputData(roads_1st, tracks_1st, dataFlowInfo.get()));
+      }      
+
+      return StatusCode::SUCCESS;
     }
     ATH_MSG_INFO("Event accepted by: " << m_evtSel->name());
 
@@ -180,6 +192,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
     m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd);
+    // record 1st stage hits in SG
+    for (auto& hit : phits_1st) {
+        FPGAHits_1st->push_back(*hit);
+    }
+
     if(m_writeOutputData) *m_slicedStripHeaderPreSP = *m_slicedStripHeader;
 
     // The slicing engine puts strip hits into a logical event input header. That header now needs to go
@@ -326,7 +343,22 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
     } else { // No tracking; 
       ATH_MSG_DEBUG("No tracking. Just running dummy road2track algorith");
-      roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0));
+      if(m_doGNNPixelSeeding) { //For GNNPixelSeeding, convert the roads to a track in the simplest form
+        for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads_1st) {
+            std::vector<std::shared_ptr<const FPGATrackSimHit>> track_hits;
+            for (unsigned layer = 0; layer < road->getNLayers(); ++layer) {
+                track_hits.insert(track_hits.end(), road->getHits(layer).begin(), road->getHits(layer).end());
+            }
+
+            FPGATrackSimTrack track_cand;
+            track_cand.setNLayers(track_hits.size());
+            for (size_t ihit = 0; ihit < track_hits.size(); ++ihit) {
+                track_cand.setFPGATrackSimHit(ihit, *(track_hits[ihit]));
+            }
+            tracks_1st.push_back(track_cand); 
+        }
+      }
+      else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
     }
 
     std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
@@ -489,29 +521,27 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vecto
                                                                 std::vector<FPGATrackSimTrack> const& tracks_1st,
                                                                 FPGATrackSimDataFlowInfo const* dataFlowInfo)
 {
-  m_logicEventOutputHeader->reset();
+    m_logicEventOutputHeader->reset();
 
-  ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size());
+    ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size());
 
-  if (!m_writeOutputData) return StatusCode::SUCCESS;
+    if (!m_writeOutputData) return StatusCode::SUCCESS;
     m_logicEventOutputHeader->reserveFPGATrackSimRoads_1st(roads_1st.size());
     m_logicEventOutputHeader->addFPGATrackSimRoads_1st(roads_1st);
-  if (m_doTracking) {
+
     m_logicEventOutputHeader->reserveFPGATrackSimTracks_1st(tracks_1st.size());
     m_logicEventOutputHeader->addFPGATrackSimTracks_1st(tracks_1st);
-  }
 
+    m_logicEventOutputHeader->setDataFlowInfo(*dataFlowInfo);
+    ATH_MSG_DEBUG(m_logicEventOutputHeader->getDataFlowInfo());
 
-  m_logicEventOutputHeader->setDataFlowInfo(*dataFlowInfo);
-  ATH_MSG_DEBUG(m_logicEventOutputHeader->getDataFlowInfo());
-
-  // It would be nice to rearrange this so both algorithms use one instance of this tool, I think.
-  // Which means that dataprep can't call writeData because that does Fill().
-  ATH_CHECK(m_writeOutputTool->writeData());
+    // It would be nice to rearrange this so both algorithms use one instance of this tool, I think.
+    // Which means that dataprep can't call writeData because that does Fill().
+    ATH_CHECK(m_writeOutputTool->writeData());
 
 
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -134,8 +134,6 @@ namespace EL
     StatusCode AlgorithmStateModule ::
     onExecute (ModuleData& data)
     {
-      RCU_CHANGE_INVARIANT (this);
-
       data.m_skipEvent = false;
       auto iter = data.m_algs.begin();
       try

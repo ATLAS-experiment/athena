@@ -7,10 +7,13 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "InDetRawData/PixelRDORawData.h"
 #include "InDetRawData/Pixel1RawData.h"
 #include "ITkPixel1RawData.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "ITkPixelRDO_Container.h"
+#include "ITkPixelCabling/ITkPixelCablingData.h"
+
 
 #include <map>
 
@@ -31,7 +34,7 @@ StatusCode ITkPixelHitSortingTool::initialize(){
 }
 
 template<class ContainerType>
-std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits(const ContainerType* rdoContainer) const {
+std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits(const ContainerType* rdoContainer, const ITkPixelCablingData* cabling) const {
 
     std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> EventHitMaps; 
 
@@ -55,7 +58,7 @@ std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortR
         const uint colsPerFE =  p_design->columnsPerCircuit();
         bool is25x100 = rowsPerFE == 768 && colsPerFE == 200;
         ATH_MSG_DEBUG("Module specs: nChips = " << nChips << ", rows per FE = " << rowsPerFE << " cols per FE = " << colsPerFE);
-
+        
         if (is25x100){
             //The bonding pattern as understood at the time of writing this code is
             //that odd sensor rows (with even indices if numbered from 0) are bonded to the left and even (= odd indices) to the right.
@@ -72,9 +75,15 @@ std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortR
         // Store ToT+1, reserve 0 for no hit.
         // ITkPixelOnlineId onlineID = m_cablingHelper.onlineId(rdoID); To be used when cabling helper is implemented
         // HitMap and encoder labels rows/cols from 0
-        auto onlineID = (waferID.get_identifier32().get_compact() << 2 ) | chip;
+
+        //Extract the online 'base' from cabling. Last two bits are reserved
+        //for chip ID.
+        ITkPixelCabling::ModuleInfo mi = cabling->onlineModuleInfo(waferID);
+        //auto onlineID = (waferID.get_identifier32().get_compact() << 2 ) | chip;
+        auto onlineID = (uint32_t)mi.id | chip;
 
         ATH_MSG_DEBUG(" Chip: " << std::hex << onlineID << std::dec << " ID: " << chip << " col: " << col << "  row: " << row << " ToT: " << tot << " eta_index = " << m_pixIdHelper->eta_index(rdoID) << " phi index = " << m_pixIdHelper->phi_index(rdoID) << " rowsPerFE = " << rowsPerFE << " colsPerFE = " << colsPerFE << "\n");
+
         EventHitMaps[onlineID](col, row) = tot + 1;
 
       };
@@ -84,18 +93,18 @@ std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortR
 
 }
 
-template std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits<ITkPixelRDO_Container>(const ITkPixelRDO_Container* rdoContainer) const;
-template std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits<PixelRDO_Container>(const PixelRDO_Container* rdoContainer) const;
-
-template<class RDOType>
-StatusCode ITkPixelHitSortingTool::createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, InDetRawDataContainer<InDetRawDataCollection<RDOType> > *rdoContainer) const  {
+template std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits<ITkPixelRDO_Container>(const ITkPixelRDO_Container* rdoContainer, const ITkPixelCablingData* cabling) const;
+template std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortRDOHits<PixelRDO_Container>(const PixelRDO_Container* rdoContainer, const ITkPixelCablingData* cabling) const;
+/*
+template<class ContainerType, class RDOType>
+StatusCode ITkPixelHitSortingTool::createRDO(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, ContainerType *rdoContainer) const  {
   //this is VERY preliminary/experimental.
   //Testing purposes only at this point, will certainly change.
   //Using current ID inspiration, adapted so that no compilation
   //warnings arise. All values are dummy and no functionality is expected
   //at this point.
 
-  typedef InDetRawDataCollection< RDOType > PixelRawCollection;
+  typedef InDetRawDataCollection< InDetRawData > PixelRawCollection;
 
   for (const auto& entry : EventHitMaps) {
 
@@ -130,6 +139,6 @@ StatusCode ITkPixelHitSortingTool::createRDO(std::map<ITkPixelOnlineId, HitMap> 
   return StatusCode::SUCCESS;
 }
 
-template StatusCode ITkPixelHitSortingTool::createRDO<ITkPixel1RawData>(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, InDetRawDataContainer<InDetRawDataCollection<ITkPixel1RawData> > *rdoContainer) const;
-template StatusCode ITkPixelHitSortingTool::createRDO<Pixel1RawData>(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, InDetRawDataContainer<InDetRawDataCollection<Pixel1RawData> > *rdoContainer) const;
-
+template StatusCode ITkPixelHitSortingTool::createRDO<ITkPixelRDO_Container, ITkPixel1RawData>(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, ITkPixelRDO_Container *rdoContainer) const;
+template StatusCode ITkPixelHitSortingTool::createRDO<PixelRDO_Container, Pixel1RawData>(std::map<ITkPixelOnlineId, HitMap> &EventHitMaps, PixelRDO_Container *rdoContainer) const;
+*/

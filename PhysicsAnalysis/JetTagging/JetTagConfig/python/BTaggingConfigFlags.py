@@ -95,7 +95,7 @@ def getNNs(flags):
         "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
     ] if isRun3Derivation(flags) else []
     gn3v01_paths = [
-        "BTagging/20250527/GN3V01/antikt4empflow/network.onnx", # Tracks+PFlow+Muons+Charge+Electrons+Hybrid
+        "BTagging/20250912/GN3EPCLV01/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
     ] if isRun3Derivation(flags) else []
     # Combine the paths for GN3v00 and GN3v01 models
     gn3_paths = gn3v00_paths + gn3v01_paths
@@ -104,7 +104,7 @@ def getNNs(flags):
              "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
              "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
              "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx",
-             "BTagging/20250522/GN3XV00/antikt10ufo/network.onnx",
+             "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx",
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
     ]

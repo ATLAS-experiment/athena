@@ -322,7 +322,8 @@ def HLTSeedingCfg(flags, seqName = None):
         L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else "",
         HLTSeedingSummaryKey = "HLTSeedingSummary", # Transient, consumed by DecisionSummaryMakerAlg
         ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.forceEnableAllChains,
-                                                    MonTool = CTPUnpackingMonitoring(flags, 512, 400) )
+                                                    MonTool = CTPUnpackingMonitoring(flags, 512, 400),
+                                                    UseEDMxAOD = flags.Trigger.CTP.UseEDMxAOD )
     )
 
     # Add L1DataConsistencyChecker unless we forceEnableAllChains which always results in missing TOBs

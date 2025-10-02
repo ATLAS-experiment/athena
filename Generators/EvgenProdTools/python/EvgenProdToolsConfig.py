@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -29,6 +29,10 @@ def CountHepMCCfg(flags, name="CountHepMC", **kwargs):
     kwargs.setdefault("FirstEvent", flags.Exec.FirstEvent)
     kwargs.setdefault("CorrectHepMC", True)
     kwargs.setdefault("CorrectEventID", True)
+
+    if flags.Input.Files:
+        kwargs.setdefault("CorrectRunNumber", True)
+        kwargs.setdefault("NewRunNumber", flags.Generator.DSID)
 
     acc = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Post))
     acc.addEventAlgo(CompFactory.CountHepMC(name, **kwargs))

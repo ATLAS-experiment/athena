@@ -2,7 +2,6 @@
 """
 This library defines a class for filtering events based on the beamspot size in athena.
 """
-from __future__ import division
 __author__  = 'Anthony Morley'
 __version__ = '$Id $'
 

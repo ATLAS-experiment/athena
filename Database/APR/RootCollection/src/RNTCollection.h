@@ -17,6 +17,7 @@
 #include "Gaudi/PluginService.h"
 
 #include <string>
+#include <memory>
 
 #include "RVersion.h"
 

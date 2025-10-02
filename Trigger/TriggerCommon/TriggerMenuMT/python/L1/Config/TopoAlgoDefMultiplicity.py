@@ -195,7 +195,7 @@ class TopoAlgoDefMultiplicity:
             # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
             'jTE100', 'jTE600', 'jTE1500', 'jTE4000', 'jTE6500', 'jTE8300', 'jTE9000', 'jTE10000', 'jTE12000',
-            'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5', 'jTEFWD8300',
+            'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5', 'jTEFWD6500',
 
             'gMHT500',
 

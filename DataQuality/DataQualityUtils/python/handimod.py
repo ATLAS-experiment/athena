@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -605,7 +605,7 @@ def makeOneHistFile(htmlDir, name, subname, sp, runlistLoc, compare, jsRoot):
                 else:
                     name = ' '.join([namecache[-1]])
                     namecache = []
-                from six.moves import urllib
+                import urllib
                 resultname = name.rsplit(':', 1)[0]
                 resultval = sp[cc-1]
                 if algorithm == 'RepeatAlgorithm' and resultname.endswith('|Status'):

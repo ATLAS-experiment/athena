@@ -278,6 +278,8 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
 
+        BinDesc.region = flags.Trigger.FPGATrackSim.region
+
         # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
         step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")
         step1.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
@@ -333,7 +335,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
     tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
     tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
-    tool.keepNInnerHits = flags.Trigger.FPGATrackSim.GenScan.keepNInnerHits    
+    tool.keepHitsStrategy = flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy
     tool.threshold = 4
 
     # set cuts
@@ -429,7 +431,11 @@ def FPGATrackSimGNNRoadMakerToolCfg(flags,name="FPGATrackSimGNNRoadMakerTool"):
     GNNRoadMakerTool = CompFactory.FPGATrackSimGNNRoadMakerTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     GNNRoadMakerTool.roadMakerTool = flags.Trigger.FPGATrackSim.GNN.roadMakerTool.value
     GNNRoadMakerTool.edgeScoreCut = flags.Trigger.FPGATrackSim.GNN.edgeScoreCut
+    GNNRoadMakerTool.doGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding
     GNNRoadMakerTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+
+    from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
+    GNNRoadMakerTool.LayerNumberTool = result.getPrimaryAndMerge(ITkTrigL2LayerNumberToolCfg(flags))
 
     result.setPrivateTools(GNNRoadMakerTool)
 
@@ -588,6 +594,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.NumOfHitPerGrouping = flags.Trigger.FPGATrackSim.ActiveConfig.NumOfHitPerGrouping
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.DoGNNTrack = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
+    theFPGATrackSimLogicalHitsProcessAlg.DoGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
@@ -722,23 +729,22 @@ def ConfigureMultiRegionFlags(flags):
     print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
 
 
-def FPGATrackSimF150FlagCfg(flags):
-    flags.Scheduler.ShowDataDeps=True
-    flags.Scheduler.CheckDependencies=True
+def FPGATrackSimF150FlagCfg(flags):    
+    FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
     
-    flags.Concurrency.NumThreads=4
-    flags.Concurrency.NumConcurrentEvents=1
-    flags.Concurrency.NumProcs=0
+    flags.Scheduler.ShowDataDeps=True 
+    flags.Scheduler.CheckDependencies=True
+    flags.Debug.DumpEvtStore=False
     
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
-    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
-    FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
     flags.Trigger.FPGATrackSim.tracking = False
     flags.Trigger.FPGATrackSim.Hough.genScan = True
-    flags.Trigger.FPGATrackSim.convertSPs = True
+    flags.Trigger.FPGATrackSim.convertSPs = False # in case we need the conversion to take place on hw we'll have to convert to SPs after the cluster-sorting (will probably need new algorithm)
+    flags.Tracking.ITkActsValidateF150Pass.doActsSpacePoint = not flags.Trigger.FPGATrackSim.convertSPs
     flags.Trigger.FPGATrackSim.Hough.secondStage = False
+    
     flags.Trigger.FPGATrackSim.regionList="34,98,162,226,290,354,418,482,546,610,674,738,802,866,930,994,1058,1122,1186,1250"
     ConfigureMultiRegionFlags(flags)
     
@@ -746,14 +752,45 @@ def FPGATrackSimF150FlagCfg(flags):
 
 def FPGATrackSimSeedingCfg(flags):
     acc=ComponentAccumulator()
-    acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimClusteringCfg(flags))
+    if not flags.Trigger.FPGATrackSim.runOnPreProducedHeaderFiles:
+        acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimClusteringCfg(flags))
 
-    from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
-    acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
+        from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
+        acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
+    else:
+        from FPGATrackSimConfTools.FPGATrackSimMergeOutputsConfig import FPGATrackSimMergeOutputsAlgCfg
+        acc.merge(FPGATrackSimMergeOutputsAlgCfg(flags))
     
     from FPGATrackSimSeeding.FPGATrackSimSeedingConfig import FPGATrackSimSeedingCfg
     acc.merge(FPGATrackSimSeedingCfg(flags))
     
+    
+    if flags.Tracking.ActiveConfig.storeTrackSeeds:
+        from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
+        from InDetConfig.ITkActsHelpers import isFastPrimaryPass
+        
+        acc.merge(ActsStoreTrackSeedsCfg(flags,
+                                         processPixels = True,
+                                         processStrips = not isFastPrimaryPass(flags)))
+    
+    
+    acc.merge(WriteAdditionalFPGATrackSimOutputCfg(flags))
+    
+    return acc
+
+def WriteAdditionalFPGATrackSimOutputCfg(flags):
+    acc=ComponentAccumulator()
+    if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+            acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+
+            if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput1st | flags.Trigger.FPGATrackSim.Hough.houghRootoutput2nd):
+                acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
+
+            if flags.Trigger.FPGATrackSim.Hough.writeTestOutput:
+                acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+
+            if (flags.Trigger.FPGATrackSim.Hough.genScan):
+                acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
     return acc
 
 if __name__ == "__main__":
@@ -858,17 +895,7 @@ if __name__ == "__main__":
         flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
         acc=MainServicesCfg(flags)
 
-        if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
-            acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
-
-            if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput1st | flags.Trigger.FPGATrackSim.Hough.houghRootoutput2nd):
-                acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
-
-            if flags.Trigger.FPGATrackSim.Hough.writeTestOutput:
-                acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
-
-            if (flags.Trigger.FPGATrackSim.Hough.genScan):
-                acc.addService(CompFactory.THistSvc(Output = ["GENSCAN DATAFILE='genscan.root', OPT='RECREATE'"]))
+        acc.merge(WriteAdditionalFPGATrackSimOutputCfg(flags))
 
         if not flags.Trigger.FPGATrackSim.wrapperFileName:
             from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

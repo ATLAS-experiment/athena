@@ -99,6 +99,7 @@ public:
     Gaudi::Property<double> m_qptpad{this, "QPtPad", 0.0, "Extra phi padding from q/pT resolution"};
     Gaudi::Property<double> m_z0pad{this, "Z0Pad", 0.0, "Extra eta padding from z0 resolution"};
     Gaudi::Property<double> m_etapad{this, "EtaPad", 0.0, "Extra eta padding from eta resolution"};
+    Gaudi::Property<unsigned> m_region{this, "region", 0, "Region number, needed to write out lookup tables for test vectors"};
     Gaudi::Property<std::vector<double>> m_slPerEtaMod{
     this,
         "slPerEtaMod",

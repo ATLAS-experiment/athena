@@ -28,7 +28,7 @@
 
 #include <algorithm>
 
-#include "boost/range.hpp"
+#include <ranges>
 
 
 //________________________________________________________________________________
@@ -543,7 +543,8 @@ bool AddressRemappingSvc::isDeleted (const SG::TransientAddress& tad) const
 {
   std::string key = tad.name();
   std::scoped_lock lock (m_deletesMutex);
-  for (const auto& p : boost::make_iterator_range (m_deletes.equal_range (key))) {
+  auto xrange = m_deletes.equal_range (key);
+  for (const auto& p : std::ranges::subrange(xrange.first,xrange.second)) {
     CLID clid = p.second;
     if (tad.transientID (clid)) {
       return true;

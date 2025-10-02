@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 """Functionality core of the Gen_tf transform"""
 
@@ -71,15 +71,15 @@ def setupSample(runArgs, flags):
     # Update the global flags
     if dsid.isdigit():
         flags.Generator.DSID = int(dsid)
-    
+
     # Set nEventsPerJob
     if not sample.nEventsPerJob:
         evgenLog.info("#############################################################")
-        evgenLog.info(" !!!! no sample.nEventsPerJob set !!!  The default 10000 used. !!! ") 
+        evgenLog.info(" !!!! no sample.nEventsPerJob set !!!  The default 10000 used. !!! ")
         evgenLog.info("#############################################################")
     else:
         checkNEventsPerJob(sample)
-        evgenLog.info(" nEventsPerJob = " + str(sample.nEventsPerJob)) 
+        evgenLog.info(" nEventsPerJob = " + str(sample.nEventsPerJob))
         flags.Generator.nEventsPerJob = sample.nEventsPerJob
 
     # Check if sample attributes have been properly set
@@ -94,9 +94,9 @@ def setupSample(runArgs, flags):
                gendict = generatorsGetInitialVersionedDictionary(gennames)
                gennamesvers = generatorsVersionedStringList(gendict)
                evgenLog.info("MetaData: generatorName = {}".format(gennamesvers))
-           else:   
+           else:
                evgenLog.info("MetaData: {} = {}".format(var, value))
-    
+
     # Check for other inconsistencies in jO
     if len(sample.generators) > len(set(sample.generators)):
         raise RuntimeError("Duplicate entries in generators: invalid configuration, please check your JO")
@@ -104,22 +104,22 @@ def setupSample(runArgs, flags):
     if gen_require_steering(sample.generators):
         if hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_PreFile"):
             raise RuntimeError("'EvtGen' found in job options name, please set '--steering=afterburn'")
-    
+
     # Keywords check
     if hasattr(sample, "keywords"):
         checkKeywords(sample, evgenLog, officialJO)
-    
+
     # L1, L2 categories check
     if hasattr(sample, "categories"):
         checkCategories(sample, evgenLog, officialJO)
-    
+
     return sample
 
 
 # Function to check black-listed releases
 def checkBlackList(cache, generatorName, checkType) :
     isError = None
-    fileName = "BlackList_caches.txt" if checkType == "black" else "PurpleList_generators.txt" 
+    fileName = "BlackList_caches.txt" if checkType == "black" else "PurpleList_generators.txt"
     with open(f"/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common/{fileName}") as bfile:
         for line in bfile.readlines():
             if not line.strip():
@@ -128,7 +128,7 @@ def checkBlackList(cache, generatorName, checkType) :
             badCache=line.split(',')[1].strip()
             # Bad generators
             badGens=line.split(',')[2].strip()
-            
+
             used_gens = ','.join(generatorName)
             # Match Generator and release cache
             if cache==badCache and re.search(badGens,used_gens) is not None:
@@ -144,9 +144,9 @@ def fromRunArgs(runArgs):
     d = release_metadata()
     evgenLog.info("using release [%(project name)s-%(release)s] [%(platform)s] [%(nightly name)s/%(nightly release)s] -- built on [%(date)s]", d)
     athenaRel = d["release"]
-    
+
     evgenLog.info("****************** STARTING EVENT GENERATION *****************")
-        
+
     evgenLog.info("**** Transformation run arguments")
     evgenLog.info(runArgs)
 
@@ -175,12 +175,12 @@ def fromRunArgs(runArgs):
     # Sort the list of generator names into standard form
     from GeneratorConfig.GenConfigHelpers import gen_sortkey, gen_lhef
     generatorNames = sorted(sample.generators, key=gen_sortkey)
-    
+
     # Check black-list and purple-list
     blError = checkBlackList(athenaRel,generatorNames, "black")
     plError = checkBlackList(athenaRel,generatorNames, "purple")
     if blError is not None:
-        raise RuntimeError(blError)   
+        raise RuntimeError(blError)
     if plError is not None:
         evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         evgenLog.warning(f"!!! WARNING {plError} !!!")
@@ -188,19 +188,24 @@ def fromRunArgs(runArgs):
 
     # Setup the main flags
     flags.Exec.FirstEvent = runArgs.firstEvent
-    flags.Exec.MaxEvents = runArgs.maxEvents if runArgs.maxEvents != -1 else flags.Generator.nEventsPerJob
+    # Max events should be not set, job stopping is handled by CountHepMC
+    # using the RequestedOutput property
+    flags.Exec.MaxEvents = -1
 
-    flags.Input.Files = []
-    flags.Input.RunNumbers = [flags.Generator.DSID]
-    flags.Input.TimeStamps = [0]
+    if hasattr(runArgs, "inputEVNT_PreFile"):
+        flags.Input.Files = runArgs.inputEVNT_PreFile
+    else:
+        flags.Input.Files = []
+        flags.Input.RunNumbers = [flags.Generator.DSID]
+        flags.Input.TimeStamps = [0]
 
     flags.Output.EVNTFileName = runArgs.outputEVNTFile
 
     flags.Beam.Energy = runArgs.ecmEnergy / 2 * GeV
-    
+
     flags.PerfMon.doFastMonMT = True
     flags.PerfMon.doFullMonMT = True
-    
+
     # Process pre-include
     processPreInclude(runArgs, flags)
 
@@ -215,11 +220,11 @@ def fromRunArgs(runArgs):
         flags.dump()
     else:
         flags.dump("Generator.*")
-    
+
     # Print various stuff
     evgenLog.info(".transform =                  Gen_tf")
     evgenLog.info(".platform = " + str(os.environ["BINARY_TAG"]))
-    
+
     # Announce start of job configuration
     evgenLog.info("**** Configuring event generation")
 
@@ -227,21 +232,25 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
     cfg = MainEvgenServicesCfg(flags, withSequences=True)
 
+    # Input file handling (if needed)
+    if flags.Input.Files:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        cfg.merge(PoolReadCfg(flags))
+
     # EventInfoCnvAlg
     from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-    cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True, xAODKey="TMPEvtInfo"), 
+    cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True, xAODKey="TMPEvtInfo"),
                                  sequenceName=EvgenSequence.Generator.value)
 
     # Set up the process
     cfg.merge(sample.setupProcess(flags))
-    
-    # Filter
-    
+
     # Fix non-standard event features
-    from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
-    cfg.merge(FixHepMCCfg(flags, 
-                          PurgeUnstableWithoutEndVtx = "Hijing" in sample.generators or \
-                                                       "Herwig7" in sample.generators))
+    if not flags.Input.Files:
+        from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
+        cfg.merge(FixHepMCCfg(flags,
+                              PurgeUnstableWithoutEndVtx="Hijing" in sample.generators or \
+                                                         "Herwig7" in sample.generators))
 
     ## Sanity check the event record (not appropriate for all generators)
     from GeneratorConfig.GenConfigHelpers import gens_testhepmc
@@ -259,14 +268,14 @@ def fromRunArgs(runArgs):
     # Configure the event counting (AFTER all filters)
     from EvgenProdTools.EvgenProdToolsConfig import CountHepMCCfg
     cfg.merge(CountHepMCCfg(flags,
-                            RequestedOutput = sample.nEventsPerJob if runArgs.maxEvents == -1
-                                              else runArgs.maxEvents))
-    evgenLog.info("Requested output events = %s", str(cfg.getEventAlgo("CountHepMC").RequestedOutput))
+                            RequestedOutput=sample.nEventsPerJob if runArgs.maxEvents == -1
+                                            else runArgs.maxEvents))
+    evgenLog.info("Requested output events = %d", cfg.getEventAlgo("CountHepMC").RequestedOutput)
 
     # Print out the contents of the first 5 events (after filtering)
     if hasattr(runArgs, "printEvts") and runArgs.printEvts > 0:
         from TruthIO.TruthIOConfig import PrintMCCfg
-        cfg.merge(PrintMCCfg(flags, 
+        cfg.merge(PrintMCCfg(flags,
                              LastEvent=runArgs.printEvts))
 
     # PerfMon
@@ -275,10 +284,10 @@ def fromRunArgs(runArgs):
 
     # Estimate time needed for Simulation
     from EvgenProdTools.EvgenProdToolsConfig import SimTimeEstimateCfg
-    cfg.merge(SimTimeEstimateCfg(flags))   
-    
+    cfg.merge(SimTimeEstimateCfg(flags))
+
     # TODO: Rivet
-         
+
     # Include information about generators in metadata
     from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
     generatorDictionary = generatorsGetInitialVersionedDictionary(generatorNames)
