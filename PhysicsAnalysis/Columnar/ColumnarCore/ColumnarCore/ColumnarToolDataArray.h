@@ -41,9 +41,6 @@ namespace columnar
     /// @brief merge the data from another column
     void mergeData (const std::string& name, ColumnDataArray&& other);
 
-    /// @brief rename columns
-    void updateColumnRef (const std::string& from, const std::string& to);
-
     /// @brief set the index for this column
     void setIndex (unsigned val_index) noexcept;
 
@@ -74,10 +71,20 @@ namespace columnar
     std::vector<ColumnarTool<ColumnarModeArray>*> sharedTools;
 
     /// @brief the names associated with all container ids
-    std::unordered_map<std::string,std::string,StringHash,std::equal_to<>> containerStoreNames;
+    std::unordered_map<std::string,std::string,StringHash,std::equal_to<>> containerInternalToUserNames;
+    std::unordered_map<std::string,std::vector<std::string>,StringHash,std::equal_to<>> containerUserToInternalNames;
+
+    /// @brief an extra map, for mapping individual column names
+    std::unordered_map<std::string,std::string,StringHash,std::equal_to<>> columnInternalToUserNames;
+    std::unordered_map<std::string,std::vector<std::string>,StringHash,std::equal_to<>> columnUserToInternalNames;
 
     /// @brief the name-column map
     std::unordered_map<std::string,ColumnDataArray> columns;
+
+
+    /// @brief convert a column name between user and internal names
+    [[nodiscard]] std::string convertInternalToUserName (std::string_view name) const;
+    [[nodiscard]] std::vector<std::string> convertUserToInternalNames (std::string_view name) const;
   };
 }
 

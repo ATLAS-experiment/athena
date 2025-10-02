@@ -30,9 +30,9 @@ namespace columnar
       : m_columnBase (&columnBase),
         m_name (name)
     {
-      columnBase.setContainerStoreName (CI::idName, name);
+      columnBase.setContainerUserName (CI::idName, name);
       m_offsetsData = std::make_unique<ColumnAccessorDataArray> (&m_offsetsIndex, &m_offsetsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-      columnBase.addColumn (name, m_offsetsData.get(), {.offsetName = (CI::perEventRange ? numberOfEventsName : ""), .isOffset = true});
+      columnBase.addColumn (std::string (CI::idName), m_offsetsData.get(), {.offsetName = (CI::perEventRange ? numberOfEventsName : ""), .isOffset = true});
     }
 
     AccessorTemplate (AccessorTemplate&& that)
