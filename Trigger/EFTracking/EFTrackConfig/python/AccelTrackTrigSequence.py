@@ -37,7 +37,7 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
 
     seq = ActsTrigSequence(self.flags, self.signature, self.rois, self.inView)
 
-    ca.merge(F100Config.dataPreparation2(self.flags, self.signature, self.inView, self.rois))
+    ca.merge(F100Config.dataPreparation(self.flags, self.signature, self.inView, self.rois))
     ca.merge(seq.fastTrackFinder())
 
     return ca

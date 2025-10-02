@@ -104,8 +104,6 @@ def F100StreamIntegrationCfg(flags, name = 'F100StreamIntegrationAlg', **kwarg):
 
     acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100StreamIntegrationAlg(name, **kwarg))
 
-    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100IntegrationAlg(name, **kwarg))
-
     return acc
 
 def F110IntegrationCfg(flags, name = 'F110IntegrationAlg', **kwarg):
@@ -195,10 +193,10 @@ def F100EDMConversionCfg(flags, name = 'F100EDMConversionAlg', **kwarg):
     return acc
 
 
-def FPGAClusterSortingCfg(flags,name="FPGAClusterSortingAlg",**kwargs):
+def FPGAClusterSortingCfg(flags,**kwargs):
     acc = ComponentAccumulator()
     from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
-    ClusterSorting = FPGAClusterSortingAlgCfg(flags,name,**kwargs)
+    ClusterSorting = FPGAClusterSortingAlgCfg(flags,**kwargs)
     
     acc.merge(ClusterSorting)
     return acc
@@ -211,42 +209,37 @@ def F100FlagsCfg(flags):
     return flags
 
 
-def FPGADataPreparation(flags,runStandalone=False,nameSuffix="",**kwargs): # thsi is used to run the F100 through Reco_tf
-    suffix=""
-    if nameSuffix is not "":
-        suffix = "_"+nameSuffix
-
-    if "FPGAThreads" not in kwargs:
-        kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)    
-    
+def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F100 through Reco_tf
+    kwargs = {}
+    kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
-    acc.merge(F100DataEncodingCfg(flags,"F110DataEncodingAlg"+suffix,**kwargs))
+    acc.merge(F100DataEncodingCfg(flags))
     
     if(flags.FPGADataPrep.doCodeType == "F1X0"):
-        acc.merge(F1X0IntegrationCfg(flags, "F1X0IntegrationAlg"+suffix, **kwargs))
+        acc.merge(F1X0IntegrationCfg(flags, "F1X0IntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F1X0XRT"):
-        acc.merge(F1X0XRTIntegrationCfg(flags, "F1X0XRTIntegrationAlg"+suffix, **kwargs))
+        acc.merge(F1X0XRTIntegrationCfg(flags, "F1X0XRTIntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F100Stream"):
-        acc.merge(F100StreamIntegrationCfg(flags, "F100StreamIntegrationAlg"+suffix, **kwargs))
+        acc.merge(F100StreamIntegrationCfg(flags, "F100StreamIntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F110"):
-        acc.merge(F110IntegrationCfg(flags, "F110IntegrationAlg"+suffix, **kwargs))
+        acc.merge(F110IntegrationCfg(flags, "F110IntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F110Stream"):
-        acc.merge(F110StreamIntegrationCfg(flags, "F110StreamIntegrationAlg"+suffix, **kwargs))
+        acc.merge(F110StreamIntegrationCfg(flags, "F110StreamIntegrationAlg", **kwargs))
     else:
         print("Code Type is not recognized")
         exit(1)
 
-    acc.merge(F100EDMConversionCfg(flags, "F100EDMConversionAlg"+suffix))
-    acc.merge(FPGAClusterSortingCfg(flags,"FPGAClusterSortingAlg"+suffix,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters'+suffix,
-                                             'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'+suffix}))
+    acc.merge(F100EDMConversionCfg(flags))
+    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters',
+                                             'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
 
     if(not runStandalone):
         if(not flags.FPGADataPrep.ForTiming): 
             from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-            acc.merge(FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg'+suffix,
+            acc.merge(FPGATrackSimReportingCfg(flags,
                                                perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
-                                            **{'xAODPixelClusterContainers' : ['ITkPixelClusters'+suffix],
-                                                'xAODStripClusterContainers' : ['ITkStripClusters'+suffix],
+                                            **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
+                                                'xAODStripClusterContainers' : ['ITkStripClusters'],
                                                 'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
                                                 'isDataPrep': True} ))
         

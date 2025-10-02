@@ -23,4 +23,4 @@ while [ $# -ge 1 ];do
 ## checking valid inputs
 if [ -z "$inputRDO" ]; then usage ; fi
 
-athena.py --imf --perfmon=fastmonmt --threads=${threads} --evtMax=${nEvents}  --filesInput=${inputRDO} TriggerJobOpts/runHLT.py Trigger.enabledSignatures=[\"Muon\",\"Jet\",\"Tau\",\"MET\"] FPGADataPrep.doCodeType=F1X0 Trigger.EFTrackPipeline=\"F100\" Trigger.useActsTracking=True ITk.doTruth=False Tracking.doTruth=False IOVDb.GlobalTag=OFLCOND-MC21-SDR-RUN4-03 Acts.doMonitoring=True Exec.FPE=1 FPGADataPrep.doF110=True FPGADataPrep.bdfID=\"${bdfid}\" FPGADataPrep.xclbin=\"${xclbinPath}\
+athena.py --imf --perfmon=fastmonmt --threads=${threads} --evtMax=${nEvents}  --filesInput=${inputRDO} TriggerJobOpts/runHLT.py Trigger.enabledSignatures=[\"Muon\",\"Jet\",\"MET\"] FPGADataPrep.doCodeType=F1X0 Trigger.EFTrackPipeline=\"F100\" Trigger.useActsTracking=True ITk.doTruth=False Tracking.doTruth=False IOVDb.GlobalTag=OFLCOND-MC21-SDR-RUN4-03 Acts.doMonitoring=True Exec.FPE=1 FPGADataPrep.doF110=True FPGADataPrep.bdfID=\"${bdfid}\" FPGADataPrep.xclbin=\"${xclbinPath}\
