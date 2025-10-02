@@ -221,7 +221,7 @@ private:
   // Source of data as a string; default is "COOL_DATABASE"
   StringProperty m_par_source{this,"Source","COOL_DATABASE","source of data as a string (default COOL_DATABASE)"};
   // CREST Server URL with host number; default is "http://crest-undertow-api.web.cern.ch"
-  StringProperty m_par_crestServer{this,"crestServer","http://crest-undertow-api.web.cern.ch","CREST URL with the port number as a string (default http://crest-undertow-api.web.cern.ch)"};
+  StringProperty m_par_crestServer{this,"crestServer","https://crest.cern.ch","CREST URL with the port number as a string (default https://crest.cern.ch)"};
   // This map contains the pairs: COOL folder - CREST tag name 
   std::map<std::string, std::string> m_cresttagmap;
   // Format of data; default is empty string (default for a given source)

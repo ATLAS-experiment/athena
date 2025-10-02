@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import logging
 msg = logging.getLogger(__name__)
@@ -95,6 +95,19 @@ def UseFrontier(flags):
         msg.info('Using default DB access')
 
     return cfg
+
+
+def UseCREST(flags):
+    """PreInclude to switch to using CREST rather than COOL
+    """
+    flags.IOVDb.UseCREST = True
+    from os import environ
+    msg.info('Enabling CREST DB access')
+    if environ.get('CREST_SERVER'):
+        flags.IOVDb.CrestServer = environ.get('CREST_SERVER')
+    else:
+        msg.info('CREST_SERVER environment variable not defined - using fall-back.')
+    msg.info(f'Using CrestServer: {flags.IOVDb.CrestServer}')
 
 
 def DumpPickle(flags, cfg):
