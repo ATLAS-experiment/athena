@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #########################################################################
 ##
@@ -62,7 +62,6 @@
 
 import sys, os.path, os, json, time, pprint, traceback
 from xmlrpc import client as xmlrpclib
-import six
 from subprocess import getstatusoutput
 #sami
 import hashlib

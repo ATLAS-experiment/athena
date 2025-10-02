@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @package DQHanConfMaker.hanwriter
 # Module containing the tools to write a DQConfiguration in han format.
@@ -90,8 +90,7 @@ class Node(DQHanConfMaker.Node):
         # restore the following in a future tdaq release
         # writer = DQHanConfMaker._get_StringIO()
         import io
-        import six
-        writer = io.BytesIO() if six.PY2 else io.StringIO()
+        writer = io.StringIO()
         if encoding is not None:
             import codecs
             writer = codecs.lookup(encoding)[3](writer)
@@ -772,4 +771,3 @@ def writeHanConfiguration(filename='dq.han.config', roots=[]):
 
     fileout = open(filename, 'w')
     print(doc.toprettyhan(" "), file=fileout)
-    
