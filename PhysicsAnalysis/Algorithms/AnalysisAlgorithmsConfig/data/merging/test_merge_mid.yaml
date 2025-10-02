@@ -1,0 +1,4 @@
+include:
+  - test_merge_frag_a.yaml
+  - test_merge_override.json
+k: mid
