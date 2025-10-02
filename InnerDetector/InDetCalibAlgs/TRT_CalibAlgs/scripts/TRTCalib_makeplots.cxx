@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -1867,10 +1867,11 @@ DvGraph::DvGraph(char *infile, string path, const string & folder, int det, int 
 
         cout << "  R-t PARAMETERS: " << p0 << " " << p1 << " " << p2 << " " << p3 << endl;
 
-        bool isdines = false;
+        const bool isdines = false; //hardcoded flag
 
         if (isdines)
         {
+            //coverity[dead_error_begin]
             string vrrelation;
             if (isinverted)
                 vrrelation = "x*[2]/sqrt([0]*[0]+x*x)";
@@ -1995,11 +1996,11 @@ DGraph::DGraph(char *infile, string path, const string& folder, int det, int lay
 
         cout << "  R-t PARAMETERS: " << p0 << " " << p1 << " " << p2 << " " << p3 << endl;
 
-        bool isdines = false;
+        const bool isdines = false; //hardcoded flag
 
         if (isdines)
         {
-
+            //coverity[dead_error_begin]
             string vrrelation;
             if (isinverted)
                 vrrelation = "x*[2]/sqrt([0]*[0]+x*x)";
@@ -2369,7 +2370,8 @@ RtGraphs::RtGraphs(char *infile, const string & folder, bool isAr = false)
         else
         {
             char name[500];
-            sprintf(name, "t(r) fit (%s)", titlemap[string(std::move(folder))].c_str());
+            //don't move 'folder'; it is passed by const ref
+            sprintf(name, "t(r) fit (%s)", titlemap[string(folder)].c_str());
             trgraph->SetTitle(name);
         }
 
@@ -2967,6 +2969,8 @@ ResidualPlots::ResidualPlots(TFile *file, bool isAr = false)
         if (not trt){
           throw std::runtime_error("trt pointer is null");
         }
+        //hardcoded flag, resulting in (intentional) dead code here
+        //coverity[dead_error_begin]
         cout << " In ResidualPlots Argon" << endl;
         if (file->FindKey("TRT_Ar_all"))
             trt = (TDirectory *)file->FindKey("TRT_Ar_all")->ReadObj();
@@ -3082,6 +3086,8 @@ ResidualPlots::ResidualPlots(TFile *file, bool isAr = false)
 
     if (isAr)
     {
+        //hardcoded flag results in dead code
+        //coverity[dead_error_begin]
         cout << "    Configure Argon residual histograms" << endl;
         if (reshist1)
             reshist1->SetTitle("residual Argon whole TRT");
@@ -3739,7 +3745,7 @@ FirstPage::FirstPage(char * /*filename*/, TFile *file)
     {
         ratioea = (residual_eaP->GetEntries() + residualAr_eaP->GetEntries()) / (residual_ea->GetEntries() + residualAr_ea->GetEntries());
     }
-    if (residual_ec && residualAr_ecP &&residualAr_ec && residual_ec->GetEntries() > 0)
+    if (residual_ecP && residual_ec && residualAr_ecP &&residualAr_ec && residual_ec->GetEntries() > 0)
     {
         ratioec = (residual_ecP->GetEntries() + residualAr_ecP->GetEntries()) / (residual_ec->GetEntries() + residualAr_ec->GetEntries());
     }
@@ -4003,7 +4009,7 @@ TGraphErrors *GetWidth(TH2F *histo)
         for (int j = 0; j < 6; j++)
         {
             // fitresult = slice->Fit("ff", "QR", "", mean - 1.5 * rms, mean + 1.5 * rms);
-            mean = ff->GetParameter(1);
+            
             rms = ff->GetParameter(2);
         }
         // fitresult = slice->Fit("ff", "QR", "", mean - 1.5 * rms, mean + 1.5 * rms);
