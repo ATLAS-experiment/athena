@@ -13,7 +13,6 @@
 # in Herwig7_i/Herwig7.h and src/Herwig7.cxx.
 
 import os, shutil, subprocess, sys
-import six
 
 from . import Herwig7Utils as hw7Utils
 from . import Herwig7JOChecker as JOChecker
@@ -351,7 +350,7 @@ def start_banner():
 
 def get_software_versions():
 
-  return(six.ensure_str(subprocess.check_output([herwig7_binary,'--version'])).splitlines())
+  return(subprocess.check_output([herwig7_binary,'--version'], text=True).splitlines())
   
 
 def get_infile_name(run_name="Herwig-Matchbox"):
