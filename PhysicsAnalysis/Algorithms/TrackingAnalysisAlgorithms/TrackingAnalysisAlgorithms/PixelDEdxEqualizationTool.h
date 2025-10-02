@@ -68,7 +68,7 @@ namespace CP {
     { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
 
     // PathResolverFindCalibFile needs the logical filename in ASG calibration area.
-    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "dev/PixelDEdxCalib/pixeldEdxEqualizationSFs_v1.root"}; // FIX! TBD
+    Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "dev/PixelDEdxCalib/pixeldEdxEqualizationSFs_v1p1.root"}; // FIX! TBD
     /// Override version in ASG calibration area with a local file is not empty string.
     Gaudi::Property<std::string> m_sfLocalFileName {this, "SFLocalFileName", ""};
     /// Name of SF tree.
