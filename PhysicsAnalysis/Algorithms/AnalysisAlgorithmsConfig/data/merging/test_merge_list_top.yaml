@@ -1,0 +1,3 @@
+include:
+  - test_merge_list_a.yaml
+  - test_merge_list_b.yaml
