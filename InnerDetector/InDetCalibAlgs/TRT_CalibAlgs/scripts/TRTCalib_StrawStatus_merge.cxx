@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -14,6 +14,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <set>
 #include <vector>
 #include <unistd.h>
+#include <memory>
 
 using namespace std;
 
@@ -26,7 +27,8 @@ int main(int argc, char *argv[])
     // nBarrelStraws (= 1642) + nEndcapStraws (= 3840) = 5482
     // 6 index refers to categories of accumulation: last index: 0 - all hits, 1 - hits on track, 2 - all HT (TR) hits, 3 - HT (TR) hits on track
     // 32 refers to the phi coordinate index
-    int accumulateHits[32][5482][6];
+    //heap-allocated
+    std::unique_ptr<int[][5482][6]> accumulateHits(new int[32][5482][6]);
 
     int nevents = 0; // we first need to read the first line in each file to get the total number of events
     for (int irun = 0; irun < nfiles; irun++)
@@ -39,8 +41,12 @@ int main(int argc, char *argv[])
             fprintf(stderr," - file %s missing\n", filename.c_str());
             exit(1);
         }
-        int tmp[10];
-        fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8);
+        int tmp[10]{};
+        int nItems = fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8);
+        if (nItems !=9){
+          std::cerr<<"TRTCalib_StrawStatus_merge: Incorrect fline in "<<filename<<std::endl;
+          continue;
+        }
         nevents += tmp[8];
         fclose(f);
     }
@@ -69,14 +75,18 @@ int main(int argc, char *argv[])
         for (int irun = 0; irun < nfiles; irun++)
         { // loop again over input files
             char filename[1000];
-            sprintf(filename, "%s", argv[irun + 2]);
+            snprintf(filename, 999, "%s", argv[irun + 2]);
             FILE *f = fopen(filename, "r");
             if (!f)
                 continue;
-            int tmp[10];
+            int tmp[10]{};
             int count(0);
             // read the first line in this file
-            fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8);
+            int nItems = fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8);
+            if (nItems !=9){
+              std::cerr<<"TRTCalib_StrawStatus_merge: Incorrect line in "<<filename<<std::endl;
+              continue;
+            }
             // read the rest of the lines in this file
             while (fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8) == 9)
             {
@@ -88,6 +98,7 @@ int main(int argc, char *argv[])
                 count++;
 
                 for (int k = 0; k < 6; k++)
+                    //coverity[tainted_data]
                     accumulateHits[tmp[1]][tmp[2]][k] += tmp[3 + k];
             }
             fclose(f);
