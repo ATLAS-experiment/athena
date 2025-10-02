@@ -452,12 +452,9 @@ namespace met {
                                       float& UEcorr) const                 // UE correction (result)
   {
       // 1. Get random phi
-      unsigned int seed = 0;
+      unsigned int seed = floor( clus.Pt() * Gaudi::Units::GeV );
       TRandom3 hole;
-      if( !v_clus.empty() ){
-        seed = floor( v_clus.back().Pt() * Gaudi::Units::GeV );
-        hole.SetSeed(seed);
-      }
+      hole.SetSeed(seed);
 
       bool isNextToPart(true);
       bool isNextToHR(true);
