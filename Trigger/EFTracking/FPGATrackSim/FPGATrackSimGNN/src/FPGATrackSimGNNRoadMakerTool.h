@@ -112,7 +112,6 @@ class JunctionAwareVisitor : public boost::default_bfs_visitor
 {
     public:
         JunctionAwareVisitor(int& current, std::vector<int>& in_control_vars, std::vector<std::vector<int>>& in_comps,
-                             const boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS>& in_graph,
                              std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map);
 
         template <typename VertexT, typename GraphT>
@@ -125,7 +124,6 @@ class JunctionAwareVisitor : public boost::default_bfs_visitor
         int& m_current_comp;
         std::vector<int>& m_control_vars;
         std::vector<std::vector<int>>& m_components;
-        const boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS>& m_graph;
         std::unordered_map<Vertex, std::vector<Vertex>>& m_pred_map;
         int m_initial_comp;
         int m_n_iter = 1;
