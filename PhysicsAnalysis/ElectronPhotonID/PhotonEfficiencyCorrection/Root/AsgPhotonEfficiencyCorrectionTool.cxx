@@ -136,7 +136,7 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
     //std::cout<<"i is "<<i<<" "<<std::endl;
     //Using the PathResolver to locate the file
     //std::string filename = PathResolverFindCalibFile( i );//Put it back after local test!
-    std::string filename =  "/afs/cern.ch/work/r/rhulsken/private/PhotonId/PhotonEffCorr/Temp_files/"+i ;
+    std::string filename =  "/eos/user/r/rhulsken/Egamma/Temp_files/"+i ;
     
     if (filename.empty()){
       ATH_MSG_ERROR ( "Could NOT resolve file name " << i );

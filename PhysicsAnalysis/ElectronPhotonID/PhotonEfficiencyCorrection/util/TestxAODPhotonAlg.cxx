@@ -184,8 +184,8 @@ int main( int argc, char* argv[] ) {
    double efficiencyScaleFactor=0, efficiencyScaleFactorError=0;
    // Loop over the events:
    std::cout << "loop on " << entries << " entries"<<std::endl;
-   //for( int entry = 0; entry < entries; ++entry ) {
-   for( int entry = 0; entry < 1; ++entry ) {
+   for( int entry = 0; entry < entries; ++entry ) {
+   //for( int entry = 0; entry < 1; ++entry ) {
 
      // Tell the object which entry to look at:
      event.getEntry( entry );   
