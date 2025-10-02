@@ -15,9 +15,10 @@
 StatusCode TrackParticleClusterAssociationAlg::initialize()
 {
 
-  if (m_detectorEtaDecor.key().empty()) {
+  if (m_detectorEtaDecor.key().empty())
       m_doDetEta = false;
-  } else {
+  else
+  {
       m_doDetEta = true;
       m_detectorEtaDecor = m_caloClusters.key() + "." + m_detectorEtaDecor.key();
   }
@@ -42,6 +43,7 @@ StatusCode TrackParticleClusterAssociationAlg::initialize()
 
 StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) const
 {
+
   ATH_MSG_DEBUG("excute()");
   // get track particles
   SG::ReadHandle<xAOD::TrackParticleContainer> trackParticles(m_trackParticleCollectionHandle, ctx);
@@ -57,18 +59,21 @@ StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) 
     cl->retrieveMoment(xAOD::CaloCluster::SECOND_R,rad);
     double cent;
     cl->retrieveMoment(xAOD::CaloCluster::CENTER_MAG,cent);
+    
     float cl_eta {99};
     if (m_doDetEta)
     {
         SG::ReadDecorHandle<xAOD::CaloClusterContainer, float> detEta(m_detectorEtaDecor, ctx);
         cl_eta = detEta(*cl);
-    } else {
-        cl_eta = cl->eta();
     }
+    else
+        cl_eta = cl->eta();
+
     double sigmaWidth = 0.0;
     if(cent > 0) sigmaWidth = atan(sqrt(rad)/cent)*cosh(cl_eta);
     sig_dec(*cl) = sigmaWidth;
   }
+
 
   // obtain the CaloExtension from the map in the event store
   SG::ReadHandle<CaloExtensionCollection> caloExts( m_caloExtKey, ctx );
@@ -80,16 +85,19 @@ StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) 
     if(!vxCont->empty()) pv0=(*vxCont)[0]; // Hard code HS vertex as PV0
   }
 
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<ElementLink<xAOD::CaloClusterContainer>> > assoClustDecor(m_assocClustersDecor, ctx);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer,
+		       std::vector<ElementLink<xAOD::CaloClusterContainer>> > assoClustDecor(m_assocClustersDecor, ctx);
     
   ATH_MSG_DEBUG("will decorate with "<<assoClustDecor.key()<< " and adding trkParam : "<< m_caloEntryParsDecor.key()  );
 
+  // ******************************************
   // main loop over tracks 
   unsigned int ntracks = 0;
   for( const xAOD::TrackParticle* tp : *trackParticles){
 
     // retrieve the vector of links to cluster (and creating it )
     std::vector< ElementLink< xAOD::CaloClusterContainer > > & caloClusterLinks = assoClustDecor(*tp);
+
     if( tp->pt() < m_ptCut ) continue;
 
     if( pv0 != nullptr) if(! m_trackvertexassoTool->isCompatible(*tp, *pv0 )) continue;
@@ -120,24 +128,29 @@ StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) 
     SG::WriteDecorHandle<xAOD::TrackParticleContainer,  const Trk::TrackParameters*> trkParamDecor( m_caloEntryParsDecor, ctx );
     for( const xAOD::TrackParticle* tp : *trackParticles){
       const Trk::CaloExtension * caloExtension = (*caloExts)[tp->index() ] ;
-      trkParamDecor( *tp ) = caloExtension ? caloExtension->caloEntryLayerIntersection() : nullptr ;
+      if (caloExtension == nullptr ) trkParamDecor( *tp ) =  nullptr ;
+      else trkParamDecor( *tp ) = caloExtension->caloEntryLayerIntersection();      
     }
   }
-
+  
   ATH_MSG_DEBUG(" Total number of selected tracks: " << ntracks );
+
   return StatusCode::SUCCESS;
 }
 
+
 std::vector<const xAOD::CaloCluster* >
-TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension & caloExtension, const xAOD::CaloClusterContainer & allClusters, const EventContext& ctx) const
+TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension & caloExtension, const xAOD::CaloClusterContainer & allClusters,
+                                                       const EventContext& ctx) const
 {
   std::vector<const xAOD::CaloCluster* > clusters;
+
   const Trk::TrackParameters*  pars = caloExtension.caloEntryLayerIntersection();
   if(!pars) {
     ATH_MSG_WARNING( " NO TrackParameters caloExtension.caloEntryLayerIntersection() ");
     return clusters;
-  }
-
+  } 
+    
   float eta = pars->position().eta();
   float phi = pars->position().phi();
 
@@ -156,28 +169,35 @@ TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension 
   static const SG::AuxElement::ConstAccessor<float> sig_acc("sigmaWidth");
 
   for(const xAOD::CaloCluster * cl : allClusters){
+
     float dPhi = P4Helpers::deltaPhi( cl->phi(), phi);
+    
     float cl_eta {99};
-    if (m_doDetEta) {
-      SG::ReadDecorHandle<xAOD::CaloClusterContainer, float> detEta(m_detectorEtaDecor, ctx);
-      cl_eta = detEta(*cl);
-    } else {
-      cl_eta = cl->eta();
+    if (m_doDetEta)
+    {
+        SG::ReadDecorHandle<xAOD::CaloClusterContainer, float> detEta(m_detectorEtaDecor, ctx);
+        cl_eta = detEta(*cl);
     }
+    else
+        cl_eta = cl->eta();
+
     float dEta = cl_eta - eta;
-    float dr2  = dPhi*dPhi + dEta*dEta;
+    float dr2  = dPhi*dPhi+ dEta*dEta;
     float dr2Cut = dr2Cut0;
     
-    if(m_useCovariance) {
-      double sigmaWidth = sig_acc(*cl);
+    if(m_useCovariance) {                        
+      
+      double sigmaWidth = sig_acc(*cl);          
       double uncertClus  = 2.*sigmaWidth*sigmaWidth;
       if(uncertExtrp>uncertClus){
-        ATH_MSG_DEBUG("Extrapolation uncertainty larger than cluster width! Returning without association.");
-        continue;
+	ATH_MSG_DEBUG("Extrapolation uncertainty larger than cluster width! Returning without association.");
+	continue;
       }
+      
       dr2Cut = uncertClus + uncertExtrp;   
     }
     if( dr2 < dr2Cut ) clusters.push_back( cl );    
   }
+
   return clusters;
 }
