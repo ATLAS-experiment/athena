@@ -239,6 +239,8 @@ StatusCode TrigCostAnalysis::execute() {
     const std::string algName = TrigConf::HLTUtils::hash2string(nameHash, "ALG");
 
     size_t i = 0;
+    if(m_excludeAlgsFromChain.find(algName) != m_excludeAlgsFromChain.end()) continue;
+
     for (const std::string& chain : algToChain[algName]){
       chainToAlgIdx[chain].insert(tc->index());
       ++i;

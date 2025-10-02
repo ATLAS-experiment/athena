@@ -58,6 +58,8 @@ then
   do 
     outfile=$resultdir/$(basename $file)
     run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList $neventsLArEM
+    status=$?
+    echo  "art-result: $status LAr EM Simulation"
   done
 
   ### Run LAr EM ntuples
@@ -87,6 +89,8 @@ then
   do
     outfile=$resultdir/$(basename $file)
     run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList $neventsbase
+    status=$?
+    echo  "art-result: $status LAr HEC Simulation"
   done
 
   ### Run HEC ntuples
@@ -117,6 +121,8 @@ then
   do
     outfile=$resultdir/$(basename $file)
     run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList $neventsbase
+    status=$?
+    echo  "art-result: $status LAr FCal Simulation"
   done
 fi
 
