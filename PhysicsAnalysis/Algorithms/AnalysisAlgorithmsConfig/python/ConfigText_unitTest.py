@@ -57,6 +57,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # CommonServices
     config.addBlock('CommonServices')
     config.setOptions(systematicsHistogram='systematicsList')
+    config.setOptions(enableExpertMode=True)
 
     # PileupReweighting
     config.addBlock('PileupReweighting')

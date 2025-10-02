@@ -58,6 +58,7 @@ class ConfigSequence:
             if not block.isUsedForConfig(config):
                 continue
             config.setAlgPostfix(block.instanceName())
+            block.checkExpertSettings (config)
             block.makeAlgs (config)
         config.setAlgPostfix('')  # reset algPostfix after all blocks are configured
 
