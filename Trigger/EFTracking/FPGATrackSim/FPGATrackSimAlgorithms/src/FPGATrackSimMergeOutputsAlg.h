@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,17 +9,21 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
-#include "FPGATrackSimObjects/FPGATrackSimLogicalEventOutputHeader.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
+//#include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
+//#include "FPGATrackSimObjects/FPGATrackSimLogicalEventOutputHeader.h"
+//#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 
-#include "TFile.h"
-#include "TTree.h"
+#include <vector>
 
+class TFile;
+class TTree;
 class FPGATrackSimTrack;
 class FPGATrackSimOverlapRemovalTool;
+class FPGATrackSimLogicalEventInputHeader;
+class FPGATrackSimLogicalEventOutputHeader;
+
 class FPGATrackSimMergeOutputsAlg : public AthAlgorithm {
 public:
   FPGATrackSimMergeOutputsAlg (const std::string& name, ISvcLocator* pSvcLocator);

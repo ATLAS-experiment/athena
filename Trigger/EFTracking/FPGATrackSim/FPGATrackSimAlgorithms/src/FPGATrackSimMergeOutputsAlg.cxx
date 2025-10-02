@@ -1,7 +1,15 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "FPGATrackSimMergeOutputsAlg.h"
 #include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
-#include "TH2F.h"
+#include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
+#include "FPGATrackSimObjects/FPGATrackSimLogicalEventOutputHeader.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 
+#include "TH2F.h"
+#include "TTree.h"
+#include "TFile.h"
 
 FPGATrackSimMergeOutputsAlg::FPGATrackSimMergeOutputsAlg (const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator) {
@@ -99,7 +107,7 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
   // get the hits
   ATH_CHECK(FPGAHits_Handle.record (std::make_unique<FPGATrackSimHitCollection>()));
   m_dataprep_tree->GetEntry(m_evtloop); 
-  for (auto tower : m_dataprep->towers()) {    
+  for (const auto & tower : m_dataprep->towers()) {    
     const std::vector<FPGATrackSimHit> hits = tower.hits();
     FPGAHits_Handle->insert(FPGAHits_Handle->end(), make_move_iterator(hits.begin()), make_move_iterator(hits.end()));
   }
@@ -114,8 +122,8 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
       m_trees[ivec][iregion]->GetEntry(m_evtloop);
       // Time to load up these tracks!
       std::vector<FPGATrackSimTrack> const tracks = m_eventOutputHeaders[ivec][iregion]->getFPGATrackSimTracks_1st();
-      for (auto track : tracks) {
-	if (track.passedOR()) FPGATracks->push_back(track);
+      for (const auto &track : tracks) {
+        if (track.passedOR()) FPGATracks->push_back(track);
       }
     }
   }
