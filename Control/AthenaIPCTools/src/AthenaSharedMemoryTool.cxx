@@ -341,17 +341,16 @@ StatusCode AthenaSharedMemoryTool::getObject(void** target, size_t& nbytes, int 
       evtH->evtOffset += sizeof(size_t);
       *target = static_cast<char*>(m_payload->get_address()) + evtH->evtOffset;
       evtH->evtOffset += nbytes;
+      return(StatusCode::SUCCESS); // return object
    }
-   if (evtH->evtOffset == evtSize) {
-      evtH->evtOffset = 0;
-      m_status->flush(num * sizeof(ShareEventHeader), sizeof(ShareEventHeader));
-      while (evtH->evtProcessStatus != ShareEventHeader::FILLED) {
-         usleep(10);
-      }
-      evtH->evtProcessStatus = ShareEventHeader::UNLOCKED;
+   nbytes = 0;
+   evtH->evtOffset = 0;
+   m_status->flush(num * sizeof(ShareEventHeader), sizeof(ShareEventHeader));
+   while (evtH->evtProcessStatus != ShareEventHeader::FILLED) {
+      usleep(10);
    }
-
-   return(StatusCode::SUCCESS);
+   evtH->evtProcessStatus = ShareEventHeader::UNLOCKED;
+   return(StatusCode::SUCCESS); // unlock server
 }
 
 //___________________________________________________________________________
