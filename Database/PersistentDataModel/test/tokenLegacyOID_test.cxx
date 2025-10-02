@@ -109,6 +109,7 @@ void test_oid_format_detection() {
     std::cout << "  OID format detection test passed\n";
 }
 
+// coverity[root_function]
 int main() {
     std::cout << "Running Token legacy OID format tests...\n\n";
 
