@@ -292,7 +292,7 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   testsvc.m_pers1 = nullptr;
 }
 
-
+// coverity[root_function]
 int main()
 {
   CxxUtils::ubsan_suppress ([]() {TInterpreter::Instance(); });

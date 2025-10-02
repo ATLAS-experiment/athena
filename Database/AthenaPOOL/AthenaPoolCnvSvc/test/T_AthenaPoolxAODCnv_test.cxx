@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -197,7 +197,7 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& /*testsvc*/)
   Gaudi::Hive::setCurrentContext (ctx);
 }
 
-
+// coverity[root_function]
 int main()
 {
   CxxUtils::ubsan_suppress ([]() {TInterpreter::Instance(); });
