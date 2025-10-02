@@ -14,7 +14,7 @@ GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometry
 BKGFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_BKG_RUN3_2022[0])")
 
 Reco_tf.py --CA "default:True" "RDOtoRDOTrigger:False" \
-           --multithreaded --maxEvents=300 \
+           --multithreaded --maxEvents=100 \
 	   --asetup "RDOtoRDOTrigger:Athena,23.0.20.8" \
 	   --steering "doOverlay" "doRDO_TRIG" "doTRIGtoALL" \
 	   --inputHITSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \

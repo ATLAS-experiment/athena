@@ -10,8 +10,10 @@
 
 set -e
 
+EVNT_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.EVNT_RUN3_1K[0])")
+
 Derivation_tf.py \
---inputEVNTFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1 \
+--inputEVNTFile ${EVNT_File} \
 --outputDAODFile art.pool.root \
 --formats TRUTH3 \
 --maxEvents 1000

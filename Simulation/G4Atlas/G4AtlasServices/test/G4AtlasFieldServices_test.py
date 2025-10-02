@@ -17,7 +17,7 @@ if __name__ == '__main__':
   from AthenaConfiguration.Enums import Project
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   flags = initConfigFlags()
-  flags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
   # Arbitrary configuration for Twiss Files
   flags.Sim.TwissFileBeam1 = '4.0TeV/0090.00m/nominal/v01/beam1.tfs'
   flags.Sim.TwissFileBeam2 = '4.0TeV/0090.00m/nominal/v01/beam2.tfs'

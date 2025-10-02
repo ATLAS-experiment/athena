@@ -17,7 +17,7 @@ if __name__ == '__main__':
   flags = initConfigFlags()
   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
   flags.Sim.ISFRun = True
-  flags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
   flags.lock()
 
   # Setup the tool

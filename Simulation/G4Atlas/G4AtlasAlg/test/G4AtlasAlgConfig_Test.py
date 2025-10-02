@@ -29,7 +29,8 @@ if __name__ == '__main__':
     flags.Input.RunNumbers = [284500] #Isn't updating - todo: investigate
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1]
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1'] #defaultTestFiles.EVNT
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags.Input.Files = defaultTestFiles.EVNT_RUN3_50
     flags.Output.HITSFileName = "myHITSnew.pool.root"
 
     #Sim flags
