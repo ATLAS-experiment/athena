@@ -99,7 +99,7 @@ void FPGATrackSimGNNRoadMakerTool::doJunctionAwareCC()
 
     for (Vertex v = 0; v < num_vertices(g); ++v){
         if(!visited[v] && boost::in_degree(v,g) == 0){
-            JunctionAwareVisitor JA_vis(comp_id, m_control_var, m_component, g, pred_map);
+            JunctionAwareVisitor JA_vis(comp_id, m_control_var, m_component, pred_map);
             std::vector<boost::default_color_type> color_map(num_vertices(g)); 
             breadth_first_search(g, v, visitor(JA_vis).color_map(boost::make_iterator_property_map(color_map.begin(), get(boost::vertex_index, g))));
             // Mark visited vertices and reset control variables
@@ -282,10 +282,9 @@ void FPGATrackSimGNNRoadMakerTool::reorderIndices()
 }
 
 JunctionAwareVisitor::JunctionAwareVisitor(int& in_current, std::vector<int>& in_control_vars, std::vector<std::vector<int>>& in_comps,
-                             const boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS>& in_graph,
-                             std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map) : 
-                             m_current_comp(in_current), m_control_vars(in_control_vars), m_components(in_comps), 
-                             m_graph(in_graph), m_pred_map(in_pred_map), m_initial_comp(in_current) {}
+                                           std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map) :
+  m_current_comp(in_current), m_control_vars(in_control_vars), m_components(in_comps),
+  m_pred_map(in_pred_map), m_initial_comp(in_current) {}
 
 template <typename VertexT, typename GraphT>
 void JunctionAwareVisitor::discover_vertex(VertexT v, const GraphT& g)
