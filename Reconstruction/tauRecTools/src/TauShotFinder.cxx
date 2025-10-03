@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -8,23 +8,13 @@
 #include "TauShotVariableHelpers.h"
 #include "tauRecTools/HelperFunctions.h"
 
-#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "CaloUtils/CaloCellList.h"
-#include "xAODPFlow/PFOContainer.h"
-#include "xAODPFlow/PFOAuxContainer.h"
-#include "xAODPFlow/PFO.h"
-
-#include <memory>
-
 
 
 TauShotFinder::TauShotFinder(const std::string& name) :
-    TauRecToolBase(name) {
-}
-
-
+    TauRecToolBase(name) {}
 
 StatusCode TauShotFinder::initialize() {
   

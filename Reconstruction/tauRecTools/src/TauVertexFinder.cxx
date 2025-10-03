@@ -5,24 +5,10 @@
 #ifndef XAOD_ANALYSIS
 #include "TauVertexFinder.h"
 
-#include "VxVertex/RecVertex.h"
-#include "VxVertex/VxCandidate.h"
-
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/Vertex.h"
-
-#include "xAODTau/TauJetContainer.h"
-#include "xAODTau/TauJetAuxContainer.h"
-#include "xAODTau/TauJet.h"
-
-#include "tauRecTools/HelperFunctions.h"
-
 TauVertexFinder::TauVertexFinder(const std::string& name ) :
-  TauRecToolBase(name) {
-}
+  TauRecToolBase(name) {}
 
-TauVertexFinder::~TauVertexFinder() {
-}
+TauVertexFinder::~TauVertexFinder() {}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode TauVertexFinder::initialize() {

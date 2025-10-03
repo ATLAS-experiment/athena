@@ -4,22 +4,14 @@
 
 #ifndef XAOD_ANALYSIS
 
-#include "Particle/TrackParticleContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-
-#include "TrkVertexFitters/AdaptiveVertexFitter.h"
-#include "TrkLinks/LinkToXAODTrackParticle.h"
-
 #include "TauVertexVariables.h"
-#include <memory>
 
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
 
 TauVertexVariables::TauVertexVariables(const std::string &name) :
-  TauRecToolBase(name) {
-}
+  TauRecToolBase(name) {}
 
 //-----------------------------------------------------------------------------
 // Destructor
