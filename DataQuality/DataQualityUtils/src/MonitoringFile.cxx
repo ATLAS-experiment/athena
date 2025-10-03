@@ -71,7 +71,7 @@ namespace dqutils {
       std::regex_match(test, reNew);
     } catch (std::exception& e) {
       std::cout << "ERROR: Invalid RegEx string \"" << re << "\"." << std::endl;
-      std::cout << "See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax" << std::endl;
+      std::cout << "See https://en.cppreference.com/w/cpp/regex.html for allowed regular expression syntax" << std::endl;
       return std::nullopt;
     }
     return reNew;
