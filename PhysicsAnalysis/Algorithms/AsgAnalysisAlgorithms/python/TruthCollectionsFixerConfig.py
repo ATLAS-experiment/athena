@@ -47,6 +47,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
                 "TruthTaus",
                 "TruthTop", "TruthBottom",
                 "TruthForwardProtons",
+                "TruthBSM", "TruthBSMWithDecayParticles",
                 "BornLeptons"
             ]
         else:
@@ -56,6 +57,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
                 "TruthTaus", "TruthTausWithDecayParticles",
                 "TruthTop", "TruthBottom", "TruthCharm", "TruthHFWithDecayParticles",
                 "TruthForwardProtons", "TruthPileupParticles",
+                "TruthBSM", "TruthBSMWithDecayParticles",
                 "BornLeptons"
             ]
             
@@ -65,12 +67,14 @@ class TruthCollectionsFixerBlock(ConfigBlock):
         elif config.isPhyslite():
             vertContainers = [
                 "TruthBosonsWithDecayVertices",
+                "TruthBSMWithDecayVertices"
             ]
         else:
             vertContainers = [
                 "TruthBosonsWithDecayVertices",
                 "TruthHFWithDecayVertices",
                 "TruthTausWithDecayVertices",
+                "TruthBSMWithDecayVertices"
             ]
 
         # in Athena, we have to rename the containers. In AnalysisBase, we can just overwrite in place
