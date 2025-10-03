@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -300,7 +300,6 @@ class TestFlagsSetupDynamic(FlagsSetup):
         wdict = copyf.Z.asdict()['W']
         self.assertEqual(cdict, wdict)
 
-
     def test_exists(self):
         """Test `has` methods"""
         self.assertTrue( self.flags.hasCategory("Z") )
@@ -315,6 +314,7 @@ class TestFlagsSetupDynamic(FlagsSetup):
         clonef = self.flags.cloneAndReplace('W', 'Z')
         clonef.loadAllDynamicFlags()
         self.assertTrue(clonef.hasFlag('W.A'))
+        clonef.W.A  # check that access works
         self.assertFalse(clonef.hasFlag('Z.A'))
         
     def test_nonReplacingCloneExists(self):

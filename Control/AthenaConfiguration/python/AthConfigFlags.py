@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from collections import defaultdict
 from copy import copy, deepcopy
 from difflib import get_close_matches
 from enum import EnumMeta
@@ -119,17 +120,23 @@ def _asdict(iterator):
     return outdict
 
 class FlagAddress(object):
-    def __init__(self, f, name):
-        if isinstance(f, AthConfigFlags):
-            self._flags = f
-            rname = self._flags._renames.get(name, name)
-            self._name = rname
+    def __init__(self, flag, name):
+        if isinstance(flag, AthConfigFlags):
+            self._flags = flag
+            self._name = name
 
-        elif isinstance(f, FlagAddress):
-            self._flags = f._flags
-            name = f._name+"."+name
-            rname = self._flags._renames.get(name, name)
-            self._name  = rname
+        elif isinstance(flag, FlagAddress):
+            self._flags = flag._flags
+            self._name  = f"{flag._name}.{name}"
+
+        else:
+            raise TypeError(f"Cannot create FlagAddress for object {name} of type {type(flag)}")
+
+        # Handle renames
+        self._name = self._flags._renames.get(self._name, self._name)
+        if self._name is None:
+            raise AttributeError(f"Accessing category {name} has been blocked by cloneAndReplace")
+
 
     def __getattr__(self, name):
         return getattr(self._flags, self._name + "." + name)
@@ -334,13 +341,11 @@ class AthConfigFlags(object):
         (since cloneAndReplace may or may not disable access to the old name,
         it is possible that an old name renames to multiple new names)
         """        
-        revmap = {}
+        revmap = defaultdict(list)
         
         for new, old in self._renames.items():
-            if old not in revmap:
-                revmap[old] = [ new ]
-            else:
-                revmap[old] += [ new ]
+            if old is not None:
+                revmap[old].append(new)
         
         def rename(key):
             for old, newlist in revmap.items():
@@ -436,10 +441,8 @@ class AthConfigFlags(object):
         if name in self._categoryCache:
             return True
 
-        if name in self._renames:
-            re_name = self._renames[name]
-            if re_name != name:
-                return self.hasCategory(re_name)
+        if (re_name := self._renames.get(name)) is not None and re_name != name:
+            return self.hasCategory(re_name)
         
         # If not found do search through all keys.
         # TODO: could be improved by using a trie for _flagdict
@@ -526,14 +529,14 @@ class AthConfigFlags(object):
 
         # protect against subsequent remaps within remaps: clone = flags.cloneAndReplace('Y', 'X').cloneAndReplace('X.b', 'X.a')
         for alias,src in self._renames.items():
-            if src == "": continue
+            if src is None: continue
             if src+"." in subsetToReplace:
                 raise RuntimeError(f'Can not replace flags {subsetToReplace} by {replacementSubset} because of already present replacement of {alias} by {src}')
 
 
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
-        
+
         if replacementSubset in newFlags._renames: #and newFlags._renames[replacementSubset]:
             newFlags._renames[subsetToReplace] = newFlags._renames[replacementSubset]
         else:
@@ -541,7 +544,7 @@ class AthConfigFlags(object):
         
         if not keepOriginal:
             if replacementSubset not in newFlags._renames or newFlags._renames[replacementSubset] == replacementSubset:
-                newFlags._renames[replacementSubset] = "" # block access to original flags
+                newFlags._renames[replacementSubset] = None # block access to original flags
             else:
                 del newFlags._renames[replacementSubset]
                 #If replacementSubset was a "pure renaming" of another set of flags,
@@ -580,10 +583,10 @@ class AthConfigFlags(object):
         import re
         compiled = re.compile(pattern)
         def truncate(s): return s[:maxLength] + ("..." if maxLength and len(s)>maxLength else "")
-        reverse_renames = {value: key for key, value in self._renames.items() if value != ''} # new name to old
+        reverse_renames = {value: key for key, value in self._renames.items() if value is not None} # new name to old
         for name in sorted(self._flagdict):
             renamed = name
-            if any([name.startswith(r) for r in reverse_renames.keys()]):
+            if any([name.startswith(r) for r in reverse_renames.keys() if r is not None]):
                 for oldprefix, newprefix in reverse_renames.items():
                     if name.startswith(oldprefix):
                         renamed = name.replace(oldprefix, newprefix)
