@@ -509,6 +509,19 @@ BkgElectronTriggers["Run3"] = [
     "HLT_g250_etcut_L1eEM26M",
     "HLT_g300_etcut_L1EM22VHI",
     "HLT_g300_etcut_L1eEM26M",
+    # Added for 2024
+    "HLT_e5_etcut_L1eEM5",
+    "HLT_e5_nopid_L1eEM5",
+    "HLT_e10_etcut_L1eEM9",
+    "HLT_e15_etcut_L1eEM9",
+    "HLT_e20_etcut_L1eEM18M",
+    "HLT_e25_etcut_L1eEM18M",
+    "HLT_e30_etcut_L1eEM18M",
+    "HLT_e40_etcut_L1eEM18M",
+    "HLT_e60_etcut_L1eEM26M",
+    "HLT_e70_etcut_L1eEM26M",
+    "HLT_e80_etcut_L1eEM26M",
+    "HLT_e100_etcut_L1eEM26M"
 ]
 
 BkgElectronTriggers["Run2"] = [

@@ -17,6 +17,8 @@
 
 // for the onnxtool
 #include "xAODBTaggingEfficiency/SaltModel.h"
+
+#include "xAODBTaggingEfficiency/ToolDefaults.h"
 //
 #include <fstream>
 #include <string>
@@ -302,64 +304,93 @@ private:
   asg::AnaToolHandle<IBTaggingSelectionTool> m_selectionTool;
 
   /// name of the data/MC efficiency scale factor calibration file (may be changed by the @c PathResolver)
-  std::string m_SFFile;
+  Gaudi::Property<std::string> m_SFFile{this, "ScaleFactorFileName", ftag::defaults::cdi_path, "name of the official scale factor calibration CDI file (uses PathResolver)"};
   std::string m_SFFileFull;
+  Gaudi::Property<std::string> m_SelectionCDIFile{this, "SelectionCDIFileName", "", "name of the CDI file to be used to configure the selection tool if needed, will use the SF CDI file by default"};
   /// name of the optional MC efficiency file (may be changed by the @c PathResolver)
-  std::string m_EffFile;
-  std::string m_EffConfigFile;
+  Gaudi::Property<std::string> m_EffFile{this, "EfficiencyFileName", "", "name of optional user-provided MC efficiency CDI file"};
+  Gaudi::Property<std::string> m_EffConfigFile{this, "EfficiencyConfig", "", "name of config file specifying which efficiency map to use with a given samples DSID"};
   /// names of the data/MC scale factor calibrations
+  Gaudi::Property<std::string> m_SFNamesB{this, "ScaleFactorBCalibration", "default", "name of b-jet scale factor calibration object"};
+  Gaudi::Property<std::string> m_SFNamesC{this, "ScaleFactorCCalibration", "default", "name of c-jet scale factor calibration object"};
+  Gaudi::Property<std::string> m_SFNamesT{this, "ScaleFactorTCalibration", "default", "name of tau-jet scale factor calibration object"};
+  Gaudi::Property<std::string> m_SFNamesLight{this, "ScaleFactorLightCalibration", "default", "name of light-flavour jet scale factor calibration object"};
   std::map<std::string, std::string> m_SFNames;
+
   /// specification of the eigenvector reduction strategy (if eigenvectors are used)
+  Gaudi::Property<std::string> m_EVReductionB{this, "EigenvectorReductionB", "Loose", "b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'"};
+  Gaudi::Property<std::string> m_EVReductionC{this, "EigenvectorReductionC", "Loose", "c-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'"};
+  Gaudi::Property<std::string> m_EVReductionLight{this, "EigenvectorReductionLight", "Loose", "light-flavour jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'"};
   std::map<std::string, std::string> m_EVReduction;
+
   /// semicolon-separated lists of MC efficiency parametrisation names
+  Gaudi::Property<std::string> m_EffNamesB{this, "EfficiencyBCalibrations", "", "(semicolon-separated) name(s) of b-jet efficiency object(s)"};
+  Gaudi::Property<std::string> m_EffNamesC{this, "EfficiencyCCalibrations", "", "(semicolon-separated) name(s) of c-jet efficiency object(s)"};
+  Gaudi::Property<std::string> m_EffNamesT{this, "EfficiencyTCalibrations", "", "(semicolon-separated) name(s) of tau-jet efficiency object(s)"};
+  Gaudi::Property<std::string> m_EffNamesLight{this, "EfficiencyLightCalibrations", "", "(semicolon-separated) name(s) of light-flavour-jet efficiency object(s)"};
   std::map<std::string, std::string> m_EffNames;
+
   // default value for all flavors, use this if specified
-  std::string m_effName;
+  Gaudi::Property<std::string> m_effName{this, "EfficiencyCalibrations", "default", "default for all flavors"};
   /// semicolon-separated list of uncertainties to be excluded from the eigenvector variation procedure for all flavours
-  std::string m_excludeFromEV;
+  Gaudi::Property<std::string> m_excludeFromEV{this, "ExcludeFromEigenVectorTreatment", "", "(semicolon-separated) names of uncertainties to be excluded from all eigenvector decompositions (if used)"};
   /// semicolon-separated list of uncertainties to be excluded from the eigenvector variation procedure for b, c, and light-flavour jets
+  Gaudi::Property<std::string> m_excludeFlvFromEVB{this, "ExcludeFromEigenVectorBTreatment", "", "(semicolon-separated) names of uncertainties to be excluded from b-jet eigenvector decompositions (if used)"};
+  Gaudi::Property<std::string> m_excludeFlvFromEVC{this, "ExcludeFromEigenVectorCTreatment", "", "(semicolon-separated) names of uncertainties to be excluded from c-jet eigenvector decompositions (if used)"};
+  Gaudi::Property<std::string> m_excludeFlvFromEVLight{this, "ExcludeFromEigenVectorLightTreatment", "", "(semicolon-separated) names of uncertainties to be excluded from light-flavour-jet eigenvector decompositions (if used)"};
   std::map<std::string, std::string> m_excludeFlvFromEV;
+
   /// optional (per-flavour) suffix that can be used to decorrelate uncertainties (between flavours, or -in case of a result from different runs- between periods)
+  Gaudi::Property<std::string> m_uncertaintySuffixesB{this, "UncertaintyBSuffix", "", "optional suffix for b-jet uncertainty naming"};
+  Gaudi::Property<std::string> m_uncertaintySuffixesC{this, "UncertaintyCSuffix", "", "optional suffix for c-jet uncertainty naming"};
+  Gaudi::Property<std::string> m_uncertaintySuffixesT{this, "UncertaintyTSuffix", "", "optional suffix for tau-jet uncertainty naming"};
+  Gaudi::Property<std::string> m_uncertaintySuffixesLight{this, "UncertaintyLightSuffix", "", "optional suffix for light-flavour-jet uncertainty naming"};
   std::map<std::string, std::string> m_uncertaintySuffixes;
   
   bool m_using_conventional_labels; // flag for if the labels in the CDI configuration are "conventional", e.g. "B", "C", "Light", and "T"
-  std::string m_SFName_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_SFNames
-  std::string m_EVReduction_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_EVReduction
-  std::string m_EffNames_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_EffNames
-  std::string m_uncertaintySuffixes_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_uncertaintySuffixes
-  std::string m_excludeFlvFromEV_flex; // remove label dependence - work from a string of semi-colon sep. to populate m_excludeFlvFromEV
+  // remove label dependence - work from a string of semi-colon sep. to populate m_SFNames
+  Gaudi::Property<std::string> m_SFName_flex{this, "FlexibleScaleFactorCalibrations", "", "(semicolon-separated) name of scale factor calibration object for (0,1,2..) indexed flavour labels, e.g. '0:default;1:default;2:default;3:default'"};
+  // remove label dependence - work from a string of semi-colon sep. to populate m_EVReduction
+  Gaudi::Property<std::string> m_EVReduction_flex{this, "FlexibleEigenvectorReduction", "", "(semicolon-separated) list of eigenvector reduction strategy for (0,1,2..) indexed flavour labels; choose between 'Loose', 'Medium', 'Tight' for different labels, e.g. '0:Loose;1:Loose;2:Loose'"};
+  // remove label dependence - work from a string of semi-colon sep. to populate m_EffNames
+  Gaudi::Property<std::string> m_EffNames_flex{this, "FlexibleEfficiencyCalibrations", "", "(semicolon-separated) name(s) of efficiency object(s) names for (0,1,2..) indexed flavour labels, e.g. '0:default;1:default;2:default;3:default'"};
+  // remove label dependence - work from a string of semi-colon sep. to populate m_uncertaintySuffixes
+  Gaudi::Property<std::string> m_uncertaintySuffixes_flex{this, "FlexibleUncertaintySuffix", "", "optional (semicolon-separated) list of suffixes for (0,1,2..) indexed flavour label uncertainty naming, e.g. '0:;1:;2:;3:'"};
+  // remove label dependence - work from a string of semi-colon sep. to populate m_excludeFlvFromEV
+  Gaudi::Property<std::string> m_excludeFlvFromEV_flex{this, "FlexibleExcludeFromEVTreatment", "", "(semicolon-separated) names of uncertainties to be excluded from (0,1,2..) indexed flavour eigenvector decompositions (if used), e.g. '0:;1:;2:;3:'"};
 
   /// tagger name
-  std::string m_taggerName;
+  Gaudi::Property<std::string> m_taggerName{this, "TaggerName", ftag::defaults::tagger, "tagging algorithm name as specified in CDI file"};
+  Gaudi::Property<std::string> m_selectionTaggerName{this, "SelectionTaggerName", "", "tagging algorithm name as specified in selection CDI file, will use TaggerName by default"};
   /// operating point
-  std::string m_OP;
+  Gaudi::Property<std::string> m_OP{this, "OperatingPoint", ftag::defaults::pcbt_op, "operating point as specified in CDI file"};
   ///  jet collection name
-  std::string m_jetAuthor;
+  Gaudi::Property<std::string> m_jetAuthor{this, "JetAuthor", ftag::defaults::jet_collection, "jet collection & JVF/JVT specification in CDI file"};
   ///  minimum jet pT
-  float m_minPt;
+  Gaudi::Property<float> m_minPt{this, "MinPt", 0., "minimum jet pT cut"};
   /// systematics model to be used (current choices are "SFEigen", "SFEigenRefined", and "Envelope") // <-------- Addoing "SFGlobalEigen" to the list
-  std::string m_systStrategy;
+  Gaudi::Property<std::string> m_systStrategy{this, "SystematicsStrategy", ftag::defaults::strategy, "name of systematics model; presently choose between 'SFEigen' and 'Envelope'"};
   /// if true, attempt to retrieve the data/MC efficiency scale factor calibration files from the @PathResolver development area
-  bool m_useDevFile;
+  Gaudi::Property<bool> m_useDevFile{this, "UseDevelopmentFile", false,
+    "specify whether or not to use the (PathResolver) area for temporary scale factor calibration CDI files"};
   /// if true, use cone-based labelling (as opposed to ghost association)
-  bool m_coneFlavourLabel;
+  Gaudi::Property<bool> m_coneFlavourLabel{this, "ConeFlavourLabel", true, "specify whether or not to use the cone-based flavour labelling instead of the default ghost association based labelling"};
   /// if true, use an 'extended' labelling (allowing for multiple HF hadrons -or perhaps partons- in the jet)
-  bool m_extFlavourLabel;
-  // bool m_excludeJESFromEV;
+  Gaudi::Property<bool> m_extFlavourLabel{this, "ExtendedFlavourLabel", false, "specify whether or not to use an 'extended' flavour labelling (allowing for multiple HF hadrons or perhaps partons)"};
   /// if true, extract pre-set lists of uncertainties to be recommended from the EV decomposition (in addition to user specified ones)
-  bool m_useRecommendedEVExclusions;
+  Gaudi::Property<bool> m_useRecommendedEVExclusions{this, "ExcludeRecommendedFromEigenVectorTreatment", false, "specify whether or not to add recommended lists to the user specified eigenvector decomposition exclusion lists"};
   /// if true, ignore out-of-extrapolation range errors (i.e., return CorrectionCode::Ok if these are encountered)
-  bool m_ignoreOutOfValidityRange;
+  Gaudi::Property<bool> m_ignoreOutOfValidityRange{this, "IgnoreOutOfValidityRange", false, "ignore out-of-extrapolation-range errors as returned by the underlying tool"};
   /// if false, suppress any non-error/warning printout from the underlying tool
   /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
-  bool m_useCTag = false;
-  bool m_readFromBTaggingObject = true;
+  Gaudi::Property<bool> m_useCTag{this, "useCTagging", false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging"};
+  Gaudi::Property<bool> m_readFromBTaggingObject{this, "readFromBTaggingObject", false, "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself."};
   /// if this string is empty, the onnx tool won't be created
-  std::string m_pathToONNX;
+  Gaudi::Property<std::string> m_pathToONNX{this, "pathToONNX", "", "path to the onnx file that will be used for inference"};
   /// @}
 
   // if true, use the flexible configuration of the CDIReader
-  bool m_useFlex = false;
+  Gaudi::Property<bool> m_useFlex{this, "useFlexibleConfig", false, "Setup the flexible configuration of the xAODBTaggingEfficiencyTool with alternate labeling"};
   std::vector<std::string> m_flex_labels;
   std::vector<unsigned int> m_flex_label_integers;
 

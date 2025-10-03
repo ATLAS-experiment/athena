@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -22,7 +22,7 @@ ExtrpTPnameFS = recordable("HLT_MSExtrapolatedMuons_FSTrackParticles")
 MSextrpTPname = recordable("HLT_MSOnlyExtrapolatedMuons_FSTrackParticles")
 
 
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
 class muonNames(object):
   def __init__(self):
@@ -68,7 +68,7 @@ def isLRT(name):
 #Returns relevant track collection name
 def getIDTracks(flags, name='', muonIDreuse=False, precision=False, suffix=''):
 
-  if muonIDreuse:
+  if muonIDreuse or suffix != '':
     if isLRT(name):
       return 'HLT_IDTrack_MuonComb_FTF_LRT'
     elif isCosmic(flags):
@@ -407,10 +407,12 @@ def VDVEFMuCBCfg(flags, RoIs, name, suffix):
       if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
         dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+NswSpacePoints' )]
 
-  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
+  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name+suffix,
                                                DataObjects = dataObjects)
   acc.addEventAlgo(alg)
   return acc
+
+
 
 def VDVPrecMuTrkCfg(flags, name, suffix):
   acc = ComponentAccumulator()
@@ -419,11 +421,13 @@ def VDVPrecMuTrkCfg(flags, name, suffix):
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
   
-  # phase-ii EFCB muon flag here
-  if not flags.Muon.enableTrigIDtrackReuse:
+  if not flags.Muon.enableTrigIDtrackReuse and suffix == '':
     dataObjects += [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname, muonIDreuse=flags.Muon.enableTrigIDtrackReuse) )]
   else:
-    MuonL2CBContainer = muNames.L2CBName+suffix
+    if suffix != 'idReuse':
+      MuonL2CBContainer = muNames.L2CBName+suffix
+    else:
+      MuonL2CBContainer = muNames.L2CBName
     dataObjects += [( 'xAOD::L2CombinedMuonContainer', 'StoreGateSvc+'+MuonL2CBContainer)]
 
   if not flags.Input.isMC:
@@ -435,6 +439,20 @@ def VDVPrecMuTrkCfg(flags, name, suffix):
   acc.addEventAlgo(alg)
   return acc
 
+
+def VDVidReuseITkCfg(flags, suffix):
+  acc = ComponentAccumulator()
+
+  vdvName = "VDVidReuseITk"
+  dataObjects = []
+
+  from TrigInDetConfig.TrigInDetConfig import InDetExtraDataObjectsFromDataPrep
+  InDetExtraDataObjectsFromDataPrep(flags, dataObjects)
+
+  alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName+suffix,
+                                               DataObjects = dataObjects)
+  acc.addEventAlgo(alg)
+  return acc
 
 
 def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
@@ -464,47 +482,29 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
   #Pass verifier as an argument and it will automatically append necessary DataObjects
   #@NOTE: Don't provide any verifier if loaded in the same view as FTF
   if isCosmic(flags) and 'LRT' not in name:
-     # phase-ii EFCB muon flag here
-     if flags.Muon.enableTrigIDtrackReuse:
-        trackParticles='HLT_IDTrack_MuonComb_FTF'
-     else:
-        trackParticles=getIDTracks(flags, name, muonIDreuse=flags.Muon.enableTrigIDtrackReuse)
+    trackParticles=getIDTracks(flags, name, muonIDreuse=flags.Muon.enableTrigIDtrackReuse)
   elif 'LRT' in name:
      muLrtFlags = getFlagsForActiveConfig(flags, "muonLRT", log)
      acc.merge(trigInDetPrecisionTrackingCfg(muLrtFlags, rois= RoIs, signatureName="muonLRT"))
-     # phase-ii EFCB muon flag here
-     if flags.Muon.enableTrigIDtrackReuse:
-        trackParticles='HLT_IDTrack_MuonComb_FTF_LRT'
-     else:
-        trackParticles = getIDTracks(muLrtFlags, name, precision=True)
+     trackParticles = getIDTracks(muLrtFlags, name, precision=True)
   elif 'FS' in name:
      muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
      acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
      trackParticles = getIDTracks(muFsFlags, precision=True)
   else:
      muFlags = getFlagsForActiveConfig(flags, "muon", log)
-     if not flags.Muon.enableTrigIDtrackReuse or suffix=="":
+     if not flags.Muon.enableTrigIDtrackReuse and suffix == '':
         acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
      trackParticles=getIDTracks(muFlags, name, muonIDreuse=flags.Muon.enableTrigIDtrackReuse, precision=True, suffix=suffix)
-     # phase-ii EFCB muon flag here
-     if flags.Muon.enableTrigIDtrackReuse:
-        trackParticles='HLT_IDTrack_MuonComb_FTF'
-     else:
-        trackParticles = getIDTracks(muFlags, precision=True)
 
-  # phase-ii EFCB muon flag here
-  if flags.Muon.enableTrigIDtrackReuse:
-     from TrigMuonEF.TrigMuonEFConfig import MergeMuonInDetTracksAlgCfg
-     acc.merge(MergeMuonInDetTracksAlgCfg(flags, name="MergeInDetTracks",
-                                      FullIDTrackContainerLocation=getIDTracks(flags),
-                                      MuonCBContainerLocation=muNames.L2CBName, 
-                                      MuonInsideOutContainerLocation=muNames.L2CBName+'IOmode',
-                                      MuonL2mtContainerLocation=muNames.L2CBName+'l2mtmode',
-                                      IDtrackOutputLocation="HLT_IDTrack_MuonComb_FTF"))
-
-  if flags.Muon.enableTrigIDtrackReuse:
+  if flags.Muon.enableTrigIDtrackReuse or suffix != '':
      if 'LRT' not in name or 'FS' not in name:
-        MuonL2CBInputContainer = muNames.L2CBName+suffix
+        if flags.GeoModel.Run > LHCPeriod.Run3:
+           acc.merge(VDVidReuseITkCfg(flags, suffix))
+        if suffix != 'idReuse':
+           MuonL2CBInputContainer = muNames.L2CBName+suffix
+        else:
+           MuonL2CBInputContainer = muNames.L2CBName
         from TrigMuonEF.TrigMuonEFConfig import GetL2CBmuonInDetTracksAlgCfg
         acc.merge(GetL2CBmuonInDetTracksAlgCfg(flags, name="GetL2CBInDetTracks"+suffix,
                                          MuonL2CBContainerLocation=MuonL2CBInputContainer, 
@@ -542,7 +542,8 @@ def VDVMuInsideOutCfg(flags, name, candidatesName, suffix):
   acc = ComponentAccumulator()
   dataObjects = [( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
                  ( 'Muon::TgcPrepDataContainer' , 'StoreGateSvc+TGC_Measurements' ),
-                 ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName )]
+                 ( 'MuonCandidateCollection' , 'StoreGateSvc+'+candidatesName ),
+                 ('Trk::SegmentCollection' , 'StoreGateSvc+TrackMuonSegments')]
   if not isCosmic(flags): dataObjects += [( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec')]
   if flags.Detector.GeometryCSC:
     dataObjects += [( 'Muon::CscPrepDataContainer' , 'StoreGateSvc+CSC_Clusters' )]
@@ -561,6 +562,7 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
   from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuGirlStauAlgCfg, StauCreatorAlgCfg, MuonInDetToMuonSystemExtensionAlgCfg, MuonInsideOutRecoAlgCfg, MuonCombinedInDetCandidateAlgCfg
+  from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonInsideOutRecoToolCfg
 
   acc = ComponentAccumulator()
   
@@ -609,11 +611,17 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
   else:
     acc.merge(MuonInDetToMuonSystemExtensionAlgCfg(flags, name="TrigInDetMuonExtensionAlg_"+name+suffix, InputInDetCandidates="InDetCandidates_"+name+suffix,
                                                           WriteInDetCandidates="InDetCandidatesSystemExtended_"+name+suffix))
-    acc.merge(MuonInsideOutRecoAlgCfg(flags, name="TrigMuonInsideOutRecoAlg_"+name+suffix,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name+suffix))
+    if 'RoI' in name:
+      ioTool = MuonInsideOutRecoToolCfg(flags, MuonLayerSegmentFinderTool="", InputSegments="TrackMuonSegments")
+    else:
+      ioTool = MuonInsideOutRecoToolCfg(flags)
+    InsideOutRecoTool = acc.popToolsAndMerge(ioTool)
+
+    acc.merge(MuonInsideOutRecoAlgCfg(flags, name="TrigMuonInsideOutRecoAlg_"+name+suffix,InDetCandidateLocation="InDetCandidatesSystemExtended_"+name+suffix, MuonCombinedInDetExtensionTool=InsideOutRecoTool))
 
     acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgInsideOut_"+name+suffix,  MuonCandidateLocation=[candidatesName], TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name+suffix,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons"+suffix,
-                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons"+suffix, CombinedLocation = "InsideOutCBCombinedMuon"+suffix, MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name)))
+                                         MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons"+suffix, CombinedLocation = "InsideOutCBCombinedMuon"+suffix, MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name+suffix)))
 
 
 

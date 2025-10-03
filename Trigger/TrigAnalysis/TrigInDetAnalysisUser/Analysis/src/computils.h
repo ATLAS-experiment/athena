@@ -33,6 +33,7 @@
 #include "TGraphAsymmErrors.h"
 
 #include "TLegend.h"
+#include <cmath>
 
 
 extern bool LINEF;
@@ -185,6 +186,7 @@ public:
       else if  ( keys[i]=="width" ) m_binwidth  = true;
       else if  ( keys[i]=="auto" )  m_autoset   = true;
       else if  ( keys[i]=="trim" )  m_trim      = true;
+      //cppcheck-suppress stlIfStrFind
       else if  ( keys[i].find("offset")==0  )  {
 
 	std::cout << "offset:" << std::endl;

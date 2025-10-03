@@ -13,9 +13,11 @@
 #include "FPGATrackSimBinning/IFPGATrackSimBinDesc.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinStep.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
+#include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include <GaudiKernel/StatusCode.h>
 #include <nlohmann/json.hpp>
 
+using FPGATrackSimBinUtil::StoredHit;
 
 StatusCode FPGATrackSimBinnedHits::initialize() {
   // Dump the configuration to make sure it propagated through right
@@ -86,7 +88,6 @@ StatusCode FPGATrackSimBinnedHits::fill(
 
       ATH_MSG_VERBOSE("valid bin");
       if (stepnum == 0) {
-
         // first step, hits from input stream
         for (const std::shared_ptr<const FPGATrackSimHit> &hit : hits) {
           StoredHit storedhit(hit);
@@ -98,36 +99,52 @@ StatusCode FPGATrackSimBinnedHits::fill(
 
       } else {        
         // subsequent steps, use hits from previous step
-        ATH_MSG_VERBOSE("Looping over previous hits of size = " << m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size());
+        if (m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size()!=0)
+          ATH_MSG_VERBOSE("Looping over previous hits of size = " << m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size());
+
         for (const auto &hit :
              m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits) {
           StoredHit storedhit(hit);
-          if (m_bintool->binDesc()->hitInBin(*step.get(), bin.idx(),
-                                             storedhit)) {
-            ATH_MSG_VERBOSE("Hit found to be in bin, is it mapped? " << hit.hitptr->isMapped());
-            // One last step, set layer based on layerMap or use default from pmap
+          if (m_bintool->binDesc()->hitInBin(*step.get(), bin.idx(),storedhit)) {
+            bool writeHit = true;
+
+            // if it is the laststep, set the layer and only write hit if there is a valid layer                                 
             if (step.get() == m_bintool->lastStep()) {
-              if (m_mod_to_lyr_map.size() != 0) {
+              if (m_mod_to_lyr_map.size() != 0) { // there is a layermap                
                 if (m_mod_to_lyr_map[bin.idx()].contains(hit.hitptr->getIdentifierHash())) {
                   storedhit.layer = m_mod_to_lyr_map[bin.idx()][hit.hitptr->getIdentifierHash()];
-                  m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
-                } 
-              } else {
+                } else {
+                  ATH_MSG_VERBOSE("Hit not in layermap" << hit);
+                  writeHit=false;
+                }
+              } else { // no layer map
                 // TODO is it right to ignore hits that were unmapped?
                 if (hit.hitptr->isMapped()) {
                   storedhit.layer = hit.hitptr->getLayer();
-                  m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
+                } else {
+                  ATH_MSG_VERBOSE("Hit not mapped" << hit);
+                  writeHit=false;
                 }
               }
-            }            
+            }
+
+            // add hit to bin
+            if (writeHit) m_binnedHitsStep[stepnum][bin.idx()].addHit(storedhit);
           }
         }
+        
+        if (m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size()!=0)
+        ATH_MSG_DEBUG("Bin Hit Count: step " << step.name()
+          << " binidx = " << bin.idx()
+          << " input hits = "  << m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size()
+          << " layers=" << m_binnedHitsStep[stepnum][bin.idx()].lyrCnt() 
+          << " hits="  << m_binnedHitsStep[stepnum][bin.idx()].hitCnt );
       }
 
     } //  end loop over bins
       
     stepnum++;
-  } // end loop over stepsd
+  } // end loop over steps
 
   return StatusCode::SUCCESS;
 }
@@ -145,11 +162,11 @@ void FPGATrackSimBinnedHits::BinEntry::reset()
 void FPGATrackSimBinnedHits::BinEntry::addHit(const StoredHit& hit)
 {
   hitCnt++;
-  if (((lyrhit >> hit.layer) & 0x1) == 0x0)
+  hits.push_back(hit);
+  if (hit.layer != StoredHit::invalidLayer)
   {
     lyrhit |= (0x1 << hit.layer);
   }
-  hits.push_back(hit);
 }
 
 unsigned FPGATrackSimBinnedHits::BinEntry::hitsInLyr(unsigned lyr) const {
@@ -163,12 +180,15 @@ unsigned FPGATrackSimBinnedHits::BinEntry::hitsInLyr(unsigned lyr) const {
 //
 //-------------------------------------------------------------------------------
 
-void FPGATrackSimBinnedHits::readLayerMap(const std::string& filename) {
+void FPGATrackSimBinnedHits::readLayerMap(const std::string &filename) {
+
+  ATH_MSG_INFO("Reading lyrmap json: " << filename);
+  
   std::ifstream f(filename);
   nlohmann::json data = nlohmann::json::parse(f);
 
   m_lyr_to_mod_map.setsize(m_bintool->lastStep()->nBins(),
-                   std::vector <std::set<unsigned> >(8,std::set<unsigned>()));
+                   std::vector <std::set<unsigned> >());
   m_mod_to_lyr_map.setsize(m_bintool->lastStep()->nBins(),
                    std::map <unsigned,unsigned>());
 
@@ -178,25 +198,29 @@ void FPGATrackSimBinnedHits::readLayerMap(const std::string& filename) {
     std::vector<unsigned> bin;
     binelem.at("bin").get_to(bin);
     auto& lyrmap = binelem["lyrmap"];
-    ATH_MSG_DEBUG("bin = " << bin);
-    ATH_MSG_DEBUG("lyrmap = " << lyrmap);
+    ATH_MSG_VERBOSE("bin = " << bin);
+    ATH_MSG_VERBOSE("lyrmap = " << lyrmap);
     for (auto &lyrelem : lyrmap) {
       unsigned lyr;
       lyrelem.at("lyr").get_to(lyr);
+      m_lyr_to_mod_map[bin].push_back(std::set<unsigned>());
       lyrelem.at("mods").get_to(m_lyr_to_mod_map[bin][lyr]);
-      ATH_MSG_DEBUG("lyr = " << lyr);
-      ATH_MSG_DEBUG("mods = " << m_lyr_to_mod_map[bin][lyr]);
+      ATH_MSG_VERBOSE("lyr = " << lyr);
+      ATH_MSG_VERBOSE("mods = " << m_lyr_to_mod_map[bin][lyr]);
       for (auto &mod : m_lyr_to_mod_map[bin][lyr]) {
         m_mod_to_lyr_map[bin][mod]=lyr;
       }
       // set valid bins, this expects binning based on the last step
       m_bintool->setValidBin(bin);
     }
-    if (m_nLayers == 0) {
-      m_nLayers = m_lyr_to_mod_map[bin].size();
-    } else if (m_nLayers != m_lyr_to_mod_map[bin].size())  {
-      ATH_MSG_FATAL("Layer map bins have inconsistent numbers of layers");
+    for (auto &lyrmods : m_lyr_to_mod_map[bin]) {
+      ATH_MSG_VERBOSE(" mods: "  << lyrmods);
+    } 
+    if (m_nLayers != 0 && m_nLayers != m_lyr_to_mod_map[bin].size())  {
+      ATH_MSG_WARNING("Layer map bins have inconsistent numbers of layers: " << m_nLayers << ", " << m_lyr_to_mod_map[bin].size());
     }
-  }
+    m_nLayers = std::max(m_nLayers, static_cast<unsigned>(m_lyr_to_mod_map[bin].size()));
 
+  }
+  ATH_MSG_INFO("JSON layer map speficied " << m_nLayers << " layers" );
 }

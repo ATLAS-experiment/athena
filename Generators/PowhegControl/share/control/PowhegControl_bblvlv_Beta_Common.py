@@ -1,3 +1,4 @@
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 import PowhegControl
 transform_runArgs = runArgs if "runArgs" in dir() else None
 transform_opts = opts if "opts" in dir() else None

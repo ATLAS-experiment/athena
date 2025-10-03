@@ -610,7 +610,7 @@ def findCacheFile( inputFilePath, run, stream, cache ):
 
 def transferDirectoryToHandoffDir( dirName, localDir, targetDir, config ):
     import time, shutil, glob
-    import six.moves.configparser as configparser
+    import configparser as configparser
     targetfname = repr(int(time.time())) + '-' + repr(os.getpid()) \
                   + '-' + os.uname()[1]  + '.tgz'
     targetfile = os.path.join(targetDir, targetfname)

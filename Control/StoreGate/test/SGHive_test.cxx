@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -85,11 +85,12 @@ public:
     {  
       rSG.commitNewDataObjects();
 
+      StatusCode sc;
       //add something to store
-      assert(rSG.record(new SG::Foo(1), "pFoo1").isSuccess());
-      assert(rSG.record(new SG::Foo(2), "pFoo2").isSuccess());
+      sc = rSG.record(new SG::Foo(1), "pFoo1");  assert(sc.isSuccess());
+      sc = rSG.record(new SG::Foo(2), "pFoo2");  assert(sc.isSuccess());
       rSG.commitNewDataObjects();
-      assert(rSG.record(new SG::Foo(3), "pFoo3").isSuccess());
+      sc = rSG.record(new SG::Foo(3), "pFoo3");  assert(sc.isSuccess());
       rSG.commitNewDataObjects();
     }
     void testNoSlot() {

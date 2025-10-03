@@ -203,6 +203,10 @@ if __name__=='__main__':
    else:
       flags.DQ.enableLumiAccess=False
 
+   if 'PEB' in STREAM: # do not have HLT results
+      flags.Trigger.decodeHLT=False
+      flags.DQ.useTrigger = False
+
    flags.lock()
 
    flags.dump()
@@ -332,6 +336,16 @@ if __name__=='__main__':
            bytestream_input.StreamType = "monitoring"
        if  STREAM=="calibration":
            bytestream_input.StreamType = "calibration"
+       if  "LArPEBDigitalTrigger" in STREAM:
+           bytestream_input.StreamType = "calibration"
+           bytestream_input.StreamNames = ['LArPEBDigitalTrigger']
+           if "EMPTY" in STREAM:
+              bytestream_input.LVL1Names=["L1_RD0_EMPTY","L1_RD0_LAR_EMPTY","L1_RD0_FIRSTEMPTY"]
+           elif "FILLED" in STREAM:   
+              bytestream_input.LVL1Names=["L1_RD0_FILLED"]
+           elif "PHYS" in STREAM:   
+              bytestream_input.LVL1Names=["L1_jJ500_LAR","L1_LAR-ZEE-eEM"]
+           pass   
 
            
        print("DEBUG: bytestream_input.StreamNames:",bytestream_input.StreamNames)
@@ -398,8 +412,24 @@ if __name__=='__main__':
    print('STREAM ',STREAM)
    
    # testing Denis stuff
-   from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfig
-   acc.merge(LArSuperCellMonConfig(flags))
+   # not working, because MbtsDetDescrManager not found.....
+   #from TileGeoModel.TileGMConfig import TileGMCfg
+   #acc.merge(TileGMCfg(flags))
+   #from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfig
+   #acc.merge(LArSuperCellMonConfig(flags))
+
+   if "LArSCvsRawChannel" in CONFIG:
+      from LArMonitoring.RecoPT_Phase1NewConfig import LArSCvsRawChannelMonAlgCfg
+      acc.merge(LArSCvsRawChannelMonAlgCfg(flags,STREAM))
+
+   elif CONFIG!="LArDTMon":
+      from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
+      acc.merge(LArMonitoringConfig(flags,CONFIG,STREAM,RunType))
+
+   else:
+      from LArMonitoring.RecoPT_Phase1NewConfig import LArDTMonitoringConfig
+      acc.merge(LArDTMonitoringConfig(flags,STREAM))
+
 
    # fixes for splashes
    if RunType == 0:

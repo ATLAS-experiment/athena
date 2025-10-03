@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbHeap.h 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbHeap class definitions
 //--------------------------------------------------------------------
@@ -16,7 +15,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/pool.h"
-#include "StorageSvc/DbHandleBase.h"
 
 /*
  *  POOL namespace declaration
@@ -27,14 +25,6 @@ namespace pool  {
   class DbContainer;
   template <class T> class DbObjectHandle;
 
-  /** Db objects: class DbHeap
-
-      Description:
-      Handle managing a persistent memory.
-
-      @author  M.Frank
-      @version 1.0
-  */
   class DbHeap  {
   public:
     /// Standard Constructor

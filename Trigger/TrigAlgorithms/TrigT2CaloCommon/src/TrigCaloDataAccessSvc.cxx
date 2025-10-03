@@ -174,14 +174,8 @@ StatusCode TrigCaloDataAccessSvc::loadFullCollections ( const EventContext& cont
                                                         CaloConstCellContainer& cont ) {
 
   // Gets all data
-  {
-  std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
   m_robDataProvider->addROBData( context, m_vrodid32fullDet );
-  }
-  {
-  std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
   m_robDataProvider->addROBData( context, m_vrodid32tile );
-  }
 
   unsigned int sc = prepareLArFullCollections( context );
   ATH_CHECK( sc == 0 );
@@ -245,12 +239,8 @@ unsigned int TrigCaloDataAccessSvc::prepareLArFullCollections( const EventContex
   for( size_t ii=0;ii<m_vrodid32fullDetHG.size();ii++) {
       std::vector<uint32_t>& vrodid32fullDet = m_vrodid32fullDetHG[ii];
       std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-      {
-        std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
-        // To be confirmed whether we need this or not
-        m_robDataProvider->addROBData( context, vrodid32fullDet );
-        m_robDataProvider->getROBData( context, vrodid32fullDet, robFrags );      
-      }
+      m_robDataProvider->addROBData( context, vrodid32fullDet );
+      m_robDataProvider->getROBData( context, vrodid32fullDet, robFrags );      
 
       status |= convertROBs( robFrags, ( cache->larContainer ), (cache->larRodBlockStructure_per_slot), cache->rodMinorVersion, cache->robBlockType, deadHandle );
       
@@ -677,19 +667,16 @@ unsigned int TrigCaloDataAccessSvc::prepareLArCollections( const EventContext& c
   std::vector<uint32_t> requestROBs;
 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  {
-    std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
-    switch ( detector ) {
-    case TTEM: {m_regionSelector_TTEM->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
-    case TTHEC: {m_regionSelector_TTHEC->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
-    case FCALEM: {m_regionSelector_FCALEM->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
-    case FCALHAD: {m_regionSelector_FCALHAD->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
-    default: break;
-    }
-
-    m_robDataProvider->addROBData( context, requestROBs );
-    m_robDataProvider->getROBData( context, requestROBs, robFrags );
+  switch ( detector ) {
+  case TTEM: {m_regionSelector_TTEM->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
+  case TTHEC: {m_regionSelector_TTHEC->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
+  case FCALEM: {m_regionSelector_FCALEM->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
+  case FCALHAD: {m_regionSelector_FCALHAD->lookup(context)->ROBIDList( sampling, roi, requestROBs ); break; }
+  default: break;
   }
+
+  m_robDataProvider->addROBData( context, requestROBs );
+  m_robDataProvider->getROBData( context, requestROBs, robFrags );
   if ( robFrags.empty() && (!requestROBs.empty()) ) {
     return 0x0; // dummy code
   }
@@ -749,12 +736,9 @@ unsigned int TrigCaloDataAccessSvc::prepareTileCollections( const EventContext& 
   std::vector<uint32_t> requestROBs;
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
   std::vector<IdentifierHash> rIds;
-  {
-    std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
-    m_regionSelector_TILE->lookup(context)->ROBIDList( 0, roi, requestROBs ); 
-    m_regionSelector_TILE->lookup(context)->HashIDList(roi, rIds);
-    m_robDataProvider->addROBData( context, requestROBs );
-  }
+  m_regionSelector_TILE->lookup(context)->ROBIDList( 0, roi, requestROBs ); 
+  m_regionSelector_TILE->lookup(context)->HashIDList(roi, rIds);
+  m_robDataProvider->addROBData( context, requestROBs );
 
 
   std::lock_guard<std::mutex> collectionLock { cache->mutex };  
@@ -777,10 +761,7 @@ unsigned int TrigCaloDataAccessSvc::prepareMBTSCollections( const EventContext& 
   if ( cache->lastFSEvent == context.evt() ) return 0x0;
 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  {
-    std::lock_guard<std::mutex> dataPrepLock { m_dataPrepMutex };
-    m_robDataProvider->addROBData( context, m_mbts_add_rods );
-  }
+  m_robDataProvider->addROBData( context, m_mbts_add_rods );
   std::lock_guard<std::mutex> collectionLock { cache->mutex };  
   TileCellCont* tilecell = cache->tileContainer;
   if ( cache->tileContainer->eventNumber() != context.evt() )

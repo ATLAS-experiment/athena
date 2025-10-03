@@ -1,6 +1,6 @@
 """Define methods to construct configured TRT Digitization tools and algorithms
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -39,15 +39,12 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     kwargs.setdefault('PartPropSvc', acc.getPrimaryAndMerge(PartPropSvcCfg(flags))) # Property from GenBase
-    kwargs.setdefault("DigVersContainerKey", "")
     # default arguments
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-    StrawStatusTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-    acc.addPublicTool(StrawStatusTool)  # public as it is has many clients to save some memory
-    kwargs.setdefault("InDetTRTStrawStatusSummaryTool", StrawStatusTool)
-    kwargs.setdefault("PAI_Tool_Ar", TRT_PAI_Process_ArToolCfg(flags))
-    kwargs.setdefault("PAI_Tool_Kr", TRT_PAI_Process_KrToolCfg(flags))
-    kwargs.setdefault("PAI_Tool_Xe", TRT_PAI_Process_XeToolCfg(flags))
+    kwargs.setdefault("InDetTRTStrawStatusSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
+    kwargs.setdefault("PAI_Tool_Ar", acc.popToolsAndMerge(TRT_PAI_Process_ArToolCfg(flags)))
+    kwargs.setdefault("PAI_Tool_Kr", acc.popToolsAndMerge(TRT_PAI_Process_KrToolCfg(flags)))
+    kwargs.setdefault("PAI_Tool_Xe", acc.popToolsAndMerge(TRT_PAI_Process_XeToolCfg(flags)))
     kwargs.setdefault("Override_TrtRangeCutProperty", flags.Sim.TRTRangeCut)
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
     if not flags.Digitization.DoInnerDetectorNoise:
@@ -166,12 +163,6 @@ def TRT_DigitizationSplitNoMergePUToolCfg(flags, name="TRT_DigitizationToolSplit
 def TRT_OverlayDigitizationToolCfg(flags, name="TRT_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured Overlay TRT digitization tool"""
     acc = ComponentAccumulator()
-    if flags.Overlay.DataOverlay:
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        # TODO: remove the hardcode
-        acc.merge(addFolders(flags, "/TRT/Cond/DigVers", "TRT_OFL", tag="TRTCondDigVers-Collisions-01", db="OFLP200", className="AthenaAttributeList"))
-        kwargs.setdefault("DigVersContainerKey", "/TRT/Cond/DigVers")
-
     kwargs.setdefault("OnlyUseContainerName", False)
     kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "TRT_RDOs")
     kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "TRT_SDO_Map")

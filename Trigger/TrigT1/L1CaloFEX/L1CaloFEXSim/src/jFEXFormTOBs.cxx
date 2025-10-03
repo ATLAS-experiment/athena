@@ -9,7 +9,7 @@
 //     email                : sergi.rodriguez@cern.ch
 //  ***************************************************************************/
 
-#include "L1CaloFEXSim/jFEXFormTOBs.h"
+#include "jFEXFormTOBs.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1 {

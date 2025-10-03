@@ -339,4 +339,14 @@
           id="C6D7DC58-2D6C-480C-851B-241DE10ED4BB" />
    <typedef name="xAOD::L1TopoSimResultsAuxContainer" />
 
+   <!-- xAOD::CTPResult interface type(s). -->
+   <class name="xAOD::CTPResult_v1"
+          id="7574FE5F-02EF-4CEE-82DF-B084358FD025" />
+   <typedef name="xAOD::CTPResult" />
+
+   <!-- xAOD::CTPResult auxiliary type(s). -->
+   <class name="xAOD::CTPResultAuxInfo_v1"
+          id="9939F2D3-5BE4-4E6F-812C-4788D71C92AC" />
+   <typedef name="xAOD::CTPResultAuxInfo" />
+
 </lcgdict>

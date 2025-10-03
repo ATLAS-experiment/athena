@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZdcID_H
@@ -30,8 +30,8 @@ public:
     typedef std::vector<Identifier>::const_iterator const_id_iterator;
     typedef MultiRange::const_identifier_factory const_expanded_id_iterator;
 
-    ZdcID(void);
-    ~ZdcID(void);
+    ZdcID();
+    ~ZdcID();
 
     /// @name Optimized accessors  - ASSUMES id IS a sct id, i.e. NOT pixel or other
     //@{
@@ -50,19 +50,19 @@ public:
 
     /// @name Hash table maximum sizes
     //@{
-    size_type           module_hash_max (void) const;
-    size_type           channel_hash_max (void) const;
+    size_type           module_hash_max () const;
+    size_type           channel_hash_max () const;
     //@}
 
     /// @name Access to all ids
     //@{
     /// Iterators over full set of ids. modules iterator is sorted
-    const_id_iterator   modules_begin (void) const;
-    const_id_iterator   modules_end   (void) const;
+    const_id_iterator   modules_begin () const;
+    const_id_iterator   modules_end   () const;
 
     /// Iterators over full set of ids. channels iterator is sorted
-    const_id_iterator   channels_begin (void) const;
-    const_id_iterator   channels_end   (void) const;
+    const_id_iterator   channels_begin () const;
+    const_id_iterator   channels_end   () const;
     //@}
 
 
@@ -87,7 +87,7 @@ public:
     virtual int         initialize_from_dictionary(const IdDictMgr& dict_mgr);
 
     /// Tests of packing
-    void                test_packing    (void) const;
+    void                test_packing    () const;
     //@}
 
 private:
@@ -97,9 +97,9 @@ private:
     typedef std::vector<unsigned short> hash_vec;
     typedef hash_vec::const_iterator    hash_vec_it;
 
-    int         initLevelsFromDict(void);
+    int         initLevelsFromDict();
 
-    int         init_hashes(void);
+    int         init_hashes();
 
     size_type                   m_zdc_region_index{};
     size_type                   m_FORWARD_INDEX{};

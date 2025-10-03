@@ -73,28 +73,20 @@ class GfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
 
 
     struct SortableTob {
-        SortableTob(unsigned int w, float e, float p) : word0(w),eta(e),phi(p) { }
+        SortableTob(unsigned int w, float e, float p, int pt) : word0(w),eta(e),phi(p),et(pt) { }
         unsigned int word0;
         float eta,phi;
+        int et;
     };
-    template <typename T> void fillVectors(const SG::ReadHandleKey<T>& key, const EventContext& ctx, std::vector<float>& etas, std::vector<float>& phis, std::vector<unsigned int>& word0s) const {
-        etas.clear();phis.clear();word0s.clear();
+    template <typename T> void fillVectors(const SG::ReadHandleKey<T>& key, const EventContext& ctx, std::vector<SortableTob>& sortedTobs) const {
+        sortedTobs.clear();
         SG::ReadHandle<T> tobs{key, ctx};
         if(tobs.isValid()) {
-            etas.reserve(tobs->size());
-            phis.reserve(tobs->size());
-            word0s.reserve(tobs->size());
-            std::vector<SortableTob> sortedTobs;
             sortedTobs.reserve(tobs->size());
             for(auto tob : *tobs) {
-                sortedTobs.emplace_back(SortableTob{tob->word(),tob->eta(),tob->phi()});
+                sortedTobs.emplace_back(SortableTob{tob->word(),tob->eta(),tob->phi(),tob->gFexTobEt()});
             }
             std::sort(sortedTobs.begin(),sortedTobs.end(),[](const SortableTob& lhs, const SortableTob& rhs) { return lhs.eta<rhs.eta; });
-            for(auto& tob : sortedTobs) {
-                etas.push_back(tob.eta);
-                phis.push_back(tob.phi);
-                word0s.push_back(tob.word0);
-            }
         }
     }
 

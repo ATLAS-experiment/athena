@@ -85,11 +85,10 @@ namespace Muon
       The pointer will be zero if the det el is not defined (i.e. it was not passed in by the ctor)*/
       virtual const MuonGM::TgcReadoutElement* detectorElement() const override final;
 
-      /** Interface method checking the type*/
-      virtual bool type(Trk::PrepRawDataType type) const override final
-      {
-        return type == Trk::PrepRawDataType::TgcPrepData;
-      }
+    //** @brief Interface method returning the prdType */
+    virtual Trk::PrepRawDataType prdType() const override {
+      return Trk::PrepRawDataType::TgcPrepData;
+    }
 
       /** @brief Returns the bcBitMap of this PRD
       bit2 for Previous BC, bit1 for Current BC, bit0 for Next BC */

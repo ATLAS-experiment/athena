@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/src/ArenaPoolAllocator.cxx
@@ -11,6 +11,7 @@
 
 #include "AthAllocators/ArenaPoolAllocator.h"
 #include "AthAllocators/ArenaBlock.h"
+#include "AthAllocators/exceptions.h"
 #include <cassert>
 
 
@@ -106,7 +107,16 @@ ArenaPoolAllocator::ArenaPoolAllocator (const Params& params)
  */
 ArenaPoolAllocator::~ArenaPoolAllocator()
 {
-  erase();
+  if (m_protected) {
+    try {
+      unprotect();
+    }
+    catch (const SG::ExcProtection&) {
+      // Got an error from mprotect...
+      std::abort();
+    }
+  }
+  ArenaBlockAllocatorBase::eraseUnprotected();
 }
 
 

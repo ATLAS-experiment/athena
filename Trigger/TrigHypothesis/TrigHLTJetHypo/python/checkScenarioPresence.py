@@ -1,6 +1,4 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-from __future__ import print_function
-from __future__ import absolute_import
 
 """Check that if a scenario apppears in a chain part name, that it also
 is a key in the chain part dict. This is to catch errors whereby a

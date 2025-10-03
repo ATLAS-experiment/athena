@@ -3,19 +3,19 @@ Smear:
   HistoReader:
     histNameMC: "JER_Nominal_MC16_AntiKt4EMTopo"
     histNameData: "JER_Nominal_data_AntiKt4EMTopo"
-    inputFile: "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
+    inputFile: "JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
     InterpType: "OnlyX"
     varX: "pt"
     varY: "abseta"
-  JSCStartingScale: "JetGSCScaleMomentum"
-  JSCOutScale: "JetSmearedMomentum"
+  InScale: "JetConstitScaleMomentum" # do not include in analysis-facing YAML
+  OutScale: "JetSmearedMomentum" # do not include in analysis-facing YAML
   SmearType: "FourVec"
 
 # Example specifying HistoReaderMC and HistoReaderData separately and explicitly setting varX/varY parameters
 SmearLong:
   HistoReaderMC:
     histName: "JER_Nominal_MC16_AntiKt4EMTopo"
-    inputFile: "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
+    inputFile: "JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
     InterpType: "OnlyX"
     varX:
       Name: "pt"
@@ -29,7 +29,7 @@ SmearLong:
       isJetVar: True
   HistoReaderData:
     histName: "JER_Nominal_data_AntiKt4EMTopo"
-    inputFile: "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
+    inputFile: "JetCalibTools/CalibArea-00-04-82/CalibrationFactors/JER_Nominal_Apr2019.root"
     InterpType: "OnlyX"
     varX:
       Name: "pt"
@@ -41,6 +41,7 @@ SmearLong:
       Scale: 1.0
       Type: "float"
       isJetVar: True
-  JSCStartingScale: "JetGSCScaleMomentum"
-  JSCOutScale: "JetSmearedMomentum"
+  InScale: "JetGSCScaleMomentum"
+  OutScale: "JetSmearedMomentum"
   SmearType: "FourVec"
+  noRun: True

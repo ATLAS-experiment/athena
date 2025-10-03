@@ -35,7 +35,7 @@ private: // properties
    IntegerProperty m_numberOfClients{this,"NumberOfClients",1};
 
 private:
-   ServiceHandle<IConversionSvc> m_cnvSvc{this,"AthenaPoolCnvSvc","AthenaPoolCnvSvc"};
+   ServiceHandle<IConversionSvc> m_cnvSvc{this,"ConversionService","AthenaPoolSharedIOCnvSvc"};
    ServiceHandle<IAthenaSharedWriterSvc> m_sharedWriterSvc{this,"AthenaRootSharedWriterSvc","AthenaRootSharedWriterSvc"};
 };
 

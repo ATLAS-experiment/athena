@@ -9,7 +9,7 @@ should be added there, not here.
 """
 
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
-    ParentDecoratorCfg
+    ParentDecoratorCfg, trackTruthDecorator
 )
 from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
@@ -49,7 +49,7 @@ PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
     "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink.InclusiveGNNVerticesLink",
     "TruthPrimaryVertices.t.x.y.z",
     "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-    "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
+    "TauChargedParticleFlowObjects.pt.eta.phi.m",
     "MET_Track.sumet",
 ]
 
@@ -134,6 +134,9 @@ def trigger_setup(SlimmingHelper, option=''):
         SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10tclcwsubjesFSAux.')
         SlimmingHelper.FinalItemList.append('xAOD::JetContainer#HLT_xAOD__JetContainer_a10ttclcwjesFS')
         SlimmingHelper.FinalItemList.append('xAOD::JetTrigAuxContainer#HLT_xAOD__JetContainer_a10ttclcwjesFSAux.')
+    if option == 'FTAG5':
+        SlimmingHelper.IncludeTriggerNavigation = True
+        SlimmingHelper.IncludeJetTriggerContent = True
 
 
 def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
@@ -191,6 +194,9 @@ def addCommonAugmentation(flags, cfg, helper):
 
     if not flags.Input.isMC:
         return
+
+    # add track truth info
+    cfg.merge(trackTruthDecorator(flags))
 
     # match jets to the parent particles
     cfg.merge(

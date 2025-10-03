@@ -9,7 +9,6 @@ from DQUtils.channel_mapping import get_channel_ids_names
 from .exceptions import (DefectUnknownError,
                          InvalidLogicTagError)
 
-import six
 from typing import Set, Iterable, Tuple, Union, List
 from collections.abc import Mapping, MutableMapping
 
@@ -55,7 +54,7 @@ def choose_new_defect_id(existing_map: Mapping[Union[str, int], Union[str,int]],
     It works for virtual IDs as well, though via a bit of an edge case for
     when none exist yet.
     """
-    existing = sorted(_ for _ in six.itervalues(existing_map) if not isinstance(_, six.string_types))
+    existing = sorted(_ for _ in existing_map.values() if not isinstance(_, str))
     if len(existing) == 0:
         newid = 0
     else:
@@ -216,7 +215,7 @@ class DefectsDBIDsNamesMixin(object):
                 (not primary_only and channel not in self.virtual_defect_ids)):
                 raise DefectUnknownError(channel)
             return channel
-        elif isinstance(channel, six.string_types):
+        elif isinstance(channel, str):
             if channel in self.defect_names:
                 return self.defect_id_map[channel]
             if not primary_only and channel in self.virtual_defect_names:
@@ -294,7 +293,7 @@ class DefectsDBIDsNamesMixin(object):
         if isinstance(defect_id, int):
             return DefectID(defect_id).is_virtual
         
-        if not isinstance(defect_id, six.string_types):
+        if not isinstance(defect_id, str):
             raise RuntimeError("Invalid defect_id, expected int or string")
         
         if defect_id in self.defect_names:
@@ -313,10 +312,10 @@ class DefectsDBIDsNamesMixin(object):
         object as `defect_id`.
         """
         wasstring = False
-        if isinstance(defect_id, six.string_types):
+        if isinstance(defect_id, str):
             defect_id = [defect_id]
             wasstring = True
-        if any(not isinstance(i, six.string_types) for i in defect_id):
+        if any(not isinstance(i, str) for i in defect_id):
             raise ValueError('All input values must be strings')
 
         uppered_defects = dict((i.upper(), i) for i in self.defect_names)

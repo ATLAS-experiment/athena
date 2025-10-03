@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONBASE_ICOLLECTIONSERVICE_H
@@ -9,7 +9,6 @@
 #include "CxxUtils/checker_macros.h"
 
 #include <string>
-#include <vector>
 
 
 namespace pool {
@@ -54,7 +53,7 @@ namespace pool {
      */
     virtual ICollection* createAndRegister( const ICollectionDescription& description,
                                             bool overwrite = false,
-                                            std::string logicalName = "" ) = 0;
+                                            const std::string & logicalName = "" ) = 0;
 
     /**
      * Registers an existing collection in a collection catalog managed by the collection
@@ -67,10 +66,10 @@ namespace pool {
      * @param type Storage technology type of collection.
      * @param connection Connection to database containing collection.
      */
-    virtual bool registerExisting( const std::string& name,
-                                   const std::string& type,
-                                   std::string connection = "",
-                                   std::string logicalName = "" ) = 0;
+    virtual bool registerExisting( const std::string & name,
+                                   const std::string & type,
+                                   const std::string & connection = "",
+                                   const std::string & logicalName = "" ) = 0;
 
 
     /**
@@ -83,7 +82,7 @@ namespace pool {
      */
     virtual bool registerExisting( ICollection* collection,
 				   bool overwrite = false,
-                                   std::string logicalName = "" ) = 0;
+                                   const std::string & logicalName = "" ) = 0;
 
 
     /**
@@ -101,7 +100,7 @@ namespace pool {
      */
     virtual ICollection* handle( const std::string& name,
                                  const std::string& type,
-                                 std::string connection = "",
+                                 const std::string & connection = "",
                                  bool readOnly = true,
                                  ISession* session = 0 ) const = 0;
 

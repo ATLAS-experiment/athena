@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RDBMaterialManager.h"
@@ -339,7 +339,7 @@ GeoElement *RDBMaterialManager::searchElementVector(const std::string & name)  c
   MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
 	
   NameEquals matchByName(name);
-  GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(),matchByName);
+  GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(),std::move(matchByName));
   	
   if (e!=m_elementVector.end()) {	
     if(log.level()==MSG::VERBOSE)    		
@@ -566,7 +566,7 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
     std::cerr << material_name << " description should be changed. Please indicate the exact fraction for elements\n";
 
   if(calculateFraction && !elementComponents.empty()) {
-    double inv_totalFraction = 1. / totalFraction;
+    double inv_totalFraction = totalFraction == 0 ? 1 : 1. / totalFraction;
     for(unsigned i=0; i<elementComponents.size(); i++)
       pmaterial->add(elementComponents[i],elementFractions[i]*elementComponents[i]->getA() * inv_totalFraction);
   }

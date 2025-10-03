@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTPCnv/CaloTopoTowerContainerCnv_p1.h"
@@ -19,7 +19,7 @@ void CaloTopoTowerContainerCnv_p1::persToTrans (const CaloTopoTowerContainer_p1*
   trans->swap (ctmp);
 
   std::vector<unsigned int> reg;
-  for (size_t i = 0; i > pers->m_caloRegions.size(); i++)
+  for (size_t i = 0; i < pers->m_caloRegions.size(); i++)
     trans->setCalo (static_cast<CaloCell_ID::SUBCALO> (pers->m_caloRegions[i]));
 
   if (msg.level() <= MSG::DEBUG) msg << MSG::DEBUG << "Creating transistent state of Containers..." << endmsg;

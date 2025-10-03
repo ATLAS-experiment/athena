@@ -1,0 +1,42 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+namespace ActsTrk::detail {
+    template <typename trackstate_t>
+    std::unique_ptr<Trk::RIO_OnTrack> 
+        TrkPrepRawDataCalibrator::createROT(const Acts::GeometryContext &gctx,
+                                            const Acts::CalibrationContext & cctx,
+                                            const Acts::SourceLink& sl,
+                                            const trackstate_t& trackState) const {
+
+     SourceLink_t prd = unpack(sl);
+      /** @todo Check how the particle hypothesis can be retrieved from the track state */
+      const Acts::BoundTrackParameters actsParam{trackState.referenceSurface().getSharedPtr(), 
+                                                 trackState.predicted(),
+                                                 trackState.predictedCovariance(), 
+                                                 Acts::ParticleHypothesis::pion()};
+      // Check that the conversion tool is set
+      assert(m_convTool != nullptr);
+      const auto trkParam = m_convTool->actsTrackParametersToTrkParameters(actsParam, gctx);
+      
+      const EventContext* ctx = cctx.get<const EventContext*>();
+      /// Check that the ROT creator has been defined
+      assert(m_rotCreator != nullptr);
+      return std::unique_ptr<Trk::RIO_OnTrack>{m_rotCreator->correct(*prd, *trkParam, *ctx)};
+    }
+    template <typename trajectory_t>
+    inline void TrkPrepRawDataCalibrator::calibrate(const Acts::GeometryContext &gctx,
+                                                    const Acts::CalibrationContext& cctx,
+                                                    const Acts::SourceLink& sl,
+                                                    TrackState_t<trajectory_t> trackState) const {
+        /// Calibrate the measurement
+        auto rot = createROT(gctx, cctx, sl, trackState);
+        /// Ensure that the rot is actually created.
+        assert(rot);
+        /// copy the rot information onto the track state
+        m_rotCalib.calibrate<trajectory_t>(gctx, cctx, m_rotCalib.pack(rot.get()), trackState);
+        /// Overwrite the source link as the ROT leaves scope at the end of the method & is deleted
+        trackState.setUncalibratedSourceLink(pack(unpack(sl)));
+    }
+
+}

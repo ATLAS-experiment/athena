@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -22,8 +22,6 @@ import uuid
 os.environ['_ATHENABARCODEIMPL_JOBUUID'] = uuid.uuid1().hex
 
 import ROOT
-from PyUtils.Helpers import ROOT6Setup
-ROOT6Setup()
 
 ROOT.DataModelAthenaPool.CLHEPConverters.initialize()
 

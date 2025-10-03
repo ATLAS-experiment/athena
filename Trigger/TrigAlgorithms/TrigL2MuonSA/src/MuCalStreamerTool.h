@@ -111,15 +111,15 @@ namespace TrigL2MuonSA {
 
     // create the MDT fragment
     StatusCode createMdtFragment(TrigL2MuonSA::MdtHits& mdtHits,  
-				 LVL2_MUON_CALIBRATION::MdtCalibFragment& mdtFragment, float phi) const;
+                 LVL2_MUON_CALIBRATION::MdtCalibFragment& mdtFragment, float phi) const;
 
     // create the RPC fragment
     StatusCode createRpcFragment(const xAOD::MuonRoI* roi,
-				 LVL2_MUON_CALIBRATION::RpcCalibFragment& rpcFragment, const EventContext& ctx) const;
+                 LVL2_MUON_CALIBRATION::RpcCalibFragment& rpcFragment, const EventContext& ctx) const;
 
     // create the TGC fragment
     StatusCode createTgcFragment(std::vector<uint32_t>& tgcRobIdList,
-				 LVL2_MUON_CALIBRATION::TgcCalibFragment& tgcFragment) const;
+                 LVL2_MUON_CALIBRATION::TgcCalibFragment& tgcFragment, const EventContext& ctx) const;
 
     TrigL2MuonSA::MuCalCircClient *m_circ = nullptr;
 

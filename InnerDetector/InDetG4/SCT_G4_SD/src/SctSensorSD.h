@@ -14,7 +14,6 @@
 
 // For the hits
 #include "InDetSimEvent/SiHitCollection.h"
-#include "StoreGate/WriteHandle.h"
 #include <gtest/gtest_prod.h>
 
 // G4 needed classes
@@ -23,7 +22,6 @@ class G4TouchableHistory;
 
 class SctSensorSD : public G4VSensitiveDetector
 {
- FRIEND_TEST( SctSensorSDtest, Initialize );
  FRIEND_TEST( SctSensorSDtest, ProcessHits );
  FRIEND_TEST( SctSensorSDtest, indexMethod );
  FRIEND_TEST( SctSensorSDtest, AddHit );
@@ -49,7 +47,8 @@ private:
   void indexMethod(const G4TouchableHistory *myTouch, double coord1z, int &brlEcap, int &layerDisk, int &etaMod, int &phiMod, int &side);
 protected:
   // The hits collection
-  SG::WriteHandle<SiHitCollection> m_HitColl;
+  std::string m_HitCollName;
+  SiHitCollection* m_HitColl{nullptr};
 };
 
 #endif //SCT_G4_SD_SCTSENSORSD_H

@@ -14,22 +14,19 @@
 
 namespace columnar
 {
-  template<> struct ContainerIdTraits<ContainerId::cluster> final
+  namespace ContainerId
   {
-    static constexpr bool isDefined = true;
-    static constexpr bool isMutable = false;
-    static constexpr bool perEventRange = true;
-    static constexpr bool perEventId = false;
+    struct cluster : regularCIBase<xAOD::CaloCluster,xAOD::CaloClusterContainer>
+    {
+      /// a unique internal identifier for this container
+      static constexpr std::string_view idName = "cluster";
+    };
+  }
 
-    /// the xAOD type to use with ObjectId
-    using xAODObjectIdType = const xAOD::CaloCluster;
-
-    /// the xAOD type to use with ObjectRange
-    using xAODObjectRangeType = const xAOD::CaloClusterContainer;
-
-    /// the xAOD type to use with ElementLink
-    using xAODElementLinkType = xAOD::CaloClusterContainer;
-  };
+  using ClusterId = ObjectId<ContainerId::cluster>;
+  using OptClusterId = OptObjectId<ContainerId::cluster>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ClusterAccessor  = AccessorTemplate<ContainerId::cluster,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ClusterDecorator = AccessorTemplate<ContainerId::cluster,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

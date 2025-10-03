@@ -37,7 +37,7 @@ StatusCode Trk::VertexMapper::initialize()
 
 
     return StatusCode::SUCCESS;
-}     
+}
 
 // finalize
 StatusCode Trk::VertexMapper::finalize()
@@ -48,7 +48,7 @@ StatusCode Trk::VertexMapper::finalize()
 
 
 StatusCode Trk::VertexMapper::updateTrackingGeometry() const {
-    // retrieve the TrackingGeometry from the detector store 
+    // retrieve the TrackingGeometry from the detector store
     if (detStore()->retrieve(m_trackingGeometry, m_trackingGeometryName).isFailure()){
         ATH_MSG_ERROR("Could not retrieve the tracking geometry. Bailing out.");
         return StatusCode::FAILURE;
@@ -58,17 +58,17 @@ StatusCode Trk::VertexMapper::updateTrackingGeometry() const {
 
 /** Record the vertex into the local frame of the closest module  */
 Trk::MappedVertex Trk::VertexMapper::mapToLocal(const Amg::Vector3D& vertex) const {
-    
+
     // first find the volume where you are in
     const Trk::TrackingVolume* mVolume = trackingGeometry().lowestTrackingVolume(vertex);
     // we have a volume, so go on
     if (mVolume){
-        // from the volume, get all the layers 
+        // from the volume, get all the layers
         const Trk::LayerArray* mLayerArray = mVolume->confinedLayers();
         // and check if we have confined layers
         if (mLayerArray){
             // extract all the layers with sensitive surfaces
-          Trk::BinnedArraySpan<Trk::Layer const * const> mLayerObjects = mLayerArray->arrayObjects();
+          std::span<Trk::Layer const * const> mLayerObjects = mLayerArray->arrayObjects();
           std::vector<const Trk::Layer*> mSensitiveLayers;
             // loop over for the extraction - and check if they have a sub surface array
             for (const auto & mLayer : mLayerObjects){
@@ -84,9 +84,9 @@ Trk::MappedVertex Trk::VertexMapper::mapToLocal(const Amg::Vector3D& vertex) con
                 const Layer*  mLayer       = nullptr;
                 Amg::Vector3D mPosition(0.,0.,0.);
                 Amg::Vector3D mDirection(0.,0.,0.);
-                // loop over the test layers 
+                // loop over the test layers
                 for (auto& sLayer : mSensitiveLayers) {
-                    // find out the optimal association : 
+                    // find out the optimal association :
                     // - for cylinders we want to radially hit the layer
                     // - for disks we want to move along z
                     mDirection = Amg::Vector3D(
@@ -109,16 +109,16 @@ Trk::MappedVertex Trk::VertexMapper::mapToLocal(const Amg::Vector3D& vertex) con
                         }
                     }
                 } // loop over layers done
-                
+
                 // continue if you have found a good layer
                 if (mLayer) {
                     // let's find the assoicated surfaces using the overlap descriptor
                     std::vector<SurfaceIntersection> testSurfaces;
                     // get the main target surface
                     const Surface* mSurface = mLayer->subSurface(mPosition);
-                    // we have more than one test surface 
+                    // we have more than one test surface
                     if (mSurface && mLayer->overlapDescriptor()){
-                        // get the reachable surfaces, the target surface will be added 
+                        // get the reachable surfaces, the target surface will be added
                         mLayer->overlapDescriptor()->reachableSurfaces(testSurfaces, *mSurface, vertex, mDirection);
                         // let's loop over the provided surfaces, intersect them and take the closest
                         mDistance = 10e10;
@@ -130,14 +130,14 @@ Trk::MappedVertex Trk::VertexMapper::mapToLocal(const Amg::Vector3D& vertex) con
                                  // change the mDistance and remember the surface
                                  mDistance = tsfInter.pathLength;
                                  mSurface  = tSurface.object;
-                             } 
+                             }
                         }
                     }
-                    // now collect all the other surfaces from the compatible surface call 
+                    // now collect all the other surfaces from the compatible surface call
                     if (mSurface){
                         // we have a surface, do the final transformation into the surface frame
                         Amg::Vector3D mLocPosition = mSurface->transform().inverse()*vertex;
-                        // everything is set -> return 
+                        // everything is set -> return
                         return Trk::MappedVertex(mLocPosition,*mSurface,*mLayer,*mVolume);
                     }
                 }

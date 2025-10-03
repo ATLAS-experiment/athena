@@ -55,8 +55,8 @@ private:                        // private helper functions
   StatusCode truthMatch (const TLorentzVector& vSubjetTLV,
                          const xAOD::TruthParticleContainer& xTruthTauContainer, 
                          const xAOD::TruthParticle* &xTruthMatch,
+			 const xAOD::Jet* &xTruthJetMatch,
                          TruthMatchedParticleType &eTruthMatchedParticleType) const;
-  ElementLink<xAOD::TruthParticleContainer> checkTruthLepton(const xAOD::IParticle* pLepton) const;
 
 private:                        // steering variables
 

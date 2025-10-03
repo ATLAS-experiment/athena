@@ -1,14 +1,10 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
-
-from collections import OrderedDict as odict
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 
 from ..Config.MonitorDef import MonitorDef
 from .PrescaleHelper import getCutFromPrescale, getPrescaleFromCut
 from .MenuUtils import binstr
-
-from past.builtins import cmp
 
 
 log = logging.getLogger(__name__)
@@ -22,7 +18,7 @@ class MenuItemsCollection(object):
         self.menuName = ''
         self.pssName = ''
         self.pssType = 'Physics'
-        self.items = odict()
+        self.items = {}
 
     def __iter__(self):
         return iter(self.items.values())
@@ -70,9 +66,7 @@ class MenuItemsCollection(object):
         return self.items.keys()
 
     def json(self):
-        confObj = odict()
-        for item in self:
-            confObj[item.name] = item.json()
+        confObj = {item.name: item.json() for item in self}
         return confObj
 
 
@@ -160,7 +154,7 @@ class MenuItem(object):
         return binstr(self.trigger_type, width=width)
 
     def json(self):
-        confObj = odict()
+        confObj = {}
         confObj["name"] = self.name
         if self.legacy:
             confObj["legacy"] = self.legacy
@@ -187,7 +181,7 @@ class PrescaleHandler(object):
             self.itemsByPartition.setdefault(item.partition,[]).append(item)
 
         for itemList in self.itemsByPartition.values():
-            itemList.sort(lambda x,y: cmp(x.ctpid,y.ctpid))
+            itemList.sort(key = lambda x: x.ctpid)
 
 
 class meta_d(type):

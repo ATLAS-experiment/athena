@@ -22,6 +22,9 @@
 #include "JetSubStructureMomentTools/JetSubStructureMomentToolsBase.h"
 #include "JetSubStructureMomentTools/ECFHelper.h"
 
+#include "AsgTools/PropertyWrapper.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+
 class EnergyCorrelatorGeneralizedTool :
   public JetSubStructureMomentToolsBase {
     ASG_TOOL_CLASS(EnergyCorrelatorGeneralizedTool, IJetModifier)
@@ -33,9 +36,10 @@ class EnergyCorrelatorGeneralizedTool :
 
       virtual StatusCode initialize() override;
 
-      int modifyJet(xAOD::Jet &injet) const override;
+      StatusCode modify(xAOD::JetContainer& jets) const override;
 
     private:
+      Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for the input jet container"};
 
       /// ECFG moments structure
       struct moments_t;
@@ -52,16 +56,24 @@ class EnergyCorrelatorGeneralizedTool :
       std::map< float, moments_t > m_moments;
 
       /// Decorators for L-series ECFs
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_2_1_2;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_3_1_1;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_3_2_1;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_3_2_2;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_3_3_1;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_4_2_2;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_4_4_1;
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_2_1_2_Key{
+	this, "ECFG_2_1_2_Key", "ECFG_2_1_2"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_3_1_1_Key{
+	this, "ECFG_3_1_1_Key", "ECFG_3_1_1"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_3_2_1_Key{
+  	this, "ECFG_3_2_1_Key", "ECFG_3_2_1"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_3_2_2_Key{
+	this, "ECFG_3_2_2_Key", "ECFG_3_2_2"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_3_3_1_Key{
+    	this, "ECFG_3_3_1_Key", "ECFG_3_3_1"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_4_2_2_Key{
+	this, "ECFG_4_2_2_Key", "ECFG_4_2_2"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_4_4_1_Key{
+	this, "ECFG_4_4_1_Key", "ECFG_4_4_1"};
 
       /// Added for MDT studies, might remove later
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_ECFG_3_3_2;
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_ECFG_3_3_2_Key{
+	this, "ECFG_3_3_2_Key", "ECFG_3_3_2"};
 
   };
 

@@ -29,6 +29,7 @@
 #define GENERATORFILTERSMUDSTARFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "CLHEP/Vector/LorentzVector.h"
 #include "TLorentzVector.h"
@@ -73,10 +74,9 @@ private:
 	double m_DstarMu_m_Max;
         //
 
-       // PDG 2022:
-       const double m_MuonMass = 105.6583755;
-       const double m_PionMass = 139.57039;
-       const double m_KaonMass = 493.677;
+       const double m_MuonMass = ParticleConstants::muonMassInMeV;
+       const double m_PionMass = ParticleConstants::chargedPionMassInMeV;
+       const double m_KaonMass = ParticleConstants::chargedKaonMassInMeV;
 
   // Private Methods:=
 

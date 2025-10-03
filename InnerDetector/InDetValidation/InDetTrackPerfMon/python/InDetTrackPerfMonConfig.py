@@ -110,6 +110,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
         return None
 
     kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
+    kwargs.setdefault( "plotTrackParametersErrors", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParametersErrors )
     kwargs.setdefault( "plotTrackMultiplicities", flags.PhysVal.IDTPM.currentTrkAna.plotTrackMultiplicities )
     kwargs.setdefault( "plotEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotEfficiencies )
     kwargs.setdefault( "plotTechnicalEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotTechnicalEfficiencies )
@@ -126,6 +127,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "plotOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.plotOfflineElectrons )
     kwargs.setdefault( "ResolutionMethod", flags.PhysVal.IDTPM.currentTrkAna.ResolutionMethod )
     kwargs.setdefault( "isITk", flags.Detector.GeometryITk )
+    kwargs.setdefault( "plotTracksInJets", "Jet" in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject )
 
     kwargs.setdefault("EtaBins", flags.Tracking.ITkMainPass.etaBins if flags.Detector.GeometryITk else [-1, 9999.]) # for technical efficiencies
     kwargs.setdefault("MinSilHits", flags.Tracking.ITkMainPass.minClusters if flags.Detector.GeometryITk else [flags.Tracking.MainPass.minClusters]) # for technical efficiencies
@@ -246,6 +248,71 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     return acc
 
 
+def InDetClusterPerfMonToolCfg( flags, name="InDetClusterPerfMonTool", **kwargs ):
+    '''
+    Tool instance CA-based configuration for cluster and space-points validation
+    Currently only available for offline-type analyses (i.e. full-scan) and Run4/ITk/ACTS
+    '''
+
+    ## Skipping Trigger Navigation trackAnalysis
+    if ( flags.PhysVal.IDTPM.currentTrkAna.RefType == "Trigger" or
+         flags.PhysVal.IDTPM.currentTrkAna.TestType == "Trigger" or
+         flags.PhysVal.IDTPM.currentTrkAna.doTrigNavigation ):
+        return None
+
+    acc = ComponentAccumulator()
+
+    ## Computing output directory string
+    folderStr = flags.PhysVal.IDTPM.DirName + "/"
+    if flags.PhysVal.IDTPM.sortPlotsByChain :
+        folderStr += "Offline/" + flags.PhysVal.IDTPM.currentTrkAna.SubFolder
+    else :
+        folderStr += flags.PhysVal.IDTPM.currentTrkAna.SubFolder + "/Offline"
+    kwargs.setdefault( "folder", folderStr )
+
+    typedCollections = flags.Input.TypedCollections
+
+    ## ITk pixel and strip cluster collections
+    if ( flags.PhysVal.IDTPM.currentTrkAna.PixelClusterKey and
+         "xAOD::PixelClusterContainer#"+flags.PhysVal.IDTPM.currentTrkAna.PixelClusterKey in typedCollections ):
+        kwargs.setdefault( "doPixelClusters", True )
+        kwargs.setdefault( "pixelClustersDirectory", "PixelClusters" )
+        kwargs.setdefault( "PixelClusterContainerKey",
+                           flags.PhysVal.IDTPM.currentTrkAna.PixelClusterKey )
+
+    if ( flags.PhysVal.IDTPM.currentTrkAna.StripClusterKey and
+         "xAOD::StripClusterContainer#"+flags.PhysVal.IDTPM.currentTrkAna.StripClusterKey in typedCollections ):
+        kwargs.setdefault( "doStripClusters", True )
+        kwargs.setdefault( "stripClustersDirectory", "StripClusters" )
+        kwargs.setdefault( "StripClusterContainerKey",
+                           flags.PhysVal.IDTPM.currentTrkAna.StripClusterKey )
+
+    ## ITk pixel and strip space points collections
+    if ( flags.PhysVal.IDTPM.currentTrkAna.PixelSpacePointKey and
+         "xAOD::SpacePointContainer#"+flags.PhysVal.IDTPM.currentTrkAna.PixelSpacePointKey in typedCollections ):
+        kwargs.setdefault( "doPixelSpacePoints", True )
+        kwargs.setdefault( "pixelSpacePointsDirectory", "PixelSpacePoints" )
+        kwargs.setdefault( "PixelSpacePointContainerKey",
+                           flags.PhysVal.IDTPM.currentTrkAna.PixelSpacePointKey )
+
+    if ( flags.PhysVal.IDTPM.currentTrkAna.StripSpacePointKey and
+         "xAOD::SpacePointContainer#"+flags.PhysVal.IDTPM.currentTrkAna.StripSpacePointKey in typedCollections ):
+        kwargs.setdefault( "doStripSpacePoints", True )
+        kwargs.setdefault( "stripSpacePointsDirectory", "StripSpacePoints" )
+        kwargs.setdefault( "StripSpacePointContainerKey",
+                           flags.PhysVal.IDTPM.currentTrkAna.StripSpacePointKey )
+
+    if ( flags.PhysVal.IDTPM.currentTrkAna.StripOverlapSpacePointKey and
+         "xAOD::SpacePointContainer#"+flags.PhysVal.IDTPM.currentTrkAna.StripOverlapSpacePointKey in typedCollections ):
+        kwargs.setdefault( "doStripOverlapSpacePoints", True )
+        kwargs.setdefault( "stripSpaceOverlapPointsDirectory", "StripOverlapSpacePoints" )
+        kwargs.setdefault( "StripOverlapSpacePointContainerKey",
+                           flags.PhysVal.IDTPM.currentTrkAna.StripOverlapSpacePointKey )
+
+    acc.setPrivateTools( CompFactory.ActsTrk.PhysValTool( name, **kwargs ) )
+    return acc
+
+
 def InDetTrackPerfMonCfg( flags ):
     '''
     CA-based configuration of all tool instances (= TrackAnalyses)
@@ -265,10 +332,18 @@ def InDetTrackPerfMonCfg( flags ):
             log.debug( "Scheduling TrackAnalysis: %s",
                        flags_thisTrkAna.PhysVal.IDTPM.currentTrkAna.anaTag )
 
+            ## Track performance validation
             tools.append(
                 acc.popToolsAndMerge( InDetTrackPerfMonToolCfg( flags_thisTrkAna,
                     name="InDetTrackPerfMonTool"+
                          flags_thisTrkAna.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+
+            ## Cluster and Space Point perfromace validation
+            if flags_thisTrkAna.PhysVal.IDTPM.currentTrkAna.doClusterValidation :
+                tool = InDetClusterPerfMonToolCfg( flags_thisTrkAna,
+                            name="InDetClusterPerfMonTool"+
+                                 flags_thisTrkAna.PhysVal.IDTPM.currentTrkAna.anaTag )
+                if tool : tools.append( acc.popToolsAndMerge( tool ) )
 
     from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
     acc.merge( PhysValMonitoringCfg( flags, tools=tools ) )

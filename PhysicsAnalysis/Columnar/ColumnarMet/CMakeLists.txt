@@ -8,5 +8,5 @@ atlas_subdir( ColumnarMet )
 atlas_add_library (ColumnarMetLib
   ColumnarMet/*.h
   INTERFACE
-  LINK_LIBRARIES ColumnarCoreLib xAODMissingET METUtilitiesLib ColumnarEgammaLib ColumnarJetLib ColumnarMuonLib
+  LINK_LIBRARIES ColumnarCoreLib xAODMissingET METUtilitiesLib ColumnarEgammaLib ColumnarJetLib ColumnarMuonLib ColumnarVariantLib
   PUBLIC_HEADERS ColumnarMet)

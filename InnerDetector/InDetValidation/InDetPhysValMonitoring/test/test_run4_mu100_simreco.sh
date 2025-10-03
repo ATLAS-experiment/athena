@@ -10,7 +10,7 @@
 # art-html: dcube_last
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-relname="r25.0.26"
+relname="r25.0.39"
 dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/HitValid_run4_mu100GeV_simreco.root
 dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/RDOAnalysis_run4_mu100GeV_simreco.root
 dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_run4_mu100GeV_simreco.root
@@ -19,3 +19,6 @@ script=test_MC_Run4_mu0_simreco.sh
 echo "Executing script ${script}"
 echo " "
 "$script" ${dcuberef_sim} ${dcuberef_rdo} ${dcuberef_rec} 10000
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

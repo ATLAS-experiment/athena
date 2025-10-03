@@ -61,7 +61,7 @@ HiveExSvc::finalize() {
 
   info() << "listing timing by alg:";
   for (const auto &s : sum) {
-    float avg = s.second/num[s.first];
+    float avg = static_cast<float>(s.second)/num[s.first];
     float sig = sqrt( ( sumSq[s.first] - 2*s.second*avg + num[s.first]*avg*avg  )/(num[s.first]) );
     info() << "\n  " << s.first 
            << "  avg: " << avg << "  sig: " << sig;

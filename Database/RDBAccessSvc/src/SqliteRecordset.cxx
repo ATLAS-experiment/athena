@@ -23,7 +23,14 @@ SqliteRecordset::SqliteRecordset()
 }
 
 void SqliteRecordset::getData(sqlite3* db, const std::string& nodeName)
-{
+{ 
+  //the following should already be checked by the calling code and should never happen
+  if (db == nullptr){
+    throw std::runtime_error("SqliteRecordset::getData : db pointer is null");
+  }
+  if (nodeName.empty()){
+    throw std::runtime_error("SqliteRecordset::getData : nodeName is empty");
+  }
   ATH_MSG_DEBUG("getData for " << nodeName);
   m_nodeName = nodeName;
 

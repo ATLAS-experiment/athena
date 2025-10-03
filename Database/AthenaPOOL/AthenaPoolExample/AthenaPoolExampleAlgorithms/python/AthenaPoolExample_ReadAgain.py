@@ -43,7 +43,7 @@ evSelector.SkipEvents = 8 # // skip the first 8 events
 evSelector.SkipEventSequence = [ 9, 10 ] # // skip two more events
 #evSelector.SkipEventSequence = " 4-6,7 , 8 , 9 - 10 "; # // skip seven more events
 #evSelector.ProcessEventSequence = "11, 12, 13,14,15, 16-20, 21 - 25 , 26- 100"; # // skip two more events
-#svcMgr.EventSelector.CollectionType = "ExplicitROOT"
+#svcMgr.EventSelector.CollectionType = "RootCollection"
 #svcMgr.EventSelector.CounterTool = "EventSelectorCounterTool/Counter"
 
 #Switch Off for TAG - start

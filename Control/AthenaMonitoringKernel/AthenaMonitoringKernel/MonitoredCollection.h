@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_MonitoredCollection_h
@@ -288,8 +288,6 @@ namespace Monitored {
 
     static_assert(std::is_convertible<R, double>::value or std::is_constructible<std::string, R>::value, "Conversion from type returned by the converter/accessor to double or string is impossible");
 
-    // With a non-template friend declaration, clang 4.0.1
-    // fails to match the friend.
     // @brief .     \if empty doc string required due to https://github.com/doxygen/doxygen/issues/6251 \endif
     template <class U> friend ObjectsCollection<U, double>
     Collection(std::string name, const U& collection,
@@ -329,7 +327,7 @@ namespace Monitored {
     ObjectsCollection(std::string name, const T& collection,
                       std::function<R(const const_value_type&)> converterToR)
         : IMonitoredVariable(std::move(name)),
-	  m_collection(std::move(collection)),
+	  m_collection(collection),
           m_converterToR(std::move(converterToR)) {}
 
     ObjectsCollection(ObjectsCollection const&) = delete;
@@ -353,8 +351,6 @@ namespace Monitored {
 
     static_assert(std::is_convertible<R, double>::value or std::is_constructible<std::string, R>::value, "Conversion from type returned by the converter/accessor to double or string is impossible");
 
-    // With a non-template friend declaration, clang 4.0.1
-    // fails to match the friend.
     // @brief .     \if empty doc string required due to https://github.com/doxygen/doxygen/issues/6251 \endif
     template <class U> friend ObjectsRefCollection<U, double>
     Collection(std::string name, const std::reference_wrapper<U>& collection,
@@ -394,7 +390,7 @@ namespace Monitored {
     ObjectsRefCollection(std::string name, const std::reference_wrapper<T>& collection,
                          std::function<R(const const_value_type&)> converterToR)
         : IMonitoredVariable(std::move(name)),
-	        m_collection(std::move(collection)),
+	        m_collection(collection),
           m_converterToR(std::move(converterToR)) {}
 
     ObjectsRefCollection(ObjectsRefCollection const&) = delete;

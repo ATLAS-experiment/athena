@@ -22,8 +22,8 @@ namespace MuonValR4 {
     constexpr int hatchedFilling = 3344;
     
     /** @brief ObjectView */
-    constexpr int objViewEta = MuonR4::SegmentFit::toInt(MuonR4::SegmentFit::AxisDefs::eta);
-    constexpr int objViewPhi = MuonR4::SegmentFit::toInt(MuonR4::SegmentFit::AxisDefs::phi);
+    constexpr int objViewEta = Acts::toUnderlying(MuonR4::SegmentFit::AxisDefs::etaCov);
+    constexpr int objViewPhi = Acts::toUnderlying(MuonR4::SegmentFit::AxisDefs::phiCov);
     
     /** @brief Create a TEllipse for drawing a drift circle
      *  @param center: Position of the drift cirle expressed in the chambers frame

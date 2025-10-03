@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_ISTRIPSPACEPOINTFORMATIONTOOL_H
@@ -22,7 +22,7 @@ namespace ActsTrk {
     Eigen::Matrix<float,3,1> globPos {0, 0, 0};
     float cov_r {0};
     float cov_z {0};
-    std::vector<std::size_t> measurementIndexes {};
+    std::array<std::size_t,2> measurementIndexes {};
     float topHalfStripLength {0};
     float bottomHalfStripLength {0};
     Eigen::Matrix<float,3,1> topStripDirection {0, 0, 0};

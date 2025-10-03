@@ -11,7 +11,6 @@
 # Created: Nov 13, 2008
 # ----------------------------------------------------------------
 #
-from __future__ import print_function
 from functools import reduce
 import sys,re
 

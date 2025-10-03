@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef ASSOCIATION_CONTEXT
@@ -97,8 +97,6 @@
        return AssociationVectorIterator(*m_store, m_store->end()); 
      } else {
        throw std::runtime_error( "Null pointer to store of associations" );
-       // dead-code
-       return AssociationVectorIterator( *m_store );
      }
    }
 

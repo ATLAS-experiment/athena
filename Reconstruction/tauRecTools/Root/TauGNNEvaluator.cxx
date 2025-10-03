@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNEvaluator.h"
@@ -14,14 +14,12 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   TauRecToolBase(name),
   m_net_inclusive(nullptr),
   m_net_0p(nullptr), m_net_1p(nullptr), m_net_2p(nullptr), m_net_3p(nullptr) {
-
-  declareProperty("MaxTracks", m_max_tracks = 30);  
 }
 
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks<<" tracks and "<<m_max_clusters<<" clusters...");
+  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks and "<<m_max_clusters<<" clusters...");
 
   // Set the layer and node names in the weight file
   TauGNN::Config config;
@@ -71,7 +69,12 @@ StatusCode TauGNNEvaluator::initialize() {
   if(m_output_discriminant < Discriminant::NegLogPJet || m_output_discriminant > Discriminant::PTau) {
     ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
-  
+
+  if (!m_tauContainerName.empty()){
+    m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
+    ATH_CHECK(m_scoreHandleKey.initialize());    
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -88,7 +91,7 @@ std::unique_ptr<TauGNN> TauGNNEvaluator::load_network(const std::string& network
   ATH_MSG_INFO("Using network config: " << pr_network_file);
   
   // Load the weights and create the network
-  std::unique_ptr<TauGNN> net = std::make_unique<TauGNN>(pr_network_file, config);
+  std::unique_ptr<TauGNN> net = std::make_unique<TauGNN>(pr_network_file, config, m_useTRT);
   if(!net) ATH_MSG_ERROR("No network configured.");
 
   return net;
@@ -110,6 +113,16 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
     return StatusCode::SUCCESS;
   }
 
+  // save CPU when running PHYS derivations
+  if (m_applyLooseTrackSel) {
+    if (tau.nTracks()>5) return StatusCode::SUCCESS;
+  }
+
+  // save CPU when running in RAWtoALL for tau trigger monitoring purpose
+  if (m_applyTightTrackSel) {
+    if (tau.nTracks()!=1 && tau.nTracks()!=3) return StatusCode::SUCCESS;
+  }
+
   // Get input objects
   ATH_MSG_DEBUG("Fetching Tracks");
   std::vector<const xAOD::TauTrack *> tracks;
@@ -120,7 +133,7 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   ATH_MSG_DEBUG("Constituent fetching done...");
 
   // Truncate tracks
-  int numTracksMax = std::min(m_max_tracks, static_cast<int>(tracks.size()));
+  int numTracksMax = std::min(m_max_tracks.value(), static_cast<int>(tracks.size()));
   std::vector<const xAOD::TauTrack *> trackVec(tracks.begin(), tracks.begin()+numTracksMax);
 
   // Network outputs
@@ -160,13 +173,6 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
 
     out_ptau(tau) = out_f.at(m_outnode_tau);
     out_pjet(tau) = out_f.at(m_outnode_jet);
-
-    if(m_decorateTracks) {
-      for(size_t i = 0; i < tracks.size(); i++) {
-        if(i < out_vc.at("track_class").size()) out_trkclass(*tracks.at(i)) = out_vc.at("track_class").at(i);
-        else out_trkclass(*tracks.at(i)) = '9'; //Dummy value for tracks outside range of out_vc
-      }
-    }
   }
 
   return StatusCode::SUCCESS;

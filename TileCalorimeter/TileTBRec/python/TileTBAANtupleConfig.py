@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileTBAANtupleConfig.py
 @brief Python configuration of TileTBAANtuple algorithm for the Run III
 '''
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TileConfiguration.TileConfigFlags import TileRunType
 
@@ -35,8 +34,6 @@ def TileTBAANtupleCfg(flags, outputFile='', useFELIX=None, **kwargs):
 
     ''' Function to configure TileTBAANtuple algorithm.'''
 
-    acc = ComponentAccumulator()
-
     cisRun      = flags.Tile.RunType is TileRunType.CIS
     monoRun     = flags.Tile.RunType is TileRunType.MONOCIS
     pedestalRun = flags.Tile.RunType is TileRunType.PED
@@ -50,10 +47,10 @@ def TileTBAANtupleCfg(flags, outputFile='', useFELIX=None, **kwargs):
     if useFELIX is None:
         useFELIX = True if run > 2310438 else False
 
-    TBperiod = getTileTBperiod(run, useFELIX)
+    TBperiod = getTileTBperiod(run, useFELIX) if not flags.Input.isMC else 2003
 
     kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')
-    kwargs.setdefault('TileBeamElemContainer', 'TileBeamElemCnt')
+    kwargs.setdefault('TileBeamElemContainer', 'TileBeamElemCnt' if not flags.Input.isMC else "")
     kwargs.setdefault('TileRawChannelContainerFlat', "")
     kwargs.setdefault('TileRawChannelContainerFit', 'TileRawChannelFit' if flags.Tile.doFit else "")
     kwargs.setdefault('TileRawChannelContainerOpt', "TileRawChannelOpt2" if flags.Tile.doOpt2 else "")
@@ -64,8 +61,8 @@ def TileTBAANtupleCfg(flags, outputFile='', useFELIX=None, **kwargs):
     kwargs.setdefault('TileRawChannelContainerFitFlx', 'TileRawChannelFlxFit' if useFELIX and flags.Tile.doFit else "")
     kwargs.setdefault('TileRawChannelContainerOptFlx', 'TileRawChannelFlxOpt2' if useFELIX and flags.Tile.doOpt2 else "")
 
-    kwargs.setdefault('TileHitContainer', "")
-    kwargs.setdefault('TileHitVector', "")
+    kwargs.setdefault('TileHitContainer', 'TileHitCnt' if flags.Input.isMC else "")
+    kwargs.setdefault('TileHitVector',  'TileHitVec' if flags.Input.isMC else "")
     kwargs.setdefault('CaloCellContainer', 'AllCalo')
 
     kwargs.setdefault('TileLaserObj', "")
@@ -80,13 +77,12 @@ def TileTBAANtupleCfg(flags, outputFile='', useFELIX=None, **kwargs):
 
     kwargs.setdefault('TBperiod', TBperiod)
 
-    acc = ComponentAccumulator()
+    if flags.Input.isMC:
+        kwargs.setdefault('beamFragList', [])
+        kwargs.setdefault('CompleteNtuple', False)
 
     from TileGeoModel.TileGMConfig import TileGMCfg
-    acc.merge(TileGMCfg(flags))
-
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    acc.merge(LArGMCfg(flags))
+    acc = TileGMCfg(flags)
 
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge( TileCablingSvcCfg(flags) )

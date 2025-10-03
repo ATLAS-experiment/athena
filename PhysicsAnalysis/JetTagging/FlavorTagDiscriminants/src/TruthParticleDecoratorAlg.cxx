@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -40,13 +40,13 @@ namespace FlavorTagDiscriminants {
     m_dec_type_label = m_TruthContainerKey.key() + "." + m_dec_type_label.key();
     m_dec_source_label = m_TruthContainerKey.key() + "." + m_dec_source_label.key();
     m_dec_vertex_index = m_TruthContainerKey.key() + "." + m_dec_vertex_index.key();
-    m_dec_parent_barcode = m_TruthContainerKey.key() + "." + m_dec_parent_barcode.key();
+    m_dec_parent_uniqueID = m_TruthContainerKey.key() + "." + m_dec_parent_uniqueID.key();
 
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
-    CHECK( m_dec_parent_barcode.initialize() );
+    CHECK( m_dec_parent_uniqueID.initialize() );
     
     // Retrieve tools
     ATH_CHECK( m_truthOriginTool.retrieve() );
@@ -80,7 +80,7 @@ namespace FlavorTagDiscriminants {
     SG::WriteDecorHandle<TPC, int> dec_type_label(m_dec_type_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_source_label(m_dec_source_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_vertex_index(m_dec_vertex_index, ctx);
-    SG::WriteDecorHandle<TPC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
+    SG::WriteDecorHandle<TPC, int> dec_parent_uniqueID(m_dec_parent_uniqueID, ctx);
 
     // sort the particles by pt to ensure the vertex clustering is deterministic
     std::vector<const xAOD::TruthParticle*> sorted_truth_particles;
@@ -99,13 +99,13 @@ namespace FlavorTagDiscriminants {
         dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
-        dec_parent_barcode(*truth_particle) = HepMC::UNDEFINED_ID; // FIXME barcode-based
+        dec_parent_uniqueID(*truth_particle) = HepMC::UNDEFINED_ID;
         continue;
       }
 
-      // get parent hadron and decorate barcode
+      // get parent hadron and decorate uniqueID
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
-      dec_parent_barcode(*truth_particle) = truth_parent ? HepMC::barcode(truth_parent) : HepMC::UNDEFINED_ID; // FIXME barcode-based
+      dec_parent_uniqueID(*truth_particle) = truth_parent ? HepMC::uniqueID(truth_parent) : HepMC::UNDEFINED_ID;
 
       // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);

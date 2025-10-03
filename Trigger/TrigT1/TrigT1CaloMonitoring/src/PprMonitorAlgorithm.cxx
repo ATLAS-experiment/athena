@@ -74,7 +74,8 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
   // Error vector for global overview
   ErrorVector overview(8);
   // Trigger tower error flag
-  bool triggerTowerHasError = false;
+  bool triggerTowerHasMcmError = false;
+  bool triggerTowerHasSubstatusError = false;
 
   // Loop over the trigger tower objects and fill the histograms 
  
@@ -87,7 +88,7 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     bool isEM = (layer == 0);
     bool isHAD = (layer == 1);     
     std::string layerName = (layer == 0) ? "EM" : "HAD";
-    
+
     ATH_MSG_DEBUG("isEM " << isEM << " isHAD " << isHAD << " layerName " << layerName);
     ATH_MSG_DEBUG("cpET: " << cpET << " jepET: " << jepET);
 
@@ -137,7 +138,7 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     // ppm_em_2d_etaPhi_tt_lutcp_Threshold, ppm_had_2d_etaPhi_tt_lutcp_Threshold
     
     for (int th : m_TT_HitMap_ThreshVec) {
-      groupName = "groupLUTCP_"+layerName+"_"+std::to_string(th)+"_LB";
+      groupName = "groupLUTCP_"+layerName+"_"+std::to_string(th);
       ATH_MSG_DEBUG("Filling group " << groupName);
       ATH_MSG_DEBUG("cpET > " << th << " ? " << (cpET > th));  
       if (cpET > th) {
@@ -170,7 +171,7 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     // ppm_em_2d_etaPhi_tt_lutjep_Threshold, ppm_had_2d_etaPhi_tt_lutcp_Threshold
 
     for (int th : m_TT_HitMap_ThreshVec) {
-      groupName = "groupLUTJEP_"+layerName+"_"+std::to_string(th)+"_LB";
+      groupName = "groupLUTJEP_"+layerName+"_"+std::to_string(th);
       ATH_MSG_DEBUG("Filling group " << groupName);
       ATH_MSG_DEBUG("jepET > " << th << " ? " << (jepET > th));
       if (jepET > th) {
@@ -314,7 +315,7 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     fill(groupName, eta_TT, mask_PedCorrOverflow, mask_PedCorrUnderflow);
 
 
-    //------------ SubStatus Word errors ----------------
+    //------------ SubStatus Word errors and MCM errors ----------------
     
     // set maximum number of error events per lumiblock(per type) to avoid histograms with many x-bins
     // Inspired by https://gitlab.cern.ch/atlas/athena/-/blob/22.0/Trigger/TrigT1/TrigT1CaloMonitoring/src/CpmSimMonitorAlgorithm.cxx#L267
@@ -331,77 +332,78 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
 
       auto  eventMonitor= Monitored::Scalar<std::string>("eventMonitor", std::to_string(eventNumber));
       auto y_2D = Monitored::Scalar<int>("y_2D", ypos);
+
+      std::lock_guard<std::mutex> lock(m_mutex);
       
-      {
-	std::lock_guard<std::mutex> lock(m_mutex);
+      for (int bit = 0; bit < 8; ++bit) {
+	auto bit_2D = Monitored::Scalar<int>("bit_2D", bit);
 
+	// MCM Error Field histograms: Here checking these PP specific error bits:
+	// ChannelDisabled = 4, MCMAbsent = 5, Timeout = 6,
+	// ASICFull = 7, EventMismatch = 8, BunchMismatch = 9,
+	// FIFOCorrupt = 10, PinParity = 11,
+	if (err.get(bit + DataError::ChannelDisabled)) {
+	  fill("group1DMCMErrorSummary", bit_2D);
 
-	for (int bit = 0; bit < 8; ++bit) {
-	  auto bit_2D = Monitored::Scalar<int>("bit_2D", bit);
-	
-	  if (err.get(bit + DataError::ChannelDisabled)) {
-	    if (crate < 4) fill("groupErrorField03", bit_2D, y_2D );
-	    else fill("groupErrorField47", bit_2D, y_2D );
-            if (m_errorLB_tt_counter[currentLumiblock]<maxErrorsPerLB && (!triggerTowerHasError)) {
-              fill("groupASICErrorEventNumbers", eventMonitor, bit_2D );
-              m_errorLB_tt_counter[currentLumiblock]+=1;
-              triggerTowerHasError = true;
-            }
+	  if (crate < 4) fill("groupErrorMCMField03", bit_2D, y_2D );
+	  else fill("groupMCMErrorField47", bit_2D, y_2D );
+
+	  if ((m_errorLB_tt_counter[currentLumiblock]<maxErrorsPerLB) && (!triggerTowerHasMcmError)) {
+	    fill("groupMCMErrorEventNumbers", eventMonitor, bit_2D );
 	  }
-
-	  if (err.get(bit + DataError::GLinkParity)) {
-	    if (crate < 4) fill("groupStatus03", bit_2D, y_2D );
-	    else fill("groupStatus47", bit_2D, y_2D );
-	    fill("group1DErrorSummary", bit_2D);
-
-            if ((m_errorLB_tt_counter[currentLumiblock]<maxErrorsPerLB) && (!triggerTowerHasError)) {
-              fill("groupErrorEventNumbers", eventMonitor, bit_2D );
-              m_errorLB_tt_counter[currentLumiblock]+=1;
-              triggerTowerHasError = true;
-            }
-	    
-	  }
+	  triggerTowerHasMcmError = true;
 	}
-      
-	if (err.get(DataError::ChannelDisabled) ||
-	    err.get(DataError::MCMAbsent))
-	  overview[crate] |= 1;
 
-	if (err.get(DataError::Timeout) || err.get(DataError::ASICFull) ||
-	    err.get(DataError::EventMismatch) ||
-	    err.get(DataError::BunchMismatch) ||
-	    err.get(DataError::FIFOCorrupt) || err.get(DataError::PinParity))
-	  overview[crate] |= (1 << 1);
+	// And here checking for these Sub-status word error bits and failing BCN:
+	// GLinkParity = 16, GLinkProtocol = 17, BCNMismatch = 18,
+	// FIFOOverflow = 19, ModuleError = 20, GLinkDown = 22,
+	// GLinkTimeout = 23, FailingBCN = 24,
+	if (err.get(bit + DataError::GLinkParity)) {
+	  fill("group1DSubStatErrorSummary", bit_2D);
 
-	if (err.get(DataError::GLinkParity) ||
-	    err.get(DataError::GLinkProtocol) ||
-	    err.get(DataError::FIFOOverflow) ||
-	    err.get(DataError::ModuleError) || err.get(DataError::GLinkDown) ||
-	    err.get(DataError::GLinkTimeout) || err.get(DataError::BCNMismatch))
-	  overview[crate] |= (1 << 2);
+	  if (crate < 4) fill("groupSubStatError03", bit_2D, y_2D );
+	  else fill("groupSubStatError47", bit_2D, y_2D );
 
+	  if ((m_errorLB_tt_counter[currentLumiblock]<maxErrorsPerLB) && (!triggerTowerHasSubstatusError)) {
+	    fill("groupSubStatErrorEventNumbers", eventMonitor, bit_2D );
+	  }
+	  triggerTowerHasSubstatusError = true;
+	}
+      } // end loop over 8 error bits
+
+      if (triggerTowerHasMcmError || triggerTowerHasSubstatusError) {
+	m_errorLB_tt_counter[currentLumiblock]+=1;
       }
- 
-    }
       
+      if (err.get(DataError::ChannelDisabled) ||
+	  err.get(DataError::MCMAbsent))
+	overview[crate] |= 1;
 
-    
+      if (err.get(DataError::Timeout) || err.get(DataError::ASICFull) ||
+	  err.get(DataError::EventMismatch) ||
+	  err.get(DataError::BunchMismatch) ||
+	  err.get(DataError::FIFOCorrupt) || err.get(DataError::PinParity))
+	overview[crate] |= (1 << 1);
+
+      if (err.get(DataError::GLinkParity) ||
+	  err.get(DataError::GLinkProtocol) ||
+	  err.get(DataError::FIFOOverflow) ||
+	  err.get(DataError::ModuleError) || err.get(DataError::GLinkDown) ||
+	  err.get(DataError::GLinkTimeout) || err.get(DataError::BCNMismatch))
+	overview[crate] |= (1 << 2);
+      
+    } // end if-statement for existence of error word
 
   } // End loop over tower objects 
 
   // Save error vector for global summary
-  {
-    auto save = std::make_unique<ErrorVector>(overview);
-    auto* result = SG::makeHandle(m_errorLocation, ctx).put(std::move(save));
-    if (!result) {
-      ATH_MSG_ERROR("Error recording PPM vector in TES");
-      return StatusCode::FAILURE;
-    }
+  auto save = std::make_unique<ErrorVector>(overview);
+  auto* result = SG::makeHandle(m_errorLocation, ctx).put(std::move(save));
+  if (!result) {
+    ATH_MSG_ERROR("Error recording PPM vector in TES");
+    return StatusCode::FAILURE;
   }
   
-  
-  
-
   return StatusCode::SUCCESS;
 }
 

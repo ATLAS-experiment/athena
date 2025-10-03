@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_IOVSVCTOOL_H
@@ -171,7 +171,7 @@ public:
 
 private:
 
-  StatusCode preLoadProxies();
+  StatusCode preLoadProxies(const EventContext& ctx);
   StatusCode preLoadData();
   StatusCode triggerCallback( IOVSvcCallBackFcn*, const std::string& key );
   StatusCode triggerCallback( const SG::DataProxy*, const std::string& key );
@@ -241,7 +241,7 @@ private:
   { return TADkey_t (t.clID(), t.name()); }
   std::set< TADkey_t > m_partPreLoad;
 
-  bool m_first{true};
+  std::atomic<bool> m_first{true};
   bool m_checkOnce{false};
   bool m_triggered{false};
   bool m_firstEventOfRun{false};

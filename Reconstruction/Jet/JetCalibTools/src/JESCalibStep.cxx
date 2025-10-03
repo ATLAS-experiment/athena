@@ -23,6 +23,8 @@ EtaMassJESCalibStep::EtaMassJESCalibStep(const std::string& name)
 StatusCode EtaMassJESCalibStep::initialize(){
   ATH_MSG_DEBUG ("Initializing " << name() << " Use spline="<<m_useSpline);
 
+  ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
+
   if(! m_useSpline){
     if(!readMCJESFromText()) {
       ATH_MSG_ERROR("Problem when reading constant file : "<< m_constantFileName);
@@ -45,12 +47,12 @@ StatusCode EtaMassJESCalibStep::calibrate(xAOD::JetContainer& jets) const {
   ATH_MSG_DEBUG("Calibrating jet collection.");
 
 
-  // Change this to EtaMassJES? Or only if Mass is applied?
-  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> jesScaleMomAcc("JetEtaJESScaleMomentum"); 
+  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> jesScaleMomAcc(m_jetOutScale); 
 
   for(xAOD::Jet* jet: jets){
       
-    const xAOD::JetFourMom_t jetStartP4 = jet->jetP4();
+    const xAOD::JetFourMom_t jetStartP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
+    jet->setJetP4(jetStartP4);
       
     // Extract the maximum energy, and store in the context
     JetHelper::JetContext jc;

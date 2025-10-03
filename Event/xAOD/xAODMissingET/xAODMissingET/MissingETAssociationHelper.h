@@ -1,19 +1,14 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMISSINGET_MISSINGETASSOCIATIONHELPER_H
 #define XAODMISSINGET_MISSINGETASSOCIATIONHELPER_H
 
-#include "xAODMissingET/versions/MissingETAssociation_v1.h"
-#include "xAODMissingET/versions/MissingETAssociationMap_v1.h"
-
-#include <string>
+#include "xAODMissingET/versions/MissingETBase.h"
 #include <vector>
-
-#include <iostream>
 
 namespace xAOD
 {
@@ -21,7 +16,8 @@ namespace xAOD
   // Forward declarations, since this class introduces cyclical dependences
   class MissingETAssociation_v1;
   class MissingETAssociationMap_v1;
-
+  class IParticle;
+  
   class MissingETAssociationHelper
   {
   public:

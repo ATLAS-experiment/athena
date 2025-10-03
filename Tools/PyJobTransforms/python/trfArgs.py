@@ -123,6 +123,8 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
     parser.add_argument('--multithreaded', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Multithreaded mode active')
+    parser.add_argument("--mpi", type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True), nargs="?",
+                        const=trfArgClasses.argBool("True"), help="MPI mode active",)
     parser.add_argument('--multiprocess', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Multiprocess mode active')
@@ -496,7 +498,7 @@ def addFileValidationArguments(parser):
                         group='File Validation', help='Use multithreaded ROOT file validation if True')
 
 def addParallelJobProcessorArguments(parser):
-    parser.defineArgGroup('Parallel Job Processor', 'Parallel Job Processor arguments')
+    parser.defineArgGroup('pool', 'Parallel Job Processor arguments')
     parser.add_argument('----parallelProcessPool', group='pool', type=argFactory(trfArgClasses.argInt, runarg=False), help='Number of processes in pool requested (int)')
 
 def addValidationArguments(parser):

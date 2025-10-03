@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CoolLumiUtilities/test/BunchLumisCondAlg_test.cxx
@@ -91,6 +91,7 @@ void push_double (double x, std::vector<uint8_t>& data)
 
 void push (unsigned int bss, float x, float avgRawLumi, std::vector<uint8_t>& data)
 {
+  if (avgRawLumi == 0) avgRawLumi = 1;
   switch (bss) {
   case 1: {
     uint8_t idat = x*100 / avgRawLumi;

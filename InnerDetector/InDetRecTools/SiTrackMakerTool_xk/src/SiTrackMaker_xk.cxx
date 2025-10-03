@@ -87,7 +87,7 @@ StatusCode InDet::SiTrackMaker_xk::initialize()
   } else {
     m_trigInDetRoadPredictorTool.disable();
   }
-  
+
   /// Get seed to track conversion tool
   /// This is used if we want to write out the seeds for
   /// performance studies
@@ -168,8 +168,10 @@ StatusCode InDet::SiTrackMaker_xk::initialize()
   resetCounter(m_deSize);
   m_usedSeedsEta.resize(SiCombinatorialTrackFinderData_xk::kNSeedTypes);
   m_seedsWithTracksEta.resize(SiCombinatorialTrackFinderData_xk::kNSeedTypes);
-  std::fill(m_usedSeedsEta.begin(), m_usedSeedsEta.end(), std::vector<double>(SiCombinatorialTrackFinderData_xk::kNRapidityRanges, 0.));
-  std::fill(m_seedsWithTracksEta.begin(), m_seedsWithTracksEta.end(), std::vector<double>(SiCombinatorialTrackFinderData_xk::kNRapidityRanges, 0.));
+  std::fill(m_usedSeedsEta.begin(), m_usedSeedsEta.end(),
+            std::vector<double>(SiCombinatorialTrackFinderData_xk::kNRapidityRanges, 0.));
+  std::fill(m_seedsWithTracksEta.begin(), m_seedsWithTracksEta.end(),
+            std::vector<double>(SiCombinatorialTrackFinderData_xk::kNRapidityRanges, 0.));
 
   ////////////////////////////////////////////////////////////////////////////////
   ATH_CHECK( m_fieldCondObjInputKey.initialize());
@@ -374,15 +376,18 @@ MsgStream& InDet::SiTrackMaker_xk::dumpStatistics(MsgStream &out) const
     }
 
     out<<rapidityTablePrint.at(i).second;
-    out<<std::setw(12)<<std::setprecision(4)<<pu[0]<<" | "
-       <<std::setw(12)<<std::setprecision(4)<<pu[1]<<" | "
-       <<std::setw(12)<<std::setprecision(4)<<pu[2]<<" | "
-       <<std::setw(12)<<std::setprecision(4)<<pu[3]<<" | "
-       <<std::setw(12)<<std::setprecision(4)<<pu[4]<<" | "
-       <<std::setw(12)<<static_cast<int>(m_seedsWithTracksEta[0][i])+static_cast<int>(m_seedsWithTracksEta[1][i])+static_cast<int>(m_seedsWithTracksEta[2][i])+static_cast<int>(m_seedsWithTracksEta[3][i])
-       <<" |"<<std::endl;
+    out << std::setw(12) << std::setprecision(4) << pu[0] << " | "
+        << std::setw(12) << std::setprecision(4) << pu[1] << " | "
+        << std::setw(12) << std::setprecision(4) << pu[2] << " | "
+        << std::setw(12) << std::setprecision(4) << pu[3] << " | "
+        << std::setw(12) << std::setprecision(4) << pu[4] << " | "
+        << std::setw(12)
+        << static_cast<int>(m_seedsWithTracksEta[0][i]) +
+               static_cast<int>(m_seedsWithTracksEta[1][i]) +
+               static_cast<int>(m_seedsWithTracksEta[2][i]) +
+               static_cast<int>(m_seedsWithTracksEta[3][i])
+        << " |" << std::endl;
   }
-
 
   out<<"|----------------------|--------------|--------------|--------------|--------------|--------------|--------------|"
      <<std::endl;
@@ -471,7 +476,7 @@ MsgStream& InDet::SiTrackMaker_xk::dumpconditions(MsgStream& out) const
 // Dumps event information into the MsgStream
 ///////////////////////////////////////////////////////////////////
 
-MsgStream& InDet::SiTrackMaker_xk::dumpevent(SiTrackMakerEventData_xk& data, MsgStream& out) 
+MsgStream& InDet::SiTrackMaker_xk::dumpevent(SiTrackMakerEventData_xk& data, MsgStream& out)
 {
   out<<"|---------------------------------------------------------------------|"
      <<std::endl;
@@ -572,8 +577,18 @@ void InDet::SiTrackMaker_xk::newTrigEvent(const EventContext& ctx, SiTrackMakerE
   data.inputseeds() = 0;
   data.goodseeds()  = 0;
   data.findtracks() = 0;
-  for(int i=0; i!=SiCombinatorialTrackFinderData_xk::kNStatAllTypes; ++i) { for(int k = 0; k!=SiCombinatorialTrackFinderData_xk::kNSeedTypes; ++k) data.summaryStatAll()[i][k] = 0.; }
-  for(int i=0; i!=SiCombinatorialTrackFinderData_xk::kNStatEtaTypes; ++i) { for(int k = 0; k!=SiCombinatorialTrackFinderData_xk::kNSeedTypes; ++k) { for(int r=0; r!=SiCombinatorialTrackFinderData_xk::kNRapidityRanges; ++r) data.summaryStatUsedInTrack()[i][k][r] = 0.; } }
+  for (int i = 0; i != SiCombinatorialTrackFinderData_xk::kNStatAllTypes; ++i) {
+    for (int k = 0; k != SiCombinatorialTrackFinderData_xk::kNSeedTypes; ++k){
+      data.summaryStatAll()[i][k] = 0.;
+    }
+  }
+  for (int i = 0; i != SiCombinatorialTrackFinderData_xk::kNStatEtaTypes; ++i) {
+    for (int k = 0; k != SiCombinatorialTrackFinderData_xk::kNSeedTypes; ++k) {
+      for (int r = 0; r != SiCombinatorialTrackFinderData_xk::kNRapidityRanges;++r){
+        data.summaryStatUsedInTrack()[i][k][r] = 0.;
+      }
+    }
+  }
 
   // Add possibility to write seed segment information
   if (m_seedsegmentsWrite) m_seedtrack->newEvent(data.conversionData(), m_trackinfo, m_patternName);
@@ -700,18 +715,23 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   /// This is done by extrapolating our estimated starting parameters through the detector
   /// and collecting all detector elements reasonably close to the projected trajectory.
   /// This will populate the 'DE" list.
-  
+
   std::vector<const InDetDD::SiDetectorElement*> DE;
-  
+
   if(!m_useTrigInDetRoadPredictorTool) {
-    if (!m_cosmicTrack) m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::alongMomentum,   DE, data.roadMakerData());
-    else                m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::oppositeMomentum,DE, data.roadMakerData());
-  }
-  else {
+    if (!m_cosmicTrack){
+      m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp, Trk::alongMomentum, DE, data.roadMakerData());
+    }
+    else{
+      m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp, Trk::oppositeMomentum, DE, data.roadMakerData());
+    }
+  } else {
     int road_length = m_trigInDetRoadPredictorTool->getRoad(Sp, DE, ctx);
-    if(road_length == 0) return tracks;
+    if(road_length == 0) {
+      return tracks;
+    }
   }
-  
+
   /// if we don't use all of pix and SCT, filter our list, erasing any that don't fit our requirements
   if (!data.pix() || !data.sct()) detectorElementsSelection(data, DE);
 
@@ -876,13 +896,13 @@ std::unique_ptr<Trk::TrackParameters> InDet::SiTrackMaker_xk::getAtaPlane
   // for tracklets we select last 3 spacepoints of the seed
   else if (m_trackletPoints == 2) {
     SP = {theSeed[theSeed.size() - 3], theSeed[theSeed.size() - 2], theSeed.back()};
-  }  
+  }
   /// for tracklets we select middle, 3rd-quarter, and last spacepoint of the seed
   else if (m_trackletPoints == 3) {
     unsigned int middleIdx = theSeed.size() == 3 ? 0 : theSeed.size()/2;
     unsigned int quarterIdx = theSeed.size() == 3 ? 1 : 3*theSeed.size()/4;
     SP = {theSeed[middleIdx], theSeed[quarterIdx], theSeed.back()};
-  }  
+  }
   /// for tracklets we select first, penultimate, and last spacepoint of the seed
   else if (m_trackletPoints == 4) {
     SP = {theSeed[0], theSeed[theSeed.size() - 2], theSeed.back()};
@@ -1063,7 +1083,7 @@ InDet::TrackQualityCuts InDet::SiTrackMaker_xk::setTrackQualityCuts(bool simpleT
 ///////////////////////////////////////////////////////////////////
 
 void InDet::SiTrackMaker_xk::detectorElementsSelection(SiTrackMakerEventData_xk& data,
-                                                       std::vector<const InDetDD::SiDetectorElement*>& DE) 
+                                                       std::vector<const InDetDD::SiDetectorElement*>& DE)
 {
   std::vector<const InDetDD::SiDetectorElement*>::iterator d = DE.begin();
   while (d!=DE.end()) {
@@ -1158,11 +1178,11 @@ bool InDet::SiTrackMaker_xk::newSeed(SiTrackMakerEventData_xk& data, const std::
 /////////////////////////////////////////////////////////////////////
 
 
-int InDet::SiTrackMaker_xk::kindSeed(const std::vector<const Trk::SpacePoint*>& Sp) 
+int InDet::SiTrackMaker_xk::kindSeed(const std::vector<const Trk::SpacePoint*>& Sp)
 {
-  
+
   if(Sp.size()!=3) return 0;//correct handling of Pixel-only ITk tracklets
-  
+
   std::vector<const Trk::SpacePoint*>::const_iterator s=Sp.begin(),se=Sp.end();
 
   int n = 0;
@@ -1170,7 +1190,7 @@ int InDet::SiTrackMaker_xk::kindSeed(const std::vector<const Trk::SpacePoint*>& 
   return n;
 }
 
-int InDet::SiTrackMaker_xk::rapidity(const std::vector<const Trk::SpacePoint*>& Sp) 
+int InDet::SiTrackMaker_xk::rapidity(const std::vector<const Trk::SpacePoint*>& Sp)
 {
   if(Sp.size() < 2) return 0;
 
@@ -1185,7 +1205,7 @@ int InDet::SiTrackMaker_xk::rapidity(const std::vector<const Trk::SpacePoint*>& 
 // Clusters-track multimap production
 ///////////////////////////////////////////////////////////////////
 
-void  InDet::SiTrackMaker_xk::clusterTrackMap(SiTrackMakerEventData_xk& data, Trk::Track* Tr) 
+void  InDet::SiTrackMaker_xk::clusterTrackMap(SiTrackMakerEventData_xk& data, Trk::Track* Tr)
 {
   DataVector<const Trk::MeasurementBase>::const_iterator
     m  = Tr->measurementsOnTrack()->begin(),
@@ -1201,7 +1221,7 @@ void  InDet::SiTrackMaker_xk::clusterTrackMap(SiTrackMakerEventData_xk& data, Tr
 // Test is it new track
 ///////////////////////////////////////////////////////////////////
 
-bool InDet::SiTrackMaker_xk::isNewTrack(SiTrackMakerEventData_xk& data, Trk::Track* Tr) 
+bool InDet::SiTrackMaker_xk::isNewTrack(SiTrackMakerEventData_xk& data, Trk::Track* Tr)
 {
   const Trk::PrepRawData* prd   [100];
   std::multimap<const Trk::PrepRawData*,const Trk::Track*>::const_iterator
@@ -1401,7 +1421,7 @@ bool InDet::SiTrackMaker_xk::isHadCaloCompatible(SiTrackMakerEventData_xk& data)
 /// tangents to the estimated trajectory (assuming a circle in x-y and straight
 /// line in r-z)
 void InDet::SiTrackMaker_xk::globalDirections
-(const double* p0, const double* p1, const double* p2, double* d0, double* d1, double* d2) 
+(const double* p0, const double* p1, const double* p2, double* d0, double* d1, double* d2)
 {
   /// transform transverse coordinates relative to the first SP
   double x01 = p1[0]-p0[0]      ;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CTPfragment/CTPExtraWordsFormat.h"
@@ -13,11 +13,6 @@
 namespace {
   std::map<const CTPfragment::FolderIndex, CTPfragment::FolderEntry>::iterator my_iter;  
   std::pair<const CTPfragment::FolderIndex, CTPfragment::FolderEntry> my_pair;
-}
-
-// Hack for ROOT6 (see ATR-10297)
-namespace CTPdataformat {
-  struct ROOT6_NamespaceAutoloadHook{};
 }
 
 /* Type conversion. The reference returned by CTPfragment::ExtraPayload::getFolderUpdates

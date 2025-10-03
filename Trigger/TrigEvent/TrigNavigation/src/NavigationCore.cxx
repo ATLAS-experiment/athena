@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -212,7 +212,7 @@ bool NavigationCore::deserialize( const std::vector<uint32_t>& input ) {
   while ( extractBlob(input, it, blob) ) {
     // Skip this blob if we've already deserialized it.
     // See ATLASRECTS-6278, ATEAM-734 and ATR-25282
-    uint64_t hash = CxxUtils::crc64 ((const char*)blob.data(),
+    uint64_t hash = CxxUtils::crc64 (reinterpret_cast<const char*>(blob.data()),
                                      blob.size()*sizeof(*blob.data()));
 
     auto& holder = memo.m_holders[hash]; // ref(!) to empty or existing holder pointer

@@ -23,9 +23,6 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkTrack/TrackInfo.h"
 
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventInfo.h"
-
 #include "GaudiKernel/ITHistSvc.h"
 #include "TTree.h"
 
@@ -88,17 +85,17 @@ StatusCode InDet::DumpObjects::initialize() {
   ATH_CHECK(m_xaodPixelSpacePointContainerKey.initialize());
   ATH_CHECK(m_xaodStripSpacePointContainerKey.initialize());
   ATH_CHECK(m_xaodStripSpacePointOverlapContainerKey.initialize());
-    
+
   ATH_CHECK(m_tracksKey.initialize());
   ATH_CHECK(m_tracksTruthKey.initialize());
   ATH_CHECK(m_detailedTracksTruthKey.initialize());
 
 
-  
-  
+
+
   // Grab PixelID helper
   ATH_CHECK (detStore()->retrieve(m_pixelID, "PixelID") );
-  
+
   if (!detStore()->contains<InDetDD::PixelDetectorManager>("Pixel") ||
       detStore()->retrieve(m_pixelManager, "Pixel").isFailure()) {
     // if Pixel retrieval fails, try ITkPixel
@@ -110,7 +107,7 @@ StatusCode InDet::DumpObjects::initialize() {
 
   // Grab SCT_ID helper
   ATH_CHECK (detStore()->retrieve(m_SCT_ID,"SCT_ID") );
-  
+
   if (!detStore()->contains<InDetDD::SCT_DetectorManager>("SCT") ||
       detStore()->retrieve(m_SCT_Manager, "SCT").isFailure()) {
     // if SCT retrieval fails, try ITkStrip
@@ -212,7 +209,7 @@ StatusCode InDet::DumpObjects::initialize() {
     m_SPCL1_index = new int[m_maxSP];
     m_SPCL2_index = new int[m_maxSP];
     m_SPisOverlap = new int[m_maxSP];
-    
+
     m_SPradius = new double[m_maxSP];
     m_SPcovr = new double[m_maxSP];
     m_SPcovz = new double[m_maxSP];
@@ -222,7 +219,7 @@ StatusCode InDet::DumpObjects::initialize() {
     m_SPbottomStripDirection   = new std::vector<std::vector<float>>;
     m_SPstripCenterDistance    = new std::vector<std::vector<float>>;
     m_SPtopStripCenterPosition = new std::vector<std::vector<float>>;
-    
+
     m_TRKindex = new int[m_maxTRK];
     m_TRKtrack_fitter = new int[m_maxTRK];
     m_TRKparticle_hypothesis = new int[m_maxTRK];
@@ -334,7 +331,7 @@ StatusCode InDet::DumpObjects::initialize() {
     m_nt->Branch("SPbottomStripDirection",&m_SPbottomStripDirection);
     m_nt->Branch("SPstripCenterDistance",&m_SPstripCenterDistance);
     m_nt->Branch("SPtopStripCenterPosition",m_SPtopStripCenterPosition);
-        
+
     m_nt->Branch("nTRK", &m_nTRK, "nTRK/I");
     m_nt->Branch("TRKindex", m_TRKindex, "TRKindex[nTRK]/I");
     m_nt->Branch("TRKtrack_fitter", m_TRKtrack_fitter, "TRKtrack_fitter[nTRK]/I");
@@ -559,7 +556,7 @@ StatusCode InDet::DumpObjects::execute() {
       int eta_module = m_pixelID->eta_module(clusterCollection->identify());
       int phi_module = m_pixelID->phi_module(clusterCollection->identify());
 
-      InDetDD::SiDetectorElement *element = m_pixelManager->getDetectorElement(clusterCollection->identify());
+      const InDetDD::SiDetectorElement *element = m_pixelManager->getDetectorElement(clusterCollection->identify());
 
       Amg::Vector3D my_normal = element->normal();
       float norm_x = fabs(my_normal.x()) > 1e-5 ? my_normal.x() : 0.;
@@ -675,7 +672,7 @@ StatusCode InDet::DumpObjects::execute() {
               v_local_cov.push_back(local_cov(i, j));
             }
           }
-        } 
+        }
         if (m_rootFile) {
           // fill TTree
           m_CLindex[m_nCL] = m_selected;
@@ -749,7 +746,7 @@ StatusCode InDet::DumpObjects::execute() {
       int phi_module = m_SCT_ID->phi_module(clusterCollection->identify());
       int side = m_SCT_ID->side(clusterCollection->identify());
 
-      InDetDD::SiDetectorElement *element = m_SCT_Manager->getDetectorElement(clusterCollection->identify());
+      const InDetDD::SiDetectorElement *element = m_SCT_Manager->getDetectorElement(clusterCollection->identify());
 
       Amg::Vector3D my_normal = element->normal();
       float norm_x = fabs(my_normal.x()) > 1e-5 ? my_normal.x() : 0.;
@@ -868,7 +865,7 @@ StatusCode InDet::DumpObjects::execute() {
               v_local_cov.push_back(local_cov(i, j));
             }
           }
-        } 
+        }
         if (m_rootFile) {
           m_CLindex[m_nCL] = m_selected;
           (*m_CLhardware).push_back("STRIP");
@@ -926,10 +923,10 @@ StatusCode InDet::DumpObjects::execute() {
   static const SG::Accessor< ElementLink<SpacePointCollection> > linkAcc("pixelSpacePointLink");
   static const SG::Accessor< ElementLink< ::SpacePointCollection > > striplinkAcc("sctSpacePointLink");
   static const SG::Accessor< ElementLink< ::SpacePointOverlapCollection > > stripOverlaplinkAcc("stripOverlapSpacePointLink");
-  
+
   // xAOD Containers
   const xAOD::SpacePointContainer *xAODPixelSPContainer = nullptr;
-  
+
   SG::ReadHandle<xAOD::SpacePointContainer> xAODPixelSpacePointContainerHandle{m_xaodPixelSpacePointContainerKey,ctx};
 
   if (not xAODPixelSpacePointContainerHandle.isValid()) {
@@ -948,7 +945,7 @@ StatusCode InDet::DumpObjects::execute() {
   }
   xAODStripSPContainer = xAODStripSpacePointContainerHandle.cptr();
 
-  
+
   const xAOD::SpacePointContainer *xAODStripSPOverlapContainer = 0;
   SG::ReadHandle<xAOD::SpacePointContainer> xAODStripSpacePointOverlapContainerHandle{m_xaodStripSpacePointOverlapContainerKey, ctx};
   if (not xAODStripSpacePointOverlapContainerHandle.isValid()) {
@@ -959,17 +956,17 @@ StatusCode InDet::DumpObjects::execute() {
 
   int sp_index     = 0;
   m_nSP     = 0;
-  
+
   if (xAODPixelSPContainer && xAODPixelSPContainer->size() > 0) {
     for (const auto sp : *xAODPixelSPContainer) {
 
-      if (not linkAcc.isAvailable(*sp)) 
+      if (not linkAcc.isAvailable(*sp))
 	ATH_MSG_FATAL("no pixel SpacePoint link for xAOD::SpacePoint");
-      
+
 
       auto trk_sp = *linkAcc(*sp);
       const InDet::SiCluster *cl = static_cast<const InDet::SiCluster*>(trk_sp->clusterList().first);
-      
+
       if (m_rootFile) {
 	m_SPindex[m_nSP] = sp_index;
 	m_SPx[m_nSP] = sp->globalPosition().x();
@@ -982,7 +979,7 @@ StatusCode InDet::DumpObjects::execute() {
 	m_SPCL2_index[m_nSP] = -1;
 	m_SPisOverlap[m_nSP] = -1;
       }
-      
+
       sp_index++;
       m_nSP++;
       if (m_nSP == m_maxSP) {
@@ -993,18 +990,18 @@ StatusCode InDet::DumpObjects::execute() {
   } // container not empty
 
   if (xAODStripSPContainer && xAODStripSPContainer->size() > 0) {
-    
+
     //loop over collection
     for (const auto sp : *xAODStripSPContainer) {
 
       ATH_CHECK(striplinkAcc.isAvailable(*sp));
-      
+
       auto trk_sp = *striplinkAcc(*sp);
       const InDet::SiCluster *cl_1 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().first);
       const InDet::SiCluster *cl_2 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().second);
 
       if (m_rootFile) {
-	
+
 	m_SPindex[m_nSP] = sp_index;
 	m_SPx[m_nSP] = sp->globalPosition().x();
 	m_SPy[m_nSP] = sp->globalPosition().y();
@@ -1017,31 +1014,31 @@ StatusCode InDet::DumpObjects::execute() {
 	m_SPisOverlap[m_nSP] = 0;
 	m_SPhl_topstrip[m_nSP] = sp->topHalfStripLength();
 	m_SPhl_botstrip[m_nSP] = sp->bottomHalfStripLength();
-	
-	
+
+
 	std::vector<float> topstripDir(sp->topStripDirection().data(),
 				       sp->topStripDirection().data() +
 				       sp->topStripDirection().size());
-	
+
 	std::vector<float> botstripDir(sp->bottomStripDirection().data(),
 				       sp->bottomStripDirection().data() +
 				       sp->bottomStripDirection().size());
-	
+
 	std::vector<float> DstripCnt(sp->stripCenterDistance().data(),
 				     sp->stripCenterDistance().data() +
 				     sp->stripCenterDistance().size());
-	
+
 	std::vector<float> topstripCnt(sp->topStripCenter().data(),
 				       sp->topStripCenter().data() +
 				     sp->topStripCenter().size());
-	
+
 	(*m_SPtopStripDirection).push_back(topstripDir);
 	(*m_SPbottomStripDirection).push_back(botstripDir);
 	(*m_SPstripCenterDistance).push_back(DstripCnt);
 	(*m_SPtopStripCenterPosition).push_back(topstripCnt);
 
       }
-	
+
       sp_index++;
       m_nSP++;
 
@@ -1054,18 +1051,18 @@ StatusCode InDet::DumpObjects::execute() {
 
 
   if (xAODStripSPOverlapContainer && xAODStripSPOverlapContainer->size() > 0) {
-    
+
     //loop over collection
     for (const auto sp : *xAODStripSPOverlapContainer) {
-      
+
       ATH_CHECK(stripOverlaplinkAcc.isAvailable(*sp));
-      
+
       auto trk_sp = *stripOverlaplinkAcc(*sp);
       const InDet::SiCluster *cl_1 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().first);
       const InDet::SiCluster *cl_2 = static_cast<const InDet::SiCluster *>(trk_sp->clusterList().second);
 
       if (m_rootFile) {
-	
+
 	m_SPindex[m_nSP] = sp_index;
 	m_SPx[m_nSP] = sp->globalPosition().x();
 	m_SPy[m_nSP] = sp->globalPosition().y();
@@ -1075,44 +1072,44 @@ StatusCode InDet::DumpObjects::execute() {
 	m_SPcovz[m_nSP] = sp->varianceZ();
 	m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
 	m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
-	
+
 	int flag = compute_overlap_SP_flag(m_CLeta_module[clusterIDMapIdx[cl_1->identify()]],
 					   m_CLphi_module[clusterIDMapIdx[cl_1->identify()]],
 					   m_CLeta_module[clusterIDMapIdx[cl_2->identify()]],
 					   m_CLphi_module[clusterIDMapIdx[cl_2->identify()]]);
-	
+
 	if ( flag<1 || flag > 3 )
 	  ATH_MSG_WARNING("Unexpected overlap SP flag: "<<flag);
-	
-	
+
+
 	m_SPisOverlap[m_nSP] = flag;
 	m_SPhl_topstrip[m_nSP] = sp->topHalfStripLength();
 	m_SPhl_botstrip[m_nSP] = sp->bottomHalfStripLength();
-	
-	
+
+
 	std::vector<float> topstripDir(sp->topStripDirection().data(),
 				       sp->topStripDirection().data() +
 				       sp->topStripDirection().size());
-	
+
 	std::vector<float> botstripDir(sp->bottomStripDirection().data(),
 				       sp->bottomStripDirection().data() +
 				       sp->bottomStripDirection().size());
-	
+
 	std::vector<float> DstripCnt(sp->stripCenterDistance().data(),
 				     sp->stripCenterDistance().data() +
 				     sp->stripCenterDistance().size());
-	
+
 	std::vector<float> topstripCnt(sp->topStripCenter().data(),
 				       sp->topStripCenter().data() +
 				       sp->topStripCenter().size());
-	
+
 	(*m_SPtopStripDirection).push_back(topstripDir);
 	(*m_SPbottomStripDirection).push_back(botstripDir);
 	(*m_SPstripCenterDistance).push_back(DstripCnt);
 	(*m_SPtopStripCenterPosition).push_back(topstripCnt);
 
       }
-      
+
       sp_index++;
       m_nSP++;
       if (m_nSP == m_maxSP) {
@@ -1122,7 +1119,7 @@ StatusCode InDet::DumpObjects::execute() {
     } // loop on container
   } // container not empty
 
-  
+
   //////////////////////////////////////////////////////////////////////
   /////////////////////////////// TRACKS ///////////////////////////////
   //////////////////////////////////////////////////////////////////////
@@ -1396,7 +1393,7 @@ StatusCode InDet::DumpObjects::finalize() {
     delete[] m_CLnorm_y;
     delete[] m_CLnorm_z;
     delete m_CLlocal_cov;
-        
+
     delete[] m_Part_event_number;
     delete[] m_Part_barcode;
     delete[] m_Part_px;
@@ -1432,11 +1429,11 @@ StatusCode InDet::DumpObjects::finalize() {
     delete[] m_SPcovz;
     delete[] m_SPhl_topstrip;
     delete[] m_SPhl_botstrip;
-    delete   m_SPtopStripDirection;     
-    delete   m_SPbottomStripDirection;   
-    delete   m_SPstripCenterDistance;    
-    delete   m_SPtopStripCenterPosition; 
-    
+    delete   m_SPtopStripDirection;
+    delete   m_SPbottomStripDirection;
+    delete   m_SPstripCenterDistance;
+    delete   m_SPtopStripCenterPosition;
+
     delete[] m_TRKindex;
     delete[] m_TRKtrack_fitter;
     delete[] m_TRKparticle_hypothesis;
@@ -1525,7 +1522,7 @@ bool InDet::DumpObjects::isPassed(HepMC::ConstGenParticlePtr particle, float &px
       vParentID.push_back((*ip)->pdg_id());
       vParentBarcode.push_back(HepMC::barcode(*ip)); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
     }
-#endif    
+#endif
   } else {
     vProdNin = 0;
     vProdNout = 0;

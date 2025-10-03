@@ -2,7 +2,6 @@
 
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import with_statement
 
 from logging import getLogger; log = getLogger("DQUtils.db")
 
@@ -13,7 +12,6 @@ from io import StringIO
 from datetime import datetime
 from keyword import iskeyword
 from os.path import dirname
-import six
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
@@ -147,7 +145,7 @@ def fetch_iovs(folder_name, since=None, until=None, channels=None, tag="",
         channel_mapping = None # get channel mapping from channel_mapping.py
     else:
         _, _, channelmap = get_channel_ids_names(folder)
-        cm_reversed = dict((value, key) for key, value in six.iteritems(channelmap))
+        cm_reversed = {value: key for key, value in channelmap.items()}
         channelmap.update(cm_reversed)
         channel_mapping = channelmap
     

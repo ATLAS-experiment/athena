@@ -5,9 +5,15 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.SystemOfUnits import GeV
 
-def FPGATrackSimSGInputToolCfg(flags):
+def FPGATrackSimSGInputToolCfg(flags,**kwargs):
     acc = ComponentAccumulator()
 
+    if not flags.Trigger.FPGATrackSim.readOfflineObjects:
+        kwargs.setdefault('OfflineTracks', "")
+        kwargs.setdefault('pixelClustersName', "")
+        kwargs.setdefault('SCT_ClustersName', "")
+    
+    
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     extrapolatorTool = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
 
@@ -15,7 +21,10 @@ def FPGATrackSimSGInputToolCfg(flags):
     truthToTrackTool = acc.popToolsAndMerge(TruthToTrackToolCfg(flags))
     from TrkConfig.TrkConfigFlags import TrackingComponent
     FPGATrackSimSGInputTool = CompFactory.FPGATrackSimSGToRawHitsTool(maxEta=5.0, minPt=0.8 * GeV,
-        Extrapolator = extrapolatorTool, TruthToTrackTool = truthToTrackTool, ReadOfflineTracks=TrackingComponent.AthenaChain in flags.Tracking.recoChain)
+        Extrapolator = extrapolatorTool, TruthToTrackTool = truthToTrackTool,
+        ReadOfflineTracks=TrackingComponent.AthenaChain in flags.Tracking.recoChain and flags.Trigger.FPGATrackSim.readOfflineObjects,
+        **kwargs)
+    FPGATrackSimSGInputToolCfg.doMultiTruth = flags.Trigger.FPGATrackSim.doMultiTruth
     acc.setPrivateTools(FPGATrackSimSGInputTool)
 
     return acc

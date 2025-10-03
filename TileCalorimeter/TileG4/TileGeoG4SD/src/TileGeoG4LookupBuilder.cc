@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -10,15 +10,15 @@
 //
 //************************************************************
 
+#include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
+
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/DataHandle.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
 
-#include "TileGeoG4SD/TileGeoG4LookupBuilder.hh"
 #include "TileGeoG4SD/TileGeoG4Lookup.hh"
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
-
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "TileDetDescr/TileDddbManager.h"
 #include "TileDetDescr/TileCellDim.h"    //added by Sergey
@@ -37,11 +37,17 @@ namespace {
 
 } // anonymous namespace
 
+// out-of-class static member definition
+std::mutex TileGeoG4LookupBuilder::s_dbManagerMutex;
+
+std::mutex& TileGeoG4LookupBuilder::GetDbManagerMutex()
+{
+  return s_dbManagerMutex;
+}
+
 TileGeoG4LookupBuilder::TileGeoG4LookupBuilder(StoreGateSvc* pDetStore, const int verboseLevel)
   : m_tileID(0),
     m_dbManager(0),
-    m_cellMap(0),
-    m_sectionMap(0),
     m_isE5(false),
     m_verboseLevel(verboseLevel) {
 
@@ -65,21 +71,24 @@ TileGeoG4LookupBuilder::TileGeoG4LookupBuilder(StoreGateSvc* pDetStore, const in
     G4cout << "ERROR: Unable to retrieve TileID helper from DetectorStore" << G4endl;
     abort();
   }
-    }
-
-TileGeoG4LookupBuilder::~TileGeoG4LookupBuilder() {
-  delete m_cellMap;
-  delete m_sectionMap;
 }
 
 void TileGeoG4LookupBuilder::BuildLookup(bool is_tb) {
   // initializations
-  m_cellMap = new TileGeoG4CellMap();
-  m_sectionMap = new TileGeoG4SectionMap();
-  m_isE5 = (m_dbManager->SetCurrentSection(10 + TileDddbManager::TILE_PLUG4, false));
-  // Building
-  CreateGeoG4Cells();
-  CreateGeoG4Sections(is_tb);
+  // TODO: just clean up the old maps and don't use pointers?
+  m_cellMap = std::make_unique<TileGeoG4CellMap>();
+  m_sectionMap = std::make_unique<TileGeoG4SectionMap>();
+
+  {
+    // we need to lock the initialization of TileGeoG4LookupBuilder because each instance
+    // is sharing the m_dbManager object, which is accessed in a non-thread-safe way (calling SetCurrentTicl)
+    // resulting in potential race condition
+    std::scoped_lock lock(s_dbManagerMutex);
+    m_isE5 = (m_dbManager->SetCurrentSection(10 + TileDddbManager::TILE_PLUG4, false));
+    // Building
+    CreateGeoG4Cells();
+    CreateGeoG4Sections(is_tb);
+  }
 
   // clean up
   m_cellMap->clear();
@@ -170,9 +179,7 @@ void TileGeoG4LookupBuilder::CreateGeoG4Cells() {
 
   int nCounter = m_dbManager->GetNumTicl();
   if (m_dbManager->GetNumberOfEnv() == 1) {
-    G4cout << "WARNING: CreateGeoG4Cells() - nCells from DB " << nCounter << G4endl;
     nCounter = 45;
-    G4cout << "WARNING: CreateGeoG4Cells() - Changing nCells for barrel-only configuration to " << nCounter << G4endl;
   }
 
   for (counter = 0; counter < nCounter; counter++) {
@@ -487,7 +494,10 @@ void TileGeoG4LookupBuilder::CreateGeoG4Sections(bool is_tb) {
     section->nrOfModules = nModules;
     section->nrOfPeriods = m_dbManager->TILBnperiod();
     section->nrOfScintillators = m_dbManager->TILBnscin();
-
+    if (section->nrOfScintillators<0){
+      //m_dbManager->TILBnscin(); may return -999
+      throw std::range_error("TileGeoG4LookupBuilder::CreateGeoG4Sections: nrScintillators is less than zero, which is subsequently used as a vector element index.");
+    }
     if (m_verboseLevel >= 5)
       G4cout << " counter=" << counter
              << "  key=" << key

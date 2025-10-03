@@ -59,6 +59,26 @@ namespace G4UA
   }
 
   //---------------------------------------------------------------------------
+  // Initialize the Geant4 main thread. 
+  //---------------------------------------------------------------------------
+  StatusCode UserActionSvc::initializeActionsMaster()
+  {
+    // Retrieve the new user actions
+    G4AtlasUserActions actions;
+    for(auto& tool : m_userActionTools) {
+      ATH_CHECK( tool->fillUserAction(actions) );
+    }
+    auto runAction = std::make_unique<G4AtlasRunAction>();
+    // Assign run plugins
+    for(auto* action : actions.runActionsMaster)
+    {
+        runAction->addRunAction(action);
+    }
+    G4RunManager::GetRunManager()->SetUserAction( runAction.release() );
+    return StatusCode::SUCCESS;
+  }
+
+  //---------------------------------------------------------------------------
   // Initialize the user actions for the current thread.
   // In this code, "action" refers to the G4 action classes, and "plugin"
   // refers to the custom action objects that get assigned to the G4 action.
@@ -83,6 +103,7 @@ namespace G4UA
     // role, so it is safer to do all checks here.
 
     if( G4RunManager::GetRunManager()->GetUserRunAction() ||
+        G4RunManager::GetRunManager()->GetUserPrimaryGeneratorAction() ||
         G4RunManager::GetRunManager()->GetUserEventAction() ||
         G4RunManager::GetRunManager()->GetUserStackingAction() ||
         G4RunManager::GetRunManager()->GetUserTrackingAction() ||
@@ -110,6 +131,18 @@ namespace G4UA
       runAction->addRunAction(action);
     G4RunManager::GetRunManager()->SetUserAction( runAction.get() );
     m_runActions.set( std::move(runAction) );
+
+    // Initialize the ATLAS primary generator action.
+    if(m_primaryGeneratorActions.get()) {
+      ATH_MSG_ERROR("Primary generator action already exists for current thread!");
+      return StatusCode::FAILURE;
+    }
+    auto primaryGeneratorAction = std::make_unique<G4AtlasPrimaryGeneratorAction>();
+    // Assign run plugins
+    for(auto* action : actions.primaryGeneratorActions)
+      primaryGeneratorAction->addPrimaryGeneratorAction(action);
+    G4RunManager::GetRunManager()->SetUserAction( primaryGeneratorAction.get() );
+    m_primaryGeneratorActions.set( std::move(primaryGeneratorAction) );
 
     // Initialize the ATLAS event action.
     if(m_eventActions.get()) {

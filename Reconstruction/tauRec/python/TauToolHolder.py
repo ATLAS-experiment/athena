@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -13,7 +13,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.SystemOfUnits import GeV, deg
-
 
 ########################################################################
 # JetSeedBuilder
@@ -541,8 +540,17 @@ def Pi0ClusterCreatorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterCreator'
 
+    # TauPi0ClusterCreator accesses cells via links only, which doesn't
+    # make a scheduler dependency.  So make additional explicit dependencies
+    # on cells in the input file.
+    extraInputs = []
+    for typ, nam in [i.split('#') for i in flags.Input.TypedCollections]:
+        if typ == 'CaloCellContainer':
+            extraInputs += [('CaloCellContainer', nam)]
+
     TauPi0ClusterCreator = CompFactory.getComp("TauPi0ClusterCreator")
-    TauPi0ClusterCreator = TauPi0ClusterCreator(name = _name)
+    TauPi0ClusterCreator = TauPi0ClusterCreator(name = _name,
+                                                ExtraInputs = extraInputs)
 
     result.setPrivateTools(TauPi0ClusterCreator)
     return result
@@ -674,7 +682,7 @@ def TauIDVarCalculatorCfg(flags):
     result.setPrivateTools(myTauIDVarCalculator)
     return result
 
-def TauJetRNNEvaluatorCfg(flags):
+def TauJetRNNEvaluatorCfg(flags, applyLooseTrackSel=False):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauJetRNN'
 
@@ -689,6 +697,7 @@ def TauJetRNNEvaluatorCfg(flags):
                                               MaxTracks = 10,
                                               MaxClusters = 6,
                                               MaxClusterDR = 1.0,
+                                              ApplyLooseTrackSel = applyLooseTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
                                               InputLayerScalar = "scalar",
                                               InputLayerTracks = "tracks",
@@ -729,13 +738,14 @@ def TauWPDecoratorJetRNNCfg(flags):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
-def TauGNNEvaluatorCfg(flags, version=0):
+def TauGNNEvaluatorCfg(flags, version=0, applyLooseTrackSel=False, applyTightTrackSel=False, tauContainerName=""):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauGNN_v' + str(version)
 
     TauGNNEvaluator = CompFactory.getComp("TauGNNEvaluator")
     GNNConf = flags.Tau.TauGNNConfig[version]
     myTauGNNEvaluator = TauGNNEvaluator(name = _name,
+                                              useTRT = flags.Detector.EnableTRT,
                                               NetworkFileInclusive = GNNConf,
                                               OutputVarname = flags.Tau.GNTauScoreName[version],
                                               OutputPTau = "GNTauProbTau",
@@ -744,18 +754,20 @@ def TauGNNEvaluatorCfg(flags, version=0):
                                               MaxClusters = flags.Tau.GNTauMaxClusters[version],
                                               MaxClusterDR = 15.0,
                                               MinTauPt = flags.Tau.MinPtDAOD,
+                                              ApplyLooseTrackSel = applyLooseTrackSel,
+                                              ApplyTightTrackSel = applyTightTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
-                                              DecorateTracks = False,
                                               InputLayerScalar = "tau_vars",
                                               InputLayerTracks = "track_vars",
                                               InputLayerClusters = "cluster_vars",
                                               NodeNameTau=flags.Tau.GNTauNodeNameTau,
-                                              NodeNameJet=flags.Tau.GNTauNodeNameJet)
+                                              NodeNameJet=flags.Tau.GNTauNodeNameJet,
+                                              TauContainerName = tauContainerName,)
 
     result.setPrivateTools(myTauGNNEvaluator)
     return result
 
-def TauWPDecoratorGNNCfg(flags, version):
+def TauWPDecoratorGNNCfg(flags, version, tauContainerName=""):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorGNN_v' + str(version)
 
@@ -765,6 +777,7 @@ def TauWPDecoratorGNNCfg(flags, version):
                                       flatteningFile1Prong = WPConf[0],
                                       flatteningFile2Prong = WPConf[1],
                                       flatteningFile3Prong = WPConf[2],
+                                      TauContainerName = tauContainerName,
                                       DecorWPNames = flags.Tau.GNTauDecorWPNames[version],
                                       DecorWPCutEffs1P = [0.95, 0.85, 0.75, 0.60],
                                       DecorWPCutEffs2P = [0.95, 0.75, 0.60, 0.45],
@@ -775,19 +788,21 @@ def TauWPDecoratorGNNCfg(flags, version):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
-def TauEleRNNEvaluatorCfg(flags):
+def TauEleRNNEvaluatorCfg(flags, applyLooseTrackSel=False):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauEleRNN'
 
     TauJetRNNEvaluator = CompFactory.getComp("TauJetRNNEvaluator")
     RNNConf = flags.Tau.TauEleRNNConfig    
     myTauEleRNNEvaluator = TauJetRNNEvaluator(name = _name,
+                                              useTRT = flags.Detector.EnableTRT,
                                               NetworkFile1P = RNNConf[0],
                                               NetworkFile3P = RNNConf[1],
                                               OutputVarname = "RNNEleScore",
                                               MaxTracks = 10,
                                               MaxClusters = 6,
                                               MaxClusterDR = 1.0,
+                                              ApplyLooseTrackSel = applyLooseTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
                                               InputLayerScalar = "scalar",
                                               InputLayerTracks = "tracks",

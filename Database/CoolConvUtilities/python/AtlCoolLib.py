@@ -8,7 +8,6 @@
 Module defining utilities for ATLAS command line/python use of COOL
 """
 
-from __future__ import print_function
 import sys,os,getopt,time,calendar
 from PyCool import cool
 # Work around pyroot issue with long long --- see ATEAM-997.

@@ -116,6 +116,7 @@
   <class name="dqm_algorithms::LastBinThresholdAction<dqm_algorithms::DifferentThan,dqm_algorithms::NoAction>"/>
   <class name="dqm_algorithms::LastBinThresholdAction<dqm_algorithms::DifferentThan,dqm_algorithms::TileDQAction>"/>
   <class name="dqm_algorithms::L1Calo_OutlierAndFlatnessTest"/>
+  <class name="dqm_algorithms::L1Calo_BinsDiffFromStripMedian"/>
   <class name="dqm_algorithms::MDTADCSpectrum"/>
   <class name="dqm_algorithms::MDTChi2"/>
   <class name="dqm_algorithms::MDTCluster"/>
@@ -160,6 +161,7 @@
   <class name="dqm_algorithms::SkewnessTest_GreaterThanAbs"/>
   <class name="dqm_algorithms::SkewnessTest_LessThan"/>
   <class name="dqm_algorithms::SkewnessTest_LessThanAbs"/>
+  <class name="dqm_algorithms::TileBinsOutRange"/>
   <class name="dqm_algorithms::TileDQAction"/>
   <class name="dqm_algorithms::TRTCheckPeakSimple"/>
   <class name="dqm_algorithms::TRTHistogramHasNonZeroEntries"/>

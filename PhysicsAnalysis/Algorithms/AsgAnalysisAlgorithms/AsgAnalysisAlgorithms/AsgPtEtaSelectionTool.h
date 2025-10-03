@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -77,8 +77,11 @@ namespace CP
     Gaudi::Property<float> m_maxEta {this, "maxEta", 0, "maximum abs(eta) to allow (or 0 for no eta cut)"};
     Gaudi::Property<float> m_etaGapLow {this, "etaGapLow", 0, "low end of the eta gap"};
     Gaudi::Property<float> m_etaGapHigh {this, "etaGapHigh", 0, "high end of the eta gap (or 0 for no eta gap)"};
+    Gaudi::Property<float> m_minRapidity {this, "minRapidity", 0, "minimum abs(rapidity) to allow (or 0 for no eta cut)"};
+    Gaudi::Property<float> m_maxRapidity {this, "maxRapidity", 0, "maximum abs(rapidity) to allow (or 0 for no eta cut)"};
     Gaudi::Property<bool> m_useClusterEta {this, "useClusterEta", false, "whether to use the cluster eta (for electrons only)"};
     Gaudi::Property<bool> m_useDressedProperties {this, "useDressedProperties", false, "whether to use the dressed kinematic properties (for truth particles only)"};
+    Gaudi::Property<bool> m_useConstituentMomentum {this, "useConstituentMomentum", false, "whether to use the constituent momentum (for jets only) (not for pt)"};
     Gaudi::Property<bool> m_printCastWarning {this, "printCastWarning", true, "whether to print a warning/error when the cast fails"};
     Gaudi::Property<bool> m_printClusterWarning {this, "printClusterWarning", true, "whether to print a warning/error when the cluster is missing"};
 
@@ -94,12 +97,18 @@ namespace CP
     int m_maxEtaCutIndex{ -1 };
     /// Index for the eta gap selection
     int m_etaGapCutIndex{ -1 };
+    ///Index for the minimum rapidity selection
+    int m_minRapidityCutIndex{ -1 };
+    /// Index for the maximum rapidity selection
+    int m_maxRapidityCutIndex{ -1 };
     /// Index for the e/gamma casting
     int m_egammaCastCutIndex{ -1 };
     /// Index for the e/gamma calo-cluster
     int m_egammaClusterCutIndex{ -1 };
     /// Index for the existence of dressed properties
     int m_dressedPropertiesIndex{ -1 };
+    /// Index for the jet casting
+    int m_jetCastCutIndex{ -1 };
 
     /// \brief a version of \ref m_printCastWarning that we modify
     /// once we printed the warning
@@ -133,8 +142,8 @@ namespace CP
 
     /// \brief dressed pt and eta accessors
   private:
-    std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_dressedPtAccessor{};
-    std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_dressedEtaAccessor{};
+    std::unique_ptr<SG::ConstAccessor<float>> m_dressedPtAccessor{};
+    std::unique_ptr<SG::ConstAccessor<float>> m_dressedEtaAccessor{};
   };
 }
 

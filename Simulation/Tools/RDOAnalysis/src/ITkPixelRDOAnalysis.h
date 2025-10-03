@@ -5,7 +5,7 @@
 #ifndef ITK_PIXEL_RDO_ANALYSIS_H
 #define ITK_PIXEL_RDO_ANALYSIS_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
 #include "GaudiKernel/LockedHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
@@ -19,10 +19,6 @@
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 
-#include <string>
-#include <vector>
-#include "TH1.h"
-#include "TH2.h"
 #include "TProfile.h"
 
 class TTree;
@@ -36,12 +32,12 @@ namespace InDetDD {
 namespace ITk
 {
 
-class PixelRDOAnalysis : public AthAlgorithm
+class PixelRDOAnalysis : public AthHistogramAlgorithm
 {
 
 public:
-  PixelRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
+  ~PixelRDOAnalysis() = default;
   virtual StatusCode initialize() override final;
   virtual StatusCode execute() override final;
 
@@ -61,8 +57,6 @@ private:
   Gaudi::Property<std::string> m_ntuplePath {this, "NtuplePath", "/RDOAnalysis/ntuples/", ""};
   Gaudi::Property<std::string> m_ntupleName {this, "NtupleName", "ITkPixel", ""};
   Gaudi::Property<bool> m_doPosition {this, "DoPosition", true, ""};
-
-  ServiceHandle<ITHistSvc> m_thistSvc {this, "HistSvc", "THistSvc", ""};
 
   // RDO
   std::vector<unsigned long long>* m_rdoID{};

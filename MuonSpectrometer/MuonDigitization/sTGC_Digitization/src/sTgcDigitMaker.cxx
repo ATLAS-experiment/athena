@@ -1,27 +1,26 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTGC_Digitization/sTgcDigitMaker.h"
 
-#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
-#include "MuonDigitContainer/sTgcDigitCollection.h"
-#include "MuonSimEvent/sTgcSimIdToOfflineId.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
-#include "TrkEventPrimitives/LocalDirection.h"
-#include "TrkSurfaces/Surface.h"
-#include "GaudiKernel/MsgStream.h"
+#include "MuonSimEvent/sTgcSimIdToOfflineId.h"
+
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "PathResolver/PathResolver.h"
+
+#include "GaudiKernel/MsgStream.h"
+
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandGamma.h"
-#include "CLHEP/Vector/ThreeVector.h"
-#include "AthenaBaseComps/AthCheckMacros.h"
 
 #include "TF1.h"
+
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -35,13 +34,13 @@ sTgcDigitMaker::sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
                                const int channelTypes,
                                double meanGasGain,
                                bool doPadChargeSharing,
-                               double stripChargeScale)
+                               bool applyAsBuiltBLines)
   : AthMessaging ("sTgcDigitMaker"),
   m_idHelperSvc{idHelperSvc},
   m_channelTypes{channelTypes},
   m_meanGasGain{meanGasGain},
   m_doPadSharing{doPadChargeSharing},
-  m_stripChargeScale{stripChargeScale} {}
+  m_applyAsBuiltBLines(applyAsBuiltBLines) {}
 //----- Destructor
 sTgcDigitMaker::~sTgcDigitMaker() = default;
 //------------------------------------------------------
@@ -273,8 +272,17 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
   const Trk::PlaneSurface& SURF_STRIP = detEl->surface(surfHash_strip); // get the strip surface
 
   const Amg::Vector3D hitOnSurface_strip = SURF_STRIP.transform().inverse()*glob_ionization_pos;
+  Amg::Vector2D posOnSurf_strip {Amg::Vector2D::Zero()};
 
-  const Amg::Vector2D posOnSurf_strip(hitOnSurface_strip.x(),hitOnSurface_strip.y());
+  if(m_applyAsBuiltBLines){
+    //This block is used to apply As-Built and BLine corrections for dedicated studies.
+    Amg::Vector3D posAfterAsBuilt {Amg::Vector3D::Zero()};
+    detEl->spacePointPosition(newId, hitOnSurface_strip.x(), hitOnSurface_strip.y(), posAfterAsBuilt);
+    posOnSurf_strip = posAfterAsBuilt.block<2,1>(0,0);
+  } else {
+    posOnSurf_strip = hitOnSurface_strip.block<2,1>(0,0);
+  }
+
   bool insideBounds = SURF_STRIP.insideBounds(posOnSurf_strip);
   if(!insideBounds) {
     ATH_MSG_DEBUG("Outside of the strip surface boundary : " <<  m_idHelperSvc->toString(newId) << "; local position " <<posOnSurf_strip );
@@ -329,7 +337,6 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
   const double total_charge = gain*ionized_charge;
 
   //************************************ spread charge among readout element **************************************
-
   // Charge Spread including tan(theta) resolution term.
   const double tan_theta = GLODIRE.perp()/GLODIRE.z();
   // The angle dependance on strip resolution goes as tan^2(angle)
@@ -340,17 +347,16 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
 
   // Each readout plane reads about half the total charge produced on the wire,
   // including a tan(theta) term to describe the increase of charge with incident angle
-  const double norm = 0.5 * total_charge * m_stripChargeScale * std::hypot(1, m_chargeAngularFactor * tan_theta);
+  const double norm = 0.5 * total_charge;
   // Strip cluster charge profile described by a double Gaussian.
   // The independent parameter x is in the units of strip channel, one strip channel = 3.2 mm,
   //   so convert position from mm to strip channel if it is not already.
-  std::unique_ptr<TF1> clusterProfile = std::make_unique<TF1>("fgaus",
-                                         "[0]*exp(-0.5*(x/[1])^2)+[2]*exp(-0.5*(x/[3])^2)",
-                                         -300., 300.);
-  clusterProfile->SetParameters(norm * m_clusterProfile[0], // normalization of 1st Gaussian
-                                m_clusterProfile[1], // sigma of 1st Gaussian
-                                norm * m_clusterProfile[2], // normalization of 2nd Gaussian
-                                m_clusterProfile[3]); // sigma of 2nd Gaussian
+std::unique_ptr<TF1> clusterProfile = std::make_unique<TF1>("fgaus",
+    "0.5 * [2] / (sqrt(2 * TMath::Pi()) * [0]) * exp(-0.5 * (x / [0])^2) + "
+    "0.5 * [2] / (sqrt(2 * TMath::Pi()) * [1]) * exp(-0.5 * (x / [1])^2)", -300., 300.);
+  clusterProfile->SetParameters(m_clusterProfile[0], // sigma of 1st Gaussian
+                                m_clusterProfile[1], // sigma of 2nd Gaussian
+                                norm);               // normalization factor
 
   // Lower limit on strip charge (arbitrary limit), in pC, which has the same units as the parameter ionized_charge. 
   constexpr double tolerance_charge = 0.0005;
@@ -375,7 +381,7 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
       // Position with respect to the peak of the charge curve
       double x_relative = locpos.x() - peak_position;
       // In clusterProfile curve, position should be in the units of strip channel
-      double charge = clusterProfile->Integral(x_relative/(2*stripHalfPitch) - 0.5, x_relative/(2*stripHalfPitch) + 0.5);
+      double charge = std::hypot(1, m_chargeAngularFactor * tan_theta) * clusterProfile->Integral(x_relative/(2*stripHalfPitch) - 0.5, x_relative/(2*stripHalfPitch) + 0.5);
       // If charge is too small, stop creating neighbor strip
       if (charge < tolerance_charge) break;
 
@@ -393,7 +399,7 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
       }
 
       addDigit(digits, newId, bctag, strip_time, charge);
-
+  
       ATH_MSG_VERBOSE("Created a strip digit: strip number = " << currentStrip << ", charge = " << charge
                       << ", time = " << strip_time << ", time offset = " << strip_time-sDigitTimeStrip
                       << ", neighbor index = " << iStrip
@@ -416,7 +422,7 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
 
       // Estimate the digit charge
       double x_relative = locpos.x() - peak_position;
-      double charge = clusterProfile->Integral(x_relative/(2*stripHalfPitch) - 0.5, x_relative/(2*stripHalfPitch) + 0.5);
+      double charge = std::hypot(1, m_chargeAngularFactor * tan_theta) * clusterProfile->Integral(x_relative/(2*stripHalfPitch) - 0.5, x_relative/(2*stripHalfPitch) + 0.5);
       if (charge < tolerance_charge) break;
 
       // Estimate digit time
@@ -498,8 +504,8 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
       // sigma is the width of the charge distribution for strips.
       double deltaX = halfPadWidthX - std::abs(diff.x());
       double deltaY= halfPadWidthY - std::abs(diff.y());
-      bool isNeighX = deltaX < 2.5*m_clusterProfile[3];
-      bool isNeighY = deltaY < 2.5*m_clusterProfile[3];
+      bool isNeighX = deltaX < 2.5*m_clusterProfile[1];
+      bool isNeighY = deltaY < 2.5*m_clusterProfile[1];
       // Pad width can be calculated to be very slightly larger than it should due to rounding errors
       // So if a hit falls on a given pad but is "outside" the width, just define it to be on the boundary of 2 pads.
       if (deltaX < 0.) deltaX = 0.1;
@@ -860,5 +866,5 @@ double sTgcDigitMaker::getPadChargeFraction(double distance) {
   // the pad charge sharing distribution figure 16 of the sTGC
   // testbeam paper https://arxiv.org/pdf/1509.06329.pdf
 
-  return 0.5 * (1.0 - std::erf( distance / (std::sqrt(2) * m_clusterProfile[3])));
+  return 0.5 * (1.0 - std::erf( distance / (std::sqrt(2) * m_clusterProfile[1])));
 }

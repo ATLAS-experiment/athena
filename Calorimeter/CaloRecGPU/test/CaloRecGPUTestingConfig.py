@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 class PlotterConfigurator:
     #DoCells currently changes nothing
     #(originally was intended to show
@@ -140,6 +140,50 @@ class PlotterConfigurator:
                                        'ymax':   0.025,
                                        'path': "EXPERT"}
                                     ),
+                                    ( (pair + "_cluster_E_ref," + pair + "_cluster_E_test;" + pair + "_E_zoom2",),
+                                      {'type': 'TH2F',
+                                       'title': "Cluster Energy Comparison; E^{(CPU)} [MeV]; E^{(GPU)} [MeV]",
+                                       'xbins':  63,
+                                       'xmin':  -5020,
+                                       'xmax':   5020,
+                                       'ybins':  63,
+                                       'ymin':  -5020,
+                                       'ymax':   5020,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_E_ref," + pair + "_cluster_delta_E_rel_ref;" + pair + "_delta_E_rel_ref_zoom2",),
+                                      {'type': 'TH2F',
+                                       'title': "Cluster Energy Resolution; E^{(CPU)} [MeV]; #Delta E / #(){E^{(CPU)}}",
+                                       'xbins':  63,
+                                       'xmin':  -5020,
+                                       'xmax':   5020,
+                                       'ybins':  63,
+                                       'ymin':  -0.05,
+                                       'ymax':   0.05,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_Et_ref," + pair + "_cluster_Et_test;" + pair + "_Et_zoom2",),
+                                      {'type': 'TH2F',
+                                       'title': "Cluster Transverse Energy Comparison; E_T^{(CPU)} [MeV]; E_T^{(GPU)} [MeV]",
+                                       'xbins':  63,
+                                       'xmin':  -5020,
+                                       'xmax':   5020,
+                                       'ybins':  63,
+                                       'ymin':  -5020,
+                                       'ymax':   5020,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_Et_ref," + pair + "_cluster_delta_Et_rel_ref;" + pair + "_delta_Et_rel_ref_zoom2",),
+                                      {'type': 'TH2F',
+                                       'title': "Cluster Transverse Energy Resolution; E_T^{(CPU)} [MeV]; #Delta E_T / #(){E_T^{(CPU)}}",
+                                       'xbins':  63,
+                                       'xmin':  -5020,
+                                       'xmax':   5020,
+                                       'ybins':  63,
+                                       'ymin':  -0.05,
+                                       'ymax':   0.05,
+                                       'path': "EXPERT"}
+                                    ),
                                     ( (pair + "_cluster_eta_ref," + pair + "_cluster_eta_test",),
                                       {'type': 'TH2F',
                                        'title': "Cluster #eta Comparison; #eta^{(CPU)}; #eta^{(GPU)}",
@@ -241,6 +285,24 @@ class PlotterConfigurator:
                                              'path': "EXPERT"}
                                            ),
                                         ]
+                      self.PlotsToDo += [ ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_1",),
+                                            {'type': 'TH1F',
+                                             'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
+                                             'xbins': 51,
+                                             'xmin':  -0.1,
+                                             'xmax':  0.1,
+                                             'path': "EXPERT"}
+                                           ),
+                                        ]
+                      self.PlotsToDo += [ ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_2",),
+                                            {'type': 'TH1F',
+                                             'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
+                                             'xbins': 51,
+                                             'xmin':  -0.05,
+                                             'xmax':  0.05,
+                                             'path': "EXPERT"}
+                                           ),
+                                        ]
     def __call__(self, Plotter):
         for plotdef in self.PlotsToDo:
             Plotter.MonitoringTool.defineHistogram(*plotdef[0], **plotdef[1])
@@ -249,7 +311,7 @@ class PlotterConfigurator:
 #For pretty printing things in axes when it comes to moments:
 #<MOMENT_NAME>: <PLOT TITLE> <AXIS TITLE> <UNITS>
 name_to_moment_map =  {
-   #"time"                        :  (("time",                "time",               "[#mu s]"),[]),
+    "time"                        :  (("time",                "time",                ""),[(0, 1e-3)]),
     "FIRST_PHI"                   :  (("firstPhi",            "firstPhi",            ""),[(-3.2, 3.2)]),
     "FIRST_ETA"                   :  (("firstEta",            "firstEta",            ""),[(-10.1, 10.1)]),
     "SECOND_R"                    :  (("secondR",             "secondR",             ""),[(0, 1.25e6)]),
@@ -274,7 +336,7 @@ name_to_moment_map =  {
     "N_BAD_CELLS"                 :  (("nBadCells",           "nBadCells",           ""),[(-0.5, 25.5)]),
     "N_BAD_CELLS_CORR"            :  (("nBadCellsCorr",       "nBadCellsCorr",       ""),[(-0.5, 25.5)]),
     "BAD_CELLS_CORR_E"            :  (("badCellsCorrE",       "badCellsCorrE",       ""),[(-0.1, 25000.)]),
-    "BADLARQ_FRAC"                :  (("badLArQFrac",         "badLArQFrac",         ""),[(-2500., 2500.)]),
+    "BADLARQ_FRAC"                :  (("badLArQFrac",         "badLArQFrac",         ""),[(-2500., 2500.),(-5., 5.)]),
     "ENG_POS"                     :  (("engPos",              "engPos",              ""),[(-0.1, 250000.)]),
     "SIGNIFICANCE"                :  (("significance",        "significance",        ""),[(-500., 500.)]),
     "CELL_SIGNIFICANCE"           :  (("cellSignificance",    "cellSignificance",    ""),[(-0.1, 100.)]),
@@ -290,7 +352,7 @@ name_to_moment_map =  {
    #"OOC_WEIGHT"                  :  (("OOCweight",           "OOCweight",           ""),[]),
    #"DM_WEIGHT"                   :  (("DMweight",            "DMweight",            ""),[]),
    #"TILE_CONFIDENCE_LEVEL"       :  (("tileConfidenceLevel", "tileConfidenceLevel", ""),[]),
-    "SECOND_TIME"                 :  (("secondTime",          "secondTime",          ""),[(0., 1e7)])
+    "SECOND_TIME"                 :  (("secondTime",          "secondTime",          ""),[(0., 1e7),(0., 100.)])
    #"number_of_cells"             :  (("numCells",            "numCells",            ""),[]),
    #"VERTEX_FRACTION"             :  (("vertexFraction",      "vertexFraction",      ""),[]),
    #"NVERTEX_FRACTION"            :  (("nVertexFraction",     "nVertexFraction",     ""),[]),
@@ -479,7 +541,7 @@ def TestPlotterConfiguration(flags, testoptions, plotter_configurator, cellsname
     if plot_moments:
         Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultMoments", "CPU_moments") ]
         Plotter.ToolsToPlot += [ SingleToolToPlot("AthenaClusterImporter", "GPU_moments") ]
-        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultMoments", "AthenaClusterImporter", "moments", True) ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultMoments", "AthenaClusterImporter", "moments", True, match_perfectly = True) ]
         
     if testoptions.TestType is TestTypes.PostGPUCalib:
         pass
@@ -837,9 +899,7 @@ def MainTestConfiguration(flags, testoptions, plotter_configurator, cellsname, c
         HybridClusterProcessor.DoPlots = True
         
         HybridClusterProcessor.PlotterTool = result.popToolsAndMerge( TestPlotterConfiguration(flags, testoptions, plotter_configurator, cellsname) )
-    
-    HybridClusterProcessor.DoMonitoring = False
-    
+        
     HybridClusterProcessor.NumPreAllocatedDataHolders = flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders
         
     if plotter_configurator is not None:
@@ -931,31 +991,26 @@ def GetRealInputFilePaths(files, default_files):
         
         from TrigValTools.TrigValSteering.Input import load_input_json
         trigger_tests = load_input_json()
-        
-        
+
         for f in files:
             if f == 'default':
                 ret += default_files
             elif f == 'trigEB':
-                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-11._0001.1",
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-12._0001.1"]
-            elif f == 'ttbar' or f == 'ttbar_original':
-                #We used ttbar to mean a different sample from the ttbar from the trigger tests...
-                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",
-                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ]
-            elif f == 'jets':
-                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
-            elif f == 'ttbar_triggertest':
-                #This is the way to get the 'proper' ttbar from the trigger test
+                ret += trigger_tests['data']['paths']
+            elif f == 'ttbar':
                 ret += trigger_tests['ttbar']['paths']
+            elif f == 'jets':
+                ret += ["/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
             elif f in trigger_tests.keys():
                 ret += trigger_tests[f]['paths']
             elif f in standard_tests.keys():
                 ret += standard_tests[f]
             else:
                 ret += [f]
-        
+
+        # for files on EOS, use xrootd rather than fuse
+        ret = [f'root://eosatlas.cern.ch/{path}' if '/eos/' in path else path for path in ret]
+
         return ret
     
     
@@ -983,6 +1038,7 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
         parser.add_argument('-uoc','--useoriginalcriteria', action = 'store_true')
         
         parser.add_argument('-ndgn','--nodoublegaussiannoise', action = 'store_true')
+        parser.add_argument('-s','--synchronize', action = 'store_true')
        
         parser.add_argument('-m','--perfmon', action = 'store_true')
         parser.add_argument('-fm','--fullmon', action = 'store_true')
@@ -1036,6 +1092,7 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
             flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders = int(args.numthreads)
         testoptions.UsePerfMon = args.perfmon or args.fullmon
         testoptions.NumEvents = int(args.numevents)
+        testoptions.SkipSyncs = not args.synchronize
     
     flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU = True
     flags.CaloRecGPU.ActiveConfig.MissingCellsToFill = [186986, 187352]

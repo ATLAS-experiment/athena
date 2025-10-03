@@ -28,6 +28,7 @@
 #include "xAODTrigMuon/L2IsoMuonAuxContainer.h"
 #include "xAODMuon/MuonAuxContainer.h"
 #include "xAODTau/TauJetAuxContainer.h"
+#include "xAODTau/DiTauJetAuxContainer.h"
 #include "xAODTau/TauTrackAuxContainer.h"
 #include "xAODJet/JetAuxContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -154,6 +155,7 @@ StatusCode HLTEDMCreator::initialize()
   INIT_XAOD( L2IsoMuonContainer, L2IsoMuonAuxContainer );
   INIT_XAOD( MuonContainer, MuonAuxContainer );
   INIT_XAOD( TauJetContainer, TauJetAuxContainer );
+  INIT_XAOD( DiTauJetContainer, DiTauJetAuxContainer );
   INIT_XAOD( TauTrackContainer, TauTrackAuxContainer );
   INIT_XAOD( JetContainer, JetAuxContainer );
   INIT_XAOD( VertexContainer, VertexAuxContainer );
@@ -496,6 +498,7 @@ StatusCode HLTEDMCreator::createOutput(const EventContext& context) const {
   CREATE_XAOD( L2IsoMuonContainer, L2IsoMuonAuxContainer );
   CREATE_XAOD( MuonContainer, MuonAuxContainer );
   CREATE_XAOD( TauJetContainer, TauJetAuxContainer );
+  CREATE_XAOD( DiTauJetContainer, DiTauJetAuxContainer );
   CREATE_XAOD( TauTrackContainer, TauTrackAuxContainer );
   CREATE_XAOD( CaloClusterContainer, CaloClusterTrigAuxContainer ); // NOTE: Difference in interface and aux
   CREATE_XAOD( JetContainer, JetAuxContainer );

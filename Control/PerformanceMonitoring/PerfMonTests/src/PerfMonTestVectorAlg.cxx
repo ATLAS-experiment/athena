@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -16,42 +16,6 @@ using namespace::std;
 
 typedef vector<DHit> HitContainer;
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-VectorAlg::VectorAlg( const std::string& name, 
-		  ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm   ( name,    pSvcLocator ),
-  m_vectorSize(1024*1024), m_2bReserved(m_vectorSize), m_mapIt(false)
-{
-  declareProperty("VectorSize", m_vectorSize, "the size of the Hit container");
-  declareProperty("ToBeReserved", m_2bReserved, "the number of element to be reserved");
-  declareProperty("MapIt", m_mapIt, "add current hit to a map");
-}
-
-// Destructor
-///////////////
-VectorAlg::~VectorAlg()
-{ 
-  ATH_MSG_DEBUG("Calling destructor");
-}
-
-// Athena Algorithm's Hooks
-////////////////////////////
-StatusCode VectorAlg::initialize()
-{
-  ATH_MSG_INFO("Initializing ");
-  return StatusCode::SUCCESS;
-}
-
-StatusCode VectorAlg::finalize()
-{
-  ATH_MSG_INFO("Finalizing ");
-  return StatusCode::SUCCESS;
-}
 
 StatusCode VectorAlg::execute()
 {  

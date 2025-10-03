@@ -53,7 +53,7 @@ namespace DerivationFramework {
 
   class TrackStateOnSurfaceDecorator : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
     public: 
-      TrackStateOnSurfaceDecorator(const std::string& t, const std::string& n, const IInterface* p);
+      using base_class::base_class;
 
       StatusCode initialize();
       StatusCode finalize();
@@ -67,17 +67,15 @@ namespace DerivationFramework {
                                                                   const xAOD::TrackMeasurementValidationContainer* ) const;
 
       // --- Steering and configuration flags
-      bool    m_isSimulation;
-      
-      bool    m_storeHoles;
-      bool    m_storeOutliers;
-      bool    m_storeTRT;
-      bool    m_storeSCT;
-      bool    m_storePixel;
-      bool    m_addPulls;
-      bool    m_addSurfaceInfo;
-      bool    m_addPRD;
-      bool    m_addExtraEventInfo;
+      Gaudi::Property<bool> m_storeHoles{this, "StoreHoles", true};
+      Gaudi::Property<bool> m_storeOutliers{this, "StoreOutliers", true};
+      Gaudi::Property<bool> m_storeTRT{this, "StoreTRT", false};
+      Gaudi::Property<bool> m_storeSCT{this, "StoreSCT", true};
+      Gaudi::Property<bool> m_storePixel{this, "StorePixel", true};
+      Gaudi::Property<bool> m_addPulls{this, "AddPulls", true};
+      Gaudi::Property<bool> m_addSurfaceInfo{this, "AddSurfaceInfo", true};
+      Gaudi::Property<bool> m_addPRD{this, "AddPRD", true};
+      Gaudi::Property<bool> m_addExtraEventInfo{this, "AddExtraEventInfo", true};
 
       // --- Configuration keys
       SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
@@ -122,18 +120,23 @@ namespace DerivationFramework {
 
      
       // --- Services and tools
-      const AtlasDetectorID* m_idHelper;
-      const PixelID*         m_pixId; 
-      const SCT_ID*          m_sctId;
-      const TRT_ID*          m_trtId;
+      const AtlasDetectorID* m_idHelper = nullptr;
+      const PixelID*         m_pixId = nullptr;
+      const SCT_ID*          m_sctId = nullptr;
+      const TRT_ID*          m_trtId = nullptr;
 
-      ToolHandle<Trk::IUpdator>                 m_updator;
-      ToolHandle<Trk::IResidualPullCalculator>  m_residualPullCalculator;
-      ToolHandle<Trk::ITrackHoleSearchTool>     m_holeSearchTool;
-      ToolHandle<Trk::IExtrapolator>            m_extrapolator;
-      ToolHandle<ITRT_CalDbTool>                m_trtcaldbTool;
-	  
-      ToolHandle<ITRT_ToT_dEdx>    m_TRTdEdxTool;
+      ToolHandle<Trk::IUpdator> m_updator {this, "Updator", "Trk::KalmanUpdator"};
+      ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator
+	{this, "ResidualPullCalculator",
+	 "Trk::ResidualPullCalculator/ResidualPullCalculator"};
+      ToolHandle<Trk::ITrackHoleSearchTool> m_holeSearchTool
+	{this, "HoleSearch", "InDet::InDetTrackHoleSearchTool/InDetHoleSearchTool"};
+      ToolHandle<Trk::IExtrapolator> m_extrapolator
+	{this, "TrackExtrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
+      ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRT_CalDbTool", "TRT_CalDbTool"};
+      ToolHandle<ITRT_ToT_dEdx> m_TRTdEdxTool
+	{this, "TRT_ToT_dEdx", "InDet::TRT_ElectronPidTools/TRT_ToT_dEdx"};
+
       // --- Private other members
       std::vector<SG::WriteDecorHandleKey<xAOD::EventInfo> > m_trtPhaseDecorKey;
       enum ETRTFloatDecor {kTRTdEdxDecor,

@@ -62,43 +62,6 @@
 
 namespace DerivationFramework {
 
-  TrackStateOnSurfaceDecorator::TrackStateOnSurfaceDecorator(const std::string& t,
-      const std::string& n,
-      const IInterface* p) :
-    base_class(t, n, p),
-    m_idHelper(nullptr),
-    m_pixId(nullptr),
-    m_sctId(nullptr),
-    m_trtId(nullptr),
-    m_updator("Trk::KalmanUpdator"),
-    m_residualPullCalculator("Trk::ResidualPullCalculator/ResidualPullCalculator"),
-    m_holeSearchTool("InDet::InDetTrackHoleSearchTool/InDetHoleSearchTool"),
-    m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
-    m_trtcaldbTool("TRT_CalDbTool",this),
-    m_TRTdEdxTool("InDet::TRT_ElectronPidTools/TRT_ToT_dEdx")
-  {
-    // --- Steering and configuration flags
-    declareProperty("IsSimulation",           m_isSimulation=true);
-
-    declareProperty("StoreHoles",             m_storeHoles =true);
-    declareProperty("StoreOutliers",          m_storeOutliers = true);
-    declareProperty("StoreTRT",               m_storeTRT =false);
-    declareProperty("StoreSCT",               m_storeSCT = true);
-    declareProperty("StorePixel",             m_storePixel =true);
-    declareProperty("AddPulls",               m_addPulls =true);
-    declareProperty("AddSurfaceInfo",         m_addSurfaceInfo =true);
-    declareProperty("AddPRD",                 m_addPRD =true);
-    declareProperty("AddExtraEventInfo",      m_addExtraEventInfo=true);
-
-    // -- Tools
-    declareProperty("Updator",                m_updator);
-    declareProperty("ResidualPullCalculator", m_residualPullCalculator);
-    declareProperty("HoleSearch",             m_holeSearchTool);
-    declareProperty("TRT_CalDbTool",          m_trtcaldbTool);
-    declareProperty("TRT_ToT_dEdx",           m_TRTdEdxTool);
-    declareProperty("TrackExtrapolator",      m_extrapolator);
-  }
-
   StatusCode TrackStateOnSurfaceDecorator::initialize()
   {
     ATH_MSG_DEBUG("Initialize");

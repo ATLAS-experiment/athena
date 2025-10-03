@@ -5,7 +5,7 @@
  * @brief 
  * @date 2021-02-19
  * 
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  * 
  */
 
@@ -91,10 +91,6 @@ int getNTauDecayParticles(const xAOD::TruthParticle& xTruthTau, int iPdgId, bool
 bool testFileForEOFContainsCharacters(const std::string& sFileName);
 void createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& vPi0s);
 void correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& correctedPi0s, TLorentzVector& TauP4);
-/** return charged and neutral daughters of truth tau */
-void truthHadrons(const xAOD::TruthParticle* xTruthTau, std::vector<const xAOD::TruthParticle*>& vChargedHadrons, std::vector<const xAOD::TruthParticle*>& vNeutralHadrons);
-/** return charged and neutral daughters of hadronic truth matched taujet */
-void truthHadrons(const xAOD::TauJet* xTau, std::vector<const xAOD::TruthParticle*>& vChargedHadrons, std::vector<const xAOD::TruthParticle*>& vNeutralHadrons);
 /** return TauJet match type*/
 TruthMatchedParticleType getTruthParticleType(const xAOD::TauJet& xTau);
 /** return DiTauJet match type*/

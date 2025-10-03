@@ -6,8 +6,14 @@
 # art-include: 23.0/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
-
-# TODO update following ATLASRECTS-8054
+# art-architecture:  '#x86_64-intel'
+# art-output: myDAOD_L1CALO1.pool.root
+# art-output: AOD.pool.root
+# art-output: DAOD_IDTIDE.pool.root
+# art-output: myDESDM_ALLCELLS.pool.root
+# art-output: ESD.pool.root
+# art-output: myDESDM_MCP.pool.root
+# art-output: myDESDM_PHOJET.pool.root
 
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
 Reco_tf.py \
@@ -37,6 +43,16 @@ MY_ART_HEARTBEAT_PID=$!
 rc2=-9999
 if [ ${rc1} -eq 0 ]
 then
+
+  # Delete root files that do not have a meaningfull output
+  for f in `ls -l *.root | awk '{print $9}'`; do
+    rf=`rootls -l $f  | grep CollectionTree`
+    if [ ${#rf} -eq 0 ] ; then
+	echo $f does not contains CollectionTree, deleting it to only compare intersting reconstruction output
+        rm -f $f
+    fi
+  done
+
   ArtPackage=$1
   ArtJobName=$2
   art.py compare grid --entries 100 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --ignore-exit-code diff-pool

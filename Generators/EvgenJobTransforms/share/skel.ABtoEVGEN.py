@@ -365,8 +365,8 @@ StreamEVGEN.ItemList += ["EventInfo#*", "xAOD::EventInfo#EventInfo*", "xAOD::Eve
 StreamEVGEN.RequireAlgs += ["EvgenFilterSeq"]
 ## Used for pile-up (remove dynamic variables except flavour labels)
 if evgenConfig.saveJets:
-    StreamEVGEN.ItemList += ["xAOD::JetContainer_v1#*"]
-    StreamEVGEN.ItemList += ["xAOD::JetAuxContainer_v1#*.TruthLabelID.PartonTruthLabelID"]
+    StreamEVGEN.ItemList += ["xAOD::JetContainer#*"]
+    StreamEVGEN.ItemList += ["xAOD::JetAuxContainer#*Aux.TruthLabelID.PartonTruthLabelID"]
 if evgenConfig.savePileupTruthParticles:
    StreamEVGEN.ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles*"]
    StreamEVGEN.ItemList += ["xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux.*"]

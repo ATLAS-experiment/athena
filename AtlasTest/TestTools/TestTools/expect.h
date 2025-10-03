@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TestTools_expect_h
@@ -31,7 +31,7 @@ namespace Athena_test {
   template <typename T>
   class TestedValue {
   public:
-    TestedValue( T v, std::string&& f, int l)
+    TestedValue( const T & v, std::string&& f, int l)
       : m_value(v),
 	m_file(std::move(f)),
 	m_line(l) {}

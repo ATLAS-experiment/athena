@@ -203,20 +203,22 @@ bool TauCombinedTES::getTESCompatibility(const xAOD::TauJet& tau) const {
 
 int TauCombinedTES::getEtaIndex(float eta) const {
   // It would be better to retrieve eta bins from the calibration file, e.g. for upgrade studies!
-  if (std::abs(eta) < 0.3) {
+  float abseta = std::abs(eta);
+      
+  if (abseta < 0.3) {
     return 0;
   }
-  if (std::abs(eta) < 0.8) {
+  if (abseta < 0.8) {
     return 1;
   }
-  if (std::abs(eta) < 1.3) {
+  if (abseta < 1.3) {
     return 2;
   }
-  if (std::abs(eta) < 1.6) {
+  if (abseta < 1.6) {
     return 3;
   }
   // slightly extend the tau eta range, as |eta|<2.5 applies to the seed jet
-  if (std::abs(eta) < 2.6) {
+  if (abseta < 2.6) {
     return 4;
   }
 
@@ -410,9 +412,6 @@ double TauCombinedTES::getCombinedEt(double caloEt,
   double weightedEt = weight * caloCalEt + (1 - weight) * panTauCalEt;
   double compatibilitySigma = getCompatibilitySigma(caloSigma, panTauSigma, correlation);
 
-  // FIXME: weighteEt will be updated in case the difference of calo TES and PanTau is too large
-  variables.pt_weighted = weightedEt;
-
   // If the difference of calo TES and PanTau is too large, the combined result
   // may not be reliable
   // FIXME: A more consistent way would be calculating the NsigmaCompatibility use caloCalEt
@@ -428,6 +427,7 @@ double TauCombinedTES::getCombinedEt(double caloEt,
   variables.sigma_constituent = panTauSigma;
   variables.pt_tauRecCalibrated = caloCalEt;
   variables.pt_constituent = panTauCalEt;
+  variables.pt_weighted = weightedEt;
   variables.weight = weight;
   variables.sigma_compatibility = compatibilitySigma;
 

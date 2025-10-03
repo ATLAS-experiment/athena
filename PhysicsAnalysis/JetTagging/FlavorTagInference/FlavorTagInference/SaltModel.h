@@ -7,15 +7,13 @@
   handles the interaction with the ATLAS EDM.
 */
 
-#ifndef FLAVORTAGDISCRIMINANTS_SALTMODEL_H
-#define FLAVORTAGDISCRIMINANTS_SALTMODEL_H
+#ifndef FLAVORTAGINFERENCE_SALTMODEL_H
+#define FLAVORTAGINFERENCE_SALTMODEL_H
 
 #include <onnxruntime_cxx_api.h>
 
 #include "nlohmann/json.hpp"
-#include "lwtnn/parse_json.hh"
-
-#include "FlavorTagInference/SaltModelOutput.h"
+#include "FlavorTagInference/ISaltModel.h"
 
 #include <map> //also has std::pair
 #include <vector>
@@ -23,11 +21,6 @@
 #include <memory>
 
 namespace FlavorTagInference {
-
-  // the first element is the input data, the second is the shape
-  using Inputs = std::pair<std::vector<float>, std::vector<int64_t>>;
-
-  enum class SaltModelVersion{UNKNOWN, V0, V1, V2};
 
   NLOHMANN_JSON_SERIALIZE_ENUM( SaltModelVersion , {
     { SaltModelVersion::UNKNOWN, "" },
@@ -40,30 +33,20 @@ namespace FlavorTagInference {
   // Utility class that loads the onnx model from the given path
   // and runs inference based on the user given inputs
 
-  class SaltModel final{
-
+  class SaltModel final : public ISaltModel
+  {
     public:
-      using OutputConfig = std::vector<SaltModelOutput>;
-
       SaltModel(const std::string& path_to_onnx);
 
-      void initialize();
+      virtual InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const override;
 
-      struct InferenceOutput {
-        std::map<std::string, float> singleFloat;
-        std::map<std::string, std::vector<char>> vecChar;
-        std::map<std::string, std::vector<float>> vecFloat;
-      };
-
-      InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const;
-
-      const lwt::GraphConfig getLwtConfig() const;
-      const nlohmann::json& getMetadata() const;
-      const OutputConfig& getOutputConfig() const;
-      SaltModelVersion getSaltModelVersion() const;
-      const std::string& getModelName() const;
+      virtual const SaltModelGraphConfig::GraphConfig getGraphConfig() const override;
+      virtual const OutputConfig& getOutputConfig() const override;
+      virtual SaltModelVersion getSaltModelVersion() const override;
+      virtual const std::string& getModelName() const override;
 
     private:
+      const nlohmann::json& getMetadata() const;
       const nlohmann::json loadMetadata(const std::string& key) const;
       const std::string determineModelName() const;
 

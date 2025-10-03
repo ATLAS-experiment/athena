@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXsumETAlgo - Algorithm for Sum ET Algorithm in jFEX
@@ -11,14 +11,9 @@
 #include <vector>
 #include <stdio.h>
 #include <math.h>
-#include "L1CaloFEXSim/jFEXsumETAlgo.h"
+#include "jFEXsumETAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1{

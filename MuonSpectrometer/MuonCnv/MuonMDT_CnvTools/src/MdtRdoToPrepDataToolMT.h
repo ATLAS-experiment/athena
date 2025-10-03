@@ -39,7 +39,7 @@ namespace Muon {
 
     class MdtRdoToPrepDataToolMT : public extends<AthAlgTool, IMuonRdoToPrepDataTool> {
     public:
-        MdtRdoToPrepDataToolMT(const std::string&, const std::string&, const IInterface*);
+        using base_class::base_class;
 
         /** default destructor */
         virtual ~MdtRdoToPrepDataToolMT() = default;

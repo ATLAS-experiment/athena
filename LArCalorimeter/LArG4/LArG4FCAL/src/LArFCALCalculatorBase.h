@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArFCALCalculator
@@ -16,12 +16,14 @@
 //             Forward Calorimeter Construction in GEANT4
 //
 //-----------------------------------------------------------------------------
+#include "LArG4Code/LArG4BirksLaw.h"
 #include "LArG4Code/LArG4Identifier.h"
 #include "LArG4Code/LArCalculatorSvcImp.h"
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
 #include "LArHV/FCALHVManager.h"
 #include "globals.hh"
 #include <stdexcept>
+
 class LArG4BirksLaw;
 class FCALModule;
 
@@ -30,8 +32,9 @@ class LArFCALCalculatorBase : public LArCalculatorSvcImp
  public:
   // constructor
   LArFCALCalculatorBase(const std::string& name, ISvcLocator *pSvcLocator);
+  LArFCALCalculatorBase (const LArFCALCalculatorBase&) = delete;
+  LArFCALCalculatorBase operator= (const LArFCALCalculatorBase&) = delete;
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
 
   /////////////////////////////////////////////
 
@@ -49,20 +52,17 @@ class LArFCALCalculatorBase : public LArCalculatorSvcImp
 
 
  protected:
+  Gaudi::Property<bool>  m_doHV{this, "FCALHVEnable", false};
+  Gaudi::Property<G4int> m_FCalSampling{this, "FCALSampling", 0};
 
-  bool m_doHV;
-
-  FCAL_ChannelMap   *m_ChannelMap;
-  const FCALModule  *m_posModule; // for hv access here...
-  const FCALModule  *m_negModule; // for hv access here...
+  FCAL_ChannelMap   *m_ChannelMap{nullptr};
+  const FCALModule  *m_posModule{nullptr}; // for hv access here...
+  const FCALModule  *m_negModule{nullptr}; // for hv access here...
   // sampling
-  G4int   m_FCalSampling;
-  LArG4BirksLaw *m_birksLaw;
+
+  std::unique_ptr<LArG4BirksLaw> m_birksLaw{};
 
   FCALHVManager::FCALHVData m_hvdata;
-
-  LArFCALCalculatorBase (const LArFCALCalculatorBase&);
-  LArFCALCalculatorBase operator= (const LArFCALCalculatorBase&);
 };
 
 #endif //  LArFCALCalculatorBase_H

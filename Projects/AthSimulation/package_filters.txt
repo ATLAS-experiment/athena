@@ -70,13 +70,11 @@
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc
-+ Database/AthenaPOOL/AthenaPoolServices
 + Database/AthenaPOOL/AthenaPoolUtilities
 + Database/AthenaPOOL/EventSelectorAthenaPool
 + Database/AthenaPOOL/OutputStreamAthenaPool
 + Database/AthenaPOOL/PoolSvc
 + Database/AthenaPOOL/RootConversions
-+ Database/AthenaPOOL/RootFileTools
 + Database/AthenaPOOL/StlAthenaPoolCnv
 + Database/AthenaRoot/AthenaRootComps
 + Database/AthenaRoot/AthenaRootKernel
@@ -91,7 +89,6 @@
 + Database/IOVDbAthenaPool
 + Database/IOVDbDataModel
 + Database/IOVDbMetaDataTools
-+ Database/IOVDbPTCnv
 + Database/IOVDbSvc
 + Database/IOVDbTPCnv
 + Database/PersistentDataModel
@@ -99,6 +96,7 @@
 + Database/PersistentDataModelTPCnv
 + Database/RDBAccessSvc
 + Database/RegistrationServices
++ Database/SQLiteDBSvc
 + Database/TPTools
 + DetectorDescription/AGDD/AGDD2GeoSvc
 + DetectorDescription/AGDD/AGDDControl
@@ -134,7 +132,6 @@
 + Event/EventInfoMgt
 + Event/EventInfoUtils
 + Event/EventKernel
-+ Event/EventPTCnv
 + Event/EventPrimitives
 + Event/EventTPCnv
 + Event/PyDumper
@@ -177,6 +174,7 @@
 + HighGranularityTimingDetector/HGTD_DetDescr/HGTD_ReadoutGeometry
 + HighGranularityTimingDetector/HGTD_DetDescrCnv/HGTD_IdCnv
 + HighGranularityTimingDetector/HGTD_G4/HGTD_G4_SD
++ InnerDetector/InDetAlignment/InDetAlignConfig
 + InnerDetector/InDetConditions/BeamSpotConditions
 + InnerDetector/InDetConditions/BeamSpotConditionsData
 + InnerDetector/InDetConditions/InDetCondTools

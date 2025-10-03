@@ -24,6 +24,7 @@
 // ACTS
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "TrkExAlgs/PropResultRootWriterSvc.h"
 #include "Acts/EventData/TrackParameters.hpp"
 // STL
@@ -118,6 +119,7 @@ namespace Trk
       /** The ATLAS Extrapolator to be retrieved */
       ToolHandle<Trk::IExtrapolator> m_atlasExtrapolator {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
 
+      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
       DoubleProperty m_sigmaD0
 	{this, "StartPerigeeSigmaD0", 17.*Gaudi::Units::micrometer};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #define likely(x)       __builtin_expect((x),1)
@@ -20,9 +20,7 @@
 
 #include <CoolApplication/DatabaseSvcFactory.h>
 
-#include <boost/typeof/typeof.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <vector>
 #include <string>
@@ -37,8 +35,8 @@ using std::endl;
 using std::string;
 using std::vector;
 
-using boost::bind;
-using boost::placeholders::_1;
+using std::bind;
+using std::placeholders::_1;
 
 using cool::DatabaseSvcFactory;
 using cool::IDatabasePtr;
@@ -75,18 +73,11 @@ cool::IRecordSelection* make_fieldselection(
     MAKE_FS(Int64,     PyLong_AsLongLong)
     MAKE_FS(UInt63,    PyLong_AsUnsignedLongLong)
     
-#if PY_VERSION_HEX < 0x03000000
-    MAKE_FS(String255, PyString_AsString)
-    MAKE_FS(String4k,  PyString_AsString)
-    MAKE_FS(String64k, PyString_AsString)
-    MAKE_FS(String16M, PyString_AsString)
-#else
     MAKE_FS(String255, _PyUnicode_AsString)
     MAKE_FS(String4k,  _PyUnicode_AsString)
     MAKE_FS(String64k, _PyUnicode_AsString)
     MAKE_FS(String16M, _PyUnicode_AsString)
-#endif
-        
+
     //MAKE_FS(Blob16M,   PyString_AsString)
     //MAKE_FS(Blob64k,   PyString_AsString)
     throw (std::runtime_error("Unsupported cool type encountered in python conversion"));
@@ -99,7 +90,7 @@ vector<const cool::IRecordSelection*> make_selection_vector()
 }
 
 // A function taking an IObject and returning a PyObject*
-typedef boost::function<PyObject* (const IObject&)> payload_fetcher_t;
+typedef std::function<PyObject* (const IObject&)> payload_fetcher_t;
 
 // A function to signal that a conversion object could not be found
 PyObject *no_conversion_available(const IObject&) {return NULL;}
@@ -108,20 +99,12 @@ PyObject *no_conversion_available(const IObject&) {return NULL;}
 PyObject *qr_PyString_FromBlob(const coral::Blob& blob)
 {
     const char* data = reinterpret_cast<const char*>(blob.startingAddress());
-#if PY_VERSION_HEX < 0x03000000
-    return PyString_FromStringAndSize(data, blob.size());
-#else
     return PyBytes_FromStringAndSize(data, blob.size());
-#endif
 }
 
 PyObject *qr_PyString_FromStdString(const string& str)
 {
-#if PY_VERSION_HEX < 0x03000000
-    return PyString_FromStringAndSize(str.c_str(), str.size());
-#else
     return PyUnicode_FromStringAndSize(str.c_str(), str.size());
-#endif
 }
 
 PyObject *qr_PyUnicode_FromStdString(const string& str)
@@ -155,7 +138,7 @@ payload_fetcher_t create_payload_fetcher(const char* name,
     // a PyObject*, `converter`.
     #define MAKE_FETCHER(type, converter)                                      \
         if (type_name == #type)                                                \
-            return bind(payload_fetcher<cool::type, BOOST_TYPEOF(converter)>,  \
+            return bind(payload_fetcher<cool::type, decltype(converter)>,  \
                         _1, name, &converter);
     
     // See the python c-api reference for python conversion functions
@@ -269,11 +252,7 @@ PyObject* quick_retrieve(const IObjectIteratorPtr& objects,
             for (Py_ssize_t i = 0; i < count; i++)
             {
                 PyObject *py_name = PySequence_GetItem(to_fetch, i);
-#if PY_VERSION_HEX < 0x03000000
-                const char *name = PyString_AsString(py_name);
-#else
                 const char *name = _PyUnicode_AsString(py_name);
-#endif
                 const string type = (object.payload()
                                            .specification()[name]
                                            .storageType()
@@ -281,7 +260,8 @@ PyObject* quick_retrieve(const IObjectIteratorPtr& objects,
                 
                 payload_fetcher_t pf = create_payload_fetcher(name, type, 
                                                               as_unicode);
-                if (pf == no_conversion_available)
+                auto pff = pf.target<PyObject* (*)(const IObject&)>();
+                if ( pff && *pff == &no_conversion_available)
                     return NULL;
                 payload_fetchers.push_back(pf);
                 Py_DECREF(py_name);

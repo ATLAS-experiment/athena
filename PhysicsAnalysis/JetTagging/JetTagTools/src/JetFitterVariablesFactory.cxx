@@ -119,8 +119,8 @@ StatusCode JetFitterVariablesFactory::computeJetFitterVariables(const xAOD::Jet 
       
   //put all needed information inside :-)
   
-  //const double s_massks=497.648;
-  const double s_pion=139.57018;//hard coded pion mass ;-)
+  //const double s_massks=ParticleConstants::KZeroMassInMeV;
+  const double s_pion=ParticleConstants::chargedPionMassInMeV;
   
   double energyFromPrimary=0.;
   double energyFromSecondary=0.;
@@ -432,8 +432,8 @@ mass_uncorr =
         
     //put all needed information inside :-)
     
-    //const double s_massks=497.648;
-    const double s_pion=139.57018;//hard coded pion mass ;-)
+    //const double s_massks=ParticleConstants::KZeroMassInMeV;
+    const double s_pion=ParticleConstants::chargedPionMassInMeV;
     
     double energyFromPrimary=0.;
     double energyFromSecondary=0.;

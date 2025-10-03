@@ -57,7 +57,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
     ATH_CHECK(m_roadFilterTool.retrieve(EnableTool{m_filterRoads}));
     ATH_CHECK(m_roadFilterTool2.retrieve(EnableTool{m_filterRoads2}));
-    ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_doSpacepoints}));
+
+    ATH_CHECK(m_spacepointsTool.retrieve(EnableTool{m_doSpacepoints}));
 
     ATH_CHECK(m_trackFitterTool_1st.retrieve(EnableTool{m_doTracking}));
     ATH_CHECK(m_overlapRemovalTool_1st.retrieve());
@@ -68,7 +69,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
     // ROOT branches created for test vectors.
-    m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
+    if (m_outputRoadUnionTool) m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
 
     // Updated slicing engine test vectors will have three streams.
@@ -76,8 +77,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     m_slicedSecondPixelHeader = m_writeOutputTool->addInputBranch(m_sliceSecondPixelBranch.value(), true);
     m_slicedStripHeader = m_writeOutputTool->addInputBranch(m_sliceStripBranch.value(), true);
 
+    // We also need a pre- and post- SP copy of the SPs.
+    m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), true);
+
     // Connect the slicing tools accordingly. We probably no longer need to hook up the roadfinder here.
-    m_roadFinderTool->setupSlices(m_slicedHitHeader);
+    if (m_outputRoadUnionTool) m_roadFinderTool->setupSlices(m_slicedHitHeader);
     m_slicingEngineTool->setupSlices(m_slicedFirstPixelHeader, m_slicedSecondPixelHeader, m_slicedStripHeader);
 
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -85,14 +89,17 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     if (!m_monTool.empty())
         ATH_CHECK(m_monTool.retrieve());
 
+    ATH_CHECK( m_FPGASpacePointsKey.initialize() );
     ATH_CHECK( m_FPGAHitInRoadsKey.initialize() );
     ATH_CHECK( m_FPGAHitFilteredKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
     ATH_CHECK( m_FPGAHitKey.initialize() );
+    ATH_CHECK( m_FPGAHitKey_1st.initialize() );
     ATH_CHECK( m_FPGAHitKey_2nd.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
+    ATH_CHECK( m_FPGAEventInfoKey.initialize() );
 
     ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
@@ -124,10 +131,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Set up write handles.
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey_1st,ctx);
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
     SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
 
+    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
     ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
     ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
     ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
@@ -138,18 +147,42 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitsFiltered_1st (m_FPGAHitFilteredKey, ctx);
     ATH_CHECK( FPGAHitsFiltered_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
 
+    SG::WriteHandle<FPGATrackSimClusterCollection> FPGASpacePoints (m_FPGASpacePointsKey, ctx);
+    ATH_CHECK( FPGASpacePoints.record (std::make_unique<FPGATrackSimClusterCollection>()));
+
     // Query the event selection service to make sure this event passed cuts.
     if (!m_evtSel->getSelectedEvent()) {
-        return StatusCode::SUCCESS;
+
+      // Potentially write the output data, now it's empty and reset, but this keeps things synchronized over trees
+      if (m_writeOutputData)  {
+       std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
+       std::vector<FPGATrackSimTrack> tracks_1st;
+       auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
+       ATH_CHECK(writeOutputData(roads_1st, tracks_1st, dataFlowInfo.get()));
+      }      
+
+      return StatusCode::SUCCESS;
     }
     ATH_MSG_INFO("Event accepted by: " << m_evtSel->name());
 
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
 
+    // Read event info structure. all we need this for is to propagate to our event info structures.
+    SG::ReadHandle<FPGATrackSimEventInfo> FPGAEventInfo(m_FPGAEventInfoKey, ctx);
+    if (!FPGAEventInfo.isValid()) {
+        ATH_MSG_ERROR("Could not find FPGA Event Info with key " << FPGAEventInfo.key());
+        return StatusCode::FAILURE;
+    }
+    FPGATrackSimEventInfo eventInfo = *FPGAEventInfo.cptr();
+    m_slicedFirstPixelHeader->newEvent(eventInfo);
+    m_slicedSecondPixelHeader->newEvent(eventInfo);
+    m_slicedStripHeader->newEvent(eventInfo);
+    m_slicedStripHeaderPreSP->newEvent(eventInfo);
+
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
 
-    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_all, phits_1st, phits_2nd;
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_output, phits_all, phits_1st, phits_2nd;
     phits_1st.reserve(FPGAHits->size());
     phits_2nd.reserve(FPGAHits->size());
     ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
@@ -159,8 +192,34 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
     m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd);
+    // record 1st stage hits in SG
+    for (auto& hit : phits_1st) {
+        FPGAHits_1st->push_back(*hit);
+    }
+
+    if(m_writeOutputData) *m_slicedStripHeaderPreSP = *m_slicedStripHeader;
+
+    // The slicing engine puts strip hits into a logical event input header. That header now needs to go
+    // to the spacepoint tool if it's turned on. Those hits then get added to phits_1st or phits_2nd as appropriate.
+    if (m_doSpacepoints) {
+        m_spacepoints.clear();
+        if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: SP fornmation");
+        ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_slicedStripHeader, m_spacepoints));
+        if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: SP fornmation");
+        for (const FPGATrackSimCluster& cluster : m_spacepoints) FPGASpacePoints->push_back(cluster);
+    }
+
+    // Use a property to control whether the strips/SPs go to 1st or second stage.
+    for (const FPGATrackSimHit& hit : m_slicedStripHeader->towers().at(0).hits()) {
+        (m_secondStageStrips ? phits_2nd : phits_1st).emplace_back(&hit, [](const FPGATrackSimHit*){});
+    }
     for (auto& hit : phits_2nd) {
         FPGAHits_2nd->push_back(*hit);
+    }
+
+    // Add all hits including SPs to this for the HoughRootOutputTool
+    for (const FPGATrackSimHit& hit : *(FPGAHits_2nd.cptr())) {
+        phits_output.emplace_back(&hit, [](const FPGATrackSimHit*){});
     }
 
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
@@ -179,7 +238,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         ATH_MSG_ERROR("Could not find FPGA Offline Track Collection with key " << FPGAOfflineTracks.key());
         return StatusCode::FAILURE;
     }
-    
+
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: GetRoads");
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
@@ -226,6 +285,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (m_doNNTrack) {
             ATH_MSG_DEBUG("Performing NN tracking");
             ATH_CHECK(m_NNTrackTool->getTracks_1st(roads_1st, tracks_1st));
+            if (m_doGNNTrack) {
+                ATH_MSG_DEBUG("Performing track parameter estimation");
+                ATH_CHECK(m_NNTrackTool->setTrackParameters(tracks_1st,true,m_evtSel->getMin(), m_evtSel->getMax()));
+            }
         } else {
             ATH_MSG_DEBUG("Performing Linear tracking");
             if (m_passLowestChi2TrackOnly) { // Pass only the lowest chi2 track per road
@@ -235,7 +298,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
                     // Collect tracks for this road
                     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadVec = {road};
-                    ATH_CHECK(m_trackFitterTool_1st->getTracks(roadVec, tracksForCurrentRoad));
+                    ATH_CHECK(m_trackFitterTool_1st->getTracks(roadVec, tracksForCurrentRoad, m_evtSel->getMin(), m_evtSel->getMax()));
 
                     // Find the best track for this road
                     if (!tracksForCurrentRoad.empty()) {
@@ -266,7 +329,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                     Monitored::Group(m_monTool, mon_best_chi2_1st);
                 }
             } else { // Pass all tracks with chi2 < 1e15
-                ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
+	      ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st, m_evtSel->getMin(), m_evtSel->getMax()));
                 float bestchi2 = 1.e15;
                 for (const FPGATrackSimTrack& track : tracks_1st) {
                     float chi2 = track.getChi2ndof();
@@ -278,15 +341,44 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                 Monitored::Group(m_monTool, mon_best_chi2_1st);
             }
         }
-    } else { // No tracking; add dummy tracks for monitoring
-        ATH_MSG_DEBUG("No tracking. Adding dummy tracks...");
-        int ntrackDummy = 0;
+    } else { // No tracking; 
+      ATH_MSG_DEBUG("No tracking. Just running dummy road2track algorith");
+      if(m_doGNNPixelSeeding) { //For GNNPixelSeeding, convert the roads to a track in the simplest form
         for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads_1st) {
-            ntrackDummy += road->getNHitCombos();
+            std::vector<std::shared_ptr<const FPGATrackSimHit>> track_hits;
+            for (unsigned layer = 0; layer < road->getNLayers(); ++layer) {
+                track_hits.insert(track_hits.end(), road->getHits(layer).begin(), road->getHits(layer).end());
+            }
+
+            FPGATrackSimTrack track_cand;
+            track_cand.setNLayers(track_hits.size());
+            for (size_t ihit = 0; ihit < track_hits.size(); ++ihit) {
+                track_cand.setFPGATrackSimHit(ihit, *(track_hits[ihit]));
+            }
+            tracks_1st.push_back(track_cand); 
         }
-        tracks_1st.resize(ntrackDummy); // Just filled with dummy tracks for monitoring
+      }
+      else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
     }
 
+    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
+    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
+    //Loop over tracks and set the region for all of them, also optionally set track parameters to truth
+    for (FPGATrackSimTrack& track : tracks_1st) {
+        track.setRegion(m_region);
+	if (m_SetTruthParametersForTracks >= 0 && truthtracks.size() > 0) {
+	  if (m_SetTruthParametersForTracks != 0)
+	    track.setQOverPt(truthtracks.front().getQOverPt());
+	  else if	(m_SetTruthParametersForTracks != 1)
+	    track.setD0(truthtracks.front().getD0());
+	  else if (m_SetTruthParametersForTracks != 2)
+	    track.setPhi(truthtracks.front().getPhi());
+	  else if (m_SetTruthParametersForTracks != 3)
+	    track.setZ0(truthtracks.front().getZ0());
+	  else if (m_SetTruthParametersForTracks != 4)
+	    track.setEta(truthtracks.front().getEta());
+	}
+    }
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
         std::vector<FPGATrackSimHit> road_hits;
@@ -307,9 +399,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: OverlapRemoval");
     // Overlap removal
     if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
+
     unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks_1st) {
-        if (track.getChi2ndof() < m_trackScoreCut) {
+      if (track.getChi2ndof() < m_trackScoreCut.value()) {
             m_nTracksChi2Tot++;
             if (track.passedOR()) {
                 ntrackOLRChi2++;
@@ -330,8 +423,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_nTracksTot += tracks_1st.size();
 
     // Do some simple monitoring of efficiencies. okay, we need truth tracks here.
-    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
-    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
     if (truthtracks.size() > 0) {
         m_evt_truth++;
         auto passroad = Monitored::Scalar<bool>("eff_road",(roads_1st.size() > 0));
@@ -351,7 +442,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             m_nTracksFound++;
 	    if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();
             for (const auto& track : tracks_1st) {
-                if (track.getChi2ndof() < m_trackScoreCut) {
+	      if (track.getChi2ndof() < m_trackScoreCut.value()) {
 		  npasschi2++;
                     if (track.passedOR()) {
 		      npasschi2OLR++;
@@ -409,14 +500,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
             return StatusCode::FAILURE;
         }
-        // Concatenate 1st and 2nd stage hits vectors to access both in the OutputTool
-        phits_2nd.insert(phits_2nd.end(), std::make_move_iterator(phits_1st.begin()), std::make_move_iterator(phits_1st.end()));
+
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut, m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, offlineTracks, phits_output, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
     }
 
     // Reset data pointers
-    m_slicedHitHeader->reset();
+    if (m_outputRoadUnionTool) m_slicedHitHeader->reset();
     m_logicEventOutputHeader->reset();
 
     return StatusCode::SUCCESS;
@@ -431,29 +521,27 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vecto
                                                                 std::vector<FPGATrackSimTrack> const& tracks_1st,
                                                                 FPGATrackSimDataFlowInfo const* dataFlowInfo)
 {
-  m_logicEventOutputHeader->reset();
+    m_logicEventOutputHeader->reset();
 
-  ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size());
+    ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size());
 
-  if (!m_writeOutputData) return StatusCode::SUCCESS;
+    if (!m_writeOutputData) return StatusCode::SUCCESS;
     m_logicEventOutputHeader->reserveFPGATrackSimRoads_1st(roads_1st.size());
     m_logicEventOutputHeader->addFPGATrackSimRoads_1st(roads_1st);
-  if (m_doTracking) {
+
     m_logicEventOutputHeader->reserveFPGATrackSimTracks_1st(tracks_1st.size());
     m_logicEventOutputHeader->addFPGATrackSimTracks_1st(tracks_1st);
-  }
 
+    m_logicEventOutputHeader->setDataFlowInfo(*dataFlowInfo);
+    ATH_MSG_DEBUG(m_logicEventOutputHeader->getDataFlowInfo());
 
-  m_logicEventOutputHeader->setDataFlowInfo(*dataFlowInfo);
-  ATH_MSG_DEBUG(m_logicEventOutputHeader->getDataFlowInfo());
-
-  // It would be nice to rearrange this so both algorithms use one instance of this tool, I think.
-  // Which means that dataprep can't call writeData because that does Fill().
-  ATH_CHECK(m_writeOutputTool->writeData());
+    // It would be nice to rearrange this so both algorithms use one instance of this tool, I think.
+    // Which means that dataprep can't call writeData because that does Fill().
+    ATH_CHECK(m_writeOutputTool->writeData());
 
 
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
@@ -465,16 +553,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS");
     ATH_MSG_INFO("========================================================================================");
     ATH_MSG_INFO("Ran on events = " << m_evt);
-    ATH_MSG_INFO("Inclusive efficiency to find a road = " << m_nRoadsFound/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track = " << m_nTracksFound/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << m_nTracksChi2Found/m_evt_truth);
-    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << m_nTracksChi2OLRFound/m_evt_truth);
+    ATH_MSG_INFO("Inclusive efficiency to find a road = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nRoadsFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksFound/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2Found/(float)m_evt_truth)));
+    ATH_MSG_INFO("Inclusive efficiency to find a track passing chi2 and OLR = " << (m_evt_truth == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRFound/(float)m_evt_truth)));
 
 
-    ATH_MSG_INFO("Number of 1st stage roads/event = " << m_nRoadsTot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage track combinations/event = " << m_nTracksTot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage tracks passing chi2/event = " << m_nTracksChi2Tot/m_evt);
-    ATH_MSG_INFO("Number of 1st stage tracks passing chi2 and OLR/event = " << m_nTracksChi2OLRTot/m_evt);
+    ATH_MSG_INFO("Number of 1st stage roads/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nRoadsTot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage track combinations/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksTot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage tracks passing chi2/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2Tot/(float)m_evt)));
+    ATH_MSG_INFO("Number of 1st stage tracks passing chi2 and OLR/event = " << (m_evt == 0 ? "NAN" : std::to_string(m_nTracksChi2OLRTot/(float)m_evt)));
     ATH_MSG_INFO("========================================================================================");
 
     ATH_MSG_INFO("Max number of 1st stage roads in an event = " << m_maxNRoadsFound);

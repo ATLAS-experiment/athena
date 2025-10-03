@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -152,7 +152,7 @@ const ElementLink<RingerRingsContainer>& TrigEMCluster::ringsLink() const
 // stream output
 std::string str( const TrigEMCluster& d ) {
 	std::stringstream log;
-        log << str( (const TrigCaloCluster&) d ) ;
+        log << str( static_cast<const TrigCaloCluster&>( d )) ;
         log << "m_Energy : "  << d.energy()  << "; ";
         log << "m_Et : "      << d.et()      << "; ";
         log << "m_Eta : "     << d.eta()     << "; ";
@@ -181,7 +181,7 @@ MsgStream& operator<< ( MsgStream& m, const TrigEMCluster& d ) {
 // comparison
 bool operator== (const TrigEMCluster& a, const TrigEMCluster& b) {
 	double ep=0.001; // arbitrary , but seems to be reasonable
-	if ( (const TrigCaloCluster&) a !=  (const TrigCaloCluster&)b )
+	if ( static_cast<const TrigCaloCluster&>(a) !=  static_cast<const TrigCaloCluster&>(b) )
 		return false;
 	if ( std::fabs(a.eta()    - b.eta()    )>ep ) return false;
 	if ( std::fabs(a.phi()    - b.phi()    )>ep ) return false;

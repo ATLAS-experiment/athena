@@ -33,7 +33,7 @@
 /// muonSystem extension.
 class MuonInDetToMuonSystemExtensionAlg : public AthReentrantAlgorithm {
 public:
-    MuonInDetToMuonSystemExtensionAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     ~MuonInDetToMuonSystemExtensionAlg() = default;
 
     StatusCode initialize() override;
@@ -120,7 +120,7 @@ private:
 
     const Muon::MuonSectorMapping m_sector_mapping{};
 
-    /// Select the MuidCo candidates and put the associated id tracks on a black list
+    /// Select the MuidCo candidates and put the associated id tracks on a block list
     StatusCode selectCandidates(const EventContext& ctx, InDetCandidateCache& cache) const;
     /// Find the sectors in the MS with muon signals
     StatusCode findHitSectors(const EventContext& ctx, InDetCandidateCache& output_cache) const;

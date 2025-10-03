@@ -9,7 +9,8 @@
  
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DiTauRec/DiTauCandidateData.h"
- 
+#include "xAODTau/DiTauJetContainer.h" 
+
 /**
  * @brief The base class for all tau tools.
  * 
@@ -44,7 +45,13 @@ class DiTauToolBase: public AthAlgTool
   //-----------------------------------------------------------------
   virtual StatusCode execute( DiTauCandidateData *data,
 			      const EventContext& ctx) const;
- 
+
+  //-----------------------------------------------------------------
+  //! Execute - called for each Ditau jet
+  //-----------------------------------------------------------------
+  virtual StatusCode executeObj( xAOD::DiTauJet& xDiTau,
+		              const EventContext& ctx) const; 
+                             
   //-----------------------------------------------------------------
   //! Finalizer
   //-----------------------------------------------------------------

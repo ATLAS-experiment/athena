@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -13,7 +13,9 @@
 using namespace std;
 int main(void) {
   cout << "*** PageAccessControl_test starts ***" <<endl;
-  size_t pagesize = sysconf(_SC_PAGE_SIZE);
+  long pagesize_ret = sysconf(_SC_PAGE_SIZE);
+  if (pagesize_ret < 0 || pagesize_ret >= 1024*1024*1024) return 1;
+  size_t pagesize = pagesize_ret;
 #ifdef DEBUGIT
   const bool DUMPMAPS(true);
 #else

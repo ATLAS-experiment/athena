@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
   This is a virtual class to represent loader of any type of constituents.
   It defines the interface for loading constituents from a jet 
@@ -11,14 +11,12 @@
 
 // local includes
 #include "FlavorTagInference/FlipTagEnums.h"
-#include "FlavorTagInference/AssociationEnums.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
 #include "FlavorTagInference/StringUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
-#include "xAODBTagging/BTagging.h"
 
 // STL includes
 #include <string>
@@ -33,7 +31,8 @@ namespace FlavorTagInference {
         ABS_D0_SIGNIFICANCE_DESCENDING,
         D0_SIGNIFICANCE_DESCENDING,
         PT_DESCENDING,
-        ABS_D0_DESCENDING
+        ABS_D0_DESCENDING,
+        UNDEFINED
     };
     enum class ConstituentsSelection {
         ALL,
@@ -49,7 +48,8 @@ namespace FlavorTagInference {
         FLOW_ELEMENT,
         TRACK,
         HIT,
-        ELECTRON
+        ELECTRON,
+        UNKNOWN
     };
 
     struct InputVariableConfig {
@@ -61,8 +61,8 @@ namespace FlavorTagInference {
     struct ConstituentsInputConfig {
         std::string name;
         std::string output_name;
-        ConstituentsType type;
-        ConstituentsSortOrder order;
+        ConstituentsType type{ConstituentsType::UNKNOWN};
+        ConstituentsSortOrder order{ConstituentsSortOrder::UNDEFINED};
         ConstituentsSelection selection = ConstituentsSelection::ALL;
         std::vector<InputVariableConfig> inputs;
     };
@@ -81,9 +81,7 @@ namespace FlavorTagInference {
             {
             };
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
-                const xAOD::Jet& jet, 
-                [[maybe_unused]] const SG::AuxElement& btag) const = 0;
+            virtual std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& jet) const = 0;
             virtual const FTagDataDependencyNames& getDependencies() const = 0;
             virtual const std::set<std::string>& getUsedRemap() const = 0;
             virtual const std::string& getName() const = 0;

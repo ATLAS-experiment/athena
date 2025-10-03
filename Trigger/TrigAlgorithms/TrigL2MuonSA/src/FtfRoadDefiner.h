@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_FTFROADDEFINER_H
@@ -29,10 +29,12 @@ namespace TrigL2MuonSA {
     virtual StatusCode initialize() override;
 
   public:
-    StatusCode defineRoad( const xAOD::TrackParticle* idtrack,
-			   TrigL2MuonSA::MuonRoad&    muonRoad) const;
-    std::unique_ptr<const Trk::TrackParameters> extTrack( const bool CylinderFirst, const xAOD::TrackParticle* trk, const double R, const double Z, int& extFlag ) const;
-    std::unique_ptr<const Trk::TrackParameters> extTrack( const bool CylinderFirst, const Trk::TrackParameters& param, const double R, const double Z, int& extFlag ) const;
+    StatusCode defineRoad( const EventContext& ctx,
+                           const xAOD::TrackParticle* idtrack,
+                           TrigL2MuonSA::MuonRoad&    muonRoad) const;
+
+    std::unique_ptr<const Trk::TrackParameters> extTrack( const EventContext& ctx, const bool CylinderFirst, const xAOD::TrackParticle* trk, const double R, const double Z, int& extFlag ) const;
+    std::unique_ptr<const Trk::TrackParameters> extTrack( const EventContext& ctx, const bool CylinderFirst, const Trk::TrackParameters& param, const double R, const double Z, int& extFlag ) const;
 
   protected:
 

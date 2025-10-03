@@ -138,16 +138,20 @@ struct ATLAS_NOT_THREAD_SAFE BacktraceInit
       if (pos != std::string::npos) ++pos;
       path.erase (0, pos);
 
-      std::string p1 = dir + "/eu-addr2line";
-      if (access (p1.c_str(), F_OK) == 0) {
-        addr2LinePath = p1;
-        break;
+      {
+        std::string p1 = dir + "/eu-addr2line";
+        if (access (p1.c_str(), F_OK) == 0) {
+          addr2LinePath = std::move (p1);
+          break;
+        }
       }
 
-      std::string p2 = dir + "/addr2line";
-      if (access (p2.c_str(), F_OK) == 0) {
-        addr2LinePath = p2;
-        break;
+      {
+        std::string p2 = dir + "/addr2line";
+        if (access (p2.c_str(), F_OK) == 0) {
+          addr2LinePath = std::move (p2);
+          break;
+        }
       }
     }
   }
@@ -1047,6 +1051,7 @@ void DebugAids::disableCoreFiles()
 {
   struct rlimit core_limit;
   core_limit.rlim_cur = 0;
+  core_limit.rlim_max = 0;
   setrlimit(RLIMIT_CORE, &core_limit);
 }
 

@@ -48,6 +48,7 @@ namespace {
     };
 }
 namespace Muon {
+    using namespace MuonStationIndex;
 
     MooTrackFitter::MooTrackFitter(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
         declareInterface<MooTrackFitter>(this);
@@ -412,8 +413,8 @@ namespace Muon {
 
         if (usePreciseHits && fitterData.startPars) removeSegmentOutliers(fitterData);
 
-        MuonStationIndex::StIndex firstStation = MuonStationIndex::StUnknown;
-        MuonStationIndex::ChIndex currentChIndex = MuonStationIndex::ChUnknown;
+        StIndex firstStation = StIndex::StUnknown;
+        ChIndex currentChIndex = ChIndex::ChUnknown;
         bool currentMeasPhi = false;
         MuPatHitPtr previousHit{nullptr};
 
@@ -431,11 +432,11 @@ namespace Muon {
                 continue;
             }
 
-            MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
-            MuonStationIndex::StIndex stIndex = MuonStationIndex::toStationIndex(chIndex);
+            ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
+            StIndex stIndex = MuonStationIndex::toStationIndex(chIndex);
             fitterData.stations.insert(stIndex);
 
-            if (firstStation == MuonStationIndex::StUnknown) {
+            if (firstStation == StIndex::StUnknown) {
                 firstStation = stIndex;
             }
 
@@ -516,9 +517,9 @@ namespace Muon {
 
         // do we have enough constraints to fit the track
         if (nphiConstraints >= 2) {
-            if (fitterData.firstEntry->stations().size() == 1 && fitterData.firstEntry->containsStation(MuonStationIndex::EI) &&
-                (fitterData.firstEntry->phiHits().empty() || (fitterData.firstEntry->containsChamber(MuonStationIndex::CSS) ||
-                                                              fitterData.firstEntry->containsChamber(MuonStationIndex::CSL)))) {
+            if (fitterData.firstEntry->stations().size() == 1 && fitterData.firstEntry->containsStation(StIndex::EI) &&
+                (fitterData.firstEntry->phiHits().empty() || (fitterData.firstEntry->containsChamber(ChIndex::CSS) ||
+                                                              fitterData.firstEntry->containsChamber(ChIndex::CSL)))) {
                 ATH_MSG_VERBOSE( " Special treatment of the forward region: adding fake at ip ");
             }
             return true;
@@ -658,7 +659,7 @@ namespace Muon {
                 // there is one overlap, add the fake in the station without the overlap
                 ATH_MSG_VERBOSE(" Special treatment for tracks with one SL overlap and no phi hits ");
 
-                MuonStationIndex::StIndex overlapStation = MuonStationIndex::StUnknown;
+                StIndex overlapStation = StIndex::StUnknown;
                 SLStationMap::iterator it = fitterData.smallLargeChambersPerStation.begin();
                 SLStationMap::iterator it_end = fitterData.smallLargeChambersPerStation.end();
                 for (; it != it_end; ++it) {
@@ -667,7 +668,7 @@ namespace Muon {
                         break;
                     }
                 }
-                if (overlapStation == MuonStationIndex::StUnknown) {
+                if (overlapStation == StIndex::StUnknown) {
                     ATH_MSG_WARNING(" unexpected condition, unknown station type ");
                     return false;
                 }
@@ -976,8 +977,8 @@ namespace Muon {
     unsigned int MooTrackFitter::hasPhiConstrain(MooTrackFitter::FitterData& fitterData) const {
         // check distance between first and last hit to determine whether we need additional phi constrainst
 
-        if ((fitterData.firstEntry->containsChamber(MuonStationIndex::CSS) ||
-             fitterData.firstEntry->containsChamber(MuonStationIndex::CSL)) &&
+        if ((fitterData.firstEntry->containsChamber(ChIndex::CSS) ||
+             fitterData.firstEntry->containsChamber(ChIndex::CSL)) &&
             !fitterData.secondEntry->phiHits().empty())
             return 2;
 
@@ -1385,12 +1386,12 @@ namespace Muon {
 
         // in endcap, if first segment in EI use its direction
         const MuPatSegment* segInfo1 = dynamic_cast<const MuPatSegment*>(fitterData.firstEntry);
-        if (segInfo1 && segInfo1->containsStation(MuonStationIndex::EI) && !segInfo1->phiHits().empty()) {
+        if (segInfo1 && segInfo1->containsStation(StIndex::EI) && !segInfo1->phiHits().empty()) {
             return segInfo1->segment->globalDirection().phi();
         }
 
         // in endcap, if first segment in EM use its direction
-        if (segInfo1 && segInfo1->containsStation(MuonStationIndex::EM) && !segInfo1->phiHits().empty()) {
+        if (segInfo1 && segInfo1->containsStation(StIndex::EM) && !segInfo1->phiHits().empty()) {
             return segInfo1->segment->globalDirection().phi();
         }
 
@@ -1523,8 +1524,8 @@ namespace Muon {
         else {
             Trk::PerigeeSurface persurf(bestseg->segment->globalPosition());
             double phi = bestseg->segment->globalDirection().phi();
-            if ((fitterData.firstEntry->containsChamber(MuonStationIndex::CSS) ||
-                 fitterData.firstEntry->containsChamber(MuonStationIndex::CSL)) &&
+            if ((fitterData.firstEntry->containsChamber(ChIndex::CSS) ||
+                 fitterData.firstEntry->containsChamber(ChIndex::CSL)) &&
                 fitterData.secondEntry->hasSLOverlap())
                 phi = (fitterData.hitList.back()->parameters().position() - bestseg->segment->globalPosition()).phi();
 

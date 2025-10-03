@@ -22,12 +22,11 @@ pool::PersistencySvc::Container::~Container()
 {}
 
 pool::ITokenIterator*
-pool::PersistencySvc::Container::tokens( const std::string& selection )
+pool::PersistencySvc::Container::tokens()
 {
   return new pool::PersistencySvc::TokenIterator( m_fileDescriptor,
                                                   this->name(),
-                                                  m_storageExplorer,
-                                                  selection );
+                                                  m_storageExplorer);
 }
 
 const std::string&

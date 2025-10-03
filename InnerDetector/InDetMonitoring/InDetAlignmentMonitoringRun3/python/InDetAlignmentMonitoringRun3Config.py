@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 ####################################################
@@ -8,7 +8,7 @@
 #                                                  #
 ####################################################
 
-def InDetAlignmentMonitoringRun3Config(flags):
+def InDetAlignmentMonitoringRun3Config(flags, TrackCollectionName = "ExtendedTracks"):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
     
@@ -16,7 +16,7 @@ def InDetAlignmentMonitoringRun3Config(flags):
     helper = AthMonitorCfgHelper(flags, "InDetAlignmentMonitoringRun3")
         
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from InDetConfig.InDetTrackSelectionToolConfig import IDAlignMonTrackSelectionToolCfg
+    from InDetConfig.InDetTrackSelectionToolConfig import Align_InDetTrackSelectionToolCfg
     from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
     from AthenaConfiguration.Enums import BeamType
     
@@ -25,8 +25,8 @@ def InDetAlignmentMonitoringRun3Config(flags):
         ########### here begins InDetAlignMonGenericTracksAlg ###########
         kwargsIDAlignMonGenericTracksAlg = { 
             'vxPrimContainerName' : 'PrimaryVertices', #InDetKeys.xAODVertexContainer(),
-            'TrackName'  : 'ExtendedTracks',  #Until new config ready
-            'TrackName2' : 'ExtendedTracks',  #Until new config ready
+            'TrackName'  : TrackCollectionName,
+            'TrackName2' : TrackCollectionName,
         }
 
         from InDetAlignmentMonitoringRun3.IDAlignMonGenericTracksAlgCfg import IDAlignMonGenericTracksAlgCfg
@@ -35,7 +35,7 @@ def InDetAlignmentMonitoringRun3Config(flags):
         for k, v in kwargsIDAlignMonGenericTracksAlg.items():
             setattr(inDetAlignMonGenericTracksAlg, k, v)
 
-        inDetAlignMonGenericTracksAlg.TrackSelectionTool = acc.popToolsAndMerge(IDAlignMonTrackSelectionToolCfg(flags))
+        inDetAlignMonGenericTracksAlg.TrackSelectionTool = acc.popToolsAndMerge(Align_InDetTrackSelectionToolCfg(flags))
 
         IDAlignMonGenericTracksAlgCfg(helper, inDetAlignMonGenericTracksAlg, **kwargsIDAlignMonGenericTracksAlg)
         
@@ -45,8 +45,8 @@ def InDetAlignmentMonitoringRun3Config(flags):
         ########### here starts InDetAlignMonResidualsAlgs ###########
      
         kwargsIDAlignMonResidualsAlg = { 
-            'TrackName'  : 'ExtendedTracks',  #Until new config ready
-            'TrackName2' : 'ExtendedTracks',  #Until new config ready
+            'TrackName'  : TrackCollectionName,
+            'TrackName2' : TrackCollectionName,
         }
 
         from InDetAlignmentMonitoringRun3.IDAlignMonResidualsAlgCfg import IDAlignMonResidualsAlgCfg
@@ -56,7 +56,7 @@ def InDetAlignmentMonitoringRun3Config(flags):
         for k, v in kwargsIDAlignMonResidualsAlg.items():
             setattr(inDetAlignMonResidualsAlg, k, v)
 
-        inDetAlignMonResidualsAlg.TrackSelectionTool = acc.popToolsAndMerge(IDAlignMonTrackSelectionToolCfg(flags))
+        inDetAlignMonResidualsAlg.TrackSelectionTool = acc.popToolsAndMerge(Align_InDetTrackSelectionToolCfg(flags))
     
         IDAlignMonResidualsAlgCfg(helper, inDetAlignMonResidualsAlg, **kwargsIDAlignMonResidualsAlg)
         
@@ -66,24 +66,17 @@ def InDetAlignmentMonitoringRun3Config(flags):
         ########### here starts InDetAlignPVBiasesAlg ###########
 
         if flags.Beam.Type is not BeamType.Cosmics:
-            kwargsIDAlignMonPVBiasesAlg = { 
-                'vxContainerName' : 'PrimaryVertices', 
-            }
-        
             from InDetAlignmentMonitoringRun3.IDAlignMonPVBiasesAlgCfg import IDAlignMonPVBiasesAlgCfg
             inDetAlignMonPVBiasesAlg = helper.addAlgorithm(CompFactory.IDAlignMonPVBiasesAlg, 'IDAlignMonPVBiasesAlg',
                                                            addFilterTools = [FilledBunchFilterToolCfg(flags)])
-            
-            for k, v in kwargsIDAlignMonPVBiasesAlg.items():
-                setattr(inDetAlignMonPVBiasesAlg, k, v)
                 
             from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
             TrackToVertexIPEstimator = acc.popToolsAndMerge(
                 TrackToVertexIPEstimatorCfg(flags, name='TrackToVertexIPEstimator'))
 
             inDetAlignMonPVBiasesAlg.TrackToVertexIPEstimator = TrackToVertexIPEstimator
-
-            IDAlignMonPVBiasesAlgCfg(helper, inDetAlignMonPVBiasesAlg, **kwargsIDAlignMonPVBiasesAlg)
+            
+            IDAlignMonPVBiasesAlgCfg(helper, inDetAlignMonPVBiasesAlg)
         
         ########### here ends InDetAlignPVBiasesAlg ###########
 

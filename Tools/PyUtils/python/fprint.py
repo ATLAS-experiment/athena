@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 ##
 # @file PyUtils/python/fprint.py
 # @author sss
@@ -34,7 +34,6 @@
 # These functions try to produce py2-default foramtting.
 
 
-from __future__ import print_function
 import string
 
 

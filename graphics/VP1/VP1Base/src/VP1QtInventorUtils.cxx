@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,6 +16,7 @@
 #include "VP1Base/VP1QtInventorUtils.h"
 #include "VP1Base/VP1ExaminerViewer.h"
 #include "VP1Base/VP1Msg.h"
+#include "CxxUtils/byteswap.h"
 
 #include "Inventor/nodes/SoMaterial.h"
 #include <Inventor/nodes/SoPerspectiveCamera.h>
@@ -48,6 +49,12 @@
 #include <QtCoreVersion>
 
 #include <iostream>
+namespace{
+  unsigned char *
+  ucharAddress(auto * pv){
+    return reinterpret_cast<unsigned char *>(pv);
+  }
+}
 
 //____________________________________________________________________
 class VP1QtInventorUtils::Imp {
@@ -117,31 +124,11 @@ public:
 		int *rowSize;
 	} ImageRec;
 
-	static void ConvertShort(unsigned short *array, long length)
-	{
-		unsigned b1, b2;
-		unsigned char *ptr;
-
-		ptr = (unsigned char *)array;
-		while (length--) {
-			b1 = *ptr++;
-			b2 = *ptr++;
-			*array++ = (b1 << 8) | (b2);
-		}
-	}
-
 	static void ConvertLong(unsigned *array, long length)
 	{
-		unsigned b1, b2, b3, b4;
-		unsigned char *ptr;
-
-		ptr = (unsigned char *)array;
 		while (length--) {
-			b1 = *ptr++;
-			b2 = *ptr++;
-			b3 = *ptr++;
-			b4 = *ptr++;
-			*array++ = (b1 << 24) | (b2 << 16) | (b3 << 8) | (b4);
+			*array = CxxUtils::byteswap (*array);
+			++array;
 		}
 	}
 
@@ -182,15 +169,20 @@ public:
         } **/
 
 		if (swapFlag) {
-			ConvertShort(&image->imagic, 6);
+			image->imagic = CxxUtils::byteswap (image->imagic);
+			image->type   = CxxUtils::byteswap (image->type);
+			image->dim    = CxxUtils::byteswap (image->dim);
+			image->xsize  = CxxUtils::byteswap (image->zsize);
+			image->ysize  = CxxUtils::byteswap (image->ysize);
+			image->zsize  = CxxUtils::byteswap (image->zsize);
 		}
 
         
         const unsigned int colourBuffSize=image->xsize*256u;
-		    image->tmp = (unsigned char *)malloc(colourBuffSize);
-		    image->tmpR = (unsigned char *)malloc(colourBuffSize);
-		    image->tmpG = (unsigned char *)malloc(colourBuffSize);
-		    image->tmpB = (unsigned char *)malloc(colourBuffSize);
+		    image->tmp = ucharAddress(malloc(colourBuffSize));
+		    image->tmpR = ucharAddress(malloc(colourBuffSize));
+		    image->tmpG = ucharAddress(malloc(colourBuffSize));
+		    image->tmpB = ucharAddress(malloc(colourBuffSize));
 		    if (image->tmp == NULL || image->tmpR == NULL || image->tmpG == NULL ||
 			    	image->tmpB == NULL) {
 			    fprintf(stderr, "Out of memory!\n");
@@ -309,11 +301,11 @@ public:
 		const unsigned int imageHeight = image->ysize;
 		const unsigned int uintSize(sizeof(unsigned)), ucharSize(sizeof(unsigned char));
 		const unsigned int colourBufSize=imageWidth*ucharSize;
-		base = (unsigned *)malloc(imageWidth*imageHeight*uintSize);
-		rbuf = (unsigned char *)malloc(colourBufSize);
-		gbuf = (unsigned char *)malloc(colourBufSize);
-		bbuf = (unsigned char *)malloc(colourBufSize);
-		abuf = (unsigned char *)malloc(colourBufSize);
+		base = reinterpret_cast<unsigned *>(malloc(imageWidth*imageHeight*uintSize));
+		rbuf = ucharAddress(malloc(colourBufSize));
+		gbuf = ucharAddress(malloc(colourBufSize));
+		bbuf = ucharAddress(malloc(colourBufSize));
+		abuf = ucharAddress(malloc(colourBufSize));
 		if(!base || !rbuf || !gbuf || !bbuf) {
 			ImageClose(image);
 			if (base) free(base);
@@ -330,22 +322,22 @@ public:
 				ImageGetRow(image,gbuf,y,1);
 				ImageGetRow(image,bbuf,y,2);
 				ImageGetRow(image,abuf,y,3);
-				rgbatorgba(rbuf,gbuf,bbuf,abuf,(unsigned char *)lptr,image->xsize);
+				rgbatorgba(rbuf,gbuf,bbuf,abuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			} else if(image->zsize==3) {
 				ImageGetRow(image,rbuf,y,0);
 				ImageGetRow(image,gbuf,y,1);
 				ImageGetRow(image,bbuf,y,2);
-				rgbtorgba(rbuf,gbuf,bbuf,(unsigned char *)lptr,image->xsize);
+				rgbtorgba(rbuf,gbuf,bbuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			} else if(image->zsize==2) {
 				ImageGetRow(image,rbuf,y,0);
 				ImageGetRow(image,abuf,y,1);
-				latorgba(rbuf,abuf,(unsigned char *)lptr,image->xsize);
+				latorgba(rbuf,abuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			} else {
 				ImageGetRow(image,rbuf,y,0);
-				bwtorgba(rbuf,(unsigned char *)lptr,image->xsize);
+				bwtorgba(rbuf,ucharAddress(lptr),image->xsize);
 				lptr += image->xsize;
 			}
 		}

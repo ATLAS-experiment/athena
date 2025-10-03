@@ -27,13 +27,12 @@ namespace {
         ParticleOrigin ::PionDecay,      // 34
         ParticleOrigin ::NucReact,       // 41
         ParticleOrigin ::PiZero,         // 42
-
-    };
+  };
 
 }  // namespace
 
 namespace Muon {
-
+    using namespace MuonStationIndex;
     // Initialize method:
     StatusCode MuonTruthSegmentCreationAlg::initialize() {
         ATH_CHECK(m_muonTruth.initialize());
@@ -59,16 +58,16 @@ namespace Muon {
     // Execute method:
     StatusCode MuonTruthSegmentCreationAlg::execute(const EventContext& ctx) const {
 
-        SG::ReadHandle<xAOD::TruthParticleContainer> muonTruthContainer(m_muonTruth, ctx);
-        ATH_CHECK(muonTruthContainer.isPresent());
+        const xAOD::TruthParticleContainer* muonTruthContainer{nullptr};
+        ATH_CHECK(SG::get(muonTruthContainer, m_muonTruth, ctx));
 
         SG::ReadDecorHandle<xAOD::TruthParticleContainer, int> truthOrigin(m_truthOriginKey, ctx);
         ATH_CHECK(truthOrigin.isPresent());
 
         // create output container
         SG::WriteHandle segmentContainer(m_muonTruthSegmentContainerName, ctx);
-        ATH_CHECK(
-            segmentContainer.record(std::make_unique<xAOD::MuonSegmentContainer>(), std::make_unique<xAOD::MuonSegmentAuxContainer>()));
+        ATH_CHECK(segmentContainer.record(std::make_unique<xAOD::MuonSegmentContainer>(), 
+                                          std::make_unique<xAOD::MuonSegmentAuxContainer>()));
         ATH_MSG_DEBUG("Recorded MuonSegmentContainer with key: " << segmentContainer.name());
         
         size_t itr = 0;
@@ -95,28 +94,22 @@ namespace Muon {
     }
 
     StatusCode MuonTruthSegmentCreationAlg::fillChamberIdMap(const EventContext& ctx,
-                                                       const xAOD::TruthParticle& truthParticle, 
-                                                       ChamberIdMap& ids) const{
+                                                             const xAOD::TruthParticle& truthParticle, 
+                                                             ChamberIdMap& ids) const{
 
         for (SG::ReadDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>& hitCollection : m_truthHitsKeyArray.makeHandles(ctx)){
-
-            ATH_CHECK(hitCollection.isPresent());
             for (const unsigned long long& hit_compID : hitCollection(truthParticle)){
-
                 const Identifier id{hit_compID};
-                const bool isTgc = m_idHelperSvc->isTgc(id);
-                const Muon::MuonStationIndex::ChIndex chIndex = !isTgc ? m_idHelperSvc->chamberIndex(id) : Muon::MuonStationIndex::ChUnknown;
-                if (isTgc) {  // TGCS should be added to both EIL and EIS
-                    Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
-                    if (index == Muon::MuonStationIndex::T4) {
-                        ids[Muon::MuonStationIndex::EIS].push_back(id);
-                        ids[Muon::MuonStationIndex::EIL].push_back(id);
+                if (m_idHelperSvc->isTgc(id)) {  // TGCS should be added to both EIL and EIS
+                    if (m_idHelperSvc->phiIndex(id) == PhiIndex::T4) {
+                        ids[ChIndex::EIS].push_back(id);
+                        ids[ChIndex::EIL].push_back(id);
                     } else {
-                        ids[Muon::MuonStationIndex::EMS].push_back(id);
-                        ids[Muon::MuonStationIndex::EML].push_back(id);
+                        ids[ChIndex::EMS].push_back(id);
+                        ids[ChIndex::EML].push_back(id);
                     }
                 } else {
-                    ids[chIndex].push_back(id);
+                    ids[m_idHelperSvc->chamberIndex(id) ].push_back(id);
                 }
             }
         }
@@ -128,41 +121,34 @@ namespace Muon {
                                                            const ChamberIdMap& ids,
                                                            xAOD::MuonSegmentContainer& segmentContainer) const {
 
-        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_detMgrKey, ctx};
-
-        std::vector<SG::ReadHandle<MuonSimDataCollection> > sdoCollections(6);
+        const MuonGM::MuonDetectorManager* detMgr{nullptr};
+        ATH_CHECK(SG::get(detMgr, m_detMgrKey, ctx));
+        
+        constexpr unsigned techMax = toInt(TechnologyIndex::TechnologyIndexMax);
+        std::array<const MuonSimDataCollection*, techMax> sdoCollections{};
+        bool useSDO = !m_CSC_SDO_TruthNames.empty();
         for (const SG::ReadHandleKey<MuonSimDataCollection>& k : m_SDO_TruthNames) {
-            SG::ReadHandle col(k, ctx);
-            ATH_CHECK(col.isPresent());
-            
-            if (col->empty()) {
+            const MuonSimDataCollection* coll{nullptr};
+            ATH_CHECK(SG::get(coll, k, ctx));
+            if (coll->empty()) {
                 continue;
             }
-            Identifier id = col->begin()->first;
-            int index = m_idHelperSvc->technologyIndex(id);
-            if (index >= (int)sdoCollections.size()) {
-                ATH_MSG_WARNING("SDO collection index out of range " << index << "  " << m_idHelperSvc->toStringChamber(id));
-            } else {
-                sdoCollections[index] = std::move(col);
-            }
-
+            Identifier id = coll->begin()->first;
+            sdoCollections[toInt(m_idHelperSvc->technologyIndex(id))] = coll;
+            useSDO = true;
         }
-
-        bool useSDO = (!sdoCollections.empty() || !m_CSC_SDO_TruthNames.empty());
-        ATH_MSG_DEBUG(" Creating Truth segments ");
-
         // loop over chamber layers
-        for (const auto& lay : ids) {
+        for (const auto& [chIdx, assocIds] : ids) {
             // skip empty layers
             Amg::Vector3D firstPos{Amg::Vector3D::Zero()}, secondPos{Amg::Vector3D::Zero()};
             bool firstPosSet{false}, secondPosSet{false};
-            Identifier chId;
+            Identifier chId{};
             int index = -1;
             uint8_t nprecLayers{0}, nphiLayers{0}, ntrigEtaLayers{0};
-            std::set<int> phiLayers, etaLayers, precLayers;
-            ATH_MSG_DEBUG(" new chamber layer " << Muon::MuonStationIndex::chName(lay.first) << " hits " << ids.size());
+            std::unordered_set<int> phiLayers{}, etaLayers{}, precLayers{};
+            ATH_MSG_DEBUG(" new chamber layer " << Muon::MuonStationIndex::chName(chIdx) << " hits " << assocIds.size());
             // loop over hits
-            for (const auto& id : lay.second) {
+            for (const auto& id : assocIds) {
                 ATH_MSG_VERBOSE(" hit " << m_idHelperSvc->toString(id));
                 bool measPhi = m_idHelperSvc->measuresPhi(id);
                 bool isCsc = m_idHelperSvc->isCsc(id);
@@ -192,10 +178,10 @@ namespace Muon {
                 Amg::Vector3D gpos{Amg::Vector3D::Zero()};
                 if (!isCsc) {
                     bool ok = false;
-                    int index = m_idHelperSvc->technologyIndex(id);
-                    if (index < (int)sdoCollections.size() && !sdoCollections[index]->empty()) {
-                        auto pos = sdoCollections[index]->find(id);
-                        if (pos != sdoCollections[index]->end()) {
+                    TechnologyIndex techIdx = m_idHelperSvc->technologyIndex(id);
+                    if (sdoCollections[toInt(techIdx)]) {
+                        auto pos = sdoCollections[toInt(techIdx)]->find(id);
+                        if (pos != sdoCollections[toInt(techIdx)]->end()) {
                             gpos = pos->second.globalPosition();
                             if (gpos.perp() > 0.1) ok = true;  // sanity check
                         }
@@ -257,7 +243,7 @@ namespace Muon {
                 nprecLayers = precLayers.size();
                 ATH_MSG_DEBUG(" total counts: precision " << static_cast<int>(nprecLayers) << " phi layers " << static_cast<int>(nphiLayers)
                               << " eta trig layers " << static_cast<int>(ntrigEtaLayers)
-                              << " associated reco muon " << index << " barcode " << HepMC::barcode(*truthLink) // FIXME barcode-based
+                              << " associated reco muon " << index << " unique ID " << HepMC::uniqueID(*truthLink)
                               << " truthLink " << truthLink);
                 xAOD::MuonSegment* segment =  segmentContainer.push_back(std::make_unique<xAOD::MuonSegment>());
                

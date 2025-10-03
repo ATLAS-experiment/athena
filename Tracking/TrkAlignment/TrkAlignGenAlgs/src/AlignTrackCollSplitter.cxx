@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackCollection.h"
@@ -12,14 +12,8 @@ namespace Trk {
 //___________________________________________________________________________
 AlignTrackCollSplitter::AlignTrackCollSplitter(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_nevents(0)
-  , m_ntracks(0)
   , m_trackTypeCounter(AlignTrack::NTrackTypes+1,0)
-  , m_nRetrievalErrors(0)
 {
-  declareProperty("InputTrkCol",        m_inputCol           = "AlignTracks");
-  declareProperty("OutputColPrefix",    m_outColPrefix       = "AlignTracks");
-  declareProperty("MaxRetrievalErrors", m_maxRetrievalErrors = -1);
 }
 
 //___________________________________________________________________________

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -281,7 +281,7 @@ StatusCode GetLCClassification::execute()
     }
   }
 
-  if ( eCalibTot > 0 ) {
+  if ( eCalibTot > 0 && nClusECalibGt0 > 0) {
     const double inv_eCalibTot = 1. / eCalibTot;
     const double inv_nClusECalibGt0 = 1. / nClusECalibGt0;
     for (const xAOD::CaloCluster * pClus : *cc) {

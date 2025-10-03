@@ -20,10 +20,8 @@ ApplicationMgr Ready
 test1
 ClassIDSvc           INFO  getRegistryEntries: read 902 CLIDRegistry entries for module ALL
 ServiceManager      FATAL No Service factory for BazSvc available.
-VarHandleKey.Se...  ERROR ServiceLocatorHelper::service: can not locate service BazSvc
                     ERROR FILE:LINE (FUNC): code FAILURE: Cannot locate store: BazSvc
 ServiceManager      FATAL No Service factory for BazSvc available.
-VarHandleKey.Se...  ERROR ServiceLocatorHelper::service: can not locate service BazSvc
                     ERROR FILE:LINE (FUNC): code FAILURE: Cannot locate store: BazSvc
 test2
 test3
@@ -33,8 +31,6 @@ VarHandle(FooSv...WARNING FILE:LINE (FUNC): could not get proxy for key foox
 VarHandle(FooSv...WARNING FILE:LINE (FUNC): could not get proxy for key foox
 test4
 ServiceManager      FATAL No Service factory for BazSvc available.
-VarHandleKey.Se...  ERROR ServiceLocatorHelper::service: can not locate service BazSvc
                     ERROR FILE:LINE (FUNC): code FAILURE: Cannot locate store: BazSvc
 ServiceManager      FATAL No Service factory for BazSvc available.
-VarHandleKey.Se...  ERROR ServiceLocatorHelper::service: can not locate service BazSvc
                     ERROR FILE:LINE (FUNC): code FAILURE: Cannot locate store: BazSvc

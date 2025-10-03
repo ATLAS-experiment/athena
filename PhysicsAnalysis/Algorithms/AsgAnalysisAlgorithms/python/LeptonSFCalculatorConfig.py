@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class LeptonSFCalculatorBlock(ConfigBlock):
-    """ConfigBlock for the common electron-muon-photon SF calculator"""
+    """ConfigBlock for the common electron-muon-photon-tau SF calculator"""
     """--> combine all the per-object SFs into a single per-event SF"""
 
     def __init__(self):
@@ -13,7 +13,7 @@ class LeptonSFCalculatorBlock(ConfigBlock):
         self.addOption('electrons', None, type=str,
                        info='the input electron container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('electronSFs', None, type=list,
-                       info='list of decorated electron SFs to use in the computation. If not set, will use reconstruction x ID x isolation.')
+                       info='list of decorated electron SFs to use in the computation. If not set, will use reconstruction x ID x isolation, also ECIDS (charge ID) if available.')
         self.addOption('muons', None, type=str,
                        info='the input muon container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('muonSFs', None, type=list,
@@ -22,14 +22,26 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                        info='the input photon container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('photonSFs', None, type=list,
                        info='list of decorated photon SFs to use in the computation. If not set, will use ID x isolation.')
+        self.addOption('taus', None, type=str,
+                       info='the input tau container, with a possible selection, in the format `container` or `container.selection`.')
+        self.addOption('tauSFs', None, type=list,
+                       info='list of decorated tau SFs to use in the computation. If not set, will use reconstruction x ID x eVeto.')
         self.addOption('lepton_postfix', None, type=str,
                        info='the name of the common lepton SF, e.g. `tight`.')
+        self.addOption('includeElectronChargeMisID', False, type=str,
+                       info='whether to include the electron charge mis-ID SFs in the computation. The user is responsible for determining whether these are available.')
+        self.addOption('includeMuonBadVeto', False, type=str,
+                       info='whether to include the muon bad veto SFs in the computation. The user is responsible for determining whether these are available.')
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.lepton_postfix
 
     def makeAlgs(self, config):
         if config.dataType() is DataType.Data: return
 
         alg = config.createAlgorithm('CP::LeptonSFCalculatorAlg',
-                                     f'leptonSFCalculator_{self.lepton_postfix}')
+                                     'leptonSFCalculator')
 
         if self.electrons:
             electrons, electronSelection = config.readNameAndSelection(self.electrons)
@@ -42,6 +54,10 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                                     f'el_id_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.electronSelection:
                     alg.electronSFs += [ f'el_isol_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
+                if 'chargeID' in  alg.electronSelection:
+                    alg.electronSFs += [ f'el_ecids_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
+                if self.includeElectronChargeMisID:
+                    alg.electronSFs += [ f'el_charge_misid_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
 
         if self.muons:
             muons, muonSelection         = config.readNameAndSelection(self.muons)
@@ -50,10 +66,13 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.muonSFs:
                 alg.muonSFs = self.muonSFs
             else:
-                alg.muonSFs = [ f'muon_reco_effSF_{self.muons.split(".")[1]}_%SYS%',
-                                f'muon_TTVA_effSF_{self.muons.split(".")[1]}_%SYS%' ]
+                alg.muonSFs = [ f'muon_reco_effSF_{self.muons.split(".")[1]}_%SYS%']
+                if 'trackSelection' in alg.muonSelection:
+                    alg.muonSFs += [ f'muon_TTVA_effSF_{self.muons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.muonSelection:
                     alg.muonSFs += [ f'muon_isol_effSF_{self.muons.split(".")[1]}_%SYS%' ]
+                if self.includeMuonBadVeto:
+                    alg.muonSFs += [ f'muon_BadMuonVeto_effSF_{self.muons.split(".")[1]}_%SYS%' ]
 
         if self.photons:
             photons, photonSelection     = config.readNameAndSelection(self.photons)
@@ -65,6 +84,19 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                 alg.photonSFs = [ f'ph_id_effSF_{self.photons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.photonSelection:
                     alg.photonSFs += [ f'ph_isol_effSF_{self.photons.split(".")[1]}_%SYS%' ]
+
+        if self.taus:
+            taus, tauSelection           = config.readNameAndSelection(self.taus)
+            alg.taus                     = taus
+            alg.tauSelection             = tauSelection
+            if self.tauSFs:
+                alg.tauSFs = self.tauSFs
+            else:
+                alg.tauSFs = [ f'tau_Reco_effSF_{self.taus.split(".")[1]}_%SYS%',
+                               f'tau_ID_effSF_{self.taus.split(".")[1]}_%SYS%']
+                if 'eVeto' in alg.tauSelection:
+                    alg.tauSFs += [ f'tau_EvetoFakeTau_effSF_{self.taus.split(".")[1]}_%SYS%',
+                                    f'tau_EvetoTrueTau_effSF_{self.taus.split(".")[1]}_%SYS%']
 
         alg.event_leptonSF = f'leptonSF_{self.lepton_postfix}_%SYS%'
 

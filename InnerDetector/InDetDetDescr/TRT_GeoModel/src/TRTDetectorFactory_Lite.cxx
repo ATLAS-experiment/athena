@@ -1,25 +1,24 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "TRTDetectorFactory_Lite.h"
 #include "TRT_DetDescrDB_ParameterInterface.h"
+
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelDescriptor.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapDescriptor.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
+#include "TRT_ConditionsData/StrawStatus.h"
 #include "InDetReadoutGeometry/Version.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
-#include "IdDictDetDescr/IdDictManager.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "GeoModelRead/ReadGeoModel.h"
 #include "ArrayFunction.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoCountVolAndSTAction.h"
 #include "GeoModelKernel/GeoAccessVolAndSTAction.h"
@@ -30,17 +29,12 @@
 #include "GeoGenericFunctions/Variable.h"
 #include "GeoGenericFunctions/Sin.h"
 #include "GeoGenericFunctions/Cos.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "DetDescrConditions/AlignableTransformContainer.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
-
 
 #include <vector>
-#include <sstream>
 #include <cmath>
 
 //TK: get rid of these and use GeoGenfun:: and GeoXF:: instead
@@ -52,19 +46,17 @@ using namespace GeoXF;
 //
 TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqliteReader, 
 						 InDetDD::AthenaComps * athenaComps,
-						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon. Will be used in later revisions
+						 std::unique_ptr<const TRTStrawStatusAccessor> statusAccessor,
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
-						 int overridedigversion,
 						 bool alignable,
 						 bool useDynamicAlignmentFolders)
   : InDetDD::DetectorFactoryBase(athenaComps), 
     m_sqliteReader (sqliteReader),
+    m_statusAccessor(std::move(statusAccessor)),
     m_useOldActiveGasMixture(useOldActiveGasMixture),
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
-    m_overridedigversion(overridedigversion),
     m_alignable(alignable),
-    m_sumTool(sumTool),
     m_useDynamicAlignFolders(useDynamicAlignmentFolders)
 { 
 }
@@ -95,7 +87,6 @@ const InDetDD::TRT_DetectorManager * TRTDetectorFactory_Lite::getDetectorManager
 //
 void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 {
-
   // Here we build materials by hand.  This awaits updates to GeoModelIO which would allow to retreive materials from
   // the database. At that point we can remove the manual creation of materials.
   
@@ -191,12 +182,6 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
     T.matrix()=M;
     shellPosVec.push_back(T);
   }
-
-  //---------------------- Check if the folder TRT/Cond/StatusHT is in place ------------------------//
-  m_strawsvcavailable =
-    detStore()->contains<TRTCond::StrawStatusMultChanContainer>("/TRT/Cond/StatusHT")
-    &&
-    m_sumTool->getStrawStatusHTContainer() != nullptr;
 
   //---------------------- Initialize ID Helper ------------------------------------//
   const TRT_ID *idHelper = nullptr;
@@ -325,18 +310,6 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 
   //Uncomment for testing:
   //  m_data->ShowValues();
-
-  //---------- Digitization Version Info for dig. and recon r-t -----------//
-  if (m_overridedigversion < 0 ) {
-    m_detectorManager->setDigitizationVersion(m_data->digversion,m_data->digversionname);
-  } else {
-    m_detectorManager->setDigitizationVersion(m_overridedigversion,"CUSTOMOVERRIDDEN");
-    ATH_MSG_INFO( "Digversion overridden via joboptions from " 
-		  << m_data->digversion << " ('" << m_data->digversionname << "') to " 
-		  << m_detectorManager->digitizationVersion()<< " ('" 
-		  << m_detectorManager->digitizationVersionName()<<"')" );
-  }
-
 
   //----------------------Initialize the numerology------------------------//
 
@@ -592,7 +565,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 
 	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
 	int strawStatusHT = TRTCond::StrawStatus::Good;
-	if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+	if (m_statusAccessor) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 	refreshGasBarrel(strawStatusHT,pShell);
 	
 	//-------------------------------------------------------------------//
@@ -828,7 +801,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		if (m_statusAccessor) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 		
 		
 		childPlane = mapFPV["TRTWheelA-StrawPlane-"
@@ -957,7 +930,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
+		if (m_statusAccessor) strawStatusHT = m_statusAccessor->status(TRT_Identifier);
 		
 		childPlane = mapFPV["TRTWheelB-StrawPlane-"
 				    +std::to_string(iiSide)+"-"
@@ -1204,7 +1177,7 @@ void  TRTDetectorFactory_Lite::refreshGasEndcap(int strawStatusHT, GeoVPhysVol *
   
   const GeoMaterial *material = m_xenonGas.get();
 
-  if (m_strawsvcavailable && (strawStatusHT == TRTCond::StrawStatus::Dead ||
+  if (m_statusAccessor && (strawStatusHT == TRTCond::StrawStatus::Dead ||
 			      strawStatusHT == TRTCond::StrawStatus::Argon))
     material= m_argonGas.get();
 
@@ -1224,7 +1197,7 @@ void  TRTDetectorFactory_Lite::refreshGasBarrel(int strawStatusHT, GeoVPhysVol *
 
   const GeoMaterial *material = m_xenonGas.get();
 
-  if (m_strawsvcavailable && (strawStatusHT == TRTCond::StrawStatus::Dead ||
+  if (m_statusAccessor && (strawStatusHT == TRTCond::StrawStatus::Dead ||
 			      strawStatusHT == TRTCond::StrawStatus::Argon))
     material= m_argonGas.get();
 

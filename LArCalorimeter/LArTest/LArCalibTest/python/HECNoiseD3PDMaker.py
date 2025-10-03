@@ -7,7 +7,6 @@
 #
 # this python alg creates a D3PD and fills it
 # 
-from __future__ import print_function
 import AthenaPython.PyAthena as PyAthena
 import ROOT 
 from array import array

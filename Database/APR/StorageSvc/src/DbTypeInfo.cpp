@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-
-// $Id: DbTypeInfo.cpp 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbTypeInfo implementation
 //--------------------------------------------------------------------
 //
-//  Package    : StorageSvc (The POOL project)
+//  Package    : APR/StorageSvc
 //
 //  Description: Type information for persistent objects
 //
@@ -16,21 +14,14 @@
 //====================================================================
 
 // Framework include files
-#include "StorageSvc/DbToken.h"
-#include "StorageSvc/DbArray.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbTransform.h"
-#include "StorageSvc/DbString.h"
 
-// STL include files
-#include <stdexcept>
-#include <cstring>
+#include "PersistentDataModel/Token.h"
+
 #include <cstdio>
-#include <vector>
-#include <thread>
-#include <mutex>
 
 #include "cxxabi.h"
 
@@ -105,10 +96,10 @@ static const std::string __typeinfoName( const std::type_info& tinfo) {
     }
   }
   else  {
-    char buff[16*1024];
-    size_t len = sizeof(buff);
     int    status = 0;
-    result = __cxxabiv1::__cxa_demangle(class_name, buff, &len, &status);
+    char* dem = __cxxabiv1::__cxa_demangle(class_name, 0, 0, &status);
+    result = dem;
+    ::free (dem);
   }
   return result;
 }
@@ -143,8 +134,10 @@ DbTypeInfo::DbTypeInfo(const Guid& guid, TypeH type, Columns& cols)
    }
    setShapeID(guid);
    if( cols.size() == 0 )   {
-      std::string full = DbReflex::fullTypeName(type);
-      std::string nam = (full.substr(0,2)=="::") ? full.substr(2) : full;
+      std::string nam = DbReflex::fullTypeName(type);
+      if (nam.starts_with ("::")) {
+        nam.erase (0, 2);
+      }
       int col_type = DbColumn::POINTER;
       if(clazz()) {
         if (clazz().TypeInfo() == typeid(unsigned char)) col_type = DbColumn::UCHAR;
@@ -253,7 +246,7 @@ DbStatus DbTypeInfo::i_fromString( const std::string& string_rep)  {
   size_t i;
   int ncol=-1;
   std::string tmp = string_rep;
-  std::string cl_name;
+
   m_mult = 0;
   for(i = 0; i < m_columns.size(); ++i)
     delete m_columns[i];
@@ -261,7 +254,7 @@ DbStatus DbTypeInfo::i_fromString( const std::string& string_rep)  {
   const char* p1 = tmp.c_str();
   DbColumn* col = 0;
   setShapeID(Guid::null());
-  for(i = 0; i < sizeof(itm)/sizeof(itm[0]); ++i)   {
+  for(i = 0; p1 != nullptr && i < sizeof(itm)/sizeof(itm[0]); ++i)   {
 Again:
     p1 = ::strstr(p1, itm[i][0]);
     if ( p1 )    {
@@ -384,19 +377,19 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
 
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::create(const std::string& cl_name)  {
+const DbTypeInfo* DbTypeInfo::create(const std::string& cl_name)  {
   Columns cols;
   return create(cl_name, cols);
 }
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::create(const Guid& guid)  {
+const DbTypeInfo* DbTypeInfo::create(const Guid& guid)  {
   Columns cols;
   return create(guid, cols);
 }
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::createEx(const Guid& guid)  {
+const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid)  {
   Columns cols;
   return createEx(guid, cols);
 }
@@ -412,12 +405,12 @@ DbTypeInfo* DbTypeInfo::regShape(const Guid& guid, const TypeH& type, Columns& c
 
 
 /// Create type information using name
-DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols)   {
+const DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols)   {
   TypeH type = DbReflex::forTypeName(cl_name);
   if ( type )    {
     Guid guid(DbReflex::guid(type));
-    DbTypeInfo* typ_info = 0;
-    if (DbTransform::getShape(guid, (const DbTypeInfo*&)typ_info) == DbStatus::Success) {
+    const DbTypeInfo* typ_info = 0;
+    if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
        clearColumns(cols);
        return typ_info;
     }
@@ -430,9 +423,9 @@ DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols)   {
 
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
-  DbTypeInfo* typ_info = 0;
-  if (DbTransform::getShape(guid, (const DbTypeInfo*&)typ_info) == DbStatus::Success) {
+const DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
+  const DbTypeInfo* typ_info = 0;
+  if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
     clearColumns(cols);
     return typ_info;
   }
@@ -445,9 +438,9 @@ DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
 }
 
 /// Create type information using Guid only Class must already be registered.
-DbTypeInfo* DbTypeInfo::createEx(const Guid& guid, Columns& cols)   {
-  DbTypeInfo* typ_info = 0;
-  if (DbTransform::getShape(guid, (const DbTypeInfo*&)typ_info) == DbStatus::Success) {
+const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid, Columns& cols)   {
+  const DbTypeInfo* typ_info = 0;
+  if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
     clearColumns(cols);
     return typ_info;
   }

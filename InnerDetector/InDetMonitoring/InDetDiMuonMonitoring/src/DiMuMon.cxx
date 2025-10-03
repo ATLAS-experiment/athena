@@ -5,6 +5,7 @@
 #include <sstream>
 #include "GaudiKernel/PhysicalConstants.h"
 #include "AthContainers/ConstDataVector.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "DiMuMon.h"
 
@@ -244,7 +245,7 @@ StatusCode DiMuMon::bookHistograms()
 StatusCode DiMuMon::fillHistograms()
 {
 
-  const double muonMass = 105.66*Gaudi::Units::MeV;
+  const double muonMass = ParticleConstants::muonMassInMeV;
   //retrieve all muons
   SG::ReadHandle<xAOD::MuonContainer> muons{m_muonCollection};
   if(!muons.isValid()){

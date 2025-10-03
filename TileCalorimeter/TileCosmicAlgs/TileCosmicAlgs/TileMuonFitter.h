@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECOSMICALGS_TILEMUONFITTER_H
@@ -92,9 +92,10 @@ class TileMuonFitter: public AthAlgorithm {
     TileMuonFitter(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~TileMuonFitter();
 
-    virtual StatusCode initialize();
-    virtual StatusCode execute();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
+    virtual bool isClonable() const override final { return true; }
 
     /** Creates an internal cell container (just vectors) from the
      input CaloCellContainer. Throws away cells below threshold

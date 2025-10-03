@@ -79,12 +79,21 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (btagger='GN2v01')
     config.setOptions (btagWP='FixedCutBEff_65')
     config.setOptions (saveScores='All')
+    # Jets.JVT
+    config.addBlock('Jets.JVT', containerName='AnaJets')
+    # FTagJetTriggerMatching
+    bjetTriggerChainsPerYear = {
+        2022: ['HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
+        2023: ['HLT_2j45_0eta290_020jvt_bgn160_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
+        2024: ['HLT_2j45_0eta290_020jvt_bgn260_2j45_pf_ftf_presel2j25XX2j25bgtwo85_L14jJ40p0ETA25'],
+    }
+    config.addBlock( 'Jets.FTagTriggerMatching' )
+    config.setOptions (containerName='AnaJets')
+    config.setOptions (triggerChainsPerYear=bjetTriggerChainsPerYear)
     # Jets.FlavourTaggingEventSF
     config.addBlock( 'Jets.FlavourTaggingEventSF')
     config.setOptions (containerName='AnaJets.baselineJvt')
     config.setOptions (btagger='GN2v01')
-    # Jets.JVT
-    config.addBlock('Jets.JVT', containerName='AnaJets')
 
     # Large-R jets
     config.addBlock('Jets')
@@ -95,19 +104,21 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Electrons
     config.addBlock ('Electrons')
     config.setOptions (containerName='AnaElectrons')
-    config.setOptions (forceFullSimConfig=True)
+    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
     config.setOptions (decorateCaloClusterEta=True)
     config.setOptions (writeTrackD0Z0=True)
+    config.setOptions (minPt=10000.0)
     # Electrons.WorkingPoint
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (selectionName='loose')
     config.setOptions (forceFullSimConfig=True)
-    config.setOptions (noEffSF=True)
     config.setOptions (identificationWP='LooseBLayerLH')
-    config.setOptions (isolationWP='Loose_VarRad')
+    config.setOptions (isolationWP='Tight_VarRad')
+    config.setOptions (chargeIDSelectionRun2=True)
+    config.setOptions (addChargeMisIDSF=True)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
@@ -122,7 +133,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     # Photons
     config.addBlock ('Photons', containerName='AnaPhotons')
-    config.setOptions (forceFullSimConfigForP4=True)
     config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recomputeIsEM=False)
     config.setOptions (recalibratePhyslite=False)
@@ -173,7 +183,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
         2015: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
         2016: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
         2017: ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
-        2018: ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+        2018: ['HLT_tau25_medium1_tracktwoEF', 'HLT_tau35_medium1_tracktwoEF'],
+        2022: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
+        2023: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
     }
     config.addBlock ('TauJets.TriggerSF')
     config.setOptions (containerName='AnaTauJets')

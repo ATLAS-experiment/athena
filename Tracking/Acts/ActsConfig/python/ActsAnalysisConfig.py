@@ -3,6 +3,179 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
+def ActsSeedToTrackAnalysisAlgCfg(flags,
+                                  name: str = "ActsSeedToTrackAnalysisAlg",
+                                  **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("InputSeedCollection", "")
+    kwargs.setdefault("InputTrackParamsCollection", "")
+    kwargs.setdefault("InputDestinyCollection", "")
+
+    if flags.Tracking.doTruth:
+        if flags.Detector.EnableITkPixel:
+            kwargs.setdefault("PixelTruthAssociationMap", "ITkPixelClustersToTruthParticles")
+        if flags.Detector.EnableITkStrip:
+            kwargs.setdefault("StripTruthAssociationMap", "ITkStripClustersToTruthParticles")
+    
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, kwargs['InputDestinyCollection'] + 'AnalysisAlgCfg')
+
+    monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedToTrackAnalysisAlg, name, **kwargs)
+    destinyTypes = ['UNKNOWN', 'SUCCEED', 'DUPLICATE', 'FAILURE', 'INCLUSIVE']
+    nTypes = len(destinyTypes)
+    
+    histoPath = f'/ActsAnalysis/{kwargs["InputDestinyCollection"]}'
+    # define the variables now
+    seedVars = helper.addArray([nTypes], monitoringAlgorithm, 'seedVars', topPath=histoPath)
+
+    for postfix, tool in seedVars.Tools.items():
+        layer = destinyTypes[ int(postfix.split("_")[1]) ]
+        tool.defineHistogram(f"eta,bottomR;Eta_Vs_bottomR_{layer}", title=f"Bottom R vs Eta for {layer}", type='TH2F', path='2D',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=320, ymin=0, ymax=320)        
+        tool.defineHistogram(f"eta,middleR;Eta_Vs_middleR_{layer}", title=f"Middle R vs Eta for {layer}", type='TH2F', path='2D',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=320, ymin=0, ymax=320)
+        tool.defineHistogram(f"eta,topR;Eta_Vs_topR_{layer}", title=f"Top R vs Eta for {layer}", type='TH2F', path='2D',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=320, ymin=0, ymax=320)
+        
+        tool.defineHistogram(f"deltaR_BT,deltaR_BM;DeltaR_BT_vs_Delta_BM_{layer}", title=f"Delta Radius BT vs BM for {layer}", type='TH2F', path='2D',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=320, ymin=0, ymax=320)
+        tool.defineHistogram(f"deltaR_BT,deltaR_MT;DeltaR_BT_vs_Delta_MT_{layer}", title=f"Delta Radius BT vs MT for {layer}", type='TH2F', path='2D',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=320, ymin=0, ymax=320)
+        tool.defineHistogram(f"deltaR_BM,deltaR_MT;DeltaR_BM_vs_Delta_MT_{layer}", title=f"Delta Radius MB vs MT for {layer}", type='TH2F', path='2D',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=320, ymin=0, ymax=320)
+
+        tool.defineHistogram(f"bottomZ,bottomR;BottomZR_{layer}", title=f"Bottom SP ZR for {layer}", type='TH2F', path='2D',
+                             xbins=12000, xmin=-3000, xmax=3000,
+                             ybins=1000, ymin=0, ymax=320)
+        tool.defineHistogram(f"middleZ,middleR;MiddleZR_{layer}", title=f"Middle SP ZR for {layer}", type='TH2F', path='2D',
+                             xbins=12000, xmin=-3000, xmax=3000,
+                             ybins=1000, ymin=0, ymax=320)
+        tool.defineHistogram(f"topZ,topR;TopZR_{layer}", title=f"Top SP ZR for {layer}", type='TH2F', path='2D',
+                             xbins=12000, xmin=-3000, xmax=3000,
+                             ybins=1000, ymin=0, ymax=320)
+
+        tool.defineHistogram(f"cotTheta_BM;cotTheta_BM_{layer}", title=f"CotTheta bottom-middle for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=0, xmax=40,
+                             ybins=80, ymin=0, ymax=40)
+        tool.defineHistogram(f"cotTheta_MT;cotTheta_MR_{layer}", title=f"CotTheta middle-top for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=0, xmax=40,
+                             ybins=80, ymin=0, ymax=40)
+        tool.defineHistogram(f"cotTheta_BM;cotTheta_BT_{layer}", title=f"CotTheta bottom-top for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=0, xmax=40,
+                             ybins=80, ymin=0, ymax=40)
+
+        tool.defineHistogram(f"deltaCotTheta_BM_MT;deltaCotTheta_BM_MT_{layer}", title=f"Delta CotTheta bottom-top vs middle-top for {layer}", type='TH1F', path='SPVars',
+                             xbins=80, xmin=-2, xmax=2,
+                             ybins=80, ymin=-2, ymax=2)
+
+        rangeQuality = 10000
+        tool.defineHistogram(f"bottomR,quality;Quality_vs_BottomR_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"middleR,quality;Quality_vs_MiddleR_{layer}", title=f"Seed Middle Radius Vs Quality for {layer};Middle SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"topR,quality;Quality_vs_TopR_{layer}", title=f"Seed Top Radius Vs Quality for {layer};Top SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+
+        tool.defineHistogram(f"deltaR_BT,quality;Quality_vs_deltaR_BT_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"deltaR_BM,quality;Quality_vs_deltaR_BM_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+        tool.defineHistogram(f"deltaR_MT,quality;Quality_vs_deltaR_MT_{layer}", title=f"Seed Bottom Radius Vs Quality for {layer};Bottom SP radius;Quality", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+
+        tool.defineHistogram(f"bottomR,truthProb;Truth_Probability_vs_bottomR_{layer}", title=f"bottom R vs truth prob. for {layer};R;Truth Prob.", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"middleR,truthProb;Truth_Probability_vs_middleR_{layer}", title=f"middle R vs truth prob. for {layer};R;Truth Prob.", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"topR,truthProb;Truth_Probability_vs_topR_{layer}", title=f"top R vs truth prob. for {layer};R;Truth Prob.", type='TH2F', path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        
+        tool.defineHistogram(f"vtxZ,quality;Quality_vs_vtxZ_{layer}", title=f"Seed Vtxz Vs Quality for {layer};vtx Z;Quality", type='TH2F', path='Quality',
+                             xbins=100, xmin=-200, xmax=200,
+                             ybins=1000, ymin=-rangeQuality, ymax=rangeQuality)
+
+        tool.defineHistogram(f"truthProb;Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH1F", path='Quality',
+                             xbins=12, xmin=0, xmax=1.2)
+        tool.defineHistogram(f"eta,truthProb;Truth_Probability_vs_Eta_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='Quality',
+                             xbins=50, xmin=-4.5, xmax=4.5,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"quality,truthProb;Truth_Probability_vs_Quality_{layer}", title=f"Seed Truth Probability VS Eta for {layer}", type="TH2F", path='Quality',
+                             xbins=1000, xmin=-rangeQuality, xmax=rangeQuality,
+                             ybins=12, ymin=0, ymax=1.2)
+
+        tool.defineHistogram(f"deltaR_BT,truthProb;deltaR_BT_vs_Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH2F", path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"deltaR_BM,truthProb;deltaR_BM_vs_Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH2F", path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        tool.defineHistogram(f"deltaR_MT,truthProb;deltaR_MT_vs_Truth_Probability_{layer}", title=f"Seed Truth Probability for {layer}", type="TH2F", path='Quality',
+                             xbins=320, xmin=0, xmax=320,
+                             ybins=12, ymin=0, ymax=1.2)
+        
+        tool.defineHistogram(f"eta;Eta_{layer}", title=f"Eta for {layer}", type='TH1F', path='SeedVars',
+                             xbins=50, xmin=-4.5, xmax=4.5)
+        tool.defineHistogram(f"pt;Pt_{layer}", title=f"Pt for {layer}", type='TH1F', path='SeedVars',
+                             xbins=100, xmin=0, xmax=100)
+        tool.defineHistogram(f"quality;Quality_{layer}", title=f"Quality for {layer}", type='TH1F', path='SeedVars',
+                             xbins=1000, xmin=-rangeQuality, xmax=rangeQuality)
+        tool.defineHistogram(f"vtxZ;VtxZ_{layer}", title=f"Vtx Z for {layer}", type='TH1F', path='SeedVars',
+                             xbins=100, xmin=-200, xmax=200)
+        
+        tool.defineHistogram(f"bottomX;BottomX_{layer}", title=f"Bottom X for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"bottomY;BottomY_{layer}", title=f"Bottom Y for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"bottomZ;BottomZ_{layer}", title=f"Bottom Z for {layer}", type='TH1F', path='SPVars',
+                             xbins=500, xmin=-3000, xmax=3000)
+        tool.defineHistogram(f"bottomR;BottomR_{layer}", title=f"Bottom Radius for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        
+        tool.defineHistogram(f"middleX;MiddleX_{layer}", title=f"Middle X for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"middleY;MiddleY_{layer}", title=f"Middle Y for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"middleZ;MiddleZ_{layer}", title=f"Middle Z for {layer}", type='TH1F', path='SPVars',
+                             xbins=500, xmin=-3000, xmax=3000)
+        tool.defineHistogram(f"middleR;MiddleR_{layer}", title=f"Middle Radius for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        
+        tool.defineHistogram(f"topX;TopX_{layer}", title=f"Top X for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"topY;TopY_{layer}", title=f"Top Y for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=-320, xmax=320)
+        tool.defineHistogram(f"topZ;TopZ_{layer}", title=f"Top Z for {layer}", type='TH1F', path='SPVars',
+                             xbins=500, xmin=-3000, xmax=3000)
+        tool.defineHistogram(f"topR;TopR_{layer}", title=f"Top Radius for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+
+        tool.defineHistogram(f"deltaR_BT;DeltaR_BT_{layer}", title=f"Delta Radius between Bottom and Top for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        tool.defineHistogram(f"deltaR_BM;DeltaR_BM_{layer}", title=f"Delta Radius between Bottom and Middle for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+        tool.defineHistogram(f"deltaR_MT;DeltaR_MT_{layer}", title=f"Delta Radius between Middle and Top for {layer}", type='TH1F', path='SPVars',
+                             xbins=320, xmin=0, xmax=320)
+                
+    acc.merge(helper.result())
+    return acc
+
+
 def ActsTrackAnalysisAlgCfg(flags,
                             name: str = "ActsTrackAnalysisAlg",
                             **kwargs) -> ComponentAccumulator:
@@ -295,6 +468,8 @@ def ActsPixelSpacePointAnalysisAlgCfg(flags,
     kwargs.setdefault("SpacePointContainerKey", "ITkPixelSpacePoints")
     kwargs.setdefault("UsePixel", True)
     kwargs.setdefault("UseOverlap", False)
+    kwargs.setdefault('ExtraInputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["SpacePointContainerKey"]}.measurements')])
 
     acc.merge(ActsBaseSpacePointAnalysisAlgCfg(flags, 
                                                name = name,
@@ -318,7 +493,9 @@ def ActsStripSpacePointAnalysisAlgCfg(flags,
     kwargs.setdefault("SpacePointContainerKey", "ITkStripSpacePoints")
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", False)
-
+    kwargs.setdefault('ExtraInputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["SpacePointContainerKey"]}.measurements')])
+    
     acc.merge(ActsBaseSpacePointAnalysisAlgCfg(flags,
                                                name = name,
                                                extension = extension,
@@ -338,7 +515,9 @@ def ActsStripOverlapSpacePointAnalysisAlgCfg(flags,
     kwargs.setdefault("SpacePointContainerKey", "ITkStripOverlapSpacePoints")
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", True)
-
+    kwargs.setdefault('ExtraInputs',
+                      [('xAOD::SpacePointContainer' , f'StoreGateSvc+{kwargs["SpacePointContainerKey"]}.measurements')])
+    
     acc.merge(ActsBaseSpacePointAnalysisAlgCfg(flags,
                                                name = name,
                                                extension = extension,
@@ -366,7 +545,7 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
     helper = AthMonitorCfgHelper(flags, extension + 'SeedAnalysisAlgCfg')
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+    geoTool = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
     acc.addPublicTool(geoTool)
     
     # ATLAS Converter Tool
@@ -544,6 +723,8 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
                                        name: str = "ActsSeedingAlgorithmAnalysis",
                                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    
+    addOtherSeedingAlgorithms = kwargs.pop("addOtherSeedingAlgorithms", False)
 
     MonitoringGroupNames = []
 
@@ -556,42 +737,50 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
         from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerToolCfg
         # The default Acts pixel seeding tool performs by default a seed selection after the seed finding
         # We have to disable it or a fair comparison with the other seed computations
-        from ActsConfig.ActsSeedingConfig import ActsPixelSeedingToolCfg
-        seedToolPixel = acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
+        from ActsConfig.ActsSeedingConfig import ActsFastPixelSeedingToolCfg
+        seedToolPixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
         # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
         ActsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags, SeedToolPixel=seedToolPixel))
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsSeedingConfig import ActsPixelGbtsSeedingToolCfg
-        gbtsSeedToolPixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
-        # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
-        # Strip will not be Gbts ... so we ignore it
-        ActsGbtsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
-                                                                                                   name="ActsSiSpacePointsSeedMakerGbts",
-                                                                                                   SeedToolPixel=gbtsSeedToolPixel))
-        ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
-        MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
-        
-        from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
-        pixel_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
-        strip_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
-        ActsITkSiSpacePointsSeedMakerOrthogonal = \
-          acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
-                                                                 name="ActsSiSpacePointsSeedMakerOrthogonal",
-                                                                 SeedToolPixel=pixel_orthogonal_seeding_tool,
-                                                                 SeedToolStrip=strip_orthogonal_seeding_tool))
-        ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
-        MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
+        if addOtherSeedingAlgorithms:
+            from ActsConfig.ActsSeedingConfig import ActsPixelGbtsSeedingToolCfg
+            gbtsSeedToolPixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
+            # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
+            # Strip will not be Gbts ... so we ignore it
+            ActsGbtsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
+                                                                                                       name="ActsSiSpacePointsSeedMakerGbts",
+                                                                                                       SeedToolPixel=gbtsSeedToolPixel))
+            ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
+            MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
 
+            from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
+            pixel_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
+            strip_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
+            ActsITkSiSpacePointsSeedMakerOrthogonal = \
+                acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
+                                                                       name="ActsSiSpacePointsSeedMakerOrthogonal",
+                                                                       SeedToolPixel=pixel_orthogonal_seeding_tool,
+                                                                       SeedToolStrip=strip_orthogonal_seeding_tool))
+            ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
+            MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
+
+            
+            
         from GaudiKernel.GaudiHandles import PrivateToolHandleArray
+        
+        privateSeedingTools = [ITkSiSpacePointsSeedMaker, ActsITkSiSpacePointsSeedMaker]
+
+        if addOtherSeedingAlgorithms:
+            privateSeedingTools.append(ActsGbtsITkSiSpacePointsSeedMaker)
+            privateSeedingTools.append(ActsITkSiSpacePointsSeedMakerOrthogonal)
+        
         kwargs.setdefault("SeedingTools",
-                          PrivateToolHandleArray([ITkSiSpacePointsSeedMaker,
-                                                  ActsITkSiSpacePointsSeedMaker,
-                                                  ActsGbtsITkSiSpacePointsSeedMaker,
-                                                  ActsITkSiSpacePointsSeedMakerOrthogonal]))
+                          PrivateToolHandleArray(privateSeedingTools))
 
     kwargs.setdefault("MonitorNames", MonitoringGroupNames)
+    kwargs.setdefault("DoStrip", not flags.Tracking.doITkFastTracking)
 
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, 'SeedingAlgorithmAnalysisAlgCfg')
@@ -650,7 +839,7 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault(
             'TrackingGeometryTool',
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
 
     if 'ATLASConverterTool' not in kwargs:
@@ -660,6 +849,8 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedsToTrackParamsAlg(name, **kwargs))
     return acc

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HEPMCTRUTHREADER_H
@@ -11,6 +11,8 @@
 #include "AtlasHepMC/GenVertex_fwd.h"
 #include "AtlasHepMC/GenParticle_fwd.h"
 #include "StoreGate/ReadHandleKey.h"
+
+#include "GeneratorObjects/McEventCollection.h"
 
 
 /// @short Algorithm demonstrating reading of HepMC truth, and printing to screen
@@ -31,7 +33,7 @@ public:
 private:
 
   /// The key of the input HepMC truth container
-  SG::ReadHandleKey<McEventCollection> m_hepMCContainerKey{ 
+  SG::ReadHandleKey<McEventCollection> m_hepMCContainerKey{
       this, "HepMCContainerKey", "GEN_EVENT", "The input McEvenCollection"};
 
   /// Flag to printout in pt,eta,phi instead of px,py,pz

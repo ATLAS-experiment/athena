@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This file defines the default input files for trigger validation tests
 # and keywords to retrieve them in test configuration
@@ -98,13 +98,54 @@ def get_input(keyword):
 
     log = get_logger()
 
-    data = load_input_json()
-    if keyword not in data.keys():
-        log.error('Failed to find keyword "%s" in input JSON %s',
-                  keyword, input_json)
-        return None
+    # use rucio dataset for grid jobs, else rely on EOS/cvmfs inputs (TrigValInputs.json)
+    import os
+    paths = os.getenv("ArtInFile",None)
 
-    data_object = data[keyword]
+    if paths:
+        source = "data" if "data" in paths else "mc"
+        format = None
+        for key,value in {'RAW':'BS', 'HITS':'HITS', 'RDO':'RDO', 'ESD':'ESD', 'AOD':'AOD'}.items():
+            if key in paths:
+                format = value
+                break
+        data_object = {"source":source, "format":format, "paths":[paths]}
+    else:
+        data = load_input_json()
+        if keyword not in data.keys():
+            log.error('Failed to find keyword "%s" in input JSON %s',keyword, input_json)
+            return None
+
+        data_object = data[keyword]
+
+        # for ART tests running on RAW data:
+        # - build tests use small files on cvmfs
+        # - grid tests running interactively must copy large files from EOS to the local area
+        if data_object["format"] == "BS":
+            grid = False
+            Nfiles = 0
+            import sys
+            with open(sys.argv[0], 'r') as f:
+                for line in f:
+                    if "# art-type:" in line:
+                        grid = line.split()[2]=="grid"
+                    if "# art-input-nfiles:" in line:
+                        Nfiles = int(line.split()[2])
+            if grid:
+                data_object["paths"] = [path for path in data_object["paths"] if "/eos/" in path]
+                import subprocess
+                local_files = []
+                for i in range(Nfiles):
+                    f = data_object["paths"][i].split('/')[-1]
+                    if not (os.path.exists(f)) and not os.environ.get('TRIGVALSTEERING_DRY_RUN'):
+                        print(f'copying {data_object["paths"][i]}')
+                        result = subprocess.run(['xrdcp',f'root://eosatlas.cern.ch/{data_object["paths"][i]}','.'])
+                        if result.returncode != 0:
+                            raise Exception("xrdcp failed, please check you have a valid kerberos ticket")
+                    local_files.append(f)
+                data_object["paths"] = local_files
+            else:
+                data_object["paths"] = [path for path in data_object["paths"] if "/cvmfs/" in path]
 
     result = TrigValInput(
         keyword,

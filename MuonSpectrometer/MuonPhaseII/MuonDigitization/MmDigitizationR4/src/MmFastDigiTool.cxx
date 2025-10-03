@@ -56,6 +56,15 @@ namespace MuonR4 {
               if (m_digitizeMuonOnly && !MC::isMuon(simHit)){
                     continue;
                 }
+
+                const double hitKineticEnergy = simHit->kineticEnergy();
+                // Don't consider electron hits below m_energyThreshold.
+                // Electrons aren't consider for now in any case due to the cut above.
+                // But this may change.
+                if (hitKineticEnergy < m_energyThreshold && MC::isElectron(simHit)) {
+                    continue;
+                }
+                
                 const Identifier hitId{simHit->identify()};
  
                 const MuonGMR4::MmReadoutElement* readOutEle = m_detMgr->getMmReadoutElement(hitId);
@@ -105,7 +114,7 @@ namespace MuonR4 {
                 /// Pipe some dummy values to the digit to ensure that the pdo / tdo calibration 
                 /// does not reject any hit downstream. Or in other words how much do you want... All charge
                 constexpr int dummyResponseTime = 100;
-                constexpr float dummyDepositedCharge = 66666;
+                constexpr float dummyDepositedCharge = 666666;
 
                 const double newLocalX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPos.x(), uncert);
                 const int newChannel = design.stripNumber(newLocalX * Amg::Vector2D::UnitX());

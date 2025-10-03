@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -55,7 +55,7 @@ StatusCode TruthParticleFillerTool::initialize()
 StatusCode TruthParticleFillerTool::book()
 {
   CHECK( addVariable("status",    m_status) );
-  CHECK( addVariable("barcode",   m_barcode) );
+  CHECK( addVariable("barcode",   m_uniqueID) ); // TODO Rename variable to be consistent?
   CHECK( addVariable(m_PDGIDVariable,     m_pdgId) );
   CHECK( addVariable("charge",    m_charge) );
   return StatusCode::SUCCESS;
@@ -73,7 +73,7 @@ StatusCode TruthParticleFillerTool::book()
 StatusCode TruthParticleFillerTool::fill (const xAOD::TruthParticle& p)
 {
   *m_status = p.status();
-  *m_barcode = HepMC::barcode(p); // FIXME barcode-based
+  *m_uniqueID = HepMC::uniqueID(p);
   *m_pdgId = p.pdgId();
 
   const HepPDT::ParticleDataTable* pdt = m_ppsvc->PDT();

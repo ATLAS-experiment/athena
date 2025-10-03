@@ -229,6 +229,13 @@ namespace CP
 
       ANA_MSG_VERBOSE ("Running systematics " << sys.name() << " with index " << m_truthWeightTool->getSysWeightIndex(sys));
 
+      // If first event is skipped, fileExecute() is not ran, and the m_weights will be empty. 
+      // Ideally we should check eventRange.m_beginEvent in the if statement, and return statusCode::Failure if eventRange.m_beginEvent is 0.
+      if (m_weights.empty()) {
+        ANA_MSG_ERROR ("No weight is available for CutBookkeeper histogram. \nDid you set skip-n-events > 0? This is a known issue in EventLoop.");
+        break;
+      }
+
       const WeightsGroup &weights = m_weights.at (m_truthWeightTool->getSysWeightIndex(sys));
       h->SetBinContent (1, weights.nEventsProcessed);
       h->SetBinContent (2, weights.sumOfWeights);

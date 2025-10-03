@@ -98,7 +98,7 @@ def main():
                 run_set.update(period_dict[period])
         # Otherwise use all periods in project
         else:
-            for period, runs in period_dict.iteritems():
+            for period, runs in period_dict.items():
                 run_set.update(runs)
         since, until = (min(run_set), 0), (max(run_set)+1, 0)
         range_iovs = IOVSet.from_runs(run_set)
@@ -125,7 +125,7 @@ def main():
                     result_dict[d.channel].add(since, until, d.channel, d.comment)
 
     # Print the results
-    for channel, result in result_dict.iteritems():
+    for channel, result in result_dict.items():
         result.solidify(DefectIOV)
         print('\n' + channel + '\n')
         result.pprint()

@@ -18,6 +18,7 @@
 #include "FourMomUtils/P4Helpers.h"
 
 #include "LArRecConditions/LArBadChannelCont.h"
+#include "CaloEvent/CaloCellContainer.h"
 
 class EfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
 public:EfexSimMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
@@ -45,6 +46,8 @@ private:
     SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eFexEmxSimContainerKey{this,"eFexEMxRoISimContainer","","SG key of the simulated eFex Em RoI container"};
     SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFexTauxSimContainerKey{this,"eFexTauxSimRoIContainer","","SG key of the simulated eFex Tau RoI container"};
 
+    // need to check how many supercells there are, as expect mismatches when any are missing:
+    SG::ReadHandleKey<CaloCellContainer> m_scellKey { this, "CaloCellContainerReadKey", "SCell", "Read handle key for the supercells"};
 
     // SG::ReadDecorHandleKey<xAOD::EventInfo> m_decorKey;
   SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerKey{this,"eFexTowerContainer","L1_eFexDataTowers","SG key of the primary eFex tower container, which should be populated if fex readout occurring"};

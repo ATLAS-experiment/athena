@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArMiniFCAL_ID.h"
@@ -23,12 +23,11 @@
 using CxxUtils::strformat;
 
 
-LArMiniFCAL_ID::LArMiniFCAL_ID(void) 
+LArMiniFCAL_ID::LArMiniFCAL_ID()
         : 
-        CaloIDHelper ("LArMiniFCAL_ID"),
+        CaloIDHelper ("LArMiniFCAL_ID", "lar_mini_fcal"),
         m_is_initialized(false),
         m_fcal_region_index(0),
-        m_minifcal_region_index(0),
         m_LAR_INDEX(999),
         m_MiniFCAL_INDEX(999),
         m_POSNEG_INDEX(999),
@@ -39,8 +38,7 @@ LArMiniFCAL_ID::LArMiniFCAL_ID(void)
         m_two_sym_sides(1)
 {}
 
-LArMiniFCAL_ID::~LArMiniFCAL_ID(void) 
-= default;
+LArMiniFCAL_ID::~LArMiniFCAL_ID() = default;
 
 int LArMiniFCAL_ID::eta_min(const Identifier modId) const
 {
@@ -205,7 +203,7 @@ int   LArMiniFCAL_ID::get_neighbours(const IdentifierHash id, const LArNeighbour
 }
 
 IdContext	
-LArMiniFCAL_ID::module_context 		(void) const
+LArMiniFCAL_ID::module_context 		() const
 {
   return region_context();
 }
@@ -261,7 +259,7 @@ int  LArMiniFCAL_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
       std::stringstream strm ;
-      strm <<  atlasDict->m_name ;
+      strm <<  atlasDict->name();
       strg = "Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " 
       + strm.str();
       if(m_msgSvc) {
@@ -278,7 +276,7 @@ int  LArMiniFCAL_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larFcalField   = -1;
     if (dict()->get_label_value("part", "LArFCAL", larFcalField)) {
       std::stringstream strm ;
-      strm <<  atlasDict->m_name ;
+      strm <<  atlasDict->name();
       strg = "Could not get value for label 'LArMiniFCAL' of field 'part' in dictionary " 
       + strm.str();
       if(m_msgSvc) {
@@ -424,7 +422,7 @@ int  LArMiniFCAL_ID::get_expanded_id  (const Identifier& id, ExpandedIdentifier&
     return 0;
 }
 
-int         LArMiniFCAL_ID::initLevelsFromDict(void) 
+int         LArMiniFCAL_ID::initLevelsFromDict()
 {
   MsgStream log(m_msgSvc, "LArMiniFCAL_ID" );
 
@@ -452,7 +450,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
 
   IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
-    m_LAR_INDEX = field->m_index ;
+    m_LAR_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'subdet' field ";
@@ -467,7 +465,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
 
   field = dict()->find_field("part") ;
   if (field) {
-    m_MiniFCAL_INDEX = field->m_index ;
+    m_MiniFCAL_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'part' field ";
@@ -482,7 +480,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
 
   field = dict()->find_field("barrel-endcap") ;
   if (field) {
-    m_POSNEG_INDEX = field->m_index ;
+    m_POSNEG_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'barrel-endcap' field ";
@@ -497,7 +495,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
   
   field = dict()->find_field("module") ;
   if (field) {
-    m_MODULE_INDEX = field->m_index ;
+    m_MODULE_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'module' field ";
@@ -513,7 +511,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
   
   field = dict()->find_field("depth-mfcal") ;
   if (field) {
-    m_DEPTH_INDEX = field->m_index ;
+    m_DEPTH_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'depth' field ";
@@ -529,7 +527,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
   
   field = dict()->find_field("eta-mfcal") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'eta' field ";
@@ -544,7 +542,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
   
   field = dict()->find_field("phi-mfcal") ;
   if (field) {
-    m_PHI_INDEX = field->m_index ;
+    m_PHI_INDEX = field->index();
   }
   else {
     std::string strg = "initLevelsFromDict - unable to find 'phi' field ";
@@ -589,21 +587,15 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
    // Set the field implementations
 
 
-  IdDictDictionary::regions_const_it rit; 
-  for (rit = dict()->m_regions.begin (); rit != dict()->m_regions.end (); ++rit) { 
-    const IdDictRegion& region = *(*rit);
-    if (region.m_group=="lar_mini_fcal") {m_minifcal_region_index = region.m_index; break;}
-  }
-  
-  const IdDictRegion& region = *dict()->m_regions[m_minifcal_region_index];
+  const IdDictRegion& region = *dict()->find_region ("", "lar_mini_fcal");
 
-  m_lar_impl      = region.m_implementation[m_LAR_INDEX]; 
-  m_fcal_impl     = region.m_implementation[m_MiniFCAL_INDEX]; 
-  m_pn_impl       = region.m_implementation[m_POSNEG_INDEX]; 
-  m_module_impl   = region.m_implementation[m_MODULE_INDEX]; 
-  m_depth_impl    = region.m_implementation[m_DEPTH_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX];
+  m_lar_impl      = region.implementation(m_LAR_INDEX);
+  m_fcal_impl     = region.implementation(m_MiniFCAL_INDEX);
+  m_pn_impl       = region.implementation(m_POSNEG_INDEX);
+  m_module_impl   = region.implementation(m_MODULE_INDEX);
+  m_depth_impl    = region.implementation(m_DEPTH_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
 
   if (!m_quiet) {
     if(m_msgSvc) {
@@ -632,7 +624,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict(void)
   return(0) ;
 }
 
-int         LArMiniFCAL_ID::init_hashes(void) 
+int         LArMiniFCAL_ID::init_hashes()
 {
   if (channels().init (*this, "channels",
                        m_full_channel_range,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -20,10 +20,6 @@
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
-//Geomodel
-#include "GeoModelUtilities/DecodeVersionKey.h"
-#include "GeoModelInterfaces/IGeoModelSvc.h"
-
 #include "GaudiKernel/Algorithm.h"         //For adding properties to an algorithm
 #include "GaudiKernel/AlgTool.h"           //For adding properties to an algtool
 
@@ -41,7 +37,6 @@
 //_________________________________________________________________________________________________________
 TRTDigSettings::TRTDigSettings()
   : AthMessaging("TRTDigSettings"),
-    m_digversion(-1),
     m_propertyNotSetMagicNumber(-999.0e50),
     m_propertyNotSetMagicNumber_int(-9999)
 {
@@ -212,31 +207,6 @@ void TRTDigSettings::print(const std::string& front) const {
   }
 
   std::cout << front << "==============================================="<<std::endl;
-
-}
-
-//---------------------------------------------------------------------
-
-StatusCode TRTDigSettings::DigSettingsFromCondDB(int dig_vers_from_condDB) {
-
-  /////////////////////////////////////////////////////////////////////////////////////
-  // This function is called during TRTDigitizationTool::lateInitialize(). It can be //
-  // used to reset parameters according to the value of TRT_Dig_Vers in the condDB   //
-  // /TRT/Cond/DigVers.                                                              //
-  // At the moment DigSettingsFromCondDB() has no effect.                            //
-  // At the time of writing (October 2013) dig_vers_from_condDB==12                //
-  // which is now the same settings (2012/2013 re-tune) that are applied as default. //
-  /////////////////////////////////////////////////////////////////////////////////////
-
-  // std::cout << "digversion fron condDB: " << dig_vers_from_condDB << std::endl;
-  if (dig_vers_from_condDB==12) {
-    // the settings are default now
-  } else {
-    ATH_MSG_ERROR("Error in settings / condDB");
-    return StatusCode::FAILURE;
-  }
-
-  return StatusCode::SUCCESS;
 
 }
 
@@ -418,25 +388,7 @@ void TRTDigSettings::defineNewBoolVariable(const std::string & name,bool * datam
 //_________________________________________________________________________________________________________
 void TRTDigSettings::fillDefaults(const InDetDD::TRT_DetectorManager* detmgr) {
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Note that at the time of writing (October 2013), the defaults below correspond to:                   //
-  //  1) detmgr m_digversion=11, digversionname=DC3version3 (collision data)                              //
-  //  2) Late initialization with DigSettingsFromCondDB() fetching m_digversion=12 from the coniditons DB //
-  // There is response to digver's except for a "throw" for values <11 as such MC is no longer supported. //
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
   InDetDD::TRT_DetectorManager::ActiveGasType activegastype = detmgr->gasType();
-  m_digversion                                              = detmgr->digitizationVersion();
-  std::string digversionname                                = detmgr->digitizationVersionName();
-
-  std::cout << "TRTDigSettings::fillDefaults TRT digitization version: digversion = "
-            << m_digversion << " " << digversionname << std::endl;
-
-  // After TRT_Digitization-00-10-74 (end of Run1) we will no longer support m_digversion<11
-  if (m_digversion<11) {
-    ATH_MSG_FATAL("digversion < 11 (" << m_digversion << ") is no longer supported. The job will die now.");
-    throw std::runtime_error("fillDefaults: digversion is not supported");
-  }
 
   bool gasok = false;
   if ( activegastype == InDetDD::TRT_DetectorManager::newgas ) gasok = true;

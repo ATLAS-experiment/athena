@@ -1,11 +1,10 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINT_CALIBSPACEPOINT_H
 #define MUONSPACEPOINT_CALIBSPACEPOINT_H
 
 #include <MuonSpacePoint/SpacePoint.h>
-#include <variant>
 
 namespace MuonR4{
     /** @brief The calibrated Space point is created during the calibration process.
@@ -14,7 +13,8 @@ namespace MuonR4{
      *         In this case, they serve in an analogous way as the Trk::PseudoMeasurement */
     class CalibratedSpacePoint {
         public:
-            
+            using Cov_t = SpacePoint::Cov_t;
+            using CovIdx = SpacePoint::CovIdx;
             /** @brief State flag to distinguish different space point states
              *      - Valid: Calibration of the space point was successful and it should be used in the fit
              *      - FailedCalib: The calibration procedure produced invalid constants and the space point shall not be included
@@ -33,39 +33,46 @@ namespace MuonR4{
              *  @param dirInChamber: Direction of the space point in chamber */
             CalibratedSpacePoint(const SpacePoint* uncalibSpacePoint,
                                  Amg::Vector3D&& posInChamber,
-                                 Amg::Vector3D&& dirInChamber,
                                  State st = State::Valid);
 
             ~CalibratedSpacePoint() = default;
-            /** @brief The position of the calibrated space point inside the chamber */
-            const Amg::Vector3D& positionInChamber() const;
-            /** @brief The direction of the calibrated space point inside the chamber */
-            const Amg::Vector3D& directionInChamber() const;
-            /** @brief The drift radius of the calibrated space point. Needs to be set externally */
+            /*** @brief: Position of the space point inside the chamber */
+            const Amg::Vector3D& localPosition() const;
+            /*** @brief: Returns the direction parallel to the primary channel, i.e. the strip or the wire */
+            const Amg::Vector3D& sensorDirection() const;
+            /*** @brief: Returns the vector pointing to the adjacent channel in the chamber */
+            const Amg::Vector3D& toNextSensor() const;
+            /** @brief Returns the vector pointing out of the measurement plane */
+            const Amg::Vector3D& planeNormal() const;
+            /** @brief Returns the measurement's recorded time */
+            double time() const;
+            /** @brief Returns whether the measurement is a Mdt */
+            bool isStraw() const;
+            /** @brief Returns whether the measurement carries time information */
+            bool hasTime() const;
+            /** @brief Returns whether the measurement constains the non-bending direction*/
+            bool measuresLoc0() const;
+            /** @brief Returns whether the measurement constains the bending direction */
+            bool measuresLoc1() const;
+            /** @brief: Returns the size of the drift radius */
             double driftRadius() const;
-            /** @brief Set the drift radius of the calibrated space point after the calibration procedure */
+            /** @brief Returns the covariance array */
+            const Cov_t& covariance() const; 
+
+            /** @brief Set the covariance matrix of the calibrated space point */
+            void setCovariance(const Cov_t& cov);
+            /** @brief Update the drift radius of the space point measurement
+             *  @param r: Radius to set */
             void setDriftRadius(const double r);
-            /** @brief The spatial covariance matrix of the calibrated space point */
-            using Covariance_t = std::variant<AmgSymMatrix(2), AmgSymMatrix(3)>;
-            const Covariance_t& covariance() const;
-            /** @brief Set the covariance matrix of the calibrated space pooint */
-            template <unsigned k>
-                void setCovariance(const AmgSymMatrix(k)& cov){
-                    static_assert(k==2 || k==3, "Covariance dimension needs to be 2 or 3");
-                    m_cov = cov;
-                }
+            
             /** @brief The pointer to the space point out of which this space point has been built */
             const SpacePoint* spacePoint() const;
             /** @brief Returns the space point type. If the calibrated space point is built without 
              *         a valid point to a spacePoint, e.g. external beamspot constraint, Other is returned */
             xAOD::UncalibMeasType type() const;
-            /** @brief Current time of the calibrated space point */
-            double time() const;
             /** @brief Set the time measurement
-             *  @param t: Time of arrival */
+             *  @param t: Time of Record */
             void setTimeMeasurement(double t);
-            /** @brief Returns whether the calibrated space point measures time*/
-            bool measuresTime() const;
             /** @brief Returns whether the calibrated space point measures phi */
             bool measuresPhi() const;
             /** @brief Returns whether the calibrated space point measures eta */
@@ -76,19 +83,26 @@ namespace MuonR4{
             void setFitState(State st);
             /** @brief Returns the local dimension of the measurement */
             unsigned dimension() const;
+
+            friend std::ostream& operator<<(std::ostream& ostr, const CalibratedSpacePoint& sp) {
+                    sp.print(ostr);
+                    return ostr;
+            }
         private:
+            void print(std::ostream& ostr) const;
             const SpacePoint* m_parent{nullptr};
             Amg::Vector3D m_posInChamber{Amg::Vector3D::Zero()};
-            Amg::Vector3D m_dirInChamber{Amg::Vector3D::Zero()};
             
             double m_driftRadius{0.};
-            Covariance_t m_cov{};
+            Cov_t m_cov{Acts::filledArray<double, 3>(0.)};
 
             double m_time{0.};
             /// By default the Mdt may measure time
             bool m_measuresTime{type() == xAOD::UncalibMeasType::MdtDriftCircleType};
             State m_state{State::Valid};
     };
+        static_assert(Acts::Experimental::CompositeSpacePoint<CalibratedSpacePoint>);
+
 
 }
 

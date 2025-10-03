@@ -1,6 +1,8 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "src/FPGATrackSimActsTrackInspectionTool.h"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include <format>
@@ -64,7 +66,7 @@ FPGATrackSimActsEventTracks FPGATrackSim::ActsTrackInspectionTool::getActsTracks
                     }
                 }
             });
-        t_actsTracks.emplace_back(std::make_unique<FpgaActsTrack>(FpgaActsTrack{ parameters, std::move(t_TrackMeasurements) }));
+        t_actsTracks.emplace_back(std::make_unique<FpgaActsTrack>(FpgaActsTrack{ parameters, std::move(t_TrackMeasurements), tp.chi2(), tp.nDoF() }));
     }
 
     return t_actsTracks;
@@ -76,27 +78,30 @@ std::string FPGATrackSim::ActsTrackInspectionTool::getPrintoutActsEventTracks(
 {
     std::ostringstream printoutTable;
     unsigned int t_trackCoutner = 0, t_measCounter = 0;
-    printoutTable << "\n|----------------------------------------------------------------------------------------------------|\n";
+   printoutTable << "\n|-------------------------------------------------------------------------------------------------------------------------------|\n";
     for (const auto& track : tracks)
     {
         ++t_trackCoutner;
-        printoutTable   << "|     # |        QopT      |      Theta      |        Phi      |         d0       |         z0       |\n"
-                        << "|----------------------------------------------------------------------------------------------------|\n"
-                        << std::format("| {:>5} | {:>16.10f} | {:>15.10f} | {:>15.10f} | {:>16.10f} | {:>16.10f} |\n",
+    printoutTable   << "|     # |        QopT      |        Eta      |        Phi      |         d0       |         z0       |      chi2     |   ndof   |\n"
+                    << "|-------------------------------------------------------------------------------------------------------------------------------|\n"
+                    << std::format("| {:>5} | {:>16.10f} | {:>15.10f} | {:>15.10f} | {:>16.10f} | {:>16.10f} | {:>12.10f} | {:>8} |\n",
             t_trackCoutner,
-            track->parameters[Acts::eBoundQOverP] / 1000.,
-            track->parameters[Acts::eBoundTheta],
+            track->parameters[Acts::eBoundQOverP] / std::sin(track->parameters[Acts::eBoundTheta]),
+            -std::log(std::tan(track->parameters[Acts::eBoundTheta] / 2.0)),
             track->parameters[Acts::eBoundPhi],
             track->parameters[Acts::eBoundLoc0],
-            track->parameters[Acts::eBoundLoc1]);
+            track->parameters[Acts::eBoundLoc1],
+            track->chi2,
+            track->ndof
+            );
         t_measCounter = 0;
-        printoutTable   << "|       |____________________________________________________________________________________________|\n"
-                        << "|       | ## |  type |     x    |     y    |     z    | outlier |  meas |  hole |     Identifier     |\n"
-                        << "|       |--------------------------------------------------------------------------------------------|\n";
+        printoutTable   << "|       |_______________________________________________________________________________________________________________________|\n"
+                        << "|       |   ## |   type |         x        |         y        |         z        | outlier |  meas |  hole |      Identifier    |\n"
+                        << "|       |-----------------------------------------------------------------------------------------------------------------------|\n";
         for (const auto& measurement : track->trackMeasurements)
         {
             ++t_measCounter;
-            printoutTable << std::format("|       | {:>2} | {} | {:>8.3f} | {:>8.3f} | {:>8.3f} | {:>7} | {:>5} | {:6>5} | {:>18} |\n",
+            printoutTable << std::format("|       | {:>4} |  {} | {:>16.5f} | {:>16.5f} | {:>16.5f} | {:>7} | {:>5} | {:6>5} | {:>18} |\n",
                 t_measCounter,
                 measurement->type.c_str(),
                 measurement->coordinates.x,
@@ -107,7 +112,7 @@ std::string FPGATrackSim::ActsTrackInspectionTool::getPrintoutActsEventTracks(
                 measurement->holeFlag,
                 measurement->identifier);
         }
-        printoutTable << "|----------------------------------------------------------------------------------------------------|\n";
+        printoutTable << "|-------------------------------------------------------------------------------------------------------------------------------|\n";
     }
 
     return printoutTable.str();
@@ -120,8 +125,8 @@ std::string FPGATrackSim::ActsTrackInspectionTool::getPrintoutStatistics(
     std::ostringstream printoutTable;
     printoutTable << "Printing out ACTS statistics";
     printoutTable << "\n|---------------------------------------------------------------------------------------|"
-        << "\n|            Collection Name        | Outliers (avg) | Measurements (avg) | Holes (avg) |"
-        << "\n|---------------------------------------------------------------------------------------|";
+                  << "\n|            Collection Name        | Outliers (avg) | Measurements (avg) | Holes (avg) |"
+                  << "\n|---------------------------------------------------------------------------------------|";
     for (const auto& collection : tracksForAllEvents)
     {
         printoutTable << std::format("\n| {:>33} | {:>14.2f} | {:>18.2f} | {:>11.2f} |",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // NAME:     LArSuperCellMonAlg.cxx
@@ -7,7 +7,6 @@
 //                L. Morvaj, P.Strizenec, D. Oliveira Damazio - develop for Digital Trigger monitoring (2021)
 // ********************************************************************
 #include "LArSuperCellMonAlg.h"
-
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloIdentifier/CaloGain.h"
@@ -106,11 +105,13 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     ATH_CHECK(createPerJobHistograms(superCellCont, noisep));
   }
 
-  //get LB
-  auto lumiBlock = Monitored::Scalar<unsigned int>("lumiBlock",0);
-  lumiBlock = ctx.eventID().lumi_block();
-  auto bcid = Monitored::Scalar<unsigned int>("bcid",0);
-  bcid = ctx.eventID().bunch_crossing_id();
+  // FIXME: "lumiBlock" is not monitored
+  //auto lumiBlock = Monitored::Scalar<unsigned int>("lumiBlock",0);
+  //lumiBlock = ctx.eventID().lumi_block();
+  // FIXME: "bcid" is not monitored nor used, only bcidFFB is
+  //auto bcid = Monitored::Scalar<unsigned int>("bcid",0);
+  //bcid = ctx.eventID().bunch_crossing_id();
+  unsigned int bcid = ctx.eventID().bunch_crossing_id();
   int bcidFFB = bcid;
   if (!m_bcDataKey.empty()){ 
     SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey,ctx);
@@ -120,23 +121,21 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
   // create local variables to speed up things
   // per layer
   std::vector<std::vector<std::string> > nameHistos;
-  for ( auto& layerName : m_layerNames){
-        std::vector<std::string> vec;
-	vec.push_back("superCellEt_"+layerName);
-	vec.push_back("superCelltime_"+layerName);
-	vec.push_back("superCellprovenance_"+layerName);
-	vec.push_back("superCellEta_"+layerName);
-	vec.push_back("superCellPhi_"+layerName);
-	vec.push_back("resolution_"+layerName);
-	vec.push_back("resolutionPass_"+layerName);
-	vec.push_back("resolutionHET_"+layerName);
-	vec.push_back("superCellEtRef_"+layerName);
-	vec.push_back("superCelltimeRef_"+layerName);
-	vec.push_back("superCellprovenanceRef_"+layerName);
-	vec.push_back("superCellEtDiff_"+layerName);
-        nameHistos.push_back(vec);
+  for (const auto& layerName : m_layerNames){
+    nameHistos.insert(nameHistos.end(),
+		      {"superCellEt_"+layerName,
+		       "superCelltime_"+layerName,
+		       "superCellprovenance_"+layerName,
+		       "superCellEta_"+layerName,
+		       "superCellPhi_"+layerName,
+		       "resolution_"+layerName,
+		       "resolutionPass_"+layerName,
+		       "resolutionHET_"+layerName,
+		       "superCellEtRef_"+layerName,
+		       "superCelltimeRef_"+layerName,
+		       "superCellprovenanceRef_"+layerName,
+		       "superCellEtDiff_"+layerName});
   }
-
 
 
     //////////////// loop over SUPER cells -------------
@@ -188,20 +187,13 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     auto MSCtRef = Monitored::Scalar<float>("superCelltimeRef",superCellRef->time());
     auto MSCprovRef = Monitored::Scalar<int>("superCellprovenanceRef",(superCellRef->provenance()&0xFFF));
     auto MSCetDiff = Monitored::Scalar<float>("superCellEtDiff",SCetDiff);
-    variables.push_back(MSCet);
-    variables.push_back(MSCt);
-    variables.push_back(MSCprov);
-    variables.push_back(MSCeta);
+    // 'push_back' conditional variables one at a time, and 'insert' all other variables in one go
     if (  SCetRef > m_thresholdsForResolution ) variables.push_back(MSCres);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCpassTime || SCpassPF ) ) variables.push_back(MSCresPass);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCet > 4e3 ) ) variables.push_back(MSCresHET);
-    variables.push_back(MSCphi);
-    variables.push_back(MSCetRef);
+
     // let us put conditional to force building the linearity plot
     // only when the new signal passes BCID
-    variables.push_back(MSCtRef);
-    variables.push_back(MSCprovRef);
-    variables.push_back(MSCetDiff);
 
     // per layer
     auto layerName=m_layerNames[iLyr];
@@ -219,19 +211,31 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
 
     auto MBCIDFFB = Monitored::Scalar<int>("BCID",bcidFFB);
     auto LMSCetDiff = Monitored::Scalar<float>(nameHistos[iLyr][11],SCetDiff);
-    variables.push_back(LMSCet);
-    variables.push_back(LMSCt);
-    variables.push_back(LMSCprov);
-    variables.push_back(LMSCeta);
     if (  SCetRef > m_thresholdsForResolution ) variables.push_back(LMSCres);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCpassTime || SCpassPF ) ) variables.push_back(LMSCresPass);
     if ( (SCetRef > m_thresholdsForResolution ) && (SCet > 4e3 ) ) variables.push_back(LMSCresHET);
-    variables.push_back(LMSCphi);
-    variables.push_back(LMSCetRef);
     if ( SCpassTime || SCpassPF ) variables.push_back(LMSCtRef);
-    variables.push_back(LMSCprovRef);
-    variables.push_back(MBCIDFFB);
-    variables.push_back(LMSCetDiff);
+    
+    variables.insert(variables.end(),
+		     {MSCet,
+		      MSCt,
+		      MSCprov,
+		      MSCeta,
+		      MSCphi,
+		      MSCetRef,
+		      MSCtRef,
+		      MSCprovRef,
+		      MSCetDiff,
+		      LMSCet,
+		      LMSCt,
+		      LMSCprov,
+		      LMSCeta,
+		      LMSCphi,
+		      LMSCetRef,
+		      LMSCprovRef,
+		      MBCIDFFB,
+		      LMSCetDiff});
+
 
     if(m_doSCReco){
        auto MSCtReco = Monitored::Scalar<float>("superCelltimeReco",0.);
@@ -244,15 +248,16 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
           MSCtReco = SCtimeReco;
           MSCetReco = SCetReco;
           LMSCtReco = SCtimeReco;
-          variables.push_back(MSCtReco);
-          variables.push_back(LMSCtReco);
-          variables.push_back(MSCetReco);
+
+	  variables.insert(variables.end(),
+			   {MSCtReco,
+			    LMSCtReco,
+			    MSCetReco});
        }
-    } 
+    }
     fill(m_MonGroupName,variables);
 
   }	// end loop over SC
-  
 
 
 
@@ -350,5 +355,3 @@ void LArSuperCellMonAlg::getHistoCoordinates(const CaloDetDescrElement* dde, flo
   iLyr=iLyrNS*2+side;  //Getting LayerEnum value. This logic works because of the way the enums LayerEnum and LayerEnumNoSides are set up. 
   return;
 }
-
-

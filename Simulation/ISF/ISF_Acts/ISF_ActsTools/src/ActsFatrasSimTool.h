@@ -24,6 +24,7 @@
 // ACTS
 #include "Acts/Utilities/UnitVectors.hpp"
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/UnitConverters.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -41,9 +42,10 @@
 #include "ActsFatras/Kernel/SimulationResult.hpp"
 #include "ActsFatras/Physics/Decay/NoDecay.hpp"
 #include "ActsFatras/Physics/StandardInteractions.hpp"
+#include "ActsFatras/Physics/ElectroMagnetic/PhotonConversion.hpp"
 #include "ActsFatras/Selectors/SurfaceSelectors.hpp"
 // Tracking
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 #include <algorithm>
@@ -72,7 +74,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   struct HitSurfaceSelector {
     /// Check if the surface should be used.
     bool operator()(const Acts::Surface &surface) const {
-      bool isSensitive = surface.associatedDetectorElement();
+      bool isSensitive = surface.associatedDetectorElement() != nullptr;
       return isSensitive;
     }
   };
@@ -190,7 +192,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
           ActsFatras::NoDecay>;
   // Neutral
   using NeutralSelector = ActsFatras::NeutralSelector;
-  using NeutralInteractions = ActsFatras::InteractionList<>;
+  using NeutralInteractions = ActsFatras::InteractionList<ActsFatras::PhotonConversion>;
   using NeutralSimulation = SingleParticleSimulation<
           NeutralPropagator, NeutralInteractions, ActsFatras::NoSurface,
           ActsFatras::NoDecay>;
@@ -213,8 +215,16 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
             ISFParticleContainer& secondaries,
             McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr) override;
   virtual StatusCode setupEvent(const EventContext&) override {
+    ATH_CHECK(m_truthRecordSvc->initializeTruthCollection());
+    m_pixelSiHits.Clear();
+    m_sctSiHits.Clear();
     return StatusCode::SUCCESS; };
-  virtual StatusCode releaseEvent(const EventContext&) override {
+  virtual StatusCode releaseEvent(const EventContext& ctx) override {
+    std::vector<SiHitCollection> hitcolls;
+    hitcolls.push_back(m_pixelSiHits);
+    hitcolls.push_back(m_sctSiHits);
+    ATH_CHECK(m_ActsFatrasWriteHandler->WriteHits(hitcolls,ctx));
+    ATH_CHECK(m_truthRecordSvc->releaseEvent());
     return StatusCode::SUCCESS; };
   virtual ISF::SimulationFlavor simFlavor() const override{
     return ISF::Fatras; };
@@ -223,6 +233,9 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     const EventContext&) const;
 
  private:
+  // For sihit creation
+  SiHitCollection m_pixelSiHits;
+  SiHitCollection m_sctSiHits;
   // Templated tool retrieval
   template <class T>
   StatusCode retrieveTool(ToolHandle<T>& thandle) {
@@ -240,7 +253,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     "RandomEngineName", "Name of random number stream"};
 
   // Tracking geometry
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
 

@@ -23,7 +23,7 @@
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 
-#include <boost/random.hpp>
+#include <random>
 
 namespace CLHEP
 {
@@ -66,7 +66,7 @@ private:
   /// shoot random number proportionally to m_intensityPattern
   CLHEP::RandGeneral* m_biRandom;
   /// as with m_biRandom, but for FastReseededPRNG
-  std::unique_ptr<const boost::random::discrete_distribution<unsigned int>> m_t0Dist{nullptr};
+  std::unique_ptr<std::discrete_distribution<unsigned int>> m_t0Dist{nullptr};
   /// the service managing our random seeds/sequences
   ServiceHandle<IAthRNGSvc> m_randomSvc{this, "RandomSvc", "AthRNGSvc","The random number service that will be used."};
   ATHRNG::RNGWrapper*           m_rngWrapper ATLAS_THREAD_SAFE{};

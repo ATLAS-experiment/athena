@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNNUtils.h"
-#include "tauRecTools/HelperFunctions.h"
-#include <algorithm>
+
 #define GeV 1000
 
 namespace TauJetRNNUtils {
@@ -109,7 +108,8 @@ void VarCalc::insert(const std::string &name, ClusterCalc func, const std::vecto
 
 std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_vars,
 					const std::vector<std::string>& track_vars,
-					const std::vector<std::string>& cluster_vars) {
+					const std::vector<std::string>& cluster_vars,
+					bool useTRT) {
     auto calc = std::make_unique<VarCalc>();
 
     // Scalar variable calculator functions
@@ -132,7 +132,7 @@ std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_v
     calc->insert("absleadTrackEta",            Variables::absleadTrackEta, scalar_vars);
     calc->insert("leadTrackDeltaEta",          Variables::leadTrackDeltaEta, scalar_vars);
     calc->insert("leadTrackDeltaPhi",          Variables::leadTrackDeltaPhi, scalar_vars);
-    calc->insert("leadTrackProbNNorHT",        Variables::leadTrackProbNNorHT, scalar_vars);
+    calc->insert("leadTrackProbNNorHT", useTRT ? Variables::leadTrackProbNNorHT : Variables::leadTrackProbNNorHT_noTRT, scalar_vars);
     calc->insert("EMFracFixed",                Variables::EMFracFixed, scalar_vars);
     calc->insert("etHotShotWinOverPtLeadTrk",  Variables::etHotShotWinOverPtLeadTrk, scalar_vars);
     calc->insert("hadLeakFracFixed",           Variables::hadLeakFracFixed, scalar_vars);
@@ -159,7 +159,7 @@ std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_v
     calc->insert("nIBLHitsAndExp", Variables::Track::nIBLHitsAndExp, track_vars);
     calc->insert("nPixelHitsPlusDeadSensors", Variables::Track::nPixelHitsPlusDeadSensors, track_vars);
     calc->insert("nSCTHitsPlusDeadSensors", Variables::Track::nSCTHitsPlusDeadSensors, track_vars);
-    calc->insert("eProbabilityNNorHT", Variables::Track::eProbabilityNNorHT, track_vars);
+    calc->insert("eProbabilityNNorHT", useTRT ? Variables::Track::eProbabilityNNorHT : Variables::Track::eProbabilityNNorHT_noTRT, track_vars);
 
     // Cluster variable calculator functions
     calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
@@ -322,6 +322,28 @@ bool leadTrackProbNNorHT(const xAOD::TauJet &tau, double &out){
   }
   return true;
 }
+
+bool leadTrackProbNNorHT_noTRT(const xAOD::TauJet &tau, double &out){
+  auto tracks = tau.allTracks();
+
+  // Sort tracks in descending pt order
+  if (!tracks.empty()) {
+    auto cmp_pt = [](const xAOD::TauTrack *lhs, const xAOD::TauTrack *rhs) {
+      return lhs->pt() > rhs->pt();
+    };
+    std::sort(tracks.begin(), tracks.end(), cmp_pt);
+
+    const xAOD::TauTrack* tauLeadTrack = tracks.at(0);
+    // Dummy values for eProbNN = 0.5, eProbHT = 1.
+    out = (tauLeadTrack->pt()>2000.) ? 0.5 : 1.;
+  }
+  else {
+    out = 0.;
+  }
+  return true;
+}
+
+
 
 bool EMFracFixed(const xAOD::TauJet &tau, double &out){
   static const SG::ConstAccessor<float> acc_emFracFixed("EMFracFixed");
@@ -496,6 +518,13 @@ bool eProbabilityNNorHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track
   static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
   float eProbabilityNN = acc_eProbabilityNN(*atrack);
   out = (atrack->pt()>2000.) ? eProbabilityNN : eProbabilityHT;
+  return true;
+}
+
+bool eProbabilityNNorHT_noTRT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+  auto atrack = track.track();
+  // Dummy values for eProbNN = 0.5, eProbHT = 1
+  out = (atrack->pt()>2000.) ? 0.5 : 1.;
   return true;
 }
 

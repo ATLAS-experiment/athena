@@ -18,10 +18,11 @@
 
 #include "CLHEP/Units/PhysicalConstants.h"
 
+#include <G4Region.hh>
 #include <cmath>
 
-StoppedParticleFastSim::StoppedParticleFastSim(const std::string& name, const std::string& fsSDname)
-  : G4VFastSimulationModel(name)
+StoppedParticleFastSim::StoppedParticleFastSim(const std::string& name, G4Region* region, const std::string& fsSDname)
+  : G4VFastSimulationModel(name, region)
   , m_fsSDname(fsSDname)
 {
 }

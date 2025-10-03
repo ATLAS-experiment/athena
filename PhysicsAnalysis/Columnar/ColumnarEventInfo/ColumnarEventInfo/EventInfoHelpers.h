@@ -5,8 +5,8 @@
 /// @author Nils Krumnack
 
 
-#ifndef COLUMNAR_CORE_EVENT_INFO_HELPERS_H
-#define COLUMNAR_CORE_EVENT_INFO_HELPERS_H
+#ifndef COLUMNAR_EVENT_INFO_EVENT_INFO_HELPERS_H
+#define COLUMNAR_EVENT_INFO_EVENT_INFO_HELPERS_H
 
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
@@ -23,7 +23,7 @@ namespace columnar
     /// class.
 
 
-    template<ContainerId CI = ContainerId::eventInfo,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ContainerId::eventInfo,typename CM=ColumnarModeDefault>
     class EventTypeAccessor final
     {
       ColumnAccessor<CI,uint32_t,CM> m_eventTypeBitmaskAcc;

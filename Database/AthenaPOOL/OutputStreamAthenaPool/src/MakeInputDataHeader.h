@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MAKEINPUTDATAHEADER_H
@@ -14,8 +14,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include <string>
-
-class DataHeader;
 
 /** @class MakeInputDataHeader 
  *  @brief This class provides an algorithm to make an OutputDataHeader the InputDataHeader.
@@ -39,8 +37,8 @@ public:
 
 private:
    /// StreamName, name of Stream to be made Input.
-   SG::ReadHandleKey<DataHeader> m_streamName { this, "StreamName", "" };
-   SG::WriteHandleKey<DataHeader> m_aliasName { this, "AliasName", "" };
+   SG::ReadHandleKey<DataHeader> m_streamName{this, "StreamName", ""};
+   SG::WriteHandleKey<DataHeader> m_aliasName{this, "AliasName", ""};
 
    /// KeepCurrentInput, keep the original InputDataHeader: default = false
    BooleanProperty m_keepInput { this, "KeepCurrentInput", false, };

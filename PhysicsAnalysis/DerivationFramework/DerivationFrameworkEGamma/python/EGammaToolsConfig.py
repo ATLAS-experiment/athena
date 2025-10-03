@@ -104,3 +104,26 @@ def PhotonVertexSelectionWrapperKernelCfg(
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc
+
+def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
+    acc = ComponentAccumulator()
+    # needed for reading cells, do not rely on other config to do that
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    acc.merge(LArGMCfg(flags))
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    acc.merge(TileGMCfg(flags))
+    #
+    kwargs.setdefault('StoreCookedMoments',False)
+    kwargs.setdefault('StoreInputMoments',False)
+    kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.ForwardElectrons)
+
+    from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    acc.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
+    from CaloRec.CaloTopoClusterConfig import getTopoMoments
+    momentsMaker = acc.popToolsAndMerge(getTopoMoments(flags))
+    kwargs.setdefault("ClusterMomentMaker",[momentsMaker])
+
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGammaCookieCutClusterTool(
+            name, **kwargs))
+    return acc

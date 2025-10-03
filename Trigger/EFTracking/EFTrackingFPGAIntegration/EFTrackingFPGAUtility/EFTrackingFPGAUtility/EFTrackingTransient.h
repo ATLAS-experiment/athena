@@ -27,12 +27,20 @@ namespace EFTrackingTransient
   constexpr unsigned int MAX_NUM_CLUSTERS = 409600;
   constexpr unsigned int NUM_PIXEL_WORD = 10;
   constexpr unsigned int NUM_STRIP_WORD = 9;
+
+
   constexpr unsigned int NUM_PIXEL_ROW = 19;
   constexpr unsigned int NUM_STRIP_ROW = 14;
   constexpr unsigned long PIXEL_BLOCK_BUF_SIZE = NUM_PIXEL_WORD * MAX_NUM_CLUSTERS;
   constexpr unsigned long STRIP_BLOCK_BUF_SIZE = NUM_STRIP_WORD * MAX_NUM_CLUSTERS;
   constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
   constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
+
+  // Optimize these, 
+  constexpr unsigned int NUM_MAXINPUT_PIXEL_ROW = 3;
+  constexpr unsigned int NUM_MAXINPUT_STRIP_ROW = 2;
+  constexpr unsigned long PIXEL_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
+  constexpr unsigned long STRIP_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
 
   /**
    * @brief The StripClusters struct contains all xAOD::StripCluster data members
@@ -69,8 +77,6 @@ namespace EFTrackingTransient
     int channelsInPhi = 0;
     int channelsInEta = 0;
     float widthInEta = 0.0f;
-    float omegaX = 0.0f;
-    float omegaY = 0.0f;
     int totList[1000] = {0};
     int totalToT = 0;
     float chargeList[1000] = {0.0f};
@@ -162,8 +168,6 @@ namespace EFTrackingTransient
     int *pcChannelsInPhi;
     int *pcChannelsInEta;
     float *pcWidthInEta;
-    float *pcOmegaX;
-    float *pcOmegaY;
     int *pcTotList;
     int *pcTotalToT;
     float *pcChargeList;
@@ -229,8 +233,6 @@ namespace EFTrackingTransient
     std::vector<int> channelsInPhi;
     std::vector<int> channelsInEta;
     std::vector<float> widthInEta;
-    std::vector<float> omegaX;
-    std::vector<float> omegaY;
     std::vector<int> totList;
     std::vector<int> totalToT;
     std::vector<float> chargeList;

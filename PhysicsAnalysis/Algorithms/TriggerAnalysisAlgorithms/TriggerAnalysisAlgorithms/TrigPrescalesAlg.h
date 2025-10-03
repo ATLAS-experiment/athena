@@ -64,7 +64,7 @@ namespace CP
 
     /// \brief the accessors for \ref m_prescaleDecoration and \ref m_trigList combination
   private:
-    std::vector<SG::AuxElement::Decorator<float>> m_prescaleAccessors;
+    std::vector<SG::Decorator<float>> m_prescaleAccessors;
 
     /// \brief the decoration for trigger selection
   private:
@@ -72,7 +72,7 @@ namespace CP
 
     /// \brief the accessors for \ref m_selectionDecoration and \ref m_trigList combination
   private:
-    std::unordered_map<std::string, SG::AuxElement::ConstAccessor<bool>> m_selectionAccessors;
+    std::unordered_map<std::string, SG::ConstAccessor<bool>> m_selectionAccessors;
   };
 }
 

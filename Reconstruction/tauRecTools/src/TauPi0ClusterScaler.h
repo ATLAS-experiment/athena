@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0CLUSTERSCALER_H
@@ -49,6 +49,9 @@ private:
   
   /** @brief associate charged PFOs to neutral PFOs */
   void subtractChargedEnergyFromNeutralPFOs(const xAOD::TauJet& tau, xAOD::PFOContainer& pNeutralPFOContainer) const;
+
+  Gaudi::Property<double> m_maxDeltaRNeutralCharged {this, "MaxDeltaRNeutralCharged", 0.04, "max DeltaR for neutral-charged cluster association"};
+
 };
 
 #endif  // TAURECTOOLS_TAUPI0CLUSTERSCALER_H

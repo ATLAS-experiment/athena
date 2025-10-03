@@ -8,6 +8,7 @@
 #ifndef EVENT_LOOP__DIRECT_INPUT_MODULE_H
 #define EVENT_LOOP__DIRECT_INPUT_MODULE_H
 
+#include <AsgTools/PropertyWrapper.h>
 #include <EventLoop/Module.h>
 #include <optional>
 #include <vector>
@@ -28,11 +29,12 @@ namespace EL
 
       using Module::Module;
 
-      std::vector<std::string> fileList;
-      std::optional<uint64_t> skipEvents;
-      std::optional<uint64_t> maxEvents;
-
-
+      Gaudi::Property<std::vector<std::string>> fileList {this, "fileList", {},
+        "the list of files to process"};
+      Gaudi::Property<uint64_t> skipEvents {this, "skipEvents", 0,
+        "the number of events to skip"};
+      Gaudi::Property<int64_t> maxEvents {this, "maxEvents", -1,
+        "the maximum number of events to process (-1 means all)"};
 
       /// Inherited Members
       /// =================

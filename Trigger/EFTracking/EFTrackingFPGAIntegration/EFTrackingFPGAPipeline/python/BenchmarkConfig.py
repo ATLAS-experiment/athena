@@ -6,8 +6,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
-    kwarg.setdefault('bdfID','0000:83:00.1') # On the testbed
-    kwarg.setdefault('xclbin', '/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin')
+    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
     kwarg.setdefault('StripClusterKernelName','processHits')
     kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
@@ -16,7 +16,9 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
     kwarg.setdefault('InputPixelClusterKey', 'ITkPixelClusters')
     kwarg.setdefault('InputStripClusterKey', 'ITkStripClusters')
     kwarg.setdefault('runPassThrough', flags.FPGADataPrep.RunPassThrough)
+    kwarg.setdefault('doEmulation', flags.FPGADataPrep.DoEmulation)
     
+
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
     clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
@@ -38,14 +40,18 @@ def BenchmarkCfg(flags, name = 'BenckmarkAlg', **kwarg):
 
     return acc
 
+def FPGAClusterSortingCfg(flags):
+    acc = ComponentAccumulator()
+    from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
+    ClusterSorting = FPGAClusterSortingAlgCfg(flags)
+    
+    acc.merge(ClusterSorting)
+    return acc
+    
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    
-    # Add FPGA Integration flags
-    from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
-    addFPGADataPrepFlags(flags)
     
     flags.Detector.EnableCalo = False
     flags.FPGADataPrep.DoActs = True
@@ -60,8 +66,8 @@ if __name__ == "__main__":
     flags.Tracking.ITkMainPass.doAthenaToActsCluster = True
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint = True
     flags.Tracking.ITkMainPass.doAthenaSpacePoint = True
-    from TrkConfig.TrkConfigFlags import TrackingComponent
-    flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
+    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
+    actsLegacyWorkflowFlags(flags)
     flags.Acts.doRotCorrection = False
     
     flags.Concurrency.NumThreads = 1
@@ -110,15 +116,18 @@ if __name__ == "__main__":
         # convert xAOD Clusters to SPs
         from EFTrackingFPGAUtility.DataPrepToActsConfig import UseActsSpacePointFormationCfg
         cfg.merge(UseActsSpacePointFormationCfg(flags))
-                
+        
+        # Sort FPGAClusters
+        cfg.merge(FPGAClusterSortingCfg(flags))
+        
         # Run the ACTS Fast Tracking on FPGA clusters
         from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimDataPrepConnectToFastTracking
         cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="FPGA",
                             **{'PixelSeedingAlg.InputSpacePoints' : ['FPGAPixelSpacePoints'],
                                 'StripSeedingAlg.InputSpacePoints' : [''],
-                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["FPGAPixelClusters","FPGAStripClusters"],
-                                'PixelClusterToTruthAssociationAlg.Measurements' : 'FPGAPixelClusters',
-                                'StripClusterToTruthAssociationAlg.Measurements' : 'FPGAStripClusters'}))
+                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["SortedFPGAPixelClusters","SortedFPGAStripClusters"],
+                                'PixelClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAPixelClusters',
+                                'StripClusterToTruthAssociationAlg.Measurements' : 'SortedFPGAStripClusters'}))
         
         # Run the ACTS Fast Tracking (C-100) as an additional reference
         cfg.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks="ActsFast"))
@@ -127,6 +136,16 @@ if __name__ == "__main__":
                     "xAOD::TrackParticleContainer#FPGATrackParticles",
                     "xAOD::TrackParticleAuxContainer#FPGATrackParticlesAux."
                     ]
+        
+        # This part is needed to extract technical efficiency
+        from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
+        cfg.merge( ITkActsPrepDataToxAODCfg( flags,
+                    PixelMeasurementContainer = "ITkPixelMeasurements_offl",
+                    StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
+        OutputItemList += ['xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl',
+                            'xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
+                            'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl',
+                            'xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.']
 
     from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
     cfg.merge(FPGAOutputValidationCfg(flags, **{

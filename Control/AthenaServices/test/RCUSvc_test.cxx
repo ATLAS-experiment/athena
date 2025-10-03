@@ -18,8 +18,7 @@
 #include "TestTools/initGaudi.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
-#include "boost/thread/shared_mutex.hpp"
-#include "boost/thread/shared_lock_guard.hpp"
+#include <shared_mutex>
 #include <iostream>
 #include <cassert>
 
@@ -158,7 +157,7 @@ public:
   };
 
 private:
-  boost::shared_mutex m_sm;
+  std::shared_mutex m_sm;
   std::vector<std::unique_ptr<RCUObject<Payload> > > m_objs;
   IRCUSvc& m_svc;
 };
@@ -191,7 +190,7 @@ void ThreadedTest::runtest()
 
 void ThreadedTest::testThread::operator()()
 {
-  boost::shared_lock_guard<boost::shared_mutex> guard (m_test.m_sm);
+  std::shared_lock<std::shared_mutex> guard (m_test.m_sm);
   Gaudi::Hive::setCurrentContextId (m_iworker);
   IIncidentListener& listener = dynamic_cast<IIncidentListener&> (m_svc);
 

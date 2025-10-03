@@ -26,6 +26,7 @@ class OnnxRuntimeBase {
         void initialize(TString);
 
         std::vector<float> runONNXInference(std::vector<float>& inputTensorValues) const;
+        std::vector<std::vector<float>> runONNXInference(std::vector<std::vector<float> >& inputTensorValues) const;
         std::vector<std::vector<float>> runONNXInference(NetworkBatchInput& inputTensorValues) const;
         std::map<int, Eigen::MatrixXf> runONNXInferenceMultilayerOutput(NetworkBatchInput& inputTensorValues) const;
 

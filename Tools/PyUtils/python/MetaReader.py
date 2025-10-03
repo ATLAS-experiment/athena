@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 import re
@@ -37,7 +37,7 @@ lite_primary_keys_to_keep = [
     'eventTypes', 'processingTags', 'itemList']
 lite_TagInfo_keys_to_keep = [
     'beam_energy', 'beam_type', 'GeoAtlas', 'IOVDbGlobalTag',
-    'AODFixVersion', 'project_name', 'mc_campaign']
+    'AODFixVersion', 'project_name', 'mc_campaign', 'keywords']
 
 trigger_keys = [
     'TriggerConfigInfo',
@@ -48,6 +48,21 @@ trigger_keys = [
     'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTMonitoring', 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTPS',
     'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1', 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS',
 ]
+
+trigger_menu_json_map = {
+    "xAOD__TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1PSAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS",
+    "xAOD__TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_BGAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_BG",
+    "xAOD__TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT",
+    "xAOD__TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTMonitoringAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTMonitoring",
+    "xAOD__TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTPSAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTPS",
+    "xAOD__TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1Aux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1",
+    "TriggerMenuJson_L1PSAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS",
+    "TriggerMenuJson_BGAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_BG",
+    "TriggerMenuJson_HLTAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT",
+    "TriggerMenuJson_HLTMonitoringAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTMonitoring",
+    "TriggerMenuJson_HLTPSAux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTPS",
+    "TriggerMenuJson_L1Aux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1",
+}
 
 
 def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = None,
@@ -166,411 +181,503 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             meta_dict[filename]['file_comp_alg'] = current_file.GetCompressionAlgorithm()
             meta_dict[filename]['file_comp_level'] = current_file.GetCompressionLevel()
 
-            if isRNTuple( current_file.Get(PoolOpts.RNTupleNames.MetaData) ):
+            if (
+                isRNTuple(md:=current_file.Get(PoolOpts.RNTupleNames.MetaData))
+                and mode != "tiny"
+            ):
                 msg.warning(
                     "Reading in-file metadata from RNTuple is currently of limited support"
                 )
-                meta_dict[filename]["nentries"] = dataheader_nentries(current_file)
+                meta_dict[filename]["metadata_items"] = {}
 
-                def get_raw_md(filename):
-                    """Helper function to read the raw metadata from RNTuple.
-                    We use subprocess because output from RNTupleReader uses
-                    std::ostream for output, which is not captured by PyROOT.
+                try:
+                    from ROOT import RNTupleReader
+                except ImportError:
+                    from ROOT.Experimental import RNTupleReader
 
-                    Returns the raw metadata as a json-like string, but one cannot
-                    assume it is valid json.
+                reader = RNTupleReader.Open(md)
+                entry = reader.CreateEntry()
+                reader.LoadEntry(0, entry)
+                auxes = {}
+                classes_with_aux = {
+                    "xAOD::FileMetaData_v1",
+                    "xAOD::FileMetaDataAuxInfo_v1",
+                    "xAOD::TriggerMenuJsonAuxContainer_v1",
+                    "DataVector<xAOD::TriggerMenuJson_v1>",
+                    "xAOD::TruthMetaDataAuxContainer_v1",
+                    "DataVector<xAOD::TruthMetaData_v1>",
+                    "xAOD::CutBookkeeperContainer_v1",
+                    "xAOD::CutBookkeeperAuxContainer_v1",
+                    "xAOD::LumiBlockRangeAuxContainer_v1",
+                    "DataVector<xAOD::LumiBlockRange_v1>",
+                }
 
-                    Known issues of invalid json constructs:
-                    - double quotes are not escaped in string values
-                    - single-quoted strings
-                    - nested json objects and lists inside single-quoted strings
-                    """
-                    import subprocess
-                    import sys
-
-                    raw_md = f"""
-from ROOT.Experimental import RNTupleReader
-from ROOT import TFile
-
-
-def read_md(infile):
-    file_handle = TFile.Open(infile)
-    md = file_handle.Get("MetaData")
-    reader = RNTupleReader.Open(md)
-    reader.Show(0)
-
-read_md("{filename}")
-                    """
-                    result = subprocess.run(
-                        [sys.executable, "-c", raw_md],
-                        capture_output=True,
-                        text=True,
-                    )
-                    raw_data = "".join(result.stdout.split())
-                    return raw_data.replace("\x00", '""')
-
-                def extract_keys(json_like_string, keys):
-                    """Helper for extracting key-value pairs from json-like string"""
-                    import json
-
-                    result = {}
-                    for key in keys:
-                        if key == "m_eventTypes":
-                            pattern = rf'"{key}":(\[\{{.*?\}}\])'
-                        elif "beamEnergy" in key:
-                            pattern = rf'"{key}":(\b[+]?([0-9]*\.[0-9]+|[0-9]+\.?[0-9]*)[eE][+]?([0-9]+)\b)'
-                        else:
-                            pattern = rf'"{key}"\s*:\s*(\[[^\]]*\]|"[^"]*"|\d+)'
-                        match = re.search(pattern, json_like_string)
-                        if match:
-                            try:
-                                result[key] = json.loads(match.group(1))
-                            except json.JSONDecodeError:
-                                pass
-                    return result
-
-                # metadata keys which can be relatively reliably extracted from RNTuple
-                keys_to_extract = [
-                    "m_numberOfEvents",
-                    "m_runNumbers",
-                    "m_lumiBlockNumbers",
-                    "m_processingTags",
-                    "m_itemList",
-                    "m_eventTypes",
-                    "m_branchNames",
-                    "m_classNames",
-                    "FileMetaDataAuxDyn:amiTag",
-                    "FileMetaDataAuxDyn:AODFixVersion",
-                    "FileMetaDataAuxDyn:AODCalibVersion",
-                    "FileMetaDataAuxDyn:beamEnergy",
-                    "FileMetaDataAuxDyn:beamType",
-                    "FileMetaDataAuxDyn:conditionsTag",
-                    "FileMetaDataAuxDyn:dataYear",
-                    "FileMetaDataAuxDyn:generatorsInfo",
-                    "FileMetaDataAuxDyn:geometryVersion",
-                    "FileMetaDataAuxDyn:isDataOverlay",
-                    "FileMetaDataAuxDyn:mcCampaign",
-                    "FileMetaDataAuxDyn:mcProcID",
-                    "FileMetaDataAuxDyn:simFlavour",
-                    "productionRelease",
-                    "dataType",
-                ]
-
-                result = extract_keys(get_raw_md(filename), keys_to_extract)
-
-                item_list = []
-                from CLIDComps.clidGenerator import clidGenerator
-
-                cgen = clidGenerator("")
-                for item in result["m_itemList"]:
-                    item_list.append((cgen.getNameFromClid(item["_0"]), item["_1"].encode("utf-8")))
-                meta_dict[filename]["itemList"] = item_list
-                event_types = []
-                for event_type in result["m_eventTypes"]:
-                    fields = {
-                        key.removeprefix("m_"): value
-                        for key, value in event_type.items()
-                    }
-                    fields = _convert_event_type_bitmask(fields)
-                    fields = _convert_event_type_user_type(fields)
-                    event_types.extend(fields["type"])
-                meta_dict[filename]["eventTypes"] = event_types
-                meta_dict[filename]["numberOfEvents"] = result["m_numberOfEvents"]
-                meta_dict[filename]["runNumbers"] = result["m_runNumbers"]
-                meta_dict[filename]["lumiBlockNumbers"] = result["m_lumiBlockNumbers"]
-                meta_dict[filename]["processingTags"] = result["m_processingTags"]
-
-                meta_dict[filename]["EventFormat"] = {}
-                ef_items = {}
-                for branch_name, class_name in dict(
-                    zip(
-                        result["m_branchNames"],
-                        result["m_classNames"],
-                    )
-                ).items():
-                    ef_items[branch_name] = class_name
-                meta_dict[filename]["EventFormat"] = ef_items
-
-                meta_dict[filename]["FileMetaData"] = {}
-                for key in keys_to_extract:
-                    try:
-                        meta_dict[filename]["FileMetaData"][key.split(":")[1]] = (
-                            result[key]
-                        )
-                    except (IndexError, KeyError):
-                        continue
-                msg.debug(f"Read metadata from RNTuple: {meta_dict[filename]}")
-                return meta_dict
-
-            # ----- read extra metadata required for 'lite' and 'full' modes ----------------------------------------#
-            if mode != 'tiny':
-                # selecting from all tree the only one which contains metadata, respectively "MetaData"
-                metadata_tree = current_file.Get('MetaData')
-                # read all list of branches stored in "MetaData" tree
-                metadata_branches = metadata_tree.GetListOfBranches()
-                nr_of_branches = metadata_branches.GetEntriesFast()
-
-                # object to store the names of metadata containers and their corresponding class name.
-                meta_dict[filename]['metadata_items'] = {}
-
-                # create a container for the list of filters used for the lite version
-                meta_filter = {}
-
-                # set the filters for name
-                if mode == 'lite':
-                    if isGaudiEnv():
-                        meta_filter = {
-                            '/TagInfo': 'IOVMetaDataContainer_p1',
-                            'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
-                            '*': 'EventStreamInfo_p*'
-                        }
-                    else:
-                        meta_filter = {
-                            'FileMetaData': '*',
-                            'FileMetaDataAux.': 'xAOD::FileMetaDataAuxInfo_v1',
-                        }
-
-                # set the filters for name
-                if mode == 'peeker':
-                    meta_filter.update({
-                        'TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format AOD (deprecated)
-                        'TriggerMenuAux.': 'xAOD::TriggerMenuAuxContainer_v1',
-                        'DataVector<xAOD::TriggerMenu_v1>_TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format ESD (deprecated)
-                        'xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.': 'xAOD::TriggerMenuAuxContainer_v1',
-                        'TriggerMenuJson_HLT': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
-                        'TriggerMenuJson_HLTAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'TriggerMenuJson_HLTMonitoring': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
-                        'TriggerMenuJson_HLTMonitoringAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'TriggerMenuJson_HLTPS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
-                        'TriggerMenuJson_HLTPSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'TriggerMenuJson_L1': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
-                        'TriggerMenuJson_L1Aux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'TriggerMenuJson_L1PS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
-                        'TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'CutBookkeepers': 'xAOD::CutBookkeeperContainer_v1',
-                        'CutBookkeepersAux.': 'xAOD::CutBookkeeperAuxContainer_v1',
-                        'FileMetaData': '*',
-                        'FileMetaDataAux.': 'xAOD::FileMetaDataAuxInfo_v1',
-                        'TruthMetaData': '*',
-                        'TruthMetaDataAux.': 'xAOD::TruthMetaDataAuxContainer_v1',
-                        'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
-                        'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTMonitoring': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
-                        'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTMonitoringAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTPS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
-                        'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTPSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
-                        'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1Aux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
-                        'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1'
-                    })
-
-                    if isGaudiEnv():
-                        meta_filter.update({
-                            '/TagInfo': 'IOVMetaDataContainer_p1',
-                            'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
-                            '/Simulation/Parameters': 'IOVMetaDataContainer_p1',
-                            '/Digitization/Parameters': 'IOVMetaDataContainer_p1',
-                            '/EXT/DCS/MAGNETS/SENSORDATA': 'IOVMetaDataContainer_p1',
-                            '*': 'EventStreamInfo_p*'
-                        })
-
-                if (mode == 'full' or mode == 'iov') and meta_key_filter:
-                    meta_filter = {f: '*' for f in meta_key_filter}
-                # store all persistent classes for metadata container existing in a POOL/ROOT file.
-                persistent_instances = {}
                 dynamic_fmd_items = {}
 
-                # Protect non-Gaudi environments from meta-data classes it doesn't know about
-                if not isGaudiEnv():
-                    metadata_tree.SetBranchStatus("*", False)
+                meta_filter = get_meta_filter(mode, meta_key_filter)
 
-                for i in range(0, nr_of_branches):
-                    branch = metadata_branches.At(i)
-                    name = branch.GetName()
-                    if name == 'index_ref':
-                        # skip the index branch
+                for field in reader.GetDescriptor().GetTopLevelFields():
+                    normalizedName = field.GetFieldName()
+                    if "index_ref" in normalizedName:
+                        continue
+                    if regexIOVMetaDataContainer.match(field.GetTypeName()):
+                        # if field name is e.g. IOVMetaDataContainer_p1__Digitization_Parameters,
+                        # strip the prefix and change underscore to slash to slash
+                        normalizedName = (
+                            field.GetFieldName()
+                            .replace("IOVMetaDataContainer_p1_", "")
+                            .replace("_", "/")
+                        )
+                        meta_dict[filename]["metadata_items"][normalizedName] = (
+                            "IOVMetaDataContainer"
+                        )
+                    elif regexByteStreamMetadataContainer.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][field.GetFieldName()] = (
+                            "ByteStreamMetadataContainer"
+                        )
+                    elif regexEventStreamInfo.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][field.GetFieldName()] = (
+                            "EventStreamInfo"
+                        )
+                    elif regexXAODFileMetaData.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName().replace("xAOD__", "xAOD::")
+                        ] = field.GetTypeName()
+                    elif regexXAODFileMetaDataAuxDyn.match(
+                        normalizedName := field.GetFieldName()
+                        .replace("xAOD__", "xAOD::")
+                        .replace("AuxDyn:", "AuxDyn.")
+                    ):
+                        result = (
+                            False
+                            if entry[field.GetFieldName()] == "\x00"
+                            else entry[field.GetFieldName()]
+                        )
+                        dynamic_fmd_items[normalizedName.split(".")[1]] = result
+                        meta_dict[filename]["metadata_items"][normalizedName] = (
+                            field.GetTypeName()
+                        )
+                        continue
+                    elif regexXAODFileMetaDataAux.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("Aux:", "Aux.")
+                        ] = field.GetTypeName()
+                    elif regexXAODTruthMetaData.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("DataVector_", "DataVector<")
+                            .replace("__Truth", ">_Truth")
+                        ] = "TruthMetaData"
+                    elif regexXAODTruthMetaDataAux.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("Aux:", "Aux.")
+                        ] = field.GetTypeName()
+                    elif regexXAODEventFormat.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName().replace("xAOD__", "xAOD::")
+                        ] = field.GetTypeName()
+                    elif regexXAODTriggerMenuJson.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("DataVector_", "DataVector<")
+                            .replace("__Trigger", ">_Trigger")
+                        ] = field.GetTypeName()
+                    elif regexXAODTriggerMenuJsonAux.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("Aux:", "Aux.")
+                        ] = field.GetTypeName()
+                    elif regexXAODCutBookkeeperContainer.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("DataVector_", "DataVector<")
+                            .replace("__CutBookkeeper", ">_CutBookkeeper")
+                        ] = field.GetTypeName()
+                    elif regexXAODCutBookkeeperContainerAux.match(field.GetTypeName()):
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName()
+                            .replace("xAOD__", "xAOD::")
+                            .replace("Aux:", "Aux.")
+                        ] = field.GetTypeName()
+                    else:
+                        meta_dict[filename]["metadata_items"][
+                            field.GetFieldName().replace("Aux:", "Aux.")
+                        ] = field.GetTypeName()
+
+                    if field.GetTypeName() in classes_with_aux:
+                        # handle aux classes later
+                        auxes[field.GetFieldName()] = field.GetTypeName()
                         continue
 
-                    class_name = branch.GetClassName()
+                    if not should_keep_meta(
+                        normalizedName, field.GetTypeName(), meta_filter
+                    ):
+                        continue
 
-                    if regexIOVMetaDataContainer.match(class_name):
-                        name = name.replace('IOVMetaDataContainer_p1_', '').replace('_', '/')
+                    try:
+                        meta_dict[filename][normalizedName] = _convert_value(
+                            entry[field.GetFieldName()]
+                        )
+                    except KeyError:
+                        msg.warning(f"missing type {field.GetTypeName()}")
 
-                    if regexIOVMetaDataContainer.match(class_name):
-                        meta_dict[filename]['metadata_items'][name] = 'IOVMetaDataContainer'
-                    elif regexByteStreamMetadataContainer.match(class_name):
-                        meta_dict[filename]['metadata_items'][name] = 'ByteStreamMetadataContainer'
-                    elif regexEventStreamInfo.match(class_name):
-                        meta_dict[filename]['metadata_items'][name] = 'EventStreamInfo'
-                    elif regexXAODFileMetaData.match(class_name):
-                        meta_dict[filename]['metadata_items'][name] = 'FileMetaData'
-                    elif regexXAODTruthMetaData.match(class_name):
-                        meta_dict[filename]['metadata_items'][name] = 'TruthMetaData'
-                    else:
-                        type_name = class_name
-                        if not type_name:
-                            try:
-                                type_name = branch.GetListOfLeaves()[0].GetTypeName()
-                            except IndexError:
-                                pass
-                        meta_dict[filename]['metadata_items'][name] = type_name
+                meta_dict[filename]["metadata_items"] = denormalize_metadata_types(
+                    meta_dict[filename]["metadata_items"]
+                )
 
-                    if len(meta_filter) > 0:
-                        keep = False
-                        for filter_key, filter_class in meta_filter.items():
-                            if (filter_key.replace('/', '_') in name.replace('/', '_') or filter_key == '*') and fnmatchcase(class_name, filter_class):
-                                if 'CutBookkeepers' in filter_key:
-                                    keep = filter_key == name
-                                    if keep:
-                                        break
-                                else:
-                                    keep = True
-                                    break
+                def _get_aux_base(aux_key: str) -> str:
+                    # Remove known prefixes
+                    key = aux_key
+                    key = key.replace("xAOD__TriggerMenuJsonAuxContainer_v1_", "")
+                    key = key.replace("xAOD__FileMetaDataAuxInfo_v1_", "")
+                    key = key.replace("xAOD__TruthMetaDataAuxContainer_v1_", "")
+                    # Remove known suffixes
+                    if key.endswith("Aux:"):
+                        key = key[:-4]
+                    elif key.endswith("Aux"):
+                        key = key[:-3]
+                    # Remove any trailing ':' or '_'
+                    key = key.strip("_:")
+                    return key
 
-                        if not keep:
-                            continue
-                    else:
-                        # CutBookkeepers should always be filtered:
-                        if 'CutBookkeepers' in name and name not in ['CutBookkeepers', 'CutBookkeepersAux.']:
-                            continue
+                def _get_main_base(main_key: str) -> str:
+                    main_base = main_key
+                    # For DataVectors
+                    if main_key.startswith("DataVector_xAOD__TriggerMenuJson_v1__"):
+                        main_base = main_key.replace(
+                            "DataVector_xAOD__TriggerMenuJson_v1__", ""
+                        )
+                    # For FileMetaData
+                    elif main_key.startswith("xAOD__FileMetaData_v1_"):
+                        main_base = main_key.replace("xAOD__FileMetaData_v1_", "")
+                    # For TruthMetaData
+                    elif main_key.startswith("DataVector_xAOD__TruthMetaData_v1__"):
+                        main_base = main_key.replace(
+                            "DataVector_xAOD__TruthMetaData_v1__", ""
+                        )
+                    return main_base
 
-                    if not isGaudiEnv():
-                        metadata_tree.SetBranchStatus(f"{name}*", True)
+                def _find_associated_pairs(auxes: dict) -> list[tuple[str, str]]:
+                    # Build lookup tables
+                    aux_map = {}
+                    for k in auxes:
+                        if "Aux" in k:
+                            aux_map[_get_aux_base(k)] = k
 
-                    # assign the corresponding persistent class based of the name of the metadata container
-                    if regexEventStreamInfo.match(class_name):
-                        if class_name.endswith('_p1'):
-                            persistent_instances[name] = ROOT.EventStreamInfo_p1()
-                        elif class_name.endswith('_p2'):
-                            persistent_instances[name] = ROOT.EventStreamInfo_p2()
-                        else:
-                            persistent_instances[name] = ROOT.EventStreamInfo_p3()
-                    elif regexIOVMetaDataContainer.match(class_name):
-                        persistent_instances[name] = ROOT.IOVMetaDataContainer_p1()
-                    elif regexXAODEventFormat.match(class_name):
-                        persistent_instances[name] = ROOT.xAOD.EventFormat_v1()
-                    elif regexXAODTriggerMenu.match(class_name) and _check_project() not in ['AthGeneration']:
-                        persistent_instances[name] = ROOT.xAOD.TriggerMenuContainer_v1()
-                    elif regexXAODTriggerMenuAux.match(class_name) and _check_project() not in ['AthGeneration']:
-                        persistent_instances[name] = ROOT.xAOD.TriggerMenuAuxContainer_v1()
-                    elif regexXAODTriggerMenuJson.match(class_name) and _check_project() not in ['AthGeneration']:
-                        persistent_instances[name] = ROOT.xAOD.TriggerMenuJsonContainer_v1()
-                    elif regexXAODTriggerMenuJsonAux.match(class_name) and _check_project() not in ['AthGeneration']:
-                        persistent_instances[name] = ROOT.xAOD.TriggerMenuJsonAuxContainer_v1()
-                    elif regexXAODCutBookkeeperContainer.match(class_name):
-                        persistent_instances[name] = ROOT.xAOD.CutBookkeeperContainer_v1()
-                    elif regexXAODCutBookkeeperContainerAux.match(class_name):
-                        persistent_instances[name] = ROOT.xAOD.CutBookkeeperAuxContainer_v1()
-                    elif regexXAODFileMetaData.match(class_name):
-                        persistent_instances[name] = ROOT.xAOD.FileMetaData_v1()
-                    elif regexXAODFileMetaDataAux.match(class_name):
-                        persistent_instances[name] = ROOT.xAOD.FileMetaDataAuxInfo_v1()
-                    elif regexXAODTruthMetaData.match(class_name):
-                        persistent_instances[name] = ROOT.xAOD.TruthMetaDataContainer_v1()
-                    elif regexXAODTruthMetaDataAux.match(class_name):
-                        persistent_instances[name] = ROOT.xAOD.TruthMetaDataAuxContainer_v1()
+                    main_map = {}
+                    for k in auxes:
+                        base = _get_main_base(k)
+                        if base:
+                            main_map[base] = k
 
-                    if name in persistent_instances:
-                        branch.SetAddress(ROOT.AddressOf(persistent_instances[name]))
+                    # Find pairs
+                    pairs = []
+                    for base, aux_key in aux_map.items():
+                        if base in main_map:
+                            pairs.append((aux_key, main_map[base]))
+                    return pairs
 
-                    # This creates a dict to store the dynamic attributes of the xAOD::FileMetaData
-                    dynamicFMD = regexXAODFileMetaDataAuxDyn.match(name)
-                    if dynamicFMD:
-                        dynamicName = dynamicFMD.group().split('.')[-1]
-                        dynamicType = regex_cppname.match(class_name)
-                        if dynamicType:
-                            # this should be a string
-                            dynamic_fmd_items[dynamicName] = ROOT.std.string()
-                            branch.SetAddress(ROOT.AddressOf(dynamic_fmd_items[dynamicName]))
-                        else:
-                            dynamic_fmd_items[dynamicName] = None
+                for pair in _find_associated_pairs(auxes):
+                    return_obj = _convert_value(
+                        entry[pair[1]],
+                        entry[pair[0]],
+                    )
+                    key = next(
+                        (
+                            k
+                            for k, v in trigger_menu_json_map.items()
+                            if v
+                            == pair[1]
+                            .replace("xAOD__", "xAOD::")
+                            .replace("DataVector_", "DataVector<")
+                            .replace("__Trigger", ">_Trigger")
+                        ),
+                        auxes[pair[0]],
+                    )
 
+                    try:
+                        key = (
+                            key.replace("xAOD__", "xAOD::")
+                            if key.count("_") <= 1
+                            else key.replace("xAOD__", "xAOD::").rsplit("_", 2)[0]
+                        )
+                    except IndexError:
+                        pass
 
-                metadata_tree.GetEntry(0)
+                    if not should_keep_meta(
+                        pair[0]
+                        .replace("xAOD__", "xAOD::")
+                        .replace("DataVector_", "DataVector<")
+                        .replace("__Trigger", ">_Trigger")
+                        .replace("Aux:", "Aux."),
+                        key,
+                        meta_filter,
+                    ):
+                        continue
 
-                # This loads the dynamic attributes of the xAOD::FileMetaData from the TTree
-                for key in dynamic_fmd_items:
-                    if dynamic_fmd_items[key] is None:
-                        try:
-                            if key.startswith("is"):
-                                # this is probably a boolean
-                                dynamic_fmd_items[key] = getattr(metadata_tree, key) != '\x00'
-                            else:
-                                # this should be a float
-                                dynamic_fmd_items[key] = getattr(metadata_tree, key)
-                        except AttributeError:
-                            # should not happen, but just ignore missing attributes
-                            pass
-                    else:
-                        # convert ROOT.std.string objects to python equivalent
-                        dynamic_fmd_items[key] = str(dynamic_fmd_items[key])
-
-                # clean the meta-dict if the meta_key_filter flag is used, to return only the key of interest
-                if meta_key_filter:
-                    meta_dict[filename] = {}
-
-                # read the metadata
-                for name, content in persistent_instances.items():
-                    key = name
-                    if hasattr(content, 'm_folderName'):
-                        key = content.m_folderName
-
-                    # Some transition AODs contain both the Run2 and Run3 metadata formats. We only wish to read the Run3 format if such a file is encountered.
-                    has_r3_trig_meta = ('TriggerMenuJson_HLT' in persistent_instances or 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT' in persistent_instances)
-                    aux = None
-                    if key.startswith('TriggerMenuJson_') and not key.endswith('Aux.'): # interface container for the menu (AOD)
-                        aux = persistent_instances[key+'Aux.']
-                    elif key.startswith('DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_') and not key.endswith('Aux.'): # interface container for the menu (ESD)
-                        menuPart = key.split('_')[-1]
-                        aux = persistent_instances['xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_'+menuPart+'Aux.']    
-                    elif key == 'TriggerMenu' and 'TriggerMenuAux.' in persistent_instances and not has_r3_trig_meta: # AOD case (legacy support, HLT and L1 menus)
-                        aux = persistent_instances['TriggerMenuAux.']
-                    elif key == 'DataVector<xAOD::TriggerMenu_v1>_TriggerMenu' and 'xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.' in persistent_instances and not has_r3_trig_meta: # ESD case (legacy support, HLT and L1 menus)
-                        aux = persistent_instances['xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.']
-                    elif (key == 'CutBookkeepers'
-                          and 'CutBookkeepersAux.' in persistent_instances):
-                        aux = persistent_instances['CutBookkeepersAux.']
-                    elif key == 'CutBookkeepersAux.':
-                        continue   # Extracted using the interface object
-                    elif (key == 'FileMetaData'
-                          and 'FileMetaDataAux.' in persistent_instances):
-                        aux = persistent_instances['FileMetaDataAux.']
-                    elif (key == 'xAOD::FileMetaData_v1_FileMetaData'
-                          and 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.' in persistent_instances):
-                        aux = persistent_instances['xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.']
-                    elif (key == 'TruthMetaData'
-                          and 'TruthMetaDataAux.' in persistent_instances):
-                        aux = persistent_instances['TruthMetaDataAux.']
-                    elif key == 'TruthMetaDataAux.':
-                        continue   # Extracted using the interface object
-                    elif 'Menu' in key and key.endswith('Aux.'):
-                        continue   # Extracted using the interface object
-
-                    return_obj = _convert_value(content, aux)
-
-                    if 'TriggerMenuJson' in key  or ('TriggerMenu' in key and not has_r3_trig_meta):
-                        if 'RAWTriggerMenuJson' in return_obj:
-                            meta_dict[filename][key] = return_obj['RAWTriggerMenuJson']
-                            del return_obj['RAWTriggerMenuJson']
-                        if 'TriggerConfigInfo' not in meta_dict[filename]:
-                            meta_dict[filename]['TriggerConfigInfo'] = {}
-                        if 'dbkey' in return_obj:
-                            meta_dict[filename]['TriggerConfigInfo'][key.split('_')[-1]] = {
-                                'key' : return_obj['dbkey'],
-                                'name': return_obj['name']
-                                }
-                            del return_obj['dbkey']
-                            del return_obj['name']
-                        if 'TriggerMenu' not in meta_dict[filename]:
-                            meta_dict[filename]['TriggerMenu'] = {}
-                        meta_dict[filename]['TriggerMenu'].update(return_obj)
-                    elif "FileMetaData" in key:
+                    if "TriggerMenuJson" in pair[0]:
+                        if "RAWTriggerMenuJson" in return_obj:
+                            key = (
+                                pair[1]
+                                if pair[0].startswith("Trigger")
+                                else trigger_menu_json_map[pair[0]]
+                            )
+                            meta_dict[filename][key] = return_obj["RAWTriggerMenuJson"]
+                            del return_obj["RAWTriggerMenuJson"]
+                        if "TriggerConfigInfo" not in meta_dict[filename]:
+                            meta_dict[filename]["TriggerConfigInfo"] = {}
+                        if "dbkey" in return_obj:
+                            meta_dict[filename]["TriggerConfigInfo"][
+                                pair[0].split("_")[-1].replace("Aux:", "")
+                            ] = {"key": return_obj["dbkey"], "name": return_obj["name"]}
+                            del return_obj["dbkey"]
+                            del return_obj["name"]
+                        if "TriggerMenu" not in meta_dict[filename]:
+                            meta_dict[filename]["TriggerMenu"] = {}
+                        meta_dict[filename]["TriggerMenu"].update(return_obj)
+                    elif "FileMetaData" in pair[0]:
                         if "FileMetaData" not in meta_dict[filename]:
                             meta_dict[filename]["FileMetaData"] = dynamic_fmd_items
                         meta_dict[filename]["FileMetaData"].update(return_obj)
-                    else:
-                        meta_dict[filename][key] = return_obj
+                    elif "TruthMetaData" in pair[0]:
+                        if pair == ("TruthMetaDataAux:", "TruthMetaData"):
+                            if "TruthMetaData" not in meta_dict[filename]:
+                                meta_dict[filename]["TruthMetaData"] = {}
+                            meta_dict[filename]["TruthMetaData"].update(return_obj)
+                        else:
+                            # for backward compatibility
+                            meta_dict[filename][
+                                pair[1]
+                                .replace("xAOD__", "xAOD::")
+                                .replace("DataVector_", "DataVector<")
+                                .replace("__Truth", ">_Truth")
+                            ] = {}
+                            meta_dict[filename][
+                                pair[0]
+                                .replace("xAOD__", "xAOD::")
+                                .replace("Aux:", "Aux.")
+                            ] = {}
+                    elif pair == ("CutBookkeepersAux:", "CutBookkeepers"):
+                        meta_dict[filename]["CutBookkeepers"] = return_obj
+
+                msg.debug(f"Read metadata from RNTuple: {meta_dict[filename]}")
+
+            else:
+                # ----- read extra metadata required for 'lite' and 'full' modes ----------------------------------------#
+                if mode != 'tiny':
+                    # selecting from all tree the only one which contains metadata, respectively "MetaData"
+                    metadata_tree = current_file.Get('MetaData')
+                    # read all list of branches stored in "MetaData" tree
+                    metadata_branches = metadata_tree.GetListOfBranches()
+                    nr_of_branches = metadata_branches.GetEntriesFast()
+
+                    # object to store the names of metadata containers and their corresponding class name.
+                    meta_dict[filename]['metadata_items'] = {}
+
+                    meta_filter = get_meta_filter(mode, meta_key_filter)
+
+                    # store all persistent classes for metadata container existing in a POOL/ROOT file.
+                    persistent_instances = {}
+                    dynamic_fmd_items = {}
+
+                    # Protect non-Gaudi environments from meta-data classes it doesn't know about
+                    if not isGaudiEnv():
+                        metadata_tree.SetBranchStatus("*", False)
+
+                    for i in range(0, nr_of_branches):
+                        branch = metadata_branches.At(i)
+                        name = branch.GetName()
+                        if name == 'index_ref':
+                            # skip the index branch
+                            continue
+
+                        class_name = branch.GetClassName()
+
+                        if regexIOVMetaDataContainer.match(class_name):
+                            name = name.replace('IOVMetaDataContainer_p1_', '').replace('_', '/')
+
+                        if regexIOVMetaDataContainer.match(class_name):
+                            meta_dict[filename]['metadata_items'][name] = 'IOVMetaDataContainer'
+                        elif regexByteStreamMetadataContainer.match(class_name):
+                            meta_dict[filename]['metadata_items'][name] = 'ByteStreamMetadataContainer'
+                        elif regexEventStreamInfo.match(class_name):
+                            meta_dict[filename]['metadata_items'][name] = 'EventStreamInfo'
+                        elif regexXAODFileMetaData.match(class_name):
+                            meta_dict[filename]['metadata_items'][name] = 'FileMetaData'
+                        elif regexXAODTruthMetaData.match(class_name):
+                            meta_dict[filename]['metadata_items'][name] = 'TruthMetaData'
+                        else:
+                            type_name = class_name
+                            if not type_name:
+                                try:
+                                    type_name = branch.GetListOfLeaves()[0].GetTypeName()
+                                except IndexError:
+                                    pass
+                            meta_dict[filename]['metadata_items'][name] = type_name
+
+                        if len(meta_filter) > 0:
+                            keep = False
+                            for filter_key, filter_class in meta_filter.items():
+                                if (filter_key.replace('/', '_') in name.replace('/', '_') or filter_key == '*') and fnmatchcase(class_name, filter_class):
+                                    if 'CutBookkeepers' in filter_key:
+                                        keep = filter_key == name
+                                        if keep:
+                                            break
+                                    else:
+                                        keep = True
+                                        break
+
+                            if not keep:
+                                continue
+                        else:
+                            # CutBookkeepers should always be filtered:
+                            if 'CutBookkeepers' in name and name not in ['CutBookkeepers', 'CutBookkeepersAux.']:
+                                continue
+
+                        if not isGaudiEnv():
+                            metadata_tree.SetBranchStatus(f"{name}*", True)
+
+                        # assign the corresponding persistent class based of the name of the metadata container
+                        if regexEventStreamInfo.match(class_name):
+                            if class_name.endswith('_p1'):
+                                persistent_instances[name] = ROOT.EventStreamInfo_p1()
+                            elif class_name.endswith('_p2'):
+                                persistent_instances[name] = ROOT.EventStreamInfo_p2()
+                            else:
+                                persistent_instances[name] = ROOT.EventStreamInfo_p3()
+                        elif regexIOVMetaDataContainer.match(class_name):
+                            persistent_instances[name] = ROOT.IOVMetaDataContainer_p1()
+                        elif regexXAODEventFormat.match(class_name):
+                            persistent_instances[name] = ROOT.xAOD.EventFormat_v1()
+                        elif regexXAODTriggerMenu.match(class_name) and _check_project() not in ['AthGeneration']:
+                            persistent_instances[name] = ROOT.xAOD.TriggerMenuContainer_v1()
+                        elif regexXAODTriggerMenuAux.match(class_name) and _check_project() not in ['AthGeneration']:
+                            persistent_instances[name] = ROOT.xAOD.TriggerMenuAuxContainer_v1()
+                        elif regexXAODTriggerMenuJson.match(class_name) and _check_project() not in ['AthGeneration']:
+                            persistent_instances[name] = ROOT.xAOD.TriggerMenuJsonContainer_v1()
+                        elif regexXAODTriggerMenuJsonAux.match(class_name) and _check_project() not in ['AthGeneration']:
+                            persistent_instances[name] = ROOT.xAOD.TriggerMenuJsonAuxContainer_v1()
+                        elif regexXAODCutBookkeeperContainer.match(class_name):
+                            persistent_instances[name] = ROOT.xAOD.CutBookkeeperContainer_v1()
+                        elif regexXAODCutBookkeeperContainerAux.match(class_name):
+                            persistent_instances[name] = ROOT.xAOD.CutBookkeeperAuxContainer_v1()
+                        elif regexXAODFileMetaData.match(class_name):
+                            persistent_instances[name] = ROOT.xAOD.FileMetaData_v1()
+                        elif regexXAODFileMetaDataAux.match(class_name):
+                            persistent_instances[name] = ROOT.xAOD.FileMetaDataAuxInfo_v1()
+                        elif regexXAODTruthMetaData.match(class_name):
+                            persistent_instances[name] = ROOT.xAOD.TruthMetaDataContainer_v1()
+                        elif regexXAODTruthMetaDataAux.match(class_name):
+                            persistent_instances[name] = ROOT.xAOD.TruthMetaDataAuxContainer_v1()
+
+                        if name in persistent_instances:
+                            branch.SetAddress(ROOT.AddressOf(persistent_instances[name]))
+
+                        # This creates a dict to store the dynamic attributes of the xAOD::FileMetaData
+                        dynamicFMD = regexXAODFileMetaDataAuxDyn.match(name)
+                        if dynamicFMD:
+                            dynamicName = dynamicFMD.group().split('.')[-1]
+                            dynamicType = regex_cppname.match(class_name)
+                            if dynamicType:
+                                # this should be a string
+                                dynamic_fmd_items[dynamicName] = ROOT.std.string()
+                                branch.SetAddress(ROOT.AddressOf(dynamic_fmd_items[dynamicName]))
+                            else:
+                                dynamic_fmd_items[dynamicName] = None
+
+
+                    metadata_tree.GetEntry(0)
+
+                    # This loads the dynamic attributes of the xAOD::FileMetaData from the TTree
+                    for key in dynamic_fmd_items:
+                        if dynamic_fmd_items[key] is None:
+                            try:
+                                if key.startswith("is"):
+                                    # this is probably a boolean
+                                    dynamic_fmd_items[key] = getattr(metadata_tree, key) != '\x00'
+                                else:
+                                    # this should be a float
+                                    dynamic_fmd_items[key] = getattr(metadata_tree, key)
+                            except AttributeError:
+                                # should not happen, but just ignore missing attributes
+                                pass
+                        else:
+                            # convert ROOT.std.string objects to python equivalent
+                            dynamic_fmd_items[key] = str(dynamic_fmd_items[key])
+
+                    # clean the meta-dict if the meta_key_filter flag is used, to return only the key of interest
+                    if meta_key_filter:
+                        meta_dict[filename] = {}
+
+                    # read the metadata
+                    for name, content in persistent_instances.items():
+                        key = name
+                        if hasattr(content, 'm_folderName'):
+                            key = content.m_folderName
+
+                        # Some transition AODs contain both the Run2 and Run3 metadata formats. We only wish to read the Run3 format if such a file is encountered.
+                        has_r3_trig_meta = ('TriggerMenuJson_HLT' in persistent_instances or 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT' in persistent_instances)
+                        aux = None
+                        if key.startswith('TriggerMenuJson_') and not key.endswith('Aux.'): # interface container for the menu (AOD)
+                            aux = persistent_instances[key+'Aux.']
+                        elif key.startswith('DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_') and not key.endswith('Aux.'): # interface container for the menu (ESD)
+                            menuPart = key.split('_')[-1]
+                            aux = persistent_instances['xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_'+menuPart+'Aux.']    
+                        elif key == 'TriggerMenu' and 'TriggerMenuAux.' in persistent_instances and not has_r3_trig_meta: # AOD case (legacy support, HLT and L1 menus)
+                            aux = persistent_instances['TriggerMenuAux.']
+                        elif key == 'DataVector<xAOD::TriggerMenu_v1>_TriggerMenu' and 'xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.' in persistent_instances and not has_r3_trig_meta: # ESD case (legacy support, HLT and L1 menus)
+                            aux = persistent_instances['xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.']
+                        elif (key == 'CutBookkeepers'
+                            and 'CutBookkeepersAux.' in persistent_instances):
+                            aux = persistent_instances['CutBookkeepersAux.']
+                        elif key == 'CutBookkeepersAux.':
+                            continue   # Extracted using the interface object
+                        elif (key == 'FileMetaData'
+                            and 'FileMetaDataAux.' in persistent_instances):
+                            aux = persistent_instances['FileMetaDataAux.']
+                        elif (key == 'xAOD::FileMetaData_v1_FileMetaData'
+                            and 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.' in persistent_instances):
+                            aux = persistent_instances['xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.']
+                        elif (key == 'TruthMetaData'
+                            and 'TruthMetaDataAux.' in persistent_instances):
+                            aux = persistent_instances['TruthMetaDataAux.']
+                        elif key == 'TruthMetaDataAux.':
+                            continue   # Extracted using the interface object
+                        elif 'Menu' in key and key.endswith('Aux.'):
+                            continue   # Extracted using the interface object
+
+                        return_obj = _convert_value(content, aux)
+
+                        if 'TriggerMenuJson' in key  or ('TriggerMenu' in key and not has_r3_trig_meta):
+                            if 'RAWTriggerMenuJson' in return_obj:
+                                meta_dict[filename][key] = return_obj['RAWTriggerMenuJson']
+                                del return_obj['RAWTriggerMenuJson']
+                            if 'TriggerConfigInfo' not in meta_dict[filename]:
+                                meta_dict[filename]['TriggerConfigInfo'] = {}
+                            if 'dbkey' in return_obj:
+                                meta_dict[filename]['TriggerConfigInfo'][key.split('_')[-1]] = {
+                                    'key' : return_obj['dbkey'],
+                                    'name': return_obj['name']
+                                    }
+                                del return_obj['dbkey']
+                                del return_obj['name']
+                            if 'TriggerMenu' not in meta_dict[filename]:
+                                meta_dict[filename]['TriggerMenu'] = {}
+                            meta_dict[filename]['TriggerMenu'].update(return_obj)
+                        elif "FileMetaData" in key:
+                            if "FileMetaData" not in meta_dict[filename]:
+                                meta_dict[filename]["FileMetaData"] = dynamic_fmd_items
+                            meta_dict[filename]["FileMetaData"].update(return_obj)
+                        else:
+                            meta_dict[filename][key] = return_obj
 
             try:
                 # get the number of events from EventStreamInfo
@@ -921,7 +1028,6 @@ def _extract_fields(obj):
 
 def _convert_value(value, aux = None):
     cl=value.__class__
-
     if hasattr(cl, '__cpp_name__'):
         result = regex_cppname.match(cl.__cpp_name__)
         if result:
@@ -1116,6 +1222,8 @@ def _extract_fields_esi(value):
     from CLIDComps.clidGenerator import clidGenerator
     cgen = clidGenerator("")
     for clid, sgkey in value.m_itemList:
+        if isinstance(sgkey, bytes):
+            sgkey = sgkey.decode()
         result['itemList'].append((cgen.getNameFromClid(clid), sgkey))
 
     return result
@@ -1400,6 +1508,7 @@ def make_peeker(meta_dict):
                 'mc_campaign',
                 'hepmc_version',
                 'generators',
+                'keywords',
                 'data_year',
             ]
             for item in list(meta_dict[filename]['/TagInfo']):
@@ -1417,6 +1526,7 @@ def make_peeker(meta_dict):
                 'Simulator',
                 'PhysicsList',
                 'SimulatedDetectors',
+                'IsDataOverlay',
             ]
             for item in list(meta_dict[filename]['/Simulation/Parameters']):
                 if item not in keys_to_keep:
@@ -1519,20 +1629,29 @@ def promote_keys(meta_dict, mode):
                 if mode == 'peeker' and 'simFlavour' in md[key]:
                     md['SimulationFlavour'] = md[key]['simFlavour']
 
-                if 'simFlavour' in md[key] and ('FullG4' in md[key]['simFlavour'] or 'ATLFAST' in md[key]['simFlavour']):
+                if mode == 'peeker' and 'isDataOverlay' in md[key]:
+                    md['IsDataOverlay'] = md[key]['isDataOverlay']
+
+                if 'dataType' in md[key]:
+                    md['processingTags'] = [md[key]['dataType']]
+
+                if (
+                    ('simFlavour' in md[key] and ('FullG4' in md[key]['simFlavour'] or 'ATLFAST' in md[key]['simFlavour']))
+                    or 'DAOD_TRUTH' in md[key]['dataType']
+                ):
                     md['eventTypes'].append('IS_SIMULATION')
                 else:
                     md['eventTypes'].append('IS_DATA')
 
-                if 'GeoAtlas' in md and 'ATLAS' in md['GeoAtlas']:
+                if (
+                    'GeoAtlas' in md and 'ATLAS' in md['GeoAtlas']
+                    or 'DAOD_TRUTH' in md[key]['dataType']
+                ):
                     md['eventTypes'].append('IS_ATLAS')
                     # this is probably safe to assume for all files used in AnalysisBase
                     md['eventTypes'].append('IS_PHYSICS')
                 else:
                     md['eventTypes'].append('IS_TESTBEAM')
-
-                if 'dataType' in md[key]:
-                    md['processingTags'] = [md[key]['dataType']]
 
                 if mode == 'peeker':
                     if 'productionRelease' in md[key]:
@@ -1639,6 +1758,134 @@ def dataheader_nentries(infile):
             if ROOT.gROOT.GetVersionInt() < 63100:
                 raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
             if isRNTuple(obj):
-                return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                try:
+                    return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                except AttributeError:
+                    return ROOT.RNTupleReader.Open(obj).GetNEntries()
             else:
                 raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
+
+def get_meta_filter(mode="lite", meta_key_filter=None) -> dict:
+    """Return a dictionary of metadata filters based on the mode and
+    optional meta_key_filter.
+    """
+
+    if meta_key_filter is None:
+        meta_key_filter = []
+
+    # create a container for the list of filters used for the lite version
+    meta_filter = {}
+
+    # set the filters for name
+    if mode == 'lite':
+        if isGaudiEnv():
+            meta_filter = {
+                '/TagInfo': 'IOVMetaDataContainer_p1',
+                'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
+                '*': 'EventStreamInfo_p*'
+            }
+        else:
+            meta_filter = {
+                'FileMetaData': '*',
+                'FileMetaDataAux.': 'xAOD::FileMetaDataAuxInfo_v1',
+            }
+
+    # set the filters for name
+    if mode == 'peeker':
+        meta_filter.update({
+            'TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format AOD (deprecated)
+            'TriggerMenuAux.': 'xAOD::TriggerMenuAuxContainer_v1',
+            'DataVector<xAOD::TriggerMenu_v1>_TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format ESD (deprecated)
+            'xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.': 'xAOD::TriggerMenuAuxContainer_v1',
+            'TriggerMenuJson_HLT': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
+            'TriggerMenuJson_HLTAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'TriggerMenuJson_HLTMonitoring': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
+            'TriggerMenuJson_HLTMonitoringAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'TriggerMenuJson_HLTPS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
+            'TriggerMenuJson_HLTPSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'TriggerMenuJson_L1': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
+            'TriggerMenuJson_L1Aux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'TriggerMenuJson_L1PS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
+            'TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'CutBookkeepers': 'xAOD::CutBookkeeperContainer_v1',
+            'CutBookkeepersAux.': 'xAOD::CutBookkeeperAuxContainer_v1',
+            'FileMetaData': '*',
+            'FileMetaDataAux.': 'xAOD::FileMetaDataAuxInfo_v1',
+            'TruthMetaData': '*',
+            'TruthMetaDataAux.': 'xAOD::TruthMetaDataAuxContainer_v1',
+            'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
+            'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTMonitoring': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
+            'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTMonitoringAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTPS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
+            'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_HLTPSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
+            'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1Aux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+            'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
+            'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1'
+        })
+
+        if isGaudiEnv():
+            meta_filter.update({
+                '/TagInfo': 'IOVMetaDataContainer_p1',
+                'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
+                '/Simulation/Parameters': 'IOVMetaDataContainer_p1',
+                '/Digitization/Parameters': 'IOVMetaDataContainer_p1',
+                '/EXT/DCS/MAGNETS/SENSORDATA': 'IOVMetaDataContainer_p1',
+                '*': 'EventStreamInfo_p*'
+            })
+
+    if (mode == 'full' or mode == 'iov') and meta_key_filter:
+        meta_filter = {f: '*' for f in meta_key_filter}
+
+    return meta_filter
+
+def denormalize_metadata_types(metadata_dict):
+    """
+    Convert canonical/C++ STL types in the metadata_items dictionary back to their
+    ROOT equivalents for backward compatibility.
+    - 'float' => 'Float_t'
+    - 'char' => 'Char_t'
+    - 'std::string' => 'string'
+    - 'xAOD::FileMetaData_v1' => 'FileMetaData'
+    - 'xAOD::FileMetaDataAuxInfo_v1' => 'FileMetaDataAux'
+    (add more as needed)
+    """
+    type_map = {
+        "float": "Float_t",
+        "char": "Char_t",
+        "std::string": "string",
+        "std::uint32_t": "UInt_t",
+        "xAOD::FileMetaData_v1": "FileMetaData",
+    }
+    denormalized = {}
+    for k, v in metadata_dict.items():
+        new_v = v
+        for old, new in type_map.items():
+            if new_v == old:
+                new_v = new
+            elif new_v.endswith("." + old):
+                new_v = new_v.rsplit(".", 1)[0] + "." + new
+        denormalized[k] = new_v
+    return denormalized
+
+
+def should_keep_meta(normalizedName, typeName, meta_filter):
+    """
+    Helper function to determine if metadata should be kept based on meta_filter.
+    """
+    if len(meta_filter) == 0:
+        return True
+
+    for filter_key, filter_class in meta_filter.items():
+        if (
+            filter_key.replace("/", "_") in normalizedName.replace("/", "_")
+            or filter_key == "*"
+        ) and fnmatchcase(typeName, filter_class):
+            if "CutBookkeepers" in filter_key:
+                keep = filter_key == normalizedName
+                if keep:
+                    return True
+            else:
+                return True
+    return False

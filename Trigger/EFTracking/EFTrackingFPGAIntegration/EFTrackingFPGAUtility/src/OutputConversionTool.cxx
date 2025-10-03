@@ -187,20 +187,20 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
               {
                 auto Ghit_w1 = get_bitfields_GHITZ_w1(ghits_words[0]);
                 auto Ghit_w2 = get_bitfields_GHITZ_w2(ghits_words[1]);
-                ATH_MSG_DEBUG("Global Hits: ");
-                ATH_MSG_DEBUG("GHIT W1: ");
-                ATH_MSG_DEBUG("\tlast: " << Ghit_w1.last/GHITZ_W1_LAST_mf);
-                ATH_MSG_DEBUG("\tlyr: " << Ghit_w1.lyr/GHITZ_W1_LYR_mf);
-                ATH_MSG_DEBUG("\trad: " << Ghit_w1.rad/GHITZ_W1_RAD_mf);
-                ATH_MSG_DEBUG("\tphi: " << Ghit_w1.phi/GHITZ_W1_PHI_mf);
-                ATH_MSG_DEBUG("\tz: " << Ghit_w1.z/GHITZ_W1_Z_mf);
-                ATH_MSG_DEBUG("\tlastofslice: " << Ghit_w1.lastofslice/GHITZ_W1_LASTOFSLICE_mf);
-                ATH_MSG_DEBUG("\tspare: " << Ghit_w1.spare/GHITZ_W1_SPARE_mf);
-                ATH_MSG_DEBUG("GHIT W2: ");
-                ATH_MSG_DEBUG("\tcluster1: " << Ghit_w2.cluster1/GHITZ_W2_CLUSTER1_mf);
-                ATH_MSG_DEBUG("\tcluster2: " << Ghit_w2.cluster2/GHITZ_W2_CLUSTER2_mf);
-                ATH_MSG_DEBUG("\trow: " << Ghit_w2.row/GHITZ_W2_ROW_mf);
-                ATH_MSG_DEBUG("\tspare: " << Ghit_w2.spare/GHITZ_W2_SPARE_mf);
+                 ATH_MSG_DEBUG("Global Hits: ");
+                 ATH_MSG_DEBUG("GHIT W1: ");
+                 ATH_MSG_DEBUG("\tlast: " << Ghit_w1.last/GHITZ_W1_LAST_mf);
+                 ATH_MSG_DEBUG("\tlyr: " << Ghit_w1.lyr/GHITZ_W1_LYR_mf);
+                 ATH_MSG_DEBUG("\trad: " << Ghit_w1.rad/GHITZ_W1_RAD_mf);
+                 ATH_MSG_DEBUG("\tphi: " << Ghit_w1.phi/GHITZ_W1_PHI_mf);
+                 ATH_MSG_DEBUG("\tz: " << Ghit_w1.z/GHITZ_W1_Z_mf);
+                 ATH_MSG_DEBUG("\tlastofslice: " << Ghit_w1.lastofslice/GHITZ_W1_LASTOFSLICE_mf);
+                 ATH_MSG_DEBUG("\tspare: " << Ghit_w1.spare/GHITZ_W1_SPARE_mf);
+                 ATH_MSG_DEBUG("GHIT W2: ");
+                 ATH_MSG_DEBUG("\tcluster1: " << Ghit_w2.cluster1/GHITZ_W2_CLUSTER1_mf);
+                 ATH_MSG_DEBUG("\tcluster2: " << Ghit_w2.cluster2/GHITZ_W2_CLUSTER2_mf);
+                 ATH_MSG_DEBUG("\trow: " << Ghit_w2.row/GHITZ_W2_ROW_mf);
+                 ATH_MSG_DEBUG("\tspare: " << Ghit_w2.spare/GHITZ_W2_SPARE_mf);
                 ghits_words.clear();
                 if (Ghit_w1.last == 1)
                   {
@@ -221,7 +221,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                 // For pixel EDM aux, we need
                 // id, idHash, localPosition, localCovariance, rdoList
                 // channelsInPhi, channelsInEta, width in Eta
-                // omegaX, omegaY, global position
+                // global position
                 // totalToT
                 pcAux->idHash.push_back(get_bitfields_EDM_PIXELCLUSTER_w1(pixel_edm_words[0]).id_hash);
 
@@ -262,8 +262,6 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
 
                 pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w7_localcovariance_xx(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).localcovariance_xx));
                 pcAux->localCovariance.push_back(to_real_EDM_PIXELCLUSTER_w7_localcovariance_yy(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).localcovariance_yy));
-                pcAux->omegaX.push_back(to_real_EDM_PIXELCLUSTER_w7_omega_x(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).omega_x));
-                pcAux->omegaY.push_back(to_real_EDM_PIXELCLUSTER_w7_omega_y(get_bitfields_EDM_PIXELCLUSTER_w7(pixel_edm_words[6]).omega_y));
 
                 pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w8_globalposition_x(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).globalposition_x));
                 pcAux->globalPosition.push_back(to_real_EDM_PIXELCLUSTER_w8_globalposition_y(get_bitfields_EDM_PIXELCLUSTER_w8(pixel_edm_words[7]).globalposition_y));
@@ -302,8 +300,6 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                     ATH_MSG_DEBUG("\tchannelsInPhi: " << pcAux->channelsInPhi.back());
                     ATH_MSG_DEBUG("\tchannelsInEta: " << pcAux->channelsInEta.back());
                     ATH_MSG_DEBUG("\twidthInEta: " << pcAux->widthInEta.back());
-                    ATH_MSG_DEBUG("\tomegaX: " << pcAux->omegaX.back());
-                    ATH_MSG_DEBUG("\tomegaY: " << pcAux->omegaY.back());
                     ATH_MSG_DEBUG("\ttotalToT: " << pcAux->totalToT.back());
                 }
                 break;
@@ -427,7 +423,7 @@ StatusCode OutputConversionTool::decodeFPGAoutput(const std::vector<uint64_t> &b
                     GTRACK_HDR_w1 gtrack_w1 = get_bitfields_GTRACK_HDR_w1(gtracks_words[0]);
                     GTRACK_HDR_w2 gtrack_w2 = get_bitfields_GTRACK_HDR_w2(gtracks_words[1]);
                     GTRACK_HDR_w3 gtrack_w3 = get_bitfields_GTRACK_HDR_w3(gtracks_words[2]);
-                    ATH_MSG_DEBUG("GTrack Hits: ");
+                    ATH_MSG_DEBUG("GTrack: ");
                     ATH_MSG_DEBUG("\tflag: 0x" << std::hex << gtrack_w1.flag/GTRACK_HDR_W1_FLAG_mf << std::dec);
                     ATH_MSG_DEBUG("\ttype: " << gtrack_w1.type/GTRACK_HDR_W1_TYPE_mf);
                     ATH_MSG_DEBUG("\tetaregion: " << gtrack_w1.eta_region/GTRACK_HDR_W1_ETA_REGION_mf);

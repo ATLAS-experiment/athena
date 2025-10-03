@@ -92,7 +92,7 @@ TextFileDBReader::readFile(const std::string & readFile)
 	  while (!istr2.eof()) { 
 	    std::string value;
 	    istr2 >> value;
-	    if (!value.empty()) currentFields.push_back(value);
+	    if (!value.empty()) currentFields.push_back(std::move(value));
 	  }
 	} else {
 	  // Get row of values

@@ -18,7 +18,7 @@ atlas_add_library( xAODTracking
    PUBLIC_HEADERS xAODTracking
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers  AthLinks GeoPrimitives
-   EventPrimitives xAODBase xAODCore xAODMeasurementBase ${extra_libs} )
+   EventPrimitives xAODBase xAODCore xAODMeasurementBase TruthUtils ${extra_libs} )
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODTracking/selection.xml

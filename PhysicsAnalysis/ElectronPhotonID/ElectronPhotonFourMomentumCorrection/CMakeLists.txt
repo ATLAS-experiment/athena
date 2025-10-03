@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ElectronPhotonFourMomentumCorrection )
@@ -11,18 +11,17 @@ endif()
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( Boost )
+find_package( GTest )
 
 # Component(s) in the package:
 atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
    ElectronPhotonFourMomentumCorrection/*.h Root/*.cxx
    PUBLIC_HEADERS ElectronPhotonFourMomentumCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgMessagingLib xAODCaloEvent xAODEgamma
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgServicesLib AsgTools AsgTestingLib AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib ColumnarCoreLib
    xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
-   xAODRootAccess xAODTracking 
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AthLinks xAODMetaData egammaLayerRecalibTool
+   xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
+   PRIVATE_LINK_LIBRARIES  AthLinks xAODMetaData egammaLayerRecalibTool
    PathResolver ${extra_libs} )
 
 if( NOT XAOD_STANDALONE )
@@ -32,6 +31,10 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools AthenaBaseComps
       EgammaAnalysisInterfacesLib ElectronPhotonFourMomentumCorrectionLib GaudiKernel
       PATInterfaces xAODBase xAODCaloEvent xAODCore xAODEgamma xAODEventInfo xAODTruth )
+else ()
+   atlas_add_component( ElectronPhotonFourMomentumCorrection
+      src/components/*.cxx
+      LINK_LIBRARIES ElectronPhotonFourMomentumCorrectionLib )
 endif()
 
 atlas_add_dictionary( ElectronPhotonFourMomentumCorrectionDict
@@ -57,7 +60,7 @@ atlas_add_executable( ElectronPhotonFourMomentumCorrection_testUniformityCorrect
    util/testUniformityCorrections.cxx
    LINK_LIBRARIES ElectronPhotonFourMomentumCorrectionLib )
 
-if( XAOD_STANDALONE )
+if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
    atlas_add_executable( ElectronPhotonFourMomentumCorrection_testEgammaCalibTool
       util/testEgammaCalibTool.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -66,7 +69,7 @@ if( XAOD_STANDALONE )
 endif()
 
 # Test(s) in the package:
-if( XAOD_STANDALONE )
+if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
    atlas_add_test( ut_maintest
                    SCRIPT test/ut_ElectronPhotonFourMomentumCorrection_maintest.py
                    POST_EXEC_SCRIPT nopost.sh PROPERTIES TIMEOUT 300 )
@@ -78,6 +81,11 @@ if( XAOD_STANDALONE )
                    POST_EXEC_SCRIPT nopost.sh )
 endif()
 
+atlas_add_test( gt_ColumnarToolTests
+                SOURCES test/gt_ColumnarToolTests.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib ElectronPhotonFourMomentumCorrectionLib
+                POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} ) 
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

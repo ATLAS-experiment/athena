@@ -12,10 +12,12 @@
 #include "PixelSensorGmxSD.h"
 
 // Athena headers
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 // Geant4 headers
 #include "G4ChargedGeantino.hh"
+#include <G4EventManager.hh>
 #include "G4Geantino.hh"
 #include "G4SDManager.hh"
 #include "G4Step.hh"
@@ -30,21 +32,24 @@
 
 #include <InDetSimEvent/SiHitIdHelper.h>
 
-// For make unique
-#include <memory>
-
 
 PixelSensorGmxSD::PixelSensorGmxSD(const std::string& name, const std::string& hitCollectionName,GeoModelIO::ReadGeoModel * sqlreader)
   : G4VSensitiveDetector( name )
-  , m_HitColl( hitCollectionName )
+  , m_HitCollName( hitCollectionName )
 {
     m_sqlreader = sqlreader;
 }
 
-// Initialize from G4 - necessary to new the write handle for now
+// Initialize from G4 - cache the hit collection for the current event
 void PixelSensorGmxSD::Initialize(G4HCofThisEvent *)
 {
-  if (!m_HitColl.isValid()) m_HitColl = std::make_unique<SiHitCollection>();
+  // ISF calls G4SDManager::PrepareNewEvent() before the Geant4 event loop starts...
+  if(auto* eventManger = G4EventManager::GetEventManager()){
+    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
+      m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
+    }
+  }
+
 }
 
 

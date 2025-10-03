@@ -503,8 +503,8 @@ struct TAuxStore::impl {
 
           // Leave the rest up to the function that is shared with the
           // dynamic branches:
-          RETURN_CHECK("xAOD::TAuxStore::impl::scanInputTree",
-                       setupAuxBranch(*sbr, auxName, true));
+          //cppcheck-suppress nullPointerRedundantCheck
+          RETURN_CHECK("xAOD::TAuxStore::impl::scanInputTree",setupAuxBranch(*sbr, auxName, true));
         }
 
         // Don't check the rest of the loop's body:

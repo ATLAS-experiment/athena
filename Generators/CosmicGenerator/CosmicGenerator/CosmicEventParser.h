@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include "CLHEP/Vector/ThreeVector.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 class CosmicEventParser {
@@ -63,7 +64,7 @@ std::istream& CosmicEventParser::read(std::istream& is)
 
 
   m_momentum.setVect(mom);
-  double energy = sqrt(pow(105.66,2)+mom.mag2());
+  double energy = sqrt(pow(ParticleConstants::muonMassInMeV,2)+mom.mag2());
   m_momentum.setE(energy);
 
   if(id == 5) m_pdgId = 13;

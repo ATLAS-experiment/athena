@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_PTFROMALPHABETA_H
@@ -26,7 +26,7 @@ class PtFromAlphaBeta: public AthAlgTool
     
   virtual StatusCode initialize() override;
 
-  void setMCFlag(const BooleanProperty& use_mcLUT,
+  void setMCFlag(bool use_mcLUT,
 		 const TrigL2MuonSA::PtEndcapLUTSvc* ptEndcapLUTSvc);
 
  public:
@@ -43,7 +43,7 @@ class PtFromAlphaBeta: public AthAlgTool
     float f(float x, float c0, float c1, float c2, float c3) const;
     float fp(float x, float c33, float c22, float c1) const;
     
-    BooleanProperty  m_use_mcLUT;
+    bool m_use_mcLUT{false};
     Gaudi::Property< bool > m_use_cscpt {
 	this, "useCscPt", false, ""};
     Gaudi::Property< bool > m_avoid_misaligned_cscs {

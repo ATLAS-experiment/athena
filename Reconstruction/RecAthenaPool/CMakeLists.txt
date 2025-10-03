@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RecAthenaPool )
@@ -23,7 +23,7 @@ find_package( AthenaPoolUtilitiesTest )
 
 if( ATHENAPOOLUTILITIESTEST_FOUND )
   set( RECATHENAPOOL_REFERENCE_TAG
-       RecAthenaPoolReference-02-00-00 )
+       RecAthenaPoolReference-02-00-01 )
   run_tpcnv_test( RecTPCnv_15.0.0   AOD-15.0.0-full
                    REQUIRED_LIBRARIES JetEventAthenaPoolPoolCnv
                    REFERENCE_TAG ${RECATHENAPOOL_REFERENCE_TAG} )

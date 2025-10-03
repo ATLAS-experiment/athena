@@ -10,18 +10,17 @@ namespace utf = boost::unit_test;
 
 BOOST_AUTO_TEST_SUITE(IdDictLabelTest)
 BOOST_AUTO_TEST_CASE(IdDictLabelConstructors){
-  BOOST_CHECK_NO_THROW(IdDictLabel());
-  IdDictLabel i1;
+  BOOST_CHECK_NO_THROW(IdDictLabel(""));
+  IdDictLabel i1("");
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictLabel i2(i1));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictLabel i3(std::move(i1)));
-  [[maybe_unused]] IdDictLabel i4{"test", true, 100};
-  [[maybe_unused]] IdDictLabel i5{.m_name="sroe", .m_valued=true, .m_value=1};
+  [[maybe_unused]] IdDictLabel i4("test", 100);
 }
 BOOST_AUTO_TEST_CASE(EmptyIdDictLabelAccessors){
-  IdDictLabel f;
-  BOOST_TEST(f.m_name == "");
-  BOOST_TEST(f.m_valued == false);
-  BOOST_TEST(f.m_value == 0);
+  IdDictLabel f("");
+  BOOST_TEST(f.name() == "");
+  BOOST_TEST(f.valued() == false);
+  BOOST_TEST(f.value() == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

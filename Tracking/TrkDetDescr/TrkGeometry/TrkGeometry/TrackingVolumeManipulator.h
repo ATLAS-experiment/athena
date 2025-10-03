@@ -69,15 +69,6 @@ protected:
        - ithe volume that holdes the BoundarySurface
        - the face type of the boundary to be set
        - the volume array to be set as inside volume array */
-  static void setInsideVolumeArray(TrackingVolume& tvol,
-                                   BoundarySurfaceFace face,
-                                   BinnedArray<TrackingVolume>* insidevolarray);
-
-  /** protected method to set inside VolumeArray of a BoundarySurface:
-      input:
-       - ithe volume that holdes the BoundarySurface
-       - the face type of the boundary to be set
-       - the volume array to be set as inside volume array */
   static void setInsideVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
@@ -91,16 +82,6 @@ protected:
   static void setOutsideVolume(TrackingVolume& tvol,
                                BoundarySurfaceFace face,
                                TrackingVolume* outsidevol);
-
-  /** protected method to set outside VolumeArray of a BoundarySurface:
-      input:
-       - the volume that holdes the BoundarySurface
-       - the face type of the boundary to be set
-       - the volume array to be set as outside volume array */
-  static void setOutsideVolumeArray(
-    TrackingVolume& tvol,
-    BoundarySurfaceFace face,
-    BinnedArray<TrackingVolume>* outsidevolarray);
 
   /** protected method to set outside VolumeArray of a BoundarySurface:
       input:

@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = "Instantiate egammaSelectedTrackCopy with default configuration"
+""" Instantiate egammaSelectedTrackCopy with default configuration
+"""
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory

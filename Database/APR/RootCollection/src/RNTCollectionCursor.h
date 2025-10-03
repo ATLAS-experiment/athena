@@ -11,9 +11,6 @@
 #include "CollectionBase/ICollectionDescription.h"
 #include "CollectionBase/ICollectionCursor.h"
 
-#include "PersistencySvc/IPositionSeek.h"
-#include "AthenaKernel/ICollectionSize.h"
-
 #include <memory>
 
 #include "RVersion.h"
@@ -43,9 +40,7 @@ namespace pool {
        * An interface used to navigate the result of a query on a collection
        * stored in RNTuple
        */
-      class RNTCollectionCursor : public ICollectionCursor,
-                                  virtual public IPositionSeek,
-                                  virtual public implements<ICollectionSize>
+      class RNTCollectionCursor : public ICollectionCursor
       {
       public:
 
@@ -61,11 +56,11 @@ namespace pool {
          /// Returns the selected Tokens and Attributes for the current row of the query result set.
          virtual const pool::CollectionRowBuffer& currentRow() const override;
 
-         /// Seeks the cursor to a given position in the collection.
-         virtual bool seek(long long int position) override;
-
          /// Return the size of the collection.
-         virtual int size() override;
+         virtual std::size_t size() override;
+
+         /// Seeks the cursor to a given position in the collection.
+         virtual bool seek(std::size_t position) override;
 
          /// Returns the event reference Token for the current row.
          virtual const Token& eventRef() const override;
@@ -90,7 +85,7 @@ namespace pool {
          /// "Token rowBuffer" for reading Tokens as strings and converting them later
          std::vector< std::pair< Token*, std::string > >  m_tokens;
 
-         int                            m_idx;
+	 std::size_t                    m_idx;
          bool                           m_dummyRef;
       };
    }

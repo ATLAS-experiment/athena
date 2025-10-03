@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RoiSerialise.cxx         
@@ -118,7 +118,7 @@ void RoiUtil::serialise( const IRoiDescriptor* roi, std::vector<RoiUtil::roitype
   if ( plusextra ) param |= RoiUtil::ROITYPE;
 
   //  s.push_back( roi->isFullscan() ? 1 : 0 );
-  s.push_back( *((roitype_t*)&param) );
+  s.push_back( * static_cast<roitype_t*>(&param) );
 
   int Nextra = 0;
   if ( plusextra ) Nextra = 3;
@@ -166,7 +166,7 @@ IRoiDescriptor*  RoiUtil::deserialise( const RoiUtil::roitype_t*& s_end, const R
   const roitype_t* s = s_end;
 
   /// get the packed version / fullscan / composite  word
-  uint32_t param = *((uint32_t*)(&s[RoiUtil::PARAM]));
+  uint32_t param = *(reinterpret_cast<const uint32_t*>(&s[RoiUtil::PARAM]));
 
   /// get the version
   int version = (param>>8);

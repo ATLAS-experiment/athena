@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -62,11 +62,7 @@ StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
     // Tau intermediate axis (corrected for tau vertex)
     TLorentzVector tauInterAxis;
 
-    // In trigger, jet candidate does not have a vertex
-    const xAOD::Vertex* jetVertex = nullptr;
-    if (!inTrigger()) {
-      jetVertex = tauRecTools::getJetVertex(*jetSeed);
-    }
+    const xAOD::Vertex* jetVertex = tauRecTools::getJetVertex(*jetSeed);
 
     // Redo the vertex correction when tau vertex is different from jet vertex
     if (jetVertex != tau.vertex()) {

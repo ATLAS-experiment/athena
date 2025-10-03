@@ -65,32 +65,46 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
   // --- print RIO
   ATH_MSG_VERBOSE ("RIO ID prints as "<<rio);
   ATH_MSG_VERBOSE ("RIO.locP = "<<Amg::toString(rio.localPosition()));
-
-  if (rio.type(Trk::PrepRawDataType::PixelCluster)) {
-    if (m_pixClusCor.isEnabled()) {
-        return m_pixClusCor->correct(rio, trk, ctx);
-    }
-  } else if (rio.type(Trk::PrepRawDataType::SCT_Cluster)) {
-    if (m_sctClusCor.isEnabled()) {
-      return m_sctClusCor->correct(rio, trk, ctx);
-    }
-  } else if (rio.type(Trk::PrepRawDataType::TRT_DriftCircle)) {
-    if (m_trt_Cor.isEnabled()){
-      return m_trt_Cor->correct(rio, trk, ctx);
-    }
-  } else if (rio.type(Trk::PrepRawDataType::MdtPrepData)) {
-    if (m_muonDriftCircleCor.isEnabled()) {
-        return m_muonDriftCircleCor->correct(rio, trk, ctx);
-    }
-  } else if (rio.type(Trk::PrepRawDataType::RpcPrepData) ||
-             rio.type(Trk::PrepRawDataType::TgcPrepData) ||
-             rio.type(Trk::PrepRawDataType::sTgcPrepData) ||
-             rio.type(Trk::PrepRawDataType::MMPrepData) ||
-             rio.type(Trk::PrepRawDataType::CscPrepData)) {
-      if (m_muonClusterCor.isEnabled()) {
-          return m_muonClusterCor->correct(rio, trk, ctx);
-      }
+  switch (rio.prdType()) {
+      using enum Trk::PrepRawDataType;
+      case PixelCluster:
+        if (m_pixClusCor.isEnabled()) {
+          return m_pixClusCor->correct(rio, trk, ctx);
+        }
+        break;
+      case SCT_Cluster: 
+        if (m_sctClusCor.isEnabled()) {
+          return m_sctClusCor->correct(rio, trk, ctx);
+        }
+        break;
+      case TRT_DriftCircle:   
+        if (m_trt_Cor.isEnabled()){
+          return m_trt_Cor->correct(rio, trk, ctx);
+        }
+        break;
+      case MdtPrepData:
+        if (m_muonDriftCircleCor.isEnabled()) {
+          return m_muonDriftCircleCor->correct(rio, trk, ctx);
+        }
+        break;
+      case RpcPrepData:
+      case TgcPrepData:
+      case sTgcPrepData:
+      case MMPrepData:
+      case CscPrepData: 
+        if (m_muonClusterCor.isEnabled()) {
+            return m_muonClusterCor->correct(rio, trk, ctx);
+        }
+        break;
+      case HGTD_Cluster:
+        ATH_MSG_WARNING("HGTD is not implemented yet");
+        break;
+      case CscStripPrepData:
+      case PlanarCluster:
+      case SiCluster:
+          ATH_MSG_WARNING("Cannot associate prd to a technology ROT creator "<<rio);
+          break;
   }
-  ATH_MSG_WARNING("Cannot calibrate "<<rio<< ". Return a nullptr.");
+  ATH_MSG_WARNING("No ROT creator active for PRD "<<rio);
   return nullptr;
 }

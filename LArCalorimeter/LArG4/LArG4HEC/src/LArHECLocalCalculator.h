@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4HECLocalCalculator.hh
@@ -8,16 +8,11 @@
 
 // 17-Feb-2006 : Pavol Strizenec
 
-#ifndef __LArG4HECLocalCalculator_H__
-#define __LArG4HECLocalCalculator_H__
+#ifndef LARG4HEC_LARG4HECLOCALCALCULATOR_H
+#define LARG4HEC_LARG4HECLOCALCALCULATOR_H
 
-//#include "globals.hh"
-//#include "G4ThreeVector.hh"
-#include "LArG4Code/LArG4Identifier.h"
 #include "LArG4Code/LArCalculatorSvcImp.h"
-#include <stdexcept>
 #include "CLHEP/Units/SystemOfUnits.h"
-
 
 // Forward declarations.
 class G4Step;
@@ -32,11 +27,12 @@ namespace LArG4 {
 class LArHECLocalCalculator : virtual public LArCalculatorSvcImp {
 
 public:
-
-  LArHECLocalCalculator(const std::string& name, ISvcLocator * pSvcLocator);
+  LArHECLocalCalculator(const std::string& name, ISvcLocator * pSvcLocator);  
+  LArHECLocalCalculator (const LArHECLocalCalculator&) = delete;
+  LArHECLocalCalculator operator= (const LArHECLocalCalculator&) = delete;
+  virtual ~LArHECLocalCalculator() = default;
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override final;
-  virtual ~LArHECLocalCalculator(){};
 
   virtual G4float OOTcut() const override final { return m_OOTcut; }
 
@@ -49,16 +45,10 @@ public:
     return !(hitTime > m_OOTcut); //FIXME should we be checking the absolute value of hitTime here?
   }
 
-
 private:
-
-  ServiceHandle<LArG4::HEC::ILocalGeometry> m_Geometry;
-
-  LArG4BirksLaw *m_birksLaw;
-  G4bool m_isX;
-
-  LArHECLocalCalculator (const LArHECLocalCalculator&);
-  LArHECLocalCalculator operator= (const LArHECLocalCalculator&);
+  ServiceHandle<LArG4::HEC::ILocalGeometry> m_Geometry {this, "GeometryCalculator", "LocalHECGeometry"};
+  Gaudi::Property<G4bool> m_isX {this, "IsX", false};
+  LArG4BirksLaw *m_birksLaw{nullptr};
 };
 
 #endif

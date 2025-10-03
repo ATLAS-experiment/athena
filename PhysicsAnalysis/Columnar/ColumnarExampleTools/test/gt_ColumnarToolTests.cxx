@@ -19,9 +19,12 @@
 #include <ColumnarExampleTools/OptionalColumnExampleTool.h>
 #include <ColumnarExampleTools/ConfigurableColumnExampleTool.h>
 #include <ColumnarExampleTools/ModularExampleTool.h>
+#include <ColumnarExampleTools/MomentumAccessorExampleTool.h>
 #include <ColumnarExampleTools/StringExampleTool.h>
+#include <ColumnarExampleTools/VariantExampleTool.h>
 
 #include <xAODJet/JetContainer.h>
+#include <xAODEgamma/PhotonContainer.h>
 #include <xAODCore/ShallowCopy.h>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -241,6 +244,125 @@ TEST_F (ColumnarMemoryTest, ConfigurableColumnExampleTool)
 }
 
 
+// in-memory test for the momentum accessor example tool
+TEST_F (ColumnarMemoryTest, MomentumAccessorExampleTool)
+{
+  // check that we are in array mode
+  if (!checkMode())
+    return;
+
+  // set up the tool
+  auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Jet)));
+  ASSERT_SUCCESS (tool->initialize ());
+
+  // this is a wrapper around the tool for this test
+  ColumnarTestToolHandle toolHandle (*tool);
+  toolHandle.initialize ();
+
+  // print out some information about the tool
+  for (auto& name : toolHandle.getColumnNames())
+    std::cout << "requested column: " << name << std::endl;
+  std::cout << "recommended systematics size: " << toolHandle.getRecommendedSystematics().size() << std::endl;
+
+  // the in-memory data frame we are filling
+  ColumnMapType columnMap {toolHandle};
+
+  // the various columns we are loading into memory
+  columnMap.addColumn ("EventInfo", {0, 2});
+  columnMap.addColumn ("Particles", {0, 1, 3});
+  columnMap.addColumn ("Particles.pt", {10e5, 10e5, 1e3});
+  columnMap.addColumn ("Particles.eta", {0, 3, 0});
+  columnMap.addColumn ("Particles.phi", {0, 0, 0});
+  columnMap.addColumn ("Particles.m", {0, 0, 0});
+  columnMap.addColumn ("Particles.selection", {0, 0, 0});
+
+  // the expected output of the tool
+  columnMap.setExpectation ("Particles.selection", {1, 1, 0});
+
+  // connect the columns to the tool
+  columnMap.connectColumnsToTool ();
+
+  // run the tool
+  columnMap.call ();
+
+  // check the output
+  columnMap.checkExpectations ();
+}
+
+
+// this is a helper function that wraps the tool for XAOD usage for the
+// PHYSLITE test below.  there is usually some amount of boilerplate
+// code that test needs to run in XAOD mode, which is usually factored
+// out into a separate function.
+template<typename ContainerType>
+void callXAODMomentumAccessorExampleTool (const columnar::MomentumAccessorExampleTool& tool, bool isPrepCall, const std::string& name)
+{
+  using namespace asg::msgUserCode;
+  const ContainerType *jets = nullptr;
+  ANA_CHECK_THROW (tool.evtStore()->retrieve (jets, name));
+  // to allow for accurate performance measurements this function is
+  // generally called twice, the first time is mostly to make sure that
+  // all data is loaded into memory, and the second time is then used as
+  // a performance measurement of the tool without i/o.
+  if (isPrepCall)
+  {
+    // for the first preparatory call we make a copy of the object to
+    // avoid the tool modifying the original object.
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*jets);
+    tool.callSingleEvent (*jetsCopy);
+    delete jetsCopy;
+    delete auxCopy;
+  } else
+  {
+    // for the second call we can skip the shallow copy, as this tool
+    // just adds to the existing object.  for tools that modify the
+    // object in place both paths would be identical, making shallow
+    // copies and then recording them (the TStore is cleared between
+    // both calls).
+    tool.callSingleEvent (*jets);
+  }
+}
+
+
+// this is a test that runs the momentum accessor example tool on
+// PHYSLITE
+TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool)
+{
+  // check that we are in a project that supports this test
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Jet)));
+  ASSERT_SUCCESS (tool->initialize ());
+
+  // this will call the tool in either mode, and also performs some
+  // performance measurements of the tool in either mode
+  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisJets", [&] (auto& args) {callXAODMomentumAccessorExampleTool<xAOD::JetContainer> (*tool, args.isPrepCall, args.inputContainer);}, {{"Particles", "AnalysisJets"}});
+}
+
+
+// another test for the momentum accessor example tool on PHYSLITE, but
+// this time for photons. this is mostly here to see the speed
+// difference for massless particles (which simplifies some momentum
+// calculations).
+TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool_photons)
+{
+  // check that we are in a project that supports this test
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Photon)));
+  ASSERT_SUCCESS (tool->initialize ());
+
+  // this will call the tool in either mode, and also performs some
+  // performance measurements of the tool in either mode
+  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisPhotons", [&] (auto& args) {callXAODMomentumAccessorExampleTool<xAOD::PhotonContainer> (*tool, args.isPrepCall, args.inputContainer);}, {{"Particles", "AnalysisPhotons"}});
+}
+
+
 TEST_F (ColumnarMemoryTest, ModularExampleTool)
 {
   if (!checkMode())
@@ -307,6 +429,102 @@ TEST_F (ColumnarMemoryTest, StringExampleTool)
   columnMap.call ();
 
   columnMap.checkExpectations ();
+}
+
+TEST_F (ColumnarMemoryTest, VariantExampleTool)
+{
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::VariantExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  ColumnarTestToolHandle toolHandle (*tool);
+  toolHandle.initialize ();
+
+  for (auto& name : toolHandle.getColumnNames())
+    std::cout << "requested column: " << name << std::endl;
+  std::cout << "recommended systematics size: " << toolHandle.getRecommendedSystematics().size() << std::endl;
+
+  ColumnMapType columnMap {toolHandle};
+
+  columnMap.addColumn ("EventInfo", {0, 1});
+
+  columnMap.addColumn ("AnalysisElectrons", {0, 2});
+  columnMap.addColumn ("AnalysisElectrons.pt", {10e3, 50e3});
+  columnMap.addColumn ("AnalysisElectrons.eta", {0, -1});
+  columnMap.addColumn ("AnalysisElectrons.ptRank", {0, 0});
+  columnMap.addColumn ("AnalysisElectrons.etaRank", {0, 0});
+
+  columnMap.setExpectation ("AnalysisElectrons.ptRank", {2, 0});
+  columnMap.setExpectation ("AnalysisElectrons.etaRank", {0, 2});
+
+  columnMap.addColumn ("AnalysisMuons", {0, 1});
+  columnMap.addColumn ("AnalysisMuons.pt", {30e3});
+  columnMap.addColumn ("AnalysisMuons.eta", {0.5});
+  columnMap.addColumn ("AnalysisMuons.ptRank", {0});
+
+  columnMap.setExpectation ("AnalysisMuons.ptRank", {1});
+
+  columnMap.connectColumnsToTool ();
+
+  columnMap.call ();
+
+  columnMap.checkExpectations ();
+}
+
+// this is a helper function for the PHYSLITE test below.  there is
+// usually some amount of boilerplate code that test needs to run in
+// XAOD mode, which is usually factored out into a separate function.
+void callXAODVariantExampleTool (const columnar::VariantExampleTool& tool, bool isPrepCall, const std::string& /*name*/)
+{
+  using namespace asg::msgUserCode;
+  const xAOD::ElectronContainer *electrons = nullptr;
+  ANA_CHECK_THROW (tool.evtStore()->retrieve (electrons, "AnalysisElectrons"));
+  const xAOD::MuonContainer *muons = nullptr;
+  ANA_CHECK_THROW (tool.evtStore()->retrieve (muons, "AnalysisMuons"));
+  // to allow for accurate performance measurements this function is
+  // generally called twice, the first time is mostly to make sure that
+  // all data is loaded into memory, and the second time is then used as
+  // a performance measurement of the tool without i/o.
+  if (isPrepCall)
+  {
+    // for the first preparatory call we make a copy of the object to
+    // avoid the tool modifying the original object.
+    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*electrons);
+    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*muons);
+    tool.callSingleEvent (*electronsCopy, *muonsCopy);
+    delete electronsCopy;
+    delete electronsAuxCopy;
+    delete muonsCopy;
+    delete muonsAuxCopy;
+  } else
+  {
+    // for the second call we can skip the shallow copy, as this tool
+    // just adds to the existing object.  for tools that modify the
+    // object in place both paths would be identical, making shallow
+    // copies and then recording them (the TStore is cleared between
+    // both calls).
+    tool.callSingleEvent (*electrons, *muons);
+  }
+}
+
+// this is a test that runs the tool on PHYSLITE.  this ensures that the
+// tool works on actual data, not just synthetic one of the in-memory
+// test.  it also allows for performance measurements of the tool in the
+// different modes.
+TEST_F (ColumnarPhysLiteTest, VariantExampleTool)
+{
+  // check that we are in a project that supports this test
+  if (!checkMode())
+    return;
+
+  auto tool = std::make_unique<columnar::VariantExampleTool> (makeUniqueName());
+  ASSERT_SUCCESS (tool->initialize ());
+
+  // this will call the tool in either mode, and also performs some
+  // performance measurements of the tool in either mode
+  doCall (*tool, "VariantExampleTool", "AnalysisElectrons", [&] (auto& args) {callXAODVariantExampleTool (*tool, args.isPrepCall, args.inputContainer);}, {{}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

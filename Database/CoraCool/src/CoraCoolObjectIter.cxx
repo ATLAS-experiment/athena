@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CoraCoolObjectIter.cxx
@@ -33,7 +33,7 @@ CoraCoolObjectIter::CoraCoolObjectIter(CoraCoolFolder* coracoolfolder,
 				       cool::IObjectIteratorPtr coolitr) :
   m_buflen(OI_BUFLEN),m_inbuf(0),m_nextobj(0),
   m_refValid(false),m_allDone(false),
-  m_folder(coracoolfolder),m_coolitr(coolitr) {
+  m_folder(coracoolfolder),m_coolitr(std::move(coolitr)) {
   m_data.resize(m_buflen);
   // assemble an AttributeListSpecification to share with the data objects
   const cool::RecordSpecification recspec=m_folder->payloadSpecification();

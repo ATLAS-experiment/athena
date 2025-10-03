@@ -10,6 +10,9 @@
 #include "src/ProtoTrackCreationAndFitAlg.h"
 #include "src/TrackExtensionAlg.h"
 #include "src/ProtoTrackReportingAlg.h"
+#include "src/HGTDTrackExtensionAlg.h"
+#include "src/HGTDTruthTrackDecorationAlg.h"
+#include "src/ActsToXAODTrackConverterAlg.h"
 
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
@@ -22,6 +25,7 @@
 
 // Algs
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
+DECLARE_COMPONENT( ActsTrk::TrackFindingBaseAlg )
 DECLARE_COMPONENT( ActsTrk::ReFitterAlg )
 DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ScoreBasedAmbiguityResolutionAlg )
@@ -29,6 +33,9 @@ DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
+DECLARE_COMPONENT( ActsTrk::HGTDTrackExtensionAlg)
+DECLARE_COMPONENT( ActsTrk::HGTDTruthTrackDecorationAlg )
+DECLARE_COMPONENT( ActsTrk::ActsToXAODTrackConverterAlg )
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )

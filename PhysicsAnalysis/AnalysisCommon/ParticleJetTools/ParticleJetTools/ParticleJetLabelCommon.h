@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,7 +28,7 @@ namespace ParticleJetTools {
     std::string pdgId;
     std::string positionDPhi;
     std::string positionDEta;
-    std::string barcode; // FIXME barcode-based
+    std::string uniqueID;
     std::string childLxy;
     std::string childPt;
     std::string childPdgId;
@@ -47,7 +47,7 @@ namespace ParticleJetTools {
     SG::AuxElement::Decorator<int> pdgId;
     SG::AuxElement::Decorator<float> positionDPhi;
     SG::AuxElement::Decorator<float> positionDEta;
-    SG::AuxElement::Decorator<int> barcode; // FIXME barcode-based
+    SG::AuxElement::Decorator<int> uniqueID;
     SG::AuxElement::Decorator<float> childLxy;
     SG::AuxElement::Decorator<float> childPt;
     SG::AuxElement::Decorator<int> childPdgId;
@@ -111,7 +111,7 @@ namespace ParticleJetTools {
     tool.declareProperty("LabelPdgIdName", n->pdgId="", "Attribute for pdgID of labelling particle");
     tool.declareProperty("LabelPositionDPhiName", n->positionDPhi="", "Attribute for the position dPhi of the labeling particle ");
     tool.declareProperty("LabelPositionDEtaName", n->positionDEta="", "Attribute for the position dEta of the labeling particle ");
-    tool.declareProperty("LabelBarcodeName", n->barcode="", "Attribute for barcode of labeling particle"); // FIXME barcode-based
+    tool.declareProperty("LabelBarcodeName", n->uniqueID="", "Attribute for uniqueID of labeling particle");
     tool.declareProperty("ChildLxyName", n->childLxy="", "Attribute for the labeling particle child Lxy");
     tool.declareProperty("ChildPtName", n->childPt="", "Attribute for the labeling particle child Pt");
     tool.declareProperty("ChildPdgIdName", n->childPdgId="", "Attribute for the labeling particle child pdg ID");

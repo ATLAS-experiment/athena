@@ -49,7 +49,7 @@ def readInput(filename, nCellsList=20, bcfile=None, cutoff=0.1):
     print("Found run dir:",rundir)
     runnbr=rundir[4:]
 
-    hist=f.Get(rundir+"/CaloMonitoring/LArClusterCellMon/Summary/cellhashPercent")
+    hist=f.Get(rundir+"/CaloMonitoring/CaloClusterCellMon/Summary/larhashPercent")
     
     freq=[]
     for idx in range(hist.GetNbinsX()):
@@ -78,7 +78,7 @@ if __name__=="__main__":
     
     import argparse
     parser= argparse.ArgumentParser()
-    parser.add_argument("inputfile",type=argparse.FileType('r'),help="Input HIST file containig <run>/CaloMonitoring/LArClusterCellMon/Summary/cellhashPercent")
+    parser.add_argument("inputfile",type=argparse.FileType('r'),help="Input HIST file containig <run>/CaloMonitoring/CaloClusterCellMon/Summary/cellhashPercent")
     parser.add_argument('BCfile', type=argparse.FileType('w'),nargs='?',default=None,help="Optional output file digestable as bad-channel input")
     parser.add_argument("--cut",type=float,default=0.1,help="Write channels appearing more often that x %% as highNoiseHG")
     parser.add_argument("--nPrint",type=int,default=20,help="Print a list of the N most noisy channels")

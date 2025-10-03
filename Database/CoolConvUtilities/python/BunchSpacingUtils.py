@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 from PyCool import cool
 from CoolConvUtilities.MagFieldUtils import getTimeForLB

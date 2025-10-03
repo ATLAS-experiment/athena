@@ -103,11 +103,6 @@ public:
   virtual void setInsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    BinnedArray<TrackingVolume>* insidevolarray) const = 0;
-
-  virtual void setInsideTrackingVolumeArray(
-    TrackingVolume& tvol,
-    BoundarySurfaceFace face,
     std::shared_ptr<BinnedArray<TrackingVolume>> insidevolarray) const = 0;
 
   /**  Glue Volume method: set outside Volume
@@ -122,11 +117,6 @@ public:
        --- Neccessary as friendship cannot be inherited: your father's friend
      isn't necessary yours ---
    */
-  virtual void setOutsideTrackingVolumeArray(
-    TrackingVolume& tvol,
-    BoundarySurfaceFace face,
-    BinnedArray<TrackingVolume>* outsidevolarray) const = 0;
-
   virtual void setOutsideTrackingVolumeArray(
     TrackingVolume& tvol,
     BoundarySurfaceFace face,

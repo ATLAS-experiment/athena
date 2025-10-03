@@ -28,6 +28,11 @@ namespace TrigConf {
       NoQueryException(std::string msg) : IOException(std::move(msg)) {}
    };
 
+   class NoKeyException : public IOException {
+   public:
+      NoKeyException(std::string msg) : IOException(std::move(msg)) {}
+   };
+
    class NoSMKException : public IOException {
    public:
       NoSMKException(std::string msg) : IOException(std::move(msg)) {}
@@ -53,6 +58,23 @@ namespace TrigConf {
       ParsingException(std::string msg) : IOException(std::move(msg)) {}
    };
 
+   // data is not consistent json 
+   class JsonParsingException : public IOException {
+   public:
+      JsonParsingException(std::string msg) : IOException(std::move(msg)) {}
+   };
+
+   // data can not be written to file
+   class FileWritingException : public IOException {
+   public:
+      FileWritingException(std::string msg) : IOException(std::move(msg)) {}
+   };
+
+   // data can not be loaded from Crest
+   class CrestLoadingException : public IOException {
+   public:
+      CrestLoadingException(std::string msg) : IOException(std::move(msg)) {}
+   };
 
 }
 

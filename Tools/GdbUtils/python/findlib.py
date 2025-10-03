@@ -17,6 +17,7 @@ def findlib (addr, quiet = False):
     print ('No inferior.')
     return
   maps = open ('/proc/%d/maps' % inf)
+  loaded_lib = None
   for l in maps.readlines():
     if l and l[-1] == '\n':
       l = l[:-1]
@@ -37,7 +38,8 @@ def findlib (addr, quiet = False):
         else:
           print (lib)
           gdb.execute ("shared " + os.path.basename (lib))
-  return lib
+        loaded_lib = lib
+  return loaded_lib
 
 
 class FindLib (gdb.Command):

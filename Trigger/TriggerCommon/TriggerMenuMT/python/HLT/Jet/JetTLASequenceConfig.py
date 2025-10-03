@@ -29,20 +29,13 @@ def JetTLASequenceCfg(flags, jetsIn):
     return recoAcc
 
 @AccumulatorCache
-def JetTLAMenuSequenceGenCfg( flags, jetsIn, attachBtag=True ):
+def JetTLAMenuSequenceGenCfg(flags, jetsIn):
     
     jetsOut = recordable(jetsIn+"_TLA")
-    # retrieves the sequence
     recoAcc = JetTLASequenceCfg(flags, jetsIn=jetsIn)
-    #  add the hypo
+
     hypo = CompFactory.TrigJetTLAHypoAlg("TrigJetTLAHypoAlg_"+jetsIn) 
-    hypo.AttachBtag = attachBtag  # avoid attaching btag if creating EMTopo Jets with no tracking
-    btagJetTool = CompFactory.TrigBtagTLATool("BtagTLATool_"+jetsIn)
 
-    if hypo.AttachBtag:
-        btagJetTool.TLAOutputBTaggingCollection = recordable(jetsOut+"_BTagging")
-
-    hypo.BtagJetTool = btagJetTool
     hypo.TLAOutputName = jetsOut
 
     selAcc = SelectionCA("TrigJetTLAMainSeq_"+jetsIn)

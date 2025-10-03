@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -12,6 +12,8 @@
 
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTau/TauJet.h"
+
+#include "TruthUtils/ParticleConstants.h"
 
 #include <cmath>
 
@@ -26,7 +28,7 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( TauTrack_v1, float, double, phi)
 
   // Pion mass, as assumed for the track:
-  static const double PION_MASS = 139.570;
+  static const double PION_MASS = ParticleConstants::chargedPionMassInMeV;
 
   TauTrack_v1::FourMom_t TauTrack_v1::p4() const {
     FourMom_t p4;
@@ -81,12 +83,6 @@ namespace xAOD {
   bool TauTrack_v1::flagWithMask(unsigned int flags) const{
     static const Accessor< TauTrack_v1::TrackFlagType > trackFlags("flagSet");
     TrackFlagType f(trackFlags(*this));
-    // std::bitset<8*sizeof(TrackFlagType)> thisTracksFlags(f);
-    // std::bitset<8*sizeof(TrackFlagType)> tracksFlags(flags);
-    // for(int i = 0; i != 8*sizeof(TrackFlagType); ++i){
-    //   if(tracksFlags[i]==1 && thisTracksFlags[i]==0) return false;
-    // }
-    // return true;
     return ((f&flags)==flags);
   }
 
@@ -97,11 +93,6 @@ namespace xAOD {
     thisTracksFlags[flag] = value;
     f = thisTracksFlags.to_ulong();
   }
-
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TauTrack_v1, float, z0sinThetaTJVA, setZ0sinThetaTJVA)
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TauTrack_v1, float, rConv, setRConv)
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TauTrack_v1, float, rConvII, setRConvII)
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TauTrack_v1, float, dRJetSeedAxis, setDRJetSeedAxis)
 
   // superseded by z0sinthetaTJVA()
   float TauTrack_v1::z0sinThetaTJVA(const xAOD::IParticle& part ) const{
@@ -120,22 +111,22 @@ namespace xAOD {
     }
   }
 
-  static const SG::AuxElement::Accessor< float > d0TJVAAcc( "d0TJVA" );
+  static const SG::Accessor< float > d0TJVAAcc( "d0TJVA" );
   float TauTrack_v1::d0TJVA() const {
     return d0TJVAAcc(*this);
   }
 
-  static const SG::AuxElement::Accessor< float > d0SigTJVAAcc( "d0SigTJVA" );  
+  static const SG::Accessor< float > d0SigTJVAAcc( "d0SigTJVA" );  
   float TauTrack_v1::d0SigTJVA() const {
     return d0SigTJVAAcc(*this);
   }
 
-  static const SG::AuxElement::Accessor< float > z0sinthetaTJVAAcc( "z0sinthetaTJVA" );
+  static const SG::Accessor< float > z0sinthetaTJVAAcc( "z0sinthetaTJVA" );
   float TauTrack_v1::z0sinthetaTJVA() const {
     return z0sinthetaTJVAAcc(*this);
   }
 
-  static const SG::AuxElement::Accessor< float > z0sinthetaSigTJVAAcc( "z0sinthetaSigTJVA" );
+  static const SG::Accessor< float > z0sinthetaSigTJVAAcc( "z0sinthetaSigTJVA" );
   float TauTrack_v1::z0sinthetaSigTJVA() const {
     return z0sinthetaSigTJVAAcc(*this);
   }
@@ -157,11 +148,6 @@ namespace xAOD {
     }
     return 0.;
   }
-
-
-  
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TauTrack_v1, float, etaStrip, setEtaStrip)
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TauTrack_v1, float, phiStrip, setPhiStrip)
 
   bool TauTrack_v1::detail( TauJetParameters::TrackDetail detail, float& value ) const{
     // Get the detail accessor:
@@ -185,7 +171,7 @@ namespace xAOD {
                                      bdtScores,
                                      setBdtScores )
   
-  static const SG::AuxElement::Accessor< std::vector<float> > bdtScoreAcc( "bdtScores" );
+  static const SG::Accessor< std::vector<float> > bdtScoreAcc( "bdtScores" );
   
   float TauTrack_v1::bdtScore( size_t i) const {
     return bdtScoreAcc(*this).at(i);
@@ -214,7 +200,7 @@ namespace xAOD {
   				     trackLinks,
   				     setTrackLinks )
   
-  static const SG::AuxElement::Accessor< TauTrack_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
+  static const SG::Accessor< TauTrack_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
   
   const TrackParticle* TauTrack_v1::track() const {
     return ( *trackAcc( *this )[0] );

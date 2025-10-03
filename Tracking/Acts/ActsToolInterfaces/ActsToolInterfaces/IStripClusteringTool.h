@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_ISTRIPSTRIPCLUSTERINGTOOL_H
@@ -14,29 +14,51 @@
 #include <InDetReadoutGeometry/SiDetectorElementStatus.h>
 #include <xAODInDetMeasurement/StripClusterContainer.h>
 #include <xAODInDetMeasurement/StripClusterAuxContainer.h>
-
+#include <Acts/Clusterization/Clusterization.hpp>
 
 namespace ActsTrk {
-
-using StripRDORawData = SCT_RDORawData;
 
 class IStripClusteringTool : virtual public IAlgTool {
 public:
   DeclareInterfaceID(IStripClusteringTool, 1, 0);
 
-    using RDOContainer = SCT_RDO_Container;
-    using RawDataCollection = RDOContainer::base_value_type;
-    using IDHelper = SCT_ID;
-    using ClusterContainer = xAOD::StripClusterContainer;
-    using ClusterAuxContainer = xAOD::StripClusterAuxContainer;
-
-    virtual StatusCode
-    clusterize(const RawDataCollection& RDOs,
-	       const IDHelper& stripID,
-	       const EventContext& ctx,
-	       ClusterContainer& container) const = 0;
+  using RDOContainer = SCT_RDO_Container;
+  using RawDataCollection = RDOContainer::base_value_type;
+  using IDHelper = SCT_ID;
+  using ClusterContainer = xAOD::StripClusterContainer;
+  using ClusterAuxContainer = xAOD::StripClusterAuxContainer;
+  
+  struct Cell {
+    size_t index;
+    Identifier id;
+    std::bitset<3> timeBits;
+    
+    Cell(size_t i, Identifier id, const std::bitset<3>& timeBits)
+      : index(i), id(id), timeBits(timeBits) {}
+  };  
+  using CellCollection = std::vector<Cell>;
+  
+  struct Cluster {
+    std::vector<Identifier::value_type> ids;
+    uint16_t hitsInThirdTimeBin{0};
+  };  
+  using ClusterCollection = std::vector<Cluster>;
+  
+  virtual StatusCode
+  clusterize(const EventContext& ctx,
+	     const RawDataCollection& RDOs,
+	     const InDet::SiDetectorElementStatus& stripDetElStatus,
+	     const InDetDD::SiDetectorElement& element,
+       Acts::Ccl::ClusteringData& data,
+	     std::vector<ClusterCollection>& collection) const = 0;
+  
+  virtual StatusCode
+  makeClusters(const EventContext& ctx,
+	       ClusterCollection& cluster,
+	       const InDetDD::SiDetectorElement& element,
+	       typename ClusterContainer::iterator itrContainer) const = 0;
 };
-
-}
+  
+} // namespace
 
 #endif

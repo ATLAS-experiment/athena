@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_EVTRANGESCATTERER_H
@@ -60,9 +60,10 @@ class EvtRangeScatterer final : public AthenaMPToolBase
 			   , yampl::ISocket* socket2Pilot
 			   , int& procReportPending);
 
-  StringProperty           m_processorChannel;
-  StringProperty           m_eventRangeChannel;
-  bool                     m_doCaching;
+  Gaudi::Property<std::string> m_processorChannel{this, "ProcessorChannel", ""};
+  Gaudi::Property<std::string> m_eventRangeChannel{this, "EventRangeChannel", ""};
+  Gaudi::Property<bool>        m_doCaching{this, "DoCaching", false};
+
   Pid2RangeID              m_pid2RangeID;        // Current RangeID-s by PIDs
 };
 

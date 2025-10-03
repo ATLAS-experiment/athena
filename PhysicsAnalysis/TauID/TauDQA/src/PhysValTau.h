@@ -21,7 +21,8 @@
 #include "TauAnalysisTools/ITauSelectionTool.h"
 
 // Local includes
-#include "TauValidationPlots.h"
+#include "TauValidationPlotsNominal.h"
+#include "TauValidationPlotsNoCuts.h"
 
 class PhysValTau
   : public ManagedMonitorToolBase
@@ -43,7 +44,6 @@ public:
 private: 
   // properties
   Gaudi::Property<std::string> m_TauJetContainerName{this, "TauContainerName", "TauJets"};
-  Gaudi::Property<std::string> m_TruthParticleContainerName{this, "TruthParticleContainerName", "TruthParticles"}; 
   Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
   // Tool used for truth-matching
@@ -54,7 +54,8 @@ private:
 
   //Histograms
   // general tau all prongs plots
-  std::unique_ptr<TauValidationPlots> m_oTauValidationPlots;
+  std::unique_ptr<TauValidationPlotsNominal> m_oTauValidationPlotsNominal;
+  std::unique_ptr<TauValidationPlotsNoCuts> m_oTauValidationPlotsNoCuts;
   
 }; 
 

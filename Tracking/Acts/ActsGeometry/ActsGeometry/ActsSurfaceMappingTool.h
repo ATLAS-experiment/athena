@@ -14,7 +14,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsSurfaceMappingTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/Material/SurfaceMaterialMapper.hpp"
@@ -42,13 +42,6 @@ public:
   Acts::SurfaceMaterialMapper::State
   mappingState() const override;
 
-  virtual
-  const IActsTrackingGeometryTool*
-  trackingGeometryTool() const override
-  {
-    return m_trackingGeometryTool.get();
-  }
-
 
 private:
   // Straight line stepper
@@ -56,7 +49,7 @@ private:
   ActsGeometryContext        m_geoContext;
   using SlStepper  = Acts::StraightLineStepper;
   using StraightLinePropagator = Acts::Propagator<SlStepper, Acts::Navigator>;
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   std::shared_ptr<Acts::SurfaceMaterialMapper> m_mapper;
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
 };

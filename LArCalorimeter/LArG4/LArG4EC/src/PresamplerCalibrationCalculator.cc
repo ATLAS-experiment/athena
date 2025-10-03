@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EC::PresamplerCalibrationCalculator
@@ -24,9 +24,7 @@ namespace LArG4 {
 
     PresamplerCalibrationCalculator::PresamplerCalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_geometryCalculator("EMECPresamplerGeometry", name) // LArG4::EC::PresamplerGeometry
     {
-      declareProperty("GeometryCalculator", m_geometryCalculator);
     }
 
     StatusCode PresamplerCalibrationCalculator::initialize()
@@ -35,11 +33,6 @@ namespace LArG4 {
       ATH_CHECK(m_geometryCalculator.retrieve());
       return StatusCode::SUCCESS;
     }
-
-    PresamplerCalibrationCalculator::~PresamplerCalibrationCalculator()
-    {
-    }
-
 
     G4bool PresamplerCalibrationCalculator::Process (const G4Step* a_step,
                                                      LArG4Identifier & identifier,
@@ -51,24 +44,23 @@ namespace LArG4 {
       // default is to process both the energy and the ID.
 
       energies.clear();
-      if ( a_process == kEnergyAndID  ||  a_process == kOnlyEnergy )
-        {
+      if ( a_process == kEnergyAndID  ||  a_process == kOnlyEnergy ) {
 #ifdef DEBUG_HITS
-          ATH_MSG_DEBUG("Process(): calling SimulationEnergies");
+	ATH_MSG_DEBUG("Process(): calling SimulationEnergies");
 #endif
-          m_energyCalculator.Energies( a_step, energies );
-        }
-      else
+	m_energyCalculator.Energies( a_step, energies );
+      }
+      else {
         for (unsigned int i=0; i != 4; i++) energies.push_back( 0. );
+      }
 
-
-      if ( a_process == kEnergyAndID  ||  a_process == kOnlyID )
-        {
-          // Calculate the identifier.
-          identifier = m_geometryCalculator->CalculateIdentifier( a_step );
-        }
-      else
+      if ( a_process == kEnergyAndID  ||  a_process == kOnlyID ) {
+	// Calculate the identifier.
+	identifier = m_geometryCalculator->CalculateIdentifier( a_step );
+      }
+      else {
         identifier = LArG4Identifier();
+      }
 
 
 #ifdef DEBUG_HITS
@@ -83,10 +75,7 @@ namespace LArG4 {
 #endif
 
       // Check for bad result.
-      if ( identifier == LArG4Identifier() )
-        return false;
-
-      return true;
+      return ( identifier != LArG4Identifier() );
     }
 
   } // namespace EC

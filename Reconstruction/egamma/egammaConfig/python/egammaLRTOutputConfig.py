@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = "Prepare LRT EGamma output list"
+""" Prepare LRT EGamma output list
+"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 

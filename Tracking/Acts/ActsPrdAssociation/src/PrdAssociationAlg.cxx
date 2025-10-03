@@ -76,7 +76,7 @@ namespace ActsTrk {
     for (std::size_t i(0ul); i<tracks->size(); ++i) {
       tracks->trackStateContainer().visitBackwards(tracks->getTrack(i).tipIndex(),
 						   [&prdMap, &nMeasurements, &status, this]
-						   (const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy state) -> bool
+						   (const auto state) -> bool
 						   {
 						     // only consider measurements
 						     if (not state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) return true;
@@ -131,8 +131,8 @@ namespace ActsTrk {
       case RecordStatus::ALREADYSTORED:
 	// do not stop execution, right now it is still possible at this stage two
 	// tracks use the same measurement
-	{ ATH_MSG_WARNING("There was a problem when storing the Prd collections");
-	  ATH_MSG_WARNING("Measurement was already stored."); }
+	{ ATH_MSG_DEBUG("There was a problem when storing the Prd collections");
+	  ATH_MSG_DEBUG("Measurement was already stored."); }
 	break;
       default:
 	{ ATH_MSG_WARNING("There was a problem when storing the Prd collections");

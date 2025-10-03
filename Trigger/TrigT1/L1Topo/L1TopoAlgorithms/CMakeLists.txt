@@ -5,6 +5,7 @@ atlas_subdir( L1TopoAlgorithms )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Hist )
+find_package( nlohmann_json )
 
 # Build ADVAE2A as part of the package.
 include( "cmake/advae2a-build.cmake" )
@@ -16,7 +17,7 @@ string( REPLACE "-Wl,--as-needed" "" CMAKE_EXE_LINKER_FLAGS
 
 # Special treatment for xAOD libraries
 if( NOT TRIGCONF_STANDALONE )
- set( extra_libs xAODTrigger )
+ set( extra_libs xAODTrigger PathResolver)
 endif()
 
 # The component(s) in the package:
@@ -24,8 +25,8 @@ atlas_add_library( L1TopoAlgorithms
    L1TopoAlgorithms/*.h Root/*.cxx
    PUBLIC_HEADERS L1TopoAlgorithms
    PRIVATE_INCLUDE_DIRS ${ADVAE2A_INCLUDE_DIRS}
-   LINK_LIBRARIES L1TopoEvent L1TopoInterfaces TrigConfBase TrigConfIO TrigConfData ${extra_libs}
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${ADVAE2A_LIBRARIES} L1TopoCommon L1TopoSimulationUtils )
+   LINK_LIBRARIES L1TopoEvent L1TopoInterfaces TrigConfBase TrigConfIO TrigConfData nlohmann_json::nlohmann_json ${extra_libs}
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${ADVAE2A_LIBRARIES} L1TopoCommon L1TopoSimulationUtils)
 add_dependencies( L1TopoAlgorithms ADVAE2A )
 
 atlas_add_executable( TrigConfL1TopoGenPyAlg

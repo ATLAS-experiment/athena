@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootUtils/src/pyroot/PyROOTTTreePatch.cxx
@@ -143,15 +143,26 @@ Bool_t TreeNotifier::Notify()
     pynotify_str = PyUnicode_InternFromString("__pynotify__");
 
   // Look for a notification object.
+#if PY_VERSION_HEX >=  0x030d0000
+  PyObject* treeobj = nullptr;
+  (void)PyWeakref_GetRef (m_treeobj_ref, &treeobj);
+#else
   PyObject* treeobj = PyWeakref_GetObject (m_treeobj_ref);
+#endif
   if (treeobj) {
     PyObject** dictptr = _PyObject_GetDictPtr (treeobj);
     if (dictptr && *dictptr) {
       PyObject* notobj = PyObject_GetItem (*dictptr, pynotify_str);
+#if PY_VERSION_HEX >=  0x030d0000
+      Py_DECREF(treeobj);
+#endif
       if (notobj) {
         // Got it --- call @c Notify.
         PyObject* ret =
           PyObject_CallMethod (notobj, const_cast<char*> ("Notify"), NULL);
+#if PY_VERSION_HEX >=  0x030d0000
+        Py_DECREF (notobj);
+#endif
         if (!ret) return 0;
         Py_DECREF (ret);
       }
@@ -281,11 +292,13 @@ PyObject* branchSetAddress (PyObject*, PyObject* args)
   // Convert the buffer argument to an address.
   void* buf = 0;
   if ( TPython::CPPInstance_Check( address ) ) {
-    if ( ((CPPInstance*)address)->fFlags & CPPInstance::kIsReference )
-      buf = (void*)((CPPInstance*)address)->fObject;
+    auto* inst = reinterpret_cast<CPPInstance*>(address);
+    if ( inst->fFlags & CPPInstance::kIsReference )
+      buf = inst->fObject;
     else
-      buf = (void*)&((CPPInstance*)address)->fObject;
-  } else
+      buf = &inst->fObject;
+  }
+  else
     RootUtils::GetBuffer( address, '*', 1, buf, kFALSE );
 
   // Make the call and return.

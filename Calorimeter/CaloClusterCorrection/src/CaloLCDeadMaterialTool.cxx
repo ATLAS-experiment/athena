@@ -21,6 +21,7 @@
 
 using CLHEP::MeV;
 using xAOD::CaloCluster;
+using namespace std::string_literals; //for suffix 's'
 
 #ifdef MAKE_MOMENTS
 void set_zero_moments(CaloCluster *theCluster);
@@ -56,20 +57,9 @@ CaloLCDeadMaterialTool::CaloLCDeadMaterialTool(const std::string& type,
   // Use Interpolation or not
   declareProperty("Interpolate",m_interpolate);
   // list of dimensions to interpolate trought in 3 different type of areas
-  std::vector<std::string > vstr;
-  vstr.resize(2);
-  vstr[0] = "DIMD_ETA";
-  vstr[1] = "DIMD_ENER";
-  m_interpolateDimensionNames[std::string("AREA_DMFIT")] = vstr;
-  vstr.resize(3);
-  vstr[0] = "DIMD_ETA";
-  vstr[1] = "DIMD_ENER";
-  vstr[2] = "DIMD_LAMBDA";
-  m_interpolateDimensionNames[std::string("AREA_DMLOOKUP")] = vstr;
-  vstr.resize(2);
-  vstr[0] = "DIMD_ETA";
-  vstr[1] = "DIMD_LAMBDA";
-  m_interpolateDimensionNames[std::string("AREA_DMSMPW")] = vstr;
+  m_interpolateDimensionNames["AREA_DMFIT"s] = {"DIMD_ETA"s, "DIMD_ENER"s};
+  m_interpolateDimensionNames["AREA_DMLOOKUP"s] = {"DIMD_ETA"s, "DIMD_ENER"s, "DIMD_LAMBDA"s};
+  m_interpolateDimensionNames["AREA_DMSMPW"s] = {"DIMD_ETA"s, "DIMD_LAMBDA"s};
   declareProperty("InterpolateDimensionNames", m_interpolateDimensionNames);
   declareProperty("UpdateSamplingVars",m_updateSamplingVars=false);
   //Use weighting of negative clusters?

@@ -126,7 +126,14 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
     auto    MuonsPhiHitsLayer1 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer1").c_str(), 0);   
     auto    MuonsPhiHitsLayer2 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer2").c_str(), 0);   
     auto    MuonsPhiHitsLayer3 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer3").c_str(), 0);   
-    auto    MuonsPhiHitsLayer4 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer4").c_str(), 0);   
+    auto    MuonsPhiHitsLayer4 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer4").c_str(), 0);
+
+    auto    LumiBlock = Monitored::Scalar<float>("LumiBlock", 0);
+    auto    LumiBlockTrackCategory = Monitored::Scalar<float>("LumiBlockTrackCategory", 0);
+
+    uint32_t lumiBlockID = evt.lumiBlock();
+    LumiBlock = lumiBlockID;
+    LumiBlockTrackCategory = getTrackCategoryID(sIdentifier);
 
     /// Loop over all Muons
     for(unsigned int n=0; n<vecMuons.size(); n++) {
@@ -143,8 +150,10 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
         MuonPt  = muon->pt() * MeVtoGeV;
 
         const xAOD::TrackParticle *metp = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
-        const xAOD::TrackParticle *idtp = nullptr;
-        idtp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        const xAOD::TrackParticle *idtp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        const xAOD::TrackParticle *mstp = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+
+        fill(tool, LumiBlock, LumiBlockTrackCategory);
 
         if (muonType==xAOD::Muon::Combined) {
             const xAOD::TrackParticle *cbtp = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);
@@ -215,7 +224,6 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
                     MuonsMEchi2ndof  = metp->chiSquared()/std::max(1.f,metp->numberDoF());   
                     fill(tool, MuonDPTIDME, MuonsIDchi2ndof, MuonsMEchi2ndof);
                 }
-
             }
         }
         else {
@@ -246,6 +254,47 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
                     fill(tool, MuonDPTIDME, MuonsIDchi2ndof, MuonsMEchi2ndof);
                 }
             }
+        }
+
+        /// Count ID, ME and MS muons in LumiBlocks
+        auto muonEta = muon->eta();
+        if (mstp) {
+            if (muonEta > 1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("MS_EA");
+            } else if (muonEta > 0) {
+                LumiBlockTrackCategory = getTrackCategoryID("MS_BA");
+            } else if (muonEta > -1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("MS_BC");
+            } else if (muonEta <= -1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("MS_EC");
+            }
+            fill(tool, LumiBlock, LumiBlockTrackCategory);
+        }
+        if (idtp) {
+            auto muonEta = muon->eta();
+            if (muonEta > 1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("ID_EA");
+            } else if (muonEta > 0) {
+                LumiBlockTrackCategory = getTrackCategoryID("ID_BA");
+            } else if (muonEta > -1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("ID_BC");
+            } else if (muonEta <= -1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("ID_EC");
+            }
+            fill(tool, LumiBlock, LumiBlockTrackCategory);
+        }
+        if (metp) {
+            auto muonEta = muon->eta();
+            if (muonEta > 1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("ME_EA");
+            } else if (muonEta > 0) {
+                LumiBlockTrackCategory = getTrackCategoryID("ME_BA");
+            } else if (muonEta > -1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("ME_BC");
+            } else if (muonEta <= -1.05) {
+                LumiBlockTrackCategory = getTrackCategoryID("ME_EC");
+            }
+            fill(tool, LumiBlock, LumiBlockTrackCategory);
         }
     }
     return StatusCode::SUCCESS;
@@ -314,10 +363,11 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
             if (!muonSegment) {
                 continue;
             }
+            using namespace Muon::MuonStationIndex;
             MuonSmallSectorR = MuonLargeSectorR = std::hypot(muonSegment->x(), muonSegment->y());
             MuonSmallSectorZ = MuonLargeSectorZ = muonSegment->z();
             MuonSector = muonSegment->sector();
-            MuonCIndex = muonSegment->chamberIndex();
+            MuonCIndex = toInt(muonSegment->chamberIndex());
             int sector = muonSegment->sector();
             if(sector % 2 == 0) {
                 fill(tool, MuonLargeSectorZ, MuonLargeSectorR, MuonSector, MuonCIndex);
@@ -701,4 +751,37 @@ const xAOD::Vertex* MuonTrackMonitorAlgorithm::getPrimaryVertex(const xAOD::Vert
         }
     }
     return pvtx;
+}
+
+//========================================================================================================
+int MuonTrackMonitorAlgorithm::getTrackCategoryID(const std::string& sIdentifier) const
+{
+    int trackCategoryID = -1;
+    
+    if (sIdentifier == "NoTrigNonCB") trackCategoryID = 1;
+    else if (sIdentifier == "NoTrigCB") trackCategoryID = 2;
+    else if (sIdentifier == "NonCB") trackCategoryID = 3;
+    else if (sIdentifier == "CB") trackCategoryID = 4;
+    else if (sIdentifier == "AllNonCB") trackCategoryID = 5;
+    else if (sIdentifier == "AllCB") trackCategoryID = 6;
+    // --------------------
+    else if (sIdentifier == "Z") trackCategoryID = 8;
+    else if (sIdentifier == "Jpsi") trackCategoryID = 9;
+    // --------------------
+    else if (sIdentifier == "ME_EC") trackCategoryID = 11;
+    else if (sIdentifier == "ME_BC") trackCategoryID = 12;
+    else if (sIdentifier == "ME_BA") trackCategoryID = 13;
+    else if (sIdentifier == "ME_EA") trackCategoryID = 14;
+    // --------------------
+    else if (sIdentifier == "MS_EC") trackCategoryID = 16;
+    else if (sIdentifier == "MS_BC") trackCategoryID = 17;
+    else if (sIdentifier == "MS_BA") trackCategoryID = 18;
+    else if (sIdentifier == "MS_EA") trackCategoryID = 19;
+    // --------------------
+    else if (sIdentifier == "ID_EC") trackCategoryID = 21;
+    else if (sIdentifier == "ID_BC") trackCategoryID = 22;
+    else if (sIdentifier == "ID_BA") trackCategoryID = 23;
+    else if (sIdentifier == "ID_EA") trackCategoryID = 24;
+    
+    return trackCategoryID;
 }

@@ -23,6 +23,7 @@
 #include "TrkDetDescrUtils/BinnedArray1D1D1D.h"
 #include "TrkDetDescrUtils/BinnedArray2D.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
+#include "TrkDetDescrUtils/SharedDoNoDelete.h"
 #include "TrkGeometry/GlueVolumesDescriptor.h"
 #include "TrkGeometry/Material.h"
 #include "TrkGeometry/TrackingGeometry.h"
@@ -317,7 +318,7 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
                                                                              std::move(barrelZPBuffer),
                                                                              Trk::negativeFaceXY, "All::Gaps::BarrelZP"));
                 // set name
-                std::string nameEncl = msEntryDefined ? "All::Gaps::Barrel" : m_entryVolume;
+                std::string nameEncl = msEntryDefined ? "All::Gaps::Barrel" : m_entryVolume.value();
                 ATH_MSG_DEBUG(" nameEncl " << nameEncl);
                 enclosed = m_trackingVolumeHelper->glueTrackingVolumeArrays(std::move(barrelZP),
                                                                             Trk::negativeFaceXY,
@@ -1006,7 +1007,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                 }
                 auto detVolVecPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
                 auto sVol = std::make_unique<Trk::TrackingVolume>(*subVol, aLVC.m_muonMaterial,
-                                                                  detVolVecPtr.release(), volName);
+                                                                  std::move(detVolVecPtr), volName);
                 // statistics
                 ++aLVC.m_frameNum;
                 aLVC.m_frameStat += detVols.size();
@@ -1069,7 +1070,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                                                                  volBinUtil);
 
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                     subVols.release(), volumeName);
+                                                     std::move(subVols), volumeName);
         // register glue volumes
         Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
         volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVols);
@@ -1086,7 +1087,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
         }
         auto muonObjsPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(muonObjs);
 
-        tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, muonObjsPtr.release(),
+        tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, std::move(muonObjsPtr),
                                                      volumeName);
         // statistics
         ++aLVC.m_frameNum;
@@ -1298,7 +1299,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                     auto detVolsPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
                     auto sVol = std::make_unique<Trk::TrackingVolume>(*subVol,
                                                                       aLVC.m_muonMaterial,
-                                                                      detVolsPtr.release(),
+                                                                      std::move(detVolsPtr),
                                                                       volName);
 
                     // statistics
@@ -1383,9 +1384,18 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                                                               Trk::negativeFaceXY,
                                                                               hBins[eta - 1][phi]);
                     }
-                    //
+                    //We need to be careful here
+                    //This will end up in subVols.
+                    //subVols will end up in the volume we create.
+                    //That volume will manage it
                     subVolumesVect.emplace_back(std::move(sVol), transf * gp);
-                    hSubsTr.emplace_back(subVolumesVect.back());
+                    //The following is used for glueing of volumes to volumes
+                    //Notice that we effectively have a "view" ptr.
+                    auto& back = subVolumesVect.back();
+                    auto ptrNoDelete = std::shared_ptr<Trk::TrackingVolume>(
+                        back.first.get(),
+                        Trk::do_not_delete<Trk::TrackingVolume>);
+                    hSubsTr.push_back({ptrNoDelete,back.second});
                 }
                 phiSubs.push_back(hSubs);
                 auto volBinArray = std::make_unique<Trk::BinnedArray1D<Trk::TrackingVolume>>(hSubsTr,
@@ -1429,7 +1439,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                                                                      hBinVecPtr);
 
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                     subVols.release(), volumeName);
+                                                     std::move(subVols), volumeName);
         // register glue volumes
         Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
         volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVolsInn);
@@ -1491,7 +1501,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                 }
                 auto detVolPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
                 auto sVol = std::make_unique<Trk::TrackingVolume>(subVol, aLVC.m_muonMaterial,
-                                                                  detVolPtr.release(),
+                                                                  std::move(detVolPtr),
                                                                   volName);
                 // statistics
                 ++aLVC.m_frameNum;
@@ -1577,7 +1587,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                                                                                  volBinUtil);
 
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                     subVols.release(), volumeName);
+                                                     std::move(subVols), volumeName);
         // register glue volumes
         Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
         volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVols);
@@ -1594,7 +1604,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
         }
         auto muonObjPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(muonObjs);
         tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial,
-                                                     muonObjPtr.release(),
+                                                     std::move(muonObjPtr),
                                                      volumeName);
         // statistics
         ++aLVC.m_frameNum;
@@ -1710,7 +1720,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processShield(const Trk::Volu
             }
             auto detVolPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
             auto sVol = std::make_unique<Trk::TrackingVolume>(subVol, aLVC.m_muonMaterial,
-                                                              detVolPtr.release(), volName);
+                                                              std::move(detVolPtr), volName);
 
             // statistics
             ++aLVC.m_frameNum;
@@ -1761,10 +1771,17 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processShield(const Trk::Volu
                 m_trackingVolumeHelper->setOutsideTrackingVolumeArray(*sVol,
                                                                       Trk::negativeFaceXY,
                                                                       hBins[eta - 1][phi]);
-
+            // We need to be careful here
+            // This will end up in subVols.
+            // subVols will end up in the volume we create.
+            // That volume will manage it
             subVolumesVect.emplace_back(std::move(sVol), transf * gp);
-            hSubsTr.emplace_back(subVolumesVect.back());
-
+            // The following is used for glueing of volumes to volumes
+            //Notice that we effectively have a "view" ptr.
+            auto& back = subVolumesVect.back();
+            auto ptrNoDelete = std::shared_ptr<Trk::TrackingVolume>(
+                back.first.get(), Trk::do_not_delete<Trk::TrackingVolume>);
+            hSubsTr.push_back({ptrNoDelete, back.second});
         }
         phiSubs.push_back(hSubs);
         /// Fix me
@@ -1790,7 +1807,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processShield(const Trk::Volu
                                                                                  hBinVecPtr);
 
     tVol = std::make_unique<Trk::TrackingVolume>(vol, aLVC.m_muonMaterial, nullptr,
-                                                 subVols.release(), volumeName);
+                                                 std::move(subVols), volumeName);
     // register glue volumes
     Trk::GlueVolumesDescriptor& volGlueVolumes = tVol->glueVolumesDescriptor();
     volGlueVolumes.registerGlueVolumes(Trk::tubeInnerCover, sVolsInn);

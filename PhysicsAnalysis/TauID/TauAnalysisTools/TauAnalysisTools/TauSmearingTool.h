@@ -67,7 +67,7 @@ private:
   asg::AnaToolHandle<ITauSmearingTool> m_tCommonSmearingTool;
 
   Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
-  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2022-prerec"};
+  Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2025-prerec"};
   Gaudi::Property<std::string> m_sCampaign{this, "Campaign", "mc21"};
   Gaudi::Property<std::string> m_sGenerator{this, "Generator", "PoPy"};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};

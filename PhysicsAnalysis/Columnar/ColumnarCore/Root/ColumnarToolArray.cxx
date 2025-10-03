@@ -27,8 +27,13 @@ namespace columnar
     m_data->mainTool = this;
     m_data->sharedTools.push_back (this);
 
-    setContainerName (ContainerId::eventContext, numberOfEventsName);
-    setContainerName (ContainerId::eventInfo, numberOfEventsName);
+    setContainerStoreName (ContainerId::eventContext::idName, numberOfEventsName);
+
+    // this name matches the ContainerId::eventInfo::idName, make sure
+    // to keep them in sync. the reason for hard-coding this in two
+    // places is because ContainerId::eventInfo is defined in a separate
+    // package
+    setContainerStoreName ("eventInfo", numberOfEventsName);
     m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
     addColumn (numberOfEventsName, m_eventsData.get(), {.isOffset = true});
   }
@@ -66,9 +71,9 @@ namespace columnar
     if (subtoolData->mainTool != &subtool)
       throw std::runtime_error ("subtool already has a different parent tool");
 
-    for (auto& containerName : subtoolData->containerNames)
+    for (auto& containerName : subtoolData->containerStoreNames)
     {
-      auto [iter,success] = m_data->containerNames.emplace (containerName.first, containerName.second);
+      auto [iter,success] = m_data->containerStoreNames.emplace (containerName.first, containerName.second);
       if (!success && iter->second != containerName.second)
         throw std::runtime_error ("container assigned different name in subtool: " + iter->second + " vs " + containerName.second);
     }
@@ -176,20 +181,20 @@ namespace columnar
 
 
   const std::string& ColumnarTool<ColumnarModeArray> ::
-  objectName (ContainerId objectType) const
+  containerStoreName (std::string_view ciName) const
   {
-    auto iter = m_data->containerNames.find (objectType);
-    if (iter == m_data->containerNames.end())
-      throw std::runtime_error ("object type not registered, make sure to register object handle first: " + std::to_string (unsigned(objectType)));
+    auto iter = m_data->containerStoreNames.find (ciName);
+    if (iter == m_data->containerStoreNames.end())
+      throw std::runtime_error ("container id not registered, make sure to register object handle first: " + std::string (ciName));
     return iter->second;
   }
 
 
 
   void ColumnarTool<ColumnarModeArray> ::
-  setContainerName (ContainerId container, const std::string& name)
+  setContainerStoreName (std::string_view container, const std::string& name)
   {
-    auto [iter, success] = m_data->containerNames.emplace (container, name);
+    auto [iter, success] = m_data->containerStoreNames.emplace (container, name);
     if (!success && iter->second != name)
       throw std::runtime_error ("container already registered with different name: " + name + " vs " + iter->second);
   }
@@ -319,7 +324,9 @@ namespace columnar
     remapName (m_info.name);
     remapName (m_info.offsetName);
     remapName (m_info.replacesColumn);
-    remapName (m_info.linkToName);
+    for (auto& linkTargetName : m_info.linkTargetNames)
+      remapName (linkTargetName);
+    remapName (m_info.variantLinkKeyColumn);
   }
 
 

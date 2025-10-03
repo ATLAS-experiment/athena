@@ -47,11 +47,6 @@ class TauCalibrateLC : public TauRecToolBase {
 
     Gaudi::Property<std::string> m_calibrationFile{this, "calibrationFile", ""};
     Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
-
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_aveIntPerXKey {this, 
-        "averageInteractionsPerCrossingKey", 
-        "EventInfo.averageInteractionsPerCrossing",
-        "Decoration for Average Interaction Per Crossing"};
   
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexInputContainer {this,
         "Key_vertexInputContainer",

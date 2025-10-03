@@ -13,6 +13,7 @@
 #include "xAODRootAccess/tools/TTransTrees.h"
 #include "xAODRootAccess/tools/TFileMerger.h"
 #include "xAODRootAccess/tools/TFileChecker.h"
+#include "xAODRootAccess/tools/RFileChecker.h"
 #include "xAODRootAccess/MakeTransientTree.h"
 #include "xAODRootAccess/Init.h"
 
@@ -32,6 +33,7 @@
 #pragma link C++ class xAOD::TTransTrees;
 #pragma link C++ class xAOD::TFileMerger;
 #pragma link C++ class xAOD::TFileChecker;
+#pragma link C++ class xAOD::Experimental::RFileChecker;
 #pragma link C++ function xAOD::MakeTransientTrees(TFile*,const char*);
 #pragma link C++ function xAOD::ClearTransientTrees;
 #pragma link C++ function xAOD::MakeTransientTree(TFile*,const char*);

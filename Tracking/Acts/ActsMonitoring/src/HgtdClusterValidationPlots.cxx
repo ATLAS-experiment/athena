@@ -8,7 +8,7 @@
 
 namespace ActsTrk {
 
-  HgtdClusterValidationPlots::HgtdClusterValidationPlots(PlotBase* pParent, 
+  HgtdClusterValidationPlots::HgtdClusterValidationPlots(PlotBase* pParent,
 							 const std::string& sDir)
     : PlotBase(pParent, sDir)
   {
@@ -48,7 +48,7 @@ namespace ActsTrk {
     m_localCovTT_left = Book1D("localCovTT_left", "HgtdCluster_localCovTT_left;Local Cov TT [ns2];Entries;", 100, 0, 0.2, false);
 
     m_eta = Book1D("eta", "HgtdCluster_eta;Eta;Entries;", 100, -5, 5, false);
-    
+
     m_global_x_left = Book1D("global_x_left", "HgtdCluster_global_x_left;Global x [mm];Entries;", 100, -1100, 1100, false);
     m_global_x_right = Book1D("global_x_right", "HgtdCluster_global_x_right;Global x [mm];Entries;", 100, -1100, 1100, false);
 
@@ -60,7 +60,7 @@ namespace ActsTrk {
 
     m_global_r_left = Book1D("global_r_left", "HgtdCluster_global_r_left;Global r [mm];Entries;", 100, 0, 900, false);
     m_global_r_right = Book1D("global_r_right", "HgtdCluster_global_r_right;Global r [mm];Entries;", 100, 0, 900, false);
-    
+
     m_local_xy_left = Book2D("local_xy_left", "HgtdCluster_local_xy_left;Local x [mm];Local y [mm];", 100, -30, 30, 100, -30, 30, false);
 
     m_global_xy_left = Book2D("global_xy_left", "HgtdCluster_global_xy_left;Global x [mm];Global y [mm];", 100, -1100, 1100, 100, -1100, 1100, false);
@@ -76,8 +76,8 @@ namespace ActsTrk {
 					const HGTD_ID* hgtdID)
   {
     const Identifier& id = hgtdID->wafer_id(cluster->identifierHash());
-    const auto *element = hgtdElements.getDetectorElement(hgtdID->wafer_hash(hgtdID->wafer_id(id)));
-    
+    const auto *element = InDetDD::HGTDDetEl::getDetectorElement(hgtdID->wafer_hash(hgtdID->wafer_id(id)),hgtdElements);
+
     const auto& local_position = cluster->template localPosition<3>();
     const auto& local_covariance = cluster->template localCovariance<3>();
 
@@ -86,15 +86,15 @@ namespace ActsTrk {
     double Ax[3] = {T(0,0),T(1,0),T(2,0)};
     double Ay[3] = {T(0,1),T(1,1),T(2,1)};
     double R [3] = {T(0,3),T(1,3),T(2,3)};
-    
+
     Amg::Vector2D M;
     M[0] = local_position(0,0);
     M[1] = local_position(1,0);
     Amg::Vector3D globalPos(M[0]*Ax[0]+M[1]*Ay[0]+R[0],M[0]*Ax[1]+M[1]*Ay[1]+R[1],M[0]*Ax[2]+M[1]*Ay[2]+R[2]);
-    
+
     m_barrelEndcap->Fill(hgtdID->endcap(id));
     m_eta->Fill(globalPos.eta(), beamSpotWeight);
-      
+
     // Divide in left and right endcaps
     if (hgtdID->endcap(id) == -2) {
       m_layer_left->Fill(hgtdID->layer(id), beamSpotWeight);
@@ -106,7 +106,7 @@ namespace ActsTrk {
       m_local_x_left->Fill(local_position(0, 0), beamSpotWeight);
       m_local_y_left->Fill(local_position(1, 0), beamSpotWeight);
       m_local_t_left->Fill(local_position(2, 0), beamSpotWeight);
-      
+
       m_localCovXX_left->Fill(local_covariance(0, 0), beamSpotWeight);
       m_localCovYY_left->Fill(local_covariance(1, 1), beamSpotWeight);
       m_localCovTT_left->Fill(local_covariance(2, 2), beamSpotWeight);
@@ -115,10 +115,10 @@ namespace ActsTrk {
       m_global_y_left->Fill(globalPos.y(), beamSpotWeight);
       m_global_z_left->Fill(globalPos.z(), beamSpotWeight);
       m_global_r_left->Fill(std::sqrt(globalPos.x()*globalPos.x() + (globalPos.y()*globalPos.y())), beamSpotWeight);
-      
+
       m_local_xy_left->Fill(local_position(0, 0), local_position(1, 0), beamSpotWeight);
       m_global_xy_left->Fill(globalPos.x(), globalPos.y(), beamSpotWeight);
-      m_global_zr_left->Fill(globalPos.z(), std::sqrt(globalPos.x()*globalPos.x() + (globalPos.y()*globalPos.y())), beamSpotWeight);	
+      m_global_zr_left->Fill(globalPos.z(), std::sqrt(globalPos.x()*globalPos.x() + (globalPos.y()*globalPos.y())), beamSpotWeight);
     } else if (hgtdID->endcap(id) == 2) {
       m_layer_right->Fill(hgtdID->layer(id), beamSpotWeight);
       m_phi_module_right->Fill(hgtdID->phi_module(id), beamSpotWeight);
@@ -129,7 +129,7 @@ namespace ActsTrk {
       m_local_x_right->Fill(local_position(0, 0), beamSpotWeight);
       m_local_y_right->Fill(local_position(1, 0), beamSpotWeight);
       m_local_t_right->Fill(local_position(2, 0), beamSpotWeight);
-      
+
       m_localCovXX_right->Fill(local_covariance(0, 0), beamSpotWeight);
       m_localCovYY_right->Fill(local_covariance(1, 1), beamSpotWeight);
       m_localCovTT_right->Fill(local_covariance(2, 2), beamSpotWeight);
@@ -143,7 +143,7 @@ namespace ActsTrk {
       m_global_xy_right->Fill(globalPos.x(), globalPos.y(), beamSpotWeight);
       m_global_zr_right->Fill(globalPos.z(), std::sqrt(globalPos.x()*globalPos.x() + (globalPos.y()*globalPos.y())), beamSpotWeight);
     }
-    
+
   }
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -89,7 +89,6 @@ class SqliteReadSvc final : public extends<AthService, IRDBAccessSvc>
 private:
   RecordsetPtrMap m_recordsets;
   sqlite3*        m_db{nullptr};
-  std::mutex      m_recordsetMutex;
   std::mutex      m_sessionMutex;
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -105,7 +105,7 @@ DbStatus RootKeyContainer::transAct(Transaction::Action action)
 DbStatus RootKeyContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt) {
   char txt[64];
   ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(linkH.second));
-  TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
+  const TKey* key = (const TKey*)m_dir->GetListOfKeys()->FindObject(txt);
   if ( key )    {
     stmt = linkH;
     return Success;
@@ -115,56 +115,48 @@ DbStatus RootKeyContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt) 
 
 // Fetch next object address of the selection to set token
 DbStatus RootKeyContainer::fetch(DbSelect& sel)   {
-  if ( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-    char txt[64];
-    Token::OID_t lnk = sel.link();
-    const long long int stk_size = DbContainerImp::size();
-    const long long int cnt_size = nextRecordId()-stk_size;
-    for(int j=lnk.second; j < cnt_size; ++j) {
-      ++lnk.second;
-      ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnk.second));
-      const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
-      if ( key )    {
-        const char* class_name = key->GetClassName();
-        const DbTypeInfo* typ = m_dbH.objectShape( DbReflex::forTypeName(class_name) );
-        if ( typ )  {
-            sel.setShapeID(typ->shapeID());
-            sel.link() = lnk;
-            return Success;
-        }
-        DbPrint err(m_name);
-        err << DbPrintLvl::Error 
-            << "Failed to find the correct shape identifier for class:"
-            << class_name << DbPrint::endmsg;
-        return Error;
-      }
-      else {
-        // Here we are if key names have holes due to deletes
-        // Try to get the next one.
-      }
-    }
-    // The object was not yet saved and is still on the
-    // commit stack.
-    lnk = sel.link();
-    for(long long int i=0; i < stk_size; ++i)  {
-      ActionList::value_type* ent = stackEntry(size_t(i));
-      bool take_it = ent->link.second > lnk.second;
-      if ( ent->action == WRITE && take_it )  {
-        ShapeH shape = ent->shape;
-        if ( shape )  {
-          sel.setShapeID(shape->shapeID());
-          sel.link() = ent->link;
+  char txt[64];
+  Token::OID_t lnk = sel.link();
+  const long long int stk_size = DbContainerImp::size();
+  const long long int cnt_size = nextRecordId()-stk_size;
+  for(int j=lnk.second; j < cnt_size; ++j) {
+    ++lnk.second;
+    ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnk.second));
+    const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
+    if ( key )    {
+      const char* class_name = key->GetClassName();
+      const DbTypeInfo* typ = m_dbH.objectShape( DbReflex::forTypeName(class_name) );
+      if ( typ )  {
+          sel.setShapeID(typ->shapeID());
+          sel.link() = lnk;
           return Success;
-        }
+      }
+      DbPrint err(m_name);
+      err << DbPrintLvl::Error 
+          << "Failed to find the correct shape identifier for class:"
+          << class_name << DbPrint::endmsg;
+      return Error;
+    }
+    else {
+      // Here we are if key names have holes due to deletes
+      // Try to get the next one.
+    }
+  }
+  // The object was not yet saved and is still on the
+  // commit stack.
+  lnk = sel.link();
+  for(long long int i=0; i < stk_size; ++i)  {
+    ActionList::value_type* ent = stackEntry(size_t(i));
+    bool take_it = ent->link.second > lnk.second;
+    if ( ent->action == WRITE && take_it )  {
+      ShapeH shape = ent->shape;
+      if ( shape )  {
+        sel.setShapeID(shape->shapeID());
+        sel.link() = ent->link;
+        return Success;
       }
     }
-    return Error;
   }
-  DbPrint log( m_name);
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "refine container scans." << DbPrint::endmsg
-      << "The only valid selection criterium is: \"\" (empty string)"
-      << DbPrint::endmsg;
   return Error;
 } 
 
@@ -204,7 +196,7 @@ DbStatus RootKeyContainer::destroyObject(ActionList::value_type& entry) {
   // Does not work, because container size is changed...
   ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnkH.second));
   TDirectory::TContext dirCtxt(m_dir);
-  TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
+  const TKey* key = (const TKey*)m_dir->GetListOfKeys()->FindObject(txt);
   if ( key )    {
     if ( m_policy == 0 || m_policy == TObject::kSingleKey )  {
       strcat(txt,";*");
@@ -366,7 +358,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
   if ( dbH.isValid() && dir_nam.length() > 0 )    {
     std::string nam = sanitisedName.starts_with('/') ? sanitisedName.substr(1)
                                                      : std::move(sanitisedName);
-    size_t idx1     = std::string::npos, idx2 = nam.find('/',1);
+    size_t idx1     = 0, idx2 = nam.find('/',1);
     TDirectory::TContext dirCtxt(0);
     IDbDatabase* idb = dbH.info();
     m_rootDb = dynamic_cast<RootDatabase*>(idb);
@@ -376,8 +368,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
     }
     m_dir  = m_rootDb->file();
     do  {
-      //bug: on entry, idx1 = 18446744073709551615UL. Adding 1 overflows size_t.
-      std::string s = nam.substr(idx1+1, idx2-idx1-1); 
+      std::string s = nam.substr(idx1, idx2-idx1); 
       m_dir->cd();
       TDirectory* dir = (TDirectory*)m_dir->Get(s.c_str());
       if ( 0==dir && mode&pool::CREATE && !s.empty() ) {
@@ -397,10 +388,11 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
               << DbPrint::endmsg;
           return Error;
         }
-        idx1  = idx2;
-        idx2  = nam.find('/', idx1+1);
+        if (idx2 == std::string::npos) break;
+        idx1  = idx2+1;
+        idx2  = nam.find('/', idx1);
       }
-    } while ( m_dir && idx1 != std::string::npos );
+    } while ( m_dir );
     if (m_dir)
       m_dir->cd();
     DbOption opt1("DEFAULT_WRITEPOLICY","");
@@ -436,7 +428,7 @@ DbStatus RootKeyContainer::checkAccess(DbDatabase& dbH,
   return Error;
 }
 
-// Define selection criteria
+// Define selection
 DbStatus RootKeyContainer::select(DbSelect& /* crit */) {
   if ( 0 != m_dir )    {
     return Success;

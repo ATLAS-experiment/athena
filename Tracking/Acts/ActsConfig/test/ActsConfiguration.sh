@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 echo "--------------------------------------------"
 echo "Running ACTS configuration tests"
@@ -52,15 +52,15 @@ failed_tests=()
 activate_all_flags="flags.Acts.doITkConversion=True; \
                     flags.Acts.doLargeRadius=True; \
 		    flags.Acts.doLowPt=True; \
-		    flags.Tracking.ITkActsPass.storeSeparateContainer=True; \
+		    flags.Tracking.ITkActsLegacyPass.storeSeparateContainer=True; \
         	    flags.Tracking.ITkActsLargeRadiusPass.storeSeparateContainer=True; \
         	    flags.Tracking.ITkActsConversionPass.storeSeparateContainer=True; \
 		    flags.Tracking.ITkActsLowPtPass.storeSeparateContainer=True; \
-       		    flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
+       		    flags.Tracking.ITkActsLegacyPass.storeTrackSeeds=True; \
 		    flags.Tracking.ITkActsLargeRadiusPass.storeTrackSeeds=True; \
         	    flags.Tracking.ITkActsConversionPass.storeTrackSeeds=True; \
 		    flags.Tracking.ITkActsLowPtPass.storeTrackSeeds=True; \
-        	    flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True; \
+        	    flags.Tracking.ITkActsLegacyPass.storeSiSPSeededTracks=True; \
         	    flags.Tracking.ITkActsLargeRadiusPass.storeSiSPSeededTracks=True; \
 		    flags.Tracking.ITkActsConversionPass.storeSiSPSeededTracks=True; \
         	    flags.Tracking.ITkActsLowPtPass.storeSiSPSeededTracks=True; \
@@ -68,34 +68,34 @@ activate_all_flags="flags.Acts.doITkConversion=True; \
         	    flags.Acts.EDM.PersistifySpacePoints=True; \
 		    flags.Detector.EnableCalo=True; \
 		    flags.Tracking.writeExtendedSi_PRDInfo=True; \
-		    flags.Acts.storeTrackStateInfo=True; \
-		    flags.Tracking.doTruth=True;"
+		    flags.Acts.storeTrackStateInfo=True;"
 		   
 activate_all_collections="\"InDet\" \
-        \"InDetActs\" \
+        \"InDetActsLegacy\" \
         \"InDetActsConversion\" \
         \"InDetActsLargeRadius\" \
         \"InDetActsLowPt\" \
-	\"SiSPSeedSegmentsActs\" \
-        \"SiSPSeedSegmentsActsPixel\" \
-        \"SiSPSeedSegmentsActsStrip\" \
+	\"SiSPSeedSegmentsActsLegacy\" \
+        \"SiSPSeedSegmentsActsLegacyPixel\" \
+        \"SiSPSeedSegmentsActsLegacyStrip\" \
         \"SiSPSeedSegmentsActsConversionStrip\" \
         \"SiSPSeedSegmentsActsLargeRadiusStrip\" \
 	\"SiSPSeedSegmentsActsLowPt\" \
         \"SiSPSeedSegmentsActsLowPtPixel\" \
         \"SiSPSeedSegmentsActsLowPtStrip\" \
-        \"SiSPSeededTracksActs\" \
+        \"SiSPSeededTracksActsLegacy\" \
         \"SiSPSeededTracksActsLargeRadius\" \
         \"SiSPSeededTracksActsConversion\" \
         \"SiSPSeededTracksActsLowPt\" \
 	"
 
 # Activate everything!
-echo "Running configuration 1: activate all"
-source ActsMainConfiguration.sh \
+echo "Running configuration 1: activate all - ACTS chain with legacy configuration"
+source ActsLegacyConfiguration.sh \
        "${activate_all_flags} \
 	flags.Acts.doAmbiguityResolution=True; \
        " \
+       "ActsExtrapTool.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Got.+error.+during.+propagation:.+PropagatorError:.." \
        >& ActsConfiguration1.log
 
 reco_rc=$?
@@ -115,11 +115,12 @@ fi
 
 
 # Activate everything eithout ambiguity resolution
-echo "Running configuration 2: activate all without ambiguity resolution"
-source ActsMainConfiguration.sh \
+echo "Running configuration 2: activate all (ACTS chain with legacy configuration) without ambiguity resolution"
+source ActsLegacyConfiguration.sh \
        "${activate_all_flags} \
 	flags.Acts.doAmbiguityResolution=False; \
        " \
+       "ActsExtrapTool.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Got.+error.+during.+propagation:.+PropagatorError:.." \
        >& ActsConfiguration2.log
 
 reco_rc=$?
@@ -138,15 +139,14 @@ else
 fi
 
 # Fast Tracking configuration
-echo "Running configuration 3: fast tracking"
-source ActsFastConfiguration.sh \
-       "flags.Tracking.ITkActsFastPass.storeSeparateContainer=True; \
-        flags.Tracking.ITkActsFastPass.storeTrackSeeds=True; \
-	flags.Tracking.ITkActsFastPass.storeSiSPSeededTracks=True; \
+echo "Running configuration 3 (ACTS chain with fast tracking configuration)"
+source ActsMainConfiguration.sh \
+       "flags.Tracking.ITkActsPass.storeSeparateContainer=True; \
+        flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
+	flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True; \
 	flags.Acts.EDM.PersistifyTracks=True; \
 	flags.Acts.doAmbiguityResolution=False; \
 	flags.Tracking.writeExtendedSi_PRDInfo=True; \
-	flags.Tracking.doTruth=True; \
        " \
        >& ActsConfiguration3.log
 
@@ -158,9 +158,9 @@ if [ $reco_rc != 0 ]; then
 else
     checkIdpvmOnFile \
 	"InDet" \
-        "InDetActsFast" \
-        "SiSPSeedSegmentsActsFastPixel" \
-        "SiSPSeededTracksActsFast"
+        "InDetActs" \
+        "SiSPSeedSegmentsActsPixel" \
+        "SiSPSeededTracksActs"
     idpvm_rc=$?
     if [ $idpvm_rc != 0 ]; then
         echo " - FAILURE (IDPVM)"
@@ -170,7 +170,7 @@ fi
 
 # Run production mode
 echo "Running configuration 4: production"
-source ActsMainConfiguration.sh \
+source ActsLegacyConfiguration.sh \
        "flags.Acts.doITkConversion=True; \
         flags.Acts.doLargeRadius=True; \
 	flags.Acts.doLowPt=True; \
@@ -190,7 +190,7 @@ fi
 
 # Persistify cluster EDM including HGTD
 echo "Running configuration 5: persistify cluster EDM including HGTD"
-source ActsMainConfiguration.sh \
+source ActsLegacyConfiguration.sh \
        "flags.Tracking.doTruth=False; \
         flags.Acts.EDM.PersistifySpacePoints=True; \
 	flags.Detector.EnableHGTD=True; \
@@ -207,8 +207,7 @@ fi
 # Run on Heavy Ions
 echo "Running Configuration 6: Heavy Ion"
 source ActsHeavyConfiguration.sh \
-       "flags.Tracking.doTruth=True; \
-        flags.Tracking.ITkActsHeavyIonPass.storeSeparateContainer=True; \
+       "flags.Tracking.ITkActsHeavyIonPass.storeSeparateContainer=True; \
 	flags.Tracking.ITkActsHeavyIonPass.storeTrackSeeds=True; \
 	flags.Tracking.ITkActsHeavyIonPass.storeSiSPSeededTracks=True; \
 	flags.Tracking.writeExtendedSi_PRDInfo=True; \

@@ -76,6 +76,41 @@ def ActsHgtdClusterizationMonitoringToolCfg(flags,
     acc.merge(ActsMonitoringHistSvcCfg(flags))
     return acc
 
+def ActsHGTDTrackExtensionMonitoringCfg(flags,
+                                        name: str = "ActsHGTDTrackExtensionMonitoringTool",
+                                        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, name)
+
+    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
+                            xbins=100, xmin=0, xmax=10000)
+    monTool.defineHistogram('track_n_measurements', path='EXPERT', type='TH1I', title='Number of track measurements',
+                            xbins=50, xmin=0, xmax=50)
+    monTool.defineHistogram('track_n_holes', path='EXPERT', type='TH1I', title='Number of track holes',
+                            xbins=50, xmin=0, xmax=50)
+    monTool.defineHistogram('track_n_outliers', path='EXPERT', type='TH1I', title='Number of track outliers',
+                            xbins=50, xmin=0, xmax=50)
+    monTool.defineHistogram('track_chi2_ndf', path='EXPERT', type='TH1F', title='Track chi2/ndf',
+                            xbins=10, xmin=0, xmax=100)
+    monTool.defineHistogram('cluster_x', path='EXPERT', type='TH1F', title='Cluster x position',
+                            xbins=100, xmin=-1000, xmax=1000)
+    monTool.defineHistogram('cluster_y', path='EXPERT', type='TH1F', title='Cluster y position',
+                            xbins=100, xmin=-1000, xmax=1000)
+    monTool.defineHistogram('cluster_z', path='EXPERT', type='TH1F', title='Cluster z position',
+                            xbins=1000, xmin=-4000, xmax=4000)
+    monTool.defineHistogram('cluster_t', path='EXPERT', type='TH1F', title='Cluster time',
+                            xbins=500, xmin=0, xmax=50)
+    monTool.defineHistogram('n_hgtd_clusters', path='EXPERT', type='TH1I', title='Number of HGTD clusters',
+                            xbins=30, xmin=0, xmax
+                            =30)
+    
+    acc.setPrivateTools(monTool)
+    acc.merge(ActsMonitoringHistSvcCfg(flags))
+    return acc
+
+
 def ActsPixelSpacePointFormationMonitoringToolCfg(flags,
                                                   name: str = "ActsPixelSpacePointFormatioMonitoringTool",
                                                   **kwargs) -> ComponentAccumulator:

@@ -1,0 +1,15 @@
+{
+    "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "doClusterValidation"  : true,
+        "PixelClusterKey"  : "_PIXELCLUSTERCOLLNAME_",
+        "StripClusterKey"  : "_STRIPCLUSTERCOLLNAME_",
+        "PixelSpacePointKey"  : "_PIXELSPCOLLNAME_",
+        "StripSpacePointKey"  : "_STRIPSPCOLLNAME_",
+        "StripOverlapSpacePointKey"  : "_STRIPOSPCOLLNAME_"
+    }
+}

@@ -83,7 +83,7 @@ def SCTHitsNoiseMonAlgConfig(inputFlags):
                                                             ybins=sctMon.n_phibins[isub], ymin=sctMon.f_phibin[isub]-0.5 , ymax=sctMon.l_phibin[isub]+0.5,
                                                             weight="numberOfStrips_"+HitsMapName,
                                                             opt='kLBNHistoryDepth=30,kAlwaysCreate')
-                    
+
             streamhitmap = "mapsOfHitsOnTracks" + abbreviations[isub] + "_" + "trackhitsmap_" + str(i//2) + "_" + str(i%2)
             histotitle = "SCT hits on tracks for " + names[isub] + " " + Title(i,isub)
             MonGroupArray[isub].defineHistogram(varname= "eta_"+streamhitmap + ",phi_"+streamhitmap + ";"+streamhitmap,
@@ -93,7 +93,18 @@ def SCTHitsNoiseMonAlgConfig(inputFlags):
                                                             xbins=sctMon.n_etabins[isub], xmin=sctMon.f_etabin[isub]-0.5, xmax=sctMon.l_etabin[isub]+0.5,
                                                             ybins=sctMon.n_phibins[isub], ymin=sctMon.f_phibin[isub]-0.5 , ymax=sctMon.l_phibin[isub]+0.5,
                                                             opt='kAlwaysCreate')
-                    
+
+            if myMonAlg.doOnlineMon:
+                streamhitmaprecent = "mapsOfHitsOnTracksrecent" + abbreviations[isub] + "_" + "trackhitsmap_" + str(i//2) + "_" + str(i%2)
+                histotitlerecent = "SCT hits on tracks for recent event for " + names[isub] + " " + Title(i,isub)
+                MonGroupArray[isub].defineHistogram(varname= "eta_"+streamhitmap + ",phi_"+streamhitmap + ";"+streamhitmaprecent,
+                                                    type= "TH2F", 
+                                                    title= histotitlerecent + ";Index in the direction of #eta;Index in the direction of #phi",
+                                                    path= path[isub] + "/hits/mapsOfHitsOnTracks/",
+                                                    xbins=sctMon.n_etabins[isub], xmin=sctMon.f_etabin[isub]-0.5, xmax=sctMon.l_etabin[isub]+0.5,
+                                                    ybins=sctMon.n_phibins[isub], ymin=sctMon.f_phibin[isub]-0.5 , ymax=sctMon.l_phibin[isub]+0.5,
+                                                    opt='kAlwaysCreate')
+
             occMap = "occupancymap" + abbreviations[isub] + "_" + str(i//2) + "_" + str(i%2)
             hitoccupancy = "hitoccupancymap" + abbreviations[isub] + "_" + str(i//2) + "_" + str(i%2)
             histotitleR  = "SCT Hit Occupancy map for " + names[isub] + ": " + Title(i,isub)

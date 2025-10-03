@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGDECISIONINTERFACE_CONDITIONS_H
@@ -68,7 +68,8 @@ namespace TrigDefs {
   const static unsigned int lastFeatureOfType         = 0x1 << 21;
   /// Run 3 "enum". Return all features along legs (still with type and container checks)
   const static unsigned int allFeaturesOfType         = 0x1 << 22;
-
+  /// Run 3 "enum". Fill active decisions ID for each feature.
+  const static unsigned int fillDecisions             = 0x1 << 23;
 
 }
 

@@ -9,19 +9,19 @@
 namespace ActsTrk {
 
   HgtdClusterAnalysisAlg::HgtdClusterAnalysisAlg(const std::string& name, ISvcLocator *pSvcLocator)
-    : AthMonitorAlgorithm(name, pSvcLocator) 
+    : AthMonitorAlgorithm(name, pSvcLocator)
   {}
-  
+
   StatusCode HgtdClusterAnalysisAlg::initialize() {
     ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
-    
+
     ATH_CHECK( m_hgtdClusterContainerKey.initialize() );
     ATH_CHECK( m_HGTDDetEleCollKey.initialize() );
     ATH_CHECK(detStore()->retrieve(m_hgtdID,"HGTD_ID"));
 
     ATH_MSG_DEBUG("Monitoring settings ...");
     ATH_MSG_DEBUG(m_monGroupName);
-    
+
     return AthMonitorAlgorithm::initialize();
   }
 
@@ -34,14 +34,14 @@ namespace ActsTrk {
       ATH_MSG_FATAL(m_HGTDDetEleCollKey.fullKey() << " is not available.");
       return StatusCode::FAILURE;
     }
-    
+
     SG::ReadHandle< xAOD::HGTDClusterContainer > inputHgtdClusterContainer( m_hgtdClusterContainerKey, ctx );
     if (not inputHgtdClusterContainer.isValid()){
         ATH_MSG_FATAL("xAOD::HGTDClusterContainer with key " << m_hgtdClusterContainerKey.key() << " is not available...");
         return StatusCode::FAILURE;
     }
     const xAOD::HGTDClusterContainer* hgtdClusterContainer = inputHgtdClusterContainer.cptr();
-    
+
     // IDs variables, e.g. module, disk or any detector-related variable HGTD uses
     // We can add global position here
     // Variables like eta, perp
@@ -55,7 +55,7 @@ namespace ActsTrk {
     for (std::size_t i(0ul); i<hgtdClusterContainer->size(); ++i) {
       const xAOD::HGTDCluster *cluster = hgtdClusterContainer->at(i);
       const Identifier& id = m_hgtdID->wafer_id(cluster->identifierHash());
-      const auto *element = hgtdElements->getDetectorElement(m_hgtdID->wafer_hash(m_hgtdID->wafer_id(id)));
+      const auto *element = InDetDD::HGTDDetEl::getDetectorElement(m_hgtdID->wafer_hash(m_hgtdID->wafer_id(id)),*hgtdElements);
 
       const Amg::Transform3D& T = element->surface().transform();
       double Ax[3] = {T(0,0),T(1,0),T(2,0)};
@@ -74,13 +74,13 @@ namespace ActsTrk {
       global_r[i] = std::sqrt(global_x[i]*global_x[i] + global_y[i]*global_y[i]);
       eta[i] = globalPos.eta();
     }
-    
+
     // Local Position
     auto monitor_localX = Monitored::Collection("localX", *inputHgtdClusterContainer,
 						[] (const auto cluster) -> float
-						{ 
-						  const auto& localPos = cluster->template localPosition<3>(); 
-						  return localPos(0,0); 
+						{
+						  const auto& localPos = cluster->template localPosition<3>();
+						  return localPos(0,0);
 						});
     auto monitor_localY = Monitored::Collection("localY", *inputHgtdClusterContainer,
 						[] (const auto cluster) -> float
@@ -98,10 +98,10 @@ namespace ActsTrk {
 
     // Local Covariance
     auto monitor_localCovXX = Monitored::Collection("localCovXX", *inputHgtdClusterContainer,
-						    [] (const auto* cluster) -> float 
+						    [] (const auto* cluster) -> float
 						    { return cluster->template localCovariance<3>()(0, 0); });
     auto monitor_localCovYY = Monitored::Collection("localCovYY", *inputHgtdClusterContainer,
-						    [] (const auto* cluster) -> float 
+						    [] (const auto* cluster) -> float
 						    { return cluster->template localCovariance<3>()(1, 1); });
 
     auto monitor_localCovTT = Monitored::Collection("localCovTT", *inputHgtdClusterContainer,
@@ -113,7 +113,7 @@ namespace ActsTrk {
     auto monitor_globalZ = Monitored::Collection("globalZ", global_z);
     auto monitor_globalR = Monitored::Collection("globalR", global_r);
     auto monitor_eta = Monitored::Collection("eta", eta);
-    
+
     fill(m_monGroupName.value(),
 	 monitor_localX, monitor_localY, monitor_localT,
 	 monitor_localCovXX, monitor_localCovYY, monitor_localCovTT,

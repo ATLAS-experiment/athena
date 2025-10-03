@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETJVTEFFICIENCYSCALEFACTORS_H_
@@ -83,7 +83,6 @@ private:
     JvtTagger m_taggingAlg{};
     std::unique_ptr<TH2> m_h_JvtHist;
     std::unique_ptr<TH2> m_h_EffHist;
-    std::string m_passJvtDecName;
     std::string m_sf_decoration_name;
     std::string m_isHS_decoration_name;
     std::string m_truthJetContName;

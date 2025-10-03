@@ -2,87 +2,57 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonStationIndex/MuonStationIndex.h"
+#include "xAODMuonPrepData/MMCluster.h"
+#include "xAODMuonPrepData/MdtDriftCircle.h"
+#include "xAODMuonPrepData/RpcMeasurement.h"
+#include "xAODMuonPrepData/TgcStrip.h"
+#include "xAODMuonPrepData/sTgcMeasurement.h"
 
 namespace MuonR4 {
 
-    SpacePointPerLayerSorter::SpacePointPerLayerSorter(const Muon::IMuonIdHelperSvc* idHelperSvc)
-                : m_idHelperSvc{idHelperSvc} {}
-
-    Identifier SpacePointPerLayerSorter::detectorLayerId(const Identifier& id) const {
-
-        Muon::MuonStationIndex::TechnologyIndex techIdx{m_idHelperSvc->technologyIndex(id)};
-
-        switch (techIdx){
-            case Muon::MuonStationIndex::MDT:{
-                const MdtIdHelper& idHelper {m_idHelperSvc->mdtIdHelper()};
-
-                Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,
-                                                        idHelper.stationPhi(id), 
-                                                        idHelper.multilayer(id),
-                                                        idHelper.tubeLayer(id), 1)};
-                return detLayId;
+    unsigned int SpacePointPerLayerSorter::sectorLayerNum(const SpacePoint& sp) const {
+        
+        switch (sp.primaryMeasurement()->type()){
+            case xAOD::UncalibMeasType::MdtDriftCircleType:{
+                auto mdtMeas = static_cast<const xAOD::MdtDriftCircle*>(sp.primaryMeasurement());
+                return sp.msSector()->logicalLayerIdx(mdtMeas->readoutElement()).at(mdtMeas->tubeLayer()-1);
             }
-            case Muon::MuonStationIndex::RPC:{
-                const RpcIdHelper& idHelper {m_idHelperSvc->rpcIdHelper()};
-
-                Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1, 
-                                                        idHelper.stationPhi(id),
-                                                        idHelper.doubletR(id), 1, 1, 
-                                                        idHelper.gasGap(id), 0, 1)};
-                return detLayId;
+            case xAOD::UncalibMeasType::RpcStripType:{
+                auto rpcMeas = static_cast<const xAOD::RpcMeasurement*>(sp.primaryMeasurement());
+                return sp.msSector()->logicalLayerIdx(rpcMeas->readoutElement()).at(rpcMeas->gasGap()-1);
             }
-            case Muon::MuonStationIndex::TGC:{
-                const TgcIdHelper& idHelper {m_idHelperSvc->tgcIdHelper()};
-
-                Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,
-                                                        idHelper.stationPhi(id), 
-                                                        idHelper.gasGap(id), 0, 1)};
-                return detLayId;
+            case xAOD::UncalibMeasType::TgcStripType:{
+                auto tgcMeas = static_cast<const xAOD::TgcStrip*>(sp.primaryMeasurement());
+                return sp.msSector()->logicalLayerIdx(tgcMeas->readoutElement()).at(tgcMeas->gasGap()-1);
             }
-            case Muon::MuonStationIndex::STGC:{
-                const sTgcIdHelper& idHelper {m_idHelperSvc->stgcIdHelper()};
-
-                Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,
-                                                        idHelper.stationPhi(id), 
-                                                        idHelper.multilayer(id),
-                                                        idHelper.gasGap(id), 
-                                                        idHelper.channelType(id), 1)};
-                return detLayId;
+            case xAOD::UncalibMeasType::sTgcStripType:{
+                auto stgcMeas = static_cast<const xAOD::sTgcMeasurement*>(sp.primaryMeasurement());
+                return sp.msSector()->logicalLayerIdx(stgcMeas->readoutElement()).at(stgcMeas->gasGap()-1);
             }
-            case Muon::MuonStationIndex::MM:{
-                const MmIdHelper& idHelper {m_idHelperSvc->mmIdHelper()};
-
-                Identifier detLayId {idHelper.channelID(idHelper.stationName(id), 1,
-                                                        idHelper.stationPhi(id), 
-                                                        idHelper.multilayer(id),
-                                                        idHelper.gasGap(id), 1)};
-                return detLayId;
+            case xAOD::UncalibMeasType::MMClusterType:{
+                auto mmMeas = static_cast<const xAOD::MMCluster*>(sp.primaryMeasurement());
+                return sp.msSector()->logicalLayerIdx(mmMeas->readoutElement()).at(mmMeas->gasGap()-1);
             }
             default:
-                return id;
+                THROW_EXCEPTION("Unexpected Measurement Type in sectorLayerNum()");
         }
     }
+    
+    bool SpacePointPerLayerSorter::operator()(const SpacePoint& sp1, const SpacePoint& sp2) const {
 
-    bool SpacePointPerLayerSorter::operator()(const SpacePoint& sp1, const SpacePoint& sp2) const{
-
-        const Identifier& id1 = sp1.identify();
-        const Identifier& id2 = sp2.identify();
-
-        const Identifier lay1 {detectorLayerId(id1)};
-        const Identifier lay2 {detectorLayerId(id2)};
+        const unsigned int lay1 {sectorLayerNum(sp1)};
+        const unsigned int lay2 {sectorLayerNum(sp2)};
 
         if (lay1 == lay2) {
-            const double dy = sp1.positionInChamber().y() - sp2.positionInChamber().y();
+            const double dy = sp1.localPosition().y() - sp2.localPosition().y();
             if ( std::abs(dy) > 20 * Gaudi::Units::micrometer ){ 
                 return dy < 0;
             }
-            return sp1.positionInChamber().x() < sp2.positionInChamber().x();
+            return sp1.localPosition().x() < sp2.localPosition().x();
         }
-        return sp1.positionInChamber().z() < sp2.positionInChamber().z();
+        return lay1 < lay2;
     }
-
+    
     bool SpacePointPerLayerSorter::operator()(const std::shared_ptr<SpacePoint>& sp1, const std::shared_ptr<SpacePoint>& sp2) const {
         return (*this)(*sp1, *sp2);
     }

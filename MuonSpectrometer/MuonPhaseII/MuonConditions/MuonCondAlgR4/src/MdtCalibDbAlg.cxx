@@ -26,8 +26,6 @@
 #include "CoralBase/Blob.h"
 #include "CoralUtilities/blobaccess.h"
 
-#include <MdtCalibData/CalibParamSorter.h>
-
 #include <unordered_map>
 #include <fstream>
 
@@ -408,10 +406,8 @@ StatusCode MdtCalibDbAlg::parseT0Payload(TTree& t0Tree,
     SET_BRANCHADDRESS(t0Tree, tube);
     
     using SingleTubeCalib = MdtTubeCalibContainer::SingleTubeCalib;
-    using SingleTubeCalibPtr = MdtTubeCalibContainer::SingleTubeCalibPtr;
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
 
-    std::set<SingleTubeCalibPtr, CalibParamSorter> t0Constants{CalibParamSorter{std::pow(0.1, m_t0CalibPrec)}};
     for (Long64_t e = 0 ; e <t0Tree.GetEntries(); ++e) {
         t0Tree.GetEntry(e);
         bool isValid{false};
@@ -422,11 +418,11 @@ StatusCode MdtCalibDbAlg::parseT0Payload(TTree& t0Tree,
             return StatusCode::FAILURE;
         }
         TubeContainerPtr calibChannels = std::make_unique<MdtTubeCalibContainer>(m_idHelperSvc.get(), detId);
-        SingleTubeCalibPtr t0Calib = std::make_unique<SingleTubeCalib>();
-        t0Calib->adcCal = adc;
-        t0Calib->t0 = t0;
-        t0Calib->statusCode = code;
-        t0Calib = (*t0Constants.insert(t0Calib).first);
+        SingleTubeCalib t0Calib{};
+        t0Calib.adcCal = adc;
+        t0Calib.t0 = t0;
+        t0Calib.statusCode = code;
+
         for (unsigned int ch = 0; ch < multiLayer->size(); ++ch){
             const Identifier tubeId{idHelper.channelID(detId, multiLayer->at(ch),
                                                         tubeLayer->at(ch), tube->at(ch), isValid)};
@@ -449,9 +445,7 @@ StatusCode MdtCalibDbAlg::parseT0Payload(const nlohmann::json& t0Blob,
                                          MdtCalibDataContainer& outContainer) const {
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     using SingleTubeCalib = MdtTubeCalibContainer::SingleTubeCalib;
-    using SingleTubeCalibPtr = MdtTubeCalibContainer::SingleTubeCalibPtr;
     
-    std::set<SingleTubeCalibPtr, CalibParamSorter> t0Constants{CalibParamSorter{std::pow(0.1, m_t0CalibPrec)}};
     /** Loop over the R-T blob payload */
     for (auto& dbEntry : t0Blob.items()) {
         const nlohmann::json payload = dbEntry.value();
@@ -468,11 +462,10 @@ StatusCode MdtCalibDbAlg::parseT0Payload(const nlohmann::json& t0Blob,
 
         for (auto& calibEntry : payload["calibConstants"].items()){
             const nlohmann::json calibPayload = calibEntry.value();
-            SingleTubeCalibPtr calibConstant{std::make_unique<SingleTubeCalib>()};
-            calibConstant->t0 = calibPayload["t0"];
-            calibConstant->adcCal = calibPayload["adc"];
-            calibConstant->statusCode = calibPayload["code"];
-            calibConstant = *t0Constants.insert(calibConstant).first;
+            SingleTubeCalib calibConstant{};
+            calibConstant.t0 = calibPayload["t0"];
+            calibConstant.adcCal = calibPayload["adc"];
+            calibConstant.statusCode = calibPayload["code"];
             for (auto& tubeEntry : calibPayload["tubes"].items()) {
                  const nlohmann::json tubePayload = tubeEntry.value();
                  const int ml = tubePayload["ml"];

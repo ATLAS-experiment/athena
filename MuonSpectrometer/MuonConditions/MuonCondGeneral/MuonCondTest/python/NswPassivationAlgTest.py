@@ -13,34 +13,20 @@ def NSWPassivAlgTest(flags,alg_name="NSWPassivAlgTest", **kwargs):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from .MdtCablingTester import SetupArgParser, setupServicesCfg
-    
-    parser = SetupArgParser()
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"])
-    args = parser.parse_args()
-    
-
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from MuonConfig.MuonConfigUtils import executeTest, SetupMuonStandaloneCA, configureCondTag
+       
     flags = initConfigFlags()
-    flags.Concurrency.NumThreads = args.threads
-    flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
-    flags.Output.ESDFileName = args.output
-    flags.Input.Files = args.inputFile
-    flags.lock()
+    flags.Input.Files = defaultTestFiles.ESD_RUN3_DATA22
    
-    cfg = setupServicesCfg(flags)
-    msgService = cfg.getService('MessageSvc')
-    msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
-
-    cfg.merge(NSWPassivAlgTest(flags))
-    cfg.printConfig(withDetails=True, summariseProps=True)
-
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
+    flags.Exec.MaxEvents = 1
+    configureCondTag(flags)
+    flags.lock()
     flags.dump()
 
-    with open("NSWPassivAlgTest.pkl", "wb") as f:
-         cfg.store(f)
-         f.close()
-
-    sc = cfg.run(1)
-    if not sc.isSuccess():
-        import sys
-        sys.exit("Execution failed")
+    cfg = SetupMuonStandaloneCA(flags)
+    cfg.merge(NSWPassivAlgTest(flags))
+   
+    executeTest(cfg)

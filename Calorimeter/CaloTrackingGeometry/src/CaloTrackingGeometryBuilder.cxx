@@ -6,7 +6,7 @@
 // CaloTrackingGeometryBuilder.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Calo
-#include "CaloTrackingGeometry/CaloTrackingGeometryBuilder.h"
+#include "CaloTrackingGeometryBuilder.h"
 // Trk
 #include <memory>
 

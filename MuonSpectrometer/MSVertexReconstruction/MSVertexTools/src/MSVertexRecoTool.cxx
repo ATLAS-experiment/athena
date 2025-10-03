@@ -518,7 +518,7 @@ namespace Muon {
             double zpossigma(dzLoF), Chi2(0), Chi2Prob(-1);
             unsigned int Nitr(0);
             std::vector<unsigned int> vxtracks;  // tracklets to be used in the vertex routine
-            std::vector<bool> blacklist(ExtrapZ[k].size(), false);         // tracklets that do not belong to the vertex
+            std::vector<bool> blocklist(ExtrapZ[k].size(), false);         // tracklets that do not belong to the vertex
 
             // minimum chi^2 iterative fit
             while (true) {
@@ -528,7 +528,7 @@ namespace Muon {
                 unsigned int iworst(0); // tracklet index contributing to the vertex chi2 the most
                 // loop on the tracklets, find the chi^2 contribution from each tracklet
                 for (unsigned int i = 0; i < ExtrapZ[k].size(); ++i) {
-                    if (blacklist[i]) continue;
+                    if (blocklist[i]) continue;
                     trkp[k].push_back(pAtVx[k][i]);
                     double delz = zLoF - ExtrapZ[k][i];
                     double ExtrapErr = std::hypot(sigmaZ[k][i], dlength[k][i], dzLoF);
@@ -550,7 +550,7 @@ namespace Muon {
                 zpossigma = tmpzpossigma;
                 double testChi2 = TMath::Prob(tmpchi2, tmpnTrks - 1);
                 if (testChi2 < m_VxChi2ProbCUT)
-                    blacklist[iworst] = true;
+                    blocklist[iworst] = true;
                 else {
                     Chi2 = tmpchi2;
                     Chi2Prob = testChi2;

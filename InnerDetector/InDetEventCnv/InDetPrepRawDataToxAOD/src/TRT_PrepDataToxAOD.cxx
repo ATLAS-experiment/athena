@@ -39,22 +39,8 @@
 //
 /////////////////////////////////////////////////////////////////////
 TRT_PrepDataToxAOD::TRT_PrepDataToxAOD(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_driftFunctionTool("TRT_DriftFunctionTool", this),
-  m_trtcaldbTool("TRT_CalDbTool", this),
-  m_neighbourSvc("TRT_StrawNeighbourSvc", name),
-  m_TRTStrawSummaryTool("TRT_StrawStatusSummaryTool",this),
-  m_TRTHelper(nullptr),
-  m_trtman(nullptr),
-  m_firstEventWarnings(true)
-{ 
-  
-  // --- Services and Tools
-  declareProperty("TRTDriftFunctionTool",  m_driftFunctionTool);
-  declareProperty("TRTCalDbTool",           m_trtcaldbTool);
-  declareProperty("NeighbourSvc",          m_neighbourSvc);
-  declareProperty("TRTStrawSummaryTool",    m_TRTStrawSummaryTool);
-
+  AthAlgorithm(name,pSvcLocator)
+{
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -285,12 +271,12 @@ StatusCode TRT_PrepDataToxAOD::execute()
       // Use the MultiTruth Collection to get a list of all true particle contributing to the DC
       if (m_useTruthInfo){
 	if(prdmtColl){
-	  std::vector<unsigned int> barcodes;
+	  std::vector<int> uniqueIDs;
 	  auto range = prdmtColl->equal_range(surfaceID);
 	  for (auto i = range.first; i != range.second; ++i) {
-	    barcodes.push_back( i->second.barcode() );
+	    uniqueIDs.push_back( HepMC::uniqueID(i->second) );
 	  }
-	  AUXDATA(xprd,  std::vector<unsigned int> , truth_barcode) = barcodes;
+	  AUXDATA(xprd,  std::vector<int> , truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
 	}
       }
       if (m_writeSDOs) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -36,7 +36,7 @@ public:
                                   std::vector< std::pair<double, double> >& trfHitRecord,
                                   std::vector<double>& initialConditions,
                                   CLHEP::HepRandomEngine* rndmEngine,
-                                  const EventContext &ctx) override;
+                                  const EventContext &ctx) const override;
 
 private:
   SensorSimPlanarTool();
@@ -50,7 +50,6 @@ private:
   std::vector<PixelHistoConverter> m_distanceMap_h;
   std::vector<PixelHistoConverter> m_lorentzMap_e;
   std::vector<PixelHistoConverter> m_lorentzMap_h;
-  std::vector<std::pair<double,double> > m_centrePixelNNEtaPhi;
   std::vector<PixelHistoConverter> m_lorentzCorrection;
   std::vector<PixelHistoConverter> m_chargeCorrection;
   std::vector<PixelHistoConverter> m_distanceCorrection;
@@ -58,11 +57,6 @@ private:
   Gaudi::Property<int> m_numberOfSteps
   {
     this, "numberOfSteps", 50, "Geant4:number of steps for PixelPlanar"
-  };
-
-  Gaudi::Property<double> m_diffusionConstant
-  {
-    this, "diffusionConstant", 0.0, "Geant4:Diffusion Constant for PixelPlanar"
   };
 
   Gaudi::Property<bool> m_doInterpolateEfield

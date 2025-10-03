@@ -16,17 +16,41 @@ else()
    atlas_install_scripts( scripts/*_CA.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 endif()
 
-atlas_add_test( ConfigTextCompareBuilder
-   SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-builder --check-order
-   POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 30 )
+if (NOT COLUMNAR_ANALYSIS)
 
-atlas_add_test( ConfigTextCompareBlock
-   SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-block --check-order
+   atlas_add_test( ConfigTextMultiMerging
+      SCRIPT python/ConfigText_merge_unitTest.py --dir AnalysisAlgorithmsConfig/merging
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 30 )
+
+   atlas_add_test( ConfigTextCompareBuilder
+      SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-builder --check-order
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 30 )
+
+   atlas_add_test( ConfigTextCompareBlock
+      SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-block --check-order
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 30 )
+
+
+   # Isolated structure is needed to avoid two CPRun test simultaneously creating workDir symlink and replace the other one
+   # which causes the test to fail.
+   # This is needed only when you have multiple CPRun tests.
+   atlas_add_test( TestCPRunFullSim
+   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_MC --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml -e 150
    POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 30 )
-atlas_add_test( TestCPRunFullSim
-   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_MC --text-config test_configuration_Run2.yaml -e 150
-   POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 1000
+   PROPERTIES
+      TIMEOUT 1000
+      PRIVATE_WORKING_DIRECTORY
    )
+
+   atlas_add_test( TestCPRunMultiMuon
+   SCRIPT CPRun.py --input-list $ASG_TEST_FILE_RUN3_MC --text-config AnalysisAlgorithmsConfig/test_configuration_multi_muon.yaml -e 150
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES
+      TIMEOUT 1000
+      PRIVATE_WORKING_DIRECTORY
+   )
+
+endif()

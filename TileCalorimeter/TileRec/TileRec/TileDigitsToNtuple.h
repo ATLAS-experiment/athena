@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -26,8 +26,11 @@
 #ifndef TILEDIGITSTONTUPLE_H
 #define TILEDIGITSTONTUPLE_H
 
+#include "TileEvent/TileDigitsContainer.h"
+
 #include "GaudiKernel/NTuple.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
 
 class TileID;
 class TileHWID;
@@ -37,29 +40,47 @@ class TileTBID;
 
 class TileDigitsToNtuple : public AthAlgorithm {
  public:
-  //Constructor
-  TileDigitsToNtuple(const std::string& name, ISvcLocator* pSvcLocator);
-  
-  //Destructor 
-  virtual ~TileDigitsToNtuple();                         
-  
+
+  using AthAlgorithm::AthAlgorithm;
+  virtual ~TileDigitsToNtuple() = default;
+
   //Gaudi Hooks
-  StatusCode initialize();    
-  StatusCode execute();
-  StatusCode finalize();
+  StatusCode initialize() override;
+  StatusCode execute() override;
+  StatusCode finalize() override;
   
  private:
 
-  const TileID* m_tileID;
-  const TileHWID* m_tileHWID;
-  const TileTBID* m_tileTBID;
+  Gaudi::Property<bool> m_saveAll{this,
+     "SaveAll", true, "Save all Tile digits"};
 
-  NTuple::Tuple* m_ntuplePtr;
-  std::string m_ntupleID;
-  std::string m_ntupleLoc;
-  bool m_commitNtuple;
+  Gaudi::Property<bool> m_saveE4prAndMBTS{this,
+     "SaveE4prAndMBTS", true, "Save Tile digits for E4 prime and MBTS"};
 
-  
+  Gaudi::Property<int> m_saveMaxChannels{this,
+     "SaveMaxChannels", 12288, "Maximum Tile raw channels to save"};
+
+  Gaudi::Property<int> m_commitNtuple{this,
+     "CommitNtuple", true, "Commit ntuple"};
+
+  Gaudi::Property<std::string> m_infoName{this,
+     "TileInfo", "TileInfo", "Tile info name"};
+
+  Gaudi::Property<std::string> m_ntupleLoc{this,
+     "NTupleLoc", "/TILE/TileRec", "Tile digits ntuple location"};
+
+  Gaudi::Property<std::string> m_ntupleID{this,
+     "NTupleID", "h40", "Tile digits ntuple ID"};
+
+  SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this,
+     "TileDigitsContainer", "TileDigitsCnt", "Tile digits container name."};
+
+  const TileID* m_tileID{nullptr};
+  const TileHWID* m_tileHWID{nullptr};
+  const TileTBID* m_tileTBID{nullptr};
+
+  NTuple::Tuple* m_ntuplePtr{nullptr};
+
   NTuple::Item<short> m_nChannel;
 
   NTuple::Array<short> m_ros;
@@ -78,11 +99,7 @@ class TileDigitsToNtuple : public AthAlgorithm {
   NTuple::Matrix<short> m_samples;
   
   std::string m_digitsContainer;
-  std::string m_infoName;
-  int m_saveMaxChannels;
-  int m_nSamples;
-  bool m_saveAll;
-  bool m_saveE4prAndMBTS;
+  int m_nSamples{7};
 };
 
 #endif

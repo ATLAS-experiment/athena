@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CaloG4_SimulationEnergies_H
@@ -117,8 +117,6 @@ namespace CaloG4
 
     // Escaped energy requires special processing.
     G4bool ProcessEscapedEnergy( G4Step* fakeStep ) const;
-
-    G4bool ParticleIsNeutrino( G4ParticleDefinition* particle ) const;
 
     std::unique_ptr<G4Step> CreateFakeStep(G4Track* a_track, G4double a_energy) const;
 

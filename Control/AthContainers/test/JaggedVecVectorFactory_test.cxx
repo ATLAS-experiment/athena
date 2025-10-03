@@ -107,8 +107,8 @@ class AuxVectorData_test
 public:
   using AuxVectorData::setStore;
 
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 20; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 20; }
 };
 
 

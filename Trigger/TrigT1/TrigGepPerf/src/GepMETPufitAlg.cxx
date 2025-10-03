@@ -80,8 +80,8 @@ StatusCode GepMETPufitAlg::PufitMET(const xAOD::CaloClusterContainer& caloCluste
 				     mean,
 				     variance);
   // Calculate the threshold
-  // double threshold = mav.first + inputSigma*sqrt(mav.second);
-  double threshold = mean + inputSigma*sqrt(variance);
+  // double threshold = mav.first + inputSigma*std::sqrt(mav.second);
+  double threshold = mean + inputSigma*std::sqrt(variance);
 
   // Apply the masks, store the masked towers and calculate the pileup
   // quantities

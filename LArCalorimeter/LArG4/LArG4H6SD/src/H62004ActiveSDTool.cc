@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H62004ActiveSDTool.h"
@@ -17,22 +17,7 @@ namespace LArG4
                                          const IInterface *parent)
     : H62004CalibSDTool(type, name, parent)
     , m_hitCollName("LArCalibrationHitActive")
-    , m_emepiwcalc("EMECPosInnerWheelCalibrationCalculator", name)
-    , m_heccalc("LocalCalibrationActiveCalculator", name)
-    , m_fcal1calc("LArFCAL1H62004CalibCalculator", name)
-    , m_fcal2calc("LArFCAL2H62004CalibCalculator", name)
-    , m_fcalcoldcalc("LArG4H6COLDTCMod0CalibCalculator", name)
   {
-    declareProperty("EMECPosIWCalibrationCalculator", m_emepiwcalc);
-    declareProperty("HECWheelActiveCalculator", m_heccalc);
-    declareProperty("FCAL1CalibCalculator", m_fcal1calc);
-    declareProperty("FCAL2CalibCalculator", m_fcal2calc);
-    declareProperty("FCALCOLDMod0CalibCalculator", m_fcalcoldcalc);
-    declareProperty("EMECVolumes", m_emecVolumes);
-    declareProperty("HECVolumes", m_hecVolumes);
-    declareProperty("FCAL1Volumes", m_fcal1Volumes);
-    declareProperty("FCAL2Volumes", m_fcal2Volumes);
-    declareProperty("FCALColdVolumes", m_fcalColdVolumes);
   }
 
   StatusCode H62004ActiveSDTool::initializeCalculators()
@@ -56,25 +41,25 @@ namespace LArG4
     // Add the SDs.
     // Lots of singleton calculators !!!
 
-    if (!m_emecVolumes.empty()) {
+    if (!m_emecVolumes.value().empty()) {
       sdWrapper->addSD( makeOneSD(
-                                  "EMEC::InnerModule::Calibration::H6", &*m_emepiwcalc, m_emecVolumes ) );
+                                  "EMEC::InnerModule::Calibration::H6", &*m_emepiwcalc, m_emecVolumes.value() ) );
     }
-    if (!m_hecVolumes.empty()) {
+    if (!m_hecVolumes.value().empty()) {
       sdWrapper->addSD( makeOneSD(
-                                  "HEC::Module::Depth::Slice::Local::Calibration::H6", &*m_heccalc, m_hecVolumes ) );
+                                  "HEC::Module::Depth::Slice::Local::Calibration::H6", &*m_heccalc, m_hecVolumes.value() ) );
     }
-    if (!m_fcal1Volumes.empty()) {
+    if (!m_fcal1Volumes.value().empty()) {
       sdWrapper->addSD( makeOneSD(
-                                  "LAr::FCAL::Module1::Gap::Calibration::H6", &*m_fcal1calc, m_fcal1Volumes ) );
+                                  "LAr::FCAL::Module1::Gap::Calibration::H6", &*m_fcal1calc, m_fcal1Volumes.value() ) );
     }
-    if (!m_fcal2Volumes.empty()) {
+    if (!m_fcal2Volumes.value().empty()) {
       sdWrapper->addSD( makeOneSD(
-                                  "LAr::FCAL::Module2::Gap::Calibration::H6", &*m_fcal2calc, m_fcal2Volumes ) );
+                                  "LAr::FCAL::Module2::Gap::Calibration::H6", &*m_fcal2calc, m_fcal2Volumes.value() ) );
     }
-    if (!m_fcalColdVolumes.empty()) {
+    if (!m_fcalColdVolumes.value().empty()) {
       sdWrapper->addSD( makeOneSD(
-                                  "LAr::FCAL::ColdTC::Gap::Calibration::H6", &*m_fcalcoldcalc, m_fcalColdVolumes ) );
+                                  "LAr::FCAL::ColdTC::Gap::Calibration::H6", &*m_fcalcoldcalc, m_fcalColdVolumes.value() ) );
     }
 
     // Return the wrapper as my SD

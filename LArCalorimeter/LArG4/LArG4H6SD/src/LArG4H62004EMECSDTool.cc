@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H62004EMECSDTool.h"
@@ -9,10 +9,7 @@
 LArG4H62004EMECSDTool::LArG4H62004EMECSDTool(const std::string& type, const std::string& name, const IInterface *parent)
   : LArG4SDTool(type,name,parent)
   , m_HitColl("LArHitEMEC")
-  , m_calculator("EMECPosInnerWheel_ECOR_GADJCalculator", name)
-  , m_emecSD(nullptr)
 {
-  declareProperty("Calculator", m_calculator);
 }
 
 StatusCode LArG4H62004EMECSDTool::initializeCalculators()

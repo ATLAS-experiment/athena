@@ -155,11 +155,9 @@ Trk::ResidualPullCalculator::residuals(
         case Trk::TrackState::SpacePoint:
         default:
             ATH_MSG_VERBOSE ("Bit-key calculation ");
-            ParamDefsAccessor PDA;
-
             // PMs, Segments etc: use LocalParameters bit-key scheme
             for (unsigned int i=0; i<5; ++i) {
-                Trk::ParamDefs iPar = PDA.pardef[i];
+                Trk::ParamDefs iPar = Trk::ParamDefsAccessor::pardef[i];
                 if (measurement->localParameters().contains(iPar)) {
                     residuals[i] = measurement->localParameters()[iPar]
                         - trkPar->parameters()[iPar];
@@ -194,10 +192,7 @@ std::optional<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
     std::vector<double> residual(dimOfLocPars);
     std::vector<double> pull(dimOfLocPars);
 
-    // has to live here as it does not compile if code is switch statement
-    ParamDefsAccessor PDA;
     unsigned int iColRow=0;
-
     ATH_MSG_VERBOSE ("Calculating residual for type " << measType << " dimension " << dimOfLocPars);
 
     // do the calculations for the different detector types
@@ -278,14 +273,14 @@ std::optional<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
 
         // PMs, Segments etc: use LocalParameters bit-key scheme
         for (unsigned int i=0; i<5; ++i) {
-            Trk::ParamDefs iPar = PDA.pardef[i];
+            Trk::ParamDefs iPar = Trk::ParamDefsAccessor::pardef[i];
             if (measurement->localParameters().contains(iPar)) {
                 residual[iColRow] = measurement->localParameters()[iPar]
                     - trkPar->parameters()[iPar];
                 if (pullIsValid)
                     pull[iColRow]     = calcPull(residual[iColRow],
-                measurement->localCovariance()(PDA.pardef[iColRow],PDA.pardef[iColRow]),
-                (*trkPar->covariance())(PDA.pardef[iColRow],PDA.pardef[iColRow]),
+                measurement->localCovariance()(Trk::ParamDefsAccessor::pardef[iColRow],Trk::ParamDefsAccessor::pardef[iColRow]),
+                (*trkPar->covariance())(Trk::ParamDefsAccessor::pardef[iColRow],Trk::ParamDefsAccessor::pardef[iColRow]),
                 resType);
                 ++iColRow;
             }

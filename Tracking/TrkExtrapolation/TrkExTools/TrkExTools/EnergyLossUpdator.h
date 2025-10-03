@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -184,9 +184,10 @@ private:
     PropDirection dir = alongMomentum,
     ParticleHypothesis particle = pion) const;
 
-  bool m_detailedEloss;               //!< provide extended EnergyLoss info
-  bool m_optimalRadiation;  //!< use calorimeter more optimal for radiation
-                            //!< detection
+  BooleanProperty m_detailedEloss{this, "DetailedEloss", true,
+    "provide extended EnergyLoss info"};
+  BooleanProperty m_optimalRadiation{this, "OptimalRadiation", true,
+    "use calorimeter more optimal for radiation detection"};
 };
 
 } // end of namespace

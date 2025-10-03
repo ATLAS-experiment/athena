@@ -53,7 +53,7 @@ namespace InDetGNNHardScatterSelection {
         using PartLinks = std::vector<ElementLink<IPC>>;
         using IPV = std::vector<const xAOD::Muon*>;
 
-        MuonSortVar iparticleSortVar(ConstituentsSortOrder);
+        static MuonSortVar iparticleSortVar(ConstituentsSortOrder);
 
         std::vector<const xAOD::Muon*> getMuonsFromVertex(const xAOD::Vertex& vertex) const;
 

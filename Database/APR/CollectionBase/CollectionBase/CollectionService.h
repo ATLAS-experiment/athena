@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONBASE_COLLECTIONSERVICE_H
@@ -60,12 +60,12 @@ namespace pool {
      */
     virtual ICollection* createAndRegister( const ICollectionDescription& description,
                                             bool overwrite = false,
-                                            std::string logicalName = "" );
+                                            const std::string & logicalName = "" );
 
 
-    virtual ICollection* open( const std::string& name,
-                               const std::string& type,
-                               std::string connection = "",
+    virtual ICollection* open( const std::string & name,
+                               const std::string & type,
+                               const std::string & connection = "",
                                bool readOnly = true) const
     {
        return handle(name, type, connection, readOnly, 0);
@@ -83,10 +83,10 @@ namespace pool {
      * @param type Storage technology type of collection.
      * @param connection Connection to database containing collection.
      */
-    virtual bool registerExisting( const std::string& name,
-                                   const std::string& type,
-                                   std::string connection = "",
-                                   std::string logicalName = "" );
+    virtual bool registerExisting( const std::string & name,
+                                   const std::string & type,
+                                   const std::string & connection = "",
+                                   const std::string & logicalName = "" );
 
 
     /**
@@ -98,8 +98,7 @@ namespace pool {
      * @param logicalName Logical name of the collection to store in the catalog
      */
     virtual bool registerExisting( ICollection* collection,
-				   bool overwrite = false,
-                                   std::string logicalName = "" );
+				   bool overwrite = false, const std::string & logicalName = "" );
 
     /**
      * Retrieves a handle to an existing collection or collection fragment for read or update
@@ -114,9 +113,9 @@ namespace pool {
      * @param readOnly Flag to distinguish read and update open modes.
      * @param session Reference to database session (need only be set for implicit collections).
      */
-    virtual ICollection* handle( const std::string& name,
-                                 const std::string& type,
-                                 std::string connection = "",
+    virtual ICollection* handle( const std::string & name,
+                                 const std::string & type,
+                                 const std::string & connection = "",
                                  bool readOnly = true,
                                  ISession* session = 0 ) const;
 

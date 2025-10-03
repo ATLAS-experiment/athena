@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_CablingXmlTags_H
@@ -13,9 +13,8 @@
  *
  */
 
-#include "GaudiKernel/time_r.h" // localtime_r
-
-#include <ctime> // std::time_t, std::tm
+#include <time.h>  // std:time_t, localtime_r
+#include <ctime>   // std::tm
 #include <iomanip> // put_time
 #include <iostream>
 #include <string>

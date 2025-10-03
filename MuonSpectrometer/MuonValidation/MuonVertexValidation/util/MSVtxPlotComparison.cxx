@@ -201,7 +201,7 @@ void MSVtxPlotComparison::drawTHStackRatioPlot(std::unique_ptr<PlotInfo<THStack>
     padRatio->cd();
 
     std::vector<TH1*> hists{};
-    for(TObject *obj : *(hstackInfo->plot->GetHists())) hists.push_back((TH1*)obj);
+    for(TObject *obj : *(hstackInfo->plot->GetHists())) hists.push_back(static_cast<TH1*>(obj));
     TGraphAsymmErrors* ratio = getRatio(hists[1], hists[0]);
     TGraphAsymmErrors* denomErrNorm = getNormalisedGraph(new TGraphAsymmErrors(hists[0]));
     drawRatio(ratio, denomErrNorm, xlabel_original, hstackInfo->plot->GetXaxis(), hstackInfo->plot->GetYaxis(), axisRescaling);
@@ -347,7 +347,7 @@ void MSVtxPlotComparison::drawTMultigraphRatioPlot(std::unique_ptr<PlotInfo<TMul
     padRatio->cd();
 
     std::vector<TGraphAsymmErrors*> efficiencies;
-    for(TObject *obj : *(mgInfo->plot->GetListOfGraphs())) efficiencies.push_back((TGraphAsymmErrors*)obj);
+    for(TObject *obj : *(mgInfo->plot->GetListOfGraphs())) efficiencies.push_back(static_cast<TGraphAsymmErrors*>(obj));
     TGraphAsymmErrors* ratio = getRatio(efficiencies[1], efficiencies[0]);
     TGraphAsymmErrors* denomErrNorm = getNormalisedGraph(efficiencies[0]);
     drawRatio(ratio, denomErrNorm, xlabel_original, mgInfo->plot->GetXaxis(), mgInfo->plot->GetYaxis(), axisRescaling);

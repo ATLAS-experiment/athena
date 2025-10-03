@@ -1,10 +1,10 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/SaltModel.h"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 #include "CxxUtils/checker_macros.h"
-#include "lwtnn/parse_json.hh"
 
 #include <stdexcept>
 #include <tuple>
@@ -25,6 +25,14 @@ namespace FlavorTagInference {
     session_options.SetLogSeverityLevel(4);
     session_options.SetGraphOptimizationLevel(
       GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    // this should reduce memory use while slowing things down slightly
+    // see
+    //
+    // https://github.com/microsoft/onnxruntime/issues/11627#issuecomment-1137668551
+    //
+    // and also https://its.cern.ch/jira/browse/AFT-818
+    //
+    session_options.DisableCpuMemArena();
 
     // declare an allocator with default options
     Ort::AllocatorWithDefaultOptions allocator;
@@ -110,27 +118,15 @@ namespace FlavorTagInference {
 
   }
 
-  const lwt::GraphConfig SaltModel::getLwtConfig() const {
-    /* for the new metadata format (>V0), the outputs are inferred directly from
-    the model graph, rather than being configured as json metadata.
-    however we still need to add an empty "outputs" key to the config so that
-    lwt::parse_json_graph doesn't throw an exception */
-
-    // deep copy the metadata by round tripping through a string stream
-    nlohmann::json metadataCopy = nlohmann::json::parse(m_metadata.dump());
-    if (getSaltModelVersion() != SaltModelVersion::V0){
-      metadataCopy["outputs"] = nlohmann::json::object();
-    }
-    std::stringstream metadataStream;
-    metadataStream << metadataCopy.dump();
-    return lwt::parse_json_graph(metadataStream);
+  const SaltModelGraphConfig::GraphConfig SaltModel::getGraphConfig() const {
+    return SaltModelGraphConfig::parse_json_graph(m_metadata);
   }
 
   const nlohmann::json& SaltModel::getMetadata() const {
     return m_metadata;
   }
 
-  const SaltModel::OutputConfig& SaltModel::getOutputConfig() const {
+  const OutputConfig& SaltModel::getOutputConfig() const {
     return m_output_nodes;
   }
 
@@ -143,7 +139,7 @@ namespace FlavorTagInference {
   }
 
 
-  SaltModel::InferenceOutput SaltModel::runInference(
+  InferenceOutput SaltModel::runInference(
     std::map<std::string, Inputs>& gnn_inputs) const {
 
     std::vector<float> input_tensor_values;

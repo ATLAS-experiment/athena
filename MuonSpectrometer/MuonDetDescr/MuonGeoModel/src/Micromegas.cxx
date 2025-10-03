@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Micromegas.h"
@@ -35,7 +35,7 @@ class GeoMaterial;
 namespace MuonGM {
 
     Micromegas::Micromegas(Component *ss) : DetectorElement(ss->name) {
-        MicromegasComponent *s = (MicromegasComponent *)ss;
+        MicromegasComponent *s = static_cast<MicromegasComponent *>(ss);
         m_component = s;
         width = s->dx1;
         longWidth = s->dx2;
@@ -60,7 +60,7 @@ namespace MuonGM {
         AGDDDetectorStore& ds = c->GetDetectorStore();
         MMDetectorDescription *mm_descr = mmHelper.Get_MMDetectorSubType(m_component->subType);
 
-        MM_Technology *t = (MM_Technology *)ds.GetTechnology(name);
+        MM_Technology *t = static_cast<MM_Technology *>(ds.GetTechnology(name));
         thickness = t->Thickness();
         double gasTck = t->gasThickness;
         double pcbTck = t->pcbThickness;

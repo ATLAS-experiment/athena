@@ -3,7 +3,6 @@
 # File: CaloRec/python/CaloBCIDAvgAlgSCConfig.py
 # Purpose: Configure CaloBCIDAvgAlgSC.
 
-from __future__ import print_function
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 

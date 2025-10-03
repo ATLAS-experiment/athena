@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -39,7 +39,14 @@ class IDC_OverlayBase : public AthReentrantAlgorithm {
                               IDC_Container *outputContainer,
                               DataPool<Type>& dataItems) const;
 
-  template <bool usePool, typename Type, typename IDC_Container>
+  template <typename IDC_Container, typename Type>
+  StatusCode overlayContainerWithSorting(const IDC_Container *bkgContainer,
+                                         const IDC_Container *signalContainer,
+                                         IDC_Container *outputContainer,
+                                         DataPool<Type>& dataItems) const;
+
+ private:
+  template <bool sortCollections, bool usePool, typename Type, typename IDC_Container>
   StatusCode overlayContainerImpl(const IDC_Container *bkgContainer,
                                   const IDC_Container *signalContainer,
                                   IDC_Container *outputContainer,

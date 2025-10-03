@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloLVL1_ID.h"
@@ -21,8 +21,9 @@
 using CxxUtils::strformat;
 
 
-CaloLVL1_ID::CaloLVL1_ID(void) : 
-    m_lvl1_region_index(0) 
+CaloLVL1_ID::CaloLVL1_ID() :
+    AtlasDetectorID("CaloLVL1_ID", "Reg_Lvl1")
+  , m_lvl1_region_index(0)
   , m_CALO_INDEX(999) 
   , m_DETZSIDE_INDEX(999) 
   , m_SAMPLING_INDEX(999) 
@@ -44,21 +45,21 @@ CaloLVL1_ID:: ~CaloLVL1_ID()= default;
 
 
 IdContext	
-CaloLVL1_ID::region_context 		(void) const
+CaloLVL1_ID::region_context 		() const
 {
     ExpandedIdentifier id;
     return {id, 0, m_REGION_INDEX};
 }
 
 IdContext	
-CaloLVL1_ID::tower_context 		(void) const
+CaloLVL1_ID::tower_context 		() const
 {
     ExpandedIdentifier id;
     return {id, 0, m_PHI_INDEX};
 }
 
 IdContext	
-CaloLVL1_ID::layer_context 		(void) const
+CaloLVL1_ID::layer_context 		() const
 {
     ExpandedIdentifier id;
     return {id, 0, m_LAYER_INDEX};
@@ -244,7 +245,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int caloValue   = -1;
     if (m_dict->get_label_value("subdet", "Calorimeter", caloValue)) 
       {
-	strm << m_dict->m_name;
+	strm << m_dict->name();
 	strg= "Could not get value for label 'Calorimeter' of field 'subdet' in dictionary "+strm.str(); 
 	if(m_msgSvc)
 	  {
@@ -263,7 +264,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     // positive half  FLG 12 Jul 07: negative side -> problem for test beam
     if (m_dict->get_label_value("DetZside", "positive_lvl1_side", lvl1CaloValue)) 
       {
-	strm << m_dict->m_name;
+	strm << m_dict->name();
 	//	strg = " Could not get value for label 'negative_lvl1_side' of field 'DetZside in dictionary"+strm.str();
 	strg = " Could not get value for label 'positive_lvl1_side' of field 'DetZside in dictionary"+strm.str();
 	if(m_msgSvc)
@@ -286,9 +287,9 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     reg_id.add(caloValue);
     reg_id.add(lvl1CaloValue); 
     Range prefix;
-    m_full_region_range = m_dict->build_multirange(reg_id, "Reg_Lvl1", prefix, "region");
-    m_full_tower_range = m_dict->build_multirange(reg_id, "Reg_Lvl1", prefix, "phi");
-    m_full_layer_range = m_dict->build_multirange(reg_id, "Reg_Lvl1", prefix);
+    m_full_region_range = m_dict->build_multirange(reg_id, group(), prefix, "region");
+    m_full_tower_range = m_dict->build_multirange(reg_id, group(), prefix, "phi");
+    m_full_layer_range = m_dict->build_multirange(reg_id, group(), prefix);
 
     // Setup the hash tables
     if(init_hashes()) return (1);
@@ -690,7 +691,7 @@ void CaloLVL1_ID::layer_id_checks   ( const Identifier towerId,
 }
 
 
-int   CaloLVL1_ID::initLevelsFromDict(void) 
+int   CaloLVL1_ID::initLevelsFromDict()
 {
   MsgStream log(m_msgSvc, "CaloLVL1_ID" );
   std::stringstream strm;
@@ -736,7 +737,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
   IdDictRegion* reg = m_dict->find_region("Lvl1_0");
   if (reg) 
     {
-      m_lvl1_region_index = reg->m_index;
+      m_lvl1_region_index = reg->index();
     }
   else 
     {
@@ -754,7 +755,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
   // Fing a LVL1 region
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_CALO_INDEX = field->m_index ;
+    m_CALO_INDEX = field->index();
   }
   else 
     {
@@ -772,7 +773,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
   
   field = m_dict->find_field("DetZside") ;
   if (field) {
-    m_DETZSIDE_INDEX = field->m_index ;
+    m_DETZSIDE_INDEX = field->index();
   }
   else 
     {
@@ -790,7 +791,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
  
  field = m_dict->find_field("LVL1sampling") ;
   if (field) {
-    m_SAMPLING_INDEX = field->m_index ;
+    m_SAMPLING_INDEX = field->index();
   }
   else 
     {
@@ -807,7 +808,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
   
   field = m_dict->find_field("region") ;
   if (field) {
-    m_REGION_INDEX = field->m_index ;
+    m_REGION_INDEX = field->index();
   }
   else 
     {
@@ -828,7 +829,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
 
   field = m_dict->find_field("eta") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else 
     {
@@ -846,7 +847,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
   
   field = m_dict->find_field("phi") ;
   if (field) {
-    m_PHI_INDEX = field->m_index ;
+    m_PHI_INDEX = field->index();
   }
   else 
     {
@@ -865,7 +866,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
   
   field = m_dict->find_field("layer") ;
   if (field) {
-    m_LAYER_INDEX = field->m_index ;
+    m_LAYER_INDEX = field->index();
   }
   else 
     {
@@ -882,15 +883,15 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
   
   // Set the field implementations
 
-  const IdDictRegion& region = *m_dict->m_regions[m_lvl1_region_index];
+  const IdDictRegion& region = m_dict->region(m_lvl1_region_index);
 
-  m_calo_impl     = region.m_implementation[m_CALO_INDEX]; 
-  m_lvl1_impl     = region.m_implementation[m_DETZSIDE_INDEX]; 
-  m_sampling_impl = region.m_implementation[m_SAMPLING_INDEX]; 
-  m_region_impl   = region.m_implementation[m_REGION_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX]; 
-  m_layer_impl    = region.m_implementation[m_LAYER_INDEX]; 
+  m_calo_impl     = region.implementation(m_CALO_INDEX);
+  m_lvl1_impl     = region.implementation(m_DETZSIDE_INDEX);
+  m_sampling_impl = region.implementation(m_SAMPLING_INDEX);
+  m_region_impl   = region.implementation(m_REGION_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
+  m_layer_impl    = region.implementation(m_LAYER_INDEX);
 
   if (!m_quiet) {
     strm1 << m_calo_impl.show_to_string();
@@ -936,7 +937,7 @@ int   CaloLVL1_ID::initLevelsFromDict(void)
 }
 
 
-int   CaloLVL1_ID::init_hashes(void) 
+int   CaloLVL1_ID::init_hashes()
 {
   MsgStream log(m_msgSvc, "CaloLVL1_ID" );
   std::stringstream strm;
@@ -1144,7 +1145,7 @@ int   CaloLVL1_ID::init_hashes(void)
 
 
 
-int   CaloLVL1_ID::init_neighbors(void) 
+int   CaloLVL1_ID::init_neighbors()
 {
   MsgStream log(m_msgSvc, "CaloLVL1_ID" );
   //  std::cout << " CaloLVL1_ID::init_neighbors " << std::endl;

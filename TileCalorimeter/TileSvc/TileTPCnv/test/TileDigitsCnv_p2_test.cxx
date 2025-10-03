@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TileTPCnv/test/TileDigitsCnv_p2_test.cxx
@@ -82,7 +82,12 @@ int main ATLAS_NOT_THREAD_SAFE ()
 {
   Athena::getMessageSvcQuiet = true;
   IdDictParser parser;
-  TileCablingSvc::init_idhelpers(parser);
-  test1();
+  try{
+    TileCablingSvc::init_idhelpers(parser);
+    test1();
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in TileDigitsCnv_p2_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }

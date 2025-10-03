@@ -7,7 +7,7 @@ from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_
     run_tests, run_checks, run_summary
 from WorkflowTestRunner.StandardTests import DerivationTest, GenerationTest, PileUpTest, QTest, SimulationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
-
+from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 
 def main():
     name = "RunUpgradeTests"
@@ -25,7 +25,7 @@ def main():
         dsid = "421356" if not options.dsid else options.dsid
         tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
     elif options.simulation:
-        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion ATLAS-P2-RUN4-03-00-00") )
+        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion {defaultGeometryTags.RUN4}") )
     elif options.overlay:
         log.error("Overlay not supported yet")
         exit(1)
@@ -34,11 +34,11 @@ def main():
             log.error("Parallel execution not supported for pile-up workflow")
             exit(1)
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
-            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, f"{options.extra_args} --digiSteeringConf StandardInTimeOnlyTruth --geometryVersion ATLAS-P2-RUN4-03-00-00 --conditionsTag default:OFLCOND-MC21-SDR-RUN4-01"))
+            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, f"{options.extra_args} --digiSteeringConf StandardInTimeOnlyTruth --geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC}"))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:
-        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion ATLAS-P2-RUN4-03-00-00"))
+        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion {defaultGeometryTags.RUN4}"))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"
@@ -47,8 +47,8 @@ def main():
         if setup.parallel_execution:
             log.error("Parallel execution not supported for the default Phase-II workflow")
             exit(1)
-        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion ATLAS-P2-RUN4-03-00-00"))
-        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion ATLAS-P2-RUN4-03-00-00 --inputHITSFile ../run_s3761/myHITS.pool.root"))
+        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion {defaultGeometryTags.RUN4}"))
+        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion {defaultGeometryTags.RUN4} --inputHITSFile ../run_s3761/myHITS.pool.root"))
 
     # Define which perfomance checks to run
     # TODO: standard performance checks do not work, disable for now

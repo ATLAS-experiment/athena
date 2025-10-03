@@ -1,8 +1,6 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-
-
 def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     # Main Job Option for ACTS Track Reconstruction with ITk
     print("Scheduling the ACTS Job Option for ITk Track Reconstruction")
@@ -107,13 +105,28 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     print('Starting Post-Processing')
 
     ## ACTS Specific write PRDInfo
-    if flags.Tracking.writeExtendedSi_PRDInfo:
+    # This functionality is not supported in case cluster formation
+    # produces clusters in multiple tracking passes
+    if flags.Tracking.writeExtendedSi_PRDInfo:        
+        # Get all the track particle collections being generated
+        # this covers the main tracking collection InDetTrackParticles
+        # as well as the converted seeds, tracks from CKF and all those
+        # track collection that do not get merged.
+        # This operation is necessary only if we desire to only persistify
+        # on-track PRD info, since we need to get all the measurements used by
+        # all tracks we want to persistify
+        generatedTrackParticleCollections = ["InDetTrackParticles"]
+        if flags.Tracking.PRDInfo.KeepOnlyOnTrackMeasurements:
+            from InDetConfig.ITkActsHelpers import getListOfGeneratedTrackParticles
+            generatedTrackParticleCollections = getListOfGeneratedTrackParticles(flags)
+                
         # Add the truth origin to the truth particles
         # This handles:
         # - Pixel detector
-        # - Strip detector
+        # - Strip detector        
         from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
-        acc.merge(ITkActsPrepDataToxAODCfg(flags))
+        acc.merge(ITkActsPrepDataToxAODCfg(flags,
+                                           TrackParticles = generatedTrackParticleCollections))
 
         # Create MSOS on final InDetTrackParticles collection
         from ActsConfig.ActsObjectDecorationConfig import ActsTrackStateOnSurfaceDecoratorAlgCfg
@@ -136,7 +149,7 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
             # CKF tracks are called: SiSPSeededTracks{currentFlags.Tracking.ActiveConfig.extension}TrackParticles
             if currentFlags.Tracking.ActiveConfig.storeSiSPSeededTracks:
                 TrackParticleCollectionForMsos = f'SiSPSeededTracks{currentFlags.Tracking.ActiveConfig.extension}TrackParticles'
-                acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
+                acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(currentFlags,
                                                                  name=f"{TrackParticleCollectionForMsos}StateOnSurfaceDecoratorAlg",
                                                                  TrackParticles=TrackParticleCollectionForMsos,
                                                                  PixelMSOSs=f"SiSPSeededITk{currentFlags.Tracking.ActiveConfig.extension}PixelMSOSs",
@@ -148,7 +161,7 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
                 # but the track particle collection remains the same
                 # name: InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles
                 TrackParticleCollectionForMsos = f'InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles'
-                acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(flags,
+                acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(currentFlags,
                                                                  name=f"{TrackParticleCollectionForMsos}StateOnSurfaceDecoratorAlg",
                                                                  TrackParticles=TrackParticleCollectionForMsos,
                                                                  PixelMSOSs=f"ITk{currentFlags.Tracking.ActiveConfig.extension}PixelMSOSs",

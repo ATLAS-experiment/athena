@@ -60,14 +60,14 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.doOptATLAS', _doOptATLAS)
      tcf.addFlag('Tile.NoiseFilter', lambda prevFlags : -1 if prevFlags.Input.isMC else 1)
      tcf.addFlag('Tile.RunType', _getRunType, type=TileRunType)
-     tcf.addFlag('Tile.correctTime', lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Beam.Type is BeamType.Collisions)
+     tcf.addFlag('Tile.correctTime', lambda prevFlags : not prevFlags.Input.isMC and not prevFlags.Overlay.DataOverlay and prevFlags.Beam.Type is BeamType.Collisions)
      tcf.addFlag('Tile.correctTimeNI', True)
      tcf.addFlag('Tile.correctAmplitude', True)
      tcf.addFlag('Tile.AmpMinForAmpCorrection', 15.0)
      tcf.addFlag('Tile.TimeMinForAmpCorrection', lambda prevFlags : (prevFlags.Beam.BunchSpacing / -2.))
      tcf.addFlag('Tile.TimeMaxForAmpCorrection', lambda prevFlags : (prevFlags.Beam.BunchSpacing / 2.))
      tcf.addFlag('Tile.OfcFromCOOL', True)
-     tcf.addFlag('Tile.BestPhaseFromCOOL', lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Beam.Type is BeamType.Collisions)
+     tcf.addFlag('Tile.BestPhaseFromCOOL', lambda prevFlags : not prevFlags.Input.isMC and not prevFlags.Overlay.DataOverlay and prevFlags.Beam.Type is BeamType.Collisions)
      tcf.addFlag('Tile.readDigits', lambda prevFlags : not prevFlags.Input.isMC)
      tcf.addFlag('Tile.doOverflowFit', True)
      tcf.addFlag('Tile.zeroAmplitudeWithoutDigits', _zeroAmplitudeWithoutDigits)
@@ -78,6 +78,11 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.doTimingHistogramsForGain', -1) # Production of Tile timing histograms per channel (< 0: switched off)
      tcf.addFlag('Tile.doTimingHistogramsForCell', {'LBA14':['A4','B6','D1'],'LBA22':['A4','B6','D1'],'EBA22':['A13','B12','D5']}) # Production of Tile timing histograms per selected cells ({}: switched off)
      tcf.addFlag('Tile.useOnlineChannelStatus', True) # Use online DB with channel/adc status
+
+     def __tilesim():
+          from TileConfiguration.TileSimConfigFlags import createTileSimConfigFlags
+          return createTileSimConfigFlags()
+     tcf.addFlagsCategory('Tile.Sim', __tilesim, prefix=True)
 
      return tcf
 

@@ -16,7 +16,6 @@
 
 #include "TLorentzVector.h"
 
-#define GeV 1000
 const float TauIDVarCalculator::LOW_NUMBER = -1111.;
 
 TauIDVarCalculator::TauIDVarCalculator(const std::string& name):

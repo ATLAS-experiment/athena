@@ -63,7 +63,7 @@ testChains = {
 
     "HLT_mb_sptrk_L1RD0_FILLED:key=HLT_IDTrack_MinBias_IDTrig",
 
-    "HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig",
+    "HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10:key=HLT_IDTrack_MinBiasPixel_IDTrig",
 
     "HLT_mu4_cosmic_L1MU3V_EMPTY:key=HLT_IDTrack_Cosmic_IDTrig",
 

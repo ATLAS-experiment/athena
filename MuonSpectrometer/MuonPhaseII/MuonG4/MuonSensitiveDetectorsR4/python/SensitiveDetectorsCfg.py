@@ -99,30 +99,35 @@ def SetupSensitiveDetectorsCfg(flags):
 def SimHitContainerListCfg(flags):
     simHitContainers = []
     if flags.Detector.EnableMDT:
+        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits_G4")]
-        else:
-            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMdtSimHits_Fatras")]
     if flags.Detector.EnableMM:
+        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMmSimHits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMmSimHits_G4")]
-        else:
-            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMmSimHits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawMmSimHits_Fatras")]
     if flags.Detector.EnableRPC:
+        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits_G4")]
-        else:
-            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawRpcSimHits_Fatras")]
     if flags.Detector.EnableTGC:
+        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits_G4")]
-        else:
-            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits_Fatras")]
     if flags.Detector.EnablesTGC:
+        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits")]
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('MUON', True)):
             simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits_G4")]
-        else:
-            simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits")]
+            if (not ('G4MS' in flags.Sim.ISF.Simulator.value and 'ACTS' in flags.Sim.ISF.Simulator.value)):
+                simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits_Fatras")]
 
     return simHitContainers
 

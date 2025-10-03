@@ -8,8 +8,10 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "ITkPixelCnvTool.h"
+#include "ITkPixelCabling/ITkPixelCablingData.h"
 
 
 class ITkPixelEncodingAlg : public AthReentrantAlgorithm 

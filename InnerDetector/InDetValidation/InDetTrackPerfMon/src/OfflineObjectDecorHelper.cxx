@@ -41,6 +41,30 @@ namespace IDTPM {
   }
 
 
+  /// getLinkedJet
+  const xAOD::Jet* getLinkedJet( const xAOD::TrackParticle& track,
+                                 const std::string& quality ) {
+    std::string decoName = "LinkedJet_" + quality;
+    return getLinkedObject< xAOD::JetContainer >( track, decoName );
+  }
+
+
+  /// recompute d0 projecting in jet direction w.r.t. origin
+  float getD0TrackInJet( const xAOD::TrackParticle& track,
+                         const std::string& quality ) {
+    const xAOD::Jet* jet = getLinkedJet( track, quality );
+    if( not jet ) return -999.;
+
+    //Amg::Vector3D nullPos( 0, 0, 0 );
+    Amg::Vector3D jetDirection( jet->px(), jet->py(), jet->pz() );
+    Amg::Vector3D unit = jetDirection.unit();
+
+    float vs = std::sin( std::atan2( unit.y(), unit.x() ) - track.phi() ) * track.d0();
+    float signD0 = vs>=0. ? 1. : -1.;
+    return signD0 * std::fabs( track.d0() );
+  }
+
+
   /// isUnlinkedTruth
   bool isUnlinkedTruth( const xAOD::TrackParticle& track ) {
     const xAOD::TruthParticle* truth = getLinkedObject< xAOD::TruthParticleContainer >(

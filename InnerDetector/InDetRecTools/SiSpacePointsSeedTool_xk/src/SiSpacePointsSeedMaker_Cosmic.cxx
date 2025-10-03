@@ -89,7 +89,7 @@ void InDet::SiSpacePointsSeedMaker_Cosmic::newEvent(const EventContext& ctx, Eve
   data.i_spforseed = data.l_spforseed.begin();
 
   float irstep = 1./m_r_rstep;
-  float errorsc[4] = {16.,16.,100.,16.};
+  std::array<float, 4> errorsc = {16.,16.,100.,16.};
 
   SG::ReadHandle<Trk::PRDtoTrackMap>  prd_to_track_map;
   const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
@@ -191,7 +191,7 @@ void InDet::SiSpacePointsSeedMaker_Cosmic::newRegion
   data.i_spforseed = data.l_spforseed.begin();
 
   float irstep = 1.f/m_r_rstep;
-  float errorsc[4] = {16.,16.,100.,16.};
+  std::array<float, 4> errorsc = {16.,16.,100.,16.};
 
   SG::ReadHandle<Trk::PRDtoTrackMap>  prd_to_track_map;
   const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
@@ -1038,7 +1038,7 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_Cosmic::newSpacePoint
 {
   InDet::SiSpacePointForSeed* sps = nullptr;
 
-  float r[3] = {static_cast<float>(sp->globalPosition().x()),
+  std::array<float, 3> r = {static_cast<float>(sp->globalPosition().x()),
                 static_cast<float>(sp->globalPosition().y()),
                 static_cast<float>(sp->globalPosition().z())};
 
@@ -1059,11 +1059,11 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_Cosmic::newSpacePoint
 ///////////////////////////////////////////////////////////////////
 
 InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_Cosmic::newSpacePoint
-(EventData& data, const Trk::SpacePoint*const& sp,const float* sc) 
+(EventData& data, const Trk::SpacePoint*const& sp, std::span<float const, 4> sc) 
 {
   InDet::SiSpacePointForSeed* sps = nullptr;
 
-  float r[3];
+  std::array<float,3> r;
   r[0]=sp->globalPosition().x();
   r[1]=sp->globalPosition().y();
   r[2]=sp->globalPosition().z();

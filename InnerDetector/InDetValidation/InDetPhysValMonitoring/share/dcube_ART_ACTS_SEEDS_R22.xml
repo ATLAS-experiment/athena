@@ -48,7 +48,7 @@
   <TDirectory name="/">
    <TDirectory name="run_242020">
     <TDirectory name="ActsAnalysis">
-      <TDirectory name="PixelSeeds">
+      <TDirectory name="LegacyPixelSeeds">
 	<hist2D name="zr1" plotopts="box" tests="KS" type="TH2F"/>
 	<hist2D name="zr2" plotopts="box" tests="KS" type="TH2F"/>
 	<hist2D name="zr3" plotopts="box" tests="KS" type="TH2F"/>
@@ -73,7 +73,7 @@
 	<hist1D name="dzdr_t" plotopts="" tests="KS" type="TH1F"/>
 	<hist1D name="Penalty" plotopts="logy" tests="KS" type="TH1F"/>
       </TDirectory>
-      <TDirectory name="StripSeeds">
+      <TDirectory name="LegacyStripSeeds">
 	<hist2D name="zr1" plotopts="box" tests="KS" type="TH2F"/>
 	<hist2D name="zr2" plotopts="box" tests="KS" type="TH2F"/>
 	<hist2D name="zr3" plotopts="box" tests="KS" type="TH2F"/>

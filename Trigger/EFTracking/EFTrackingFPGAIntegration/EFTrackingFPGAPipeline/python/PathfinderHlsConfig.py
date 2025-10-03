@@ -1,0 +1,97 @@
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+    argumentParser = ArgumentParser()
+    argumentParser.add_argument(
+        "--xclbinPath", 
+        default = "/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/22_pathfinder_HLS/Pathfinder_hw.xclbin",
+    )
+
+    argumentParser.add_argument(
+        "--hitTestVectorPath",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/pattern_reco_output.txt",
+    )
+
+    argumentParser.add_argument(
+        "--trackTestVectorPath",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/spacepoint_strips_output.txt",
+    )
+
+    argumentParser.add_argument(
+        "--outputPath", 
+        default = "pathfinder_output.txt",
+    )
+
+    argumentParser.add_argument(
+        "--bufferSize", 
+        type = int, 
+        default = 8192,
+    )
+
+    argumentParser.add_argument(
+        "--verbose", 
+        action = "store_true",
+    )
+
+    arguments = argumentParser.parse_args()
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    if arguments.verbose:
+        from AthenaCommon.Constants import DEBUG
+        flags.Exec.OutputLevel = DEBUG
+
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    acc = MainServicesCfg(flags)
+
+    from AthenaConfiguration.ComponentFactory import CompFactory 
+    acc.addService(CompFactory.ChronoStatSvc(
+        PrintUserTime = True,
+        PrintSystemTime = True,
+        PrintEllapsedTime = True,
+    ))
+
+    acc.addService(CompFactory.AthXRT.DeviceMgmtSvc(XclbinPathsList = [arguments.xclbinPath]))
+
+    from EFTrackingFPGAUtility.EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
+    acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
+        flags,
+        name = "trackDataStreamLoader",
+        bufferSize = arguments.bufferSize,
+        inputCsvPath = arguments.trackTestVectorPath,
+        inputDataStream = "inputTrackDataStream",
+    ))
+
+    acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
+        flags,
+        name = "hitDataStreamLoader",
+        bufferSize = arguments.bufferSize,
+        inputCsvPath = arguments.hitTestVectorPath,
+        inputDataStream = "inputHitDataStream",
+    ))
+
+    from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
+    acc.merge(EFTrackingXrtAlgorithmCfg(
+        flags, 
+        inputInterfaces = [
+            ["loader:{loader_1}", "inputTrackDataStream", 0],
+            ["loader:{loader_2}", "inputHitDataStream", 0],
+        ],
+        outputInterfaces = [
+            ["unloader:{unloader_1}", "outputDataStream", 1],
+        ],
+    ))
+
+    from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
+    acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
+        flags,
+        outputCsvPath = arguments.outputPath,
+        outputDataStream = "outputDataStream",
+    ))
+
+    acc.run(2)
+

@@ -10,7 +10,6 @@
 #include "AthenaOutputStreamTool.h"
 
 // Gaudi
-#include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/IClassIDSvc.h"
@@ -44,7 +43,6 @@ bool hasInputAlias (const SG::DataProxy& dp)
 AthenaOutputStreamTool::AthenaOutputStreamTool(const std::string& type,
 		const std::string& name,
 		const IInterface* parent) : base_class(type, name, parent),
-	m_conversionSvc("AthenaPoolCnvSvc", name),
 	m_clidSvc("ClassIDSvc", name),
 	m_decSvc("DecisionSvc/DecisionSvc", name) {
 }
@@ -300,12 +298,12 @@ void AthenaOutputStreamTool::propagateProvenance( const DataHeader& src_dh )
       if( auto dhProxy=m_store->proxy(&src_dh); dhProxy && dhProxy->address() ) {
          DataHeaderElement dhe(dhProxy, dhProxy->address(), pTag);
          m_dataHeader->insertProvenance(dhe);
-         insertedTags.insert(pTag);
+         insertedTags.insert(std::move(pTag));
       }
       else if( dhTransAddr ) {
          DataHeaderElement dhe(dhTransAddr.get(), dhTransAddr->address(), pTag);
          m_dataHeader->insertProvenance(dhe);
-         insertedTags.insert(pTag);
+         insertedTags.insert(std::move(pTag));
       }
    }
 
@@ -470,7 +468,7 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
       }
    }
    // End of loop over DataObjects, write DataHeader
-   if (m_conversionSvc.type() == "AthenaPoolCnvSvc" && dataHeaderObj != nullptr) {
+   if ((m_conversionSvc.type() == "AthenaPoolCnvSvc" || m_conversionSvc.type() == "AthenaPoolSharedIOCnvSvc") && dataHeaderObj != nullptr) {
       IOpaqueAddress* addr = new TokenAddress(0, dataHeaderObj->clID(), outputConnectionString);
       addr->addRef();
       if (m_conversionSvc->createRep(dataHeaderObj, addr).isSuccess()) {
@@ -506,7 +504,7 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
       }
    }
    m_dataHeader->addHash(&*m_store);
-   if (m_conversionSvc.type() == "AthenaPoolCnvSvc" && dataHeaderObj != nullptr) {
+   if ((m_conversionSvc.type() == "AthenaPoolCnvSvc" || m_conversionSvc.type() == "AthenaPoolSharedIOCnvSvc") && dataHeaderObj != nullptr) {
       // End of DataObjects, fill refs for DataHeader
       SG::DataProxy* proxy = dynamic_cast<SG::DataProxy*>(dataHeaderObj->registry());
       if (proxy != nullptr && written.find(dataHeaderObj) != written.end()) {

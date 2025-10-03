@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VTUNE_PROFILERSERVICE_H
@@ -49,9 +49,6 @@ class VTuneProfilerService : public extends<AthService,
       virtual void handle( const Incident& inc ) override;
 
   private:
-
-      /// Helper method to create auditors
-      StatusCode makeAuditor (const std::string& audName, IAuditorSvc* audSvc);
 
       /// Handle to the incident service
       ServiceHandle< IIncidentSvc > m_incidentSvc;

@@ -13,7 +13,6 @@
 # ---------------------------------------------------------------------------------------------------
 # Creation of Pickled dictionary for output
 # ---------------------------------------------------------------------------------------------------
-from __future__ import with_statement, print_function
 from CoolRunQuery.AtlRunQueryQueryConfig import QC
 from CoolRunQuery.selector.AtlRunQuerySelectorBase import DataKey
 

@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-
-from collections import OrderedDict as odict
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -58,9 +56,10 @@ class CTP(object):
                 raise RuntimeError(msg)
 
     def json(self):
-        confObj = odict()
-        confObj["inputs"] = self.inputConnectors
-        confObj["monitoring"] = self.counters.json()
+        confObj = {
+            "inputs": self.inputConnectors,
+            "monitoring": self.counters.json()
+        }
         return confObj
 
 

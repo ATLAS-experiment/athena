@@ -120,7 +120,7 @@ struct BazCont
   typedef Baz value_type;
   typedef const Baz* const_pointer;
   typedef const Baz& const_reference;
-  
+
   struct const_iterator
     : public StrSet::const_iterator
   {
@@ -179,7 +179,7 @@ struct IdentTest
   }
 
   void fill (const std::string& prefix);
-  
+
   vec_t m_vec;
 };
 
@@ -279,7 +279,34 @@ const typename Index<CONT>::type& doindex (const CONT* cont, const IDX& idx)
   return Index<CONT>(cont)[idx];
 }
 
+template <typename T>
+void checkNoExceptMove() {
+  // An ElementLink is always copy/move constructible/assignable
+  // Notice that we do not have explicit move ctor
+  // and move assignment operators declared.
+  // This means that the defaulted copy ctor/assignment
+  // are used for "moves".
+  static_assert(std::is_copy_constructible_v<T>);
+  static_assert(std::is_copy_assignable_v<T>);
+  static_assert(std::is_move_constructible_v<T>);
+  static_assert(std::is_move_assignable_v<T>);
+  // The exception specification (since defaulted)
+  // of the ElementLink's copy ctor/assignment
+  // will depend on the ElementLink's data members.
+  // In particular on the exception specification
+  // of the data member's copy ctor/assignment.
 
+  // When the container is of the form vector<T*>
+  // the ElementLinkBase is used.
+  // In which case copies (and as a result moves)
+  // are no-throw.
+  if constexpr (std::is_base_of_v<ElementLinkBase, T>) {
+    static_assert(std::is_nothrow_copy_constructible_v<T>);
+    static_assert(std::is_nothrow_copy_assignable_v<T>);
+    static_assert(std::is_nothrow_move_constructible_v<T>);
+    static_assert(std::is_nothrow_move_assignable_v<T>);
+  }
+}
 
 template <class CONT>
 void testit (SGTest::TestStore& store,
@@ -296,6 +323,7 @@ void testit (SGTest::TestStore& store,
 {
   typedef ElementLink<CONT> Link;
   typedef typename Link::ElementType element_t;
+  checkNoExceptMove<Link>();
   element_t null_element = element_t();
   CLID clid = ClassID_traits<CONT>::ID();
   TestStore::sgkey_t sgkey = store.stringToKey (key, clid);
@@ -706,7 +734,7 @@ void test3 (SGTest::TestStore& store)
   TestStore::sgkey_t sgkey = store.stringToKey ("foocont3", fooclid);
 
   //Add check to see if Element link optimized for std::vector expansion
-  static_assert(std::is_nothrow_move_constructible<ElementLink<FooCont>>::value);
+  checkNoExceptMove<ElementLink<FooCont>>();
 
   FooCont* foocont3 = new FooCont;
   for (int i=0; i < 4; i++)
@@ -753,7 +781,7 @@ void test3 (SGTest::TestStore& store)
 void test4 (SGTest::TestStore& store)
 {
   std::cout << "test4\n";
-  
+
   TestStore store2;
   FooCont* foocont4 = new FooCont;
   for (int i=0; i < 4; i++)
@@ -864,7 +892,7 @@ void test7 (SGTest::TestStore& store)
   ElementLink<FooCont> FooVecLink1;
   FooVecLink1.toContainedElement(*fooVec, f1);
 
-  // move to persistent state and check index 
+  // move to persistent state and check index
   FooVecLink1.toPersistent();
   assert(FooVecLink1.index() == 0);
   // get the pointer from ElementLink and check
@@ -889,13 +917,13 @@ void test7 (SGTest::TestStore& store)
   // test of Element Link with key
   ElementLink<FooCont> FooVecLink3("fooVec", 2);
   assert (FooVecLink3.index() == 2);
-  const Foo* f = *FooVecLink3;  
+  const Foo* f = *FooVecLink3;
   assert (f->x == 3);
 
   // check resetWithKeyAndIndex
   // assign el1 to el4
   ElementLink<FooCont> FooVecLink4 = FooVecLink1;
-  // check index 
+  // check index
   assert(FooVecLink4.index() == 0);
   // get the pointer from ElementLink and check
   assert ((**FooVecLink4).x == 1);
@@ -907,7 +935,7 @@ void test7 (SGTest::TestStore& store)
   //assert (IdentifiedState::valid(&FooVecLink4));
   // move to transient and check that it has the right values
   FooVecLink4.toTransient();
-  f = *FooVecLink4;  
+  f = *FooVecLink4;
   assert (f->x == 3);
 
 
@@ -928,7 +956,7 @@ void test7 (SGTest::TestStore& store)
   linkset.setElement(pCF);  // set only element
   linkset.toPersistent(); // XXX SHOULD BE AN ERROR???
 
-  linkset.setStorableObject(*fooVec);  // set Collection
+  (void)linkset.setStorableObject(*fooVec);  // set Collection
   assert (linkset.index() == 2);
   assert ((**linkset).x == 3);
   assert( linkset.toPersistent() );

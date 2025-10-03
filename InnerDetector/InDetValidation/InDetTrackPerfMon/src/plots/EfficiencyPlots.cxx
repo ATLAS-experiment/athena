@@ -18,9 +18,10 @@
 IDTPM::EfficiencyPlots::EfficiencyPlots(
     PlotMgr* pParent, const std::string& dirName, 
     const std::string& anaTag, const std::string& trackType,
-    bool doGlobalPlots, bool doTruthMuPlots ) :
+    bool isTechnical, bool doGlobalPlots, bool doTruthMuPlots ) :
         PlotMgr( dirName, anaTag, pParent ), 
         m_trackType( trackType ),
+        m_isTechnical( isTechnical ),
         m_doGlobalPlots( doGlobalPlots ),
         m_doTruthMuPlots( doTruthMuPlots ) { }
 
@@ -43,6 +44,7 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
 
   ATH_CHECK( retrieveAndBook( m_eff_vs_inclusive,  "eff_vs_"+m_trackType+"_inclusive" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_pt,  "eff_vs_"+m_trackType+"_pt" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_logPt,  "eff_vs_"+m_trackType+"_logPt" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_lowPt,  "eff_vs_"+m_trackType+"_lowPt" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_eta, "eff_vs_"+m_trackType+"_eta" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_phi, "eff_vs_"+m_trackType+"_phi" ) );
@@ -60,6 +62,30 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
   if( m_doGlobalPlots ) {
     ATH_CHECK( retrieveAndBook( m_eff_vs_actualMu, "eff_vs_actualMu" ) );
     if( m_doTruthMuPlots ) ATH_CHECK( retrieveAndBook( m_eff_vs_truthMu, "eff_vs_truthMu" ) );
+  }
+
+  /// updating technical efficiencies plot lables
+  if( m_isTechnical ) {
+    updateYaxisLabel( m_eff_vs_inclusive );
+    updateYaxisLabel( m_eff_vs_pt );
+    updateYaxisLabel( m_eff_vs_logPt );
+    updateYaxisLabel( m_eff_vs_lowPt );
+    updateYaxisLabel( m_eff_vs_eta );
+    updateYaxisLabel( m_eff_vs_phi );
+    updateYaxisLabel( m_eff_vs_d0 );
+    updateYaxisLabel( m_eff_vs_z0 );
+    if( m_trackType == "truth" ) {
+      updateYaxisLabel( m_eff_vs_prodR );
+      updateYaxisLabel( m_eff_vs_prodZ );
+    }
+    updateYaxisLabel( m_eff_vs_eta_vs_pt );
+    updateYaxisLabel( m_eff_vs_eta_vs_phi );
+    updateYaxisLabel( m_eff_vs_z0_vs_d0 );
+    updateYaxisLabel( m_eff_vs_z0sin_vs_d0 );
+    if( m_doGlobalPlots ) {
+      updateYaxisLabel( m_eff_vs_actualMu );
+      if( m_doTruthMuPlots ) updateYaxisLabel( m_eff_vs_truthMu );
+    }
   }
 
   return StatusCode::SUCCESS;
@@ -86,6 +112,7 @@ StatusCode IDTPM::EfficiencyPlots::fillPlots(
   /// Fill the histograms
   ATH_CHECK( fill( m_eff_vs_inclusive,  1,  isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_pt,  ppt,  isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_logPt,  ppt,  isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_lowPt,  ppt,  isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_eta, peta, isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_phi, pphi, isMatched, weight ) );
@@ -122,4 +149,16 @@ void IDTPM::EfficiencyPlots::finalizePlots()
 {
   ATH_MSG_DEBUG( "Finalising efficiency plots" );
   /// print stat here if needed
+}
+
+
+/// ----------------------------
+/// ----- updateYaxisLabel -----
+/// ----------------------------
+void IDTPM::EfficiencyPlots::updateYaxisLabel( TEfficiency*& eff )
+{
+  std::string oldTID( eff->GetTitle() );
+  TString oldTitle( retrieveDefinition( oldTID ).titleDigest() );
+  TString newTitle = oldTitle.ReplaceAll( "Efficiency", "Technical Efficiency" );
+  eff->SetTitle( newTitle.Data() );
 }

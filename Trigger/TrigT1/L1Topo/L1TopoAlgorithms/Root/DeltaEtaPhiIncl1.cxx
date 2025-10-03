@@ -16,6 +16,7 @@
 #include "L1TopoAlgorithms/DeltaEtaPhiIncl1.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 REGISTER_ALG_TCS(DeltaEtaPhiIncl1)
 
@@ -142,6 +143,11 @@ TCS::DeltaEtaPhiIncl1::processBitCorrect( const std::vector<TCS::TOBArray const 
                    TRG_MSG_DEBUG(msgss.str());
                }
            }
+       for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1[i])
+                                    || TSU::isAmbiguousTruncation(input[0], p_NumberLeading2, p_MinET2[i]);
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+        }
     } else {
         TCS_EXCEPTION("DeltaEtaPhiIncl1 alg must have  1 input, but got " << input.size());
     }

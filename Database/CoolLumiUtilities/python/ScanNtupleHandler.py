@@ -6,7 +6,6 @@
 # Definition of vdM scan ntuple
 #
 
-from __future__ import print_function
 # Utility to unpack BCID blobs
 from CoolLumiUtilities.CoolBCIDData import LumiBCIDData
 

@@ -185,10 +185,17 @@ def PoolWriteCfg(flags):
                          f"and a maximum (across all outputs) AutoFlush of {maxAutoFlush}")
             useParallelCompression = False
 
-    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-    return AthenaPoolCnvSvcCfg(flags,
-                               PoolAttributes=PoolAttributes,
-                               ParallelCompression=useParallelCompression,
-                               StorageTechnology=flags.Output.StorageTechnology.EventData,
-                               OutputMetadataContainers=OutputMetadataContainers,
-                               OneDataHeaderForm = oneDHForm)
+    if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
+        return AthenaPoolSharedIOCnvSvcCfg(flags,
+                                           PoolAttributes=PoolAttributes,
+                                           ParallelCompression=useParallelCompression,
+                                           StorageTechnology=flags.Output.StorageTechnology.EventData,
+                                           OutputMetadataContainers=OutputMetadataContainers,
+                                           OneDataHeaderForm = oneDHForm)
+    else:
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        return AthenaPoolCnvSvcCfg(flags,
+                                   PoolAttributes=PoolAttributes,
+                                   StorageTechnology=flags.Output.StorageTechnology.EventData,
+                                   OneDataHeaderForm = oneDHForm)

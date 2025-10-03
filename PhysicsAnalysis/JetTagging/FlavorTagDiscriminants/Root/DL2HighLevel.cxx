@@ -25,7 +25,6 @@ namespace FlavorTagDiscriminants {
   DL2HighLevel::DL2HighLevel(const std::string& nn_file_name,
                              FlipTagConfig flip_config,
                              std::map<std::string,std::string> remap_scalar,
-                             TrackLinkType track_link_type,
                              float default_output_value):
     m_dl2(nullptr)
   {
@@ -40,9 +39,8 @@ namespace FlavorTagDiscriminants {
     if (config.inputs.size() > 1) {
       throw std::logic_error("DL2 doesn't support multiple inputs");
     }
-
-    auto [input_config, constituents_configs, options] = dataprep::createGetterConfig(
-      config, flip_config, std::move(remap_scalar), track_link_type);
+    auto [input_config, constituents_configs, options] = dataprep::createGetterConfig<lwt::GraphConfig, lwt::OutputNodeConfig>(
+      config, flip_config, std::move(remap_scalar));
     options.default_output_value = default_output_value;
 
     m_dl2.reset(
@@ -58,19 +56,15 @@ namespace FlavorTagDiscriminants {
   DL2HighLevel::DL2HighLevel(DL2HighLevel&&) = default;
   DL2HighLevel::DL2HighLevel(const DL2HighLevel&) = default;
 
-  void DL2HighLevel::decorate(const xAOD::BTagging& btag) const {
-    m_dl2->decorate(btag);
+  void DL2HighLevel::decorate(const xAOD::IParticle& i_jet) const {
+    m_dl2->decorate(i_jet);
   }
-  void DL2HighLevel::decorate(const xAOD::Jet& jet) const {
-    m_dl2->decorate(jet);
-  }
-  void DL2HighLevel::decorateWithDefaults(const SG::AuxElement& jet) const {
-    m_dl2->decorateWithDefaults(jet);
+  void DL2HighLevel::decorateWithDefaults(const xAOD::IParticle& i_jet) const {
+    m_dl2->decorateWithDefaults(i_jet);
   }
 
   FTagDataDependencyNames DL2HighLevel::getDataDependencyNames() const
   {
     return m_dl2->getDataDependencyNames();
   }
-
 }

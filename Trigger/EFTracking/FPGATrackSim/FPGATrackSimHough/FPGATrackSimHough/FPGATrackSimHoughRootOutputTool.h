@@ -60,13 +60,14 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         void ResetVectors();
 
 	ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
-        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", ""};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
         Gaudi::Property <std::string> m_algorithm { this, "ORAlgo", "Normal", "Overlap removal algorithm"};
+        Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
 
         ORAlgo m_algo{ORAlgo::Normal};       //  Internal ORAlgo enum for faster compare
 
-        const FPGATrackSimRegionMap* m_SUBREGIONMAP = m_FPGATrackSimMapping->SubRegionMap();
+        const FPGATrackSimRegionMap* m_SUBREGIONMAP{nullptr};
         TrackCorrType m_IdealCoordFitType = TrackCorrType::None;
 
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
@@ -113,6 +114,12 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         float m_candidate_barcode = 0.0F;
         float m_candidate_eventindex = 0.0F;
         unsigned int m_fakelabel = 0; // label for fake tracks. 1 if track candidate's barcodefrac is < 0.5, 0 else
+        float m_associated_truth_d0 = 9999;
+        float m_associated_truth_z0 = 9999;
+        float m_associated_truth_pt = 9999;
+        float m_associated_truth_q = 9999;
+        float m_associated_truth_eta = 9999;
+        float m_associated_truth_phi = 9999;
 
         // track number in the event, since the request is to store this per road
         // naively vectors of vectors and one entry per event makes more sense but this was the

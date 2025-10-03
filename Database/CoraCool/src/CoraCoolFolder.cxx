@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CoraCoolFolder.cxx
@@ -42,7 +42,7 @@ CoraCoolFolder::CoraCoolFolder(const std::string& coolfolder,
              CoraCoolDatabase* coradb, coral::MessageStream& log)
         :
         m_foldername(coolfolder),
-        m_proxy(proxy),m_cooldb(cooldb),m_coradb(coradb),
+        m_proxy(proxy),m_cooldb(std::move(cooldb)),m_coradb(coradb),
         m_log(log),
 	m_bulkactive(false),m_payloadbuf(0),m_bulki(0),m_seqpk(0),m_seqfk(0),
 	m_nextpk(0),m_usedpk(0),m_nextfk(0),m_usedfk(0)
@@ -563,7 +563,7 @@ CoraCoolObjectIterPtr CoraCoolFolder::browseObjects(
   // first initialise COOL query
   cool::IObjectIteratorPtr coolitr=m_coolfolder->browseObjects(since,until,
 	channels,tagName);
-  CoraCoolObjectIterPtr itr(new CoraCoolObjectIter(this,coolitr));
+  CoraCoolObjectIterPtr itr(new CoraCoolObjectIter(this,std::move(coolitr)));
   return itr;
 }
 

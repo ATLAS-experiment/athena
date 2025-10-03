@@ -48,7 +48,7 @@ namespace CP
 
   /// \brief the decorator for \ref m_taggerDecisionDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Decorator<int> > m_taggerDecisionDecorator {};
+    std::unique_ptr<const SG::Decorator<int> > m_taggerDecisionDecorator {};
   };
 }
 #endif 

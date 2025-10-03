@@ -34,8 +34,9 @@ run_InsideOut(){
         Trigger.FPGATrackSim.sampleType="${SAMPLE_TYPE}" \
         Trigger.FPGATrackSim.doEDMConversion=True \
         Trigger.FPGATrackSim.doOverlapRemoval=True \
-        Trigger.FPGATrackSim.Hough.secondStage=False \
+        Trigger.FPGATrackSim.Hough.secondStage=True \
         Trigger.FPGATrackSim.writeToAOD=True \
+        Trigger.FPGATrackSim.writeClustersToAOD="$WRITE_XAOD_CLUSTERS" \
         Trigger.FPGATrackSim.writeAdditionalOutputData="$WRITE_UPSTREAM_OUTPUT_DATA" \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
         Output.AODFileName=$xAODOutput

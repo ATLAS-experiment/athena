@@ -2,12 +2,17 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+// This absolutely needs to go first to ensure Eigen plugin is loaded
+#include "GeoPrimitives/GeoPrimitives.h"
+//
+
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 // ATHENA
 #include "GaudiKernel/EventContext.h"
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PathResolver/PathResolver.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorManager.h"
@@ -19,6 +24,8 @@
 
 // ACTS
 #include "Acts/ActsVersion.hpp"
+#include "Acts/Geometry/Blueprint.hpp"
+#include "Acts/Geometry/ContainerBlueprintNode.hpp"
 #include "Acts/Geometry/CylinderVolumeBounds.hpp"
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
 #include "Acts/Geometry/CylinderVolumeHelper.hpp"
@@ -40,6 +47,7 @@
 #include <Acts/Surfaces/DiscSurface.hpp>
 #include <Acts/Surfaces/LineSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
+#include <Acts/Visualization/ObjVisualization3D.hpp>
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IDetectorElement.h"
@@ -75,8 +83,11 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
         ATH_MSG_FATAL("Failed to interpret " << m_subDetNoAlignProp << " as ActsDetectorElements");
         return StatusCode::FAILURE;
     }
-}
+  }
+  ATH_CHECK(m_caloVolumeBuilder.retrieve(EnableTool{!m_caloVolumeBuilder.empty()}));
+  ATH_CHECK(m_msVolumeBuilder.retrieve(EnableTool{!m_msVolumeBuilder.empty()}));
 
+ 
   // FIXME: ActsCaloTrackingVolumeBuilder holds ReadHandle to
   // CaloDetDescrManager. Hopefully this service is never called before that
   // object is available.
@@ -139,6 +150,66 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     m_passiveITkStripBarrelLayerHalflengthZ.size() != m_passiveITkStripBarrelLayerThickness.size()) {
         ATH_MSG_FATAL("Consistency check for ITk strip barrel passive layer construction failed. Please check your inputs! ");
         return StatusCode::FAILURE;
+  }
+
+  if (m_useBlueprint) {
+
+
+    ATH_MSG_INFO("Using Blueprint API for geometry construction");
+    std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
+                                    m_buildSubdetectors.end());
+
+    ATH_CHECK(m_blueprintNodeBuilders.retrieve());
+
+    using enum Acts::AxisDirection;
+  
+    std::vector<ActsTrk::IBlueprintNodeBuilder*> ptrBuilders;
+    std::transform(m_blueprintNodeBuilders.begin(), m_blueprintNodeBuilders.end(),
+               std::back_inserter(ptrBuilders),
+               [](ToolHandle<ActsTrk::IBlueprintNodeBuilder>& b) { return b.get(); });
+
+    auto logger = makeActsAthenaLogger(this, std::string("Blueprint"), std::string("ActsTGSvc"));
+    
+    Acts::Experimental::Blueprint::Config cfg;
+    cfg.envelope[AxisZ] = {20_mm, 20_mm};
+    cfg.envelope[AxisR] = {0_mm, 20_mm};
+
+    auto blueprint = std::make_unique<Acts::Experimental::Blueprint>(cfg);
+
+    auto& root = blueprint->addCylinderContainer("Detector", AxisZ);
+    //The starting top node 
+    std::shared_ptr<Acts::Experimental::BlueprintNode> currentTop{nullptr};
+
+    for (auto& builder : ptrBuilders) {
+      currentTop = builder->buildBlueprintNode(getNominalContext().context(), std::move(currentTop));
+      
+    }
+
+    root.addChild(std::move(currentTop));
+    
+    m_trackingGeometry = blueprint->construct(
+      {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
+
+    if (m_objDebugOutput) {
+    Acts::ObjVisualization3D vis;
+    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                {.visible = false}, {.visible = true});
+    vis.write("blueprint_sensitive.obj");
+    vis.clear();
+
+    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
+                                {.visible = false}, {.visible = false});
+    vis.write("blueprint_volume.obj");
+    vis.clear();
+
+    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                {.visible = true}, {.visible = false});
+    vis.write("blueprint_portals.obj");
+
+
+  }
+
+    return StatusCode::SUCCESS;
   }
 
   ATH_MSG_DEBUG("Setting up ACTS geometry helpers");
@@ -402,10 +473,17 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     }
 
     // Calo
-    if (buildSubdet.count("Calo") > 0) {
+    if (m_caloVolumeBuilder.isEnabled()) {
       tgbConfig.trackingVolumeBuilders.push_back(
           [&](const auto &gctx, const auto &inner, const auto &) {
             return m_caloVolumeBuilder->trackingVolume(gctx, inner, nullptr);
+          });
+    }
+
+    if (m_msVolumeBuilder.isEnabled()){
+      tgbConfig.trackingVolumeBuilders.push_back(
+          [&](const auto &gctx, const auto &inner, const auto &) {
+            return m_msVolumeBuilder->trackingVolume(gctx, inner, nullptr);
           });
     }
   } catch (const std::exception &e) {
@@ -1044,9 +1122,11 @@ unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore 
     ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
     unsigned int nElements = 0;
     m_trackingGeometry->visitSurfaces([&store, &nElements](const Acts::Surface *srf) {
-        const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
-        const IDetectorElement *gmde = dynamic_cast<const IDetectorElement *>(detElem);
-        nElements += gmde->storeAlignedTransforms(store);
+        const auto *detElem = dynamic_cast<const IDetectorElement *>(srf->associatedDetectorElement());
+        if (!detElem) {
+            return;
+        }
+        nElements += detElem->storeAlignedTransforms(store);
     });
     ATH_MSG_DEBUG("Populated with " << nElements << " elements");
     return nElements;

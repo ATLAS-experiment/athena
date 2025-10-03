@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 //////////////////////////////////////////////////////////////
 // Moore Validation/Performance Plots
 //
@@ -25,11 +28,7 @@ void allpTPage( const char* histo, const char* reco="", const char* legendPos=""
   TCanvas* c1 = (TCanvas*)canvasList->First();
   c1->Clear();
   c1->Divide(2,2);
-  //  c1->Divide(2,3);
-
- 
-  //TIter next(gROOT->GetListOfFiles());
-  //TFile* f;
+  
   char hTitle[256];
 
   Int_t iFile(0);  //while ((f = (TFile*)next())) {
@@ -41,13 +40,9 @@ void allpTPage( const char* histo, const char* reco="", const char* legendPos=""
 
     if (obj->InheritsFrom("TDirectory")) {
 
-      //printf("Looping over directory %s\n",((TDirectory*)obj)->GetTitle());
 
-      ((TDirectory*)obj)->cd();
-
-      //f->cd();
-      //sprintf(hTitle,"p_{T} = %s GeV/c",((TDirectory*)obj)->GetTitle());
-      sprintf(hTitle,"%s",((TDirectory*)obj)->GetTitle());
+      (static_cast<TDirectory*>(obj))->cd();
+      sprintf(hTitle,"%s",(static_cast<TDirectory*>(obj))->GetTitle());
 
       c1->cd(iFile+1);
 
@@ -63,22 +58,22 @@ void allpTPage( const char* histo, const char* reco="", const char* legendPos=""
         sprintf(nameMu,"%sMu",histo);
         sprintf(nameCb,"%sCb",histo);
 
-        TH1F* histMo = (TH1F*)gDirectory->Get(nameMo);
+        TH1F* histMo = static_cast<TH1F*>(gDirectory->Get(nameMo));
         if ( !histMo ){
           printf("allpTPage can't find histogram %s/n",nameMo);
           return;
         }
-        TH1F* histId = (TH1F*)gDirectory->Get(nameId);
+        TH1F* histId = static_cast<TH1F*>(gDirectory->Get(nameId));
         if ( !histId ) {
           printf("allpTPage can't find histogram %s/n",nameId);
           return;
         }
-        TH1F* histMu = (TH1F*)gDirectory->Get(nameMu);
+        TH1F* histMu = static_cast<TH1F*>(gDirectory->Get(nameMu));
         if ( !histMu ) {
           printf("allpTPage can't find histogram %s/n",nameMu);
           return;
         }
-        TH1F* histCb = (TH1F*)gDirectory->Get(nameCb);
+        TH1F* histCb = static_cast<TH1F*>(gDirectory->Get(nameCb));
         if ( !histCb ) {
           printf("allpTPage can't find histogram %s/n",nameCb);
           return;
@@ -89,10 +84,7 @@ void allpTPage( const char* histo, const char* reco="", const char* legendPos=""
         histMu->SetTitle(hTitle);
         histCb->SetTitle(hTitle);
 
-//         setStyle22(histMo);
-//         setStyle22(histId);
-//         setStyle22(histMu);
-//         setStyle22(histCb);
+
         setStyle23(histMo);
         setStyle23(histId);
         setStyle23(histMu);
@@ -131,12 +123,10 @@ void allpTPage( const char* histo, const char* reco="", const char* legendPos=""
 
         char hName[256];
         sprintf(hName,"%s%s",histo,reco);
-	//	printf("In macro allpTPage - histo hName %s %s\n",histo, hName);
 
-        TH1F* h1D = (TH1F*)gDirectory->FindObject(hName);
+        TH1F* h1D = static_cast<TH1F*>(gDirectory->FindObject(hName));
         h1D->SetTitle(hTitle);
         setScheme(h1D,reco);
-	//        setStyle22(h1D);
         setStyle23(h1D);
         h1D->Draw();
       }  
@@ -155,16 +145,11 @@ void allpTPage2D( const char* histo, const char* reco="", const char* title="" )
   char pTSpec[256];
 
   TSeqCollection* canvasList = gROOT->GetListOfCanvases();
-  TCanvas* c1 = (TCanvas*)canvasList->First();
+  TCanvas* c1 = static_cast<TCanvas*>(canvasList->First());
   c1->Clear();
   c1->Divide(2,2);
-  //  c1->Divide(2,3);
-
-  //TIter next(gROOT->GetListOfFiles());
-  //TFile* f;
-
+ 
   Int_t iFile(0);
-  //while ((f = (TFile*)next())) {
 
   TDirectory* currentDir = gDirectory;
   TIter objIter(gDirectory->GetList());
@@ -173,12 +158,10 @@ void allpTPage2D( const char* histo, const char* reco="", const char* title="" )
 
     if (obj->InheritsFrom("TDirectory")) {
 
-      ((TDirectory*)obj)->cd();
-      //f->cd();
-      //sprintf(pTSpec,"pT = %s GeV/c",((TDirectory*)obj)->GetTitle());
-      sprintf(pTSpec,"%s",((TDirectory*)obj)->GetTitle());
+      (static_cast<TDirectory*>(obj))->cd();
+     
+      sprintf(pTSpec,"%s",(static_cast<TDirectory*>(obj))->GetTitle());
 
-      //      TText* pTText = new TText(0.18,0.7,pTSpec);
       TText* pTText = new TText(0.20,0.9,pTSpec);
       pTText->SetNDC();
       pTText->SetTextSize(0.07);
@@ -188,10 +171,8 @@ void allpTPage2D( const char* histo, const char* reco="", const char* title="" )
 
       char hName[256];
       sprintf(hName,"%s%s",histo,reco);
-      //      printf("In macro allpTPage2D - histo hName %s %s\n",histo, hName);
         
-      TH2F* h2D = (TH2F*)gDirectory->FindObject(hName);
-      //      setStyle22(h2D);
+      TH2F* h2D = static_cast<TH2F*>(gDirectory->FindObject(hName));
       setStyle23(h2D);
       h2D->Draw("COLZ");
       pTText->Draw();
@@ -209,7 +190,7 @@ void compRecoPage(const char* var )
 {
 
   TSeqCollection* canvasList = gROOT->GetListOfCanvases();
-  TCanvas* c1 = (TCanvas*)canvasList->First();
+  TCanvas* c1 = static_cast<TCanvas*>(canvasList->First());
 
   char nameMo[256];
   char nameId[256];
@@ -278,7 +259,7 @@ void compRecoPage2D(const char* var)
 {
 
   TSeqCollection* canvasList = gROOT->GetListOfCanvases();
-  TCanvas* c1 = (TCanvas*)canvasList->First();
+  TCanvas* c1 = static_cast<TCanvas*>(canvasList->First());
 
   char nameMo[256];
   char nameId[256];
@@ -579,10 +560,8 @@ void makeSummaryPages() {
   char nameMu[256];
   char nameCb[256];
 
-  //TIter next(gROOT->GetListOfFiles());
-  //TFile* f;
+ 
   Int_t iFile(0);
-  //while ((f = (TFile*)next())) {
   TDirectory* currentDir = gDirectory;
   TIter objIter(gDirectory->GetList());
   TObject* obj;
@@ -590,34 +569,33 @@ void makeSummaryPages() {
 
     if (obj->InheritsFrom("TDirectory")) {
 
-      ((TDirectory*)obj)->cd();
+      (static_cast<TDirectory*>(obj))->cd();
       c1->Clear();
       c1->Divide(2,2);
 
       c1->cd(1);
-      //f->cd();
 
       sprintf(nameMo,"%sMo","effVsEta");
       sprintf(nameId,"%sId","effVsEta");
       sprintf(nameMu,"%sMu","effVsEta");
       sprintf(nameCb,"%sCb","effVsEta");
 
-      TH1F* histMo = (TH1F*)gDirectory->Get(nameMo);
+      TH1F* histMo = static_cast<TH1F*>(gDirectory->Get(nameMo));
       if ( !histMo ) {
         printf("makeSummaryPages can't find histogram %s/n",nameMo);
         return;  
       }
-      TH1F* histId = (TH1F*)gDirectory->Get(nameId);
+      TH1F* histId = static_cast<TH1F*>(gDirectory->Get(nameId));
       if ( !histId ) {
         printf("makeSummaryPages can't find histogram %s/n",nameId);
         return;
       }
-      TH1F* histMu = (TH1F*)gDirectory->Get(nameMu);
+      TH1F* histMu = static_cast<TH1F*>(gDirectory->Get(nameMu));
       if ( !histMu ) {
         printf("makeSummaryPages can't find histogram %s/n",nameMu);
         return;
       }
-      TH1F* histCb = (TH1F*)gDirectory->Get(nameCb);
+      TH1F* histCb = static_cast<TH1F*>(gDirectory->Get(nameCb));
       if ( !histCb ) {
         printf("makeSummaryPages can't find histogram %s/n",nameCb);
         return;
@@ -649,40 +627,32 @@ void makeSummaryPages() {
       TGraphErrors* graphId;
       TGraphErrors* graphCb;
 
-//       gPad->SetLogx(1);
-//       graphMo = (TGraphErrors*)gDirectory->Get("effVsPhi1BinVspTMo");
-//       graphMo->Draw("AP");
-//       graphMu = (TGraphErrors*)gDirectory->Get("effVsPhi1BinVspTMu");
-//       graphMu->Draw("P");
-//       graphId = (TGraphErrors*)gDirectory->Get("effVsPhi1BinVspTId");
-//       graphId->Draw("P");
-//       graphCb = (TGraphErrors*)gDirectory->Get("effVsPhi1BinVspTCb");
-//      graphCb->Draw("P");
+
 
       c1->cd(3);
       //f->cd();
-      ((TDirectory*)obj)->cd();
+      (static_cast<TDirectory*>(obj))->cd();
       sprintf(nameMo,"%sMo","pTResWidthVsEta");
       sprintf(nameId,"%sId","pTResWidthVsEta");
       sprintf(nameMu,"%sMu","pTResWidthVsEta");
       sprintf(nameCb,"%sCb","pTResWidthVsEta");
 
-      TH1F* histMo2 = (TH1F*)gDirectory->Get(nameMo);
+      TH1F* histMo2 = static_cast<TH1F*>(gDirectory->Get(nameMo));
       if ( !histMo2 ) {
         printf("makeSummaryPages can't find histogram %s\n",nameMo);
         return;
         }
-      TH1F* histId2 = (TH1F*)gDirectory->Get(nameId);
+      TH1F* histId2 = static_cast<TH1F*>(gDirectory->Get(nameId));
       if ( !histId2 ) {
         printf("makeSummaryPages can't find histogram %s\n",nameId);
         return;
       }
-      TH1F* histMu2 = (TH1F*)gDirectory->Get(nameMu);
+      TH1F* histMu2 = static_cast<TH1F*>(gDirectory->Get(nameMu));
       if ( !histMu2 ) {
         printf("makeSummaryPages can't find histogram %s\n",nameMu);
         return;
       }
-      TH1F* histCb2 = (TH1F*)gDirectory->Get(nameCb);
+      TH1F* histCb2 = static_cast<TH1F*>(gDirectory->Get(nameCb));
       if ( !histCb2 ) {
         printf("makeSummaryPages can't find histogram %s\n",nameCb);
         return;
@@ -701,21 +671,12 @@ void makeSummaryPages() {
       c1->cd(4);
       gROOT->cd();
 
-//       gPad->SetLogx(1);
-//       graphMo = (TGraphErrors*)gDirectory->Get("pTResVspTMo");
-//       graphMo->Draw("AP");
-//       graphMu = (TGraphErrors*)gDirectory->Get("pTResVspTMu");
-//       graphMu->Draw("P");
-//       graphId = (TGraphErrors*)gDirectory->Get("pTResVspTId");
-//       graphId->Draw("P");
-//       graphCb = (TGraphErrors*)gDirectory->Get("pTResVspTCb");
-//      graphCb->Draw("P");
 
       c1->Update();
 
       char filename[256];
       Float_t thepT(0.);
-      sscanf(((TDirectory*)obj)->GetTitle(),"%f",&thepT);
+      sscanf((static_cast<TDirectory*>(obj))->GetTitle(),"%f",&thepT);
       sprintf(filename,"summary_%iGeV.gif", (Int_t)thepT);
       c1->Print(filename);
 

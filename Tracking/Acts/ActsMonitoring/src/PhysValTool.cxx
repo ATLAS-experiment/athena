@@ -37,56 +37,62 @@ namespace ActsTrk {
     ATH_MSG_DEBUG(m_doStripSpacePoints);
     ATH_MSG_DEBUG(m_doStripOverlapSpacePoints);
     
-    std::string folder = "SquirrelPlots/Acts";
+    std::string folder = m_folder.value();
     if (m_doPixelClusters) {
+      std::string subdir = m_pixelClustersDir.empty() ?
+                           m_pixelClusterContainerKey.key() :
+                           m_pixelClustersDir.value();
       m_pixelClusterValidationPlots = 
 	std::make_unique< ActsTrk::PixelClusterValidationPlots >(nullptr, 
-								 Form("%s/%s/", 
-								      folder.c_str(),
-								      m_pixelClusterContainerKey.key().c_str()));
+								 Form("%s/%s/", folder.c_str(), subdir.c_str()));
     }
 
     if (m_doStripClusters) {
+      std::string subdir = m_stripClustersDir.empty() ?
+                           m_stripClusterContainerKey.key() :
+                           m_stripClustersDir.value();
       m_stripClusterValidationPlots = 
 	std::make_unique< ActsTrk::StripClusterValidationPlots >(nullptr, 
-								 Form("%s/%s/", 
-								      folder.c_str(),
-								      m_stripClusterContainerKey.key().c_str()));
+								 Form("%s/%s/", folder.c_str(), subdir.c_str()));
     }
 
     if (m_doPixelSpacePoints) {
+      std::string subdir = m_pixelSPDir.empty() ?
+                           m_pixelSpacePointContainerKey.key() :
+                           m_pixelSPDir.value();
       m_pixelSpacePointValidationPlots =
 	std::make_unique< ActsTrk::PixelSpacePointValidationPlots >(nullptr,
-								    Form("%s/%s/",
-									 folder.c_str(),
-									 m_pixelSpacePointContainerKey.key().c_str()));
+								    Form("%s/%s/", folder.c_str(), subdir.c_str()));
     }
 
     if (m_doStripSpacePoints) {
+      std::string subdir = m_stripSPDir.empty() ?
+                           m_stripSpacePointContainerKey.key() :
+                           m_stripSPDir.value();
       m_stripSpacePointValidationPlots =
 	std::make_unique< ActsTrk::StripSpacePointValidationPlots >(nullptr,
-								    Form("%s/%s/",
-									 folder.c_str(),
-									 m_stripSpacePointContainerKey.key().c_str()),
+								    Form("%s/%s/", folder.c_str(), subdir.c_str()),
 								    "Strip");
     }
 
     if (m_doStripOverlapSpacePoints) {
+      std::string subdir = m_stripOSPDir.empty() ?
+                           m_stripOverlapSpacePointContainerKey.key() :
+                           m_stripOSPDir.value();
       m_stripOverlapSpacePointValidationPlots = 
 	std::make_unique< ActsTrk::StripSpacePointValidationPlots >(nullptr,
-								    Form("%s/%s/",
-									 folder.c_str(),
-									 m_stripOverlapSpacePointContainerKey.key().c_str()),
+								    Form("%s/%s/", folder.c_str(), subdir.c_str()),
 								    "StripOverlap");
     }
 
     // Schedule HGTD objects
     if (m_doHgtdClusters) {
+      std::string subdir = m_hgtdClustersDir.empty() ?
+                           m_hgtdClusterContainerKey.key() :
+                           m_hgtdClustersDir.value();
       m_hgtdClusterValidationPlots =
 	std::make_unique< ActsTrk::HgtdClusterValidationPlots >(nullptr,
-								Form("%s/%s/",
-								     folder.c_str(),
-								     m_hgtdClusterContainerKey.key().c_str()));
+								Form("%s/%s/", folder.c_str(), subdir.c_str()));
     }
     
     if (m_doPixelClusters or m_doPixelSpacePoints)

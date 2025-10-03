@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Standalone application to produce a reference file from the pixel TOT calibration DB */
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
         std::string variable(aux.substr(0,aux.find("=")));
         std::string value(aux.substr(aux.find("=")+1));
         if     (variable.compare("tagName")    == 0) {
-            tagName = value;
+            tagName = std::move(value);
         }
         else if(variable.compare("folder")     == 0) folderName = std::move(value);
         else if(variable.compare("outputFile") == 0) outputFileName = std::move(value);       

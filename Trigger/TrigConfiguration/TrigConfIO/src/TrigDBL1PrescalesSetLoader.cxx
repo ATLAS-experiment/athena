@@ -28,30 +28,15 @@ bool
 TrigConf::TrigDBL1PrescalesSetLoader::loadL1Prescales ( unsigned int psk, TrigConf::L1PrescalesSet & pss,
                                                         const std::string & outFileName ) const
 {
+   // load data into ptree
    boost::property_tree::ptree pt;
-   {
-      auto session = createDBSession();
-      session->transaction().start( /*bool readonly=*/ true);
-      const size_t sv = schemaVersion(session.get());
-      QueryDefinition qdef = getQueryDefinition(sv, m_queries);
-      try {
-         qdef.setBoundValue<int>("key", psk);
-         auto q = qdef.createQuery( session.get() );
-         auto & cursor = q->execute();
-         if ( ! cursor.next() ) {
-            TRG_MSG_ERROR("Tried reading L1 prescales, but L1 prescale key " << psk << " is not available" );
-            throw TrigConf::NoL1PSKException("TrigDBL1PrescalesSetLoader: L1 PSK " + std::to_string(psk) + " not available");
-         }
-         const coral::AttributeList& row = cursor.currentRow();
-         const coral::Blob& dataBlob = row[qdef.dataName()].data<coral::Blob>();
-         writeRawFile( dataBlob, outFileName );
-         blobToPtree( dataBlob, pt );
-      }
-      catch(coral::QueryException & ex) {
-         TRG_MSG_ERROR("When reading L1 prescales for L1 PSK " << psk << " a coral::QueryException was caught ( " << ex.what() <<" )" );
-         throw TrigConf::QueryException("TrigDBL1PrescalesSetLoader: " + std::string(ex.what()));
-      }
+   if(useCrest()) {
+      loadFromCrest(psk, pt, outFileName, "L1 prescales", "L1PS");
+   } else {
+      loadFromOracle(psk, pt, outFileName, "L1 prescales", m_queries);
    }
+    
+   // fill L1PrescaleSet with data
    try {
       pss.setData(std::move(pt));
       pss.setPSK(psk);

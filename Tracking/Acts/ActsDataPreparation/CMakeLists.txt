@@ -10,8 +10,8 @@ atlas_add_component( ActsDataPreparation
    src/*.h src/*.cxx
    src/components/*.cxx
    LINK_LIBRARIES
-   ActsCore
-   ActsEventCnvLib
+   Acts::Core
+   ActsCalibratorsLib
    ActsGeometryLib
    ActsGeometryInterfacesLib
    ActsToolInterfacesLib

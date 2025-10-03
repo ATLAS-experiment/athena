@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -112,7 +112,7 @@ PyObject* CPPInstanceExpand( PyObject*, PyObject* args )
 void PyROOTPickle::Initialize( PyObject* libpyroot_pymodule, PyObject* cppinstance_pytype )
 {
   Py_INCREF( libpyroot_pymodule );
-  PyTypeObject* pytype = (PyTypeObject*)cppinstance_pytype;
+  PyTypeObject* pytype = reinterpret_cast<PyTypeObject*>(cppinstance_pytype);
 
   // Don't change this name to CPPInstance since it's saved in pickles.
   static PyMethodDef s_pdefExp = { (char*)"_ObjectProxy__expand__",

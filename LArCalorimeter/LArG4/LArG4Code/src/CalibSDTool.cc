@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/CalibSDTool.h"
@@ -24,15 +24,8 @@ namespace LArG4
   //---------------------------------------------------------------------------
   CalibSDTool::CalibSDTool(const std::string& type, const std::string& name,
                            const IInterface* parent)
-    : SensitiveDetectorBase(type, name, parent),
-      m_doPID(false),
-      m_larEmID(nullptr),
-      m_larFcalID(nullptr),
-      m_larHecID(nullptr),
-      m_caloDmID(nullptr),
-      m_id_helper(nullptr)
+    : SensitiveDetectorBase(type, name, parent)
   {
-    declareProperty("ParticleID", m_doPID);
   }
 
   //---------------------------------------------------------------------------
@@ -60,8 +53,6 @@ namespace LArG4
       ATH_MSG_ERROR("Invalid CaloDM ID helper");
       return StatusCode::FAILURE;
     }
-
-    ATH_CHECK(detStore()->retrieve(m_id_helper));
 
     // No general volume list for SensitiveDetectorBase
     m_noVolumes = true;
@@ -103,7 +94,7 @@ namespace LArG4
 
     const std::string dead("Dead");
     if(sdName.find(dead)==std::string::npos) {
-      sd->addDetectorHelper(m_id_helper);
+      sd->addDetectorHelper(m_larEmID);
     }
 
     // Assign the volumes to the SD

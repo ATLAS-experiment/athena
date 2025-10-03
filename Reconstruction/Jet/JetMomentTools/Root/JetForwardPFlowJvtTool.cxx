@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardPFlowJvtTool.cxx
@@ -85,8 +85,12 @@
 
     ATH_CHECK(m_vxContKey.initialize());
 
+#ifndef XAOD_STANDALONE
+    if (m_suppressInputDependence) {
+      renounce(m_passJvtKey);
+    }
+#endif
 
-    
     return StatusCode::SUCCESS;
   }
 

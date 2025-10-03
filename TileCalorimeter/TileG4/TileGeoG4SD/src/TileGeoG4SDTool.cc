@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -10,14 +10,18 @@
 //************************************************************
 
 #include "TileGeoG4SDTool.h"
+
+#include <memory>
+
 #include "TileGeoG4SD.hh"
-#include "TileG4Interfaces/ITileCalculator.h"
+#include "TileGeoG4SD/TileHitVectorBuilder.hh"
+
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "HitManagement/HitCollectionMap.h"
 
 TileGeoG4SDTool::TileGeoG4SDTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase(type,name,parent)
-  , m_tileCalculator("TileGeoG4SDCalc", name)
 {
-  declareProperty( "TileCalculator", m_tileCalculator);
 }
 
 StatusCode TileGeoG4SDTool::initialize()
@@ -26,20 +30,20 @@ StatusCode TileGeoG4SDTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileGeoG4SDTool::Gather()
+StatusCode TileGeoG4SDTool::SetupEvent(HitCollectionMap& hitCollections)
 {
-  ATH_MSG_VERBOSE( "TileGeoG4SDTool::Gather()" );
-  if(!getSD()) {
-    ATH_MSG_ERROR ("Gather: TileGeoG4SD never created!");
-    return StatusCode::FAILURE;
-  } else {
-    TileGeoG4SD *localSD = dynamic_cast<TileGeoG4SD*>(getSD());
-    if(!localSD){
-      ATH_MSG_ERROR ("Gather: Failed to cast m_SD into TileGeoG4SD.");
-      return StatusCode::FAILURE;
-    }
-    localSD->EndOfAthenaEvent();
-  }
+  ATH_MSG_VERBOSE( "Setting up Tile hits for event");
+  hitCollections.Emplace<TileHitVectorBuilder>(m_outputCollectionNames[0], m_outputCollectionNames[0], m_tileCalculator->GetLookupBuilder());
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TileGeoG4SDTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.TransformAndRecord<TileHitVector>(m_outputCollectionNames[0], [](TileHitVector& hits){
+    // Because ISF transports multiple G4Event per Athena event, ResetCells must be called here.
+    // Once we have a one-to-one G4Event to Athena event mapping, this should be moved to G4VSensitiveDetector::EndOfEvent
+    static_cast<TileHitVectorBuilder&>(hits).ResetCells();
+  });
   return StatusCode::SUCCESS;
 }
 

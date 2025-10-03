@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # TLACommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -22,14 +22,10 @@ def TLACommonAugmentationsCfg(ConfigFlags,**kwargs):
             AddPVCollectionCfg,
             AddTruthCollectionNavigationDecorationsCfg)
         from DerivationFrameworkTLA.TLACommonConfigFunctions import AddStandardTLATruthContentsCfg
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
-        TLACommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
+        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
+        TLACommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             ConfigFlags,
-            name                    = "TLACommonTruthCharmTool",
-            NewCollectionName       = "TruthCharm",
-            KeepNavigationInfo      = False,
-            ParticleSelectionString = "(abs(TruthParticles.pdgId) == 4)",
-            Do_Compress             = True)) 
+            name = "TLACommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
         acc.addEventAlgo(CommonAugmentation("TLACommonTruthCharmKernel",AugmentationTools=[TLACommonTruthCharmTool]))
         acc.merge(AddHFAndDownstreamParticlesCfg(ConfigFlags))

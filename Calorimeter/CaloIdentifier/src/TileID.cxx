@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
  Access to Tile Calorimeter raw data
  -----------------------------------------
  ***************************************************************************/
-
-//<doc><file>   $Id: TileID.cxx,v 1.23 2008-07-10 00:55:04 solodkov Exp $
-//<version>     $Name: not supported by cvs2svn $
 
 
 #include "CaloIdentifier/TileID.h"
@@ -25,8 +22,8 @@
 #include <stdexcept>
 
 
-TileID::TileID( void ) 
-  : Tile_Base_ID ("TileID", false)
+TileID::TileID()
+  : Tile_Base_ID ("TileID", "tile", false)
 {
 }
 
@@ -47,7 +44,7 @@ int TileID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   }
 
   // init base object
-  if (Tile_Base_ID::initialize_base_from_dictionary(dict_mgr, "tile"))
+  if (Tile_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
     return (1);
 
   return 0;

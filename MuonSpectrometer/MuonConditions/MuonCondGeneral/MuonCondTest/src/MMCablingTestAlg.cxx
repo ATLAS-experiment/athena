@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MMCablingTestAlg.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -8,8 +8,6 @@
 
 #include <fstream>
 
-MMCablingTestAlg::MMCablingTestAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthAlgorithm(name,pSvcLocator) {}
 
 
 StatusCode MMCablingTestAlg::initialize(){
@@ -25,17 +23,12 @@ StatusCode MMCablingTestAlg::execute(){
                                          std::make_unique<std::fstream>(m_dumpFile, std::fstream::out) : nullptr;
   ATH_MSG_INFO("Start validation of the MM cabling. Dump complete mapping into "<<m_dumpFile);
   
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorMgr{m_DetectorManagerKey, ctx};
-  if (!detectorMgr.isValid()){
-      ATH_MSG_FATAL("Failed to retrieve the Detector manager "<<m_DetectorManagerKey.fullKey());
-      return StatusCode::FAILURE;
-  }
+  const MuonGM::MuonDetectorManager* detectorMgr{nullptr};
+  ATH_CHECK(SG::get(detectorMgr, m_DetectorManagerKey, ctx));
 
-  SG::ReadCondHandle<Nsw_CablingMap> cabling{m_cablingKey,ctx};
-  if (!cabling.isValid()) {
-     ATH_MSG_ERROR("Failed to retrieve the Mdt cabling "<<m_cablingKey.fullKey());
-     return StatusCode::FAILURE;
-  }
+  const Nsw_CablingMap* cabling{nullptr};
+  ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
+  
   Identifier chId1 = m_idHelperSvc->mmIdHelper().channelID("MML", 1, 1, 1, 1, 1);
   cabling->correctChannel(chId1, msgStream());
 

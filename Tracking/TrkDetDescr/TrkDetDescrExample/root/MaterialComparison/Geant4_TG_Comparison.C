@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MaterialMapperTree.h"
@@ -181,11 +181,11 @@ int main(int argc, char **argv)
 		    
           // do the normalization for the last to plots (rho/t) !
           } else {
-             TH1F* g4Histo = (TH1F*)(*g4Profiles)[icanv*numhists+ihist];
-             TH1F* g4Path  = (TH1F*)(*g4Profiles)[icanv*numhists+numhists-1];
+             TH1F* g4Histo = static_cast<TH1F*>((*g4Profiles)[icanv*numhists+ihist]);
+             TH1F* g4Path  = static_cast<TH1F*>((*g4Profiles)[icanv*numhists+numhists-1]);
              
-             TH1F* tgHisto = (TH1F*)(*tgProfiles)[icanv*numhists+ihist];
-             TH1F* tgPath  = (TH1F*)(*tgProfiles)[icanv*numhists+numhists-1];
+             TH1F* tgHisto = static_cast<TH1F*>((*tgProfiles)[icanv*numhists+ihist]);
+             TH1F* tgPath  = static_cast<TH1F*>((*tgProfiles)[icanv*numhists+numhists-1]);
              // get the number of bins
              Int_t numBins = g4Histo->GetNbinsX();
 

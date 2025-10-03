@@ -11,7 +11,6 @@
 # TriggerHandler - utility tool to find trigger-based information from COOL
 #
 
-from __future__ import print_function
 import sys
 import time
 import calendar

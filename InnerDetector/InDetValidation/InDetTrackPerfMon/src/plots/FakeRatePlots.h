@@ -56,6 +56,7 @@ namespace IDTPM {
 
     TEfficiency* m_fakerate_vs_incl{};
     TEfficiency* m_fakerate_vs_pt{};
+    TEfficiency* m_fakerate_vs_logPt{};
     TEfficiency* m_fakerate_vs_eta{};
     TEfficiency* m_fakerate_vs_phi{};
     TEfficiency* m_fakerate_vs_d0{};

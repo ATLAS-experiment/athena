@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TileTPCnv/test/TileDigitsContainerCnv_p3_test.cxx
@@ -20,6 +20,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
+#include <memory>
 
 
 class TileCablingSvc
@@ -172,7 +174,12 @@ int main ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "TileTPCnv/TileDigitsContainerCnv_p3_test\n";
   IdDictParser parser;
-  TileCablingSvc helpers(parser);
-  test1 (helpers.tileid);
+  try{
+    auto helpers = std::make_unique<TileCablingSvc>(parser);
+    test1 (helpers->tileid);
+  } catch (std::exception & e){
+    std::cerr<<"Exception "<<e.what()<<" in TileDigitsContainerCnv_p3_test"<<std::endl;
+    return 1;
+  }
   return 0;
 }

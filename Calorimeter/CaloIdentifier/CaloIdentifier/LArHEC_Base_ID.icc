@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/LArHEC_Base_ID.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -157,31 +155,31 @@ inline LArHEC_Base_ID::id_iterator LArHEC_Base_ID::reg_begin () const
 }
 
 //----------------------------------------------------------------------------
-inline LArHEC_Base_ID::id_iterator LArHEC_Base_ID::reg_end      (void) const
+inline LArHEC_Base_ID::id_iterator LArHEC_Base_ID::reg_end      () const
 {
   return regions().end();
 }
 
 //----------------------------------------------------------------------------
-inline LArHEC_Base_ID::id_range LArHEC_Base_ID::reg_range      (void) const
+inline LArHEC_Base_ID::id_range LArHEC_Base_ID::reg_range      () const
 {
   return regions().range();
 }
 
 //----------------------------------------------------------------------------
-inline LArHEC_Base_ID::id_iterator LArHEC_Base_ID::hec_begin    (void) const
+inline LArHEC_Base_ID::id_iterator LArHEC_Base_ID::hec_begin    () const
 {
   return channels().begin();
 }
 
 //----------------------------------------------------------------------------
-inline LArHEC_Base_ID::id_iterator LArHEC_Base_ID::hec_end      (void) const
+inline LArHEC_Base_ID::id_iterator LArHEC_Base_ID::hec_end      () const
 {
   return channels().end();
 }
 
 //----------------------------------------------------------------------------
-inline LArHEC_Base_ID::id_range LArHEC_Base_ID::hec_range      (void) const
+inline LArHEC_Base_ID::id_range LArHEC_Base_ID::hec_range      () const
 {
   return channels().range();
 }

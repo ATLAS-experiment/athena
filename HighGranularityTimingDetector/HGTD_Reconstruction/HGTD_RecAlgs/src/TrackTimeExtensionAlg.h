@@ -83,16 +83,16 @@ private:
 
   ToolHandle<IHGTD_ClusterTruthTool> m_truth_tool{this, "TruthTool", "ClusterTruthTool/ClusterTruthTool", "Tool for classifying HGTD clusters with truth information"};
 
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey{this, "HGTD_has_extension", "InDetTrackParticles.HGTD_has_extension", "deco with a handle for an extension"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerExtensionChi2Key{this, "HGTD_extension_chi2", "InDetTrackParticles.HGTD_extension_chi2", "deco with a handle for a ch2 of extension"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterRawTimeKey{this, "HGTD_cluster_raw_time", "InDetTrackParticles.HGTD_cluster_raw_time", "deco with a handle for layer cluster raw time"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTimeKey{this, "HGTD_cluster_time", "InDetTrackParticles.HGTD_cluster_time", "deco with a handle for cluster time"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTruthClassKey{this, "HGTD_cluster_truth_class", "InDetTrackParticles.HGTD_cluster_truth_class", "deco with a handle for a truth time"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterShadowedKey{this, "HGTD_cluster_shadowed", "InDetTrackParticles.HGTD_cluster_shadowed", "deco with a handle for a shadowed cluster"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterMergedKey{this, "HGTD_cluster_merged", "InDetTrackParticles.HGTD_cluster_merged", "deco with a handle for a merged cluster"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey{this, "HGTD_primary_expected", "InDetTrackParticles.HGTD_primary_expected", "deco with a handle for an expected primary"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapXKey{this, "HGTD_extrap_x", "InDetTrackParticles.HGTD_extrap_x", "deco with a handle for an x of extrap"};
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapYKey{this, "HGTD_extrap_y", "InDetTrackParticles.HGTD_extrap_y", "deco with a handle for an y of extrap"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey{this, "HGTD_has_extension", m_trk_ptkl_rh_key, "HGTD_has_extension", "deco with a handle for an extension"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerExtensionChi2Key{this, "HGTD_extension_chi2", m_trk_ptkl_rh_key, "HGTD_extension_chi2", "deco with a handle for a ch2 of extension"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterRawTimeKey{this, "HGTD_cluster_raw_time", m_trk_ptkl_rh_key, "HGTD_cluster_raw_time", "deco with a handle for layer cluster raw time"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTimeKey{this, "HGTD_cluster_time", m_trk_ptkl_rh_key, "HGTD_cluster_time", "deco with a handle for cluster time"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTruthClassKey{this, "HGTD_cluster_truth_class", m_trk_ptkl_rh_key, "HGTD_cluster_truth_class", "deco with a handle for a truth time"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterShadowedKey{this, "HGTD_cluster_shadowed", m_trk_ptkl_rh_key, "HGTD_cluster_shadowed", "deco with a handle for a shadowed cluster"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterMergedKey{this, "HGTD_cluster_merged", m_trk_ptkl_rh_key, "HGTD_cluster_merged", "deco with a handle for a merged cluster"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey{this, "HGTD_primary_expected", m_trk_ptkl_rh_key, "HGTD_primary_expected", "deco with a handle for an expected primary"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapXKey{this, "HGTD_extrap_x", m_trk_ptkl_rh_key, "HGTD_extrap_x", "deco with a handle for an x of extrap"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapYKey{this, "HGTD_extrap_y", m_trk_ptkl_rh_key, "HGTD_extrap_y", "deco with a handle for an y of extrap"};
 
 };
 

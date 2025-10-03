@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -49,6 +49,11 @@ class TrackTools: public extends<AthAlgTool, ITrackTools> {
     double getPath(const CaloCell* cell, const Trk::TrackParameters *entrance, const Trk::TrackParameters *exit) const override;
     int retrieveIndex(int sampling, float eta) const override;
 
+    std::vector<float> getEnergyInCones(const xAOD::TrackParticle* track,
+                                        const xAOD::CaloClusterContainer* clusters,
+                                        const std::set<xAOD::CaloCluster::CaloSample>& samplings,
+                                        const std::vector<double>& drCones,
+                                        const EventContext& ctx) const override;
 
   private:
 

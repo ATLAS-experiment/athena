@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -57,7 +57,7 @@ namespace CP
 
     /// \brief the accessor for \ref m_classificationDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::ConstAccessor<unsigned int> > m_classificationAccessor{};
+    std::unique_ptr<const SG::ConstAccessor<unsigned int> > m_classificationAccessor{};
 
     /// \brief the decoration for the promptness
   private:
@@ -65,7 +65,7 @@ namespace CP
 
     /// \brief the decorator for \ref m_isPromptDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Decorator<int> > m_isPromptDecorator{};
+    std::unique_ptr<const SG::Decorator<int> > m_isPromptDecorator{};
 
     /// \brief the decoration for the hadronic origin
   private:
@@ -73,7 +73,7 @@ namespace CP
 
     /// \brief the decorator for \ref m_fromHadDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Decorator<int> > m_fromHadronDecorator{};
+    std::unique_ptr<const SG::Decorator<int> > m_fromHadronDecorator{};
 
     /// \brief the decoration for the BSM origin
   private:
@@ -81,7 +81,7 @@ namespace CP
 
     /// \brief the decorator for \ref m_fromBSMDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Decorator<int> > m_fromBSMDecorator{};
+    std::unique_ptr<const SG::Decorator<int> > m_fromBSMDecorator{};
 
     /// \brief the decoration for the tau origin
   private:
@@ -89,7 +89,7 @@ namespace CP
 
     /// \brief the decorator for \ref m_fromTauDecoration
   private:
-    std::unique_ptr<const SG::AuxElement::Decorator<int> > m_fromTauDecorator{};
+    std::unique_ptr<const SG::Decorator<int> > m_fromTauDecorator{};
   };
 
 } // namespace CP

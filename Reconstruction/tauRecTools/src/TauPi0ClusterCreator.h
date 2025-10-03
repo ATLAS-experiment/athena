@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0CLUSTERCREATOR_H
@@ -80,6 +80,9 @@ private:
   std::vector<float> get2ndEtaMomWRTCluster(const xAOD::CaloCluster& cluster) const;
 
   Gaudi::Property<double> m_clusterEtCut {this, "ClusterEtCut", 0.5 * Gaudi::Units::GeV, "Et threshould for pi0 candidate clusters"};
+  Gaudi::Property<double> m_maxDeltaRNeutral {this, "MaxDeltaRNeutral", 0.2, "max DeltaR for pi0-tau association"};
+  Gaudi::Property<double> m_maxDeltaRJetClust {this, "MaxDeltaRJetClust", 0.4, "max DeltaR for vertexed cluster-tau association"};
+
 };
 
 #endif // TAURECTOOLS_TAUPI0CLUSTERCREATOR_H

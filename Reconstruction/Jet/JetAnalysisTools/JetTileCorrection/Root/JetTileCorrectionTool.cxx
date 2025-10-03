@@ -267,7 +267,7 @@ namespace CP {
   }
   
 
-  JTC::TS JetTileCorrectionTool :: overlap(const xAOD::Jet& j, Hole region){
+  JTC::TS JetTileCorrectionTool :: overlap(const xAOD::Jet& j, const Hole& region){
 
     double phisize   = region.phi2-region.phi1;
     double phicenter = (region.phi1+region.phi2)/2.;
@@ -411,7 +411,7 @@ namespace CP {
   }
 
 
-  IPair JetTileCorrectionTool :: getModulePosition(const xAOD::Jet& jet, Hole mod){
+  IPair JetTileCorrectionTool :: getModulePosition(const xAOD::Jet& jet, const Hole& mod){
 
     float eta = (mod.eta1+mod.eta2)/2.;
     float phi = (mod.phi1+mod.phi2)/2.;
@@ -599,18 +599,18 @@ namespace CP {
     return ptbin;
   }
  
-  bool JetTileCorrectionTool :: inIOV(Hole region, int run){
+  bool JetTileCorrectionTool :: inIOV(const Hole& region, int run){
     if( region.iov.first>=0 &&  (run < region.iov.first) ) return false;
     if( region.iov.second>=0 &&  (run > region.iov.second) ) return false;
     return true;
   }
 
-  bool JetTileCorrectionTool :: inHole(const xAOD::Jet& jet, Hole rdead){
+  bool JetTileCorrectionTool :: inHole(const xAOD::Jet& jet, const Hole& rdead){
     return inHole(jet.eta(), jet.phi(), rdead);
   }
 
 
-  bool JetTileCorrectionTool :: inHole(float eta, float phi, Hole rdead){
+  bool JetTileCorrectionTool :: inHole(float eta, float phi, const Hole& rdead){
 
     if(rdead.eta1==rdead.eta2 || rdead.phi1==rdead.phi2) return false;
     if((eta > rdead.eta1) && (eta < rdead.eta2) && (phi > rdead.phi1) && (phi < rdead.phi2)) return true;

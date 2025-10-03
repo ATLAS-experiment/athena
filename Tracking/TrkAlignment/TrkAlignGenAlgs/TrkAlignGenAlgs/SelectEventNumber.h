@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENALGS_SELECTEVENTNUMBER_H
@@ -23,10 +23,7 @@ namespace Trk {
   public: 
     
     /** constructor */
-    SelectEventNumber(const std::string& name, ISvcLocator* pSvcLocator);
-
-    /** destructor */
-    virtual ~SelectEventNumber();
+    using AthAlgorithm::AthAlgorithm;
     
     /** initialize method */
     virtual StatusCode  initialize();
@@ -34,15 +31,13 @@ namespace Trk {
     /** execute method */
     virtual StatusCode  execute();
     
-    /** finalize method */
-    virtual StatusCode  finalize(); 
-    
   private:
 
-    std::string m_eventListName;  //!> name of event list ASCII file    
+    StringProperty m_eventListName{this, "EventList", "goodEvents.txt",
+	"name of event list ASCII file"};
     std::vector< std::pair<int,int> > m_goodEventList; //!> good events read in from ASCII file
 
-    int m_lastGoodEvt;
+    int m_lastGoodEvt = 0;
 
   };
   

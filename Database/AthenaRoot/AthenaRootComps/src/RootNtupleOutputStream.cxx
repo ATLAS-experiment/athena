@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -357,7 +357,7 @@ RootNtupleOutputStream::collectAllObjects()
 
     m_selection.reserve(selection.size());
     if (toremove.empty()) {
-      m_selection = selection;
+      m_selection = std::move(selection);
     } else {
       for(Items_t::const_iterator 
             isel=selection.begin(),

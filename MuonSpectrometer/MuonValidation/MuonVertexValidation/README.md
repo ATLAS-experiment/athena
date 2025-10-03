@@ -24,7 +24,7 @@ source x8*/setup.sh
 ```
 
 ## Running
-The two main functionalities of this package are the ntuple creation and validation plot production.
+The three main functionalities of this package are the ntuple creation, hit dumping, and validation plot production.
 
 ### Ntuple maker
 The job configurations of the ntuple maker are defined in `python/MuonVertexValidationRun.py`. After sourcing the package, the ntuple maker is run via:
@@ -33,6 +33,29 @@ cd ../run
 python -m MuonVertexValidation.MuonVertexValidationRun -i <path to input AOD files> -o <path to the output root file> --maxEvents <number of events>
 ```
 Note that a list of input files can be passed (for example via globbing) and by default `--maxEvents=-1`.
+
+#### Running on the grid
+The ntuple maker can run on the grid via the pathena tool. To run, set up atlas as usual, then call:
+```
+lsetup rucio
+lsetup panda
+pathena --trf "python -m MuonVertexValidation.MuonVertexValidationRun \
+        --inputFile=%IN \
+        --outputFile=%OUT.NTUP.root" \
+        --inDS <your dataset> \ 
+        --outDS=user.<username>.<output dataset name> \
+        --nFiles <number of pool files to run over> \
+        --nFilesPerJob <number of files per job> \
+        --mergeOutput \
+        --nCore 8 \
+```
+
+### Hit Dumping
+Similarly, an algorithm to dump the MDT and RPC hits is configured in `python/HitDumper.py` and can be run on ESD files via
+```
+python -m MuonVertexValidation.HitDumperRun -i <path to input ESD files> -o <path to the output root file> --maxEvents <number of events>
+```
+The submission to the grid is also analogous.
 
 ### Validation plots 
 The plotting routines are defined in `util/`. The package offers two main functionalities: 

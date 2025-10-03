@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # HION2.py  
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.CFElements import seqAND
-from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
+from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HITight_Cfg
 
 #########################################################################################
 #Skiming
@@ -25,7 +25,7 @@ def HION2SkimmingToolCfg(flags):
     from DerivationFrameworkHI import ListTriggers
     
     triggers  = []
-    triggers += ListTriggers.HION2MinBias2023()
+    triggers += ListTriggers.HION2MinBias2024()
     
     expression = ' ( ' +' || '.join(triggers) + ' ) && (count(abs(PrimaryVertices.z)<100)>1)'
     
@@ -34,13 +34,7 @@ def HION2SkimmingToolCfg(flags):
                                                                              expression = expression,
                                                                              TrigDecisionTool=tdt), 
                                                                              primary = True) 
-    return(acc)                    
-#########################################################################################
-#Creating InDetTrackTools
-
-def InDetTrackSelectionTool_HITight_Cfg(flags, name="InDetTrackSelectionTool_HITight", **kwargs):
-    kwargs.setdefault("CutLevel", "HITight")
-    return InDetTrackSelectionToolCfg(flags, name, **kwargs)    
+    return(acc)
 
 #########################################################################################
 def HION2AugmentationToolCfg(flags):

@@ -28,10 +28,6 @@
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 #include <cmath>
 
-// Use IdxSet and ParSet from FPGATrackSimUtil
-using FPGATrackSimBinUtil::IdxSet;
-using FPGATrackSimBinUtil::ParSet;
-
 //-------------------------------------------------------------------------------------------------------
 //
 // Tool for doing Key Layer Math
@@ -51,7 +47,7 @@ public:
 
   struct KeyLyrPars {
     KeyLyrPars() = default;
-    KeyLyrPars(const ParSet &parset)
+    KeyLyrPars(const FPGATrackSimBinUtil::ParSet &parset)
         : z1(parset[0]), z2(parset[1]), phi1(parset[2]), phi2(parset[3]), xm(parset[4]) {}
     double z1{};
     double z2{};

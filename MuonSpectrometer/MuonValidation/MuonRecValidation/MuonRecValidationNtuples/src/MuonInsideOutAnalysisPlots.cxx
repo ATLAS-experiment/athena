@@ -12,7 +12,7 @@
 #include "MuonStationIndex/MuonStationIndex.h"
 
 namespace Muon {
-
+  using namespace MuonStationIndex;
   float mstau = 431000.;
 
   void ResPlots::book( const TString& prefix ) {
@@ -40,8 +40,8 @@ namespace Muon {
   void ChamberResPlots::book( TDirectory* dir, const TString& prefix ) {
     TDirectory* ndir = dir->mkdir(prefix+"Chamber");
     ndir->cd();
-    plots.resize(MuonStationIndex::ChIndexMax);
-    plots_p.resize(MuonStationIndex::ChIndexMax);
+    plots.resize(toInt(ChIndex::ChIndexMax));
+    plots_p.resize(toInt(ChIndex::ChIndexMax));
     for( unsigned int i=0;i<plots.size();++i ){
       TString name = prefix + "chIndex_" + std::to_string(i).c_str() + "_";
       plots[i].book(name);
@@ -51,7 +51,7 @@ namespace Muon {
   }
 
   void ChamberResPlots::fill( int chIndex_, float res_, float pull_, float exerr_, float p_ ) {
-    if( chIndex_ < 0 || chIndex_ >= MuonStationIndex::ChIndexMax ) return;
+    if( chIndex_ <0 || static_cast<unsigned>(chIndex_) >= plots.size() ) return;
 
     plots[chIndex_].fill(res_,pull_,exerr_);
     plots_p[chIndex_].fill(res_,pull_,exerr_,p_);
@@ -218,7 +218,7 @@ namespace Muon {
     betaRes = new TH1F(prefix+"betaRes","betaRes",200,-1.2,1.2);
     betaResTrig = new TH1F(prefix+"betaTrigRes","betaTrigRes",200,-1.2,1.2);
     quality = new TH1F(prefix+"quality","quality",6,-0.5,5.5);
-    quality_chIndex = new TH2F(prefix+"quality_chIndex","quality_chIndex",6,-0.5,5.5,MuonStationIndex::ChIndexMax,-0.5,-0.5+MuonStationIndex::ChIndexMax);
+    quality_chIndex = new TH2F(prefix+"quality_chIndex","quality_chIndex",6,-0.5,5.5,toInt(ChIndex::ChIndexMax),-0.5,-0.5+toInt(ChIndex::ChIndexMax));
     quality_sector = new TH2F(prefix+"quality_sector","quality_sector",6,-0.5,5.5,16,0.5,16.5);
 
     allx.book(prefix+"x_");

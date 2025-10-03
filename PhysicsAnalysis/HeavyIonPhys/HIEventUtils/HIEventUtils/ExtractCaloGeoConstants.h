@@ -38,5 +38,6 @@ private:
   TH3F* m_h3_eta{nullptr};
   TH3F* m_h3_phi{nullptr};
   TH3F* m_h3_R{nullptr};
+  TH1F* m_h1_events{nullptr};
 };
 #endif

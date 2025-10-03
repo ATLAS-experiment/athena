@@ -1,8 +1,6 @@
 <lcgdict>
 
-  <namespace name="col" />
-
-  <enum name="columnar::ContainerId" />
+  <namespace name="columnar" />
 
   <class name="columnar::ColumnarTool<ColumnarModeXAOD>" />
   <class name="columnar::ColumnarTool<ColumnarModeArray>" />

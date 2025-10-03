@@ -88,7 +88,7 @@ TrigConf::TriggerItemNode::setInternalTrigger(L1DataDef::TriggerType x,
                                               unsigned int thresholdNumber) {
    m_InternalTrigger.first = x;
    m_InternalTrigger.second = thresholdNumber;
-   m_ThresholdName = L1DataDef::typeConfig(x).name + boost::lexical_cast<string,unsigned int>(thresholdNumber);
+   m_ThresholdName = L1DataDef::typeConfig(x).name + std::to_string(thresholdNumber);
    m_Threshold = 0;
 }
 

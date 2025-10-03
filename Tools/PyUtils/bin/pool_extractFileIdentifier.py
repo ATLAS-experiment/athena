@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file:    pool_extractFileIdentifier.py
 # @purpose: extract the GUID of a POOL file.
@@ -14,11 +14,6 @@
 #
 # if pool_extractFileIdentifier.py has been made 'chmod +x' one can just do:
 # ./pool_extractFileIdentifier.py aod.pool.root
-
-from __future__ import with_statement, print_function
-
-from future import standard_library
-standard_library.install_aliases()
 
 def pool_extract(files):
     print (":: extracting GUID for [%i] files... "% len(files))

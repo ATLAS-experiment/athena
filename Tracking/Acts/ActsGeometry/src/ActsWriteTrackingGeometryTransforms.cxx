@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PACKAGE
@@ -20,18 +20,15 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 
 // STL
 #include <string>
 
 using gid = Acts::GeometryIdentifier;
 
-ActsWriteTrackingGeometryTransforms::ActsWriteTrackingGeometryTransforms(const std::string& name,
-                                 ISvcLocator* pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator),m_pixelID(nullptr),m_SCT_ID(nullptr),
-    m_writeFullTransform(false)
-{
-}
 
 StatusCode ActsWriteTrackingGeometryTransforms::initialize() {
   
@@ -142,9 +139,5 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
   });
   
   
-  return StatusCode::SUCCESS;
-}
-
-StatusCode ActsWriteTrackingGeometryTransforms::finalize() {
   return StatusCode::SUCCESS;
 }

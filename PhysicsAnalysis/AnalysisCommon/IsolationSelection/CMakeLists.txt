@@ -27,6 +27,10 @@ if( NOT XAOD_STANDALONE )
    atlas_add_component( IsolationSelection
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES AsgTools AthenaBaseComps IsolationSelectionLib MuonAnalysisInterfacesLib EgammaAnalysisInterfacesLib GaudiKernel FourMomUtils )
+else()
+   atlas_add_component( IsolationSelection
+      src/components/*.cxx
+      LINK_LIBRARIES IsolationSelectionLib )
 endif()
 
 atlas_add_dictionary( IsolationSelectionDict

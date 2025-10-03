@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdCnv/src/CaloIDHelper_IDDetDescrCnv.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -40,8 +38,11 @@ StatusCode CaloIDHelper_IDDetDescrCnv::createObj (IOpaqueAddress* pAddr,
   CHECK( clidsvc->getTypeNameOfID (objType(), type_name) );
 
   // Get the SG key.
-  DetDescrAddress* ddAddr;
-  CHECK( (ddAddr = dynamic_cast<DetDescrAddress*> (pAddr)) != nullptr );
+  DetDescrAddress* ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
+  if (!ddAddr) {
+    ATH_MSG_ERROR ("Dynamic cast to DetDescrAddress fails!");
+    return StatusCode::FAILURE;
+  }
   std::string helperKey  = *( ddAddr->par() );
   if (helperKey.empty()) {
     ATH_MSG_DEBUG("No Helper key ");

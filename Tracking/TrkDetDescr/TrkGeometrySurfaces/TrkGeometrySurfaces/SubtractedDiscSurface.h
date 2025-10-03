@@ -32,8 +32,14 @@ namespace Trk {
 class SubtractedDiscSurface final : public DiscSurface
 {
 public:
-  /** Default Constructor - needed for persistency*/
-  SubtractedDiscSurface();
+  /** Defaults. Copies need care due to unique_ptr*/
+  SubtractedDiscSurface() = default;
+  SubtractedDiscSurface(SubtractedDiscSurface&&) = default;
+  SubtractedDiscSurface& operator=(SubtractedDiscSurface&&) = default;
+  virtual ~SubtractedDiscSurface() = default;
+
+  /** Constructor */
+  SubtractedDiscSurface(const DiscSurface& ps, std::shared_ptr<const AreaExcluder> vol, bool shared);
 
   /** Copy Constructor*/
   SubtractedDiscSurface(const SubtractedDiscSurface& psf);
@@ -41,12 +47,6 @@ public:
   /** Copy Constructor*/
   SubtractedDiscSurface(const SubtractedDiscSurface& psf,
                         const Amg::Transform3D& shift);
-
-  /** Constructor */
-  SubtractedDiscSurface(const DiscSurface& ps, AreaExcluder* vol, bool shared);
-
-  /**Destructor*/
-  virtual ~SubtractedDiscSurface();
 
   /**Assignment operator*/
   SubtractedDiscSurface& operator=(const SubtractedDiscSurface& psf);
@@ -63,7 +63,7 @@ public:
                             double tol2 = 0.) const override final;
 
   /**This method allows access to the subtracted part*/
-  std::shared_ptr<AreaExcluder> subtractedVolume() const;
+  const AreaExcluder* subtractedVolume() const;
 
   /** Return properly formatted class name for screen output */
   virtual std::string name() const override final
@@ -72,8 +72,8 @@ public:
   }
 
 protected:
-  std::shared_ptr<AreaExcluder> m_subtrVol;
-  bool m_shared;
+  std::shared_ptr<const AreaExcluder> m_subtrVol{nullptr};
+  bool m_shared{true};
 };
 
 inline bool
@@ -105,10 +105,10 @@ SubtractedDiscSurface::shared() const
   return m_shared;
 }
 
-inline std::shared_ptr<AreaExcluder>
+inline const AreaExcluder*
 SubtractedDiscSurface::subtractedVolume() const
 {
-  return m_subtrVol;
+  return m_subtrVol.get();
 }
 
 } // end of namespace

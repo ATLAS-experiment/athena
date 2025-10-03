@@ -6,7 +6,7 @@
 #define SCT_GEOMODEL_SCT_DETECTORTOOL_H
 
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "SCT_GeoModelAthenaComps.h" 
+#include "SCT_GeoModelAthenaComps.h"
 
 #include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
@@ -31,7 +31,7 @@ public:
   virtual StatusCode clear() override final;
 
   // Callback function itself
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align ATLAS_NOT_THREAD_SAFE(IOVSVC_CALLBACK_ARGS) override;
 
 private:
   BooleanProperty m_alignable{this, "Alignable", true};
@@ -39,7 +39,7 @@ private:
   bool m_cosmic{false};
 
   const InDetDD::SCT_DetectorManager* m_manager{nullptr};
-  
+
   SCT_GeoModelAthenaComps m_athenaComps;
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};

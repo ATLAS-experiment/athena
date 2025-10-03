@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header file
@@ -175,7 +175,7 @@ namespace DerivationFramework {
         MEy += tp->py();
       }
     }
-    genFiltMET = sqrt(MEx*MEx+MEy*MEy);
+    genFiltMET = std::sqrt(MEx*MEx+MEy*MEy);
 
     // Get PTZ
     float PtZ(.0);

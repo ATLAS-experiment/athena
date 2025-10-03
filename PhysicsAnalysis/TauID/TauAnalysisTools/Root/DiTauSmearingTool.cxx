@@ -31,8 +31,10 @@ StatusCode DiTauSmearingTool::initialize()
 
   if (m_sRecommendationTag == "2019-winter")
   {
-    if (m_sInputFilePath.empty())
+    if (m_sInputFilePath.empty()){
+      sDirectory = "TauAnalysisTools/00-03-16/Smearing/";	    
       m_sInputFilePath = sDirectory+"TES_TrueHadDiTau_2019-winter.root";
+    }
     ATH_CHECK(ASG_MAKE_ANA_TOOL(m_tCommonDiTauSmearingTool, TauAnalysisTools::CommonDiTauSmearingTool));
     ATH_CHECK(m_tCommonDiTauSmearingTool.setProperty("InputFilePath", m_sInputFilePath));
     ATH_CHECK(m_tCommonDiTauSmearingTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));

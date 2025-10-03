@@ -4,31 +4,31 @@
 #ifndef MUONREADOUTGEOMETRYR4_STRIPLAYER_ICC
 #define MUONREADOUTGEOMETRYR4_STRIPLAYER_ICC
 
-#include "GaudiKernel/SystemOfUnits.h"
-
 namespace MuonGMR4{
     inline const Amg::Transform3D& StripLayer::toOrigin() const { return m_transform->getDefTransform(); }
     inline bool StripLayer::hasPhiDesign() const { 
         assert(m_phiDesign && m_etaDesign);
-        return m_phiDesign != m_etaDesign; 
+        return m_phiDesign.get() != m_etaDesign.get(); 
     }
     inline const StripDesign& StripLayer::design(bool phiView) const { 
         return phiView ? *m_phiDesign :*m_etaDesign;
     }
     inline const IdentifierHash StripLayer::hash() const { return m_hash; }
 
-    inline Amg::Vector3D StripLayer::to3D(CheckVector2D&& vec, const bool phiView) const {
-        if (!vec) {
-            return Amg::Vector3D::Zero();
-        }
+    inline Amg::Vector3D StripLayer::to3D(CheckVector2D&& vec, const bool phiView) const{
         Amg::Vector3D pos{Amg::Vector3D::Zero()};
         if (!phiView || !hasPhiDesign()) {
             pos.block<2,1>(0, 0) = std::move(*vec);
         } else {
-            const Eigen::Rotation2D rot{90.*Gaudi::Units::deg};
-            pos.block<2,1>(0,0) = rot * (*vec);
+            pos.block<2,1>(0,0) = Eigen::Rotation2D{m_phiRot} * std::move(*vec);
         }
         return pos;
+    }
+    inline Amg::Vector2D StripLayer::to2D(const Amg::Vector3D& vec, const bool phiView) const{
+         if (!phiView || !hasPhiDesign()) {
+            return vec.block<2,1>(0,0);
+        } 
+        return Eigen::Rotation2D{-m_phiRot} * vec.block<2,1>(0,0);
     }
     inline Amg::Vector3D StripLayer::localStripPosition(unsigned int stripNum, bool phiView) const {
         return to3D(design(phiView).center(stripNum), phiView);

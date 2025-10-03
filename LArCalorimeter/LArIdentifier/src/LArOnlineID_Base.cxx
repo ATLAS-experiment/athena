@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArOnlineID_Base.h"
@@ -44,8 +44,11 @@
 /* LArOnlineID::init_H8hashes() */
 /* LArOnlineID::init_H6hashes() */
 
-LArOnlineID_Base::LArOnlineID_Base(void) :
-  m_this_is_slar(false),
+LArOnlineID_Base::LArOnlineID_Base(const std::string& name,
+                                   const std::string& group,
+                                   bool is_slar) :
+  AtlasDetectorID(name, group),
+  m_this_is_slar(is_slar),
   m_laronlineRegion_index(999),
   m_lar_index(999), 
   m_laronline_index(999), 
@@ -65,8 +68,7 @@ LArOnlineID_Base::LArOnlineID_Base(void) :
 }
 
 
-LArOnlineID_Base::~LArOnlineID_Base(void) 
-= default;
+LArOnlineID_Base::~LArOnlineID_Base() = default;
 
 
 //==================================================================
@@ -243,7 +245,7 @@ std::string LArOnlineID_Base::channel_name( const HWIdentifier id )const{
 
 
 /* =================================================================== */
-IdContext LArOnlineID_Base::cryostatEndContext(void) const
+IdContext LArOnlineID_Base::cryostatEndContext() const
 /* =================================================================== */
 {
   ExpandedIdentifier id;
@@ -253,7 +255,7 @@ IdContext LArOnlineID_Base::cryostatEndContext(void) const
 
 
 /* =================================================================== */
-IdContext LArOnlineID_Base::feedthroughContext(void) const
+IdContext LArOnlineID_Base::feedthroughContext() const
 /* =================================================================== */
 {
   ExpandedIdentifier id;
@@ -264,7 +266,7 @@ IdContext LArOnlineID_Base::feedthroughContext(void) const
 
 
 /* =================================================================== */
-IdContext LArOnlineID_Base::channelContext(void) const
+IdContext LArOnlineID_Base::channelContext() const
 /* =================================================================== */
 {
   ExpandedIdentifier id;
@@ -274,7 +276,7 @@ IdContext LArOnlineID_Base::channelContext(void) const
 
 
 /* =================================================================== */
-IdContext LArOnlineID_Base::febContext(void) const
+IdContext LArOnlineID_Base::febContext() const
 /* =================================================================== */
 {
   ExpandedIdentifier id;
@@ -358,9 +360,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
     /* Initialize the field indices */
 //    if(initLevelsFromDict()) return (1);
-    std::string group_name("LArOnline");
-    if ( m_this_is_slar ) group_name+="_SuperCell";
-    if(initLevelsFromDict(group_name)) return (1);
+    if(initLevelsFromDict(group())) return (1);
 
 
     /* Find value for the field LAr Calorimeter */
@@ -368,7 +368,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
         std::stringstream strm;
-        strm << atlasDict->m_name;
+        strm << atlasDict->name();
         std::string strg= " Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -383,7 +383,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineField   = -4;
     if (m_dict->get_label_value("part", "LArOnline", larOnlineField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnline' of field 'part' in dictionary "+strm.str(); 
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -398,7 +398,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineCalibField   = -5;
     if (m_dict->get_label_value("part", "LArOnlineCalib", larOnlineCalibField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -421,9 +421,9 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     Range prefix2;
 
     /*Full range for all channels*/
-    m_full_laronline_range = m_dict->build_multirange( region_id , group_name, prefix); 
-    m_full_feb_range       = m_dict->build_multirange( region_id , group_name, prefix, "slot"); 
-    m_full_feedthrough_range = m_dict->build_multirange( region_id , group_name, prefix, "feedthrough");
+    m_full_laronline_range = m_dict->build_multirange( region_id , group(), prefix);
+    m_full_feb_range       = m_dict->build_multirange( region_id , group(), prefix, "slot");
+    m_full_feedthrough_range = m_dict->build_multirange( region_id , group(), prefix, "feedthrough");
 
     std::string strg0= " initialize_from_dictionary :";
     std::string strg1= " feedthrough range -> " + (std::string)m_full_feedthrough_range;
@@ -444,8 +444,8 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
     /* calib */ 
     /* Full range for calib channels */
-    m_full_calib_laronline_range = m_dict->build_multirange( region_id2 , group_name, prefix2); 
-    m_full_calib_module_range    = m_dict->build_multirange( region_id2 , group_name, prefix2, "slot"); 
+    m_full_calib_laronline_range = m_dict->build_multirange( region_id2 , group(), prefix2);
+    m_full_calib_module_range    = m_dict->build_multirange( region_id2 , group(), prefix2, "slot");
 
     if (!m_quiet) {
       std::string strg0= "=> initialize_from_dictionary : ";
@@ -874,7 +874,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   IdDictRegion* reg = m_dict->find_region("laronline-barrel");
   if (reg) 
     {
-      m_laronlineRegion_index = reg->m_index;
+      m_laronlineRegion_index = reg->index();
     }
   else 
     {
@@ -893,7 +893,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) 
     {
-      m_lar_index = field->m_index ;
+      m_lar_index = field->index();
     }
   else 
     {
@@ -913,7 +913,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("part") ;
   if (field) 
     {
-      m_laronline_index = field->m_index ;
+      m_laronline_index = field->index();
     }
   else 
     {
@@ -933,7 +933,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("barrel-ec") ;
   if (field) 
     {
-      m_bec_index = field->m_index ;
+      m_bec_index = field->index();
     }
   else 
     {
@@ -953,7 +953,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("pos_neg") ;
   if (field) 
     {
-      m_side_index = field->m_index ;
+      m_side_index = field->index();
     }
   else 
     {
@@ -978,7 +978,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   }
   field = m_dict->find_field(feedthrough_name) ;
   if (field) {
-    m_feedthrough_index = field->m_index ;
+    m_feedthrough_index = field->index();
   }
   else 
     {
@@ -1004,7 +1004,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field(slot_name) ;
   if (field) 
     {
-      m_slot_index = field->m_index ;
+      m_slot_index = field->index();
     }
   else 
     {
@@ -1030,7 +1030,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field(channel_name) ;
   if (field) 
     {
-      m_channel_in_slot_index = field->m_index ;
+      m_channel_in_slot_index = field->index();
     }
   else 
     {
@@ -1051,7 +1051,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   field = m_dict->find_field("is-slar") ;
   if (field)
     {
-      m_slar_index = field->m_index ;
+      m_slar_index = field->index();
     }
   else
     {
@@ -1075,20 +1075,20 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
         log << MSG::ERROR << "initLevelsFromDict - cannot find "
                 << group_name << endmsg;
   } else {
-        m_laronlineRegion_index = group->regions()[0]->m_index;
+        m_laronlineRegion_index = group->regions()[0]->index();
   }
 
-  const IdDictRegion& region = *m_dict->m_regions[m_laronlineRegion_index];
+  const IdDictRegion& region = m_dict->region(m_laronlineRegion_index);
 
-  m_lar_impl            = region.m_implementation[m_lar_index]; 
-  m_laronline_impl      = region.m_implementation[m_laronline_index]; 
-  m_bec_impl            = region.m_implementation[m_bec_index]; 
-  m_side_impl           = region.m_implementation[m_side_index]; 
-  m_feedthrough_impl    = region.m_implementation[m_feedthrough_index]; 
-  m_slot_impl           = region.m_implementation[m_slot_index]; 
-  m_channel_in_slot_impl= region.m_implementation[m_channel_in_slot_index]; 
+  m_lar_impl            = region.implementation(m_lar_index);
+  m_laronline_impl      = region.implementation(m_laronline_index);
+  m_bec_impl            = region.implementation(m_bec_index);
+  m_side_impl           = region.implementation(m_side_index);
+  m_feedthrough_impl    = region.implementation(m_feedthrough_index);
+  m_slot_impl           = region.implementation(m_slot_index);
+  m_channel_in_slot_impl= region.implementation(m_channel_in_slot_index);
   if ( m_this_is_slar ) 
-   m_slar_impl           = region.m_implementation[m_slar_index];
+   m_slar_impl           = region.implementation(m_slar_index);
 
   if (!m_quiet) {
     if(m_msgSvc) {
@@ -1123,7 +1123,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
 
 
 /*======================================*/
-int LArOnlineID_Base::init_hashes(void) 
+int LArOnlineID_Base::init_hashes()
 /*======================================*/
 {
   MsgStream log(m_msgSvc, "LArOnlineID_Base" );
@@ -1884,17 +1884,17 @@ bool LArOnlineID_Base::isEMECinHECchannel(const HWIdentifier id) const
 
 
 
-LArOnlineID_Base::size_type LArOnlineID_Base::feedthroughHashMax (void) const
+LArOnlineID_Base::size_type LArOnlineID_Base::feedthroughHashMax () const
      /*=======================================================================*/
 {
   return m_feedthroughHashMax;
 }
-LArOnlineID_Base::size_type LArOnlineID_Base::febHashMax (void) const
+LArOnlineID_Base::size_type LArOnlineID_Base::febHashMax () const
 /*=======================================================================*/
 {
   return m_febHashMax;
 }
-LArOnlineID_Base::size_type LArOnlineID_Base::channelHashMax (void) const
+LArOnlineID_Base::size_type LArOnlineID_Base::channelHashMax () const
 /*====================================================================*/
 {
   return m_channelHashMax;
@@ -1974,7 +1974,7 @@ int LArOnlineID_Base::is_slar(const HWIdentifier id)const
 
 
 /*========================================*/
-int LArOnlineID_Base::init_calib_hashes(void) 
+int LArOnlineID_Base::init_calib_hashes()
 /*========================================*/
 {
   MsgStream log(m_msgSvc, "LArOnlineID_Base" );

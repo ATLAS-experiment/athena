@@ -40,7 +40,7 @@ def createTauConfigFlags():
 
     # Run2 settings and calibration files
     tau_cfg.addFlag("Tau.tauRecToolsCVMFSPath", "tauRecTools/R22_preprod")
-    tau_cfg.addFlag("Tau.tauRNNTrackClassConfig", "RNNTrackClassifier_2021-07-19_14-25-14_90_25_30.json")
+    tau_cfg.addFlag("Tau.tauRNNTrackClassConfig", lambda prevFlags: "RNNTrackClassifier_2021-07-19_14-25-14_90_25_30.json" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "Run4/RNNTrackClassifier_v1.json")
     tau_cfg.addFlag("Tau.CalibrateLCConfig", "CaloTES_R22_Round2.5.root")
     tau_cfg.addFlag("Tau.CombinedTESConfig", "CombinedTES_R22_Round2.5.root")
     tau_cfg.addFlag("Tau.MvaTESConfig0p", "MvaTES_0p_R23.root")
@@ -48,6 +48,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.MinPt0p", 9.25*Units.GeV)
     tau_cfg.addFlag("Tau.MinPt", 6.75*Units.GeV)
     tau_cfg.addFlag("Tau.MinPtDAOD", 13*Units.GeV)
+    tau_cfg.addFlag("Tau.MaxTracksDAOD", 5)
     tau_cfg.addFlag("Tau.TauJetRNNConfig", ["tauid_rnn_1p_R22_v1.json", "tauid_rnn_2p_R22_v1.json", "tauid_rnn_3p_R22_v1.json"])
     tau_cfg.addFlag("Tau.TauJetRNNWPConfig", ["tauid_rnnWP_1p_R22_v0.root", "tauid_rnnWP_2p_R22_v0.root", "tauid_rnnWP_3p_R22_v0.root"])
     tau_cfg.addFlag("Tau.TauEleRNNConfig", ["taueveto_rnn_config_1P_r22.json", "taueveto_rnn_config_3P_r22.json"])
@@ -89,6 +90,8 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.doTauEleRMRec", True)
     # helper for derivations, TauJets_EleRM not available for AODs produced before 24.0.17
     tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
+    # helper for derivations, used in PHYSVAL monitoring
+    tau_cfg.addFlag("Tau.TauMuonRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_MuonRM" in prevFlags.Input.TypedCollections)
     # had-had boosted ditaus
     tau_cfg.addFlag("Tau.doDiTauRec", True)
 

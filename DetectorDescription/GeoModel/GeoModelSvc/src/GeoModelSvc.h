@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_GEOMODELSVC_H
@@ -79,10 +79,10 @@ private:
     
     Gaudi::Property<bool> m_sqliteDb{this,"SQLiteDB",false,"Activate GeoModel initialization from SQLite"};
     Gaudi::Property<std::string> m_sqliteDbFullPath{this,"SQLiteDBFullPath","","Explicit setting of full path to SQLiteDB. For testing purposes only"};
-
+    Gaudi::Property<unsigned> m_nTheads{this, "nThreads", 0, "Number of available threads for the geometry reading"};
 
     std::unique_ptr<GeoModelIO::ReadGeoModel> m_sqliteReader{};
-    std::unique_ptr<GMDBManager>              m_sqliteDbManager{};
+    std::shared_ptr<GMDBManager>              m_sqliteDbManager{};
 
     virtual const std::string & atlasVersion()                     const override {return m_atlasVersion;}
     virtual const std::string & inDetVersionOverride()             const override {return m_inDetVersionOverride;}

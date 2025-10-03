@@ -2050,7 +2050,7 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
 
   while (offset < size && nfrag < MAX_ROD_FRAG) {
     //std::cout << "nfrag="<<(nfrag) << " offset="<<offset<<" data[offset]="<<data[offset]<<std::endl;
-    frag[nfrag] = (const T_RodDataFrag *) (data + offset);
+    frag[nfrag] = reinterpret_cast<const T_RodDataFrag *> (data + offset);
 
     if (frag[nfrag]->size < m_sizeOverhead
         || frag[nfrag]->size > size - offset + m_sizeOverhead - 2) {
@@ -2238,7 +2238,7 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
 
 
 
-          const uint16_t* sample = (const uint16_t *) (++data);
+          const uint16_t* sample = reinterpret_cast<const uint16_t *> (++data);
 
           size_t start_channel(miniDrawer * Tile::MAX_MINIDRAWER_CHAN);
           size_t end_channel(start_channel + Tile::MAX_MINIDRAWER_CHAN);
@@ -2272,21 +2272,21 @@ void TileTBDump::unpack_frag6(const uint32_t* data, unsigned int size,
     }
   }
 
-  digitsMetaData.push_back(bcid);
-  digitsMetaData.push_back(l1id);
-  digitsMetaData.push_back(moduleID);
-  digitsMetaData.push_back(runType);
-  digitsMetaData.push_back(runNumber);
-  digitsMetaData.push_back(pedestalHi);
-  digitsMetaData.push_back(pedestalLo);
-  digitsMetaData.push_back(chargeInjected);
-  digitsMetaData.push_back(timeInjected);
-  digitsMetaData.push_back(capacitor);
-  digitsMetaData.push_back(ecr);
+  digitsMetaData.push_back(std::move(bcid));
+  digitsMetaData.push_back(std::move(l1id));
+  digitsMetaData.push_back(std::move(moduleID));
+  digitsMetaData.push_back(std::move(runType));
+  digitsMetaData.push_back(std::move(runNumber));
+  digitsMetaData.push_back(std::move(pedestalHi));
+  digitsMetaData.push_back(std::move(pedestalLo));
+  digitsMetaData.push_back(std::move(chargeInjected));
+  digitsMetaData.push_back(std::move(timeInjected));
+  digitsMetaData.push_back(std::move(capacitor));
+  digitsMetaData.push_back(std::move(ecr));
   if (version) {
-    digitsMetaData.push_back(bcr);
-    digitsMetaData.push_back(packetVersion);
-    digitsMetaData.push_back(fragmentID);
+    digitsMetaData.push_back(std::move(bcr));
+    digitsMetaData.push_back(std::move(packetVersion));
+    digitsMetaData.push_back(std::move(fragmentID));
   }
 }
 

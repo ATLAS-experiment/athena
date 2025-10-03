@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 from functools import cache
 
 class TrigXMLElement:

@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "eFexEMRoIThresholdsTool.h"
+#include "utilities.h"
+using namespace HLTSeedingNs;
 
-uint64_t eFexEMRoIThresholdsTool::getPattern(const xAOD::eFexEMRoI& roi,
+uint64_t eFexEMRoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
+                                             const xAOD::eFexEMRoI& roi,
                                              const RoIThresholdsTool::ThrVec& menuThresholds,
                                              const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
   // Get RoI properties (once, rather than for every threshold in the menu)
@@ -20,7 +23,7 @@ uint64_t eFexEMRoIThresholdsTool::getPattern(const xAOD::eFexEMRoI& roi,
     // Test ET threshold and jet discriminant codes, set bit in threshold word if conditions met
     if (et > thr->thrValueCounts(ieta) && reta >= (unsigned int)thr->reta() &&
         rhad >= (unsigned int)thr->rhad() && wstot >= (unsigned int)thr->wstot()) {
-      thresholdMask |= (1<<thr->mapping());
+      thresholdMask |= (1_u64<<thr->mapping());
     }
   }
 

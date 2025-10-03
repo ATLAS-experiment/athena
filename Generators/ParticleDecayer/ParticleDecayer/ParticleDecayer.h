@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_PARTICLEDECAYER_H
@@ -97,7 +97,7 @@ class ParticleDecayer: public GenModule {
   //decay vertex of the second dark photon
   CLHEP::HepLorentzVector m_posLV2;  
   //counter
-  int m_eventCounter;  
+  int m_eventCounter{};  
 };
 
 #endif

@@ -14,6 +14,8 @@
 #include "TrigCompositeUtils/ChainNameParser.h"
 #include "TrigConfHLTData/HLTSequenceList.h"
 #include "SpecialCases.h"
+#include <limits>
+#include <cstdint>
 
 namespace TCU = TrigCompositeUtils;
 
@@ -1246,6 +1248,8 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkFeaNode(ConvProxySet_t &convProxies
   // from all FEAs of the associated TE pick those objects that are to be linked
   for (const auto &proxy : convProxies)
   {
+    auto [bestFeaIdx, bestObjIdx] = getHighestPtObject(*proxy, run2Nav);
+
     auto feaN = getFeaSize(*proxy);
     if (feaN > 1)
     { // expand for more H nodes and connect them
@@ -1273,8 +1277,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkFeaNode(ConvProxySet_t &convProxies
     }
 
     auto hNodeIter = proxy->hNode.begin();
-    for (auto &fea : proxy->features)
+    for (std::size_t feaIdx = 0; feaIdx < proxy->features.size(); ++feaIdx)
     {
+      auto &fea = proxy->features[feaIdx];
       auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, fea);
       // link to itself when lined collection has size 0
       if (fea.getIndex().objectsBegin() == fea.getIndex().objectsEnd())
@@ -1285,8 +1290,10 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkFeaNode(ConvProxySet_t &convProxies
       }
       for (auto n = fea.getIndex().objectsBegin(); n < fea.getIndex().objectsEnd(); ++n)
       {
-        // connecting feature
-        (*hNodeIter)->typelessSetObjectLink(TrigCompositeUtils::featureString(), sgKey, sgCLID, n, n + 1);
+        // connecting feature or subfeature
+        const std::string& linkName = (feaIdx == bestFeaIdx && n == bestObjIdx) ?
+                                       TrigCompositeUtils::featureString() : "subfeature";
+        (*hNodeIter)->typelessSetObjectLink(linkName, sgKey, sgCLID, n, n + 1);
         ++hNodeIter;
       }
     }
@@ -1416,6 +1423,13 @@ uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerE
     boost::hash_combine(hash, fea.getIndex().objectsBegin());
     boost::hash_combine(hash, fea.getIndex().objectsEnd());
   }
+  // Include the originating TE identifier and pointer to ensure that
+  // navigation elements stemming from different Trigger Elements do not
+  // collapse into a single proxy even if their features are otherwise
+  // identical. The TE ID alone is not sufficient, as multiple clones of the
+  // same TE share the ID, so we also add the pointer value to the hash.
+  boost::hash_combine(hash, te_ptr->getId());
+  boost::hash_combine(hash, reinterpret_cast<std::uintptr_t>(te_ptr));
   ATH_MSG_VERBOSE("Obtained FEA hash " << hash);
   return hash;
 }
@@ -1541,4 +1555,45 @@ std::tuple<uint32_t, CLID, std::string> Run2ToRun3TrigNavConverterV2::getSgKey(c
   }
 
   return {evtStore()->stringToKey(sgStringKey, saveCLID), saveCLID, hltLabel}; // sgKey, sgCLID, sgName
+}
+
+std::pair<std::size_t, std::size_t> Run2ToRun3TrigNavConverterV2::getHighestPtObject(
+    const ConvProxy& proxy, const HLT::TrigNavStructure& run2Nav) const
+{
+  std::size_t bestFea = std::numeric_limits<std::size_t>::max();
+  std::size_t bestObj = 0;
+  float bestPt = -1.0;
+
+  for (std::size_t i = 0; i < proxy.features.size(); ++i) {
+    const auto& fea = proxy.features[i];
+    auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, fea);
+    if (!feaToSave(fea, sgName)) {
+      continue;
+    }
+    if (sgKey == 0) continue;
+    const std::string* keyStr = evtStore()->keyToString(sgKey, sgCLID);
+    if (!keyStr) continue;
+    const xAOD::IParticleContainer* cont = nullptr;
+    if (evtStore()->retrieve(cont, *keyStr).isFailure()) continue;
+    for (auto n = fea.getIndex().objectsBegin(); n < fea.getIndex().objectsEnd(); ++n) {
+      if (n >= cont->size()) continue;
+      const xAOD::IParticle* p = (*cont)[n];
+      if (!p) continue;
+      if (p->pt() > bestPt) {
+        bestPt = p->pt();
+        bestFea = i;
+        bestObj = n;
+      }
+    }
+  }
+  if (bestFea == std::numeric_limits<std::size_t>::max()) {
+    for (std::size_t i = 0; i < proxy.features.size(); ++i) {
+      auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, proxy.features[i]);
+      if (!feaToSave(proxy.features[i], sgName)) continue;
+      bestFea = i;
+      bestObj = proxy.features[i].getIndex().objectsBegin();
+      break;
+    }
+  }
+  return {bestFea, bestObj};
 }

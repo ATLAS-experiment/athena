@@ -1,8 +1,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg, PhysicsListSvcCfg
+from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
-from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
+from G4AtlasTools.G4GeometryToolConfig import G4AtlasDetectorConstructionToolCfg
+from G4AtlasTools.G4AtlasToolsConfig import G4ThreadPoolSvcCfg, SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
 from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata, readSimulationParameters
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,7 +24,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
         kwargs.setdefault( "TruthPreselectionTool", result.popToolsAndMerge(TruthPreselectionToolCfg(flags)) )
 
-    kwargs.setdefault("DetGeoSvc", result.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)))
+    kwargs.setdefault("DetectorConstruction", result.addPublicTool(result.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(flags))))
 
     kwargs.setdefault("InputTruthCollection", "BeamTruthEvent") #tocheck -are these string inputs?
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
@@ -39,6 +40,9 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     from SimulationConfig.SimEnums import LArParameterization
     # Configure fast simulation
     if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        from G4AtlasTools.G4AtlasToolsConfig import PunchThroughG4ToolCfg
+        physics_initialization_tools = kwargs.setdefault("PhysicsInitializationTools", [])
+        physics_initialization_tools.append(result.addPublicTool(result.popToolsAndMerge(PunchThroughG4ToolCfg(flags))))
         # Set the path to the simplified calorimeter geometry for particle transport if provided
         if flags.Sim.SimplifiedGeoPath:
             kwargs.setdefault('SimplifiedGeoPath', flags.Sim.SimplifiedGeoPath)
@@ -70,6 +74,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     is_hive = flags.Concurrency.NumThreads > 0
     kwargs.setdefault("MultiThreading", is_hive)
     if is_hive:
+        result.merge(G4ThreadPoolSvcCfg(flags))
         kwargs.setdefault('Cardinality', flags.Concurrency.NumThreads)
 
     kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)))

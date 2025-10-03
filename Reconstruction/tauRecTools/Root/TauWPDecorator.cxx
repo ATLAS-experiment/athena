@@ -5,6 +5,7 @@
 #include "tauRecTools/TauWPDecorator.h"
 
 #include "AsgDataHandles/ReadDecorHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 #include <algorithm>
 #include <array>
@@ -130,6 +131,21 @@ double TauWPDecorator::transformScore(double score, double cutLow, double effLow
 //______________________________________________________________________________
 StatusCode TauWPDecorator::initialize() {
 
+  if (!m_tauContainerName.empty() && m_decorWPs.empty()) {
+    ATH_MSG_ERROR("TauContainerName is provided but DecorWPNames is empty");
+    return StatusCode::FAILURE;
+  }
+  for (size_t wpIndex=0; wpIndex < m_decorWPs.size(); ++wpIndex) {
+    m_charDecors.emplace_back(SG::AuxElement::Accessor<char>( m_decorWPs[wpIndex] ));
+    // temporarily need both accessor and decoration
+    if (!m_tauContainerName.empty()) {
+      m_decorHandleKeys.emplace_back(m_tauContainerName + "." + m_decorWPs[wpIndex]);
+      // add also decor handle for the trans score
+      m_decorHandleKeys.emplace_back(m_tauContainerName + "." + m_scoreNameTrans);  
+    }
+  }
+  ATH_CHECK( m_decorHandleKeys.initialize() );
+
   ATH_CHECK( m_aveIntPerXKey.initialize() );
 
   // 1p and 3p files must be provided
@@ -159,10 +175,6 @@ StatusCode TauWPDecorator::initialize() {
   m_hists3p = std::make_shared<std::vector<m_pair_t>>();
   ATH_CHECK(retrieveHistos(3));
   ATH_CHECK(storeLimits(3));  
-    
-  for (size_t wpIndex=0; wpIndex < m_decorWPs.size(); ++wpIndex) {
-    m_charDecors.emplace_back(SG::Accessor<char>( m_decorWPs[wpIndex] ));
-  }
 
   return StatusCode::SUCCESS;
 }

@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKSYSTEMATICS_H
@@ -15,12 +15,6 @@ namespace InDet {
     // resolution smearing systematics from material and dead sensors
     TRK_RES_D0_MEAS,
     TRK_RES_Z0_MEAS,
-    TRK_RES_D0_MEAS_UP,
-    TRK_RES_Z0_MEAS_UP,
-    TRK_RES_D0_MEAS_DOWN,
-    TRK_RES_Z0_MEAS_DOWN,
-    TRK_RES_D0_DEAD,
-    TRK_RES_Z0_DEAD,
     // weak mode alignment systematics
     TRK_BIAS_D0_WM,
     TRK_BIAS_Z0_WM,
@@ -57,12 +51,6 @@ namespace InDet {
 #define DEF_SYST( NAME ) {TRK_##NAME, CP::SystematicVariation("TRK_" #NAME )}
     DEF_SYST( RES_D0_MEAS ),
     DEF_SYST( RES_Z0_MEAS ),
-    {TRK_RES_D0_MEAS_UP,         CP::SystematicVariation("TRK_RES_D0_MEAS", 1)},
-    {TRK_RES_Z0_MEAS_UP,         CP::SystematicVariation("TRK_RES_Z0_MEAS", 1)},
-    {TRK_RES_D0_MEAS_DOWN,       CP::SystematicVariation("TRK_RES_D0_MEAS", -1)},
-    {TRK_RES_Z0_MEAS_DOWN,       CP::SystematicVariation("TRK_RES_Z0_MEAS", -1)},
-    DEF_SYST( RES_D0_DEAD ),
-    DEF_SYST( RES_Z0_DEAD ),
     DEF_SYST( BIAS_D0_WM ),
     DEF_SYST( BIAS_Z0_WM ),
     DEF_SYST( BIAS_QOVERP_SAGITTA_WM ),

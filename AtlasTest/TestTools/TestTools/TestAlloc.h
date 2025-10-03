@@ -49,12 +49,12 @@ public:
     Head* h = (Head*)p;
     h->i[0] = n;
     h->i[1] = MAGIC;
-    return (pointer)(h+1);
+    return reinterpret_cast<pointer>(h+1);
   }
 
   void deallocate (pointer p, size_type n)
   {
-    Head* h = (Head*)p;
+    Head* h = reinterpret_cast<Head*>(p);
     --h;
     if (h->i[0] != n ||
         h->i[1] != MAGIC) {

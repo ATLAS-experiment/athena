@@ -14,7 +14,7 @@ set( COMMON_LIBRARIES
     ${Boost_LIBRARIES} AsgTools CxxUtils xAODBase xAODTrigger 
     TrigConfHLTData TrigConfL1Data TrigNavStructure TrigRoiConversionLib 
     TrigConfInterfaces TrigDecisionInterface TrigCompositeUtilsLib
-    TrigConfHLTUtilsLib AsgDataHandlesLib)
+    TrigConfHLTUtilsLib AsgDataHandlesLib TrigAnalysisHelpersLib)
 set (COMMON_PRIVATE_LIBRARIES
     ${ROOT_LIBRARIES} TrigSteeringEvent TrigConfData)
 
@@ -47,11 +47,11 @@ else()
          PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES_NOPYTHON} AthenaBaseComps
          TrigSteeringEvent AthenaKernel TrigConfData)
    endif()
-
-   atlas_add_component( TrigDecisionTool
-      src/components/*.cxx
-      LINK_LIBRARIES TrigDecisionToolLib )
 endif()
+
+atlas_add_component( TrigDecisionTool
+   src/components/*.cxx
+   LINK_LIBRARIES TrigDecisionToolLib )
 
 atlas_add_dictionary( TrigDecisionToolDict
    TrigDecisionTool/TrigDecisionToolDict.h

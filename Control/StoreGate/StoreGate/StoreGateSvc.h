@@ -12,9 +12,8 @@
 //include below in your header file!
 #include "AthenaKernel/CLASS_DEF.h"
 
-//HIVE wrapper implementation
-//base classes
 #include "GaudiKernel/Service.h"
+#include "GaudiKernel/SmartIF.h"
 #include "AthenaKernel/IProxyDict.h"
 
 #include "AthenaKernel/IHiveStore.h"
@@ -23,7 +22,6 @@
 #include "StoreGate/SGHiveEventSlot.h"
 
 #include <GaudiKernel/ClassID.h>        // for CLID
-#include <GaudiKernel/IInterface.h>     // for InterfaceID
 #include <GaudiKernel/IMessageSvc.h>    // for Level
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -113,19 +111,15 @@ namespace SG {
  *  to the hive store rather than to the default one.
  *
  *  @author ATLAS Collaboration
- *  $Id: SGStoreGateSvc.h 549999 2013-06-06 00:26:39Z calaf $
  **/
-class StoreGateSvc :
-  public Service, 
-  public IProxyDict, 
-  virtual public IHiveStore,
-  public IHiveStoreMgr,
-  public IIncidentListener
+class StoreGateSvc : public extends<Service,
+                                    IProxyDict,
+                                    IHiveStore,
+                                    IHiveStoreMgr,
+                                    IIncidentListener>
 {
 
 public:
-#ifndef BOOST_NO_CXX11_TEMPLATE_ALIASES
-#ifndef BOOST_NO_CXX11_VARIADIC_TEMPLATES
   /////////////////////////////////////////////////////////////////////////
   /// \name Basic Client Interface: data object creation
   //@{
@@ -151,8 +145,6 @@ public:
   template <typename T, typename TKEY, typename... ARGS>
   SG::WPtr<T> create(const TKEY& key, ARGS... constructorArgs);
   //@}
-#endif   /* needs C++11 variadic templates to call arbitrary constructors */
-#endif   /* needs "templated typedef" to define SG::WPtr (for now) */
 
   /////////////////////////////////////////////////////////////////////////
   /// \name Basic Client Interface: data object registration
@@ -767,11 +759,7 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode stop() override;
   virtual StatusCode finalize() override;
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
   //@}
-  /// Should rather be in IStoreGateSvc.h if we had one
-  static const InterfaceID& interfaceID();
-
 
   //////////////////////////////////////////////////////////////////
   /// \name Gaudi IIncidentListener implementation
@@ -804,11 +792,20 @@ public:
 
 
 private:
+  /// Properties
+  //@{
+  ServiceHandle<IProxyProviderSvc> m_pPPSHandle{this, "ProxyProviderSvc", "ProxyProviderSvc"};
+  ServiceHandle<IIncidentSvc> m_incSvc{this, "IncidentSvc", "IncidentSvc"};
+  ServiceHandle<IAlgContextSvc> m_algContextSvc{this, "AlgContextSvc", "AlgContextSvc"};
+  Gaudi::Property<bool> m_DumpStore{this, "Dump", false, "Dump contents at EndEvent"};
+  Gaudi::Property<bool> m_ActivateHistory{this, "ActivateHistory", false, "record DataObjects history"};
+  Gaudi::Property<bool> m_DumpArena{this, "DumpArena", false, "Dump Arena usage stats"};
+  //@}
 
-  SGImplSvc* m_defaultStore;
-  ServiceHandle<IProxyProviderSvc> m_pPPSHandle; ///< property
-  ServiceHandle<IIncidentSvc> m_incSvc; ///< property
+  /// Cache store type in the facade class.
+  StoreID::type m_storeID;
 
+  SmartIF<SGImplSvc> m_defaultStore;
 
   friend class SG::TestHiveStoreSvc;
   static SG::HiveEventSlot* currentSlot();
@@ -914,16 +911,6 @@ private:
   void addAutoSymLinks (const std::string& key, CLID clid, SG::DataProxy* dp,
                         const std::type_info* tinfo,
                         bool warn_nobib = true);
-
-  bool m_DumpStore; ///<  property Dump: triggers dump() at EndEvent
-  bool m_ActivateHistory; ///< property: activate the history service
-  bool m_DumpArena; ///< DumpArena Property flag : trigger m_arena->report() at clearStore
-
-  /// Cache store type in the facade class.
-  StoreID::type m_storeID;
-
-  /// Algorithm context, for tracking bad calls.
-  ServiceHandle<IAlgContextSvc> m_algContextSvc;
 
   struct BadListItem
     : public DataObjID

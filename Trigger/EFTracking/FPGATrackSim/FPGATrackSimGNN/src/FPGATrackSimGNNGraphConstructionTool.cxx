@@ -14,11 +14,16 @@ FPGATrackSimGNNGraphConstructionTool::FPGATrackSimGNNGraphConstructionTool(const
 
 StatusCode FPGATrackSimGNNGraphConstructionTool::initialize()
 {
+    ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if(m_graphTool == "ModuleMap") {
-        if(m_moduleMapPath == "") { // Require a path provided for the Module Map
-                ATH_MSG_FATAL("ERROR! No Module Map provided. Please provide a valid path to a ROOT file."); 
-                return StatusCode::FAILURE;
+        if (m_FPGATrackSimMapping->getGNNModuleMapString() != "") {
+            m_moduleMapPath = m_FPGATrackSimMapping->getGNNModuleMapString();
         }
+        else {
+            ATH_MSG_ERROR("Path to 1st stage NN-based fake track removal ONNX file is empty! If you want to run this pipeline, you need to provide an input file.");
+            return StatusCode::FAILURE;
+        }
+
         if(m_moduleMapType == "doublet") {
             loadDoubletModuleMap(); // Load the doublet module map and store entry branches in vectors
         }
@@ -49,7 +54,7 @@ StatusCode FPGATrackSimGNNGraphConstructionTool::getEdges(const std::vector<std:
 
 void FPGATrackSimGNNGraphConstructionTool::loadDoubletModuleMap()
 {
-    std::unique_ptr<TFile> file(TFile::Open(m_moduleMapPath.value().c_str()));
+    std::unique_ptr<TFile> file(TFile::Open(m_moduleMapPath.c_str()));
     std::unique_ptr<TTree> tree(static_cast<TTree*>(file->Get("TreeModuleDoublet")));
 
     unsigned int mid1_value = 0;
@@ -160,7 +165,6 @@ void FPGATrackSimGNNGraphConstructionTool::applyDoubletCuts(const std::shared_pt
     std::shared_ptr<FPGATrackSimGNNEdge> edge = std::make_shared<FPGATrackSimGNNEdge>();
     edge->setEdgeIndex1(hit1_index);
     edge->setEdgeIndex2(hit2_index);
-    computeEdgeFeatures(edge, hit1, hit2);
     edges.emplace_back(edge);
 }
 
@@ -278,7 +282,6 @@ void FPGATrackSimGNNGraphConstructionTool::doClustering(const std::vector<std::s
                 
                 edge->setEdgeIndex1(index1);
                 edge->setEdgeIndex2(index2);
-                computeEdgeFeatures(edge, hits[index1], hits[index2]);
                 edges.emplace_back(edge);
                 ++count;
             }
@@ -289,20 +292,4 @@ void FPGATrackSimGNNGraphConstructionTool::doClustering(const std::vector<std::s
         }
 
     }
-}
-
-void FPGATrackSimGNNGraphConstructionTool::computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const std::shared_ptr<FPGATrackSimGNNHit> & hit1, const std::shared_ptr<FPGATrackSimGNNHit> & hit2)
-{
-    float deta = hit1->getEta() - hit2->getEta();
-    float dz = hit2->getZ() - hit1->getZ();
-    float dr = hit2->getR() - hit1->getR();
-    float dphi = P4Helpers::deltaPhi(hit2->getPhi(),hit1->getPhi());
-    float phislope = dr==0. ? 0. : dphi / dr;
-    
-    edge->setEdgeDR(dr);
-    edge->setEdgeDPhi(dphi);
-    edge->setEdgeDZ(dz);
-    edge->setEdgeDEta(deta);
-    edge->setEdgePhiSlope(phislope);
-    edge->setEdgeRPhiSlope(0.5 * (hit2->getR() + hit1->getR()) * phislope);
 }

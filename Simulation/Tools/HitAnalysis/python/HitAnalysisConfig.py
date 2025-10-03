@@ -1,17 +1,12 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def HitAnalysisOutputCfg(flags, output_name='SiHitAnalysis'):
-    acc = ComponentAccumulator()
-
-    histsvc = CompFactory.THistSvc(name="THistSvc",
-                                   Output=[ f"{output_name} DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'" ])
-    acc.addService(histsvc)
-
-    return acc
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    return setupHistSvcCfg(flags, outFile=flags.Output.HISTFileName, outStream=output_name)
 
 
 def BLMHitAnalysisCfg(flags, name='BLMHitAnalysis', **kwargs):
@@ -21,7 +16,6 @@ def BLMHitAnalysisCfg(flags, name='BLMHitAnalysis', **kwargs):
     kwargs.setdefault('CollectionName', 'BLM_Hits')
     kwargs.setdefault('HistPath', '/SiHitAnalysis/')
     acc.addEventAlgo(CompFactory.SiHitAnalysis(name, **kwargs))
-
     acc.merge(HitAnalysisOutputCfg(flags))
 
     return acc
@@ -179,6 +173,7 @@ def CaloHitAnalysisCfg(flags, name='CaloHitAnalysis', **kwargs):
     if flags.Detector.GeometryLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg
         acc.merge(LArGMCfg(flags))
+        acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
     kwargs.setdefault("UseLAr", flags.Detector.GeometryLAr)
 
     if flags.Detector.GeometryTile:
@@ -186,7 +181,9 @@ def CaloHitAnalysisCfg(flags, name='CaloHitAnalysis', **kwargs):
         acc.merge(TileGMCfg(flags))
     kwargs.setdefault("UseTile", flags.Detector.GeometryTile)
 
-    kwargs.setdefault('HistPath', f'/{name}/')
+    kwargs.setdefault('HistPath', f'/{name}/histos/Calo/')
+    kwargs.setdefault('NtupleFileName', f'/{name}/ntuples/')
+
     acc.addEventAlgo(CompFactory.CaloHitAnalysis(name, **kwargs))
     acc.merge(HitAnalysisOutputCfg(flags, output_name=name))
     return acc
@@ -247,6 +244,19 @@ def MMHitAnalysisCfg(flags, name='MMHitAnalysis', **kwargs):
 
     return acc
 
+def xMuonHitAnalysisCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Muon.usePhaseIIGeoSetup:
+        return result
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
+    result.addEventAlgo(CompFactory.MuonValR4.xMuonHitAnalysis(**kwargs))
+    histPath = kwargs["HistPath"]
+    result.merge(HitAnalysisOutputCfg(flags, output_name=histPath[ : histPath.find("/")]))
+    return result
+
 
 def sTGCHitAnalysisCfg(flags, name='sTGCHitAnalysis', **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
@@ -303,8 +313,8 @@ def ZDCHitAnalysisCfg(flags, name='ZDCHitAnalysis', **kwargs):
 #Truth
 def TrackRecordAnalysisCfg(flags, name='TrackRecordAnalysis', **kwargs):
     acc = ComponentAccumulator()
-
-    kwargs.setdefault('HistPath', f'/{name}/')
+    kwargs.setdefault('HistPath', f'/{name}/histos/TrackRecord/')
+    kwargs.setdefault('NtupleFileName', f'/{name}/ntuples/')  
     acc.addEventAlgo(CompFactory.TrackRecordAnalysis(name, **kwargs))
     acc.merge(HitAnalysisOutputCfg(flags, output_name="TrackRecordAnalysis"))
 
@@ -314,7 +324,8 @@ def TrackRecordAnalysisCfg(flags, name='TrackRecordAnalysis', **kwargs):
 def TruthHitAnalysisCfg(flags, name='TruthHitAnalysis', **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault('HistPath', f'/{name}/')
+    kwargs.setdefault('HistPath', f'/{name}/histos/TruthHits/')
+    kwargs.setdefault('NtupleFileName', f'/{name}/ntuples/')    
     acc.addEventAlgo(CompFactory.TruthHitAnalysis(name, **kwargs))
     acc.merge(HitAnalysisOutputCfg(flags, output_name="TruthHitAnalysis"))
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArAccumulatedCalibDigitContByteStreamCnv.h"
@@ -99,6 +99,11 @@ LArAccumulatedCalibDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr,
   // Convert the RawEvent to  LArAccumulatedCalibDigitContainer
   ATH_MSG_DEBUG(  "Converting LArAccumulatedCalibDigits (from ByteStream). key=" << key << " ,gain=" << gain );
   LArAccumulatedCalibDigitContainer *DigitContainer=new LArAccumulatedCalibDigitContainer;
+  if (not *calibLineMapping){
+    delete DigitContainer;
+    ATH_MSG_ERROR("LArAccumulatedCalibDigitContByteStreamCnv::createObjConst: nullptr.");
+    return StatusCode::FAILURE;
+  }
   StatusCode sc=m_tool->convert(re,DigitContainer,gain,
                                 **calibLineMapping);
   if (sc!=StatusCode::SUCCESS) {

@@ -20,6 +20,7 @@
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
+#include <xAODTrigger/TrigDecision.h>
 //---------------------------------------------------
 #include "ZdcUtils/ZdcEventInfo.h"
 #include "ZdcConditions/ZdcInjPulserAmpMap.h"
@@ -48,9 +49,10 @@ public:
     StatusCode fillPhysicsDataHistograms( const EventContext& ctx ) const;
 
 private:
+    bool check_equal_within_rounding(float a, float b, float epsilon = 1e-6f) const;
     void calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
     float calculate_inverse_bin_width(float event_value, const std::string& variable_name, const std::vector<float>& bin_edges) const;
-    
+
     Gaudi::Property<unsigned int> m_runNumber {this, "RunNumber", 0, "Run number for current job"};
     ZdcInjPulserAmpMap::Token m_injMapRunToken{};
     
@@ -80,13 +82,15 @@ private:
     Gaudi::Property<std::string> m_UCCtriggerHELT25{this, "triggerUCCHELT25", "L1_ZDC_HELT25_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 25 TeV"};
     Gaudi::Property<std::string> m_UCCtriggerHELT35{this, "triggerUCCHELT35", "L1_ZDC_HELT35_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 35 TeV"};
     Gaudi::Property<std::string> m_UCCtriggerHELT50{this, "triggerUCCHELT50", "L1_ZDC_HELT50_jTE4000", "UCC trigger requiring ZDC hadronic energy be less than 50 TeV"};
-    
-    float m_timingCutsInjectorPulse [2][4][2] = {{{30, 38}, {30, 38}, {28, 38}, {30, 38}}, {{30, 38}, {30, 38}, {30, 38}, {30, 38}}}; // Timing cuts (array of dimension 2 * 4 * 2) for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream
+
     Gaudi::Property<unsigned int> m_nSecondsRejectStartofLBInjectorPulse {this, "NSecondsRejectStartofLBInjectorPulse", 3, "The number of seconds to reject at beginning of each LB in reco-amp-vs-input-voltage histograms in the injector pulse stream"};
     Gaudi::Property<float> m_minAmpRequiredHGInjectorPulse {this, "MinAmpRequiredHGInjectorPulse", 20, "HG Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
     Gaudi::Property<float> m_minAmpRequiredLGInjectorPulse {this, "MinAmpRequiredLGInjectorPulse", 20, "LG Minimum amplitude required for event to enter reco-amp-vs-input-voltage histograms in the injector pulse stream"};
     Gaudi::Property<float> m_minVInjToImposeAmpRequirementHGInjectorPulse {this, "MinVInjToImposeAmpRequirementHGInjectorPulse", 0.002, "Minimum input voltage to impose HG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel HG minimum-amplitude requirement"};
     Gaudi::Property<float> m_minVInjToImposeAmpRequirementLGInjectorPulse {this, "MinVInjToImposeAmpRequirementLGInjectorPulse", 0.002, "Minimum input voltage to impose LG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel LG minimum-amplitude requirement"};
+
+    Gaudi::Property<std::vector<std::string>> m_OOpOtriggerChains {this, "OOpOTriggers", {}, "List of trigger chains to monitor"};
+    Gaudi::Property<std::map<int,std::string>> m_OOpOL1TriggerFromCTPIDMap {this, "OOpOL1TriggerFromCTPIDMap", {}, "Map of CTP ID to trigger name for ZdcCalib PEB stream pO/OO monitoring"};
 
     Gaudi::Property<std::string > m_lbTimeCoolFolderName{ this, "LumiBlockTimeCoolFolderName", "/TRIGGER/LUMI/LBLB", "COOL folder in COOLONL_TRIGGER holding info about start and stop times for luminosity blocks" };
 
@@ -104,6 +108,7 @@ private:
     std::map<std::string,int> m_ZDCSideToolIndices;
     std::map<std::string,std::map<std::string,int>> m_ZDCModuleToolIndices;
     std::map<std::string,std::map<std::string,int>> m_RPDChannelToolIndices;
+    std::map<std::string,std::map<std::string,std::map<std::string,int>>> m_LucrodResponseSingleVoltageToolIndices;
 
     std::vector<float> m_ZdcModuleChisqBinEdges;
     std::vector<float> m_ZdcModuleChisqOverAmpBinEdges;
@@ -120,7 +125,11 @@ private:
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
     Gaudi::Property<bool> m_EnableZDCSingleSideTriggers {this,"EnableZDCSingleSideTriggers",true};
     Gaudi::Property<bool> m_EnableUCCTriggers {this,"EnableUCCTriggers",false};
+    Gaudi::Property<bool> m_EnableOOpOTriggers {this,"EnableOOpOTriggers",false};
+    Gaudi::Property<bool> m_IsPEBStream {this,"IsPEBStream",true};
     Gaudi::Property<bool> m_isPPMode {this,"IsPPMode",true};
+    Gaudi::Property<bool> m_ispOMode {this,"IspOMode",true};
+    Gaudi::Property<bool> m_isOOMode {this,"IsOOMode",true};
     Gaudi::Property<bool> m_isInjectedPulse {this,"IsInjectedPulse",false};
     Gaudi::Property<bool> m_isStandalone {this,"IsStandalone",false}; // determine if standalone via metadata
     Gaudi::Property<bool> m_enableZDC {this,"EnableZDC",true};
@@ -129,6 +138,8 @@ private:
     Gaudi::Property<bool> m_enableRPDAmp {this,"EnableRPDAmp",true};
     Gaudi::Property<bool> m_enableCentroid {this,"EnableCentroid",true};
     
+    Gaudi::Property<std::vector<float>> m_injPulseVoltageSteps {this, "InjPulseVoltageSteps", {0.}};
+    Gaudi::Property<std::vector<std::string>> m_injPulseVoltageStepsStr {this, "InjPulseVoltageStepsStr", {""}};
 
     // owner, name (allows us to modify the key in python configuration), key
     SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumContainerKey {this, "ZdcSumContainerKey", "ZdcSums"};

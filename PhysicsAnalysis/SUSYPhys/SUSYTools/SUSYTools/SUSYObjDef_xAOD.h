@@ -528,6 +528,7 @@ namespace ST {
     std::string m_jetUncertaintiesAnalysisFile;
     std::string m_jetUncertaintiesCalibArea;
     std::string m_jetUncertaintiesMCType;
+    std::string m_fatJetUncertaintiesMCType;
     bool m_jetUncertaintiesPDsmearing;
 
     bool m_useBtagging;
@@ -728,7 +729,9 @@ namespace ST {
     std::string m_tauConfigPathBaseline;
     bool   m_tauDoTTM;
     std::string m_tauSmearingToolRecommendationTag;
+    std::string m_tauEffToolRecommendationTag;
     std::string m_tauSmearingToolGenerator;
+    bool m_ApplyMVATESQualityCheck;
     TEnv m_tauConfigReader;
 
     double m_jetPt;

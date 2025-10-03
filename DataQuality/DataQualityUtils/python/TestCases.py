@@ -2,7 +2,6 @@
 
 # None of this works, but keep it around in case someone wants to resurrect it later...
 # - PO 20180419
-from __future__ import print_function
 
 import unittest
 import os, shutil

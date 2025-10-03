@@ -35,9 +35,10 @@ namespace EL
 
       // user provided an executable to be used 
       // loop over all outputs
-      for (auto & output : data.m_outputs){
-        std::string outputLabel = output.first; 
-        std::string outputFileName = output.second.finalFileName();
+      for (auto & [outputLabel, outputPtr] : data.m_outputs){
+        if (outputLabel != outputPtr->mainStreamName()) continue;
+
+        const std::string& outputFileName = outputPtr->finalFileName();
         
         if (!outputFileName.size()){
           ANA_MSG_WARNING ("PostClosedOutputsModule: empty outputFileName skipping outputLabel = "+outputLabel);

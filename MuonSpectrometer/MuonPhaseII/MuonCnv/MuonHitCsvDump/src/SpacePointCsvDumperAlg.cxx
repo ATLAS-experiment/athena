@@ -48,15 +48,18 @@ StatusCode SpacePointCsvDumperAlg::execute(){
     file<<"locSensorDirX"<<delim;
     file<<"locSensorDirY"<<delim;
     file<<"locSensorDirZ"<<delim;
+    /// Vector normal to the direction of the strip direction (inside plane)
+    file<<"locSensorNormX"<<delim;
+    file<<"locSensorNormY"<<delim;
+    file<<"locSensorNormZ"<<delim;
     /// Normal vector on the sensor plane
     file<<"locPlaneNormX"<<delim;
     file<<"locPlaneNormY"<<delim;
     file<<"locPlaneNormZ"<<delim;
     /// Covariance entries of the uncalibrated space point
-    file<<"covXX"<<delim;
-    file<<"covXY"<<delim;
-    file<<"covYX"<<delim;
-    file<<"covYY"<<delim;
+    file<<"covX"<<delim;
+    file<<"covY"<<delim;
+    file<<"covT"<<delim;   
     /// Drift radius
     file<<"driftR"<<delim;
     /// Properties of the space point Identifier
@@ -64,6 +67,7 @@ StatusCode SpacePointCsvDumperAlg::execute(){
     file<<"primaryCh"<<delim;
     file<<"measuresEta"<<delim;
     file<<"measuresPhi"<<delim;
+    file<<"measuresTime"<<delim;
     file<<std::endl;
 
    auto dumpToFile = [&](const unsigned bucketId,
@@ -112,46 +116,55 @@ StatusCode SpacePointCsvDumperAlg::execute(){
 
         file<<secId<<delim;
         file<<bucketId<<delim;
-        file<<precCutOff(spacePoint.positionInChamber().x())<<delim;
-        file<<precCutOff(spacePoint.positionInChamber().y())<<delim;
-        file<<precCutOff(spacePoint.positionInChamber().z())<<delim;
+        file<<precCutOff(spacePoint.localPosition().x())<<delim;
+        file<<precCutOff(spacePoint.localPosition().y())<<delim;
+        file<<precCutOff(spacePoint.localPosition().z())<<delim;
         //
-        file<<precCutOff(spacePoint.directionInChamber().x())<<delim;
-        file<<precCutOff(spacePoint.directionInChamber().y())<<delim;
-        file<<precCutOff(spacePoint.directionInChamber().z())<<delim;
+        file<<precCutOff(spacePoint.sensorDirection().x())<<delim;
+        file<<precCutOff(spacePoint.sensorDirection().y())<<delim;
+        file<<precCutOff(spacePoint.sensorDirection().z())<<delim;
+        //
+        file<<precCutOff(spacePoint.toNextSensor().x())<<delim;
+        file<<precCutOff(spacePoint.toNextSensor().y())<<delim;
+        file<<precCutOff(spacePoint.toNextSensor().z())<<delim;
         //
         file<<precCutOff(spacePoint.planeNormal().x())<<delim;
         file<<precCutOff(spacePoint.planeNormal().y())<<delim;
         file<<precCutOff(spacePoint.planeNormal().z())<<delim;
         //
-        file<<precCutOff(spacePoint.covariance()(Amg::x, Amg::x))<<delim;
-        file<<precCutOff(spacePoint.covariance()(Amg::x, Amg::y))<<delim;
-        file<<precCutOff(spacePoint.covariance()(Amg::y, Amg::x))<<delim;
-        file<<precCutOff(spacePoint.covariance()(Amg::y, Amg::y))<<delim;
+        using CovIdx = SpacePoint::CovIdx;
+        file<<precCutOff(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)])<<delim;
+        file<<precCutOff(spacePoint.covariance()[Acts::toUnderlying(CovIdx::etaCov)])<<delim;
+        /// Dummy value for the moment
+        file<<1.<<delim;
         file<<precCutOff(spacePoint.driftRadius())<<delim;
         file<<gasGap<<delim;
         file<<primaryCh<<delim;
         file<<spacePoint.measuresEta()<<delim;
         file<<spacePoint.measuresPhi()<<delim;
+        /// Dummy value for the moment
+        file<<false<<delim;
         file<<std::endl;
    };
 
-   for (const SG::ReadHandleKey<SpacePointContainer>& key : m_readKeys) {
+    for (const SG::ReadHandleKey<SpacePointContainer>& key : m_readKeys) {
         const SpacePointContainer* spContainer{nullptr};
         ATH_CHECK(SG::get(spContainer, key, ctx));
 
-        const SpacePointPerLayerSorter layerSorter{m_idHelperSvc.get()};
+        const SpacePointPerLayerSorter layerSorter{};
         for(const SpacePointBucket* bucket : *spContainer) {
-         std::unordered_map<Identifier, unsigned> gasNumbers{};
-         for (const SpacePointBucket::value_type& spacePoint:  *bucket) {
-                unsigned int gasGap{gasNumbers.insert(
-                                    std::make_pair(layerSorter.detectorLayerId(spacePoint->identify()), 
-                                                   gasNumbers.size())).first->second};
+            std::vector<unsigned int> layNumbers{};
+            for (const SpacePointBucket::value_type& spacePoint:  *bucket) {
+                const unsigned int layNum = layerSorter.sectorLayerNum(*spacePoint);
+                if (std::find(layNumbers.begin(), layNumbers.end(), layNum) == layNumbers.end()) {
+                    layNumbers.push_back(layNum);
+                }
+                const unsigned gasGap = layNumbers.size()-1;
                 dumpToFile(bucket->bucketId(), *spacePoint, gasGap);
             }
         }
-   }
-   return StatusCode::SUCCESS;
+    }
+    return StatusCode::SUCCESS;
 }
 }
 

@@ -21,7 +21,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     ATH_CHECK(m_FPGAClusterKey.initialize(m_doClusters or m_doSP));
     ATH_CHECK(m_FPGASPKey.initialize(m_doSP));
     ATH_CHECK(m_FPGAHitKey.initialize(m_doHits));
-    ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk));
+    ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk && m_useRoads));
     ATH_CHECK(m_FPGAHitInRoadsKey.initialize(m_doActsTrk));
     ATH_CHECK(m_FPGATrackKey.initialize(m_doActsTrk && !m_useRoads));
     ATH_CHECK(m_xAODPixelClusterFromFPGAClusterKey.initialize(m_doClusters));
@@ -30,7 +30,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     ATH_CHECK(m_xAODStripClusterFromFPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_xAODStripSpacePointFromFPGAKey.initialize(m_doSP));  
     ATH_CHECK(m_xAODPixelSpacePointFromFPGAKey.initialize(m_doSP));      
-    ATH_CHECK(m_ActsProtoTrackFromFPGARoadKey.initialize(m_doActsTrk));
+    ATH_CHECK(m_ActsProtoTrackFromFPGARoadKey.initialize(m_doActsTrk && m_useRoads));
     ATH_CHECK(m_ActsProtoTrackFromFPGATrackKey.initialize(m_doActsTrk));
     ATH_CHECK(m_outputStripClusterContainerKey.initialize(m_doClusters));
     ATH_CHECK(m_outputPixelClusterContainerKey.initialize(m_doClusters));
@@ -117,8 +117,9 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
               return StatusCode::FAILURE;
             }
             const FPGATrackSimTrackCollection* FPGATrackColl = FPGATracksHandle.cptr();
+
             if constexpr (enableBenchmark) m_chrono->chronoStart("FPGAConversion: Prototrack formation (from tracks)");
-            ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
+	          ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
             if constexpr (enableBenchmark) m_chrono->chronoStop("FPGAConversion: Prototrack formation (from tracks)");
           }
         }
@@ -143,10 +144,12 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       ATH_CHECK( xAODStripClusterFromFPGAClusterHandle.record (std::move(SCTContFromClusters), std::move(SCTAuxContFromClusters)));
       if(m_doActsTrk)
       {
-        SG::WriteHandle<ActsTrk::ProtoTrackCollection> ActsProtoTrackFromFPGARoadHandle (m_ActsProtoTrackFromFPGARoadKey, ctx);
         SG::WriteHandle<ActsTrk::ProtoTrackCollection> ActsProtoTrackFromFPGATrackHandle (m_ActsProtoTrackFromFPGATrackKey, ctx);
-        ATH_CHECK( ActsProtoTrackFromFPGARoadHandle.record (std::move(ProtoTracksFromRoads)));
         ATH_CHECK( ActsProtoTrackFromFPGATrackHandle.record (std::move(ProtoTracksFromTracks)));
+        if(m_useRoads) {
+          SG::WriteHandle<ActsTrk::ProtoTrackCollection> ActsProtoTrackFromFPGARoadHandle (m_ActsProtoTrackFromFPGARoadKey, ctx);
+          ATH_CHECK( ActsProtoTrackFromFPGARoadHandle.record (std::move(ProtoTracksFromRoads)));
+      }
       }
       if (m_doSP) 
       {
@@ -158,7 +161,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     }  
 
     if (m_doHits) {
-
       SG::ReadHandle<FPGATrackSimHitCollection> FPGAHitsHandle (m_FPGAHitKey, ctx);
 
       if (FPGAHitsHandle.isValid()) {
@@ -180,6 +182,20 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       SG::WriteHandle<xAOD::StripClusterContainer> xAODStripClusterFromFPGAHitHandle (m_xAODStripClusterFromFPGAHitKey, ctx);
       ATH_CHECK( xAODPixelClusterFromFPGAHitHandle.record (std::move(PixelContFromHits),std::move(PixelAuxContFromHits)));
       ATH_CHECK( xAODStripClusterFromFPGAHitHandle.record (std::move(SCTContFromHits),std::move(SCTAuxContFromHits)));
+
+      // Also do the tracks
+      if (m_doActsTrk && !m_useRoads) {
+	SG::ReadHandle<FPGATrackSimTrackCollection> FPGATracksHandle(m_FPGATrackKey, ctx);
+	if (!FPGATracksHandle.isValid()) {
+	  ATH_MSG_FATAL("Failed to retrieve 1st stage FPGATrackSimTrackCollection");
+	  return StatusCode::FAILURE;
+	}
+	const FPGATrackSimTrackCollection* FPGATrackColl = FPGATracksHandle.cptr();
+	
+	if constexpr (enableBenchmark) m_chrono->chronoStart("FPGAConversion: Prototrack formation (from tracks)");
+	ATH_CHECK(m_ActsTrkConverter->findProtoTracks(ctx, *PixelContFromClusters, *SCTContFromClusters, *ProtoTracksFromTracks, *FPGATrackColl));
+	if constexpr (enableBenchmark) m_chrono->chronoStop("FPGAConversion: Prototrack formation (from tracks)");
+      }    
     }
     
     return StatusCode::SUCCESS;

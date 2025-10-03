@@ -16,9 +16,10 @@ class L1CaloMonitorCfgHelper(object):
     hanAlgConfigs = {}
     hanThresholdConfigs = {}
     xmlConfigs = {} # flat dictionary of histograms that are in the shifter folders, so are used for online monitoring
+    embargoed = [] # list of embargoed dqdm plots
 
-    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
-    HELPURL = "https://codimd.web.cern.ch/s/678H65Tk9"
+    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gXEJWOJMHT","gXEJWOJMST","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
+    HELPURL = "" #"https://codimd.web.cern.ch/s/678H65Tk9" No longer adding a help url
 
     @staticmethod
     def createXmls():
@@ -45,6 +46,7 @@ class L1CaloMonitorCfgHelper(object):
                 db.create_obj("DQAlgorithm",conf["name"])
                 dqAlgo = db.get_dal("DQAlgorithm",conf["name"])
                 dqAlgo.LibraryName = conf["libname"]
+                print("Created dqAlgo",conf["name"])
             # ensure all parameters appear in ParametersNames, and thresholds in ThresholdsNames
             for par,val in conf.items():
                 if par=="thresholds" and val in L1CaloMonitorCfgHelper.hanThresholdConfigs:
@@ -52,9 +54,11 @@ class L1CaloMonitorCfgHelper(object):
                         if thresh not in dqAlgo.ThresholdsNames:
                             updated=True
                             dqAlgo.ThresholdsNames += [thresh]
+                            print("Added",thresh,"to",conf["name"],"ThresholdNames")
                 elif par not in ["name","libname","thresholds"]+dqAlgo.ParametersNames:
                     updated=True
                     dqAlgo.ParametersNames += [par]
+                    print("Added",par,"to",conf["name"],"ParameterNames")
             if updated:
                 db.update_dal(dqAlgo)
 
@@ -123,10 +127,12 @@ class L1CaloMonitorCfgHelper(object):
                 #     algorithm No_UnderFlows
 
                 outputs = set()
-                def printConf(d,prefix=""):
+                algorithms = set()
+                def printConf(d,prefix="",currentOutput=""):
                     for key,value in d.items():
                         if type(value)==dict:
                             print(prefix,key,"{")
+                            newCurrentOutput=str(currentOutput)
                             if(key=="dir detail" or key=="dir Developer"):
                                 print(prefix+"  algorithm = GatherData") # define GatherData as default algo for all of these hists
                             if key.startswith("dir ") and any([x.startswith("hist ") for x in value.keys()]):
@@ -134,13 +140,16 @@ class L1CaloMonitorCfgHelper(object):
                                 for childKey,childVal in value.items():
                                     if childKey.startswith("hist ") and "output" in childVal:
                                         print(prefix+"  output = "+childVal["output"])
+                                        newCurrentOutput = str(childVal["output"])
                                         break
-                            printConf(value,prefix + "  ")
+                            printConf(value,prefix + "  ",newCurrentOutput)
                             print(prefix,"}")
                         else:
                             # save all output paths to add to output block (don't need to print here b.c. specified at dir level
+                            # exception is if plot was embargoed!
                             if key == "output": outputs.add(value)
-                            else: print(prefix,key,"=",value)
+                            if key != "output" or value != currentOutput: print(prefix,key,"=",value)
+                            if key == "algorithm": algorithms.add(value)
 
 
                 print("#inputs")
@@ -149,17 +158,22 @@ class L1CaloMonitorCfgHelper(object):
                 print("}")
                 print("#outputs")
                 print("output top_level {")
-                def printOutputs(d,prefix=""):
-                    for key,value in d.items():
-                        if(key.startswith("hist ")):
-                            pass # do nothing
-                        elif type(value)==dict:
-                            print(prefix,key.replace("dir ","output "),"{")
-                            if key=="dir Developer": print(prefix,"  algorithm = L1Calo_AlwaysUndefinedSummary")
-                            printOutputs(value,prefix + "  ")
-                            print(prefix,"}")
                 print("  output L1Calo {")
-                printOutputs(L1CaloMonitorCfgHelper.hanConfigs,"   ")
+
+                # go through outputs set, build a nested dictionary of paths
+                outputsDict = {}
+                for o in outputs:
+                    theDict = outputsDict
+                    for p in o.split("/"):
+                        if p not in theDict: theDict[p] = {}
+                        theDict = theDict[p]
+                def printOutputs(d,prefix=""):
+                     for key,value in d.items():
+                         print(prefix,"output",key,"{")
+                         if key=="detail" or key=="Developer": print(prefix,"  algorithm = L1Calo_AlwaysUndefinedSummary")
+                         printOutputs(value,prefix + "  ")
+                         print(prefix,"}")
+                printOutputs(outputsDict["L1Calo"],"   ")
                 print("  }")
                 print("}")
                 # include example of adding algorithms and thresholds
@@ -177,9 +191,12 @@ algorithm L1Calo_AlwaysUndefinedSummary {
     name = AlwaysUndefinedSummary
 }
 """)
+                thresholds = set()
                 for algName,algProps in L1CaloMonitorCfgHelper.hanAlgConfigs.items():
+                    if algName not in algorithms: continue # only print the algorithms that were used
                     print(f"algorithm {algName} {{")
                     for propName,propVal in algProps.items():
+                        if propName == "thresholds": thresholds.add(propVal)
                         print(f"  {propName} = {propVal}")
                     print("  }")
                 print("""
@@ -192,6 +209,7 @@ thresholds th_AnyBinIsError {
 }
 """)
                 for threshName,threshProps in L1CaloMonitorCfgHelper.hanThresholdConfigs.items():
+                    if threshName not in thresholds: continue # only print used thresholds
                     print(f"thresholds {threshName} {{")
                     for parName,parLims in threshProps.items():
                         print(f"  limits {parName} {{")
@@ -222,7 +240,7 @@ thresholds th_AnyBinIsError {
 
         :param name: name of algorithm
         :param hanConfig: dict of algo properties
-        :param thresholdConfig: dict of thresholds, keys in form of ParName.level
+        :param thresholdConfig: dict of thresholds, key = ParName, value = pair of thresholds [warning,error]
         :return:
         """
 
@@ -264,6 +282,7 @@ thresholds th_AnyBinIsError {
 
         if paths != []:
             for path in paths:
+                if self.dqEnv=='online' and any([x.startswith("Shifter/") for x in paths]) and not path.startswith("Shifter/"): continue # only fill Shifter folder copies online
                 # create a copy of the histogram in each of the extra locations
                 self.defineHistogram(*args,fillGroup=fillGroup,hanConfig=hanConfig,paths=[],path=path,**kwargs)
             return None
@@ -287,16 +306,18 @@ thresholds th_AnyBinIsError {
             return None
 
         # require a hanConfig not in Developer or a detail dir
-        if splitPath[0] != "Developer" and splitPath[-1] != "detail" and ("algorithm" not in hanConfig):
+        if splitPath[0] != "Developer" and splitPath[-1] != "detail" and ("algorithm" not in hanConfig) and (splitPath[0]+"/algorithm" not in hanConfig):
             # will default to using GatherData as long as there is a description
-            if "description" not in hanConfig:
+            if "description" not in hanConfig and splitPath[0]+"/description" not in hanConfig:
                 raise Exception("Must specify a hanConfig for a Shifter or Expert (non-detail) histogram")
             else:
                 hanConfig["algorithm"] = "GatherData" # must have an algo, otherwise wont be valid han config
         elif "algorithm" in hanConfig and hanConfig["algorithm"] not in self.hanAlgConfigs and hanConfig["algorithm"] not in ["All_Bins_Filled","Histogram_Effective_Empty","Histogram_Empty","Histogram_Not_Empty","No_OverFlows","No_UnderFlows"]:
             # if algorithm specified, must have been defined
             raise Exception(f'DQ Algorithm {hanConfig["algorithm"]} for histogram {args[0]} not defined. Please use defineDQAlgorithm method to define it')
-
+        elif splitPath[0]+"/algorithm" in hanConfig and hanConfig[splitPath[0]+"/algorithm"] not in self.hanAlgConfigs and hanConfig[splitPath[0]+"/algorithm"] not in ["All_Bins_Filled","Histogram_Effective_Empty","Histogram_Empty","Histogram_Not_Empty","No_OverFlows","No_UnderFlows"]:
+            # if algorithm specified, must have been defined
+            raise Exception(f'{splitPath[0]} DQ Algorithm {hanConfig[splitPath[0]+"/algorithm"]} for histogram {args[0]} not defined. Please use defineDQAlgorithm method to define it')
 
         if fillGroup is None: fillGroup = self.alg.name + "_fillGroup"
         if fillGroup not in self.fillGroups:
@@ -309,28 +330,54 @@ thresholds th_AnyBinIsError {
         histName = argsCopy[0].split(";")[-1]
 
         # add help link for all expert plots
-        if splitPath[0] == "Expert":
+        if splitPath[0] == "Expert" and self.HELPURL!="":
             linkUrl = self.HELPURL + "#" + "".join(splitPath[1:]+[histName])
             linkUrl = f"<a href=\"{linkUrl}\">Help</a>"
-            if "description" not in hanConfig: hanConfig["description"] = linkUrl
-            else: hanConfig["description"] += " - " + linkUrl
+            if "description" not in hanConfig and "Expert/descripton" not in hanConfig: hanConfig["description"] = linkUrl
+            elif "description" in hanConfig: hanConfig["description"] += " - " + linkUrl
+            else: hanConfig["Expert/description"] += " - " + linkUrl
 
         # only add to hanConfig if in Expert or Developer folder
         if splitPath[0] == "Expert" or splitPath[0] == "Developer":
+            splitPathWithHist = splitPath + [histName]
+            # check if hist is in the embargoed list
+            embargo = ("/".join(splitPathWithHist) in L1CaloMonitorCfgHelper.embargoed)
+            if embargo:
+                if "Expert/description" not in hanConfig: hanConfig["description"] = "<b>EMBARGOED PLOT</b> - " + (hanConfig.get("description",""))
+                else: hanConfig["Expert/description"] = "<b>EMBARGOED PLOT</b> - " + (hanConfig.get("Expert/description",""))
             if "description" in hanConfig and hanConfig["description"]=="":
                 del hanConfig["description"]
-            splitPathWithHist = splitPath + [histName]
+            if splitPath[0]+"/description" in hanConfig and hanConfig[splitPath[0]+"/description"]=="":
+                del hanConfig[splitPath[0]+"/description"]
             x = L1CaloMonitorCfgHelper.hanConfigs
             for i,p in enumerate(splitPathWithHist):
                 key = ("dir " if i!=len(splitPathWithHist)-1 else "hist ") + p
                 if key not in x:
                     x[key] = {}
                 x = x[key]
-            hanConfig["output"] = "/".join(["L1Calo"]+splitPath)
-            x.update(hanConfig)
+            hanConfig["output"] = "/".join(["L1Calo"]+[splitPath[0] if not embargo else "Developer"]+splitPath[1:]) #embargoed plots appear in developer folder in DQDM, but come from Expert folder in ROOT file
+            # create a copy of the hanConfig and remove any keys beginning with "Shifter/", which means its a shifter-only config attribute
+            myConfig = {}
+            for k,v in hanConfig.items():
+                if k.startswith("Shifter/"): continue
+                # strip Expert/ prefix if it exists
+                myConfig[str(k).replace("Expert/","")] = v
+            if "algorithm" in myConfig and myConfig["algorithm"] in self.hanAlgConfigs:
+                # if there are any string parameters in the config, add them to the description
+                # need this until WebDisplay shows string parameters
+                for pName,pVal in self.hanAlgConfigs[myConfig["algorithm"]].items():
+                    if len(str(pVal))>0 and str(pVal)[0]=="\"":
+                        myConfig["description"] += f"<br>{pName} : {pVal[1:-1]}"
+            x.update(myConfig)
         elif splitPath[0] == "Shifter": # record shifter histograms in another map, for generating xmls
+            # create a copy of the hanConfig and remove any keys beginning with "Expert/", which means its a expert-only config attribute
+            myConfig = {}
+            for k,v in hanConfig.items():
+                if k.startswith("Expert/"): continue
+                # strip Shifter/ prefix if it exists
+                myConfig[str(k).replace("Shifter/","")] = v
             L1CaloMonitorCfgHelper.xmlConfigs["/".join(["L1Calo"]+splitPath+[histName])] = {}
-            L1CaloMonitorCfgHelper.xmlConfigs["/".join(["L1Calo"]+splitPath+[histName])].update(hanConfig) # copy in the config
+            L1CaloMonitorCfgHelper.xmlConfigs["/".join(["L1Calo"]+splitPath+[histName])].update(myConfig) # copy in the config
 
         return out
 
@@ -368,6 +415,11 @@ thresholds th_AnyBinIsError {
         kwargsCopy["opt"] = ['kCanRebin','kAddBinsDynamically','kAlwaysCreate']
         kwargsCopy["merge"] = "merge"
         is2d = (kwargsCopy["title"].count(";")>1)
+        # take the right number of variables for defining the histogram
+        if is2d:
+            argsCopy[0] = argsCopy[0].split(",")[0] + "," + argsCopy[0].split(",")[1] + ";" + argsCopy[0].rsplit(";",1)[-1]
+        else:
+            argsCopy[0] = argsCopy[0].split(",")[0] + ";" + argsCopy[0].rsplit(";",1)[-1]
         self.defineHistogram(argsCopy[0],type="TH2I" if is2d else "TH1I",xbins=1,xmin=0,xmax=1,ybins=1 if is2d else None,ymin=0,ymax=1,fillGroup=fillGroup,**kwargsCopy)
         if not any([x in self.dqEnv for x in ['tier0','online']]):
             out = self.fillGroups[fillGroup].defineTree(*args,**kwargs)
@@ -490,11 +542,11 @@ def LVL1CaloMonitoringConfig(flags):
                 from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
                 JfexSimMonitoring = JfexSimMonitoringConfig(flags)
                 result.merge(JfexSimMonitoring)
-            
-            if flags.Trigger.L1.doTopo:
+
+            if flags.Trigger.L1.doTopo and isData:
                 #L1TopoSimulation (with monitoring Off to avoid clash with next call)
                 from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
-                result.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False,DeactivateL1TopoMuons=True))
+                result.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False, useMuonDecoder=True, writeMuonRoIs = False))
                 #L1TopoOnlineMonitoring specific for L1Calo DQPlots
                 from L1TopoOnlineMonitoring.L1TopoOnlineMonitoringConfig import Phase1TopoMonitoringCfg
                 result.merge(Phase1TopoMonitoringCfg(flags))

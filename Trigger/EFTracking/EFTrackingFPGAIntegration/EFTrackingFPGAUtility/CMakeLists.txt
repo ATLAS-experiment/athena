@@ -3,7 +3,7 @@
 atlas_subdir(EFTrackingFPGAUtility)
 
 atlas_add_library(EFTrackingFPGAUtilityLib
-                  src/* 
+                  src/*.cxx
                   PUBLIC_HEADERS EFTrackingFPGAUtility
                   LINK_LIBRARIES GaudiKernel 
                                  AthenaBaseComps 
@@ -11,10 +11,12 @@ atlas_add_library(EFTrackingFPGAUtilityLib
                                  xAODInDetMeasurement 
                                  InDetPrepRawData 
                                  InDetIdentifier 
-                                 InDetReadoutGeometry)
+                                 InDetReadoutGeometry
+				 FPGATrackSimObjectsLib
+			         InDetMeasurementUtilitiesLib)
 
 atlas_add_component(EFTrackingFPGAUtility
-                    src/components/*
+                    src/components/*.cxx
                     PUBLIC_HEADERS EFTrackingFPGAUtility
                     LINK_LIBRARIES EFTrackingFPGAUtilityLib)
 

@@ -91,10 +91,11 @@ if __name__=="__main__":
     flags.Scheduler.ShowDataDeps = True 
     flags.Scheduler.ShowDataFlow = True
     flags.lock()
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
-    cfg = setupServicesCfg(flags)
-    from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
-    cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile))
+    flags.dump(evaluate = True)
+    
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg, SetupMuonStandaloneCA
+    cfg = SetupMuonStandaloneCA(flags)
+    cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile, outStream="GEOMODELTESTER"))
     
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     chambToExclude = args.excludedChambers
@@ -119,8 +120,4 @@ if __name__=="__main__":
    
     cfg.merge(GeoModelCscTestCfg(flags))
     
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    flags.dump(evaluate = True)
-    if not cfg.run(1).isSuccess():
-        print("Execution failed")
-        exit(1)  
+    executeTest(cfg)

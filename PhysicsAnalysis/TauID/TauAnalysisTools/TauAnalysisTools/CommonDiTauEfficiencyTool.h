@@ -5,7 +5,7 @@
  * @brief 
  * @date 2021-02-18
  * 
- * @copyright Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  * 
  */
 
@@ -22,7 +22,6 @@
 
 // Local include(s):
 #include "TauAnalysisTools/Enums.h"
-// #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/IDiTauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/CommonEfficiencyTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
@@ -60,23 +59,17 @@ public:
    * 
    * @param xDiTau : reco DiTauJet
    * @param dEfficiencyScaleFactor : reference to output variable where efficiency is returned
-   * @param iRunNumber : run number
-   * @param iMu : number of interactions
    * @return CP::CorrectionCode 
    */
-  virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::DiTauJet& xDiTau, double& dEfficiencyScaleFactor, 
-    unsigned int iRunNumber = 0, unsigned int iMu = 0 ) override;
+  virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::DiTauJet& xDiTau, double& dEfficiencyScaleFactor) override;
 
   /**
    * @brief Get the Efficiency Scale Factor of ditau jet
    * 
    * @param xDiTau 
-   * @param iRunNumber 
-   * @param iMu 
    * @return CP::CorrectionCode 
    */
-  virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::DiTauJet& xDiTau,
-    unsigned int iRunNumber = 0, unsigned int iMu = 0 ) override;
+  virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::DiTauJet& xDiTau) override;
 
   /** scale factor bin x (e.g. lead match pT)*/
   double (*m_fXDiTau)(const xAOD::DiTauJet& xDiTau);

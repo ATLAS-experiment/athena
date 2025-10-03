@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MOOSEGMENTFINDERS_MUONSEGMENTFILTERALG_H
@@ -15,9 +15,10 @@
 ///  The muon segment filter alg thins all segments coming from a certain detector technology,
 ///  or in a certain region of the muon spectrometer, e.g. BI, BIS, Barrel, Middle, etc... 
 ///  The pointers of the TrackSegements passing the filter are added to a SG::VIEW_ELEMENTS container.
+
 class MuonSegmentFilterAlg : public AthReentrantAlgorithm {
 public:
-    MuonSegmentFilterAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual ~MuonSegmentFilterAlg() = default;
 
@@ -44,16 +45,22 @@ private:
         "TrackMuonSegments",
         "Input container",
     };
-
-    
-  
-    using  StIdx = Muon::MuonStationIndex;
-
-    Gaudi::Property<std::vector<int>> m_thin_stations{this, "ThinStations", {StIdx::BI, StIdx::BM, StIdx::BO, StIdx::BE, StIdx::EI}, "Removes sgements in a given Muon station" };
-    Gaudi::Property<std::vector<int>> m_thin_layers{this, "ThinLayers", {}, "Removes segments in a given layer of the MuonSpectrometer "};
-    Gaudi::Property<std::vector<int>> m_thin_technology{this, "ThinTechnology", {StIdx::STGC, StIdx::MM}, "Removes segments from a given chamber technology"};
-    Gaudi::Property<std::vector<int>> m_thin_region{this, "ThinDetRegion", {}, "Removes all segments form Barrel / EndcapA / EndcapC"};
-    Gaudi::Property<std::vector<int>> m_thin_chamber_idx{this, "ThinChamberIndex", {}, "Removes all segments from a BIS/BIL/BMS/.."};
+    Gaudi::Property<std::set<int>> m_thin_stations
+      {this, "ThinStations",
+       {toInt(Muon::MuonStationIndex::StIndex::BI),
+        toInt(Muon::MuonStationIndex::StIndex::BM), 
+        toInt(Muon::MuonStationIndex::StIndex::BO),
+        toInt(Muon::MuonStationIndex::StIndex::BE),
+        toInt(Muon::MuonStationIndex::StIndex::EI)},
+       "Removes segments in a given Muon station" };
+    Gaudi::Property<std::set<int>> m_thin_layers{this, "ThinLayers", {}, "Removes segments in a given layer of the MuonSpectrometer "};
+    Gaudi::Property<std::set<int>> m_thin_technology
+      {this, "ThinTechnology",
+       {toInt(Muon::MuonStationIndex::TechnologyIndex::STGC),
+        toInt(Muon::MuonStationIndex::TechnologyIndex::MM)},
+       "Removes segments from a given chamber technology"};
+    Gaudi::Property<std::set<int>> m_thin_region{this, "ThinDetRegion", {}, "Removes all segments form Barrel / EndcapA / EndcapC"};
+    Gaudi::Property<std::set<int>> m_thin_chamber_idx{this, "ThinChamberIndex", {}, "Removes all segments from a BIS/BIL/BMS/.."};
     
     /// If no segments are removed from the container then empty the entire container as the 
     /// algoritihms depending on the filtered container will give the same as the vanilla chain

@@ -10,10 +10,6 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "CxxUtils/trapping_fp.h"
 
-#define GeV 1000
-
-
-
 MvaTESVariableDecorator::MvaTESVariableDecorator(const std::string& name) 
   : TauRecToolBase(name) {
 }
@@ -41,7 +37,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
   }
   else {
     // convert from float to int to ignore peculiar values used in MC
-    mu = (int)eventInfoDecorHandle(0);
+    mu = static_cast<int>(eventInfoDecorHandle(0));
   }
   static const SG::Accessor<float> acc_mu("mu");  
   acc_mu(xTau) = mu;
@@ -73,7 +69,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
       ATH_MSG_WARNING ("Could not retrieve rho.");
     }
     static const SG::Accessor<float> acc_rho("rho");
-    acc_rho(xTau) = (float)rho;
+    acc_rho(xTau) = static_cast<float>(rho);
   }
 
   double center_lambda=0.       , first_eng_dens=0.      , em_probability=0.      , second_lambda=0.      ;
@@ -175,30 +171,30 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
   if (clusters_had_P4.E()+clusters_EM_P4.E()!=0.)
     upsilon_cluster = (clusters_had_P4.E()-clusters_EM_P4.E())/(clusters_had_P4.E()+clusters_EM_P4.E());
   
-  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanCenterLambda, (float) mean_center_lambda);
-  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanFirstEngDens, (float) mean_first_eng_dens);
-  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanEMProbability, (float) mean_em_probability);
-  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanSecondLambda, (float) mean_second_lambda);
-  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanPresamplerFrac, (float) mean_presampler_frac);
+  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanCenterLambda, static_cast<float>(mean_center_lambda));
+  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanFirstEngDens, static_cast<float>(mean_first_eng_dens));
+  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanEMProbability, static_cast<float>(mean_em_probability));
+  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanSecondLambda, static_cast<float>(mean_second_lambda));
+  xTau.setDetail(xAOD::TauJetParameters::ClustersMeanPresamplerFrac, static_cast<float>(mean_presampler_frac));
 
   static const SG::Accessor<float> acc_ClusterTotalEnergy("ClusterTotalEnergy");
-  acc_ClusterTotalEnergy(xTau) = (float) Etot;
+  acc_ClusterTotalEnergy(xTau) = static_cast<float>(Etot);
 
   static const SG::Accessor<float> acc_ptIntermediateAxisEM("ptIntermediateAxisEM");
-  acc_ptIntermediateAxisEM(xTau) = (float) tauIntermediateAxisEM.Pt();
+  acc_ptIntermediateAxisEM(xTau) = static_cast<float>(tauIntermediateAxisEM.Pt());
 
   // online-specific, not defined in TauDefs enum
   static const SG::Accessor<float> acc_LeadClusterFrac("LeadClusterFrac");
   static const SG::Accessor<float> acc_UpsilonCluster("UpsilonCluster");
-  acc_LeadClusterFrac(xTau) = (float) lead_cluster_frac;
-  acc_UpsilonCluster(xTau) = (float) upsilon_cluster;
+  acc_LeadClusterFrac(xTau) = static_cast<float>(lead_cluster_frac);
+  acc_UpsilonCluster(xTau) = static_cast<float>(upsilon_cluster);
 
   if (inTrigger()) {
     // for now only used by trigger, but could be used by offline 0p in the 2022 reprocessing
     static const SG::Accessor<float> acc_SecondClusterFrac("SecondClusterFrac");
     static const SG::Accessor<float> acc_ThirdClusterFrac("ThirdClusterFrac");
-    acc_SecondClusterFrac(xTau) = (float) second_cluster_frac;
-    acc_ThirdClusterFrac(xTau) = (float) third_cluster_frac;
+    acc_SecondClusterFrac(xTau) = static_cast<float>(second_cluster_frac);
+    acc_ThirdClusterFrac(xTau) = static_cast<float>(third_cluster_frac);
 
     return StatusCode::SUCCESS;
   }
@@ -242,7 +238,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
   if (Pi0_totalE+charged_totalE != 0.){
     relDiff = (charged_totalE - Pi0_totalE) / (charged_totalE + Pi0_totalE) ;
   }
-  xTau.setDetail(xAOD::TauJetParameters::PFOEngRelDiff, (float) relDiff);
+  xTau.setDetail(xAOD::TauJetParameters::PFOEngRelDiff, static_cast<float>(relDiff));
   
   return StatusCode::SUCCESS;
 }

@@ -12,7 +12,7 @@ atlas_add_library( FsrUtilsLib
    PUBLIC_HEADERS FsrUtils
    LINK_LIBRARIES AsgTools PATInterfaces xAODEgamma xAODMuon
    PRIVATE_LINK_LIBRARIES AthContainers EgammaAnalysisInterfacesLib IsolationCorrectionsLib
-   IsolationSelectionLib xAODRootAccess )
+   IsolationSelectionLib xAODRootAccess EgammaAnalysisAlgorithmsLib)
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( FsrUtils

@@ -8,13 +8,15 @@
 # art-include: 22.0-mc20/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
 
 Reco_tf.py \
 --AMI=q442 \
 --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
 --athenaopts='--nprocs=2' \
 --maxEvents=500 \
---outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
+--outputAODFile=AOD.pool.root --outputESDFile=ESD.pool.root \
 --imf False \
 --preExec "all:flags.DQ.Steering.doHLTMon=False" 
 

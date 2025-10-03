@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NAVIGATIONTOKEN_H
@@ -146,8 +146,8 @@ class NavigationToken : public INavigationToken
 
    private:
 
-   const tokenStore*   m_store;
-   tokenConstIterator  m_actual;
+   const tokenStore*   m_store{};
+   tokenConstIterator  m_actual{};
  };
 
  typedef NavigationTokenIterator const_iterator;
@@ -305,11 +305,11 @@ class NavigationToken : public INavigationToken
  tokenStore  m_data;
 
  // internal pointer to associated navigation processor
- INavigationCondition*       m_navCondition;
+ INavigationCondition*       m_navCondition{};
  INavigationSelector<CHILD,CHILDPAR>* m_navSelector;
 
   // Used to cache dynamic_cast results.
-  const std::type_info*     m_lastReject;
+  const std::type_info*     m_lastReject{};
 };
 
 #include "Navigation/NavigationToken.icc"

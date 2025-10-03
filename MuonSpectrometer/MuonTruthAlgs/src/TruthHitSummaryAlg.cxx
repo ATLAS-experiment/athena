@@ -10,6 +10,7 @@
 #include "TrkGeometry/TrackingVolume.h"
 
 namespace Muon {    
+    using namespace MuonStationIndex;
     // Initialize method:
     StatusCode TruthHitSummaryAlg::initialize() {
         ATH_CHECK(m_muonTruth.initialize());
@@ -67,14 +68,15 @@ namespace Muon {
                                                 ChamberIdMap& ids, summaryDecors& myDecors) const {
         
         std::vector<unsigned int> nprecHitsPerChamberLayer;
-        nprecHitsPerChamberLayer.resize(Muon::MuonStationIndex::ChIndexMax);
         std::vector<unsigned int> nphiHitsPerChamberLayer;
-        nphiHitsPerChamberLayer.resize(Muon::MuonStationIndex::PhiIndexMax);
         std::vector<unsigned int> ntrigEtaHitsPerChamberLayer;
-        ntrigEtaHitsPerChamberLayer.resize(Muon::MuonStationIndex::PhiIndexMax);
+
+        ntrigEtaHitsPerChamberLayer.resize(toInt(PhiIndex::PhiIndexMax));
+        nprecHitsPerChamberLayer.resize(toInt(ChIndex::ChIndexMax));
+        nphiHitsPerChamberLayer.resize(toInt(PhiIndex::PhiIndexMax));
         
-        ATH_MSG_DEBUG("addHitCounts: barcode " << HepMC::barcode(truthParticle)); // FIXME barcode-based
-        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1); // Returns a list of uniqueIDs (currently for xAOD::TruthParticle these would be barcodes)
+        ATH_MSG_DEBUG("addHitCounts: unique ID " << HepMC::uniqueID(truthParticle));
+        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1); // Returns a list of unique IDs
         // loop over detector technologies
         for (SG::ReadHandle<PRD_MultiTruthCollection>& col : m_PRD_TruthNames.makeHandles(ctx)) {
             ATH_CHECK(col.isPresent());
@@ -82,155 +84,144 @@ namespace Muon {
             // loop over trajectories
             for (const std::pair<Identifier, HepMcParticleLink> trajectory : *col) {
                  // check if gen particle same as input
-                if (std::ranges::find(truthParticleHistory, HepMC::barcode(trajectory.second)) == truthParticleHistory.end()) {
-                    continue; // FIXME barcode-based - TrackRecords read in from existing inputs will not have valid id values.
+                if (std::ranges::find(truthParticleHistory, HepMC::uniqueID(trajectory.second)) == truthParticleHistory.end()) {
+                    continue;
                 }
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);
                 bool isTgc = m_idHelperSvc->isTgc(id);
-                Muon::MuonStationIndex::ChIndex chIndex = !isTgc ? m_idHelperSvc->chamberIndex(id) : Muon::MuonStationIndex::ChUnknown;
+                ChIndex chIndex = !isTgc ? m_idHelperSvc->chamberIndex(id) : ChIndex::ChUnknown;
+
                 // add identifier to map
-                if (isTgc) {  // TGCS should be added to both EIL and EIS
-                    Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
-                    if (index == Muon::MuonStationIndex::T4) {
-                        ids[Muon::MuonStationIndex::EIS].push_back(id);
-                        ids[Muon::MuonStationIndex::EIL].push_back(id);
+                if (m_idHelperSvc->isTgc(id)) {  // TGCS should be added to both EIL and EIS
+                    PhiIndex index = m_idHelperSvc->phiIndex(id);
+                    if (index == PhiIndex::T4) {
+                        ids[ChIndex::EIS].push_back(id);
+                        ids[ChIndex::EIL].push_back(id);
                     } else {
-                        ids[Muon::MuonStationIndex::EMS].push_back(id);
-                        ids[Muon::MuonStationIndex::EML].push_back(id);
+                        ids[ChIndex::EMS].push_back(id);
+                        ids[ChIndex::EML].push_back(id);
                     }
                 } else {
-                    ids[chIndex].push_back(id);
+                    ids[m_idHelperSvc->chamberIndex(id)].push_back(id);
                 }
-
                 if (m_idHelperSvc->issTgc(id)) {
                     if (measPhi) {
-                        int index = m_idHelperSvc->phiIndex(id);
-                        ++nphiHitsPerChamberLayer.at(index);
+                        PhiIndex index = m_idHelperSvc->phiIndex(id);
+                        ++nphiHitsPerChamberLayer.at(toInt(index));
                     }  else {
-                        ++nprecHitsPerChamberLayer.at(chIndex);
+                        ++nprecHitsPerChamberLayer.at(toInt(chIndex));
                     }
                 } else if (m_idHelperSvc->isMM(id)) {
-                    ++nprecHitsPerChamberLayer.at(chIndex);
+                    ++nprecHitsPerChamberLayer.at(toInt(chIndex));
                 } else if (m_idHelperSvc->isTrigger(id)) {
-                    int index = m_idHelperSvc->phiIndex(id);
-                    if (index >= 0) {
+                    PhiIndex index = m_idHelperSvc->phiIndex(id);
+                    if (index != PhiIndex::PhiUnknown) {
                         if (measPhi)
-                            ++nphiHitsPerChamberLayer.at(index);
+                            ++nphiHitsPerChamberLayer.at(toInt(index));
                         else
-                            ++ntrigEtaHitsPerChamberLayer.at(index);
+                            ++ntrigEtaHitsPerChamberLayer.at(toInt(index));
                     }
                 } else {
                     if (measPhi) {
-                        Muon::MuonStationIndex::PhiIndex index = m_idHelperSvc->phiIndex(id);
-                        ++nphiHitsPerChamberLayer.at(index);
+                        PhiIndex index = m_idHelperSvc->phiIndex(id);
+                        ++nphiHitsPerChamberLayer.at(toInt(index));
                     } else {
-                        ++nprecHitsPerChamberLayer.at(chIndex);
+                        ++nprecHitsPerChamberLayer.at(toInt(chIndex));
                     }
                 }
             }
         }
 
-        uint8_t innerSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIS] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::EIS] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::CSS];
+        uint8_t innerSmallHits = nprecHitsPerChamberLayer[toInt(ChIndex::BIS)] +
+                                 nprecHitsPerChamberLayer[toInt(ChIndex::EIS)] +
+                                 nprecHitsPerChamberLayer[toInt(ChIndex::CSS)];
 
-        uint8_t innerLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIL] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::EIL] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::CSL];
+        uint8_t innerLargeHits = nprecHitsPerChamberLayer[toInt(ChIndex::BIL)] +
+                                 nprecHitsPerChamberLayer[toInt(ChIndex::EIL)] +
+                                 nprecHitsPerChamberLayer[toInt(ChIndex::CSL)];
 
-        uint8_t middleSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BMS] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::EMS];
+        uint8_t middleSmallHits = nprecHitsPerChamberLayer[toInt(ChIndex::BMS)] +
+                                  nprecHitsPerChamberLayer[toInt(ChIndex::EMS)];
 
-        uint8_t middleLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::EML];
+        uint8_t middleLargeHits = nprecHitsPerChamberLayer[toInt(ChIndex::BML)] +
+                                  nprecHitsPerChamberLayer[toInt(ChIndex::EML)];
 
-        uint8_t outerSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BOS] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOS];
+        uint8_t outerSmallHits = nprecHitsPerChamberLayer[toInt(ChIndex::BOS)] +
+                                 nprecHitsPerChamberLayer[toInt(ChIndex::EOS)];
 
-        uint8_t outerLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] +
-                                nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOL];
+        uint8_t outerLargeHits = nprecHitsPerChamberLayer[toInt(ChIndex::BML)] +
+                                 nprecHitsPerChamberLayer[toInt(ChIndex::EOL)];
 
-        uint8_t extendedSmallHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::EES] +
-                                    nprecHitsPerChamberLayer[Muon::MuonStationIndex::BEE];
+        uint8_t extendedSmallHits = nprecHitsPerChamberLayer[toInt(ChIndex::EES)] +
+                                    nprecHitsPerChamberLayer[toInt(ChIndex::BEE)];
 
-        uint8_t extendedLargeHits = nprecHitsPerChamberLayer[Muon::MuonStationIndex::EEL];
+        uint8_t extendedLargeHits = nprecHitsPerChamberLayer[toInt(ChIndex::EEL)];
 
-        uint8_t phiLayer1Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM1] +
-                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T4] +
-                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::CSC] +
-                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] +
-                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC2];
+        uint8_t phiLayer1Hits = nphiHitsPerChamberLayer[toInt(PhiIndex::BM1)] +
+                                nphiHitsPerChamberLayer[toInt(PhiIndex::T4)] +
+                                nphiHitsPerChamberLayer[toInt(PhiIndex::CSC)] +
+                                nphiHitsPerChamberLayer[toInt(PhiIndex::STGC1)] +
+                                nphiHitsPerChamberLayer[toInt(PhiIndex::STGC2)];
 
-        uint8_t phiLayer2Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM2] +
-                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T1];
+        uint8_t phiLayer2Hits = nphiHitsPerChamberLayer[toInt(PhiIndex::BM2)] +
+                                nphiHitsPerChamberLayer[toInt(PhiIndex::T1)];
 
-        uint8_t phiLayer3Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO1] +
-                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T2];
+        uint8_t phiLayer3Hits = nphiHitsPerChamberLayer[toInt(PhiIndex::BO1)] +
+                                nphiHitsPerChamberLayer[toInt(PhiIndex::T2)];
 
-        uint8_t phiLayer4Hits = nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO2] +
-                                nphiHitsPerChamberLayer[Muon::MuonStationIndex::T3];
+        uint8_t phiLayer4Hits = nphiHitsPerChamberLayer[toInt(PhiIndex::BO2)] +
+                                nphiHitsPerChamberLayer[toInt(PhiIndex::T3)];
 
-        uint8_t etaLayer1Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM1] +
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T4]+
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::CSC] +
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] +
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC2];
+        uint8_t etaLayer1Hits = ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BM1)] +
+                                ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T4)]+
+                                ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::CSC)] +
+                                ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::STGC1)] +
+                                ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::STGC2)];
 
-        uint8_t etaLayer2Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM2] +
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T1];
+        uint8_t etaLayer2Hits = ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BM2)] +
+                                ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T1)];
 
-        uint8_t etaLayer3Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO1] +
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T2];
+        uint8_t etaLayer3Hits = ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BO1)] +
+                                ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T2)];
 
-        uint8_t etaLayer4Hits = ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO2] +
-                                ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T3];
+        uint8_t etaLayer4Hits = ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BO2)] +
+                                ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T3)];
 
         uint8_t nprecLayers = 0;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::BIL] > 3)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::BMS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::BML] > 2)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::BOS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::BOL] > 2)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::EIS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EIL] > 3)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::EMS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EML] > 2)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EOL] > 2)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::EES] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::EEL] > 3)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::CSS] + nprecHitsPerChamberLayer[Muon::MuonStationIndex::CSL] > 2)
-            ++nprecLayers;
-        if (nprecHitsPerChamberLayer[Muon::MuonStationIndex::BEE] > 3) ++nprecLayers;
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::BIS)] + nprecHitsPerChamberLayer[toInt(ChIndex::BIL)] > 3);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::BMS)] + nprecHitsPerChamberLayer[toInt(ChIndex::BML)] > 2);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::BOS)] + nprecHitsPerChamberLayer[toInt(ChIndex::BOL)] > 2);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::EIS)] + nprecHitsPerChamberLayer[toInt(ChIndex::EIL)] > 3);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::EMS)] + nprecHitsPerChamberLayer[toInt(ChIndex::EML)] > 2);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::EOS)] + nprecHitsPerChamberLayer[toInt(ChIndex::EOL)] > 2);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::EES)] + nprecHitsPerChamberLayer[toInt(ChIndex::EEL)] > 3);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::CSS)] + nprecHitsPerChamberLayer[toInt(ChIndex::CSL)] > 2);
+        nprecLayers += (nprecHitsPerChamberLayer[toInt(ChIndex::BEE)] > 3);
 
         uint8_t nphiLayers = 0;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM1] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::BM2] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO1] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::BO2] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::T1] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::T2] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::T3] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::T4] > 0) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::CSC] > 2) ++nphiLayers;
-        if (nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] + nphiHitsPerChamberLayer[Muon::MuonStationIndex::STGC2] > 3)
-            ++nphiLayers;
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::BM1)] > 0);
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::BM2)] > 0);
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::BO1)] > 0);
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::BO2)] > 0);
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::T1)] > 0); 
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::T2)] > 0); 
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::T3)] > 0);
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::T4)] > 0); 
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::CSC)] > 2);
+        nphiLayers += (nphiHitsPerChamberLayer[toInt(PhiIndex::STGC1)] + nphiHitsPerChamberLayer[toInt(PhiIndex::STGC2)] > 3);
 
         uint8_t ntrigEtaLayers = 0;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM1] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BM2] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO1] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::BO2] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T1] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T2] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T3] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::T4] > 0) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::CSC] > 2) ++ntrigEtaLayers;
-        if (ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC1] + ntrigEtaHitsPerChamberLayer[Muon::MuonStationIndex::STGC2] > 3)
-            ++ntrigEtaLayers;
-
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BM1)] > 0);
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BM2)] > 0);
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BO1)] > 0);
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::BO2)] > 0);
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T1)] > 0); 
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T2)] > 0); 
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T3)] > 0);
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::T4)] > 0); 
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::CSC)] > 2);
+        ntrigEtaLayers += (ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::STGC1)] + ntrigEtaHitsPerChamberLayer[toInt(PhiIndex::STGC2)] > 3);
         // copy hit counts onto TruthParticle
         (*myDecors.nprecLayersDecor)(truthParticle) = nprecLayers;
         (*myDecors.nphiLayersDecor)(truthParticle) = nphiLayers;
@@ -264,7 +255,7 @@ namespace Muon {
 
                 for (int index = 0; index < static_cast<int>(nprecHitsPerChamberLayer.size()); ++index) {
                     if (nprecHitsPerChamberLayer[index] > 0)
-                        msg(MSG::VERBOSE) << " " << Muon::MuonStationIndex::chName(static_cast<Muon::MuonStationIndex::ChIndex>(index))
+                        msg(MSG::VERBOSE) << " " << chName(static_cast<ChIndex>(index))
                                         << " hits " << nprecHitsPerChamberLayer[index];
                 }
             }
@@ -272,7 +263,7 @@ namespace Muon {
                 msg(MSG::VERBOSE) << endmsg << " Phi chambers ";
                 for (int index = 0; index < static_cast<int>(nphiHitsPerChamberLayer.size()); ++index) {
                     if (nphiHitsPerChamberLayer[index] > 0)
-                        msg(MSG::VERBOSE) << " " << Muon::MuonStationIndex::phiName(static_cast<Muon::MuonStationIndex::PhiIndex>(index))
+                        msg(MSG::VERBOSE) << " " << phiName(static_cast<PhiIndex>(index))
                                         << " hits " << nphiHitsPerChamberLayer[index];
                 }
             }
@@ -281,7 +272,7 @@ namespace Muon {
                 msg(MSG::VERBOSE) << endmsg << " Trigger Eta ";
                 for (int index = 0; index < static_cast<int>(ntrigEtaHitsPerChamberLayer.size()); ++index) {
                     if (ntrigEtaHitsPerChamberLayer[index] > 0)
-                        msg(MSG::VERBOSE) << " " << Muon::MuonStationIndex::phiName(static_cast<Muon::MuonStationIndex::PhiIndex>(index))
+                        msg(MSG::VERBOSE) << " " << phiName(static_cast<PhiIndex>(index))
                                         << " hits " << ntrigEtaHitsPerChamberLayer[index];
                 }
             }
@@ -291,8 +282,8 @@ namespace Muon {
     }
 
     StatusCode TruthHitSummaryAlg::addHitIDVectors(const xAOD::TruthParticle& truthParticle,
-                                                const ChamberIdMap& ids,
-                                                summaryDecors& myDecors) const {
+                                                   const ChamberIdMap& ids,
+                                                   summaryDecors& myDecors) const {
         std::vector<unsigned long long> mdtTruthHits{};
         std::vector<unsigned long long> tgcTruthHits{};
         std::vector<unsigned long long> rpcTruthHits{};
@@ -304,17 +295,17 @@ namespace Muon {
         int nEI = 0, nEM = 0;
         for (const auto& lay : ids) {
             // loop over hits
-            if (lay.first == Muon::MuonStationIndex::EIS || lay.first == Muon::MuonStationIndex::EIL) nEI++;
-            if (lay.first == Muon::MuonStationIndex::EMS || lay.first == Muon::MuonStationIndex::EML) nEM++;
+            if (lay.first == ChIndex::EIS || lay.first == ChIndex::EIL) nEI++;
+            if (lay.first == ChIndex::EMS || lay.first == ChIndex::EML) nEM++;
             for (const Identifier& id : lay.second) {
                 if (m_idHelperSvc->isMdt(id))
                     mdtTruthHits.push_back(id.get_compact());
                 else if (m_idHelperSvc->isCsc(id))
                     cscTruthHits.push_back(id.get_compact());
                 else if (m_idHelperSvc->isTgc(id)) {
-                    if ((lay.first == Muon::MuonStationIndex::EIS || lay.first == Muon::MuonStationIndex::EIL) && nEI > 1)
+                    if ((lay.first == ChIndex::EIS || lay.first == ChIndex::EIL) && nEI > 1)
                         continue;  // otherwise we double-count
-                    if ((lay.first == Muon::MuonStationIndex::EMS || lay.first == Muon::MuonStationIndex::EML) && nEM > 1)
+                    if ((lay.first == ChIndex::EMS || lay.first == ChIndex::EML) && nEM > 1)
                         continue;  // otherwise we double-count
                     tgcTruthHits.push_back(id.get_compact());
                 } else if (m_idHelperSvc->issTgc(id))

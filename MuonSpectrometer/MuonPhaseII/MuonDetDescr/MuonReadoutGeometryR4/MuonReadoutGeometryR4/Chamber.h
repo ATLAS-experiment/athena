@@ -13,6 +13,7 @@
 namespace Acts {
     class TrapezoidVolumeBounds;
     class Volume;
+    class PlaneSurface;
 }
 
 
@@ -24,8 +25,8 @@ namespace MuonGMR4 {
           /** @brief Define the list of read out elements of the chamber */
           using ReadoutSet = std::vector<const MuonReadoutElement*>;
           struct defineArgs{
-              /** @brief Transformation of the chamber */
-              Amg::Transform3D locToGlobTrf{Amg::Transform3D::Identity()};
+              /** @brief Associated chamber surface */
+              std::shared_ptr<const Acts::PlaneSurface> surface{};             
               /** @brief List of associated readout elements */
               ReadoutSet  detEles{};
               /** @brief Chamber volume bounds */
@@ -49,6 +50,8 @@ namespace MuonGMR4 {
           int stationPhi() const;
           /** @brief Returns the station eta of the chamber */
           int stationEta() const;
+          /** @brief Returns the side of the chamber */
+          int8_t side() const;
           /** @brief Returns an integer representing the stationName */
           int stationName() const;
           /** @brief Returns the MS sector of the chamber */
@@ -63,6 +66,8 @@ namespace MuonGMR4 {
           /** @brief Returns the global -> local transformation 
            *  @param gctx: Geometry context carrrying the alignment transformations */
           Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
+          /** @brief Returns the surface associated with the chamber */
+          const Acts::PlaneSurface& surface() const;
           /** @brief Long-extend of the chamber in the x-direction at positive Y */
           double halfXLong() const;
           /** @brief Short extend of the chamber in the x-direction at negative Y*/

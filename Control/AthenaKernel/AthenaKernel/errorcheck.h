@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -222,7 +222,7 @@ public:
    * We override this method from @c MsgStream in order to fix up
    * the message punctuation.
    */
-  virtual MsgStream& doOutput();
+  virtual MsgStream& doOutput() override;
 
   /**
    * @brief Convert to a @c MsgStream reference.

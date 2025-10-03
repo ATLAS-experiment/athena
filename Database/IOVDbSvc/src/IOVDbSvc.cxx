@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbSvc.cxx
@@ -235,7 +235,6 @@ StatusCode IOVDbSvc::initialize() {
   ATH_MSG_INFO( "Initialised with " << m_connections.size() << 
     " connections and " << m_foldermap.size() << " folders" );
   if (m_outputToFile.value()) ATH_MSG_INFO("Db dump to file activated");
-  if (m_crestToFile.value()) ATH_MSG_INFO("Crest dump to file activated");
   if (m_crestCoolToFile.value())ATH_MSG_INFO("Crest or Cool dump to file activated");
   ATH_MSG_INFO( "Service IOVDbSvc initialised successfully" );
 
@@ -258,6 +257,7 @@ StatusCode IOVDbSvc::io_finalize() {
 
 StatusCode IOVDbSvc::finalize() {
   // summarise and delete folders, adding total read from COOL
+  unsigned long long nread=0;
   float readtime=0.;
   // accumulate a map of readtime by connection
   typedef std::map<IOVDbConn*,float> CTMap;
@@ -265,6 +265,7 @@ StatusCode IOVDbSvc::finalize() {
   for (const auto & namePtrPair : m_foldermap) {
     IOVDbFolder* folder=namePtrPair.second;
     folder->summary();
+    nread+=folder->bytesRead();
     const float& fread=folder->readTime();
     readtime+=fread;
     IOVDbConn* cptr=folder->conn();
@@ -276,7 +277,7 @@ StatusCode IOVDbSvc::finalize() {
     }
     delete folder;
   }
-  ATH_MSG_INFO(  " bytes in (( " << std::fixed << std::setw(9) << std::setprecision(2) <<
+  ATH_MSG_INFO(  "Total payload read from IOVDb: " << nread << " bytes in (( " << std::fixed << std::setw(9) << std::setprecision(2) <<
     readtime << " ))s" );
 
   // close and delete connections, printing time in each one
@@ -430,7 +431,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   for (const auto & thisNamePtrPair : m_foldermap) {
     newmap[thisNamePtrPair.second->key()]=thisNamePtrPair.second;
   }
-  m_foldermap=newmap;
+  m_foldermap=std::move(newmap);
   // fill global and explicit folder tags into TagInfo
   if (StatusCode::SUCCESS!=fillTagInfo()) 
     ATH_MSG_ERROR("Could not fill TagInfo object from preLoadAddresses" );
@@ -763,7 +764,8 @@ void IOVDbSvc::handle( const Incident& inc) {
     Athena::DBLock dblock;
 
     const StoreClearedIncident* sinc = dynamic_cast<const StoreClearedIncident*>(&inc);
-    if( (inc.type()=="StoreCleared" && sinc!=nullptr && sinc->store()==&*m_h_sgSvc)
+    if( (inc.type()=="StoreCleared" && sinc!=nullptr && sinc->store()==&*m_h_sgSvc
+         && m_state>=IOVDbSvc::EVENT_LOOP)
         or inc.type()==IncidentType::EndProcessing )
     {
        m_state=IOVDbSvc::FINALIZE_ALG;
@@ -950,7 +952,7 @@ StatusCode IOVDbSvc::setupFolders() {
       return StatusCode::FAILURE;
     }
     
-    allFolderdata.push_back(folderdata);
+    allFolderdata.push_back(std::move(folderdata));
   }
 
   //2. Loop through overwrites:
@@ -1054,7 +1056,7 @@ StatusCode IOVDbSvc::setupFolders() {
     }
     
     IOVDbFolder* folder=new IOVDbFolder(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
-                                        m_par_checklock, m_outputToFile.value(), m_par_source, m_crestToFile.value(), m_par_crestServer, crestTag, m_crestCoolToFile);
+                                        m_par_checklock, m_outputToFile.value(), m_par_source, m_par_crestServer, crestTag, m_crestCoolToFile);
     const std::string& key=folder->key();
     if (m_foldermap.find(key)==m_foldermap.end()) {  //This check is too weak. For POOL-based folders, the SG key is in the folder description (not known at this point).
       m_foldermap[key]=folder;

@@ -19,7 +19,7 @@ def METCommonCfg(ConfigFlags):
     metDefs = ['AntiKt4EMTopo']
     if ConfigFlags.MET.DoPFlow:
         metDefs.append('AntiKt4EMPFlow')
-        
+
     for metDef in metDefs:
         acc.merge(METAssociatorCfg(ConfigFlags, metDef))
 
@@ -92,3 +92,30 @@ def METRemappingCfg(ConfigFlags):
     acc.addEventAlgo(CompFactory.DerivationFramework.METRemappingAlg('AnalysisMETRemappingAlg'))
 
     return acc
+
+def HadRecoilMETCfg(ConfigFlags):
+    from METReconstruction.METAssocCfg import METAssocConfig, AssocConfig
+    from METReconstruction.METAssociatorCfg import getAssocCA
+
+
+    jettype='PFlowJetHR'
+    assocname='AntiKt4EMPFlowHR'
+    doPFlow=True
+    doRecoil=True
+
+    associators = [AssocConfig(jettype),
+                    AssocConfig('Muon'),
+                    AssocConfig('Ele'),
+                    AssocConfig('Gamma'),
+                    AssocConfig('Tau'),
+                    AssocConfig('Soft')]
+
+    cfg = METAssocConfig(assocname,
+                         ConfigFlags,
+                         buildconfigs = associators,
+                         doPFlow = doPFlow,
+                         doRecoil = doRecoil,
+                         usePFOLinks = ConfigFlags.MET.UseFELinks)
+
+
+    return getAssocCA(cfg, METName=assocname)

@@ -51,7 +51,7 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     kwargs.setdefault("doMergeFinalVerticesDistance"           , True)
     kwargs.setdefault("doAssociateNonSelectedTracks"           , True)
     kwargs.setdefault("DoTruth"                                , flags.Input.isMC)
-    kwargs.setdefault("FillHist"                               , True)
+    kwargs.setdefault("FillHist"                               , False)
     kwargs.setdefault("TruthParticleFilter"                    , "Higgs")
     kwargs.setdefault("CutSctHits"                             , 2)
     kwargs.setdefault("TrkA0ErrCut"                            , 200000)

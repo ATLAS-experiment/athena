@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -32,7 +32,7 @@ def RpcMonitoringConfig(inputFlags):
 
     rpcTrackAnaAlg.plotMuonEff = True
     rpcTrackAnaAlg.plotPRD     = True
-    rpcTrackAnaAlg.ElementsFileName = "Element.xml"
+    rpcTrackAnaAlg.ElementsFileName = "RpcRawDataMonitoring/Element.xml"
     rpcTrackAnaAlg.TagAndProbe         = False
 
     if not inputFlags.DQ.triggerDataAvailable:

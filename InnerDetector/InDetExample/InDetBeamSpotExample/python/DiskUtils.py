@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 import glob
 import os
 import re
@@ -143,40 +142,12 @@ class AccessError(RuntimeError): pass
 def get_lumi_blocks(root_file):
     
     try: 
-        from PyUtils.RootUtils import import_root
-        root = import_root()
-        f = root.TFile.Open(root_file, 'READ')
+        from PyUtils.MetaReader import read_metadata
+        md = read_metadata(root_file)
 
-        meta = f.Get( 'MetaData' )
-        if not meta:
-            raise Exception('No metadata')
-        
-        meta.GetEntry( 0 )
-
-        esiName= 'Stream'
-        esiTypeName = 'EventStreamInfo'
-        for l in meta.GetListOfLeaves():
-            if l.GetTypeName().startswith(esiTypeName):
-                esiTypeName = l.GetTypeName()
-                esiName = l.GetName()
-                break
-
-        if esiTypeName != 'EventStreamInfo_p3':
-            raise Exception("old schema is not supported:", esiTypeName)
-
-        import cppyy
-
-        esic = cppyy.gbl.EventStreamInfoPTCnv_p3()
-        esi = getattr (meta, esiName)
-        if esiName.startswith(esiTypeName):
-            esiName = esiName[len(esiTypeName)+1:]
-
-        return(  list(esic.lumiBlockNumbers(esi)) )
-
+        return( md[root_file]['lumiBlockNumbers'] )
     except  Exception as e:
         print( "Failed to read MetaData will fall back to looping ", repr(e))
-    finally: 
-        f.Close()
     
     try:
         from PyUtils.RootUtils import import_root

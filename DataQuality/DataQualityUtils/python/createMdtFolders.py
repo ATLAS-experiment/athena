@@ -5,7 +5,6 @@
 # python script to create the MDT DQ folders in sqlite files and fill in it
 # during the postprocessing algorithm
 # ************************************************
-from __future__ import print_function
 
 def createMDTConditionDBDead():
     import os

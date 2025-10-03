@@ -39,10 +39,4 @@ namespace ActsTrk {
    };
 }
 
-
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AthenaKernel/CondCont.h"
-CLASS_DEF( ActsTrk::DetectorElementToActsGeometryIdMap, 98583818, 1 )
-CONDCONT_DEF(ActsTrk::DetectorElementToActsGeometryIdMap, 14180);
-
 #endif

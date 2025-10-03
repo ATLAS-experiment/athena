@@ -16,6 +16,7 @@
 #include "L1TopoAlgorithms/DisambiguationDetaDPhiIncl3.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include "L1TopoSimulationUtils/Helpers.h"
 
 REGISTER_ALG_TCS(DisambiguationDetaDPhiIncl3)
 
@@ -166,6 +167,12 @@ TCS::DisambiguationDetaDPhiIncl3::processBitCorrect( const std::vector<TCS::TOBA
                }
             }
          }
+         bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1)
+                                 || TSU::isAmbiguousTruncation(input[1], p_NumberLeading2, p_MinET2)
+                                 || TSU::isAmbiguousTruncation(input[2], p_NumberLeading3, p_MinET3);
+         for (unsigned int i=0; i < numberOutputBits(); ++i) {
+            output[i]->setAmbiguityFlag(hasAmbiguousInputs);
+        }
    } else {
       TCS_EXCEPTION("DisambiguationDetaDPhiIncl3 alg must have  3 inputs, but got " << input.size());
    }

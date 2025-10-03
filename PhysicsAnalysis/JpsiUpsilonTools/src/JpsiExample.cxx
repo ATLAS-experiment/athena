@@ -22,12 +22,13 @@
 #include "TVector3.h"
 #include "TLorentzVector.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "TruthUtils/ParticleConstants.h"
 
 //////////////////////////////////////////////////////////////
 
 JpsiExample::JpsiExample(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
-  m_muonMass(105.66)
+  m_muonMass(ParticleConstants::muonMassInMeV)
 {
   
   // Declare user-defined properties - cuts and vertexing method
@@ -192,7 +193,7 @@ StatusCode JpsiExample::execute() {
     m_jpsiChi2->push_back(jpsiCandidate->chiSquared());
     m_jpsiMassRec->push_back(orig_mass);
     m_jpsiMassPullRec->push_back((mass-orig_mass)/error);
-    m_jpsiMassPullMC->push_back((mass-3096.88)/error);
+    m_jpsiMassPullMC->push_back((mass-ParticleConstants::JpsiMassInMeV)/error);
     
   }
      

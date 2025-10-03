@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "METRoIsUnpackingTool.h"
 #include "TrigT1Result/JetEnergyResult.h"
@@ -66,7 +66,7 @@ StatusCode METRoIsUnpackingTool::unpack(const EventContext& ctx,
   }
 
   ATH_MSG_DEBUG("Linking to FS RoI descriptor");
-  decision->setObjectLink( initialRoIString(), ElementLink<TrigRoiDescriptorCollection>( m_fsRoIKey, 0 ) );
+  decision->setObjectLink( initialRoIString(), ElementLink<TrigRoiDescriptorCollection>( m_fsRoIKey, 0, ctx ) );
 
   // check the MET RoI, TODO unpack and create L1 MET object (only if turns out to be needed)
   bool foundMETRoI = false;

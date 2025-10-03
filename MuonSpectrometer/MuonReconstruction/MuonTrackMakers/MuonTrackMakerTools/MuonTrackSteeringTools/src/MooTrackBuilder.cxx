@@ -199,13 +199,14 @@ namespace Muon {
             return nullptr;
         }
         fieldCondObj->getInitializedCache(fieldCache);
-
-        bool slFit = !fieldCache.toroidOn() || nstations == 1 || (nstations == 2 && (stations.count(MuonStationIndex::EM) &&
-                                                           (stations.count(MuonStationIndex::BO) || stations.count(MuonStationIndex::EO))));
+        using namespace MuonStationIndex;
+        bool slFit = !fieldCache.toroidOn() || nstations == 1 || 
+                    (nstations == 2 && (stations.count(StIndex::EM) &&
+                                        (stations.count(StIndex::BO) || stations.count(StIndex::EO))));
         if (msgLvl(MSG::DEBUG)) {
             msg(MSG::DEBUG) << MSG::DEBUG << " combining entries: nstations " << nstations << " types:";
-            for (std::set<MuonStationIndex::StIndex>::iterator it = stations.begin(); it != stations.end(); ++it) {
-                msg(MSG::DEBUG) << MSG::DEBUG << "  " << MuonStationIndex::stName(*it);
+            for (std::set<StIndex>::const_iterator it = stations.begin(); it != stations.end(); ++it) {
+                msg(MSG::DEBUG) << MSG::DEBUG << "  " << stName(*it);
             }
             if (slFit) {
                 msg(MSG::DEBUG) << " doing SL fit ";

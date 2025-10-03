@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGCOMPS_FOLDER_H
@@ -86,9 +86,15 @@ namespace SG {
   private:
 
     ServiceHandle<IClassIDSvc> m_pCLIDSvc;
-    /// property: the list of items (data objects identified by a class name/key pair)
-    StringArrayProperty m_itemList;
-    void decodeItemList(Gaudi::Details::PropertyBase&) { 
+
+    BooleanProperty m_checkItems{this, "CheckItems", false, "check if item types are known to ClassIDSvc"};
+
+    StringArrayProperty m_itemList{this, "ItemList", {}, &Folder::decodeItemList,
+      "List of data objects identified by a class name (or clid)#key pairs. One can use '*' as key value to "
+      "add all objects of a given type to the Folder. If the type name ends with !, then write the object as "
+      "exactly that type (and not as any derived class)."};
+
+    void decodeItemList(Gaudi::Details::PropertyBase&) {
       const bool DONTCHECKVALIDCLID(false);
       Folder::updateItemList(DONTCHECKVALIDCLID); 
     }
@@ -99,9 +105,7 @@ namespace SG {
     StatusCode add(const CLID& clid, const std::string& skey, 
 		   bool checkValidCLID, bool exact);
 
-    ItemList m_list; 
-    /// property: check if item types are known to ClassIDSvc
-    BooleanProperty m_checkItems;
+    ItemList m_list;
 
   };
 } //ns SG

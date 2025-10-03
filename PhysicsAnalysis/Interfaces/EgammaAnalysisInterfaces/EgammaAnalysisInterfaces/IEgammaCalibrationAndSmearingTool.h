@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,7 +20,6 @@
 namespace EgammaCalibPeriodRunNumbersExample {
   const int run_2016 = 297730;
   const int run_2015 = 252604;
-  struct ROOT6_NamespaceAutoloadHook{};
 }
 
 

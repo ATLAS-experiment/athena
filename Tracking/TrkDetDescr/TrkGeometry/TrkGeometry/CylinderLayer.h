@@ -47,7 +47,7 @@ public:
 
   /**Constructor with CylinderSurface components and  MaterialProperties */
   CylinderLayer(const Amg::Transform3D& transform,
-                std::shared_ptr<CylinderBounds> cbounds,
+                std::shared_ptr<const CylinderBounds> cbounds,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,
                 std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -66,7 +66,7 @@ public:
      surfaceArray
       */
   CylinderLayer(const Amg::Transform3D& transform,
-                std::shared_ptr<CylinderBounds> cbounds,
+                std::shared_ptr<const CylinderBounds> cbounds,
                 std::unique_ptr<SurfaceArray> surfaceArray,
                 double thickness = 0.,
                 std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -76,7 +76,7 @@ public:
   /**Constructor with CylinderSurface components,
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   CylinderLayer(const Amg::Transform3D& transform,
-                std::shared_ptr<CylinderBounds> cbounds,
+                std::shared_ptr<const CylinderBounds> cbounds,
                 std::unique_ptr<SurfaceArray> surfaceArray,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,
@@ -86,7 +86,7 @@ public:
 
   /**Concentric Layer: Constructor with CylinderSurface components and
    * MaterialProperties */
-  CylinderLayer(std::shared_ptr<CylinderBounds> cbounds,
+  CylinderLayer(std::shared_ptr<const CylinderBounds> cbounds,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,
                 std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -94,7 +94,7 @@ public:
 
   /**Concentric Layer: Constructor with CylinderSurface components and pointer
    * to SurfaceArray (passing ownership) */
-  CylinderLayer(std::shared_ptr<CylinderBounds> cbounds,
+  CylinderLayer(std::shared_ptr<const CylinderBounds> cbounds,
                 std::unique_ptr<SurfaceArray> surfaceArray,
                 double thickness = 0.,
                 std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -103,7 +103,7 @@ public:
 
   /**Concentric Layer: Constructor with CylinderSurface components,
      MaterialProperties and pointer SurfaceArray (passing ownership) */
-  CylinderLayer(std::shared_ptr<CylinderBounds> cbounds,
+  CylinderLayer(std::shared_ptr<const CylinderBounds> cbounds,
                 std::unique_ptr<SurfaceArray> surfaceArray,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,

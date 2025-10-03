@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastDataPreparator.h"
@@ -69,7 +69,7 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::MuFastDataPreparator::setMCFlag(const BooleanProperty& use_mcLUT)
+StatusCode TrigL2MuonSA::MuFastDataPreparator::setMCFlag(bool use_mcLUT)
 {
   m_use_mcLUT = use_mcLUT;
 
@@ -145,7 +145,8 @@ void TrigL2MuonSA::MuFastDataPreparator::setExtrapolatorTool(ToolHandle<ITrigMuo
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI*        p_roi,
+StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const EventContext& ctx,
+                                                           const xAOD::MuonRoI*        p_roi,
                                                            const TrigRoiDescriptor*    p_roids,
                                                            const bool                  insideOut,
                                                            TrigL2MuonSA::RpcHits&      rpcHits,
@@ -167,7 +168,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
 
     if(m_use_rpc && !insideOut) {
 
-        sc = m_rpcDataPreparator->prepareData(p_roids,
+        sc = m_rpcDataPreparator->prepareData(ctx,
+                                          p_roids,
                                           rpcHits,
                                           rpcLayerHits,
                                           &m_rpcPatFinder,
@@ -201,7 +203,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
 
     ATH_MSG_DEBUG("nr of RPC hits=" << rpcHits.size());
 
-    sc = m_rpcRoadDefiner->defineRoad(p_roi,
+    sc = m_rpcRoadDefiner->defineRoad(ctx,
+                                      p_roi,
                                       insideOut,
                                       muonRoad,
                                       rpcLayerHits,
@@ -216,7 +219,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
         return sc;
     }
 
-    sc = m_mdtDataPreparator->prepareData(p_roids,
+    sc = m_mdtDataPreparator->prepareData(ctx,
+                                        p_roids,
                                         rpcFitResult,
                                         muonRoad,
                                         mdtRegion,
@@ -237,7 +241,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI*                 p_roi,
+StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const EventContext& ctx,
+                                                           const xAOD::MuonRoI*                 p_roi,
                                                            const TrigRoiDescriptor*             p_roids,
                                                            std::vector<TrigL2MuonSA::MuonRoad>& clusterRoad,
                                                            std::vector<TrigL2MuonSA::RpcFitResult>&  clusterFitResults,
@@ -261,7 +266,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
 
   } else {
 
-    sc = m_rpcDataPreparator->prepareData(p_roids,
+    sc = m_rpcDataPreparator->prepareData(ctx,
+                                          p_roids,
                                           rpcLayerClusters,
                                           &m_clusterPatFinder,
                                           dynamicDeltaRpc);
@@ -291,7 +297,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
     roiEtaMaxHigh = p_roids->eta();
   }
 
-  sc = m_clusterRoadDefiner->defineRoad(p_roi,
+  sc = m_clusterRoadDefiner->defineRoad(ctx,
+                                        p_roi,
                                         clusterRoad,
                                         rpcLayerClusters,
                                         &m_clusterPatFinder,
@@ -306,7 +313,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
 
   }
   if(!clusterRoad.empty()){
-    sc = m_mdtDataPreparator->prepareData(p_roids,
+    sc = m_mdtDataPreparator->prepareData(ctx,
+                                          p_roids,
                                           clusterFitResults.back(),
                                           clusterRoad.back(),
                                           mdtRegion,
@@ -361,7 +369,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI*        p_roi,
+StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const EventContext& ctx,
+                                                           const xAOD::MuonRoI*        p_roi,
                                                            const TrigRoiDescriptor*    p_roids,
                                                            const bool                  insideOut,
                                                            TrigL2MuonSA::TgcHits&      tgcHits,
@@ -377,8 +386,7 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
   ATH_MSG_DEBUG("RoI eta/phi=" << p_roi->eta() << "/" << p_roi->phi());
 
   if(!insideOut) {
-    sc = m_tgcDataPreparator->prepareData(p_roi,
-                                          tgcHits);
+    sc = m_tgcDataPreparator->prepareData(ctx, p_roi, tgcHits);
   } else {
     ATH_MSG_DEBUG("Skip TgcDataPreparator");
   }
@@ -388,7 +396,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
   }
   ATH_MSG_DEBUG("nr of TGC hits=" << tgcHits.size());
 
-  sc = m_tgcRoadDefiner->defineRoad(p_roids,
+  sc = m_tgcRoadDefiner->defineRoad(ctx,
+                                    p_roids,
                                     insideOut,
                                     tgcHits,
                                     muonRoad,
@@ -398,7 +407,8 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
     return sc;
   }
 
-  sc = m_mdtDataPreparator->prepareData(p_roids,
+  sc = m_mdtDataPreparator->prepareData(ctx,
+                                        p_roids,
                                         tgcFitResult,
                                         muonRoad,
                                         mdtRegion,
@@ -411,8 +421,7 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
   ATH_MSG_DEBUG("nr of MDT (normal)  hits=" << mdtHits.size());
 
   if(!m_cscDataPreparator.empty()) {
-    sc = m_cscDataPreparator->prepareData(muonRoad,
-					  cscHits);
+    sc = m_cscDataPreparator->prepareData(ctx, muonRoad, cscHits);
     if (!sc.isSuccess()) {
       ATH_MSG_WARNING("Error in CSC data preparation.");
       return sc;
@@ -421,8 +430,7 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
   }
 
   if(m_use_stgc && !m_stgcDataPreparator.empty()){
-    sc = m_stgcDataPreparator->prepareData(p_roids,
-					   stgcHits);
+    sc = m_stgcDataPreparator->prepareData(ctx, p_roids, stgcHits);
     if (!sc.isSuccess()) {
       ATH_MSG_WARNING("Error in sTGC data preparation.");
       return sc;
@@ -431,8 +439,7 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
   }
 
   if(m_use_mm && !m_mmDataPreparator.empty()){
-    sc = m_mmDataPreparator->prepareData(p_roids,
-					 mmHits);
+    sc = m_mmDataPreparator->prepareData(ctx, p_roids, mmHits);
     if (!sc.isSuccess()) {
       ATH_MSG_WARNING("Error in MM data preparation.");
       return sc;

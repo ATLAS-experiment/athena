@@ -267,6 +267,15 @@ struct TopCollection {
          m_order[m_nextSlot]=m_nextSlot;
       }
    }
+   // Accept the element of the latest slot provided there is still a free slot.
+   bool acceptNoSort() {
+      // if there are still free slot increase the number of used slots
+      if (m_nextSlot < m_maxSlots) {
+         ++m_nextSlot;
+         m_order[m_nextSlot]=m_nextSlot;
+      }
+      return (m_nextSlot < m_maxSlots);
+   }
 
    bool empty() const {
       return m_nextSlot==0;
@@ -437,7 +446,8 @@ protected:
                                        trajectory_t& trajectory,
                                        const Acts::Logger& logger,
                                        const std::size_t numMeasurementsCut,
-                                       const std::pair<float,float>& maxChi2Cut) const {
+                                       const std::pair<float,float>& maxChi2Cut,
+                                       bool forced) const {
       Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
          result = boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface>{};
 
@@ -465,10 +475,18 @@ protected:
 
       // select n measurents with the smallest chi2.
       auto preCalibrator = derived().template preCalibrator<DIM, BaseElementType>();
+      auto postCalibrator = derived().template postCalibrator<DIM, BaseElementType>();
       TopCollection<NMeasMax, TheMatchingMeasurement > selected_measurements(numMeasurementsCut);
-      {
-         for ( const auto &measurement : measurement_range ) {
-            TheMatchingMeasurement &matching_measurement=selected_measurements.slot();
+      for ( const auto &measurement : measurement_range ) {
+         TheMatchingMeasurement &matching_measurement=selected_measurements.slot();
+         if (forced && postCalibrator) {
+            // skip preCalibrator and computeChi2, by doing everything else. We start with what's done if no preCalibrator.
+            const auto &m = derived().forwardToCalibrator(measurement);
+            matching_measurement.m_measurement = std::make_pair( m.template localPosition<DIM>(), m.template localCovariance<DIM>() );
+            matching_measurement.m_chi2 = 0.0f;
+            matching_measurement.m_sourceLink=measurement;
+            if (!selected_measurements.acceptNoSort()) break;
+         } else {
             matching_measurement.m_measurement = preCalibrator(geometryContext,
                                                                calibrationContext,
                                                                derived().forwardToCalibrator(measurement),
@@ -489,7 +507,6 @@ protected:
       }
 
       // apply final calibration to n-best measurements
-      auto postCalibrator = derived().template postCalibrator<DIM, BaseElementType>();
       using post_calib_meas_cov_pair_t
          = std::pair<typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurement<DIM>,
                      typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM> >;
@@ -532,16 +549,16 @@ protected:
 
             // apply the calibration
             calibrated_measurement = postCalibrator(geometryContext,
-                                                      calibrationContext,
-                                                      derived().forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
-                                                      derived().boundParams(boundState));
+                                                    calibrationContext,
+                                                    derived().forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
+                                                    derived().boundParams(boundState));
             // update chi2 using calibrated measurement
             a_selected_measurement.m_chi2 = computeChi2(calibrated_measurement.first,
-                                                        calibrated_measurement.second,
-                                                        predicted.first,
-                                                        predicted.second);
+                                                         calibrated_measurement.second,
+                                                         predicted.first,
+                                                         predicted.second);
             // ... and set outlier flag
-            a_selected_measurement.m_isOutLier =  (a_selected_measurement.m_chi2 >= maxChi2Cut.first);
+            a_selected_measurement.m_isOutLier =  (!forced && a_selected_measurement.m_chi2 >= maxChi2Cut.first);
             if constexpr(!pre_and_post_calib_types_agree) {
                ++calibrated_meas_cov_i;
             }
@@ -552,7 +569,7 @@ protected:
          for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
                  idx: selected_measurements) {
             TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
-            a_selected_measurement.m_isOutLier =  (a_selected_measurement.m_chi2 >= maxChi2Cut.first);
+            a_selected_measurement.m_isOutLier =  (!forced && a_selected_measurement.m_chi2 >= maxChi2Cut.first);
          }
       }
 
@@ -720,8 +737,8 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
       Acts::Result<boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> >
          result = Acts::CombinatorialKalmanFilterError::MeasurementSelectionFailed;
       // get associated measurement container and the relevant measurement range for the given surface.
-      auto [a_measurement_container_variant_ptr, range] = this->derived().containerAndRange(surface);
-      if (!this->derived().expectMeasurements( surface, a_measurement_container_variant_ptr, range)) {
+      auto [a_measurement_container_variant_ptr, range, forced] = this->derived().containerAndRange(surface);
+      if (!forced && !this->derived().expectMeasurements( surface, a_measurement_container_variant_ptr, range)) {
          result = result.failure(Acts::CombinatorialKalmanFilterError::NoMeasurementExpected);
          return result;
       }
@@ -741,7 +758,8 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
                                   &trajectory,
                                   &logger,
                                   numMeasurementsCut,
-                                  &maxChi2Cut] (const auto &measurement_container_with_dimension) {
+                                  &maxChi2Cut,
+                                  forced] (const auto &measurement_container_with_dimension) {
                using ArgType = std::remove_cv_t<std::remove_reference_t< decltype(measurement_container_with_dimension) > >;
                constexpr std::size_t DIM = ArgType::dimension();
                auto measurement_range = this->derived().rangeForContainer(measurement_container_with_dimension,range);
@@ -756,7 +774,8 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
                                                            trajectory,
                                                            logger,
                                                            numMeasurementsCut,
-                                                           maxChi2Cut);
+                                                           maxChi2Cut,
+                                                           forced);
             },
             *a_measurement_container_variant_ptr);
          }

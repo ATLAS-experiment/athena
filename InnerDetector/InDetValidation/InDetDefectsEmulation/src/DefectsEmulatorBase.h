@@ -9,7 +9,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "ModuleIdentifierMatchUtil.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 
@@ -68,7 +68,6 @@ protected:
    Gaudi::Property<std::vector<std::vector<double>> > m_noiseShape
       {this,"NoiseShape",{}, "Shape of noise distribution (e.g. used for Pixel tot distribution or strip time bin distribution."};
 
-
    enum EHistType {
       kRejectedHits,
       kNoiseHits,
@@ -90,7 +89,7 @@ protected:
    mutable std::atomic<std::size_t>   m_splitRDOs {};
    mutable std::atomic<std::size_t>   m_totalNoise {};
 
-   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool
+   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
       {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
    ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};

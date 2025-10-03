@@ -41,12 +41,12 @@ namespace Trk {
 
 namespace Muon {
 
-    class MuonTrackCleaner : virtual public IMuonTrackCleaner, public AthAlgTool {
+    class MuonTrackCleaner : virtual public extends<AthAlgTool, IMuonTrackCleaner> {
     public:
         struct MCTBCleaningInfo {
             Identifier id{};
             Identifier chId{};
-            MuonStationIndex::ChIndex chIndex{MuonStationIndex::ChUnknown};
+            MuonStationIndex::ChIndex chIndex{MuonStationIndex::ChIndex::ChUnknown};
             int useInFit{1};
             bool inBounds{true};
             bool isNoise{false};
@@ -138,7 +138,7 @@ namespace Muon {
         };
 
         struct ChamberLayerStatistics {
-            MuonStationIndex::ChIndex chIndex{MuonStationIndex::ChUnknown};
+            MuonStationIndex::ChIndex chIndex{MuonStationIndex::ChIndex::ChUnknown};
             unsigned int nhits{0};
             unsigned int noutliers{0};
             unsigned int ndeltas{0};
@@ -198,9 +198,7 @@ namespace Muon {
         };
 
     public:
-        /** @brief constructor */
-        MuonTrackCleaner(const std::string&, const std::string&, const IInterface*);
-
+        using base_class::base_class;
         /** @brief destructor */
         ~MuonTrackCleaner() = default;
 

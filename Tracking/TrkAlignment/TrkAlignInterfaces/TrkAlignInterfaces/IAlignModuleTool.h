@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_ALIGNMODULETOOL_IH
@@ -50,7 +50,7 @@ namespace Trk {
     virtual StatusCode finalize() = 0;
 
     /** returns type of AlignModuleList (see AlignModuleList.h for more info) */
-    AlignModuleListType alignModuleListType() { return (AlignModuleListType)m_alignModuleListType; }
+    virtual AlignModuleListType alignModuleListType() const = 0;
 
     /** gets detector type for a detector element */
     virtual AlignModule::DetectorType getDetectorType(const TrkDetElementBase* det) const = 0;    
@@ -140,9 +140,8 @@ namespace Trk {
     virtual void setLogStream(std::ostream * os) { m_logStream = os; }
 
   protected:
-    int m_alignModuleListType;  //!< uses Trk enum AlignModuleListType (L1,L2,L3,L1_5,L2_5)
 
-    std::ostream * m_logStream; //!< logfile output stream
+    std::ostream * m_logStream = nullptr; //!< logfile output stream
 
   };
 

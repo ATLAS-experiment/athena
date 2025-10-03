@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSLAYERBUILDER_H
@@ -128,7 +128,7 @@ public:
   // Config
   // getConfiguration() const;
 
-  ActsLayerBuilder::Config
+  const ActsLayerBuilder::Config&
   getConfiguration() const
   {
     return m_cfg;

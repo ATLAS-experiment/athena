@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -36,9 +36,9 @@ DECLARE_TPCNV_FACTORY(TrigInDetTrackTruthMapCnv_tlp2,
 DECLARE_TPCNV_FACTORY(TrigInDetTrackTruthMapCnv_tlp3,
                       TrigInDetTrackTruthMap,
                       TrigInDetTrackTruthMap_tlp3,
-                      Athena::TPCnvVers::Current)
+                      Athena::TPCnvVers::Old)
 
 DECLARE_TPCNV_FACTORY(TrigInDetTrackTruthMapCnv_tlp4,
                       TrigInDetTrackTruthMap,
                       TrigInDetTrackTruthMap_tlp4,
-                      Athena::TPCnvVers::Old)
+                      Athena::TPCnvVers::Current)

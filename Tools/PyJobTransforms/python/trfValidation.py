@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfValidation
 #
@@ -228,6 +228,7 @@ class athenaLogFileReport(logFileReport):
 
         self._metaPat = re.compile(r"MetaData:\s+(.*?)\s*=\s*(.*)$")
         self._metaData = {}
+        self._eventLoopWarnings = []
         self._substepName = substepName
         self._msgLimit = msgLimit
 
@@ -254,6 +255,7 @@ class athenaLogFileReport(logFileReport):
             self._levelCounter[level] = 0
 
         self._errorDetails = {}
+        self._eventLoopWarnings = []
         for level in self._levelCounter:
             self._errorDetails[level] = []
             # Format:
@@ -284,6 +286,7 @@ class athenaLogFileReport(logFileReport):
         return linesList
 
     def scanLogFile(self, resetReport=False):
+        
         nonStandardErrorsList = self.knowledgeFileHandler('nonStandardErrors.db')
 
         if resetReport:
@@ -305,7 +308,12 @@ class athenaLogFileReport(logFileReport):
                 self._levelCounter['ERROR'] = 1
                 self._errorDetails['ERROR'] = {'message': str(e), 'firstLine': 0, 'count': 1}
                 return
-            for line, lineCounter in myGen:
+            # Detect whether we are in the event loop part of the log file
+            inEventLoop = False
+            for line, lineCounter in myGen:  
+                if '===>>>  start processing event' in line: inEventLoop = True
+                if 'Application Manager Stopped successfully' in line: inEventLoop = False
+
                 # In case we have enabled a custom log parser, run the line through it first
                 if customLogParser is not None:
                     customLogParser.processLine(line)
@@ -366,6 +374,11 @@ class athenaLogFileReport(logFileReport):
                     fields[matchKey] = m.group(matchKey)
                 msg.debug('Line parsed as: {0}'.format(fields))
 
+                # If this is a WARNING and we passed the start of the event loop, 
+                # add it to special list 
+                if (fields['level'] == 'WARNING') and inEventLoop:
+                    self._eventLoopWarnings.append(fields)
+
                 # Check this is not in our ignore list
                 ignoreFlag = False
                 for ignorePat in self._ignoreList.structuredPatterns:
@@ -418,7 +431,7 @@ class athenaLogFileReport(logFileReport):
                     else:
                         # Overcounted
                         pass
-                if 'Total payload read from COOL' in fields['message']:
+                if 'Total payload read from IOVDb' in fields['message']:
                     msg.debug("Found COOL payload information at line {0}".format(line))
                     a = re.match(r'(\D+)(?P<bytes>\d+)(\D+)(?P<time>\d+[.]?\d*)(\D+)', fields['message'])
                     self._dbbytes += int(a.group('bytes'))
@@ -447,7 +460,6 @@ class athenaLogFileReport(logFileReport):
 
         return {'level': worstName, 'nLevel': worst, 'firstError': firstError}
 
-
     ## Return the first error found in the logfile above a certain loglevel
     def firstError(self, floor='ERROR'):
         firstLine = firstError = None
@@ -463,6 +475,14 @@ class athenaLogFileReport(logFileReport):
 
         return {'level': firstName, 'nLevel': firstLevel, 'firstError': firstError}
 
+    def eventLoopWarnings(self):
+        eventLoopWarnings = []
+        for item in self._eventLoopWarnings:
+            if item in [element['item'] for element in eventLoopWarnings]:
+                continue
+            count = self._eventLoopWarnings.count(item)
+            eventLoopWarnings.append({'item':item, 'count': count})
+        return eventLoopWarnings          
 
     def moreDetails(self, log, firstline, firstLineCount, knowledgeFile, offset=0):
         # Look for "abnormal" and "last normal" line(s)

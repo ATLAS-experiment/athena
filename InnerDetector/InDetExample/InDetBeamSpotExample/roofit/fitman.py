@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 Command line tool to extract desired vertices from a beam spot fitter
 ntuple, store them in a standalone ntuple for use in RooFit, and run
@@ -37,7 +37,7 @@ import random
 #
 qargv = [ ]
 for s in sys.argv:
-    if re.search('\s|\*|\?',s):   # any white space or special characters in word so we need quoting?
+    if re.search(r'\s|\*|\?',s):   # any white space or special characters in word so we need quoting?
         if "'" in s:
             qargv.append('"%s"' % re.sub('"',"'",s))
         else:

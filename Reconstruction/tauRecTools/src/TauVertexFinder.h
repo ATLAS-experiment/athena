@@ -53,6 +53,7 @@ private:
 private:
   
   Gaudi::Property<bool> m_useTJVA {this, "UseTJVA", true};
+  Gaudi::Property<double> m_dDeltaRMax{ this, "DeltaRMax", 0.2, "Maximum DeltaR to consider tracks for TJVA"};  
   Gaudi::Property<std::string> m_assocTracksName {this, "AssociatedTracks", ""};
   
   ToolHandle< InDet::IInDetTrackSelectionTool > m_TrackSelectionToolForTJVA {this, "InDetTrackSelectionToolForTJVA", ""};

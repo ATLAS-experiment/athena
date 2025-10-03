@@ -15,5 +15,5 @@ atlas_add_library( HGTD_ReadoutGeometry
    DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} Identifier
    ReadoutGeometryBase TrkEventPrimitives HGTD_Identifier AthenaBaseComps
-   TrkSurfaces
+   TrkSurfaces AthContainers
    PRIVATE_LINK_LIBRARIES AtlasDetDescr StoreGateLib GeoModelUtilities )

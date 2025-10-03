@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EC::PresamplerCalibrationCalculator
@@ -43,7 +43,7 @@ namespace LArG4 {
 
       PresamplerCalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator);
       StatusCode initialize() override final;
-      virtual ~PresamplerCalibrationCalculator();
+      virtual ~PresamplerCalibrationCalculator() = default;
 
       // The Process method returns a boolean value.  If it's true, the
       // hit can be used by Geant4; if it's false, there's something wrong
@@ -64,11 +64,10 @@ namespace LArG4 {
     private:
 
       // Geometry calculator
-      ServiceHandle<IECPresamplerGeometry> m_geometryCalculator;
+      ServiceHandle<IECPresamplerGeometry> m_geometryCalculator{this, "GeometryCalculator", "EMECPresamplerGeometry"};
 
       // Energy calculator
-      CaloG4::SimulationEnergies m_energyCalculator;
-
+      CaloG4::SimulationEnergies m_energyCalculator{};
     };
 
   } // namespace EC

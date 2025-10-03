@@ -30,13 +30,28 @@ namespace CP
     ANA_CHECK (m_makerTool.retrieve());
 
     for (auto* handle : {&m_electronsHandle, &m_photonsHandle,
-                         &m_muonsHandle, &m_tausHandle, &m_invisHandle}) {
+                         &m_muonsHandle, &m_tausHandle}) {
       ANA_CHECK (handle->initialize (m_systematicsList, SG::AllowEmpty));
     }
+    ANA_CHECK (m_invisHandles.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK (m_electronsSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK (m_muonsSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_photonsSelection.initialize(m_systematicsList, m_photonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_tausSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
+
+    // Initialize invisible selections - need to pair each selection with its corresponding handle
+    if (m_invisSelectionKeys.size() != m_invisHandles.size()) {
+      ATH_MSG_ERROR("Number of invisible selections (" << m_invisSelectionKeys.size()
+                    << ") doesn't match number of invisible handles (" << m_invisHandles.size() << ")");
+      return StatusCode::FAILURE;
+    }
+    m_invisSelections.clear();
+    m_invisSelections.reserve(m_invisHandles.size());
+    for (size_t i = 0; i < m_invisHandles.size(); ++i) {
+      m_invisSelections.emplace_back(m_invisSelectionKeys[i], this);
+      ANA_CHECK (m_invisSelections.back().initialize(m_systematicsList, m_invisHandles.at(i), SG::AllowEmpty));
+    }
+
     ANA_CHECK (m_jetsHandle.initialize (m_systematicsList));
     ANA_CHECK (m_metHandle.initialize (m_systematicsList));
 
@@ -73,10 +88,14 @@ namespace CP
 
       metHelper.resetObjSelectionFlags();
 
-      if (m_invisHandle) {
+      for (size_t i = 0; i < m_invisHandles.size(); ++i) {
         const xAOD::IParticleContainer* invisible = nullptr;
-        ATH_CHECK( m_invisHandle.retrieve(invisible, sys) );
-        ATH_CHECK( m_makerTool->markInvisible(invisible, metHelper, met.get() ) );
+        ATH_CHECK( m_invisHandles.at(i).retrieve(invisible, sys) );
+        ConstDataVector<xAOD::IParticleContainer> invisSelected(SG::VIEW_ELEMENTS);
+        for (const xAOD::IParticle *invisParticle : *invisible)
+          if (m_invisSelections.at(i).getBool(*invisParticle, sys))
+            invisSelected.push_back(invisParticle);
+        ANA_CHECK (m_makerTool->markInvisible (invisSelected.asDataVector(), metHelper, met.get() ) );
       }
 
       // Lambda helping with calculating the MET terms coming from the leptons

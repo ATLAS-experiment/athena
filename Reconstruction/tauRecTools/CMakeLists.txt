@@ -48,4 +48,8 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AsgMessagingLib xAODBase
       xAODCaloEvent xAODJet xAODPFlow xAODTau FourMomUtils tauRecToolsLib PFlowUtilsLib
       FlavorTagDiscriminants FlavorTagInference ${extra_private_libs} )
+else()
+   atlas_add_component( tauRecTools
+      src/components/*.cxx
+      LINK_LIBRARIES tauRecToolsLib )
 endif()

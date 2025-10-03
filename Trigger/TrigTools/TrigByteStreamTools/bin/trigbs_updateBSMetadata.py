@@ -12,7 +12,6 @@ import argparse
 import logging
 import eformat
 import libpyevent_storage as EventStorage
-import six
 
 
 # This mapping was found in a comment in PyUtils.MetaReader
@@ -137,7 +136,7 @@ def main():
         file_name_base = '.'.join(file_name_list)
 
     # Write the new file
-    metadata_extra_strings = ['{:s}={:s}'.format(k, str(v)) for k, v in six.iteritems(metadata_extra)]
+    metadata_extra_strings = ['{:s}={:s}'.format(k, str(v)) for k, v in metadata_extra.items()]
     output_stream = eformat.ostream(
         core_name         = file_name_base,
         run_number        = metadata_basic['runNumber'],

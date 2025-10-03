@@ -34,13 +34,14 @@ parser.add_argument('--lumifolder', type=str, help='Lumi folder', default='/TRIG
 parser.add_argument('--lumitag', type=str, help='Lumi tag', default='OflLumi-Run3-003')
 parser.add_argument('--outdir', type=str, help='Directory to dump plots', default='plots')
 parser.add_argument('--dblivetime', action='store_true', help='Look up livetime from DB')
-parser.add_argument('--campaign', type=str, help='mc16a/d/e, mc21, mc23a')
+parser.add_argument('--campaign', type=str, help='mc16a/d/e, mc21, mc23a/d/e')
 
 args     = parser.parse_args()
 campaign = args.campaign
+run3 = "mc2" in campaign
 
 ZPURITYFACTOR = 0.9935
-if args.campaign in ["mc21", "mc23a"]:
+if run3:
     ZXSEC = 2.0675
 else:
     ZXSEC = 1.929
@@ -72,7 +73,7 @@ if args.outdir:
 else: 
     out_dir = runname + ".csv"
 
-if args.campaign in ["mc21", "mc23a"]:
+if run3:
     lb_length_name = '%s/GLOBAL/DQTGlobalWZFinder/duration_vs_LB' % runname
     livetime_name = '%s/GLOBAL/DQTGlobalWZFinder/avgLiveFrac_vs_LB' % runname
 else:
@@ -288,7 +289,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
             #hpass   = fin.Get("%s/%s/GLOBAL/DQTGlobalWZFinder/m_ele_tight_passkine" % (runname, lb))
             #hphoton.GetXaxis().SetRangeUser(66000, 250000)
             #hpass.GetXaxis().SetRangeUser(66000, 250000)
-            if args.campaign in ["mc21", "mc23a"]:
+            if run3:
                 ACCEPTANCE = 0.2971
             else:
                 ACCEPTANCE = 0.2996
@@ -302,7 +303,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
             hms = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_match_ss' % (runname, lb))
             hno = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_nomatch_os' % (runname, lb))
             hns = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_nomatch_ss' % (runname, lb))
-            if args.campaign in ["mc21", "mc23a"]:
+            if run3:
                 ACCEPTANCE = 0.3292
             else:
                 ACCEPTANCE = 0.3323224

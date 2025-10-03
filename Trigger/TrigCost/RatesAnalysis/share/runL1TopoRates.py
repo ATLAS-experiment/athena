@@ -4,6 +4,7 @@
 """
 CA module to configure the (standalone) HLT for athena.
 """
+from AthenaCommon.Constants import DEBUG
 
 # This entry point is only used when running in athena
 
@@ -137,6 +138,7 @@ if __name__ == "__main__":
         rates.m_userDefinedNames = userDefinedNames  
         rates.m_userDefinedDefinitions = userDefinedDefinitions
 
+   rates.OutputLevel =  DEBUG
    rates.DoTriggerGroups = True
    rates.DoGlobalGroups = True
    rates.DoExpressRates = True

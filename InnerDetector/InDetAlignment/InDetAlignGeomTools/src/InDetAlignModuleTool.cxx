@@ -21,10 +21,7 @@ namespace InDet {
   }
 
   //________________________________________________________________________
-  InDetAlignModuleTool::~InDetAlignModuleTool()
-  {
-
-  }
+  InDetAlignModuleTool::~InDetAlignModuleTool() = default;
 
   //________________________________________________________________________
   StatusCode InDetAlignModuleTool::initialize()
@@ -37,7 +34,7 @@ namespace InDet {
       return StatusCode::FAILURE;
     }
 
-    // Set up TRT ID helper 
+    // Set up TRT ID helper
     if (detStore()->retrieve(m_trtHelper, "TRT_ID").isFailure()) {
       msg(MSG::FATAL)<<"Could not get TRT ID helper"<<endmsg;
       return StatusCode::FAILURE;
@@ -57,7 +54,7 @@ namespace InDet {
     }
     return StatusCode::SUCCESS;
   }
-  
+
   //________________________________________________________________________
   int InDetAlignModuleTool::subDetElementIDHash(Identifier id) const
   {

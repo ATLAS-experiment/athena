@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -20,6 +20,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/no_sanitize_undefined.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace pool {
@@ -61,7 +62,7 @@ namespace pool {
       if (cxlevel && fObjlen > 256) {
         if (cxlevel == 2) cxlevel--;
         Int_t nbuffers = fObjlen/kMAXZIPBUF;
-        Int_t buflen = TMath::Max(512,fKeylen + fObjlen + 9*nbuffers + 8); //add 8 bytes in case object is placed in a deleted gap
+        Int_t buflen = std::max(512,fKeylen + fObjlen + 9*nbuffers + 8); //add 8 bytes in case object is placed in a deleted gap
         fBuffer = new char[buflen];
         char *objbuf = fBufferRef->Buffer() + fKeylen;
         char *bufcur = &fBuffer[fKeylen];
@@ -108,7 +109,7 @@ namespace pool {
       if (!gFile) return 0;
       fBufferRef->SetParent(gFile);
       if (fObjlen > fNbytes-fKeylen) {
-        fBuffer = new char[fNbytes];
+        fBuffer = new char[fNbytes]{};
         ReadFile();                    //Read object structure from file
         memcpy(fBufferRef->Buffer(),fBuffer,fKeylen);
       }
@@ -153,8 +154,7 @@ namespace pool {
         UChar_t *bufcur = (UChar_t *)&fBuffer[fKeylen];
         Int_t nin, nout, nbuf;
         Int_t noutot = 0;
-        bool loop = true;
-        while (loop) {
+        while (true) {
           nin  = 9 + ((Int_t)bufcur[3] | ((Int_t)bufcur[4] << 8) | ((Int_t)bufcur[5] << 16));
           nbuf = (Int_t)bufcur[6] | ((Int_t)bufcur[7] << 8) | ((Int_t)bufcur[8] << 16);
           R__unzip(&nin, bufcur, &nbuf, (unsigned char*)objbuf, &nout);
@@ -308,7 +308,7 @@ int pool::RootKeyIOHandler::read(const char* knam, void** obj) const    {
 
 int pool::RootKeyIOHandler::read NO_SANITIZE_UNDEFINED (TKey* key, void** obj) const   {
   if ( key )  { 
-    Key* mkey = (Key*)key;// Extremely ugly, but it works, because
+    Key* mkey = reinterpret_cast<Key*>(key);// Extremely ugly, but it works, because
     // of single inheritance and no virtuality.
     // But we then need to disable ubsan for this function.
     int nbytes = mkey->readObject(obj);

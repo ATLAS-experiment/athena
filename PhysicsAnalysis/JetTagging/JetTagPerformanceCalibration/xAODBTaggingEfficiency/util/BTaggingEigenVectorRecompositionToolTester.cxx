@@ -9,7 +9,7 @@
 #include "FTagAnalysisInterfaces/IBTaggingEigenVectorRecompositionTool.h"
 
 
-int main() {
+int main ATLAS_NOT_THREAD_SAFE () {
   bool retval = true;
 
   std::string taggerName = "MV2c10";

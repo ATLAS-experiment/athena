@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Module with PAT transform options and substeps
 
@@ -9,46 +9,41 @@ msg = msg.getChild(__name__)
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
 from PyJobTransforms.trfArgs import getExtraDPDList
-from PyJobTransforms.trfExe import  NTUPMergeExecutor, POOLMergeExecutor
-
-# TODO: it seems this method is not called at all in Athena, 
-# at least from what appears in LXR:
-# https://acode-browser1.usatlas.bnl.gov/lxr/search?%21v=head&_filestring=&_string=addPhysValidationFiles
-def addPhysValidationFiles(parser):
-    # TODO: Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
-    # Use arggroup to get these arguments in their own sub-section (of --help)
-    parser.defineArgGroup('PhysVal', 'Physics validation files and steering options')
-    parser.add_argument('--outputNTUP_PHYSVALFile', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
-                        help='Output physics validation file', group='Validation Files')
+from PyJobTransforms.trfExe import  NTUPMergeExecutor, POOLMergeExecutor, NtupPhysValPostProcessingExecutor
     
 def addPhysValidationMergeFiles(parser):
     # TODO: Better to somehow auto-import this from PhysicsAnalysis/PhysicsValidation/PhysValMonitoring
     # Use arggroup to get these arguments in their own sub-section (of --help)
-    parser.defineArgGroup('Merge_tf', 'Physics Validation merge job specific options')
+    parser.defineArgGroup('PhysValMerge', 'Physics Validation merge job specific options')
     parser.add_argument('--inputNTUP_PHYSVALFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='input'),
-                        help='Input physics validation file', group='Validation Files', nargs='+')
-    parser.add_argument('--outputNTUP_PHYSVAL_MRGFile', 
-                        allow_abbrev=False,
+                        help='Input physics validation file', group='PhysValMerge', nargs='+')
+    parser.add_argument('--outputNTUP_PHYSVAL_MRGFile',
                         type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
-                        help='Output merged physics validation file', group='Validation Files')
+                        help='Output merged physics validation file', group='PhysValMerge')
     parser.add_argument('--skipPostProcessing', 
                         action='store_true', 
-                        help='If given, skip the post-processing step and just do the merging')
+                        default = False,
+                        help='If given, skip the post-processing step and just do the merging',
+                        group='PhysValMerge')
 
 def addNTUPMergeSubsteps(executorSet, skip_post_processing=False):
     # Ye olde NTUPs
+    intermediateStep = 'NTUP_PHYSVAL_MRG0'
     try:
         if skip_post_processing:
-            msg.info("User requested to SKIP post-processing ('--skipPostProcessing' [%s]), so we'll skip running post-processing.", skip_post_processing)
+            msg.debug("User requested to SKIP post-processing ('--skipPostProcessing' [%s]), so we'll just do merging and skip running post-processing.", skip_post_processing)
             out_data = ['NTUP_PHYSVAL_MRG']
         else:
-            msg.info("We'll run merging and post-processing (currently implemented only for ID track monitoring).")
-            out_data = ['NTUP_PHYSVAL_MRG0']
-            executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVALPostProc', exe='postProcessIDPVMHistos', inData=['NTUP_PHYSVAL_MRG0'], outData=['NTUP_PHYSVAL_MRG'], exeArgs=[]))
+            msg.debug("We'll run merging and post-processing (implemented for ID track monitoring, EGamma, and BTagging).")
+            out_data = [intermediateStep]
 
         executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVAL', exe='hadd', inData=['NTUP_PHYSVAL'], outData=out_data, exeArgs=[]))
+
+        if not skip_post_processing:
+            executorSet.add(NTUPMergeExecutor(name='NTUPLEPHYSVALIDTrackingPostProc', exe='postProcessIDPVMHistos', inData=[intermediateStep], outData=['NTUP_PHYSVAL_MRG1'], exeArgs=[]))
+            executorSet.add(NtupPhysValPostProcessingExecutor(name='NTUPLEPHYSVALPostProc', exe='physvalPostProcessing.py', inData=['NTUP_PHYSVAL_MRG1'], outData=['NTUP_PHYSVAL_MRG'],exeArgs=[]))
+
         # Extra Tier-0 NTUPs
         extraNTUPs = getExtraDPDList(NTUPOnly = True)
         for ntup in extraNTUPs:

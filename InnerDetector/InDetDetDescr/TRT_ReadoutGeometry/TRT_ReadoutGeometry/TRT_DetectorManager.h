@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_READOUTGEOMETRY_TRT_DETECTORMANAGER_H
@@ -16,21 +16,15 @@
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
-#include "InDetReadoutGeometry/Version.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementCollection.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "GeoModelKernel/GeoXF.h"
-#include "AthenaKernel/IIOVSvc.h"
-#include "AthenaBaseComps/AthMsgStreamMacros.h"
-
-#include "CLHEP/Geometry/Transform3D.h"
 
 #include "CxxUtils/checker_macros.h"
 
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -91,12 +85,6 @@ namespace InDetDD {
     void setGasType(const ActiveGasType &);                                        //
     //-----------------------------------------------------------------------------//
 
-    /** Get and set information about digitization version ------------------------*/
-    unsigned int digitizationVersion() const;                                      //
-    const std::string& digitizationVersionName() const;                            //
-    void setDigitizationVersion(const unsigned int &, const std::string& name );   //
-    //-----------------------------------------------------------------------------//
-
     /** Access Numerological information:------------------------------------------*/
     TRT_Numerology *getNumerology();                                               //
     const TRT_Numerology * getNumerology() const;                                  //
@@ -115,6 +103,9 @@ namespace InDetDD {
     const TRT_DetElementCollection* getDetectorElementCollection() const;
     TRT_DetElementCollection::const_iterator getDetectorElementBegin() const;
     TRT_DetElementCollection::const_iterator getDetectorElementEnd() const;
+    TRT_DetElementCollection::iterator getDetectorElementBegin();
+    TRT_DetElementCollection::iterator getDetectorElementEnd();
+
 
     //-----------------------------------------------------------------------------//
 
@@ -211,7 +202,7 @@ namespace InDetDD {
 
 
     /** Invalidate cache for all detector elements */
-    virtual void invalidateAll() const override;
+    virtual void invalidateAll() override;
 
     /** Update all caches. */
     virtual void updateAll() const override;
@@ -229,7 +220,7 @@ namespace InDetDD {
                                 const CondAttrListCollection* obj,
                                 GeoVAlignmentStore* alignStore) const override;
 
-    bool processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType dummy) const override;
+    bool processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType dummy) override;
 
     bool processSpecialAlignment(const std::string& key,
                                  const CondAttrListCollection* obj=nullptr,

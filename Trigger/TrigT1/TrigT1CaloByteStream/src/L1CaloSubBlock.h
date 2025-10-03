@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_L1CALOSUBBLOCK_H
@@ -216,8 +216,8 @@ class L1CaloSubBlock {
    int      m_maxBits;
    uint32_t m_maxMask;
    bool     m_unpackerFlag;
-   std::vector<uint32_t>::const_iterator m_dataPos;
-   std::vector<uint32_t>::const_iterator m_dataPosEnd;
+   std::vector<uint32_t>::const_iterator m_dataPos{};
+   std::vector<uint32_t>::const_iterator m_dataPosEnd{};
    //  Used for neutral bit packing
    std::vector<int> m_currentPinBit;
    std::vector<int> m_oddParity;

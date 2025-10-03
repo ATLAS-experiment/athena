@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import division
 
 from collections import defaultdict
 from pickle import load, dump, loads

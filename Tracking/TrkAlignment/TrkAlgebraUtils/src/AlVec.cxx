@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/StatusCode.h"
@@ -13,6 +13,13 @@
 #include <exception>
 #include <fstream>
 #include <iomanip>
+
+namespace{
+  char *
+  charAddress(auto & v){
+    return reinterpret_cast<char *>(&v);
+  }
+}
 
 namespace Trk {
 
@@ -323,9 +330,9 @@ StatusCode AlVec::Write(const std::string &filename, bool binary, double scale,
     outvec.open((m_pathbin+filename).c_str(), std::ios::binary);
     if(outvec.fail())
       return StatusCode::FAILURE;
-    outvec.write((char*)&io_size, sizeof (io_size));
-    outvec.write((char*)&scale, sizeof (scale));
-    outvec.write((char*)&version, sizeof (version));
+    outvec.write(charAddress(io_size), sizeof (io_size));
+    outvec.write(charAddress(scale), sizeof (scale));
+    outvec.write(charAddress(version), sizeof (version));
   }
   else {
     outvec.open((m_pathtxt+filename).c_str());
@@ -352,8 +359,8 @@ StatusCode AlVec::Write(const std::string &filename, bool binary, double scale,
     velem = *(m_ptr_data+i);
 
     if(binary){
-      outvec.write((char*)&(ielem), sizeof (ielem));
-      outvec.write((char*)&(velem), sizeof (velem));
+      outvec.write(charAddress((ielem)), sizeof (ielem));
+      outvec.write(charAddress((velem)), sizeof (velem));
     }
     else
       outvec << std::setw(20) << ielem << std::setw(18) << velem << std::endl;
@@ -376,9 +383,9 @@ StatusCode AlVec::WritePartial(const std::string &filename, bool binary, double 
     outvec.open((m_pathbin+filename).c_str(), std::ios::binary);
     if(outvec.fail())
     return StatusCode::FAILURE;
-    outvec.write((char*)&io_size, sizeof (io_size));
-    outvec.write((char*)&scale, sizeof (scale));
-    outvec.write((char*)&version, sizeof (version));
+    outvec.write(charAddress(io_size), sizeof (io_size));
+    outvec.write(charAddress(scale), sizeof (scale));
+    outvec.write(charAddress(version), sizeof (version));
     
     }
     else {
@@ -409,8 +416,8 @@ StatusCode AlVec::WritePartial(const std::string &filename, bool binary, double 
     velem = *(m_ptr_data+i);
 
     if(binary){
-      outvec.write((char*)&(ielem), sizeof (ielem));
-      outvec.write((char*)&(velem), sizeof (velem));
+      outvec.write(charAddress((ielem)), sizeof (ielem));
+      outvec.write(charAddress((velem)), sizeof (velem));
     }
     else
       outvec << std::setw(20) << ielem << std::setw(18) << velem << std::endl;
@@ -461,9 +468,9 @@ StatusCode AlVec::InitializeOutputVector(const std::string& filename, bool binar
     outvec.open((m_pathbin+filename).c_str(), std::ios::binary);
     if(outvec.fail()) 
       return StatusCode::FAILURE;
-    outvec.write((char*)&io_size, sizeof (io_size));
-    outvec.write((char*)&scale,   sizeof (scale));
-    outvec.write((char*)&version, sizeof (version));
+    outvec.write(charAddress(io_size), sizeof (io_size));
+    outvec.write(charAddress(scale),   sizeof (scale));
+    outvec.write(charAddress(version), sizeof (version));
     
   }
   else {
@@ -497,15 +504,15 @@ StatusCode AlVec::ReadPartial(const std::string &filename, double &scale,
   }
 
   int32_t vsiz=0;
-  invec.read((char*)&vsiz, sizeof (vsiz));
+  invec.read(charAddress(vsiz), sizeof (vsiz));
   m_size  = vsiz;
 
 //  int32_t io_scale;
-  invec.read((char*)&scale, sizeof(scale));
+  invec.read(charAddress(scale), sizeof(scale));
 //  scale=io_scale;
 
   if (StdUnits)
-    invec.read((char*)&version, sizeof (version));
+    invec.read(charAddress(version), sizeof (version));
 
 //  std::cout << "AlVec::StdUnits: " << StdUnits << std::endl;
 //  std::cout << "AlVec::scale: " << scale << std::endl;
@@ -514,10 +521,10 @@ StatusCode AlVec::ReadPartial(const std::string &filename, double &scale,
   int64_t ielem=0;
   double  velem=0.0;
   for( int i=0; i<m_size; i++) {
-    invec.read((char*)&ielem, sizeof (ielem));
+    invec.read(charAddress(ielem), sizeof (ielem));
     modmap[i] = ielem;
 
-    invec.read((char*)&velem, sizeof (velem));
+    invec.read(charAddress(velem), sizeof (velem));
     *(m_ptr_data+i) = velem;
 
     // std::cout << "AlVec (" << i << "):: " << ielem << ", " << velem << std::endl;
@@ -535,14 +542,14 @@ StatusCode AlVec::CheckVecVersion(const std::string& filename, bool &StdUnits){
     return StatusCode::FAILURE;
 
   int32_t vsiz=0;
-  invec.read((char*)&vsiz, sizeof (vsiz));
+  invec.read(charAddress(vsiz), sizeof (vsiz));
 
 //  int32_t scale=0;
   double scale=0.;
-  invec.read((char*)&scale, sizeof (scale));
+  invec.read(charAddress(scale), sizeof (scale));
 
   float version=0.0;
-  invec.read((char*)&version, sizeof (version));
+  invec.read(charAddress(version), sizeof (version));
 
   StdUnits = version>=2.0;
 
@@ -572,17 +579,17 @@ StatusCode AlVec::Read(const std::string &filename, double &scale,
     return StatusCode::FAILURE;
 
   int32_t vsiz=0;
-  invec.read((char*)&vsiz, sizeof (vsiz));
+  invec.read(charAddress(vsiz), sizeof (vsiz));
   m_size  = vsiz;
 //  std::cout<<"size="<<m_size<<std::endl;
 
 //  int32_t io_scale;
-  invec.read((char*)&scale, sizeof (scale));
+  invec.read(charAddress(scale), sizeof (scale));
 //  scale=io_scale;
 //  std::cout<<"scale="<<scale<<std::endl;
 
   if (StdUnits)
-    invec.read((char*)&version, sizeof (version));
+    invec.read(charAddress(version), sizeof (version));
 
 //  std::cout << "AlVec::StdUnits: " << StdUnits << std::endl;
 //  std::cout << "AlVec::scale: " << scale << std::endl;
@@ -591,10 +598,10 @@ StatusCode AlVec::Read(const std::string &filename, double &scale,
   int64_t ielem=0;
   double  velem=0.0;
   for( int i=0; i<m_size; i++) {
-    invec.read((char*)&ielem, sizeof (ielem));
+    invec.read(charAddress(ielem), sizeof (ielem));
     modmap[i/6] = ielem;
 
-    invec.read((char*)&velem, sizeof (velem));
+    invec.read(charAddress(velem), sizeof (velem));
     *(m_ptr_data+i) = velem;
 
     // std::cout << "AlVec (" << i << "):: " << ielem << ", " << velem << std::endl;
@@ -614,14 +621,14 @@ StatusCode AlVec::ReadProjected(const std::string &filename, double &scale,
     return StatusCode::FAILURE;
 
   int32_t vsiz=0;
-  invec.read((char*)&vsiz, sizeof (vsiz));
+  invec.read(charAddress(vsiz), sizeof (vsiz));
   m_size  = vsiz;
 
 //  int32_t io_scale;
-  invec.read((char*)&scale, sizeof (scale));
+  invec.read(charAddress(scale), sizeof (scale));
 //  scale=io_scale;
 
-  invec.read((char*)&version, sizeof (version));
+  invec.read(charAddress(version), sizeof (version));
 
   // std::cout << "AlVec::scale: " << scale << std::endl;
   // std::cout << "AlVec::version: " << version << std::endl;
@@ -629,10 +636,10 @@ StatusCode AlVec::ReadProjected(const std::string &filename, double &scale,
   int64_t ielem=0;
   double  velem=0.0;
   for( int i=0; i<m_size; i++) {
-    invec.read((char*)&ielem, sizeof (ielem));
+    invec.read(charAddress(ielem), sizeof (ielem));
     modmap[i/6] = ielem;
 
-    invec.read((char*)&velem, sizeof (velem));
+    invec.read(charAddress(velem), sizeof (velem));
     *(m_ptr_data+i) = velem;
 
     // std::cout << "AlVec (" << i << "):: " << ielem << ", " << velem << std::endl;
@@ -650,12 +657,12 @@ StatusCode AlVec::ReadScalaPack(const std::string &filename){
     return StatusCode::FAILURE;
 
   int32_t vsiz=0;
-  eigenvec.read((char*)&vsiz, sizeof (vsiz));
+  eigenvec.read(charAddress(vsiz), sizeof (vsiz));
   m_size=vsiz;
 
   double velem=0;
   for( int i=0; i<m_size; i++) {
-    eigenvec.read((char*)&velem, sizeof (velem));
+    eigenvec.read(charAddress(velem), sizeof (velem));
     // printf("v[%d] = %.16lf \n",i,velem);
     *(m_ptr_data+i) = velem;
   }
@@ -676,7 +683,7 @@ StatusCode AlVec::WriteEigenvalueVec(const std::string &filename, bool binary){
     if(outvec.fail())
       return StatusCode::FAILURE;
 
-    outvec.write((char*)&io_size, sizeof (io_size));
+    outvec.write(charAddress(io_size), sizeof (io_size));
   }
   else{
     outvec.open((m_pathtxt+filename).c_str());
@@ -699,7 +706,7 @@ StatusCode AlVec::WriteEigenvalueVec(const std::string &filename, bool binary){
     velem = *(m_ptr_data+i);
 
     if(binary)
-      outvec.write((char*)&(velem), sizeof (velem));
+      outvec.write(charAddress((velem)), sizeof (velem));
     else
       outvec << std::setw(10) << i << std::setw(18) << velem << std::endl;
   }

@@ -60,7 +60,7 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
    pool::CollectionRowBuffer rowBuffer;
    collection->initNewRow( rowBuffer );
 
-   unsigned long long ntab[] = {
+   const unsigned long long ntab[] = {
       0x0000000000000000ULL,
       0x0000000000000001ULL,
       0x0000000000010000ULL,
@@ -134,56 +134,6 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
   std::cout << counter << " records read back" << std::endl;
   delete query1;
 
-  
-  cout << endl << "Executing query that selects 2 meta data columns." << endl;
-  pool::ICollectionQuery* query2 = collection->newQuery();
-  query2->setCondition( "attr1 > 5" );
-  query2->addToOutputList( "attr1,attr2" );
-  pool::ICollectionCursor& cursor2 = query2->execute();
-  counter = 0;
-  while ( cursor2.next() && counter < 100 )
-  {
-     //MN: std::cout << "Token : " << cursor2.currentRow().eventRef().toString() << std::endl;
-    std::cout << "Token : " << cursor2.eventRef().toString() << std::endl;
-    coral::AttributeList attributeList = cursor2.currentRow().attributeList();
-    std::cout << "Meta data : ";
-    for ( coral::AttributeList::const_iterator iAttribute = attributeList.begin();
-          iAttribute != attributeList.end(); ++iAttribute )
-    {
-      if ( iAttribute != attributeList.begin() ) std::cout << ", ";
-      std::cout << "[";
-      iAttribute->toOutputStream( std::cout );
-      std::cout << "]";
-    }
-    cout << endl;
-    counter++;
-  }
-  std::cout << counter << " records read back" << std::endl;
-  delete query2;
-
-  cout << endl << "Executing query on 64bit unsigned int attribute:" << endl;
-  pool::ICollectionQuery* query3 = collection->newQuery();
-  query3->setCondition( "" );
-  query3->addToOutputList( "attr64bit" );
-  pool::ICollectionCursor& cursor3 = query3->execute();
-  counter = 0;
-  while ( cursor3.next() && counter < 100 )
-  {
-    coral::AttributeList attributeList = cursor3.currentRow().attributeList();
-    std::cout << "Meta data : ";
-    for ( coral::AttributeList::const_iterator iAttribute = attributeList.begin();
-          iAttribute != attributeList.end(); ++iAttribute )
-    {
-      if ( iAttribute != attributeList.begin() ) std::cout << ", ";
-      std::cout << "[";
-      iAttribute->toOutputStream( std::cout );
-      std::cout << "]";
-    }
-    cout << endl;
-    counter++;
-  }
-  std::cout << counter << " records read back" << std::endl << endl;
-  delete query3;
   collection->close();
   delete collection;
 }

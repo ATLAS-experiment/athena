@@ -10,6 +10,8 @@
 #include "Egamma1_LArStrip_Fex.h"
 #include "CaloEvent/CaloCell.h"
 
+#include "../IO/LArStripNeighborhoodDumper.h"
+
 #include "xAODEventInfo/EventInfo.h"
 
 #include <fstream>
@@ -86,12 +88,13 @@ namespace GlobalSim {
     
     SG::WriteHandle<GlobalSim::LArStripNeighborhoodContainer> h_write(m_neighKey, ctx);
 
+    auto dumper = GlobalSim::LArStripNeighborhoodDumper();
     if (m_dump) {
-      CHECK(dump(*eventInfo, *neighborhoods));
+      CHECK(dumper.dump(name(), *eventInfo, *neighborhoods));
     }
 
     if (m_dumpTerse) {
-      CHECK(dumpTerse(*eventInfo, *neighborhoods));
+      CHECK(dumper.dumpTerse(name(), *eventInfo, *neighborhoods));
     }
  
     
@@ -286,74 +289,4 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
   
-  StatusCode
-  Egamma1_LArStrip_Fex::dump(const xAOD::EventInfo& eventInfo,
-			     const LArStripNeighborhoodContainer& neighborhoods) const {
-    
-    std::ofstream out(name() + "_" +
-		      std::to_string(eventInfo.eventNumber()) +
-		      ".log");
-
-    out << "run " << eventInfo.runNumber()
-	<< " evt " <<  eventInfo.eventNumber() 
-	<< " is simulation " << std::boolalpha
-	<< eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
-	<< " weight " << eventInfo.mcEventWeight() << '\n';
-
-    for (const auto nbhd : neighborhoods) {
-      out << *nbhd << '\n';
-    }
-    
-    out.close();
-
-    return StatusCode::SUCCESS;
-  }
-
-  void dump_stripdataVector(const StripDataVector& sdv, std::ostream& os) {
-
-    for(const auto& sd : sdv) {
-      os << sd.m_eta << ' ';
-    }
-    os << '\n';
-    
-    
-    for(const auto& sd : sdv) {
-      os << sd.m_phi << ' ';
-    }
-    os << '\n';
-      
-    for(const auto & sd : sdv) {
-      os << sd.m_e << ' ';
-    }
-    os << '\n';
-    os << '\n';
-  }
-
-  void dump_n(const LArStripNeighborhood* n,
-	      std::ostream& os){
-    dump_stripdataVector(n->phi_low(), os);
-    dump_stripdataVector(n->phi_center(), os);
-    dump_stripdataVector(n->phi_high(), os);
-  }
-
-  StatusCode
-  Egamma1_LArStrip_Fex::dumpTerse(const xAOD::EventInfo& eventInfo,
-				  const LArStripNeighborhoodContainer& neighborhoods) const {
-    
-    std::ofstream out(name() + "_" +
-		      std::to_string(eventInfo.eventNumber()) +
-		      "_terse.log");
-    out << "run " << eventInfo.runNumber()
-	<< " evt " <<  eventInfo.eventNumber() 
-	<< " is simulation " << std::boolalpha
-	<< eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
-	<< " weight " << eventInfo.mcEventWeight() << '\n';	
-
-    for (const auto n : neighborhoods) {dump_n(n, out);}
-    
-    
-    out.close();
-  
-    return StatusCode::SUCCESS;
-  }
 }

@@ -75,3 +75,12 @@ def find_datafile(fname, pathlist=None, access=os.R_OK):
                       type(pathlist))
 
    return FindFile(fname, pathlist, access)
+
+### pathresolver-like helper function -----------------------------------------
+def find_calibfile(fname, pathlist=None, access=os.R_OK):
+   """the python equivalent to the C++ PathResolver for calibfiles.
+   """
+   if pathlist is None:
+      pathlist = os.getenv('CALIBPATH').split(os.pathsep)
+   
+   return find_datafile(fname, pathlist, access)

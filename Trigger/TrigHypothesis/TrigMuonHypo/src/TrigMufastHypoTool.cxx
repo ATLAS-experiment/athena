@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -39,7 +39,7 @@ StatusCode TrigMufastHypoTool::initialize()
      ATH_MSG_DEBUG("Accepting all the events!");
   }
   else if(m_doCalib){
-     ATH_MSG_DEBUG("This is muon calibration chain.");
+     ATH_MSG_DEBUG("This is a muon calibration chain.");
   }
   else {
      ATH_MSG_DEBUG("AcceptAll = False");
@@ -188,7 +188,7 @@ bool TrigMufastHypoTool::decideOnSingleObject(TrigMufastHypoTool::MuonClusterInf
       zatBeam = -9999.;
    }
 
-   if(m_doCalib){
+   if(m_doCalib && !m_acceptAll){ 
       result = false;
       ATH_MSG_DEBUG("This muoncalib chain is only monitored.");
       return result;

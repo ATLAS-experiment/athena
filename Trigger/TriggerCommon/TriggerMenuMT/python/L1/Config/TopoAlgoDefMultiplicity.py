@@ -151,19 +151,6 @@ class TopoAlgoDefMultiplicity:
                                        nbits = 2, classtype='jJetMultiplicity')
             tm.registerTopoAlgo(alg)
 
-        jLJThresholds_2bits = [ 
-            # jLJ thresholds for commissioning
-            'jLJ80', 'jLJ120', 'jLJ140', 'jLJ180',
-
-            # jLJ thresholds for production
-            'jLJ60', 'jLJ100', 'jLJ160', 'jLJ200',
-        ]
-
-        for jLJet in jLJThresholds_2bits:
-            alg = JetMultiplicityAlgo( name = jLJet, 
-                                       threshold = jLJet,
-                                       nbits = 2, classtype='jLJetMultiplicity')
-            tm.registerTopoAlgo(alg)
 
         gJThresholds_3bits = [ 'gJ20p0ETA25', 'gJ20p25ETA49', 'gJSPARE1', ]
         gJThresholds_2bits = [ 'gJ50p0ETA25', 'gJ100p0ETA25', 'gJ400p0ETA25' ]
@@ -208,15 +195,13 @@ class TopoAlgoDefMultiplicity:
             # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
             'jTE100', 'jTE600', 'jTE1500', 'jTE4000', 'jTE6500', 'jTE8300', 'jTE9000', 'jTE10000', 'jTE12000',
-            'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5',
+            'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5', 'jTEFWD6500',
 
             'gMHT500',
 
             'jXEPerf100',
 
-            # spares (for any energy thresholds)
-            'jXESPARE1', 
-
+            # spares (for any energy thresholds) 
         ]
 
         for XE in XEThresholds:
@@ -269,7 +254,6 @@ class TopoAlgoDefMultiplicity:
             # FPGA 1, Topo1 fiber 2
             multLimits(thrtype='jJ',            conn='Topo1Opt2', nbit=3, startbit=0,  endbit=32),
             multLimits(thrtype='jJ',            conn='Topo1Opt2', nbit=2, startbit=36, endbit=73),
-            multLimits(thrtype='jLJ',           conn='Topo1Opt2', nbit=2, startbit=78, endbit=93),
             
             # FPGA 1, Topo1 fiber 3
             multLimits(thrtype='jTAU',          conn='Topo1Opt3', nbit=3, startbit=0,  endbit=2 ),

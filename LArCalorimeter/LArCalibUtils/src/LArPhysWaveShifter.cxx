@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -91,7 +91,7 @@ StatusCode LArPhysWaveShifter::stop() {
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineHelper = (const LArOnlineID_Base*)ll;
+      m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG("Found the LArOnlineID helper");
     }
   } else { // m_isSC
@@ -102,7 +102,7 @@ StatusCode LArPhysWaveShifter::stop() {
       return StatusCode::FAILURE;
     }
     else {
-      m_onlineHelper = (const LArOnlineID_Base*)ll;
+      m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
   }

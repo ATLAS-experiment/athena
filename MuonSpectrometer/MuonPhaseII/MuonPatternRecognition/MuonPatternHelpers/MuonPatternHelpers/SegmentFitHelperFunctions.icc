@@ -1,0 +1,25 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MuonPatternHelpers_MuonSegmentFitHelperFunctions_ICC
+#define MuonPatternHelpers_MuonSegmentFitHelperFunctions_ICC
+
+#include "MuonPatternEvent/MuonHoughDefs.h"
+
+
+#include "Acts/Seeding/detail/CompSpacePointAuxiliaries.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
+
+
+namespace MuonR4::SegmentFit {
+
+    constexpr Line_t::ParamVector spatialLinePars(const Parameters& segmentPars) {
+        Line_t::ParamVector toReturn{};
+        for (const ParamDefs p : {ParamDefs::x0, ParamDefs::y0, ParamDefs::theta, ParamDefs::phi}) {
+            toReturn[Acts::toUnderlying(p)] = segmentPars[Acts::toUnderlying(p)];
+        }
+        return toReturn;
+    }
+
+}
+#endif // MUONR4__MuonSegmentFitHelperFunctions__ICC

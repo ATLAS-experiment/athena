@@ -66,13 +66,15 @@ private:
     std::unordered_map<std::string, ScalarCalc> m_scalar_map;
     std::unordered_map<std::string, TrackCalc> m_track_map;
     std::unordered_map<std::string, ClusterCalc> m_cluster_map;
+
 };
 
 // Factory function to create a variable calculator populated with default
 // variables
 std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_vars,
 					const std::vector<std::string>& track_vars,
-					const std::vector<std::string>& cluster_vars);
+					const std::vector<std::string>& cluster_vars,
+					bool useTRT);
 
 
 namespace Variables {
@@ -114,6 +116,7 @@ bool absleadTrackEta           (const xAOD::TauJet &tau, double &out);
 bool leadTrackDeltaEta         (const xAOD::TauJet &tau, double &out);
 bool leadTrackDeltaPhi         (const xAOD::TauJet &tau, double &out);
 bool leadTrackProbNNorHT       (const xAOD::TauJet &tau, double &out);
+bool leadTrackProbNNorHT_noTRT (const xAOD::TauJet &tau, double &out);
 bool EMFracFixed               (const xAOD::TauJet &tau, double &out);
 bool etHotShotWinOverPtLeadTrk (const xAOD::TauJet &tau, double &out);
 bool hadLeakFracFixed          (const xAOD::TauJet &tau, double &out);
@@ -184,6 +187,9 @@ bool nSCTHitsPlusDeadSensors (
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
 bool eProbabilityNNorHT(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
+
+bool eProbabilityNNorHT_noTRT(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
 } // namespace Track

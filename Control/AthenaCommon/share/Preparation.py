@@ -45,14 +45,14 @@ if not "POOL_OUTMSG_LEVEL" in os.environ:
 ## basic job configuration
 import AthenaCommon.AtlasUnixStandardJob
 
-from PyUtils.Helpers import ROOT6Setup
-ROOT6Setup(batch=not opts.interactive)
+from PyUtils.Helpers import ROOTSetup
+ROOTSetup(batch=not opts.interactive)
 # Make sure that batch mode gets set properly.
-# ROOT6Setup will set things up so that whenever we do an `import ROOT',
+# ROOTSetup will set things up so that whenever we do an `import ROOT',
 # then gROOT.SetBatch will be called properly.
 # However, if someone instead writes `from ROOT import gSystem'
 # (or anything other than gROOT), then the ROOT python update thread
-# will be started before ROOT6Setup calls SetBatch.
+# will be started before ROOTSetup calls SetBatch.
 # (This was then problematic for some MP jobs which used python
 # algorithms.)
 # So include the import here explictly to ensure that batch mode gets set.
@@ -110,6 +110,10 @@ if opts.do_leak_chk:
 
 from AthenaCommon.ConcurrencyFlags import jobproperties as jps
 if opts.nprocs and (opts.nprocs >= 1 or opts.nprocs==-1):
+   # MPI and AthenaMP don't mix
+   if opts.mpi:
+      _msg.error("Cannot run AthenaMP with MPI")
+      sys.exit()
    jps.ConcurrencyFlags.NumProcs = opts.nprocs
    _msg.info ("configuring AthenaMP with [%s] sub-workers", 
               jps.ConcurrencyFlags.NumProcs())

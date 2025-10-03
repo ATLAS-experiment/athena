@@ -77,7 +77,7 @@ namespace InDetDD {
     m_volume.push_back(vol);
   }
 
-  SiDetectorElement* PixelDetectorManager::getDetectorElement(const Identifier & id) const
+  const SiDetectorElement* PixelDetectorManager::getDetectorElement(const Identifier & id) const
   {
   // NB the id helpers implementation for getting a hash is not optimal.
   // Essentially does a binary search.
@@ -91,13 +91,12 @@ namespace InDetDD {
     }
   }
 
-
-  SiDetectorElement*  PixelDetectorManager::getDetectorElement(const IdentifierHash & idHash) const
+  const SiDetectorElement*  PixelDetectorManager::getDetectorElement(const IdentifierHash & idHash) const
   {
     return m_elementCollection[idHash];
   }
 
-  SiDetectorElement* PixelDetectorManager::getDetectorElement(int barrel_endcap, int layer_wheel, int phi_module, int eta_module) const
+  const SiDetectorElement* PixelDetectorManager::getDetectorElement(int barrel_endcap, int layer_wheel, int phi_module, int eta_module) const
   {
     return getDetectorElement(m_idHelper->wafer_id(barrel_endcap, layer_wheel, phi_module, eta_module));
   }
@@ -116,7 +115,15 @@ namespace InDetDD {
   {
     return m_elementCollection.end();
   }
+  SiDetectorElementCollection::iterator PixelDetectorManager::getDetectorElementBegin()
+  {
+    return m_elementCollection.begin();
+  }
 
+  SiDetectorElementCollection::iterator PixelDetectorManager::getDetectorElementEnd()
+  {
+    return m_elementCollection.end();
+  }
 
   void PixelDetectorManager::addDetectorElement(SiDetectorElement * element)
   {
@@ -202,18 +209,23 @@ namespace InDetDD {
 
       } else if (frame == InDetDD::local) {
 
-        SiDetectorElement * element =  m_elementCollection[idHash];
+        const SiDetectorElement * element =  m_elementCollection[idHash];
         if (!element) return false;
 
         // Its a local transform
         //See header file for definition of m_isLogical
         if( m_isLogical ){
-    //Ensure cache is up to date and use the alignment corrected local to global transform
-    element->setCache();
-    return setAlignableTransformLocalDelta(m_alignableTransforms[idHash].get(), element->transform(), delta, alignStore);
+          // Ensure cache is up to date and use the alignment corrected local to
+          // global transform
+          element->updateCache();
+          return setAlignableTransformLocalDelta(
+              m_alignableTransforms[idHash].get(), element->transform(), delta,
+              alignStore);
         } else
-    //Use default local to global transform
-    return setAlignableTransformLocalDelta(m_alignableTransforms[idHash].get(), element->defTransform(), delta, alignStore);
+          //Use default local to global transform
+          return setAlignableTransformLocalDelta(
+              m_alignableTransforms[idHash].get(), element->defTransform(),
+              delta, alignStore);
       } else {
         // other not supported
         ATH_MSG_WARNING("Frames other than global or local are not supported.");
@@ -296,7 +308,7 @@ namespace InDetDD {
 
   // The implementation of the new IBLDist DB;
   // Specific for IBL -> maybe make it different function in future to be more general
-  bool PixelDetectorManager::processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType alignfolderType) const
+  bool PixelDetectorManager::processSpecialAlignment(const std::string & key, InDetDD::AlignFolderType alignfolderType)
   {
 
   bool alignmentChange = false;
@@ -388,7 +400,7 @@ namespace InDetDD {
           ATH_MSG_WARNING("No IBLDist corrections can be applied for invalid HashID's - exiting");
           return false;
         }
-        SiDetectorElement * sielem = m_elementCollection[idHash];
+        const SiDetectorElement * sielem = m_elementCollection[idHash];
         //This should work as Bowing is in L3 frame, i.e. local module frame
         Amg::Vector3D center = sielem->defTransform() * Amg::Vector3D{0, 0, 0};
         double z = center[2];

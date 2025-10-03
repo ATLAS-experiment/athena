@@ -184,9 +184,6 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
     }
   }
 
-  // Create canvas
-  auto c1 = new TCanvas("c1", "Tree comparison");
-
   // Set binning
   int nBins{128};
   size_t nBinsU = static_cast<size_t>(nBins);
@@ -330,6 +327,10 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
 
   std::cout << "Running comparisons..." << std::endl;
   start = std::chrono::high_resolution_clock::now();
+
+  // Store only last canvas
+  std::unique_ptr<TCanvas> lastCanvas;
+
   for (const std::string &colName : requiredColumns)
   {
     ++counter;
@@ -350,7 +351,8 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
     {
       gErrorIgnoreLevel = kError; // this is spammy due to empty bins
     }
-    auto rp = std::unique_ptr<TRatioPlot>(new TRatioPlot(h2, h1));
+    auto c1 = std::make_unique<TCanvas>();
+    auto rp = std::make_unique<TRatioPlot>(h2, h1);
     if (!verbose)
     {
       gErrorIgnoreLevel = kWarning;
@@ -390,11 +392,6 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
     rp->GetLowerRefGraph()->SetMaximum(1.5);
     rp->GetLowYaxis()->SetNdivisions(505);
 
-    if (valid) {
-      c1->SetTicks(0, 1);
-      c1->Update();
-    }
-
     if (!fileOpen)
     {
       // Open file
@@ -404,12 +401,14 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
     // Actual plot
     c1->Print(outputPDF.c_str());
     c1->Clear();
+    lastCanvas = std::move(c1);
   }
 
   if (fileOpen)
   {
     // Close file
-    c1->Print((outputPDF + "]").c_str());
+    lastCanvas->Print((outputPDF + "]").c_str());
+    lastCanvas.reset();
   }
 
   stop = std::chrono::high_resolution_clock::now();

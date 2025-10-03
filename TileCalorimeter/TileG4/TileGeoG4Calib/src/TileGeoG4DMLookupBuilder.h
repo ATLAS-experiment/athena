@@ -15,17 +15,16 @@
 #ifndef TILEGEOG4CALIB_TILEGEOG4DMLOOKUPBUILDER_H
 #define TILEGEOG4CALIB_TILEGEOG4DMLOOKUPBUILDER_H
 
+#include <map>
+#include <memory>
+
+#include "GaudiKernel/ServiceHandle.h"
 #include "TileDetDescr/TileDddbManager.h"
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "TileCalibDddbManager.h"
 
-#include <map>
-#include <string>
-
 class TileGeoG4CalibSection;
 class TileGeoG4LookupBuilder;
-
-#include "GaudiKernel/ServiceHandle.h"
 class IRDBAccessSvc;
 class IGeoModelSvc;
 class StoreGateSvc;
@@ -35,7 +34,6 @@ public:
   TileGeoG4DMLookupBuilder(TileGeoG4LookupBuilder* tile_lookup_builder, ServiceHandle<IRDBAccessSvc> &access,
                            ServiceHandle<IGeoModelSvc> &geo_svc, const ServiceHandle<StoreGateSvc> &pDetStore,
                            const int verboseLevel);
-  ~TileGeoG4DMLookupBuilder();
 
   void BuildLookup(bool test_beam = false, int plateToCell = -1);
   void ResetCells();
@@ -64,9 +62,9 @@ private:
 
   void CreateGeoG4CalibSections(bool is_ctb, int plateToCell);
 
-  TileCalibDddbManager* m_dbManager;
+  std::unique_ptr<TileCalibDddbManager> m_dbManager;
   TileGeoG4LookupBuilder* m_lookup_builder;
-  TileGeoG4CalibSectionMap* m_sectionMap;
+  std::unique_ptr<TileGeoG4CalibSectionMap> m_sectionMap;
 
   const TileDetDescrManager* m_theManager;
   TileDddbManager* m_tdbManager;

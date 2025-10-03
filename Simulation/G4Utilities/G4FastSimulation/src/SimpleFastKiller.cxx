@@ -7,11 +7,6 @@
 // G4 includes
 #include "G4FastStep.hh"
 
-SimpleFastKiller::SimpleFastKiller(const std::string& name)
-  : G4VFastSimulationModel(name)
-{
-}
-
 void SimpleFastKiller::DoIt(const G4FastTrack&, G4FastStep& fastStep)
 {
   fastStep.KillPrimaryTrack();

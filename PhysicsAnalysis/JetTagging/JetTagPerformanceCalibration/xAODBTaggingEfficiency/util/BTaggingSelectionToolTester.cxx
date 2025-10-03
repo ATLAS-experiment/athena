@@ -25,7 +25,7 @@ ANA_MSG_HEADER(testBTagSelection)
 ANA_MSG_SOURCE(testBTagSelection, "BtaggingSelectionToolTester")
 using namespace testBTagSelection;
 
-int main(int argc, char* argv[]) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   const char* TEST_NAME = argv[0];
 
@@ -34,6 +34,8 @@ int main(int argc, char* argv[]) {
     ANA_MSG_ERROR (  "Usage: " << TEST_NAME << "[DAOD file name] [CDI path] [b-tagger name] [WP name]" );
     return 1;
   }
+
+  POOL::Init();
 
   std::string inputDAOD = argv[1];
   std::string CDIPath = argv[2];
@@ -54,10 +56,10 @@ int main(int argc, char* argv[]) {
 
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool("BTaggingSelectionTool/BTagSelecTest");
   StatusCode code1 = tool.setProperty( "FlvTagCutDefinitionsFileName", CDIPath);
-  StatusCode code2 = tool.setProperty( "TaggerName",                   taggerName);
+  StatusCode code2 = StatusCode::SUCCESS;
   StatusCode code3 = tool.setProperty( "OperatingPoint",               workingPointName);
-  StatusCode code4 = tool.setProperty( "JetAuthor",                    JetCollectionName);
-  StatusCode code5 = tool.setProperty( "MinPt",                        20000);
+  StatusCode code4 = StatusCode::SUCCESS;
+  StatusCode code5 = StatusCode::SUCCESS;
   StatusCode code6 = tool.initialize();
   std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6};
   for (const auto& code : codes) {
@@ -71,8 +73,8 @@ int main(int argc, char* argv[]) {
   gErrorIgnoreLevel = kError;
   TEVENT event(TEVENT::kClassAccess);
 
-  TFile* m_file = TFile::Open(inputDAOD.c_str(),"read");
-  if(!event.readFrom(m_file).isSuccess()) { 
+  TFile* root_file = TFile::Open(inputDAOD.c_str(),"read");
+  if(!event.readFrom(root_file).isSuccess()) { 
     ANA_MSG_ERROR ( "failed to load file! " );
     return 1;
   }

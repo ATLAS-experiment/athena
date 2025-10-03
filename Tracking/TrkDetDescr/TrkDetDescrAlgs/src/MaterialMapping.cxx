@@ -17,6 +17,7 @@
 #include "TrkGeometry/LayerMaterialRecord.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/MaterialStep.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/AssociatedMaterial.h"
 #include "TrkGeometry/LayerMaterialMap.h"
@@ -196,14 +197,24 @@ StatusCode Trk::MaterialMapping::execute()
                   const Trk::Surface& pSurface = parameters->associatedSurface();
                   // get the surface with associated layer (that has material)
                   ATH_MSG_VERBOSE("[L] Testing layer with associatedLayer() " << pSurface.associatedLayer() << " and materialLayer() " << pSurface.materialLayer() );
-                  //
-                  if ( ( pSurface.associatedLayer() && pSurface.associatedLayer()->layerMaterialProperties() )  || pSurface.materialLayer() ){
-                      // material layer
-                      const Trk::Layer* mLayer = pSurface.materialLayer() ? pSurface.materialLayer() : pSurface.associatedLayer();
-                      // record that one
-                      std::pair<const Trk::Layer*, Amg::Vector3D> layerHitPair(mLayer, parameters->position());
-                      ATH_MSG_VERBOSE("[L] Layer " << ++ilayer << " with index " << mLayer->layerIndex().value() << " hit at " << Amg::toString(parameters->position()));
-                      layersAndHits.push_back(layerHitPair);
+
+                  if ((pSurface.associatedLayer() &&
+                       pSurface.associatedLayer()->layerMaterialProperties()) ||
+                      pSurface.materialLayer()) {
+                    // material layer
+
+                    const Trk::Layer* mLayer = pSurface.materialLayer()
+                                                   ? pSurface.materialLayer()
+                                                   : pSurface.associatedLayer();
+                    // record that one
+                    std::pair<const Trk::Layer*, Amg::Vector3D> layerHitPair(
+                        mLayer, parameters->position());
+                    ATH_MSG_VERBOSE("[L] Layer "
+                                    << ++ilayer << " with index "
+                                    << mLayer->layerIndex().value()
+                                    << " hit at "
+                                    << Amg::toString(parameters->position()));
+                    layersAndHits.push_back(layerHitPair);
                   }
                   delete parameters;
               }
@@ -365,7 +376,7 @@ void Trk::MaterialMapping::assignLayerMaterialProperties( Trk::TrackingVolume& t
     Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol.confinedLayers();
     if (confinedLayers) {
         // get the objects in a vector-like format
-        Trk::BinnedArraySpan<Trk::Layer * const> layers = confinedLayers->arrayObjects();
+        std::span<Trk::Layer * const> layers = confinedLayers->arrayObjects();
         ATH_MSG_INFO("--> found : "<< layers.size() << "confined Layers");
         // the iterator over the vector
         // loop over layers
@@ -391,7 +402,7 @@ void Trk::MaterialMapping::assignLayerMaterialProperties( Trk::TrackingVolume& t
     Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
     if (confinedVolumes) {
         // get the objects in a vector-like format
-        Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
+        std::span<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
         ATH_MSG_INFO("--> found : "<< volumes.size() << "confined TrackingVolumes");
         // loop over volumes
         for (const auto & volume : volumes) {
@@ -544,7 +555,7 @@ void Trk::MaterialMapping::registerVolume(const Trk::TrackingVolume& tvol, int l
     const Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol.confinedLayers();
     if (confinedLayers) {
          // this go ahead with the layers
-         Trk::BinnedArraySpan<Trk::Layer const * const> layers = confinedLayers->arrayObjects();
+         std::span<Trk::Layer const * const> layers = confinedLayers->arrayObjects();
          for (int indent=0; indent<sublevel; ++indent)
              std::cout << " ";
          std::cout << "- found : "<< layers.size() << "confined Layers"<< std::endl;
@@ -567,7 +578,7 @@ void Trk::MaterialMapping::registerVolume(const Trk::TrackingVolume& tvol, int l
     // step dopwn the navigation tree to reach the confined volumes
     const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
     if (confinedVolumes) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
+        std::span<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
 
         for (int indent=0; indent<sublevel; ++indent)
             std::cout << " ";

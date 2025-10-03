@@ -108,12 +108,12 @@ class ATLAS_NOT_THREAD_SAFE LArShapeDumper : public AthAlgorithm
   Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{}, "Bad-Channel categories to patch"};
   LArBadChannelMask m_bcMaskSC;
   Gaudi::Property<std::vector<std::string> > m_problemsToMaskSC{this,"ProblemsToMaskSC",{}, "Bad-Channel categories to mask"};
-
   SG::ReadHandleKey<LArDigitContainer> m_digitsKey{this, "DigitsKey", "FREE", "key for LArDigitContainer"};
   SG::ReadHandleKey<LArRawChannelContainer> m_channelsKey{this, "ChannelsKey", "LArRawChannels", "key for LArRawChannels"};
 
   SG::ReadHandleKey<LArDigitContainer> m_digitsKeySC{this, "DigitsKeySC", "SC_ADC_BAS", "key for LArDigitContainer for SC"};
   SG::ReadHandleKey<LArRawSCContainer> m_rawscKey{this, "RawSCKey", "SC_ET_ID", "key for LArRawSCContainer"};
+  SG::ReadHandleKey<LArRawSCContainer> m_rawRecomputedscKey{this, "RecomputedSCKey", "SC_ET_RECO", "key for recomputed LArRawSCContainer"};
 
 
   SG::ReadCondHandleKey<LArADC2MeV>   m_adc2mevKey{this,"ADC2MeVKey","LArADC2MeV","SG Key of ADC2MeV conditions object"};

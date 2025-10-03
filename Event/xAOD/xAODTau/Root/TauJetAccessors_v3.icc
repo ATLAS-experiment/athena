@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTAU_TAUACCESSORS_V3_ICC
@@ -13,7 +13,7 @@
 #define DEFINE_TAUJETPARAMETER_ACCESSOR(TYPE, NAME )                               \
   case xAOD::TauJetParameters::NAME:					\
 {                                                               \
-  static const SG::AuxElement::Accessor< TYPE > a( #NAME );		\
+  static const SG::Accessor< TYPE > a( #NAME );		\
   return &a;							\
 }                                                               \
 break;
@@ -21,12 +21,10 @@ break;
 
 #ifndef TAUTRACK_V1_ACCESSORS
 
-  const SG::AuxElement::Accessor< float >* discriminantAccessorV3( xAOD::TauJetParameters::TauID discriminant ) {
+  const SG::Accessor< float >* discriminantAccessorV3( xAOD::TauJetParameters::TauID discriminant ) {
 
     switch( discriminant ) {
 	
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, Likelihood );	
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, SafeLikelihood );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, EleMatchLikelihoodScore );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, BDTJetScore );	
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, RNNJetScore );	
@@ -36,7 +34,6 @@ break;
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, BDTJetScoreSigTrans );   
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, RNNJetScoreSigTrans );   
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, RNNEleScoreSigTrans );   
-      //DEFINE_TAUJETPARAMETER_ACCESSOR( float, BDTJetScoreBkgTrans );   
 
     default:
       std::cerr << "xAOD::TauJetParameters ERROR Unknown tau discriminant value ("
@@ -46,7 +43,7 @@ break;
   }
 
 
-  template <> const SG::AuxElement::Accessor< float >* panTauDetailsAccessorV3<float>( xAOD::TauJetParameters::PanTauDetails detail ) {
+  template <> const SG::Accessor< float >* panTauDetailsAccessorV3<float>( xAOD::TauJetParameters::PanTauDetails detail ) {
     
     switch( detail ) {
 	
@@ -75,7 +72,7 @@ break;
     }
   }
 
-  template <> const SG::AuxElement::Accessor< int >* panTauDetailsAccessorV3<int>( xAOD::TauJetParameters::PanTauDetails detail ) {
+  template <> const SG::Accessor< int >* panTauDetailsAccessorV3<int>( xAOD::TauJetParameters::PanTauDetails detail ) {
 
     switch( detail ) {
 	
@@ -100,7 +97,7 @@ break;
 
 
 
-  template <> const SG::AuxElement::Accessor< float >* detailsAccessorV3<float>( xAOD::TauJetParameters::Detail detail ) {
+  template <> const SG::Accessor< float >* detailsAccessorV3<float>( xAOD::TauJetParameters::Detail detail ) {
     
     switch( detail ) {
 
@@ -111,9 +108,6 @@ break;
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, massTrkSys );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, trkWidth2 );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, trFlightPathSig );
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, ele_E237E277 );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, ele_PresamplerFraction );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, ele_ECALFirstFraction );//r21 cleanup
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, numEffTopoClusters );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, topoInvMass );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, effTopoInvMass );
@@ -126,10 +120,6 @@ break;
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, isolFrac );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, centFrac );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, stripWidth2 );
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, etEMCalib );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, etHadCalib );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, seedCalo_eta );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, seedCalo_phi );//r21 cleanup
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, trkAvgDist );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, trkRmsDist );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, lead2ClusterEOverAllClusterE );
@@ -140,8 +130,6 @@ break;
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, secMaxStripEt );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, sumEMCellEtOverLeadTrkPt );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, hadLeakEt );
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, EM_TES_scale );//r21 cleanup
-      //      DEFINE_TAUJETPARAMETER_ACCESSOR( float, LC_TES_precalib );//r21 cleanup
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, cellBasedEnergyRing1 );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, cellBasedEnergyRing2 );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, cellBasedEnergyRing3 );
@@ -159,17 +147,8 @@ break;
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, TESOffset );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, TESCalibConstant );
 
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, etEflow );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, mEflow );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, ptRatioEflow );//r21 cleanup
-
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, etEflowTopo );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, mEflowTopo );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( float, ptRatioEflowTopo );//r21 cleanup
-
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, innerTrkAvgDist );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, SumPtTrkFrac );
-
 
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, centFracCorrected );
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, etOverPtLeadTrkCorrected );
@@ -202,17 +181,14 @@ break;
     }
   }
 
-  template <> const SG::AuxElement::Accessor< int >* detailsAccessorV3<int>( xAOD::TauJetParameters::Detail detail ) {
+  template <> const SG::Accessor< int >* detailsAccessorV3<int>( xAOD::TauJetParameters::Detail detail ) {
 
     switch( detail ) {
 
       DEFINE_TAUJETPARAMETER_ACCESSOR( int, numCells );
       DEFINE_TAUJETPARAMETER_ACCESSOR( int, numTopoClusters );
       DEFINE_TAUJETPARAMETER_ACCESSOR( int, nStrip );
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( int, nPi0 );//r21 cleanup
       DEFINE_TAUJETPARAMETER_ACCESSOR( int, nCharged );
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( int, nPi0Topo );//r21 cleanup
-      // DEFINE_TAUJETPARAMETER_ACCESSOR( int, nChargedTopo );//r21 cleanup
       DEFINE_TAUJETPARAMETER_ACCESSOR( int, GhostMuonSegmentCount );
       DEFINE_TAUJETPARAMETER_ACCESSOR( int, nChargedTracks );
       DEFINE_TAUJETPARAMETER_ACCESSOR( int, nIsolatedTracks );
@@ -227,7 +203,7 @@ break;
     }
   }
 
-  template <> const SG::AuxElement::Accessor< ElementLink<IParticleContainer> >* detailsAccessorV3<ElementLink<IParticleContainer > >( xAOD::TauJetParameters::Detail detail ) {
+  template <> const SG::Accessor< ElementLink<IParticleContainer> >* detailsAccessorV3<ElementLink<IParticleContainer > >( xAOD::TauJetParameters::Detail detail ) {
 
     switch( detail ) {
       
@@ -242,7 +218,7 @@ break;
 
 #else
 
-  template <> const SG::AuxElement::Accessor< float >* trackDetailsAccessorV3<float>( xAOD::TauJetParameters::TrackDetail detail ) {
+  template <> const SG::Accessor< float >* trackDetailsAccessorV3<float>( xAOD::TauJetParameters::TrackDetail detail ) {
     
     switch( detail ) {
       DEFINE_TAUJETPARAMETER_ACCESSOR( float, CaloSamplingEtaEM );

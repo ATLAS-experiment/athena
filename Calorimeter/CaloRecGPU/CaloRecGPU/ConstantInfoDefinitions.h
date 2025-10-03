@@ -13,6 +13,8 @@
 #include "EtaPhiMap.h"
 #include "NeighArr.h"
 
+#include <cmath>
+
 namespace CaloRecGPU
 {
 
@@ -232,6 +234,8 @@ public:
     float dphi[NCaloCells];
 
     float volume[NCaloCells];
+    
+    int   nCellsPerSampling[NumSamplings];
 
     NeighArr neighbours;
     
@@ -330,6 +334,9 @@ public:
 
       DeAllocWrapper wrapper(etaPhiToCell.finish_initializing_buffer_size());
 
+#if CALORECGPU_ETA_PHI_MAP_DEBUG
+      printf("CALORECGPU ETA PHI MAP DEBUG OUTPUT: Max occupied cells is %d\n", etaPhiToCell.get_max_real_overlap());
+#endif
       etaPhiToCell.finish_initializing(wrapper.buf);
 
     }
@@ -359,8 +366,10 @@ public:
 
               const float delta_eta = eta[this_cell] - test_eta;
               const float delta_phi = Helpers::angular_difference(phi[this_cell], test_phi);
+              
+              using namespace std;
 
-              const float this_dist = delta_eta * delta_eta + delta_phi * delta_phi;
+              const float this_dist = fabsf(delta_eta) + fabsf(delta_phi);
               if (this_dist < distance || (this_dist == distance && this_cell > ret))
                 {
                   distance = this_dist;

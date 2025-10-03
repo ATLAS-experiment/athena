@@ -254,7 +254,9 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_tauConfigPathBaseline(""),
     m_tauDoTTM(false),
     m_tauSmearingToolRecommendationTag(""),
+    m_tauEffToolRecommendationTag(""),
     m_tauSmearingToolGenerator(""),
+    m_ApplyMVATESQualityCheck(true),
     //
     m_jetPt(-99.),
     m_jetEta(-99.),
@@ -611,6 +613,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "TauDoTruthMatching", m_tauDoTTM);
   declareProperty( "TauSmearingToolRecommendationTag", m_tauSmearingToolRecommendationTag);
   declareProperty( "TauSmearingToolGenerator", m_tauSmearingToolGenerator);
+  declareProperty( "TauEffToolRecommendationTag", m_tauEffToolRecommendationTag);
+  declareProperty( "TauMVATESQualityCheck", m_ApplyMVATESQualityCheck);
 
   //Leptons
   declareProperty( "SigLepRequireIso", m_doIsoSignal ); //leave here for back-compatibility
@@ -1464,7 +1468,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_EG_corrModel, "Ele.EffNPcorrModel", rEnv, "TOTAL");
   configFromFile(m_EG_corrFNList, "Ele.EffCorrFNList", rEnv, "None");
   configFromFile(m_electronTriggerSFStringSingle, "Ele.TriggerSFStringSingle", rEnv, "SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0");
-  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2024_Consolidated_Prerecom_v1/map1.txt");
+  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt");
   configFromFile(m_eleAllowRun3TrigSFFallback, "Ele.AllowRun3TrigSFFallback", rEnv, false);
   configFromFile(m_eleForceFullSimCalib, "Ele.ForceFullSimCalib", rEnv, false);
   
@@ -1547,8 +1551,10 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_tauConfigPathBaseline, "TauBaseline.ConfigPath", rEnv, "default");
   configFromFile(m_tauDoTTM, "Tau.DoTruthMatching", rEnv, false);
   //
-  configFromFile(m_tauSmearingToolRecommendationTag,"Tau.SmearingToolRecommendationTag", rEnv, "2022-prerec");
+  configFromFile(m_tauSmearingToolRecommendationTag,"Tau.SmearingToolRecommendationTag", rEnv, "2025-prerec");
   configFromFile(m_tauSmearingToolGenerator,"Tau.SmearingToolGenerator", rEnv, "PoPy");
+  configFromFile(m_tauEffToolRecommendationTag,"Tau.EffToolRecommendationTag", rEnv, "2025-prerec");
+  configFromFile(m_ApplyMVATESQualityCheck, "Tau.MVATESQualityCheck", rEnv, true);
   //
   configFromFile(m_jetPt, "Jet.Pt", rEnv, 20000.);
   configFromFile(m_jetEta, "Jet.Eta", rEnv, 2.8);
@@ -1562,7 +1568,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_jetUncertaintiesMCType, "Jet.UncertMCType", rEnv, "", true); // empty string means the MCType is guessed
   configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, true); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
   configFromFile(m_fatJets, "Jet.LargeRcollection", rEnv, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"); // set to "None" to turn off large jets
-  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, "rel22/Fall2024_PreRec/R10_CategoryJES_FullJER_FullJMS.config");
+  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, "rel22/Spring2025_PreRec/R10_CategoryJES_FullJER_FullJMS.config");
   configFromFile(m_fatJetUncertaintiesPDsmearing, "Jet.LargeRUncertPDsmearing", rEnv, true); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
   configFromFile(m_fatJetUncVars, "Jet.LargeRuncVars", rEnv, "default"); // do all if not specified
   configFromFile(m_WtagConfig, "Jet.WtaggerConfig", rEnv, "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
@@ -1601,7 +1607,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagWP, "Btag.WP", rEnv, "Continuous");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
 
-  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root": "xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root");
+  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/MC23_2025-06-17_GN2v01_v4.root": "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root");
   configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "SFEigen");
   configFromFile(m_EigenvectorReductionB, "Btag.EigenvectorReductionB", rEnv, "Loose");
   configFromFile(m_EigenvectorReductionC, "Btag.EigenvectorReductionC", rEnv, "Loose");
@@ -1686,8 +1692,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   //
   configFromFile(m_prwActualMu2017File, "PRW.ActualMu2017File", rEnv, "GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root");
   configFromFile(m_prwActualMu2018File, "PRW.ActualMu2018File", rEnv, "GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root");
-  configFromFile(m_prwActualMu2022File, "PRW.ActualMu2022File", rEnv, "GoodRunsLists/data22_13p6TeV/20230207/purw.actualMu.2022.root");
-  configFromFile(m_prwActualMu2023File, "PRW.ActualMu2023File", rEnv, "GoodRunsLists/data23_13p6TeV/20230828/purw.actualMu.2023.root");
+  configFromFile(m_prwActualMu2022File, "PRW.ActualMu2022File", rEnv, "GoodRunsLists/data22_13p6TeV/20250321/purw.actualMu.root");
+  configFromFile(m_prwActualMu2023File, "PRW.ActualMu2023File", rEnv, "GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.root");
   configFromFile(m_prwActualMu2024File, "PRW.ActualMu2024File", rEnv, "GoodRunsLists/data24_13p6TeV/20241118/purw.actualMu.root");
   configFromFile(m_prwDataSF, "PRW.DataSF", rEnv, 1./1.03); // default for mc16, see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ExtendedPileupReweighting#Tool_Properties
   configFromFile(m_prwDataSF_UP, "PRW.DataSF_UP", rEnv, 1./0.99); // mc16 uncertainty? defaulting to the value in PRWtool
@@ -1822,9 +1828,9 @@ const std::vector<std::string> SUSYObjDef_xAOD::split(const std::string& s, cons
 
 std::string SUSYObjDef_xAOD::getDefaultJetUncConfig() {
   if (m_isRun3)
-    return isAtlfast() ? "rel22/Winter2025_AF3_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Winter2025_PreRec/R4_CategoryReduction_FullJER.config";
+    return isAtlfast() ? "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC23.config" : "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC23.config";
   else
-    return isAtlfast() ? "rel22/Fall2024_PreRec/R4_CategoryReduction_FullJER.config" : "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config";  
+    return isAtlfast() ? "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC20_MC21.config" : "rel22/Spring2025_PreRec/R4_CategoryReduction_FullJER_MC20_MC21.config";  
 }
 
 void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector<float>& pT_window, std::vector<float>& eta_window, bool &eleOLR, bool &muVeto, bool &muOLR) const {

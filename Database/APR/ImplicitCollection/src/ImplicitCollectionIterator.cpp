@@ -31,29 +31,11 @@ pool::ImplicitCollectionIterator::~ImplicitCollectionIterator()
 }
 
 
-void
-pool::ImplicitCollectionIterator::
-setCondition( const std::string& whereClause,
-              coral::AttributeList*,
-              TokenList* )
-{
-   m_whereClause += whereClause;
-}
-
-
 pool::ICollectionCursor&
 pool::ImplicitCollectionIterator::execute()
 {
-   m_tokenIterator = m_container.tokens( m_whereClause );
+   m_tokenIterator = m_container.tokens();
    return *this;
-}
-
-
-
-const std::string&
-pool::ImplicitCollectionIterator::whereClause() const
-{
-  return m_whereClause;
 }
 
 
@@ -85,22 +67,16 @@ pool::ImplicitCollectionIterator::currentRow() const
 
 
 bool
-pool::ImplicitCollectionIterator::seek (long long int position)
+pool::ImplicitCollectionIterator::seek(std::size_t position)
 {
-  IPositionSeek* ies = dynamic_cast<IPositionSeek*> (m_tokenIterator);
-  if (!ies)
-    return false;
   // We'll have to do a next() to read the event.
   // So subtract one here to compensate for that.
-  return ies->seek (position - 1);
+  return m_tokenIterator->seek(position - 1);
 }
 
 
-int
-pool::ImplicitCollectionIterator::size ()
+std::size_t
+pool::ImplicitCollectionIterator::size()
 {
-  ICollectionSize* ics = dynamic_cast<ICollectionSize*> (m_tokenIterator);
-  if (!ics)
-    return 0;
-  return ics->size();
+  return m_tokenIterator->size();
 }

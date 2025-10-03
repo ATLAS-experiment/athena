@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __all__ = ['MenuBoardsCollection', 'BoardType']
 
 from enum import Enum
-from collections import OrderedDict as odict
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -47,10 +46,7 @@ class MenuBoardsCollection(object):
         return self.boards[name]
 
     def json(self):
-        from collections import OrderedDict as odict
-        confObj = odict()
-        for boardName in sorted(self.boards):
-            confObj[boardName] = self.boards[boardName].json()
+        confObj = {boardName : self.boards[boardName].json() for boardName in sorted(self.boards)}
         return confObj
 
 
@@ -66,7 +62,7 @@ class Board(object):
         self.outputConnectors += connName
 
     def json(self):
-        confObj = odict()
+        confObj = {}
         confObj["type"] = str(self.btype)
         if self.isLegacy:
             confObj["legacy"] = self.isLegacy

@@ -1,6 +1,4 @@
 <lcgdict>
-   <class name="ExampleHit_p0"/>
-   <class name="ExampleHitStreamer_p0"/>
    <class name="ExampleHitContainer_p1" id="6BB89FA1-EB62-4641-97CA-3F8DB6588053"/>
    <class name="std::vector<ExampleHit_p1>"/>
    <class name="ExampleHit_p1"/>

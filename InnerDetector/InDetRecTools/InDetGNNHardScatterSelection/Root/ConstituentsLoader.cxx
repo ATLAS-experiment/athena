@@ -18,10 +18,10 @@ namespace {
   // We define a few structures to map variable names to type, default
   // value, etc.
   //
-  typedef std::vector<std::pair<std::regex, ConstituentsEDMType>> TypeRegexes;
-  typedef std::vector<std::pair<std::regex, std::string>> StringRegexes;
-  typedef std::vector<std::pair<std::regex, ConstituentsSortOrder>> SortRegexes;
-  typedef std::vector<std::pair<std::regex, ConstituentsSelection>> SelRegexes;
+  using TypeRegexes = std::vector<std::pair<std::regex, ConstituentsEDMType>>;
+  using StringRegexes = std::vector<std::pair<std::regex, std::string>>;
+  using SortRegexes = std::vector<std::pair<std::regex, ConstituentsSortOrder>>;
+  using SelRegexes = std::vector<std::pair<std::regex, ConstituentsSelection>>;
   
   ConstituentsInputConfig get_iparticle_input_config(
     const std::string& name,

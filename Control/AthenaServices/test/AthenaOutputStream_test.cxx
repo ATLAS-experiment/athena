@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaOutputStream_test.cxx
@@ -65,13 +65,14 @@ int main() {
 
   assert( (pAlg->sysInitialize()).isSuccess() );
 
-  assert( (pStore->record(new Foo(), "uno")).isSuccess());
-  assert( (pStore->record(new Foo(), "due")).isSuccess());
-  assert( (pStore->record(new Bar(), "uno")).isSuccess());
-  assert( (pStore->record(new Bar(), "due")).isSuccess());
+  StatusCode sc;
+  sc = pStore->record(new Foo(), "uno");  if (!sc.isSuccess()) std::abort();
+  sc = pStore->record(new Foo(), "due");  if (!sc.isSuccess()) std::abort();
+  sc = pStore->record(new Bar(), "uno");  if (!sc.isSuccess()) std::abort();
+  sc = pStore->record(new Bar(), "due");  if (!sc.isSuccess()) std::abort();
 
-  assert( (pStore->record(new Bar(), "quattro")).isSuccess() );
-  assert( (pStore->record(new Bar(), "cinque")).isSuccess() );
+  sc = pStore->record(new Bar(), "quattro"); if (!sc.isSuccess()) std::abort();
+  sc = pStore->record(new Bar(), "cinque");  if (!sc.isSuccess()) std::abort();
   assert( (pStore->symLink(8107, "quattro", 8108)).isSuccess() );
   assert( (pStore->symLink(8107, "cinque", 8108)).isSuccess() );
 

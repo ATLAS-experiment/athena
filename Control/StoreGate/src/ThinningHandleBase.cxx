@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/src/ThinningHandleBase.cxx
@@ -40,7 +40,14 @@ ThinningHandleBase::ThinningHandleBase
  */
 ThinningHandleBase::~ThinningHandleBase()
 {
-  if (m_decisionHandle.record (std::move (m_decision)).isFailure()) {
+  StatusCode sc = StatusCode::FAILURE;
+  try {
+    sc = m_decisionHandle.record (std::move (m_decision));
+  }
+  catch (const GaudiException&) {
+    sc = StatusCode::FAILURE;
+  }
+  if (sc.isFailure()) {
     MsgStream msg (Athena::getMessageSvc(), "ThinningHandleBase");
     msg << MSG::ERROR
         << "Can't record SG::ThinningDecision object: "

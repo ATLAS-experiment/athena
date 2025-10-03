@@ -6,7 +6,6 @@ from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
-from Campaigns.Utils import Campaign
 from AthenaCommon.Logging import logging
 
 # E/gamma import(s).
@@ -18,12 +17,12 @@ import PATCore.ParticleDataType
 class ElectronCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the electron four-momentum correction"""
 
-    def __init__ (self, containerName='') :
+    def __init__ (self) :
         super (ElectronCalibrationConfig, self).__init__ ()
         self.setBlockName('Electrons')
         self.addOption ('inputContainer', '', type=str,  
             info="select electron input container, by default set to Electrons")
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('ESModel', '', type=str,
@@ -38,7 +37,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="whether to perform LAr crack veto based on the cluster eta, "
             "i.e. remove electrons within 1.37<|eta|<1.52. The default "
             "is False.")
-        self.addOption ('isolationCorrection', False, type=bool,
+        self.addOption ('isolationCorrection', True, type=bool,
             info="whether or not to perform isolation corrections (leakage "
             "corrections), i.e. set up an instance of "
             "CP::EgammaIsolationCorrectionAlg.")
@@ -50,11 +49,14 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "The default is 4.5 GeV.")
         self.addOption ('maxEta', 2.47, type=float,
             info="maximum electron |eta| (float). The default is 2.47.")
-        self.addOption ('forceFullSimConfig', False, type=bool,
+        self.addOption ('forceFullSimConfigForP4', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
-            "full simulation samples. Only for testing purposes. The default "
-            "is False.")
-
+            "full simulation samples for P4 corrections. Only for testing purposes. "
+            "The default is False.")
+        self.addOption ('forceFullSimConfigForIso', False, type=bool,
+            info="whether to force the tool to use the configuration meant for "
+            "full simulation samples for isolation corrections. Only for testing purposes. "
+            "The default is False.")
         self.addOption ('splitCalibrationAndSmearing', False, type=bool,
             info="EXPERIMENTAL: This splits the EgammaCalibrationAndSmearingTool "
             " into two steps. The first step applies a baseline calibration that "
@@ -75,6 +77,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('decorateSamplingPattern', False, type=bool,
             info="add samplingPattern decorations to clusters as part of PHYSLITE")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
         """Create the calibration and smearing algorithm
@@ -84,7 +89,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         log = logging.getLogger('ElectronCalibrationConfig')
 
         # Set up the calibration and smearing algorithm:
-        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
+        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name )
         config.addPrivateTool( 'calibrationAndSmearingTool',
                             'CP::EgammaCalibrationAndSmearingTool' )
         # Set default ESModel per period
@@ -94,17 +99,17 @@ class ElectronCalibrationConfig (ConfigBlock) :
             if config.geometry() is LHCPeriod.Run2:
                 alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v1'
             elif config.geometry() is LHCPeriod.Run3:
-                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+                alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             elif config.geometry() is LHCPeriod.Run4:
                 log.warning("No ESModel set for Run4, using Run 3 model instead")
-                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+                alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")
 
         alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
         alg.calibrationAndSmearingTool.useFastSim = (
-            0 if self.forceFullSimConfig
+            0 if self.forceFullSimConfigForP4
             else int( config.dataType() is DataType.FastSim ))
         alg.calibrationAndSmearingTool.decorateEmva = self.decorateEmva
         alg.egammas = config.readName (self.containerName)
@@ -117,7 +122,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         log = logging.getLogger('ElectronCalibrationConfig')
 
-        if self.forceFullSimConfig:
+        if self.forceFullSimConfigForP4:
             log.warning("You are running ElectronCalibrationConfig forcing full sim config")
             log.warning(" This is only intended to be used for testing purposes")
 
@@ -129,22 +134,22 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Decorate calo cluster eta if required
         if self.decorateCaloClusterEta:
             alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg',
-                                          'ElectronEgammaCaloClusterEtaAlg' + self.postfix,
+                                          'ElectronEgammaCaloClusterEtaAlg',
                                            reentrant=True )
             alg.particles = config.readName(self.containerName)
             config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
 
         if self.decorateSamplingPattern:
-            config.createAlgorithm( 'CP::EgammaSamplingPatternDecoratorAlg', 'EgammaSamplingPatternDecoratorAlg' + self.postfix )
+            config.createAlgorithm( 'CP::EgammaSamplingPatternDecoratorAlg', 'EgammaSamplingPatternDecoratorAlg' )
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
-            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
 
         # Set up the eta-cut on all electrons prior to everything else
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' )
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         alg.selectionTool.maxEta = self.maxEta
@@ -157,7 +162,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Select electrons only with good object quality.
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' )
         alg.selectionDecoration = 'goodOQ' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::EgammaIsGoodOQSelectionTool' )
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSELECTRON
@@ -200,10 +205,10 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.doScaleCorrection = False
             alg.calibrationAndSmearingTool.useMVACalibration = False
             alg.calibrationAndSmearingTool.decorateEmva = False
-
+        
         if self.minPt > 0 :
             # Set up the the pt selection
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' + self.postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' )
             alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
             alg.selectionTool.minPt = self.minPt
@@ -215,13 +220,15 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Set up the isolation correction algorithm:
         if self.isolationCorrection:
             alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
-                                          'ElectronIsolationCorrectionAlg' + self.postfix )
+                                          'ElectronIsolationCorrectionAlg' )
             config.addPrivateTool( 'isolationCorrectionTool',
                                    'CP::IsolationCorrectionTool' )
             alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
             alg.isolationCorrectionTool.AFII_corr = (
-                0 if self.forceFullSimConfig
+                0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
+            alg.isolationCorrectionTool.ToolVer = "REL22"
+            alg.isolationCorrectionTool.CorrFile = "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root"
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
@@ -229,11 +236,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
-                                          'LeptonTrackDecorator' + self.containerName + self.postfix,
+                                          'LeptonTrackDecorator',
                                            reentrant=True )
             alg.particles = config.readName (self.containerName)
 
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName(self.containerName)
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
@@ -263,12 +270,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
-    def __init__ (self, containerName='', selectionName='') :
+    def __init__ (self) :
         super (ElectronWorkingPointConfig, self).__init__ ()
-        self.addOption ('containerName', containerName, type=str,
+        self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
-        self.addOption ('selectionName', selectionName, type=str,
+        self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the electron selection to define (e.g. tight or "
             "loose).")
@@ -288,11 +295,15 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH, TightDNN, MediumDNN, LooseDNN, "
-            "TightNoCFDNN, MediumNoCFDNN, VeryLooseNoCF97DNN.")
+            "TightNoCFDNN, MediumNoCFDNN, VeryLooseNoCF97DNN, NoID.")
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
             "VarRad, TightTrackOnly_FixedRad, NonIso.")
+        self.addOption ('convSelection', None, type=str,
+            info="enter additional selection (string) to use. To be used with "
+            "TightLH or will crash. Supported keywords:"
+            "Veto, MatConv, GammaStar.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only electrons satisfying the working point "
             "requirements. The default is True.")
@@ -335,7 +346,14 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('correlationModelReco', 'SIMPLIFIED', type=str,
             info="the correlation model (string) to use for reconstruction scale factors "
             "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
+        self.addOption('addChargeMisIDSF', False, type=bool,
+            info="Adds scale factors for charge-misID.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None :
+            return self.containerName + '_' + self.selectionName + self.postfix
+        return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
 
@@ -362,7 +380,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the track selection algorithm:
         if self.trackSelection :
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                                          'ElectronTrackSelectionAlg' + postfix,
+                                          'ElectronTrackSelectionAlg',
                                           reentrant=True )
             alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
             alg.maxD0Significance = self.maxD0Significance
@@ -376,7 +394,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         if 'LH' in self.identificationWP:
             # Set up the likelihood ID selection algorithm
             # It is safe to do this before calibration, as the cluster E is used
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' )
             alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_char'
             if self.recomputeID:
                 # Rerun the likelihood ID
@@ -385,7 +403,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
                 # which differ from the one used for scale factors
                 if config.geometry() >= LHCPeriod.Run3:
-                    alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron'
+                    if 'HI' not in self.identificationWP:
+                        alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron'
+                    else:
+                        alg.selectionTool.WorkingPoint = self.identificationWP.replace('_HI', 'Electron_HI')
                 elif config.geometry() is LHCPeriod.Run2:
                     alg.selectionTool.WorkingPoint = self.identificationWP.replace("BLayer","BL") + 'Electron_Run2'
             else:
@@ -396,7 +417,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 alg.selectionTool.selectionFlags = [dfFlag]
         elif 'SiHit' in self.identificationWP:
             # Only want SiHit electrons, so veto loose LH electrons
-            algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto' + postfix + 'Veto')
+            algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto')
             algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
             algVeto.selectionTool.selectionFlags = ["DFCommonElectronsLHLoose"]
@@ -408,7 +429,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
             # Select SiHit electrons using IsEM bits
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' )
             alg.selectionDecoration = 'selectSiHit' + selectionPostfix + ',as_char'
             # Select from Derivation Framework IsEM bits
             config.addPrivateTool( 'selectionTool', 'CP::AsgMaskSelectionTool' )
@@ -422,7 +443,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  '`chargeIDSelectionRun2` option as there are '
                                  'DNN WPs containing charge flip rejection.')
             # Set up the DNN ID selection algorithm
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' )
             alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_char'
             if self.recomputeID:
                 # Rerun the DNN ID
@@ -437,16 +458,21 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
                 dfFlag = "DFCommonElectronsDNN" + self.identificationWP.split('DNN')[0]
                 alg.selectionTool.selectionFlags = [dfFlag]
+        elif self.identificationWP == 'NoID':
+            alg = None
+        else:
+            raise ValueError (f"Electron ID working point '{self.identificationWP}' is not recognised!")
 
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                             preselection=self.addSelectionToPreselection)
+        if alg is not None:
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
         # maintain order of selections
         if 'SiHit' in self.identificationWP:
             # Set up the ElectronSiHitDecAlg algorithm to decorate SiHit electrons with a minimal amount of information:
-            algDec = config.createAlgorithm( 'CP::ElectronSiHitDecAlg', 'ElectronSiHitDecAlg' + postfix )
+            algDec = config.createAlgorithm( 'CP::ElectronSiHitDecAlg', 'ElectronSiHitDecAlg' )
             selDec = 'siHitEvtHasLeptonPair' + selectionPostfix + ',as_char'
             algDec.selectionName     = selDec.split(",")[0]
             algDec.ElectronContainer = config.readName (self.containerName)
@@ -455,11 +481,54 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addSelection (self.containerName, self.selectionName, selDec,
                                  preselection=self.addSelectionToPreselection)
 
+        # Additional selection for conversions and gamma*
+        if self.convSelection is not None:
+            # skip if not applied together with TightLH
+            if self.identificationWP != 'TightLH':
+                raise ValueError(f"convSelection can only be used with TightLH ID, "
+                                 f"whereas {self.identificationWP} has been selected. convSelection option will be ignored.")
+            # check if allowed value 
+            allowedValues = ["Veto", "GammaStar", "MatConv"]
+            if self.convSelection not in allowedValues:  
+                raise ValueError(f"convSelection has been set to {self.convSelection}, which is not a valid option. "
+                                 f"convSelection option must be one of {allowedValues}.")
+
+            # ambiguityType == 0
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronAmbiguityTypeAlg' )
+            alg.selectionDecoration = 'selectAmbiguityType' + selectionPostfix + ',as_char'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgNumDecorationSelectionToolUInt8' )
+            alg.selectionTool.decorationName = "ambiguityType"
+            alg.selectionTool.doEqual = True
+            alg.selectionTool.equal = 0
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
+
+            # DFCommonAddAmbiguity selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDFCommonAddAmbiguityAlg' )
+            alg.selectionDecoration = 'selectDFCommonAddAmbiguity' + selectionPostfix + ',as_char'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgNumDecorationSelectionToolInt' )
+            alg.selectionTool.decorationName = "DFCommonAddAmbiguity"
+            if self.convSelection == "Veto":
+                alg.selectionTool.doMax = True
+                alg.selectionTool.max = 1
+            elif self.convSelection == "GammaStar":
+                alg.selectionTool.doEqual = True
+                alg.selectionTool.equal = 1
+            elif self.convSelection == "MatConv":
+                alg.selectionTool.doEqual = True
+                alg.selectionTool.equal = 2
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
+
         # Set up the FSR selection
         if self.doFSRSelection :
             # save the flag set for the WP
             wpFlag = alg.selectionDecoration.split(",")[0]
-            alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' + postfix )
+            alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' )
             alg.selectionDecoration = wpFlag
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
             # For SiHit electrons, set flag to remove FSR electrons.
@@ -471,7 +540,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
             alg = config.createAlgorithm( 'CP::EgammaIsolationSelectionAlg',
-                                          'ElectronIsolationSelectionAlg' + postfix )
+                                          'ElectronIsolationSelectionAlg' )
             alg.selectionDecoration = 'isolated' + selectionPostfix + ',as_char'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.ElectronWP = self.isolationWP
@@ -483,12 +552,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         if self.chargeIDSelectionRun2 and config.geometry() >= LHCPeriod.Run3:
-            log.warning("ECIDS is only available for Run 2 and will not have effect in run 3.")
+            log.warning("ECIDS is only available for Run 2 and will not have any effect in Run 3.")
 
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
-                                          'ElectronChargeIDSelectionAlg' + postfix )
+                                          'ElectronChargeIDSelectionAlg' )
             alg.selectionDecoration = 'chargeID' + selectionPostfix + ',as_char'
             if self.recomputeChargeID:
                 # Rerun the ECIDS BDT
@@ -509,23 +578,22 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map0.txt' \
+                   if config.geometry() is LHCPeriod.Run2 else \
+                   'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
-
-            if config.geometry() is LHCPeriod.Run2:
-                raise ValueError('Run 2 does not yet have efficiency correction, '
-                                 'please disable it by setting `noEffSF` to True.')
             if 'DNN' in self.identificationWP:
                 raise ValueError('DNN does not yet have efficiency correction, '
                                  'please disable it by setting `noEffSF` to True.')
 
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgReco' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgReco' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_reco_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
             if self.correlationModelReco not in correlationModels:
                 raise ValueError('Invalid correlation model for reconstruction efficiency, '
@@ -553,12 +621,14 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the ID electron efficiency correction algorithm:
-        if config.dataType() is not DataType.Data and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF and self.identificationWP != 'NoID':
+
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgID' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgID' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
             if self.correlationModelId not in correlationModels:
                 raise ValueError('Invalid correlation model for identification efficiency, '
@@ -583,21 +653,20 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         # Set up the ISO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
-                                          'ElectronEfficiencyCorrectionAlgIsol' + postfix )
+                                          'ElectronEfficiencyCorrectionAlgIsol' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
+            alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP
             if self.correlationModelIso not in correlationModels:
                 raise ValueError('Invalid correlation model for isolation efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
-            if config.geometry() >= LHCPeriod.Run3:
+            if self.correlationModelIso != 'TOTAL':
                 log.warning("Only TOTAL correlation model is currently supported "
                       "for isolation efficiency correction in Run 3.")
-                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
-            else:
-                alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelIso
+            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
                     PATCore.ParticleDataType.Full if self.forceFullSimConfig
@@ -614,25 +683,96 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                      'isol_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
 
-        # TO-DO: add trigger SFs, for which we need ID key + ISO key + Trigger key !
+        if (self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3 and 
+            config.dataType() is not DataType.Data and not self.noEffSF):
+            alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
+                                          'ElectronEfficiencyCorrectionAlgEcids' )
+            config.addPrivateTool( 'efficiencyCorrectionTool',
+                                   'AsgElectronEfficiencyCorrectionTool' )
+            alg.scaleFactorDecoration = 'el_ecids_effSF' + selectionPostfix + '_%SYS%'
+            if self.isolationWP != 'Tight_VarRad':
+                raise ValueError('ECIDS SFs are supported only for Tight_VarRad isolation.')
+            if self.identificationWP == 'LooseBLayerLH':
+                ecids_lh = 'loose'
+            elif self.identificationWP == 'MediumLH':
+                ecids_lh = 'medium'
+            elif self.identificationWP == 'TightLH':
+                ecids_lh = 'tight'
+            else:  
+                raise ValueError('ECIDS SFs are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
 
-        if self.chargeIDSelectionRun2:
-            # ECIDS is currently not supported in R22.
-            # SFs might become available or it will be part of the DNN ID.
-            pass
+            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
+            alg.efficiencyCorrectionTool.CorrectionFileNameList = \
+                [f'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v2/ecids/efficiencySF.ChargeID.{ecids_lh}_ECIDS_Tight_VarRad.root']
+            if config.dataType() is DataType.FastSim:
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig
+                    else PATCore.ParticleDataType.Fast)
+            elif config.dataType() is DataType.FullSim:
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full
+            alg.outOfValidity = 2 #silent
+            alg.outOfValidityDeco = 'el_ecids_bad_eff' + selectionPostfix
+            alg.electrons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'ecids_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
+        
+        if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF:
+            if config.geometry() >= LHCPeriod.Run3:
+                raise ValueError('Run 3 does not yet have charge mis-ID correction, '
+                                 'please disable it by setting `noEffSF` to False.')
+
+            alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
+                                          'ElectronEfficiencyCorrectionAlgMisid' )
+            config.addPrivateTool( 'efficiencyCorrectionTool',
+                                   'CP::ElectronChargeEfficiencyCorrectionTool' )
+            alg.scaleFactorDecoration = 'el_charge_misid_effSF' + selectionPostfix + '_%SYS%'
+            if self.isolationWP != 'Tight_VarRad':
+                raise ValueError('Charge mis-ID SFs are supported only for Tight_VarRad isolation.')
+            if self.identificationWP == 'LooseBLayerLH':
+                misid_lh = 'LooseAndBLayerLLH'
+            elif self.identificationWP == 'MediumLH':
+                misid_lh = 'MediumLLH'
+            elif self.identificationWP == 'TightLH':
+                misid_lh = 'TightLLH'
+            else:  
+                raise ValueError('Charge mis-ID SFs are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
+            misid_suffix = '_ECIDSloose' if self.chargeIDSelectionRun2 else ''
+
+            alg.efficiencyCorrectionTool.CorrectionFileName = \
+                f'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v2/charge_misID/chargeEfficiencySF.{misid_lh}_d0z0_TightVarRad{misid_suffix}.root'
+            if config.dataType() is DataType.FastSim:
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig
+                    else PATCore.ParticleDataType.Fast)
+            elif config.dataType() is DataType.FullSim:
+                alg.efficiencyCorrectionTool.ForceDataType = \
+                    PATCore.ParticleDataType.Full
+            alg.outOfValidity = 2 #silent
+            alg.outOfValidityDeco = 'el_misid_bad_eff' + selectionPostfix
+            alg.electrons = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            if self.saveDetailedSF:
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                     'charge_misid_effSF' + postfix)
+            sfList += [alg.scaleFactorDecoration]
 
         if config.dataType() is not DataType.Data and not self.noEffSF and self.saveCombinedSF:
             alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
-                                          'ElectronCombinedEfficiencyScaleFactorAlg' + postfix )
+                                          'ElectronCombinedEfficiencyScaleFactorAlg' )
             alg.particles = config.readName (self.containerName)
             alg.inScaleFactors = sfList
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
             config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
+        
 
 
 class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
-    def __init__ (self, configName='') :
+    def __init__ (self) :
         super (ElectronTriggerAnalysisSFBlock, self).__init__ ()
 
         self.addOption ('triggerChainsPerYear', {}, type=None,
@@ -651,9 +791,9 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('prefixEff', 'trigEff', type=str,
                         info="the decoration prefix for MC trigger efficiencies, "
                         "the default is 'trigEff'")
-        self.addOption ('includeAllYears', False, type=bool,
-                        info="if True, all configured years will be included in all jobs. "
-                        "The default is False.")
+        self.addOption ('includeAllYearsPerRun', False, type=bool,
+                        info="if True, all configured years in the LHC run will "
+                        "be included in all jobs. The default is False.")
         self.addOption ('removeHLTPrefix', True, type=bool,
                         info="remove the HLT prefix from trigger chain names, "
                         "The default is True.")
@@ -664,13 +804,17 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                         info="the input electron container, with a possible selection, in "
                         "the format container or container.selection.")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
+
     def makeAlgs (self, config) :
 
         if config.dataType() is not DataType.Data:
             log = logging.getLogger('ElectronTriggerSFConfig')
 
-            if self.includeAllYears and not self.useToolKeyAsOutput:
-                log.warning('`includeAllYears` is set to True, but `useToolKeyAsOutput` is set to False. '
+            if self.includeAllYearsPerRun and not self.useToolKeyAsOutput:
+                log.warning('`includeAllYearsPerRun` is set to True, but `useToolKeyAsOutput` is set to False. '
                             'This will cause multiple branches to be written out with the same content.')
 
             # Dictionary from TrigGlobalEfficiencyCorrection/Triggers.cfg
@@ -680,7 +824,9 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
             # currently recommended versions
             version_Run2 = "2015_2018/rel21.2/Precision_Summer2020_v1"
-            version_Run3 = "2015_2025/rel22.2/2022_Summer_Prerecom_v1"
+            map_Run2 = f"{version_Run2}/map4.txt"
+            version_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4"
+            map_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt"
 
             version = version_Run2 if config.geometry() is LHCPeriod.Run2 else version_Run3
             # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg
@@ -701,21 +847,12 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
                 return conf[0]
 
-            if self.includeAllYears:
+            if self.includeAllYearsPerRun:
                 years = [int(year) for year in self.triggerChainsPerYear.keys()]
-                if any(year in years for year in [2015, 2016, 2017, 2018]) \
-                    and any(year in years for year in [2022, 2023, 2024, 2025]):
-                    raise ValueError("Mixing years from Run 2 and Run 3 in the same job is currently not supported.")
-            elif config.campaign() is Campaign.MC20a:
-                years = [2015, 2016]
-            elif config.campaign() is Campaign.MC20d:
-                years = [2017]
-            elif config.campaign() is Campaign.MC20e:
-                years = [2018]
-            elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]:
-                years = [2022]
-            elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
-                years = [2023]
+            else:
+                from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import (
+                    get_input_years)
+                years = get_input_years(config)
 
             # prepare keys
             import ROOT
@@ -742,8 +879,12 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             electronMapKeys = dict(electronMapKeys_Run2) | dict(electronMapKeys_Run3)
 
             # collect configurations
+            from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import is_year_in_current_period
             triggerConfigs = {}
             for year in years:
+                if not is_year_in_current_period(config, year):
+                    continue
+
                 triggerChains = self.triggerChainsPerYear.get(int(year), self.triggerChainsPerYear.get(str(year), []))
                 for chain in triggerChains:
                     chain = chain.replace(" || ", "_OR_")
@@ -776,7 +917,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                                            'AsgElectronEfficiencyCorrectionTool' )
 
                     # Reproduce config from TrigGlobalEfficiencyAlg
-                    alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/" + version + "/map4.txt"
+                    alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/" + (map_Run3 if config.geometry() is LHCPeriod.Run3 else map_Run2)
                     alg.efficiencyCorrectionTool.IdKey = self.electronID.replace("LH","")
                     alg.efficiencyCorrectionTool.IsoKey = self.electronIsol
                     alg.efficiencyCorrectionTool.TriggerKey = (
@@ -813,13 +954,16 @@ class ElectronLRTMergedConfig (ConfigBlock) :
             info="the name of the output container after LRT merging."
         )
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName
 
     def makeAlgs (self, config) :
 
         if config.isPhyslite() :
             raise(RuntimeError("Electron LRT merging is not available in Physlite mode"))
 
-        alg = config.createAlgorithm( "CP::ElectronLRTMergingAlg", "ElectronLRTMergingAlg" + self.containerName )
+        alg = config.createAlgorithm( "CP::ElectronLRTMergingAlg", "ElectronLRTMergingAlg" )
         alg.PromptElectronLocation = self.inputElectrons
         alg.LRTElectronLocation = self.inputLRTElectrons
         alg.OutputCollectionName = self.containerName

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DbSession.h 726071 2016-02-25 09:23:05Z krasznaa $
@@ -67,6 +67,27 @@ namespace pool  {
       switchPtr(0);
       return *this;
     }
+
+    // Move
+    DbSession (DbSession&& cp)
+    {
+      setPtr (cp.m_ptr);
+      setType (cp.m_type);
+      cp.setPtr (nullptr);
+      cp.setType(DbType(0));
+    }
+    DbSession& operator= (DbSession&& cp)
+    {
+      if (&cp != this) {
+        switchPtr (nullptr);
+        setPtr (cp.m_ptr);
+        setType (cp.m_type);
+        cp.setPtr (nullptr);
+        cp.setType(DbType(0));
+      }
+      return *this;
+    }
+
     /// Access reference counter
     int refCount() const;
     /// Find domain object in session (by technology type)

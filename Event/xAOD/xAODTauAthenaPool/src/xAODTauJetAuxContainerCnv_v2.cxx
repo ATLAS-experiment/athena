@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -7,6 +7,7 @@
 
 // Gaudi/Athena include(s):
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 // EDM include(s):
 #include "xAODTau/versions/TauJetContainer_v2.h"
@@ -40,6 +41,26 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
     return;
   }
 
+   std::string tauTrackContName=key;
+   if (tauTrackContName.ends_with ("Aux.")) {
+     tauTrackContName.resize (tauTrackContName.size()-4);
+   }
+
+   //example names:
+   //TauJets : Jets --> Tracks
+   //HLT_xAOD__TauJetContainer_TrigTauRecMerged Jet --> Track; +=Tracks
+   //HLT_xAOD__TauJetContainer_TrigTauRecPreselection ""
+   if(tauTrackContName.find("Jet") != std::string::npos){
+     tauTrackContName.replace( tauTrackContName.find("Jet"), 3, "Track" );
+     if(tauTrackContName.find("HLT") != std::string::npos) tauTrackContName+="Tracks";
+   }
+   else if (key.length() > 0) {
+     log << MSG::ERROR << "Cannot decipher name TauTrackContainer should have" << endmsg;
+     return;
+   }
+
+   std::string tauTrackAuxContName=tauTrackContName+"Aux.";
+
    xAOD::TauTrackContainer* pTracks = nullptr;
    xAOD::TauTrackAuxContainer* pAuxTracks = nullptr; 
    if(key.length()){
@@ -48,6 +69,12 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
      pTracks = new xAOD::TauTrackContainer();
      pAuxTracks = new xAOD::TauTrackAuxContainer();
      pTracks->setStore(pAuxTracks);
+
+     if(evtStore->record(pTracks, tauTrackContName).isFailure() ||
+        evtStore->record(pAuxTracks, tauTrackAuxContName).isFailure()){
+       log << MSG::DEBUG << "Couldn't Record TauTracks" << endmsg;
+       return;
+     }
    }
 
    // Clear the transient object:
@@ -62,7 +89,6 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
    xAOD::TauJetContainer newInt;
    newInt.setStore( newObj );
 
-  
    // Loop over the interface objects, and do the conversion with their help:
    for( const xAOD::TauJet_v2* oldTau : oldInt ) {
 
@@ -79,9 +105,6 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setP4( xAOD::TauJetParameters::IntermediateAxis, oldTau->ptIntermediateAxis(), oldTau->etaIntermediateAxis(), oldTau->phiIntermediateAxis(), oldTau->mIntermediateAxis() );
       newTau->setP4( xAOD::TauJetParameters::TauEnergyScale, oldTau->ptTauEnergyScale(), oldTau->etaTauEnergyScale(), oldTau->phiTauEnergyScale(), oldTau->mTauEnergyScale() );
       newTau->setP4( xAOD::TauJetParameters::TauEtaCalib, oldTau->ptTauEtaCalib(), oldTau->etaTauEtaCalib(), oldTau->phiTauEtaCalib(), oldTau->mTauEtaCalib() );
-      /// don't need to convert this anymore as v2 taujet doesn't have these 4-vectors anymore
-      // newTau->setP4( xAOD::TauJetParameters::PanTauEFlowRec, oldTau->ptPanTauEFlowRec(), oldTau->etaPanTauEFlowRec(), oldTau->phiPanTauEFlowRec(), oldTau->mPanTauEFlowRec() );
-      // newTau->setP4( xAOD::TauJetParameters::PanTauEFlowRecProto, oldTau->ptPanTauEFlowRecProto(), oldTau->etaPanTauEFlowRecProto(), oldTau->phiPanTauEFlowRecProto(), oldTau->mPanTauEFlowRecProto() );
       newTau->setP4( xAOD::TauJetParameters::PanTauCellBased, oldTau->ptPanTauCellBased(), oldTau->etaPanTauCellBased(), oldTau->phiPanTauCellBased(), oldTau->mPanTauCellBased() );
       newTau->setP4( xAOD::TauJetParameters::PanTauCellBasedProto, oldTau->ptPanTauCellBasedProto(), oldTau->etaPanTauCellBasedProto(), oldTau->phiPanTauCellBasedProto(), oldTau->mPanTauCellBasedProto() );
 
@@ -96,22 +119,8 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       //copy PID variables
       //
       newTau->setDiscriminant(xAOD::TauJetParameters::BDTJetScoreSigTrans    , oldTau->discriminant(xAOD::TauJetParameters::BDTJetScoreSigTrans) );
-      // newTau->setDiscriminant(xAOD::TauJetParameters::BDTJetScoreBkgTrans    , oldTau->discriminant(xAOD::TauJetParameters::BDTJetScoreBkgTrans) );
       newTau->setDiscriminant(xAOD::TauJetParameters::BDTJetScore    , oldTau->discriminant(xAOD::TauJetParameters::BDTJetScore) );
       newTau->setDiscriminant(xAOD::TauJetParameters::BDTEleScore    , oldTau->discriminant(xAOD::TauJetParameters::BDTEleScore) );
-      //      newTau->setDiscriminant(xAOD::TauJetParameters::Likelihood     , oldTau->discriminant(xAOD::TauJetParameters::Likelihood) );
-      //      newTau->setDiscriminant(xAOD::TauJetParameters::SafeLikelihood , oldTau->discriminant(xAOD::TauJetParameters::SafeLikelihood) );
-      // newTau->setIsTau(xAOD::TauJetParameters::ElectronVetoLoose  ,   oldTau->isTau(xAOD::TauJetParameters::ElectronVetoLoose) );
-      // newTau->setIsTau(xAOD::TauJetParameters::ElectronVetoLoose  ,   oldTau->isTau(xAOD::TauJetParameters::ElectronVetoLoose) );
-      // newTau->setIsTau(xAOD::TauJetParameters::ElectronVetoMedium ,   oldTau->isTau(xAOD::TauJetParameters::ElectronVetoMedium) );
-      // newTau->setIsTau(xAOD::TauJetParameters::ElectronVetoTight  ,   oldTau->isTau(xAOD::TauJetParameters::ElectronVetoTight) );
-      //      newTau->setIsTau(xAOD::TauJetParameters::MuonVeto           ,   oldTau->isTau(xAOD::TauJetParameters::MuonVeto) );
-      // newTau->setIsTau(xAOD::TauJetParameters::TauCutLoose        ,   oldTau->isTau(xAOD::TauJetParameters::TauCutLoose) );
-      // newTau->setIsTau(xAOD::TauJetParameters::TauCutMedium       ,   oldTau->isTau(xAOD::TauJetParameters::TauCutMedium) );
-      // newTau->setIsTau(xAOD::TauJetParameters::TauCutTight        ,   oldTau->isTau(xAOD::TauJetParameters::TauCutTight) );
-      // newTau->setIsTau(xAOD::TauJetParameters::TauLlhLoose        ,   oldTau->isTau(xAOD::TauJetParameters::TauLlhLoose) );
-      // newTau->setIsTau(xAOD::TauJetParameters::TauLlhMedium       ,   oldTau->isTau(xAOD::TauJetParameters::TauLlhMedium) );
-      // newTau->setIsTau(xAOD::TauJetParameters::TauLlhTight        ,   oldTau->isTau(xAOD::TauJetParameters::TauLlhTight) );
       newTau->setIsTau(xAOD::TauJetParameters::JetBDTSigLoose     ,   oldTau->isTau(xAOD::TauJetParameters::JetBDTSigLoose) );
       newTau->setIsTau(xAOD::TauJetParameters::JetBDTSigMedium    ,   oldTau->isTau(xAOD::TauJetParameters::JetBDTSigMedium) );
       newTau->setIsTau(xAOD::TauJetParameters::JetBDTSigTight     ,   oldTau->isTau(xAOD::TauJetParameters::JetBDTSigTight) );
@@ -122,9 +131,6 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       //
       //set individual int type details variables
       //
-      //r21 cleanup
-      // newTau->setDetail(xAOD::TauJetParameters::nPi0                   , oldTau->detail<int>(xAOD::TauJetParameters::nPi0) );                     
-      // newTau->setDetail(xAOD::TauJetParameters::nPi0Topo                   , oldTau->detail<int>(xAOD::TauJetParameters::nPi0Topo) );                     
       newTau->setDetail(xAOD::TauJetParameters::nCharged                   , oldTau->detail<int>(xAOD::TauJetParameters::nCharged) );                     
       newTau->setDetail(xAOD::TauJetParameters::numCells               ,      oldTau->detail<int>(xAOD::TauJetParameters::numCells) );				  
       newTau->setDetail(xAOD::TauJetParameters::numTopoClusters        ,      oldTau->detail<int>(xAOD::TauJetParameters::numTopoClusters) );			  
@@ -140,12 +146,6 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setDetail(xAOD::TauJetParameters::massTrkSys             ,       oldTau->detail<float>(xAOD::TauJetParameters::massTrkSys) );				  
       newTau->setDetail(xAOD::TauJetParameters::trkWidth2              ,       oldTau->detail<float>(xAOD::TauJetParameters::trkWidth2) );				  
       newTau->setDetail(xAOD::TauJetParameters::trFlightPathSig        ,       oldTau->detail<float>(xAOD::TauJetParameters::trFlightPathSig) );				  
-      //r21 cleanup
-      // newTau->setDetail(xAOD::TauJetParameters::etEflow                ,       oldTau->detail<float>(xAOD::TauJetParameters::etEflow) );					  
-      // newTau->setDetail(xAOD::TauJetParameters::mEflow		      ,        oldTau->detail<float>(xAOD::TauJetParameters::mEflow) );					  
-      // newTau->setDetail(xAOD::TauJetParameters::ele_E237E277           ,       oldTau->detail<float>(xAOD::TauJetParameters::ele_E237E277) );				  
-      // newTau->setDetail(xAOD::TauJetParameters::ele_PresamplerFraction ,       oldTau->detail<float>(xAOD::TauJetParameters::ele_PresamplerFraction) );			  
-      // newTau->setDetail(xAOD::TauJetParameters::ele_ECALFirstFraction  ,       oldTau->detail<float>(xAOD::TauJetParameters::ele_ECALFirstFraction) );			  
       newTau->setDetail(xAOD::TauJetParameters::numEffTopoClusters     ,       oldTau->detail<float>(xAOD::TauJetParameters::numEffTopoClusters) );			  
       newTau->setDetail(xAOD::TauJetParameters::topoInvMass            ,       oldTau->detail<float>(xAOD::TauJetParameters::topoInvMass) );				  
       newTau->setDetail(xAOD::TauJetParameters::effTopoInvMass         ,       oldTau->detail<float>(xAOD::TauJetParameters::effTopoInvMass) );				  
@@ -158,11 +158,6 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setDetail(xAOD::TauJetParameters::isolFrac               ,       oldTau->detail<float>(xAOD::TauJetParameters::isolFrac) );			  
       newTau->setDetail(xAOD::TauJetParameters::centFrac               ,       oldTau->detail<float>(xAOD::TauJetParameters::centFrac) );			  
       newTau->setDetail(xAOD::TauJetParameters::stripWidth2            ,       oldTau->detail<float>(xAOD::TauJetParameters::stripWidth2) );			  
-      //r21 cleanup
-      // newTau->setDetail(xAOD::TauJetParameters::etEMCalib              ,       oldTau->detail<float>(xAOD::TauJetParameters::etEMCalib) );			  
-      // newTau->setDetail(xAOD::TauJetParameters::etHadCalib             ,       oldTau->detail<float>(xAOD::TauJetParameters::etHadCalib) );			  
-      // newTau->setDetail(xAOD::TauJetParameters::seedCalo_eta           ,       oldTau->detail<float>(xAOD::TauJetParameters::seedCalo_eta) );				  
-      // newTau->setDetail(xAOD::TauJetParameters::seedCalo_phi           ,       oldTau->detail<float>(xAOD::TauJetParameters::seedCalo_phi) );				  
       newTau->setDetail(xAOD::TauJetParameters::trkAvgDist             ,       oldTau->detail<float>(xAOD::TauJetParameters::trkAvgDist) );			  
       newTau->setDetail(xAOD::TauJetParameters::trkRmsDist             ,       oldTau->detail<float>(xAOD::TauJetParameters::trkRmsDist) );			  
       newTau->setDetail(xAOD::TauJetParameters::lead2ClusterEOverAllClusterE , oldTau->detail<float>(xAOD::TauJetParameters::lead2ClusterEOverAllClusterE) );	  
@@ -173,9 +168,6 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setDetail(xAOD::TauJetParameters::secMaxStripEt  ,	       oldTau->detail<float>(xAOD::TauJetParameters::secMaxStripEt) );				  
       newTau->setDetail(xAOD::TauJetParameters::sumEMCellEtOverLeadTrkPt  ,    oldTau->detail<float>(xAOD::TauJetParameters::sumEMCellEtOverLeadTrkPt) );				  
       newTau->setDetail(xAOD::TauJetParameters::hadLeakEt  ,	               oldTau->detail<float>(xAOD::TauJetParameters::hadLeakEt) );				  
-      //r21 cleanup
-      // newTau->setDetail(xAOD::TauJetParameters::EM_TES_scale ,		       oldTau->detail<float>(xAOD::TauJetParameters::EM_TES_scale) );				  
-      //      newTau->setDetail(xAOD::TauJetParameters::LC_TES_precalib ,	       oldTau->detail<float>(xAOD::TauJetParameters::LC_TES_precalib) );				  
       newTau->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing1 ,	       oldTau->detail<float>(xAOD::TauJetParameters::cellBasedEnergyRing1) );			  
       newTau->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing2 ,	       oldTau->detail<float>(xAOD::TauJetParameters::cellBasedEnergyRing2) );			  
       newTau->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing3 ,	       oldTau->detail<float>(xAOD::TauJetParameters::cellBasedEnergyRing3) );			  
@@ -185,13 +177,7 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setDetail(xAOD::TauJetParameters::cellBasedEnergyRing7 ,	       oldTau->detail<float>(xAOD::TauJetParameters::cellBasedEnergyRing7) );			  
       newTau->setDetail(xAOD::TauJetParameters::TRT_NHT_OVER_NLT ,	       oldTau->detail<float>(xAOD::TauJetParameters::TRT_NHT_OVER_NLT) );			  
       newTau->setDetail(xAOD::TauJetParameters::TauJetVtxFraction ,	       oldTau->detail<float>(xAOD::TauJetParameters::TauJetVtxFraction) );			  
-      //r21 cleanup
-      // newTau->setDetail(xAOD::TauJetParameters::ptRatioEflow ,	               oldTau->detail<float>(xAOD::TauJetParameters::ptRatioEflow) );			  
-      // newTau->setDetail(xAOD::TauJetParameters::etEflowTopo ,	               oldTau->detail<float>(xAOD::TauJetParameters::etEflowTopo) );			  
       newTau->setDetail(xAOD::TauJetParameters::TauJetVtxFraction ,	       oldTau->detail<float>(xAOD::TauJetParameters::TauJetVtxFraction) );			  
-      //r21 cleanup
-      // newTau->setDetail(xAOD::TauJetParameters::mEflowTopo ,	               oldTau->detail<float>(xAOD::TauJetParameters::mEflowTopo) );			  
-      // newTau->setDetail(xAOD::TauJetParameters::ptRatioEflowTopo ,	       oldTau->detail<float>(xAOD::TauJetParameters::ptRatioEflowTopo) );			  
       newTau->setDetail(xAOD::TauJetParameters::PSSFraction ,	               oldTau->detail<float>(xAOD::TauJetParameters::PSSFraction) );			  
       newTau->setDetail(xAOD::TauJetParameters::ChPiEMEOverCaloEME ,	       oldTau->detail<float>(xAOD::TauJetParameters::ChPiEMEOverCaloEME) );			  
       newTau->setDetail(xAOD::TauJetParameters::EMPOverTrkSysP ,	       oldTau->detail<float>(xAOD::TauJetParameters::EMPOverTrkSysP) );			  
@@ -214,15 +200,11 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTValue_1p0n_vs_1p1n,                       oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTValue_1p0n_vs_1p1n ));		  
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTValue_1p1n_vs_1pXn, 			oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTValue_1p1n_vs_1pXn ));	  
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTValue_3p0n_vs_3pXn, 			oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTValue_3p0n_vs_3pXn ));		  
-      //      newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Basic_NNeutralConsts, 		oldTau->panTauDetail<int>(xAOD::TauJetParameters::PanTau_BDTVar_Basic_NNeutralConsts ));		  
-      //      newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Charged_JetMoment_EtDRxTotalEt, 	oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Charged_JetMoment_EtDRxTotalEt )); 
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Charged_StdDev_Et_WrtEtAllConsts, 	oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Charged_StdDev_Et_WrtEtAllConsts )); 
-      // newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_HLV_SumM, 			oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_HLV_SumM 		     ));  
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_PID_BDTValues_BDTSort_1, 	oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_PID_BDTValues_BDTSort_1 ));  
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_PID_BDTValues_BDTSort_2, 	oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_PID_BDTValues_BDTSort_2 ));  
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Ratio_1stBDTEtOverEtAllConsts,oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Ratio_1stBDTEtOverEtAllConsts )); 
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Ratio_EtOverEtAllConsts, 	oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Ratio_EtOverEtAllConsts ));  
-      // newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Shots_NPhotonsInSeed, 	oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Neutral_Shots_NPhotonsInSeed ));	  
       newTau->setPanTauDetail(xAOD::TauJetParameters::PanTau_BDTVar_Combined_DeltaR1stNeutralTo1stCharged,oldTau->panTauDetail<float>(xAOD::TauJetParameters::PanTau_BDTVar_Combined_DeltaR1stNeutralTo1stCharged ));
       
       //copy element links
@@ -230,16 +212,10 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setVertexLink( oldTau->vertexLink() );
       newTau->setSecondaryVertexLink( oldTau->secondaryVertexLink() );
 
-      // newTau->setTrackLinks( oldTau->trackLinks() );
-      // newTau->setOtherTrackLinks( oldTau->otherTrackLinks() );
-      // newTau->setWideTrackLinks( oldTau->wideTrackLinks() );
-
       newTau->setNeutralPFOLinks( oldTau->neutralPFOLinks() );
       newTau->setChargedPFOLinks( oldTau->chargedPFOLinks() );
       newTau->setPi0PFOLinks( oldTau->pi0PFOLinks() );
       newTau->setShotPFOLinks( oldTau->shotPFOLinks() );
-      /// can't set hadronic pfo links because v1 taujet doesn't have them
-      // newTau->setHadronicPFOLinks( oldTau->hadronic_PFOLinks() );
 
       //v2 doesn't have pfo element link with specific type name, so copy cellbased ones into proto
       newTau->setProtoNeutralPFOLinks( oldTau->protoNeutralPFOLinks() );
@@ -247,88 +223,69 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
       newTau->setProtoPi0PFOLinks( oldTau->protoPi0PFOLinks() );
 
       if(key.length()==0) continue;
-      
+
+      // Get context and look up hashed track container key.
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+      ElementLink<xAOD::TauTrackContainer> dum (tauTrackContName, 0, ctx);
+      SG::sgkey_t track_sgkey = dum.key();
+      IProxyDict* sg = dum.source();
+
       for(unsigned int i = 0; i < oldTau->nTracks(); ++i){
 	ElementLink< xAOD::TrackParticleContainer > linkToTrackParticle = oldTau->trackLinks()[i];
+        linkToTrackParticle.toTransient (sg);
 	if(!linkToTrackParticle.isValid()) continue;
-	xAOD::TauTrack* track = new xAOD::TauTrack();
-	pTracks->push_back(track);
-	const xAOD::TrackParticle* trackParticle=oldTau->track(i);
-        track->addTrackLink(linkToTrackParticle);
-        track->setP4(trackParticle->pt(), trackParticle->eta(), trackParticle->phi(), trackParticle->m());
-	track->setFlag(xAOD::TauJetParameters::TauTrackFlag::coreTrack, true);
-        track->setFlag(xAOD::TauJetParameters::TauTrackFlag::passTrkSelector, true);
-        track->setFlag(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged, true); 
-        track->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true); 
-        ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
-        linkToTauTrack.toContainedElement(*pTracks, track);
-        newTau->addTauTrackLink(linkToTauTrack);
+	newTau->addTauTrackLink(ElementLink<xAOD::TauTrackContainer>(track_sgkey, pTracks->size(), ctx));
+	pTracks->push_back(std::make_unique<xAOD::TauTrack>());
+	xAOD::TauTrack& track = *pTracks->back();
+	const xAOD::TrackParticle* trackParticle=*linkToTrackParticle;
+        track.addTrackLink(linkToTrackParticle);
+        track.setP4(trackParticle->pt(), trackParticle->eta(), trackParticle->phi(), trackParticle->m());
+	track.setFlag(xAOD::TauJetParameters::TauTrackFlag::coreTrack, true);
+        track.setFlag(xAOD::TauJetParameters::TauTrackFlag::passTrkSelector, true);
+        track.setFlag(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged, true);
+        track.setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
+        //ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
+        //linkToTauTrack.resetWithKeyAndIndex(track_sgkey, pTracks->size()-1, ctx);
+        //newTau->addTauTrackLink(linkToTauTrack);
       }
 
       for(unsigned int i = 0; i < oldTau->nWideTracks(); ++i){
 	ElementLink< xAOD::TrackParticleContainer > linkToTrackParticle = oldTau->wideTrackLinks()[i];
+        linkToTrackParticle.toTransient (sg);
 	if(!linkToTrackParticle.isValid()) continue;
-	xAOD::TauTrack* track = new xAOD::TauTrack();
-	pTracks->push_back(track);
-	const xAOD::TrackParticle* trackParticle=oldTau->wideTrack(i);
-        track->addTrackLink(linkToTrackParticle);
-        track->setP4(trackParticle->pt(), trackParticle->eta(), trackParticle->phi(), trackParticle->m());
-	track->setFlag(xAOD::TauJetParameters::TauTrackFlag::wideTrack, true);
-        track->setFlag(xAOD::TauJetParameters::TauTrackFlag::passTrkSelector, true);
-        track->setFlag(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation, true); 
-        track->setFlag(xAOD::TauJetParameters::TauTrackFlag::modifiedIsolationTrack, true); 
-        track->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true); 
-        ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
-        linkToTauTrack.toContainedElement(*pTracks, track);
-        newTau->addTauTrackLink(linkToTauTrack);
+	newTau->addTauTrackLink(ElementLink<xAOD::TauTrackContainer>(track_sgkey, pTracks->size(), ctx));
+	pTracks->push_back(std::make_unique<xAOD::TauTrack>());
+	xAOD::TauTrack& track = *pTracks->back();
+	const xAOD::TrackParticle* trackParticle=*linkToTrackParticle;
+        track.addTrackLink(linkToTrackParticle);
+        track.setP4(trackParticle->pt(), trackParticle->eta(), trackParticle->phi(), trackParticle->m());
+	track.setFlag(xAOD::TauJetParameters::TauTrackFlag::wideTrack, true);
+        track.setFlag(xAOD::TauJetParameters::TauTrackFlag::passTrkSelector, true);
+        track.setFlag(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation, true);
+        track.setFlag(xAOD::TauJetParameters::TauTrackFlag::modifiedIsolationTrack, true);
+        track.setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
       }
 
       for(unsigned int i = 0; i < oldTau->nOtherTracks(); ++i){
 	ElementLink< xAOD::TrackParticleContainer > linkToTrackParticle = oldTau->otherTrackLinks()[i];
+        linkToTrackParticle.toTransient (sg);
 	if(!linkToTrackParticle.isValid()) continue;
-	xAOD::TauTrack* track = new xAOD::TauTrack();
-	pTracks->push_back(track);
-	const xAOD::TrackParticle* trackParticle=oldTau->otherTrack(i);
-        track->addTrackLink(linkToTrackParticle);
-        track->setP4(trackParticle->pt(), trackParticle->eta(), trackParticle->phi(), trackParticle->m());
+	newTau->addTauTrackLink(ElementLink<xAOD::TauTrackContainer>(track_sgkey, pTracks->size(), ctx));
+	pTracks->push_back(std::make_unique<xAOD::TauTrack>());
+	xAOD::TauTrack& track = *pTracks->back();
+	const xAOD::TrackParticle* trackParticle=*linkToTrackParticle;
+        track.addTrackLink(linkToTrackParticle);
+        track.setP4(trackParticle->pt(), trackParticle->eta(), trackParticle->phi(), trackParticle->m());
 	float dR=oldTau->p4(xAOD::TauJetParameters::IntermediateAxis).DeltaR(trackParticle->p4());
-	if(dR<=0.2) track->setFlag(xAOD::TauJetParameters::TauTrackFlag::coreTrack, true);
-	else track->setFlag(xAOD::TauJetParameters::TauTrackFlag::wideTrack, true);
-	track->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true); 
-        ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
-        linkToTauTrack.toContainedElement(*pTracks, track);
-        newTau->addTauTrackLink(linkToTauTrack);
+	if(dR<=0.2) track.setFlag(xAOD::TauJetParameters::TauTrackFlag::coreTrack, true);
+	else track.setFlag(xAOD::TauJetParameters::TauTrackFlag::wideTrack, true);
+	track.setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
       }
 
 
       newTau->setDetail(xAOD::TauJetParameters::nChargedTracks, (int) newTau->nTracks());
       newTau->setDetail(xAOD::TauJetParameters::nIsolatedTracks, (int) newTau->nTracks(xAOD::TauJetParameters::classifiedIsolation));
 
-   }
-   
-   if(key.length()){
-     std::string tauTrackContName=key;
-     tauTrackContName.replace(tauTrackContName.find("Aux."),4,"");
-     //example names:
-     //TauJets : Jets --> Tracks
-     //HLT_xAOD__TauJetContainer_TrigTauRecMerged Jet --> Track; +=Tracks
-     //HLT_xAOD__TauJetContainer_TrigTauRecPreselection ""
-     if(tauTrackContName.find("Jet") != std::string::npos){
-       tauTrackContName.replace( tauTrackContName.find("Jet"), 3, "Track" );
-       if(tauTrackContName.find("HLT") != std::string::npos) tauTrackContName+="Tracks";
-     }
-     else {
-       log << MSG::ERROR << "Cannot decipher name TauTrackConatiner should have" << endmsg;
-       return;
-     }
-   
-     std::string tauTrackAuxContName=tauTrackContName+"Aux.";
-
-     if(evtStore->record(pTracks, tauTrackContName).isFailure() ||
-        evtStore->record(pAuxTracks, tauTrackAuxContName)){
-       log << MSG::DEBUG << "Couldn't Record TauTracks" << endmsg;
-       return;
-     }
    }
 
    return;

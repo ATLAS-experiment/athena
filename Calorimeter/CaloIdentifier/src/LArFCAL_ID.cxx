@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/LArFCAL_ID.h"
@@ -21,13 +21,12 @@
 
 #define MAX_BUFFER_LEN 1024
 
-LArFCAL_ID::LArFCAL_ID(void) : 
-  LArFCAL_Base_ID("LArFCAL_ID", 0)
+LArFCAL_ID::LArFCAL_ID() :
+  LArFCAL_Base_ID("LArFCAL_ID", "lar_fcal", 0)
 {
 }
 
-LArFCAL_ID::~LArFCAL_ID(void) 
-= default;
+LArFCAL_ID::~LArFCAL_ID() = default;
 
 int  LArFCAL_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /*=================================================================*/
@@ -47,8 +46,7 @@ int  LArFCAL_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   }
 
   // init base object
-  if (LArFCAL_Base_ID::initialize_base_from_dictionary(dict_mgr,
-						       "lar_fcal"))
+  if (LArFCAL_Base_ID::initialize_base_from_dictionary(dict_mgr, group()))
   {
     if(dictionaryVersion() == "H8TestBeam" )
       return 0;

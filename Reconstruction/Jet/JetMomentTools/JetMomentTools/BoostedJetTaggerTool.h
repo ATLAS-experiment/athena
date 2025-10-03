@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef DERIVATIONFRAMEWORK_BOOSTEDJETTAGGERTOOL_H
@@ -31,6 +31,8 @@ private:
   Gaudi::Property<std::string> m_decorationName{this, "DecorationName", "", "Tagger decoration name key"};
   Gaudi::Property<std::string> m_calibArea{this, "CalibArea", "", "CalibArea key"};
   Gaudi::Property<std::string> m_configFile{this, "ConfigFile", "", "ConfigFile key"};
+
+  Gaudi::Property<bool> m_suppressInputDependence{this, "SuppressInputDependence", false};
   
   // Internals
   

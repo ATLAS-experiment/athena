@@ -66,7 +66,7 @@ StatusCode CommonDiTauEfficiencyTool::initialize()
 
   generateSystematicSets();
 
-  if (m_sWP.length()>0)
+  if (m_sWP.size()>0)
     m_sSFHistName = "sf_"+m_sWP;
 
   // load empty systematic variation by default
@@ -84,7 +84,7 @@ StatusCode CommonDiTauEfficiencyTool::initialize()
 */
 //______________________________________________________________________________
 CP::CorrectionCode CommonDiTauEfficiencyTool::getEfficiencyScaleFactor(const xAOD::DiTauJet& xDiTau,
-    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/, unsigned int /*iMu*/)
+    double& dEfficiencyScaleFactor)
 {
   // check which true state is requestet
   if (getTruthParticleType(xDiTau) != m_eCheckTruth)
@@ -160,8 +160,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getEfficiencyScaleFactor(const xAO
   multiple instances of this tool with different decoration names.
 */
 //______________________________________________________________________________
-CP::CorrectionCode CommonDiTauEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::DiTauJet& xDiTau,
-    unsigned int iRunNumber, unsigned int iMu)
+CP::CorrectionCode CommonDiTauEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::DiTauJet& xDiTau)
 {
   double dSf = 0.;
 
@@ -180,7 +179,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::applyEfficiencyScaleFactor(const x
     return CP::CorrectionCode::Ok;
 
   // retrieve scale factor
-  CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xDiTau, dSf, iRunNumber, iMu);
+  CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xDiTau, dSf);
   // adding scale factor to tau as decoration
   decor(xDiTau) = dSf;
 
@@ -253,11 +252,8 @@ void CommonDiTauEfficiencyTool::generateSystematicSets()
   std::string sSystematicBaseString = "TAUS_"+sTruthType+"_EFF_"+sEfficiencyType+"_";
   // set truth type to check for in truth matching
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
-  if (sTruthType=="TRUEELECTRON") m_eCheckTruth = TauAnalysisTools::TruthElectron;
-  if (sTruthType=="TRUEMUON") m_eCheckTruth = TauAnalysisTools::TruthMuon;
-  if (sTruthType=="TRUEJET") m_eCheckTruth = TauAnalysisTools::TruthJet;
   if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
-  if (sEfficiencyType=="ELEOLR") m_bNoMultiprong = true;
+
   for (auto mSF : *m_mSF)
   {
     // parse for nuisance parameter in histogram name

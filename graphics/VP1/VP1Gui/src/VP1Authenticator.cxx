@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Gui/VP1Authenticator.h"
@@ -21,7 +21,7 @@
 class VP1Authenticator::Imp {
 
 public:
-  Imp(VP1Authenticator*,QString);
+  Imp(VP1Authenticator*,const QString &);
   ~Imp();
 
   Imp (const Imp&) = delete;
@@ -34,20 +34,20 @@ public:
   void connectToAuthenticator(VP1Authenticator* authenticator);
 
   // Display error message in the TextEdit box
-  void displayError(QString);
+  void displayError(const QString& );
 
-  VP1Authenticator* m_theClass;
-  QNetworkAccessManager* m_netmanager;
-  QNetworkReply* m_netreply;
-  QFile* m_log;
+  VP1Authenticator* m_theClass{};
+  QNetworkAccessManager* m_netmanager{};
+  QNetworkReply* m_netreply{};
+  QFile* m_log{};
 
-  int stage;
+  int stage{1};
   QString m_fileInfoUrl;
   QString m_loginServer;
 };
 
 VP1Authenticator::Imp::Imp(VP1Authenticator* theClass
-			   ,QString fileInfoUrl)
+			   , const QString & fileInfoUrl)
   : m_theClass(theClass)
   , m_netmanager(new QNetworkAccessManager())
   , m_netreply(0)
@@ -117,7 +117,7 @@ void VP1Authenticator::Imp::connectToAuthenticator(VP1Authenticator* authenticat
 #endif
 }
 
-void VP1Authenticator::Imp::displayError(QString message)
+void VP1Authenticator::Imp::displayError(const QString & message)
 {
   m_theClass->teditError->setVisible(true);
   m_theClass->setFixedSize(400,350);
@@ -133,7 +133,7 @@ void VP1Authenticator::Imp::displayError(QString message)
 }
 
 //__________________________ Main Class __________________________________
-VP1Authenticator::VP1Authenticator(QWidget* parent, QString fileInfoUrl)
+VP1Authenticator::VP1Authenticator(QWidget* parent, const QString & fileInfoUrl)
   : QDialog(parent)
   , m_d(new Imp(this,fileInfoUrl))
 {

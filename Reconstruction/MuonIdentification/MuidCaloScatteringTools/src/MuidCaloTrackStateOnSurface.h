@@ -32,12 +32,7 @@
 #include "MuidInterfaces/IMuidCaloMaterialParam.h"
 #include "MuidInterfaces/IMuidCaloTrackStateOnSurface.h"
 #include "TrkExInterfaces/IPropagator.h"
-
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
-
-namespace Trk {
-    class MagneticFieldProperties;
-}  // namespace Trk
+#include "TrkGeometry/MagneticFieldProperties.h"
 
 namespace Rec {
 

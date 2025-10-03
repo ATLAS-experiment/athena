@@ -10,6 +10,7 @@
 #include "TrkExInterfaces/IMaterialEffectsEngine.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/TrackingGeometry.h"
+#include "TrkGeometry/MaterialLayer.h"
 #include "TrkVolumes/BoundarySurface.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 

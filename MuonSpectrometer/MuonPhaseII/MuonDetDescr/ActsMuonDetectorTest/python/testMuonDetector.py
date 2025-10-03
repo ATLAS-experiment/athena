@@ -20,6 +20,12 @@ def MuonDetectorNavTestCfg(flags, name = "MuonDetectorNavTest", **kwargs):
     from MuonTruthAlgsR4.MuonTruthAlgsConfig import TruthSegmentMakerCfg, TruthSegmentToTruthPartAssocCfg, SdoMultiTruthMakerCfg
 
     from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg, MuonTruthHitCountsAlgCfg
+    if ("TruthEvents" in flags.Input.Collections):
+        from xAODTruthCnv.RedoTruthLinksConfig import RedoTruthLinksAlgCfg
+        result.merge( RedoTruthLinksAlgCfg(flags) )
+    else:
+        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+        result.merge(GEN_AOD2xAODCfg(flags))
 
     result.merge(TruthMuonMakerAlgCfg(flags, pdgIds=[13,998,999]))
     result.merge(MuonTruthHitCountsAlgCfg(flags))
@@ -39,7 +45,8 @@ def MuonDetectorNavTestCfg(flags, name = "MuonDetectorNavTest", **kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
     parser.set_defaults(outRootFile="MuonNavigationTestR4_NewMaterial_Passive.root")

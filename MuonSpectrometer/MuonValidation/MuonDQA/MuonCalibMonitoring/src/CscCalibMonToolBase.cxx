@@ -714,7 +714,7 @@ StatusCode CscCalibMonToolBase::procHistograms()
 
   if(endOfRunFlag())
   {
-    const CscCalibResultContainer* calibContainer;
+    const CscCalibResultContainer* calibContainer = nullptr;
     if (!evtStore()->retrieve(calibContainer, m_calibResultKey).isSuccess())
     {
       ATH_MSG_ERROR( " Cannot retrieve container with name " << m_calibResultKey  );

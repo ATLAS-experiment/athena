@@ -21,6 +21,8 @@ StatusCode PileupAreaCalibStep::initialize() {
 
   ATH_MSG_INFO("Initializing pileup area correction.");
 
+  ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
+
   ATH_CHECK( m_rhoKey.initialize() );
   return StatusCode::SUCCESS;
 }
@@ -43,16 +45,17 @@ StatusCode PileupAreaCalibStep::calibrate(xAOD::JetContainer& jetCont) const {
   ATH_MSG_DEBUG("  Rho = " << 0.001*rho << " GeV");
 
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> areaAcc("ActiveArea4vec");  
-  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> puScaleMomAcc("JetPileupScaleMomentum");  
+  const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> outScaleMomAcc(m_jetOutScale);  
   SG::AuxElement::Accessor<int> puCorrectedAcc("PileupCorrected");
   for(xAOD::Jet *jet : jetCont){
 
-    xAOD::JetFourMom_t jetStartP4 = jet->jetP4();
+    const xAOD::JetFourMom_t jetStartP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
+    jet->setJetP4(jetStartP4);
+
     xAOD::JetFourMom_t jetareaP4 = areaAcc.getAttribute(*jet);
     ATH_MSG_VERBOSE("    Area = " << jetareaP4);
 
     xAOD::JetFourMom_t calibP4;
-    
     
     if(m_useFull4vectorArea){
       calibP4 = jetStartP4 - rho*jetareaP4;
@@ -68,7 +71,7 @@ StatusCode PileupAreaCalibStep::calibrate(xAOD::JetContainer& jetCont) const {
     //Attribute to track if a jet has received the pileup subtraction (always true if this code was run)
     puCorrectedAcc(*jet) = 1 ;    
     //Transfer calibrated jet properties to the Jet object
-    puScaleMomAcc.setAttribute(*jet, calibP4 );
+    outScaleMomAcc.setAttribute(*jet, calibP4 );
     jet->setJetP4( calibP4 );    
   } 
   return StatusCode::SUCCESS;

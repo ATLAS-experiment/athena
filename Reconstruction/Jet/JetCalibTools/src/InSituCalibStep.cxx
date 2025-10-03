@@ -23,7 +23,7 @@ InSituCalibStep::InSituCalibStep(const std::string& name)
 
 StatusCode InSituCalibStep::initialize() {
   ATH_MSG_DEBUG ("Initializing " << name() );
-  ATH_MSG_INFO("Reading from " << m_jetStartScale << " and writing to " << m_jetOutScale);
+  ATH_MSG_INFO("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
   // Initialise ReadHandle(s)
   ATH_CHECK( m_evtInfoKey.initialize() );
 
@@ -85,11 +85,12 @@ StatusCode InSituCalibStep::calibrate(xAOD::JetContainer& jets) const {
     return StatusCode::SUCCESS; 
   JetHelper::JetContext jc;
   for (xAOD::Jet* jet : jets){
+    const xAOD::JetFourMom_t jetStartP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
+    jet->setJetP4(jetStartP4);
     double s = 1.0; // scale
     if (getInsituCorr(*jet, jc, periodInd, s).isFailure())
         return StatusCode::FAILURE;
-    const xAOD::JetFourMom_t jetStartP4 = jet->jetP4();
-    xAOD::JetFourMom_t calibP4=jetStartP4;
+    xAOD::JetFourMom_t calibP4=jet->jetP4();
     calibP4 = calibP4 * s;
     // Set the output scale
     jet->setAttribute<xAOD::JetFourMom_t>(m_jetOutScale,calibP4);

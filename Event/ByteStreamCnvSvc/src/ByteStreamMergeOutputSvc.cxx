@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamMergeOutputSvc.h"
@@ -18,9 +18,10 @@ typedef std::map<uint32_t, ROBF*> ROBMAP;
 
 // Constructor.
 ByteStreamMergeOutputSvc::ByteStreamMergeOutputSvc(const std::string& name, ISvcLocator* svcloc) :
-   base_class(name,svcloc),
-   m_bsOutputStreamName(name)
+   base_class(name,svcloc)
 {
+   // cppcheck-suppress useInitializationList; deprecated Property constructor
+   m_bsOutputStreamName = name;
 }
 
 // Destructor.
@@ -58,14 +59,14 @@ bool  ByteStreamMergeOutputSvc::putEvent(const RawEvent* newEvent) {
    // do the merge...
    // get all the ROBFragments
    const size_t MAX_ROBFRAGMENTS = 2048;
-   OFFLINE_FRAGMENTS_NAMESPACE::PointerType orgRobF[MAX_ROBFRAGMENTS];
-   OFFLINE_FRAGMENTS_NAMESPACE::PointerType newRobF[MAX_ROBFRAGMENTS];
-   size_t orgrobcount = orgEvent->children(orgRobF, MAX_ROBFRAGMENTS);
+   std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> orgRobF(MAX_ROBFRAGMENTS);
+   std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> newRobF(MAX_ROBFRAGMENTS);
+   size_t orgrobcount = orgEvent->children(orgRobF.data(), MAX_ROBFRAGMENTS);
    if (orgrobcount == MAX_ROBFRAGMENTS) {
       ATH_MSG_ERROR("ROB buffer overflow");
       return false;
    }
-   size_t newrobcount = newEvent->children(newRobF,MAX_ROBFRAGMENTS);
+   size_t newrobcount = newEvent->children(newRobF.data(),MAX_ROBFRAGMENTS);
    if (newrobcount == MAX_ROBFRAGMENTS) {
       ATH_MSG_ERROR("ROB buffer overflow");
       return false;

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimConstGenAlgo.cxx
@@ -32,6 +32,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <cassert>
+#include <format>
+#include <stdexcept>
 
 #include <TVectorD.h>
 #include <TDecompLU.h>
@@ -434,28 +436,28 @@ bool FPGATrackSimConstGenAlgo::failedConstants(geo_constants const & geo, std::v
 {
   geo_constants gco = calculate_gcorth(geo, m_nCoords, usable);
 
-    if (CHECK_NAN(gco.pars.qOverPt)) return true;
+    //if (CHECK_NAN(gco.pars.qOverPt)) return true; commenting out all gco's to gret more sectors. we do not use this anyways... for the meanwhile
     if (CHECK_NAN(geo.pars.qOverPt)) return true;
-    if (CHECK_NAN(gco.pars.d0)) return true;
+    //if (CHECK_NAN(gco.pars.d0)) return true;
     if (CHECK_NAN(geo.pars.d0)) return true;
-    if (CHECK_NAN(gco.pars.phi)) return true;
+    //if (CHECK_NAN(gco.pars.phi)) return true;
     if (CHECK_NAN(geo.pars.phi)) return true;
-    if (CHECK_NAN(gco.pars.z0)) return true;
+    //if (CHECK_NAN(gco.pars.z0)) return true;
     if (CHECK_NAN(geo.pars.z0)) return true;
-    if (CHECK_NAN(gco.pars.eta)) return true;
+    //if (CHECK_NAN(gco.pars.eta)) return true;
     if (CHECK_NAN(geo.pars.eta)) return true;
 
     for (int i = 0; i < m_nCoords; i++)
     {
-        if (CHECK_NAN(gco.Vcurvature[i])) return true;
+        //if (CHECK_NAN(gco.Vcurvature[i])) return true;
         if (CHECK_NAN(geo.Vcurvature[i])) return true;
-        if (CHECK_NAN(gco.Vd0[i])) return true;
+        //if (CHECK_NAN(gco.Vd0[i])) return true;
         if (CHECK_NAN(geo.Vd0[i])) return true;
-        if (CHECK_NAN(gco.Vphi[i])) return true;
+        //if (CHECK_NAN(gco.Vphi[i])) return true;
         if (CHECK_NAN(geo.Vphi[i])) return true;
-        if (CHECK_NAN(gco.Vz0[i])) return true;
+        //if (CHECK_NAN(gco.Vz0[i])) return true;
         if (CHECK_NAN(geo.Vz0[i])) return true;
-        if (CHECK_NAN(gco.Veta[i])) return true;
+        //if (CHECK_NAN(gco.Veta[i])) return true;
         if (CHECK_NAN(geo.Veta[i])) return true;
     }
 
@@ -751,17 +753,17 @@ StatusCode FPGATrackSimConstGenAlgo::finalize()
 
     std::string filename = "corrgen_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".gcon";
 
-    DumpConstants(m_geo_consts, filename);
+    ATH_CHECK(DumpConstants(m_geo_consts, filename));
 
     if (m_dumpMissingHitsConstants) {
       for (int missing = 0; missing < m_nLayers; missing++) {
 	filename = "corrgen_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + "_skipPlane" + std::to_string(missing) + ".gcon";
 	// pick up only the ones for this missing plane
-	DumpConstants(m_geo_consts_with_missinghit[missing], filename);
+	ATH_CHECK(DumpConstants(m_geo_consts_with_missinghit[missing], filename));
       }
     }
 
-    writeSectors();
+    ATH_CHECK(writeSectors());
 
     ATH_CHECK(m_tHistSvc->finalize());
     m_mafile->Close();
@@ -770,7 +772,7 @@ StatusCode FPGATrackSimConstGenAlgo::finalize()
 }
 
 
-void FPGATrackSimConstGenAlgo::writeSectors()
+StatusCode FPGATrackSimConstGenAlgo::writeSectors()
 {
     // Create FPGATrackSimSectorSlice
     FPGATrackSimTrackPars copymin = m_sliceMin;
@@ -781,7 +783,16 @@ void FPGATrackSimConstGenAlgo::writeSectors()
     std::string sector_filename = "sectors_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".patt";
     std::string sectorHW_filename = "sectorsHW_raw_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + "_checkGood" + std::to_string(m_CheckGood2ndStage) + ".patt";
     FILE *sector_file = fopen(sector_filename.c_str(),"w");
+    if (!sector_file) {
+      ATH_MSG_ERROR("Cannot open output file " << sector_filename);
+      return StatusCode::FAILURE;
+    }
     FILE *sectorHW_file = fopen(sectorHW_filename.c_str(),"w");
+    if (!sectorHW_file) {
+      ATH_MSG_ERROR("Cannot open output file " << sectorHW_filename);
+      fclose (sector_file);
+      return StatusCode::FAILURE;
+    }
 
     fprintf(sector_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
     fprintf(sectorHW_file,"%zu %d\n",m_geo_consts.size(),m_nLayers);
@@ -813,13 +824,19 @@ void FPGATrackSimConstGenAlgo::writeSectors()
     fclose(sectorHW_file);
     std::string slice_filename = "slices_" + std::to_string(m_nLayers) + "L_reg" + std::to_string(m_region) + ".root";
     slice.saveSlices(slice_filename);
+
+    return StatusCode::SUCCESS;
 }
 
 
 // ASCII file writeout
-void FPGATrackSimConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_consts, std::string & filename)
+StatusCode FPGATrackSimConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_consts, std::string & filename)
 {
     FILE *const_file = fopen(filename.c_str(),"w");
+    if (!const_file) {
+      ATH_MSG_ERROR("Cannot open output file " << filename);
+      return StatusCode::FAILURE;
+    }
 
     fprintf(const_file,"! ***           RECONSTRUCTION GEOMETRY CONSTANTS               ***\n");
     fprintf(const_file,"\n");
@@ -896,5 +913,6 @@ void FPGATrackSimConstGenAlgo::DumpConstants(std::vector<geo_constants> &geo_con
 
     fclose(const_file);
 
+    return StatusCode::SUCCESS;
 }
 

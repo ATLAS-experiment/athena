@@ -1,6 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 #ifndef ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H
 #define ACTSCOLLECTIONALGS_TRACKCONTAINERREADER_H
 
@@ -9,7 +10,8 @@
 #include "GaudiKernel/EventContext.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/TrackContainer.h"
 
 // STL includes
 #include <string>
@@ -21,16 +23,14 @@
 namespace ActsTrk { 
 class TrackContainerReader : public AthReentrantAlgorithm {
 public:
-  TrackContainerReader(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;  
   virtual ~TrackContainerReader() override = default;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& context) const override final;
-  virtual StatusCode finalize() override;
-
 private:
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-  ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "TrackContainer", "TrackContainer"};
 };
 }

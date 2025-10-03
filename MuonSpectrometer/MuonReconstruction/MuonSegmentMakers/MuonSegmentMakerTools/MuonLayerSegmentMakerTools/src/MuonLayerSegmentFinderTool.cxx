@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerSegmentFinderTool.h"
@@ -18,11 +18,7 @@ namespace {
     const float OneOverSqrt12 = 1. / std::sqrt(12);
 }
 namespace Muon {
-
-    MuonLayerSegmentFinderTool::MuonLayerSegmentFinderTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonLayerSegmentFinderTool>(this);
-    }
+    using namespace MuonStationIndex;
 
     StatusCode MuonLayerSegmentFinderTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -68,8 +64,9 @@ namespace Muon {
         }
 
         // get hits
-        MuonStationIndex::TechnologyIndex clusterTech =
-            intersection.layerSurface.regionIndex == MuonStationIndex::Barrel ? MuonStationIndex::RPC : MuonStationIndex::TGC;
+        using namespace MuonStationIndex;
+        TechnologyIndex clusterTech =
+            intersection.layerSurface.regionIndex == DetectorRegionIndex::Barrel ? TechnologyIndex::RPC : TechnologyIndex::TGC;
         const std::vector<const MdtDriftCircleOnTrack*>& mdts = layerROTs.getMdts();
         const std::vector<const MuonClusterOnTrack*>& clusters = layerROTs.getClusters(clusterTech);
 
@@ -113,8 +110,8 @@ namespace Muon {
         ATH_MSG_DEBUG(" MM prds " << layerPrepRawData.mms.size() << " STGC prds " << layerPrepRawData.stgcs.size());
 
         // get STGC and MM clusters
-        const std::vector<const MuonClusterOnTrack*>& clustersSTGC = layerROTs.getClusters(MuonStationIndex::STGC);
-        const std::vector<const MuonClusterOnTrack*>& clustersMM = layerROTs.getClusters(MuonStationIndex::MM);
+        const std::vector<const MuonClusterOnTrack*>& clustersSTGC = layerROTs.getClusters(TechnologyIndex::STGC);
+        const std::vector<const MuonClusterOnTrack*>& clustersMM = layerROTs.getClusters(TechnologyIndex::MM);
 
         using NSWSegmentCache = Muon::IMuonNSWSegmentFinderTool::SegmentMakingCache;
         NSWSegmentCache cache{};
@@ -210,7 +207,7 @@ namespace Muon {
         MuonStationIndex::LayerIndex          layerIndex    = intersection.layerSurface.layerIndex;
 
         // get hough data
-        SG::ReadHandle<MuonLayerHoughTool::HoughDataPerSectorVec> houghDataPerSectorVec{m_houghDataPerSectorVecKey, ctx};
+        SG::ReadHandle houghDataPerSectorVec{m_houghDataPerSectorVecKey, ctx};
         if (!houghDataPerSectorVec.isValid()) {
             ATH_MSG_ERROR("Hough data per sector vector not found");
             return;
@@ -240,7 +237,7 @@ namespace Muon {
         const MuonLayerHoughTool::MaximumVec& maxVec = houghDataPerSector.maxVec[sectorLayerHash];
 
         // get local coordinates in the layer frame
-        bool barrelLike = intersection.layerSurface.regionIndex == MuonStationIndex::Barrel;
+        bool barrelLike = intersection.layerSurface.regionIndex == DetectorRegionIndex::Barrel;
 
         float phi = intersection.trackParameters->position().phi();
 
@@ -320,7 +317,7 @@ namespace Muon {
 
             // get phi hits
             const MuonLayerHoughTool::PhiMaximumVec& phiMaxVec =
-                houghDataPerSector.phiMaxVec[intersection.layerSurface.regionIndex];
+                houghDataPerSector.phiMaxVec[toInt(intersection.layerSurface.regionIndex)];
             ATH_MSG_DEBUG("   Got Phi Hough maxima " << phiMaxVec.size() << " phi " << phi);
 
             // loop over maxima and associate them to the extrapolation

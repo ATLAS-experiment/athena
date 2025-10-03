@@ -76,18 +76,12 @@ class InformationHandler:
         self.m_Infos_Double["DecayModeDeterminator_BDTCutValue_R3XX_CellBased"] = flags.Tau.PanTau.DecayModeDeterminator_BDTCutValue_R3XX_CellBased
 
     def setupInfo_String(self, flags):
-        self.m_Infos_String["Name_TauRecContainer"]             = flags.Tau.PanTau.Name_TauRecContainer
-        self.m_Infos_String["Name_TrackParticleContainer"]      = flags.Tau.PanTau.Name_TrackParticleContainer
         self.m_Infos_String["ModeDiscriminator_TMVAMethod"]     = flags.Tau.PanTau.ModeDiscriminator_TMVAMethod
 
 
     def setupInfo_VecDouble(self, flags):
         self.m_Infos_VecDouble["TauConstituents_BinEdges_Eta"]                       = flags.Tau.PanTau.TauConstituents_BinEdges_Eta
         self.m_Infos_VecDouble["TauConstituents_Selection_Neutral_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_Neutral_EtaBinned_EtCut
-        self.m_Infos_VecDouble["TauConstituents_Selection_Pi0Neut_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_Pi0Neut_EtaBinned_EtCut
-        self.m_Infos_VecDouble["TauConstituents_Selection_Charged_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_Charged_EtaBinned_EtCut
-        self.m_Infos_VecDouble["TauConstituents_Selection_OutNeut_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_OutNeut_EtaBinned_EtCut
-        self.m_Infos_VecDouble["TauConstituents_Selection_OutChrg_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_OutChrg_EtaBinned_EtCut
         self.m_Infos_VecDouble["CellBased_BinEdges_Eta"]                             = flags.Tau.PanTau.CellBased_BinEdges_Eta
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_1prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_1prong
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_3prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_3prong
@@ -102,8 +96,7 @@ class InformationHandler:
 
     def setupInfo_Features(self, flags):
         
-        #get list of algorithms and signal modes from config
-        List_InputAlgs      = flags.Tau.PanTau.Names_InputAlgorithms
+        #get list of signal modes from config
         List_ModeCases      = flags.Tau.PanTau.Names_ModeCases
         
         #get the feature handler
@@ -113,35 +106,31 @@ class InformationHandler:
         #for each algorithm and mode, loop over variables to be used in BDT
         # and fetch the type of the variable and the name
         # these are needed for the PanTauFillerTool in TauD3PDMaker
-        for iAlg in List_InputAlgs:
-            for iModeCase in List_ModeCases:
+        for iModeCase in List_ModeCases:
                 
-                infoKey_Names = "ModeDiscriminator_BDTVariableNames_" + iAlg + "_" + iModeCase
-                curVarList = self.m_Infos_VecString[infoKey_Names]
+            infoKey_Names = "ModeDiscriminator_BDTVariableNames_CellBased_" + iModeCase
+            curVarList = self.m_Infos_VecString[infoKey_Names]
                 
-                BDTVariable_TypeList        = []
-                BDTVariable_DefaultValList  = []
+            BDTVariable_TypeList        = []
+            BDTVariable_DefaultValList  = []
                 
-                for iVar in curVarList:
-                    theType     = theFeatureHandler.m_Feature_Types[iVar]
-                    theDefVal   = theFeatureHandler.m_Feature_Defaults[iVar]
-                    BDTVariable_TypeList        += [theType]
-                    BDTVariable_DefaultValList  += [theDefVal]
-                #end loop over variables
+            for iVar in curVarList:
+                theType     = theFeatureHandler.m_Feature_Types[iVar]
+                theDefVal   = theFeatureHandler.m_Feature_Defaults[iVar]
+                BDTVariable_TypeList        += [theType]
+                BDTVariable_DefaultValList  += [theDefVal]
+            #end loop over variables
                 
-                infoKey_Types       = "ModeDiscriminator_BDTVariableTypes_" + iAlg + "_" + iModeCase
-                self.m_Infos_VecString[infoKey_Types] = BDTVariable_TypeList
+            infoKey_Types       = "ModeDiscriminator_BDTVariableTypes_CellBased_" + iModeCase
+            self.m_Infos_VecString[infoKey_Types] = BDTVariable_TypeList
                 
-                infoKey_Defaults    = "ModeDiscriminator_BDTVariableDefaults_" + iAlg + "_" + iModeCase
-                self.m_Infos_VecDouble[infoKey_Defaults] = BDTVariable_DefaultValList
-                
-            #end loop over signal modes
-        #end loop over algs for default value creation for ModeDiscriminator tools
+            infoKey_Defaults    = "ModeDiscriminator_BDTVariableDefaults_CellBased_" + iModeCase
+            self.m_Infos_VecDouble[infoKey_Defaults] = BDTVariable_DefaultValList    
+        #end loop over signal modes
         
         #add the prefixes for the variables
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Sum"]         = theFeatureHandler.m_VarTypeName_Sum
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Ratio"]       = theFeatureHandler.m_VarTypeName_Ratio
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_EtInRing"]    = theFeatureHandler.m_VarTypeName_EtInRing
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Isolation"]   = theFeatureHandler.m_VarTypeName_Isolation
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Num"]         = theFeatureHandler.m_VarTypeName_Num
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Mean"]        = theFeatureHandler.m_VarTypeName_Mean
@@ -151,8 +140,6 @@ class InformationHandler:
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_DeltaR"]      = theFeatureHandler.m_VarTypeName_DeltaR
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_JetMoment"]   = theFeatureHandler.m_VarTypeName_JetMoment
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Combined"]    = theFeatureHandler.m_VarTypeName_Combined
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_JetShape"]    = theFeatureHandler.m_VarTypeName_JetShape
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_ImpactParams"]= theFeatureHandler.m_VarTypeName_ImpactParams
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Basic"]       = theFeatureHandler.m_VarTypeName_Basic
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_PID"]         = theFeatureHandler.m_VarTypeName_PID
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Shots"]       = theFeatureHandler.m_VarTypeName_Shots

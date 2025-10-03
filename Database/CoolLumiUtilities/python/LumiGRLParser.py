@@ -5,8 +5,7 @@
 #
 # Utility to parse GRL XML file and provide access to useful information in python
 #
-from __future__ import print_function
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 
 class LumiGRLParser:
 

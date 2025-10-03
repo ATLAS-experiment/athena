@@ -3,8 +3,11 @@
 
 #include "./TrigDBHelper.h"
 
+#include "TrigConfIO/Exceptions.h"
+
 #include "RelationalAccess/ISchema.h"
 #include <iostream>
+#include <format>
 
 std::unique_ptr< coral::IQuery >
 TrigConf::QueryDefinition::createQuery( coral::ISessionProxy * session )
@@ -37,7 +40,6 @@ TrigConf::QueryDefinition::createQuery( coral::ISessionProxy * session )
    return query;
 }
 
-
 void
 TrigConf::QueryDefinition::addToTableList(const std::string & table, const std::string & table_short)
 {
@@ -52,11 +54,54 @@ TrigConf::QueryDefinition::extendCondition(const std::string & condext) {
    m_condition += condext;
 }
 
-
-
 void
 TrigConf::blobToPtree( const coral::Blob & blob, boost::property_tree::ptree & pt ) {
    boost::iostreams::stream<boost::iostreams::array_source> stream( static_cast<const char*> ( blob.startingAddress()), 
                                                                     blob.size());
    boost::property_tree::read_json(stream, pt);
 }
+
+void
+TrigConf::stringToPtree( const std::string & json_string, boost::property_tree::ptree & pt ) {
+   boost::iostreams::array_source source(json_string.data(), json_string.size());
+   boost::iostreams::stream<boost::iostreams::array_source> stream(source);
+   boost::property_tree::read_json(stream, pt);
+}
+
+void
+TrigConf::writeRawFile(const coral::Blob & data, const std::string & outFileName)
+{
+   try {
+      std::ofstream outFile(outFileName, std::ofstream::binary);
+      if (!outFile) {
+         throw FileWritingException(std::format("Failed to open file {} for writing", outFileName));
+      }
+      outFile.write( static_cast<const char*> ( data.startingAddress()), data.size() );
+      if (!outFile) {
+         throw FileWritingException("Failed to write data to file " + outFileName);
+      }
+      outFile.close();
+   } catch (const std::exception& e) {
+      throw FileWritingException(std::format("Exception while writing file {} : {}", outFileName, e.what()));
+   }
+}
+
+void
+TrigConf::writeRawFile(const std::string & data, const std::string & outFileName)
+{
+   try {
+      std::ofstream outFile(outFileName, std::ofstream::binary);
+      if (!outFile) {
+         throw FileWritingException(std::format("Failed to open file {} for writing", outFileName));
+      }
+      outFile.write(data.data(), data.size());
+      if (!outFile) {
+         throw FileWritingException("Failed to write data to file " + outFileName);
+      }
+      outFile.close();
+   } catch (const std::exception& e) {
+      throw FileWritingException(std::format("Exception while writing file {} : {}", outFileName, e.what()));
+   }
+}
+
+

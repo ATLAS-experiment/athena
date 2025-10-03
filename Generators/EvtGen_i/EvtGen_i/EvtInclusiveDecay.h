@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -31,7 +31,6 @@
 #include "EvtGenBase/EvtRandomEngine.hh"
 
 #include "GeneratorModules/GenBase.h"
-//#include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"

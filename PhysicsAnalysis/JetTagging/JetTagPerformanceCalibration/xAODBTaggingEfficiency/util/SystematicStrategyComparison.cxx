@@ -46,7 +46,7 @@ POOL::TEvent event(POOL::TEvent::kClassAccess);
 #endif
 
 
-int main() {
+int main ATLAS_NOT_THREAD_SAFE () {
   bool retval = true;
   bool perform_jet_validation = false; // flag for turning on the 
   // systematic strategies to compare
@@ -61,8 +61,8 @@ int main() {
     // set your own DAOD file (ideally a sample with many jets, like ttH), and select a suitable event below
     std::string DAODpath = "/DAODs/Example.pool.root.1"; // path to an example DAOD file, from which we can retrieve jets to test the BTagging tools
       //load some jets to show how to use the tool
-    TFile* m_file = TFile::Open(DAODpath.c_str(),"read");
-    if(!event.readFrom(m_file).isSuccess()){
+    TFile* root_file = TFile::Open(DAODpath.c_str(),"read");
+    if(!event.readFrom(root_file).isSuccess()){
       std::cout << "failed to load file" << std::endl;
       return -1;
     }

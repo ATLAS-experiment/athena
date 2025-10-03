@@ -68,11 +68,16 @@ private:
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusters
   { this, "Clusters", "", "Container of clusters for which cells should be saved." };
 
+  /// Calo Cell links for the clusters we keep cells for
+  SG::ThinningHandleKey<CaloClusterCellLinkContainer> m_clusterCellLinks{
+      this, "CaloClusterCellLinks", "",
+      "Container of CaloClusterCellLinks corresponding to the clusters for which we save cells."};
+
   StringArrayProperty m_samplingNames
   { this, "SamplingCellsName", {},
     "List of names of samplings for which all cluster cells in a rectangular window should be saved" };
 
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};      
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
 
   /// Decoded list of samplings.
   std::vector<int> m_validSamplings;

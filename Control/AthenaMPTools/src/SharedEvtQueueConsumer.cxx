@@ -79,10 +79,10 @@ StatusCode SharedEvtQueueConsumer::initialize()
 
     //FIXME: AthenaPool dependent for now
 
-    m_dataShare = SmartIF<IDataShare>(serviceLocator()->service("AthenaPoolCnvSvc"));
-    if(!m_dataShare) {
-      if(m_useSharedWriter) {
-        ATH_MSG_ERROR("Error retrieving AthenaPoolCnvSvc");
+    if(m_useSharedWriter) {
+      m_dataShare = SmartIF<IDataShare>(serviceLocator()->service("AthenaPoolSharedIOCnvSvc"));
+      if(!m_dataShare) {
+        ATH_MSG_ERROR("Error retrieving AthenaPoolSharedIOCnvSvc");
         return StatusCode::FAILURE;
       }
     }
@@ -361,7 +361,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   if(m_useSharedWriter && m_dataShare) {
     SmartIF<IProperty> propertyServer(m_dataShare);
     if (!propertyServer || propertyServer->setProperty("MakeStreamingToolClient", m_rankId + 1).isFailure()) {
-      ATH_MSG_ERROR("Could not change AthenaPoolCnvSvc MakeClient Property");
+      ATH_MSG_ERROR("Could not change AthenaPoolSharedIOCnvSvc MakeClient Property");
       return outwork;
     } 
     else {

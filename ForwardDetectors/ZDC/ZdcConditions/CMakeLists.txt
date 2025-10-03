@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ZdcConditions )
@@ -13,4 +13,4 @@ atlas_add_library( ZdcConditions
                    LINK_LIBRARIES AthenaKernel Identifier ZdcIdentifier AsgMessagingLib nlohmann_json::nlohmann_json 
                    PRIVATE_LINK_LIBRARIES GaudiKernel RDBAccessSvcLib GeoModelInterfaces GeoModelUtilities GeoPrimitives GeometryDBSvcLib StoreGateLib PathResolver)
 
-atlas_install_data( data/* )
+atlas_install_data( data/*.json )

@@ -37,7 +37,7 @@ def commonInDetFullScanCfg(flags: AthConfigFlags) -> ComponentAccumulator:
         "inputTracks": flagsWithTrk.Tracking.ActiveConfig.tracks_FTF,
         "outputVtx": flagsWithTrk.Tracking.ActiveConfig.vertex_jet,
     }
-    if flags.Trigger.FSTrk.doJetRestrictedVertexSort:
+    if flags.Trigger.FSHad.doJetRestrictedVertexSort:
         from TrkConfig.TrkVertexToolsConfig import JetRestrictedSumPt2VertexCollectionSortingToolCfg
         from TrkConfig.TrkVertexWeightCalculatorsConfig import JetRestrictedSumPt2VertexWeightCalculatorCfg
         jetcalccfg = JetRestrictedSumPt2VertexWeightCalculatorCfg(

@@ -1,8 +1,18 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def CaloCellDecoratorCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
+    kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
+    acc.setPrivateTools(CompFactory.DerivationFramework.CaloCellDecorator(**kwargs))
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+
+    acc.merge(LArOnOffIdMappingCfg(flags))
+    return acc
+   
 
 def MaxCellDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
@@ -63,6 +73,19 @@ def ClusterEnergyPerLayerDecoratorCfg(flags, **kwargs):
     acc.setPrivateTools(
         CompFactory.DerivationFramework.ClusterEnergyPerLayerDecorator(**kwargs)
     )
+    return acc
+
+
+def CaloCellDecoratorKernelCfg(flags, name="CaloCellDecoratorKernel", **kwargs):
+    acc = ComponentAccumulator()
+
+    augmentationTools = [
+        acc.addPublicTool(acc.popToolsAndMerge(CaloCellDecoratorCfg(flags)))
+    ]
+
+    kwargs.setdefault("AugmentationTools", augmentationTools)
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc
 
 
@@ -144,11 +167,8 @@ def getGainDecorations(
         collections = [flags.Egamma.Keys.Output.Electrons, flags.Egamma.Keys.Output.Photons]
 
     GainDecoratorTool = None
-    for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
-        toolStr = f"{toolStr}"
-        splitStr = toolStr.split("/")
-        tool = acc.getPublicTool(splitStr[1])
-        if splitStr[0] == "DerivationFramework::GainDecorator":
+    for tool in acc.getEventAlgo(kernel).AugmentationTools:
+        if tool.getType() == "DerivationFramework::GainDecorator":
             GainDecoratorTool = tool
 
     if GainDecoratorTool:
@@ -167,11 +187,8 @@ def getClusterEnergyPerLayerDecorations(acc, kernel):
     object (e.g. Photons.E7x11_Lr0, ...)"""
     properties = "SGKey_photons", "SGKey_electrons"
     ClusterEnergyPerLayerDecorators = []
-    for toolStr in acc.getEventAlgo(kernel).AugmentationTools:
-        toolStr = f"{toolStr}"
-        splitStr = toolStr.split("/")
-        tool = acc.getPublicTool(splitStr[1])
-        if splitStr[0] == "DerivationFramework::ClusterEnergyPerLayerDecorator":
+    for tool in acc.getEventAlgo(kernel).AugmentationTools:
+        if tool.getType() == "DerivationFramework::ClusterEnergyPerLayerDecorator":
             ClusterEnergyPerLayerDecorators.append(tool)
 
     decorations = []

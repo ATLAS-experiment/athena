@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYSVAL.py
 # This defines DAOD_PHYSVAL, an unskimmed DAOD format for
@@ -22,10 +22,10 @@ def PHYSVALKernelCfg(flags, name='PHYSVALKernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # LLP-specific configs
-    if flags.Tracking.doLargeD0:
-        from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
-        acc.merge(PhysValLLPCfg(flags))
+    from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
+    acc.merge(PhysValLLPCfg(flags))
 
+    if flags.Tracking.doLargeD0:
         # LRT Egamma
         from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
         acc.merge(EGammaLRTCfg(flags))
@@ -89,6 +89,8 @@ def PHYSVALCfg(flags):
                                               "MET_Baseline_AntiKt4EMTopo",
                                               "MET_Baseline_AntiKt4EMPFlow",
                                               "TauJets",
+                                              "TauJets_MuonRM",
+                                              "TauJets_EleRM",
                                               "DiTauJets",
                                               "DiTauJetsLowPt",
                                               "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
@@ -115,7 +117,11 @@ def PHYSVALCfg(flags):
                                            "BTagging_AntiKt4EMPFlowSecVtx",
                                            "BTagging_AntiKt4EMPFlowSecVtxFlip", #Flip version of SV1
                                            "TauJets",
+                                           "TauJets_MuonRM",
+                                           "TauJets_EleRM",
                                            "TauTracks",
+                                           "TauTracks_MuonRM",
+                                           "TauTracks_EleRM",
                                            "DiTauJets",
                                            "DiTauJetsLowPt",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets","AntiKt10LCTopoJets","AntiKt4LCTopoJets","AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -159,6 +165,11 @@ def PHYSVALCfg(flags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
+    StaticContent += ["xAOD::TauJetContainer#TauJets_MuonRM"]
+    StaticContent += ["xAOD::TauJetAuxContainer#TauJets_MuonRMAux.-VertexedClusters"]
+    StaticContent += ["xAOD::VertexContainer#TauSecondaryVertices_MuonRM"]
+    StaticContent += ["xAOD::VertexAuxContainer#TauSecondaryVertices_MuonRMAux.-vxTrackAtVertex"]
+
     for wp in ["","_LeptonsMod_LRTR3_1p0"]:
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
@@ -237,7 +248,11 @@ def PHYSVALCfg(flags):
                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.DFCommonJets_fJvt",
                                              "TruthPrimaryVertices.t.x.y.z",
                                              "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
-                                             "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
+                                             "TauChargedParticleFlowObjects.pt.eta.phi.m",
+                                             "TauNeutralParticleFlowObjects_MuonRM.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
+                                             "TauChargedParticleFlowObjects_MuonRM.pt.eta.phi.m",
+                                             "TauNeutralParticleFlowObjects_EleRM.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
+                                             "TauChargedParticleFlowObjects_EleRM.pt.eta.phi.m",
                                              "MET_Track.sumet"]
     PHYSVALSlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
 

@@ -20,6 +20,6 @@ G4VFastSimulationModel* ForwardTransportModelTool::makeFastSimModel()
   if(msgLvl(MSG::VERBOSE)) verboseLevel = 10;
   else if(msgLvl(MSG::DEBUG)) verboseLevel = 5;
   // Create a fresh Fast Sim Model
-  return new ForwardTransportModel(name(), verboseLevel, m_FwdTrSvcName);
+  return new ForwardTransportModel(name(), getRegion(), verboseLevel, m_FwdTrSvcName);
 
 }

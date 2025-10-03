@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -21,24 +21,12 @@ namespace Trk {
            const IInterface* parent)
     
     : AthAlgTool(type,name,parent)
-    , m_idHelper         (nullptr)
-    , m_alignModules     (nullptr)
-    , m_alignModuleMaps  (AlignModule::NDetectorTypes,(const AlignModuleList*)nullptr)
-    , m_alignParList     (nullptr)
-    , m_fullAlignParList (nullptr)
+    , m_alignModuleMaps  (AlignModule::NDetectorTypes, nullptr)
     , m_alignParList1D   (SG::VIEW_ELEMENTS)
-    , m_subDetElement    (AlignModule::NDetectorTypes,false)
+    , m_subDetElement    (AlignModule::NDetectorTypes, false)
   {
     declareInterface<IAlignModuleTool>(this);
-    
-    declareProperty("AlignModuleListType", m_alignModuleListType = Trk::L3);
-
-    m_logStream = nullptr;
   }
-
-  //________________________________________________________________________
-  AlignModuleTool::~AlignModuleTool()
-  = default;
 
   //________________________________________________________________________
   StatusCode AlignModuleTool::initialize()
@@ -64,7 +52,6 @@ namespace Trk {
   //________________________________________________________________________
   StatusCode AlignModuleTool::finalize()
   {
-
     return StatusCode::SUCCESS;
   }
   

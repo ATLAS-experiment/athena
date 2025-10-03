@@ -299,13 +299,13 @@ def TrigMufastHypoToolFromDict(flags, chainDict):
 
     doMonitoring = monitorAll or any(group in muonHypoMonGroups for group in chainDict['monGroups'])
 
-    config = TrigMufastHypoToolConfig(chainDict['chainName'], chainPart, doOverlapRemoval, doMonitoring)
+    config = TrigMufastHypoToolConfig(chainDict['chainName'], chainPart, chainDict['eventBuildType'], doOverlapRemoval, doMonitoring)
     config.compile(flags)
     return config.tool()
 
 
 class TrigMufastHypoToolConfig:
-    def __init__(self, name, cpart, doOverlapRemoval = False, doMonitoring = False):
+    def __init__(self, name, cpart, eventBuildType, doOverlapRemoval = False, doMonitoring = False):
 
         from AthenaCommon.Logging import logging
         self.__log = logging.getLogger('TrigMufastHypoToolConfig')
@@ -315,6 +315,7 @@ class TrigMufastHypoToolConfig:
         self.__multiplicity = int(cpart['multiplicity'])
         self.__isPassThrough = 'mucombTag' in cpart['extra']
         self.__isCalibration = 'muoncalib' in cpart['extra']
+        self.__isMuonDSCalibration = 'MuonDS' in eventBuildType
         self.__isBarrelOnly = '0eta105' in cpart['etaRange']
         self.__useGeV_v15a = any(x in cpart['addInfo'] for x in ['idperf', 'idtp', '3layersEC'])
         self.__doL2MT = 'l2mt' in cpart['l2AlgInfo']
@@ -342,6 +343,9 @@ class TrigMufastHypoToolConfig:
 
     def isCalibration(self):
         return self.__isCalibration
+
+    def isMuonDSCalibration(self):
+        return self.__isMuonDSCalibration
 
     def isBarrelOnly(self):
         return self.__isBarrelOnly
@@ -411,8 +415,12 @@ class TrigMufastHypoToolConfig:
     def compile(self, flags):
 
         nt = self.multiplicity()
+        
         if self.isCalibration():
-            self.tool().AcceptAll = False
+            if self.isMuonDSCalibration():
+                self.tool().AcceptAll = True
+            else: 
+                self.tool().AcceptAll = False
             self.tool().DoCalib = True
             self.tool().PtBins = [ [ 0.0, 2.5 ] ] * nt
 
@@ -563,7 +571,7 @@ def TrigmuCombHypoToolwORFromDict( flags, chainDict ):
 
 
 # muComb Hypo for L2 inside-out
-def Trigl2IOHypoToolwORFromDict( chainDict ):
+def Trigl2IOHypoToolwORFromDict( flags, chainDict ):
 
     thresholds = getThresholdsFromDict( chainDict )
     if chainDict['chainParts'][0]['multiplicity']=="0":
@@ -593,7 +601,7 @@ def Trigl2IOHypoToolwORFromDict( chainDict ):
 
 
 # muComb Hypo for L2 multi-track SA mode
-def Trigl2mtCBHypoToolwORFromDict( chainDict ):
+def Trigl2mtCBHypoToolwORFromDict( flags, chainDict ):
 
     if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :
        thresholds = ['passthrough']

@@ -20,6 +20,7 @@ set( _sources
   src/GenEventVertexPositioner.cxx src/GenEventVertexPositioner.h
   src/LongBeamspotVertexPositioner.cxx src/LongBeamspotVertexPositioner.h
   src/VertexBeamCondPositioner.cxx src/VertexBeamCondPositioner.h
+  src/LRAVertexPositioner.cxx src/LRAVertexPositioner.h
   src/ZeroLifetimePositioner.cxx src/ZeroLifetimePositioner.h
 )
 set( _extra_libs )
@@ -39,7 +40,7 @@ atlas_add_test( BeamEffectsAlg_test
                 INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib GaudiKernel TestTools AthenaBaseComps
                   StoreGateLib xAODEventInfo GeneratorObjects HepMC_InterfacesLib
-                  BeamSpotConditionsData CxxUtils ${GTEST_LIBRARIES} ${_extra_libs} )
+                  BeamSpotConditionsData CxxUtils PathResolver ${GTEST_LIBRARIES} ${_extra_libs} )
 
 #Added test of new component accumulator syntax
 atlas_add_test( BeamEffectsAlgConfig_test
@@ -52,7 +53,7 @@ atlas_add_component( BeamEffects
                      INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib CxxUtils GaudiKernel AthenaBaseComps
                       HepMC_InterfacesLib StoreGateLib xAODEventInfo GeneratorObjects
-                      BeamSpotConditionsData ${_extra_libs} )
+                      BeamSpotConditionsData PathResolver ${_extra_libs} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -32,3 +32,15 @@ atlas_add_executable( pdgInfo
 atlas_add_executable( listPDGIDs
                 test/listPDGIDs.cxx
                 LINK_LIBRARIES TruthUtils )
+
+if (NOT XAOD_STANDALONE)
+
+   find_package( HepPDT )
+
+   atlas_add_test( testParticleConstants
+                   SOURCES
+                   test/testParticleConstants.cxx
+                   INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
+                   LINK_LIBRARIES TruthUtils GaudiKernel ${HEPPDT_LIBRARIES}
+                   POST_EXEC_SCRIPT nopost.sh)
+endif ()

@@ -52,17 +52,21 @@ namespace ISF {
 
     /** Convert selected particles from the given McEventCollection into G4PrimaryParticles
         and push them into the given G4Event */
-    virtual StatusCode convertHepMCToG4Event(const EventContext& ctx, McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const = 0;
+    virtual StatusCode convertHepMCToG4Event(
+        McEventCollection& inputGenEvents, G4Event& outputG4Event,
+        McEventCollection& shadowGenEvents) const = 0;
 
     /** Convert selected particles from the given McEventCollection into G4PrimaryParticles
         and push them into the given G4Event */
-    virtual StatusCode convertHepMCToG4EventLegacy(const EventContext& ctx, McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event) const = 0;
+    virtual StatusCode convertHepMCToG4EventLegacy(
+        McEventCollection& inputGenEvents, G4Event& outputG4Event) const = 0;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
-    virtual G4Event* ISF_to_G4Event(const EventContext& ctx, const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const = 0;
-
+    virtual void ISF_to_G4Event(G4Event& event,
+                                const std::vector<ISF::ISFParticle*>& isp,
+                                HepMC::GenEvent* genEvent,
+                                HepMC::GenEvent* shadowGenEvent = nullptr,
+                                bool useHepMC = false) const = 0;
   };
 
 } // end of ISF namespace

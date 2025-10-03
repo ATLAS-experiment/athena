@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XMLCOREPARSER_DOMNODE_H
@@ -7,7 +7,6 @@
 
 #include <string>
 #include <vector>
-#include <iostream> 
 #include <map> 
 
 namespace CoreParser
@@ -48,8 +47,8 @@ namespace CoreParser
       std::string m_value;
       DOMNamedNodeMap m_attributes;
       DOMSiblings m_siblings;
-      DOMSiblings::iterator m_it;
-      DOMNode* m_parent;
+      DOMSiblings::iterator m_it{};
+      DOMNode* m_parent{};
     };
 }
 

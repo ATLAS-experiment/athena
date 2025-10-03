@@ -6,7 +6,7 @@
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 #include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eTowerBuilder.h"
+#include "eTowerBuilder.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 
 // TOWER IS A COLLECTION OF SUPER CELLS

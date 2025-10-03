@@ -237,10 +237,9 @@ static void hhh_report( void ) {
          ignore = 0;
          if ( pos ) {
            sub = (char*)malloc( pos-first + 1 );
-            if (sub){
-              strncpy( sub, first, pos-first );
-              sub[ pos-first ] = '\0';
-            }
+           if (!sub) abort();
+           strncpy( sub, first, pos-first );
+           sub[ pos-first ] = '\0';
          } else {
             sub = (char*)first;
          }

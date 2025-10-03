@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "POOLCore/Exception.h"
 #include "POOLCore/DbPrint.h"
 #include "FileCatalog/URIParser.h"
+
+#include <exception>
 #include <iostream>
 
 namespace pool{
@@ -39,7 +40,7 @@ namespace pool{
       }else{
         mystr=me;
       }
-      m_contactstr=mystr;
+      m_contactstr=std::move(mystr);
     }
     //
     //look up separators
@@ -50,15 +51,12 @@ namespace pool{
     if(prefixpos == m_contactstr.npos || prefixpos>tmppos) {
       m_url=m_contactstr;
       if(tmppos != m_contactstr.npos && m_contactstr.substr(0,5)!="file:"){
-         throw Exception("only file: protocol is allowed for PFC contactstring with no prefix.",
-                         "URIParser::parse", "APR");
+
+         throw std::runtime_error(std::string("only file: protocol is allowed for PFC contactstring with no prefix. (APR: \" URIParser::parse \")"));
       }
     }else{
       //have prefix
       m_prefix=m_contactstr.substr(0,prefixpos);
-      //if(m_prefix != "xmlcatalog" && m_prefix != "XMLFileCatalog"&& m_prefix != "mysqlcatalog" && m_prefix != "edgcatalog"){
-      //	throw FCillegalContactStringException("URIParser::parse","illegal prefix");
-      //}
       startpos=prefixpos+1;//new starting point
       m_url=m_contactstr.substr(startpos,m_contactstr.length()-startpos);
     }//end prefix lookup

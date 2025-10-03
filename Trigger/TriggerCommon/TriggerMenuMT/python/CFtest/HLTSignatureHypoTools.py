@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # file to simulate the HypoTool configuration of the signatures
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,28 +9,28 @@ def TestHypoTool(name, prop, threshold_value):
     HLTTest__TestHypoTool=CompFactory.getComp("HLTTest::TestHypoTool") 
     return HLTTest__TestHypoTool(name, Threshold=value, Property=prop, LinkName=UseThisLinkName)
 
-def MuTestHypoTool(chainDict):
+def MuTestHypoTool(flags, chainDict):
     name = chainDict['chainName']
     threshold = getThreshold(chainDict) 
     return TestHypoTool(name,prop="pt", threshold_value=threshold)
 
-def ElTestHypoTool(chainDict):
+def ElTestHypoTool(flags, chainDict):
     name = chainDict['chainName']
     threshold = getThreshold(chainDict) 
     return TestHypoTool(name,prop="et", threshold_value=threshold)
 
-def GammTestHypoTool(chainDict):
+def GammTestHypoTool(flags, chainDict):
     name = chainDict['chainName']
     threshold = getThreshold(chainDict) 
     return TestHypoTool(name,prop="et", threshold_value=threshold)
 
 
-def MuTest2HypoTool(chainDict):
+def MuTest2HypoTool(flags, chainDict):
     name = chainDict['chainName']
     threshold = getThreshold(chainDict) 
     return TestHypoTool(name,prop="pt2", threshold_value=threshold)
 
-def ElTest2HypoTool(chainDict):
+def ElTest2HypoTool(flags, chainDict):
     name = chainDict['chainName']
     threshold = getThreshold(chainDict) 
     return TestHypoTool(name,prop="et", threshold_value=threshold)
@@ -43,7 +43,7 @@ def getThreshold(chainDict):
 
 
 
-def dimuDrComboHypoTool(chainDict):
+def dimuDrComboHypoTool(flags, chainDict):
     name = chainDict['chainName']
     tool= CompFactory.DeltaRRoIComboHypoTool(name)
     tool.DRcut=0.3

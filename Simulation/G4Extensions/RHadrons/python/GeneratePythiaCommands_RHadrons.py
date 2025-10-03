@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from MadGraphControl.MadGraphUtils import * # noqa: F401 F403
 from MadGraphControl.MadGraph_NNPDF30NLO_Base_Fragment import * # noqa: F401 F403
@@ -13,7 +13,7 @@ def determineLegacyGeneratorJobOptions(mcChannelNumber):
     # Default position: look in cvmfs for job options
     if(mcChannelNumber ==  449497 ):
         mcChannelNumber =  421442
-        rhlog.info('MC channel number changed from 449497 to ', str(mcChannelNumber))
+        rhlog.info('MC channel number changed from 449497 to %d', mcChannelNumber)
 
     cvmfs_mc16 = '/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/'
 
@@ -200,7 +200,7 @@ def configureAndRunMadGraph(flags):
     JIRA: https://its.cern.ch/jira/browse/ATLMCPROD-5979
     """
 
-    from MadGraphControl.MadGraphUtilsHelpers import get_physics_short
+    from MCJobOptionUtils.JOsupport import get_physics_short
     phys_short = get_physics_short() # FIXME There must be a more robust way of doing this!?
     infoStrings = phys_short.split("_")
     rhlog.info( "  jobConfig: %s  ", phys_short[0] )
@@ -339,7 +339,7 @@ def configureAndRunMadGraph(flags):
 
     rhlog.info("Calling SUSY_Generation")
     # Note that for gridpack generation (i.e. MadGraph_writeGridpack=True), the job will exit after this command
-    from MadGraphControl.MadGraphUtils import SUSY_Generation
+    from MadGraphControl.SUSY_Helpers import SUSY_Generation
     ktdurham = SUSY_Generation(**argdict)
 
     addProcessCardsToDATAPATH()

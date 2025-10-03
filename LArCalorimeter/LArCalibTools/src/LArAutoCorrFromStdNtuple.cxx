@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArAutoCorrFromStdNtuple.h"
@@ -173,12 +173,11 @@ StatusCode LArAutoCorrFromStdNtuple::stop()
     } 
 
     AutoCorrVec av(nsamples);
-    for(int i=0;i<nsamples; ++i) {av[i]=0.; }
     for (int i = 0; i < nsamples; ++i ) {
        av[i]=covr[i];
     }
 
-    AutoCorr[std::make_pair(hwid,gain)]=av;
+    AutoCorr[{hwid,gain}]= std::move(av);
 
     ATH_MSG_DEBUG ( "after reading size " << AutoCorr[std::make_pair(hwid,gain)].size() );
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EC::CalibrationCalculator
@@ -21,14 +21,8 @@ namespace LArG4 {
     //CalibrationCalculator::CalibrationCalculator(LArG4::LArWheelCalculator_t t, int zside)
     CalibrationCalculator::CalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator)
       : LArCalibCalculatorSvcImp(name, pSvcLocator)
-      , m_wcalc_tProp(0)
       , m_wcalc_t(LArG4::InnerAbsorberWheel)
-      , m_geometryCalculator("",name)
     {
-      declareProperty("WheelType", m_wcalc_tProp);
-      m_wcalc_tProp.declareUpdateHandler(&CalibrationCalculator::WheelTypeHandler, this);
-      declareProperty("zSide", m_zside=0);
-      declareProperty("GeometryCalculator",m_geometryCalculator);
     }
 
     void CalibrationCalculator::WheelTypeHandler(Gaudi::Details::PropertyBase&)

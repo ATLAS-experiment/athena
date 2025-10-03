@@ -24,11 +24,13 @@ def FPGATrackSimRunFirstStageOnManyRegions(flags):
         
         from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimLogicalHitsProcessAlgCfg
         acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags1st,
-                  **{'FPGATrackSimHitKey_2nd': f"FPGAHits_2nd_reg{region}",
+                  **{'FPGATrackSimHitKey_1st': f"FPGAHits_1st_reg{region}",
+                     'FPGATrackSimHitKey_2nd': f"FPGAHits_2nd_reg{region}",
                      'FPGATrackSimHitFiltered1stKey': f"FPGAHitsFiltered_1st_reg{region}",
                      'FPGATrackSimHitInRoads1stKey': f"FPGAHitsInRoads_1st_reg{region}",
                      'FPGATrackSimRoad1stKey': f"FPGARoads_1st_reg{region}",
-                     'FPGATrackSimTrack1stKey': f"FPGATracks_1st_reg{region}"}))
+                     'FPGATrackSimTrack1stKey': f"FPGATracks_1st_reg{region}",
+                     'FPGATrackSimSpacePoints1stKey': f"FPGASpacePoints_1st_reg{region}"}))
     return acc
     
 def FPGATrackSimRunSecondStageOnManyRegions(flags):
@@ -48,6 +50,21 @@ def FPGATrackSimRunSecondStageOnManyRegions(flags):
                      'FPGATrackSimTrack2ndKey': f"FPGATracks_2nd_reg{region}"}))
     return acc
 
+def FPGATrackSimRunLayerStudyOnManyRegions(flags):
+    acc = ComponentAccumulator()
+    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags 
+    from FPGATrackSimConfTools.FPGATrackSimLayerStudyConfig import FPGATrackSimLayerStudyCfg 
+    
+    for region in flags.Trigger.FPGATrackSim.regionList:
+        flagsLS = flags.clone()
+        flagsLS.Trigger.FPGATrackSim.region = region
+        ConfigureMultiRegionFlags(flagsLS)
+        flagsLS.lock()
+        acc.merge(FPGATrackSimLayerStudyCfg(flagsLS))
+
+    return acc
+
+
 def FPGATrackSimRegionMergeringAlgCfg(flagsIn,name="FPGATrackSimRegionMergingAlg",**kwargs):
     acc = ComponentAccumulator()
     flags = flagsIn.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flagsIn.Trigger.FPGATrackSim.algoTag,keepOriginal=False)
@@ -62,11 +79,20 @@ def FPGATrackSimRegionMergeringAlgCfg(flagsIn,name="FPGATrackSimRegionMergingAlg
     kwargs.setdefault('FPGATrackSimHitsInRoadsCollections',HitsInRoadsCollections)
     
     regionMerging = CompFactory.FPGATrackSim.FPGATrackSimRegionMergingAlg(name,**kwargs)
-    regionMerging.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemoval
-    regionMerging.useRoads = not flags.Trigger.FPGATrackSim.tracking
+    regionMerging.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions
+
+
+    regionMerging.useRoads = False # not flags.Trigger.FPGATrackSim.tracking (maybe we'll never actually use roads at this point)
+
+    if stage == "2nd":
+        from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import FPGATrackSimOverlapRemovalToolCfg
+        regionMerging.OverlapRemovalTool = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags,name="OLRMerge"))
+    elif stage == "1st":
+        from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimOverlapRemovalToolCfg
+        regionMerging.OverlapRemovalTool = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags,name="OLRMerge"))
     
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimOverlapRemovalToolCfg
-    regionMerging.OverlapRemovalTool = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
-    
+    ### disable chi2 cut for overlap removal tool
+    regionMerging.OverlapRemovalTool.MinChi2 = 1e15
+        
     acc.addEventAlgo(regionMerging)
     return acc

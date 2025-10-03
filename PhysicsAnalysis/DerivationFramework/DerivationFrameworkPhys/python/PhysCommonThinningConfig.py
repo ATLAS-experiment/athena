@@ -38,7 +38,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
 
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     if "TauJetThinningToolName" in kwargs:
-        tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD}"
+        tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD} && TauJets.nTracks <= {flags.Tau.MaxTracksDAOD}"
         acc.merge(TauThinningCfg(flags,
             name                 = kwargs['TauJetThinningToolName'],
             StreamName           = StreamName,
@@ -73,6 +73,15 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             TauSecondaryVertices = "TauSecondaryVertices_EleRM",
             SelectionString      = tau_erm_thinning_expression))
 
+    # di-tau thinning
+    if "DiTauThinningToolName" in kwargs:
+        acc.merge(GenericObjectThinningCfg(
+            flags,
+            name            = kwargs['DiTauThinningToolName'],
+            StreamName      = StreamName,
+            ContainerName   = "DiTauJets",
+            SelectionString = "DiTauJets.nSubjets > 1 && abs(DiTauJets.charge) < 3"))
+
     # ID tracks associated with high-pt di-tau
     if "DiTauTPThinningToolName" in kwargs:
         acc.merge(DiTauTrackParticleThinningCfg(
@@ -80,7 +89,8 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             name                    = kwargs['DiTauTPThinningToolName'],
             StreamName              = StreamName,
             DiTauKey                = "DiTauJets",
-            InDetTrackParticlesKey  = "InDetTrackParticles"))
+            InDetTrackParticlesKey  = "InDetTrackParticles",
+            SelectionString         = "DiTauJets.nSubjets > 1 && abs(DiTauJets.charge) < 3"))
  
     ## Low-pt di-tau thinning
     if "DiTauLowPtThinningToolName" in kwargs:
@@ -89,7 +99,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             name            = kwargs['DiTauLowPtThinningToolName'],
             StreamName      = StreamName,
             ContainerName   = "DiTauJetsLowPt",
-            SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
+            SelectionString = "DiTauJetsLowPt.nSubjets > 1 && (DiTauJetsLowPt.charge == 0 ||  abs(DiTauJetsLowPt.charge) == 2)"))
     
     # ID tracks associated with low-pt ditau
     if "DiTauLowPtTPThinningToolName" in kwargs:
@@ -99,7 +109,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
             StreamName              = StreamName,
             DiTauKey                = "DiTauJetsLowPt",
             InDetTrackParticlesKey  = "InDetTrackParticles",
-            SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
+            SelectionString         = "DiTauJetsLowPt.nSubjets > 1 && (DiTauJetsLowPt.charge == 0 ||  abs(DiTauJetsLowPt.charge) == 2)"))
  
     # keep calo clusters around electrons
     if "ElectronCaloClusterThinningToolName" in kwargs:

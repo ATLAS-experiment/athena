@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,10 +7,6 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>   $Id: TileNeighbour.cxx,v 1.13 2008-12-13 04:57:11 ssnyder Exp $
-//<version>     $Name: not supported by cvs2svn $
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "CaloIdentifier/TileNeighbour.h"
 #include "CaloIdentifier/TileID.h"
@@ -123,7 +119,7 @@ int TileNeighbour::initialize(const Tile_Base_ID* tileID, const std::string& fil
     fin.ignore(MAX_TOKEN_SIZE, '\n'); // skip to eol
 
     log << endmsg;
-    allCells.push_back(newCell);
+    allCells.emplace_back(std::move(newCell));
     record++;				     // count input records
     
   } // end while fin
@@ -161,7 +157,7 @@ int TileNeighbour::initialize(const Tile_Base_ID* tileID, const std::string& fil
           newCell.neighbours[j1].push_back(tmpName);
         }
       }
-      allCells.push_back(newCell);
+      allCells.push_back(std::move(newCell));
     }
   }
 

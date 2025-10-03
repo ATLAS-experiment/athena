@@ -14,7 +14,6 @@ def setIDPVMFlags(flags, idpvm_output_file:str='idpvm.root') :
     # Set default truthMinPt depending on Run config
                                 
     flags.PhysVal.IDPVM.doExpertOutput   = True
-    flags.PhysVal.IDPVM.doPhysValOutput  = False
     flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = True
     flags.PhysVal.IDPVM.doHitLevelPlots = True
     flags.PhysVal.IDPVM.runDecoration = False

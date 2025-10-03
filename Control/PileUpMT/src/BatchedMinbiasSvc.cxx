@@ -5,13 +5,12 @@
 #include "BatchedMinbiasSvc.h"
 
 #include <GaudiKernel/ConcurrencyFlags.h>
-#include <fmt/chrono.h>
-#include <fmt/format.h>
 
 #include <algorithm>
 #include <boost/core/demangle.hpp>
 #include <chrono>
 #include <cmath>
+#include <format>
 #include <random>
 #include <range/v3/algorithm/stable_sort.hpp>
 #include <range/v3/numeric/accumulate.hpp>
@@ -71,7 +70,7 @@ StatusCode BatchedMinbiasSvc::initialize() {
 
   // Setup proxy provider
   SmartIF<IProxyProviderSvc> proxyProviderSvc{
-    serviceLocator()->service(fmt::format("ProxyProviderSvc/BkgPPSvc_{}", name()))
+    serviceLocator()->service(std::format("ProxyProviderSvc/BkgPPSvc_{}", name()))
   };
   ATH_CHECK(proxyProviderSvc.isValid());
 
@@ -85,7 +84,7 @@ StatusCode BatchedMinbiasSvc::initialize() {
   }
   // AthenaPoolAddressProviderSvc
   SmartIF<IAddressProvider> athPoolAP{
-    serviceLocator()->service(fmt::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()))
+    serviceLocator()->service(std::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()))
   };
   if (!athPoolAP) {
     ATH_MSG_WARNING(
@@ -95,7 +94,7 @@ StatusCode BatchedMinbiasSvc::initialize() {
   }
   // AddressRemappingSvc
   SmartIF<IAddressProvider> addRemapAP{
-    serviceLocator()->service(fmt::format("AddressRemappingSvc/BkgARSvc_{}", name()))
+    serviceLocator()->service(std::format("AddressRemappingSvc/BkgARSvc_{}", name()))
   };
   if (!addRemapAP) {
     ATH_MSG_WARNING("Could not cast AddressRemappingSvc to IAddressProvider");
@@ -112,7 +111,7 @@ StatusCode BatchedMinbiasSvc::initialize() {
     for (int j = 0; j < mbBatchSize; ++j) {
       // creates / retrieves a different StoreGateSvc for each slot
       auto& sg = sgs->emplace_back(
-          fmt::format("StoreGateSvc/StoreGate_{}_{}_{}", name(), i, j), name());
+          std::format("StoreGateSvc/StoreGate_{}_{}_{}", name(), i, j), name());
       ATH_CHECK(sg.retrieve());
       sg->setStoreID(StoreID::PILEUP_STORE);
       sg->setProxyProviderSvc(proxyProviderSvc);
@@ -275,15 +274,12 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   index_array = rv::ints(0, int(mbBatchSize)) | rv::sample(num_mb, prng) |
                 ranges::to<std::vector<std::uint64_t>>;
   ranges::shuffle(index_array, prng);
-  if (m_HSBatchSize > 1) {
-    ATH_MSG_DEBUG("HS ID " << hs_id << " uses " << num_mb << " events");
-  } else {
-    ATH_MSG_DEBUG("HS ID " << hs_id << " uses " << num_mb << " events\n"
-                           << fmt::format("\t\tBy bunch: [{}]\n",
-                                          fmt::join(num_mb_by_bunch, ", "))
-                           << fmt::format("\t\tOrder: [{}]",
-                                          fmt::join(index_array, ", ")));
-  }
+  ATH_MSG_DEBUG("HS ID " << hs_id << " uses " << num_mb << " events");
+  // Disabled until C++ 23 range formatting can be used
+  // if (m_HSBatchSize <= 1) {
+  //   ATH_MSG_DEBUG(fmt::format("\t\tBy bunch: [{}]\n", fmt::join(num_mb_by_bunch, ", "))
+  //                 << fmt::format("\t\tOrder: [{}]", fmt::join(index_array, ", ")));
+  // }
   return num_mb;
 }
 
@@ -314,15 +310,17 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
         std::this_thread::sleep_for(50ms);
       }
       auto wait_time = std::chrono::steady_clock::now() - order_wait_start;
-      ATH_MSG_INFO(fmt::format(
+      ATH_MSG_INFO(std::format(
           "Waited {:%M:%S} to prevent out-of-order loading", wait_time));
     }
     // See if there are any free caches
     // Using try_lock here to avoid reading same batch twice
-    if (m_empty_caches_mtx.try_lock()) {
+    std::unique_lock<std::mutex> empty_caches_lock (m_empty_caches_mtx,
+                                                    std::try_to_lock);
+    if (empty_caches_lock.owns_lock()) {
       if (m_empty_caches.empty()) {
         // Unlock mutex if we got the lock but there were no free caches
-        m_empty_caches_mtx.unlock();
+        empty_caches_lock.unlock();
         if (first_wait) {
           ATH_MSG_INFO("Waiting for a free cache");
           first_wait = false;
@@ -335,7 +333,7 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
       if (!first_wait) {
         auto wait_time = std::chrono::steady_clock::now() - cache_wait_start;
         ATH_MSG_INFO(
-            fmt::format("Waited {:%M:%S} for a free cache", wait_time));
+            std::format("Waited {:%M:%S} for a free cache", wait_time));
       }
       std::scoped_lock reading{m_cache_mtxs[batch], m_reading_batch_mtx};
       if (m_HSBatchSize != 0) {
@@ -371,12 +369,12 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
         ATH_CHECK(sg->recordAddress(addr));
         ATH_CHECK(sg->loadEventProxies());
         // Read data now if desired
-        for (const auto* proxy_ptr : sg->proxies()) {
-          if (!proxy_ptr->isValid()) {
-            continue;
-          }
+        if (!m_onDemandMB) {
+          for (const auto* proxy_ptr : sg->proxies()) {
+            if (!proxy_ptr->isValid()) {
+              continue;
+            }
 
-          if (!m_onDemandMB) {
             // Sort of a const_cast, then ->accessData()
             sg->proxy_exact(proxy_ptr->sgkey())->accessData();
           }
@@ -385,11 +383,10 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
       // Reset active store
       m_activeStoreSvc->setStore(old_store);
       if (m_HSBatchSize != 0) {
-        ATH_MSG_INFO(fmt::format(
+        ATH_MSG_INFO(std::format(
             "Reading {} events took {:%OMm %OSs}", m_cache[batch]->size(),
             std::chrono::system_clock::now() - start_time));
       }
-      m_empty_caches_mtx.unlock();
       m_last_loaded_batch.exchange(batch);
       return StatusCode::SUCCESS;
     }
@@ -409,7 +406,7 @@ StoreGateSvc* BatchedMinbiasSvc::getMinbias(const EventContext& ctx,
 std::size_t BatchedMinbiasSvc::getNumForBunch(const EventContext& ctx,
                                               int bunch) const {
   if (bunch < m_earliestDeltaBC.value() || bunch > m_latestDeltaBC.value()) {
-    throw std::logic_error(fmt::format(
+    throw std::logic_error(std::format(
         "Tried to request bunch {} which is outside the range [{}, {}]", bunch,
         m_earliestDeltaBC.value(), m_latestDeltaBC.value()));
   }

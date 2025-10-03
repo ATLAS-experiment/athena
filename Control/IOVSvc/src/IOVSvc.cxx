@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -445,7 +445,8 @@ IOVSvc::getRange(const CLID& clid, const std::string& key,
 StatusCode 
 IOVSvc::getRangeFromDB(const CLID& clid, const std::string& key, 
                        IOVRange& range, std::string& tag,
-                       std::unique_ptr<IOpaqueAddress>& ioa) const {
+                       std::unique_ptr<IOpaqueAddress>& ioa,
+                       const EventIDBase& now) const {
 
   std::lock_guard<std::recursive_mutex> lock(m_lock);
 
@@ -456,15 +457,12 @@ IOVSvc::getRangeFromDB(const CLID& clid, const std::string& key,
     return StatusCode::FAILURE;
   } else {
     
-    //Get current time form thread-local context
-    const EventContext& context = Gaudi::Hive::currentContext();
-    const EventIDBase& eventID = context.eventID();
-    uint32_t event = eventID.lumi_block();
-    uint32_t run   = eventID.run_number();
+    uint32_t event = now.lumi_block();
+    uint32_t run   = now.run_number();
     IOVTime curTime;
     curTime.setRunEvent(run,event);
     // get ns timestamp from event
-    curTime.setTimestamp(1000000000L*(uint64_t)eventID.time_stamp() + eventID.time_stamp_ns_offset());
+    curTime.setTimestamp(1000000000L*static_cast<uint64_t>(now.time_stamp()) + now.time_stamp_ns_offset());
 
 
     return ist->getRangeFromDB( clid, key, range, tag, ioa, curTime );
@@ -859,7 +857,7 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
   
   std::unique_ptr<IOpaqueAddress> ioa;
   if (getRangeFromDB(id.clid(), sgKey, t, range, tag, ioa).isFailure()) {
-    ATH_MSG_ERROR( "unable to get range from db for " 
+    ATH_MSG_ERROR( "unable to get range from db for time "  << t << " clid "
                    << id.clid() << " " << sgKey );
     return StatusCode::FAILURE;
   }

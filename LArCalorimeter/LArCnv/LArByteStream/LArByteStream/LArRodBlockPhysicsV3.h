@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKPYSICSV3_H
@@ -355,7 +355,7 @@ inline uint32_t  LArRodBlockPhysicsV3::getHottestCellEnergy() const  // to be ch
 {
 
   uint32_t aux;
-  aux = * ((uint32_t *)(m_CounterPtr+8));
+  aux = * reinterpret_cast<const uint32_t *>(m_CounterPtr+8);
   return (aux&0x01FFFFFF);
 }
 

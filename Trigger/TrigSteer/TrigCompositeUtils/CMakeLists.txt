@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 
 # Declare the package name.
 atlas_subdir( TrigCompositeUtils )
@@ -16,6 +16,11 @@ atlas_add_library( TrigCompositeUtilsLib
   PUBLIC_HEADERS TrigCompositeUtils
   LINK_LIBRARIES TrigConfHLTUtilsLib CxxUtils AsgMessagingLib AsgDataHandlesLib AsgTools TrigDecisionInterface xAODBase xAODTrigger TrigConfHLTData ${extra_libs}
   PRIVATE_LINK_LIBRARIES TrigSteeringEvent )
+
+atlas_add_dictionary( ChainNameParserDict 
+   TrigCompositeUtils/ChainNameParserDict.h
+   TrigCompositeUtils/selection.xml
+   LINK_LIBRARIES TrigCompositeUtilsLib )
 
 if( NOT XAOD_STANDALONE )
   atlas_add_component( TrigCompositeUtils

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRecUtils/LArOFPeakRecoTool.h"
@@ -56,14 +56,14 @@ StatusCode LArOFPeakRecoTool::initialize() {
      if (sc.isFailure()) {
          ATH_MSG_ERROR("Unable to retrieve  LArOnlineID from DetectorStore");
          return StatusCode::FAILURE;
-      } else m_lar_on_id = (LArOnlineID_Base*) laron;
+      } else m_lar_on_id = static_cast<const LArOnlineID_Base*> (laron);
   } else {
        const LArOnline_SuperCellID* laron;
        StatusCode sc = detStore()->retrieve(laron,"LArOnline_SuperCellID");
        if (sc.isFailure()) {
            ATH_MSG_ERROR("Unable to retrieve  LArOnlineID from DetectorStore");
            return StatusCode::FAILURE;
-       } else m_lar_on_id = (LArOnlineID_Base*) laron;
+       } else m_lar_on_id =static_cast<const LArOnlineID_Base*> (laron);
   }
   return StatusCode::SUCCESS;
 }
@@ -169,7 +169,7 @@ LArOFIterResults LArOFPeakRecoTool::peak(const std::vector<float>& samples, // r
     if (delay>timeMax) delay=timeMax-epsilon;
     if (delay<0.) delay=0.;
     //Index of the in in the vector according to the delay
-    delayIdx=(unsigned)floor(0.5+delay/timeBinWidth);
+    delayIdx=(unsigned)std::floor(0.5+delay/timeBinWidth);
   }
 
   //Get first set of OFC's

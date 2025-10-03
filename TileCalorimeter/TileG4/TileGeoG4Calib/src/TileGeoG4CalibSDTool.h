@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -30,17 +30,24 @@ public:
 
   ///
   virtual StatusCode initialize() override final;
+  
+  virtual StatusCode SetupEvent(HitCollectionMap&) override final;
 
   /// End of an athena event
-  StatusCode Gather() override final; //FIXME would be good to be able to avoid this.
+  virtual StatusCode Gather(HitCollectionMap&) override final;
 
 protected:
   /// Make me an SD!
-  G4VSensitiveDetector* makeSD() const override final;
+  virtual G4VSensitiveDetector* makeSD() const override final;
 
 private:
   /// Calculator Service
-  ServiceHandle<ITileCalculator> m_tileCalculator;
+  ServiceHandle<ITileCalculator> m_tileCalculator{this, "TileCalculator", "TileGeoG4SDCalc"};
+
+  std::string m_tileHits{};
+  std::string m_tileActiveCellCalibHits{};
+  std::string m_tileInactiveCellCalibHits{};
+  std::string m_tileDeadMaterialCalibHits{};
 
 };
 

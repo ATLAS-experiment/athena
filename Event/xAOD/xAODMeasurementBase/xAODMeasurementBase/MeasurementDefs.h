@@ -74,7 +74,8 @@ template <int N> MeasVector<N> toStorage(const AmgVector(N)& amgVec){
 
 ///@brief Converts the double precision of the AmgSymMatrix 
 ///       into the floating point storage precision of the MeasMatrix
-template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat) {
+template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat)
+    requires (N > 1) {
      MeasMatrix<N> mat{MeasMatrix<N>::Zero()};
      for (int i =0 ; i < N; ++i){
         for (int j =0 ; j < N; ++j) {
@@ -84,7 +85,8 @@ template <int N> MeasMatrix<N> toStorage(const AmgSymMatrix(N)& amgMat) {
      return mat;
 }
 
-template <int N> AmgSymMatrix(N) toEigen(const ConstMatrixMap<N>& xAODmat) {
+template <int N> AmgSymMatrix(N) toEigen(const ConstMatrixMap<N>& xAODmat)
+    requires (N > 1) {
     AmgSymMatrix(N) mat{AmgSymMatrix(N)::Zero()};
     for (int i=0; i < N; ++i){
         for (int j =0; j < N; ++j){

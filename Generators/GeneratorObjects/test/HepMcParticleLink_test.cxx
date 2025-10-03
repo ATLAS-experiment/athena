@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -110,8 +110,8 @@ namespace MCTesting {
     // create v3
     HepMC::GenVertexPtr v3 = HepMC::newGenVertexPtr();
     evt->add_vertex( v3 );
-    v3->add_particle_in( p3 );
-    v3->add_particle_in( p4 );
+    v3->add_particle_in( std::move(p3) );
+    v3->add_particle_in( std::move(p4) );
     HepMC::GenParticlePtr p5 =
       HepMC::newGenParticlePtr( HepMC::FourVector(-3.813,0.113,-1.833,4.233 ), 22, 1 );
     v3->add_particle_out( p5   );
@@ -124,7 +124,7 @@ namespace MCTesting {
     // create v4
     HepMC::GenVertexPtr v4 = HepMC::newGenVertexPtr();
     evt->add_vertex( v4 );
-    v4->add_particle_in( p6 );
+    v4->add_particle_in( std::move(p6) );
     HepMC::GenParticlePtr p7 =
       HepMC::newGenParticlePtr( HepMC::FourVector(-2.445,28.816,6.082,29.552), 1,1 );
     v4->add_particle_out( p7 );
@@ -176,7 +176,7 @@ namespace MCTesting {
     HepMC::suggest_barcode(inParticle3,3);
     HepMC::suggest_barcode(inParticle4,4);
     HepMC::set_signal_process_vertex(&ge, myVertex );
-    ge.set_beam_particles(inParticle1,inParticle2);
+    ge.set_beam_particles(std::move(inParticle1),std::move(inParticle2));
     return inParticle3;
   }
 
@@ -202,7 +202,7 @@ namespace MCTesting {
     HepMC::suggest_barcode(inParticle3,3);
     HepMC::suggest_barcode(inParticle4,4);
     HepMC::set_signal_process_vertex(&ge, myVertex );
-    ge.set_beam_particles(inParticle1,inParticle2);
+    ge.set_beam_particles(std::move(inParticle1),std::move(inParticle2));
     return inParticle4;
   }
 
@@ -255,7 +255,7 @@ namespace MCTesting {
 #endif
 
     //.....add new vertex with geantino
-    ge.add_vertex(genVertex);
+    ge.add_vertex(std::move(genVertex));
     HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max());
 
     return genPart;

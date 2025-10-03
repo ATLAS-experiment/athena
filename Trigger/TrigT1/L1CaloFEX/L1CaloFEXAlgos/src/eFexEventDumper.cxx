@@ -70,7 +70,7 @@ namespace LVL1 {
 
         if(!m_towerKey.empty()) {
             SG::ReadHandle <xAOD::eFexTowerContainer> towers{m_towerKey, ctx};
-            for (const auto &tower: *towers) {
+            for (const xAOD::eFexTower* tower: *towers) {
                 auto counts = tower->et_count();
                 if (counts.empty()) continue;
                 double tEta = (int((tower->eta()+0.025)*10)-(tower->eta()<0)*1)*0.1; // left edge

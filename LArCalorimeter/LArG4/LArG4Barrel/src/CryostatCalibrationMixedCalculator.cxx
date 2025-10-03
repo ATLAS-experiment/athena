@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationMixedCalculator
@@ -37,25 +37,14 @@ namespace LArG4 {
     ///////////////////////////////////////////////////////////
 
     CalibrationMixedCalculator::CalibrationMixedCalculator(const std::string& name, ISvcLocator *pSvcLocator)
-  : LArCalibCalculatorSvcImp(name, pSvcLocator)
-  , m_backupCalculator("BarrelCryostatCalibrationLArCalculator",name)
+      : LArCalibCalculatorSvcImp(name, pSvcLocator)
     {
-       declareProperty("BackupCalculator", m_backupCalculator);
     }
-
+    
     StatusCode CalibrationMixedCalculator::initialize() {
       // Get a "backup" calculator.
       ATH_CHECK(m_backupCalculator.retrieve());
-
       return StatusCode::SUCCESS;
-    }
-
-
-    CalibrationMixedCalculator::~CalibrationMixedCalculator()
-    {
-      // Cleanup pointers.
-      //delete m_backupCalculator;
-      //m_backupCalculator = 0;
     }
 
     // This calculator is intended to apply to the following volumes that have "mixed" identifiers:
@@ -84,13 +73,12 @@ namespace LArG4 {
       // identifier associated with this G4Step.  Note that the
       // default is to process both the energy and the ID.
 
-      if ( process == kEnergyAndID  ||  process == kOnlyEnergy )
-        {
-          m_energyCalculator.Energies( step, energies );
-        }
-      else
+      if ( process == kEnergyAndID  ||  process == kOnlyEnergy ) {
+	m_energyCalculator.Energies( step, energies );
+      }
+      else {
         for (unsigned int i=0; i != 4; i++) energies.push_back( 0. );
-
+      }
 
       identifier.clear();
       if ( process == kEnergyAndID  ||  process == kOnlyID )
@@ -241,10 +229,7 @@ namespace LArG4 {
 #endif
 
       // Check for bad result.
-      if ( identifier == LArG4Identifier() )
-        return false;
-
-      return true;
+      return ( identifier != LArG4Identifier() );
     }
 
   } // namespace BarrelCryostat

@@ -27,6 +27,7 @@
 
 #include <exception>
 #include <string>
+#include <format>
 
 //__________________________________________________________________________
 template <class COLL_T, class ELEM_T, class ELEM_P>
@@ -434,6 +435,8 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::
 setToken (const std::string& token)
 {
    char context[32];
-   ::sprintf(context, "[CTXT=%08X]", m_persCtx);
+   const std::string contextStr = std::format("[CTXT={:08X}]", m_persCtx);
+   std::strncpy(context, contextStr.c_str(), sizeof(context) - 1);
+   context[sizeof(context) - 1] = '\0';
    T_AthenaPoolCustCnv<COLL_T, ELEM_T>::setToken( token + context );
 }

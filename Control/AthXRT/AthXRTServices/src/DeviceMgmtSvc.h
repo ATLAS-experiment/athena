@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHXRTSERVICES_DEVICEMGMTSVC_H
 #define ATHXRTSERVICES_DEVICEMGMTSVC_H
@@ -114,6 +114,7 @@ class DeviceMgmtSvc : public extends<AthService, IDeviceMgmtSvc> {
     std::string fpga_device_name;
     std::string uuid;
     std::vector<std::string> kernel_names;
+    std::vector<std::string> cu_names;
   };
 
   /// Helper function to check if an XCLBIN file is compatible with a device.

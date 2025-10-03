@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -21,9 +21,9 @@ DECLARE_TPCNV_FACTORY (DetailedTrackTruthCollectionCnv_p2,
 DECLARE_TPCNV_FACTORY (DetailedTrackTruthCollectionCnv_p3,
                        DetailedTrackTruthCollection,
                        Trk::DetailedTrackTruthCollection_p3,
-                       Athena::TPCnvVers::Current)
+                       Athena::TPCnvVers::Old)
 
 DECLARE_TPCNV_FACTORY (DetailedTrackTruthCollectionCnv_p4,
                        DetailedTrackTruthCollection,
                        Trk::DetailedTrackTruthCollection_p4,
-                       Athena::TPCnvVers::Old)
+                       Athena::TPCnvVers::Current)

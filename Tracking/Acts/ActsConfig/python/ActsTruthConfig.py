@@ -71,13 +71,14 @@ def ActsTrackToTruthAssociationAlgCfg(flags,
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
+    if flags.Detector.EnableHGTD and flags.Acts.useHGTDClusterInTrackFinding:
+        kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
         
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
@@ -90,14 +91,15 @@ def ActsTruthParticleHitCountAlgCfg(flags,
 
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
+    if flags.Detector.EnableHGTD and flags.Acts.useHGTDClusterInTrackFinding:
+        kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
     kwargs.setdefault('NHitsMin',4)
 
     if 'TrackingGeometryTool' not in kwargs:    
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     
     acc.addEventAlgo( CompFactory.ActsTrk.TruthParticleHitCountAlg(name=name, **kwargs) )
     return acc
@@ -113,20 +115,20 @@ def ActsTruthAssociationAlgCfg(flags,
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="StripClusterToTruthAssociationAlg.", **kwargs) ))
     
-    if flags.Detector.EnableHGTD and (flags.Acts.useHGTDClusterInTrackFinding or flags.HGTD.doActs):
+    if flags.Detector.EnableHGTD and flags.Acts.useHGTDClusterInTrackFinding:
         acc.merge(ActsHgtdClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="HgtdClusterToTruthAssociationAlg.", **kwargs) ))
     return acc
 
 def setDefaultTruthMatchingArgs(kwargs) :
-    kwargs.setdefault('MatchWeights',[0.,               # other
-                                      10., 5.,           # ID (pixel, strips)
-                                      0.,  0., 0. , 0.,  # MS
-                                      0. ])             # HGTD
+    kwargs.setdefault('MatchWeights',[0.,                    # other
+                                      10., 5.,               # ID (pixel, strips)
+                                      0.,  0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
+                                      0. ])                  # HGTD
     # weights used for hit purity and hit efficiencies
-    kwargs.setdefault('CountWeights',[0.,               # other
-                                      1.,1.,            # ID (pixel, strips)
-                                      0., 0., 0. , 0.,  # MS
-                                      0. ])             # HGTD
+    kwargs.setdefault('CountWeights',[0.,                   # other
+                                      1.,1.,                # ID (pixel, strips)
+                                      0., 0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
+                                      0. ])                 # HGTD
     kwargs.setdefault('StatisticPtBins',[1e3,2.5e3,5e3,10e3,100e3])
     kwargs.setdefault('ShowDetailedTables',False)
     kwargs.setdefault('PdgIdCategorisation',False)

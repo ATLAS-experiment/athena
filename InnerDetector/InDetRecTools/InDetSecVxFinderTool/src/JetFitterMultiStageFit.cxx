@@ -124,7 +124,7 @@ Trk::VxJetCandidate* JetFitterMultiStageFit::doTwoStageFit(const Trk::RecVertex 
 
             ATH_MSG_VERBOSE(" new overall number of tracks (vertices?) to fit : " << setOfVertices.size());
             myJetCandidate->setVerticesOnJetAxis(setOfVertices);
-            m_initializationHelper->updateTrackNumbering(myJetCandidate);
+            Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);
             //question: should this be done???
             m_routines->initializeToMinDistancesToJetAxis(myJetCandidate);
             // we re-initialize, is this wise? We've merged vertices in the previous iteration...
@@ -238,7 +238,7 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
                                                       *myJetCandidate);
 
                 //now you need to update the numbering scheme
-                m_initializationHelper->updateTrackNumbering(myJetCandidate);//maybe this should be moved to a lower level...
+                Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);//maybe this should be moved to a lower level...
                 continue;
             }
 
@@ -249,8 +249,8 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
                 const Trk::VxVertexOnJetAxis *firstVertex = pairOfVxVertexOnJetAxisExcludingPrimary.first;
                 const Trk::VxVertexOnJetAxis *secondVertex = pairOfVxVertexOnJetAxisExcludingPrimary.second;
 
-                CLHEP::HepLorentzVector massVector1 = m_jetFitterUtils->fourMomentumAtVertex(*firstVertex);//MeV
-                CLHEP::HepLorentzVector massVector2 = m_jetFitterUtils->fourMomentumAtVertex(*secondVertex);//MeV
+                CLHEP::HepLorentzVector massVector1 = InDet::InDetJetFitterUtils::fourMomentumAtVertex(*firstVertex);//MeV
+                CLHEP::HepLorentzVector massVector2 = InDet::InDetJetFitterUtils::fourMomentumAtVertex(*secondVertex);//MeV
 
                 CLHEP::HepLorentzVector sumMassVector = massVector1 + massVector2;
 
@@ -278,7 +278,7 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
                                                           *pairOfVxVertexOnJetAxisExcludingPrimary.second,
                                                           *myJetCandidate);
 
-                    m_initializationHelper->updateTrackNumbering(myJetCandidate);//maybe this should be moved to a lower level...
+                    Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);//maybe this should be moved to a lower level...
                     continue;//go to next cycle, after a succesful merging
                 }
             }

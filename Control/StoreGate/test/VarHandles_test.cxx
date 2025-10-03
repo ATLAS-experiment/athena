@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -64,7 +64,9 @@ namespace Athena_test {
     //init with an empty proxy
     ReadHandle<IntList> emptyProxy("foo");
     assert(!emptyProxy.isInitialized());
-    assert(emptyProxy.setState(new DataProxy()).isFailure()); //we are friends
+    StatusCode sc;
+    sc = emptyProxy.setState(new DataProxy());
+    assert(sc.isFailure()); //we are friends
     assert(!emptyProxy.isInitialized());
     assert(!emptyProxy.isSet());
     assert(!emptyProxy.isConst());

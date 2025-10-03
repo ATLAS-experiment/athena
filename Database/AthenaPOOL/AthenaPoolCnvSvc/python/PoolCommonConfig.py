@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,6 +24,19 @@ def PoolSvcCfg(flags, withCatalogs=False, **kwargs):
         kwargs.setdefault("ReadCatalog", catalogs)
 
     acc.addService(CompFactory.PoolSvc(**kwargs))
+    return acc
+
+
+def AthenaPoolSharedIOCnvSvcCfg(flags, **kwargs):
+    acc = PoolSvcCfg(flags)
+
+    if flags.PoolSvc.PersSvcPerInputType:
+        kwargs.setdefault("PersSvcPerInputType", "CollectionTree")
+
+    service = CompFactory.AthenaPoolSharedIOCnvSvc(**kwargs)
+    acc.addService(service)
+    acc.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",
+                                                 CnvServices=[service.getFullJobOptName()]))
     return acc
 
 

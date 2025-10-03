@@ -3,6 +3,8 @@
 */
 
 #include "AFP_GeoModelFactory.h"
+#include "AFP_GeoModelManager.h"
+
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoLogVol.h"  
@@ -11,11 +13,13 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"  
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
+
 #include "CLHEP/GenericFunctions/AbsFunction.hh"
 #include "CLHEP/GenericFunctions/Variable.hh"
 #include "CLHEP/GenericFunctions/Sin.hh"
 #include "CLHEP/GenericFunctions/Cos.hh"
 #include "StoreGate/StoreGateSvc.h"
+
 
 #include "GeoModelUtilities/GeoOpticalPhysVol.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
@@ -27,22 +31,14 @@
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
-#include <iostream>
-#include <fstream>
-
-#include <algorithm>
-#include <cmath>
-#include <cstdlib>
-#include <list>
-#include <map>
-#include <string>
+#include <cstdio>
 
 
 using namespace Genfun;
 using namespace CLHEP;
 
 AFP_GeoModelFactory::AFP_GeoModelFactory(StoreGateSvc *detStore, AFP_Geometry* pGeometry)
-    :m_pDetectorManager(nullptr), m_pDetectorStore(detStore), m_addSeparationWindow(false)
+    :m_pDetectorStore(detStore)
 {
     pGeometry->getCfgParams(&m_CfgParams);
     m_pGeometry=pGeometry;

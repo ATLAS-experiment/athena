@@ -6,7 +6,7 @@
 #define INCLUDE_PERSISTENCYSVC_ITECHNOLOGYSPECIFICATTRIBUTES_H
 
 // includes
-#include "PersistencySvc/PersistencySvcException.h"
+#include <exception>
 #include <string>
 #include <sstream>
 #include <typeinfo>
@@ -21,18 +21,6 @@ namespace pool {
 
   class ITechnologySpecificAttributes {
   public:
-    /// Exception thrown by the ITechnologySpecificAttributes class
-    class Exception : public PersistencySvcException {
-    public:
-      /// Constructor
-      Exception( const std::string& message ):
-        PersistencySvcException( message,
-                                 "ITechnologySpecificAttributes" )
-      {}
-      /// Destructor
-      virtual ~Exception() throw() {}
-    };
-
     /// Templated method to retrieve an attribute
     template< class T > T attribute( const std::string& attributeName,
                                      const std::string& option = "" ) {
@@ -44,7 +32,7 @@ namespace pool {
                                     option ) ) {
         std::ostringstream error;
         error << "Failed to retrieve attribute " << attributeName << " of type " << typeInfo.name();
-        throw Exception( error.str() );
+        throw std::runtime_error( error.str() + " (APR: \" ITechnologySpecificAttributes \" from \" PersistencySvc \")");
       }
       return data;
     }

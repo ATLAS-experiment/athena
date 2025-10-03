@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils/python/dbsqlite.py
 # reaped off: http://svn.python.org/view/sandbox/trunk/dbm_sqlite
@@ -12,8 +12,6 @@ Issues:
     # ??? what is the correct isolation mode
 
 """
-
-from __future__ import print_function
 
 __all__ = ['error', 'open']
 

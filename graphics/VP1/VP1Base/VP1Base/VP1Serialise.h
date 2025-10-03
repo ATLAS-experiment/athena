@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -135,7 +135,7 @@ void VP1Serialise::save(const T& t) {//Fallback template method
 template <class T>
 void VP1Serialise::save( T* t)
 {
-  save((const T*)t);
+  save(const_cast<const T*>(t));
 }
 
 #endif

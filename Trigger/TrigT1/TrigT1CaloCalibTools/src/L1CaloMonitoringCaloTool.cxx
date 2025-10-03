@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -75,8 +75,7 @@ StatusCode L1CaloMonitoringCaloTool:: initialize()
     return sc;
   }
   else {
-    //msg(MSG::DEBUG) << " Found the CaloLVL1_ID helper. " << endmsg;
-    m_lvl1Helper = (CaloLVL1_ID*) lvl1_id;
+    m_lvl1Helper = static_cast<const CaloLVL1_ID*> (lvl1_id);
   }
 
   // Set up cell to tt mapping arrays

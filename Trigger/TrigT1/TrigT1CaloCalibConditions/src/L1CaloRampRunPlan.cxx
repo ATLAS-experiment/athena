@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloRampRunPlan.h"
@@ -62,7 +62,7 @@ DataObject* L1CaloRampRunPlan::makePersistent() const {
     }
     (*attrList)[ this->specificationName(eEnergySteps) ].data<std::string>()= oss.str();
 
-	return (DataObject*) attrList;
+	return attrList;
 }
 
 void L1CaloRampRunPlan::makeTransient(const AthenaAttributeList*& athenaAttributeList) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -60,15 +60,15 @@ private:
     std::vector<LArRampPTmp>          m_rampCache;
     std::vector<LArRampPTmp>          m_rampCorrections;
 
-    const LArOnlineID* m_onlineID; 
-    BooleanProperty    m_testCondObjs;
-    BooleanProperty    m_readCondObjs;
-    BooleanProperty    m_writeCondObjs;
-    BooleanProperty    m_writeCorrections;
-    BooleanProperty    m_applyCorrections;
-    BooleanProperty    m_testReadDB; 
-    BooleanProperty    m_TB; 
-    int                m_tbin ;
+    const LArOnlineID* m_onlineID{};
+    BooleanProperty    m_testCondObjs{this, "TestCondObjs", false};
+    BooleanProperty    m_readCondObjs{this, "ReadCondObjs", false};
+    BooleanProperty    m_writeCondObjs{this, "WriteCondObjs", false};
+    BooleanProperty    m_writeCorrections{this, "WriteCorrections", false};
+    BooleanProperty    m_applyCorrections{this, "ApplyCorrections", false};
+    BooleanProperty    m_testReadDB{this, "TestReadDBDirect", false};
+    BooleanProperty    m_TB{this, "Testbeam", false};
+    IntegerProperty    m_tbin{this, "Tbin", 0};
 };
 #endif // LARIOV_LARCONDITIONSTESTALG_H
 

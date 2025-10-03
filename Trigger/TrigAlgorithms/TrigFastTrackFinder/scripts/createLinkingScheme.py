@@ -5,8 +5,9 @@ import pandas as pd
 def parseArgs():
     import argparse
     parser = argparse.ArgumentParser(description="create GBTS linking table")
-    parser.add_argument("-o", "--output_file", default="binTables_ITK_RUN4_new.txt", help="output table for use by GBTS (default=%(default)s)")
+    parser.add_argument("-o", "--output_file", default="binTables_ITK_RUN4.txt", help="output table for use by GBTS (default=%(default)s)")
     parser.add_argument("-p", "--min-link-probability", type=float, default=0.01, help="minimum linking probability (default=%(default)s, LRT=0.001)")
+    parser.add_argument("-e", "--eta-bins", type=float, default=0.2, help="eta bin width (default=%(default)s)")
     parser.add_argument("-a", "--no-symmetrize", action='store_true', help="do not symmetrize by adding missing layers on the other side")
     parser.add_argument("-i", "--write-inverse-linking-scheme", action='store_true', help="write inverse linking scheme table")
     parser.add_argument("-w", "--write-scheme-file", default="inverse_linking_scheme_ITK_RUN4.txt", help="inverse linking scheme table file name (default=%(default)s)")
@@ -27,9 +28,14 @@ class Pair(object):
 
 args = parseArgs()
 
+print(f"Read {args.input_csv}")
+
 link_df = pd.read_csv(args.input_csv)
+link_df_orig_len = len(link_df)
 
 link_df = link_df.drop(link_df[link_df['probability'] < args.min_link_probability].index)
+
+print(f"Drop {link_df_orig_len-len(link_df)} ({link_df_orig_len}->{len(link_df)}) links with p<{args.min_link_probability}")
 
 layer_from_idx = link_df['from'].values
 layer_to_idx = link_df['to'].values
@@ -159,11 +165,11 @@ if args.write_inverse_linking_scheme:
 
     link_file.close()
 
-print('writing output binTables...')
+print(f"Write output file {args.output_file} with {nConnsTotal} connections and eta bin width {args.eta_bins}")
 
 bin_table = open(args.output_file, 'w')
 
-bin_table.write('%d 0.2\n' % (nConnsTotal))
+bin_table.write(f"{nConnsTotal} {args.eta_bins}\n")
 
 conn_counter = 0
 

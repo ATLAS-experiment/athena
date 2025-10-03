@@ -3,7 +3,7 @@
 */
 #include "TrackToTrackParticleCnvAlg.h"
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -22,6 +22,7 @@
 #include "src/detail/HitSummaryDataUtils.h"
 #include "src/detail/ExpectedHitUtils.h"
 
+#include <Acts/Definitions/TrackParametrization.hpp>
 #include <tuple>
 #include <sstream>
 
@@ -143,8 +144,10 @@ namespace ActsTrk
 
      if (m_perigeeExpression == "BeamLine") m_expression_strategy = expressionStrategy::BeamLine;
      else if (m_perigeeExpression == "Vertex") m_expression_strategy = expressionStrategy::Vertex;
+     else if (m_perigeeExpression == "DontRecalculate") m_expression_strategy = expressionStrategy::DontRecalculate;
      else return StatusCode::FAILURE;
     
+     ATH_CHECK(m_trackingGeometryTool.retrieve());
      ATH_CHECK( m_tracksContainerKey.initialize() );
      ATH_CHECK( m_trackParticlesOutKey.initialize() );
      ATH_CHECK( m_beamSpotKey.initialize(m_expression_strategy == expressionStrategy::BeamLine) );
@@ -160,7 +163,7 @@ namespace ActsTrk
      {
         auto logger = makeActsAthenaLogger(this, "Prop");
 
-        Navigator::Config cfg{m_extrapolationTool->trackingGeometryTool()->trackingGeometry()};
+        Navigator::Config cfg{m_trackingGeometryTool->trackingGeometry()};
         cfg.resolvePassive = false;
         cfg.resolveMaterial = true;
         cfg.resolveSensitive = true;
@@ -248,6 +251,16 @@ namespace ActsTrk
       trackContainers.push_back( handle.cptr() );
       nTracks += trackContainers.back()->size();
     }
+
+    // Fast Insertion Trick
+    std::vector<xAOD::TrackParticle*> toAddParticles;
+    toAddParticles.reserve(nTracks);
+    for (std::size_t i(0); i<nTracks; ++i) {
+      toAddParticles.push_back( new xAOD::TrackParticle() );
+    }
+    track_particles->insert(track_particles->end(),
+			    toAddParticles.begin(),
+			    toAddParticles.end());
     
     SG::ReadCondHandle<AtlasFieldCacheCondObj> fieldHandle = SG::makeHandle( m_fieldCacheCondObjInputKey, ctx );
     ATH_CHECK(fieldHandle.isValid());
@@ -255,14 +268,13 @@ namespace ActsTrk
     MagField::AtlasFieldCache fieldCache;
     field_cond_data->getInitializedCache(fieldCache);
 
-    const ActsGeometryContext &gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
+    const ActsGeometryContext &gctx = m_trackingGeometryTool->getNominalGeometryContext();
     std::shared_ptr<Acts::PerigeeSurface> perigee_surface {nullptr};
     if (m_expression_strategy == expressionStrategy::BeamLine) {
       perigee_surface = makePerigeeSurface(beamspot_data);
     } else if (m_expression_strategy == expressionStrategy::Vertex) {
       perigee_surface = makePerigeeSurface(*primaryVertex);
     }
-    track_particles->reserve( nTracks );
 
     std::array<const InDetDD::SiDetectorElementCollection *,ActsTrk::detail::to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl {};
     for (unsigned int idx=0; idx <m_siDetEleCollToMeasurementType.size(); ++idx ) {
@@ -286,20 +298,36 @@ namespace ActsTrk
 
     unsigned int converted_track_states=0;
 
+    std::size_t particleCounter = 0ul;
     using namespace Acts::UnitLiterals;
     for (const ActsTrk::TrackContainer *tracksContainer : trackContainers) {
+
+      bool precalculatedLayerPattern = detail::ExpectedLayerPatternHelper::exists(*tracksContainer);
+
       for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
-	track_particles->push_back( new xAOD::TrackParticle );
-	xAOD::TrackParticle *track_particle=track_particles->back();
+	xAOD::TrackParticle *track_particle = track_particles->at(particleCounter++);
 	
 	// convert defining parameters
 	// @TODO add support for other modes available in the legacy converter : wrt a vertex, origin, beamspot ?
-	Acts::BoundTrackParameters perigeeParam = parametersAtPerigee(ctx, track, *perigee_surface);
-	track_particle->setDefiningParameters(perigeeParam.parameters()[Acts::eBoundLoc0],
-					      perigeeParam.parameters()[Acts::eBoundLoc1],
-					      perigeeParam.parameters()[Acts::eBoundPhi],
-					      perigeeParam.parameters()[Acts::eBoundTheta],
-					      perigeeParam.parameters()[Acts::eBoundQOverP] * 1_MeV);
+  Acts::BoundTrackParameters perigeeParam = [&] {
+        if (m_expression_strategy == expressionStrategy::DontRecalculate) {
+          // If the strategy is "DontRecalculate", we will take the reference surface as is 
+          // from the track finding without modification. Consult track finding configuration to
+          // find out what that is.
+          return track.createParametersAtReference();
+        }
+        else {
+          return parametersAtPerigee(ctx, track, *perigee_surface);
+        }
+  }();
+
+  Acts::BoundVector boundParams = perigeeParam.parameters();
+  track_particle->setDefiningParameters(boundParams[Acts::eBoundLoc0],
+                                        boundParams[Acts::eBoundLoc1],
+                                        boundParams[Acts::eBoundPhi],
+                                        boundParams[Acts::eBoundTheta],
+                                        boundParams[Acts::eBoundQOverP] * 1_MeV);
+
 	if (perigeeParam.covariance().has_value()) {
           // only use the 5x5 sub-matrix of the full covariance matrix
           lowerTriangleToVectorScaleLastRow(perigeeParam.covariance().value(),tmp_cov_vector,5, 1_MeV);
@@ -409,14 +437,25 @@ namespace ActsTrk
 	setSummaryValue(*track_particle,
 			hitInfo.contributingSharedHits(ActsTrk::detail::HitSummaryData::pixelTotal),
 			xAOD::numberOfPixelSharedHits);
-	// do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
-	std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
-							       || hitInfo.contributingLayers(ActsTrk::detail::HitSummaryData::pixelTotal))
-							   ? detail::expectedLayerPattern(ctx,
-											  *m_extrapolationTool,
-											  perigeeParam,
-											  m_pixelExpectLayerPathLimitInMM.value() * Acts::UnitConstants::mm)
-							   : std::array<unsigned int,4> {0u,0u, 0u,0u} );
+
+
+  std::array<unsigned int,4> expect_layer_pattern{};
+  if (precalculatedLayerPattern) {
+    // We have a pre-calculated layer pattern from track finding, use as is
+    expect_layer_pattern = detail::ExpectedLayerPatternHelper::get(track);
+  }
+  else {
+    // Only check if computeExpectedLayerPattern is true. TODO:: move this computation to the track finding to avoid calling propagator steps here.
+    // Do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
+    expect_layer_pattern = (m_computeExpectedLayerPattern.value()
+                  && (!m_expectIfPixelContributes.value()
+                      || hitInfo.contributingLayers(ActsTrk::detail::HitSummaryData::pixelTotal))
+                  ? detail::expectedLayerPattern(ctx,
+                          *m_extrapolationTool,
+                          perigeeParam,
+                          m_pixelExpectLayerPathLimitInMM.value() * Acts::UnitConstants::mm)
+                  : std::array<unsigned int,4> {0u,0u, 0u,0u} );
+  }
 	
 	// @TODO consider end-caps  for inner most pixel hits ?
 	setSummaryValue(*track_particle,

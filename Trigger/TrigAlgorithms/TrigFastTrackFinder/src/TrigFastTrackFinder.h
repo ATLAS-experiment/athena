@@ -232,7 +232,6 @@ protected:
   float m_LRTHardMinPt;
 
   std::string m_trigseedML_LUT;//ML-based track seeding LUT name
-  std::string m_connectionFile;
 
   // create UTT EDMs (to avoid crash in case of findTrack's quitting before UTT algos)
   StatusCode createEmptyUTTEDMs(const EventContext&) const;

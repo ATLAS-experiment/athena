@@ -13,7 +13,7 @@ from L1TopoSimulation import L1TopoSimulationConfig as TopoSimConfig
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
 from TrigEDMConfig.TriggerEDM import recordable
 from AthenaCommon.CFElements import seqAND
-
+from TriggerMenuMT.HLT.CommonSequences.RejectSequences import RejectSequence
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO, 
 # so let's make them functions already now
@@ -50,19 +50,10 @@ def LArSuperCellMonitoringGenCfg(flags,appendName=""):
    )
    reco = InEventRecoCA('LArSuperCellMonitoring'+appendName,inputMaker=inputMaker)
    reco.merge( LArSuperCellMonConfigHLT(flags,name="LArSuperCellMonConfigHLT"+appendName) )
-   # TimeBurner alg works as a reject-all hypo
    selAcc = SelectionCA('LArSuperCellMonitoringSequence'+appendName)
    selAcc.mergeReco(reco)
-   selAcc.addHypoAlgo(
-       TimeBurnerCfg(flags,
-                     name="LArSuperCellMonHypoConfig"+appendName,
-                     SleepTimeMillisec=0
-       )
-   )
-
-   # TimeBurnerHypo is never even called
-   msca = MenuSequence(flags, selAcc,
-                         HypoToolGen=TimeBurnerHypoToolGen)
+   HypoName = "LArSuperCellMonHypoConfig"+appendName
+   msca = RejectSequence(flags, HypoName, selAcc)
    return msca
 
 def L1TopoOnlineMonitorSequenceCfg(flags):
@@ -102,7 +93,11 @@ def MistimeMonSequenceCfg(flags):
         recoAlg = L1CorrelationAlgCfg(flags, "MistimeMonj400", ItemList=['L1_J400','L1_gJ400p0ETA25'],
                                       TrigCompositeWriteHandleKey=outputName, trigCompPassKey=outputName+".pass",
                                       l1AKey=outputName+".l1a_type", otherTypeKey=outputName+".other_type",
-                                      beforeAfterKey=outputName+".beforeafterflag")
+                                      beforeAfterKey=outputName+".beforeafterflag",
+                                      otherTypeBeforeKey=outputName+".other_type_before",
+                                      otherTypeAfterKey=outputName+".other_type_after",
+                                      beforeOffsetKey=outputName+".offset_before",
+                                      afterOffsetKey=outputName+".offset_after")
         reco.addRecoAlgo(recoAlg)
         selAcc =  SelectionCA("MistimeMonSequence")
         selAcc.mergeReco(reco)
@@ -125,14 +120,10 @@ def CaloClusterMonitorCfg(flags, suffix = ""):
    
    selAcc.mergeReco(reco)
    
-   selAcc.addHypoAlgo(
-       TimeBurnerCfg(flags,
-                     name="CaloClusterMonitoringHypoConfig" + suffix,
-                     SleepTimeMillisec=0
-       )
-   )
+   HypoName = "CaloClusterMonHypoConfig"+ suffix
+   msca = RejectSequence(flags, HypoName, selAcc)
 
-   return MenuSequence(flags, selAcc, HypoToolGen=TimeBurnerHypoToolGen)
+   return msca 
                       
 
 #----------------------------------------------------------------

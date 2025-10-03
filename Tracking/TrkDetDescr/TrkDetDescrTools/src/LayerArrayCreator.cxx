@@ -34,13 +34,10 @@ Trk::LayerArrayCreator::LayerArrayCreator(const std::string& t, const std::strin
     declareProperty("EmptyLayerMode", m_emptyLayerMode);
 }
 
-// destructor
-Trk::LayerArrayCreator::~LayerArrayCreator()
-= default;
 
-
-Trk::LayerArray* Trk::LayerArrayCreator::cylinderLayerArray(const std::vector<Trk::CylinderLayer*>& cylLayersInput,
-                                                            double rmin, double rmax, Trk::BinningType btype) const
+std::unique_ptr<Trk::BinnedArray1D<Trk::Layer>> Trk::LayerArrayCreator::cylinderLayerArray(
+  const std::vector<Trk::CylinderLayer*>& cylLayersInput,
+  double rmin, double rmax, Trk::BinningType btype) const
 {
     ATH_MSG_VERBOSE( " build LayerArray with " << cylLayersInput.size() << " cylindrical material layers." );
     ATH_MSG_VERBOSE( "       rmin/rmax provided : " << rmin << " / " << rmax );
@@ -53,7 +50,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::cylinderLayerArray(const std::vector<Tr
 
     // needed for all cases
     Trk::Layer*                         cylinderLayer      = nullptr;
-    Trk::LayerArray*                    cylinderLayerArray = nullptr;
+    std::unique_ptr<Trk::BinnedArray1D<Trk::Layer>>    cylinderLayerArray = nullptr;
     std::vector< std::pair<std::shared_ptr<Trk::Layer>, Amg::Vector3D> >   layerOrderVector;
 
     switch (btype) {
@@ -77,7 +74,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::cylinderLayerArray(const std::vector<Tr
             ATH_MSG_VERBOSE( "equidistant : created a BinUtility as " << binUtility );
 
             // create the BinnedArray; BinnedArray now owns the binUtility pointer
-            cylinderLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            cylinderLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
         } break;
 
         // bi-equidistant binning - take care the layers have to be binned equidistant + same thickness
@@ -143,7 +140,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::cylinderLayerArray(const std::vector<Tr
             ATH_MSG_VERBOSE( "bi-equidistant : created a BinUtility as " << binUtility );
 
             // create the BinnedArray; BinnedArray now owns the binUtility pointer
-            cylinderLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            cylinderLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
 
@@ -208,7 +205,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::cylinderLayerArray(const std::vector<Tr
             ATH_MSG_VERBOSE( "arbitrary : created a BinUtility as " << binUtility );
 
             // create the BinnedArray; BinnedArray now owns the binUtility pointer
-            cylinderLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            cylinderLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
 
@@ -220,17 +217,18 @@ Trk::LayerArray* Trk::LayerArrayCreator::cylinderLayerArray(const std::vector<Tr
 }
 
 
-Trk::LayerArray* Trk::LayerArrayCreator::discLayerArray(const std::vector<Trk::DiscLayer*>& discLayersInput,
-                                                        double zmin,
-                                                        double zmax,
-                                                        Trk::BinningType btype) const
+std::unique_ptr<Trk::BinnedArray1D<Trk::Layer>> Trk::LayerArrayCreator::discLayerArray(
+  const std::vector<Trk::DiscLayer*>& discLayersInput,
+  double zmin,
+  double zmax,
+  Trk::BinningType btype) const
 {
 
     ATH_MSG_VERBOSE( " build LayerArray with " << discLayersInput.size() << " disc-like material layers." );
     ATH_MSG_VERBOSE( "       zmin/zmax provided : " << zmin << " / " << zmax );
 
     // needed for all cases
-    Trk::LayerArray*                    discLayerArray = nullptr;
+    std::unique_ptr<Trk::BinnedArray1D<Trk::Layer>>  discLayerArray = nullptr;
     std::vector<std::pair<std::shared_ptr<Trk::Layer>, Amg::Vector3D>>   layerOrderVector;
 
     //copy so that you can sort
@@ -262,7 +260,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::discLayerArray(const std::vector<Trk::D
             ATH_MSG_VERBOSE( "equidistant : created a BinUtility as " << binUtility );
 
             // create the BinnedArray; BinnedArray now owns the binUtility pointer
-            discLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            discLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
 
@@ -327,7 +325,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::discLayerArray(const std::vector<Trk::D
             ATH_MSG_VERBOSE( "bi-equidistant : created a BinUtility as " << binUtility );
 
             // create the BinnedArray; BinnedArray now owns the binUtility pointer
-            discLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            discLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
 
@@ -401,7 +399,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::discLayerArray(const std::vector<Trk::D
 
             // create the BinnedArray; BinnedArray now owns the binUtility pointer
             // cppcheck-suppress memleak
-            discLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            discLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
 
@@ -413,13 +411,17 @@ Trk::LayerArray* Trk::LayerArrayCreator::discLayerArray(const std::vector<Trk::D
 }
 
 
-Trk::LayerArray* Trk::LayerArrayCreator::planeLayerArray(const std::vector<Trk::PlaneLayer*>& planeLayersInput,
-                                                         double posmin, double posmax, Trk::BinningType btype, Trk::BinningValue bv) const
+std::unique_ptr<Trk::BinnedArray1D<Trk::Layer>> Trk::LayerArrayCreator::planeLayerArray(
+  const std::vector<Trk::PlaneLayer*>& planeLayersInput,
+  double posmin,
+  double posmax,
+  Trk::BinningType btype,
+  Trk::BinningValue bv) const
 {
     ATH_MSG_VERBOSE( " build LayerArray with " << planeLayersInput.size() << " plane-like material layers." );
 
     // needed for all cases
-    Trk::LayerArray*                    planeLayerArray = nullptr;
+    std::unique_ptr<Trk::BinnedArray1D<Trk::Layer>>  planeLayerArray = nullptr;
     std::vector< std::pair< std::shared_ptr<Trk::Layer>, Amg::Vector3D> >   layerOrderVector;
     Amg::Vector3D layerCenter(0.,0.,0.);
 
@@ -461,7 +463,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::planeLayerArray(const std::vector<Trk::
             // create the binUitlity
             auto binUtility = Trk::BinUtility(layers,posmin,posmax, Trk::open, bv);
             // create the BinnedArray
-            planeLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            planeLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
 
@@ -569,7 +571,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::planeLayerArray(const std::vector<Trk::
             auto binUtility = Trk::BinUtility(layers, layerThickness, posmin, posmax, Trk::open, bv);
 
             // create the BinnedArray
-            planeLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            planeLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
 
@@ -657,7 +659,7 @@ Trk::LayerArray* Trk::LayerArrayCreator::planeLayerArray(const std::vector<Trk::
             // create the BinUtility
             auto binUtility = Trk::BinUtility(boundaries, Trk::open, bv);
             // and the BinnedArray
-            planeLayerArray = new Trk::BinnedArray1D<Trk::Layer>(layerOrderVector, binUtility);
+            planeLayerArray = std::make_unique<Trk::BinnedArray1D<Trk::Layer>>(layerOrderVector, binUtility);
 
         } break;
         // default return 0
@@ -672,10 +674,16 @@ Trk::Layer* Trk::LayerArrayCreator::checkAndReplaceEmptyLayer(Trk::Layer* lay) c
     // empty layers will be replaced by navigation layers
     if (m_emptyLayerMode){
         if (lay->layerMaterialProperties() || lay->surfaceArray()) return lay;
-         ATH_MSG_VERBOSE("         replacing dummyMaterial layer with " << ( m_emptyLayerMode > 1 ? " nothing" :" NavigationLayer." ) );
-         Trk::NavigationLayer* nLayer = m_emptyLayerMode > 1 ? nullptr : new Trk::NavigationLayer(lay->surfaceRepresentation().uniqueClone(), 1.);
-         delete lay;
-         return nLayer;
+        ATH_MSG_VERBOSE(
+            "         replacing dummyMaterial layer with "
+            << (m_emptyLayerMode > 1 ? " nothing" : " NavigationLayer."));
+        Trk::NavigationLayer* nLayer =
+            m_emptyLayerMode > 1
+                ? nullptr
+                : new Trk::NavigationLayer(
+                      lay->surfaceRepresentation().uniqueClone(), 1.);
+        delete lay;
+        return nLayer;
     }
     // don't replace - just give back what you had
     return lay;

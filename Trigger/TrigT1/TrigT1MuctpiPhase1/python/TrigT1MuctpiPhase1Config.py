@@ -6,13 +6,20 @@ from AthenaCommon.Logging import logging
 #Muon RecRoiTools
 from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
 
-def TrigThresholdDecisionToolCfg(flags, name="TrigThresholdDecisionTool"):
-  acc = ComponentAccumulator()
-  tool = CompFactory.getComp("LVL1::TrigThresholdDecisionTool")(name)
-  tool.RPCRecRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
-  tool.TGCRecRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
-  acc.setPrivateTools(tool)
-  return acc
+def TrigThresholdDecisionToolCfg(flags, name="TrigThresholdDecisionTool", AODinput = False):
+    acc = ComponentAccumulator()
+    tool = CompFactory.getComp("LVL1::TrigThresholdDecisionTool")(name)
+    tool.RPCRecRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
+    tool.TGCRecRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
+
+    # if we are running from an AOD.pool, we need the metadata service and load the L1 menu from that
+    if AODinput:
+        from TrigConfxAOD.TrigConfxAODConfig import getxAODConfigSvc
+        tool.TrigConfigSvc = acc.getPrimaryAndMerge(getxAODConfigSvc(flags))
+        tool.MenuFromxAOD = True
+
+    acc.setPrivateTools(tool)
+    return acc
 
 
 def MUCTPI_AthToolCfg(flags, name):

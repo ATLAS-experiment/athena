@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdlib>
@@ -793,7 +793,12 @@ int main(int argc, char** argv) {
       // load from db
       TrigConf::L1Menu l1menu;
       TrigConf::TrigDBMenuLoader dbLoader(dbalias);
-      dbLoader.loadL1Menu( smk, l1menu);
+      try{
+        dbLoader.loadL1Menu( smk, l1menu);
+      } catch (std::ios_base::failure & e){
+        std::cout<<"ios_base exception "<<e.what()<<" caught in TestTriggerMenuAccess.\n";
+        return 1;
+      }
       success = testL1Menu(l1menu);
    } else {
       // load from file

@@ -24,6 +24,7 @@ def IDTR2Cfg(flags):
     acc.merge(VrtSecInclusiveCfg(
         flags,
         name="VrtSecInclusive",
+        AugmentingVersionString="",
         FillIntermediateVertices=False,
         TrackLocation="InDetWithLRTTrackParticles"))
 
@@ -77,7 +78,7 @@ def IDTR2Cfg(flags):
     skimmingTools = []
     augmentationTools = [IDTR2_Reco_V0Finder]
 
-    if flags.Input.isMC:
+    if flags.Derivation.InDet.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
         acc.merge(TrackSystematicsAlgCfg(
             flags,

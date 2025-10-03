@@ -59,7 +59,6 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
     ATH_CHECK(m_hitMapTools.retrieve());
     ATH_CHECK(m_hitFilteringTool.retrieve(EnableTool{m_doHitFiltering}));
     ATH_CHECK(m_clusteringTool.retrieve(EnableTool{m_clustering > 0}));
-    ATH_CHECK(m_spacepointsTool.retrieve(EnableTool{m_doSpacepoints}));
     
     ATH_CHECK(m_writeOutputTool.retrieve());
     ATH_CHECK(m_eventSelectionTools.retrieve());
@@ -67,7 +66,6 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), true);
-    m_logicEventHeader_cluster = m_writeOutputTool->addInputBranch(m_clusterBranch.value(), true);
     m_logicEventHeader = m_writeOutputTool->addInputBranch(m_postClusterBranch.value(), true);
     
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -77,12 +75,12 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
     ATH_CHECK( m_FPGAClusterKey.initialize() );
     ATH_CHECK( m_FPGAHitKey.initialize() );
-    ATH_CHECK( m_FPGASpacePointsKey.initialize() );
     ATH_CHECK( m_FPGAHitUnmappedKey.initialize() );
     ATH_CHECK( m_inputTruthParticleContainerKey.initialize(m_useInternalTruthTracks) );
     ATH_CHECK( m_truthLinkContainerKey.initialize() );
     ATH_CHECK( m_FPGATruthTrackKey.initialize() );
     ATH_CHECK( m_FPGAOfflineTrackKey.initialize() );
+    ATH_CHECK( m_FPGAEventInfoKey.initialize() );
 
     ATH_CHECK( m_chrono.retrieve() );
     ATH_MSG_DEBUG("initialize() Finished");
@@ -122,9 +120,6 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     SG::WriteHandle<FPGATrackSimClusterCollection> FPGAClusters (m_FPGAClusterKey.at(0), ctx);
     ATH_CHECK( FPGAClusters.record (std::make_unique<FPGATrackSimClusterCollection>()));
 
-    SG::WriteHandle<FPGATrackSimClusterCollection> FPGASpacePoints (m_FPGASpacePointsKey.at(0), ctx);
-    ATH_CHECK( FPGASpacePoints.record (std::make_unique<FPGATrackSimClusterCollection>()));
-
     SG::WriteHandle<xAODTruthParticleLinkVector> truthLinkVec(m_truthLinkContainerKey);
     ATH_CHECK(truthLinkVec.record(std::make_unique<xAODTruthParticleLinkVector>()));
 
@@ -132,9 +127,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     ATH_CHECK(FPGATruthTracks.record(std::make_unique<FPGATrackSimTruthTrackCollection>()));
 
     SG::WriteHandle<FPGATrackSimOfflineTrackCollection> FPGAOfflineTracks (m_FPGAOfflineTrackKey);
-    ATH_CHECK(FPGAOfflineTracks.record(std::make_unique<FPGATrackSimOfflineTrackCollection>()));       
-    
-    // Apply event selection based on truth tracks    
+    ATH_CHECK(FPGAOfflineTracks.record(std::make_unique<FPGATrackSimOfflineTrackCollection>()));
+    // Apply event selection based on truth tracks
     if (m_doEvtSel) {
         bool acceptEvent = false;
         if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: EventSelection");
@@ -157,20 +151,19 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
             std::unordered_map<HepMcParticleLink::barcode_type, std::pair<const xAOD::TruthParticle*, size_t>> truthParticlesMap;
             size_t truthParticleIndex = 0;
             for (const xAOD::TruthParticle* truthParticle : *truthParticleContainer) {
-                truthParticlesMap.insert(std::make_pair(HepMC::barcode(truthParticle), std::make_pair(truthParticle,truthParticleIndex)));
+                truthParticlesMap.insert(std::make_pair(HepMC::uniqueID(truthParticle), std::make_pair(truthParticle,truthParticleIndex)));
                 truthParticleIndex++;
             }
-            
             const FPGATrackSimTruthTrackCollection& fpgaTruthTracks = m_eventHeader.optional().getTruthTracks();
             truthLinkVec->reserve(fpgaTruthTracks.size());
             ATH_MSG_DEBUG("begin truth matching for " << fpgaTruthTracks.size() << " FPGA truth tracks");
             for (const FPGATrackSimTruthTrack& fpgaTruthTrack : fpgaTruthTracks) {
-                auto it = truthParticlesMap.find(fpgaTruthTrack.getBarcode());
+                auto it = truthParticlesMap.find(fpgaTruthTrack.getUniqueID()); // TODO FIXME need to check FPGATrackSimTruthTrack uniqueIDs are properly filled
                 if (it != truthParticlesMap.end()) {
                     ElementLink<xAOD::TruthParticleContainer> truthParticleLink(*truthParticleContainer, it->second.second);
-                    // TODO: check if we can avoid using the previously-created map and look directly for the barcode in the link vector container
-                    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::barcode(it->second.first), 0,
-                        HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), truthParticleLink));
+                    // TODO: check if we can avoid using the previously-created map and look directly for the unique ID in the link vector container
+                    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::uniqueID(it->second.first), 0,
+                        HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID), truthParticleLink));
                     ATH_MSG_DEBUG("Truth link added");
                 }
             }
@@ -193,7 +186,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     m_evt++;
     
     // Map, cluster, and filter hits
-    ATH_CHECK(processInputs(FPGAHitUnmapped, FPGAClusters, FPGASpacePoints));
+    ATH_CHECK(processInputs(FPGAHitUnmapped, FPGAClusters));
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: get truth/offline tracks");
     // Now that this is done, push truth tracks back to storegate.
@@ -234,7 +227,11 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     auto mon_nhits = Monitored::Scalar<unsigned>("nHits", hits.size());
     auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", m_hits_miss.size());
     Monitored::Group(m_monTool, mon_nhits, mon_nhits_unmapped);
-    
+
+    // Put the FPGATrackSim event info on storegate so later algorithms can access it easily.
+    SG::WriteHandle<FPGATrackSimEventInfo> FPGAEventInfo (m_FPGAEventInfoKey);
+    ATH_CHECK(FPGAEventInfo.record(std::make_unique<FPGATrackSimEventInfo>(m_eventHeader.event())));
+
     // Write the output and reset
     if (m_writeOutputData)
         ATH_CHECK(m_writeOutputTool->writeData());
@@ -243,8 +240,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     m_eventHeader.reset();
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
-    m_logicEventHeader_cluster->reset();
-    
+
     return StatusCode::SUCCESS;
 }
 
@@ -295,18 +291,15 @@ StatusCode FPGATrackSimDataPrepAlg::readInputs(bool & done)
 
 // Applies clustering, mapping, hit filtering, and space points
 StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
-                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters,
-                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints)
+                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters)
 {
     m_clusters->clear();
-    m_spacepoints.clear();
     m_hits_miss.clear();
 
     // Map hits
     ATH_MSG_DEBUG("Running hits conversion");
     m_logicEventHeader->reset();
     m_logicEventHeader_precluster->reset();
-    m_logicEventHeader_cluster->reset();
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: RawToLogical");
     for (auto hitMapTool : m_hitMapTools){
         ATH_CHECK(hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
@@ -346,17 +339,6 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
         std::make_move_iterator(m_clusters->end()));
     
     if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: Clustering");
-    // At this stage, copy the logicEventHeader.
-    if(m_writeOutputData) *m_logicEventHeader_cluster = *m_logicEventHeader;
-    
-    // Space points
-    if (m_doSpacepoints) {
-        if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: SP fornmation");
-        ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_logicEventHeader, m_spacepoints));
-        if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: SP fornmation");
-        for (const FPGATrackSimCluster& cluster : m_spacepoints) FPGASpacePoints->push_back(cluster);
-    }
-
 
     return StatusCode::SUCCESS;
 }

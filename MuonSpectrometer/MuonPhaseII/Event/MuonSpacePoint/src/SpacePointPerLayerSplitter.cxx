@@ -7,32 +7,26 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonSpacePoint/SpacePointPerLayerSorter.h>
 
+#include "Acts/Utilities/Helpers.hpp"
 namespace MuonR4 {
     using HitVec = SpacePointPerLayerSplitter::HitVec;
-    inline HitVec stripSmartPtr(const SpacePointBucket& bucket) {
-        HitVec hits{};
-        hits.reserve(bucket.size());
-        std::transform(bucket.begin(),bucket.end(),std::back_inserter(hits), 
-                      [](const SpacePointBucket::value_type& hit){return hit.get();});
-        return hits;
-    }
     SpacePointPerLayerSplitter::SpacePointPerLayerSplitter(const SpacePointBucket& bucket):
-        SpacePointPerLayerSplitter(stripSmartPtr(bucket)){}
+        SpacePointPerLayerSplitter(Acts::unpackConstSmartPointers(bucket)){}
 
     SpacePointPerLayerSplitter::SpacePointPerLayerSplitter(const HitVec& hits) {
         if (hits.empty()) return;
 
         const Muon::IMuonIdHelperSvc* idHelperSvc {hits.front()->msSector()->idHelperSvc()};
         const MdtIdHelper& idHelper {idHelperSvc->mdtIdHelper()};
-        SpacePointPerLayerSorter laySorter{idHelperSvc};
+        const SpacePointPerLayerSorter laySorter{};
 
         HitVec::const_iterator itr = hits.begin();
 
         while (itr != hits.end()) {
-            const Identifier refId = laySorter.detectorLayerId((*itr)->identify());
+            const unsigned int refLay = laySorter.sectorLayerNum(**itr);
 
-            HitVec::const_iterator end_insert  = std::find_if(itr, hits.end(),[&refId,&laySorter](const SpacePoint* testMe) {
-                 return refId != laySorter.detectorLayerId(testMe->identify());
+            HitVec::const_iterator end_insert  = std::find_if(itr, hits.end(),[&refLay,&laySorter](const SpacePoint* testMe) {
+                 return refLay != laySorter.sectorLayerNum(*testMe);
             });
 
             const bool isMdt = (*itr)->type() == xAOD::UncalibMeasType::MdtDriftCircleType;

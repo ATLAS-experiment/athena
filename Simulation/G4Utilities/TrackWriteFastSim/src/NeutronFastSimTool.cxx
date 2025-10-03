@@ -22,5 +22,5 @@ G4VFastSimulationModel* NeutronFastSimTool::makeFastSimModel()
   ATH_MSG_DEBUG( "Initializing Fast Sim Model" );
 
   // Create a fresh Fast Sim Model
-  return new NeutronFastSim(name(),m_trackFastSimSDName,m_etaCut,m_timeCut);
+  return new NeutronFastSim(name(), getRegion(), m_trackFastSimSDName,m_etaCut,m_timeCut);
 }

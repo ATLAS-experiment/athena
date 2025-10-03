@@ -5,7 +5,7 @@ atlas_subdir( JetSubStructureMomentTools )
 
 # External dependencies:
 find_package( FastJet )
-find_package( FastJetContrib COMPONENTS Nsubjettiness EnergyCorrelator )
+find_package( FastJetContrib COMPONENTS Nsubjettiness EnergyCorrelator LundPlane)
 find_package( ROOT COMPONENTS Core Hist )
 
 # Component(s) in the package:
@@ -21,7 +21,7 @@ atlas_add_library( JetSubStructureMomentToolsLib
    JetSubStructureMomentTools/*.h Root/*.cxx ${extra_srcs}
    PUBLIC_HEADERS JetSubStructureMomentTools
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${FASTJETCONTRIB_INCLUDE_DIRS} ${FASTJET_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgTools xAODCaloEvent xAODJet JetInterface JetRecLib
+   LINK_LIBRARIES AsgTools xAODCaloEvent xAODJet JetInterface JetRecLib 
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${FASTJETCONTRIB_LIBRARIES} ${FASTJET_LIBRARIES} xAODMuon CxxUtils
    JetEDM JetSubStructureUtils ${extra_libs} )
 

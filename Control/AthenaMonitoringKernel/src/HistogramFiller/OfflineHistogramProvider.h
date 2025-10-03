@@ -46,7 +46,15 @@ namespace Monitored {
     {}
 
     // store metadata trees on object destruction
-    virtual ~OfflineHistogramProvider() override { storeMetadata(); }
+    virtual ~OfflineHistogramProvider() override {
+      try {
+        storeMetadata();
+      }
+      catch (const GaudiException&) {
+        // storeMetadata can throw due to dereferencing a Gaudi handle
+        std::abort();
+      }
+    }
 
     /**
      * @brief Getter of ROOT object
@@ -87,7 +95,7 @@ namespace Monitored {
       objcacheref.object = m_factory->create(*m_histDef);
       const auto fullName = m_factory->getFullName(*m_histDef);
       if (std::find(m_storedPaths.begin(), m_storedPaths.end(), fullName) == m_storedPaths.end()) {
-        m_storedPaths.push_back(fullName);
+        m_storedPaths.push_back(std::move(fullName));
       }
       return objcacheref.object;
     }

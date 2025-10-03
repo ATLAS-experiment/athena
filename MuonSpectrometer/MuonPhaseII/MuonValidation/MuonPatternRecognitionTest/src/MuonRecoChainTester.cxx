@@ -85,8 +85,8 @@ namespace MuonValR4{
             m_trkTruthLinks.emplace_back(m_TrackKeyHoughR4, "truthParticleLink");
             m_trkTruthLinks.emplace_back(m_TrackKeyR4, "truthParticleLink");
             m_trkTruthLinks.emplace_back(m_truthSegmentKey, "truthParticleLink");
-            m_trkTruthLinks.emplace_back(std::format("{:}_truthParticleLink", m_r4PatternSegmentKey.value()));
-            m_trkTruthLinks.emplace_back(std::format("{:}_truthParticleLink", m_segmentKeyR4.value()));
+            m_trkTruthLinks.emplace_back(std::format("{:}.truthParticleLink", m_r4PatternSegmentKey.value()));
+            m_trkTruthLinks.emplace_back(std::format("{:}.truthParticleLink", m_segmentKeyR4.value()));
 
             m_truthTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "TruthMuons");
             BilateralLinkerBranch::connectCollections(m_legacyTrks, m_truthTrks, [](const xAOD::IParticle* trk){ 

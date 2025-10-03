@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -67,8 +67,8 @@ namespace CP
 
   private:
     Gaudi::Property<std::string> m_isJESbtag {this, "isJESbtagLabel", "IsBjet", "The label to apply to truth b-tagged jets, for JES flavour uncertainties"};
-    std::optional<SG::AuxElement::Decorator<char>> m_decIsJESbtag;
-    std::optional<SG::AuxElement::Accessor<int>> m_accTruthLabel;
+    std::optional<SG::Decorator<char>> m_decIsJESbtag;
+    std::optional<SG::Accessor<int>> m_accTruthLabel;
 
   };
 }

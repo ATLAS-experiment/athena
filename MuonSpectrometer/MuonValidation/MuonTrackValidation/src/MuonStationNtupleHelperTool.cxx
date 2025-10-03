@@ -100,18 +100,19 @@ StatusCode Muon::MuonStationNtupleHelperTool::fillMeasurementData (
 
     // identify the detector type:
     Identifier id = Trk::IdentifierExtractor::extract(hit);
-
+    using namespace Muon::MuonStationIndex;
+    const int stIdx = toInt(m_idHelperSvc->stationIndex(id));
     if (detectorType==Trk::TrackState::MDT) {
       m_mdtSectorIx->push_back(m_idHelperSvc->sector(id));
-      m_mdtStationIx->push_back(m_idHelperSvc->stationIndex(id));
+      m_mdtStationIx->push_back(stIdx);
     }
     if (detectorType==Trk::TrackState::RPC) {
       m_rpcSectorIx->push_back(m_idHelperSvc->sector(id));
-      m_rpcStationIx->push_back(m_idHelperSvc->stationIndex(id));
+      m_rpcStationIx->push_back(stIdx);
       m_rpcMeasuresPhi->push_back(m_idHelperSvc->measuresPhi(id));
     }
     if (detectorType==Trk::TrackState::TGC) {
-      m_tgcStationIx->push_back(m_idHelperSvc->stationIndex(id));
+      m_tgcStationIx->push_back(stIdx);
       m_tgcMeasuresPhi->push_back(m_idHelperSvc->measuresPhi(id));
     }
 

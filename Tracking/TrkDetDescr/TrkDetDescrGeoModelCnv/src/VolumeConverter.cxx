@@ -120,7 +120,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
             auto confinedVols =std::make_unique<std::vector<TrackingVolume*>>();
             confinedVols->push_back(std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
             envName = name + "_envelope";
-            trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
+            trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, std::move(confinedVols), envName);
         }
 
         return trEnv;
@@ -217,7 +217,7 @@ std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv
         auto confinedVols = std::make_unique<std::vector<TrackingVolume*>>();
         confinedVols->push_back( std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
         envName = envName + "_envelope";
-        trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
+        trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, std::move(confinedVols), envName);
     }
 
     return trEnv;
@@ -244,11 +244,11 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
                 dynamic_cast<const SubtractedVolumeBounds*>(&bounds);
             if (comb) {
                 (*sIter).parts[ii].reset(comb->first()->clone());
-                VolumePart vp = (*sIter);
-                constituents.push_back(vp);
-                constituents.back().parts[ii].reset(comb->second()->clone());
-                constituents.push_back(vp);
-                constituents.back().parts.emplace_back(comb->second()->clone());
+                VolumePart vp(*sIter); //copy here
+                constituents.push_back(vp); //inser copy the iter can be invalidated
+                constituents.back().parts[ii].reset(comb->second()->clone()); //modify
+                constituents.push_back(vp); //push copy
+                constituents.back().parts.emplace_back(comb->second()->clone());//modify
                 constituents.back().sign = -1. * constituents.back().sign;
                 update = true;
                 break;
@@ -504,8 +504,16 @@ std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
     }
 
     //
-    double minZ{1.e6}, maxZ{-1.e6}, minPhi{2 * M_PI}, maxPhi{0.}, minR{1.e6},
-        maxR{0.}, minX{1.e6}, maxX{-1.e6}, minY{1.e6}, maxY{-1.e6};
+    double minZ{1.e6};
+    double maxZ{-1.e6};
+    double minPhi{2 * M_PI};
+    double maxPhi{0.};
+    double minR{1.e6};
+    double maxR{0.};
+    double minX{1.e6};
+    double maxX{-1.e6};
+    double minY{1.e6};
+    double maxY{-1.e6};
 
     // defined vertices and edges
     std::vector<Amg::Vector3D> vtx;

@@ -63,7 +63,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
 
   declareProperty("THistSvc", m_thistSvc);
 
-  declareProperty("DoHist", m_doHist=true); //histograming yes/no true/false
+  declareProperty("DoHist", m_doHist=false); //histograming yes/no true/false
 
   m_nPass = 0;
   m_nFail = 0;
@@ -303,7 +303,7 @@ StatusCode TestHepMC::execute() {
         std::shared_ptr<HepMC3::GenCrossSection> dummy_xsec = std::make_shared<HepMC3::GenCrossSection>();
         dummy_xsec->set_cross_section(1.0,0.0);
 	HepMC::GenEvent* evt_nonconst = const_cast<HepMC::GenEvent*>(evt);
-        evt_nonconst->set_cross_section(dummy_xsec);
+        evt_nonconst->set_cross_section(std::move(dummy_xsec));
       }
       else {
         ATH_MSG_WARNING("-> Will report this as failure.");
@@ -312,7 +312,7 @@ StatusCode TestHepMC::execute() {
 
     // Check beams and work out per-event beam energy
     std::vector<std::shared_ptr<const HepMC3::GenParticle>> beams_t;
-    for (auto p : evt->beams()) { if (p->status() == 4)  beams_t.push_back(p); }
+    for (auto p : evt->beams()) { if (p->status() == 4)  beams_t.push_back(std::move(p)); }
     std::pair<std::shared_ptr<const HepMC3::GenParticle>,std::shared_ptr<const HepMC3::GenParticle>> beams;
     if (beams_t.size() == 2) {
       beams.first=beams_t.at(0);
@@ -356,6 +356,12 @@ StatusCode TestHepMC::execute() {
       }
       if(beams.first->pdg_id() == MC::PROTON && beams.second->pdg_id() == MC::LEAD){//pPb collisions
         cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::LEAD))/MC::baryonNumber(MC::LEAD));
+      }
+      if(beams.first->pdg_id() == MC::OXYGEN && beams.second->pdg_id() == MC::HELIUM){//OHe collisions
+        cmenergy /= std::sqrt(static_cast<double>(MC::baryonNumber(MC::OXYGEN)*MC::baryonNumber(MC::HELIUM)));
+      }
+      if(beams.first->pdg_id() == MC::HELIUM && beams.second->pdg_id() == MC::OXYGEN){//HeO collisions
+        cmenergy /= std::sqrt(static_cast<double>(MC::baryonNumber(MC::OXYGEN)*MC::baryonNumber(MC::HELIUM)));
       }
 
       if (m_cm_energy > 0 && std::abs(cmenergy - m_cm_energy) > m_cme_diff) {
@@ -647,7 +653,7 @@ StatusCode TestHepMC::execute() {
                               << " @ " << displacement2 << "mm) "
                               << " but parent vertex is displaced (" << decayvtx
                               << " @ " << displacement << "mm)");
-              undisplaceds.push_back(ip);
+              undisplaceds.push_back(std::move(ip));
               ++m_undisplacedLLHdaughtersCheckRate;
             } // Check for displacement below 1 um
           } // Loop over all particles coming from the decay vertex
@@ -711,7 +717,7 @@ StatusCode TestHepMC::execute() {
     if (!negEnPart.empty()) {
       std::stringstream ss;
       ss << "NEGATIVE ENERGY PARTICLES FOUND :";
-      for (auto b: negEnPart){
+      for (const auto &b: negEnPart){
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());
@@ -769,9 +775,9 @@ StatusCode TestHepMC::execute() {
 
     // Undisplaced decay daughters of displaced vertices
     if (!undisplaceds.empty()) {
-      std::stringstream ss;
-      ss << "Undisplaced decay vertices from displaced particle: ";
-      for (auto b: undisplaceds){
+      std::stringstream ss{"Undisplaced decay vertices from displaced particle: "};
+      for (HepMC::ConstGenParticlePtr b: undisplaceds){
+        // coverity[COPY_INSTEAD_OF_MOVE]
         ss << " " << b;
       }
       ATH_MSG_WARNING(ss.str());

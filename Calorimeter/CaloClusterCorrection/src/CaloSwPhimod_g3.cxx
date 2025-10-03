@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -71,9 +71,16 @@ void CaloSwPhimod_g3::makeCorrection (const Context& myctx,
 std::vector<float> CaloSwPhimod_g3::qphmop (const Context& myctx,
                                             float aeta) const
 {
-  const CxxUtils::Array<2> correction = m_correction (myctx);
+  std::vector<float> coef;
 
-  std::vector<float> coef (correction.size(1)-1);
+  const CxxUtils::Array<2> correction = m_correction (myctx);
+  if (correction.size() == 0) {
+    ATH_MSG_ERROR("Empty correction array");
+    coef.resize(5);
+    return coef;
+  }
+
+  coef.resize (correction.size(1)-1);
 
   int i1 = 0;
   int i2 = 0;

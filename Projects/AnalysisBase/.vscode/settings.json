@@ -1,0 +1,24 @@
+{
+   "python.defaultInterpreterPath": "${workspaceFolder}/../../../build/ide_python",
+   "python.envFile": "${workspaceFolder}/../../../build/env.txt",
+   "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+   "autopep8.path": [
+       "${workspaceFolder}/../../../build/ide_autopep8"
+   ],
+   "flake8.path": [
+       "${workspaceFolder}/../../../build/ide_flake8"
+   ],
+   "flake8.args": [
+        "--isolated",
+        "--select=ATL,B,F,E101,E7,E9,W6", // note that equals sign is required by VS Code
+        "--ignore=B006,B007,B019,E701,E702,E704,E741",
+        "--enable-extensions=ATL902"
+    ],
+   "cmake.buildDirectory": "${workspaceFolder}/../../../build",
+   "cmake.configureSettings" : {
+       "ATLAS_ENABLE_IDE_HELPERS" : "TRUE",
+       "ATLAS_ALWAYS_CHECK_WILDCARDS" : "TRUE"
+   }
+}

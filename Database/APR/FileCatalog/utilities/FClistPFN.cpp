@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**FClistPFN.cpp -- FileCatalog command line tool to list the PFN entries from the catalog
@@ -10,8 +10,9 @@
 #include "FileCatalog/CommandLine.h"
 #include "FileCatalog/IFileCatalog.h"
 #include "FileCatalog/URIParser.h"
-#include "POOLCore/Exception.h"
 #include "POOLCore/SystemTools.h"
+
+#include <exception>
 #include <memory>
 #include <vector>
 #include <string>
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
       printUsage();
       return 0;
     }
-  }catch(std::string& strError){
+  }catch(const std::string& strError){
     std::cerr << "Error: command parsing error "<<strError<<std::endl;
     return 0;
   }
@@ -106,7 +107,7 @@ int main(int argc, char** argv)
     if( !mylfn.empty() ) {
        fids.push_back( mycatalog->lookupLFN( mylfn ) );
     } else if( !myfid.empty() ) {
-       fids.push_back( myfid );
+       fids.emplace_back( std::move(myfid) );
     } else {
        // go through all FIDs in the catalog
        mycatalog->getFIDs( fids );
@@ -126,7 +127,7 @@ int main(int argc, char** argv)
     }
     mycatalog->commit();  
     mycatalog->disconnect();
-  }catch (const pool::Exception& er){
+  }catch (const std::runtime_error& er){
     std::cerr<<er.what()<<std::endl;
     return 1;
   }catch (const std::exception& er){

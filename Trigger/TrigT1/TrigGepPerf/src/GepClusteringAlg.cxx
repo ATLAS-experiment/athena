@@ -12,6 +12,7 @@
 
 // concrete cluster maker classes:
 #include "./WFSClusterMaker.h"
+#include "./BasicGepClusterMaker.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
@@ -64,6 +65,10 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
     clusterMaker.reset(new Gep::WFSClusterMaker());
   }
 
+  if( m_clusterAlg == "GEPBasic" ){
+    clusterMaker.reset(new Gep::BasicGepClusterMaker());
+  }
+
   if( !clusterMaker ){ 
     ATH_MSG_ERROR( "Unknown clusterMaker" + m_clusterAlg );
     return StatusCode::FAILURE;
@@ -102,10 +107,10 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
 
     CaloClusterCellLink *cccl = new CaloClusterCellLink();
 
-    for (auto cell_id : gepclus.cell_id) 
+    for (auto cell_id : gepclus.cell_id)
         cccl->addCell(pCellMap->at(cell_id).index, 1.0);
 
-    ptr->addCellLink(cccl);
+    ptr->addCellLink(std::make_unique<CaloClusterCellLink>(*cccl));
   }
   
     

@@ -42,7 +42,7 @@ namespace GlobalSim {
     for (const auto nbhd : *in) {
       auto c_phi = combine_phi(nbhd);
       if (c_phi.empty()) {continue;}  // corner case: not all phi have len 17
-      auto input = digitize(c_phi);
+      auto input = digitizer::digitize10(c_phi);
 
       assert(input.size() == n_features);
       ap_int<10>* c_input = &input[0];  // vector->array
@@ -51,14 +51,14 @@ namespace GlobalSim {
 
       // the bdt variable is already set up 
       bdt.decision_function(c_input, scores);
-      {
+      if (msgLevel() <= MSG::DEBUG) {
 	std::stringstream ss;
 	ss << "BDT input: ";
 	for (const auto& i : input) {ss << i << ' ';}
 	ATH_MSG_DEBUG(ss.str());
       }
 
-      {
+      if (msgLevel() <= MSG::DEBUG) {
 	std::stringstream ss;
 	ss << "C BDT output: ";
 	for (const auto& i : scores) {ss << i << ' ';}
@@ -111,30 +111,6 @@ namespace GlobalSim {
     
     return result;
   }
-
-  
-  std::vector<ap_int<10>>
-  Egamma1BDTAlgTool::digitize(const std::vector<double>& v) const {
-    auto sf = [](double v) {
-      if (v < 0) {return 0.;}
-      if (v < 8000) {return v / 31.25;}
-      if (v < 40000) {return 192. + v / 125;}
-      if (v < 168000) {return 432. + v / 500;}
-      if (v < 678000) {return 686. + v / 2000;}
-      return 1023.;
-    };
-
-    auto result = std::vector<ap_int<10>>();
-    result.reserve(s_combination_len);
-      
-    std::transform(std::cbegin(v),
-		   std::cend(v),
-		   std::back_inserter(result),
-		   sf);
-		   
-    return result;
-  }
-
 
   std::string Egamma1BDTAlgTool::toString() const {
 

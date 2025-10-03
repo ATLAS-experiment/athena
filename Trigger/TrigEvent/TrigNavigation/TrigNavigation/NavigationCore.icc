@@ -1,15 +1,13 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef TRIGNAVIGATION_HLTNAVIGATIONCORE_ICC
 #define TRIGNAVIGATION_HLTNAVIGATIONCORE_ICC
 
-#include <iostream>
-#include <algorithm>
 
 #include "TrigNavigation/Holder.h"
 #include "TrigNavigation/Holder.icc"
@@ -21,7 +19,7 @@
  * COMPILE TYPE OBJECTS REGISTRATION
  *
  *****************************************************************************/
-#include <type_traits>
+#include <type_traits>//remove_pointer, remove_const
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -480,7 +478,7 @@ HLTNavDetails::Holder<T>* HLT::NavigationCore::getHolder NO_SANITIZE_UNDEFINED (
 /////////////////////////////////////////////////////////////////////////////
 // 2012-09-14 new stuff for composite obejcts
 
-#include "TrigNavigation/NavigationInit.h"
+//#include "TrigNavigation/NavigationInit.h"
 
 #include <stdlib.h>
 #include <cxxabi.h>

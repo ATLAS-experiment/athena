@@ -6,6 +6,9 @@
 #include "JetJvtEfficiency/JvtEfficiencyTool.h"
 #include "JetJvtEfficiency/NNJvtEfficiencyTool.h"
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT( CP::JetJvtEfficiency )
 DECLARE_COMPONENT( CP::FJvtSelectionTool )
 DECLARE_COMPONENT( CP::JvtSelectionTool )

@@ -7,6 +7,16 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
+def TrackParticleCreatorToolBaseCfg(
+        flags, name="ParticleCreatorTool", **kwargs):
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result = BeamSpotCondAlgCfg(flags)
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
+
+    result.setPrivateTools(
+        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+    return result
 
 ####################################
 #####        InDet/ITk         #####
@@ -19,9 +29,7 @@ def TrackParticleCreatorToolCfg(flags,
         name = name.replace("InDet", "ITk")
         return ITkTrackParticleCreatorToolCfg(flags, name, **kwargs)
 
-    # To produce InDet::BeamSpotData CondHandle
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    result = BeamSpotCondAlgCfg(flags)
+    result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
@@ -39,7 +47,7 @@ def TrackParticleCreatorToolCfg(flags,
         from InDetConfig.TRT_ElectronPidToolsConfig import (
             TRT_ElectronPidToolCfg)
         kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
-            TRT_ElectronPidToolCfg(flags, name="InDetTRT_ElectronPidTool")))
+            TRT_ElectronPidToolCfg(flags)))
 
     if 'PixelToTPIDTool' not in kwargs and flags.Detector.EnablePixel:
         from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
@@ -68,8 +76,8 @@ def TrackParticleCreatorToolCfg(flags,
     kwargs.setdefault("KeepFirstParameters", False)
     kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
 
-    result.setPrivateTools(
-        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolBaseCfg(
+        flags, name, **kwargs)))
     return result
 
 
@@ -187,9 +195,8 @@ def InDetTrigParticleCreatorToolFTFCfg(flags,
     kwargs.setdefault("AssociationMapName", "")
     kwargs.setdefault("DoSharedSiHits", kwargs["AssociationMapName"] != "")
 
-    result.setPrivateTools(
-        CompFactory.Trk.TrackParticleCreatorTool(f"{name}_{flags.Tracking.ActiveConfig.input_name}", **kwargs))
-
+    result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolBaseCfg(
+        flags, f"{name}_{flags.Tracking.ActiveConfig.input_name}", **kwargs)))
     return result
 
 
@@ -197,9 +204,7 @@ def InDetTrigParticleCreatorToolFTFCfg(flags,
 def ITkTrackParticleCreatorToolCfg(flags,
                                    name="ITkTrackParticleCreatorTool",
                                    **kwargs):
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    # To produce InDet::BeamSpotData CondHandle
-    result = BeamSpotCondAlgCfg(flags)
+    result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
@@ -236,8 +241,8 @@ def ITkTrackParticleCreatorToolCfg(flags,
     kwargs.setdefault("IBLParameterSvc", "")
     kwargs.setdefault("DoITk", True)
 
-    result.setPrivateTools(
-        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolBaseCfg(
+        flags, name, **kwargs)))
     return result
 
 
@@ -284,8 +289,8 @@ def GSFBuildInDetParticleCreatorToolCfg(flags,
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
 
-    result.setPrivateTools(
-        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolBaseCfg(
+        flags, name, **kwargs)))
     return result
 
 
@@ -315,8 +320,8 @@ def MuonParticleCreatorToolCfg(flags, name="MuonParticleCreatorTool", **kwargs):
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
 
-    result.setPrivateTools(
-        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolBaseCfg(
+        flags, name, **kwargs)))
     return result
 
 
@@ -405,6 +410,6 @@ def MuonCaloParticleCreatorCfg(flags, name="MuonCaloParticleCreator", **kwargs):
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
 
-    result.setPrivateTools(
-        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+    result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolBaseCfg(
+        flags, name, **kwargs)))
     return result

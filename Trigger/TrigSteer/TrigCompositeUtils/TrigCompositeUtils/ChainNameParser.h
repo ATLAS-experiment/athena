@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <iterator>
 #include "xAODBase/ObjectType.h"
 
@@ -102,6 +103,12 @@ namespace ChainNameParser {
     /// A list of all signature names
     const std::vector<std::string> &allSignatures();
 
+    /// A list of all post-fix qualifiers which may come immediately after the "XSigY" pattern, e.g. the noL1 in "2mu10noL1"
+    const std::vector<std::string> &allSignaturePostfixQualifiers();
+
+    /// A set of identifiers which are actually single leg, even if followed by other identifiers
+    const std::set<std::string> &singleLegIdentifiers();
+
     /*
      * @brief The regex pattern to match the part at the start of each leg
      *
@@ -122,7 +129,6 @@ namespace ChainNameParser {
     * It matches the the multiplicities returned by the above method
     */
     std::vector<std::string> signatures(const std::string& chain);
-
     
 }
 

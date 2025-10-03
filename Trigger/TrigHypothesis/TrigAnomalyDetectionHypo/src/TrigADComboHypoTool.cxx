@@ -24,7 +24,15 @@
 TrigADComboHypoTool::TrigADComboHypoTool(const std::string& type, const std::string& name, const IInterface* parent): ComboHypoToolBase(type, name, parent) {}
 
 StatusCode TrigADComboHypoTool::initialize(){
+
+  if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
   
+  ATH_CHECK(m_adScoreKey.initialize(SG::AllowEmpty));
+  if (m_adScoreKey.key() == "Undefined") {
+    ATH_MSG_ERROR("AD score key name is undefined" );
+    return StatusCode::FAILURE;
+  }
+
   ATH_CHECK( m_svc.retrieve() );
   std::string model_file_name = PathResolverFindCalibFile(m_modelFileName);
 
@@ -93,7 +101,7 @@ StatusCode TrigADComboHypoTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigADComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*context*/) const{
+StatusCode TrigADComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& context) const{
 
   ATH_MSG_DEBUG("Size of passingLegs = " << passingLegs.size());
 
@@ -221,8 +229,31 @@ StatusCode TrigADComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, cons
   for(const auto &pair : met_decisions){
     input_mets.push_back(pair.first);
   }
+
+  float outputScore = this->getAdScore(input_jets, input_muons, input_electrons, input_photons, input_taus, input_mets);
   
-  bool trigPass = this->getAdDecision(input_jets, input_muons, input_electrons, input_photons, input_taus, input_mets);
+  // Recording Data
+  if(!m_adScoreKey.empty()){
+    auto adScoreContainer = std::make_unique< xAOD::TrigCompositeContainer>();
+    auto adScoreContainerAux = std::make_unique< xAOD::TrigCompositeAuxContainer>();
+    adScoreContainer->setStore(adScoreContainerAux.get());
+
+    xAOD::TrigComposite* adScore = new xAOD::TrigComposite();
+    adScoreContainer->push_back(adScore);
+    adScore->setDetail( "adScore", outputScore );
+  
+    SG::WriteHandle<xAOD::TrigCompositeContainer> adScoreHandle(m_adScoreKey, context);
+    ATH_CHECK( adScoreHandle.record( std::move( adScoreContainer ), std::move( adScoreContainerAux ) ) );
+  }
+
+  // Monitoring
+  if(m_monFlag){
+    auto monScore = Monitored::Scalar<float>("adScore", -1.0);
+    auto monGroup = Monitored::Group(m_monTool, monScore); // possible use in future
+    monScore = outputScore;
+  }
+  
+  bool trigPass = (outputScore > m_adScoreThres);
 
   if(!trigPass){
     eraseFromLegDecisionsMap(passingLegs);
@@ -231,7 +262,7 @@ StatusCode TrigADComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, cons
   return StatusCode::SUCCESS;	
 }
 
-bool TrigADComboHypoTool::getAdDecision(
+float TrigADComboHypoTool::getAdScore(
   const std::vector<const xAOD::Jet*> &input_jets,
   const std::vector<const xAOD::Muon*> &input_muons,
   const std::vector<const xAOD::Electron*> &input_electrons,
@@ -335,9 +366,7 @@ bool TrigADComboHypoTool::getAdDecision(
   float outputScore = runInference(inputTensor);
   ATH_MSG_DEBUG("Computed TrigADScore: " << outputScore);
 
-  bool trigPass = (outputScore > m_adScoreThres);
-
-  return trigPass;
+  return outputScore;
 }
 
 float TrigADComboHypoTool::runInference(std::vector<float> &tensor) const {

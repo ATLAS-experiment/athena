@@ -137,10 +137,6 @@ void TileCell::setEnergy(float e1, float e2)
    m_energy  = e1+e2;
 }
 
-void TileCell::addEnergy(float ene)
-{
-   m_energy  += ene;
-}
 void TileCell::scaleEnergy(float scale)
 {
    m_energy  *= scale;
@@ -167,16 +163,6 @@ void TileCell::setTime(float t, int pmt) // works only for second PMT in a cell
     m_time = (t + m_time)/2.;
     m_timeDiff = t - m_time;
   }
-}
-
-void TileCell::setQuality(uint16_t quality)
-{
-  CaloCell::setQuality(quality);
-}
-
-void TileCell::setQuality(double quality)
-{
-  CaloCell::setQuality(quality);
 }
 
 int TileCell::gain1(void) const

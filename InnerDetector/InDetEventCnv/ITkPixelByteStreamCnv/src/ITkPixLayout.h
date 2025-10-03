@@ -35,6 +35,15 @@ template<class T> class ITkPixLayout{
 
         }
 
+        int nHits() const {
+
+            //count hits
+            int hits = 0;
+            for (const auto& pixel : m_pixels) if (pixel) hits++;
+            return hits;
+
+        }
+
     private:
 
         //All chips will allways have 400*384 pixels

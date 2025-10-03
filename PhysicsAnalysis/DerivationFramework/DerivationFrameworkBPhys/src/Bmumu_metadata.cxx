@@ -8,6 +8,7 @@
  */
 
 #include "Bmumu_metadata.h"
+#include "TruthUtils/ParticleConstants.h"
 
 namespace DerivationFramework {
 
@@ -100,13 +101,13 @@ namespace DerivationFramework {
     recordPropertyVS("AllMuonCollections", {}     );
 
     // Global mass values (in MeV, from PDG 2015)
-    recordPropertyD("GlobalMuonMass" ,  105.6584);
-    recordPropertyD("GlobalPionMass" ,  139.57061);
-    recordPropertyD("GlobalKaonMass" ,  493.677 );
-    recordPropertyD("GlobalJpsiMass" , 3096.92  );
-    recordPropertyD("GlobalBplusMass", 5279.29 );
-    recordPropertyD("GlobalB0Mass"   , 5279.61 );
-    recordPropertyD("GlobalBsMass"   , 5366.79 );
+    recordPropertyD("GlobalMuonMass" ,  ParticleConstants::muonMassInMeV);
+    recordPropertyD("GlobalPionMass" ,  ParticleConstants::chargedPionMassInMeV);
+    recordPropertyD("GlobalKaonMass" ,  ParticleConstants::chargedKaonMassInMeV );
+    recordPropertyD("GlobalJpsiMass" ,  ParticleConstants::JpsiMassInMeV  );
+    recordPropertyD("GlobalBplusMass",  ParticleConstants::BPlusMassInMeV );
+    recordPropertyD("GlobalB0Mass"   ,  ParticleConstants::BZeroMassInMeV );
+    recordPropertyD("GlobalBsMass"   ,  ParticleConstants::BsMassInMeV );
 
     // mass ranges
     recordPropertyD("GlobalBMassUpperCut"     , 7000.);

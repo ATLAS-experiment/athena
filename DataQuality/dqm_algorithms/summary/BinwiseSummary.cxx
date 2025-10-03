@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file DivideByHist.cxx file takes a parameter map containing two histograms and divides one by the other.
@@ -76,7 +76,7 @@ dqm_algorithms::summary::BinwiseSummary::execute( const std::string &,
 	 tagIter != inputResult->tags_.end(); ++tagIter ) {
       if( tagIter->first.find("Algorithm--BinsDiffByStrips") != std::string::npos) {
 	if( inputobject->IsA()->InheritsFrom("TObjArray") ) {
-	  firstBinwiseHist = (TH1*) ((TObjArray*)inputobject)->First();
+	  firstBinwiseHist = static_cast<TH1*> (static_cast<TObjArray*>(inputobject)->First());
 	  nBinsX = firstBinwiseHist->GetNbinsX();
 	  nBinsY = firstBinwiseHist->GetNbinsY();
 	  break;
@@ -125,8 +125,9 @@ dqm_algorithms::summary::BinwiseSummary::execute( const std::string &,
       std::string tagType = "ConfParameter--Role--Mask";
       if ( (stringPos = tag.find(tagType)) != std::string::npos) {
 	if ( inputobject->IsA()->InheritsFrom("TH1") ) {
-	  if( (((TH1*)inputobject)->GetNbinsX() == nBinsX) && (((TH1*)inputobject)->GetNbinsY() == nBinsY)) {
-	    mask = (TH1*)inputobject;
+	  if( (static_cast<TH1*>(inputobject)->GetNbinsX() == nBinsX) &&
+              (static_cast<TH1*>(inputobject)->GetNbinsY() == nBinsY)) {
+	    mask = static_cast<TH1*>(inputobject);
 	  }
 	}
 	isSpecialParameter = true;
@@ -136,7 +137,7 @@ dqm_algorithms::summary::BinwiseSummary::execute( const std::string &,
       tagType = "Algorithm--BinsDiffByStrips"; //<-The only algorithm so far which produces a binwise status.
       if ( (stringPos = tag.find(tagType)) != std::string::npos) {
 	if( inputobject->IsA()->InheritsFrom("TObjArray") ) {
-	  binwiseStatHist = (TH1*) ((TObjArray*) inputobject)->First();
+	  binwiseStatHist = static_cast<TH1*> (static_cast<TObjArray*> (inputobject)->First());
 	  if( (binwiseStatHist->GetNbinsX() != nBinsX) || (binwiseStatHist->GetNbinsY() != nBinsY) ) {
 	    binwiseStatHist = 0;
 	  }

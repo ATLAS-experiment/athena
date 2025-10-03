@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTPROCESSINGOFSTRAW_H
@@ -21,7 +21,6 @@
 #include "MagFieldElements/AtlasFieldCache.h"
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 
 #include "TRTElectronicsProcessing.h"
@@ -64,9 +63,9 @@ public:
                         TRTDigCondBase* digcond,
                         const HepPDT::ParticleDataTable*,
                         const TRT_ID*,
-                        ITRT_PAITool* = NULL,
-                        ITRT_PAITool* = NULL,
-                        const ITRT_CalDbTool* = NULL);
+                        ITRT_PAITool* = nullptr,
+                        ITRT_PAITool* = nullptr,
+                        const ITRT_CalDbTool* = nullptr);
   /** Destructor */
   ~TRTProcessingOfStraw();
 

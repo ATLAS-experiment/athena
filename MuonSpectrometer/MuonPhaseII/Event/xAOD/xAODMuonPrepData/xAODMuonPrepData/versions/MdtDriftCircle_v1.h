@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_MDTDRIFTCIRCLE_V1_H
 #define XAODMUONPREPDATA_VERSION_MDTDRIFTCIRCLE_V1_H
@@ -21,7 +21,7 @@ namespace xAOD {
 class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
 
    public:
-    using MdtDriftCircleStatus = Muon::MdtDriftCircleStatus;
+    using MdtDriftCircleStatus = ::Muon::MdtDriftCircleStatus;
     /// Default constructor
     MdtDriftCircle_v1() = default;
     /// Virtual destructor
@@ -80,15 +80,8 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     const MuonGMR4::MdtReadoutElement* readoutElement() const;
 
     private:
-#ifdef __CLING__
-    /// Down cast the memory of the readoutElement cache if the object is stored to disk 
-    ///  to arrive at the same memory layout between Athena & CLING
-    char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *>)]{};
-    char m_identifier[sizeof(CxxUtils::CachedValue<Identifier>)]{};
-#else
-    CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *> m_readoutEle{};
-    CxxUtils::CachedValue<Identifier> m_identifier{};
-#endif
+        CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *> m_readoutEle{};
+        CxxUtils::CachedValue<Identifier> m_identifier{};
 
 };
 

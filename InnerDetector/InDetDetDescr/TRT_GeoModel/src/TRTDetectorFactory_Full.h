@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,6 +15,7 @@
 #define TRT_GEOMODEL_TRTDETECTORFACTORY_FULL_H
 
 #include "TRTParameterInterface.h"
+#include "TRTStrawStatusAccessor.h"
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h" //for Argon
@@ -23,7 +24,8 @@
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
 
 #include "GeoModelKernel/GeoDefinitions.h"
-#include <string>
+
+#include <memory>
 
 class GeoPhysVol;
 class GeoFullPhysVol;
@@ -36,9 +38,9 @@ class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
   // Constructor:
   TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaComps,
 			  const ITRT_StrawStatusSummaryTool * sumTool,
+			  std::unique_ptr<const TRTStrawStatusAccessor> statusAccessor,
 			  bool useOldActiveGasMixture,
 			  bool DC2CompatibleBarrelCoordinates,
-			  int overridedigversion,
 			  bool alignable,
 			  bool doArgon,
 			  bool doKrypton,
@@ -91,12 +93,12 @@ class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
   InDetDD::TRT_DetectorManager                  *m_detectorManager = nullptr; // ownership handed to calleer.
   std::unique_ptr<InDetMaterialManager>         m_materialManager;
   std::unique_ptr<TRTParameterInterface>        m_data;
+  std::unique_ptr<const TRTStrawStatusAccessor> m_statusAccessor;
+  const ITRT_StrawStatusSummaryTool* m_sumTool{nullptr};
 
   bool m_useOldActiveGasMixture;
   bool m_DC2CompatibleBarrelCoordinates;
-  int m_overridedigversion;
   bool m_alignable;
-  const ITRT_StrawStatusSummaryTool* m_sumTool; // added for Argon
   bool m_strawsvcavailable;
   bool m_doArgon;
   bool m_doKrypton;

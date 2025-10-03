@@ -9,7 +9,7 @@
 
 #include "DiTauRecTools/DiTauIDVarCalculator.h"
 #include "DiTauRecTools/DiTauDiscriminantTool.h"
-#include "DiTauRecTools/DiTauOnnxDiscriminantTool.h"  
+#include "DiTauRecTools/DiTauOnnxDiscriminantTool.h"
 
 #endif // DITAURECTOOLS_TAURECTOOLSDICT_H
 

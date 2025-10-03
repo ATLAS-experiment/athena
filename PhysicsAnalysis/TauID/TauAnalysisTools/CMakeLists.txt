@@ -18,7 +18,7 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
                      AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
                      xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
-                     MCTruthClassifierLib AsgAnalysisInterfaces
+                     MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces
                      xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib
       PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 else()
@@ -30,7 +30,7 @@ else()
                      AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
                      xAODTruth TruthUtils PATCoreLib PATInterfaces 
                      ElectronPhotonSelectorToolsLib tauRecToolsLib 
-                     MCTruthClassifierLib AsgAnalysisInterfaces GaudiKernel 
+                     MCTruthClassifierLib TruthUtils AsgAnalysisInterfaces GaudiKernel
                      xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib
       PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 endif()
@@ -41,6 +41,10 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
       LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaBaseComps AsgTools xAODTau GaudiKernel
       TauAnalysisToolsLib xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib)
+else()
+   atlas_add_component( TauAnalysisTools
+      src/components/*.cxx
+      LINK_LIBRARIES TauAnalysisToolsLib)
 endif()
 
 atlas_add_dictionary( TauAnalysisToolsDict

@@ -32,33 +32,28 @@ namespace InDet {
     * @tparam T_ROW_BITS number of bits to store the row index of a defect.
     * @tparam T_COL_BITS number of bits to store the column index of a defect.
     * @tparam T_CHIP_BITS number of bits to store the chip index of a defect.
-    * @tparam T_MASK_SEL_BITS number of bits to store the mask index of a group defect.
-    * @tparam T_N_MASKS total number of masks supported by this helper; must be representable by the
-    *         number of @T_MASK_SEL_BITS
     *
     * The key assumes a hierarchical ordering of the indices where the chip index ranks highest and the
-    * row index lowest. The mask is applied to the final key and can be used to represent a defect of
-    * adjacent pixels by a single key, provided it is possible to compute the first pixel of such a
-    * group from a key which addresses a single pixel by a simple mask i.e. single-pixel-key
-    * bit-wise-and mask = group-key where the group-key is the single pixel key of the first pixel in
-    * that group.
+    * row index lowest. The range bits indicate that a key marks the beginning of an inclusive range
+    * till the previous key (previous because of the reverse order).
     */
-   template <typename T, unsigned  int T_ROW_BITS, unsigned int T_COL_BITS, unsigned int T_CHIP_BITS, unsigned int T_MASK_SEL_BITS, unsigned int T_N_MASKS=3>
+   template <typename T, unsigned  int T_ROW_BITS, unsigned int T_COL_BITS, unsigned int T_CHIP_BITS, unsigned int T_TYPE_BITS=0u>
    struct ModuleKeyHelper {
       static constexpr unsigned int ROW_BITS = T_ROW_BITS;
       static constexpr unsigned int COL_BITS = T_COL_BITS;
       static constexpr unsigned int CHIP_BITS = T_CHIP_BITS;
-      static constexpr unsigned int MASK_SEL_BITS = T_MASK_SEL_BITS;
-      static constexpr unsigned int N_MASKS = T_N_MASKS;
+      static constexpr unsigned int RANGE_FLAG_BITS = 1u;
+      static constexpr unsigned int TYPE_BITS = T_TYPE_BITS;
       static constexpr T ROW_SHIFT   = 0u;
       static constexpr T COL_SHIFT   = ROW_BITS;
       static constexpr T CHIP_SHIFT  = ROW_BITS + COL_BITS;
-      static constexpr T MASK_SEL_SHIFT = ROW_BITS + COL_BITS + CHIP_BITS;
+      static constexpr T RANGE_FLAG_SHIFT = ROW_BITS + COL_BITS + CHIP_BITS;
+      static constexpr T TYPE_SHIFT  = RANGE_FLAG_SHIFT + RANGE_FLAG_BITS;
       static constexpr T ROW_MASK    = MaskUtils::createMask<0,                          ROW_BITS>();
       static constexpr T COL_MASK    = MaskUtils::createMask<ROW_BITS,                   ROW_BITS+COL_BITS>();
       static constexpr T CHIP_MASK   = MaskUtils::createMask<ROW_BITS+COL_BITS,          ROW_BITS+COL_BITS+CHIP_BITS>();
-      static constexpr T MASK_SEL_MASK  = MaskUtils::createMask<ROW_BITS+COL_BITS+CHIP_BITS,ROW_BITS+COL_BITS+CHIP_BITS+MASK_SEL_BITS>();
-      static constexpr unsigned int MASKS_SIZE=N_MASKS;
+      static constexpr T RANGE_FLAG_MASK  = MaskUtils::createMask<ROW_BITS+COL_BITS+CHIP_BITS,ROW_BITS+COL_BITS+CHIP_BITS+RANGE_FLAG_BITS>();
+      static constexpr T TYPE_MASK   = MaskUtils::createMask<TYPE_SHIFT,TYPE_SHIFT+TYPE_BITS>();
       using KEY_TYPE = T;
 
    protected:
@@ -78,21 +73,21 @@ namespace InDet {
          }
       }
 
+   public:
       /** Create a key from mask, chip, column and row indices.
-       * @param mask_sel the index of a mask starting from zero
+       * @param is_range if true the key marks the beginning of an inclusive range
        * @param chip the index of a chip starting from zero
        * @param col the index of a column starting from zero
        * @param row the index of a row starting from zero
        *
        * The indices must be representable by the number of reserved bits.
        */
-      static constexpr T makeKey(unsigned int mask_sel, unsigned int chip, unsigned int col, unsigned int row=0u) {
-         return   makeKeyPart<MASK_SEL_SHIFT,MASK_SEL_MASK>(mask_sel)
+      static constexpr T makeKey(bool is_range, unsigned int chip, unsigned int col, unsigned int row=0u) {
+         return   static_cast<T>(is_range) << RANGE_FLAG_SHIFT
             | makeKeyPart<CHIP_SHIFT,CHIP_MASK>(chip)
             | makeKeyPart<COL_SHIFT,COL_MASK>(col)
             | makeKeyPart<ROW_SHIFT,ROW_MASK>(row);
       }
-   public:
 
       /** Get the column index from a full key.
        */
@@ -102,109 +97,94 @@ namespace InDet {
        */
       static constexpr T getRow(T key)    { return (key & ROW_MASK)   >> ROW_SHIFT; }
 
+      /** Get the maximum row value
+       */
+      static constexpr T getLimitRowMax()     { return ROW_MASK; }
+
+      /** Get the maximum row value
+       */
+      static constexpr T getLimitColumnMax()  { return COL_MASK; }
+
       /** Get the column index from a full key.
        */
       static constexpr T getChip(T key)   { return (key & CHIP_MASK)  >> CHIP_SHIFT; }
 
-      /** Get the mask index from a full key.
+      /** Get an associated defect type.
        */
-      static constexpr T getMaskIdx(T key)  { return (key & MASK_SEL_MASK) >> MASK_SEL_SHIFT; }
-
-      /** Get the number of possible masks.
-       */
-      static constexpr unsigned int nMasks() { return std::max(1u,N_MASKS);}
-
-      /** Construct this key helper.
-       * @param masks the possible masks available for this key helper.
-       *
-       * The first mask should have all bits set which specify the row, column and chip index i.e.
-       * a mask for keys addressing individual cells e.g. pixel or strip.
-       * The other masks may have the lowest n-bits set to zero. Masks are expected to be in
-       * ascending order i.e. the number of trailing zero value bits is increasing.
-       */
-      ModuleKeyHelper(std::array<T, N_MASKS> &&masks) requires (N_MASKS>0) : m_masks( masks) {}
-      ModuleKeyHelper() = default;
-
-      /** Get the mask specified by the full key.
-       * @param key a full defect key.
-       *
-       * The mask index must be smaller than the total number of masks available in this helper. The
-       * result will be undefined otherwise.
-       */
-      T getMask(T key) const {
-         if constexpr(N_MASKS>0) {
-            unsigned int idx;
-            if constexpr(N_MASKS==1) {
-               idx=0u;
-            }
-            else {
-                  idx = getMaskIdx(key);
-            }
-            assert( idx < m_masks.size());
-            return m_masks[idx];
+      static constexpr T getDefectType(T key) {
+         if constexpr(TYPE_BITS>0) {
+            return (key & TYPE_MASK)  >> TYPE_SHIFT;
          }
          else {
-            return static_cast<T>(1u);
+            return T{};
          }
       }
 
-      /** Create a key for a group defect.
-       * @param mask_idx the index of mask associated to this group defect
-       * @param chip the chip index of one cell (e.g. pixel or strip) of this group defect
-       * @param column the column index of one cell (e.g. pixel or strip) of this group defect
-       * @param row the row index of one cell (e.g. pixel or strip) of this group defect
-       *
-       * The resulting key will be the key of the first cell (e.g. pixel or strip) of this group
-       * defect, and the mask index will be set accordingly.
+      /** Get key component of an associated defect type.
        */
-      unsigned int maskedKey([[maybe_unused]] unsigned int mask_idx, unsigned int chip, unsigned int col, unsigned int row=0u) const {
-         if constexpr(N_MASKS>0) {
-            assert( mask_idx < m_masks.size());
-            return (m_masks[mask_idx] & makeKey(0u, chip, col, row)) | makeKey(mask_idx, 0u,0u,0u);
+      static constexpr T getDefectTypeComponent(T key) {
+         if constexpr(TYPE_BITS>0) {
+            return key & TYPE_MASK;
          }
          else {
-            return makeKey(0u, chip, col, row);
+            return T{};
          }
       }
 
-      /** Turn a single cell (e.g. pixel or strip) defect key into a group defect key.
-       * @param mask_idx the index of mask associated to this group defect
-       * @param key single pixel key
-       *
-       * The resulting key will be the key of the first pixel of this group
-       * defect, and the mask index will be set accordingly.
+      /** Make the key component representing the an associated defect type
        */
-      unsigned int maskedKey(unsigned int mask_idx, unsigned int key) const {
-         if constexpr(N_MASKS>0) {
-            assert( mask_idx < m_masks.size());
-            return (m_masks[mask_idx] & key) | makeKey(mask_idx, 0u,0u,0u);
+      static constexpr T makeDefectTypeKey(unsigned int defect_type)
+      {
+         if constexpr(TYPE_BITS>0) {
+            assert( (((defect_type << TYPE_SHIFT ) & TYPE_MASK) >> TYPE_SHIFT) == defect_type);
+            return (defect_type << TYPE_SHIFT ) & TYPE_MASK;
          }
          else {
-            return key;
+            return T{};
          }
       }
 
-
-      /** Test whether a single cell (e.g. pixel or strip) key is compatible with a defect key
-       * @param key_ref a defect key
-       * @param key_test a single cell (e.g. pixel or strip) key.
-       * The defect key can be either the key of a single cell (e.g. pixel or strip) or the first cell
-       * (e.g. pixel or strip) of a group, which is fully identified by this key and the mask also specified
-       * by the key and which can be obtained by @ref getMask.
+      /** Test whether a key is a range key.
+       * Range keys mark the beginning of inclusive range.
        */
-      bool isOverlapping(T key_ref, T key_test) const {
-         if constexpr(N_MASKS>0) {
-            unsigned int mask = getMask(key_ref);
-            return (key_ref & mask) == (key_test & mask);
+      static constexpr bool isRangeKey(T key) {
+         if constexpr(TYPE_MASK) {
+            return ((key & RANGE_FLAG_MASK)>>RANGE_FLAG_SHIFT);
          }
          else {
-            return key_ref == key_test;
+            return ((key>>RANGE_FLAG_SHIFT) );
          }
       }
 
-   protected:
-      struct Empty {};
-      std::conditional< (N_MASKS>0), std::array<T, MASKS_SIZE>, Empty>::type m_masks; ///< the masks for this helper.
+      /** Turn a key into a range key.
+       * Such keys mark the beginning of an inclusive range.
+       */
+      static constexpr T makeRangeKey(T key) { return key | RANGE_FLAG_MASK; }
+
+      /** Return the key with  the range flag removed.
+       * If the key is a range key return the key without the range flag otherwise return the
+       * the same key.
+       */
+      static constexpr T makeBaseKey(T key) { return key & (~(RANGE_FLAG_MASK|TYPE_MASK)); }
+
+      /** Return a key pair marking the beginning and the end of the range for the given mask and key
+       * @param key a key which marks a point in the range
+       * @param mask a mask which defines the range
+       * @preturn a pair containing the start key and end key of the range
+       */
+      static constexpr std::pair<T, T> makeRangeForMask( T key, T mask) {
+         return std::make_pair( key & mask, (key | ((~mask) & (CHIP_MASK|COL_MASK|ROW_MASK))) );
+      }
+
+      /** Convenience method to check whether the key matches the defect.
+       * @param defect_key the key of the defect returned by lower_bound of the emulated defects.
+       * @param key the key to test
+       * @return true if key overlaps with the defect range or defect.
+       */
+      static constexpr bool isMatchingDefect(T defect_key, T key) {
+         return  (key == makeBaseKey(defect_key) || isRangeKey(defect_key));
+      }
+
    };
 
 }

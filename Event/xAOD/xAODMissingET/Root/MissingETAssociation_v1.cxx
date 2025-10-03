@@ -1,17 +1,15 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODMissingET/versions/MissingETAssociation_v1.h"
-#include "xAODMissingET/versions/MissingETCompositionBase.h"
+#include "xAODMissingET/MissingETAssociationHelper.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/FlowElement.h"
 #include "xAODPFlow/FEHelpers.h"
 
-#include <iterator>
-#include <cstdio>
 
 using namespace MissingETBase::Types;
 using std::vector;

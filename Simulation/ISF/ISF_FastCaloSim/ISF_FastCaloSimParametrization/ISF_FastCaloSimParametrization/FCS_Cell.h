@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FCS_Cell
 #define FCS_Cell
 #include <vector>
-//#include <stdint.h>
+#include <cmath> //std::abs
+#include <algorithm> //std::sort, std::remove_if
 #include <Rtypes.h>
 #include <TLorentzVector.h>
-//#include <iostream>
 /******************************************
 This contains structure definition
 All structures are relatively simple
@@ -41,7 +41,6 @@ struct FCS_hit //this is the FCS detailed hit
   float  hit_y;
   float  hit_z;
   bool operator<(const FCS_hit &rhs) const { return hit_energy > rhs.hit_energy;};
-  //float  hit_sampfrac;
 };
 
 struct FCS_g4hit //this is the standard G4Hit
@@ -51,7 +50,6 @@ struct FCS_g4hit //this is the standard G4Hit
   int    sampling;
   float  hit_energy;
   float  hit_time;
-  //float  hit_sampfrac;
   bool operator<(const FCS_g4hit &rhs) const { return hit_energy > rhs.hit_energy;};
 };
 
@@ -66,7 +64,7 @@ struct FCS_matchedcell //this is the matched structure for a single cell
   inline void sorthit() { std::sort(hit.begin(), hit.end());};
   inline void sortg4hit() { std::sort(g4hit.begin(), g4hit.end());};
   inline void sort() { sorthit(); sortg4hit();};
-  inline void time_trim(float timing_cut) { /*std::cout <<"Cutting: "<<timing_cut<<" from: "<<hit.size()<<" "<<g4hit.size()<<std::endl;*/hit.erase(std::remove_if(hit.begin(), hit.end(), [&timing_cut](const FCS_hit &rhs) { return rhs.hit_time>timing_cut;}), hit.end()); g4hit.erase(std::remove_if(g4hit.begin(), g4hit.end(), [&timing_cut](const FCS_g4hit &rhs) { return rhs.hit_time>timing_cut;}),g4hit.end());/*std::cout <<"remaining: "<<hit.size()<<" "<<g4hit.size()<<std::endl;*/};
+  inline void time_trim(float timing_cut) { hit.erase(std::remove_if(hit.begin(), hit.end(), [&timing_cut](const FCS_hit &rhs) { return rhs.hit_time>timing_cut;}), hit.end()); g4hit.erase(std::remove_if(g4hit.begin(), g4hit.end(), [&timing_cut](const FCS_g4hit &rhs) { return rhs.hit_time>timing_cut;}),g4hit.end());};
 };
 
 struct FCS_matchedcellvector //this is the matched structure for the whole event (or single layer) - vector of FCS_matchedcell 
@@ -77,11 +75,11 @@ struct FCS_matchedcellvector //this is the matched structure for the whole event
   inline std::vector<FCS_matchedcell> GetLayer(int layer){std::vector<FCS_matchedcell> ret; for (unsigned i=0; i<m_vector.size(); i++) {if (m_vector[i].cell.sampling == layer) ret.push_back(m_vector[i]);}; return ret;};
   inline FCS_matchedcell operator[](unsigned int place) { return m_vector[place];};
   inline unsigned int size() {return m_vector.size();};
-  inline void push_back(FCS_matchedcell cell) { m_vector.push_back(cell);};
+  inline void push_back(const FCS_matchedcell & cell) { m_vector.push_back(cell);};
   inline void sort_cells() { std::sort(m_vector.begin(), m_vector.end());};
   inline void sort() { std::sort(m_vector.begin(), m_vector.end()); for (unsigned int i=0; i<m_vector.size(); i++) { m_vector[i].sort();};};
   inline void time_trim(float timing_cut) 
-  { for (unsigned int i=0; i< m_vector.size(); i++) { m_vector[i].time_trim(timing_cut); }; m_vector.erase(std::remove_if(m_vector.begin(), m_vector.end(), [] (const FCS_matchedcell &rhs) { return (rhs.hit.size()==0 && rhs.g4hit.size() ==0 && fabs(rhs.cell.energy)<1e-3);}), m_vector.end());};
+  { for (unsigned int i=0; i< m_vector.size(); i++) { m_vector[i].time_trim(timing_cut); }; m_vector.erase(std::remove_if(m_vector.begin(), m_vector.end(), [] (const FCS_matchedcell &rhs) { return (rhs.hit.size()==0 && rhs.g4hit.size() ==0 && std::fabs(rhs.cell.energy)<1e-3);}), m_vector.end());};
   inline float scalingfactor(){float cellsum=0.; float hitsum=0.; for (unsigned int i=0; i<m_vector.size(); i++){cellsum+=m_vector[i].cell.energy;for (unsigned int j=0; j<m_vector[i].hit.size(); j++){hitsum+=m_vector[i].hit[j].hit_energy;};}; return cellsum/hitsum;}; //doesn't check for 0!
 };
 

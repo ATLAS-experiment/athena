@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_ALGOJIVEXML_H
@@ -7,15 +7,13 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/MsgStream.h"
 #include "JiveXML/IDataRetriever.h"
-#include "xAODEventInfo/EventInfo.h"
+
 #include <vector>
 
 //Forward declarations
 namespace JiveXML{
-  //  class IDataRetriever;
   class IFormatTool;
   class IStreamTool;
 }
@@ -48,6 +46,7 @@ namespace JiveXML {
     Gaudi::Property<bool> m_writeGeometry {this, "WriteGeometry", false, "Whether Geometry-XML files shall be produced"};
     Gaudi::Property<std::string> m_geometryVersionIn {this, "GeometryVersion", "default", "Geometry version as read from Athena"};
     Gaudi::Property<std::vector<std::string>> m_GeoWriterNames {this, "GeoWriterNames", {"JiveXML::GeometryWriter/GeometryWriter","JiveXML::MuonGeometryWriter/MuonGeometryWriter"}, "The names of the geometry-writer tools"};
+    Gaudi::Property<bool> m_ready4PhysicsAtStart {this, "Ready4PhysicsAtStart", false, "ATLAS is ready for physics when this job was launched"};
     /**
      * The list of DataRetrievers. This is initialised using the list of names
      * supplied by the jobOptions. DataRetrievers are AlgTools residing in the
@@ -68,6 +67,7 @@ namespace JiveXML {
     ToolHandle<JiveXML::IStreamTool> m_StreamToFileTool {this, "StreamToFileTool", "JiveXML::StreamToFileTool/StreamToFileTool", "Stream to file tool"};
     ToolHandle<JiveXML::IStreamTool> m_StreamToServerTool {this, "StreamToServerTool", "JiveXML::StreamServerTool/StreamToServerTool", "Stream to server tool"};
 
+    uint32_t m_previousRunNumber=0;
   };
 
 }//namespace

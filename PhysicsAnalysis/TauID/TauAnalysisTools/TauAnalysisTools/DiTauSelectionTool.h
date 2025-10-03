@@ -17,6 +17,8 @@
 #include "AsgTools/PropertyWrapper.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "xAODTau/DiTauJetContainer.h"
 
 // Local include(s):
 #include "TauAnalysisTools/IDiTauSelectionTool.h"
@@ -35,6 +37,8 @@ class DiTauSelectionCut;
 class DiTauSelectionCutPt;
 class DiTauSelectionCutAbsEta;
 class DiTauSelectionCutNSubjets;
+class DiTauSelectionCutAbsCharge;
+class DiTauSelectionCutOmniScore;
 
 class DiTauSelectionTool : public virtual IAsgSelectionTool,
   public virtual IDiTauSelectionTool,
@@ -46,6 +50,8 @@ class DiTauSelectionTool : public virtual IAsgSelectionTool,
   friend class DiTauSelectionCutPt;
   friend class DiTauSelectionCutAbsEta;
   friend class DiTauSelectionCutNSubjets;
+  friend class DiTauSelectionCutAbsCharge;
+  friend class DiTauSelectionCutOmniScore;
 
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( DiTauSelectionTool,
@@ -98,6 +104,12 @@ private:
   std::vector<float> m_vAbsEtaRegion;
   // vector of number of subjets cut regions
   std::vector<float> m_vNSubjetsRegion;
+  // vector of absolute charge requirements
+  std::vector<int> m_vAbsCharges;
+  // vector of OmniScore cut regions
+  std::vector<float> m_vOmniScoreRegion;
+
+  bool m_useOmniScore=false;
 
   Gaudi::Property<std::string> m_sConfigPath{this, "ConfigPath", ""};
   Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoDiTauCut};
@@ -107,6 +119,15 @@ private:
   Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
   Gaudi::Property<float> m_dNSubjetsMin{this, "NSubjetsMin", NAN};
   Gaudi::Property<float> m_dNSubjetsMax{this, "NSubjetsMax", NAN};
+  Gaudi::Property<float> m_iAbsCharge{this, "AbsCharge", NAN};
+  Gaudi::Property<float> m_dOmniScoreMin{this, "OmniScoreMin", NAN};
+  Gaudi::Property<float> m_dOmniScoreMax{this, "OmniScoreMax", NAN};
+
+  Gaudi::Property<std::vector<float>> m_vecPtRegion{this, "PtRegion", {}};
+  Gaudi::Property<std::vector<float>> m_vecAbsEtaRegion{this, "AbsEtaRegion",{}};
+  Gaudi::Property<std::vector<float>> m_vecNSubjetsRegion{this, "NSubjetsRegion", {}};
+  Gaudi::Property<std::vector<int>> m_vecAbsCharges{this, "AbsCharges", {}};
+  Gaudi::Property<std::vector<float>> m_vecOmniScoreRegion{this, "OmniScoreRegion", {}};
 
 protected:
   TFile* m_fOutFile;//!
@@ -119,7 +140,9 @@ private:
   void setupCutFlowHistogram();
 
 protected:
-  bool m_bCreateControlPlots;
+  
+  Gaudi::Property<bool> m_bCreateControlPlots{this, "CreateControlPlots", false};
+  SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_OmniScoreDecorKey {this, "OmniScoreDecorName", "", "Name of OmniScore decoration"};
 
   /// Object used to store selection information.
   asg::AcceptInfo m_aAccept;

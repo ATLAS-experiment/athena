@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CondInputLoader.cxx 
@@ -57,7 +57,7 @@ namespace
 ////////////////
 CondInputLoader::CondInputLoader( const std::string& name, 
                                   ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
+  ::AthReentrantAlgorithm( name, pSvcLocator ),
   m_condStore("StoreGateSvc/ConditionStore", name),
   m_condSvc("CondSvc",name),
   m_IOVSvc("IOVSvc",name),
@@ -103,7 +103,7 @@ CondInputLoader::initialize()
   IIOVDbSvc::KeyInfo info;
   DataObjIDColl handles_to_load;
 
-  for (auto key : keys) {
+  for (const std::string& key : keys) {
     if( m_IOVDbSvc->getKeyInfo(key, info) ) {
       m_keyFolderMap[key] = info.folderName;
     } else {
@@ -277,11 +277,11 @@ CondInputLoader::start()
                         << vhk.fullKey());
           fail = true;
         } else {
-          m_vhk.push_back(vhk);
+          m_vhk.emplace_back(std::move(vhk));
         }
       }
     } else {
-      m_vhk.push_back(vhk);
+      m_vhk.emplace_back(std::move(vhk));
     }
   }
   
@@ -305,12 +305,12 @@ CondInputLoader::start()
 //-----------------------------------------------------------------------------
 
 StatusCode 
-CondInputLoader::execute()
+CondInputLoader::execute(const EventContext& ctx) const
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   EventIDBase now;
-  if (!getContext().valid()) {
+  if (!ctx.valid()) {
     ATH_MSG_WARNING("EventContext not valid! This should not happen!");
     const xAOD::EventInfo* thisEventInfo;
     if(evtStore()->retrieve(thisEventInfo)!=StatusCode::SUCCESS) {
@@ -324,11 +324,11 @@ CondInputLoader::execute()
     now.set_time_stamp_ns_offset(thisEventInfo->timeStampNSOffset());
   }
   else {
-    now.set_run_number(getContext().eventID().run_number());
-    now.set_event_number(getContext().eventID().event_number());
-    now.set_lumi_block(getContext().eventID().lumi_block());
-    now.set_time_stamp(getContext().eventID().time_stamp());
-    now.set_time_stamp_ns_offset(getContext().eventID().time_stamp_ns_offset());
+    now.set_run_number(ctx.eventID().run_number());
+    now.set_event_number(ctx.eventID().event_number());
+    now.set_lumi_block(ctx.eventID().lumi_block());
+    now.set_time_stamp(ctx.eventID().time_stamp());
+    now.set_time_stamp_ns_offset(ctx.eventID().time_stamp_ns_offset());
   }
 
   EventIDBase now_event = now;
@@ -339,7 +339,7 @@ CondInputLoader::execute()
   // number with the conditions run number from the event context,
   // if it is defined.
   EventIDBase::number_type conditionsRun =
-    Atlas::getExtendedEventContext (getContext()).conditionsRun();
+    Atlas::getExtendedEventContext (ctx).conditionsRun();
   if (conditionsRun != EventIDBase::UNDEFNUM) {
     now.set_run_number (conditionsRun);
   }
@@ -362,7 +362,7 @@ CondInputLoader::execute()
       continue;
     }
 
-    std::string dbKey = m_keyFolderMap[vhk.key()];
+    const std::string& dbKey = m_keyFolderMap.at(vhk.key());
     if (m_IOVSvc->createCondObj( ccb, vhk.fullKey(), now ).isFailure()) {
       ATH_MSG_ERROR("unable to create Cond object for " << vhk.fullKey() << " dbKey: " 
                     << dbKey);

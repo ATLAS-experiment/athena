@@ -930,6 +930,7 @@ std::array<int, 3> RpcDigitizationTool::physicalClusterSize(const EventContext& 
     std::array<int, 3> result{};
 
     const Amg::Vector3D position = fromSimHitToLayer(ele, id) * gapCentre;
+
     const int doubletPhi = m_idHelper->doubletPhi(id);
     const int gasGap = m_idHelper->gasGap(id);
     const bool measuresPhi = m_idHelper->measuresPhi(id);

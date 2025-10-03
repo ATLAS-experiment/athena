@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGInputLoader.cxx 
@@ -147,7 +147,7 @@ SGInputLoader::execute()
                         << *obj);
       }
     }
-    m_load = toLoad;
+    m_load = std::move(toLoad);
     
     m_first = false;
   }
@@ -182,7 +182,7 @@ SGInputLoader::loader(Gaudi::Details::PropertyBase& p ) {
     toLoad.emplace(obj);
     if(!outputDataObjs().count(obj)) { addDependency(obj,Gaudi::DataHandle::Writer); }
   }
-  m_load = toLoad;
+  m_load = std::move(toLoad);
 
 }
 
@@ -211,7 +211,7 @@ SGInputLoader::loadObjs(const DataObjIDColl& objs) const {
           ATH_MSG_ERROR("   obj " << obj << " has no provider, and is only Transient - indicative of a missing output declaration" );
           ok =false;
         } else { // just warning for now for potentially undeclared decorations, instead of error, because too many cases to fix
-          ATH_MSG_WARNING("   decoration " << obj << " has no provider, and is only Transient - indicative of a missing output declaration" );
+          ATH_MSG_WARNING("   decoration " << obj << " has no provider, and is only Transient - either a decoration output declaration is missing, or a ReadDecorHandleKey is being used to read a non-decoration" );
         }
       }
     } else {

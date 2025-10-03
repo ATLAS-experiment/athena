@@ -27,22 +27,12 @@ StatusCode FastSimulationMasterTool::initializeFastSims(){
     CHECK(ifs->initializeFastSim());
   }
 
-  // If we added a fast simulation, then we will need to add the process to the particles
-  if ( m_FastSimList.size() > 0 ){
-    G4FastSimulationManagerProcess* fastSimManagerProcess = new G4FastSimulationManagerProcess();
-    G4ParticleTable* theParticleTable = G4ParticleTable::GetParticleTable();
-    G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
-
-    theParticleIterator->reset();
-    while( (*theParticleIterator)() ){
-      G4ProcessManager* pmanager = theParticleIterator->value()->GetProcessManager();
-      pmanager->AddProcess(fastSimManagerProcess, -1, 1, 1);
-    } // Done with loop over particles
-  } // Done with process assignment
-
   return StatusCode::SUCCESS;
 }
 
+bool FastSimulationMasterTool::HasFastSimulationModels() const {
+  return !m_FastSimList.empty();
+}
 
 StatusCode FastSimulationMasterTool::BeginOfAthenaEvent(){
   // Method that gets called at the beginning of every *athena* event

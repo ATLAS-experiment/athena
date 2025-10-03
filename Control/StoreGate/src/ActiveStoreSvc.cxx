@@ -1,29 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ActiveStoreSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/errorcheck.h"
-#include "AthenaKernel/StoreID.h"
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
 
 using namespace SG;
 
-/// Standard Constructor
-ActiveStoreSvc::ActiveStoreSvc(const std::string& name,ISvcLocator* svc) : 
-  Service(name,svc),
-  m_storeName()
-{
-  declareProperty("StoreName", m_storeName=StoreID::storeName(StoreID::EVENT_STORE));
-}
-
-
-/// Standard Destructor
-ActiveStoreSvc::~ActiveStoreSvc()  
-{}
 
 //////////////////////////////////////////////////////////////
 /// Service initialization
@@ -161,27 +148,6 @@ void ActiveStoreSvc::registerKey (sgkey_t key,
                                   CLID clid)
 {
   return activeStore()->registerKey (key, str, clid);
-}
-
-
-const InterfaceID& ActiveStoreSvc::interfaceID() { 
-  static const InterfaceID IDActiveStoreSvc("ActiveStoreSvc", 1, 0);
-  return IDActiveStoreSvc; 
-}
-StatusCode ActiveStoreSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (ActiveStoreSvc*)this;
-  }
-  else if ( IProxyDict::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IProxyDict*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 

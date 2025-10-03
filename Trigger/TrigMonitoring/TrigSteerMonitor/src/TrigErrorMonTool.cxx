@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigErrorMonTool.h"
 #include "AthenaKernel/AthStatusCode.h"
 #include "GaudiKernel/IAlgExecStateSvc.h"
+#include "GaudiKernel/IAlgManager.h"
 
 // =============================================================================
 // Standard constructor
@@ -17,8 +18,7 @@ TrigErrorMonTool::TrigErrorMonTool(const std::string& type, const std::string& n
 StatusCode TrigErrorMonTool::initialize() {
   ATH_CHECK(m_monTool.retrieve(DisableTool{m_monTool.name().empty()}));
   ATH_CHECK(m_algToChainTool.retrieve(DisableTool{m_algToChainTool.name().empty()}));
-  ATH_CHECK(m_aess.retrieve());
-  
+
   if (!m_trigCostSvcHandle.empty()) ATH_CHECK(m_trigCostSvcHandle.retrieve());
 
   return StatusCode::SUCCESS;
@@ -30,7 +30,6 @@ StatusCode TrigErrorMonTool::initialize() {
 StatusCode TrigErrorMonTool::finalize() {
   ATH_CHECK(m_monTool.release());
   ATH_CHECK(m_algToChainTool.release());
-  ATH_CHECK(m_aess.release());
   return StatusCode::SUCCESS;
 }
 
@@ -40,18 +39,20 @@ StatusCode TrigErrorMonTool::finalize() {
 std::unordered_map<std::string_view, StatusCode> TrigErrorMonTool::algExecErrors(const EventContext& eventContext) const {
   std::unordered_map<std::string_view, StatusCode> algErrors;
   bool wasTimeout = false;
-  for (const auto& [key, state] : m_aess->algExecStates(eventContext)) {
+  SmartIF<IAlgManager> algMgr{serviceLocator()->as<IAlgManager>()};
+  for (const IAlgorithm* alg : algMgr->getAlgorithms()) {
+    auto state = alg->execState(eventContext);
     if (!state.execStatus().isSuccess() && state.state()!=AlgExecState::State::None) {
       
-      ATH_MSG_DEBUG("Algorithm " << key << " returned StatusCode " << state.execStatus().message()
+      ATH_MSG_DEBUG("Algorithm " << alg->name() << " returned StatusCode " << state.execStatus().message()
                     << " in event " << eventContext.eventID());
-      algErrors[key.str()] = state.execStatus();
-      auto monErrorAlgName = Monitored::Scalar<std::string>("ErrorAlgName", key.str());
+      algErrors[alg->name()] = state.execStatus();
+      auto monErrorAlgName = Monitored::Scalar<std::string>("ErrorAlgName", alg->name());
       auto monErrorCode = Monitored::Scalar<std::string>("ErrorCode", state.execStatus().message());
       auto mon = Monitored::Group(m_monTool, monErrorAlgName, monErrorCode);
 
       if (m_algToChainTool.isEnabled()) {
-        std::set<std::string> chainNames = m_algToChainTool->getActiveChainsForAlg(key.str(), eventContext);
+        std::set<std::string> chainNames = m_algToChainTool->getActiveChainsForAlg(alg->name(), eventContext);
         // Monitored::Collection requires operator[]
         std::vector<std::string> chainNamesVec(chainNames.begin(), chainNames.end());
 

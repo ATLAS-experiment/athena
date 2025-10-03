@@ -4,13 +4,11 @@
 atlas_subdir( DQUtils )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( Oracle )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( six )
 find_package( sqlalchemy )
 
 string(REPLACE "-Wl,--as-needed" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
@@ -21,15 +19,15 @@ atlas_add_library( DQUtils
                    src/pythonic_coracool.cxx
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${ORACLE_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ORACLE_LIBRARIES} ${ROOT_LIBRARIES}
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${Python_LIBRARIES} ${CORAL_LIBRARIES} CoraCool CxxUtils )
+                   PRIVATE_LINK_LIBRARIES ${COOL_LIBRARIES} ${Python_LIBRARIES} ${CORAL_LIBRARIES} CoraCool CxxUtils )
 
 atlas_add_dictionary( DQUtilsDict
                       dict/dictionary.h
                       dict/dictionary.xml
-                      INCLUDE_DIRS ${ORACLE_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ORACLE_LIBRARIES} ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${Python_LIBRARIES} ${CORAL_LIBRARIES} CoraCool DQUtils )
+                      INCLUDE_DIRS ${ORACLE_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Python_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+                      LINK_LIBRARIES ${ORACLE_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${Python_LIBRARIES} ${CORAL_LIBRARIES} CoraCool DQUtils )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py python/ext python/sugar

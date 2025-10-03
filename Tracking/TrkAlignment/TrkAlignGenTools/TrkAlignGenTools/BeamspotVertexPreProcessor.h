@@ -1,24 +1,25 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRKALIGNGENTOOLS_BEAMSPOTVERTEXPREPROCESSOR_H
 #define  TRKALIGNGENTOOLS_BEAMSPOTVERTEXPREPROCESSOR_H
 
-#include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "TrkAlignInterfaces/IAlignTrackPreProcessor.h"
-#include "TrkEventPrimitives/ParticleHypothesis.h"
-#include <limits>
-#include "VxVertex/VxContainer.h"
-#include <functional>
+#include "StoreGate/ReadHandleKey.h"
 
+#include "TrkAlignInterfaces/IAlignTrackPreProcessor.h"
+
+#include "TrkAlignInterfaces/IAlignModuleTool.h"
+#include "TrkExInterfaces/IExtrapolator.h"
+#include "TrkFitterInterfaces/IGlobalTrackFitter.h"
+#include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/Vertex.h"
+#include "TrkEventPrimitives/ParticleHypothesis.h"
+
 #include "xAODTracking/VertexContainer.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
@@ -40,16 +41,11 @@
  
 
 namespace Trk {
-  class IGlobalTrackFitter;
-  class IExtrapolator;
-  //class ITrackSelectorTool;
   class Track;
   class AlignTrack;
   class AlignVertex;
-  class VxCandidate;
   class VertexOnTrack;
   class VxTrackAtVertex;
-  class IAlignModuleTool;
 
   class BeamspotVertexPreProcessor : virtual public Trk::IAlignTrackPreProcessor, public AthAlgTool
   {
@@ -58,18 +54,18 @@ namespace Trk {
 
     BeamspotVertexPreProcessor(const std::string & type, const std::string & name, const IInterface * parent);
     virtual ~BeamspotVertexPreProcessor();
+    
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
 
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
+    virtual DataVector<Track> * processTrackCollection(const DataVector<Track> * trks) override;
 
-    virtual DataVector<Track> * processTrackCollection(const DataVector<Track> * trks);
+    void accumulateVTX(AlignTrack* alignTrack) override;
 
-    void accumulateVTX(AlignTrack* alignTrack);
-
-    void solveVTX();
+    void solveVTX() override;
 
     /** Print processing summary to logfile. */
-    virtual void printSummary();
+    virtual void printSummary() override;
 
 
 
@@ -94,54 +90,78 @@ namespace Trk {
     AlignTrack* doTrackRefit(const Track* track);
 
 
-
-    ToolHandle<IGlobalTrackFitter>    m_trackFitter;     //!< normal track fitter
-    ToolHandle<IGlobalTrackFitter>    m_SLTrackFitter;   //! straight line track fitter
-    ToolHandle<IExtrapolator>         m_extrapolator;    //!< track extrapolator
-    //ToolHandle<ITrackSelectorTool>    m_trkSelector;     //!< track selector tool
-    ToolHandle<InDet::IInDetTrackSelectionTool> m_trkSelector; //!< new track selector tool
-    //ToolHandle<ITrackSelectorTool>    m_BSTrackSelector; //!< track selector tool for tracks to be used with beam-spot constraint
-    ToolHandle<InDet::IInDetTrackSelectionTool> m_BSTrackSelector; //!< new track selector tool for tracks to be used with beam-spot constraint
-    //MD:
-    ToolHandle<ITrackToVertexIPEstimator>        m_trackToVertexIPEstimatorTool; 
+    ToolHandle<IGlobalTrackFitter> m_trackFitter{
+      this, "TrackFitter", "Trk::GlobalChi2Fitter/InDetTrackFitter",
+      "normal track fitter"};
+    ToolHandle<IGlobalTrackFitter> m_SLTrackFitter{
+      this, "SLTrackFitter", "", "straight line track fitter"};
+    ToolHandle<IExtrapolator> m_extrapolator{
+      this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
+    ToolHandle<InDet::IInDetTrackSelectionTool> m_trkSelector{
+      this, "TrackSelector", "", "new track selector tool"};
+    ToolHandle<InDet::IInDetTrackSelectionTool> m_BSTrackSelector{
+      this, "BSConstraintTrackSelector", "",
+      "new track selector tool for tracks to be used with beam-spot constraint"};
+    ToolHandle<ITrackToVertexIPEstimator> m_trackToVertexIPEstimatorTool{
+      this, "TrackToVertexIPEstimatorTool", ""};
     
     /** Pointer to AlignModuleTool*/
-    ToolHandle <Trk::IAlignModuleTool> m_alignModuleTool;
+    PublicToolHandle<IAlignModuleTool> m_alignModuleTool{
+      this, "AlignModuleTool", "InDet::InDetAlignModuleTool/InDetAlignModuleTool"};
     
-    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {
+      this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
-    std::string m_PVContainerName;                       //!< the name of the primary vertex container
-    bool m_runOutlierRemoval;                            //!< switch whether to run outlier logics or not
-    bool m_selectVertices;                 	         //!< do vertex selection  
-    int  m_particleNumber;             		         //!< type of material interaction in extrapolation
-    bool m_doTrkSelection;                               //!< to activate the preprocessor track selection
-    bool m_doBSTrackSelection;                           //!< the selection mechanism which is based on cutting the perigee parameters, pt, etc.
-    bool m_doAssociatedToPVSelection;        		 //!< the selection mechanism that only use the tracks associated to PV
+    SG::ReadHandleKey<xAOD::VertexContainer> m_PVContainerName{
+      this, "PVContainerName", "PrimaryVertices"};
+    
+    BooleanProperty m_runOutlierRemoval{this, "RunOutlierRemoval", false,
+      "switch whether to run outlier logics or not"};
+    IntegerProperty m_particleNumber{this, "ParticleNumber", 3,
+      "type of material interaction in extrapolation, 3=pion, 0=non-interacting"};
+    BooleanProperty m_doTrkSelection{this, "DoTrackSelection", true,
+      "to activate the preprocessor track selection"};
+    BooleanProperty m_doBSTrackSelection{this, "DoBSTrackSelection", false,
+      "the selection mechanism which is based on cutting the perigee parameters, pt, etc."};
+    BooleanProperty m_doAssociatedToPVSelection{
+      this, "DoAssociatedToPVSelection", true,
+      "the selection mechanism that only use the tracks associated to PV"};
 
-    unsigned int m_constraintMode;
+    UnsignedIntegerProperty m_constraintMode{this, "ConstraintMode", 0};
 
-    std::string m_compareMethod;			 //!< the method used to judge whether two tracks are the same track
-    std::vector<std::string> m_interestedVertexContainers;
     std::vector< std::pair< const xAOD::Vertex*, std::vector<VxTrackAtVertex> > >  m_allTracksVector;
-    bool m_doBeamspotConstraint;    			 //!< do beamspot constraint 
-    bool m_doPrimaryVertexConstraint;      		 //!< do vertex constraint 
-    bool m_doFullVertexConstraint;                       //!< do GX full vertex constraint 
-    bool m_doNormalRefit;                                //!< provide tracks in the case failed BS, PV and FullVertex constraints. 
-    
-    double m_maxPt;                             //!< Max pT range for refitting tracks
- 
-    bool m_refitTracks;                       //!< flag to refit tracks
-    bool m_storeFitMatrices;  			         //!< flag to store derivative and covariance matrices after refit
-    bool m_useSingleFitter;                   //!< only use 1 fitter for refitting track
-    double m_BSScalingFactor;               //!< scaling factor on beasmpot width
-    double m_PVScalingFactor;               //!< scaling factor on primary vertex position error
 
-    int m_minTrksInVtx;                     //!< requirement to the minimal number of tracks in the vertex
-    int m_nTracks;
-    std::vector<int> m_trackTypeCounter;
-    int m_nFailedNormalRefits;
-    int m_nFailedBSRefits;
-    int m_nFailedPVRefits;
+    BooleanProperty m_doBeamspotConstraint{this, "DoBSConstraint", true,
+      "Constrain tracks to the beamspot (x,y) position"};
+    BooleanProperty m_doPrimaryVertexConstraint{this, "DoPVConstraint", false,
+      "Constrain tracks to the associated primary vertex (x,y,z) position"};
+    BooleanProperty m_doFullVertexConstraint{this, "DoFullVertex", false,
+      "Full 3D vertex constraint.  Note DoPVConstraint needs to be set to true to use this option. If DoBSConstraint vertex position will be constrained to the BS"};
+    BooleanProperty m_doNormalRefit{this, "doNormalRefit", true,
+      "provide tracks in the case failed BS, PV and FullVertex constraints."};
+    
+    DoubleProperty m_maxPt{this, "maxPt", 0.,
+      "Max pT range for refitting tracks"};
+ 
+    BooleanProperty m_refitTracks{this, "RefitTracks", true,
+      "flag to refit tracks"};
+    BooleanProperty m_storeFitMatrices{this, "StoreFitMatrices", true,
+      "flag to store derivative and covariance matrices after refit"};
+    BooleanProperty m_useSingleFitter{this, "UseSingleFitter", false,
+      "only use 1 fitter for refitting track"};
+    DoubleProperty m_BSScalingFactor{this, "BeamspotScalingFactor", 1.,
+      "scaling factor on beasmpot width"};
+    DoubleProperty m_PVScalingFactor{this, "PrimaryVertexScalingFactor", 1.,
+      "scaling factor on primary vertex position error"};
+
+    IntegerProperty m_minTrksInVtx{this, "MinTrksInVtx", 3,
+      "requirement to the minimal number of tracks in the vertex"};
+
+    int m_nTracks = 0;
+    std::vector<int> m_trackTypeCounter{};
+    int m_nFailedNormalRefits = 0;
+    int m_nFailedBSRefits = 0;
+    int m_nFailedPVRefits = 0;
 
     DataVector<AlignVertex> m_AlignVertices;	         //!< collection of AlignVertices used in FullVertex constraint option
 

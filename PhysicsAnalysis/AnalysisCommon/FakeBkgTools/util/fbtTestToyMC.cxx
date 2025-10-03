@@ -24,6 +24,7 @@
 
 #include "xAODEgamma/Electron.h"
 #include "AthContainers/Accessor.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -440,7 +441,7 @@ StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
 	    
 	    lep_pt = lep_pts[ilep];
 	    lep_eta = -5. + 10*rand.Uniform();
-	    lepton->setP4( 1000*lep_pt, lep_eta, 0, 0.511);
+	    lepton->setP4( 1000*lep_pt, lep_eta, 0, ParticleConstants::electronMassInMeV);
 	    
 	    FakeBkgTools::ParticleData lepton_data;
 	    ANA_CHECK( lookupEfficiencies(*lepton, lepton_data) );

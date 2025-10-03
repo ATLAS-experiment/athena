@@ -16,9 +16,10 @@
 #ifndef KLGaussianMixReductionUtils_H
 #define KLGaussianMixReductionUtils_H
 
+#include "TrkGaussianSumFilterUtils/AlignedDynArray.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
-#include <array>
+#include <vector>
 #include <cstdint>
 
 namespace GSFUtils {
@@ -33,33 +34,17 @@ struct Component1D
   double invCov = 1e10;
   double weight = 0.;
 };
-/**
- * @brief struct representing an array of 1D component.
- * with the maximum size we can have after convolution
- * with material effects.
- */
-struct Component1DArray
-{
-  alignas(GSFConstants::alignment)
-    std::array<Component1D,
-               GSFConstants::maxComponentsAfterConvolution> components{};
-  int numComponents = 0;
-};
+using Component1DArray = AlignedDynArray<Component1D, GSFConstants::alignment>;
 /**
  * @brief struct representing an array or the merges.
  * The merge is from the element in positon 'From'
  * to the element in position 'To'
  */
-struct MergeArray
-{
-  struct merge
-  {
-    int8_t To = 0;
-    int8_t From = 0;
-  };
-  std::array<merge, GSFConstants::maxComponentsAfterConvolution> merges{};
-  int numMerges = 0;
+struct Merge {
+  int To = 0;
+  int From = 0;
 };
+using MergeArray = std::vector<Merge>;
 
 /**
  * @brief Find the order in which the components need to
@@ -69,15 +54,14 @@ struct MergeArray
  * the To (RHS is smaller than LHS)
  *
  * @c Component1DArray : Array of simplified 1D components
- * used to calculate the merge order using q/p. Its size
- * can not exceed GSFConstants::maxComponentsAfterConvolution
+ * used to calculate the merge order using q/p.
  *
  * @c reducedSize  The size we want to reduce the mixture to.
  * Needs to be smaller than the numComponents of the componentsIn
  * array
  */
 MergeArray
-findMerges(const Component1DArray& componentsIn, const int8_t reducedSize);
+findMerges(Component1DArray&& componentsIn, const int reducedSize);
 
 } // namespace KLGaussianMixtureReduction
 

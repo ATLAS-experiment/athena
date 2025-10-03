@@ -20,18 +20,16 @@ atlas_add_component( TrkExTools
 
 
 # Tests in the package:
-atlas_add_test( ObjContainer_boost_test
-  SOURCES test/ObjContainer_boost_test.cxx
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
-  LINK_LIBRARIES ${Boost_LIBRARIES}  CxxUtils
-  POST_EXEC_SCRIPT nopost.sh
-)
-	
 atlas_add_test( TrkExToolsStringUtility_test	
   SOURCES 
   test/TrkExToolsStringUtility_test.cxx src/TrkExToolsStringUtility.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
   POST_EXEC_SCRIPT nopost.sh
+)
+
+atlas_add_test( ExtrUniquePtrHolder_test	
+  SOURCES 
+  test/ExtrUniquePtrHolder_test.cxx
 )
 

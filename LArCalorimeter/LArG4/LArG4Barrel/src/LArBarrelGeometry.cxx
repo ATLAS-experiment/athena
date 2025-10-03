@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -41,39 +41,7 @@ namespace LArG4 {
 
     Geometry::Geometry(const std::string& name, ISvcLocator *pSvcLocator)
       : base_class(name, pSvcLocator)
-      , m_detectorName("LArMgr")
-      , m_rMinAccordion(0)
-      , m_rMaxAccordion(0)
-      , m_zMinBarrel(0)
-      , m_zMaxBarrel(0)
-      , m_zMaxBarrelDMMargin(0)
-      , m_etaMaxBarrel(0)
-      , m_NCellTot(0)
-      , m_NCellMax(0)
-      , m_Nbrt(0)
-      , m_Nbrt1(0)
-      , m_gam0(0)
-      , m_rint_eleFib(0)
-      , m_rc(nullptr)
-      , m_phic(nullptr)
-      , m_xc(nullptr)
-      , m_yc(nullptr)
-      , m_delta(nullptr)
-      , m_parity(0)
-      , m_coudeelec(nullptr)
-      , m_coudeabs(nullptr)
-      , m_electrode(nullptr)
-      , m_absorber(nullptr)
-      , m_testbeam(false)
-      , m_iflSAG(false)
-      , m_NRphi(0)
-      , m_Rmin(0)
-      , m_Rmax(0)
-      , m_Rphi{0}
-      , m_dR(0)
     {
-      declareProperty("DetectorName",m_detectorName);
-      declareProperty("TestBeam", m_testbeam);
     }
 
     // ====================================================================================

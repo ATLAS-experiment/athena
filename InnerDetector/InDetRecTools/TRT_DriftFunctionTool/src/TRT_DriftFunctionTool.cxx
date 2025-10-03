@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,18 +14,13 @@
 
 #include "TRT_DriftFunctionTool.h"
 
-#include "GaudiKernel/IToolSvc.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
-#include "InDetReadoutGeometry/Version.h"
 
 #include <cmath> 
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <string>
 //
 // Constructor
@@ -185,7 +180,7 @@ double TRT_DriftFunctionTool::driftRadius(double rawtime, Identifier id, double&
   if (m_dummy) return 0.;
 
   double radius = 0.;
-  if (!m_isoverlay){ //standard case
+  if (!m_isDataOverlay){ //standard case
     radius = m_TRTCalDbTool->driftRadius(crawtime,ft0,cid,isOK);
     t0 = ft0 + m_t0_shift;
   }
@@ -219,7 +214,7 @@ double TRT_DriftFunctionTool::errorOfDriftRadius(double drifttime, Identifier id
   double error = m_TRTCalDbTool->driftError(drifttime,id,founderr);
   double slope = m_TRTCalDbTool->driftSlope(drifttime,id,foundslope);
   bool mcdigit = word & (1u<<31);
-  if(m_isoverlay && mcdigit){
+  if(m_isDataOverlay && mcdigit){
     //check if it's a MC digit, and if so apply other calibration
     ATH_MSG_DEBUG ("Overlay TRTCalDbTool gave error: "<<error<<", found="<<founderr);
     error = m_TRTCalDbTool2->driftError(drifttime,id,founderr);
@@ -292,7 +287,7 @@ void TRT_DriftFunctionTool::setupRtRelation()
 		  ": Retrieved service " << m_TRTCalDbTool.type());
   }
 
-  if (m_isoverlay){
+  if (m_isDataOverlay){
     ATH_MSG_DEBUG("Using TRTCalDbTool2 for overlay ! ");
     if ( m_TRTCalDbTool2.retrieve().isFailure() ) {
       ATH_MSG_FATAL(m_TRTCalDbTool2.propertyName() <<": Failed to retrieveservice " << m_TRTCalDbTool2.type());
@@ -303,21 +298,11 @@ void TRT_DriftFunctionTool::setupRtRelation()
   //for now we make a hack in order always to get the right t0 after having centered the
   //drifttime spectrum better in the allowed time-window with digi version 12 in release 14.
 
-  int type = m_forced_digiversion;
-  if(m_ismc || m_isoverlay){
-   
-    if(!m_allow_digi_version_override) {
-      type = m_manager->digitizationVersion();
-      ATH_MSG_DEBUG("TRT detector manager returned digitization version "<< type <<
-		    " corresponding to "<< m_manager->digitizationVersionName());
-    } else {
-      ATH_MSG_WARNING("Digitization version chosen by user for global t0 correction: "<<type);
-    }
+  if(m_isMC || m_isDataOverlay){
 
-
-    if(type>10) {
+    if(m_enable_t0_barrel_shift) {
       m_t0_shift=-8.;
-      ATH_MSG_DEBUG(" Digitization version " << type << " - T0 for barrel is shifted by "
+      ATH_MSG_DEBUG(" T0 for barrel is shifted by "
                    << m_t0_shift);
     }
 

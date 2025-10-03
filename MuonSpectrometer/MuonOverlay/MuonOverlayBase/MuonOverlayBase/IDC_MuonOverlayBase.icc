@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Generic overlaying code for Muon Identifiable Containers.
@@ -31,11 +31,10 @@ std::unique_ptr<Collection> IDC_MuonOverlayBase::copyCollection(const Identifier
 
 
 
-template <class IDC_Container>
-StatusCode IDC_MuonOverlayBase::overlayContainerBase(const IDC_Container *bkgContainer,
+template <bool isMultiHitCollection, class IDC_Container>
+StatusCode IDC_MuonOverlayBase::overlayContainerImpl(const IDC_Container *bkgContainer,
                                                      const IDC_Container *signalContainer,
-                                                     IDC_Container *outputContainer,
-                                                     bool isMultiHitCollection) const
+                                                     IDC_Container *outputContainer) const
 {
   typedef typename IDC_Container::base_value_type Collection;
 
@@ -101,7 +100,7 @@ StatusCode IDC_MuonOverlayBase::overlayContainerBase(const IDC_Container *bkgCon
       std::unique_ptr<Collection> bkgCollection = copyCollection(hashId, bkgContainer->indexFindPtr(hashId));
 
       // Merge collections
-      if (isMultiHitCollection) {
+      if constexpr(isMultiHitCollection) {
         Overlay::mergeMultiHitCollections(bkgCollection.get(), signalCollection.get(), outputCollection.get());
       } else {
         Overlay::mergeCollections(bkgCollection.get(), signalCollection.get(), outputCollection.get(), this);

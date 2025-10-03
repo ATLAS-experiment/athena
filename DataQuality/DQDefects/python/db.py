@@ -33,8 +33,6 @@ from .virtual_mixin import DefectsDBVirtualDefectsMixin
 from .virtual_calculator import calculate_virtual_defects
 from typing import Union, Tuple, Optional, Iterable, Collection, Mapping
 
-import six
-
 class DefectsDB(DefectsDBVirtualDefectsMixin, 
                 DefectsDBTagsMixin,
                 DefectsDBFoldersMixin, 
@@ -83,7 +81,7 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
         self.connection_string = connection_string
         self._read_only = read_only
         self._create = create
-        if isinstance(tag, six.string_types):
+        if isinstance(tag, str):
             self._tag = tagtype(tag, tag) if tag else tagtype("HEAD", "HEAD")
         else:
             try:

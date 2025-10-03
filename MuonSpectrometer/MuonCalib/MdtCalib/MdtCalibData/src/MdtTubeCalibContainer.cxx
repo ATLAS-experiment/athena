@@ -16,17 +16,12 @@ namespace MuonCalib {
                         m_idHelper.tubeMax(secondMl));
     m_data.resize(m_nLayers * m_nTubes * m_nMl);
 }
-bool MdtTubeCalibContainer::setCalib(SingleTubeCalibPtr val, const Identifier& tubeId, MsgStream& msg) {
+bool MdtTubeCalibContainer::setCalib(SingleTubeCalib val, const Identifier& tubeId, MsgStream& msg) {
     /// Make enough space for the calibration constants
     const unsigned int index = vectorIndex(tubeId);
     if (m_moduleID != m_idHelperSvc->chamberId(tubeId)) {
         msg << MSG::ERROR<<__FILE__<<":"<<__LINE__<<" The channel "<<m_idHelperSvc->toString(tubeId)
             <<" does not correspond to chamber "<<m_idHelperSvc->chamberNameString(tubeId) <<endmsg;
-        return false;
-    }
-    if (!val) {
-        msg << MSG::ERROR<<__FILE__<<":" <<__LINE__<<" No data is parsed for "
-            << m_idHelperSvc->toString(tubeId)<<endmsg;
         return false;
     }
     if (index >= m_data.size()) {
@@ -35,15 +30,7 @@ bool MdtTubeCalibContainer::setCalib(SingleTubeCalibPtr val, const Identifier& t
             <<m_idHelperSvc->chamberNameString(m_moduleID)<<endmsg;
         m_data.resize(index +1);
     }
-    SingleTubeCalibPtr& store = m_data[index];
-    if (store && store !=val) {
-        msg << MSG::ERROR<< __FILE__ <<":"<< __LINE__<< " Data has already been stored for channel "
-            << m_idHelperSvc->toString(tubeId) 
-            <<", layer max: "<<m_nLayers<<", tube max: "<<m_nTubes
-            << endmsg;
-        return false;
-    }
-    store = std::move(val);
+    m_data[index] = std::move(val);    
     if (msg.level() <= MSG::VERBOSE) {
         msg << MSG::VERBOSE<<" Succesfully stored calibration data for channel "<<m_idHelperSvc->toString(tubeId) << endmsg;
     }

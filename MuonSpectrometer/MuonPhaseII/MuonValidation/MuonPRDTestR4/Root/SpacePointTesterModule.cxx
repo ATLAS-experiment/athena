@@ -4,6 +4,8 @@
 
 #include "MuonPRDTestR4/SpacePointTesterModule.h"
 #include "StoreGate/ReadHandle.h"
+
+using namespace Muon::MuonStationIndex;
 namespace MuonValR4{
     SpacePointTesterModule::SpacePointTesterModule(MuonTesterTree& tree,
                                    const std::string& inContainer,
@@ -23,15 +25,16 @@ namespace MuonValR4{
             return insert_itr.first->second;
         }
         
-        m_globPos.push_back(spacePoint.positionInChamber());
+        m_spPos.push_back(spacePoint.localPosition());
         m_driftR.push_back(spacePoint.driftRadius());
 
 
-        const AmgSymMatrix(2)& cov{spacePoint.covariance()};
-        m_covXX.push_back(cov(Amg::x, Amg::x));
-        m_covXY.push_back(cov(Amg::x, Amg::y));
-        m_covYX.push_back(cov(Amg::y, Amg::x));
-        m_covYY.push_back(cov(Amg::y, Amg::y));
+        const auto& cov{spacePoint.covariance()};
+        using CovIdx = MuonR4::SpacePoint::CovIdx;
+        m_covX.push_back(cov[Acts::toUnderlying(CovIdx::phiCov)]);
+        m_covY.push_back(cov[Acts::toUnderlying(CovIdx::etaCov)]);
+        m_covT.push_back(cov[Acts::toUnderlying(CovIdx::timeCov)]);
+
 
         m_measEta.push_back(spacePoint.measuresEta());
         m_measPhi.push_back(spacePoint.measuresPhi());
@@ -42,7 +45,7 @@ namespace MuonValR4{
         using TechIndex = Muon::MuonStationIndex::TechnologyIndex; 
         const Identifier id = spacePoint.identify();
         const TechIndex techIdx = idHelperSvc()->technologyIndex(id);
-        m_techIdx.push_back(static_cast<int>(techIdx));
+        m_techIdx.push_back(Acts::toUnderlying(techIdx));
         m_spacePointId.push_back(id);
         int phiChannel{-1};
         switch (techIdx) {
@@ -123,9 +126,8 @@ namespace MuonValR4{
     }
     bool SpacePointTesterModule::fill(const EventContext& ctx) {
         m_internalFill = true;
-        SG::ReadHandle container{m_key, ctx};
-        if (!container.isPresent()) {
-            ATH_MSG_FATAL("Failed to retrieve container "<<m_key.fullKey());
+        const MuonR4::SpacePointContainer* container{nullptr};
+        if (!SG::get(container, m_key, ctx).isSuccess()) {
             return false;
         }
         for (const MuonR4::SpacePointBucket* bucket : *container) {

@@ -11,29 +11,40 @@ namespace ActsTrk::detail {
 template <Acts::TrackContainerFrontend track_container_t>
 inline auto SharedHitCounter::computeSharedHits(typename track_container_t::TrackProxy &track,
                                                 track_container_t &tracks,
-                                                const MeasurementIndex &measurementIndex) -> ReturnSharedAndBad {
+                                                const MeasurementIndex &measurementIndex,
+                                                bool removeSharedHits) -> ReturnSharedAndBad {
   return computeSharedHits(track, tracks, measurementIndex.size(), [&measurementIndex](const xAOD::UncalibratedMeasurement &hit) -> std::size_t {
     return measurementIndex.index(hit);
-  });
+  }, removeSharedHits);
 }
 
 template <Acts::TrackContainerFrontend track_container_t>
 inline auto SharedHitCounter::computeSharedHitsDynamic(typename track_container_t::TrackProxy &track,
                                                        track_container_t &tracks,
-                                                       MeasurementIndex &measurementIndex) -> ReturnSharedAndBad {
+                                                       MeasurementIndex &measurementIndex,
+                                                       bool removeSharedHits) -> ReturnSharedAndBad {
   return computeSharedHits(track, tracks, measurementIndex.size(), [this, &measurementIndex](const xAOD::UncalibratedMeasurement &hit) -> std::size_t {
     auto [index, newContainer] = measurementIndex.newMeasurementIndex(hit);
     if (newContainer)
       m_firstTrackStateOnTheHit.resize(measurementIndex.size(), s_noTrackState);
     return index;
-  });
+  },removeSharedHits);
 }
 
+
+  /**
+     track  : the track under investigation and that will be updated with the shared hit information
+     tracks : the track container. Used to check what hits are used. Both tracks that share hits will get the shared states set and nShared hits updated
+     indexSize : the size of measurements to be used fo shared hit counting
+     indexFun  : template param to get the index from the hit
+     removeSharedHits : if true this function will remove the shared hits from the track and the matching tracks and reset the states sharedHit flag.
+   */  
 template <Acts::TrackContainerFrontend track_container_t, typename IndexFun>
 inline auto SharedHitCounter::computeSharedHits(typename track_container_t::TrackProxy &track,
                                                 track_container_t &tracks,
                                                 std::size_t indexSize,
-                                                IndexFun &&indexFun) -> ReturnSharedAndBad {
+                                                IndexFun &&indexFun,
+                                                bool removeSharedHits) -> ReturnSharedAndBad {
   // Based on ActsExamples::TrackFindingAlgorithm::computeSharedHits().
   // Finds shared hits in the reconstructed track and updates SharedHitFlag in both tracks.
   // Uses measurementIndex to convert hit to hitIndex, and then m_firstTrackStateOnTheHit[] to convert hitIndex -> TrackStateIndex
@@ -50,14 +61,17 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
 
     if (!state.hasUncalibratedSourceLink())
       continue;
-
+    
+    if (removeSharedHits and !state.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag))
+      continue;
+    
     auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
     const xAOD::UncalibratedMeasurement& hit = getUncalibratedMeasurement(sl);
     std::size_t hitIndex = indexFun(hit);
     if (!(hitIndex < m_firstTrackStateOnTheHit.size())) {
       state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
       // Save ATH_MSG_ERROR() for the caller, since for simplicity and efficiency this class doesn't have access to AthMsgStream.
-      // std::cout << "ERROR hit index " << hitIndex << " past end of " << m_firstTrackStateOnTheHit.size() << " hit indices\n";
+      //std::cout << "ERROR hit index " << hitIndex << " past end of " << m_firstTrackStateOnTheHit.size() << " hit indices\n";
       ++nBadTrackMeasurements;
       continue;
     }
@@ -73,33 +87,61 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
     const TrackStateIndex& indexFirstTrackState = m_firstTrackStateOnTheHit[hitIndex];
     if (!(indexFirstTrackState.trackIndex < tracks.size())) {
       state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
-      // std::cout << "ERROR track index " << indexFirstTrackState.trackIndex << " past end of " << tracks.size() << " tracks in container\n";
+      //std::cout << "ERROR track index " << indexFirstTrackState.trackIndex << " past end of " << tracks.size() << " tracks in container\n";
       ++nBadTrackMeasurements;
       continue;
     }
 
     auto firstTrack = tracks.getTrack(indexFirstTrackState.trackIndex);
     auto& firstStateContainer = firstTrack.container().trackStateContainer();
+    
     if (!(indexFirstTrackState.stateIndex < firstStateContainer.size())) {
       state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
-      // std::cout << "ERROR track state index " << indexFirstTrackState.stateIndex << " past end of " << firstStateContainer.size() << " track states in container\n";
+      //std::cout << "ERROR track state index " << indexFirstTrackState.stateIndex << " past end of " << firstStateContainer.size() << " track states in container\n";
       ++nBadTrackMeasurements;
       continue;
     }
-
+    
     auto firstState = firstStateContainer.getTrackState(indexFirstTrackState.stateIndex);
-    if (!firstState.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag)) {
-      firstState.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
-      firstTrack.nSharedHits()++;
+
+    // if removeSharedHits is false, this is the nominal behaviour
+    if (!removeSharedHits) {
+      if (!firstState.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag)) {
+        firstState.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+        firstTrack.nSharedHits()++;
+        ++nShared;
+      }
+      // Decorate this track state
+      state.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+      track.nSharedHits()++;
       ++nShared;
+
+    } else { // remove shared hits mode
+      if (firstState.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag)) {
+        firstState.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+        
+        //We should not find more shared measurements than initially attached to the track
+        if (firstTrack.nSharedHits() == 0) {
+          //std::cout << "ERROR inconsistency in removing shared hits for firstTrack " <<std::endl;
+          ++nBadTrackMeasurements;
+        }
+        else {
+          firstTrack.nSharedHits()--;
+          ++nShared;
+        }
+      }
+      // reset the flag for this track state
+      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      track.nSharedHits()--;
+      ++nShared;
+
+      // clear up the firstTrackStateOnTheHit vector from the update
+      if (m_firstTrackStateOnTheHit[hitIndex].trackIndex == track.index() && m_firstTrackStateOnTheHit[hitIndex].stateIndex == state.index())
+        m_firstTrackStateOnTheHit[hitIndex] = s_noTrackState;
     }
-
-    // Decorate this track state
-    state.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
-    track.nSharedHits()++;
-    ++nShared;
-  }
-
+    
+  } // loop on the track states
+  
   return {nShared, nBadTrackMeasurements};
 }
 

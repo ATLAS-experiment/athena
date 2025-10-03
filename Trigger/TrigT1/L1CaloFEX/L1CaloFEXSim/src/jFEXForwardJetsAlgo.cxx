@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXForwardJetsAlgo - Algorithm for forward Jets in jFEX
@@ -11,16 +11,12 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "L1CaloFEXSim/jFEXForwardJetsAlgo.h"
+#include "jFEXForwardJetsAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
+#include "PathResolver/PathResolver.h"
 
 #include <fstream>
 
@@ -85,7 +81,7 @@ std::array<float,2> LVL1::jFEXForwardJetsAlgo::globalEtaPhi(int TTID) {
     return {tmpTower->centreEta(),tmpTower->centrephi_toPI()};
 }
 
-int LVL1::jFEXForwardJetsAlgo::getEt(unsigned int TTID) {
+int LVL1::jFEXForwardJetsAlgo::getEt(unsigned int TTID) const {
     if(TTID == 0) {
         return -999;
     }
@@ -255,7 +251,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
     return FCALJetTowerIDLists;
 }
 
-int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) {
+int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) const {
     
     // Exists the jTower in the mapping?
     auto it_seed_map = m_SeedRingMap.find(TTID);
@@ -265,20 +261,24 @@ int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) {
     }
     int summedEt = 0;
     for(const auto& seedTT : it_seed_map->second){
-        summedEt += getEt(seedTT);  
+        //getEt can return -999 as an error value
+        const int thisEt = getEt(seedTT);
+        if (thisEt != -999){
+          summedEt += getEt(seedTT);
+        } 
     }
 
     return summedEt;
 }
 
-bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
+bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID) const {
     
     int CentralSeedEt = SumEtSeed(TTID);
     
     // Exists the jTower in the seach (greater than) tower map?
     auto it_seed_map = m_SearchGMap.find(TTID);
     if(it_seed_map == m_SearchGMap.end()) {
-        ATH_MSG_ERROR("Could not find TT" << TTID << " in the seach (>) local maxima for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the search (>) local maxima for jets file.");
         return false;
     }
 
@@ -321,7 +321,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
     return true;
 }
 
-bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
+bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID) const {
     
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_CorrMap.find(TTID);
@@ -336,7 +336,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
     return false;
 }
 
-unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr(unsigned int TTID){
+unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr(unsigned int TTID) const {
     auto it_seed_map = m_CorrMap.find(TTID);
     if(it_seed_map == m_CorrMap.end()) {
         ATH_MSG_ERROR("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
@@ -346,7 +346,7 @@ unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr(unsigned int TTID){
     return (it_seed_map->second).size();
 }
 
-bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
+bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID) const {
 
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_CorrMap.find(TTID);
@@ -376,7 +376,7 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
     
 }
 
-unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr2(unsigned int TTID){
+unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr2(unsigned int TTID) const {
     auto it_seed_map = m_Corr2Map.find(TTID);
     if(it_seed_map == m_Corr2Map.end()) {
         ATH_MSG_ERROR("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
@@ -386,7 +386,7 @@ unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr2(unsigned int TTID){
     return (it_seed_map->second).size();
 }
 
-bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
+bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID) const {
 
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_Corr2Map.find(TTID);
@@ -433,7 +433,7 @@ bool LVL1::jFEXForwardJetsAlgo::getTTowerSat(unsigned int TTID ) {
     return tmpTower->getTowerSat();
 }
 
-StatusCode LVL1::jFEXForwardJetsAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){
+StatusCode LVL1::jFEXForwardJetsAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap) const {
     
     std::string myline;
     
@@ -485,4 +485,3 @@ StatusCode LVL1::jFEXForwardJetsAlgo::ReadfromFile(const std::string & fileName,
 
 
 }// end of namespace LVL1
-

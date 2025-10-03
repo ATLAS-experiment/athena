@@ -42,41 +42,57 @@ StatusCode ActsTrk::SeedingAlgorithmAnalysisAlg::fillHistograms(const EventConte
 
         InDet::SiSpacePointsSeedMakerEventData seedEventData;
 
-        timeMonitors[TimeMonitoringType::StripSeedInitialisation].start();
-        seedingTool->newEvent(ctx, seedEventData, 0);
-        timeMonitors[TimeMonitoringType::StripSeedInitialisation].stop();
-        auto stripSeedInitialisationTime = Monitored::Scalar<float>("stripSeedInitialisationTime", static_cast<float>(timeMonitors[TimeMonitoringType::StripSeedInitialisation]));
-
-        auto numberStripSpacePoints = Monitored::Scalar<int>("numberStripSpacePoints", seedEventData.ns);
-
-        timeMonitors[TimeMonitoringType::StripSeedProduction].start();
-        seedingTool->find3Sp(ctx, seedEventData, {});
-        timeMonitors[TimeMonitoringType::StripSeedProduction].stop();
-        auto stripSeedProductionTime = Monitored::Scalar<float>("stripSeedProductionTime", static_cast<float>(timeMonitors[TimeMonitoringType::StripSeedProduction]));
-
+        auto stripSeedInitialisationTime = Monitored::Scalar<float>("stripSeedInitialisationTime", 0.);
+        auto numberStripSpacePoints = Monitored::Scalar<int>("numberStripSpacePoints", 0);
         auto numberStripSeeds = Monitored::Scalar<int>("numberStripSeeds", 0);
-        if (not seedEventData.l_ITkSpacePointForSeed.empty())
-            numberStripSeeds = seedEventData.i_ITkSeeds.size();
-        else if (not seedEventData.v_ActsSpacePointForSeed.empty())
-            numberStripSeeds = seedEventData.nsazv;
+        auto stripSeedProductionTime = Monitored::Scalar<float>("stripSeedProductionTime", 0.);
 
-        timeMonitors[TimeMonitoringType::PixelSeedInitialisation].start();
-        seedingTool->newEvent(ctx, seedEventData, 1);
-        timeMonitors[TimeMonitoringType::PixelSeedInitialisation].stop();
-        auto pixelSeedInitialisationTime = Monitored::Scalar<float>("pixelSeedInitialisationTime", static_cast<float>(timeMonitors[TimeMonitoringType::PixelSeedInitialisation]));
-
-        auto numberPixelSpacePoints = Monitored::Scalar<int>("numberPixelSpacePoints", seedEventData.ns);
-
-        timeMonitors[TimeMonitoringType::PixelSeedProduction].start();
-        seedingTool->find3Sp(ctx, seedEventData, {});
-        timeMonitors[TimeMonitoringType::PixelSeedProduction].stop();
-        auto pixelSeedProductionTime = Monitored::Scalar<float>("pixelSeedProductionTime", static_cast<float>(timeMonitors[TimeMonitoringType::PixelSeedProduction]));
-
+        auto pixelSeedInitialisationTime = Monitored::Scalar<float>("pixelSeedInitialisationTime", 0.);
+        auto numberPixelSpacePoints = Monitored::Scalar<int>("numberPixelSpacePoints", 0);
         auto numberPixelSeeds = Monitored::Scalar<int>("numberPixelSeeds", 0);
-        if (not seedEventData.l_ITkSpacePointForSeed.empty())
-            numberPixelSeeds = seedEventData.i_ITkSeeds.size();
-        else if (not seedEventData.v_ActsSpacePointForSeed.empty())
-            numberPixelSeeds = seedEventData.nsazv;
+        auto pixelSeedProductionTime = Monitored::Scalar<float>("pixelSeedProductionTime", 0.);
+
+
+        if (m_doStrip) {
+            timeMonitors[TimeMonitoringType::StripSeedInitialisation].start();
+            seedingTool->newEvent(ctx, seedEventData, 0);
+            timeMonitors[TimeMonitoringType::StripSeedInitialisation].stop();
+            stripSeedInitialisationTime = static_cast<float>(timeMonitors[TimeMonitoringType::StripSeedInitialisation]);
+
+            numberStripSpacePoints = seedEventData.ns;
+
+            timeMonitors[TimeMonitoringType::StripSeedProduction].start();
+            seedingTool->find3Sp(ctx, seedEventData, {});
+            timeMonitors[TimeMonitoringType::StripSeedProduction].stop();
+            stripSeedProductionTime = static_cast<float>(timeMonitors[TimeMonitoringType::StripSeedProduction]);
+
+            if (not seedEventData.l_ITkSpacePointForSeed.empty())
+                numberStripSeeds = seedEventData.i_ITkSeeds.size();
+            else if (not seedEventData.v_ActsSpacePointForSeed.empty())
+                numberStripSeeds = seedEventData.nsazv;
+        }
+
+        if (m_doPixel) {
+            seedingTool->newEvent(ctx, seedEventData, 0);
+            timeMonitors[TimeMonitoringType::PixelSeedInitialisation].start();
+            seedingTool->newEvent(ctx, seedEventData, 1);
+            timeMonitors[TimeMonitoringType::PixelSeedInitialisation].stop();
+            pixelSeedInitialisationTime = static_cast<float>(timeMonitors[TimeMonitoringType::PixelSeedInitialisation]);
+
+            numberPixelSpacePoints = seedEventData.ns;
+
+            timeMonitors[TimeMonitoringType::PixelSeedProduction].start();
+            seedingTool->find3Sp(ctx, seedEventData, {});
+            timeMonitors[TimeMonitoringType::PixelSeedProduction].stop();
+            pixelSeedProductionTime = static_cast<float>(timeMonitors[TimeMonitoringType::PixelSeedProduction]);
+
+            if (not seedEventData.l_ITkSpacePointForSeed.empty())
+                numberPixelSeeds = seedEventData.i_ITkSeeds.size();
+            else if (not seedEventData.v_ActsSpacePointForSeed.empty())
+                numberPixelSeeds = seedEventData.nsazv;
+        }
+
+
 
         auto monGroup = getGroup(m_monitoringGroupNames[index]);
         fill(monGroup,
@@ -89,6 +105,10 @@ StatusCode ActsTrk::SeedingAlgorithmAnalysisAlg::fillHistograms(const EventConte
              numberStripSpacePoints,
              numberPixelSeeds,
              numberStripSeeds);
+
+
+
+
     }
 
     return StatusCode::SUCCESS;

@@ -37,19 +37,8 @@ using std::string;
 /// Standard Constructor
 PileUpMergeSvc::PileUpMergeSvc(const std::string& name,ISvcLocator* svc)
   : AthService(name,svc), 
-    p_overStore("StoreGateSvc", "StoreGateSvc"),
-    m_intervals(this),
-    m_pITriggerTime(""),
-    m_returnTimedData(true),
-    m_EventInfoKeyName("OverlayEvent"),
-    m_xAODCnvTool("xAODMaker::EventInfoCnvTool/EventInfoCnvTool", this)
+    p_overStore("StoreGateSvc", "StoreGateSvc")
 {
-  declareProperty("Intervals", m_intervals, "Folders specifying bunch xing intervals for different data objects");
-  declareProperty("TriggerTimeTool", m_pITriggerTime, "allows to apply a trigger time offset");
-  declareProperty("ReturnTimedData", m_returnTimedData, 
-		  "determine whether the TimedData returned by retrieveSubEvts have non trivial PileUpTimeEventIndex. May be set to false for overlay with real events ");
-  declareProperty( "xAODCnvTool", m_xAODCnvTool );
-  declareProperty("EventInfoKeyName", m_EventInfoKeyName, "default name for EventInfo"); 
 }
 
 /// setup PileUpIntervals

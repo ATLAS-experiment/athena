@@ -3,7 +3,6 @@
 """Instantiates TrigJetHypoToolConfig_fastreduction AlgTool 
 from a hypo tree."""
 
-from __future__ import print_function
 
 from collections import defaultdict
 

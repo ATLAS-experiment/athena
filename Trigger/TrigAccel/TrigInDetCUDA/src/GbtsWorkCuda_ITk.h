@@ -10,7 +10,7 @@
 #include "TrigAccelEvent/Work.h" //base class
 
 #include <cstdio> // for printf
-#include <memory> // for shared_ptr
+#include <memory> // for shared_ptr and unique_ptr
 
 class GbtsDeviceContext;
 class WorkTimeStampQueue;

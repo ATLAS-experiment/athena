@@ -29,25 +29,25 @@ namespace MuonValR4{
            /** @brief Name of the SimHit collection in the output tree */
            std::string m_collName{};
            /** @brief Global position of the SimHits */
-           ThreeVectorBranch m_globPos{parent(), m_collName+"GlobPos"};
+           ThreeVectorBranch m_globPos{parent(), m_collName+"_globPos"};
            /** @brief Global direction of the traversing particle generating the hit */
-           ThreeVectorBranch m_globDir{parent(), m_collName+"GlobDir"};
+           ThreeVectorBranch m_globDir{parent(), m_collName+"_globDir"};
            /** @brief Local position of the produced simHit */           
-           ThreeVectorBranch m_locPos{parent(), m_collName+"LocalPos"};
+           ThreeVectorBranch m_locPos{parent(), m_collName+"_localPos"};
            /** @brief Local direction of the traversing particle generating the hit */
-           ThreeVectorBranch m_locDir{parent(), m_collName+"LocalDir"};
+           ThreeVectorBranch m_locDir{parent(), m_collName+"_localDir"};
            /** @brief Global time when the simHit was produced */
-           VectorBranch<float>& m_globTime{parent().newVector<float>(m_collName+"GlobalTime")};
+           VectorBranch<float>& m_globTime{parent().newVector<float>(m_collName+"_globalTime")};
            /** @brief Velocity of the simHit expressed in terms of beta */
-           VectorBranch<float>& m_beta{parent().newVector<float>(m_collName+"Beta")};
+           VectorBranch<float>& m_beta{parent().newVector<float>(m_collName+"_beta")};
            /** @brief PdgId of the particle generating the hit */
-           VectorBranch<int>& m_pdgId{parent().newVector<int>(m_collName+"PdgId")};
+           VectorBranch<int>& m_pdgId{parent().newVector<int>(m_collName+"_pdgId")};
            /** @brief Energy deposited in the volume */
-           VectorBranch<float>& m_energyDep{parent().newVector<float>(m_collName+"EnergyDeposit")};
+           VectorBranch<float>& m_energyDep{parent().newVector<float>(m_collName+"_energyDeposit")};
            /** @brief Kinetic energy of the traversing particle */
-           VectorBranch<float>& m_kinE{parent().newVector<float>(m_collName+"KinericEnergy")};
+           VectorBranch<float>& m_kinE{parent().newVector<float>(m_collName+"_kineticEnergy")};
            /** @brief Mass of the traversing particle */
-           VectorBranch<float>& m_mass{parent().newVector<float>(m_collName+"Mass")};
+           VectorBranch<float>& m_mass{parent().newVector<float>(m_collName+"_mass")};
            /** @brief Pointer to the Identifier branch */
            std::shared_ptr<MuonIdentifierBranch> m_identifier{};
            

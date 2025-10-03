@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -28,14 +28,8 @@ Folder::Folder( const std::string& type,
                 const std::string& name,
                 const IInterface* parent) : 
   base_class( type, name, parent ),
-  m_pCLIDSvc("ClassIDSvc", name),
-  m_checkItems(false)
+  m_pCLIDSvc("ClassIDSvc", name)
 {
-  declareProperty("ItemList", m_itemList,
-		  " list of data objects identified by a class name (or clid)#key pairs. One can use '*' as key value to add all objects of a given type to the Folder.  If the type name ends with !, then write the object as exactly that type (and not as any derived class). ");
-  m_itemList.declareUpdateHandler(&Folder::decodeItemList, this);
-  declareProperty("CheckItems", m_checkItems, 
-		  "check if item types are known to ClassIDSvc");
 }
 
 //-----------------------------------------------------------------------------
@@ -91,7 +85,7 @@ Folder::add(const std::string& typeName, const std::string& skey) {
   if (sc.isSuccess()) sc=add(clid, skey, false, exact);
   else {
     MsgStream log(msgSvc(), name());
-    log << MSG::WARNING << "add: can not find type ["
+    log << MSG::ERROR << "add: can not find type ["
 	<< typeName << "] in clid db" << endmsg;
   }
   return sc;
@@ -107,7 +101,7 @@ Folder::add(const CLID& clid, const std::string& skey,
     sc = StatusCode::SUCCESS;
   } else if (0 != clid) {
     MsgStream log(msgSvc(), name());
-    log << MSG::WARNING << "add: can not find clid "
+    log << MSG::ERROR << "add: can not find clid "
 	<< clid << " in clid db" << endmsg;
   }
 #ifdef SGFOLDER_DEBUG

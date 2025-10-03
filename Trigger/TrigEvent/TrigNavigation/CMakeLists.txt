@@ -4,7 +4,7 @@
 atlas_subdir( TrigNavigation )
 
 # External dependencies:
-find_package( Boost COMPONENTS regex )
+find_package( Boost )
 find_package( ROOT COMPONENTS Core )
 find_package( TBB )
 

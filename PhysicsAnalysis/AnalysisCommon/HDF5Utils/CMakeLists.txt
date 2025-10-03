@@ -83,3 +83,11 @@ atlas_add_test( test_hdf5_writer
 atlas_add_test( test_histogram
   SCRIPT test-histogram
   POST_EXEC_SCRIPT test-histogram-output)
+
+
+# half precision tests
+atlas_add_executable( test-half-precision
+  util/test-half-precision.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES HDF5Utils ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+

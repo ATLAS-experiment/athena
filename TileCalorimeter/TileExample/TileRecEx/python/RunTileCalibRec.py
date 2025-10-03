@@ -152,6 +152,7 @@ if __name__=='__main__':
     # Initially the following flags are not set up (they must be provided)
     flags.Input.Files = []
     flags.Tile.RunType = TileRunType.UNDEFINED
+    flags.LAr.doHVCorr = False
 
     # Initial configuration flags from command line arguments (to be used to set up defaults)
     flags.fillFromArgs(parser=parser)
@@ -221,7 +222,7 @@ if __name__=='__main__':
     # Set up the DB global conditions tag
     if flags.Input.Format is Format.BS:
         if args.run3:
-            condDbTag = 'CONDBR2-BLKPA-2024-04' if args.upd4 else 'CONDBR2-ES1PA-2024-05'
+            condDbTag = 'CONDBR2-BLKPA-2025-03' if args.upd4 else 'CONDBR2-ES1PA-2025-02'
             detDescrVersion = 'ATLAS-R3S-2021-03-01-00'
         elif args.run2:
             condDbTag = 'CONDBR2-BLKPA-2018-16' if args.upd4 else 'CONDBR2-ES1PA-2018-05'
@@ -321,13 +322,14 @@ if __name__=='__main__':
         if flags.Tile.doOptATLAS and any([flags.Tile.doFit, flags.Tile.doOpt2]):
             rawChannelContainer = 'TileRawChannelOpt2' if flags.Tile.doOpt2 else 'TileRawChannelFit'
         from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
+        mergeChannels = flags.Tile.RunType is TileRunType.PHY
         if biGainRun:
             cfg.merge( TileCellMakerCfg(flags, SkipGain=0, mergeChannels=False) )
             cfg.merge( TileCellMakerCfg(flags, SkipGain=1, mergeChannels=False) )
             cfg.getEventAlgo("TileCellMakerHG").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
             cfg.getEventAlgo("TileCellMakerLG").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
         else:
-            cfg.merge( TileCellMakerCfg(flags, mergeChannels=False) )
+            cfg.merge( TileCellMakerCfg(flags, mergeChannels=mergeChannels) )
             cfg.getEventAlgo("TileCellMaker").CaloCellMakerToolNames["TileCellBuilder"].TileRawChannelContainer = rawChannelContainer
 
     # =======>>> Set up the Tile clusters maker
@@ -413,7 +415,7 @@ if __name__=='__main__':
         if args.dq_mon and flags.Tile.RunType is TileRunType.PHY and flags.Tile.readDigits:
             from TileMonitoring.TileDQFragMonitorAlgorithm import TileDQFragMonitoringConfig
             cfg.merge(TileDQFragMonitoringConfig(flags))
-            setOnlineEnvironment(cfg.getEventAlgo('TileDQMonAlg'))
+            setOnlineEnvironment(cfg.getEventAlgo('TileDQFragMonAlg'))
 
         if args.cell_mon:
             from TileMonitoring.TileCellMonitorAlgorithm import TileCellMonitoringConfig

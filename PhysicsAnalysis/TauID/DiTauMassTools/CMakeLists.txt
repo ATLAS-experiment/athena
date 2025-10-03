@@ -23,11 +23,9 @@ atlas_add_library( DiTauMassToolsLib
    LINK_LIBRARIES AsgTools PATInterfaces xAODMissingET xAODEventInfo xAODBase xAODTau
    PRIVATE_LINK_LIBRARIES PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( DiTauMassTools
-      src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel DiTauMassToolsLib )
-endif()
+atlas_add_component( DiTauMassTools
+   src/components/*.cxx
+   LINK_LIBRARIES DiTauMassToolsLib )
 
 atlas_add_dictionary( DiTauMassToolsDict
    DiTauMassTools/DiTauMassToolsDict.h

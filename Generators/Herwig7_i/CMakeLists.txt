@@ -4,7 +4,6 @@
 atlas_subdir( Herwig7_i )
 
 # External dependencies:
-find_package( Boost )
 find_package( Herwig3 COMPONENTS HerwigAPI )
 find_package( ThePEG COMPONENTS "ThePEG" "LesHouches${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 find_package( GSL )
@@ -31,12 +30,12 @@ if (HEPMC3_USE)
 find_package( hepmc3 )
 atlas_add_component( Herwig7_i
    Herwig7_i/Herwig7.h src/Herwig7.cxx src/Herwig7HepMC.cxx src/components/*.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS}
+   INCLUDE_DIRS  ${HERWIG3_INCLUDE_DIRS}
    ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${OPENLOOPS_INCLUDE_DIRS} ${HEPMC3_INCLUDE_DIRS}
    DEFINITIONS -DHWVERSION=\"${HERWIG3_LCGVERSION}\"
    -DHWVER_IS_72=\"${HW3_VER_IS_72}\"
    -DHAVE_HEPMC3
-   LINK_LIBRARIES ${HERWIG3_LIBRARIES}  ${Boost_LIBRARIES}
+   LINK_LIBRARIES ${HERWIG3_LIBRARIES}
    ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
    GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
 
@@ -44,11 +43,11 @@ else()
 find_package( HepMC )
 atlas_add_component( Herwig7_i
    Herwig7_i/Herwig7.h src/Herwig7.cxx src/Herwig7HepMC.cxx src/components/*.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS}
+   INCLUDE_DIRS ${HERWIG3_INCLUDE_DIRS}
    ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${OPENLOOPS_INCLUDE_DIRS}
    DEFINITIONS -DHWVERSION=\"${HERWIG3_LCGVERSION}\"
    -DHWVER_IS_72=\"${HW3_VER_IS_72}\"
-   LINK_LIBRARIES ${HERWIG3_LIBRARIES}  ${Boost_LIBRARIES}
+   LINK_LIBRARIES ${HERWIG3_LIBRARIES}
    ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
    GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
 endif()
@@ -83,8 +82,8 @@ atlas_add_library ( powhegHerwigBB4L
   BB4LHerwig/powhegAnalysis.h
   NO_PUBLIC_HEADERS
   SHARED
-  INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/include ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified
-  LINK_LIBRARIES ${THEPEG_LIBRARIES} ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
+  INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/include ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified
+  LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
 
 
 # Set up some environment variables for Herwig.

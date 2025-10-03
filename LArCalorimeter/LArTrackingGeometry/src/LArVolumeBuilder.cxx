@@ -61,10 +61,6 @@ LAr::LArVolumeBuilder::~ LArVolumeBuilder() = default;
 // initialize
 StatusCode LAr::LArVolumeBuilder::initialize()
 {
-  // Retrieve the tracking volume helper
-  ATH_CHECK(m_lArTrackingVolumeHelper.retrieve());
-  ATH_MSG_DEBUG( "Retrieved tool " << m_lArTrackingVolumeHelper );
-
   // Retrieve the volume creator
   ATH_CHECK(m_trackingVolumeCreator.retrieve());
   ATH_MSG_DEBUG( "Retrieved tool " << m_trackingVolumeCreator );
@@ -124,10 +120,6 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
 
   std::shared_ptr<Trk::CylinderVolumeBounds> solenoidBounds             = nullptr;
   std::shared_ptr<Trk::CylinderVolumeBounds> solenoidLArBarrelGapBounds = nullptr;
-
-  // dummy objects
-  Trk::LayerArray* dummyLayers = nullptr;
-  Trk::TrackingVolumeArray* dummyVolumes = nullptr;
 
   // default material definition
   Trk::Material solenoidMaterial = Trk::Material( 69.9, 811.5,  28.9, 13.8, 0.003);
@@ -299,14 +291,14 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
     const Trk::BinnedMaterial lArBarrelMaterialBinNeg(*lArBarrelMaterial,bubn,layBUN,indexN,matID);
 
 
-    auto lArBarrelPos = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelPos = new Trk::AlignableTrackingVolume(
       std::move(lArBPosTransform),
       std::move(lArBarrelBoundsPos),
       lArBarrelMaterialBinPos,
       1,
       "Calo::Detectors::LAr::BarrelPos");
 
-    auto lArBarrelNeg = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelNeg = new Trk::AlignableTrackingVolume(
       std::move(lArBNegTransform),
       std::move(lArBarrelBoundsNeg),
       lArBarrelMaterialBinNeg,
@@ -366,7 +358,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
                nullptr,
 				       solenoidBounds,
 				       solenoidMaterial,
-				       dummyLayers, dummyVolumes,
+				       nullptr, nullptr,
 				       "Calo::Solenoid");
 
   }
@@ -458,14 +450,14 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
     const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinPos(*lArBarrelPresamplerMaterial,rBU,dummylay,matBP);
     const Trk::BinnedMaterial lArBarrelPresamplerMaterialBinNeg(*lArBarrelPresamplerMaterial,rBUc,dummylay,matBP);
 
-    auto lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelPresamplerPos = new Trk::AlignableTrackingVolume(
                           std::move(lArPBPosTransform),
 											    lArBarrelPresamplerPosBounds,
 											    lArBarrelPresamplerMaterialBinPos,
 											    0,
 											    "Calo::Detectors::LAr::BarrelPresamplerPos");
 
-    auto lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(
+    auto *lArBarrelPresamplerNeg = new Trk::AlignableTrackingVolume(
                           std::move(lArPBNegTransform),
 											    std::move(lArBarrelPresamplerNegBounds),
 											    lArBarrelPresamplerMaterialBinNeg,
@@ -496,7 +488,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
     solenoidLArBarrelGap = new Trk::TrackingVolume(nullptr,
                                                    std::move(solenoidLArBarrelGapBounds),
                                                    solenoidGapMaterial,
-                                                   dummyLayers, dummyVolumes,
+                                                   nullptr, nullptr,
                                                    "Calo::GapVolumes::LAr::SolenoidPresamplerGap");
   }
 
@@ -1283,7 +1275,11 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
 
    if(m_useCaloSurfBuilder){
 
-     double z, rmin, rmax, hphi, depth;
+     double z;
+     double rmin;
+     double rmax;
+     double hphi;
+     double depth;
      Amg::Transform3D pos;
      m_calosurf->get_disk_surface(CaloCell_ID::HEC0, 1, pos, z, rmin, rmax, hphi, depth, &caloDDM);
      caloSurfZOffset = lArHecZmin - z;
@@ -1593,14 +1589,14 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
               std::move(lArPositiveMBTSTransform),
 							std::make_shared<Trk::CylinderVolumeBounds>(*lArNegativeMBTSBounds),
 							dummyMaterial,
-							dummyLayers, dummyVolumes,
+							nullptr, nullptr,
 							"Calo::Detectors::MBTS");
 
     lArNegativeEndcapInnerGap = new Trk::TrackingVolume(
               std::move(lArNegativeMBTSTransform),
 							std::move(lArNegativeMBTSBounds),
 							dummyMaterial,
-							dummyLayers, dummyVolumes,
+							nullptr, nullptr,
 							"Calo::Detectors::MBTS");
   }
 

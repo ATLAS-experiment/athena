@@ -59,6 +59,8 @@ class TH2D;
     // Takes the truthtracks as input and parses it into a useful form for later use
     // (e.g. stores which bin the true track is in)
     void parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks);
+    FPGATrackSimBinUtil::IdxSet& truthBin(unsigned stepnum) { return m_truthbin[stepnum]; }
+    std::vector<FPGATrackSimBinUtil::IdxSet>& truthBin() { return m_truthbin; }
 
     // Fill methods
     void fillHitLevelInput(const FPGATrackSimHit* hit);
@@ -79,7 +81,15 @@ class TH2D;
     Gaudi::Property<double> m_phiScale{this, "phiScale", {}, "Scale for Delta Phi variable"};
     Gaudi::Property<double> m_etaScale{this, "etaScale", {}, "Scale for Delta Eta variable"};
     Gaudi::Property<double> m_drScale{this, "drScale", {}, "Scale for radius differences"};
+    Gaudi::Property<bool> m_plotAllBins{this, "plotAllBins", {false}, "Default is to plot only truth bin values, this set to plot all bins"};
 
+    Gaudi::Property<double> m_d0pad{this, "D0Pad", 0.0, "Extra phi padding from d0 resolution"};
+    Gaudi::Property<double> m_phipad{this, "PhiPad", 0.0, "Extra phi padding from phi resolution"};
+    Gaudi::Property<double> m_qptpad{this, "QPtPad", 0.0, "Extra phi padding from q/pT resolution"};
+    Gaudi::Property<double> m_z0pad{this, "Z0Pad", 0.0, "Extra eta padding from z0 resolution"};
+    Gaudi::Property<double> m_etapad{this, "EtaPad", 0.0, "Extra eta padding from eta resolution"};
+    Gaudi::Property<std::string> m_layerStudyTreeName{this, "LayerStudyTreeName", "LayerStudy", "Name of the LayerStudy TTree"};
+    Gaudi::Property<std::string> m_truthTreeName{this,"TruthTreeName","TruthTree","Name of the Truth TTree"};
     ///////////////////////////////////////////////////////////////////////
     // Pointer to binned hits
     const FPGATrackSimBinnedHits *m_binnedhits{nullptr};
@@ -95,7 +105,8 @@ class TH2D;
     // plots are only filled for the truth bin if single particle sample
     // this gives the distributions of the cut variables when they are
     // reconstructed in the right bin
-    void setBinPlotsActive(const FPGATrackSimBinUtil::IdxSet &idx) {m_binPlotsActive = ((m_truthbin.back() == idx) || (!m_isSingleParticle));}
+    void setBinPlotsActive(const FPGATrackSimBinUtil::IdxSet &idx); 
+    
     // this flag governs if pair filter and pairset filter plots filled
     bool m_binPlotsActive = false;
 
@@ -108,6 +119,9 @@ class TH2D;
     TH1D *m_truthpars_hists[5] = {0, 0, 0, 0, 0};
 
     TH1D *m_inputHits = 0;
+
+    int m_binsFilledCnt{0};
+    TH1D *m_binsFilled = 0;
 
     // residuals and shifts from truth bin center
     std::vector<TH1D *> m_phiResidual;
@@ -130,6 +144,16 @@ class TH2D;
     TH1D * m_hitsPerLayer = 0;
     TH2D * m_hitsPerLayer2D = 0;
     TH2D *m_hitsPerLayer_bin = 0;
+
+    // distributions for efficiency monitoring
+    std::vector<std::string> m_distPlotClasses{"truth","ThrshNlayer","ThrshNlayerm1"}; // 0=truth distribution, 1=passes n-1 binning selection
+    std::vector<TH1D *> m_ptDist;
+    std::vector<TH1D *> m_etaDist;
+    std::vector<TH1D *> m_phiDist;
+    std::vector<TH1D *> m_d0Dist;
+    std::vector<TH1D *> m_z0Dist;
+    
+
 
     private:
 

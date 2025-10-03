@@ -64,10 +64,10 @@ class EDMItem (TreeWidget.TreeItem):
             attrs.sort()
             for attr in attrs:
                 # private 
-                if re.search("\A_",attr):
+                if re.search(r"\A_",attr):
                     continue
                 # member
-                if re.search("\Am_",attr):
+                if re.search(r"\Am_",attr):
                     continue
                 # method
                 attrRef = getattr(self.ref,attr)
@@ -85,7 +85,7 @@ class RootItem (EDMItem):
         attrs.sort()
         for attr in attrs:
             # private 
-            if re.search("\A_",attr):
+            if re.search(r"\A_",attr):
                 continue
             # else
             attrRef = getattr(self.ref,attr)
@@ -114,7 +114,7 @@ rootObj = MyRootObj()
 for key in objList.keys():
     name = objList[key]
     try:
-        exec 'con = PyKernel.retrieve(g.%s,"%s")' % (name, key)
+        exec('con = PyKernel.retrieve(g.%s,"%s")' % (name, key))
         setattr(rootObj,key, con)
     except:
         pass

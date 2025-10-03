@@ -1,119 +1,72 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFPHitAnalysis.h"
 
+#include "StoreGate/ReadHandle.h"
 #include "AFP_SimEv/AFP_SIDSimHit.h"
-#include "AFP_SimEv/AFP_SIDSimHitCollection.h"
 
-#include "TH1.h"
-#include "TTree.h"
-#include "TString.h"
 
-#include <algorithm>
-#include <math.h>
-#include <functional>
-#include <iostream>
-#include <stdio.h>
-
-AFPHitAnalysis::AFPHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
-   : AthAlgorithm(name, pSvcLocator)
-   , m_h_hitID(0)
-   , m_h_pdgID(0)
-   , m_h_trackID(0)
-   , m_h_kine(0)
-   , m_h_edep(0)
-   , m_h_stepX(0)
-   , m_h_stepY(0)
-   , m_h_stepZ(0)
-   , m_h_time(0)
-   , m_h_stationID(0)
-   , m_h_detID(0)
-   , m_h_pixelRow(0)
-   , m_h_pixelCol(0)
-   , m_hitID(0)
-   , m_pdgID(0)
-   , m_trackID(0)
-   , m_kine(0)
-   , m_edep(0)
-   , m_stepX(0)
-   , m_stepY(0)
-   , m_stepZ(0)
-   , m_time(0)
-   , m_stationID(0)
-   , m_detID(0)
-   , m_pixelRow(0)
-   , m_pixelCol(0)
-   , m_tree(0)
-   , m_ntupleFileName("/AFPHitAnalysis/")
-   , m_path("/AFPHitAnalysis/")
-   , m_thistSvc("THistSvc", name)
-{
-  declareProperty("NtupleFileName", m_ntupleFileName);
-  declareProperty("HistPath", m_path);
-}
 
 
 StatusCode AFPHitAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing AFPHitAnalysis" );
 
-  // Grab the Ntuple and histogramming service for the tree
-  CHECK(m_thistSvc.retrieve());
-
+  ATH_CHECK(m_readKey.initialize());
   /** now define the histograms**/
   m_h_hitID = new TH1D("h_hitID", "hitID",100, 0., 100.);
   m_h_hitID->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_hitID->GetName(), m_h_hitID));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_hitID->GetName(), m_h_hitID));
 
   m_h_pdgID =  new TH1D("h_pdgID", "pdgID", 200, -100,100);
   m_h_pdgID->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_pdgID->GetName(), m_h_pdgID));	
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_pdgID->GetName(), m_h_pdgID));	
 
   m_h_trackID =  new TH1D("h_trackID", "trackID", 100, 0,100);
   m_h_trackID->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_trackID->GetName(), m_h_trackID));	
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_trackID->GetName(), m_h_trackID));	
 
   m_h_kine =  new TH1D("h_kine", "kine", 100, 0,1000);
   m_h_kine->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_kine->GetName(), m_h_kine));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_kine->GetName(), m_h_kine));
 
   m_h_edep =  new TH1D("h_edep", "edep", 100, 0,1000);
   m_h_edep->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_edep->GetName(), m_h_edep));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_edep->GetName(), m_h_edep));
 
   m_h_stepX =  new TH1D("h_stepX", "stepX", 100, 0,1000);
   m_h_stepX->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_stepX->GetName(), m_h_stepX));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_stepX->GetName(), m_h_stepX));
 
   m_h_stepY =  new TH1D("h_stepY", "stepY", 100, 0,1000);
   m_h_stepY->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_stepY->GetName(), m_h_stepY));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_stepY->GetName(), m_h_stepY));
 
   m_h_stepZ =  new TH1D("h_stepZ", "stepZ", 100, 0,1000);
   m_h_stepZ->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_stepZ->GetName(), m_h_stepZ));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_stepZ->GetName(), m_h_stepZ));
 
   m_h_stationID =  new TH1D("h_stationID", "stationID", 50, 0,50);
   m_h_stationID->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_stationID->GetName(), m_h_stationID));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_stationID->GetName(), m_h_stationID));
 
   m_h_detID =  new TH1D("h_detID", "detID", 50, 0,50);
   m_h_detID->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_detID->GetName(), m_h_detID));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_detID->GetName(), m_h_detID));
 
   m_h_pixelRow =  new TH1D("h_pixelRow", "pixelRow", 20, 0,20);
   m_h_pixelRow->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_pixelRow->GetName(), m_h_pixelRow));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_pixelRow->GetName(), m_h_pixelRow));
 
   m_h_pixelCol =  new TH1D("h_pixelCol", "pixelCol", 20, 0,20);
   m_h_pixelCol->StatOverflows();
-  CHECK(m_thistSvc->regHist(m_path+m_h_pixelCol->GetName(), m_h_pixelCol));
+  ATH_CHECK(histSvc()->regHist(m_path+m_h_pixelCol->GetName(), m_h_pixelCol));
   
   /** now add branches and leaves to the tree */
   m_tree = new TTree("AFP","AFP");
   std::string fullNtupleName =  "/" + m_ntupleFileName + "/";
-  CHECK(m_thistSvc->regTree(fullNtupleName,m_tree));
+  ATH_CHECK(histSvc()->regTree(fullNtupleName,m_tree));
 
   if (m_tree){
     m_tree->Branch("hitID", &m_hitID);
@@ -129,10 +82,7 @@ StatusCode AFPHitAnalysis::initialize() {
     m_tree->Branch("pixelRow", &m_pixelRow);
     m_tree->Branch("pixelCol", &m_pixelCol);  
   }
-  else {
-    ATH_MSG_ERROR("No tree found!");
-  }
-
+  
   ATH_MSG_INFO("Exiting AFPHitAnalysis::initialize()");
   
   return StatusCode::SUCCESS;
@@ -159,9 +109,11 @@ StatusCode AFPHitAnalysis::execute() {
   ATH_MSG_INFO( "AFPHitAnalysis tree branches cleared" );
 
   AFP_SIDSimHitConstIter hi;
-  const AFP_SIDSimHitCollection* iter;
-  CHECK( evtStore()->retrieve(iter,"AFP_SIDSimHitCollection") );
 
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
+  const AFP_SIDSimHitCollection* iter{nullptr};
+  ATH_CHECK(SG::get(iter, m_readKey, ctx));
+  
   ATH_MSG_DEBUG( "AFP_SIDSSimHitCollection retrieved" );
   
   for ( hi=(*iter).begin(); hi != (*iter).end(); ++hi ) {

@@ -67,9 +67,8 @@ using namespace GeoStrUtils;
 namespace MuonGM {
 
     //============================================================================
-    MMReadoutElement::MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, MuonDetectorManager* mgr, const NswPassivationDbData* passivData) 
-    : MuonClusterReadoutElement(pv,mgr, Trk::DetectorElemType::MM),
-      m_passivData(passivData),
+    MMReadoutElement::MMReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, MuonDetectorManager* mgr) 
+    : MuonClusterReadoutElement{pv,mgr, Trk::DetectorElemType::MM},
       m_ml(mL) {
       
         std::string fixName = (stName[2] == 'L') ? "MML" : "MMS";

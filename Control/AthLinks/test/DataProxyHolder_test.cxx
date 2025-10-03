@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/DataProxyHolder_test.cxx
@@ -377,7 +377,7 @@ void initInputRename ATLAS_NOT_THREAD_SAFE ()
   SG::StringPool sp;
   auto m = std::make_unique<InputRenameMap_t>();
   Athena::InputRenameEntry ren { sp.stringToKey("fooy", fooclid), "fooy" };
-  (*m)[sp.stringToKey("foox", fooclid)] = ren;
+  (*m)[sp.stringToKey("foox", fooclid)] = std::move(ren);
   Athena::RCUUpdate<InputRenameMap_t> u (inputRenameMap);
   u.update (std::move (m));
   SG::setDataProxyHolderInputRenameMap (&inputRenameMap);

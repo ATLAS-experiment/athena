@@ -100,6 +100,56 @@ def load_files_for_fcp_scenario(MASS, CHARGE, X, Y):
     del particleLine2
 
 
+@AccumulatorCache
+def load_files_for_dyon_scenario(MASS, CHARGE, GCHARGE):
+    CODE=4110000+int(CHARGE)*10
+    CODE2=4120000+int(CHARGE)*10
+    if getPDGTABLE('PDGTABLE.MeV'):
+        ALINE1="M {code}                         {intmass}.E+03       +0.0E+00 -0.0E+00 DyonSS         0".format(code=CODE,intmass=int(MASS)) #Dyon magnetic and electric charges are the same sign
+        ALINE2="W {code}                          0.E+00         +0.0E+00 -0.0E+00 DyonSS        0".format(code=CODE)
+        ALINE3="M {code2}                         {intmass}.E+03       +0.0E+00 -0.0E+00 DyonOS         0".format(code2=CODE2,intmass=int(MASS)) #Dyon magnetic and electric charges are opposite signs
+        ALINE4="W {code2}                          0.E+00         +0.0E+00 -0.0E+00 DyonOS        0".format(code2=CODE2)
+
+
+        BLINE1="{code} {intmass}.00 {fcharge} {gcharge} # DyonSS".format(code=CODE, intmass=int(MASS), fcharge=float(CHARGE), gcharge=GCHARGE)
+        BLINE2="-{code} {intmass}.00 -{fcharge} -{gcharge} # DyonSSBar".format(code=CODE, intmass=int(MASS), fcharge=float(CHARGE), gcharge=GCHARGE)
+        BLINE3="{code2} {intmass}.00 -{fcharge} {gcharge} # DyonOS".format(code2=CODE2, intmass=int(MASS), fcharge=float(CHARGE), gcharge=GCHARGE)
+        BLINE4="-{code2} {intmass}.00 {fcharge} -{gcharge} # DyonOSBar".format(code2=CODE2, intmass=int(MASS), fcharge=float(CHARGE), gcharge=GCHARGE)
+
+        f=open('PDGTABLE.MeV','a')
+        f.writelines(str(ALINE1))
+        f.writelines('\n')
+        f.writelines(str(ALINE2))
+        f.writelines('\n')
+        f.writelines(str(ALINE3))
+        f.writelines('\n')
+        f.writelines(str(ALINE4))
+        f.writelines('\n')
+        f.close()
+        partmod = os.path.isfile('particles.txt')
+        if partmod is True:
+            os.remove('particles.txt')
+        f=open('particles.txt','w')
+        f.writelines(str(BLINE1))
+        f.writelines('\n')
+        f.writelines(str(BLINE2))
+        f.writelines('\n')
+        f.writelines(str(BLINE3))
+        f.writelines('\n')
+        f.writelines(str(BLINE4))
+        f.writelines('\n')
+        f.close()
+
+        del ALINE1
+        del ALINE2
+        del ALINE3
+        del ALINE4
+        del BLINE1
+        del BLINE2
+        del BLINE3
+        del BLINE4
+
+
 def MonopolePhysicsToolCfg(flags, name="MonopolePhysicsTool", **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools( CompFactory.MonopolePhysicsTool(name, **kwargs) )
@@ -187,6 +237,46 @@ def QballCfg(flags):
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
         result.getService("PhysicsListSvc").PhysOption += physicsOptions
 
+    return result
+
+
+def DyonPreInclude(flags):
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
+        # add monopole-specific configuration for looper killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.MonopoleLooperKillerToolCfg']
+        # add default HIP killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.HIPKillerToolCfg']
+        flags.Sim.G4Stepper = 'ClassicalRK4'
+        flags.Sim.G4EquationOfMotion = "G4mplEqMagElectricField" #Monopole Equation of Motion
+        flags.Sim.TightMuonStepping = False
+        simdict = flags.Input.SpecialConfiguration
+        if "InteractingPDGCodes" not in simdict:
+            assert "CHARGE" in simdict
+            CODE=4110000+int(float(simdict["CHARGE"])*10)
+            CODE2=4120000+int(float(simdict["CHARGE"])*10)
+            simdict['InteractingPDGCodes'] = str([CODE,-1*CODE,CODE2,-1*CODE2])
+            flags.Input.SpecialConfiguration = simdict
+
+
+def DyonCfg(flags):
+    result = ComponentAccumulator()
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
+        result.merge(PhysicsListSvcCfg(flags))
+
+    simdict = flags.Input.SpecialConfiguration
+    assert "MASS" in simdict
+    assert "CHARGE" in simdict
+    assert "GCHARGE" in simdict
+    load_files_for_dyon_scenario(simdict["MASS"], simdict["CHARGE"], simdict["GCHARGE"])
+    pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+    from ExtraParticles.PDGHelpers import updateExtraParticleAcceptList
+    updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
+
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from GaudiKernel.GaudiHandles import PrivateToolHandleArray
+        physicsOptions = PrivateToolHandleArray([ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ])
+        result.getService("PhysicsListSvc").PhysOption = physicsOptions + result.getService("PhysicsListSvc").PhysOption
     return result
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,7 +31,7 @@ public:
 
   //Static methods used in various places. Put it here to avoid copying code:
   static int nMax() { return 400; }
-  static bool calcParsFromExtentAndSpacing( VP1HelperClassBase*,const double& extent, const double& spacing,
+  static bool calcParsFromExtentAndSpacing( const VP1HelperClassBase*,const double& extent, const double& spacing,
 					    const int& nmaxlimit, int& nmax, double& distmax );
 
   VP1Floor( SoSeparator * attachsep,//where the floor separator will attach itself when visible

@@ -3,6 +3,13 @@
 """
   Run ACTS geometry construction for ITk
 """
+from pathlib import Path
+import argparse
+
+parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk")
+parser.add_argument("--gen3", action="store_true", help="Use Gen3 geometry + construction")
+args = parser.parse_args()
+
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 
@@ -18,11 +25,14 @@ flags.Detector.GeometryITkPixel = True
 flags.Detector.GeometryITkStrip = True
 flags.Detector.GeometryBpipe = True
 flags.Detector.GeometryCalo = False
+flags.Detector.GeometryMuon = False
 
 flags.Concurrency.NumThreads = 64
 flags.Concurrency.NumConcurrentEvents = 64
 
 flags.Exec.MaxEvents = 200
+
+flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
 
 flags.lock()
 flags.dump()
@@ -37,6 +47,7 @@ tgSvc = ActsTrackingGeometrySvcCfg(flags,
                                    OutputLevel=INFO,
                                    RunConsistencyChecks=True,
                                    #  ConsistencyCheckOutput="trk_geo_check.csv", # enable debug output writing
+                                   BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
                                    ObjDebugOutput=True)
 acc.merge(tgSvc)
 

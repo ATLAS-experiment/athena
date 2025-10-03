@@ -10,10 +10,12 @@
 #include "GaudiKernel/ToolHandle.h" // For tool handle array
 // Athena headers
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthMessaging.h"
 #include "G4AtlasInterfaces/IDetectorConstructionTool.h"
 #include "G4AtlasInterfaces/IDetectorGeometryTool.h"
 #include "G4AtlasInterfaces/IRegionCreator.h"
 #include "G4AtlasInterfaces/IParallelWorldTool.h"
+#include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 #include "G4AtlasInterfaces/IFieldManagerTool.h"
 #include "G4AtlasInterfaces/IG4GeometryConfigurationTool.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
@@ -33,6 +35,24 @@
 class G4AtlasDetectorConstructionTool final : public extends<AthAlgTool, IDetectorConstructionTool> {
 
  public:
+  /// G4VUserDetectorConstruction object passed to the G4 run manager
+  /// Thid shouldn't live longer than the parent tool
+  class G4AtlasDetectorConstruction : public G4VUserDetectorConstruction,
+                                      public AthMessaging {
+   public:
+    G4AtlasDetectorConstruction(
+        G4AtlasDetectorConstructionTool* detConstructionTool)
+        : AthMessaging("G4AtlasDetectorConstruction"),
+          m_detConstructionTool(detConstructionTool) {}
+
+    virtual G4VPhysicalVolume* Construct() override final;
+    virtual void ConstructSDandField() override final;
+
+   private:
+    G4AtlasDetectorConstructionTool* m_detConstructionTool{
+        nullptr};  // Pointer to the G4 Atlas detector construction tool
+  };
+
   /// Standard constructor
   G4AtlasDetectorConstructionTool( const std::string& type , const std::string& name,
                                    const IInterface* parent ) ;
@@ -44,12 +64,8 @@ class G4AtlasDetectorConstructionTool final : public extends<AthAlgTool, IDetect
   virtual StatusCode initialize( ) override final;
 
   /** implements the following IDetectorConstructionTool methods */
-  virtual G4VUserDetectorConstruction* GetDetectorConstruction() override final {return this;}
+  virtual UPDetectorConstruction GetDetectorConstruction() override final;
   virtual std::vector<std::string>& GetParallelWorldNames() override final; // Called by DetectorGeometrySvc
-
-  /** Implements the following G4VUserDetectorConstruction methods*/
-  virtual G4VPhysicalVolume* Construct() override final;
-  virtual void ConstructSDandField() override final;
 
  private:
   ToolHandle<IDetectorGeometryTool> m_detTool{this, "World", "", "Tool handle of the top-of-the-tree detector geometry tool"};
@@ -57,6 +73,7 @@ class G4AtlasDetectorConstructionTool final : public extends<AthAlgTool, IDetect
   ToolHandleArray<IParallelWorldTool> m_parallelWorlds{this, "ParallelWorlds", {} , "Tools to define G4 parallel worlds"};
   ToolHandleArray<IG4GeometryConfigurationTool> m_configurationTools{this, "GeometryConfigurationTools", {}, "Tools for geometry configuration"};
   PublicToolHandle<ISensitiveDetectorMasterTool> m_senDetTool{this, "SenDetMasterTool", "SensitiveDetectorMasterTool", ""};
+  PublicToolHandle<IFastSimulationMasterTool> m_fastSimTool{this, "FastSimMasterTool", "FastSimulationMasterTool", ""};
   ToolHandleArray<IFieldManagerTool> m_fieldManagers{this, "FieldManagers", {}, "field managers used"};
   PublicToolHandle<IG4CaloTransportTool> m_G4CaloTransportTool{this, "G4CaloTransportTool", "", "Tool handle of the Geant4 transport tool for the FastCaloSim in Geant4 implementation"};
   Gaudi::Property<bool> m_activateParallelWorlds{this, "ActivateParallelWorlds", false, "Toggle on/off the G4 parallel geometry system"};

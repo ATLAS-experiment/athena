@@ -11,7 +11,7 @@
 SimpleFastKillerTool::SimpleFastKillerTool(const std::string& type, const std::string& name, const IInterface *parent)
   : FastSimulationBase(type,name,parent)
 {
-  m_regionNames.setValue({ "BeampipeFwdCut" });
+  m_regionName.setValue({ "BeampipeFwdCut" });
 }
 
 G4VFastSimulationModel* SimpleFastKillerTool::makeFastSimModel()
@@ -19,5 +19,5 @@ G4VFastSimulationModel* SimpleFastKillerTool::makeFastSimModel()
   ATH_MSG_DEBUG( "Initializing Fast Sim Model" );
 
   // Create a fresh Fast Sim Model
-  return new SimpleFastKiller(name());
+  return new SimpleFastKiller(name(), getRegion());
 }

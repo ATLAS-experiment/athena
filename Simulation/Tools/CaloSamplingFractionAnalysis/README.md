@@ -5,7 +5,7 @@
 ### LAr EM
 The sampling fractions input electrons are generated in release 21.6 as single electrons with a momentum of 50 GeV, injected at a radius of r=1.5m for the barrel and distance of z=3.7405m for the endcap
 ```
-setupATLAS
+setupATLAS -c centos7
 asetup 21.6.31,AthGeneration
 Gen_tf.py  --ecmEnergy=13000 --firstEvent=1 --maxEvents=10 --randomSeed=1234 --jobConfig=athena/Simulation/Tools/CaloSamplingFractionAnalysis/share/PG_pid11_Mom50000_Radius1500000_eta_0_140 --outputEVNTFile=mc.PG_pid11_Mom50000_Radius1500000_eta_0_140.EVNT.pool.root
 Gen_tf.py  --ecmEnergy=13000 --firstEvent=1 --maxEvents=10 --randomSeed=1234 --jobConfig=athena/Simulation/Tools/CaloSamplingFractionAnalysis/share/PG_pid11_Mom50000_Z3740500_bec_eta_135_350 --outputEVNTFile=mc.PG_pid11_Mom50000_Z3740500_bec_eta_135_350.EVNT.pool.root
@@ -19,7 +19,7 @@ Input files with 100k events can be found in:
 ### HEC
 The sampling fractions input particles are generated in release 21.6 as single electrons, positrons and photons with a momentum of 100 GeV, injected at distances of z=4.3195m and z=5.1750m which correspond to the front faces of the two HEC wheels
 ```
-setupATLAS
+setupATLAS -c centos7
 asetup 21.6.31,AthGeneration
 Gen_tf.py  --ecmEnergy=13000 --maxEvents=10000 --randomSeed=1234 --jobConfig=athena/Simulation/Tools/CaloSamplingFractionAnalysis/share/PG_pid11_Mom100000_Z4319500_bec_eta_150_330 --outputEVNTFile=mc.PG_pid11_Mom100000_Z4319500_bec_eta_150_330.EVNT.pool.root
 Gen_tf.py  --ecmEnergy=13000 --maxEvents=10000 --randomSeed=1234 --jobConfig=athena/Simulation/Tools/CaloSamplingFractionAnalysis/share/PG_pid-11_Mom100000_Z4319500_bec_eta_150_330 --outputEVNTFile=mc.PG_pid-11_Mom100000_Z4319500_bec_eta_150_330.EVNT.pool.root
@@ -40,100 +40,102 @@ Input files with 10k events each can be found in:
 /eos/atlas/atlascerngroupdisk/proj-simul/G4Run3/SamplingFractions/HEC/mc.PG_pid22_Mom100000_Z5175000_bec_eta_160_330.EVNT.pool.root
 ```
 
+### FCal
+The sampling fractions input particles are generated in release 21.6 as single electrons, with a momentum of 40 GeV, injected at distances of z=4.7135m, z=5.1733m and z=5.6478 which correspond to the front faces of the three FCal modules
+```
+setupATLAS -c centos7
+asetup 21.6.31,AthGeneration
+Gen_tf.py  --ecmEnergy=13000 --maxEvents=10000 --randomSeed=1234 --jobConfig=athena/Simulation/Tools/CaloSamplingFractionAnalysis/share/PG_pid11_Mom40000_Z4713500_bec_eta_350_380 --outputEVNTFile=mc.PG_pid11_Mom40000_Z4713500_bec_eta_350_380.EVNT.pool.root
+Gen_tf.py  --ecmEnergy=13000 --maxEvents=10000 --randomSeed=1234 --jobConfig=athena/Simulation/Tools/CaloSamplingFractionAnalysis/share/PG_pid11_Mom40000_Z5173300_bec_eta_350_380 --outputEVNTFile=mc.PG_pid11_Mom40000_Z5173300_bec_eta_350_380.EVNT.pool.root
+Gen_tf.py  --ecmEnergy=13000 --maxEvents=10000 --randomSeed=1234 --jobConfig=athena/Simulation/Tools/CaloSamplingFractionAnalysis/share/PG_pid11_Mom40000_Z5647800_bec_eta_350_380 --outputEVNTFile=mc.PG_pid11_Mom40000_Z5647800_bec_eta_350_380.EVNT.pool.root
+```
+
+Input files with 10k events each can be found in:
+```
+/eos/atlas/atlascerngroupdisk/proj-simul/G4Run3/SamplingFractions/FCal/mc.PG_pid11_Mom40000_Z4713500_bec_eta_350_380.EVNT.pool.root
+/eos/atlas/atlascerngroupdisk/proj-simul/G4Run3/SamplingFractions/FCal/mc.PG_pid11_Mom40000_Z5173300_bec_eta_350_380.EVNT.pool.root
+/eos/atlas/atlascerngroupdisk/proj-simul/G4Run3/SamplingFractions/FCal/mc.PG_pid11_Mom40000_Z5647800_bec_eta_350_380.EVNT.pool.root
+```
+
 ## G4 Simulation
 Simulation is run with calibration hits in batches of 5000 events per job with the following simulation command
 ```
-Sim_tf.py --simulator 'FullG4MT' \
---conditionsTag 'default:OFLCOND-MC16-SDR-14' \
---physicsList 'FTFP_BERT_ATL' \
---truthStrategy 'MC15aPlus' \
---postInclude 'default:PyJobTransforms.UseFrontier' \
---preExec 'from SimulationConfig.SimEnums import VertexSource;flags.Sim.VertexSource=VertexSource.AsGenerated;from SimulationConfig.G4Optimizations import enableBeamPipeKill;enableBeamPipeKill(flags);from SimulationConfig.G4Optimizations import enableCalHits;enableCalHits(flags);from SimulationConfig.G4Optimizations import enableParticleID;enableParticleID(flags);from SimulationConfig.G4Optimizations import enableTightMuonStepping;enableTightMuonStepping;enableTightMuonStepping(flags)' \
---geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
---inputEVNTFile INPUTEVNTfile \
---outputHITSFile OUTPUTEVNTfile \
---maxEvents 5000 \
---skipEvent 0 \
+Sim_tf.py \
+--CA \
+--multithreaded \
+--conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-04' \
+--physicsList "$physlist" \
+--simulator 'FullG4MT_QS' \
+--postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
+--preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+--inputEVNTFile "$inputEVNT" \
+--outputHITSFile "$outfile_job" \
+--maxEvents $nevents \
+--skipEvent $skip \
+--postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
 --imf False
 ```
 
-For the LAr EM and HEC input files this can be done interactively in a shell with the commands below. When running this, maxjobs will say how many jobs should be launched simulateously from the shell
+For the LAr EM, HEC and FCal input files this can be done interactively in a shell with the commands below
 ```
-maxjobs=4
-eosdir=/eos/atlas/atlascerngroupdisk/proj-simul/G4Run3/SamplingFractions
-G4version=10.1
-PhysList=FTFP_BERT_ATL
-resultdir=$PWD/"$G4version"-$PhysList
+export eosdir=/eos/atlas/atlascerngroupdisk/proj-simul/G4Run3/SamplingFractions
+export G4version=11.3
+export PhysList=FTFP_BERT_ATL
+export resultdir=$PWD/"$G4version"-$PhysList
 mkdir -p $resultdir
 
-for file in $eosdir/LArEM/mc.PG_pid11_Mom50000_*.EVNT.pool.root; do outfile=$resultdir/$(basename $file); source run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 8 $maxjobs;done
-for file in $eosdir/HEC/mc.PG_pid*_Mom100000_*EVNT.pool.root; do outfile=$resultdir/$(basename $file); source run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 1 $maxjobs;done
+get_files run_LAr_SamplingFraction_simulation.sh
+for file in $eosdir/LArEM/mc.PG_pid11_Mom50000_*.EVNT.pool.root; do outfile=$resultdir/$(basename $file); run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 40000 ;done
+for file in $eosdir/HEC/mc.PG_pid*_Mom100000_*EVNT.pool.root; do outfile=$resultdir/$(basename $file); run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 5000;done
+for file in $eosdir/FCal/mc.PG_pid11_Mom40000_*EVNT.pool.root; do outfile=$resultdir/$(basename $file); run_LAr_SamplingFraction_simulation.sh $file ${outfile/EVNT.pool.root/HITS.pool.root} $PhysList 5000;done
 ```
 
 ## LAr EM NTuple creation and analysis
 For a sufficient precision, ~40k electrons in the barrel and ~40k electrons in the endcap are needed for LAr EM.
 
 ```
-G4version=10.1
-PhysList=FTFP_BERT_ATL
-resultdir=$PWD/"$G4version"-$PhysList
-athena.py --filesInput="'$resultdir'/mc.PG_pid11_Mom50000_Radius1500000*.HITS.*.pool.root" LArEMSamplingFractionCfg.py
+export G4version=11.3
+export PhysList=FTFP_BERT_ATL
+export resultdir=$PWD/"$G4version"-$PhysList
+athena.py --filesInput="$resultdir/mc.PG_pid11_Mom50000_Radius1500000*.HITS.pool.root" CaloSamplingFractionAnalysis/LArEMSamplingFractionConfig.py
 mv LArEM_SF.root $resultdir/LArEM_SF_barrel.root
 
-athena.py --filesInput="'$resultdir'/mc.PG_pid11_Mom50000_Z3740500*.HITS.*.pool.root"' LArEMSamplingFractionCfg.py
+athena.py --filesInput="$resultdir/mc.PG_pid11_Mom50000_Z37*.HITS.pool.root" CaloSamplingFractionAnalysis/LArEMSamplingFractionConfig.py
 mv LArEM_SF.root $resultdir/LArEM_SF_endcap.root
 
 get_files LarEMSamplingFraction_analysis.C
 root -b -q 'LarEMSamplingFraction_analysis.C("'$resultdir/LArEM_SF_barrel.root'","'$resultdir/LArEM_SF_endcap.root'")'
-mv SF_LAr_barrel.pdf SF_LAr_endcap.pdf $resultdir/
+mv SF_LAr_barrel.* SF_LAr_endcap.* $resultdir/
 ```
 
 ## HEC NTuple creation and analysis
 For a sufficient precision, 5k events per pdgid and Z position are needed, so in total 30k events
 
 ```
-G4version=10.1
-PhysList=FTFP_BERT_ATL
-resultdir=$PWD/"$G4version"-$PhysList
-for file in $resultdir/mc.PG_pid*Mom100000_Z[45]*HITS.*.pool.root;do echo $file;athena.py -c 'inFileName=["'$file'"]' LArEMSamplingFractionCfg.py;a=$file;b=${a/Z4319500_bec_eta_150_330.HITS/HECfwh.NTUP};c=${b/Z5175000_bec_eta_160_330.HITS/HECrwh.NTUP};mv LArEM_SF.root $c;done
+export G4version=11.3
+export PhysList=FTFP_BERT_ATL
+export resultdir=$PWD/"$G4version"-$PhysList
+for file in $resultdir/mc.PG_pid*Mom100000_Z[45]*HITS.pool.root;do echo $file;athena.py --filesInput="$file" CaloSamplingFractionAnalysis/LArEMSamplingFractionConfig.py;a=$file;b=${a/Z4319500_bec_eta_150_330.HITS/HECfwh.NTUP};c=${b/Z5175000_bec_eta_160_330.HITS/HECrwh.NTUP};mv LArEM_SF.root $c;done
 
 get_files HEC_SF_analysis
 root -b -q HEC_SF_analysis/init.C 'HEC_SF_analysis/store_eta.C("'$G4version'","'$PhysList'","'$PWD'")' 'HEC_SF_analysis/get_SF.C("'$G4version'","'$PhysList'")'
 ```
 
-
-# FCal sampling fractions
-
-## Configuring and running the simulation
-
-The Geant4 simulation is configured in the `LarFCalSamplingFraction_G4Atlas_jobOptions.py` job options file in the `share` directory.
-The sampling fractions are computed separately for each of the FCal1, FCal2 and FCal3 modules by modifying the `module` variable at the top of the job options file. 
-Electrons are generated directly in front of the face of the specified module at the given coordinates, pseudorapidity and energy.
-These parameters can be modified by changing the corresponding `ParticleGun` settings in the `params` variable in the job options.
-See the [ParticleGunForAtlas](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ParticleGunForAtlas) TWiki for more details on this tool.
-
-After configuring the simulation, compile and run it with
-
-```console
-mkdir build
-cd build
-asetup Athena,<version>
-cmake <path/to/source>
-make
-athena LArFCalSamplingFractionG4AtlasCfg.py
+## FCal NTuple creation and analysis
 ```
+export G4version=11.3
+export PhysList=FTFP_BERT_ATL
+export resultdir=$PWD/"$G4version"-$PhysList
 
-The results of the simulations are saved to an output ntuple file named `LArFCalSamplingFraction.<module>.<el_energy>GeV.aan.root`, where `<module>` is the FCal module name and `<el_energy>` is the energy of the incident electrons in GeV.
-
-## Computing the sampling fractions
-
-The `LarFCalSamplingFraction_analysis.py` script is provided in the `share` directory to compute the FCal sampling fractions from the ntuple files produced in the previous step.
-Run it with
-
-```console
-./share/LarFCalSamplingFraction_analysis.py LArFCalSamplingFraction.<module>.<el_energy>GeV.aan.root
-```
-
-The sampling fractions are saved to a text file, which can be specified using the `-o` option when running the above script.
+get_files LarFCalSamplingFraction_analysis.py
+for file in $resultdir/mc.PG_pid*Mom40000_Z*_bec_eta_350_380.HITS.pool.root;do echo $file;athena.py --filesInput="$file" CaloSamplingFractionAnalysis/LArFCalSamplingFractionConfig.py;a=$file;b1=${a/Z4713500_bec_eta_350_380.HITS.pool/fcal1.aan};b2=${b1/Z5173300_bec_eta_350_380.HITS.pool/fcal2.aan};b3=${b2/Z5647800_bec_eta_350_380.HITS.pool/fcal3.aan};mv LArFCal_SF.root $b3;python LarFCalSamplingFraction_analysis.py $b3 -o ${b3/aan.root/txt};done
+```                                                                                                                                                                 
 
 # Tile sampline fractions
+
+
+# All simulation+analysis steps together for all LAr calorimeters should run out-of-the box with the following command
+```
+run_all_SamplingFraction_simulation.sh 5000
+```

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArOnlineID.h"
@@ -16,15 +16,13 @@
 
 /* See comments in Base class */
 
-LArOnlineID::LArOnlineID(void) :
-  LArOnlineID_Base()
+LArOnlineID::LArOnlineID() :
+  LArOnlineID_Base("LArOnlineID", "LArOnline", false)
 {
-  m_this_is_slar=false;
 }
 
 
-LArOnlineID::~LArOnlineID(void) 
-= default;
+LArOnlineID::~LArOnlineID() = default;
 
 /* =================================================================== */
 int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
@@ -72,8 +70,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
     /* Initialize the field indices */
 //    if(initLevelsFromDict()) return (1);
-    std::string group_name("LArOnline");
-    if(LArOnlineID_Base::initLevelsFromDict(group_name)) return (1);
+    if(LArOnlineID_Base::initLevelsFromDict(group())) return (1);
 
 
     /* Find value for the field LAr Calorimeter */
@@ -81,7 +78,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
         std::stringstream strm;
-        strm << atlasDict->m_name;
+        strm << atlasDict->name();
         std::string strg= " Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -96,7 +93,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineField   = -4;
     if (m_dict->get_label_value("part", "LArOnline", larOnlineField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnline' of field 'part' in dictionary "+strm.str(); 
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -111,7 +108,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int larOnlineCalibField   = -5;
     if (m_dict->get_label_value("part", "LArOnlineCalib", larOnlineCalibField)) {
         std::stringstream strm;
-        strm <<  m_dict->m_name;      
+        strm <<  m_dict->name();
         std::string strg = "Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "+strm.str();
         if(m_msgSvc) {
             log << MSG::ERROR << strg << endmsg;
@@ -129,9 +126,9 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     Range prefix;
 
     /*Full range for all channels*/
-    m_full_laronline_range = m_dict->build_multirange( region_id , group_name, prefix); 
-    m_full_feb_range       = m_dict->build_multirange( region_id , group_name, prefix, "slot"); 
-    m_full_feedthrough_range = m_dict->build_multirange( region_id , group_name, prefix, "feedthrough");
+    m_full_laronline_range = m_dict->build_multirange( region_id , group(), prefix);
+    m_full_feb_range       = m_dict->build_multirange( region_id , group(), prefix, "slot");
+    m_full_feedthrough_range = m_dict->build_multirange( region_id , group(), prefix, "feedthrough");
 
     if (!m_quiet) {
       std::string strg0= " initialize_from_dictionary :";
@@ -402,7 +399,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
 
 /*========================================*/
-int LArOnlineID::init_H8Hashes(void) 
+int LArOnlineID::init_H8Hashes()
 /*========================================*/
 {
   MsgStream log(m_msgSvc, "LArOnlineID" );
@@ -559,7 +556,7 @@ int LArOnlineID::init_H8Hashes(void)
 
 
 /*========================================*/
-int LArOnlineID::init_H6Hashes(void) 
+int LArOnlineID::init_H6Hashes()
 /*========================================*/
 {
   MsgStream log(m_msgSvc, "LArOnlineID" );

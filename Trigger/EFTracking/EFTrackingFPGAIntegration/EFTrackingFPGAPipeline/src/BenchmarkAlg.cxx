@@ -31,7 +31,7 @@ namespace EFTrackingFPGAIntegration
             Athena::Chrono chrono("CL::loadProgram", m_chronoSvc.get());
             ATH_CHECK(IntegrationBase::loadProgram(m_xclbin));
         }
-
+        ATH_MSG_INFO("loading "<<m_xclbin);
         ATH_CHECK(m_inputPixelClusterKey.initialize());
         ATH_CHECK(m_inputStripClusterKey.initialize());
         ATH_CHECK(m_pixelRDOKey.initialize());
@@ -79,198 +79,11 @@ namespace EFTrackingFPGAIntegration
         metadata->numOfPixelClusters = numPixelClusters;
         metadata->pcRdoIndexSize = numPixelClusters;
 
-        EFTrackingTransient::StripClusterAuxInput scAux;
-        EFTrackingTransient::PixelClusterAuxInput pcAux;
+        // make strip cluster
+        ATH_CHECK(m_xaodClusterMaker->makeStripClusterContainer(stripClusters, metadata.get(), ctx));
 
-        // Declare a few vairiables to be used in the loop
-        int row = 0;
-        uint64_t rdo;
-        int rdoCounter = 0;
-
-        // Make strip cluster aux input
-        {
-            Athena::Chrono chrono("Make strip cluster container", m_chronoSvc.get());
-            for (unsigned int i = 0; i < numStripClusters; i++)
-            {
-                rdoCounter = 0;
-                row = 0; // idhash
-                scAux.idHash.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-                row = 1; // id
-                scAux.id.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-                row = 2; // rdo w1
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    scAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-                row = 3; // rdo w2
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    scAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-                row = 4; // rdo w3
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    scAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-                row = 5; // rdo w4
-                rdo = stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    scAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-                row = 6; // local x
-                scAux.localPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-                row = 8; // local covariance xx
-                scAux.localCovariance.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-                row = 9; // global x
-                scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-                row = 10; // global y
-                scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-                row = 11; // global z
-                scAux.globalPosition.push_back(*(double *)&stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-                row = 12; // channels in phi
-                scAux.channelsInPhi.push_back(stripClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                metadata->scRdoIndex[i] = rdoCounter;
-            }
-            ATH_CHECK(m_xaodClusterMaker->makeStripClusterContainer(scAux, metadata.get(), ctx));
-            // print out the strip cluster aux input
-            if (msgLvl(MSG::DEBUG))
-            {
-                for (unsigned int i = 0; i < numStripClusters; i++)
-                {
-                    ATH_MSG_DEBUG("Strip cluster " << i << " idHash: " << scAux.idHash[i]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " id: " << scAux.id[i]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " localPosition x: " << scAux.localPosition[i]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " localCovariance: " << scAux.localCovariance[i]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " globalPosition x: " << scAux.globalPosition[i * 3]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " globalPosition y: " << scAux.globalPosition[i * 3 + 1]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " globalPosition z: " << scAux.globalPosition[i * 3 + 2]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " channelsInPhi: " << scAux.channelsInPhi[i]);
-                    ATH_MSG_DEBUG("Strip cluster " << i << " rdoList size: " << metadata->scRdoIndex[i]);
-                }
-            }
-        }
-
-        // Make pixel cluster aux input
-        {
-            Athena::Chrono chrono("Make pixel cluster container", m_chronoSvc.get());
-            for (unsigned int i = 0; i < numPixelClusters; i++)
-            {
-                rdoCounter = 0;
-                row = 0; // id hash
-                pcAux.idHash.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 1; // id
-                pcAux.id.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 2; // rdo w1
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    pcAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-
-                row = 3; // rdo w2
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    pcAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-
-                row = 4; // rdo w3
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    pcAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-
-                row = 5; // rdo w4
-                rdo = pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8];
-                if (rdo)
-                {
-                    pcAux.rdoList.push_back(rdo);
-                    rdoCounter++;
-                }
-
-                row = 6; // local x
-                pcAux.localPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 7; // local y
-                pcAux.localPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 8; // local covariance xx
-                pcAux.localCovariance.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 9; // local covariance yy
-                pcAux.localCovariance.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 10; // global x
-                pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 11; // global y
-                pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 12; // global z
-                pcAux.globalPosition.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 13; // channels in phi
-                pcAux.channelsInPhi.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 14; // channels in eta
-                pcAux.channelsInEta.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 15; // width in eta
-                pcAux.widthInEta.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 16; // omega x
-                pcAux.omegaX.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 17; // omega y
-                pcAux.omegaY.push_back(*(double *)&pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                row = 18; // total ToT
-                pcAux.totalToT.push_back(pixelClusters[row * EFTrackingTransient::MAX_NUM_CLUSTERS + i + 8]);
-
-                metadata->pcRdoIndex[i] = rdoCounter;
-            }
-
-            ATH_CHECK(m_xaodClusterMaker->makePixelClusterContainer(pcAux, metadata.get(), ctx));
-
-            // print out pixel cluster aux input
-            if (msgLvl(MSG::DEBUG))
-            {
-                for (unsigned int i = 0; i < numPixelClusters; i++)
-                {
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " idHash: " << pcAux.idHash[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " id: " << pcAux.id[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " localPosition x: " << pcAux.localPosition[i * 2]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " localPosition y: " << pcAux.localPosition[i * 2 + 1]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " localCovariance xx: " << pcAux.localCovariance[i * 2]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " localCovariance yy: " << pcAux.localCovariance[i * 2 + 1]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " globalPosition x: " << pcAux.globalPosition[i * 3]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " globalPosition y: " << pcAux.globalPosition[i * 3 + 1]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " globalPosition z: " << pcAux.globalPosition[i * 3 + 2]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " channelsInPhi: " << pcAux.channelsInPhi[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " channelsInEta: " << pcAux.channelsInEta[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " widthInEta: " << pcAux.widthInEta[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " omegaX: " << pcAux.omegaX[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " omegaY: " << pcAux.omegaY[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " totalToT: " << pcAux.totalToT[i]);
-                    ATH_MSG_DEBUG("Pixel cluster " << i << " rdoList size: " << metadata->pcRdoIndex[i]);
-                }
-            }
-        }
+        // Make pixel cluster
+        ATH_CHECK(m_xaodClusterMaker->makePixelClusterContainer(pixelClusters, metadata.get(), ctx));
 
         return StatusCode::SUCCESS;
     }
@@ -349,9 +162,12 @@ namespace EFTrackingFPGAIntegration
         std::vector<uint64_t> encodedPixelRDO;
         std::vector<uint64_t> encodedStripRDO;
 
+        std::vector<IdentifierHash> listOfPixelIds;
+        std::vector<IdentifierHash> listOfStripIds;
+
         // Encode RDOs into byte stream
-        ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, encodedPixelRDO, ctx));
-        ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, encodedStripRDO, ctx));
+        ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, encodedPixelRDO, listOfPixelIds, ctx));
+        ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, encodedStripRDO, listOfStripIds, ctx));
 
         for (unsigned int i = 0; i < encodedPixelRDO.size(); i++)
         {
@@ -366,10 +182,10 @@ namespace EFTrackingFPGAIntegration
         // Clustering
         cl::Buffer pixelClusterInputBuffer(m_context, CL_MEM_READ_ONLY, sizeof(uint64_t) * encodedPixelRDO.size(), NULL, &err);
         cl::Buffer stripClusterInputBuffer(m_context, CL_MEM_READ_ONLY, sizeof(uint64_t) * encodedStripRDO.size(), NULL, &err);
-        cl::Buffer pixelClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedPixelRDO.size(), NULL, &err); // Don't care in DataPrep
-        cl::Buffer stripClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedStripRDO.size(), NULL, &err); // Don't care in DataPrep
-        cl::Buffer pixelClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedPixelRDO.size() * EFTrackingTransient::NUM_PIXEL_WORD, NULL, &err);
-        cl::Buffer stripClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * encodedStripRDO.size() * EFTrackingTransient::NUM_STRIP_WORD, NULL, &err);
+        cl::Buffer pixelClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep
+        cl::Buffer stripClusterOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep
+        cl::Buffer pixelClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE,EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err);
+        cl::Buffer stripClusterEDMOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err);
         // L2G
         cl::Buffer pixelL2GOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep
         cl::Buffer stripL2GOutputBuffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err); // Don't care in DataPrep

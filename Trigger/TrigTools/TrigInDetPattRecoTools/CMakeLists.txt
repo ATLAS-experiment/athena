@@ -6,7 +6,7 @@ atlas_subdir( TrigInDetPattRecoTools )
 # library in the package:
 atlas_add_library( TrigInDetPattRecoToolsLib
                    src/TrigInDetUtils.cxx
-		   src/TrigTrackSeedGenerator.cxx
+                   src/TrigTrackSeedGenerator.cxx
                    PUBLIC_HEADERS TrigInDetPattRecoTools
                    LINK_LIBRARIES TrigInDetPattRecoEvent
                    PRIVATE_LINK_LIBRARIES IRegionSelector TrigInDetEvent InDetPrepRawData BeamSpotConditionsData)
@@ -16,9 +16,9 @@ atlas_add_component( TrigInDetPattRecoToolsComp
                      src/SeedingToolBase.cxx
                      src/TrigInDetTrackSeedingTool.cxx
                      src/Gbts2ActsSeedingTool.cxx
-		     src/GNN_*.cxx
+                     src/GNN_*.cxx
                      src/components/*.cxx
-		     LINK_LIBRARIES AthenaBaseComps AtlasDetDescr GaudiKernel PathResolver InDetIdentifier InDetPrepRawData MagFieldConditions MagFieldElements StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TrigInDetEvent TrigInDetPattRecoEvent TrigInDetToolInterfacesLib TrkEventPrimitives TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkSurfaces TrkToolInterfaces TrkTrack IRegionSelector BeamSpotConditionsData ActsToolInterfacesLib TrigAccelEvent TrigInDetAccelerationServiceLib)
+                     LINK_LIBRARIES AthenaBaseComps AtlasDetDescr GaudiKernel PathResolver InDetIdentifier InDetPrepRawData MagFieldConditions MagFieldElements StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TrigInDetEvent TrigInDetPattRecoEvent TrigInDetToolInterfacesLib TrkEventPrimitives TrkParameters TrkPrepRawData TrkRIO_OnTrack TrkSurfaces TrkToolInterfaces TrkTrack IRegionSelector BeamSpotConditionsData ActsToolInterfacesLib TrigAccelEvent TrigInDetAccelerationServiceLib)
 
 atlas_add_test( mockSeeds
                 SOURCES test/mockSeeds.cxx

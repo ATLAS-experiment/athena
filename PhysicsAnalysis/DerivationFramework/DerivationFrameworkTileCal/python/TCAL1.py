@@ -111,8 +111,9 @@ def TCAL1KernelCfg(flags, name='TCAL1Kernel', **kwargs):
     triggerListsHelper = kwargs.pop('TriggerListsHelper', 'TriggerListsHelper')
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = triggerListsHelper))
-    
-    cellsMuonDecorator = acc.getPrimaryAndMerge( TCAL1TileCellsMuonDecoratorCfg(flags, Prefix=prefix) )
+
+    deltaRCones = kwargs.pop('DeltaRCones', [0.2, 0.4])
+    cellsMuonDecorator = acc.getPrimaryAndMerge( TCAL1TileCellsMuonDecoratorCfg(flags, Prefix=prefix, DeltaRCones=deltaRCones) )
     kwargs.setdefault('AugmentationTools', [cellsMuonDecorator])
 
     skimmingTool = acc.getPrimaryAndMerge(TCAL1StringSkimmingToolCfg(flags, Prefix=prefix))
@@ -134,8 +135,9 @@ def TCAL1Cfg(flags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     TCAL1TriggerListsHelper = TriggerListsHelper(flags)
 
+    deltaRCones = [0.2, 0.4]
     acc = ComponentAccumulator()
-    acc.merge(TCAL1KernelCfg(flags, name="TCAL1Kernel", StreamName="StreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
+    acc.merge(TCAL1KernelCfg(flags, name="TCAL1Kernel", StreamName="StreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper, DeltaRCones=deltaRCones))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
@@ -156,6 +158,9 @@ def TCAL1Cfg(flags):
 
     for pmt in ['pmt1', 'pmt2']:
         TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_{pmt}_'.join(['', 'ros', 'drawer', 'channel', 'energy', 'time', 'quality', 'qbit', 'bad', 'gain'])
+
+    for drCone in deltaRCones:
+        TCAL1ExtraVariables += f'.{TCAL1Prefix}elarcone{int(drCone*100)}'
 
     TCAL1SlimmingHelper.ExtraVariables = [TCAL1ExtraVariables]
 

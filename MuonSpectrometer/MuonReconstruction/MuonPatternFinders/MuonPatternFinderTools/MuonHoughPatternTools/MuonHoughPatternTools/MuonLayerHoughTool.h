@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHOUGHPATTERNTOOLS_MUONLAYERHOUGHTOOL_H
@@ -43,37 +43,37 @@ namespace MuonHough {
 
 namespace Muon {
 
-    class MuonLayerHoughTool : virtual public IMuonHoughPatternFinderTool, public AthAlgTool {
+    class MuonLayerHoughTool :  public extends<AthAlgTool,  IMuonHoughPatternFinderTool> {
     public:
-        typedef std::vector<IdentifierHash> HashVec;
-        typedef std::vector<HashVec> RegionHashVec;
-        typedef std::vector<RegionHashVec> TechnologyRegionHashVec;
+        using HashVec = std::vector<IdentifierHash>;
+        using RegionHashVec = std::vector<HashVec>;
+        using TechnologyRegionHashVec = std::vector<RegionHashVec>;
+        using DetRegIdx = MuonStationIndex::DetectorRegionIndex;
 
         struct CollectionsPerSector {
-            int sector;
+            int sector{-1};
             TechnologyRegionHashVec technologyRegionHashVecs;
         };
         typedef std::vector<CollectionsPerSector> CollectionsPerSectorVec;
 
-        typedef HoughDataPerSec::HitVec HitVec;
-        typedef HoughDataPerSec::RegionHitVec RegionHitVec;
-        typedef HoughDataPerSec::PhiHitVec PhiHitVec;
-        typedef HoughDataPerSec::RegionPhiHitVec RegionPhiHitVec;
-        typedef HoughDataPerSec::MaximumVec MaximumVec;
-        typedef HoughDataPerSec::PhiMaximumVec PhiMaximumVec;
-        typedef HoughDataPerSec::MaximumAssociationMap MaximumAssociationMap;
-        typedef HoughDataPerSec::RegionMaximumVec RegionMaximumVec;
-        typedef HoughDataPerSec::RegionPhiMaximumVec RegionPhiMaximumVec;
-
-        typedef HoughDataPerSec HoughDataPerSector;
-
-        using HoughDataPerSectorVec = Muon::HoughDataPerSectorVec;
+        using HitVec = HoughDataPerSec::HitVec;
+        using RegionHitVec = HoughDataPerSec::RegionHitVec;
+        using PhiHitVec = HoughDataPerSec::PhiHitVec;
+        using RegionPhiHitVec = HoughDataPerSec::RegionPhiHitVec;
+        using MaximumVec = HoughDataPerSec::MaximumVec;
+        using PhiMaximumVec = HoughDataPerSec::PhiMaximumVec;
+        using MaximumAssociationMap = HoughDataPerSec::MaximumAssociationMap;
+        using RegionMaximumVec = HoughDataPerSec::RegionMaximumVec;
+        using RegionPhiMaximumVec = HoughDataPerSec::RegionPhiMaximumVec;
+        using HoughDataPerSector = HoughDataPerSec;
 
         class Road {
         public:
-            Road(std::shared_ptr<MuonHough::MuonLayerHough::Maximum> seed_) : seed(seed_) { add(seed_); }
+            Road(std::shared_ptr<MuonHough::MuonLayerHough::Maximum> seed_) : 
+                seed(seed_) { add(seed_); }
             Road() = default;
-            MuonStationIndex::DetectorRegionIndex neighbouringRegion{MuonStationIndex::DetectorRegionUnknown};
+            using DetRegIdx = MuonStationIndex::DetectorRegionIndex;
+            DetRegIdx neighbouringRegion{DetRegIdx::DetectorRegionUnknown};
             int neighbouringSector{-1};
             std::shared_ptr<MuonHough::MuonLayerHough::Maximum> seed{nullptr};
             void add(std::shared_ptr<MuonHough::MuonLayerHough::Maximum> max) {
@@ -81,16 +81,16 @@ namespace Muon {
                 maximumSet.insert(max);
             }
             void add(std::shared_ptr<MuonHough::MuonPhiLayerHough::Maximum> max) { phiMaxima.emplace_back(max); }
-            MaximumVec maxima;
-            PhiMaximumVec phiMaxima;
-            std::set<std::shared_ptr<MuonHough::MuonLayerHough::Maximum>> maximumSet;
+            MaximumVec maxima{};
+            PhiMaximumVec phiMaxima{};
+            
+            std::set<std::shared_ptr<MuonHough::MuonLayerHough::Maximum>> maximumSet{};
 
-            std::vector<MuonHough::MuonPhiLayerHough::Maximum> mergedPhiMaxima;
+            std::vector<MuonHough::MuonPhiLayerHough::Maximum> mergedPhiMaxima{};
         };
 
         /** Default constructor */
-        MuonLayerHoughTool(const std::string& type, const std::string& name, const IInterface* parent);
-
+        using base_class::base_class;
         /** Destructor */
         virtual ~MuonLayerHoughTool() = default;
 
@@ -121,8 +121,7 @@ namespace Muon {
         int sublay(const Identifier& id, float z = 0) const;  // the z value is only used for the tgcs
 
         struct State {
-            MaximumVec
-                seedMaxima;  // Does not own the contained objects, they're just references to objects stored in houghDataPerSectorVec.
+            MaximumVec seedMaxima{};  // Does not own the contained objects, they're just references to objects stored in houghDataPerSectorVec.
             std::unique_ptr<HoughDataPerSectorVec> houghDataPerSectorVec{std::make_unique<HoughDataPerSectorVec>()};
             std::set<Identifier> truthHits;
             std::set<Identifier> foundTruthHits;
@@ -190,7 +189,7 @@ namespace Muon {
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonManagerKey{this, "MuonManagerKey", "MuonDetectorManager", "MuonManager ReadKey for IOV Range intersection"};
 
 
-        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+        ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "printerTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
 
         std::vector<MuonHough::MuonLayerHoughSelector> m_selectors;
@@ -262,14 +261,15 @@ namespace Muon {
             sublayer += 100;  // type info
         } else if (m_idHelperSvc->isTgc(id)) {
             sublayer = m_idHelperSvc->tgcIdHelper().gasGap(id) - 1;
-            Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(id);
-            if (stIndex == Muon::MuonStationIndex::EM) {
+            using namespace MuonStationIndex;
+            StIndex stIndex = m_idHelperSvc->stationIndex(id);
+            if (stIndex == StIndex::EM) {
                 // T1 gets +3; T2 gets +3+3; T3 gets +3+6; T4 gets0 (because it is also EI)
-                Muon::MuonStationIndex::PhiIndex phiIndex = m_idHelperSvc->phiIndex(id);
+                PhiIndex phiIndex = m_idHelperSvc->phiIndex(id);
                 sublayer += 3;
-                if (phiIndex == Muon::MuonStationIndex::T2)
+                if (phiIndex == PhiIndex::T2)
                     sublayer += 3;
-                else if (phiIndex == Muon::MuonStationIndex::T3)
+                else if (phiIndex == PhiIndex::T3)
                     sublayer += 6;
                 // float fz = fabs(z);
                 // if( fz < 13350 )      sublayer += 0;

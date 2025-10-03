@@ -1,51 +1,19 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFAHitAnalysis.h"
 
 // Section of includes for Pixel and SCT tests
 #include "ALFA_SimEv/ALFA_HitCollection.h"
+#include "StoreGate/ReadHandle.h"
 
-#include "TH1.h"
-#include "TTree.h"
-#include "TString.h"
-
-#include <algorithm>
-#include <math.h>
-#include <functional>
-#include <iostream>
-
-ALFAHitAnalysis::ALFAHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
-   : AthAlgorithm(name, pSvcLocator)
-   , m_station(0)
-   , m_plate(0)
-   , m_fiber(0)
-   , m_sign(0)
-   , m_energy(0)
-     
-   , m_tree(0)
-   , m_ntupleFileName("/ALFAHitsAnalysis/")
-   , m_path("/ALFAHitsAnalysis/")
-   , m_thistSvc("THistSvc", name)
-{ 
-  for (int i(0); i<8; i++) {
-    m_h_E_full_sum_h[i]=0;
-    m_h_E_layer_sum_h[i]=0;
-    m_h_hit_layer[i]=0;
-    m_h_hit_fiber[i]=0;
-  }
-  declareProperty("NtupleFileName", m_ntupleFileName);    
-  declareProperty("HistPath", m_path); 
-}
 
 
 StatusCode ALFAHitAnalysis::initialize() {
   ATH_MSG_DEBUG( "Initializing ALFAHitAnalysis" );
 
-  // Grab the Ntuple and histogramming service for the tree
-  CHECK(m_thistSvc.retrieve());
- 
+  ATH_CHECK(m_readKey.initialize());
   /** now add branches and leaves to the tree */
   std::stringstream s;
   for (unsigned int j=0; j<8; j++) {
@@ -55,40 +23,35 @@ StatusCode ALFAHitAnalysis::initialize() {
     if (j==3) Emax = 150;
     m_h_E_full_sum_h[j] = new TH1D(s.str().c_str(), s.str().c_str(), 100, 0, Emax);
     m_h_E_full_sum_h[j]->StatOverflows();
-    CHECK( m_thistSvc->regHist( m_path + m_h_E_full_sum_h[j]->GetName(), m_h_E_full_sum_h[j] ) );
+    ATH_CHECK( histSvc()->regHist( m_path + m_h_E_full_sum_h[j]->GetName(), m_h_E_full_sum_h[j] ) );
 
     s.str("");
     s << "edep_per_layer_det_no." << j+1;
     m_h_E_layer_sum_h[j] = new TH1D(s.str().c_str(), s.str().c_str(), 100, 0, 15);
     m_h_E_layer_sum_h[j]->StatOverflows();
-    CHECK( m_thistSvc->regHist( m_path + m_h_E_layer_sum_h[j]->GetName(), m_h_E_layer_sum_h[j] ) );
+    ATH_CHECK( histSvc()->regHist( m_path + m_h_E_layer_sum_h[j]->GetName(), m_h_E_layer_sum_h[j] ) );
 
     s.str("");
     s << "hit_layer_det_no." << j+1;
     m_h_hit_layer[j] = new TH1D(s.str().c_str(), s.str().c_str(), 50, 0, 50);
     m_h_hit_layer[j]->StatOverflows();
-    CHECK( m_thistSvc->regHist( m_path + m_h_hit_layer[j]->GetName(), m_h_hit_layer[j] ) );
+    ATH_CHECK( histSvc()->regHist( m_path + m_h_hit_layer[j]->GetName(), m_h_hit_layer[j] ) );
 
     s.str("");
     s << "hit_fiber_det_no." << j+1;
     m_h_hit_fiber[j] = new TH1D(s.str().c_str(), s.str().c_str(), 100, 0, 60);
     m_h_hit_fiber[j]->StatOverflows();
-    CHECK( m_thistSvc->regHist( m_path + m_h_hit_fiber[j]->GetName(), m_h_hit_fiber[j] ) );
+    ATH_CHECK( histSvc()->regHist( m_path + m_h_hit_fiber[j]->GetName(), m_h_hit_fiber[j] ) );
   }
 
   m_tree = new TTree("ALFA", "ALFA");
   std::string fullNtupleName =  "/" + m_ntupleFileName + "/" ;
-  CHECK(m_thistSvc->regTree(fullNtupleName,m_tree));
+  ATH_CHECK(histSvc()->regTree(fullNtupleName,m_tree));
   
-  if (m_tree) {
-      m_tree->Branch("station", &m_station);
-      m_tree->Branch("plate", &m_plate);
-      m_tree->Branch("fiber", &m_fiber);
-      m_tree->Branch("energy", &m_energy);
-  }
-  else {
-    ATH_MSG_ERROR("No tree found!");
-  }
+  m_tree->Branch("plate", &m_plate);
+  m_tree->Branch("station", &m_station);
+  m_tree->Branch("energy", &m_energy);
+  m_tree->Branch("fiber", &m_fiber);
   
   return StatusCode::SUCCESS;
 }		 
@@ -120,8 +83,9 @@ StatusCode ALFAHitAnalysis::execute() {
   }
   
   ALFA_HitConstIter iter;
-  const ALFA_HitCollection* col_alfa;
-  CHECK( evtStore()->retrieve( col_alfa, "ALFA_HitCollection" ) );
+  const EventContext& ctx{Gaudi::Hive::currentContext()};
+  const ALFA_HitCollection* col_alfa{nullptr};
+  ATH_CHECK(SG::get(col_alfa, m_readKey, ctx));
   for (iter = (*col_alfa).begin(); iter != (*col_alfa).end(); ++iter) {
     station = (*iter).GetStationNumber();
     plate = (*iter).GetPlateNumber();

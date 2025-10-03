@@ -5,67 +5,56 @@
 #ifndef LUCID_HIT_ANALYSIS_H
 #define LUCID_HIT_ANALYSIS_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthHistogramAlgorithm.h"
+#include "LUCID_SimEvent/LUCID_SimHitCollection.h"
+#include "StoreGate/ReadHandleKey.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
-
-#include <string>
-#include <vector>
-#include "TH1.h"
-#include "TH2.h"
-#include "TTree.h"
-
-class TH1;
-class TH2;
-class TTree;
-
-
-class LucidHitAnalysis : public AthAlgorithm {
+class LucidHitAnalysis : public AthHistogramAlgorithm {
 
  public:
 
-   LucidHitAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-   ~LucidHitAnalysis(){}
+  using AthHistogramAlgorithm::AthHistogramAlgorithm; 
+  ~LucidHitAnalysis() = default;
 
-   virtual StatusCode initialize();
-   virtual StatusCode execute();
+  virtual StatusCode initialize() override final;
+  virtual StatusCode execute() override final;
 
  private:
 
    /** Some histograms**/
-   TH1* m_h_hit_x;
-   TH1* m_h_hit_y;
-   TH1* m_h_hit_z;
-   TH2* m_h_xy;
-   TH2* m_h_zr;
-   TH1* m_h_hit_post_x;
-   TH1* m_h_hit_post_y;
-   TH1* m_h_hit_post_z;
-   TH1* m_h_hit_edep;
-   TH1* m_h_hit_pdgid;
-   TH1* m_h_hit_pretime;
-   TH1* m_h_hit_posttime;
-   TH1* m_h_genvolume;
-   TH1* m_h_wavelength;
+   TH1* m_h_hit_x{nullptr};
+   TH1* m_h_hit_y{nullptr};
+   TH1* m_h_hit_z{nullptr};
+   TH2* m_h_xy{nullptr};
+   TH2* m_h_zr{nullptr};
+   TH1* m_h_hit_post_x{nullptr};
+   TH1* m_h_hit_post_y{nullptr};
+   TH1* m_h_hit_post_z{nullptr};
+   TH1* m_h_hit_edep{nullptr};
+   TH1* m_h_hit_pdgid{nullptr};
+   TH1* m_h_hit_pretime{nullptr};
+   TH1* m_h_hit_posttime{nullptr};
+   TH1* m_h_genvolume{nullptr};
+   TH1* m_h_wavelength{nullptr};
 
-   std::vector<float>* m_hit_x;
-   std::vector<float>* m_hit_y;
-   std::vector<float>* m_hit_z;
-   std::vector<float>* m_hit_post_x;
-   std::vector<float>* m_hit_post_y;
-   std::vector<float>* m_hit_post_z;
-   std::vector<float>* m_hit_edep;
-   std::vector<float>* m_hit_pdgid;
-   std::vector<float>* m_hit_pretime;
-   std::vector<float>* m_hit_posttime;
-   std::vector<float>* m_gen_volume;
-   std::vector<float>* m_wavelength;
+   std::vector<float>* m_hit_x{nullptr};
+   std::vector<float>* m_hit_y{nullptr};
+   std::vector<float>* m_hit_z{nullptr};
+   std::vector<float>* m_hit_post_x{nullptr};
+   std::vector<float>* m_hit_post_y{nullptr};
+   std::vector<float>* m_hit_post_z{nullptr};
+   std::vector<float>* m_hit_edep{nullptr};
+   std::vector<float>* m_hit_pdgid{nullptr};
+   std::vector<float>* m_hit_pretime{nullptr};
+   std::vector<float>* m_hit_posttime{nullptr};
+   std::vector<float>* m_gen_volume{nullptr};
+   std::vector<float>* m_wavelength{nullptr};
    
-   TTree * m_tree;
-   std::string m_ntupleFileName; 
-   std::string m_path; 
-   ServiceHandle<ITHistSvc>  m_thistSvc;
+   TTree * m_tree{nullptr};
+
+   StringProperty m_ntupleFileName{this, "NtupleFileName", "/LucidHitAnalysis/"};
+   StringProperty m_path{this, "HistPath", "/LucidHitAnalysis/"};
+   SG::ReadHandleKey<LUCID_SimHitCollection> m_readKey{this, "InputKey", "LucidSimHitsVector"};
 
 };
 

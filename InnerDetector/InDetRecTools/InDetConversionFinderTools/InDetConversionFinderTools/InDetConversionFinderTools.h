@@ -45,7 +45,7 @@
 
 namespace InDet {
 
-class InDetConversionFinderTools
+class InDetConversionFinderTools final
   : public AthAlgTool
   , virtual public IVertexFinder
 {
@@ -65,7 +65,6 @@ public:
   BooleanProperty m_decorateVertices
     {this, "DecorateVertices", true, "Decorate vertices with values used for vertex selection"};
 
-  using IVertexFinder::findVertex;
   //!< Conversion candidate reconstruction for Trk::Tracks.
   virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
   findVertex(const EventContext& ctx,
@@ -77,7 +76,7 @@ public:
              const xAOD::TrackParticleContainer* trk_coll) const override;
 
 protected:
- 
+
   /** Vertex fitter interface.   */
   /** Track pair selection tool. */
   ToolHandle<Trk::IVertexFitter> m_iVertexFitter{ this,

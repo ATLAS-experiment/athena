@@ -138,7 +138,7 @@ void samfr_etaX (
 //   
    if (iPart == 0) {
       for (ip=1; ip<=3; ip++) {
-         sprintf (rootfile, "%s/%s/mc.PG_pid%d_Mom100000_HEC%s.NTUP.0.pool.root", Dir, JOB1, PPart[ip], CHEC[iHEC]);
+         sprintf (rootfile, "%s/%s/mc.PG_pid%d_Mom100000_HEC%s.NTUP.pool.root", Dir, JOB1, PPart[ip], CHEC[iHEC]);
          cout << " ===  " << rootfile << "  === " << endl;  
          chain->Add(rootfile);
       }
@@ -147,7 +147,7 @@ void samfr_etaX (
 //  Single particle
 //
    else {
-      sprintf (rootfile, "%s/%s/mc.PG_pid%d_Mom100000_HEC%s.NTUP.0.pool.root", Dir, JOB1, PPart[iPart], CHEC[iHEC]);
+      sprintf (rootfile, "%s/%s/mc.PG_pid%d_Mom100000_HEC%s.NTUP.pool.root", Dir, JOB1, PPart[iPart], CHEC[iHEC]);
       cout << " ===  " << rootfile << "  === " << endl;  
       chain->Add(rootfile);
    }

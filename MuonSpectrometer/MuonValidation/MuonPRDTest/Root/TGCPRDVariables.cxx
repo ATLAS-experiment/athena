@@ -23,7 +23,6 @@ namespace MuonPRDTest {
 
         ATH_MSG_DEBUG("retrieved TGC PRD Container with size " << tgcprdContainer->size());
 
-        if (tgcprdContainer->size() == 0) ATH_MSG_DEBUG(" TGC PRD Container empty ");
         unsigned int n_PRD{0};
         for(const Muon::TgcPrepDataCollection* coll : *tgcprdContainer ) {
             for (const Muon::TgcPrepData* prd: *coll) {
@@ -41,7 +40,7 @@ namespace MuonPRDTest {
                 m_TGC_PRD_globalPos.push_back(pos);
                 m_TGC_PRD_localPos.push_back(loc_pos);                
                 m_TGC_PRD_bcId.push_back(prd->getBcBitMap());
-                m_TGC_PRD_cov.push_back(Amg::error(prd->localCovariance(), Trk::locX));
+                m_TGC_PRD_error.push_back(Amg::error(prd->localCovariance(), Trk::locX));
                 ++n_PRD;
             }
         }

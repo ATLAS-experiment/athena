@@ -163,13 +163,17 @@ StatusCode ZdcRecRun3::execute()
     //
     if (modSum->zdcSide() == 0) {
       //
-      // Add the event type and daq mode as aux decors
+      // Add the event type and daq mode as aux decors, but not if this information is already written (e.g. if we are using an existing xAOD)
       //
-      SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> eventTypeHandle(m_ZdcEventType);
-      eventTypeHandle(*modSum) = eventType;
-
-      SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> DAQModeHandle(m_ZdcDAQMode);
-      DAQModeHandle(*modSum) = m_DAQMode;
+      static const SG::ConstAccessor<unsigned int> eventTypeAcc("EventType");
+      if (!eventTypeAcc.isAvailable(*modSum))
+	{ 
+	  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> eventTypeHandle(m_ZdcEventType);
+	  eventTypeHandle(*modSum) = eventType;
+	  
+	  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> DAQModeHandle(m_ZdcDAQMode);
+	  DAQModeHandle(*modSum) = m_DAQMode;
+	}
     }
   }
 

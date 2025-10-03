@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
@@ -21,6 +21,7 @@ CostMonDS, PhysicsTLA
 # WARNING: ID=0 is reserved for full HLT result
 _DataScoutingIdentifiers = {
     'CostMonDS': 1,
+    'MuonDS' : 2,
     'PhysicsTLA': 5,
     'DarkJetPEBTLA': 6,
     'FTagPEBTLA' : 7,
@@ -30,6 +31,7 @@ _DataScoutingIdentifiers = {
 # Each stream should correspond to exactly one event building type
 _DataScoutingStreams = {
     'calibration_CostMonitoring': 'CostMonDS',
+    'calibration_MuonDSCalib':'MuonDS',
     'physics_TLA': 'PhysicsTLA',
     'physics_DarkJetPEBTLA': 'DarkJetPEBTLA',
     'physics_FTagPEBTLA': 'FTagPEBTLA',
@@ -40,6 +42,7 @@ _DataScoutingStreams = {
 TruncationThresholds = {
     0: 7*(1024**2),  # Main: 7 MB (increased from 5MB after ATR-29142)
     1: 2*(1024**2),  # CostMonDS: 2 MB
+    2: 1*(1024**2),  # MuonDS: 1 MB
     5: 1*(1024**2),  # PhysicsTLA: 1 MB
     6: 1*(1024**2),  # DarkJetPEBTLA: 1 MB
     7: 1*(1024**2),  # FTagPEBTLA 1 MB

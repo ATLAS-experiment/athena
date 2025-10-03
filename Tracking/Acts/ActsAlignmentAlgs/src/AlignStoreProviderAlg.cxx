@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "AlignStoreProviderAlg.h"
 
@@ -7,8 +7,6 @@
 #include "StoreGate/WriteHandle.h"
 
 using namespace ActsTrk;
-AlignStoreProviderAlg::AlignStoreProviderAlg(const std::string& name, ISvcLocator* pSvcLocator) : 
-        AthReentrantAlgorithm(name, pSvcLocator) {}
 
 AlignStoreProviderAlg::~AlignStoreProviderAlg() = default;
 
@@ -48,12 +46,9 @@ StatusCode AlignStoreProviderAlg::execute(const EventContext& ctx) const {
     std::unique_ptr<DetectorAlignStore> newAlignment{};
     
     if (!m_inputKey.empty()) {
-        SG::ReadCondHandle<DetectorAlignStore> readHandle{m_inputKey, ctx};
-        if (!readHandle.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve " << m_inputKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-        newAlignment = std::make_unique<DetectorAlignStore>(**readHandle);
+        const DetectorAlignStore* inStore{};
+        ATH_CHECK(SG::get(inStore, m_inputKey, ctx));
+        newAlignment = std::make_unique<DetectorAlignStore>(*inStore);
         /// Setup a separate cache for the full physical volume transfomrations
         if (m_splitPhysVolCache) {
             if (newAlignment->geoModelAlignment) {
@@ -81,7 +76,7 @@ StatusCode AlignStoreProviderAlg::execute(const EventContext& ctx) const {
         /// There's no need of the absolute transform cache anymore
         newAlignment->geoModelAlignment.reset();
     }
-    SG::WriteHandle<DetectorAlignStore> writeHandle{m_outputKey, ctx};
+    SG::WriteHandle writeHandle{m_outputKey, ctx};
     ATH_MSG_DEBUG("Record alignment store for detector technology "<<to_string(newAlignment->detType)
                 <<" with a capacity of "<<DetectorAlignStore::TrackingAlignStore::distributedTickets(newAlignment->detType)<<".");
     ATH_CHECK(writeHandle.record(std::move(newAlignment)));

@@ -5,7 +5,6 @@
 #include "PanTauAlgs/Tool_TauConstituentGetter.h"
 #include "PanTauAlgs/TauConstituent.h"
 #include "PanTauAlgs/HelperFunctions.h"
-#include "PanTauAlgs/Tool_InformationStore.h"
 #include "PanTauAlgs/Tool_InputConverter.h"
 #include "xAODTau/TauJet.h"
 #include "xAODPFlow/PFO.h"
@@ -22,10 +21,8 @@ StatusCode PanTau::Tool_TauConstituentGetter::initialize() {
   ATH_MSG_INFO(" initialize()");
   m_init=true;
 
-  ATH_CHECK( HelperFunctions::bindToolHandle( m_Tool_InformationStore, m_Tool_InformationStoreName ) );
   ATH_CHECK( HelperFunctions::bindToolHandle( m_Tool_InputConverter, m_Tool_InputConverterName ) );
     
-  ATH_CHECK( m_Tool_InformationStore.retrieve() );
   ATH_CHECK( m_Tool_InputConverter.retrieve() );
     
   return StatusCode::SUCCESS;
@@ -36,13 +33,7 @@ StatusCode PanTau::Tool_TauConstituentGetter::initialize() {
  * Function to get the PFOs for a given TauJet object (Shots in each PFO etc are collected in "ConvertToTauConstituent")
  */
 StatusCode PanTau::Tool_TauConstituentGetter::GetTauConstituents(const xAOD::TauJet* tauJet,
-                                                                 std::vector<TauConstituent*>& outputConstituents,
-                                                                 const std::string& algName) const {
-    
-  if(algName != "CellBased") {
-    ATH_MSG_WARNING("Unknown input algorithm: " << algName << " -> Pantau BDT Training not done for this algorithm!");
-    return StatusCode::FAILURE;
-  }
+                                                                 std::vector<TauConstituent*>& outputConstituents) const {
     
   //loop over charged PFOs
   for(unsigned int iChrgPFO=0; iChrgPFO<tauJet->nProtoChargedPFOs(); iChrgPFO++) {

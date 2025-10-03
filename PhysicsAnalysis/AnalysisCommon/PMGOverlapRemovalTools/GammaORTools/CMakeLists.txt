@@ -9,11 +9,9 @@ atlas_add_library( GammaORToolsLib
    PUBLIC_HEADERS GammaORTools
    LINK_LIBRARIES AsgTools xAODTruth MCTruthClassifierLib TruthUtils)
 
-if( NOT XAOD_STANDALONE )
-  atlas_add_component( GammaORTools
-    src/components/*.cxx
-    LINK_LIBRARIES GammaORToolsLib)
-endif()
+atlas_add_component( GammaORTools
+  src/components/*.cxx
+  LINK_LIBRARIES GammaORToolsLib)
 
 atlas_add_dictionary( GammaORToolsDict
   GammaORTools/GammaORToolsDict.h

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( GlobalSimulation )
@@ -6,16 +6,18 @@ atlas_subdir( GlobalSimulation )
 # External dependencies:
 find_package( ROOT COMPONENTS Core Hist)
 find_package( GTest )
+find_package( APTypes )
 
 atlas_add_component (GlobalSimulation
    src/*.h src/*.cxx src/L1TopoAlgs/*.h src/L1TopoAlgs/*.cxx
    src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx
    src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp 
    src/GlobalAlgs/Hypothesis/UCL/*.h src/GlobalAlgs/Hypothesis/UCL/*.cxx 
+   src/GlobalAlgs/FirstChain/*.h src/GlobalAlgs/FirstChain/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel
+   INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${APTYPES_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel
    CaloDetDescrLib
    CaloIdentifier
    L1TopoSimulationLib
@@ -25,6 +27,7 @@ atlas_add_component (GlobalSimulation
    AthenaBaseComps
    AthenaMonitoringKernelLib
    xAODTrigger
+   xAODEventInfo
    CaloEvent
    PathResolver)
 
@@ -44,8 +47,8 @@ atlas_add_test(testEgamma1BDT_tv
                SOURCES src/GlobalAlgs/TestEgamma1/all_tests.cxx
 	       src/GlobalAlgs/TestEgamma1/egamma1BDT_Test.cxx
 	       src/GlobalAlgs/Egamma1BDT/*.cpp
-               INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-               LINK_LIBRARIES ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
+               INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+               LINK_LIBRARIES ${APTYPES_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
 	       		      PathResolver
 	       POST_EXEC_SCRIPT nopost.sh
    )

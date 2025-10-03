@@ -8,7 +8,6 @@
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 #include "MuonPatternEvent/SegmentSeed.h"
-#include "MuonSpacePoint/UtilFunctions.h"
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
@@ -41,7 +40,7 @@ namespace MuonR4{
      * @param chambEdges: Array encoding the minmal [1] and maximal [1] position along the strip
      *                    of a chamber */
     constexpr double chamberCoverage(const std::array<double,2>& seedEdges,
-                                    const std::array<double, 2>& chambEdges) {
+                                     const std::array<double, 2>& chambEdges) {
         // The seed is full embedded
         if (chambEdges[0] <= seedEdges[0] && chambEdges[1] >= seedEdges[1]) {
             return 1.;
@@ -125,8 +124,8 @@ void EtaHoughTransformAlg::preProcess(const EventContext& ctx,
         // get the average z of our hits and use it to correct our angle estimate
         double zmin{1.e9}, zmax{-1.e9};
         for (const std::shared_ptr<MuonR4::SpacePoint> & sp : *bucket) {
-            zmin = std::min(zmin, sp->positionInChamber().z());
-            zmax = std::max(zmax, sp->positionInChamber().z());
+            zmin = std::min(zmin, sp->localPosition().z());
+            zmax = std::max(zmax, sp->localPosition().z());
         }
         const double z = 0.5*(zmin + zmax);
 
@@ -140,8 +139,8 @@ void EtaHoughTransformAlg::preProcess(const EventContext& ctx,
         /// our guesstimate of tan(theta) 
         for (const std::shared_ptr<MuonR4::SpacePoint> & hit : *bucket){
             // two estimates: For the two extrema of tan(theta) resulting from the guesstimate
-            double y0l = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaLeft;
-            double y0r = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaRight;
+            double y0l = hit->localPosition().y() - hit->localPosition().z() * tanThetaLeft;
+            double y0r = hit->localPosition().y() - hit->localPosition().z() * tanThetaRight;
             // pick the widest envelope
             ymin=std::min(ymin, std::min(y0l, y0r) - m_targetResoIntercept); 
             ymax=std::max(ymax, std::max(y0l, y0r) + m_targetResoIntercept); 
@@ -198,8 +197,8 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
                                                             const int mL, const int layer){
         seenLayers.emplace(mL, layer);
         seenChambers.insert(re);
-        tubeExtend[0] = std::min(tubeExtend[0], sp.positionInChamber().x() - sensorL);
-        tubeExtend[1] = std::max(tubeExtend[1], sp.positionInChamber().x() + sensorL);
+        tubeExtend[0] = std::min(tubeExtend[0], sp.localPosition().x() - sensorL);
+        tubeExtend[1] = std::max(tubeExtend[1], sp.localPosition().x() + sensorL);
     };
     for (const SpacePoint* SP : maximum.hitIdentifiers){       
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Maximum has associated hit in "
@@ -416,7 +415,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         // add phi measurements - will be filtered for compatibility in separate algorithm
         extendWithPhiHits(hitList, bucket);
         // sort hits by layer 
-        SpacePointPerLayerSorter sorter{m_idHelperSvc.get()};
+        const SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitList, sorter);
         // create hough maximum instance and add it to the event data for later writing! 
         const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};
@@ -441,6 +440,8 @@ void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughH
 
     using namespace std::placeholders; 
     double w = 1.0; 
+    // convert Gaudi::property to double to avoid deep copy in std::bind expression
+    double resolutionTarget = m_targetResoIntercept; 
     // downweight RPC measurements in the barrel relative to MDT  
     if (SP->primaryMeasurement()->type() == xAOD::UncalibMeasType::RpcStripType){
         w = 0.5; 
@@ -454,13 +455,13 @@ void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughH
         // dummy index for precision layer counting within the hough plane 
         const unsigned precisionLayerIndex = (dc->readoutElement()->multilayer() * 10 + dc->tubeLayer());
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtLeft,
-                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  m_targetResoIntercept), SP, precisionLayerIndex, w);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  resolutionTarget), SP, precisionLayerIndex, w);
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtRight,
-                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  m_targetResoIntercept), SP, precisionLayerIndex, w);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2,  resolutionTarget), SP, precisionLayerIndex, w);
     } else {
         if (SP->measuresEta()) {
             data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamStrip,
-                                                std::bind(HoughHelpers::Eta::houghWidthStrip, _1, _2, m_targetResoIntercept), SP, 0, w * (
+                                                std::bind(HoughHelpers::Eta::houghWidthStrip, _1, _2, resolutionTarget), SP, 0, w * (
                                                 m_downWeightMultiplePrd ? 1.0 / SP->nEtaInstanceCounts() : 1.));
         }
     }

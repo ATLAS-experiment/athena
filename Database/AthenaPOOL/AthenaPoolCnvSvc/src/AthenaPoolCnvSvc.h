@@ -30,7 +30,6 @@
 #include <limits>
 
 // Forward declarations
-class IAthenaSerializeSvc;
 class Guid;
 
 template <class TYPE> class SvcFactory;
@@ -53,7 +52,7 @@ public:
    /// Required of all Gaudi Services
    virtual StatusCode finalize() override;
    virtual StatusCode io_finalize() override;
-   virtual StatusCode stop() override final;
+   virtual StatusCode stop() override;
 
    /// Implementation of IConversionSvc: Create the transient representation of an object from persistent state.
    /// @param pAddress [IN] pointer to IOpaqueAddress of the representation.
@@ -145,22 +144,6 @@ public:
    /// @param fileName [IN] name of the input file
    virtual StatusCode setInputAttributes(const std::string& fileName) override;
 
-   /// Make this a server.
-   virtual StatusCode makeServer(int num) override;
-
-   /// Make this a client.
-   virtual StatusCode makeClient(int num) override;
-
-   /// Read the next data object
-   virtual StatusCode readData() override;
-
-   /// Commit Catalog
-   virtual StatusCode commitCatalog() override;
-
-   /// Send abort to SharedWriter clients if the server quits on error
-   /// @param client_n [IN] number of the current client, -1 if no current
-   StatusCode abortSharedWrClients(int client_n);
-
    /// Implementation of IIncidentListener: Handle for EndEvent incidence
    virtual void handle(const Incident& incident) override;
 
@@ -193,12 +176,8 @@ private: // data
    std::string                   m_lastInputFileName;
    ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
-   ServiceHandle<IAthenaSerializeSvc> m_serializeSvc{this,"AthenaRootSerializeSvc","AthenaRootSerializeSvc"};
-   ToolHandle<IAthenaIPCTool>    m_inputStreamingTool{this,"InputStreamingTool",{}};
-   ToolHandle<IAthenaIPCTool>    m_outputStreamingTool{this,"OutputStreamingTool",{}};
-   bool m_streamServerActive=false;
-   int m_metadataClient=0;
 
+protected: // shared with derived services
    /// Map that holds chrono information
    PMonUtils::BasicStopWatchResultMap_t m_chronoMap{};
 
@@ -238,6 +217,7 @@ private: // properties
    long long m_domainMaxFileSize=std::numeric_limits<long long>::max();
    std::map<std::string, long long> m_databaseMaxFileSize;
 
+protected: // properties
    /// PersSvcPerOutput, boolean property to use multiple persistency services, one per output stream.
    /// default = true.
    BooleanProperty m_persSvcPerOutput{this,"PersSvcPerOutput",true};
@@ -248,19 +228,7 @@ private: // properties
    StringProperty m_persSvcPerInputType{this,"PersSvcPerInputType",""};
    std::mutex  m_mutex;
 
-   /// For SharedWriter:
    /// To use MetadataSvc to merge data placed in a certain container
-   StringProperty  m_metadataContainerProp{this,"OutputMetadataContainer","MetaData"};
-   StringArrayProperty m_metadataContainersAug{this, "OutputMetadataContainers", {}, "Metadata containers used for augmentations"};
-
-   /// Make this instance a Streaming Client during first connect/write automatically
-   IntegerProperty m_makeStreamingToolClient{this,"MakeStreamingToolClient",0};
-   /// Use Streaming for selected technologies only
-   IntegerProperty m_streamingTechnology{this,"StreamingTechnology",-1};
-   /// Use Athena Object sharing for metadata only, event data is collected and send via ROOT TMemFile
-   BooleanProperty m_parallelCompression{this,"ParallelCompression",true};
-   /// Extension to use ROOT TMemFile for event data, "?pmerge=<host>:<port>"
-   StringProperty  m_streamPortString{this,"StreamPortString","?pmerge=localhost:0"};
    /// When using TMemFile call Write on number of Events, respecting CollectionTree auto_flush
    IntegerProperty m_numberEventsPerWrite{this,"NumberEventsPerWrite",-1};
 

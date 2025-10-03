@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigPartialEventBuilding/PEBInfoWriterToolBase.h"
@@ -27,7 +27,7 @@ PEBInfoWriterToolBase::~PEBInfoWriterToolBase() {}
 
 // =============================================================================
 
-StatusCode PEBInfoWriterToolBase::decide(std::vector<Input>& inputs) const {
+StatusCode PEBInfoWriterToolBase::decide(const EventContext& ctx, std::vector<Input>& inputs) const {
   std::set<ElementLink<TrigRoiDescriptorCollection>> uniqueRoIs;
   for (Input& input : inputs) {
     // Skip if previous step for this chain didn't pass
@@ -61,7 +61,7 @@ StatusCode PEBInfoWriterToolBase::decide(std::vector<Input>& inputs) const {
     }
 
     // Create new PEB Info for this input (empty if max RoIs limit is reached)
-    PEBInfo pebInfo = maxRoIsReached ? PEBInfo{} : createPEBInfo(input);
+    PEBInfo pebInfo = maxRoIsReached ? PEBInfo{} : createPEBInfo(ctx, input);
 
     // Merge with previous ROBs    
     std::vector<uint32_t> previousRobs;

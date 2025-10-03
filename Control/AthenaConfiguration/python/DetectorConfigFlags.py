@@ -206,7 +206,8 @@ def _loadDetectorsFromMetaData(flags, key, keep_beampipe=False):
 
     # MBTS compatibility check
     from AthenaConfiguration.Enums import LHCPeriod
-    if (flags.GeoModel.Run < LHCPeriod.Run4 and 'LAr' in detectors  # built as part of LAr
+    if ((not flags.GeoModel.AtlasVersion.startswith('ATLAS-CTB')
+         and flags.GeoModel.Run < LHCPeriod.Run4 and 'LAr' in detectors)  # built as part of LAr
         or 'TileHitVector#MBTSHits' in flags.Input.TypedCollections
         or 'TileTTL1Container#TileTTL1MBTS' in flags.Input.TypedCollections):
         detectors.append('MBTS')

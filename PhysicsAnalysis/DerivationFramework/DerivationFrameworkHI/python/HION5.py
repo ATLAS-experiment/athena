@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # HION5.py  
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -15,7 +15,6 @@ def HION5SkimmingToolCfg(flags):
     ExtraData += ['xAOD::ElectronContainer/Electrons']
     ExtraData += ['xAOD::PhotonContainer/Photons']
     ExtraData += ['xAOD::TrackParticleContainer/InDetTrackParticles']
-    ExtraData += ['xAOD::TrackParticleContainer/InDetTrackPaasdasdrticles']
     
     acc.addSequence( seqAND("HION5Sequence") )
     acc.getSequence("HION5Sequence").ExtraDataForDynamicConsumers = ExtraData
@@ -113,7 +112,7 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     # Use modified OR that does not check overlaps with taus
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
 
-    outputLabel = "DFCommonJets_passOR"
+    outputLabel = "DFCommonJets_passOR_HI"
     bJetLabel = ""  # default
     tauLabel = ""  # workaround for missing taus
     tauKey = ""  # workaround for missing taus
@@ -168,13 +167,51 @@ def HION5Cfg(flags):
     from DerivationFrameworkHI import ListSlimming
     
     HION5SlimmingHelper = SlimmingHelper("HION5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    
+    HION5SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
+                                               'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
+                                               'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
+                                               'TruthLHEParticles':'xAOD::TruthParticleContainer', 'TruthLHEParticlesAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthTaus':'xAOD::TruthParticleContainer','TruthTausAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthNeutrinos':'xAOD::TruthParticleContainer','TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthBSM':'xAOD::TruthParticleContainer','TruthBSMAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthBoson':'xAOD::TruthParticleContainer','TruthBosonAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthBottom':'xAOD::TruthParticleContainer','TruthBottomAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthTop':'xAOD::TruthParticleContainer','TruthTopAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthForwardProtons':'xAOD::TruthParticleContainer','TruthForwardProtonsAux':'xAOD::TruthParticleAuxContainer',
+                                               'BornLeptons':'xAOD::TruthParticleContainer','BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthBosonsWithDecayParticles':'xAOD::TruthParticleContainer','TruthBosonsWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthBosonsWithDecayVertices':'xAOD::TruthVertexContainer','TruthBosonsWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
+                                               'TruthBSMWithDecayParticles':'xAOD::TruthParticleContainer','TruthBSMWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
+                                               'TruthBSMWithDecayVertices':'xAOD::TruthVertexContainer','TruthBSMWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
+                                               'AntiKt4TruthDressedWZJets':'xAOD::JetContainer','AntiKt4TruthDressedWZJetsAux':'xAOD::JetAuxContainer',
+                                               'AntiKt10TruthSoftDropBeta100Zcut10Jets':'xAOD::JetContainer','AntiKt10TruthSoftDropBeta100Zcut10JetsAux':'xAOD::JetAuxContainer',
+                                               'MET_Track1000':'xAOD::MissingETContainer', 'MET_Track1000Aux':'xAOD::MissingETAuxContainer',
+                                               'MET_Track2000':'xAOD::MissingETContainer', 'MET_Track2000Aux':'xAOD::MissingETAuxContainer',
+                                               'MET_Track3000':'xAOD::MissingETContainer', 'MET_Track3000Aux':'xAOD::MissingETAuxContainer',
+                                               'MET_Track4000':'xAOD::MissingETContainer', 'MET_Track4000Aux':'xAOD::MissingETAuxContainer',
+                                               'MET_Track5000':'xAOD::MissingETContainer', 'MET_Track5000Aux':'xAOD::MissingETAuxContainer',
+                                              }
+     # Build track MET with ptCut in MeV and HItight Tracks
+    from DerivationFrameworkHI.TrackMET_config import Cfg_METTrack
+    met_ptCutList = [1000,2000,3000,4000,5000]
+
+    for ptCut in met_ptCutList:
+        acc.merge(Cfg_METTrack(flags, ptCut))
+
     AllVariables  = []    
     AllVariables += ListSlimming.HION5AllVariables()
     AllVariables += ListSlimming.HION5ExtraContainersTrigger()
 
+    if flags.Input.isMC:
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddStandardTruthContentsCfg
+        acc.merge(AddStandardTruthContentsCfg(flags))
+        AllVariables += ListSlimming.HION5AllTruthVariables()
+
     HION5SlimmingHelper.SmartCollections = ListSlimming.HION5SmartCollections()
-    HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5Extravariables()
+    HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5ExtraVariables()
     HION5SlimmingHelper.ExtraVariables   += PhotonsCPDetailedContent
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronShowerShapes
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronGSFVar

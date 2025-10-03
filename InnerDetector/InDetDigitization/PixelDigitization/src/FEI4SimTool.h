@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/FEI4SimTool.h
@@ -28,7 +28,7 @@ public:
   virtual StatusCode finalize();
   virtual ~FEI4SimTool();
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
-                       CLHEP::HepRandomEngine* rndmEngine);
+                       CLHEP::HepRandomEngine* rndmEngine) const;
 private:
    SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey{
     this, "PixelModuleData", "PixelModuleData", "Pixel module data"

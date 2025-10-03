@@ -14,11 +14,12 @@
 
 #include <type_traits>
 
-template <class HIT>
+template <typename HIT>
 class TimedHitPtr {
 public:
+  using element_type = std::add_const_t<HIT>;
   using value_type = HIT;
-  using const_value_type = const HIT;
+  using const_value_type = element_type;
   ///STL required constructors
   TimedHitPtr() = default;
   TimedHitPtr(const TimedHitPtr<HIT>& rhs)  = default;
@@ -40,6 +41,7 @@ public:
   const HIT* operator->() const  { return m_pHit; }
   const HIT* get() const { return m_pHit; }
 
+  operator bool () const { return m_pHit != nullptr; }
   ///the index of the component event in PileUpEventInfo. Allows, in principle,
   ///to navigate back to the parent event
   unsigned short eventId() const { return m_eventId; }

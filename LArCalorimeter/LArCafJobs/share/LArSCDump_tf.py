@@ -29,6 +29,18 @@ if __name__ == '__main__':
                             type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output', treeNames="SCDIGITS"),
                             help='Output LAr SuperCells Mon file', group='Ntuple Files')
 
+    trf.parser.add_argument('--ETThresh', type=trfArgClasses.argFactory(trfArgClasses.argFloat),
+                             help='Fill only SC above this ET', group='LArSCDump_tf',
+                             default=trfArgClasses.argFloat(-1.)) 
+
+    trf.parser.add_argument('--ETThreshMain', type=trfArgClasses.argFactory(trfArgClasses.argFloat),
+                             help='Fill only SC with Main redout above this ET', group='LArSCDump_tf',
+                             default=trfArgClasses.argFloat(-1.)) 
+
+    trf.parser.add_argument('--ADCThresh', type=trfArgClasses.argFactory(trfArgClasses.argInt),
+                             help='Fill only SC with ADCmax - ADC(0) samples above this threshold', group='LArSCDump_tf',
+                             default=trfArgClasses.argInt(-1)) 
+
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()

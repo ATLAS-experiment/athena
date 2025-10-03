@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@
 #include "AtlasHepMC/SimpleVector.h"
 #include "InDetSimEvent/SiHit.h"
 #include "InDetSimData/InDetSimDataCollection.h"
-
+#include "TruthUtils/MagicNumbers.h"
 
 #include "TMath.h" 
 #include "CLHEP/Geometry/Point3D.h"
@@ -388,12 +388,12 @@ StatusCode PixelPrepDataToxAOD::execute()
             // @TODO provide possibility to move tp_indices to its final destination
             AUXDATA(xprd,std::vector<unsigned int>, truth_index) = tp_indices;
          }
-         std::vector<unsigned int> barcodes; // FIXME  barcode-based - requires xAOD::TrackMeasurementValidation to be migrated away from barcodes
+         std::vector<int> uniqueIDs;
          for (auto i = range.first; i != range.second; ++i) {
-           barcodes.push_back( HepMC::barcode(i->second) );
+           uniqueIDs.push_back( HepMC::uniqueID(i->second) );
          }
          // @TODO move vector
-         AUXDATA(xprd,std::vector<unsigned int>, truth_barcode) = barcodes;
+         AUXDATA(xprd,std::vector<int>, truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
       }
       
       std::vector< std::vector< int > > sdo_tracks;
@@ -428,12 +428,12 @@ StatusCode PixelPrepDataToxAOD::execute()
   static const SG::AuxElement::Accessor<int> acc_layer ("layer");
   static const SG::AuxElement::Accessor<int> acc_phi_module ("phi_module");
   static const SG::AuxElement::Accessor<int> acc_eta_module ("eta_module");
-  static const SG::AuxElement::Accessor<std::vector<int> > acc_sihit_barcode ("sihit_barcode");
+  static const SG::AuxElement::Accessor<std::vector<int> > acc_sihit_barcode ("sihit_barcode"); // TODO rename variable to be consistent?
   for ( auto clusItr = xaod->begin(); clusItr != xaod->end(); ++clusItr)
   {
       auto pixelCluster = *clusItr;
       int layer = acc_layer(*pixelCluster);
-      std::vector<int> barcodes = acc_sihit_barcode(*pixelCluster);
+      std::vector<int> uniqueIDs = acc_sihit_barcode(*pixelCluster); // TODO rename variable to be consistent?
 
       const std::vector< unsigned int> &cluster_idx_list = cluster_map.at( makeKey(acc_phi_module(*pixelCluster), acc_eta_module(*pixelCluster), acc_layer(*pixelCluster) ));
       for (unsigned int cluster_idx : cluster_idx_list) {
@@ -445,10 +445,10 @@ StatusCode PixelPrepDataToxAOD::execute()
 	  if ( acc_phi_module(*pixelCluster) != acc_phi_module(*pixelCluster2) )
 	      continue;
 
-	  std::vector<int> barcodes2 = acc_sihit_barcode(*pixelCluster2);
+	  std::vector<int> uniqueIDs2 = acc_sihit_barcode(*pixelCluster2); // TODO rename variable to be consistent?
 	  
-	  for ( auto bc : barcodes ) {
-              if (std::find(barcodes2.begin(), barcodes2.end(), bc ) == barcodes2.end()) continue;
+	  for ( auto uid : uniqueIDs ) {
+              if (std::find(uniqueIDs2.begin(), uniqueIDs2.end(), uid ) == uniqueIDs2.end()) continue;
               static const SG::AuxElement::Accessor<char> acc_broken ("broken");
               acc_broken(*pixelCluster)  = true;
               acc_broken(*pixelCluster2) = true;
@@ -470,30 +470,30 @@ std::vector< std::vector< int > > PixelPrepDataToxAOD::addSDOInformation( xAOD::
 									  const InDetSimDataCollection& sdoCollection ) const
 {
   std::vector<int> sdo_word;
-  std::vector< std::vector< int > > sdo_depositsBarcode;
+  std::vector< std::vector< int > > sdo_depositsUniqueID;
   std::vector< std::vector< float > > sdo_depositsEnergy;
   // find hit
   for( const auto &hitIdentifier : prd->rdoList() ){
     auto pos = sdoCollection.find(hitIdentifier);
     if( pos == sdoCollection.end() ) continue;
     sdo_word.push_back( pos->second.word() ) ;
-    std::vector<int> sdoDepBC(pos->second.getdeposits().size(), HepMC::INVALID_PARTICLE_ID);
+    std::vector<int> sdoDepUID(pos->second.getdeposits().size(), HepMC::INVALID_PARTICLE_ID);
     std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
     unsigned int nDepos{0};
     for (auto& deposit: pos->second.getdeposits()) {
-      if (deposit.first) sdoDepBC[nDepos] = HepMC::barcode(deposit.first);
+      if (deposit.first) sdoDepUID[nDepos] = HepMC::uniqueID(deposit.first);
       ATH_MSG_DEBUG(" SDO Energy Deposit " << deposit.second  ) ;
       sdoDepEnergy[nDepos] = deposit.second;
       nDepos++;
     }
-    sdo_depositsBarcode.push_back( sdoDepBC );
+    sdo_depositsUniqueID.push_back( sdoDepUID );
     sdo_depositsEnergy.push_back( sdoDepEnergy );
   }
   AUXDATA(xprd,std::vector<int>,sdo_words)  = sdo_word;
-  AUXDATA(xprd,std::vector< std::vector<int> >,sdo_depositsBarcode)  = sdo_depositsBarcode;
+  AUXDATA(xprd,std::vector< std::vector<int> >,sdo_depositsBarcode)  = sdo_depositsUniqueID; // TODO rename variable to be consistent?
   AUXDATA(xprd,std::vector< std::vector<float> >,sdo_depositsEnergy) = sdo_depositsEnergy;
   
-  return sdo_depositsBarcode;
+  return sdo_depositsUniqueID;
 }
 
 
@@ -507,7 +507,7 @@ void  PixelPrepDataToxAOD::addSiHitInformation( xAOD::TrackMeasurementValidation
 
   std::vector<float> sihit_energyDeposit(numHits,0);
   std::vector<float> sihit_meanTime(numHits,0);
-  std::vector<int>   sihit_barcode(numHits,0);
+  std::vector<int>   sihit_uniqueID(numHits,HepMC::UNDEFINED_ID);
   std::vector<int>   sihit_pdgid(numHits,0);
   
   std::vector<float> sihit_startPosX(numHits,0);
@@ -525,7 +525,7 @@ void  PixelPrepDataToxAOD::addSiHitInformation( xAOD::TrackMeasurementValidation
       sihit_energyDeposit[hitNumber] =  sihit.energyLoss() ;
       sihit_meanTime[hitNumber] =  sihit.meanTime() ;
       const HepMcParticleLink& HMPL = sihit.particleLink();
-      sihit_barcode[hitNumber] =  HepMC::barcode(HMPL) ;
+      sihit_uniqueID[hitNumber] =  HepMC::uniqueID(HMPL) ;
       if(HMPL.isValid()){
         sihit_pdgid[hitNumber]   = HMPL->pdg_id();
       }
@@ -550,7 +550,7 @@ void  PixelPrepDataToxAOD::addSiHitInformation( xAOD::TrackMeasurementValidation
 
   AUXDATA(xprd,std::vector<float>,sihit_energyDeposit) = sihit_energyDeposit;
   AUXDATA(xprd,std::vector<float>,sihit_meanTime) = sihit_meanTime;
-  AUXDATA(xprd,std::vector<int>,sihit_barcode) = sihit_barcode;
+  AUXDATA(xprd,std::vector<int>,sihit_barcode) = sihit_uniqueID; // TODO rename variable to be consistent?
   AUXDATA(xprd,std::vector<int>,sihit_pdgid) = sihit_pdgid;
   
   AUXDATA(xprd,std::vector<float>,sihit_startPosX) = sihit_startPosX;
@@ -571,7 +571,7 @@ void  PixelPrepDataToxAOD::addSiHitInformation( xAOD::TrackMeasurementValidation
 
 std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const InDet::PixelCluster* prd, 
                                                                           const std::vector<const SiHit*>* sihits,
-									  std::vector< std::vector< int > > & trkBCs ) const
+									  std::vector< std::vector< int > > & trkUIDs ) const
 {
   ATH_MSG_VERBOSE( "Got " << sihits->size() << " SiHits to look through" );
   std::vector<SiHit>  matchingHits;
@@ -607,9 +607,9 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
     }
     else
     {
-    auto bc = HepMC::barcode(siHit->particleLink());
-    for ( const auto& barcodeSDOColl : trkBCs ) {
-        if (std::find(barcodeSDOColl.begin(),barcodeSDOColl.end(),bc) == barcodeSDOColl.end() ) continue;
+      auto uid = HepMC::uniqueID(siHit->particleLink());
+      for ( const auto& uniqueIDSDOColl : trkUIDs ) {
+        if (std::find(uniqueIDSDOColl.begin(),uniqueIDSDOColl.end(),uid) == uniqueIDSDOColl.end() ) continue;
         multiMatchingHits.push_back(siHit);
         break;
       }
@@ -682,16 +682,16 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
       time /= (float)ajoiningHits.size();
        
       matchingHits.emplace_back(lowestXPos->localStartPosition(), 
-                                     highestXPos->localEndPosition(),
-                                     energyDep,
-                                     time,
-                                     HepMC::barcode((*siHitIter)->particleLink()),
-                                     0, // 0 for pixel 1 for Pixel
-                                     (*siHitIter)->getBarrelEndcap(),
-                                     (*siHitIter)->getLayerDisk(),
-                                     (*siHitIter)->getEtaModule(),
-                                     (*siHitIter)->getPhiModule(),
-                                     (*siHitIter)->getSide() );
+                                highestXPos->localEndPosition(),
+                                energyDep,
+                                time,
+                                (*siHitIter)->particleLink(),
+                                0, // 0 for pixel 1 for Pixel
+                                (*siHitIter)->getBarrelEndcap(),
+                                (*siHitIter)->getLayerDisk(),
+                                (*siHitIter)->getEtaModule(),
+                                (*siHitIter)->getPhiModule(),
+                                (*siHitIter)->getSide() );
      ATH_MSG_DEBUG("Finished Merging " << ajoiningHits.size() << " SiHits together." );
 
     }
@@ -997,7 +997,7 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
   std::vector<float> theta(numberOfSiHits,0);
   std::vector<float> phi(numberOfSiHits,0);
 
-  std::vector<int>   barcode(numberOfSiHits,0);
+  std::vector<int>   uniqueID(numberOfSiHits,HepMC::UNDEFINED_ID);
   std::vector<int>   pdgid(numberOfSiHits,0);
   std::vector<float> chargeDep(numberOfSiHits,0);
   std::vector<float> truep(numberOfSiHits,0);
@@ -1006,7 +1006,7 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
   std::vector<float> pathlengthY(numberOfSiHits,0);
   std::vector<float> pathlengthZ(numberOfSiHits,0);
 
-  std::vector<int>   motherBarcode(numberOfSiHits,0);
+  std::vector<int>   motherUniqueID(numberOfSiHits,HepMC::UNDEFINED_ID);
   std::vector<int>   motherPdgid(numberOfSiHits,0);
 
 
@@ -1114,7 +1114,7 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
     phi[hitNumber] = std::atan(std::tan(bowphi)-readoutside*tanlorentz);
     const HepMcParticleLink& HMPL = siHit.particleLink();
     if (HMPL.isValid()){
-      barcode[hitNumber] = HepMC::barcode(HMPL);
+      uniqueID[hitNumber] = HepMC::uniqueID(HMPL);
       const auto particle = HMPL.cptr();
       pdgid[hitNumber]   = particle->pdg_id();
       HepMC::FourVector mom=particle->momentum();
@@ -1124,13 +1124,13 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
 #ifdef HEPMC3
       if ( vertex && !vertex->particles_in().empty()){
         const auto& mother_of_particle=vertex->particles_in().front();             
-        motherBarcode[hitNumber] =  HepMC::barcode(mother_of_particle);
+        motherUniqueID[hitNumber] =  HepMC::uniqueID(mother_of_particle);
         motherPdgid[hitNumber]    = mother_of_particle->pdg_id();
       }
 #else
       if ( vertex ){
         if( vertex->particles_in_const_begin() !=  vertex->particles_in_const_end() ){
-          motherBarcode[hitNumber] =  HepMC::barcode(*vertex->particles_in_const_begin());
+          motherUniqueID[hitNumber] =  HepMC::uniqueID(*vertex->particles_in_const_begin());
           motherPdgid[hitNumber]    =  (*vertex->particles_in_const_begin())->pdg_id();
         }
       }
@@ -1151,12 +1151,12 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
   AUXDATA(xprd, std::vector<float>, NN_theta)     = theta;
   AUXDATA(xprd, std::vector<float>, NN_phi)       = phi;
 
-  AUXDATA(xprd, std::vector<int>, NN_barcode)     = barcode;
+  AUXDATA(xprd, std::vector<int>, NN_barcode)     = uniqueID; // TODO Rename variable to be consistent?
   AUXDATA(xprd, std::vector<int>, NN_pdgid)       = pdgid;
   AUXDATA(xprd, std::vector<float>, NN_energyDep) = chargeDep;
   AUXDATA(xprd, std::vector<float>, NN_trueP)     = truep;
 
-  AUXDATA(xprd, std::vector<int>, NN_motherBarcode) = motherBarcode;
+  AUXDATA(xprd, std::vector<int>, NN_motherBarcode) = motherUniqueID; // TODO Rename variable to be consistent?
   AUXDATA(xprd, std::vector<int>, NN_motherPdgid)   = motherPdgid;
  
 

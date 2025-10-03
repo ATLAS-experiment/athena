@@ -63,10 +63,11 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
     const double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), 100);
     const double ignoreBelow = dqm_algorithms::tools::GetFirstFromMap( "IgnoreBelow", config.getParameters(), 0);
     const double probThreshold = dqm_algorithms::tools::GetFirstFromMap( "ProbThreshold", config.getParameters(), 0.01);
-    const int publishDetail = dqm_algorithms::tools::GetFirstFromMap( "PublishDetail", config.getParameters(), 0x10/*publish status code - since saw some inconsistencies in webdisplay on local testing. Should plan to set to 0 in future*/);
+    const int publishDetail = dqm_algorithms::tools::GetFirstFromMap( "PublishDetail", config.getParameters(), 0x20/*publish status code - since saw some inconsistencies in webdisplay on local testing. Should plan to set to 0 in future*/);
     const int nBinsZ = dqm_algorithms::tools::GetFirstFromMap( "NBinsY", config.getParameters(), 0); // if this is specified, plot is interpreted as being temporal ... this is number of bins in the 'y-axis' direction of each time slice
     const int minDuration = dqm_algorithms::tools::GetFirstFromMap( "MinDuration", config.getParameters(),3); // when in temporal mode, this is the number of consecutive bins in the time axis (x-axis) that an anomaly must exist for to be flagged
     const int liveMode = dqm_algorithms::tools::GetFirstFromMap( "LiveMode", config.getParameters(), 0); // if non-zero, running in live (p1) mode, will influence how results presented
+    const int printLevel = dqm_algorithms::tools::GetFirstFromMap("OutputLevel",config.getParameters(),3); // controls debugging printout .. follows same outputlevel codes as athena (3=info)
 
     // use y-axis label to determine convention for temporal plot
     bool reverseConvention = TString(histogram->GetYaxis()->GetTitle()).EndsWith("+y");
@@ -146,8 +147,17 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
                 double binvalue = (nBinsZ<=0) ? histogram->GetBinContent(i,j) : histogram->GetBinContent(t,reverseConvention ? ((ymax-ymin+1)*(i-1)+j) :  ((xmax-xmin+1)*(j-1)+i));
                 if (binvalue < ignoreBelow) continue;
                 if(binvalue>0) filledRows.insert(j); // used to veto running deadstrip tests on sparsely populated plots
-                onestrip.push_back(binvalue);
-                stripSum += binvalue;
+                // don't include known anomalous bins in strip calculations
+                bool knownAnomaly=false;
+                for(auto& [k,v] : knownBins) {
+                    if(v.find({i,j})!=v.end()) {
+                        knownAnomaly = true; break;
+                    }
+                }
+                if(!knownAnomaly) {
+                    onestrip.push_back(binvalue);
+                    stripSum += binvalue;
+                }
                 //stripSum2 += binvalue*binvalue;
             }
             stripsAvg.push_back(stripSum/onestrip.size());
@@ -179,7 +189,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
                 stripsProb.push_back(1);
             }
         }
-        if(nBinsZ>=0 && filledRows.empty()) {
+        if(nBinsZ>0 && filledRows.empty()) {
             continue; // don't create a result object for empty time slices
         }
 
@@ -263,9 +273,14 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
                     if( (cut < 0 && bin.m_outstandingRatio < cut) || (cut > 0 && bin.m_outstandingRatio > cut && bin.m_value>=minstat) ) {
                         classCut = cut;
                         if(knownBins[k].find({bin.m_ix,bin.m_iy})==knownBins[k].end()) {
+                            if(printLevel<=2) std::cout << " found " << k << " @ " << bin.m_ix << " " << bin.m_iy << " " << t << " : " << bin.m_outstandingRatio << std::endl;
                             result->tags_[TString::Format("_%s(%d,%d)", k.c_str(), bin.m_ix,
                                                           bin.m_iy).Data()] = bin.m_outstandingRatio;
                             counts["N"+k]++;
+                        } else {
+                            // report as a known anomaly
+                            result->tags_[TString::Format("_Known%s(%d,%d)",k.c_str(), bin.m_ix,
+                                                          bin.m_iy).Data()] = bin.m_outstandingRatio;
                         }
                         break;
                     }
@@ -296,7 +311,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
     }
 
     dqm_core::Result* result;
-    if(nBinsZ>=0) {
+    if(nBinsZ>0) {
         // ensure all counts defined, even if will end up being 0
         counts["NDeadStrip"]= 0;
         counts["NDead"]=0;
@@ -314,6 +329,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
                 // empty slice .. record all sufficiently large anomalies and reset
                 for(auto& [k,v] : anomalies) {
                     if(v>=minDuration) {
+                        if(printLevel<=2) std::cout << " Got anomaly: " << k << " duration: " << v << " end: " << t << std::endl;
                         int lbStart = histogram->GetXaxis()->GetBinLowEdge(t-v);
                         int lbEnd = histogram->GetXaxis()->GetBinLowEdge(t);
                         // in liveMode (for P1 monitoring), don't put the LBs in the result name, so that we get a consistent history plot
@@ -428,7 +444,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
         result->tags_["StatusCode"] = 0;
     }
     for(auto& [k,v] : counts) {
-        if(nBinsZ>=0 && k=="NConsecUnlikelyStrip") continue; // not currently counting consecutive unlikely strips in temporal mode
+        if(nBinsZ>0 && k=="NConsecUnlikelyStrip") continue; // not currently counting consecutive unlikely strips in temporal mode
         result->tags_[k] = v;
         if(v>dqm_algorithms::tools::GetFirstFromMap(k, redThresholds, std::numeric_limits<double>::max())||result->status_ == dqm_core::Result::Red) {
             result->status_ = dqm_core::Result::Red;
@@ -466,7 +482,7 @@ void dqm_algorithms::L1Calo_BinsDiffFromStripMedian::printDescription(std::ostre
   out<<"Optional Parameter: MinStat: Minimum histogram statistics needed to perform Algorithm, also min entries for warm/hot spots (cuts > 0), and min entries in neighbour strip to declare a strip dead"<<std::endl;
   out<<"Optional Parameter: IgnoreBelow: values below which the bins wont be considered (default 0)"<<std::endl;
   out<<"Optional Parameter: ProbThreshold: cutoff for strip k-test probabilities for strip to be considered unlikely (default 0.05)"<<std::endl;
-  out<<"Optional Parameter: PublishDetail: Bitmask of what extra info to publish about strips. Starting with MSB: AlgStatusCode,Zeros,Noise,Prob,StdDev,Median (default 000000)"<<std::endl;
+  out<<"Optional Parameter: PublishDetail: Bitmask of what extra info to publish about strips. Starting with MSB: AlgStatusCode,Zeros,Noise,Prob,StdDev,Median (default 100000)"<<std::endl;
   
 }
 

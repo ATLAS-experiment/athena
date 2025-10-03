@@ -53,7 +53,7 @@ class AthenaCPRunScript(CPBaseRunner):
         self.cfg.merge(PoolReadCfg(self.flags))
         self.cfg.merge(CutFlowSvcCfg(self.flags))
         
-        outputFile = f"ANALYSIS DATAFILE='{self.args.output_name}.root' OPT='RECREATE'"
+        outputFile = f"ANALYSIS DATAFILE='{self.outputName}.root' OPT='RECREATE'"
         from AthenaConfiguration.ComponentFactory import CompFactory
         self.cfg.addService(CompFactory.THistSvc(Output=[outputFile]))
         self.cfg.merge(self.makeAlgSequence())

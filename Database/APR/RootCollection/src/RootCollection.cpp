@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
@@ -12,7 +12,6 @@
 #include "RootCollection/AttributeListLayout.h"
 
 #include "PersistentDataModel/Token.h"
-#include "POOLCore/Exception.h"
 #include "RootUtils/APRDefaults.h"
 
 #include "CollectionBase/ICollectionColumn.h"
@@ -32,8 +31,8 @@
 
 #define corENDL coral::MessageStream::endmsg
 
+#include <exception>
 #include <map>
-#include <vector>
 #include <deque>
 #include <ctype.h>
 
@@ -130,10 +129,7 @@ namespace pool {
         if( m_open && !m_file && m_session && m_mode != ICollection::READ ) {
            m_file = TFile::Open(m_fileName.c_str(), pool::RootCollection::poolOptToRootOpt[m_mode] );
            if(!m_file || m_file->IsZombie()) {
-              throw pool::Exception( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] 
-                                     + "\" file " + m_fileName,
-                                     std::string("RootCollection::") + method,
-                                     "RootCollection" );
+              throw std::runtime_error( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RootCollection::" + method + " \" from \" RootCollection \")" );
            }
            m_poolOut << coral::Info << "File " << m_fileName << " opened in " << method <<  coral::MessageStream::endmsg;
  
@@ -167,7 +163,7 @@ namespace pool {
      void RootCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
      {
         if( m_mode == pool::ICollection::READ ) {
-           throw pool::Exception( "Cannot modify the data of a collection in READ open mode.", "RootCollection::insertRow", "RootCollection" );
+           throw std::runtime_error( "Cannot modify the data of a collection in READ open mode. (APR: \" RootCollection::insertRow \" from \" RootCollection \")" );
         }
         std::map< std::string, TBranch* > branchByName;
         const TObjArray* branches = m_tree->GetListOfBranches();
@@ -191,7 +187,7 @@ namespace pool {
               branchByName[ att.specification().name() ]->SetAddress( att.addressOfData() );
            }
         }
-	if( m_tree->Fill() <= 0 ) throw pool::Exception( "TTree::Fill() failed", "RootCollection::insertRow", "RootCollection" );
+	if( m_tree->Fill() <= 0 ) throw std::runtime_error( "TTree::Fill() failed. (APR: \" RootCollection::insertRow \" from \" RootCollection \")" );
      }
         
         
@@ -228,7 +224,7 @@ namespace pool {
           delayedFileOpen("close");
               
           if( m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-             TObject* tree = getCollectionTree();
+             const TObject* tree = getCollectionTree();
              if( tree )
                 m_mode = ICollection::UPDATE;
              else {
@@ -297,9 +293,7 @@ namespace pool {
         if( m_mode == ICollection::CREATE ){
           string fid = retrieveFID();
           if(fid!="")
-            throw pool::Exception( "Cannot CREATE already registered collections",
-            "RootCollection::open", 
-            "RootCollection");
+            throw std::runtime_error( "Cannot REATE already registered collections. (APR: \" RootCollection::open \" from \" RootCollection \")" );
           else{
             m_fileName = retrievePFN();
             FileCatalog::FileID dummy;
@@ -327,9 +321,7 @@ namespace pool {
           if(fid!="")
             m_fileName = retrieveUniquePFN(fid);
           else
-            throw pool::Exception( "Cannot UPDATE non registered collections",
-            "RootCollection::open", 
-            "RootCollection");
+            throw std::runtime_error( "Cannot UPDATE non registered collections. (APR: \" RootCollection::open \" from \" RootCollection \")" );
         }
 
         else if(m_mode == ICollection::READ) {
@@ -340,9 +332,7 @@ namespace pool {
              m_fileCatalog->getFirstPFN(fid, dummy, dummy);
              m_fileCatalog->commit();
           }else
-             throw pool::Exception( "Cannot READ non registered collections",
-                                    "RootCollection::open", 
-                                    "RootCollection");
+             throw std::runtime_error( "Cannot READ non registered collections. (APR: \" RootCollection::open \" from \" RootCollection \")" );
         }
       }
 
@@ -405,10 +395,7 @@ namespace pool {
 	    }
          }
          if(!m_file || m_file->IsZombie()) {
-            throw pool::Exception( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] 
-                                   + "\" file " + m_fileName,
-                                   "RootCollection::open", 
-                                   "RootCollection" );
+             throw std::runtime_error( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RootCollection::open \" from \" RootCollection \")" );
          }
          m_poolOut << coral::Info << "File " << m_fileName << " opened" << coral::MessageStream::endmsg;
       }
@@ -428,15 +415,13 @@ namespace pool {
 
 	   if (n == 0) delete m_file; 
 	   m_file=0;
-            throw pool::Exception( string("POOL Collection TTree not found in file ") + m_fileName,
-                                   "RootCollection::open", 
-                                   "RootCollection" );
+           throw std::runtime_error( string("POOL Collection TTree not found in file ") + m_fileName + " (APR: \" RootCollection::open \" from \" RootCollection \")" );
          }
 
          AttributeListLayout* all = dynamic_cast<AttributeListLayout*>( m_tree->GetCurrentFile()->Get(RootCollection::c_attributeListLayoutName) );
          CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
          // clear the description
-         m_description = desc;
+         m_description = std::move(desc);
          if( all ) {
             // Copy the specification to collection description
             all->fillDescription( m_description );
@@ -457,9 +442,7 @@ namespace pool {
                      foundToken = true;
                      m_description.setEventReferenceColumnName( column_name );
                   } else {
-                     throw pool::Exception( "can't reconstruct Description if more than one Token column",
-                        "pool::RootCollection::readAttributeListSpecification",
-                        "RootCollection" );
+                     throw std::runtime_error( "Can't reconstruct Description if more than one Token column. (APR: \" RootCollection::readAttributeListSpecification \" from \" RootCollection \")" );
                   }
                }
             }
@@ -471,12 +454,7 @@ namespace pool {
 
       if( m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
         // create a new TTree
-        if( 0 && m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-          m_poolOut << coral::Warning <<  "Cleaning previous collection object from the file..." << coral::MessageStream::endmsg;
-          std::string treeName = std::string(APRDefaults::TTreeNames::EventTag) + ";*";
-          m_file->Delete(treeName.c_str());
-          m_file->Delete("Schema;*");
-        }
+
         m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
         m_poolOut << coral::Debug << "Created Collection TTree. Collection file will be " << m_fileName << coral::MessageStream::endmsg;
         m_schemaWritten = false;
@@ -535,9 +513,7 @@ namespace pool {
      
     string RootCollection::retrievePFN() const {
       if (m_name.substr (0, 4) != "PFN:")
-        throw pool::Exception( "In CREATE mode a PFN has to be provided",
-        "RootCollection::open", 
-        "RootCollection");
+        throw std::runtime_error( "In CREATE mode a PFN has to be provided. (APR: \" RootCollection::retrievePFN \" from \" RootCollection \")" );
       return m_name.substr(4,string::npos);
     }
 
@@ -562,9 +538,7 @@ namespace pool {
       else if (m_name.substr (0, 4) == "FID:") {
         fid = m_name.substr(4,string::npos);
       }else
-        throw pool::Exception( "A FID, PFN or and LFN has to be provided",
-        "RootCollection::retrieveFID", 
-        "RootCollection");
+        throw std::runtime_error( "A FID, PFN or and LFN has to be provided. (APR: \" RootCollection::retrieveFID \" from \" RootCollection \")" );
       return fid;
     }
 
@@ -576,13 +550,9 @@ namespace pool {
       m_fileCatalog->getPFNs(fid, pfns);
       m_fileCatalog->commit();
       if( pfns.empty() )
-         throw pool::Exception( "This exception should never have been thrown, please send a bug report",
-                                "RootCollection::retrieveUniquePFN", 
-                                "RootCollection"); 
+        throw std::runtime_error( "This exception should never have been thrown, please send a bug report. (APR: \" RootCollection::retrieveUniquePFN \" from \" RootCollection \")" );
       if( pfns.size() > 1 )
-         throw pool::Exception( "Cannot UPDATE or CREATE_AND_OVERWRITE since there are replicas",
-                                "RootCollection::retrieveUniquePFN", 
-                                "RootCollection");
+        throw std::runtime_error( "Cannot UPDATE or CREATE_AND_OVERWRITE since there are replicas. (APR: \" RootCollection::retrieveUniquePFN \" from \" RootCollection \")" );
       return pfns[0].first;
     }
 
@@ -596,7 +566,7 @@ namespace pool {
     ICollectionQuery* RootCollection::newQuery()
     {
        if( !isOpen() ) {
-          throw pool::Exception( "Attempt to query a closed collection.", "RootCollection::newQuery", "RootCollection" );
+          throw std::runtime_error( "Attempt to query a closed collection. (APR: \" RootCollection::newQuery \" from \" RootCollection \")" );
        }
        return new RootCollectionQuery( m_description, m_tree );
     }

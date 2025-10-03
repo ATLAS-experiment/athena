@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// File:  Generators/FlowAfterburnber/CheckFlow.h
+// File:  Generators/FlowAfterburner/CheckFlow.h
 // Description:
 //    This is a simple algorithm to histogram particle properties
 //    for diagnosing of flow generation
@@ -14,14 +14,13 @@
 // Andrzej Olszewski: Initial Code February 2006
 #ifndef CHECKFLOW_H
 #define CHECKFLOW_H
-#include <math.h>
+
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "FlowAfterburner/GenAccessIO.h"
 #include "GeneratorObjects/HijingEventParams.h"
 
-#include "GaudiKernel/ITHistSvc.h"
-#include "TH1.h"
 #include <string>
+
 
 class TH1F;                    //Forward declaration
 class TH2F;                    //Forward declaration

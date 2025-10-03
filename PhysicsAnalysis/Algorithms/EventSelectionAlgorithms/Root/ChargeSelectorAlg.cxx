@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -17,10 +17,14 @@ namespace CP {
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tausHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_tauSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
     ANA_CHECK(m_electronsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronTruthSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tausTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_tauTruthSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
@@ -51,6 +55,10 @@ namespace CP {
       const xAOD::MuonContainer *muons = nullptr;
       if (m_muonsHandle)
 	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      // retrieve the tau-jet container
+      const xAOD::TauJetContainer *taus = nullptr;
+      if (m_tausHandle)
+	ANA_CHECK(m_tausHandle.retrieve(taus, sys));
       // retrieve the truth electron container
       const xAOD::TruthParticleContainer *truthElectrons = nullptr;
       if (m_electronsTruthHandle)
@@ -59,11 +67,15 @@ namespace CP {
       const xAOD::TruthParticleContainer *truthMuons = nullptr;
       if (m_muonsTruthHandle)
 	ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys));
+      // retrieve the truth tau container
+      const xAOD::TruthParticleContainer *truthTaus = nullptr;
+      if (m_tausTruthHandle)
+	ANA_CHECK(m_tausTruthHandle.retrieve(truthTaus, sys));
 
       // apply the requested selection and compute the local charge
       int total_charge = 0;
       int total_leptons = 0;
-      if (m_electronsHandle || m_muonsHandle) {
+      if (m_electronsHandle || m_muonsHandle || m_tausHandle) {
 	if (m_electronsHandle) {
 	  for (const xAOD::Electron *el : *electrons) {
 	    if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
@@ -76,6 +88,14 @@ namespace CP {
 	  for (const xAOD::Muon *mu : *muons) {
 	    if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)){
 	      total_charge += mu->charge();
+	      total_leptons++;
+	    }
+	  }
+	}
+  if (m_tausHandle) {
+	  for (const xAOD::TauJet *tau : *taus) {
+	    if (!m_tauSelection || m_tauSelection.getBool(*tau, sys)){
+	      total_charge += tau->charge();
 	      total_leptons++;
 	    }
 	  }
@@ -94,6 +114,14 @@ namespace CP {
 	  for (const xAOD::TruthParticle *mu : *truthMuons) {
 	    if (!m_muonTruthSelection || m_muonTruthSelection.getBool(*mu, sys)){
 	      total_charge += mu->charge();
+	      total_leptons++;
+	    }
+	  }
+	}
+  if (m_tausTruthHandle) {
+	  for (const xAOD::TruthParticle *tau : *truthTaus) {
+	    if (!m_tauTruthSelection || m_tauTruthSelection.getBool(*tau, sys)){
+	      total_charge += tau->charge();
 	      total_leptons++;
 	    }
 	  }

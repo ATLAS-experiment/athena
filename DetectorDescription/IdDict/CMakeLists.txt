@@ -10,19 +10,6 @@ atlas_add_library( IdDict
                    PUBLIC_HEADERS IdDict
                    LINK_LIBRARIES Identifier )
 
-# Code in this file makes heavy use of eigen and runs orders of magnitude
-# more slowly without optimization.  So force this to be optimized even
-# in debug builds.  If you need to debug it you might want to change this.
-# Specifying optimization via an attribute on the particular
-# function didn't work, because that still didn't allow inlining.
-if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
-  set_source_files_properties(
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx
-     PROPERTIES
-     COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
-     COMPILE_DEFINITIONS "FLATTEN" )
-endif()
-
 atlas_add_test(IdDictLabel_test
   SOURCES test/IdDictLabel_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
@@ -88,4 +75,10 @@ atlas_add_test(get_bits_test
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict Identifier
   POST_EXEC_SCRIPT nopost.sh 
+)
+
+atlas_add_test(IdDictGroup_test
+  SOURCES test/IdDictGroup_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
 )

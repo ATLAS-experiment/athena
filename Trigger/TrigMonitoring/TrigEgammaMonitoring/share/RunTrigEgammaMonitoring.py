@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -56,13 +56,6 @@ if __name__=='__main__':
     sys.exit(1)
 
   args = parser.parse_args()
-
-
-
-
-  # ATR-11839 to fix the egammaPid import
-  from PyUtils.Helpers import ROOT6Setup
-  ROOT6Setup()
 
   # Set the Athena configuration flags
   from AthenaConfiguration.AllConfigFlags import initConfigFlags

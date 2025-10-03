@@ -5,8 +5,8 @@
 #include "CollectionBase/TokenList.h"
 
 #include "PersistentDataModel/Token.h"
-#include "POOLCore/Exception.h"
 
+#include <exception>
 #include <ostream>
 #include <sstream>
 
@@ -103,9 +103,7 @@ pool::TokenList::operator[]( const std::string& name )
 
    if( iData == m_tokenMap.end() )   {
       std::string errorMsg = "Cannot find Token with name `" + name + "' in Token list.";
-      throw pool::Exception( errorMsg,
-			     "TokenList::operator[](name)",
-			     "CollectionBase" );
+      throw std::runtime_error( errorMsg + " (APR: \" TokenList::operator[](name) \" from \" CollectionBase" );
    }
    return *( iData->second );
 }
@@ -117,9 +115,7 @@ pool::TokenList::operator[]( unsigned int index )
    if( index >= m_tokenVector.size() ) {
       std::ostringstream errorMsg;
       errorMsg << "Cannot find Token with index `" << index << "' in Token list.";
-      throw pool::Exception( errorMsg.str(),
-			     "TokenList::operator[](index)",
-			     "CollectionBase" );
+      throw std::runtime_error( errorMsg.str() + " (APR: \" TokenList::operator[](index) \" from \" CollectionBase" );
    }
    return *m_tokenVector[index];
 }
@@ -132,9 +128,7 @@ pool::TokenList::operator[]( const std::string& name ) const
 
    if( iData == m_tokenMap.end() )   {
       std::string errorMsg = "Cannot find Token with name `" + name + "' in Token list.";
-      throw pool::Exception( errorMsg,
-			     "TokenList::operator[](name)",
-			     "CollectionBase" );
+      throw std::runtime_error( errorMsg + " (APR: \" TokenList::operator[](name) \" from \" CollectionBase" );
    }
    return *( iData->second );
 }
@@ -146,9 +140,7 @@ pool::TokenList::operator[]( unsigned int index ) const
    if( index >= m_tokenVector.size() ) {
       std::ostringstream errorMsg;
       errorMsg << "Cannot find Token with index `" << index << "' in Token list.";
-      throw pool::Exception( errorMsg.str(),
-			     "TokenList::operator[](index)",
-			     "CollectionBase" );
+      throw std::runtime_error( errorMsg.str() + " (APR: \" TokenList::operator[](index) \" from \" CollectionBase" );
    }
    return *m_tokenVector[index];
 }

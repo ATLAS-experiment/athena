@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 def LArSuperCellMonConfig(flags, **kwargs):
@@ -219,12 +219,12 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True,is
     cellMonGroup.defineHistogram('BCID,superCellEt;h_SuperCellEt_vs_BCID',
                                  title='Super Cell ET [MeV] vs BCID ; BCID from train front; %',
                                  type='TH2F', path=sc_hist_path,
-                                 xbins = 50, xmin=0,xmax=50,
+                                 xbins = 100, xmin=0,xmax=100,
                                  ybins = 80, ymin=-1000,ymax=1000)
     cellMonGroup.defineHistogram('BCID,superCellEtRef;h_SuperCellEtRef_vs_BCID',
                                  title='Super Cell ET [MeV] vs BCID ; BCID from train front; %',
                                  type='TH2F', path=sc_hist_path,
-                                 xbins = 50, xmin=0,xmax=50,
+                                 xbins = 100, xmin=0,xmax=100,
                                  ybins = 80, ymin=-1000,ymax=1000)
 
     cellMonGroup.defineHistogram('resolutionHET;h_SuperCellResolution',
@@ -248,7 +248,7 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True,is
     cellMonGroup.defineHistogram('BCID,resolution;h_SuperCellResolution_vs_BCID',
                                  title='Super Cell reconstruction resolution vs BCID ; BCID from train front; %',
                                  type='TH2F', path=sc_hist_path,
-                                 xbins = 50, xmin=0,xmax=50,
+                                 xbins = 100, xmin=0,xmax=100,
                                  ybins = 80, ymin=-120,ymax=120)
 
     cellMonGroup.defineHistogram('superCellEtRef,superCellEt;h_SuperCellEtLin',
@@ -326,12 +326,12 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True,is
            cellMonGroup.defineHistogram('BCID,superCellEt_'+part+';h_SuperCellET_vs_BCID'+part,
                                         title='Super Cell ET [MeV] vs BCID '+partp+'; BCID from train front; %',
                                         type='TH2F', path=sc_hist_path,
-                                        xbins = 50, xmin=0,xmax=50,
+                                        xbins = 100, xmin=0,xmax=100,
                                         ybins = 100, ymin=-1000,ymax=1000)
            cellMonGroup.defineHistogram('BCID,superCellEtRef_'+part+';h_SuperCellRefET_vs_BCID'+part,
                                         title='Super Cell ET [MeV] vs BCID '+partp+'; BCID from train front; %',
                                         type='TH2F', path=sc_hist_path,
-                                        xbins = 50, xmin=0,xmax=50,
+                                        xbins = 100, xmin=0,xmax=100,
                                         ybins = 100, ymin=-1000,ymax=1000)
         
            cellMonGroup.defineHistogram('resolutionHET_'+part+';h_SuperCellResolution'+part,
@@ -355,7 +355,7 @@ def defineHistograms(cellMonGroup,LayerNames,isHLT=False,isDatabaseNoise=True,is
            cellMonGroup.defineHistogram('BCID,resolution_'+part+';h_SuperCellResolution_vs_BCID'+part,
                                         title='Super Cell reconstruction resolution vs BCID '+partp+'; BCID from train front; %',
                                         type='TH2F', path=sc_hist_path,
-                                        xbins = 50, xmin=0,xmax=50,
+                                        xbins = 100, xmin=0,xmax=100,
                                         ybins = 80, ymin=-120,ymax=120)
         
            cellMonGroup.defineHistogram('superCellEtRef_'+part+',superCellEt_'+part+';h_SuperCellEtLin'+part,
@@ -432,7 +432,7 @@ if __name__=='__main__':
     #from AthenaConfiguration.TestDefaults import defaultTestFiles
     #flags.Input.Files = defaultTestFiles.ESD
     # to test tier0 workflow:
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1']
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1_200evt']
 
     flags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
     flags.DQ.enableLumiAccess = True

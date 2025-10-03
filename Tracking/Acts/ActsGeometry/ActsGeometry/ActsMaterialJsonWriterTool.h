@@ -6,6 +6,7 @@
 #define ACTSGEOMETRY_ACTSMATERIALJSONWRITERTOOL_H
 
 // ATHENA
+#include <Acts/Material/TrackingGeometryMaterial.hpp>
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/IInterface.h"
@@ -36,7 +37,7 @@ public:
 
   virtual
   void
-  write(const ActsGeometryContext& gctx, const Acts::MaterialMapJsonConverter::DetectorMaterialMaps& detMaterial) const override;
+  write(const ActsGeometryContext& gctx, const Acts::TrackingGeometryMaterial& detMaterial) const override;
 
   virtual
   void

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -129,8 +129,13 @@ public:
      passed in by the ctor)*/
   virtual const TrkDetElementBase* detectorElement() const = 0;
 
-  /** Interface method checking the type*/
-  virtual bool type(PrepRawDataType type) const = 0;
+  /** @brief Interface method checking the type*/
+  virtual bool type(PrepRawDataType type) const {
+      return prdType() == type;
+  }
+
+  /** @brief Interface method returning the prdType */
+  virtual PrepRawDataType prdType() const = 0;
 
   /** dump information about the PRD object. */
   virtual MsgStream& dump(MsgStream& stream) const;

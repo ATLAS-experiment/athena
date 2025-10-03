@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
+from functools import cache
+
 
 class LArRunInfo:
     "Wrapper class to hold LAr run configuration information"
@@ -54,14 +56,13 @@ class LArRunInfo:
        if (self._runType ==2) :
            return 'Result'
 
-
+@cache
 def getLArFormatForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
     from AthenaCommon.Logging import logging
     mlog_LRF = logging.getLogger( 'getLArRunFormatForRun' )
 
     mlog_LRF.info("Connecting to database %s", connstring)
 
-    mlog_LRF.info("Found LAr info for run %i",run)
     runDB=indirectOpen(connstring)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
@@ -88,7 +89,6 @@ def getLArFormatForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         #mlog_LRF.warning(e)
         return None
     runDB.closeDatabase()
-    mlog_LRF.info("Found info for run %i", run)
     return  LArRunInfo(nSamples,gainType,latency,firstSample,format,runType)
 
 class LArDTRunInfo:
@@ -149,6 +149,7 @@ def parse_recipe(recipe,mux,mlog):
        pass
     return (sTypes,sLengths) 
 
+@cache
 def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
     from AthenaCommon.Logging import logging
     mlog_LRF = logging.getLogger( 'getLArDTRunInfoForRun' )
@@ -158,7 +159,7 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
         raise RuntimeError("getLArFormatForRun ERROR: Cannot connect to database %s",connstring)
-    mlog_LRF.info("Found DB")
+
     timing="LAR"
     adccalib=0
     mux=[]
@@ -173,10 +174,9 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         recipePEB=payload['recipe_tdaq_B']
         mux.append(ord(payload['mux_setting_0_tdaq']))
         mux.append(ord(payload['mux_setting_1_tdaq']))
-        adccalib=payload['ADCCalibMode']
+        adccalib=ord(payload['ADCCalibMode'])
         if run > 493743: # hardcoded, first run when this info was filled
             fw=ord(payload['ttype_mask_A'])
-        mlog_LRF.info("Found DT info for run %i",run)
     except Exception:
         mlog_LRF.warning("No information in /LAR/Configuration/RunLogDT for run %i", run)
         mlog_LRF.warning("Using defaults: MUX0: ADC MUX1: ET_ID receipe: at0_bc5-at1_bc1_ts1-q")
@@ -186,7 +186,6 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
         mux.append(3)
 
     runDB.closeDatabase()
-    print(mux,fw)
     sTypes, sLengths = parse_recipe(recipe,mux,mlog_LRF)
     sTypesPEB, sLengthsPEB = parse_recipe(recipePEB,mux,mlog_LRF)
     return  LArDTRunInfo(sTypes, sLengths, sTypesPEB, sLengthsPEB, timing, adccalib, fw)

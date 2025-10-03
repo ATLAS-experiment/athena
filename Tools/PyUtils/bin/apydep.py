@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Created: Oct 2020, Frank Winklmeier
 #
@@ -34,8 +34,8 @@ class DependencyFinder(ast.NodeVisitor):
    def visit_Call(self, node):
       """"include(XYZ/ABC.py)"""
       if isinstance(node.func, ast.Name) and node.func.id=='include' and node.args:
-         if isinstance(node.args[0], ast.Str):
-            self.includes.add(node.args[0].s.split('/',1)[0])
+         if isinstance(node.args[0], ast.Constant):
+            self.includes.add(node.args[0].value.split('/',1)[0])
 
 
 def get_dependencies(filename, print_error=False):

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonChamberHoleRecoveryTool.h"
@@ -383,9 +383,12 @@ namespace Muon {
             ATH_MSG_ERROR("Failed to retrieve chamber intersection service");
             throw std::runtime_error("No chamber intersection service");
         }
-        const MuonGM::MdtReadoutElement* readoutEle = interSectSvc->detMgr()->getMdtReadoutElement(chId);
 
-        MuonStationIntersect intersect = interSectSvc->tubesCrossedByTrack(chId, position, direction);
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_DetectorManagerKey,ctx};
+        const MuonGM::MuonDetectorManager* MuonDetMgr = detMgr.cptr();
+        const MuonGM::MdtReadoutElement* readoutEle = MuonDetMgr->getMdtReadoutElement(chId);
+
+        MuonStationIntersect intersect = interSectSvc->tubesCrossedByTrack(MuonDetMgr, chId, position, direction);
 
         // clear hole vector
         std::set<Identifier> holes;

@@ -13,7 +13,6 @@
 // Framework include files
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbSession.h"
-#include "StorageSvc/DbObject.h"
 #include "DbDatabaseObj.h"
 #include "DbDomainObj.h"
 #include "CxxUtils/checker_macros.h"

@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////
-//TRTStrawStatusRead.h
-// Algorithm to dump the straw status info in CondStore to text file 
-//phansen@nbi.dk
+// TRTStrawStatusRead.h
+//  Algorithm to dump the straw status info in CondStore to text file
+// phansen@nbi.dk
 ////////////////////////////////////////////////////
-
 
 #ifndef TRTSTRAWSTATUSREAD_H
 #define TRTSTRAWSTATUSREAD_H
@@ -24,38 +23,33 @@
 class TRTStrawStatusRead : public AthAlgorithm
 {
 
- public:
+public:
+    TRTStrawStatusRead(const std::string &name, ISvcLocator *pSvcLocator);
+    virtual ~TRTStrawStatusRead() = default;
+    typedef TRTCond::StrawStatusMultChanContainer StrawStatusContainer;
 
-  TRTStrawStatusRead( const std::string &name, ISvcLocator *pSvcLocator);
-  virtual ~TRTStrawStatusRead()=default;
-  typedef TRTCond::StrawStatusMultChanContainer StrawStatusContainer ;
+    // Gaudi
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
 
-  // Gaudi
-  virtual StatusCode initialize( ) override;
-  virtual StatusCode execute( ) override;
-  virtual StatusCode finalize( ) override;
+    virtual StatusCode writeToTextFile(const std::string &filename);
 
+    virtual const StrawStatusContainer *getStrawStatusContainer() const;
+    virtual const StrawStatusContainer *getStrawStatusPermanentContainer() const;
+    virtual const StrawStatusContainer *getStrawStatusHTContainer() const;
 
-  virtual StatusCode writeToTextFile(const std::string& filename);
+private:
+    const TRT_ID *m_trtid{}; //!< trt id helper
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_status{this, "TRT_StrawStatusSummaryTool", "InDetTRTStrawStatusSummaryTool", ""};
+    //  ReadHandle  keys
+    SG::ReadCondHandleKey<StrawStatusContainer> m_statReadKey{this, "StatReadKeyName", "/TRT/Cond/Status", "StrawStatus in-key"};
+    SG::ReadCondHandleKey<StrawStatusContainer> m_permReadKey{this, "PermReadKeyName", "/TRT/Cond/StatusPermanent", "StrawStatusPermanent in-key"};
+    SG::ReadCondHandleKey<StrawStatusContainer> m_statHTReadKey{this, "StatHTReadKeyName", "/TRT/Cond/StatusHT", "StrawStatusHT in-key"};
 
-  virtual const StrawStatusContainer* getStrawStatusContainer() const;
-  virtual const StrawStatusContainer* getStrawStatusPermanentContainer() const;
-  virtual const StrawStatusContainer* getStrawStatusHTContainer() const;
-
- private:
-
-
-  bool m_setup;                             //false before first event
-  const TRT_ID* m_trtid;                    //!< trt id helper
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_status;
-  //  ReadHandle  keys
-  SG::ReadCondHandleKey<StrawStatusContainer> m_statReadKey{this,"StatReadKeyName","/TRT/Cond/Status","StrawStatus in-key"};
-  SG::ReadCondHandleKey<StrawStatusContainer> m_permReadKey{this,"PermReadKeyName","/TRT/Cond/StatusPermanent","StrawStatusPermanent in-key"};
-  SG::ReadCondHandleKey<StrawStatusContainer> m_statHTReadKey{this,"StatHTReadKeyName","/TRT/Cond/StatusHT","StrawStatusHT in-key"};
-
-  // Which folder to print
-  std::string m_printfolder;
+    // Which folder to print
+    Gaudi::Property<std::string> m_printfolder{this, "FolderToPrint", ""};
+    Gaudi::Property<std::string> m_outputfile{this, "OutputFile", "StrawStatusDump_Writer.txt"};
 };
-
 
 #endif

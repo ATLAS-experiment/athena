@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Root includes
@@ -155,7 +155,7 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::runTestT(
       Trk::PdgToParticleHypothesis pdgFromHypothesis;
       // now convert
       double mass = Trk::ParticleMasses::mass[m_particleHypothesis];
-      int pdg = pdgFromHypothesis.convert((Trk::ParticleHypothesis) m_particleHypothesis, m_charge);
+      int pdg = pdgFromHypothesis.convert(static_cast<Trk::ParticleHypothesis>(m_particleHypothesis.value()), m_charge);
       m_posmomWriter->initializeTrack(startParameters.position(),
                                       startParameters.momentum(),
                                       mass, pdg);
@@ -163,7 +163,7 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::runTestT(
 
     // setup the extrapolation how you'd like it
     Trk::ExtrapolationCell < T > ecc(startParameters);
-    ecc.setParticleHypothesis((Trk::ParticleHypothesis) m_particleHypothesis);
+    ecc.setParticleHypothesis(static_cast<Trk::ParticleHypothesis>(m_particleHypothesis.value()));
     ecc.addConfigurationMode(Trk::ExtrapolationMode::StopAtBoundary);
     ecc.addConfigurationMode(Trk::ExtrapolationMode::FATRAS);
     if (m_collectSensitive) ecc.addConfigurationMode(Trk::ExtrapolationMode::CollectSensitive);
@@ -230,11 +230,8 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::runTestT(
       if (m_stepwiseExtrapolation && stepSurfaces.size()) {
         // the ExtrapolationCell for stepwise
         Trk::ExtrapolationCell < T > eccSteps(startParameters);
-        eccSteps.setParticleHypothesis((Trk::ParticleHypothesis) m_particleHypothesis);
+        eccSteps.setParticleHypothesis(static_cast<Trk::ParticleHypothesis>(m_particleHypothesis.value()));
         eccSteps.addConfigurationMode(Trk::ExtrapolationMode::StopAtBoundary);
-        // if (m_collectSensitive) eccSteps.addConfigurationMode(Trk::ExtrapolationMode::CollectSensitive);
-        // if (m_collectPassive)   eccSteps.addConfigurationMode(Trk::ExtrapolationMode::CollectPassive);
-        // if (m_collectBoundary)  eccSteps.addConfigurationMode(Trk::ExtrapolationMode::CollectBoundary);
         if (m_collectMaterial) eccSteps.addConfigurationMode(Trk::ExtrapolationMode::CollectMaterial);
         std::vector < const T * > stepParameters;
         // prepare the extrapolation Code

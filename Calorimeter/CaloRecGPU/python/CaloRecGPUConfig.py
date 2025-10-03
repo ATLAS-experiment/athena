@@ -235,6 +235,7 @@ def GPUClusterMomentsCalculatorToolCfg(flags, name = "GPUTopoMoments", **kwargs)
     result=ComponentAccumulator()
 
     kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
+    kwargs.setdefault("TimeFileOutput", name + "Times.txt")
 
     kwargs.setdefault("WeightingOfNegClusters", flags.CaloRecGPU.ActiveConfig.MomentsUseAbsEnergy)
 
@@ -483,8 +484,7 @@ def DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger, prefix = 
 #instantiates GPU or CPU tools with consistent options...
 def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
                           clustersname = None, clustersnapname="CaloTopoClusters", name="HybridClusterProcessor",
-                          MonitorTool = None, MonitorCells = False, PlotterTool = None,
-                          addAsPrimary = True, ReallyUseGPUTools = True):
+                          PlotterTool = None, addAsPrimary = True, ReallyUseGPUTools = True):
 
     doLCCalib = flags.CaloRecGPU.ActiveConfig.doTopoClusterLocalCalib
 
@@ -521,10 +521,6 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
     HybridClusterProcessor.DeferConstantDataPreparationToFirstEvent = True
     HybridClusterProcessor.DoPlots = PlotterTool is not None
     HybridClusterProcessor.PlotterTool = PlotterTool
-    HybridClusterProcessor.DoMonitoring = MonitorTool is not None
-    HybridClusterProcessor.MonitoringTool = MonitorTool
-    HybridClusterProcessor.MonitorCells = MonitorCells
-    HybridClusterProcessor.CellsName = cellsname
     
     HybridClusterProcessor.NumPreAllocatedDataHolders = flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders
 

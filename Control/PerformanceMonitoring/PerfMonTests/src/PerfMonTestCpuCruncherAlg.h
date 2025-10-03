@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestCpuCruncherAlg.h 
@@ -28,22 +28,11 @@ class CpuCruncherAlg : public AthAlgorithm
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
-
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  CpuCruncherAlg( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Destructor: 
-  virtual ~CpuCruncherAlg(); 
-
-  // Assignment operator: 
-  //CpuCruncherAlg &operator=(const CpuCruncherAlg &alg); 
+  using AthAlgorithm::AthAlgorithm;
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
 
   // Perform math operations to burn CPU for a number of iterations
   double burn(unsigned long nIterations);
@@ -53,14 +42,11 @@ class CpuCruncherAlg : public AthAlgorithm
   /////////////////////////////////////////////////////////////////// 
  private: 
 
-  /// Default constructor: 
-  CpuCruncherAlg();
-
   /// Property to setup the mean (in ms) of CPU time to consume
-  float m_meanCpuTime;
+  Gaudi::Property<float> m_meanCpuTime{this, "MeanCpu", 100., "Mean (in ms) of CPU time to consume."};
 
   /// Property to setup the RMS  (in ms) of CPU time to consume
-  float m_rmsCpuTime;
+  Gaudi::Property<float> m_rmsCpuTime{this, "RmsCpu", 5., "RMS (in ms) of CPU time to consume."};
 
   /// Random number setup
   std::default_random_engine m_random;

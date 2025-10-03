@@ -116,7 +116,7 @@ namespace GlobalSim {
 			 return std::make_shared<GenericTob>(bs);});
 	
       }
-      m_testTobs1.push_back(container);
+      m_testTobs1.emplace_back(std::move(container));
     }
 
     {
@@ -131,7 +131,7 @@ namespace GlobalSim {
 			 return std::make_shared<GenericTob>(bs);});
 	
       }
-      m_testTobs2.push_back(container);
+      m_testTobs2.emplace_back(std::move(container));
     }
 
     m_expectedResults.push_back(m_expResults_in);

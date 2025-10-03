@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -48,8 +48,8 @@ namespace CP
       }
       ANA_CHECK (met::buildMETSum (m_finalKey, met, softTerm->source()));
 
-      const static SG::AuxElement::Decorator<float> met_met_dec("met");
-      const static SG::AuxElement::Decorator<float> met_phi_dec("phi");
+      const static SG::Decorator<float> met_met_dec("met");
+      const static SG::Decorator<float> met_phi_dec("phi");
       for (const xAOD::MissingET *metTerm : (*met))
       {
         if (!metTerm)

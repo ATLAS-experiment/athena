@@ -23,8 +23,8 @@
 #include "ISF_Event/TruthBinding.h"
 #include "ISF_Event/ISFParticle.h"
 
-ForwardTransportModel::ForwardTransportModel(const std::string& name, const int verboseLevel, const std::string& FwdTrSvcName)
-  : G4VFastSimulationModel(name)
+ForwardTransportModel::ForwardTransportModel(const std::string& name, G4Region* region, const int verboseLevel, const std::string& FwdTrSvcName)
+  : G4VFastSimulationModel(name, region)
   , m_fwdSvc(FwdTrSvcName, "ForwardTransportModel")
   , m_verboseLevel(verboseLevel)
 {

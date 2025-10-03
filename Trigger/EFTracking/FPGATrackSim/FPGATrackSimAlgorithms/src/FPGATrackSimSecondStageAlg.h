@@ -14,6 +14,7 @@
 #include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfo.h"
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
 
 #include "FPGATrackSimAlgorithms/IFPGATrackSimTrackExtensionTool.h"
@@ -22,6 +23,7 @@
 
 #include <fstream>
 #include "StoreGate/StoreGateSvc.h"
+#include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoadCollection.h"
@@ -58,9 +60,6 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         // Handles
         ToolHandle<IFPGATrackSimTrackExtensionTool>      m_trackExtensionTool {this, "TrackExtensionTool", "FPGATrackSimTrackExtensionTool", "Track extensoin tool"};
 
-        // We definitely need this one, in case we do Elliot's inside in -> extrapolate to spacepoints.
-        ToolHandle<IFPGATrackSimRoadFilterTool>          m_spRoadFilterTool {this, "SPRoadFilterTool", "FPGATrackSimSpacepointRoadFilterTool", "Spacepoint Road Filter Tool"};
-
         // Hough ROOT output.
         ToolHandle<FPGATrackSimHoughRootOutputTool>      m_houghRootOutputTool {this, "HoughRootOutputTool", "FPGATrackSimHoughRootOutputTool/FPGATrackSimHoughRootOutputTool", "Hough ROOT Output Tool"};
 
@@ -77,6 +76,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
         // Flags
+        Gaudi::Property<int> m_SetTruthParametersForTracks {this, "SetTruthParametersForTracks", -1, "flag to override track parameters and set them to the truth values"};
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
@@ -142,6 +142,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         // Not sure if this algorithm also needs these.
         SG::ReadHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::ReadHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
+        SG::ReadHandleKey<FPGATrackSimEventInfo> m_FPGAEventInfoKey {this, "FPGATrackSimEventInfoKey", "FPGAEventInfo", "FPGATrackSim event info"};
 };
 
 

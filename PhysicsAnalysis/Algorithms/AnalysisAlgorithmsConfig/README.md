@@ -1,8 +1,10 @@
 Combining Configuration Files
 -----------------------------
 
-Configuration files contain with one special key: `include`.
-If this appears in a yaml object, the parser will assume the key
+Configuration files contain with one special key: `include`. This key should be a *list of files*.
+These will be iteratively merged into the current scope, such that the current file has priority, 
+followed by the first item in the list, with the final file in the list having the lowest priority.
+For each file in the list, the parser will  assume the key
 gives a path _relative to the current file_. Any entries in the file
 will be imported at the same scope where the `include` key appears.
 If local keys conflict with imported ones they will be merged, giving

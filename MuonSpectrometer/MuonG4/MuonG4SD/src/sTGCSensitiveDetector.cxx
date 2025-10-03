@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTGCSensitiveDetector.h"
-#include "MuonSimEvent/sTgcHitIdHelper.h"
 #include "MCTruth/TrackHelper.h"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
@@ -11,17 +10,18 @@
 #include "G4Track.hh"
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 #include <string>
 
 // construction/destruction
-sTGCSensitiveDetector::sTGCSensitiveDetector(const std::string& name, const std::string& hitCollectionName)
-  : G4VSensitiveDetector( name )
-  , m_sTGCSimHitCollection( hitCollectionName )
-{
-  m_muonHelper = sTgcHitIdHelper::GetHelper();
-  //m_muonHelper->PrintFields();
-}
+sTGCSensitiveDetector::sTGCSensitiveDetector(const std::string& name, 
+                                             const std::string& hitCollectionName,
+                                             unsigned baseDepth): 
+    G4VSensitiveDetector( name ),
+    AthMessaging{name},
+    m_sTGCSimHitCollection( hitCollectionName ),
+    m_baseDepth{baseDepth} {}
 
 // Implemenation of memebr functions
 void sTGCSensitiveDetector::Initialize(G4HCofThisEvent*)
@@ -60,18 +60,16 @@ G4bool sTGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*RO
 
   // int iDepth=touchHist->GetHistoryDepth();
   //  G4cout << "\t\t\t\t Touchable history dump "<<G4endl;
-  int nLayer=touchHist->GetVolume(0)->GetCopyNo();
-  std::string chName=touchHist->GetVolume(1)->GetLogicalVolume()->GetName();
+  int nLayer=touchHist->GetVolume(m_baseDepth)->GetCopyNo();
+  std::string chName=touchHist->GetVolume(1+m_baseDepth)->GetLogicalVolume()->GetName();
   //G4cout << "sTGCSensitiveDetector name: "<<chName<<G4endl;
   std::string subType=chName.substr(chName.find('-')+1);
   //G4cout << "\t\t sType: "<<subType);
-  if (subType[0]!='T'&&subType[0]!='Q' ) G4cout << " something is wrong, this is no sTGC!"<<G4endl;
-  std::string temp(&subType[2]);
-  std::istringstream is(temp);
-  int iRing;
-  is>>iRing;
+  if (subType[0]!='T'&&subType[0]!='Q' ) ATH_MSG_WARNING(" something is wrong, this is no sTGC! "<<chName<<", "<<Amg::toString(preposition));
+  int iRing = std::atoi(&subType[2]) -1;
+  ATH_MSG_VERBOSE("Volume name: "<<chName<<", nLayer: "<<nLayer<<", subType: "<<subType<<", iRing: "<<iRing);
+
   // identifiers have eta naming 0-2, eta encoded in subtype is 1-3
-  iRing--;
   // double phiDiff=2*M_PI;
 
   G4ThreeVector posH=postStep->GetPosition(); //posH is equivalent to position - eigen not used to avoid additional dependence on EventPrimitives

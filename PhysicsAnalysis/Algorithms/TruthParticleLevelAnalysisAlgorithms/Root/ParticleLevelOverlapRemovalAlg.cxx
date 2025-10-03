@@ -73,13 +73,13 @@ StatusCode ParticleLevelOverlapRemovalAlg::execute(const EventContext &ctx) cons
   SG::WriteDecorHandle<xAOD::JetContainer, char> dec_jets_OR(m_decORjet, ctx);
 
   // accessors
-  static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed(
+  static const SG::ConstAccessor<float> acc_pt_dressed(
       "pt_dressed");
-  static const SG::AuxElement::ConstAccessor<float> acc_eta_dressed(
+  static const SG::ConstAccessor<float> acc_eta_dressed(
       "eta_dressed");
-  static const SG::AuxElement::ConstAccessor<float> acc_phi_dressed(
+  static const SG::ConstAccessor<float> acc_phi_dressed(
       "phi_dressed");
-  static const SG::AuxElement::ConstAccessor<float> acc_e_dressed("e_dressed");
+  static const SG::ConstAccessor<float> acc_e_dressed("e_dressed");
 
   // Default decorations: all objects pass!
   for (const auto* jet : *jets) {

@@ -1,18 +1,12 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESSINTERFACES_TVIRTUALEVENT_H
 #define XAODROOTACCESSINTERFACES_TVIRTUALEVENT_H
 
+// Project include(s).
 #include "CxxUtils/sgkey_t.h"
-
-// System include(s):
-extern "C" {
-#   include <stdint.h>
-}
-#include <string>
-#include <vector>
 
 // Forward declaration(s):
 namespace std {
@@ -51,14 +45,6 @@ namespace xAOD {
       bool retrieve( const T*& obj, const std::string& key,
                      bool silent = false );
 
-      /// provide list of all keys associated with provided type.
-      /// usage: event->keys( vec_to_fill, metadata )
-      /// @param vkeys will be filled with the list of keys (may be empty)
-      /// @param metadata (default false) look in metadata content if true
-      template< typename T >
-      void keys( std::vector< std::string >& vkeys,
-                 bool metadata = false ) const;
-
       /// Function returning the hash describing an object's name/key
       virtual sgkey_t getHash( const std::string& key ) const = 0;
       /// Function returning the hash describing a known object
@@ -76,10 +62,6 @@ namespace xAOD {
       virtual const void* getInputObject( sgkey_t key,
                                           const std::type_info& ti,
                                           bool silent = false ) = 0;
-      /// Function to retrieve list of keys describing a type name
-      virtual void getNames( const std::string& targetClassName,
-                             std::vector<std::string>& vkeys,
-                             bool metadata) const = 0;
 
    }; // class TVirtualEvent
 

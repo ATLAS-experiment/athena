@@ -18,12 +18,10 @@ atlas_add_library( JetCalibToolsLib
    xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib JetToolHelpersLib MuonAnalysisInterfacesLib JetAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES xAODMuon PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( JetCalibTools
-      src/components/*.cxx
-      INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} JetCalibToolsLib )
-endif()
+atlas_add_component( JetCalibTools
+   src/components/*.cxx
+   INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} JetCalibToolsLib )
 
 atlas_add_dictionary( JetCalibToolsDict
    JetCalibTools/JetCalibToolsDict.h

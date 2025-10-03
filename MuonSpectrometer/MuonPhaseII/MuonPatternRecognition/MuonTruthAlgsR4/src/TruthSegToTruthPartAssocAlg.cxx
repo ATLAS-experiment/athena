@@ -10,6 +10,7 @@
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "xAODTruth/TruthVertex.h"
 
 #include <unordered_set>
 
@@ -41,8 +42,9 @@ namespace MuonR4{
         ATH_CHECK(SG::get(truthParticles, m_truthKey, ctx));
 
         using IdDecorHandle_t = SG::ReadDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>;
-        using TruthSegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
-        SG::WriteDecorHandle<xAOD::TruthParticleContainer, TruthSegLink_t> segLinkDecor{m_segLinkKey ,ctx};
+        using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
+        using SegLinkVec_t = std::vector<SegLink_t>;
+        SG::WriteDecorHandle<xAOD::TruthParticleContainer, SegLinkVec_t> segLinkDecor{m_segLinkKey ,ctx};
 
         /// Initialize the Identifier decorators
         std::vector<IdDecorHandle_t> idDecorHandles{};
@@ -58,7 +60,7 @@ namespace MuonR4{
             segLinkDecor(*truthMuon).clear();
             IdSet_t assocIds{};
             ATH_MSG_DEBUG("Truth muon "<<truthMuon->pt()<<", eta: "<<truthMuon->eta()<<", "<<truthMuon->phi()
-                         <<", barcode: "<<HepMC::barcode(truthMuon));
+                         <<", barcode: "<< HepMC::uniqueID(truthMuon));
             for (const IdDecorHandle_t& hitDecor : idDecorHandles) {
                 std::ranges::transform(hitDecor(*truthMuon), std::inserter(assocIds, assocIds.begin()),
                                        [this](unsigned long long rawId){
@@ -121,7 +123,7 @@ namespace MuonR4{
                         }
                         if (!counts) continue;
                         ATH_MSG_VERBOSE("Truth muon "<<truthMuon->pt()<<", eta: "<<truthMuon->eta()<<", "<<truthMuon->phi()
-                             <<", barcode: "<<HepMC::barcode(truthMuon)<<", matched hits: "<<counts<<", unmatched: "<<std::endl<<unMatchedStr.str());
+                             <<", barcode: "<<HepMC::uniqueID(truthMuon)<<", matched hits: "<<counts<<", unmatched: "<<std::endl<<unMatchedStr.str());
                     }
                 }
                 continue;
@@ -129,8 +131,19 @@ namespace MuonR4{
             const xAOD::TruthParticle* truthPart{std::get<0>(*best_itr)};
             segLinkDecor(*truthPart).emplace_back(segments, segment->index());
             truthLinkDecor(*segment) = TruthPartLink_t{truthParticles, truthPart->index()};
+        
         }
-
+        /// Finally sort the segments along the trajectory
+        for (const xAOD::TruthParticle* truthMuon : *truthParticles){
+            const Amg::Vector3D dir = Amg::Vector3D{truthMuon->px(), truthMuon->py(), truthMuon->pz()}.normalized();
+            const xAOD::TruthVertex* vtx{truthMuon->prodVtx()};
+            const Amg::Vector3D pos = (vtx? Amg::Vector3D{vtx->x(), vtx->y(), vtx->z()} : Amg::Vector3D::Zero());
+            SegLinkVec_t& linkedSegs{segLinkDecor(*truthMuon)};
+            std::ranges::sort(linkedSegs,[&pos, &dir](const SegLink_t& linkA, const SegLink_t& linkB){
+                                                return dir.dot((*linkA)->position() - pos) <
+                                                       dir.dot((*linkB)->position() - pos);
+                                        });
+        }
         return StatusCode::SUCCESS;
     }
 }

@@ -4,7 +4,6 @@
 
 // Local include(s):
 #include "TauAnalysisTools/TauSelectionTool.h"
-#include "TauAnalysisTools/SharedFilesVersion.h"
 #include "TauAnalysisTools/TauSelectionCuts.h"
 
 // Framework include(s):
@@ -27,40 +26,7 @@ TauSelectionTool::TauSelectionTool( const std::string& name )
   , m_sEleIDWP("ELEIDNONE")
   , m_fOutFile(nullptr)
   , m_aAccept( "TauSelection" )
-{
-  declareProperty( "CreateControlPlots", m_bCreateControlPlots = false);
-  /*
-    Baseline properties declaration:
-    properties containing 'Region' are a vector of lower and upper bounds
-    other properties named in plural are a list of exact values to cut on
-    other properties are single cuts
-  */
-  declareProperty( "ConfigPath",    m_sConfigPath    = "TauAnalysisTools/"+std::string(sSharedFilesVersion)+"/Selection/recommended_selection_r22.conf");
-  declareProperty( "SelectionCuts", m_iSelectionCuts = NoCut); // initialize with 'no' cuts
-  declareProperty( "PtRegion",      m_vPtRegion      = {});  // in GeV
-  declareProperty( "PtMin",         m_dPtMin         = NAN); // in GeV
-  declareProperty( "PtMax",         m_dPtMax         = NAN); // in GeV
-  declareProperty( "AbsEtaRegion",  m_vAbsEtaRegion  = {});
-  declareProperty( "AbsEtaMin",     m_dAbsEtaMin     = NAN);
-  declareProperty( "AbsEtaMax",     m_dAbsEtaMax     = NAN);
-  declareProperty( "AbsCharges",    m_vAbsCharges    = {});
-  declareProperty( "AbsCharge",     m_iAbsCharge     = NAN);
-  declareProperty( "NTracks",       m_vNTracks       = {});
-  declareProperty( "NTrack",        m_iNTrack        = NAN);
-  declareProperty( "JetRNNSigTransRegion", m_vJetRNNSigTransRegion = {});
-  declareProperty( "JetRNNSigTransMin", m_dJetRNNSigTransMin = NAN);
-  declareProperty( "JetRNNSigTransMax", m_dJetRNNSigTransMax = NAN);
-  declareProperty( "GNTauSigTransRegion", m_vGNTauSigTransRegion = {});
-  declareProperty( "GNTauSigTransMin", m_dGNTauSigTransMin = NAN);
-  declareProperty( "GNTauSigTransMax", m_dGNTauSigTransMax = NAN);
-  declareProperty( "JetIDWP",       m_iJetIDWP       = 0);
-  declareProperty( "EleRNNRegion",  m_vEleRNNRegion  = {});
-  declareProperty( "EleRNNMin",     m_dEleRNNMin     = NAN);
-  declareProperty( "EleRNNMax",     m_dEleRNNMax     = NAN);
-  declareProperty( "EleIDWP",       m_iEleIDWP       = 0);
-  declareProperty( "EleIDVersion",  m_iEleIDVersion  = 1);
-  declareProperty( "MuonOLR",       m_bMuonOLR       = false);
-}
+{}
 
 //______________________________________________________________________________
 TauSelectionTool::~TauSelectionTool()
@@ -71,28 +37,37 @@ TauSelectionTool::~TauSelectionTool()
 //______________________________________________________________________________
 StatusCode TauSelectionTool::initialize()
 {
+
+  m_vPtRegion = m_vecPtRegion.value();	
+  m_vAbsEtaRegion = m_vecAbsEtaRegion.value();
+  m_vAbsCharges = m_vecAbsCharges.value(); 
+  m_vNTracks = m_vecNTracks.value();
+  m_vJetRNNSigTransRegion = m_vecJetRNNSigTransRegion.value();
+  m_vGNTauSigTransRegion = m_vecGNTauSigTransRegion.value();
+  m_vEleRNNSigTransRegion = m_vecEleRNNSigTransRegion.value();
+
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
   if (!bConfigViaProperties and !m_vPtRegion.empty())         bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dPtMin == m_dPtMin)         bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dPtMax == m_dPtMax)         bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dPtMin.value()))         bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dPtMax.value()))         bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())     bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dAbsEtaMin == m_dAbsEtaMin) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dAbsEtaMax == m_dAbsEtaMax) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMin.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMax.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsCharges.empty())       bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_iAbsCharge == m_iAbsCharge) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_iAbsCharge.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vNTracks.empty())          bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_iNTrack == m_iNTrack)       bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_iNTrack.value()))       bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vJetRNNSigTransRegion.empty())         bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dJetRNNSigTransMin == m_dJetRNNSigTransMin) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dJetRNNSigTransMax == m_dJetRNNSigTransMax) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dJetRNNSigTransMin.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dJetRNNSigTransMax.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vGNTauSigTransRegion.empty())         bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dGNTauSigTransMin == m_dGNTauSigTransMin) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dGNTauSigTransMax == m_dGNTauSigTransMax) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dGNTauSigTransMin.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dGNTauSigTransMax.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and m_iJetIDWP != 0)              bConfigViaProperties = true;
-  if (!bConfigViaProperties and !m_vEleRNNRegion.empty())     bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dEleRNNMin == m_dEleRNNMin) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_dEleRNNMax == m_dEleRNNMax) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !m_vEleRNNSigTransRegion.empty())     bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dEleRNNSigTransMin.value())) bConfigViaProperties = true;
+  if (!bConfigViaProperties and !std::isnan(m_dEleRNNSigTransMax.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and m_iEleIDWP != 0)              bConfigViaProperties = true;
   if (!bConfigViaProperties and m_bMuonOLR)                   bConfigViaProperties = true;
 
@@ -143,18 +118,18 @@ StatusCode TauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | CutPt;
         if (m_vPtRegion.empty())
-          TauAnalysisTools::split(rEnv,"PtRegion", ';', m_vPtRegion);
+           TauAnalysisTools::split(rEnv,"PtRegion", ';', m_vPtRegion);		
       }
       else if (sCut == "PtMin")
       {
         iSelectionCuts = iSelectionCuts | CutPt;
-        if (m_dPtMin != m_dPtMin)
+        if (std::isnan(m_dPtMin.value()))
           m_dPtMin = rEnv.GetValue("PtMin",NAN);
       }
       else if (sCut == "PtMax")
       {
         iSelectionCuts = iSelectionCuts | CutPt;
-        if (m_dPtMax != m_dPtMax)
+        if (std::isnan(m_dPtMax.value()))
           m_dPtMax = rEnv.GetValue("PtMax",NAN);
       }
       else if (sCut == "AbsEtaRegion")
@@ -166,13 +141,13 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "AbsEtaMin")
       {
         iSelectionCuts = iSelectionCuts | CutAbsEta;
-        if (m_dAbsEtaMin != m_dAbsEtaMin)
+        if (std::isnan(m_dAbsEtaMin.value()))
           m_dAbsEtaMin = rEnv.GetValue("AbsEtaMin",NAN);
       }
       else if (sCut == "AbsEtaMax")
       {
         iSelectionCuts = iSelectionCuts | CutAbsEta;
-        if (m_dAbsEtaMax != m_dAbsEtaMax)
+        if (std::isnan(m_dAbsEtaMax.value()))
           m_dAbsEtaMax = rEnv.GetValue("AbsEtaMax",NAN);
       }
       else if (sCut == "AbsCharges")
@@ -184,7 +159,7 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "AbsCharge")
       {
         iSelectionCuts = iSelectionCuts | CutAbsCharge;
-        if (m_iAbsCharge != m_iAbsCharge)
+        if (std::isnan(m_iAbsCharge.value()))
           m_iAbsCharge = rEnv.GetValue("AbsCharge",NAN);
       }
       else if (sCut == "NTracks")
@@ -196,7 +171,7 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "NTrack")
       {
         iSelectionCuts = iSelectionCuts | CutNTrack;
-        if (m_iNTrack != m_iNTrack)
+        if (std::isnan(m_iNTrack.value()))
           m_iNTrack = rEnv.GetValue("NTrack",NAN);
       }
       else if (sCut == "JetRNNSigTransRegion")
@@ -208,13 +183,13 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "JetRNNSigTransMin")
       {
         iSelectionCuts = iSelectionCuts | CutJetRNNScoreSigTrans;
-        if (m_dJetRNNSigTransMin != m_dJetRNNSigTransMin)
+        if (std::isnan(m_dJetRNNSigTransMin.value()))
           m_dJetRNNSigTransMin = rEnv.GetValue("JetRNNSigTransMin",NAN);
       }
       else if (sCut == "JetRNNSigTransMax")
       {
         iSelectionCuts = iSelectionCuts | CutJetRNNScoreSigTrans;
-        if (m_dJetRNNSigTransMax != m_dJetRNNSigTransMax)
+        if (std::isnan(m_dJetRNNSigTransMax.value()))
           m_dJetRNNSigTransMax = rEnv.GetValue("JetRNNSigTransMax",NAN);
       }
       else if (sCut == "GNTauSigTransRegion")
@@ -229,7 +204,7 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "GNTauSigTransMin")
       {
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
-        if (m_dGNTauSigTransMin != m_dGNTauSigTransMin)
+        if (std::isnan(m_dGNTauSigTransMin.value()))
           m_dGNTauSigTransMin = rEnv.GetValue("GNTauSigTransMin",NAN);
 
 	// check if using GNTau 
@@ -238,29 +213,29 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "GNTauSigTransMax")
       {
         iSelectionCuts = iSelectionCuts | CutGNTauScoreSigTrans;
-        if (m_dGNTauSigTransMax != m_dGNTauSigTransMax)
+        if (std::isnan(m_dGNTauSigTransMax.value()))
           m_dGNTauSigTransMax = rEnv.GetValue("GNTauSigTransMax",NAN);
 
 	// check if using GNTau 
 	m_useGNTau = true;
       }
-      else if (sCut == "EleRNNRegion")
+      else if (sCut == "EleRNNSigTransRegion")
       {
-        iSelectionCuts = iSelectionCuts | CutEleRNNScore;
-        if (m_vEleRNNRegion.empty())
-          TauAnalysisTools::split(rEnv,"EleRNNRegion", ';', m_vEleRNNRegion);
+        iSelectionCuts = iSelectionCuts | CutEleRNNScoreSigTrans;
+        if (m_vEleRNNSigTransRegion.empty())
+          TauAnalysisTools::split(rEnv,"EleRNNRegion", ';', m_vEleRNNSigTransRegion);
       }
-      else if (sCut == "EleRNNMin")
+      else if (sCut == "EleRNNSigTransMin")
       {
-        iSelectionCuts = iSelectionCuts | CutEleRNNScore;
-        if (m_dEleRNNMin != m_dEleRNNMin)
-          m_dEleRNNMin = rEnv.GetValue("EleRNNMin",NAN);
+        iSelectionCuts = iSelectionCuts | CutEleRNNScoreSigTrans;
+        if (std::isnan(m_dEleRNNSigTransMin.value()))
+          m_dEleRNNSigTransMin = rEnv.GetValue("EleRNNSigTransMin",NAN);
       }
-      else if (sCut == "EleRNNMax")
+      else if (sCut == "EleRNNSigTransMax")
       {
-        iSelectionCuts = iSelectionCuts | CutEleRNNScore;
-        if (m_dEleRNNMax != m_dEleRNNMax)
-          m_dEleRNNMax = rEnv.GetValue("EleRNNMax",NAN);
+        iSelectionCuts = iSelectionCuts | CutEleRNNScoreSigTrans;
+        if (std::isnan(m_dEleRNNSigTransMax.value()))
+          m_dEleRNNSigTransMax = rEnv.GetValue("EleRNNSigTransMax",NAN);
       }
       else if (sCut == "JetIDWP")
       {
@@ -333,7 +308,7 @@ StatusCode TauSelectionTool::initialize()
    {CutJetRNNScoreSigTrans, std::make_unique<TauAnalysisTools::TauSelectionCutRNNJetScoreSigTrans>(this)},
    {CutGNTauScoreSigTrans, std::make_unique<TauAnalysisTools::TauSelectionCutGNTauScoreSigTrans>(this)},
    {CutJetIDWP, std::make_unique<TauAnalysisTools::TauSelectionCutJetIDWP>(this)},
-   {CutEleRNNScore, std::make_unique<TauAnalysisTools::TauSelectionCutRNNEleScore>(this)},
+   {CutEleRNNScoreSigTrans, std::make_unique<TauAnalysisTools::TauSelectionCutRNNEleScoreSigTrans>(this)},
    {CutEleIDWP, std::make_unique<TauAnalysisTools::TauSelectionCutEleIDWP>(this)},
    {CutMuonOLR, std::make_unique<TauAnalysisTools::TauSelectionCutMuonOLR>(this)}
   };
@@ -341,21 +316,21 @@ StatusCode TauSelectionTool::initialize()
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
   
   ATH_MSG_INFO( "Initializing TauSelectionTool" );
-  FillRegionVector(m_vPtRegion, m_dPtMin, m_dPtMax);
-  FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin, m_dAbsEtaMax);
-  FillRegionVector(m_vJetRNNSigTransRegion, m_dJetRNNSigTransMin, m_dJetRNNSigTransMax );
-  FillRegionVector(m_vGNTauSigTransRegion, m_dGNTauSigTransMin, m_dGNTauSigTransMax );
-  FillRegionVector(m_vEleRNNRegion, m_dEleRNNMin, m_dEleRNNMax );
-  FillValueVector(m_vAbsCharges, m_iAbsCharge );
-  FillValueVector(m_vNTracks, m_iNTrack );
+  FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
+  FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
+  FillRegionVector(m_vJetRNNSigTransRegion, m_dJetRNNSigTransMin.value(), m_dJetRNNSigTransMax.value() );
+  FillRegionVector(m_vGNTauSigTransRegion, m_dGNTauSigTransMin.value(), m_dGNTauSigTransMax.value() );
+  FillRegionVector(m_vEleRNNSigTransRegion, m_dEleRNNSigTransMin.value(), m_dEleRNNSigTransMax.value() );
+  FillValueVector(m_vAbsCharges, m_iAbsCharge.value());
+  FillValueVector(m_vNTracks, m_iNTrack.value());
 
   PrintConfigRegion ("Pt",          m_vPtRegion);
   PrintConfigRegion ("AbsEta",      m_vAbsEtaRegion);
   PrintConfigValue  ("AbsCharge",   m_vAbsCharges);
   PrintConfigValue  ("NTrack",      m_vNTracks);
   PrintConfigRegion ("RNNJetScoreSigTrans", m_vJetRNNSigTransRegion);
-  PrintConfigRegion ("GNTauScoreSigTrans", m_vGNTauSigTransRegion);
-  PrintConfigRegion ("RNNEleScore", m_vEleRNNRegion);
+  PrintConfigRegion ("GNTauScoreSigTrans",  m_vGNTauSigTransRegion);
+  PrintConfigRegion ("RNNEleScoreSigTrans", m_vEleRNNSigTransRegion);
   PrintConfigValue  ("JetIDWP",     m_sJetIDWP);
   PrintConfigValue  ("JetIDWP ENUM",m_iJetIDWP);
   PrintConfigValue  ("EleIDWP",     m_sEleIDWP);
@@ -371,7 +346,7 @@ StatusCode TauSelectionTool::initialize()
   if (m_iSelectionCuts & CutJetRNNScoreSigTrans) sCuts += "JetRNNScoreSigTrans ";
   if (m_iSelectionCuts & CutGNTauScoreSigTrans) sCuts += "GNTauScoreSigTrans ";
   if (m_iSelectionCuts & CutJetIDWP) sCuts += "JetIDWP ";
-  if (m_iSelectionCuts & CutEleRNNScore) sCuts += "EleRNNScore ";
+  if (m_iSelectionCuts & CutEleRNNScoreSigTrans) sCuts += "EleRNNScoreSigTrans ";
   if (m_iSelectionCuts & CutEleIDWP) sCuts += "EleIDWP ";
   if (m_iSelectionCuts & CutMuonOLR) sCuts += "MuonOLR ";
 

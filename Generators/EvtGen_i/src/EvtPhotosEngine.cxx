@@ -120,7 +120,7 @@ bool EvtPhotosEngine::doDecay( EvtParticle* theMother )
 
     // Add the mother particle as the incoming particle to the vertex.
     GenParticlePtr hepMCMother = this->createGenParticle( theMother, true );
-    theVertex->add_particle_in( hepMCMother );
+    theVertex->add_particle_in( std::move(hepMCMother) );
 
     // Find all daughter particles and assign them as outgoing particles to the vertex.
     // Keep track of the number of photons already in the decay (e.g. we may have B -> K* gamma)
@@ -129,7 +129,7 @@ bool EvtPhotosEngine::doDecay( EvtParticle* theMother )
         EvtParticle* theDaughter = theMother->getDaug( iDaug );
         GenParticlePtr hepMCDaughter = this->createGenParticle( theDaughter,
                                                                 false );
-        theVertex->add_particle_out( hepMCDaughter );
+        theVertex->add_particle_out( std::move(hepMCDaughter) );
 
         if ( theDaughter ) {
             int daugId = theDaughter->getPDGId();

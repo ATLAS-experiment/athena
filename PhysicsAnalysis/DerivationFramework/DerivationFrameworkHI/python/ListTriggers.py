@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ListTriggers.py - List of triggers for skimming from athena 21.2 [HION4,HION12] 
 
 #################################################################################
@@ -183,7 +183,17 @@ def HION2pPb_2016_5TeV():
 
 def HION2MinBias2023():
     triggers  = []
-    triggers += ["HLT_.*"]
+    triggers += ["HLT_noalg_L1TE600p0ETA49"]
+    triggers += ["HLT_noalg_L1TE50_VTE600p0ETA49"]
+    triggers += ["HLT_mb_sptrk_pc_L1ZDC_A_C_VTE50"]
+    
+    return triggers
+
+def HION2MinBias2024():
+    triggers  = []
+    triggers += ["HLT_noalg_L1jTE600"]
+    triggers += ["HLT_noalg_L1jTE50_VjTE600"]
+    triggers += ["HLT_mb_sptrk_pc_L1ZDC_A_C_VjTE50"]
     
     return triggers
     
@@ -501,9 +511,14 @@ def HION5SkimmingTriggers():
     triggers += ["HLT_e20_medium_nogsf_ion_L1EM15"]
     triggers += ["HLT_mu10_L1MU8F"] #also 2024
     triggers += ["HLT_mu10_L1MU5VF"] #also 2024
+    triggers += ["HLT_g15_loose_ion_L1eEM12"]
+    triggers += ["HLT_g15_loose_ion_L1eEM15"]
+    triggers += ["HLT_g20_loose_ion_L1eEM15"]
+    triggers += ["HLT_g20_loose_ion_L1eEM18"]
+    triggers += ["HLT_g30_loose_ion_L1eEM18"]
+    triggers += ["HLT_g50_loose_ion_L1eEM26"]
 
     #2024 HI
-
     triggers += ["HLT_e15_lhloose_nogsf_ion_L1eEM15"]
     triggers += ["HLT_e15_loose_nogsf_ion_L1eEM15"]
     triggers += ["HLT_e15_lhmedium_nogsf_ion_L1eEM15"]
@@ -533,9 +548,216 @@ def HION5SkimmingTriggers():
     triggers += ["HLT_mu15_L1MU8F"]
     triggers += ["HLT_mu15_L1MU14FCH"]
     triggers += ["HLT_mu4noL1_L1MBTS_1"]
-
+    triggers += ["HLT_g15_loose_L1eEM15"]
+    triggers += ["HLT_g20_loose_L1eEM15"]
+    triggers += ["HLT_g30_loose_L1eEM18"]
+    triggers += ["HLT_g40_loose_L1eEM18"]
+    triggers += ["HLT_g40_loose_L1eEM26"]
+    triggers += ["HLT_g50_loose_L1eEM26"]
     
     return triggers
+
+#################################################################################
+#HION7
+# for all jet triggers HLT jet threshold as cutoff
+
+def HION7JetTriggers2023():
+    triggers  = {}
+    triggers.update({'HLT_j60_ion_L1J15' : 60})
+    triggers.update({'HLT_j75_ion_L1J20' : 75})
+    triggers.update({'HLT_j85_ion_L1J15' : 85})
+
+    return triggers
+
+def HION7BJetTriggers2023():
+    triggers  = {}
+    triggers.update({'HLT_mu4_j50_ion_dRAB05_L1MU3V' : 50})
+    triggers.update({'HLT_mu4_j50_ion_dRAB05_L1MU3V_J12' : 50})
+    triggers.update({'HLT_mu4_j60_ion_dRAB05_L1MU3V' : 60})
+    triggers.update({'HLT_mu6_j40_ion_dRAB05_L1MU5VF' : 40})
+    triggers.update({'HLT_mu6_j50_ion_dRAB05_L1MU5VF' : 50})
+    triggers.update({'HLT_mu4_j40_ion_dRAB05_L1MU3V' : 40})
+    triggers.update({'HLT_mu6_j30_ion_dRAB05_L1MU5VF' : 30})
+
+    return triggers
+
+def HION7FwdJetTriggers2023(): # currently not included in HION7
+    triggers  = {}
+    triggers.update({'HLT_j30f_ion_L1TE20' : 30})
+    triggers.update({'HLT_j50f_ion_L1TE50' : 50})
+    triggers.update({'HLT_j50f_ion_L1J15p31ETA49' : 50})
+
+    return triggers
+
+def HION7PCCCTriggers2023():
+    triggers  = {}
+    triggers.update({'HLT_mb_sptrk_pc_L1ZDC_A_C_VTE50' : 20})
+    triggers.update({'HLT_noalg_L1TE50_VTE600p0ETA49' : 20})
+    triggers.update({'HLT_noalg_L1TE600p0ETA49' : 20})
+
+    return triggers
+
+def HION7JetTriggers2024():
+    triggers  = {}
+    triggers.update({'HLT_j60_ion_L1jJ40' : 60})
+    triggers.update({'HLT_j75_ion_L1jJ50' : 75})
+
+    return triggers
+
+def HION7MuonTriggers():
+    triggers  = {}
+    triggers.update({'HLT_mu4_L1MU3V' : 25}) # accept any event with jet above 25 GeV
+
+    return triggers
+
+def HION7FwdJetTriggers2024(): # currently not included in HION7
+    triggers  = {}
+    triggers.update({'HLT_j30f_ion_L1jTE20' : 30})
+    triggers.update({'HLT_j50f_ion_L1jTE50' : 50})
+    triggers.update({'HLT_j50f_ion_L1jJ40p30ETA49' : 50})
+
+    return triggers
+
+def HION7PCCCTriggers2024():
+    triggers  = {}
+    triggers.update({'HLT_mb_sptrk_pc_L1ZDC_A_C_VjTE50' : 20})
+    triggers.update({'HLT_noalg_L1jTE50_VjTE600' : 20})
+    triggers.update({'HLT_noalg_L1jTE600' : 20})
+
+    return triggers
+
+def HION7JetTriggersPP():
+    triggers  = {}
+    triggers.update({'HLT_j30a_L1jTE20' : 30})
+    triggers.update({'HLT_j40_L1jJ40' : 40})
+    triggers.update({'HLT_j50_L1jJ40' : 50})
+    triggers.update({'HLT_j60_L1jJ50' : 60})
+    triggers.update({'HLT_j75_L1jJ50' : 75})
+    triggers.update({'HLT_j85_L1jJ50' : 85})
+    triggers.update({'HLT_j100_L1jJ50': 100})
+    triggers.update({'HLT_j100_L1jJ60': 100})
+    triggers.update({'HLT_j120_L1jJ60': 120})
+
+    return triggers
+
+def HION7BJetTriggersPP():
+    triggers  = {}
+    triggers.update({'HLT_mu4_j40_L1MU3V_jJ50' : 40})
+    triggers.update({'HLT_j30_0eta290_020jvt_bgn260_pf_ftf_L1jTE50' : 30})
+    triggers.update({'HLT_j45_0eta290_020jvt_bgn260_pf_ftf_L1jJ40' : 45})
+    triggers.update({'HLT_j60_0eta290_020jvt_bgn260_pf_ftf_L1jJ50' : 60})
+    triggers.update({'HLT_j80_0eta290_020jvt_bgn260_pf_ftf_L1jJ60' : 80})
+
+    return triggers
+
+def HION7FwdJetTriggersPP(): # currently not included in HION7
+    triggers  = {}
+    triggers.update({'HLT_j15f_L1jTE5': 15})
+    triggers.update({'HLT_j25f_L1jTE10' : 25})
+    triggers.update({'HLT_j35f_L1jTE20' : 35})
+    triggers.update({'HLT_j45f_L1jJ40p30ETA49' : 45})
+    triggers.update({'HLT_j60f_L1jJ50p30ETA49' : 60})
+
+    return triggers
+
+def HION7MinBiasTriggersPP():
+    triggers  = {}
+    triggers.update({'HLT_mb_sptrk_L1RD0_FILLED' : 15})
+
+    return triggers
+
+def HION7JetTriggerspO():
+    triggers  = {}
+    triggers.update({'HLT_j20_L1jJ20' : 20})
+    triggers.update({'HLT_j30_L1jJ20' : 30})
+    triggers.update({'HLT_j40_L1jJ20' : 40})
+    triggers.update({'HLT_j20_pf_ftf_L1jJ20' : 20})
+    triggers.update({'HLT_j30_pf_ftf_L1jJ20' : 30})
+    triggers.update({'HLT_j40_pf_ftf_L1jJ20' : 40})
+    triggers.update({'HLT_j20_ionp_L1jJ10' : 20})
+    triggers.update({'HLT_j30_ionp_L1jJ10' : 30})
+    triggers.update({'HLT_j40_ionp_L1jJ20' : 40})
+
+    return triggers
+
+def HION7MinBiasTriggerspO():
+    triggers  = {}
+    triggers.update({'HLT_mb_sptrk_L1RD0_FILLED' : 15})
+    triggers.update({'HLT_mb_sptrk_L1TRT_FILLED' : 15})
+    triggers.update({'HLT_mb_sptrk_L1ZDC_OR' : 15})
+    triggers.update({'HLT_mb_sptrk_L1jTE20' : 15})
+    triggers.update({'HLT_mb_sptrk_L1jTE50' : 15})
+
+    return triggers
+
+def HION7JetTriggersOO():
+    triggers  = {}
+    triggers.update({'HLT_j20_ionp_L1jJ10' : 20})
+    triggers.update({'HLT_j40_ionp_L1jJ20' : 40})
+    triggers.update({'HLT_j50_ionp_L1jJ30' : 50})
+
+    return triggers
+
+def HION7SkimmingTriggers2023():
+    triggers  = HION7JetTriggers2023()
+    triggers.update(HION7BJetTriggers2023())
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7PCCCTriggers2023())
+
+    return triggers
+
+def HION7SkimmingTriggers2024():
+    triggers  = HION7JetTriggers2024()
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION7SkimmingTriggersPP():
+    triggers  = HION7JetTriggersPP()
+    triggers.update(HION7BJetTriggersPP())
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7MinBiasTriggersPP())
+
+    return triggers
+
+def HION7SkimmingTriggerspO():
+    triggers  = HION7JetTriggerspO()
+    triggers.update(HION7MinBiasTriggerspO())
+
+    return triggers
+
+def HION7SkimmingTriggersOO():
+    triggers  = HION7JetTriggerspO()
+    triggers.update(HION7JetTriggersOO())
+    triggers.update(HION7MinBiasTriggerspO())
+
+    return triggers
+
+def HION7SkimmingTriggers2025():
+    triggers  = HION7SkimmingTriggers2024()
+
+    return triggers
+
+#################################################################################
+def GetTriggers(project_tag, isSmallSystem):
+    switcher_HION7 = {
+        'data23_hi': HION7SkimmingTriggers2023(),
+        'data24_hi': HION7SkimmingTriggers2024(),
+        'data25_hi': HION7SkimmingTriggers2025(),
+        }
+
+    switcher_SmallSystems = {
+        'data24_5p36TeV': HION7SkimmingTriggersPP(),
+        'data25_hip': HION7SkimmingTriggerspO(),
+        'data25_hi': HION7SkimmingTriggersOO(),
+        }
+
+    if isSmallSystem:
+        return  switcher_SmallSystems.get(project_tag, "Invalid project tag")
+    else:
+        return  switcher_HION7.get(project_tag, "Invalid project tag")
+
 
 #################################################################################
 #HION12

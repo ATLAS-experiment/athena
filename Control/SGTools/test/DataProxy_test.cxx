@@ -43,7 +43,7 @@ class XLock : public ILockable
 {
 public:
   XLock() : m_locked (false) {}
-  void lock() { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
   bool m_locked;
 };
 CLASS_DEF(XLock, 8114, 1)
@@ -52,7 +52,7 @@ class XLockObj : public DataObject, public ILockable
 {
 public:
   XLockObj() : m_locked (false) {}
-  void lock() { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
   bool m_locked;
 };
 CLASS_DEF(XLockObj, 8124, 1)
@@ -61,63 +61,58 @@ class TestConversionSvc
   : public implements<IConversionSvc>
 {
 public:
-  virtual StatusCode addConverter(IConverter* /*pConverter*/)
+  virtual StatusCode addConverter(IConverter* /*pConverter*/) override
   { std::cout << "addConverter\n"; std::abort(); }
-  virtual StatusCode addConverter(const CLID& /*clid*/)
+  virtual StatusCode addConverter(const CLID& /*clid*/) override
   { std::cout << "addConverter clid\n"; std::abort(); }
-  virtual StatusCode removeConverter(const CLID& /*clid*/)
+  virtual StatusCode removeConverter(const CLID& /*clid*/) override
   { std::cout << "removeConverter\n"; std::abort(); }
-  virtual IConverter* converter(const CLID& /*clid*/)
+  virtual IConverter* converter(const CLID& /*clid*/) override
   { std::cout << "converter\n"; std::abort(); }
-  virtual StatusCode connectOutput(const std::string& /*outputFile*/)
+  virtual StatusCode connectOutput(const std::string& /*outputFile*/) override
   { std::cout << "connectOutput1\n"; std::abort(); }
   virtual StatusCode connectOutput(const std::string& /*outputFile*/,
-                                   const std::string& /*openMode*/)
+                                   const std::string& /*openMode*/) override
   { std::cout << "connectOutput2\n"; std::abort(); }
   virtual StatusCode commitOutput(const std::string& /*outputFile*/,
-                                  bool /*do_commit*/)
+                                  bool /*do_commit*/) override
   { std::cout << "commitOutput\n"; std::abort(); }
 
-  virtual StatusCode initialize()
+  virtual StatusCode initialize() override
   { std::cout << "initialize\n"; std::abort(); }
-  virtual StatusCode finalize()
+  virtual StatusCode finalize() override
   { std::cout << "finalize\n"; std::abort(); }
-  virtual const CLID& objType() const
+  virtual const CLID& objType() const override
   { std::cout << "objType\n"; std::abort(); }
-  virtual long repSvcType() const
+  virtual long repSvcType() const override
   { std::cout << "repSvcType\n"; std::abort(); }
-  virtual StatusCode setDataProvider(IDataProviderSvc* /*pService*/)
+  virtual StatusCode setDataProvider(IDataProviderSvc* /*pService*/) override
   { std::cout << "setDataProvider\n"; std::abort(); }
-  virtual SmartIF<IDataProviderSvc>& dataProvider() const
+  virtual SmartIF<IDataProviderSvc>& dataProvider() const override
   { std::cout << "dataProvider\n"; std::abort(); }
-  virtual StatusCode setConversionSvc(IConversionSvc* /*pService*/)
+  virtual StatusCode setConversionSvc(IConversionSvc* /*pService*/) override
   { std::cout << "setConversionSvc\n"; std::abort(); }
-  virtual SmartIF<IConversionSvc>& conversionSvc()    const
+  virtual SmartIF<IConversionSvc>& conversionSvc()    const override
   { std::cout << "conversionSvc\n"; std::abort(); }
-  virtual StatusCode setAddressCreator(IAddressCreator* /*creator*/)
+  virtual StatusCode setAddressCreator(IAddressCreator* /*creator*/) override
   { std::cout << "setAddressCreator\n"; std::abort(); }
-  virtual SmartIF<IAddressCreator>& addressCreator()    const
+  virtual SmartIF<IAddressCreator>& addressCreator()    const override
   { std::cout << "addressCreator\n"; std::abort(); }
-  virtual StatusCode createObj(IOpaqueAddress* /*pAddress*/, DataObject*& /*refpObject*/)
+  virtual StatusCode createObj(IOpaqueAddress* /*pAddress*/, DataObject*& /*refpObject*/) override
   { std::cout << "createObj\n"; std::abort(); }
-  virtual StatusCode fillObjRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/)
+  virtual StatusCode fillObjRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
   { std::cout << "fillObjRefs\n"; std::abort(); }
-  virtual StatusCode updateObj(IOpaqueAddress* /*pAddress*/, DataObject* /*refpObject*/)
+  virtual StatusCode updateObj(IOpaqueAddress* /*pAddress*/, DataObject* /*refpObject*/) override
   { std::cout << "updateObj\n"; std::abort(); }
-  virtual StatusCode updateObjRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/)
+  virtual StatusCode updateObjRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
   { std::cout << "updateObjRefs\n"; std::abort(); }
-  virtual StatusCode fillRepRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/)
+  virtual StatusCode fillRepRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
   { std::cout << "fillRepRefs\n"; std::abort(); }
-  virtual StatusCode updateRep(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/)
+  virtual StatusCode updateRep(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
   { std::cout << "updateRep\n"; std::abort(); }
-  virtual StatusCode updateRepRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/)
+  virtual StatusCode updateRepRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
   { std::cout << "updateRepRefs\n"; std::abort(); }
-
-  // dummy ref-counting to avoid double-delete in this test
-  virtual unsigned long addRef() { return 1; }
-  virtual unsigned long release() { return 1; }
-
-  virtual StatusCode createRep(DataObject* /*pObject*/, IOpaqueAddress*& /*refpAddress*/)
+  virtual StatusCode createRep(DataObject* /*pObject*/, IOpaqueAddress*& /*refpAddress*/) override
   { std::cout << "createRep\n"; std::abort(); }
 };
 
@@ -127,19 +122,19 @@ class TestOpaqueAddress
 {
 public:
   // dummy ref-counting
-  virtual unsigned long        addRef     () { return 1; }
-  virtual unsigned long        release    () { return 1; }
-  virtual const CLID&          clID       () const
+  virtual unsigned long        addRef     () override { return 1; }
+  virtual unsigned long        release    () override { return 1; }
+  virtual const CLID&          clID       () const override
   { std::cout << "clID\n"; std::abort(); }
-  virtual long                 svcType    () const
+  virtual long                 svcType    () const override
   { std::cout << "svcType\n"; std::abort(); }
-  virtual IRegistry*           registry   () const
+  virtual IRegistry*           registry   () const override
   { std::cout << "registry\n"; std::abort(); }
-  virtual void                 setRegistry(IRegistry* /*r*/)
+  virtual void                 setRegistry(IRegistry* /*r*/) override
   { std::cout << "setRegistry\n"; std::abort(); }
-  virtual const std::string*   par        () const
+  virtual const std::string*   par        () const override
   { std::cout << "par\n"; std::abort(); }
-  virtual const unsigned long* ipar       () const
+  virtual const unsigned long* ipar       () const override
   { std::cout << "ipar\n"; std::abort(); }
 };
 
@@ -220,7 +215,7 @@ class Test3Loader
 public:
   Test3Loader();
 
-  virtual StatusCode createObj(IOpaqueAddress* /*pAddress*/, DataObject*& refpObject)
+  virtual StatusCode createObj(IOpaqueAddress* /*pAddress*/, DataObject*& refpObject) override
   {
     m_store = SG::CurrentEventStore::store();
     refpObject = m_bucket;
@@ -236,6 +231,7 @@ Test3Loader::Test3Loader()
   : m_store(nullptr),
     m_bucket (new SG::DataBucket<X1>(std::make_unique<X1>()))
 {
+  addRef();  // for correct ref-counting, avoids double delete on destruction
 }
 
 
@@ -522,7 +518,9 @@ int main (int argc, char** argv)
     if (argc >= 3) {
       n = atoi (argv[2]);
     }
-    perftest(n);
+    if (n > 0) {
+      perftest(n);
+    }
     return 0;
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algorithm producing truth info for PrepRawData, keeping all MC particles contributed to a PRD.
@@ -10,12 +10,6 @@
 #include <iterator>
 #include <vector>
 
-//================================================================
-MuonDetailedTrackTruthMaker::MuonDetailedTrackTruthMaker(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
-
-// Initialize method
-// -----------------------------------------------------------------------------------------------------
 StatusCode MuonDetailedTrackTruthMaker::initialize() {
     ATH_MSG_DEBUG("MuonDetailedTrackTruthMaker::initialize()");
 
@@ -49,33 +43,28 @@ StatusCode MuonDetailedTrackTruthMaker::execute(const EventContext& ctx) const {
     //----------------------------------------------------------------
     // Retrieve prep raw data truth
     std::vector<const PRD_MultiTruthCollection*> prdCollectionVector;
-    for (SG::ReadHandle<PRD_MultiTruthCollection>& col : m_PRD_TruthNames.makeHandles(ctx)) {
-        if (!col.isPresent()) continue;
-        if (!col.isValid()) {
-            ATH_MSG_WARNING("invalid PRD_MultiTruthCollection " << col.name());
-            return StatusCode::FAILURE;
-        }
-        prdCollectionVector.push_back(col.cptr());
+    for (const auto& truthKey : m_PRD_TruthNames){
+        prdCollectionVector.emplace_back(nullptr);
+        ATH_CHECK(SG::get(prdCollectionVector.back(), truthKey, ctx));
     }
 
+    ATH_MSG_DEBUG("Loaded in total "<<prdCollectionVector.size()<<" prd truth collections");
     //----------------------------------------------------------------
     // Retrieve track collections
 
     int i = 0;
-    for (SG::ReadHandle<TrackCollection>& tcol : m_trackCollectionNames.makeHandles(ctx)) {
-        if (!tcol.isValid()) {
-            ATH_MSG_WARNING("invalid TrackCollection " << tcol.name());
-            return StatusCode::FAILURE;
-        }
-        if (!tcol.isPresent()) continue;
+    for (const auto& trkKey : m_trackCollectionNames) {
+        const TrackCollection* tcol{nullptr};
+        ATH_CHECK(SG::get(tcol, trkKey, ctx));
 
         //----------------------------------------------------------------
         // Produce and store the output.
 
-        SG::WriteHandle<DetailedTrackTruthCollection> dttc(m_detailedTrackTruthNames.at(i), ctx);
+        SG::WriteHandle dttc(m_detailedTrackTruthNames.at(i), ctx);
+        ATH_MSG_DEBUG("Write detailed collection "<<m_detailedTrackTruthNames.at(i).fullKey());
         ATH_CHECK(dttc.record(std::make_unique<DetailedTrackTruthCollection>()));
-        dttc->setTrackCollection(tcol.cptr());
-        m_truthTool->buildDetailedTrackTruth(dttc.ptr(), *(tcol.cptr()), prdCollectionVector, ctx);
+        dttc->setTrackCollection(tcol);
+        m_truthTool->buildDetailedTrackTruth(dttc.ptr(), *tcol, prdCollectionVector, ctx);
         i++;
     }
     return StatusCode::SUCCESS;

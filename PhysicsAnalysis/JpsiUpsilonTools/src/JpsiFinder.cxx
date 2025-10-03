@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -22,6 +22,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/ParticleConstants.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 namespace Analysis {
     
@@ -98,7 +99,7 @@ namespace Analysis {
     }
     
 
-    JpsiFinder::JpsiFinder(const std::string& t, const std::string& n, const IInterface* p)  : AthAlgTool(t,n,p),
+    JpsiFinder::JpsiFinder(const std::string& t, const std::string& n, const IInterface* p)  : base_class(t,n,p),
     m_mumu(true),
     m_mutrk(false),
     m_trktrk(false),
@@ -108,8 +109,8 @@ namespace Analysis {
     m_useCombMeasurement(false),
     m_useV0Fitter(false),
     m_diMuons(true),
-    m_trk1M(105.66),
-    m_trk2M(105.66),
+    m_trk1M(ParticleConstants::muonMassInMeV),
+    m_trk2M(ParticleConstants::muonMassInMeV),
     m_thresholdPt(0.0),
     m_higherPt(0.0),
     m_trkThresholdPt(0.0),
@@ -126,7 +127,6 @@ namespace Analysis {
     m_forceTagAndProbe(false) //forcing T&P method for any charge combinations
     
     {
-        declareInterface<JpsiFinder>(this);
         declareProperty("muAndMu",m_mumu);
         declareProperty("muAndTrack",m_mutrk);
         declareProperty("TrackAndTrack",m_trktrk);

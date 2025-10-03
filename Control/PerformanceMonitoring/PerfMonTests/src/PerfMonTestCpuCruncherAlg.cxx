@@ -1,7 +1,5 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonTestCpuCruncherAlg.cxx 
@@ -22,40 +20,7 @@
 
 using namespace PerfMonTest;
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
 
-// Constructors
-////////////////
-CpuCruncherAlg::CpuCruncherAlg( const std::string& name, 
-				ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm( name,    pSvcLocator ),
-  m_random(0)
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-  declareProperty( "MeanCpu",
-		   m_meanCpuTime = 100.,
-		   "Mean (in ms) of CPU time to consume." );
-    
-  declareProperty( "RmsCpu",
-		   m_rmsCpuTime = 5.,
-		   "RMS (in ms) of CPU time to consume." );
-}
-
-// Destructor
-///////////////
-CpuCruncherAlg::~CpuCruncherAlg()
-{ 
-  ATH_MSG_DEBUG ( "Calling destructor" ) ;
-}
-
-// Athena Algorithm's Hooks
-////////////////////////////
 StatusCode CpuCruncherAlg::initialize()
 {
   ATH_MSG_INFO ( "Initializing " << name() << "..." ) ;
@@ -71,11 +36,6 @@ StatusCode CpuCruncherAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CpuCruncherAlg::finalize()
-{
-  ATH_MSG_INFO ( "Finalizing " << name() << "..." ) ;
-  return StatusCode::SUCCESS;
-}
 
 StatusCode CpuCruncherAlg::execute()
 {  

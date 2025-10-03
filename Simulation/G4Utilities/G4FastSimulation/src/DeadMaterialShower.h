@@ -7,6 +7,7 @@
 
 #include "G4VFastSimulationModel.hh"
 
+#include <G4Region.hh>
 #include <string>
 class G4FastStep;
 class G4FastTrack;
@@ -16,7 +17,7 @@ class DeadMaterialShower: public G4VFastSimulationModel
 {
  public:
 
-  DeadMaterialShower(const std::string& name, const double& highEnergy, const double& lowEnergy, const double& zcutoff);
+  DeadMaterialShower(const std::string& name, G4Region* region, const double& highEnergy, const double& lowEnergy, const double& zcutoff);
   ~DeadMaterialShower() {}
 
   G4bool IsApplicable(const G4ParticleDefinition&) override final;

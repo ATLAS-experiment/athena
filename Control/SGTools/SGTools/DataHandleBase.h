@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // DataHandleBase.h 
@@ -74,11 +74,11 @@ public:
   //@{
   bool isConst() const;
   bool isInitialized() const;    ///<weaker test but it does not touch the disk!
-  bool isSet() const { return isInitialized(); }
+  virtual bool isSet() const override { return isInitialized(); }
   //@}
 
   /// Get the key string with which the current object was stored.
-  const std::string& key() const;
+  virtual const std::string& key() const override;
 
   StatusCode setState(SG::DataProxy* proxy) const;
   StatusCode setState(IProxyDict* store, const ID_type& name) const;

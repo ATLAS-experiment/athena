@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # -*- coding: utf-8 -*-
 # flake8: noqa
 #  unicode characters embedded below confuse flake8
@@ -12,8 +12,6 @@ from logging import getLogger; log = getLogger("DQDefects.tests")
 from DQUtils import init_logger
 from DQDefects import DefectsDB
 from DQDefects.exceptions import DefectExistsError, DefectUnknownError
-
-import six
 
 TEST_DATABASE = "test_defects.db/COMP200"
 
@@ -56,7 +54,7 @@ def test_database_creation():
 @with_setup(create_database, teardown_database)
 def test_database_creation_unicode():
     assert exists("test_defects.db")
-    log.info("Created database %s", six.ensure_text(TEST_DATABASE))
+    log.info("Created database %s", TEST_DATABASE)
     
 @with_setup(create_database, teardown_database)
 def test_database_retrieval():
@@ -160,12 +158,11 @@ def test_defect_insertion_retrieval():
 
 @with_setup(create_database, teardown_database)
 def test_defect_insertion_retrieval_unicode():
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     TEST_ID = 0
@@ -195,12 +192,11 @@ def test_defect_failure_nonascii_name():
     """
     Check that we raise an error if the defect name is not ASCII
     """
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     ddb.create_defect(u"DQD_TÉST_DÉFÉCT_0", "Test")
@@ -210,12 +206,11 @@ def test_defect_mangle_bad_stored_unicode():
     """
     Check that we recover if any of the string payloads are bad UTF-8
     """
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     TEST_DEFECT_NAME = 'DQD_TEST_DEFECT_0'
@@ -325,12 +320,11 @@ def test_virtual_defect_failure_nonascii_name():
     """
     Check that we raise an error if the virtual defect name is not ASCII
     """
-    if six.PY3:
-        import ROOT
-        if ROOT.gROOT.GetVersionInt() < 62000:
-            # Passing str objects using multibyte encodings is broken
-            # with pyroot up to 6.18.  Should be fixed in 6.20?
-            return
+    import ROOT
+    if ROOT.gROOT.GetVersionInt() < 62000:
+        # Passing str objects using multibyte encodings is broken
+        # with pyroot up to 6.18.  Should be fixed in 6.20?
+        return
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     
     ddb.create_defect(u"DQD_TEST_DEFECT_0", "Test")
@@ -568,7 +562,7 @@ def test_tagging_unicode():
                            
     what = {"channels": [u"DQD_TEST_VIRTUAL_DEFECT"]}
 
-    orig_iovs = DefectsDB((TEST_DATABASE), tag=six.ensure_text(original_htag)).retrieve(**what)
+    orig_iovs = DefectsDB((TEST_DATABASE), tag=original_htag).retrieve(**what)
     
     assert len(orig_iovs) == 2
     assert (orig_iovs[0].since, orig_iovs[0].until) == (  0, 100)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/CondCont_test.cxx
@@ -350,7 +350,8 @@ void test1 (TestRCUSvc& rcusvc)
   assert (cc_ts.maxSize() == 1);
 
   const EventIDRange r4 (timestamp (800), timestamp (899));
-  assert( cc_ts.typelessInsert (r4, new B(4)).isSuccess() );
+  StatusCode sc = cc_ts.typelessInsert (r4, new B(4));
+  assert (sc.isSuccess());
   assert (cc_ts.entries() == 2);
 
   std::vector<CondCont<B>::key_type> keys1 =
@@ -385,7 +386,6 @@ void test1 (TestRCUSvc& rcusvc)
   assert (cc_ts.insert (EventIDRange (runlbn (10, 20), runlbn (10, 30)),
                         std::make_unique<B> (20)).isFailure());
 
-  StatusCode sc;
   sc = cc_rl.insert (EventIDRange (runlbn (10, 20), runlbn (10, 40)),
                      std::make_unique<B> (30));
   assert (sc.isSuccess()); 
@@ -1160,10 +1160,10 @@ void testThread_MixedWriter::operator()()
     if (i >= ninflight/2) {
       std::vector<CondContBase::key_type> keys;
       keys.reserve (ninflight/2);
-      for (int j = i/2-ninflight/2; j<i/2; j++) {
+      for (int j = std::max(0, i/2-ninflight/2); j<i/2; j++) {
         keys.push_back (j);
       }
-      m_map.trim (keys,keys);
+      (void)m_map.trim (keys,keys);
     }
     EventIDRange r = makeRange(i);
     int payload = r.start().lumi_block() + r.start().time_stamp();

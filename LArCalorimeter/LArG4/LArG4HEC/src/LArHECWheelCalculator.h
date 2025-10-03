@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArHECWheelCalculator.hh
@@ -11,10 +11,8 @@
 #ifndef LARG4HEC_LARHECWHEELCALCULATOR_H
 #define LARG4HEC_LARHECWHEELCALCULATOR_H
 
-#include "LArG4Code/LArG4Identifier.h"
 #include "LArG4Code/LArCalculatorSvcImp.h"
 #include "LArHV/HECHVManager.h"
-#include <stdexcept>
 
 // Forward declarations.
 
@@ -34,6 +32,8 @@ class LArHECWheelCalculator : virtual public LArCalculatorSvcImp {
 public:
 
   LArHECWheelCalculator(const std::string& name, ISvcLocator * pSvcLocator);
+  LArHECWheelCalculator (const LArHECWheelCalculator&) = delete;
+  LArHECWheelCalculator& operator= (const LArHECWheelCalculator&) = delete;
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override final;
   ~LArHECWheelCalculator();
@@ -52,17 +52,13 @@ public:
 
 
 private:
-  ServiceHandle<LArG4::HEC::IHECGeometry> m_Geometry;
-  const HECDetectorManager *m_DetectorManager;
-
-
-  LArG4BirksLaw *m_birksLaw;
-  bool     m_doHV;
+  ServiceHandle<LArG4::HEC::IHECGeometry> m_Geometry{this, "GeometryCalculator", "HECGeometry"};
+  Gaudi::Property<bool>     m_doHV{this, "HECHVEnable", false};
+  
+  const HECDetectorManager *m_DetectorManager{nullptr};
+  LArG4BirksLaw *m_birksLaw{nullptr};
 
   HECHVManager::HECHVData m_hvdata;
-
-  LArHECWheelCalculator (const LArHECWheelCalculator&);
-  LArHECWheelCalculator& operator= (const LArHECWheelCalculator&);
 };
 
 #endif

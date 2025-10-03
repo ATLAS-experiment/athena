@@ -35,9 +35,6 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     if flags.BTagging.AddV0Finder:
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
 
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
-
     # thinning tools
     thinningTools = []
 
@@ -105,6 +102,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
             "AntiKt4UFOCSSKJets",
+            "CaloCalFwdTopoTowers",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
             "GlobalChargedParticleFlowObjects",
@@ -126,6 +124,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "BTagging_AntiKt4EMTopoJFVtx",
             "BTagging_AntiKt4EMTopoSecVtx",
             "AntiKt4TruthJets",
+            "ITkPixelMeasurements",
+            "ITkStripMeasurements"
             ]
 
 
@@ -140,6 +140,9 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     # Add additional e/gamma variables
     FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
+
+    # Add labels in EMTopo jets
+    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
 
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!

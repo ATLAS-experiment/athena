@@ -1,7 +1,7 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
+#ifndef XAOD_STANDALONE
 #ifndef TrigBtagValidationTest_H
 #define TrigBtagValidationTest_H
 
@@ -46,4 +46,5 @@ private:
 
 } // namespace
 
+#endif
 #endif

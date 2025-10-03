@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUtils/JetCaloQualityUtils.h"
@@ -364,7 +364,6 @@ namespace jet {
   double JetCalcCentroid::jetCalculation() const {  
 
     if (m_totE == 0) return 0;
-  
     double c_x = m_centroid_x/ m_totE;
     double c_z = m_centroid_z/ m_totE;
     double c_y = m_centroid_y/ m_totE;
@@ -376,6 +375,9 @@ namespace jet {
 
     double e = iter->e() ;  // using iter since it is set at the expected scale by the JetCaloCalculations instance
     if(iter->type() == xAOD::Type::ParticleFlow){
+      e = iter->rawConstituent()->e();
+    }
+    if(iter->type() == xAOD::Type::FlowElement){
       e = iter->rawConstituent()->e();
     }
 

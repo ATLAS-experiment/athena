@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -561,7 +561,8 @@ TagInfoMgr::notifyListeners() const
    ATH_MSG_DEBUG( "notifyListeners  (" << m_listeners.size() <<" registered)");
 
    m_mutex.lock_shared();
-   const auto listeners = m_listeners;
+   // Make a copy to use outside of the lock.
+   const std::set<Listener*> listeners = m_listeners;
    m_mutex.unlock_shared();
 
    for( auto listener : listeners ) {

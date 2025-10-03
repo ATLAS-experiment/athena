@@ -11,12 +11,20 @@ atlas_subdir( ActsGeoUtils )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 
 
+set( extra_libs )
+
+if( NOT SIMULATIONBASE )
+    find_package(Acts COMPONENTS Core)
+    set( extra_libs xAODTracking Acts::Core)
+endif()
+
+
 atlas_add_library( ActsGeoUtils
                    src/*.cxx
                    PUBLIC_HEADERS ActsGeoUtils
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoPrimitives Identifier 
-                                  ActsGeometryInterfacesLib GeoModelUtilities CxxUtils)
+                                  ActsGeometryInterfacesLib GeoModelUtilities CxxUtils ${extra_libs})
 
 if( NOT SIMULATIONBASE )                                                            
     # we also add unit tests. 

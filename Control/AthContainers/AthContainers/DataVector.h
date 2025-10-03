@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.h
@@ -979,7 +979,7 @@ public:
    *
    * Any auxiliary data will be moved along with the container contents.
    */
-  DataVector& operator= (DataVector&& rhs) noexcept;
+  DataVector& operator= (DataVector&& rhs);
 
 
   /**
@@ -1782,7 +1782,7 @@ public:
    *
    * This can be used to make sure that it's instantiated.
    */
-  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const;
+  virtual const DataModel_detail::DVLInfoBase& dvlinfo_v() const override;
 
 
   /**
@@ -2006,7 +2006,7 @@ private:
    * called, the one corresponding to the most-derived @c DataVector
    * gets run.
    */
-  virtual const std::type_info& dv_typeid() const;
+  virtual const std::type_info& dv_typeid() const override;
 
 
 protected:
@@ -2025,7 +2025,7 @@ protected:
    * been set if this container was made via copy construction, so set
    * it appropriately now so we can test again.
    */
-  virtual void setMostDerived();
+  virtual void setMostDerived() override;
 
 
 private:
@@ -2254,7 +2254,7 @@ public:
    *
    * Any auxiliary data will be moved along with the container contents.
    */
-  DataVector& operator= (DataVector&& rhs) noexcept;
+  DataVector& operator= (DataVector&& rhs);
 
 
   /**
@@ -2324,7 +2324,7 @@ public:
    *        This version is virtual, to be callable from the AuxData
    *        base class.
    */
-  virtual size_type size_v() const;
+  virtual size_type size_v() const override;
 
 
   /**
@@ -2360,7 +2360,7 @@ public:
    *        This version is virtual, to be callable from the AuxData
    *        base class.
    */
-  virtual size_type capacity_v() const;
+  virtual size_type capacity_v() const override;
 
 
   /**

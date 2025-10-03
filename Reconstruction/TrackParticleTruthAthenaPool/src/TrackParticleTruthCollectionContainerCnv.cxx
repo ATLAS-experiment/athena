@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleTruthCollectionContainerCnv.h"
@@ -32,9 +32,9 @@ TrackParticleTruthCollectionContainerCnv::~TrackParticleTruthCollectionContainer
 
 TrackParticleTruthCollectionContainerPERS* TrackParticleTruthCollectionContainerCnv::createPersistent(TrackParticleTruthCollectionContainer* trans) {
   MsgStream log(msgSvc(), "TrackParticleTruthCollectionContainerCnv");
-  log<<MSG::DEBUG<<"Writing TrackParticleTruthCollectionContainer_tlp2"<<endmsg;
+  log<<MSG::DEBUG<<"Writing TrackParticleTruthCollectionContainer_tlp3"<<endmsg;
 
-  TrackParticleTruthCollectionContainerPERS* p_cont =  m_converter_p2->createPersistent( trans, log );
+  TrackParticleTruthCollectionContainerPERS* p_cont =  m_converter_p3->createPersistent( trans, log );
   return p_cont;
 }
 

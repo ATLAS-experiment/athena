@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArPhysWaveHECTool.h" 
@@ -84,11 +84,11 @@ StatusCode LArPhysWaveHECTool::initialize()
     ATH_MSG_DEBUG("==== looking at SuperCells ====");
     const LArOnline_SuperCellID* ll;
     ATH_CHECK( detStore()->retrieve(ll, "LArOnline_SuperCellID") );
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
   } else { // m_isSC
     const LArOnlineID* ll;
     ATH_CHECK( detStore()->retrieve(ll, "LArOnlineID") );
-    m_onlineHelper = (const LArOnlineID_Base*)ll;
+    m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
   }
   return StatusCode::SUCCESS;
 }

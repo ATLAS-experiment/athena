@@ -44,6 +44,10 @@ def createDigitizationCfgFlags():
     flags.addFlag("Digitization.DigiSteeringConf", _checkDigiSteeringConf)
     # Run Inner Detector noise simulation
     flags.addFlag("Digitization.DoInnerDetectorNoise", lambda prevFlags: not prevFlags.Common.isOverlay)
+    # Run Pixel Detector noise simulation
+    flags.addFlag("Digitization.DoITkPixelDetectorNoise", lambda prevFlags: prevFlags.Digitization.DoInnerDetectorNoise)
+    # Run Strip Detector noise simulation
+    flags.addFlag("Digitization.DoITkStripDetectorNoise", lambda prevFlags: prevFlags.Digitization.DoInnerDetectorNoise)
     # Run pile-up digitization on one bunch crossing at a time?
     flags.addFlag("Digitization.DoXingByXingPileUp", False)
     # Run Calorimeter noise simulation

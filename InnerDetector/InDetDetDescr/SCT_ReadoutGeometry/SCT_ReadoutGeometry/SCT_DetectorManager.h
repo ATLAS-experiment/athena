@@ -22,7 +22,7 @@
 #include "InDetIdentifier/SCT_ID.h"
 
 #include <memory>
-  
+
 class StoreGateSvc;
 class Identifier;
 class IdentifierHash;
@@ -45,17 +45,17 @@ namespace InDetDD {
    * @author: Grant Gorfine
    * - modified and maintained by Nick Styles & Andreas Salzburger
    */
-      
+
   class SCT_DetectorManager : public SiDetectorManager  {
 
   public:
-    
+
     /// Constructor
     SCT_DetectorManager( StoreGateSvc* detStore );
 
     /// Constructur with name
     SCT_DetectorManager( StoreGateSvc* detStore, const std::string& name, const bool doEncapNeighbour=false );
-     
+
     /**
      * @name Access Raw Geometry
      */
@@ -66,20 +66,20 @@ namespace InDetDD {
     /// Add tree top
     void addTreeTop(const PVConstLink& vol);
 
-    
+
     /**
      * @name Access Readout Elements
      */
     //@{
     /// access to individual elements via Identifier
-    virtual SiDetectorElement* getDetectorElement(const Identifier& id) const override;
+    virtual const SiDetectorElement* getDetectorElement(const Identifier& id) const override;
 
     /// access to individual elements via IdentifierHash
-    virtual SiDetectorElement* getDetectorElement(const IdentifierHash& idHash) const override;
-      
+    virtual const SiDetectorElement* getDetectorElement(const IdentifierHash& idHash) const override;
+
     /// access to individual elements via module numbering schema
-    SiDetectorElement* getDetectorElement(int barrel_endcap, int layer_wheel, int phi_module, int eta_module, int side) const;
-    
+    const SiDetectorElement* getDetectorElement(int barrel_endcap, int layer_wheel, int phi_module, int eta_module, int side) const;
+
     /**
      * @name access to whole collectiom via iterators
      */
@@ -87,36 +87,38 @@ namespace InDetDD {
     virtual const SiDetectorElementCollection* getDetectorElementCollection() const override;
     virtual SiDetectorElementCollection::const_iterator getDetectorElementBegin() const override;
     virtual SiDetectorElementCollection::const_iterator getDetectorElementEnd() const override;
+    virtual SiDetectorElementCollection::iterator getDetectorElementBegin() override;
+    virtual SiDetectorElementCollection::iterator getDetectorElementEnd() override;
     //@}
 
     /// Add elememts during construction
     virtual void addDetectorElement(SiDetectorElement* element) override;
     //@}
-    
+
     /// Add alignable transforms. No access to these, they will be changed by manager:
     virtual void addAlignableTransform (int level,
                                         const Identifier& id,
                                         GeoAlignableTransform* xf,
                                         const GeoVFullPhysVol* child);
-      
+
     /// As above but does a dynamic_cast to GeoVFullPhysVol
     virtual void addAlignableTransform (int level,
                                         const Identifier& id,
                                         GeoAlignableTransform* xf,
                                         const GeoVPhysVol* child);
-    
+
     /// DEPRECATED For backward compatibility
     virtual void addAlignableTransform (int, const Identifier&, GeoAlignableTransform*) override {};
-    
+
     /// Initialize the neighbours. This can only be done when all elements are built.
     virtual void initNeighbours() override;
-        
+
     /// Methods to query which manager we have
     virtual bool isPixel() const override {return false;}
-    
+
     /// Check identifier is for this detector
     virtual bool identifierBelongs(const Identifier& id) const override;
-    
+
     /// Access to module design, casts to SCT_ModuleSideDesign
     const SCT_ModuleSideDesign* getSCT_Design(int i) const;
 
@@ -128,7 +130,7 @@ namespace InDetDD {
 
     /// Comply with InDetDetectorManager interface (not implemented for SCT)
     bool processSpecialAlignment(const std::string& key,
-                                 InDetDD::AlignFolderType alignfolder) const override;
+                                 InDetDD::AlignFolderType alignfolder) override;
 
     /// Comply with InDetDetectorManager interface (not implemented for SCT)
     bool processSpecialAlignment(const std::string& key,
@@ -143,9 +145,9 @@ namespace InDetDD {
 
   private:
 
-    // Used by initNeighbours() to deal with strip encap eta overlap. 
+    // Used by initNeighbours() to deal with strip encap eta overlap.
     // This can only be done when all elements are built.
-    int getStripEndcapEtaNeighbour(const SiDetectorElement* element, 
+    int getStripEndcapEtaNeighbour(const SiDetectorElement* element,
                                    IdentifierHash& idHashNeighbour,
                                    const bool phi_plus_one=false) const;
 
@@ -158,14 +160,14 @@ namespace InDetDD {
                                             const Amg::Transform3D& delta,
                                             FrameType frame,
                                             GeoVAlignmentStore* alignStore) const override;
-      
+
     /// Prevent assign operator
     const SCT_DetectorManager& operator=(const SCT_DetectorManager& right) = delete;
     /// Prevent copy constructor
     SCT_DetectorManager(const SCT_DetectorManager& right) = delete;
-    
+
     virtual const SCT_ID* getIdHelper() const override;
-       
+
     /**
      * @name Private member data
      */
@@ -186,15 +188,15 @@ namespace InDetDD {
      */
     bool                                                        m_isLogical;
     //@}
-    
+
     bool m_doEndcapEtaNeighbour;
   };
 
 } // namespace InDetDD
 
 #ifndef GAUDI_NEUTRAL
-#include "AthenaKernel/CLASS_DEF.h" 
-CLASS_DEF(InDetDD::SCT_DetectorManager, 72488296, 1) 
+#include "AthenaKernel/CLASS_DEF.h"
+CLASS_DEF(InDetDD::SCT_DetectorManager, 72488296, 1)
 #endif
 
 #endif // INDETREADOUTGEOMETRY_SCT_DETECTORMANAGER_H

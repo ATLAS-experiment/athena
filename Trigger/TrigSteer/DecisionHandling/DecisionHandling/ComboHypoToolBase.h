@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DECISIONHANDLING_COMBOHYPOTOOLBASE_H
 #define DECISIONHANDLING_COMBOHYPOTOOLBASE_H
@@ -31,9 +31,9 @@ public:
   /**
    * @brief retrieves the decisions associated to this decId, make their combinations and apply the algorithm
    * @param[in]  LegDecisionsMap that lists all the passing decisions, to be updated by the tool depending on the outcome of executeAlg 
-   * @param[in]  Event Context, currently unused
+   * @param[in]  Event Context
    **/  
-  virtual StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*ctx*/) const override;
+  virtual StatusCode decide(Combo::LegDecisionsMap& passingLegs, const EventContext& ctx) const override;
     
   /**
    * @brief retrieves this ComboHypoTool's chain's decision ID
@@ -79,7 +79,7 @@ public:
   * param[in] combination A single combination of objects to be discriminated against. Vector contains the required number of objects over
   * all legs. Use the pair.first to tell which leg a given pair.second decision object belongs to in the current combination.
   **/
-  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination) const;
+  virtual bool executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& ctx) const;
 
   /**
   * @brief Creates the per-leg vectors of Decision objects starting from the initial LegDecision map, storing only those concerning this HypoTool's chain
@@ -101,7 +101,7 @@ public:
   /**
   * @brief Print the output of the tool, after having removed failed Decision Objects. Restricted to the ComboHypoTool's chain's legs.
   **/
-  StatusCode printDebugInformation(const Combo::LegDecisionsMap & passingLegs) const;
+  void printDebugInformation(const Combo::LegDecisionsMap & passingLegs) const;
 
   Gaudi::Property<size_t> m_combinationsThresholdWarn {this, "CombinationsThresholdWarn", 1000,
     "Events processing this many combinations will generate a WARNING message."};

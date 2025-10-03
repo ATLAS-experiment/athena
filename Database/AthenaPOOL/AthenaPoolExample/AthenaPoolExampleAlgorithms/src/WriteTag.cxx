@@ -10,7 +10,6 @@
 
 #include "WriteTag.h"
 
-#include "AthenaPoolUtilities/TagAthenaAttributeList.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 #include "AthenaPoolUtilities/AthenaAttributeListSpecification.h"
 #include "StoreGate/WriteHandle.h"
@@ -46,7 +45,6 @@ StatusCode WriteTag::initialize() {
    }
 
    ATH_CHECK( m_key.initialize() );
-   ATH_CHECK( m_tagKey.initialize() );
    return StatusCode::SUCCESS;
 }
 //___________________________________________________________________________
@@ -56,14 +54,6 @@ StatusCode WriteTag::execute (const EventContext& ctx) const {
    unsigned int eventNumber = ctx.eventID().event_number();
    unsigned int runNumber = ctx.eventID().run_number();
    ATH_MSG_INFO("EventInfo event: " << eventNumber << "  run: " << runNumber);
-
-   const AthenaAttributeListSpecification* attribListSpec = m_attribListSpec;
-   auto tagAttribList = std::make_unique<TagAthenaAttributeList>(*attribListSpec);
-   (*tagAttribList)["RunNumber"].data<unsigned int>() = runNumber;
-   (*tagAttribList)["EventNumber"].data<unsigned int>() = eventNumber;
-   if (m_magic > 0) {
-      (*tagAttribList)["MagicNumber"].data<unsigned int>() = m_magic.value();
-   }
 
    coral::AttributeListSpecification* cspec = new coral::AttributeListSpecification;
    m_attribListSpec->coralSpec (*cspec);
@@ -76,9 +66,7 @@ StatusCode WriteTag::execute (const EventContext& ctx) const {
    }
 
    SG::WriteHandle<AthenaAttributeList> attribListH (m_key, ctx);
-   SG::WriteHandle<TagAthenaAttributeList> tagAttribListH (m_tagKey, ctx);
    ATH_CHECK( attribListH.record (std::move(attribList)) );
-   ATH_CHECK( tagAttribListH.record (std::move(tagAttribList)) );
 
    ATH_MSG_INFO("registered all data");
    return StatusCode::SUCCESS;

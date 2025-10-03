@@ -1,23 +1,21 @@
 #
-#Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
-# import ROOT
 
 # local
 import RpcRawDataMonitoring.RPCRawDataMonUtils as RPCRawDataMonUtils
 import RpcRawDataMonitoring.CoreClass as CoreClass
 import RpcRawDataMonitoring.GetLBInfoFromCOOL as GetLBInfoFromCOOL
 
+from AthenaCommon.Utils.unixtools import find_datafile
+
 #############################################################################
 def readElementFromXML():
-  # from xml.dom.minidom import parse
   import xml.dom.minidom as Dom
   import os
-  import ROOT
 
   # -- Get the validation xml file path
-  xml_file   = ROOT.PathResolver.find_file("Element.xml", "DATAPATH", ROOT.PathResolver.RecursiveSearch)
+  xml_file   = find_datafile("RpcRawDataMonitoring/Element.xml")
 
   if not os.path.isfile(xml_file):
     print ("ERROR: can NOT find xml file: %s!" %xml_file)

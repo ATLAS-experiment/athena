@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <time.h>
@@ -29,6 +29,27 @@ using EventStorage::DataWriterCallBack;
 using EventStorage::DWError;
 using EventStorage::FileNameCallback;
 using EventStorage::SimpleFileName;
+
+namespace{
+  char *
+  charAddress(auto & val){
+    return reinterpret_cast<char *>(&val);
+  }
+  const char *
+  ccharAddress(const auto & val){
+    return reinterpret_cast<const char *>(&val);
+  }
+  
+  Bytef * //Bytef is defined in zlib
+  bytefAddress(auto & val){
+    return reinterpret_cast<Bytef *>(&val);
+  }
+  const Bytef * //Bytef is defined in zlib
+  cbytefAddress(auto & val){
+    return reinterpret_cast<const Bytef *>(&val);
+  }
+
+}
 
 // constructors
 DataWriter::
@@ -485,7 +506,7 @@ DWError DataWriter::closeFile()
 				   m_streamName,
 				   m_applicationName,
 				   m_guid,
-				   checksum,
+				   std::move(checksum),
 				   m_file_end_record.events_in_file, 
 				   m_internal_run_parameters_record.run_number,
 				   m_file_start_record.file_number,
@@ -650,11 +671,11 @@ void DataWriter::file_record(void *ri, const void *pi) {
 
   for(int i=0; i<size; i++) {
     if(pattern[i] != 0) {
-      m_cFile.write((char *)(pattern+i),sizeof(uint32_t));
-      m_check = ::adler32(m_check,(const Bytef*)(pattern+i),sizeof(uint32_t));
+      m_cFile.write(reinterpret_cast<const char*>(pattern+i),sizeof(uint32_t));
+      m_check = ::adler32(m_check,reinterpret_cast<const Bytef*>(pattern+i),sizeof(uint32_t));
     } else {
-      m_cFile.write((char *)(record+i),sizeof(uint32_t));
-      m_check = ::adler32(m_check,(const Bytef*)(record+i),sizeof(uint32_t));
+      m_cFile.write(reinterpret_cast<char*>(record+i),sizeof(uint32_t));
+      m_check = ::adler32(m_check,reinterpret_cast<const Bytef*>(record+i),sizeof(uint32_t));
     }
   }
 }
@@ -668,35 +689,31 @@ void DataWriter::file_record(const offline_EventStorage_v5::file_name_strings& n
   uint32_t sizeName =  nst.appName.size();
   uint32_t sizeTag =  nst.fileNameCore.size();
 
-  m_cFile.write((char *)(&offline_EventStorage_v5::file_name_strings_marker),sizeof(uint32_t));
-  m_check =  ::adler32(m_check,(const Bytef*)
+  m_cFile.write(ccharAddress(offline_EventStorage_v5::file_name_strings_marker),sizeof(uint32_t));
+  m_check =  ::adler32(m_check,reinterpret_cast<const Bytef*>
 		     (&offline_EventStorage_v5::file_name_strings_marker),
 		     sizeof(uint32_t));
 
-  m_cFile.write((char *)(&sizeName),sizeof(uint32_t));
-  m_check =  ::adler32(m_check,(const Bytef*)
-		     (&sizeName),
-		     sizeof(uint32_t));
+  m_cFile.write(charAddress(sizeName),sizeof(uint32_t));
+  m_check =  ::adler32(m_check,cbytefAddress(sizeName),sizeof(uint32_t));
   m_cFile.write(cName,sizeName);
-  m_check =  ::adler32(m_check,(const Bytef*)
-		     (cName),
-		     sizeName);
+  m_check =  ::adler32(m_check,reinterpret_cast<const Bytef*>(cName),sizeName);
 
   char ns = sizeName % 4;
   if(ns){ 
     m_cFile.write("    ",4-ns);
-    m_check = ::adler32(m_check,(const Bytef*)"    ",4-ns);
+    m_check = ::adler32(m_check,reinterpret_cast<const Bytef*>("    "),4-ns);
   }
 
-  m_cFile.write((char *)(&sizeTag),sizeof(uint32_t));
-  m_check = ::adler32(m_check,(const Bytef*)(&sizeTag),sizeof(uint32_t));
+  m_cFile.write(charAddress(sizeTag),sizeof(uint32_t));
+  m_check = ::adler32(m_check,bytefAddress(sizeTag),sizeof(uint32_t));
   m_cFile.write(cTag,sizeTag);
-  m_check = ::adler32(m_check,(const Bytef*)cTag,sizeTag);
+  m_check = ::adler32(m_check,reinterpret_cast<const Bytef*>(cTag),sizeTag);
 
   ns = sizeTag % 4;
   if(ns){ 
     m_cFile.write("    ",4-ns);
-    m_check = ::adler32(m_check,(const Bytef*)"    ",4-ns);
+    m_check = ::adler32(m_check,reinterpret_cast<const Bytef*>("    "),4-ns);
   }
 
 }
@@ -705,15 +722,14 @@ void DataWriter::file_record(const offline_EventStorage_v5::freeMetaDataStrings&
 {
   ERS_DEBUG(2,"Writing the metadata strings.");
 
-  m_cFile.write((char *)(&offline_EventStorage_v5::free_strings_marker),sizeof(uint32_t));
-  m_check = ::adler32(m_check, (const Bytef*)
+  m_cFile.write(ccharAddress(offline_EventStorage_v5::free_strings_marker),sizeof(uint32_t));
+  m_check = ::adler32(m_check, reinterpret_cast<const Bytef*>
 		    (&offline_EventStorage_v5::free_strings_marker),
 		    sizeof(uint32_t));
 
   uint32_t nstrings = fmdStrings.size();
-  m_cFile.write((char *)(&nstrings),sizeof(uint32_t));
-  m_check = ::adler32(m_check, (const Bytef*)
-		    (&nstrings),
+  m_cFile.write(charAddress(nstrings),sizeof(uint32_t));
+  m_check = ::adler32(m_check, bytefAddress(nstrings),
 		    sizeof(uint32_t));
 
   vector<string>::const_iterator it;
@@ -722,14 +738,14 @@ void DataWriter::file_record(const offline_EventStorage_v5::freeMetaDataStrings&
     const char *cst = it->c_str();
     uint32_t slen =  it->size();
    
-    m_cFile.write((char *)(&slen),sizeof(uint32_t));
-    m_check = ::adler32(m_check,(const Bytef*)(&slen),sizeof(uint32_t));
+    m_cFile.write(charAddress(slen),sizeof(uint32_t));
+    m_check = ::adler32(m_check,bytefAddress(slen),sizeof(uint32_t));
     m_cFile.write(cst,slen);
-    m_check = ::adler32(m_check,(const Bytef*)cst,slen);
+    m_check = ::adler32(m_check,reinterpret_cast<const Bytef*>(cst),slen);
     char ns = slen % 4;
     if(ns){ 
       m_cFile.write("    ",4-ns);
-      m_check = ::adler32(m_check,(const Bytef*)"    ",4-ns);
+      m_check = ::adler32(m_check,reinterpret_cast<const Bytef*>("    "),4-ns);
     }
   }
 }
@@ -767,8 +783,7 @@ void DataWriter::replaceGuid() {
     m_next_guid = "";
   }
   
-  string e1="GUID=" + m_guid;
-  m_fmdStrings[0]=e1;
+  m_fmdStrings[0] = "GUID=" + m_guid;
 }
 
 void DataWriter::setGuid(const std::string& Guid){

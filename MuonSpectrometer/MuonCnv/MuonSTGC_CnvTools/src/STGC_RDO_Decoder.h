@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAMSTGCRDODECODER_H
@@ -33,7 +33,7 @@ namespace Muon {
 
     virtual StatusCode initialize() override;
     
-    sTgcDigit * getDigit(const Muon::STGC_RawData * data) const override;
+    sTgcDigit * getDigit(const EventContext& ctx, const Muon::STGC_RawData * data) const override;
     
   private:
     
@@ -44,10 +44,8 @@ namespace Muon {
   
 }
 
-inline sTgcDigit * Muon::STGC_RDO_Decoder::getDigit(const Muon::STGC_RawData* data) const
+inline sTgcDigit * Muon::STGC_RDO_Decoder::getDigit(const EventContext& ctx, const Muon::STGC_RawData* data) const
 {
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // unit conversion
   Identifier Id    = data->identify();
   int tdo          = data->tdo();

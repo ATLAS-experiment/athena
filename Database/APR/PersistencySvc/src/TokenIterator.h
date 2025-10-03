@@ -6,8 +6,6 @@
 #define PERSISTENCYSVC_TOKENITERATOR_H
 
 #include "PersistencySvc/ITokenIterator.h"
-#include "PersistencySvc/IPositionSeek.h"
-#include "AthenaKernel/ICollectionSize.h"
 #include "GaudiKernel/implements.h"
 
 #include <string>
@@ -27,18 +25,15 @@ namespace pool {
      *
      */
 
-    class TokenIterator : virtual public ITokenIterator,
-			  virtual public IPositionSeek,
-			  virtual public implements<ICollectionSize>
+    class TokenIterator : virtual public ITokenIterator
       {
       public:
 	/** Constructor taking as argument a DbSelection object,
-	 *  the file descriptor, the container name and the selection string
+	 *  the file descriptor, the container name
 	 */
 	TokenIterator( FileDescriptor& fileDescriptor,
 		       const std::string& containerName,
-		       IStorageExplorer& storageExplorer,
-		       const std::string& selection );
+		       IStorageExplorer& storageExplorer );
 	/// Destructor
 	~TokenIterator();
 
@@ -53,16 +48,16 @@ namespace pool {
 	Token* next();
 
         /**
+         * @brief Return the size of the collection.
+         */
+        virtual std::size_t size();
+
+        /**
          * @brief Seek to a given position in the collection
          * @param position  The position to which to seek.
          * @returns True if successful, false otherwise.
          */
-        virtual bool seek (long long int position);
-
-        /**
-         * @brief Return the size of the collection.
-         */
-        virtual int size ();
+        virtual bool seek(std::size_t position);
 
       private:
 	/// Reference to the storage explorer

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -20,9 +20,6 @@
  */
 namespace pool    {
 
-  // Forward declarations
-  template <class T> class DbHandleBase;
-
   /** @class DbHandleBase DbHandleBase.h StorageSvc/DbHandleBase.h
     *
     * Description:
@@ -40,12 +37,19 @@ namespace pool    {
     /// Data member: Object pointer. Sub-classes need access on re-assignment
     T*                      m_ptr;
     /// Data member: Technology type. Sub-classes need access on re-assignment
-     DbType                  m_type;
+    DbType                  m_type;
 
     /// Standard destructor
     ~DbHandleBase() {  m_type.check();                  }
     /// Standard constructor
     DbHandleBase() : m_ptr(0), m_type(0)  {             }
+
+    // Copy/move handled by derived classes.
+    DbHandleBase (const DbHandleBase&) = delete;
+    DbHandleBase (DbHandleBase&&) = delete;
+    DbHandleBase& operator= (const DbHandleBase&) = delete;
+    DbHandleBase& operator= (DbHandleBase&&) = delete;
+
     /// Set handle type
     void setType(const DbType& typ)       { m_type=typ; }
     /// Set data pointer

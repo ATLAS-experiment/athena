@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -257,7 +257,7 @@ void test1 (SGTest::TestStore& store)
 		  << (*assItr)->getP()
 		  << "]"
 		  << std::endl;
-	if ( tIdx - assoIdx == 1 ) {
+	if ( assoIdx == tIdx + 1 ) {
 	  ttAsso.addAssociation( tCont, *tIter, tCont, *assItr );
 	} else {
 	  ttAsso.addAssociation( tCont, tIdx,   tCont, assoIdx );

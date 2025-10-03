@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgDataHandles/ReadHandle.h"
@@ -109,7 +109,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
     // Obtain navigation routes for objects which fail
     if (condition == TrigDefs::includeFailedDecisions) {
       std::vector<const TrigCompositeUtils::Decision*> rejectedDecisionNodes = 
-        TrigCompositeUtils::getRejectedDecisionNodes(eventStore, HLTSummaryKeyIn.key(), thisChainIDs);
+        TrigCompositeUtils::getRejectedDecisionNodes(eventStore, ctx, HLTSummaryKeyIn.key(), thisChainIDs);
 
       ATH_MSG_DEBUG("Chain " << chainID << " has " << rejectedDecisionNodes.size() 
         << " dangling nodes in the graph from objects which were rejected.");
@@ -129,7 +129,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
     << "Total nodes:" << navGraph.nodes() << " total edges:" << navGraph.edges() << " final nodes:" << navGraph.finalNodes().size());
   if (msg().level() <= MSG::DEBUG && navGraph.finalNodes().size()) {
     for (const TrigCompositeUtils::NavGraphNode* n : navGraph.finalNodes()) {
-      ATH_MSG_DEBUG("  Final node:" << TrigCompositeUtils::decisionToElementLink(n->node()).dataID() << " #" << n->node()->index());
+      ATH_MSG_DEBUG("  Final node:" << TrigCompositeUtils::decisionToElementLink(n->node(), ctx).dataID() << " #" << n->node()->index());
     }
   }
 
@@ -142,10 +142,10 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
     navGraph.printAllPaths(msg(), MSG::VERBOSE);
   }
 
-  const bool lastFeatureOfTypeFlag = (featureCollectionMode == TrigDefs::lastFeatureOfType);
-
   std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> returnVector =
-    TrigCompositeUtils::recursiveGetFeaturesOfType<CONTAINER>(navGraph, containerSGKey, lastFeatureOfTypeFlag, navElementLinkKey, allRequestedChainIDs);
+    TrigCompositeUtils::recursiveGetFeaturesOfType<CONTAINER>(navGraph, containerSGKey,
+                                                              featureCollectionMode | TrigDefs::fillDecisions, // also fill LinkInfo::decisions
+                                                              navElementLinkKey, allRequestedChainIDs);
 
   size_t invalid = 0;
   for (const TrigCompositeUtils::LinkInfo<CONTAINER>& linkInfo : returnVector) {

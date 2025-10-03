@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -62,7 +62,7 @@ template <class DVL, class Compare>
 struct Compwrapper<DVL, Compare, DataModel_detail::NoBase>
   : public Compare
 {
-  Compwrapper (Compare comp) : Compare (comp) {}
+  Compwrapper (Compare comp) : Compare (std::move(comp)) {}
 };
 
 
@@ -103,7 +103,7 @@ template <class DV, class Predicate>
 struct Predwrapper<DV, Predicate, DataModel_detail::NoBase>
   : public Predicate
 {
-  Predwrapper (Predicate pred) : Predicate (pred) {}
+  Predwrapper (Predicate pred) : Predicate (std::move(pred)) {}
 };
 
 

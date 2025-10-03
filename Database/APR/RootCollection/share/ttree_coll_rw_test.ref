@@ -55,27 +55,3 @@ Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-
 Meta data : 
 10 records read back
 
-Executing query that selects 2 meta data columns.
-Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : [attr1 (int) : 6], [attr2 (string) : testString_6]
-Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : [attr1 (int) : 7], [attr2 (string) : testString_7]
-Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : [attr1 (int) : 8], [attr2 (string) : testString_8]
-Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : [attr1 (int) : 9], [attr2 (string) : testString_9]
-4 records read back
-
-Executing query on 64bit unsigned int attribute:
-Meta data : [attr64bit (unsigned long long) : 0]
-Meta data : [attr64bit (unsigned long long) : 1]
-Meta data : [attr64bit (unsigned long long) : 65536]
-Meta data : [attr64bit (unsigned long long) : 65537]
-Meta data : [attr64bit (unsigned long long) : 8070450532247994369]
-Meta data : [attr64bit (unsigned long long) : 9223372036854775808]
-Meta data : [attr64bit (unsigned long long) : 9223372036854775809]
-Meta data : [attr64bit (unsigned long long) : 9223372036854841344]
-Meta data : [attr64bit (unsigned long long) : 9223372036854841345]
-Meta data : [attr64bit (unsigned long long) : 17293822569102770177]
-10 records read back
-

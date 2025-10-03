@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -19,8 +19,7 @@ namespace Analysis
 {
 
 /** Default constructor */
-JetFitterTagInfo::JetFitterTagInfo() : BaseTagInfo(),
-				       m_nVTX(-1),
+JetFitterTagInfo::JetFitterTagInfo() : m_nVTX(-1),
 				       m_nSingleTracks(-1),
 				       m_nTracksAtVtx(-1),
 				       m_mass(-1.),
@@ -34,7 +33,7 @@ JetFitterTagInfo::JetFitterTagInfo() : BaseTagInfo(),
 
 /** constructor with infotype */
 JetFitterTagInfo::JetFitterTagInfo(const TagInfoType& tagJetInfoType) : 
-  BaseTagInfo(tagJetInfoType),
+  IJetFitterTagInfo(tagJetInfoType),
   m_nVTX(-1),
   m_nSingleTracks(-1),
   m_nTracksAtVtx(-1),
@@ -49,7 +48,7 @@ JetFitterTagInfo::JetFitterTagInfo(const TagInfoType& tagJetInfoType) :
 
 /** Copy constructor */
 JetFitterTagInfo::JetFitterTagInfo(const JetFitterTagInfo& rhs) : 
-  BaseTagInfo(rhs),
+  IJetFitterTagInfo(rhs),
   m_nVTX(rhs.m_nVTX),
   m_nSingleTracks(rhs.m_nSingleTracks),
   m_nTracksAtVtx(rhs.m_nTracksAtVtx),

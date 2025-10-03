@@ -97,7 +97,7 @@ DbStatus RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
         << "and file not opened for update." << DbPrint::endmsg;
   }
   else {
-    m_version = par_val;
+    m_version = std::move(par_val);
   }
   if ( m_file )  {
     log << DbPrintLvl::Debug << dbH.name() << " File version:" << int(m_file->GetVersion())
@@ -268,7 +268,7 @@ DbStatus RootDatabase::reopen(DbAccessMode mode)   {
       result = m_file->ReOpen("UPDATE");
     }
     else  {
-      const char* nam = (m_file) ? m_file->GetName() : "UNKNOWN";
+      const char* nam = m_file->GetName();
       DbPrint log("RootDatabase.reopen");
       log << DbPrintLvl::Error << "Failed to reopen file: " << nam;
       log << " in mode " << accessMode(mode) << DbPrint::endmsg;
@@ -939,7 +939,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
          }
       }
       // check all TTrees, if Branch baskets are below max, after explicit Write() call
-      for( auto& el : m_containersInTree ) {
+      for( const auto& el : m_containersInTree ) {
          reduceBasketsSize( el.first );
       }
    }

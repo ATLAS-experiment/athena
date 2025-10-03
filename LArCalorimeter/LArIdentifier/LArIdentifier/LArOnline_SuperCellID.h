@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARONLINE_SUPERCELLID_H
@@ -25,11 +25,11 @@ class LArOnline_SuperCellID : public LArOnlineID_Base
   /** 
    * @brief Default constructor
    */
-  LArOnline_SuperCellID(void);    
+  LArOnline_SuperCellID();
   /** 
    * @brief Default destructor
    */
-  ~LArOnline_SuperCellID(void);
+  ~LArOnline_SuperCellID();
 
 
   int  initialize_from_dictionary (const IdDictMgr& dict_mgr) override final;
@@ -38,11 +38,6 @@ class LArOnline_SuperCellID : public LArOnlineID_Base
   bool  isEMECchannel    (const HWIdentifier id) const override final; // differs for Maini and DT
   bool  isEMECIW         (const HWIdentifier id) const override final; // differs for Main and DT
   bool  isEMECOW         (const HWIdentifier id) const override final; // differs for Main and DT
-
-private:    
-     
-  int  init_hashes(void) ;
-
 };
 
 CLASS_DEF( LArOnline_SuperCellID , 115600394 , 1 )

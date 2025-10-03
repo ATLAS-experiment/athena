@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 
 """
 beamspotnt is a command line utility for beam spot ntuples.
@@ -38,7 +37,7 @@ import sys, os, time, glob, re, copy, math
 # Create a properly quoted string of the command line to save
 qargv = [ ]
 for s in sys.argv:
-    if re.search('\s|\*|\?',s):   # any white space or special characters in word so we need quoting?
+    if re.search(r'\s|\*|\?',s):   # any white space or special characters in word so we need quoting?
         if "'" in s:
             qargv.append('"%s"' % re.sub('"',"'",s))
         else:
@@ -1111,7 +1110,7 @@ if cmd=='maketable' and len(args)==1:
         cols = []
         for v in varList:
             try:
-                cols.append('%s $\pm$ %s' % (fmtVal(v,getattr(b,v),True,useAlternate=True),
+                cols.append(r'%s $\pm$ %s' % (fmtVal(v,getattr(b,v),True,useAlternate=True),
                                              fmtVal(v,getattr(b,v+'Err'),True,useAlternate=True)))
             except:
                 cols.append('%10s' % (fmtVal(v,getattr(b,v),True,useAlternate=True)))
@@ -1271,7 +1270,7 @@ if cmd=='ave' and len(args)==1:
             except:
                 iTable = 1
             latexheader = 'Period '
-            latexrow = '%s' % options.period.replace('_','\_')
+            latexrow = '%s' % options.period.replace('_',r'\_')
             print ('\nAverage beam spot parameters (part %i):\n' % iTable)
             for i in r:
                 parName = calc.varList[i]
@@ -1282,18 +1281,18 @@ if cmd=='ave' and len(args)==1:
                                                               fmtVal(parName,rms[i])))
                 latexheader += '& %s ' % varDef(parName,'latexheader',parName,useAlternate=True)
                 if options.rms:
-                    latexrow += ' & %s $\pm$ %s' % (fmtVal(parName,ave[i],useAlternate=True),fmtVal(parName,rms[i],useAlternate=True))
+                    latexrow += r' & %s $\pm$ %s' % (fmtVal(parName,ave[i],useAlternate=True),fmtVal(parName,rms[i],useAlternate=True))
                 else:
-                    latexrow += ' & %s $\pm$ %s' % (fmtVal(parName,ave[i],useAlternate=True),fmtVal(parName,err[i],useAlternate=True))
+                    latexrow += r' & %s $\pm$ %s' % (fmtVal(parName,ave[i],useAlternate=True),fmtVal(parName,err[i],useAlternate=True))
             print()
             print ('\nLaTeX code for table %i:\n' % iTable)
             print ('\\begin{table}[htbp]\n\\begin{center}\n\\begin{tabular}{l%s}' % (len(r)*'c'))
-            print ('\hline \hline')
-            print (latexheader,'\\\\ \hline')
+            print (r'\hline \hline')
+            print (latexheader,r'\\\\ \hline')
             print()
             print (latexrow,' \\\\')
             print()
-            print ('\hline \hline')
+            print (r'\hline \hline')
             print ('\\end{tabular}\n\\end{center}\n\\caption{\\label{tab:}}\n\\end{table}')
             print()
     if options.cooltag and minrun<1e10:

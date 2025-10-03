@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMDT_CABLING_MDTCABLINGDATA_H
@@ -18,6 +18,7 @@ struct MdtCablingOffData {
     MdtCablingOffData(const MdtCablingOffData& other) : MdtCablingOffData() {
         m_cache.hash = other.m_cache.hash;
     }
+    // cppcheck-suppress operatorEqVarError; stationIndex, etc intentionally not copied.
     MdtCablingOffData& operator=(const MdtCablingOffData& other) {
         if (&other != this)
             m_cache.hash = other.m_cache.hash;
@@ -56,6 +57,7 @@ struct MdtCablingOnData {
     MdtCablingOnData(const MdtCablingOnData& other) : MdtCablingOnData() {
         m_cache.hash = other.m_cache.hash;
     }
+    // cppcheck-suppress operatorEqVarError; subDetectorId, etc intentionally not copied.
     MdtCablingOnData& operator=(const MdtCablingOnData& other) {
         if (&other != this)
             m_cache.hash = other.m_cache.hash;

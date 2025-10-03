@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATHSEGMENTMAKER_H
@@ -184,8 +184,7 @@ namespace Muon {
         };
 
     public:
-        DCMathSegmentMaker(const std::string&, const std::string&, const IInterface*);
-
+        using base_class::base_class;
         virtual ~DCMathSegmentMaker() = default;
 
         virtual StatusCode initialize();

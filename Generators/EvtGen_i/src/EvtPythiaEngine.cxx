@@ -635,7 +635,7 @@ void EvtPythiaEngine::updatePythiaDecayTable( EvtId& particleId, int aliasInt,
 
     }    // Loop over modes
 
-    m_pythiaModeMap[aliasInt] = pythiaModes;
+    m_pythiaModeMap[aliasInt] = std::move(pythiaModes);
 
     // Now, renormalise the decay branching fractions to sum to 1.0
     std::ostringstream rescaleStr;
@@ -791,12 +791,12 @@ void EvtPythiaEngine::updatePhysicsParameters()
     // Set the multiplicity level for hadronic weak decays
     std::string multiWeakCut( "ParticleDecays:multIncreaseWeak = 2.0" );
     m_genericPythiaGen->readString( multiWeakCut );
-    m_aliasPythiaGen->readString( multiWeakCut );
+    m_aliasPythiaGen->readString( std::move(multiWeakCut) );
 
     // Set the multiplicity level for all other decays
     std::string multiCut( "ParticleDecays:multIncrease = 4.5" );
     m_genericPythiaGen->readString( multiCut );
-    m_aliasPythiaGen->readString( multiCut );
+    m_aliasPythiaGen->readString( std::move(multiCut) );
 
     //Now read in any custom configuration entered in the XML
     GeneratorCommands commands =

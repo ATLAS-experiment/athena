@@ -28,7 +28,7 @@ public:
 
     // Callback function itself
     // virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override final;
-    virtual StatusCode align(IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
+    virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
 
 private:
     const HGTD_DetectorManager *m_detManager{};

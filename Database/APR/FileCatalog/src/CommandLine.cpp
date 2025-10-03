@@ -4,7 +4,7 @@
 *  CommandLine.cpp
 *  Created by John F. Hubbard, on Sat Jul 29 2000, 19:01:05 PST
 *
-*  Copyright (c) 2000, 2020, ATD Azad Technology Development Corporation
+*  Copyright (c) 2000, 2020, 2025, ATD Azad Technology Development Corporation
 *
 *            The Reliable Software Outsource Resource
 *        You hire us, we do it for you, and we do it right.
@@ -110,7 +110,7 @@ pool::CommandLine::ParseSettings(const std::string& strInput)
           }
           ++mnParameterCount;
        }
-       else if ( strNextWord.length() > 0 )
+       else
        {
           TranslateQuotes(ist, strNextWord);
           pResult = mArgMap.insert(std::make_pair(GetParamName(strWord),strNextWord));
@@ -169,7 +169,7 @@ pool::CommandLine::TranslateQuotes(std::istringstream& ist, std::string& strWord
     {
       throw (std::string("Mismatched quotes in CommandLine arguments."));
     }
-    strWord = strFullWord;
+    strWord = std::move(strFullWord);
   }
   // else, strWord is unchanged.
 }

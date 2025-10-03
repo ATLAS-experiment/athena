@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventQualityFilterAlg.h
@@ -38,9 +38,8 @@ class EventQualityFilterAlg
   virtual ~EventQualityFilterAlg();
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute() override;
 
   ///////////////////////////////////////////////////////////////////
   // Private data:
@@ -48,16 +47,17 @@ class EventQualityFilterAlg
  private:
 
   /// Flag to turn on/off checking of LAr calorimeter error flag
-  BooleanProperty m_useLArError;
+  BooleanProperty m_useLArError{ this, "VetoLArError", true, "Veto events with a LAr error" };
 
   /// Flag to turn on/off checking of tile calorimter error flag
-  BooleanProperty m_useTileError;
+  BooleanProperty m_useTileError{ this, "VetoTileError", true, "Veto events with a Tile error" };
 
   /// Flag to turn on/off checking of SCT error flag
-  BooleanProperty m_useSCTError;
+  BooleanProperty m_useSCTError{ this, "VetoSCTError", true,  "Veto events with an SCT error" };
 
   /// Flag to turn on/off checking of core error flag
-  BooleanProperty m_useCoreError;
+  BooleanProperty m_useCoreError{ this, "VetoCoreError", true, "Veto events with a Core error" };
+
 
   // /// Flag to turn on/off checking of tile trip information
   // BooleanProperty m_useTileTripReader;

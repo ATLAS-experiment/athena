@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -244,7 +244,7 @@ int testGetFeaturesOnSameTypes(MsgStream& log, Navigation* nav, TriggerElement* 
     el = *elvIt;
     typedef typename T::base_value_type S;
     const S* t = *el;
-    multipleRecentThroughELV.push_back((S*)t);
+    multipleRecentThroughELV.push_back(t);
   }
 
   log << MSG::DEBUG << "testGetFeatures passed features retrieval ... checking thier relations" << endmsg; 

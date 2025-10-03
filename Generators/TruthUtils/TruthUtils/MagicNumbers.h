@@ -94,10 +94,10 @@ namespace HepMC {
       return *p;
     }
     else if constexpr (std::is_same_v<T, xAOD::TruthParticle_v1> || std::is_same_v<T, xAOD::TruthVertex_v1>) {
-      return p.barcode();
+      return p.uid();
     }
     else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthParticle_v1> || std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthVertex_v1>) {
-      return p->barcode();
+      return p->uid();
     }
     else if constexpr (std::is_same_v<T, CaloCalibrationHit>) {
       return p.particleUID();
@@ -120,6 +120,12 @@ namespace HepMC {
     else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
       return *p;
     }
+    else if constexpr (std::is_same_v<T, xAOD::TruthParticle_v1> || std::is_same_v<T, xAOD::TruthVertex_v1>) {
+      return p.uid();
+    }
+    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthParticle_v1> || std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthVertex_v1>) {
+      return p->uid();
+    }
     else if constexpr (std::is_same_v<T, CaloCalibrationHit>) {
       return p.particleUID();
     }
@@ -134,19 +140,12 @@ namespace HepMC {
     }
   }
 #endif
- // Temporarily specialize status for xAOD::Truth classes ahead of the barcode migration - TODO remove this
   template <typename T> inline int status(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
       return p;
     }
     else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
       return *p;
-    }
-    else if constexpr (std::is_same_v<T, xAOD::TruthVertex_v1>) {
-      return p.id();
-    }
-    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthVertex_v1>) {
-      return p->id();
     }
     else if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
       return p->status();
@@ -218,7 +217,7 @@ namespace HepMC {
     template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1% SIM_REGENERATION_INCREMENT == b2 % SIM_REGENERATION_INCREMENT; }
 
     /// @brief Method to establish if two particles/vertices in the GenEvent actually represent the same generated particle
-    template <class T1, class T2> inline bool is_same_object(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1 == b2; }
+    template <class T1, class T2> inline bool is_same_object(const T1& p1,const T2& p2) { int b1 = uniqueID(p1); int b2 = uniqueID(p2); return  b1 == b2; } // NB Still need to adapt CaloCalibrationHits
 
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
     template <class T1, class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
@@ -352,25 +351,25 @@ namespace HepMC {
   }
 
   /// @brief Method to establish if a particle (or barcode) was created during the simulation (TODO update to be status based)
-  template <class T>  inline bool is_simulation_particle(const T& p){ return BarcodeBased::is_simulation_particle(p);}
+  template <class T>  inline bool is_simulation_particle(const T& p){ return StatusBased::is_simulation_particle(p);}
 
   /// @brief Method to return how many interactions a particle has undergone during simulation (TODO migrate to be based on status).
-  template <class T>  inline int generations(const T& p){ return BarcodeBased::generations(p);}
+  template <class T>  inline int generations(const T& p){ return StatusBased::generations(p);}
 
   /// @brief Method to establish if the vertex was created during simulation (TODO migrate to be based on status).
-  template <class T>  inline bool is_simulation_vertex(const T& v){ return BarcodeBased::is_simulation_vertex(v);}
+  template <class T>  inline bool is_simulation_vertex(const T& v){ return StatusBased::is_simulation_vertex(v);}
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-  template <class T1,class T2>  inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return BarcodeBased::is_same_generator_particle(p1, p2); }
+  template <class T1,class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return StatusBased::is_same_generator_particle(p1, p2); }
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same  particle
-  template <class T1,class T2>  inline bool is_same_particle(const T1& p1,const T2& p2) { return BarcodeBased::is_same_object(p1, p2); }
+  template <class T1,class T2>  inline bool is_same_particle(const T1& p1,const T2& p2) { return StatusBased::is_same_object(p1, p2); }
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same  vertex
-  template <class T1,class T2>  inline bool is_same_vertex(const T1& p1,const T2& p2) { return BarcodeBased::is_same_object(p1, p2); }
+  template <class T1,class T2>  inline bool is_same_vertex(const T1& p1,const T2& p2) { return StatusBased::is_same_object(p1, p2); }
 
   /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-  template <class T1,class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { return BarcodeBased::is_sim_descendant(p1, p2);}
+  template <class T1,class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { return StatusBased::is_sim_descendant(p1, p2);}
 
   /// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
   template <class T> void old_to_new_simulation_scheme(T& evt) {

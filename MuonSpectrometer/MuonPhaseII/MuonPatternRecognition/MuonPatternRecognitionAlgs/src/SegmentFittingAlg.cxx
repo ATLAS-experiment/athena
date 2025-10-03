@@ -4,25 +4,16 @@
 
 #include "SegmentFittingAlg.h"
 
-#include <TrkEventPrimitives/ParticleHypothesis.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
-#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "xAODMuonPrepData/RpcStripContainer.h"
 #include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
-#include <MuonSpacePoint/UtilFunctions.h>
 
-#include <xAODMuonPrepData/RpcMeasurement.h>
-#include <xAODMuonPrepData/TgcStrip.h>
-#include "xAODMuonSimHit/MuonSimHitContainer.h"
 
-#include <GaudiKernel/PhysicalConstants.h>
-#include <Minuit2/Minuit2Minimizer.h>
-#include <Math/Minimizer.h>
-
+#include <xAODMuonSimHit/MuonSimHitContainer.h>
+#include <xAODMuonPrepData/MdtDriftCircle.h>
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
 #include <format>
@@ -78,7 +69,6 @@ namespace MuonR4 {
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
-
         std::vector<std::unique_ptr<Segment>> allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
             std::vector<std::unique_ptr<Segment>> segments = fitSegmentSeed(ctx, *gctx, seed);
@@ -90,16 +80,15 @@ namespace MuonR4 {
                     yLegend-=0.04;
                     for (const std::unique_ptr<Segment>& seg : segments) {
                         const Parameters pars = localSegmentPars(*gctx, *seg);
-                        const auto [locPos, locDir] = makeLine(pars);
-
+                        const auto [pos, dir] = makeLine(pars);
                         segmentLines.emplace_back(drawLine(pars, -Gaudi::Units::m, Gaudi::Units::m, kRed));
                         std::stringstream signStream{};
                         signStream<<std::format("#chi^{{2}}/nDoF: {:.2f} ({:}), ", seg->chi2() / seg->nDoF(), seg->nDoF());
-                        signStream<<std::format("y_{{0}}={:.2f}",pars[toInt(ParamDefs::y0)])<<", ";
-                        signStream<<std::format("#theta={:.2f}^{{#circ}}", pars[toInt(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
+                        signStream<<std::format("y_{{0}}={:.2f}",pars[Acts::toUnderlying(ParamDefs::y0)])<<", ";
+                        signStream<<std::format("#theta={:.2f}^{{#circ}}", pars[Acts::toUnderlying(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
                         for (const Segment::MeasType& m : seg->measurements()) {
                             if (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType && m->fitState() == CalibratedSpacePoint::State::Valid) {
-                                signStream<<(SegmentFitHelpers::driftSign(locPos, locDir, *m, msgStream()) == -1 ? "L" : "R");
+                                signStream<<(SeedingAux::strawSign(pos, dir, *m) == -1 ? "L" : "R");
                             }
                         }
                         segmentLines.push_back(drawLabel(signStream.str(), 0.2, yLegend, 13));
@@ -114,7 +103,7 @@ namespace MuonR4 {
                 if (nBeforeAmbi != segments.size()) {
                     drawFinalReco("post ambiguity");
                 }
-            } else  if (m_visionTool.isEnabled() && segments.empty() &&
+            } else if (m_visionTool.isEnabled() && segments.empty() &&
                       std::ranges::count_if(seed->getHitsInMax(),[this](const SpacePoint* hit){
                             return  m_visionTool->isLabeled(*hit);
                       })) {
@@ -151,17 +140,14 @@ namespace MuonR4 {
             if (numPhi) {
                 const Amg::Transform3D globToLoc{calibHits[0]->spacePoint()->msSector()->globalToLocalTrans(gctx)};
                 Amg::Vector3D beamSpot{globToLoc.translation()};
-                AmgSymMatrix(3) covariance{AmgSymMatrix(3)::Identity()}; 
+                SpacePoint::Cov_t covariance{};
+                covariance[Acts::toUnderlying(AxisDefs::etaCov)] = Acts::square(m_beamSpotR);
+                covariance[Acts::toUnderlying(AxisDefs::phiCov)] = Acts::square(m_beamSpotL);
+                 
                 /// placeholder for a very generous beam spot: 300mm in X,Y (tracking volume), 20000 along Z
-                covariance(0,0) = std::pow(m_beamSpotR, 2);
-                covariance(1,1) = std::pow(m_beamSpotR, 2);
-                covariance(2,2) = std::pow(m_beamSpotL, 2);
-                AmgSymMatrix(3) jacobian =  globToLoc.linear();
-                covariance = jacobian * covariance * jacobian.transpose(); 
-                AmgSymMatrix(2) beamSpotCov{covariance.block<2,2>(0,0)};
-                auto beamSpotSP = std::make_unique<CalibratedSpacePoint>(nullptr, std::move(beamSpot), Amg::Vector3D::Zero());
-                beamSpotSP->setCovariance<2>(std::move(beamSpotCov));
-                ATH_MSG_VERBOSE("Beam spot constraint "<<Amg::toString(beamSpotSP->positionInChamber())<<", "<<toString(beamSpotSP->covariance()));
+                auto beamSpotSP = std::make_unique<CalibratedSpacePoint>(nullptr, std::move(beamSpot));
+                beamSpotSP->setCovariance(std::move(covariance));
+                ATH_MSG_VERBOSE("Beam spot constraint "<<Amg::toString(beamSpotSP->localPosition())<<", "<<beamSpotSP->covariance());
                 calibHits.push_back(std::move(beamSpotSP));
             }
         }
@@ -172,6 +158,8 @@ namespace MuonR4 {
         fitCfg.calibrator = m_calibTool.get();
         fitCfg.doTimeFit = m_doT0Fit;
         fitCfg.reCalibrate = m_recalibInFit;
+        fitCfg.useFastFit = m_useFastFitter;
+        fitCfg.useSecOrderDeriv = m_hessianResidual;
 
         MdtSegmentFitter fitter{name(), std::move(fitCfg)};
         return fitter.fitSegment(ctx, std::move(calibHits), startPars, locToGlob);
@@ -187,13 +175,12 @@ namespace MuonR4 {
         MdtSegmentSeedGenerator::Config genCfg{};
         genCfg.hitPullCut = m_seedHitChi2;
         genCfg.recalibSeedCircles = m_recalibSeed;
-        genCfg.fastSeedFit = m_refineSeed;
-        genCfg.fastSegFitWithT0 = m_doT0Fit;
         genCfg.calibrator = m_calibTool.get();
+        genCfg.startWithPattern = m_tryPatternPars;
         
 
         /// At very high inclanation angles, the muon may traverse 3 hits in the same layer (E.g. BEE)
-        genCfg.busyLayerLimit = 2 + 2*(patternSeed->parameters()[toInt(ParamDefs::theta)] > 50 * Gaudi::Units::deg);
+        genCfg.busyLayerLimit = 2 + 2*(patternSeed->parameters()[Acts::toUnderlying(ParamDefs::theta)] > 50 * Gaudi::Units::deg);
         /** Draw the pattern with all possible seeds */
          if (m_visionTool.isEnabled()) { 
             PrimitiveVec seedLines{};
@@ -206,6 +193,7 @@ namespace MuonR4 {
         }
 
         MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
+        ATH_MSG_VERBOSE("fitSegmentHits() - Start segment seed search");
         while (auto seed = seedGen.nextSeed(ctx)) {
             SegmentFitResult data{};
             data.segmentPars = seed->parameters;
@@ -233,6 +221,8 @@ namespace MuonR4 {
             }
             segments.push_back(convertToSegment(locToGlob, patternSeed, std::move(data)));
         }
+        ATH_MSG_VERBOSE("fitSegmentHits() - In total "<<segments.size()<<" segment were constructed ");
+      
         return segments;
     }
      std::unique_ptr<Segment> SegmentFittingAlg::convertToSegment(const Amg::Transform3D& locToGlob, 
@@ -249,7 +239,7 @@ namespace MuonR4 {
         finalSeg->setCallsToConverge(data.nIter);
         finalSeg->setParUncertainties(std::move(data.segmentParErrs));
         if (data.timeFit) {
-            finalSeg->setSegmentT0(data.segmentPars[toInt(ParamDefs::time)]);
+            finalSeg->setSegmentT0(data.segmentPars[Acts::toUnderlying(ParamDefs::t0)]);
         }
         return finalSeg;
     }
@@ -266,34 +256,36 @@ namespace MuonR4 {
             return false;
         }
 
-        const auto [segPos, segDir] = data.makeLine();
-
         if (data.converged && data.chi2 / data.nDoF < m_outlierRemovalCut) {
-            ATH_MSG_VERBOSE("The segment "<<Amg::toString(segPos)<<" + "<<Amg::toString(segDir)
-                            <<" is already of good quality "<<data.chi2 / std::max(data.nDoF, 1)
+            ATH_MSG_VERBOSE("The segment "<<toString(data.segmentPars)
+                             <<" is already of good quality "<<data.chi2 / std::max(data.nDoF, 1)
                             <<". Don't remove outliers");
             return true;
         }
         ATH_MSG_VERBOSE("Segment "<<toString(data.segmentPars)<<" is of badish quality.");
+
         /** Remove a priori the beamspot constaint as it never should pose any problem and
          *  another one will be added anyway in the next iteration */        
         if (m_doBeamspotConstraint && removeBeamSpot(data.calibMeasurements)) {
             data.nDoF-=2;
             data.nPhiMeas-=1;
         }
+        const auto [segPos, segDir] = data.makeLine();
 
         /** Next sort the measurements by chi2 */
         std::ranges::sort(data.calibMeasurements,
-                  [&, this](const HitVec::value_type& a, const HitVec::value_type& b){
-                    return SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *a, msgStream()) <
-                           SegmentFitHelpers::chiSqTerm(segPos, segDir, data.segmentPars[toInt(ParamDefs::time)], std::nullopt, *b, msgStream());
+                  [&](const HitVec::value_type& a, const HitVec::value_type& b){
+                    using enum CalibratedSpacePoint::State;
+                    const double chiSqA = a->fitState() == Valid ? SeedingAux::chi2Term(segPos, segDir, *a) : 0.;
+                    const double chiSqB = b->fitState() == Valid ? SeedingAux::chi2Term(segPos, segDir, *b) : 0.;
+                    return chiSqA < chiSqB;                   
                   });
         
         /** Declare the hit with the largest chi2 as outlier. */
         data.calibMeasurements.back()->setFitState(CalibratedSpacePoint::State::Outlier);
         data.nDoF -= data.calibMeasurements.back()->measuresEta();
         data.nDoF -= data.calibMeasurements.back()->measuresPhi();
-        if (m_doT0Fit && data.calibMeasurements.back()->measuresTime() && 
+        if (m_doT0Fit && data.calibMeasurements.back()->hasTime() && 
                          data.calibMeasurements.back()->type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
             --data.nDoF;
         }
@@ -340,13 +332,13 @@ namespace MuonR4 {
                 if (usedSpacePoint.count(mdtHit)) {
                     continue;
                 }
-                const double dist = Amg::lineDistance(locPos, locDir, mdtHit->positionInChamber(), mdtHit->directionInChamber());
+                const double dist = Amg::lineDistance(locPos, locDir, mdtHit->localPosition(), mdtHit->sensorDirection());
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(mdtHit->primaryMeasurement());
                 if (dist >= dc->readoutElement()->innerTubeRadius()) {
                     continue;
                 }
-                HitVec::value_type calibHit{m_calibTool->calibrate(ctx, mdtHit, locPos, locDir, beforeRecov.segmentPars[toInt(ParamDefs::time)])};
-                const double pull = std::sqrt(SegmentFitHelpers::chiSqTermMdt(locPos, locDir, *calibHit, msgStream()));
+                HitVec::value_type calibHit{m_calibTool->calibrate(ctx, mdtHit, locPos, locDir, beforeRecov.segmentPars[Acts::toUnderlying(ParamDefs::t0)])};
+                const double pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *calibHit));
                 ATH_MSG_VERBOSE(__func__<<"() :"<<__LINE__<<" Candidate hit for recovery "<<m_idHelperSvc->toString(mdtHit->identify())<<", chi2: "<<pull);
                 if (pull <= m_recoveryPull) {
                     hasCandidate |= calibHit->fitState() == CalibratedSpacePoint::State::Valid;
@@ -407,9 +399,7 @@ namespace MuonR4 {
                         continue;
                     }
                     copyHit->setFitState(CalibratedSpacePoint::State::Valid);
-                    bool append = std::sqrt(SegmentFitHelpers::chiSqTerm(beforePos, beforeDir, 
-                                                                        beforeRecov.segmentPars[toInt(ParamDefs::time)], 
-                                                                        std::nullopt, *copyHit, msgStream())) < m_recoveryPull;
+                    bool append = std::sqrt(SeedingAux::chi2Term(beforePos, beforeDir, *copyHit)) < m_recoveryPull;
                     if (append) {
                         runAnotherTrial = true;    
                     } else {
@@ -453,7 +443,7 @@ namespace MuonR4 {
                                                 }
                                                 /** The segment has never crossed the tube */
                                                 if (hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-                                                    const double dist = Amg::lineDistance(segPos, segDir, hit->positionInChamber(), hit->directionInChamber());
+                                                    const double dist = Amg::lineDistance(segPos, segDir, hit->localPosition(), hit->sensorDirection());
                                                     const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(hit->spacePoint()->primaryMeasurement());
                                                     return dist >= dc->readoutElement()->innerTubeRadius();
                                                 }
@@ -461,11 +451,14 @@ namespace MuonR4 {
                                                 }), candidate.calibMeasurements.end());
 
         std::ranges::sort(candidate.calibMeasurements, [](const Segment::MeasType& a, const Segment::MeasType& b){
-            return a->positionInChamber().z() < b->positionInChamber().z();
+            return a->localPosition().z() < b->localPosition().z();
         });
     }
     void SegmentFittingAlg::resolveAmbiguities(const ActsGeometryContext& gctx,
                                                std::vector<std::unique_ptr<Segment>>& segmentCandidates) const {
+        if (segmentCandidates.empty()) {
+            return;
+        }
         using SegmentVec = std::vector<std::unique_ptr<Segment>>;
         ATH_MSG_VERBOSE("Resolve ambiguities amongst "<<segmentCandidates.size()<<" segment candidates. ");
         std::unordered_map<const MuonGMR4::SpectrometerSector*, SegmentVec> candidatesPerChamber{};

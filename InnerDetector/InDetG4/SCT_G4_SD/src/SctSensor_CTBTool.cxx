@@ -10,6 +10,8 @@
 
 //package includes
 #include "SctSensor_CTB.h"
+#include "HitManagement/HitCollectionMap.h"
+#include "InDetSimEvent/SiHitCollection.h"
 
 // STL includes
 #include <exception>
@@ -19,6 +21,18 @@
 SctSensor_CTBTool::SctSensor_CTBTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase( type , name , parent )
 {
+}
+
+StatusCode SctSensor_CTBTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<SiHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode SctSensor_CTBTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -28,7 +28,6 @@ namespace IDTPM {
         const std::string& anaTag,
         const std::string& trackType,
         bool doTrigger = false,
-        bool doGlobalPlots = false,
         bool doTruthMuPlots = false );
 
     /// Destructor
@@ -53,7 +52,6 @@ namespace IDTPM {
 
     std::string m_trackType;
     bool m_doTrigger{};
-    bool m_doGlobalPlots{};
     bool m_doTruthMuPlots{};
 
     /// Importing Counter enum
@@ -71,8 +69,10 @@ namespace IDTPM {
 
     TH1*  m_nTracks[ NCOUNTERS ]{};
     TH2*  m_nTracks_vs_nVertices[ NCOUNTERS ]{};
-    TH2*  m_nTracks_vs_truthMu{};
-    TH2*  m_nTracks_vs_actualMu{};
+    TH2*  m_nTracks_vs_truthMu[ NCOUNTERS ]{};
+    TH2*  m_nTracks_vs_actualMu[ NCOUNTERS ]{};
+    TProfile*  m_avg_nTracks_vs_truthMu[ NCOUNTERS ]{};
+    TProfile*  m_avg_nTracks_vs_actualMu[ NCOUNTERS ]{};
 
   }; // class NtracksPlots
 

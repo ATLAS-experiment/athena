@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // HLTSeeding includes
 #include "EMRoIsUnpackingTool.h"
@@ -95,15 +95,15 @@ StatusCode EMRoIsUnpackingTool::unpack(const EventContext& ctx,
 
       decisionMain->setDetail( "thresholds", passedThresholdIDs );
       decisionMain->setObjectLink( initialRoIString(),
-                                   ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1) );
+                                   ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
       decisionMain->setObjectLink( initialRecRoIString(),
-                                   ElementLink<DataVector<LVL1::RecEmTauRoI>>(m_recRoIsKey.key(), recRoIs->size()-1) );
+                                   ElementLink<DataVector<LVL1::RecEmTauRoI>>(m_recRoIsKey.key(), recRoIs->size()-1, ctx) );
 
       decisionProbe->setDetail( "thresholds", passedThresholdIDs );
       decisionProbe->setObjectLink( initialRoIString(),
-                                    ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1) );
+                                    ElementLink<TrigRoiDescriptorCollection>(m_trigRoIsKey.key(), trigRoIs->size()-1, ctx) );
       decisionProbe->setObjectLink( initialRecRoIString(),
-                                    ElementLink<DataVector<LVL1::RecEmTauRoI>>(m_recRoIsKey.key(), recRoIs->size()-1) );
+                                    ElementLink<DataVector<LVL1::RecEmTauRoI>>(m_recRoIsKey.key(), recRoIs->size()-1, ctx) );
     }
   }
 

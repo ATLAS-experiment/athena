@@ -10,7 +10,6 @@
 
 #include "CxxUtils/checker_macros.h"
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
-#include "StoreGate/WriteHandle.h"
 #include <gtest/gtest_prod.h>
 
 class TRTParameters;
@@ -23,7 +22,6 @@ class G4TouchableHistory;
 
 class TRTSensitiveDetector : public G4VSensitiveDetector
 {
- FRIEND_TEST( TRTSensitiveDetectortest, Initialize);
  FRIEND_TEST( TRTSensitiveDetectortest, ProcessHits );
  FRIEND_TEST( TRTSensitiveDetectortest, AddHit );
 
@@ -82,7 +80,8 @@ class TRTSensitiveDetector : public G4VSensitiveDetector
 
   ///Other member variables
   // The hits collection
-  SG::WriteHandle<TRTUncompressedHitCollection> m_HitColl; //pUncompressedHitCollection;
+  std::string m_HitCollName;
+  TRTUncompressedHitCollection* m_HitColl{nullptr}; //pUncompressedHitCollection;
 
   const TRTParameters* m_pParameters;
 

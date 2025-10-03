@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*@file SCTHitsNoiseMonTool.cxx
@@ -113,8 +113,6 @@ namespace SCT_Monitoring{
     return 0;
   }
 
-  // Ensure that the enums are available from ROOT
-  struct ROOT6_NamespaceAutoloadHook{};
 }//namespace
 
 #endif

@@ -48,7 +48,7 @@ def releaseInRange(flags,rel1,rel2):
         raise RuntimeError("Boundary releases not from the same release series, got %s and %s"%(rel1,rel2))
 
     if identifyMajorAndMinorRel(rel1) != identifyMajorAndMinorRel(inputRelease):
-        msg.info("Input release not from the same release series.")
+        msg.info("Input release %s not from the same release series %s.", inputRelease, rel1)
         return False
 
     #convert number to int for comparison

@@ -377,7 +377,7 @@ namespace ITk
       * @param[in] sp: Input space point. 
     **/
     SiSpacePointForSeed* newSpacePoint(EventData& data, const Trk::SpacePoint*const& sp) const;
-    SiSpacePointForSeed* newSpacePoint(EventData& data, const Trk::SpacePoint*const& sp, float* r, bool usePixStripInform=false) const;
+    SiSpacePointForSeed* newSpacePoint(EventData& data, const Trk::SpacePoint*const& sp, std::span<float, 15> r, bool usePixStripInform=false) const;
 
     static void newSeed
     (EventData& data,
@@ -490,7 +490,7 @@ namespace ITk
     bool newVertices(EventData& data, const std::list<Trk::Vertex>&) const;
     void findNext(EventData& data) const;
     bool isZCompatible(EventData& data, float Zv, float R, float T) const;
-    static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,float*) ;
+    static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*,float*) ;
     bool isUsed(const Trk::SpacePoint*, const Trk::PRDtoTrackMap &prd_to_track_map) const;
 
     void initializeEventData(EventData& data, const EventContext& ctx) const;

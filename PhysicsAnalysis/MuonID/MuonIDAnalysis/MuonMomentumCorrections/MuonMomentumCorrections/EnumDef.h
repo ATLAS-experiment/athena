@@ -13,7 +13,7 @@ namespace MCP {
     enum class TrackType{ CB, ID, ME }; 
 
     // This is for SagittaCorrection, there are two different types of error terms
-    enum class SagittaCorrection{ Nominal, Datastat__1up, Residual__1up }; 
+    enum class SagittaCorrection{ Nominal, Datastat__1up, Residual__1up, PtExtra__1up }; 
 
     // This for the calibration constants of the Scale and Resolution Corrections, s0/s1/r0/r1/r2
     enum class ScaleResCorrection{ Nominal, SystErr__1up, SystErr__1down }; 

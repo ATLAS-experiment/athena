@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_ENUMS_H
@@ -45,11 +45,11 @@ namespace TauAnalysisTools
     CutNTrack       = 1<<3, // 000000001000
     CutAbsCharge    = 1<<4, // 000000010000
     CutJetIDWP      = 1<<5, // 000000100000
-    CutEleRNNScore  = 1<<6, // 000001000000
-    CutEleIDWP      = 1<<7, // 000010000000
-    CutMuonOLR      = 1<<8,        // 000100000000
-    CutJetRNNScoreSigTrans = 1<<9, // 001000000000
-    CutGNTauScoreSigTrans = 1<<10 // 010000000000	    
+    CutEleRNNScoreSigTrans  = 1<<6, // 000001000000
+    CutEleIDWP              = 1<<7, // 000010000000
+    CutMuonOLR              = 1<<8,        // 000100000000
+    CutJetRNNScoreSigTrans  = 1<<9, // 001000000000
+    CutGNTauScoreSigTrans   = 1<<10 // 010000000000	    
   };
 
   enum DiTauSelectionCuts 
@@ -58,6 +58,8 @@ namespace TauAnalysisTools
     DiTauCutPt           = 1,    // 000000000001
     DiTauCutAbsEta       = 1<<1, // 000000000010
     DiTauCutNSubjets     = 1<<2, // 000000000100
+    DiTauCutAbsCharge    = 1<<3, // 000000001000
+    DiTauCutOmniScore       = 1<<4, // 000000010000 
   };
 
   enum EfficiencyCorrectionType
@@ -101,8 +103,6 @@ namespace TauAnalysisTools
     TruthJet         = 5,
     TruthHadronicDiTau = 6
   };
-
-  struct ROOT6_NamespaceAutoloadHook{};
 
 }
 

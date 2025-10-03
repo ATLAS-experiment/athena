@@ -4,6 +4,7 @@
 #include "TruthParentDecoratorAlg.h"
 
 #include "StoreGate/WriteDecorHandle.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -338,8 +339,8 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
   unsigned int n_parents = 0;
   for (const auto* p: psort) {
     unsigned int parent_index = n_parents++;
-    ATH_MSG_VERBOSE("pdgid: " << p->pdgId() << ", barcode: " << HepMC::barcode(p));
-    for (auto& [cbar, histbars]: findAllDescendants(HepMC::barcode(p), barcodex)) {
+    ATH_MSG_VERBOSE("pdgid: " << p->pdgId() << ", barcode: " << HepMC::uniqueID(p));
+    for (auto& [cbar, histbars]: findAllDescendants(HepMC::uniqueID(p), barcodex)) {
       IPMap::mapped_type& barkids = ipmap.at(cbar);
       const xAOD::TruthParticle* child = selectChild(barkids);
       std::vector<std::pair<float, const J*>> drs;
@@ -470,8 +471,8 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
 
   // insert a particle into the record, return the child set
   auto insert = [&barcodex, &ipmap](const xAOD::TruthParticle* p) -> auto& {
-    ipmap[HepMC::barcode(p)].insert(p);
-    return barcodex[HepMC::barcode(p)];
+    ipmap[HepMC::uniqueID(p)].insert(p);
+    return barcodex[HepMC::uniqueID(p)];
   };
 
   for (const xAOD::TruthParticle* p: container) {
@@ -493,7 +494,7 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
           } else {
             auto problem = std::format(
               "null truth child [barcode={},pdg_id={},child={}of{}]",
-              HepMC::barcode(p), p->pdgId(), child_n, p->nChildren());
+              HepMC::uniqueID(p), p->pdgId(), child_n, p->nChildren());
             const auto& warn_missing = m_warn_missing_children_pdgids.value();
             if (warn_missing.contains(p->pdgId())) {
               m_missing_n_warned++;
@@ -504,7 +505,7 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
           }
         } else if (cascadeWants(c)) {
           insert(c);
-          child_set.insert(HepMC::barcode(c));
+          child_set.insert(HepMC::uniqueID(c));
         }
       };
     }

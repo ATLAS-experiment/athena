@@ -7,6 +7,7 @@
 
 //Base class header
 #include "G4VFastSimulationModel.hh"
+#include <G4Region.hh>
 
 //STL headers
 #include <string>
@@ -17,7 +18,7 @@ class NeutronFastSim: public G4VFastSimulationModel
 {
 public:
 
-  NeutronFastSim(const std::string& name, const std::string& fsSDname, const double etaCut, const double timeCut);
+  NeutronFastSim(const std::string& name, G4Region* region, const std::string& fsSDname, const double etaCut, const double timeCut);
   ~NeutronFastSim() {}
 
   // Fast Sim Methods

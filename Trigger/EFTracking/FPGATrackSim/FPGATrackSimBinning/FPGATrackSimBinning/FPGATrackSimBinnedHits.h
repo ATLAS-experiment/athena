@@ -34,8 +34,7 @@
 
 #include <string>
 #include <vector>
-
-using FPGATrackSimBinUtil::StoredHit;
+#include <bit>
 
 //-------------------------------------------------------------------------------------------------------
 // BinnedHits
@@ -71,12 +70,12 @@ public:
   struct BinEntry {
     BinEntry() {}
     void reset();
-    void addHit(const StoredHit& hit);
-    unsigned int lyrCnt() const { return __builtin_popcount(lyrhit); };
+    void addHit(const FPGATrackSimBinUtil::StoredHit& hit);
+    unsigned int lyrCnt() const { return std::popcount(lyrhit); };
     unsigned int hitsInLyr(unsigned lyr) const; 
     unsigned int hitCnt = 0;
     layer_bitmask_t lyrhit = 0;
-    std::vector<StoredHit> hits{};
+    std::vector<FPGATrackSimBinUtil::StoredHit> hits{};
   };
 
   // access to binned hits..

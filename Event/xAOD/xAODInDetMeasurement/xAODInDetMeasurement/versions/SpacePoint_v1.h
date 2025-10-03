@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODINDETMEASUREMENT_VERSION_SPACEPOINT_V1_H
@@ -79,7 +79,7 @@ namespace xAOD {
     /// @{
 
     /// Sets the IdentifierHash of the measurement (corresponds to the detector element IdentifierHash)
-    void setElementIdList(const std::vector<DetectorIDHashType>& idHash);
+    void setElementIdList(std::vector<DetectorIDHashType>&& idHash);
 
     /// Set the radius
     void setRadius(float);
@@ -89,7 +89,7 @@ namespace xAOD {
     void setVarianceZ(float);
 
     /// Sets the index of the measurements
-    void setMeasurements(const std::vector< const xAOD::UncalibratedMeasurement* >&);
+    void setMeasurements(std::vector< const xAOD::UncalibratedMeasurement* > && value );
 
     void setTopHalfStripLength(float);
     void setBottomHalfStripLength(float);
@@ -99,12 +99,12 @@ namespace xAOD {
     void setSpacePoint(DetectorIDHashType idHash,
 		       const Eigen::Matrix<float,3,1>& globPos,
 		       float cov_r, float cov_z,
-		       const std::vector< const xAOD::UncalibratedMeasurement* >& measurementIndexes);
+		       std::vector< const xAOD::UncalibratedMeasurement* >&& measurementIndexes);
 
-    void setSpacePoint(const std::vector<DetectorIDHashType>& idHashes,
+    void setSpacePoint(std::vector<DetectorIDHashType>&& idHashes,
 		       const Eigen::Matrix<float,3,1>& globPos,
 		       float cov_r, float cov_z,
-		       const std::vector< const xAOD::UncalibratedMeasurement* >& measurementIndexes,
+		       std::vector< const xAOD::UncalibratedMeasurement* >&& measurementIndexes,
 		       float topHalfStripLength,
 		       float bottomHalfStripLength,
 		       const Eigen::Matrix<float,3,1>& topStripDirection,

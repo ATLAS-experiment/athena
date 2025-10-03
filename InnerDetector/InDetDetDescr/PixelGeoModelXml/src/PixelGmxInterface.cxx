@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "PixelGeoModelXml/PixelGmxInterface.h"
 
 #include <InDetGeoModelUtils/WaferTree.h>
@@ -11,6 +10,8 @@
 #include <PixelReadoutGeometry/PixelDetectorManager.h>
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include <ReadoutGeometryBase/PixelDiodeMatrix.h>
+#include "ReadoutGeometryBase/PixelDiodeTree.h"
+#include "ReadoutGeometryBase/PixelDiodeTreeBuilder.h"
 #include <ReadoutGeometryBase/SiCommonItems.h>
 
 #include <RDBAccessSvc/IRDBAccessSvc.h>
@@ -22,6 +23,21 @@
 namespace
 {
 constexpr int PixelHitIndex{0};
+
+InDetDD::PixelReadoutTechnology getPixelReadoutTechnology(InDetDD::DetectorType detectorType, int rowsPerCircuit, int columnsPerCircuit) {
+   if (detectorType == InDetDD::DetectorType::PixelBarrel
+       || detectorType == InDetDD::DetectorType::PixelEndcap
+       || detectorType == InDetDD::DetectorType::PixelInclined
+       || detectorType == InDetDD::DetectorType::PLR) {
+      // if ITk
+      return InDetDD::PixelReadoutTechnology::RD53;
+   }
+   else {
+      // if not ITk
+      if (rowsPerCircuit*columnsPerCircuit>26000) { return InDetDD::PixelReadoutTechnology::FEI4; }
+      else                                        { return InDetDD::PixelReadoutTechnology::FEI3; }
+   }
+}
 }
 
 
@@ -92,6 +108,20 @@ void PixelGmxInterface::addSensorType(const std::string& clas,
 
   if (clas == "SingleChip_RD53" || clas == "QuadChip_RD53") {
     makePixelModule(typeName, parameters);
+    // @TODO remove once all endcap modules are oriented consistently i.e. there is
+    // one relation between local "hardware" coordinates and local offline coordinates.
+    // Currently all endcap modules have a surface normal (defined by the transform),
+    // which points outwards. This is the case for endcap modules for which the sensor
+    // facing side points towards the IP (even phi index), and those for which the sensor
+    // facing side points outwards (odd phi index). By introducing separate module design
+    // objects for endcap modules with even or odd phi index, the module design can
+    // provide extra information to indicate the translation scheme between hardware
+    // coordinates and offline coordinates.
+    if (   typeName.find("Quad")!= std::string::npos
+        && (   typeName.find("endcap")!= std::string::npos
+            || typeName.find("inclined")!= std::string::npos)) {
+       makePixelModule(typeName+"_even",parameters);
+    }
   } else {
     ATH_MSG_ERROR("addSensorType: unrecognised module class: " << clas);
     ATH_MSG_ERROR("No module design created");
@@ -115,8 +145,8 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
   int nPhiLongPerSide{};
   int nEtaEndPerSide{};
   int nPhiEndPerSide{};
-  int rowsPerChip{};
-  int columnsPerChip{};
+  int rowsPerCircuit{};
+  int columnsPerCircuit{};
 
   // unused
   InDetDD::CarrierType carrier{InDetDD::electrons};
@@ -132,8 +162,8 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
   getParameter(typeName, parameters, "circuitsPerPhi", circuitsPerPhi);
   getParameter(typeName, parameters, "thickness", thickness);
   getParameter(typeName, parameters, "is3D", is3D);
-  getParameter(typeName, parameters, "rows", rowsPerChip);
-  getParameter(typeName, parameters, "columns", columnsPerChip);
+  getParameter(typeName, parameters, "rows", rowsPerCircuit);
+  getParameter(typeName, parameters, "columns", columnsPerCircuit);
   getParameter(typeName, parameters, "pitchEta", pitchEta);
   getParameter(typeName, parameters, "pitchPhi", pitchPhi);
   getParameter(typeName, parameters, "pitchEtaLong", pitchEtaLong);
@@ -152,26 +182,15 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
   //
   // Make Module Design and add to DetectorManager
   //
-  std::shared_ptr<const PixelDiodeMatrix> fullMatrix = buildMatrix(pitchPhi, pitchEta,
-                                                                   pitchPhiLong, pitchPhiEnd,
-                                                                   pitchEtaLong, pitchEtaEnd,
-                                                                   nPhiLongPerSide, nPhiEndPerSide,
-                                                                   nEtaLongPerSide, nEtaEndPerSide,
-                                                                   circuitsPerPhi, circuitsPerEta,
-                                                                   columnsPerChip, rowsPerChip);
-
-  ATH_MSG_DEBUG("fullMatrix = buildMatrix(" << pitchPhi << ", " << pitchEta << ", "
-                                            << pitchPhiLong << ", " << pitchPhiEnd << ", "
-                                            << pitchEtaLong << ", " << pitchEtaEnd << ", "
-                                            << nPhiLongPerSide << ", " << nPhiEndPerSide << ", "
-                                            << nEtaLongPerSide << ", " << nEtaEndPerSide << ", "
-                                            << circuitsPerPhi << ", " << circuitsPerEta << ", "
-                                            << columnsPerChip << ", " << rowsPerChip << ")");
-  ATH_MSG_DEBUG("readout geo - design " << thickness << " "
-                                        << circuitsPerPhi << " " << circuitsPerEta << " "
-                                        << columnsPerChip << " " << rowsPerChip << " "
-                                        << columnsPerChip << " " << rowsPerChip << " "
-                                        << carrier << " " << readoutSide);
+  ATH_MSG_DEBUG("readout geo - design thickness " << thickness << " "
+                << " circuits " << circuitsPerPhi << " " << circuitsPerEta << " "
+                << " rows/columns " << rowsPerCircuit << " " << columnsPerCircuit << " "
+                << " pitch regular/long/end " << pitchPhi << " " << pitchEta
+                << " " << pitchPhiLong << " " << pitchEtaLong
+                << " " << pitchPhiEnd << " "  << pitchEtaEnd
+                << " n-long " << nPhiLongPerSide << " " << nEtaLongPerSide
+                << " n-end "  << nPhiEndPerSide  << " " << nEtaEndPerSide
+                << carrier << " " << readoutSide);
 
   //For optionally setting PixelBarrel,PixelEndcap,PixelInclined
   //(so far) primarily useful for the latter to avoid orientation warnings
@@ -183,16 +202,144 @@ void PixelGmxInterface::makePixelModule(const std::string &typeName,
     else if (detectorTypeEnum == 3) detectorType = InDetDD::PixelInclined;
   }
 
+  InDetDD::PixelReadoutTechnology readoutTechnology = getPixelReadoutTechnology(detectorType, rowsPerCircuit, columnsPerCircuit );
+
+  if (   circuitsPerPhi*rowsPerCircuit<0    || circuitsPerPhi*rowsPerCircuit    >= std::numeric_limits<PixelDiodeTree::CellIndexType>::max()
+      || circuitsPerEta*columnsPerCircuit<0 || circuitsPerEta*columnsPerCircuit >= std::numeric_limits<PixelDiodeTree::CellIndexType>::max()) {
+     std::stringstream amsg;
+     amsg << "Index overflows index type of PixelDiodeTree. Parameters "
+          << "( " <<  circuitsPerPhi << " * " << rowsPerCircuit << " ), ( "
+          << "( " <<  circuitsPerEta << " * " << columnsPerCircuit << " ) !<"
+          << std::numeric_limits<PixelDiodeTree::CellIndexType>::max() << " each.";
+     throw std::runtime_error(amsg.str());
+  }
+
+  // @TODO remove once all endcap modules are oriented consistently i.e. there is
+  // one relation between local "hardware" coordinates and local offline coordinates
+  bool flipFE=(typeName.find("_even") !=std::string::npos);
+
+  // helper function to associate correct  diode type and front-end number to sub-matrices and diodes
+  // in the diode tree as attributes.
+  auto computeAttribute = [readoutTechnology,
+                           pitchPhi,
+                           pitchEta,
+                           circuitsPerPhi,
+                           circuitsPerEta,
+                           rowsPerCircuit,
+                           columnsPerCircuit,
+                           flipFE
+                           ](const std::array<PixelDiodeTree::IndexType,2> &split_idx,
+                             const PixelDiodeTree::Vector2D &diode_width,
+                             [[maybe_unused]] const std::array<bool,4> &ganged,
+                             [[maybe_unused]] unsigned int split_i,
+                             PixelDiodeTree::AttributeType current_matrix_attribute,
+                             PixelDiodeTree::AttributeType current_diode_attribute)
+     -> std::tuple<PixelDiodeTree::AttributeType,PixelDiodeTree::AttributeType>
+     {
+        // split_idx the absolute index at which this sub-matrix is split into 4 sub-sub-matrices
+        // diode_width the diode pitch in both directions
+        // ganged ganged[0],ganged[1] whether the pixel diode is ganged in the corresponding direction
+        //        ganged[2],ganged[3] whether the diode is inside (true) or outside the dead zone
+        //        where ganged[2] denotes the flag in local-x and ganged[3] in local-y direction
+        //
+        // split_i   defines which of the 4 areas the diode belongs to :  2 | 3        ^
+        //                                                                -----        |  local-y (chip-columns)
+        //                                                                0 | 1        |
+        //                                                                ---> local-x (chip-rows)
+        //
+        // current_matrix_attribute the default attribute for the unsplit sub-matrix assigned by the builder
+        // current_diode_attribute the default attribute assigned to the current diode associated to the split
+        //                         area specified by split_i
+        // return new matrix attribute, new diode attribute
+
+        // if the pixel is significantly wider in one direction consider the pixel to be long
+        // or if wider in both directions large
+        assert(split_idx[0]>=0 && split_idx[1]>=0);
+        std::array<int,2> chip_idx{split_idx[0]/rowsPerCircuit, split_idx[1]/columnsPerCircuit};
+
+        unsigned int n_large_dimensions = (  (std::abs(diode_width[0]-pitchPhi)>pitchPhi*.25)
+                                            +(std::abs(diode_width[1]-pitchEta)>pitchEta*.25));
+        switch (n_large_dimensions) {
+        case 1:
+           current_diode_attribute=InDetDD::detail::makeAttributeType(InDetDD::PixelDiodeType::LONG);
+           break;
+        case 2:
+           current_diode_attribute=InDetDD::detail::makeAttributeType(InDetDD::PixelDiodeType::LARGE);
+           break;
+        default:
+           current_diode_attribute=InDetDD::detail::makeAttributeType(InDetDD::PixelDiodeType::NORMAL);
+        }
+
+        if (readoutTechnology==InDetDD::PixelReadoutTechnology::RD53) {
+           // The matrix attribute is used to store the front-end number, this works because
+           // the matrices are first split by circuit and then by inner edge.
+
+           // @TODO Is the numbering-scheme something that should be specified by the DB ?
+           //
+           //  The front-ends are numbered like ^   0 | 1       2 | 3
+           //                                   |   -----      ------
+           //                           local-x |   2 | 3       0 \ 1
+           //                           row/phi |   (even)      (odd)
+           //                                   + ---> local-y (chip-column/eta)
+           //
+           // (the sensor facing side of even modules points towards the IP)
+
+           // Numbering scheme taken from the ITkPixelReadoutManager:
+           if (flipFE) {
+              current_matrix_attribute = InDetDD::detail::makeAttributeType(chip_idx[1] + (circuitsPerPhi-chip_idx[0]-1)*2);
+           }
+           else {
+              current_matrix_attribute = InDetDD::detail::makeAttributeType(chip_idx[1] + chip_idx[0]*2);
+           }
+
+        }
+        else {
+           // @TODO compute front-end number correctly
+           // just do something simple:
+           // if there is a single row just  the chip-column (local-y, eta)
+           // if there are two rows: top row chip-column starting from the opposite end; bottom row: chip column + chips per top row
+           //         ^    0   |..  |n/2-1
+           // local-x |    ---------------         [swapped axis direction to fit into fewer lines]
+           // /eta    |    n-1 |... |n/2
+           //         --> local-y (chip-rows, phi)
+           current_matrix_attribute = InDetDD::detail::makeAttributeType( chip_idx[0] > 0
+                                                                          ? circuitsPerEta - chip_idx[1] - 1
+                                                                          : (circuitsPerPhi-1) * circuitsPerEta + chip_idx[1]);
+        }
+        return std::make_tuple(current_matrix_attribute, current_diode_attribute);
+     };
+
+  PixelDiodeTree diode_tree
+        = createPixelDiodeTree(std::array<unsigned int,2>{static_cast<unsigned int>(circuitsPerPhi),static_cast<unsigned int>(circuitsPerEta)},
+                               std::array<unsigned int,2>{static_cast<unsigned int>(rowsPerCircuit),static_cast<unsigned int>(columnsPerCircuit)},
+                               PixelDiodeTree::Vector2D{pitchPhi,pitchEta},  // regular ptich
+                               std::array<std::array<unsigned int,2>, 2>{ std::array<unsigned int,2>{static_cast<unsigned int>(nPhiEndPerSide),
+                                                                                                     static_cast<unsigned int>(nEtaEndPerSide)},   // outer edge in pixels
+                                                                          std::array<unsigned int,2>{static_cast<unsigned int>(nPhiLongPerSide),
+                                                                                                     static_cast<unsigned int>(nEtaLongPerSide)}}, // inner edge in pixels
+                               std::array<PixelDiodeTree::Vector2D,2>{PixelDiodeTree::Vector2D{pitchPhiEnd,  pitchEtaEnd},      // outer edge pitch (correct?)
+                                                                      PixelDiodeTree::Vector2D{pitchPhiLong,pitchEtaLong}       // inner edge pitch
+                               },
+                               std::array<std::array<unsigned int,2>, 2>{ std::array<unsigned int,2>{0u,0u},   // @TODO add dead zone for run1-3 pixels?
+                                                                          std::array<unsigned int,2>{0u,0u}    // @TODO add dead zone for run1-3 pixels?
+                               },
+                               computeAttribute,
+                               nullptr);
+
   auto design = std::make_unique<PixelModuleDesign>(thickness,
                                                     phiSymmetric, etaSymmetric, depthSymmetric,
                                                     circuitsPerPhi, circuitsPerEta,
-                                                    columnsPerChip, rowsPerChip,
-                                                    columnsPerChip, rowsPerChip,
-                                                    fullMatrix, carrier,
-                                                    readoutSide, is3D, detectorType);
-  
+                                                    columnsPerCircuit, rowsPerCircuit,
+                                                    columnsPerCircuit, rowsPerCircuit,
+                                                    std::move(diode_tree), carrier,
+                                                    readoutSide, is3D, detectorType, readoutTechnology);
 
-  ATH_MSG_DEBUG("readout geo - design : " << design->width() << " " << design->length() << " " << design->thickness() << " " <<design->rows() << " " << design->columns());
+  ATH_MSG_DEBUG("readout geo - design : " << typeName
+                << " " << design->width() << "x" << design->length() << "x" << design->thickness()
+                << " " << design->rows() << "x" << design->columns()
+                << ", " << circuitsPerPhi << "x" << circuitsPerEta << " "
+                << rowsPerCircuit << " " << columnsPerCircuit << ":\n"
+                << diode_tree.debugStringRepr());
 
   [[maybe_unused]] auto observePtr = m_detectorManager->addDesign(std::move(design));
 
@@ -235,10 +382,20 @@ void PixelGmxInterface::addSensor(const std::string& typeName,
     return;
   }
 
+  // @TODO remove once all endcap modules are oriented consistently i.e. there is
+  // one relation between local "hardware" coordinates and local offline coordinates
+  // Currently all endcap modules have a surface normal (defined by the transform),
+  // which points outwards. This is the case for endcap modules for which the sensor
+  // facing side points towards the IP (even phi index), and those for which the sensor
+  // facing side points outwards (odd phi index). By introducing separate module design
+  // objects for endcap modules with even or odd phi index, the module design can
+  // provide extra information to indicate the translation scheme between hardware
+  // coordinates and offline coordinates.
+  bool flipFE=index["barrel_endcap"]!=0 && index["phi_module"]%2==0 && typeName.find("Quad") != std::string::npos;
   //
   // Create the detector element and add to the DetectorManager
   //
-  auto it = m_geometryMap.find(typeName);
+  auto it = m_geometryMap.find( (flipFE ? typeName+"_even" : typeName));
   if(it == m_geometryMap.end()) {
     ATH_MSG_ERROR("addSensor: Error: Readout sensor type " << typeName << " not found.");
     throw std::runtime_error("readout sensor type " + typeName + " not found.");
@@ -269,182 +426,6 @@ void PixelGmxInterface::addSensor(const std::string& typeName,
   return;
 }
 
-
-std::shared_ptr<const PixelDiodeMatrix> PixelGmxInterface::buildMatrix(double phiPitch, double etaPitch,
-                                                                       double phiPitchLong, double phiPitchEnd,
-                                                                       double etaPitchLong, double etaPitchEnd,
-                                                                       int nPhiLong, int nPhiEnd,
-                                                                       int nEtaLong, int nEtaEnd,
-                                                                       int circuitsPhi, int circuitsEta,
-                                                                       int diodeColPerCirc, int diodeRowPerCirc) const
-{
-  // checking for unlogical values
-  if (circuitsPhi < 1 or circuitsEta < 1) {
-    ATH_MSG_WARNING("Number of circuits is 0");
-    return nullptr;
-  }
-  if (diodeRowPerCirc < 1 or diodeColPerCirc < 1) {
-    ATH_MSG_WARNING("Number of diodes per circuit is 0");
-    return nullptr;
-  }
-  if (nPhiLong < 0 or nPhiEnd < 0 or nEtaLong < 0 or nEtaEnd < 0) {
-    ATH_MSG_WARNING("Number of long/end cells per circuit is below 0");
-    return nullptr;
-  }
-
-  // checking and correcting inconsistent values
-  if (nPhiLong == 0 and not (phiPitchLong == 0.0 or phiPitchLong == phiPitch)) {
-    ATH_MSG_DEBUG("nPhiLong is set to 0, but phiPitchLong is neither 0 nor phiPitch! Setting nPhiLong to 1");
-    nPhiLong = 1;
-  }
-  if (nPhiEnd == 0 and not (phiPitchEnd == 0.0 or phiPitchEnd == phiPitch)) {
-    ATH_MSG_DEBUG("nPhiEnd is set to 0, but phiPitchEnd is neither 0 nor phiPitch! Setting nPhiEnd to 1");
-    nPhiEnd = 1;
-  }
-  if (nEtaLong == 0 and not (etaPitchLong == 0.0 or etaPitchLong == etaPitch)) {
-    ATH_MSG_DEBUG("nEtaLong is set to 0, but etaPitchLong is neither 0 nor etaPitch! Setting nEtaLong to 1");
-    nEtaLong = 1;
-  }
-  if (nEtaEnd == 0 and not (etaPitchEnd == 0.0 or etaPitchEnd == etaPitch)) {
-    ATH_MSG_DEBUG("nEtaEnd is set to 0, but etaPitchEnd is neither 0 nor etaPitch! Setting nEtaEnd to 1");
-    nEtaEnd = 1;
-  }
-
-  /*
-    The naming of internal PixelDiodeMatrix cell objects here follows the
-    convention of cell_XX, where X is N for normal, L for long or E for end.
-    The first index denotes the phi direction, the second eta.
-  */
-
-  // creation of individual pixels
-  std::shared_ptr<const PixelDiodeMatrix> cell_NN{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_NL{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_NE{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_LN{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_LL{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_LE{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_EN{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_EL{};
-  std::shared_ptr<const PixelDiodeMatrix> cell_EE{};
-
-  // only filling long/end pixels if needed
-  cell_NN = PixelDiodeMatrix::construct(phiPitch, etaPitch);
-  if (nEtaLong > 0) {cell_NL = PixelDiodeMatrix::construct(phiPitch, etaPitchLong);}
-  if (nEtaEnd > 0)  {cell_NE = PixelDiodeMatrix::construct(phiPitch, etaPitchEnd);}
-
-  if (nPhiLong > 0) {
-    cell_LN = PixelDiodeMatrix::construct(phiPitchLong, etaPitch);
-    if (nEtaLong > 0) {cell_LL = PixelDiodeMatrix::construct(phiPitchLong, etaPitchLong);}
-    if (nEtaEnd > 0)  {cell_LE = PixelDiodeMatrix::construct(phiPitchLong, etaPitchEnd);}
-  }
-  if (nPhiEnd > 0) {
-    cell_EN = PixelDiodeMatrix::construct(phiPitchEnd, etaPitch);
-    if (nEtaLong > 0) {cell_EL = PixelDiodeMatrix::construct(phiPitchEnd, etaPitchLong);}
-    if (nEtaEnd > 0)  {cell_EE = PixelDiodeMatrix::construct(phiPitchEnd, etaPitchEnd);}
-  }
-
-  // creation of long/end cell blocks (in case there are more then one long/end per cicuit)
-  if (nPhiLong > 1) {
-    if (cell_LN) {cell_LN = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, nullptr, cell_LN, nPhiLong, nullptr);}
-    if (cell_LL) {cell_LL = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, nullptr, cell_LL, nPhiLong, nullptr);}
-    if (cell_LE) {cell_LE = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, nullptr, cell_LE, nPhiLong, nullptr);}
-  }
-  if (nPhiEnd > 1) {
-    if (cell_EN) {cell_EN = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, nullptr, cell_EN, nPhiEnd, nullptr);}
-    if (cell_EL) {cell_EL = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, nullptr, cell_EL, nPhiEnd, nullptr);}
-    if (cell_EE) {cell_EE = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, nullptr, cell_EE, nPhiEnd, nullptr);}
-  }
-  if (nEtaLong > 1) {
-    if (cell_NL) {cell_NL = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, nullptr, cell_NL, nEtaLong, nullptr);}
-    if (cell_LL) {cell_LL = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, nullptr, cell_LL, nEtaLong, nullptr);}
-    if (cell_EL) {cell_EL = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, nullptr, cell_EL, nEtaLong, nullptr);}
-  }
-  if (nEtaEnd > 1) {
-    if (cell_NE) {cell_NE = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, nullptr, cell_NE, nEtaEnd, nullptr);}
-    if (cell_LE) {cell_LE = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, nullptr, cell_LE, nEtaEnd, nullptr);}
-    if (cell_EE) {cell_EE = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, nullptr, cell_EE, nEtaEnd, nullptr);}
-  }
-
-  /*
-    The naming of internal PixelDiodeMatrix cell objects here follows the
-    convention of row_XY, where X is for phi N, L or E as before.
-    Y is for eta:
-    - L for a lower chip
-    - M for a middle chip
-    - U for an upper chip
-    The first index denotes the phi direction, the second eta.
-    If just one index is given, it is phi and eta is a full row.
-  */
-
-  // putting together the single chip rows (eta direction)
-  std::shared_ptr<const PixelDiodeMatrix> fullChipRow_N{};
-  std::shared_ptr<const PixelDiodeMatrix> fullChipRow_L{};
-  std::shared_ptr<const PixelDiodeMatrix> fullChipRow_E{};
-  if (circuitsEta == 1) {
-    // special case of just one circuit in eta direction (no long cells, just end)
-    fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_NE, std::move(cell_NN) , diodeColPerCirc - 2*nEtaEnd, cell_NE);
-    if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_LE, std::move(cell_LN), diodeColPerCirc - 2*nEtaEnd, cell_LE);}
-    if (cell_EN) {fullChipRow_E = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_EE, std::move(cell_EN), diodeColPerCirc - 2*nEtaEnd, cell_EE);}
-  } else {
-    // rows of individual chips
-    auto singleChipRow_NL = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_NE, cell_NN, diodeColPerCirc -nEtaEnd  -nEtaLong, cell_NL);
-    auto singleChipRow_NM = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_NL, cell_NN, diodeColPerCirc -nEtaLong -nEtaLong, cell_NL);
-    auto singleChipRow_NU = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(cell_NL), std::move(cell_NN), diodeColPerCirc -nEtaLong -nEtaEnd,  std::move(cell_NE));
-
-    std::shared_ptr<const PixelDiodeMatrix> singleChipRow_LL{};
-    std::shared_ptr<const PixelDiodeMatrix> singleChipRow_LM{};
-    std::shared_ptr<const PixelDiodeMatrix> singleChipRow_LU{};
-    if (cell_LN) {
-      singleChipRow_LL = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_LE, cell_LN, diodeColPerCirc -nEtaEnd  -nEtaLong, cell_LL);
-      singleChipRow_LM = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_LL, cell_LN, diodeColPerCirc -nEtaLong -nEtaLong, cell_LL);
-      singleChipRow_LU = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(cell_LL), cell_LN, diodeColPerCirc -nEtaLong -nEtaEnd,  std::move(cell_LE));
-    }
-
-    std::shared_ptr<const PixelDiodeMatrix> singleChipRow_EL{};
-    std::shared_ptr<const PixelDiodeMatrix> singleChipRow_EM{};
-    std::shared_ptr<const PixelDiodeMatrix> singleChipRow_EU{};
-    if (cell_EN) {
-      singleChipRow_EL = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_EE, cell_EN, diodeColPerCirc -nEtaEnd  -nEtaLong, cell_EL);
-      singleChipRow_EM = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_EL, cell_EN, diodeColPerCirc -nEtaLong -nEtaLong, cell_EL);
-      singleChipRow_EU = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(cell_EL), cell_EN, diodeColPerCirc -nEtaLong -nEtaEnd,  std::move(cell_EE));
-    }
-
-    // putting together the single chip rows
-    if (circuitsEta == 2) {
-      // special case of no middle chips in eta (just lower and upper)
-      fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_NL), std::move(singleChipRow_NU), 1, nullptr);
-      if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_LL), std::move(singleChipRow_LU), 1, nullptr);}
-      if (cell_EN) {fullChipRow_E = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_EL), std::move(singleChipRow_EU), 1, nullptr);}
-    } else {
-      fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_NL), std::move(singleChipRow_NM), circuitsEta-2, std::move(singleChipRow_NU) );
-      if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_LL) , std::move(singleChipRow_LM), circuitsEta-2, std::move(singleChipRow_LU));}
-      if (cell_EN) {fullChipRow_E = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_EL), std::move(singleChipRow_EM), circuitsEta-2, std::move(singleChipRow_EU));}
-    }
-  }
-
-  // combining the full eta rows to the full Matrix
-  std::shared_ptr<const PixelDiodeMatrix> fullMatrix{};
-  if (circuitsPhi == 1) {
-    // special case of just one circuit in eta direction (no long cells, just end)
-    fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, fullChipRow_E, std::move(fullChipRow_N), diodeRowPerCirc - 2*nPhiEnd, fullChipRow_E);
-  } else {
-    // columns of individual chips
-    auto singleChipCol_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, fullChipRow_E, fullChipRow_N, diodeRowPerCirc -nPhiEnd  -nPhiLong, fullChipRow_L);
-    auto singleChipCol_M = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, fullChipRow_L, fullChipRow_N, diodeRowPerCirc -nPhiLong -nPhiLong, fullChipRow_L);
-    auto singleChipCol_U = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, std::move(fullChipRow_L), std::move(fullChipRow_N) , diodeRowPerCirc -nPhiLong -nPhiEnd,  std::move(fullChipRow_E));
-
-    // putting together the single chip rows
-    if (circuitsPhi == 2) {
-      // special case of no middle chips in phi (just lower and upper)
-      fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, std::move(singleChipCol_L), std::move(singleChipCol_U), 1, nullptr);
-    } else {
-      fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,  std::move(singleChipCol_L), std::move(singleChipCol_M), circuitsPhi-2, std::move(singleChipCol_U));
-    }
-  }
-
-  return fullMatrix;
-}
-
 void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc,GeoModelIO::ReadGeoModel* sqlreader){
 
     const std::array<std::string,2> sensorTypes{"QuadChip_RD53","SingleChip_RD53"};
@@ -461,6 +442,13 @@ void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         }
            std::string rd35_Name = (*rd53)[iR]->getString("SensorType");
            makePixelModule(rd35_Name,rd53_Map);
+           // @TODO remove once all endcap modules are oriented consistently i.e. there is
+           // one relation between local "hardware" coordinates and local offline coordinates
+           if (   rd35_Name.find("Quad")!= std::string::npos
+               && (   rd35_Name.find("endcap")!= std::string::npos
+                   || rd35_Name.find("inclined")!= std::string::npos)) {
+              makePixelModule(rd35_Name+"_even",rd53_Map);
+           }
           } 
        }
     else ATH_MSG_WARNING("Could not retrieve "<<sType<<" table");

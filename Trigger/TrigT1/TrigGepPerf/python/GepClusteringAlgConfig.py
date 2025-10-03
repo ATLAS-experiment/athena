@@ -4,9 +4,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def GepClusteringAlgCfg(flags, name='GepClusteringAlg',
-                        TopoClAlg='CaloWFS',
-                        gepCellMapKey='GepCells',
-                        outputCaloClustersKey='GEPWFSClusters',
+                        TopoClAlg='GEPBasic',
+                        gepCellMapKey='GEPCells',
+                        outputCaloClustersKey='GEPBasicClusters',
                         OutputLevel=None):
 
     cfg = ComponentAccumulator()

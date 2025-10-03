@@ -28,7 +28,9 @@ const IZdcGeometryDB* ZdcGeoDBGeometryDB::getInstance()
 }
 
 //constructor
-ZdcFileGeometryDB::ZdcFileGeometryDB() :  asg::AsgMessaging("ZdcFileGeometryDB"),m_fileStr("ZDCgeom_Run3.json")
+ZdcFileGeometryDB::ZdcFileGeometryDB() :
+  asg::AsgMessaging("ZdcFileGeometryDB"),
+  m_fileStr("ZdcConditions/ZDCgeom_Run3.json")
 {
 
   msg().setLevel(MSG::INFO);
@@ -53,7 +55,7 @@ bool ZdcFileGeometryDB::loadJSONFile()
       ATH_MSG_WARNING("No JSON filename defined!");
       return ret;
     }
-  std::string filePath = PathResolver::find_file(m_fileStr,"DATAPATH", PathResolver::RecursiveSearch);
+  std::string filePath = PathResolverFindDataFile(m_fileStr);
   if (!filePath.empty())
     {
       ATH_MSG_DEBUG( "ZdcGeometryDB::found ZDC JSON at " << filePath );

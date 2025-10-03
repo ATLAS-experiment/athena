@@ -113,8 +113,8 @@ namespace MuonCalibR4{
             continue;
         }
         MdtCalibDataContainer::TubeContainerPtr dummyT0cont = std::make_unique<MdtTubeCalibContainer>(m_idHelperSvc.get(), detId);
-        MdtTubeCalibContainer::SingleTubeCalibPtr dummyT0Calib = std::make_unique<MdtTubeCalibContainer::SingleTubeCalib>();
-        dummyT0Calib->t0 = m_missingT0;
+        MdtTubeCalibContainer::SingleTubeCalib dummyT0Calib{};
+        dummyT0Calib.t0 = m_missingT0;
         for (const Identifier& tubeId : tubeIds(detId)) {
             if (!dummyT0cont->setCalib(dummyT0Calib, tubeId, msgStream())) {
                 return StatusCode::FAILURE;

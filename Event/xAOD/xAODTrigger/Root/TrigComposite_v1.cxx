@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -180,13 +180,11 @@ namespace xAOD {
       // Check we don't have one (or more) entries with this raw name (raw = might be mangled).
       if (this->hasObjectLink(name)) continue;
       // Check if the link is for a single object or collection of objects by looking for the mangled suffix
-      const bool isCollection = (name.size() > s_collectionSuffix.size() && 
-                                 std::equal(s_collectionSuffix.rbegin(), s_collectionSuffix.rend(), name.rbegin()));
-      if (isCollection) {
+      if (name.ends_with(s_collectionSuffix)) {
         // The copyLinkCollectionFrom call needs the un-mangled name as it is a public fn. It will re-mangle.
         const std::string unmangledName = name.substr(0, name.size() - s_collectionSuffix.size());
         copyLinkCollectionFrom(other, unmangledName);
-      } else { // !isCollection
+      } else { // not a collection
         copyLinkFrom(other, name);
       }
       didCopy = true;

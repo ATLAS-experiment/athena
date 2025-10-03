@@ -118,7 +118,6 @@ private:
   Gaudi::Property<bool> m_doT0Shift{this, "DoT0Shift", false};
   Gaudi::Property<bool> m_doTMaxShift{this, "DoTMaxShift", false};
 
-  Gaudi::Property<double> m_unphysicalHitRadiusUpperBound{this, "UpperBoundHitRadius", 20.};
   Gaudi::Property<double> m_unphysicalHitRadiusLowerBound{this, "LowerBoundHitRadius" , 0.};
   Gaudi::Property<double> m_resTwin{this, "ResolutionTwinTube" , 1.05, "Twin tube resolution"};
 

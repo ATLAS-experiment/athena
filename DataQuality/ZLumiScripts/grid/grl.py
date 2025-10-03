@@ -2,7 +2,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 # Postinclude snippet for Reco_tf to bring in a GRL
 
-from __future__ import print_function
 
 from GoodRunsLists.GoodRunsListsConf import GoodRunsListSelectorTool
 from GoodRunsListsUser.GoodRunsListsUserConf import GRLTriggerSelectorAlg

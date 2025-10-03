@@ -23,6 +23,8 @@
 #include "RelationalAccess/ITransaction.h"
 #include "RelationalAccess/SchemaException.h"
 
+#include "TrigConfBase/MsgStream.h"
+
 /** helper class to store a query */
 namespace TrigConf {
    class QueryDefinition {
@@ -78,6 +80,28 @@ namespace TrigConf {
    }
 
    void blobToPtree( const coral::Blob & blob, boost::property_tree::ptree & pt );
+
+   void stringToPtree( const std::string & json_string, boost::property_tree::ptree & pt );
+
+   /** @brief write coral data blob to file
+    *
+    * This is used by loader classes to write the DB content to file without going through a ptree
+    *
+    * @param data [in] coral blob to be written
+    * @param outFileName [in] name of file to write out the loaded data (if an empty string, no file will be written)
+    * @throws TrigConf::JsonFileWritingException if writing was successfull
+    */
+   void writeRawFile(const coral::Blob & data, const std::string & outFileName);
+
+   /** @brief write string into file
+    *
+    * This is used by loader classes to write the DB content from CREST to file without going through a ptree
+    *
+    * @param data [in] crest data string to be written
+    * @param outFileName [in] name of file to write out the loaded data (if an empty string, no file will be written)
+    * @throws TrigConf::JsonFileWritingException if writing was successfull
+    */
+   void writeRawFile(const std::string & data, const std::string & outFileName);
 
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
@@ -49,7 +49,7 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCUDA::initialize()
 
     // Create the session.
     ATH_MSG_INFO("Asking model from: " << m_modelFileName.value());
-    std::string modelFilePath = PathResolver::find_file(m_modelFileName.value(), "CALIBPATH", PathResolver::RecursiveSearch);
+    std::string modelFilePath = PathResolver::find_calib_file(m_modelFileName.value());
     ATH_MSG_INFO("Loading model from: " << modelFilePath);
     m_session = std::make_unique<Ort::Session>(m_onnxRuntimeSvc->env(),  modelFilePath.c_str(), sessionOptions);
 

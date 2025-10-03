@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ElectronEfficiencyCorrection )
@@ -24,11 +24,9 @@ atlas_add_library( ElectronEfficiencyCorrectionLib
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} xAODEventInfo AsgMessagingLib
    xAODMetaData PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( ElectronEfficiencyCorrection
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES ElectronEfficiencyCorrectionLib )
-endif()
+atlas_add_component( ElectronEfficiencyCorrection
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES ElectronEfficiencyCorrectionLib )
 
 atlas_add_dictionary( ElectronEfficiencyCorrectionDict
    ElectronEfficiencyCorrection/ElectronEfficiencyCorrectionDict.h
@@ -48,7 +46,12 @@ atlas_add_test(ut_SimpleInitTest
    LOG_IGNORE_PATTERN "Package.AsgTool...  DEBUG|MessageSvc not found")
 
 # AnalysisBase-only utilities:
-if( XAOD_STANDALONE )
+if ( NOT XAOD_STANDALONE )
+   atlas_add_test(ut_testTtool
+	          SCRIPT python -m  ElectronEfficiencyCorrection.TElectronTestAlgConfig --filesInput $ASG_TEST_FILE_MC --evtMax=5
+              POST_EXEC_SCRIPT nopost.sh 
+              PROPERTIES TIMEOUT 300)
+elseif ( NOT COLUMNAR_ANALYSIS )
    atlas_add_executable( EgEfficiencyCorr_testEgEfficiencyCorr
       util/testEgEfficiencyCorr.cxx util/SFHelpers.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -86,17 +89,12 @@ if( XAOD_STANDALONE )
    atlas_add_test(ut_TestFunctionality
 	          SCRIPT test/testEgEfficiencyDetailed.py
 	      	  PROPERTIES TIMEOUT 300)
-else()  
-   atlas_add_test(ut_testTtool
-	          SCRIPT python -m  ElectronEfficiencyCorrection.TElectronTestAlgConfig --filesInput $ASG_TEST_FILE_MC --evtMax=5
-              POST_EXEC_SCRIPT nopost.sh 
-              PROPERTIES TIMEOUT 300)
-
 endif()
 
 atlas_add_test( gt_ColumnarToolTests
                 SOURCES test/gt_ColumnarToolTests.cxx
                 LINK_LIBRARIES ColumnarTestFixturesLib ElectronEfficiencyCorrectionLib
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_install_python_modules( util/*.py python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

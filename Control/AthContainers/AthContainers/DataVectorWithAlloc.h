@@ -53,7 +53,7 @@
 #include "AthAllocators/maybeUnprotect.h"
 #include "AthContainers/DataVector.h"
 #include "AthContainers/DataVectorWithAllocFwd.h"
-#include <boost/type_traits.hpp>
+#include <type_traits>
 
 /**
  * @brief @c DataVector using a custom allocator for the elements.
@@ -104,7 +104,7 @@ public:
   typedef typename std::reverse_iterator<iterator>
     reverse_iterator;
 
-  typedef boost::true_type isSequence;
+  typedef std::true_type isSequence;
 
   /// If true, then this type must own its contents.
   static constexpr bool must_own = true;
@@ -801,7 +801,7 @@ struct ClassID_traits<DataVectorWithAlloc<DV, ALLOC> >
   : public ClassID_traits<DV>
 {
 public:
-  BOOST_STATIC_CONSTANT(bool, s_isConst = true);
+  static constexpr bool s_isConst = true;
 };
 
 

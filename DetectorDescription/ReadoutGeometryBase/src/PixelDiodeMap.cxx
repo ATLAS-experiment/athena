@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -83,13 +83,10 @@ PixelDiodeMap::parameters(const SiCellId & cellId) const
     return {};
   }
 
-  double halfWidth = 0.5*width();
-  double halfLength = 0.5*length();
-  
   //
   // Position is relative to left bottom corner.
   //
-  Amg::Vector2D position(-halfWidth, -halfLength);
+  Amg::Vector2D position;
   const PixelDiodeMatrix *cell = m_matrix->positionOfCell(cellId, position);
   if (cell != nullptr) {
     

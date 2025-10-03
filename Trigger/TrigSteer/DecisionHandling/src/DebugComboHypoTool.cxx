@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/DebugComboHypoTool.h"
@@ -21,7 +21,8 @@ StatusCode DebugComboHypoTool::initialize() {
 }
 
 
-bool DebugComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination) const {
+bool DebugComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination,
+                                    const EventContext& /*ctx*/) const {
   ATH_MSG_ALWAYS("Next Combination:");
   using namespace TrigCompositeUtils;
   // Passes if *at least one* physics object with pT > 45 MeV is supplied on *each* leg.

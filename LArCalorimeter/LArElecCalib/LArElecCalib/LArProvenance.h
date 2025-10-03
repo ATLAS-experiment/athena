@@ -18,7 +18,7 @@ namespace LArProv {
     PEAKOFC      = 0x5, // Default Run 1 - Run 3
     PEAKTILEINFO = 0x6, // Only used in early commissioning
     PEAKNN       = 0x7, // Neural-Network peak reco (run 4 plans) 
-    PATCHED      = 0x8, // patched from the SuperCell container 
+    PATCHED      = 0x8, // patched from the SuperCells or neighbors
     RAMPCONST     = 0x10, //use hard-coded constant Ramp value (only early commissioning)
     RAMPDB        = 0x20, //Ramp from DB (default)
     PEDSAMPLEZERO = 0x40, //use ADC[0] as pedestal value (only early commissioning)

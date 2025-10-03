@@ -13,10 +13,7 @@
 # art-output: dcube*
 # art-html: dcube_shifter_last
 
-#RDO is made at rel 22.0.73
-#reference plots are made at rel 22.0.73
-
-relname="r25.0.26"
+relname="r25.0.39"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_piplus1GeV_reco.root
@@ -26,3 +23,6 @@ script=test_MC_mu0_reco.sh
 echo "Executing script ${script}"
 echo " "
 "$script" ${ArtProcess} ${ArtInFile} ${dcubeRef}
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

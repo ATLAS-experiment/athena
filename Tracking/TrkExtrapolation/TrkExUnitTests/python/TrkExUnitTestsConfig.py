@@ -1,41 +1,28 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to configure TrkExUnitTest"""
 
-def PositionMomentumWriterCfg(configFlags, name="PositionMomentumWriter", **kwargs) :
-  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator 
-  from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 
+def PositionMomentumWriterCfg(flags, name="PositionMomentumWriter", **kwargs):
   result = ComponentAccumulator()
+  result.setPrivateTools(CompFactory.Trk.PositionMomentumWriter(name, **kwargs))
+  return result
 
-  Trk__PositionMomentumWriter = CompFactory.Trk.PositionMomentumWriter
-  posMomWriter = Trk__PositionMomentumWriter(name, **kwargs)
-  result.addPublicTool(posMomWriter)
-  #result.setPrivateTools(posMomWriter)
-  return result, posMomWriter
-
-def ExtrapolationEngineTestCfg(configFlags, name = "ExtrapolationEngineTest", **kwargs ) :
-  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator 
-  from AthenaConfiguration.ComponentFactory import CompFactory
-  
+def ExtrapolationEngineTestCfg(flags, name = "ExtrapolationEngineTest", **kwargs):
   result=ComponentAccumulator()  
 
-  
-  histSvc = CompFactory.THistSvc(Output = ["val DATAFILE='ExtrapolationEngineTest.root' TYPE='ROOT' OPT='RECREATE'"])
+  histSvc = CompFactory.THistSvc(Output = [
+    "val DATAFILE='ExtrapolationEngineTest.root' TYPE='ROOT' OPT='RECREATE'"])
   result.addService( histSvc )    
 
   from TrkConfig.AtlasExtrapolationEngineConfig import AtlasExtrapolationEngineCfg
-  extrapAcc = AtlasExtrapolationEngineCfg(configFlags)
-  extrapolationEngine = extrapAcc.getPrimary()
-  result.merge(extrapAcc)
-  kwargs["ExtrapolationEngine"] = extrapolationEngine
+  kwargs.setdefault("ExtrapolationEngine", result.getPrimaryAndMerge(
+    AtlasExtrapolationEngineCfg(flags)))
 
-  posMomAcc, posMomWriter = PositionMomentumWriterCfg(configFlags)
-  result.merge(posMomAcc)
-  kwargs.setdefault('PositionMomentumWriter', posMomWriter)
-     
-  Trk__ExtrapolationEngineTest = CompFactory.Trk.ExtrapolationEngineTest
-  extrapolationTest = Trk__ExtrapolationEngineTest(name, **kwargs)
-  result.addEventAlgo(extrapolationTest)
-  
+  kwargs.setdefault('PositionMomentumWriter', result.popToolsAndMerge(
+    PositionMomentumWriterCfg(flags)))
+
+  result.addEventAlgo(CompFactory.Trk.ExtrapolationEngineTest(name, **kwargs))
   return result

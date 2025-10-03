@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -62,16 +62,6 @@ void xAOD::PixelCluster_v1::setChannelsInPhiEta(int channelsInPhi,
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, widthInEta,
                                      setWidthInEta)
-
-void xAOD::PixelCluster_v1::setOmegas(float omegaX, float omegaY) {
-    static const SG::AuxElement::Accessor<float> omegaXAcc("omegaX");
-    omegaXAcc(*this) = omegaX;
-    static const SG::AuxElement::Accessor<float> omegaYAcc("omegaY");
-    omegaYAcc(*this) = omegaY;
-}
-
-AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, float, omegaX)
-AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, float, omegaY)
 
 AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<int>, totList,
 				  setToTlist)

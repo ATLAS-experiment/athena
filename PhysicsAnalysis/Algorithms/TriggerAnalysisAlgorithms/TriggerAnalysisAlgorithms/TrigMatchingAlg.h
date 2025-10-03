@@ -53,7 +53,7 @@ namespace CP
     Gaudi::Property<std::string> m_matchingDecoration {this, "matchingDecoration", {}, "The decoration for trigger matching"};
 
     /// \brief the decorators for \ref m_matchingDecoration and triggers combination
-    std::unordered_map<std::string, SG::AuxElement::Decorator<char>> m_matchingDecorators;
+    std::unordered_map<std::string, SG::Decorator<char>> m_matchingDecorators;
 
     /// \brief list of triggers
     Gaudi::Property<std::vector<std::string>> m_trigSingleMatchingList {this, "trigSingleMatchingList", {}, "List of triggers for Matching"};

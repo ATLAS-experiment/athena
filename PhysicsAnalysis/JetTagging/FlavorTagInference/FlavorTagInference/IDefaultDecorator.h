@@ -9,14 +9,14 @@
 #ifndef I_DEFAULT_DECORATOR_H
 #define I_DEFAULT_DECORATOR_H
 
-#include "AthContainers/AuxElement.h"
+#include "xAODBase/IParticle.h"
 
 class IDefaultDecorator
 {
 public:
 
   /// Method to decorate a jet with defaults.
-  virtual void decorateWithDefaults(const SG::AuxElement& jet) const = 0;
+  virtual void decorateWithDefaults(const xAOD::IParticle& i_jet) const = 0;
 
 };
 

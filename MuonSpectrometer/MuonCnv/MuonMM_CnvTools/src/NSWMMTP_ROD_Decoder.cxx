@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -53,9 +53,9 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   //for all the 3/5 elinks expected, the MMTP header parameters should be the same by design
   //checking consistency of a fraction of the header
   bool consistent = true;
-  const auto l0 = dynamic_cast<const Muon::nsw::NSWTriggerMML1AElink*>(decoder.get_elinks()[0].get());
+  const auto l0 = static_cast<const Muon::nsw::NSWTriggerMML1AElink*>(decoder.get_elinks()[0].get());
   for(const auto& baseLink: decoder.get_elinks()) {
-    const auto l = dynamic_cast<const Muon::nsw::NSWTriggerMML1AElink*>(baseLink.get());
+    const auto l = static_cast<const Muon::nsw::NSWTriggerMML1AElink*>(baseLink.get());
     if (l0->head_sectID() != l->head_sectID()) {consistent = false; break;}
     if (l0->L1ID() != l->L1ID()) {consistent = false; break;}
     if (l0->l1a_versionID() != l->l1a_versionID()) {consistent = false; break;}

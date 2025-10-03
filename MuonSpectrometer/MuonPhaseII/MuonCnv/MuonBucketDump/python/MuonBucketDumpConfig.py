@@ -3,6 +3,18 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
+def MuonHitDumperCfg(flags, name="MuonHitDumper", **kwargs):
+    result = ComponentAccumulator()
+    spCont = []
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        spCont+=["MuonSpacePoints"]
+    if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
+        spCont+=["NswSpacePoints"]
+    kwargs.setdefault("SpacePointKeys", spCont)
+    result.addEventAlgo(CompFactory.MuonR4.MlHitDumperAlg(name, **kwargs))
+    return result
+
 def MuonBucketDumpCfg(flags, name="MuonBucketDumper", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg

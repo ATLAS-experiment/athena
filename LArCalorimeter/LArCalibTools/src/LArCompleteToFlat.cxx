@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArCompleteToFlat.h"
@@ -273,7 +273,11 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
 
       if (ofca.size()==nSamples) {
 	for (unsigned i=0;i<nSamples;++i) {
-	  pOfca[hs*nSamples+i]=ofca[i];
+          if(std::isnan(ofca[i]) || std::isinf(ofca[i]) || (m_isSC && fabs(ofca[i])> 10.)) { // protection
+            pOfca[hs*nSamples+i]=1.0;
+          } else { 
+	    pOfca[hs*nSamples+i]=ofca[i];
+          }
 	}
       }
       else {
@@ -288,7 +292,11 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
      
       if (ofcb.size()==nSamples) {
 	for (unsigned i=0;i<nSamples;++i) {
-	  pOfcb[hs*nSamples+i]=ofcb[i];
+          if(std::isnan(ofcb[i]) || std::isinf(ofcb[i]) || (m_isSC && fabs(ofcb[i])> 100.)) { // protection
+             pOfcb[hs*nSamples+i]=1.0;
+          } else { 
+	     pOfcb[hs*nSamples+i]=ofcb[i];
+          }
           // FIXME: it should be replaced by proper conditions per channel
 	  // HERE - multiplying HEC OFCb by 1.5 for SCs
           // https://its.cern.ch/jira/browse/ATLLARONL-1784
@@ -390,7 +398,11 @@ CondAttrListCollection* LArCompleteToFlat::shapeFlat(const LArShapeComplete* inp
    
       if (shape.size()==nSamples) {
 	for (unsigned i=0;i<nSamples;++i) {
-	  pShape[hs*nSamples+i]=shape[i];
+          if(std::isnan(shape[i]) || std::isinf(shape[i])) {
+	     pShape[hs*nSamples+i]=0.0;
+          } else {
+	     pShape[hs*nSamples+i]=shape[i];
+          }
 	}
       }
       else {
@@ -406,7 +418,11 @@ CondAttrListCollection* LArCompleteToFlat::shapeFlat(const LArShapeComplete* inp
    
       if (shapeDer.size()==nSamples) {
 	for (unsigned i=0;i<nSamples;++i) {
-	  pShapeDer[hs*nSamples+i]=shapeDer[i];
+          if(std::isnan(shapeDer[i]) || std::isinf(shapeDer[i])) {
+	     pShapeDer[hs*nSamples+i]=0.0;
+          } else {
+	     pShapeDer[hs*nSamples+i]=shapeDer[i];
+          }
 	}
       }
       else {
@@ -658,7 +674,7 @@ StatusCode LArCompleteToFlat::stop() {
 	return StatusCode::FAILURE;
       }
       else {
-	m_onlineID = (const LArOnlineID_Base*)ll;
+	m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
 	ATH_MSG_DEBUG("Found the LArOnlineID helper");
       }
     }else{
@@ -669,7 +685,7 @@ StatusCode LArCompleteToFlat::stop() {
 	return StatusCode::FAILURE;
       }
       else {
-	m_onlineID = (const LArOnlineID_Base*)ll;
+	m_onlineID = static_cast<const LArOnlineID_Base*>(ll);
 	ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
       }
 

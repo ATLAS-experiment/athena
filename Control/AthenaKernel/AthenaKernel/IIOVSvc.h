@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IIOVSVC_H
@@ -114,8 +114,9 @@ public:
 
   /// Get IOVRange from db for current event
   virtual StatusCode getRangeFromDB(const CLID& clid, const std::string& key, 
-				    IOVRange& range, std::string &tag,
-                                    std::unique_ptr<IOpaqueAddress>& ioa) const =0;
+                                    IOVRange& range, std::string &tag,
+                                    std::unique_ptr<IOpaqueAddress>& ioa,
+                                    const EventIDBase& now) const =0;
 
   /// Get IOVRange from db for a particular event
   virtual StatusCode getRangeFromDB(const CLID& clid, const std::string& key, 

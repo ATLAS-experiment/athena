@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TrigComposite_v1.icc 784388 2016-11-15 17:08:58Z tamartin $
 #ifndef XAODTRIGGER_VERSIONS_TRIGCOMPOSITE_V1_ICC
 #define XAODTRIGGER_VERSIONS_TRIGCOMPOSITE_V1_ICC
 
@@ -13,6 +12,7 @@
 #include <stdexcept>
 
 // xAOD include(s):
+#include "AthContainers/tools/CurrentEventStore.h"
 #include "AthContainers/DataVector.h"
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainers/Accessor.h"
@@ -57,21 +57,20 @@ namespace xAOD {
 
   template< typename TYPE >
   bool TrigComposite_v1::getDetail( const std::string& name, TYPE& value) const {
-    if( ! hasDetail<TYPE>(name) ) {
-       return false;
-    }
     // Object used to access the auxiliary data:
     ConstAccessor< TYPE > acc( name );
+
+    if( ! acc.isAvailable( *this ) ) {
+       return false;
+    }
     value = acc( *this );
     return true;
   }
 
   template< typename TYPE >
   TYPE TrigComposite_v1::getDetail( const std::string& name ) const {
-    TYPE temp;
-    if ( getDetail(name, temp) == false ) 
-      throw std::runtime_error( "xAOD::TrigComposite::getDetail<TYPE>("+name+") encountered missing detail"); 
-    return temp; // RVO
+    ConstAccessor< TYPE > acc( name );
+    return acc( *this );
   }
   
   template< class CONTAINER >
@@ -127,13 +126,17 @@ namespace xAOD {
    ElementLink< CONTAINER >
    TrigComposite_v1::objectLink( const std::string& name ) const {
 
+      // Retrieve current store once (would be better to pass EventContext everywhere)
+      auto sg = SG::CurrentEventStore::store();
+
       // Find the right object:
       const std::vector< std::string >& names = linkColNames();
       for( size_t i = 0; i < names.size(); ++i ) {
          if( names[ i ] != name ) continue;
          checkTypes< CONTAINER >(linkColClids()[ i ], name);
          ElementLink< CONTAINER > link( linkColKeys()[ i ],
-                                        linkColIndices()[ i ] );
+                                        linkColIndices()[ i ],
+                                        sg );
          
          if (link.isValid()) {
             return link;
@@ -141,7 +144,8 @@ namespace xAOD {
 
          if (isRemapped()) {
             return ElementLink< CONTAINER >( linkColKeysRemap()[ i ],
-                                             linkColIndicesRemap()[ i ] );
+                                             linkColIndicesRemap()[ i ],
+                                             sg );
          }
 
          return link;
@@ -161,6 +165,9 @@ namespace xAOD {
          return nullptr;
       }
 
+      // Retrieve current store once (would be better to pass EventContext everywhere)
+      auto sg = SG::CurrentEventStore::store();
+
       // Now look for it:
       const std::vector< std::string >& names = linkColNames();
       for( size_t i = 0; i < names.size(); ++i ) {
@@ -169,14 +176,16 @@ namespace xAOD {
          checkTypes< DataVector< OBJECT > >(linkColClids()[ i ], name);
          // Create a temporary ElementLink:
          ElementLink< DataVector< OBJECT > > link( linkColKeys()[ i ],
-                                                   linkColIndices()[ i ] );
+                                                   linkColIndices()[ i ],
+                                                   sg );
          if( link.isValid() ) {
             return *link;
          }
 
          if (isRemapped()) {
            link = ElementLink< DataVector< OBJECT > >( linkColKeysRemap()[ i ],
-                                                       linkColIndicesRemap()[ i ] );
+                                                       linkColIndicesRemap()[ i ],
+                                                       sg );
            if( link.isValid() ) {
               return *link;
            }
@@ -227,6 +236,9 @@ namespace xAOD {
     std::vector<ElementLink< CONTAINER >> links;
     const std::string mangledName = collectionName + s_collectionSuffix;
 
+    // Retrieve current store once (would be better to pass EventContext everywhere)
+    auto sg = SG::CurrentEventStore::store();
+
     const std::vector< std::string >& names = linkColNames();
     for( size_t i = 0; i < names.size(); ++i ) {
        if( names[ i ] != mangledName ) continue;
@@ -234,12 +246,14 @@ namespace xAOD {
        checkTypes< CONTAINER >(linkColClids()[ i ], collectionName);
        // Construct and add the link:
        ElementLink< CONTAINER > link(linkColKeys()[ i ],
-                                     linkColIndices()[ i ]);
+                                     linkColIndices()[ i ],
+                                     sg);
        if (link.isValid()) {
           links.push_back( link );
        } else if (isRemapped()) {
           link = ElementLink< CONTAINER >(linkColKeysRemap()[ i ],
-                                          linkColIndicesRemap()[ i ]);
+                                          linkColIndicesRemap()[ i ],
+                                          sg);
           links.push_back( link );
        } else {
           links.push_back( link );

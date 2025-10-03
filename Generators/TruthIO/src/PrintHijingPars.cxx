@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthIO/PrintHijingPars.h"
@@ -32,7 +32,7 @@ StatusCode PrintHijingPars::initialize(){
 StatusCode PrintHijingPars::execute() 
 {
   
-  const HijingEventParams *hijing_pars;
+  const HijingEventParams *hijing_pars = nullptr;
   const StatusCode sc =  evtStore()->retrieve(hijing_pars, m_key);
   if (!sc.isSuccess()) {
     ATH_MSG_ERROR("Could not retrieve Hijing_event_params");

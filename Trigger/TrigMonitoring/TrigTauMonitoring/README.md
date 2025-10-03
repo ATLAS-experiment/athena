@@ -1,8 +1,12 @@
-# TrigTauMonitoring:
+# TrigTauMonitoring
 
 Tau offline monitoring package.
 
 To add or remove chains from the monitoring, add/remove the `tauMon:t0`, `tauMon:shifter`, or `tauMon:val` monitoring groups in the [Trigger Menu definition files](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Menu/) as required. If the Monitoring framework is executed standalone on AOD files that don't contain Monitoring information for the used Menu in the Metadata, the manual chain list defined in [ManualChains.py](python/ManualChains.py) will be loaded.
+
+## Developing
+
+Any major change to the monitoring package should be thoroughly tested on both MC signal and EB background AODs, as they could affect signal or background events asymmetrically. You can use SampleA $`Z\to\tau\tau`$ or $`\gamma^*\to\tau\tau`$ MC AODs, and AODs from the latest EB HLT reprocessing.
 
 ## How to Run standalone:
 

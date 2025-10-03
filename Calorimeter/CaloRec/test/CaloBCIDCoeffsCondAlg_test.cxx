@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloRec/test/CaloBCIDCoeffsCondAlg_test.cxx
@@ -17,6 +17,7 @@
 #include "LArElecCalib/ILArMinBiasAverage.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "CaloIdentifier/CaloHelpersTest.h"
+#include "CaloIdentifier/LArID_Exception.h"
 #include "IdDictParser/IdDictParser.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/DummyRCUSvc.h"
@@ -26,6 +27,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include <iostream>
 #include <cassert>
+#include <memory>
 
 
 static constexpr size_t NCELL = 1833;
@@ -329,9 +331,15 @@ int main()
     return 1;
   }
 
-  CaloHelpersTest caloHelpers;
-  LArOnlineIDTest larhelpers;
+  try {
+    auto caloHelpers = std::make_unique<CaloHelpersTest>();
+    LArOnlineIDTest larhelpers;
 
-  test1 (svcloc, caloHelpers.caloID(), larhelpers.onlineID());
+    test1 (svcloc, caloHelpers->caloID(), larhelpers.onlineID());
+  }
+  catch (const LArID_Exception& e) {
+    std::cerr << "LArID_Exception: " << std::string(e) << "\n";
+    return 1;
+  }
   return 0;
 }

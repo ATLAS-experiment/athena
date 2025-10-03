@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -11,6 +11,8 @@
 
 #ifndef FEXAlgoSpaceDefs_H
 #define FEXAlgoSpaceDefs_H
+
+#include <array>
 
 namespace LVL1 {
 

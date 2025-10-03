@@ -463,6 +463,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
     m_at1type = (status8 >> 2) & 0x3;
   }
   m_nthLATOME = robFrag->rod_source_id();
+  m_LATOMEFW = rod_status[3] & 0x0fff;
 
   LatomeCalibPatterns pat1, pat2, pat3;
   pat1.DAC = rod_status[9];
@@ -536,6 +537,16 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 
   /// OK all headers checked and we have all info we need to decode each packet, so lets start
   m_iPacket = 0;
+  if (m_nPackets==0) {
+    ATH_MSG_WARNING("Data corruption, nPackets=0");
+    return;
+  }
+
+  if (m_nPackets>m_packetEnd.size()) {
+    ATH_MSG_WARNING("Data corruption, nPackets " << m_nPackets << " exceeds size " << m_packetEnd.size());
+    return;
+  }
+     
   if (m_packetEnd[m_nPackets - 1] + m_monTrailerSize != n) {
     ATH_MSG_WARNING("problem in packet size loop " << m_packetEnd[m_nPackets - 1] << " != " << n);
   }
@@ -928,6 +939,7 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
   }
 
   const HWIdentifier hwidEmpty;
+  unsigned nWarnings = 0;
   for (SuperCell ch = 0; ch < N_LATOME_CHANNELS; ++ch) {
     LArCalibParams* calibParams = 0;
     auto SCID = map ? map->getChannelID(m_nthLATOME, ch) : hwidEmpty;
@@ -952,14 +964,21 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
     sum.resize(m_averagedRawValuesInEvent[ch].sum.size());
     sum2.resize(m_averagedRawValuesInEvent[ch].sum.size());
 
-    for (unsigned int is = 0; is < m_averagedRawValuesInEvent[ch].sum.size(); ++is) {
-      double fsum = (double)m_averagedRawValuesInEvent[ch].sum[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
-      double fsum2 = (double)m_averagedRawValuesInEvent[ch].sumSq[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
-      sum[is] = round(fsum);
-      sum2[is] = round(fsum2);
+    if (ntmin > 0) {
+      for (unsigned int is = 0; is < m_averagedRawValuesInEvent[ch].sum.size(); ++is) {
+        double fsum = (double)m_averagedRawValuesInEvent[ch].sum[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
+        double fsum2 = (double)m_averagedRawValuesInEvent[ch].sumSq[is] / m_averagedRawValuesInEvent[ch].nTrigValid[is] * ntmin;
+        sum[is] = round(fsum);
+        sum2[is] = round(fsum2);
+      }
+    } else {
+      std::fill(sum.begin(), sum.end(), 0);
+      std::fill(sum2.begin(), sum2.end(), 0);
+      if (++nWarnings < 64) {
+        ATH_MSG_WARNING("No valid triggers for supercell " << SCID.getString());
+      }
     }
     if (m_accdigits) {
-
       LArAccumulatedDigit* accdigi = new LArAccumulatedDigit(SCID, gain, sum, sum2, ntmin);
       m_accdigits->push_back(accdigi);
     }
@@ -1030,6 +1049,9 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
     }
 
   }  /// for loop on SCs
+  if (nWarnings > 16) {
+      ATH_MSG_WARNING("Found " << nWarnings << " supercells with no valid triggers");
+  }
 }
 
 // Pass ADC values from an event
@@ -1112,7 +1134,7 @@ void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping* map) {
 void LArLATOMEDecoder::EventProcess::fillHeader() {
 
   if (m_header_coll) {
-    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID, m_activeSC, m_latomeBCID, m_l1ID, m_ROBFragSize);
+    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID, m_activeSC, m_latomeBCID, m_l1ID, m_ROBFragSize, m_LATOMEFW);
     m_header_coll->push_back(latome);
   }
 }

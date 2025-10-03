@@ -163,11 +163,14 @@ def athenaMPoutputsLinkAndUpdate(newFullFilenames, fileArg):
     for linkname, fname in zip(linkedNameList, newFullFilenames):
         if linkname:
             if len(newFullFilenames) == 1:
-                try:
-                    os.rename(fname,fileArg.originalName)
-                    newFilenameValue[0]=fileArg.originalName
-                except OSError as e:
-                    raise trfExceptions.TransformExecutionException(trfExit.nameToCode("TRF_OUTPUT_FILE_ERROR"), "Failed to move {0} to {1}: {2}".format(fname, linkname, e))
+                if path.exists(fname):
+                    try:
+                        os.rename(fname, fileArg.originalName)
+                    except OSError as e:
+                        raise trfExceptions.TransformExecutionException(trfExit.nameToCode("TRF_OUTPUT_FILE_ERROR"), "Failed to move {0} to {1}: {2}".format(fname, fileArg.originalName, e))
+                elif not path.exists(fileArg.originalName):
+                    raise trfExceptions.TransformExecutionException(trfExit.nameToCode("TRF_OUTPUT_FILE_ERROR"), "Neither {0} nor {1} exists".format(fname, fileArg.originalName))
+                newFilenameValue[0] = fileArg.originalName
             else:
                  try:
                      if path.lexists(linkname):

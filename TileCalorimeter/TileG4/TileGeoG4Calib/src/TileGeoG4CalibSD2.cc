@@ -20,6 +20,7 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "TileGeoG4CalibSD.h"
+#include "TileHitVectorDMBuilder.h"
 #include "TileGeoG4DMLookupBuilder.h"
 #include "TileGeoG4DMLookup.h"
 #include "TileEscapedEnergyProcessing.h"
@@ -165,15 +166,15 @@ bool TileGeoG4CalibSD::FindTileCalibSection() {
         m_dm_subDet = -abs(m_dm_subDet);
       }
     }
-
+    TileGeoG4DMLookupBuilder* lookupDM = GetHitCollection()->GetDMLookupBuilder(); 
     //Retrieve Tile calibration sections
     if (namePhysSection.find("EBarrel") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
       m_isExtended = true;
       m_detector = 2;
       m_dm_region = 1;
     } else if (namePhysSection.find("Barrel") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
       m_detector = 1;
       m_dm_region = 0;
     } else if (namePhysSection.find("ITC") != G4String::npos) {
@@ -183,37 +184,37 @@ bool TileGeoG4CalibSD::FindTileCalibSection() {
       if (level > 2) {
         G4String namePlug = m_stepTouchable->GetVolume(level - 3)->GetName();
         if (namePlug.find("Plug1") != G4String::npos) {
-          m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG1);
+          m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG1);
         } else {
-          m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG2);
+          m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG2);
         }
       } else {
-        m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG2);
+        m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG2);
       }
     } else if (namePhysSection.find("Gap") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG3);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG3);
       m_detector = 4;
       m_dm_region = 2;
     } else if (namePhysSection.find("Crack") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG4);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG4);
       m_detector = 4;
       m_dm_region = 2;
     } else if (namePhysSection.find("EFinger") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
       m_isExtended = true;
       m_detector = 2;
       m_dm_region = 1;
     } else if (namePhysSection.find("Finger") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
       m_detector = 1;
       m_dm_region = 0;
     } else if (namePhysSection.find("ESaddle") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
       m_isExtended = true;
       m_detector = 2;
       m_dm_region = 2;
     } else if (namePhysSection.find("Saddle") != G4String::npos) {
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
       m_detector = 1;
       m_dm_region = 0;
     } else {
@@ -717,32 +718,33 @@ void TileGeoG4CalibSD::GirderCellIDCalculator() {
 }
 
 void TileGeoG4CalibSD::DefaultHitIDCalculator() {
-  const double zBarrelMaxPos = m_lookupDM->zBarrMaxPos;
-  const double zBarrelMaxNeg = m_lookupDM->zBarrMaxNeg;
-  const double dzITC = m_lookupDM->zLegngthITC;
-  const double dzEBarrelModule = m_lookupDM->dzExtBarrMod;
-  const double zBarrelModuleMax = m_lookupDM->dzBarrMod / 2.0;
+  TileGeoG4DMLookupBuilder* lookupDM = GetHitCollection()->GetDMLookupBuilder();
+  const double zBarrelMaxPos = lookupDM->zBarrMaxPos;
+  const double zBarrelMaxNeg = lookupDM->zBarrMaxNeg;
+  const double dzITC = lookupDM->zLegngthITC;
+  const double dzEBarrelModule = lookupDM->dzExtBarrMod;
+  const double zBarrelModuleMax = lookupDM->dzBarrMod / 2.0;
 
   const double zEBarrelModuleMaxPos = zBarrelMaxPos + dzITC + dzEBarrelModule;
   const double zEBarrelModuleMaxNeg = zBarrelMaxNeg - dzITC - dzEBarrelModule;
 
-  const double drFrontPlate = m_lookupDM->dRFront;
-  const double dzEndPlate = m_lookupDM->dZEnd;
-  const double dzEndPlateSh = m_lookupDM->dZEndSh;
+  const double drFrontPlate = lookupDM->dRFront;
+  const double dzEndPlate = lookupDM->dZEnd;
+  const double dzEndPlateSh = lookupDM->dZEndSh;
 
-  const double dzBarrelPeriod = m_lookupDM->dzBarrPeriod; //18.25762
-  const double dzEBarrelPeriod = m_lookupDM->dzExtBarrPeriod; //18.25358
+  const double dzBarrelPeriod = lookupDM->dzBarrPeriod; //18.25762
+  const double dzEBarrelPeriod = lookupDM->dzExtBarrPeriod; //18.25358
 
-  const double rBarrelMin = m_lookupDM->rBMin;
-  const double rBarrelMax = m_lookupDM->rBMax;
-  const double rGirderMin = m_lookupDM->rGirdMin;
+  const double rBarrelMin = lookupDM->rBMin;
+  const double rBarrelMax = lookupDM->rBMax;
+  const double rGirderMin = lookupDM->rGirdMin;
   //ITC region parameters
-  const double rPlug1Min = m_lookupDM->rP1Min;
-  const double rPlug2Min = m_lookupDM->rP2Min;
-  const double rGapMax = m_lookupDM->rGapMax;
-  const double rGapMin = m_lookupDM->rGapMin;
-  const double rCrackMax = m_lookupDM->rCrMax;
-  const double rCrackMin = m_lookupDM->rCrMin;
+  const double rPlug1Min = lookupDM->rP1Min;
+  const double rPlug2Min = lookupDM->rP2Min;
+  const double rGapMax = lookupDM->rGapMax;
+  const double rGapMin = lookupDM->rGapMin;
+  const double rCrackMax = lookupDM->rCrMax;
+  const double rCrackMin = lookupDM->rCrMin;
 
   double rBarrelCenter = (rBarrelMin + drFrontPlate + rGirderMin) / 2;
 
@@ -799,7 +801,7 @@ void TileGeoG4CalibSD::DefaultHitIDCalculator() {
 
   if ( (m_zGlobal < zBarrelMaxPos) && (m_zGlobal > zBarrelMaxNeg)) {
     //barrel section
-    m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
+    m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_BARREL);
     m_dm_region = 0;
     m_detector = 1;
 
@@ -895,15 +897,15 @@ void TileGeoG4CalibSD::DefaultHitIDCalculator() {
       double rCenter = 0;
       if (rGlobal > rPlug1Min) {
         //Plug1
-        m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG1);
+        m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG1);
         nSamp = 0;
       } else if (rGlobal > rPlug2Min) {
         //Plug2
-        m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG2);
+        m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG2);
         nSamp = 0;
       } else if (rGlobal > rGapMin) {
         //Gap
-        m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG3);
+        m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG3);
         rCenter = (rGapMin + rGapMax) / 2.0;
         if (rGlobal - rCenter < m_cSection->sample_ZBound[0]) {
           nSamp = 0;
@@ -912,7 +914,7 @@ void TileGeoG4CalibSD::DefaultHitIDCalculator() {
         }
       } else {
         //Crack
-        m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG4);
+        m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG4);
         rCenter = (rCrackMin + rCrackMax) / 2.0;
         if (rGlobal - rCenter < m_cSection->sample_ZBound[0]) {
           nSamp = 0;
@@ -931,7 +933,7 @@ void TileGeoG4CalibSD::DefaultHitIDCalculator() {
     } else {
       //girder
       m_dm_sample = 2;
-      m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG1);
+      m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_PLUG1);
       m_gCell = m_cSection->GetTileGirderCell(0);
       m_dm_neta = m_gCell->tower;
       if (m_dm_neta < 0) m_dm_neta *= -1;
@@ -943,7 +945,7 @@ void TileGeoG4CalibSD::DefaultHitIDCalculator() {
     m_detector = 2;
     m_dm_region = 1;
 
-    m_cSection = m_lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
+    m_cSection = lookupDM->GetSection(TileCalibDddbManager::TILE_EBARREL);
 
     double zEBarrelModuleCenter;
     if (m_zGlobal > 0) {

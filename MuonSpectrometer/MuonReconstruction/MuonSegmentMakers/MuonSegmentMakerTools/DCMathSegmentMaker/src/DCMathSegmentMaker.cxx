@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DCMathSegmentMaker.h"
@@ -58,10 +58,8 @@ namespace {
 
 }  // namespace
 namespace Muon {
-
-    DCMathSegmentMaker::DCMathSegmentMaker(const std::string& t, const std::string& n, const IInterface* p) :
-        base_class(t, n, p)  {}
-
+    using namespace MuonStationIndex;
+    
     StatusCode DCMathSegmentMaker::initialize() {
         ATH_CHECK(m_mdtKey.initialize(m_removeDeltas && !m_mdtKey.empty()));
         // retrieve MuonDetectorManager
@@ -234,10 +232,9 @@ namespace Muon {
         // find all curved segments
         MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(chid);
 
-        static constexpr std::array<Muon::MuonStationIndex::ChIndex ,4> statWithField{MuonStationIndex::BIL, MuonStationIndex::BML,
-                                                                                      MuonStationIndex::BMS, MuonStationIndex::BOL};
+        static constexpr std::array<ChIndex ,4> statWithField{ChIndex::BIL, ChIndex::BML, ChIndex::BMS, ChIndex::BOL};
         const bool isCurvedSegment = segment.hasCurvatureParameters() &&
-                                     std::find(statWithField.begin(), statWithField.end(), chIndex) != statWithField.end();
+                                     std::ranges::find(statWithField, chIndex) != statWithField.end();
 
         // remove segments with too few hits
         if (segment.hitsOnTrack() < 3) return nullptr;
@@ -519,16 +516,16 @@ namespace Muon {
                 charge = charge / std::abs(charge);
                 // if the curved segment was not refit, then use a momentum estimate
                 constexpr double BILALPHA(28.4366), BMLALPHA(62.8267), BMSALPHA(53.1259), BOLALPHA(29.7554);
-                if (chIndex == MuonStationIndex::BIL) {
+                if (chIndex == ChIndex::BIL) {
                     qoverp = (charge * segment.deltaAlpha()) / BILALPHA;
                     dqoverp = M_SQRT2 * segment.dtheta() / BILALPHA;
-                } else if (chIndex == MuonStationIndex::BML) {
+                } else if (chIndex == ChIndex::BML) {
                     qoverp = (charge * segment.deltaAlpha()) / BMLALPHA;
                     dqoverp = M_SQRT2 * segment.dtheta() / BMLALPHA;
-                } else if (chIndex == MuonStationIndex::BMS) {
+                } else if (chIndex == ChIndex::BMS) {
                     qoverp = (charge * segment.deltaAlpha()) / BMSALPHA;
                     dqoverp = M_SQRT2 * segment.dtheta() / BMSALPHA;
-                } else if (chIndex == MuonStationIndex::BOL) {
+                } else if (chIndex == ChIndex::BOL) {
                     qoverp = (charge * segment.deltaAlpha()) / BOLALPHA;
                     dqoverp = M_SQRT2 * segment.dtheta() / BOLALPHA;
                 }
@@ -1698,8 +1695,10 @@ namespace Muon {
             ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
             return {};
         }
-        const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(chid, gpos, gdir);
-        const MuonGM::MuonDetectorManager* MuonDetMgr = InterSectSvc->detMgr();
+        SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_DetectorManagerKey,ctx};
+        const MuonGM::MuonDetectorManager* MuonDetMgr = detMgr.cptr();
+
+        const MuonStationIntersect intersect = InterSectSvc->tubesCrossedByTrack(MuonDetMgr, chid, gpos, gdir);
 
         // set to identify the hit on the segment
         std::set<Identifier> hitsOnSegment, chambersOnSegment;

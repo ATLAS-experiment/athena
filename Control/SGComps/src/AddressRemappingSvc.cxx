@@ -28,7 +28,7 @@
 
 #include <algorithm>
 
-#include "boost/range.hpp"
+#include <ranges>
 
 
 //________________________________________________________________________________
@@ -154,7 +154,7 @@ StatusCode AddressRemappingSvc::initInputRenames()
     // Translate to sgkeys and add to the map.
     SG::sgkey_t from_key = m_proxyDict->stringToKey (from, clid);
     SG::sgkey_t to_key = m_proxyDict->stringToKey (to, clid);
-    newmap[from_key] = Athena::InputRenameEntry { to_key, to };
+    newmap[from_key] = Athena::InputRenameEntry { to_key, std::move(to) };
   }
 
   // Publish the map.
@@ -370,7 +370,10 @@ StatusCode AddressRemappingSvc::renameTads (IAddressProvider::tadList& tads) con
   // FIXME: m_deletes will almost never be empty, but many times it will have
   // no overlap with the input file.  Should try to speed up by
   // noticing/caching that somehow.
-  if (r->empty() && m_deletes.empty()) return StatusCode::SUCCESS;
+  {
+    std::scoped_lock lock (m_deletesMutex);
+    if (r->empty() && m_deletes.empty()) return StatusCode::SUCCESS;
+  }
 
   // We may discover additional remappings due to autosymlinking.
   // Accumulate them here.
@@ -474,7 +477,7 @@ StatusCode AddressRemappingSvc::renameTads (IAddressProvider::tadList& tads) con
 
 
 //________________________________________________________________________________
-CLID AddressRemappingSvc::getClid(std::string type) const {
+CLID AddressRemappingSvc::getClid(const std::string& type) const {
    CLID clid(atoi(type.c_str())); // Is type a CLID? 
    if (clid == 0) { // or not
       if (!m_clidSvc->getIDOfTypeName(type, clid).isSuccess()) {
@@ -540,7 +543,8 @@ bool AddressRemappingSvc::isDeleted (const SG::TransientAddress& tad) const
 {
   std::string key = tad.name();
   std::scoped_lock lock (m_deletesMutex);
-  for (auto p : boost::make_iterator_range (m_deletes.equal_range (key))) {
+  auto xrange = m_deletes.equal_range (key);
+  for (const auto& p : std::ranges::subrange(xrange.first,xrange.second)) {
     CLID clid = p.second;
     if (tad.transientID (clid)) {
       return true;

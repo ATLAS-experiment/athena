@@ -32,24 +32,22 @@ namespace Trk {
 class SubtractedCylinderSurface : public CylinderSurface
 {
 public:
-  /** Default Constructor - needed for persistency*/
-  SubtractedCylinderSurface();
-
-  /** Copy Constructor*/
-  SubtractedCylinderSurface(const SubtractedCylinderSurface& psf);
-
-  /** Copy Constructor with shift*/
-  SubtractedCylinderSurface(const SubtractedCylinderSurface& psf,
-                            const Amg::Transform3D& transf);
+  /** Defaults. Copies need care due to unique_ptr*/
+  SubtractedCylinderSurface() = default;
+  SubtractedCylinderSurface(SubtractedCylinderSurface&&) = default;
+  SubtractedCylinderSurface& operator=(SubtractedCylinderSurface&&) = default;
+  virtual ~SubtractedCylinderSurface() = default;
 
   /** Constructor */
   SubtractedCylinderSurface(const CylinderSurface& cs,
-                            AreaExcluder* vol,
+                            std::shared_ptr<const AreaExcluder> vol,
                             bool shared);
 
-  /**Destructor*/
-  virtual ~SubtractedCylinderSurface();
-
+  /** Copy Constructor*/
+  SubtractedCylinderSurface(const SubtractedCylinderSurface& psf);
+  /** Copy Constructor with shift*/
+  SubtractedCylinderSurface(const SubtractedCylinderSurface& psf,
+                            const Amg::Transform3D& transf);
   /**Assignment operator*/
   SubtractedCylinderSurface& operator=(const SubtractedCylinderSurface& psf);
 
@@ -65,7 +63,7 @@ public:
                             double tol2 = 0.) const override final;
 
   /**This method allows access to the subtracted part*/
-  std::shared_ptr<AreaExcluder> subtractedVolume() const;
+  const AreaExcluder* subtractedVolume() const;
 
   /** Return properly formatted class name for screen output */
   virtual std::string name() const override final
@@ -74,8 +72,8 @@ public:
   }
 
 protected:
-  std::shared_ptr<AreaExcluder> m_subtrVol;
-  bool m_shared;
+  std::shared_ptr<const AreaExcluder> m_subtrVol{nullptr};
+  bool m_shared{true};
 };
 } // end of namespace
 

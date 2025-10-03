@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackTruthCollectionCnv.h"
@@ -35,9 +35,9 @@ TrackTruthCollectionCnv::TrackTruthCollectionCnv(ISvcLocator* svcLoc) :
 //================================================================
 TrackTruthCollectionPERS* TrackTruthCollectionCnv::createPersistent(TrackTruthCollection* trans) {
   MsgStream log(msgSvc(), "TrackTruthCollectionCnv");
-  log<<MSG::DEBUG<<"Writing TrackTruthCollection_p2"<<endmsg;
+  log<<MSG::DEBUG<<"Writing TrackTruthCollection_p3"<<endmsg;
   TrackTruthCollectionPERS* pers=new TrackTruthCollectionPERS();
-  m_converter_p2.transToPers(trans,pers,log);
+  m_converter_p3.transToPers(trans,pers,log);
   return pers;
 }
 

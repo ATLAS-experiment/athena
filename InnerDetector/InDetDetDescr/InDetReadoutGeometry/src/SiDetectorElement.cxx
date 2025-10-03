@@ -52,7 +52,7 @@ namespace InDetDD {
   bool
   SiDetectorElement::isBlayer() const
   {
-    if (const auto *const pIdHelper= getIdHelper();isPixel() and isBarrel() and 
+    if (const auto *const pIdHelper= getIdHelper();isPixel() and isBarrel() and
       pIdHelper->helper() ==  AtlasDetectorID::HelperType::Pixel) {
       const PixelID* p_pixelId = static_cast<const PixelID*>(pIdHelper);
       return (0==p_pixelId->layer_disk(m_id));
@@ -100,7 +100,7 @@ namespace InDetDD {
           id = pixelIdHelper->pixel_id(m_id, cellId.phiIndex(), cellId.etaIndex());
         }
       } else if (isSCT()) {
-        
+
         if (pAtlasHelper->helper() ==  AtlasDetectorID::HelperType::SCT) {
           const SCT_ID* sctIdHelper = static_cast<const SCT_ID*>(pAtlasHelper);
           id = sctIdHelper->strip_id(m_id, cellId.strip());
@@ -126,11 +126,11 @@ namespace InDetDD {
     if (identifier.is_valid()) {
       const auto *const pAtlasHelper = getIdHelper();
       if (isPixel() and pAtlasHelper->helper() == AtlasDetectorID::HelperType::Pixel) {
-        const auto *const pixelIdHelper = static_cast<const PixelID*>(pAtlasHelper); 
+        const auto *const pixelIdHelper = static_cast<const PixelID*>(pAtlasHelper);
         cellId = SiCellId(pixelIdHelper->phi_index(identifier), pixelIdHelper->eta_index(identifier));
       } else if (isSCT() and pAtlasHelper->helper() == AtlasDetectorID::HelperType::SCT) {
         const SCT_ID* sctIdHelper = static_cast<const SCT_ID*>(pAtlasHelper);
-        //This adds some extra code for supporting rows, 
+        //This adds some extra code for supporting rows,
         //but this method is only used in validation-type code
         //So should not add an overhead in normal running
         //(although we perhaps still try to avoid this...)
@@ -143,7 +143,7 @@ namespace InDetDD {
         }else {
           cellId =  SiCellId(strip);
         }
-        
+
       } else if (isPLR() and pAtlasHelper->helper() == AtlasDetectorID::HelperType::PLR) {
         const PLR_ID* plrIdHelper = static_cast<const PLR_ID*>(pAtlasHelper);
         cellId = SiCellId(plrIdHelper->phi_index(identifier), plrIdHelper->eta_index(identifier));
@@ -168,7 +168,7 @@ namespace InDetDD {
     // return the surfaces
     return *m_surfaces.ptr();
   }
- 
+
   const Amg::Transform3D&
   SiDetectorElement::moduleTransform() const
   {
@@ -282,7 +282,7 @@ namespace InDetDD {
   SiDetectorElement::sinStereo(const Amg::Vector3D& globalPos) const
   {
     return sinStereoImpl(globalPos);
-  } 
+  }
 
   double
   SiDetectorElement::sinStereoLocal(const Amg::Vector2D& localPos) const
@@ -317,7 +317,7 @@ namespace InDetDD {
       return center().z();  // z
     }
   }
-  
+
 
   bool
   SiDetectorElement::nearBondGap(const Amg::Vector2D& localPosition, double etaTol) const
@@ -353,7 +353,7 @@ namespace InDetDD {
     // Set booleans for wether we are pixel/sct barrel/endcap
     m_isPixel = getIdHelper()->is_pixel(m_id);
     m_isSCT = getIdHelper()->is_sct(m_id);
-    // we use is_lumi here instead of is_plr because is_plr is currently only setup 
+    // we use is_lumi here instead of is_plr because is_plr is currently only setup
     // for ExpandedIdentifiers and not Identifiers, which is what is needed here.
     m_isPLR = getIdHelper()->is_lumi(m_id);
     if (!m_isPixel && !m_isSCT && !m_isPLR) {
@@ -393,26 +393,6 @@ namespace InDetDD {
 
   }
 
-  // update cache
-  // This is supposed to be called inside a block like
-  //
-  // if (!m_cache.isValid()) updateCache();
-  //
-  void
-  SiDetectorElement::updateCache() const
-  {
-
-
-    SolidStateDetectorElementBase::updateCache();
-
-    //Similar to 21.9, but ... Do we actually need this? If not, we could just rely on the base-class implementation?
-    if (isBarrel() && !m_axisDir.ptr()->m_barrelLike) {
-      ATH_MSG_WARNING("Element has endcap like orientation with barrel identifier.");
-    } else if (!isBarrel() && m_axisDir.ptr()->m_barrelLike && (m_siDesign->type())!=InDetDD::PixelInclined && (m_siDesign->type())!=InDetDD::PLR) {
-      ATH_MSG_WARNING("Element has barrel like orientation with endcap identifier.");
-    }
-  }
-
   bool
   SiDetectorElement::determineStereo() const
   {
@@ -434,7 +414,7 @@ namespace InDetDD {
 
     return false;
   }
-  
+
   double
   SiDetectorElement::sinStereoImpl() const
   {
@@ -471,8 +451,8 @@ namespace InDetDD {
         Amg::Vector3D sensorCenter = m_siDesign->sensorCenter();
         //Below retrieved method will return -sin(m_Stereo), thus sinStereolocal = sin(m_Stereo)
         double sinStereoReco = - (m_siDesign->sinStripAngleReco(sensorCenter[1], sensorCenter[0]));
-        double cosStereoReco = sqrt(1-sinStereoReco*sinStereoReco); 
-        double radialShift = sensorCenter[0]; 
+        double cosStereoReco = sqrt(1-sinStereoReco*sinStereoReco);
+        double radialShift = sensorCenter[0];
         //The focus of all strips in the local reco frame
         Amg::Vector2D localfocus(-radialShift*sinStereoReco, radialShift - radialShift*cosStereoReco);
         //The focus of all strips in the global frame
@@ -480,8 +460,8 @@ namespace InDetDD {
         //The direction of x-axis of the Strip frame in the global frame
               const Amg::Vector3D& center = this->center();
         Amg::Vector3D globalSFxAxis =(center - globalfocus)/radialShift;
-        //Stereo angle is the angle between global radial direction and the x-axis of the Strip frame in the global frame 
-        sinStereo = (center.y() * globalSFxAxis.x() - center.x() * globalSFxAxis.y()) / center.perp();   
+        //Stereo angle is the angle between global radial direction and the x-axis of the Strip frame in the global frame
+        sinStereo = (center.y() * globalSFxAxis.x() - center.x() * globalSFxAxis.y()) / center.perp();
       }
       // else if (designShape == InDetDD::PolarAnnulus) {} // Polar specialisation in future
       else { // barrel

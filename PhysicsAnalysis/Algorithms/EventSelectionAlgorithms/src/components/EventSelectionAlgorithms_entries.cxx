@@ -19,6 +19,9 @@
 #include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
 #include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
 
+// Project include(s).
+#include "AsgTools/AsgComponentFactories.h"
+
 DECLARE_COMPONENT (CP::ChargeSelectorAlg)
 DECLARE_COMPONENT (CP::MissingETPlusTransverseMassSelectorAlg)
 DECLARE_COMPONENT (CP::MissingETSelectorAlg)

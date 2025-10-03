@@ -2,6 +2,7 @@ Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
 Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
 Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
 Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
+Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
 Py:IOVDbAutoCfgFlags WARNING Failed to extract year from project tag . Assuming CONDBR2.
 Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
 ApplicationMgr       INFO Application Manager Configured successfully
@@ -13,7 +14,6 @@ PoolSvc                                             DEBUG POOL ReadCatalog is ap
 PoolSvc                                             DEBUG POOL ReadCatalog is apcfile:poolcond/PoolCat_comcond.xml
 AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
-IOVDbSvc                                             INFO Cache alignment will be done in 3 slices
 IOVDbFolder                                          INFO Read from meta data only for folder /TagInfo
 IOVDbSvc                                             INFO Initialised with 1 connections and 1 folders
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
@@ -21,6 +21,9 @@ AthDictLoaderSvc                                     INFO in initialize...
 AthDictLoaderSvc                                     INFO acquired Dso-registry
 CondInputLoader                                      INFO Adding base classes:
 CondInputLoader                                      INFO Will create WriteCondHandle dependencies for the following DataObjects:
+EventInfoCnvAlg                                      INFO Initializing EventInfoCnvAlg
+EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available
+EventInfoCnvAlg.EventInfoCnvTool                     INFO Will not fill beam spot information into xAOD::EventInfo
 WriteData                                            INFO in initialize()
 WriteData                                           DEBUG data dependencies:
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
@@ -33,7 +36,6 @@ WriteTag                                            DEBUG  name EventNumber type
 WriteTag                                            DEBUG  name MagicNumber type unsigned int
 WriteTag                                            DEBUG data dependencies:
   + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+RunEventTag' ) 
-  + OUTPUT  ( 'TagAthenaAttributeList' , 'StoreGateSvc+RunEventTag' ) 
 MagicWriteTag                                        INFO in initialize()
 MagicWriteTag                                       DEBUG Defining the attribute list specification.
 MagicWriteTag                                       DEBUG Printing out attribute list specification:
@@ -42,13 +44,12 @@ MagicWriteTag                                       DEBUG  name EventNumber type
 MagicWriteTag                                       DEBUG  name MagicNumber type unsigned int
 MagicWriteTag                                       DEBUG data dependencies:
   + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+MagicTag' ) 
-  + OUTPUT  ( 'TagAthenaAttributeList' , 'StoreGateSvc+MagicTag' ) 
+StreamStream1                                       DEBUG In initialize
 StreamStream1                                       DEBUG In initialize 
 StreamStream1                                       DEBUG Found IDecisionSvc.
 DecisionSvc                                          INFO Inserting stream: StreamStream1 with no Algs
 StreamStream1                                       DEBUG End initialize 
-StreamStream1                                       DEBUG In initialize
-StreamStream1                                       DEBUG Found StoreGateSvc store.
+StreamStream1                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream1                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 StreamStream1.StreamStream1Tool                      INFO Initializing StreamStream1.StreamStream1Tool
 StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Initializing StreamStream1.StreamStream1_MakeEventStreamInfo
@@ -102,22 +103,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 1
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 1
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -161,15 +162,39 @@ SimplePoolFile1.root                                DEBUG --->Adding Shape[1 , 6
 SimplePoolFile1.root                                DEBUG ---->Class:ExampleHitContainer_p1
 SimplePoolFile1.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO xAOD::EventAuxInfo_v3 [0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (5 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile1.root                                DEBUG --->Adding Shape[2 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
+SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO xAOD::EventInfo_v1 [AE8BED6D-1D41-4CAF-994B-42613FC91A0A]
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventInfo_v1/EventInfo)
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Branch container 'xAOD::EventInfo_v1_EventInfo'
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opened container CollectionTree(xAOD::EventInfo_v1/EventInfo) of type ROOT_Tree
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/CollectionTree(xAOD::EventInfo_v1/EventInfo) [202]  (6 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
+SimplePoolFile1.root                                DEBUG --->Adding Shape[3 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG ---->Class:xAOD::EventInfo_v1
+SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO DataHeader_p6 [4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLContainer(DataHeader) [202]  (5 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLContainer(DataHeader) [202]  (7 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile1.root                                DEBUG --->Adding Shape[2 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[4 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:DataHeader_p6
 SimplePoolFile1.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -179,9 +204,9 @@ POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
 POOLContainerForm(DataHeaderForm)                   DEBUG Opened container POOLContainerForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLContainerForm(DataHeaderForm) [202]  (6 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLContainerForm(DataHeaderForm) [202]  (8 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile1.root                                DEBUG --->Adding Shape[3 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[5 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:DataHeaderForm_p6
 SimplePoolFile1.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -191,9 +216,9 @@ POOLCollectionTree(Token)                           DEBUG Opening
 POOLCollectionTree(Token)                           DEBUG    attributes# = 1
 POOLCollectionTree(Token)                           DEBUG Branch container 'Token'
 POOLCollectionTree(Token)                           DEBUG Opened container POOLCollectionTree(Token) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(Token) [202]  (7 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(Token) [202]  (9 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A
-SimplePoolFile1.root                                DEBUG --->Adding Shape[4 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[6 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:Token
 SimplePoolFile1.root                                DEBUG ---->[0]:Token Typ:Token [18] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -203,9 +228,9 @@ POOLCollectionTree(RunNumber)                       DEBUG Opening
 POOLCollectionTree(RunNumber)                       DEBUG    attributes# = 1
 POOLCollectionTree(RunNumber)                       DEBUG Branch container 'RunNumber'
 POOLCollectionTree(RunNumber)                       DEBUG Opened container POOLCollectionTree(RunNumber) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(RunNumber) [202]  (8 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(RunNumber) [202]  (a , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile1.root                                DEBUG --->Adding Shape[5 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[7 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:unsigned int
 SimplePoolFile1.root                                DEBUG ---->[0]:unsigned int Typ:unsigned int [3] Size:0 Offset:0 #Elements:1
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(EventNumber)
@@ -213,14 +238,14 @@ POOLCollectionTree(EventNumber)                     DEBUG Opening
 POOLCollectionTree(EventNumber)                     DEBUG    attributes# = 1
 POOLCollectionTree(EventNumber)                     DEBUG Branch container 'EventNumber'
 POOLCollectionTree(EventNumber)                     DEBUG Opened container POOLCollectionTree(EventNumber) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(EventNumber) [202]  (9 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(EventNumber) [202]  (b , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(MagicNumber)
 POOLCollectionTree(MagicNumber)                     DEBUG Opening
 POOLCollectionTree(MagicNumber)                     DEBUG    attributes# = 1
 POOLCollectionTree(MagicNumber)                     DEBUG Branch container 'MagicNumber'
 POOLCollectionTree(MagicNumber)                     DEBUG Opened container POOLCollectionTree(MagicNumber) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(MagicNumber) [202]  (a , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(MagicNumber) [202]  (c , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile1.root                                DEBUG DB Action Commit
 StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
@@ -251,14 +276,44 @@ SimplePoolFile2.root                                DEBUG ---->ClassID:C634FDB6-
 SimplePoolFile2.root                                DEBUG --->Adding Shape[0 , C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:EventInfo_p4
 SimplePoolFile2.root                                DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(ExampleHitContainer_p1/MyHits)
+CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opening
+CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG    attributes# = 1
+CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Branch container 'ExampleHitContainer_p1_MyHits'
+CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opened container CollectionTree(ExampleHitContainer_p1/MyHits) of type ROOT_Tree
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/CollectionTree(ExampleHitContainer_p1/MyHits) [202]  (4 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG ---->ClassID:6BB89FA1-EB62-4641-97CA-3F8DB6588053
+SimplePoolFile2.root                                DEBUG --->Adding Shape[1 , 6BB89FA1-EB62-4641-97CA-3F8DB6588053]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG ---->Class:ExampleHitContainer_p1
+SimplePoolFile2.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
+CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [202]  (5 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile2.root                                DEBUG --->Adding Shape[2 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
+SimplePoolFile2.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventInfo_v1/EventInfo)
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Branch container 'xAOD::EventInfo_v1_EventInfo'
+CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opened container CollectionTree(xAOD::EventInfo_v1/EventInfo) of type ROOT_Tree
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/CollectionTree(xAOD::EventInfo_v1/EventInfo) [202]  (6 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
+SimplePoolFile2.root                                DEBUG --->Adding Shape[3 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG ---->Class:xAOD::EventInfo_v1
+SimplePoolFile2.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLContainer(DataHeader) [202]  (4 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLContainer(DataHeader) [202]  (7 , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile2.root                                DEBUG --->Adding Shape[1 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[4 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:DataHeader_p6
 SimplePoolFile2.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLContainerForm(DataHeaderForm)
@@ -266,9 +321,9 @@ POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
 POOLContainerForm(DataHeaderForm)                   DEBUG Opened container POOLContainerForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLContainerForm(DataHeaderForm) [202]  (5 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLContainerForm(DataHeaderForm) [202]  (8 , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile2.root                                DEBUG --->Adding Shape[2 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[5 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:DataHeaderForm_p6
 SimplePoolFile2.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(Token)
@@ -276,9 +331,9 @@ POOLCollectionTree(Token)                           DEBUG Opening
 POOLCollectionTree(Token)                           DEBUG    attributes# = 1
 POOLCollectionTree(Token)                           DEBUG Branch container 'Token'
 POOLCollectionTree(Token)                           DEBUG Opened container POOLCollectionTree(Token) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(Token) [202]  (6 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(Token) [202]  (9 , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A
-SimplePoolFile2.root                                DEBUG --->Adding Shape[3 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[6 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:Token
 SimplePoolFile2.root                                DEBUG ---->[0]:Token Typ:Token [18] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(RunNumber)
@@ -286,9 +341,9 @@ POOLCollectionTree(RunNumber)                       DEBUG Opening
 POOLCollectionTree(RunNumber)                       DEBUG    attributes# = 1
 POOLCollectionTree(RunNumber)                       DEBUG Branch container 'RunNumber'
 POOLCollectionTree(RunNumber)                       DEBUG Opened container POOLCollectionTree(RunNumber) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(RunNumber) [202]  (7 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(RunNumber) [202]  (a , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile2.root                                DEBUG --->Adding Shape[4 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[7 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:unsigned int
 SimplePoolFile2.root                                DEBUG ---->[0]:unsigned int Typ:unsigned int [3] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(EventNumber)
@@ -296,14 +351,14 @@ POOLCollectionTree(EventNumber)                     DEBUG Opening
 POOLCollectionTree(EventNumber)                     DEBUG    attributes# = 1
 POOLCollectionTree(EventNumber)                     DEBUG Branch container 'EventNumber'
 POOLCollectionTree(EventNumber)                     DEBUG Opened container POOLCollectionTree(EventNumber) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(EventNumber) [202]  (8 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(EventNumber) [202]  (b , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(MagicNumber)
 POOLCollectionTree(MagicNumber)                     DEBUG Opening
 POOLCollectionTree(MagicNumber)                     DEBUG    attributes# = 1
 POOLCollectionTree(MagicNumber)                     DEBUG Branch container 'MagicNumber'
 POOLCollectionTree(MagicNumber)                     DEBUG Opened container POOLCollectionTree(MagicNumber) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(MagicNumber) [202]  (9 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(MagicNumber) [202]  (c , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
@@ -331,22 +386,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 2
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 2
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -375,22 +430,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 3
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 3
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -419,22 +474,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 4
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 4
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -463,22 +518,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 5
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 5
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -507,22 +562,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 6
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 6
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -551,22 +606,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 7
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 7
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -595,22 +650,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 8
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 8
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -639,22 +694,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 9
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 9
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -683,22 +738,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 10
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 10
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -727,22 +782,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 11
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 11
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -771,22 +826,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 12
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 12
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -815,22 +870,22 @@ StreamStream1                                       DEBUG addItemObjects(9102,"P
 StreamStream1                                       DEBUG            Key:PetersHits
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG Result of checking MyHits against PetersHits to see if it matches is false
 StreamStream1                                       DEBUG  No object matching 9102,"PetersHits" found
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 13
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 13
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -864,17 +919,16 @@ StreamStream1                                       DEBUG addItemObjects(3885391
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 14
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 14
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -907,17 +961,16 @@ StreamStream1                                       DEBUG addItemObjects(3885391
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 15
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 15
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -950,17 +1003,16 @@ StreamStream1                                       DEBUG addItemObjects(3885391
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 16
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 16
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -993,17 +1045,16 @@ StreamStream1                                       DEBUG addItemObjects(3885391
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 17
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 17
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -1036,17 +1087,16 @@ StreamStream1                                       DEBUG addItemObjects(3885391
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 18
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 18
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -1079,17 +1129,16 @@ StreamStream1                                       DEBUG addItemObjects(3885391
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 19
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 19
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
@@ -1122,22 +1171,20 @@ StreamStream1                                       DEBUG addItemObjects(3885391
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG addItemObjects(167728019,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-StreamStream1                                       DEBUG  Collected objects:
-StreamStream1                                       DEBUG  Object/count: EventInfo_McEventInfo, 20
-StreamStream1                                       DEBUG  Object/count: ExampleHitContainer_MyHits, 20
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG DB Action Commit
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 20 events processed so far  <<<===
-StreamStream1                                       DEBUG AthenaOutputStream StreamStream1 ::stop()
 StreamStream1                                       DEBUG handle() incident type: MetaDataStop
 ToolSvc.BookkeeperTool                               INFO Successfully copied CutBookkeepers to the output MetaDataStore
 StreamStream1                                       DEBUG addItemObjects(73252552,"FileMetaDataAux.") called
@@ -1168,9 +1215,9 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (b , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (d , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile1.root                                DEBUG --->Adding Shape[6 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[8 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -1180,9 +1227,9 @@ MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Branch container 'EventStreamInfo_p3_StreamStream1'
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opened container MetaData(EventStreamInfo_p3/StreamStream1) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [202]  (c , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [202]  (e , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile1.root                                DEBUG --->Adding Shape[7 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[9 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolFile1.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -1192,9 +1239,9 @@ MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (d , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (f , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile1.root                                DEBUG --->Adding Shape[8 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[10 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -1204,9 +1251,9 @@ MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opening
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG    attributes# = 1
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (e , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (10 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile1.root                                DEBUG --->Adding Shape[9 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[11 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolFile1.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdr(DataHeader)
@@ -1214,26 +1261,26 @@ MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [202]  (f , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [202]  (11 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [202]  (10 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [202]  (12 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile1.root                                DEBUG DB Action Commit
-StreamStream1                                        INFO Metadata records written: 21
+StreamStream1                                       DEBUG Metadata items written: 4
 StreamStream1                                       DEBUG Leaving incident handler for MetaDataStop
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (a , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (d , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile2.root                                DEBUG --->Adding Shape[5 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[8 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile2.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(EventStreamInfo_p3/StreamStream2)
@@ -1241,9 +1288,9 @@ MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG Branch container 'EventStreamInfo_p3_StreamStream2'
 MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG Opened container MetaData(EventStreamInfo_p3/StreamStream2) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(EventStreamInfo_p3/StreamStream2) [202]  (b , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(EventStreamInfo_p3/StreamStream2) [202]  (e , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile2.root                                DEBUG --->Adding Shape[6 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[9 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolFile2.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaData_v1/FileMetaData)
@@ -1251,9 +1298,9 @@ MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (c , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (f , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile2.root                                DEBUG --->Adding Shape[7 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[10 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolFile2.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(IOVMetaDataContainer_p1//TagInfo)
@@ -1261,9 +1308,9 @@ MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opening
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG    attributes# = 1
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (d , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (10 , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile2.root                                DEBUG --->Adding Shape[8 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[11 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolFile2.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdr(DataHeader)
@@ -1271,17 +1318,16 @@ MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdr(DataHeader) [202]  (e , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdr(DataHeader) [202]  (11 , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdrForm(DataHeaderForm) [202]  (f , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdrForm(DataHeaderForm) [202]  (12 , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile2.root                                DEBUG DB Action Commit
-StreamStream2                                        INFO Metadata records written: 21
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -1360,7 +1406,6 @@ EmptyPoolFile.root                                  DEBUG --->Adding Shape[5 , 7
 EmptyPoolFile.root                                  DEBUG ---->Class:DataHeaderForm_p6
 EmptyPoolFile.root                                  DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
 EmptyPoolFile.root                                  DEBUG DB Action Commit
-StreamStream3                                        INFO Metadata records written: 1
 PoolSvc                                             DEBUG Disconnect request for contextId=0
 PoolSvc                                             DEBUG Disconnected PersistencySvc session
 PoolSvc                                             DEBUG Disconnect request for contextId=1

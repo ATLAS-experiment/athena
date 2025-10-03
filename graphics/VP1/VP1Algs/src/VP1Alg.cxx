@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Algs/VP1Alg.h"
@@ -105,8 +105,8 @@ StatusCode VP1Alg::initialize()
 			m_initialvp1files,
 			m_cruiseInitialMode,
 			m_cruiseInitialUpdateSeconds,
-			(m_mfOn ? m_mfSourceDir : ""),
-			(m_mfOn ? m_mfLocalCopyDir : ""),
+            (m_mfOn ? m_mfSourceDir.value() : ""),
+            (m_mfOn ? m_mfLocalCopyDir.value() : ""),
 			m_mfLimit,
 			( m_mfOn ? m_mfAvailableLocalInputDirectories : Gaudi::Property<std::vector<std::string>>() ) );
   if (!m_vp1gui->argumentsAreValid()) {

@@ -1,11 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/SimpleSDTool.h"
-
-// External includes
-#include "CLHEP/Units/SystemOfUnits.h"
 
 // ID helper includes
 #include "CaloIdentifier/CaloIdManager.h"
@@ -26,17 +23,8 @@ namespace LArG4
   //---------------------------------------------------------------------------
   SimpleSDTool::SimpleSDTool(const std::string& type, const std::string& name,
                              const IInterface* parent)
-    : SensitiveDetectorBase(type, name, parent),
-      m_timeBinType("Default"),
-      m_timeBinWidth(2.5*CLHEP::ns),
-      m_useFrozenShowers(false),
-      m_larEmID(nullptr),
-      m_larFcalID(nullptr),
-      m_larHecID(nullptr)
+    : SensitiveDetectorBase(type, name, parent)
   {
-    declareProperty("TimeBinType", m_timeBinType);
-    declareProperty("TimeBinWidth", m_timeBinWidth);
-    declareProperty("UseFrozenShowers", m_useFrozenShowers);
   }
 
   //---------------------------------------------------------------------------

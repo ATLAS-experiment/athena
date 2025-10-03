@@ -2,9 +2,12 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MURoIThresholdsTool.h"
+#include "utilities.h"
 #include <memory>
+using namespace HLTSeedingNs;
 
-uint64_t MURoIThresholdsTool::getPattern(const xAOD::MuonRoI& roi,
+uint64_t MURoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
+                                         const xAOD::MuonRoI& roi,
                                          const RoIThresholdsTool::ThrVec& menuThresholds,
                                          const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
   uint32_t thr_num = static_cast<uint32_t>(roi.getThrNumber());
@@ -24,7 +27,7 @@ uint64_t MURoIThresholdsTool::getPattern(const xAOD::MuonRoI& roi,
 
     if (passed) {
       // set the corresponding bit in the pattern
-      thresholdsPattern |= (static_cast<uint64_t>(1) << thr->mapping());
+      thresholdsPattern |= (1_u64 << thr->mapping());
     }
 
   } // loop over thresholds

@@ -333,7 +333,7 @@ namespace SH
   {
     RCU_READ_INVARIANT (this);
     SampleHandler result;
-    boost::regex expr (pattern);
+    std::regex expr (pattern);
     for (iterator iter = begin(), end = this->end(); iter != end; ++ iter)
     {
       if (RCU::match_expr (expr, (*iter)->name()))
@@ -509,7 +509,7 @@ namespace SH
   {
     // no invariant used
 
-    boost::regex mypattern (pattern);
+    std::regex mypattern (pattern);
 
     for (iterator sample = begin(),
 	   end2 = end(); sample != end2; ++ sample)
@@ -527,7 +527,7 @@ namespace SH
   {
     // no invariant used
 
-    boost::regex mypattern (pattern);
+    std::regex mypattern (pattern);
 
     for (iterator sample = begin(),
 	   end2 = end(); sample != end2; ++ sample)

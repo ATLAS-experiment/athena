@@ -44,24 +44,25 @@ public:
     std::vector<GsfMaterial::Combined>&,
     const MultiComponentState&,
     const Layer&,
-    PropDirection direction,
-    ParticleHypothesis particleHypothesis) const = 0;
+    PropDirection direction) const = 0;
 
   //!< Convolution with pre-measurement-update material properties
   virtual MultiComponentState preUpdate(
     std::vector<GsfMaterial::Combined>&,
     const MultiComponentState&,
     const Layer&,
-    PropDirection direction,
-    ParticleHypothesis particleHypothesis) const = 0;
+    PropDirection direction) const = 0;
 
   //!< Convolution with post-measurement-update material properties
   virtual MultiComponentState postUpdate(
     std::vector<GsfMaterial::Combined>&,
     const MultiComponentState&,
     const Layer&,
-    PropDirection direction,
-    ParticleHypothesis particleHypothesis) const = 0;
+    PropDirection direction) const = 0;
+
+  //!< The particle hypothesis we implement material effects for.
+  virtual Trk::ParticleHypothesis particleHypothesis() const = 0;
+
 };
 
 } // end Trk namespace

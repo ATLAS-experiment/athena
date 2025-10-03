@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -9,6 +9,7 @@
 //     email                : antonio.jacques.costa@cern.ch ulla.blumenschein@cern.ch tong.qiu@cern.ch
 //  ***************************************************************************/
 #include <vector>
+#include <mutex>
 
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
@@ -18,19 +19,11 @@
 
 namespace LVL1 {
 
-    static thread_local int s_corrections[3][25] = {
-            {0,0,0,0,0,0,0,0x8,0,0,0xb,0x4,0x8,0x9,0x34,0x7e,0x7b,0x6b,0,0,0,0,0,0,0xc},
-            {0xe,0x12,0x12,0x12,0x12,0x13,0x18,0x17,0x42,0x40,0x38,0x3d,0x3b,0x4e,0x2d,0xc,0x10,0x4,0x27,0x19,0x19,0x16,0x12,0x10,0xc},
-            {0xb,0x8,0x8,0x8,0x8,0x8,0x7,0x9,0x8,0x8,0x8,0x7,0x8,0x8,0x21,0x2,0x2,0x4,0x6,0x8,0x8,0x8,0x9,0x10,0x12}
-    };
-    bool thread_local eFEXegAlgo::s_dmCorrectionsLoaded = false;
-
-
     // default constructor for persistency
     eFEXegAlgo::eFEXegAlgo(const std::string& type, const std::string& name, const IInterface* parent):
             AthAlgTool(type, name, parent)
     {
-        declareInterface<IeFEXegAlgo>(this);
+        declareInterface<eFEXegAlgo>(this);
     }
 
     /** Destructor */
@@ -352,6 +345,23 @@ namespace LVL1 {
 
     }
 
+
+    LVL1::eFEXegAlgo::Corrections::Corrections (const CondAttrListCollection& dmCorrections,
+                                                MsgStream& msg)
+    {
+      for (const auto& p : dmCorrections) {
+        if (p.first < 25 || p.first >= 50) continue;
+        m_corrections[0][p.first - 25] = p.second["EmPS"].data<int>();
+        m_corrections[1][p.first - 25] = p.second["EmFR"].data<int>();
+        m_corrections[2][p.first - 25] = p.second["EmMD"].data<int>();
+        if (msg.level() <= MSG::DEBUG) {
+          msg << MSG::DEBUG << "DM Correction for etaIdx=" << (p.first - 25) << " : [" << m_corrections[0][p.first - 25] << ","
+              << m_corrections[1][p.first - 25] << "," << m_corrections[2][p.first - 25] << "]"
+              << endmsg;
+        }
+      }
+    }
+
     unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer) {
         /// Check corrections are required and layer is valid, otherwise do nothing
         if ( !m_dmCorr || layer > 2 ) return ET;
@@ -377,32 +387,25 @@ namespace LVL1 {
             ieta = 8 + 4*(3-m_fpgaid) + (4-m_central_eta);
         }
 
-        if (!s_dmCorrectionsLoaded) {
-            std::lock_guard<std::mutex> lk(m_dmCorrectionsMutex); // ensure only one thread tries to load corrections
+	static std::once_flag flag;
+	std::call_once(flag, [&]() {
+
             if (!m_dmCorrectionsKey.empty()) {
-                // replace s_corrections values with values from database ... only try this once
+                // replace m_corrections values with values from database ... only try this once
                 SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey/*, ctx*/ };
                 if (dmCorrections.isValid()) {
                     if(dmCorrections->size()==0 && Gaudi::Hive::currentContext().eventID().time_stamp()>1672527600) { // not an error for data before 2023 (will include MC21 and MC23a)
                         ATH_MSG_ERROR("No dead material corrections found in conditions database for this event in folder " << m_dmCorrectionsKey.key());
                         throw std::runtime_error("No dead material corrections found in database for this event");
                     }
-                    for (auto itr = dmCorrections->begin(); itr != dmCorrections->end(); ++itr) {
-                        if (itr->first < 25 || itr->first >= 50) continue;
-                        s_corrections[0][itr->first - 25] = itr->second["EmPS"].data<int>();
-                        s_corrections[1][itr->first - 25] = itr->second["EmFR"].data<int>();
-                        s_corrections[2][itr->first - 25] = itr->second["EmMD"].data<int>();
-                        ATH_MSG_DEBUG("DM Correction for etaIdx=" << (itr->first - 25) << " : [" << s_corrections[0][itr->first - 25] << ","
-                                                                  << s_corrections[1][itr->first - 25] << "," << s_corrections[2][itr->first - 25] << "]" );
-                    }
+                    m_corrections = Corrections (*dmCorrections.cptr(), msg());
                 }
-                ATH_MSG_INFO("Loaded DM Corrections from database");
+		ATH_MSG_INFO("Loaded DM Corrections from database");
             }
-            s_dmCorrectionsLoaded = true;
-        }
+        });
 
         /// Retrieve the factor from table (eventually from DB)
-        unsigned int factor = s_corrections[layer][ieta];
+        unsigned int factor = m_corrections.corr(layer, ieta);
 
         /** Calculate correction
             Factors are 7 bit words, highest bit corresponding to the most significant

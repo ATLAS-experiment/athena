@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -31,8 +31,8 @@ namespace CP {
 
   StatusCode MissingETPlusTransverseMassSelectorAlg::execute() {
     // accessors
-    static const SG::AuxElement::ConstAccessor<float> acc_pt_dressed("pt_dressed");
-    static const SG::AuxElement::ConstAccessor<float> acc_phi_dressed("phi_dressed");
+    static const SG::ConstAccessor<float> acc_pt_dressed("pt_dressed");
+    static const SG::ConstAccessor<float> acc_phi_dressed("phi_dressed");
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo

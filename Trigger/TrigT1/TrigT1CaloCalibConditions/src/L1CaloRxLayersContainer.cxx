@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloRxLayersContainer.h"
@@ -105,7 +105,7 @@ DataObject* L1CaloRxLayersContainer::makePersistent() const {
         attrListCollection->add(channelId, attrList);
     }
 
-    return (DataObject*) attrListCollection;
+    return attrListCollection;
 }
 
 void L1CaloRxLayersContainer::makeTransient(const std::map<std::string, const CondAttrListCollection*>& condAttrListCollectionMap) {

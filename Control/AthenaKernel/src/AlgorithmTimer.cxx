@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -57,7 +57,7 @@ AlgorithmTimer::AlgorithmTimer(unsigned int milliseconds,
 			       AlgorithmTimerConfig conf) :
   m_timeout (0),
   m_timerid(),
-  m_onAlarm(callback),
+  m_onAlarm(std::move(callback)),
   m_gdb_details (0)
 {
   // prevent valgrind warning

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -147,6 +147,7 @@ StatusCode HiveMgrSvc::freeStore( size_t slotIndex ) {
  * @return    slot number (npos to indicate an error).
  */
 size_t HiveMgrSvc::getPartitionNumber(int evtNumber) const {
+  std::scoped_lock lock{m_mutex};
   for (size_t index=0; index<m_nSlots; ++index) {
     if( m_slots[index].eventNumber == evtNumber) return index;
   }
@@ -170,7 +171,7 @@ bool HiveMgrSvc::exists( const DataObjID& id) {
     std::string cl = id.fullKey();
     cl.erase(cl.find('/'),cl.length());
 
-    DataObjID d2(cl,key);
+    DataObjID d2(std::move(cl),key);
     return m_hiveStore->transientContains(d2.clid(), key);
   } else {    
     return m_hiveStore->transientContains(id.clid(), key);

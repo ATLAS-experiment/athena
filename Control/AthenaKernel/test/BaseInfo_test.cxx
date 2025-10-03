@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/test/BaseInfo_test.cxx
@@ -308,7 +308,7 @@ class KCopyConversion
   : public SG::CopyConversion<K, M>
 {
 public:
-  void convert (const K& src, M& dst) const
+  virtual void convert (const K& src, M& dst) const override
   { dst.x = src.x; }
 };
 

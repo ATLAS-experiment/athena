@@ -20,9 +20,6 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 
-#include "xAODBTagging/BTaggingContainer.h"
-#include "xAODBTagging/BTaggingAuxContainer.h"
-
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -37,7 +34,7 @@ class TrigBjetBtagHypoTool : virtual public ::AthAlgTool {
  public:
   struct TrigBjetBtagHypoToolInfo {
     TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
-    ElementLink< xAOD::BTaggingContainer > btaggingEL;
+    ElementLink< xAOD::JetContainer > jetEL;
     ElementLink< xAOD::VertexContainer > vertexEL;
     TrigCompositeUtils::Decision* decision;
     const InDet::BeamSpotData* beamSpot;

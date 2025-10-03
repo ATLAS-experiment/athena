@@ -9,7 +9,6 @@
 # is getting out of control.
 #
 
-from __future__ import print_function
 
 
 import CoolConvUtilities.AtlCoolLib as AtlCoolLib

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/IBender.h"
@@ -19,7 +19,7 @@ namespace ForwardTracker {
 		 double              aper3,
 		 double              aper4,
 		 Side                side,
-		 IBender::ConstPtr_t bender, 
+		 IBender * bender, 
 		 const std::string&  label):
     m_label    (label),
     m_side     (side),

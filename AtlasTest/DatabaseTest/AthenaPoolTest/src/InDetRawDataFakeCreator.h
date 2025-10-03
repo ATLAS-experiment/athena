@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SRC_INDETRAWDATAFAKECREATOR_H
@@ -25,7 +25,6 @@
  *
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "InDetRawData/PixelRDO_Collection.h"
 #include "InDetRawData/SCT_RDO_Collection.h"
@@ -35,7 +34,6 @@
 #include "InDetIdentifier/TRT_ID.h"
 #include "GaudiKernel/MsgStream.h"
 
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 class InDetRawDataFakeCreator
 {
@@ -64,8 +62,6 @@ public:
 };
 
 
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 inline InDetRawDataFakeCreator::InDetRawDataFakeCreator()
 {
@@ -143,16 +139,18 @@ InDetRawDataFakeCreator::createSCT_RawDataColl(IdentifierHash hashId,
 					       MsgStream& log)
 {
     // create a new sct RDO collection
-    InDetRawDataCollection<SCT_RDORawData>* rdocoll = 
-	new InDetRawDataCollection< SCT_RDORawData >(hashId);
-
+    auto * rdocoll = new InDetRawDataCollection< SCT_RDORawData >(hashId);
     IdContext cntx(sctId->wafer_context());
-
     // need the DE identifier
     Identifier waferId = sctId->wafer_id (hashId);
     rdocoll->setIdentifier(waferId);
-
-    int deltaStrip = sctId->strip_max(waferId)/6;
+    const int maxPossibleStrip = sctId->strip_max(waferId);
+    if (maxPossibleStrip<0) { //error condition, if waferId not found
+      delete rdocoll;
+      log << MSG::WARNING <<"waferId unknown in InDetRawDataFakeCreator::createSCT_RawDataColl"<<endmsg;
+      return nullptr;
+    }
+    int deltaStrip = maxPossibleStrip/6;
     log << MSG::VERBOSE << "strip max, dstrip: " 
 	<< sctId->strip_max(waferId) << " " 
 	<< deltaStrip << " " 

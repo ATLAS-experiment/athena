@@ -11,7 +11,7 @@
 #include <cmath>
 #include <vector>
 
-#include "L1CaloFEXSim/gFEXaltMetAlgo.h"
+#include "gFEXaltMetAlgo.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gTower.h"
 

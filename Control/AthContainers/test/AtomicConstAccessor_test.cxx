@@ -26,8 +26,8 @@ class AuxVectorBase
   : public SG::AuxVectorData
 {
 public:
-  virtual size_t size_v() const { return 10; }
-  virtual size_t capacity_v() const { return 10; }
+  virtual size_t size_v() const override { return 10; }
+  virtual size_t capacity_v() const override { return 10; }
 
   using SG::AuxVectorData::setStore;
   void set (SG::AuxElement& b, size_t index)

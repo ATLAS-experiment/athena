@@ -36,7 +36,8 @@ namespace CP {
         {340453,2017},
         {364292,2018},
         {440613,2022},
-        {456749,2023}
+        {456749,2023},
+        {486706,2024}
     };
 
     MuonTriggerScaleFactors::MuonTriggerScaleFactors(const std::string& name) :
@@ -47,7 +48,7 @@ namespace CP {
         m_efficiencyMap(),
         m_efficiencyMapReplicaArray(),
         m_muonquality("Medium"),
-        m_calibration_version("240717_mc23ad"),
+        m_calibration_version("250731_SummerUpdate"),
         m_custom_dir(),
         m_binning("fine"),
         m_allowZeroSF(false),
@@ -80,12 +81,13 @@ namespace CP {
   StatusCode MuonTriggerScaleFactors::LoadTriggerMap(unsigned int year) {
         std::string fileName = m_fileName;
         if (fileName.empty()) {
-          if (year == 2015) fileName = "muontrigger_sf_2015_mc20a_v1.root";
-          else if (year == 2016) fileName = "muontrigger_sf_2016_mc20a_v1.root";
-          else if (year == 2017) fileName = "muontrigger_sf_2017_mc20d_v1.root";
-          else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v2.root";
-          else if (year == 2022) fileName = "muontrigger_sf_2022_mc23a_v02.root";
-          else if (year == 2023) fileName = "muontrigger_sf_2023_mc23d_v02.root";
+          if (year == 2015) fileName = "muontrigger_sf_2015_mc20a_v3.root";
+          else if (year == 2016) fileName = "muontrigger_sf_2016_mc20a_v3.root";
+          else if (year == 2017) fileName = "muontrigger_sf_2017_mc20d_v3.root";
+          else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v3.root";
+          else if (year == 2022) fileName = "muontrigger_sf_2022_mc23a_v3.root";
+          else if (year == 2023) fileName = "muontrigger_sf_2023_mc23d_v3.root";
+          else if (year == 2024) fileName = "muontrigger_sf_2024_mc23e_v1.root";
           else{
             ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
             return StatusCode::SUCCESS;
@@ -222,7 +224,7 @@ namespace CP {
             m_replicaSet.insert(trigToy);
 
         ATH_MSG_INFO("MuonTriggerScaleFactors::initialize");
-        constexpr auto years_to_run = std::to_array<int>({2015, 2016, 2017, 2018, 2022, 2023});
+        constexpr auto years_to_run = std::to_array<int>({2015, 2016, 2017, 2018, 2022, 2023, 2024});
         for (const int &year: years_to_run) {
             ATH_CHECK(LoadTriggerMap(year));
         }
@@ -798,13 +800,24 @@ namespace CP {
         else if (year == 2022) {
             if(runNumber >= 430536 && runNumber <= 432180) return "F";
             else if (runNumber >= 435816 && runNumber <= 439927) return "H";
-            else if (runNumber >= 440407 && runNumber <= 440613) return "J";
+            else if (runNumber >= 440199 && runNumber <= 440613) return "J";
         }
         else if (year == 2023) {
             if(runNumber >= 451094 && runNumber <= 455924) return "F";
             else if (runNumber >= 455975 && runNumber <= 456749) return "G";
         }
-    
+        else if (year == 2024) {
+            if(runNumber >= 473235 && runNumber <= 473400) return "E";
+            else if (runNumber >= 473617 && runNumber <= 474271) return "F";
+            else if (runNumber >= 474441 && runNumber <= 474602) return "G";
+            else if (runNumber >= 474657 && runNumber <= 475522) return "H";
+            else if (runNumber >= 476060 && runNumber <= 477048) return "I";
+            else if (runNumber >= 479103 && runNumber <= 480032) return "K";
+            else if (runNumber >= 480188 && runNumber <= 482221) return "M";
+            else if (runNumber >= 482374 && runNumber <= 484799) return "N";
+            else if (runNumber >= 484909 && runNumber <= 486706) return "O";
+        }
+
       ATH_MSG_FATAL("RunNumber: " << runNumber << " not known! Will stop the code to prevent using wrong SFs.");
       throw std::invalid_argument{""};
     }

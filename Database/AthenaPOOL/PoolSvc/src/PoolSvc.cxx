@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolSvc.cxx
@@ -43,38 +43,30 @@
 
 #include "DBReplicaSvc/IDBReplicaSvc.h"
 
-#include <cstdlib> 	  // for getenv()
-#include <cstring> 	  // for strcmp()
-#include <algorithm>  // for STL find()
-#include <cstdio>     // for fopen
-#include <ctype.h>    // for isdigit
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+#include <cstdio>
+#include <cctype>
+#include <exception>  // for runtime_error
 
 bool isNumber(const std::string& s) {
-   return !s.empty() and ( isdigit(s[0]) or s[0]=='+' or s[0]=='-' );
+   return !s.empty() && (std::isdigit(s[0]) || s[0] == '+' || s[0] == '-');
 }
 
 //__________________________________________________________________________
 StatusCode PoolSvc::initialize() {
-   if (!::AthService::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthService base class.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(::AthService::initialize());
 
    // Register this service for 'I/O' events
    ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
-   if (!iomgr.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Could not retrieve IoComponentMgr !");
-      return(StatusCode::FAILURE);
-   }
-   if (!iomgr->io_register(this).isSuccess()) {
-      ATH_MSG_FATAL("Could not register myself with the IoComponentMgr !");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(iomgr.retrieve());
+   ATH_CHECK(iomgr->io_register(this));
    // Register input file's names with the I/O manager, unless in SharedWrite mode, set by AthenaPoolCnvSvc
    bool allGood = true;
-   for (auto& catalog : m_readCatalog.value()) {
-      if (catalog.compare(0, 16, "xmlcatalog_file:") == 0) {
-         const std::string& fileName = catalog.substr(16);
+   for (const auto& catalog : m_readCatalog.value()) {
+      if (catalog.starts_with("xmlcatalog_file:")) {
+         const std::string fileName = catalog.substr(16);
          if (!iomgr->io_register(this, IIoComponentMgr::IoMode::READ, fileName, fileName).isSuccess()) {
             ATH_MSG_FATAL("could not register [" << catalog << "] for input !");
             allGood = false;
@@ -83,8 +75,8 @@ StatusCode PoolSvc::initialize() {
          }
       }
    }
-   if (m_writeCatalog.value().compare(0, 16, "xmlcatalog_file:") == 0) {
-      const std::string& fileName = m_writeCatalog.value().substr(16);
+   if (m_writeCatalog.value().starts_with("xmlcatalog_file:")) {
+      const std::string fileName = m_writeCatalog.value().substr(16);
       if (!iomgr->io_register(this, IIoComponentMgr::IoMode::WRITE, fileName, fileName).isSuccess()) {
          ATH_MSG_FATAL("could not register [" << m_writeCatalog.value() << "] for input !");
          allGood = false;
@@ -246,6 +238,7 @@ StatusCode PoolSvc::stop() {
 
 //__________________________________________________________________________
 void PoolSvc::clearState() {
+   std::lock_guard<CallMutex> lock(m_pool_mut);
    // Cleanup persistency service
    for (const auto& persistencySvc : m_persistencySvcVec) {
       delete persistencySvc;
@@ -511,7 +504,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
    pool::CollectionDescription collDes(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "");
    if (collectionType == "RootCollection" &&
 	   m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-      ATH_MSG_INFO("Writing ExplicitROOT Collection - do not pass session pointer");
+      ATH_MSG_INFO("Writing RootCollection - do not pass session pointer");
       std::scoped_lock lock(m_pool_mut);
       collPtr = collFac->create(collDes,  pool::ICollection::READ);
    } else {
@@ -537,9 +530,8 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
          }
          rntuple_error = e.what();
       }
-      if( !collPtr ) throw pool::Exception( "Failed to open APR Collection as RootCollection or RNTCollection: "
-                                            + tree_error + " | " + rntuple_error,
-                                            "PoolSvc::createCollection", "PoolSvc" );
+      if( !collPtr ) throw std::runtime_error( "Failed to open APR Collection as RootCollection or RNTCollection: "
+                                            + tree_error + " | " + rntuple_error + "PoolSvc::createCollection" );
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
@@ -586,7 +578,7 @@ Token* PoolSvc::getToken(const std::string& connection,
    if (contH == nullptr) {
       return(nullptr);
    }
-   pool::ITokenIterator* tokenIter = contH->tokens("");
+   pool::ITokenIterator* tokenIter = contH->tokens();
    Token* thisToken = tokenIter->next();
    for (unsigned long ipos = 0; ipos < ientry; ipos++) {
       delete thisToken; thisToken = tokenIter->next();
@@ -912,7 +904,7 @@ StatusCode PoolSvc::setFrontierCache(const std::string& conn) {
          for (int irep = 0, nrep = dbset->numberOfReplicas(); irep < nrep; ++irep) {
 	    const std::string pcon = dbset->replica(irep).connectionString();
 	    if (pcon.compare(0, 9, "frontier:") == 0) {
-               physcons.push_back(pcon);
+               physcons.push_back(std::move(pcon));
             }
          }
          delete dbset; dbset = nullptr;
@@ -931,20 +923,18 @@ StatusCode PoolSvc::setFrontierCache(const std::string& conn) {
    // get the WebCacheControl interface via ConnectionSvc
    // note ConnectionSvc should already be loaded by initialize
    coral::IWebCacheControl& webCache = conSvcH.webCacheControl();
-   for (std::vector<std::string>::const_iterator iter = physcons.begin(), last = physcons.end();
-		   iter != last; ++iter) {
-      if (find(m_frontierRefresh.value().begin(), m_frontierRefresh.value().end(), *iter)
-		      == m_frontierRefresh.value().end()
-	      && find(m_frontierRefresh.value().begin(), m_frontierRefresh.value().end(), conn)
-		      == m_frontierRefresh.value().end()) {
+   for (const auto& physcon : physcons) {
+      const auto& refreshList = m_frontierRefresh.value();
+      if (std::find(refreshList.begin(), refreshList.end(), physcon) == refreshList.end()
+          && std::find(refreshList.begin(), refreshList.end(), conn) == refreshList.end()) {
          // set that a table DUMMYTABLE should be refreshed - indicates that everything
          // else in the schema should not be
-         webCache.refreshTable(*iter, "DUMMYTABLE");
+         webCache.refreshTable(physcon, "DUMMYTABLE");
       } else {
          // set the schema to be refreshed
-         webCache.refreshSchemaInfo(*iter);
+         webCache.refreshSchemaInfo(physcon);
       }
-      ATH_MSG_DEBUG("Cache flag for connection " << *iter << " set to " << webCache.webCacheInfo(*iter).isSchemaInfoCached());
+      ATH_MSG_DEBUG("Cache flag for connection " << physcon << " set to " << webCache.webCacheInfo(physcon).isSchemaInfoCached());
    }
    return(StatusCode::SUCCESS);
 }
@@ -993,7 +983,6 @@ PoolSvc::~PoolSvc() {
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, const std::string& dbName) const {
-   pool::IDatabase* dbH = nullptr;
    if (contextId >= m_persistencySvcVec.size()) {
       ATH_MSG_WARNING("getDbHandle: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
@@ -1011,15 +1000,13 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       }
    }
    if (dbName.compare(0, 4,"PFN:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
    } else if (dbName.compare(0, 4, "LFN:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
    } else if (dbName.compare(0, 4,"FID:") == 0) {
-      dbH = sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
-   } else {
-      dbH = sesH.databaseHandle(dbName, pool::DatabaseSpecification::PFN);
-   }
-   return(std::unique_ptr<pool::IDatabase>(dbH));
+      return sesH.databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
+   } 
+   return sesH.databaseHandle(dbName, pool::DatabaseSpecification::PFN);
 }
 //__________________________________________________________________________
 std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* dbH, const std::string& contName) const {

@@ -15,7 +15,7 @@ namespace FlavorTagInference {
         ConstituentsSortOrder config) 
     {
       typedef xAOD::FlowElement FE;
-      typedef xAOD::Jet Jet;
+      typedef xAOD::IParticle Jet;
       switch(config) {
         case ConstituentsSortOrder::PT_DESCENDING:
           return [](const FE* p, const Jet&) {return p->pt();};
@@ -35,7 +35,7 @@ namespace FlavorTagInference {
           cfg.inputs, options))
     {
         static const SG::AuxElement::ConstAccessor<PartLinks> acc("constituentLinks");
-        m_associator = [](const xAOD::Jet& jet) -> FEV {
+        m_associator = [](const xAOD::IParticle& jet) -> FEV {
           FEV particles;
           for (const ElementLink<IPC>& link : acc(jet)){
             if (!link.isValid()) {
@@ -55,7 +55,7 @@ namespace FlavorTagInference {
     }
 
     std::vector<const xAOD::FlowElement*> FlowElementsLoader::getFlowElementsFromJet(
-        const xAOD::Jet& jet
+        const xAOD::IParticle& jet
     ) const
     {
         std::vector<std::pair<double, const xAOD::FlowElement*>> particles;
@@ -70,13 +70,12 @@ namespace FlavorTagInference {
         return only_particles;
     }
 
-    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> FlowElementsLoader::getData(
-      const xAOD::Jet& jet, 
-      [[maybe_unused]] const SG::AuxElement& btag) const {
+    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> FlowElementsLoader::getData(
+      const xAOD::IParticle& jet) const {
         FlowElements sorted_flows = getFlowElementsFromJet(jet);
 
         // We return a dummy vector of IParticles as we don't decorate flow elements
-        return std::make_tuple(m_config.output_name, m_seqGetter.getFeats(jet, sorted_flows), std::vector<const xAOD::IParticle *>{});
+        return std::make_tuple(m_seqGetter.getFeats(jet, sorted_flows), std::vector<const xAOD::IParticle *>{});
     }
 
     const FTagDataDependencyNames& FlowElementsLoader::getDependencies() const {

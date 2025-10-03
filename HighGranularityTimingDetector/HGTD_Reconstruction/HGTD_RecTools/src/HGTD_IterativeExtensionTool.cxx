@@ -102,9 +102,7 @@ HGTD::ExtensionObject HGTD_IterativeExtensionTool::extendTrackToHGTD(
 
   // get the layers, traverse depending on endcap used
   // since they are not in ascending z order!!
-  Trk::BinnedArraySpan<const Trk::Layer* const> layers =
-      confined_layers
-          ->arrayObjects(); // is CxxUtils::span<const Trk::Layer* const>
+  std::span<Trk::Layer const * const> layers = confined_layers->arrayObjects();
   size_t layer_size = layers.size();
 
   short position = is_pos_endcap ? 0 : layer_size - 1;

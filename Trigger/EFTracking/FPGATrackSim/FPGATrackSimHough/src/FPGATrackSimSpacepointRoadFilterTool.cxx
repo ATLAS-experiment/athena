@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimSpacepointRoadFilterTool.cxx
@@ -33,6 +33,9 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::initialize()
     // Retrieve info
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if (m_setSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
+
+    // Convert number of missing hits to threshold.
+    m_threshold = ((m_isSecondStage) ? m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers() : m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers()) - m_threshold;
 
     // This should be done properly through the monitors, later.
     m_inputRoads = new TH1I((m_isSecondStage) ? "srft_input_roads2" : "srft_input_roads", "srft_input_roads", 1000, -0.5, 1000-0.5);
@@ -149,9 +152,12 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             // This can now only happen due to eta pattern filtering, so don't drop the road, but leave a way to track.
             retval = false;
 
+            // Debug message. Let's see if this still happens, now.
+            ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road->getXBin() << ", y = " << initial_road->getYBin() << ": spacepoints_in = " << spacepoints_in << ", spacepoints_out = " << spacepoints_out);
+
             // Update the spacepoint vectors.
-            spacepoints_in = new_sp_in;
-            spacepoints_out = new_sp_out;
+            spacepoints_in = std::move(new_sp_in);
+            spacepoints_out = std::move(new_sp_out);
 
             // Now update the two layers accordingly, having converted invalid SPs back to paired hits.
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_in = spacepoints_in;
@@ -161,13 +167,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_out = spacepoints_out;
             new_all_out.insert(std::end(new_all_out), std::begin(strip_hits_out), std::end(strip_hits_out));
             initial_road->setHits(layer + 1, std::move(new_all_out));
-
-            // Debug message.
-            ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road->getXBin() << ", y = " << initial_road->getYBin());
         }
-
-        strip_hits.emplace(layer, strip_hits_in);
-        strip_hits.emplace(layer + 1, strip_hits_out);
 
         // Update our spacepoint maps now that any uniques have been eliminated.
         inner_spacepoints.emplace(layer, spacepoints_in);
@@ -176,6 +176,14 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             ATH_MSG_WARNING("Handling of unique spacepoints failed, " << spacepoints_in.size() << " != " << spacepoints_out.size());
             return false;
         }
+
+        // If told to do so, filter out any strip hits if there were ALSO spacepoints.
+        if (spacepoints_in.size() > 0 && !m_dropUnpairedIfSP) {
+            strip_hits_in.clear();
+            strip_hits_out.clear();
+        }
+        strip_hits.emplace(layer, strip_hits_in);
+        strip_hits.emplace(layer + 1, strip_hits_out);
 
         layer += 1;
     }
@@ -249,9 +257,9 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
                 // Because we are only iterating up to the *original* size, we can add new
                 // entries to the end like this.
                 // Require that we only keep roads that have enough hits to save time.
-                working_roads[i] = spacepoints_only;
+                working_roads[i] = std::move(spacepoints_only);
                 if (strips_only.getNHitLayers() >= m_threshold) {
-                    working_roads.push_back(strips_only);
+                    working_roads.push_back(std::move(strips_only));
                 }
             }
         }
@@ -275,7 +283,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             continue;
         }
 
-            m_postfilter_roads.push_back(road);
+            m_postfilter_roads.push_back(std::move(road));
     }
 
     return retval;

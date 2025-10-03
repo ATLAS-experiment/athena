@@ -62,7 +62,7 @@ namespace ActsTrk
      ATH_CHECK( m_trackingGeometryTool.retrieve() );
      ATH_CHECK( m_pixelClustersToTruth.initialize() );
      ATH_CHECK( m_stripClustersToTruth.initialize() );
-     ATH_CHECK( m_hgtdClustersToTruth.initialize() );
+     ATH_CHECK( m_hgtdClustersToTruth.initialize(not m_hgtdClustersToTruth.empty()) );
 
      ATH_CHECK( m_truthHitCountsOut.initialize() );
 
@@ -105,31 +105,35 @@ namespace ActsTrk
     std::unique_ptr<TruthParticleHitCounts>
        truth_particle_hit_counts( std::make_unique<TruthParticleHitCounts>() );
 
-    SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> pixelClustersToTruthAssociation = SG::makeHandle(m_pixelClustersToTruth, ctx);
-    if (!pixelClustersToTruthAssociation.isValid()) {
-       ATH_MSG_ERROR("No pixel clusterss for key " << m_pixelClustersToTruth.key() );
-       return StatusCode::FAILURE;
-    }
-    SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> stripClustersToTruthAssociation = SG::makeHandle(m_stripClustersToTruth, ctx);
-    if (!stripClustersToTruthAssociation.isValid()) {
-       ATH_MSG_ERROR("No strip clusterss for key " << m_stripClustersToTruth.key() );
-       return StatusCode::FAILURE;
-    }
-    SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> hgtdClustersToTruthAssociation = SG::makeHandle(m_hgtdClustersToTruth, ctx);
-    if(!hgtdClustersToTruthAssociation.isValid()) {
-       ATH_MSG_DEBUG("No HGTD clusterss for key " << m_hgtdClustersToTruth.key() );
-    }
+    
+    const ActsTrk::MeasurementToTruthParticleAssociation* pixelClustersToTruthAssociation{nullptr};
+    ATH_CHECK(SG::get(pixelClustersToTruthAssociation, m_pixelClustersToTruth, ctx));
+  
+    const ActsTrk::MeasurementToTruthParticleAssociation* stripClustersToTruthAssociation{nullptr};
+    ATH_CHECK(SG::get(stripClustersToTruthAssociation, m_stripClustersToTruth, ctx));
+  
+    const ActsTrk::MeasurementToTruthParticleAssociation* hgtdClustersToTruthAssociation{nullptr};
+    ATH_CHECK(SG::get(hgtdClustersToTruthAssociation, m_hgtdClustersToTruth, ctx));
+   
+
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
                static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
        measurement_to_truth_association_maps{};
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
-    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation.cptr();
-    ATH_MSG_DEBUG("Measurement association entries: "
-                  << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]->size()
-                  << " + " << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]->size());
+    
+    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation;
+    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation;
+    measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation;
+    auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
+      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[to_underlying(type)];
+      return assoc ? assoc->size() : 0ul;
+    };
+
+    ATH_MSG_DEBUG("Measurement association entries: "  << assocSize(xAOD::UncalibMeasType::PixelClusterType)
+                 << " + " << assocSize(xAOD::UncalibMeasType::StripClusterType) 
+                 << " + " << assocSize(xAOD::UncalibMeasType::HGTDClusterType)
+                 );
 
     unsigned int measurement_type_i=0;
     --measurement_type_i;

@@ -176,7 +176,7 @@ TBranchAuxDynReader::TBranchAuxDynReader(TTree *tree, TBranch *base_branch)
    // The Branch here is the object (AuxContainer) branch, not the attribute branch
    TClass *tc = nullptr, *storeTC = nullptr;
    EDataType type;
-   base_branch->GetExpectedType(tc, type);    //MN: Errors would be coaught in isAuxDynBranch() earlier
+   (void)base_branch->GetExpectedType(tc, type);    //MN: Errors would be caught in isAuxDynBranch() earlier
    if( tc ) storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
    if( storeTC ) m_storeHolderOffset = tc->GetBaseClassOffset( storeTC );
    if( m_storeHolderOffset < 0 ) {

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TBECInnerModuleTool__H
-#define TBECInnerModuleTool__H
+#ifndef TBECInnerModuleTool_H
+#define TBECInnerModuleTool_H
 
 #include "LArG4Code/LArG4SDTool.h"
 #include <string>
@@ -27,7 +27,7 @@ class TBECInnerModuleTool : public LArG4SDTool
   TBECInnerModuleTool(const std::string& type, const std::string& name, const IInterface *parent);
 
   // Destructor
-  virtual ~TBECInnerModuleTool() {}
+  virtual ~TBECInnerModuleTool() = default;
 
   virtual StatusCode initializeCalculators() override final;
 
@@ -51,22 +51,29 @@ class TBECInnerModuleTool : public LArG4SDTool
   SG::WriteHandle<LArHitContainer> m_HitColl_chcoll;
   SG::WriteHandle<LArHitContainer> m_HitColl_ropt;
 
-  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjcalc;// LArG4::EMEC_ECOR_GADJ
-  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjoldcalc;// LArG4::EMEC_ECOR_GADJ_OLD
-  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjecalc;// LArG4::EMEC_ECOR_GADJ_E
-  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjscalc;// LArG4::EMEC_ECOR_GADJ_S
-  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjsecalc;// LArG4::EMEC_ECOR_GADJ_SE
-  ServiceHandle<ILArCalculatorSvc> m_emecinnerchclcalc;// LArG4::EMEC_ECOR_CHCL
-  ServiceHandle<ILArCalculatorSvc> m_emecinnercalc;// LArG4::EMEC_ECOR_ROPT
+  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjcalc {this, "EMECPosInnerWheel_ECOR_GADJCalculator"
+    , "EMECPosInnerWheel_ECOR_GADJCalculator"}; // LArG4::EMEC_ECOR_GADJ
+  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjoldcalc {this, "EMECPosInnerWheel_ECOR_GADJ_OLDCalculator"
+    , "EMECPosInnerWheel_ECOR_GADJ_OLDCalculator"}; // LArG4::EMEC_ECOR_GADJ_OLD
+  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjecalc {this, "EMECPosInnerWheel_ECOR_GADJ_ECalculator"
+    , "EMECPosInnerWheel_ECOR_GADJ_ECalculator"}; // LArG4::EMEC_ECOR_GADJ_E
+  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjscalc {this, "EMECPosInnerWheel_ECOR_GADJ_SCalculator"
+    , "EMECPosInnerWheel_ECOR_GADJ_SCalculator"}; // LArG4::EMEC_ECOR_GADJ_S
+  ServiceHandle<ILArCalculatorSvc> m_emecinnergadjsecalc {this, "EMECPosInnerWheel_ECOR_GADJ_SECalculator"
+    , "EMECPosInnerWheel_ECOR_GADJ_SECalculator"}; // LArG4::EMEC_ECOR_GADJ_SE
+  ServiceHandle<ILArCalculatorSvc> m_emecinnerchclcalc {this, "EMECPosInnerWheel_ECOR_CHCLCalculator"
+    , "EMECPosInnerWheel_ECOR_CHCLCalculator"}; //LArG4::EMEC_ECOR_CHCL
+  ServiceHandle<ILArCalculatorSvc> m_emecinnercalc {this, "EMECPosInnerWheelCalculator"
+    , "EMECPosInnerWheelCalculator"}; //LArG4::EMEC_ECOR_ROPT
 
   // List of volumes for each SD and the corresponding SDs
-  LArG4SimpleSD* m_gapadjSD;
-  LArG4SimpleSD* m_gapoldSD;
-  LArG4SimpleSD* m_gap_eSD;
-  LArG4SimpleSD* m_gap_sSD;
-  LArG4SimpleSD* m_gap_seSD;
-  LArG4SimpleSD* m_chcollSD;
-  LArG4SimpleSD* m_roptSD;
+  LArG4SimpleSD* m_gapadjSD {nullptr};
+  LArG4SimpleSD* m_gapoldSD {nullptr};
+  LArG4SimpleSD* m_gap_eSD {nullptr};
+  LArG4SimpleSD* m_gap_sSD {nullptr};
+  LArG4SimpleSD* m_gap_seSD {nullptr};
+  LArG4SimpleSD* m_chcollSD {nullptr};
+  LArG4SimpleSD* m_roptSD {nullptr};
 };
 
 #endif

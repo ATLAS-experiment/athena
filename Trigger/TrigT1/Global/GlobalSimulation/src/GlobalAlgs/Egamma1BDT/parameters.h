@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_BDT_PARAMS_H
 #define GLOBALSIM_BDT_PARAMS_H
 
 #include  "BDT.h"
-#include "../../NumericTypes/ap_fixed.h"
-#include "../../NumericTypes/ap_int.h"
+#include "ap_fixed.h"
+#include "ap_int.h"
 
 namespace GlobalSim {
   static const int n_trees = 40;

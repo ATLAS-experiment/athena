@@ -1,13 +1,23 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, ClusterFinderCfg, IDVarCalculatorCfg
+from DiTauRec.DiTauToolsConfig import (
+    SeedJetBuilderCfg, 
+    SubjetBuilderCfg, 
+    JetAlgCfg, 
+    VertexFinderCfg, 
+    DiTauTrackFinderCfg, 
+    CellFinderCfg, 
+    DiTauConstituentFinderCfg,
+    DiTauExtraVarDecoratorCfg, 
+    DiTauOnnxScoreCalculatorCfg
+)
 
-def DiTauBuilderCfg(flags, name="DiTauBuilder", doLowPt=False, **kwargs):
+def DiTauBuilderCfg(flags, name="DiTauBuilder", doLowPt=False):
     acc = ComponentAccumulator()
 
     tools = [
-        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[0])),
+        acc.popToolsAndMerge(SeedJetBuilderCfg(flags)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
 
@@ -17,25 +27,24 @@ def DiTauBuilderCfg(flags, name="DiTauBuilder", doLowPt=False, **kwargs):
 
     tools.append(acc.popToolsAndMerge(DiTauTrackFinderCfg(flags)))
     if doLowPt:
-        tools.append(acc.popToolsAndMerge(ClusterFinderCfg(flags)))
+        tools.append(acc.popToolsAndMerge(DiTauConstituentFinderCfg(flags, UseRawConstit=True)))
     else:    
         tools.append(acc.popToolsAndMerge(CellFinderCfg(flags)))
-    tools.append(acc.popToolsAndMerge(IDVarCalculatorCfg(flags)))
 
-    if doLowPt:
-        kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[1])
-        kwargs.setdefault("minPt", flags.DiTau.JetSeedPt[1])
-    else:
-        kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[0])
-        kwargs.setdefault("minPt", flags.DiTau.JetSeedPt[0])
+    if flags.DiTau.doExtraVariables:
+        tools.append(acc.popToolsAndMerge(DiTauExtraVarDecoratorCfg(flags))) 
 
-    kwargs.setdefault("Tools", tools)
-    kwargs.setdefault("SeedJetName", flags.DiTau.SeedJetCollection[0])
-    kwargs.setdefault("maxEta", flags.DiTau.MaxEta)
-    kwargs.setdefault("Rjet", flags.DiTau.Rjet)
-    kwargs.setdefault("Rsubjet", flags.DiTau.Rsubjet)
-    kwargs.setdefault("Rcore", flags.DiTau.Rcore)
+    if flags.DiTau.doRunDiTauDiscriminant:
+        tools.append(acc.popToolsAndMerge(DiTauOnnxScoreCalculatorCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.DiTauBuilder(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DiTauBuilder(name,
+                                              DiTauContainer = flags.DiTau.DiTauContainer[1] if doLowPt else flags.DiTau.DiTauContainer[0],
+                                              minPt = flags.DiTau.JetSeedPt[1] if doLowPt else flags.DiTau.JetSeedPt[0],
+                                              Tools = tools,
+                                              SeedJetName = flags.DiTau.SeedJetCollection[0],
+                                              maxEta = flags.DiTau.MaxEta,
+                                              Rjet = flags.DiTau.Rjet,
+                                              Rsubjet = flags.DiTau.Rsubjet,
+                                              Rcore = flags.DiTau.Rcore))
     return acc
 

@@ -77,7 +77,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
     
     if (CaloRecGPU::GeometryArr::is_tile(cell_index))
       {
-        const TileCell * tile_cell = (TileCell *) cell;
+        const TileCell * tile_cell = static_cast<const TileCell *> (cell);
 
         ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
                                                                           tile_cell->qual2(),

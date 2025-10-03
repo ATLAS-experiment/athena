@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationCalculator
@@ -46,7 +46,7 @@ namespace LArG4 {
 
       CalibrationCalculator(const std::string& name, ISvcLocator *pSvcLocator);
       StatusCode initialize() override final;
-      virtual ~CalibrationCalculator();
+      virtual ~CalibrationCalculator() = default;
 
       // The Process method returns a boolean value.  If it's true, the
       // hit can be used by Geant4; if it's false, there's something wrong
@@ -66,12 +66,11 @@ namespace LArG4 {
     private:
 
       // Energy calculator
-      CaloG4::SimulationEnergies m_energyCalculator;
+      CaloG4::SimulationEnergies m_energyCalculator{};
 
       // Define a "backup" calculator, in this case this calculator
       // misses a volume.
-      ServiceHandle<ILArCalibCalculatorSvc> m_backupCalculator;
-
+      ServiceHandle<ILArCalibCalculatorSvc> m_backupCalculator{this, "BackupCalculator", "EndcapCryostatCalibrationLArCalculator"};
     };
 
   } // namespace EndcapCryostat

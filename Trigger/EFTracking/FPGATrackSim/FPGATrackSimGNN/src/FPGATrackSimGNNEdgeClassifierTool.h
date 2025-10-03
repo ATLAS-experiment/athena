@@ -37,6 +37,7 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
         // Functions
 
         virtual StatusCode scoreEdges(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits, std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
+        int regionNum() const { return m_regionNum; }
 
     private:
 
@@ -44,13 +45,15 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
         // Handles
 
         ToolHandle<AthOnnx::IOnnxRuntimeInferenceTool> m_GNNInferenceTool {this, "GNNInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"};
+        Gaudi::Property<int> m_regionNum{this, "regionNum", -1, "Region number for this GNNEdgeClassifierTool"};
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
         
         std::vector<float> getNodeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits);
         std::vector<int64_t> getEdgeList(const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
-        std::vector<float> getEdgeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges);
+        std::vector<float> getEdgeFeatures(std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, const std::vector<float> & gNodeFeatures);
+        void computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const int& hit1_index, const int& hit2_index, const std::vector<float> & gNodeFeatures);
 
         StringArrayProperty m_gnnFeatureNamesVec{
             this, "GNNFeatureNames",
@@ -60,7 +63,6 @@ class FPGATrackSimGNNEdgeClassifierTool : public AthAlgTool
             this, "GNNFeatureScales",
             {1000.0, 3.14159265359, 1000.0, 1.0, 1000.0, 3.14159265359, 1000.0, 1.0, 1000.0, 3.14159265359, 1000.0, 1.0},
             "Feature scales for the GNN model"};
-
 };      
 
 

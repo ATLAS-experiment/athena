@@ -27,7 +27,7 @@ def mkGetOpenLoopsJob(options):
     if os.path.exists("Process/OpenLoops"):
         shutil.rmtree("Process/OpenLoops")
 
-    job = options.batchSystemModule.batchJob("0.getOpenLoops", hours=2, nCores=options.ncoresScons, memMB=1, basedir=options.jobOptionDir[0])
+    job = options.batchSystemModule.batchJob("0.getOpenLoops", hours=2, nCores=options.ncoresScons, mounts=options.mounts, account=options.account, queue=options.queue, memMB=1, basedir=options.jobOptionDir[0])
 
     job.cmds += ["source $AtlasSetup/scripts/asetup.sh "+options.athenaVersion]
     job.cmds += ["set -e"]
@@ -58,7 +58,7 @@ def mkCreateLibsJob(options, prevJob):
     if len(glob.glob(procName)) > 0:
         return None
 
-    job = options.batchSystemModule.batchJob("1.createLibs", hours=48, nCores=1, memMB=options.createLibsRAM, basedir=options.jobOptionDir[0])
+    job = options.batchSystemModule.batchJob("1.createLibs", hours=48, nCores=1, mounts=options.mounts, account=options.account, queue=options.queue, memMB=options.createLibsRAM, basedir=options.jobOptionDir[0])
 
     if prevJob:
         job.dependsOnOk.append(prevJob.id)
@@ -112,7 +112,7 @@ def mkMakelibsJob(options, prevJob):
     if os.path.exists("Process/Amegic/lib"):
         return None
 
-    job = options.batchSystemModule.batchJob("2.makelibs", hours=48, nCores=options.ncoresMakelibs, memMB=1, basedir=options.jobOptionDir[0])
+    job = options.batchSystemModule.batchJob("2.makelibs", hours=48, nCores=options.ncoresMakelibs, mounts=options.mounts, account=options.account, queue=options.queue, memMB=1, basedir=options.jobOptionDir[0])
 
     if prevJob:
         job.dependsOnOk.append(prevJob.id)
@@ -157,7 +157,7 @@ def mkIntegrateJob(options, ecm, prevJob):
 
     if options.RAM > 100:
         options.Sherpa_i.MemoryMB = options.RAM
-    job = options.batchSystemModule.batchJob("3.integrate", hours=targetHours, nCores=targetCores, memMB=options.Sherpa_i.MemoryMB, basedir=options.jobOptionDir[0]+"/"+ecmfolder)
+    job = options.batchSystemModule.batchJob("3.integrate", hours=targetHours, nCores=targetCores, mounts=options.mounts, account=options.account, queue=options.queue, memMB=options.Sherpa_i.MemoryMB, basedir=options.jobOptionDir[0]+"/"+ecmfolder)
 
     if prevJob:
         job.dependsOnOk.append(prevJob.id)
@@ -247,7 +247,7 @@ def mkTarballmakerJob(options, ecm, prevJob):
     ecmfolder = "ecm"+ecmstring
     tarballname = "mc_"+ecmstring+"."+physicsShort+".GRID.tar.gz"
 
-    job = options.batchSystemModule.batchJob("4.makeTarball", hours=1, nCores=1, memMB=1, basedir=options.jobOptionDir[0]+"/"+ecmfolder)
+    job = options.batchSystemModule.batchJob("4.makeTarball", hours=1, nCores=1, mounts=options.mounts, account=options.account, queue=options.queue, memMB=1, basedir=options.jobOptionDir[0]+"/"+ecmfolder)
     job.cmds += ["set -e"]
 
     if prevJob:
@@ -272,7 +272,7 @@ def mkEvntGenTestJob(options, ecm, jodir, prevJob):
     ecmstring = ('{0:g}'.format(ecm)).replace(".","p")+"TeV"
     ecmfolder = "ecm"+ecmstring
 
-    job = options.batchSystemModule.batchJob("5.EvntGenTest", hours=24, nCores=1, memMB=1, basedir=jodir+"/"+ecmfolder)
+    job = options.batchSystemModule.batchJob("5.EvntGenTest", hours=24, nCores=1, mounts=options.mounts, account=options.account, queue=options.queue, memMB=1, basedir=jodir+"/"+ecmfolder)
 
     if prevJob:
         job.dependsOnOk.append(prevJob.id)

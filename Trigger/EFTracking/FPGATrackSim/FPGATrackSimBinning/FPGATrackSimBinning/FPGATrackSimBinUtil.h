@@ -76,11 +76,22 @@ void setIdxSubVec(IdxSet &idx, const std::vector<unsigned> &subvecelems,
 std::vector<IdxSet> makeVariationSet(const std::vector<unsigned> &scanpars,
                                      const IdxSet &idx);
 
+// this is needed by the stream manager below for outputing std::vector<unsigned>
+std::ostream &operator<<(std::ostream &os, const std::vector<unsigned> &idx);
+
 // Class for writing const files formatted for firmware
 struct StreamManager {
   StreamManager(const std::string &setname) : m_setname(setname) {}
   ~StreamManager();
-  template <typename T> void writeVar(const std::string &var, T val);
+  template <typename T> void writeVar(const std::string &var, T val) {
+    auto emplace_result = m_map.try_emplace(
+        var, m_setname + "_" + var + "_const.txt", std::ios_base::out);
+    if (!emplace_result.second) {
+      emplace_result.first->second << ",\n";
+    }
+    emplace_result.first->second << val;
+  }
+
 private:
   std::string m_setname;
   std::map<std::string, std::fstream> m_map;
@@ -124,6 +135,14 @@ public:
 
     // find the track phi that would be consistent with the other track parameters and the hit (r,phi)
     static double parsToTrkPhi(const FPGATrackSimTrackPars &pars, FPGATrackSimHit const *hit);
+
+    // find the difference between the hit and trk phi as a function of r and track pars
+    static double dPhiHitTrkFromPars(double r, const FPGATrackSimTrackPars &pars);
+
+    // for padding
+    static double dZdEta(double eta);
+    static double dPhidQOverPt(double hitr);
+
 };
 
 

@@ -12,6 +12,15 @@ Jets:
     runJvtUpdate: False
     runNNJvtUpdate: True
     recalibratePhyslite: False
+    FTagTriggerMatching:
+      - containerName: AnaJets
+        triggerChainsPerYear:
+          2022:
+            - HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25
+          2023:
+            - HLT_2j45_0eta290_020jvt_bgn160_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25
+          2024:
+            - HLT_2j45_0eta290_020jvt_bgn260_2j45_pf_ftf_presel2j25XX2j25bgtwo85_L14jJ40p0ETA25
     FlavourTagging:
       - selectionName: ftag
         btagger: GN2v01
@@ -27,16 +36,18 @@ Jets:
 
 Electrons:
   - containerName: AnaElectrons
-    forceFullSimConfig: True
+    forceFullSimConfigForIso: True
     recalibratePhyslite: False
     decorateTruth: true
     decorateCaloClusterEta: true
     writeTrackD0Z0: True
+    minPt: 10000.0
     WorkingPoint:
       - selectionName: loose
         forceFullSimConfig: True
         identificationWP: LooseBLayerLH
-        isolationWP: Loose_VarRad
+        isolationWP: Tight_VarRad
+        chargeIDSelectionRun2: True
     PtEtaSelection:
       minPt: 10000.0
     IFFClassification: {}
@@ -46,7 +57,6 @@ Electrons:
 Photons:
   - containerName: AnaPhotons
     recomputeIsEM: False
-    forceFullSimConfigForP4: True
     forceFullSimConfigForIso: True
     recalibratePhyslite: False
     decorateTruth: true
@@ -92,8 +102,14 @@ TauJets:
             - HLT_tau25_medium1_tracktwo
             - HLT_tau35_medium1_tracktwo
           2018:
-            - HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
-            - HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA
+            - HLT_tau25_medium1_tracktwoEF
+            - HLT_tau35_medium1_tracktwoEF
+          2022:
+            - HLT_tau25_mediumRNN_tracktwoMVA
+            - HLT_tau35_mediumRNN_tracktwoMVA
+          2023:
+            - HLT_tau25_mediumRNN_tracktwoMVA
+            - HLT_tau35_mediumRNN_tracktwoMVA
     MCTCClassification:
       prefix: truth_
 

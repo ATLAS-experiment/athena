@@ -29,7 +29,10 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
 
   std::vector<uint64_t> outputData;
 
-  ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, outputData, ctx));
+  std::vector<IdentifierHash> listOfPixelIds;
+  std::vector<IdentifierHash> listOfStripIds;
+
+  ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, outputData, listOfPixelIds, ctx));
 
   // Report the output
   ATH_MSG_DEBUG("ITK pixel encoded data");
@@ -44,7 +47,7 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
 
   {
     Athena::Chrono chrono("ConvertStripHitsToFPGADataFormat", m_chronoSvc.get());
-    ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, ctx));
+    ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, outputData, listOfStripIds, ctx));
   }
 
   // Report the output
@@ -160,8 +163,6 @@ StatusCode FPGADataFormatAlg::execute(const EventContext &ctx) const
       ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition y: " << pcAux.globalPosition[3 * i + 1]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has globalPosition z: " << pcAux.globalPosition[3 * i + 2]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has channelsInPhi: " << pcAux.channelsInPhi[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has omegaX: " << pcAux.omegaX[i]);
-      ATH_MSG_DEBUG("\tCluster [" << i << "] has omegaY: " << pcAux.omegaY[i]);
       ATH_MSG_DEBUG("\tCluster [" << i << "] has totalToT: " << pcAux.totalToT[i]);
     }
 

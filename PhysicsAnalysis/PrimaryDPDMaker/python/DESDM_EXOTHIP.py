@@ -43,7 +43,7 @@ def DESDM_EXOTHIPKernelCfg(flags, name='DESDM_EXOTHIPKernel', **kwargs):
                                                                       FilterList=[skimTool1, skimTool2]))
         acc.addPublicTool(CombinedTool,primary = True)
         
-    EXOTHIPKernel = CompFactory.DerivationFramework.DerivationKernel(name, SkimmingTools = CombinedTool)
+    EXOTHIPKernel = CompFactory.DerivationFramework.DerivationKernel(name, SkimmingTools = [CombinedTool])
     acc.addEventAlgo( EXOTHIPKernel )
 
     return acc

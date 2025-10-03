@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UserSession.h"
@@ -87,20 +87,20 @@ pool::PersistencySvc::UserSession::connectedDatabases() const
   return result;
 }
 
-pool::IDatabase*
+std::unique_ptr<pool::IDatabase>
 pool::PersistencySvc::UserSession::databaseHandle( const std::string& dbName,
                                                    DatabaseSpecification::NameType dbNameType )
 {
   if ( m_transaction->isActive() ) {
-    return new pool::PersistencySvc::UserDatabase( *m_technologyDispatcher,
+     return std::make_unique<UserDatabase>( UserDatabase( *m_technologyDispatcher,
                                                    *m_policy,
                                                    *m_catalog,
                                                    *m_transaction,
                                                    *m_registry,
                                                    dbName,
-                                                   dbNameType );
+                                                   dbNameType ) );
   }
-  return 0;
+  return nullptr;
 }
 
 pool::ITransaction&

@@ -197,6 +197,9 @@ private:
   void processSubBlockStatus_(State& state,
                               uint8_t crate, uint8_t module, uint32_t word) const;
 
+  void processPpmErrorBits_(State& state,
+			    uint8_t crate, uint8_t module, BitReader& br) const;
+
 private:
   ToolHandle<LVL1BS::L1CaloErrorByteStreamTool> m_errorTool;
   /// Channel mapping tool
@@ -214,9 +217,10 @@ private:
 
 // ==========================================================================
 private:
-   static const uint8_t s_crates   = 8;
-   static const uint8_t s_modules  = 16;
-   static const uint8_t s_channels = 64;
+   static const uint8_t s_crates     = 8;
+   static const uint8_t s_modules    = 16;
+   static const uint8_t s_submodules = 16;
+   static const uint8_t s_channels   = 64;
    static const uint16_t s_maxtowers = s_crates * s_modules * s_channels;
 
    bool m_useSWROD = false;

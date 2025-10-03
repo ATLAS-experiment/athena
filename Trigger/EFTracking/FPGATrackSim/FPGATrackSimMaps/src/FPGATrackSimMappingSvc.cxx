@@ -125,6 +125,7 @@ std::string FPGATrackSimMappingSvc::getExtensionNNHitMapString() const {
     }
 }
 
+
 std::string FPGATrackSimMappingSvc::getParamNNMapString() const {
     if (m_NNmap_param != nullptr) {
         return m_NNmap_param->getNNMap();
@@ -143,7 +144,14 @@ std::string FPGATrackSimMappingSvc::getParamNNMap2ndString() const {
     }
 }
 
-
+std::string FPGATrackSimMappingSvc::getGNNModuleMapString() const {
+    if (m_GNNmap_moduleMap != nullptr) {
+        return m_GNNmap_moduleMap->getNNMap();
+    }
+    else{
+        return "";
+    }
+}
 
 int FPGATrackSimMappingSvc::countPmapSize(std::ifstream& fileIn)
 {
@@ -197,29 +205,33 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         fin.close();
 
         ATH_MSG_DEBUG("Creating the 1st stage region map: " << PathResolverFindCalibFile(m_rmap_path.value()));
-        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
+        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Creating the 2nd stage region map: " << PathResolverFindCalibFile(m_rmap_path.value()));
-        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value())));
+        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Creating the sub-region map: " << PathResolverFindCalibFile(m_subrmap_path.value()));
-        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
+        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Creating the 2nd stage sub-region map:" << PathResolverFindCalibFile(m_subrmap_path.value()));
-        m_subrmap_2nd = std::make_unique<FPGATrackSimRegionMap>(m_pmap_vector_2nd, PathResolverFindCalibFile(m_subrmap_path.value()));
+        m_subrmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_subrmap_path.value()), !(m_loadRegionMap.value())));
 
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         ATH_MSG_DEBUG("Loading the Module LUT from " << PathResolverFindCalibFile(m_modulelut_path.value()));
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
         m_rmap_2nd->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
 
-        ATH_MSG_DEBUG("Setting the average radius per logical layer for Region and Subregion Maps");
-        ATH_MSG_DEBUG("Loading Radii from " << PathResolverFindCalibFile(m_radii_path.value()));
-        m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
-        m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
-        m_subrmap->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
-        m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));
-        m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));	
+        if (m_loadRadii) {
+            ATH_MSG_DEBUG("Setting the average radius per logical layer for Region and Subregion Maps");
+            ATH_MSG_DEBUG("Loading Radii from " << PathResolverFindCalibFile(m_radii_path.value()));
+            m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_rmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii2nd_path.value()), m_pmap_vector_1st.at(0)->getNLogiLayers(), m_pmap_vector_2nd.at(0)->getNLogiLayers());
+
+            m_subrmap->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()), 0, m_pmap_vector_1st.at(0)->getNLogiLayers());
+            m_subrmap_2nd->loadRadiiFile(PathResolverFindCalibFile(m_radii2nd_path.value()), m_pmap_vector_1st.at(0)->getNLogiLayers(), m_pmap_vector_2nd.at(0)->getNLogiLayers());
+        }
 
         ATH_MSG_DEBUG("Creating NN weighting map");
         ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_fake.value() << " for fake track estimation");
@@ -229,43 +241,68 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_vol.value() << " for track extension");
         ATH_MSG_INFO("MappingSVc using " << m_NNmap_path_extension_hit.value() << " for track extension");
 
+        if ( ! m_NNmap_path_extension_vol.empty() ) {
+	    std::string model_path = m_NNmap_path_extension_vol.value() + "_" + std::to_string(m_regionID) + "_cyl_condor.onnx";
+	    m_NNmap_extension_vol = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
+            m_NNmap_extension_vol = nullptr;
+	}
+
+	if ( ! m_NNmap_path_extension_hit.empty() ) {
+	  std::string model_path = m_NNmap_path_extension_hit.value() + "_" + std::to_string(m_regionID) + "_cyl_condor.onnx";
+	  m_NNmap_extension_hit = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
+            m_NNmap_extension_hit = nullptr;
+           
+        }
+
         if ( ! m_NNmap_path_fake.empty() ) {
-            m_NNmap_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_fake.value()));
-        } else {
+	    std::string model_path = m_NNmap_path_fake.value() + "_" + std::to_string(m_regionID) + "_condor.onnx";
+	    m_NNmap_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
             m_NNmap_fake = nullptr;
         }
 
         if ( ! m_NNmap2nd_path_fake.empty() ) {
-            m_NNmap2nd_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap2nd_path_fake.value()));
-        } else {
-            m_NNmap2nd_fake = nullptr;
+	  std::string model_path = m_NNmap2nd_path_fake.value() + "_" + std::to_string(m_regionID) + "_condor.onnx";
+	  m_NNmap2nd_fake = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	} else {
+	  m_NNmap2nd_fake = nullptr;
+        }	
+
+        if (m_doGNNTrack) { // For GNN algorithms to use second stage models in first stage
+            if ( ! m_NNmap_path_param.empty() ) {
+                std::string model_path = m_NNmap_path_param.value() + "_" + std::to_string(m_regionID) + "_condor.onnx";
+                m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	        } else {
+                m_NNmap_param = nullptr;
+            }
         }
-
-
-        if ( ! m_NNmap_path_extension_vol.empty() ) {
-            m_NNmap_extension_vol = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_vol.value()));
-        } else {
-            m_NNmap_extension_vol = nullptr;
-        }
-
-        if ( ! m_NNmap_path_extension_hit.empty() ) {
-            m_NNmap_extension_hit = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_extension_hit.value()));
-        } else {
-            m_NNmap_extension_hit = nullptr;
-        }
-
-        if ( ! m_NNmap_path_param.empty() ) {
-            m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path_param.value()));
-        } else {
-            m_NNmap_param = nullptr;
+        else { // For GenScan/InsideOut algorithms to use first stage models
+            if ( ! m_NNmap_path_param.empty() ) {	  
+	            std::string model_path;
+	            if(m_regionID <= 354) model_path = m_NNmap_path_param.value() + "_34_354.onnx";
+	            else if (m_regionID <= 738)  model_path = m_NNmap_path_param.value() + "_418_738.onnx";
+	            else model_path = m_NNmap_path_param.value() + "_802_1250.onnx";	  
+	            m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+            } else {
+                m_NNmap_param = nullptr;
+            }
         }
 
         if ( ! m_NNmap2nd_path_param.empty() ) {
-            m_NNmap2nd_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap2nd_path_param.value()));
-        } else {
-            m_NNmap2nd_param = nullptr;
+            std::string model_path = m_NNmap2nd_path_param.value() + "_" + std::to_string(m_regionID) + "_condor.onnx";
+            m_NNmap_param = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	    } else {
+            m_NNmap_param = nullptr;
         }
 
+        if ( ! m_GNNmap_path_moduleMap.empty() ) {
+            std::string model_path = m_GNNmap_path_moduleMap.value()+ "_" + std::to_string(m_regionID) + ".root";
+            m_GNNmap_moduleMap = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(model_path));
+	    } else {
+            m_GNNmap_moduleMap = nullptr;
+        }
     }
     ATH_CHECK(checkAllocs());
     return StatusCode::SUCCESS;

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloSwEtaoff_v2.h
@@ -77,6 +77,10 @@ void CaloSwEtaoff_v2::makeTheCorrection (const Context& myctx,
   unsigned int n_energies = energies.size();
   unsigned int shape[] = {n_energies, 4};
   CaloRec::WritableArrayData<2> partab (shape);
+  if (n_energies == 0) {
+    ATH_MSG_ERROR("Empty energies vector");
+    return;
+  }
 
   // If we're outside the range of the table, we'll just be using the
   // value at the end (no extrapolation).  We only need to calculate

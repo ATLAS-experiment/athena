@@ -47,7 +47,7 @@ SinglePadClusterTool::clusterize(const HGTD_RDO_Collection& rdo_coll,
   cluster_collection->setIdentifier(identifier);
   cluster_collection->reserve(rdo_coll.size());
 
-  InDetDD::HGTD_DetectorElement* element =
+  const InDetDD::HGTD_DetectorElement* element =
       m_hgtd_det_mgr->getDetectorElement(identifier);
 
   for (const auto *const rdo : rdo_coll) {

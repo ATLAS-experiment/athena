@@ -59,7 +59,7 @@ def calibrationTag(flags):
 
 
 def saveSv1(prevFlags):
-    return prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4
+    return prevFlags.GeoModel.Run >= LHCPeriod.Run4
 
 
 def runOldSecVrtSecIncl(prevFlags):
@@ -79,6 +79,7 @@ def getNNs(flags):
     '''
     Gets the paths of models to run via MultiFoldTagger.
     '''
+
     # dummy for now
     caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
     pf_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
@@ -89,15 +90,24 @@ def getNNs(flags):
     # But this *should* be cleaned up at some point
     # Note also, reco tests failing due to leptonID missing, so for now don't run taggers unless derivation
     # https://gitlab.cern.ch/atlas/athena/-/merge_requests/77764#note_9063625
-    gn3_paths = [
+    gn3v00_paths = [
         "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
-        "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
-        "BTagging/20250213/GN3MuonsV00/antikt4empflow/network.onnx", # Tracks+Muons
         "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
-    ] if isRun3Derivation(flags) else [   
-        "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
-        "BTagging/20250213/GN3PflowV00/antikt4empflow/network.onnx", # Tracks+PFlow
-     ]
+    ] if isRun3Derivation(flags) else []
+    gn3v01_paths = [
+        "BTagging/20250912/GN3EPCLV01/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
+    ] if isRun3Derivation(flags) else []
+    # Combine the paths for GN3v00 and GN3v01 models
+    gn3_paths = gn3v00_paths + gn3v01_paths
+
+    lrj_paths = [
+             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
+             "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
+             "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx",
+             "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx",
+             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
+             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
+    ]
 
     return {
         'AntiKt4EMPFlowJets': [
@@ -107,6 +117,13 @@ def getNNs(flags):
                 'cone_association': True,
             },
             *[{'folds' : [nn_path]} for nn_path in gn3_paths]
+        ],
+        'AntiKt4EMTopoJets': [
+            {
+                'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True,
+            },
         ],
         'AntiKt4EMPFlowCustomVtxJets': [
             {
@@ -122,6 +139,9 @@ def getNNs(flags):
                 'hash': 'jetFoldHash',
                 'cone_association': True
             }
+        ],
+        'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': [
+            {'folds' : [nn_path]} for nn_path in lrj_paths
         ]
     }
 
@@ -180,13 +200,12 @@ def createBTaggingConfigFlags():
     btagcf.addFlag("BTagging.GNNVertexFitter", False)
 
     # a flag to enable legacy BTagging
-    btagcf.addFlag("BTagging.EnableLegacyBTagging", True)
+    btagcf.addFlag("BTagging.EnableLegacyBTagging", False)
 
     # (multifold) NN trainings, each jet collection maps to a list of
     # dicts. The dict has several keys:
     #  - folds: list of NNs to run
     #  - remapping (optional): any variable remapping
     btagcf.addFlag("BTagging.NNs", getNNs)
-    
 
     return btagcf

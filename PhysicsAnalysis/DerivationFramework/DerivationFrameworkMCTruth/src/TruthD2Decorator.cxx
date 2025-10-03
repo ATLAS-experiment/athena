@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -24,20 +24,17 @@ namespace DerivationFramework {
   }
 
   StatusCode TruthD2Decorator::initialize()  
-  {
- 
+  { 
       ATH_CHECK(m_jetContainerKey.initialize()); 
       m_decorationName = m_jetContainerKey.key()+".D2";
       ATH_CHECK(m_decorationName.initialize());
 
       return StatusCode::SUCCESS;
-
   }
 
 
   StatusCode TruthD2Decorator::addBranches() const
   {
-
       // Event context
       const EventContext& ctx = Gaudi::Hive::currentContext();
 
@@ -61,8 +58,8 @@ namespace DerivationFramework {
         
         //calculate D2 and decorate
         float D2=-999;
-        if(fabs(ecf2)>1e-8)
-          D2=ecf3 * pow(ecf1, 3.0) / pow(ecf2, 3.0);
+        if(std::abs(ecf2)>1e-8)
+          D2=ecf3 * std::pow(ecf1, 3.0) / std::pow(ecf2, 3.0);
         decoratorD2(*jet) = D2;
       }
 

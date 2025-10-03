@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TRIGPRECISIONELECTRONPRECISIONHYPOTOOLINC_H
 #define TRIGEGAMMAHYPO_TRIGPRECISIONELECTRONPRECISIONHYPOTOOLINC_H 1
@@ -37,13 +37,15 @@ class TrigEgammaPrecisionElectronHypoTool : public extends<AthAlgTool, ITrigEgam
   Gaudi::Property< float >              m_detacluster { this, "dETACLUSTERthr", 0. , "" };
   Gaudi::Property< float >              m_dphicluster { this, "dPHICLUSTERthr", 0. , "" };  
   Gaudi::Property< float >              m_RelPtConeCut { this, "RelPtConeCut", -999., "Track isolation cut" };
+  Gaudi::Property< float >              m_TopoEtConeCut { this, "TopoEtConeCut", -999., "Calorimeter isolation cut" };
   Gaudi::Property< float >              m_d0{ this,  "d0Cut", -1., "d0 cut" };
   Gaudi::Property<std::string>          m_pidName{this,"PidName", "", "Pid name"};
   Gaudi::Property< bool >               m_acceptAll { this, "AcceptAll", false , "accept all." };
   Gaudi::Property< bool >               m_doNoPid { this, "DoNoPid", false , "No Pid/Isolation applied" };
   ToolHandle< GenericMonitoringTool >   m_monTool { this, "MonTool", "", "Monitoring tool" };
-  /*Isolation validation flag*/
-  Gaudi::Property<bool> m_isoValidation{ this, "IsoValidation", false};
+  /*switch between relptvarcone30 and relptvarcone20 isolation*/
+  Gaudi::Property<bool> m_useRelptvarcone30{ this, "UseRelptvarcone30", false};
+  Gaudi::Property<bool> m_useTopoetCone20{ this, "UseTopoetcone20", false};
 
 
   int findCutIndex( float eta ) const;

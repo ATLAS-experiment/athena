@@ -34,7 +34,7 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
   declareProperty("JetTrackOrigins", m_trackOriginsKey = "AntiKt4EMPFlow."+m_gnnModel+"_TrackOrigin");
   declareProperty("JetVertexLinks", m_vertexLinksKey = "AntiKt4EMPFlow."+m_gnnModel+"_VertexIndex");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
-  m_massPi = 139.5702 * Gaudi::Units::MeV;
+  m_massPi = ParticleConstants::chargedPionMassInMeV;
 }
 
 /* Destructor */

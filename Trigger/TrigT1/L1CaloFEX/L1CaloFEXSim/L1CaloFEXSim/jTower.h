@@ -14,12 +14,8 @@
 #define jTower_H
 
 #include <vector>
+#include "Identifier/Identifier.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-
-#include "xAODBase/IParticle.h"
 #include "xAODCore/AuxStoreAccessorMacros.h"
 
 namespace LVL1 {

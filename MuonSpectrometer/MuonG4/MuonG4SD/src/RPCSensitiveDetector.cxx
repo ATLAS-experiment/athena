@@ -15,6 +15,8 @@
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 // construction/destruction
 RPCSensitiveDetector::RPCSensitiveDetector(const std::string& name, const std::string& hitCollectionName, unsigned int nGasGaps)
@@ -72,7 +74,15 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   double     globalTime    = aStep->GetPreStepPoint()->GetGlobalTime();
   Amg::Vector3D localPosition = Amg::Hep3VectorToEigen( trans.TransformPoint(position) );
   Amg::Vector3D localPostPosition = Amg::Hep3VectorToEigen( trans.TransformPoint(postPosition) );
-
+  {
+    const Amg::Vector3D stepVector = localPostPosition - localPosition;
+    /// Reject hits that are parallel through the gas gap
+    if (stepVector.mag()>std::numeric_limits<float>::epsilon() &&
+        std::abs(std::abs(Amg::angle(stepVector, Amg::Vector3D::UnitX()))
+                 - 90.*Gaudi::Units::deg) < 0.0001* Gaudi::Units::deg) {
+      return true;
+    }
+  }
   int mydbZ=0;
   int mydbPMod=0;
   int mydbP=0;

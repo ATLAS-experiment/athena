@@ -15,4 +15,25 @@ namespace MuonR4{
         }
         return nullptr;
     }
+    std::vector<const xAOD::UncalibratedMeasurement*> collectMeasurements(const Segment& seg,
+                                                                          bool skipOutlier) {
+      std::vector<const xAOD::UncalibratedMeasurement*> out{};
+      out.reserve(seg.measurements().size()*2);
+      for (const auto& meas : seg.measurements()){
+        /// remove all the garbage
+        if (skipOutlier && meas->fitState() != CalibratedSpacePoint::State::Valid) {
+          continue;
+        }
+        // Remove the external constraints
+        const SpacePoint* sp = meas->spacePoint();
+        if (!sp) {
+          continue;
+        }
+        out.emplace_back(sp->primaryMeasurement());
+        if (sp->secondaryMeasurement()) {
+          out.emplace_back(sp->secondaryMeasurement());
+        }
+      }
+      return out;
+    }
 }

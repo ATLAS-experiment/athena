@@ -7,6 +7,7 @@
 
 #include "AGDDControl/XMLHandler.h"
 #include <string>
+#include <vector>
 
 class addmaterialHandler:public XMLHandler {
 public:

@@ -52,7 +52,7 @@ StatusCode tester( TriggerEDMSerialiserTool* ser) {
     VALUE( status ) EXPECTED( StatusCode::SUCCESS );
 
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    SGImplSvc* evtStore = static_cast<SGImplSvc*>(Atlas::getExtendedEventContext(ctx).proxy());
+    SmartIF<SGImplSvc> evtStore(Atlas::getExtendedEventContext(ctx).proxy());
         
     status = ser->serialisexAODAuxContainer( (void*)emAux, auxAddress, serialisedData, evtStore );
     VALUE( status ) EXPECTED( StatusCode::SUCCESS );  

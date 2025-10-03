@@ -169,23 +169,23 @@ setup:
      - accepting taus passing the given working point
      -
 
-   * - ``CutEleRNNScore``
-     - ``EleRNNRegion``
+   * - ``CutEleRNNScoreSigTrans``
+     - ``EleRNNSigTransRegion``
      - ``std::vector<double>``
      - accepting taus within electron RNN score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
      - This cut is applied only on 1 prong tau
 
    * -
-     - ``EleRNNMin``
+     - ``EleRNNSigTransMin``
      - ``double``
      - accepting taus with a electron RNN score above a lower bound
-     - if ``EleRNNMin`` is configured, ``EleRNNRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
+     - if ``EleRNNSigTransMin`` is configured, ``EleRNNSigTransRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
 
    * -
-     - ``EleRNNMax``
+     - ``EleRNNSigTransMax``
      - ``double``
      - accepting taus with a electron RNN score below an upper bound
-     - if ``EleRNNMax`` is configured, ``EleRNNRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
+     - if ``EleRNNSigTransMax`` is configured, ``EleRNNSigTransRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
 
    * - 
      - ``EleIDVersion``
@@ -193,6 +193,11 @@ setup:
      - EleRNN version number for variable to use
      - Default is 1
 
+   * - ``CutEleIDWP``
+     - ``EleIDWP``
+     - ``int``
+     - accepting taus passing the given working point
+  
    * - ``CutMuonOLR``
      - ``MuonOLR``
      - ``bool``
@@ -211,29 +216,29 @@ Currently implemented working points for ``CutJetIDWP`` are:
      - no cut at all
 
    * - JETIDRNNVERYLOOSE
-     - passing RNN very loose working point, ID efficiency 95%
+     - passing RNN very loose working point, ID efficiency 95% for 1 and 3 prong reco taus matched to true taus
 
    * - JETIDRNNLOOSE
-     - passing RNN loose working point, ID efficiency 85% (75%) for 1-prong (3-prong)
+     - passing RNN loose working point, ID efficiency 85% (75%) for 1-prong (3-prong) reco taus matched to true taus
      
    * - JETIDRNNMEDIUM
-     - passing RNN medium working point, ID efficiency 75% (60%) for 1-prong (3-prong)
+     - passing RNN medium working point, ID efficiency 75% (60%) for 1-prong (3-prong) reco taus matched to true taus
      
    * - JETIDRNNTIGHT
-     - passing RNN tight working point, ID efficiency 60% (45%) for 1-prong (3-prong)
+     - passing RNN tight working point, ID efficiency 60% (45%) for 1-prong (3-prong) reco taus matched to true taus
      
    * - JETIDGNTAUVERYLOOSE
-     - passing GNTau very loose working point, ID efficiency 95%
+     - passing GNTau very loose working point, ID efficiency 95% reco taus matched to true taus
 
    * - JETIDGNTAULOOSE
-     - passing GNTau loose working point, ID efficiency 85% (75%) for 1-prong (3-prong)
+     - passing GNTau loose working point, ID efficiency 85% (75%) for 1-prong (3-prong) reco taus matched to true taus
      
-   * - JETIDGNTAUMEDIUM
-     - passing GNTau medium working point, ID efficiency 75% (60%) for 1-prong (3-prong)
+   * - JETIDGNTAUMEDIUM 
+     - passing GNTau medium working point, ID efficiency 75% (60%) for 1-prong (3-prong) reco taus matched to true taus
      
    * - JETIDGNTAUTIGHT
-     - passing GNTau tight working point, ID efficiency 60% (45%) for 1-prong (3-prong)
-
+     - passing GNTau tight working point, ID efficiency 60% (45%) for 1-prong (3-prong) reco taus matched to true taus
+ 
 and for ``CutEleIDWP``:
 
 .. list-table::
@@ -244,13 +249,13 @@ and for ``CutEleIDWP``:
      - description
      
    * - ELEIDRNNLOOSE
-     - passing electron RNN loose working point. Electron ID efficiency 95% (98%) for 1-prong (3-prong)
+     - passing electron RNN loose working point. Electron ID efficiency 95% (98%) for 1-prong (3-prong) reco taus matched to true taus
      
    * - ELEIDRNNMEDIUM
-     - passing electron RNN medium working point. Electron ID efficiency 90% (95%) for 1-prong (3-prong)
+     - passing electron RNN medium working point. Electron ID efficiency 90% (95%) for 1-prong (3-prong) reco taus matched to true taus
      
    * - ELEIDRNNTIGHT
-     - passing electron RNN tight working point. Electron ID efficiency 85% (90%) for 1-prong (3-prong)
+     - passing electron RNN tight working point. Electron ID efficiency 85% (90%) for 1-prong (3-prong) reco taus matched to true taus
 
 Note: even though the eRNN was trained also for 3 prong taus, current recommendation is to apply it only for 1 prong tau. In case an analysis suffers from large contamination of electrons mis-reconstructed as tau for 3 prong, please contact the TauCP conveners    
 

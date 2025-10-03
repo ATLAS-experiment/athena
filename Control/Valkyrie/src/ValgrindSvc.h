@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ValgrindSvc.h 
@@ -67,17 +67,8 @@ class ValgrindSvc : public extends<AthService,
   
   /// Number of created callgrind profiles
   virtual unsigned int profileCount() override { return m_profileCounter; }
-  
-  /////////////////////////////////////////////////////////////////// 
-  // Private methods: 
-  /////////////////////////////////////////////////////////////////// 
- private: 
 
-  /** helper method to create auditors
-   */
-  StatusCode makeAuditor (const std::string& audName, IAuditorSvc* audSvc);
 
-    
   /////////////////////////////////////////////////////////////////// 
   // Private data: 
   /////////////////////////////////////////////////////////////////// 

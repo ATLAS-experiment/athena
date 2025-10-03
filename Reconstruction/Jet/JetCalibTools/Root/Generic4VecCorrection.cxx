@@ -46,6 +46,8 @@ StatusCode Generic4VecCorrection::initialize()
     algo_type = "JPS_PtResidual";
     default_OutJetScale = "JetPtResidualScaleMomentum";
     ATH_CHECK( initialize_correctionResponse() );
+    // Save etaAxis to assist in avoiding eta-interpolation
+    m_etaAxis = *(m_only_correction_2D->GetYaxis());
 
   } else if(m_correctionType == JET_CORRTYPE::MC2MC){
     algo_type = "JPS_MC2MC";
@@ -143,8 +145,13 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
   if (m_correctionType == JET_CORRTYPE::PTRESIDUAL){
     this_pt = jet.pt()/1000.;
     static const SG::ConstAccessor<float> DetectorEtaAcc ("DetectorEta");
-    this_eta = fabs( DetectorEtaAcc(jet) );
+    this_eta = DetectorEtaAcc(jet);
     h_correction_2D = m_only_correction_2D;
+
+    // PtResidual should not interpolate across eta bins, so set this_eta to the center of its histogram bin
+    int eta_bin = m_etaAxis.FindBin(this_eta);
+    this_eta = m_etaAxis.GetBinCenter(eta_bin);
+
   } else if (m_correctionType == JET_CORRTYPE::FASTSIM){
     this_pt = jet.pt()/1000.;
     this_eta = fabs(jet.rapidity());
@@ -169,7 +176,7 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
     ATH_CHECK( readHisto(correctionFactor, h_correction_2D, this_pt, this_eta) );
   }
   // Apply the correction and set it in the jet EDM
-  calibP4 *= 1.0/correctionFactor;
+  calibP4 *= correctionFactor;
   jet.setAttribute<xAOD::JetFourMom_t>(m_outJetScale.Data(),calibP4);
   jet.setJetP4(calibP4);
 
@@ -228,7 +235,7 @@ StatusCode Generic4VecCorrection::initialize_correctionResponse()
   return StatusCode::SUCCESS;
 }
 
-StatusCode Generic4VecCorrection::load_json(nlohmann::json& json_object, std::string json_filepath) const
+StatusCode Generic4VecCorrection::load_json(nlohmann::json& json_object, const std::string& json_filepath) const
 {
   std::string full_path = PathResolverFindCalibFile(json_filepath);
   std::ifstream json_stream(full_path);

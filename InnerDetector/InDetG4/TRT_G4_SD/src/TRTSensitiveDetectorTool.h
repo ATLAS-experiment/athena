@@ -19,8 +19,8 @@ class TRTSensitiveDetectorTool : public SensitiveDetectorBase
   // Constructor
   TRTSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface *parent);
 
-  // Destructor
-  ~TRTSensitiveDetectorTool() { /* don't own any of the pointers... */ }
+  virtual StatusCode SetupEvent(HitCollectionMap&) override;
+  virtual StatusCode Gather(HitCollectionMap&) override;
 
 protected:
   // Make me an SD!

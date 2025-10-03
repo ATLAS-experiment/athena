@@ -38,6 +38,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "AtlasHepMC/Operators.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/ParticleConstants.h"
 
 
 namespace ISFTesting {
@@ -63,15 +64,14 @@ namespace ISFTesting {
     // cppcheck-suppress unknownMacro
     MOCK_CONST_METHOD2(convert, StatusCode(McEventCollection&,
                                            ISF::ISFParticleContainer&));
-    MOCK_CONST_METHOD4(convertHepMCToG4Event, StatusCode(const EventContext&, McEventCollection&,
-                                                         G4Event*&,
-                                                         McEventCollection&));
-    MOCK_CONST_METHOD3(convertHepMCToG4EventLegacy, StatusCode(const EventContext&, McEventCollection&,
-                                                               G4Event*&));
-    MOCK_CONST_METHOD5(ISF_to_G4Event, G4Event*(const EventContext&, const std::vector<ISF::ISFParticle*>&,
-                                                HepMC::GenEvent*,
-                                                HepMC::GenEvent*,
-                                                bool));
+    MOCK_CONST_METHOD3(convertHepMCToG4Event,
+                       StatusCode(McEventCollection&, G4Event&,
+                                  McEventCollection&));
+    MOCK_CONST_METHOD2(convertHepMCToG4EventLegacy,
+                       StatusCode(McEventCollection&, G4Event&));
+    MOCK_CONST_METHOD5(ISF_to_G4Event,
+                       void(G4Event&, const std::vector<ISF::ISFParticle*>&,
+                            HepMC::GenEvent*, HepMC::GenEvent*, bool));
 
   }; // MockInputConverter class
 
@@ -786,7 +786,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
 
     ISF::ISFParticle convertedParticle(position,
                                        momentum,
-                                       0.510999*Gaudi::Units::MeV,  // e- mass
+                                       ParticleConstants::electronMassInMeV,  // e- mass
                                        -1.,  // charge
                                        11,  // e- PDG code
                                        1, ///status

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,6 +14,9 @@
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExUtils/MaterialUpdateMode.h"
 #include "TrkParameters/TrackParameters.h"
+#include "TrkExInterfaces/IEnergyLossUpdator.h"
+#include "TrkExInterfaces/IMultipleScatteringUpdator.h"
+#include "TrkDetDescrInterfaces/IMaterialMapper.h"
 // Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -23,20 +26,11 @@
 
 #include <boost/thread/tss.hpp>
 
-#define TRKEXTOOLS_MAXUPDATES 100
-#ifndef COVARIANCEUPDATEWITHCHECK
-#define COVARIANCEUPDATEWITHCHECK(cov, sign, value)                            \
-  cov += (sign > 0 ? value : (value > cov ? 0 : sign * value))
-#endif
-
 namespace Trk {
 
 class Layer;
 // class TrackParameters;
 class MaterialProperties;
-class IEnergyLossUpdator;
-class IMultipleScatteringUpdator;
-class IMaterialMapper;
 
 /** @class MaterialEffectsUpdator
 
@@ -49,7 +43,7 @@ class IMaterialMapper;
   (e.g silicon sensors) that most of the material
   corresponds to the sensor itself or is located
   behind it.
-  
+
   In this case the material effects would be post-update
   with respect to the measurement update on the given surface,
   e.g in a Kalman filter procedure.
@@ -310,35 +304,51 @@ private:
     const TrackParameters* parm) const;
 
   /* Private Class members*/
-  bool m_doCompoundLayerCheck; //!< turn on/off the necessary checks when we may
-                               //!< have compound layers
-  bool m_doEloss;              //!< steer energy loss On/Off from outside
-  bool m_doMs;                 //!< steer multiple scattering On/Off from outside
+  BooleanProperty m_doEloss{this, "EnergyLoss", true,
+    "steer energy loss On/Off from outside"};
+  BooleanProperty m_doMs{this, "MultipleScattering", true,
+    "steer multiple scattering On/Off from outside"};
 
-  bool m_forceMomentum;        //!< Force the momentum to be a specific value
-  bool m_xKalmanStraggling;    //!< the momentum Error as calculated in xKalman
-  bool m_useMostProbableEloss; //!< use the most probable energy loss
+  BooleanProperty m_forceMomentum{this, "ForceMomentum", false,
+    "Force the momentum to be a specific value"};
+  BooleanProperty m_useMostProbableEloss{this, "MostProbableEnergyLoss", false,
+    "use the most probable energy loss"};
 
-  bool m_msgOutputValidationDirection; //!< validation direction used for screen
-                                       //!< output
-  bool m_msgOutputCorrections;         //!< screen output of actual corrections
+  BooleanProperty m_msgOutputValidationDirection
+    {this, "ScreenOutputValidationDirection", true,
+     "validation direction used for screen output"};
+  BooleanProperty m_msgOutputCorrections{this, "ScreenOutputCorrections", false,
+    "screen output of actual corrections"};
 
   // ------------ validation variables
   // -------------------------------------------------
-  bool m_validationMode;             //!< Switch for validation mode
-  bool m_validationIgnoreUnmeasured; //!< Ignore unmeasured TrackParameters
-                                     //!< (Navigation!)
-  bool m_landauMode;                 //!< If in Landau mode, error propagation is done as for
-                                     //!< landaus
-  int m_validationDirection;         //!< validation direction
+  BooleanProperty m_validationMode{this, "ValidationMode", false,
+    "Switch for validation mode"};
+  BooleanProperty m_validationIgnoreUnmeasured
+    {this, "ValidationIgnoreUnmeasured", false,
+     "Ignore unmeasured TrackParameters (Navigation!)"};
+  BooleanProperty m_landauMode{this, "LandauMode", false,
+    "If in Landau mode, error propagation is done as for landaus"};
+  IntegerProperty m_validationDirection{this, "ValidationDirection", 1,
+    "validation direction"};
   //  ------------------------------
-  double m_momentumCut;    //!< Minimal momentum cut for update
-  double m_momentumMax;    //!< Maximal momentum cut for update
-  double m_forcedMomentum; //!< Forced momentum value
+  DoubleProperty m_momentumCut{this, "MinimalMomentum", 50. * Gaudi::Units::MeV,
+    "Minimal momentum cut for update"};
+  DoubleProperty m_momentumMax{this, "MaximalMomentum", 10. * Gaudi::Units::TeV,
+    "Maximal momentum cut for update"};
+  DoubleProperty m_forcedMomentum
+    {this, "ForcedMomentumValue", 2000. * Gaudi::Units::MeV, "Forced momentum value"};
 
-  ToolHandle<IEnergyLossUpdator> m_eLossUpdator;      //!< AlgoTool for EnergyLoss updates
-  ToolHandle<IMultipleScatteringUpdator> m_msUpdator; //!< AlgoTool for MultipleScatterin effects
-  ToolHandle<IMaterialMapper> m_materialMapper; //!< the material mapper for recording the layer material
+  ToolHandle<IEnergyLossUpdator> m_eLossUpdator
+    {this, "EnergyLossUpdator", "Trk::EnergyLossUpdator/AtlasEnergyLossUpdator",
+    "AlgoTool for EnergyLoss updates"};
+  ToolHandle<IMultipleScatteringUpdator> m_msUpdator
+    {this, "MultipleScatteringUpdator",
+     "Trk::MultipleScatteringUpdator/AtlasMultipleScatteringUpdator",
+     "AlgoTool for MultipleScatterin effects"};
+  ToolHandle<IMaterialMapper> m_materialMapper
+    {this, "ValidationMaterialMapper", "Trk::MaterialMapper/AtlasMaterialMapper",
+     "the material mapper for recording the layer material"};
 
   /*
    * TLS part

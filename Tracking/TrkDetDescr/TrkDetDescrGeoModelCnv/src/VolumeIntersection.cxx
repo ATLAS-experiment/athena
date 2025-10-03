@@ -420,7 +420,8 @@ Trk::VolumeIntersection::intersectApproximative(const Volume& volA,
     Trk::PolygonCache pgA = polygonXY(volA);
     Trk::PolygonCache pgB = polygonXY(volB);
 
-    const Trk::CylinderVolumeBounds *cylA{nullptr}, *cylB{nullptr};
+    const Trk::CylinderVolumeBounds *cylA{nullptr};
+    const Trk::CylinderVolumeBounds *cylB{nullptr};
     if (pgA.nVtx == 0)
         cylA = dynamic_cast<const Trk::CylinderVolumeBounds*>(
             &(volA.volumeBounds()));

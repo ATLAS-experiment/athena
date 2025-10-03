@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CAVERNINFRAGEOMODEL_CAVERNINFRADETECTORFACTORY_H
@@ -16,8 +16,8 @@ class CavernInfraDetectorFactory : public GeoVDetectorFactory
 {
  public:
   // Constructor:
-  CavernInfraDetectorFactory(ServiceHandle<StoreGateSvc> pDetStore,
-			     ServiceHandle<IRDBAccessSvc> pAccess);
+  CavernInfraDetectorFactory(const ServiceHandle<StoreGateSvc>& pDetStore,
+			     const ServiceHandle<IRDBAccessSvc>& pAccess);
 
   // Illegal operations:
   const CavernInfraDetectorFactory & operator=(const CavernInfraDetectorFactory &right) = delete;

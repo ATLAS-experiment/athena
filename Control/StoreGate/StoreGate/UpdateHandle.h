@@ -307,11 +307,4 @@ namespace SG {
 #include "StoreGate/UpdateHandle.icc"
 
 
-#ifndef NO_LEGACY_HANDLES
-namespace SG {
-  template <class T>
-  using RWVar = UpdateHandle<T>;
-} 
-#endif
-
 #endif //> !STOREGATE_SG_UPDATEHANDLE_H

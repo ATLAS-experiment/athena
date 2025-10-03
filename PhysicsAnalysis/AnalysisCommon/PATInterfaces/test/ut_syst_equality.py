@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 
 # Import ROOT without graphics
 from ROOT import gROOT

@@ -8,7 +8,7 @@ if __name__=="__main__":
                             Example: python -m PixelCalibAlgs.PixelCalibrationConfig --folder "global/path/to/folder/" --thr "threshold_file" --thr_intime "intime_file" 
                                                                                      --tot "tot_file --layers [Blayer, L1, L2, disk] [--saveInfo --runCal --skipPlots]""")
     
-    parser.add_argument('--folder'    , required=True, help="Directory path to the files")
+    parser.add_argument('--folder'    , type=str, default="/eos/atlas/atlascerngroupdisk/det-pix/p1/scan-data/", help="Directory path to the files")
     parser.add_argument('--thr'       , required=True, help="Threshold file, format must be \"SCAN_SXXXXXXXXX\" THRESHOLD_SCAN (0Preset_full)")
     parser.add_argument('--thr_intime', required=True, help="Threshold intime file, format must be \"SCAN_SXXXXXXXXX\" THRESHOLD_SCAN (0Preset_short_intime) ")
     parser.add_argument('--tot'       , required=True, help="Time over threshold file, format must be \"SCAN_SXXXXXXXXX\" TOT_CALIB (Test_Han)")
@@ -21,6 +21,11 @@ if __name__=="__main__":
     
     
     args = parser.parse_args()
+
+    from PixelCalibAlgs.IBLCalibrationConfig import scanFullName
+    args.thr        = scanFullName(args.thr)
+    args.thr_intime = scanFullName(args.thr_intime)
+    args.tot        = scanFullName(args.tot)
     
     import subprocess
     proc = []

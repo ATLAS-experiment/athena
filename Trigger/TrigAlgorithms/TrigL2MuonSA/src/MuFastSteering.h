@@ -70,7 +70,7 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
   StatusCode findMuonSignature(const std::vector<const TrigRoiDescriptor*>&	roi,
 			       const std::vector<const xAOD::MuonRoI*>& 	muonRoIs,
 			       DataVector<xAOD::L2StandAloneMuon>& 		outputTracks,
-			       xAOD::TrigCompositeContainer& outputMuonCal,
+			       xAOD::TrigCompositeContainer*                    outputMuonCal,
 			       TrigRoiDescriptorCollection&	 		outputID,
 			       TrigRoiDescriptorCollection&	 		outputMS,
 			       const bool                                       dynamicDeltaRpc,
@@ -270,7 +270,7 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
 
   //WriteHandle <xAOD::L2StandAloneMuonContainer>
   SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_muCompositeContainerKey{
-	this, "MuonCalibrationStream", "MuonCalibrationStream", "Name of the decisions object attached by MuFastSteering"};
+	this, "MuonCalibrationStream", "", "Name of the decisions object attached by MuFastSteering"};
 
   //WriteHandle <TrigRoiDescriptor> for ID
   SG::WriteHandleKey<TrigRoiDescriptorCollection> m_muIdContainerKey{

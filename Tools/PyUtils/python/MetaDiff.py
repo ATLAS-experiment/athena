@@ -1,8 +1,7 @@
 """The function in this module you should look to be using is meta_diff"""
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # This script reads metadata from a given file
-from __future__ import print_function
 
 import logging
 import re
@@ -335,19 +334,20 @@ def meta_diff(
             drop[i] = re.compile( drop[i] )
 
     def filter_key(key):
+        key_str = str(key)  # force conversion to plain Python string
 
         if drop is not None:
             for drop_key in drop:
                 if not regex:
-                    if key.startswith(drop_key):
+                    if key_str.startswith(drop_key):
                         return False
                 else:
-                    if drop_key.match(key):
+                    if drop_key.match(key_str):
                         return False
 
         if ignore_trigger:
             for trigger_key in trigger_keys:
-                if key.startswith(trigger_key):
+                if key_str.startswith(trigger_key):
                     return False
 
         return True

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleTruthCollectionCnv.h"
@@ -38,7 +38,7 @@ TrackParticleTruthCollectionPERS* TrackParticleTruthCollectionCnv::createPersist
   MsgStream log(msgSvc(), "TrackParticleTruthCollectionCnv");
   log<<MSG::DEBUG<<"Writing TrackParticleTruthCollection_p2"<<endmsg;
   TrackParticleTruthCollectionPERS* pers=new TrackParticleTruthCollectionPERS();
-  m_converter_p2.transToPers(trans,pers,log);
+  m_converter_p3.transToPers(trans,pers,log);
   return pers;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -17,13 +17,13 @@ CaloCell_ID::CaloCell_ID(const LArEM_ID*        em_id,
                          const LArFCAL_ID*      fcal_id, 
                          const LArMiniFCAL_ID*  minifcal_id,
                          const TileID*          tile_id) : 
-  CaloCell_Base_ID (em_id, hec_id, fcal_id, minifcal_id, tile_id, false)
+  CaloCell_Base_ID ("CaloCell_Base_ID",
+                    em_id, hec_id, fcal_id, minifcal_id, tile_id, false)
 {
 }
 
 
-CaloCell_ID::~CaloCell_ID(void) 
-= default;
+CaloCell_ID::~CaloCell_ID() = default;
 
 
 int

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CosmicTriggerTimeTool.h"
@@ -71,17 +71,15 @@ double CosmicTriggerTimeTool::trackRecordTime()
   } 
 
   double t = 0; 
-  for (auto it : *coll) {
-    // TimedTrackRecord * r = const_cast<TimedTrackRecord*>( *it ); 
-    CLHEP::Hep3Vector pos = it.GetPosition(); 
-    CLHEP::Hep3Vector p = it.GetMomentum(); 
-    // ATH_MSG_DEBUG( "TimedTrackRecord xyz position " <<pos.x()<<" "
+  for (const TrackRecord& r : *coll) {
+    CLHEP::Hep3Vector pos = r.GetPosition();
+    CLHEP::Hep3Vector p = r.GetMomentum();
     ATH_MSG_DEBUG( "TrackRecord xyz position " <<pos.x()<<" " 
                    << pos.y() << " " << pos.z() ); 
     ATH_MSG_DEBUG( "                      momentum " <<p.x() << " " 
                    << p.y() << " " << p.z() );
-    ATH_MSG_DEBUG( "                      time     " << it.GetTime() ); 
-    t +=  it.GetTime() ; 
+    ATH_MSG_DEBUG( "                      time     " << r.GetTime() );
+    t +=  r.GetTime();
   } 
 
   t = t/n ; 

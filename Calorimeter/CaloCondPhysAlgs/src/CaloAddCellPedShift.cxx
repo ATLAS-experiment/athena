@@ -183,7 +183,13 @@ StatusCode CaloAddCellPedShift::stop()
           unsigned int dbGain = CaloCondUtils::getDbCaloGain(gain);
           unsigned int subHash2;
           unsigned int iCool = m_caloCoolIdTool->getCoolChannelId(idHash,subHash2);
-          const CaloCondBlobFlt* const flt = pedBlobMap.find(iCool)->second;
+          auto it = pedBlobMap.find(iCool);
+          if (it == pedBlobMap.end()) {
+            ATH_MSG_ERROR("Bad system id " << iCool);
+            fclose(fp);
+            return StatusCode::FAILURE;
+          }
+          const CaloCondBlobFlt* const flt = it->second;
           float ped1_old= flt->getData(subHash2,dbGain,0);
           float ped2= flt->getData(subHash2,dbGain,1);
 

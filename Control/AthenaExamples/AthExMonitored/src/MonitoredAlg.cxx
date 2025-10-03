@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonitoredAlg.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "TestTools/random.h"
 
 #include <vector>
 #include <cmath>
@@ -50,13 +51,14 @@ StatusCode MonitoredAlg::execute()
 
   auto mon = Monitored::Group(m_monTool, count, eta, absphi, timer);
 
-  count = 1 + (rand() % 10);   // random number of tracks
+  count = Athena_test::randi_seed (m_seed, 11, 1);   // random number of tracks
 
   // Creating some random tracks
   for (int i=0; i<count; ++i) {
-    tracks.push_back(Track(-3.0 + 6.0*rand()/static_cast<float>(RAND_MAX),
-                           -M_PI + 2*M_PI*rand()/static_cast<float>(RAND_MAX),
-                           100.0*rand()/static_cast<float>(RAND_MAX)));                     
+    float eta = Athena_test::randf_seed (m_seed, 3.0, -3.0);
+    float phi = Athena_test::randf_seed (m_seed, M_PI, -M_PI);
+    float pt  = Athena_test::randf_seed (m_seed, 100);
+    tracks.push_back(Track(eta, phi, pt));
   }
   
   return StatusCode::SUCCESS;

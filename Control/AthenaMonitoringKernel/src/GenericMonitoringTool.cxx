@@ -1,9 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <map>
-#include <mutex>
 #include <algorithm>
 
 #include <TH1.h>
@@ -13,9 +11,9 @@
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthenaMonitoringKernel/HistogramDef.h"
-#include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "AthenaMonitoringKernel/IMonitoredVariable.h"
 
+#include "HistogramFiller/HistogramFiller.h"
 #include "HistogramFiller/HistogramFillerFactory.h"
 
 using namespace Monitored;
@@ -87,7 +85,7 @@ StatusCode GenericMonitoringTool::book() {
             filler->touch(); // create now and be done with it
           }
         }
-      	m_fillers.push_back(filler);
+      	m_fillers.push_back(std::move(filler));
       } else {
         ATH_MSG_WARNING( "The histogram filler cannot be instantiated for: " << def.name );
       }
@@ -125,90 +123,84 @@ namespace Monitored {
     }
 }
 
-namespace std {
-  // Next four functions are for speeding up lookups in the the caching of invokeFillers
-  // They allow us to directly compare keys of the cache std::map
-  // with vectors of IMonitoredVariables, avoiding memory allocations
-  // these compare strings and IMonitoredVariables
-  bool operator<(const std::string& a, const std::reference_wrapper<Monitored::IMonitoredVariable>& b)  {
-    return a < b.get().name();
-  }
-  bool operator<(const std::reference_wrapper<Monitored::IMonitoredVariable>& a, const std::string& b)  {
-    return a.get().name() < b;
-  }
-
-  // lexicographical comparison of cache map items and vector of IMonitoredVariables
-  bool operator<(const std::vector<std::string>& lhs,
-                 const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& rhs) {
-    return std::lexicographical_compare(lhs.begin(), lhs.end(),
-                                        rhs.begin(), rhs.end());
-  }
-  bool operator<(const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& lhs,
-                 const std::vector<std::string>& rhs) {
-    return std::lexicographical_compare(lhs.begin(), lhs.end(),
-                                        rhs.begin(), rhs.end());
-  }
-}
-
 namespace {
-  // this exists to avoid reallocating memory on every invokeFillers call
-  thread_local Monitored::HistogramFiller::VariablesPack tl_vars ATLAS_THREAD_SAFE;
+  void invokeFillersDebug(MsgStream& log,
+                          const Monitored::HistogramFiller::VariablesPack& vars,
+                          const std::shared_ptr<Monitored::HistogramFiller>& filler,
+                          const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& monitoredVariables) {
+    bool reasonFound = false;
+    if (ATH_UNLIKELY(!filler->histogramWeightName().empty() && !vars.weight)) {
+      reasonFound = true;
+      log << MSG::DEBUG << "Filler weight not found in monitoredVariables:"
+          << "\n  Filler weight               : " << filler->histogramWeightName()
+          << "\n  Asked to fill from mon. tl_vars: " << monitoredVariables << endmsg;
+    }
+    if (ATH_UNLIKELY(!filler->histogramCutMaskName().empty() && !vars.cut)) {
+      reasonFound = true;
+      log << MSG::DEBUG << "Filler cut mask not found in monitoredVariables:"
+          << "\n  Filler cut mask             : " << filler->histogramCutMaskName()
+          << "\n  Asked to fill from mon. tl_vars: " << monitoredVariables << endmsg;
+    }
+    if ( not reasonFound ) {
+      log << MSG::DEBUG << "Filler has different variables than monitoredVariables:"
+          << "\n  Filler variables            : " << filler->histogramVariablesNames()
+          << "\n  Asked to fill from mon. tl_vars: " << monitoredVariables
+          << "\n  Selected monitored variables: " << vars.names() << endmsg;
+    }
+  }
 
-  // Ensure that TLS defined in this library actually gets used.
-  // Avoids a potential slowdown in accessing TLS seen in simualation.
-  // See ATLASSIM-4932.
-  [[maybe_unused]]
-  const Monitored::HistogramFiller::VariablesPack& varDum = tl_vars;
+  /**
+   * Concatenate the monitored variable names to create a key to be used in the ConcurrentStr map.
+   * This may seem very inefficient but is actually faster than the previous solution of storing a
+   * std::vector<std::string> in a std::map + mutex.
+   */
+  std::string fillerKey(const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& v) {
+    std::string r;
+    for (const auto& m : v) r.append(m.get().name());
+    return r;
+  }
 }
 
 void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& monitoredVariables) const {
   // This is the list of fillers to consider in the invocation.
   // If we are using the cache then this may be a proper subset of m_fillers; otherwise will just be m_fillers
-  const std::vector<std::shared_ptr<Monitored::HistogramFiller>>* fillerList{nullptr};
-  // do we need to update the cache?
-  bool makeCache = false;
+  const std::vector<std::shared_ptr<Monitored::HistogramFiller>>* fillerList{&m_fillers};
   // pointer to list of matched fillers, if we need to update the cache (default doesn't create the vector)
-  std::unique_ptr<std::vector<std::shared_ptr<Monitored::HistogramFiller>>> matchedFillerList;
+  std::vector<std::shared_ptr<Monitored::HistogramFiller>>* matchedFillerList{nullptr};
   if (m_useCache) {
-    // lock the cache during lookup
-    std::scoped_lock cacheguard(m_cacheMutex);
-    const auto match = m_fillerCacheMap.find(monitoredVariables);
+    const auto match = m_fillerCacheMap.find(fillerKey(monitoredVariables));
     if (match != m_fillerCacheMap.end()) {
-      fillerList = match->second.get();
+      fillerList = &match->second;
     } else {
-      fillerList = &m_fillers;
-      matchedFillerList = std::make_unique<std::vector<std::shared_ptr<Monitored::HistogramFiller>>>();
-      makeCache = true;
+      // make new cache entry
+      matchedFillerList = new std::vector<std::shared_ptr<Monitored::HistogramFiller>>;
     }
-  } else {
-    fillerList = &m_fillers;
   }
 
   for ( auto filler: *fillerList ) {
-    tl_vars.reset();
     const int fillerCardinality = filler->histogramVariablesNames().size() + (filler->histogramWeightName().empty() ? 0: 1) + (filler->histogramCutMaskName().empty() ? 0 : 1);
 
     if ( fillerCardinality == 1 ) { // simplest case, optimising this to be super fast
       for ( auto& var: monitoredVariables ) {
         if ( var.get().name().compare( filler->histogramVariablesNames()[0] ) == 0 )  {
-          tl_vars.var[0] = &var.get();
           {
             auto guard{filler->getLock()};
-            filler->fill( tl_vars );
+            filler->fill({&var.get()});
           }
-          if (makeCache) { 
-            matchedFillerList->push_back(filler); 
+          if (matchedFillerList) {
+            matchedFillerList->push_back(std::move(filler));
           }
           break;
         }
       }
     } else { // a more complicated case, and cuts or weights
       int matchesCount = 0;
+      Monitored::HistogramFiller::VariablesPack vars;
       for ( const auto& var: monitoredVariables ) {
         bool matched = false;
         for ( unsigned fillerVarIndex = 0; fillerVarIndex < filler->histogramVariablesNames().size(); ++fillerVarIndex ) {
           if ( var.get().name().compare( filler->histogramVariablesNames()[fillerVarIndex] ) == 0 ) {
-            tl_vars.set(fillerVarIndex, &var.get());
+            vars.set(fillerVarIndex, &var.get());
             matched = true;
             matchesCount++;
             break;
@@ -217,10 +209,10 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
         if ( matchesCount == fillerCardinality ) break;
         if ( not matched ) { // may be a weight or cut variable still
           if ( var.get().name().compare( filler->histogramWeightName() ) == 0 )  {
-            tl_vars.weight = &var.get();
+            vars.weight = &var.get();
             matchesCount ++;
           } else if ( var.get().name().compare( filler->histogramCutMaskName() ) == 0 )  {
-            tl_vars.cut = &var.get();
+            vars.cut = &var.get();
             matchesCount++;
          }
         }
@@ -229,53 +221,21 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
       if ( matchesCount == fillerCardinality ) {
         {
           auto guard{filler->getLock()};
-          filler->fill( tl_vars );
+          filler->fill( vars );
         }
-        if (makeCache) { 
-          matchedFillerList->push_back(filler); 
+        if (matchedFillerList) {
+          matchedFillerList->push_back(std::move(filler));
         }
-      } else if ( ATH_UNLIKELY( matchesCount != 0 ) ) { // something has matched, but not all, worth informing user
-        invokeFillersDebug(filler, monitoredVariables);
+      } else if ( ATH_UNLIKELY( msgLvl(MSG::DEBUG) && matchesCount != 0 ) ) { // something has matched, but not all, worth informing user
+        invokeFillersDebug(msg(), vars, filler, monitoredVariables);
       }
     }
   }
 
-  if (makeCache) {
-    // we may hit this multiple times. If another thread has updated the cache in the meanwhile, don't update
-    // (or we might delete the fillerList under another thread)
-    std::scoped_lock cacheguard(m_cacheMutex);
-    const auto match = m_fillerCacheMap.find(monitoredVariables);
-    if (match == m_fillerCacheMap.end()) {
-      std::vector<std::string> key;
-      key.reserve(monitoredVariables.size());
-      for (const auto& mv : monitoredVariables) {
-        key.push_back(mv.get().name());
-      }
-      m_fillerCacheMap[key].swap(matchedFillerList);
-    }
-  }
-}
-
-void GenericMonitoringTool::invokeFillersDebug(const std::shared_ptr<Monitored::HistogramFiller>& filler,
-                                               const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& monitoredVariables) const {
-  bool reasonFound = false;
-  if (ATH_UNLIKELY(!filler->histogramWeightName().empty() && !tl_vars.weight)) {
-    reasonFound = true;
-    ATH_MSG_DEBUG("Filler weight not found in monitoredVariables:"
-      << "\n  Filler weight               : " << filler->histogramWeightName()
-      << "\n  Asked to fill from mon. tl_vars: " << monitoredVariables);
-  }
-  if (ATH_UNLIKELY(!filler->histogramCutMaskName().empty() && !tl_vars.cut)) {
-    reasonFound = true;
-    ATH_MSG_DEBUG("Filler cut mask not found in monitoredVariables:"
-      << "\n  Filler cut mask             : " << filler->histogramCutMaskName()
-      << "\n  Asked to fill from mon. tl_vars: " << monitoredVariables);
-  }
-  if ( not reasonFound ) {
-    ATH_MSG_DEBUG("Filler has different variables than monitoredVariables:"
-      << "\n  Filler variables            : " << filler->histogramVariablesNames()
-      << "\n  Asked to fill from mon. tl_vars: " << monitoredVariables
-      << "\n  Selected monitored variables: " << tl_vars.names() );
+  if (matchedFillerList) {
+    // We may hit this multiple times. If another thread has updated the cache in the meanwhile,
+    // nothing will be done here.
+    m_fillerCacheMap.emplace(fillerKey(monitoredVariables), std::move(*matchedFillerList));
   }
 }
 

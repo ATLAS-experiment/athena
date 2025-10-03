@@ -12,7 +12,8 @@
 #ifndef INDETREADOUTGEOMETRY_TRT_DETELEMENTCOLLECTION_H
 #define INDETREADOUTGEOMETRY_TRT_DETELEMENTCOLLECTION_H
 
-#include <vector>
+#include "AthContainers/DataVector.h"
+#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 #include "InDetIdentifier/TRT_ID.h"
 
 class IdentifierHash;
@@ -20,14 +21,10 @@ class Identifier;
 
 namespace InDetDD {
 
-  class TRT_BaseElement;
-
-  /// Class to hold collection of TRT detector elements. 
-
-  class TRT_DetElementCollection : public std::vector<TRT_BaseElement *>
+  /// Class to hold collection of TRT detector elements.
+  class TRT_DetElementCollection : public DataVector<TRT_BaseElement>
   {
     public:
-
       const TRT_BaseElement* getDetectorElement(const IdentifierHash& hash) const;
   };
 

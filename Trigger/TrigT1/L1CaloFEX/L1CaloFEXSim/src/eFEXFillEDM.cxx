@@ -9,7 +9,7 @@
 //      email                 : nluongo@uoregon.edu
 //***********************************************************************
 
-#include "L1CaloFEXSim/eFEXFillEDM.h" 
+#include "eFEXFillEDM.h"
 
 namespace LVL1 {
 
@@ -18,7 +18,7 @@ namespace LVL1 {
   eFEXFillEDM::eFEXFillEDM(const std::string& type, const std::string& name, const IInterface* parent):
     AthAlgTool(type, name, parent) 
   {
-    declareInterface<IeFEXFillEDM>(this);
+    declareInterface<eFEXFillEDM>(this);
   }
 
   //----------------- Initialization ----------------------------

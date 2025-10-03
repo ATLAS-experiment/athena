@@ -23,7 +23,7 @@
 #include "ActsGeometry/IActsPropStepRootWriterSvc.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialTrackWriterSvc.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
 
 // OTHER
@@ -43,13 +43,6 @@ namespace Acts{
       std::pair<std::pair<Acts::Vector3, Acts::Vector3>, RecordedMaterial>;
 }
 
-ActsExtrapolationAlg::ActsExtrapolationAlg(const std::string &name,
-                                           ISvcLocator *pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator),
-      m_propStepWriterSvc("ActsPropStepRootWriterSvc", name),
-      m_rndmGenSvc("AthRNGSvc", name) ,
-      m_materialTrackWriterSvc("ActsMaterialTrackWriterSvc", name)
-{}
 
 StatusCode ActsExtrapolationAlg::initialize() {
 
@@ -58,7 +51,7 @@ StatusCode ActsExtrapolationAlg::initialize() {
   ATH_CHECK(m_rndmGenSvc.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_propStepWriterSvc.retrieve());
-
+  ATH_CHECK(m_trackingGeometryTool.retrieve());
   if (m_writeMaterialTracks) {
   ATH_CHECK( m_materialTrackWriterSvc.retrieve() );
   }
@@ -116,8 +109,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
 
     if (charge != 0.) {
       // Perigee, no alignment -> default geo context
-      ActsGeometryContext gctx = m_extrapolationTool->trackingGeometryTool()
-                                     ->getNominalGeometryContext();
+      ActsGeometryContext gctx = m_trackingGeometryTool->getNominalGeometryContext();
       Acts::GenericBoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
       output = m_extrapolationTool->propagationSteps(ctx, startParameters);
       if(output.first.size() == 0) {

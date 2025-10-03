@@ -31,7 +31,7 @@ def main():
     trf.execute()
     trf.generateReport()
 
-    msg.info("%s stopped at %s, trf exit code %d", (sys.argv[0], time.asctime(), trf.exitCode))
+    msg.info("%s stopped at %s, trf exit code %d", sys.argv[0], time.asctime(), trf.exitCode)
     sys.exit(trf.exitCode)
 
 

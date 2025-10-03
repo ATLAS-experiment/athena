@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUCLUSTERCONTAINER_H
@@ -22,9 +22,10 @@ DATE:		October 17th, 2005
 
 ******************************************************/
 // includes section
-#include "TrigCaloEvent/TrigTauCluster.h"
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/BaseInfo.h"
+#include "TrigCaloEvent/TrigTauCluster.h"
+
 
 /** Container from TrigTauCluster type objects.
         See TrigTauCluster and T2CaloTaus

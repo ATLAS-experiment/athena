@@ -7,18 +7,17 @@ import sys
 def PPMSimBSMonitoringConfig(flags):
     '''Function to configure LVL1 PPM Sim algorithm in the monitoring system.'''
 
-
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    # make the athena monitoring helper
-    from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'PPMSimBSMonitoringCfg')
+    # use L1Calo's special MonitoringCfgHelper
+    from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+    helper = L1CaloMonitorCfgHelper(flags,CompFactory.PPMSimBSMonitorAlgorithm,'PPMSimBSMonAlg')
 
     # get any algorithms
-    PPMSimBSMonAlg = helper.addAlgorithm(CompFactory.PPMSimBSMonitorAlgorithm,'PPMSimBSMonAlg')
+    PPMSimBSMonAlg = helper.alg
     
     # import tools
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg # Needed for L1TTIDTools (ATR-21865)
@@ -35,66 +34,78 @@ def PPMSimBSMonitoringConfig(flags):
     PPMSimBSMonAlg.PackageName = groupName
     
     # Histogram paths
-    mainDir = 'L1Calo'
-    trigPath = 'PPM/'
+    histPath_dev = 'Developer/PPMSimBSMonAlg/Simulation'
+    histPath_exp = 'Expert/PpmTrex/Simulation'
 
     # Trigger tower plots: eta-phi granularity
     etabins = [-4.9,-4.475,-4.050,-3.625,-3.2,-3.1,-2.9,
-                     -2.7,-2.5,-2.4,-2.3,-2.2,-2.1,-2.0,-1.9,
-                     -1.8,-1.7,-1.6,-1.5,-1.4,-1.3,-1.2,-1.1,
-                     -1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,
-                     -0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,
-                     0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,
-                     1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.7,2.9,
-                     3.1,3.2,3.625,4.050,4.475,4.9]
-
-
-
+               -2.7,-2.5,-2.4,-2.3,-2.2,-2.1,-2.0,-1.9,
+               -1.8,-1.7,-1.6,-1.5,-1.4,-1.3,-1.2,-1.1,
+               -1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,
+               -0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,
+               0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,
+               1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.7,2.9,
+               3.1,3.2,3.625,4.050,4.475,4.9]
 
     phibins = 64
     phimin = 0
 
-    # Common location 
-    trigPath = "/PPM/Errors/Data_Simulation"
-    
     ####################
     #      BCID        #
     ####################
-    
-   
+
+    histPath = histPath_exp+'/BcidSim'
     group_names = {"peakf": "Peakfinder", "satBcid": "SaturatedBCID"}
     mismatch_map= {"NonZeroMatches": "Data/Simulation Non-Zero Matches", "ZeroMatches":  "Data/Simulation Zero Matches", "DataNoSim":"Data but no Simulation", "SimNoData":"Simulation but no Data"}
 
-
     # Eta-phi maps
-    histPath = trigPath+'/PPMBcidSim'
     for names in group_names:
         for elem in mismatch_map:
-            group_bcidsim = helper.addGroup(PPMSimBSMonAlg,  'group_Mismatch_{0}_{1}'.format(names, elem),  mainDir)
-            group_bcidsim.defineHistogram('etaTT_2D,phiTT_2D;ppm_2d_etaPhi_tt_'+names+'_'+elem, title='PPM '+group_names[names]+' ' + mismatch_map[elem],  type='TH2D', path=histPath, xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, opt='kAlwaysCreate')
+            helper.defineHistogram('etaTT_2D,phiTT_2D;ppm_2d_etaPhi_tt_'+names+'_'+elem,
+                                   fillGroup='group_Mismatch_{0}_{1}'.format(names, elem),
+                                   title='PPM '+group_names[names]+' ' + mismatch_map[elem],
+                                   type='TH2D', path=histPath,
+                                   hanConfig={
+                                       "description": 'PPM '+group_names[names]+' ' + mismatch_map[elem]
+                                   },
+                                   xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins,
+                                   opt='kAlwaysCreate')
     
 
 
     ####################
     #      LUT         #
     ####################
-    
-    histPath_CP = trigPath+'/PPMLUTSim'
-    histPath_JEP = trigPath+'/PPMLUTSim'
+
+    histPath = histPath_exp+'/LutSim'
     lut_map =  { "SimEqData": "Data/Simulation Non-zero Matches", "SimNeData": "Data/Simulation Non-zero Mismatches", "SimNoData":  "Simulation but no Data", "DataNoSim": "Data but no Simulation" }
-    group_names_lut = {"lutCp": ["CP", histPath_CP], "lutJep": ["JEP", histPath_JEP] }
+    group_names_lut = {"lutCp": ["CP", histPath], "lutJep": ["JEP", histPath] }
     
     # EM layer
+    # MW 20/02/2025: removed kAlwaysCreate for EM which is powered off as of 2025
+    histPath = histPath_dev+'/LutSim'
     for names in group_names_lut:
         for elem in lut_map:
-            group_lut_em = helper.addGroup(PPMSimBSMonAlg,  'groupLUT{0}_EM_{1}'.format(group_names_lut[names][0],elem),  mainDir)
-            group_lut_em.defineHistogram('etaTT_2D,phiTT_2D;ppm_em_2d_etaPhi_tt_'+names+'_'+elem, title='PPM LUT-'+group_names_lut[names][0]+' EM ' + lut_map[elem],  type='TH2D', path=group_names_lut[names][1], xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, opt='kAlwaysCreate')
+            helper.defineHistogram('etaTT_2D,phiTT_2D;ppm_em_2d_etaPhi_tt_'+names+'_'+elem,
+                                   fillGroup='groupLUT{0}_EM_{1}'.format(group_names_lut[names][0],elem),
+                                   title='PPM LUT-'+group_names_lut[names][0]+' EM ' + lut_map[elem],
+                                   type='TH2D', path=histPath,
+                                   xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins,
+                                   opt='')
     
     # HAD layer 
+    histPath = histPath_exp+'/LutSim'
     for names in group_names_lut:
         for elem in lut_map:
-            group_lut_had = helper.addGroup(PPMSimBSMonAlg,  'groupLUT{0}_HAD_{1}'.format(group_names_lut[names][0],elem),  mainDir)
-            group_lut_had.defineHistogram('etaTT_2D,phiTT_2D;ppm_had_2d_etaPhi_tt_'+names+'_'+elem, title='PPM LUT-'+group_names_lut[names][0]+' HAD ' + lut_map[elem],  type='TH2D', path=group_names_lut[names][1], xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, opt='kAlwaysCreate')
+            helper.defineHistogram('etaTT_2D,phiTT_2D;ppm_had_2d_etaPhi_tt_'+names+'_'+elem,
+                                   fillGroup='groupLUT{0}_HAD_{1}'.format(group_names_lut[names][0],elem),
+                                   title='PPM LUT-'+group_names_lut[names][0]+' HAD ' + lut_map[elem],
+                                   type='TH2D', path=histPath,
+                                   hanConfig={
+                                       "description": 'PPM LUT-'+group_names_lut[names][0]+' HAD ' + lut_map[elem]
+                                   },
+                                   xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins,
+                                   opt='kAlwaysCreate')
 
     ####################
     #      Errors      #
@@ -104,22 +115,27 @@ def PPMSimBSMonitoringConfig(flags):
     nCrates          = 8
     nModulesPerCrate = 16
 
-    histPath = trigPath+'/MismatchEventNumbers'
-
     y = 2 * (nModulesPerCrate + 16 * (nCrates % 2) )
-
     yErrorLabels = []
-    
-
     crate_map= [ "cr0cr1", "cr2cr3", "cr4cr5", "cr6cr7"]
     
     for elem in crate_map:
+        # kAlwaysCreate only for crates 6 and 7 (others switched off as of 2025)
         yErrorLabels =  BinErrors(y, elem)
-        group_Error= helper.addGroup(PPMSimBSMonAlg, 'group_Error_{}'.format(elem), mainDir)     
-        group_Error.defineHistogram('eventMonitor,y_2D;ppm_2d_LUT_MismatchEvents_'+ elem, title='PPM LUT Mismatch Event Numbers;Events with Error/Mismatch;Crate/Module', type='TH2I', path=histPath,xbins=10,xmin=0, xmax=10, ybins=y, ymin=0, ymax=y,ylabels=yErrorLabels,opt='kAlwaysCreate')
+        helper.defineHistogram('eventMonitor,y_2D;ppm_2d_LUT_MismatchEvents_'+ elem,
+                               fillGroup='group_Error_{}'.format(elem),
+                               title='PPM LUT Mismatch Event Numbers;Events with Error/Mismatch;Crate/Module',
+                               type='TH2I', path=histPath_exp,
+                               hanConfig={
+                                   "display" : "SetGridx,SetGridy",
+                                   "algorithm" : "Histogram_Empty",
+                                   "description" : "PPM LUT Mismatch Event Numbers."
+                               },
+                               xbins=10,xmin=0, xmax=10,
+                               ybins=y, ymin=0, ymax=y,ylabels=yErrorLabels,
+                               opt='kAlwaysCreate' if elem == 'cr6cr7' else '')
         
     # Finish up
-
     acc = helper.result()
     result.merge(acc)
     return result

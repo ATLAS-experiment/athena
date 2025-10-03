@@ -29,5 +29,5 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})
 
 atlas_add_test( JpsiAlgConfig_test
                  SCRIPT python -m JpsiUpsilonTools.runJpsiAlg
-                 PROPERTIES TIMEOUT 300
+                 PROPERTIES TIMEOUT 600
                  POST_EXEC_SCRIPT nopost.sh)

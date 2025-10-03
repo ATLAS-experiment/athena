@@ -28,9 +28,7 @@
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/Units.h"
 // Trk
-#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
-//#include "TrkDetDescrInterfaces/IMaterialEffectsOnTrackProvider.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkDetDescrUtils/BinningType.h"
@@ -61,7 +59,6 @@ Tile::TileVolumeBuilder::TileVolumeBuilder(const std::string& t, const std::stri
   AthAlgTool(t,n,p),
   m_tileMgr(nullptr),
   m_tileMgrLocation("Tile"),
-  m_trackingVolumeHelper("Trk::TrackingVolumeHelper/TrackingVolumeHelper"),
   m_trackingVolumeCreator("Trk::CylinderVolumeCreator/TrackingVolumeCreator"),
   m_tileBarrelEnvelope(25.*mm),
   m_useCaloSurfBuilder(true),
@@ -77,7 +74,6 @@ Tile::TileVolumeBuilder::TileVolumeBuilder(const std::string& t, const std::stri
   declareProperty("BarrelEnvelopeCover",                    m_tileBarrelEnvelope);
   declareProperty("ForceVolumeSymmetry",                    m_forceSymmetry);
   // helper tools
-  declareProperty("TrackingVolumeHelper",                   m_trackingVolumeHelper);
   declareProperty("TrackingVolumeCreator",                  m_trackingVolumeCreator);
   declareProperty("UseCaloSurfBuilder",                     m_useCaloSurfBuilder);
   declareProperty("BarrelLayersPerSampling",                m_tileBarrelLayersPerSampling);
@@ -94,32 +90,14 @@ Tile::TileVolumeBuilder::~ TileVolumeBuilder()
 StatusCode Tile::TileVolumeBuilder::initialize()
 {
   // get Tile Detector Description Manager
-  if (detStore()->retrieve(m_tileMgr, m_tileMgrLocation).isFailure()){
-    ATH_MSG_FATAL( "Could not get TileDetDescrManager! Tile TrackingVolumes will not be built" );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(detStore()->retrieve(m_tileMgr, m_tileMgrLocation));
 
-  // Retrieve the tracking volume helper   -------------------------------------------------
-  if (m_trackingVolumeHelper.retrieve().isFailure())
-    {
-      ATH_MSG_FATAL(  "Failed to retrieve tool " << m_trackingVolumeHelper );
-      return StatusCode::FAILURE;
-    } else
-    ATH_MSG_INFO( "Retrieved tool " << m_trackingVolumeHelper );
+  // Retrieve the second volume creator
+  ATH_CHECK(m_trackingVolumeCreator.retrieve());
+  ATH_MSG_INFO( "Retrieved tool " << m_trackingVolumeCreator );
 
-    // Retrieve the second volume creator
-    if (m_trackingVolumeCreator.retrieve().isFailure()){
-        ATH_MSG_FATAL( "Failed to retrieve tool " << m_trackingVolumeCreator );
-        return StatusCode::FAILURE;
-    } else
-        ATH_MSG_INFO( "Retrieved tool " << m_trackingVolumeCreator );
-
-  if(m_surfBuilder.retrieve().isFailure())
-    {
-      ATH_MSG_FATAL(  "Failed to retrieve tool " << m_surfBuilder );
-      return StatusCode::FAILURE;
-    } else
-    ATH_MSG_INFO( "Retrieved tool " << m_surfBuilder );
+  ATH_CHECK(m_surfBuilder.retrieve());
+  ATH_MSG_INFO( "Retrieved tool " << m_surfBuilder );
 
   ATH_MSG_INFO( " initialize() successful" );
   return StatusCode::SUCCESS;
@@ -168,10 +146,6 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
   std::shared_ptr<Trk::CylinderVolumeBounds> itcPlug1Bounds;
   std::shared_ptr<Trk::CylinderVolumeBounds> itcPlug2Bounds;
   std::shared_ptr<Trk::CylinderVolumeBounds> gapBounds;
-
-  // dummy objects
-  Trk::LayerArray* dummyLayers = nullptr;
-  Trk::TrackingVolumeArray* dummyVolumes = nullptr;
 
   std::vector<std::pair<const Trk::Surface*, const Trk::Surface*>> entrySurf =
     m_surfBuilder->entrySurfaces(&caloDDM);
@@ -410,7 +384,7 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
     tileGirder = new Trk::TrackingVolume(nullptr,
                                          std::move(tileGirderBounds),
                                          girderProperties,
-                                         dummyLayers, dummyVolumes,
+                                         nullptr, nullptr,
                                          "Calo::Girder::TileCombined");
   }
 
@@ -541,12 +515,12 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
 
   Trk::TrackingVolume* gBufferPos = new Trk::TrackingVolume(
       std::move(gBuffPosTransform), gapBuffBounds, fingerProperties,
-      dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::GapBufferPos");
+      nullptr, nullptr, "Calo::GapVolumes::Tile::GapBufferPos");
 
   Trk::TrackingVolume* gBufferNeg = new Trk::TrackingVolume(
       std::move(gBuffNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(gapBuffBounds->clone()),
-      fingerProperties, dummyLayers, dummyVolumes,
+      fingerProperties, nullptr, nullptr,
       "Calo::GapVolumes::Tile::GapBufferNeg");
 
   Trk::TrackingVolume* positiveGapSector = nullptr;
@@ -582,14 +556,14 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
       itcPlug2Bounds->innerRadius(), itcPlug2Bounds->outerRadius(), h2Buff);
 
   Trk::TrackingVolume* p2BufferPos = new Trk::TrackingVolume(
-      std::move(p2BuffPosTransform), p2BuffBounds, fingerProperties, dummyLayers,
-      dummyVolumes, "Calo::GapVolumes::Tile::Plug2BufferPos");
+      std::move(p2BuffPosTransform), p2BuffBounds, fingerProperties, nullptr,
+      nullptr, "Calo::GapVolumes::Tile::Plug2BufferPos");
 
   Trk::TrackingVolume* p2BufferNeg = new Trk::TrackingVolume(
       std::move(p2BuffNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(p2BuffBounds->clone()),
-      fingerProperties, dummyLayers,
-      dummyVolumes, "Calo::GapVolumes::Tile::Plug2BufferNeg");
+      fingerProperties, nullptr,
+      nullptr, "Calo::GapVolumes::Tile::Plug2BufferNeg");
 
   Trk::TrackingVolume* positiveP2Sector = nullptr;
   if (p2BufferPos) {
@@ -655,14 +629,14 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
 
   tileBarrelPositiveFingerGap = new Trk::TrackingVolume(
       std::move(bfPosTransform), tileBarrelFingerGapBounds, barrelFingerGapProperties,
-      dummyLayers, dummyVolumes,
+      nullptr, nullptr,
       "Calo::GapVolumes::Tile::BarrelPositiveFingerGap");
 
   tileBarrelNegativeFingerGap = new Trk::TrackingVolume(
       std::move(bfNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(
           tileBarrelFingerGapBounds->clone()),
-      barrelFingerGapProperties, dummyLayers, dummyVolumes,
+      barrelFingerGapProperties, nullptr, nullptr,
       "Calo::GapVolumes::Tile::BarrelNegativeFingerGap");
 
   // ------------------------------ ENDCAP SECTION COMPLETION --------------------------------------------------
@@ -683,12 +657,12 @@ std::vector<Trk::TrackingVolume*> Tile::TileVolumeBuilder::trackingVolumes(
 
   tilePositiveFingerGap = new Trk::TrackingVolume(
       std::move(efPosTransform), tilePositiveFingerGapBounds, fingerGapProperties,
-      dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::PositiveFingerGap");
+      nullptr, nullptr, "Calo::GapVolumes::Tile::PositiveFingerGap");
 
   tileNegativeFingerGap = new Trk::TrackingVolume(
       std::move(efNegTransform),
       std::shared_ptr<Trk::CylinderVolumeBounds>(tilePositiveFingerGapBounds->clone()),
-      fingerGapProperties, dummyLayers, dummyVolumes, "Calo::GapVolumes::Tile::NegativeFingerGap");
+      fingerGapProperties, nullptr, nullptr, "Calo::GapVolumes::Tile::NegativeFingerGap");
 
   // set the color code for displaying
   tileBarrel->registerColorCode( 4 );

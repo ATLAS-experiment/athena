@@ -319,10 +319,10 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
   unsigned long long central_EyTopoLong = static_cast<unsigned long long>(central_EyTopo);
 
   unsigned long long Et2Topo = global_ExTopoLong*global_ExTopoLong + global_EyTopoLong*global_EyTopoLong;
-  unsigned int EtTopo =  std::sqrt( Et2Topo );
+  unsigned long long EtTopo =  std::sqrt( Et2Topo );
   unsigned long long Et2Topo_central = central_ExTopoLong*central_ExTopoLong + central_EyTopoLong*central_EyTopoLong;
-  unsigned int EtTopo_central =  std::sqrt( Et2Topo_central );
-
+  unsigned long long EtTopo_central =  std::sqrt( Et2Topo_central );
+  
   TCS::jXETOB jxe( global_ExTopo, global_EyTopo, EtTopo, TCS::JXE );
   TCS::jXETOB jxec( central_ExTopo, central_EyTopo, EtTopo_central, TCS::JXEC );
 
@@ -359,6 +359,9 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
   ATH_CHECK(jTE_EDM.isValid());
 
   int topoTE = 0;
+  int topoTEsideA = 0;
+  int topoTEsideC = 0;
+
   bool topoTE_sat = false;
   // jTE variations include jTEC, jTEFWD, jTEFWDA, jTEFWDC
   // These quantities are defined according to the jFex module number
@@ -367,6 +370,7 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
   int topoTEFWD = 0;
   int topoTEFWDA = 0;
   int topoTEFWDC = 0;
+  
 
   for(const xAOD::jFexSumETRoI* jFexRoI : *jTE_EDM){
 
@@ -398,6 +402,18 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
     topoTE += EtUpperTopo;
     topoTE_sat |= Sat_lower;
     topoTE_sat |= Sat_upper;
+
+    // jTESideA
+    if( jFexNumber<3 ){ 
+        topoTEsideA += EtLowerTopo;
+        topoTEsideA += EtUpperTopo;
+    }
+    // jTESideC
+    else{
+      topoTEsideC += EtLowerTopo;
+      topoTEsideC += EtUpperTopo;
+    }
+    
 
     // jTEC
     topoTEC += EtLowerTopo;
@@ -437,6 +453,12 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
   jtefwd.setSumEtDouble( static_cast<double>(topoTEFWD*m_sumEtDouble_conversion) );
   jtefwda.setSumEtDouble( static_cast<double>(topoTEFWDA*m_sumEtDouble_conversion) );
   jtefwdc.setSumEtDouble( static_cast<double>(topoTEFWDC*m_sumEtDouble_conversion) );
+
+  // Set the hemisphere values
+  jte.setSumEtSideA( topoTEsideA );
+  jte.setSumEtSideC( topoTEsideC );
+  jte.setSumEtDoubleSideA( static_cast<double>(topoTEsideA*m_sumEtDouble_conversion) );
+  jte.setSumEtDoubleSideC( static_cast<double>(topoTEsideC*m_sumEtDouble_conversion) );
 
   inputEvent.setjTE( jte );
   inputEvent.setjTEC( jtec );

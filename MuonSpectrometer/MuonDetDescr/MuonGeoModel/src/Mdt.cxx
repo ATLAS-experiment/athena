@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Mdt.h"
@@ -32,7 +32,7 @@ namespace MuonGM {
     Mdt::Mdt(const MYSQL& mysql,
              Component *ss, const std::string& lVName) : DetectorElement(ss->name) {
         logVolName = lVName;
-        MdtComponent *s = (MdtComponent *)ss;
+        MdtComponent *s = static_cast<MdtComponent *>(ss);
         const MDT *thism = dynamic_cast<const MDT*>(mysql.GetTechnology(s->name));
 
         width = s->dx1;

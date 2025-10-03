@@ -16,7 +16,7 @@ public:
     const std::string& name,
     const IInterface* parent);
   virtual StatusCode initialize() override;
-  virtual bool passThreshold(const SG::AuxElement&) const override;
+  virtual bool passThreshold(const xAOD::Jet&) const override;
 private:
   struct Accessors {
     SG::AuxElement::ConstAccessor<float> n;

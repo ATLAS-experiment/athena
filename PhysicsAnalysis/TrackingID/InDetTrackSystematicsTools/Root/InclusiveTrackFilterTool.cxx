@@ -30,12 +30,9 @@ namespace InDet {
       return StatusCode::FAILURE;
     }
 
-    TH2* trkLRTEff_tmp = nullptr;
-    ATH_CHECK( initObject<TH2>( trkLRTEff_tmp,
+    ATH_CHECK( initObject<TH2>( m_trkLRTEff,
                m_calibFileLRTEff, 
                m_calibHistLRTEff) );
-
-    m_trkLRTEff = std::unique_ptr<TH2>(trkLRTEff_tmp);
 
     ATH_CHECK ( InDetTrackSystematicsTool::initialize() );
 

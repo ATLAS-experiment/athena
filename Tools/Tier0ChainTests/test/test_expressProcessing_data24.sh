@@ -5,6 +5,9 @@
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-athena-mt: 8
+# art-architecture:  '#x86_64-intel'
+# art-output: AOD.pool.root
+# art-output: ESD.pool.root
 
 Reco_tf.py  \
 --AMI x717  \

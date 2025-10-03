@@ -121,7 +121,7 @@ bool InDet::DiscOverlapDescriptor::reachableSurfaces(std::vector<Trk::SurfaceInt
       const Trk::Surface* previousPhi_NextEta = nullptr;
       const Trk::Surface* nextPhi_NextEta     = nullptr;
 
-      Trk::BinnedArraySpan<Trk::Surface const * const> surf = m_bin_array->arrayObjects();
+      std::span<Trk::Surface const * const> surf = m_bin_array->arrayObjects();
       size_t offset = 0;
       for (unsigned int bin = 0; bin < m_singleBinUtils.size(); bin++) {
         int etamod =

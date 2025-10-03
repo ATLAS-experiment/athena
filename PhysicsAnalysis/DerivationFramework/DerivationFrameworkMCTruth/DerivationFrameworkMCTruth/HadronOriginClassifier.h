@@ -14,6 +14,7 @@
 #define  DerivationFrameworkMCTruth_HadronOriginClassifier_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -52,33 +53,28 @@ namespace DerivationFramework{
                                  std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const;
 
     bool isCHadronFromB(const xAOD::TruthParticle* part, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;
-
-
-    /// init_part needed to detect looping graphs (sherpa)
-    /// up to know only seen at parton level
-    bool isLooping(const xAOD::TruthParticle* part, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;
     
-    const xAOD::TruthParticle* findInitial(const xAOD::TruthParticle* part, bool looping, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;
+    const xAOD::TruthParticle* findInitial(const xAOD::TruthParticle* part, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;
     
-    bool isFromTop(const xAOD::TruthParticle* part, bool looping) const;
-    static bool isDirectlyFromTop(const xAOD::TruthParticle* part, bool looping) ;
-    bool isDirectlyFromWTop(const xAOD::TruthParticle* part, bool looping) const;
+    bool isFromTop(const xAOD::TruthParticle* part) const;
+    static bool isDirectlyFromTop(const xAOD::TruthParticle* part) ;
+    bool isDirectlyFromWTop(const xAOD::TruthParticle* part) const;
 
-    static bool isDirectlyFromGluonQuark(const xAOD::TruthParticle* part, bool looping) ;
-    bool isFromGluonQuark(const xAOD::TruthParticle* part, bool looping) const;
-    bool isDirectlyFSRPythia6(const xAOD::TruthParticle* part, bool looping) const;
+    static bool isDirectlyFromGluonQuark(const xAOD::TruthParticle* part) ;
+    bool isFromGluonQuark(const xAOD::TruthParticle* part) const;
+    bool isDirectlyFSRPythia6(const xAOD::TruthParticle* part) const;
 
-    bool isDirectlyFromQuarkTop(const xAOD::TruthParticle* part, bool looping) const;
-    bool isFromQuarkTop(const xAOD::TruthParticle* part, bool looping) const;
-    bool isDirectlyFSR(const xAOD::TruthParticle* part, bool looping) const;
-    bool isFromWTop(const xAOD::TruthParticle* part, bool looping) const;
+    bool isDirectlyFromQuarkTop(const xAOD::TruthParticle* part) const;
+    bool isFromQuarkTop(const xAOD::TruthParticle* part) const;
+    bool isDirectlyFSR(const xAOD::TruthParticle* part) const;
+    bool isFromWTop(const xAOD::TruthParticle* part) const;
 
-    static bool isDirectlyMPIPythia6(const xAOD::TruthParticle* part, bool looping) ;
+    static bool isDirectlyMPIPythia6(const xAOD::TruthParticle* part) ;
 
-    bool isDirectlyMPIPythia8(const xAOD::TruthParticle* part, bool looping) const;
-    bool isDirectlyFromQuarkTopPythia8(const xAOD::TruthParticle* part, bool looping) const;
-    bool isFromQuarkTopPythia8(const xAOD::TruthParticle* part, bool looping) const;
-    bool isDirectlyFSRPythia8(const xAOD::TruthParticle* part, bool looping) const;
+    bool isDirectlyMPIPythia8(const xAOD::TruthParticle* part) const;
+    bool isDirectlyFromQuarkTopPythia8(const xAOD::TruthParticle* part) const;
+    bool isFromQuarkTopPythia8(const xAOD::TruthParticle* part) const;
+    bool isDirectlyFSRPythia8(const xAOD::TruthParticle* part) const;
 
     static bool isDirectlyMPISherpa(const xAOD::TruthParticle* part) ;
 
@@ -87,14 +83,12 @@ namespace DerivationFramework{
     inline bool IsPythia8() const {return m_GenUsed==GEN_id::Pythia8;};
     inline bool IsPythia6() const {return m_GenUsed==GEN_id::Pythia6;};
     inline bool IsSherpa() const {return m_GenUsed==GEN_id::Sherpa;};
-    inline bool IsTtBb() const {return m_ttbb;}
 
-    Gaudi::Property<std::string> m_mcName{this, "MCCollectionName", "TruthEvents"};
+    SG::ReadHandleKey<xAOD::TruthEventContainer> m_mcName {this, "MCCollectionName", "TruthEvents", "TruthEventContainer key"};
     Gaudi::Property<double> m_HadronPtMinCut{this, "HadronpTMinCut", 5000.}; /// MeV
     Gaudi::Property<double> m_HadronEtaMaxCut{this, "HadronetaMaxCut", 2.5};
     Gaudi::Property<int> m_DSID{this, "DSID", 410000};
     GEN_id m_GenUsed{};
-    bool m_ttbb{false};
     
   };
 

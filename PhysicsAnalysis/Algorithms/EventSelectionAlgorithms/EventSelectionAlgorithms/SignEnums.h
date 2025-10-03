@@ -7,6 +7,8 @@
 #ifndef EVENT_SELECTOR_SIGN_ENUMS_H
 #define EVENT_SELECTOR_SIGN_ENUMS_H
 
+#include <stdexcept>
+#include <map>
 
 /// \brief the conversion key for comparison operators for Event Selection Algorithms
 

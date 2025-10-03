@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -132,7 +132,7 @@ TileInfo::~TileInfo()
     for (int j=0; j<sizemodu; ++j){
       int sizegain=(m_decoCovaria[i][j]).size();
       for (int k=0; k<sizegain; ++k){
-        if (m_decoCovaria[i][j][k]) delete (TMatrixD*)(m_decoCovaria[i][j][k]);
+        if (m_decoCovaria[i][j][k]) delete m_decoCovaria[i][j][k];
       }
       m_decoCovaria[i][j].clear();
     }

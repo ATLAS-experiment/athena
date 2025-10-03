@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: CaloCellLinkContainerCnv_p2.cxx,v 1.9 2009-02-18 22:50:08 hma Exp $
 /* @file  CaloCellLinkContainerCnv_p2.cxx
  * @author Ilija Vukotic <ivukotic@cern.ch>, scott snyder <snyder@bnl.gov>
  * @date May, 2007
@@ -307,7 +306,7 @@ CaloCellLinkContainerCnv_p2::transToPersWithKey (const CaloCellLinkContainer* tr
     for (size_t i = 0; i < ncells; ++i) {
       const cell_t& cell = cells[i];
 
-      if (static_cast<int>(last_cell + nl_in_seq) == cell.cell &&
+      if (last_cell >= 0 && static_cast<int>(last_cell + nl_in_seq) == cell.cell &&
           nl_in_seq < ISEQ_MAX)
       {
         ++nl_in_seq;

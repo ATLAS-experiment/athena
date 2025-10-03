@@ -65,10 +65,13 @@ namespace CP
 
       if (m_particlesHandle)  ANA_CHECK(m_particlesHandle.retrieve(particles, syst));
 
+      ATH_MSG_DEBUG("Retrieving " << m_particlesHandle.getName(syst));
+
       if (particles != nullptr)
       {
         for (const xAOD::IParticle *particle : *particles)
         {
+          ATH_MSG_DEBUG("-- Considering offline eta:" << particle->eta() << " phi:" << particle->phi() << " (pT:" << particle->pt() << ")");
           for (const std::string &chain : m_trigSingleMatchingList)
           {
             // A string-based signature-identifier per leg, may contain duplicated return values for asymmetric chains.
@@ -79,11 +82,14 @@ namespace CP
             }
 
             const float dR = (signatures.at(0) == "tau" ? 0.2 : 0.1);
-            (m_matchingDecorators.at(chain))(*particle) = m_trigMatchingTool->match(*particle, chain, dR, false);
+            const bool match = m_trigMatchingTool->match(*particle, chain, dR, false);
+            (m_matchingDecorators.at(chain))(*particle) = match;
+            ATH_MSG_DEBUG("-- -- Considering for " << chain << ", match = " << match);
           }
 
           for (const std::string &chain : m_trigSingleMatchingListDummy)
           {
+            ATH_MSG_DEBUG("Applying dummy match=0 decoration for " << chain);
             (m_matchingDecorators.at(chain))(*particle) = 0;
           }
         }

@@ -11,7 +11,7 @@
 #include <cmath>
 #include <vector>
 
-#include "L1CaloFEXSim/gFEXJwoJAlgo.h"
+#include "gFEXJwoJAlgo.h"
 #include "L1CaloFEXSim/gFEXJwoJTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gTower.h"
@@ -506,11 +506,11 @@ void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
   // MET_x = MET_x >> 4;
   // MET_y = MET_y >> 4;
 
-  if (MET_x < -0x008000) MET_x = -0x08000;
-  if (MET_y < -0x008000) MET_y = -0x00800;
+  if (MET_x < -0x000800) MET_x = -0x000800; //-2048
+  if (MET_y < -0x000800) MET_y = -0x000800; //-2048
 
-  if (MET_x > 0x0007FF) MET_x  = 0x0007FF;
-  if (MET_y > 0x0007FF) MET_y  = 0x0007FF;
+  if (MET_x > 0x0007FF) MET_x  = 0x0007FF; //2047
+  if (MET_y > 0x0007FF) MET_y  = 0x0007FF; //2047
 
 }
 

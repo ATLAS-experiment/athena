@@ -86,10 +86,11 @@ namespace MuonValR4 {
                                                            const xAOD::MuonSegment& truthSeg,
                                                            const MuonR4::Segment& recoSeg) const{
         unsigned int same{0};
-        const auto [truPos, truDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(truthSeg));
-        const auto [recoPos, recoDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(gctx, recoSeg));
-        const std::vector<int> truthSigns = SegmentFitHelpers::driftSigns(truPos, truDir, recoSeg.measurements(), msgStream());
-        const std::vector<int> recoSigns = SegmentFitHelpers::driftSigns(recoPos, recoDir, recoSeg.measurements(), msgStream());
+        using namespace SegmentFit;
+        Line_t recoLine{spatialLinePars(SegmentFit::localSegmentPars(truthSeg))}, 
+               trueLine{spatialLinePars(localSegmentPars(gctx, recoSeg))};
+        const std::vector<int> truthSigns = SeedingAux::strawSigns(trueLine, recoSeg.measurements());
+        const std::vector<int> recoSigns = SeedingAux::strawSigns(recoLine, recoSeg.measurements());
         for (unsigned int s = 0 ; s < truthSigns.size(); ++s) {
             same += (truthSigns[s] != 0) && truthSigns[s] == recoSigns[s];
         }
@@ -266,7 +267,7 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }
     void MuonHoughTransformTester::fillChamberInfo(const MuonGMR4::SpectrometerSector* msSector){
-        m_out_chamberIndex = msSector->chamberIndex();
+        m_out_chamberIndex = Acts::toUnderlying(msSector->chamberIndex());
         m_out_stationSide = msSector->side();
         m_out_stationPhi = msSector->stationPhi();
     }                
@@ -286,11 +287,11 @@ namespace MuonValR4 {
 
         const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
         m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
-       
-        m_out_gen_nMDTHits = (segment->technology() == Muon::MuonStationIndex::MDT ? segment->nPrecisionHits() : 0); 
-        m_out_gen_nNswHits = (segment->technology() != Muon::MuonStationIndex::MDT ? segment->nPrecisionHits() : 0); 
-        m_out_gen_nTGCHits = (segment->chamberIndex() > Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
-        m_out_gen_nRPCHits = (segment->chamberIndex() <= Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
+        using namespace Muon::MuonStationIndex;
+        m_out_gen_nMDTHits = segment->nPrecisionHits() * (segment->technology() == TechnologyIndex::MDT); 
+        m_out_gen_nNswHits = segment->nPrecisionHits() * (segment->technology() != TechnologyIndex::MDT); 
+        m_out_gen_nTGCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) * !isBarrel(segment->chamberIndex());
+        m_out_gen_nRPCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) *  isBarrel(segment->chamberIndex());
 
         m_out_gen_tantheta = houghTanTheta(chamberDir); 
         m_out_gen_tanphi   = houghTanPhi(chamberDir);
@@ -350,8 +351,8 @@ namespace MuonValR4 {
             double minYhit = m_out_bucketEnd.getVariable();
             double maxYhit = m_out_bucketStart.getVariable();
             for (const SpacePoint* hit : seed->getHitsInMax()){
-                minYhit = std::min(hit->positionInChamber().y(),minYhit); 
-                maxYhit = std::max(hit->positionInChamber().y(),maxYhit); 
+                minYhit = std::min(hit->localPosition().y(),minYhit); 
+                maxYhit = std::max(hit->localPosition().y(),maxYhit); 
             }
             m_out_seed_minYhit.push_back(minYhit);
             m_out_seed_maxYhit.push_back(maxYhit);
@@ -449,11 +450,11 @@ namespace MuonValR4 {
             m_out_segment_nDoF.push_back(segment->nDoF());
             m_out_segment_hasTimeFit.push_back(segment->hasTimeFit());
 
-            m_out_segment_err_x0.push_back(segment->covariance()(toInt(ParamDefs::x0), toInt(ParamDefs::x0)));
-            m_out_segment_err_y0.push_back(segment->covariance()(toInt(ParamDefs::y0), toInt(ParamDefs::y0)));
-            m_out_segment_err_tantheta.push_back(segment->covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta)));
-            m_out_segment_err_tanphi.push_back(segment->covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi)));
-            m_out_segment_err_time.push_back(segment->covariance()(toInt(ParamDefs::time), toInt(ParamDefs::time)));
+            m_out_segment_err_x0.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::x0), Acts::toUnderlying(ParamDefs::x0)));
+            m_out_segment_err_y0.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::y0), Acts::toUnderlying(ParamDefs::y0)));
+            m_out_segment_err_tantheta.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::theta), Acts::toUnderlying(ParamDefs::theta)));
+            m_out_segment_err_tanphi.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::phi), Acts::toUnderlying(ParamDefs::phi)));
+            m_out_segment_err_time.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::t0), Acts::toUnderlying(ParamDefs::t0)));
             const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, *segment));
             m_out_segment_tanphi.push_back(houghTanPhi(locDir));
             m_out_segment_tantheta.push_back(houghTanTheta(locDir));
@@ -472,8 +473,8 @@ namespace MuonValR4 {
             for (const auto & meas : segment->measurements()){
                 // skip dummy measurement from beam spot constraint
                 if (meas->type() == xAOD::UncalibMeasType::Other) continue;
-                minYhit = std::min(meas->positionInChamber().y(),minYhit); 
-                maxYhit = std::max(meas->positionInChamber().y(),maxYhit);
+                minYhit = std::min(meas->localPosition().y(),minYhit); 
+                maxYhit = std::max(meas->localPosition().y(),maxYhit);
                 if (m_writeSpacePoints) {
                     unsigned treeIdx = m_spTester->push_back(*meas->spacePoint());
                     if (treeIdx >= matched.size()){

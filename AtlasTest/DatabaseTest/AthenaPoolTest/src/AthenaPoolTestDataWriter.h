@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaPoolTestDataWriter_h
@@ -12,8 +12,6 @@
  * objects to the transient store
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
- *
- * $Id: AthenaPoolTestDataWriter.h,v 1.4 2005-01-10 18:05:51 schaffer Exp $
  *
  */
 
@@ -42,25 +40,19 @@ public:
     /// Algorithm destructor
     ~AthenaPoolTestDataWriter();
   
-    /// Algorithm initialize at begin of job
-    virtual StatusCode initialize();
-
     /// Algorithm execute once per event
-    virtual StatusCode execute(); 
-
-    /// Algorithm finalize at end of job
-    virtual StatusCode finalize();
+    virtual StatusCode execute() override;
 
 private:
 
     /// Create only part of the collections
-    BooleanProperty m_partialCreate;
+    Gaudi::Property<bool> m_partialCreate{this, "PartialCreate", false};
 
     /// For partial create read second half of collections
-    BooleanProperty m_readOtherHalf;
+    Gaudi::Property<bool> m_readOtherHalf{this, "ReadOtherHalf", false};
 
     /// For partial create read first half of collections
-    BooleanProperty m_readFirstHalf; 
+    Gaudi::Property<bool> m_readFirstHalf{this, "ReadFirstHalf", false};
 
 };
 #endif

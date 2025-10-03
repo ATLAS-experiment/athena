@@ -70,14 +70,11 @@ if [ $reco_rc != 0 ]; then
 fi
 
 # Run with ACTS
-ignore_pattern="Acts.+FindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,Acts.+FindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,Acts.+FindingAlg.Acts.+ERROR.+failed.+to.+extrapolate.+track"
-
 run "Reconstruction-acts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsFastWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Tracking.ITkActsFastPass.storeSiSPSeededTracks=True;" \
-    --ignorePatterns ${ignore_pattern} \
+    	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${nEvents}
@@ -97,7 +94,7 @@ run "IDPVM-acts" \
     --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude \
-    --validateExtraTrackCollections "SiSPSeededTracksActsFast" \
+    --validateExtraTrackCollections "SiSPSeededTracksActs" \
     ${idpvmOpts[@]}
 
 reco_rc=$?

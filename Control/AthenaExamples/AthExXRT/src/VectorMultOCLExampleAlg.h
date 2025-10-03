@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHEXXRT_VECTORMULTOCLEXAMPLEALG_H
 #define ATHEXXRT_VECTORMULTOCLEXAMPLEALG_H
@@ -9,6 +9,7 @@
 
 // AthXRT include(s).
 #include "AthXRTInterfaces/IDeviceMgmtSvc.h"
+#include "AthXRTInterfaces/StateHandler.h"
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -25,20 +26,25 @@ namespace AthExXRT {
 ///
 /// @author Quentin Berthet <quentin.berthet@cern.ch>
 ///
-class VectorMultOCLExampleAlg : public AthReentrantAlgorithm {
+class VectorMultOCLExampleAlg : public ::AthReentrantAlgorithm, public AthXRT::StateHandler {
 
  public:
-  // Inherit the base class's constructor(s).
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+	 using ::AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  /// Function initialising the algorithm
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override {
+      return StateHandler::initialize();
+  }
+
+  virtual StatusCode initialize_global() override;
+  virtual StatusCode initialize_worker() override;
 
   /// Function executing the algorithm
   virtual StatusCode execute(const EventContext& ctx) const override;
 
-  /// Function finalising the algorithm
-  virtual StatusCode finalize() override;
+  virtual StatusCode stop() override {
+      return StateHandler::stop();
+  }
+  virtual StatusCode stop_worker() override;
 
  private:
   /// The XRT device manager to use
@@ -58,6 +64,8 @@ class VectorMultOCLExampleAlg : public AthReentrantAlgorithm {
 
   // Number of uint32_t element in the vectors
   static constexpr int s_element_count = 4096;
+
+  std::vector<AthXRT::IDeviceMgmtSvc::OpenCLHandle> m_handles;
 
   /// Slot-specific state.
   struct SlotData {

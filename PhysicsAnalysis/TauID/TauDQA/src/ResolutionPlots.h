@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUDQA_RESOLUTIONPLOTS_H
@@ -16,9 +16,10 @@ namespace Tau{
     virtual ~ResolutionPlots();
     void fill(const xAOD::TauJet& tau, const xAOD::TruthParticle&, float weight);
     
-    TH1* m_ptResolution;
-    TH1* m_etaResolution;
-    TH1* m_phiResolution;	 
+    TH1* m_ptResolution{};
+    TH1* m_etaResolution{};
+    TH1* m_phiResolution{};
+    TH1* m_chargeResolution{};	 
     
   private:
     void initializePlots();

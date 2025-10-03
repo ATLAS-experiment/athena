@@ -39,7 +39,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
     {"ModeDiscriminator_TMVAMethod","BDTG"},
     {"FeatureExtractor_VarTypeName_varTypeName_Sum", "Sum"},
     {"FeatureExtractor_VarTypeName_varTypeName_Ratio", "Ratio"},
-    {"FeatureExtractor_VarTypeName_varTypeName_EtInRing", "EtInRing"},
     {"FeatureExtractor_VarTypeName_varTypeName_Isolation", "Isolation"},
     {"FeatureExtractor_VarTypeName_varTypeName_Num", "Num"},
     {"FeatureExtractor_VarTypeName_varTypeName_Mean", "Mean"},
@@ -49,8 +48,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
     {"FeatureExtractor_VarTypeName_varTypeName_DeltaR", "DeltaR"},
     {"FeatureExtractor_VarTypeName_varTypeName_JetMoment", "JetMoment"},
     {"FeatureExtractor_VarTypeName_varTypeName_Combined", "Combined"},
-    {"FeatureExtractor_VarTypeName_varTypeName_JetShape", "JetShape"},
-    {"FeatureExtractor_VarTypeName_varTypeName_ImpactParams", "ImpactParams"},
     {"FeatureExtractor_VarTypeName_varTypeName_Basic", "Basic"},
     {"FeatureExtractor_VarTypeName_varTypeName_PID", "PID"},
     {"FeatureExtractor_VarTypeName_varTypeName_Shots", "Shots"},
@@ -63,10 +60,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
   MapVecDouble m04 = {
     {"TauConstituents_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
     {"TauConstituents_Selection_Neutral_EtaBinned_EtCut",{2.1*GeV, 2.5*GeV, 2.6*GeV, 2.4*GeV, 1.9*GeV}},
-    {"TauConstituents_Selection_Pi0Neut_EtaBinned_EtCut",{2.1*GeV, 2.5*GeV, 2.6*GeV, 2.4*GeV, 1.9*GeV}},
-    {"TauConstituents_Selection_Charged_EtaBinned_EtCut",{1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV}},
-    {"TauConstituents_Selection_OutNeut_EtaBinned_EtCut",{1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV}},
-    {"TauConstituents_Selection_OutChrg_EtaBinned_EtCut",{1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV, 1.0*GeV}},
     // Eta Binned    P I 0 - B D T   C U T S
     {"CellBased_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
     {"CellBased_EtaBinned_Pi0MVACut_1prong",{0.46, 0.39, 0.51, 0.47, 0.54}},
@@ -81,7 +74,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
 
   // vector<string> values
   MapVecString m05 = {
-    {"Names_InputAlgorithms",{"CellBased"}},
     {"Names_ModeCases",{"1p0n_vs_1p1n","1p1n_vs_1pXn","3p0n_vs_3pXn"}},
     // ---> CellBased BDT variables
     {"ModeDiscriminator_BDTVariableNames_CellBased_1p0n_vs_1p1n",{"Neutral_PID_BDTValues_BDTSort_1","Neutral_Ratio_1stBDTEtOverEtAllConsts","Combined_DeltaR1stNeutralTo1stCharged","Charged_JetMoment_EtDRxTotalEt","Neutral_Shots_NPhotonsInSeed"}},
@@ -115,9 +107,6 @@ StatusCode PanTau::Tool_InformationStore::initialize() {
 
   //This function does nothing in athena
   ABRDefaultInit();
-
-  ATH_CHECK( this->getInfo_String("Name_TauRecContainer", m_Name_Container_TauRec) );
-  ATH_CHECK( this->getInfo_String("Name_TrackParticleContainer", m_Name_Container_Tracks) );
     
   return StatusCode::SUCCESS;
 }

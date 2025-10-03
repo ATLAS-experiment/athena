@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file DivideByHist.cxx file takes a parameter map containing two histograms and divides one by the other.
@@ -177,8 +177,8 @@ dqm_algorithms::summary::DivideByHist::execute( const std::string & name,
     }
     else {
 
-      TH1* hOverW = (TH1*) overWriteObject;
-      TH1* hResult = (TH1*) newresult->getObject();
+      TH1* hOverW = static_cast<TH1*> (overWriteObject);
+      TH1* hResult = static_cast<TH1*>  (newresult->getObject());
 
       if (hOverW->GetDimension() == hResult->GetDimension()) {
 	hOverW->Reset();
@@ -228,7 +228,7 @@ dqm_algorithms::summary::DivideByHist::execute(const std::string & name,
   }
 
   if( numero->IsA()->InheritsFrom("TH1") ){
-    hNumerator = (TH1*) numero;
+    hNumerator = static_cast<TH1*> (numero);
   }
   else {
     char errorStr[64];
@@ -236,7 +236,7 @@ dqm_algorithms::summary::DivideByHist::execute(const std::string & name,
     throw dqm_core::BadConfig( ERS_HERE, name, errorStr);
   }
   if( denomino->IsA()->InheritsFrom("TH1") ){
-    hDenominator = (TH1*) denomino;
+    hDenominator =  static_cast<TH1*> (denomino);
   }
   else {
     char errorStr[64];
@@ -257,7 +257,7 @@ dqm_algorithms::summary::DivideByHist::execute(const std::string & name,
   newresult = dqm_algorithms::tools::ExecuteNamedAlgorithm(algorithmName,*hQuotient,config);
   
   //Make the quotient histogram the output result object
-  newresult->object_ = (boost::shared_ptr<TObject>)(TObject*)hQuotient;
+  newresult->object_ = boost::shared_ptr<TObject>(hQuotient);
 
   return newresult;
 }

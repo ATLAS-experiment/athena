@@ -1,4 +1,3 @@
-#include "../PerfMonTestNoopAlg.h"
 #include "../PerfMonTestLeakyAlg.h"
 #include "../PerfMonTestCpuCruncherAlg.h"
 #include "../PerfMonTestMallocAlg.h"
@@ -9,7 +8,6 @@
 #include "../PerfMonTestPolyVectorAlgWithArenas.h"
 
   
-DECLARE_COMPONENT( PerfMonTest::NoopAlg )
 DECLARE_COMPONENT( PerfMonTest::LeakyAlg )
 DECLARE_COMPONENT( PerfMonTest::CpuCruncherAlg )
 DECLARE_COMPONENT( PerfMonTest::MallocAlg )

@@ -98,8 +98,6 @@ enum ObjectType {
 
 }; // enum ObjectType
 
-struct ROOT6_NamespaceAutoloadHook{};
-
 } // namespace xAODType
 
 namespace xAOD{

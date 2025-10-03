@@ -69,7 +69,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 	unsigned int nTowers = 0;
 	for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
 
-        Toweret=gfexTowerRoI->towerEt();
+        Toweret=gfexTowerRoI->towerEt(); //returns MLE value
         Towersaturationflag=gfexTowerRoI->isSaturated();
         float eta = gfexTowerRoI->eta();
         float phi = gfexTowerRoI->phi();
@@ -82,7 +82,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
             if(eTowerItr == emulatedTowers.end()) {
                 // missing emulated tower?
                 Decision = "MissingTower";
-                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
                 continue;
             }
 
@@ -92,62 +92,76 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
             if(refTowerET != Toweret) {
                 Decision = "ETMismatch";
-                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
             if(refTowerSat != Towersaturationflag) {
                 Decision = "SatMismatch";
-                fill("errors",Decision,lbnString,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
 
         }
 
 
 
-		fill("gTowers",Toweret,Towersaturationflag);
+		fill("gTowers",Toweret);
 
 		if (eta < -3.17 && eta > -3.25){ eta = -3.225;}
 		if (eta < 3.3 && eta > 3.17){ eta = 3.275;}
 
 		Towereta = eta;	
 			
-		if(gfexTowerRoI->towerEt() >= 200 ){
+		if(gfexTowerRoI->towerEt() >= 1662 ){
 			nTowers++;
 		}
 
-		//GREATER THAN 2GEV
-		if (gfexTowerRoI->towerEt() >= 10){
+		//looking at only saturated gTowers
+		if (int(Towersaturationflag) == 1){	
+			if (std::abs(eta) >= 3.2 ){ //FPGAc
+				Towerphi = phi- 0.1;
+				fill("SatgTowers",Towereta,Towerphi,Toweret);	
+				Towerphi = phi + 0.1;
+				fill("SatgTowers",Towereta,Towerphi,Toweret);
+			} else { //FPGA a&b
+				Towerphi = phi;
+				fill("SatgTowers",Towereta,Towerphi,Toweret);
+			}
+		}
+
+
+		//GREATER THAN 2GEV MLE=1342
+		if (gfexTowerRoI->towerEt() >= 1342){
 			if (std::abs(eta) >= 3.2 ){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
-				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",Towereta,Towerphi,Toweret);
 				fill("highEtgTowers",lbn,binNumber);	
 				Towerphi = phi + 0.1;
 				binNumber = getBinNumberTower(eta, phi+0.1,0,0);
-				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",Towereta,Towerphi,Toweret);
 				fill("highEtgTowers",lbn,binNumber);
 			} else {
 				Towerphi = phi;
 				binNumber = getBinNumberTower(eta,phi,0,0);
-				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",Towereta,Towerphi,Toweret);
 				fill("highEtgTowers",lbn,binNumber);
 			}
 			
 		}
-      //only for h_gTower_coldtowers_etaphimap
-		else if (gfexTowerRoI->towerEt() <= -10){
+      	//only for h_gTower_coldtowers_etaphimap MLE = 1182
+		else if (gfexTowerRoI->towerEt() <= 1182){
 			if (std::abs(eta) >= 3.2){
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
-				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",Towereta,Towerphi,Toweret);
 				fill("lowEtgTowers",lbn,binNumber);	
 				Towerphi = phi + 0.1;
 				binNumber = getBinNumberTower(eta, phi+0.1,0,0);
-				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",Towereta,Towerphi,Toweret);
 				fill("lowEtgTowers",lbn,binNumber);
 			} else {
 				Towerphi = phi;
 				binNumber = getBinNumberTower(eta,phi,0,0);
-				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",Towereta,Towerphi,Toweret);
 				fill("lowEtgTowers",lbn,binNumber);
 			}
 		}
@@ -161,7 +175,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 }
 
 int GfexInputMonitorAlgorithm::getBinNumberTower (const float& inputEta, const float& inputPhi, int xbin, int ybin) const{
-   const std::vector<float> eta = {-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0,6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.1,3.3,3.25,3.5,4.1,4.9};
+    const std::vector<float> eta = {-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.1,3.25,3.3,3.5,4.1,4.9};
 
    for (int i = 0; i <= 40; i++){ 
        if (inputEta >= eta[i] && inputEta < eta[i+1]){
@@ -177,7 +191,7 @@ int GfexInputMonitorAlgorithm::getBinNumberTower (const float& inputEta, const f
             }
         j++;
 	}
-    int binN = 40*(ybin-1)+xbin; 
+    int binN = 32*(xbin-1)+ybin; 
     return binN;
 }
 

@@ -21,16 +21,17 @@
 #include "AthLinks/ElementLink.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include <memory>
+#include "TruthUtils/ParticleConstants.h"
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
 #include <limits>
 
 namespace Analysis {
 
     // Set masses
-    constexpr double muMass = 105.658;
-    constexpr double kMass = 493.677;
-    constexpr double piMass = 139.57;
-    constexpr double pMass = 938.272;
+    constexpr double muMass = ParticleConstants::muonMassInMeV;
+    constexpr double kMass = ParticleConstants::chargedKaonMassInMeV;
+    constexpr double piMass = ParticleConstants::chargedPionMassInMeV;
+    constexpr double pMass = ParticleConstants::protonMassInMeV;
     
     StatusCode JpsiPlus2Tracks::initialize() {
         
@@ -446,7 +447,7 @@ namespace Analysis {
 
 
         if (m_useMassConst) {
-            constexpr double jpsiTableMass = 3096.916;
+            constexpr double jpsiTableMass = ParticleConstants::JpsiMassInMeV;
             m_VKVFitter->setMassInputParticles(m_altMassMuonTracks,*state);
             std::array<int,2> indices= {1, 2};
             if (m_altMassConst<0.0) m_VKVFitter->setMassForConstraint(jpsiTableMass,indices,*state);

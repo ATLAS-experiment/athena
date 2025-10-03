@@ -127,7 +127,7 @@ StatusCode Trk::TrkDetDescrTPCnvTest::runTest()
 		std::vector< unsigned short int >            materialIndices;
 		materialVector.reserve(200);
 		materialIndices.reserve(200);
-        for (size_t iib = 0; iib < 200; ++iib){
+    for (size_t iib = 0; iib < 200; ++iib){
 			 materialIndices.push_back(int(TrkDetDescrUnitTestBase::m_flatDist->shoot()*200));
              materialVector.push_back(new Trk::MaterialProperties(TrkDetDescrUnitTestBase::m_flatDist->shoot(),
                                                                   TrkDetDescrUnitTestBase::m_flatDist->shoot(),
@@ -175,7 +175,8 @@ StatusCode Trk::TrkDetDescrTPCnvTest::runTest()
 				zVector.push_back((unsigned char)(TrkDetDescrUnitTestBase::m_flatDist->shoot()*UCHAR_MAX));
 				rhoVector.push_back((unsigned char)(TrkDetDescrUnitTestBase::m_flatDist->shoot()*UCHAR_MAX));
 				std::vector< Trk::ElementFraction > elements;
-				for (size_t iic = 0; iic < 5; ++iic){
+				elements.reserve(5);
+        for (size_t iic = 0; iic < 5; ++iic){
 					elements.emplace_back((unsigned char)(TrkDetDescrUnitTestBase::m_flatDist->shoot()*UCHAR_MAX),
 															(unsigned char)(TrkDetDescrUnitTestBase::m_flatDist->shoot()*UCHAR_MAX));
 				}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///@file tauAnalysisHelperObject.h  DEPRECATED DO NOT USE 
@@ -328,7 +328,7 @@ class tauAnalysisHelperObject
         //   -- add cells to emcluster --
         void d0_emcluster_addCell(const CaloCellContainer* cellContainer, const CaloCell* theCell) {
             tauCell_type theLink;
-            theLink.toContainedElement( *cellContainer, (CaloCell*) theCell );
+            theLink.toContainedElement( *cellContainer, static_cast<const CaloCell*> (theCell) );
             m_d0_emcluster.push_back(theLink);
         }
 
@@ -348,7 +348,7 @@ class tauAnalysisHelperObject
         //   -- add Tracks --
         void d0_05_addTrack(const Rec::TrackParticleContainer* trackContainer, const Rec::TrackParticle* theTrack) {
             tauTrack_type theLink;
-            theLink.toContainedElement( *trackContainer, (Rec::TrackParticle*) theTrack );
+            theLink.toContainedElement( *trackContainer, static_cast<const Rec::TrackParticle*> (theTrack) );
             m_d0_05_Tracks.push_back(theLink);
         }
         //@}
@@ -368,7 +368,7 @@ class tauAnalysisHelperObject
         //   -- add Tracks --
         void d0_tau_addTrack(const Rec::TrackParticleContainer* trackContainer, const Rec::TrackParticle* theTrack) {
             tauTrack_type theLink;
-            theLink.toContainedElement( *trackContainer, (Rec::TrackParticle*) theTrack );
+            theLink.toContainedElement( *trackContainer, static_cast<const Rec::TrackParticle*>( theTrack) );
             m_d0_tau_Tracks.push_back(theLink);
         }
         //@}
@@ -388,7 +388,7 @@ class tauAnalysisHelperObject
         //   -- add Tracks --
         void d0_nontau_addTrack(const Rec::TrackParticleContainer* trackContainer, const Rec::TrackParticle* theTrack) {
             tauTrack_type theLink;
-            theLink.toContainedElement( *trackContainer, (Rec::TrackParticle*) theTrack );
+            theLink.toContainedElement( *trackContainer, static_cast<const Rec::TrackParticle*> (theTrack) );
             m_d0_nontau_Tracks.push_back(theLink);
         }
         //@}

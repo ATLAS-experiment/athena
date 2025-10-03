@@ -15,11 +15,9 @@ atlas_add_dictionary(TruthClassificationDict
   TruthClassification/selection.xml
   LINK_LIBRARIES TruthClassificationLib)
 
-if (NOT XAOD_STANDALONE)
-  atlas_add_component(TruthClassification
-    src/*.h src/*.cxx src/components/*.cxx
-    LINK_LIBRARIES TruthClassificationLib)
-endif ()
+atlas_add_component(TruthClassification
+  src/*.h src/*.cxx src/components/*.cxx
+  LINK_LIBRARIES TruthClassificationLib)
 
 # Extra test libraries based on the build environment:
 set(xaod_access_lib)

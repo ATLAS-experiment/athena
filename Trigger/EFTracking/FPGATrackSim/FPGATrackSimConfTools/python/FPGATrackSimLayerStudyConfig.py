@@ -1,12 +1,16 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Logging import AthenaLogger
+from AthenaCommon.Logging import logging
+
+
 import AthenaCommon.Utils.unixtools as unixtools
 import importlib
 import os
+from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
+from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import getPadding
 
-log = AthenaLogger(__name__)
+log = logging.getLogger ('FPGATrackSim')
 
 #### Now inmport Data Prep config from other file
 from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
@@ -15,6 +19,7 @@ from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
 def FPGATrackSimBinnedHitsToolCfg(flags):
     # This can probably be imported in the future from the analysis config, but for now it's here.
     result = ComponentAccumulator()
+    log.info("Setting binning parameters")
 
     # Allow the initial set of cuts to be read in via config flags, instead of the cuts file.
     # This effectively eliminates the need to make a "step 0" cut file.
@@ -66,6 +71,17 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
 
+        BinDesc.region = flags.Trigger.FPGATrackSim.region
+
+        #resolution padding
+        BinDesc.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
+        BinDesc.EtaPad=getPadding(flags.Trigger.FPGATrackSim.region)["eta"]
+        BinDesc.QPtPad=getPadding(flags.Trigger.FPGATrackSim.region)["qpt"]
+        BinDesc.PhiPad=getPadding(flags.Trigger.FPGATrackSim.region)["phi"]
+        BinDesc.Z0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["z0"]
+        BinDesc.fieldCorrection=True
+        BinDesc.fieldCorRegion=flags.Trigger.FPGATrackSim.region
+
         # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
         step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")
         step1.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
@@ -101,35 +117,51 @@ def FPGATrackSimLayerStudyToolCfg(flags):
     Monitor = CompFactory.FPGATrackSimLayerStudyTool("BinMonitoring")
     Monitor.THistSvc = CompFactory.THistSvc()
     Monitor.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    Monitor.phiScale = 10.0
+    Monitor.etaScale = 100.0
+    Monitor.drScale = 20.0
+    Monitor.plotAllBins = False
+
+    Monitor.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
+    Monitor.EtaPad=getPadding(flags.Trigger.FPGATrackSim.region)["eta"]
+    Monitor.QPtPad=getPadding(flags.Trigger.FPGATrackSim.region)["qpt"]
+    Monitor.PhiPad=getPadding(flags.Trigger.FPGATrackSim.region)["phi"]
+    Monitor.Z0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["z0"]
 
     result.setPrivateTools(Monitor)
     return result
 
-def FPGATrackSimLayerStudyCfg(inputFlags):
-
-    flags = FPGATrackSimAnalysisConfig.prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(inputFlags)
-
-    result=ComponentAccumulator()
+def FPGATrackSimLayerStudyCfg(flags):
+    from AthenaConfiguration.ComponentFactory import CompFactory    
+    flags = FPGATrackSimAnalysisConfig.prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(flags)
+    result = ComponentAccumulator()
     if not flags.Trigger.FPGATrackSim.wrapperFileName:
         from InDetConfig.InDetPrepRawDataFormationConfig import AthenaTrkClusterizationCfg
         result.merge(AthenaTrkClusterizationCfg(flags))
 
-    theFPGATrackSimLayerStudyAlg = CompFactory.FPGATrackSimLayerStudyAlg()
+    reg = flags.Trigger.FPGATrackSim.region
 
+    monitor_tool = CompFactory.FPGATrackSimLayerStudyTool(
+        f"BinMonitoring_reg{reg}",
+        LayerStudyTreeName=FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags, "LayerStudy"),
+        TruthTreeName=FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags, "TruthTree"),
+    )
+
+    theFPGATrackSimLayerStudyAlg = CompFactory.FPGATrackSimLayerStudyAlg(name=f"FPGATrackSimLayerStudyAlg_reg{reg}")
+
+    theFPGATrackSimLayerStudyAlg.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg(flags))
+    theFPGATrackSimLayerStudyAlg.BinMonitoringTool = monitor_tool
     theFPGATrackSimLayerStudyAlg.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
     theFPGATrackSimLayerStudyAlg.stage = flags.Trigger.FPGATrackSim.layerStudyStage
-
     theFPGATrackSimLayerStudyAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     theFPGATrackSimLayerStudyAlg.FPGATrackSimMapping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
 
-    theFPGATrackSimLayerStudyAlg.BinningTool = result.getPrimaryAndMerge(FPGATrackSimBinnedHitsToolCfg(flags))
-    theFPGATrackSimLayerStudyAlg.BinMonitoringTool = result.getPrimaryAndMerge(FPGATrackSimLayerStudyToolCfg(flags))
-
     result.addEventAlgo(theFPGATrackSimLayerStudyAlg)
-
     return result
 
+
 if __name__ == "__main__":
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
@@ -144,8 +176,8 @@ if __name__ == "__main__":
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
     flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    from TrkConfig.TrkConfigFlags import TrackingComponent
-    flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
+    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
+    actsLegacyWorkflowFlags(flags)
     flags.Acts.doRotCorrection = False
 
     ############################################
@@ -157,11 +189,30 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
+    ConfigureMultiRegionFlags(flags)
+
 
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+
+    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
+    ConfigureMultiRegionFlags(flags)
+
+    # The region map needs to not be loaded when running layer study; we set this here to
+    # guarantee it propagates consistently to all code that tries to set up the mapping service.
+    flags.Trigger.FPGATrackSim.loadRegionMap = False
+    flags.Trigger.FPGATrackSim.loadRadii = False
+
+    # We also don't want to load any of the ONNX files, so set them to the empty string.
+    # Again, override the user.
+    flags.Trigger.FPGATrackSim.FakeNNonnxFile1st = ""
+    flags.Trigger.FPGATrackSim.FakeNNonnxFile2nd = ""
+    flags.Trigger.FPGATrackSim.ParamNNonnxFile1st = ""
+    flags.Trigger.FPGATrackSim.ParamNNonnxFile2nd = ""
+    flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile = ""
+    flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile = ""
 
     flags.lock()
     flags.dump()
@@ -196,13 +247,15 @@ if __name__ == "__main__":
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
 
-    # Configure both the dataprep and logical hits algorithms.
+    #Configure Multiregion config algo for layerstudyalg
+    from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimRunLayerStudyOnManyRegions
+    acc.merge(FPGATrackSimRunLayerStudyOnManyRegions(flags))
+
+    # Configure dataprep as well; layerstudy is already configured above
     acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-    acc.merge(FPGATrackSimLayerStudyCfg(flags))
 
     acc.store(open('AnalysisConfig.pkl','wb'))
-
-    acc.foreach_component("FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    acc.foreach_component("*FPGATrackSim*").OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     if flags.Trigger.FPGATrackSim.msgLimit!=-1:
         acc.getService("MessageSvc").debugLimit = flags.Trigger.FPGATrackSim.msgLimit
         acc.getService("MessageSvc").infoLimit = flags.Trigger.FPGATrackSim.msgLimit

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -160,7 +160,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
             log << MSG::ERROR << "massageEventInfo: Cannot get EventSelector " << eventSelector << endmsg; 
             throw std::runtime_error("Cannot get EventSelector");
         }
-        BooleanProperty overrideRunNumber = IntegerProperty("OverrideRunNumberFromInput", false);
+        BooleanProperty overrideRunNumber("OverrideRunNumberFromInput", false);
         sc = evtSel->getProperty(&overrideRunNumber);
         if (!sc.isSuccess()) {
             // Not all EventSelectors have this property, so we must be tolerant
@@ -169,7 +169,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
         }
         m_overrideRunNumber = overrideRunNumber.value();
         if (m_overrideRunNumber) {
-            IntegerProperty runNumber = IntegerProperty("RunNumber", 0);
+            IntegerProperty runNumber("RunNumber", 0);
             sc = evtSel->getProperty(&runNumber);
             if (!sc.isSuccess()) {
                 log << MSG::ERROR << "massageEventInfo: unable to get RunNumber from EventSelector: found " 
@@ -182,7 +182,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                 log << MSG::DEBUG << "massageEventInfo: Run number:  " << m_simRunNumber 
                     << " obtained from " << eventSelector << endmsg;
             }
-            IntegerProperty lumiBlockNumber = IntegerProperty("FirstLB", 0);
+            IntegerProperty lumiBlockNumber("FirstLB", 0);
             sc = evtSel->getProperty(&lumiBlockNumber);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get FirstLB from EventSelector. Using "
@@ -193,7 +193,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                 log << MSG::DEBUG << "massageEventInfo: LumiBlock number:  " << m_lumiBlockNumber 
                     << " obtained from " << eventSelector << endmsg;
             }
-            IntegerProperty evtsPerLumiBlock = IntegerProperty("EventsPerLB", 0);
+            IntegerProperty evtsPerLumiBlock("EventsPerLB", 0);
             sc = evtSel->getProperty(&evtsPerLumiBlock);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get EventsPerLB from EventSelector. Using "
@@ -204,7 +204,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                 log << MSG::DEBUG << "massageEventInfo: EventsPerLB:  " << m_evtsPerLumiBlock 
                     << " obtained from " << eventSelector << endmsg;
             }
-            IntegerProperty timeStamp = IntegerProperty("InitialTimeStamp", 0);
+            IntegerProperty timeStamp("InitialTimeStamp", 0);
             sc = evtSel->getProperty(&timeStamp);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get InitialTimeStamp from EventSelector. Using "
@@ -215,7 +215,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                 log << MSG::DEBUG << "massageEventInfo: InitialTimeStamp:  " << m_timeStamp  
                     << " obtained from " << eventSelector << endmsg;
             }
-            IntegerProperty timeStampInterval = IntegerProperty("TimeStampInterval", 0);
+            IntegerProperty timeStampInterval("TimeStampInterval", 0);
             sc = evtSel->getProperty(&timeStampInterval);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get TimeStampInterval from EventSelector. Using "

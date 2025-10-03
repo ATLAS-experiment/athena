@@ -69,11 +69,11 @@ namespace DerivationFramework {
 
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthSGKey{this, "TruthKey", ""};
 
-        /// Keys to whitelist the muons & tracks needed for MCP studies to output
+        /// Keys to include the muons & tracks needed for MCP studies to output
         SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonKeepKey{this, "MuonKeepKey", m_muonSGKey, "", 
-                                "Key to whitelist the muon for writeout. Will be overwritten by BranchPrefix property"};
+                                "Key to include the muon for writeout. Will be overwritten by BranchPrefix property"};
         SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trkKeepKey{this, "TrackKeepKey", m_trackSGKey, "",  
-                                "Key to whitelist the tracks for writeout. Will be overwritten by BranchPreFix property"};
+                                "Key to include the tracks for writeout. Will be overwritten by BranchPreFix property"};
         /// Event Decision Key
         SG::WriteHandleKey<int> m_skimmingKey{this, "SkimmingKey", "", "Set via BranchPreFixProperty + DIMU_pass"};
 

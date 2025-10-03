@@ -382,9 +382,8 @@ Root::TElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
                 ->GetListOfKeys()
                 ->Contains(pdf.c_str())) {
             TH1F* hist = (TH1F*)(((TDirectory*)pdfFile->Get(pdfdir.c_str()))->Get(pdf.c_str()));
-            fPDFbins[s_or_b][ip][et][eta][varIndex] =
-              new EGSelectors::SafeTH1(hist);
-            delete hist;
+            m_fPDFbins[s_or_b][ip][et][eta][varIndex] =
+              std::make_unique<EGSelectors::SafeTH1>(hist);
           } else {
             ATH_MSG_INFO("Warning: Object " << pdf << " does not exist.");
             ATH_MSG_INFO("Skipping all other histograms with this variable.");
@@ -782,14 +781,14 @@ Root::TElectronLikelihoodTool::evaluateLikelihood(
     for (unsigned int s_or_b = 0; s_or_b < 2; s_or_b++) {
 
       int bin =
-        fPDFbins[s_or_b][ipbin][etbin][etabin][var]->FindBin(varVector[var]);
+        m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->FindBin(varVector[var]);
 
       double prob = 0;
       if (m_doSmoothBinInterpolation) {
         prob = InterpolatePdfs(s_or_b, ipbin, et, eta, bin, var);
       } else {
         double integral =
-          double(fPDFbins[s_or_b][ipbin][etbin][etabin][var]->Integral());
+          double(m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->Integral());
         if (integral == 0) {
           ATH_MSG_WARNING("Error! PDF integral == 0!");
           return -1.35;
@@ -797,7 +796,7 @@ Root::TElectronLikelihoodTool::evaluateLikelihood(
 
         prob =
           double(
-            fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetBinContent(bin)) /
+            m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetBinContent(bin)) /
           integral;
       }
 
@@ -837,7 +836,7 @@ Root::TElectronLikelihoodTool::TransformLikelihoodOutput(double ps,
   }
 
   double tau = 15.0;
-  disc = -log(1.0 / disc - 1.0) * (1. / double(tau));
+  disc = -std::log(1.0 / disc - 1.0) * (1. / double(tau));
 
   // Linearly transform the discriminant as a function of pileup, rather than
   // the old scheme of changing the cut value based on pileup. This is simpler
@@ -1178,12 +1177,12 @@ Root::TElectronLikelihoodTool::InterpolatePdfs(unsigned int s_or_b,
   int etbin = getLikelihoodEtHistBin(et); // hist binning
   int etabin = getLikelihoodEtaBin(eta);
   double integral =
-    double(fPDFbins[s_or_b][ipbin][etbin][etabin][var]->Integral());
+    double(m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->Integral());
   double prob =
-    double(fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetBinContent(bin)) /
+    double(m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetBinContent(bin)) /
     integral;
 
-  int Nbins = fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetNbinsX();
+  int Nbins = m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetNbinsX();
   if (et > 42500.) {
     return prob; // interpolation stops here.
   }
@@ -1220,7 +1219,7 @@ Root::TElectronLikelihoodTool::InterpolatePdfs(unsigned int s_or_b,
     if (etbin + 1 <= 6) {
       // account for potential histogram bin inequalities
       int NbinsPlus =
-        fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->GetNbinsX();
+        m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->GetNbinsX();
       int binplus = bin;
       if (Nbins < NbinsPlus) {
         binplus = int(round(bin * (Nbins / NbinsPlus)));
@@ -1229,9 +1228,9 @@ Root::TElectronLikelihoodTool::InterpolatePdfs(unsigned int s_or_b,
       }
       // do interpolation
       double integral_next =
-        double(fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->Integral());
+        double(m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->Integral());
       prob_next =
-        double(fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->GetBinContent(
+        double(m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->GetBinContent(
           binplus)) /
         integral_next;
       return prob + (prob_next - prob) * (et - bin_center) / (bin_width);
@@ -1242,7 +1241,7 @@ Root::TElectronLikelihoodTool::InterpolatePdfs(unsigned int s_or_b,
   if (etbin - 1 >= 0) {
     // account for potential histogram bin inequalities
     int NbinsMinus =
-      fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->GetNbinsX();
+      m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->GetNbinsX();
     int binminus = bin;
     if (Nbins < NbinsMinus) {
       binminus = int(round(bin * (Nbins / NbinsMinus)));
@@ -1250,9 +1249,9 @@ Root::TElectronLikelihoodTool::InterpolatePdfs(unsigned int s_or_b,
       binminus = int(round(bin * (NbinsMinus / Nbins)));
     }
     double integral_before =
-      double(fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->Integral());
+      double(m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->Integral());
     prob_before =
-      double(fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->GetBinContent(
+      double(m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->GetBinContent(
         binminus)) /
       integral_before;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -58,7 +58,8 @@ void AGDDsTGC::CreateVolume (AGDDBuilder& builder)
 	stgc_comp.yCutoutCathode=yCutoutCathode();
 	
 	MuonGM::sTGC cham(&stgc_comp);
-	GeoPhysVol *vvv=(GeoPhysVol*)cham.build(builder.GetMaterialManager(), 1);
+        // We have IsSensitiveVolume true, so we want a GeoFulPhysVol here.
+	GeoFullPhysVol *vvv=cham.build(builder.GetMaterialManager(), 1);
 
 	CreateSolid (builder);
 

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // $Header: /DetectorDescription/IdDict/src/IdDictMgr.cxx,v 1.43 2008-12-09 09:49:43 dquarrie Exp $
@@ -125,7 +125,7 @@ IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) const {
 void IdDictMgr::add_dictionary(IdDictDictionary* dictionary) {
   if (dictionary == 0) return;
 
-  std::string& name = dictionary->m_name;
+  const std::string& name = dictionary->name();
 
   // Delete entry if already there
   dictionary_map::iterator it = m_dictionaries.find(name);
@@ -155,7 +155,7 @@ void IdDictMgr::resolve_references() {
   for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
     // From mgr, only resolve refs for top-level dictionaries
     IdDictDictionary* dictionary = (*it).second;
-    if (m_subdictionary_names.find(dictionary->m_name) != m_subdictionary_names.end()) continue;
+    if (m_subdictionary_names.find(dictionary->name()) != m_subdictionary_names.end()) continue;
     dictionary->resolve_references(*this);
   }
 }
@@ -175,7 +175,7 @@ void IdDictMgr::generate_implementation(const std::string& tag) {
     for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
       // From mgr, only generate impl for top-level dictionaries
       IdDictDictionary* dictionary = (*it).second;
-      if (m_subdictionary_names.find(dictionary->m_name) != m_subdictionary_names.end()) continue;
+      if (m_subdictionary_names.find(dictionary->name()) != m_subdictionary_names.end()) continue;
       dictionary->generate_implementation(*this, tag);
     }
     m_generated_implementation = true;
@@ -191,7 +191,7 @@ void IdDictMgr::reset_implementation() {
     for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
       // From mgr, only generate impl for top-level dictionaries
       IdDictDictionary* dictionary = (*it).second;
-      if (m_subdictionary_names.find(dictionary->m_name) != m_subdictionary_names.end()) continue;
+      if (m_subdictionary_names.find(dictionary->name()) != m_subdictionary_names.end()) continue;
       dictionary->reset_implementation();
     }
     m_generated_implementation = false;

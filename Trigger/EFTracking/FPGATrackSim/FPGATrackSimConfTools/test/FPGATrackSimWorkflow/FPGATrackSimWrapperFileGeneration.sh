@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e
 
-GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/RDO/reg0_singlemu.root"
-RDO_EVT=200
+source FPGATrackSim_CommonEnv.sh
 
 echo "... RDO to AOD with sim"
 Reco_tf.py \
@@ -11,7 +9,7 @@ Reco_tf.py \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName='wrapper.root'" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" \
-    --inputRDOFile ${RDO} \
+    --inputRDOFile ${RDO_SINGLE_MUON} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${RDO_EVT}
 ls -l

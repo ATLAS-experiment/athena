@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MSVTXVALIDATIONALGUTILS_H
@@ -7,9 +7,13 @@
 
 #include <vector>
 #include <cmath>
+#include <unordered_set>
+#include <algorithm>
 
-#include "GaudiKernel/SystemOfUnits.h"
 #include "CxxUtils/fpcompare.h"
+#include "GaudiKernel/SystemOfUnits.h"
+#include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
@@ -18,6 +22,8 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h"
+
+#include <TLorentzVector.h>
 
 
 namespace MSVtxValidationAlgUtils {
@@ -30,7 +36,24 @@ namespace MSVtxValidationAlgUtils {
 
     // decay chain utils
     std::vector<const xAOD::TruthParticle*> getChildren(const xAOD::TruthParticle* mother);
-    std::vector<const xAOD::TruthParticle*> getGenStableChildren(const xAOD::TruthParticle* mother);
+    std::vector<const xAOD::TruthParticle*> getStableChildren(const xAOD::TruthParticle* particle, bool findOnlyGenStable);
+    std::vector<const xAOD::TruthParticle*> getStableChildrenRecursive(const xAOD::TruthParticle* particle, bool findOnlyGenStable, std::unordered_set<const xAOD::TruthParticle*>& visited);
+    std::vector<const xAOD::TruthParticle*> getDecayProducts(const xAOD::TruthVertex* vtx);
+
+    // active vertices associated with jets
+    struct ActiveVertex {
+        const xAOD::TruthVertex* vtx{nullptr};
+        // from the four vector such of the direct decay products of the vertex
+        Double_t vtxEnergy{0.};
+        Double_t vtxMass{0.};
+        Double_t vtxPt{0.};
+        Double_t vtxScalarPtSum{0.}; // scalar pT sum of the direct decay products
+        // decay chain properties
+        size_t nChildren{0};
+        size_t decayDepth{0};
+    };
+
+    std::vector<ActiveVertex> getActiveVertices(const xAOD::Jet* jet, const xAOD::TruthParticleContainer& truthParticles);
 
     // vertex isolation
     struct VtxIso {

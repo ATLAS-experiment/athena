@@ -40,23 +40,22 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::execute(const EventContex
     std::vector<SG::ReadHandle<FPGATrackSimHitContainer>> incomingFPGAHitsInRoadsCollections = m_FPGAHitsInRoadsCollectionKeys.makeHandles(ctx);
     SG::WriteHandle<FPGATrackSimHitContainer> finalFPGAHitsInRoads (m_FinalFPGAHitsInRoadsCollectionKey, ctx);
     
-    if (not m_useRoads) {
-        std::vector<const FPGATrackSimTrackCollection*> incomingFPGATrackSimTrackCollectionsPtrs;
-        for (SG::ReadHandle<FPGATrackSimTrackCollection>& trackCollection : incomingFPGATrackSimTrackCollections)
+    std::vector<const FPGATrackSimTrackCollection*> incomingFPGATrackSimTrackCollectionsPtrs;
+    for (SG::ReadHandle<FPGATrackSimTrackCollection>& trackCollection : incomingFPGATrackSimTrackCollections)
+    {
+        if (!trackCollection.isValid())
         {
-            if (!trackCollection.isValid())
-            {
-                ATH_MSG_ERROR("Invalid FPGATrackCollection key with name " << trackCollection.key());
-                return StatusCode::FAILURE;
-            }
-            incomingFPGATrackSimTrackCollectionsPtrs.push_back(trackCollection.cptr());
+            ATH_MSG_ERROR("Invalid FPGATrackCollection key with name " << trackCollection.key());
+            return StatusCode::FAILURE;
         }
-
-        std::unique_ptr<FPGATrackSimTrackCollection> finalFPGATracksPtr = std::make_unique<FPGATrackSimTrackCollection>(); // temporary collection
-        ATH_CHECK(mergeTracks(incomingFPGATrackSimTrackCollectionsPtrs, finalFPGATracksPtr));
-        finalFPGATracksHandle = std::move(finalFPGATracksPtr);
+        incomingFPGATrackSimTrackCollectionsPtrs.push_back(trackCollection.cptr());
     }
-    else{
+
+    std::unique_ptr<FPGATrackSimTrackCollection> finalFPGATracksPtr = std::make_unique<FPGATrackSimTrackCollection>(); // temporary collection
+    ATH_CHECK(mergeTracks(incomingFPGATrackSimTrackCollectionsPtrs, finalFPGATracksPtr));
+    finalFPGATracksHandle = std::move(finalFPGATracksPtr);
+    
+    if(m_useRoads){
         std::vector<const FPGATrackSimRoadCollection*> incomingFPGARoadSimTrackCollectionsPtrs;
         std::vector<const FPGATrackSimHitContainer*> incomingFPGAHitsInRoadsCollectionsPtrs;
         for (SG::ReadHandle<FPGATrackSimRoadCollection>& roadCollection : incomingFPGARoadSimTrackCollections)

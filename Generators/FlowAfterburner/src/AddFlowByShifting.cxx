@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// File:  Generators/FlowAfterburnber/AddFlowByShifting.cxx
+// File:  Generators/FlowAfterburner/AddFlowByShifting.cxx
 // Description:
 //    This code is used to introduce particle flow
 //    to particles from generated events
@@ -18,9 +18,18 @@
 
 // For the Athena-based random numbers
 #include "AthenaKernel/RNGWrapper.h"
+#include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussQ.h"
 #include "CLHEP/Vector/LorentzVector.h"
+//
+#include "GeneratorObjects/HijingEventParams.h"
+#include "GeneratorObjects/McEventCollection.h"
+#include "AtlasHepMC/Relatives.h" //descendant_vertices
+// gnus scientific library
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_roots.h>
 
 #include "GaudiKernel/PhysicalConstants.h"
 
@@ -245,7 +254,7 @@ StatusCode AddFlowByShifting::execute() {
 
         // Add flow to particles from main vertex
         double phishift = AddFlowToParent(parent, hijing_pars);
-        MoveDescendantsToParent(parent, phishift);// adjust decsandants to parent position
+        MoveDescendantsToParent(std::move(parent), phishift);// adjust decsandants to parent position
       }
 
     // correct for double counting

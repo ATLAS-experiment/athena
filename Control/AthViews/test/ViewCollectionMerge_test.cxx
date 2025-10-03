@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -79,8 +79,10 @@ public:
     evtStore(svcLoc->service("StoreGateSvc"))
   {
     EXPECT_TRUE( evtStore.isValid() );
+    Atlas::setExtendedEventContext (ctx, Atlas::ExtendedEventContext(evtStore.get()) );
   }
 
+  EventContext ctx;
   SmartIF<StoreGateSvc> evtStore;
 
 };  // ViewCollectionMerge_test fixture
@@ -121,8 +123,9 @@ TEST_F( ViewCollectionMerge_test, testViewReadWrite ) {
   viewData->push_back( new int(1) );
 
   // Store the data vector in a view
-  SG::WriteHandle< DataVector< int > > outputDataHandle( DATA_NAME );
-  ASSERT_TRUE( outputDataHandle.setProxyDict( outputViewsHandle->at( 0 ) ).isSuccess() );
+  SG::WriteHandleKey< DataVector< int > > whk( DATA_NAME );
+  ASSERT_TRUE( whk.initialize().isSuccess() );
+  auto outputDataHandle = ViewHelper::makeHandle( outputViewsHandle->at( 0 ), whk, ctx );
   ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
   ASSERT_TRUE( outputDataHandle.isValid() );
 
@@ -132,8 +135,9 @@ TEST_F( ViewCollectionMerge_test, testViewReadWrite ) {
   ASSERT_EQ( inputViewsHandle->size(), 1u );
 
   // Retrieve the data vector from a view  
-  SG::ReadHandle< DataVector< int > > inputDataHandle( DATA_NAME );
-  ASSERT_TRUE( inputDataHandle.setProxyDict( inputViewsHandle->at( 0 ) ).isSuccess() );
+  SG::ReadHandleKey< DataVector< int > > rhk( DATA_NAME );
+  ASSERT_TRUE( rhk.initialize().isSuccess() );
+  auto inputDataHandle = ViewHelper::makeHandle( inputViewsHandle->at( 0 ), rhk, ctx );
   ASSERT_TRUE( inputDataHandle.isValid() );
   ASSERT_EQ( inputDataHandle->size(), 1u );
   ASSERT_EQ( *inputDataHandle->at(0), 1 );
@@ -153,13 +157,14 @@ TEST_F( ViewCollectionMerge_test, testManyViewReadWrite ) {
   ASSERT_TRUE( outputViewsHandle.isValid() );
 
   // Store a data vector in each view
+  SG::WriteHandleKey< DataVector< int > > whk( DATA_NAME );
+  ASSERT_TRUE( whk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
     auto viewData = std::make_unique< DataVector< int > >();
     viewData->push_back( new int(viewIndex) );
 
-    SG::WriteHandle< DataVector< int > > outputDataHandle( DATA_NAME );
-    ASSERT_TRUE( outputDataHandle.setProxyDict( outputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto outputDataHandle = ViewHelper::makeHandle( outputViewsHandle->at( viewIndex ), whk, ctx );
     ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
     ASSERT_TRUE( outputDataHandle.isValid() );
   }
@@ -170,10 +175,10 @@ TEST_F( ViewCollectionMerge_test, testManyViewReadWrite ) {
   ASSERT_EQ( inputViewsHandle->size(), 2u );
 
   // Retrieve the data vector from each view
+  SG::ReadHandleKey< DataVector< int > > rhk( DATA_NAME );
+  ASSERT_TRUE( rhk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
-
-    SG::ReadHandle< DataVector< int > > inputDataHandle( DATA_NAME );
-    ASSERT_TRUE( inputDataHandle.setProxyDict( inputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto inputDataHandle = ViewHelper::makeHandle( inputViewsHandle->at( viewIndex ), rhk, ctx );
     ASSERT_TRUE( inputDataHandle.isValid() );
     ASSERT_EQ( inputDataHandle->size(), 1u );
     ASSERT_EQ( *inputDataHandle->at(0), static_cast<int> (viewIndex) );
@@ -194,13 +199,14 @@ TEST_F( ViewCollectionMerge_test, testViewMerge ) {
   ASSERT_TRUE( outputViewsHandle.isValid() );
 
   // Store a data vector in each view
+  SG::WriteHandleKey< DataVector< int > > whk( DATA_NAME );
+  ASSERT_TRUE( whk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
     auto viewData = std::make_unique< DataVector< int > >();
     viewData->push_back( new int(viewIndex) );
 
-    SG::WriteHandle< DataVector< int > > outputDataHandle( DATA_NAME );
-    ASSERT_TRUE( outputDataHandle.setProxyDict( outputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto outputDataHandle = ViewHelper::makeHandle( outputViewsHandle->at( viewIndex ), whk, ctx );
     ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
     ASSERT_TRUE( outputDataHandle.isValid() );
   }
@@ -214,11 +220,11 @@ TEST_F( ViewCollectionMerge_test, testViewMerge ) {
   auto mergedData = std::make_unique< DataVector< int > >();
 
   // Retrieve the data vector from each view and merge
+  SG::ReadHandleKey< DataVector< int > > rhk( DATA_NAME );
+  ASSERT_TRUE( rhk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
-    SG::ReadHandle< DataVector< int > > inputDataHandle( DATA_NAME );
-    
-    ASSERT_TRUE( inputDataHandle.setProxyDict( inputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto inputDataHandle = ViewHelper::makeHandle( inputViewsHandle->at( viewIndex ), rhk, ctx );
     ASSERT_TRUE( inputDataHandle.isValid() );
     ASSERT_EQ( inputDataHandle->size(), 1u );
     ASSERT_EQ( *inputDataHandle->at(0), static_cast<int> (viewIndex) );
@@ -254,13 +260,14 @@ TEST_F( ViewCollectionMerge_test, testOtherViewMerge ) {
   ASSERT_TRUE( outputViewsHandle.isValid() );
 
   // Store a data vector in each view
+  SG::WriteHandleKey< DataVector< int > > whk( DATA_NAME );
+  ASSERT_TRUE( whk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
     auto viewData = std::make_unique< DataVector< int > >();
     viewData->push_back( new int(viewIndex) );
 
-    SG::WriteHandle< DataVector< int > > outputDataHandle( DATA_NAME );
-    ASSERT_TRUE( outputDataHandle.setProxyDict( outputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto outputDataHandle = ViewHelper::makeHandle(outputViewsHandle->at( viewIndex ), whk, ctx );
     ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
     ASSERT_TRUE( outputDataHandle.isValid() );
   }
@@ -274,11 +281,11 @@ TEST_F( ViewCollectionMerge_test, testOtherViewMerge ) {
   DataVector< int > mergedData(SG::VIEW_ELEMENTS);
 
   // Retrieve the data vector from each view and merge
+  SG::ReadHandleKey< DataVector< int > > rhk( DATA_NAME );
+  ASSERT_TRUE( rhk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
-    SG::ReadHandle< DataVector< int > > inputDataHandle( DATA_NAME );
-
-    ASSERT_TRUE( inputDataHandle.setProxyDict( inputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto inputDataHandle = ViewHelper::makeHandle( inputViewsHandle->at( viewIndex ), rhk, ctx );
     ASSERT_TRUE( inputDataHandle.isValid() );
     ASSERT_EQ( inputDataHandle->size(), 1u );
     ASSERT_EQ( *inputDataHandle->at(0), static_cast<int> (viewIndex) );
@@ -377,8 +384,9 @@ TEST_F( ViewCollectionMerge_test, elementLinkViewRemapTest ) {
   viewData->push_back( new int(1) );
 
   // Store the data vector
-  SG::WriteHandle< DataVector< int > > outputDataHandle( DATA_NAME );
-  ASSERT_TRUE( outputDataHandle.setProxyDict( testView ).isSuccess() );
+  SG::WriteHandleKey< DataVector< int > > whk( DATA_NAME );
+  ASSERT_TRUE( whk.initialize().isSuccess() );
+  auto outputDataHandle = ViewHelper::makeHandle( testView, whk, ctx );
   ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
   ASSERT_TRUE( outputDataHandle.isValid() );
 
@@ -396,8 +404,9 @@ TEST_F( ViewCollectionMerge_test, elementLinkViewRemapTest ) {
   viewData2->push_back( new int(4) );
 
   // Store the new data vector
-  SG::WriteHandle< DataVector< int > > outputDataHandle2( DATA_NAME + "2" );
-  ASSERT_TRUE( outputDataHandle2.setProxyDict( testView ).isSuccess() );
+  SG::WriteHandleKey< DataVector< int > > whk2( DATA_NAME + "2" );
+  ASSERT_TRUE( whk2.initialize().isSuccess() );
+  auto outputDataHandle2 = ViewHelper::makeHandle( testView, whk2, ctx );
   ASSERT_TRUE( outputDataHandle2.record( std::move( viewData2 ) ).isSuccess() );
   ASSERT_TRUE( outputDataHandle2.isValid() );
 
@@ -435,13 +444,14 @@ TEST_F( ViewCollectionMerge_test, elementLinkMergeRemapTest ) {
   ASSERT_TRUE( outputViewsHandle.isValid() );
 
   // Store a data vector in each view
+  SG::WriteHandleKey< DataVector< int > > whk( DATA_NAME );
+  ASSERT_TRUE( whk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
     auto viewData = std::make_unique< DataVector< int > >();
     viewData->push_back( new int(viewIndex) );
 
-    SG::WriteHandle< DataVector< int > > outputDataHandle( DATA_NAME );
-    ASSERT_TRUE( outputDataHandle.setProxyDict( outputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto outputDataHandle = ViewHelper::makeHandle( outputViewsHandle->at( viewIndex ), whk, ctx );
     ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
     ASSERT_TRUE( outputDataHandle.isValid() );
   }
@@ -460,11 +470,11 @@ TEST_F( ViewCollectionMerge_test, elementLinkMergeRemapTest ) {
   auto mergedData = std::make_unique< DataVector< int > >();
 
   // Retrieve the data vector from each view and merge
+  SG::ReadHandleKey< DataVector< int > > rhk( DATA_NAME );
+  ASSERT_TRUE( rhk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
-    SG::ReadHandle< DataVector< int > > inputDataHandle( DATA_NAME );
-
-    ASSERT_TRUE( inputDataHandle.setProxyDict( inputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto inputDataHandle = ViewHelper::makeHandle( inputViewsHandle->at( viewIndex ), rhk, ctx );
     ASSERT_TRUE( inputDataHandle.isValid() );
     ASSERT_EQ( inputDataHandle->size(), 1u );
     ASSERT_EQ( *inputDataHandle->at(0), static_cast<int> (viewIndex) );
@@ -524,13 +534,14 @@ TEST_F( ViewCollectionMerge_test, elementLinkMergeRemapBookkeepTest ) {
   ASSERT_TRUE( outputViewsHandle.isValid() );
 
   // Store a data vector in each view
+  SG::WriteHandleKey< DataVector< DummyData > > whk( DATA_NAME );
+  ASSERT_TRUE( whk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
     auto viewData = std::make_unique< DataVector< DummyData > >();
     viewData->push_back( new DummyData( viewIndex ) );
 
-    SG::WriteHandle< DataVector< DummyData > > outputDataHandle( DATA_NAME );
-    ASSERT_TRUE( outputDataHandle.setProxyDict( outputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto outputDataHandle = ViewHelper::makeHandle( outputViewsHandle->at( viewIndex ), whk, ctx );
     ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
     ASSERT_TRUE( outputDataHandle.isValid() );
   }
@@ -553,12 +564,11 @@ TEST_F( ViewCollectionMerge_test, elementLinkMergeRemapBookkeepTest ) {
   DummyData::Accessor< ElementLink<TrigRoiDescriptorCollection> > viewBookkeeper( "viewIndex" );
 
   // Retrieve the data vector from each view and merge
+  SG::ReadHandleKey< DataVector< DummyData > > rhk( DATA_NAME );
+  ASSERT_TRUE( rhk.initialize().isSuccess() );
   for ( unsigned int viewIndex = 0; viewIndex < outputViewsHandle->size(); ++viewIndex ) {
 
-    SG::ReadHandle< DataVector< DummyData > > inputDataHandle( DATA_NAME );
-
-
-    ASSERT_TRUE( inputDataHandle.setProxyDict( inputViewsHandle->at( viewIndex ) ).isSuccess() );
+    auto inputDataHandle = ViewHelper::makeHandle( inputViewsHandle->at( viewIndex ), rhk, ctx );
     ASSERT_TRUE( inputDataHandle.isValid() );
     ASSERT_EQ( inputDataHandle->size(), 1u );
     ASSERT_EQ( inputDataHandle->at(0)->value(), static_cast<int> (viewIndex) );

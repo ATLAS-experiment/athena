@@ -15,7 +15,6 @@
 
 #ifndef EFEXSUPERCELLTOWERIDPROVIDER
 #define EFEXSUPERCELLTOWERIDPROVIDER
-#include "L1CaloFEXToolInterfaces/IeFEXSuperCellTowerIdProvider.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include <string>
@@ -28,7 +27,9 @@ namespace LVL1 {
    * Load information stored in a .csv file and
    * provide information needed to connect the SuperCells to its corresponding tower.
    */
-  class eFEXSuperCellTowerIdProvider: public AthAlgTool, virtual public IeFEXSuperCellTowerIdProvider{
+  static const InterfaceID IID_IIeFEXSuperCellTowerIdProvider("LVL1::eFEXSuperCellTowerIdProvider", 1 , 0);
+
+    class eFEXSuperCellTowerIdProvider: public AthAlgTool {
 
   /**
    * @brief Sturcture stores mapping information of a SuperCell
@@ -40,6 +41,7 @@ namespace LVL1 {
   };
 
   public:
+        static const InterfaceID& interfaceID() { return IID_IIeFEXSuperCellTowerIdProvider; };
     /// @brief Constructor
     eFEXSuperCellTowerIdProvider(const std::string& type,const std::string& name,const IInterface* parent);
 
@@ -47,10 +49,10 @@ namespace LVL1 {
     ~eFEXSuperCellTowerIdProvider();
 
     /// @brief initialize the tool
-    StatusCode initialize() override;
+    virtual StatusCode initialize() override;
 
     /// @brief set the address to the csv file and load
-    StatusCode setAddress(std::string) override;
+    StatusCode setAddress(const std::string&);
 
     /**
      * @brief obtain ordered tower IDs in an eFEX
@@ -63,10 +65,10 @@ namespace LVL1 {
      * @return status code
      *
      */
-    StatusCode geteTowerIDandslot(uint64_t scid, int &eTowerID, int &slot, bool &issplit) const override;
+    StatusCode geteTowerIDandslot(uint64_t scid, int &eTowerID, int &slot, bool &issplit) const;
 
     /// @brief Check if the csv file is valid
-    bool ifhaveinputfile() const override;
+    bool ifhaveinputfile() const;
 
   private:
     bool m_hascsvfile{false}; ///< if the csv file is valid
@@ -74,10 +76,10 @@ namespace LVL1 {
     std::string m_csvaddress; ///< path to the csv file
 
     /// @brief Check if the SuperCell id exists in the csv file
-    bool hasSuperCell(uint64_t) const override;
+    bool hasSuperCell(uint64_t) const;
 
     /// @brief load the csv file
-    StatusCode loadcsv() override;
+    StatusCode loadcsv();
   
     /// map to store information about SuperCells with SuperCell ID as the key.
     std::unordered_map<uint64_t, towerinfo> m_SuperCelltoTowerIdmap;

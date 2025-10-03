@@ -5,7 +5,7 @@
 
 
 /**
-* @brief extracts geo version stirng from 'GeometryVersion':'ATLAS-P2-RUN4-03-00-00'
+* @brief extracts geo version string from 'GeometryVersion':'ATLAS-P2-RUN4-03-00-00'
 */
 // std::string getGeo(const std::string& line) {
 //     const size_t start = line.find(':')+2;
@@ -18,6 +18,7 @@ std::vector<uint32_t> Remappings::diskIndices(const std::string& geoKey) {
     const std::vector<uint32_t> recentMapping({0, 15, 21, 44, 50, 61, 69, 77, 86});
 
     if ( geoKey.compare(0, recentKey.size(), recentKey) == 0 ) {
+        //coverity[COPY_INSTEAD_OF_MOVE]
         return recentMapping;        
     } else if ( geoKey == "ATLAS-P2-ITK-22-02-00" ) {
         return {0,17,47,58,66};

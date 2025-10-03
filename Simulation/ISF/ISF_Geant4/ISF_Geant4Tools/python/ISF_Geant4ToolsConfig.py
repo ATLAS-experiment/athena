@@ -6,13 +6,17 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from RngComps.RngCompsConfig import AthRNGSvcCfg
 from G4AtlasServices.G4AtlasServicesConfig import (
-    DetectorGeometrySvcCfg, PhysicsListSvcCfg
+    PhysicsListSvcCfg
 )
 from G4AtlasServices.G4AtlasUserActionConfig import (
     ISFUserActionSvcCfg, ISFFullUserActionSvcCfg,
     ISFPassBackUserActionSvcCfg, ISF_ATLFAST_UserActionSvcCfg,
 )
+from G4AtlasTools.G4GeometryToolConfig import (
+    G4AtlasDetectorConstructionToolCfg
+)
 from G4AtlasTools.G4AtlasToolsConfig import (
+    G4ThreadPoolSvcCfg,
     SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 )
 from ISF_Services.ISF_ServicesConfig import (
@@ -28,7 +32,7 @@ def G4RunManagerHelperCfg(flags, name="G4RunManagerHelper", **kwargs):
 
 def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("DetGeoSvc", acc.getPrimaryAndMerge(DetectorGeometrySvcCfg(flags)))
+    kwargs.setdefault("DetectorConstruction", acc.addPublicTool(acc.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(flags))))
 
     kwargs.setdefault("RandomNumberService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
@@ -38,6 +42,11 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
 
     if "UserActionSvc" not in kwargs.keys():
         kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISFUserActionSvcCfg(flags)))
+    from SimulationConfig.SimEnums import LArParameterization
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        from G4AtlasTools.G4AtlasToolsConfig import PunchThroughG4ToolCfg
+        physics_initialization_tools = kwargs.setdefault("PhysicsInitializationTools", [])
+        physics_initialization_tools.append(acc.addPublicTool(acc.popToolsAndMerge(PunchThroughG4ToolCfg(flags))))
 
     kwargs.setdefault("RecordFlux", flags.Sim.RecordFlux)
 
@@ -62,6 +71,7 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     # Workaround to keep other simulation flavours working while we migrate everything to be AthenaMT-compatible.
     from SimulationConfig.SimEnums import SimulationFlavour
     if flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFAST3F_ACTSMT, SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
+        acc.merge(G4ThreadPoolSvcCfg(flags))
         acc.setPrivateTools(CompFactory.iGeant4.G4TransportTool(name, **kwargs))
     else:
         kwargs.setdefault("G4RunManagerHelper", acc.addPublicTool(acc.popToolsAndMerge(G4RunManagerHelperCfg(flags))))

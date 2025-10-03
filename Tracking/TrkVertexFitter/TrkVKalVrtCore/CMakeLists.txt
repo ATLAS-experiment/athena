@@ -8,5 +8,6 @@ atlas_subdir( TrkVKalVrtCore )
 atlas_add_library( TrkVKalVrtCore
                    src/*.cxx
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   PUBLIC_HEADERS TrkVKalVrtCore )
+                   PUBLIC_HEADERS TrkVKalVrtCore 
+                   LINK_LIBRARIES TruthUtils)
 

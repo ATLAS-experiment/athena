@@ -19,7 +19,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
-                          std::shared_ptr<Trk::DiscBounds> dbounds,
+                          std::shared_ptr<const Trk::DiscBounds> dbounds,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -44,7 +44,7 @@ Trk::DiscLayer::DiscLayer(Trk::DiscSurface* disc,
 }
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
-                          std::shared_ptr<Trk::DiscBounds> dbounds,
+                          std::shared_ptr<const Trk::DiscBounds> dbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
@@ -61,7 +61,7 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
 }
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
-                          std::shared_ptr<Trk::DiscBounds> dbounds,
+                          std::shared_ptr<const Trk::DiscBounds> dbounds,
                           std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
@@ -158,7 +158,7 @@ void Trk::DiscLayer::resizeLayer(const VolumeBounds& bounds, double envelope) {
     Trk::DiscBounds* rDiscBounds =
         new Trk::DiscBounds(rInner + envelope, rOuter - envelope);
     Trk::DiscSurface::m_bounds =
-        std::shared_ptr<Trk::SurfaceBounds>(rDiscBounds);
+        std::shared_ptr<const Trk::SurfaceBounds>(rDiscBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // r/phi binning
     if (Trk::Layer::m_layerMaterialProperties) {

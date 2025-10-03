@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TestSystems )
@@ -25,5 +25,7 @@ atlas_add_library( VP1TestSystems VP1TestSystems/*.h src/*.h src/*.cxx src/*.qrc
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${EIGEN_LIBRARIES} GeoPrimitives GaudiKernel TrkSurfaces TrkParameters TrkTrack )
 
 # Enable Qt support for cppcheck:
-set_property( TARGET VP1TestSystems
-   APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1TestSystems
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()

@@ -54,17 +54,15 @@ def ActsPixelClusteringToolCfg(flags,
                                **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelChargeCalibCondAlgCfg, ITkPixelOfflineCalibCondAlgCfg
-    acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
-    acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))
+    if flags.Acts.Clusters.RetrieveChargeInformation:
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelChargeCalibCondAlgCfg, ITkPixelOfflineCalibCondAlgCfg
+        acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
+        acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))        
+        kwargs.setdefault('PixelChargeCalibCondData', 'ITkPixelChargeCalibCondData')
 
     from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
     acc.merge(ITkPixelReadoutManagerCfg(flags))
     
-    if 'PixelRDOTool' not in kwargs:
-        from InDetConfig.SiClusterizationToolConfig import ITkPixelRDOToolCfg
-        kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(ITkPixelRDOToolCfg(flags)))
-
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
@@ -109,10 +107,10 @@ def ActsPixelClusterizationAlgCfg(flags,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("expectedClustersPerRDO", 32)
     kwargs.setdefault("IDHelper", "PixelID")
     kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("ClustersKey", "ITkPixelClusters")
+    kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     # Regional selection
     kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
@@ -126,6 +124,11 @@ def ActsPixelClusterizationAlgCfg(flags,
     if 'ClusteringTool' not in kwargs:
         kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsPixelClusteringToolCfg(flags)))
 
+    if 'DetElStatus' not in kwargs:
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+        acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault('DetElStatus', 'ITkPixelDetectorElementStatus')
+                
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelClusterizationMonitoringToolCfg(flags)))
@@ -144,8 +147,8 @@ def ActsStripClusterizationAlgCfg(flags,
 
     kwargs.setdefault("RDOContainerKey", "ITkStripRDOs")
     kwargs.setdefault("ClustersKey", "ITkStripClusters")
-    kwargs.setdefault("expectedClustersPerRDO", 6)
     kwargs.setdefault("IDHelper", "SCT_ID")
+    kwargs.setdefault("DetEleCollKey", "ITkStripDetectorElementCollection")
     # Regional selection
     kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
@@ -155,6 +158,11 @@ def ActsStripClusterizationAlgCfg(flags,
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+
+    if 'DetElStatus' not in kwargs :
+        from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  ITkStripDetectorElementStatusAlgCfg
+        acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("DetElStatus", "ITkStripDetectorElementStatus")
 
     if 'ClusteringTool' not in kwargs:
         kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsStripClusteringToolCfg(flags)))
@@ -225,7 +233,6 @@ def ActsStripClusterPreparationAlgCfg(flags,
     else:
         acc.addEventAlgo(CompFactory.ActsTrk.StripClusterCacheDataPreparationAlg(name, **kwargs))
     return acc
-
 
 def ActsHgtdClusterPreparationAlgCfg(flags,
                                      name: str = 'ActsHgtdClusterPreparationAlg',
@@ -349,17 +356,19 @@ def ActsClusterizationCfg(flags,
     # pass only if cache is enabled. In the latter case it is useed to collect all
     # the clusters from all views before passing them to the downstream algorithms
 
-    if flags.Tracking.ActiveConfig.isSecondaryPass:
+    from InDetConfig.ITkActsHelpers import isPrimaryPass, isValidationPass
+    if isPrimaryPass(flags) or isValidationPass(flags):
+        # Primary pass
+        # Validation passes count as primary passes
+        kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
+        kwargs.setdefault('runReconstruction', True)
+        kwargs.setdefault('runPreparation', flags.Acts.useCache)
+    else:
         # Secondary passes
         kwargs.setdefault('runCacheCreation', False)
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
         kwargs.setdefault('runPreparation', True)
-    else:
-        # Primary pass
-        kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
-        kwargs.setdefault('runReconstruction', True)
-        kwargs.setdefault('runPreparation', flags.Acts.useCache)
-
+        
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius Tracking uses full scan RoI created in the primary pass
@@ -480,14 +489,20 @@ def ActsClusterizationCfg(flags,
     if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
         toAOD = []
         if kwargs['processPixels']:
+            pixel_cluster_shortlist = ['-validationMeasurementLink']
+            pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
+            
             pixelClusterCollection = kwargs['PixelClusterizationAlg.ClustersKey']
             toAOD += [f'xAOD::PixelClusterContainer#{pixelClusterCollection}',
-                      f'xAOD::PixelClusterAuxContainer#{pixelClusterCollection}Aux.']
+                      f'xAOD::PixelClusterAuxContainer#{pixelClusterCollection}Aux.{pixel_cluster_variables}']
             
         if kwargs['processStrips']:
+            strip_cluster_shortlist = ['-validationMeasurementLink']
+            strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+            
             stripClusterCollection = kwargs['StripClusterizationAlg.ClustersKey']
             toAOD += [f"xAOD::StripClusterContainer#{stripClusterCollection}",
-                      f"xAOD::StripClusterAuxContainer#{stripClusterCollection}Aux."]
+                      f"xAOD::StripClusterAuxContainer#{stripClusterCollection}Aux.{strip_cluster_variables}"]
             
         if kwargs['processHGTD']:
             hgtdClusterCollection = kwargs['HgtdClusterizationAlg.ClusterContainerName']

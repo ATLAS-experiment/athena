@@ -2,6 +2,7 @@
 #include <utility>
 
 #include "TrackInfo.h"
+#include "TruthUtils/ParticleConstants.h"
 namespace MMCTest {
     TrackInfo::TrackInfo(std::string type, std::vector<std::string> systs)
       : m_Type (std::move (type)),
@@ -61,9 +62,9 @@ namespace MMCTest {
     TLorentzVector TrackInfo::GetFourMomentum(bool calib) {
         TLorentzVector result;
         if (calib)
-            result.SetPtEtaPhiM(m_CalibPt[""], m_Eta, m_Phi, 0.105658);
+            result.SetPtEtaPhiM(m_CalibPt[""], m_Eta, m_Phi, ParticleConstants::muonMassInMeV/1000.); // convert MeV to GeV
         else
-            result.SetPtEtaPhiM(m_Pt, m_Eta, m_Phi, 0.105658);
+            result.SetPtEtaPhiM(m_Pt, m_Eta, m_Phi, ParticleConstants::muonMassInMeV/1000.); // convert MeV to GeV
         return result;
     }
 }  // namespace MMCTest

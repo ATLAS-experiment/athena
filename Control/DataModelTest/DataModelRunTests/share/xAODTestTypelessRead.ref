@@ -9076,7 +9076,6 @@ xAODTe...elessRead   INFO
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 ClassIDSvc           INFO getRegistryEntries: read 12 CLIDRegistry entries for module ALL
-StreamStream1        INFO Metadata records written: 21
 xaoddata.root        INFO Database being retired...
 Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1458DB6A-ABD2-354E-9CA6-D2B33C406B3C
 xaoddata3.root       INFO Database being retired...

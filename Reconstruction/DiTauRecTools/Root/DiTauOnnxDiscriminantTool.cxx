@@ -40,11 +40,28 @@ StatusCode DiTauOnnxDiscriminantTool::initialize()
   m_ort_session = std::make_unique<Ort::Session>(*m_ort_env, model_path.c_str(), session_options);
 
   ATH_CHECK( m_ditauContainerKey.initialize() );
+  ATH_CHECK( m_ditau_pt_DecorKey.initialize() );
+  ATH_CHECK( m_f_core_lead_DecorKey.initialize() );
+  ATH_CHECK( m_f_core_sublead_DecorKey.initialize() );
+  ATH_CHECK( m_f_subjet_subl_DecorKey.initialize() );
+  ATH_CHECK( m_f_subjets_DecorKey.initialize() );
+  ATH_CHECK( m_R_max_lead_DecorKey.initialize() );
+  ATH_CHECK( m_R_max_sublead_DecorKey.initialize() );
+  ATH_CHECK( m_n_track_DecorKey.initialize() );
+  ATH_CHECK( m_R_track_all_DecorKey.initialize() );  
+  ATH_CHECK( m_R_isotrack_DecorKey.initialize() );
+  ATH_CHECK( m_R_track_sublead_DecorKey.initialize() );
+  ATH_CHECK( m_M_core_lead_DecorKey.initialize() );
+  ATH_CHECK( m_M_core_sublead_DecorKey.initialize() );
+  ATH_CHECK( m_M_track_lead_DecorKey.initialize() );
+  ATH_CHECK( m_d0_leadtrack_lead_DecorKey.initialize() );
+  ATH_CHECK( m_d0_leadtrack_sublead_DecorKey.initialize() );
+  ATH_CHECK( m_f_isotracks_DecorKey.initialize() ); 
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode DiTauOnnxDiscriminantTool::execute(const xAOD::DiTauJet& xDiTau)
+StatusCode DiTauOnnxDiscriminantTool::execute(const xAOD::DiTauJet& xDiTau) const
 {
     const static SG::Decorator<float> omni_scoreDec("omni_score");
     ATH_MSG_DEBUG("Inferencing omni DiTau ID score...");
@@ -144,11 +161,13 @@ float DiTauOnnxDiscriminantTool::GetDiTauObjOnnxScore(const xAOD::DiTauJet& dita
     SG::ReadDecorHandle<xAOD::DiTauJetContainer,float> d0_leadtrack_leadDec(m_d0_leadtrack_lead_DecorKey);
     SG::ReadDecorHandle<xAOD::DiTauJetContainer,float> d0_leadtrack_sublDec(m_d0_leadtrack_sublead_DecorKey);
     SG::ReadDecorHandle<xAOD::DiTauJetContainer,float> f_isotracks_Dec(m_f_isotracks_DecorKey);
-    SG::ReadDecorHandle<xAOD::DiTauJetContainer,uint8_t> numberOfInrmstPxlLyrHitsDec(m_numberOfInrmstPxlLyrHits_DecorKey);
-    SG::ReadDecorHandle<xAOD::DiTauJetContainer,uint8_t> numberOfPixelHitsDec(m_numberOfPixelHits_DecorKey);
-    SG::ReadDecorHandle<xAOD::DiTauJetContainer,uint8_t> numberOfSCTHitsDec(m_numberOfSCTHits_DecorKey);
-    SG::ReadDecorHandle<xAOD::DiTauJetContainer,float> z0Dec(m_z0_DecorKey);
-    SG::ReadDecorHandle<xAOD::DiTauJetContainer,float> d0Dec(m_d0_DecorKey);
+    // Accessors for reading the necessary features from the xAOD::TrackParticle object
+    static const SG::ConstAccessor< uint8_t > numberOfInrmstPxlLyrHitsAcc ("numberOfInnermostPixelLayerHits");
+    static const SG::ConstAccessor< uint8_t > numberOfPixelHitsAcc        ("numberOfPixelHits");
+    static const SG::ConstAccessor< uint8_t > numberOfSCTHitsAcc          ("numberOfSCTHits");
+    static const SG::ConstAccessor<   float > z0Acc                       ("z0");
+    static const SG::ConstAccessor<   float > d0Acc                       ("d0");
+
 
     // Input features for Ditau tagger ONNX model
     std::vector<float> jet_vars = {
@@ -198,13 +217,13 @@ float DiTauOnnxDiscriminantTool::GetDiTauObjOnnxScore(const xAOD::DiTauJet& dita
             delta_eta,
             delta_phi,
             pt_log,
-            d0Dec(*xTrack),
+            d0Acc(*xTrack),
             pt_ratio_log_nan_less,
-            z0Dec(*xTrack),
+            z0Acc(*xTrack),
             delta_R,
-            static_cast<float>(numberOfInrmstPxlLyrHitsDec(*xTrack)),
-            static_cast<float>(numberOfPixelHitsDec(*xTrack)),
-            static_cast<float>(numberOfSCTHitsDec(*xTrack)),
+            static_cast<float>(numberOfInrmstPxlLyrHitsAcc(*xTrack)),
+            static_cast<float>(numberOfPixelHitsAcc(*xTrack)),
+            static_cast<float>(numberOfSCTHitsAcc(*xTrack)),
             track_charge
         };
     }

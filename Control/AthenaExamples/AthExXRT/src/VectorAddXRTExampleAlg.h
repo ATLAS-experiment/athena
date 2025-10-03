@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHEXXRT_VECTORADDXRTEXAMPLEALG_H
 #define ATHEXXRT_VECTORADDXRTEXAMPLEALG_H
@@ -9,11 +9,13 @@
 
 // AthXRT include(s).
 #include "AthXRTInterfaces/IDeviceMgmtSvc.h"
+#include "AthXRTInterfaces/StateHandler.h"
 
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "GaudiKernel/ServiceHandle.h"
+
 
 namespace AthExXRT {
 
@@ -25,19 +27,23 @@ namespace AthExXRT {
 ///
 /// @author Quentin Berthet <quentin.berthet@cern.ch>
 ///
-class VectorAddXRTExampleAlg : public AthReentrantAlgorithm {
+class VectorAddXRTExampleAlg : public AthReentrantAlgorithm, public AthXRT::StateHandler {
 
  public:
   // Inherit the base class's constructor(s).
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  /// Function initialising the algorithm
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override {
+      return StateHandler::initialize();
+  }
 
-  /// Function executing the algorithm
+  virtual StatusCode initialize_global() override;
+  virtual StatusCode initialize_worker() override;
+
   virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
+
   /// The XRT device manager to use
   ServiceHandle<AthXRT::IDeviceMgmtSvc> m_DeviceMgmtSvc{
       this, "DeviceMgmtSvc", "AthXRT::DeviceMgmtSvc",
@@ -45,6 +51,9 @@ class VectorAddXRTExampleAlg : public AthReentrantAlgorithm {
 
   // Kernel name string
   static constexpr char s_krnl_name[] = "krnl_VectorAdd";
+
+  // list of found accelerator devices
+  std::vector<std::shared_ptr<xrt::device>> m_devices;
 
   // Kernel arguments indexes
   // Must match the kernel arguments order.

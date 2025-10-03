@@ -159,49 +159,17 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     return StatusCode::SUCCESS;
   }
   
-  bool legacyHLT=false, phase1HLT=false; 
-  const CTP_RDO* ctpBc = 0;
-  ctpBc = SG::get(m_ctpRdoReadKey);
-  CTP_Decoder ctp;
-  ctp.setRDO(ctpBc);
-  uint32_t numberBC = ctpBc->getNumberOfBunches();
-  if (numberBC > 0) {
-    unsigned int bcPos = ctpBc->getL1AcceptBunchPosition();
-    if (currentRunNo < 472553){
-      legacyHLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(180)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(180)));
-      phase1HLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(224)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(224)));
-    }
-    else if (currentRunNo < 476718){
-      legacyHLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(184)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(184)));
-      phase1HLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(228)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(228)));
-    }
-    else {
-      legacyHLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(185)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(185)));
-      phase1HLT = ((ctp.getBunchCrossing(bcPos-1).getTBP().test(229)) or (ctp.getBunchCrossing(bcPos+1).getTBP().test(229)));
-    }
-  }
-   
-  if ((m_uselegacy) and (legacyHLT==false)) {
-    ATH_MSG_DEBUG("TrigDec don't pass HLT_mistimemonj400_L1All");
-    return StatusCode::SUCCESS;
-  }
-  else if ((m_usephaseI) and (phase1HLT==false)) {
-    ATH_MSG_DEBUG("TrigDec don't pass HLT_mistimemonj400_L1All");
-    return StatusCode::SUCCESS;
-  }
-  // if all events fail here, check the ctp item number with the right SMUK key
-
   cutFlowX=HLT_mistimemonj400;
   fill(m_packageName,cutFlowX);
   
-  //Only select events which passed the L1_J100, L1_jJ160, L1_eEM26M, L1_jJ400 or L1_gJ400p0ETA25
+  //Only select events which passed the L1_J100, L1_jJ160, L1_eEM26M, L1_j5400, L1_gLJ140p0ETA25 or L1_gJ400p0ETA25
   //Adjustable depending on which trigger we are interested 
   if (m_usephaseI) {
     if(! ( (m_trigDec->isPassed("L1_eEM26M")) or
-         (m_trigDec->isPassed("L1_gJ100p0ETA25")) or
+         (m_trigDec->isPassed("L1_gLJ140p0ETA25")) or
          (m_trigDec->isPassed("L1_gJ400p0ETA25")) or
          (m_trigDec->isPassed("L1_jJ160")) or
-         (m_trigDec->isPassed("L1_jJ400")) 
+         (m_trigDec->isPassed("L1_jJ500")) 
          ) ){ 
       ATH_MSG_DEBUG("TrigDec doesn't pass");
       return StatusCode::SUCCESS;
@@ -233,11 +201,11 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
       phase1Trigger= true;
       trigger = "eFex";
     }
-    if ((m_trigDec->isPassed("L1_jJ160"))or (m_trigDec->isPassed("L1_jJ400"))) {
+    if ((m_trigDec->isPassed("L1_jJ160"))or (m_trigDec->isPassed("L1_jJ500"))) {
       phase1Trigger= true;
       trigger = "jFex";
     }
-    if ( (m_trigDec->isPassed("L1_gJ400p0ETA25")) or (m_trigDec->isPassed("L1_gJ100p0ETA25")) ) {
+    if ( (m_trigDec->isPassed("L1_gJ400p0ETA25")) or (m_trigDec->isPassed("L1_gLJ140p0ETA25")) ) {
       phase1Trigger= true;
       trigger = "gFex";
     }
@@ -248,16 +216,12 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
   
    // now classify the tower signals by looking at their FADC counts, if it exceeds 70
-  int badCounter = 0; // category 2 really bad
-  int bad2Counter = 0; // category 4 bad peak 2 
-  int bad3Counter = 0; // category 6 bad peak 3 
-  int good3Counter = 0; // category 5 good peak 3 
-  int good2Counter = 0; // category 5 good peak 3 
+  int good3Counter = 0; // category 5 good peak 3
+  int good2Counter = 0; // category 5 good peak 2
   int eFexintimeCounter = 0; // in-time TOBs
   int eFexoutoftimeCounter = 0; // out-of-time TOBs
   int jFexCounter = 0; // in-time TOBs
   int gFexCounter = 0; // in-time TOBs
-  int emActivityCounter = 0; //count number of TT in EM layer with ADC > 70 
 
   double dEta = 0., dPhi = 0., dPhi1 = 0., dR = 0.; 
   double etaIn = 0., phiIn = 0., etIn = 0.;
@@ -312,11 +276,9 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     }
     else if(maxADCval == 1023) {
       ttPulseCategory = 1;
-      if(! (tt)->layer()) emActivityCounter++;
     }
     else{
       bool goodQual = pulseQuality(readoutCorrectedADC, adcPeakPositon);
-      if(! (tt)->layer()) emActivityCounter++;
       //look at any of the five FADC values
       if(adcPeakPositon == 2){ // can be class 3 or 4 now
         if(goodQual){
@@ -326,7 +288,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         }
         else{
           //badly peaking TT in BCID0
-          bad2Counter++;
           ttPulseCategory = 4;
         }
       }
@@ -338,13 +299,11 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         }
         else{
           //badly peaking TT in BCID+1
-          bad3Counter++;
           ttPulseCategory = 6;
         }
       }
       else{
           //TT peaking in BCID-1,-2 or +2
-          badCounter++;
           ttPulseCategory = 2;
       }
 
@@ -469,27 +428,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
       jFexCounter++;
     } 
   }
-
-  if(badCounter > 4){
-    //reject events with more than 4 wrongly peaked towers
-    return StatusCode::SUCCESS;
-  }
-  cutFlowX=badpeakTT;
-  fill(m_packageName,cutFlowX);
-  
-  if(bad2Counter > 4){
-    //reject events with more than 4 pulses peaking in slice 2 that are badly timed or mis-shapen
-    return StatusCode::SUCCESS;
-  }
-  cutFlowX=badCentralTT;
-  fill(m_packageName,cutFlowX);
-  
-  if(bad3Counter > 4){
-    //reject events with more than 4 pulses peaking in slice 3 that are badly timed or mis-shapen
-    return StatusCode::SUCCESS;
-  }
-  cutFlowX=badLateTT;
-  fill(m_packageName,cutFlowX);
   
   if(  (good3Counter < 2) or ((trigger == "eFex") and (eFexoutoftimeCounter < 2)) ){
     //reject events with less than 2 pulses nicely peaking in slice 3 
@@ -506,13 +444,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     return StatusCode::SUCCESS;
   }
   cutFlowX= InTime;
-  fill(m_packageName,cutFlowX);
-  
-  if(!emActivityCounter){
-    //reject events with no activity in the EM layer
-    return StatusCode::SUCCESS;
-  }
-  cutFlowX=  TTEMLayer;
   fill(m_packageName,cutFlowX);
   
   if (trigger == "eFex") {
@@ -778,32 +709,28 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
                 }
               }
               fill(groupName+"Efex1", TOBeta, TOBphi, TOBeT);
-              if (trigger == "eFex") {
-                fill("Efex_maxTOB_in", TOBeT);
-              }
             }
         }
         else if (tob->bcn4() == (((ctx.eventID().bunch_crossing_id())+1) & 0xf )) {
-            if (TOBeT > 0.0){
-              if (TOBeT_max < TOBeT) {
-                TOBeT_max = tob->et()/1000;
-                TOBeta_max = tob->eta();
-                if (tob->phi() < 0) {
-                  TOBphi_max = tob->phi()+2*M_PI;
-                }
-                else {
-                  TOBphi_max = tob->phi();
-                }
+          if (TOBeT > 0.0){
+            if (TOBeT_max < TOBeT) {
+              TOBeT_max = tob->et()/1000;
+              TOBeta_max = tob->eta();
+              if (tob->phi() < 0) {
+                TOBphi_max = tob->phi()+2*M_PI;
               }
-              fill(groupName+"Efex2", TOBeta, TOBphi, TOBeT);
-              if (trigger == "eFex") {
-                fill("Efex_maxTOB_out", TOBeT);
+              else {
+                TOBphi_max = tob->phi();
               }
             }
+            fill(groupName+"Efex2", TOBeta, TOBphi, TOBeT);
+          }
         }
       }
     }
     if (trigger == "eFex") {
+      fill("Efex_maxTOB_in", TOBeT_max_in);
+      fill("Efex_maxTOB_out", TOBeT_max);
       fill("Efex_maxTOB_out", TOBeta_max, TOBphi_max);
       fill("Efex_maxTOB_in", TOBeta_max_in, TOBphi_max_in);
     }
@@ -864,11 +791,9 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
         }
       }
       fill(groupName+"JfexSRJet", jFexeta, jFexphi, jFexEt);
-      if (trigger == "jFex") {
-        fill("Jfex_maxTOB", jFexEt);
-      }
     }
     if (trigger == "jFex") {
+      fill("Jfex_maxTOB", TOBeT_max);
       fill("Jfex_maxTOB", TOBeta_max, TOBphi_max);
     }
 
@@ -930,15 +855,13 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
           else if (key_index == 1) {
             fill(groupName+"GfexLRJet",gFexEta, gFexPhi, gFexEt);
           }
-          if (trigger == "gFex") {
-            fill("Gfex_maxTOB", gFexEt);
-          }
         }
       }
       key_index++;  
     }
     if (trigger == "gFex") {
-        fill("Gfex_maxTOB", TOBeta_max, TOBphi_max);
+      fill("Gfex_maxTOB", TOBeT_max);  
+      fill("Gfex_maxTOB", TOBeta_max, TOBphi_max);
     }
 
   }
@@ -952,6 +875,158 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     if (phase1Trigger) {
       fill("Event_all_", eventMonitor_all_phaseI, lbMonitor_all );
     }
+
+    SG::ReadHandle<xAOD::eFexEMRoIContainer>eFexContainer(m_eFexEMContainerKey, ctx);
+    if ( !eFexContainer.isValid() ) {
+      ATH_MSG_WARNING("No eFex EM container found in storegate  "<< eFexContainer.key());
+    }
+    
+    // monitored variables for histograms
+    auto TOBeT = Monitored::Scalar<float>("TOBTransverseEnergy",0.0);
+    auto TOBeta = Monitored::Scalar<float>("TOBEta",0.0);
+    auto TOBphi = Monitored::Scalar<float>("TOBPhi",0.0);
+    auto TOBeT_max = Monitored::Scalar<float>("TOBTransverseEnergy_max",0.0);
+    auto TOBeta_max = Monitored::Scalar<float>("TOBEta_max",0.0);
+    auto TOBphi_max = Monitored::Scalar<float>("TOBPhi_max",0.0);
+    auto TOBeT_max_in = Monitored::Scalar<float>("TOBTransverseEnergy_max",0.0);
+    auto TOBeta_max_in = Monitored::Scalar<float>("TOBEta_max",0.0);
+    auto TOBphi_max_in = Monitored::Scalar<float>("TOBPhi_max",0.0);
+
+    TOBeT_max = 0; 
+    TOBeT_max_in = 0; 
+
+    for(auto key : {"L1_eEMxRoI","L1_eEMxRoIOutOfTime"}) {
+
+      const xAOD::eFexEMRoIContainer* emTobs;
+      CHECK( evtStore()->retrieve( emTobs, key ) );
+      
+      for(auto tob : *emTobs) {
+        TOBeT = tob->et()/1000; //eT in GeV
+        TOBeta = tob->eta();
+        
+        // adjust the phi to 0 to 2 pi
+        if (tob->phi() < 0) {
+          TOBphi = tob->phi()+2*M_PI;
+        }
+        else {
+          TOBphi = tob->phi();
+        }
+
+        if (tob->bcn4() == ((ctx.eventID().bunch_crossing_id()) & 0xf )) {
+            if (TOBeT > 0.0){
+              if (TOBeT_max_in < TOBeT) {
+                TOBeT_max_in = tob->et()/1000;
+                TOBeta_max_in = tob->eta();
+                if (tob->phi() < 0) {
+                  TOBphi_max_in = tob->phi()+2*M_PI;
+                }
+                else {
+                  TOBphi_max_in = tob->phi();
+                }
+              }
+            }
+        }
+        else if (tob->bcn4() == (((ctx.eventID().bunch_crossing_id())+1) & 0xf )) {
+            if (TOBeT > 0.0){
+              if (TOBeT_max < TOBeT) {
+                TOBeT_max = tob->et()/1000;
+                TOBeta_max = tob->eta();
+                if (tob->phi() < 0) {
+                  TOBphi_max = tob->phi()+2*M_PI;
+                }
+                else {
+                  TOBphi_max = tob->phi();
+                }
+              }
+            }
+        }
+      }
+    }
+    if (trigger == "eFex") {
+      fill("Efex_maxTOB_in", TOBeT_max_in);
+      fill("Efex_maxTOB_out", TOBeT_max);
+      fill("Efex_maxTOB_out", TOBeta_max, TOBphi_max);
+      fill("Efex_maxTOB_in", TOBeta_max_in, TOBphi_max_in);
+    }
+
+    // variables for histograms
+    auto jFexEt      = Monitored::Scalar<int>  ("jFexEt",0);
+    auto jFexeta     = Monitored::Scalar<float>("jFexEta",0.0);
+    auto jFexphi     = Monitored::Scalar<float>("jFexPhi",0.0);
+    
+    // Access jFex tower container
+    SG::ReadHandle<xAOD::jFexTowerContainer> jFexTowerContainer{m_jFexDataTowerKey, ctx};
+    if(!jFexTowerContainer.isValid()) {
+        ATH_MSG_WARNING("No jFex Tower container valid in storegate with key: "<< m_jFexDataTowerKey<<". Will be skipped!");
+    }
+    
+    TOBeT_max = 0; 
+    for(const xAOD::jFexSRJetRoI* jFexSRJetRoI : *jFexSRJetContainer) {
+      if(jFexSRJetRoI->tobWord()==0) continue; //remove empty TOBs
+      jFexEt=jFexSRJetRoI->tobEt()/5;
+      jFexeta=jFexSRJetRoI->eta();
+      if (jFexSRJetRoI->phi() < 0) {
+        jFexphi=jFexSRJetRoI->phi()+2*M_PI;
+      }
+      else {
+        jFexphi=jFexSRJetRoI->phi();
+      }
+      if (TOBeT_max < jFexEt) {
+        TOBeT_max = jFexSRJetRoI->tobEt()/5;
+        TOBeta_max = jFexSRJetRoI->eta();
+        if (jFexSRJetRoI->phi() < 0) {
+          TOBphi_max =jFexSRJetRoI->phi()+2*M_PI;
+        }
+        else {
+          TOBphi_max =jFexSRJetRoI->phi();
+        }
+      }
+    }
+    if (trigger == "jFex") {
+      fill("Jfex_maxTOB", TOBeT_max);
+      fill("Jfex_maxTOB", TOBeta_max, TOBphi_max);
+    }
+
+    auto gFexEt      = Monitored::Scalar<int>  ("gFexEt",0);
+    auto gFexEta     = Monitored::Scalar<float>("gFexEta",0.0);
+    auto gFexPhi     = Monitored::Scalar<float>("gFexPhi",0.0);
+
+    TOBeT_max = 0; 
+    // Small-R and large-R jets container loop
+    for (const auto& key : m_gFexJetTobKeyList){
+      SG::ReadHandle<xAOD::gFexJetRoIContainer> jetContainer (key, ctx);
+      // Check that this container is present
+      if ( !jetContainer.isValid() ) {
+        ATH_MSG_WARNING("No gFex jet container found in storegate: "<< key.key());
+      }
+      else {
+        for(const xAOD::gFexJetRoI* gFexJetRoIContainer : *jetContainer) {
+          gFexEt =gFexJetRoIContainer->gFexTobEt()/10;
+          gFexEta=gFexJetRoIContainer->eta();
+          if (gFexJetRoIContainer->phi() < 0) {
+            gFexPhi=gFexJetRoIContainer->phi()+2*M_PI;
+          }
+          else {
+            gFexPhi=gFexJetRoIContainer->phi();
+          }
+          if (TOBeT_max < gFexEt) {
+            TOBeT_max = gFexJetRoIContainer->gFexTobEt()/10;
+            TOBeta_max = gFexJetRoIContainer->eta();
+            if (gFexJetRoIContainer->phi() < 0) {
+              TOBphi_max=gFexJetRoIContainer->phi()+2*M_PI;
+            }
+            else {
+              TOBphi_max=gFexJetRoIContainer->phi();
+            }
+          }
+        }
+      }
+    }
+    if (trigger == "gFex") {
+      fill("Gfex_maxTOB", TOBeT_max);  
+      fill("Gfex_maxTOB", TOBeta_max, TOBphi_max);
+    }
+
   }
 
   return StatusCode::SUCCESS;

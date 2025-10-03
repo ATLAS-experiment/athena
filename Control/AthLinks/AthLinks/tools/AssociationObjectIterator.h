@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file */
@@ -304,8 +304,8 @@ size_t size() const { return m_store->size(); }
 
 private:
 
-  const store_type* m_store;
-  typename store_type::const_iterator m_actual;
+  const store_type* m_store{};
+  typename store_type::const_iterator m_actual{};
 };
 #endif
 

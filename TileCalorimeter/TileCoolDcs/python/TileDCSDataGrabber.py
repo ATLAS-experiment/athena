@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Author: nils.gollub@cern.ch
 
-from __future__ import print_function
 
 import time
+import pytz
 import logging
 from PyCool import cool
 import ROOT
@@ -12,6 +12,7 @@ import copy
 from CoolConvUtilities.AtlCoolTool import connect
 from TileCoolDcs.TileDCSDataInfo import TileDCSDataInfo
 from TileCoolDcs.ProgressBar import progressBar
+import cx_Oracle
 
 #====================================================================================================
 class IOVDict:
@@ -217,11 +218,13 @@ class TileDCSDataGrabber:
             self.oldTableBoundary = 131231230000
             if dbstring is None:
                 dbstring = self.info.get_dbstring(dbSource, 1 if int(self.iovStart) < self.oldTableBoundary else 2)
-            self.db = ROOT.TSQLServer.Connect( dbstring[0], dbstring[1], dbstring[2])
+            self.db = cx_Oracle.connect(dbstring[1],dbstring[2],dbstring[0].split("/")[-1])
+            self.con = self.db.cursor()
         elif dbSource=="TESTBEAM":
             if dbstring is None:
                 dbstring = self.info.get_dbstring(dbSource,0)
-            self.db = ROOT.TSQLServer.Connect( dbstring[0], dbstring[1], dbstring[2])
+            self.db = cx_Oracle.connect(dbstring[1],dbstring[2],dbstring[0].split("/")[-1])
+            self.con = self.db.cursor()
         else:
             raise Exception("Unknown dbSource: %s, please use either COOL or ORACLE or TESTBEAM" % dbSource)
 
@@ -275,8 +278,9 @@ class TileDCSDataGrabber:
         if self.queryCounter == self.maxQueryCounter:
             if self.dbSource=="ORACLE" or self.dbSource=="TESTBEAM":
                 print ("Max connect counter reached, reconnecting to Databaase Server")
-                self.db.Close()
-                self.db = ROOT.TSQLServer.Connect( self.dbString[0], self.dbString[1], self.dbString[2] )
+                self.db.close()
+                self.db = cx_Oracle.connect(self.dbString[1],self.dbString[2],self.dbString[0].split("/")[-1])
+                self.con = self.db.cursor()
             self.queryCounter=1
         else:
             self.queryCounter+=1
@@ -656,33 +660,22 @@ class TileDCSDataGrabber:
                         logging.debug( "Processing table: %s", table )
                         oracleString = self.getOracleString(folder, drawer, var, table, tableRangeStart, tableRangeEnd)
                         logging.debug( "Oralce string: %s", oracleString )
-                        stmt = self.db.Statement(oracleString)
-                        if stmt.Process():
-                            stmt.StoreResult()
+                        self.con.execute(oracleString)
+                        data=self.con.fetchall()
+                        if data:
                             #=== read all values
                             value = 0
-                            while stmt.NextResultRow():
+                            for line in data:
                                 if   varType==self.info.type_int:
-                                    value = stmt.GetInt(   1)
+                                    value = int(line[1])
                                 elif varType==self.info.type_float:
-                                    value = stmt.GetDouble(1)
+                                    value = float(line[1])
                                 #=== catch in oracle
                                 if value < -10000:
                                     nCrap += 1
                                     continue
-                                #=== extract time stamp
-                                Y     = stmt.GetYear(0)
-                                M     = stmt.GetMonth(0)
-                                D     = stmt.GetDay(0)
-                                H     = stmt.GetHour(0)
-                                Min   = stmt.GetMinute(0)
-                                Sec   = stmt.GetSecond(0)
-                                tuple = (Y,M,D,H,Min,Sec,0,0,0)
-                                #=== time.mktime interprets tuple as local standard (==winter) time
-                                #=== example: Oracle time stamp is 15:00
-                                #=== mktime makes seconds for 15:00 local winter time, i.e. 14:00 UTC
-                                #=== --> need to add 3600 seconds (time.timezone == -3600)
-                                unixTime = time.mktime(tuple) - time.timezone
+                                #=== extract time stamp from datetime (which is actually in UTC, not local time)
+                                unixTime = line[0].replace(tzinfo=pytz.utc).timestamp()
                                 iovSince = int(unixTime*self.unix2cool)
                                 folderVarSet.setVariable(var, value)
                                 folderVarSet.registerInIOVStore(drawer,iovSince)
@@ -813,19 +806,19 @@ class TileDCSDataGrabber:
             statement += "start_time < to_date('%s', 'yymmddhh24miss') " % iovEnd
             statement += ")"
 
-            stmt = self.db.Statement(statement)
-            if stmt.Process() is True:
-                stmt.StoreResult()
-                while stmt.NextResultRow():
-                    rangeStart = stmt.GetString(1)
+            self.con.execute(statement)
+            data=self.con.fetchall()
+            if data:
+                for line in data:
+                    rangeStart = line[1]
                     if iovStart > rangeStart:
                         rangeStart = iovStart
-                    rangeEnd = stmt.GetString(2)
-                    if rangeEnd=="" or iovEnd<rangeEnd:
+                    rangeEnd = line[2]
+                    if rangeEnd is None or rangeEnd=="" or iovEnd<rangeEnd:
                         rangeEnd=iovEnd
 
                     validityRange = ( rangeStart , rangeEnd )
-                    evhistNum = (8*'0'+stmt.GetString(0))[-8:]
+                    evhistNum = "%08i" % int(line[0])
                     evhistNames["ATLAS_PVSSTIL.EVENTHISTORY_"+evhistNum] = validityRange
 
         return evhistNames

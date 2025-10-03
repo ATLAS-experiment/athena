@@ -9,11 +9,11 @@ find_package(Acts COMPONENTS Core)
 atlas_add_component(FPGATrackSimPrototrackFitter
     src/*.cxx
     src/components/*.cxx
-    LINK_LIBRARIES 
-	ActsCore
-	ActsEventCnvLib
-	ActsToolInterfacesLib
-    LINK_LIBRARIES ActsEventLib
+    LINK_LIBRARIES
+    Acts::Core
+    ActsToolInterfacesLib
+    ActsCalibratorsLib
+    ActsEventLib
 )
 
 atlas_install_python_modules( python/*.py )

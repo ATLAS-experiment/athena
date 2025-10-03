@@ -39,7 +39,7 @@ class ATLAS_NOT_THREAD_SAFE RPDAnalysisTool : public virtual IZdcAnalysisTool, p
   void analyze();
   void writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer) const;
 
-  StatusCode initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
+  StatusCode initializeWriteKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
   ZDCMsg::MessageFunctionPtr MakeMessageFunction();
 
   bool m_initialized = false;

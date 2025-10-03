@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, MetadataCategory, HIMode
@@ -34,19 +34,27 @@ def RecoSteering(flags):
         log.info("---------- Configured POOL reading")
 
     acc.flagPerfmonDomain('Truth')
-    if flags.Input.isMC:
+    if flags.Input.isMC or flags.Overlay.DataOverlay:
         # AOD2xAOD Truth conversion
-        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-        acc.merge(GEN_AOD2xAODCfg(flags))
-        log.info("---------- Configured AODtoxAOD Truth Conversion")
+        if flags.Output.doGEN_AOD2xAOD:
+            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+            acc.merge(GEN_AOD2xAODCfg(flags))
+            log.info("---------- Configured AODtoxAOD Truth Conversion")
+        # copy background vertex collection to AOD
+        if flags.Overlay.DataOverlay:
+            from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+            acc.merge(addToAOD(flags, [f'xAOD::VertexContainer#{flags.Overlay.BkgPrefix}PrimaryVertices',
+                f'xAOD::VertexAuxContainer#{flags.Overlay.BkgPrefix}PrimaryVerticesAux.x.y.z']))
 
         # We always want to write pileup truth jets to AOD,
         # irrespective of whether we write jets to AOD in general
         # This is because we cannot rebuild jets from pileup truth
         # particles from the AOD
-        from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
-        acc.merge(addTruthPileupJetsToOutputCfg(flags))
-        log.info("---------- Configured Truth pileup jet writing")
+        # but truth jets are not available for DataOverlay
+        if not flags.Overlay.DataOverlay:
+            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
+            acc.merge(addTruthPileupJetsToOutputCfg(flags))
+            log.info("---------- Configured Truth pileup jet writing") 
 
     # trigger
     acc.flagPerfmonDomain('Trigger')
@@ -227,6 +235,13 @@ def RecoSteering(flags):
     if flags.Reco.EnablePostProcessing:
         acc.merge(RecoPostProcessingCfg(flags))
         log.info("---------- Configured post-processing")
+
+    # Setup data overlay reconstruction
+    if flags.Overlay.DataOverlay:
+        # Override conditions for data overlay
+        if flags.Overlay.DataOverlayConditions:
+            from PyJobTransforms.TransformUtils import executeFromFragment
+            executeFromFragment(flags.Overlay.DataOverlayConditions, flags, acc)
 
     # setup output
     acc.flagPerfmonDomain('IO')

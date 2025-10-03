@@ -33,6 +33,17 @@ static bool isNumber(const std::string& str) {
 IdDictDictionary::IdDictDictionary () = default;
 IdDictDictionary::~IdDictDictionary () = default;
 
+IdDictDictionary::IdDictDictionary (const std::string& name,
+                                    const std::string& version /*= ""*/,
+                                    const std::string& date /*= ""*/,
+                                    const std::string& author /*= ""*/)
+  : m_name (name),
+    m_version (version),
+    m_date (date),
+    m_author (author)
+{
+}
+
 IdDictField* IdDictDictionary::find_field(const std::string& name) const {
   std::map <std::string, IdDictField*>::const_iterator it;
 
@@ -64,18 +75,16 @@ IdDictLabel* IdDictDictionary::find_label(const std::string& field, const std::s
 int IdDictDictionary::get_label_value(const std::string& field, const std::string& label, int& value) const {
   IdDictLabel* idLabel = find_label(field, label);
 
-  if (!idLabel || !idLabel->m_valued) return(1);
+  if (!idLabel || !idLabel->valued()) return(1);
 
-  value = idLabel->m_value;
+  value = idLabel->value();
   return(0);
 }
 
 void IdDictDictionary::add_field(IdDictField* field) {
   if (field == 0) return;
 
-  std::string& name = field->m_name;
-
-  m_fields[name] = field;
+  m_fields[field->name()] = field;
 }
 
 IdDictSubRegion*
@@ -94,13 +103,13 @@ IdDictRegion* IdDictDictionary::find_region(const std::string& region_name) cons
 }
 
 IdDictRegion* IdDictDictionary::find_region(const std::string& region_name, const std::string& group_name) const {
-  for (size_t i = 0; i < m_regions.size(); ++i) {
-    IdDictRegion* region = m_regions[i];
+  for (IdDictRegion* region : m_regions) {
+    if (!region) continue;
     if ((group_name != "") && (region->group_name() != group_name)) continue;
-    if ((region != 0) && (region_name == region->m_name)) return(region);
+    if ((region_name != "") && (region->name() != region_name)) continue;
+    return region;
   }
-
-  return(0);
+  return nullptr;
 }
 
 IdDictGroup* IdDictDictionary::find_group(const std::string& group_name) const {
@@ -114,14 +123,16 @@ IdDictGroup* IdDictDictionary::find_group(const std::string& group_name) const {
 
 void IdDictDictionary::add_subregion(IdDictSubRegion* subregion) {
   if (subregion == 0) return;
-
-  std::string& name = subregion->m_name;
-
-  m_subregions[name] = subregion;
+  m_subregions[subregion->name()] = subregion;
 }
 
 void IdDictDictionary::add_subdictionary_name(const std::string& name) {
   m_subdictionary_names.push_back(name);
+}
+
+void IdDictDictionary::set_parent_dict (IdDictDictionary* parent_dict)
+{
+  m_parent_dict = parent_dict;
 }
 
 void IdDictDictionary::add_dictentry(IdDictDictEntry* region) {
@@ -135,15 +146,11 @@ void IdDictDictionary::add_dictentry(IdDictDictEntry* region) {
   group->add_dictentry(region);
 }
 
-void IdDictDictionary::resolve_references(const IdDictMgr& idd) {
-  {
-    std::map<std::string, IdDictField*>::iterator it;
+void IdDictDictionary::add_region(IdDictRegion* region) {
+  m_all_regions.push_back(region);
+}
 
-    for (it = m_fields.begin(); it != m_fields.end(); ++it) {
-      IdDictField* field = (*it).second;
-      field->resolve_references(idd);
-    }
-  }
+void IdDictDictionary::resolve_references(const IdDictMgr& idd) {
   {
     std::map<std::string, IdDictSubRegion*>::iterator it;
 
@@ -198,6 +205,10 @@ void IdDictDictionary::generate_implementation(const IdDictMgr& idd,
 
     // Set integral over the number of bits
     integrate_bits();
+
+    for (IdDictGroup* g : m_groups) {
+      g->build_region_tree();
+    }
 
     // Set neighbours for regions
     IdDictDictionary::regions_it itr;
@@ -272,18 +283,7 @@ IdDictDictionary::integrate_bits() {
   // for each FieldImplementation
 
   for (IdDictRegion* region : m_regions) {
-    size_t bits_offset = 0;
-    for (IdDictFieldImplementation& impl : region->m_implementation) {
-      impl.optimize(); // optimize for decoding
-      impl.set_bits_offset(bits_offset);
-      bits_offset += impl.bits();
-
-      // Set whether or not to decode index
-      Range::field field = impl.ored_field();
-      if ((not field.isBounded()) || (0 != field.get_minimum())) {
-        impl.set_decode_index(true);
-      }
-    }
+    region->integrate_bits();
   }
 }
 
@@ -318,11 +318,11 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
-      if (region.m_is_empty) continue;
+      if (region.is_empty()) continue;
 
       Range range(region.build_range());
       // Check region selection
@@ -334,11 +334,11 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
-      if (region.m_is_empty) continue;
+      if (region.is_empty()) continue;
 
       Range range(region.build_range());
       // Check region selection
@@ -347,16 +347,14 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
         // remove duplicate ranges with addRangeToMR
         Range new_range(prefix); // Prepend with prefix
 
-        std::vector <IdDictFieldImplementation>::const_iterator fit;
-        for (fit = region.m_implementation.begin();
-             fit != region.m_implementation.end();
-             ++fit) {
-          const IdDictFieldImplementation& impl = *fit;
+        size_t nimpl = region.n_implementation();
+        for (size_t i = 0; i < nimpl; ++i) {
+          const IdDictFieldImplementation& impl = region.implementation(i);
 
 //              new_range.add(impl.m_field);
           new_range.add(impl.range()->build_range());
 
-          if (last_field == impl.range()->m_field->m_name) {
+          if (last_field == impl.range()->field()->name()) {
             break;
           }
         }
@@ -381,11 +379,11 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
-      if (region.m_is_empty) continue;
+      if (region.is_empty()) continue;
 
       Range range(region.build_range());
       // Check region selection
@@ -397,11 +395,11 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
       const IdDictRegion& region = *(*it);
 
       // skip regions created from parents
-      if ("dummy" == region.m_name) continue;
+      if ("dummy" == region.name()) continue;
 
       // skip empty regions - may arise from alternate_regions
       // where a tag selects an empty region
-      if (region.m_is_empty) continue;
+      if (region.is_empty()) continue;
 
       Range range(region.build_range());
       // Check region selection
@@ -410,16 +408,14 @@ MultiRange IdDictDictionary::build_multirange(const ExpandedIdentifier& region_i
         // remove duplicate ranges with addRangeToMR
         Range new_range(prefix); // Prepend with prefix
 
-        std::vector <IdDictFieldImplementation>::const_iterator fit;
-        for (fit = region.m_implementation.begin();
-             fit != region.m_implementation.end();
-             ++fit) {
-          const IdDictFieldImplementation& impl = *fit;
+        size_t nimpl = region.n_implementation();
+        for (size_t i = 0; i < nimpl; ++i) {
+          const IdDictFieldImplementation& impl = region.implementation(i);
 
 //              new_range.add(impl.m_field);
           new_range.add(impl.range()->build_range());
 
-          if (last_field == impl.range()->m_field->m_name) {
+          if (last_field == impl.range()->field()->name()) {
             break;
           }
         }
@@ -485,12 +481,12 @@ IdDictDictionary::pack32(const ExpandedIdentifier& id,
 
     // Must skip empty regions - can arise when a tag selects an
     // empty region
-    if (region.m_is_empty) continue;
+    if (region.is_empty()) continue;
 
-    for (size_t i = 0; i < region.m_implementation.size(); ++i) {
+    for (size_t i = 0; i < region.n_implementation(); ++i) {
       if (i >= id.fields()) break;
 
-      const IdDictFieldImplementation& impl = region.m_implementation[i];
+      const IdDictFieldImplementation& impl = region.implementation(i);
 
       if (!impl.field().match(id[i])) {
         selected = false;
@@ -502,7 +498,7 @@ IdDictDictionary::pack32(const ExpandedIdentifier& id,
       size_t position = Identifier::NBITS;
       // We have the proper region.
       for (size_t i = index1; i <= index2; ++i) {
-        const IdDictFieldImplementation& impl = region.m_implementation[i];
+        const IdDictFieldImplementation& impl = region.implementation(i);
 
         Identifier::value_type index = impl.ored_field().get_value_index(id[i]);
 
@@ -551,7 +547,7 @@ IdDictDictionary::pack32(const int* fields,
   const IdDictRegion& region = *m_regions[region_index];
 
   if (m_do_checks) {
-    if (region.m_is_empty) {
+    if (region.is_empty()) {
       std::cout << "IdDictDictionary::pack32 - region id empty" << std::endl;
       // bad parameters.
       return(1);
@@ -566,13 +562,13 @@ IdDictDictionary::pack32(const int* fields,
   // Set the starting position
   size_t position = Identifier::NBITS;
   if (!first_field_index) {
-    const IdDictFieldImplementation& impl = region.m_implementation[index1];
+    const IdDictFieldImplementation& impl = region.implementation(index1);
     position -= impl.bits_offset();
   }
 
   size_t field_index = 0;
   for (size_t i = index1; i <= index2; ++i, ++field_index) {
-    const IdDictFieldImplementation& impl = region.m_implementation[i];
+    const IdDictFieldImplementation& impl = region.implementation(i);
 
     if (m_do_checks) {
       // Field should be within allowed range
@@ -636,7 +632,7 @@ int IdDictDictionary::reset(size_t index1,
   const IdDictRegion& region = *m_regions[region_index];
 
   if (m_do_checks) {
-    if (region.m_is_empty) {
+    if (region.is_empty()) {
       std::cout << "IdDictDictionary::pack32 - region id empty" << std::endl;
       // bad parameters.
       return(1);
@@ -645,7 +641,7 @@ int IdDictDictionary::reset(size_t index1,
 
   size_t field_index = 0;
   for (size_t i = index1; i <= index2; ++i, ++field_index) {
-    const IdDictFieldImplementation& impl = region.m_implementation[i];
+    const IdDictFieldImplementation& impl = region.implementation(i);
 
     size_t position = Identifier::NBITS - impl.bits_offset() - impl.bits();
 
@@ -659,310 +655,135 @@ int IdDictDictionary::reset(size_t index1,
 }
 
 /**
- *  Unpack the bits32 id to an expanded Identifier, considering the
- *  provided prefix (result will include the prefix)
+ *  Unpack the value_type id to an expanded Identifier for a given group,
+ *  considering the provided prefix (result will include the prefix)
+ *  and up to index2 - (index1 is assumed to be 0, i.e. part of prefix).
+ *
+ *  Returns 0 on success, nonzero on error.
  */
-#if defined(FLATTEN) && defined(__GNUC__)
-// We compile this package with optimization, even in debug builds; otherwise,
-// the heavy use of Eigen makes it too slow.  However, from here we may call
-// to out-of-line Eigen code that is linked from other DSOs; in that case,
-// it would not be optimized.  Avoid this by forcing all Eigen code
-// to be inlined here if possible.
-__attribute__ ((flatten))
-#endif
-int
-IdDictDictionary::unpack(const Identifier& id,
-                         const ExpandedIdentifier& prefix,
-                         size_t index2,
-                         ExpandedIdentifier& unpackedId) const {
-  ExpandedIdentifier localPrefix(prefix);
-
-  unpackedId.clear();
-  if (localPrefix.isValid()) unpackedId = localPrefix;
-
-  /**
-   *   First we need to check whether the specified identifier prefix
-   *   really matches the Dictionary specifications.
-   */
-
-  size_t index1 = 0;  // field index
-  size_t position = Identifier::NBITS; // overall bit position - used for debugging only
-
-  for (size_t k = 0; k < m_regions.size(); ++k) {
-    bool selected = false;
-
-    const IdDictRegion& region = *m_regions[k];
-
-    // Must skip empty regions - can arise when a tag selects an
-    // empty region
-    if (region.m_is_empty) continue;
-
-    for (size_t i = 0; i < region.m_implementation.size(); ++i) {
-      if (i >= localPrefix.fields()) {
-        /**
-         *   ok
-         *   we require that the region is at least as large as the prefix.
-         */
-        selected = true;
-        index1 = i;
-        break;
-      }
-
-      const IdDictFieldImplementation& impl = region.m_implementation[i];
-
-      if (!impl.field().match(localPrefix[i])) {
-        break;
-      }
-    }
-    if (!selected) {
-      continue;
-    }
-
-      /**
-       *   We have one region that matches the prefix.
-       *   Let's now try to expand the bits32 from the fields of the region
-       *   that are beyond the prefix.
-       */
-      for (size_t i = index1; i < region.m_implementation.size(); ++i) {
-        const IdDictFieldImplementation& impl = region.m_implementation[i];
-
-        if (impl.bits() == 0) continue;
-        Identifier::value_type mask = (static_cast<Identifier::value_type>(1) << impl.bits()) - 1;
-        if (position < impl.bits()) break;                                                 // Nothing more to get
-        size_t index = id.extract(position - impl.bits(), mask);
-
-        if (index >= impl.ored_field().get_indices()) {
-          /**
-           *  this index extracted from the bits32 does not seem to
-           * match this field in the region...
-           * Let's try another region
-           */
-
-          selected = false;
-          break;
-        }
-
-        ExpandedIdentifier::element_type value = impl.ored_field().get_value_at(index);
-
-        /**
-         *  this index extracted from the bits32 does not
-         * match this field in the region...
-         * Let's try another region
-         */
-
-        if (!impl.field().match(value)) {
-          selected = false;
-          break;
-        }
-
-
-
-        // Found value
-
-        unpackedId.add(value);
-        localPrefix.add(value);
-
-        position -= impl.bits(); // overall bit position
-
-
-
-        index1++;  // next field
-
-        if (index1 > index2) break; // quit at index2
-      }
-
-      if (selected) break;
+int IdDictDictionary::unpack(const std::string& group,
+                             const Identifier& id,
+                             const ExpandedIdentifier& prefix,
+                             size_t index2,
+                             ExpandedIdentifier& unpackedId) const
+{
+  const IdDictGroup* g = find_group (group);
+  int ret = 1;
+  if (g)  {
+    ret = g->unpack (id, prefix, index2, unpackedId);
   }
-
-  return(0);
+  return ret;
 }
 
 /**
- *  Unpack the bits32 id to a string, considering the provided
- *  prefix (result will include the prefix) and up to index2 -
- *  (index1 is assumed to be 0, i.e. part of prefix).
+ *  Unpack the value_type id to a string for a given group,
+ *  considering the provided prefix (result will include the prefix)
+ *  and up to index2 - (index1 is assumed to be 0, i.e. part of prefix).
+ *
+ *  Returns 0 on success, nonzero on error.
  */
-int
-IdDictDictionary::unpack(const Identifier& id,
-                         const ExpandedIdentifier& prefix,
-                         size_t index2,
-                         const std::string& sep,
-                         std::string& unpackedId) const {
-  ExpandedIdentifier localPrefix(prefix);
+int IdDictDictionary::unpack(const std::string& group,
+                             const Identifier& id,
+                             const ExpandedIdentifier& prefix,
+                             size_t index2,
+                             const std::string& sep,
+                             std::string& unpackedId) const
+{
+  const IdDictGroup* g = find_group (group);
+  ExpandedIdentifier unpacked;
+  std::vector<const IdDictFieldImplementation*> impls;
+  int ret = 1;
+  if (g) {
+    ret = g->unpack (id, prefix, index2, unpacked, &impls);
+  }
+  if (ret == 0) {
+    assert (unpacked.fields() == impls.size());
+    for (size_t i = 0; i < unpacked.fields(); ++i) {
+      // Add value to string
 
+      std::string str_value("nil");
+      char temp[20];
 
-  /**
-   *   First we need to check whether the specified identifier prefix
-   *   really matches the Dictionary specifications.
-   */
+      const IdDictFieldImplementation& impl = *impls[i];
+      ExpandedIdentifier::element_type value = unpacked[i];
 
-  size_t index1 = 0;  // field index
-  size_t position = Identifier::NBITS; // overall bit position - used for debugging only
-
-  for (size_t k = 0; k < m_regions.size(); ++k) {
-    bool selected = false;
-
-    const IdDictRegion& region = *m_regions[k];
-
-    // Must skip empty regions - can arise when a tag selects an
-    // empty region
-    if (region.m_is_empty) continue;
-
-//      for (size_t i = index1; i < region.m_implementation.size (); ++i)
-    for (size_t i = 0; i < region.m_implementation.size(); ++i) {
-      if (i >= localPrefix.fields()) {
-        /**
-         *   ok
-         *   we require that the region is at least as large as the prefix.
-         */
-        selected = true;
-        index1 = i;
+      // The policy below is:
+      //   - if a value is a character string or name, just add this name
+      //   - if a value is a number, then prefix it with the
+      //     name of the field
+      //
+      // NOTE: min/max is a number, but for value/label we
+      // distinguish between number and name by looking for an IdDictLabel
+      const IdDictRange* range = impl.range();
+      const IdDictLabel* label = range->field()->find_label(range->label());
+      switch (range->specification()) {
+      case IdDictRange::by_minmax:
+        // For a range of values (numbers), add in the field name
+        str_value = range->field()->name() + ' ';
+        sprintf(temp, "%d", value);
+        str_value += temp;
         break;
-      }
 
-      const IdDictFieldImplementation& impl = region.m_implementation[i];
-
-      if (!impl.field().match(localPrefix[i])) {
+      case IdDictRange::by_value:
+      case IdDictRange::by_label:
+        str_value = "";
+        if (!label) {
+          // Is a number, add in field name
+          str_value += range->field()->name() + ' ';
+        }
+        str_value += range->label();
         break;
-      }
-    }
 
-    if (selected) {
-      /**
-       *   We have one region that matches the prefix.
-       *   Let's now try to expand the bits32 from the fields of the region
-       *   that are beyond the prefix.
-       */
-
-//               bits32 temp = id;
-
-//        std::cout << "Region #" << region.m_index << " selected" << std::endl;
-
-      for (size_t i = index1; i < region.m_implementation.size(); ++i) {
-        const IdDictFieldImplementation& impl = region.m_implementation[i];
-
-        if (impl.bits() == 0) continue;
-
-        Identifier::value_type mask = (static_cast<Identifier::value_type>(1) << impl.bits()) - 1;
-
-        if (position < impl.bits()) break;                                               // Nothing more to get
-        size_t index = id.extract(position - impl.bits(), mask);
-
-        if (index >= impl.ored_field().get_indices()) {
-          selected = false;
-          break;
-        }
-
-        ExpandedIdentifier::element_type value = impl.ored_field().get_value_at(index);
-
-        /**
-         *  this index extracted from the bits32 does not
-         * match this field in the region...
-         * Let's try another region
-         */
-
-        if (!impl.field().match(value)) {
-          selected = false;
-          break;
-        }
-
-
-        // Add value to string
-
-        std::string str_value("nil");
-        char temp[20];
-
-        // The policy below is:
-        //   - if a value is a character string or name, just add this name
-        //   - if a value is a number, then prefix it with the
-        //     name of the field
-        //
-        // NOTE: min/max is a number, but for value/label we
-        // distinguish between number and name by looking for an IdDictLabel
-        const IdDictRange* range = impl.range();
-        IdDictLabel* label = range->m_field->find_label(range->m_label);
-        switch (range->m_specification) {
-        case IdDictRange::by_minmax:
-          // For a range of values (numbers), add in the field name
-          str_value = range->m_field->m_name + ' ';
-          sprintf(temp, "%d", value);
-          str_value += temp;
-          break;
-
-        case IdDictRange::by_value:
-        case IdDictRange::by_label:
-          str_value = "";
-          if (!label) {
-            // Is a number, add in field name
-            str_value += range->m_field->m_name + ' ';
+      case IdDictRange::by_values:
+      case IdDictRange::by_labels:
+        str_value = "";
+        // Is a name
+        if (label) {
+          // Found label with "find_label" on the field
+          if (label->valued()) {
+            str_value += range->label();
           }
-          str_value += range->m_label;
-          break;
+        } else {
+          // If not found with the "find" above, we must
+          // get the value and name from the range
+          // itself.
 
-        case IdDictRange::by_values:
-        case IdDictRange::by_labels:
-          str_value = "";
-          // Is a name
-          if (label) {
-            // Found label with "find_label" on the field
-            if (label->m_valued) {
-              str_value += range->m_label;
+          unsigned int index1 = 0;
+          for (int v : range->values()) {
+            if (value == v) break;
+            ++index1;
+          }
+
+          if (index1 < range->labels().size()) {
+            if (isNumber(range->labels()[index1])) {
+              str_value += range->field()->name() + ' ';
             }
+            str_value += range->labels()[index1];
           } else {
-            // If not found with the "find" above, we must
-            // get the value and name from the range
-            // itself.
-
-            unsigned int index1 = 0;
-            for (; index1 < range->m_values.size(); ++index1) {
-              if (value == range->m_values[index1]) {
-                break;
-              }
+            std::cout << "IdDictDictionary::unpack - Could not find value." << std::endl;
+            std::cout << "value " << value << std::endl;
+            std::cout << "field values " << std::endl;
+            for (int v : range->values()) {
+              std::cout << v << " ";
             }
-
-            // In some cases we
-            if (index1 < range->m_labels.size()) {
-              if (isNumber(range->m_labels[index1])) {
-                str_value += range->m_field->m_name + ' ';
-              }
-              str_value += range->m_labels[index1];
-            } else {
-              std::cout << "IdDictDictionary::unpack - Could not find value." << std::endl;
-              std::cout << "value " << value << std::endl;
-              std::cout << "field values " << std::endl;
-              for (unsigned int i = 0; i < range->m_values.size(); ++i) {
-                std::cout << range->m_values[i] << " ";
-              }
-              std::cout << std::endl;
-            }
+            std::cout << std::endl;
           }
-          break;
-
-        case IdDictRange::unknown:
-
-          std::cout << "unknown" << std::endl;
-
-          break;
         }
+        break;
 
+      case IdDictRange::unknown:
 
-        if (index1) unpackedId += sep;
-        unpackedId += str_value;
-        localPrefix.add(value);
+        std::cout << "unknown" << std::endl;
 
-        position -= impl.bits(); // overall bit position
-
-
-
-        index1++;  // next field
-
-        if (index1 > index2) break; // quit at index2
+        break;
       }
-      if (selected) break;
+
+      if (i > 0) unpackedId += sep;
+      unpackedId += str_value;
     }
   }
 
-  return(0);
+  return ret;
 }
 
 /**
@@ -994,15 +815,15 @@ IdDictDictionary::unpack(const Identifier& id,
 
   if (m_do_checks) {
     // check number of fields
-    if (field_index >= region.m_implementation.size()) {
+    if (field_index >= region.n_implementation()) {
       std::cout << "IdDictDictionary::unpack - field index too large. Index, nfields "
-                << field_index << " " << region.m_implementation.size()
+                << field_index << " " << region.n_implementation()
                 << std::endl;
       return(1);
     }
   }
 
-  const IdDictFieldImplementation& impl = region.m_implementation.at(field_index);
+  const IdDictFieldImplementation& impl = region.implementation(field_index);
   size_t prefix_offset = 0;
 
   size_t position = Identifier::NBITS; // overall bit position
@@ -1010,16 +831,16 @@ IdDictDictionary::unpack(const Identifier& id,
   // One or more fields missing from prefix, get the offset
   if (first_field_index) {
     if (m_do_checks) {
-      if (first_field_index >= region.m_implementation.size()) {
+      if (first_field_index >= region.n_implementation()) {
         std::cout << "IdDictDictionary::unpack - first_field_index too large. Index, nfields "
-                  << first_field_index << " " << region.m_implementation.size()
+                  << first_field_index << " " << region.n_implementation()
                   << std::endl;
         return(1);
       }
     }
 
     // One or more fields missing from prefix, get the offset
-    prefix_offset = region.m_implementation[first_field_index].bits_offset();
+    prefix_offset = region.implementation(first_field_index).bits_offset();
 
     if (m_do_checks) {
       // Should have a non-zero number of bits
@@ -1076,14 +897,14 @@ IdDictDictionary::copy(const Identifier& idin,
 
   const IdDictRegion& region = *m_regions[region_index];
 
-  if (first_field_index >= region.m_implementation.size() ||
-      begin_field_index >= region.m_implementation.size() ||
-      end_field_index >= region.m_implementation.size()) {
+  if (first_field_index >= region.n_implementation() ||
+      begin_field_index >= region.n_implementation() ||
+      end_field_index >= region.n_implementation()) {
     std::cout << "IdDictDictionary::copy - field index too large. Indexes first, begin, end, nfields "
               << first_field_index << " "
               << begin_field_index << " "
               << end_field_index << " "
-              << region.m_implementation.size()
+              << region.n_implementation()
               << std::endl;
     return(1);
   }
@@ -1096,7 +917,7 @@ IdDictDictionary::copy(const Identifier& idin,
       return(1);
     }
     // One or more fields missing from prefix, get the offset
-    missing_offset = region.m_implementation[first_field_index].bits_offset();
+    missing_offset = region.implementation(first_field_index).bits_offset();
   }
 
   size_t prefix_offset = 0;
@@ -1107,10 +928,10 @@ IdDictDictionary::copy(const Identifier& idin,
       return(1);
     }
     // One or more fields missing from prefix, get the offset
-    prefix_offset = region.m_implementation[begin_field_index].bits_offset();
+    prefix_offset = region.implementation(begin_field_index).bits_offset();
   }
 
-  const IdDictFieldImplementation& impl = region.m_implementation[end_field_index];
+  const IdDictFieldImplementation& impl = region.implementation(end_field_index);
   size_t suffix_offset = impl.bits() + impl.bits_offset();
 
   size_t position = Identifier::NBITS; // overall bit position
@@ -1264,4 +1085,16 @@ void IdDictDictionary::clear() {
 
     m_groups.clear();
   }
+}
+
+
+void
+IdDictDictionary::dump() const
+{
+  std::cout << "=== IdDictDictionary " << m_name << " " << m_version << " "
+            << m_date << " " << m_author << "\n";
+  for (const IdDictGroup* g : m_groups) {
+    g->dump();
+  }
+  std::cout.flush();
 }

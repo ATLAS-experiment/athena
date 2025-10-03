@@ -33,12 +33,23 @@ RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name)
   declareProperty("UseCalibDecorations", m_forceUseCalibDecorations, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values");
 }
 
-StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key) {
-  readHandleKey = containerName + key + m_auxSuffix;
+// nominally, aux suffix is added to read key, since upstream tools were probably configured to write decorations with the same suffix
+// however, certain decorations remain unchanged in a reprocessing (e.g., those written by ZdcRecChannelToolLucrod), in which case the suffix should not be added
+StatusCode RpdSubtractCentroidTool::initializeReadKey(
+  std::string const& containerName,
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey,
+  std::string const& key,
+  bool const addSuffix = true
+) {
+  std::string sgkey = containerName + key;
+  if (addSuffix) {
+    sgkey += m_auxSuffix;
+  }
+  readHandleKey = sgkey;
   return readHandleKey.initialize();
 }
 
-StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
+StatusCode RpdSubtractCentroidTool::initializeWriteKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
   writeHandleKey = containerName + key + m_auxSuffix;
   return writeHandleKey.initialize();
 }
@@ -112,44 +123,44 @@ StatusCode RpdSubtractCentroidTool::initialize() {
   ATH_CHECK(m_eventInfoKey.initialize());
 
   // zdc modules read keys
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_xposRelKey, ".xposRel"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_yposRelKey, ".yposRel"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_rowKey, ".row"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_colKey, ".col"));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_xposRelKey, ".xposRel", false));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_yposRelKey, ".yposRel", false));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_rowKey, ".row", false));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_colKey, ".col", false));
 
   if (m_readZDCDecorations) {
-    ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_ZDCModuleCalibEnergyKey, ".CalibEnergy"));
-    ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_ZDCModuleStatusKey, ".Status"));
+    ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_ZDCModuleCalibEnergyKey, ".CalibEnergy"));
+    ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_ZDCModuleStatusKey, ".Status"));
   }
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeKey, ".RPDChannelAmplitude"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeCalibKey, ".RPDChannelAmplitudeCalib"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCKey, ".RPDChannelMaxADC"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCCalibKey, ".RPDChannelMaxADCCalib"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelPileupFracKey, ".RPDChannelPileupFrac"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelStatusKey, ".RPDChannelStatus"));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeKey, ".RPDChannelAmplitude"));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeCalibKey, ".RPDChannelAmplitudeCalib"));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCKey, ".RPDChannelMaxADC"));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCCalibKey, ".RPDChannelMaxADCCalib"));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_RPDChannelPileupFracKey, ".RPDChannelPileupFrac"));
+  ATH_CHECK(initializeReadKey(m_ZDCModuleContainerName, m_RPDChannelStatusKey, ".RPDChannelStatus"));
 
   // zdc sums read keys
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDSideStatusKey, ".RPDStatus"));
+  ATH_CHECK(initializeReadKey(m_ZDCSumContainerName, m_RPDSideStatusKey, ".RPDStatus"));
   if (m_readZDCDecorations) {
-    ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_ZDCFinalEnergyKey, ".FinalEnergy"));
-    ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_ZDCStatusKey, ".Status"));
+    ATH_CHECK(initializeReadKey(m_ZDCSumContainerName, m_ZDCFinalEnergyKey, ".FinalEnergy"));
+    ATH_CHECK(initializeReadKey(m_ZDCSumContainerName, m_ZDCStatusKey, ".Status"));
   }
 
   // zdc sums write keys
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_centroidEventValidKey, ".centroidEventValid"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_centroidStatusKey, ".centroidStatus"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDChannelSubtrAmpKey, ".RPDChannelSubtrAmp"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDSubtrAmpSumKey, ".RPDSubtrAmpSum"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xCentroidPreGeomCorPreAvgSubtrKey, ".xCentroidPreGeomCorPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yCentroidPreGeomCorPreAvgSubtrKey, ".yCentroidPreGeomCorPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xCentroidPreAvgSubtrKey, ".xCentroidPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yCentroidPreAvgSubtrKey, ".yCentroidPreAvgSubtr"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xCentroidKey, ".xCentroid"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yCentroidKey, ".yCentroid"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_xRowCentroidKey, ".xRowCentroid"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_yColCentroidKey, ".yColCentroid"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_reactionPlaneAngleKey, ".reactionPlaneAngle"));
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_cosDeltaReactionPlaneAngleKey, ".cosDeltaReactionPlaneAngle"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_centroidEventValidKey, ".centroidEventValid"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_centroidStatusKey, ".centroidStatus"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_RPDChannelSubtrAmpKey, ".RPDChannelSubtrAmp"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_RPDSubtrAmpSumKey, ".RPDSubtrAmpSum"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_xCentroidPreGeomCorPreAvgSubtrKey, ".xCentroidPreGeomCorPreAvgSubtr"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_yCentroidPreGeomCorPreAvgSubtrKey, ".yCentroidPreGeomCorPreAvgSubtr"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_xCentroidPreAvgSubtrKey, ".xCentroidPreAvgSubtr"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_yCentroidPreAvgSubtrKey, ".yCentroidPreAvgSubtr"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_xCentroidKey, ".xCentroid"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_yCentroidKey, ".yCentroid"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_xRowCentroidKey, ".xRowCentroid"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_yColCentroidKey, ".yColCentroid"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_reactionPlaneAngleKey, ".reactionPlaneAngle"));
+  ATH_CHECK(initializeWriteKey(m_ZDCSumContainerName, m_cosDeltaReactionPlaneAngleKey, ".cosDeltaReactionPlaneAngle"));
 
   if (m_writeAux && !m_auxSuffix.empty()) {
     ATH_MSG_DEBUG("suffix string = " << m_auxSuffix);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -17,9 +17,7 @@
 #include "TrkTruthTPCnv/TrackTruthCollectionCnv_p1.h"
 #include "TrkTruthTPCnv/TrackTruthCollectionCnv_p0.h"
 
-namespace Trk { class TrackTruthCollection_p2; }
-
-typedef Trk::TrackTruthCollection_p2 TrackTruthCollectionPERS;
+typedef Trk::TrackTruthCollection_p3 TrackTruthCollectionPERS;
 
 typedef T_AthenaPoolCustomCnv<TrackTruthCollection, TrackTruthCollectionPERS> TrackTruthCollectionCnvBase;
 

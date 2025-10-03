@@ -14,13 +14,13 @@ main()
 
   // Let's use the expansion of the exponential function
   // and approximate e-1 = 1/e
-  std::array<double, 1> expPoly0{ 1. };
-  std::array<double, 2> expPoly1{ 1., 1. };
-  std::array<double, 3> expPoly2{ 1 / 2., 1., 1. };
-  std::array<double, 4> expPoly3{ 1 / 6., 1 / 2., 1., 1. };
-  std::array<double, 5> expPoly4{ 1. / 24., 1 / 6., 1 / 2., 1., 1. };
-  std::array<double, 6> expPoly5{ 1. / 120., 1. / 24., 1 / 6., 1 / 2., 1., 1.};
-  std::array<double, 7> expPoly6{ 1. / 720., 1. / 120., 1. / 24., 1 / 6., 1 / 2., 1., 1.};
+  constexpr std::array<double, 1> expPoly0{ 1. };
+  constexpr std::array<double, 2> expPoly1{ 1., 1. };
+  constexpr std::array<double, 3> expPoly2{ 1 / 2., 1., 1. };
+  constexpr std::array<double, 4> expPoly3{ 1 / 6., 1 / 2., 1., 1. };
+  constexpr std::array<double, 5> expPoly4{ 1. / 24., 1 / 6., 1 / 2., 1., 1. };
+  constexpr std::array<double, 6> expPoly5{ 1. / 120., 1. / 24., 1 / 6., 1 / 2., 1., 1.};
+  constexpr std::array<double, 7> expPoly6{ 1. / 720., 1. / 120., 1. / 24., 1 / 6., 1 / 2., 1., 1.};
 
   std::cout << "Approximating e^-1 = "<< 1 / M_E << '\n';
   std::cout <<"0th "<< hornerEvaluate(expPoly0, -1) << " vs " << 1. << '\n';

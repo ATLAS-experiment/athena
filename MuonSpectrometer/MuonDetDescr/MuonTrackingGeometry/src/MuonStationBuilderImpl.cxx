@@ -158,7 +158,7 @@ void MuonStationBuilderImpl::glueComponents(Trk::DetachedTrackingVolume* stat) c
         return;
     }
 
-    Trk::BinnedArraySpan<Trk::TrackingVolume* const> components =  volArray->arrayObjects();
+    std::span<Trk::TrackingVolume* const> components =  volArray->arrayObjects();
     const Trk::BinUtility* binUtilityX = volArray->binUtility();
     const Trk::CuboidVolumeBounds* cubVolBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(components[0]->volumeBounds()));
 
@@ -301,7 +301,7 @@ void MuonStationBuilderImpl::identifyLayers(
                 ATH_MSG_DEBUG("wrong tgcROE?" << stationStr << "," << etaSt
                                               << "," << phiSt);
             if (assocVol && assocVol->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer* const> layers =
+                std::span<Trk::Layer* const> layers =
                     assocVol->confinedLayers()->arrayObjects();
 
                 for (unsigned int il = 0; il < layers.size(); il++) {
@@ -332,11 +332,11 @@ void MuonStationBuilderImpl::identifyLayers(
         const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
         const int nameIndex = idHelper.stationNameIndex(stationName.substr(0, 3));
         if (station->trackingVolume()->confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> cVols =
+            std::span<Trk::TrackingVolume* const> cVols =
                 station->trackingVolume()->confinedVolumes()->arrayObjects();
             for (auto* cVol : cVols) {
                 if (cVol->confinedLayers()) {
-                    Trk::BinnedArraySpan<Trk::Layer* const> cLays = cVol->confinedLayers()->arrayObjects();
+                    std::span<Trk::Layer* const> cLays = cVol->confinedLayers()->arrayObjects();
                     const MuonGM::MdtReadoutElement* mdtROE = nullptr;
                     bool is_valid{false};
 
@@ -397,11 +397,11 @@ void MuonStationBuilderImpl::identifyLayers(
     }
     // by now, all the layers should be identified - verify
     if (station->trackingVolume()->confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume* const> cVols =
+        std::span<Trk::TrackingVolume* const> cVols =
             station->trackingVolume()->confinedVolumes()->arrayObjects();
         for (auto* cVol : cVols) {
             if (cVol->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer* const> cLays =
+                std::span<Trk::Layer* const> cLays =
                     cVol->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
@@ -434,7 +434,7 @@ void MuonStationBuilderImpl::identifyLayers(
         }
     }
     if (station->trackingVolume()->confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer* const> cLays =
+        std::span<Trk::Layer* const> cLays =
             station->trackingVolume()->confinedLayers()->arrayObjects();
         for (unsigned int il = 0; il < cLays.size(); il++) {
             Identifier id(cLays[il]->layerType());
@@ -455,7 +455,7 @@ void MuonStationBuilderImpl::identifyNSWLayers(Trk::DetachedTrackingVolume& stat
 
 
     if (!station.trackingVolume()->confinedLayers()) return;
-    Trk::BinnedArraySpan<Trk::Layer* const> lays = station.trackingVolume()->confinedLayers()->arrayObjects();
+    std::span<Trk::Layer* const> lays = station.trackingVolume()->confinedLayers()->arrayObjects();
     const bool isStgc{station.name().substr(0, 4) == "sTGC"};
     const bool isMm{station.name().substr(0, 2) == "MM"};
     if (!isMm && !isStgc) return;
@@ -519,7 +519,7 @@ void MuonStationBuilderImpl::identifyPrototype(Trk::TrackingVolume& station, int
         // RPC ?
         Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = station.confinedVolumes();
         if (confinedVolumes) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = confinedVolumes->arrayObjects();
+            std::span<Trk::TrackingVolume* const> vols = confinedVolumes->arrayObjects();
             for (auto* vol : vols) {
                 if (!m_idHelperSvc->hasRPC() || vol->volumeName() != "RPC") {
                     break;
@@ -606,10 +606,10 @@ void MuonStationBuilderImpl::identifyPrototype(Trk::TrackingVolume& station, int
 
     // by now, all the layers should be identified - verify
     if (station.confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume* const> cVols = station.confinedVolumes()->arrayObjects();
+        std::span<Trk::TrackingVolume* const> cVols = station.confinedVolumes()->arrayObjects();
         for (auto* cVol : cVols) {
             if (cVol->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer* const> cLays = cVol->confinedLayers()->arrayObjects();
+                std::span<Trk::Layer* const> cLays = cVol->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
                     if (id == 1) {
@@ -629,7 +629,7 @@ void MuonStationBuilderImpl::identifyPrototype(Trk::TrackingVolume& station, int
         }
     }
     if (station.confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer* const> cLays = station.confinedLayers()->arrayObjects();
+        std::span<Trk::Layer* const> cLays = station.confinedLayers()->arrayObjects();
         for (unsigned int il = 0; il < cLays.size(); il++) {
             Identifier id(cLays[il]->layerType());
             if (id == 1) {
@@ -991,16 +991,16 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
             auto layerRepr = m_muonStationTypeBuilder->createLayerRepresentation(*csc_station);
             // create prototype as detached tracking volume
             auto layerVec = std ::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
-            typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, csc_station.release(),
-                                                                     layerRepr.first.release(), layerVec.release());
+            typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, std::move(csc_station),
+                                                                     std::move(layerRepr.first), std::move(layerVec));
         } else {
             std::unique_ptr<Trk::TrackingVolume> tgc_station{m_muonStationTypeBuilder->processTgcStation(cv, cache)};
             // create layer representation
             auto layerRepr =  m_muonStationTypeBuilder->createLayerRepresentation(*tgc_station);
             // create prototype as detached tracking volume
             auto layerVec = std ::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
-            typeStat =  std::make_unique<Trk::DetachedTrackingVolume>(stname, tgc_station.release(),
-                                                                      layerRepr.first.release(), layerVec.release());
+            typeStat =  std::make_unique<Trk::DetachedTrackingVolume>(stname, std::move(tgc_station),
+                                                                      std::move(layerRepr.first), std::move(layerVec));
         }
 
     } else {
@@ -1074,9 +1074,9 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
                 std::unique_ptr<Trk::TrackingVolume> newType{};
                 if (!confinedLayers.empty()) {
                     auto confinedLayerPtr = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(confinedLayers));
-                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, confinedLayerPtr.release(), stname);
+                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, std::move(confinedLayerPtr), stname);
                 } else {
-                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, nullptr, confinedVolumes.release(), stname);
+                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, nullptr, std::move(confinedVolumes), stname);
                 }
 
 
@@ -1089,8 +1089,9 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetect
 
                 // create prototype as detached tracking volume
                 auto layerVec = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
-                typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, newType.release(),
-                                                                         layerRepr.first.release(), layerVec.release());
+                typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, std::move(newType),
+                                                                         std::move(layerRepr.first),
+                                                                         std::move(layerVec));
             }
         }
     }  // end new station type

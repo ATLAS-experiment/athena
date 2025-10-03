@@ -48,7 +48,7 @@ def _getClassIfDictionaryExists (cname):
 # Force-load the main Gaudi library if it's available. If this package's library
 # is loaded before Gaudi, the application gets into a weird state. Hopefully we
 # will be able to remove this with future compiler versions. (GCC 10?...)
-if cppyy.gbl.gSystem.FindDynamicLibrary( 'libGaudiKernel', True ):
+if cppyy.gbl.gSystem.FindDynamicLibrary( cppyy.gbl.TString('libGaudiKernel'), True ):
     cppyy.load_library( 'libGaudiKernel' )
     pass
 

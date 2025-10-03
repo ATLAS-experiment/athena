@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s)
@@ -58,10 +58,10 @@ StatusCode VTuneAuditor::initialize()
 /*
  * Implementation of base class methods
  */
-void VTuneAuditor::before( StandardEventType etype, INamedInterface* component ) {
+void VTuneAuditor::before( const std::string& event, const std::string& name, const EventContext& ) {
 
   for( auto& val : m_algs ) {
-    if ( etype == StandardEventType::Execute && component->name() == val ) {
+    if ( event == IAuditor::Execute && name == val ) {
       if ( m_vtuneProfilerSvc->resumeProfiling().isFailure() ) {
         msgStream() << MSG::ERROR
                     << "Could not resume the profiling from the auditor"
@@ -74,10 +74,11 @@ void VTuneAuditor::before( StandardEventType etype, INamedInterface* component )
 
 }
 
-void VTuneAuditor::after( StandardEventType etype, INamedInterface* component, const StatusCode& ) {
+void VTuneAuditor::after( const std::string& event, const std::string& name, const EventContext&,
+                          const StatusCode& ) {
 
   for( auto& val : m_algs ) {
-    if ( etype == StandardEventType::Execute && component->name() == val ) {
+    if ( event == IAuditor::Execute && name == val ) {
       if ( m_vtuneProfilerSvc->pauseProfiling().isFailure() ) {
         msgStream() << MSG::ERROR
                     << "Could not pause the profiling from the auditor"

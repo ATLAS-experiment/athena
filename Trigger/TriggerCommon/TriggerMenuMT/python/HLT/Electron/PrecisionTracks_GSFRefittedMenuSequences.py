@@ -37,7 +37,7 @@ def precisionTracks_GSFRefittedSequenceGenCfg(flags, name='Electron', ion=False,
     thePrecisionTrack_GSFRefittedHypo = CompFactory.TrigStreamerHypoAlg(name + tag(ion) + "Hypo" + variant)
     thePrecisionTrack_GSFRefittedHypo.FeatureIsROI = False
     selAcc.addHypoAlgo(thePrecisionTrack_GSFRefittedHypo)
-    def acceptAllHypoToolGen(chainDict):
+    def acceptAllHypoToolGen(flags, chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
     return MenuSequence(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
 

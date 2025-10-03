@@ -4,7 +4,6 @@
 # @author: Wim Lavrijsen <WLavrijsen@lbl.gov>
 # @author: Sebastien Binet <binet@cern.ch>
 
-from __future__ import print_function
 
 ### data
 __author__  = """

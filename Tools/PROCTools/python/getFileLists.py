@@ -225,7 +225,7 @@ class findTCTFiles:
             self.getCommonChains()
         #print (self._commonDirs)
         
-        for (name,(ref,val)) in six.iteritems (self._commonDirs):
+        for (name,(ref,val)) in self._commonDirs.items():
             reffiles=self.findFilesInDir(ref.directory,pattern)
             valfiles=self.findFilesInDir(val.directory,pattern)
 

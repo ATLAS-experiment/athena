@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBTAGEMULATION_JET_H
@@ -16,12 +16,13 @@ namespace Trig {
 
 class TrigBtagEmulationJet {
 public:
-  TrigBtagEmulationJet() = delete;
-  TrigBtagEmulationJet(const xAOD::Jet&, 
-		       const std::string& btagLink = "btaggingLink");
+  TrigBtagEmulationJet();
+  TrigBtagEmulationJet(const xAOD::Jet&, const std::string& btagLink = "btaggingLink");
+  TrigBtagEmulationJet(const xAOD::Jet&, const xAOD::BTagging* btag);
   virtual ~TrigBtagEmulationJet() = default;
   
   double pt() const;
+  double et() const;
   double eta() const;
   double phi() const;
   float jvt() const;
@@ -31,7 +32,7 @@ public:
   
   bool satisfy(const std::string& tagger_name,
 	       double workingPoint) const;
-  
+
 private:
   double dl1r_weight(double pu, double pb, double pc) const;
   
@@ -40,6 +41,7 @@ private:
   const xAOD::BTagging *m_btag = nullptr;
   
   double m_pt;
+  double m_et;
   double m_eta;    
   double m_phi;
   double m_dl1r_cFrac = 0.018;
@@ -47,6 +49,7 @@ private:
 };
 
  inline double TrigBtagEmulationJet::pt() const { return m_pt; }
+ inline double TrigBtagEmulationJet::et() const { return m_et; }
  inline double TrigBtagEmulationJet::eta() const  { return m_eta; };
  inline double TrigBtagEmulationJet::phi() const { return m_phi; }
  inline float TrigBtagEmulationJet::jvt() const {

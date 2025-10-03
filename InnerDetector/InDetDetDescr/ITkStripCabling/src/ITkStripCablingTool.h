@@ -1,5 +1,3 @@
-// -*- C++ -*-
-
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
@@ -13,7 +11,6 @@
  * @author Shaun Roe
  * @author Edson Carquin
  * @author Daniel Torres
- * @date 06 March, 2025
  **/
 
 #include "ITkStripCabling/IITkStripCablingTool.h"
@@ -43,7 +40,7 @@ class ITkStripCablingTool: public extends<AthAlgTool, IITkStripCablingTool> {
 
   //@name Tool methods, reimplemented
   //@{
-  ITkStripCablingTool(const std::string& type, const std::string& name, const IInterface* parent);
+  using base_class::base_class;
   virtual ~ITkStripCablingTool() = default;
   virtual StatusCode initialize() override;
   //@}
@@ -51,6 +48,8 @@ class ITkStripCablingTool: public extends<AthAlgTool, IITkStripCablingTool> {
   //@name ITkStripCablingTool methods implemented, these are visible to clients
   //@{
   
+  virtual IdentifierHash getHashFromOnlineId(const ITkStripOnlineId& onlineId, const EventContext& ctx, const bool withWarnings = true) const override;
+
   /// return the online Id, given a hash (used by simulation encoders)
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const override;
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash) const override;    
@@ -67,9 +66,10 @@ class ITkStripCablingTool: public extends<AthAlgTool, IITkStripCablingTool> {
 
  private:
   SG::ReadCondHandleKey<ITkStripCablingData> m_data{this, "ITkStripCablingData", "ITkStripCablingData", "ITkStripCablingData created by ITkStripCablingCondAlgFromCoraCool"};
-  StringProperty m_cablingDataSource; //!< the name of the data source
+  StringProperty m_cablingDataSource{this, "DataSource", "", "the name of the data source"};
+  bool m_usingDatabase{true};
+
   const SCT_ID* m_idHelper{nullptr}; //!< helper for offlineId/hash conversions
-  BooleanProperty m_usingDatabase{true};
 
   const ITkStripCablingData* getData(const EventContext& ctx) const;
 };

@@ -11,7 +11,7 @@ atlas_add_component( ActsPrdAssociation
    LINK_LIBRARIES
    AthenaBaseComps
    GaudiKernel
-   ActsCore
+   Acts::Core
    ActsEventLib
    ActsGeometryLib
    )

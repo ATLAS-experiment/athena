@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODCnv.cxx 
@@ -114,7 +114,7 @@ StatusCode xAODCnv::initialize()
   ATH_MSG_VERBOSE("loaded dictionary for clid ["
                   << this->objType() << "]: name=["
                   << ty.Name() << "]");
-  m_type = ty;
+  m_type = std::move(ty);
 
   ATH_MSG_DEBUG("converter correctly initialized - clid=[" << objType() << "]");
   return StatusCode::SUCCESS;

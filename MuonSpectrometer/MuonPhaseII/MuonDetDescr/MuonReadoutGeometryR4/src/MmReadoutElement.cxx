@@ -5,7 +5,6 @@
 
 
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
-#include <ActsGeoUtils/SurfaceBoundSet.h>
 
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
@@ -42,10 +41,11 @@ StatusCode MmReadoutElement::initElement() {
        return StatusCode::FAILURE;
     }
 #ifndef SIMULATIONBASE
-    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfShortWidth, 
-                                                                                      m_pars.halfLongWidth, 
-                                                                                      m_pars.halfHeight,
-                                                                                      90.*Gaudi::Units::deg)));
+    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), 
+                m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(m_pars.halfShortWidth, 
+                                                                      m_pars.halfLongWidth, 
+                                                                      m_pars.halfHeight,
+                                                                      90.*Gaudi::Units::deg)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -57,10 +57,11 @@ StatusCode MmReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
       const StripDesign& design{m_pars.layers[layer]->design()};
 
-      ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.shortHalfHeight(),
-                                                                             design.longHalfHeight(),
-                                                                             design.halfWidth(),
-                                                                             90.*Gaudi::Units::deg - design.stereoAngle())));
+      ATH_CHECK(planeSurfaceFactory(layHash, 
+            m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(design.shortHalfHeight(),
+                                                                  design.longHalfHeight(),
+                                                                  design.halfWidth(),
+                                                                  90.*Gaudi::Units::deg + design.stereoAngle())));
 #endif
     }
 #ifndef SIMULATIONBASE

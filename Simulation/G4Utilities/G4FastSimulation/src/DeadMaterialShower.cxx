@@ -16,8 +16,8 @@
 #include "G4PionPlus.hh"
 #include "G4PionMinus.hh"
 
-DeadMaterialShower::DeadMaterialShower(const std::string& name, const double& highEnergy, const double& lowEnergy, const double& zcutoff)
-  : G4VFastSimulationModel(name),
+DeadMaterialShower::DeadMaterialShower(const std::string& name, G4Region* region, const double& highEnergy, const double& lowEnergy, const double& zcutoff)
+  : G4VFastSimulationModel(name, region),
     m_highEnergy(highEnergy),
     m_lowEnergy(lowEnergy),
     m_zcutoff(zcutoff)

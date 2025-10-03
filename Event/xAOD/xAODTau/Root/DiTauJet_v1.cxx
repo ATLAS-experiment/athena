@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DiTauJet_v1.cxx 631921 2015-09-23 23:30:59Z dkirchme $
@@ -10,7 +10,6 @@
 
 // Local include(s):
 #include "xAODTau/versions/DiTauJet_v1.h"
-// #include "xAODDiTau/versions/TauJetCalibMapper_v1.h"
 #include "DiTauJetAccessors_v1.h"
 #include <stdexcept>
 
@@ -72,7 +71,7 @@ namespace xAOD {
                      jetLink,
                      setJetLink )
 
-  static const SG::AuxElement::Accessor< DiTauJet_v1::JetLink_t > jetAcc( "jetLink" );
+  static const SG::Accessor< DiTauJet_v1::JetLink_t > jetAcc( "jetLink" );
 
   const Jet* DiTauJet_v1::jet() const {
    return ( *jetAcc( *this ) );
@@ -194,7 +193,7 @@ namespace xAOD {
                      vertexLink,
                      setVertexLink )
 
-  static const SG::AuxElement::Accessor< DiTauJet_v1::VertexLink_t > vertexAcc( "vertexLink" );
+  static const SG::Accessor< DiTauJet_v1::VertexLink_t > vertexAcc( "vertexLink" );
 
   const Vertex* DiTauJet_v1::vertex() const {
     return ( *vertexAcc( *this ) );
@@ -207,49 +206,16 @@ namespace xAOD {
     vertexAcc( *this ).toContainedElement( *cont, vertex );
   }
 
-  // // ----------------------------------------------------------------------------
-  // // setters and getters for the secondary vertex links
-  // // ----------------------------------------------------------------------------
-  // AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
-  //                    DiTauJet_v1::SecVertexLinks_t,
-  //                    secVertexLinks,
-  //                    setSecVertexLinks )
-  
-  // static const SG::AuxElement::Accessor< DiTauJet_v1::SecVertexLinks_t > secVtxAcc( "secVertexLinks" );
-  
-  // const Vertex* DiTauJet_v1::secVertex( size_t i ) const {
-  //   return ( *secVtxAcc( *this )[ i ] );
-  // }
-  
-  // size_t DiTauJet_v1::nSecVertex() const {
-  //   return secVtxAcc( *this ).size();
-  // }
-  
-  // void DiTauJet_v1::addSecVertex( const xAOD::VertexContainer* pVertexCont, 
-  //                                       const xAOD::Vertex* pVertex) {
-  //   ElementLink<xAOD::VertexContainer> linkToVertex;
-  //   linkToVertex.toContainedElement(*pVertexCont, pVertex);
-
-  //   secVtxAcc( *this ).push_back( linkToVertex );
-
-  //   return;
-  // }
-  
-  // void DiTauJet_v1::clearSecVertexLinks() {
-  //   secVtxAcc( *this ).clear();
-  //   return;
-  // }
-
   // ----------------------------------------------------------------------------
   // setters and getters for the track links
   // ----------------------------------------------------------------------------
-  // tacks inside subjets
+  // tracks inside subjets
   AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
                      DiTauJet_v1::TrackParticleLinks_t,
                      trackLinks,
                      setTrackLinks )
   
-  static const SG::AuxElement::Accessor< DiTauJet_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
+  static const SG::Accessor< DiTauJet_v1::TrackParticleLinks_t > trackAcc( "trackLinks" );
   
   const TrackParticle* DiTauJet_v1::track( size_t i ) const {
     return ( *trackAcc( *this )[ i ] );
@@ -275,13 +241,13 @@ namespace xAOD {
   }
 
 
-  // tacks inside isolation region
+  // tracks inside isolation region
   AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
                      DiTauJet_v1::TrackParticleLinks_t,
                      isoTrackLinks,
                      setIsoTrackLinks )
   
-  static const SG::AuxElement::Accessor< DiTauJet_v1::TrackParticleLinks_t > isoTrackAcc( "isoTrackLinks" );
+  static const SG::Accessor< DiTauJet_v1::TrackParticleLinks_t > isoTrackAcc( "isoTrackLinks" );
   
   const TrackParticle* DiTauJet_v1::isoTrack( size_t i ) const {
     return ( *isoTrackAcc( *this )[ i ] );
@@ -307,13 +273,13 @@ namespace xAOD {
   }
 
 
-  // tacks in seed jet that do not fulfill quality cuts
+  // tracks in seed jet that do not fulfill quality cuts
   AUXSTORE_OBJECT_SETTER_AND_GETTER( DiTauJet_v1,
                      DiTauJet_v1::TrackParticleLinks_t,
                      otherTrackLinks,
                      setOtherTrackLinks )
   
-  static const SG::AuxElement::Accessor< DiTauJet_v1::TrackParticleLinks_t > otherTrackAcc( "otherTrackLinks" );
+  static const SG::Accessor< DiTauJet_v1::TrackParticleLinks_t > otherTrackAcc( "otherTrackLinks" );
   
   const TrackParticle* DiTauJet_v1::otherTrack( size_t i ) const {
     return ( *otherTrackAcc( *this )[ i ] );
@@ -371,7 +337,7 @@ namespace xAOD {
   // Set int detail via enum
   //-------------------------------------------------------------------------
   void DiTauJet_v1::setDetail( DiTauJetParameters::Detail detail, int value ) {
-    const SG::AuxElement::Accessor< int >* acc = xAODDiTau::detailsAccessorV1<int>( detail );
+    const SG::Accessor< int >* acc = xAODDiTau::detailsAccessorV1<int>( detail );
     if (!acc) {
       throw std::runtime_error ("DiTauJet_v1::setDetail: bad detail code");
     }
@@ -382,7 +348,7 @@ namespace xAOD {
   // Set float detail via enum
   //-------------------------------------------------------------------------
   void DiTauJet_v1::setDetail( DiTauJetParameters::Detail detail, float value ) {
-    const SG::AuxElement::Accessor< float >* acc = xAODDiTau::detailsAccessorV1<float>( detail );
+    const SG::Accessor< float >* acc = xAODDiTau::detailsAccessorV1<float>( detail );
     if (!acc) {
       throw std::runtime_error ("DiTauJet_v1::setDetail: bad detail code");
     }

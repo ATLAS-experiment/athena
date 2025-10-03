@@ -204,10 +204,10 @@ namespace ITk
     float dxyt = xt * xt + yt * yt;
     float drt = std::sqrt( xt*xt + yt*yt + dzt*dzt );
 
-    float tzb = dzb * std::sqrt( 1./dxyb );
-    float tzt = dzt * std::sqrt( 1./dxyt );
+    float tzb = dzb * std::sqrt( 1.f/dxyb );
+    float tzt = dzt * std::sqrt( 1.f/dxyt );
 
-    float sTzb2 = std::sqrt(1 + tzb*tzb);
+    float sTzb2 = std::sqrt(1.f + tzb*tzb);
 
     float dU = Ut - Ub;
     if (dU == 0.) {
@@ -215,7 +215,7 @@ namespace ITk
     }
 
     float A = (Vt - Vb) / dU;
-    float S2 = 1. + A * A;
+    float S2 = 1.f + A * A;
     float B = Vb - A * Ub;
     if (B==0)
       return;
@@ -227,14 +227,14 @@ namespace ITk
 
     // eta
     float meanOneOverTanThetaSquare = isPixel ? (cotThetaB * cotThetaT) :
-                                                 std::pow((cotThetaB + cotThetaT) / 2.,2);
+                                                 std::pow((cotThetaB + cotThetaT) / 2.f,2);
     if (meanOneOverTanThetaSquare <= 0) {
       return;
     }
-    float theta = std::atan(1. / std::sqrt(meanOneOverTanThetaSquare)); // [0, pi/2)
+    float theta = std::atan(1.f / std::sqrt(meanOneOverTanThetaSquare)); // [0, pi/2)
     if (top.z()<0) {theta = -theta;} // (-pi/2, pi/2)
     if (theta < 0.) {theta = theta + M_PI;} // [0, pi)
-    float eta = -std::log(std::tan(0.5 * theta));
+    float eta = -std::log(std::tan(0.5f * theta));
 
     // pt
     float pt = pTPerHelixRadius*std::sqrt(S2 / B2);

@@ -2,7 +2,7 @@
     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "L1CaloFEXSim/jSuperCellTowerMapper.h"
+#include "jSuperCellTowerMapper.h"
 
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"

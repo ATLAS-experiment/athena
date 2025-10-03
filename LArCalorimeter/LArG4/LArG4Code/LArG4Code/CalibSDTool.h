@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4CODE_CALIBSDTOOL_H
 #define LARG4CODE_CALIBSDTOOL_H
 
-/// @file CalibSDTool.h
-/// @brief Defines the CalibSDTool class
-/// @author Steve Farrell <Steven.Farrell@cern.ch>
-/// @date 2016-03-26
+/**
+ * @file CalibSDTool.h
+ * @brief Defines the CalibSDTool class
+ * @author Steve Farrell <Steven.Farrell@cern.ch>
+ * @date 2016-03-26
+ */
 
 // System includes
 #include <string>
@@ -69,17 +71,17 @@ namespace LArG4
       /// @{
 
       /// Are we set up to run with PID hits?
-      G4bool m_doPID;
+      Gaudi::Property<G4bool> m_doPID{this, "ParticleID", false};
 
       /// @}
 
       /// @name Calo identifier helpers
       /// @{
-      const LArEM_ID*       m_larEmID;
-      const LArFCAL_ID*     m_larFcalID;
-      const LArHEC_ID*      m_larHecID;
-      const CaloDM_ID*      m_caloDmID;
-      const AtlasDetectorID* m_id_helper;
+      const LArEM_ID*       m_larEmID{nullptr};
+      const LArFCAL_ID*     m_larFcalID{nullptr};
+      const LArHEC_ID*      m_larHecID{nullptr};
+      const CaloDM_ID*      m_caloDmID{nullptr};
+      const AtlasDetectorID* m_id_helper{nullptr};
       /// @}
 
   }; // class CalibSDTool

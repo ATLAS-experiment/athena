@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoCoreSim/Connector.h"
 
@@ -67,7 +67,7 @@ TCS::Connector::reset() {
 unsigned int
 TCS::Connector::numberOutputBits() const {
    if(isDecisionConnector()) {
-      return ((DecisionAlg*) algorithm())->numberOutputBits();
+      return (static_cast<const DecisionAlg*>(algorithm()))->numberOutputBits();
    } else {
       return 0;
    }

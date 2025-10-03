@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONPRDTEST_NSWPRDVALALG_H
-#define MUONPRDTEST_NSWPRDVALALG_H
+#ifndef MUONPRDTEST_MuonHitValAlg_H
+#define MUONPRDTEST_MuonHitValAlg_H
 
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
@@ -70,10 +70,12 @@ private:
     Gaudi::Property<bool> m_doMDTHit{this, "doMDTHit", false};                // switch on the output of the MDT simulated hits
     Gaudi::Property<bool> m_doMDTSDO{this, "doMDTSDO", false};                // switch on the output of the MDT SDO
     Gaudi::Property<bool> m_doMDTDigit{this, "doMDTDigit", false};            // switch on the output of the MDT digitization
+    Gaudi::Property<bool> m_doMDTPRD{this, "doMDTPRD", false};                // switch on the output of the MDT prepdata
 
     Gaudi::Property<bool> m_doRPCHit{this, "doRPCHit", false};                // switch on the output of the RPC simulated hits
     Gaudi::Property<bool> m_doRPCSDO{this, "doRPCSDO", false};                // switch on the output of the RPC SDO
     Gaudi::Property<bool> m_doRPCDigit{this, "doRPCDigit", false};            // switch on the output of the RPC digitization
+    Gaudi::Property<bool> m_doRPCPRD{this, "doRPCPRD", false};                // switch on the output of the RPC prepdata
 
     Gaudi::Property<bool> m_doTGCHit{this, "doTGCHit", false};                // switch on the output of the TGC simulated hits
     Gaudi::Property<bool> m_doTGCSDO{this, "doTGCSDO", false};                // switch on the output of the TGC SDO
@@ -107,10 +109,12 @@ private:
     Gaudi::Property<std::string> m_MdtSimHitKey{this, "MdtSimKey", "MDT_Hits"};
     Gaudi::Property<std::string> m_MdtSdoKey{this, "MdtSdoKey", "MDT_SDO"};
     Gaudi::Property<std::string> m_MdtDigitKey{this, "MdtDigitKey", "MDT_DIGITS"};
+    Gaudi::Property<std::string> m_MdtPrdKey{this, "MdtPrdKey", "MDT_DriftCircles"};
 
     Gaudi::Property<std::string> m_RpcSimHitKey{this, "RpcSimKey", "RPC_Hits"};
     Gaudi::Property<std::string> m_RpcSdoKey{this, "RpcSdoKey", "RPC_SDO"};
     Gaudi::Property<std::string> m_RpcDigitKey{this, "RpcDigitKey", "RPC_DIGITS"};
+    Gaudi::Property<std::string> m_RpcPrdKey{this, "RpcPrdKey", "RPC_Measurements"};
 
     Gaudi::Property<std::string> m_TgcSimHitKey{this, "TgcSimKey", "TGC_Hits"};
     Gaudi::Property<std::string> m_TgcSdoKey{this, "TgcSdoKey", "TGC_SDO"};
@@ -125,4 +129,4 @@ private:
     Gaudi::Property<uint> m_maxStripDiff{this, "setMaxStripDistance", 3};
 };
 }
-#endif  // NSWPRDVALALG_H
+#endif  // MuonHitValAlg_H

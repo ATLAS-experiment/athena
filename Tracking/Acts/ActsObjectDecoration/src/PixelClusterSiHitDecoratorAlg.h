@@ -9,7 +9,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -29,36 +28,38 @@ namespace ActsTrk {
 
   private:
     std::vector<SiHit>
-    findAllHitsCompatibleWithCluster( const xAOD::PixelCluster& cluster,
+    findAllHitsCompatibleWithCluster( const std::vector< Identifier >& rdos,
 				      const InDetDD::SiDetectorElement&	element,
 				      const std::vector<const SiHit*>& sihits,
 				      const std::vector< std::vector< int > >& sdoTracks) const;
     
   private:
     SG::ReadHandleKey< xAOD::TrackMeasurementValidationContainer > m_inputMeasurementsKey {this, "Measurements", ""};
-    SG::ReadHandleKey< xAOD::PixelClusterContainer > m_inputClustersKey {this, "Clusters", ""};
     SG::ReadHandleKey< InDetSimDataCollection > m_SDOcontainer_key {this, "SDOs", ""};
     SG::ReadHandleKey< SiHitCollection > m_siHitsKey {this, "SiHits", ""};
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection"};
+
+    // detector decorator
+    SG::ReadDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_measurement_detectorElementID {this, "MeasurementDetectorElementID", m_inputMeasurementsKey, "detectorElementID"};
     
     // SDO decorations
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sdo_words {this, "SdoWords", "sdo_words"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sdo_depositsBarcode {this, "SdoDepositsBarcode", "sdo_depositsBarcode"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sdo_depositsEnergy {this, "SdoDepositsEnergy", "sdo_depositsEnergy"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sdo_words {this, "SdoWords", m_inputMeasurementsKey, "sdo_words"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sdo_depositsBarcode {this, "SdoDepositsBarcode", m_inputMeasurementsKey, "sdo_depositsBarcode"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sdo_depositsEnergy {this, "SdoDepositsEnergy", m_inputMeasurementsKey, "sdo_depositsEnergy"};
 
     // SiHit decorations
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_energyDeposit_decor_key {this, "SiHitEnergyDeposit", "sihit_energyDeposit"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_meanTime_decor_key {this, "SiHitMeanTime", "sihit_meanTime"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_barcode_decor_key {this, "SiHitBarcode", "sihit_barcode"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_pdgid_decor_key {this, "SiHitPdgId", "sihit_pdgid"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_energyDeposit_decor_key {this, "SiHitEnergyDeposit", m_inputMeasurementsKey, "sihit_energyDeposit"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_meanTime_decor_key {this, "SiHitMeanTime", m_inputMeasurementsKey, "sihit_meanTime"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_barcode_decor_key {this, "SiHitBarcode", m_inputMeasurementsKey, "sihit_barcode"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_pdgid_decor_key {this, "SiHitPdgId", m_inputMeasurementsKey, "sihit_pdgid"};
 
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_startPosX_decor_key {this, "SiHitStartPosX", "sihit_startPosX"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_startPosY_decor_key {this, "SiHitStartPosY", "sihit_startPosY"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_startPosZ_decor_key {this, "SiHitStartPosZ", "sihit_startPosZ"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_startPosX_decor_key {this, "SiHitStartPosX", m_inputMeasurementsKey, "sihit_startPosX"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_startPosY_decor_key {this, "SiHitStartPosY", m_inputMeasurementsKey, "sihit_startPosY"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_startPosZ_decor_key {this, "SiHitStartPosZ", m_inputMeasurementsKey, "sihit_startPosZ"};
     
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_endPosX_decor_key {this, "SiHitStopPosX", "sihit_endPosX"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_endPosY_decor_key {this, "SiHitStopPosY", "sihit_endPosY"};
-    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_endPosZ_decor_key {this, "SiHitStopPosZ", "sihit_endPosZ"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_endPosX_decor_key {this, "SiHitStopPosX", m_inputMeasurementsKey, "sihit_endPosX"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_endPosY_decor_key {this, "SiHitStopPosY", m_inputMeasurementsKey, "sihit_endPosY"};
+    SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_sihit_endPosZ_decor_key {this, "SiHitStopPosZ", m_inputMeasurementsKey, "sihit_endPosZ"};
 
     Gaudi::Property<bool> m_useSiHitsGeometryMatching {this, "UseSiHitsGeometryMatching", true};
 

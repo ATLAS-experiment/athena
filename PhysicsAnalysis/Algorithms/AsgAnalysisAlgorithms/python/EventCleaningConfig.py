@@ -39,25 +39,19 @@ class EventCleaningBlock (ConfigBlock):
         if self.runGRL and self.userGRLFiles:
             raise ValueError("No userGRLFiles should be specified if runGRL=False")
 
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return '' # no instance name needed for singleton block
+
     def getDefaultGRLs (self, data_year) :
         """ returns a reasonable set of GRLs that should be suited for most analyses """
         from GoodRunsLists.GoodRunsListsDictionary import getGoodRunsLists
         GRLDict = getGoodRunsLists()
 
-        if data_year == 2015:
-            return GRLDict['GRL2015']
-        elif data_year == 2016:
-            return GRLDict['GRL2016']
-        elif data_year == 2017:
-            return GRLDict['GRL2017_Triggerno17e33prim']
-        elif data_year == 2018:
-            return GRLDict['GRL2018_Triggerno17e33prim']
-        elif data_year == 2022:
-            return GRLDict['GRL2022']
-        elif data_year == 2023:
-            return GRLDict['GRL2023']
-        else:
-            raise ValueError (f"Data year {data_year} is not recognised for automatic GRL retrieval!")
+        GRLKey = 'GRL' + str(data_year)
+        if data_year==2017 or data_year==2018:
+            GRLKey = GRLKey + '_Triggerno17e33prim'
+        return GRLDict[GRLKey]
 
     def makeAlgs (self, config) :
         

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory 
@@ -137,7 +137,6 @@ if __name__=="__main__":
     
     from LArNoiseFlags import addNoiseFlags
     addNoiseFlags(flags)
-    #flags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0043._SFO-ALL._0001.1']
     flags.Input.Files=['/eos/atlas/atlastier0/rucio/data23_13p6TeV/express_express/00461002/data23_13p6TeV.00461002.express_express.merge.RAW/data23_13p6TeV.00461002.express_express.merge.RAW._lb0922._SFO-ALL._0001.1']
 
     from AthenaConfiguration.TestDefaults import defaultGeometryTags

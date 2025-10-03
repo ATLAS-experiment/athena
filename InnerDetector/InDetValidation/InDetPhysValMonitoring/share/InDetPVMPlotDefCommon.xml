@@ -1018,6 +1018,18 @@
   <x title="#mu" n="300" lo="0" hi="300"/>
   <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
 </h>
+<h id="technical_efficiency_vs_R" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="R [mm]" n="100" lo="0" hi="50"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_prodR" type="TEfficiency" title="Track Efficiency vs Production Vertex Radius (with hit requirement)">
+  <x title="prod_R [mm]" n="65" lo="0" hi="650"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_prodR_extended" type="TEfficiency" title="Track Efficiency vs Production Vertex Radius (with hit requirement)">
+  <x title="prod_R [mm]" n="40" lo="0" hi="1200"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
 <!-- Duplicate plots -->
 <h id="duplicate_rate_vs_eta" type="TEfficiency" title="Fraction of particles with more than one track matched">
   <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>

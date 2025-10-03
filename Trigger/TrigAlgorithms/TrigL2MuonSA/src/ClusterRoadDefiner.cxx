@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ClusterRoadDefiner.h"
@@ -32,8 +32,9 @@ StatusCode TrigL2MuonSA::ClusterRoadDefiner::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::ClusterRoadDefiner::defineRoad(const xAOD::MuonRoI*                      p_roi,
-						        std::vector<TrigL2MuonSA::MuonRoad>&      clusterRoad,
+StatusCode TrigL2MuonSA::ClusterRoadDefiner::defineRoad(const EventContext& ctx,
+                                                        const xAOD::MuonRoI*                      p_roi,
+                                                        std::vector<TrigL2MuonSA::MuonRoad>&      clusterRoad,
                                                         TrigL2MuonSA::RpcLayerClusters&           rpcLayerClusters,
                                                         const ToolHandle<ClusterPatFinder>*       clusterPatFinder,
                                                         std::vector<TrigL2MuonSA::RpcFitResult>&  clusterFitResults,
@@ -186,12 +187,12 @@ StatusCode TrigL2MuonSA::ClusterRoadDefiner::defineRoad(const xAOD::MuonRoI*    
 
     TrigRoiDescriptor* roi = new TrigRoiDescriptor( p_roi->eta(), etaMin, etaMax, p_roi->phi(), phiMin, phiMax );
 
-    const IRoiDescriptor* iroi = (IRoiDescriptor*) roi;
+    const IRoiDescriptor* iroi = static_cast<IRoiDescriptor*> (roi);
 
-    if (iroi) m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(*iroi, mdtHashList);
+    if (iroi) m_regionSelector->lookup(ctx)->HashIDList(*iroi, mdtHashList);
     else {
       TrigRoiDescriptor fullscan_roi( true );
-      m_regionSelector->lookup( Gaudi::Hive::currentContext() )->HashIDList(fullscan_roi, mdtHashList);
+      m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, mdtHashList);
     }
 
     if(roi) delete roi;

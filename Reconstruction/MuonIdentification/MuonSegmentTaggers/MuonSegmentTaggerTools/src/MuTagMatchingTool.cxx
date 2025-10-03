@@ -25,8 +25,9 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/Track.h"
 
-MuTagMatchingTool::MuTagMatchingTool(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t, n, p) {
-    declareInterface<IMuTagMatchingTool>(this);
+
+using namespace Muon::MuonStationIndex;
+MuTagMatchingTool::MuTagMatchingTool(const std::string& t, const std::string& n, const IInterface* p) : base_class(t, n, p) {
 
     declareProperty("GlobalThetaCut", m_GLOBAL_THETA_CUT = 0.1);
     declareProperty("GlobalPhiCut", m_GLOBAL_PHI_CUT = 0.5);
@@ -125,7 +126,7 @@ bool MuTagMatchingTool::match(const Trk::TrackParameters& atSurface, const Muon:
     const Identifier id = m_edmHelperSvc->chamberId(segment);
 
     /// We need a barrel function here
-    if (m_idHelperSvc->regionIndex(id) == Muon::MuonStationIndex::Barrel)
+    if (m_idHelperSvc->regionIndex(id) == DetectorRegionIndex::Barrel)
         return thetaMatch(atSurface, segment);
     else
         return rMatch(atSurface, segment);
@@ -554,7 +555,7 @@ MuonCombined::MuonSegmentInfo MuTagMatchingTool::muTagSegmentInfo(const EventCon
     ATH_MSG_DEBUG(" info.pullXZ " << info.pullXZ);
 
     Identifier chId = m_edmHelperSvc->chamberId(segment);
-    Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(chId);
+    StIndex stIndex = m_idHelperSvc->stationIndex(chId);
     //
     //  residuals and pulls in X coordinate (along tube)
     //
@@ -702,14 +703,36 @@ MuonCombined::MuonSegmentInfo MuTagMatchingTool::muTagSegmentInfo(const EventCon
 
     // station layer
     info.stationLayer = 0;
-    if (stIndex == Muon::MuonStationIndex::BI) info.stationLayer = 1;
-    if (stIndex == Muon::MuonStationIndex::BM) info.stationLayer = 2;
-    if (stIndex == Muon::MuonStationIndex::BO) info.stationLayer = 3;
-    if (stIndex == Muon::MuonStationIndex::BE) info.stationLayer = 4;
-    if (stIndex == Muon::MuonStationIndex::EI) info.stationLayer = m_idHelperSvc->isMdt(chId) ? 11 : 21;
-    if (stIndex == Muon::MuonStationIndex::EM) info.stationLayer = 12;
-    if (stIndex == Muon::MuonStationIndex::EO) info.stationLayer = 13;
-    if (stIndex == Muon::MuonStationIndex::EE) info.stationLayer = 14;
+    switch (stIndex) {
+        case StIndex::BI:
+            info.stationLayer = 1;
+            break;
+        case StIndex::BM:
+            info.stationLayer = 2;
+            break;
+        case StIndex::BO:
+            info.stationLayer = 3;
+            break;
+        case StIndex::BE:
+            info.stationLayer = 4;
+            break;
+        case StIndex::EI:
+            info.stationLayer = m_idHelperSvc->isMdt(chId) ? 11 : 21;
+            break;
+        case StIndex::EM:
+            info.stationLayer = 12;
+            break;
+        case StIndex::EO:
+            info.stationLayer = 13;
+            break;
+        case StIndex::EE:
+            info.stationLayer = 14;
+            break;
+        case StIndex::StUnknown:
+        case StIndex::StIndexMax:
+            ATH_MSG_WARNING(__func__<<"(): "<<__LINE__<<"Invalid station index passed");
+            break;
+    }
 
     ATH_MSG_DEBUG("stationLayer " << info.stationLayer);
     // number of holes

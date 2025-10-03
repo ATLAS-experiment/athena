@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimHough1DShiftTool.cxx
@@ -151,7 +151,7 @@ void FPGATrackSimHough1DShiftTool::calculateShifts()
 		}
 
 		m_qpt.push_back(qpt);
-		m_shifts.push_back(shifts);
+		m_shifts.push_back(std::move(shifts));
 
 	    }
 
@@ -276,9 +276,9 @@ void FPGATrackSimHough1DShiftTool::readShifts(std::string const & filepath)
 	    }
 
 	    m_qpt.push_back(qpt);
-	    m_shifts.push_back(shifts);
-	    m_dropable.push_back(drops);
-	    m_phivals.push_back(phivals);
+	    m_shifts.push_back(std::move(shifts));
+	    m_dropable.push_back(std::move(drops));
+	    m_phivals.push_back(std::move(phivals));
 
 
 	}
@@ -658,7 +658,7 @@ void FPGATrackSimHough1DShiftTool::calculated0Shifts()
          int shift = static_cast<int>(round(phi_for_d0step/ m_phiStep));
          d0shift.push_back(shift);
       }
-      m_d0shifts.push_back(d0shift);
+      m_d0shifts.push_back(std::move(d0shift));
       if (d0step>m_d0spread) break;
       ++steps;
     }
@@ -706,7 +706,7 @@ void FPGATrackSimHough1DShiftTool::calculateDropable()
        }
     }
     
-    m_dropable[iShift]=drops;
+    m_dropable[iShift]=std::move(drops);
 
   }
 

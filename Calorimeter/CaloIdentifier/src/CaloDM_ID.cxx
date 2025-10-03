@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloDM_ID.h"
@@ -21,8 +21,9 @@
 using CxxUtils::strformat;
 
 
-CaloDM_ID::CaloDM_ID(void) : 
-    m_calodm_region_index(0) 
+CaloDM_ID::CaloDM_ID() :
+    AtlasDetectorID("CaloDM_ID", "DM_Reg")
+  , m_calodm_region_index(0)
   , m_CALO_INDEX(999) 
   , m_DETZSIDE_INDEX(999)
   , m_DMAT_INDEX(999) 
@@ -221,12 +222,12 @@ int  CaloDM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
       if(m_msgSvc)
 	{
 	  log << MSG::ERROR << "Could not get value for label 'Calorimeter' of field 'subdet' in dictionary " 
-	      << m_dict->m_name << endmsg;
+	      << m_dict->name() << endmsg;
 	}
       else
 	{
 	  std::cout << "Could not get value for label 'Calorimeter' of field 'subdet' in dictionary " 
-		    << m_dict->m_name
+		    << m_dict->name()
 		    << std::endl;
 	}
     return (1);
@@ -239,12 +240,12 @@ int  CaloDM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
       if(m_msgSvc)
 	{
 	  log << MSG::ERROR << "Could not get value for label 'negative_DMLar_side' of field 'DetZside' in dictionary " 
-	      << m_dict->m_name << endmsg;
+	      << m_dict->name() << endmsg;
 	}
       else
 	{
 	  std::cout << "Could not get value for label 'negative_DMLar_side' of field 'DetZside' in dictionary " 
-		    << m_dict->m_name
+		    << m_dict->name()
 		    << std::endl;
 	}
       return (1);
@@ -257,13 +258,13 @@ int  CaloDM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
       if(m_msgSvc)
 	{
 	  log << MSG::ERROR << "Could not get value for label 'negative_DMTile_side' of field 'DetZside' in dictionary " 
-	      << m_dict->m_name
+	      << m_dict->name()
 	      << endmsg;
 	}
       else
 	{
 	  std::cout << "Could not get value for label 'negative_DMTile_side' of field 'DetZside' in dictionary " 
-		    << m_dict->m_name
+		    << m_dict->name()
 		    << std::endl;
 	}
     return (1);
@@ -526,14 +527,14 @@ int  CaloDM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 }
 
 IdContext       
-CaloDM_ID::region_context             (void) const
+CaloDM_ID::region_context             () const
 {
     ExpandedIdentifier id;
     return {id, 0, m_REGION_INDEX};
 }
 
 IdContext       
-CaloDM_ID::zone_context              (void) const
+CaloDM_ID::zone_context              () const
 {
     ExpandedIdentifier id;
     return {id, 0, m_PHI_INDEX};
@@ -629,7 +630,7 @@ void CaloDM_ID::zone_id_checks   ( const Identifier& regionId,
 
 
 /*=======================================*/
-int   CaloDM_ID::initLevelsFromDict(void) 
+int   CaloDM_ID::initLevelsFromDict()
 /*=======================================*/
 {
   // Msg Service
@@ -664,7 +665,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
   IdDictRegion* reg = m_dict->find_region("DM_4_1_0_0");
   if (reg) 
     {
-      m_calodm_region_index = reg->m_index;
+      m_calodm_region_index = reg->index();
     }
   else 
     {
@@ -684,7 +685,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
   // Fing a CaloDM region
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_CALO_INDEX = field->m_index ;
+    m_CALO_INDEX = field->index();
   }
   else 
     {
@@ -704,7 +705,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
   field = m_dict->find_field("DetZside") ;
   if (field) 
     {
-      m_DETZSIDE_INDEX = field->m_index ;
+      m_DETZSIDE_INDEX = field->index();
     }
   else 
     {
@@ -724,7 +725,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
  field = m_dict->find_field("DMvalue") ;
   if (field) 
     {
-      m_DMAT_INDEX = field->m_index ;
+      m_DMAT_INDEX = field->index();
     }
   else 
     {
@@ -745,7 +746,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
  field = m_dict->find_field("samplingvalue") ;
   if (field) 
     {
-      m_SAMPLING_INDEX = field->m_index ;
+      m_SAMPLING_INDEX = field->index();
     }
   else 
     {
@@ -765,7 +766,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
   field = m_dict->find_field("DMregion") ;
   if (field) 
     {
-      m_REGION_INDEX = field->m_index ;
+      m_REGION_INDEX = field->index();
     }
   else 
     {
@@ -785,7 +786,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
 
   field = m_dict->find_field("DMEta") ;
   if (field) {
-    m_ETA_INDEX = field->m_index ;
+    m_ETA_INDEX = field->index();
   }
   else 
     {
@@ -805,7 +806,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
   field = m_dict->find_field("phivalue") ;
   if (field) 
     {
-      m_PHI_INDEX = field->m_index ;
+      m_PHI_INDEX = field->index();
     }
   else 
     {
@@ -825,15 +826,15 @@ int   CaloDM_ID::initLevelsFromDict(void)
  
   // Set the field implementations
 
-  const IdDictRegion& region = *m_dict->m_regions[m_calodm_region_index];
+  const IdDictRegion& region = m_dict->region(m_calodm_region_index);
 
-  m_calo_impl     = region.m_implementation[m_CALO_INDEX]; 
-  m_calodm_impl   = region.m_implementation[m_DETZSIDE_INDEX]; 
-  m_dmat_impl     = region.m_implementation[m_DMAT_INDEX]; 
-  m_sampling_impl = region.m_implementation[m_SAMPLING_INDEX]; 
-  m_region_impl   = region.m_implementation[m_REGION_INDEX]; 
-  m_eta_impl      = region.m_implementation[m_ETA_INDEX]; 
-  m_phi_impl      = region.m_implementation[m_PHI_INDEX]; 
+  m_calo_impl     = region.implementation(m_CALO_INDEX);
+  m_calodm_impl   = region.implementation(m_DETZSIDE_INDEX);
+  m_dmat_impl     = region.implementation(m_DMAT_INDEX);
+  m_sampling_impl = region.implementation(m_SAMPLING_INDEX);
+  m_region_impl   = region.implementation(m_REGION_INDEX);
+  m_eta_impl      = region.implementation(m_ETA_INDEX);
+  m_phi_impl      = region.implementation(m_PHI_INDEX);
 
   if (!m_quiet) {
     if(m_msgSvc)
@@ -879,7 +880,7 @@ int   CaloDM_ID::initLevelsFromDict(void)
 }
 
 /*=======================================*/
-int   CaloDM_ID::init_lar_hashes(void) 
+int   CaloDM_ID::init_lar_hashes()
 /*=======================================*/
 {
   // Msg Service
@@ -1022,7 +1023,7 @@ int   CaloDM_ID::init_lar_hashes(void)
 }
 
 /*=====================================*/
-int   CaloDM_ID::init_tile_hashes(void) 
+int   CaloDM_ID::init_tile_hashes()
 /*=====================================*/
 {
   // Msg Service

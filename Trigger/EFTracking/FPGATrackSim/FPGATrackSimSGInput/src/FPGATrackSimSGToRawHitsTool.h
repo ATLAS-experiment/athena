@@ -60,7 +60,7 @@ private:
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey { this, "EventInfo", "EventInfo" };
   SG::ReadHandleKey<InDet::SiClusterContainer> m_pixelClusterContainerKey { this, "pixelClustersName", "ITkPixelClusters" };
-  SG::ReadHandleKey<InDet::SiClusterContainer> m_sctClusterContainerKey { this, "SCT_ClustersName", "SCT_Clusters" };
+  SG::ReadHandleKey<InDet::SiClusterContainer> m_sctClusterContainerKey { this, "SCT_ClustersName", "ITkStripClusters" };
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_offlineTracksKey  { this, "OfflineTracks", "InDetTrackParticles"};
   SG::ReadHandleKey<McEventCollection> m_mcCollectionKey  { this, "McTruth", "TruthEvent" };
@@ -82,7 +82,8 @@ private:
   Gaudi::Property<bool>        m_UseNominalOrigin { this, "UseNominalOrigin", false, "if true truth values are always with respect to (0,0,0)" };
   Gaudi::Property<double>      m_maxEta { this, "maxEta", 5.0 };
   Gaudi::Property<double>      m_minPt { this, "minPt", .8*CLHEP::GeV };
-
+  Gaudi::Property<bool>        m_doMultiTruth { this, "doMultiTruth", true };
+  
   //internal pointers
   const PixelID* m_pixelId = nullptr;
   const SCT_ID* m_sctId = nullptr;

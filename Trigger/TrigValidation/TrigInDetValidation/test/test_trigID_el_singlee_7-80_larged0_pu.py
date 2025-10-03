@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for el_singlee_7-80_larged0_pu
 # art-type: grid
@@ -35,7 +35,6 @@ Events  = 20000
 Threads = 8 
 Slots   = 8
 Input   = 'Single_el_larged0_pu40'    # defined in TrigValTools/share/TrigValInputs.json
-GridFiles=True
 
 Jobs = [ ( "Truth",       " TIDAdata-run3-larged0-el.dat                    -o data-hists.root -p 11",   "Test_bin_larged0.dat" ),
          ( "Offline",     " TIDAdata-run3-offline-larged0-el.dat -r Offline -o data-hists-offline.root", "Test_bin_larged0.dat" ) ]

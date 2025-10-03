@@ -854,7 +854,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processMdtBox
                                                                              binUtility,
                                                                              Amg::Transform3D(Amg::Transform3D::Identity()));
 
-    return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, mdtLayerArray.release(), nullptr, "MDT");
+    return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, std::move(mdtLayerArray), nullptr, "MDT");
 
 }
 //
@@ -990,7 +990,7 @@ std::unique_ptr<Trk::TrackingVolume>
     auto mdtLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
                                                                               Amg::Transform3D(Amg::Transform3D::Identity()));
 
-    return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, mdtLayerArray.release(), nullptr, "MDT");
+    return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, std::move(mdtLayerArray), nullptr, "MDT");
 
 }
 std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(const Trk::Volume& vol,
@@ -1174,7 +1174,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(co
 
     ATH_MSG_DEBUG(" Rpc component volume processed with" << layers.size()<< " layers");
     auto rpcLayers = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(layers));
-    return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, rpcLayers.release(), "RPC");
+    return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, std::move(rpcLayers), "RPC");
 }
 //
 
@@ -1304,7 +1304,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                 const GeoBox* box = dynamic_cast<const GeoBox*>(shape);
                 if (box && subVs.size() == 4) {
                     std::unique_ptr<Trk::Volume> v1{}, v2{};
-                    std::unique_ptr<Trk::VolumeExcluder> volExcl = nullptr;
+                    std::shared_ptr<const Trk::VolumeExcluder> volExcl = nullptr;
                     const GeoBox* sb1 = dynamic_cast<const GeoBox*>(subVs[0].first);
                     if (sb1) {
                         v1 = std::make_unique<Trk::Volume>(makeTransform(subVs[0].second),
@@ -1323,9 +1323,9 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         auto combinedBounds = std::make_shared<Trk::CombinedVolumeBounds>(std::move(v1), std::move(v2), false);
                         auto cVol = std::make_unique<Trk::Volume>(makeTransform(Amg::getTranslateX3D(-shift)),
                                                                  std::move(combinedBounds));
-                        volExcl = std::make_unique<Trk::VolumeExcluder>(std::unique_ptr<Trk::Volume>(cVol->clone()));
+                        volExcl = std::make_shared<const Trk::VolumeExcluder>(std::unique_ptr<Trk::Volume>(cVol->clone()));
                         Trk::PlaneSurface surf{transf[ic] * Amg::getTranslateX3D(shift) * Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2), std::move(bounds)};
-                        auto subPlane = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), volExcl.release(), false);
+                        auto subPlane = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), std::move(volExcl), false);
                         auto subPlaneX = std::make_unique<Trk::SubtractedPlaneSurface>(*subPlane, Amg::getTranslateX3D(-2 * shift));
 
                         Trk::MaterialProperties material(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
@@ -1341,10 +1341,10 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         thickness = subVs[2].second.translation().mag();
 
 
-                        auto volEx = std::make_unique<Trk::VolumeExcluder>(std::make_unique<Trk::Volume>(*cVol, Amg::getTranslateX3D(2 * shift)));
+                        auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::make_unique<Trk::Volume>(*cVol, Amg::getTranslateX3D(2 * shift)));
 
                         surf = Trk::PlaneSurface{transf[ic] * Amg::getRotateX3D(M_PI_2), std::move(bounds)};
-                        auto subPlaneBis = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), volEx.release(), false);
+                        auto subPlaneBis = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), std::move(volEx), false);
                         material = Trk::MaterialProperties(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                         spacerMaterial = Trk::HomogeneousLayerMaterial(material, 0.);
                         auto lay = std::make_unique<Trk::SubtractedPlaneLayer>(subPlaneBis.get(), spacerMaterial, thickness, nullptr, 0);
@@ -1365,7 +1365,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
             lIt = layers.erase(lIt);
 
     auto  spacerLayers = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(layers));
-    auto spacer = std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, spacerLayers.release(), "Spacer");
+    auto spacer = std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, std::move(spacerLayers), "Spacer");
 
     if (!m_resolveSpacer) {  // average into a single material layer
         ATH_MSG_VERBOSE(" !m_resolveSpacer createLayerRepresentation ");
@@ -1374,7 +1374,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
         layers.clear();
         layers.push_back(std::move(laySpacer.first));
         auto spacerLays = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(layers));
-        spacer = std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, spacerLays.release(), "Spacer");
+        spacer = std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, std::move(spacerLays), "Spacer");
     }
 
     return spacer;
@@ -1516,7 +1516,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
             auto compBounds = std::make_unique<Trk::TrapezoidVolumeBounds>(xMin, xMax, y1, xSizes[ic]);
             std::unique_ptr<Trk::LayerArray> cscLayerArray = processCSCTrdComponent(compGeoVol[ic], *compBounds, compTr, cache);
             std::unique_ptr<Trk::Volume> compVol = std::make_unique<Trk::Volume>(makeTransform(compTr), std::move(compBounds));
-            auto compTV =  std::make_shared<Trk::TrackingVolume>(*compVol, *m_muonMaterial, cscLayerArray.release(), nullptr, compName[ic]);
+            auto compTV =  std::make_shared<Trk::TrackingVolume>(*compVol, *m_muonMaterial, std::move(cscLayerArray), nullptr, compName[ic]);
             components.push_back(std::move(compTV));
             xCurr += xSizes[ic];
             volSteps.push_back(xCurr + xShift);
@@ -1543,7 +1543,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
             std::unique_ptr<Trk::LayerArray> cscLayerArray{processCSCDiamondComponent(compGeoVol[ic], *compBounds, compTr, cache)};
             std::unique_ptr<Trk::Volume> compVol = std::make_unique<Trk::Volume>(makeTransform(compTr), std::move(compBounds));
             auto compTV = std::make_shared<Trk::TrackingVolume>(*compVol, *m_muonMaterial,
-                                                                cscLayerArray.release(), nullptr, compName[ic]);
+                                                                std::move(cscLayerArray), nullptr, compName[ic]);
             components.push_back(std::move(compTV));
             xCurr += xSizes[ic];
             volSteps.push_back(xCurr + xShift);
@@ -1561,7 +1561,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
 
     }
     // ready to build the station prototype
-    return std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, nullptr, compArray.release(), name);
+    return std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, nullptr, std::move(compArray), name);
 }
 
 std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processTgcStation(const GeoVPhysVol* cv, Cache& cache) const {
@@ -1591,7 +1591,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processTgcSta
         auto envelope = std::make_unique<Trk::Volume>(makeTransform(tTr), std::move(tgcBounds));
 
         // ready to build the station prototype
-        auto tgc_station = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, tgcLayerArray.release(), nullptr, tgc_name);
+        auto tgc_station = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, std::move(tgcLayerArray), nullptr, tgc_name);
         return tgc_station;
     } else {
         ATH_MSG_WARNING( tgc_name << ": TGC component not a trapezoid ?  no prototype built ");
@@ -1659,11 +1659,11 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
                                                                               Amg::Transform3D(Amg::Transform3D::Identity()));
     // build tracking volume
     auto sTgc = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial,
-                                                      stgcLayerArray.release(), nullptr, vName);
+                                                      std::move(stgcLayerArray), nullptr, vName);
     // create layer representation
     auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf * envelope_trf_local, layBounds, stgcMaterial, sTgc_mat.thickness());
     // create prototype as detached tracking volume
-    return std::make_unique<Trk::DetachedTrackingVolume>(vName, sTgc.release(), layerRepr.release(), nullptr);
+    return std::make_unique<Trk::DetachedTrackingVolume>(vName, std::move(sTgc), std::move(layerRepr), nullptr);
 }
 
 std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::process_MM(const Identifier& nswId,
@@ -1725,11 +1725,11 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     auto mmLayerArray = std::make_unique<Trk::NavBinnedArray1D<Trk::Layer>>(layerOrder, binUtility,
                                                                            Amg::Transform3D(Amg::Transform3D::Identity()));
     // build tracking volume
-    auto mM = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, mmLayerArray.release(), nullptr, vName);
+    auto mM = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, std::move(mmLayerArray), nullptr, vName);
     // create layer representation
     auto layerRepr = std::make_unique<Trk::PlaneLayer>(transf * envelope_trf_local, layBounds, mmMaterial, mm_mat.thickness());
     // create prototype as detached tracking volume
-    return std::make_unique<Trk::DetachedTrackingVolume>(vName, mM.release(), layerRepr.release(), nullptr);
+    return std::make_unique<Trk::DetachedTrackingVolume>(vName, std::move(mM), std::move(layerRepr), nullptr);
 }
 
 double Muon::MuonStationTypeBuilder::get_x_size(const GeoVPhysVol* pv) const {
@@ -2225,7 +2225,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
                                                     std::make_shared<Trk::RectangleBounds>(*bounds), mat, thickness, nullptr, 1);
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
+            std::span<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (auto* vol : vols) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(*vol, sf);
@@ -2257,7 +2257,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
 
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
+            std::span<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (auto* vol : vols) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(*vol, sf);
@@ -2289,7 +2289,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
         layRepr = std::make_unique<Trk::PlaneLayer>(trVol.transform(), bounds, mat, thickness, nullptr, 1);
         // multilayers
         if (m_multilayerRepresentation && trVol.confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
+            std::span<Trk::TrackingVolume* const> vols = trVol.confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (auto* vol : vols) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(*vol, sf);
@@ -2356,7 +2356,7 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     // sf is surface of the new layer used to calculate the average 'thickness'
     // of components layers
     if (vol.confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer const* const> lays = vol.confinedLayers()->arrayObjects();
+        std::span<Trk::Layer const* const> lays = vol.confinedLayers()->arrayObjects();
         for (const auto* lay : lays) {
             const Trk::MaterialProperties* mLay =lay->layerMaterialProperties()->fullMaterial(lay->surfaceRepresentation().center());
             // protect nan
@@ -2388,10 +2388,10 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     }
     // subvolumes
     if (vol.confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const* const> subVols = vol.confinedVolumes()->arrayObjects();
+        std::span<Trk::TrackingVolume const* const> subVols = vol.confinedVolumes()->arrayObjects();
         for (const auto* subVol : subVols) {
             if (subVol->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer const* const> lays = subVol->confinedLayers()->arrayObjects();
+                std::span<Trk::Layer const* const> lays = subVol->confinedLayers()->arrayObjects();
                 for (const auto* lay : lays) {
                     const Trk::MaterialProperties* mLay = lay->layerMaterialProperties()->fullMaterial(
                                                                             lay->surfaceRepresentation().center());

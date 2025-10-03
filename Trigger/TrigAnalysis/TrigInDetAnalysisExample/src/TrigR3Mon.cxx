@@ -450,8 +450,13 @@ StatusCode TrigR3Mon::bookHistograms() {
 	  double massMin = 40;
 	  double massMax = 150;
 
+	  if ( tag.head().find("Jpsi")!=std::string::npos ) { 
+	    massMin = 0;
+	    massMax = 20;
+	  }
+	    
 	  if ( mcTruth ) tnp = new TagNProbe( "Truth",   massMin, massMax );
-	  else             tnp = new TagNProbe( "Offline", massMin, massMax );
+	  else           tnp = new TagNProbe( "Offline", massMin, massMax );
 
 	  tnp->tag(tag.raw()) ;
 	  tnp->probe(probe.raw()) ;

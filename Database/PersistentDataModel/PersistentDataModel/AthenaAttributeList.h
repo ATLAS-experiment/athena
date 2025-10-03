@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -57,7 +57,7 @@ public:
     /// the lifetime of the attribute list.
     explicit AthenaAttributeList(const coral::AttributeListSpecification& rhs);
 
-    ~AthenaAttributeList() {}
+    virtual ~AthenaAttributeList() {}
 
     /// print to simulate function provided by old POOL AttributeList
     void print(std::ostream& os) const;

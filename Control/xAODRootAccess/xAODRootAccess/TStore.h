@@ -24,6 +24,9 @@
 namespace xAOD {
 
    // Forward declaration(s):
+   namespace Experimental {
+      class REvent;
+   }
    class THolder;
    class TEvent;
 
@@ -45,6 +48,7 @@ namespace xAOD {
 
       /// Make TEvent a friend of this class
       friend class TEvent;
+      friend class Experimental::REvent;
 
    public:
       /// Default constructor

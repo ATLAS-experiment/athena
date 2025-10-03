@@ -26,6 +26,7 @@ StatusCode SCTErrMonAlg::initialize() {
   else m_dcsTool.disable();
   ATH_CHECK(m_pSummaryTool.retrieve());
   ATH_CHECK(m_flaggedTool.retrieve());
+  ATH_CHECK(m_atlasReadyFilter.retrieve());
   // Retrieve geometrical information
   const InDetDD::SCT_DetectorManager* sctManager{nullptr};
   ATH_CHECK(detStore()->retrieve(sctManager, "SCT"));
@@ -370,6 +371,14 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
       auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
       auto detectorCoverageAcc{Monitored::Scalar<double>("detectorCoverage"+coverageVarNames[iProblem], detector_coverage)};
       fill("SCTErrMonitor", lumiBlockAcc, detectorCoverageAcc);
+
+      if (iProblem==summary) {
+	auto detectorCoverageR4PAcc{Monitored::Scalar<double>("detectorCoverage"+coverageVarNames[iProblem]+"InR4P", detector_coverage)};
+	bool atlasReady = m_atlasReadyFilter->accept();
+	if(atlasReady) {
+	  fill("SCTErrMonitor", lumiBlockAcc, detectorCoverageR4PAcc);
+	}
+      }
     }
     
     /// Fill /SCT/DetectorCoverage/SCT_ModulesWithPSTripVsLbs ///
@@ -377,6 +386,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
     auto psTripModulesAcc{Monitored::Scalar<int>("psTripModules", psTripModules)};
     fill("SCTErrMonitor", lumiBlockAcc, psTripModulesAcc);
+
   }
 
   return StatusCode::SUCCESS;

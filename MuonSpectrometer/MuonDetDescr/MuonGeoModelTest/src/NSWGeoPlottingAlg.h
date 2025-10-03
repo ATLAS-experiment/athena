@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef GEOMODELCHECK_NSWPLOTTINGALG_H
 #define GEOMODELCHECK_NSWPLOTTINGALG_H
@@ -13,11 +13,10 @@
 
 class TGraph;
 class TH1;
-
+namespace MuonGM{
 class NSWGeoPlottingAlg : public AthHistogramAlgorithm {
  public:
-  NSWGeoPlottingAlg(const std::string& name, ISvcLocator* pSvcLocator);
-
+  using AthHistogramAlgorithm::AthHistogramAlgorithm;
   StatusCode initialize() override;
   StatusCode execute() override;
   StatusCode finalize() override;
@@ -45,5 +44,5 @@ class NSWGeoPlottingAlg : public AthHistogramAlgorithm {
   std::map<int, std::unique_ptr<TH1>> m_nswActiveAreas{};
   bool m_alg_run{false};
 };
-
+}
 #endif

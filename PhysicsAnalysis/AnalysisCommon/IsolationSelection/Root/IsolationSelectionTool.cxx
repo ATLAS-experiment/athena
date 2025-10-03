@@ -205,6 +205,150 @@ namespace CP {
                                                            xAOD::Iso::neflowisol20};
             wp->addCut(std::make_unique<IsolationConditionCombined>(
                 "MuonPFlowLoose", isoTypes, std::make_unique<TF2>("pflowTFunction", "fabs(x)+0.4*(y>0?y:0)"), "0.16*x", m_isoDecSuffix));
+        } else if (muWPname == "R3PLITasPLIVefficiencyTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{3.75},
+                                                                {2.4599999999999946, 0.0002400000000000006},
+                                                                {2.6437499999999883, 0.00023250000000000085},
+                                                                {5.576250000000033, 2.249999999999814e-05},
+                                                                {7.061249999999798, -5.2499999999991085e-05},
+                                                                {6.933482142856749, -4.553571428570058e-05},
+                                                                {7.271590909090752, -5.5909090909086746e-05},
+                                                                {5.105882352941061, -1.1764705882350721e-05},
+                                                                {4.4250000000000025, -2.97364147850582e-20},
+                                                                {4.425000000000001}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R3PLITasPLIVefficiencyTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R3PLITasPLIVefficiencyVeryTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{4.050000000000001},
+                                                                {2.5912499999999903, 0.0002625000000000011},
+                                                                {2.8012499999999214, 0.00024750000000000623},
+                                                                {5.677499999999787, 4.500000000001207e-05},
+                                                                {6.2137499999998145, 2.2500000000008228e-05},
+                                                                {7.09151785714283, -1.8749999999999094e-05},
+                                                                {8.57727272727282, -6.545454545454794e-05},
+                                                                {5.969852941176529, -1.0294117647059968e-05},
+                                                                {5.528483606557319, -2.581967213113981e-06},
+                                                                {5.324999999999999}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R3PLITasPLIVefficiencyVeryTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R3PLITasPLIVrejectionTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{3.6750000000000007},
+                                                                {2.4374999999999987, 0.00022500000000000008},
+                                                                {2.572499999999916, 0.00022500000000000666},
+                                                                {5.351249999999845, 2.2500000000008773e-05},
+                                                                {7.113749999999581, -6.749999999998147e-05},
+                                                                {7.213392857142764, -6.964285714285394e-05},
+                                                                {7.4778409090906415, -7.977272727272016e-05},
+                                                                {4.105790441176434, -1.3419117647058116e-05},
+                                                                {3.590163934426209, -4.180327868852198e-06},
+                                                                {3.1499999999999986}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R3PLITasPLIVrejectionTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R3PLITasPLIVrejectionVeryTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{3.974999999999998},
+                                                                {2.5875000000000035, 0.0002549999999999993},
+                                                                {2.8687499999999373, 0.00023250000000000495},
+                                                                {5.527499999999797, 4.500000000001146e-05},
+                                                                {6.048749999999677, 2.2500000000014293e-05},
+                                                                {7.019196428571157, -2.4107142857133378e-05},
+                                                                {8.878977272727232, -8.38636363636353e-05},
+                                                                {5.708823529411479, -1.76470588235239e-05},
+                                                                {5.215573770491751, -7.131147540982918e-06},
+                                                                {4.649999999999999}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R3PLITasPLIVrejectionVeryTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R2PLITasPLIVefficiencyTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{3.974999999999998},
+                                                                {2.789999999999986, 0.00021000000000000172},
+                                                                {2.39249999999993, 0.00025500000000000555},
+                                                                {5.737499999999933, 1.5000000000003797e-05},
+                                                                {7.413749999999598, -6.749999999998225e-05},
+                                                                {7.098214285714245, -5.3571428571427186e-05},
+                                                                {6.934090909090853, -4.909090909090761e-05},
+                                                                {5.253676470587868, -1.6176470588228218e-05},
+                                                                {4.275000000000021, -3.17095862137587e-19},
+                                                                {4.349999999999998}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R2PLITasPLIVefficiencyTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R2PLITasPLIVefficiencyVeryTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{4.199999999999999},
+                                                                {2.9625000000000026, 0.00022499999999999956},
+                                                                {2.7674999999999454, 0.0002550000000000043},
+                                                                {5.752499999999801, 4.500000000001117e-05},
+                                                                {6.2887499999995, 2.2500000000022112e-05},
+                                                                {7.265625000000208, -2.4107142857150163e-05},
+                                                                {8.287500000000128, -5.863636363636705e-05},
+                                                                {5.99329044117658, -1.194852941176682e-05},
+                                                                {5.653893442622939, -5.5327868852457475e-06},
+                                                                {5.25}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R2PLITasPLIVefficiencyVeryTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R2PLITasPLIVrejectionTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{3.8999999999999986},
+                                                                {2.853749999999994, 0.00018750000000000065},
+                                                                {2.321250000000002, 0.0002474999999999998},
+                                                                {5.426250000000083, 2.2499999999995095e-05},
+                                                                {7.312499999999872, -7.499999999999437e-05},
+                                                                {7.552232142857126, -8.303571428571374e-05},
+                                                                {7.140340909090713, -7.022727272726753e-05},
+                                                                {4.7727941176470186, -2.499999999999921e-05},
+                                                                {3.679918032786865, -5.409836065573509e-06},
+                                                                {3.0}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R2PLITasPLIVrejectionTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R2PLITasPLIVrejectionVeryTight") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {5500.0, 10000.0, 15000.0, 20000.0, 25000.0, 32000.0, 43000.0, 60000.0, 95000.0};
+            const std::vector<std::vector<double>> parameters = {{4.199999999999999},
+                                                                {2.9887499999999982, 0.0002175000000000001},
+                                                                {2.9287500000000426, 0.0002324999999999965},
+                                                                {5.602499999999976, 4.500000000000134e-05},
+                                                                {6.262499999999722, 1.5000000000012243e-05},
+                                                                {7.651339285714248, -4.5535714285712985e-05},
+                                                                {8.947159090908924, -8.659090909090467e-05},
+                                                                {5.994117647058617, -2.3529411764701903e-05},
+                                                                {4.8565573770491985, -2.213114754098622e-06},
+                                                                {4.349999999999998}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R2PLITasPLIVrejectionVeryTight", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
         } else {
             ATH_MSG_ERROR("Unknown muon isolation WP: " << muWPname);
             return StatusCode::FAILURE;
@@ -467,5 +611,58 @@ namespace CP {
 
     const asg::AcceptInfo& IsolationSelectionTool::getMuonAcceptInfo() const { return m_muonAccept; }
     const asg::AcceptInfo& IsolationSelectionTool::getObjAcceptInfo() const { return m_objAccept; }
+
+    std::string IsolationSelectionTool::createPieceWisePolinomialFunction(const std::vector<double>& boundaries, const std::vector<std::vector<double>>& parameters, bool isOpen) const {
+
+        if (isOpen && boundaries.size() != parameters.size() - 1) {
+            ATH_MSG_ERROR("The number of region boundaries must be one less than the number of parameters for the piecewise polynomial function.");
+            return "";
+        } else if (!isOpen && boundaries.size() != parameters.size() + 1) {
+            ATH_MSG_ERROR("The number of region boundaries must be one more than the number of parameters for the piecewise polynomial function.");
+            return "";
+        }
+
+        std::ostringstream oss;
+        oss << std::setprecision(16);
+
+        // a lambda for the polynomial expression
+        // one could remove the zeroes in the parameters vector 
+        auto polynomial = [](const std::vector<double>& params) {
+            std::ostringstream oss;
+            oss << std::setprecision(16);
+            oss << "(";
+            for (size_t i = 0; i < params.size(); ++i) {
+                if (i > 0) oss << " + ";
+                if (i == 0) {
+                    oss << params[i];  // constant term
+                } else if (i == 1) {
+                    oss << params[i] << " * x";  // linear term
+                } else  {// higher order terms
+                    oss << params[i] << " * pow(x, " << i << ")"; // higher order terms
+                }
+            }
+            oss << ")";
+            return oss.str();
+        };
+
+        // Start the function definition, using concateation of ternary operators
+        // if isOpen==false, just nullify the function before the first and after the last boundary
+        // just create a copy of params, and insert 0.0 at the beginning and end if isOpen==false
+        std::vector<std::vector<double>> params = parameters;
+        if (!isOpen) {
+            params.insert(params.begin(), {0.0});  // add a zero vector at the beginning
+            params.push_back({0.0});  // add a zero vector at the end
+        }
+
+        // now loop over the boundaries and parameters (we can ignore isOpen finally)
+        for (size_t i = 0; i < boundaries.size(); ++i) {
+            if (i == 0) oss << "(";
+            oss << "(x < " << boundaries[i] << ") ? " << polynomial(params[i]) << " : ";
+        }
+        oss << polynomial(params.back()) << ")";  // last segment, no ternary operator
+
+        return oss.str();
+
+    }
 
 }  // namespace CP

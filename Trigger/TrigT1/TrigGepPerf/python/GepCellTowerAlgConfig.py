@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def GepCellTowerAlgCfg(
         flags,
-        name='GelCellTowerAlg',
+        name='GepCellTowerAlg',
         outputCellTowerKey='GEPCellTowers',
         gepCellMapKey='GepCells',
         OutputLevel=None):

@@ -191,7 +191,7 @@ public:
     const MagneticFieldProperties&,
     ParticleHypothesis,
     std::vector<unsigned int>&,
-    std::vector<const Trk::TrackStateOnSurface*>*&,
+    std::vector<const Trk::TrackStateOnSurface*>*,
     std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*,
     double&,
     bool,
@@ -214,15 +214,6 @@ public:
   {
     ATH_MSG_ERROR("Call to non-implemented multiStatePropagate");
     return {};
-  }
-
-  virtual Trk::ExtrapolationCode propagate(
-    const EventContext&,
-    Trk::ExCellCharged&,
-    Trk::TargetSurfaces&,
-    Trk::TargetSurfaceVector&) const override final
-  {
-    return Trk::ExtrapolationCode::FailureConfiguration;
   }
 
 private:

@@ -29,12 +29,10 @@ namespace EL
     {
       if (data.m_inputTree)
       {
-        double cacheSize = data.m_metaData->castDouble (Job::optCacheSize, 0);
-        if (cacheSize > 0)
-          data.m_inputTree->SetCacheSize (cacheSize);
-        double cacheLearnEntries = data.m_metaData->castDouble (Job::optCacheLearnEntries, 0);
-        if (cacheLearnEntries > 0)
-          data.m_inputTree->SetCacheLearnEntries (cacheLearnEntries);
+        if (cacheSize.value() > 0)
+          data.m_inputTree->SetCacheSize (cacheSize.value());
+        if (cacheLearnEntries.value() > 0)
+          data.m_inputTree->SetCacheLearnEntries (cacheLearnEntries.value());
       }
       return StatusCode::SUCCESS;
     }
@@ -44,7 +42,7 @@ namespace EL
     StatusCode TreeCacheModule ::
     onCloseInputFile (ModuleData& data)
     {
-      if (data.m_metaData->castBool (Job::optPrintPerFileStats, false))
+      if (printPerFileStats.value())
       {
         ANA_MSG_INFO ("file stats for: " << data.m_inputFileUrl);
         data.m_inputTree->PrintCacheStats ();

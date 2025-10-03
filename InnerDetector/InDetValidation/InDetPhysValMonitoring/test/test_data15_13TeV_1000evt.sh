@@ -13,7 +13,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r25.0.26"
+relname="r25.0.39"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 inputBS=${artdata}/RecJobTransformTests/data15_13TeV.00283429.physics_Main.daq.RAW._lb0154._SFO-1._0001.data 
@@ -27,3 +27,6 @@ geotag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometry
 echo "Executing script ${script}"
 echo " "
 "$script" ${inputBS} ${dcubeRef} ${conditions} ${geotag}
+
+echo "Clean up output directory (based on compiler)"
+clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

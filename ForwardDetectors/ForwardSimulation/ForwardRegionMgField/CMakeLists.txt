@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ForwardRegionMgField )
@@ -18,4 +18,4 @@ atlas_add_library( ForwardRegionMgField
 set_target_properties( ForwardRegionMgField PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
-atlas_install_runtime( share/*.dat )
+atlas_install_data( share/*.dat )

@@ -49,3 +49,4 @@ atlas_add_dictionary( JetToolHelpersDict
    LINK_LIBRARIES JetToolHelpersLib )
 endif()
 
+atlas_install_python_modules( python/*.py )

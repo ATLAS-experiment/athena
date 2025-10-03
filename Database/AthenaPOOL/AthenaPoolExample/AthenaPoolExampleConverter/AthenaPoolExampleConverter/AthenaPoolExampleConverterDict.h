@@ -8,7 +8,4 @@
 #include "AthenaPoolExampleConverter/ExampleHitContainer_p1.h"
 #include "AthenaPoolExampleConverter/ExampleTrackContainer_p1.h"
 
-#include "AthenaPoolExampleConverter/ExampleHit_p0.h"
-#include "AthenaPoolExampleConverter/ExampleHitStreamer_p0.h"
-
 #endif

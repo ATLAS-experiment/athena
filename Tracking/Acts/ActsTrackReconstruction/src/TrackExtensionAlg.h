@@ -11,7 +11,7 @@
 
 // Tools
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/EventData/TrackContainer.hpp"
@@ -27,6 +27,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 // STL
 #include <memory>
@@ -48,8 +49,8 @@
 namespace ActsTrk {
 class TrackExtensionAlg : public AthReentrantAlgorithm {
  public:
-  TrackExtensionAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
   using CKFOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
@@ -65,14 +66,13 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
-  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
-  SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap>
-      m_detectorElementToGeometryIdMapKey{
-          this, "DetectorElementToActsGeometryIdMapKey",
-          "DetectorElementToActsGeometryIdMap",
-          "Map which associates detector elements to Acts Geometry IDs"};
+  ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{this};
 
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+  SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{
+    this, "BeamSpotKey", "BeamSpotData",
+    "SG key for beam spot"};
+  
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{
       this, "ExtrapolationTool", ""};
@@ -96,9 +96,6 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   std::unique_ptr<detail::CKF_config> m_ckfConfig;
   std::unique_ptr<const Acts::Logger> m_logger;
 
-  Acts::CalibrationContext
-      m_calibrationContext;  // this will change in future to be updatable event
-                             // by event
 };
 }  // namespace ActsTrk
 #endif  // ACTSTRACKRECONSTRUCTION_TRACKEXTENSIONALG_H

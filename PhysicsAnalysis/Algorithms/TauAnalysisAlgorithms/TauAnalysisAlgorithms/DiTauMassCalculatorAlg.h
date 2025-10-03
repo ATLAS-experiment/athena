@@ -35,7 +35,6 @@ namespace CP {
     using EL::AnaAlgorithm::AnaAlgorithm;
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
-    virtual StatusCode finalize() override;
 
   private:
     // configurable properties

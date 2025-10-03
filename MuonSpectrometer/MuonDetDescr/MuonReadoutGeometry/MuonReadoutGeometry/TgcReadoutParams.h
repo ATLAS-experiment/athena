@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_TGCREADOUTPARAMS_H
@@ -44,41 +44,38 @@ namespace MuonGM {
         using GasGapFloatArray = std::array<double, MaxNGaps>;
         using WiregangArray = std::array<int, MaxNGangs>;
         using StripArray = std::array<double, MaxNStrips>;
-
-        /// Constructor not setting any parameters
+        /// @brief Default constructor used by the MuonTPCnv tests
         TgcReadoutParams();
-
+        /// @brief Constructor implementing the strip layout per gasGap
+        /// @param name: Name of the chamber type
+        /// @param iCh: Chamber type index
+        /// @param WireSp: Wire pitch
+        /// @param NCHRNG: Number of phi sectors
+        /// @param numWireGangs: Number of wire gangs in each gas gap
+        /// @param IWGS1: Number of wires in each gang in gas gap 1
+        /// @param IWGS2: Number of wires in each gang in gas gap 2
+        /// @param IWGS3: Number of wires in each gang in gas gap 3
+        /// @param PDIST: Distance of the strip frame to the bottom of the chamber
+        /// @param SLARGE: Position of each strip mounting point on the top of the frame
+        /// @param SSHORT: Position of each strip mounting point on the bottom of the frame
+        /// @param numStrip: Array representing the number of strips in each gasgap
         TgcReadoutParams(const std::string& name, 
                          int iCh, 
-                         int Version, 
                          double WireSp, 
                          const int NCHRNG, 
                          GasGapIntArray && numWireGangs,
                          WiregangArray&& IWGS1, 
                          WiregangArray&& IWGS2, 
-                         WiregangArray&& IWGS3, 
-                         GasGapIntArray&& numStrips);
-
-        // Another constructor for the layout Q
-        TgcReadoutParams(const std::string& name, 
-                         int iCh, 
-                         int Version, double WireSp, 
-                         const int NCHRNG, 
-                         GasGapIntArray && numWireGangs,
-                         WiregangArray&& IWGS1, 
-                         WiregangArray&& IWGS2, 
-                         WiregangArray&& IWGS3, 
-
+                         WiregangArray&& IWGS3,
                          double PDIST, 
-                         StripArray&& SLARGE, 
-                         StripArray&& SSHORT,
+                         std::vector<StripArray>&& SLARGE, 
+                         std::vector<StripArray>&& SSHORT,
                          GasGapIntArray&& numStrips);
 
         ~TgcReadoutParams();
 
         inline const std::string& GetName() const;
         int chamberType() const;
-        int readoutVersion() const;
         int nPhiChambers() const;
         int nGaps() const;
 
@@ -104,19 +101,19 @@ namespace MuonGM {
         double physicalDistanceFromBase() const;
         /// Returns the signed distance of the i-th's strip's left edge w.r.t 
         /// the center of the bottom chamber edge
-        double stripPositionOnLargeBase(int strip) const;
+        double stripPositionOnLargeBase(int strip, int gasGap) const;
         /// Returns the signed distance of the i-th's strip's left edge w.r.t.
         /// the center of the top chamber edge
-        double stripPositionOnShortBase(int strip) const;
+        double stripPositionOnShortBase(int strip, int gasGap) const;
         /// Returns the signed distance along the chamber edge of the strip expressed at the 
         /// chamber center
-        double stripCenter(int strip) const;
-
+        double stripCenter(int strip , int gasGap) const;
+        /// Returns the number of defined strip layers
+        int nStripLayers() const { return m_stripPositionCenter.size(); }
     private:
         // Data members
         std::string m_chamberName{};
         int m_chamberType{0};
-        int m_readoutVersion{0};
         double m_wirePitch{0.};
         int m_nPhiChambers{0};
         
@@ -134,11 +131,11 @@ namespace MuonGM {
         /// These 2 arrays represent the left edges of the i-th strip in a Tgc chamber
         /// The numbers are given as the signed distance along the chamber edge measured 
         /// from the center of the top edge (Large base) or of the bottom edge (Short base)
-        StripArray m_stripPositionOnLargeBase{make_array<double, MaxNStrips>(0)};
-        StripArray m_stripPositionOnShortBase{make_array<double, MaxNStrips>(0)};
+        std::vector<StripArray> m_stripPositionOnLargeBase{};
+        std::vector<StripArray> m_stripPositionOnShortBase{};
         /// The position of the strip center is defined as the intersector of the large and short edge
         /// strip position values
-        StripArray m_stripPositionCenter{make_array<double, MaxNStrips>(0)};
+        std::vector<StripArray> m_stripPositionCenter{};
         
         inline bool invalidGasGap(int gasGap) const{ return gasGap<1 or gasGap>MaxNGaps;}
         inline bool invalidGang(int gang) const{ return gang<1 or gang>MaxNGangs;}

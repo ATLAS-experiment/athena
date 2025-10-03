@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -132,8 +132,8 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
 
   // Opening a database
   const auto & fname = (fileName.empty()? m_fileName : fileName);
-  pool::IDatabase* db = persistencySvc->session().databaseHandle(fname, nameType);
-  if ( ! db ) {
+  auto db = persistencySvc->session().databaseHandle(fname, nameType);
+  if( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
   db->setTechnology( pool::ROOT_StorageType.type() );
@@ -147,7 +147,7 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
       throw std::runtime_error( "Could not retrieve the container" );
     }
     std::cout << "Container : " << container->name() << std::endl;
-    pool::ITokenIterator* tokenIterator = container->tokens( "" );
+    pool::ITokenIterator* tokenIterator = container->tokens();
     if ( ! tokenIterator ) {
       throw std::runtime_error( "Could not obtain a token iterator" );
     }
@@ -170,8 +170,6 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
     delete tokenIterator;
     delete container;
   }
-
-  delete db;
 
   std::cout << "Committing the transaction." << std::endl;
   if ( ! persistencySvc->session().transaction().commit() ) {

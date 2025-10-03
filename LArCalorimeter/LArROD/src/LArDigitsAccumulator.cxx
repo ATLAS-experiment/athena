@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDigitsAccumulator.h"
@@ -38,7 +38,7 @@ StatusCode LArDigitsAccumulator::initialize()
         ATH_MSG_ERROR( "Could not get LArOnline_SuperCellID helper !" );
         return sc;
      } else {
-        m_onlineHelper = (const LArOnlineID_Base*)scid;
+        m_onlineHelper = static_cast<const LArOnlineID_Base*>(scid);
         ATH_MSG_DEBUG("Found the LArOnlineID helper");
      }
   } else { 
@@ -48,7 +48,7 @@ StatusCode LArDigitsAccumulator::initialize()
         ATH_MSG_ERROR( "Could not get LArOnlineID helper !" );
         return sc;
      } else {
-        m_onlineHelper = (const LArOnlineID_Base*)ll;
+        m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
         ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
      }
   } //m_isSC

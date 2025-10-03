@@ -72,6 +72,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::initialize()
 // --------------------------------------------------------------------------------
 
 StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
+                            const EventContext& ctx,
                             const TrigRoiDescriptor*    p_roids,
                             const TrigL2MuonSA::RpcFitResult& rpcFitResult,
                             TrigL2MuonSA::MuonRoad&  muonRoad,
@@ -81,7 +82,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
   // define regions
   ATH_CHECK( m_mdtRegionDefiner->getMdtRegions(p_roids, rpcFitResult, muonRoad, mdtRegion) );
 
-  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits) );
+  ATH_CHECK( getMdtHits(ctx, p_roids, muonRoad, mdtHits) );
 
   return StatusCode::SUCCESS;
 }
@@ -90,6 +91,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
 // --------------------------------------------------------------------------------
 
 StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
+                            const EventContext& ctx,
                             const TrigRoiDescriptor*          p_roids,
                             const TrigL2MuonSA::TgcFitResult& tgcFitResult,
                             TrigL2MuonSA::MuonRoad&           muonRoad,
@@ -99,7 +101,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
   // define regions
   ATH_CHECK( m_mdtRegionDefiner->getMdtRegions(p_roids, tgcFitResult, muonRoad, mdtRegion) );
 
-  ATH_CHECK( getMdtHits(p_roids, muonRoad, mdtHits) );
+  ATH_CHECK( getMdtHits(ctx, p_roids, muonRoad, mdtHits) );
 
   return StatusCode::SUCCESS;
 }
@@ -109,18 +111,18 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::prepareData(
 // --------------------------------------------------------------------------------
 
 StatusCode TrigL2MuonSA::MdtDataPreparator::getMdtHits(
+                                const EventContext& ctx,
                                 const TrigRoiDescriptor* p_roids,
                                 TrigL2MuonSA::MuonRoad& muonRoad,
                                 TrigL2MuonSA::MdtHits& mdtHits) const
 {
   std::vector<IdentifierHash> mdtHashList;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   if (m_use_RoIBasedDataAccess) {
 
     ATH_MSG_DEBUG("Use RoI based data access");
 
-    m_regionSelector->lookup( ctx )->HashIDList(*p_roids, mdtHashList);
+    m_regionSelector->lookup(ctx)->HashIDList(*p_roids, mdtHashList);
     ATH_MSG_DEBUG("mdtHashList.size()=" << mdtHashList.size());
 
   } else {
@@ -234,7 +236,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const Eve
             if (st=='M' && chamberType[2]=='G') chamber = xAOD::L2MuonParameters::Chamber::Backup;
         }
 
-        double &cXmid{tmp.cXmid}, &cYmid{tmp.cYmid}, &cPhip{tmp.cPhip};   //tmp.cAmid remains zero
+        double &cXmid{tmp.cXmid}, &cYmid{tmp.cYmid}, &cPhip{tmp.cPhip};
         Amg::Transform3D trans = muonStation->getNominalAmdbLRSToGlobal();
         if(!muonStation->endcap()){
             cXmid = (trans.translation()).z();
@@ -271,9 +273,8 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const Eve
 
         double Rmin = (trans * muonStation->getBlineFixedPointInAmdbLRS()).perp();
         double OrtoRadialPos = mdtReadout->getStationS();
-        tmp.cInCo = 1./std::cos(std::abs(std::atan(OrtoRadialPos/Rmin)));
+        tmp.cInCo = 1./std::cos(std::atan(OrtoRadialPos/Rmin));
         tmp.cPhi0 = cPhip - std::atan(OrtoRadialPos/Rmin);
-        if(tmp.cPhi0 > M_PI) cPhip -= 2*M_PI;
         if(cPhip<0. && (std::abs(M_PI+cPhip) < 0.05) ) cPhip = M_PI;
 
         ATH_MSG_DEBUG(" ...MDT hit Z/R/chamber/MultiLater/TubeLayer/Tube/Layer/adc/tdc = "

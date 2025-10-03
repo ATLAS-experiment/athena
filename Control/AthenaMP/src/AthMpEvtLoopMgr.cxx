@@ -4,12 +4,10 @@
 
 #include "AthMpEvtLoopMgr.h"
 
-#include "AthenaMPTools/IAthenaMPTool.h"
 #include "AthenaInterprocess/SharedQueue.h"
 #include "AthenaInterprocess/Utilities.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
-#include "AthenaKernel/IDataShare.h"
 #include "GaudiKernel/Incident.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIoComponentMgr.h"
@@ -41,38 +39,7 @@ namespace athenaMP_MemHelper
 AthMpEvtLoopMgr::AthMpEvtLoopMgr(const std::string& name
 				 , ISvcLocator* svcLocator)
   : base_class(name,svcLocator)
-  , m_evtProcessor("AthenaEventLoopMgr", name)
-  , m_evtSelector(nullptr)
-  , m_nWorkers(0)
-  , m_workerTopDir("athenaMP_workers")
-  , m_outputReportName("AthenaMPOutputs")
-  , m_strategy("")
-  , m_isPileup(false)
-  , m_collectSubprocessLogs(false)
-  , m_tools(this)
-  , m_nChildProcesses(0)
-  , m_nPollingInterval(100) // 0.1 second
-  , m_nMemSamplingInterval(0) // no sampling by default
-  , m_nEventsBeforeFork(0)
-  , m_eventPrintoutInterval(1)
-  , m_execAtPreFork()
   , m_masterPid(getpid())
-{
-  declareProperty("NWorkers",m_nWorkers);
-  declareProperty("WorkerTopDir",m_workerTopDir);
-  declareProperty("OutputReportFile",m_outputReportName);
-  declareProperty("Strategy",m_strategy);
-  declareProperty("IsPileup",m_isPileup);
-  declareProperty("CollectSubprocessLogs",m_collectSubprocessLogs);
-  declareProperty("Tools",m_tools);
-  declareProperty("PollingInterval",m_nPollingInterval);
-  declareProperty("MemSamplingInterval",m_nMemSamplingInterval);
-  declareProperty("EventsBeforeFork",m_nEventsBeforeFork);
-  declareProperty("EventPrintoutInterval",m_eventPrintoutInterval);
-  declareProperty("ExecAtPreFork", m_execAtPreFork);
-}
-
-AthMpEvtLoopMgr::~AthMpEvtLoopMgr()
 {
 }
 
@@ -88,8 +55,10 @@ StatusCode AthMpEvtLoopMgr::initialize()
     return StatusCode::FAILURE;
   }
 
-  std::string evtSelName = prpMgr->getProperty("EvtSel").toString();
-  m_evtSelector = serviceLocator()->service(evtSelName);
+  {
+    std::string evtSelName = prpMgr->getProperty("EvtSel").toString();
+    m_evtSelector = serviceLocator()->service(std::move(evtSelName));
+  }
   ATH_CHECK(m_evtSelector.isValid());
 
   if(m_strategy=="EventService") {
@@ -192,7 +161,7 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
   }
 
   // Prepare work directory for sub-processes
-  if(mkdir(m_workerTopDir.c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)!=0) {
+  if(mkdir(m_workerTopDir.value().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)!=0) {
     switch(errno) {
     case EEXIST:
       {
@@ -202,28 +171,29 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
 	srand((unsigned)time(0));
 	std::ostringstream randname;
 	randname << rand();
-	std::string backupDir = (m_workerTopDir.rfind('/')==(m_workerTopDir.size()-1)?m_workerTopDir.substr(0,m_workerTopDir.size()-1):m_workerTopDir)+std::string("-bak-")+randname.str(); 
+	std::string backupDir = (m_workerTopDir.value().rfind('/')==(m_workerTopDir.value().size()-1)
+				 ? m_workerTopDir.value().substr(0,m_workerTopDir.value().size()-1)
+				 : m_workerTopDir.value())+std::string("-bak-")+randname.str(); 
 
 	ATH_MSG_WARNING("The top directory " << m_workerTopDir << " already exists");
 	ATH_MSG_WARNING("The job will attempt to save it with the name " << backupDir <<  " and create new top directory from scratch");
 
-	if(rename(m_workerTopDir.c_str(),backupDir.c_str())!=0) {
-      char buf[256];
-      strerror_r(errno, buf, sizeof(buf));
+	if(rename(m_workerTopDir.value().c_str(),backupDir.c_str())!=0) {
+	  char buf[256];
+	  strerror_r(errno, buf, sizeof(buf));
 	  ATH_MSG_ERROR("Unable to make backup directory! " << buf);
 	  return StatusCode::FAILURE;
 	}
 
-	if(mkdir(m_workerTopDir.c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==0) 
-	  break;
+	if(mkdir(m_workerTopDir.value().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==0) break;
       }
       /* FALLTHROUGH */
     default:
       {
-      char buf[256];
-      strerror_r(errno, buf, sizeof(buf));
-      ATH_MSG_ERROR("Unable to make top directory " << m_workerTopDir << " for children processes! " << buf);
-      return StatusCode::FAILURE;
+	char buf[256];
+	strerror_r(errno, buf, sizeof(buf));
+	ATH_MSG_ERROR("Unable to make top directory " << m_workerTopDir << " for children processes! " << buf);
+	return StatusCode::FAILURE;
       }
     }
   }
@@ -246,13 +216,13 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
   // we have to make sure that mother process is a conversion service
   // client so that events before forking workers are captured...
 
-  SmartIF<IDataShare> dataShare{serviceLocator()->service("AthenaPoolCnvSvc")};
-  ATH_CHECK(dataShare.isValid());
-
   auto sharedWriterTool = m_tools["SharedWriterTool"];
   const bool sharedWriterWithFAFE = (m_nEventsBeforeFork!=0 && sharedWriterTool);
 
   if(sharedWriterWithFAFE) {
+    m_dataShare = SmartIF<IDataShare>(serviceLocator()->service("AthenaPoolSharedIOCnvSvc"));
+    ATH_CHECK(m_dataShare.isValid());
+
     (*sharedWriterTool)->useFdsRegistry(registry);
     (*sharedWriterTool)->setRandString(randStream.str());
 
@@ -273,7 +243,7 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
     }
 
     // Make the mother process a client
-    if(!dataShare->makeClient(m_nWorkers+1).isSuccess()) {
+    if(!m_dataShare->makeClient(m_nWorkers+1).isSuccess()) {
       ATH_MSG_FATAL("Cannot make mother process a client for Conversion Service");
       return StatusCode::FAILURE;
     }
@@ -283,13 +253,17 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
   // Try processing requested number of events here
   if(m_nEventsBeforeFork) {
     // Take into account a corner case: m_nEventsBeforeFork > maxevt
-    int nEventsToProcess = ((maxevt>-1 && m_nEventsBeforeFork>maxevt)?maxevt:m_nEventsBeforeFork);
+    int nEventsToProcess = (maxevt>-1 && m_nEventsBeforeFork>maxevt)
+      ? maxevt
+      : m_nEventsBeforeFork.value();
     StatusCode scEvtProc = m_evtProcessor->nextEvent(nEventsToProcess);
     if(!scEvtProc.isSuccess()) {
-      if(nEventsToProcess)
+      if(nEventsToProcess) {
 	ATH_MSG_FATAL("Unable to process first " << nEventsToProcess << " events in the master");
-      else
+      }
+      else {
 	ATH_MSG_FATAL("Unable to process first event in the master");
+      }
       return scEvtProc;
     }
   }
@@ -304,7 +278,7 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
   fflush(NULL);
 
   // Make the mother process not client
-  if(sharedWriterWithFAFE && !dataShare->makeClient(0).isSuccess()) {
+  if(sharedWriterWithFAFE && !m_dataShare->makeClient(0).isSuccess()) {
     ATH_MSG_FATAL("Cannot make mother process not client for Conversion Service");
     return StatusCode::FAILURE;
   }
@@ -465,7 +439,7 @@ StatusCode AthMpEvtLoopMgr::generateOutputReport()
   // If m_nEventsBeforeFork!=0 then take into account the outputs made by the master process too
 
   std::ofstream ofs;
-  ofs.open(m_outputReportName.c_str());
+  ofs.open(m_outputReportName.value().c_str());
   if(!ofs) {
     ATH_MSG_ERROR("Unable to open AthenaMPOutputs for writing!");
     return StatusCode::FAILURE;

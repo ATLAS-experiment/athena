@@ -8,11 +8,11 @@
 #define XAODTRUTH_TRUTHVERTEXAUXCONTAINER_H
 
 // Local include(s):
-#include "xAODTruth/versions/TruthVertexAuxContainer_v1.h"
+#include "xAODTruth/versions/TruthVertexAuxContainer_v2.h"
 
 namespace xAOD {
    /// Declare the latest version of the truth vertex auxiliary container
-   typedef TruthVertexAuxContainer_v1 TruthVertexAuxContainer;
+   typedef TruthVertexAuxContainer_v2 TruthVertexAuxContainer;
 }
 
 // Declare a CLID for the class

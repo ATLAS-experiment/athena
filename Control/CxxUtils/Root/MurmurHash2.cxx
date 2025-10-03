@@ -57,7 +57,7 @@ uint32_t MurmurHash2 ( const void * key, int len, uint32_t seed )
 
   while(len >= 4)
   {
-    uint32_t k = *(uint32_t*)data;
+    uint32_t k = *reinterpret_cast<const uint32_t*>(data);
 
     k *= m;
     k ^= k >> r;
@@ -122,7 +122,7 @@ uint64_t MurmurHash64A ( const void * key, int len, uint64_t seed )
     h *= m; 
   }
 
-  const unsigned char * data2 = (const unsigned char*)data;
+  const unsigned char * data2 = reinterpret_cast<const unsigned char*>(data);
 
   switch(len & 7)
   {
@@ -185,11 +185,11 @@ uint64_t MurmurHash64B ( const void * key, int len, uint64_t seed )
 
   switch(len)
   {
-  case 3: h2 ^= ((unsigned const char*)data)[2] << 16;
+  case 3: h2 ^= (reinterpret_cast<unsigned const char*>(data))[2] << 16;
   // FALLTHROUGH
-  case 2: h2 ^= ((unsigned const char*)data)[1] << 8;
+  case 2: h2 ^= (reinterpret_cast<unsigned const char*>(data))[1] << 8;
   // FALLTHROUGH
-  case 1: h2 ^= ((unsigned const char*)data)[0];
+  case 1: h2 ^= (reinterpret_cast<unsigned const char*>(data))[0];
       h2 *= m;
   };
 
@@ -229,7 +229,7 @@ uint32_t MurmurHash2A ( const void * key, int len, uint32_t seed )
 
   while(len >= 4)
   {
-    uint32_t k = *(uint32_t*)data;
+    uint32_t k = *reinterpret_cast<const uint32_t*>(data);
 
     MurmurHash_mmix(h,k);
 
@@ -359,7 +359,7 @@ uint32_t MurmurHashAligned2 ( const void * key, int len, uint32_t seed )
 
     while(len >= 4)
     {
-      d = *(uint32_t *)data;
+      d = *reinterpret_cast<const uint32_t *>(data);
       t = (t >> sr) | (d << sl);
 
       uint32_t k = t;
@@ -435,7 +435,7 @@ uint32_t MurmurHashAligned2 ( const void * key, int len, uint32_t seed )
   {
     while(len >= 4)
     {
-      uint32_t k = *(uint32_t *)data;
+      uint32_t k = *reinterpret_cast<const uint32_t *>(data);
 
       MIX(h,k,m);
 

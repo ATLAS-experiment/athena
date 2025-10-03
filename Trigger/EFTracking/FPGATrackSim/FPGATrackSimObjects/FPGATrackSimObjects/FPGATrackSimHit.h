@@ -111,6 +111,15 @@ public:
     float getPhiCoord() const { return m_phiCoord; }
     float getEtaCoord() const { return m_etaCoord; }
 
+    void setMaxPhiIndex(int v) { m_maxPhiIndex = v; }
+    void setMinPhiIndex(int v) { m_minPhiIndex = v; }
+    void setMaxEtaIndex(int v) { m_maxEtaIndex = v; }
+    void setMinEtaIndex(int v) { m_minEtaIndex = v; }
+    int getMaxPhiIndex() const { return m_maxPhiIndex; }
+    int getMinPhiIndex() const { return m_minPhiIndex; }
+    int getMaxEtaIndex() const { return m_maxEtaIndex; }
+    int getMinEtaIndex() const { return m_minEtaIndex; }
+
     float getPhiWindow() const { return m_phiWindow; }
 
     // Converts the hit into a spacepoint. Keeps copies of the local information.
@@ -236,6 +245,12 @@ protected:
     float m_phiCoord = -999; // local position along phi direction
     float m_etaCoord = -999; // local position along eta direction
 
+    // --- Min/Max Indices used for cluster equivalent to estimate widths ---
+    int m_maxPhiIndex = std::numeric_limits<int>::min();
+    int m_minPhiIndex = std::numeric_limits<int>::max();
+    int m_maxEtaIndex = std::numeric_limits<int>::min();
+    int m_minEtaIndex = std::numeric_limits<int>::max();
+
     // --- Global Coordinates ---
     float m_x = 0;  // Hit position in global coordinates
     float m_y = 0;
@@ -292,7 +307,7 @@ protected:
     std::vector<unsigned> m_IDhashVec; // for a cluster, when we get the equivalent hit info we want to store all the ID hash containing it
     std::vector<int> m_PhiIndexVec; // for a cluster, all the phi indices in it
     std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it
-    ClassDefNV(FPGATrackSimHit, 13);
+    ClassDefNV(FPGATrackSimHit, 14);
 };
 
 // Container of <FPGATrackSimHit const *>

@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 #include "ByteStreamEventStorageOutputSvc.h"
 
 #include <stdexcept>
@@ -108,6 +108,7 @@ ByteStreamEventStorageOutputSvc::finalize() {
   // clean up
   ATH_MSG_DEBUG("deleting DataWriter");
   m_dataWriter.reset();
+  std::lock_guard< std::mutex > lock(m_dataWriterMutex);
   ATH_MSG_INFO("number of events written: " << m_totalEventCounter);
   return StatusCode::SUCCESS;
 }
@@ -414,7 +415,7 @@ ByteStreamEventStorageOutputSvc::updateDataWriterParameters(
     event_type += "is calibration";
   else event_type += "is physics";
 
-  params.fmdStrings.push_back(event_type);
+  params.fmdStrings.push_back(std::move(event_type));
 }
 
 

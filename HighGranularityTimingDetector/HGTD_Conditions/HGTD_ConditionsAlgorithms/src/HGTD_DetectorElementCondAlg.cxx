@@ -53,17 +53,17 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
 
   // ____________ Construct new Write Cond Object ____________
   std::unique_ptr<InDetDD::HGTD_DetectorElementCollection> writeCdo{std::make_unique<InDetDD::HGTD_DetectorElementCollection>()};
- 
+
   // Make sure we make a mixed IOV.
   writeHandle.addDependency (IOVInfiniteRange::infiniteMixed());
-  
+
   // ____________ Update writeCdo ____________
   std::map<const InDetDD::HGTD_DetectorElement*, const InDetDD::HGTD_DetectorElement*> oldToNewMap;
   oldToNewMap[nullptr] = nullptr;
-  writeCdo->resize(oldColl->size(), nullptr);
+  writeCdo->resize(oldColl->size());
   InDetDD::HGTD_DetectorElementCollection::iterator newEl{writeCdo->begin()};
   for (const InDetDD::HGTD_DetectorElement* oldEl: *oldColl) {
-    *newEl = new InDetDD::HGTD_DetectorElement(oldEl->identify(),     
+    *newEl = new InDetDD::HGTD_DetectorElement(oldEl->identify(),
                                                &(oldEl->design()),
                                                oldEl->GeoVDetectorElement::getMaterialGeom(),
                                                oldEl->getCommonItems());
@@ -77,9 +77,10 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
     if (oldToNewMap[(*oldIt)]!=newEl) {
       ATH_MSG_ERROR("Old and new elements are not synchronized!");
     }
-    // Layer of old element is set by HGTD_LayerBuilderCond::registerSurfacesToLayer.
     const Trk::Layer* layer{(*oldIt)->surface().associatedLayer()};
     if (layer) {
+      //NOTE!!! associateLayer occurs here but it also occurs
+      //later in the layer builder
       newEl->surface().associateLayer(*layer);
     }
     ++oldIt;
@@ -87,13 +88,13 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
 
   // Apply alignment using readCdo passed to HGTD_DetectorElement
   for (InDetDD::HGTD_DetectorElement* newEl: *writeCdo) {
-    newEl->setCache();
+    newEl->updateCache();
   }
 
   // Record WriteCondHandle
   const std::size_t size{writeCdo->size()};
   if (writeHandle.record(std::move(writeCdo)).isFailure()) {
-    ATH_MSG_FATAL("Could not record " << writeHandle.key() 
+    ATH_MSG_FATAL("Could not record " << writeHandle.key()
                   << " with EventRange " << writeHandle.getRange()
                   << " into Conditions Store");
     return StatusCode::FAILURE;

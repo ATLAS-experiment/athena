@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_CONDATTRLISTVECADDRESS_H
@@ -32,7 +32,7 @@ public:
     // not allowed with new Gaudi
     CondAttrListVecAddress& operator=(const CondAttrListVecAddress& copy) = delete;
     /// Constructor from GA
-    CondAttrListVecAddress(const GenericAddress& copy);
+    explicit CondAttrListVecAddress(const GenericAddress& copy);
     /// Standard Constructor
     CondAttrListVecAddress( long svc,
 			  const CLID& clid,

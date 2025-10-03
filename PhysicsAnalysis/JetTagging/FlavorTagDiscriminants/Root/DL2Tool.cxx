@@ -15,7 +15,6 @@ namespace FlavorTagDiscriminants {
     declareProperty("nnFile", m_props.nnFile);
     declareProperty("flipTagConfig", m_props.flipTagConfig);
     declareProperty("variableRemapping", m_props.variableRemapping);
-    declareProperty("trackLinkType", m_props.trackLinkType);
     declareProperty("defaultOutputValue", m_props.default_output_value);
   }
   DL2Tool::~DL2Tool() {}
@@ -26,35 +25,25 @@ namespace FlavorTagDiscriminants {
     if (m_props.flipTagConfig.size() > 0) {
       flipConfig = FlavorTagInference::flipTagConfigFromString(m_props.flipTagConfig);
     }
-    TrackLinkType trackLinkType = TrackLinkType::TRACK_PARTICLE;
-    if (m_props.trackLinkType.size() > 0) {
-      trackLinkType = FlavorTagInference::trackLinkTypeFromString(m_props.trackLinkType);
-    }
     m_dl2.reset(
       new DL2HighLevel(
         m_props.nnFile,
         flipConfig,
-        m_props.variableRemapping,
-        trackLinkType
+        m_props.variableRemapping
         )
       );
     return StatusCode::SUCCESS;
   }
 
-  void DL2Tool::decorate(const xAOD::BTagging& btag) const {
-    ATH_MSG_DEBUG("Decorating btagging object from: " + m_props.nnFile);
-    m_dl2->decorate(btag);
-    ATH_MSG_VERBOSE("Decorated btagging object");
+  void DL2Tool::decorate(const xAOD::IParticle& i_jet) const {
+    ATH_MSG_DEBUG("Decorating i_jet from: " + m_props.nnFile);
+    m_dl2->decorate(i_jet);
+    ATH_MSG_VERBOSE("Decorated i_jet");
   }
-  void DL2Tool::decorate(const xAOD::Jet& jet) const {
-    ATH_MSG_DEBUG("Decorating jet from: " + m_props.nnFile);
-    m_dl2->decorate(jet);
-    ATH_MSG_VERBOSE("Decorated jet");
-  }
-  void DL2Tool::decorateWithDefaults(const SG::AuxElement& jet) const {
-    ATH_MSG_DEBUG("Decorating jet with defaults from: " + m_props.nnFile);
-    m_dl2->decorateWithDefaults(jet);
-    ATH_MSG_VERBOSE("Decorated jet with defaults");
+  void DL2Tool::decorateWithDefaults(const xAOD::IParticle& i_jet) const {
+    ATH_MSG_DEBUG("Decorating i_jet with defaults from: " + m_props.nnFile);
+    m_dl2->decorateWithDefaults(i_jet);
+    ATH_MSG_VERBOSE("Decorated i_jet with defaults");
   }
 
   std::set<std::string> DL2Tool::getDecoratorKeys() const {

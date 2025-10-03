@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FCALSDTool.h"
-
 #include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
@@ -15,17 +14,7 @@ namespace LArG4
   FCALSDTool::FCALSDTool(const std::string& type, const std::string& name,
                          const IInterface* parent)
     : SimpleSDTool(type, name, parent)
-    , m_fcal1calc("FCAL1Calculator", name)
-    , m_fcal2calc("FCAL2Calculator", name)
-    , m_fcal3calc("FCAL3Calculator", name)
   {
-    declareProperty("FCAL1Volumes", m_fcal1Volumes);
-    declareProperty("FCAL2Volumes", m_fcal2Volumes);
-    declareProperty("FCAL3Volumes", m_fcal3Volumes);
-
-    declareProperty("FCAL1Calculator", m_fcal1calc);
-    declareProperty("FCAL2Calculator", m_fcal2calc);
-    declareProperty("FCAL3Calculator", m_fcal3calc);
   }
 
   //---------------------------------------------------------------------------

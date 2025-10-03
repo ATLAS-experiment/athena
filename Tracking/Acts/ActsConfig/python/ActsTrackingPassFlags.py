@@ -26,17 +26,17 @@ def activateActsComponents(icf):
 
     
 # Main ACTS Tracking pass    
-def createActsTrackingPassFlags():
+def createActsLegacyTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = "Acts"
+    icf.extension = "ActsLegacy"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     return icf
 
 # Main ACTS Tracking pass with Fast Tracking configuration
-def createActsFastTrackingPassFlags():
+def createActsTrackingPassFlags():
     icf = createITkFastTrackingPassFlags()
-    icf.extension = "ActsFast"
+    icf.extension = "Acts"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     return icf
@@ -63,8 +63,6 @@ def createActsHeavyIonTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf : pcf.Acts.doAmbiguityResolution
     icf.doActsToAthenaResolvedTrack = lambda pcf : pcf.Acts.doAmbiguityResolution
 
-    # Other specific flags
-    icf.minPTSeed = 0.4
     # Deactivate CTIDE processor fit
     icf.doAmbiguityProcessorTrackFit = False    
     return icf
@@ -77,9 +75,9 @@ def createActsLargeRadiusTrackingPassFlags():
     activateActsComponents(icf)
     # Mark as secondary pass 
     icf.isSecondaryPass = True
-    # For the time being we do not store sepate containers for LRT (to be revised)
+    # Store sepate container for LRT
     # In Athena this is handled by the Tracking.storeSeparateLargeD0Container flag
-    icf.storeSeparateContainer = False
+    icf.storeSeparateContainer = True
     return icf
 
 # Secondary ACTS Tracking pass for Conversion tracking
@@ -161,6 +159,12 @@ def createActsValidateConversionSeedsTrackingPassFlags():
     icf.isSecondaryPass = False
     return icf
 
+def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
+    icf = createActsLargeRadiusTrackingPassFlags()
+    icf.extension = "ActsValidateLargeRadiusStandalone"
+    icf.isSecondaryPass = False
+    return icf
+
 def createActsValidateLargeRadiusSeedsTrackingPassFlags():
     icf = createActsLargeRadiusTrackingPassFlags()
     icf.extension = "ActsValidateLargeRadiusSeeds"
@@ -215,4 +219,27 @@ def createActsValidateAmbiguityResolutionTrackingPassFlags():
     icf.doAthenaToActsTrack = True
     icf.doActsAmbiguityResolution = True
     icf.doActsToAthenaResolvedTrack = True
+    return icf
+
+def createEFValidateF100TrackingPassFlags():
+    icf = createActsTrackingPassFlags()
+    icf.extension = "ActsValidateF100"
+    icf.doActsCluster = False
+    icf.doFPGACluster = True
+    icf.doFPGATrackSim = True
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    return icf
+
+def createEFValidateF150TrackingPassFlags():
+    icf = createActsTrackingPassFlags()
+    icf.extension = "ActsValidateF150"
+    icf.doActsCluster = False
+    icf.doFPGACluster = True
+    icf.doFPGASeed = True
+    icf.doFPGATrackSim = True
+    icf.doActsSpacePoint = False
+    icf.doActsSeed = False
+    icf.doActsTrack = True
     return icf

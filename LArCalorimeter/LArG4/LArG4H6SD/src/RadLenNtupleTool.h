@@ -44,7 +44,7 @@ namespace G4UA
   private:
     /// Configuration parameters
     RadLenNtuple::Config m_config;
-
+    Gaudi::Property<std::string> m_mcEventCollName {this, "McEventCollName", "GEN_EVENT"};
   }; // class RadLenNtupleTool
 
 } // namespace G4UA

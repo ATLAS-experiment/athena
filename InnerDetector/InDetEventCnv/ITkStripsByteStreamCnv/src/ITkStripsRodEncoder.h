@@ -8,8 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ITkStripsByteStreamCnv/IITkStripsRodEncoder.h"
 
-#include "InDetRawData/SCT_RDO_Container.h"
-#include "SCT_Cabling/ISCT_CablingTool.h"
+#include "ITkStripCabling/IITkStripCablingTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include <set>
@@ -31,17 +30,13 @@ class
 ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{ 
  public:
  
-  /** Constructor */
-  ITkStripsRodEncoder(const std::string& type, const std::string& name, const IInterface* parent);
-
+  using base_class::base_class;
+  
   /** Destructor */
   virtual ~ITkStripsRodEncoder() = default;
 
   /** Initialize */
   virtual StatusCode initialize() override;
-
-  /** Finalize */
-  virtual StatusCode finalize() override;
 
   /**
    * @brief Main Convert method
@@ -74,7 +69,8 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   
   mutable std::atomic<uint8_t> m_bcid = 0;
   mutable std::atomic<uint8_t> m_l0tag = 0;
-  void encodeData(const std::vector<uint16_t>& clusters, std::vector<uint8_t>& data_encode,
+  
+  void encodeData(const std::vector<uint16_t>& clusters, const uint16_t ichannel, std::vector<uint8_t>& data_encode,
                                 int typ, uint8_t l0tag, uint8_t bc_count) const;
   
   /**
@@ -154,9 +150,9 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   uint16_t getTrailer(const int& errorWord) const;
   
   /** Providing mappings of online and offline identifiers and also serial numbers. */
-  ToolHandle<ISCT_CablingTool> m_cabling{this, 
-                                         "SCT_CablingTool", 
-                                         "SCT_CablingTool", 
+  ToolHandle<IITkStripCablingTool> m_cabling{this, 
+                                         "ITkStripCablingTool", 
+                                         "ITkStripCablingTool", 
                                          "Tool to retrieve ITkStrips Cabling"};
 
   /** Identifier helper class for the ITkStrips subdetector that creates compact Identifier objects and 
@@ -170,4 +166,4 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   std::set<Identifier> m_swapModuleID{};
 };
 
-#endif // SCT_RAWDATABYTESTREAMCNV_SCT_RODENCODER_H
+#endif // ITKSTRIP_RAWDATABYTESTREAMCNV_ITKSTRIP_RODENCODER_H

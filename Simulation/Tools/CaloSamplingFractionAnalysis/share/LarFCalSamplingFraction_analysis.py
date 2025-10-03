@@ -9,7 +9,6 @@ Calculate FCal Sampling Fractions
 Calculate the FCal sampling fractions from Geant4 simulation.
 """
 
-from __future__ import absolute_import, division, print_function
 
 
 import argparse
@@ -72,6 +71,9 @@ def calculate_samp_frac(args):
     samp_frac = 0
     samp_frac_sq = 0
 
+    min_eta=1000.0;
+    max_eta=0.0;
+
     if args.verbose:
         print("Event  Active E [MeV]  Total E [MeV]")
 
@@ -90,6 +92,9 @@ def calculate_samp_frac(args):
         samp_frac += activeE / totalE
         samp_frac_sq += (activeE / totalE)**2
 
+        min_eta=min(min_eta,event.Vertex_Eta)
+        max_eta=max(max_eta,event.Vertex_Eta)
+
         if args.verbose:
             print("{:<6} {:<15g} {:<15g}".format(event.Event, activeE, totalE))
 
@@ -104,6 +109,14 @@ def calculate_samp_frac(args):
     samp_frac_err = math.sqrt(samp_frac_sq - samp_frac**2) / math.sqrt(n_event)
 
     print("{} sampling fraction (E = {:g} GeV): {:g} +/- {:g}".format(args.module, E_init, samp_frac, samp_frac_err))
+
+
+    outfile=root.TFile.Open("SF_LAr.root","UPDATE")
+    func=root.TF1("SF_{}_eta_{:4.2f}_{:4.2f}".format(args.module,min_eta,max_eta),"pol0",min_eta,max_eta)
+    func.SetParameter(0,samp_frac);
+    func.SetParError(0,samp_frac_err);
+    func.Write()
+    outfile.Close()
 
     return E_init, samp_frac, samp_frac_err
 

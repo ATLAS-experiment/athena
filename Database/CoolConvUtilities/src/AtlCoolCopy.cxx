@@ -35,7 +35,6 @@
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/PersistencySvcException.h"
 #include "PersistencySvc/SimpleUtilityBase.h"
 #include "RelationalAccess/ConnectionService.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"
@@ -770,7 +769,7 @@ int AtlCoolCopy::copyFolder ATLAS_NOT_THREAD_SAFE
   	  std::string htag=sourcefl->resolveTag(*itag);
 	  if (find(tags.begin(),tags.end(),htag)==tags.end()) {
 	    std::cout << *itag << "=" << htag << " ";
-	    tags.push_back(htag);
+	    tags.push_back(std::move(htag));
 	  }
 	}
 	// ignore exceptions indicating tag not defined here
@@ -796,8 +795,13 @@ int AtlCoolCopy::copyFolder ATLAS_NOT_THREAD_SAFE
     int retcode;
     // verify or copy folder
     if (m_verify) {
-      retcode=verifyIOVs(folder,sourcefl,sourceflc,destfl,destflc,
-			 *itag,since,until,checkrefs,iscora,spaymode);
+      if (!destfl) {
+        retcode = 1;
+      }
+      else {
+        retcode=verifyIOVs(folder,sourcefl,sourceflc,destfl,destflc,
+                           *itag,since,until,checkrefs,iscora,spaymode);
+      }
     } else if (m_nocopy) {
       retcode=nocopyIOVs(folder,sourcefl,*itag,since,until,checkrefs);
     } else if (m_root) {
@@ -1586,7 +1590,7 @@ int AtlCoolCopy::rootIOVs(const std::string& folder,
     // clear the buffer of pointers - note this leaks the memory of the
     // previous buffers, but to do this properly would have to remember
     // the type of each object and delete appropriately
-    m_nt_treename=treename;
+    m_nt_treename=std::move(treename);
     m_nt_bufferptr.clear();
     for (unsigned int icol=0;icol<ncolumns;++icol) {
       const cool::IFieldSpecification& fieldspec=spec[icol];
@@ -2391,9 +2395,9 @@ int AtlCoolCopy::setOpts(int argc, const char* argv[]) {
       std::cout << "File not found" << std::endl;
       return 3;
     }
-    char* p_buf=new char[999];
+    std::vector<char> p_buf (999);
     while (!feof(p_inp)) {
-      char* p_line=fgets(p_buf,999,p_inp);
+      char* p_line=fgets(p_buf.data(),p_buf.size(),p_inp);
       if (p_line!=nullptr) {
 	int fargc=0;
 	const char* fargv[99];
@@ -2425,7 +2429,6 @@ int AtlCoolCopy::setOpts(int argc, const char* argv[]) {
     }
     std::cout << "Close file" << std::endl;
     fclose(p_inp);
-    delete[] p_buf;
   }
 
   // now open the database so folder lookup will work
@@ -2559,6 +2562,11 @@ cool::ValidityKey AtlCoolCopy::timeVal(const char* input) {
       cool::ValidityKey itime=static_cast<cool::ValidityKey>(mktime(&mytm));
       strptime("1970-01-02:00:00:00","%Y-%m-%d:%T",&mytm2);
       cool::ValidityKey caltime=static_cast<cool::ValidityKey>(mktime(&mytm2));
+      if (caltime == static_cast<cool::ValidityKey>(-1)) {
+        std::cout << 
+          "ERROR in mktime" << std::endl;
+        return 0;
+      }
       itime+=24*60*60-caltime;
       return itime*static_cast<cool::ValidityKey>(1.E9);
     } else {
@@ -2881,16 +2889,15 @@ bool AtlCoolCopy::getRunList() {
       std::cout << "File not found" << std::endl;
       return false;
     }
-    char* p_buf=new char[999];
+    std::vector<char> p_buf (999);
     while (!feof(p_inp)) {
-      char* p_line=fgets(p_buf,999,p_inp);
+      char* p_line=fgets(p_buf.data(),p_buf.size(),p_inp);
       if (p_line!=nullptr) {
 	unsigned int run=atoi(p_line);
 	m_runlist.push_back(run);
       }
     }
     fclose(p_inp);
-    delete[] p_buf;
   }
   std::sort(m_runlist.begin(),m_runlist.end());
   std::cout << "Read list of " << m_runlist.size() << " runs from " <<
@@ -3013,7 +3020,7 @@ void AtlCoolCopy::checkRef(const cool::IRecord& payload,
       }
     } else {
       // for fileGUID, POOL GUID is just the string
-      poolref=addr;
+      poolref=std::move(addr);
     }
     std::string foldertag=folder+":"+tag;
     // insert into list, first check if same as before

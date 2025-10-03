@@ -100,7 +100,7 @@ namespace SG {
 ///////////////////////////////////////////////////////////////////////////
 /// Standard Constructor
 SGImplSvc::SGImplSvc(const string& name,ISvcLocator* svc)
-  : Service(name, svc),
+  : base_class(name, svc),
     m_pCLIDSvc("ClassIDSvc", name),
     m_pDataLoader("EventPersistencySvc", name),
     m_pPPSHandle("ProxyProviderSvc", name),
@@ -326,41 +326,6 @@ StatusCode SGImplSvc::reinitialize()    {
   const bool FORCEREMOVE(true);
   clearStore(FORCEREMOVE).ignore();
   //not in v20r2p2! return Service::reinitialize();
-  return StatusCode::SUCCESS;
-}
-
-const InterfaceID& 
-SGImplSvc::interfaceID() { 
-  static const InterfaceID IID("SGImplSvc", 1, 0);
-  return IID; 
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode SGImplSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( IProxyDict::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IProxyDict*)this;
-  }
-  else if ( IProxyDict::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IProxyDict*)this;
-  }
-  else if ( IHiveStoreMgr::interfaceID().versionMatch(riid) )    {
-    *ppvInterface = (IHiveStoreMgr*)this;
-  }
-  else if ( interfaceID().versionMatch(riid) )    {
-    // In principle this should be cast to ISGImplSvc*. However, there
-    // is an anomaly in that existing clients are using the concrete StoreGate
-    // interface instead of an abstract ISGImplSvc interface.
-    *ppvInterface = (SGImplSvc*)this;
-  } else  {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 

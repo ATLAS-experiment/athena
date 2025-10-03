@@ -45,7 +45,7 @@ class SlidingDiscSurface final : public DiscSurface
 {
 
 public:
- 
+
   /**Constructor */
   SlidingDiscSurface(DiscSurface& surf,
                      const Trk::BinUtility & bu,

@@ -14,7 +14,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsVolumeMappingTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/Material/VolumeMaterialMapper.hpp"
@@ -42,21 +42,13 @@ public:
   Acts::VolumeMaterialMapper::State
   mappingState() const override;
 
-  virtual
-  const IActsTrackingGeometryTool*
-  trackingGeometryTool() const override
-  {
-    return m_trackingGeometryTool.get();
-  }
-
-
 private:
   // Straight line stepper
   Acts::MagneticFieldContext m_magFieldContext;
   Acts::GeometryContext      m_geoContext;
   using SlStepper  = Acts::StraightLineStepper;
   using StraightLinePropagator = Acts::Propagator<SlStepper, Acts::Navigator>;
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
   std::shared_ptr<Acts::VolumeMaterialMapper> m_mapper;
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
 };

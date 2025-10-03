@@ -31,6 +31,8 @@
 - Event/xAOD/.*Cnv
 - Event/xAOD/xAODMuonRDO
 - Event/xAOD/xAODMuonRDOAthenaPool
+- Event/xAOD/xAODAuxiliaryMeasurement
+- Event/xAOD/xAODAuxiliaryMeasurementAthenaPool
 + Event/xAOD/.*
 
 # Others:
@@ -131,6 +133,7 @@
 + Trigger/TrigAnalysis/TrigAnalysisInterfaces
 + Trigger/TrigAnalysis/TrigBunchCrossingTool
 + Trigger/TrigAnalysis/TrigDecisionTool
++ Trigger/TrigAnalysis/TrigAnalysisHelpers
 + Trigger/TrigAnalysis/TrigGlobalEfficiencyCorrection
 + Trigger/TrigAnalysis/TriggerMatchingTool
 + Trigger/TrigConfiguration/TrigConfBase
@@ -149,7 +152,7 @@
 + Trigger/TrigEvent/TrigSteeringEvent
 + Trigger/TrigSteer/TrigCompositeUtils
 + Trigger/TrigT1/TrigT1MuctpiBits
-#+ Trigger/TriggerSimulation/TrigBtagEmulationTool
++ Trigger/TrigEmulation/TrigBtagEmulationTool
 #+ Reconstruction/RecoTools/IsolationTool
 + Reconstruction/RecoTools/RecoToolInterfaces
 + MuonSpectrometer/MuonValidation/MuonTesterTree
@@ -182,6 +185,8 @@
 + Control/PerformanceMonitoring/PerfMonComps
 + Control/PerformanceMonitoring/PerfMonGPerfTools
 + Control/Navigation
+# AthenaServices dependency
++ Database/SQLiteDBSvc
 
 #scripts package contains useful commands like get_files
 + Tools/Scripts
@@ -200,7 +205,6 @@
 + Database/AthenaRoot/.*
 + Database/ConnectionManagement/.*
 - Database/AthenaPOOL/AthenaPoolExample.*
-- Database/AthenaPOOL/.*Tools
 + Database/AthenaPOOL/.*
 + Database/DBLock
 + Database/IOVDb.*
@@ -233,7 +237,6 @@
 + Event/EventInfo.*
 + Event/EventAthenaPool
 + Event/EventTPCnv
-+ Event/EventPTCnv
 + DetectorDescription/Identifier
 + DetectorDescription/GeoModel/GeoModelInterfaces
 

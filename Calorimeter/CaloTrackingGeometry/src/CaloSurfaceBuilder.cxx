@@ -494,7 +494,9 @@ CaloSurfaceBuilder::get_disk_surface(CaloCell_ID::CaloSample sample,
     return false;
   }
 
-  double ri, ra, zow;
+  double ri;
+  double ra;
+  double zow;
   for (const CaloDetDescriptor* reg : calo_dd->calo_descriptors_range()) {
     if (reg) {
       if (reg->getSampling(0) == sample && reg->calo_sign() * side > 0) {

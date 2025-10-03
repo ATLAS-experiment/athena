@@ -46,12 +46,12 @@ namespace {
   }
 }
 
-void BTagTrackIpAccessor::augment(const xAOD::TrackParticle &track, const xAOD::Jet &jet) const {
+void BTagTrackIpAccessor::augment(const xAOD::TrackParticle &track, const xAOD::IParticle &jet) const {
   augment_with_grades(track, jet);
   augment_with_ip(track, jet);
 }
 
-BTagSignedIP BTagTrackIpAccessor::getSignedIp(const xAOD::TrackParticle &track, const xAOD::Jet &jet) const {
+BTagSignedIP BTagTrackIpAccessor::getSignedIp(const xAOD::TrackParticle &track, const xAOD::IParticle &jet) const {
   const TLorentzVector jet_fourVector = jet.p4();
   const Amg::Vector3D jet_threeVector(jet_fourVector.X(),jet_fourVector.Y(),jet_fourVector.Z());
   const Amg::Vector3D track_displacement = get_vector3d(m_track_displacement(track));
@@ -94,7 +94,7 @@ double BTagTrackIpAccessor::z0SinThetaUncertainty(const xAOD::TrackParticle &tra
   return m_ip_z0_sigma(track);
 }
 
-void BTagTrackIpAccessor::augment_with_ip(const xAOD::TrackParticle &track, const xAOD::Jet &jet) const {
+void BTagTrackIpAccessor::augment_with_ip(const xAOD::TrackParticle &track, const xAOD::IParticle &jet) const {
   BTagSignedIP ip = getSignedIp(track, jet);
   m_ip2d_signed_d0(track) = ip.ip2d_signed_d0;
   m_ip3d_signed_d0(track) = ip.ip3d_signed_d0;
@@ -102,7 +102,7 @@ void BTagTrackIpAccessor::augment_with_ip(const xAOD::TrackParticle &track, cons
   m_ip3d_signed_z0_sin_theta(track) = ip.ip3d_signed_z0_sin_theta;
   m_ip3d_signed_z0_sin_theta_significance(track) = ip.ip3d_signed_z0_sin_theta_significance;
 }
-void BTagTrackIpAccessor::augment_with_grades(const xAOD::TrackParticle &track, const xAOD::Jet &jet) const {
+void BTagTrackIpAccessor::augment_with_grades(const xAOD::TrackParticle &track, const xAOD::IParticle &jet) const {
   int ip3d_grade = -1;
   const xAOD::BTagging &btagging = *xAOD::BTaggingUtilities::getBTagging( jet );
   const std::vector<ElementLink<xAOD::TrackParticleContainer> > ip3d_tracks = m_ip3d_trackParticleLinks(btagging);

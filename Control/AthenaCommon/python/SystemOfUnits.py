@@ -1,5 +1,5 @@
 #####################################################################################
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #                                                                                   #
 # This software is distributed under the terms of the Apache version 2 licence,     #
 # copied verbatim in the file "LICENSE".                                            #
@@ -11,7 +11,7 @@
 # File: AthenaCommon/share/SystemOfUnits.py
 # Author: Wim Lavrijsen (LBNL, WLavrijsen@lbl.gov)
 # Created: 01/21/04
-# Last: 01/21/04
+# Last: 06/20/25
 
 # This script is a direct adaptation of CLHEP/Units/SystemOfUnits.h
 # and the following is the originial CLHEP comment:
@@ -53,6 +53,7 @@
 #            (from Brian.Lasiuk@yale.edu (STAR)). Added luminous units.
 # 05.08.98   angstrom, picobarn, microsecond, picosecond, petaelectronvolt
 # 01.03.01   parsec
+# 06.20.25   e_SI
 # -----
 
 #
@@ -152,7 +153,7 @@ ps = picosecond
 # Electric charge [Q]
 #
 eplus = 1.0  # positron charge
-e_SI = 1.602176487e-19  # positron charge in coulomb
+e_SI = 1.602176634e-19  # positron charge in coulomb
 coulomb = eplus / e_SI  # coulomb = 6.24150 e+18 * eplus
 
 #

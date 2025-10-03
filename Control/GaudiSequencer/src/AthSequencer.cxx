@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthSequencer.cxx
@@ -118,7 +118,7 @@ AthSequencer::execute( const EventContext& ctx ) const
 
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  auto& state = execState( ctx );
+  auto state = execState( ctx );
   
   // Bypass the loop if this sequencer is disabled or has already been executed
   if ( isEnabled( ) && state.state() != AlgExecState::State::Done ) {
@@ -142,7 +142,11 @@ AthSequencer::execute( const EventContext& ctx ) const
           if ( !m_ignoreFilter ) {
             // Take the filter passed status of this algorithm as my own status
             const bool passed = theAlgorithm->execState( ctx ).filterPassed();
-            state.setFilterPassed( passed );
+            if ( m_invert ) {
+              state.setFilterPassed( !passed );
+            } else {
+              state.setFilterPassed( passed );
+            }
             
             // The behaviour when the filter fails depends on the 
             // StopOverride property.
@@ -161,7 +165,13 @@ AthSequencer::execute( const EventContext& ctx ) const
     }
   }
 
-  if ( !m_ignoreFilter && !m_names.empty() ) state.setFilterPassed( seqPass );
+  if ( !m_ignoreFilter && !m_names.empty() ) {
+    if ( m_invert ) {
+      state.setFilterPassed( !seqPass );
+    } else {
+      state.setFilterPassed( seqPass );
+    }
+  }
 
   state.setState( AlgExecState::State::Done );
 

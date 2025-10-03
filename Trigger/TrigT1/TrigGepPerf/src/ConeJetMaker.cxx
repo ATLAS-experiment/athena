@@ -62,7 +62,6 @@ std::vector<Gep::Jet>
 Gep::ConeJetMaker::makeJets( const std::vector<Gep::Cluster> &clusters) const
 {
   std::vector<Gep::Jet> jets;
-
   for (const auto seed: m_seeds) {
 
     float seedEt = seed->et();
@@ -88,9 +87,9 @@ Gep::ConeJetMaker::makeJets( const std::vector<Gep::Cluster> &clusters) const
       float dR_seed_cl = deltaR(seedEta, cl.vec.Eta(), seedPhi, cl.vec.Phi());
 
       if (dR_seed_cl < m_jetR) {
-        jetVec += cl.vec;        
+        jetVec += cl.vec;
         px += cl.vec.Px();
-	py += cl.vec.Py();
+        py += cl.vec.Py();
 	
         jet.constituentsIndices.push_back(clusterIndex);
       }
@@ -114,7 +113,7 @@ Gep::ConeJetMaker::makeJets( const std::vector<Gep::Cluster> &clusters) const
     } else {
       throw std::runtime_error("GEP ConeJetMaker recombinaton scheme error");
     }
-    jets.push_back(jet);
+    jets.emplace_back(std::move(jet));
   }
 
   return jets;

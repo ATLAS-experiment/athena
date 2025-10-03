@@ -192,6 +192,12 @@ def StripDefectsEmulatorCondAlgCfg(flags,
     kwargs.setdefault("IDName","SCT_ID")
     kwargs.setdefault("HistogramGroupName","") # disable histogramming; enable: e.g. /StripDefects/EmulatedDefects/
 
+    kwargs.setdefault("RngPerDefectType",False) # If True use one RNG per defect type (module, chip-defects, core-column, pixel-defects, corner-defects)
+    kwargs.setdefault("DefectsInputFiles",[])   # If not empty read defects from input files and merge defects (root RNTuple/json; extension: .root .json")
+    kwargs.setdefault("DefectsOutputFile","")   # If not empty write defects to a  output file (root RNTuple/json; (extension: .root .json")
+    if "DefectsOutputFile" in kwargs and kwargs["DefectsOutputFile"] is None :
+        kwargs["DefectsOutputFile"]=""
+
     acc.addCondAlgo(CompFactory.InDet.StripDefectsEmulatorCondAlg(name,**kwargs))
     return acc
 
@@ -207,6 +213,12 @@ def ITkStripDefectsEmulatorCondAlgCfg(flags,
     kwargs.setdefault("DetEleCollKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("IDName","SCT_ID")
     kwargs.setdefault("WriteKey", "ITkStripEmulatedDefects")
+
+    kwargs.setdefault("RngPerDefectType",False) # If True use one RNG per defect type (module, chip-defects, core-column, pixel-defects, corner-defects)
+    kwargs.setdefault("DefectsInputFiles",[])   # If not empty read defects from input files and merge defects (root RNTuple/json; extension: .root .json")
+    kwargs.setdefault("DefectsOutputFile","")   # If not empty write defects to a  output file (root RNTuple/json; (extension: .root .json")
+    if "DefectsOutputFile" in kwargs and kwargs["DefectsOutputFile"] is None :
+        kwargs["DefectsOutputFile"]=""
 
     return StripDefectsEmulatorCondAlgCfg(flags,name,**kwargs)
 

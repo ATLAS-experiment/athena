@@ -15,4 +15,5 @@
   <class name="JetParticleOriginVertexAssociation" />  
   <class name="JetTruthLabelingTool" />
   <class name="JetPileupLabelingTool" />
+  <class name="JetQuarkChargeLabelingTool" />
 </lcgdict>

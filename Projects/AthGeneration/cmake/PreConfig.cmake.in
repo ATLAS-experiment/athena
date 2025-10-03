@@ -38,6 +38,7 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 # Imported target(s) used by the project.
 find_package( GTest ${_quietFlag} )
 find_package( Boost ${_quietFlag} COMPONENTS ALL )
+find_package( SQLite3 ${_quietFlag} )
 
 # Clean up.
 unset( _quietFlag )

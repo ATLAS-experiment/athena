@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -23,9 +23,9 @@ namespace CP {
 
     m_signEnum = SignEnum::stringToOperator.at( m_sign );
 
-    m_ghostAcc = std::make_unique<SG::AuxElement::ConstAccessor<int>> (m_ghost.value());
+    m_ghostAcc = std::make_unique<SG::ConstAccessor<int>> (m_ghost.value());
     if ( !m_veto.value().empty() ) {
-      m_vetoAcc= std::make_unique<SG::AuxElement::ConstAccessor<int>> (m_veto.value());
+      m_vetoAcc= std::make_unique<SG::ConstAccessor<int>> (m_veto.value());
       m_doVeto = true;
     }
 
@@ -53,7 +53,7 @@ namespace CP {
       int count = 0;
       for (const xAOD::Jet *jet : *jets){
         if (!m_jetSelection || m_jetSelection.getBool(*jet, sys)){
-          if (jet->pt() > m_ptmin){
+          if (jet->pt() >= m_ptmin){
             if (!m_ghostAcc->isAvailable(*jet)) {
               ANA_MSG_ERROR ("Ghost decoration " << m_ghost.value() << " is not available on this jet!");
               return StatusCode::FAILURE;

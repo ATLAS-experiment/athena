@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_ROISUNPACKINGTOOLPHASE1_H
 #define HLTSEEDING_ROISUNPACKINGTOOLPHASE1_H
@@ -7,11 +7,13 @@
 // Local includes
 #include "RoIsUnpackingToolBase.h"
 #include "HLTSeedingRoIToolDefs.h"
+#include "utilities.h"
 
 // Athena includes
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
+
 
 /**
  * @class RoIsUnpackingToolPhase1
@@ -61,6 +63,7 @@ public:
   virtual StatusCode unpack(const EventContext& ctx,
                             const xAOD::TrigComposite& l1TriggerResult,
                             const HLT::IDSet& activeChains) const override {
+    using namespace HLTSeedingNs;
     using namespace TrigCompositeUtils;
     const bool doProbe = !m_decisionsKeyProbe.empty();
 
@@ -122,7 +125,7 @@ public:
       uint64_t thresholdPattern = thrPatternAcc(*roi);
       ATH_MSG_DEBUG("RoI #" << linkIndex << " threshold pattern: " << thresholdPattern);
       for (const std::shared_ptr<TrigConf::L1Threshold>& thr : thresholds.value().get()) {
-        if ((thresholdPattern & (1 << thr->mapping())) == 0u) {continue;}
+        if ((thresholdPattern & (1_u64 << thr->mapping())) == 0_u64) {continue;}
         passedThresholdIDs.push_back(HLT::Identifier(thr->name()));
         ATH_MSG_DEBUG("RoI #" << linkIndex << " passed threshold number " << thr->mapping()
                       << " name" << (doProbe ? "s " : " ") << thr->name()

@@ -34,11 +34,19 @@ public:
 
 private:
 
-  Gaudi::Property<std::string> m_electronID{this,"electronID","LHMedium","Select electron ID"};
-  Gaudi::Property<bool> m_removeNeutralElectronFE{this,"removeNeutralElectronFE",false,"Remove neutral FE matched to electrons"};
+  Gaudi::Property<std::string> m_electronIDToExclude{this,"electronIDToExclude","LHMedium","Select electron ID to exclude"};
+  Gaudi::Property<std::string> m_electronIDToInclude{this,"electronIDToInclude","LHLoose","Select electron ID to include"};
+  Gaudi::Property<bool> m_excludeChargedElectronFE{this,"excludeChargedElectronFE",true,"Exclude charged FE matched to electrons"};
+  Gaudi::Property<bool> m_includeChargedElectronFE{this,"includeChargedElectronFE",false,"Include charged FE matched to electrons"};
+  Gaudi::Property<bool> m_excludeNeutralElectronFE{this,"excludeNeutralElectronFE",false,"Exclude neutral FE matched to electrons"};
+  Gaudi::Property<bool> m_includeNeutralElectronFE{this,"includeNeutralElectronFE",false,"Include neutral FE matched to electrons"};
 
-  Gaudi::Property<std::string> m_muonID{this,"muonID","Medium","Select muon ID"};
-  Gaudi::Property<bool> m_removeNeutralMuonFE{this,"removeNeutralMuonFE",false,"Remove neutral FE matched to muons"};
+  Gaudi::Property<std::string> m_muonIDToExclude{this,"muonIDToExclude","Medium","Select muon ID to exclude"};
+  Gaudi::Property<std::string> m_muonIDToInclude{this,"muonIDToInclude","Loose","Select muon ID to include"};
+  Gaudi::Property<bool> m_excludeChargedMuonFE{this,"excludeChargedMuonFE",true,"Exclude charged FE matched to muons"};
+  Gaudi::Property<bool> m_includeChargedMuonFE{this,"includeChargedMuonFE",false,"Include charged FE matched to muons"};
+  Gaudi::Property<bool> m_excludeNeutralMuonFE{this,"excludeNeutralMuonFE",false,"Exclude neutral FE matched to muons"};
+  Gaudi::Property<bool> m_includeNeutralMuonFE{this,"includeNeutralMuonFE",false,"Include neutral FE matched to muons"};
 
   SG::ReadHandleKey<xAOD::FlowElementContainer> m_ChargedPFlowContainerKey = {this, "ChargedPFlowInputContainer", "", "The input Charged PFlow Objects"};
   SG::ReadHandleKey<xAOD::FlowElementContainer> m_NeutralPFlowContainerKey = {this, "NeutralPFlowInputContainer", "", "The input Neutral PFlow Objects"};
@@ -60,6 +68,7 @@ private:
 
   SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_chargedFE_energy_match_muonReadHandleKey{this,"FlowElementContainer_ChargedFE_energy_matched_muon","JetETMissChargedParticleFlowObjects.FE_efrac_matched_muon","ReadHandleKey for the fraction of neutral FlowElements cluster energy used to match to Muons"};
 
+  
 
 };
 

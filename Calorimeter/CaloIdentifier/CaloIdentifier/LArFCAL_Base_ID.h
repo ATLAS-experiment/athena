@@ -21,7 +21,9 @@ public:
         
   typedef Identifier::size_type  size_type ;
 
-  LArFCAL_Base_ID(const std::string& name, bool supercell);
+  LArFCAL_Base_ID(const std::string& name,
+                  const std::string& group,
+                  bool supercell);
 
   /** module identifier for a channel from ExpandedIdentifier */
   Identifier  module_id	(const ExpandedIdentifier& exp_id) const ;
@@ -60,7 +62,7 @@ public:
   IdentifierHash channel_hash_binary_search (Identifier channelId) const;
 
   /**  region hash table max size */
-  size_type     module_hash_max (void) const;
+  size_type     module_hash_max () const;
 
   /** Type for iterators over identifiers. */
   typedef std::vector<Identifier>::const_iterator id_iterator;
@@ -68,16 +70,16 @@ public:
   typedef boost::iterator_range<id_iterator> id_range;
 
   /** begin iterator over set of module Identifiers */
-  id_iterator mod_begin    (void) const;
+  id_iterator mod_begin    () const;
   /** end iterator over set of module Identifiers */
-  id_iterator mod_end      (void) const;
+  id_iterator mod_end      () const;
   /** Range over full set of FCAL modules. */
   id_range mod_range () const;
 
   /** begin iterator over full set of Fcal Identifiers for channels */
-  id_iterator fcal_begin    (void) const;
+  id_iterator fcal_begin    () const;
   /** end iterator over full set of Fcal Identifiers for channels */
-  id_iterator fcal_end      (void) const;
+  id_iterator fcal_end      () const;
   /** Range over full set of FCAL Identifiers. */
   id_range fcal_range () const;
 
@@ -112,7 +114,7 @@ public:
 
   /** context for modules --  method kept for backward compatibility. NOT optimised <br>
       access to IdContext's which define which levels of fields are contained in the id */
-  IdContext    module_context   (void) const;
+  IdContext    module_context   () const;
 
 
 
@@ -174,7 +176,7 @@ private:
   virtual int  get_expanded_id  (const Identifier& id, ExpandedIdentifier& exp_id, const IdContext* context) const;
 
   int         initLevelsFromDict(const std::string& group_name) ;
-  int         init_hashes(void) ;
+  int         init_hashes();
 
   int         init_neighbours_from_file(const std::string& filename, std::vector<std::set<IdentifierHash> > &vec);
 

@@ -81,6 +81,8 @@ from DerivationFrameworkBPhys.BPHY28 import BPHY28Cfg
 from DerivationFrameworkSM.STDM6 import STDM6Cfg
 from DerivationFrameworkSM.STDM7 import STDM7Cfg
 from DerivationFrameworkSM.STDM13 import STDM13Cfg
+from DerivationFrameworkSM.STDM16 import STDM16Cfg
+from DerivationFrameworkSM.STDM17 import STDM17Cfg
 
 # TileCal derivations
 from DerivationFrameworkTileCal.TCAL1 import TCAL1Cfg
@@ -103,9 +105,10 @@ from DerivationFrameworkEGamma.EGAM12 import EGAM12Cfg
 from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
 from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
 from DerivationFrameworkFlavourTag.FTAG3 import FTAG3Cfg
-from DerivationFrameworkFlavourTag.FTAG_XBB import FTAG_XBBCfg
+from DerivationFrameworkFlavourTag.FTAGXBB import FTAGXBBCfg
 from DerivationFrameworkFlavourTag.FTAG4 import FTAG4Cfg
-from DerivationFrameworkFlavourTag.FTAG_PU import FTAG_PUCfg
+from DerivationFrameworkFlavourTag.FTAG5 import FTAG5Cfg
+from DerivationFrameworkFlavourTag.FTAGPU import FTAGPUCfg
 
 # Jet/Etmiss derivations
 # JETM1: dijet for MC calibrations, JER, MJB, eta-intercalibration
@@ -165,7 +168,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg','PHYSLITECfg','SKIMCfg',
            'PHYSVALCfg',
-           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg','FTAG_XBBCfg', 'FTAG_PUCfg',
+           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg', 'FTAG5Cfg', 'FTAGXBBCfg', 'FTAGPUCfg',
            'HIGG1D1Cfg', 'HIGG9D1Cfg', 'HIGG1D2Cfg',
            'LLP1Cfg', 'LLJ1Cfg',
            'SUSY20Cfg',
@@ -175,7 +178,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY15Cfg',
            'BPHY16Cfg', 'BPHY18Cfg',
            'BPHY21Cfg', 'BPHY22Cfg', 'BPHY23Cfg', 'BPHY24Cfg', 'BPHY25Cfg', 'BPHY28Cfg',
-           'STDM6Cfg', 'STDM7Cfg','STDM13Cfg',
+           'STDM6Cfg', 'STDM7Cfg','STDM13Cfg','STDM16Cfg','STDM17Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',

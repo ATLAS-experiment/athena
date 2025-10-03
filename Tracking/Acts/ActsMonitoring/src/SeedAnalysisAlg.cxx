@@ -405,7 +405,7 @@ namespace ActsTrk {
 	float deltaZ = zO - zM;
 	float x = deltaX * cosPhiM + deltaY * sinPhiM;
 	float y = deltaY * cosPhiM - deltaX * sinPhiM;
-	float iDeltaR2 = 1. / (deltaX * deltaX + deltaY * deltaY);
+	float iDeltaR2 = 1.f / (deltaX * deltaX + deltaY * deltaY);
 	float iDeltaR = std::sqrt(iDeltaR2);
 	int bottomFactor = int(not isBottom) - int(isBottom);
 	float cot_theta = deltaZ * iDeltaR * bottomFactor;
@@ -460,10 +460,10 @@ namespace ActsTrk {
     float yt = dyt * ax - dxt * ay;
     float dxyt = xt * xt + yt * yt;
 
-    float tzb = dzb * std::sqrt( 1./dxyb );
-    float tzt = dzt * std::sqrt( 1./dxyt );
+    float tzb = dzb * std::sqrt( 1.f/dxyb );
+    float tzt = dzt * std::sqrt( 1.f/dxyt );
 
-    float sTzb2 = std::sqrt(1 + tzb*tzb);
+    float sTzb2 = std::sqrt(1.f + tzb*tzb);
 
     float dU = Ut - Ub;
     if (dU == 0.) {
@@ -471,7 +471,7 @@ namespace ActsTrk {
     }
 
     float A = (Vt - Vb) / dU;
-    float S2 = 1. + A * A;
+    float S2 = 1.f + A * A;
     float B = Vb - A * Ub;
     float B2 = B * B;
     if (B2 == 0) B2 = 1e-8;
@@ -485,11 +485,11 @@ namespace ActsTrk {
     if (cotThetaAvg2 <= 0) {
       return {-1, -1, -1, -1, -1, -1, -1};
     }
-    float theta = std::atan(1. / std::sqrt(cotThetaAvg2));
-    float eta = -std::log(std::tan(0.5 * theta));
+    float theta = std::atan(1.f / std::sqrt(cotThetaAvg2));
+    float eta = -std::log(std::tan(0.5f * theta));
 
     // pt
-    float pt = pTPerHelixRadius * std::sqrt(S2 / B2) / 2.;
+    float pt = pTPerHelixRadius * std::sqrt(S2 / B2) / 2.f;
 
     // d0
     float d0 = std::abs((A - B * rM) * rM);

@@ -59,7 +59,7 @@ namespace CP {
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
         
         // Release scheme 
-        Gaudi::Property<std::string> m_release{this, "release", "Recs2024_05_06_Run2Run3", "Release version"};
+        Gaudi::Property<std::string> m_release{this, "release", "Recs2025_03_26_Run2Run3", "Release version"};
         
         typedef std::map<MCP::MST_Categories, std::shared_ptr<MCP::CalibContainer>>  HighpTConstMap;
 

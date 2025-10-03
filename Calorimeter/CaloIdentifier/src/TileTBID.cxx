@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,8 +7,6 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: TileTBID.cxx,v 1.1 2009-03-30 11:19:28 tsulaia Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 #include "CaloIdentifier/TileTBID.h"
 #include "IdDict/IdDictDefs.h"
@@ -25,8 +23,9 @@
 using CxxUtils::strformat;
 
 
-TileTBID::TileTBID( void ) 
-  : m_tile_region_index(0)
+TileTBID::TileTBID( )
+  : AtlasDetectorID("TileTBID", "tile")
+    , m_tile_region_index(0)
     , m_SYSTEM_INDEX(999)
     , m_SECTION_INDEX(999)
     , m_TYPE_INDEX(999)
@@ -39,8 +38,7 @@ TileTBID::TileTBID( void )
 {
 }
 
-TileTBID::~TileTBID(void) 
-= default;
+TileTBID::~TileTBID() = default;
 
 //
 // TileTBID methods
@@ -298,21 +296,21 @@ bool TileTBID::channel_id       ( const Identifier& module_id,
 }
 
 IdContext	
-TileTBID::type_context  (void)  const
+TileTBID::type_context  ()  const
 {
     ExpandedIdentifier id;
     return {id, 0, m_TYPE_INDEX};
 }
 
 IdContext	
-TileTBID::module_context  (void)  const
+TileTBID::module_context  ()  const
 {
     ExpandedIdentifier id;
     return {id, 0, m_MODULE_INDEX};
 }
 
 IdContext	
-TileTBID::channel_context     (void)  const
+TileTBID::channel_context     ()  const
 {
     ExpandedIdentifier id;
     return {id, 0, m_CHANNEL_INDEX};
@@ -433,7 +431,7 @@ int  TileTBID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int tileField   = -1;
   if (atlasDict->get_label_value("subdet", "TileCalorimeter", tileField)) {
     log << MSG::ERROR << "Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
-        << atlasDict->m_name
+        << atlasDict->name()
         << endmsg;
     return (1);
   }
@@ -442,7 +440,7 @@ int  TileTBID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int tiletbField   = -1;
   if (m_dict->get_label_value("section", "Testbeam", tiletbField)) {
     log << MSG::ERROR << "Could not get value for label 'Testbeam' of field 'section' in dictionary " 
-        << m_dict->m_name
+        << m_dict->name()
         << endmsg;
     return (1);
   }
@@ -490,15 +488,15 @@ int TileTBID::get_expanded_id  (const Identifier& id, ExpandedIdentifier& exp_id
   }
   else if ( 0 == begin) {
     ExpandedIdentifier empty;
-    result = m_dict->unpack(id, empty, end, exp_id);
+    result = m_dict->unpack(group(), id, empty, end, exp_id);
   }
   else {
-    result = m_dict->unpack(id, context->prefix_id(), end, exp_id);
+    result = m_dict->unpack(group(), id, context->prefix_id(), end, exp_id);
   }
   return result;
 }
 
-int TileTBID::initLevelsFromDict(void) 
+int TileTBID::initLevelsFromDict()
 {
   MsgStream log(m_msgSvc, "TileTBID" );
 
@@ -528,7 +526,7 @@ int TileTBID::initLevelsFromDict(void)
   // Fing a Tile region
   IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
-    m_SYSTEM_INDEX = field->m_index ;
+    m_SYSTEM_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'subdet' field "
@@ -538,7 +536,7 @@ int TileTBID::initLevelsFromDict(void)
 
   field = m_dict->find_field("section") ;
   if (field) {
-    m_SECTION_INDEX = field->m_index ;
+    m_SECTION_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'section' field "
@@ -548,7 +546,7 @@ int TileTBID::initLevelsFromDict(void)
 
   field = m_dict->find_field("type") ;
   if (field) {
-    m_TYPE_INDEX = field->m_index ;
+    m_TYPE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'type' field "
@@ -558,7 +556,7 @@ int TileTBID::initLevelsFromDict(void)
 
   field = m_dict->find_field("tbmodule") ;
   if (field) {
-    m_MODULE_INDEX = field->m_index ;
+    m_MODULE_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'tbmodule' field "
@@ -568,7 +566,7 @@ int TileTBID::initLevelsFromDict(void)
 
   field = m_dict->find_field("tbchannel") ;
   if (field) {
-    m_CHANNEL_INDEX = field->m_index ;
+    m_CHANNEL_INDEX = field->index();
   }
   else {
     log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'tbchannel' field "
@@ -577,13 +575,13 @@ int TileTBID::initLevelsFromDict(void)
   }
 
    /* Set the field implementations */
-  const IdDictRegion& region = *m_dict->m_regions[m_tile_region_index];
+  const IdDictRegion& region = m_dict->region(m_tile_region_index);
 
-  m_system_impl  = region.m_implementation[m_SYSTEM_INDEX]; 
-  m_section_impl = region.m_implementation[m_SECTION_INDEX]; 
-  m_type_impl    = region.m_implementation[m_TYPE_INDEX]; 
-  m_module_impl  = region.m_implementation[m_MODULE_INDEX]; 
-  m_channel_impl = region.m_implementation[m_CHANNEL_INDEX]; 
+  m_system_impl  = region.implementation(m_SYSTEM_INDEX);
+  m_section_impl = region.implementation(m_SECTION_INDEX);
+  m_type_impl    = region.implementation(m_TYPE_INDEX);
+  m_module_impl  = region.implementation(m_MODULE_INDEX);
+  m_channel_impl = region.implementation(m_CHANNEL_INDEX);
 
   m_base_tile_type=Identifier (0);
   m_system_impl.pack  (tile_field_value(),m_base_tile_type);
@@ -601,7 +599,7 @@ int TileTBID::initLevelsFromDict(void)
   return(0) ;
 }
 
-int TileTBID::init_hashes(void) 
+int TileTBID::init_hashes()
 {
   MsgStream log(m_msgSvc, "TileTBID" );
 

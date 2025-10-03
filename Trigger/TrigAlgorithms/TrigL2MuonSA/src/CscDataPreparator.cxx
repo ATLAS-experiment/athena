@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscDataPreparator.h"
@@ -38,8 +38,9 @@ StatusCode TrigL2MuonSA::CscDataPreparator::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigL2MuonSA::CscDataPreparator::prepareData(TrigL2MuonSA::MuonRoad& muonRoad,
-							TrigL2MuonSA::CscHits&  cscHits) const
+StatusCode TrigL2MuonSA::CscDataPreparator::prepareData(const EventContext& ctx,
+                                                        TrigL2MuonSA::MuonRoad& muonRoad,
+                                                        TrigL2MuonSA::CscHits&  cscHits) const
 {
 
   // Clear the output
@@ -47,7 +48,7 @@ StatusCode TrigL2MuonSA::CscDataPreparator::prepareData(TrigL2MuonSA::MuonRoad& 
 
   // Get CSC container
   if(!m_cscPrepContainerKey.empty()){
-    auto cscPrepContainerHandle = SG::makeHandle(m_cscPrepContainerKey);
+    auto cscPrepContainerHandle = SG::makeHandle(m_cscPrepContainerKey, ctx);
     const Muon::CscPrepDataContainer* cscPrepContainer = cscPrepContainerHandle.cptr();
     if (!cscPrepContainerHandle.isValid()) {
       ATH_MSG_ERROR("Cannot retrieve CSC PRD Container key: " << m_cscPrepContainerKey.key());

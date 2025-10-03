@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -638,10 +638,10 @@ StatusCode CosmicGenerator::fillEvt(HepMC::GenEvent* event) {
 
       // Create the vertex, and add the particle to the vertex.
       HepMC::GenVertexPtr vertex = HepMC::newGenVertexPtr(HepMC::FourVector(m_fourPos[v].x(),m_fourPos[v].y(),m_fourPos[v].z(),m_fourPos[v].t()));
-      vertex->add_particle_out( particle );
+      vertex->add_particle_out( std::move(particle) );
 
       // Add the vertex to the event.
-      event->add_vertex( vertex );
+      event->add_vertex( std::move(vertex) );
 
     }
 

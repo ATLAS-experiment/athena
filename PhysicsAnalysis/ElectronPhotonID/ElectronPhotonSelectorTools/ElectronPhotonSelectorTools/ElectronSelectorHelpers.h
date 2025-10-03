@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -41,8 +41,6 @@ bool
 passAmbiguity(xAOD::AmbiguityTool::AmbiguityType type,
               const uint16_t criterion);
 
-struct ROOT6_NamespaceAutoloadHook
-{};
 }
 
 #endif

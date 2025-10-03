@@ -6,6 +6,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def AddTauAugmentationCfg(flags, **kwargs):
 
     prefix = kwargs["prefix"]
+    kwargs.setdefault("TauContainerName", "TauJets")
     kwargs.setdefault("doRNNVeryLoose", False)
     kwargs.setdefault("doRNNLoose",     False)
     kwargs.setdefault("doRNNMedium",    False)
@@ -18,7 +19,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     # tau selection relies on RNN electron veto, we must decorate the fixed eveto WPs before applying tau selection
-    acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets"))
+    acc.merge(AddTauIDDecorationCfg(flags, TauContainerName=kwargs["TauContainerName"]))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
     from TauAnalysisTools.TauAnalysisToolsConfig import TauSelectionToolCfg
@@ -36,7 +37,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                    name               = "TauRNNVeryLooseWrapper",
                                                                                    AsgSelectionTool   = TauSelectorRNNVeryLoose,
                                                                                    StoreGateEntryName = "DFTauRNNVeryLoose",
-                                                                                   ContainerName      = "TauJets"))
+                                                                                   ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauRNNVeryLooseWrapper)
 
     if kwargs["doRNNLoose"]:
@@ -49,7 +50,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                name               = "TauRNNLooseWrapper",
                                                                                AsgSelectionTool   = TauSelectorRNNLoose,
                                                                                StoreGateEntryName = "DFTauRNNLoose",
-                                                                               ContainerName      = "TauJets"))
+                                                                               ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauRNNLooseWrapper)
 
     if kwargs["doRNNMedium"]:
@@ -62,7 +63,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                 name               = "TauRNNMediumWrapper",
                                                                                 AsgSelectionTool   = TauSelectorRNNMedium,
                                                                                 StoreGateEntryName = "DFTauRNNMedium",
-                                                                                ContainerName      = "TauJets"))
+                                                                                ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauRNNMediumWrapper)
 
     if kwargs["doRNNTight"]:
@@ -75,7 +76,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                name               = "TauRNNTightWrapper",
                                                                                AsgSelectionTool   = TauSelectorRNNTight,
                                                                                StoreGateEntryName = "DFTauRNNTight",
-                                                                               ContainerName      = "TauJets"))
+                                                                               ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauRNNTightWrapper)
 
     # GNTau TauID WPs
@@ -89,7 +90,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                      name               = "TauGNTauVeryLooseWrapper",
                                                                                      AsgSelectionTool   = TauSelectorGNTauVeryLoose,
                                                                                      StoreGateEntryName = "DFTauGNTauVeryLoose",
-                                                                                     ContainerName      = "TauJets"))
+                                                                                     ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauGNTauVeryLooseWrapper)
  
     
@@ -103,7 +104,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                  name               = "TauGNTauLooseWrapper",
                                                                                  AsgSelectionTool   = TauSelectorGNTauLoose,
                                                                                  StoreGateEntryName = "DFTauGNTauLoose",
-                                                                                 ContainerName      = "TauJets"))
+                                                                                 ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauGNTauLooseWrapper)
 
     if kwargs["doGNTauMedium"]:
@@ -116,7 +117,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                   name               = "TauGNTauMediumWrapper",
                                                                                   AsgSelectionTool   = TauSelectorGNTauMedium,
                                                                                   StoreGateEntryName = "DFTauGNTauMedium",
-                                                                                  ContainerName      = "TauJets"))
+                                                                                  ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauGNTauMediumWrapper)
 
     if kwargs["doGNTauTight"]:
@@ -129,7 +130,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
                                                                                  name               = "TauGNTauTightWrapper",
                                                                                  AsgSelectionTool   = TauSelectorGNTauTight,
                                                                                  StoreGateEntryName = "DFTauGNTauTight",
-                                                                                 ContainerName      = "TauJets"))
+                                                                                 ContainerName      = kwargs["TauContainerName"]))
         TauAugmentationTools.append(TauGNTauTightWrapper)
 
 
@@ -155,6 +156,32 @@ def AddDiTauLowPtCfg(flags, **kwargs):
 
     return acc
 
+def AddDiTauIDDecorationCfg(flags, **kwargs):
+    """Decorate ditau ID scores """
+
+    acc = ComponentAccumulator()
+
+    import DiTauRec.DiTauToolsConfig as DiTauTools
+
+    diTauOnnxScoreCalculator = acc.popToolsAndMerge(DiTauTools.DiTauOnnxScoreCalculatorCfg(
+            flags, 
+            onnxModelPath                   = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx",
+        ))
+
+    acc.addPublicTool(diTauOnnxScoreCalculator)
+
+    DiTauIDDecoratorWrapper = CompFactory.DerivationFramework.DiTauIDDecoratorWrapper
+    DiTauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+
+    DiTauIDDecoratorWrapper = DiTauIDDecoratorWrapper(name               = "DiTauIDDecoratorWrapper",
+                                                      DiTauContainerName = kwargs['DiTauContainerName'],
+                                                      DiTauOnnxDiscriminantTool = diTauOnnxScoreCalculator)
+
+    acc.addPublicTool(DiTauIDDecoratorWrapper)
+    acc.addEventAlgo(DiTauIDDecoratorKernel(name              = "DiTauIDDecorKernel",
+                                            AugmentationTools = [DiTauIDDecoratorWrapper]))
+    return acc
+    
 
 def AddTauIDDecorationCfg(flags, **kwargs):
     """Decorate tau ID scores and working points"""
@@ -176,8 +203,8 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         # vertex-corrected clusters must be rebuilt for tau ID
         tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
         # Add in GNTau!
-        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0)) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,1)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0,applyLooseTrackSel=True)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,1,applyLooseTrackSel=True)) )
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,0)) )
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,1)) )
 
@@ -199,6 +226,26 @@ def AddTauIDDecorationCfg(flags, **kwargs):
 
     return acc
 
+
+def AddDiTauChargeDecoratorCfg(flags, **kwargs):
+    """Decorate DiTau charge"""
+
+    kwargs.setdefault("DiTauContainerName", "DiTauJets")
+    kwargs.setdefault("prefix",           kwargs['DiTauContainerName'])
+
+    acc = ComponentAccumulator()
+   
+    DiTauChargeDecorator = CompFactory.DerivationFramework.DiTauChargeDecorator
+    DiTauChargeDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+
+    prefix = kwargs['prefix']
+    diTauChargeDecorator = DiTauChargeDecorator(name               = f"{prefix}_DiTauChargeDecorator",
+                                                DiTauContainerName = kwargs['DiTauContainerName'])
+    acc.addPublicTool(diTauChargeDecorator)
+    acc.addEventAlgo(DiTauChargeDecoratorKernel(name              = f"{prefix}_DiTauIDDecorKernel",
+                                                AugmentationTools = [diTauChargeDecorator]))
+
+    return acc
 
 # TauJets_MuonRM steering
 def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
@@ -228,9 +275,9 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     tools_after[-1].EventShapeKey = ''
     tools_after.append( acc.popToolsAndMerge(tauTools.MvaTESEvaluatorCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
-    tools_after.append( acc.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
+    tools_after.append( acc.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags,applyLooseTrackSel=True)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
-    tools_after.append( acc.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
+    tools_after.append( acc.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags,applyLooseTrackSel=True )) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
     tools_after.append( acc.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
     TauAODRunnerAlg=CompFactory.getComp("TauAODRunnerAlg")

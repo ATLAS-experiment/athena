@@ -28,6 +28,9 @@ namespace columnar
       public ColumnarTool<>
   {
   public:
+    
+    // Create a proper constructor for Athena
+    ASG_TOOL_CLASS( ConfigurableColumnExampleTool, asg::IAsgTool )
 
     ConfigurableColumnExampleTool (const std::string& name);
 

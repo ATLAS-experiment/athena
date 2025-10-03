@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "LArClusterCellDumper/EventReaderAlg.h"
 
@@ -528,7 +528,7 @@ StatusCode EventReaderAlg::dumpTruthParticle(SG::ReadHandle<xAOD::ElectronContai
       m_mc_vert_perp->push_back(vertex->perp());  // Vertex transverse distance from the beam line
       m_mc_vert_eta->push_back(vertex->eta());  // Vertex pseudorapidity
       m_mc_vert_phi->push_back(vertex->phi());  // Vertex azimuthal angle
-      m_mc_vert_barcode->push_back(HepMC::barcode(vertex));  // FIXME barcode-based
+      m_mc_vert_uniqueID->push_back(HepMC::uniqueID(vertex));
       m_mc_vert_status->push_back(HepMC::status(vertex));
 
       m_mc_part_energy->push_back(elecSelected->e());

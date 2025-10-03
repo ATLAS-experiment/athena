@@ -144,7 +144,7 @@ namespace CP
         {
             ATH_MSG_DEBUG("Size of output electron collection " << electronCol.size());
 
-            static const SG::AuxElement::Decorator<ElementLink<xAOD::ElectronContainer>> originalElectronLink("originalElectronLink");
+            static const SG::Decorator<ElementLink<xAOD::ElectronContainer>> originalElectronLink("originalElectronLink");
 
             // loop over electrons
             for (const auto *const electron : electronCol)
@@ -159,7 +159,7 @@ namespace CP
                     eLink.toIndexedElement(electronCol, electron->index());
                     originalElectronLink(*newElectron) = eLink;
                     setOriginalObjectLink(*electron, *newElectron);
-                    static const SG::AuxElement::Accessor<char> isLRT("isLRT");
+                    static const SG::Accessor<char> isLRT("isLRT");
                     isLRT(*newElectron) = isLRT(*electron);
                     outputCol->push_back(std::move(newElectron));
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,7 +73,7 @@ void populateGenEvent(HepMC::GenEvent & ge, int pdgid1, int pdgid2, std::vector<
   HepMC::suggest_barcode(inParticle3,maxBarcode+3);
   HepMC::suggest_barcode(inParticle4,maxBarcode+4);
   HepMC::set_signal_process_vertex(&ge, myVertex );
-  ge.set_beam_particles(inParticle1,inParticle2);
+  ge.set_beam_particles(std::move(inParticle1),std::move(inParticle2));
 }
 
 void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenParticlePtr>& genPartList)
@@ -146,7 +146,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
 #endif
 
   //.....add new vertex with geantino
-  ge.add_vertex(genVertex);
+  ge.add_vertex(std::move(genVertex));
   HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
 }
 

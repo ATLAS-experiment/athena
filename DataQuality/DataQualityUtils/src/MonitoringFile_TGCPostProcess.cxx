@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +289,7 @@ namespace dqutils {
                 if (tgc_debug) std::cout << "TGC noisy channel : " << ss.str() << " " << occu << std::endl;
 
                 std::pair<std::string, float> p(ss.str(), occu);
-                noisychambers.push_back(p);
+                noisychambers.push_back(std::move(p));
               } else if (occu < TGCChamberLowOccupancyCut) {//too low occupancy
                 ss.str("");
                 TString schamber = hprof->GetXaxis()->GetBinLabel(binx);
@@ -301,7 +301,7 @@ namespace dqutils {
                 if (tgc_debug) std::cout << "TGC low occupancy chamber : " << ss.str() << " " << occu << std::endl;
 
                 std::pair<std::string, float> p(ss.str(), occu);
-                deadchambers.push_back(p);
+                deadchambers.push_back(std::move(p));
               }
             }//biny
           }//binx
@@ -546,7 +546,7 @@ namespace dqutils {
                 if (tgc_debug) std::cout << "TGC low efficiency chamber : " << ss.str() << " " << eff << std::endl;
 
                 std::pair<std::string, float> p(ss.str(), eff);
-                loweffchambers.push_back(p);
+                loweffchambers.push_back(std::move(p));
               }
             }//biny
           }//binx
@@ -763,9 +763,9 @@ namespace dqutils {
 
                 std::pair<std::string, float> p(ss.str(), fc);
                 if (sllpt == 0) {
-                  badtrgtimingchambers.push_back(p);
+                  badtrgtimingchambers.push_back(std::move(p));
                 } else {
-                  badrotimingchambers.push_back(p);
+                  badrotimingchambers.push_back(std::move(p));
                 }
               }
             }//phi48

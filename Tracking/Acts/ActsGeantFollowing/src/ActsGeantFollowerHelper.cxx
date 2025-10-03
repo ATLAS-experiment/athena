@@ -22,45 +22,24 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 //other
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "TrkExInterfaces/IExtrapolationEngine.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
 // constructor
 ActsGeantFollowerHelper::ActsGeantFollowerHelper(const std::string& t, const std::string& n, const IInterface* p) :
   base_class(t,n,p),
-  m_extrapolationEngine(""),
-  m_actsExtrapolator(""),
-  m_extrapolateDirectly(true),
-  m_extrapolateIncrementally(true),
-  m_parameterCache(nullptr),
-  m_actsParameterCache(std::nullopt),
-  m_tX0Cache(0.),
-  m_tX0NonSensitiveCache(0.),
-  m_tNonSensitiveCache(0.),
-  m_tX0CacheActs(0.),
-  m_tX0CacheATLAS(0.),
   m_validationTreeName("G4Follower_"+n),
   m_validationTreeDescription("Output of the G4Follower_"),
   m_validationTreeFolder("/val/G4Follower_"+n),
-  m_validationTree(nullptr)
-{
-  // properties
-  declareProperty("ExtrapolationEngine",            m_extrapolationEngine);
-  declareProperty("ActsExtrapolator",               m_actsExtrapolator);
-  declareProperty("ExtrapolateDirectly",            m_extrapolateDirectly);
-  declareProperty("ExtrapolateIncrementally",       m_extrapolateIncrementally);
-}
+  m_validationTree(nullptr){}
 
-// destructor
-ActsGeantFollowerHelper::~ActsGeantFollowerHelper()
-{}
+
 
 // Athena standard methods
 // initialize
@@ -72,15 +51,9 @@ StatusCode ActsGeantFollowerHelper::initialize()
   //   ATH_MSG_ERROR("Could not retrieve Extrapolator " << m_extrapolator << " . Abort.");
   //   return StatusCode::FAILURE;
   // }
-  if (m_extrapolationEngine.retrieve().isFailure()){
-    ATH_MSG_ERROR("Could not retrieve Extrapolator Engine " << m_extrapolationEngine << " . Abort.");
-    return StatusCode::FAILURE;
-  }
-  
-  if (m_actsExtrapolator.retrieve().isFailure()){
-    ATH_MSG_ERROR("Could not retrieve ActsExtrapolator " << m_actsExtrapolator << " . Abort.");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_extrapolationEngine.retrieve());
+  ATH_CHECK(m_actsExtrapolator.retrieve());
 
   // create the new Tree
   m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
@@ -183,8 +156,8 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 {
   // const EventContext ctx;
   const EventContext &ctx = Gaudi::Hive::currentContext();
-  const ActsGeometryContext &gctx = m_actsExtrapolator->trackingGeometryTool()->getGeometryContext(ctx);
-  auto trackingGeometry = m_actsExtrapolator->trackingGeometryTool()->trackingGeometry();
+  const ActsGeometryContext &gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+  auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   // construct the initial parameters
   Amg::Vector3D npos(pos.x(),pos.y(),pos.z());
   Amg::Vector3D nmom(mom.x(),mom.y(),mom.z());
@@ -226,7 +199,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   }
 
   // Store material in cache
-  float tX0 = X0 > 10e-5 ? t/X0 : 0.;
+  float tX0 = X0 > 10e-5f ? t/X0 : 0.f;
   m_tX0NonSensitiveCache += tX0;
   m_tNonSensitiveCache += t;
   if (!isSensitive)

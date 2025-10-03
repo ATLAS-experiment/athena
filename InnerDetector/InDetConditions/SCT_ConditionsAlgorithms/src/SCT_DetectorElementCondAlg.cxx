@@ -75,7 +75,7 @@ StatusCode SCT_DetectorElementCondAlg::execute(const EventContext& ctx) const
 
   // Make sure we make a mixed IOV.
   writeHandle.addDependency (IOVInfiniteRange::infiniteMixed());
-  
+
   // Add dependency
   writeHandle.addDependency(readHandle);
   // Additional dependencies for IOV range to limit lifetime to TrackingGeometry lifetime
@@ -110,7 +110,7 @@ StatusCode SCT_DetectorElementCondAlg::execute(const EventContext& ctx) const
   // ____________ Update writeCdo using readCdo ____________
   std::map<const InDetDD::SiDetectorElement*, const InDetDD::SiDetectorElement*> oldToNewMap;
   oldToNewMap[nullptr] = nullptr;
-  writeCdo->resize(oldColl->size(), nullptr);
+  writeCdo->resize(oldColl->size());
   InDetDD::SiDetectorElementCollection::iterator newEl{writeCdo->begin()};
   for (const InDetDD::SiDetectorElement* oldEl: *oldColl) {
     *newEl = new InDetDD::SiDetectorElement(oldEl->identify(),
@@ -134,7 +134,9 @@ StatusCode SCT_DetectorElementCondAlg::execute(const EventContext& ctx) const
     newEl->setNextInPhi(oldToNewMap[(*oldIt)->nextInPhi()]);
     newEl->setPrevInPhi(oldToNewMap[(*oldIt)->prevInPhi()]);
     newEl->setOtherSide(oldToNewMap[(*oldIt)->otherSide()]);
-    // Layer of old element is set by InDet::SiLayerBuilder::registerSurfacesToLayer.
+    //Note here we set the Layer. But then is reset by the
+    //Tracking Geometry. The later should be the last
+    //const correctness MT issue
     const Trk::Layer* layer{(*oldIt)->surface().associatedLayer()};
     if (layer) {
       newEl->surface().associateLayer(*layer);
@@ -144,13 +146,13 @@ StatusCode SCT_DetectorElementCondAlg::execute(const EventContext& ctx) const
 
   // Apply alignment using readCdo passed to SiDetectorElement
   for (InDetDD::SiDetectorElement* newEl: *writeCdo) {
-    newEl->setCache();
+    newEl->updateCache();
   }
 
   // Record WriteCondHandle
   const std::size_t size{writeCdo->size()};
   if (writeHandle.record(std::move(writeCdo)).isFailure()) {
-    ATH_MSG_FATAL("Could not record " << writeHandle.key() 
+    ATH_MSG_FATAL("Could not record " << writeHandle.key()
                   << " with EventRange " << writeHandle.getRange()
                   << " into Conditions Store");
     return StatusCode::FAILURE;

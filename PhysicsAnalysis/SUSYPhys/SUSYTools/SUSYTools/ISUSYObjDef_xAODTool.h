@@ -173,6 +173,7 @@ namespace ST {
 
     //pre-process sample name
     TString tmp_name(sample_name);
+
     if(tmp_name.Contains("Py8EG") && !tmp_name.Contains("aMcAtNloPy8EG")) tmp_name.ReplaceAll("Py8EG","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Pythia") && !tmp_name.Contains("Pythia8") && !tmp_name.Contains("EvtGen")) tmp_name.ReplaceAll("Pythia","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Pythia8") && !tmp_name.Contains("EvtGen")) tmp_name.ReplaceAll("Pythia8","PYTHIA8EVTGEN");
@@ -180,6 +181,7 @@ namespace ST {
     if(tmp_name.Contains("Sh_2")) tmp_name.ReplaceAll("Sh_2","SHERPA_2");
     if(tmp_name.Contains("Sh_") && !tmp_name.Contains("Sh_2")) tmp_name.ReplaceAll("Sh_","SHERPA_UNKNOWN_");
     if(tmp_name.Contains("Sherpa_") && !tmp_name.Contains("Sherpa_2")) tmp_name.ReplaceAll("Sherpa_","SHERPA_UNKNOWN_"); //This is needed as some samples don't label the Sherpa version
+    if(tmp_name.Contains("PYTHIA8EVTGEN517")) tmp_name.ReplaceAll("PYTHIA8EVTGEN517","PYTHIA8EVTGEN"); //This is no longer a special case, but we want to leave it in the generator keys to avoid renumbering for backwards compatibility
     
     //capitalize the entire sample name
     tmp_name.ToUpper();

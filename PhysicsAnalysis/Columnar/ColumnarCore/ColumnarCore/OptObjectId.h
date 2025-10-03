@@ -21,28 +21,26 @@ namespace columnar
   /// `nullptr` taking the empty value.  This is its own type both for
   /// compactness and to allow a slightly more efficient representation
   /// internally.
-  template<ContainerId CI, typename CM = ColumnarModeDefault> class OptObjectId;
+  template<ContainerIdConcept CI, typename CM> class OptObjectId;
 
 
 
 
 
-  template<ContainerId CI> class OptObjectId<CI,ColumnarModeXAOD> final
+  template<ContainerIdConcept CI> class OptObjectId<CI,ColumnarModeXAOD> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODObject = typename ContainerIdTraits<CI>::xAODObjectIdType;
+    using xAODObject = typename CI::xAODObjectIdType;
 
     OptObjectId () noexcept = default;
 
     OptObjectId (std::nullopt_t) noexcept {}
 
     OptObjectId (ObjectId<CI,ColumnarModeXAOD> val_object) noexcept
-      : m_object (&val_object.getXAODObject())
+      : m_object (&val_object.getXAODObjectNoexcept())
     {}
 
     OptObjectId (xAODObject *val_object) noexcept
@@ -62,9 +60,22 @@ namespace columnar
     [[nodiscard]] ObjectId<CI,ColumnarModeXAOD> value () const {
       if (m_object == nullptr)
         throw std::bad_optional_access();
+      // This object should ever be held within the context of a
+      // single thread (and generally on the stack), so the associated
+      // check is meaningless.
+      auto *result ATLAS_THREAD_SAFE = m_object;
+      return ObjectId<CI,ColumnarModeXAOD> (*result);}
+
+    [[nodiscard]] ObjectId<CI,ColumnarModeXAOD> operator * () const {
+      if (m_object == nullptr)
+        throw std::bad_optional_access();
       return ObjectId<CI,ColumnarModeXAOD> (*m_object);}
 
     [[nodiscard]] xAODObject *getXAODObject () const noexcept {
+      return m_object;}
+
+    // a version of `getXAODObject` that only exists when it is `noexcept`
+    [[nodiscard]] xAODObject *getXAODObjectNoexcept () const noexcept {
       return m_object;}
 
     [[nodiscard]] bool operator == (const OptObjectId<CI,ColumnarModeXAOD>& that) const noexcept {
@@ -79,30 +90,28 @@ namespace columnar
     xAODObject *m_object = nullptr;
   };
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator== (const OptObjectId<CI,ColumnarModeXAOD>& lhs, const OptObjectId<CI,ColumnarModeXAOD>& rhs)
   {
-    return lhs.getXAODObject() == rhs.getXAODObject();
+    return lhs.getXAODObjectNoexcept() == rhs.getXAODObjectNoexcept();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator!= (const OptObjectId<CI,ColumnarModeXAOD>& lhs, const OptObjectId<CI,ColumnarModeXAOD>& rhs)
   {
-    return lhs.getXAODObject() != rhs.getXAODObject();
+    return lhs.getXAODObjectNoexcept() != rhs.getXAODObjectNoexcept();
   }
 
 
 
 
-  template<ContainerId CI> class OptObjectId<CI,ColumnarModeArray> final
+  template<ContainerIdConcept CI> class OptObjectId<CI,ColumnarModeArray> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    static_assert (ContainerIdTraits<CI>::isDefined, "ContainerId not defined, include the appropriate header");
-
-    using xAODObject = typename ContainerIdTraits<CI>::xAODObjectIdType;
+    using xAODObject = typename CI::xAODObjectIdType;
 
     OptObjectId () noexcept = default;
 
@@ -112,6 +121,10 @@ namespace columnar
       : m_data (val_object.getData()), m_index (val_object.getIndex())
     {}
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     OptObjectId (xAODObject * /*val_object*/)
     {
       throw std::logic_error ("can't call xAOD function in columnar mode");
@@ -121,6 +134,10 @@ namespace columnar
 
     OptObjectId& operator = (const OptObjectId<CI,ColumnarModeArray>& that) noexcept = default;
 
+    // Whatever you do: Do not remove this function. Yes, it will always
+    // throw. It is meant to throw in this template specialization, and
+    // only do something useful in the xAOD mode specialization. If you
+    // remove it you break the columnar mode.
     [[nodiscard]] xAODObject *getXAODObject () const {
       throw std::logic_error ("can't call xAOD function in columnar mode");}
 
@@ -135,6 +152,11 @@ namespace columnar
         throw std::bad_optional_access();
       return ObjectId<CI,ColumnarModeArray> (m_data, m_index);}
 
+    [[nodiscard]] ObjectId<CI,ColumnarModeArray> operator * () const {
+      if (m_index == invalidObjectIndex)
+        throw std::bad_optional_access();
+      return ObjectId<CI,ColumnarModeArray> (m_data, m_index);}
+  
     [[nodiscard]] bool operator == (const OptObjectId<CI,ColumnarModeArray>& that) const noexcept {
       return m_index == that.m_index;}
 
@@ -172,42 +194,17 @@ namespace columnar
     std::size_t m_index = invalidObjectIndex;
   };
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator== (const OptObjectId<CI,ColumnarModeArray>& lhs, const OptObjectId<CI,ColumnarModeArray>& rhs)
   {
     return lhs.getIndex() == rhs.getIndex();
   }
 
-  template<ContainerId CI>
+  template<ContainerIdConcept CI>
   bool operator!= (const OptObjectId<CI,ColumnarModeArray>& lhs, const OptObjectId<CI,ColumnarModeArray>& rhs)
   {
     return lhs.getIndex() != rhs.getIndex();
   }
-
-
-
-
-  using OptJetId = OptObjectId<ContainerId::jet>;
-  using OptMutableJetId = OptObjectId<ContainerId::mutableJet>;
-  using OptMuonId = OptObjectId<ContainerId::muon>;
-  using OptElectronId = OptObjectId<ContainerId::electron>;
-  using OptPhotonId = OptObjectId<ContainerId::photon>;
-  using OptEgammaId = OptObjectId<ContainerId::egamma>;
-  using OptClusterId = OptObjectId<ContainerId::cluster>;
-  using OptTrackId = OptObjectId<ContainerId::track>;
-  using OptTrack0Id = OptObjectId<ContainerId::track0>;
-  using OptTrack1Id = OptObjectId<ContainerId::track1>;
-  using OptTrack2Id = OptObjectId<ContainerId::track2>;
-  using OptVertexId = OptObjectId<ContainerId::vertex>;
-  using OptParticleId = OptObjectId<ContainerId::particle>;
-  using OptParticle0Id = OptObjectId<ContainerId::particle0>;
-  using OptParticle1Id = OptObjectId<ContainerId::particle1>;
-  using OptMetId = OptObjectId<ContainerId::met>;
-  using OptMet0Id = OptObjectId<ContainerId::met0>;
-  using OptMet1Id = OptObjectId<ContainerId::met1>;
-  using OptMutableMetId = OptObjectId<ContainerId::mutableMet>;
-  using OptMetAssociationId = OptObjectId<ContainerId::metAssociation>;
-  using OptEventInfoId = OptObjectId<ContainerId::eventInfo>;
 }
 
 #endif

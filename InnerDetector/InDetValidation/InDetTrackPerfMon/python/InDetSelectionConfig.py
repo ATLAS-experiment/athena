@@ -54,8 +54,12 @@ def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwarg
     acc = ComponentAccumulator()
 
     objStr = flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject
+    objQuality = flags.PhysVal.IDTPM.currentTrkAna.ObjectQuality
+    if objQuality == "Medium" and "Jet" in objStr :
+        ## changing default for jets
+        objQuality = "DRtruthJet"
     kwargs.setdefault( "ObjectType",    objStr )
-    kwargs.setdefault( "ObjectQuality", flags.PhysVal.IDTPM.currentTrkAna.ObjectQuality )
+    kwargs.setdefault( "ObjectQuality", objQuality )
 
     if "Tau" in objStr:
         kwargs.setdefault( "TauType",    flags.PhysVal.IDTPM.currentTrkAna.TauType )
@@ -84,7 +88,7 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     if qualityWP == "EFTracking" :
         etaBins = [-1., 2., 2.6, 9999.]
         minHitsVector = [9, 8, 7]
-        minPtVector = [1000., 400., 400.]
+        minPtVector = [900., 400., 400.]
         maxD0Vector = [2., 2., 10.]
         maxZ0Vector = [150., 150., 150.]
         qualityWP = "" # to avoid conflicts with InDetTrackSelectionTool options
@@ -204,7 +208,10 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     if "HighPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
         truthMinPt = 10000  # 10 GeV
         truthMaxPt = -9999. # +inf
-    if "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+    elif "VeryLowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        truthMinPt = 1000   # 1 GeV
+        truthMaxPt = 2000   # 2 GeV
+    elif "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
         truthMinPt = 1000   # 1 GeV
         truthMaxPt = 10000  # 10 GeV
 

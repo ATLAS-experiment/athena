@@ -9,11 +9,9 @@ atlas_add_library( LRTMuonAnalysisToolsLib
    PUBLIC_HEADERS LRTMuonAnalysisTools
    LINK_LIBRARIES AsgTools MuonAnalysisInterfacesLib xAODMuon xAODTracking )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( LRTMuonAnalysisTools
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES LRTMuonAnalysisToolsLib )
-endif()
+atlas_add_component( LRTMuonAnalysisTools
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES LRTMuonAnalysisToolsLib )
 
 atlas_add_dictionary( LRTMuonAnalysisToolsDict
    LRTMuonAnalysisTools/LRTMuonAnalysisToolsDict.h

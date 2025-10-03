@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,6 +22,7 @@
 // Input/output classes
 #include "ReadoutGeometryBase/SiCellId.h"
 #include "ReadoutGeometryBase/SiDiodesParameters.h"
+#include "ReadoutGeometryBase/PixelDiodeParametersProxy.h"
 
 namespace InDetDD {
 
@@ -107,6 +108,13 @@ class PixelDiodeMatrix;
 
           /** Debug representation */
           std::string debugStringRepr() const;
+
+          /** Search diode for the given cell and return proxy to access its parameters.
+           * Will search through the diode matrix, and compute the diode position at the
+           * same time. The position will be cached in the proxy. The proxy will provide
+           * access to parameters associated to the diode.
+           */
+          PixelDiodeParametersProxy parametersProxy(const SiCellId &cellId) const;
 
           ///////////////////////////////////////////////////////////////////
           // Private methods:
@@ -197,6 +205,12 @@ class PixelDiodeMatrix;
     inline std::string PixelDiodeMap::debugStringRepr() const
     {
       return m_matrix->createDebugStringRepr();
+    }
+
+    inline PixelDiodeParametersProxy PixelDiodeMap::parametersProxy(const SiCellId &cellId) const {
+       PixelDiodeParametersProxy ret;
+       ret.cell_ptr() = m_matrix->positionOfCell(cellId, ret.position());
+       return ret;
     }
 
 } // namespace InDetDD

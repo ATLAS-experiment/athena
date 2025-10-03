@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCRAWDATAMONITORING_RPCTRACKANAALG_H
@@ -31,6 +31,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // local
 #include "RPCDQUtils.h"
@@ -110,7 +111,7 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm {
     StringProperty m_packageName{this, "PackageName", "RpcTrackAnaAlg",
                                  "group name for histograming"};
 
-    StringProperty m_elementsFileName{this, "ElementsFileName", "Element.xml",
+    StringProperty m_elementsFileName{this, "ElementsFileName", "RpcRawDataMonitoring/Element.xml",
                                       "Elements xml file"};
 
     StringProperty m_trigTagList{
@@ -134,7 +135,7 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm {
     FloatProperty m_barrelMinEta{this, "barrelMinEta", 0.1};
     FloatProperty m_barrelMaxEta{this, "barrelMaxEta", 1.05};
 
-    FloatProperty m_muonMass{this, "MuonMass", 105.6583755,
+    FloatProperty m_muonMass{this, "MuonMass", ParticleConstants::muonMassInMeV,
                              "muon invariant mass in MeV"};
     FloatProperty m_zMass_lowLimit{
         this, "zMass_lowLimit", 50000.,

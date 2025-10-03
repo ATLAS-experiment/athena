@@ -110,8 +110,12 @@ def sweep_ignore_mrs():
       if choice[0]=="a" or str(i) in choice:
          print(f"Restoring files from {mr.web_url}")
          for s in mr.diff_status:
-            restore_file(mr, s)
-
+            try:
+               restore_file(mr, s)
+            except Exception as e:
+               print(e)
+               filename = s.split()[1]
+               warn(f"Problem restoring {filename} of sweep:ignore MR !{mr.iid}. Manual resolution is required.")
 
 def restore_file(mr, status):
    """Given a --name-status line, restore the file. The format is:
@@ -122,13 +126,21 @@ def restore_file(mr, status):
    """
 
    def git_try_cmd(cmd, filename):
-      """Check if filename was modified again after this MR. If not, run cmd."""
+      """Check if filename was modified by another MR. If not, run cmd."""
+
+      # Check if filename was modified after this MR
       git_diff = git_cmd(f"git diff --quiet {mr.merge_commit_sha}..{args.source} -- {filename}",
-                         check=False)
-      if git_diff.returncode==0:
+                         check=False).returncode
+
+      # Check if filename was modified before this MR
+      git_diff += git_cmd(f"git diff --quiet ...{mr.merge_commit_sha}^ -- {filename}",
+                          check=False).returncode
+
+      if git_diff==0:
          git_cmd(cmd)
       else:
-         warn(f"{filename} was modified by another commit. Manual merge needed.")
+         warn(f"Cannot restore {filename} because it was modified by another MR in this merge. "
+              "You need to resolve this manually.")
 
    def find_rename(filename):
       """Try to find the original name of filename if it was renamed"""

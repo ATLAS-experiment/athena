@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_CTAUROITHRESHOLDSTOOL_H
 #define HLTSEEDING_CTAUROITHRESHOLDSTOOL_H
@@ -17,7 +17,8 @@ public:
   // Override initialize to initialize the extra data handle
   virtual StatusCode initialize() override;
 
-  virtual uint64_t getPattern(const xAOD::eFexTauRoI& eTau,
+  virtual uint64_t getPattern(const EventContext& ctx,
+                              const xAOD::eFexTauRoI& eTau,
                               const ThrVec& menuThresholds,
                               const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const override;
 

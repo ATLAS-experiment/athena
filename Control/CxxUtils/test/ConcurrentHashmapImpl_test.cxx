@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentHashmapImpl_test.cxx
@@ -113,11 +113,15 @@ public:
   }
 
 
-  unsigned int inGrace() const { return m_inGrace; }
+  unsigned int inGrace() const
+  {
+    std::lock_guard<std::mutex> g (m_mutex);
+    return m_inGrace;
+  }
 
 
 private:
-  std::mutex m_mutex;
+  mutable std::mutex m_mutex;
   std::atomic<T*> m_p;
   std::vector<T*> m_garbage;
   unsigned int m_inGrace;

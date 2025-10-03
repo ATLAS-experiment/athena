@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/GNN.h"
 #include "FlavorTagInference/SaltModel.h"
+#include "FlavorTagInference/SaltModelGraphConfig.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -27,12 +28,12 @@ namespace InDetGNNHardScatterSelection {
     m_saltModel = std::make_shared<FlavorTagInference::SaltModel>(fullPathToOnnxFile);
 
     // Extract metadata from the ONNX file, primarily about the model's inputs.
-    auto lwt_config = m_saltModel->getLwtConfig();
+    auto graph_config = m_saltModel->getGraphConfig();
 
     // Create configuration objects for data preprocessing.
-    auto [inputs, constituents_configs] = dataprep::createGetterConfig(lwt_config);
+    auto [inputs, constituents_configs] = dataprep::createGetterConfig(graph_config);
     
-    for (auto config : constituents_configs){
+    for (const auto& config : constituents_configs){
       switch (config.type){
       case ConstituentsType::TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config));
@@ -58,7 +59,7 @@ namespace InDetGNNHardScatterSelection {
     m_varsFromVertex = dataprep::createVertexVarGetters(inputs);
 
     // Retrieve the configuration for the model outputs.
-    FlavorTagInference::SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
+    FlavorTagInference::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
 
     for (const auto& outNode : gnn_output_config) {
       // the node's output name will be used to define the decoration name
@@ -80,7 +81,8 @@ namespace InDetGNNHardScatterSelection {
     std::map<std::string, FlavorTagInference::Inputs> gnn_input;
 
     std::vector<float> vertex_feat;
-    for (const auto& getter: m_varsFromVertex) {
+    vertex_feat.reserve(m_varsFromVertex.size());
+for (const auto& getter: m_varsFromVertex) {
       vertex_feat.push_back(getter(vertex).second);
     }
     std::vector<int64_t> vertexfeat_dim = {1, static_cast<int64_t>(vertex_feat.size())};
@@ -88,7 +90,7 @@ namespace InDetGNNHardScatterSelection {
     FlavorTagInference::Inputs vertex_info (vertex_feat, vertexfeat_dim);
     gnn_input.insert({"vertex_features", vertex_info});
 
-    for (auto loader : m_constituentsLoaders){
+    for (const auto& loader : m_constituentsLoaders){
       auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(vertex);
       gnn_input.insert({sequence_name, sequence_data});
     }

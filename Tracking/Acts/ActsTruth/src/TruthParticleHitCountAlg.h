@@ -18,7 +18,7 @@
 #include "ActsEvent/TruthParticleHitCounts.h"
 #include "ActsEvent/MeasurementToTruthParticleAssociation.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsTruth/ElasticDecayUtil.h"
 
 #include <mutex>
@@ -52,7 +52,7 @@ namespace ActsTrk
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool
+     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
         {this, "TrackingGeometryTool", ""};
 
      SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_pixelClustersToTruth

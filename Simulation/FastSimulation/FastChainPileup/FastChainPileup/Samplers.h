@@ -6,6 +6,8 @@
 // Olivier Arnaez, started 17/12/15
 // adapted from Generators/ParticleGun/python/samplers.py
 
+#include "TruthUtils/ParticleConstants.h"
+
 #include "TLorentzVector.h"
 #include "TRandom.h"
 #include "TMath.h"
@@ -345,20 +347,20 @@ class ParticleSampler {
   ~ParticleSampler() = default;
   ParticleSampler(Sampler * pid, MomSampler * mom, int n=1):m_mom(mom), m_pos(PosSampler(0,0,0)), m_pid(pid), m_n( ConstSampler(n)),  m_mass_override(true) {
     // A default dictionary of particle masses (in MeV)
-    m_massdict[22  ] =     0.0; // photon
-    m_massdict[11  ] =     0.5; // electron
-    m_massdict[12  ] =     0.0; // nu_e
-    m_massdict[13  ] =   105.7; // muon
-    m_massdict[14  ] =     0.0; // nu_mu
-    m_massdict[15  ] =  1777.8; // tau
-    m_massdict[16  ] =     0.0; // nu_tau
-    m_massdict[2212] =   938.0; // proton
-    m_massdict[2112] =   940.0; // neutron
-    m_massdict[111 ] =   135.0; // pi0
-    m_massdict[211 ] =   140.0; // pi+-
-    m_massdict[221 ] =   547.0; // eta
-    m_massdict[321 ] =   494.0; // K+-
-    m_massdict[311 ] =   598.0; // K0
+    m_massdict[22  ] = ParticleConstants::photonMassInMeV; // photon
+    m_massdict[11  ] = ParticleConstants::electronMassInMeV; // electron
+    m_massdict[12  ] = ParticleConstants::electronNeutrinoMassInMeV; // nu_e
+    m_massdict[13  ] = ParticleConstants::muonMassInMeV; // muon
+    m_massdict[14  ] = ParticleConstants::muonNeutrinoMassInMeV; // nu_mu
+    m_massdict[15  ] = ParticleConstants::tauMassInMeV; // tau
+    m_massdict[16  ] = ParticleConstants::tauNeutrinoMassInMeV; // nu_tau
+    m_massdict[2212] = ParticleConstants::protonMassInMeV; // proton
+    m_massdict[2112] = ParticleConstants::neutronMassInMeV; // neutron
+    m_massdict[111 ] = ParticleConstants::piZeroMassInMeV; // pi0
+    m_massdict[211 ] = ParticleConstants::chargedPionMassInMeV; // pi+-
+    m_massdict[221 ] = ParticleConstants::etaMassInMeV; // eta
+    m_massdict[321 ] = ParticleConstants::chargedKaonMassInMeV; // K+-
+    m_massdict[311 ] = ParticleConstants::KZeroMassInMeV; // K0
   };
 
   //Return a vector of sampled particles

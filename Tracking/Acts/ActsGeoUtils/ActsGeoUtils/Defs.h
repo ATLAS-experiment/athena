@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSGEOUTILS_DEFS_H
 #define ACTSGEOUTILS_DEFS_H
@@ -13,10 +13,6 @@
 
 /** @brief forward declarations of the classes defined in the package*/
 namespace ActsTrk{
-   
-  template <class> class SurfaceBoundSet;
-  /// Aberivation to create a new SurfaceBoundSetPtr
-  template<class BoundType> using SurfaceBoundSetPtr = std::shared_ptr<SurfaceBoundSet<BoundType>>;
 
    class SurfaceCache;
    using SurfaceCacheSet = std::set<std::unique_ptr<SurfaceCache>, std::less<>>;

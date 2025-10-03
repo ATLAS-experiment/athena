@@ -96,7 +96,10 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleToolStrip {this, "LorentzAngleToolStrip", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retrieve Lorentz angle of SCT"};
     
     Gaudi::Property<bool> m_skipStripSpacePointFormation {this, "skipStripSpFormation", true, "Should be enabled in case we want to test strip seeding"};
-    Gaudi::Property<bool> m_doShift {this, "doLorentzShift", true, "Apply Lorentz angle shift to the clusters"};
+    Gaudi::Property<bool> m_doShift {this, "doLorentzShift", false, "Apply Lorentz angle shift to the clusters"};
+    Gaudi::Property<bool> m_useInherentLocalCoordinates {this, "useFPGALocalCoordinates", true, "instead of getting indirectly the local coordinates from the cell position, use the values stored in FPGATrackSimHit objects"};
+    Gaudi::Property<bool> m_broadErrors {this, "broadErrors", false, "If true use cluster width to set errors, otherwise use avg pixel width"};
+   
  };
 
 #endif

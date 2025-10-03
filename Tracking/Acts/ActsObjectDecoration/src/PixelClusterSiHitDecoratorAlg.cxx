@@ -3,6 +3,7 @@
 */
 
 #include "src/PixelClusterSiHitDecoratorAlg.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Identifier/IdentifierHash.h"
@@ -21,34 +22,19 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Initializing " << name() << " ..." );
 
     ATH_CHECK( m_inputMeasurementsKey.initialize() );
-    ATH_CHECK( m_inputClustersKey.initialize() );
     ATH_CHECK( m_SDOcontainer_key.initialize() );
     ATH_CHECK( m_pixelDetEleCollKey.initialize() );
     ATH_CHECK( m_siHitsKey.initialize() );
+
+    // Detector decoration
+    ATH_CHECK( m_measurement_detectorElementID.initialize() );
     
     // SDO decorations
-    m_sdo_words = m_inputMeasurementsKey.key() + "." + m_sdo_words.key();
-    m_sdo_depositsBarcode = m_inputMeasurementsKey.key() + "." + m_sdo_depositsBarcode.key();
-    m_sdo_depositsEnergy = m_inputMeasurementsKey.key() + "." + m_sdo_depositsEnergy.key();
-
     ATH_CHECK( m_sdo_words.initialize() );
     ATH_CHECK( m_sdo_depositsBarcode.initialize() );
     ATH_CHECK( m_sdo_depositsEnergy.initialize() );
 
     // SiHit decorations
-    m_sihit_energyDeposit_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_energyDeposit_decor_key.key();
-    m_sihit_meanTime_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_meanTime_decor_key.key();
-    m_sihit_barcode_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_barcode_decor_key.key();
-    m_sihit_pdgid_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_pdgid_decor_key.key();
-
-    m_sihit_startPosX_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_startPosX_decor_key.key();
-    m_sihit_startPosY_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_startPosY_decor_key.key();
-    m_sihit_startPosZ_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_startPosZ_decor_key.key();
-
-    m_sihit_endPosX_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_endPosX_decor_key.key();
-    m_sihit_endPosY_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_endPosY_decor_key.key();
-    m_sihit_endPosZ_decor_key = m_inputMeasurementsKey.key() + "." + m_sihit_endPosZ_decor_key.key();
-
     ATH_CHECK( m_sihit_energyDeposit_decor_key.initialize() );
     ATH_CHECK( m_sihit_meanTime_decor_key.initialize() );
     ATH_CHECK( m_sihit_barcode_decor_key.initialize() );
@@ -77,11 +63,6 @@ namespace ActsTrk {
     ATH_CHECK( measurementHandle.isValid() );
     const xAOD::TrackMeasurementValidationContainer* measurements = measurementHandle.cptr();
 
-    ATH_MSG_DEBUG( "Retrieving PixelClusterContainer with key: " << m_inputClustersKey.key() );
-    SG::ReadHandle< xAOD::PixelClusterContainer > clusterHandle = SG::makeHandle( m_inputClustersKey, ctx );
-    ATH_CHECK( clusterHandle.isValid() );
-    const xAOD::PixelClusterContainer* clusters = clusterHandle.cptr();
-
     ATH_MSG_DEBUG( "Retrieving InDetSimDataCollection with key: " << m_SDOcontainer_key.key() );
     SG::ReadHandle< InDetSimDataCollection > sdoHandle = SG::makeHandle( m_SDOcontainer_key, ctx );
     ATH_CHECK( sdoHandle.isValid() );
@@ -96,6 +77,10 @@ namespace ActsTrk {
     ATH_CHECK(pixelDetEleHandle.isValid());
     const InDetDD::SiDetectorElementCollection* pixElements = pixelDetEleHandle.cptr();
 
+    // Detector decorator
+    SG::ReadDecorHandle<xAOD::TrackMeasurementValidationContainer, std::uint64_t> decor_detectorElementID ( m_measurement_detectorElementID, ctx );
+    ATH_CHECK( decor_detectorElementID.isValid() );
+    
     // SDO decorators
     SG::WriteDecorHandle< xAOD::TrackMeasurementValidationContainer, std::vector<int> > decor_sdo_words( m_sdo_words, ctx );
     SG::WriteDecorHandle< xAOD::TrackMeasurementValidationContainer, std::vector< std::vector<int> > > decor_sdo_depositsBarcode( m_sdo_depositsBarcode, ctx );
@@ -114,10 +99,6 @@ namespace ActsTrk {
     SG::WriteDecorHandle< xAOD::TrackMeasurementValidationContainer, std::vector<float> > decor_sihit_endPosX( m_sihit_endPosX_decor_key, ctx );
     SG::WriteDecorHandle< xAOD::TrackMeasurementValidationContainer, std::vector<float> > decor_sihit_endPosY( m_sihit_endPosY_decor_key, ctx );
     SG::WriteDecorHandle< xAOD::TrackMeasurementValidationContainer, std::vector<float> > decor_sihit_endPosZ( m_sihit_endPosZ_decor_key, ctx );
-
-    // measurements and clusters have the same size
-    // measurement n corresponds to cluster n
-    ATH_CHECK( measurements->size() == clusters->size() );
 
     // organize the si hits in such a way we group them together by idhash
     std::vector< std::vector< const SiHit* > > siHitsCollections(m_PixelHelper->wafer_hash_max());
@@ -141,10 +122,9 @@ namespace ActsTrk {
       siHitsCollections[wafer_hash].push_back(&siHit);
     } // loop on si hits
     
-    
-    ContainerAccessor<xAOD::PixelCluster, IdentifierHash, 1>
-      pixelAccessor ( *clusters,
-		      [] (const xAOD::PixelCluster& cl) -> IdentifierHash { return cl.identifierHash(); },
+    ContainerAccessor<xAOD::TrackMeasurementValidation, IdentifierHash, 1>
+      pixelAccessor ( *measurements,
+		      [&decor_detectorElementID] (const xAOD::TrackMeasurementValidation& cl) -> IdentifierHash { return decor_detectorElementID(cl); },
 		      pixElements->size());
 
     // run on id hashes
@@ -160,26 +140,31 @@ namespace ActsTrk {
       const std::vector< const SiHit* >& siHitsWithCurrentHash = siHitsCollections.at(hashId);
 
       for (auto itr = startRange; itr != stopRange; ++itr) {
-	const xAOD::PixelCluster* cluster = *startRange;
-	const xAOD::TrackMeasurementValidation* measurement = measurements->at(cluster->index());
-	ATH_CHECK(measurement->identifier() == cluster->identifier() );
+	const xAOD::TrackMeasurementValidation* measurement = *itr;
 
-	auto [word, depositsBarcode, depositsEnergy] = ActsTrk::detail::getSDOInformation(cluster->rdoList(), *sdos);
-	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(*cluster, *element, siHitsWithCurrentHash, depositsBarcode);
+	const std::vector< std::uint64_t > rdoIdentifierList = measurement->rdoIdentifierList();
+	// convert to RDOs
+	std::vector< Identifier > rdos( rdoIdentifierList.size() );
+	for (std::size_t i(0); i < rdoIdentifierList.size(); ++i) {
+	  rdos[i].set_literal( rdoIdentifierList[i] );
+	}
+		
+	auto [word, depositsUniqueID, depositsEnergy] = ActsTrk::detail::getSDOInformation(rdos, *sdos);
+	std::vector<SiHit> compatibleSiHits = findAllHitsCompatibleWithCluster(rdos, *element, siHitsWithCurrentHash, depositsUniqueID);
 
-	auto [energyDeposit, meanTime, barcode, pdgid,
+	auto [energyDeposit, meanTime, uniqueID, pdgid,
 	      startPosX, startPosY, startPosZ,
 	      endPosX, endPosY, endPosZ] = ActsTrk::detail::getSiHitInformation(*element, compatibleSiHits);
 	
 	// attach SDO decorations
 	decor_sdo_words(*measurement) = std::move(word);
-	decor_sdo_depositsBarcode(*measurement) = std::move(depositsBarcode);
+	decor_sdo_depositsBarcode(*measurement) = std::move(depositsUniqueID);
 	decor_sdo_depositsEnergy(*measurement) = std::move(depositsEnergy);
 
 	// attach SiHit decorations
 	decor_sihit_energyDeposit(*measurement) = std::move(energyDeposit);
 	decor_sihit_meanTime(*measurement) = std::move(meanTime);
-	decor_sihit_barcode(*measurement) = std::move(barcode);
+	decor_sihit_barcode(*measurement) = std::move(uniqueID);
 	decor_sihit_pdgid(*measurement) = std::move(pdgid);
 	
 	decor_sihit_startPosX(*measurement) = std::move(startPosX);
@@ -196,7 +181,7 @@ namespace ActsTrk {
   }
 
   
-  std::vector<SiHit> PixelClusterSiHitDecoratorAlg::findAllHitsCompatibleWithCluster( const xAOD::PixelCluster& cluster,
+  std::vector<SiHit> PixelClusterSiHitDecoratorAlg::findAllHitsCompatibleWithCluster( const std::vector< Identifier >& rdos,
 										      const InDetDD::SiDetectorElement& element,
 										      const std::vector<const SiHit*>& sihits,
 										      const std::vector< std::vector< int > >& sdoTracks) const
@@ -212,7 +197,7 @@ namespace ActsTrk {
 	Amg::Vector2D pos = element.hitLocalToLocal( averagePosition.z(), averagePosition.y() );
 	InDetDD::SiCellId diode = element.cellIdOfPosition(pos);
 	
-	for( const auto& hitIdentifier : cluster.rdoList() ){
+	for( const Identifier& hitIdentifier : rdos ) {
 	    ATH_MSG_DEBUG("Truth Phi " <<  diode.phiIndex() << " Cluster Phi " <<   m_PixelHelper->phi_index( hitIdentifier ) );
 	    ATH_MSG_DEBUG("Truth Eta " <<  diode.etaIndex() << " Cluster Eta " <<   m_PixelHelper->eta_index( hitIdentifier ) );
 	    if( std::abs( static_cast<int>(diode.etaIndex()) - m_PixelHelper->eta_index( hitIdentifier ) ) <= 1 and
@@ -223,9 +208,9 @@ namespace ActsTrk {
 	} // list on rdos
 	
       } else { // not m_useSiHitsGeometryMatching
-	auto siHitBarcode = HepMC::barcode(siHit->particleLink());       
-	for ( const std::vector<int>& barcodeSDOColl : sdoTracks ) {
-	  if (std::find(barcodeSDOColl.begin(), barcodeSDOColl.end(), siHitBarcode) == barcodeSDOColl.end()) continue;
+	auto siHitUniqueID = HepMC::uniqueID(siHit->particleLink());
+	for ( const std::vector<int>& uniqueIDSDOColl : sdoTracks ) {
+	  if (std::find(uniqueIDSDOColl.begin(), uniqueIDSDOColl.end(), siHitUniqueID) == uniqueIDSDOColl.end()) continue;
 	  multiMatchingHits.push_back(siHit);	
 	  break;
 	}	
@@ -298,7 +283,7 @@ namespace ActsTrk {
 				  highestXPos->localEndPosition(),
 				  energyDep,
 				  time,
-				  HepMC::barcode((*siHitIter)->particleLink()),
+				  (*siHitIter)->particleLink(),
 				  0, // 0 for pixel 1 for strip
 				  (*siHitIter)->getBarrelEndcap(),
 				  (*siHitIter)->getLayerDisk(),

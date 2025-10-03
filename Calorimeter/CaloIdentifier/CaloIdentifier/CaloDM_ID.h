@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALODM_ID_H
@@ -105,7 +105,7 @@ public:
   typedef Identifier::size_type  size_type ;
 
 
-  CaloDM_ID(void);    
+  CaloDM_ID();
 
   virtual ~CaloDM_ID();
 
@@ -155,31 +155,31 @@ public:
  
 
   /**  lar region hash table max size */
-   size_type     lar_region_hash_max (void) const;
+   size_type     lar_region_hash_max () const;
   /**  lar zone hash table max size */
-   size_type     lar_zone_hash_max (void) const;
+   size_type     lar_zone_hash_max () const;
   /**  tile region hash table max size */
-   size_type     tile_region_hash_max (void) const;
+   size_type     tile_region_hash_max () const;
   /**  tile zone hash table max size */
-   size_type     tile_zone_hash_max (void) const;
+   size_type     tile_zone_hash_max () const;
 
   /** begin iterator over lar regions */
-  std::vector<Identifier>::const_iterator lar_region_begin    (void) const;
+  std::vector<Identifier>::const_iterator lar_region_begin    () const;
   /** end iterator over lar regions */
-  std::vector<Identifier>::const_iterator lar_region_end      (void) const;
+  std::vector<Identifier>::const_iterator lar_region_end      () const;
   /** begin iterator over tile regions */
-  std::vector<Identifier>::const_iterator tile_region_begin    (void) const;
+  std::vector<Identifier>::const_iterator tile_region_begin    () const;
   /** end iterator over tile regions */
-  std::vector<Identifier>::const_iterator tile_region_end      (void) const;
+  std::vector<Identifier>::const_iterator tile_region_end      () const;
 
  /** begin iterator over full set of LAr identifiers */
-  std::vector<Identifier>::const_iterator lar_zone_begin    (void) const;
+  std::vector<Identifier>::const_iterator lar_zone_begin    () const;
  /** end iterator over full set of LAr identifiers */
-  std::vector<Identifier>::const_iterator lar_zone_end      (void) const;
+  std::vector<Identifier>::const_iterator lar_zone_end      () const;
  /** begin iterator over full set of Tile identifiers */
-  std::vector<Identifier>::const_iterator tile_zone_begin    (void) const;
+  std::vector<Identifier>::const_iterator tile_zone_begin    () const;
  /** end iterator over full set of Tile identifiers */
-  std::vector<Identifier>::const_iterator tile_zone_end      (void) const;
+  std::vector<Identifier>::const_iterator tile_zone_end      () const;
 
  
   /**
@@ -279,10 +279,10 @@ public:
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);
 
   /** access to IdContext's which define which levels of fields are contained in a region id */
-  IdContext    region_context   (void) const;
+  IdContext    region_context   () const;
 
   /** access to IdContext's which define which levels of fields are contained in a zone id */
-  IdContext    zone_context   (void) const;
+  IdContext    zone_context   () const;
 
 
 private:    
@@ -311,10 +311,10 @@ private:
 
 
 
-  int         initLevelsFromDict(void) ;
+  int         initLevelsFromDict();
 
-  int         init_lar_hashes(void) ;
-  int         init_tile_hashes(void) ;
+  int         init_lar_hashes();
+  int         init_tile_hashes();
 
 
   size_type                     m_calodm_region_index;
@@ -563,74 +563,74 @@ inline IdentifierHash CaloDM_ID::tile_zone_hash (Identifier TileZoneId) const
 }
 
 //----------------------------------------------------------------------------
-inline CaloDM_ID::size_type   CaloDM_ID::lar_region_hash_max (void) const
+inline CaloDM_ID::size_type   CaloDM_ID::lar_region_hash_max () const
 {
   return m_lar_region_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline CaloDM_ID::size_type   CaloDM_ID::lar_zone_hash_max (void) const
+inline CaloDM_ID::size_type   CaloDM_ID::lar_zone_hash_max () const
 {
   return m_lar_zone_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline CaloDM_ID::size_type   CaloDM_ID::tile_region_hash_max (void) const
+inline CaloDM_ID::size_type   CaloDM_ID::tile_region_hash_max () const
 {
   return m_tile_region_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline CaloDM_ID::size_type   CaloDM_ID::tile_zone_hash_max (void) const
+inline CaloDM_ID::size_type   CaloDM_ID::tile_zone_hash_max () const
 {
   return m_tile_zone_hash_max;
 }
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_region_begin    (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_region_begin    () const
 {
   return(m_lar_region_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_region_end      (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_region_end      () const
 {
   return(m_lar_region_vec.end());
 }
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_zone_begin    (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_zone_begin    () const
 {
   return(m_lar_zone_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_zone_end      (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::lar_zone_end      () const
 {
   return(m_lar_zone_vec.end());
 }
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_region_begin    (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_region_begin    () const
 {
   return(m_tile_region_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_region_end      (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_region_end      () const
 {
   return(m_tile_region_vec.end());
 }
 
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_zone_begin    (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_zone_begin    () const
 {
   return(m_tile_zone_vec.begin());
 }
 
 //----------------------------------------------------------------------------
-inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_zone_end      (void) const
+inline std::vector<Identifier>::const_iterator CaloDM_ID::tile_zone_end      () const
 {
   return(m_tile_zone_vec.end());
 }

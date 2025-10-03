@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_XXX_SILICONID_H
@@ -14,8 +14,6 @@
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
  */
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/Identifier.h"
@@ -50,9 +48,9 @@ public:
 
   /// @name strutors
   //@{
-  SiliconID(void);
+  SiliconID();
   SiliconID(const PixelID* pixel_helper, const SCT_ID* sct_helper);
-  ~SiliconID(void);
+  ~SiliconID();
   //@}
 
   /// @name Optimized accessors: less optimal than PixelID/SCT_ID
@@ -64,7 +62,7 @@ public:
   IdentifierHash wafer_hash(Identifier wafer_id) const;
 
   /// Hash table maximum sizes
-  size_type wafer_hash_max(void) const;
+  size_type wafer_hash_max() const;
 
   /// Test for barrel - generic, i.e. works for EITHER pixel or sct id
   bool is_barrel(const Identifier& id) const;
@@ -97,7 +95,7 @@ public:
   //@}
 
   /// Tests of packing
-  int test_wafer_hashes(void) const;
+  int test_wafer_hashes() const;
 private:
   size_type m_wafer_hash_max;
   size_type m_pixel_wafer_hash_max;
@@ -106,10 +104,6 @@ private:
 };
 
 
-
-/////////////////////////////////////////////////////////////////////////////
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-/////////////////////////////////////////////////////////////////////////////
 
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
@@ -146,7 +140,7 @@ SiliconID::wafer_hash(Identifier wafer_id) const {
 
 //----------------------------------------------------------------------------
 inline SiliconID::size_type
-SiliconID::wafer_hash_max(void) const {
+SiliconID::wafer_hash_max() const {
   // Hash table maximum sizes
   return(m_wafer_hash_max);
 }

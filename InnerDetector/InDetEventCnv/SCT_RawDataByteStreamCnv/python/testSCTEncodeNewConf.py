@@ -1,6 +1,23 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
+
+def SCTRawContByteStreamToolCfg(flags, name="SCTRawContByteStreamToolCustom", **kwargs) :
+    acc = ComponentAccumulator()
+    acc.setPrivateTools( CompFactory.SCTRawContByteStreamTool(name=name,**kwargs))
+    return acc
+
+def SCTRawContByteStreamToolProviderToolCfg(flags, name="SCTRawContByteStreamToolProviderTool", **kwargs) :
+    acc = ComponentAccumulator()
+    if "RawContByteStreamTool" not in kwargs :
+        kwargs.setdefault("RawContByteStreamTool", acc.popToolsAndMerge(SCTRawContByteStreamToolCfg(flags)))
+    acc.addPublicTool( CompFactory.SCTRawContByteStreamToolProviderTool(name=name,**kwargs))
+    return acc
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -24,6 +41,9 @@ if __name__ == "__main__":
     writingAcc.getService("ByteStreamEventStorageOutputSvc").StreamType = "EventStorage"
     writingAcc.getService("ByteStreamEventStorageOutputSvc").StreamName = "StreamBSFileOutput"
     acc.merge(writingAcc)
+
+    if flags.GeoModel.Run is not LHCPeriod.Run4:
+        acc.merge(SCTRawContByteStreamToolProviderToolCfg(flags))    
 
     # For SCT geometry and cabling
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinHeightThreshold.cxx checks for a set of consecutive bins above a threshold value and returns dqm_core::Result
@@ -186,7 +186,7 @@ dqm_algorithms::BinHeightThreshold::execute(	const std::string &  name,
 
   result->tags_["NRedBins"] = countRed;
   result->tags_["NYellowBins"] = countYellow;
-  result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);
+  result->object_ =  boost::shared_ptr<TObject>(resulthisto);
   if(countRed>=n_bins)
     {
       result->status_ = dqm_core::Result::Red;

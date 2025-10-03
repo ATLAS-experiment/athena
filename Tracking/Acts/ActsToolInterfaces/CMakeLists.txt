@@ -12,12 +12,12 @@ atlas_add_library( ActsToolInterfacesLib
                    INTERFACE
                    PUBLIC_HEADERS ActsToolInterfaces
                    LINK_LIBRARIES
-		     ActsCore
+		     Acts::Core
 		     ActsEventLib
 		     ActsGeometryLib
 		     BeamSpotConditionsData
 		     GaudiKernel
-                     HGTD_RawData
+		     HGTD_RawData
 		     InDetIdentifier
 		     InDetRawData
 		     InDetReadoutGeometry

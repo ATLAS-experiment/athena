@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrackParticleAthenaPool )
@@ -18,7 +18,7 @@ atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 find_package( AthenaPoolUtilitiesTest )
 if( ATHENAPOOLUTILITIESTEST_FOUND )
    set( TRACKPARTICLEATHENAPOOL_REFERENCE_TAG
-        TrackParticleAthenaPoolReference-04-00-00 )
+        TrackParticleAthenaPoolReference-04-00-01 )
    run_tpcnv_test( TrackParticleTPCnv_16.6.3   AOD-16.6.3-full
                    REFERENCE_TAG ${TRACKPARTICLEATHENAPOOL_REFERENCE_TAG} )
    run_tpcnv_test( TrackParticleTPCnv_17.2.8   AOD-17.2.8-full

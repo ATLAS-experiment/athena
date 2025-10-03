@@ -36,18 +36,6 @@
   <!-- Add every fnc within Ringer namespace -->
   <function pattern="Ringer::*"/>
 
-  <!--<class name="Ringer::ROOT6_NamespaceAutoloadHook" />
-  <class name="Ringer::IOHelperFcns::ROOT6_NamespaceAutoloadHook" />
-  <class name="IOHelperFcns::ROOT6_NamespaceAutoloadHook" />
-  <function name="Ringer::ROOT6_NamespaceAutoloadHook" />
-  <enum pattern="Ringer::ROOT6_NamespaceAutoloadHook"/>
-  <function name="Ringer::IOHelperFcns::*" /> -->
-
-	<!-- <variable pattern="egammaPID::*"/> -->
-	<!-- <class name="Ringer::ROOT6_NamespaceAutoloadHook" /> -->
-
-  <!-- <class pattern="Ringer::*" /> -->
-
   <!-- Remove extra Root catch-ups by above patterns that we dont want -->
   <exclusion>
     <class pattern="*ROOTDict::*" />

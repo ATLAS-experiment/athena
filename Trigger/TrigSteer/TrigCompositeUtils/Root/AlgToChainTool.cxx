@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/AlgToChainTool.h"
@@ -115,7 +115,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getAllActiveSequences( const Even
     IProxyDict* storeProxy = Atlas::getExtendedEventContext(context).proxy();
     SmartIF<SGImplSvc> eventStore (storeProxy);
     if (m_cachedEventID != context.eventID().event_number()){
-        ATH_MSG_INFO("Caching the event store keys for event " << context.eventID().event_number());
+        ATH_MSG_DEBUG("Caching the event store keys for event " << context.eventID().event_number());
         eventStore->keys(static_cast<CLID>( ClassID_traits<TrigCompositeUtils::DecisionContainer>::ID() ), m_cachedEventStoreKeys);
         m_cachedEventID = context.eventID().event_number();
     }
@@ -149,7 +149,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getAllActiveSequences( const Even
 
 void TrigCompositeUtils::AlgToChainTool::cacheSGKeys(const EventContext& context) {
     if (m_cachedEventID != context.eventID().event_number()){
-        ATH_MSG_INFO("Caching the event store keys for event " << context.eventID().event_number());
+        ATH_MSG_DEBUG("Caching the event store keys for event " << context.eventID().event_number());
         m_cachedEventStoreKeys = readSGKeys(context);
         m_cachedEventID = context.eventID().event_number();
     }
@@ -240,11 +240,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getChainInfo(const EventContext& 
     SG::ReadHandle<TrigConf::HLTMenu>  hltMenuHandle = SG::makeHandle( m_HLTMenuKey, context );
     ATH_CHECK( hltMenuHandle.isValid() );
 
-    HLT::Identifier id = HLT::Identifier(decId);
-    if (TrigCompositeUtils::isLegId(id)){
-        id = getIDFromLeg(id);
-    }
-
+    HLT::Identifier id = getIDFromLeg(decId);
     info.id = id;
 
     // Find chain with given id

@@ -1,6 +1,6 @@
-*** PathResolver_test starts ***
-filename a.txt
-fileLocation ../test/A/a.txt
-filename B/a.txt
-fileLocation ../test/B/a.txt
-*** PathResolver_test ends ***
+test1
+test2
+test3
+PathResolver      WARNING Locating dev file dev/foo.txt. Do not let this propagate to a release!
+PathResolver      WARNING Could not locate dev/foo.txt
+

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationLArCalculator
@@ -48,7 +48,7 @@ namespace LArG4 {
 
       CalibrationLArCalculator(const std::string& name, ISvcLocator *pSvcLocator);
       StatusCode initialize() override final;
-      virtual ~CalibrationLArCalculator();
+      virtual ~CalibrationLArCalculator() = default;
 
       // The Process method returns a boolean value.  If it's true, the
       // hit can be used by Geant4; if it's false, there's something wrong
@@ -66,13 +66,12 @@ namespace LArG4 {
 
     private:
       // Energy calculator
-      CaloG4::SimulationEnergies m_energyCalculator;
+      CaloG4::SimulationEnergies m_energyCalculator{};
 
       // Access to parameters.
-      const LArVG4DetectorParameters* m_parameters;
+      const LArVG4DetectorParameters* m_parameters{nullptr};
 
-      ServiceHandle<ILArCalibCalculatorSvc> m_defaultCalculator;
-
+      ServiceHandle<ILArCalibCalculatorSvc> m_defaultCalculator{this, "DefaultCalculator", "CalibrationDefaultCalculator"};
     };
 
   } // namespace BarrelCryostat

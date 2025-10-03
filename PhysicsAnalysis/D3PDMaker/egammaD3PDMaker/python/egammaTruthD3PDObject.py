@@ -65,5 +65,5 @@ ProdVertexAssoc = SimpleAssociation \
 ProdVertexAssoc.defineBlock (
     1, 'ProdVertPos',
     D3PD.AuxDataFillerTool,
-    Vars = ['x', 'y', 'z', 'barcode'])
+    Vars = ['x', 'y', 'z', 'uid'])
 

@@ -38,7 +38,6 @@ StatusCode PanTau::Tool_DetailsArranger::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Neutral_EtaBinned_EtCut",  m_EtaBinnedEtCuts) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Sum",          m_varTypeName_Sum) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Ratio",        m_varTypeName_Ratio) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_EtInRing",     m_varTypeName_EtInRing) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Isolation",    m_varTypeName_Isolation) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Num",          m_varTypeName_Num) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Mean",         m_varTypeName_Mean) );
@@ -48,8 +47,6 @@ StatusCode PanTau::Tool_DetailsArranger::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_DeltaR",       m_varTypeName_DeltaR) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_JetMoment",    m_varTypeName_JetMoment) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Combined",     m_varTypeName_Combined) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_JetShape",     m_varTypeName_JetShape) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_ImpactParams", m_varTypeName_ImpactParams) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Basic",        m_varTypeName_Basic) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_PID",          m_varTypeName_PID) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Shots",        m_varTypeName_Shots) );
@@ -59,8 +56,6 @@ StatusCode PanTau::Tool_DetailsArranger::initialize() {
 
 
 StatusCode PanTau::Tool_DetailsArranger::execute(PanTau::PanTauSeed* inSeed, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const {
-
-  std::string inputAlg = inSeed->getNameInputAlgorithm();
     
   bool noAnyConstituents           = inSeed->isOfTechnicalQuality(PanTau::PanTauSeed::t_NoConstituentsAtAll);
   bool noSelConstituents           = inSeed->isOfTechnicalQuality(PanTau::PanTauSeed::t_NoSelectedConstituents);
@@ -125,7 +120,7 @@ void PanTau::Tool_DetailsArranger::addPanTauDetailToTauJet(PanTauSeed* inSeed,
 
   bool isValid;
   const PanTau::TauFeature* features  = inSeed->getFeatures();
-  std::string         fullFeatName    = inSeed->getNameInputAlgorithm() + "_" + featName;
+  std::string         fullFeatName    = "CellBased_" + featName;
 
   double theValue = features->value(fullFeatName, isValid);
   if (!isValid) {
@@ -148,11 +143,11 @@ void PanTau::Tool_DetailsArranger::addPanTauDetailToTauJet(PanTauSeed* inSeed,
 
   switch(detailType) {
   case PanTau::Tool_DetailsArranger::t_Int:
-    valueToAddInt   = (int)theValue;
+    valueToAddInt   = static_cast<int>(theValue);
     tauJet->setPanTauDetail(detailEnum, valueToAddInt);
     break;
   case PanTau::Tool_DetailsArranger::t_Float:
-    valueToAddFloat = (float)theValue;
+    valueToAddFloat = static_cast<float>(theValue);
     tauJet->setPanTauDetail(detailEnum, valueToAddFloat);
     break;
   default:
@@ -165,8 +160,6 @@ void PanTau::Tool_DetailsArranger::addPanTauDetailToTauJet(PanTauSeed* inSeed,
 
 
 StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const {
-
-  std::string inputAlg = inSeed->getNameInputAlgorithm();
    
   //get the PFO links
   std::vector< ElementLink< xAOD::PFOContainer > > chrgPFOLinks       = tauJet->protoChargedPFOLinks();
@@ -193,7 +186,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
   tauJet->setChargedPFOLinks(chrgPFOLinks);
   tauJet->setNeutralPFOLinks(neutralPFOLinks);
     
-  tauJet->setDetail(xAOD::TauJetParameters::nCharged, (int)chrgPFOLinks.size());
+  tauJet->setDetail(xAOD::TauJetParameters::nCharged, static_cast<int>(chrgPFOLinks.size()));
 
   //arrange pi0 pfos: depends on decay mode classification
   int decayModeProto = inSeed->getDecayModeBySubAlg();
@@ -201,7 +194,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     
   if(decayModeFinal == xAOD::TauJetParameters::Mode_Other) {
     tauJet->setPi0PFOLinks(pi0PFOLinks);
-    SetHLVTau(inSeed, tauJet, inputAlg, m_varTypeName_Basic);
+    SetHLVTau(inSeed, tauJet, m_varTypeName_Basic);
 
     return StatusCode::SUCCESS;
   }
@@ -244,7 +237,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     } else if( decayModeFinal == xAOD::TauJetParameters::Mode_1pXn && decayModeProto == xAOD::TauJetParameters::Mode_1p1n ){
 
 
-      if( pi0PFOLinks.size() == 1 && HasMultPi0sInOneCluster(pi0PFOLinks.at(0).cachedElement(), decayModeProto, inputAlg) ){ 
+      if( pi0PFOLinks.size() == 1 && HasMultPi0sInOneCluster(pi0PFOLinks.at(0).cachedElement(), decayModeProto) ){ 
 	  
 	// assign twice the pi0 mass to the one pi0 PFO:
 	SetNeutralConstituentVectorMasses(pi0PFOLinks, neutralPFOContainer, 2*MASS_PI0);
@@ -290,7 +283,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 
   tauJet->setPi0PFOLinks(preLinkPi0PFOLinks);
 
-  SetHLVTau(inSeed, tauJet, inputAlg, m_varTypeName_Basic);
+  SetHLVTau(inSeed, tauJet, m_varTypeName_Basic);
 
   std::vector< ElementLink< xAOD::PFOContainer > > finalChrgPFOLinks       = tauJet->chargedPFOLinks();
   std::vector< ElementLink< xAOD::PFOContainer > > finalPi0PFOLinks        = tauJet->pi0PFOLinks();
@@ -324,7 +317,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 
 
 // Calculate final 4-vector:
-void PanTau::Tool_DetailsArranger::SetHLVTau( PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) {
+void PanTau::Tool_DetailsArranger::SetHLVTau( PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& varTypeName_Basic) {
 
   std::vector< ElementLink< xAOD::PFOContainer > > finalChrgPFOLinks       = tauJet->chargedPFOLinks();
   std::vector< ElementLink< xAOD::PFOContainer > > finalPi0PFOLinks        = tauJet->pi0PFOLinks();
@@ -345,20 +338,18 @@ void PanTau::Tool_DetailsArranger::SetHLVTau( PanTau::PanTauSeed* inSeed, xAOD::
   inSeed->setFinalMomentum(tlv_PanTau_Final);
 
   PanTau::TauFeature* featureMap = inSeed->getFeatures();
-  featureMap->addFeature(inputAlg + "_" + varTypeName_Basic + "_FinalMomentumCore_pt", tlv_PanTau_Final.Pt() );
-  featureMap->addFeature(inputAlg + "_" + varTypeName_Basic + "_FinalMomentumCore_eta", tlv_PanTau_Final.Eta() );
-  featureMap->addFeature(inputAlg + "_" + varTypeName_Basic + "_FinalMomentumCore_phi", tlv_PanTau_Final.Phi() );
-  featureMap->addFeature(inputAlg + "_" + varTypeName_Basic + "_FinalMomentumCore_m", tlv_PanTau_Final.M() );
+  featureMap->addFeature("CellBased_" + varTypeName_Basic + "_FinalMomentumCore_pt", tlv_PanTau_Final.Pt() );
+  featureMap->addFeature("CellBased_" + varTypeName_Basic + "_FinalMomentumCore_eta", tlv_PanTau_Final.Eta() );
+  featureMap->addFeature("CellBased_" + varTypeName_Basic + "_FinalMomentumCore_phi", tlv_PanTau_Final.Phi() );
+  featureMap->addFeature("CellBased_" + varTypeName_Basic + "_FinalMomentumCore_m", tlv_PanTau_Final.M() );
 }
 
 
-bool PanTau::Tool_DetailsArranger::HasMultPi0sInOneCluster(const xAOD::PFO* pfo, int decayModeProto, const std::string& inputAlg) const {
+bool PanTau::Tool_DetailsArranger::HasMultPi0sInOneCluster(const xAOD::PFO* pfo, int decayModeProto) const {
 
   // this is only relevant for reco 1p1n modes, hence restrict the output to these modes
 
   int nPi0sPerCluster = 1;
-
-  if (inputAlg != "CellBased" ) return (nPi0sPerCluster > 1);
 
   // cell-based sets this to 1pXn however below this function is
   // called with the decayModeProto as evaluated by Pantau!
@@ -455,8 +446,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
 
   if (iDecayMode == xAOD::TauJetParameters::Mode_1p1n && iNumPi0PFO > 1) {
 
-    // TODO: find out if the pi0 mass is defined elsewhere in atlas code!
-    // float fMassPi0 = 134.98;
+    // float fMassPi0 = ParticleConstants::piZeroMassInMeV;
     float fMassPi0Squared = MASS_PI0*MASS_PI0;
     
     // combine both photons (with 0 mass that is already set) to one pi0 vector:

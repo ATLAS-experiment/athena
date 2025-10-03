@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
@@ -15,8 +15,10 @@ def createTestBeamConfigFlags():
     # Test Beam beam properties
     tbcf.addFlag("TestBeam.BeamPID", 11)
     tbcf.addFlag("TestBeam.BeamEnergy", 100000) # Just use Beam.Energy?
+    tbcf.addFlag("TestBeam.Xbeam", -27500)
     tbcf.addFlag("TestBeam.Ybeam", [-20,20])
     tbcf.addFlag("TestBeam.Zbeam", [-15,15])
+    tbcf.addFlag("TestBeam.Tbeam", -27500)
 
     return tbcf
 

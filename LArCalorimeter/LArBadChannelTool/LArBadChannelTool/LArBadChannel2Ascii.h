@@ -37,7 +37,7 @@ private:
   Gaudi::Property<std::string>  m_executiveSummaryFile{this,"ExecutiveSummaryFile",""};
   Gaudi::Property<bool>         m_wMissing{this,"WithMissing",false};
   Gaudi::Property<bool>         m_skipDisconnected{this,"SkipDisconnected",true};
-  Gaudi::Property<bool>         m_isSC{"SuperCell",false};
+  Gaudi::Property<bool>         m_isSC{this,"SuperCell",false};
 
   enum DetPart {
     EMB=0,

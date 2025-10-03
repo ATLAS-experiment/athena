@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/ConstituentsLoader.h"
@@ -42,7 +42,7 @@ namespace {
       input.flip_sign = false;
       input.type = str::match_first(type_regexes, input.name,
                                 "iparticle type matching");
-      config.inputs.push_back(input);
+      config.inputs.push_back(std::move(input));
     }
     return config;
   }
@@ -71,7 +71,7 @@ namespace {
       if ((flip_config != FlipTagConfig::STANDARD) && std::regex_match(varname, re)){
         input.flip_sign=true;
       }
-      config.inputs.push_back(input);
+      config.inputs.push_back(std::move(input));
     }
     return config;
   }
@@ -111,7 +111,7 @@ namespace {
       input.type = str::match_first(type_regexes, input.name,
                                 "electron type matching");
       input.flip_sign = false;
-      config.inputs.push_back(input);
+      config.inputs.push_back(std::move(input));
     }
     return config;
   }
@@ -128,11 +128,11 @@ namespace FlavorTagInference {
       ConstituentsInputConfig config;
       TypeRegexes electron_type_regexes {
           // default electron variables
-          {"(deltaEta1|deltaPhiRescaled2|"
-               "ftag_energyOverP|Rhad|Rhad1|"
+          {"(deltaEta1|deltaPhiRescaled2|Rhad|Rhad1|"
                "Eratio|weta2|Rphi|Reta|wtots1|f1|f3|pt|eta|phi)"_r, ConstituentsEDMType::FLOAT},
           // custom variables
-          {"(ftag_.*|ptfrac|ptrel|dr)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(ftag_.*|ptfrac|ptrel|dr|"
+               "et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           // variables extracted from the corresponding track
           {"(numberOf.*|d0.*|abs_eta|qOverP|eProbabilityHT)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };

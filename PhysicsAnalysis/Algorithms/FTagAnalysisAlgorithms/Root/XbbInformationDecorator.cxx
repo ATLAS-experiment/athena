@@ -16,7 +16,7 @@ namespace CP
       return StatusCode::FAILURE;
     }
 
-    m_taggerDecisionDecorator = std::make_unique<SG::AuxElement::Decorator<int>>(m_taggerDecisionDecoration);
+    m_taggerDecisionDecorator = std::make_unique<SG::Decorator<int>>(m_taggerDecisionDecoration);
 
     ANA_CHECK (m_selectionTool.retrieve());
     ANA_CHECK (m_jetHandle.initialize (m_systematicsList));

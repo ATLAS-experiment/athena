@@ -1,43 +1,47 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
-
-// Gaudi includes
-#include "GaudiKernel/ConcurrencyFlags.h"
 
 // Local include(s).
 #include "VectorMultOCLExampleAlg.h"
 
 namespace AthExXRT {
 
-StatusCode VectorMultOCLExampleAlg::initialize() {
+StatusCode VectorMultOCLExampleAlg::initialize_global() {
 
-  // Retrieve the necessary component(s).
+  ATH_MSG_INFO("initialize_global()");
+
   ATH_CHECK(m_DeviceMgmtSvc.retrieve());
 
-  cl_int err = CL_SUCCESS;
-
   // Retrieve the list of OpencCL Handle(s) providing the kernel.
-  std::vector<AthXRT::IDeviceMgmtSvc::OpenCLHandle> handles =
-      m_DeviceMgmtSvc->get_opencl_handles_by_kernel_name(s_krnl_name);
+  m_handles = m_DeviceMgmtSvc->get_opencl_handles_by_kernel_name(s_krnl_name);
 
-  if (handles.empty()) {
+  if (m_handles.empty()) {
     ATH_MSG_ERROR("No OpenCL context provides kernel '" << s_krnl_name << "'");
     return StatusCode::FAILURE;
   }
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode VectorMultOCLExampleAlg::initialize_worker() {
+
+  ATH_MSG_INFO("initialize_worker()");
+
+  cl_int err = CL_SUCCESS;
 
   // Allocate slot specific resources.
   std::size_t slotIdx = 0;
   for (SlotData& slot : m_slots) {
     ATH_MSG_DEBUG("Allocating resources for slot " << slotIdx);
 
-    if (handles.size() > 1) {
+    if (m_handles.size() > 1) {
       ATH_MSG_WARNING("More than one OpenCL context provides a '"
-                      << s_krnl_name << "' kernel (" << handles.size()
+                      << s_krnl_name << "' kernel (" << m_handles.size()
                       << "), using the first one");
     }
-    slot.m_context = handles[0].context;
-    slot.m_program = handles[0].program;
+    slot.m_context = m_handles[0].context;
+    slot.m_program = m_handles[0].program;
 
     // Create kernel objects.
     slot.m_kernel =
@@ -103,7 +107,23 @@ StatusCode VectorMultOCLExampleAlg::initialize() {
     ++slotIdx;
   }
 
-  // Return gracefully.
+  return StatusCode::SUCCESS;
+}
+
+StatusCode VectorMultOCLExampleAlg::stop_worker() {
+
+  ATH_MSG_INFO("stop_worker(): Cleaning OCL environment");
+  // Unmap buffer objects.
+  for (SlotData& slot : m_slots) {
+    ATH_CHECK(slot.m_queue->enqueueUnmapMemObject(
+                  *slot.m_dev_buf_in1, slot.m_host_buf_in1) == CL_SUCCESS);
+    ATH_CHECK(slot.m_queue->enqueueUnmapMemObject(
+                  *slot.m_dev_buf_in2, slot.m_host_buf_in2) == CL_SUCCESS);
+    ATH_CHECK(slot.m_queue->enqueueUnmapMemObject(
+                  *slot.m_dev_buf_out, slot.m_host_buf_out) == CL_SUCCESS);
+    ATH_CHECK(slot.m_queue->finish() == CL_SUCCESS);
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -156,24 +176,6 @@ StatusCode VectorMultOCLExampleAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  // Return gracefully.
-  return StatusCode::SUCCESS;
-}
-
-StatusCode VectorMultOCLExampleAlg::finalize() {
-
-  // Unmap buffer objects.
-  for (SlotData& slot : m_slots) {
-    ATH_CHECK(slot.m_queue->enqueueUnmapMemObject(
-                  *slot.m_dev_buf_in1, slot.m_host_buf_in1) == CL_SUCCESS);
-    ATH_CHECK(slot.m_queue->enqueueUnmapMemObject(
-                  *slot.m_dev_buf_in2, slot.m_host_buf_in2) == CL_SUCCESS);
-    ATH_CHECK(slot.m_queue->enqueueUnmapMemObject(
-                  *slot.m_dev_buf_out, slot.m_host_buf_out) == CL_SUCCESS);
-    ATH_CHECK(slot.m_queue->finish() == CL_SUCCESS);
-  }
-
-  // Return gracefully.
   return StatusCode::SUCCESS;
 }
 

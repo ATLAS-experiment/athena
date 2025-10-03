@@ -3,7 +3,6 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 #James Walder
 
-from __future__ import print_function
 
 
 __doc__ ="""Simple Transform to understand what goes on"""

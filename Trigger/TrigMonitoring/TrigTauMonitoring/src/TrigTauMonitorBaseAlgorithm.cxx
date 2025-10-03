@@ -19,6 +19,8 @@ StatusCode TrigTauMonitorBaseAlgorithm::initialize() {
     ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
     ATH_CHECK( m_offlineTauJetKey.initialize() );
+    m_offlineGNTauDecorKey = m_offlineTauJetKey.key() + "." + m_offlineGNTauDecorKey.key();
+    ATH_CHECK( m_offlineGNTauDecorKey.initialize() );
 
     if(m_L1_select_by_et_only) ATH_MSG_INFO("L1 RoI selection by Et cut only! No isolated L1 tau items are allowed!");
     ATH_CHECK( m_phase1l1eTauRoIKey.initialize() );
@@ -55,7 +57,9 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOnlineTausAll(c
 {
     std::vector<const xAOD::TauJet*> tau_vec;
 
-    const std::string tau_container_name = getOnlineContainerKey(trigger).key();
+    
+    const TrigTauInfo& info = getTrigInfo(trigger);
+    const std::string tau_container_name = getOnlineContainerKey(info.getHLTTauType()).key();
     ATH_MSG_DEBUG("Tau container name is: " << tau_container_name);
     auto vec = m_trigDecTool->features<xAOD::TauJetContainer>(trigger, TrigDefs::Physics, tau_container_name);
     for(auto& featLinkInfo : vec) {
@@ -228,15 +232,15 @@ std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> TrigTau
     return roi_vec;
 }
 
-const SG::ReadHandleKey<xAOD::TauJetContainer>& TrigTauMonitorBaseAlgorithm::getOnlineContainerKey(const std::string& trigger) const
+
+const SG::ReadHandleKey<xAOD::TauJetContainer>& TrigTauMonitorBaseAlgorithm::getOnlineContainerKey(const std::string& sequence) const
 {
-    const TrigTauInfo& info = getTrigInfo(trigger);
-    if(info.getHLTTauType() == "tracktwoMVA" || info.getHLTTauType() == "tracktwoMVABDT") return m_hltTauJetKey;
-    else if(info.getHLTTauType() == "tracktwoLLP") return m_hltTauJetLLPKey;
-    else if(info.getHLTTauType() == "trackLRT") return m_hltTauJetLRTKey;
-    else if(info.getHLTTauType() == "ptonly") return m_hltTauJetCaloMVAOnlyKey;
+    if(sequence == "tracktwoMVA" || sequence == "tracktwoMVABDT") return m_hltTauJetKey;
+    else if(sequence == "tracktwoLLP") return m_hltTauJetLLPKey;
+    else if(sequence == "trackLRT") return m_hltTauJetLRTKey;
+    else if(sequence == "ptonly") return m_hltTauJetCaloMVAOnlyKey;
     else {
-        ATH_MSG_ERROR("Unknown HLT TauJet container for chain: \"" << trigger << "\", of type \"" << info.getHLTTauType() << "\". Returning the default \"" << m_hltTauJetKey.key() << "\"");
+        ATH_MSG_ERROR("Unknown HLT TauJet container for sequence \"" << sequence << "\". Returning the default \"" << m_hltTauJetKey.key() << "\"");
         return m_hltTauJetKey;
     }
 }
@@ -273,14 +277,21 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(co
 {
     std::vector<const xAOD::TauJet*> tau_vec;
 
+    SG::ReadDecorHandle<xAOD::TauJetContainer, char> tauid_medium{m_offlineGNTauDecorKey, Gaudi::Hive::currentContext()};
+    if(!tauid_medium.isValid()) {
+      ATH_MSG_WARNING("Cannot retrieve " << tauid_medium.key());
+      return tau_vec;
+    }
+
     for(const xAOD::TauJet* tau : taus) {
         if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
 
-        // Consider only offline taus which pass RNN medium WP 
-        if(tau_id == TauID::RNN && !tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
+        // Consider only offline taus which pass medium ID WP
+        if(tau_id == TauID::RNN) {
+	  if(!tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
+	}
         else if(tau_id == TauID::GNTau) {
-            static const SG::ConstAccessor<char> tauid_medium("GNTauM_v0prune");
-            if(!tauid_medium(*tau)) continue;
+	  if(!tauid_medium(*tau)) continue;
         }
 
         tau_vec.push_back(tau);

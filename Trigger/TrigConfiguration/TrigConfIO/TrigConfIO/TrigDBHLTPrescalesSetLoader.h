@@ -33,6 +33,8 @@ namespace TrigConf {
        * @brief Load content from the Trigger DB into an HLTPrescalesSet for a given HLTPrescaleKey (HLTPSK)
        * @param hltpsk [in] the HLTPSK that should be loaded
        * @param hltpss [out] the loaded HLTPrescalesSet
+       * @param outFileName [in] name of file to write out the loaded data (optional, by default no file will be written)
+       * @return true if loading (and optional writing) was successfull
        */
       bool loadHLTPrescales ( unsigned int hltpsk,
                               HLTPrescalesSet & hltpss,

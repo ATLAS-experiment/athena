@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DECISIONHANDLING_DEBUGCOMBOHYPOTOOL_H
@@ -28,7 +28,8 @@ class DebugComboHypoTool:  public ComboHypoToolBase {
   virtual StatusCode initialize() override;
 
   private:
-  bool executeAlg(const std::vector<Combo::LegDecision>& combination) const override;
+  bool executeAlg(const std::vector<Combo::LegDecision>& combination,
+                  const EventContext& ctx) const override;
 
 };  
 

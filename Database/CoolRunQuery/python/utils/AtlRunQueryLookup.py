@@ -16,7 +16,6 @@
 # Implementation:
 #   http://alxr.usatlas.bnl.gov/lxr/source/atlas/DetectorDescription/DetDescrCond/DetectorStatus/python/DetStatusLib.py
 
-from __future__ import print_function
 import sys
 
 DQChannelDict = {'PIXB':101,'PIX0':102,'PIXEA':104,'PIXEC':105,

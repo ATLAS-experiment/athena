@@ -13,6 +13,7 @@
 
 // Geant4 forward declarations
 class G4UserRunAction;
+class G4VUserPrimaryGeneratorAction;
 class G4UserEventAction;
 class G4UserTrackingAction;
 class G4UserSteppingAction;
@@ -31,6 +32,8 @@ namespace G4UA
   struct G4AtlasUserActions
   {
     std::vector<G4UserRunAction*> runActions;
+    std::vector<G4UserRunAction*> runActionsMaster;
+    std::vector<G4VUserPrimaryGeneratorAction*> primaryGeneratorActions;
     std::vector<G4UserEventAction*> eventActions;
     std::vector<G4UserTrackingAction*> trackingActions;
     std::vector<G4UserSteppingAction*> steppingActions;

@@ -371,7 +371,7 @@ public:
 		while (true) {
 			QString n = QString(perspective?"Perspective":"Orthographic")+"View"+QString::number(i++);
 			bool ok(true);
-			for(StoredView sv : storedViews) {
+			for(const StoredView & sv : storedViews) {
 				if (sv.name()==n) {
 					ok = false;
 					break;
@@ -737,8 +737,9 @@ QByteArray VP1ExaminerViewer::saveState()
 	/////////////////////////
 
 	QList<QByteArray> persistifiedViews;
-	for(Imp::StoredView sv : m_d->storedViews)
-	persistifiedViews << sv.persistifiedState();
+	for(const Imp::StoredView & sv : m_d->storedViews){
+	  persistifiedViews << sv.persistifiedState();
+	}
 	out << persistifiedViews;
 
 	/////////////////////////
@@ -2157,7 +2158,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 		storeViewActions << act;
 		if (!storedViews.isEmpty()) {
 			viewmenu_storecurrentview->addSeparator();
-			for(StoredView sv : storedViews) {
+			for(const StoredView & sv : storedViews) {
 				act = viewmenu_storecurrentview->addAction("Overwrite "+sv.name());
 				act->setIcon(sv.icon());
 				if (!fitsCurrentCamType(sv)) {
@@ -2174,7 +2175,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 	if (viewmenu_zoomtoview==menu) {
 		viewmenu_zoomtoview->clear();
 		zoomToViewActions.clear();
-		for(StoredView sv : storedViews) {
+		for(const StoredView & sv : storedViews) {
 			QAction * act = viewmenu_zoomtoview->addAction(sv.name());
 			act->setIcon(sv.icon());
 			if (!fitsCurrentCamType(sv)) {
@@ -2189,7 +2190,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 	if (viewmenu_restoreview==menu) {
 		viewmenu_restoreview->clear();
 		restoreViewActions.clear();
-		for(StoredView sv : storedViews) {
+		for(const StoredView & sv : storedViews) {
 			QAction * act = viewmenu_restoreview->addAction(sv.name());
 			act->setIcon(sv.icon());
 			act->setData(sv.name());
@@ -2200,7 +2201,7 @@ void VP1ExaminerViewer::Imp::aboutToShowMenu(QMenu * menu)
 	if (viewmenu_deleteview==menu) {
 		viewmenu_deleteview->clear();
 		deleteViewActions.clear();
-		for(StoredView sv : storedViews) {
+		for(const StoredView & sv : storedViews) {
 			QAction * act = viewmenu_deleteview->addAction(sv.name());
 			act->setIcon(sv.icon());
 			act->setData(sv.name());
@@ -2556,7 +2557,7 @@ void VP1ExaminerViewer::showPopupMenu()
 		//Remove old stored views with that name (if any)
 		int i(0);
 		bool replaced(false);
-		for(Imp::StoredView oldsv : m_d->storedViews) {
+		for(const Imp::StoredView & oldsv : m_d->storedViews) {
 			if (oldsv.name()==name) {
 				m_d->storedViews.replace(i,sv);
 				replaced = true;
@@ -2575,7 +2576,7 @@ void VP1ExaminerViewer::showPopupMenu()
 		SoGroup * root = dynamic_cast<SoGroup*>(getSceneGraph());
 		SoCamera * camera = getCamera();
 		if (root&&camera) {
-			for(Imp::StoredView sv : m_d->storedViews) {
+			for(const Imp::StoredView & sv : m_d->storedViews) {
 				if (sv.name()==name) {
 					if (isAnimating())
 						stopAnimating();
@@ -2597,7 +2598,7 @@ void VP1ExaminerViewer::showPopupMenu()
 		SoGroup * root = dynamic_cast<SoGroup*>(getSceneGraph());
 		SoCamera * camera = getCamera();
 		if (root&&camera) {
-			for(Imp::StoredView sv : m_d->storedViews) {
+			for(const Imp::StoredView & sv : m_d->storedViews) {
 				if (sv.name()==name) {
 					if (!m_d->fitsCurrentCamType(sv))
 						toggleCameraType();
@@ -2619,7 +2620,7 @@ void VP1ExaminerViewer::showPopupMenu()
 	if (m_d->deleteViewActions.contains(selAct)) {
 		QString name = selAct->data().toString();
 		int i(0);
-		for(Imp::StoredView sv : m_d->storedViews) {
+		for(const Imp::StoredView & sv : m_d->storedViews) {
 			if (sv.name()==name) {
 				m_d->storedViews.removeAt(i);
 				break;

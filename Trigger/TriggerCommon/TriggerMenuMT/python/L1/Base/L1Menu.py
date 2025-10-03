@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from .CTP import CTP
 from .Items import MenuItemsCollection
@@ -12,7 +12,6 @@ from .L1MenuFlags import L1MenuFlags
 from .ThresholdType import ThrType
 from ..Config.TypeWideThresholdConfig import getTypeWideThresholdConfig
 
-from collections import OrderedDict as odict
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
@@ -147,7 +146,7 @@ class L1Menu(object):
 
         boardName = connDefName+fpgaName
 
-        allowedInputs = odict()
+        allowedInputs = {}
         allowedInputs['Topo1Opt0'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                      'ZeroBiasA'] # TOPO1A, FPGA1
         allowedInputs['Topo1Opt1'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                     ] # TOPO1A, FPGA2
         allowedInputs['Topo1Opt2'] = ['MU',        'eTAU', 'cTAU', 'j',               'gXE', 'gTE', 'gMHT'] # TOPO1B, FPGA1
@@ -172,7 +171,7 @@ class L1Menu(object):
     def checkL1CaloThresholds(self, thresholds, boardName, connName):
         fullName = boardName + connName
 
-        allowedInputs = odict()
+        allowedInputs = {}
         allowedInputs['Ctpin7EM1'] = 8*['EM']
         allowedInputs['Ctpin7EM2'] = 8*['EM']
         allowedInputs['Ctpin7TAU1'] = 8*['HA']

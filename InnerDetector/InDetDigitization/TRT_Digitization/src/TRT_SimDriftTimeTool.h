@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -15,7 +15,6 @@
 #ifndef TRT_DIGITIZATION_TRT_SIMDRIFTTIMETOOL_H
 #define TRT_DIGITIZATION_TRT_SIMDRIFTTIMETOOL_H
 #include "ITRT_SimDriftTimeTool.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
@@ -44,8 +43,6 @@ private:
   double m_maxField;
   double m_maxFieldSquaredLimit;
   double m_invMaxFieldSquared;
-
-  unsigned int m_digversion;
 
   const unsigned int m_nTabulatedDistances;
   const double m_invDeltaTabulatedDistances;

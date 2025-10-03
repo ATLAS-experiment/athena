@@ -1,3 +1,4 @@
+
 /*
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
@@ -15,6 +16,10 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+#include "InDetReadoutGeometry/SiDetectorManager.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 class FPGAOutputValidationAlg : public AthReentrantAlgorithm
 {
@@ -32,7 +37,8 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
     "Create extra histograms for cluster parameter diffs between matched clusters."
   };
   Gaudi::Property<bool> m_matchByID{this, "matchByID", false, "Use hash to match clusters. If false, use only the rdo list."};
-  Gaudi::Property<size_t> m_allowedRdoMisses {this, "allowedRdoMisses", 0, "Use hash to match clusters. If false, use only the rdo list."};
+  Gaudi::Property<size_t> m_allowedRdoMisses {this, "allowedRdoMisses", 0, "Allowed number of RDOs that don't have to match between clusters. Setting this to a very large number means essentially that 1 common RDO is enough to match clusters."};
+  Gaudi::Property<bool> m_checkClusterRdos {this, "checkClusterRdos", false, "If true, check if FPGA clusters share any RDOs"};
 
   SG::ReadHandleKeyArray<xAOD::PixelClusterContainer> m_pixelKeys{this, "pixelKeys", {}};
   SG::ReadHandleKeyArray<xAOD::StripClusterContainer> m_stripKeys{this, "stripKeys", {}};
@@ -42,6 +48,10 @@ class FPGAOutputValidationAlg : public AthReentrantAlgorithm
   // chrono service
   ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
+  const PixelID* m_pixelid {nullptr};
+  const SCT_ID* m_stripid {nullptr};
+  const InDetDD::SiDetectorManager* m_PIX_mgr = nullptr;
+  const InDetDD::SiDetectorManager* m_SCT_mgr = nullptr;
  public:
   FPGAOutputValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override final;

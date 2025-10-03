@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArRawChannelContByteStreamCnv.h"
@@ -7,8 +7,7 @@
 
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
-#include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
-#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 
+#include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "ByteStreamData/RawEvent.h" 
 
 #include "LArRawEvent/LArRawChannelContainer.h"

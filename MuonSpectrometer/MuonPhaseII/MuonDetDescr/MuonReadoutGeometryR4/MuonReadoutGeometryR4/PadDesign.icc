@@ -17,18 +17,22 @@ namespace MuonGMR4 {
     inline int PadDesign::numPadEta() const { return m_numPadEta; }
     inline double PadDesign::padHeight() const { return m_padHeight; }
     inline int PadDesign::maxPadEta() const { return m_maxPadEta; }
-    inline int PadDesign::padNumber(const int channel) const {
-        int padEta = padEtaPhi(channel).first;
-        int padPhi = padEtaPhi(channel).second;  
-        int padNumber = (padPhi - 1) * maxPadEta() + padEta;
-        return padNumber;
+    inline std::pair<int, int> PadDesign::padNumber(const int SeqChannel) const {
+        int padEta = (SeqChannel -1) % numPadEta() + 1;
+        int padPhi = (SeqChannel -1) / numPadEta() + 1; 
+        if (SeqChannel < 0 || padEta > numPadEta() || padPhi > numPadPhi()) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Pad channel: "<< SeqChannel<< " resulted in invalid (eta, phi): ("<<padEta<< ", " <<padPhi
+                                    <<"), (maxEta, maxPhi): "<<numPadEta()<<", "<<numPadPhi()<<"). total pads available: "<<numPads());
+            return std::make_pair(0, 0);
+        }
+        return std::make_pair(padEta, padPhi);
     };
     inline std::pair<int, int> PadDesign::padEtaPhi(const int channel) const {  
-        int padEta = (channel -1) % numPadEta() + 1;
-        int padPhi = (channel -1) / numPadEta() + 1; 
+        int padEta = (channel -1) % maxPadEta() + 1;
+        int padPhi = (channel -1) / maxPadEta() + 1; 
         if (channel < 0 || padEta > numPadEta() || padPhi > numPadPhi()) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Pad channel " << channel << " is out of range. Maximum range: " << numPads());
-            ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Pad channel: "<< channel<< " padEta: "<<padEta<<" numPadEta: "<<numPadEta()<<" padPhi "<<padPhi<<" numPadPhi: "<<numPadPhi()<<" total pads "<<numPads());
+           ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Pad channel: "<< channel<< " resulted in invalid (eta, phi): ("<<padEta<< ", " <<padPhi
+                                    <<"), (maxEta, maxPhi): "<<numPadEta()<<", "<<numPadPhi()<<"). total pads available: "<<numPads());            
             return std::make_pair(0, 0);
         }
         return std::make_pair(padEta, padPhi);
@@ -93,7 +97,8 @@ namespace MuonGMR4 {
         if (outsidePhiRange) {
             padPhiDouble = (locPhi - firstPadPhiDiv()) / anglePadPhi();
             ATH_MSG_DEBUG("The Hit: "<< Amg::toString(hitPos, 2) << " is out of bounds." << " maxActive X: " << maxActiveX(hitPos.y()));
-            ATH_MSG_DEBUG("HitPhi: "<< locPhi << " MaxPhi: " << locMaxPhi << " Staggered Hit phi: " << shiftedLocPhi);
+            ATH_MSG_DEBUG("HitPhi: "<< locPhi << " MaxPhi: " << locMaxPhi << " Staggered Hit phi: " << shiftedLocPhi 
+                            << " padPhi: " << padPhiDouble << " firsPadPhiDiv: " << firstPadPhiDiv() << " anglePadPhi: " << anglePadPhi());
         }
         else {
             padPhiDouble = (shiftedLocPhi - firstPadPhiDiv()) / anglePadPhi();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -51,7 +51,7 @@ namespace CP
 
     /// \brief the underlying accessor
   private:
-    SG::AuxElement::Decorator<char> m_accessor;
+    SG::Decorator<char> m_accessor;
 
     /// \brief the label of the accessor
   private:

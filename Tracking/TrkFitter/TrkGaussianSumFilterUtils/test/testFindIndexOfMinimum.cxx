@@ -1,23 +1,20 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrkGaussianSumFilterUtils/GSFFindIndexOfMinimum.h"
-//
+#include "TrkGaussianSumFilterUtils/GsfFindIndexOfMinimum.h"
 #include "TrkGaussianSumFilterUtils/AlignedDynArray.h"
 //
 #include <algorithm>
 #include <iostream>
 #include <random>
 
+#ifdef __clang__  // trapping-math is incompatible with multiversioning with clang 20.1.5
+#pragma float_control(except, off)
+#endif
 
 //Multiversion for the test
-#if HAVE_FUNCTION_MULTIVERSIONING
-[[gnu::target("default")]]
-#endif
-int vIdxOfMin(const float* distancesIn, int n) {
-  return vAlgs::vIdxOfMin<128>(distancesIn, n);
-}
+// For float
 #if HAVE_FUNCTION_MULTIVERSIONING
 [[gnu::target("avx2")]]
 int vIdxOfMin(const float* distancesIn, int n) {
@@ -25,15 +22,21 @@ int vIdxOfMin(const float* distancesIn, int n) {
 }
 [[gnu::target("default")]]
 #endif
-int vIdxOfMin(const double* distancesIn, int n) {
+int vIdxOfMin(const float* distancesIn, int n) {
   return vAlgs::vIdxOfMin<128>(distancesIn, n);
 }
+//For double
 #if HAVE_FUNCTION_MULTIVERSIONING
 [[gnu::target("avx2")]]
 int vIdxOfMin(const double* distancesIn, int n) {
   return vAlgs::vIdxOfMin<256>(distancesIn, n);
 }
+[[gnu::target("default")]]
 #endif
+int vIdxOfMin(const double* distancesIn, int n) {
+  return vAlgs::vIdxOfMin<128>(distancesIn, n);
+}
+
 //constants
 constexpr size_t STRIDE = vAlgs::strideOfNumSIMDVec<256,float>(4);
 constexpr size_t ALIGNMENT = vAlgs::alignmentForArray<256>();
@@ -60,20 +63,18 @@ struct InitArray {
   }
   GSFUtils::AlignedDynArray<T, ALIGNMENT> distances;
 };
+
 static const InitArray<float> initArrayF;
 static const InitArray<double> initArrayD;
 
 //Test using STL
 static void findIdxOfMinimumSTL() {
-  const float* arrayF =
-      std::assume_aligned<ALIGNMENT>(
-          initArrayF.distances.buffer());
+  const float* arrayF = std::assume_aligned<ALIGNMENT>(initArrayF.distances.buffer());
   int minIndex = std::distance(arrayF, std::min_element(arrayF, arrayF + N));
   std::cout << "STL Index of Minimum : " << minIndex << " with value "
             << initArrayF.distances[minIndex] << '\n';
-  const double* arrayD =
-      std::assume_aligned<ALIGNMENT>(
-          initArrayD.distances.buffer());
+
+  const double* arrayD =std::assume_aligned<ALIGNMENT>(initArrayD.distances.buffer());
   minIndex = std::distance(arrayD, std::min_element(arrayD, arrayD + N));
   std::cout << "STL Index of Minimum : " << minIndex << " with value "
             << initArrayD.distances[minIndex] << '\n';

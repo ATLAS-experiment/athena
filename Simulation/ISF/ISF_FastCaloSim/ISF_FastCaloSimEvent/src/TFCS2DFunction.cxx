@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS2DFunction.h"
@@ -10,7 +10,7 @@
 #include "TH2F.h"
 #include "TRandom.h"
 #include "TFile.h"
-
+#include <cmath>
 #include <iostream>
 
 //=============================================
@@ -41,7 +41,7 @@ double TFCS2DFunction::CheckAndIntegrate2DHistogram(
       if (binval < 0) {
         // Can't work if a bin is negative, forcing bins to 0 in this case
         double fraction = binval / hint;
-        if (TMath::Abs(fraction) > 1e-5) {
+        if (std::abs(fraction) > 1e-5) {
           ATH_MSG_NOCLASS(logger,
                           "Warning: bin content is negative in histogram "
                               << hist->GetName() << " : " << hist->GetTitle()

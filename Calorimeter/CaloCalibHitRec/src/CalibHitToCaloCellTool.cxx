@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibHitRec/CalibHitToCaloCellTool.h"
@@ -131,7 +131,6 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   int hec_nchan=0;
   int fcal_nchan=0;
   int tile_nchan=0; 
-  int unknown_nchan = 0 ;
   
   std::vector<Identifier> ID;
 
@@ -145,7 +144,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   for (unsigned int i=0; i<calibHitContainers.size(); i++) {
     for( const auto *const calibhit: *(calibHitContainers[i])) {
       //care only for deposits of the given truth particle
-      if (!MC::isSingleParticle(HepMC::barcode(calibhit))) continue; // FIXME barcode-based
+      if (!MC::isGenStable(HepMC::barcode(calibhit))) continue; // FIXME barcode-based
 
       double Etot   = calibhit->energyTotal();
       double Eem    = calibhit->energy(0);
@@ -253,16 +252,12 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   if(tile_nchan) {
     for (int i=0;i<CalibHitUtils::nEnergyTypes;i++) truthCells[i]->setHasCalo(CaloCell_ID::TILE);
   }
-  if(unknown_nchan) {
-    for (int i=0;i<CalibHitUtils::nEnergyTypes;i++) truthCells[i]->setHasCalo(CaloCell_ID::NOT_VALID);
-  }
   ATH_MSG_DEBUG("--- LAr INFO --- "<<nchan );
   ATH_MSG_DEBUG("LArCells  = "<<nchan );
   ATH_MSG_DEBUG("EMCells   = "<<em_nchan );
   ATH_MSG_DEBUG("HECCells  = "<<hec_nchan );
   ATH_MSG_DEBUG("FCALCells = "<<fcal_nchan );
   ATH_MSG_DEBUG("TileCells = "<<tile_nchan );
-  ATH_MSG_DEBUG("NOT_VALID = "<<unknown_nchan );
     
   ID.clear();
 

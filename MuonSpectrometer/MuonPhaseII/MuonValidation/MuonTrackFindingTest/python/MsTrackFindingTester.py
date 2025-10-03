@@ -22,18 +22,16 @@ def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result    
 
-
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
     parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
                                             action='store_true')
     parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
                                               default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(noSTGC=True)
-    parser.set_defaults(noMM=True)
- 
+  
     parser.set_defaults(outRootFile="MsTrkTester.root")
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
    
@@ -59,8 +57,7 @@ if __name__=="__main__":
 
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
     cfg.merge(MSTrackFinderAlgCfg(flags,
-                                  VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
-
+                                VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
     cfg.merge(MsTrackTesterCfg(flags))
    
     executeTest(cfg)

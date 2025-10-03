@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -235,7 +235,7 @@ dqm_algorithms::BinContentComp::execute(	const std::string & name,
   
   result->tags_["NBins"] = count;
   result->tags_["NSkippedBins"] = nSkippedBins;
-  if (resulthisto) result->object_ =  (boost::shared_ptr<TObject>)(TObject*)(resulthisto);
+  if (resulthisto) result->object_ =  boost::shared_ptr<TObject>(resulthisto);
 
   if (gthreshold > rthreshold) {
      if ( count >= gthreshold ) {

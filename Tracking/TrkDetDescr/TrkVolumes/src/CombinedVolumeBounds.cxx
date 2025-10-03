@@ -124,7 +124,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
 
     if (sclo || splo) {
       bool shared = false;
-      std::shared_ptr<Trk::AreaExcluder> vEx;
+      const Trk::AreaExcluder* vEx;
       if (splo) {
         vEx = splo->subtractedVolume();
         shared = splo->shared();
@@ -133,7 +133,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
         vEx = sclo->subtractedVolume();
         shared = sclo->shared();
       }
-      const Trk::VolumeExcluder* volExcl = dynamic_cast<const Trk::VolumeExcluder*>(vEx.get());
+      const Trk::VolumeExcluder* volExcl = dynamic_cast<const Trk::VolumeExcluder*>(vEx);
       if (!volExcl){
         throw std::logic_error("Not a VolumeExcluder");
       }
@@ -161,26 +161,26 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
           nullptr,
           std::make_shared<Trk::SubtractedVolumeBounds>(std::move(firstSub), std::move(secondSub)));
       }
-      Trk::VolumeExcluder* volEx = new Trk::VolumeExcluder(std::move(comb_sub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(comb_sub));
       bool new_shared = shared;
       if (m_intersection){
         new_shared = true;
       }
       if (splo){
-        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*splo, volEx, new_shared));
+        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*splo, std::move(volEx), new_shared));
       }
-      if (sclo){
-        retsf.push_back(std::make_unique<Trk::SubtractedCylinderSurface>(*sclo, volEx, new_shared));
+      else if (sclo){
+        retsf.push_back(std::make_unique<Trk::SubtractedCylinderSurface>(*sclo, std::move(volEx), new_shared));
       }
     } else if (plo || clo || dlo) {
-      Trk::VolumeExcluder* volEx = new Trk::VolumeExcluder(std::move(secondSub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(secondSub));
       if (plo){
-        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*plo, volEx, m_intersection));
+        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*plo, std::move(volEx), m_intersection));
       }
-      if (clo){
-        retsf.push_back(std::make_unique<Trk::SubtractedCylinderSurface>(*clo, volEx, m_intersection));
+      else if (clo){
+        retsf.push_back(std::make_unique<Trk::SubtractedCylinderSurface>(*clo, std::move(volEx), m_intersection));
       }
-      if (dlo) {
+      else if (dlo) {
         const DiscBounds* db = dynamic_cast<const DiscBounds*>(&(dlo->bounds()));
         if (!db){
           throw std::logic_error("Not DiscBounds");
@@ -188,7 +188,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
         auto eb = std::make_shared<EllipseBounds>(db->rMin(), db->rMin(), db->rMax(), db->rMax(), db->halfPhiSector());
         retsf.push_back( std::make_unique<Trk::SubtractedPlaneSurface>(
             PlaneSurface(Amg::Transform3D(dlo->transform()), eb),
-            volEx,
+            std::move(volEx),
             m_intersection));
       }
     } else {
@@ -237,7 +237,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
       secondSurfaces[in]->transform().inverse() * transf, m_first.get()));
     if (scli || spli) {
       bool shared = false;
-      std::shared_ptr<Trk::AreaExcluder> vEx;
+      const Trk::AreaExcluder* vEx;
       if (spli) {
         vEx = spli->subtractedVolume();
         shared = spli->shared();
@@ -246,7 +246,7 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
         vEx = scli->subtractedVolume();
         shared = scli->shared();
       }
-      const Trk::VolumeExcluder* volExcl = dynamic_cast<const Trk::VolumeExcluder*>(vEx.get());
+      const Trk::VolumeExcluder* volExcl = dynamic_cast<const Trk::VolumeExcluder*>(vEx);
       if (!volExcl){
         throw std::logic_error("Not a VolumeExcluder");
       }
@@ -273,33 +273,33 @@ Trk::CombinedVolumeBounds::decomposeToSurfaces(const Amg::Transform3D& transf) {
           nullptr,
           std::make_shared<Trk::SubtractedVolumeBounds>(std::move(secondSub), std::move(firstSub)));
       }
-      Trk::VolumeExcluder* volEx = new Trk::VolumeExcluder(std::move(comb_sub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(comb_sub));
       bool new_shared = shared;
       if (m_intersection){
         new_shared = true;
       }
       if (spli){
-        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*spli, volEx, new_shared));
+        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*spli, std::move(volEx), new_shared));
       }
-      if (scli)
-        retsf.push_back( std::make_unique<Trk::SubtractedCylinderSurface>(*scli, volEx, new_shared));
+      else if (scli)
+        retsf.push_back( std::make_unique<Trk::SubtractedCylinderSurface>(*scli, std::move(volEx), new_shared));
 
     } else if (pli || cli || dli) {
-      Trk::VolumeExcluder* volEx = new Trk::VolumeExcluder(std::move(firstSub));
+      auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(firstSub));
       if (pli){
-        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*pli, volEx, m_intersection));
+        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(*pli, std::move(volEx), m_intersection));
       }
-      if (cli){
-        retsf.push_back(std::make_unique<Trk::SubtractedCylinderSurface>(*cli, volEx, m_intersection));
+      else if (cli){
+        retsf.push_back(std::make_unique<Trk::SubtractedCylinderSurface>(*cli, std::move(volEx), m_intersection));
       }
-      if (dli) {
+      else if (dli) {
         const DiscBounds* db = dynamic_cast<const DiscBounds*>(&(dli->bounds()));
         if (!db){
           throw std::logic_error("Not DiscBounds");
         }
         auto eb = std::make_shared<EllipseBounds>(db->rMin(), db->rMin(), db->rMax(), db->rMax(), db->halfPhiSector());
         auto pliN = PlaneSurface(Amg::Transform3D(dli->transform()), eb);
-        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(pliN, volEx, m_intersection));
+        retsf.push_back(std::make_unique<Trk::SubtractedPlaneSurface>(pliN, std::move(volEx), m_intersection));
       }
     } else {
       throw std::runtime_error(

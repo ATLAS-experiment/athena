@@ -10,7 +10,6 @@
 # NtupleHandler - Utility to define and fill the per-BCID ntuple
 #
 
-from __future__ import print_function
 import os
 import array
 from ROOT import TObject, TFile, TTree, gROOT, AddressOf

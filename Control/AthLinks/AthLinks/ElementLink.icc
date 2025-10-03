@@ -403,7 +403,7 @@ ElementLink<STORABLE>::cptr() const
   const STORABLE* ptr = this->getDataPtr();
   if (ptr && IndexingPolicy::isValid(this->storedIndex())) {
     this->setCachedElement (IndexingPolicy::lookup(this->storedIndex(), *ptr));
-    this->getCachedElement (ret);
+    (void)this->getCachedElement (ret);
   }
   return ret;
 }

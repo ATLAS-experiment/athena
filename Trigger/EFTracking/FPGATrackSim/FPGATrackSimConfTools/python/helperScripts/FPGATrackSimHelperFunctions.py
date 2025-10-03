@@ -19,7 +19,7 @@ def convertRegionsExpressionToArray(expression, min_value=0, max_value=1279):
     exclude_set = set()
 
     print(f"Initial expression: {str(expression)}")
-    if isinstance(expression, tuple):
+    if isinstance(expression, tuple) or isinstance(expression, list):
         expression = ",".join(map(str, expression))
     
     parts = expression.split(",")  # Handle single-element expressions

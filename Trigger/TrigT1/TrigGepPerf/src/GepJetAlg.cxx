@@ -11,6 +11,7 @@
 // concrete jet reconstruction classes.
 #include "./ModAntikTJetMaker.h"
 #include "./ConeJetMaker.h"
+#include "./WTAConeJetMaker.h"
 
 // input and output types
 #include "./Cluster.h"
@@ -83,7 +84,24 @@ StatusCode GepJetAlg::execute(const EventContext& context) const {
     ATH_MSG_DEBUG("No of seeds "<< h_seeds->size());
     jetMaker.reset(new Gep::ConeJetMaker(0.4, *h_seeds));
     
-  } else {
+  } else if(m_jetAlgName=="WTACone"){ // Large block for the WTACone
+
+    auto WTAConeJetMaker = std::make_unique<Gep::WTAConeJetMaker>(); // Default parameters for now
+
+    WTAConeJetMaker->m_GEPWTAParameters.SetConstEtCut(m_WTAConstEtCut * Athena::Units::GeV); // Set ConstEtCut to 2GeV
+    WTAConeJetMaker->m_GEPWTAParameters.SetSeedEtCut(m_WTASeedEtCut * Athena::Units::GeV); // Set SeedEtCut to 5GeV by default
+    WTAConeJetMaker->m_GEPWTAParameters.SetJet_dR2(m_WTAJet_dR2);
+    WTAConeJetMaker->m_GEPWTAParameters.SetIso_dR2(m_WTAJet_dR2); // Default is Jet_dR2 = Iso_dR2
+    WTAConeJetMaker->m_GEPWTAParameters.SetMaxConstN(m_WTAMaxConstN);
+    WTAConeJetMaker->m_GEPWTAParameters.SetMaxSeedSortingN(m_WTAMaxSeedSortingN);
+    WTAConeJetMaker->SetBlockN(m_WTABlockN);
+
+    WTAConeJetMaker->SetSeedCleaningAlgo(0); // 0 = Baseline
+    if(m_WTASeedCleaningName=="TwoPass")WTAConeJetMaker->SetSeedCleaningAlgo(1); // 1 = TwoPass
+
+    jetMaker = std::move(WTAConeJetMaker);
+  } // WTACone loop, will be updated as the WTAConeJets
+  else {
     ATH_MSG_ERROR( "Unknown JetMaker " <<  m_jetAlgName);
     return StatusCode::FAILURE;
   }

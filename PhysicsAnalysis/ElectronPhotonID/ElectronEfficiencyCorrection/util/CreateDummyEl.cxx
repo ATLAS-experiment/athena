@@ -12,6 +12,7 @@
 #include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODEgamma/ElectronAuxContainer.h>
 #include <xAODEgamma/ElectronContainer.h>
+#include "TruthUtils/ParticleConstants.h"
 
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgMessaging/MsgStream.h"
@@ -133,7 +134,7 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
     el->setCaloClusterLinks(links);
     el->setEta(eta);
     el->setPhi(0.0);
-    el->setM(0.511);
+    el->setM(ParticleConstants::electronMassInMeV);
     el->setPt(pt);
   }
   if (!store.record(std::move(electrons), "MyElectrons").isSuccess() ||

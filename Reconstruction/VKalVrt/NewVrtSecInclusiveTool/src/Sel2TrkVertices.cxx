@@ -75,6 +75,8 @@ namespace Rec{
                h.m_curTup->Sig3D[i]=trackSignif[i];
                h.m_curTup->idHF[i] =getIdHF(selectedTracks[i]);
                h.m_curTup->dRdZrat[i] =dRdZratio[i];
+               h.m_curTup->displaced[i]=isDisplaced(selectedTracks[i]);
+
                uint8_t TRTHits;
                if( !(selectedTracks[i]->summaryValue(  TRTHits,xAOD::numberOfTRTHits))) TRTHits=0;
                h.m_curTup->trkTRT[i] =TRTHits;
@@ -97,14 +99,9 @@ namespace Rec{
          for (j=i+1; j<NTracks; j++) {
              if(trackSignif[j]<m_trkSigCut || dRdZratio[j]<m_dRdZRatioCut )continue;
              PSum2T=selectedTracks[i]->p4()+selectedTracks[j]->p4();
-             if(PSum2T.M()>1.5*m_vrt2TrMassLimit)continue;  //Approximate mass
              if( std::abs(selectedTracks[i]->eta()-selectedTracks[j]->eta())==0 &&
                  std::abs(selectedTracks[i]->phi()-selectedTracks[j]->phi())==0 &&
                  std::abs(selectedTracks[i]->pt() -selectedTracks[j]->pt())==0 ) continue; //remove duplicated tracks
-             float ihitR  = selectedTracks[i]->radiusOfFirstHit();
-             float jhitR  = selectedTracks[j]->radiusOfFirstHit();
-             if(std::abs(ihitR-jhitR)>50.)continue;                         //- FMPs are in very different layers
-             
              tracksForFit[0]=selectedTracks[i];
              tracksForFit[1]=selectedTracks[j];
              double minDZ=0.;
@@ -118,64 +115,56 @@ namespace Rec{
              }
              if(nPixHits[i]>0 && nPixHits[j]>0){ if(minDZ>   m_fastZSVCut) continue; } // Drop SV candidates with big Z track-track distance.
              else{                               if(minDZ>2.*m_fastZSVCut) continue; } // Drop SV candidates with big Z track-track distance.  
-             m_fitSvc->setApproximateVertex(iniVrt.x(), iniVrt.y(), iniVrt.z(),*state);
+             m_fitSvc->setApproximateVertex(iniVrt.x(), iniVrt.y(), iniVrt.z(), *state);
              sc=m_fitSvc->VKalVrtFit(tracksForFit, neutralPartDummy, tmpVrt.fitVertex, tmpVrt.momentum, Charge,
                                   tmpVrt.errorMatrix, tmpVrt.chi2PerTrk, tmpVrt.trkAtVrt, tmpVrt.chi2, *state, false );
-             if(sc.isFailure())                       continue;          /* No fit */ 
-             double Prob2v=TMath::Prob(tmpVrt.chi2,1);
-             if( Prob2v < m_sel2VrtProbCut )                 continue;
-             if( tmpVrt.momentum.M()> m_vrt2TrMassLimit )    continue; 
-             if( tmpVrt.fitVertex.perp() > m_maxSVRadiusCut) continue;                  // Too far from interaction point
-             double cosSVPV=projSV_PV(tmpVrt.fitVertex, primVrt, tmpVrt.momentum);
-             TLorentzVector SVPV(tmpVrt.fitVertex.x()-primVrt.x(),
-                                 tmpVrt.fitVertex.y()-primVrt.y(),
-                                 tmpVrt.fitVertex.z()-primVrt.z(), 10.);
-             if(m_fillHist){
-               Hists& h = getHists();
-               if(Charge==0){h.m_hb_massPiPi->Fill(tmpVrt.momentum.M(),1.);}
-               h.m_hb_cosSVMom->Fill(cosSVPV,1.);
-               h.m_hb_etaSV->Fill(SVPV.Eta(),1.);
-             }
-             if(cosSVPV<m_cosSVPVCut)continue;
-             if(tmpVrt.momentum.Pt()<1000.)continue;
+             if(sc.isFailure())           continue;          /* No fit */ 
+             if(tmpVrt.chi2>20.)          continue;    /*Too bad Chi2 for nDoF=1 fit*/    
+             ///
+             ///----Prepare data for selector
+             float vQuality;
+             xAOD::Vertex testV;
+             testV.makePrivateStore();
+             testV.setPosition(tmpVrt.fitVertex);
+             std::vector<float> testVcov(tmpVrt.errorMatrix.begin(),tmpVrt.errorMatrix.end());
+             testV.setCovariance(testVcov);
+             testV.setFitQuality(tmpVrt.chi2,1.);
+             bool acceptV=m_ini_v2trselector->isgood(std::make_pair(selectedTracks[i],selectedTracks[j]), testV, 
+                              std::make_pair(momAtVrt(tmpVrt.trkAtVrt[0]),momAtVrt(tmpVrt.trkAtVrt[1])), primVrt, vQuality);
+             if(!acceptV) continue; // Main 2-track vertex selection
+
+
+//Check close material layer. Not validated in detail, use with care.
              double vrtR=tmpVrt.fitVertex.perp();
-             double vrtRErr=vrtRadiusError(tmpVrt.fitVertex,tmpVrt.errorMatrix );
-//Check close material layer
              double dstMatSignif=1.e4;
              if(m_removeTrkMatSignif>0. && vrtR>20.){
+                double vrtRErr=vrtRadiusError(tmpVrt.fitVertex,tmpVrt.errorMatrix );               
                 if(vrtR<30.){ dstMatSignif=std::abs(vrtR-m_beampipeR)/vrtRErr;}
                 else        { dstMatSignif=distToMatLayerSignificance(tmpVrt);}     //Material in Pixel volume
                 if(dstMatSignif<m_removeTrkMatSignif)continue;
              }
 //
-// Check pixel hits vs vertex positions.
-             int ihitIBL  = getIBLHit(selectedTracks[i]);
-             int jhitIBL  = getIBLHit(selectedTracks[j]);
-             if( m_do2TrkIBLChecks && ( (ihitIBL==0&&jhitIBL>0) || (ihitIBL>0&&jhitIBL==0) ) ) continue;
-             int ihitBL   = getBLHit (selectedTracks[i]);
-             int jhitBL   = getBLHit (selectedTracks[j]);
-//--Very general cleaning cuts based on ID geometry and applicable to all processes
-             if( m_do2TrkIBLChecks && tmpVrt.fitVertex.perp()<m_firstPixelLayerR-2.*vrtRErr ){
-                if( ihitIBL<1 && ihitBL<1) continue;
-                if( jhitIBL<1 && jhitBL<1) continue;
-             }
-             if( vrtR-std::min(ihitR,jhitR) > 50.) continue; //- FMP is closer to (0,0) than SV itself
-             if(ihitR-vrtR > 180.+2.*vrtRErr)continue;  //- Distance FMP-vertex should be less then SCT-Pixel gap
-             if(jhitR-vrtR > 180.+2.*vrtRErr)continue;  //- Distance FMP-vertex should be less then SCT-Pixel gap
-//-------------------------------------------------------
-              if(m_useVertexCleaning){ //More agressive cleaning 
-               if(std::abs(ihitR-jhitR)>12.) continue;
-               if( ihitR-vrtR > 36.) continue; // Too big dR between vertex and hit in pixel
-               if( jhitR-vrtR > 36.) continue; // Should be another layer in between 
-               if( ihitR-vrtR <-2.*vrtRErr) continue; // Vertex is behind hit in pixel 
-               if( jhitR-vrtR <-2.*vrtRErr) continue; // Vertex is behind hit in pixel 
-             }
-             if ((std::abs(selectedTracks[i]->d0())<m_twoTrkVtxFormingD0Cut) && (std::abs(selectedTracks[j]->d0())<m_twoTrkVtxFormingD0Cut)) continue;
-//
 // Debugging and BDT
              double minPtT = std::min(tracksForFit[0]->pt(),tracksForFit[1]->pt());
              if( m_fillHist ){
+                float ihitR  = selectedTracks[i]->radiusOfFirstHit();
+                float jhitR  = selectedTracks[j]->radiusOfFirstHit();
+                int ihitIBL  = getIBLHit(selectedTracks[i]);
+                int jhitIBL  = getIBLHit(selectedTracks[j]);
+                int ihitBL   = getBLHit (selectedTracks[i]);
+                int jhitBL   = getBLHit (selectedTracks[j]);
+                double Prob2v=TMath::Prob(tmpVrt.chi2,1);
+                double cosSVPV=projSV_PV(tmpVrt.fitVertex, primVrt, tmpVrt.momentum);
+                ROOT::Math::PxPyPzMVector SVPV(tmpVrt.fitVertex.x()-primVrt.x(),
+                                               tmpVrt.fitVertex.y()-primVrt.y(),
+                                               tmpVrt.fitVertex.z()-primVrt.z(), 10.);
+ 
                 Hists& h = getHists();
+
+                if(Charge==0){h.m_hb_massPiPi->Fill(tmpVrt.momentum.M(),1.);}
+                h.m_hb_cosSVMom->Fill(cosSVPV,1.);
+                h.m_hb_etaSV->Fill(SVPV.Eta(),1.);
+
                 double Sig3D=0.,Sig2D=0., Dist2D=0.; 
                 int idisk1=0,idisk2=0,idisk3=0,jdisk1=0,jdisk2=0,jdisk3=0;
                 int sumIBLHits =  std::max(ihitIBL,0)+std::max(jhitIBL,0);
@@ -184,9 +173,13 @@ namespace Rec{
                 getPixelDiscs(selectedTracks[j],jdisk1,jdisk2,jdisk3);
                 vrtVrtDist(primVrt, tmpVrt.fitVertex, tmpVrt.errorMatrix, Sig3D);
                 Dist2D=vrtVrtDist2D(primVrt, tmpVrt.fitVertex, tmpVrt.errorMatrix, Sig2D);
+                int barVrt1=getProdVrtBarcode(tracksForFit[0],0.1); // FIXME barcode-based
+                int barVrt2=getProdVrtBarcode(tracksForFit[1],0.1); // FIXME barcode-based
                 h.m_hb_signif3D->Fill(Sig3D,1.);
                 h.m_curTup->VrtTrkHF [h.m_curTup->n2Vrt] = getIdHF(tracksForFit[0])+ getIdHF(tracksForFit[1]);
                 h.m_curTup->VrtTrkI  [h.m_curTup->n2Vrt] = getG4Inter(tracksForFit[0])+ getG4Inter(tracksForFit[1]);
+                h.m_curTup->VrtTrueBar[h.m_curTup->n2Vrt]  = (barVrt1 && barVrt2 && barVrt1==barVrt2) ? 1 : 0;
+                h.m_curTup->VrtTrueNear[h.m_curTup->n2Vrt] = checkTrue2TrVrt(tracksForFit[0],tracksForFit[1],0.1);
                 h.m_curTup->VrtCh    [h.m_curTup->n2Vrt] = Charge;
                 h.m_curTup->VrtProb  [h.m_curTup->n2Vrt] = Prob2v;
                 h.m_curTup->VrtSig3D [h.m_curTup->n2Vrt] = Sig3D;
@@ -202,39 +195,22 @@ namespace Rec{
                 h.m_curTup->VMinPtT  [h.m_curTup->n2Vrt] = minPtT;
                 h.m_curTup->VMinS3DT [h.m_curTup->n2Vrt] = std::min(trackSignif[i],trackSignif[j]);
                 h.m_curTup->VMaxS3DT [h.m_curTup->n2Vrt] = std::max(trackSignif[i],trackSignif[j]);
-                h.m_curTup->VrtBDT   [h.m_curTup->n2Vrt] = 1.1;
+                h.m_curTup->VrtBDT   [h.m_curTup->n2Vrt] = vQuality;
                 h.m_curTup->VrtHR1   [h.m_curTup->n2Vrt] = ihitR;
                 h.m_curTup->VrtHR2   [h.m_curTup->n2Vrt] = jhitR;
                 h.m_curTup->VrtDZ    [h.m_curTup->n2Vrt] = minDZ;
                 h.m_curTup->VrtDisk  [h.m_curTup->n2Vrt] = idisk1+10*idisk2+20*idisk3+30*jdisk1+40*jdisk2+50*jdisk3;
                 h.m_curTup->VSigMat  [h.m_curTup->n2Vrt] = dstMatSignif;
+                h.m_curTup->VrtIT    [h.m_curTup->n2Vrt] = i;
+                h.m_curTup->VrtJT    [h.m_curTup->n2Vrt] = j;
                 if(h.m_curTup->n2Vrt<DevTuple::maxNVrt-1)h.m_curTup->n2Vrt++;
              }
-//-------------------BDT based rejection
-             if(tmpVrt.momentum.Pt() > m_vrt2TrPtLimit) continue;
-             std::vector<float> VARS(10);
-             VARS[0]=Prob2v;
-             VARS[1]=log(tmpVrt.momentum.Pt());
-             VARS[2]=log(std::max(minPtT,m_cutPt.value()));
-             VARS[3]=log(vrtR<20. ? SVPV.Perp() : vrtR);
-             VARS[4]=log(std::max(std::min(trackSignif[i],trackSignif[j]),m_trkSigCut.value()));
-             VARS[5]=log(std::max(trackSignif[i],trackSignif[j]));
-             VARS[6]=tmpVrt.momentum.M();
-             VARS[7]=sqrt(std::abs(1.-cosSVPV*cosSVPV));
-             VARS[8]=SVPV.Eta();
-             VARS[9]=std::max(ihitR,jhitR);
-             float wgtSelect=m_SV2T_BDT->GetGradBoostMVA(VARS);
-             if( m_fillHist ) {
-               Hists& h = getHists();
-               h.m_curTup->VrtBDT[h.m_curTup->n2Vrt-1] = wgtSelect;
-             }
-             if(wgtSelect<m_v2tIniBDTCut) continue;
 //
 //---  Save good candidate for multi-vertex fit
 //
              add_edge(i,j,compatibilityGraph);
              goodVrt[NTracks*i+j]=std::vector<double>{tmpVrt.fitVertex.x(),tmpVrt.fitVertex.y(),tmpVrt.fitVertex.z()};
-             trkCount[i].emplace_back(j,wgtSelect); trkCount[j].emplace_back(i,wgtSelect);            
+             trkCount[i].emplace_back(j,vQuality); trkCount[j].emplace_back(i,vQuality);            
          }
       }
       //=== Resolve -!----!- case to speed up cluster finding
@@ -253,20 +229,6 @@ namespace Rec{
                   if(t<j)goodVrt.erase(NTracks*t+j); else goodVrt.erase(NTracks*j+t);
                   trkCount[j].clear();
                   trkCount[t].erase(trkCount[t].begin()+1);
-               }
-            }      
-         }
-      }
-      //=== Remove isolated 2track vertices
-      for(int t=0; t<NTracks; t++){
-         if(trkCount[t].size()==1){
-            i=std::get<0>(trkCount[t][0]);
-            if(trkCount[i].size()==1){
-               if( std::get<1>(trkCount[t][0]) < m_v2tFinBDTCut ) {
-                  remove_edge(t,i,compatibilityGraph);
-                  if(t<i)goodVrt.erase(NTracks*t+i); else goodVrt.erase(NTracks*i+t);
-                  trkCount[t].clear();
-                  trkCount[i].clear();
                }
             }      
          }

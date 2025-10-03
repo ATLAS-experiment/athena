@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for tau_ztautau_pu46
 # art-type: grid
@@ -36,7 +36,6 @@ Threads = 8
 Slots   = 8
 Release = "current"
 Input   = 'Ztautau'    # defined in TrigValTools/share/TrigValInputs.json  
-GridFiles = True
 
 ExtraAna = " --parentpdgid=15 "
 

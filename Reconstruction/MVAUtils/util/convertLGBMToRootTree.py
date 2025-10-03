@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = "Convert LightGBM model to TTree to be used with MVAUtils."
+""" Convert LightGBM model to TTree to be used with MVAUtils. """
+
 __author__ = "Ruggero Turra"
 
 try:

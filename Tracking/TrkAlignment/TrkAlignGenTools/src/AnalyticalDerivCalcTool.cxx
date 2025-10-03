@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/Track.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkEventUtils/MeasurementTypeID.h"
 #include "TrkParameters/TrackParameters.h"
-#include "TrkAlignInterfaces/IAlignModuleTool.h"
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
@@ -19,7 +18,6 @@
 #include "TrkAlignEvent/AlignTSOS.h"
 #include "TrkAlignEvent/AlignTrack.h"
 #include "TrkAlignEvent/AlignPar.h"
-#include "TrkAlignEvent/AlignResidualType.h"
 
 #include "TrkAlignGenTools/AnalyticalDerivCalcTool.h"
 
@@ -34,46 +32,21 @@ namespace Trk {
                                                    const std::string & name,
                                                    const IInterface  * parent)
     : AthAlgTool(type,name,parent)
-    , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-    , m_idHelper(nullptr)
-    , m_measTypeIdHelper(nullptr)
-    , m_residualType(HitOnly)
-    , m_residualTypeSet(false)
-    , m_storeDerivatives(false)
   {
     declareInterface<IDerivCalcTool>(this);
-
-    declareProperty("AlignModuleTool",   m_alignModuleTool);
-
-    declareProperty("UseLocalSetting", m_useLocalSetting=false, "use local setup for the covariance matrix of the track");
-
-    // Use constant errors for each sub-detector such that it's equivalent
-    // to minimize residual distance instead of minizing residual pull.
-    // This is only applied if m_useLocalSetting==true
-    declareProperty("UseIntrinsicPixelError", m_useIntrinsicPixelErrors, "use intrinsic errors for Pixel");
-    declareProperty("UseIntrinsicSCTError",   m_useIntrinsicSCTErrors,   "use intrinsic errors for SCT");
-    declareProperty("UseIntrinsicTRTError",   m_useIntrinsicTRTErrors,   "use intrinsic errors for TRT");
-
-    declareProperty("StoreDerivatives", m_storeDerivatives, "store derivatives dr/da on AlignTSOS to be filled into ntuple");
-
-    m_logStream = nullptr;
   }
-
-  //________________________________________________________________________
-  AnalyticalDerivCalcTool::~AnalyticalDerivCalcTool()
-  = default;
 
   //________________________________________________________________________
   StatusCode AnalyticalDerivCalcTool::initialize()
   {
     if (m_alignModuleTool.retrieve().isFailure()) {
-      msg(MSG::FATAL) << "Could not get " << m_alignModuleTool << endmsg;
+      ATH_MSG_FATAL("Could not get " << m_alignModuleTool);
       return StatusCode::FAILURE;
     }
     ATH_MSG_INFO("Retrieved " << m_alignModuleTool);
 
     if (detStore()->retrieve(m_idHelper, "AtlasID").isFailure()) {
-      msg(MSG::FATAL) << "Could not get AtlasDetectorID helper" << endmsg;
+      ATH_MSG_FATAL("Could not get AtlasDetectorID helper");
       return StatusCode::FAILURE;
     }
     m_measTypeIdHelper = new MeasurementTypeID(m_idHelper);

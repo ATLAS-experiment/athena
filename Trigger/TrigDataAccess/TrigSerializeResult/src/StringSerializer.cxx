@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstring>
@@ -33,9 +33,8 @@ void StringSerializer::serialize (const std::vector<std::string>& strings, std::
   }
   m_ostream.flush();
   
-  char * carray = new char [sizeToReserve];
-  strncpy(carray, m_ostream.str().c_str(), sizeToReserve);
-  const uint32_t * uarray = (const uint32_t*) carray;
+  std::string s (m_ostream.str());
+  const uint32_t * uarray = reinterpret_cast<const uint32_t*> (s.data());
 
   storage.push_back(strings.size()); // put number of strings first
   storage.insert(storage.end(), &uarray[0], &uarray[sizeToReserve/sizeof(uint32_t)]);
@@ -50,8 +49,6 @@ void StringSerializer::serialize (const std::vector<std::string>& strings, std::
   std::cerr << " " << std::dec << std::endl;
   */
   
-  delete[] carray;
-
 }
 
 void StringSerializer::serialize (const std::string& str, std::vector<uint32_t>& storage ) {
@@ -68,12 +65,6 @@ std::size_t StringSerializer::deserialize (std::vector<uint32_t>::const_iterator
   if ( storageSize <= 1 ) return storageSize;
   unsigned int numOfStrings = *first;
 
-  // Copy storage into array of uint32_t
-  uint32_t * uarray = new uint32_t[storageSize-1];
-  std::vector<uint32_t>::const_iterator itBegin = first; 
-  advance(itBegin, 1);
-  copy(itBegin, last, &uarray[0]);
-
   /*
     unsigned int i;
     std::cerr << "deserialized: " << std::endl;
@@ -83,8 +74,8 @@ std::size_t StringSerializer::deserialize (std::vector<uint32_t>::const_iterator
     std::cerr << " " << std::dec << std::endl;
   */
   
-  const char * carray = (const char*)uarray;
-  std::string whole(carray, (storageSize-1)*sizeof(uint32_t));
+  std::string whole(reinterpret_cast<const char*>(&*(first+1)),
+                    (storageSize-1)*sizeof(uint32_t));
 
   m_istream.clear();  // istream reset
   m_istream.str(whole);
@@ -99,7 +90,6 @@ std::size_t StringSerializer::deserialize (std::vector<uint32_t>::const_iterator
     readInStrings++;
     nChars += one.size() + 1;
   }
-  delete[] uarray;
   
   return 1 + (nChars+getPadding(nChars))/sizeof(uint32_t);  // # uint32_t words (incl. header)
 }

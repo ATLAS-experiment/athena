@@ -36,15 +36,6 @@ IOVDbMetaDataTool::IOVDbMetaDataTool(const std::string& type,
   , m_maxRunNumber(0)
   , m_modifyFolders(false)
 {
-  // Declare properties
-  declareProperty("MinMaxRunNumbers",  m_minMaxRunNumbers);
-
-  // Folders and attributes to be deleted
-  declareProperty("FoldersToBeModified"
-		  , m_foldersToBeModified = std::vector<std::string>(1, "/Simulation/Parameters"));
-  declareProperty("AttributesToBeRemoved"
-		  , m_attributesToBeRemoved = std::vector<std::string>(1, "RandomSeedOffset"));
-
 }
 
 //--------------------------------------------------------------------------
@@ -97,7 +88,7 @@ void IOVDbMetaDataTool::handle(const Incident& inc)
 
   StatusCode sc = processInputFileMetaData(fileName);
   if(!sc.isSuccess()) throw std::runtime_error("Could not process input file meta data");
-  m_filesProcessed.insert(fileName);
+  m_filesProcessed.insert(std::move(fileName));
 }
 
 StatusCode IOVDbMetaDataTool::beginInputFile(const SG::SourceID& sid)
@@ -166,7 +157,7 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
     }
 
     // Is flag set to override the run number? 
-    BooleanProperty overrideRunNumber = IntegerProperty("OverrideRunNumberFromInput", false);
+    BooleanProperty overrideRunNumber("OverrideRunNumberFromInput", false);
     sc = evtSel->getProperty(&overrideRunNumber);
     if (!sc.isSuccess()) {
         // Not all EventSelectors have this property, so we must be tolerant
@@ -176,7 +167,7 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
     m_overrideRunNumber = overrideRunNumber.value();
     if (m_overrideRunNumber) {
         // New run number
-        IntegerProperty runNumber = IntegerProperty("RunNumber", 0);
+        IntegerProperty runNumber("RunNumber", 0);
         sc = evtSel->getProperty(&runNumber);
         if (!sc.isSuccess()) {
             ATH_MSG_ERROR("checkOverrideRunNumber: unable to get RunNumber from EventSelector: found "
@@ -185,14 +176,14 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
         }
         m_newRunNumber = runNumber.value();
         // Old run number
-        runNumber = IntegerProperty("OldRunNumber", 0);
-        sc = evtSel->getProperty(&runNumber);
+        IntegerProperty oldRunNumber("OldRunNumber", 0);
+        sc = evtSel->getProperty(&oldRunNumber);
         if (!sc.isSuccess()) {
             ATH_MSG_ERROR("checkOverrideRunNumber: unable to get OldRunNumber from EventSelector: found "
-                          << runNumber.value());
+                          << oldRunNumber.value());
             return;
         }
-        m_oldRunNumber = runNumber.value();
+        m_oldRunNumber = oldRunNumber.value();
 
         ATH_MSG_DEBUG("checkOverrideRunNumber: Changing old to new run number:  " << m_oldRunNumber
                       << " " << m_newRunNumber << " obtained from " << eventSelector);

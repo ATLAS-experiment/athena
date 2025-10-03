@@ -31,6 +31,9 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     
     fillSuperCells=False
 
+    # has the L1Calo simulation been configured by job flags
+    isL1CaloSim = flags.Trigger.L1.doeFex and flags.Trigger.L1.dojFex and flags.Trigger.L1.dogFex
+
     # decode the legacy L1Calo information - required because flags.Trigger.doLVL1 is False
     if isNotPool:
         from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
@@ -111,11 +114,12 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         eFexEmulatedTool = eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers')
         acc.merge(eFexEmulatedTool)
 
+
     # Re-simulate from LATOME (for both data and POOL files with SCells)
     from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
     if isNotPool:
         acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
-    else:
+    elif isL1CaloSim:
         SCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
         if SCellType in flags.Input.Collections:
             acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
@@ -175,6 +179,11 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # Container selection based on share/L1CALO versions
     # Note: if the container is in the on-the-fly list (ContainersOnTheFly.py) then we do not have to add it to the dictionary
     # We can do smart slimming if the container is in the smart list (FullListOfSmartContainers.py)
+
+    # if we do not run the simulation on MC, write SCells
+    if flags.Input.isMC and not isL1CaloSim:
+        L1CaloSlimmingHelper.AppendToDictionary.update({"SCell":"CaloCellContainer"})
+        AllVariables += ["SCell"]
 
     # some gymnastics for HLT from RAWD
     if isNotPool and L1CaloSlimmingHelper.IncludeEGammaTriggerContent:
@@ -486,7 +495,15 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     )    
     AllVariables += ["L1_jFexEmulatedTowers"]
 
-    # In case MC has no jets, schedule reconstruction
+    # For MC, add emulated gFEX input towers
+    if flags.Input.isMC:
+        L1CaloSlimmingHelper.AppendToDictionary.update (
+            {"L1_gFexEmulatedTowers":"xAOD::gFexTowerContainer",
+             "L1_gFexEmulatedTowersAux":"xAOD::gFexTowerAuxContainer"}
+        )
+        AllVariables += [ "L1_gFexEmulatedTowers" ]
+
+    # In case MC has no jets, b-tagging or MET, schedule reconstruction
     if flags.Input.isMC:
         from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
         from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR, AntiKt10UFOCSSKSoftDrop_trigger
@@ -497,6 +514,38 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
             from JetRecConfig.JetRecConfig import JetRecCfg
             for container in jets_to_schedule:
                 acc.merge(JetRecCfg(flags, container))
+
+        jet_collections = set([_.fullname().replace('Jets','') for _ in jets_to_schedule])
+        btag_jet_collections = set(['AntiKt4EMPFlow'])
+        met_jet_collections = set(['AntiKt4EMPFlow'])
+
+        if jet_collections & btag_jet_collections:
+            log.info('Scheduling b-tagging of rebuilt jets')
+            from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+            acc.merge(BeamSpotCondAlgCfg(flags))
+            from BTagging.BTagConfig import BTagRecoSplitCfg
+            # 
+            for container in jet_collections & btag_jet_collections:
+                acc.merge(BTagRecoSplitCfg(flags, [container]))
+
+        # MET
+        if jet_collections & met_jet_collections:
+             log.info('Scheduling rebuild of standard MET')
+             from METReconstruction.METAssociatorCfg import METAssociatorCfg
+             from METUtilities.METMakerConfig import getMETMakerAlg
+             for container in jet_collections & met_jet_collections:
+                 if container == 'AntiKt4EMPFlow':
+                     # build links between FlowElements and electrons, photons, muons and taus
+                     log.info('Scheduling FlowElement linking')
+                     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+                     acc.merge(PFGlobalFlowElementLinkingCfg(flags))
+                 acc.merge(METAssociatorCfg(flags, container))
+                 acc.addEventAlgo(getMETMakerAlg(container))
+             from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+             acc.merge(CaloNoiseCondAlgCfg(flags)) # Prereq for Calo MET
+             from METReconstruction.METCalo_Cfg import METCalo_Cfg
+             acc.merge(METCalo_Cfg(flags))
+
 
     # Truth collections
     if flags.Input.isMC:
@@ -526,11 +575,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         # Special collection for Born leptons
         acc.merge(AddBornLeptonCollectionCfg(flags))
 
-        L1CaloSlimmingHelper.AppendToDictionary.update (
-            {
-                'HardScatterParticles':'xAOD::TruthParticleContainer','HardScatterParticlesAux':'xAOD::TruthParticleAuxContainer'}
-        )
-
         AllVariables += [
             "TruthElectrons",
             "TruthMuons",
@@ -538,7 +582,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
             "TruthTaus",
             "TruthNeutrinos",
             "BornLeptons",
-            "HardScatterParticles",
             "MET_Truth",
             "AntiKt4TruthJets",
             "AntiKt4TruthWZJets",

@@ -51,7 +51,7 @@ public:
   bool checkedUnused;
   qint32 version;
 
-  QSet<QWidget*> handledWidgets;
+  QSet<const QWidget*> handledWidgets;
   QSet<QWidget*> ignoredWidgets;
 
   QWidget * widgetNeedingUnblock;
@@ -69,7 +69,7 @@ public:
     }
   }
 
-  void handle(QWidget*w) {
+  void handle(const QWidget*w) {
     if (!w)
       return;
     if (handledWidgets.contains(w))
@@ -78,7 +78,6 @@ public:
 			+", name="+w->objectName());
     handledWidgets.insert(w);
   }
-  void handle(const QWidget*w) { handle((QWidget*)(w)); }
   bool expectsPersistification(QWidget*w);
 
   static unsigned numberOfInstantiations;

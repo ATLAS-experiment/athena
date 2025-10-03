@@ -111,6 +111,7 @@ void callXAOD (const AsgElectronEfficiencyCorrectionTool& tool, bool isPrepCall,
 
 
 
+// temporarily disabled until we have the new PHYSLITE test file
 TEST_F (ColumnarPhysLiteTest, AsgElectronEfficiencyCorrectionTool)
 {
   asg::AsgToolConfig toolConfig;

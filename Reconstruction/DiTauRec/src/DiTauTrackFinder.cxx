@@ -100,6 +100,12 @@ StatusCode DiTauTrackFinder::execute(DiTauCandidateData * data,
 
   data->subjets = vSubjets;
   ATH_MSG_DEBUG("number of subjets  after track association: " << data->subjets.size());
+  // set subjet p4 in xAODDiTau
+  for (unsigned int i = 0; i < vSubjets.size(); i++) {
+    const fastjet::PseudoJet& subjet = vSubjets.at(i);
+    pDiTau->setSubjetPtEtaPhiE(i, subjet.pt(), subjet.eta(), subjet.phi_std(), subjet.e());
+    ATH_MSG_DEBUG("subjet " << i << " pt: " << subjet.pt() << " eta: " << subjet.eta() << " phi: " << subjet.phi_std() << " e: " << subjet.e());
+  }
   vSubjets.clear();
 
 

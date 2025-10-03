@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,12 +10,13 @@
 
 #include "EFTrackingFPGAUtility/TestVectorTool.h"
 #include "EFTrackingFPGAUtility/FPGADataFormatUtilities.h"
+#include "InDetMeasurementUtilities/Helpers.h"
 #include <fstream>
 
 StatusCode TestVectorTool::initialize()
 {
     ATH_MSG_INFO("Initializing TestVectorTool tool");
-
+    
     return StatusCode::SUCCESS;
 }
 
@@ -224,8 +225,8 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
         // Pixel cluster w7
         auto pixelCluster_w7 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w7(pixelClusters->at(i)->localCovariance<2>()(0, 0),
                                                                                  pixelClusters->at(i)->localCovariance<2>()(1, 1),
-                                                                                 pixelClusters->at(i)->omegaX(),
-                                                                                 pixelClusters->at(i)->omegaY()
+                                                                                 0,
+										                                         0
                                                                                  );
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w7(pixelCluster_w7));
 

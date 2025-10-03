@@ -86,6 +86,7 @@ StatusCode SubjetBuilder::execute(DiTauCandidateData * data,
   }
 
   data->subjets = vSubjets;
+  
   vSubjets.clear();
 
   return StatusCode::SUCCESS;

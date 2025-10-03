@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
@@ -123,7 +123,7 @@ namespace MuonGMR4 {
     inline double StripDesign::stripLength(int stripNumber) const {
         const int stripCh = (stripNumber - firstStripNumber());
         if (stripCh < 0 ||  stripCh > numStrips()) {
-            ATH_MSG_WARNING("center() -- Invalid strip number given "<<stripNumber<<" allowed range ["
+            ATH_MSG_WARNING("stripLength() -- Invalid strip number given "<<stripNumber<<" allowed range ["
                          <<firstStripNumber()<<";"<<numStrips()<<"]");
             return 0.;
         }
@@ -222,11 +222,42 @@ namespace MuonGMR4 {
         return insideBoundaries(m_stereoToEta * extPos);
     }
     inline bool StripDesign::insideBoundaries(const Amg::Vector2D& pos) const {
-        /// One needs to go backward to reach the bottom edge
-        CheckVector2D botIsect = rightInterSect(pos);
-        if (!botIsect || stripDir().dot(pos - (*botIsect)) < 0) return false;
-        CheckVector2D topIsect = leftInterSect(pos);
-        return topIsect && stripDir().dot(pos - (*topIsect)) < 0;       
+        if (pos.y() > 0){
+            if (const auto topEdge = Amg::intersect<2>(cornerTopLeft(), edgeDirTop(),
+                                                        pos, Amg::Vector2D::UnitY());
+                !topEdge || (*topEdge) < 0 || (yCutout() && !isFlipped()  && pos.y()> longHalfHeight())){
+                ATH_MSG_VERBOSE("The point "<<Amg::toString(pos, 2)<<" is outside of the trapezoid top edge "
+                            <<Amg::toString(cornerTopLeft(), 2)<<" + lambda "<<Amg::toString(edgeDirTop(), 2));
+                return false;
+            } 
+            
+       } else {
+            if (const auto botEdge = Amg::intersect<2>(cornerBotLeft(), edgeDirBottom(),
+                                                        pos, Amg::Vector2D::UnitY());
+                !botEdge || (*botEdge) > 0|| (yCutout() && !isFlipped()  && pos.y()  < - longHalfHeight())) {
+                ATH_MSG_VERBOSE("The point "<<Amg::toString(pos, 2)<<" is outside of the trapezoid bottom edge "
+                            <<Amg::toString(cornerBotLeft(), 2)<<" + lambda "<<Amg::toString(edgeDirBottom(), 2));
+                return false;
+            }
+       }
+       if (pos.x() > 0) {
+            if (const auto rightEdge = Amg::intersect<2>(cornerTopRight(), edgeDirRight(),
+                                                         pos, Amg::Vector2D::UnitX());
+                !rightEdge || (*rightEdge) < 0) {
+                ATH_MSG_VERBOSE("The point "<<Amg::toString(pos, 2)<<" is outside of the trapezoid right edge "
+                            <<Amg::toString(cornerTopRight(), 2)<<" + lambda "<<Amg::toString(edgeDirRight(), 2));
+                return false;
+            }
+        } else {
+            if (const auto leftEdge = Amg::intersect<2>(cornerTopLeft(), edgeDirLeft(),
+                                                        pos, Amg::Vector2D::UnitX());
+                !leftEdge || (*leftEdge) > 0) {
+                ATH_MSG_VERBOSE("The point "<<Amg::toString(pos, 2)<<" is outside of the trapezoid left edge "
+                            <<Amg::toString(cornerTopLeft(), 2)<<" + lambda "<<Amg::toString(edgeDirLeft(), 2));
+                return false;
+            }
+        }
+        return true;
     }
 }
 #undef SET_DIRECTION

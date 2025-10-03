@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_CLUSTERROADDEFINER_H
@@ -39,9 +39,10 @@ class ClusterRoadDefiner: public AthAlgTool
 
   virtual StatusCode initialize() override;
  public:
-  StatusCode defineRoad(const xAOD::MuonRoI*                      p_roi,
+  StatusCode defineRoad(const EventContext& ctx,
+			const xAOD::MuonRoI*                      p_roi,
 			std::vector<TrigL2MuonSA::MuonRoad>&      clusterRoad,
-                        TrigL2MuonSA::RpcLayerClusters&           rpcLayerClusters,
+            TrigL2MuonSA::RpcLayerClusters&           rpcLayerClusters,
 			const ToolHandle<ClusterPatFinder>*       clusterPatFinder,
 			std::vector<TrigL2MuonSA::RpcFitResult>&  clusterFitResults,
 			double                                    roiEtaMinLow,

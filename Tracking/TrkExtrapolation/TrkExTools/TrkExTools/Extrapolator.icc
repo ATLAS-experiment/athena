@@ -40,17 +40,4 @@ Extrapolator::subMaterialEffectsUpdator(const Trk::TrackingVolume& tvol) const
            : nullptr;
 }
 
-
-inline const Trk::TrackParameters*
-Extrapolator::returnResult(Cache& cache,
-                           const Trk::TrackParameters* result) const
-{
-  (void)cache;
-  // call the model action on the material effect updaters
-  for (unsigned int imueot = 0; imueot < m_subupdaters.size(); ++imueot) {
-    m_subupdaters[imueot]->modelAction();
-  }
-  // return the result
-  return result;
-}
 }

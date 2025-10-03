@@ -113,6 +113,21 @@ def OfflineTauRNN3prongDecoratorAlgCfg( flags, name="OfflineTauRNN3prongDecorato
     return acc
 
 
+def OfflineJetDecoratorAlgCfg( flags, name="OfflineJetDecoratorAlg", **kwargs ):
+    acc = ComponentAccumulator()
+    kwargs.setdefault( "Prefix", "LinkedJet_" )
+    kwargs.setdefault( "OfflineTrkParticleContainerName",
+                       flags.PhysVal.IDTPM.currentTrkAna.OfflineTrkKey )
+    kwargs.setdefault( "JetContainerName", flags.PhysVal.IDTPM.currentTrkAna.JetContainerName )
+    kwargs.setdefault( "maxTrkJetDR", flags.PhysVal.IDTPM.currentTrkAna.maxTrkJetDR )
+    kwargs.setdefault( "JetAbsEtaMin", flags.PhysVal.IDTPM.currentTrkAna.jetMinAbsEta )
+    kwargs.setdefault( "JetAbsEtaMax", flags.PhysVal.IDTPM.currentTrkAna.jetMaxAbsEta )
+    kwargs.setdefault( "JetPtMin", flags.PhysVal.IDTPM.currentTrkAna.jetMinPt )
+    kwargs.setdefault( "JetPtMax", flags.PhysVal.IDTPM.currentTrkAna.jetMaxPt )
+    acc.addEventAlgo( CompFactory.IDTPM.OfflineJetDecoratorAlg( name, **kwargs ) )
+    return acc
+
+
 def OfflineObjectDecoratorAlgCfg( flags, name="OfflineObjectDecoratorAlg", **kwargs ):
     '''
     create decoration algorithm(s) to decorate offline tracks with a link to
@@ -128,17 +143,17 @@ def OfflineObjectDecoratorAlgCfg( flags, name="OfflineObjectDecoratorAlg", **kwa
         tauType = getattr( flags.PhysVal.IDTPM, trkAnaName+".TauType" )
         if tauType : tauTypeList.append( tauType )
 
-    if "Electron" in objStrList:
-        acc.merge( OfflineElectronDecoratorAlgCfg(flags) )
-
     if "ElectronGSF" in objStrList:
         acc.merge( OfflineElectronGSFDecoratorAlgCfg(flags) )
 
-    if "Muon" in objStrList:
-        acc.merge( OfflineMuonDecoratorAlgCfg(flags) )
+    if "Electron" in objStrList:
+        acc.merge( OfflineElectronDecoratorAlgCfg(flags) )
 
     if "MuonComb" in objStrList:
         acc.merge( OfflineMuonCombDecoratorAlgCfg(flags) )
+
+    if "Muon" in objStrList:
+        acc.merge( OfflineMuonDecoratorAlgCfg(flags) )
 
     if "Tau" in objStrList:
         if "BDT" in tauTypeList:
@@ -147,6 +162,9 @@ def OfflineObjectDecoratorAlgCfg( flags, name="OfflineObjectDecoratorAlg", **kwa
         if "RNN" in tauTypeList:
             acc.merge( OfflineTauRNN1prongDecoratorAlgCfg(flags) )
             acc.merge( OfflineTauRNN3prongDecoratorAlgCfg(flags) )
+
+    if "Jet" in objStrList:
+        acc.merge( OfflineJetDecoratorAlgCfg(flags) )
 
     return acc
 

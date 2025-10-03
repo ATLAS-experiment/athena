@@ -1219,7 +1219,7 @@ bool InDetIterativeSecVtxFinderTool::V0kine( const std::vector< Amg::Vector3D > 
 
   std::vector<double> Pv (ntrk);
   double vx = 0., vy = 0., vz = 0., eK0 = 0. ;
-  double pi2 = 139.57018*139.57018 ;   // Pion in MeV
+  double pi2 = ParticleConstants::chargedPionMassInMeV*ParticleConstants::chargedPionMassInMeV ;   // Pion in MeV
 
   for ( int t = 0 ; t < ntrk ; t ++ )
   {
@@ -1258,10 +1258,10 @@ bool InDetIterativeSecVtxFinderTool::V0kine( const std::vector< Amg::Vector3D > 
   // 1 eV^(-1) of time = hbar / eV = 6.582173*10^(-16) second,  for energy-time in natural unit
 //  double planck = 6.582173 ;      
 
-  double eGam = std::sqrt( Pv[0] + 0.511*0.511 ) + std::sqrt( Pv[1] + 0.511*0.511 ) ;
+  double eGam = std::sqrt( Pv[0] + ParticleConstants::electronMassInMeV*ParticleConstants::electronMassInMeV ) + std::sqrt( Pv[1] + ParticleConstants::electronMassInMeV*ParticleConstants::electronMassInMeV ) ;
   double mGam = eGam*eGam - mnt2 ;
  
-  double prtn2 = 938.27205*938.27205 ;
+  double prtn2 = ParticleConstants::protonMassInMeV*ParticleConstants::protonMassInMeV ;
   double eLam = Pv[0] > Pv[1] ?  std::sqrt( Pv[0] + prtn2 ) + std::sqrt( Pv[1] + pi2 ) : 
                           sqrt( Pv[0] + pi2 ) + std::sqrt( Pv[1] + prtn2 )  ;
   double mLam = eLam*eLam - mnt2 ;
@@ -1270,9 +1270,9 @@ bool InDetIterativeSecVtxFinderTool::V0kine( const std::vector< Amg::Vector3D > 
                  <<" "<< ( mGam >= 0 ? std::sqrt( mGam ) : std::sqrt( -mGam ) )
                  <<" "<< ( mLam >= 0 ? std::sqrt( mLam ) : std::sqrt( -mLam ) ) );
 
-  if (   ( std::abs( mass - 497.614 ) < 100. )   // K short 
+  if (   ( std::abs( mass - ParticleConstants::KZeroMassInMeV ) < 100. )   // K short 
       || ( mGam > 0 && sqrt( mGam ) < 40. )  // gamma conversion ;
-      || ( mLam > 0 && std::abs( sqrt( mLam ) - 1115.683 ) < 200.  ) //  Lambda 
+      || ( mLam > 0 && std::abs( sqrt( mLam ) - ParticleConstants::lambdaMassInMeV ) < 200.  ) //  Lambda 
      )  return true ;
 
   return false ;
@@ -1581,7 +1581,7 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
 
   std::vector<Trk::ITrackLink*> selectedTracks;
 
-  typedef DataVector<Trk::Track>::const_iterator TrackDataVecIter;
+  using TrackDataVecIter = DataVector<Trk::Track>::const_iterator;
 
   bool selectionPassed;
   for (TrackDataVecIter itr  = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
@@ -1616,7 +1616,7 @@ std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetIterativeSecVt
   std::vector<Trk::ITrackLink*> selectedTracks;
 
 
-  typedef DataVector<Trk::TrackParticleBase>::const_iterator TrackParticleDataVecIter;
+  using TrackParticleDataVecIter = DataVector<Trk::TrackParticleBase>::const_iterator;
 
   bool selectionPassed;
   for (TrackParticleDataVecIter itr  = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {

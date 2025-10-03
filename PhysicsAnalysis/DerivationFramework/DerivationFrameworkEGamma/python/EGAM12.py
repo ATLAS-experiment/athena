@@ -103,7 +103,7 @@ def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
     # Use modified OR that does not check overlaps with tauls
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
 
-    outputLabel = "DFCommonJets_passOR"
+    outputLabel = "DFCommonJets_passOR_EMTopo"
     bJetLabel = ""  # default
     tauLabel = ""  # workaround for missing taus
     tauKey = ""  # workaround for missing taus
@@ -152,6 +152,7 @@ def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
             EventCleaningToolCfg(flags, "EventCleaningTool_" + wp, cleaningLevel)
         )
         ecTool.JetCleanPrefix = prefix
+        ecTool.OrDecorator = "passOR_EMTopo"
         ecTool.JetContainer = "AntiKt4EMTopoJets"
         ecTool.JetCleaningTool = jetCleaningTool
         acc.addPublicTool(ecTool)

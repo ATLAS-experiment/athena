@@ -14,6 +14,5 @@ ClassIDSvc           INFO  getRegistryEntries: read 259 CLIDRegistry entries for
 VarHandleKey::assign failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "FeeSvc+foo/aac": keys with "/" only allowed for ConditionStore - store is "FeeSvc"'
 ClassIDSvc           INFO  getRegistryEntries: read 904 CLIDRegistry entries for module ALL
 ServiceManager      FATAL No Service factory for FooSvc available.
-VarHandleKey.Se...  ERROR ServiceLocatorHelper::service: can not locate service FooSvc
                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: FooSvc
                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot initialize a Read/Write/Update handle with a null key.

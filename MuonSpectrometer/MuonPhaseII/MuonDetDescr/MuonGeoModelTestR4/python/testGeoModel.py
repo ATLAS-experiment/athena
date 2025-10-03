@@ -52,14 +52,6 @@ def setupServicesCfg(flags):
     result.merge(MuonIdHelperSvcCfg(flags))
     return result
 
-def setupHistSvcCfg(flags, outFile="MdtGeoDump.root", outStream="GEOMODELTESTER"):
-    result = ComponentAccumulator()
-    if len(outFile) == 0: return result
-    histSvc = CompFactory.THistSvc(Output=[f"{outStream} DATAFILE='{outFile}', OPT='RECREATE'"])
-    result.addService(histSvc, primary=True)
-    return result
-
-
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
@@ -92,7 +84,11 @@ def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
 
 def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("TestActsSurface", False)
+    kwargs.setdefault("TestActsSurface", True)
+    kwargs.setdefault("plotTgc", flags.Detector.GeometryTGC)
+    kwargs.setdefault("plotStgc", flags.Detector.GeometrysTGC)
+    kwargs.setdefault("plotMm", flags.Detector.GeometryMM)
+    
     the_alg = CompFactory.MuonGMR4.NswGeoPlottingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -104,17 +100,18 @@ def configureDefaultTagsCfg(flags):
     if not flags.GeoModel.SQLiteDB:
         raise ValueError("Default tag configuration only works for SQLite")
     ### For dummy purposes configure the R2 geometry tag such that the job does not crash
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2    
     from AthenaConfiguration.Enums import LHCPeriod
     if flags.GeoModel.Run == LHCPeriod.Run3:   
-        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC if flags.Input.isMC else defaultConditionsTags.RUN3_DATA
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     elif flags.GeoModel.Run == LHCPeriod.Run4:
           flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-          flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     else:
         raise ValueError(f"Invalid run period {flags.GeoModel.Run}")
+    from MuonConfig.MuonConfigUtils import configureCondTag
+    configureCondTag(flags)
+
     log.info(f"Setup {flags.GeoModel.AtlasVersion} geometry loading {flags.GeoModel.SQLiteDBFullPath}")
     log.info(f"Use conditions tag {flags.IOVDb.GlobalTag}")
     
@@ -201,7 +198,6 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
     #flags.PerfMon.doFullMonMT = True
-   
     flags.lock()
     flags.dump(evaluate = True)
     cfg = setupServicesCfg(flags)
@@ -228,7 +224,8 @@ def executeTest(cfg):
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)  
-    cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile))
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    cfg.merge(setupHistSvcCfg(flags, outFile = args.outRootFile, outStream="GEOMODELTESTER"))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     chambToExclude = args.excludedChambers
     
@@ -285,7 +282,6 @@ if __name__=="__main__":
                                         TestStations = [ch for ch in chambToTest if ch[0] == "M"],
                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"])) 
         else:
-
             cfg.merge(GeoModelMmTestCfg(flags, 
                                         TestStations = [ch for ch in chambToTest if ch[0] == "M"],
                                         ExcludeStations = [ch for ch in chambToExclude if ch[0] == "M"],

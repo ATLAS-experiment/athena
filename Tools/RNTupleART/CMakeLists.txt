@@ -4,4 +4,4 @@
 atlas_subdir( RNTupleART )
 
 # Install files from the package:
-atlas_install_scripts( test/*.sh python/compare_metadata.py )
+atlas_install_scripts( test/*.sh )

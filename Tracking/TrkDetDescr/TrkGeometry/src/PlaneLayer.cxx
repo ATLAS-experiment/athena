@@ -17,7 +17,7 @@
 
 Trk::PlaneLayer::PlaneLayer(
   const Amg::Transform3D & transform,
-  std::shared_ptr<Trk::SurfaceBounds> tbounds,
+  std::shared_ptr<const Trk::SurfaceBounds> tbounds,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
   std::unique_ptr<Trk::OverlapDescriptor> olap,

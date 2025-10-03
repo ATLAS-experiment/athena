@@ -162,6 +162,10 @@ def FPGATrackSimDataPrepOutputCfg(flags):
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputDataPrep")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimDataPrepTree"
+    if not flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+        FPGATrackSimWriteOutput.EventLimit = 0
+    else:
+        FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
@@ -182,8 +186,8 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("FPGATrackSimHitInRoadsKey", "FPGAHitsInRoads")
     kwargs.setdefault("FPGATrackSimRoadKey", "FPGARoads")
     kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks")
-    kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClusters%sFromFPGACluster" %(stage))
-    kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClusters%sFromFPGACluster" %(stage))
+    kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClustersFromFPGACluster")
+    kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClustersFromFPGACluster")
     kwargs.setdefault("xAODStripSpacePointFromFPGAKey", "xAODStripSpacePoints%sFromFPGA" %(stage))
     kwargs.setdefault("xAODPixelSpacePointFromFPGAKey", "xAODPixelSpacePoints%sFromFPGA" %(stage))
     kwargs.setdefault("xAODPixelClusterFromFPGAHitKey", "xAODPixelClusters%sFromFPGAHit" %(stage))
@@ -197,8 +201,10 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("ClusterConverter", result.popToolsAndMerge(FPGAClusterConverterCfg(flags)))
     kwargs.setdefault("ActsTrkConverter", result.popToolsAndMerge(FPGAActsTrkConverterCfg(flags)))
     
-    result.addEventAlgo(CompFactory.FPGAConversionAlgorithm(name, **kwargs))
-
+    ConvertionAlgorithm = CompFactory.FPGAConversionAlgorithm(name, **kwargs)
+    ConvertionAlgorithm.ClusterConverter.doLorentzShift=False # this should not be turned on unless needed for validation purposes
+    
+    result.addEventAlgo(ConvertionAlgorithm)
     return result
 
 def FPGAClusterConverterCfg(flags):
@@ -215,6 +221,7 @@ def FPGAClusterConverterCfg(flags):
     result.setPrivateTools(FPGAClusterConverter)
 
     return result
+
 
 def FPGAActsTrkConverterCfg(flags):
     result=ComponentAccumulator()
@@ -242,14 +249,16 @@ def WriteToAOD(flags, stage = '',finalTrackParticles = ''): #  store xAOD contai
     log.info("---------- Configured AOD writing")
     
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-    toAOD = []
     toAOD = [f"xAOD::TrackParticleContainer#{finalTrackParticles}",f"xAOD::TrackParticleAuxContainer#{finalTrackParticles}Aux."]
+    if flags.Trigger.FPGATrackSim.writeClustersToAOD:
+        toAOD += ["xAOD::PixelClusterContainer#xAODPixelClustersFromFPGACluster","xAOD::PixelClusterAuxContainer#xAODPixelClustersFromFPGAClusterAux.",
+                "xAOD::StripClusterContainer#xAODStripClustersFromFPGACluster","xAOD::StripClusterAuxContainer#xAODStripClustersFromFPGAClusterAux."]
+    if flags.Trigger.FPGATrackSim.writeOfflPRDInfo:
+        toAOD += ['xAOD::TrackMeasurementValidationContainer#ITkPixelMeasurements_offl','xAOD::TrackMeasurementValidationAuxContainer#ITkPixelMeasurements_offlAux.',
+                'xAOD::TrackMeasurementValidationContainer#ITkStripMeasurements_offl','xAOD::TrackMeasurementValidationAuxContainer#ITkStripMeasurements_offlAux.']
     if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
-        toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
-                f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
-                f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
-                f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink",
-                ]
+        toAOD += [f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODPixelSpacePoints{stage}FromFPGAAux.-measurements",
+                  f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointAuxContainer#xAODStripSpacePoints{stage}FromFPGAAux.-measurements.-sctSpacePointLink"]
     
     result.merge(addToAOD(flags, toAOD))
 
@@ -292,16 +301,22 @@ def FPGATrackSimMappingCfg(flags,name="FPGATrackSimMappingSvc"):
     mappingSvc.regionID = flags.Trigger.FPGATrackSim.region
     mappingSvc.mappingType = "FILE"
     mappingSvc.rmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".rmap" # we need more configurability here i.e. file choice should depend on some flag
-    mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".subrmap" # presumably also here we want to be able to change the slices definition file
+    mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".rmap" # At this point this is the same as the region map, so let's not have two files
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii.txt"
+    mappingSvc.radiiFile2nd = flags.Trigger.FPGATrackSim.mapsDir + "/"+getBaseName(flags)+"_radii_2nd.txt"
+    mappingSvc.loadRadii = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN) and flags.Trigger.FPGATrackSim.loadRadii
+    mappingSvc.loadRegionMap = flags.Trigger.FPGATrackSim.loadRegionMap
+    mappingSvc.DoGNNTrack = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
+
     mappingSvc.FakeNNonnx1st = flags.Trigger.FPGATrackSim.FakeNNonnxFile1st
     mappingSvc.FakeNNonnx2nd = flags.Trigger.FPGATrackSim.FakeNNonnxFile2nd
     mappingSvc.ParamNNonnx1st = flags.Trigger.FPGATrackSim.ParamNNonnxFile1st
     mappingSvc.ParamNNonnx2nd = flags.Trigger.FPGATrackSim.ParamNNonnxFile2nd
     mappingSvc.ExtensionNNVolonnx = flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile
     mappingSvc.ExtensionNNHitonnx = flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile
+    mappingSvc.GNNModuleMap = flags.Trigger.FPGATrackSim.GNN.moduleMapPath
     mappingSvc.layerOverride = []
     result.addService(mappingSvc, create=True, primary=True)
     return result
@@ -335,12 +350,27 @@ def FPGATrackSimHitFilteringToolCfg(flags):
     result.addPublicTool(HitFilteringTool, primary=True)
     return result
 
+def FPGATrackSimLorentzAngleToolCfg(flags):
+    result=ComponentAccumulator()
+    LorentzAngleTool = CompFactory.FPGATrackSim.LorentzAngleTool()
+    LorentzAngleTool.UseAthenaLorentzAngleTools=False
+    LorentzAngleTool.shiftGlobalPosition=True
+    
+    from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+    LorentzAngleTool.LorentzAngleToolPixel = result.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags))
+    
+    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+    LorentzAngleTool.LorentzAngleToolStrip = result.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags))
+    
+    result.addPublicTool(LorentzAngleTool, primary=True)
+    return result
 
 def FPGATrackSimDataPrepAlgCfg(inputFlags):
 
     flags = prepareFlagsForFPGATrackSimDataPrepAlg(inputFlags)
 
     result=ComponentAccumulator()
+    
 
     theFPGATrackSimDataPrepAlg=CompFactory.FPGATrackSimDataPrepAlg()
     theFPGATrackSimDataPrepAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
@@ -369,22 +399,26 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
         theFPGATrackSimDataPrepAlg.SGInputTool = ""
     else:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+        result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
         theFPGATrackSimDataPrepAlg.InputTool = ""
         theFPGATrackSimDataPrepAlg.InputTool2 = ""
         from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
         theFPGATrackSimDataPrepAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
-
-    theFPGATrackSimDataPrepAlg.SpacePointTool = result.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
+        theFPGATrackSimDataPrepAlg.SGInputTool.ReadOfflineClusters=False
+        theFPGATrackSimDataPrepAlg.SGInputTool.ReadOfflineTracks=False
 
     theFPGATrackSimDataPrepAlg.HitFilteringTool = result.getPrimaryAndMerge(FPGATrackSimHitFilteringToolCfg(flags))
 
     theFPGATrackSimDataPrepAlg.ClusteringTool = CompFactory.FPGATrackSimClusteringTool()
-    theFPGATrackSimDataPrepAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimDataPrepOutputCfg(flags))
+    if not flags.Trigger.FPGATrackSim.wrapperFileName:
+        theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleTool = result.getPrimaryAndMerge(FPGATrackSimLorentzAngleToolCfg(flags))
+        theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleShift = flags.Trigger.FPGATrackSim.LorentzAngleShift
+    else:
+        theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleShift = -1 # should be set to False by default in the tool class but just in case...
+        
 
-    # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
-    if flags.Trigger.FPGATrackSim.spacePoints:
-        theFPGATrackSimDataPrepAlg.Spacepoints = True
+    
+    theFPGATrackSimDataPrepAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimDataPrepOutputCfg(flags))
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg
     theFPGATrackSimDataPrepAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
@@ -396,22 +430,23 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
 
 log = AthenaLogger(__name__)
 
-def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwargs):
+def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-", **kwargs):
         
     flags = flagsIn.clone()
     
     # configure FastTracking based on C-100 flags
-    from ActsConfig.ActsCIFlags import actsFastWorkflowFlags
-    actsFastWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsWorkflowFlags
+    actsWorkflowFlags(flags)
     
     flags.Tracking.ActiveConfig.extension=FinalTracks 
-    flags.Tracking.writeExtendedSi_PRDInfo=True
     flags.lock()
     
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass") # TODO: Check if it's really necessary 
     prefix=flags.Tracking.ActiveConfig.extension # prefix for the name of final tracks (this is what IDTPM reads)
     
     result = ComponentAccumulator()
+
+
     
     from ActsConfig.ActsUtilities import extractChildKwargs
     
@@ -446,59 +481,194 @@ def FPGATrackSimDataPrepConnectToFastTracking(flagsIn,FinalTracks="F100-",**kwar
     
     ################################################################################
     # Track to Truth association and validation
-    from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
-    result.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
-                                                       name=f"{prefix}PixelClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODTruthLinks",
-                                                       AssociationMapOut=f"{prefix}ITkPixelClustersToTruthParticles",
-                                                       Measurements=kwargs.get('PixelClusterToTruthAssociationAlg.Measurements'))) 
-    
-    result.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
-                                                       name=f"{prefix}StripClusterToTruthAssociationAlg",
-                                                       InputTruthParticleLinks="xAODTruthLinks",
-                                                       AssociationMapOut=f"{prefix}ITkStripClustersToTruthParticles",
-                                                       Measurements=kwargs.get('StripClusterToTruthAssociationAlg.Measurements')))
-    
-    result.merge(ActsTruthParticleHitCountAlgCfg(flags,
-                                              name=f"{prefix}TruthParticleHitCountAlg",
-                                              PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
-                                              StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
-                                              TruthParticleHitCountsOut=f"{prefix}TruthParticleHitCounts"))
-    
-    from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
-    result.merge(ActsTrackToTruthAssociationAlgCfg(flags,
-                                                name=f"{prefix}TrackToTruthAssociationAlg",
+    if(flags.ITk.doTruth):
+        from ActsConfig.ActsTruthConfig import ActsTruthParticleHitCountAlgCfg, ActsPixelClusterToTruthAssociationAlgCfg,ActsStripClusterToTruthAssociationAlgCfg
+        result.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags,
+                                                        name=f"{prefix}PixelClusterToTruthAssociationAlg",
+                                                        InputTruthParticleLinks="xAODTruthLinks",
+                                                        AssociationMapOut=f"{prefix}ITkPixelClustersToTruthParticles",
+                                                        Measurements=kwargs.get('PixelClusterToTruthAssociationAlg.Measurements'))) 
+        
+        result.merge(ActsStripClusterToTruthAssociationAlgCfg(flags,
+                                                        name=f"{prefix}StripClusterToTruthAssociationAlg",
+                                                        InputTruthParticleLinks="xAODTruthLinks",
+                                                        AssociationMapOut=f"{prefix}ITkStripClustersToTruthParticles",
+                                                        Measurements=kwargs.get('StripClusterToTruthAssociationAlg.Measurements')))
+        
+        result.merge(ActsTruthParticleHitCountAlgCfg(flags,
+                                                name=f"{prefix}TruthParticleHitCountAlg",
                                                 PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
                                                 StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
-                                                ACTSTracksLocation=acts_tracks,
-                                                AssociationMapOut=f"{acts_tracks}ToTruthParticleAssociation"))
-    
-    result.merge(ActsTrackFindingValidationAlgCfg(flags,
-                                                name=f"{prefix}TrackFindingValidationAlg",
-                                                TrackToTruthAssociationMap=f"{acts_tracks}ToTruthParticleAssociation",
-                                                TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts"
-                                                ))
-    
+                                                TruthParticleHitCountsOut=f"{prefix}TruthParticleHitCounts"))
+        
+        from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
+        result.merge(ActsTrackToTruthAssociationAlgCfg(flags,
+                                                    name=f"{prefix}TrackToTruthAssociationAlg",
+                                                    PixelClustersToTruthAssociationMap=f"{prefix}ITkPixelClustersToTruthParticles",
+                                                    StripClustersToTruthAssociationMap=f"{prefix}ITkStripClustersToTruthParticles",
+                                                    ACTSTracksLocation=acts_tracks,
+                                                    AssociationMapOut=f"{acts_tracks}ToTruthParticleAssociation"))
+        
+        result.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                    name=f"{prefix}TrackFindingValidationAlg",
+                                                    TrackToTruthAssociationMap=f"{acts_tracks}ToTruthParticleAssociation",
+                                                    TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts"
+                                                    ))
     ################################################################################
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
     result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, name=f"{prefix}TrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation=[acts_tracks],
                                                 TrackParticlesOutKey=f"{prefix}TrackParticles"))
-   
-    from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
-    result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags, name=f"{prefix}TrackParticleTruthDecorationAlg",
-                                                    TrackToTruthAssociationMaps=[f"{acts_tracks}ToTruthParticleAssociation"],
-                                                    TrackParticleContainerName=f"{FinalTracks}TrackParticles",
-                                                    TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
-                                                    ComputeTrackRecoEfficiency=True))
+    if(flags.ITk.doTruth):
+        from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
+        result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags, name=f"{prefix}TrackParticleTruthDecorationAlg",
+                                                        TrackToTruthAssociationMaps=[f"{acts_tracks}ToTruthParticleAssociation"],
+                                                        TrackParticleContainerName=f"{FinalTracks}TrackParticles",
+                                                        TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
+                                                        ComputeTrackRecoEfficiency=True))
 
-    if flags.Tracking.writeExtendedSi_PRDInfo:
+
+    if flags.Trigger.FPGATrackSim.writeOfflPRDInfo: 
         from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
-        result.merge(ITkActsPrepDataToxAODCfg(flags))
+        result.merge( ITkActsPrepDataToxAODCfg( flags,
+                        PixelMeasurementContainer = "ITkPixelMeasurements_offl",
+                        StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
     
     return result
 
+def FPGATrackSimRegionFlagCfg(flags):
+    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
+        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
+    else: # otherwise use the regionList (this overrides the region flag)
+        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
+    return flags
+
+def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
+    acc=ComponentAccumulator()
+    if not flags.Trigger.FPGATrackSim.runOnPreProducedHeaderFiles:
+        acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+            'FPGATrackSimSPKey': 'FPGAClusters_1st',
+            'xAODPixelClusterFromFPGAClusterKey': 'FPGAPixelClusters',
+            'xAODStripClusterFromFPGAClusterKey': 'FPGAStripClusters',
+            'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
+            'doActsTrk': False,
+            'useRoads': False,          
+            'doSP': flags.Trigger.FPGATrackSim.convertSPs,
+        }))
+    else:
+        from FPGATrackSimConfTools.FPGATrackSimMergeOutputsConfig import FPGATrackSimMergeOutputsAlgCfg
+        acc.merge(FPGATrackSimMergeOutputsAlgCfg(flags))            
+        acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg', stage = '_1st',**{
+            'FPGATrackSimHitKey': 'FPGAHits',
+            'xAODPixelClusterFromFPGAHitKey': 'FPGAPixelClusters',
+            'xAODStripClusterFromFPGAHitKey': 'FPGAStripClusters',
+            'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
+            'doActsTrk': True,
+            'useRoads': False,          
+            'doClusters': False,
+            'doHits': True,
+            'doSP': flags.Trigger.FPGATrackSim.convertSPs,
+        }))      
+        
+    from FPGAClusterSorting.FPGAClusterSortingConfig import FPGAClusterSortingAlgCfg
+    ClusterSorting = FPGAClusterSortingAlgCfg(flags,**{'xAODPixelClusterContainer': 'FPGAPixelClusters',
+                                                       'xAODStripClusterContainer': 'FPGAStripClusters',
+                                                       'sortedxAODPixelClusterContainer': 'ITkPixelClusters',
+                                                       'sortedxAODStripClusterContainer': 'ITkStripClusters'})
+    
+    acc.merge(ClusterSorting)
+    
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
+    acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
+    
+    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
+    acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
+
+    if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
+        toAOD = []
+
+        pixel_cluster_shortlist = ['-pixelClusterLink']
+        strip_cluster_shortlist = ['-sctClusterLink']
+        
+        pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
+        strip_cluster_variables = '.'.join(strip_cluster_shortlist)
+
+        toAOD += ['xAOD::PixelClusterContainer#ITkPixelClusters',
+                  'xAOD::PixelClusterAuxContainer#ITkPixelClustersAux.' + pixel_cluster_variables,
+                  'xAOD::StripClusterContainer#ITkStripClusters',
+                  'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
+        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
+        acc.merge(addToAOD(flags, toAOD))
+    
+    
+    from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+    acc.merge(FPGATrackSimReportingCfg(flags,
+                                       perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
+                                        **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
+                                            'xAODStripClusterContainers' : ['ITkStripClusters'],
+                                            'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
+                                            'isDataPrep': True} ))
+    
+    return acc
+
+def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuration
+    flags.Scheduler.ShowDataDeps=True
+    flags.Scheduler.CheckDependencies=True
+    
+    flags.Trigger.FPGATrackSim.readOfflineObjects=False
+    flags.Trigger.FPGATrackSim.doMultiTruth=False
+    
+    flags = FPGATrackSimRegionFlagCfg(flags)
+    
+    return flags
+
+def FixITkMainPassFlags(flags):
+    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
+    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
+    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
+    actsLegacyWorkflowFlags(flags)
+    flags.Acts.doRotCorrection = False
+    return flags
+
+
+def FPGATrackSimDataPrepSetup(flags,runReco=True):
+    acc = ComponentAccumulator()
+    if flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
+      return acc 
+
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    acc.merge(PoolReadCfg(flags))
+
+    if not runReco:
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+        acc.merge(EventInfoCnvAlgCfg(flags))
+    else:
+        if flags.Input.isMC:
+            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+            acc.merge(GEN_AOD2xAODCfg(flags))
+
+            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
+            acc.merge(addTruthPileupJetsToOutputCfg(flags))
+        
+        if flags.Detector.EnableCalo:
+            from CaloRec.CaloRecoConfig import CaloRecoCfg
+            acc.merge(CaloRecoCfg(flags))
+
+        if not flags.Reco.EnableTrackOverlay:
+
+            from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+            acc.merge(InDetTrackRecoCfg(flags))
+            from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
+            acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
+            from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
+            acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
+
+    return acc
+
+  
 def runDataPrepChain():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -511,11 +681,7 @@ def runDataPrepChain():
     
     ############################################    
     # ensure that the xAOD SP and cluster containers are available
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    from TrkConfig.TrkConfigFlags import TrackingComponent
-    flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
-    flags.Acts.doRotCorrection = False
+    flags = FixITkMainPassFlags(flags)
     
     ############################################
     flags.Concurrency.NumThreads=1
@@ -530,13 +696,12 @@ def runDataPrepChain():
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+
+    flags.Tracking.writeExtendedSi_PRDInfo = not flags.Trigger.FPGATrackSim.writeOfflPRDInfo    # Don't write ITkPixel/StripMeasurements if writeOfflPRDInfo = True
+                                                                                                # In this case, ITkPixel/StripMeasurements_offl written based on F100 clustering
     
-    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
-        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
-    else: # otherwise use the regionList (this overrides the region flag)
-        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
-        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
-    
+    flags = FPGATrackSimRegionFlagCfg(flags)
+
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkMainPass", keepOriginal=True)
     
@@ -546,30 +711,8 @@ def runDataPrepChain():
         acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='dataprep.root', OPT='RECREATE'"]))
 
 
-    if not flags.Trigger.FPGATrackSim.wrapperFileName:
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        acc.merge(PoolReadCfg(flags))
+    acc.merge(FPGATrackSimDataPrepSetup(flags))
     
-        if flags.Input.isMC:
-            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-            acc.merge(GEN_AOD2xAODCfg(flags))
-
-            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
-            acc.merge(addTruthPileupJetsToOutputCfg(flags))
-        
-        if flags.Detector.EnableCalo:
-            from CaloRec.CaloRecoConfig import CaloRecoCfg
-            acc.merge(CaloRecoCfg(flags))
-
-        if not flags.Reco.EnableTrackOverlay:
-            from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-            acc.merge(InDetTrackRecoCfg(flags))
-            from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
-            acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
-            from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
-            acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
-   
-
     # Use the imported configuration function for the data prep algorithm.
     acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
 
@@ -579,8 +722,8 @@ def runDataPrepChain():
         # convert Pixel Clusters to SPs
         from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg
         acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,name="FPGAActsPixelSpacePointFormationAlg",
-                                                     **{'PixelClusters':"xAODPixelClusters_1stFromFPGACluster",
-                                                        'PixelSpacePoints':"xAODPixelSpacePoints_1stFromFPGA"}))         
+                                                     **{'PixelClusters':"xAODPixelClustersFromFPGACluster",
+                                                        'PixelSpacePoints':"xAODPixelSpacePointsFromFPGA"}))         
         
         if flags.Trigger.FPGATrackSim.connectToToITkTracking:
             if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:     
@@ -589,18 +732,18 @@ def runDataPrepChain():
                
             # Run ACTS Fast Tracking for FPGA clusters (starting from seeding)
             acc.merge(FPGATrackSimDataPrepConnectToFastTracking(flags, FinalTracks=FinalDataPrepTrackChainxAODTracksKeyPrefix,
-                            **{'PixelSeedingAlg.InputSpacePoints' : ['xAODPixelSpacePoints_1stFromFPGA'],
+                            **{'PixelSeedingAlg.InputSpacePoints' : ['xAODPixelSpacePointsFromFPGA'],
                                 'StripSeedingAlg.InputSpacePoints' : [''],
-                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["xAODPixelClusters_1stFromFPGACluster","xAODStripClusters_1stFromFPGACluster"],
-                                'PixelClusterToTruthAssociationAlg.Measurements' : 'xAODPixelClusters_1stFromFPGACluster',
-                                'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClusters_1stFromFPGACluster'}))
+                                'TrackFindingAlg.UncalibratedMeasurementContainerKeys' : ["xAODPixelClustersFromFPGACluster","xAODStripClustersFromFPGACluster"],
+                                'PixelClusterToTruthAssociationAlg.Measurements' : 'xAODPixelClustersFromFPGACluster',
+                                'StripClusterToTruthAssociationAlg.Measurements' : 'xAODStripClustersFromFPGACluster'}))
+
 
         if flags.Trigger.FPGATrackSim.writeToAOD:
-            acc.merge(WriteToAOD(flags, stage = '_1st',))
-            if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags,
-                                                                             stage = '_1st',
-                                                                             finalTrackParticles=f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"))
-            
+            acc.merge(WriteToAOD(flags,
+                                stage = '_1st',
+                                finalTrackParticles=f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"))
+
         # Printout for various FPGA-related objects
         from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
         acc.merge(FPGATrackSimReportingCfg(flags,stage="_1st",
@@ -610,8 +753,8 @@ def runDataPrepChain():
         # cluster monitoring
         if flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
             from EFTrackingFPGAOutputValidation.FPGAOutputValidationConfig import FPGAOutputValidationCfg
-            acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClusters_1stFromFPGACluster","ITkPixelClusters"],
-                                                        'stripKeys':["xAODStripClusters_1stFromFPGACluster","ITkStripClusters"],
+            acc.merge(FPGAOutputValidationCfg(flags, **{'pixelKeys' : ["xAODPixelClustersFromFPGACluster","ITkPixelClusters"],
+                                                        'stripKeys':["xAODStripClustersFromFPGACluster","ITkStripClusters"],
                                                         'doDiffHistograms':True,
                                                         'matchByID' : True}))
             

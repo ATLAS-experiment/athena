@@ -1,18 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODMissingET/MissingETAssociationHelper.h"
-
-#include "xAODTracking/TrackParticle.h"
-#include "xAODJet/JetAttributes.h"
-
-#include "xAODBase/IParticleContainer.h"
-#include "xAODBase/ObjectType.h"
-
-#include <iterator>
-#include <cstdio>
-#include <climits>
+#include "xAODMissingET/versions/MissingETAssociation_v1.h"
+#include "xAODMissingET/versions/MissingETAssociationMap_v1.h"
+#include "xAODMissingET/versions/MissingETCompositionBase.h"
+#include <stdexcept>
 
 using namespace xAOD;
 

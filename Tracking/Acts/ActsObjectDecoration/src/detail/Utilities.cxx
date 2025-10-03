@@ -14,7 +14,7 @@ namespace ActsTrk::detail {
 		     const InDetSimDataCollection& sdoCollection )
   {
     std::vector<int> sdo_word {};
-    std::vector< std::vector< int > > sdo_depositsBarcode {};
+    std::vector< std::vector< int > > sdo_depositsUniqueID {};
     std::vector< std::vector< float > > sdo_depositsEnergy {};
 
     for (const Identifier hitIdentifier : rdoList) {
@@ -23,22 +23,22 @@ namespace ActsTrk::detail {
 
       sdo_word.push_back( pos->second.word() ) ;
 
-      std::vector<int> sdoDepBC(pos->second.getdeposits().size(), HepMC::INVALID_PARTICLE_ID);
+      std::vector<int> sdoDepUID(pos->second.getdeposits().size(), HepMC::INVALID_PARTICLE_ID);
       std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
 
       unsigned int nDepos {0};
       for (const auto& deposit: pos->second.getdeposits()) {
-	if (deposit.first) sdoDepBC[nDepos] = HepMC::barcode(deposit.first);
+	if (deposit.first) sdoDepUID[nDepos] = HepMC::uniqueID(deposit.first);
 	sdoDepEnergy[nDepos] = deposit.second;
 	++nDepos;
       }
 
-      sdo_depositsBarcode.push_back( std::move(sdoDepBC) );
+      sdo_depositsUniqueID.push_back( std::move(sdoDepUID) );
       sdo_depositsEnergy.push_back( std::move(sdoDepEnergy) );
     }
     
     return std::make_tuple(std::move(sdo_word),
-                           std::move(sdo_depositsBarcode),
+                           std::move(sdo_depositsUniqueID),
                            std::move(sdo_depositsEnergy));
   }
   
@@ -61,7 +61,7 @@ namespace ActsTrk::detail {
     
     std::vector<float> sihit_energyDeposit(numHits, 0);
     std::vector<float> sihit_meanTime(numHits, 0);
-    std::vector<int>   sihit_barcode(numHits, 0);
+    std::vector<int>   sihit_uniqueID(numHits, 0);
     std::vector<int>   sihit_pdgid(numHits, 0);
 
     std::vector<float> sihit_startPosX(numHits, 0);
@@ -78,7 +78,7 @@ namespace ActsTrk::detail {
       sihit_meanTime[hitNumber] =  sihit.meanTime() ;
 
       const HepMcParticleLink& HMPL = sihit.particleLink();
-      sihit_barcode[hitNumber] = HepMC::barcode(HMPL) ;
+      sihit_uniqueID[hitNumber] = HepMC::uniqueID(HMPL);
       if( HMPL.isValid() ){
         sihit_pdgid[hitNumber] = HMPL->pdg_id();
       }
@@ -99,7 +99,7 @@ namespace ActsTrk::detail {
       ++hitNumber;
     }
 
-    return std::make_tuple(std::move(sihit_energyDeposit), std::move(sihit_meanTime), std::move(sihit_barcode), std::move(sihit_pdgid),
+    return std::make_tuple(std::move(sihit_energyDeposit), std::move(sihit_meanTime), std::move(sihit_uniqueID), std::move(sihit_pdgid),
                            std::move(sihit_startPosX), std::move(sihit_startPosY), std::move(sihit_startPosZ),
                            std::move(sihit_endPosX), std::move(sihit_endPosY), std::move(sihit_endPosZ));
   }

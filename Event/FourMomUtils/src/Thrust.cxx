@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FourMomUtils/Thrust.h"
@@ -129,7 +129,7 @@ thrust( const I4MomIter_t& iBeg, const I4MomIter_t& iEnd,
         numerator_m += (c.cross(n_0[n_tests])).mag();
         denominator += c.mag();
       }
-    const double inv_denominator = 1. / denominator;
+    const double inv_denominator = denominator!= 0 ? (1. / denominator) : 1;
     if( numerator_t * inv_denominator > thrust_major )
       {
         thrust_major = numerator_t * inv_denominator;

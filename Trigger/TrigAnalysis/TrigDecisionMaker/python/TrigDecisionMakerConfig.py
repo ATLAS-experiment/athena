@@ -73,6 +73,7 @@ def Run3DecisionMakerCfg(flags):
     tdm = CompFactory.TrigDec.TrigDecisionMakerMT()
     tdm.doL1 = flags.Trigger.L1.doCTP
     tdm.doHLT = flags.Trigger.decodeHLT
+    tdm.UseEDMxAOD = flags.Trigger.CTP.UseEDMxAOD
     if flags.Input.Format is not Format.BS:
         # Construct trigger bits from HLTNav_summary instead of reading from BS
         tdm.BitsMakerTool = CompFactory.TriggerBitsMakerTool()

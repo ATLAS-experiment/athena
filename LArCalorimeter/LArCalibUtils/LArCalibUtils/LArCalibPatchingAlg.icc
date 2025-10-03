@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <tuple>
@@ -786,27 +786,27 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(LArSingleFloatP& patch) {
 
 template<class CONDITIONSCONTAINER>
 StatusCode  LArCalibPatchingAlg<CONDITIONSCONTAINER>::setSymlink(const LArRampComplete* ramp) const {
-  ATH_CHECK( detStore()->symLink(ramp, (ILArRamp*)ramp) );
+  ATH_CHECK( detStore()->symLink(ramp, static_cast<const ILArRamp*>(ramp)) );
   return StatusCode::SUCCESS;
 }
 
 
 template<class CONDITIONSCONTAINER>
 StatusCode  LArCalibPatchingAlg<CONDITIONSCONTAINER>::setSymlink(const LArOFCComplete* ofc) const {
-  ATH_CHECK( detStore()->symLink(ofc, (ILArOFC*)ofc) );
+  ATH_CHECK( detStore()->symLink(ofc, static_cast<const ILArOFC*>(ofc)) );
   return StatusCode::SUCCESS;
 }
 
 
 template<class CONDITIONSCONTAINER>
 StatusCode  LArCalibPatchingAlg<CONDITIONSCONTAINER>::setSymlink(const LArMphysOverMcalComplete* ramp) const {
-  ATH_CHECK( detStore()->symLink(ramp, (ILArMphysOverMcal*)ramp) );
+  ATH_CHECK( detStore()->symLink(ramp, static_cast<const ILArMphysOverMcal*>(ramp)) );
   return StatusCode::SUCCESS;
 }
 
 template<class CONDITIONSCONTAINER>
 StatusCode  LArCalibPatchingAlg<CONDITIONSCONTAINER>::setSymlink(const LArAutoCorrComplete* ac) const {
-  ATH_CHECK( detStore()->symLink(ac, (ILArAutoCorr*)ac) );
+  ATH_CHECK( detStore()->symLink(ac, static_cast<const ILArAutoCorr*>(ac)) );
   return StatusCode::SUCCESS;
 }
 

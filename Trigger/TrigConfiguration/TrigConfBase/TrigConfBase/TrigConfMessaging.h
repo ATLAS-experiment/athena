@@ -57,6 +57,11 @@ namespace TrigConf {
      */
     MsgStreamTC& msg (const MSGTC::Level lvl) const;
 
+    /** @brief name accessor
+     * @returns the name
+     */
+    const std::string& getName() const;
+
   private:
     TrigConfMessaging() = delete;
     TrigConfMessaging( const TrigConfMessaging& rhs ) = delete;
@@ -93,6 +98,9 @@ namespace TrigConf {
     return msg() << lvl;
   }
   
+  inline const std::string& TrigConfMessaging::getName() const {
+    return m_name;
+  }
 } // namespace TrigConf
 
 #endif

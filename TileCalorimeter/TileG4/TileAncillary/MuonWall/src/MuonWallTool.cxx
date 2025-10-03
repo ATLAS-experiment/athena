@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -32,22 +32,7 @@
 #include <iostream>
 
 MuonWallTool::MuonWallTool(const std::string& type, const std::string& name, const IInterface* parent)
-  : DetectorGeometryBase(type,name,parent),
-    m_zLength(0.),
-    m_yLength(0.),
-    m_xLength(0.),
-    m_backWall(true),
-    m_sideWall(false)
-{
-  ATH_MSG_DEBUG( "MuonWallTool constructor for " << name );
-  declareProperty("ZLength", m_zLength, "");
-  declareProperty("YLength", m_yLength, "");
-  declareProperty("XLength", m_xLength, "");
-  declareProperty("backWall", m_backWall, "");
-  declareProperty("sideWall", m_sideWall, "");
-}
-
-MuonWallTool::~MuonWallTool()
+  : DetectorGeometryBase(type,name,parent)
 {
 }
 

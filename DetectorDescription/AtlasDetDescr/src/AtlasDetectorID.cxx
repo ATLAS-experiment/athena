@@ -14,9 +14,19 @@
 #include <assert.h>
 #include <format>
 
-AtlasDetectorID::AtlasDetectorID(const std::string &name) : AthMessaging(name) {}
+AtlasDetectorID::AtlasDetectorID(const std::string &name,
+                                 const std::string& group)
+  : AthMessaging(name),
+    m_group (group)
+{
+}
 AtlasDetectorID::~AtlasDetectorID() {
     if(m_helper) delete m_helper;
+}
+
+const std::string& AtlasDetectorID::group() const
+{
+  return m_group;
 }
 
 Identifier AtlasDetectorID::mdt() const {
@@ -353,6 +363,10 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
     std::string result("Unable to decode id");
     unsigned int max_index = (context) ? context->end_index() : 999;
 
+    if (!id.is_valid()) {
+      return "[INVALID]";
+    }
+
     if (!m_is_initialized_from_dict)
         return result;
 
@@ -381,7 +395,7 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
         ATH_MSG_WARNING(__func__<<" No detector type associated to id "<<id);
         return result;
     }
-    if (dict->unpack(compact, prefix, max_index, expId)) {
+    if (dict->unpack(m_group, compact, prefix, max_index, expId)) {
         return result;
     }
 
@@ -439,7 +453,7 @@ std::string AtlasDetectorID::print_to_string(Identifier id,
             ATH_MSG_WARNING(__func__<<":"<<__LINE__<<" No dictionary could be associated to "<<id);
             return result;
         }
-        if (dict->unpack(compact, prefix, max_index," ", result)) {
+        if (dict->unpack(m_group, compact, prefix, max_index," ", result)) {
             return result;
         }
     }
@@ -479,7 +493,7 @@ void AtlasDetectorID::set_quiet(bool quiet) {
 
 void AtlasDetectorID::setDictVersion(const IdDictMgr &dict_mgr, const std::string &name) {
     const IdDictDictionary *dict = dict_mgr.find_dictionary(name);
-    m_dict_version = dict->m_version;
+    m_dict_version = dict->version();
 }
 
 std::string AtlasDetectorID::to_range(const ExpandedIdentifier &id) const {
@@ -544,8 +558,8 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
                                    int& idToAssign, 
                                    bool mandatory = true) ->bool {
         IdDictLabel *label = field->find_label(systemName);
-        if (label && label->m_valued){
-            idToAssign = label->m_value;
+        if (label && label->valued()){
+            idToAssign = label->value();
             ATH_MSG_VERBOSE("Assign system "<<systemName<<" to "<<idToAssign<<".");
             return true;
         } else if (label) {
@@ -570,7 +584,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         top_dict = m_indet_dict; // save as top_dict
         // Check if this is High Luminosity LHC layout
         // should just use std::string::contains once that is available... (C++23)
-        std::string versionString = m_indet_dict->m_version;
+        std::string versionString = m_indet_dict->version();
         m_isHighLuminosityLHC = (versionString.find("ITk") != std::string::npos || versionString.find("P2-RUN4") != std::string::npos);
 
         // Get InDet subdets
@@ -657,7 +671,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         }
         field = m_lar_dict->find_field("module");
         if (field) {
-            m_LAR_FCAL_MODULE_INDEX = field->m_index;
+            m_LAR_FCAL_MODULE_INDEX = field->index();
         } else {
             ATH_MSG_DEBUG("initLevelsFromDict - unable to find 'module' field for miniFCAL");
         }
@@ -701,7 +715,6 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
 
             size_type nStationNames = field->get_label_number();
             std::string stationNameString{};
-            const std::vector<IdDictLabel *>& stationNameLabels = field->m_labels;
 
             // first check for the maximum value assigned to any stationName
             int stationNameIndex{};
@@ -709,7 +722,8 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
             for (size_type i = 0; i < nStationNames; ++i) {
                 // in case no individual values are given,
                 // the order inside the dictionary is used
-                stationNameIndex = stationNameLabels[i]->m_valued ? stationNameLabels[i]->m_value : i;
+                const IdDictLabel& label = field->label(i);
+                stationNameIndex = label.valued() ? label.value() : i;
 
                 maxStationNameIndex = std::max(maxStationNameIndex, stationNameIndex);
             }
@@ -717,34 +731,36 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
             // the vector may contain gaps (value=0) in case of jumps
             // in the values
             m_muon_tech_bits.resize(maxStationNameIndex + 1);
-            const std::vector<IdDictRegion *>& muonRegions = m_muon_dict->m_all_regions;
 
             // loop over all stationNames and search for associations
             // to technology
             for (size_type i = 0; i < nStationNames; ++i) {
-                stationNameString = stationNameLabels[i]->m_name;
+                const IdDictLabel& label = field->label(i);
+                stationNameString = label.name();
                 // in case no individual values are given,
                 // the order inside the dictionary is used
-                stationNameIndex = stationNameLabels[i]->m_valued ? stationNameLabels[i]->m_value : i;
+                stationNameIndex = label.valued() ? label.value() : i;
                 // next loop over all regions to look for
                 // stationName <-> technology associations
                 bool found{false}, stationNameFound{false}, technologyFound{false};
                 std::string techLabel{};
-                for (size_type j = 0; j < muonRegions.size(); ++j) {
-                    IdDictRegion *region = muonRegions[j];
-                    const std::vector<IdDictRegionEntry *>& entries = region->m_entries;
+                size_t nregions = m_muon_dict->n_regions();
+                for (size_type j = 0; j < nregions; ++j) {
+                    const IdDictRegion& region = m_muon_dict->region(j);
                     // loop over all entries of a region to look for
                     // stationName and technology information
                     stationNameFound = technologyFound = false;
-                    for (size_type k = 0; k < entries.size(); ++k) {
-                        IdDictRange *range = dynamic_cast<IdDictRange *>(entries[k]);
+                    size_t nentries = region.n_entries();
+                    for (size_type k = 0; k < nentries; ++k) {
+                        const IdDictRange *range =
+                          dynamic_cast<const IdDictRange *>(&region.entry(k));
                         if (!range) {
                             continue;
                         }
                         
-                        if (range->m_field_name == "stationName") {
+                        if (range->field_name() == "stationName") {
 
-                            if (range->m_label == stationNameString) {
+                          if (range->label() == stationNameString) {
                                 // we found a region containing the current stationName
                                 stationNameFound = true;
                                 continue;
@@ -753,9 +769,9 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
                                 // let's skip
                                 break;
                             }
-                        }  else if (range->m_field_name == "technology") {
+                        }  else if (range->field_name() == "technology") {
                             technologyFound = true;
-                            techLabel = range->m_label;
+                            techLabel = range->label();
                         }
 
                         if (!stationNameFound || !technologyFound) {
@@ -797,7 +813,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
 
         field = m_muon_dict->find_field("technology");
         if (field) {
-            m_MUON_SUBDET_INDEX = field->m_index;
+            m_MUON_SUBDET_INDEX = field->index();
         }
         else {
             ATH_MSG_ERROR("initLevelsFromDict - unable to find 'technology' field for MuonSpectrometer dictionary");
@@ -838,13 +854,13 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         m_lvl1_field.clear();
         // negative half
         if (m_calo_dict->get_label_value("DetZside", "negative_lvl1_side", value)) {
-            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'negative_lvl1_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name);
+            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'negative_lvl1_side' of field 'DetZside' in dictionary " << m_calo_dict->name());
             return 1;
         }
         m_lvl1_field.add_value(value);
         // positive half
         if (m_calo_dict->get_label_value("DetZside", "positive_lvl1_side", value)) {
-            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'positive_lvl1_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name);
+            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'positive_lvl1_side' of field 'DetZside' in dictionary " << m_calo_dict->name());
             return 1;
         }
         m_lvl1_field.add_value(value);
@@ -852,13 +868,13 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         m_lar_dm_field.clear();
         // negative half
         if (m_calo_dict->get_label_value("DetZside", "negative_DMLar_side", value)) {
-            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'negative_DMLar_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name);
+            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'negative_DMLar_side' of field 'DetZside' in dictionary " << m_calo_dict->name());
             return 1;
         }
         m_lar_dm_field.add_value(value);
         // positive half
         if (m_calo_dict->get_label_value("DetZside", "positive_DMLar_side", value)) {
-            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'positive_DMLar_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name);
+            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'positive_DMLar_side' of field 'DetZside' in dictionary " << m_calo_dict->name());
             return 1;
         }
         m_lar_dm_field.add_value(value);
@@ -867,13 +883,13 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         m_tile_dm_field.clear();
         // negative half
         if (m_calo_dict->get_label_value("DetZside", "negative_DMTile_side", value)) {
-            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'negative_DMTile_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name);
+            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'negative_DMTile_side' of field 'DetZside' in dictionary " << m_calo_dict->name());
             return 1;
         }
         m_tile_dm_field.add_value(value);
         // positive half
         if (m_calo_dict->get_label_value("DetZside", "positive_DMTile_side", value)) {
-            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'positive_DMTile_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name);
+            ATH_MSG_ERROR("initLevelsFromDict - Could not get value for label 'positive_DMTile_side' of field 'DetZside' in dictionary " << m_calo_dict->name());
             return 1;
         }
         m_tile_dm_field.add_value(value);
@@ -881,7 +897,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         // Set lvl1 field for is_lvl1_online
         m_lvl1_onl_field.clear();
         if (m_calo_dict->get_label_value("DetZside", "no_side", value)) {
-            ATH_MSG_DEBUG("initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name);
+            ATH_MSG_DEBUG("initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary " << m_calo_dict->name());
         } else {
             m_lvl1_onl_field.add_value(value);
         }
@@ -892,10 +908,10 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
 
         field = top_dict->find_field("subdet");
         if (field) {
-            m_DET_INDEX = field->m_index;
+            m_DET_INDEX = field->index();
         } else {
             ATH_MSG_ERROR("initLevelsFromDict -  - unable to find 'subdet' field from dict "
-                          << top_dict->m_name);
+                          << top_dict->name());
             return 1;
         }
 
@@ -920,27 +936,27 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         }
         // Get name of next level
         std::string name{};
-        if (top_dict->m_name == "InnerDetector") {
+        if (top_dict->name() == "InnerDetector") {
             name = "part";
-        } else if (top_dict->m_name == "Calorimeter") {
+        } else if (top_dict->name() == "Calorimeter") {
             name = "DetZside";
-        } else if (top_dict->m_name == "LArCalorimeter") {
+        } else if (top_dict->name() == "LArCalorimeter") {
             name = "part";
-        } else if (top_dict->m_name == "MuonSpectrometer") {
+        } else if (top_dict->name() == "MuonSpectrometer") {
             name = "stationName";
-        } else if (top_dict->m_name == "TileCalorimeter") {
+        } else if (top_dict->name() == "TileCalorimeter") {
             name = "section";
-        } else if (top_dict->m_name == "ForwardDetectors") {
+        } else if (top_dict->name() == "ForwardDetectors") {
             name = "part";
         }
         // While we're here, save the index to the sub-detector level
         // ("part" for InDet)
         field = top_dict->find_field(name);
         if (field) {
-            m_SUBDET_INDEX = field->m_index;
+            m_SUBDET_INDEX = field->index();
         }
         else {
-            ATH_MSG_ERROR("initLevelsFromDict - unable to find field " << name << " from dict "<< top_dict->m_name);
+            ATH_MSG_ERROR("initLevelsFromDict - unable to find field " << name << " from dict "<< top_dict->name());
             return 1;
         }
     } else {
@@ -950,14 +966,13 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
 
     // Set the field implementations
 
-    const IdDictRegion *region = nullptr;
     size_type region_index = m_helper->pixel_region_index();
     if (m_indet_dict && AtlasDetectorIDHelper::UNDEFINED != region_index) {
 
-        region = m_indet_dict->m_regions[region_index];
+        const IdDictRegion& region = m_indet_dict->region(region_index);
 
         // Detector
-        m_det_impl = region->m_implementation[m_DET_INDEX];
+        m_det_impl = region.implementation(m_DET_INDEX);
 
         // Add on extra values to assure that one has a value per
         // bit. This is needed to avoid an overflow decoding error
@@ -981,43 +996,43 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         ATH_MSG_VERBOSE("set extra bits    "<< m_det_impl.show_to_string());
 
         // InDet part
-        m_indet_part_impl = region->m_implementation[m_SUBDET_INDEX];
+        m_indet_part_impl = region.implementation(m_SUBDET_INDEX);
     }
 
     // Calo side: LVL1, LAr & Tile DeadMat
     region_index = m_helper->lvl1_region_index();
     if (m_calo_dict && AtlasDetectorIDHelper::UNDEFINED != region_index) {
-        region = m_calo_dict->m_regions[region_index];
-        m_calo_side_impl = region->m_implementation[m_SUBDET_INDEX];
+        const IdDictRegion& region = m_calo_dict->region(region_index);
+        m_calo_side_impl = region.implementation(m_SUBDET_INDEX);
     }
 
     // LAr part
     region_index = m_helper->lar_em_region_index();
     if (m_lar_dict && AtlasDetectorIDHelper::UNDEFINED != region_index) {
-        region = m_lar_dict->m_regions[region_index];
-        m_lar_part_impl = region->m_implementation[m_SUBDET_INDEX];
+        const IdDictRegion& region = m_lar_dict->region(region_index);
+        m_lar_part_impl = region.implementation(m_SUBDET_INDEX);
     }
 
     // LAr part
     region_index = m_helper->lar_fcal_region_index();
     if (m_lar_dict && AtlasDetectorIDHelper::UNDEFINED != region_index &&
         m_LAR_FCAL_MODULE_INDEX != 999) {
-        region = m_lar_dict->m_regions[region_index];
-        m_lar_fcal_module_impl = region->m_implementation[m_LAR_FCAL_MODULE_INDEX];
+        const IdDictRegion& region = m_lar_dict->region(region_index);
+        m_lar_fcal_module_impl = region.implementation(m_LAR_FCAL_MODULE_INDEX);
     }
 
     // Muon station name
     region_index = m_helper->mdt_region_index();
     if (m_muon_dict && AtlasDetectorIDHelper::UNDEFINED != region_index) {
-        region = m_muon_dict->m_regions[region_index];
-        m_muon_station_name_impl = region->m_implementation[m_SUBDET_INDEX];
+        const IdDictRegion& region = m_muon_dict->region(region_index);
+        m_muon_station_name_impl = region.implementation(m_SUBDET_INDEX);
         // Muon MDT
-        m_muon_mdt_impl = region->m_implementation[m_MUON_SUBDET_INDEX];
+        m_muon_mdt_impl = region.implementation(m_MUON_SUBDET_INDEX);
         // Muon RPC
         region_index = m_helper->rpc_region_index();
         if (AtlasDetectorIDHelper::UNDEFINED != region_index) {
-            region = m_muon_dict->m_regions[region_index];
-            m_muon_rpc_impl = region->m_implementation[m_MUON_SUBDET_INDEX];
+            const IdDictRegion& rpc_region = m_muon_dict->region(region_index);
+            m_muon_rpc_impl = rpc_region.implementation(m_MUON_SUBDET_INDEX);
         }
     }
     return 0;

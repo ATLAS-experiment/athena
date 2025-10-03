@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef EnergyCMXData_ClassDEF_H
 #define EnergyCMXData_ClassDEF_H
 //Put here the CLASS_DEF macros for the STL containers you put in StoreGate
 
-#ifndef TRIGT1CALO_ENERGYCMXDATA_H
-#include "TrigT1CaloEvent/EnergyCMXData.h"
-#endif
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthContainers/DataVector.h"

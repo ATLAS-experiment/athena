@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_MonitoredGroup_h
@@ -13,7 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "AthenaMonitoringKernel/HistogramFiller.h"
 #include "AthenaMonitoringKernel/IMonitoredVariable.h"
 
 namespace Monitored {
@@ -83,7 +82,14 @@ namespace Monitored {
     
     ~Group() {
       if (m_autoFill) {
-        fill();
+        try {
+          fill();
+        }
+        catch (std::exception &) {
+          // fill can throw due to dereferencing a Gaudi handle
+          //or boost container exception
+          std::abort();
+        }
       }
     }
 

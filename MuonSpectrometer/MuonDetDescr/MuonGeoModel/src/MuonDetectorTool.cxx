@@ -146,7 +146,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
     
     if (sqliteReader) {
 
-      ATH_MSG_INFO("New DD Activated; Muon detector description input from SQLITE fie");
+      ATH_MSG_INFO("New DD Activated; Muon detector description input from SQLITE file");
 
       MuonDetectorFactoryLite theFactory(detStore().operator->(),sqliteReader);
       theFactory.setRDBAccess(accessSvc.get());

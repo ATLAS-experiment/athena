@@ -1,8 +1,9 @@
 namespace CP {
   template <typename HANDLE> template <typename OWNER>
   SysHandleArray<HANDLE>::SysHandleArray(
-      OWNER *owner, const std::vector<std::string> &values)
-    : asg::AsgMessagingForward(owner), m_decorNames(values)
+      const std::vector<std::string> &values, OWNER *owner)
+    : asg::AsgMessagingForward(owner), m_decorNames(values),
+     m_makeHandle([owner](const std::string &name) { return HANDLE(name, owner); })
   {
   }
 
@@ -12,7 +13,8 @@ namespace CP {
       const std::string &propertyName,
       const std::vector<std::string> &propertyValue,
       const std::string &propertyDescription)
-    : asg::AsgMessagingForward(owner), m_decorNames(propertyValue)
+    : asg::AsgMessagingForward(owner), m_decorNames(propertyValue),
+     m_makeHandle([owner](const std::string &name) { return HANDLE(name, owner); })
   {
     owner->declareProperty(propertyName, m_decorNames, propertyDescription);
   }
@@ -24,11 +26,16 @@ namespace CP {
     // partially initialized if there's a failure
     std::vector<HANDLE> handles;
     handles.reserve(m_decorNames.size());
+    if (!m_makeHandle)
+    {
+      ATH_MSG_ERROR("SysHandleArray: No handle maker function defined!");
+      return StatusCode::FAILURE;
+    }
     for (const std::string &decor : m_decorNames)
     {
       // NB: This will fail if the templated class doesn't have the right
       // constructor
-      handles.emplace_back(decor, this);
+      handles.emplace_back(m_makeHandle(decor));
       ATH_CHECK(handles.back().initialize(std::forward<Args>(args)...));
     }
     // If we get here then it all worked OK

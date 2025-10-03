@@ -27,8 +27,6 @@ namespace TrigConf {
 
    void toLower(std::string&);
 
-   void removeAllSpaces(std::string&);
-
    uint32_t bin2uint(const std::string& binary);
    
    std::string uint2bin(uint32_t uinteger, uint16_t width);

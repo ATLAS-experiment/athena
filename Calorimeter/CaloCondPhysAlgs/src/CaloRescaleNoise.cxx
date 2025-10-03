@@ -26,7 +26,6 @@ CaloRescaleNoise::CaloRescaleNoise(const std::string& name, ISvcLocator* pSvcLoc
   m_phi(0),
   m_layer(0),
   m_Gain(0),
-  m_noise(0),
   m_elecNoise(0),
   m_pileupNoise (0),
   m_elecNoiseRescaled(0),
@@ -51,11 +50,10 @@ StatusCode CaloRescaleNoise::initialize()
   ATH_CHECK( detStore()->retrieve( mgr ) );
   m_calo_id      = mgr->getCaloCell_ID();
 
-  ATH_CHECK( m_totalNoiseKey.initialize() );
   ATH_CHECK( m_elecNoiseKey.initialize() );
   ATH_CHECK( m_pileupNoiseKey.initialize() );
 
-  ATH_CHECK( m_scaleCorrKey.initialize() );
+  ATH_CHECK( m_scaleCorrKey.initialize(!m_absScaling) );
   ATH_CHECK( m_cablingKey.initialize());
   ATH_CHECK( m_onlineScaleCorrKey.initialize() );
   ATH_CHECK( m_caloMgrKey.initialize() );
@@ -69,7 +67,6 @@ StatusCode CaloRescaleNoise::initialize()
   m_tree->Branch("phi",&m_phi,"phi/F");
   m_tree->Branch("layer",&m_layer,"layer/I");
   m_tree->Branch("iGain",&m_Gain,"iGain/I");
-  m_tree->Branch("Noise",&m_noise,"Noise/F");
   m_tree->Branch("ElecNoise",&m_elecNoise,"ElecNoise/F");
   m_tree->Branch("PileupNoise",&m_pileupNoise,"PileupNoise/F");
   m_tree->Branch("ElecNoiseRescaled",&m_elecNoiseRescaled,"ElecNoiseRescaled/F");
@@ -98,9 +95,12 @@ StatusCode CaloRescaleNoise::stop()
 
   FILE* fp = std::fopen("calonoise.txt","w");
 
-  SG::ReadCondHandle<ILArHVScaleCorr> scaleCorr (m_scaleCorrKey, ctx);
+  const ILArHVScaleCorr *scaleCorr = nullptr;
+  if(!m_absScaling) {
+     SG::ReadCondHandle<ILArHVScaleCorr> scaleCorrHdl (m_scaleCorrKey, ctx);
+     scaleCorr = *scaleCorrHdl;
+  }
   SG::ReadCondHandle<ILArHVScaleCorr> onlineScaleCorr (m_onlineScaleCorrKey, ctx);
-  SG::ReadCondHandle<CaloNoise> totalNoise  (m_totalNoiseKey,  ctx);
   SG::ReadCondHandle<CaloNoise> elecNoise   (m_elecNoiseKey,   ctx);
   SG::ReadCondHandle<CaloNoise> pileupNoise (m_pileupNoiseKey, ctx);
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
@@ -165,7 +165,7 @@ StatusCode CaloRescaleNoise::stop()
        float hvonline=1.;
 
        if (iCool<48) {
-          hvcorr = scaleCorr->HVScaleCorr(hwid);
+          if(!m_absScaling) hvcorr = scaleCorr->HVScaleCorr(hwid);
           hvonline = onlineScaleCorr->HVScaleCorr(hwid);
        }
 
@@ -185,7 +185,6 @@ StatusCode CaloRescaleNoise::stop()
           }
           m_Gain = igain;
 
-          m_noise       = totalNoise->getNoise(id,gain);
           m_elecNoise   = elecNoise->getNoise(id,gain);
           m_pileupNoise = pileupNoise->getNoise(id,gain);
 

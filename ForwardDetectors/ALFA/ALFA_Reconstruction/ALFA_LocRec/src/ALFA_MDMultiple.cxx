@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_MDMultiple.h"
@@ -54,37 +54,20 @@ ALFA_MDMultiple::ALFA_MDMultiple(const ALFA_MDMultiple &obj) :
 	m_iRPot            = obj.m_iRPot;
 	m_iUVCut           = obj.m_iUVCut;
 
-	m_fRecXPos = nullptr;
-	m_fRecYPos = nullptr;
-	m_fOvU     = nullptr;
-	m_fOvV     = nullptr;
-	m_iNU      = nullptr;
-	m_iNV      = nullptr;
-	m_fRecXPos = new std::vector<Float_t>();
-	m_fRecYPos = new std::vector<Float_t>();
-	m_fOvU     = new std::vector<Float_t>();
-	m_fOvV     = new std::vector<Float_t>();
-	m_iNU      = new std::vector<Int_t>();
-	m_iNV      = new std::vector<Int_t>();
-
-	std::copy(obj.m_fRecXPos->begin(), obj.m_fRecXPos->end(), m_fRecXPos->begin());
-	std::copy(obj.m_fRecYPos->begin(), obj.m_fRecYPos->end(), m_fRecYPos->begin());
-	std::copy(obj.m_fOvU->begin(),     obj.m_fOvU->end(),     m_fOvU->begin());
-	std::copy(obj.m_fOvV->begin(),     obj.m_fOvV->end(),     m_fOvV->begin());
-	std::copy(obj.m_iNU->begin(),      obj.m_iNU->end(),      m_iNU->begin());
-	std::copy(obj.m_iNV->begin(),      obj.m_iNV->end(),      m_iNV->begin());
+	m_fRecXPos = new std::vector<Float_t>(*obj.m_fRecXPos);
+	m_fRecYPos = new std::vector<Float_t>(*obj.m_fRecYPos);
+	m_fOvU     = new std::vector<Float_t>(*obj.m_fOvU);
+	m_fOvV     = new std::vector<Float_t>(*obj.m_fOvV);
+	m_iNU      = new std::vector<Int_t>(*obj.m_iNU);
+	m_iNV      = new std::vector<Int_t>(*obj.m_iNV);
 
 	for (int iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
 	{
 		m_iFibSel[iLayer] = new std::vector<Int_t>(*obj.m_iFibSel[iLayer]);
 	}
 
-	m_iTrackMatch[0] = nullptr;
-	m_iTrackMatch[1] = nullptr;
-	m_iTrackMatch[0] = new std::vector<Int_t>();
-	m_iTrackMatch[1] = new std::vector<Int_t>();
-	std::copy(obj.m_iTrackMatch[0]->begin(), obj.m_iTrackMatch[0]->end(), m_iTrackMatch[0]->begin());
-	std::copy(obj.m_iTrackMatch[1]->begin(), obj.m_iTrackMatch[1]->end(), m_iTrackMatch[1]->begin());
+	m_iTrackMatch[0] = new std::vector<Int_t>(*obj.m_iTrackMatch[0]);
+	m_iTrackMatch[1] = new std::vector<Int_t>(*obj.m_iTrackMatch[1]);
 }
 
 ALFA_MDMultiple& ALFA_MDMultiple::operator=(const ALFA_MDMultiple &obj)

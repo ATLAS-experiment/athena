@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/EmTauROIRetriever.h"
@@ -126,16 +126,17 @@ namespace JiveXML {
    }//end if readCPM
 
     DataMap myDataMap;
+    const auto nPhi = phi.size();
     myDataMap["energy"] = energy;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["energy"] = energy;
-    myDataMap["energyEM"] = energyEM;
-    myDataMap["energyTAU"] = energyTAU;
-    myDataMap["roiWord"] = roiWord;
-    myDataMap["thrPattern"] = thrPattern;
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["energy"] = std::move(energy);
+    myDataMap["energyEM"] = std::move(energyEM);
+    myDataMap["energyTAU"] = std::move(energyTAU);
+    myDataMap["roiWord"] = std::move(roiWord);
+    myDataMap["thrPattern"] = std::move(thrPattern);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size()
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi
 					    << " from: " << m_sgKey << endmsg;
 
     //forward data to formating tool

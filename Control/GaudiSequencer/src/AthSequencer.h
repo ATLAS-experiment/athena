@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthSequencer.h
@@ -176,13 +176,16 @@ private:
    **************************/
   
   Gaudi::Property<std::vector<std::string>> m_names{this, "Members",{},
-    "Algorithm names (of the form '<cppType>/<instanceName>')","SubAlgorithm"};
+    "Algorithm names (of the form '<cppType>/<instanceName>')","std::vector<Algorithm>"};
 
   Gaudi::Property<bool> m_modeOR{this, "ModeOR", false,
     "Use OR logic instead of AND"};
 
   Gaudi::Property<bool> m_ignoreFilter{this, "IgnoreFilterPassed", false,
     "Always continue sequence ignoring filterPassed of member algorithms"};
+
+  Gaudi::Property<bool> m_invert{ this, "Invert", false,
+    "Invert the logic result of the sequencer"};
 
   Gaudi::Property<bool> m_stopOverride{this, "StopOverride", false,
     "Continue even if algorithm filter fails"};

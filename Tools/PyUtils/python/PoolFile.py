@@ -11,7 +11,6 @@ __author__  = "Sebastien Binet <binet@cern.ch>"
 __all__ = [
     'PoolFileCatalog',
     'PoolOpts',
-    'extract_items',
     'isRNTuple',
     'PoolRecord',
     'PoolFile',
@@ -451,37 +450,6 @@ def make_pool_record (branch, dirType):
                       dirType=dirType,
                       typeName=typeName)
 
-def extract_items(pool_file, verbose=True, items_type='eventdata'):
-    """Helper function to read a POOL file and extract the item-list from the
-    DataHeader content.
-    @params
-      `pool_file`  the name of the pool file to inspect
-      `verbose`    self-explanatory
-      `items_type` what kind of items one is interested in
-                   allowed values: 'eventdata' 'metadata'
-    Note: this function is actually executed in a forked sub-process
-          if `fork` is True
-    """
-    _allowed_values = ('eventdata',
-                       'metadata',)
-    if items_type not in _allowed_values:
-        err = "".join([
-            "invalid argument for 'items_type'. ",
-            "got: [%s] " % items_type,
-            "(allowed values: %r)" % _allowed_values
-            ])
-        raise ValueError(err)
-
-    key = '%s_items' % items_type
-    f_root = _root_open(pool_file)
-    import PyUtils.FilePeekerTool as fpt
-    fp = fpt.FilePeekerTool(f_root)
-    items = fp.getPeekedData(key)
-
-    if items is None:
-        items = []
-    return items
-
 class PoolRecord(object):
     """
     """
@@ -620,7 +588,11 @@ class PoolFile(object):
                 if isinstance(obj, self.ROOT.TTree):
                     nEntries = obj.GetEntries()
                 elif isRNTuple(obj):
-                    nEntries = self.ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                    try:
+                        nEntries = self.ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                    except AttributeError:
+                        # ROOT 6.36 and later
+                        nEntries = self.ROOT.RNTupleReader.Open(obj).GetNEntries()
                 else:
                     raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
                 break
@@ -637,7 +609,11 @@ class PoolFile(object):
                 nEntries = obj.GetEntries()
                 dirType = "T"
             elif isRNTuple(obj):
-                reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                try:
+                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                except AttributeError:
+                    # ROOT 6.36 and later
+                    reader = self.ROOT.RNTupleReader.Open(obj)
                 containerName = reader.GetDescriptor().GetName()
                 nEntries = reader.GetNEntries()
                 dirType = "N"
@@ -662,7 +638,10 @@ class PoolFile(object):
             if isinstance(obj, self.ROOT.TTree):
                 name = obj.GetName()
             elif isRNTuple(obj):
-                inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                try:
+                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                except AttributeError:
+                    inspector = self.ROOT.RNTupleInspector.Create(obj)
                 name = inspector.GetDescriptor().GetName()
 
             if PoolOpts.isDataHeader(name):

@@ -39,7 +39,7 @@ namespace MuonValR4{
              * */
             void dumpAllHitsInChamber(const Identifier& chamberId);
             /** @brief Activates the seeded dump of the branch. Only hits that are parsed either directly or
-             *         which are on the whitelist from the dumpAllHitsInChamber are added to the output
+             *         which are included by the dumpAllHitsInChamber are added to the output
              */
             void enableSeededDump(); 
         private:

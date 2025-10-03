@@ -1,4 +1,6 @@
-//********************************
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 //Produce ps files for EM cluster validation
 // from work of 
 //author: A. Kaczmarska
@@ -15,7 +17,6 @@ void setStyle(){
   gStyle->SetMarkerStyle(8);
   gStyle->SetStatW(0.2);
   gStyle->SetStatH(0.2);
-  // gStyle->SetStatFontSize(0.07);
   gStyle->SetLabelSize(0.06);
   gStyle->SetOptStat(0000);
   gStyle->SetCanvasBorderMode(0);
@@ -24,7 +25,6 @@ void setStyle(){
   gStyle->SetCanvasColor(0);
   gStyle->SetTitleColor(0);
   gStyle->SetStatColor(0);
-  // gStyle->SetTitleFontSize(0.08);
   gStyle->SetMarkerSize(1.);
 }
 
@@ -80,11 +80,9 @@ void histsToPostScript(char* newFile, char* refFile, char* psFile){
   int count = nWin;
   TH1* nhist;
   TH1* rhist;
-  // cout<<"iterating..."<<endl;
   TObjArray* nHistsForAPage = new TObjArray(0);
   TObjArray* rHistsForAPage = new TObjArray(0);
   while( (nhist = (TH1*)nIter.Next())){
-    // cout<<"found an  nhist"<<endl;
     rhist = (TH1*)rIter.Next();
 
     
@@ -92,7 +90,6 @@ void histsToPostScript(char* newFile, char* refFile, char* psFile){
     if( count == nWin){
       c1->Clear();
       c1->Divide(nx,ny);
-      // ps->NewPage();
       nHistsForAPage->Clear();
       rHistsForAPage->Clear();
     }
@@ -101,7 +98,6 @@ void histsToPostScript(char* newFile, char* refFile, char* psFile){
     nHistsForAPage->Add(nhist);
     rHistsForAPage->Add(rhist);
     --count;
-    // cout<<"count "<<count<<endl;
     
     if( count == 0){
       displayHists(c1, nHistsForAPage, rHistsForAPage);
@@ -122,56 +118,42 @@ void histsToPostScript(char* newFile, char* refFile, char* psFile){
 // display hists on a canvas
 void displayHists(TCanvas* c1, TObjArray* newHists, TObjArray* refHists){
 
-  // cout<<"displayHists"<<endl;
   TIter nIter(newHists);
   TIter rIter(refHists);
   int panel = 0;
   TH1* nhist;
   TH1* rhist;
-  TH2F* d1;
-  TH2F* d2;
-  while( (nhist = (TH1*)nIter.Next())){
-    rhist = (TH1*)rIter.Next();
-    //cout<<"Print a hist"<<endl;
+  while( (nhist = static_cast<TH1*>(nIter.Next()))){
+    rhist = static_cast<TH1*>(rIter.Next());
 
     ++panel;
     c1->cd(panel);
 
-//    try{
     if (nhist->GetDimension()<2) {
       if(nhist){
-	//cout<<"drawing 1d new"<<endl;
         nhist->SetMarkerStyle();
 	nhist->SetLineColor(1);
 	nhist->Draw();
       }
 
       if(rhist){
-	//cout<<"drawing 1d ref"<<endl;
         rhist->SetMarkerStyle();
-	//rhist->Scale(0.9); //debug..... remove for production!
 	rhist->SetLineColor(2);
 	rhist->Draw("same");
       }
-//    }catch(){
     }else{
       if(nhist){
-	//cout<<"drawing 2d"<<endl;
-	d1 = (TH2F*)nhist;
-        d1->SetMarkerStyle(29);
-        d1->SetMarkerSize(.5);
-        d1->SetMarkerColor(1);        
-	d1->Draw();
+        nhist->SetMarkerStyle(29);
+        nhist->SetMarkerSize(.5);
+        nhist->SetMarkerColor(1);
+	nhist->Draw();
       }
       
       if(rhist){
-        //cout<<"drawing 2d - ref "<<endl;
-	d2 = (TH2F*)rhist;
-	//d2->Scale(0.9);
-        d2->SetMarkerStyle(25);
-        d2->SetMarkerSize(.5);        
-        d2->SetMarkerColor(2);        
-	d2->Draw("same");
+        rhist->SetMarkerStyle(25);
+        rhist->SetMarkerSize(.5);
+        rhist->SetMarkerColor(2);
+	rhist->Draw("same");
       }
     }
   }

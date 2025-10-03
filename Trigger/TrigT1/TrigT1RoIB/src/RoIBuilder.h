@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1ROIB_ROIBUILDER_H
@@ -19,7 +19,7 @@
 #include "TrigT1Interfaces/SlinkWord.h"
 #include "TrigT1Result/RoIBResult.h"
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 //! namespace for RoIBuilder related classes
 namespace ROIB {
@@ -34,13 +34,13 @@ namespace ROIB {
     * @author Attila Kraznahorkay Jr. <Attila.Krasznahorkay@cern.ch>
     * @author Wolfgang Ehrenfeld <Wolfgang.Ehrenfeld@desy.de>
     */
-   class RoIBuilder : public AthAlgorithm {
+   class RoIBuilder : public AthReentrantAlgorithm {
 
    public:
-      RoIBuilder( const std::string& name, ISvcLocator* pSvcLocator ) ;
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
       virtual StatusCode initialize() override;
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) const override;
 
    private:
      Gaudi::Property<bool> m_doCalo{ this, "DoCalo", true, "Use inputs from Calo system" }; 

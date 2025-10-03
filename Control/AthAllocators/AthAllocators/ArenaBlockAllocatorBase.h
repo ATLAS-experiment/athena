@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/ArenaBlockAllocatorBase.h
@@ -145,6 +145,14 @@ protected:
    *        free list.  Update statistics appropriately.
    */
   ArenaBlock* getBlock();
+
+
+  /**
+   * @brief Free all allocated elements and release memory back to the system.
+   *
+   * Assumes that the blocks are already unprotected.
+   */
+  void eraseUnprotected();
 
   /// The parameters for this allocator.
   Params m_params;

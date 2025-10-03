@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RadLenNtupleTool.h"
@@ -15,7 +15,6 @@ namespace G4UA
                                      const IInterface* parent)
     : UserActionToolBase<RadLenNtuple>(type, name, parent)
   {
-    declareProperty("McEventCollName", m_config.mcEventCollName);
   }
 
   //---------------------------------------------------------------------------
@@ -25,6 +24,7 @@ namespace G4UA
   {
     if(msgLvl(MSG::VERBOSE))    { m_config.verboseLevel = 10; }
     else if(msgLvl(MSG::DEBUG)) { m_config.verboseLevel = 5;  }
+    m_config.mcEventCollName = m_mcEventCollName;
     return StatusCode::SUCCESS;
   }
 

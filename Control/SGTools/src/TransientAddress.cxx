@@ -119,6 +119,8 @@ TransientAddress::~TransientAddress()
 }
 
 
+// cppcheck-suppress operatorEqVarError; false positive ---
+//    m_address is copied by setAddress.
 TransientAddress& TransientAddress::operator= (const TransientAddress& other)
 {
   if (this != &other) {

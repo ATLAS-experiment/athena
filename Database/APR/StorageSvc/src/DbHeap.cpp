@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StorageSvc/DbHeap.h"
-#include "StorageSvc/DbObject.h"
+#include "StorageSvc/DbObjectHandle.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbObjectGuard.h"
 
@@ -78,7 +78,7 @@ DbObject* DbHeap::allocate( size_t                    size,
   char* ptr = (char*)::operator new(size+GUARDSIZE);
   DbObjectGuard* g = ::new(ptr) DbObjectGuard(0, size+GUARDSIZE);
   ptr += GUARDSIZE;
-  DbObject* pObj = (DbObject*)ptr;
+  DbObject* pObj = reinterpret_cast<DbObject*>(ptr);
   if ( lnkH ) g->oid()       = *lnkH;
   if ( cntH ) g->container() = *cntH;
   if ( objH ) objH->_setObject(pObj);

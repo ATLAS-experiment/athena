@@ -365,8 +365,8 @@ InDet::PixelClusterOnTrackTool::correctDefault
       }else {
         // collision endcap data
         if (m_positionStrategy == 1) {
-          double deltax = offlineCalibData->getPixelChargeInterpolationParameters()->getDeltaXendcap();
-          double deltay = offlineCalibData->getPixelChargeInterpolationParameters()->getDeltaYendcap();
+          double deltax = PixelCalib::PixelChargeInterpolationParameters::getDeltaXendcap();
+          double deltay = PixelCalib::PixelChargeInterpolationParameters::getDeltaYendcap();
           localphi += deltax * (omegaphi - 0.5);
           localeta += deltay * (omegaeta - 0.5);
         }

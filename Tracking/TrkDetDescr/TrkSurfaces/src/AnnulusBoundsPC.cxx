@@ -124,7 +124,8 @@ Trk::AnnulusBoundsPC::inside(const Amg::Vector2D& locpo, double tol1, double tol
   // locpo is PC in STRIP SYSTEM
   // need to perform internal rotation induced by m_phiAvg
   Amg::Vector2D locpo_rotated = m_rotationStripPC * locpo;
-  double tolR = tol1, tolPhi = tol2;
+  double tolR = tol1;
+  double tolPhi = tol2;
   double phiLoc = locpo_rotated[Trk::locPhi];
   double rLoc = locpo_rotated[Trk::locR];
 

@@ -4,14 +4,13 @@
 atlas_subdir( SGComps )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_component( SGComps
    src/*.h src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthContainersInterfaces AthLinks AthenaBaseComps AthenaKernel CxxUtils GaudiKernel SGTools StoreGateLib )
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthContainersInterfaces AthLinks AthenaBaseComps AthenaKernel CxxUtils GaudiKernel SGTools StoreGateLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 

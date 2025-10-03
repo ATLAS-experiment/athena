@@ -1,8 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-__doc__ = """
-          Instantiate the electron, photon and muon isolation
-          """
+""" Instantiate the electron, photon and muon isolation
+"""
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator

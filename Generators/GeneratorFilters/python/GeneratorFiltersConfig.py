@@ -64,6 +64,27 @@ def CreateTruthJetsCfg(flags, jetR, mods=""):
     return cfg
 
 
+def QCDTruthJetFilterCfg(flags, jetR, mods="", **kwargs):
+    """Default truth jet filter setup
+    """
+    cfg = ComponentAccumulator()
+    cfg.merge(CreateTruthJetsCfg(flags, jetR, mods)) # Algs in prefiltSeq
+    kwargs.setdefault("TruthJetContainer", 'AntiKt{0}Truth{1}Jets'.format(int(jetR*10),mods))
+    kwargs.setdefault("MaxPt", flags.Beam.Energy)
+    # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
+    cfg.addEventAlgo(CompFactory.QCDTruthJetFilter(name="QCDTruthJetFilter", **kwargs)) ## TODO add to filtSeq
+    return cfg
+
+
+def JZSliceCfg(flags,x, jetR, mods="", **kwargs):
+    # Min and max momenta for the slices
+    minDict = {0:-1,1:20,2:60,3:160,4:400,5:800,6:1300,7:1800,8:2500,9:3200,10:3900,11:4600,12:5300}
+    maxDict = {0:20,1:60,2:160,3:400,4:800,5:1300,6:1800,7:2500,8:3200,9:3900,10:4600,11:5300,12:7000}
+    kwargs.setdefault("MinPt", minDict[x]*GeV)
+    kwargs.setdefault("MaxPt", maxDict[x]*GeV)
+    return QCDTruthJetFilterCfg(flags, jetR, mods="", **kwargs)
+
+
 def LeptonPairFilterExampleCfg(flags, name='SS3LFilter', **kwargs):
     """Example configuring LeptonPairFilter to accept SS lepton pairs with
     massive parents, as used in

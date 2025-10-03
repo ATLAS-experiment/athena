@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HECSDTool.h"
-
 #include "LArG4Code/SDWrapper.h"
-
 
 namespace LArG4
 {
@@ -16,13 +14,7 @@ namespace LArG4
   HECSDTool::HECSDTool(const std::string& type, const std::string& name,
                        const IInterface* parent)
     : SimpleSDTool(type, name, parent)
-    , m_heccalc("HECWheelCalculator", name)
   {
-    //declareProperty("SliceVolumes", m_sliceVolumes);
-    //declareProperty("LocalVolumes", m_localVolumes);
-    declareProperty("WheelVolumes", m_wheelVolumes);
-
-    declareProperty("HECWheelCalculator", m_heccalc);
   }
 
   //---------------------------------------------------------------------------
@@ -46,13 +38,6 @@ namespace LArG4
     auto *sdWrapper = new SimpleSDWrapper("LArHECSDWrapper", m_outputCollectionNames[0]);
 
     // Add the SDs
-    //sdWrapper->addSD( makeOneSD("LAr::HEC::Module::Depth::Slice",
-    //                            LArHECCalculator::GetCalculator(),
-    //                            m_sliceVolumes) );
-    //sdWrapper->addSD( makeOneSD("LAr::HEC::Module::Depth::Slice::Local",
-    //                            LArHECLocalCalculator::GetCalculator(),
-    //                            m_localVolumes) );
-
     sdWrapper->addSD( makeOneSD("LAr::HEC::Module::Depth::Slice::Wheel", &*m_heccalc, m_wheelVolumes) );
 
     return sdWrapper;
