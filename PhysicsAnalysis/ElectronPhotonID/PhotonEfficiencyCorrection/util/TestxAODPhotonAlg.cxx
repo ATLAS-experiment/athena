@@ -113,7 +113,7 @@ int main( int argc, char* argv[] ) {
    // If the Pileup reweighting tool is not initialized, one can use next properties:
    ANA_CHECK(photonSF_ID.setProperty("UseRandomRunNumber",false));
    ANA_CHECK(photonSF_ID.setProperty("DefaultRandomRunNumber",428648)); // first runnumber of physics in run-3
-   ANA_CHECK(photonSF_ID.setProperty("CorrelationModel","FULL")); 
+   ANA_CHECK(photonSF_ID.setProperty("CorrelationModel","FULL")); //FULL for the eigenvector decomposition one, TOTAL for one uncertainty 
    
 
    ANA_CHECK(photonSF_Iso.setProperty("UseRandomRunNumber",false));

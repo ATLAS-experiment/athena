@@ -95,7 +95,7 @@ AsgPhotonEfficiencyCorrectionTool::AsgPhotonEfficiencyCorrectionTool( const std:
   declareProperty("CorrelationModel",
                   m_correlation_model_name = "TOTAL",
                   "Uncertainty correlation model. At the moment TOTAL, FULL,"
-		  "default is FULL");
+		  "default is TOTAL");
 										
 
 }
