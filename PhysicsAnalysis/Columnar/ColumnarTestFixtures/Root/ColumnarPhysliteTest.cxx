@@ -1708,7 +1708,7 @@ namespace columnar
     }
   }
 
-  void ColumnarPhysLiteTest :: doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, std::function<void(XAODArgs&)> callXAOD, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName)
+  void ColumnarPhysLiteTest :: doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, TestUtils::IXAODToolCaller& xAODToolCaller, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName)
   {
     using namespace asg::msgUserCode;
 
@@ -1792,7 +1792,11 @@ namespace columnar
       Benchmark benchmarkPrepClear (name + " prep clear");
 #endif
       Benchmark benchmarkCall (name + " call");
+      Benchmark benchmarkCallCopyRecord (name + " call copy-record");
+      Benchmark benchmarkCallRetrieve (name + " call retrieve");
       Benchmark benchmarkPrep (name + " prep");
+      Benchmark benchmarkPrepCopyRecord (name + " prep copy-record");
+      Benchmark benchmarkPrepRetrieve (name + " prep retrieve");
       Benchmark benchmarkGetEntry (name + " getEntry");
 
       const auto numberOfEvents = event.getEntries();
@@ -1820,22 +1824,30 @@ namespace columnar
         benchmarkGetEntry.startTimer ();
         event.getEntry (entry % numberOfEvents);
         benchmarkGetEntry.stopTimer ();
-        XAODArgs args;
-        args.inputContainer = container;
-        args.outputContainer = container + "Copy1";
-        args.isPrepCall = true;
+        benchmarkPrepRetrieve.startTimer ();
+        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        benchmarkPrepRetrieve.stopTimer ();
+        benchmarkPrepCopyRecord.startTimer ();
+        static const std::string prepPostfix = "Prep";
+        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), prepPostfix));
+        benchmarkPrepCopyRecord.stopTimer ();
         benchmarkPrep.startTimer ();
-        callXAOD (args);
+        ASSERT_SUCCESS (xAODToolCaller.call ());
         benchmarkPrep.stopTimer ();
-        args.outputContainer = container + "Copy2";
-        args.isPrepCall = false;
 #ifdef XAOD_STANDALONE
         benchmarkPrepClear.startTimer ();
         store.clear ();
         benchmarkPrepClear.stopTimer ();
 #endif
+        benchmarkCallRetrieve.startTimer ();
+        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        benchmarkCallRetrieve.stopTimer ();
+        benchmarkCallCopyRecord.startTimer ();
+        static const std::string callPostfix = "Call";
+        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), callPostfix));
+        benchmarkCallCopyRecord.stopTimer ();
         benchmarkCall.startTimer ();
-        callXAOD (args);
+        ASSERT_SUCCESS (xAODToolCaller.call ());
         benchmarkCall.stopTimer ();
 #ifdef XAOD_STANDALONE
         benchmarkCallClear.startTimer ();

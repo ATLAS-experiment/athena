@@ -29,6 +29,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
+using columnar::TestUtils::IXAODToolCaller;
 
 TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
 {
@@ -89,27 +90,42 @@ TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
 
 
 
-void callXAOD (const AsgPhotonEfficiencyCorrectionTool& tool, bool isPrepCall, const std::string& name) {
-  using namespace asg::msgUserCode;
-  if (isPrepCall)
+class XAODTestToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+{
+public:
+  XAODTestToolCaller (const AsgPhotonEfficiencyCorrectionTool& tool, const std::string& name)
+    : AsgMessaging ("XAODTestToolCaller"), m_tool (tool), m_name (name)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
-    const xAOD::PhotonContainer *photons = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (photons, name));
-    auto [photonsCopy, auxCopy] = xAOD::shallowCopyContainer (*photons);
-    const xAOD::EventInfo *eventInfo = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (eventInfo, "EventInfo"));
-    tool.callSingleEvent (*photonsCopy, *eventInfo);
-    delete photonsCopy;
-    delete auxCopy;
-  }else
-  {
-    const xAOD::PhotonContainer *photons = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (photons, name));
-    const xAOD::EventInfo *eventInfo = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (eventInfo, "EventInfo"));
-    tool.callSingleEvent (*photons, *eventInfo);
+    ANA_CHECK (evtStore.retrieve (m_photons, m_name));
+    ANA_CHECK (evtStore.retrieve (m_eventInfo, "EventInfo"));
+    return StatusCode::SUCCESS;
   }
-}
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    auto [photonsCopy, photonsAuxCopy] = xAOD::shallowCopyContainer (*m_photons);
+    m_photons = photonsCopy;
+    ANA_CHECK (evtStore.record (photonsCopy, m_name + postfix));
+    ANA_CHECK (evtStore.record (photonsAuxCopy, m_name + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_photons, *m_eventInfo);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const AsgPhotonEfficiencyCorrectionTool& m_tool;
+  std::string m_name;
+
+  const xAOD::PhotonContainer *m_photons = nullptr;
+  const xAOD::EventInfo *m_eventInfo = nullptr;
+};
 
 
 
@@ -124,7 +140,9 @@ TEST_F (ColumnarPhysLiteTest, AsgPhotonEfficiencyCorrectionTool)
 
   ASSERT_SUCCESS (tool->initialize ());
 
-  doCall (*tool, "AsgPhotonEfficiencyCorrectionTool", "AnalysisPhotons", [&] (auto& args) {callXAOD (*tool, args.isPrepCall, args.inputContainer);}, {{"Photons", "AnalysisPhotons"}});
+  XAODTestToolCaller callXAOD (*tool, "AnalysisPhotons");
+
+  doCall (*tool, "AsgPhotonEfficiencyCorrectionTool", "AnalysisPhotons", callXAOD, {{"Photons", "AnalysisPhotons"}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

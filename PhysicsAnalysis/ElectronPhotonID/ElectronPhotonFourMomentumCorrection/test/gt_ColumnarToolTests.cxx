@@ -29,6 +29,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
+using columnar::TestUtils::IXAODToolCaller;
 
 TEST_F (ColumnarMemoryTest, EgammaCalibrationAndSmearingTool)
 {
@@ -93,17 +94,43 @@ TEST_F (ColumnarMemoryTest, EgammaCalibrationAndSmearingTool)
   columnMap.checkExpectations ();
 }
 
-void callXAOD (const CP::EgammaCalibrationAndSmearingTool& tool, const std::string& name, const std::string& outputName) {
-  using namespace asg::msgUserCode;
-  const xAOD::ElectronContainer *egammas = nullptr;
-  ANA_CHECK_THROW (tool.evtStore()->retrieve (egammas, name));
-  auto [egammasCopy, auxCopy] = xAOD::shallowCopyContainer (*egammas);
-  const xAOD::EventInfo *eventInfo = nullptr;
-  ANA_CHECK_THROW (tool.evtStore()->retrieve (eventInfo, "EventInfo"));
-  tool.callSingleEvent (*egammasCopy, *eventInfo);
-  ANA_CHECK_THROW (tool.evtStore()->record (egammasCopy, outputName));
-  ANA_CHECK_THROW (tool.evtStore()->record (auxCopy, outputName + "Aux."));
-}
+class XAODEgammaCalibrationAndSmearingToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+{
+public:
+  XAODEgammaCalibrationAndSmearingToolCaller (const CP::EgammaCalibrationAndSmearingTool& tool, const std::string& name)
+    : AsgMessaging ("XAODEgammaCalibrationAndSmearingToolCaller"), m_tool (tool), m_name (name)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
+  {
+    ANA_CHECK (evtStore.retrieve (m_egammas, m_name));
+    ANA_CHECK (evtStore.retrieve (m_eventInfo, "EventInfo"));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    auto [egammasCopy, egammasAuxCopy] = xAOD::shallowCopyContainer (*m_egammas);
+    m_egammasCopy = egammasCopy;
+    ANA_CHECK (evtStore.record (egammasCopy, m_name + postfix));
+    ANA_CHECK (evtStore.record (egammasAuxCopy, m_name + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_egammasCopy, *m_eventInfo);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const CP::EgammaCalibrationAndSmearingTool& m_tool;
+  std::string m_name;
+
+  const xAOD::ElectronContainer *m_egammas = nullptr;
+  xAOD::ElectronContainer *m_egammasCopy = nullptr;
+  const xAOD::EventInfo *m_eventInfo = nullptr;
+};
 
 TEST_F (ColumnarPhysLiteTest, EgammaCalibrationAndSmearingTool)
 {
@@ -116,7 +143,9 @@ TEST_F (ColumnarPhysLiteTest, EgammaCalibrationAndSmearingTool)
   ASSERT_SUCCESS (tool->setProperty ("onlyElectrons", 1));
   ASSERT_SUCCESS (tool->initialize ());
 
-  doCall (*tool, "EgammaCalibrationAndSmearingTool", "AnalysisElectrons", [&] (auto& args) {callXAOD (*tool, args.inputContainer, args.outputContainer);}, {{"EGamma", "AnalysisElectrons"}});
+  XAODEgammaCalibrationAndSmearingToolCaller callXAOD (*tool, "AnalysisElectrons");
+
+  doCall (*tool, "EgammaCalibrationAndSmearingTool", "AnalysisElectrons", callXAOD, {{"EGamma", "AnalysisElectrons"}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN
