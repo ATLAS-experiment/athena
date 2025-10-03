@@ -34,12 +34,13 @@
 #include <TImageDump.h>
 #include <TFrame.h>
 
-#include <boost/algorithm/string/case_conv.hpp>
 #include <charconv>
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <ranges>
 #include <tuple> //for std::ignore
 
 #include "DataQualityInterfaces/HanUtils.h"
@@ -1245,11 +1246,9 @@ namespace dqutils
     std::string drawopt = "";
     while (found != std::string::npos) {
       std::size_t found1 = display.find_first_of(',', found + 1);
-      if (found1 != std::string::npos) {
-        drawopt += boost::algorithm::to_lower_copy(display.substr(found + 5, found1 - found - 5));
-      } else {
-        drawopt += boost::algorithm::to_lower_copy(display.substr(found + 5, display.size()));
-      }
+      auto temp = display.substr(found + 5, found1 != std::string::npos ? found1 - found - 5 : display.size());
+      std::ranges::transform(temp, temp.begin(), [](unsigned char c) { return std::tolower(c); });
+      drawopt += temp;
       found = display.find("Draw=", found + 1);
     }
     // Look for DrawRef Options
@@ -1257,11 +1256,9 @@ namespace dqutils
     std::string drawrefopt = "";
     while (found != std::string::npos) {
       std::size_t found1 = display.find_first_of(',', found + 1);
-      if (found1 != std::string::npos) {
-        drawrefopt += boost::algorithm::to_lower_copy(display.substr(found + 8, found1 - found - 8));
-      } else {
-        drawrefopt += boost::algorithm::to_lower_copy(display.substr(found + 8, display.size()));
-      }
+      auto temp = display.substr(found + 8, found1 != std::string::npos ? found1 - found - 8 : display.size());
+      std::ranges::transform(temp, temp.begin(), [](unsigned char c) { return std::tolower(c); });
+      drawrefopt += temp;
       found = display.find("DrawRef=", found + 1);
     }
     if (drawrefopt == "") {
@@ -1272,11 +1269,9 @@ namespace dqutils
     std::string drawrefopt2D = "";
     while (found != std::string::npos) {
       std::size_t found1 = display.find_first_of(',', found + 1);
-      if (found1 != std::string::npos) {
-        drawrefopt2D += boost::algorithm::to_lower_copy(display.substr(found + 10, found1 - found - 10));
-      } else {
-        drawrefopt2D += boost::algorithm::to_lower_copy(display.substr(found + 10, display.size()));
-      }
+      auto temp = display.substr(found + 10, found1 != std::string::npos ? found1 - found - 10 : display.size());
+      std::ranges::transform(temp, temp.begin(), [](unsigned char c) { return std::tolower(c); });
+      drawrefopt2D += temp;
       found = display.find("DrawRef2D=", found + 1);
     }
 
@@ -2006,11 +2001,9 @@ namespace dqutils
     std::string drawopt = "";
     while (found != std::string::npos) {
       std::size_t found1 = display.find_first_of(',', found + 1);
-      if (found1 != std::string::npos) {
-        drawopt += boost::algorithm::to_lower_copy(display.substr(found + 5, found1 - found - 5));
-      } else {
-        drawopt += boost::algorithm::to_lower_copy(display.substr(found + 5, display.size()));
-      }
+      auto temp = display.substr(found + 5, found1 != std::string::npos ? found1 - found - 5 : display.size() );
+      std::ranges::transform(temp, temp.begin(), [](unsigned char c) { return std::tolower(c); });
+      drawopt += temp;
       found = display.find("Draw", found + 1);
     }
 
