@@ -15,7 +15,6 @@ def CaloComputeNoiseCfg(flagsIn,mu=60,nsamp=4,dt=25,output='cellnoise_data.root'
     #Clone flags-container and modify it, since this is not a standard reco job
     flags=flagsIn.clone()
     flags.Calo.Noise.fixedLumiForNoise=mu
-    flags.LAr.doHVCorr = False #Avoid double-rescaling
     flags.LAr.ROD.NumberOfCollisions = mu # for OFC computation
     flags.LAr.ROD.nSamples = nsamp # number of samples to use
     flags.lock()
@@ -79,6 +78,8 @@ def CaloComputeNoiseCfg(flagsIn,mu=60,nsamp=4,dt=25,output='cellnoise_data.root'
     
     result.addEventAlgo(CompFactory.CaloRescaleNoise(absScaling=True,
                                          ElecNoiseKey="elecNoise",PileupNoiseKey="pileupNoise"))
+
+    result.getCondAlgo("LArADC2MeVCondAlg").LArHVScaleCorrKey = "" #Avoid double-rescaling
 
     import os
     if os.path.exists(output):
