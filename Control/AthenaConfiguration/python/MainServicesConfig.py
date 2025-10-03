@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import INFO
@@ -61,7 +61,7 @@ def OutputUsageIgnoreCfg(flags, algorithm):
 
 def AthenaEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
-    elmgr = CompFactory.AthenaEventLoopMgr()
+    elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
         elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge( EvtIdModifierSvcCfg(flags) ).name
@@ -89,7 +89,8 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     elmgr = CompFactory.AthenaHiveEventLoopMgr(
         WhiteboardSvc = "EventDataSvc",
-        SchedulerSvc = scheduler.getName())
+        SchedulerSvc = scheduler.getName(),
+        EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
@@ -107,7 +108,7 @@ def AthenaMpEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     if flags.Common.isOverlay:
         if not flags.Overlay.DataOverlay:
-            elmgr = CompFactory.AthenaEventLoopMgr()
+            elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
             elmgr.RequireInputAttributeList = True
             elmgr.UseSecondaryEventNumber = True
             cfg.addService( elmgr )
@@ -134,7 +135,8 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
     elmgr = CompFactory.AthenaMtesEventLoopMgr(
         WhiteboardSvc = "EventDataSvc",
         SchedulerSvc = scheduler.getName(),
-        EventRangeChannel = channel)
+        EventRangeChannel = channel,
+        EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
