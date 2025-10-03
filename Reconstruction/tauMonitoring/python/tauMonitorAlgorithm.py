@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file tauMonitorAlgorithm.py
@@ -378,15 +378,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
             igroup.defineHistogram(namer('EMFracTrk','EMFracTrk','SubStructure',postfix), title='Ratio of pt to shot electromagnetic energy for associated tracks; track pt ratio in EM',path=folder+"SubStructure",
             xbins=15, xmin=0, xmax=1.5 )
 
-            igroup.defineHistogram(namer('EfracL2EffCluster','EfracL2EffCluster','SubStructure',postfix), title='Energy fraction of leading two effective clusters in shot; energy fraction',path=folder+"SubStructure",
-            xbins=15, xmin=0, xmax=1.5 )
-
-            igroup.defineHistogram(namer('EisoEffCluster','EisoEffCluster','SubStructure',postfix), title='Isolation Energy after correction in effective clusters ; isolation energy (GeV)',path=folder+"SubStructure",
-            xbins=10, xmin=0, xmax=50. )
-
-            igroup.defineHistogram(namer('InvMassEffClusters','InvMassEffClusters','SubStructure',postfix), title='Invariant mass of effective clusters in shot; invariant mass (GeV)',path=folder+"SubStructure",
-            xbins=40, xmin=0, xmax=8. )
-
             igroup.defineHistogram(namer('nNeutPFO','nNeutPFO','SubStructure',postfix), title='_NumNeutPFO;Number of neutral ParticleFlow objects ; PFO number',path=folder+"SubStructure",
             xbins=20, xmin=0, xmax=20. )
 
@@ -402,18 +393,11 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
             igroup.defineHistogram(namer('panPt','panPt','SubStructure',postfix), title='tau Pt from PanTau ; substructure pt (GeV)',path=folder+"SubStructure",
             xbins=20, xmin=0, xmax=200 )
 
-            igroup.defineHistogram(namer('pt3','shots_pt3','SubStructure',postfix), title='weighted cell pt in 3x3 window in shots; pt3 (GeV) ',path=folder+"SubStructure",
-            xbins=24, xmin=0, xmax=12 )
-
             igroup.defineHistogram(namer('PSSFrac','PSSFracEffCluster','SubStructure',postfix), title='Energy fraction for PreSampling and sampling layers in effective clusters in shot;Sampling Energy Fraction',path=folder+"SubStructure",
             xbins=10, xmin=0, xmax=1. )
 
             igroup.defineHistogram(namer('ptRatioEflowApprox','ptRatioApprox','SubStructure',postfix), title='Ratio of pt to shot total energy for associated tracks; track pt ratio',
                 xbins=20, xmin=0., xmax=2., path=folder+"SubStructure" )
-
-
-
-
 
         
         if(postfix =="BA" or postfix =="CR" or postfix=="EC" or postfix.startswith('TauTrig') or postfix=="Global"):
@@ -454,14 +438,8 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
             igroup.defineHistogram(namer('hadRadius','hadRadius','Calo',postfix), title='Hadronic Radius of tau candidates;Hadronic Radius; Number Of Candidates',path=folder+"Calo",
             xbins=50, xmin=0., xmax=1. )
 
-            igroup.defineHistogram(namer('stripWidth2','stripWidth2','Calo',postfix), title='Strip Width of tau candidates;Strip Width;Number of Candidates',path=folder+"Calo",
-            xbins=50, xmin=-0.1, xmax=0.12 )
-
             igroup.defineHistogram(namer('isolFrac','isolFrac','Calo',postfix), title='Isolation Fraction;Et Isolation Fraction;Number of Candidates',path=folder+"Calo",
             xbins=51, xmin=0.0, xmax=1.02 )
-
-            igroup.defineHistogram(namer('nStrip','nStrip','Calo',postfix), title='Number of strip cells of tau candidates;Number of Strip Cells;Number of Candidates',path=folder+"Calo",
-            xbins=56, xmin=-0.5, xmax=55.5 )
 
             igroup.defineHistogram(namer('etEMAtEMScale','etEMAtEMScale','Calo',postfix), title='EM energy at the EM scale;EM Et (GeV) );Number of Candidates',path=folder+"Calo",
             xbins=50, xmin=0., xmax=200. )
@@ -574,9 +552,6 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
 
             igroup.defineHistogram(namer('phiTrack','phi','Track_leadTrack',postfix), title='Track Phi;Phi',path=folder+"Track/leadTrack",
             xbins=64, xmin=PHIMIN, xmax=PHIMAX )
-
-            igroup.defineHistogram(namer('trkWidth2','trkWidth2','Track',postfix), title='Weighted Track Width;Momentum-Weighted Width of Track System',path=folder+"Track",
-            xbins=50, xmin=0.0, xmax=0.1 )
 
             igroup.defineHistogram(namer('ipZ0SinThetaSigLeadTrk','ipZ0SinThetaSigLeadTrk','Track_leadTrack',postfix), title='Impact Parameter z0 Sine Theta Significance of Leading Track;Z0SinTheta Significance',path=folder+"Track/leadTrack",
             xbins=50, xmin=-10.0, xmax=10.0 )
