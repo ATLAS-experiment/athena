@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArNoisyROTool.cxx 
@@ -10,39 +10,12 @@
 #include "LArNoisyROTool.h"
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "LArRecEvent/LArNoisyROSummary.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArIdentifier/LArOnlineID.h" 
 #include "LArIdentifier/LArElectrodeID.h" 
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "LArRecConditions/LArHVNMap.h"
-
-LArNoisyROTool::LArNoisyROTool( const std::string& type, 
-				const std::string& name, 
-				const IInterface* parent ) : 
-  ::AthAlgTool  ( type, name, parent   ),m_hvMapTool("LArHVMapTool",this),
-  m_calo_id(nullptr), m_onlineID(nullptr), 
-  m_partitionMask({{LArNoisyROSummary::EMECAMask,LArNoisyROSummary::EMBAMask,LArNoisyROSummary::EMBCMask,LArNoisyROSummary::EMECCMask}}) //beware: The order matters! 
-{
-  declareInterface<ILArNoisyROTool >(this);
-  declareProperty( "BadChanPerFEB", m_BadChanPerFEB=30 );
-  declareProperty( "CellQualityCut", m_CellQualityCut=4000 );
-  declareProperty( "IgnoreMaskedCells", m_ignore_masked_cells=false );
-  declareProperty( "IgnoreFrontInnerWheelCells", m_ignore_front_innerwheel_cells=true );
-  declareProperty( "BadFEBCut", m_MinBadFEB=3 );
-
-  declareProperty( "MNBLooseCut",m_MNBLooseCut=5,"Number of cells above CellQualityCut");
-  declareProperty( "MNBTightCut",m_MNBTightCut=17,"Number of cells above CellQualityCut");
-  declareProperty( "MNBTight_PsVetoCut",m_MNBTight_PsVetoCut={13,3},"Number of cells above CellQualityCut");
-  declareProperty( "SaturatedCellQualityCut", m_SaturatedCellQualityCut=65535);
-  declareProperty( "SaturatedCellEnergyTightCut", m_SaturatedCellEnergyTightCut=1000.);
-  declareProperty( "SaturatedCellTightCut", m_SaturatedCellTightCut=20);
-
-  declareProperty( "DoHVflag", m_doHVline=true );
-  declareProperty( "BadChanFracPerHVline", m_BadChanFracPerHVline=0.25 );
-  declareProperty( "BadHVCut", m_MinBadHV=3 );
-}
 
 // Destructor
 ///////////////
@@ -98,7 +71,7 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
      doHVline = false;
   }
 
-  std::unique_ptr<LArNoisyROSummary> noisyRO(new LArNoisyROSummary);
+  std::unique_ptr<LArNoisyROSummary> noisyRO=std::make_unique<LArNoisyROSummary>();
 
   if(!cellContainer) return noisyRO;
 
@@ -113,12 +86,8 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
   unsigned int NsaturatedTightCutEMECA = 0;
   unsigned int NsaturatedTightCutEMECC = 0;
 
-
-  CaloCellContainer::const_iterator cellItr    = cellContainer->begin();
-  CaloCellContainer::const_iterator cellItrEnd = cellContainer->end();
-  for ( ; cellItr != cellItrEnd; ++cellItr )
+  for (const CaloCell* cell : *cellContainer )
   {
-    const CaloCell* cell = (*cellItr);
     if (!cell) continue;
 
     // only cells with a bad enough Quality Factor
@@ -182,42 +151,29 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
 
   // loop on all FEBs and check whether FEB can be declared as bad for the different type of flags:
   // regular noise burst, weighted noise burst, MNB tight and loose
-  for ( FEBEvtStatMapCstIt it = FEBStats.begin(); it != FEBStats.end(); ++it ) {
-    ATH_MSG_VERBOSE(" candidate FEB " << it->first << " with " << it->second.badChannels() << " bad channels");
-    if ( it->second.badChannels() > m_BadChanPerFEB ) {
-      noisyRO->add_noisy_feb(HWIdentifier(it->first));
+  for (auto& it : FEBStats) {
+    ATH_MSG_VERBOSE(" candidate FEB " << it.first << " with " << it.second.badChannels() << " bad channels");
+    if ( it.second.badChannels() > m_BadChanPerFEB ) {
+      noisyRO->add_noisy_feb(HWIdentifier(it.first));
     }
 
     // Loose MNBs
-    if ( it->second.badChannels() > m_MNBLooseCut ){
-       noisyRO->add_MNBLoose_feb(HWIdentifier(it->first));
-       ATH_MSG_DEBUG("Loose bad FEB " << it->first << " " << m_onlineID->channel_name(HWIdentifier(it->first)) << " with " << it->second.badChannels() << " bad channels");
+    if ( it.second.badChannels() > m_MNBLooseCut ){
+       noisyRO->add_MNBLoose_feb(HWIdentifier(it.first));
+       ATH_MSG_DEBUG("Loose bad FEB " << it.first << " " << m_onlineID->channel_name(HWIdentifier(it.first)) << " with " << it.second.badChannels() << " bad channels");
        // Tight_PsVeto MNBs
-       if ( it->second.badChannels() > m_MNBTight_PsVetoCut[0] ){
-         unsigned int associatedPSFEB = m_mapPSFEB.find(it->first)->second;
+       if ( it.second.badChannels() > m_MNBTight_PsVetoCut[0] ){
+         unsigned int associatedPSFEB = m_mapPSFEB.find(it.first)->second;
          if (associatedPSFEB != 0){ // Check if a PS FEB is associated (TRUE only for EMB FEBs)
-           if (FEBStats.count(associatedPSFEB) == 0) noisyRO->add_MNBTight_PsVeto_feb(HWIdentifier(it->first));
-           else if (FEBStats[associatedPSFEB].badChannels() < m_MNBTight_PsVetoCut[1]) noisyRO->add_MNBTight_PsVeto_feb(HWIdentifier(it->first));
+           if (FEBStats.count(associatedPSFEB) == 0) noisyRO->add_MNBTight_PsVeto_feb(HWIdentifier(it.first));
+           else if (FEBStats[associatedPSFEB].badChannels() < m_MNBTight_PsVetoCut[1]) noisyRO->add_MNBTight_PsVeto_feb(HWIdentifier(it.first));
          }
        }
        // Tight MNBs
-       if ( it->second.badChannels() > m_MNBTightCut ){
-          noisyRO->add_MNBTight_feb(HWIdentifier(it->first));
+       if ( it.second.badChannels() > m_MNBTightCut ){
+          noisyRO->add_MNBTight_feb(HWIdentifier(it.first));
        }
     }
- 
-
-//  // Noisy preamp removed as no used currently
-//  // Kept here just in case we may want to revive it
-//    const unsigned int* PAcounters = it->second.PAcounters();
-//    for ( size_t i = 0; i < 32; i++ ) {
-//      if ( PAcounters[i] > m_BadChanPerPA ) {
-//	uint64_t PAid = static_cast<uint64_t>(1000000000)*static_cast<uint64_t>(i)+static_cast<uint64_t>(it->first);
-//	ATH_MSG_DEBUG(" bad preamp " << i << " in FEB " << it->first << "  ID " << PAid);
-//	noisyRO->add_noisy_preamp(HWIdentifier(it->first),4*i);
-//	 if (m_printSummary) m_badPA_counters[PAid]++;
-//      }
-//    }
 
   }//end loop over m_FEBats
 
@@ -293,8 +249,7 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
   std::array<unsigned,5> nTight_PsVetoMNBFEBSperPartition({{0,0,0,0,0}});
   std::array<unsigned,5> nLooseMNBFEBSperPartition({{0,0,0,0,0}});
   for (HWIdentifier febid: *knownMNBFEBs) { //Loop over known MNB FEBs
-    //FEBEvtStatMapCstIt statIt=FEBStats.find(febid.get_identifier32().get_compact());
-    FEBEvtStatMapCstIt statIt=FEBStats.find(febid.get_identifier32().get_compact());
+    auto statIt=FEBStats.find(febid.get_identifier32().get_compact());
     if (statIt!=FEBStats.end()) {
       if (statIt->second.badChannels()>=m_MNBLooseCut) {
 	(nLooseMNBFEBSperPartition[partitionNumber(febid)])++;
