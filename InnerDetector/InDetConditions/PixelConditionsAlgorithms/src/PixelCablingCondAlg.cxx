@@ -6,15 +6,15 @@
 #include "GaudiKernel/EventIDRange.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
 
 #include "PathResolver/PathResolver.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdContext.h"
 #include "CoralBase/Blob.h"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 PixelCablingCondAlg::PixelCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -128,6 +128,7 @@ StatusCode PixelCablingCondAlg::execute(const EventContext& ctx) const {
     if (line.substr(line.length()-3,line.length())=="GMT") { continue; }
 
     std::istringstream parse(line);
+    // coverity[tainted_data_argument]
     parse >> barrel_ec >> layer_disk >> phi_module >> eta_module >> std::hex >> robid >> rodid >> sl_40_fmt >> sl_40_link >> sl_80_fmt >> sl_80_link >> DCSname;
 
     // Debug
