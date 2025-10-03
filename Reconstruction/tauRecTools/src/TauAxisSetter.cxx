@@ -7,16 +7,8 @@
 #include "TauAxisSetter.h"
 #include "tauRecTools/HelperFunctions.h"
 
-#include "xAODTau/TauJetContainer.h"
-#include "xAODTau/TauJetAuxContainer.h"
-#include "xAODTau/TauJet.h"
-#include "xAODCaloEvent/CaloVertexedTopoCluster.h"
-
-
-
 TauAxisSetter::TauAxisSetter(const std::string& name) :
-TauRecToolBase(name) {
-}
+TauRecToolBase(name) {}
 
 StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
 

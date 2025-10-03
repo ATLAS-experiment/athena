@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -7,19 +7,13 @@
 #include "TauCellVariables.h"
 #include "tauRecTools/HelperFunctions.h"
 
-#include "xAODTau/TauJet.h"
-#include "xAODJet/Jet.h"
 #include "CaloUtils/CaloVertexedCell.h"
 
-#include <cmath>
 #include <vector>
 
 
 TauCellVariables::TauCellVariables(const std::string& name) :
-  TauRecToolBase(name) {
-}
-
-
+  TauRecToolBase(name) {}
 
 StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
 
