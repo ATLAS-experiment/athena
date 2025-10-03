@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_SUITE(SingleHistogramDefinitionTest)
 		const std::string xTitle{"xAxis"}, yTitle{"yAxis"};
 		const std::string aFolder("folderName");
 		//
-		auto referenceValuesMatchXConstruction = [=](const auto & h){return h.name == name and h.histoType == type 
+		auto referenceValuesMatchXConstruction = [&name, type, &title, nBinsX, xAxis, &xTitle, &yTitle, &aFolder](const auto & h){return h.name == name and h.histoType == type 
 		   and h.title == title and h.nBinsX == nBinsX and h.xAxis == xAxis
 		   and h.xTitle == xTitle and h.yTitle == yTitle and aFolder == h.folder;
 		};
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_SUITE(SingleHistogramDefinitionTest)
 		const float yLo(0.2), yHi(10.2);
 		const auto yAxis=std::make_pair(yLo, yHi);
     //
-		auto referenceValuesMatchXYConstruction = [=] (const auto & h){
+		auto referenceValuesMatchXYConstruction = [nBinsY, yAxis, &referenceValuesMatchXConstruction] (const auto & h){
 		  return referenceValuesMatchXConstruction(h) and h.nBinsY == nBinsY and h.yAxis == yAxis;
 		};
 		// construct the XY histo and test
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_SUITE(SingleHistogramDefinitionTest)
 		const float zLo(0.3), zHi(10.3);
 		const auto zAxis=std::make_pair(zLo, zHi);
 		const std::string zTitle{"zAxis"};
-		auto referenceValuesMatchXYZConstruction = [=] (const auto & h){
+		auto referenceValuesMatchXYZConstruction = [nBinsZ, zAxis, &zTitle, &referenceValuesMatchXYConstruction] (const auto & h){
 		  return referenceValuesMatchXYConstruction(h) and h.nBinsZ == nBinsZ and h.zAxis == zAxis and h.zTitle == zTitle;
 		};
 		// construct the XYZ histo and test
