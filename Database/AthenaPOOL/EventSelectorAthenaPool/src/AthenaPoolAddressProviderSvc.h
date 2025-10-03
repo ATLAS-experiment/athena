@@ -34,8 +34,6 @@ public: // Constructor and Destructor
 
    /// Required of all Gaudi Services
    virtual StatusCode initialize() override;
-   /// Required of all Gaudi Services
-   virtual StatusCode finalize() override;
 
    /// Get all addresses from provider. Called before begin event.
    /// @param storeID [IN] store ID, this function only preloads detector store addresses.

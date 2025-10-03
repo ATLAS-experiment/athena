@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolCollectionConverter.cxx
@@ -25,6 +25,7 @@
 
 #include <assert.h>
 #include <exception>
+#include <format>
 
 //______________________________________________________________________________
 PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionType,
@@ -62,11 +63,11 @@ StatusCode PoolCollectionConverter::initialize() {
       if (m_inputCollection.starts_with( "PFN:")
 	      || m_inputCollection.starts_with( "LFN:")
 	      || m_inputCollection.starts_with( "FID:")) {
-         // Aready prefixed
+         // Already prefixed
          m_connection = m_inputCollection;
       } else {
          // Prefix with PFN:
-         m_connection = "PFN:" + m_inputCollection;
+         m_connection = std::format("PFN:{}", m_inputCollection);
       }
       try {
          m_poolCollection = m_poolSvc->createCollection("RootCollection", m_connection, m_inputCollection, m_contextId);
@@ -75,7 +76,7 @@ StatusCode PoolCollectionConverter::initialize() {
       }
       if (m_poolCollection == nullptr) {
          // Now set where to look in the implicit file
-         m_inputCollection = m_inputContainer + "(DataHeader)";
+         m_inputCollection = std::format("{}(DataHeader)", m_inputContainer);
       }
    }
    try {
@@ -83,32 +84,32 @@ StatusCode PoolCollectionConverter::initialize() {
          m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
       }
       if (m_poolCollection == nullptr && m_collectionType == "ImplicitCollection") {
-         m_inputCollection = m_inputContainer + "_DataHeader";
+         m_inputCollection = std::format("{}_DataHeader", m_inputContainer);
          m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
       }
    } catch (std::exception &e) {
-      return(StatusCode::RECOVERABLE);
+      return StatusCode::RECOVERABLE;
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::disconnectDb() {
    if (m_poolCollection == nullptr) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    if (m_poolCollection->description().type() == "ImplicitCollection") {
-      return(m_poolSvc->disconnectDb(m_connection));
+      return m_poolSvc->disconnectDb(m_connection);
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::isValid() const {
-   return(m_poolCollection != nullptr ? StatusCode::SUCCESS : StatusCode::FAILURE);
+   return m_poolCollection != nullptr ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 //______________________________________________________________________________
 pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
    delete m_collectionQuery; m_collectionQuery = nullptr;
    m_collectionQuery = m_poolCollection->newQuery();
    m_collectionQuery->selectAll();
-   return(m_collectionQuery->execute());
+   return m_collectionQuery->execute();
 }
