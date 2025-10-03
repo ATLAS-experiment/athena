@@ -143,7 +143,7 @@ namespace ORUtils
       if(!m_decHelper->isSurvivingObject(*jet)) continue;
       if(!isBJet(*jet)) continue;
       for(const auto tau : taus) {
-        if(!m_decHelper->isSurvivingObject(*jet)) continue;
+        if(!m_decHelper->isSurvivingObject(*tau)) continue;
         if(!isSurvivingAntiTau(*tau)) continue;
         if(m_dRMatcher->objectsMatch(*tau, *jet)) {
           ATH_CHECK( handleOverlap(tau, jet) );
