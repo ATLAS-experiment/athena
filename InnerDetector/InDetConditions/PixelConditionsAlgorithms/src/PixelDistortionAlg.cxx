@@ -102,10 +102,6 @@ StatusCode PixelDistortionAlg::execute() {
 
       if (m_distortionVersion == 1) {
         input >> idmod;
-        if (idmod>std::numeric_limits<IdentifierHash::value_type>::max()){
-          ATH_MSG_ERROR("idmod out of range: "<<idmod);
-          return StatusCode::FAILURE;
-        }
         hashID = idmod;
       } else {
         input >> std::hex >> idmod >> std::dec;
