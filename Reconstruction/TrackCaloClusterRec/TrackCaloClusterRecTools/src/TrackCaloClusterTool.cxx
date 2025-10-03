@@ -381,9 +381,7 @@ StatusCode UFOTool::fillTCC(xAOD::FlowElementContainer* tccContainer, const Trac
   ufoB.combinedUFOLoop(&tccInfo, pfos.cptr());
   
   // Create a UFO for all neutral and charged PFO which are not matched to any tracks
-  unsigned int i = -1;
   for ( const xAOD::FlowElement* pfo : *pfos ) {
-    i++;
     if(pfo->pt() <= 0) continue;
     if(tccInfo.clusterToTracksWeightMap.find(pfo)!=tccInfo.clusterToTracksWeightMap.end())
       {
