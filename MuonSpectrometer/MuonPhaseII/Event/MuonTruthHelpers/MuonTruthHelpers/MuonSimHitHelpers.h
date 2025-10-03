@@ -39,6 +39,8 @@ namespace MuonR4 {
     const xAOD::TruthParticle* getTruthMatchedParticle(const xAOD::MuonSegment& segment);
     /** @brief Returns the truth-matched segment */
     const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSegment& segment);
+    /** @brief Returns the segments associated to the truth muon */
+    std::vector<const xAOD::MuonSegment*> getTruthSegments(const xAOD::TruthParticle& truthMuon);
 }
 
 #endif

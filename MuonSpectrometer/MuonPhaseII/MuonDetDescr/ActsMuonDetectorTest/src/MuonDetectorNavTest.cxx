@@ -36,7 +36,6 @@ using namespace Muon::MuonStationIndex;
 namespace {
 
 using SegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
-static const SG::ConstAccessor<SegLink_t> segAcc{"truthSegmentLinks"};
 static const Amg::Vector3D dummyPos{100.*Gaudi::Units::m, 100.*Gaudi::Units::m, 100.*Gaudi::Units::m};
 struct PropagatorRecorder{
     /// @brief Position obtained by the ACTS propagator
@@ -179,8 +178,7 @@ StatusCode MuonDetectorNavTest::execute() {
 
         
         std::vector<std::pair<const xAOD::MuonSegment*, std::vector<const xAOD::MuonSimHit*>>> muonSegmentWithSimHits;
-        for (const auto& truthSegLink : segAcc(*truthParticle)){
-            const xAOD::MuonSegment* seg{*truthSegLink}; 
+        for (const xAOD::MuonSegment* seg : MuonR4::getTruthSegments(*truthParticle)){
             auto unordedHits = MuonR4::getMatchingSimHits(*seg);
             std::vector<const xAOD::MuonSimHit*> muonSimHits{unordedHits.begin(), unordedHits.end()};           
             ATH_MSG_VERBOSE("Segment at : "<<Amg::toString(seg->position())<<" with Sim Hits: "<<unordedHits.size());
