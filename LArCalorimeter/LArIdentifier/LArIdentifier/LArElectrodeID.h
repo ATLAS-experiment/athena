@@ -5,20 +5,14 @@
 #ifndef LARIDENTIFIER_LARELECTRODEID_H
 #define LARIDENTIFIER_LARELECTRODEID_H
 
-#include "AthenaKernel/CLASS_DEF.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
+#include "IdDict/IdDictFieldImplementation.h"
 #include "Identifier/HWIdentifier.h"
 #include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-#include "LArIdentifier/LArOnlID_Exception.h"
+#include "Identifier/MultiRange.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include <vector>
-#include <iostream>
-#include <algorithm>
 
-class IdentifierHash;
-class Range;
 
   /**
    * @brief Helper for the Liquid Argon Calorimeter cell at the electrode level. This 
@@ -102,7 +96,7 @@ class LArElectrodeID : public AtlasDetectorID {
  public:
   
 
-  typedef Identifier::size_type  size_type;
+  using size_type = Identifier::size_type;
   
 
   /**
@@ -112,7 +106,7 @@ class LArElectrodeID : public AtlasDetectorID {
   /**
    * @brief Default destructor
    */
-  ~LArElectrodeID();
+  virtual ~LArElectrodeID();
   
   /**
   * @brief Create an Electrode identifier from fields 
