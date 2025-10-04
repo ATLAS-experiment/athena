@@ -413,8 +413,8 @@ namespace xAOD {
               size_t sz = size_noLock();
               getVector1 (id, sz, sz, true, false);
               m_dynamicVecs[id]->resize (sz - other_size);
-              m_dynamicVecs[id]->insertMove (pos, src_ptr, 0, other_size,
-                                             other);
+              (void)m_dynamicVecs[id]->insertMove (pos, src_ptr, 0, other_size,
+                                                   other);
               nomove = false;
             }
           }
