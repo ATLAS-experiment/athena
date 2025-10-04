@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: xAODMissingETAuxAssociationMapCnv_v1.cxx 693797 2015-09-08 22:06:19Z khoo $
@@ -95,8 +95,8 @@ persToTrans( const xAOD::MissingETAuxAssociationMap_v1* oldObj,
      for(size_t iObj=0; iObj<assoc->size(); ++iObj) {
        constvec_t calvec = assoc->calVec(iObj);
        constvec_t trkvec = assoc->trkVec(iObj);
-       bitmask_t calmask = 1<<iObj;
-       bitmask_t trkmask = 1<<iObj;
+       bitmask_t calmask = static_cast<bitmask_t>(1)<<iObj;
+       bitmask_t trkmask = static_cast<bitmask_t>(1)<<iObj;
        ATH_MSG("  Obj " << iObj);
        // Build up masks identifying overlaps
        for(size_t iOverlap=0; iOverlap<assoc->overlapIndices(iObj).size(); ++iOverlap) {
@@ -105,11 +105,11 @@ persToTrans( const xAOD::MissingETAuxAssociationMap_v1* oldObj,
 	 ATH_MSG("    Overlap " << iOverlap << " (" << overlapIndex << ", " << overlapType << ")" );
 	 if( (calOverlap&overlapType) && calvec.sumpt() <= assoc->calVec(overlapIndex).sumpt() ) {
 	   ATH_MSG("    cal overlap " << overlapIndex);
-	   calmask |= 1<<overlapIndex;
+	   calmask |= static_cast<bitmask_t>(1)<<overlapIndex;
 	 }
 	 if( (trkOverlap&overlapType) && trkvec.sumpt() <= assoc->trkVec(overlapIndex).sumpt() ) {
 	   ATH_MSG("    trk overlap " << overlapIndex);
-	   trkmask |= 1<<overlapIndex;
+	   trkmask |= static_cast<bitmask_t>(1)<<overlapIndex;
 	 }
        }
        ATH_MSG("    calmask = " << calmask << ", trkmask = " << trkmask);
