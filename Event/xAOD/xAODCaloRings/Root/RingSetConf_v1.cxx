@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s).
@@ -359,19 +359,13 @@ void RingSetConf_v1::getEdges( const RawConfCollection &clRingsConf,
 //==============================================================================
 void RingSetConf_v1::fillRingSetConfContainer(
     const RawConfCollection &rawConfCol,
-    RingSetConfContainer_v1 *container)
+    RingSetConfContainer_v1 &container)
 {
-
-  // Protect against bad pointers:
-  if ( container == nullptr ) {
-    container = new RingSetConfContainer_v1();
-  }
 
   // Loop through RawConfCollection and build true RingSetConf_v1 objects from
   // them:
   for ( const auto& rsRawConf : rawConfCol ) {
-    RingSetConf_v1 *rsConf =  new RingSetConf_v1( rsRawConf );
-    container->push_back(rsConf);
+    container.push_back(std::make_unique<RingSetConf_v1>( rsRawConf ));
   }
 
 }
