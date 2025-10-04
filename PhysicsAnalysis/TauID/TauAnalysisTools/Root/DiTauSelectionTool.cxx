@@ -4,7 +4,6 @@
 
 // Local include(s):
 #include "TauAnalysisTools/DiTauSelectionTool.h"
-#include "TauAnalysisTools/SharedFilesVersion.h"
 #include "TauAnalysisTools/DiTauSelectionCuts.h"
 
 // Framework include(s):
@@ -15,7 +14,6 @@
 #include "THashList.h"
 
 // System include(s)
-#include <atomic>
 #include <cmath>  // for std::isnan
 
 using namespace TauAnalysisTools;

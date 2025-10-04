@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // local include(s)
 #include "TauAnalysisTools/DiTauSelectionCuts.h"
 #include "TauAnalysisTools/DiTauSelectionTool.h"
-
-// framework include(s)
-#include "AsgDataHandles/ReadHandle.h"
 
 using namespace TauAnalysisTools;
 
@@ -18,8 +15,7 @@ DiTauSelectionCut::DiTauSelectionCut(const std::string& sName, TauAnalysisTools:
   , m_hHistCutPre(nullptr)
   , m_hHistCut(nullptr)
   , m_tDTST(tDTST)
-{
-}
+{}
 
 //______________________________________________________________________________
 DiTauSelectionCut::~DiTauSelectionCut()
