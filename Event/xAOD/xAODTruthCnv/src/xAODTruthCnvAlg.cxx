@@ -254,12 +254,12 @@ namespace xAODMaker {
 #endif
           }
 
-          xAOD::TruthEvent* xTruthEvent = new xAOD::TruthEvent();
-          xAOD::TruthPileupEvent* xTruthPileupEvent = new xAOD::TruthPileupEvent();
+          xAOD::TruthEvent* xTruthEvent = nullptr;
+          xAOD::TruthPileupEvent* xTruthPileupEvent = nullptr;
 
 
           if (isSignalProcess) {
-            xTruthEventContainer->push_back( xTruthEvent );
+            xTruthEvent = xTruthEventContainer->push_back( std::make_unique<xAOD::TruthEvent>() );
             // Cross-section
             auto crossSection = genEvt->cross_section();
 #ifdef HEPMC3
@@ -395,8 +395,8 @@ namespace xAODMaker {
             }
 #endif
           }else{//not isSignalProcess
-      xTruthPileupEventContainer->push_back( xTruthPileupEvent );
-    }
+            xTruthPileupEvent = xTruthPileupEventContainer->push_back( std::make_unique<xAOD::TruthPileupEvent>() );
+          }
 
           // (2) Build particles and vertices
           // Map for building associations between particles and vertices
@@ -412,7 +412,7 @@ namespace xAODMaker {
           if (disconnectedSignalProcessVtx) {
             if (disconnectedSignalProcessVtx->particles_in_size() == 0 && disconnectedSignalProcessVtx->particles_out_size() == 0 ) {
               //This is a disconnected vertex, add it manually
-              vertices.push_back (disconnectedSignalProcessVtx);
+              vertices.push_back (std::move(disconnectedSignalProcessVtx));
             }
           } else {
             ATH_MSG_WARNING("Signal process vertex pointer not valid in HepMC Collection for GenEvent #" << cntr << " / " << mcColl->size());
@@ -427,7 +427,10 @@ namespace xAODMaker {
         if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
         // We want to process particles in barcode order.
         auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>("barcodes"); // FIXME barcode-based
-        if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
+        if (!bcmapatt) {
+          ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
+          return StatusCode::FAILURE;
+        }
         std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
         xTruthParticleContainer->reserve(bcmap.size());
         for (const auto &[genPartBarcode,part]: bcmap) {
@@ -467,7 +470,7 @@ namespace xAODMaker {
             if (productionVertex && productionVertex->parent_event() != nullptr) {
               VertexParticles& parts = vertexMap[productionVertex];
               if (parts.incoming.empty() && parts.outgoing.empty())
-                vertices.push_back (productionVertex);
+                vertices.push_back (std::move(productionVertex));
               parts.outgoingEL.push_back(eltp);
               parts.outgoing.push_back(xTruthParticle);
             }
@@ -479,7 +482,7 @@ namespace xAODMaker {
             if (decayVertex) {
               VertexParticles& parts = vertexMap[decayVertex];
               if (parts.incoming.empty() && parts.outgoing.empty())
-                vertices.push_back (decayVertex);
+                vertices.push_back (std::move(decayVertex));
               parts.incomingEL.push_back(eltp);
               parts.incoming.push_back(xTruthParticle);
             }
@@ -511,10 +514,6 @@ namespace xAODMaker {
             // (h) Set Particle<->Vertex links for incoming particles
             for (xAOD::TruthParticle* p : parts.outgoing) p->setProdVtxLink(eltv);
           } //end of loop over vertices
-
-          // Delete the event that wasn't used
-          if (isSignalProcess) delete xTruthPileupEvent;
-          if (!isSignalProcess) delete xTruthEvent;
 
         } // end of loop over McEventCollection
 
