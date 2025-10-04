@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -48,9 +48,9 @@ namespace xAODMaker {
             stores.emplace_back( store, key );
          }
       } else {
-         SG::ConstIterator< SG::IConstAuxStore > begin, end;
-         ATH_CHECK( evtStore()->retrieve( begin, end ) );
-         for( auto itr = begin; itr != end; ++itr ) {
+         SG::ConstIterator< SG::IConstAuxStore > itr, end;
+         ATH_CHECK( evtStore()->retrieve( itr, end ) );
+         for( ; itr != end; ++itr ) {
             const SG::IConstAuxStore* store = nullptr;
             ATH_CHECK( evtStore()->retrieve( store, itr.key() ) );
             stores.emplace_back( store, itr.key() );
