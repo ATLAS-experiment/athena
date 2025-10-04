@@ -43,15 +43,19 @@ namespace xAOD {
 
    ShallowAuxContainer::ShallowAuxContainer( const ShallowAuxContainer& parent )
       : SG::IAuxStore(), SG::IAuxStoreIO(), SG::IAuxStoreHolder(),
-        m_store( parent.m_store ), m_storeIO( parent.m_storeIO ),
-        m_ownsStore( false ), m_locked( parent.m_locked ),
-        m_parentLink( parent.m_parentLink ),
-        m_parentIO( parent.m_parentIO ), m_shallowIO( parent.m_shallowIO ),
+        m_ownsStore( false ),
         m_auxids (),
         m_auxidsValid (false)
    {
       // Keep the source unmutable during copy
       guard_t guard( parent.m_mutex );
+      // cppcheck-suppress copyCtorPointerCopying
+      m_store = parent.m_store;
+      m_storeIO = parent.m_storeIO;
+      m_locked = parent.m_locked;
+      m_parentLink = parent.m_parentLink;
+      m_parentIO = parent.m_parentIO;
+      m_shallowIO = parent.m_shallowIO;
       m_selection = parent.m_selection;
       m_name = parent.m_name;
    }
