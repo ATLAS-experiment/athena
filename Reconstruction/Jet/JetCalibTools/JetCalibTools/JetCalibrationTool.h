@@ -51,6 +51,7 @@ public:
   // Get the nominal resolution
   StatusCode getNominalResolutionData(const xAOD::Jet& jet, double& resolution) const override;
   StatusCode getNominalResolutionMC(  const xAOD::Jet& jet, double& resolution) const override;
+  StatusCode getNominalResolutionHist( const xAOD::Jet& jet, double& resolution, const TH2D* histo) const;
   
 private:
   StatusCode calibrate(xAOD::Jet& jet, JetEventInfo& jetEventInfo) const;
@@ -93,6 +94,9 @@ private:
   std::string m_forceCalibFile_PtResidual{};
   std::string m_forceCalibFile_FastSim{};
   std::string m_forceCalibFile_MC2MC{};
+  std::string m_calibAreaTagLeg;
+  std::string m_calibFileLeg;
+  std::string m_calibMCTypeLeg;
 
   //TEnv to hold the global text config
   TEnv * m_globalConfig{};
@@ -115,6 +119,10 @@ private:
 
   // Try to use jet-attribute-specified origin vertex for calibration
   bool m_useOriginVertex{};
+
+  // Store R21 JER histograms in case resolution is requested without smearing step
+  TH2D* m_resData{};
+  TH2D* m_resMC{};
 }; 
 
 #endif //> !JETCALIBTOOLS_APPLYJETCALIBRATION_H
