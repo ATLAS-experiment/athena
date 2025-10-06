@@ -146,6 +146,12 @@ atlas_add_test( CachedValueTiming_test
   LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES}
   PROPERTIES TIMEOUT 300
   POST_EXEC_SCRIPT noerror.sh )
+  
+atlas_add_test( close_to_zero_test
+  SOURCES test/close_to_zero_test.cxx
+  LINK_LIBRARIES CxxUtils 
+  PROPERTIES TIMEOUT 300
+  POST_EXEC_SCRIPT nopost.sh )
 
 
 # Set up the "simple" tests:
