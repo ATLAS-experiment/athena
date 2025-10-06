@@ -120,9 +120,13 @@ def FTAGPUCfg(flags):
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
     addCommonAugmentation(flags, acc, FTAGPUSlimmingHelper)
-
+    FTAGPUSlimmingHelper.AppendToDictionary.update({
+    "DuplicatedTrks"      : "xAOD::TrackParticleContainer",
+    "DuplicatedTrksAux."  : "xAOD::TrackParticleAuxContainer",
+    })
     FTAGPUSlimmingHelper.SmartCollections = ["AntiKt4EMPFlowJets",
                                             "AntiKt4TruthJets",
+                                            "AntiKt4EMPFlowJets_FTAG",
                                             ]
     #FtagBaseContent.add_baseline_slimming_smartcollections(FTAGPUSlimmingHelper)
     
@@ -131,8 +135,21 @@ def FTAGPUCfg(flags):
                                           "PrimaryVertices",
                                           "InDetTrackParticles",
                                           "TruthParticles",
-                                          "TruthVertices"
-                                        ]
+                                          "TruthVertices",
+                                          "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
+                                          "JetAssociatedPixelClusters",
+                                          "JetAssociatedSCTClusters",
+                                          "PixelClusters",
+                                          "SCT_Clusters",
+                                          "DuplicatedTrks",]
+    
+    FTAGPUSlimmingHelper.ExtraVariables = ["TruthPrimaryVertices.t.x.y.z",
+                                            "Electrons.TruthLink",
+                                            "Muons.TruthLink.segmentDeltaPhi.segmentDeltaEta.ParamEnergyLoss.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.MeasEnergyLoss.MeasEnergyLossSigma",
+                                            "Photons.TruthLink",
+                                            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink.InclusiveGNNVerticesLink",
+                                            "DuplicatedTrks.btagIp_ByVertex1_d0.btagIp_ByVertex1_z0Sintheta",
+                                            ]
     
     # Add truth containers
     if flags.Input.isMC:
@@ -177,8 +194,8 @@ def FTAGPUCfg(flags):
     acc.merge(JetBTagginglessByVertexAlgCfg(
         flags,
         "AntiKt4EMPFlowByVertexJets",
-        dzCut_vec=[5, 4, 3, 2],
-        useMinZ0Vertex_vec=[True,False]))
+        dzCut_vec=[5, 3, 2],
+        useMinZ0Vertex_vec=[False]))
 
     # Output stream
     FTAGPUItemList = FTAGPUSlimmingHelper.GetItemList()

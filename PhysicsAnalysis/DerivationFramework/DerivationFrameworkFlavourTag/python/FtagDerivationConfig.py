@@ -3,8 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
-from BTagging.JetBTagginglessConfig import JetBTagginglessAlgCfg, JetBTagginglessByVertexAlgCfg
+from BTagging.BTagConfig import GetTaggerTrainingMap
+from BTagging.BTagLegacyConfig import BTagAlgsCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 
