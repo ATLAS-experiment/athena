@@ -255,10 +255,9 @@ DbStatus RNTupleContainer::initObjectFieldDesc( FieldDesc& dsc )
    if( dsc.clazz )  {
       if( dsc.clazz->GetStreamerInfo() and dsc.clazz->HasDictionary() )  {
          // AUX STORE specifics
+         // get rid of the AUX_POSTFIX dot at the end (converted to _ earlier)
+         if (dsc.fieldname.ends_with("Aux_")) dsc.fieldname.back() = ':';
          if( m_auxDynTool and m_auxDynTool->hasAuxStoreIO(dsc.clazz) ) {
-            // get rid of the AUX_POSTFIX dot at the end (converted to _ earlier)
-            auto last = dsc.fieldname.end() - 1;
-            if( *last == '_' )  *last = ':';
             dsc.auxdyn_writer = m_auxDynTool->getNTupleAuxDynWriter(*dsc.clazz);
             if( !dsc.auxdyn_writer ) {
                DbPrint log(m_name);
