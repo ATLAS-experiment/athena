@@ -23,6 +23,7 @@ class IEnhancedBiasWeighter : public virtual DerivationFramework::IAugmentationT
 
       virtual double   getEBWeight(const xAOD::EventInfo* eventInfo) const = 0;
       virtual double   getEBWeight(const EventContext& context) const = 0;
+      virtual double   getBunchCrossingRate() const = 0;
       virtual double   getEBLiveTime(const xAOD::EventInfo* eventInfo) const = 0;
       virtual double   getEBLiveTime(const EventContext& context) const = 0;
       virtual double   getLBLumi(const xAOD::EventInfo* eventInfo) const = 0;

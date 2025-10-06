@@ -44,8 +44,8 @@ class L1TopoRatesCalculator: public ::RatesAnalysisAlg {
   std::vector<std::string> m_RCM_nameOrder;
  private:  
   TH2D* m_ratesMatrixHist{}; // Rates Matrix
-  TH2D* m_countsMatrixHist; // Counts Matrix
-  TH2D* m_L1TopoScoreMatrixHist; // L1TopoScore Matrix
+  TH2D* m_countsMatrixHist{}; // Counts Matrix
+  TH2D* m_L1TopoScoreMatrixHist{}; // L1TopoScore Matrix
   struct ResultDefinition {
       unsigned int conID{};
       unsigned int flatindex{};

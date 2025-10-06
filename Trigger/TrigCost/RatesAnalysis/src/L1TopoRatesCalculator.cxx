@@ -665,6 +665,7 @@ StatusCode L1TopoRatesCalculator::ratesFinalize() {
             double A  = m_rates_matrix[i][i];
             double B  = m_rates_matrix[j][j];
             double AB = m_rates_matrix[i][j];
+
             double sigma_A  = m_rates_matrix2[i][i];
             double sigma_B  = m_rates_matrix2[j][j];
             double sigma_AB = m_rates_matrix2[i][j];
