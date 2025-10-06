@@ -82,6 +82,10 @@ def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs
     global my_MGC_instance
     print(process,plugin,keepJpegs,usePMGSettings)
     my_MGC_instance = MGControl(process, plugin, keepJpegs, usePMGSettings)
+    # Sync options as an intermediate solution until the full migration is done
+    modify_run_card(process_dir=my_MGC_instance.process_dir,settings=my_MGC_instance.runCardDict,skipBaseFragment=True)
+    # This should be enabled ASAP, but isn't yet ready
+    #modify_config_card(process_dir=my_MGC_instance.process_dir,settings=my_MGC_instance.configCardDict)
     return my_MGC_instance.process_dir
 
 def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
