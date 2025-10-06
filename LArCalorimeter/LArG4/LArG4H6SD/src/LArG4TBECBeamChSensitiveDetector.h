@@ -37,7 +37,7 @@ private:
   // detector.
   G4String m_HCname;
 
-  std::vector< LArG4TBECBeamChHit*> m_Hits;
+  std::vector< std::unique_ptr<LArG4TBECBeamChHit>> m_Hits;
 };
 
 #endif // LARG4H6SD_LARG4TBECBEAMCHSENSITIVEDETECTOR_H
