@@ -136,6 +136,7 @@ def createFPGATrackSimConfigFlags():
 
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)
+    cf.addFlag('regionToWriteDPTree', -1)
     cf.addFlag('writeOutputEventLimit', -1)
     cf.addFlag('readOfflineObjects', True)
 
