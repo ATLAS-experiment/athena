@@ -3,16 +3,11 @@
 */
 
 #include "PanTauAlgs/Tool_TauConstituentGetter.h"
-#include "PanTauAlgs/TauConstituent.h"
 #include "PanTauAlgs/HelperFunctions.h"
-#include "PanTauAlgs/Tool_InputConverter.h"
-#include "xAODTau/TauJet.h"
-#include "xAODPFlow/PFO.h"
 
 PanTau::Tool_TauConstituentGetter::Tool_TauConstituentGetter(const std::string& name) :
   asg::AsgTool(name)
-{
-}
+{}
 
 PanTau::Tool_TauConstituentGetter::~Tool_TauConstituentGetter() = default;
 
