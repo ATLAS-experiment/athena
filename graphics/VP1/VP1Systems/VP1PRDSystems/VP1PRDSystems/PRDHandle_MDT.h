@@ -30,7 +30,7 @@ public:
   inline int ADC() const;
 
   bool inMuonChamber() const { return true; }
-  GeoPVConstLink parentMuonChamberPV() const { return m_driftcircle->detectorElement()->parentStationPV(); }
+  GeoPVConstLink parentMuonChamberPV() const { return m_driftcircle->detectorElement()->getMaterialGeom()->getParent(); }
 
 
 // protected:

@@ -24,7 +24,7 @@ public:
 
 
   bool inMuonChamber() const { return true; }
-  GeoPVConstLink parentMuonChamberPV() const { return m_csc->detectorElement()->parentStationPV(); }
+  GeoPVConstLink parentMuonChamberPV() const { return m_csc->detectorElement()->getMaterialGeom()->getParent(); }
 
   virtual QStringList clicked() const;//Called when user selects the node. The returned strings will be displayed in the textbox.
 
