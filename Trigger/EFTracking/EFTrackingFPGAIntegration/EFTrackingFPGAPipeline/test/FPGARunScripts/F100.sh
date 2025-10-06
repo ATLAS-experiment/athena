@@ -15,6 +15,9 @@ usage () {
     -x  |  --xclbin         STRING      path to the xclbin that needs to be run
     -b  |  --bdfid          STRING      bdfid of the FPGA to run on
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
+    -d  |  --skipEvents     INT         Number of events to skip at the start (default = 0)
+    -t  |  --threads        INT         Number of threads to use (default = 1)
+    -q  |  --doCodeType     STRING      Code type for FPGADataPrep.doCodeType (default = F1X0)
     -s  |  --skipCheck                  skip checks on output AOD file
     -f  |  --runF110                    run F110 Integration algo
     -c  |  --doClusters                 persistify xAOD cluster and space point containers
