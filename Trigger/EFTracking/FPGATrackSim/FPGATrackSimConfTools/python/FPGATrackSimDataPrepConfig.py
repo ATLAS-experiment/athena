@@ -159,10 +159,13 @@ def prepareFlagsForFPGATrackSimDataPrepAlg(flags):
 
 def FPGATrackSimDataPrepOutputCfg(flags):
     result=ComponentAccumulator()
+    
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputDataPrep")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
-    FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimDataPrepTree"
-    if not flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+    FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimDataPrepTree"    
+    writeThis=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and ((flags.Trigger.FPGATrackSim.regionToWriteDPTree in flags.Trigger.FPGATrackSim.regionList) or (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0))
+    
+    if not writeThis:
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
         FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
@@ -375,6 +378,9 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg=CompFactory.FPGATrackSimDataPrepAlg()
     theFPGATrackSimDataPrepAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimDataPrepAlg.writeOutputData = flags.Trigger.FPGATrackSim.writeAdditionalOutputData
+    writePreClusterBranch=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0)
+    theFPGATrackSimDataPrepAlg.writePreClusterBranch=writePreClusterBranch
+
     theFPGATrackSimDataPrepAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
     theFPGATrackSimDataPrepAlg.doEvtSel= False if flags.Trigger.FPGATrackSim.pipeline.startswith('F-1') or flags.Trigger.FPGATrackSim.sampleType == 'skipTruth' else True
     theFPGATrackSimDataPrepAlg.useInternalTruthTracks = flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching

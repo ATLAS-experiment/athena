@@ -69,17 +69,18 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
     // ROOT branches created for test vectors.
-    if (m_outputRoadUnionTool) m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
 
+    if (m_outputRoadUnionTool) m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), m_writeInputBranches);
+      
     // Updated slicing engine test vectors will have three streams.
-    m_slicedFirstPixelHeader = m_writeOutputTool->addInputBranch(m_sliceFirstPixelBranch.value(), true);
-    m_slicedSecondPixelHeader = m_writeOutputTool->addInputBranch(m_sliceSecondPixelBranch.value(), true);
-    m_slicedStripHeader = m_writeOutputTool->addInputBranch(m_sliceStripBranch.value(), true);
-
+    m_slicedFirstPixelHeader = m_writeOutputTool->addInputBranch(m_sliceFirstPixelBranch.value(), m_writeInputBranches);
+    m_slicedSecondPixelHeader = m_writeOutputTool->addInputBranch(m_sliceSecondPixelBranch.value(), m_writeInputBranches);
+    m_slicedStripHeader = m_writeOutputTool->addInputBranch(m_sliceStripBranch.value(), m_writeInputBranches);
+    
     // We also need a pre- and post- SP copy of the SPs.
-    m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), true);
-
+    m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), m_writeInputBranches);
+    
     // Connect the slicing tools accordingly. We probably no longer need to hook up the roadfinder here.
     if (m_outputRoadUnionTool) m_roadFinderTool->setupSlices(m_slicedHitHeader);
     m_slicingEngineTool->setupSlices(m_slicedFirstPixelHeader, m_slicedSecondPixelHeader, m_slicedStripHeader);
@@ -179,7 +180,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_slicedSecondPixelHeader->newEvent(eventInfo);
     m_slicedStripHeader->newEvent(eventInfo);
     m_slicedStripHeaderPreSP->newEvent(eventInfo);
-
+    
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_output, phits_all, phits_1st, phits_2nd;

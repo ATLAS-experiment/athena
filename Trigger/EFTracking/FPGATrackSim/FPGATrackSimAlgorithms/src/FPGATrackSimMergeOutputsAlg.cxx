@@ -36,7 +36,9 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
   for (unsigned iregion = 0; iregion < N; iregion++) {
     regionsFound[iregion] = false;
   }
-  
+
+  bool foundDP=false;
+
   for (unsigned ifile = 0; ifile < nfiles; ifile++) { // loop over paths to files
     m_files[ifile] = new TFile(m_inpaths[ifile].c_str(),"READ");
     if (!m_files[ifile]->IsOpen() || m_files[ifile]->IsZombie()) {
@@ -44,17 +46,22 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
       return StatusCode::FAILURE;
     }
     
-    if (ifile == 0) { // do this only on the first file
+    if (!foundDP) { // only needed for one file
       m_dataprep_tree = (TTree*)(m_files[ifile]->Get("FPGATrackSimDataPrepTree"));
-      m_dataprep = new FPGATrackSimLogicalEventInputHeader();
-      
-      TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
-      if (!dpb) {
-	ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
-	return StatusCode::FAILURE;
+      if (m_dataprep_tree) {
+	if (m_dataprep_tree->GetEntries() > 0) {
+	  foundDP = true;
+	  m_dataprep = new FPGATrackSimLogicalEventInputHeader();
+	  
+	  TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
+	  if (!dpb) {
+	    ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
+	    return StatusCode::FAILURE;
+	  }
+	  dpb->SetAddress(&m_dataprep);
+	  m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
+	}
       }
-      dpb->SetAddress(&m_dataprep);
-      m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
     }
 
     
@@ -88,6 +95,11 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
       m_trees[ifile][iregion]->SetBranchStatus("LogicalEventStrip*",0);        
       
     }
+  }
+
+  if (!foundDP) {
+    ATH_MSG_ERROR("Did not find the DP tree");
+    return StatusCode::FAILURE;
   }
   
   return StatusCode::SUCCESS;

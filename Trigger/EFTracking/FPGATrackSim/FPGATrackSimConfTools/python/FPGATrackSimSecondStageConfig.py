@@ -560,7 +560,11 @@ def FPGATrackSimSecondStageOutputCfg(flags,name="FPGATrackSimWriteOutputSecondSt
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimSecondStageTree")
-    if not flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+
+    ### don't write this if not needed
+    writeThis=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0)
+    
+    if not writeThis:
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
         FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit

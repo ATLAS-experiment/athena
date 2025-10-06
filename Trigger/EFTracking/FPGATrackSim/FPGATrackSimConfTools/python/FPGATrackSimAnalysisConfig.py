@@ -25,6 +25,7 @@ def FPGATrackSimWriteOutputCfg(flags):
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimLogicalEventTree")
+
     if not flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
@@ -652,6 +653,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.LRTRoadFinder = result.getPrimaryAndMerge(LRTRoadFinderCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.NNTrackTool = result.getPrimaryAndMerge(NNTrackToolCfg(flags))
 
+    theFPGATrackSimLogicalHitsProcessAlg.writeInputBranches=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0)
     theFPGATrackSimLogicalHitsProcessAlg.OutputTool = result.popToolsAndMerge(FPGATrackSimWriteOutputCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.TrackFitter_1st = result.getPrimaryAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
     theFPGATrackSimLogicalHitsProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
