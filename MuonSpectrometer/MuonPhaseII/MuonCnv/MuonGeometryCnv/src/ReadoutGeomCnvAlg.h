@@ -124,7 +124,10 @@ class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         SG::ReadCondHandleKeyArray<ActsTrk::DetectorAlignStore> m_alignStoreKeys{this, "AlignmentKeys", {}, "Alignment key"};
         
         Gaudi::Property<bool> m_checkGeo{this, "checkGeo", false, "Checks the positions of the sensors"};
+        Gaudi::Property<bool> m_dumpGeo{this, "dumpGeo", false, "Dumps the constructed geometry"};
+        Gaudi::Property<std::string> m_geoDumpName{this,"geoDumpName", "ConvMuonGeoModel.db",};
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+
  
 };
 }

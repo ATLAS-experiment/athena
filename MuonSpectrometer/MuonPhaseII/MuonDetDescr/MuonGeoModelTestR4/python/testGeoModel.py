@@ -232,6 +232,7 @@ if __name__=="__main__":
     ### Ensure consistent translation of the geometry
     if flags.Muon.usePhaseIIGeoSetup:
         cfg.getCondAlgo("MuonDetectorCondAlg").checkGeo = True
+        cfg.getCondAlgo("MuonDetectorCondAlg").dumpGeo = True
         from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
         cfg.merge(TrackingGeometryCondAlgCfg(flags))
     
