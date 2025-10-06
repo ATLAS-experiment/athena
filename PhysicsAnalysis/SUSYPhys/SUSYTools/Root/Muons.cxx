@@ -29,8 +29,9 @@
 
 #include "TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h"
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/replace.hpp>
+#include <regex>
+#include <string_view>
+#include <ranges>
 
 #ifndef XAOD_STANDALONE // For now metadata is Athena-only
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -577,10 +578,10 @@ double SUSYObjDef_xAOD::GetTotalMuonTriggerSF(const xAOD::MuonContainer& sfmuons
 
     //redefine dimuon triggers here (2mu14 --> mu14_mu14)
     if (isdimuon) { newtrigExpr += "_"+newtrigExpr;  }
-    boost::replace_all(newtrigExpr, "HLT_", "");
-    boost::char_separator<char> sep("_");
+    newtrigExpr = std::regex_replace(newtrigExpr, std::regex("HLT_"), "");
 
-    for (const auto& mutrig : boost::tokenizer<boost::char_separator<char>>(newtrigExpr, sep)) {
+    for (auto part : std::views::split(newtrigExpr, '_')) {
+      std::string mutrig(&*part.begin(), std::ranges::distance(part));
       double dataFactor = 1.;
       double mcFactor   = 1.;
       
