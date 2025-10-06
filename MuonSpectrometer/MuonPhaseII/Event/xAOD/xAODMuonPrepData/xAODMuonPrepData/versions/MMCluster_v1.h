@@ -76,11 +76,11 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Sets the microTPC chisq probability*/
     void setChiSqProb(float value);
 
-    using Author = Muon::MMPrepData::Author;
+    using Author = ::Muon::MMPrepData::Author;
     Author author() const;
     void setAuthor(Author author);
     
-    using Quality = Muon::MMPrepData::Quality;
+    using Quality = ::Muon::MMPrepData::Quality;
     Quality quality() const;
     void setQuality(Quality quality);
 
