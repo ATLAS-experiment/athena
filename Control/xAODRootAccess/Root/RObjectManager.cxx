@@ -69,6 +69,7 @@ namespace xAOD {
       // Renew the object in memory if we are in such a mode:
       if( m_renewOnRead ) {
          m_holder->renew();
+         m_field.BindRawPtr(m_holder->get());
       }
 
       // Load the entry.
