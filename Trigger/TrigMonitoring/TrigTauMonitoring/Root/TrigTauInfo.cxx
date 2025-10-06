@@ -3,6 +3,7 @@
 */
 
 #include "TrigTauMonitoring/TrigTauInfo.h"
+#include <ranges>
 
 TrigTauInfo::TrigTauInfo(const std::string& trigger)
     : m_trigger{trigger}
@@ -38,7 +39,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     }
 
     std::vector<std::string> sections;
-    boost::split(sections, m_trigger, boost::is_any_of("_"));
+    for (auto&& subrange : std::views::split(m_trigger, '_')) sections.emplace_back(subrange.begin(), subrange.end());
 
     std::regex tau_rgx("^(\\d*)tau(\\d+)$");
     std::regex elec_rgx("^(\\d*)e(\\d+)$");
@@ -78,10 +79,10 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 // HLT Tau ID
                 itr = find_if(leg.begin(), leg.end(), [tau_ID_rgx](const std::string& s) { return std::regex_match(s, tau_ID_rgx); });
                 std::string tau_id = itr != leg.end() ? *itr : "";
-                if(boost::starts_with(tau_id, "veryloose")) tau_id = tau_id.substr(9);
-                else if(boost::starts_with(tau_id, "loose")) tau_id = tau_id.substr(5);
-                else if(boost::starts_with(tau_id, "medium")) tau_id = tau_id.substr(6);
-                else if(boost::starts_with(tau_id, "tight")) tau_id = tau_id.substr(5);
+                if(tau_id.starts_with( "veryloose")) tau_id = tau_id.substr(9);
+                else if(tau_id.starts_with( "loose")) tau_id = tau_id.substr(5);
+                else if(tau_id.starts_with( "medium")) tau_id = tau_id.substr(6);
+                else if(tau_id.starts_with( "tight")) tau_id = tau_id.substr(5);
 
                 // Override for the old trigger names
                 if(tau_id == "RNN") {

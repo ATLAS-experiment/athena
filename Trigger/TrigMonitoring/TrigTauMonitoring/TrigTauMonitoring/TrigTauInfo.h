@@ -10,8 +10,6 @@
 #include <map>
 #include <iostream>
 
-#include <boost/algorithm/string.hpp>
-
 class TrigTauInfo {
 public:
     TrigTauInfo() {} // Required for the dictionary
