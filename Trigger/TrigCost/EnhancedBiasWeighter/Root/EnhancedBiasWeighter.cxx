@@ -46,7 +46,7 @@ StatusCode EnhancedBiasWeighter::initialize()
     }
     m_deadtime = 1.; // No deadtime for MC
     m_pairedBunches = FULL_RING; // Assume full-ring
-    const float mcCrossSectionInSqCm = 1e-33 * m_mcCrossSection; // Convert nb -> cm^2 
+    const double mcCrossSectionInSqCm = 1e-33 * m_mcCrossSection; // Convert nb -> cm^2 
     m_mcModifiedCrossSection = mcCrossSectionInSqCm * m_mcFilterEfficiency * m_mcKFactor;
     ATH_MSG_INFO ("Running over MC with xsec:" << m_mcCrossSection << " nb, filter efficiency:" << m_mcFilterEfficiency << ", k-factor:" << m_mcKFactor);
 
@@ -311,7 +311,7 @@ std::unordered_map<std::string, ChainDetail> EnhancedBiasWeighter::parsePrescale
           // Later processing here does not expect any spaces, so remove them now. Pure comma separated list
           std::string lower = xml->GetNodeContent(sigDetailsNode);
           while (lower.find(" ") != std::string::npos) lower.replace( lower.find(" "), 1, "");
-          result[chainName].m_lowerName = lower;
+          result[chainName].m_lowerName = std::move(lower);
         } else if (detail == "evts_passed") {
           result[chainName].m_eventsPassed = std::stod( xml->GetNodeContent(sigDetailsNode) );
         } else if (detail == "evts_passed_weighted") {
@@ -396,7 +396,10 @@ double EnhancedBiasWeighter::getEBWeight(const xAOD::EventInfo* eventInfo) const
 
   ATH_CHECK( trackAverages(eventInfo), 0 );
 
-  if (m_isMC) {
+  if (m_isMC && m_doMultiSliceDiJet) {
+    return static_cast<double>(eventInfo->mcEventWeight(0)) * m_mcModifiedCrossSection * m_targetLumi;
+
+  } else if (m_isMC) {
 
     if (m_mcIgnoreGeneratorWeights) {
       return 1.;
@@ -464,6 +467,9 @@ StatusCode EnhancedBiasWeighter::trackAverages(const xAOD::EventInfo* eventInfo)
   return StatusCode::SUCCESS;
 }
 
+double EnhancedBiasWeighter::getBunchCrossingRate() const {
+  return m_pairedBunches * LHC_FREQUENCY;
+}
 double EnhancedBiasWeighter::getEBLiveTime(const xAOD::EventInfo* eventInfo) const
 {
     if (m_isMC) {
