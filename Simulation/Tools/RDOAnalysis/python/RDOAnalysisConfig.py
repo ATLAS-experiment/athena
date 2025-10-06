@@ -320,8 +320,7 @@ def LArRDOAnalysisCfg(flags, name="LArRDOAnalysis", **kwargs):
     kwargs.setdefault("InputTTL1HADKey", "LArTTL1HAD")
     kwargs.setdefault("InputTTL1EMKey", "LArTTL1EM")
     if flags.Digitization.AddCaloDigiThinned or \
-       f"{prefix}LArDigitContainer_MC_Thinned" in flags.Input.Collections or \
-       flags.Common.ProductionStep is ProductionStep.Digitization: \
+       f"{prefix}LArDigitContainer_MC_Thinned" in flags.Input.Collections: \
         
         kwargs.setdefault("InputDigitKey", f"{prefix}LArDigitContainer_MC_Thinned")
     else:
@@ -432,8 +431,7 @@ def RpcRDOAnalysisCfg(flags, name="RPC_RDOAnalysis", **kwargs):
     prefix=''
     if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
         prefix=flags.Overlay.BkgPrefix
-    if not flags.Muon.usePhaseIIGeoSetup:
-        kwargs.setdefault("InputPadKey", f"{prefix}RPCPAD" if not flags.Muon.usePhaseIIGeoSetup else "" )
+    kwargs.setdefault("InputPadKey", f"{prefix}RPCPAD" if not flags.Muon.usePhaseIIGeoSetup else "" )
     from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
     result.merge(RPCCablingConfigCfg(flags))
     kwargs.setdefault("InputRdoKey", f"{prefix}NRPCRDO" if flags.Muon.enableNRPC else "" ) 
