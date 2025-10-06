@@ -46,6 +46,9 @@ NoTestHepMCGenerators = ["Superchic","ParticleDecayer", "ParticleGun", "CosmicGe
 # Generators with no flexibility/concept of a tune or PDF choice
 NoTuneGenerators = ["ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "HepMCAscii"]
 
+# Generators whose unstable particles without end vertex have to be purged
+# n.b. "Pythia8-Angantyr" is not a 'real' name, the real name would be just 'Pythia8'
+PurgeNoEndVtxGenerators = ["Pythia8-Angantyr", "Herwig7", "Hijing"]
 
 def gen_require_steering(gennames):
     """Return a boolean of whether this set of generators requires the steering command line flag"""
@@ -85,6 +88,16 @@ def gen_notune(genname):
 def gens_notune(gennames):
     """Return whether all of the generators are allowed to not provide PDF and tune information"""
     return all(gen_notune(g) for g in gennames)
+
+def gen_purgenoendvtx(genname):
+    """Return whether a generator may produce unstable particles 
+    without end vertex that have to be purged"""
+    return genname in PurgeNoEndVtxGenerators
+
+def gens_purgenoendvtx(gennames):
+    """Return whether any of the generators may produce unstable particles 
+    without end vertex that have to be purged"""
+    return any(gen_purgenoendvtx(g) for g in gennames)
 
 def gen_sortkey(genname):
     """Return a key suitable for sorting a generator name by stage, then alphabetically"""
