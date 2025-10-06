@@ -4,13 +4,6 @@
 
 #include "PanTauAlgs/HelperFunctions.h"
 #include "PanTauAlgs/TauConstituent.h"
-#include "Math/SpecFuncMathMore.h"
-#include "TMath.h"
-#include "TLorentzVector.h"
-#include "TVector3.h"
-#include <vector>
-#include <sstream>
-#include <cmath>
 
 std::string PanTau::HelperFunctions::convertNumberToString(double x) const {
   std::stringstream tmpStream;

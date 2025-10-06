@@ -3,15 +3,11 @@
 */
 
 #include "PanTauAlgs/Tool_TauConstituentSelector.h"
-#include "PanTauAlgs/TauConstituent.h"
 #include "PanTauAlgs/HelperFunctions.h"
-#include "PanTauAlgs/Tool_InformationStore.h"
-
 
 PanTau::Tool_TauConstituentSelector::Tool_TauConstituentSelector(const std::string& name) :
   asg::AsgTool(name)
-{
-}
+{}
 
 
 PanTau::Tool_TauConstituentSelector::~Tool_TauConstituentSelector() = default;
