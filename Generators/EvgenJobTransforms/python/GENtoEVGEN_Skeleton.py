@@ -248,9 +248,15 @@ def fromRunArgs(runArgs):
     # Fix non-standard event features
     if not flags.Input.Files:
         from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
+        from GeneratorConfig.GenConfigHelpers import gens_purgenoendvtx
+        generatorsList = sample.generators
+        if "Pythia8" in generatorsList:
+            pythia8Alg = cfg.getEventAlgo("Pythia8_i")
+            if pythia8Alg.Beam1 != "PROTON" or pythia8Alg.Beam2 != "PROTON":
+            # generator name is still "Pythia8", even when colliding nuclei
+                generatorsList.append("Pythia8-Angantyr")
         cfg.merge(FixHepMCCfg(flags,
-                              PurgeUnstableWithoutEndVtx="Hijing" in sample.generators or \
-                                                         "Herwig7" in sample.generators))
+                              PurgeUnstableWithoutEndVtx=gens_purgenoendvtx(generatorsList)))
 
     ## Sanity check the event record (not appropriate for all generators)
     from GeneratorConfig.GenConfigHelpers import gens_testhepmc
