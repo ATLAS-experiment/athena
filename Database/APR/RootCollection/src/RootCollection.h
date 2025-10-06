@@ -10,7 +10,7 @@
 #include "CollectionBase/CollectionRowBuffer.h"
 
 #include "FileCatalog/IFileCatalog.h"
-#include "CoralBase/MessageStream.h"
+#include "POOLCore/DbPrint.h"
 
 #include "GaudiKernel/IFileMgr.h"
 #include "GaudiKernel/SmartIF.h"
@@ -58,7 +58,7 @@ namespace pool {
          . 
          ROOT documentation can be found at http://root.cern.ch/ 
       */
-      class RootCollection :  public ICollection {
+      class RootCollection :  public ICollection, public APRMessaging {
     
      public:
 	typedef Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)> Factory;
@@ -177,10 +177,9 @@ namespace pool {
         bool                                 m_readOnly;
         bool                                 m_schemaWritten;
         
-        std::unique_ptr<pool::IFileCatalog> m_fileCatalog;
-        coral::MessageStream                m_poolOut;
+        std::unique_ptr<pool::IFileCatalog>  m_fileCatalog;
 
-        SmartIF<IFileMgr>                  m_fileMgr;
+        SmartIF<IFileMgr>                    m_fileMgr;
 
       };
    }

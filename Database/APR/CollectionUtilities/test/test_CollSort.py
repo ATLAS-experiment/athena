@@ -13,6 +13,7 @@ Logging.log.setLevel(Constants.DEBUG)
 import ROOT
 pool = ROOT.pool
 collSvc = pool.CollectionService()
+collSvc.setMessageSvcQuiet()
 
 primaryColl = { 'name' : 'EventNumber',  'type' : 'unsigned long' }
 sampleCollName = 'sample_apr_collection'
@@ -37,7 +38,7 @@ from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
 sorter = SortedCollectionCreator(name="SortEvents")
 sorter.execute( sampleCollName, sortAttribute = primaryColl['name'],
                 outputCollection = outputCollNameTree, outputCollectionType="RootCollection" )
-sorter.execute( sampleCollName, sortAttribute = primaryColl['name'],
+sorter.executeInSubprocess( sampleCollName, sortAttribute = primaryColl['name'],
                 outputCollection = outputCollNameRNTup, outputCollectionType="RNTCollection" )
 
 # Read the collections in VERBOSE mode to see the content

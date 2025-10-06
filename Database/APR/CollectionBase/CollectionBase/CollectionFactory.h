@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONBASE_COLLECTIONFACTORY_H
@@ -8,6 +8,7 @@
 #include "CollectionBase/ICollection.h"
 #include "CollectionBase/CollectionDescription.h"
 #include "FileCatalog/IFileCatalog.h"
+#include "POOLCore/DbPrint.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <string>
@@ -26,7 +27,7 @@ namespace pool {
    * A plugin factory for the creation of storage technology specific collections or 
    * collection fragments.
    */
-  class ATLAS_NOT_THREAD_SAFE CollectionFactory
+  class ATLAS_NOT_THREAD_SAFE CollectionFactory : public APRMessaging
   // not thread-safe due to constness violations wrt the catalog.
   {
   public:
@@ -178,9 +179,6 @@ namespace pool {
 
     /// Default destructor.
     virtual ~CollectionFactory();
-
-    /// Collection factory singleton.
-    static CollectionFactory s_instance;
 
     /// Definition of file catalog entry type for collections registered in catalog.
     static const std::string c_fileType;

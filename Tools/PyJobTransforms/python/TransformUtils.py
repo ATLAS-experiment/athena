@@ -136,7 +136,12 @@ def SortInput(flags, cfg):
     # Sort Inputs based on one of the EventInfoTag attributes
     # Store sorted event collection in a temporary file
     # This should run as postInclude, so we assume EventSelector.InputCollections is set earlier
-    sorter.execute(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+
+    # moved execution to a subprocess, because Gaudi messaging created by collections causes
+    # AppManager errors
+    rc = sorter.executeInSubprocess(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+    if rc != 0:
+       msg.error(f"Sorting failed with exit code: {rc}")
 
     # Reading Events through References require a populated FileCatalog
     for inpfile in inputs:
