@@ -25,7 +25,6 @@
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/ReadHandle.h>
-#include "PathResolver/PathResolver.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 
