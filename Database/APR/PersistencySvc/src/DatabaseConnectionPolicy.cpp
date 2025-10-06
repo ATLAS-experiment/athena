@@ -1,22 +1,22 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
-#include "CoralBase/MessageStream.h"
+#include <format>
+#include <stdexcept>
+
+constexpr const char* const CompName = "PersistencySvc::DatabaseConnectionPolicy";
+using namespace std;
 
 bool
 pool::DatabaseConnectionPolicy::setWriteModeForExisting( pool::DatabaseConnectionPolicy::Mode mode )
 {
   if ( mode == pool::DatabaseConnectionPolicy::CREATE ) {
-    coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-    log << coral::Error << "CREATE is not allowed as an option in setWriteModeForExisting()" 
-        << coral::MessageStream::endmsg;
+    throw runtime_error( format("{}: CREATE is not allowed as an option in setWriteModeForExisting()", CompName) );
   }
   else if ( mode == pool::DatabaseConnectionPolicy::READ ) {
-    coral::MessageStream  log( "PersistencySvc::DatabaseConnectionPolicy" );
-    log << coral::Error << "READ is not allowed as an option in setWriteModeForExisting()" 
-        << coral::MessageStream::endmsg;
+    throw runtime_error( format("{}: READ is not allowed as an option in setWriteModeForExisting()", CompName) );
   }
   else {
     if ( mode == pool::DatabaseConnectionPolicy::RAISE_ERROR ||
@@ -26,9 +26,7 @@ pool::DatabaseConnectionPolicy::setWriteModeForExisting( pool::DatabaseConnectio
       return true;
     }
     else {
-      coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-      log << coral::Error << "Unrecognizable option specified in setWriteModeForExisting()" 
-          << coral::MessageStream::endmsg;
+      throw runtime_error( format("{}: Unrecognizable option specified in setWriteModeForExisting()", CompName) );
     }
   }
   return false;
@@ -38,14 +36,10 @@ bool
 pool::DatabaseConnectionPolicy::setWriteModeForNonExisting( pool::DatabaseConnectionPolicy::Mode mode )
 {
   if ( mode ==  pool::DatabaseConnectionPolicy::READ ) {
-    coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-    log << coral::Error << "READ is not allowed as an option in setWriteModeForNonExisting()" 
-        << coral::MessageStream::endmsg;
+    throw runtime_error( format("{}: READ is not allowed as an option in setWriteModeForNonExisting()", CompName) );
   }
   else if ( mode == pool::DatabaseConnectionPolicy::OVERWRITE ) {
-    coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-    log << coral::Error << "OVERWRITE is not allowed as an option in setWriteModeForExisting()" 
-        << coral::MessageStream::endmsg;
+    throw runtime_error( format("{}: OVERWRITE is not allowed as an option in setWriteModeForExisting()", CompName) );
   }
   else {
     if ( mode == pool::DatabaseConnectionPolicy::RAISE_ERROR ||
@@ -55,9 +49,7 @@ pool::DatabaseConnectionPolicy::setWriteModeForNonExisting( pool::DatabaseConnec
       return true;
     }
     else {
-      coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-      log << coral::Error << "Unrecognizable option specified in setWriteModeForNonExisting()"
-          << coral::MessageStream::endmsg;
+      throw runtime_error( format("{}: Unrecognizable option specified in setWriteModeForNonExisting()", CompName) );
     }
   }
   return false;
@@ -67,16 +59,13 @@ bool
 pool::DatabaseConnectionPolicy::setReadMode( pool::DatabaseConnectionPolicy::Mode mode )
 {
   if ( mode == pool::DatabaseConnectionPolicy::CREATE ) {
-    coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-    log << coral::Error << "CREATE is not allowed as an option in setReadMode()" << coral::MessageStream::endmsg;
+    throw runtime_error( format("{}: CREATE is not allowed as an option in setReadMode()", CompName) );
   }
   else if ( mode == pool::DatabaseConnectionPolicy::OVERWRITE ) {
-    coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-    log << coral::Error << "OVERWRITE is not allowed as an option in setReadMode()" << coral::MessageStream::endmsg;
+    throw runtime_error( format("{}: OVERWRITE is not allowed as an option in setReadMode()", CompName) );
   }
   else if ( mode == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-    coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-    log << coral::Error << "RAISE_ERROR is not allowed as an option in setReadMode()" << coral::MessageStream::endmsg;
+    throw runtime_error( format("{}: RAISE_ERROR is not allowed as an option in setReadMode()", CompName) );
   }
   else {
     if ( mode == pool::DatabaseConnectionPolicy::READ ||
@@ -85,8 +74,7 @@ pool::DatabaseConnectionPolicy::setReadMode( pool::DatabaseConnectionPolicy::Mod
       return true;
     }
     else {
-      coral::MessageStream log( "PersistencySvc::DatabaseConnectionPolicy" );
-      log << coral::Error << "Unrecognizable option specified in setReadMode()" << coral::MessageStream::endmsg;
+      throw runtime_error( format("{}: Unrecognizable option specified in setReadMode()", CompName) );
     }
   }
   return false;

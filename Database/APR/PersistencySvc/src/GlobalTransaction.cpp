@@ -4,7 +4,7 @@
 
 #include "GlobalTransaction.h"
 #include "DatabaseHandler.h"
-#include "CoralBase/MessageStream.h"
+#include "POOLCore/DbPrint.h"
 
 pool::PersistencySvc::GlobalTransaction::GlobalTransaction( pool::PersistencySvc::DatabaseRegistry& registry ):
   m_type( pool::ITransaction::UNDEFINED ),
@@ -38,10 +38,10 @@ pool::PersistencySvc::GlobalTransaction::commit()
           iDb != m_databases.end(); ++iDb ) {
       bool bCommit = (*iDb)->commitTransaction(); // This has to be replaced with a two phase commit
       if ( ! bCommit ) {
-        coral::MessageStream log( "PersistencySvc::GlobalTransaction" );
-        log << coral::Error << "Could not commit the transaction for the database with" << coral::MessageStream::endmsg
-            << "FID = " << (*iDb)->fid() << coral::MessageStream::endmsg
-            << "PFN = " << (*iDb)->pfn() << coral::MessageStream::endmsg;
+        DbPrint log( "PersistencySvc::GlobalTransaction" );
+        log << MSG::ERROR << "Could not commit the transaction for the database with" << endmsg
+            << "FID = " << (*iDb)->fid() << endmsg
+            << "PFN = " << (*iDb)->pfn() << endmsg;
       }
       OK = OK && bCommit;
     }
@@ -61,10 +61,10 @@ pool::PersistencySvc::GlobalTransaction::commitAndHold()
           iDb != m_databases.end(); ++iDb ) {
       bool bCommit = (*iDb)->commitAndHoldTransaction(); // This has to be replaced with a two phase commit
       if ( ! bCommit ) {
-        coral::MessageStream log( "PersistencySvc::GlobalTransaction" );
-        log << coral::Error << "Could not commit and hold the transaction for the database with" << coral::MessageStream::endmsg
-            << "FID = " << (*iDb)->fid() << coral::MessageStream::endmsg
-            << "PFN = " << (*iDb)->pfn() << coral::MessageStream::endmsg;
+        DbPrint log( "PersistencySvc::GlobalTransaction" );
+        log << MSG::ERROR << "Could not commit and hold the transaction for the database with" << endmsg
+            << "FID = " << (*iDb)->fid() << endmsg
+            << "PFN = " << (*iDb)->pfn() << endmsg;
       }
       OK = OK && bCommit;
     }

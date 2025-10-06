@@ -8,6 +8,7 @@
 #include "CollectionBase/ICollectionCursor.h"
 
 #include "FileCatalog/IFileCatalog.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <exception>
 #include <cstring>
@@ -202,3 +203,9 @@ pool::CollectionService::setCatalog( IFileCatalog* collCat )
    CollectionFactory::get()->setDefaultCatalog( collCat );   
 }
 
+
+void
+pool::CollectionService::setMessageSvcQuiet( bool quiet )
+{
+   Athena::getMessageSvcQuiet = quiet;
+}

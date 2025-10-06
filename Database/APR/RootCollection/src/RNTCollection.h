@@ -10,11 +10,12 @@
 #include "CollectionBase/CollectionRowBuffer.h"
 
 #include "FileCatalog/IFileCatalog.h"
-#include "CoralBase/MessageStream.h"
+#include "POOLCore/DbPrint.h"
 
 #include "GaudiKernel/IFileMgr.h"
 #include "GaudiKernel/SmartIF.h"
 #include "Gaudi/PluginService.h"
+
 
 #include <string>
 #include <memory>
@@ -58,7 +59,7 @@ namespace pool {
          @brief Collection (and CollectionProxy) implementation based on RNTuple
       */
 
-      class RNTCollection :  public ICollection {
+      class RNTCollection :  public ICollection, public APRMessaging {
     
      public:
 	typedef Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)> Factory;
@@ -153,7 +154,6 @@ namespace pool {
         bool                                 m_readOnly;
         
         std::unique_ptr<pool::IFileCatalog>  m_fileCatalog;
-        coral::MessageStream                 m_poolOut;
 
         SmartIF<IFileMgr>                    m_fileMgr;
       };
