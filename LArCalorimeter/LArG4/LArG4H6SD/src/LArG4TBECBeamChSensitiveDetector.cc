@@ -74,21 +74,21 @@ G4bool LArG4TBECBeamChSensitiveDetector::ProcessHits(G4Step* a_step,
             << std::endl;
 #endif
 
-        LArG4TBECBeamChHit* hit = new LArG4TBECBeamChHit(ident, x, y);
+        auto hit = std::make_unique<LArG4TBECBeamChHit>(ident, x, y);
 
 #ifdef DEBUG_HITS
-        std::cout << "LArG4TBECBeamChSensitiveDetector hit = " << hit << std::endl;
+        std::cout << "LArG4TBECBeamChSensitiveDetector hit = " << hit.get() << std::endl;
 #endif
 
         G4bool found = false;
-        for (const LArG4TBECBeamChHit* hit : m_Hits) {
+        for (const auto & hit : m_Hits) {
                 if(hit->getIdentifier() == ident){
                         found = true;
                         break;
                 }
         }
         if(!found){
-                m_Hits.push_back(hit);
+                m_Hits.push_back(std::move(hit));
                 return true;
         } else {
 #ifdef DEBUG_HITS
@@ -109,7 +109,7 @@ void LArG4TBECBeamChSensitiveDetector::EndOfEvent(G4HCofThisEvent* /*m_HCE*/)
 #endif
 
 #ifdef DEBUG_HITS
-	for(auto hit : m_Hits) {
+	for(const auto & hit : m_Hits) {
                 std::cout << "LArG4TBECBeamChSensitiveDetector::EndOfEvent"
                           << " ID= " << hit->getIdentifier()
                           << " x=" << hit->X()
