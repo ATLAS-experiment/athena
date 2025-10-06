@@ -2176,7 +2176,7 @@ void VP1GeometrySystem::Imp::updatePV2MuonStationMap(const MuonGM::MuonReadoutEl
 {
   if (!elem)
     return;
-  GeoPVConstLink pvlink = elem->parentStationPV();
+  GeoPVConstLink pvlink = elem->getMaterialGeom()->getParent();
   const MuonGM::MuonStation * station = elem->parentMuonStation();
   if (!station) {
     theclass->message("WARNING: Ignored null station pointer");

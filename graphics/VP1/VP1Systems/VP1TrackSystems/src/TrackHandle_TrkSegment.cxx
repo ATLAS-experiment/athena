@@ -81,7 +81,7 @@ void TrackHandle_TrkSegment::ensureTouchedMuonChambersInitialised() const
     if (rio) {
       muonDetEl = getMuonReadoutElement(*rio);
       if (muonDetEl)
-        registerTouchedMuonChamber(muonDetEl->parentStationPV());
+        registerTouchedMuonChamber(muonDetEl->getMaterialGeom()->getParent());
     }
   }
 }
