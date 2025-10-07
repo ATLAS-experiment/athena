@@ -13,6 +13,8 @@
 
 // helper function include(s)
 #include "PathResolver/PathResolver.h"
+#include "AthOnnxUtils/OnnxUtils.h"
+// #include "EvaluateUtils.h"
 #include "tauRecTools/TauDecayModeNNClassifier.h" // to get TauDecayModeNNVariable and TauDecayModeNNHelper from the tauRecTools namespace
 
 // standard library include(s)
@@ -46,92 +48,95 @@ StatusCode TauNeutralFourVecNNRegression::initialize()
 {
   ATH_MSG_INFO("Initializing TauNeutralFourVecNNRegression");
   ATH_CHECK ( m_decayModeName.initialize() );
+  ATH_CHECK( m_onnxTool_1p1n.retrieve() );
+  ATH_CHECK( m_onnxTool_1pXn.retrieve() );
+  ATH_CHECK( m_onnxTool_3pXn.retrieve() );
   // find input JSON files
-  std::string weightFile_1p1n = find_file(m_weightFile_1p1n);
-  std::string weightFile_1pXn = find_file(m_weightFile_1pXn);
-  std::string weightFile_3pXn = find_file(m_weightFile_3pXn);
-  if (weightFile_1p1n.empty())
-  {
-    ATH_MSG_ERROR("Could not find 1p1n network weights: " << m_weightFile_1p1n);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("Loaded 1p1n network configuration from: " << weightFile_1p1n);
-  if (weightFile_1pXn.empty())
-  {
-    ATH_MSG_ERROR("Could not find 1pXn network weights: " << m_weightFile_1pXn);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("Loaded 1pXn network configuration from: " << weightFile_1pXn);
-  if (weightFile_3pXn.empty())
-  {
-    ATH_MSG_ERROR("Could not find 3pXn network weights: " << m_weightFile_3pXn);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("Loaded 3pXn network configuration from: " << weightFile_3pXn);
+  // std::string weightFile_1p1n = find_file(m_weightFile_1p1n);
+  // std::string weightFile_1pXn = find_file(m_weightFile_1pXn);
+  // std::string weightFile_3pXn = find_file(m_weightFile_3pXn);
+  // if (weightFile_1p1n.empty())
+  // {
+  //   ATH_MSG_ERROR("Could not find 1p1n network weights: " << m_weightFile_1p1n);
+  //   return StatusCode::FAILURE;
+  // }
+  // ATH_MSG_INFO("Loaded 1p1n network configuration from: " << weightFile_1p1n);
+  // if (weightFile_1pXn.empty())
+  // {
+  //   ATH_MSG_ERROR("Could not find 1pXn network weights: " << m_weightFile_1pXn);
+  //   return StatusCode::FAILURE;
+  // }
+  // ATH_MSG_INFO("Loaded 1pXn network configuration from: " << weightFile_1pXn);
+  // if (weightFile_3pXn.empty())
+  // {
+  //   ATH_MSG_ERROR("Could not find 3pXn network weights: " << m_weightFile_3pXn);
+  //   return StatusCode::FAILURE;
+  // }
+  // ATH_MSG_INFO("Loaded 3pXn network configuration from: " << weightFile_3pXn);
 
   // load lwt graph configurations
-  std::ifstream inputFile_1p1n(weightFile_1p1n);
-  lwt::GraphConfig lwtGraphConfig_1p1n;
-  std::ifstream inputFile_1pXn(weightFile_1pXn);
-  lwt::GraphConfig lwtGraphConfig_1pXn;
-  std::ifstream inputFile_3pXn(weightFile_3pXn);
-  lwt::GraphConfig lwtGraphConfig_3pXn;
-  try
-  {
-    lwtGraphConfig_1p1n = lwt::parse_json_graph(inputFile_1p1n);
-  }
-  catch (const std::logic_error &e)
-  {
-    ATH_MSG_ERROR("Error parsing 1p1n network config: " << e.what());
-    return StatusCode::FAILURE;
-  }
-  try
-  {
-    lwtGraphConfig_1pXn = lwt::parse_json_graph(inputFile_1pXn);
-  }
-  catch (const std::logic_error &e)
-  {
-    ATH_MSG_ERROR("Error parsing 1pXn network config: " << e.what());
-    return StatusCode::FAILURE;
-  }
-  try
-  {
-    lwtGraphConfig_3pXn = lwt::parse_json_graph(inputFile_3pXn);
-  }
-  catch (const std::logic_error &e)
-  {
-    ATH_MSG_ERROR("Error parsing 3pXn network config: " << e.what());
-    return StatusCode::FAILURE;
-  }
+  // std::ifstream inputFile_1p1n(weightFile_1p1n);
+  // lwt::GraphConfig lwtGraphConfig_1p1n;
+  // std::ifstream inputFile_1pXn(weightFile_1pXn);
+  // lwt::GraphConfig lwtGraphConfig_1pXn;
+  // std::ifstream inputFile_3pXn(weightFile_3pXn);
+  // lwt::GraphConfig lwtGraphConfig_3pXn;
+  // try
+  // {
+  //   lwtGraphConfig_1p1n = lwt::parse_json_graph(inputFile_1p1n);
+  // }
+  // catch (const std::logic_error &e)
+  // {
+  //   ATH_MSG_ERROR("Error parsing 1p1n network config: " << e.what());
+  //   return StatusCode::FAILURE;
+  // }
+  // try
+  // {
+  //   lwtGraphConfig_1pXn = lwt::parse_json_graph(inputFile_1pXn);
+  // }
+  // catch (const std::logic_error &e)
+  // {
+  //   ATH_MSG_ERROR("Error parsing 1pXn network config: " << e.what());
+  //   return StatusCode::FAILURE;
+  // }
+  // try
+  // {
+  //   lwtGraphConfig_3pXn = lwt::parse_json_graph(inputFile_3pXn);
+  // }
+  // catch (const std::logic_error &e)
+  // {
+  //   ATH_MSG_ERROR("Error parsing 3pXn network config: " << e.what());
+  //   return StatusCode::FAILURE;
+  // }
 
-  // configure neural networks
-  try
-  {
-    m_lwtGraph_1p1n = std::make_unique<lwt::LightweightGraph>(lwtGraphConfig_1p1n, lwtGraphConfig_1p1n.outputs.cbegin()->first);
-  }
-  catch (const lwt::NNConfigurationException &e)
-  {
-    ATH_MSG_ERROR("Error configuring 1p1n network: " << e.what());
-    return StatusCode::FAILURE;
-  }
-  try
-  {
-    m_lwtGraph_1pXn = std::make_unique<lwt::LightweightGraph>(lwtGraphConfig_1pXn, lwtGraphConfig_1pXn.outputs.cbegin()->first);
-  }
-  catch (const lwt::NNConfigurationException &e)
-  {
-    ATH_MSG_ERROR("Error configuring 1pXn network: " << e.what());
-    return StatusCode::FAILURE;
-  }
-  try
-  {
-    m_lwtGraph_3pXn = std::make_unique<lwt::LightweightGraph>(lwtGraphConfig_3pXn, lwtGraphConfig_3pXn.outputs.cbegin()->first);
-  }
-  catch (const lwt::NNConfigurationException &e)
-  {
-    ATH_MSG_ERROR("Error configuring 3pXn network: " << e.what());
-    return StatusCode::FAILURE;
-  }
+  // // configure neural networks
+  // try
+  // {
+  //   m_lwtGraph_1p1n = std::make_unique<lwt::LightweightGraph>(lwtGraphConfig_1p1n, lwtGraphConfig_1p1n.outputs.cbegin()->first);
+  // }
+  // catch (const lwt::NNConfigurationException &e)
+  // {
+  //   ATH_MSG_ERROR("Error configuring 1p1n network: " << e.what());
+  //   return StatusCode::FAILURE;
+  // }
+  // try
+  // {
+  //   m_lwtGraph_1pXn = std::make_unique<lwt::LightweightGraph>(lwtGraphConfig_1pXn, lwtGraphConfig_1pXn.outputs.cbegin()->first);
+  // }
+  // catch (const lwt::NNConfigurationException &e)
+  // {
+  //   ATH_MSG_ERROR("Error configuring 1pXn network: " << e.what());
+  //   return StatusCode::FAILURE;
+  // }
+  // try
+  // {
+  //   m_lwtGraph_3pXn = std::make_unique<lwt::LightweightGraph>(lwtGraphConfig_3pXn, lwtGraphConfig_3pXn.outputs.cbegin()->first);
+  // }
+  // catch (const lwt::NNConfigurationException &e)
+  // {
+  //   ATH_MSG_ERROR("Error configuring 3pXn network: " << e.what());
+  //   return StatusCode::FAILURE;
+  // }
 
   return StatusCode::SUCCESS;
 }
@@ -140,7 +145,7 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
 {
   // Read the previously classified decay mode of the tau
   // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
-  // here they are encoded as 0, 1, 2, 3, 4 (as in TauDecayModeNNClassifier.cxx)
+  // they are encoded as 0, 1, 2, 3, 4
   
   SG::ReadDecorHandle<xAOD::TauJetContainer, int> decayModeHandle( m_decayModeName );
   if (!decayModeHandle.isPresent())
@@ -155,93 +160,147 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   }
   int decayMode = decayModeHandle(xTau);
 
-  // inputs
-  // ------
-  // m_inputMap will not hold any information,
-  // but it is required by the lwtnn API.
-  //
-  InputMap inputMapDummy;
-  InputSequenceMap inputSeqMap;
+  // // inputs
+  // // ------
+  // // m_inputMap will not hold any information,
+  // // but it is required by the lwtnn API.
+  // //
+  // InputMap inputMapDummy;
+  // InputSequenceMap inputSeqMap;
   
-  DMHelper::initMapKeys(inputSeqMap, branches);
+  // DMHelper::initMapKeys(inputSeqMap, branches);
 
-  ATH_CHECK(getInputs(xTau, inputSeqMap));
+  // ATH_CHECK(getInputs(xTau, inputSeqMap));
 
-  // output
-  // ------
-  ValueMap outputs;
+  // // output
+  // // ------
+  // ValueMap outputs;
 
-  // inference
-  // ---------
-  if (decayMode == 1) // 1p1n
-  {
-    try
-    {
-      outputs = m_lwtGraph_1p1n->compute(inputMapDummy, inputSeqMap);
-    }
-    catch (const std::exception &e)
-    {
-      ATH_MSG_ERROR("Error evaluating the network: " << e.what());
-      return StatusCode::FAILURE;
-    }
-  }
-  else if (decayMode == 2) // 1pXn
-  {
-    try
-    {
-      outputs = m_lwtGraph_1pXn->compute(inputMapDummy, inputSeqMap);
-    }
-    catch (const std::exception &e)
-    {
-      ATH_MSG_ERROR("Error evaluating the network: " << e.what());
-      return StatusCode::FAILURE;
-    }
-  }
-  else if (decayMode == 4) // 3pXn
-  {
-    try
-    {
-      outputs = m_lwtGraph_3pXn->compute(inputMapDummy, inputSeqMap);
-    }
-    catch (const std::exception &e)
-    {
-      ATH_MSG_ERROR("Error evaluating the network: " << e.what());
-      return StatusCode::FAILURE;
-    }
-  }
-  /*
-  * This should also work, but I think it's more convoluted. To fill the outputs map to then read it to the pi0fourVec std:array
-  * Instead I'll just initialise the array with 0s in all entries and only fill it with the content of the output map, if the decay mode is not a 0n one.
-  */
-  // else // 1p0n or 3p0n
+  // // inference
+  // // ---------
+  // if (decayMode == 1) // 1p1n
   // {
-  //   for (int i = 0; i < 3; i++)
+  //   try
   //   {
-  //     outputs[m_fourVecDimNames[i]] = 0;
+  //     outputs = m_lwtGraph_1p1n->compute(inputMapDummy, inputSeqMap);
+  //   }
+  //   catch (const std::exception &e)
+  //   {
+  //     ATH_MSG_ERROR("Error evaluating the network: " << e.what());
+  //     return StatusCode::FAILURE;
   //   }
   // }
+  // else if (decayMode == 2) // 1pXn
+  // {
+  //   try
+  //   {
+  //     outputs = m_lwtGraph_1pXn->compute(inputMapDummy, inputSeqMap);
+  //   }
+  //   catch (const std::exception &e)
+  //   {
+  //     ATH_MSG_ERROR("Error evaluating the network: " << e.what());
+  //     return StatusCode::FAILURE;
+  //   }
+  // }
+  // else if (decayMode == 4) // 3pXn
+  // {
+  //   try
+  //   {
+  //     outputs = m_lwtGraph_3pXn->compute(inputMapDummy, inputSeqMap);
+  //   }
+  //   catch (const std::exception &e)
+  //   {
+  //     ATH_MSG_ERROR("Error evaluating the network: " << e.what());
+  //     return StatusCode::FAILURE;
+  //   }
+  // }
+  // /*
+  // * This should also work, but I think it's more convoluted. To fill the outputs map to then read it to the pi0fourVec std:array
+  // * Instead I'll just initialise the array with 0s in all entries and only fill it with the content of the output map, if the decay mode is not a 0n one.
+  // */
+  // // else // 1p0n or 3p0n
+  // // {
+  // //   for (int i = 0; i < 3; i++)
+  // //   {
+  // //     outputs[m_fourVecDimNames[i]] = 0;
+  // //   }
+  // // }
 
+  // prepare inputs
+  std::vector<float> inputDataVector;
+
+  inputDataVector.reserve(m_input_tensor_values_notFlat.size());
+  for (const std::vector<std::vector<float> >& imageData : m_input_tensor_values_notFlat){
+    std::vector<float> flatten = AthOnnxUtils::flattenNestedVectors(imageData);
+    inputDataVector.insert(inputDataVector.end(), flatten.begin(), flatten.end());
+  }
+  std::vector<int64_t> inputShape_1 = {1, 3, 4}; // Charged PFOs
+  std::vector<int64_t> inputShape_2 = {1, 10, 12}; // Neutral PFOs
+  std::vector<int64_t> inputShape_3 = {1, 6, 4}; // Conversion Tracks
+  std::vector<int64_t> inputShape_4 = {1, 4, 4}; // Photon Shots
+
+  AthInfer::InputDataMap inputData;
+  inputData["input_1"] = std::make_pair( // Charged PFOs
+    inputShape_1, std::move(inputDataVector)
+  );
+  inputData["input_2"] = std::make_pair( // Neutral PFOs
+    inputShape_2, std::move(inputDataVector)
+  );
+  inputData["input_3"] = std::make_pair( // Conversion Tracks
+    inputShape_3, std::move(inputDataVector)
+  );
+  inputData["input_4"] = std::make_pair( // Photon Shots
+    inputShape_4, std::move(inputDataVector)
+  );
+
+  AthInfer::OutputDataMap outputData;
+  outputData["dense_10"] = std::make_pair(
+    std::vector<int64_t>{m_batchSize, 1}, std::vector<float>{} // pT
+  );
+  outputData["dense_11"] = std::make_pair(
+    std::vector<int64_t>{m_batchSize, 1}, std::vector<float>{} // eta
+  );
+  outputData["dense_12"] = std::make_pair(
+    std::vector<int64_t>{m_batchSize, 1}, std::vector<float>{} // phi
+  );
+
+  if (decayMode == 1)
+  {
+    ATH_CHECK(m_onnxTool_1p1n->inference(inputData, outputData));
+  }
+  else if (decayMode == 2)
+  {
+    ATH_CHECK(m_onnxTool_1pXn->inference(inputData, outputData));
+  }
+  else if (decayMode == 4)
+  {
+    ATH_CHECK(m_onnxTool_3pXn->inference(inputData, outputData));
+  }
+
+  // TODO
+  // Fill with 0 if different decay mode or initialize with 0's.
+  std::array<float, 3> pi0fourVec = {std::get<std::vector<float>>(outputData["dense_10"].second), std::get<std::vector<float>>(outputData["dense_11"].second), std::get<std::vector<float>>(outputData["dense_12"].second)};
 
   // Results
   // -------
   /*
-  * TO DO
-  *  - I think, we're currently predicting p not E, but wanna change that. Gotta make sure, this uses whatever the final version of the network is.
+  * TODO
+  *  - I think, we're currently predicting pT not E, but wanna change that. Gotta make sure, this uses whatever the final version of the network is.
   *  - I'm currently just guessing, that the names of the output are going to be c_E, c_eta, and c_phi. E, eta, and phi make sense to me (though they might be like E_pi0 or something?), the c_ prefix I copy pasted from the DecayModeClassifier tool, because I assume that's a convention for these kind of json files or something. Gonna have to check that with Lukas' code (but that will of course also show up in testing)
   *  - Maybe add mass to output (pion mass for 1p1n, but not trivial for 1pXn and 3pXn). In the end we wanna decorate TauDecayParticle Objects to the tau, not just the individual values, so for this step of development, I don't really need it. But in the end we do still need a decision on what mass to decorate onto the Xn objects.
   */
   // Outputs are E, eta, and phi
   // here they are encoded as 0, 1, 2
-  std::array<float, 3> pi0fourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
-  if (decayMode != 0 && decayMode != 3) // not 1p0n or 1p3n
-  {
-    // the prefix to match to output name in the json weight file
-    std::string prefix = "c_";
-    for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
-    {
-      pi0fourVec[i] = outputs.at(prefix + m_fourVecDimNames[i]);
-    }
-  }
+  // std::array<float, 3> pi0fourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
+  // if (decayMode != 0 && decayMode != 3) // not 1p0n or 3p0n
+  // {
+  //   // the prefix to match to output name in the json weight file
+  //   std::string prefix = "c_";
+  //   for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
+  //   {
+  //     pi0fourVec[i] = outputs.at(prefix + m_fourVecDimNames[i]);
+  //   }
+  // }
 
   for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
   {
