@@ -10,7 +10,6 @@
 
 // EDM include(s)
 #include "xAODTau/DiTauJet.h"
-#include <string>
 
 namespace DiTauRecTools
 {

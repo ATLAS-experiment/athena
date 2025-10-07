@@ -5,9 +5,8 @@
 #include "DiTauRecTools/DiTauOnnxDiscriminantTool.h"
 
 // Core include(s):
-#include "AthLinks/ElementLink.h"
 #include "PathResolver/PathResolver.h"
-#include <AsgDataHandles/ReadDecorHandle.h>
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 using TrackParticleLinks_t = std::vector<ElementLink<xAOD::TrackParticleContainer>>;
 
