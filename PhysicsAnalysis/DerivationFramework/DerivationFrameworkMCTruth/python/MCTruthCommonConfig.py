@@ -92,9 +92,21 @@ def AddTruthMETCfg(flags):
 
     return acc
 
-def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
+
+def TruthClassificationAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
+
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthClassificationToolCfg
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthClassificationKernel",
+                                                                        AugmentationTools = [ acc.getPrimaryAndMerge(DFCommonTruthClassificationToolCfg(flags)) ]))
+
+    return acc
+
+
+def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
+
+    acc = TruthClassificationAugmentationsCfg(flags)
 
     augmentationToolsList = []
 
@@ -102,14 +114,14 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
     # If requested, add a decoration to photons that were used in the dressing
 
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import ( DFCommonTruthElectronDressingToolCfg,
-    DFCommonTruthMuonDressingToolCfg, DFCommonTruthClassificationToolCfg, DFCommonTruthMuonToolCfg, DFCommonTruthElectronToolCfg,
+    DFCommonTruthMuonDressingToolCfg, DFCommonTruthMuonToolCfg, DFCommonTruthElectronToolCfg,
     DFCommonTruthPhotonToolSimCfg, DFCommonTruthNeutrinoToolCfg, DFCommonTruthBottomToolCfg, DFCommonTruthTopToolCfg,
     DFCommonTruthBosonToolCfg, DFCommonTruthBSMToolCfg, DFCommonTruthForwardProtonToolCfg, DFCommonTruthElectronIsolationTool1Cfg,
     DFCommonTruthElectronIsolationTool2Cfg, DFCommonTruthMuonIsolationTool1Cfg, DFCommonTruthMuonIsolationTool2Cfg,
     DFCommonTruthPhotonIsolationTool1Cfg, DFCommonTruthPhotonIsolationTool2Cfg, DFCommonTruthPhotonIsolationTool3Cfg )
-    
+
     # schedule the special truth building tools and add them to a common augmentation; note taus are handled separately below
-    for item in [ DFCommonTruthClassificationToolCfg, DFCommonTruthMuonToolCfg, DFCommonTruthElectronToolCfg,
+    for item in [ DFCommonTruthMuonToolCfg, DFCommonTruthElectronToolCfg,
     DFCommonTruthPhotonToolSimCfg, DFCommonTruthNeutrinoToolCfg, DFCommonTruthBottomToolCfg, DFCommonTruthTopToolCfg,
     DFCommonTruthBosonToolCfg, DFCommonTruthBSMToolCfg, DFCommonTruthElectronIsolationTool1Cfg,
     DFCommonTruthElectronIsolationTool2Cfg, DFCommonTruthMuonIsolationTool1Cfg, DFCommonTruthMuonIsolationTool2Cfg,
@@ -124,7 +136,6 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
     for i, tool in enumerate(augmentationToolsList):
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthCommonPreJetKernelNo{num}".format(num = i+1), AugmentationTools = [tool]))
 
-   
     return(acc)
 
 
@@ -300,7 +311,7 @@ def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
     kwargs.setdefault("addC",True)
     kwargs.setdefault("generations",-1)
     kwargs.setdefault("prefix",'')
-    acc = ComponentAccumulator()
+    acc = TruthClassificationAugmentationsCfg(flags)
     # Set up a tool to keep b- and c-quarks and all downstream particles
     collection_name = kwargs['prefix']+"TruthHFWithDecay"
     DFCommonHFAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(

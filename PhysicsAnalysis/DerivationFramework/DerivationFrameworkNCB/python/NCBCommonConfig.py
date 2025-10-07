@@ -40,7 +40,9 @@ def NCBCommonAugmentationsCfg(flags,**kwargs):
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg,
-            AddTruthCollectionNavigationDecorationsCfg)
+            AddTruthCollectionNavigationDecorationsCfg,
+            TruthClassificationAugmentationsCfg)
+        acc.merge(TruthClassificationAugmentationsCfg(flags))
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
         NCBCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,
