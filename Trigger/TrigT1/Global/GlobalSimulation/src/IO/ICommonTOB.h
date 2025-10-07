@@ -45,10 +45,13 @@ namespace GlobalSim::IOBitwise{
     virtual std::bitset<s_phi_width> phi_bits() const = 0;
   };
 
+  using ICommonTOBContainer = std::vector<std::shared_ptr<ICommonTOB>>;
+  
   /** @brief Output stream operator*/
   std::ostream& operator << (std::ostream&, const ICommonTOB&);
 } //End of namespace 
 
 CLASS_DEF( GlobalSim::IOBitwise::ICommonTOB , 220265942 , 1 )
+CLASS_DEF( GlobalSim::IOBitwise::ICommonTOBContainer , 1229615490 , 1 )
 
 #endif //GLOBALSIM_ICOMMONTOB_H
