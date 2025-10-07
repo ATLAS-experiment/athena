@@ -62,7 +62,7 @@ namespace ActsTrk{
             });
         }
         msSurfaces.reserve(msSurfaces.size() + reSurfaces.size());
-        for (std::shared_ptr<Acts::Surface>& surf : re->getSurfaces()) {
+        for (std::shared_ptr<Acts::Surface>& surf : reSurfaces) {
             surf->assignGeometryId(Acts::GeometryIdentifier{}.withLayer(chIdx + m_firstLayId).withSensitive(++surfCounter[chIdx]));
             msSurfaces.push_back(std::move(surf));
         }
