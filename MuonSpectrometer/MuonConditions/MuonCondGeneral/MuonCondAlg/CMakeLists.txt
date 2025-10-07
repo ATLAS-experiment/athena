@@ -7,14 +7,13 @@ atlas_subdir( MuonCondAlg )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( nlohmann_json )
-find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( MuonCondAlgLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonCondAlg
                    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities 
                                   Identifier GaudiKernel MuonCondData MuonCondInterface MuonCondSvcLib 
                                   CoralUtilitiesLib StoreGateLib MuonIdHelpersLib MuonReadoutGeometry 

@@ -32,6 +32,12 @@ def F1X0IntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
         PrintEllapsedTime = True
     ))
 
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    montool = GenericMonitoringTool(flags, HistPath = f"F100Integration_{name}")
+    montool.defineHistogram('TIME_Total',path='EXPERT',type='TH1F',title="Total time (ms)", xbins = 400, xmin=0.0, xmax=2000.0)
+
+    kwarg.setdefault('MonTool', montool)
+
     acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F1X0IntegrationAlg(name, **kwarg))
 
     return acc

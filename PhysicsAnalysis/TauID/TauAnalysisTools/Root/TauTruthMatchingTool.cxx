@@ -6,15 +6,6 @@
 #include "TauAnalysisTools/TauTruthMatchingTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
 
-// Core include(s):
-#include "AthLinks/ElementLink.h"
-#include "TruthUtils/HepMCHelpers.h"
-#include "AthContainers/ConstAccessor.h"
-#include "AthContainers/Decorator.h"
-
-// EDM include(s):
-#include "xAODTau/TauxAODHelpers.h"
-
 using namespace TauAnalysisTools;
 
 //=================================PUBLIC-PART==================================
@@ -25,8 +16,7 @@ TauTruthMatchingTool::TauTruthMatchingTool( const std::string& name )
   , m_accEtaVis("eta_vis")
   , m_accPhiVis("phi_vis")
   , m_accMVis("m_vis")
-{
-}
+{}
 
 //______________________________________________________________________________
 StatusCode TauTruthMatchingTool::initialize()

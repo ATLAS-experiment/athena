@@ -42,7 +42,8 @@ class FTagConfig (ConfigBlock):
             "probabilities.")
         self.addOption ('saveCustomVariables', [], type=list,
             info="[Expert mode] additional variables to save from the b-tagging object associated "
-            "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.")
+            "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""

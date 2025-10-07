@@ -229,8 +229,8 @@ namespace InDet{
      std::vector<bool> has(n_masks, false);
      for (unsigned int mask_i=n_masks; mask_i-->1; ) {
         for (unsigned int match_i: module_pattern_idx) {
-           assert(!m_perPatternAndMaskFractions.at(match_i).at(mask_i-1).empty());
-           if (m_perPatternAndMaskFractions.at(match_i).at(mask_i-1).back()>0.) {
+           assert(!m_perPatternAndMaskFractions.at(match_i).at(mask_i).empty());
+           if (m_perPatternAndMaskFractions.at(match_i).at(mask_i).back()>0.) {
               has[mask_i]=true;
               break;
            }
@@ -242,14 +242,14 @@ namespace InDet{
         float prob = !has.at(mask_i) ? 1. : CLHEP::RandFlat::shoot(rndmEngine[mask_i],1.);
 
         for (unsigned int match_i: module_pattern_idx) {
-           unsigned int n_mask_defects_idx=m_perPatternAndMaskFractions.at(match_i).at(mask_i-1).size();
-           for (; n_mask_defects_idx-->0 && prob <= m_perPatternAndMaskFractions[match_i][mask_i-1][n_mask_defects_idx];);
-           if (++n_mask_defects_idx < m_perPatternAndMaskFractions[match_i][mask_i-1].size()) {
+           unsigned int n_mask_defects_idx=m_perPatternAndMaskFractions.at(match_i).at(mask_i).size();
+           for (; n_mask_defects_idx-->0 && prob <= m_perPatternAndMaskFractions[match_i][mask_i][n_mask_defects_idx];);
+           if (++n_mask_defects_idx < m_perPatternAndMaskFractions[match_i][mask_i].size()) {
               n_mask_defects[mask_i] =  n_mask_defects_idx+1;
               break;
            }
 
-           prob -= m_perPatternAndMaskFractions[match_i][mask_i-1].back();
+           prob -= m_perPatternAndMaskFractions[match_i][mask_i].back();
            if (prob<=0.f) break;
         }
      }
@@ -371,7 +371,7 @@ namespace InDet{
   }
 
   StatusCode DefectsEmulatorCondAlgBase::initializeProbabilities(unsigned int n_masks) {
-     if (n_masks>1) {
+     if (n_masks>=1) {
         if (m_nDefectFractionsPerPattern.size() != m_modulePattern.size()) {
            ATH_MSG_ERROR("The number of fraction lists per pattern does not match the number of module patterns: "
                          << m_nDefectFractionsPerPattern.size() << " != " << m_modulePattern.size());
@@ -383,8 +383,10 @@ namespace InDet{
            return StatusCode::FAILURE;
         }
         m_perPatternAndMaskFractions.resize( m_nDefectFractionsPerPattern.size() );
+
+        // there should be one vector with fractions for each mask 0:cell, 1:1st group mask, ...
         for (unsigned int pattern_i=0; pattern_i< m_perPatternAndMaskFractions.size(); ++pattern_i) {
-           m_perPatternAndMaskFractions[pattern_i].reserve( n_masks-1);
+           m_perPatternAndMaskFractions[pattern_i].reserve( n_masks);
            m_perPatternAndMaskFractions[pattern_i].emplace_back();
            if (m_defectProbability[pattern_i].size() != kCellDefectProb + n_masks) {
               ATH_MSG_ERROR("There should be one probability for the module to be defect, one probability for a pixel/strip etc. "
@@ -397,9 +399,9 @@ namespace InDet{
            for (unsigned int value_i=0; value_i< m_nDefectFractionsPerPattern[pattern_i].size(); ++value_i) {
               if (m_nDefectFractionsPerPattern[pattern_i][value_i]<0.) {
                  if (value_i+1 < m_nDefectFractionsPerPattern[pattern_i].size()) {
-                    if (m_perPatternAndMaskFractions[pattern_i].size() == n_masks-1) {
+                    if (m_perPatternAndMaskFractions[pattern_i].size() == n_masks) {
                        ATH_MSG_ERROR("More fraction lists than number of masks: "
-                                     << m_perPatternAndMaskFractions[pattern_i].size()+1 << " > " << (n_masks-1)
+                                     << m_perPatternAndMaskFractions[pattern_i].size()+1 << " > " << (n_masks)
                                      << " for pattern " << pattern_i);
                        return StatusCode::FAILURE;
                     }
@@ -412,6 +414,13 @@ namespace InDet{
                  m_perPatternAndMaskFractions[pattern_i].back().push_back(sum);
               }
            }
+           std::vector<std::string> defect_names;
+           assert( 1+m_groupDefectHistNames.size() == n_masks);
+           defect_names.resize( 1+m_groupDefectHistNames.size() );
+           defect_names[0]="cell";
+           std::copy(m_groupDefectHistNames.begin(), m_groupDefectHistNames.end(), defect_names.begin()+1);
+
+           // mask_i:  0: cell, 1: first group,  ...
            for (unsigned int mask_i=0; mask_i< m_perPatternAndMaskFractions[pattern_i].size(); ++mask_i) {
               if (   m_perPatternAndMaskFractions[pattern_i][mask_i].empty()
                   || std::abs(m_perPatternAndMaskFractions[pattern_i][mask_i].back()-1.)>1e-5) {
@@ -419,19 +428,24 @@ namespace InDet{
                                << (!m_perPatternAndMaskFractions[pattern_i][mask_i].empty()
                                    ?m_perPatternAndMaskFractions[pattern_i][mask_i].back() : -1.f)
                                << " for pattern " << pattern_i << ", mask " << mask_i
-                               << " (" << m_groupDefectHistNames.at(mask_i) << ")");
+                               << " (" << defect_names.at(mask_i) << ")");
                  return StatusCode::FAILURE;
               }
               ATH_MSG_DEBUG("Fractions for pattern " << pattern_i << " mask " << mask_i
-                           << " (" << m_groupDefectHistNames.at(mask_i) << "):"
+                           << " (" << defect_names.at(mask_i) << "):"
                            << m_perPatternAndMaskFractions[pattern_i][mask_i]);
               assert( pattern_i < m_defectProbability.size() );
-              assert( kNProb + mask_i < m_defectProbability[pattern_i].size() );
-              for (float &value : m_perPatternAndMaskFractions[pattern_i][mask_i] ) {
-                 value *= m_defectProbability[pattern_i][kNProb+mask_i];
+              assert( kCellDefectProb + mask_i < m_defectProbability[pattern_i].size() );
+              if (mask_i>0) {
+                 // only scale the fractions to the total probability to have at least one defect
+                 // for group defects.
+                 // For cell defects the fractions mean fractions for group sizes 1,2, ....
+                 for (float &value : m_perPatternAndMaskFractions[pattern_i][mask_i] ) {
+                    value *= m_defectProbability[pattern_i][kCellDefectProb+mask_i];
+                 }
               }
               ATH_MSG_DEBUG("Probabilities for pattern " << pattern_i << " mask " << mask_i
-                           << " (" << m_groupDefectHistNames.at(mask_i) << ") for 1.."
+                           << " (" << defect_names.at(mask_i) << ") for 1.."
                            << m_perPatternAndMaskFractions[pattern_i][mask_i].size() << " defects:"
                            << m_perPatternAndMaskFractions[pattern_i][mask_i]);
            }

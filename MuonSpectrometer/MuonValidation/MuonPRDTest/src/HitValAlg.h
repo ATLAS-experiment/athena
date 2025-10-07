@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONPRDTEST_NSWPRDVALALG_H
-#define MUONPRDTEST_NSWPRDVALALG_H
+#ifndef MUONPRDTEST_MuonHitValAlg_H
+#define MUONPRDTEST_MuonHitValAlg_H
 
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
@@ -129,4 +129,4 @@ private:
     Gaudi::Property<uint> m_maxStripDiff{this, "setMaxStripDistance", 3};
 };
 }
-#endif  // NSWPRDVALALG_H
+#endif  // MuonHitValAlg_H

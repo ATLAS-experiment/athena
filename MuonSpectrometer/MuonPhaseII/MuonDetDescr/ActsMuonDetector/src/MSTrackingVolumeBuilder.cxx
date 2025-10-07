@@ -48,6 +48,19 @@ namespace ActsTrk{
     for (const MuonGMR4::MuonReadoutElement* re : m_detMgr->getAllReadoutElements()) {
         const unsigned chIdx = toInt(re->chamberIndex());
         auto reSurfaces = re->getSurfaces();
+        if (re->detectorType() == ActsTrk::DetectorType::Rpc ||
+            re->detectorType() == ActsTrk::DetectorType::Tgc) {
+            const Muon::IMuonIdHelperSvc* idHelperSvc = re->idHelperSvc();
+            /// Ensure that the phi surfaces appear first in the vector -> no removal of phi surfaces
+            /// if the track carries eta & phi measurements from the same gap
+            std::ranges::stable_sort(reSurfaces, [idHelperSvc](const std::shared_ptr<Acts::Surface>& a,
+                                                const std::shared_ptr<Acts::Surface>& b){
+                const auto* detA = static_cast<const ActsTrk::IDetectorElementBase*>(a->associatedDetectorElement());
+                const auto* detB = static_cast<const ActsTrk::IDetectorElementBase*>(b->associatedDetectorElement());
+                return idHelperSvc->measuresPhi(detA->identify()) >
+                       idHelperSvc->measuresPhi(detB->identify());  
+            });
+        }
         msSurfaces.reserve(msSurfaces.size() + reSurfaces.size());
         for (std::shared_ptr<Acts::Surface>& surf : re->getSurfaces()) {
             surf->assignGeometryId(Acts::GeometryIdentifier{}.withLayer(chIdx + m_firstLayId).withSensitive(++surfCounter[chIdx]));

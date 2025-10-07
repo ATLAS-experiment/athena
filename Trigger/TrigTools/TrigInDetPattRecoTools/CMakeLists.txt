@@ -7,6 +7,7 @@ atlas_subdir( TrigInDetPattRecoTools )
 atlas_add_library( TrigInDetPattRecoToolsLib
                    src/TrigInDetUtils.cxx
                    src/TrigTrackSeedGenerator.cxx
+                   src/GNN_*.cxx
                    PUBLIC_HEADERS TrigInDetPattRecoTools
                    LINK_LIBRARIES TrigInDetPattRecoEvent
                    PRIVATE_LINK_LIBRARIES IRegionSelector TrigInDetEvent InDetPrepRawData BeamSpotConditionsData)

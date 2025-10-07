@@ -202,6 +202,9 @@ namespace CP {
         Gaudi::Property<bool> m_allowComm{this, "AcceptCommChain", true, "Accepts muons from the EMEO chain if set to true"};
         Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", true, "Include BEE and BIS7/8 in high-pT WP in Run3"};        
 
+        Gaudi::Property<int> m_expertMode_RunNumber{this, "expertMode_RunNumber", 0, "Expert only option. Overwrites RunNumber"};
+        Gaudi::Property<unsigned long long> m_expertMode_EvtNumber{this, "expertMode_EvtNumber", 0, "Expert only option. Overwrites EventNumber"};
+	
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
 
         // MVA configs for low-pT working point. Expert use only!

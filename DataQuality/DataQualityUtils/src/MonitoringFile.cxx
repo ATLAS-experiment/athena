@@ -71,7 +71,7 @@ namespace dqutils {
       std::regex_match(test, reNew);
     } catch (std::exception& e) {
       std::cout << "ERROR: Invalid RegEx string \"" << re << "\"." << std::endl;
-      std::cout << "See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax" << std::endl;
+      std::cout << "See https://en.cppreference.com/w/cpp/regex.html for allowed regular expression syntax" << std::endl;
       return std::nullopt;
     }
     return reNew;
@@ -676,7 +676,7 @@ namespace dqutils {
 
     if (dirName != "") {
       DirMap_t::value_type dirmapVal(dirName, dir);
-      dirmap.insert(dirmapVal);
+      dirmap.insert(std::move(dirmapVal));
     }
 
     TIter next(dir->GetListOfKeys());
@@ -724,7 +724,7 @@ namespace dqutils {
         } else {
           subdir = dir->mkdir(dName.c_str());
           DirMap_t::value_type dirmapVal(fName, subdir);
-          dirmap.insert(dirmapVal);
+          dirmap.insert(std::move(dirmapVal));
         }
       } else {
         subdir = dir;
@@ -789,7 +789,7 @@ namespace dqutils {
       if (mdMap.find(nameStr) == mdMap.end()) {
         MetaData md(nameStr, static_cast<char*>(i_interval.GetAddress()), static_cast<char*>(i_chain.GetAddress()), static_cast<char*>(i_merge.GetAddress()));
         std::map<std::string, MetaData>::value_type mdVal(nameStr, md);
-        mdMap.insert(mdVal);
+        mdMap.insert(std::move(mdVal));
       }
     }
 
@@ -1102,7 +1102,7 @@ namespace dqutils {
       TDirectory* fromDir = dynamic_cast<TDirectory*>(dkey->ReadObj());
 
       DirMap_t::value_type dirmapVal(dirName, fromDir);
-      indirmap.insert(dirmapVal);
+      indirmap.insert(std::move(dirmapVal));
     } else {
       std::cout << "Building list of all TDirectories in file...\n" << std::flush;
       getAllDirs(indirmap, m_file, "");

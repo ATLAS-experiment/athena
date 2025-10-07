@@ -3,21 +3,16 @@
 */
 
 #include "PanTauAlgs/Tool_ModeDiscriminator.h"
-#include "PanTauAlgs/Tool_InformationStore.h"
-#include "PanTauAlgs/TauFeature.h"
 #include "PanTauAlgs/PanTauSeed.h"
 #include "PanTauAlgs/HelperFunctions.h"
 #include "PathResolver/PathResolver.h"
-#include "TString.h"
 #include "TFile.h"
 #include "TTree.h"
-#include <memory>
 
 PanTau::Tool_ModeDiscriminator::Tool_ModeDiscriminator(const std::string& name) :
   asg::AsgTool(name),
   m_MVABDT_List()
-{
-}
+{}
 
 
 PanTau::Tool_ModeDiscriminator::~Tool_ModeDiscriminator() = default;

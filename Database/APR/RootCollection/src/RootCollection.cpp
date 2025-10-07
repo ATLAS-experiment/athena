@@ -29,13 +29,10 @@
 #include "TMessage.h"
 #include "TDirectory.h"
 
-#define corENDL coral::MessageStream::endmsg
-
 #include <exception>
 #include <map>
 #include <deque>
 #include <ctype.h>
-
 
 using namespace std;
 
@@ -47,20 +44,20 @@ namespace pool {
     const char* const RootCollection::c_attributeListLayoutName = "Schema"; 
 
      RootCollection::RootCollection(
-        const pool::ICollectionDescription* description,
-        pool::ICollection::OpenMode mode,
-        pool::ISession* )
-      : m_description( *description ),
-      m_name( description->name() ),
-      m_fileName( description->name() + ".root" ),
-      m_mode( mode ),
-      m_tree( 0 ),
-      m_file( 0 ),
-      m_session( 0 ),
-      m_open( false ),
-      m_readOnly( mode == ICollection::READ ? true : false ),
-      m_schemaWritten( true ),
-      m_poolOut( "RootCollection")
+            const pool::ICollectionDescription* description,
+            pool::ICollection::OpenMode mode,
+            pool::ISession* )
+        : APRMessaging( "RootCollection"),
+         m_description( *description ),
+         m_name( description->name() ),
+         m_fileName( description->name() + ".root" ),
+         m_mode( mode ),
+         m_tree( 0 ),
+         m_file( 0 ),
+         m_session( 0 ),
+         m_open( false ),
+         m_readOnly( mode == ICollection::READ ? true : false ),
+         m_schemaWritten( true )
     {
        RootCollection::open();
     }
@@ -71,7 +68,7 @@ namespace pool {
         if( m_open ) try {
            RootCollection::close();
         } catch( std::exception& exception ) {
-           m_poolOut << coral::Error << exception.what() << corENDL;
+           ATH_MSG_ERROR( exception.what() );
            cleanup();
         }
         else cleanup();
@@ -120,8 +117,7 @@ namespace pool {
         m_tree->Branch( name.c_str(), 0, leaflist.c_str() );
      
         m_schemaWritten = false;
-        m_poolOut << coral::Debug << "Created Branch " <<  name
-                  << ", Type=" <<  type_name << coral::MessageStream::endmsg;
+        ATH_MSG_DEBUG( "Created Branch " <<  name << ", Type=" <<  type_name );
      }
 
      void  RootCollection::delayedFileOpen( const std::string& method )
@@ -131,13 +127,13 @@ namespace pool {
            if(!m_file || m_file->IsZombie()) {
               throw std::runtime_error( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RootCollection::" + method + " \" from \" RootCollection \")" );
            }
-           m_poolOut << coral::Info << "File " << m_fileName << " opened in " << method <<  coral::MessageStream::endmsg;
+           ATH_MSG_INFO( "File " << m_fileName << " opened in " << method );
  
            m_tree->SetDirectory(m_file);
            if( !m_schemaWritten ) {
               m_tree->GetCurrentFile()->cd();
               AttributeListLayout all( m_description );
-              m_poolOut << coral::Debug << "###### Writing schema...." << coral::MessageStream::endmsg;
+              ATH_MSG_DEBUG( "###### Writing schema...." );
               all.Write( RootCollection::c_attributeListLayoutName, TObject::kOverwrite );
               m_schemaWritten = true;
            }
@@ -151,9 +147,7 @@ namespace pool {
         if( m_file ) {
            tree = dynamic_cast<TTree*>(m_file->Get(APRDefaults::TTreeNames::EventTag));
            if( tree )
-              m_poolOut << coral::Debug << "Retrieved Collection TTree  \""
-                        << tree->GetName() << "\" from file " << m_fileName
-                        << coral::MessageStream::endmsg;
+              ATH_MSG_DEBUG( "Retrieved Collection TTree  '" << tree->GetName() << "' from file " << m_fileName );
         }
         return tree;
      }
@@ -198,28 +192,22 @@ namespace pool {
         if( m_open ) {
 
 	  if (m_tree->GetCurrentFile() == 0) {
-	    m_poolOut << coral::Debug << "setting TFile for " 
-		      << m_tree->GetName() << " to " << m_file->GetName()
-		      << coral::MessageStream::endmsg;
-	    m_tree->SetDirectory(m_file);
+        ATH_MSG_DEBUG( "setting TFile for " << m_tree->GetName() << " to " << m_file->GetName() );
+	     m_tree->SetDirectory(m_file);
 	  }
 
-           m_poolOut << coral::Debug
-                     << "Commit: saving collection TTree to file: " << m_tree->GetCurrentFile()->GetName()
-                     << coral::MessageStream::endmsg;
+           ATH_MSG_DEBUG( "Commit: saving collection TTree to file: " << m_tree->GetCurrentFile()->GetName() );
 
            Long64_t bytes = m_tree->AutoSave();
 
-           m_poolOut << "   bytes written to TTree " << (size_t)bytes
-                     << coral::MessageStream::endmsg;
+           ATH_MSG_DEBUG( "   bytes written to TTree " << (size_t)bytes );
         }
      }
 
      
     void RootCollection::close()
     {
-       m_poolOut << coral::Info << "Closing " << (m_open? "open":"not open")
-                 << " collection '" << m_fileName << "'" << coral::MessageStream::endmsg;
+       ATH_MSG_INFO( "Closing " << (m_open? "open":"not open") << " collection '" << m_fileName << "'" );
        if(m_open) {
           delayedFileOpen("close");
               
@@ -241,7 +229,7 @@ namespace pool {
              if( !m_schemaWritten ) {
                 m_tree->GetCurrentFile()->cd();
                 AttributeListLayout all( m_description );
-                m_poolOut << coral::Debug << "###### Writing schema...." << coral::MessageStream::endmsg;
+                ATH_MSG_DEBUG( "###### Writing schema...." );
                 all.Write( RootCollection::c_attributeListLayoutName, TObject::kOverwrite );
                 m_schemaWritten = true;
              }
@@ -339,11 +327,9 @@ namespace pool {
       TDirectory::TContext dirctxt;
       if( m_session == 0 || m_mode == ICollection::READ || m_mode == ICollection::UPDATE ) {
          // first step: Try to open the file
-         m_poolOut << coral::Info << "Opening Collection File " << m_fileName << " in mode: "
-                   << pool::RootCollection::poolOptToRootOpt[m_mode] << coral::MessageStream::endmsg;
+         ATH_MSG_INFO( "Opening Collection File " << m_fileName << " in mode: " << pool::RootCollection::poolOptToRootOpt[m_mode] );
          bool fileExists = !gSystem->AccessPathName( m_fileName.c_str() );
-         m_poolOut << coral::Debug << "File " << m_fileName
-		   << (fileExists? " exists." : " does not exist." ) << corENDL;
+         ATH_MSG_DEBUG( "File " << m_fileName << (fileExists? " exists." : " does not exist." ) );
          // open the file if it exists, or create if requested
          if( !fileExists && m_mode != ICollection::CREATE && m_mode != ICollection::CREATE_AND_OVERWRITE )
             m_file = 0;
@@ -355,23 +341,18 @@ namespace pool {
                                || m_mode == ICollection::CREATE_AND_OVERWRITE ) ) {
                // creating collection in an existing file
                root_mode = "UPDATE";
-	       io_mode = (Io::WRITE | Io::APPEND);
+	            io_mode = (Io::WRITE | Io::APPEND);
             }
             if( !m_fileMgr ) {
                m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
                if ( !m_fileMgr ) {
-                  m_poolOut << coral::Error 
-                            << "unable to get the FileMgr, will not manage TFiles"
-                            << coral::MessageStream::endmsg;
+                  ATH_MSG_ERROR( "unable to get the FileMgr, will not manage TFiles" );
                }
 	    }
 	    // FIXME: hack to avoid issue with setting up RecExCommon links
 	    if (m_fileMgr &&
-		m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
-	      m_poolOut << coral::Info 
-			<< "Unable to locate ROOT file handler via FileMgr. "
-			<< "Will use default TFile::Open" 
-			<< coral::MessageStream::endmsg;
+		   m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
+          ATH_MSG_INFO( "Unable to locate ROOT file handler via FileMgr. Will use default TFile::Open" );
 	      m_fileMgr.reset();
 	    }
 
@@ -386,9 +367,7 @@ namespace pool {
 	      }	       
 	      int r = m_fileMgr->open(Io::ROOT,"RootCollection",m_fileName,io_mode,vf,"TAG",SHARED);
 	      if (r < 0) {
-		m_poolOut << coral::Error << "unable to open \"" << m_fileName
-			  << "\" for " << root_mode
-			  << coral::MessageStream::endmsg;
+         ATH_MSG_ERROR( "unable to open '" << m_fileName << "' for " << root_mode );
 	      } else {      
 		m_file = (TFile*)vf;
 	      }
@@ -397,7 +376,7 @@ namespace pool {
          if(!m_file || m_file->IsZombie()) {
              throw std::runtime_error( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RootCollection::open \" from \" RootCollection \")" );
          }
-         m_poolOut << coral::Info << "File " << m_fileName << " opened" << coral::MessageStream::endmsg;
+         ATH_MSG_INFO( "File " << m_fileName << " opened" );
       }
 
       if( m_mode == ICollection::READ || m_mode == ICollection::UPDATE ) {
@@ -427,14 +406,14 @@ namespace pool {
             all->fillDescription( m_description );
             delete all;
          } else {
-            m_poolOut << coral::Warning << " Collection Description not found in file, reconstructing " <<  corENDL;
+            ATH_MSG_INFO( " Collection Description not found in file, reconstructing " );
             bool      foundToken = false;
             for( int i = 0; i < m_tree->GetNbranches(); i++ ) {
                TBranch* branch = (TBranch*)m_tree->GetListOfBranches()->UncheckedAt(i);
                std::string column_name = branch->GetName();
                std::string column_type = branch->GetTitle();
-               m_poolOut << coral::Debug << "  + adding column: " << column_name <<  corENDL;
-               m_poolOut << coral::Debug << "      column type: " << column_type <<  corENDL;
+               ATH_MSG_DEBUG( "  + adding column: " << column_name );
+               ATH_MSG_DEBUG( "      column type: " << column_type );
                if( column_type.substr(0,5) != "Token" ) {
                   m_description.insertColumn( column_name, column_type.substr(0, column_type.size() -2) );
                } else {
@@ -456,7 +435,7 @@ namespace pool {
         // create a new TTree
 
         m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
-        m_poolOut << coral::Debug << "Created Collection TTree. Collection file will be " << m_fileName << coral::MessageStream::endmsg;
+        ATH_MSG_DEBUG( "Created Collection TTree. Collection file will be " << m_fileName );
         m_schemaWritten = false;
         for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
              std::string columnName = m_description.tokenColumn(col_id).name();
@@ -468,7 +447,7 @@ namespace pool {
         }
       }
 
-      m_poolOut << coral::Info <<  "Root collection opened, size = " << m_tree->GetEntries() << corENDL;
+      ATH_MSG_INFO( "Root collection opened, size = " << m_tree->GetEntries() );
 
       if( m_session && m_mode == ICollection::UPDATE ) {
         m_tree->SetDirectory(0);
@@ -486,7 +465,7 @@ namespace pool {
       m_open = true;
     }
     catch( std::exception &e ) {
-       m_poolOut << coral::Debug << "Open() failed with expception: " << e.what() << corENDL;
+       ATH_MSG_DEBUG( "Open() failed with exception: " << e.what() );
        cleanup();
        throw;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETMATERIALMANAGER_H
@@ -10,6 +10,9 @@
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelKernel/GeoMaterial.h"
 
+#include <string>
+#include <map>
+
 class GeoElement;
 class StoredMaterialManager;
 class StoreGateSvc;
@@ -19,9 +22,6 @@ namespace InDetDD
 {
   class AthenaComps;
 }
-
-#include <string>
-#include <map>
 
 /// InDetMaterialManager. This provides an interface to the GeoModel Material Manager
 /// as well as allowing additional materials to be defined or standard ones redefined.

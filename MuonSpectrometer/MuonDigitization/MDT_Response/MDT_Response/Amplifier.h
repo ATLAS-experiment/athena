@@ -54,6 +54,7 @@ class Amplifier {
   double m_triggerElectron = 0.0;                  // trigger electron 
   double m_threshold = 0.0;                        // threshold 
   int    m_integrationWindow;                // integration window in bins
+  double m_integrationWindowNs = 0.0;                 // integration window in ns
 
   // maximum of the single electron response
   double m_responseMax = 0.0;

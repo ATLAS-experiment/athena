@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ATHLYSIS
@@ -7,9 +7,6 @@
 #include "TauClusterFinder.h"
 #include "tauRecTools/HelperFunctions.h"
 
-#include "xAODTau/TauJetContainer.h"
-#include "xAODTau/TauJetAuxContainer.h"
-#include "xAODTau/TauJet.h"
 #include "xAODBase/IParticleHelpers.h"
 
 

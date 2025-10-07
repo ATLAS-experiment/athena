@@ -17,7 +17,9 @@ namespace {
   auto getSaltModel(const std::string& nn_file) {
     using namespace FlavorTagInference;
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
-    return std::make_shared<const SaltModel>(fullPathToOnnxFile);
+    auto saltShared = std::make_shared<const SaltModel>(fullPathToOnnxFile);
+    ISaltModelPtr retPtr = saltShared;
+    return retPtr;
   }
 
   template <typename T>
@@ -45,13 +47,13 @@ namespace FlavorTagInference {
   {
   }
 
-  GNN::GNN(std::shared_ptr<const SaltModel> util, const GNNOptions& o):
+  GNN::GNN(ISaltModelPtr util, const GNNOptions& o):
     m_saltModel(util),
     m_jetLink(jetLinkName),
     m_dataLoader(util, o)
   {
     // Retrieve the configuration for the model outputs.
-    SaltModel::OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
+    OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
 
     // Create the output decorators.
     auto [dd, rd] = createDecorators(gnn_output_config, m_dataLoader.ftag_options);
@@ -185,7 +187,7 @@ namespace FlavorTagInference {
   }
 
   std::tuple<FTagDataDependencyNames, std::set<std::string>>
-  GNN::createDecorators(const SaltModel::OutputConfig& outConfig, const FTagOptions& options) {
+  GNN::createDecorators(const OutputConfig& outConfig, const FTagOptions& options) {
     FTagDataDependencyNames deps;
     Decorators decs;
 

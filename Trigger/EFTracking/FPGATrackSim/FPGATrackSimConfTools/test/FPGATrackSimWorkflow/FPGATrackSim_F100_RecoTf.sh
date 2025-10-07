@@ -13,8 +13,10 @@ usage () {
     -i  |  --inputRDO       STRING      full path to input RDO file (mandatory)
     -o  |  --outputAOD      STRING      name of the output AOD file (mandatory)
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
+    -d  |  --skipEvents     INT         Number of events to skip at start (default = 0)
     -s  |  --skipCheck                  skip checks on output AOD file
     -c  |  --doClusters                 persistify xAOD cluster and space point containers
+    -k  |  --doSeeds                    persistify xAOD track seed containers
     -h  |  --help                       this help
     "
     [ $# -gt 0 ] && exit $1
@@ -25,7 +27,7 @@ inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 outputAOD="AOD.root"
 nEvents="1"
 skipCheck=0
-doClusters="0"
+storeClusters=False
 doSeeds="0"
 skipEvents=0
 
@@ -38,7 +40,7 @@ while [ $# -ge 1 ];do
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
-        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; doClusters="1" ;;
+        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True; shift ;;
         -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds="1" ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
@@ -68,30 +70,19 @@ fi
 export ATHENA_CORE_NUMBER=1
 source FPGATrackSim_CommonEnv.sh
 ## running reconstruction
-if [ "$doClusters" == "1" ]; then
-  Reco_tf.py --CA \
-    --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
-    --preExec "flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
-              flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;\
-              flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;"\
-    --steering 'doRAWtoALL' \
-    --inputRDOFile "${inputRDO_arg}" \
-    --outputAODFile ${outputAOD}
-else
-  Reco_tf.py --CA \
+Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg' \
     --preExec "flags.Tracking.doPixelDigitalClustering=True;\
-               flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
-               flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
-               flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;"\
+                flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
+                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
+                flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;\
+                flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};"\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \
     --outputAODFile ${outputAOD}
-fi
 
 rc=$?
 echo "Reco_tf.py result: $rc"

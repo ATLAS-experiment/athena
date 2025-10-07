@@ -5,7 +5,6 @@ atlas_subdir( GNNVertexFitter )
 
 # External dependencies:
 #find_package( Boost COMPONENTS filesystem )
-find_package( Boost )
 find_package( lwtnn )
 find_package( onnxruntime )
 find_package(ROOT COMPONENTS Core MathCore Tree Hist RIO pthread REQUIRED)
@@ -14,8 +13,8 @@ find_package(nlohmann_json REQUIRED)
 
 atlas_add_component( GNNVertexFitter 
                      src/*.h src/*.cxx src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} 
+                     INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS}
+                     LINK_LIBRARIES 
                                     ${ROOT_LIBRARIES}
                                     GNNVertexFitterLib 
                                     AthenaBaseComps 
@@ -54,9 +53,9 @@ atlas_add_component( GNNVertexFitter
 atlas_add_library(   GNNVertexFitterLib
                      GNNVertexFitter/*.h Root/*.cxx
                      PUBLIC_HEADERS GNNVertexFitter
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
                      PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils 
-                     LINK_LIBRARIES ${Boost_LIBRARIES} 
+                     LINK_LIBRARIES 
                                     ${ROOT_LIBRARIES}
                                     AthenaBaseComps 
                                     StoreGateLib 

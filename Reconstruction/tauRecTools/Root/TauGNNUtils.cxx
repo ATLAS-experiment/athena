@@ -3,9 +3,7 @@
 */
 
 #include "tauRecTools/TauGNNUtils.h"
-#include "tauRecTools/HelperFunctions.h"
 #include <algorithm>
-#include <iostream>
 
 #define GeV 1000
 

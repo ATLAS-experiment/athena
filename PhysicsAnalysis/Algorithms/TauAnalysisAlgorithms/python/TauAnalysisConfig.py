@@ -138,13 +138,16 @@ class TauWorkingPointConfig (ConfigBlock) :
             "recommendations: set it to True if muon mis-reconstructed as tau is a large background for your analysis")
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau based ID instead of RNNTau ID "
-            "recommendations: that's new experimental feature and might come default soon")
+            "recommendations: that's new experimental feature and might come default soon",
+            expertMode=True)
         self.addOption ('dropPtCut', False, type=bool,
             info="select taus without explicit min Pt cut. For PHYS/PHYSLITE, this would mean selecting taus starting from 13 GeV "
-            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs")
+            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs",
+            expertMode=True)
         self.addOption ('useLowPt', False, type=bool, 
             info="select taus starting from 15 GeV instead of the default 20 GeV cut "
-            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs")
+            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs",
+            expertMode=True)
         self.addOption ('useSelectionConfigFile', True, type=bool,
             info="use pre-defined configuration files for selecting taus "
             "recommendations: set this to False only if you want to test/optimise the tau selection for selections not already provided through config files")
@@ -171,7 +174,8 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
-            "factors are not available. The default is False.")
+            "factors are not available. The default is False.",
+            expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
             info="save all the independent detailed object scale factors. "
             "The default is True.")

@@ -162,7 +162,7 @@ namespace EFTrackingFPGAIntegration
         std::unique_lock lock(m_fpgaHandleMtx);
 
 
-        ATH_MSG_DEBUG("F100 Thread number "<<ctx.slot()<<" running on buffer "<<bufferIndex<<" pixelClusterIndex: "<< pixelClusterIndex<<" stripClusterIndex: "<< stripClusterIndex<<" stripL2GIndex: "<< stripL2GIndex<<" pixelEDMIndex: "<< pixelEDMIndex<<" stripEDMIndex: "<< stripEDMIndex);
+        //ATH_MSG_DEBUG("F100 Thread number "<<ctx.slot()<<" running on buffer "<<bufferIndex<<" pixelClusterIndex: "<< pixelClusterIndex<<" stripClusterIndex: "<< stripClusterIndex<<" stripL2GIndex: "<< stripL2GIndex<<" pixelEDMIndex: "<< pixelEDMIndex<<" stripEDMIndex: "<< stripEDMIndex);
 
 
         // Grab buffers

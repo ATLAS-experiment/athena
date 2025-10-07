@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_TRIGCOSTALYSIS_H
@@ -135,7 +135,10 @@ class TrigCostAnalysis: public ::AthAlgorithm {
     Gaudi::Property<std::map<std::string, std::vector<uint32_t>>> m_rosToRob {
       this, "ROSToROBMap", {}, "ROS to ROB mapping" };
 
-    SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_costDataKey { this, "CostReadHandleKey", "HLT_TrigCostContainer",
+  Gaudi::Property<std::set<std::string>> m_excludeAlgsFromChain {
+    this, "ExcludeAlgsFromChainTime", {}, "Algorithms to exclude from chain time calculation"};
+
+  SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_costDataKey { this, "CostReadHandleKey", "HLT_TrigCostContainer",
       "Trigger cost payload container for algorithms" };
 
     SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_rosDataKey { this, "CostROSReadHandleKey", "HLT_TrigCostROSContainer",

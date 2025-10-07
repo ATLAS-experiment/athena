@@ -90,6 +90,7 @@ if __name__=="__main__":
     flags.IOVDb.GlobalTag = args.condTag
     flags.Scheduler.ShowDataDeps = True 
     flags.Scheduler.ShowDataFlow = True
+    flags.Exec.MaxEvents = 1
     flags.lock()
     flags.dump(evaluate = True)
     

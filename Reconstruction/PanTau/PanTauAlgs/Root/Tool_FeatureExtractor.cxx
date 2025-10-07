@@ -2,19 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "xAODTau/TauJet.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/TrackParticle.h"
-
-#include "TLorentzVector.h"
-#include "TVector3.h"
-
-#include <cmath>
-#include <map>
-#include <vector>
-
 #include "PanTauAlgs/Tool_FeatureExtractor.h"
-#include "PanTauAlgs/Tool_InformationStore.h"
 #include "PanTauAlgs/TauConstituent.h"
 #include "PanTauAlgs/PanTauSeed.h"
 #include "PanTauAlgs/TauFeature.h"
@@ -33,8 +21,7 @@ bool sortTauConstituentEt(const PanTau::TauConstituent* u, const PanTau::TauCons
 
 PanTau::Tool_FeatureExtractor::Tool_FeatureExtractor(const std::string& name) :
   asg::AsgTool(name)
-{
-}
+{}
 
 
 StatusCode PanTau::Tool_FeatureExtractor::initialize() {

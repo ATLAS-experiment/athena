@@ -15,7 +15,7 @@ def dataPreparation(flags: AthConfigFlags, signature: str, inView: bool, rois: s
         acc.merge(SGInputLoaderCfg(flags, Load=loadRDOs))
 
     
-    from EFTrackingFPGAPipeline.F100IntegrationConfig import F100IntegrationCfg
+    from EFTrackingFPGAPipeline.F100IntegrationConfig import F1X0IntegrationCfg
 
     acc.merge(fpga_data_encoding(flags, signature, rois))
 
@@ -28,7 +28,7 @@ def dataPreparation(flags: AthConfigFlags, signature: str, inView: bool, rois: s
     kwarg.setdefault("FPGAOutputStripKey", "FPGAFormatStripClusters_"+signature)
     kwarg.setdefault("FPGAThreads", 0)
     
-    acc.merge(F100IntegrationCfg(flags, name="F100IntegAlg_"+signature, **kwarg))
+    acc.merge(F1X0IntegrationCfg(flags, name="F100IntegAlg_"+signature, **kwarg))
 
     #convert back to 
     acc.merge(fpga_xaod_creation(flags, signature))

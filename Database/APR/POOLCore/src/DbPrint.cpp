@@ -9,5 +9,5 @@ using namespace pool;
 
 // Global variable storing APR output level
 // Can be set through the environment POOL_OUTMSG_LEVEL
-// or through API
+// or through the API
 std::atomic<DbPrintLvl::MsgLevel> DbPrintLvl::outputLvl = SystemTools::GetOutputLvl();

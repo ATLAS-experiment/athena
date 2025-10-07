@@ -56,6 +56,142 @@ StatusCode FPGADataFormatTool::convertStripHitsToFPGADataFormat(
 
 
 
+
+StatusCode FPGADataFormatTool::convertFPGASliceToFPGADataFormat(
+  const FPGATrackSimHitCollection* slices,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &ctx) const {
+
+  // Fill the event header
+  ATH_CHECK(fillHeader(encodedData));
+
+  // Convert Slices
+  ATH_CHECK(convertFPGASlices(slices, encodedData, ctx));
+
+  // Fill the event footer
+  ATH_CHECK(fillFooter(encodedData));
+
+
+  return StatusCode::SUCCESS;
+}
+
+
+
+StatusCode FPGADataFormatTool::convertFPGASlices(
+  const FPGATrackSimHitCollection* hitsinSlice,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &/*ctx*/
+  ) const {
+
+    ATH_MSG_DEBUG("Encoded Slices: ");                                                                                                                                                                    
+
+    auto sliceWord_w1 = FPGADataFormatUtilities::fill_SLICE_HDR_w1(0x88, 34, 0, 0, 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_SLICE_HDR_w1(sliceWord_w1));   
+
+    std::vector<FPGATrackSimHit> hits;
+    for (size_t i = 0; i < hitsinSlice->size(); i++)  
+    {
+	      const FPGATrackSimHit& hit = hitsinSlice->at(i);
+	
+        int cluster1D=0;
+        int cluster2D=0;
+        if(hit.getOriginalHit().getCluster1ID() >=0)
+        {
+          cluster1D=hit.getOriginalHit().getCluster1ID();
+        }
+        
+        if(hit.getOriginalHit().getCluster2ID() >=0)
+        {
+          cluster2D=hit.getOriginalHit().getCluster2ID();
+        }
+
+	      ATH_MSG_DEBUG("\tphiregion: " << hit.getLayer());
+        ATH_MSG_DEBUG("\tlayerbitmask: " << hit.getR());
+        ATH_MSG_DEBUG("\td0: " << hit.getGPhi());
+        ATH_MSG_DEBUG("\tz0: " << hit.getZ());
+        ATH_MSG_DEBUG("\tcluster1D: " << cluster1D);
+        ATH_MSG_DEBUG("\tcluster2D: " << cluster2D);
+
+      bool isLast = (i + 1 == hits.size());
+      auto ghit_w1 = FPGADataFormatUtilities::fill_GHITZ_w1(isLast, hit.getLayer(), hit.getR(),  hit.getGPhi(), hit.getZ(), 0, 0);
+      auto ghit_w2 = FPGADataFormatUtilities::fill_GHITZ_w2 (cluster1D, cluster2D, hit.getEtaModule(), 0);
+      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w1(ghit_w1));  
+      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w2(ghit_w2));  
+   
+    }
+  return StatusCode::SUCCESS;
+ 
+}
+
+
+
+StatusCode FPGADataFormatTool::convertFPGAHitsToFPGADataFormat(
+  const FPGATrackSimHitCollection* slices,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &ctx) const {
+
+  // Fill the event header
+  ATH_CHECK(fillHeader(encodedData));
+
+  // Convert Slices
+  ATH_CHECK(convertFPGAHits(slices, encodedData, ctx));
+
+  // Fill the event footer
+  ATH_CHECK(fillFooter(encodedData));
+
+
+  return StatusCode::SUCCESS;
+}
+
+
+
+StatusCode FPGADataFormatTool::convertFPGAHits(
+  const FPGATrackSimHitCollection* hitsinSlice,
+  std::vector<uint64_t> &encodedData,
+  const EventContext &/*ctx*/
+  ) const {
+
+    ATH_MSG_DEBUG("Encodings Hits: ");                                                                                                                                                                    
+
+    std::vector<FPGATrackSimHit> hits;
+    for (size_t i = 0; i < hitsinSlice->size(); i++)
+    {
+	      const FPGATrackSimHit& hit = hitsinSlice->at(i);
+	
+        int cluster1D=0;
+        int cluster2D=0;
+        if(hit.getOriginalHit().getCluster1ID() >=0)
+        {
+          cluster1D=hit.getOriginalHit().getCluster1ID();
+        }
+        
+        if(hit.getOriginalHit().getCluster2ID() >=0)
+        {
+          cluster2D=hit.getOriginalHit().getCluster2ID();
+        }
+
+	      ATH_MSG_DEBUG("\tphiregion: " << hit.getLayer());
+        ATH_MSG_DEBUG("\tlayerbitmask: " << hit.getR());
+        ATH_MSG_DEBUG("\td0: " << hit.getGPhi());
+        ATH_MSG_DEBUG("\tz0: " << hit.getZ());
+        ATH_MSG_DEBUG("\tcluster1D: " << cluster1D);
+        ATH_MSG_DEBUG("\tcluster2D: " << cluster2D);
+
+      bool isLast = (i + 1 == hits.size());
+      auto ghit_w1 = FPGADataFormatUtilities::fill_GHITZ_w1(isLast, hit.getLayer(), hit.getR(),  hit.getGPhi(), hit.getZ(), 0, 0);
+      auto ghit_w2 = FPGADataFormatUtilities::fill_GHITZ_w2 (cluster1D, cluster2D, hit.getEtaModule(), 0);
+      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w1(ghit_w1));  
+      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w2(ghit_w2));  
+   
+    }
+  return StatusCode::SUCCESS;
+ 
+}
+
+
+
+
+
 StatusCode FPGADataFormatTool::convertFPGATracksToFPGADataFormat(
   const FPGATrackSimTrackCollection* tracks,
   std::vector<uint64_t> &encodedData,

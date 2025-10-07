@@ -399,7 +399,16 @@ bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
     driftRadius *= result.trackingSign;
 
     //+Implementation for RT_Relation_DB_Tool
-    MdtDigiToolInput digiInput(std::abs(driftRadius), distRO, 0., 0., 0., 0., DigitId);
+
+    // total from the hit to the tube endplug
+    double distanceToRO = 0.;
+    if (distRO < 0. && hit.localPosition().z() > 0.) {
+        distanceToRO = -distRO + hit.localPosition().z();
+    }
+    else {
+        distanceToRO = distRO - hit.localPosition().z();
+    }
+    MdtDigiToolInput digiInput(std::abs(driftRadius), distanceToRO, 0., 0., 0., 0., DigitId);
     double qcharge = 1.;
     double qgamma = -9999.;
 
@@ -418,7 +427,7 @@ bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
         }
         qcharge = MC::fractionalCharge(genParticle);
       }
-      digiInput = MdtDigiToolInput{std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma, DigitId};
+      digiInput = MdtDigiToolInput{std::abs(driftRadius), distanceToRO, 0., 0., qcharge, qgamma, DigitId};
     }
 
     // digitize input

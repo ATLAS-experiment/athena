@@ -46,7 +46,7 @@ class sTgcMeasurement_v1 : public UncalibratedMeasurement_v1 {
   IdentifierHash layerHash() const;
 
   /** @brief Which algorithm produced the Measurement object*/
-  using Author = Muon::sTgcPrepData::Author;
+  using Author = ::Muon::sTgcPrepData::Author;
   Author author() const;
 
   /** @brief In which gasGap is the Measurement */

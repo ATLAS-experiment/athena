@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // INav4MomAssocs.h 
@@ -48,6 +48,14 @@ class INav4MomAssocs : public AssociationMap< INavigable4MomentumCollection,
   /** Assignment operator: 
    */
   INav4MomAssocs& operator=( const INav4MomAssocs& rhs ); 
+
+  /** Move constructor: 
+   */
+  INav4MomAssocs( INav4MomAssocs&& rhs );
+
+  /** Move operator: 
+   */
+  INav4MomAssocs& operator=( INav4MomAssocs&& rhs ); 
 
   /** Constructor with parameters: 
    */

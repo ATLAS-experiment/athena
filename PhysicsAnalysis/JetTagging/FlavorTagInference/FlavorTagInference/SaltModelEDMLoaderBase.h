@@ -1,11 +1,11 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
 #include "xAODBase/IParticle.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
-#include "FlavorTagInference/SaltModel.h"
+#include "FlavorTagInference/ISaltModel.h"
 
 #include "FlavorTagInference/TracksLoader.h"
 #include "FlavorTagInference/FlowElementsLoader.h"
@@ -30,9 +30,8 @@ namespace FlavorTagInference {
 
     class SaltModelEDMLoaderBase {
     public:
-        SaltModelEDMLoaderBase(std::shared_ptr<const SaltModel> salt_model) :
-            salt_model(salt_model), graph_config(salt_model->getGraphConfig()) {};
-        std::shared_ptr<const SaltModel> salt_model;
+        SaltModelEDMLoaderBase(ISaltModelPtr salt_model) :
+            graph_config(salt_model->getGraphConfig()) {};
         SaltModelGraphConfig::GraphConfig graph_config;
         std::string scalarInputName;
         std::vector<std::pair<std::string /* varName */, std::function<float(const xAOD::IParticle* /* parent */)>>> scalarVarLoaders;

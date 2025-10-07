@@ -65,6 +65,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     auto Decision = Monitored::Scalar<std::string>("Error", "");
     auto refTowerET = Monitored::Scalar<int>("RefTowerEt",0);
     auto refTowerSat = Monitored::Scalar<char>("RefTowerSat",0.0);
+	auto FillTree = Monitored::Scalar<bool>("FillTree",true);
 
 	unsigned int nTowers = 0;
 	for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
@@ -82,7 +83,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
             if(eTowerItr == emulatedTowers.end()) {
                 // missing emulated tower?
                 Decision = "MissingTower";
-                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
                 continue;
             }
 
@@ -92,11 +93,11 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
             if(refTowerET != Toweret) {
                 Decision = "ETMismatch";
-                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
             if(refTowerSat != Towersaturationflag) {
                 Decision = "SatMismatch";
-                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
 
         }

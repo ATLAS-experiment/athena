@@ -47,12 +47,18 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   declareProperty( "ForceCalibFilePtResidual", m_forceCalibFile_PtResidual = "");
   declareProperty( "ForceCalibFileFastSim",    m_forceCalibFile_FastSim = "");
   declareProperty( "ForceCalibFileMC2MC",      m_forceCalibFile_MC2MC = "");
+  // Options to use legacy calibrations for jet energy resolution in case smearing is not enabled
+  declareProperty( "CalibFileLeg", m_calibFileLeg = "JER_Nominal_Apr2019.root");
+  declareProperty( "CalibAreaLeg", m_calibAreaTagLeg = "00-04-82");
+  declareProperty( "CalibMCTypeLeg", m_calibMCTypeLeg = "MC16");
 }
 
 JetCalibrationTool::~JetCalibrationTool() {
   if(m_globalConfig) delete m_globalConfig;
   for(TEnv* config : m_globalTimeDependentConfigs) delete config;
   for(TEnv* config : m_globalInsituCombMassConfig) delete config;
+  if (m_resData) delete m_resData;
+  if (m_resMC)   delete m_resMC; 
 }
 
 
@@ -230,6 +236,30 @@ StatusCode JetCalibrationTool::initialize() {
   } else {
     // Received a PV key, declare the data dependency
     ATH_CHECK( m_pvKey.initialize() );
+  }
+
+  if (m_calibSeq.find("Smear") == std::string::npos) { // No smearing running, store legacy JER histograms
+    std::string pathJER_legacy = "JetCalibTools/CalibArea-" + m_calibAreaTagLeg + "/CalibrationFactors/" + m_calibFileLeg;
+    TString fn_JER = PathResolverFindCalibFile(pathJER_legacy);
+    TFile *f_LegJER = new TFile(fn_JER, "READ");
+
+    TH2D* hist_data{};
+    TH2D* hist_MC{};
+    TString data_hist_name = "JER_Nominal_data_" +m_jetAlgo;
+    TString mc_hist_name = "JER_Nominal_" + m_calibMCTypeLeg + "_" + m_jetAlgo; // m_calibMCTypeLeg = MC16, AFII
+
+    hist_data =  (TH2D*)f_LegJER->Get(data_hist_name);
+    hist_MC   =  (TH2D*)f_LegJER->Get(mc_hist_name);
+    if (hist_data) {
+      m_resData = (TH2D*)hist_data->Clone();
+      m_resData->SetDirectory(nullptr);  // keep it alive after closing input ROOT file
+    }
+    if (hist_MC) {
+      m_resMC = (TH2D*)hist_MC->Clone();
+      m_resMC->SetDirectory(nullptr);  // keep it alive after closing input ROOT file
+    }
+
+    f_LegJER->Close();
   }
 
   return StatusCode::SUCCESS;
@@ -686,18 +716,65 @@ StatusCode JetCalibrationTool::calibrate(xAOD::Jet& jet, JetEventInfo& jetEventI
 StatusCode JetCalibrationTool::getNominalResolutionData(const xAOD::Jet& jet, double& resolution) const{
 
   if(m_smearIndex < 0){
-    ATH_MSG_ERROR("Cannot retrieve the nominal data resolution - smearing was not configured during initialization");
-    return StatusCode::FAILURE;
+    ATH_MSG_DEBUG("Requesting nominal data resolution without smearing - currently configured to return R21 JER!");
+    return getNominalResolutionHist(jet, resolution, m_resData);
+  } else {
+    return m_calibSteps.at(m_smearIndex)->getNominalResolutionData(jet, resolution);
   }
-  return m_calibSteps.at(m_smearIndex)->getNominalResolutionData(jet, resolution);
 }
 
 StatusCode JetCalibrationTool::getNominalResolutionMC(const xAOD::Jet& jet, double& resolution) const{
   
   if(m_smearIndex < 0){
-    ATH_MSG_ERROR("Cannot retrieve the nominal MC resolution - smearing was not configured during initialization");
+    ATH_MSG_DEBUG("Requesting nominal MC resolution without smearing - currently configured to return R21 JER!");
+    return getNominalResolutionHist(jet, resolution, m_resMC);
+  } else {
+    return m_calibSteps.at(m_smearIndex)->getNominalResolutionMC(jet, resolution);
+  }
+}
+
+StatusCode JetCalibrationTool::getNominalResolutionHist(const xAOD::Jet& jet, double& resolution, const TH2D* histo) const{
+
+  // Open R21 JER and fetch the corresponding histogram
+  // Currently only supported for AntiKt4EMPFlow and AntiKt4EMTopo collections
+  if (m_jetAlgo != "AntiKt4EMTopo" and m_jetAlgo != "AntiKt4EMPFlow"){
+    ATH_MSG_ERROR("Cannot retrieve resolution without smearing step for jet collection " << m_jetAlgo);
     return StatusCode::FAILURE;
   }
-  return m_calibSteps.at(m_smearIndex)->getNominalResolutionMC(jet, resolution);
+
+  if(!histo) {
+    ATH_MSG_ERROR( "Missing resolution histograms!" ); 
+    return StatusCode::FAILURE;
+  }
+
+  // Check dimensionality just to be safe
+  if (histo->GetDimension() != 2)
+  {
+      ATH_MSG_ERROR("Blocking reading of a " << histo->GetDimension() << "D histogram as a 2D histogram");
+      return StatusCode::FAILURE;
+  }
+
+  // x-axis: jet pt, y-axis: abs(jet eta)
+  double x = jet.pt();
+  double y = fabs(jet.eta());
+
+  // Ensure we are within boundaries
+  const double minX = histo->GetXaxis()->GetBinLowEdge(1);
+  const double maxX = histo->GetXaxis()->GetBinLowEdge(histo->GetNbinsX()+1);
+  if ( x >= maxX )
+      x = maxX - 1.e-6;
+  else if ( x <= minX )
+      x = minX + 1.e-6;
+  const double minY = histo->GetYaxis()->GetBinLowEdge(1);
+  const double maxY = histo->GetYaxis()->GetBinLowEdge(histo->GetNbinsY()+1);
+  if ( y >= maxY )
+      y = maxY - 1.e-6;
+  else if ( y <= minY )
+      y = minY + 1.e-6;
+
+  // Get the result, no interpolation
+  resolution = histo->GetBinContent(histo->GetXaxis()->FindBin(x),histo->GetYaxis()->FindBin(y));
+
+  return StatusCode::SUCCESS;
 }
 

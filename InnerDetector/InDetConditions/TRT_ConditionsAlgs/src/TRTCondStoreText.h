@@ -12,16 +12,18 @@
  **/
 
 //
-#include <string>
+
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ICondSvc.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
-#include "InDetIdentifier/TRT_ID.h"
+
 #include "TRT_ConditionsData/RtRelationMultChanContainer.h"
 #include "TRT_ConditionsData/StrawT0MultChanContainer.h"
-#include "AthenaKernel/IAthenaOutputStreamTool.h"
+#include "TRT_ConditionsData/ExpandedIdentifier.h" //for TRTCond::ExpandedIdentifier::STRAW
+
+#include <string>
+#include <iosfwd> //for std::istream fwd declaration
+
+class Identifier;
+class TRT_ID;
 
 /** @class TRTCondStoreText
    read calibration constants from text file and store them in a pool and cool file.

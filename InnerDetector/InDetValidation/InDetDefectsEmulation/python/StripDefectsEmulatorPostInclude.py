@@ -28,6 +28,49 @@
 #                                                                For efficiency files should be ordered by the significance of the
 #                                                                defects i.e. files with more module defects should precede files
 #                                                                with mostly single strip defects
+import math
+
+def poissonFractions(expectation=4, max_n=12) :
+    """
+    Create fractions for exactly 1..max_n defects, assuming a Poisson
+    distribution with an expected value of expect_n.
+    """
+    def PoissonProb(expected, n) :
+        return math.pow(expected,n)*math.exp(-expected)/math.gamma(n+1)
+    def norm(fractions) :
+        Norm = 1./sum (fractions)
+        return [Norm*elm for elm in fractions ]
+    return norm([ PoissonProb(expectation,i) for i in range(1,max_n+1) ])
+
+
+def mergeFractions(probA,fractionA, probB, fractionB) :
+    if probA <= 0. :
+        return fractionB
+    if probB <= 0. :
+        return fractionA
+
+    if len(fractionA) < len(fractionB) :
+        min_n=len(fractionA)
+        scaleA = probA/probB
+        scaleB = 1.
+        fraction=fractionB
+    else :
+        min_n=len(fractionA)
+        scaleB = probA/probB
+        scaleA = 1.
+        fraction=fractionA
+    for idx in range(0,min_n) :
+        fraction[idx]=fractionA[idx]*scaleA + fractionB[idx]*scaleB
+    norm=1./sum(fraction)
+    fraction = [elm*norm for elm in fraction]
+    return fraction
+
+def expectationValue(fractions) :
+    expectation_value=0
+    for idx in range(0,len(fractions)) :
+        expectation_value += (idx+1)*fractions[idx]
+    return expectation_value
+
 
 def emulateITkStripDefects(flags,
                            cfg,
@@ -38,6 +81,9 @@ def emulateITkStripDefects(flags,
                            RngPerDefectType=False,
                            DefectsInputFiles=[],
                            DefectsOutputFile=None,
+                           coldNoiseDefectProb: float=0.,
+                           coldNoiseNDefectFractions=None,
+                           coldNoiseDefectsEvenOnly: bool=False,
                            FillHistogramsPerPattern: bool=True,
                            FillEtaPhiHistogramsPerPattern: bool=True,
                            HistogramGroupName: str="ITkStripDefects",
@@ -56,7 +102,9 @@ def emulateITkStripDefects(flags,
         ITkStripDefectsEmulatorToDetectorElementStatusCondAlgCfg,
         DefectsHistSvcCfg,
         moduleDefect,
-        combineModuleDefects
+        combineModuleDefects,
+        # ODD_INDEX,
+        EVEN_INDEX
     )
     from AthenaCommon.Constants import INFO
 
@@ -65,9 +113,48 @@ def emulateITkStripDefects(flags,
     if HistogramGroupName is not None :
         cfg.merge( DefectsHistSvcCfg(flags, HistogramGroup=HistogramGroupName, FileName=HistogramFileName))
 
+    # coldNoiseDefectFractions=poissonFractions(4,16)
+    fractions=mergeFractions(StripDefectProb,[1.],coldNoiseDefectProb,coldNoiseNDefectFractions)
+    # total number of defects due to cold noise should be steered just by the coldNoiseDefectProb
+    # so in case of defect groups reduce this probability according to the defect group size created
+    # in average by each generated defect:
+    expectation_value = expectationValue(fractions)
+    coldNoiseDefectProb/=expectation_value
+
+    cold_noise_phi_range=EVEN_INDEX if coldNoiseDefectsEvenOnly else [-99,99]
+
     # dummy "fractions" for strips, module pattern are just examples, and currently all
     # modules get the same defect probabilities irrespectively of e.g. strip length.
-    module_pattern, module_defect_prob, fractions, ignore_NoiseProbability,ignore_NoiseShape, cornerDefectParam, cornerDefectFractions  = combineModuleDefects([
+    if True :
+        module_pattern, module_defect_prob, fractions, ignore_NoiseProbability,ignore_NoiseShape, cornerDefectParam, cornerDefectFractions  = combineModuleDefects([
+                                         # coldNoise defects show up in petal modules 4 and 5 (endcap eta index 14-17), and only on
+                                         # the lower module part which have even index in phi ?
+                                         moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=cold_noise_phi_range,eta_range=[14,17],
+                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                      probability=[ModuleDefectProb, # probability of a module to be defect
+                                                                   StripDefectProb+coldNoiseDefectProb,  # probability of a strip to be defect
+                                                                   ],
+                                                      fractionsOfNDefects=[fractions]),
+                                         moduleDefect(bec=[2,2],layer=[0,99], phi_range=EVEN_INDEX,eta_range=[14,17], # select endcap C4,5 even modules,
+                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                      probability=[ModuleDefectProb, # probability of a module to be defect
+                                                                   StripDefectProb+coldNoiseDefectProb  # probability of a strip to be defect
+                                                                   ],
+                                                      fractionsOfNDefects=[fractions]),
+                                         moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[14,17], # select endcap A4,5 modules,
+                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                      probability=[ModuleDefectProb, # probability of a module to be defect
+                                                                   StripDefectProb   # probability of a strip to be defect
+                                                                   ]),
+                                         moduleDefect(bec=[2,2],layer=[0,99], phi_range=[-99,99],eta_range=[14,17], # select endcap C4,5 modules,
+                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                      probability=[ModuleDefectProb, # probability of a module to be defect
+                                                                   StripDefectProb   # probability of a strip to be defect
+                                                                   ]),
                                          moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all endcap A modules
                                                       side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
                                                       all_rows=False,       # if True all rows of the same un-split module are marked as defect
@@ -92,6 +179,7 @@ def emulateITkStripDefects(flags,
                                                       probability=[ModuleDefectProb, # probability of a module to be defect
                                                                    StripDefectProb   # probability of a strip to be defect
                                                                    ])])
+    NDefectFractionsPerPattern = fractions
 
     if NoiseProb > 0. :
         # strip noise
@@ -126,6 +214,7 @@ def emulateITkStripDefects(flags,
                                                  MaxRandomPositionAttempts=MaxRandomPositionAttempts,
                                                  ModulePatterns=module_pattern,
                                                  DefectProbabilities=module_defect_prob,
+                                                 NDefectFractionsPerPattern = NDefectFractionsPerPattern,
                                                  CornerDefectParamsPerPattern=[],
                                                  NCornerDefectFractionsPerPattern=[],
                                                  RngPerDefectType=RngPerDefectType,

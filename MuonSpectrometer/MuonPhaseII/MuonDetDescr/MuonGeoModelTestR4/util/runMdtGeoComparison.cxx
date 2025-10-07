@@ -187,6 +187,9 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
         MdtChamber newchamber{};
 
         newchamber.id.stationIndex = (*stationIndex);
+        if (newchamber.id.stationIndex!= 13) {
+            continue;
+        }
         newchamber.id.eta = (*stationEta);
         newchamber.id.phi = (*stationPhi);
         newchamber.id.multilayer = (*stationML);
@@ -309,7 +312,7 @@ int main( int argc, char** argv ) {
         }
         /// The ultimate goal is to have the tube positioned at the same place. 
         /// We maybe need the origin position later when we are adding the alignable transforms...
-        if (false && distortion.translation().mag() > tolerance) {
+        if (distortion.translation().mag() > tolerance) {
             std::cout<<"The origins of the chamber coordinate systems are not exactly at the same point for "
                      <<reference<<". Translation shift: "<<Amg::toString(distortion.translation(), 2)<<std::endl;
         }
@@ -371,7 +374,7 @@ int main( int argc, char** argv ) {
             chamberOkay = false;
 
         } else {
-            // std::cout<<"runMdtGeoComparision() "<<__LINE__<<": Found perfect agreement between new & old geometry for "<<reference<<std::endl;
+            std::cout<<"runMdtGeoComparision() "<<__LINE__<<": Found perfect agreement between new & old geometry for "<<reference<<std::endl;
             ++goodChamb;
         }
     }

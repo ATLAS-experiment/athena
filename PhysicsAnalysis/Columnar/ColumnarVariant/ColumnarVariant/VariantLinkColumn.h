@@ -309,15 +309,15 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
     {
-      std::string dataName = columnBase.containerStoreName (CI::idName) + "." + name;
-      std::string keysName = columnBase.containerStoreName (CI::idName) + "." + name + ".keys";
+      std::string dataName = std::string (CI::idName) + "." + name;
+      std::string keysName = std::string (CI::idName) + "." + name + ".keys";
 
       auto dataInfo = info;
-      dataInfo.offsetName = columnBase.containerStoreName (CI::idName);
+      dataInfo.offsetName = CI::idName;
       dataInfo.variantLinkKeyColumn = keysName;
       dataInfo.linkTargetNames.reserve (VariantCI::numVariants);
       for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
-        dataInfo.linkTargetNames.push_back (columnBase.containerStoreName (containerIdNames[i]));
+        dataInfo.linkTargetNames.emplace_back (containerIdNames[i]);
       auto keyInfo = info;
       keyInfo.fixedDimensions.push_back (VariantCI::numVariants);
 
@@ -378,19 +378,19 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
     {
-      std::string offsetName = columnBase.containerStoreName (CI::idName) + "." + name + ".offset";
-      std::string dataName = columnBase.containerStoreName (CI::idName) + "." + name + ".data";
-      std::string keysName = columnBase.containerStoreName (CI::idName) + "." + name + ".keys";
+      std::string offsetName = std::string (CI::idName) + "." + name + ".offset";
+      std::string dataName = std::string (CI::idName) + "." + name + ".data";
+      std::string keysName = std::string (CI::idName) + "." + name + ".keys";
 
       auto offsetInfo = info;
-      offsetInfo.offsetName = columnBase.containerStoreName (CI::idName);
+      offsetInfo.offsetName = CI::idName;
       offsetInfo.isOffset = true;
       auto dataInfo = info;
       dataInfo.offsetName = offsetName;
       dataInfo.variantLinkKeyColumn = keysName;
       dataInfo.linkTargetNames.reserve (VariantCI::numVariants);
       for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
-        dataInfo.linkTargetNames.push_back (columnBase.containerStoreName (containerIdNames[i]));
+        dataInfo.linkTargetNames.emplace_back (containerIdNames[i]);
       auto keyInfo = info;
       keyInfo.fixedDimensions.push_back (VariantCI::numVariants);
 

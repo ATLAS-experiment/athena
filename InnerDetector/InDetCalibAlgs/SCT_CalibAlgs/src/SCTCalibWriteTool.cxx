@@ -518,7 +518,7 @@ SCTCalibWriteTool::streamOutCondObjects(const std::string& foldername) {
    IAthenaOutputStreamTool::TypeKeyPairs typeKeys{1};
    if (m_readWriteCool) {
       IAthenaOutputStreamTool::TypeKeyPair attrCollPair{"CondAttrListCollection", foldername};
-      typeKeys[0] = attrCollPair;
+      typeKeys[0] = std::move(attrCollPair);
    }
 
    if (m_streamer->streamObjects(typeKeys).isFailure()) {
@@ -653,6 +653,7 @@ SCTCalibWriteTool::setBasicValues(coral::AttributeList& attrList, const Identifi
    //
    const std::string becName{capsFormat?"BarrelEndcap":"barrel_endcap"};
    attrList["SampleSize"].setValue(static_cast<int>(samplesize));
+   //coverity [copy_constructor_call]
    attrList[becName].setValue(static_cast<int>(barrel_ec));
    attrList["Layer"].setValue(static_cast<int>(layer));
    attrList["Eta"].setValue(static_cast<int>(eta));

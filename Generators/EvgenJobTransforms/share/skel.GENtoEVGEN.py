@@ -107,7 +107,7 @@ evgenLog.debug("****************** CONFIGURING EVENT GENERATION ****************
 ## Functions for operating on generator names
 ## NOTE: evgenConfig, topSeq, svcMgr, theApp, etc. should NOT be explicitly re-imported in JOs
 from EvgenJobTransforms.EvgenConfig import evgenConfig
-from GeneratorConfig.GenConfigHelpers import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
+from GeneratorConfig.GenConfigHelpers import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering, gens_purgenoendvtx
 
 ## Fix non-standard event features
 from EvgenProdTools.EvgenProdToolsConf import FixHepMC
@@ -514,7 +514,13 @@ else:
    include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
 ## Purge unstable particle w/o end vertex occasionally produced by Hijing or Herwig
-if 'Hijing' in evgenConfig.generators or 'Herwig7' in evgenConfig.generators:
+generatorsList = evgenConfig.generators
+if hasattr(genSeq, "Pythia8"):
+    if (hasattr(genSeq.Pythia8, "Beam1") and genSeq.Pythia8.Beam1 != "PROTON" ) or \
+       (hasattr(genSeq.Pythia8, "Beam2") and genSeq.Pythia8.Beam2 != "PROTON" ):
+        # generator name is still "Pythia8", even when colliding nuclei
+        generatorsList.append("Pythia8-Angantyr")
+if gens_purgenoendvtx(generatorsList):
     fixSeq.FixHepMC.PurgeUnstableWithoutEndVtx = True
 
 ## Skip the semi-disconnected particles correction when running Sherpa with HEPMC_TREE_LIKE: 1

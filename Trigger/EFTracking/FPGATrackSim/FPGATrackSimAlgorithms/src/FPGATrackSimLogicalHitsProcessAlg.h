@@ -119,7 +119,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_secondStageStrips {this, "secondStageStrips", true, "If set to true, strip hits/SPs go to the second stage. Otherwise they go to the first." };
         Gaudi::Property<bool> m_outputRoadUnionTool {this, "outputRoadUnionTool", false, "If set to true, create LogicalEventInputHeader in output ROOT file using road union tool."};
         Gaudi::Property<int> m_region {this, "Region", 0, "Region ID to assign to tracks"};
-
+        Gaudi::Property<bool> m_writeInputBranches {this, "writeInputBranches", true, "If set to false, never write input branches"};
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for sliced hits in output ROOT file." };
         Gaudi::Property<std::string> m_outputBranch {this, "outputBranchName", "LogicalEventOutputHeader", "Name of the branch for output data in output ROOT file." };
@@ -157,7 +157,6 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         unsigned long m_maxNTracksTot = 0; // max number of tracks in an event
         unsigned long m_maxNTracksChi2Tot = 0; // max number of tracks passing chi2 in an event
         unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
-
 
         StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
                                    FPGATrackSimDataFlowInfo const * dataFlowInfo);

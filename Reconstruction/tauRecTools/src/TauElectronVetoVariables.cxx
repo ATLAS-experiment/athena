@@ -6,7 +6,6 @@
 
 #include "TauElectronVetoVariables.h"
 
-#include "xAODTau/TauJet.h"
 #include "CaloUtils/CaloVertexedCell.h"
 #include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
@@ -23,10 +22,7 @@
 using Gaudi::Units::GeV;
 
 TauElectronVetoVariables::TauElectronVetoVariables(const std::string &name) :
-TauRecToolBase(name) {
-}
-
-
+TauRecToolBase(name) {}
 
 StatusCode TauElectronVetoVariables::initialize() {
   ATH_CHECK( m_caloExtensionTool.retrieve() );

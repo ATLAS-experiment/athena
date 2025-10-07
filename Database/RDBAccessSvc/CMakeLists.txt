@@ -6,7 +6,7 @@ atlas_subdir( RDBAccessSvc )
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( SQLite3 )
-find_package( Boost COMPONENTS unit_test_framework)
+find_package( Boost COMPONENTS )
 
 # Component(s) in the package:
 atlas_add_library( RDBAccessSvcLib
@@ -34,7 +34,7 @@ atlas_add_executable( geomdb2oracle
 atlas_add_test( SqliteRecordset_test
   SOURCES src/SqliteRecord.cxx src/SqliteRecordset.cxx test/SqliteRecordset_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${SQLITE3_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} ${SQLITE3_LIBRARIES} RDBAccessSvcLib AthenaBaseComps
+  LINK_LIBRARIES ${Boost_LIBRARIES} ${SQLITE3_LIBRARIES} RDBAccessSvcLib AthenaBaseComps Boost::unit_test_framework
   POST_EXEC_SCRIPT "nopost.sh"
 )
 

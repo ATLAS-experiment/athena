@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <TauAnalysisTools/TauTruthTrackMatchingTool.h>
+#include "TauAnalysisTools/TauTruthTrackMatchingTool.h"
 
 // EDM include(s)
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include "AthContainers/ConstAccessor.h"
 
 using namespace TauAnalysisTools;
 
@@ -16,13 +15,11 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 TauTruthTrackMatchingTool::TauTruthTrackMatchingTool( const std::string& name )
   : AsgTool(name)
-{
-}
+{}
 
 //______________________________________________________________________________
 TauTruthTrackMatchingTool::~TauTruthTrackMatchingTool( )
-{
-}
+{}
 
 //______________________________________________________________________________
 StatusCode TauTruthTrackMatchingTool::initialize()

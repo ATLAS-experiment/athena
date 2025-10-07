@@ -257,7 +257,10 @@ bool AuxStoreInternal::resize (size_t sz)
   if (m_locked)
     throw ExcStoreLocked ("resize");
   bool nomoves = true;
-  for (std::unique_ptr<IAuxTypeVector>& v : m_vecs) {
+  for (SG::auxid_t id : m_auxids) {
+    SG::IAuxTypeVector* v = nullptr;
+    if (id < m_vecs.size())
+      v = m_vecs[id].get();
     if (v && !v->isLinked()) {
       if (!v->resize (sz))
         nomoves = false;

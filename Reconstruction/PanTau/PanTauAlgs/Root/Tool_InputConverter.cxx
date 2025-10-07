@@ -3,20 +3,15 @@
 */
 
 #include "PanTauAlgs/Tool_InputConverter.h"
-#include "PanTauAlgs/Tool_InformationStore.h"
 #include "PanTauAlgs/TauConstituent.h"
 #include "PanTauAlgs/PanTauSeed.h"
 #include "PanTauAlgs/HelperFunctions.h"
-#include "xAODTau/TauJet.h"
-#include "xAODPFlow/PFO.h"
-#include "xAODPFlow/PFODefs.h"
 #include "TruthUtils/ParticleConstants.h"
 
 
 PanTau::Tool_InputConverter::Tool_InputConverter( const std::string& name ) :
   asg::AsgTool(name)
-{
-}
+{}
 
 PanTau::Tool_InputConverter::~Tool_InputConverter() = default;
 

@@ -4,7 +4,6 @@
 
 // local include(s)
 #include "tauRecTools/MvaTESEvaluator.h"
-#include "tauRecTools/HelperFunctions.h"
 
 
 MvaTESEvaluator::MvaTESEvaluator(const std::string& name)

@@ -11,6 +11,7 @@
 #include <AsgTools/AsgTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
+#include <ColumnarTestFixtures/IXAODToolCaller.h>
 
 #include <gtest/gtest.h>
 
@@ -53,15 +54,7 @@ namespace columnar
 
     void setupColumns (ToolColumnVectorMap& toolWrapper);
 
-    /// the arguments for the function calling in xAOD mode
-    struct XAODArgs
-    {
-      std::string inputContainer;
-      std::string outputContainer;
-      bool isPrepCall = false;
-    };
-
-    void doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, std::function<void(XAODArgs&)> callXAOD, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName = "");
+    void doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, TestUtils::IXAODToolCaller& xAODToolCaller, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName = "");
   };
 }
 

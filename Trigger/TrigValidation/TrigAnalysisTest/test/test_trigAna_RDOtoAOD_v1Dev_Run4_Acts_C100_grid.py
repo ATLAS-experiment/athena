@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: Test of transform RDO->RDO_TRIG->AOD with threads=1 and Acts tracking (C100)
+# art-description: Test of transform RDO->RDO_TRIG->AOD with threads=8 and Acts tracking (C100)
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583

@@ -12,11 +12,22 @@
 #include <MuonPatternEvent/Segment.h>
 #include <AthLinks/ElementLink.h>
 
+namespace {
+    using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
+    using SimHitLink_t = ElementLink<xAOD::MuonSimHitContainer>;
+    using PrdLink_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
+ 
+    using PrdLinkVec_t = std::vector<PrdLink_t>;
+    using SimHitLinkVec_t = std::vector<SimHitLink_t>;
+    using SegLinkVec_t = std::vector<SegLink_t>;
+
+}
+
 namespace MuonR4 {
     const xAOD::MuonSimHit* getTruthMatchedHit(const xAOD::UncalibratedMeasurement& prdHit) {
-        static const SG::ConstAccessor<ElementLink<xAOD::MuonSimHitContainer>> acc("simHitLink");
+        static const SG::ConstAccessor<SimHitLink_t> acc("simHitLink");
         if (acc.isAvailable(prdHit)){
-            const ElementLink<xAOD::MuonSimHitContainer>& link{acc(prdHit)};
+            const SimHitLink_t& link{acc(prdHit)};
             if (link.isValid()) {
                 return (*link);
             }
@@ -26,16 +37,12 @@ namespace MuonR4 {
 
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment) {
         
-        using SimHitLinkVec_t = std::vector<ElementLink<xAOD::MuonSimHitContainer>>;
-        using PrdLink_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
-        using PrdLinkVec_t = std::vector<PrdLink_t>;
-        
         static const SG::ConstAccessor<SimHitLinkVec_t> acc_simLink{"simHitLinks"};
         static const SG::ConstAccessor<PrdLinkVec_t> acc_prdLink{"prdLinks"};
         std::unordered_set<const xAOD::MuonSimHit*> hits{};
         if (acc_simLink.isAvailable(segment)){
             hits.reserve(acc_simLink(segment).size());
-            for (const ElementLink<xAOD::MuonSimHitContainer>& link : acc_simLink(segment)) {
+            for (const SimHitLink_t& link : acc_simLink(segment)) {
                 if (link.isValid()) {
                     hits.insert(*link);
                 }
@@ -109,7 +116,6 @@ namespace MuonR4 {
         return nullptr;
     }
     const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSegment& segment) {
-        using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
         static const SG::ConstAccessor<SegLink_t> acc{"truthSegmentLink"};
         if (acc.isAvailable(segment)) {
             const SegLink_t& link{acc(segment)};
@@ -118,6 +124,18 @@ namespace MuonR4 {
             }
         }
         return nullptr;
+    }
+    std::vector<const xAOD::MuonSegment*> getTruthSegments(const xAOD::TruthParticle& truthMuon) {
+        static const SG::ConstAccessor<SegLinkVec_t> acc{"truthSegmentLinks"};
+        std::vector<const xAOD::MuonSegment*> segments{};
+
+        if (!acc.isAvailable(truthMuon)) {
+            return segments;
+        }
+        for (const SegLink_t& link : acc(truthMuon)) {
+            segments.emplace_back(*link);
+        }
+        return segments;
     }
 }
 

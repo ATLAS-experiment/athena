@@ -187,10 +187,7 @@ StatusCode DoubleEventSelectorAthenaPool::recordAttributeList() const
   (*athAttrList)["hasSecondaryInput"].data<bool>() = true;
 
   SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
-  if (!wh.record(std::move(athAttrList)).isSuccess()) {
-    ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(wh.record(std::move(athAttrList)));
 
   return StatusCode::SUCCESS;
 }

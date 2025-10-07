@@ -16,7 +16,7 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include <cinttypes>
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
-
+#include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 
 class FPGADataFormatTool
 : public extends<AthAlgTool, IEFTrackingFPGADataFormatTool> {
@@ -46,8 +46,20 @@ class FPGADataFormatTool
 	const FPGATrackSimTrackCollection* tracks,
         std::vector<uint64_t> &encodedData,
         const EventContext &ctx
-        ) const override;  
+        ) const override;
   
+    virtual StatusCode convertFPGASliceToFPGADataFormat(
+       const FPGATrackSimHitCollection*  hitsInSlices,
+       std::vector<uint64_t> &encodedData,
+       const EventContext &ctx
+       ) const override; 
+  
+    virtual StatusCode convertFPGAHitsToFPGADataFormat(
+       const FPGATrackSimHitCollection* hits,
+       std::vector<uint64_t> &encodedData,
+       const EventContext &ctx
+       ) const override; 
+
   private:
     const PixelID* m_pixelId = nullptr;
     const SCT_ID* m_sctId = nullptr;
@@ -75,7 +87,20 @@ class FPGADataFormatTool
 	const FPGATrackSimTrackCollection* tracks,
         std::vector<uint64_t> &encodedData,
         const EventContext &ctx
-        ) const;   
+        ) const;
+
+    StatusCode convertFPGASlices(
+        const FPGATrackSimHitCollection*  hitsInSlices,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx /*ctx*/
+	) const;
+
+    StatusCode convertFPGAHits(
+        const FPGATrackSimHitCollection* hits,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx /*ctx*/
+	) const;
+
 
     // Helper function for common header and Footer info
     StatusCode fillHeader(std::vector<uint64_t> &encodedData) const;

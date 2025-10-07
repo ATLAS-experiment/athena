@@ -20,7 +20,7 @@
 #include "ITkStripCabling/ITkStripOnlineId.h"
 #include "Identifier/Identifier.h"
 #include "IdDictParser/IdDictParser.h"
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictMgr.h"
 #include "InDetIdentifier/SCT_ID.h"
 
 

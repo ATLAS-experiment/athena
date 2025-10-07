@@ -3,11 +3,12 @@
 import textwrap
 import inspect
 from functools import wraps
+import warnings
 
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgBlock = logging.getLogger('CPAlgCfgBlock')
 
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ExpertModeWarning
 import re
 
 def filter_dsids (filterList, config) :
@@ -147,8 +148,8 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
         self._blockName = ''
         self._factoryName = None
         self._dependencies = []
-        self._options = {}
-        # used with block configuration to set arbitrary option
+        self._options = {} # used with block configuration to set arbitrary option
+        self._expertModeSettings = {} # dictionary to track expert mode requirements for each option
         self.addOption('groupName', '', type=str,
             info=('Used to specify this block when setting an'
                 ' option at an arbitrary location.'))
@@ -176,7 +177,8 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
                   ' the algorithm name. THIS IS MEANT TO BE EXPERT'
                   ' USAGE ONLY. Properties that need to be set by'
                   ' the user should be declared as options on the'
-                  ' block itself. EXPERT USE ONLY!'))
+                  ' block itself. EXPERT USE ONLY!'),
+                  expertMode=True)
         # Increment the instance count for the current class
         cls = type(self)  # Get the actual class of the instance (also derived!)
         if cls not in ConfigBlock.instance_counts:
@@ -310,7 +312,7 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
         return self._dependencies
 
     def addOption (self, name, defaultValue, *,
-            type, info='', noneAction='ignore', required=False) :
+                   type, info='', noneAction='ignore', required=False, expertMode=None) :
         """declare the given option on the configuration block
 
         This should only be called in the constructor of the
@@ -327,6 +329,18 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
         noneActions = ['error', 'set', 'ignore']
         if noneAction not in noneActions :
             raise ValueError (f'invalid noneAction: {noneAction} [allowed values: {noneActions}]')
+
+        # Store expert mode settings if provided
+        if expertMode is not None:
+            if expertMode is True:
+                # in this case we will just check against the default value
+                self._expertModeSettings[name] = True
+            elif not isinstance(expertMode, list):
+                raise TypeError (f'expertMode must be a list, got {type(expertMode)}')
+            else:
+                # here we will check against a list of custom values
+                self._expertModeSettings[name] = expertMode
+
         setattr (self, name, defaultValue)
         self._options[name] = ConfigBlockOption(type=type, info=info,
             noneAction=noneAction, required=required, default=defaultValue)
@@ -418,3 +432,57 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
     def get_instance_count(cls):
         # Access the current count for this class
         return ConfigBlock.instance_counts.get(cls, 0)
+
+    def _is_expert_value(self, rule, value):
+        """
+        Check whether value matches an expert mode rule.
+        Rule can be:
+        - A literal (compared with ==)
+        - A callable predicate (called with value)
+        - A special marker string (common callable)
+        """
+        if callable(rule):
+            return rule(value)
+
+        if isinstance(rule, str):
+            if rule == "nonemptystring":
+                return isinstance(value, str) and value != ""
+            if rule == "nonemptylist":
+                return isinstance(value, list) and value != []
+            if rule == "positiveint":
+                return isinstance(value, int) and value > 0
+
+        # Fallback: direct value comparison
+        return value == rule
+
+    def checkExpertSettings(self, config):
+        """
+        Check if any settings require expert mode and validate accordingly.
+        If any setting is set to a value that requires expert mode but we're
+        not in expert mode, raise an error.
+        """
+        for option_name, expert_rule in self._expertModeSettings.items():
+            current_value = self.getOptionValue(option_name)
+            default_value = self._options[option_name].default
+
+            if expert_rule is True:
+                # Any deviation from the default requires expert mode
+                if current_value != default_value:
+                    warnings.warn(
+                        f"Block '{self.factoryName()}' option '{option_name}' "
+                        f"set to '{current_value}' (default '{default_value}'), "
+                        f"requires expert mode.",
+                        ExpertModeWarning, stacklevel=2
+                    )
+
+            else:  # it's a list of expert values/markers/predicates
+                for ev in expert_rule:
+                    if self._is_expert_value(ev, current_value):
+                        warnings.warn(
+                            f"Block '{self.factoryName()}' option '{option_name}' "
+                            f"set to expert-only value '{current_value}'. "
+                            f"Requires expert mode.",
+                            ExpertModeWarning, stacklevel=2
+                        )
+        # All checks passed
+        return

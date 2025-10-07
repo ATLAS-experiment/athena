@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "EventContainers/IdentifiableContainerMT.h"
 #include <vector>
@@ -319,13 +319,11 @@ public:
             if(m_abortedhashes.count(i)) { //testing aborting collections
                continue;
             }
-            bool deleted = false;
             StatusCode x = lock.addOrDelete(std::move(dcoll));
             if(x.isFailure()) {
                 std::cout << "failure in addOrDelete" << std::endl;
                 std::abort();
             }
-            if(deleted) ++c.deletedcount;
 
         }
 

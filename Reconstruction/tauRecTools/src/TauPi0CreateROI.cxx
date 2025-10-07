@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -8,13 +8,9 @@
 #include "tauRecTools/HelperFunctions.h"
 
 #include "CaloUtils/CaloCellList.h"
-#include <memory>
 
 TauPi0CreateROI::TauPi0CreateROI(const std::string& name) :
-     TauRecToolBase(name) {
-}
-   
-
+     TauRecToolBase(name) {}
 
 StatusCode TauPi0CreateROI::initialize() {
     

@@ -130,7 +130,7 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
 	  moduleString.push_back(buffer);
 	  checkModule.erase(0, pos + delimiter.length());
 	}
-	moduleString.push_back(checkModule);
+	moduleString.push_back(std::move(checkModule));
 
 	if (moduleString.size()!=2) {
 	  ATH_MSG_FATAL("String size (moduleString) is not 2. " << moduleString.size() << " in " << i << " channel " <<  attrList.first << " read from " << readHandle.fullKey());

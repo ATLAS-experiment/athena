@@ -58,7 +58,7 @@ std::vector<std::string> getObservableAndResoAndSuffix(const TObject* resHelper)
         second = name.substr(sep + 1, sep2 - sep - 1);
         third  = name.substr(sep2 + 1);
     }
-
+    // coverity[copy_constructor_call]
     return {first, second, third};
 }
 

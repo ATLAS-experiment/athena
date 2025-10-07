@@ -262,13 +262,12 @@ StatusCode xAODRingSetConfWriter::fillConfigurations()
   for (size_t counter = 0; counter < m_rsConfContVec.size(); ++counter)
   {
     auto& crBuilder = m_crBuilderTools[counter];
-    auto& rsCont = m_rsConfContVec[counter];
 
     // Create the xAOD configuration object (it will populate
     // RingSetConfContainer for us):
     xAOD::RingSetConf::fillRingSetConfContainer( 
         crBuilder->rawConf(), 
-        rsCont);
+        *m_rsConfContVec[counter]);
 
     // Inform what we did:
     ATH_MSG_DEBUG( "Got configuration for " << crBuilder->name() << "." );

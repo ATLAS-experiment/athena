@@ -57,6 +57,13 @@ concept InputValIterator =
   std::convertible_to<std::iter_value_t<ITERATOR>, VAL>;
 
 
+// An allocation function.  Can be used like <code>T* p = F()</code> to allocate
+// a new object.
+template <typename F, typename T>
+concept AllocationFunction =
+  std::invocable<F> && std::convertible_to<std::invoke_result_t<F>, T*>;
+
+
 } // namespace detail
 } // namespace CxxUtils
 

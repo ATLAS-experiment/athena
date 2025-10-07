@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // INav4MomAssocsCnv_p1.cxx 
@@ -145,7 +145,7 @@ INav4MomAssocsCnv_p1::transToPers( const INav4MomAssocs* transObj,
       const INav4MomAssocs::asso_link asso = begAsso.getLink();
       INav4MomAssocs_p1::Elem_t assoElem (asso.dataID(), asso.index());
       const INav4MomAssocs_p1::ElemLink_t association( keyElem, assoElem );
-      persObj->m_assocs.push_back( association );
+      persObj->m_assocs.emplace_back( keyElem, assoElem );
     }
   }
 

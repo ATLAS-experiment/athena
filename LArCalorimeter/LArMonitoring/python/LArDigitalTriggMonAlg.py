@@ -98,7 +98,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
     larDigitalTriggMonAlg = helper.addAlgorithm(CompFactory.LArDigitalTriggMonAlg('larDigitalTriggMonAlg'))
     larDigitalTriggMonAlg.ProblemsToMask=["maskedOSUM"] #highNoiseHG","highNoiseMG","highNoiseLG","deadReadout","deadPhys"]
     if nsamples < 4:
-        larDigitalTriggMonAlg.LArRawSCEtRecoContainerKey="dummy" # this will not exists, so not used in monitoring
+        larDigitalTriggMonAlg.LArRawSCEtRecoContainerKey="" 
 
     larDigitalTriggMonAlg.isADCBas = hasAdcBas
     larDigitalTriggMonAlg.LArRawSCContainerKey = RawSCContainerKey

@@ -35,7 +35,7 @@ StatusCode gFEXCondAlgo::execute(const EventContext& ctx) const {
     }
 
     bool validTimeStamp = (ctx.eventID().time_stamp() < m_dbBeginTimestamp) ? false : true;
-    if (m_isMC) validTimeStamp = false;
+    if (m_isMC) validTimeStamp = true;
 
     // Set DB to false if any of keys not provided
     bool anyKeyEmpty = m_GfexNoiseCutsKey.empty();
@@ -61,7 +61,7 @@ StatusCode gFEXCondAlgo::execute(const EventContext& ctx) const {
                 const std::string s((char*)blob.startingAddress(),blob.size());
                 nlohmann::json attrList = nlohmann::json::parse(s);
 
-                //Trying to update Noise cut values
+                // Trying to update Noise cut values
 
                     bool allitemsPresent = true;
                     for(const auto & name:myStringsNoise ) {
@@ -87,7 +87,6 @@ StatusCode gFEXCondAlgo::execute(const EventContext& ctx) const {
         }
     }
     else{
-        
         writeCHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
         writeDBTool->set_Aslopes(m_AslopesDefault);
         writeDBTool->set_Bslopes(m_BslopesDefault);

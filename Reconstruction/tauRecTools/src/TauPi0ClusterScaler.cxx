@@ -4,10 +4,6 @@
 
 
 #include "TauPi0ClusterScaler.h"
-
-#include "xAODTau/TauJet.h"
-#include "xAODPFlow/PFO.h"
-#include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
 #include <vector>

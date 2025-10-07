@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  PixelMapping.cxx
 //  PixelMapping
@@ -44,9 +44,7 @@ namespace pix{
           throw std::runtime_error(msg);
         }
       }
-      result.first = name;
-      result.second = coords;
-      return result;
+      return {name, coords};
     };
     while (std::getline(fs, line)){
       //hash at start indicates comment, do nothing

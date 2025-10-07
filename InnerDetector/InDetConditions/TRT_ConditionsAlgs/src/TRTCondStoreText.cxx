@@ -2,19 +2,22 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <fstream>
-#include <iostream>
-#include <string>
+
 #include "TRTCondStoreText.h"
+
 #include "TRT_ConditionsData/BasicRtRelation.h"
 #include "TRT_ConditionsData/DinesRtRelation.h"
 #include "TRT_ConditionsData/BinnedRtRelation.h"
 #include "TRT_ConditionsData/RtRelationFactory.h"
+#include "InDetIdentifier/TRT_ID.h"
 
+#include <fstream>
+#include <iostream>
+#include <string>
 
 
 /**  @file TRTCondStoreText.cxx
- *   Algoritm for reading TRT calibration constants from text file and store them in a pool and cool file
+ *   Algorithm for reading TRT calibration constants from text file and store them in a pool and cool file
  *
  *
  * @author Peter Hansen <phansen@nbi.dk>
@@ -67,7 +70,7 @@ StatusCode TRTCondStoreText::checkTextFile(const std::string& filename, int& for
 {
 
   StatusCode sc=StatusCode::SUCCESS ;
-  std::ifstream infile(filename.c_str()) ;
+  std::ifstream infile(filename) ;
   if(!infile) {
     ATH_MSG_ERROR( "Cannot find input file " << filename ) ;
     sc=StatusCode::FAILURE;
@@ -85,7 +88,7 @@ StatusCode TRTCondStoreText::checkTextFile(const std::string& filename, int& for
       // 'rewind' the file
 
       infile.close() ;
-      infile.open(filename.c_str()) ;
+      infile.open(filename) ;
     }
   }
   infile.close() ;
@@ -96,7 +99,7 @@ StatusCode TRTCondStoreText::readTextFile(const std::string& filename, int& form
 {
 
   StatusCode sc=StatusCode::SUCCESS ;
-  std::ifstream infile(filename.c_str()) ;
+  std::ifstream infile(filename) ;
   if(!infile) {
     ATH_MSG_ERROR( "Cannot find input file " << filename ) ;
   } else {
@@ -113,7 +116,7 @@ StatusCode TRTCondStoreText::readTextFile(const std::string& filename, int& form
       // 'rewind' the file
 
       infile.close() ;
-      infile.open(filename.c_str()) ;
+      infile.open(filename) ;
     }
     ATH_MSG_INFO( "Reading calibration data from text file " << filename << " format " << format ) ;
     switch(format) {
@@ -170,7 +173,8 @@ StatusCode TRTCondStoreText::readTextFile_Format1(std::istream& infile)
 
 
  	TRTCond::RtRelation* rt = TRTCond::RtRelationFactory::readFromFile(is) ;
-        rtContainer->set( id,rt); 
+ 	// coverity[tainted_data]
+  rtContainer->set( id,rt); 
 	delete rt ;
 	++nrtrelations ;
       } else if( readmode == ReadingStrawT0 ) {
@@ -180,7 +184,7 @@ StatusCode TRTCondStoreText::readTextFile_Format1(std::istream& infile)
 	
 	//skip straws with t0=0. The
 	if(t0==0) continue;
-	
+	      // coverity[tainted_data]
         t0Container->setT0( id, t0, t0err );
         //debug
         //id.print();
@@ -278,14 +282,16 @@ StatusCode TRTCondStoreText::readTextFile_Format2(std::istream& infile)
       if( readmode == ReadingRtRelation ) {
 
  	TRTCond::RtRelation* rt = TRTCond::RtRelationFactory::readFromFile(is) ;
-        rtContainer->set( id,rt); 
+ 	// coverity[tainted_data]
+  rtContainer->set( id,rt); 
 	delete rt ;
 	++nrtrelations ;
 
       } else if( readmode == ReadingErrors ) {
 
  	TRTCond::RtRelation* err = TRTCond::RtRelationFactory::readFromFile(is) ;
-        errContainer->set( id,err);
+ 	// coverity[tainted_data]
+  errContainer->set( id,err);
 	delete err ;
 	++nerrors ;
 
@@ -293,7 +299,8 @@ StatusCode TRTCondStoreText::readTextFile_Format2(std::istream& infile)
 
 	float t0(0), t0err(0) ;
 	is >> t0 >> t0err ;
-        t0Container->setT0( id, t0, t0err );
+	// coverity[tainted_data]
+  t0Container->setT0( id, t0, t0err );
 
 	++nstrawt0 ;
       }
@@ -401,6 +408,7 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
       if( readmode == ReadingRtRelation ) {
 
         TRTCond::RtRelation* rt = TRTCond::RtRelationFactory::readFromFile(is) ;
+        // coverity[tainted_data]
         rtContainer->set( id,rt); 
         delete rt ;
         ++nrtrelations ;
@@ -408,6 +416,7 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
       } else if( readmode == ReadingErrors ) {
 
         TRTCond::RtRelation* err = TRTCond::RtRelationFactory::readFromFile(is) ;
+        // coverity[tainted_data]
         errContainer->set( id,err);
         delete err ;
         ++nerrors ;
@@ -415,6 +424,7 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
       } else if( readmode == ReadingSlopes ) {
 
         TRTCond::RtRelation* slope = TRTCond::RtRelationFactory::readFromFile(is) ;
+        // coverity[tainted_data]
         slopeContainer->set( id,slope);
         delete slope ;
         ++nslopes ;
@@ -423,6 +433,7 @@ StatusCode TRTCondStoreText::readTextFile_Format3(std::istream& infile)
 
         float t0(0), t0err(0) ;
         is >> t0 >> t0err ;
+        // coverity[tainted_data]
         t0Container->setT0( id, t0, t0err );
         ++nstrawt0 ;
       }

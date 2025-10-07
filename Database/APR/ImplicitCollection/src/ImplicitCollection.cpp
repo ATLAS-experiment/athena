@@ -8,9 +8,6 @@
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
-
-#include "CoralBase/MessageStream.h"
-
 #include "StorageSvc/DbType.h"
 
 #include <sstream>
@@ -24,7 +21,7 @@ namespace pool {
                        const std::string& connection,
                        const std::string& name,
                        ICollection::OpenMode mode )
-         :
+         : APRMessaging("ImplicitCollection"),
          m_container( 0 ),
          m_description( name,"ImplicitCollection", connection )
    {
@@ -36,7 +33,7 @@ namespace pool {
    ImplicitCollection( const ICollectionDescription* description,
                        ICollection::OpenMode mode,
                        ISession* session )
-         :
+         : APRMessaging("ImplicitCollection"),
          m_container( 0 ),
          m_description( *description )
    {
@@ -49,10 +46,8 @@ namespace pool {
    open( ICollection::OpenMode mode,
          ISession* session )
    {
-      coral::MessageStream log( "ImplicitCollection");
-
       if ( mode != ICollection::READ ) {
-         log << coral::Error << "An implicit collection can be opened only in READ mode" << coral::MessageStream::endmsg;
+         ATH_MSG_ERROR( "An implicit collection can be opened only in READ mode" );
          throw std::runtime_error( "An implicit collection can be opened only in READ mode (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
 
@@ -62,7 +57,7 @@ namespace pool {
       const std::string& connection = m_description.connection();
       std::string::size_type pos = connection.find( ":" );
       if ( pos == std::string::npos ) {
-         log << coral::Error << "Badly formed connection string : \"" << connection << "\"" << coral::MessageStream::endmsg;
+         ATH_MSG_ERROR( "Badly formed connection string : '" << connection << "'" );
          throw std::runtime_error( "Badly formed connection string (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
 
@@ -72,7 +67,7 @@ namespace pool {
       else if ( dbType == "LFN" ) dbNameType = DatabaseSpecification::LFN;
       else if ( dbType == "FID" ) dbNameType = DatabaseSpecification::FID;
       else {
-         log << coral::Error << "Unrecognizable database name type : \"" << dbType << "\"" << coral::MessageStream::endmsg;
+         ATH_MSG_ERROR( "Unrecognizable database name type : '" << dbType << "'" );
          throw std::runtime_error( "Unrecognizable database name type : " + dbType + " (APR: \"ImplicitCollection::ImplicitCollection (APR: \" ImplicitCollection \")" );
       }
 
@@ -82,7 +77,7 @@ namespace pool {
       is >> dbName >> technologyName;
 
       if ( dbName.empty() ) {
-         log << coral::Error << "Invalid database name " << coral::MessageStream::endmsg;
+         ATH_MSG_ERROR( "Invalid database name" );
          throw std::runtime_error( "Invalid database name (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
   
@@ -124,9 +119,7 @@ namespace pool {
       if( !m_container ) {
          throw std::runtime_error( "Could not open the container " + name + " (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
-      log << coral::Info << "Opened the implicit collection with connection string \""
-          << connection << "\"" << coral::MessageStream::endmsg
-          << "and a name \"" << name << "\"" << coral::MessageStream::endmsg;
+      ATH_MSG_INFO( "Opened the implicit collection with connection string '" << connection << "' and a name '" << name << "'" );
    }
 
 

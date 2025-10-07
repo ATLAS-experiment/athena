@@ -8,7 +8,6 @@
 #include "LUCID_Identifier/LUCID_ID.h"
 #include "LUCID_Identifier/LUCID_DetElemHash.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"  
 #include <set>
 #include <algorithm>
 #include <iostream>

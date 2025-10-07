@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -8,8 +8,6 @@
 // local include(s)
 #include "TauAnalysisTools/CommonDiTauEfficiencyTool.h"
 #include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
-#include "xAODTruth/TruthParticleContainer.h"
-#include "AthContainers/Decorator.h"
 
 // ROOT include(s)
 #include "TH2F.h"

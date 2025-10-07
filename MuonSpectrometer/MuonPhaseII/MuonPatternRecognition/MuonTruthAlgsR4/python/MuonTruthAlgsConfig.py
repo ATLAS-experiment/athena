@@ -62,38 +62,6 @@ def TruthHitAssociationCfg(flags):
                                              AssocPull = 1. if cont_name=="xAODsTgcPads" else 3. ))
     return result
 
-def PrdMultiTruthMakerCfg(flags):
-    result = ComponentAccumulator()
-    from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
-    prdContainer = PrimaryMeasContNamesCfg(flags)
-    if flags.Detector.GeometryMDT: 
-        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerMdt",
-                                                        PrdContainer = [prd for prd in prdContainer if "xMdt" in prd], 
-                                                        WriteKey = "MDT_TruthMap")
-        result.addEventAlgo(the_alg)
-    if flags.Detector.GeometryRPC:
-        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerRpc",
-                                                        PrdContainer = [prd for prd in prdContainer if "xRpc" in prd], 
-                                                        WriteKey = "RPC_TruthMap")
-        result.addEventAlgo(the_alg)
-    if flags.Detector.GeometryTGC: 
-        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerTgc",
-                                                        PrdContainer = [prd for prd in prdContainer if "xTgc" in prd],
-                                                        WriteKey = "TGC_TruthMap")
-        result.addEventAlgo(the_alg)       
-    if flags.Detector.GeometryMM: 
-        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerMm",
-                                                        PrdContainer = [prd for prd in prdContainer if "MM" in prd], 
-                                                        WriteKey = "MM_TruthMap")
-        result.addEventAlgo(the_alg) 
-    if flags.Detector.GeometrysTGC: 
-        the_alg = CompFactory.MuonR4.PrdMultiTruthMaker("PrdMultiTruthMakerSTGC",
-                                                        PrdContainer = [prd for prd in prdContainer if "sTgc" in prd], 
-                                                        WriteKey = "STGC_TruthMap")
-        result.addEventAlgo(the_alg) 
-    return result
-
-
 def SdoMultiTruthMakerCfg(flags, useSDO = False):
     result = ComponentAccumulator()
 
@@ -175,7 +143,7 @@ def MuonTruthAlgsCfg(flags):
     PrdLinkInputs = [( "xAOD::UncalibratedMeasurementContainer" , 
                      "StoreGateSvc+{cont_name}.simHitLink".format(cont_name = cont_name)) for cont_name in PrimaryMeasContNamesCfg(flags) ]
     result.merge(TruthSegmentMakerCfg(flags, ExtraInputs = PrdLinkInputs))
-    result.merge(PrdMultiTruthMakerCfg(flags))
+    result.merge(SdoMultiTruthMakerCfg(flags, useSDO = True))
     from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg, MuonTruthHitCountsAlgCfg
     result.merge(TruthMuonMakerAlgCfg(flags))
     result.merge(MuonTruthHitCountsAlgCfg(flags))

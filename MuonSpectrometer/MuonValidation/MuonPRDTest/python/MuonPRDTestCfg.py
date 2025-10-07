@@ -11,7 +11,7 @@ def NswOccupancyAlgCfg(flags, binWidth = 100):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def AddMetaAlgCfg(flags, alg_name="MuonTPMetaAlg", OutStream="NSWPRDValAlg", **kwargs):
+def AddMetaAlgCfg(flags, alg_name="MuonTPMetaAlg", OutStream="MuonHitValAlg", **kwargs):
     result = ComponentAccumulator()
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
     from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
@@ -27,7 +27,7 @@ def AddMetaAlgCfg(flags, alg_name="MuonTPMetaAlg", OutStream="NSWPRDValAlg", **k
     return result
 
 
-def AddHitValAlgCfg(flags, name = "HitValAlg", outFile="NSWPRDValAlg.ntuple.root", **kwargs):
+def AddHitValAlgCfg(flags, name = "HitValAlg", outFile="MuonHitValAlg.ntuple.root", **kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonConfigUtils import setupHistSvcCfg
     result.merge(setupHistSvcCfg(flags, outFile=outFile, outStream="MUONHITVALIDSTREAM"))

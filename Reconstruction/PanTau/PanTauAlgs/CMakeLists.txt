@@ -3,17 +3,13 @@
 # Declare the package name:
 atlas_subdir( PanTauAlgs )
 
-# External dependencies:
-find_package( ROOT COMPONENTS Core RIO Tree MathCore MathMore Physics )
-
 # Component(s) in the package.
 atlas_add_library( PanTauAlgsLib
    PanTauAlgs/*.h Root/*.cxx
    PUBLIC_HEADERS PanTauAlgs
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgTools xAODBase
-   xAODParticleEvent xAODPFlow xAODTau tauRecToolsLib MVAUtils TruthUtils
-   PRIVATE_LINK_LIBRARIES xAODTracking PathResolver )
+   LINK_LIBRARIES ${ROOT_LIBRARIES} tauRecToolsLib
+   PRIVATE_LINK_LIBRARIES PathResolver ) 
 
 atlas_add_dictionary( PanTauAlgsDict
    PanTauAlgs/PanTauAlgsDict.h PanTauAlgs/selection.xml

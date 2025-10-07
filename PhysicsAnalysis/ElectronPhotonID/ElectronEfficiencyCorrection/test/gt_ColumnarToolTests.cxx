@@ -29,6 +29,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
+using columnar::TestUtils::IXAODToolCaller;
 
 TEST_F (ColumnarMemoryTest, AsgElectronEfficiencyCorrectionTool)
 {
@@ -87,27 +88,42 @@ TEST_F (ColumnarMemoryTest, AsgElectronEfficiencyCorrectionTool)
 
 
 
-void callXAOD (const AsgElectronEfficiencyCorrectionTool& tool, bool isPrepCall, const std::string& name) {
-  using namespace asg::msgUserCode;
-  if (isPrepCall)
+class XAODTestToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+{
+public:
+  XAODTestToolCaller (const AsgElectronEfficiencyCorrectionTool& tool, const std::string& name)
+    : AsgMessaging ("XAODTestToolCaller"), m_tool (tool), m_name (name)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
-    const xAOD::ElectronContainer *electrons = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (electrons, name));
-    auto [electronsCopy, auxCopy] = xAOD::shallowCopyContainer (*electrons);
-    const xAOD::EventInfo *eventInfo = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (eventInfo, "EventInfo"));
-    tool.callSingleEvent (*electronsCopy, *eventInfo);
-    delete electronsCopy;
-    delete auxCopy;
-  }else
-  {
-    const xAOD::ElectronContainer *electrons = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (electrons, name));
-    const xAOD::EventInfo *eventInfo = nullptr;
-    ANA_CHECK_THROW (tool.evtStore()->retrieve (eventInfo, "EventInfo"));
-    tool.callSingleEvent (*electrons, *eventInfo);
+    ANA_CHECK (evtStore.retrieve (m_electrons, m_name));
+    ANA_CHECK (evtStore.retrieve (m_eventInfo, "EventInfo"));
+    return StatusCode::SUCCESS;
   }
-}
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons);
+    m_electrons = electronsCopy;
+    ANA_CHECK (evtStore.record (electronsCopy, m_name + postfix));
+    ANA_CHECK (evtStore.record (electronsAuxCopy, m_name + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_electrons, *m_eventInfo);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const AsgElectronEfficiencyCorrectionTool& m_tool;
+  std::string m_name;
+
+  const xAOD::ElectronContainer *m_electrons = nullptr;
+  const xAOD::EventInfo *m_eventInfo = nullptr;
+};
 
 
 
@@ -124,7 +140,9 @@ TEST_F (ColumnarPhysLiteTest, AsgElectronEfficiencyCorrectionTool)
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
 
-  doCall (*myToolHandle, "AsgElectronEfficiencyCorrectionTool", "AnalysisElectrons", [&] (auto& args) {callXAOD (*myToolHandle, args.isPrepCall, args.inputContainer);}, {{"Electrons", "AnalysisElectrons"}});
+  XAODTestToolCaller callXAOD (*myToolHandle, "AnalysisElectrons");
+
+  doCall (*myToolHandle, "AsgElectronEfficiencyCorrectionTool", "AnalysisElectrons", callXAOD, {{"Electrons", "AnalysisElectrons"}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

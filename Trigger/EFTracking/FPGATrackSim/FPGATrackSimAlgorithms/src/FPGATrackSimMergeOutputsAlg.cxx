@@ -1,7 +1,15 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "FPGATrackSimMergeOutputsAlg.h"
 #include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
-#include "TH2F.h"
+#include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
+#include "FPGATrackSimObjects/FPGATrackSimLogicalEventOutputHeader.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 
+#include "TH2F.h"
+#include "TTree.h"
+#include "TFile.h"
 
 FPGATrackSimMergeOutputsAlg::FPGATrackSimMergeOutputsAlg (const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator) {
@@ -28,7 +36,9 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
   for (unsigned iregion = 0; iregion < N; iregion++) {
     regionsFound[iregion] = false;
   }
-  
+
+  bool foundDP=false;
+
   for (unsigned ifile = 0; ifile < nfiles; ifile++) { // loop over paths to files
     m_files[ifile] = new TFile(m_inpaths[ifile].c_str(),"READ");
     if (!m_files[ifile]->IsOpen() || m_files[ifile]->IsZombie()) {
@@ -36,17 +46,22 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
       return StatusCode::FAILURE;
     }
     
-    if (ifile == 0) { // do this only on the first file
+    if (!foundDP) { // only needed for one file
       m_dataprep_tree = (TTree*)(m_files[ifile]->Get("FPGATrackSimDataPrepTree"));
-      m_dataprep = new FPGATrackSimLogicalEventInputHeader();
-      
-      TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
-      if (!dpb) {
-	ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
-	return StatusCode::FAILURE;
+      if (m_dataprep_tree) {
+	if (m_dataprep_tree->GetEntries() > 0) {
+	  foundDP = true;
+	  m_dataprep = new FPGATrackSimLogicalEventInputHeader();
+	  
+	  TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
+	  if (!dpb) {
+	    ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
+	    return StatusCode::FAILURE;
+	  }
+	  dpb->SetAddress(&m_dataprep);
+	  m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
+	}
       }
-      dpb->SetAddress(&m_dataprep);
-      m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
     }
 
     
@@ -81,6 +96,11 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
       
     }
   }
+
+  if (!foundDP) {
+    ATH_MSG_ERROR("Did not find the DP tree");
+    return StatusCode::FAILURE;
+  }
   
   return StatusCode::SUCCESS;
 }
@@ -99,7 +119,7 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
   // get the hits
   ATH_CHECK(FPGAHits_Handle.record (std::make_unique<FPGATrackSimHitCollection>()));
   m_dataprep_tree->GetEntry(m_evtloop); 
-  for (auto tower : m_dataprep->towers()) {    
+  for (const auto & tower : m_dataprep->towers()) {    
     const std::vector<FPGATrackSimHit> hits = tower.hits();
     FPGAHits_Handle->insert(FPGAHits_Handle->end(), make_move_iterator(hits.begin()), make_move_iterator(hits.end()));
   }
@@ -114,8 +134,8 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
       m_trees[ivec][iregion]->GetEntry(m_evtloop);
       // Time to load up these tracks!
       std::vector<FPGATrackSimTrack> const tracks = m_eventOutputHeaders[ivec][iregion]->getFPGATrackSimTracks_1st();
-      for (auto track : tracks) {
-	if (track.passedOR()) FPGATracks->push_back(track);
+      for (const auto &track : tracks) {
+        if (track.passedOR()) FPGATracks->push_back(track);
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ClusterDumper.cxx 767574 2016-08-11 13:52:47Z ssnyder $
@@ -25,6 +25,7 @@ ClusterDumper::ClusterDumper( const std::string& name,
 StatusCode ClusterDumper::initialize() {
   ATH_MSG_INFO( "Initializing" );
 
+  std::lock_guard<std::mutex> fileLock{m_fileMutex};
   if (!m_fileName.empty()) {
     m_fileOut.open(m_fileName);
     if (m_fileOut.is_open()) {

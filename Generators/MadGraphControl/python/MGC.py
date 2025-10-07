@@ -25,6 +25,12 @@ MADGRAPH_CATCH_ERRORS=True
 # PDF setting (global setting)
 MADGRAPH_PDFSETTING=None
 
+## Options:
+# 'madevent_simd' for SIMD (vector) instructions
+# 'madevent_gpu' for GPU-based execution
+# 'max' to try to auto-detect the best we can do
+MADGRAPH_DEVICES=None
+
 class MGControl:
     def __init__(self, process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False):
         """ Generate a new process in madgraph.
@@ -51,12 +57,23 @@ class MGControl:
         for l in process.split('\n'):
             if 'output' not in l:
                 a_card.write(l+'\n')
-            elif '-nojpeg' in l or keepJpegs:
-                a_card.write(l+'\n')
-            elif '#' in l:
-                a_card.write(l.split('#')[0]+' -nojpeg #'+l.split('#')[1]+'\n')
             else:
-                a_card.write(l+' -nojpeg\n')
+                # Special handling for output line
+                outline = l.strip()
+                if '-nojpeg' not in l and not keepJpegs:
+                    # We need to add -nojpeg somehow
+                    if '#' in l:
+                        outline = outline.split('#')[0]+' -nojpeg #'+outline.split('#')[1]
+                    else:
+                        outline = outline + ' -nojpeg'
+                # Special handling for devises
+                if MADGRAPH_DEVICES is not None:
+                    if MADGRAPH_DEVICES.lower() in ['madevent_simd','madevent_gpu']:
+                        outline = 'output '+MADGRAPH_DEVICES.lower()+' '+outline.split('output')[1]
+                    elif MADGRAPH_DEVICES.lower() == 'max':
+                        self.mglog.warning('Not fully implemented yet; setting avx')
+                        outline = 'output madevent_simd '+outline.split('output')[1]
+                a_card.write(outline+'\n')
         a_card.close()
 
         madpath=os.environ['MADPATH']
@@ -143,6 +160,9 @@ class MGControl:
         mglog.info('Modifying config paths to avoid use of afs:')
         mglog.info(option_paths)
 
+        # Load up the run card dictionary
+        self.runCardDict = getDictFromCard(process_dir+'/Cards/run_card.dat')
+
         # Set the paths appropriately
         self.change_config_card(process_dir=process_dir,settings=option_paths,set_commented=False)
         # Done modifying paths
@@ -154,15 +174,23 @@ class MGControl:
         # After 2.9.3, enforce the standard default sde_strategy, so that this won't randomly change on the user
         if is_version_or_newer([2,9,3]) and not is_NLO_run(process_dir=process_dir):
             mglog.info('Setting default sde_strategy to old default (1)')
-            my_settings = {'sde_strategy':1}
-            self.change_run_card(process_dir=process_dir,settings=my_settings,skipBaseFragment=True)
-            
+            self.runCardDict['sde_strategy']=1
+
         #tell MadGraph not to bother trying to create popup windows since this is running in a CLI, this will save ~50 seconds every time MadGraph is called.    
         self.change_config_card(process_dir=process_dir,settings={'notification_center':'False'})
 
+        # Add some custom settings based on the device requests
+        if MADGRAPH_DEVICES is not None:
+            if MADGRAPH_DEVICES.lower()=='madevent_simd':
+                self.runCardDict['cudacpp_backend'] = 'cppauto'
+            elif MADGRAPH_DEVICES.lower()=='madevent_gpu':
+                self.runCardDict['cudacpp_backend'] = 'cuda'
+            elif MADGRAPH_DEVICES.lower() == 'max':
+                self.mglog.warning('Not fully implemented yet; setting avx')
+                self.runCardDict['cudacpp_backend'] = 'cppauto'
+
         # Make sure we store the resultant directory
         self.MADGRAPH_COMMAND_STACK += ['export MGaMC_PROCESS_DIR='+os.path.basename(process_dir)]
-        self.runCardDict = getDictFromCard(process_dir+'/Cards/run_card.dat')
         self.process_dir = process_dir
 
     def change_run_card(self, run_card_input=None,run_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,runArgs=None,settings={},skipBaseFragment=False ):

@@ -47,7 +47,8 @@ class MetAnalysisConfig (ConfigBlock):
             info="EXPERIMENTAL: whether to use simplified OR based on nominal jets "
             "and for jet-related systematics only. "
             "WARNING: this option is strictly for doing physics studies of the feasibility "
-            "of this OR scheme, it should not be used in a regular analysis")
+            "of this OR scheme, it should not be used in a regular analysis",
+            expertMode=True)
         self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
@@ -55,9 +56,11 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map")
         self.addOption ('useCaloSoftTerm', False, type=bool,
-            info="(expert) use calo- instead of track-based soft term")
+            info="(expert) use calo- instead of track-based soft term",
+            expertMode=True)
         self.addOption ('softTermResolution', -1.0, type=float,
-            info="(expert) override the default soft term resolution in METSignificance")
+            info="(expert) override the default soft term resolution in METSignificance",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -112,7 +115,9 @@ class MetAnalysisConfig (ConfigBlock):
         if self.invisible:
             if isinstance(self.invisible, str):
                 self.invisible = [self.invisible]
-            alg.invisible, alg.invisibleSelection = [config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible]
+            invisibleContainers, invisibleSelections = zip(*[config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible])
+            alg.invisible = list(invisibleContainers)
+            alg.invisibleSelection = list(invisibleSelections)
         alg.met = config.writeName (self.containerName, isMet = True)
 
 
