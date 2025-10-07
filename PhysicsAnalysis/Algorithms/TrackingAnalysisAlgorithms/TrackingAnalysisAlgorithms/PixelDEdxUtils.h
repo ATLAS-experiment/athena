@@ -33,13 +33,13 @@ namespace PixelDEdx {
   };
 
   void getClusterdEdx( PixelClusterStruct& cluster,
-                        int& nIBLOverflowHits,
+                        unsigned char& nIBLOverflowHits,
                         bool tightClusterCleaning = false);
   
   void getdEdxMetrics(const std::vector<PixelClusterStruct>& clusters,
                          float& averagedEdx, 
                          float& sigmadEdx, 
-                         int& nUsedHits,
+                         unsigned char& nUsedHits,
                          bool equalize = false);
 
 } // namespace PixelDEdx

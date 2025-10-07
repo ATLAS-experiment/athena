@@ -154,8 +154,8 @@ namespace CP {
       ///    It will then calculate the truncated mean (and other metrics) using the equalized cluster measurements.
       
       int allPixelHits = 0; // all pixel hits linked to the track.
-      int nUsedHits = 0; // divisor in truncated mean.
-      int nIBLOverflowHits = 0; // number of IBL hits in overflow.
+      unsigned char nUsedHits = 0; // divisor in truncated mean.
+      unsigned char nIBLOverflowHits = 0; // number of IBL hits in overflow.
 
       /// Get pixel clusters in this simple struct to abstract away the two EDMs.
       std::vector<PixelDEdx::PixelClusterStruct> clusters;
@@ -284,27 +284,27 @@ namespace CP {
                             << ") does not match the value calculated here (" << averagedEdx << ")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
-          if ( (int) stored_numberOfUsedHitsdEdx != nUsedHits ) {
+          if ( stored_numberOfUsedHitsdEdx != nUsedHits ) {
             ATH_MSG_DEBUG("The numberOfUsedHitsdEdx stored in the AOD ("<< (int) stored_numberOfUsedHitsdEdx
-                            << ") does not match the value calculated here ("<< nUsedHits <<")!"
+                          << ") does not match the value calculated here ("<< (int) nUsedHits <<")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
-          if ( (int) stored_numberOfIBLOverflowsdEdx != nIBLOverflowHits) {
+          if ( stored_numberOfIBLOverflowsdEdx != nIBLOverflowHits) {
             ATH_MSG_DEBUG("The numberOfIBLOverflowsdEdx stored in the AOD ("<< (int) stored_numberOfIBLOverflowsdEdx
-                            << ") does not match the value calculated here ("<< nIBLOverflowHits <<")!"
+                          << ") does not match the value calculated here ("<< (int) nIBLOverflowHits <<")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
           }
         }
         
         /// Now get the cluster equalized dE/dx metrics.
-        int nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
+        unsigned char nUsedHitsEq=0; // need separate counter or will double count if calculating both raw and equalized dE/dx
         float averagedEdxEq = 0;
         float sigmadEdxEq = 0;
         PixelDEdx::getdEdxMetrics(clusters, averagedEdxEq, sigmadEdxEq, nUsedHitsEq, true);
         
         /// Sanity check that nUsedHits and nUsedHitsEq are the same.
         if (nUsedHitsEq != nUsedHits) {
-          ATH_MSG_DEBUG("The numberOfUsedHitsdEdx calculated for the raw ("<< nUsedHits <<") and equalized ("<< nUsedHitsEq <<") dE/dx differ!"
+          ATH_MSG_DEBUG("The numberOfUsedHitsdEdx calculated for the raw ("<< (int) nUsedHits <<") and equalized ("<< (int) nUsedHitsEq <<") dE/dx differ!"
                         << "\nThis can happen if the equalization changes the order of the clusters and there's an IBL OF hit.");
           /// For example, imagine there are 4 good clusters on track, and one is an IBL overflow hit.
           /// Say it is the third cluster when sorting by increasing dE/dx.
@@ -325,10 +325,10 @@ namespace CP {
         /// Decorate with nUsedHits and nIBLOverflowHits as calculated here with the xAOD EDM.
         /// Can be different from those calculated during reconstruction due to migration across cluster quality cuts.
         /// Particularly the cluster local (x,y), we changes between the ESD and the xAOD...
-        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqNUsedKey << " with value " << nUsedHitsEq);
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqNUsedKey << " with value " << (int) nUsedHitsEq);
         trackdEdxEqNUsedHandle(*trk) = nUsedHitsEq;
         
-        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqIBLOFKey << " with value " << nIBLOverflowHits);
+        ATH_MSG_DEBUG("Will decorate  variable " << m_trackdEdxEqIBLOFKey << " with value " << (int) nIBLOverflowHits);
         trackdEdxEqIBLOFHandle(*trk) = nIBLOverflowHits;
         
       } // end cluster-level equalization if 

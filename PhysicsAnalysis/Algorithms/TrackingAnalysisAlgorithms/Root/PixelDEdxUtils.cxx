@@ -11,7 +11,7 @@ namespace PixelDEdx {
   /// Also, increment nIBLOverflowHits.
   /// If bad measurement, keep default negative value for dE/dx, don't increment.
   void getClusterdEdx(PixelClusterStruct& cluster,
-                      int& nIBLOverflowHits,
+                      unsigned char& nIBLOverflowHits,
                       bool tightClusterCleaning) {    
 
     float dEdxValue;
@@ -129,7 +129,7 @@ namespace PixelDEdx {
   void getdEdxMetrics(const std::vector<PixelClusterStruct>& clusters,
                          float& averagedEdx, 
                          float& sigmadEdx, 
-                         int& nUsedHits, 
+                         unsigned char& nUsedHits,
                          bool equalize) {
 
     int pixelhits = clusters.size();
