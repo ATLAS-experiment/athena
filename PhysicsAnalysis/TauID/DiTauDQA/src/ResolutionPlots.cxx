@@ -2,10 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <utility>
 #include "ResolutionPlots.h"
 #include "AthContainers/ConstAccessor.h"
-#include "TLorentzVector.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
 namespace DiTau{

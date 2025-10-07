@@ -9,17 +9,10 @@
 
 // PhysVal includes
 #include "PhysValDiTau.h"
-
-// STL includes
-#include <vector>
-
-// FrameWork includes
-#include "GaudiKernel/IToolSvc.h"
-#include "xAODJet/JetContainer.h"
-#include "AthenaBaseComps/AthCheckMacros.h"
-#include "TruthUtils/HepMCHelpers.h"
+#include "EventInfo/EventInfo.h"
+#include "xAODTau/DiTauJetContainer.h"
 #include "AthContainers/ConstAccessor.h"
-
+#include <vector>
 
 PhysValDiTau::PhysValDiTau(const std::string& type, 
 		         const std::string& name, 
