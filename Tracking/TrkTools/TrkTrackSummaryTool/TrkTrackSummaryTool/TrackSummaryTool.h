@@ -12,6 +12,7 @@
 
 #include "TRT_ElectronPidTools/ITRT_ToT_dEdx.h" //template parameter to tool handle
 #include "TrkToolInterfaces/IExtendedTrackSummaryHelperTool.h" //template parameter to tool handle
+#include "TrkToolInterfaces/IPixelToTPIDTool.h" //template parameter to tool handle
 #include "TrkToolInterfaces/ITRT_ElectronPidTool.h" //template parameter to tool handle
 
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"

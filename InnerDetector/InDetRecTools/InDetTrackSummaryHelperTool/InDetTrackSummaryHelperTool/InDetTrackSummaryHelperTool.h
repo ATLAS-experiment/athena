@@ -10,6 +10,7 @@
 
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
+#include "TrkToolInterfaces/IPixelToTPIDTool.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "TrkTrackSummary/TrackSummary.h" // defines the Trk::numberOfDetectorTypes enum
 
