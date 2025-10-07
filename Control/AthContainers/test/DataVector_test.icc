@@ -18,7 +18,10 @@
 #include "TestTools/expect_exception.h"
 #include "SGTools/TestStore.h"
 #include "CxxUtils/checker_macros.h"
-#include "boost/concept_check.hpp"
+#include <concepts>
+#include <type_traits>
+#include <iterator>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <sstream>
@@ -6598,8 +6601,8 @@ void test2_deleter()
 template <class B, class D>
 void do_test2()
 {
-  boost::function_requires<boost::ForwardContainer<DataVector<B> > >();
-  boost::function_requires<boost::ForwardContainer<DataVector<D> > >();
+  static_assert(std::ranges::forward_range<DataVector<B>>, "DataVector<B> must be a forward range");
+  static_assert(std::ranges::forward_range<DataVector<D>>, "DataVector<D> must be a forward range");
 
   test2_initial<B,D> ();
   test2_default_ctor<B,D> ();
