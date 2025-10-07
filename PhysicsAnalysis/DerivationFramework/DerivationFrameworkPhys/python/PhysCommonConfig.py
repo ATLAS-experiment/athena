@@ -20,7 +20,9 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
             AddStandardTruthContentsCfg,
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
-            AddPVCollectionCfg)
+            AddPVCollectionCfg,
+            TruthClassificationAugmentationsCfg)
+        acc.merge(TruthClassificationAugmentationsCfg(flags))
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
         PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,

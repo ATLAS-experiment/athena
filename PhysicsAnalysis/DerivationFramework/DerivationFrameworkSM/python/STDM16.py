@@ -46,7 +46,9 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
             #AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg,
-            AddTruthCollectionNavigationDecorationsCfg)
+            AddTruthCollectionNavigationDecorationsCfg,
+            TruthClassificationAugmentationsCfg)
+        acc.merge(TruthClassificationAugmentationsCfg(flags))
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
         STDM16CommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,
