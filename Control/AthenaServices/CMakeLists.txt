@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaServices )
@@ -79,6 +79,12 @@ atlas_add_test( AthDictLoaderSvc
 atlas_add_test( ItemListSemanticsTest
    SCRIPT test/OutputStreamItemListTest.py
    POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TimeoutAlgTest
+   SCRIPT test/TimeoutAlg_test.py
+   PROPERTIES PROCESSORS 2
+              PASS_REGULAR_EXPRESSION "ERROR Event timeout"
+   POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py

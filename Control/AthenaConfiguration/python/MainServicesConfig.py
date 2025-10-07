@@ -6,9 +6,7 @@ from AthenaCommon.Constants import INFO
 
 def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
     """Mininmal basic config, just good enough for HelloWorld and alike"""
-    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence,
-                                                        Sequential=True,
-                                                        TimeOut=flags.Exec.EventTimeOut))
+    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence, Sequential=True))
     cfg.setAsTopLevel()
     cfg.setAppProperty('TopAlg',['AthSequencer/'+masterSequence])
     cfg.setAppProperty('MessageSvcType', 'MessageSvc')
@@ -306,6 +304,14 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
 
     if flags.Concurrency.NumProcs > 0:
         cfg.merge(AthenaMpEventLoopMgrCfg(flags))
+
+    # Timeout
+    if flags.Exec.EventTimeOut > 0:
+        timeoutAlg = CompFactory.TimeoutAlg(
+            Timeout = flags.Exec.EventTimeOut,
+            AbortJob = True,
+            DumpSchedulerState = False)
+        cfg.addEventAlgo(timeoutAlg, sequenceName='AthBeginSeq')
 
     # Additional components needed for threaded jobs only:
     if flags.Concurrency.NumThreads > 0:
