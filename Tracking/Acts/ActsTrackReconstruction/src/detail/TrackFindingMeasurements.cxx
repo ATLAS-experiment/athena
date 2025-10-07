@@ -35,7 +35,6 @@ namespace ActsTrk::detail {
     }
     m_measurementRanges.setContainer(typeIndex32, &clusterContainer);
 
-    xAOD::UncalibMeasType lastMeasurementType = xAOD::UncalibMeasType::Other;
     xAOD::DetectorIDHashType lastIdHash = std::numeric_limits<xAOD::DetectorIDHashType>::max();
     MeasurementRange *currentRange = nullptr;
 
@@ -44,13 +43,12 @@ namespace ActsTrk::detail {
     Acts::GeometryIdentifier measurementSurfaceId{};
     for (; sl_idx < n_elements; ++sl_idx) {
       const auto *measurement = clusterContainer[sl_idx];
-      if (measurement->identifierHash() != lastIdHash or
-          measurement->type() != lastMeasurementType) {
+      xAOD::DetectorIDHashType idHash = measurement->identifierHash();
+      if (idHash != lastIdHash) {
         if (currentRange) {
           currentRange->updateEnd(typeIndex, sl_idx);
         }
-        lastIdHash = measurement->identifierHash();
-        lastMeasurementType = measurement->type();
+        lastIdHash = idHash;
 
         measurementSurfaceId = ActsTrk::getSurfaceGeometryIdOfMeasurement(detectorElementToGeoid, *measurement);
 

@@ -54,7 +54,7 @@ namespace GlobalSim {
     }
 
     auto h_towerTOBs = SG::makeHandle(m_gblCellTowers, ctx);
-    auto towers = std::make_unique<IOBitwise::CommonTOBContainer>();
+    auto towers = std::make_unique<IOBitwise::ICommonTOBContainer>();
     towers->reserve(nEta * nPhi);
 
     for (int etaBin = 0; etaBin < nEta; ++etaBin) {

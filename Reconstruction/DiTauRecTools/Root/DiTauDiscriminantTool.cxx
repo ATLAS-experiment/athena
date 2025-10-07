@@ -3,17 +3,8 @@
 */
 
 #include "DiTauRecTools/DiTauDiscriminantTool.h"
-
-// Core include(s):
-#include "AthLinks/ElementLink.h"
-
-// EDM include(s):
-#include "xAODTau/DiTauJet.h"
-
-#include "DiTauRecTools/HelperFunctions.h"
-#include "PathResolver/PathResolver.h"
 #include "AthContainers/ConstAccessor.h"
-
+#include "PathResolver/PathResolver.h"
 
 using namespace DiTauRecTools;
 

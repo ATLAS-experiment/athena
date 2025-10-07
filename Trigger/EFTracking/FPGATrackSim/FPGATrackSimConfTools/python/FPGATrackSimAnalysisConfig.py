@@ -261,9 +261,16 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
             BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
         else:
             # now assumed to be in the map directory with name = basename for region + _lyrmap.json
-            BinnnedHits.layerMapFile =os.path.join(
-             PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
-             f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json")
+            if flags.Trigger.FPGATrackSim.GenScan.useLayerRadiiFile:
+                BinnnedHits.layerRadiiFile =os.path.join(
+                PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+                f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrradii.json")
+            else:   
+                BinnnedHits.layerMapFile =os.path.join(
+                PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+                f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrmap.json")
+                
+            
 
 
     # make the bintool class
@@ -278,6 +285,10 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
         BinDesc.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
+        if flags.Trigger.FPGATrackSim.GenScan.useLayerRadiiFile:
+            phirange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
+            phicenter = (phirange[0]+phirange[1])/2.0
+            BinDesc.PhiOffset = -1.0*phicenter
 
         BinDesc.region = flags.Trigger.FPGATrackSim.region
 
@@ -669,9 +680,13 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg
     theFPGATrackSimLogicalHitsProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
+
     result.addEventAlgo(theFPGATrackSimLogicalHitsProcessAlg)
 
     return result
+
+
+
 
 def getChi2Cut(region):
     chi2cut_l = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 20] #from most recent run on this branch with new maps/banks, all chi2's are under 1

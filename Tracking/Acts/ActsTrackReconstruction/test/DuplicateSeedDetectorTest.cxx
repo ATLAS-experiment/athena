@@ -131,9 +131,9 @@ namespace ActsTrk::detail {
       std::cout << "Checking seedOffset" << std::endl;
       assert( duplicateSeedDetector.m_seedOffset.empty() );
       std::cout << "Chacking UsedMeasurements" << std::endl;
-      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0ul );
+      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0u );
       std::cout << "Checking nSeedMeasurements" << std::endl;
-      checkCollection( duplicateSeedDetector.m_nSeedMeasurements, nTotalSeeds, 0ul );
+      checkCollection( duplicateSeedDetector.m_nSeedMeasurements, nTotalSeeds, 0u );
       std::cout << "Checking isDuplicateSeed" << std::endl;
       checkCollection( duplicateSeedDetector.m_isDuplicateSeed, nTotalSeeds, false );
 
@@ -155,15 +155,15 @@ namespace ActsTrk::detail {
       assert( duplicateSeedDetector.m_seedOffset[0] == 0ul );
       assert( duplicateSeedDetector.m_seedOffset[1] == pixelSeeds.size() );
       std::cout << "Chacking UsedMeasurements" << std::endl;
-      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0ul );
+      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0u );
       std::cout << "Checking nSeedMeasurements" << std::endl;
-      const std::vector<std::size_t>& nSeedMeasurementsPostFill = duplicateSeedDetector.m_nSeedMeasurements;
-      for (std::vector<std::size_t>::const_iterator it(nSeedMeasurementsPostFill.begin()),
+      const std::vector<unsigned int>& nSeedMeasurementsPostFill = duplicateSeedDetector.m_nSeedMeasurements;
+      for (std::vector<unsigned int>::const_iterator it(nSeedMeasurementsPostFill.begin()),
             itEnd(nSeedMeasurementsPostFill.begin() + pixelSeeds.size());
           it != itEnd; ++it) {
         assert( *it == 3ul );
       }
-      for (std::vector<std::size_t>::const_iterator it(nSeedMeasurementsPostFill.begin() + pixelSeeds.size());
+      for (std::vector<unsigned int>::const_iterator it(nSeedMeasurementsPostFill.begin() + pixelSeeds.size());
           it != nSeedMeasurementsPostFill.end(); ++it) {
         assert( *it == 6 );
       }

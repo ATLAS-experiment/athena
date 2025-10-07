@@ -77,6 +77,16 @@ public:
     // get the array with the size in each dimension of the
     const std::vector<unsigned int> &dims() const { return m_dims; }
 
+    // Check if index is a valid entry
+    bool isValid(const std::vector<unsigned int> &idx) const {
+        if (idx.size() != m_dims.size()) return false;
+        for (unsigned int i = 0; i < m_dims.size(); i++)
+        {
+            if (idx[i]>=m_dims[i]) return false;            
+        }
+        return true;
+    }
+
     // look up content by idx specified as a std::vector<unsigned int>
     const T &operator[](const std::vector<unsigned int> &idx) const
     {

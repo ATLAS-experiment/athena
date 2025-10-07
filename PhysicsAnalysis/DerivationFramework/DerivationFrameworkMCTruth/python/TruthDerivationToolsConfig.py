@@ -19,8 +19,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def TruthCollectionMakerCfg(flags, name, **kwargs):
     """Configure the TruthCollectionMaker tool"""
     acc = ComponentAccumulator()
-    TruthCollectionMaker = CompFactory.DerivationFramework.TruthCollectionMaker
-    acc.addPublicTool(TruthCollectionMaker(name = name,**kwargs),
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMaker(name = name,**kwargs),
                       primary = True)
     return acc
 
@@ -55,7 +54,7 @@ def DFCommonTruthElectronToolCfg(flags):
 
 
 def DFCommonTruthPhotonToolCfg(flags):
-    """Photon truth collection maker"""
+    """Photon truth collection maker (Currently unused?)"""
     return TruthCollectionMakerCfg(flags,
                                    name                    = "DFCommonTruthPhotonTool",
                                    OutputCollectionName = "TruthPhotons",

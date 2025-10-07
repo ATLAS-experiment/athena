@@ -5,6 +5,13 @@
 #ifndef GLOBALSIM_IEEMSELECTOR_H
 #define GLOBALSIM_IEEMSELECTOR_H
 
+
+namespace GlobalSim {
+  namespace IOBitwise{
+    class IeEmTOB;
+  }
+}
+
 namespace  GlobalSim {
 
   /**
@@ -12,7 +19,7 @@ namespace  GlobalSim {
    *
    */
 
-  using IOBitwise::IeEmTOB;
+  using GlobalSim::IOBitwise::IeEmTOB;
   
   class IeEmSelector {
   public:
