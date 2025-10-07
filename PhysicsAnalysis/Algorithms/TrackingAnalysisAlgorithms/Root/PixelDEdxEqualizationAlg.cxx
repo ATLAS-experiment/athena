@@ -44,7 +44,7 @@ namespace CP {
       ATH_MSG_WARNING("Tight cluster cleaning requested for dE/dx calculation, but feature not yet supported.");
     }
 
-    /// Initialize decorators, independent of equalization strategy.
+    /// Initialize decorator keys, independent of equalization strategy.
     /// Most won't be used for track-level equalization strategy since no pixel clusters.
     std::string trackContainer = m_trackContainerName.key();
 
@@ -93,13 +93,15 @@ namespace CP {
     ANA_CHECK ( m_trackdEdxEqIBLOFKey.initialize() );
 
     ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " <<  m_trackdEdxEqKey);
-    ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " <<  m_trackdEdxEqStdDevKey);
-    ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " <<  m_trackdEdxEqNUsedKey);
-    ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " <<  m_trackdEdxEqIBLOFKey);
 
     ANA_CHECK ( m_clusterdEdxKey.initialize() );
     ANA_CHECK ( m_clusterdEdxEqKey.initialize() );
+
+    /// If performing cluster-level equalization, then clusters are present, and these variables can be re-calculated after EQ using xAOD EDM.
     if(m_equalizeClusterMeasurements) {
+      ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " <<  m_trackdEdxEqStdDevKey);
+      ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " <<  m_trackdEdxEqNUsedKey);
+      ATH_MSG_INFO("Will decorate track container " << m_trackContainerName << " with variable " <<  m_trackdEdxEqIBLOFKey);
       ATH_MSG_INFO("Will decorate PixelClusters with their raw dE/dx using key: " << m_clusterdEdxKey);
       ATH_MSG_INFO("Will decorate PixelClusters with their equalized dE/dx using key: " << m_clusterdEdxEqKey);
     }
