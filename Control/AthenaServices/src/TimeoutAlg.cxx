@@ -65,6 +65,7 @@ StatusCode TimeoutAlg::stop()
     // Signal timeout thread to stop
     ATH_MSG_DEBUG("Stopping timeout thread");
     m_stop_thread.set_value();
+    m_thread.join();
   }
 
   return StatusCode::SUCCESS;
