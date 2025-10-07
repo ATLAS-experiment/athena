@@ -15,8 +15,8 @@ namespace ActsTrk::detail {
                                                bool enabled)
       : m_disabled(!enabled),
 	m_measOffset(measOffset),
-        m_nUsedMeasurements(enabled ? numSeeds : 0ul, 0ul),
-        m_nSeedMeasurements(enabled ? numSeeds : 0ul, 0ul),
+        m_nUsedMeasurements(enabled ? numSeeds : 0ul, 0u),
+        m_nSeedMeasurements(enabled ? numSeeds : 0ul, 0u),
         m_isDuplicateSeed(enabled ? numSeeds : 0ul, false) {
     if (m_disabled)
       return;
