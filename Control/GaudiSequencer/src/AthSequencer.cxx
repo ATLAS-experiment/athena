@@ -18,15 +18,7 @@
 
 #include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "AthenaKernel/AlgorithmTimer.h"
 #include "AthenaBaseComps/DynamicDataHelper.h"
-#include "CxxUtils/excepts.h"
-
-#include <memory.h>
-#include "valgrind/valgrind.h"
-
-/// timer will abort job once timeout for any algorithm or sequence is reached
-thread_local std::unique_ptr<Athena::AlgorithmTimer> s_abortTimer{nullptr};
 
 
 /**
@@ -35,8 +27,7 @@ thread_local std::unique_ptr<Athena::AlgorithmTimer> s_abortTimer{nullptr};
 AthSequencer::AthSequencer( const std::string& name, 
                             ISvcLocator* pSvcLocator ):
   ::AthCommonDataStore<AthCommonMsg<Gaudi::Sequence>>   ( name, pSvcLocator ),
-  m_clidSvc("ClassIDSvc/ClassIDSvc", name),
-  m_timeoutMilliseconds(0)
+  m_clidSvc("ClassIDSvc/ClassIDSvc", name)
 {
   m_names.declareUpdateHandler( &AthSequencer::membershipHandler, this );
 }
@@ -50,13 +41,6 @@ AthSequencer::~AthSequencer()
 StatusCode
 AthSequencer::initialize()
 {
-  m_timeoutMilliseconds = static_cast<int>(m_timeout * 1e-6);
-  
-  if ( RUNNING_ON_VALGRIND ) {
-    ATH_MSG_WARNING ("### detected running inside Valgrind, disabling algorithm timeout ###");
-    m_timeoutMilliseconds = 0;
-  }
-  
   if (!decodeMemberNames().isSuccess()) {
     ATH_MSG_ERROR ("Unable to configure one or more sequencer members ");
     return StatusCode::FAILURE;
@@ -182,25 +166,8 @@ AthSequencer::execute( const EventContext& ctx ) const
 StatusCode AthSequencer::executeAlgorithm (Gaudi::Algorithm* theAlgorithm,
                                            const EventContext& ctx) const
 {
-  // Start timer if enabled
-  if (m_timeoutMilliseconds>0) {
-    // Create thread-specific timer if not done already
-    if (!s_abortTimer) {
-      s_abortTimer = std::make_unique<Athena::AlgorithmTimer>(0);
-    }
-    s_abortTimer->start(m_timeoutMilliseconds);
-  }
-
   // Call the sysExecute() of the method the algorithm
-  StatusCode sc = theAlgorithm->sysExecute( ctx );
-
-  // Stop timer if enabled
-  if (m_timeoutMilliseconds>0) {
-    const unsigned int remaining = s_abortTimer->stop();
-    ATH_MSG_DEBUG ("Time left before interrupting <"
-                   << theAlgorithm->name() << "> : " << remaining);
-  }
-  return sc;
+  return theAlgorithm->sysExecute( ctx );
 }
 
 StatusCode
