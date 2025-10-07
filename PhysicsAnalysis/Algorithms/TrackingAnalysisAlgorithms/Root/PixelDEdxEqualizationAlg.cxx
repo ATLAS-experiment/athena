@@ -28,12 +28,12 @@ namespace CP {
     }
     else if (m_equalizeClusterMeasurements) {
       ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and calculate the truncated mean.");
-      ATH_MSG_INFO("NB: MC20 does not model radiation damage and is not yet supported.  Will apply SF=1.");
+      ATH_MSG_INFO("NB: MC20 does not model radiation damage and is not yet supported.  Will apply SF=1 to any MC20 track.");
     }
     else if (m_equalizeTrackMeasurements) {
       ATH_MSG_INFO("Will equalize the track-level truncated mean dE/dx from the AOD.");
-      ATH_MSG_INFO("NB: Run 3 data is not yet supported, so will apply SFs from last run in Run 2.");
-      ATH_MSG_INFO("NB: MC20 and MC23 are not yet supported, so will apply SF=1.  Radiation damage not modeled in MC20.");
+      ATH_MSG_INFO("NB: Run 3 data is not yet supported.  Will apply SFs from end of Run 2 to Run 3 tracks.");
+      ATH_MSG_INFO("NB: MC20 and MC23 are not yet supported.  Will apply SF=1 to any MC20 or MC23 track.  Radiation damage not modeled in MC20.");
     }
     else{
       ATH_MSG_ERROR("Must choose to equalize the dE/dx measurements at cluster-level OR track-level.");
@@ -117,8 +117,8 @@ namespace CP {
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqHandle(m_trackdEdxEqKey, ctx);
     /// Following only used if doing cluster-level equalization
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float > trackdEdxEqStdDevHandle(m_trackdEdxEqStdDevKey, ctx);
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqNUsedHandle(m_trackdEdxEqNUsedKey, ctx);
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, int > trackdEdxEqIBLOFHandle(m_trackdEdxEqIBLOFKey, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned char > trackdEdxEqNUsedHandle(m_trackdEdxEqNUsedKey, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned char > trackdEdxEqIBLOFHandle(m_trackdEdxEqIBLOFKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxHandle(m_clusterdEdxKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float > clusterdEdxEqHandle(m_clusterdEdxEqKey, ctx);
 
