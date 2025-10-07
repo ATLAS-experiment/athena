@@ -70,6 +70,11 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
         BinDesc.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
+        phirange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
+        if flags.Trigger.FPGATrackSim.GenScan.useLayerRadiiFile:
+            phicenter = (phirange[0]+phirange[1])/2.0
+            BinDesc.PhiOffset = phicenter
+            BinDesc.PhiOffset = -1.0*phicenter
 
         BinDesc.region = flags.Trigger.FPGATrackSim.region
 

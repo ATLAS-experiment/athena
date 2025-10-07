@@ -162,6 +162,7 @@ class TH2D;
     void ClearTreeVectors();
 
     TTree *m_bin_tree = nullptr; // output tree
+    int m_bin_tree_event{0};
     std::vector<unsigned> m_bin_tree_bin; // 5 tracks parameter bin
     std::vector<float> m_bin_tree_r;
     std::vector<float> m_bin_tree_z;

@@ -92,12 +92,17 @@ public:
   FPGATrackSimBinArray< std::vector <std::set<unsigned> > > m_lyr_to_mod_map;
   FPGATrackSimBinArray< std::map<unsigned,unsigned> > m_mod_to_lyr_map;
 
+  // structure is list of hits
+  void readLayerRadii(const std::string & filename);
+  FPGATrackSimBinArray < std::vector < std::pair<double,double> > > m_lyr_radii;
+
   // Number of layers
   void setNLayers(const unsigned &nLayers) { m_nLayers = nLayers; }
   unsigned getNLayers() const {return m_nLayers;}
 
 private:
   Gaudi::Property<std::string> m_lyrmapFile{this, "layerMapFile",{""}, "use externally defined layer map"};
+  Gaudi::Property<std::string> m_lyrradiiFile{this, "layerRadiiFile",{""}, "define layers in terms of rz radius instead of modules"};
   ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel{this, "FPGATrackSimEventSelectionSvc", ""};
     
   // Vector of BinEntry for each step

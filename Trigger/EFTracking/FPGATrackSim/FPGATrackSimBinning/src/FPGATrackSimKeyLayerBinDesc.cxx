@@ -56,12 +56,12 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         // distance of hit from bin center
         storedhit.phiShift =
             phiResidual(step.binCenter(idx), storedhit.hitptr.get());
-        
+
         // Get expected curvature shift from bin center    
         auto half_xm_bin_pars = parSetToKeyPars(step.binCenter(idx));
         half_xm_bin_pars.xm = step.binWidth(4)/2.0; // 4 = xm par
         double xshift =
-            m_keylyrtool.xExpected(half_xm_bin_pars, storedhit.hitptr.get());
+            m_keylyrtool.xExpected(half_xm_bin_pars, storedhit.hitptr->getR(), storedhit.hitptr->getGPhi()+m_phiOffset);
         double xrange = std::abs(xshift) + r1 * step.binWidth(2) / 2.0
                         + ((r2*step.binWidth(3) - r1*step.binWidth(2)) / (r2 - r1) * (hitr - r1))/2.0;
 
@@ -83,12 +83,22 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         // add phiShift resolution padding, 1000.0 is the GeV to MeV conversion
         padding += m_d0pad + hitr*m_phipad + hitr*m_qptpad*1000.0*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr);
         passesPhi = std::abs(storedhit.phiShift) < (xrange+padding);
-        ATH_MSG_DEBUG("Phi qpt pad: " << storedhit.phiShift << " " << hitr*m_qptpad*1000.0*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr) << " " << m_qptpad);
+        ATH_MSG_VERBOSE("Phi qpt pad: " << storedhit.phiShift << " " << hitr*m_qptpad*1000.0*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr) << " " << m_qptpad);
         if (isTruthBin && !passesPhi) ATH_MSG_DEBUG("Hit fails Phi cut, lyr=" << storedhit.hitptr->getPhysLayer() << " "
                         << storedhit.phiShift << " " << xrange + padding << " " <<xrange << " "<< padding
                         << " " << m_d0pad << " "  << hitr*m_phipad  << " "  << hitr*m_qptpad*FPGATrackSimBinUtil::GeomHelpers::dPhidQOverPt(hitr)
                         << " "  << ((storedhit.hitptr->getDetType() == SiliconTech::strip) ?  (stripLength*std::abs(FPGATrackSimBinUtil::GeomHelpers::dPhiHitTrkFromPars(hitr,trackpars))) : 99999)
                         << " " << hitr << " " << trackpars);
+
+        // Firmware x-check
+        phiLUTConsts phiconsts = getPhiLUTConsts(step,step.stepIdx(idx));
+        double fw_phiShift = phiconsts.phiShift(storedhit.hitptr->getGPhi() + m_phiOffset,  hitr);
+        double fw_phiWindow = phiconsts.phiWindow( hitr);        
+        ATH_MSG_VERBOSE("FW x-check: phiShift orig: " << storedhit.phiShift << " fwcalc: " << fw_phiShift << " diff: " << storedhit.phiShift-fw_phiShift);
+        ATH_MSG_VERBOSE("FW " << phiconsts.w_in << " " << phiconsts.dw_dr*(hitr-phiconsts.r_in) << " " <<  phiconsts.w_x*(hitr-phiconsts.r_in)*(phiconsts.r_out-hitr) 
+        << "    Orig: " <<  r1 * step.binWidth(2) / 2.0 << " " << ((r2*step.binWidth(3) - r1*step.binWidth(2)) / (r2 - r1) * (hitr - r1))/2.0 << " " << std::abs(xshift));
+        ATH_MSG_VERBOSE("FW x-check: phiWindow orig: " << xrange << " fwcalc: " << fw_phiWindow << " diff: " << xrange-fw_phiWindow);
+        
     }
 
     if (stepIsREta(step)) {
@@ -116,6 +126,15 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         passesEta = std::abs(storedhit.etaShift) < (zrange+padding);
         if (isTruthBin && !passesEta) ATH_MSG_DEBUG("Hit fails Eta cut , lyr=" << storedhit.hitptr->getPhysLayer() << " r=" << hitr << " " 
                         << storedhit.etaShift << " " << zrange + padding << " " <<zrange << " "<< padding << " " << hitr << " " << trackpars);        
+
+        // Firmware x-check
+        etaLUTConsts etaconsts = getEtaLUTConsts(step,step.stepIdx(idx));
+        double fw_etaShift = etaconsts.etaShift(storedhit.hitptr->getZ(),  hitr);
+        double fw_etaWindow = etaconsts.etaWindow( hitr);
+        ATH_MSG_VERBOSE("FW x-check: etaShift orig: " << storedhit.etaShift << " fwcalc: " << fw_etaShift << " diff: " << storedhit.etaShift-fw_etaShift);
+        ATH_MSG_VERBOSE("FW x-check: etaWindow orig: " << zrange << " fwcalc: " << fw_etaWindow << " diff: " << zrange-fw_etaWindow);
+        
+
     }
    
     
@@ -149,6 +168,87 @@ bool FPGATrackSimKeyLayerBinDesc::stepIsREta(
 
 //---------------------------------------------------------------------------------------
 //
+//     Calculate the Firmware LUT for a bin
+// 
+//---------------------------------------------------------------------------------------
+FPGATrackSimKeyLayerBinDesc::phiLUTConsts FPGATrackSimKeyLayerBinDesc::getPhiLUTConsts(const FPGATrackSimBinStep &step, const std::vector<unsigned>& idx) const {
+  phiLUTConsts retv;
+
+  FPGATrackSimKeyLayerTool::KeyLyrPars keypars;
+  keypars.phi1 = step.binCenter(2,idx[0]);
+  keypars.phi2 = step.binCenter(3,idx[1]);
+  keypars.xm = step.binCenter(4, idx[2]);
+
+  auto rotated_coords = m_keylyrtool.getRotatedConfig(keypars);
+
+  retv.y = rotated_coords.y;
+  retv.x1p = rotated_coords.xy1p.first;
+  retv.y1p = rotated_coords.xy1p.second;
+  retv.cosb = rotated_coords.rotang.first;
+  retv.sinb = rotated_coords.rotang.second;
+  retv.x_m = keypars.xm;
+  retv.x_factor = 4.0 * keypars.xm / (rotated_coords.y * rotated_coords.y);
+
+  double r_in = m_keylyrtool.R1();
+  double r_out = m_keylyrtool.R2();
+  retv.r_in = r_in;
+  retv.r_out= r_out;
+
+  double w_in = r_in * step.binWidth(2) / 2.0;
+  double w_out = r_out * step.binWidth(3) / 2.0;
+  double w_x = step.binWidth(4) / 2.0;
+
+  retv.w_x = 4.0 * w_x / ((r_out - r_in) * (r_out - r_in));
+  retv.w_in = w_in;
+  retv.dw_dr = (w_out - w_in) / (r_out - r_in);
+
+  return retv;
+}
+
+FPGATrackSimKeyLayerBinDesc::etaLUTConsts FPGATrackSimKeyLayerBinDesc::getEtaLUTConsts(const FPGATrackSimBinStep &step, const std::vector<unsigned>& idx) const {
+  etaLUTConsts retv;
+
+  double r_in = m_keylyrtool.R1();
+  double r_out = m_keylyrtool.R2();
+  retv.r_in = r_in;
+  retv.r_out= r_out;
+
+  double z_in = step.binCenter(0, idx[0]);
+  double z_out = step.binCenter(1, idx[1]);
+  double dz_dr = (z_out - z_in) / (r_out - r_in);
+
+  retv.z_in = z_in;
+  retv.dz_dr = dz_dr;
+
+  double w_in = step.binWidth(0) / 2.0;
+  double w_out = step.binWidth(1) / 2.0;
+  double dw_dr = (w_out - w_in) / (r_out - r_in);
+  retv.w_in = w_in;
+  retv.dw_dr = dw_dr;
+
+  return retv;
+}
+
+double FPGATrackSimKeyLayerBinDesc::phiLUTConsts::phiShift(double phi, double r) {
+    double xc = r*cos(phi);
+    double yc = r*sin(phi);
+    double xh = xc*cosb+yc*sinb-x1p;
+    double yh = -xc*sinb+yc*cosb-y1p;
+    return xh - x_factor*yh*(y-yh);
+}
+double FPGATrackSimKeyLayerBinDesc::phiLUTConsts::phiWindow(double r) { 
+    return w_in + dw_dr*(r-r_in) + w_x*(r-r_in)*(r_out-r);
+}
+double FPGATrackSimKeyLayerBinDesc::etaLUTConsts::etaShift(double z, double r) {     
+    return z - z_in - dz_dr*(r-r_in);
+}
+double FPGATrackSimKeyLayerBinDesc::etaLUTConsts::etaWindow(double r) {
+  return w_in + dw_dr*(r-r_in);
+}
+
+
+//---------------------------------------------------------------------------------------
+//
 //     Write the relevant LUT tables for firmware
 // 
 //---------------------------------------------------------------------------------------
@@ -174,36 +274,27 @@ void FPGATrackSimKeyLayerBinDesc::writeLUTs(const FPGATrackSimBinStep &step) con
     for (FPGATrackSimBinArray<int>::ConstIterator &bin : step.validBinsLocal()) {
       if (!bin.data())
         continue;      
+      phiLUTConsts phiconsts = getPhiLUTConsts(step,bin.idx());
 
       sm.writeVar("phi_bin", bin.idx());
+  
+      sm.writeVar("y", phiconsts.y);
+      sm.writeVar("x1p", phiconsts.x1p);
+      sm.writeVar("y1p", phiconsts.y1p);
+      sm.writeVar("cosb", phiconsts.cosb);
+      sm.writeVar("sinb", phiconsts.sinb);
 
-      FPGATrackSimKeyLayerTool::KeyLyrPars keypars;
-      keypars.phi1 = step.binCenter(2,bin.idx()[0]);
-      keypars.phi2 = step.binCenter(3,bin.idx()[1]);
-      keypars.xm = step.binCenter(4, bin.idx()[2]);
+      sm.writeVar("x_m", phiconsts.x_m);
+      sm.writeVar("x_factor", phiconsts.x_factor);
 
-      auto rotated_coords = m_keylyrtool.getRotatedConfig(keypars);
-
-      sm.writeVar("y", rotated_coords.y);
-      sm.writeVar("x1p", rotated_coords.xy1p.first);
-      sm.writeVar("y1p", rotated_coords.xy1p.second);
-      sm.writeVar("cosb", rotated_coords.rotang.first);
-      sm.writeVar("sinb", rotated_coords.rotang.second);
-
-      sm.writeVar("x_m", keypars.xm);
-      sm.writeVar("x_factor", 4.0 * keypars.xm / (rotated_coords.y * rotated_coords.y));
+      if (nbins == 0) {
+        sm.writeVar("w_x", phiconsts.w_x);
+        sm.writeVar("w_in", phiconsts.w_in);
+        sm.writeVar("dw_dr", phiconsts.dw_dr);
+      }
 
       nbins++;
-    }
-
-    double w_in = r_in * step.binWidth(2) / 2.0;
-    double w_out = r_out * step.binWidth(3) / 2.0;
-    double w_x = step.binWidth(4) / 2.0;
-    double dw_dr = (w_out - w_in) / (r_out - r_in);
-
-    sm.writeVar("w_x", 4.0 * w_x / ((r_out - r_in) * (r_out - r_in)));
-    sm.writeVar("w_in", w_in);
-    sm.writeVar("dw_dr", dw_dr);
+    }    
 
     sm.writeVar("nbins", nbins);
   }
@@ -218,31 +309,23 @@ void FPGATrackSimKeyLayerBinDesc::writeLUTs(const FPGATrackSimBinStep &step) con
       if (!bin.data())
         continue;
 
-      // write just this steps idxs
-      sm.writeVar("z_bin", bin.idx());
+      etaLUTConsts etaconsts = getEtaLUTConsts(step,bin.idx());
 
-      double z_in = step.binCenter(0, bin.idx()[0]);
-      double z_out = step.binCenter(1, bin.idx()[1]);
-      double dz_dr = (z_out - z_in) / (r_out - r_in);
-      
-      sm.writeVar("z_in", z_in);
-      sm.writeVar("dz_dr", dz_dr);
+      // write just this steps idxs
+      sm.writeVar("z_bin", bin.idx());      
+      sm.writeVar("z_in", etaconsts.z_in);
+      sm.writeVar("dz_dr", etaconsts.dz_dr);
     
+      if (nbins==0) {
+        sm.writeVar("w_in", etaconsts.w_in);
+        sm.writeVar("dw_dr", etaconsts.dw_dr);
+      };
+      
       nbins++;
     }
     sm.writeVar("nbins", nbins);
-
-    // same for all bins
-    double w_in = step.binWidth(0) / 2.0;
-    double w_out = step.binWidth(1) / 2.0;
-    double dw_dr = (w_out - w_in) / (r_out - r_in);
-    sm.writeVar("w_in", w_in);
-    sm.writeVar("dw_dr", dw_dr);
-
+      
   }
-
-    
-
 
 }
     
