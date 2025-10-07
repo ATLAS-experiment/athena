@@ -985,7 +985,9 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
       for (const auto trackState : track.trackStatesReversed()) {
         updateCounts(track, trackState.typeFlags(), measurementType(trackState));
       }
-      checkCounts(track);
+      if (m_checkCounts) {
+        checkCounts(track);
+      }
     }
 
     ++ntracks;
