@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRecTools/HelperFunctions.h"
 
-#include <TObjString.h>
-#include <TObjArray.h>
-#include <TFile.h>
-#include <TTree.h>
-
-#include <iostream>
+#include "TLorentzVector.h"
+#include "TObjString.h"
+#include "TObjArray.h"
+#include "TFile.h"
+#include "TTree.h"
 
 namespace DiTauRecTools {
   ANA_MSG_SOURCE(msgHelperFunction, "HelperFunction")
