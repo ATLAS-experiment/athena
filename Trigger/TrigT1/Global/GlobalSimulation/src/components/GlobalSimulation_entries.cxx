@@ -32,6 +32,7 @@
 #include "../GlobalAlgs/FirstChain/LArCellPreparationAlg.h"
 #include "../GlobalAlgs/FirstChain/LArCellMuxAlg.h"
 #include "../GlobalAlgs/FirstChain/GlobalCellTowerAlgTool.h"
+#include "../GlobalAlgs/FirstChain/eFexCvtrAlgTool.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
@@ -65,3 +66,5 @@ DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerComparator)
 DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
 DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)
 DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
+
+DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
