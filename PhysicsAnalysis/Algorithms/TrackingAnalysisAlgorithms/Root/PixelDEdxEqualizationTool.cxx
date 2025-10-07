@@ -1,3 +1,7 @@
+//
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+//
+
 #include "TrackingAnalysisAlgorithms/PixelDEdxEqualizationTool.h"
 
 namespace CP {

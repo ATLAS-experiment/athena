@@ -1,3 +1,7 @@
+//
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+//
+
 #ifndef TRACKINGANALYSISALGORITHMS_PIXELDEDXUTILS_H
 #define TRACKINGANALYSISALGORITHMS_PIXELDEDXUTILS_H
 

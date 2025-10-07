@@ -9,7 +9,7 @@ from Campaigns.Utils import Campaign
 from AthenaCommon.Logging import logging
 
 class PixelDEdxEqualizationBlock (ConfigBlock) :
-    """the ConfigBlock for the Pixel ToT PID tool"""
+    """the ConfigBlock for the pixel dE/dx equalization"""
 
     def __init__ (self, containerName='') :
         super (PixelDEdxEqualizationBlock, self).__init__ ()
