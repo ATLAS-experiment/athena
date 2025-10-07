@@ -6,6 +6,7 @@
 #define TAUDQA_TAUVALIDATIONPLOTSNOMINAL_H
 
 // PlotBase objects
+#include "TrkValHistUtils/PlotBase.h"
 #include "TauKinematicPlots.h"
 #include "GeneralTauPlots.h"
 #include "TauIDVariablesPlots.h"
@@ -15,10 +16,6 @@
 #include "CorePlots.h"
 #include "DecayModeMigration.h"
 #include "EfficiencyPlots.h"
-
-#include "xAODJet/JetContainer.h"
-#include "xAODEgamma/ElectronContainer.h" 
-#include "xAODTau/TauJetContainer.h" 
 
 class TauValidationPlotsNominal:public PlotBase {
    public:

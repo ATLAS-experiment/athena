@@ -3,7 +3,6 @@
 */
 
 #include "TauIDVariablesPlots.h"
-#include "AthContainers/ConstAccessor.h"
 #include "AthenaKernel/Units.h"
 
 namespace Tau{
