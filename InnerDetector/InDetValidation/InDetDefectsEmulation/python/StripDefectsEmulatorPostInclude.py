@@ -136,7 +136,7 @@ def emulateITkStripDefects(flags,
                                                                    StripDefectProb+coldNoiseDefectProb,  # probability of a strip to be defect
                                                                    ],
                                                       fractionsOfNDefects=[fractions]),
-                                         moduleDefect(bec=[2,2],layer=[0,99], phi_range=EVEN_INDEX,eta_range=[14,17], # select endcap C4,5 even modules,
+                                         moduleDefect(bec=[2,2],layer=[0,99], phi_range=cold_noise_phi_range,eta_range=[14,17], # select endcap C4,5 even modules,
                                                       side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
                                                       all_rows=False,       # if True all rows of the same un-split module are marked as defect
                                                       probability=[ModuleDefectProb, # probability of a module to be defect
