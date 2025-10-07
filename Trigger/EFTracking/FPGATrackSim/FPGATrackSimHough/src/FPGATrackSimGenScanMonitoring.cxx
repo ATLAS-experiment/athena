@@ -402,7 +402,7 @@ void FPGATrackSimGenScanMonitoring::parseTruthInfo(
 
   // a closure test
   FPGATrackSimTrackPars recovered = bindesc->parSetToTrackPars(m_truthparset);
-  ATH_MSG_DEBUG("parset:" << m_truthparset << " " << m_truthpars
+  ATH_MSG_DEBUG("truth parset:" << m_truthparset << " " << m_truthpars
                           << " ?= " << recovered << " closure:"
                           << " " << recovered[FPGATrackSimTrackPars::IHIP] - m_truthpars[FPGATrackSimTrackPars::IHIP]
                           << " " << recovered[FPGATrackSimTrackPars::IPHI] - m_truthpars[FPGATrackSimTrackPars::IPHI]

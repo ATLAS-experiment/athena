@@ -75,7 +75,7 @@ StatusCode FPGATrackSimLayerStudyTool::registerHistograms(const FPGATrackSimBinn
                                  "; Hits per bin in step", 20, 0, m_isSingleParticle ? 50 : 10000));
   ATH_CHECK(makeAndRegHist(m_hitsPerLayer, "hitsPerLayer", "; Layer ; Hits ", nLyrs, 0, nLyrs));
   ATH_CHECK(makeAndRegHist(m_hitsPerLayer2D, "hitsPerLayer2D", "; Layer ; Hits ", nLyrs, 0, nLyrs, 20, 0, m_isSingleParticle ? 20 : 10000));
-  ATH_CHECK(makeAndRegHist(m_binsFilled, "binsFilled", "; Bins Filled per Event", 200, 0, 200));
+  ATH_CHECK(makeAndRegHist(m_binsFilled, "binsFilled", "; Bins Filled per Event", 2000, 0, 2000));
 
 
   // All Hit level histograms
@@ -131,6 +131,7 @@ StatusCode FPGATrackSimLayerStudyTool::bookTrees() {
   // Create the LayerStudy tree
   m_bin_tree = new TTree(m_layerStudyTreeName.value().c_str(),
                          m_layerStudyTreeName.value().c_str());
+  m_bin_tree->Branch("event", &m_bin_tree_event);
   m_bin_tree->Branch("bin",     &m_bin_tree_bin);
   m_bin_tree->Branch("r",       &m_bin_tree_r);
   m_bin_tree->Branch("z",       &m_bin_tree_z);
@@ -162,6 +163,7 @@ StatusCode FPGATrackSimLayerStudyTool::bookTrees() {
 
 void FPGATrackSimLayerStudyTool::ClearTreeVectors()
 {
+  m_bin_tree_bin.clear();
   m_bin_tree_r.clear();
   m_bin_tree_z.clear();
   m_bin_tree_id.clear();
@@ -218,10 +220,10 @@ void FPGATrackSimLayerStudyTool::fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const 
               });
 
     // Fill tree
-    m_bin_tree_bin = std::vector<unsigned>(idx);
     ClearTreeVectors();
+    m_bin_tree_bin = std::vector<unsigned>(idx);
+    ATH_MSG_DEBUG("Output: Bin Tree bin" << idx);
     for (auto &hit : sorted_hits) {
-
       m_bin_tree_r.push_back(hit.hitptr->getR());
       m_bin_tree_z.push_back(hit.hitptr->getZ());
       m_bin_tree_id.push_back(hit.hitptr->getIdentifier());
@@ -255,10 +257,9 @@ void FPGATrackSimLayerStudyTool::fillBinningSummary ATLAS_NOT_THREAD_SAFE(
       m_hitsPerLayer2D->Fill(lyr, cnt);
     }
   }
-
   m_binsFilled->Fill(m_binsFilledCnt);
   m_binsFilledCnt=0;
-
+  
 }
 
 void FPGATrackSimLayerStudyTool::fillHitLevelInput(const FPGATrackSimHit *hit) {
@@ -293,6 +294,7 @@ void FPGATrackSimLayerStudyTool::fillHitLevelInput(const FPGATrackSimHit *hit) {
 void FPGATrackSimLayerStudyTool::parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks) {
   ATH_MSG_DEBUG("In parseTruthInfo, truthtracks size = " << truthtracks.size());
   m_truthIsValid = false;
+  m_bin_tree_event++;
 
   const IFPGATrackSimBinDesc* bindesc = m_binnedhits->getBinTool().binDesc();
 
@@ -397,14 +399,14 @@ void FPGATrackSimLayerStudyTool::setBinPlotsActive(const FPGATrackSimBinUtil::Id
   padding[FPGATrackSimTrackPars::IZ0] = m_z0pad;
   padding[FPGATrackSimTrackPars::IETA] = m_etapad;
   padding[FPGATrackSimTrackPars::IPHI] = m_phipad;
-  padding[FPGATrackSimTrackPars::IHIP] = m_qptpad;
+  padding[FPGATrackSimTrackPars::IHIP] = 1000.0*m_qptpad;
   bool inRange = true;
   for (unsigned par =0; par < FPGATrackSimTrackPars::NPARS; par++) {
       inRange = inRange &&  (m_truthpars[par] > minpars[par]-padding[par]);
       inRange = inRange &&  (m_truthpars[par] < maxpars[par]+padding[par]);
   }
   //m_binPlotsActive |= inRange;
-  m_binPlotsActive = m_binPlotsActive||(m_truthbin.back()==idx)||(m_plotAllBins) ;
+  m_binPlotsActive = m_binPlotsActive||inRange||(m_plotAllBins) ;
 
 
 }
