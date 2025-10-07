@@ -7,6 +7,8 @@
 #include "TrkValHistUtils/PlotBase.h"
 #include "xAODTau/DiTauJet.h"
 
+class TH1;
+
 namespace DiTau{
 
   class ResolutionPlots: public PlotBase {

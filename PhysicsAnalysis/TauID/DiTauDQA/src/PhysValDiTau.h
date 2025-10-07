@@ -5,13 +5,7 @@
 #ifndef DITAUDQA_PHYSVALDITAU_H
 #define DITAUDQA_PHYSVALDITAU_H
 
-// STL includes
-#include <memory>
-#include <string>
-#include <vector>
-
 // FrameWork includes
-#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AsgTools/PropertyWrapper.h"
 
@@ -23,7 +17,8 @@
 // Local includes
 #include "DiTauValidationPlots.h"
 
-#include "xAODTau/DiTauJetContainer.h"
+#include <memory>
+#include <string>
 
 class PhysValDiTau
   : public ManagedMonitorToolBase
