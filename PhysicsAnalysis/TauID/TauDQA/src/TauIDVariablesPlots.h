@@ -5,8 +5,11 @@
 #ifndef TAUDQA_TAUIDVARIABLESPLOTS_H
 #define TAUDQA_TAUIDVARIABLESPLOTS_H
 
+#include "TrkValHistUtils/PlotBase.h"
 #include "GeneralTauPlots.h"
 #include "xAODTau/TauJet.h"
+
+class TH1;
 
 namespace Tau{
 

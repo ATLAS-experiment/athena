@@ -5,14 +5,12 @@
 #ifndef TAUDQA_PHYSVALTAU_H
 #define TAUDQA_PHYSVALTAU_H
 
-// STL includes
 #include <memory>
 #include <string>
-#include <vector>
+
+#include "GaudiKernel/ToolHandle.h"
 
 // FrameWork includes
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "AsgTools/PropertyWrapper.h"
 
 // Local includes
