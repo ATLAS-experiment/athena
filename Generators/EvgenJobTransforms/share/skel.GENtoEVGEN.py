@@ -514,7 +514,7 @@ else:
    include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
 ## Purge unstable particle w/o end vertex occasionally produced by Hijing or Herwig
-generatorsList = evgenConfig.generators
+generatorsList = evgenConfig.generators.copy()
 if hasattr(genSeq, "Pythia8"):
     if (hasattr(genSeq.Pythia8, "Beam1") and genSeq.Pythia8.Beam1 != "PROTON" ) or \
        (hasattr(genSeq.Pythia8, "Beam2") and genSeq.Pythia8.Beam2 != "PROTON" ):

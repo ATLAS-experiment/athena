@@ -249,7 +249,7 @@ def fromRunArgs(runArgs):
     if not flags.Input.Files:
         from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
         from GeneratorConfig.GenConfigHelpers import gens_purgenoendvtx
-        generatorsList = sample.generators
+        generatorsList = sample.generators.copy()
         if "Pythia8" in generatorsList:
             pythia8Alg = cfg.getEventAlgo("Pythia8_i")
             if pythia8Alg.Beam1 != "PROTON" or pythia8Alg.Beam2 != "PROTON":
