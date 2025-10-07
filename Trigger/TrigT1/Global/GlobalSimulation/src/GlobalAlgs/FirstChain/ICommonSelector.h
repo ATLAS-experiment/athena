@@ -5,16 +5,23 @@
 #ifndef GLOBALSIM_ICOMMONSELECTOR_H
 #define	GLOBALSIM_ICOMMONSELECTOR_H
 
+namespace GlobalSim {
+  namespace IOBitwise{
+    class ICommonTOB;
+  }
+}
+
 namespace  GlobalSim {
   /**
-   * @brief PABC to selector classes for eEmTOBs.
+   * @brief PABC to selector class for ICommonTOBs.
    *
    */
-
-  using IOBitwise::ICommonTOB;
   
+  using GlobalSim::IOBitwise::ICommonTOB;
+
   class ICommonSelector {
   public:
+    
     virtual ~ICommonSelector() = default;
     virtual bool select(const ICommonTOB&) const = 0; 
   };
