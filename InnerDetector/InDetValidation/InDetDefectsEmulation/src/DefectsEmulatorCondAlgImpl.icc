@@ -228,10 +228,10 @@ namespace {
          return element.value();
       }
       static bool isDefect(const nlohmann::json &value) {
-         return value["isDefect"];
+         return !value.contains("isDefect") ? false : value["isDefect"].get<bool>();
       }
       static std::vector<KEY_TYPE> moduleDefects(const nlohmann::json &value) {
-         return value["defects"];
+         return !value.contains("defects") ? std::vector<KEY_TYPE>() : value["defects"].get< std::vector<KEY_TYPE> >();
       }
    private:
       nlohmann::json m_jsDefects;
