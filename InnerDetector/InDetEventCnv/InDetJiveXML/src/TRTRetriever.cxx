@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTRetriever.h"
@@ -47,7 +47,7 @@ namespace JiveXML {
     //First try to retrieve the DriftCircleContainer
     SG::ReadHandle<InDet::TRT_DriftCircleContainer> DriftCircleContainer( m_TRTDriftCircleCollKey );
     if ( !DriftCircleContainer.isValid() ) {
-      ATH_MSG_DEBUG( "Unable to retrive TRT_DriftCircleContainer with name " << m_TRTDriftCircleCollKey.key() );
+      ATH_MSG_DEBUG( "Unable to retrieve TRT_DriftCircleContainer with name " << m_TRTDriftCircleCollKey.key() );
       return StatusCode::RECOVERABLE;
     }
 
