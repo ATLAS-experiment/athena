@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
@@ -53,7 +53,7 @@ BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   declareProperty( "OperatingPoint",                m_OP="",            "operating point");
   declareProperty( "JetAuthor",                     m_jetAuthor=def::jet_collection,     "jet collection");
   declareProperty( "WorkingPointDefinitions",       m_wps_raw="FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60",       "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes");
-  declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrived. default behaviour is to give an error, switching to false will turn it into a warning");
+  declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrieved. default behaviour is to give an error, switching to false will turn it into a warning");
   declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
   declareProperty( "useCTagging",                   m_useCTag=false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
   declareProperty( "readFromBTaggingObject",        m_readFromBTaggingObject=false,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
@@ -255,7 +255,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
     tagger.spline = nullptr;
   }
 
-  //retrive the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
+  //retrieve the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
   if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
 
