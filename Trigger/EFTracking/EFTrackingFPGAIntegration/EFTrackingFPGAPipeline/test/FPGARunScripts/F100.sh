@@ -21,6 +21,7 @@ usage () {
     -s  |  --skipCheck                  skip checks on output AOD file
     -f  |  --runF110                    run F110 Integration algo
     -c  |  --doClusters                 persistify xAOD cluster and space point containers
+    -k  |  --doSeeds                    persistify xAOD track seed containers
     -h  |  --help                       this help
     "
     [ $# -gt 0 ] && exit $1
@@ -41,6 +42,7 @@ threads=1
 nEvents="100"
 skipCheck=0
 storeClusters=False
+doSeeds=False
 runF110=False
 skipEvents=0
 doCodeType="F1X0"
@@ -57,6 +59,7 @@ while [ $# -ge 1 ];do
         -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1 ; shift ;;
         -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True; shift ;;
+        -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds=True; shift ;;
         -f  | --runF110 )       runF110=True ;;
         -t  | --threads )       if [ $# -lt 2 ] ; then usage ; fi ; threads=${2} ; shift ;;
         -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
@@ -93,6 +96,7 @@ ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --preExec "flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
                 flags.Tracking.doPixelDigitalClustering=True;\
                 flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads};\
+                flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
                 flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
