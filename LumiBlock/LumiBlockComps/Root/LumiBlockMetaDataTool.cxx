@@ -80,8 +80,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     }
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
     for ( const auto* lb : *lbrange ) {
-      xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*lb);
-      m_cacheInputRangeContainer.push_back(iovr);
+      m_cacheInputRangeContainer.push_back(std::make_unique<xAOD::LumiBlockRange>(*lb));
     }
   }
   if (m_pInputStore->contains<xAOD::LumiBlockRangeContainer>(m_unfinishedLBColl_name)) {
@@ -94,8 +93,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     }
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
     for ( const auto* lb : *lbrange ) {
-      xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*lb);
-      m_cacheInputRangeContainer.push_back(iovr);
+      m_cacheInputRangeContainer.push_back(std::make_unique<xAOD::LumiBlockRange>(*lb));
     }
   }
   if (m_pInputStore->contains<xAOD::LumiBlockRangeContainer>(m_suspectLBColl_name)) {
@@ -108,8 +106,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
     }
     ATH_MSG_INFO( "xAOD::LumiBlockRangeContainer size" << lbrange->size() );
     for ( const auto* lb : *lbrange ) {
-      xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*lb);
-      m_cacheSuspectInputRangeContainer.push_back(iovr);
+      m_cacheSuspectInputRangeContainer.push_back(std::make_unique<xAOD::LumiBlockRange>(*lb));
     }
   }
   return(StatusCode::SUCCESS);
@@ -180,16 +177,15 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
     
     //  Use tmp collection to do the merging
     xAOD::LumiBlockRangeContainer tempLBColl;
-    xAOD::LumiBlockRangeAuxContainer* p_tempAuxLBColl = new xAOD::LumiBlockRangeAuxContainer();
-    tempLBColl.setStore( p_tempAuxLBColl );
+    xAOD::LumiBlockRangeAuxContainer tempAuxLBColl;
+    tempLBColl.setStore( &tempAuxLBColl );
     
     // Sort and Merge LumiBlockRange objects if necessary
     // Merge LumiBlockRange objects for same run and lumiblock
     xAOD::LumiBlockRangeContainer::const_iterator i = m_cacheOutputRangeContainer.begin();
     xAOD::LumiBlockRangeContainer::const_iterator ie = m_cacheOutputRangeContainer.end();
     xAOD::LumiBlockRangeContainer::const_iterator ilast = m_cacheOutputRangeContainer.begin();
-    xAOD::LumiBlockRange* iovr = new xAOD::LumiBlockRange(*(*i));
-    tempLBColl.push_back(iovr);
+    xAOD::LumiBlockRange* iovr = tempLBColl.push_back(std::make_unique<xAOD::LumiBlockRange>(*(*i)));
     ATH_MSG_VERBOSE(  "Push_back tmpLBColl with run  " 
 		      << (*i)->startRunNumber() << " LB " << (*i)->startLumiBlockNumber() << " events seen "     
 		      << (*ilast)->eventsSeen() << " expected " << (*i)->eventsExpected());
@@ -214,13 +210,12 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
 	}
       }
       else {
-	iovr = new xAOD::LumiBlockRange(*(*i));
+	iovr = tempLBColl.push_back(std::make_unique<xAOD::LumiBlockRange>(*(*i)));
 	
 	ATH_MSG_VERBOSE(  "Push_back tmpLBColl with run  " 
 			  << iovr->startRunNumber() << " LB " << iovr->startLumiBlockNumber() << " events seen "     
 			  << iovr->eventsSeen() << " expected " << iovr->eventsExpected());
 	
-	tempLBColl.push_back(iovr);
 	ilast = i;
       }
       ++i;
@@ -317,9 +312,7 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
             << range->stopLumiBlockNumber()
             << ") eventsSeen = " << range->eventsSeen()
             << ", eventsExpected = " << range->eventsExpected() << " ]");
-        xAOD::LumiBlockRange* out = new xAOD::LumiBlockRange();
-        complete->push_back(out);
-        *out = *range;
+        *complete->push_back(std::make_unique<xAOD::LumiBlockRange>()) = *range;
       }
     } else {
       ATH_MSG_INFO("Recording "
@@ -366,9 +359,7 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
             << range->stopLumiBlockNumber()
             << ") eventsSeen = " << range->eventsSeen()
             << ", eventsExpected = " << range->eventsExpected() << " ]");
-        xAOD::LumiBlockRange* out = new xAOD::LumiBlockRange();
-        unfinished->push_back(out);
-        *out = *range;
+        *unfinished->push_back(std::make_unique<xAOD::LumiBlockRange>()) = *range;
       }
     } else {
       ATH_MSG_INFO("Recording "
@@ -415,9 +406,7 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
             << range->stopLumiBlockNumber()
             << ") eventsSeen = " << range->eventsSeen()
             << ", eventsExpected = " << range->eventsExpected() << " ]");
-        xAOD::LumiBlockRange* out = new xAOD::LumiBlockRange();
-        suspect->push_back(out);
-        *out = *range;
+        *suspect->push_back(std::make_unique<xAOD::LumiBlockRange>()) = *range;
       }
     } else {
       ATH_MSG_INFO("Recording "
