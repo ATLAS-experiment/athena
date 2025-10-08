@@ -61,7 +61,7 @@ GeoVPhysVol* GeoPixelDisk::Build( ) {
   }
   //
   // Define the Sensor to be used here, so it will be the same for all the disk
-  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, false);
+  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_mapFPV, m_mapAX, false, false, true /*different design for even and odd phi*/);
   if(m_sqliteReader && m_gmt_mgr->isEndcap() ) brl_ec = 2*m_gmt_mgr->GetSide();
   GeoFullPhysVol* diskPhys = m_sqliteReader==nullptr ? new GeoFullPhysVol(theDisk) : nullptr;
   //

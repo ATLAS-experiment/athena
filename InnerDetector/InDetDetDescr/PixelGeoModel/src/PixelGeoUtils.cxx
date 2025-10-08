@@ -9,17 +9,20 @@
 
 namespace InDetDD {
 namespace detail {
-PixelDiodeTree PixelDiodeTreeMakerBase::make(InDetDD::PixelReadoutTechnology /* readoutTechnology */,
+
+PixelDiodeTree PixelDiodeTreeMakerBase::make([[maybe_unused]] InDetDD::PixelReadoutTechnology readoutTechnology,
                                              const std::array<int,kNDirections> &circuits,
                                              const std::array<int,kNDirections> &dimPerCircuit,
-                                             const std::array<std::array<double,kNDirections>,kNPixelLocations> &pitch) {
+                                             const std::array<std::array<double,kNDirections>,kNPixelLocations> &pitch,
+                                             InDetDD::detail::FENumbering fe_numbering) {
 
   // helper function to associate correct diode type and front-end number to sub-matrices and diodes
   // in the diode tree as attributes.
   auto computeAttribute = [
                            &pitch=pitch[InDetDD::detail::kCentral],
                            &circuits,
-                           &dimPerCircuit
+                           &dimPerCircuit,
+                           fe_numbering
                            ](const std::array<PixelDiodeTree::IndexType,2> &split_idx,
                              const PixelDiodeTree::Vector2D &diode_width,
                              [[maybe_unused]] const std::array<bool,4> &ganged,
@@ -72,6 +75,20 @@ PixelDiodeTree PixelDiodeTreeMakerBase::make(InDetDD::PixelReadoutTechnology /* 
        = InDetDD::detail::makeAttributeType( chip_idx[0] > 0
                                              ? circuits[InDetDD::detail::kEta] - chip_idx[1] - 1
                                              : (circuits[InDetDD::detail::kPhi]-1) * circuits[InDetDD::detail::kEta] + chip_idx[1]);
+
+     switch (fe_numbering) {
+     case InDetDD::detail::FENumbering::kMirror: {
+        // for even phi Run <=3 endcap modules the numbering is mirrored
+        if (circuits[InDetDD::detail::kPhi] == 2) {
+           current_matrix_attribute =   circuits[InDetDD::detail::kEta]- (current_matrix_attribute % circuits[InDetDD::detail::kEta]) -1
+              +  ((current_matrix_attribute / circuits[InDetDD::detail::kEta]) ^ 1) * circuits[InDetDD::detail::kEta];
+        }
+        break;
+     }
+     default:
+        break;
+     }
+
      return std::make_tuple(current_matrix_attribute, current_diode_attribute);
   };
 

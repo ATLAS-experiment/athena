@@ -46,7 +46,7 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
 				                     GeoModelIO::ReadGeoModel* sqliteReader,
                                      std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                      std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
-                                     bool isBLayer, bool isModule3D)
+                                     bool isBLayer, bool isModule3D, bool even_odd_phi_design)
   : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
 {
   // 
@@ -82,6 +82,16 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
      circuitsPerPhi_corr*=2;
      rowsPerCircuit_corr/=2;
   }
+
+  // optionally create different module design for even and odd phi modules, because
+  // the front-ends are numbered differently
+  m_nPhiDesigns=even_odd_phi_design ? 2 : 1;
+  for (unsigned int design_i=0; design_i<m_nPhiDesigns ; ++design_i) {
+  // for endcap modules the design for even-phi indices uses a "mirrored" front-end numbering scheme.
+  // instead of from top left  0..7 to top right, then bottom right to bottom left 8..15 , the front
+  // ends are numbered from bottom left to top left i.e. bottom and top are swapped.
+  InDetDD::detail::FENumbering fe_numbering = (even_odd_phi_design && design_i==0 ? InDetDD::detail::FENumbering::kMirror : InDetDD::detail::FENumbering::kRegular);
+
   constexpr auto kNDirections = InDetDD::detail::kNDirections;
   constexpr auto kNPixelLocations = InDetDD::detail::kNPixelLocations;
   PixelDiodeTree diode_tree = InDetDD::detail::makePixelDiodeTree(m_gmt_mgr,
@@ -91,7 +101,8 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
                                                     std::array<std::array<double,kNDirections>,kNPixelLocations>{        // regular/central,longEnd/outer,long/inner
                                                        std::array<double,kNDirections>{pitchPhi,pitchEta},
                                                        std::array<double,kNDirections>{0.,pitchEtaLongEnd},
-                                                       std::array<double,kNDirections>{0.,pitchEtaLong}});
+                                                       std::array<double,kNDirections>{0.,pitchEtaLong}},
+                                                    fe_numbering);
 
   std::unique_ptr<PixelModuleDesign> p_barrelDesign2 = std::make_unique<PixelModuleDesign>(thickness,
 							     circuitsPerPhi,
@@ -160,7 +171,8 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
   }
 
 
-  m_design = m_DDmgr->addDesign(std::move(p_barrelDesign2));
+  m_design.at(design_i) = m_DDmgr->addDesign(std::move(p_barrelDesign2));
+  }
   
   
 }
@@ -191,12 +203,11 @@ GeoVPhysVol* GeoPixelSiCrystal::Build() {
 
     siPhys = new GeoFullPhysVol(logVolume);
   }
-
   // Build the Identifier for the silicon:
   //
   const PixelID * idHelper = m_gmt_mgr->getIdHelper();
   m_id = idHelper->wafer_id(brl_ec,m_gmt_mgr->GetLD(),m_gmt_mgr->Phi(),m_gmt_mgr->Eta());
-  SiDetectorElement * element = new SiDetectorElement(m_id, m_design, siPhys, m_gmt_mgr->commonItems());
+  SiDetectorElement * element = new SiDetectorElement(m_id, m_design[ m_gmt_mgr->Phi() % m_nPhiDesigns] , siPhys, m_gmt_mgr->commonItems());
   
   // add the element to the manager
   m_DDmgr->addDetectorElement(element);

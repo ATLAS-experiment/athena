@@ -7,6 +7,8 @@
 #include "ReadoutGeometryBase/PixelDiodeTree.h"
 #include "PixelReadoutDefinitions/PixelReadoutDefinitions.h"
 #include <array>
+#include "Identifier/Identifier.h"
+#include "InDetIdentifier/PixelID.h"
 
 #define MSG_HELPER(LEVEL,body) if (this->msgLvl(LEVEL)) { this->msg(LEVEL) << body << endmsg;} do {} while (0)
 #define GEO_MSG_DEBUG(body) MSG_HELPER(MSG::DEBUG,body)
@@ -19,6 +21,11 @@ namespace InDetDD {
       enum EPixelLocation {kCentral,kOuterEdge,kInnerEdge, kNPixelLocations};
       enum EDirection {kPhi, kEta,kNDirections};
 
+      enum class FENumbering {
+         kRegular,
+         kMirror
+      };
+
       struct MessagingAdapter {
          virtual ~MessagingAdapter() = default;
          virtual MsgStream& msg (const MSG::Level lvl) const = 0;
@@ -30,7 +37,8 @@ namespace InDetDD {
          PixelDiodeTree make(InDetDD::PixelReadoutTechnology readoutTechnology,
                              const std::array<int,kNDirections> &circuits,
                              const std::array<int,kNDirections> &dimPerCircuit,
-                             const std::array<std::array<double,kNDirections>,kNPixelLocations> &pitch);
+                             const std::array<std::array<double,kNDirections>,kNPixelLocations> &pitch,
+                             FENumbering fe_numbering);
       };
 
       template <class T_MsgParent>
@@ -47,10 +55,11 @@ namespace InDetDD {
                                                InDetDD::PixelReadoutTechnology readoutTechnology,
                                                const std::array<int,kNDirections> &circuits,
                                                const std::array<int,kNDirections> &dimPerCircuit,
-                                               const std::array<std::array<double,kNDirections>,kNPixelLocations> &pitch) {
+                                               const std::array<std::array<double,kNDirections>,kNPixelLocations> &pitch,
+                                               FENumbering fe_numbering) {
 
          PixelDiodeTreeMaker<T_MsgParent> maker(gmt_mgr);
-         auto ret=maker.make( readoutTechnology, circuits, dimPerCircuit, pitch);
+         auto ret=maker.make(readoutTechnology, circuits, dimPerCircuit, pitch, fe_numbering);
          return ret;
       }
    }
