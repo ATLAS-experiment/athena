@@ -177,7 +177,7 @@ StatusCode LArAlignDbAlg::streamOutCondObjects()
   IAthenaOutputStreamTool::TypeKeyPairs typeKeys(npairs);
 
   IAthenaOutputStreamTool::TypeKeyPair align("DetCondKeyTrans", LAR_ALIGN);
-  typeKeys[0] = align;
+  typeKeys[0] = std::move(align);
   
   ATH_CHECK( m_streamer->streamObjects(typeKeys) );
   ATH_CHECK( m_streamer->commitOutput() );
