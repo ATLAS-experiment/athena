@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Finds the nearest jet and adds its info to the muon.
@@ -22,7 +22,7 @@ StatusCode DerivationFramework::MuonJetDrTool::addBranches(const EventContext& c
     // Retrieve main muonicle collection
     SG::ReadHandle<xAOD::MuonContainer> muons{m_muonSGKey, ctx};
     if (!muons.isValid()) {
-        ATH_MSG_FATAL("Failed to retrive container " << m_muonSGKey.fullKey());
+        ATH_MSG_FATAL("Failed to retrieve container " << m_muonSGKey.fullKey());
         return StatusCode::FAILURE;
     }
     SG::ReadHandle<xAOD::JetContainer> jets{m_jetSGKey, ctx};
