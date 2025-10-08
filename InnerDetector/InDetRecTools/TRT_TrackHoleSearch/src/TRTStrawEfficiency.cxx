@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TRTStrawEfficiency.cxx
@@ -94,7 +94,7 @@ StatusCode TRTStrawEfficiency::execute() {
 		}
 	}
 
-	// retrive tracks
+	// retrieve tracks
 	SG::ReadHandle<TrackCollection> tracks(m_tracksKey);
 	if (!tracks.isValid()) {
 		ATH_MSG_FATAL( "Failed to retrieve " << m_tracksKey.key() );
