@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkExTools )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( Boost COMPONENTS unit_test_framework)
+find_package( Boost COMPONENTS )
 
 # Component(s) in the package:
 atlas_add_component( TrkExTools
@@ -24,7 +24,8 @@ atlas_add_test( TrkExToolsStringUtility_test
   SOURCES 
   test/TrkExToolsStringUtility_test.cxx src/TrkExToolsStringUtility.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
-  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
+  LINK_LIBRARIES CxxUtils
+  Boost::unit_test_framework
   POST_EXEC_SCRIPT nopost.sh
 )
 

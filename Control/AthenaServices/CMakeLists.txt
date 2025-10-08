@@ -4,7 +4,7 @@
 atlas_subdir( AthenaServices )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread serialization unit_test_framework)
+find_package( Boost COMPONENTS thread serialization )
 find_package( bmpi3 REQUIRED )
 find_package( CLHEP )
 find_package( Python COMPONENTS Development )
@@ -72,8 +72,8 @@ atlas_add_test( ThinningCacheTool_test
 atlas_add_test( MetaDataSvc_test
    SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx 
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
-                  StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools
+   LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
+                  StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
    POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( AthTPCnvSvc
