@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/Geometry.h"
@@ -35,7 +35,7 @@ bool Geo::setBinLabels(TH2* hist, PartitionId part)
 {
   if (hist->GetXaxis()->GetNbins() != nFEBs(part)) return false;
   for (int i = 0; i < nFeedThroughs(part); i++)
-    hist->GetXaxis()->SetBinLabel(1 + i*nSlots(part), feedThroughName(part, i));
+    hist->GetXaxis()->SetBinLabel(1 + i*static_cast<int>(nSlots(part)), feedThroughName(part, i));
 
   short nTicks = 16;
   if (hist->GetYaxis()->GetNbins() != nPartitionChannels(part)) return false;
