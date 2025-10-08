@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <algorithm>
 #include <random>
@@ -33,11 +33,11 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   // setup logger
   m_logger = makeActsAthenaLogger(this, std::string("ActsFatras"),std::string("ActsFatrasSimTool"));
 
-  // retrive tracking geo tool
+  // retrieve tracking geo tool
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   
-  //retrive Magnetfield tool
+  //retrieve Magnetfield tool
   ATH_MSG_VERBOSE("Using ATLAS magnetic field service");
   ATH_CHECK( m_fieldCacheCondObjInputKey.initialize());
 
