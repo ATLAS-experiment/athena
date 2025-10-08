@@ -154,12 +154,18 @@ def restore_file(mr, status):
 
    f = None
    if s.startswith("A"):
-      # Delete added file
-      git_try_cmd(f"git rm -f -- {status[1]}", status[1])
+      if git_cmd(f"git cat-file -e {args.target}:{status[1]}").returncode==0:
+         # If new file exists on target branch, we restore that file (below)
+         f = status[1]
+      else:
+         # If it does not exist on target branch, we delete it
+         git_try_cmd(f"git rm -f -- {status[1]}", status[1])
+
    elif s.startswith("R"):
       # Undo rename and restore original file (below)
       f = status[1]
       git_try_cmd(f"git mv {status[2]} {f}", status[2])
+
    else:
       f = status[1]
 
