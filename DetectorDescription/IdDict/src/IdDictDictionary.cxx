@@ -702,6 +702,8 @@ int IdDictDictionary::unpack(const std::string& group,
       // Add value to string
 
       std::string str_value("nil");
+      char temp[20];
+
       const IdDictFieldImplementation& impl = *impls[i];
       ExpandedIdentifier::element_type value = unpacked[i];
 
@@ -717,7 +719,9 @@ int IdDictDictionary::unpack(const std::string& group,
       switch (range->specification()) {
       case IdDictRange::by_minmax:
         // For a range of values (numbers), add in the field name
-        str_value = range->field()->name() + ' '+std::to_string(value);
+        str_value = range->field()->name() + ' ';
+        sprintf(temp, "%d", value);
+        str_value += temp;
         break;
 
       case IdDictRange::by_value:
