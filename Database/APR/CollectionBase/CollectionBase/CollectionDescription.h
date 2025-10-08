@@ -59,17 +59,16 @@ namespace pool {
      */
     CollectionDescription& operator=( const ICollectionDescription& rhs );
 
-    /**
-     * Assignment operator.
-     *
-     * @param rhs source CollectionDescription object to copy.
-     */ 
+    // Redirect to the copy operator accepting interface reference
     CollectionDescription& operator=( const CollectionDescription& rhs )
+    { operator=( (const ICollectionDescription&) rhs ); return *this; }
+
+    // Force the use of the user-defined copy operator (the default one leaks)
+    CollectionDescription& operator= (CollectionDescription&& rhs)
     { operator=( (const ICollectionDescription&) rhs ); return *this; }
 
     // Defaults should work for move.
     CollectionDescription (CollectionDescription&&) = default;
-    CollectionDescription& operator= (CollectionDescription&&) = default;
 
     /**
      * Equality operator.
