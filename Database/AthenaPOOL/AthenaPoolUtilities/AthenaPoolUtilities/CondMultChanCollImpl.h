@@ -126,9 +126,9 @@ private:
 inline
 CondMultChanCollImpl::CondMultChanCollImpl()
 	:
-	m_attrListColl(0),
+	m_attrListColl(nullptr),
 	// Assume run/event for minRange
-	m_minRange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT), 
+	m_minRange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT),
 			    IOVTime(IOVTime::MAXRUN, IOVTime::MAXEVENT))),
 	m_hasUniqueIOV(true),
 	m_checkRunEventTime(true)
@@ -235,8 +235,8 @@ CondMultChanCollImpl::add(ChanNum chanNum)
 }
 
 /// Adding in iov ranges
-inline 
-void                    
+inline
+void
 CondMultChanCollImpl::add(const IOVRange& range)
 {
     // Check if we're adding too many iovs - may be a 2nd pass
@@ -245,7 +245,7 @@ CondMultChanCollImpl::add(const IOVRange& range)
 	// add more iovs than channels. Now we just return
 	return;
     }
-    
+
     // Save range
     m_iovs.push_back(range);
 
@@ -255,12 +255,12 @@ CondMultChanCollImpl::add(const IOVRange& range)
 	ChanNum chan = m_channels[m_iovs.size()-1];
 	m_attrListColl->add(chan, range);
     }
-    
+
     if(m_checkRunEventTime) {
 	// On the first push_back we must check if we're using a time
 	// stamp and if so, reset the minRange
 	if(range.start().isTimestamp()) {
-	    m_minRange = IOVRange(IOVTime(IOVTime::MINTIMESTAMP), 
+	    m_minRange = IOVRange(IOVTime(IOVTime::MINTIMESTAMP),
 				  IOVTime(IOVTime::MAXTIMESTAMP));
 	}
 	m_checkRunEventTime = false;
@@ -272,7 +272,7 @@ CondMultChanCollImpl::add(const IOVRange& range)
     IOVTime stop = m_minRange.stop();
     if (range.stop() < m_minRange.stop()) stop = range.stop();
     m_minRange = IOVRange(start, stop);
-    if (m_hasUniqueIOV && range != m_minRange)m_hasUniqueIOV = false;
+    if (m_hasUniqueIOV && range != m_minRange) m_hasUniqueIOV = false;
 }
 
 /// Add new stop time to minRange - make sure that stop is <= to new

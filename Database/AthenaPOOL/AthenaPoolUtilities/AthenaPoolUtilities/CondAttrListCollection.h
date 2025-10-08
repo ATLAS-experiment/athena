@@ -25,10 +25,9 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "GaudiKernel/DataObject.h"
 
-#include <vector>
 #include <map>
-#include <algorithm>
 #include <sstream>
+#include <vector>
 
 
 /**
@@ -208,28 +207,30 @@ CONDCONT_DEF( CondAttrListCollection, 1223307417 );
 
 inline CondAttrListCollection::CondAttrListCollection()
 :
-m_minRange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT), 
+m_minRange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT),
                     IOVTime(IOVTime::MAXRUN, IOVTime::MAXEVENT))),
     m_hasUniqueIOV(true),
     m_hasRunLumiBlockTime(true),
-    m_spec(0)
+    m_spec(nullptr)
 {}
 
 /// Constructor with specification for type of time: run/lumiBlock or timestamp
 inline CondAttrListCollection::CondAttrListCollection(bool hasRunLumiBlockTime)
 	:
-	m_minRange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT), 
+	m_minRange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT),
 			    IOVTime(IOVTime::MAXRUN, IOVTime::MAXEVENT))),
 	m_hasUniqueIOV(true),
      m_hasRunLumiBlockTime(hasRunLumiBlockTime),
-     m_spec(0)
+     m_spec(nullptr)
 {
-    if (!m_hasRunLumiBlockTime) m_minRange = IOVRange(IOVTime(IOVTime::MINTIMESTAMP), 
-                                                      IOVTime(IOVTime::MAXTIMESTAMP));
+    if (!m_hasRunLumiBlockTime) {
+        m_minRange = IOVRange(IOVTime(IOVTime::MINTIMESTAMP),
+                              IOVTime(IOVTime::MAXTIMESTAMP));
+    }
 }
 
 inline CondAttrListCollection::~CondAttrListCollection() {
-  if (m_spec!=0) m_spec->release();
+  if (m_spec) m_spec->release();
 }
 
 inline CondAttrListCollection::CondAttrListCollection(
@@ -240,22 +241,20 @@ inline CondAttrListCollection::CondAttrListCollection(
   m_minRange(rhs.m_minRange),
   m_hasUniqueIOV(rhs.m_hasUniqueIOV),
   m_hasRunLumiBlockTime(rhs.m_hasRunLumiBlockTime),
-  m_spec(0)
+  m_spec(nullptr)
 {
   // members with normal semantics setup in initialisation list
   // make a new cached AttributeListSpecificaiton and make the payload use it
-  if (rhs.m_attrMap.size()>0) {
+  if (!rhs.m_attrMap.empty()) {
     m_spec=new coral::AttributeListSpecification();
     const coral::AttributeList& atr1=rhs.m_attrMap.begin()->second;
-    for (coral::AttributeList::const_iterator itr=atr1.begin();itr!=atr1.end();++itr) {
-      const coral::AttributeSpecification& aspec=itr->specification();
+    for (const auto& attr : atr1) {
+      const coral::AttributeSpecification& aspec=attr.specification();
       m_spec->extend(aspec.name(),aspec.typeName());
     }
-    for (const_iterator itr=rhs.m_attrMap.begin();itr!=rhs.m_attrMap.end();
-       ++itr)
-    {
-      auto newit = m_attrMap.try_emplace (itr->first, *m_spec, true).first;
-      newit->second.fastCopyData(itr->second);
+    for (const auto& [chanNum, attrList] : rhs.m_attrMap) {
+      auto newit = m_attrMap.try_emplace(chanNum, *m_spec, true).first;
+      newit->second.fastCopyData(attrList);
     }
   }
 }
@@ -448,13 +447,13 @@ CondAttrListCollection::hasUniqueIOV() const
 }
 
 /// Adding in chan/attrList pairs: ASSUMED TO BE IN ORDER
-inline bool                    
+inline bool
 CondAttrListCollection::add(ChanNum chanNum, const AttributeList& attributeList)
 {
-  if (m_attrMap.size()==0) {   
+  if (m_attrMap.empty()) {
     m_spec=new coral::AttributeListSpecification();
-    for (coral::AttributeList::const_iterator itr=attributeList.begin();itr!=attributeList.end();++itr) {
-      const coral::AttributeSpecification& aspec=itr->specification();
+    for (const auto& attr : attributeList) {
+      const coral::AttributeSpecification& aspec=attr.specification();
       m_spec->extend(aspec.name(),aspec.typeName());
     }
   }
@@ -465,13 +464,13 @@ CondAttrListCollection::add(ChanNum chanNum, const AttributeList& attributeList)
 }
 
 /// Adding in chan/attrList pairs with shared AttrList: ASSUMED TO BE IN ORDER
-inline void                    
+inline void
 CondAttrListCollection::addShared(ChanNum chanNum, const AttributeList& attributeList)
 {
-  if (m_attrMap.size()==0) {   
+  if (m_attrMap.empty()) {
     m_spec=new coral::AttributeListSpecification();
-    for (coral::AttributeList::const_iterator itr=attributeList.begin();itr!=attributeList.end();++itr) {
-      const coral::AttributeSpecification& aspec=itr->specification();
+    for (const auto& attr : attributeList) {
+      const coral::AttributeSpecification& aspec=attr.specification();
       m_spec->extend(aspec.name(),aspec.typeName());
     }
   }
@@ -553,58 +552,46 @@ CondAttrListCollection::resetMinRange()
     }
 }
 
-inline void                    
+inline void
 CondAttrListCollection::dump() const
 {
     // min range
     std::cout << "min range: " << m_minRange << std::endl;
 
     // attribute list
-    const_iterator it   = begin();
-    const_iterator last = end();
-    for (; it != last; ++it) {
-	std::cout << "chan, attr: " << (*it).first << std::endl;
-	(*it).second.toOutputStream(std::cout) << std::endl;
+    for (const auto& [chanNum, attrList] : m_attrMap) {
+      std::cout << "chan, attr: " << chanNum << std::endl;
+      attrList.toOutputStream(std::cout) << std::endl;
     }
     // IOVs
-    iov_const_iterator it1   = iov_begin();
-    iov_const_iterator last1 = iov_end();
-    for (; it1 != last1; ++it1) {
-	std::cout << "chan, iov: " << (*it1).first << std::endl;
-	std::cout << (*it1).second  << std::endl;
+    for (const auto& [chanNum, iov] : m_iovMap) {
+      std::cout << "chan, iov: " << chanNum << std::endl;
+      std::cout << iov << std::endl;
     }
     // channel names
-    name_const_iterator it2   = name_begin();
-    name_const_iterator last2 = name_end();
-    for (; it2 != last2; ++it2) {
-	std::cout << "chan, name: " << (*it2).first << std::endl;
-	std::cout << (*it2).second  << std::endl;
+    for (const auto& [chanNum, name] : m_nameMap) {
+      std::cout << "chan, name: " << chanNum << std::endl;
+      std::cout << name << std::endl;
     }
-    
+
 }
 
-inline void                    
+inline void
 CondAttrListCollection::dump(std::ostringstream& stream) const
 {
   stream << m_minRange << " iov size " << m_iovMap.size() << std::endl;
   // IOVs
-  iov_const_iterator itIOV   = iov_begin();
-  iov_const_iterator lastIOV = iov_end();
-  for(; itIOV != lastIOV; ++itIOV) {
-    stream << "chan, iov: " << (*itIOV).first << " " << (*itIOV).second  << std::endl;
+  for (const auto& [chanNum, iov] : m_iovMap) {
+    stream << "chan, iov: " << chanNum << " " << iov << std::endl;
   }
   // Attribute list
-  const_iterator itAtt = begin();
-  const_iterator lastAtt = end();
-  for(; itAtt != lastAtt; ++itAtt) {
-    stream << "chan, attr: " << (*itAtt).first << std::endl;
-    (*itAtt).second.toOutputStream(stream) << std::endl;
+  for (const auto& [chanNum, attrList] : m_attrMap) {
+    stream << "chan, attr: " << chanNum << std::endl;
+    attrList.toOutputStream(stream) << std::endl;
   }
   // channel names
-  name_const_iterator itName   = name_begin();
-  name_const_iterator lastName = name_end();
-  for (; itName != lastName; ++itName) {
-    stream << "chan, name: " << (*itName).first << " " << (*itName).second  << std::endl;
+  for (const auto& [chanNum, name] : m_nameMap) {
+    stream << "chan, name: " << chanNum << " " << name << std::endl;
   }
 }
 
@@ -645,31 +632,31 @@ CondAttrListCollection::isSameButMinRange ( const CondAttrListCollection& rhs,
 
     if (!ignoreIOVs) {
         // Check IOVs
-        iov_const_iterator it1  = m_iovMap.begin();
-        iov_const_iterator it2  = rhs.m_iovMap.begin();
-        iov_const_iterator end1 = m_iovMap.end();
+        auto it1 = m_iovMap.begin();
+        auto it2 = rhs.m_iovMap.begin();
+        auto end1 = m_iovMap.end();
         for (; it1 != end1; ++it1, ++it2) {
-            if ((*it1).first != (*it2).first)   return false;
-            if ((*it1).second != (*it2).second) return false;
+            if (it1->first != it2->first) return false;
+            if (it1->second != it2->second) return false;
         }
     }
-    
+
     // Check attribute lists
-    const_iterator it3  = m_attrMap.begin();
-    const_iterator it4  = rhs.m_attrMap.begin();
-    const_iterator end3 = m_attrMap.end();
+    auto it3 = m_attrMap.begin();
+    auto it4 = rhs.m_attrMap.begin();
+    auto end3 = m_attrMap.end();
     for (; it3 != end3; ++it3, ++it4) {
-        if ((*it3).first != (*it4).first)   return false;
-        if ((*it3).second != (*it4).second) return false;
+        if (it3->first != it4->first) return false;
+        if (it3->second != it4->second) return false;
     }
-    
+
     // Check names
-    name_const_iterator it5  = m_nameMap.begin();
-    name_const_iterator it6  = rhs.m_nameMap.begin();
-    name_const_iterator end5 = m_nameMap.end();
+    auto it5 = m_nameMap.begin();
+    auto it6 = rhs.m_nameMap.begin();
+    auto end5 = m_nameMap.end();
     for (; it5 != end5; ++it5, ++it6) {
-        if ((*it5).first != (*it6).first)   return false;
-        if ((*it5).second != (*it6).second) return false;
+        if (it5->first != it6->first) return false;
+        if (it5->second != it6->second) return false;
     }
 
     return true;
