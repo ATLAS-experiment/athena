@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArBadChannelTool/LArBadChannelParser2.h"
@@ -40,7 +40,7 @@ LArBadChannelParser2::parseISfile( int nint, int minString,
     ++m_linenumber;
     ISLine parsedLine;
     if (parseLine( readLine, parsedLine, nint, minString, firstWildcard)) {
-      result.push_back(parsedLine);
+      result.push_back(std::move(parsedLine));
       // (*m_log) << MSG::DEBUG << "LArBadChannelParser ACCEPTED line " << readLine << endmsg;
     }
     else {
