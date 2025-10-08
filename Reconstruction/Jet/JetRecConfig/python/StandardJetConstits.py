@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
  StandardJetConstits: A module containing standard definitions for jet inputs : external container and 
@@ -117,11 +117,11 @@ def _muonSegmentInputsExist(flags):
 
 def _unassocMuonSegmentInputsExist(flags):
     warning = "UnAssociated muon segments not present"
+    if "UnAssocMuonSegments" in flags.Input.Collections:
+        return True, warning
     if flags.Input.RunNumbers[0] < 410000:
         # Unassociated containers only exist from Run 3 and mc23 onwards
         return False, warning
-    if "UnAssocMuonSegments" in flags.Input.Collections:
-        return True, warning
     if isAnalysisRelease():
         # reco flags don't exist in analysis release
         return False, warning
