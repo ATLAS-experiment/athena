@@ -380,7 +380,11 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
         for (const Identifier& gapId : gapIds) {
             const int surfaceHash = newElement->surfaceHash(gapId);
             const int layerHash = newElement->layerHash(gapId);
-            const Amg::Transform3D& refTrf{copyMe->localToGlobalTrans(gctx, gapId)};
+            const Amg::Transform3D refTrf{copyMe->localToGlobalTrans(gctx, gapId)* 
+                                          (m_idHelperSvc->measuresPhi(gapId) ? 
+                                                Amg::getRotateZ3D(90*Gaudi::Units::deg) :
+                                                Amg::Transform3D::Identity())};
+            ATH_MSG_VERBOSE("Assign transform: "<<m_idHelperSvc->toString(gapId)<<", "<<Amg::toString(refTrf));
             newElement->m_surfaceData->m_layerTransforms[surfaceHash] = refTrf;
             newElement->m_surfaceData->m_layerCenters[layerHash] = refTrf.translation();
             newElement->m_surfaceData->m_layerNormals[layerHash] = refTrf.linear() * Amg::Vector3D::UnitZ();
@@ -936,7 +940,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                                                   refEle.doubletZ(), 
                                                                   doubPhi, gasGap, measPhi, strip);
                     
-                    const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
+                    const Amg::Transform3D refTrans{refEle.localToGlobalTrans(gctx, stripId) * 
+                                                    (measPhi ? Amg::getRotateZ3D(90*Gaudi::Units::deg) : 
+                                                               Amg::Transform3D::Identity())};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
                     if (strip == 1 && !Amg::isIdentity(refTrans.inverse()*testTrans)) {
                         ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<" - "<<refEle.identHash()<<std::endl

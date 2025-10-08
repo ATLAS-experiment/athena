@@ -173,17 +173,14 @@ namespace MuonR4{
                 cov[Acts::toUnderlying(AxisDefs::timeCov)] = Acts::square(m_rpcTimeResolution);
 
                 const double time1 = strip->time() 
-                                   - strip->readoutElement()->distanceToEdge(strip->layerHash(),
-                                                                             lPos.block<2,1>(0,0),
+                                   - strip->readoutElement()->distanceToEdge(strip->layerHash(), lPos,
                                                                              EdgeSide::readOut)  /m_rpcSignalVelocity;
 
                 if (spacePoint->dimension() == 2) {                   
                     auto* strip2 = static_cast<const xAOD::RpcMeasurement*>(spacePoint->secondaryMeasurement());
 
                     const double time2 = strip2->time() -
-                                         strip2->readoutElement()->distanceToEdge(strip2->layerHash(),
-                                                                                  Eigen::Rotation2D{90._degree}*lPos.block<2,1>(0,0),
-                                                                                  EdgeSide::readOut)/m_rpcSignalVelocity;
+                                         strip2->readoutElement()->distanceToEdge(strip2->layerHash(),lPos, EdgeSide::readOut)/m_rpcSignalVelocity;
                     /// Average the time
                     calibSP->setTimeMeasurement(0.5*(time1 + time2));
                     /// Add the difference to the covariance though
