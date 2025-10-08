@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCondBlobAlgs/CaloCoolIdTool.h"
@@ -31,7 +31,7 @@ CaloCoolIdTool::initialize()
 {
   StatusCode sc=detStore()->retrieve(m_calo_id,"CaloCell_ID");
   if (sc.isFailure()) {
-    msg(MSG::ERROR) << "Failed to retrive CaloCell_ID" << endmsg;
+    msg(MSG::ERROR) << "Failed to retrieve CaloCell_ID" << endmsg;
     return sc;
   }
 
