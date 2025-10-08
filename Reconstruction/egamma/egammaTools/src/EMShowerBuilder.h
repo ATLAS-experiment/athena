@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMATOOLS_EMSHOWERBUILDER_H
@@ -75,7 +75,7 @@ public:
   virtual StatusCode finalize() override;
 
 private:
-  /** @brief Wraps tool retrival to ensure it is has a name. */
+  /** @brief Wraps tool retrieval to ensure it is has a name. */
   template <typename T> StatusCode RetrieveTool(ToolHandle<T> &tool, bool tool_requested);
   /** @brief calculate shower shapes*/
   StatusCode CalcShowerShape(xAOD::Egamma* eg,
