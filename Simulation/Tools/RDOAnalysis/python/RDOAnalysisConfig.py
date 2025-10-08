@@ -210,7 +210,7 @@ def PLR_RDOAnalysisCfg(flags, name="PLR_RDOAnalysis", **kwargs):
     return result
 
 
-def RDOAnalysisCfg(flags):
+def RDOAnalysisCfg(flags, doTileNtuple=True, doLarNtuple=True):
     acc = ComponentAccumulator()
 
     acc.merge(EventInfoRDOAnalysisCfg(flags))
@@ -225,10 +225,10 @@ def RDOAnalysisCfg(flags):
         acc.merge(TRT_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnableLAr:
-        acc.merge(LArRDOAnalysisCfg(flags))
+        acc.merge(LArRDOAnalysisCfg(flags, doNtuple = doLarNtuple))
 
     if flags.Detector.EnableTile:
-        acc.merge(TileRDOAnalysisCfg(flags))
+        acc.merge(TileRDOAnalysisCfg(flags,doNtuple=doTileNtuple))
 
     if flags.Detector.EnableMDT:
         from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg

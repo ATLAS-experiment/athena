@@ -31,6 +31,7 @@ private:
   SG::ReadHandleKey<LArDigitContainer> m_inputDigitKey{this, "InputDigitKey", "LArDigitContainer_MC_Thinned"};
   BooleanProperty m_presampling{this, "PreSampling", false};
 
+  Gaudi::Property<bool> m_doNtuple{this , "doNtuple" , true};
   Gaudi::Property<std::string> m_ntupleFileName{this , "NtupleFileName" , "/ntuples/file1"};
   Gaudi::Property<std::string> m_ntupleDirName{this , "NtupleDirectoryName" , "/LArRDOAnalysis/"};
   Gaudi::Property<std::string> m_ntupleTreeName{this , "NtupleTreeName" , "LArRDOAna"};
