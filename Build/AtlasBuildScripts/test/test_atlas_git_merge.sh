@@ -59,4 +59,15 @@ if [[ -z "${status}" ]]; then
     exit 1
 fi
 
+# Merge with sweep:ignore adding new file that is already on target branch
+# https://gitlab.cern.ch/atlas/athena/-/merge_requests/83273
+git checkout -f -B source 318911d5329b35e90239bbd1d909a828022aa2aa
+git checkout -f -B target c102fc8098b67db10116b344c8fad80fee349493
+echo "a" | ../Build/AtlasBuildScripts/atlas_git_merge.py source target --remote ''
+status=`git status -s 'Control/AthenaServices/src/TimeoutAlg.cxx'`
+if [[ ! -z "${status}" ]]; then
+    echo "ERROR: sweep:ignore did not work as expected"
+    exit 1
+fi
+
 echo "OK. All tests succeeded."
