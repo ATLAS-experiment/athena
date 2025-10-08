@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************************
@@ -237,14 +237,14 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       
       //Trk::RIO_OnTrack object contains information on the hit used to fit the track at this surface
       const Trk::RIO_OnTrack* hit = dynamic_cast <const Trk::RIO_OnTrack*>(mesh);
-      ATH_MSG_DEBUG(" --> Going to retrive the Trk::RIO_OnTrack for hit " << nTSOS);
+      ATH_MSG_DEBUG(" --> Going to retrieve the Trk::RIO_OnTrack for hit " << nTSOS);
       if (hit== nullptr) {
 	//for some reason the first tsos has no associated hit - maybe because this contains the defining parameters?
 	if (nHits >0) ATH_MSG_DEBUG("No hit associated with TSOS " << nTSOS);
 	continue;
       }
       
-      ATH_MSG_DEBUG(" --> Going to retrive the track parameters of this TSOS: " << nTSOS);
+      ATH_MSG_DEBUG(" --> Going to retrieve the track parameters of this TSOS: " << nTSOS);
       const Trk::TrackParameters* trackParameter = tsos->trackParameters();
       if(trackParameter==nullptr) {
 	//if no TrackParameters for TSOS we cannot define residuals
