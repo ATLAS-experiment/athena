@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTEventFlagWriter.h"
@@ -32,8 +32,8 @@ StatusCode SCTEventFlagWriter::execute(const EventContext& ctx) const
 
   if ((nLVL1IDErrors > 500) or (nROBFragmentErrors > 1000)) { // Check if number of errors exceed threshold
     bool setOK_xAOD{false};
-    SG::ReadHandle<xAOD::EventInfo> xAODEvtInfo{m_xAODEvtInfoKey, ctx}; // Retrive xAOD EventInfo
-    if (xAODEvtInfo.isValid()) { // Retriving xAOD EventInfo successful
+    SG::ReadHandle<xAOD::EventInfo> xAODEvtInfo{m_xAODEvtInfoKey, ctx}; // Retrieve xAOD EventInfo
+    if (xAODEvtInfo.isValid()) { // Retrieving xAOD EventInfo successful
       setOK_xAOD = xAODEvtInfo->updateErrorState(xAOD::EventInfo::SCT, xAOD::EventInfo::Error);
     } 
     if (not setOK_xAOD) {
