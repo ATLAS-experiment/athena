@@ -3,6 +3,11 @@
 */
 
 #include "MuonIdHelpers/TgcIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
 
 TgcIdHelper::TgcIdHelper() : MuonIdHelper("TgcIdHelper", "tgc") {

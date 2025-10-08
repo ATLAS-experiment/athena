@@ -2,9 +2,14 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
 #include "MuonIdHelpers/RpcIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
+
 RpcIdHelper::RpcIdHelper() : MuonIdHelper("RpcIdHelper", "rpc") {}
 
 // Initialize dictionary
