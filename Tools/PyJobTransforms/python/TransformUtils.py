@@ -86,6 +86,9 @@ def UseFrontier(flags):
     from os import environ
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
+    if flags.IOVDb.UseCREST:
+        raise RuntimeError('Using PyJobTransforms.UseCREST (setting flags.IOVDb.UseCREST = True) and PyJobTransforms.UseFrontier in the same job is not supported!')
+
     cfg = ComponentAccumulator()
     if environ.get('FRONTIER_SERVER'):
         msg.info('Enabling FRONTIER DB access')
