@@ -401,7 +401,7 @@ def setupMenu():
         ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM26', groups=SupportPhIGroup+SingleElectronGroup, monGroups=['egammaMon:shifter_tp']),  
 
         # ATR-27373
-        ChainProp(name='HLT_e28_lhtight_ivarloose_L1eEM28M', stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
+        ChainProp(name='HLT_e28_lhtight_ivarloose_L1eEM28M', stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp']),
 
         # ATR-27156 Phase-1
         # dnn chains
@@ -426,8 +426,8 @@ def setupMenu():
 
         # ATR-27373
         ChainProp(name='HLT_e60_lhmedium_L1eEM28M', stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp']),
-        ChainProp(name='HLT_e140_lhloose_L1eEM28M', stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:shifter_tp','caloMon:t0']),
-        ChainProp(name='HLT_e300_etcut_L1eEM28M', stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:shifter','caloMon:t0']),
+        ChainProp(name='HLT_e140_lhloose_L1eEM28M', stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:shifter_tp']),
+        ChainProp(name='HLT_e300_etcut_L1eEM28M', stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:shifter']),
 
         #--------- primary 1e
         ChainProp(name='HLT_e26_lhtight_ivarmedium_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:shifter_tp']), # Phase-1 ATR-27156
