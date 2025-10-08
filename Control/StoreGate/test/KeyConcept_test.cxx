@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/constraints/KeyConcept.h"
@@ -15,12 +15,10 @@ int main () {
 
   cerr << "*** KeyConcept_test BEGIN ***" << endl;
 
-  KeyClass<string> tryThis;
-  classIsKey<string>();
-  
-  KeyClass<int> tryThat;
-  classIsKey<int>();
-  
+  [[maybe_unused]] KeyConcept auto key1 = std::string{"hello"};
+
+  [[maybe_unused]] KeyConcept auto key2 = 42;
+
   cerr << "*** KeyConcept_test OK ***" <<endl;
   return 0;
 

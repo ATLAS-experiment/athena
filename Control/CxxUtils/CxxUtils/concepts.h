@@ -56,6 +56,30 @@ concept InputValIterator =
   std::input_iterator<ITERATOR> &&
   std::convertible_to<std::iter_value_t<ITERATOR>, VAL>;
 
+template <typename SET>
+concept SimpleAssociativeContainer = requires(SET s, typename SET::key_type k) {
+    typename SET::value_type;
+    typename SET::key_type;
+    typename SET::iterator;
+    typename SET::const_iterator;
+    typename SET::reference;
+    typename SET::const_reference;
+    typename SET::const_pointer;
+
+    { s.find(k) } -> std::convertible_to<typename SET::const_iterator>;
+    { s.insert(k) } -> std::convertible_to<std::pair<typename SET::iterator, bool>>;
+};
+
+template <typename MAP>
+concept PairAssociativeContainer = requires(MAP m, typename MAP::key_type k, typename MAP::mapped_type v) {
+    typename MAP::value_type;
+    typename MAP::key_type;
+    typename MAP::mapped_type;
+
+    { m[k] } -> std::convertible_to<typename MAP::mapped_type>;
+    { m.find(k) } -> std::convertible_to<typename MAP::iterator>;
+    { m.insert(std::make_pair(k, v)) } -> std::same_as<std::pair<typename MAP::iterator, bool>>;
+};
 
 // An allocation function.  Can be used like <code>T* p = F()</code> to allocate
 // a new object.

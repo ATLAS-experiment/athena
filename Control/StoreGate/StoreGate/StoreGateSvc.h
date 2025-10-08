@@ -58,6 +58,7 @@
 
 #include "GaudiKernel/IIncidentListener.h"
 
+#include "StoreGate/constraints/KeyConcept.h"
 
 //forward declarations
 namespace SG {
@@ -207,7 +208,7 @@ public:
 
   /// Retrieve an object with "key", into a const T*
   template <typename T, typename TKEY> 
-  StatusCode retrieve(const T*& ptr, const TKEY& key) const;
+  StatusCode retrieve(const T*& ptr, const TKEY& key) const requires KeyConcept<TKEY>;
 
   /// Retrieve an object with "key", into a const T*.
   /// Overload for std::string KEY type
@@ -217,7 +218,7 @@ public:
 
   /// Retrieve an object with "key", into a T*
   template <typename T, typename TKEY>
-  StatusCode retrieve(T*& ptr, const TKEY& key) const;
+  StatusCode retrieve(T*& ptr, const TKEY& key) const  requires KeyConcept<TKEY>;
 
   /// Retrieve an object with "key", into a T*.
   /// Overload for std::string KEY type
@@ -233,9 +234,9 @@ public:
   /// Variant of the above which doesn't print a warning message.
   /// Just returns null if the object isn't found. Compare to contains
   template <typename T, class TKEY>
-  T* tryRetrieve (const TKEY& key) const;
+  T* tryRetrieve (const TKEY& key) const requires KeyConcept<TKEY>;
   template <typename T, class TKEY>
-  const T* tryConstRetrieve(const TKEY& key) const;
+  const T* tryConstRetrieve(const TKEY& key) const requires KeyConcept<TKEY>;
 
 
 
@@ -307,16 +308,16 @@ public:
   StatusCode symLink (const T* p2BRegistered, const TLINK* p2BLinked );
 
   /// make a soft link to the object pointed by id/key
-  template <typename TKEY> 
+  template <KeyConcept TKEY> 
   StatusCode symLink (const CLID id, const TKEY& key, const CLID linkid);
 
   /// make an alias to a DataObject (provide data type and old key)
   template <typename T, typename TKEY, typename AKEY>
-  StatusCode setAlias(const T* p2BAliased, const TKEY& key, const AKEY& aliasKey);
+  StatusCode setAlias(const T* p2BAliased, const TKEY& key, const AKEY& aliasKey) requires KeyConcept<TKEY> && KeyConcept<AKEY>;
 
   /// make an alias to a DataObject (provide only valid pointer)
   template <typename T, typename AKEY>
-  StatusCode setAlias(const T* p2BAliased, const AKEY& aliasKey);
+  StatusCode setAlias(const T* p2BAliased, const AKEY& aliasKey) requires KeyConcept<AKEY>;
 
   /// make an alias to a DataObject (provide valid proxy)
   StatusCode setAlias(SG::DataProxy* proxy, const std::string& aliasKey);
@@ -864,12 +865,12 @@ private:
   // Helper for record.
   template <typename T, typename TKEY> 
   StatusCode record1(DataObject* obj, T* pObject, const TKEY& key, 
-                     bool allowMods, bool resetOnly=true, bool noHist=false);
+                     bool allowMods, bool resetOnly=true, bool noHist=false) requires KeyConcept<TKEY>;
 
   // Helper for overwrite.
   template <typename T, typename TKEY> 
   StatusCode overwrite1(DataObject* obj, T* pObject, const TKEY& key, 
-                        bool allowMods, bool noHist=false);
+                        bool allowMods, bool noHist=false) requires KeyConcept<TKEY>;
 
   bool isSymLinked(const CLID& linkID, SG::DataProxy* dp);
 

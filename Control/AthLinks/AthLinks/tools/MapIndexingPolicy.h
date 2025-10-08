@@ -24,7 +24,10 @@
 #include "AthenaKernel/tools/type_tools.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-#include <boost/concept_check.hpp>
+#include "CxxUtils/concepts.h"
+#include <concepts>
+#include <utility>
+#include <type_traits>
 #include <map>
 #include <algorithm>
 #include <cassert>
@@ -43,12 +46,11 @@ namespace SG {
  * as the payload.  The type returned from the link is the second type
  * of the map.
  */
-template <class MAP>
+
+template <CxxUtils::detail::PairAssociativeContainer MAP>
 class MapIndexingPolicy
 {
 private:
-  //compiler checks that MAP is an stl pair associative container
-  BOOST_CONCEPT_ASSERT((boost::PairAssociativeContainerConcept<MAP>));
 
   typedef typename MAP::mapped_type mapped_type;
   typedef typename MAP::const_iterator const_iterator;
