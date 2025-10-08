@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -61,7 +61,7 @@ GetDetectorLocalFrames::GetDetectorLocalFrames(std::string const&  name, ISvcLoc
 StatusCode GetDetectorLocalFrames::initialize(){
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "initialize()" << endmsg;
   
-  /** Retrive TRT info */
+  /** Retrieve TRT info */
   if (detStore()->retrieve(m_TRTHelper, "TRT_ID").isFailure()) {
     msg(MSG::FATAL) << "Could not get TRT ID helper" << endmsg;
     return StatusCode::FAILURE;
@@ -73,10 +73,10 @@ StatusCode GetDetectorLocalFrames::initialize(){
     return StatusCode::FAILURE;
   }
   
-  /** Retrive SCT info */
+  /** Retrieve SCT info */
   ATH_CHECK(m_SCTDetEleCollKey.initialize());
   
-  /** Retrive Pixel info */
+  /** Retrieve Pixel info */
   ATH_CHECK(m_pixelDetEleCollKey.initialize());
   
   /** Output text File */
