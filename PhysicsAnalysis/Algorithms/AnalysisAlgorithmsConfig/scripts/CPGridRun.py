@@ -432,13 +432,37 @@ class CPGridRun:
             else:
                 logCPGridRun.error(f"Formatting clause '{key}' is not recognized in the CPRun.py script. Check CPGridRun.py")
                 raise ValueError(f"Formatting clause '{key}' is not recognized in the CPRun.py script. Check CPGridRun.py")
-            
+        self._checkYamlExists(runscriptArgs)
         # Return the formatted arguments as a string
         arg_string = ' '.join(
             f'--{k.replace("_", "-")}' if isinstance(v, bool) and v else
             f'--{k.replace("_", "-")} {v}' for k, v in vars(runscriptArgs).items() if v not in [None, False]
         )
         return f'"CPRun.py {arg_string}"'
+    
+    def _checkYamlExists(self, runscriptArgs):
+        from AnalysisAlgorithmsConfig.CPBaseRunner import CPBaseRunner
+        if not hasattr(runscriptArgs, 'text_config'):
+            self._errorCollector['no yaml'] = "No YAML configuration file is specified in the exec string. Please provide one using --text-config"
+            return
+        yamlPath = getattr(runscriptArgs, 'text_config')
+        haveLocalYaml = CPBaseRunner.findLocalPathYamlConfig(yamlPath)
+        if haveLocalYaml:
+            logCPGridRun.warning("A path to a local YAML configuration file is found, but it may not be grid-usable.")
+
+        repoYamls = CPBaseRunner.findRepoPathYamlConfig(yamlPath)
+        if repoYamls and len(repoYamls) > 1:
+            self._errorCollector['ambiguous yamls'] = f'Multiple files named \"{yamlPath}\" found in the analysis repository. Please provide a more specific path to the config file.\nMatches found:\n' + '\n'.join(repoYamls)
+            return
+        elif repoYamls and len(repoYamls) == 1:
+            logCPGridRun.info(f"Found a grid-usable YAML configuration file in the analysis repository: {repoYamls[0]}")
+            return
+        
+        if not repoYamls:
+            self._errorCollector['no usable yaml'] = f"Grid usable YAML configuration file not found: {yamlPath}"
+            if haveLocalYaml:
+                self._errorCollector['have local yaml'] = f"Only a local YAML configuration file is found: {yamlPath}, not usable in the grid.\n" \
+                f"Make sure the YAML file is in build/x86_64-el9-gcc14-opt/data/package_name/config.yaml. You can install the YAML file through CMakeList.txt with `atlas_install_data( data/* )`; use `-t package_name/config.yaml` in the --exec"
 
     def outputsFormatter(self):
         outputs = [f'{output.split(".")[0]}:{output}' for output in self.args.output_files]
