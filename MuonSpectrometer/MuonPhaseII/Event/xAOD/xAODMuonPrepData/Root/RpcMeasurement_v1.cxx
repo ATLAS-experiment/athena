@@ -35,7 +35,7 @@ namespace xAOD {
                                                        measuresPhi());
     }
     IdentifierHash RpcMeasurement_v1::layerHash() const {
-        return MuonGMR4::RpcReadoutElement::createHash(0, gasGap(), doubletPhi(), measuresPhi());
+        return MuonGMR4::RpcReadoutElement::createHash(0, gasGap(), doubletPhi(), 0);
     }
     const Identifier& RpcMeasurement_v1::identify() const {
         if (!m_identifier.isValid()){
@@ -46,7 +46,7 @@ namespace xAOD {
     Amg::Vector3D RpcMeasurement_v1::localMeasurementPos() const {
         Amg::Vector3D lPos{Amg::Vector3D::Zero()};
         if(numDimensions() == 1) {
-            lPos[Trk::locX] =  localPosition<1>()[Trk::locX];
+            lPos[measuresPhi()] =  localPosition<1>()[0];
         } else {
             lPos.block<2,1>(0,0) = xAOD::toEigen(localPosition<2>());
         }

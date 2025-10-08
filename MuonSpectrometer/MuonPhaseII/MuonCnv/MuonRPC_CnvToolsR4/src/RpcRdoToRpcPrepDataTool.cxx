@@ -62,13 +62,13 @@ namespace MuonR4{
             sortedRdos[offId][stripSide] = rdo;
         }
 
-        SG::WriteHandle<xAOD::RpcStripContainer> stripHandle{m_writeKey, ctx};
+        SG::WriteHandle stripHandle{m_writeKey, ctx};
         ATH_CHECK(stripHandle.record(std::make_unique<xAOD::RpcStripContainer>(),
                                      std::make_unique<xAOD::RpcStripAuxContainer>()));
 
         SG::WriteHandle<xAOD::RpcStrip2DContainer> strip2DHandle{};
         if (!m_writeKeyBI.empty()) {
-            strip2DHandle =  SG::WriteHandle<xAOD::RpcStrip2DContainer>{m_writeKeyBI, ctx};
+            strip2DHandle =  SG::WriteHandle{m_writeKeyBI, ctx};
             ATH_CHECK(strip2DHandle.record(std::make_unique<xAOD::RpcStrip2DContainer>(),
                                            std::make_unique<xAOD::RpcStrip2DAuxContainer>()));
 
@@ -97,8 +97,9 @@ namespace MuonR4{
         using CheckVector2D = MuonGMR4::StripDesign::CheckVector2D;
         for (const auto& [offId, rdoPairs] : sortedRdos) {
             const MuonGMR4::RpcReadoutElement* reElement = m_detMgr->getRpcReadoutElement(offId);
+            const IdentifierHash measHash = reElement->measurementHash(offId);
             
-            const MuonGMR4::StripDesign& design{reElement->sensorLayout(reElement->measurementHash(offId)).design()};
+            const MuonGMR4::StripDesign& design{reElement->sensorLayout(measHash)->design(idHelper.measuresPhi(offId))};
             
             CheckVector2D stripPos = design.center(idHelper.channel(offId));
             if (!stripPos) {
@@ -142,17 +143,17 @@ namespace MuonR4{
     }
     StatusCode RpcRdoToRpcPrepDataTool::decode(const EventContext& ctx,
                                                const std::vector<uint32_t>& robIds) const {
-        SG::ReadCondHandle cablingMap{m_cablingKey, ctx};
-        ATH_CHECK(cablingMap.isValid());
+        const Muon::RpcCablingMap* cablingMap{nullptr};
+        ATH_CHECK(SG::get(cablingMap, m_cablingKey, ctx));
         return decode(ctx, cablingMap->getChamberHashVec(robIds, msgStream()));
     }
     StatusCode RpcRdoToRpcPrepDataTool::provideEmptyContainer(const EventContext& ctx) const {
-        SG::WriteHandle<xAOD::RpcStripContainer> stripHandle{m_writeKey, ctx};
+        SG::WriteHandle stripHandle{m_writeKey, ctx};
         ATH_CHECK(stripHandle.record(std::make_unique<xAOD::RpcStripContainer>(),
                                      std::make_unique<xAOD::RpcStripAuxContainer>()));
 
         if (!m_writeKeyBI.empty()) {
-            SG::WriteHandle<xAOD::RpcStrip2DContainer> strip2DHandle{m_writeKeyBI, ctx};
+            SG::WriteHandle strip2DHandle{m_writeKeyBI, ctx};
             ATH_CHECK(strip2DHandle.record(std::make_unique<xAOD::RpcStrip2DContainer>(),
                                            std::make_unique<xAOD::RpcStrip2DAuxContainer>()));
 

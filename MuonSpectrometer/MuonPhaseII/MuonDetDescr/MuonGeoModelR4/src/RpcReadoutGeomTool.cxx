@@ -189,10 +189,9 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
 
         if (etaDesign) {
             insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
-                                                          etaDesign,
+                                                          etaDesign, phiDesign,
                                                           RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)));
-        }
-        if (phiDesign) {
+        } else if (phiDesign) {
             insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform*
                                                                                                   Amg::getRotateZ3D(90. * Gaudi::Units::deg)), 
                                                           phiDesign,
