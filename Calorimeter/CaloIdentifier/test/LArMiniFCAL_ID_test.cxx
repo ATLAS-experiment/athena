@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  CaloIdentifier/test/LArMiniFCAL_ID_test.cxx
  * @author scott snyder
@@ -13,6 +11,7 @@
 #undef NDEBUG
 
 #include "CaloIdentifier/LArMiniFCAL_ID.h"
+#include "CaloIdentifier/LArID_Exception.h"
 #include "IdDictParser/IdDictParser.h"
 #include <iostream>
 

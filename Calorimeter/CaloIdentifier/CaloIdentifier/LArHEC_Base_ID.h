@@ -14,20 +14,15 @@
 #define CALOIDENTIFIER_LARHEC_BASE_ID_H
 
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-
 #include "CaloIdentifier/CaloIDHelper.h"
-#include "CaloIdentifier/LArID_Exception.h"
 #include "CaloIdentifier/LArNeighbours.h"
+#include "IdDict/IdDictFieldImplementation.h"
+#include "Identifier/IdentifierHash.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include "boost/range/iterator_range.hpp"
 
 #include <vector>
 #include <algorithm>
-
 
 class Range;
 class LArHEC_region;

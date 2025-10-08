@@ -11,8 +11,12 @@
 #include <cmath>
 
 #include "CaloIdentifier/LArEM_Base_ID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "LArEM_region.h"
-#include "IdDict/IdDictDefs.h"
 #include "CxxUtils/StrFormat.h"
 #include "CxxUtils/trapping_fp.h"
 

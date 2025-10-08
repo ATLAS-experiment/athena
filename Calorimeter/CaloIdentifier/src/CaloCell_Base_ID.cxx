@@ -11,6 +11,7 @@
 
 #include "CaloIdentifier/CaloCell_Base_ID.h"
 #include "CaloIdentifier/CaloNeighbours.h"
+#include "IdDict/IdDictMgr.h"
 
 
 CaloCell_Base_ID::CaloCell_Base_ID(const std::string& name,

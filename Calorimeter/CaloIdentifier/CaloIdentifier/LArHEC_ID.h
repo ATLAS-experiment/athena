@@ -6,19 +6,11 @@
 #define LARHEC_ID_H
 
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-
 #include "CaloIdentifier/LArHEC_Base_ID.h"
-#include "CaloIdentifier/LArID_Exception.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/BaseInfo.h"
-#include "boost/range/iterator_range.hpp"
 
-#include <vector>
-#include <algorithm>
+class IdDictMgr;
 
 
 /**  
@@ -78,15 +70,13 @@
 * @author maintained by Fabienne Ledroit
 */
 
-class Range;
 
 class LArHEC_ID
   : public LArHEC_Base_ID
 {
 public:        
-
   LArHEC_ID();
-  ~LArHEC_ID();
+  virtual ~LArHEC_ID();
 
 
   /** initialization from the identifier dictionary*/

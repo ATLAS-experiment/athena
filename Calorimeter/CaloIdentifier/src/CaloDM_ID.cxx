@@ -3,10 +3,13 @@
 */
 
 #include "CaloIdentifier/CaloDM_ID.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
+#include "IdDict/IdDictDictionary.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
