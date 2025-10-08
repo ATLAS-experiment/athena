@@ -205,11 +205,14 @@ namespace MuonR4{
                 ATH_MSG_VERBOSE("Loop over track state: "<<(itr++)<<", "<<m_idHelperSvc->toString(xAOD::identify(goodMeas.front()))
                                 <<", id: "<<surfAcc.get(goodMeas.front())->geometryId());
 
-                summary.nPrecHits += (goodMeas.front()->type() == xAOD::UncalibMeasType::MdtDriftCircleType);
-                if (m_idHelperSvc->measuresPhi(xAOD::identify(goodMeas.front()))){
+                const xAOD::UncalibratedMeasurement* m = goodMeas.front();
+                summary.nPrecHits += (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType);
+                if (m->type() == xAOD::UncalibMeasType::Other) {
+                }
+                else if (m_idHelperSvc->measuresPhi(xAOD::identify(m))){
                     ++summary.nPhiHits;
                 } else {
-                    summary.nEtaTrigHits += (goodMeas.front()->type() != xAOD::UncalibMeasType::MdtDriftCircleType);
+                    summary.nEtaTrigHits += (m->type() != xAOD::UncalibMeasType::MdtDriftCircleType);
                 }
             });
 
