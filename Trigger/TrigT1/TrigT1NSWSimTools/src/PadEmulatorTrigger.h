@@ -23,12 +23,12 @@ namespace NSWL1 {
     public:
       PadEmulatorTrigger(const char wheel, const uint32_t sector,
                          const uint32_t bandid, const uint32_t phiid, const uint32_t relbcid,
-                         const PadPattern pattern = PadPattern(0, 0, {}, {}, false), const uint32_t hitmask = 0);
+                         const PadPattern &pattern, const uint32_t hitmask = 0);
       ~PadEmulatorTrigger() = default;
 
       char getWheel()            const { return m_wheel; };
       uint32_t getSector()       const { return m_sector; };
-      PadPattern getPattern()    const { return m_pattern; };
+      const PadPattern& getPattern() const { return m_pattern; };
       uint32_t getHitMask()      const { return m_hitmask; };
       uint32_t getBandid()       const { return m_bandid; };
       uint32_t getSourceid()     const { return NSWL1::PAD::wheelSectorToSourceID(m_wheel, m_sector); };
