@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ namespace DerivationFramework {
         //----------------------------------------------------
         SG::ReadHandle<xAOD::VertexContainer>    pvContainer{m_pvContainerKey,ctx};
         if (!pvContainer.isValid()){
-            ATH_MSG_FATAL("Failed to retrive "<<m_pvContainerKey.fullKey());
+            ATH_MSG_FATAL("Failed to retrieve "<<m_pvContainerKey.fullKey());
             return StatusCode::FAILURE;
         }
         //----------------------------------------------------
