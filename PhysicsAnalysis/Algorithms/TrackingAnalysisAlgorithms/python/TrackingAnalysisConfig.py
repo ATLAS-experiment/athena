@@ -29,9 +29,9 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :
             info="whether to perform extra cluster cleaning for dE/dx measurements (e.g. cluster size/shape).")
         self.addOption ('sfLocalFileName', "", type=str,
             info="Path to scale factor trees, overriding files stored in ASG calibration area.")
-        self.addOption ('clusterSFTreeName', "cluster_SFs", type=str, # FIX! TBD
+        self.addOption ('clusterSFTreeName', "cluster_SFs", type=str,
             info="Name of tree storing the cluster-level dE/dx equalization scale factors.")
-        self.addOption ('trackSFTreeName', "track_SFs", type=str, # FIX! TBD
+        self.addOption ('trackSFTreeName', "track_SFs", type=str,
             info="Name of tree storing the track-level dE/dx equalization scale factors.")
 
         

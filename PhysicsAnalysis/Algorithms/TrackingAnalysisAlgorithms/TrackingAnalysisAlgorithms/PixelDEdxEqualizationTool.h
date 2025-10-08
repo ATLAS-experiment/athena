@@ -76,8 +76,8 @@ namespace CP {
     /// Override version in ASG calibration area with a local file is not empty string.
     Gaudi::Property<std::string> m_sfLocalFileName {this, "SFLocalFileName", ""};
     /// Name of SF tree.
-    Gaudi::Property<std::string> m_clusterSFTreeName { this, "ClusterSFTreeName", "cluster_SFs"}; // FIX! TBD
-    Gaudi::Property<std::string> m_trackSFTreeName { this, "TrackSFTreeName", "track_SFs"}; // FIX! TBD
+    Gaudi::Property<std::string> m_clusterSFTreeName { this, "ClusterSFTreeName", "cluster_SFs"};
+    Gaudi::Property<std::string> m_trackSFTreeName { this, "TrackSFTreeName", "track_SFs"};
 
     /// dE/dx equalization scale factor dataframe read from trees.
     std::shared_ptr<ROOT::RDataFrame> m_df;
