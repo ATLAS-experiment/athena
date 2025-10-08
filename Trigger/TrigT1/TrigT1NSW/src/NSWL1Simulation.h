@@ -16,7 +16,7 @@
 #include "TrigT1NSWSimTools/IStripSegmentTool.h"
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
 #include "TrigT1NSWSimTools/IPadTriggerLogicTool.h"
-#include "TrigT1NSWSimTools/PadTriggerAdapter.h"
+#include "TrigT1NSWSimTools/IPadEmulatorTool.h"
 #include "TrigT1NSWSimTools/ITriggerProcessorTool.h"
 
 // Forward includes
@@ -57,6 +57,7 @@ namespace NSWL1 {
     SG::WriteHandleKey<Muon::NSW_TrigRawDataContainer> m_trigRdoContainer{this, "NSWTrigRDOContainerName", "L1_NSWTrigContainer", "Name of the NSW trigger RDO container"};
 
   private:
+    ToolHandle <IPadEmulatorTool>      m_pad_emulator{this, "PadEmulatorTool", "NSWL1::PadEmulatorTool", "Tool simulating the sTGC Pad Trigger"};
     ToolHandle <IPadTdsTool>           m_pad_tds{this, "PadTdsTool", "NSWL1::PadTdsOfflineTool", "Tool simulating the functionalities of the sTGC PAD TDS"};
     ToolHandle <IPadTriggerLogicTool>  m_pad_trigger{this, "PadTriggerTool", "NSWL1::PadTriggerLogicOfflineTool", "Tool simulating the sTGC pad trigger logic"};
     ToolHandle <IStripTdsTool>         m_strip_tds{this, "StripTdsTool", "NSWL1::StripTdsOfflineTool", "Tool simulating the functionalities of the sTGC Strip TDS"};
