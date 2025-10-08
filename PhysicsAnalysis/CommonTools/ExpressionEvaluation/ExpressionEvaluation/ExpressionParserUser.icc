@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "ExpressionEvaluation/SGxAODProxyLoader.h"
 #include "ExpressionEvaluation/SGNTUPProxyLoader.h"
@@ -64,14 +64,15 @@ StatusCode ExpressionParserUserBase<T_Base,NUM_PARSER>::_initializeParser(const 
    StatusCode sc = pre_xaod_loader(*proxyLoaders);
    if (sc.isFailure()) return sc;
 
-   m_xAODProxyLoader=new ExpressionParsing::SGxAODProxyLoader(this->evtStore(), this->msgLvl(MSG::DEBUG));
-   proxyLoaders->push_back(m_xAODProxyLoader);
+   ExpressionParsing::IProxyLoader* loader = proxyLoaders->push_back
+     (std::make_unique<ExpressionParsing::SGxAODProxyLoader>(this->evtStore(), this->msgLvl(MSG::DEBUG)));
+   m_xAODProxyLoader = static_cast<ExpressionParsing::SGxAODProxyLoader*>(loader);
 
    sc = post_xaod_loader(*proxyLoaders);
    if (sc.isFailure()) return sc;
 
    // load the expressions
-   m_proxyLoaders.reset( proxyLoaders.release() );
+   m_proxyLoaders = std::move(proxyLoaders);
    m_parser = ExpressionParsing::ParserHelper<NUM_PARSER>::createParser( *m_proxyLoaders, selection_string, NUM_PARSER );
    return sc;
 }
@@ -113,7 +114,7 @@ StatusCode ExpressionParserUser<T_Base, NUM_PARSER>::initializeParser(const Expr
    return this->_initializeParser(selection_string,
                                   ExpressionParsing::NoLoaderFunc,
                                   [this](ExpressionParsing::MultipleProxyLoader &proxy_loaders) -> StatusCode {
-                                     proxy_loaders.push_back(new ExpressionParsing::SGNTUPProxyLoader(this->evtStore()));
+                                     proxy_loaders.push_back(std::make_unique<ExpressionParsing::SGNTUPProxyLoader>(this->evtStore()));
                                      return StatusCode::SUCCESS;
                                   });
 }

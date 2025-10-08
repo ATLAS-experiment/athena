@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /* Dear emacs, this is -*-c++-*- */
 #ifndef _ExpressionParserUserWithTrigSupport_H_
@@ -29,7 +29,7 @@ public:
                                         if( !this->m_trigDecisionTool.empty() ) {
                                            StatusCode sc = this->m_trigDecisionTool.retrieve();
                                            if (sc.isFailure()) return sc;
-                                           proxy_loaders.push_back(new ExpressionParsing::TriggerDecisionProxyLoader(this->m_trigDecisionTool));
+                                           proxy_loaders.push_back(std::make_unique<ExpressionParsing::TriggerDecisionProxyLoader>(this->m_trigDecisionTool));
                                         }
                                         else {
                                            this->m_trigDecisionTool.disable();
@@ -37,7 +37,7 @@ public:
                                         return StatusCode::SUCCESS;
                                      },
                                      [this](ExpressionParsing::MultipleProxyLoader &proxy_loaders) -> StatusCode {
-                                        proxy_loaders.push_back(new ExpressionParsing::SGNTUPProxyLoader(this->evtStore()));
+                                       proxy_loaders.push_back(std::make_unique<ExpressionParsing::SGNTUPProxyLoader>(this->evtStore()));
                                         return StatusCode::SUCCESS;
                                      });
    }

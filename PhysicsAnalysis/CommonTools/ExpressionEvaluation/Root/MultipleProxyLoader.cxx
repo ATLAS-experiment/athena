@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -27,9 +27,10 @@ namespace ExpressionParsing {
   }
 
 
-  void MultipleProxyLoader::push_back(IProxyLoader *proxyLoader)
+  IProxyLoader* MultipleProxyLoader::push_back(std::unique_ptr<IProxyLoader> proxyLoader)
   {
-    m_proxyLoaders.push_back(proxyLoader);
+    m_proxyLoaders.push_back(std::move(proxyLoader));
+    return m_proxyLoaders.back().get();
   }
 
   void MultipleProxyLoader::reset()
@@ -54,7 +55,7 @@ namespace ExpressionParsing {
       } catch (const std::runtime_error &) {
         continue;
       }
-      m_varnameToProxyLoader.emplace(varname, proxyLoader);
+      m_varnameToProxyLoader.emplace(varname, proxyLoader.get());
       return result;
     }
     std::stringstream msg;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ namespace ExpressionParsing {
       MultipleProxyLoader();
       virtual ~MultipleProxyLoader();
 
-      void push_back(IProxyLoader *proxyLoader);
+      IProxyLoader* push_back(std::unique_ptr<IProxyLoader> proxyLoader);
 
       virtual void reset();
 
@@ -38,7 +38,7 @@ namespace ExpressionParsing {
       virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
     private:
-      std::vector<IProxyLoader *> m_proxyLoaders;
+      std::vector<std::unique_ptr<IProxyLoader> > m_proxyLoaders;
 
       using proxyCache_t = CxxUtils::ConcurrentStrMap<IProxyLoader*, CxxUtils::SimpleUpdater>;
       mutable proxyCache_t m_varnameToProxyLoader ATLAS_THREAD_SAFE;
