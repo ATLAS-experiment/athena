@@ -1,6 +1,12 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+// Compile this file assuming that FP operations may trap.
+// Prevents spurious FPEs in the clang build.
+#include <CxxUtils/trapping_fp.h>
+CXXUTILS_TRAPPING_FP;
+
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
 
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
