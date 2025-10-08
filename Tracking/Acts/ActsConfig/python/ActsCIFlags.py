@@ -68,6 +68,8 @@ def actsValidateLargeRadiusSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
     flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
                                 TrackingComponent.ActsValidateLargeRadiusSeeds]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Default
     flags.Tracking.writeSeedValNtuple = True
     
 def actsValidateOrthogonalSeedsFlags(flags) -> None:
