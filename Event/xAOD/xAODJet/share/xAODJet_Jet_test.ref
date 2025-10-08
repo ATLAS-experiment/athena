@@ -65,7 +65,7 @@ TEST SUCCEEDED : set then retrieve attribute
 TEST SUCCEEDED : retrieved vector identical
   --> retrieve 4-momentum
 TEST SUCCEEDED : Scale momentum retrieved as attribute identical to scale
-TEST SUCCEEDED : Scale momentum set as attribute identical when retrived as scale
+TEST SUCCEEDED : Scale momentum set as attribute identical when retrieved as scale
  OK filled jets2 19
 
  ---------------- testClusterConstituents  
