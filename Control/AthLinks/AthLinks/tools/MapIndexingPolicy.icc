@@ -18,7 +18,7 @@ namespace SG {
  * @brief Test to see if an index is valid.
  * @param index The index to test.
  */
-template <class MAP>
+template <CxxUtils::detail::PairAssociativeContainer MAP>
 inline
 bool MapIndexingPolicy<MAP>::isValid (const stored_index_type& index) 
 {
@@ -30,10 +30,10 @@ bool MapIndexingPolicy<MAP>::isValid (const stored_index_type& index)
  * @brief Convert from stored to external index types.
  * @param index The stored index.
  */
-template <class CONT>
+template <CxxUtils::detail::PairAssociativeContainer MAP>
 inline
-typename MapIndexingPolicy<CONT>::index_type
-MapIndexingPolicy<CONT>::storedToExternal (stored_index_type index)
+typename MapIndexingPolicy<MAP>::index_type
+MapIndexingPolicy<MAP>::storedToExternal (stored_index_type index)
 {
   return index;
 }
@@ -43,7 +43,7 @@ MapIndexingPolicy<CONT>::storedToExternal (stored_index_type index)
  * @brief Make an index invalid.
  * @param index[out] The index to reset.
  */
-template <class MAP>
+template <CxxUtils::detail::PairAssociativeContainer MAP>
 inline
 void MapIndexingPolicy<MAP>::reset (stored_index_type& index)
 {
@@ -59,7 +59,7 @@ void MapIndexingPolicy<MAP>::reset (stored_index_type& index)
  * Will throw SG::ExcInvalidIndex if the index is invalid and
  * SG::ExcIndexNotFound if the index is not in the container.
  */
-template <class MAP>
+template <CxxUtils::detail::PairAssociativeContainer MAP>
 typename MapIndexingPolicy<MAP>::ElementType
 MapIndexingPolicy<MAP>::lookup(const stored_index_type& index,
                                const MAP& data)
@@ -81,14 +81,14 @@ MapIndexingPolicy<MAP>::lookup(const stored_index_type& index,
  *
  * Throws SG::ExcElementNotFound if the element is not in the container.
  */
-template <class MAP>
+template <CxxUtils::detail::PairAssociativeContainer MAP>
 void
 MapIndexingPolicy<MAP>::reverseLookup(const MAP& data,
                                       ElementConstReference element,
                                       index_type& index) 
 {
   //compiler checks we can compare elements
-  ::boost::function_requires<typename ::boost::EqualityComparableConcept<ElementType> >();
+  static_assert(std::equality_comparable<ElementType>, "ElementType must support == and !=");
 
   // Note that reverseLookup will recalculate index even if m_valid is true.
   // Must ensure that index is write before persistency

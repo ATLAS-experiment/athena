@@ -24,7 +24,10 @@
 #include "AthenaKernel/tools/type_tools.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-#include <boost/concept_check.hpp>
+#include "CxxUtils/concepts.h"
+#include <concepts>
+#include <utility>
+#include <type_traits>
 #include <set>
 #include <algorithm>
 #include <cassert>
@@ -42,12 +45,12 @@ namespace SG {
  * Indexes here are use IndexHolder, with the key of the container
  * as the payload.
  */
+
 template <class SET>
+requires CxxUtils::detail::SimpleAssociativeContainer<SET>
 class SetIndexingPolicy
 {
 private:
-  //compiler checks that SET is an stl simple associative container
-  BOOST_CONCEPT_ASSERT((boost::SimpleAssociativeContainerConcept<SET>));
 
   typedef typename SET::reference reference;
   typedef typename SET::iterator iterator;

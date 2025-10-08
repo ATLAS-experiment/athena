@@ -215,14 +215,12 @@ template <typename T, typename TKEY>
 StatusCode StoreGateSvc::record1(DataObject* obj,
                                  T* pObject, const TKEY& key, 
                                  bool allowMods, bool resetOnly, bool noHist)
+requires KeyConcept<TKEY>
 {
   if (m_storeID == StoreID::EVENT_STORE && currentSlot() != nullptr) {
     rememberBadRecord (ClassID_traits<T>::ID(), key);
   }
 
-#ifndef __clang__
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-#endif
   // make sure the BaseInfo(Base) structure is initialized
   SG::BaseInfo<T>::baseinfo();
 
@@ -258,14 +256,12 @@ template <typename T, typename TKEY>
 StatusCode StoreGateSvc::overwrite1(DataObject* obj, T* pObject,
                                     const TKEY& key, 
                                     bool allowMods, bool noHist)
+requires KeyConcept<TKEY>
 {
   if (m_storeID == StoreID::EVENT_STORE && currentSlot() != nullptr) {
     rememberBadRecord (ClassID_traits<T>::ID(), key);
   }
 
-#ifndef __clang__
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-#endif
   // make sure the BaseInfo(Base) structure is initialized
   SG::BaseInfo<T>::baseinfo();
 
@@ -403,10 +399,8 @@ StatusCode StoreGateSvc::retrieve(const T*& ptr, const std::string& key) const
 //////////////////////////////////////////////////////////////////
 template <typename T, typename TKEY>
 StatusCode StoreGateSvc::retrieve(const T*& ptr, const TKEY& key) const
+requires KeyConcept<TKEY>
 {
-#ifndef __clang__
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-#endif
   return this->retrieve(ptr, static_cast<std::string>(key));
 }
 
@@ -453,10 +447,8 @@ StatusCode StoreGateSvc::retrieve(T*& ptr, const std::string& key) const
 //////////////////////////////////////////////////////////////////
 template <typename T, typename TKEY>
 StatusCode StoreGateSvc::retrieve(T*& ptr, const TKEY& key) const
+requires KeyConcept<TKEY>
 {
-#ifndef __clang__
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-#endif
   return this->retrieve(ptr, static_cast<std::string>(key));
 }
 
@@ -545,13 +537,11 @@ const T* StoreGateSvc::tryConstRetrieve() const
  **/
 template <typename T, class TKEY>
 T* StoreGateSvc::tryRetrieve (const TKEY& key) const
+requires KeyConcept<TKEY>
 {
   if (m_storeID == StoreID::EVENT_STORE && currentSlot() != nullptr) {
     rememberBadRetrieve (ClassID_traits<T>::ID(), key);
   }
-#ifndef __clang__
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-#endif
   SG::DataProxy* dp = proxy (ClassID_traits<T>::ID(),
                              static_cast<std::string> (key),
                              false);
@@ -567,14 +557,12 @@ T* StoreGateSvc::tryRetrieve (const TKEY& key) const
 
 template <typename T, class TKEY>
 const T* StoreGateSvc::tryConstRetrieve (const TKEY& key) const
+requires KeyConcept<TKEY>
 {
   if (m_storeID == StoreID::EVENT_STORE && currentSlot() != nullptr) {
     rememberBadRetrieve (ClassID_traits<T>::ID(), key);
   }
 
-#ifndef __clang__
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-#endif
   SG::DataProxy* dp = proxy (ClassID_traits<T>::ID(),
                              static_cast<std::string> (key),
                              false);
@@ -712,8 +700,8 @@ StatusCode StoreGateSvc::overwrite(std::unique_ptr<T> pUnique, const TKEY& key,
 
 template <typename T, typename AKEY>
 StatusCode StoreGateSvc::setAlias(const T* pObject, const AKEY& aKey)
+requires KeyConcept<AKEY>
 {
-  boost::function_requires< KeyConcept<AKEY> > ();
   _SGXCALL(setAlias, (pObject, aKey), StatusCode::FAILURE);
 }
 //-------------------------------------------------------------------
@@ -721,11 +709,8 @@ template <typename T, typename TKEY, typename AKEY>
 StatusCode 
 StoreGateSvc::setAlias(const T* /*dummy*/,
                        const TKEY& key, const AKEY& aKey)
+requires KeyConcept<TKEY> && KeyConcept<AKEY>
 {
-#ifndef __clang__
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-  BOOST_CONCEPT_ASSERT( (KeyConcept<AKEY>) );
-#endif
   _SGXCALL(setAlias, (ClassID_traits<T>::ID(), key, aKey), StatusCode::FAILURE);
 }
 
@@ -756,15 +741,10 @@ StoreGateSvc::symLink(const T* pObject, const TLINK* /*dummy*/)
   _SGXCALL(symLink, (pObject, ClassID_traits<TLINK>::ID()), StatusCode::FAILURE);
 }
 
-template <typename TKEY> 
+template <KeyConcept TKEY> 
 StatusCode 
 StoreGateSvc::symLink(const CLID id, const TKEY& key, const CLID linkid)
 {
-#ifndef __clang__
-  //FIXME we have no way to check that the type represented by ID (the primary)
-  //FIXME is convertible into the linkid type. VERY BAD. Need introspection???
-  BOOST_CONCEPT_ASSERT( (KeyConcept<TKEY>) );
-#endif
   _SGXCALL(symLink, (id, key, linkid), StatusCode::FAILURE);
 }
 
