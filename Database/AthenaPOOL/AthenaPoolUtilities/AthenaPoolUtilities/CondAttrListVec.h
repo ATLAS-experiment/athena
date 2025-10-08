@@ -125,17 +125,17 @@ CLASS_DEF( CondAttrListVec , 55403898 , 1)
 CONDCONT_DEF( CondAttrListVec, 74272308 );
 
 inline CondAttrListVec::CondAttrListVec(bool runevent) :
-  m_minrange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT), 
+  m_minrange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT),
 		      IOVTime(IOVTime::MAXRUN, IOVTime::MAXEVENT))),
-  m_uniqueiov(true),m_runevent(runevent),m_spec(0) {
+  m_uniqueiov(true),m_runevent(runevent),m_spec(nullptr) {
   if (!runevent) m_minrange=IOVRange(IOVTime(IOVTime::MINTIMESTAMP), 
 				     IOVTime(IOVTime::MAXTIMESTAMP));
 }
 
 inline CondAttrListVec::CondAttrListVec(bool runevent, size_type nelm) :
-  m_minrange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT), 
+  m_minrange(IOVRange(IOVTime(IOVTime::MINRUN, IOVTime::MINEVENT),
 		      IOVTime(IOVTime::MAXRUN, IOVTime::MAXEVENT))),
-	 m_uniqueiov(true),m_runevent(runevent),m_spec(0) {
+	 m_uniqueiov(true),m_runevent(runevent),m_spec(nullptr) {
   if (!runevent) m_minrange=IOVRange(IOVTime(IOVTime::MINTIMESTAMP), 
 				     IOVTime(IOVTime::MAXTIMESTAMP));
   m_data.reserve(nelm);
@@ -143,7 +143,7 @@ inline CondAttrListVec::CondAttrListVec(bool runevent, size_type nelm) :
 
 
 inline CondAttrListVec::~CondAttrListVec() {
-  if (m_spec!=0) m_spec->release();
+  if (m_spec) m_spec->release();
 }
 
 inline CondAttrListVec::CondAttrListVec(const CondAttrListVec& rhs) :
@@ -152,22 +152,21 @@ inline CondAttrListVec::CondAttrListVec(const CondAttrListVec& rhs) :
   m_minrange(rhs.m_minrange),
   m_uniqueiov(rhs.m_uniqueiov),
   m_runevent(rhs.m_runevent),
-  m_spec(0)
+  m_spec(nullptr)
 {
   // members with normal semantics setup in initialisation list
   // make a new cached AttributeListSpecification and make the payload use it
-  if (rhs.m_data.size()>0) {
+  if (!rhs.m_data.empty()) {
     m_spec=new coral::AttributeListSpecification();
     const coral::AttributeList& atr1=rhs.m_data.begin()->second;
-    for (coral::AttributeList::const_iterator itr=atr1.begin();itr!=atr1.end();
-	 ++itr) {
-      const coral::AttributeSpecification& aspec=itr->specification();
+    for (const auto& attr : atr1) {
+      const coral::AttributeSpecification& aspec=attr.specification();
       m_spec->extend(aspec.name(),aspec.typeName());
     }
-    for (const_iterator itr=rhs.m_data.begin();itr!=rhs.m_data.end();++itr) {
-      m_data.push_back(AttrListPair(itr->first,
+    for (const auto& [chan, attrList] : rhs.m_data) {
+      m_data.push_back(AttrListPair(chan,
 				    coral::AttributeList(*m_spec,true)));
-      (m_data.back().second).fastCopyData(itr->second);
+      (m_data.back().second).fastCopyData(attrList);
     }
   }
 }
@@ -249,10 +248,10 @@ inline void CondAttrListVec::add(const IOVRange& range,
   m_minrange=IOVRange(start,stop);
   if (m_uniqueiov && range!=m_minrange) m_uniqueiov=false;
   // store attributeList if needed
-  if (m_spec==0 && data_begin!=data_end) {
+  if (!m_spec && data_begin!=data_end) {
     m_spec=new coral::AttributeListSpecification();
-    for (coral::AttributeList::const_iterator itr=data_begin->begin();itr!=data_begin->end();++itr) {
-      const coral::AttributeSpecification& aspec=itr->specification();
+    for (const auto& attr : *data_begin) {
+      const coral::AttributeSpecification& aspec=attr.specification();
       m_spec->extend(aspec.name(),aspec.typeName());
     }
   }
@@ -280,12 +279,11 @@ inline void CondAttrListVec::addSlice
   m_minrange=IOVRange(start,stop);
   if (m_uniqueiov && range!=m_minrange) m_uniqueiov=false;
   // store attributeList if needed
-  if (m_spec==0 && datastart!=dataend) {
+  if (!m_spec && datastart!=dataend) {
     m_spec=new coral::AttributeListSpecification();
     const coral::AttributeList& atr0=data[datastart];
-    for (coral::AttributeList::const_iterator itr=atr0.begin();
-	 itr!=atr0.end();++itr) {
-      const coral::AttributeSpecification& aspec=itr->specification();
+    for (const auto& attr : atr0) {
+      const coral::AttributeSpecification& aspec=attr.specification();
       m_spec->extend(aspec.name(),aspec.typeName());
     }
   }
