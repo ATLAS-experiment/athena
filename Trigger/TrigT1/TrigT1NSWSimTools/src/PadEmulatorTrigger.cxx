@@ -7,7 +7,7 @@
 namespace NSWL1 {
   PadEmulatorTrigger::PadEmulatorTrigger(const char wheel, const uint32_t sector,
                                          const uint32_t bandid, const uint32_t phiid, const uint32_t relbcid,
-                                         const PadPattern pattern, const uint32_t hitmask):
+                                         const PadPattern &pattern, const uint32_t hitmask):
     m_wheel{wheel},
     m_sector{sector},
     m_pattern{pattern},
