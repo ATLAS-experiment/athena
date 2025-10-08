@@ -3,6 +3,10 @@
 */
 
 #include "MuonIdHelpers/MuonIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
 
 const std::string MuonIdHelper::BAD_NAME = "UNKNOWN";
