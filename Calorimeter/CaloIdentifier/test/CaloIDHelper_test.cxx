@@ -14,6 +14,7 @@
 
 #include "CaloIdentifier/CaloIDHelper.h"
 #include "IdDictParser/IdDictParser.h"
+#include "IdDict/IdDictRegion.h"
 #include <cassert>
 #include <iostream>
 

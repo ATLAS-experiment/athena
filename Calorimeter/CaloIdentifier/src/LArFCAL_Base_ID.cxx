@@ -3,7 +3,10 @@
 */
 
 #include "CaloIdentifier/LArFCAL_Base_ID.h"
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "PathResolver/PathResolver.h"
 
 #include "CxxUtils/StrFormat.h"
