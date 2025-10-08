@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventCon
   
   SG::ReadHandle<xAOD::IParticleContainer> inputCont{m_recoKey, ctx};
   if (!inputCont.isValid()) {
-    ATH_MSG_FATAL("Failed to retrive "<<m_recoKey.fullKey());
+    ATH_MSG_FATAL("Failed to retrieve "<<m_recoKey.fullKey());
     return StatusCode::FAILURE;
   }
   for ( const xAOD::IParticle* input : *inputCont) {
