@@ -7,12 +7,12 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: IdDictCnvTest.cxx,v 1.6 2004-10-12 16:45:36 schaffer Exp $
-//<version>	$Name: not supported by cvs2svn $
-
 #include "IdDictCnvTest.h"
 
 // Id-related includes
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
+#include "Identifier/MultiRange.h"
 #include "Identifier/Range.h" 
 #include "Identifier/IdentifierHash.h"
 #include "IdDictDetDescr/IdDictManager.h"

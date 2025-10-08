@@ -11,7 +11,6 @@
 
 #include "InDetIdentifier/SiliconID.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include "GaudiKernel/MsgStream.h"
 #include <iostream>
 
