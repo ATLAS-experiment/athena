@@ -10,7 +10,7 @@ atlas_add_library( MuonPatternHelpers
                     Root/*.cxx
                     PUBLIC_HEADERS MuonPatternHelpers
                     LINK_LIBRARIES xAODMuonPrepData Acts::Core Identifier MuonReadoutGeometryR4 xAODMeasurementBase  
-                                   MuonPatternEvent MuonStationIndexLib FourMomUtils MuonSpacePoint MuonRecToolInterfacesR4)
+                                   MuonPatternEvent MuonStationIndexLib FourMomUtils MuonSpacePoint MuonRecToolInterfacesR4 CxxUtils)
 
 
 file(GLOB_RECURSE files "test/*.cxx")
