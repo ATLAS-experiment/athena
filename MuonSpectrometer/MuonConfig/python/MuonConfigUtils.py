@@ -5,7 +5,11 @@
 def setupHistSvcCfg(flags, outFile: str, outStream: str):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
-    if len(outFile) == 0: return result
+    if len(outFile) == 0: 
+        raise ValueError("The output file must not be empty")
+    if len(outStream) == 0: 
+        raise ValueError("The outstream must not be empty")
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     histSvc = CompFactory.THistSvc(Output=[f"{outStream} DATAFILE='{outFile}', OPT='RECREATE'"])
     print(f"Regiter new stream {outStream} piped to {outFile}")
