@@ -237,7 +237,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
   ATH_MSG_DEBUG("Decoding TGC RDO into TGC PrepRawData");
 
   // retrieve the collection of RDO
-  ATH_MSG_DEBUG("Retriving TGC RDO container from the store");
+  ATH_MSG_DEBUG("Retrieving TGC RDO container from the store");
   SG::ReadHandle<TgcRdoContainer> rdoContainer{m_rdoContainerKey, ctx};
   ATH_CHECK(rdoContainer.isValid());
   ///////////// here the RDO container is retrieved and filled -whatever input type we start with- => check the size
