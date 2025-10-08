@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ServicesTracker.h"
@@ -8,7 +8,6 @@
 #include "ServicesStave.h"
 #include "ComputeStaveServices.h"
 #include "ConvertStaveServices.h"
-#include <map>
 #include <iostream>  // for DEBUG only
 using namespace std;
 
@@ -106,7 +105,7 @@ void ServicesTracker::finaliseServices()
 	}
 	layerMaterial[*il] = layerMat;
       }
-      result.push_back( layerMat);
+      result.push_back( std::move(layerMat));
     }
 
     (**iv).setMaterials( result);
