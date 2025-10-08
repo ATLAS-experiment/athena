@@ -318,6 +318,9 @@ InDetMaterialManager::addMaterial(GeoMaterial* material) {
 
 bool
 InDetMaterialManager::compareDensity(double d1, double d2) const {
+  if (close_to_zero(d2)){
+    throw (std::runtime_error("InDetMaterialManager:compareDensity: Density is zero"));
+  }
   return(std::abs(d1 / d2 - 1.) < 1e-5);
 }
 
