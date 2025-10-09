@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_RDBMATERIALMANAGER_H
@@ -17,6 +17,7 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelKernel/GeoElement.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 #include <string>
 #include <vector>
@@ -25,7 +26,7 @@
 class GeoMaterial;
 class ISvcLocator;
 
-class RDBMaterialManager final : public StoredMaterialManager {
+class RDBMaterialManager final : public StoredMaterialManager, public AthMessaging {
 
  public:
 

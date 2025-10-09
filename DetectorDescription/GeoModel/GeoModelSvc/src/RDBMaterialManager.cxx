@@ -9,16 +9,11 @@
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/Units.h"
 
-#include "StoreGate/DataHandle.h"
-
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 
-#include "AthenaKernel/getMessageSvc.h"
-#include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 
@@ -132,6 +127,7 @@ int printFullMaterial ( GeoMaterial* &p_material)
 	
 
 RDBMaterialManager::RDBMaterialManager(ISvcLocator* pSvcLocator)
+  : AthMessaging("GeoModelSvc::RDBMaterialManager")
 {
   if(!readMaterialsFromDB(pSvcLocator).isSuccess()) {
     throw std::runtime_error("RDBMaterialManager failed to read Geometry DB");
@@ -140,46 +136,34 @@ RDBMaterialManager::RDBMaterialManager(ISvcLocator* pSvcLocator)
 
 StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
 {
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 		
-
   SmartIF<IGeoModelSvc> iGeoModel{pSvcLocator->service("GeoModelSvc")};
   ATH_CHECK( iGeoModel.isValid() );
 
   SmartIF<IRDBAccessSvc> iAccessSvc{pSvcLocator->service("RDBAccessSvc")};
   ATH_CHECK( iAccessSvc.isValid() );
   
-  auto warn = [&](const std::string & msg){
-    if (log.level()<=MSG::WARNING){
-      log << MSG::WARNING <<msg << endmsg;
-    }
-  };
-  auto debug = [&](const std::string & msg){
-    if (log.level()<=MSG::DEBUG){
-      log << MSG::DEBUG <<msg << endmsg;
-    }
-  };
   const bool loadDefaults = iGeoModel->geoConfig() != GeoModel::GEO_RUN4;
   auto defaulted = [=](const IRDBRecordset_ptr pRecordset) -> bool{
     return (loadDefaults and pRecordset->size() == 0);
   };
   // Do not load defaults for RUN4
-  if (loadDefaults) debug("Will load material defaults if not present");
+  if (loadDefaults) ATH_MSG_DEBUG("Will load material defaults if not present");
 
   // --- Standard materials, elements
   DecodeVersionKey keyAtlas(iGeoModel, "ATLAS");
   m_elements = iAccessSvc->getRecordsetPtr("Elements",keyAtlas.tag(),keyAtlas.node());
   if(defaulted(m_elements)) {
-    warn("Getting Elements with default tag");
+    ATH_MSG_WARNING("Getting Elements with default tag");
     m_elements = iAccessSvc->getRecordsetPtr("Elements","Materials-00","Materials");
   }
   m_stdmatcomponents = iAccessSvc->getRecordsetPtr("StdMatComponents",keyAtlas.tag(),keyAtlas.node());
   if(defaulted(m_stdmatcomponents))	{
-    warn("Getting StdMatComponents with default tag");
+    ATH_MSG_WARNING("Getting StdMatComponents with default tag");
     m_stdmatcomponents = iAccessSvc->getRecordsetPtr("StdMatComponents","Materials-00","Materials");
   }
   m_stdmaterials = iAccessSvc->getRecordsetPtr("StdMaterials",keyAtlas.tag(),keyAtlas.node());
   if(defaulted(m_stdmaterials)) {
-    warn("Getting StdMaterials with default tag");
+    ATH_MSG_WARNING("Getting StdMaterials with default tag");
     m_stdmaterials = iAccessSvc->getRecordsetPtr("StdMaterials","Materials-00","Materials");
   }
   
@@ -187,12 +171,12 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   DecodeVersionKey keyPixel(iGeoModel, "Pixel");
   m_pixmatcomponents = iAccessSvc->getRecordsetPtr("PixMatComponents",keyPixel.tag(),keyPixel.node());
   if(defaulted(m_pixmatcomponents)) {
-    warn("Getting PixMatComponents with default tag");
+    ATH_MSG_WARNING("Getting PixMatComponents with default tag");
     m_pixmatcomponents = iAccessSvc->getRecordsetPtr("PixMatComponents","PixMatComponents-00");
   }
   m_pixmaterials = iAccessSvc->getRecordsetPtr("PixMaterials",keyPixel.tag(),keyPixel.node());
   if(defaulted(m_pixmaterials)) {
-    warn("Getting PixMaterials with default tag");
+    ATH_MSG_WARNING("Getting PixMaterials with default tag");
     m_pixmaterials = iAccessSvc->getRecordsetPtr("PixMaterials","PixMaterials-00");
   }
   
@@ -200,12 +184,12 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   //for test beam materials we just issue debug level messages. Perhaps this load can be fully omitted?
   m_pixtbmatcomponents = iAccessSvc->getRecordsetPtr("PixelTBMatComponents",keyPixel.tag(),keyPixel.node());
   if(defaulted( m_pixtbmatcomponents)) {
-    debug("Getting PixTBMatComponents with default tag" );
+    ATH_MSG_DEBUG("Getting PixTBMatComponents with default tag" );
     m_pixtbmatcomponents = iAccessSvc->getRecordsetPtr("PixMatComponents","PixMatComponents-00");
   }
   m_pixtbmaterials = iAccessSvc->getRecordsetPtr("PixelTBMaterials",keyPixel.tag(),keyPixel.node());
   if(defaulted(m_pixtbmaterials)) {
-    debug("Getting PixTBMaterials with default tag");
+    ATH_MSG_DEBUG("Getting PixTBMaterials with default tag");
     m_pixtbmaterials = iAccessSvc->getRecordsetPtr("PixMaterials","PixMaterials-00");
   }
   
@@ -213,13 +197,13 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   DecodeVersionKey keySCT(iGeoModel, "SCT");
   m_sctmatcomponents = iAccessSvc->getRecordsetPtr("SCTMatComponents",keySCT.tag(),keySCT.node());
   if(defaulted(m_sctmatcomponents))	{
-    warn("Getting SCTMatComponents with default tag");
+    ATH_MSG_WARNING("Getting SCTMatComponents with default tag");
     m_sctmatcomponents = iAccessSvc->getRecordsetPtr("SCTMatComponents","SCTMatComponents-00");
   }
   
   m_sctmaterials = iAccessSvc->getRecordsetPtr("SCTMaterials",keySCT.tag(),keySCT.node());
   if(defaulted(m_sctmaterials)) {
-    warn("Getting SCTMaterials with default tag");
+    ATH_MSG_WARNING("Getting SCTMaterials with default tag");
     m_sctmaterials = iAccessSvc->getRecordsetPtr("SCTMaterials","SCTMaterials-00");
   }
   
@@ -227,12 +211,12 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   DecodeVersionKey keyTRT(iGeoModel, "TRT");
   m_trtmatcomponents = iAccessSvc->getRecordsetPtr("TrtMatComponents",keyTRT.tag(),keyTRT.node());
   if(defaulted(m_trtmatcomponents))	{
-    warn("Getting TrtMatComponents with default tag");
+    ATH_MSG_WARNING("Getting TrtMatComponents with default tag");
     m_trtmatcomponents = iAccessSvc->getRecordsetPtr("TrtMatComponents","TrtMatComponents-00");
   }
   m_trtmaterials = iAccessSvc->getRecordsetPtr("TrtMaterials",keyTRT.tag(),keyTRT.node());
   if(defaulted(m_trtmaterials)) {
-    warn("Getting TrtMaterials with default tag");
+    ATH_MSG_WARNING("Getting TrtMaterials with default tag");
     m_trtmaterials = iAccessSvc->getRecordsetPtr("TrtMaterials","TrtMaterials-00");
   }
   
@@ -240,13 +224,13 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   DecodeVersionKey keyInDet(iGeoModel, "InnerDetector");
   m_indetmatcomponents = iAccessSvc->getRecordsetPtr("InDetMatComponents",keyInDet.tag(),keyInDet.node());
   if(defaulted(m_indetmatcomponents)) {
-    debug("Getting InDetMatComponents with default tag");
+    ATH_MSG_DEBUG("Getting InDetMatComponents with default tag");
     m_indetmatcomponents = iAccessSvc->getRecordsetPtr("InDetMatComponents","InDetMatComponents-00");
   }
   
   m_indetmaterials = iAccessSvc->getRecordsetPtr("InDetMaterials",keyInDet.tag(),keyInDet.node());
   if(defaulted(m_indetmaterials)) {
-    debug("Getting InDetMaterials with default tag");
+    ATH_MSG_DEBUG("Getting InDetMaterials with default tag");
     m_indetmaterials = iAccessSvc->getRecordsetPtr("InDetMaterials","InDetMaterials-00");
   }
   
@@ -254,12 +238,12 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   DecodeVersionKey keyLAr(iGeoModel, "LAr");    
   m_larmatcomponents = iAccessSvc->getRecordsetPtr("LArMatComponents",keyLAr.tag(),keyLAr.node());
   if(defaulted(m_larmatcomponents)) {
-    warn("Getting LArMatComponents with default tag");
+    ATH_MSG_WARNING("Getting LArMatComponents with default tag");
     m_larmatcomponents = iAccessSvc->getRecordsetPtr("LArMatComponents","LArMatComponents-00");
   }
   m_larmaterials = iAccessSvc->getRecordsetPtr("LArMaterials",keyLAr.tag(),keyLAr.node());
   if(defaulted(m_larmaterials)) {
-    warn("Getting LArMaterials with default tag");
+    ATH_MSG_WARNING("Getting LArMaterials with default tag");
     m_larmaterials = iAccessSvc->getRecordsetPtr("LArMaterials","LArMaterials-00");
   }
   
@@ -267,12 +251,12 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   DecodeVersionKey keyTile(iGeoModel, "TileCal");    
   m_tilematcomponents = iAccessSvc->getRecordsetPtr("TileMatComponents",keyTile.tag(),keyTile.node());
   if (defaulted(m_tilematcomponents)) {
-    warn("Getting TileMatComponents with default tag" );
+    ATH_MSG_WARNING("Getting TileMatComponents with default tag" );
     m_tilematcomponents = iAccessSvc->getRecordsetPtr("TileMatComponents","TileMatComponents-00");
   }
   m_tilematerials = iAccessSvc->getRecordsetPtr("TileMaterials",keyTile.tag(),keyTile.node());
   if(defaulted(m_tilematerials)) {
-    warn("Getting TileMaterials with default tag");
+    ATH_MSG_WARNING("Getting TileMaterials with default tag");
     m_tilematerials = iAccessSvc->getRecordsetPtr("TileMaterials","TileMaterials-00");
   }
   
@@ -280,32 +264,32 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
   DecodeVersionKey keyMuon(iGeoModel, "MuonSpectrometer");
   m_muomatcomponents = iAccessSvc->getRecordsetPtr("MUOMatComponents",keyMuon.tag(),keyMuon.node());
   if(defaulted(m_muomatcomponents))	{
-    warn("Getting MUOMatComponents with default tag");
+    ATH_MSG_WARNING("Getting MUOMatComponents with default tag");
     m_muomatcomponents = iAccessSvc->getRecordsetPtr("MUOMatComponents","MUOMatComponents-00");
   }
   m_muomaterials = iAccessSvc->getRecordsetPtr("MUOMaterials",keyMuon.tag(),keyMuon.node());
   if(defaulted(m_muomaterials)) {
-    warn("Getting MUOMaterials with default tag" );
+    ATH_MSG_WARNING("Getting MUOMaterials with default tag" );
     m_muomaterials = iAccessSvc->getRecordsetPtr("MUOMaterials","MUOMaterials-00");  
   }
   m_shieldmatcomponents = iAccessSvc->getRecordsetPtr("ShieldMatComponents",keyMuon.tag(),keyMuon.node());
   if(defaulted(m_shieldmatcomponents)) {
-    warn("Getting ShieldMatComponents with default tag");
+    ATH_MSG_WARNING("Getting ShieldMatComponents with default tag");
     m_shieldmatcomponents = iAccessSvc->getRecordsetPtr("ShieldMatComponents","ShieldMatComponents-00");
   }
   m_shieldmaterials = iAccessSvc->getRecordsetPtr("ShieldMaterials",keyMuon.tag(),keyMuon.node());
   if(defaulted(m_shieldmaterials)) {
-    warn("Getting ShieldMaterials with default tag");
+    ATH_MSG_WARNING("Getting ShieldMaterials with default tag");
     m_shieldmaterials = iAccessSvc->getRecordsetPtr("ShieldMaterials","ShieldMaterials-00");
   }
   m_toromatcomponents = iAccessSvc->getRecordsetPtr("ToroMatComponents",keyMuon.tag(),keyMuon.node());
   if(defaulted(m_toromatcomponents)) {
-    warn("Getting ToroMatComponents with default tag");
+    ATH_MSG_WARNING("Getting ToroMatComponents with default tag");
     m_toromatcomponents =	iAccessSvc->getRecordsetPtr("ToroMatComponents","ToroMatComponents-00");
   }
   m_toromaterials = iAccessSvc->getRecordsetPtr("ToroMaterials",keyMuon.tag(),keyMuon.node());
   if(defaulted(m_toromaterials)) {
-    warn("Getting ToroMaterials with default tag"); 
+    ATH_MSG_WARNING("Getting ToroMaterials with default tag");
     m_toromaterials = iAccessSvc->getRecordsetPtr("ToroMaterials","ToroMaterials-00");
   }
   return StatusCode::SUCCESS;
@@ -316,81 +300,60 @@ RDBMaterialManager::~RDBMaterialManager() = default;
 
 GeoMaterial* RDBMaterialManager::searchMaterialMap(const std::string & name) const
 {
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
-	
-  MaterialMap::const_iterator m   = m_materialMap.find(std::string(name));
+  MaterialMapIterator m = m_materialMap.find(name);
 
   if (m!=m_materialMap.end()) {
-    if(log.level()==MSG::VERBOSE)
-      log << MSG::VERBOSE << " ***** in searchMaterialMap(): search sucess "  << endmsg;	
+    ATH_MSG_VERBOSE(" ***** in searchMaterialMap(): search sucess for " << name);
     return (*m).second;
   }
-  
-  if(log.level()==MSG::VERBOSE)    
-    log << MSG::VERBOSE << " ***** in searchMaterialMap(): search fail "  << endmsg;	
-  
+
+  ATH_MSG_VERBOSE(" ***** in searchMaterialMap(): search failed for "  << name);
   return nullptr;
-  
 }
 
 
 GeoElement *RDBMaterialManager::searchElementVector(const std::string & name)  const
 { 
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
-	
   NameEquals matchByName(name);
   GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(),std::move(matchByName));
-  	
-  if (e!=m_elementVector.end()) {	
-    if(log.level()==MSG::VERBOSE)    		
-      log << MSG::VERBOSE << " ***** in searchElementVector() search succes "  << endmsg;	
+
+  if (e!=m_elementVector.end()) {
+    ATH_MSG_VERBOSE(" ***** in searchElementVector() search succes for "  << name);
     return *e;
   }
-  else {
-    if(log.level()==MSG::VERBOSE)
-      log << MSG::VERBOSE << " ***** in searchElementVector() search fail "  << endmsg;	
-    return nullptr;
-  }
+
+  ATH_MSG_VERBOSE(" ***** in searchElementVector() search failed for "  << name);
+  return nullptr;
 }
 
 
 GeoElement *RDBMaterialManager::searchElementVector(const unsigned int atomicNumber) const
 { 
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
-	
   NumberEquals matchByNumber(atomicNumber);
   GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(), matchByNumber);
   	
   if (e!=m_elementVector.end()) {
-    if(log.level()==MSG::VERBOSE)  		
-      log << MSG::VERBOSE << " ***** in searchElementVector(atomicNumber) search succes "  << endmsg;
+    ATH_MSG_VERBOSE(" ***** in searchElementVector(atomicNumber) search succes for atomic number "  << atomicNumber);
     return *e;
   }
  
-  if(log.level()==MSG::VERBOSE)
-    log << MSG::VERBOSE << " ***** in searchElementVector(atomicNumber) search succes "  << endmsg;
+  ATH_MSG_VERBOSE(" ***** in searchElementVector(atomicNumber) search succes for atomic number "  << atomicNumber);
   return nullptr;
-  
 }
 
 const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
-
   unsigned int  ind{0}, com_ind{0};
-	
   std::string material_name;
   std::string tmp_name;
   long 	    material_id{0};
   double    material_density{0.};
-	
-	
   std::string component_name{};
   double      component_fraction{0.};
   int 	      component_id{0};
-		
+
   std::string detector;
   std::string tmp_det;
   std::string data_id;
-	
 	
   std::string matcomponents_table;
 
@@ -402,13 +365,11 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
   GeoMaterial* pmaterial;
 
   const GeoElement*  p_com_element;
-	
+
   IRDBRecordset_ptr tmp_materials;
   IRDBRecordset_ptr tmp_matcomponents;
-	
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
-  if(log.level()<=MSG::DEBUG) 
-    log << MSG::DEBUG  << " ***** getMaterial( ): "  << name << endmsg;	
+
+  ATH_MSG_DEBUG(" ***** getMaterial( ): "  << name);
 
   pmaterial = nullptr;
   pmaterial = searchMaterialMap( name);
@@ -492,7 +453,7 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
       tmp_matcomponents = m_toromatcomponents;
       data_id = "TOROMATERIALS_DATA_ID";
     }
-  else {return 0 ;}
+  else {return 0;}
 
   for( ind = 0; ind < tmp_materials->size(); ind++)
     {
@@ -503,9 +464,8 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
 	material_name  =detector+"::"+rec->getString("NAME");
 	material_id = rec->getLong(data_id);
 	material_density = rec->getDouble("DENSITY");
-        		
-	if(log.level()<=MSG::DEBUG)
-	  log << MSG::DEBUG  << " ***** Material: name id density: "  << material_name <<" " << material_id <<" "<< material_density << endmsg;	
+
+	ATH_MSG_DEBUG(" ***** Material: name id density: "  << material_name <<" " << material_id <<" "<< material_density);
 	break;
       }
     }
@@ -563,7 +523,7 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
     }    
 
   if(calculateFraction && hasSubMaterial && elementComponents.size()>0)
-    std::cerr << material_name << " description should be changed. Please indicate the exact fraction for elements\n";
+    ATH_MSG_WARNING(material_name << " description should be changed. Please indicate the exact fraction for elements");
 
   if(calculateFraction && !elementComponents.empty()) {
     double inv_totalFraction = totalFraction == 0 ? 1 : 1. / totalFraction;
@@ -579,26 +539,23 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
 
 
 const GeoElement *RDBMaterialManager::getElement(const std::string & name) {
-	
   unsigned int ind;
 
   std::string element_name;
   std::string element_symbol;
   std::string tmp_name;
-	
+
   double      element_a;
   double      element_z;
-	
+
   GeoElement *pelement;
 
   pelement = nullptr;
   pelement = searchElementVector( name);
-  if (pelement != nullptr) 
+  if (pelement != nullptr)
       return pelement;
 
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
-  if(log.level()==MSG::VERBOSE)
-    log << MSG::VERBOSE << " ***** getElement(): " << name  <<endmsg;
+  ATH_MSG_VERBOSE(" ***** getElement(): " << name);
 
   for(ind = 0; ind < m_elements->size(); ind++)
     {
@@ -624,9 +581,7 @@ const GeoElement *RDBMaterialManager::getElement(const std::string & name) {
   if (ind == m_elements->size()) 		return nullptr;
 	
   return pelement;
-
 }
-
 
 const GeoElement *RDBMaterialManager::getElement(unsigned int atomicNumber) {
 
@@ -640,9 +595,7 @@ const GeoElement *RDBMaterialManager::getElement(unsigned int atomicNumber) {
 	
   GeoElement* pelement(0);
 
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
-  if(log.level()==MSG::VERBOSE)
-    log << MSG::VERBOSE << " ***** const getElement(atomicNumber) const : " << atomicNumber <<endmsg;	
+  ATH_MSG_VERBOSE(" ***** const getElement(atomicNumber) const : " << atomicNumber);
 
   for(ind = 0; ind < m_elements->size(); ind++)
     {
@@ -669,15 +622,14 @@ const GeoElement *RDBMaterialManager::getElement(unsigned int atomicNumber) {
 }
 
 void RDBMaterialManager::addMaterial(const std::string & /*space*/, GeoMaterial *material) {
+  ATH_MSG_VERBOSE(" ***** RDBMaterialManager::addMaterial() ");
 	
-  MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
-  if(log.level()==MSG::VERBOSE)
-    log << MSG::VERBOSE << " ***** RDBMaterialManager::addMaterial() "<<endmsg;
-	
-  std::string key = std::string(material->getName());
+  std::string key = material->getName();
   // Check whether we already have materials with the same space::name defined
-  if(m_materialMap.find(key)!=m_materialMap.end())
-    log << MSG::WARNING << " Attempt to redefine material " << key << "!. The existing instance is kept. Please choose another name for new material" << endmsg;
+  if(m_materialMap.find(key)!=m_materialMap.end()) {
+    ATH_MSG_WARNING(" Attempt to redefine material " << key
+		    << "!. The existing instance is kept. Please choose another name for new material");
+  }
   else {
     material->lock();             
     m_materialMap[key]=material;
@@ -709,8 +661,8 @@ std::ostream &  RDBMaterialManager::printAll(std::ostream & o) const
   for (const auto& p : m_materialMap){
     o << "Material: " << p.first <<  " Density " << p.second->getDensity() * (Gaudi::Units::cm3 / GeoModelKernelUnits::gram)  << "\n";
     for (size_t i = 0; i< p.second->getNumElements();i++) {
-	    o <<" ***** ***** "<< int (p.second->getFraction(i)*100) << "% \t"  << p.second->getElement(i)->getName() << std::endl;
-	  }
+      o <<" ***** ***** "<< int (p.second->getFraction(i)*100) << "% \t"  << p.second->getElement(i)->getName() << std::endl;
+    }
   }
   	  	
   return o;
