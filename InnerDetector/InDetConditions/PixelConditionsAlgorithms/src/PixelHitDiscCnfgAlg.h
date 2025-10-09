@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelHitDiscCnfgAlg.h
@@ -18,6 +18,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelHitDiscCnfgData.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 
 class PixelHitDiscCnfgAlg : public AthReentrantAlgorithm {

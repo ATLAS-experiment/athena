@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelConditionsAlgorithms )
@@ -14,7 +14,7 @@ find_package( Boost COMPONENTS unit_test_framework )
 atlas_add_component( PixelConditionsAlgorithms
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} nlohmann_json::nlohmann_json AthenaBaseComps AthenaKernel AthenaPoolUtilities DetDescrConditions GaudiKernel GeoModelUtilities GeoPrimitives Identifier InDetCondTools InDetIdentifier InDetReadoutGeometry PathResolver PixelConditionsData PixelReadoutGeometryLib StoreGateLib TrkGeometry TrkSurfaces MuonReadoutGeometry TRT_ReadoutGeometry)
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} nlohmann_json::nlohmann_json AthenaBaseComps AthenaKernel AthenaPoolUtilities DetDescrConditions GaudiKernel GeoModelUtilities GeoPrimitives Identifier InDetCondTools InDetIdentifier InDetReadoutGeometry PathResolver PixelConditionsData PixelReadoutGeometryLib StoreGateLib TrkGeometry TrkSurfaces MuonReadoutGeometry TRT_ReadoutGeometry PersistentDataModel)
 
 atlas_add_test( StringUtilities_test
   SOURCES test/StringUtilities_test.cxx src/StringUtilities.cxx
