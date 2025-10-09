@@ -45,7 +45,10 @@ namespace GlobalSim {
 
     /** @brief Overriding toString function from base class */
     virtual std::string toString() const override;
-    
+
+    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
+				 const EventContext&) const override;
+
   private:
 
     /** @brief Key to the GlobalLArCellContainer */

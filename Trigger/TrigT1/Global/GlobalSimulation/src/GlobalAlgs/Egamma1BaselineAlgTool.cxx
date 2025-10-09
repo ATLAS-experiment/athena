@@ -186,7 +186,13 @@ namespace GlobalSim {
 
     return result;
   }
-  
+
+   StatusCode
+   Egamma1BaselineAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+				     const EventContext& ctx) const {
+     CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
+    return StatusCode::SUCCESS;
+  }
   std::string Egamma1BaselineAlgTool::toString() const {
 
     std::stringstream ss;

@@ -38,7 +38,10 @@ namespace GlobalSim {
     virtual StatusCode run(const EventContext& ctx) const override;
     
     virtual std::string toString() const override;
-    
+
+    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
+				 const EventContext&) const override;
+
   private:
     
 

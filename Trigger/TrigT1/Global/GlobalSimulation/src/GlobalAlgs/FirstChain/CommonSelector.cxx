@@ -31,7 +31,7 @@ namespace GlobalSim {
     }
 
     if(eta_high == "inf") {
-      m_phi_high = std::bitset<ICommonTOB::s_phi_width>(phi_high).to_ulong();
+      m_phi_high = ULONG_MAX;
     } else {			    
       m_phi_high = std::bitset<ICommonTOB::s_phi_width>(phi_high).to_ulong();
     }
