@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TGC_DIGITIZATIONR4_TGCFASTDIGITOOL_H
 #define TGC_DIGITIZATIONR4_TGCFASTDIGITOOL_H
@@ -12,7 +12,7 @@
 namespace MuonR4{
     class TgcFastDigiTool final: public MuonDigitizationTool {
         public:
-            TgcFastDigiTool(const std::string& type, const std::string& name, const IInterface* pIID);
+            using MuonDigitizationTool::MuonDigitizationTool;
 
             StatusCode initialize() override final;
             StatusCode finalize() override final;
@@ -20,8 +20,6 @@ namespace MuonR4{
             StatusCode digitize(const EventContext& ctx,
                                 const TimedHits& hitsToDigit,
                                 xAOD::MuonSimHitContainer* sdoContainer) const override final; 
-        
- 
         private:
             /** @brief Digitize the wire hit by smearing the truth hit position according to the
              *         wire group pitch and then assigning the Identifier to it
