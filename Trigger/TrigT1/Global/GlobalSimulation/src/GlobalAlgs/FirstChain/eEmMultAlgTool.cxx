@@ -67,6 +67,10 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
 
   }
-  
 
+  StatusCode eEmMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+				       const EventContext& ctx) const {
+    CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
+    return StatusCode::SUCCESS;
+  }
 }

@@ -41,7 +41,9 @@ namespace GlobalSim {
   
     /** @brief Main functional block running for each event */
     virtual StatusCode run(const EventContext& ctx) const override;
-  
+
+    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
+				 const EventContext&) const override;
   private:
   
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};

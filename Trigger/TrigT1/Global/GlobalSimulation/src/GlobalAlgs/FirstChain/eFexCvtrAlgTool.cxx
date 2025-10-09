@@ -42,6 +42,13 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
+  
+  StatusCode eFexCvtrAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+					const EventContext& ctx) const {
+    CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
+    return StatusCode::SUCCESS;
+  }
+
   std::string eFexCvtrAlgTool::toString() const {
     return "eFexRoI to eEmTOB converter";
   }
