@@ -142,6 +142,13 @@ def getNNs(flags):
         ],
         'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': [
             {'folds' : [nn_path]} for nn_path in lrj_paths
+        ],
+        'DFAntiKt4HIJets': [
+            {
+                'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True
+            }
         ]
     }
 

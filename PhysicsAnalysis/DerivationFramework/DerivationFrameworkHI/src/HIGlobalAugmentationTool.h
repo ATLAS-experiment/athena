@@ -39,6 +39,7 @@ namespace DerivationFramework {
  
   private:
     int m_nHarmonic;
+    bool m_doTopoClusDec;
     std::string m_TP_key;
     ToolHandleArray< InDet::IInDetTrackSelectionTool > m_trkSelTools; //!< track selection tool which can be optionally used for N_trk and sum pt cuts
     std::vector<std::string>  m_cutLevels;
