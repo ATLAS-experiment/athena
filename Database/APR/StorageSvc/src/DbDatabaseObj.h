@@ -136,8 +136,6 @@ namespace pool    {
     DbStatus close();
     /// End database access, but still leave database accessible
     DbStatus retire();
-    /// Check for pending updates
-    bool updatesPending() const;
     /// Execute Database Transaction action
     DbStatus transAct(Transaction::Action action);
 

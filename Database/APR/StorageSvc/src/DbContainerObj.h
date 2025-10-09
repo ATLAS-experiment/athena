@@ -85,8 +85,6 @@ namespace pool  {
     DbDatabase& database()                  {  return m_dbH;          }
     /// Access the token of the container object
     const Token* token() const              {  return m_tokH;         }
-    /// Query the pending transaction stack
-    bool updatesPending() const;
     /// Flag if container was opened
     bool isOpen() const                     {  return m_isOpen;       }
     /// Check if database is in read-only mode
@@ -113,8 +111,6 @@ namespace pool  {
 
     /// Remove the transient representation of the object from memory
     DbStatus remove(ObjHandle& objH);
-    /// Destroy an existing persistent object identified by its handle
-    DbStatus destroy(const Token::OID_t& linkH);
     /// Add an object to the container identified by its handle
     DbStatus save(DbObjectHandle<DbObject>& objH,
                   const DbTypeInfo* typ);
@@ -138,22 +134,6 @@ namespace pool  {
       * @return DbStatus code indicating success or failure.
       */
     DbStatus save(DbContainer& cntH, const void* object, ShapeH shape, Token::OID_t& linkH);
-
-    /// Update an object to the container identified by its handle.
-    /** @param  cntH      [IN]   Handle to container object.
-      * @param  linkH     [IN]   Internal OID to identify object.
-      *
-      * @return DbStatus code indicating success or failure.
-      */
-    DbStatus update(DbContainer& cntH, const void* object, ShapeH shape, const Token::OID_t& linkH);
-
-    /// Update existing object in the container
-    /** @param cntH      [IN]     Valid handle to container 
-      * @param objH      [IN]     Object handle
-      *
-      * @return Status code indicating success or failure.
-      */
-    DbStatus update(DbContainer& cntH, const void* object, ShapeH shape, const DbObjectHandle<DbObject>& objH);
 
     /// Select object in the container identified by its handle
     DbStatus load( void** ptr, ShapeH shape, 

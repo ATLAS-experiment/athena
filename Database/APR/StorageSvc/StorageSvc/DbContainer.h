@@ -61,13 +61,8 @@ namespace pool  {
     /// Internal add of an object entry identified by its handle
     DbStatus _save( DbObjectHandle<DbObject>& objH,
                     const DbTypeInfo* typ);
-    /// Add object to the container
-    DbStatus _update( const DbObjectHandle<DbObject>& handle,
-                      const DbTypeInfo* typ);
     /// Remove the transient representation of the object from memory
     DbStatus _remove( DbObjectHandle<DbObject>& objH);
-    /// Destroy the persistent representation of the object
-    DbStatus _destroy(DbObjectHandle<DbObject>& objH);
 
   public:
     /// Constructor with initializing arguments
@@ -166,10 +161,6 @@ namespace pool  {
     DbStatus allocate(const void* object, ShapeH shape, Token::OID_t& oid);
     /// Save new object in the container and return its handle
     DbStatus save(const void* object, ShapeH shape, Token::OID_t& linkH);
-    /// Update an object to the container identified by its handle
-    DbStatus update(const void* object, ShapeH shape, const Token::OID_t& linkH);
-    /// Destroy an existing persistent object identified by its handle
-    DbStatus destroy(const Token::OID_t& linkH);
     /// Select object in the container identified by its handle
     DbStatus load(void** ptr, ShapeH shape, const Token::OID_t& lH);
     //@}
@@ -185,17 +176,10 @@ namespace pool  {
     /// Remove the transient representation of the object from memory
     template <class T> DbStatus remove( const DbObjectHandle<T>& objH)
     { DbObjectHandle<DbObject> oH(objH.ptr()); return _remove(oH);           }
-    /// Destroy the persistent representation of the object
-    template <class T> DbStatus destroy(const DbObjectHandle<T>& objH) 
-    { DbObjectHandle<DbObject> oH(objH.ptr()); return _destroy(oH);          }
     /// Add an object to the container identified by its handle
     template <class T> DbStatus save( DbObjectHandle<T>& objH,
                                       const DbTypeInfo* typ)    
     { DbObjectHandle<DbObject> oH(objH.ptr()); return _save(oH, typ);        }
-    /// Update an object to the container identified by its handle
-    template <class T> DbStatus update( const DbObjectHandle<T>& objH,
-                                        const DbTypeInfo* typ) 
-    { DbObjectHandle<DbObject> oH(objH.ptr()); return _update(oH, typ);      }
     /// Load object in the container identified by its handle
     template <class T> DbStatus load( DbObjectHandle<T>& objH,
                                       const Token::OID_t& linkH,

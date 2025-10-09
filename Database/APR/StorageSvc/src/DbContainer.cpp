@@ -186,11 +186,6 @@ DbStatus DbContainer::free(void* ptr) {
   return isValid() ? m_ptr->free(ptr, *this) : Error;
 }
 
-/// Destroy the persistent representation of the object
-DbStatus DbContainer::destroy(const Token::OID_t& linkH)    {
-  return isValid() ? m_ptr->destroy(linkH) : Error;
-}
-
 /// Load object in the container identified by its handle
 DbStatus DbContainer::load( void** ptr,
                             ShapeH shape,
@@ -209,11 +204,6 @@ DbStatus DbContainer::save(const void* object, ShapeH shape, Token::OID_t& linkH
   return isValid() && object ? m_ptr->save(*this, object, shape, linkH) : Error;
 }
 
-/// Update object in the container identified by its pointer
-DbStatus DbContainer::update(const void* object, ShapeH shape, const Token::OID_t& linkH) {
-  return isValid() && object ? m_ptr->update(*this, object, shape, linkH) : Error;
-}
-
 /// Save object in the container identified by its handle
 DbStatus DbContainer::_save(DbObjectHandle<DbObject>& objH, const DbTypeInfo* typ) {
   if ( isValid() && objH.isValid() )    {
@@ -226,29 +216,9 @@ DbStatus DbContainer::_save(DbObjectHandle<DbObject>& objH, const DbTypeInfo* ty
   return Error;
 }
 
-/// Update an object to the container identified by its handle
-DbStatus 
-DbContainer::_update(const DbObjectHandle<DbObject>& objH, const DbTypeInfo* typ) {
-  if ( isValid() && objH.isValid() && typ )    {
-    DbStatus sc = m_ptr->update(*this, 0, typ, objH);
-    return sc;
-  }
-  return Error;
-}
-
 /// Remove the transient representation of the object from memory
 DbStatus DbContainer::_remove(DbObjectHandle<DbObject>& objH)   {
   return isValid() && objH.isValid() ? m_ptr->remove(objH) : Error;
-}
-
-/// Destroy the persistent representation of the object
-DbStatus DbContainer::_destroy(DbObjectHandle<DbObject>& objH)    {
-  if ( isValid() && objH.isValid() ) {
-    if ( m_ptr->destroy(objH.oid()).isSuccess() ) {
-      return m_ptr->remove(objH);
-    }
-  }
-  return Error;
 }
 
 /// Load object in the container identified by its link handle
