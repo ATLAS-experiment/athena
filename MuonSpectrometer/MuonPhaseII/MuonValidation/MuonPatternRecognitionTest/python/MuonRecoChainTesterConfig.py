@@ -14,7 +14,8 @@ if __name__=="__main__":
                         help="runs VTune profiler service for the muon hough alg", action='store_true', default = False)
     parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
                         default=False, action='store_true')
-  
+    parser.add_argument("--houghR4", help="Schedules the R4 pattern -> legacy segment -> legacy track chain",
+                        action="store_true", default = False)
 
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -41,23 +42,27 @@ if __name__=="__main__":
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))    
     cfg.merge(MuonSegmentFittingAlgCfg(flags))
+    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
+    cfg.merge(MSTrackFinderAlgCfg(flags))
+   
 
     from MuonPatternRecognitionTest.PatternTestConfig import MuonR4PatternRecoChainCfg, MuonR4SegmentRecoChainCfg
-    cfg.merge(MuonR4PatternRecoChainCfg(flags))
+    if args.houghR4:
+        cfg.merge(MuonR4PatternRecoChainCfg(flags))
 
     ### What happens if you parse the R4 patterns to the legacy chain?
     cfg.merge(MuonR4SegmentRecoChainCfg(flags))
 
     from MuonPatternRecognitionTest.PatternTestConfig import TrackTruthMatchCfg
-    cfg.merge(TrackTruthMatchCfg(flags))
+    cfg.merge(TrackTruthMatchCfg(flags, setupHoughR4 = args.houghR4))
 
     from MuonPatternRecognitionTest.PatternTestConfig import MuonRecoChainTesterCfg
-    cfg.merge(MuonRecoChainTesterCfg(flags))
+    cfg.merge(MuonRecoChainTesterCfg(flags,
+                                    SegmentFromR4HoughKey = "MuonSegmentsFromHoughR4" if args.houghR4 else "" ))
     if args.runVtune: 
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
     
-    ## cfg.getService("MessageSvc").setVerbose = ["TrackBuildingFromR4Segments", "TrackBuildingFromHoughR4", "MuonR4SegmentCnvAlg" ]
     if args.monitorPlots:
         from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 

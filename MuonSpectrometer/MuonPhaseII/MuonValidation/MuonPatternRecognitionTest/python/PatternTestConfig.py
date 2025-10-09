@@ -171,13 +171,15 @@ def MuonR4SegmentRecoChainCfg(flags):
 
     return result 
 
-def TrackTruthMatchCfg(flags):
+def TrackTruthMatchCfg(flags, setupHoughR4 = True):
     result = ComponentAccumulator()
     if not flags.Input.isMC:
         return result
     from MuonTruthAlgsR4.MuonTruthAlgsConfig import TrackToTruthPartAssocCfg
     
-    track_colstp = ["MuonSpectrometerTrackParticlesR4", "MuonSpectrometerTrackParticlesFromHoughR4", "MuonSpectrometerTrackParticles"]
+    track_colstp = ["MuonSpectrometerTrackParticlesR4",  "MuonSpectrometerTrackParticles"]
+    if setupHoughR4:
+         track_colstp+=["MuonSpectrometerTrackParticlesFromHoughR4"]
 
     for trk in track_colstp:
         result.merge(TrackToTruthPartAssocCfg(flags, name=f"TrackToTruth{trk}",  TrackCollection=trk))
