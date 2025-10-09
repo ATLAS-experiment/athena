@@ -56,13 +56,19 @@ namespace GlobalSim {
       "eEmTOBs",
       "Key for GlobalSim eEmTOB container"};
 
-    
-    SG::WriteHandleKey<bool> m_resultKey {
+    SG::ReadHandleKey<ulong>
+    m_multiplicity_in {
       this,
-      "eEmMultResult",
-      "eEmMultResult",
-      "Key for selection result"}; 
+      "mult",
+      "mult",
+      "Key to read in intermediate result"};
     
+    SG::WriteHandleKey<ulong>
+    m_multiplicity_out{
+      this,
+      "mult",
+      "mult",
+      "Key to write out  intermediate result"};
     
     Gaudi::Property<std::string> m_et_low_str {
       this,
@@ -135,6 +141,19 @@ namespace GlobalSim {
       "wstot_high",
       "inf",
       "wstot high for window selector"};
+
+    Gaudi::Property<int> m_TIP_position {
+      this,
+      "TIPposition",
+      0,
+      "start position to write into the TIP"};
+
+    
+    Gaudi::Property<int> m_n_multbits {
+      this,
+      "n_multbits",
+      3,
+      "number of bits to write into the TIP"};
 
   };
 }
