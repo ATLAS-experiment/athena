@@ -82,3 +82,10 @@ atlas_add_test(IdDictGroup_test
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
 )
+
+atlas_add_test(IdDictFieldImplementation_test
+  SOURCES test/IdDictFieldImplementation_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
+  POST_EXEC_SCRIPT nopost.sh
+)
