@@ -732,8 +732,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
        for (unsigned int iR =0;iR<stereoAnnulus->size();iR++){
             std::map<std::string,std::string> stereoAnnulusMap;
             for(const std::string& paramName:stereoAnnulusParamNames){
-                std::string paramValue = (*stereoAnnulus)[iR]->getString(paramName);
-                stereoAnnulusMap[paramName] = paramValue;
+                stereoAnnulusMap[paramName] = (*stereoAnnulus)[iR]->getString(paramName);
             }
         std::string stereoAnnulusName = (*stereoAnnulus)[iR]->getString("SensorType");
         makeStereoAnnulus(stereoAnnulusName,stereoAnnulusMap);
