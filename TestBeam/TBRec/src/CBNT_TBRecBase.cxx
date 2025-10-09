@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNT_TBRecBase.h"
@@ -77,7 +77,7 @@ StatusCode CBNT_TBRecBase::pre_execute() {
     std::string basepath(m_ntpath.begin(),m_ntpath.begin()+i);
     //std::cout << "Basepath" << basepath << std::endl;
  
-    // retrive pointer to THistSvc
+    // retrieve pointer to THistSvc
     ServiceHandle<ITHistSvc> tHistSvc("THistSvc", name());
     ATH_CHECK( tHistSvc.retrieve() );
 
