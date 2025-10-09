@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * Abstract base class for LWTNN Neural networks.
  * Inherits from a generic abstract network class,
@@ -119,8 +119,8 @@ private:
   /**
    * @brief Get json string from TTree.
    *
-   * Given a TTree object, retrive the json string from the
-   * standard branch. This is used to retrive a network previously
+   * Given a TTree object, retrieve the json string from the
+   * standard branch. This is used to retrieve a network previously
    * saved using writeNetToTTree.
    *
    * @param tree   TTree with the json saved inside.
@@ -130,8 +130,8 @@ private:
   /**
    * @brief Get json string from TTree.
    *
-   * Given a TTree object, retrive the json string from the
-   * standard branch. This is used to retrive a network previously
+   * Given a TTree object, retrieve the json string from the
+   * standard branch. This is used to retrieve a network previously
    * saved using writeNetToTTree.
    *
    * @param tree   TTree with the json saved inside.
