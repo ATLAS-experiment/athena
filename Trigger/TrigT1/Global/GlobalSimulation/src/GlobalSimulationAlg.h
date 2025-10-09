@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_GLOBALSIMULATIONALG_H
@@ -20,6 +20,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "IGlobalSimAlgTool.h"
+#include "IO/TipWord_clid.h"
 
 namespace GlobalSim {
   
@@ -32,6 +33,13 @@ namespace GlobalSim {
     virtual StatusCode execute (const EventContext& ctx) const override;
 
   private:
+
+    SG::WriteHandleKey<std::bitset<1024>> m_tipWordKey {
+      this,
+	"tipWord",
+	"GlobalSimTIP",
+	"Key to ewrite out TIP bitset"}; 
+    
 
     Gaudi::Property<bool>
     m_useTestInputEvent {this, "useTestInputEvent", {false},
