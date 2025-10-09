@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
@@ -131,7 +131,7 @@ class ttZ(PowhegV2):
 
     def get_nlox_params_file(self):
         """
-        Retrives nlox parameters file, copy it in local directory, and edit some of the parameters
+        Retrieve nlox parameters file, copy it into the local directory, and edit some of the parameters
         """
         import os
         import shutil
