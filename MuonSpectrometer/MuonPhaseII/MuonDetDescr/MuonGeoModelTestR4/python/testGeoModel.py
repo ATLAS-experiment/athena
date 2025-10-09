@@ -2,6 +2,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
+
+class MuonPhaseIITestDefaults:
+    PG_EVGEN = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"]
+    PG_HITS_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"]
+    PG_HITS_R4 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"]
+    DATA_BS = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data" ]
+
+
 def geoModelFileDefault(useR4Layout = False):
     # If this is changed, remember to also test with other dependent tests 
     # e.g. run ctest with ActsEventCnv
@@ -14,10 +23,7 @@ def SetupArgParser():
 
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
-    parser.add_argument("--inputFile", "-i", default=[
-                                                      #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
-                                                      "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
-                                                      ], 
+    parser.add_argument("--inputFile", "-i", default= MuonPhaseIITestDefaults.PG_EVGEN, 
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--defaultGeoFile", help="Use the  predefined GeoModel files on cvmfs", choices=["NONE", "RUN3", "RUN4" ], default="NONE")
