@@ -55,12 +55,9 @@ namespace {
                                         const Amg::Transform3D& toChamberTrans) {
         if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>){
             return toChamberTrans * meas.localCirclePosition();
-        } else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement>){
+        } else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement> ||
+                             std::is_same_v<MeasType, xAOD::TgcStrip>){
             return toChamberTrans * meas.localMeasurementPos();
-        } else if constexpr (std::is_same_v<MeasType, xAOD::TgcStrip>){
-            const auto& stripLay = meas.readoutElement()->sensorLayout(meas.layerHash());
-            return toChamberTrans * stripLay->to3D(meas.template localPosition<1>()[0]*Amg::Vector2D::UnitX(),
-                                                   meas.measuresPhi());
         } else if constexpr (std::is_same_v<MeasType, xAOD::MMCluster>){
             return toChamberTrans * (meas.template localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
         } else if constexpr (std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
@@ -86,7 +83,7 @@ namespace {
             } else if constexpr(std::is_same_v<PrdType, xAOD::RpcMeasurement>) {
                 return 0.5*(prd.measuresPhi() ? re->stripPhiLength() : re->stripEtaLength());
             } else if constexpr(std::is_same_v<PrdType, xAOD::TgcStrip>) {
-                return 0.5 * re->sensorLayout(prd.layerHash())->design().stripLength(prd.channelNumber());
+                return 0.5 * re->sensorLayout(prd.layerHash())->design(prd.measuresPhi()).stripLength(prd.channelNumber());
             } else if constexpr(std::is_same_v<PrdType, xAOD::MMCluster>) {
                 return 0.5* re->stripLayer(prd.layerHash()).design().stripLength(prd.channelNumber());
             } else if constexpr(std::is_same_v<PrdType, xAOD::sTgcMeasurement>) {
@@ -439,7 +436,7 @@ StatusCode SpacePointMakerAlg::execute(const EventContext& ctx) const {
                         <<" primary and "<<hitsPerChamber.phiHits.size()<<" phi space points.");
         distributePointsAndStore(std::move(hitsPerChamber), *outContainer);
     }
-    SG::WriteHandle<SpacePointContainer> writeHandle{m_writeKey, ctx};
+    SG::WriteHandle writeHandle{m_writeKey, ctx};
     ATH_CHECK(writeHandle.record(std::move(outContainer)));
     return StatusCode::SUCCESS;
 }

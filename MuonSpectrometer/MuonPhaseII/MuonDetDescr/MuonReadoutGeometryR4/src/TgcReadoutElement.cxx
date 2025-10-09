@@ -53,9 +53,7 @@ StatusCode TgcReadoutElement::initElement() {
         /// ensure a consistent layerHash schema
         if (isStrip(layPtr->hash())) {
             m_pars.sensorLayouts[static_cast<unsigned>(layHash)] = layPtr;
-        }
-        if (layHash != layPtr->hash()) {
-            THROW_EXCEPTION("Fart");
+            continue;
         }
         ATH_CHECK(insertTransform<TgcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE

@@ -1003,7 +1003,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
             const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
             ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<", nCh: "<<refEle.numChannels(layHash)<<", layHash: "<<layHash);
             if (!refEle.numChannels(layHash)) continue;
-            const Amg::Transform3D& refLayerTrf = refEle.localToGlobalTrans(gctx, layHash);
+            const Amg::Transform3D refLayerTrf = refEle.localToGlobalTrans(gctx, refEle.constructHash(0, gasGap, false)) *
+                                                                            (!isStrip ? Amg::Transform3D::Identity()
+                                                                                      : Amg::getRotateZ3D(-90.*Gaudi::Units::deg));
             const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
             if (!Amg::isIdentity(refLayerTrf.inverse()* testLayerTrf)) {
                 ATH_MSG_FATAL("The transformations in "<<m_idHelperSvc->toString(layId)
