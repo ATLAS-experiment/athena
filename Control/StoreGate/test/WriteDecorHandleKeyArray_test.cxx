@@ -10,10 +10,12 @@
 
 
 #undef NDEBUG
+#include "StoreGate/WriteDecorHandleKeyArray.h"
+#include "StoreGate/exceptions.h"
 #include "SGTools/TestStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "TestTools/initGaudi.h"
+#include "TestTools/expect_exception.h"
 #include <cassert>
 #include <iostream>
 
@@ -99,6 +101,18 @@ void test1()
   assert (k1[1].key() == "ccc.fee2");
   assert (k1[1].contHandleKey().key() == "ccc");
 
+  SG::ReadHandleKey<MyObj> ok ("aaa");
+  SG::WriteDecorHandleKeyArray<MyObj> k2{ok, {"dec1", "dec2"}};
+  assert (k2.size() == 2);
+  assert (k2[0].clid() == 293847295);
+  assert (k2[0].key() == "aaa.dec1");
+  assert (k2[1].key() == "aaa.dec2");
+  assert (k2[0].mode() == Gaudi::DataHandle::Writer);
+  assert (k2[0].storeHandle().name() == "StoreGateSvc");
+  assert (!k2[0].storeHandle().isSet());
+
+  EXPECT_EXCEPTION(SG::ExcBadHandleKey,
+                   (SG::WriteDecorHandleKeyArray<MyObj> {ok, {"aaa.dec1", "aaa.dec2"}}));
 }
 
 void test1a()

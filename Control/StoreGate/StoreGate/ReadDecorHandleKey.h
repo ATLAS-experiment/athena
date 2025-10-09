@@ -87,6 +87,8 @@ public:
   /// Base class.
   typedef ReadHandleKey<T> Base;
 
+  constexpr static bool isDecorHandleKey = true;
+
   /// Class for which we set the CLID.  See above.
   typedef typename SG::TopBase<T>::type topbase_t;
 
