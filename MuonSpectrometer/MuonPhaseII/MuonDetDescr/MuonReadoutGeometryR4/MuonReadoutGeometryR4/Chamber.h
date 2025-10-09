@@ -46,6 +46,8 @@ namespace MuonGMR4 {
           const Muon::IMuonIdHelperSvc* idHelperSvc() const;
           /** @brief Returns the chamber index */
           Muon::MuonStationIndex::ChIndex chamberIndex() const;
+          /** @brief Returns the first readout elements detectorType (sorted by techIdx) */
+          ActsTrk::DetectorType detectorType() const;
           /** @brief Returns the station phi of the chamber */
           int stationPhi() const;
           /** @brief Returns the station eta of the chamber */
