@@ -11,6 +11,7 @@
 //
 #include "xAODTrigL1Calo/gFexTowerContainer.h"
 #include "xAODTrigL1Calo/gFexTower.h"
+#include "L1CaloFEXByteStream/gFexPos.h"
 
 class GfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
 public:GfexInputMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );

@@ -110,7 +110,11 @@ def GfexInputMonitoringConfig(flags):
                         fillGroup = "gTowers",
                         type='TH1I',
                         xbins= 2000 , xmin=500, xmax=2500.0)
-    
+
+    helper.defineHistogram('TowerEt;h_TileTowerEt', title='gFex Tile Tower Et ; Et (GeV)',
+                        fillGroup = "gTileTowers",
+                        type='TH1I',
+                        xbins= 255 , xmin=0, xmax=255)
 
     helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_SaturatedTower_HeatMap', title='gFex Tower Average Et Distribution for Saturated gTower ;#eta;#phi;averageEt (MLE)',
                            fillGroup = "SatgTowers",
