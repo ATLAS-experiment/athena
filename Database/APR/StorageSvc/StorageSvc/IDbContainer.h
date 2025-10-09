@@ -121,42 +121,9 @@ namespace pool    {
 
     /// Add object to the container
     virtual DbStatus save(  DbObjectHandle<DbObject>& objH) = 0;
-    /// Update existing object in the container
-    /** @param cntH      [IN]     Valid handle to container 
-      * @param  object   [IN]     Pointer to feed data.
-      * @param objH      [IN]     Object handle
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus update(DbContainer&  cntH,
-                            const void* object,
-                            ShapeH shape, 
-                            const DbObjectHandle<DbObject>& objH) = 0;
-
-    /// Update existing object in the container
-    /** @param cntH      [IN]     Valid handle to container 
-      * @param  object   [IN]     Pointer to feed data.
-      * @param linkH     [IN/OUT] Object identifier
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus update(DbContainer&  cntH,
-                            const void* object,
-                            ShapeH shape, 
-                            const Token::OID_t& linkH) = 0;
-
-    /// Destroy an object in a container
-    /** @param linkH     [IN]     Object identifier
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus destroy( const Token::OID_t& linkH) = 0;
 
     /// Execute Transaction Action
     virtual DbStatus transAct(Transaction::Action) = 0;
-
-    /// Query the pending transaction stack
-    virtual bool updatesPending() const = 0;
   };
 }      // End namespace pool
 #endif // POOL_IDBCONTAINER_H

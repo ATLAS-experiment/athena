@@ -57,8 +57,6 @@ namespace pool  {
     int                m_ioBytes;
 
   protected:
-    /// Destroy persistent object in the container
-    virtual DbStatus destroyObject(ActionList::value_type&) override;
     /// Commit single entry to container
     virtual DbStatus writeObject(ActionList::value_type&) override;
   public:

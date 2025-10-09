@@ -116,33 +116,6 @@ namespace pool  {
                                     ShapeH                shapeH,
                                     Token*&               refpTok);
 
-    /// In place update of an existing object.
-    /**
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   object    [IN] Pointer to persistent data object.
-      * @param   shapeH    [IN] Handle to persistent type information
-      * @param   refToken  [IN] Reference to token containing the location
-      *                         information of the persistent object.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus update(        FileDescriptor&       refDB,
-                                    const void*           object,
-                                    ShapeH                shapeH,
-                                    Token&                refToken);
-
-    /// Destroy an existing persistent object.
-    /**
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   refToken  [IN] Reference to token containing the location
-      *                         information of the persistent object.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus destroy(             FileDescriptor& refDB,
-                                          Token&          refToken);
-
-
     /// Read a persistent object from the medium.
     /** Reading an object does not create the object.
       *
