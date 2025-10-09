@@ -23,7 +23,7 @@ class GeoPixelSiCrystal : public GeoVPixelFactory {
 		    GeoModelIO::ReadGeoModel* sqliteReader,
                     std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                     std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
-                    bool isBLayer, bool isModule3D=false);
+                    bool isBLayer, bool isModule3D=false, bool even_odd_phi_design=false);
   virtual GeoVPhysVol* Build() override;
   inline Identifier getID() {return m_id;}
 
@@ -31,7 +31,12 @@ class GeoPixelSiCrystal : public GeoVPixelFactory {
 
  private:
   Identifier m_id;
-  const InDetDD::SiDetectorDesign* m_design{nullptr};
+  // Cache for multiple phi designs.
+  // The first element will hold the design for modules with either even or event+odd phi indices.
+  // If there are more than one designs than the second element will hold the design for modules
+  // with  odd phi index.
+  unsigned int m_nPhiDesigns=1;
+  std::array<const InDetDD::SiDetectorDesign*,2> m_design{nullptr,nullptr};
   bool m_isBLayer = false;
   bool m_isModule3D = false;
 };

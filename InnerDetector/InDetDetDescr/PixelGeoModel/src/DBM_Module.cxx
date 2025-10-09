@@ -55,7 +55,8 @@ DBM_Module::DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
                                                    std::array<std::array<double,kNDirections>,kNPixelLocations>{   // regular/central,longEnd/outer,long/inner
                                                       std::array<double,kNDirections>{pitchPhi,pitchEta},
                                                       std::array<double,kNDirections>{0.,pitchEtaLongEnd},
-                                                      std::array<double,kNDirections>{0.,pitchEtaLong}});
+                                                      std::array<double,kNDirections>{0.,pitchEtaLong}},
+                                                   InDetDD::detail::FENumbering::kRegular);
  
   std::unique_ptr<PixelModuleDesign> p_dbmdesign = std::make_unique<PixelModuleDesign>(thickness,
 							     circuitsPerPhi,
