@@ -1,4 +1,4 @@
-<!--Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration-->
+<!--Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration-->
 
 # Bjet Trigger configuration guide
 
@@ -354,7 +354,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
        )
       ```
       The inputs to it are the names of the jet, b-Tagging, tracks and PV collections.\
-      The hypo-algorithms retrive the collections from the view. For this reason online monitoring is being performed at this instance (see [TrigBjetMonitoringConfig.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py)).\
+      The hypo-algorithms retrieve the collections from the view. For this reason online monitoring is being performed at this instance (see [TrigBjetMonitoringConfig.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py)).\
       In the end the hypothesis is being tested with the help of the hypotool (see [TrigBjetBtagHypoTool.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py))
       ```python
         from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict
