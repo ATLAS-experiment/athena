@@ -9,6 +9,7 @@
 #include <regex>
 #include <map>
 #include <iostream>
+#include <cstdint>
 
 class TrigTauInfo {
 public:

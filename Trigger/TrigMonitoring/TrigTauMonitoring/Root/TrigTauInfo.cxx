@@ -4,6 +4,7 @@
 
 #include "TrigTauMonitoring/TrigTauInfo.h"
 #include <ranges>
+#include <cstdint>
 
 TrigTauInfo::TrigTauInfo(const std::string& trigger)
     : m_trigger{trigger}
