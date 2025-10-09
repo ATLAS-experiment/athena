@@ -35,14 +35,6 @@ StatusCode GfexSimMonitorAlgorithm::initialize() {
 	ATH_MSG_DEBUG("m_simu_gScalarERms" << m_simu_gScalarERms );
 
 
-	/*    ATH_MSG_DEBUG("m_data_key_gGlob "  << m_data_key_gGlob  );
-	      ATH_MSG_DEBUG("m_data_key_gJ "  << m_data_key_gJ  );
-
-	      ATH_MSG_DEBUG("m_simu_key_gGlob "   << m_simu_key_gGlob   );
-	      ATH_MSG_DEBUG("m_simu_key_gJ "  << m_simu_key_gJ  );
-	      */
-
-
 	// we initialise all the containers
 	ATH_CHECK ( m_data_gFexRho.initialize() );
 	ATH_CHECK ( m_data_gFexBlock.initialize() );
@@ -115,7 +107,6 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 	auto Signature = Monitored::Scalar<std::string>("Signature",label);
 	auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
 	auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
-	auto FillTree = Monitored::Scalar<bool>("FillTree",true);
 
 	//sorting mismatched data/sim TOB
     std::set<const xAOD::gFexJetRoI*> mismatchedTOBs;
@@ -138,8 +129,8 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 			}
 		}
 		if(!isMatched) {
-            mismatchedTOBs.insert(tob1);
-			DataMismatchedTOBs.insert(tob1); //saving only the mismatched data tob
+            mismatchedTOBs.insert(tob1); //saving these for TTree
+			DataMismatchedTOBs.insert(tob1); //saving only the mismatched data tob for detail plot
 		}
 	}
 
@@ -154,7 +145,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
             }
         }
         if(!isMatched) {
-            mismatchedTOBs.insert(tob2);
+            mismatchedTOBs.insert(tob2); //saving these for TTree
         }
     }
 
@@ -202,17 +193,19 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		}*/
         tobMismatched=100;
         auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",simReady);
-		fill("jet_mismatches",FillTree,simReadyMismatch,tobMismatched,lbn,lbnString,l1id,evtNumber,dtobEtas,dtobPhis,dtobEts,dtobWord0s,stobEtas,stobPhis,stobEts,stobWord0s,Signature,simReady,eventType);		
+		auto FillJetTree = Monitored::Scalar<bool>("FillJetTree",true);
+
+		fill("mismatches",FillJetTree,simReadyMismatch,tobMismatched,lbn,lbnString,l1id,evtNumber,dtobEtas,dtobPhis,dtobEts,dtobWord0s,stobEtas,stobPhis,stobEts,stobWord0s,Signature,simReady,eventType);		
 		if (label=="gJ" || label=="gLJ") {
             auto locIdx = Monitored::Scalar<std::string>("locIdx","");
 			for(auto tob : DataMismatchedTOBs) {
 				locIdx = std::to_string(tob->iEta()) + ":" + std::to_string(tob->iPhi());
-                fill("mismatches"+label,FillTree,lbn,locIdx); //only recording data eta,phi vs LBN
+                fill("mismatches"+label,lbn,locIdx); //only recording data eta,phi vs LBN
 			}
 		}
 	} else {
         tobMismatched=0;
-        fill("jet_mismatches",lbn,Signature,tobMismatched,simReady,eventType);
+        fill("mismatches",lbn,Signature,tobMismatched,simReady,eventType);
     }
 
 	return !mismatchedTOBs.empty();
@@ -236,8 +229,6 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 	auto eventType = Monitored::Scalar<std::string>("EventType","DataTowers"); // always have data towers
 	auto Signature = Monitored::Scalar<std::string>("Signature",label);
 	auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
-	auto FillTree = Monitored::Scalar<bool>("FillTree",true);
-
 
 	bool mismatches = (tobs1Cont->size()!=tobs2Cont->size());
 
@@ -291,10 +282,12 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
         tobMismatched=100;
 		
         auto simReadyMismatch = Monitored::Scalar<bool>("SimulationReadyMismatch",false/* global RoI not sim ready yet*/);
-        fill("global_mismatches",FillTree,simReadyMismatch,lbn,lbnString,evtNumber,l1id,dtobMet1,dtobMet2,dtobWord0s,stobMet1,stobMet2,stobWord0s,Signature,tobMismatched,eventType);
+		auto FillGlobalTree = Monitored::Scalar<bool>("FillGlobalTree",true);
+
+        fill("mismatches",FillGlobalTree,simReadyMismatch,lbn,lbnString,evtNumber,l1id,dtobMet1,dtobMet2,dtobWord0s,stobMet1,stobMet2,stobWord0s,Signature,tobMismatched,eventType);
 	} else {
         tobMismatched=0;
-        fill("global_mismatches",lbn,Signature,tobMismatched,eventType);
+        fill("mismatches",lbn,Signature,tobMismatched,eventType);
     }
 
 
