@@ -628,6 +628,7 @@ def HION7PCCCTriggers2024():
 
 def HION7JetTriggersPP():
     triggers  = {}
+    triggers.update({'HLT_j20_L1RD0_FILLED' : 20})
     triggers.update({'HLT_j30a_L1jTE20' : 30})
     triggers.update({'HLT_j40_L1jJ40' : 40})
     triggers.update({'HLT_j50_L1jJ40' : 50})
@@ -647,6 +648,11 @@ def HION7BJetTriggersPP():
     triggers.update({'HLT_j45_0eta290_020jvt_bgn260_pf_ftf_L1jJ40' : 45})
     triggers.update({'HLT_j60_0eta290_020jvt_bgn260_pf_ftf_L1jJ50' : 60})
     triggers.update({'HLT_j80_0eta290_020jvt_bgn260_pf_ftf_L1jJ60' : 80})
+    triggers.update({'HLT_j30_0eta290_020jvt_boffperf_pf_ftf_L1jTE50' : 30})
+    triggers.update({'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ40' : 45})
+    triggers.update({'HLT_j60_0eta290_020jvt_boffperf_pf_ftf_L1jJ50' : 60})
+    triggers.update({'HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ60' : 80})
+    triggers.update({'HLT_j100_0eta290_020jvt_boffperf_pf_ftf_L1jJ60' : 100})
 
     return triggers
 

@@ -43,13 +43,18 @@ def HIEventShapeMakerCfg(flags, name="HIEventShapeMaker", doWeighted=False, **kw
     acc = ComponentAccumulator()
     
     # merge dependencies
-    from CaloRec.CaloRecoConfig import CaloRecoCfg  
-    acc.merge(CaloRecoCfg(flags))
-    from CaloRec.CaloTowerMakerConfig import CaloTowerMakerCfg
-    towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
+    if not flags.HeavyIon.isDerivation:
+        from CaloRec.CaloRecoConfig import CaloRecoCfg
+        acc.merge(CaloRecoCfg(flags))
 
-    kwargs.setdefault("NaviTowerKey", towerMaker.TowerContainerName)
-    kwargs.setdefault("InputTowerKey", "")
+        from CaloRec.CaloTowerMakerConfig import CaloTowerMakerCfg
+        towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
+
+        kwargs.setdefault("NaviTowerKey", towerMaker.TowerContainerName)
+        kwargs.setdefault("InputTowerKey", "")
+    else:
+        kwargs.setdefault("InputTowerKey", "HIClusters")
+
     kwargs.setdefault("OutputContainerKey", "HIEventShape")
     if "HIEventShapeFillerTool" not in kwargs:
         name_esft="HIEventShapeFillerTool_Weighted" if doWeighted else "HIEventShapeFillerTool"

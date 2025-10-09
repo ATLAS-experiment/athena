@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ListSlimming.py - List of collections for slimming from athena 21.2 HION4 and EGAM1ExtraContent.py
 
 #################################################################################
@@ -382,8 +382,6 @@ def HION7SmartCollections():
 
 def HION7AllVarContent():
     variables  = []
-    variables += ["AntiKt2HIJets"]
-    variables += ["AntiKt4HIJets"]
     variables += ["CaloSums"]
     variables += ["ZdcModules"]
     variables += ["PrimaryVertices"]
@@ -398,9 +396,135 @@ def HION7AllVarTruthContent():
     variables += ["TruthEvents"]
     variables += ["TruthParticles"]
     variables += ["TruthVertices"]
+    variables += ["TruthElectrons"]
+    variables += ["TruthMuons"]
+    variables += ["TruthPrimaryVertices"]
 
     return variables
 
+def HION7AllVarFromFTAG1():
+
+    variables = []
+    variables += ["InDetLargeD0TrackParticles"]
+    variables += ["AntiKt4EMPFlowJets"]
+    variables += ["AntiKt4UFOCSSKJets"]
+    variables += ["CaloCalFwdTopoTowers"]
+    variables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
+    variables += ["UFOCSSK"]
+    variables += ["GlobalChargedParticleFlowObjects"]
+    variables += ["GlobalNeutralParticleFlowObjects"]
+    variables += ["CHSGChargedParticleFlowObjects"]
+    variables += ["CHSGNeutralParticleFlowObjects"]
+    variables += ["JetAssociatedPixelClusters"]
+    variables += ["JetAssociatedSCTClusters"]
+    variables += ["PixelClusters"]
+    variables += ["SCT_Clusters"]
+
+    return variables
+
+def HION7ExtraVarForBtag(JetColl):
+
+    variables  = [JetColl+"AntiKt4HIJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
+    FTAG_AUXDATA = [
+    'VxTrackAtVertex',
+    'btagIp_d0Uncertainty',
+    'btagIp_z0SinThetaUncertainty',
+    'btagIp_z0SinTheta',
+    'btagIp_d0',
+    'btagIp_trackMomentum',
+    'btagIp_trackDisplacement',
+    'btagIp_invalidIp',
+    'numberOfNextToInnermostPixelLayerHits',
+    'numberOfInnermostPixelLayerSharedHits',
+    'numberOfInnermostPixelLayerSplitHits',
+    'numberOfPixelSplitHits',
+    'leptonID',
+    'TTVA_AMVFVertices',
+    'TTVA_AMVFWeights',
+    'ftagTruthParentBarcode',
+    'ftagTruthOriginLabel',
+    'ftagTruthTypeLabel',
+    'ftagTruthVertexIndex',
+    'ftagTruthSourceLabel',
+    ]
+    variables += [".".join(["InDetTrackParticles"] + FTAG_AUXDATA)]
+    variables += ["PrimaryVertices.covariance"]
+
+    return variables
+
+def makeHIJetBasicBranchList():
+    state_vars=["pt","eta","phi","m"]
+    c=list(state_vars)
+    states=["JetUnsubtractedScaleMomentum","JetSubtractedScaleMomentum"]
+    for s in states:
+        for v in state_vars:
+            c.append(s+'_'+v)
+    c+=['ConstituentScale',
+        'constituentLinks',
+        'constituentWeights',
+        ]
+    return c
+
+def makeHIJetRemovedBranchList():
+    state_vars=["pt","eta","phi","m"]
+    c=list(state_vars)
+    states=["JetEMScaleMomentum", "JetConstitScaleMomentum", "JetEtaJESScaleMomentum", "JetPileupScaleMomentum", "JetInsituScaleMomentum", "JetSubtractedOriginCorrectedScaleMomentum"]
+    for s in states:
+        for v in state_vars:
+            c.append(s+'_'+v)
+    return c
+
+def makeHIJetBranchList():
+    state_vars=["pt","eta","phi","m"]
+    c=list(state_vars)
+    states=["JetUnsubtractedScaleMomentum","JetSubtractedScaleMomentum"]
+    for s in states:
+        for v in state_vars:
+            c.append(s+'_'+v)
+    c+=['ConstituentScale',
+        'constituentLinks',
+        'constituentWeights',
+        'AverageLArQF',
+        'EMFrac',
+        'FracSamplingMax',
+        'FracSamplingMaxIndex',
+        'HECFrac',
+        'HECQuality',
+        'LArQuality',
+        'N90Constituents',
+        'NegativeE',
+        'Timing',
+        'BchCorrCell',
+        'LArBadHVEnergyFrac',
+        'LArBadHVNCell',
+        'EnergyPerSampling',
+        'GhostAntiKt4HITrackJets',
+        'GhostAntiKt4HITrackJetsCount',
+        'GhostAntiKt4HITrackJetsPt',
+        'GhostMuonSegmentCount',
+        'GhostTrack',
+        'NumTrkPt4000',
+        'SumPtTrkPt4000',
+        'TrackWidthPt4000',
+        'Width',
+        'MaxConstituentET',
+        'MaxOverMean']
+    return c
+
+def HION7BasicJetVars(JetColl):
+    #Only basic kinematics for small jets
+    ExtraVars = []
+    HIJetBranches=makeHIJetBranchList()
+    for collection in [JetColl + "AntiKt2HIJets",JetColl + "AntiKt4HIJets"]:
+        for j in HIJetBranches:
+            ExtraVars.append(collection+'.'+j)
+
+    return ExtraVars
+
+def HION7ExtraContainersTrigger():
+    variables  = ["HLT_MuonsCB_RoI",
+                  "HLT_MuonsCB_RoIAux."]
+    return variables
 
 #################################################################################
 #HION12
@@ -712,3 +836,27 @@ def HIONHPODSmartCollections():
     variables += ["Muons"]
 
     return variables
+
+#################################################################################
+#HION15
+
+def HION15SmartCollections():
+    return HION7SmartCollections()
+
+def HION15AllVarContent():
+    return HION7AllVarContent()
+
+def HION15AllVarTruthContent():
+    return HION7AllVarTruthContent()
+
+def HION15AllVarFromFTAG1():
+    return HION7AllVarFromFTAG1()
+
+def HION15ExtraVarForBtag(JetColl):
+    return HION7ExtraVarForBtag(JetColl)
+
+def HION15BasicJetVars(JetColl):
+    return HION7BasicJetVars(JetColl)
+
+def HION15ExtraContainersTrigger():
+    return HION7ExtraContainersTrigger()
