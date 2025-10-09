@@ -10,7 +10,7 @@ atlas_add_library( AthCUDAKernelLib
    PUBLIC_HEADERS AthCUDAKernel
    LINK_LIBRARIES GaudiKernel AthCUDAInterfacesLib AthCUDACoreLib )
 set_target_properties( AthCUDAKernelLib PROPERTIES
-   POSITION_INDEPENDENT_CODE ON )
+   POSITION_INDEPENDENT_CODE TRUE )
 
 # Disable faulty "declared but never used" warnings for the template code.
 target_compile_options( AthCUDAKernelLib PUBLIC
@@ -21,3 +21,4 @@ atlas_add_test( ArrayKernelTask
    SOURCES test/test_ArrayKernelTask.cu
    LINK_LIBRARIES AthCUDAKernelLib
    POST_EXEC_SCRIPT nopost.sh )
+set_property( TARGET AthCUDAKernel_ArrayKernelTask PROPERTY POSITION_INDEPENDENT_CODE TRUE )
