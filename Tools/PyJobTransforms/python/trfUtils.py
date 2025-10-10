@@ -1643,14 +1643,15 @@ def ValgrindCommand(
 def VTuneCommand(
     defaultOptions                    = True,
     extraOptionsList                  = None,
-    AthenaSerialisedConfigurationFile = "athenaConf.pkl",
+    AthenaCommand                     = ["athena.py", "athenaConf.pkl"],
     returnFormat                      = "string"
     ):
 
     # Access VTune suppressions files by finding the paths from
     # environment variables. Append the files to the VTune suppressions
     # options.
-    optionsList = ["vtune"]
+    # setsid prevents vtune killing the entire job / terminal session when it finishes
+    optionsList = ["setsid", "vtune"]
     # If default options are not suppressed, use them.
     if defaultOptions:
         optionsList.append("-run-pass-thru=--no-altstack")
@@ -1664,9 +1665,8 @@ def VTuneCommand(
                 isCollectSpecified=True
     if not isCollectSpecified:
         optionsList.append("-collect=hotspots")
-    optionsList.append("-- $(which python)")
-    optionsList.append("$(which athena.py)")
-    optionsList.append(AthenaSerialisedConfigurationFile)
+    optionsList.append("--")
+    optionsList.extend(AthenaCommand)
     # Return the command in the requested format, string (by default) or list.
     if returnFormat is None or returnFormat == "string":
         return(" ".join(optionsList))

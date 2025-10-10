@@ -76,7 +76,7 @@ class TestValgrindCommand(unittest.TestCase):
 class TestVTuneCommand(unittest.TestCase):
     def test_vtunearguments(self):
         vgc=VTuneCommand()
-        self.assertTrue(vgc.startswith('vtune'))
+        self.assertTrue('vtune' in vgc)
 
 class TestVersionDetection(unittest.TestCase):
     def test_asetup_version_detection(self):
