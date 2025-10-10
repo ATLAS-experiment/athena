@@ -70,7 +70,7 @@ namespace MuonR4 {
             void setDirection(const Amg::Vector3D& sensorDir,
                               const Amg::Vector3D& toNextSensor);
             /*** @brief  Setter for the position of the uncalibrated muon measurement in the sector frame */
-            void setPosition(Amg::Vector3D&& pos);
+            void setPosition(const Amg::Vector3D& pos);
 
             /*** @brief: Pointer to the primary measurement */
             const xAOD::UncalibratedMeasurement* primaryMeasurement() const;

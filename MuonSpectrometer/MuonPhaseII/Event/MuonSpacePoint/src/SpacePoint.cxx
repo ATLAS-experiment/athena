@@ -70,7 +70,7 @@ namespace MuonR4{
         m_toNext = toNextSensor;
         m_normal = m_dir.cross(m_toNext).unit();
     }
-    void SpacePoint::setPosition(Amg::Vector3D&& pos){ m_pos = std::move(pos); }
+    void SpacePoint::setPosition(const Amg::Vector3D& pos){ m_pos = pos; }
             
     const xAOD::UncalibratedMeasurement* SpacePoint::primaryMeasurement() const {
        return m_primaryMeas;

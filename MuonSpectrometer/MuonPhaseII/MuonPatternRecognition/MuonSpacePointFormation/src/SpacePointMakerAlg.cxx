@@ -46,33 +46,6 @@ namespace {
             return sectorTrans * reEle->localToGlobalTrans(gctx, meas.layerHash());
         }
     }
-    /** @brief Express the position of an uncalibrated measurement in the sector frame.
-     *  @param meas: Reference to the measurement of interest
-     *  @param toChamberTrans: Transformation to go from the local frame of the measurement
-     *                         into the sector frame */
-    template<typename MeasType>
-        Amg::Vector3D positionInChamber(const MeasType& meas,
-                                        const Amg::Transform3D& toChamberTrans) {
-        if constexpr (std::is_same_v<MeasType, xAOD::MdtDriftCircle>){
-            return toChamberTrans * meas.localCirclePosition();
-        } else if constexpr (std::is_same_v<MeasType, xAOD::RpcMeasurement> ||
-                             std::is_same_v<MeasType, xAOD::TgcStrip>){
-            return toChamberTrans * meas.localMeasurementPos();
-        } else if constexpr (std::is_same_v<MeasType, xAOD::MMCluster>){
-            return toChamberTrans * (meas.template localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
-        } else if constexpr (std::is_same_v<MeasType, xAOD::sTgcMeasurement>){
-            if (meas.channelType() == sTgcIdHelper::sTgcChannelTypes::Strip ||
-                meas.channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
-                    return toChamberTrans * (meas.template localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
-            }
-            Amg::Vector3D locPos{Amg::Vector3D::Zero()};
-            locPos.block<2,1>(0,0) = xAOD::toEigen(meas.template localPosition<2>());
-            return toChamberTrans * locPos;
-        }  else {
-            static_assert(std::false_type::value, "Unsupported measurement type.");
-        }
-        return Amg::Vector3D::Zero();
-    }
     /** @brief Estimates the half-length of a tube or a readout-strip 
      *  @param prd: Reference to the measurement for which the half-length is to be estimated */
     template <typename PrdType>
@@ -254,7 +227,7 @@ template <typename PrdType>
                 sensorDir = toSectorTrans.rotation() * stripLayout->to3D(radialDesign.stripDir(prd->channelNumber()), allSpArePhi);
             }
         }
-        newSp.setPosition(positionInChamber(*prd, toSectorTrans));
+        newSp.setPosition(toSectorTrans * prd->localMeasurementPos());
         newSp.setDirection(sensorDir, toNextSen);
         auto cov = Acts::filledArray<double,3>(0.);        
         if (prd->numDimensions() == 2) {
@@ -303,12 +276,12 @@ template <class ContType>
         SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
         const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTrans(*gctx);
         ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
-        if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer>){
+        if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer>) {
             pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.capacity() + viewer.size());       
             for (const PrdType prd : viewer) {
                 Amg::Transform3D toChamberTrans{toChamberTransform(*gctx, sectorTrans, *prd)};
                 SpacePoint& sp{pointsInChamb.etaHits.emplace_back(prd)};
-                sp.setPosition(positionInChamber(*prd, toChamberTrans));
+                sp.setPosition(toChamberTrans*prd->localMeasurementPos());
                 sp.setDirection(toChamberTrans.rotation().col(Amg::z),
                                 toChamberTrans.rotation().col(Amg::y));
                 std::array<double, 3> cov{Acts::filledArray<double,3>(0.)};
@@ -404,8 +377,8 @@ template <class ContType>
                         SpacePoint& newSp = pointsInChamb.etaHits.emplace_back(etaHits[etaP], phiHits[phiP]);
                         newSp.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
           
-                        auto spIsect = lineIntersect(positionInChamber(*etaHits[etaP], toSectorTransEta), sensorDir, 
-                                                     positionInChamber(*phiHits[phiP], toSectorTransPhi), toNextDir); 
+                        auto spIsect = lineIntersect(toSectorTransEta*etaHits[etaP]->localMeasurementPos(), sensorDir, 
+                                                     toSectorTransPhi*phiHits[phiP]->localMeasurementPos(), toNextDir); 
                         newSp.setPosition(spIsect.position());
                         newSp.setDirection(sensorDir, toNextDir);
                         auto cov = Acts::filledArray<double, 3>(0.);

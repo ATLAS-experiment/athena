@@ -30,7 +30,7 @@ IdentifierHash MdtDriftCircle_v1::measurementHash() const {
     return MuonGMR4::MdtReadoutElement::measurementHash(tubeLayer(),
                                                         driftTube());
 }
-Amg::Vector3D MdtDriftCircle_v1::localCirclePosition() const {
+Amg::Vector3D MdtDriftCircle_v1::localMeasurementPos() const {
     if (numDimensions() == 1) {
         return Amg::Vector3D::Zero();
     }

@@ -37,9 +37,7 @@ IdentifierHash TgcStrip_v1::layerHash() const {
    return MuonGMR4::TgcReadoutElement::constructHash(0, gasGap(), false);
 }
 Amg::Vector3D TgcStrip_v1::localMeasurementPos() const {
-   /// Recall that the eta and phi surfaces are rotated clock wise
-   return measuresPhi() ? - localPosition<1>()[0] * Amg::Vector3D::UnitY()
-                        : localPosition<1>()[0] * Amg::Vector3D::UnitX();
+   return localPosition<1>()[0] * Amg::Vector3D::Unit(measuresPhi());
 }
 }  // namespace xAOD
 #undef IMPLEMENT_SETTER_GETTER
