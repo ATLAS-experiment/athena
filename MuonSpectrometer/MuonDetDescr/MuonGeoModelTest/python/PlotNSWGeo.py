@@ -11,8 +11,9 @@ def NSWGeoPlottingAlgCfg(flags, name = "NSWGeoPlottingAlg", **kwargs):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser
+    from AthenaCommon.TestDefaults import defaultTestFiles
     parser = SetupArgParser()
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"])
+    parser.set_defaults(inputFile=defaultTestFiles.EVNT)
     args = parser.parse_args()
 
     flags = initConfigFlags()

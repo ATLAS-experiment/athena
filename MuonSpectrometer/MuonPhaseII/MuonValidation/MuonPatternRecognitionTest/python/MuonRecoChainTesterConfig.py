@@ -8,7 +8,7 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="RecoChainTester.root")
-    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.PG_HITS_R3)
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.add_argument("--monitorPlots", action='store_true', default=False, 
                         help="Setup monitoring plots of the pattern recognition")
     parser.add_argument("--runVtune", 
