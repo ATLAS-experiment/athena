@@ -26,7 +26,7 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   ATH_CHECK(BaseSimulatorTool::initialize());
   ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS version: v"
     << Acts::VersionMajor << "." << Acts::VersionMinor << "."
-    << Acts::VersionPatch << " [" << Acts::CommitHash << "]");
+    << Acts::VersionPatch << " [" << Acts::CommitHash.value_or("unknown hash") << "]");
   // Retrieve particle filter
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
@@ -130,7 +130,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     // Acts: Energy, mass, and momentum are in GeV, position in mm
     ATH_MSG_DEBUG(name() << " Convert ISF::Particle(mass) " << isfp->id()<<"|" << isfp<<"(" << isfp->mass() << ")");
     std::vector<ActsFatras::Particle> input = std::vector<ActsFatras::Particle>{
-      ActsFatras::Particle(ActsFatras::Barcode().setVertexPrimary(0).setParticle(isfp->id()), static_cast<Acts::PdgParticle>(isfp->pdgCode()),
+      ActsFatras::Particle(ActsFatras::Barcode().withVertexPrimary(0).withParticle(isfp->id()), static_cast<Acts::PdgParticle>(isfp->pdgCode()),
                            isfp->charge(),isfp->mass() * Acts::UnitConstants::MeV)
         .setDirection(Acts::makeDirectionFromPhiEta(isfp->momentum().phi(), isfp->momentum().eta()))
         .setAbsoluteMomentum(isfp->momentum().mag() * Acts::UnitConstants::MeV)

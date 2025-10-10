@@ -19,7 +19,7 @@
 #include <Acts/Geometry/TrackingVolume.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Surfaces/PlaneSurface.hpp>
-#include <Acts/Plugins/GeoModel/GeoModelMaterialConverter.hpp>
+#include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
 
 
@@ -303,7 +303,7 @@ MuonBlueprintNodeBuilder::blendMaterial(
   GeoModelTools::GeoMaterialHelper geoMaterialHelper;
   std::pair<GeoModelTools::GeoMaterialPtr, double> geoMaterials = geoMaterialHelper.collectMaterial(parentVolume);
 
-  const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterials.first);
+  const Acts::Material aMat = ActsPlugins::GeoModel::geoMaterialConverter(*geoMaterials.first);
   //rotate about the z axis
   auto constPtr = element.surface().getSharedPtr();
   //to assign the material shouldnt be const

@@ -9,7 +9,7 @@
 #include <Acts/Material/TrackingGeometryMaterial.hpp>
 #include "GaudiKernel/IAlgTool.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
-#include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
+#include "ActsPlugins/Json/MaterialMapJsonConverter.hpp"
 
 namespace Acts {
   class TrackingGeometry;
