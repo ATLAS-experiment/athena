@@ -10,7 +10,7 @@ find_package( Acts COMPONENTS Core )
 atlas_add_library( ActsInteropLib
    ActsInterop/*.h src/*.cxx
    PUBLIC_HEADERS ActsInterop
-   LINK_LIBRARIES Acts::Core GaudiKernel
+   LINK_LIBRARIES Acts::Core GaudiKernel AthenaBaseComps
    PRIVATE_LINK_LIBRARIES InDetIdentifier InDetReadoutGeometry )
 
 # Unpack header from Acts target to use without linking
