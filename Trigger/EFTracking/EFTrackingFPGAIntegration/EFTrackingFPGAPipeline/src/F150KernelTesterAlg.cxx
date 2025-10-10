@@ -7,6 +7,9 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "AthenaKernel/Chrono.h"
 #include "EFTrackingFPGAPipeline/DataPreparationPipeline.h"
 
+#include <iostream>
+#include <fstream> // Required for std::ofstream
+
 namespace EFTrackingFPGAIntegration
 {
     std::string F150KernelTesterAlg::get_cu_name(const std::string& kernel_name, int cu) {
@@ -17,10 +20,14 @@ namespace EFTrackingFPGAIntegration
 
     void F150KernelTesterAlg::dumpHexData(size_t dataLen, uint64_t *data, const std::string& dataDescriptor) const {
         ATH_MSG_DEBUG("STARTING " << dataDescriptor << " words:");
+        std::ofstream outputFile(dataDescriptor);
+
         for (size_t i = 0; i < dataLen; i++) {
-          ATH_MSG_DEBUG(std::hex << std::setw(16) << std::setfill('0') << data[i]);
+          outputFile << std::hex << std::setw(16) << std::setfill('0') << data[i] << std::endl;
         }
-        ATH_MSG_DEBUG("ENDING " << dataDescriptor << " words");
+    
+        // Write different data types
+        outputFile.close();
     }
 
     StatusCode F150KernelTesterAlg::initialize()
@@ -51,8 +58,6 @@ namespace EFTrackingFPGAIntegration
           m_slicingEngineInput = cl::Kernel(m_program, get_cu_name(m_slicingEngineInputName, cu).c_str(), &err);
           m_slicingEngineOutput = cl::Kernel(m_program, get_cu_name(m_slicingEngineOutputName, cu).c_str(), &err);
 
-          xrt::uuid loadedXclbinUUID = m_xrt_accelerator.get_xclbin_uuid();
-          m_slicingEngineIP = xrt::ip(m_xrt_accelerator, loadedXclbinUUID, get_cu_name(m_slicingEngineName, cu).c_str());
         }
         if (m_runIO) {
           m_insideOutInput = cl::Kernel(m_program, get_cu_name(m_insideOutInputName, cu).c_str(), &err);
@@ -75,6 +80,8 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_FPGASlicedHitKey.initialize());
         ATH_CHECK(m_FPGATrackKey.initialize());
 
+        ATH_CHECK(m_FPGATrackOutput.initialize());
+
         return StatusCode::SUCCESS;
     }
 
@@ -82,66 +89,90 @@ namespace EFTrackingFPGAIntegration
     {
         ATH_MSG_DEBUG("Executing F150KernelTesterAlg");
 
-        cl_int err = CL_SUCCESS;
+        SG::WriteHandle<std::vector<uint64_t>> FPGATrackOutput(m_FPGATrackOutput, ctx);
+        auto outputVec = std::make_unique<std::vector<uint64_t>>();
 
-        int n_pixel_words = 4;
-        size_t pixel_size_bytes = n_pixel_words * sizeof(uint64_t);
+        SG::ReadHandle<FPGATrackSimTrackCollection> outTrackCollection(m_FPGATrackKey, ctx);
+        ATH_CHECK(m_FPGADataFormatTool->convertFPGATracksToFPGADataFormat(outTrackCollection.cptr(), *outputVec, ctx));
+        // Now record the filled vector
+        ATH_CHECK(FPGATrackOutput.record(std::move(outputVec)));
+
+
+        // Prepare the inputs for testing
+        ATH_MSG_DEBUG("Accessing SE In data.");
+        std::vector<uint64_t> pixelDataIN;
+        std::vector<uint64_t> stripDataIN;
+        SG::ReadHandle<FPGATrackSimHitCollection> hitCollectionHandle(m_FPGAHitKey, ctx);
+        ATH_CHECK(m_FPGADataFormatTool->convertFPGAHitsToFPGADataFormat(hitCollectionHandle.cptr(), true, false, pixelDataIN, ctx));
+        ATH_CHECK(m_FPGADataFormatTool->convertFPGAHitsToFPGADataFormat(hitCollectionHandle.cptr(), false, true, stripDataIN, ctx));
+        dumpHexData(pixelDataIN.size(), pixelDataIN.data(), "FPGATrackSim_slicingIn_pixel.txt");
+        dumpHexData(stripDataIN.size(), stripDataIN.data(), "FPGATrackSim_slicingIn_strip.txt");
+
+        ATH_MSG_DEBUG("Accessing SE Out data.");
+        std::vector<uint64_t> dataPixelOut;
+        std::vector<uint64_t> dataStripOut;
+        SG::ReadHandle<FPGATrackSimHitCollection> outhitCollectionHandle(m_FPGASlicedHitKey, ctx);
+        ATH_CHECK(m_FPGADataFormatTool->convertFPGASliceToFPGADataFormat(outhitCollectionHandle.cptr(), true, false, dataPixelOut, ctx));
+        ATH_CHECK(m_FPGADataFormatTool->convertFPGASliceToFPGADataFormat(outhitCollectionHandle.cptr(), false, true, dataStripOut, ctx));
+        dumpHexData(dataPixelOut.size(), dataPixelOut.data(), "FPGATrackSim_slicingOut_pixel.txt");
+        dumpHexData(dataStripOut.size(), dataStripOut.data(), "FPGATrackSim_slicingOut_strip.txt");
+
+        ATH_MSG_DEBUG("Accessing SE Out data.");
+        std::vector<uint64_t> dataInsideOut;
+        ATH_CHECK(m_FPGADataFormatTool->convertFPGATracksToFPGADataFormat(outTrackCollection.cptr(), dataInsideOut, ctx));
+        dumpHexData(dataInsideOut.size(), dataInsideOut.data(), "FPGATrackSim_insideOut.txt");
+
+
+        cl_int err = CL_SUCCESS;
 
         if (m_runSE) {
           ATH_MSG_DEBUG("Allocating SE buffers");
+
+          size_t pixel_size_bytes = pixelDataIN.size() * sizeof(uint64_t);
+
           m_slicingEngineInputBuffer = cl::Buffer(m_context, CL_MEM_READ_ONLY, pixel_size_bytes, NULL, &err);
           m_slicingEngineOutputBuffer = cl::Buffer(m_context, CL_MEM_WRITE_ONLY, pixel_size_bytes, NULL, &err);
 
-          ATH_MSG_DEBUG("Setting SE args");
-          // TODO: FIX ARGS
-          m_slicingEngineInput.setArg(0, m_slicingEngineInputBuffer); // Input buffer
-          m_slicingEngineInput.setArg(1, n_pixel_words); // Input words
-          m_slicingEngineOutput.setArg(0, m_slicingEngineOutputBuffer); // Output buffer
-          m_slicingEngineOutput.setArg(1, n_pixel_words); // Output words (TODO: how do we get this???)
-                                                          
-          uint64_t out_data[n_pixel_words];
+          m_slicingEngineInput.setArg(0, m_slicingEngineInputBuffer);
+          m_slicingEngineInput.setArg(2, static_cast<unsigned long long>(pixelDataIN.size()));
 
-          // Write
-          ATH_MSG_DEBUG("Loading input data to SE input kernel");
-          // TODO: Replace with real data to write
-          m_queue.enqueueWriteBuffer(m_slicingEngineInputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
+          m_slicingEngineOutput.setArg(1, m_slicingEngineOutputBuffer);
+
+          ATH_MSG_DEBUG("Transfering SE data");
+          m_queue.enqueueWriteBuffer(m_slicingEngineInputBuffer, CL_FALSE, 0, sizeof(uint64_t) * pixelDataIN.size(), &pixelDataIN);
           m_queue.finish();
           
           // Execute
           ATH_MSG_DEBUG("Executing SE kernel");
-          m_slicingEngineIP.write_register(USER_CTRL_OFFSET, EVENT_COUNT_RST);
           m_queue.enqueueTask(m_slicingEngineInput);
           m_queue.enqueueTask(m_slicingEngineOutput);
           m_queue.finish();
 
           // Read
           ATH_MSG_DEBUG("Reading output data from kernel");
+          std::vector<uint64_t> out_data(pixelDataIN.size(), 0);
           m_queue.enqueueReadBuffer(m_slicingEngineOutputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
           m_queue.finish();
 
-          dumpHexData(n_pixel_words, out_data, "Real Slicing Engine Output");
+          dumpHexData(out_data.size(), &out_data[0], "HW_slicingOut_pixel.txt");
         }
         if (m_runIO) {
           ATH_MSG_DEBUG("Allocating IO buffers");
-          if (!m_runIOOnSE) {
-            m_insideOutInputBuffer = cl::Buffer(m_context, CL_MEM_READ_ONLY, pixel_size_bytes, NULL, &err);
-          }
+          size_t pixel_size_bytes = dataPixelOut.size() * sizeof(uint64_t);
+
+          m_insideOutInputBuffer = cl::Buffer(m_context, CL_MEM_READ_ONLY, pixel_size_bytes, NULL, &err);
           m_insideOutOutputBuffer = cl::Buffer(m_context, CL_MEM_WRITE_ONLY, pixel_size_bytes, NULL, &err);
 
           ATH_MSG_DEBUG("Setting IO args");
           // TODO: FIX ARGS
-          m_insideOutInput.setArg(0, m_runIOOnSE ? m_slicingEngineOutputBuffer : m_insideOutInputBuffer);
+          m_insideOutInput.setArg(0,  m_insideOutInputBuffer);
           m_insideOutOutput.setArg(0, m_insideOutOutputBuffer);
 
-          uint64_t out_data[n_pixel_words];
-
-          if (!m_runIOOnSE) {
-            // Write
-            ATH_MSG_DEBUG("Loading input data to IO input kernel");
-            // TODO: Replace with real data to write
-            m_queue.enqueueWriteBuffer(m_insideOutInputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
-            m_queue.finish();
-          }
+        
+          ATH_MSG_DEBUG("Loading input data to IO input kernel");
+          m_queue.enqueueWriteBuffer(m_insideOutInputBuffer, CL_TRUE, 0, pixel_size_bytes, &dataPixelOut);
+          m_queue.finish();
+          
 
           // Execute
           ATH_MSG_DEBUG("Executing IO kernel");
@@ -151,19 +182,19 @@ namespace EFTrackingFPGAIntegration
 
           // Read
           ATH_MSG_DEBUG("Reading output data from kernel");
-          m_queue.enqueueReadBuffer(m_slicingEngineOutputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
+          std::vector<uint64_t> out_data(dataPixelOut.size(), 0);
+          m_queue.enqueueReadBuffer(m_insideOutOutputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
           m_queue.finish();
 
-          dumpHexData(n_pixel_words, out_data, "Real Inside Out Output");
+          dumpHexData(out_data.size(), &out_data[0], "HW_insideOut.txt");
         }
-
+        
 
         return StatusCode::SUCCESS;
     }
     
     StatusCode F150KernelTesterAlg::finalize()
     {
-      ATH_MSG_INFO("Average Kernel execution time: " << m_sum_kernelTime /m_num_Events /1e6 << " ms");
       return StatusCode::SUCCESS;
     }
 }

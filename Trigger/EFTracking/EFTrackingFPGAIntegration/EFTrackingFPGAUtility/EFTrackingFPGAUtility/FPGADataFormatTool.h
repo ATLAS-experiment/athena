@@ -50,12 +50,16 @@ class FPGADataFormatTool
   
     virtual StatusCode convertFPGASliceToFPGADataFormat(
        const FPGATrackSimHitCollection*  hitsInSlices,
+        bool doPixel, 
+        bool doStrip,
        std::vector<uint64_t> &encodedData,
        const EventContext &ctx
        ) const override; 
   
     virtual StatusCode convertFPGAHitsToFPGADataFormat(
-       const FPGATrackSimHitCollection* hits,
+       const FPGATrackSimHitCollection* allHits,
+       bool doPixel, 
+       bool doStrip,
        std::vector<uint64_t> &encodedData,
        const EventContext &ctx
        ) const override; 
@@ -91,12 +95,16 @@ class FPGADataFormatTool
 
     StatusCode convertFPGASlices(
         const FPGATrackSimHitCollection*  hitsInSlices,
+        bool doPixel, 
+        bool doStrip,
         std::vector<uint64_t> &encodedData,
         const EventContext &ctx /*ctx*/
 	) const;
 
     StatusCode convertFPGAHits(
         const FPGATrackSimHitCollection* hits,
+        bool doPixel, 
+        bool doStrip,
         std::vector<uint64_t> &encodedData,
         const EventContext &ctx /*ctx*/
 	) const;
@@ -108,6 +116,8 @@ class FPGADataFormatTool
 
     // For module
     StatusCode fillModuleHeader(const InDetDD::SiDetectorElement* sielement, std::vector<uint64_t> &encodedData) const;
+
+    void fillHit(const FPGATrackSimHit* hit, bool isLast, bool isLastofSlice, std::vector<uint64_t> &encodedData) const;
 
 
 };
