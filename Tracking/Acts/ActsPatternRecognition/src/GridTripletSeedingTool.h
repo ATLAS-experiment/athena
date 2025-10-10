@@ -334,13 +334,13 @@ class GridTripletSeedingTool
                                       45. * Acts::UnitConstants::mm};
 
  private:
-  Acts::Experimental::CylindricalSpacePointGrid2::Config m_gridCfg;
-  Acts::Experimental::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
-  Acts::Experimental::DoubletSeedFinder::Config m_topDoubletFinderCfg;
-  Acts::Experimental::TripletSeedFinder::Config m_tripletFinderCfg;
-  Acts::Experimental::BroadTripletSeedFilter::Config m_filterCfg;
+  Acts::CylindricalSpacePointGrid2::Config m_gridCfg;
+  Acts::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
+  Acts::DoubletSeedFinder::Config m_topDoubletFinderCfg;
+  Acts::TripletSeedFinder::Config m_tripletFinderCfg;
+  Acts::BroadTripletSeedFilter::Config m_filterCfg;
 
-  std::optional<Acts::Experimental::TripletSeeder> m_finder;
+  std::optional<Acts::TripletSeeder> m_finder;
 
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
@@ -351,16 +351,14 @@ class GridTripletSeedingTool
   /// Private access to the logger
   const Acts::Logger& logger() const { return *m_logger; }
 
-  bool spacePointSelectionFunction(
-      const xAOD::SpacePoint* sp, float r) const;
+  bool spacePointSelectionFunction(const xAOD::SpacePoint* sp, float r) const;
 
-  bool doubletSelectionFunction(
-      const Acts::Experimental::ConstSpacePointProxy2& middle,
-      const Acts::Experimental::ConstSpacePointProxy2& other, float cotTheta,
-      bool isBottomCandidate) const;
+  bool doubletSelectionFunction(const Acts::ConstSpacePointProxy2& middle,
+                                const Acts::ConstSpacePointProxy2& other,
+                                float cotTheta, bool isBottomCandidate) const;
 
   std::pair<float, float> retrieveRadiusRangeForMiddle(
-      const Acts::Experimental::ConstSpacePointProxy2& spM,
+      const Acts::ConstSpacePointProxy2& spM,
       const Acts::Range1D<float>& rMiddleSpRange) const;
 };
 

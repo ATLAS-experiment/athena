@@ -29,8 +29,8 @@
 #include "Acts/Visualization/ObjVisualization3D.hpp"
 #include "Acts/Detector/MultiWireStructureBuilder.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
-#include "Acts/Plugins/GeoModel/GeoModelMaterialConverter.hpp"
-#include "Acts/Plugins/GeoModel/GeoModelToDetectorVolume.hpp"
+#include "ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp"
+#include "ActsPlugins/GeoModel/GeoModelToDetectorVolume.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/ConvexPolygonBounds.hpp"
@@ -67,7 +67,7 @@ namespace ActsTrk {
     StatusCode MuonDetectorBuilderTool::initialize() {
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_MSG_DEBUG("ACTS version is: v"<< Acts::VersionMajor << "." << Acts::VersionMinor << "." << Acts::VersionPatch << " [" << Acts::CommitHash << "]");
+        ATH_MSG_DEBUG("ACTS version is: v"<< Acts::VersionMajor << "." << Acts::VersionMinor << "." << Acts::VersionPatch << " [" << Acts::CommitHash.value_or("unknown hash") << "]");
 
         return StatusCode::SUCCESS;
     }
@@ -267,7 +267,7 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
         const float thickness = chamber.halfZ() * 2;
         PVConstLink parentVolume = chamber.readoutEles().front()->getMaterialGeom()->getParent();
         std::pair<MaterialPtr, double> geoMaterials = getMaterial(parentVolume);
-        const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterials.first);
+        const Acts::Material aMat = ActsPlugins::GeoModel::geoMaterialConverter(*geoMaterials.first);
         //rotate about the z axis
         std::shared_ptr<Acts::PlaneSurface> surface = Acts::Surface::makeShared<Acts::PlaneSurface>(chamberTransform, bounds);
         Acts::MaterialSlab slab{aMat, thickness};
@@ -341,12 +341,12 @@ std::pair<std::vector<volumePtr>,std::vector<surfacePtr>>
         ATH_MSG_VERBOSE("Drawing volume named "<<name);
         const GeoShape* shape = node.volume->getLogVol()->getShape();
         const GeoMaterial* geoMaterial = node.volume->getLogVol()->getMaterial();
-        const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterial);
+        const Acts::Material aMat = ActsPlugins::GeoModel::geoMaterialConverter(*geoMaterial);
         std::shared_ptr<Acts::HomogeneousVolumeMaterial> material = std::make_shared<Acts::HomogeneousVolumeMaterial>(aMat);
         ATH_MSG_DEBUG("FINAL TRANSFORM " << GeoTrf::toString(transform));
 
-        auto rawVolume = Acts::GeoModel::convertVolume(transform, shape, boundFactory);
-        volumePtr volume = Acts::GeoModel::convertDetectorVolume(gctx.context(), *rawVolume, std::format("{}_{}", name ,passiveVolumes.size()),  {});
+        auto rawVolume = ActsPlugins::GeoModel::convertVolume(transform, shape, boundFactory);
+        volumePtr volume = ActsPlugins::GeoModel::convertDetectorVolume(gctx.context(), *rawVolume, std::format("{}_{}", name ,passiveVolumes.size()),  {});
         volume->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(30).withSensitive(passiveVolumes.size()));
         volume->assignVolumeMaterial(material);
         passiveVolumes.push_back(volume);

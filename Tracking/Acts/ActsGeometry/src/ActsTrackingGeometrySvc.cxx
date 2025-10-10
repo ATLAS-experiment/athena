@@ -40,8 +40,8 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
-#include <Acts/Plugins/Json/JsonMaterialDecorator.hpp>
-#include <Acts/Plugins/Json/MaterialMapJsonConverter.hpp>
+#include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
+#include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/AnnulusBounds.hpp>
 #include <Acts/Surfaces/DiscSurface.hpp>
@@ -96,7 +96,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
   ATH_MSG_INFO("ACTS version is: v"
                << Acts::VersionMajor << "." << Acts::VersionMinor << "."
-               << Acts::VersionPatch << " [" << Acts::CommitHash << "]");
+               << Acts::VersionPatch << " [" << Acts::CommitHash.value_or("unknown hash") << "]");
 
   // load which subdetectors to build from property
   std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
