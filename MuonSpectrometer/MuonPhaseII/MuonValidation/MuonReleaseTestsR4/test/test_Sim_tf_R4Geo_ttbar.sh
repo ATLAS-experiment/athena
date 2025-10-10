@@ -10,7 +10,7 @@
 # art-output: SimHitsR4.pool.root
 
 
-GEOMODEL_DB_FILE=$(python -c "from MuonGeoModelTestR4.testGeoModel import geoModelFileDefault; print(geoModelFileDefault(useR4Layout = True))")
+GEOMODEL_DB_FILE=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults; print(MuonPhaseIITestDefaults.GEODB_R4)")
 ATLAS_CONDDB_TAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 ATLAS_GEO_TAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
 

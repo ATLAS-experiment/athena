@@ -19,7 +19,6 @@ if __name__ == "__main__":
     parser.add_argument("--outT0JSON" , default="T0Constants.json")
     parser.set_defaults(outRootFile="MdtCalib.root")
     
-    #parser.set_defaults(inputFile = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/ESD/data23_cos.00448208.express_express.recon.ESD.x721/73events.data23_cos.00448208.express_express.recon.ESD.x721._lb0003._SFO-ALL._0001.1"])
     args = parser.parse_args()
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg

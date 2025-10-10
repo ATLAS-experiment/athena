@@ -2,15 +2,13 @@
 
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import SetupArgParser
+    from MuonGeoModelTestR4.testGeoModel import SetupArgParser, MuonPhaseIITestDefaults
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="InferenceHoughTest.root")
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
-    parser.set_defaults(inputFile=[
-                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
-                                    ])
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
     args = parser.parse_args()
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg

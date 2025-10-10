@@ -469,8 +469,9 @@ def muonRdoDecodeTestData( forTrigger = False ):
 def muonRdoDecodeTestMC():
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.110401.PowhegPythia_P2012_ttbar_nonallhad.recon.RDO.e3099_s2578_r7572_tid07644622_00/RDO.07644622._000001.pool.root.1"]
+    flags.Input.Files = defaultTestFiles.RDO_RUN3
 
     flags.lock()
     flags.dump()

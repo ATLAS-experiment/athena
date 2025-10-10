@@ -17,7 +17,7 @@ if __name__ == "__main__":
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(noRpc=True)
     parser.set_defaults(noTgc=True)
-    #parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    parser.set_defaults(geoModelFile="RUN4")
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Muon.Calib.readMdtJSON = True

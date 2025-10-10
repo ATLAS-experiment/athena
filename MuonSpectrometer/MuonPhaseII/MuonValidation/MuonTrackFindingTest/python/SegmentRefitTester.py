@@ -41,7 +41,7 @@ if __name__=="__main__":
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
-    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.PG_HITS_R3)
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
    
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
