@@ -17,13 +17,9 @@
 #include <memory>
 #include "xAODMuonPrepData/TgcStripAuxContainer.h"
 
-//================ Constructor =================================================
 namespace{
     using namespace xAOD::P4Helpers;
 }
-Muon::TgcRdoToPrepDataToolMT::TgcRdoToPrepDataToolMT(const std::string& t, const std::string& n, const IInterface* p)
-  : base_class(t, n, p) {}  
-
 //================ Initialization =================================================
 
 StatusCode Muon::TgcRdoToPrepDataToolMT::initialize()
@@ -139,7 +135,7 @@ template<class ContType, class CollType>
 
 StatusCode Muon::TgcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const {
   if (!m_xAODKey.empty()){
-    SG::WriteHandle<xAOD::TgcStripContainer> handle(m_xAODKey, ctx);
+    SG::WriteHandle handle{m_xAODKey, ctx};
     ATH_CHECK(handle.record(std::make_unique<xAOD::TgcStripContainer>(), 
                             std::make_unique<xAOD::TgcStripAuxContainer>()));
   }
@@ -365,8 +361,11 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
           tgcStrip->setChannelNumber(idHelper.channel(allBcPrd->identify()));
           tgcStrip->setBcBitMap(allBcPrd->getBcBitMap());
           tgcStrip->setIdentifier(allBcPrd->identify().get_compact());
+          /// In the R4 layout both phi & eta measurements are expressed on the same surface. However, the
+          //  rotation from eta -> phi is clockwise  --> minus sign in prd creation
+          const double locPos = (tgcStrip->measuresPhi() ? -1. : 1.) * allBcPrd->localPosition().x();
           tgcStrip->setMeasurement(m_idHelperSvc->moduleHash(allBcPrd->identify()),
-                                  xAOD::MeasVector<1>(allBcPrd->localPosition().x()),
+                                  xAOD::MeasVector<1>(locPos),
                                   xAOD::MeasMatrix<1>(allBcPrd->localCovariance()(0,0)));
         }
     }

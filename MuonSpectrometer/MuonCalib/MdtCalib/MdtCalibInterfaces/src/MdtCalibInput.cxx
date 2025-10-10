@@ -70,7 +70,7 @@ MdtCalibInput::MdtCalibInput(const xAOD::MdtDriftCircle& prd,
    m_gctx{&gctx},
    m_RE{prd.readoutElement()},
    m_hash{prd.measurementHash()},  
-   m_approach{localToGlobal()* prd.localCirclePosition()} {}
+   m_approach{localToGlobal()* prd.localMeasurementPos()} {}
    
    
 MdtCalibInput::MdtCalibInput(const Muon::MdtPrepData& prd):
