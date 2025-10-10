@@ -1,22 +1,22 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_RDBMATERIALMANAGER_H
 #define GEOMODELSVC_RDBMATERIALMANAGER_H
 
-//---------------------------------------------------------//
-//                                                         //
-// class RDBMaterialManager  This is a material manager   //
-// which gets its material from RDB.                       //
-//                                                         //
-// Joe Boudreau March 2003                                 //
-//                                                         //
-//---------------------------------------------------------//
+/**
+ *  @class  RDBMaterialManager
+ *  @brief  This is a material manager which gets material definitions from
+ *          the Geometry DB (Oracle)
+ *  @author Joe Boudreau
+ */
+
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelKernel/GeoElement.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 #include <string>
 #include <vector>
@@ -25,7 +25,7 @@
 class GeoMaterial;
 class ISvcLocator;
 
-class RDBMaterialManager final : public StoredMaterialManager {
+class RDBMaterialManager final : public StoredMaterialManager, public AthMessaging {
 
  public:
 
