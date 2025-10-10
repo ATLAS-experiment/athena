@@ -71,12 +71,13 @@ namespace EFTrackingFPGAIntegration
         SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGASlicedHitKey{this, "FPGATrackSimHitKey_1st", "FPGAHits_1st_reg34", "FPGATrackSim Hits 1st stage key"}; // Slicing Engine Output
         SG::ReadHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrack1stKey","FPGATracks_1st_reg34","FPGATrackSim Tracks 1st stage key"}; // Inside Out Output
 
+        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGATrackOutput{this, "FPGAOutputTrackKey", "FPGATrackOutput", "Track output from FPGA format"};
+
        // Tool for output conversion
        ToolHandle<OutputConversionTool> m_outputConversionTool{this, "OutputConversionTool", "OutputConversionTool", "tool for output conversion"};
 
        // XRT Kernels and IPs Name Properties
        Gaudi::Property<std::string> m_slicingEngineInputName{this, "SlicingEngineInputName", "", "Name of the slicing engine input kernel"};
-       Gaudi::Property<std::string> m_slicingEngineName{this, "SlicingEngineName", "", "Name of the slicing engine kernel"};
        Gaudi::Property<std::string> m_slicingEngineOutputName{this, "SlicingEngineOutputName", "", "Name of the slicing engine output kernel"};
        Gaudi::Property<std::string> m_insideOutInputName{this, "InsideOutInputName", "", "Name of the inside out input kernel"};
        Gaudi::Property<std::string> m_insideOutOutputName{this, "InsideOutOutputName", "", "Name of the inside out output kernel"};
@@ -87,24 +88,23 @@ namespace EFTrackingFPGAIntegration
        // For IP access through XRT
        xrt::device m_xrt_accelerator;
 
-       cl::Event m_slicingEngineInputEndEvent;
-       cl::Event m_slicingEngineOutputEndEvent;
-       cl::Event m_insideOutEndEvent;
+       cl::Event m_slicingEngineInputEndEvent ATLAS_THREAD_SAFE;
+       cl::Event m_slicingEngineOutputEndEvent ATLAS_THREAD_SAFE;
+       cl::Event m_insideOutEndEvent ATLAS_THREAD_SAFE;
 
        
        // Kernels
-       mutable xrt::ip m_slicingEngineIP;
-       mutable cl::Kernel m_slicingEngineInput;
-       mutable cl::Kernel m_slicingEngineOutput;
-       mutable cl::Kernel m_insideOutInput;
-       mutable cl::Kernel m_insideOutOutput;
+       mutable cl::Kernel m_slicingEngineInput ATLAS_THREAD_SAFE;
+       mutable cl::Kernel m_slicingEngineOutput ATLAS_THREAD_SAFE;
+       mutable cl::Kernel m_insideOutInput ATLAS_THREAD_SAFE;
+       mutable cl::Kernel m_insideOutOutput ATLAS_THREAD_SAFE;
 
        
        // Buffers
-       mutable cl::Buffer m_slicingEngineInputBuffer;
-       mutable cl::Buffer m_slicingEngineOutputBuffer;
-       mutable cl::Buffer m_insideOutInputBuffer;
-       mutable cl::Buffer m_insideOutOutputBuffer;
+       mutable cl::Buffer m_slicingEngineInputBuffer ATLAS_THREAD_SAFE;
+       mutable cl::Buffer m_slicingEngineOutputBuffer ATLAS_THREAD_SAFE;
+       mutable cl::Buffer m_insideOutInputBuffer ATLAS_THREAD_SAFE;
+       mutable cl::Buffer m_insideOutOutputBuffer ATLAS_THREAD_SAFE;
 
        // Command queue
        cl::CommandQueue m_queue;

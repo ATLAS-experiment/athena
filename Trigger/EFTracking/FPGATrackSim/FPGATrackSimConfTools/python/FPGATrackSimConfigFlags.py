@@ -83,6 +83,9 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('MinSpacePointsPerSeed',3)
     cf.addFlag('MaxSpacePointsPerSeed',3)
 
+    cf.addFlag('runF150hw', False)
+
+
     def __httHough1DFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createHough1dFPGATrackSimConfigFlags
