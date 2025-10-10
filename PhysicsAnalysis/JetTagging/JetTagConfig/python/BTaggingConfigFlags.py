@@ -206,9 +206,6 @@ def createBTaggingConfigFlags():
     # GNN vertex fitter
     btagcf.addFlag("BTagging.GNNVertexFitter", False)
 
-    # a flag to enable legacy BTagging
-    btagcf.addFlag("BTagging.EnableLegacyBTagging", False)
-
     # (multifold) NN trainings, each jet collection maps to a list of
     # dicts. The dict has several keys:
     #  - folds: list of NNs to run
