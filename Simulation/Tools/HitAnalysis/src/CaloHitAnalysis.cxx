@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Base class
@@ -62,6 +62,26 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_cell_radius = new TH1D("h_Calo_cell_radius", "cell_radius", 100, 0., 6000.);
   m_h_cell_radius->StatOverflows();
   CHECK(m_thistSvc->regHist( m_path+m_h_cell_radius->GetName(), m_h_cell_radius));
+
+  m_h_cell_layer = new TH1D("h_Calo_cell_layer", "cell_layer", 24, -0.5, 23.5);
+  m_h_cell_layer->StatOverflows();
+  CHECK(m_thistSvc->regHist( m_path+m_h_cell_layer->GetName(), m_h_cell_layer));
+
+  m_h_cell_eta_Eweight = new TH1D("h_Calo_cell_eta_Eweight", "cell_eta_Eweight", 50,-5.,5.);
+  m_h_cell_eta_Eweight->StatOverflows();
+  CHECK(m_thistSvc->regHist( m_path+m_h_cell_eta_Eweight->GetName(), m_h_cell_eta_Eweight));
+
+  m_h_cell_phi_Eweight = new TH1D("h_Calo_cell_phi_Eweight", "cell_phi_Eweight", 50,-3.1416,3.1416);
+  m_h_cell_phi_Eweight->StatOverflows();
+  CHECK(m_thistSvc->regHist( m_path+m_h_cell_phi_Eweight->GetName(), m_h_cell_phi_Eweight));
+
+  m_h_cell_radius_Eweight = new TH1D("h_Calo_cell_radius_Eweight", "cell_radius_Eweight", 100, 0., 6000.);
+  m_h_cell_radius_Eweight->StatOverflows();
+  CHECK(m_thistSvc->regHist( m_path+m_h_cell_radius_Eweight->GetName(), m_h_cell_radius_Eweight));
+
+  m_h_cell_layer_Eweight = new TH1D("h_Calo_cell_layer_Eweight", "cell_layer_Eweight", 24, -0.5, 23.5);
+  m_h_cell_layer_Eweight->StatOverflows();
+  CHECK(m_thistSvc->regHist( m_path+m_h_cell_layer_Eweight->GetName(), m_h_cell_layer_Eweight));
 
   m_h_xy = new TH2F("h_Calo_xy", "xy", 100,-4000,4000,100, -4000, 4000);
   m_h_xy->StatOverflows();
@@ -152,6 +172,7 @@ StatusCode CaloHitAnalysis::initialize() {
     m_tree->Branch("CellZ", &m_cell_z);
     m_tree->Branch("CellE", &m_cell_e);
     m_tree->Branch("CellRadius", &m_cell_radius);
+    m_tree->Branch("CellLayer", &m_cell_layer);
     m_tree->Branch("Time", &m_time);
     m_tree->Branch("CalibEta", &m_calib_eta);
     m_tree->Branch("CalibPhi", &m_calib_phi);
@@ -182,6 +203,7 @@ StatusCode CaloHitAnalysis::execute() {
   m_cell_y->clear();
   m_cell_z->clear();
   m_cell_radius->clear();
+  m_cell_layer->clear();
   m_time->clear();
   m_calib_eta->clear();
   m_calib_phi->clear();
@@ -211,6 +233,11 @@ StatusCode CaloHitAnalysis::execute() {
           m_h_cell_eta->Fill(ddElement->eta());
           m_h_cell_phi->Fill(ddElement->phi()) ;
           m_h_cell_radius->Fill(ddElement->z());
+          m_h_cell_layer->Fill(ddElement->getSampling());
+          m_h_cell_eta_Eweight->Fill(ddElement->eta(),tot_e);
+          m_h_cell_phi_Eweight->Fill(ddElement->phi(),tot_e) ;
+          m_h_cell_radius_Eweight->Fill(ddElement->z(),tot_e);
+          m_h_cell_layer_Eweight->Fill(ddElement->getSampling(),tot_e);
           m_h_xy->Fill(ddElement->x(), ddElement->y());
           m_h_zr->Fill(ddElement->r(), ddElement->r());
           m_h_etaphi->Fill(ddElement->eta(), ddElement->phi());
@@ -228,6 +255,7 @@ StatusCode CaloHitAnalysis::execute() {
           m_cell_y->push_back(ddElement->y());
           m_cell_z->push_back(ddElement->z());
           m_cell_radius->push_back(ddElement->r());
+          m_cell_layer->push_back(ddElement->getSampling());
           m_time->push_back(tot_time);
         }
       }
@@ -250,6 +278,7 @@ StatusCode CaloHitAnalysis::execute() {
           double eta = hitElement->eta();
           double phi = hitElement->phi();
           double radius = hitElement->r();
+          int layer = hitElement->getSampling();
           float x = hitElement->x();
           float y = hitElement->y();
           double z = hitElement->z();
@@ -258,6 +287,11 @@ StatusCode CaloHitAnalysis::execute() {
           m_h_cell_eta->Fill( eta );
           m_h_cell_phi->Fill( phi );
           m_h_cell_radius->Fill( radius );
+          m_h_cell_layer->Fill( layer );
+          m_h_cell_eta_Eweight->Fill( eta , energy );
+          m_h_cell_phi_Eweight->Fill( phi , energy );
+          m_h_cell_radius_Eweight->Fill( radius , energy );
+          m_h_cell_layer_Eweight->Fill( layer , energy );
           m_h_xy->Fill(x,y);
           m_h_zr->Fill(z,radius);
           m_h_etaphi->Fill(eta, phi);
@@ -274,6 +308,7 @@ StatusCode CaloHitAnalysis::execute() {
           m_cell_y->push_back(y);
           m_cell_z->push_back(z);
           m_cell_radius->push_back(radius);
+          m_cell_layer->push_back(layer);
           m_time->push_back(time);
         } // End while hits
       } // End statuscode success upon retrieval of hits

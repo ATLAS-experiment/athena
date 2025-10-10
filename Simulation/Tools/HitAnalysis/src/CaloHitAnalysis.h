@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HITANALYSIS_CALOHITANALYSIS_H
@@ -41,6 +41,12 @@ private:
   TH1* m_h_cell_phi{};
   TH1* m_h_cell_e{};
   TH1* m_h_cell_radius{};
+  TH1* m_h_cell_layer{};
+  // repeat the same 4 basic histograms but energy weighted
+  TH1* m_h_cell_eta_Eweight{};
+  TH1* m_h_cell_phi_Eweight{};
+  TH1* m_h_cell_radius_Eweight{};
+  TH1* m_h_cell_layer_Eweight{};
   TH2* m_h_xy{};
   TH2* m_h_zr{};
   TH2* m_h_etaphi{};
@@ -69,6 +75,7 @@ private:
   std::vector<float>* m_cell_z{};
   std::vector<float>* m_cell_e{};
   std::vector<float>* m_cell_radius{};
+  std::vector<int>*   m_cell_layer{};
   std::vector<float>* m_time{};
   std::vector<float>* m_calib_eta{};
   std::vector<float>* m_calib_phi{};
