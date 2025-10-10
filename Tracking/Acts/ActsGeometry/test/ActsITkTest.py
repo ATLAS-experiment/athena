@@ -48,7 +48,7 @@ tgSvc = ActsTrackingGeometrySvcCfg(flags,
                                    RunConsistencyChecks=True,
                                    #  ConsistencyCheckOutput="trk_geo_check.csv", # enable debug output writing
                                    BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
-                                   ObjDebugOutput=True)
+                                   ObjDebugOutput=False)
 acc.merge(tgSvc)
 
 alg = ActsExtrapolationAlgCfg(flags,
