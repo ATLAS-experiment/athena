@@ -3,15 +3,11 @@
 # Declare the package name:
 atlas_subdir( CaloIdentifier )
 
-# External dependencies:
-find_package( Boost COMPONENTS thread )
-
 # Component(s) in the package:
 atlas_add_library( CaloIdentifier
                    src/*.cxx
                    PUBLIC_HEADERS CaloIdentifier
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} CaloGeoHelpers AthenaKernel AtlasDetDescr IdDict Identifier GaudiKernel
+                   LINK_LIBRARIES CaloGeoHelpers AthenaKernel AtlasDetDescr IdDict Identifier GaudiKernel
                    PRIVATE_LINK_LIBRARIES CxxUtils IdDictParser PathResolver )
 
 atlas_add_dictionary( CaloIdentifierDict

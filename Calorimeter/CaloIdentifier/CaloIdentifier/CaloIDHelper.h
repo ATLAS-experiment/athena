@@ -19,8 +19,8 @@
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/MultiRange.h" //used in the icc file
 #include "Identifier/RangeIterator.h"
-#include "boost/range/iterator_range.hpp"
 #include <vector>
+#include <ranges>
 #include <set>
 class IMessageSvc;
 class IdDictRegion;
@@ -39,9 +39,9 @@ public:
   typedef Identifier::size_type  size_type ;
 
   /** Type for iterators over identifiers. */
-  typedef std::vector<Identifier>::const_iterator id_iterator;
+  using id_iterator = std::vector<Identifier>::const_iterator;
   /** Type for range over identifiers. */
-  typedef boost::iterator_range<id_iterator> id_range;
+  using id_range = std::ranges::subrange<id_iterator>;
 
 
 

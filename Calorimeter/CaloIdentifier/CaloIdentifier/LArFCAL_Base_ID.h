@@ -11,7 +11,7 @@
 #include "IdDict/IdDictFieldImplementation.h"
 #include "CaloIdentifier/LArNeighbours.h"
 #include "CaloIdentifier/LArID_Exception.h"
-#include "boost/range/iterator_range.hpp"
+#include <ranges>
 
 class IdDictRegion;
 
@@ -65,9 +65,9 @@ public:
   size_type     module_hash_max () const;
 
   /** Type for iterators over identifiers. */
-  typedef std::vector<Identifier>::const_iterator id_iterator;
+  using id_iterator = std::vector<Identifier>::const_iterator;
   /** Type for range over identifiers. */
-  typedef boost::iterator_range<id_iterator> id_range;
+  using id_range = std::ranges::subrange<id_iterator>;
 
   /** begin iterator over set of module Identifiers */
   id_iterator mod_begin    () const;
