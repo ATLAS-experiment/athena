@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TVirtualConverter.h
@@ -87,8 +87,8 @@
  * with @c TConverterRegistry.
  */
 
-#ifndef TVIRTUALCONVERTER_H
-#define TVIRTUALCONVERTER_H
+#ifndef ROOTCONVERSIONS_TVIRTUALCONVERTER_H
+#define ROOTCONVERSIONS_TVIRTUALCONVERTER_H
 
 #include <string>
 #include <typeinfo>
@@ -221,7 +221,7 @@ public:
    * @brief Helper to convert a class name to a Root class pointer.
    * @param name  The name of the class to convert.
    *
-   * Returns 0 on failure.
+   * Returns nullptr on failure.
    */
   static TClass* ToClass (const std::string& name);
 
@@ -229,7 +229,7 @@ public:
    * @brief Helper to convert a @c type_info to a Root class pointer.
    * @param name  The @c type_info of the class to convert.
    *
-   * Returns 0 on failure.
+   * Returns nullptr on failure.
    */
   static TClass* ToClass (const std::type_info& id);
 
@@ -336,4 +336,4 @@ public:
 #include "RootConversions/TVirtualConverter.icc"
 
 
-#endif // not TVIRTUALCONVERTER_H
+#endif // not ROOTCONVERSIONS_TVIRTUALCONVERTER_H

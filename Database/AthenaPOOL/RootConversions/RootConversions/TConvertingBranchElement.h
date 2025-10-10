@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TConvertingBranchElement.h
@@ -39,8 +39,10 @@
  */
 
 
-#ifndef TCONVERTINGBRANCHELEMENT_H
-#define TCONVERTINGBRANCHELEMENT_H
+#ifndef ROOTCONVERSIONS_TCONVERTINGBRANCHELEMENT_H
+#define ROOTCONVERSIONS_TCONVERTINGBRANCHELEMENT_H
+
+#include <atomic>
 
 #if defined(__clang__)
 # pragma clang diagnostic push
@@ -52,8 +54,6 @@
 #if defined(__clang__)
 # pragma clang diagnostic pop
 #endif
-
-#include <atomic>
 
 class TVirtualConverter;
 
@@ -152,13 +152,11 @@ protected:
 
 private:
   /// Flag used to mark dummy nodes created by @c BuildConvertedElisions.
-  enum {
-    kIsDummy      = BIT(20)
-  };
+  static constexpr unsigned int kIsDummy = BIT(20);
 
   /**
    * @brief new() method for this object.
-   * @param p Address for placement new, or 0.
+   * @param p Address for placement new, or nullptr.
    * @return Address of the new object.
    *
    * This is installed as the @c New method in @c TBranchElement's @c TClass.
@@ -221,5 +219,5 @@ private:
   TConvertingBranchElement (const TConvertingBranchElement&);
 };
 
-#endif
+#endif // not ROOTCONVERSIONS_TCONVERTINGBRANCHELEMENT_H
 

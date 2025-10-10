@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TConverterStreamer.cxx
@@ -26,7 +26,7 @@ TConverterStreamer::TConverterStreamer (const CheckSumMap& convmap,
   : fConvmap (convmap),
     fClass (cls),
     fStreamerChecksum (0),
-    fLastFile (0)
+    fLastFile (nullptr)
 {
 }
 
@@ -45,7 +45,7 @@ void TConverterStreamer::operator() (TBuffer& b, void* obj)
     FindVersion (b, startpos, bcnt, version);
     // find converter for the object shape checksum
     // (checksum is read from the file in FindVersion)
-    CheckSumMap::const_iterator i = fConvmap.find (fStreamerChecksum);
+    auto i = fConvmap.find (fStreamerChecksum);
 
     if (i != fConvmap.end()) {
       // Found a converter --- call it.
