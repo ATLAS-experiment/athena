@@ -18,6 +18,13 @@ atlas_add_test( testMuonDetectorNav
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
+atlas_add_test( testMuonTrackingGeometry
+                SCRIPT python -m ActsMuonDetectorTest.testMuonTrackingGeometry --gen3
+                PROPERTIES TIMEOUT 1000
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
+
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
