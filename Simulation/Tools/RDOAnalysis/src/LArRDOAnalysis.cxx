@@ -5,7 +5,8 @@
 
 #include "LArRDOAnalysis.h"
 #include "StoreGate/ReadHandle.h"
-
+#include "TTree.h"
+#include "TH1F.h"
 #include <format>
 
 StatusCode LArRDOAnalysis::initialize() {
@@ -238,7 +239,7 @@ StatusCode LArRDOAnalysis::execute() {
  }
   
 
- if(m_doNtuple){ 
+ if(m_tree and m_doNtuple){ 
   m_tree->Fill();
  }
   
