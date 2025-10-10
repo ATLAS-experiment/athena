@@ -130,10 +130,6 @@ namespace MuonR4 {
         }
     
 
-        const IdentifierHash stripHash{readOutEle->constructHash(0,readOutEle->gasGapNumber(measHash), true)};
-        const IdentifierHash wireHash{readOutEle->constructHash(0, readOutEle->gasGapNumber(measHash), false)};
-
-
         const Amg::Vector2D locSimHitPos{readOutEle->sensorLayout(measHash)->to2D(xAOD::toEigen(timedHit->localPosition()),true)};
 
 

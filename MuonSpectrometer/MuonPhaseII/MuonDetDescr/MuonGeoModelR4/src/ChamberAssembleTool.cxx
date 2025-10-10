@@ -395,10 +395,10 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
          sectorArgs.bounds = envelopeBox;
          sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toCenter.inverse() * envelopeCentre, envelopePlane);
           //sort the readout elements in the chamber per technology (in cases we have multiple technologies in the same chamber)
-         std::ranges::sort(candidate.detEles,[this](const MuonReadoutElement* a, 
-                                                    const MuonReadoutElement* b){
-                                                         return a->detectorType() < b->detectorType();
-                                                        });
+         std::ranges::sort(candidate.detEles,[](const MuonReadoutElement* a, 
+						const MuonReadoutElement* b){
+	   return a->detectorType() < b->detectorType();
+	 });
          
          if (!isNsw(candidate.detEles.front())) {
             /** Define the chamber envelopes */
