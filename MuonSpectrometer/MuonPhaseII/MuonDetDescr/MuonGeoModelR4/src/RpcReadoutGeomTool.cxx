@@ -187,15 +187,16 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         }
         gapVol.transform = gapVol.transform * Amg::getRotateY3D( (isAside ? -90. :  90.)* Gaudi::Units::degree);
 
-        if (etaDesign) {
+        if (etaDesign && phiDesign) {
             insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
                                                           etaDesign, phiDesign,
                                                           RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)));
-        } else if (phiDesign) {
-            insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform*
-                                                                                                  Amg::getRotateZ3D(90. * Gaudi::Units::deg)), 
-                                                          phiDesign,
-                                                          RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, true))); 
+        } else if (etaDesign) {
+            insertStripLayer(std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(gapVol.transform), 
+                                                          etaDesign, RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)));
+        } else {
+            ATH_MSG_ERROR("It's not forseen to have a chamber without eta design");
+            return StatusCode::FAILURE;
         }     
     }
     return StatusCode::SUCCESS;
