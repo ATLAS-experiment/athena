@@ -187,7 +187,7 @@ namespace MuonR4 {
             Then converting to coordinate system where  0 -> -0.5*l to match strip local coordinates
                                             d1 -> d1 = -0.5*l + 0.5* (l-d) = -0.5*d = -0.5 * v_pro*deltaT
         */
-        const double smearedY =  -0.5 * m_propagationVelocity * smearedDeltaT; //in mm
+        const double smearedY = 0.5 * m_propagationVelocity * smearedDeltaT; //in mm
         //If smearedDeltaT == 0 position is in the centre of the strip (0).
 
         const Amg::Vector2D locHitPos{smearedX, smearedY};
@@ -221,10 +221,11 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
             return false;
         }
-        ATH_MSG_VERBOSE("Digitize hit "<<m_idHelperSvc->toString(digitId)<<" located at: "<<Amg::toString(locHitPos));
+        ATH_MSG_VERBOSE("Digitize hit "<<m_idHelperSvc->toString(digitId)<<" located at: "<<Amg::toString(locPos)
+                     <<", SDO: "<<Amg::toString(locHitPos));
         /// Check whether the digit is actually efficient
-        const bool effiSignal1 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
-        const bool effiSignal2 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
+        const bool effiSignal1 = !effiMap || effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
+        const bool effiSignal2 = !effiMap || effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
         if (effiSignal1) {
             outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime(simHit) + smearedTimeR, timeOverThreshold(rndEngine)));
         }
