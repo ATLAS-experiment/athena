@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DQATLASREADYFILTERTOOL_H
@@ -10,6 +10,7 @@
 #include "GaudiKernel/StatusCode.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 // This filter tool rejects events where the ATLAS READY flag is not set
 // @author Peter Onyisi <ponyisi@cern.ch>
