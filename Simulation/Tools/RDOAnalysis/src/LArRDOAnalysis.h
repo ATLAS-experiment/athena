@@ -12,7 +12,11 @@
 #include "LArRawEvent/LArTTL1Container.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
+#include <vector>
+#include <cstdint>
 
+class TH1;
+class TTree;
 
 class LArRDOAnalysis : public AthHistogramAlgorithm {
 
