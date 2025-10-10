@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigConfigSvc )
@@ -14,7 +14,7 @@ find_package( TBB )
 atlas_add_component( TrigConfigSvc
                      src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps AthenaPoolUtilities CxxUtils GaudiKernel StoreGateLib TrigConfData TrigConfIO TrigConfInterfaces nlohmann_json::nlohmann_json )
+                     LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps AthenaPoolUtilities CxxUtils GaudiKernel StoreGateLib TrigConfData TrigConfIO TrigConfInterfaces PersistentDataModel nlohmann_json::nlohmann_json )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
