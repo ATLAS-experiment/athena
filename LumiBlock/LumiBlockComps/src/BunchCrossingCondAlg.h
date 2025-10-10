@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file BunchCrossingCondAlg.h
@@ -22,6 +22,7 @@
 #include "TrigConfInterfaces/ILVL1ConfigSvc.h"
 #include "LumiBlockData/LuminosityCondData.h"
 #include "TrigConfData/L1BunchGroupSet.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 /**
  * @brief Conditions algorithm to unpack fill parameters from COOL.
