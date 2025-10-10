@@ -18,7 +18,7 @@ def createTileSimConfigFlags():
     and 5ns granularity will be used for all other hits')
     tileSimFlags.addFlag('TimeCut', 'NONE', help='Time cut for hits, all hits go to one single time bin if time is above this cut')
     tileSimFlags.addFlag('PlateToCell', 'NONE', help='Special flag for Calibration Hits. If true then Tile. Plates are the parts of the adjacent Tile cells. If false then they are Dead Materials')
-    tileSimFlags.addFlag('doTileRaw', 'NONE', help='Enable energy per tile row in TileHit')
+    tileSimFlags.addFlag('doTileRow', 'NONE', help='Enable energy per tile row in TileHit')
     tileSimFlags.addFlag('doTOFCorrection', 'NONE', help='Apply TOF correction (subtract Time Of Flight from ATLAS center')
     tileSimFlags.addFlag('doBirk', 'NONE', help='Enable Birk\'s law')
     tileSimFlags.addFlag('OldBirk', 'NONE', help='Use expected values from NIM 80 (1970) 239-244: birk1=0.0130 g/(MeV*cm^2), birk2=9.6e-6 (g/(MeV*cm^2))^2')
