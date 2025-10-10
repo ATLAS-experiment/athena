@@ -3,17 +3,17 @@
         "source": "data",
         "format": "BS",
         "paths": [
-	    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1_200evt",
-	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-11._0001.1",
-	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW._lb0231._SFO-12._0001.1"
+           "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW._lb0395._SFO-15._0001.1_200evt",
+           "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW._lb0395._SFO-15._0001.1",
+           "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW._lb0395._SFO-17._0001.1"
         ]
     },
     "data_Main": {
         "source": "data",
         "format": "BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data_150evt",
-	    "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data24_13p6TeV.00475321.physics_Main.daq.RAW._lb0247._SFO-11._0006.data"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data25_13p6TeV.00500306.physics_Main.daq.RAW._lb0434._SFO-11._0006.data_150evt",
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigP1Test/data25_13p6TeV.00500306.physics_Main.daq.RAW._lb0434._SFO-11._0006.data"
         ]
     },
     "data_run1": {
