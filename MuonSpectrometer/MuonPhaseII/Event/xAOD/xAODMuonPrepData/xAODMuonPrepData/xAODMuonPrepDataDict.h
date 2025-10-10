@@ -45,6 +45,9 @@
 #include "xAODMuonPrepData/sTgcPadContainer.h"
 #include "xAODMuonPrepData/sTgcPadHit.h"
 
+#include "xAODMuonPrepData/CombinedMuonStrip.h"
+#include "xAODMuonPrepData/CombinedMuonStripAuxContainer.h"
+#include "xAODMuonPrepData/CombinedMuonStripContainer.h"
 
 // Instantiate all necessary types for the dictionary.
 namespace {
@@ -64,7 +67,9 @@ struct GCCXML_DUMMY_INSTANTIATION_XAODMUONPRD {
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcMeasContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcWireContainer_v1);
-    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcPadContainer_v1);    
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcPadContainer_v1);  
+    
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, CombinedMuonStripContainer_v1);
 };
 }  // namespace
 
