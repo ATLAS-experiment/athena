@@ -19,7 +19,7 @@ references_map = {
     "s4454": "v8",
     "a913": "v19",
     # Digi
-    "d1920": "v16",
+    "d1920": "v17",
     # Overlay
     "d1726": "v16",
     "d1759": "v24",
@@ -29,8 +29,8 @@ references_map = {
     # Reco
     "q442": "v91",
     "q449": "v150",
-    "q452": "v56",
-    "q454": "v75",
+    "q452": "v57",
+    "q454": "v76",
     # Derivations
     "data_PHYS_Run2": "v67",
     "data_PHYSLITE_Run2": "v37",
