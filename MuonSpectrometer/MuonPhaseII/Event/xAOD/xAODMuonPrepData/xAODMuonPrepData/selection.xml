@@ -139,4 +139,15 @@
       <class name="xAOD::sTgcPadAuxContainer_v1"
               id="7F62C588-0EF3-4E4B-BEC5-4881D7E24D72" />
       <typedef name="xAOD::sTgcPadAuxContainer" />
+
+
+       <!-- Combined muonstraip -->
+       <class name="xAOD::CombinedMuonStrip_v1" />
+       <typedef name="xAOD::CombinedMuonStrip" />
+       <class name="xAOD::CombinedMuonStripContainer_v1" 
+               id="7C7907CD-4F95-4193-A8E2-7C4981A50784" />
+       <typedef name="xAOD::CombinedMuonStripContainer" />
+       <class name="xAOD::CombinedMuonStripAuxContainer_v1" 
+               id="EB2F3A88-B85F-4093-A245-0530E45A9AE0" />
+       <typedef name="xAOD::CombinedMuonAuxStripContainer" />
 </lcgdict>
