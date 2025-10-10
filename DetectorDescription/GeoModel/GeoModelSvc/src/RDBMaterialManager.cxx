@@ -303,7 +303,7 @@ GeoMaterial* RDBMaterialManager::searchMaterialMap(const std::string & name) con
   MaterialMapIterator m = m_materialMap.find(name);
 
   if (m!=m_materialMap.end()) {
-    ATH_MSG_VERBOSE(" ***** in searchMaterialMap(): search sucess for " << name);
+    ATH_MSG_VERBOSE(" ***** in searchMaterialMap(): search success for " << name);
     return (*m).second;
   }
 
@@ -318,7 +318,7 @@ GeoElement *RDBMaterialManager::searchElementVector(const std::string & name)  c
   GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(),std::move(matchByName));
 
   if (e!=m_elementVector.end()) {
-    ATH_MSG_VERBOSE(" ***** in searchElementVector() search succes for "  << name);
+    ATH_MSG_VERBOSE(" ***** in searchElementVector() search success for "  << name);
     return *e;
   }
 
@@ -333,11 +333,11 @@ GeoElement *RDBMaterialManager::searchElementVector(const unsigned int atomicNum
   GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(), matchByNumber);
   	
   if (e!=m_elementVector.end()) {
-    ATH_MSG_VERBOSE(" ***** in searchElementVector(atomicNumber) search succes for atomic number "  << atomicNumber);
+    ATH_MSG_VERBOSE(" ***** in searchElementVector(atomicNumber) search success for atomic number "  << atomicNumber);
     return *e;
   }
  
-  ATH_MSG_VERBOSE(" ***** in searchElementVector(atomicNumber) search succes for atomic number "  << atomicNumber);
+  ATH_MSG_VERBOSE(" ***** in searchElementVector(atomicNumber) search success for atomic number "  << atomicNumber);
   return nullptr;
 }
 
@@ -537,102 +537,62 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
   return pmaterial;
 }
 
-
-const GeoElement *RDBMaterialManager::getElement(const std::string & name) {
-  unsigned int ind;
-
-  std::string element_name;
-  std::string element_symbol;
-  std::string tmp_name;
-
-  double      element_a;
-  double      element_z;
-
-  GeoElement *pelement;
-
-  pelement = nullptr;
-  pelement = searchElementVector( name);
-  if (pelement != nullptr)
-      return pelement;
-
+const GeoElement *RDBMaterialManager::getElement(const std::string & name)
+{
   ATH_MSG_VERBOSE(" ***** getElement(): " << name);
 
-  for(ind = 0; ind < m_elements->size(); ind++)
-    {
-      const IRDBRecord* rec = (*m_elements)[ind];
-		
-      tmp_name = rec->getString("NAME");
+  GeoElement* pelement = searchElementVector(name);
+  if(!pelement) {
+    for(const auto& rec : *m_elements) {
+      if(name == rec->getString("NAME")) {
+	pelement = new GeoElement(rec->getString("NAME")
+				  , rec->getString("SYMBOL")
+				  , rec->getDouble("Z")
+				  , rec->getDouble("A")*GeoModelKernelUnits::gram/Gaudi::Units::mole);
 	
-      if( name == tmp_name)
-	{ 
-	  element_name   = rec->getString("NAME");
-	  element_symbol = rec->getString("SYMBOL");
-	  element_a = rec->getDouble("A");
-	  element_z = rec->getDouble("Z");
-                	
-	  pelement = new GeoElement( element_name , element_symbol  ,element_z , element_a *(GeoModelKernelUnits::gram/Gaudi::Units::mole));
-
-	  // a table to keep the memory allocation, and easy for delete 
-	  m_elementVector.push_back( pelement);
-			
-	  break;
-	}
+	// a table to keep the memory allocation, and easy for delete
+	m_elementVector.push_back(pelement);
+	break;
+      }
     }
-  if (ind == m_elements->size()) 		return nullptr;
-	
+  }
   return pelement;
 }
 
-const GeoElement *RDBMaterialManager::getElement(unsigned int atomicNumber) {
-
-  unsigned int ind;
-
-  std::string element_name;
-  std::string element_symbol;
-	
-  double      element_a;
-  double      element_z;
-	
-  GeoElement* pelement(0);
-
+const GeoElement *RDBMaterialManager::getElement(unsigned int atomicNumber)
+{
   ATH_MSG_VERBOSE(" ***** const getElement(atomicNumber) const : " << atomicNumber);
 
-  for(ind = 0; ind < m_elements->size(); ind++)
-    {
-      const IRDBRecord* rec = (*m_elements)[ind];
-		
-      if(atomicNumber == rec->getDouble("A"))
-	{ 
-	  element_name   = rec->getString("NAME");
-	  element_symbol = rec->getString("SYMBOL");
-	  element_a = rec->getDouble("A");
-	  element_z = rec->getDouble("Z");
-                	
-	  pelement = new GeoElement( element_name , element_symbol  ,element_z , element_a *(GeoModelKernelUnits::gram/Gaudi::Units::mole));
-
-	  // a table to keep the memory allocation, and easy for delete 
-	  m_elementVector.push_back( pelement);
-			
-	  break;
-	}
-    }
-  if (ind == m_elements->size()) 	return nullptr;
+  GeoElement* pelement = searchElementVector(atomicNumber);
+  if(!pelement) {
+    for(const auto& rec : *m_elements) {
+      if(atomicNumber == rec->getDouble("A")) {
+	pelement = new GeoElement(rec->getString("NAME")
+				  , rec->getString("SYMBOL")
+				  , rec->getDouble("Z")
+				  , rec->getDouble("A")*GeoModelKernelUnits::gram/Gaudi::Units::mole);
 	
+	// a table to keep the memory allocation, and easy for delete
+	m_elementVector.push_back( pelement);
+	break;
+      }
+    }
+  }
   return pelement;
 }
 
-void RDBMaterialManager::addMaterial(const std::string & /*space*/, GeoMaterial *material) {
+void RDBMaterialManager::addMaterial(const std::string & /*space*/, GeoMaterial *material)
+{
   ATH_MSG_VERBOSE(" ***** RDBMaterialManager::addMaterial() ");
-	
-  std::string key = material->getName();
-  // Check whether we already have materials with the same space::name defined
-  if(m_materialMap.find(key)!=m_materialMap.end()) {
-    ATH_MSG_WARNING(" Attempt to redefine material " << key
-		    << "!. The existing instance is kept. Please choose another name for new material");
+  const std::string& key = material->getName();
+  const auto [it_material, success] = m_materialMap.emplace(key,material);
+  if(success) {
+    it_material->second->lock();
   }
   else {
-    material->lock();             
-    m_materialMap[key]=material;
+    // Warn if we already have material with the same name defined
+    ATH_MSG_WARNING(" Attempt to redefine material " << key
+		    << "!. The existing instance is kept. Please choose another name for new material");
   }
 }
 

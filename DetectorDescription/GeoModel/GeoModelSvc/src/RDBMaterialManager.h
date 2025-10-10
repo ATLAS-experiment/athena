@@ -5,14 +5,13 @@
 #ifndef GEOMODELSVC_RDBMATERIALMANAGER_H
 #define GEOMODELSVC_RDBMATERIALMANAGER_H
 
-//---------------------------------------------------------//
-//                                                         //
-// class RDBMaterialManager  This is a material manager   //
-// which gets its material from RDB.                       //
-//                                                         //
-// Joe Boudreau March 2003                                 //
-//                                                         //
-//---------------------------------------------------------//
+/**
+ *  @class  RDBMaterialManager
+ *  @brief  This is a material manager which gets material definitions from
+ *          the Geometry DB (Oracle)
+ *  @author Joe Boudreau
+ */
+
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "GeoModelKernel/GeoIntrusivePtr.h"
