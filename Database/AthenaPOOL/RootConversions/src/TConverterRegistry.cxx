@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TConverterRegistry.cxx
@@ -11,13 +11,12 @@
  * Register each converter with @c AddConverter.
  */
 
-
 #include "RootConversions/TConverterRegistry.h"
-#include "RootConversions/TVirtualConverter.h"
 #include "RootConversions/TConverterStreamer.h"
+#include "RootConversions/TVirtualConverter.h"
 #include "CxxUtils/checker_macros.h"
-#include "TMemberStreamer.h"
 #include "TClass.h"
+#include "TMemberStreamer.h"
 #include "TROOT.h"
 
 
@@ -95,19 +94,19 @@ bool TConverterRegistry::AddConverter (const char* convname)
  * @brief Look up a converter in the registry by name and checksum.
  * @param name     The name of the (transient) class.
  * @param checksum The checksum of the persistent class.
- * @return The converter, or 0 if none.
+ * @return The converter, or nullptr if none.
  */
 TVirtualConverter* TConverterRegistry::GetConverter (const char* name,
                                                      int checksum) const
 {
   lock_t lock (fMutex);
-  MapType::const_iterator i = fMap.find (name);
+  auto i = fMap.find (name);
   if (i != fMap.end()) {
-    CheckSumMap::const_iterator i2 = i->second.find (checksum);
+    auto i2 = i->second.find (checksum);
     if (i2 != i->second.end())
       return i2->second.first;
   }
-  return 0;
+  return nullptr;
 }
 
 
@@ -117,7 +116,7 @@ void TConverterRegistry::AddStreamerConverter (const std::string& from_type,
 {
   lock_t lock (fMutex);
   std::string key = from_type + "-" + to_type;
-  SMapType::const_iterator i = fSMap.find (key);
+  auto i = fSMap.find (key);
   if (i != fSMap.end())
     delete i->second;
   fSMap[key] = streamer;
@@ -130,10 +129,10 @@ TConverterRegistry::GetStreamerConverter (const std::string& from_type,
 {
   lock_t lock (fMutex);
   std::string key = from_type + "-" + to_type;
-  SMapType::const_iterator i = fSMap.find (key);
+  auto i = fSMap.find (key);
   if (i != fSMap.end())
     return i->second;
-  return 0;
+  return nullptr;
 }
 
 
@@ -156,16 +155,13 @@ TConverterRegistry* TConverterRegistry::Instance()
  */
 TConverterRegistry::~TConverterRegistry()
 {
-  for (MapType::iterator i = fMap.begin(); i != fMap.end(); ++i) {
-    for (CheckSumMap::iterator j = i->second.begin();
-         j != i->second.end();
-         ++j)
-    {
-      if (j->second.second)
-        delete j->second.first;
+  for (auto& [name, checksum_map] : fMap) {
+    for (auto& [checksum, payload] : checksum_map) {
+      if (payload.second)
+        delete payload.first;
     }
   }
 
-  for (SMapType::iterator i = fSMap.begin(); i != fSMap.end(); ++i)
-    delete i->second;
+  for (auto& [key, streamer] : fSMap)
+    delete streamer;
 }
