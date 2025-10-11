@@ -184,6 +184,9 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    placement.setFileName(outputConnectionSpec);
 
    std::string containerPrefix = m_containerPrefix;
+   if( containerPrefix == "Default" ) {
+      containerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
+   }
    std::string dhContainerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ? APRDefaults::RNTupleNames::DataHeader : APRDefaults::TTreeNames::DataHeader;
    std::string containerName;
 

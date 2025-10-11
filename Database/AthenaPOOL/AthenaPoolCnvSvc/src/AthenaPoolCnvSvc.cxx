@@ -64,18 +64,23 @@ StatusCode AthenaPoolCnvSvc::initialize() {
          }
       }
    }
-   ATH_MSG_DEBUG("Setting StorageType to " << m_storageTechProp.value());
-   m_dbType = pool::DbType::getType( m_storageTechProp.value() );
-   if( m_dbType == TEST_StorageType ) {
-      ATH_MSG_FATAL("Unknown StorageType rquested: " << m_storageTechProp.value());
-      return StatusCode::FAILURE;
+   // Validate provided event data technologies and fill the internal cache
+   for (const auto& [key, value] : m_storageTechProp.value()) {
+      try {
+         const auto dbType = pool::DbType::getType(value);
+         if (dbType == pool::TEST_StorageType) {
+            ATH_MSG_FATAL(std::format("Unknown storage type requested for file {}: {}", key, value));
+            return StatusCode::FAILURE;
+         }
+         m_storageTechMap.emplace(key, dbType.type());
+      } catch (const std::exception& e) {
+        ATH_MSG_FATAL(std::format("Exception while getting storage type for file {}: {}", key, e.what()));
+        return StatusCode::FAILURE;
+      } catch (...) {
+        ATH_MSG_FATAL(std::format("Unknown exception while getting storage type for file {}", key));
+        return StatusCode::FAILURE;
+      }
    }
-   if( m_containerPrefixProp.value() == "Default" ) {
-      // select default storage element name accoring to storage tech
-      if( m_dbType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) m_containerPrefixProp.setValue( APRDefaults::RNTupleNames::EventData );
-      else m_containerPrefixProp.setValue( APRDefaults::TTreeNames::EventData );
-   }
-
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
    // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
@@ -261,7 +266,7 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
 // This is called before DataObjects are being converted.
    std::string outputConnection = outputConnectionSpec.substr(0, outputConnectionSpec.find('['));
    // Extract the technology
-   int tech = m_dbType.type();
+   int tech{0};
    if (!decodeOutputSpec(outputConnection, tech).isSuccess()) {
       ATH_MSG_ERROR("connectOutput FAILED extract file name and technology.");
       return(StatusCode::FAILURE);
@@ -334,7 +339,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
    PMonUtils::BasicStopWatch stopWatch("commitOutput", m_chronoMap);
    std::unique_lock<std::mutex> lock(m_mutex);
    // Extract the technology
-   int tech = m_dbType.type();
+   int tech{0};
    if (!decodeOutputSpec(outputConnection, tech).isSuccess()) {
       ATH_MSG_ERROR("connectOutput FAILED extract file name and technology.");
       return(StatusCode::FAILURE);
@@ -379,7 +384,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       return(StatusCode::FAILURE);
    }
    // Check FileSize
-   long long int currentFileSize = m_poolSvc->getFileSize(outputConnection, m_dbType.type(), contextId);
+   long long int currentFileSize = m_poolSvc->getFileSize(outputConnection, tech, contextId);
    if (m_databaseMaxFileSize.find(outputConnection) != m_databaseMaxFileSize.end()) {
       if (currentFileSize > m_databaseMaxFileSize[outputConnection]) {
          ATH_MSG_WARNING(std::format("FileSize {} > {} for {}", currentFileSize, m_databaseMaxFileSize[outputConnection], outputConnection));
@@ -506,9 +511,25 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& output
       outputTech = pool::ROOTRNTUPLE_StorageType.type();
       fileSpec.erase(0, 12);
    } else if (outputTech == 0) {
-      outputTech = m_dbType.type();
+      // Extract the file name
+      std::string fileName{fileSpec};
+      if (auto pos = fileSpec.find("?pmerge="); pos != std::string::npos) {
+         fileName = fileSpec.substr(0, pos);
+      }
+      // Find the appropriate event data technology for this file
+      // This will be used for event data and its data header
+      // First we look for an exact file name match
+      // If that fails, we look for a wildcard ("*") match
+      // If that also fails, we use the hardcoded default value
+      if (auto it = m_storageTechMap.find(fileName); it != m_storageTechMap.end()) {
+         outputTech = it->second;
+      } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
+         outputTech = it->second;
+      } else {
+         outputTech = pool::ROOTTREEINDEX_StorageType.type();
+      }
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::registerCleanUp(IAthenaPoolCleanUp* cnv) {

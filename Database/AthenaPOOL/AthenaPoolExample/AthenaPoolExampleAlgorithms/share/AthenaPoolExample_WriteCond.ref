@@ -8,7 +8,6 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile1.root, name=SimplePoolFile1.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes

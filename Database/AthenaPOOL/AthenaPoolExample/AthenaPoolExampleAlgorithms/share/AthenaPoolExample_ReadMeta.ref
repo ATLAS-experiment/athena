@@ -8,7 +8,6 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog2.xml
-AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 ToolSvc.AthPoolEx::ReadMeta                          INFO in initialize()
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG reinitialization...
