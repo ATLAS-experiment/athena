@@ -58,7 +58,7 @@ if __name__ == "__main__":
     and 5ns granularity will be used for all other hits')
     simargs.add_argument('--time-cut', default=None, help='Time cut for hits, all hits go to one single time bin if time is above this cut ')
     simargs.add_argument('--plate-to-cell', default=None, help='Special flag for Calibration Hits. If true then Tile. Plates are the parts of the adjacent Tile cells. If false then they are Dead Materials')
-    simargs.add_argument('--do-tile-raw', default=None, help='Enable energy per tile row in TileHit')
+    simargs.add_argument('--do-tile-row', default=None, help='Enable energy per tile row in TileHit')
     simargs.add_argument('--do-tof-correction', default=None, help='Apply TOF correction (subtract Time Of Flight from ATLAS center')
     simargs.add_argument('--do-birk', default=None, help='Enable Birk\'s law')
     simargs.add_argument('--old-birk', action='store_true', help='Use expected values from NIM 80 (1970) 239-244: birk1=0.0130 g/(MeV*cm^2), birk2=9.6e-6 (g/(MeV*cm^2))^2')
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     # Check if post configuration of Tile simulation is needed
     postConfig = False
     if any([args.ushape, args.steel, args.pvt, args.cstube, args.delta_thit, args.time_cut, args.plate_to_cell,
-            args.do_tile_raw, args.do_tof_correction, args.do_birk, args.old_birk, args.birk1, args.birk2]):
+            args.do_tile_row, args.do_tof_correction, args.do_birk, args.old_birk, args.birk1, args.birk2]):
         postConfig = True
         if args.ushape:
             simulationFlags += [f'flags.Tile.Sim.Ushape={args.ushape}']
@@ -123,18 +123,18 @@ if __name__ == "__main__":
             simulationFlags += [f'flags.Tile.Sim.TimeCut={args.time_cut}']
         if args.plate_to_cell:
             simulationFlags += [f'flags.Tile.Sim.PlateToCell={args.plate_to_cell}']
-        if args.do_tile_raw:
-            simulationFlags += [f'flags.Tile.Sim.DoTileRow={args.do_tile_raw}']
+        if args.do_tile_row:
+            simulationFlags += [f'flags.Tile.Sim.doTileRow={args.do_tile_row}']
         if args.do_tof_correction:
-            simulationFlags += [f'flags.Tile.Sim.DoTOFCorrection={args.DoTOFCorrection}']
+            simulationFlags += [f'flags.Tile.Sim.doTOFCorrection={args.do_tof_correction}']
         if args.do_birk:
-            simulationFlags += [f'flags.Tile.Sim.DoBirk={args.do_birk}']
+            simulationFlags += [f'flags.Tile.Sim.doBirk={args.do_birk}']
         if args.old_birk:
             simulationFlags += [f'flags.Tile.Sim.OldBirk={args.old_birk}']
         if args.birk1:
-            simulationFlags += [f'flags.Tile.Sim.birk1={args.birk1}']
+            simulationFlags += [f'flags.Tile.Sim.Birk1={args.birk1}']
         if args.birk2:
-            simulationFlags += [f'flags.Tile.Sim.birk2={args.birk2}']
+            simulationFlags += [f'flags.Tile.Sim.Birk2={args.birk2}']
 
     # =======>>> Set up the Tile TB simulation preExec
     simulationPreExec = '; '.join(simulationFlags)

@@ -60,8 +60,8 @@ def TileCTBGeoG4SDCalcCfg(flags, hit_collection_name, name="TileCTBGeoG4SDCalc",
         kwargs.setdefault("TimeCut", flags.Tile.Sim.TimeCut)
     if flags.Tile.Sim.PlateToCell != 'NONE':
         kwargs.setdefault("PlateToCell", flags.Tile.Sim.PlateToCell)
-    if flags.Tile.Sim.doTileRaw != 'NONE':
-        kwargs.setdefault("DoTileRow", flags.Tile.Sim.doTileRaw)
+    if flags.Tile.Sim.doTileRow != 'NONE':
+        kwargs.setdefault("DoTileRow", flags.Tile.Sim.doTileRow)
     if flags.Tile.Sim.doTOFCorrection != 'NONE':
         kwargs.setdefault("DoTOFCorrection", flags.Tile.Sim.doTOFCorrection)
     if flags.Tile.Sim.doBirk != 'NONE':
