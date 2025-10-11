@@ -60,23 +60,23 @@ StatusCode CaloHitAnalysis::initialize() {
 
   m_h_cell_layer = new TH1D("h_Calo_cell_layer", "cell_layer", 24, -0.5, 23.5);
   m_h_cell_layer->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_layer->GetName(), m_h_cell_layer));
+  CHECK(histSvc()->regHist( m_path+m_h_cell_layer->GetName(), m_h_cell_layer));
 
   m_h_cell_eta_Eweight = new TH1D("h_Calo_cell_eta_Eweight", "cell_eta_Eweight", 50,-5.,5.);
   m_h_cell_eta_Eweight->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_eta_Eweight->GetName(), m_h_cell_eta_Eweight));
+  CHECK(histSvc()->regHist( m_path+m_h_cell_eta_Eweight->GetName(), m_h_cell_eta_Eweight));
 
   m_h_cell_phi_Eweight = new TH1D("h_Calo_cell_phi_Eweight", "cell_phi_Eweight", 50,-3.1416,3.1416);
   m_h_cell_phi_Eweight->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_phi_Eweight->GetName(), m_h_cell_phi_Eweight));
+  CHECK(histSvc()->regHist( m_path+m_h_cell_phi_Eweight->GetName(), m_h_cell_phi_Eweight));
 
   m_h_cell_radius_Eweight = new TH1D("h_Calo_cell_radius_Eweight", "cell_radius_Eweight", 100, 0., 6000.);
   m_h_cell_radius_Eweight->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_radius_Eweight->GetName(), m_h_cell_radius_Eweight));
+  CHECK(histSvc()->regHist( m_path+m_h_cell_radius_Eweight->GetName(), m_h_cell_radius_Eweight));
 
   m_h_cell_layer_Eweight = new TH1D("h_Calo_cell_layer_Eweight", "cell_layer_Eweight", 24, -0.5, 23.5);
   m_h_cell_layer_Eweight->StatOverflows();
-  CHECK(m_thistSvc->regHist( m_path+m_h_cell_layer_Eweight->GetName(), m_h_cell_layer_Eweight));
+  CHECK(histSvc()->regHist( m_path+m_h_cell_layer_Eweight->GetName(), m_h_cell_layer_Eweight));
 
   m_h_xy = new TH2F("h_Calo_xy", "xy", 100,-4000,4000,100, -4000, 4000);
   m_h_xy->StatOverflows();
