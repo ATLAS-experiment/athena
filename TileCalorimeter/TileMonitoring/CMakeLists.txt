@@ -16,7 +16,7 @@ atlas_add_library( TileMonitoringLib
 atlas_add_component( TileMonitoring
   TileMonitoring/*.h src/*.cxx src/components/*.cxx
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib ByteStreamCnvSvcBaseLib CaloEvent CaloIdentifier CxxUtils GaudiKernel JetInterface JetSelectorToolsLib StoreGateLib TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier TileMonitoringLib TileRecUtilsLib TrigConfData TrigDecisionToolLib TrigT1Result xAODCaloEvent xAODCore xAODEventInfo xAODJet xAODMuon xAODTrigger )
+  LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib ByteStreamCnvSvcBaseLib CaloEvent CaloIdentifier CxxUtils GaudiKernel JetInterface JetSelectorToolsLib StoreGateLib TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier TileMonitoringLib TileRecUtilsLib TrigConfData TrigDecisionToolLib TrigT1Result xAODCaloEvent xAODCore xAODEventInfo xAODJet xAODMuon xAODTrigger Identifier )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

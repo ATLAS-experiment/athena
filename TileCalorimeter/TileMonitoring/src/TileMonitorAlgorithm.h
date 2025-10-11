@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEMONITORALGORITHM_H
 #define TILEMONITORING_TILEMONITORALGORITHM_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
+#include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h"
 
 class CaloCell;
 class TileID;
