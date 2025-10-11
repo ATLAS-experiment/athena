@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
