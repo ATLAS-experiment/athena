@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_CPMMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_CPMMONITORALGORITHM_H
@@ -12,6 +12,7 @@
 #include "xAODTrigL1Calo/CPMTobRoIContainer.h"
 #include "xAODTrigL1Calo/CMXCPTobContainer.h"
 #include "xAODTrigL1Calo/CMXCPHitsContainer.h"
+#include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 
 
