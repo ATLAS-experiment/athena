@@ -5,7 +5,6 @@ AthenaEventLoopMgr                                   INFO Initializing AthenaEve
 EventInfoCnvAlg                                      INFO Initializing EventInfoCnvAlg
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
-AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 MetaDataSvc                                         DEBUG Registering all Tools in ToolHandleArray MetaDataTools
 MetaDataSvc                                         DEBUG Adding public ToolHandle tool ToolSvc.xAODMaker::FileMetaDataTool (xAODMaker::FileMetaDataTool)
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available

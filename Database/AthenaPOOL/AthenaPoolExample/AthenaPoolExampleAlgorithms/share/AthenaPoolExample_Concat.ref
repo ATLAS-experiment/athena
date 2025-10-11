@@ -5,7 +5,6 @@ AthenaEventLoopMgr                                   INFO Initializing AthenaEve
 EventInfoCnvAlg                                      INFO Initializing EventInfoCnvAlg
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
-AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Beam spot information not available
 EventInfoCnvAlg.EventInfoCnvTool                     INFO Will not fill beam spot information into xAOD::EventInfo
 WriteData                                            INFO in initialize()

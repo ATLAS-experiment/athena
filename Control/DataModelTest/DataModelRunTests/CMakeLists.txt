@@ -32,7 +32,7 @@ function (datamodel_run_test testName)
 
   if( ARG_RNTUPLE )
     set( testName "${testName}RNTup" )
-    set( _options " Output.StorageTechnology.EventData='ROOTRNTUPLE' " )
+    set( _options " Output.StorageTechnology.EventData={\\'*\\':\\'ROOTRNTUPLE\\'} " )
   endif()
 
   atlas_add_test( ${testName}

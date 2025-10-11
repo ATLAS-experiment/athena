@@ -172,7 +172,6 @@ private: // member functions
 
 private: // data
    /// decoded storage tech requested in "StorageTechnology" property
-   pool::DbType                  m_dbType;
    std::string                   m_lastInputFileName;
    ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
@@ -187,7 +186,8 @@ private: // properties
    BooleanProperty m_useDetailChronoStat{this,"UseDetailChronoStat",false};
 
    /// Default Storage Tech for containers (ROOTTREE, ROOTTREEINDEX, ROOTRNTUPLE)
-   StringProperty  m_storageTechProp{this,"StorageTechnology", "ROOTTREEINDEX"};
+   Gaudi::Property<std::map<std::string, std::string>> m_storageTechProp{this, "StorageTechnology", {{"*","ROOTTREEINDEX"}}};
+   std::map<std::string, int> m_storageTechMap;
    /// POOL Container name prefix - will be part of or whole TTree/RNTuple name
    /// 'Default' takes the prefix from APRDefaults according to StorageTech
    StringProperty  m_containerPrefixProp{this,"PoolContainerPrefix","Default"};

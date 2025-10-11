@@ -8,7 +8,6 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
 MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:A811B014-0297-AD47-AF4C-B75EF418982D

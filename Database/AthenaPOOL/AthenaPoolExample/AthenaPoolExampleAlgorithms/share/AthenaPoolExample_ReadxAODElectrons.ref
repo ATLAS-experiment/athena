@@ -8,7 +8,6 @@ ReadExampleElectron                                  INFO ReadExampleElectron: i
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "SimplePoolFile_xAOD.root" from the collection list.

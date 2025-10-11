@@ -37,7 +37,7 @@ Derivation_tf.py \
   --inputAODFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1" \
   --outputDAODFile="rntuple.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTRNTUPLE\";flags.Output.StorageTechnology.MetaData=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.StorageTechnology.EventData={\"*\":\"ROOTRNTUPLE\"};flags.Output.StorageTechnology.MetaData=\"ROOTRNTUPLE\";";
 
 echo "art-result: $? rntuple";
 
@@ -78,7 +78,7 @@ timeout 64800 \
 Merge_tf.py \
   --inputAODFile="DAOD_PHYS.ttree.pool.root" \
   --outputAOD_MRGFile="DAOD_PHYS.ttree-to-rntuple.pool.root" \
-  --preExec='flags.Output.StorageTechnology.EventData="ROOTRNTUPLE";flags.Output.StorageTechnology.MetaData="ROOTRNTUPLE";'
+  --preExec='flags.Output.StorageTechnology.EventData={"*":"ROOTRNTUPLE"};flags.Output.StorageTechnology.MetaData="ROOTRNTUPLE";'
 
 echo "art-result: $? conversion to rntuple (PHYS)"
 
@@ -86,7 +86,7 @@ timeout 64800 \
 Merge_tf.py \
   --inputAODFile="DAOD_PHYSLITE.ttree.pool.root" \
   --outputAOD_MRGFile="DAOD_PHYSLITE.ttree-to-rntuple.pool.root" \
-  --preExec='flags.Output.StorageTechnology.EventData="ROOTRNTUPLE";flags.Output.StorageTechnology.MetaData="ROOTRNTUPLE";'
+  --preExec='flags.Output.StorageTechnology.EventData={"*":"ROOTRNTUPLE"};flags.Output.StorageTechnology.MetaData="ROOTRNTUPLE";'
 
 echo "art-result: $? conversion to rntuple (PHYSLITE)"
 
