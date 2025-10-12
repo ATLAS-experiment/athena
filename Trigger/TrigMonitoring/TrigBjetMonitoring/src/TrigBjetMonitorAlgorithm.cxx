@@ -6,6 +6,7 @@
 
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODBTagging/BTaggingContainer.h"
 
