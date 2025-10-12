@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LArRODMONALG_H
@@ -23,6 +23,7 @@
 #include "StoreGate/ReadDecorHandleKey.h"
 
 #include <atomic>
+#include <fstream>
 
 
 class LArDigit;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  Morvaj, P.Strizenec - develop for Digital Trigger monitoring (2021)
 
@@ -17,6 +17,7 @@
 //#include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloConditions/CaloNoise.h"
+#include "CaloEvent/CaloCellContainer.h"
 
 //#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "LumiBlockData/BunchCrossingCondData.h"

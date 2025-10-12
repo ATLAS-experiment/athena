@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LARRAWCHANNELMONALG_H
@@ -13,6 +13,7 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoring/DQAtlasReadyFilterTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
 #include "LArRecConditions/LArBadChannelMask.h"
