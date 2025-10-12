@@ -7,6 +7,7 @@
 #include "LArRecEvent/LArEventBitInfo.h"
 
 #include "TrigTauMonitorBaseAlgorithm.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 TrigTauMonitorBaseAlgorithm::TrigTauMonitorBaseAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)
     : AthMonitorAlgorithm(name, pSvcLocator)
