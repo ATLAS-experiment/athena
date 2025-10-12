@@ -3,6 +3,7 @@
 */
 
 #include "HLTCalo_TopoCaloClustersMonitor.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "LArRecEvent/LArEventBitInfo.h"
 

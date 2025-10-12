@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTCalo_L2CaloEMClustersMonitor.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "CxxUtils/phihelper.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "LArRecEvent/LArEventBitInfo.h"
