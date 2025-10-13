@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -15,6 +15,8 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 #include "ZdcIdentifier/ZdcID.h"
 
 
