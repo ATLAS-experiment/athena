@@ -34,13 +34,13 @@ namespace DerivationFramework {
 
   StatusCode AugmentationToolLeadingJets::addBranches() const
   {
-
-      // Set up the decorators
-      SG::WriteDecorHandle<xAOD::JetContainer, bool> decorator (m_decorationKey);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    // Set up the decorators
+    SG::WriteDecorHandle<xAOD::JetContainer, bool> decorator (m_decorationKey, ctx);
 
       // CALCULATION OF THE NEW VARIABLE
       // Get Primary vertex
-      SG::ReadHandle<xAOD::JetContainer> jets (m_jetKey);
+    SG::ReadHandle<xAOD::JetContainer> jets (m_jetKey, ctx);
       int counter=0;
       for ( unsigned int i =0 ; i < jets->size() ; i++){
        auto jet = (*jets)[i] ;
