@@ -14,6 +14,8 @@
 #include "eFexRoIAlgTool.h"
 
 #include "../IO/LArStripNeighborhoodContainer.h"
+#include "../IO/IeEmNbhoodTOBContainer.h"
+#include "../IO/IeEmTOB.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -68,22 +70,22 @@ namespace GlobalSim {
       false,
       "flag to enable terse dumps"};
 
-    SG::WriteHandleKey<LArStripNeighborhoodContainer>
+    SG::WriteHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
     m_neighKey {
       this,
-      "stripNeighborhoodKey",
-      "stripNeighborhoodContainer",
-      "location to write strip neighborhoods of EFex RoIs"};
+      "stripNeighborhoodTOBKey",
+      "stripNeighborhoodTOBContainer",
+      "location to write strip neighborhoods of EFex RoIs, with the associated TOBs"};
 
     StatusCode
     findNeighborhoods(const std::vector<const xAOD::eFexEMRoI*>&,
 		      const std::vector<const CaloCell*>&,
-		      LArStripNeighborhoodContainer&) const;
+		      IOBitwise::IeEmNbhoodTOBContainer&) const;
 
     StatusCode
     findNeighborhood(const xAOD::eFexEMRoI*,
 		     const std::vector<const CaloCell*>&,
-		     LArStripNeighborhoodContainer&) const;
+		     IOBitwise::IeEmNbhoodTOBContainer&) const;
 
     StatusCode
     findClosestCellToRoI(const xAOD::eFexEMRoI*,

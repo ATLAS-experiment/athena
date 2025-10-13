@@ -91,15 +91,6 @@ namespace GlobalSim {
     
     SG::WriteHandle<GlobalSim::LArStripNeighborhoodContainer> h_write(m_neighKey, ctx);
     SG::WriteHandle<std::vector<int> > h_phimax(m_phimaxKey, ctx);
-    
-    auto dumper = GlobalSim::LArStripNeighborhoodDumper();
-    if (m_dump) {
-      CHECK(dumper.dump(name(), *eventInfo, *neighborhoods));
-    }
-
-    if (m_dumpTerse) {
-      CHECK(dumper.dumpTerse(name(), *eventInfo, *neighborhoods));
-    }
 
     CHECK(h_write.record(std::move(neighborhoods)));
     CHECK(h_phimax.record(std::move(phimax)));

@@ -5,7 +5,7 @@
 #ifndef GLOBALSIM_LARSTRIPNEIGHBORHOODDUMPER_H
 #define GLOBALSIM_LARSTRIPNEIGHBORHOODDUMPER_H
 
-#include "LArStripNeighborhoodContainer.h"
+#include "IeEmNbhoodTOBContainer.h"
 #include "LArStripNeighborhood.h"
 #include "xAODEventInfo/EventInfo.h"
 
@@ -18,12 +18,12 @@ namespace GlobalSim {
     StatusCode
     dump(const std::string& name,
 	 const xAOD::EventInfo& eventInfo,
-         const LArStripNeighborhoodContainer&) const;
+         const IOBitwise::IeEmNbhoodTOBContainer&) const;
 
     StatusCode
     dumpTerse(const std::string& name,
 	      const xAOD::EventInfo& eventInfo,
-              const LArStripNeighborhoodContainer&) const;    
+              const IOBitwise::IeEmNbhoodTOBContainer&) const;    
   };
 }
 
