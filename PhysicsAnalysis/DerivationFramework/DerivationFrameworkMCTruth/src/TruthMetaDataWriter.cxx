@@ -81,7 +81,7 @@ StatusCode DerivationFramework::TruthMetaDataWriter::addBranches() const
         m_tmd->push_back( md );
 
         // Get the list of weights from the metadata
-        std::map<std::string,std::size_t> weight_name_map = m_weightSvc->weightNames();
+        std::map<std::string,std::size_t> weight_name_map = m_weightSvc->weightNames(ctx);
 
         std::vector<std::string> orderedWeightNameVec;
         orderedWeightNameVec.reserve( weight_name_map.size() );

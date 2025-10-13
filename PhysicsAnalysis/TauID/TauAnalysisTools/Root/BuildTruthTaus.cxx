@@ -82,20 +82,19 @@ StatusCode BuildTruthTaus::initialize()
 
 StatusCode BuildTruthTaus::retrieveTruthTaus()
 {
-  return retrieveTruthTaus (m_truthTausEvent);
-}
-
-
-StatusCode BuildTruthTaus::retrieveTruthTaus(ITruthTausEvent& truthTausEvent) const
-{
-  return retrieveTruthTaus (dynamic_cast<TruthTausEvent&> (truthTausEvent));
-}
-
-
-StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) const
-{
   const EventContext& ctx = Gaudi::Hive::currentContext();
+  return retrieveTruthTaus (m_truthTausEvent, ctx);
+}
 
+
+StatusCode BuildTruthTaus::retrieveTruthTaus(ITruthTausEvent& truthTausEvent, const EventContext& ctx) const
+{
+  return retrieveTruthTaus (dynamic_cast<TruthTausEvent&> (truthTausEvent), ctx);
+}
+
+
+StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent, const EventContext& ctx) const
+{
   // truth matching mode
   if (m_truthMatchingMode) {
     if (!m_truthElectronContainer.empty()) {
