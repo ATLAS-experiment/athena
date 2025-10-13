@@ -69,7 +69,7 @@ class SegmentSeed {
     Amg::Vector3D localDirection() const; 
    private:
         /** @brief Set of defining parameters */
-        Parameters m_pars{Parameters::Zero()};
+        Parameters m_pars{};
         /** @brief Pointer to the parent */
         const SpacePointBucket* m_parent{nullptr};
         /** @brief List of associated hits */

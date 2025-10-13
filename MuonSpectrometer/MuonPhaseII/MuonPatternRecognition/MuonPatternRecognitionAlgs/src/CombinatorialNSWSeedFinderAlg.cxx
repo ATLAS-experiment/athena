@@ -10,7 +10,6 @@
 
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"

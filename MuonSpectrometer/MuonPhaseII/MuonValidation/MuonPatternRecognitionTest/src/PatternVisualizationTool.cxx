@@ -8,8 +8,6 @@
 #include "MuonPatternEvent/Segment.h"
 #include "MuonPatternEvent/SegmentSeed.h"
 
-#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
-
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 

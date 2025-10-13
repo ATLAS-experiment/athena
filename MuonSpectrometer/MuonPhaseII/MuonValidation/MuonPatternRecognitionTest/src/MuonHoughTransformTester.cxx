@@ -6,7 +6,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonTesterTree/EventInfoBranch.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
-#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
@@ -87,10 +86,10 @@ namespace MuonValR4 {
                                                            const MuonR4::Segment& recoSeg) const{
         unsigned int same{0};
         using namespace SegmentFit;
-        Line_t recoLine{spatialLinePars(SegmentFit::localSegmentPars(truthSeg))}, 
-               trueLine{spatialLinePars(localSegmentPars(gctx, recoSeg))};
-        const std::vector<int> truthSigns = SeedingAux::strawSigns(trueLine, recoSeg.measurements());
-        const std::vector<int> recoSigns = SeedingAux::strawSigns(recoLine, recoSeg.measurements());
+        const auto[truePos, trueDir] = makeLine(localSegmentPars(truthSeg)); 
+        const auto[recoPos, recoDir] = makeLine(localSegmentPars(gctx, recoSeg));
+        const std::vector<int> truthSigns = SeedingAux::strawSigns(truePos, trueDir, recoSeg.measurements());
+        const std::vector<int> recoSigns = SeedingAux::strawSigns(recoPos, recoDir, recoSeg.measurements());
         for (unsigned int s = 0 ; s < truthSigns.size(); ++s) {
             same += (truthSigns[s] != 0) && truthSigns[s] == recoSigns[s];
         }

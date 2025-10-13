@@ -33,7 +33,7 @@ def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     kwargs.setdefault("ResoSeedHitAssoc", 5. )
     kwargs.setdefault("RecoveryPull", 3.)
     kwargs.setdefault("fitSegmentT0", False)
-    kwargs.setdefault("recalibInFit", True)
+    kwargs.setdefault("recalibInFit", False)
     kwargs.setdefault("useFastFitter", False)
     kwargs.setdefault("doBeamspotConstraint", True)
     

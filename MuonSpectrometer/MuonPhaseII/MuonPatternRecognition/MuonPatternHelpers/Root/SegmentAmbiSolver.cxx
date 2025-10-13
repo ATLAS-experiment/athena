@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/SegmentAmbiSolver.h>
-#include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <Acts/Utilities/Enumerate.hpp>
 
 namespace MuonR4::SegmentFit {
@@ -96,12 +95,11 @@ namespace MuonR4::SegmentFit {
     std::vector<int> SegmentAmbiSolver::driftSigns(const ActsGeometryContext& gctx,
                                                    const Segment& segment,
                                                    const Segment::MeasVec& measurements) const {
-        Line_t line{};
-        line.updateParameters(spatialLinePars(localSegmentPars(gctx, segment)));
-        
-        ATH_MSG_VERBOSE("Fetch drift signs for segment "<<segment.msSector()->identString()<<" -- "<<Amg::toString(line.position())
-                        <<Amg::toString(line.direction()));
-        return SeedingAux::strawSigns(line, measurements);
+        const auto [pos, dir] = makeLine(localSegmentPars(gctx, segment));
+     
+        ATH_MSG_VERBOSE("Fetch drift signs for segment "<<segment.msSector()->identString()
+                      <<" -- "<<Amg::toString(pos)<<" + " <<Amg::toString(dir));
+        return SeedingAux::strawSigns(pos, dir, measurements);
     }
     SegmentAmbiSolver::MeasurementSet 
         SegmentAmbiSolver::extractPrds(const Segment& segment) const {

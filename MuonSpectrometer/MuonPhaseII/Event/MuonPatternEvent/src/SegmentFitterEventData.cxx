@@ -25,18 +25,23 @@ namespace MuonR4{
             return Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
         }
         std::pair<Amg::Vector3D, Amg::Vector3D> makeLine(const Parameters& pars) {
-            return std::make_pair(Amg::Vector3D(pars[toUnderlying(ParamDefs::x0)], 
-                                                pars[toUnderlying(ParamDefs::y0)],0.),
-                                  Amg::dirFromAngles(pars[toUnderlying(ParamDefs::phi)],
-                                                     pars[toUnderlying(ParamDefs::theta)]));
+            using enum ParamDefs;
+            return std::make_pair(Amg::Vector3D(pars[toUnderlying(x0)], 
+                                                pars[toUnderlying(y0)],0.),
+                                  Amg::dirFromAngles(pars[toUnderlying(phi)],
+                                                     pars[toUnderlying(theta)]));
         }
         Parameters localSegmentPars(const xAOD::MuonSegment& seg) {
             static const SG::Accessor<xAOD::MeasVector<toUnderlying(ParamDefs::nPars)>> acc{"localSegPars"};
-            return xAOD::toEigen(xAOD::ConstVectorMap<toUnderlying(ParamDefs::nPars)>{acc(seg).data()});
+            Parameters segPars{};
+            for (std::size_t p =0 ; p < segPars.size(); ++p) {
+                segPars[p] = acc(seg)[p];
+            }
+            return segPars;
         }
         Parameters localSegmentPars(const ActsGeometryContext& gctx,
                                     const Segment& segment) {
-            Parameters pars{Parameters::Zero()};
+            Parameters pars{};
             const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTrans(gctx);
             const Amg::Vector3D locPos = globToLoc * segment.position();
             const Amg::Vector3D locDir = globToLoc.linear() * segment.direction();

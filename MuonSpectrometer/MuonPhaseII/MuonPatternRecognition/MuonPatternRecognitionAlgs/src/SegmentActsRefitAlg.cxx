@@ -20,7 +20,6 @@
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
-#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 
 #include "Acts/Surfaces/PlaneSurface.hpp"
 namespace{

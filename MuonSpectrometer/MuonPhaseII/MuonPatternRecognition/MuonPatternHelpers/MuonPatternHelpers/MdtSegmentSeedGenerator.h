@@ -61,7 +61,7 @@ namespace MuonR4::SegmentFit {
             /** @brief Helper struct from a generated Mdt seed */
             struct DriftCircleSeed{
                 /** @brief Seed parameters */
-                Parameters parameters{Parameters::Zero()};
+                Parameters parameters{};
                 /** @brief List of calibrated measurements */
                 std::vector<std::unique_ptr<CalibratedSpacePoint>> measurements{};
                 /** @brief Iterations to obtain the seed */

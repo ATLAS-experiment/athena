@@ -54,11 +54,15 @@ namespace MuonR4{
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay) const override final;
 
-            CalibSpacePointVec calibrate(const EventContext& ctx,
-                                         CalibSpacePointVec&& spacePoints,
+            CalibSpacePointVec calibrate(const Acts::CalibrationContext& ctx,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
-                                         const double timeDelay) const override final;
+                                         const double timeDelay,
+                                         const CalibSpacePointVec& spacePoints) const override final;
+
+            void updateSigns(const Amg::Vector3D& trackPos,
+                             const Amg::Vector3D& trackDir,
+                             CalibSpacePointVec& hitsToCalib) const override final;
 
             double driftVelocity(const EventContext& ctx,
                                  const CalibratedSpacePoint& spacePoint) const override final;

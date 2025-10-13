@@ -12,7 +12,6 @@
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "GeoModelHelpers/TransformSorter.h"
 #include <fstream>
 #include <AthenaKernel/RNGWrapper.h>
 #include "CLHEP/Random/RandFlat.h"
@@ -32,11 +31,10 @@ namespace {
              if (a->etaIndex() != b->etaIndex()) {
                 return a->etaIndex() < b->etaIndex();
              }
-            const GeoTrf::TransformSorter trfSorter{};
             using namespace MuonR4::SegmentFit;
             auto locParsA = localSegmentPars(*a);
             auto locParsB = localSegmentPars(*b);
-            return trfSorter.compare(locParsA.cast<double>(), locParsB.cast<double>())<0;
+            return  locParsA < locParsB;
         }
     };
 }
