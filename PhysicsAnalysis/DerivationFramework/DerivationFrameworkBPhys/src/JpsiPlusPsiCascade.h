@@ -13,6 +13,8 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include <vector>
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace Trk {
     class IVertexFitter;
@@ -34,7 +36,7 @@ namespace DerivationFramework {
     JpsiPlusPsiCascade(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~JpsiPlusPsiCascade() = default;
     virtual StatusCode initialize() override;
-    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer_noConstr) const;
+    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer_noConstr, const EventContext& ctx) const;
     virtual StatusCode addBranches() const override;
 
   private:

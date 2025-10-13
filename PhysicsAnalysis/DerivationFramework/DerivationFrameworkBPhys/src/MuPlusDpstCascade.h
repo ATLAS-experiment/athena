@@ -17,6 +17,8 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "GaudiKernel/IPartPropSvc.h"
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace Trk {
     class IVertexFitter;
@@ -39,7 +41,7 @@ namespace DerivationFramework {
         MuPlusDpstCascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~MuPlusDpstCascade();
         virtual StatusCode initialize() override;
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
+        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
         virtual StatusCode addBranches() const override;
 
       private:

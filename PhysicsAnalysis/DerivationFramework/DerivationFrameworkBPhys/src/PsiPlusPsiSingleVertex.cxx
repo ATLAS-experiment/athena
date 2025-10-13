@@ -168,6 +168,7 @@ namespace DerivationFramework {
   }
 
   StatusCode PsiPlusPsiSingleVertex::addBranches() const {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     if (m_vtx1Daug_num < 2 || m_vtx1Daug_num > 4 || m_vtx2Daug_num < 2 || m_vtx2Daug_num > 4) {
       ATH_MSG_FATAL("Incorrect number of Psi daughters");
       return StatusCode::FAILURE;
@@ -180,7 +181,7 @@ namespace DerivationFramework {
     }
     std::array<SG::WriteHandle<xAOD::VertexContainer>, topoN> VtxWriteHandles; int ikey(0);
     for(const SG::WriteHandleKey<xAOD::VertexContainer>& key : m_outputsKeys) {
-      VtxWriteHandles[ikey] = SG::WriteHandle<xAOD::VertexContainer>(key);
+      VtxWriteHandles[ikey] = SG::WriteHandle<xAOD::VertexContainer>(key, ctx);
       ATH_CHECK( VtxWriteHandles[ikey].record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()) );
       ikey++;
     }
@@ -188,7 +189,7 @@ namespace DerivationFramework {
     //----------------------------------------------------
     // retrieve primary vertices
     //----------------------------------------------------
-    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName);
+    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName, ctx);
     ATH_CHECK( pvContainer.isValid() );
     if (pvContainer.cptr()->size()==0) {
       ATH_MSG_WARNING("You have no primary vertices: " << pvContainer.cptr()->size());
@@ -196,7 +197,7 @@ namespace DerivationFramework {
     }
 
     // Get TrackParticle container (for setting links to the original tracks)
-    SG::ReadHandle<xAOD::TrackParticleContainer> trackContainer(m_trackContainerName);
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackContainer(m_trackContainerName, ctx);
     ATH_CHECK( trackContainer.isValid() );
 
     std::vector<const xAOD::TrackParticle*> tracksJpsi1;
@@ -222,9 +223,9 @@ namespace DerivationFramework {
     for(auto mass : massesPsi2) massesInputTracks.push_back(mass);
 
     // Get Psi1 container
-    SG::ReadHandle<xAOD::VertexContainer> psi1Container(m_vertexPsi1ContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> psi1Container(m_vertexPsi1ContainerKey, ctx);
     ATH_CHECK( psi1Container.isValid() );
-    SG::ReadHandle<xAOD::VertexContainer> psi2Container(m_vertexPsi2ContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> psi2Container(m_vertexPsi2ContainerKey, ctx);
     ATH_CHECK( psi2Container.isValid() );
 
     // Select the psi1 candidates before calling fit
@@ -492,13 +493,13 @@ namespace DerivationFramework {
       }
     } //Iterate over candidatePairs vertices
 
-    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
     ATH_CHECK( evt.isValid() );
     BPhysPVTools helper(&(*m_V0Tools), evt.cptr());
     helper.SetMinNTracksInPV(m_PV_minNTracks);
 
     if(m_refitPV) {
-      SG::WriteHandle<xAOD::VertexContainer> refPvContainer(m_refPVContainerName);
+      SG::WriteHandle<xAOD::VertexContainer> refPvContainer(m_refPVContainerName, ctx);
       ATH_CHECK( refPvContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()) );
       
       if(VtxWriteHandles[2]->size()>0) {

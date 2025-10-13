@@ -123,11 +123,11 @@ bool VertexTrackIsolation::isContainedIn(const xAOD::Vertex* theVtx,
 
 StatusCode VertexTrackIsolation::addBranches() const {
 
-  const xAOD::TrackParticleContainer* idTrackParticleContainer = NULL;
-  const xAOD::VertexContainer* vertexContainer = NULL;
+  const xAOD::TrackParticleContainer* idTrackParticleContainer{};
+  const xAOD::VertexContainer* vertexContainer{};
 
   if (evtStore()->contains<xAOD::TrackParticleContainer>(m_trackContainerName)) {
-    CHECK(evtStore()->retrieve(idTrackParticleContainer, m_trackContainerName));
+    CHECK(evtStore()->retrieve(idTrackParticleContainer, m_trackContainerName)); // FIXME Use Handles
   } else {
     ATH_MSG_ERROR("Failed loading IdTrackparticleContainer container");
     return StatusCode::FAILURE;
@@ -135,7 +135,7 @@ StatusCode VertexTrackIsolation::addBranches() const {
 
   //  load vertices
   if (evtStore()->contains<xAOD::VertexContainer>(m_vertexContainerName)) {
-    CHECK(evtStore()->retrieve(vertexContainer, m_vertexContainerName));
+    CHECK(evtStore()->retrieve(vertexContainer, m_vertexContainerName)); // FIXME Use Handles
   } else {
     ATH_MSG_ERROR("Failed loading vertex container");
     return StatusCode::FAILURE;

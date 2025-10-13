@@ -75,10 +75,10 @@ namespace DerivationFramework {
     StatusCode Reco_4mu::addBranches() const
     {
         // Output containers and its auxilliary store
-        xAOD::VertexContainer*    pairContainer = NULL;
-        xAOD::VertexAuxContainer* pairAuxContainer = NULL;
-        xAOD::VertexContainer*    quadContainer = NULL;
-        xAOD::VertexAuxContainer* quadAuxContainer = NULL;
+        xAOD::VertexContainer*    pairContainer{};
+        xAOD::VertexAuxContainer* pairAuxContainer{};
+        xAOD::VertexContainer*    quadContainer{};
+        xAOD::VertexAuxContainer* quadAuxContainer{};
         bool acceptEvent = false; // this is a dummy
         //----------------------------------------------------
         // call  finder
@@ -103,8 +103,8 @@ namespace DerivationFramework {
         //----------------------------------------------------
         // retrieve primary vertices
         //----------------------------------------------------
-        const xAOD::VertexContainer*    pvContainer = NULL;
-        auto sc = evtStore()->retrieve(pvContainer, m_pvContainerName);
+        const xAOD::VertexContainer*    pvContainer{};
+        auto sc = evtStore()->retrieve(pvContainer, m_pvContainerName); // FIXME Use Handles
         if(sc.isFailure()){
             ATH_MSG_FATAL("Cannot find PV Container");
             return StatusCode::FAILURE;
@@ -112,8 +112,8 @@ namespace DerivationFramework {
         //----------------------------------------------------
         // Refit primary vertices
         //----------------------------------------------------
-        xAOD::VertexContainer*    refPvContainer = NULL;
-        xAOD::VertexAuxContainer* refPvAuxContainer = NULL;
+        xAOD::VertexContainer*    refPvContainer{};
+        xAOD::VertexAuxContainer* refPvAuxContainer{};
         
         if(m_refitPV) {
             refPvContainer = new xAOD::VertexContainer;
@@ -219,20 +219,20 @@ namespace DerivationFramework {
         //----------------------------------------------------
         // Pairs
         if (!evtStore()->contains<xAOD::VertexContainer>(m_pairName))
-            evtStore()->record(pairContainer, m_pairName).ignore();
+            evtStore()->record(pairContainer, m_pairName).ignore(); // FIXME Use Handles
         if (!evtStore()->contains<xAOD::VertexAuxContainer>(m_pairName+"Aux."))
-            evtStore()->record(pairAuxContainer, m_pairName+"Aux.").ignore();
+            evtStore()->record(pairAuxContainer, m_pairName+"Aux.").ignore(); // FIXME Use Handles
         
         // Quads
         if (!evtStore()->contains<xAOD::VertexContainer>(m_quadName))
-            evtStore()->record(quadContainer, m_quadName).ignore();
+            evtStore()->record(quadContainer, m_quadName).ignore(); // FIXME Use Handles
         if (!evtStore()->contains<xAOD::VertexAuxContainer>(m_quadName+"Aux."))
-            evtStore()->record(quadAuxContainer, m_quadName+"Aux.").ignore();
+            evtStore()->record(quadAuxContainer, m_quadName+"Aux.").ignore(); // FIXME Use Handles
         
         // Refitted PVs
         if(m_refitPV) {
-            evtStore()->record(refPvContainer   , m_refPVContainerName).ignore();
-            evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux.").ignore();
+            evtStore()->record(refPvContainer   , m_refPVContainerName).ignore(); // FIXME Use Handles
+            evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux.").ignore(); // FIXME Use Handles
         }
         
         return StatusCode::SUCCESS;
