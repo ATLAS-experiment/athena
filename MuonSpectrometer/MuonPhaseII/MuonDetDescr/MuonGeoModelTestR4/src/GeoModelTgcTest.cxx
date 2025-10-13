@@ -169,7 +169,9 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
             const IdentifierHash measHash = reElement->constructHash(strip, gap, true);
             const RadialStripDesign& layout{reElement->stripLayout(measHash)};
 
-            const Amg::Transform3D& localToGlobal{reElement->localToGlobalTrans(gctx , layHash)};
+            const Amg::Transform3D localToGlobal{reElement->localToGlobalTrans(gctx , 
+                                                                                reElement->layerHash(measHash)) *
+                                                (Amg::getRotateZ3D(-90.*Gaudi::Units::deg))};
             if (strip == 1) {
                 m_layTans.push_back(localToGlobal);
                 m_layMeasPhi.push_back(true);
