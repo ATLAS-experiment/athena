@@ -158,7 +158,11 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
        ATH_MSG_DEBUG("Loose bad FEB " << it.first << " " << m_onlineID->channel_name(HWIdentifier(it.first)) << " with " << it.second.badChannels() << " bad channels");
        // Tight_PsVeto MNBs
        if ( it.second.badChannels() > m_MNBTight_PsVetoCut[0] ){
-         unsigned int associatedPSFEB = m_mapPSFEB.find(it.first)->second;
+         unsigned int associatedPSFEB = 0;
+         auto assoc_it = m_mapPSFEB.find(it.first);
+         if (assoc_it != m_mapPSFEB.end()) {
+           associatedPSFEB = assoc_it->second;
+         }
          if (associatedPSFEB != 0){ // Check if a PS FEB is associated (TRUE only for EMB FEBs)
            if (FEBStats.count(associatedPSFEB) == 0) noisyRO->add_MNBTight_PsVeto_feb(HWIdentifier(it.first));
            else if (FEBStats[associatedPSFEB].badChannels() < m_MNBTight_PsVetoCut[1]) noisyRO->add_MNBTight_PsVeto_feb(HWIdentifier(it.first));
