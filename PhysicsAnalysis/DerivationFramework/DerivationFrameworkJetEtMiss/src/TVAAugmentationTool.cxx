@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TVAAugmentationTool.h"
@@ -33,13 +33,13 @@ namespace DerivationFramework {
 
   StatusCode TVAAugmentationTool::addBranches() const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, vtxLink_t> vtxDec_handle(m_vtxDec_key, ctx);
 
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, vtxLink_t> vtxDec_handle(m_vtxDec_key);
-
-    const xAOD::VertexContainer* vertices = nullptr;
-    ATH_CHECK(evtStore()->retrieve(vertices, m_vertexName) );
-    const xAOD::TrackParticleContainer* tracks = nullptr;
-    ATH_CHECK(evtStore()->retrieve(tracks, m_trackName) );
+    const xAOD::VertexContainer* vertices{};
+    ATH_CHECK(evtStore()->retrieve(vertices, m_vertexName) ); // FIXME Use Handles
+    const xAOD::TrackParticleContainer* tracks{};
+    ATH_CHECK(evtStore()->retrieve(tracks, m_trackName) ); // FIXME Use Handles
 
     xAOD::TrackVertexAssociationMap matchMap = m_tool->getMatchMap(*tracks, *vertices);
 

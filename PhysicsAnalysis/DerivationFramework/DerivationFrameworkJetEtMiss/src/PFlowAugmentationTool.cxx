@@ -45,11 +45,11 @@ namespace DerivationFramework {
 
   StatusCode PFlowAugmentationTool::addBranches() const
   {
-
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Get the vertex.
-    const xAOD::Vertex* pv(0);
+    const xAOD::Vertex* pv{};
 
-    auto vertexContainer = SG::makeHandle (m_vertexContainer_key);
+    auto vertexContainer = SG::makeHandle (m_vertexContainer_key, ctx);
     if (!vertexContainer.isValid()){
       ATH_MSG_WARNING("Invalid  xAOD::VertexContainer datahandle"
 		      << m_vertexContainer_key.key()); 
@@ -82,14 +82,14 @@ namespace DerivationFramework {
       }
     }
 
-    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_corrP4_pt(m_corrP4_ptKey);
-    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_z0(m_z0Key);
-    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_vz(m_vzKey);
-    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_d0(m_d0Key);
-    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_theta(m_thetaKey);
-    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_envWeight(m_envWeightKey);
+    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_corrP4_pt(m_corrP4_ptKey, ctx);
+    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_z0(m_z0Key, ctx);
+    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_vz(m_vzKey, ctx);
+    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_d0(m_d0Key, ctx);
+    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_theta(m_thetaKey, ctx);
+    SG::WriteDecorHandle<xAOD::FlowElementContainer,float> dec_envWeight(m_envWeightKey, ctx);
 
-    auto pfoContainer = SG::makeHandle (m_pfoContainer_key);
+    auto pfoContainer = SG::makeHandle (m_pfoContainer_key, ctx);
     if (!pfoContainer.isValid()){
       ATH_MSG_WARNING("Invalid  xAOD::PFOContainer datahandle"
                       << m_pfoContainer_key.key());

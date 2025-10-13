@@ -66,15 +66,15 @@ StatusCode JetExternalAssocTool::finalize(){
 StatusCode JetExternalAssocTool::addBranches() const{
 
   // get jet collection to be decorated
-  const xAOD::JetContainer* jets = 0;
-  if(evtStore()->retrieve(jets, m_containerName).isFailure()){
+  const xAOD::JetContainer* jets{};
+  if(evtStore()->retrieve(jets, m_containerName).isFailure()){ // FIXME Use Handles
     ATH_MSG_ERROR("Unable to retrieve jet collection: " << m_containerName << "!");
     return StatusCode::FAILURE;
   }
 
   // get external jet collection
-  const xAOD::JetContainer* ExternalJetCollection = 0;
-  if(evtStore()->retrieve(ExternalJetCollection, m_ExternalJetCollectionName).isFailure()){
+  const xAOD::JetContainer* ExternalJetCollection{};
+  if(evtStore()->retrieve(ExternalJetCollection, m_ExternalJetCollectionName).isFailure()){ // FIXME Use Handles
     ATH_MSG_ERROR("Unable to find external jet collection: " << m_ExternalJetCollectionName << "!");
     return StatusCode::FAILURE;
   }

@@ -66,10 +66,10 @@ namespace DerivationFramework {
     if (evtStore()->contains<xAOD::EnergySumRoI>(m_outputName) ) return StatusCode::SUCCESS;
 
     const xAOD::EnergySumRoI* originalL1(0);
-    ATH_CHECK( evtStore()->retrieve(originalL1, m_L1METName) );
+    ATH_CHECK( evtStore()->retrieve(originalL1, m_L1METName) ); // FIXME Use Handles
 
     const xAOD::JetRoIContainer* l1Jets(0);
-    ATH_CHECK( evtStore()->retrieve(l1Jets, m_L1JetName) );
+    ATH_CHECK( evtStore()->retrieve(l1Jets, m_L1JetName) ); // FIXME Use Handles
 
     xAOD::EnergySumRoI* l1_kf = new xAOD::EnergySumRoI();
     xAOD::EnergySumRoIAuxInfo* l1_kfAux = new xAOD::EnergySumRoIAuxInfo();
@@ -103,8 +103,8 @@ namespace DerivationFramework {
     l1_kf->setEnergyT(KFSumEt);
 
     ATH_MSG_DEBUG( "Built KF MET" );
-    ATH_CHECK( evtStore()->record(l1_kf, m_outputName) );
-    ATH_CHECK( evtStore()->record(l1_kfAux, m_outputName+"Aux.") );
+    ATH_CHECK( evtStore()->record(l1_kf, m_outputName) ); // FIXME Use Handles
+    ATH_CHECK( evtStore()->record(l1_kfAux, m_outputName+"Aux.") ); // FIXME Use Handles
     return StatusCode::SUCCESS;
   }
 }
