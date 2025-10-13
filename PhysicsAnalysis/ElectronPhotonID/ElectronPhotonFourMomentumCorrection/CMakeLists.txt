@@ -27,8 +27,8 @@ atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
 if( NOT XAOD_STANDALONE )
    atlas_add_component( ElectronPhotonFourMomentumCorrection
       src/*.h src/*.cxx src/components/*.cxx
-      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools AthenaBaseComps
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthenaBaseComps
       EgammaAnalysisInterfacesLib ElectronPhotonFourMomentumCorrectionLib GaudiKernel
       PATInterfaces xAODBase xAODCaloEvent xAODCore xAODEgamma xAODEventInfo xAODTruth )
 else ()
