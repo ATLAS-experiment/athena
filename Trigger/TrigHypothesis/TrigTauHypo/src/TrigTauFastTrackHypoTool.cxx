@@ -3,8 +3,7 @@
 */
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
-#include "TrkTrack/TrackCollection.h"
-
+#include "xAODTracking/TrackParticleContainer.h"
 #include "TrigTauFastTrackHypoTool.h"
 
 
@@ -30,10 +29,10 @@ bool TrigTauFastTrackHypoTool::decide(const ITrigTauFastTrackHypoTool::ToolInfo&
     // Get RoI descriptor
     ATH_MSG_DEBUG( "Input RoI eta: " << input.roi->eta() << ", phi: " << input.roi->phi() << ", z: " << input.roi->zed());
 
-    // Check the input TrackCollection
-    const TrackCollection* tracks = input.trackCollection;
+    // Check the input TrackParticles
+    const xAOD::TrackParticleContainer* tracks = input.trackCollection;
     if(!tracks->empty()){
-        ATH_MSG_DEBUG("Input Fast Tracks collection has size: " << tracks->size());
+        ATH_MSG_DEBUG("Input Fast TrackParticle collection has size: " << tracks->size());
     }
 
     // This is (for now) a dummy step, so we won't be applying any decision here
