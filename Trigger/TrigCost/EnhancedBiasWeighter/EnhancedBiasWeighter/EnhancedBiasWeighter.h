@@ -131,7 +131,7 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
    * @return How far into the current train this BCID is.
    * Retrieved from the database using the BunchCrossingCondData or fetched from TRIG1 dAOD
    */
-   virtual StatusCode getDistanceIntoTrain(const xAOD::EventInfo* eventInfo, uint32_t& distance) const override;
+   virtual StatusCode getDistanceIntoTrain(const xAOD::EventInfo* eventInfo, uint32_t& distance, const EventContext& ctx) const override;
 
    /**
    * @return the RunNumber.
