@@ -1,5 +1,5 @@
-AtlasFieldCacheCondAlg                       1   0    INFO updateCurrentFromParameters: Update from job options: Range of input/output is {[475321,l:0,b:4294967295] - [475322,l:0,b:4294967295]}
-AtlasFieldCacheCondAlg                       1   0    INFO execute: initialized AtlasFieldCacheCondObj and cache with SFs - sol/tor 1/1, EventRange {[475321,l:0,b:4294967295] - [475322,l:0,b:4294967295]}
+AtlasFieldCacheCondAlg                       1   0    INFO updateCurrentFromParameters: Update from job options: Range of input/output is {[500306,l:0,b:4294967295] - [500307,l:0,b:4294967295]}
+AtlasFieldCacheCondAlg                       1   0    INFO execute: initialized AtlasFieldCacheCondObj and cache with SFs - sol/tor 1/1, EventRange {[500306,l:0,b:4294967295] - [500307,l:0,b:4294967295]}
 AtlasFieldCacheCondAlg                       1   0    INFO execute: solenoid zone id  7000
 MagFieldCondReader                           1   0    INFO Field status: solenoid=1, toroids=1
 MagFieldCondReader                           1   0    INFO Field xyz: 100, 100, 100, 1.58913e-06, -2.49264e-07, 0.00199734
