@@ -164,8 +164,9 @@ const TrackBag& Cascade3Plus1::ApplyAdditionalCuts(const TrackBag& alltracks, co
 
 StatusCode Cascade3Plus1::addBranches() const
 {
-    const xAOD::TrackParticleContainer  *trackContainer(nullptr);
-    ATH_CHECK(evtStore()->retrieve(trackContainer, "InDetTrackParticles"      ));
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  const xAOD::TrackParticleContainer  *trackContainer{};
+  ATH_CHECK(evtStore()->retrieve(trackContainer, "InDetTrackParticles"      )); // FIXME Use Handles
 
     //----------------------------------------------------
     // Try to retrieve refitted primary vertices
@@ -175,15 +176,15 @@ StatusCode Cascade3Plus1::addBranches() const
     if (m_refitPV) {
         if (evtStore()->contains<xAOD::VertexContainer>(m_refPVContainerName)) {
             // refitted PV container exists. Get it from the store gate
-            ATH_CHECK(evtStore()->retrieve(refPvContainer, m_refPVContainerName       ));
-            ATH_CHECK(evtStore()->retrieve(refPvAuxContainer, m_refPVContainerName + "Aux."));
+            ATH_CHECK(evtStore()->retrieve(refPvContainer, m_refPVContainerName       )); // FIXME Use Handles
+            ATH_CHECK(evtStore()->retrieve(refPvAuxContainer, m_refPVContainerName + "Aux.")); // FIXME Use Handles
         } else {
             // refitted PV container does not exist. Create a new one.
             refPvContainer = new xAOD::VertexContainer;
             refPvAuxContainer = new xAOD::VertexAuxContainer;
             refPvContainer->setStore(refPvAuxContainer);
-            ATH_CHECK(evtStore()->record(refPvContainer, m_refPVContainerName));
-            ATH_CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux."));
+            ATH_CHECK(evtStore()->record(refPvContainer, m_refPVContainerName)); // FIXME Use Handles
+            ATH_CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux.")); // FIXME Use Handles
         }
     }
 
@@ -194,16 +195,16 @@ StatusCode Cascade3Plus1::addBranches() const
         Vtxwritehandles[i] = new xAOD::VertexContainer();
         Vtxwritehandlesaux[i] = new xAOD::VertexAuxContainer();
         Vtxwritehandles[i]->setStore(Vtxwritehandlesaux[i]);
-        ATH_CHECK(evtStore()->record(Vtxwritehandles[i], m_cascadeOutputsKeys[i]       ));
-        ATH_CHECK(evtStore()->record(Vtxwritehandlesaux[i], m_cascadeOutputsKeys[i] + "Aux."));
+        ATH_CHECK(evtStore()->record(Vtxwritehandles[i], m_cascadeOutputsKeys[i]       )); // FIXME Use Handles
+        ATH_CHECK(evtStore()->record(Vtxwritehandlesaux[i], m_cascadeOutputsKeys[i] + "Aux.")); // FIXME Use Handles
     }
     xAOD::VertexContainer *v3container = nullptr;
     if(!m_3TrackVertexOutput.empty()) {
         v3container    = new xAOD::VertexContainer();
         auto vcontaineraux = new xAOD::VertexAuxContainer();
         v3container->setStore(vcontaineraux);
-        ATH_CHECK(evtStore()->record(v3container, m_3TrackVertexOutput       ));
-        ATH_CHECK(evtStore()->record(vcontaineraux, m_3TrackVertexOutput + "Aux."));
+        ATH_CHECK(evtStore()->record(v3container, m_3TrackVertexOutput       )); // FIXME Use Handles
+        ATH_CHECK(evtStore()->record(vcontaineraux, m_3TrackVertexOutput + "Aux.")); // FIXME Use Handles
     }
     //----------------------------------------------------
     // retrieve primary vertices
@@ -211,7 +212,7 @@ StatusCode Cascade3Plus1::addBranches() const
 
     const xAOD::Vertex * primaryVertex(nullptr);
     const xAOD::VertexContainer *pvContainer(nullptr);
-    ATH_CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName));
+    ATH_CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName)); // FIXME Use Handles
 
     if (pvContainer->size()==0) {
         ATH_MSG_WARNING("You have no primary vertices: " << pvContainer->size());
@@ -230,7 +231,7 @@ StatusCode Cascade3Plus1::addBranches() const
     TrackBag theMuonsAfterSelection;
     if(m_muonTrackBit.any()) {
         const xAOD::MuonContainer* importedMuonCollection(0);
-        ATH_CHECK(evtStore()->retrieve(importedMuonCollection, "Muons"));
+        ATH_CHECK(evtStore()->retrieve(importedMuonCollection, "Muons")); // FIXME Use Handles
         for(auto muon : *importedMuonCollection) {
             if(muon->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) continue;
             auto ptr = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
@@ -294,7 +295,7 @@ StatusCode Cascade3Plus1::addBranches() const
     std::map<const std::array<const xAOD::TrackParticle*, 3>, xAOD::Vertex* > threeVertexMap;
 
     if(!m_3TrackVertexOutput.empty()) {
-        SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
         if(not evt.isValid()) ATH_MSG_ERROR("Cannot Retrieve " << evt.key() );
         BPhysPVTools helper(&(*m_V0Tools), evt.cptr());
         helper.SetMinNTracksInPV(0);
@@ -380,7 +381,7 @@ StatusCode Cascade3Plus1::addBranches() const
     SG::AuxElement::Decorator<float> TauErr_svdecor(m_3TrackName+"_TauErr");
 
 
-    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
     if(not evt.isValid()) ATH_MSG_ERROR("Cannot Retrieve " << m_eventInfo_key.key() );
     BPhysPVCascadeTools helper(&(*m_CascadeTools), evt.cptr());
     helper.SetMinNTracksInPV(m_PV_minNTracks);

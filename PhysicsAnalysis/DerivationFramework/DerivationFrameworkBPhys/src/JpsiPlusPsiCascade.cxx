@@ -60,6 +60,7 @@ namespace DerivationFramework {
   }
 
   StatusCode JpsiPlusPsiCascade::addBranches() const {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     if (m_vtx1Daug_num != 3 && m_vtx1Daug_num != 4) {
       ATH_MSG_FATAL("Incorrect number of Psi daughters (should be 3 or 4)");
       return StatusCode::FAILURE;
@@ -72,7 +73,7 @@ namespace DerivationFramework {
     }
     std::array<SG::WriteHandle<xAOD::VertexContainer>, topoN> VtxWriteHandles; int ikey(0);
     for(const SG::WriteHandleKey<xAOD::VertexContainer>& key : m_cascadeOutputsKeys) {
-      VtxWriteHandles[ikey] = SG::WriteHandle<xAOD::VertexContainer>(key);
+      VtxWriteHandles[ikey] = SG::WriteHandle<xAOD::VertexContainer>(key, ctx);
       ATH_CHECK( VtxWriteHandles[ikey].record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()) );
       ikey++;
     }
@@ -80,7 +81,7 @@ namespace DerivationFramework {
     //----------------------------------------------------
     // retrieve primary vertices
     //----------------------------------------------------
-    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName);
+    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName, ctx);
     ATH_CHECK( pvContainer.isValid() );
     if (pvContainer.cptr()->size()==0) {
       ATH_MSG_WARNING("You have no primary vertices: " << pvContainer.cptr()->size());
@@ -92,15 +93,15 @@ namespace DerivationFramework {
     //----------------------------------------------------
     SG::WriteHandle<xAOD::VertexContainer> refPvContainer;
     if(m_refitPV) {
-      refPvContainer = SG::WriteHandle<xAOD::VertexContainer>(m_refPVContainerName);
+      refPvContainer = SG::WriteHandle<xAOD::VertexContainer>(m_refPVContainerName, ctx);
       ATH_CHECK( refPvContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()) );
     }
 
     std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
     std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer_noConstr;
-    ATH_CHECK(performSearch(&cascadeinfoContainer,&cascadeinfoContainer_noConstr));
+    ATH_CHECK(performSearch(&cascadeinfoContainer,&cascadeinfoContainer_noConstr,ctx));
 
-    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
     ATH_CHECK( evt.isValid() );
     BPhysPVCascadeTools helper(&(*m_CascadeTools), evt.cptr());
     helper.SetMinNTracksInPV(m_PV_minNTracks);
@@ -137,9 +138,9 @@ namespace DerivationFramework {
     SG::AuxElement::Decorator<float> a0zErr_SV2_decor("a0zErr_SV2");
 
     // Get the containers and identify the input Jpsi and Psi
-    SG::ReadHandle<xAOD::VertexContainer> psiContainer(m_vertexPsiContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> psiContainer(m_vertexPsiContainerKey, ctx);
     ATH_CHECK( psiContainer.isValid() );
-    SG::ReadHandle<xAOD::VertexContainer> jpsiContainer(m_vertexContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> jpsiContainer(m_vertexContainerKey, ctx);
     ATH_CHECK( jpsiContainer.isValid() );
 
     for(size_t ic=0; ic<cascadeinfoContainer.size(); ic++) {
@@ -338,12 +339,12 @@ namespace DerivationFramework {
     declareProperty("CascadeVertexCollections",   m_cascadeOutputsKeys);
   }
 
-  StatusCode JpsiPlusPsiCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer_noConstr) const {
+  StatusCode JpsiPlusPsiCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer_noConstr, const EventContext& ctx) const {
     ATH_MSG_DEBUG( "JpsiPlusPsiCascade::performSearch" );
     assert(cascadeinfoContainer!=nullptr && cascadeinfoContainer_noConstr!=nullptr);
 
     // Get TrackParticle container (for setting links to the original tracks)
-    SG::ReadHandle<xAOD::TrackParticleContainer> trackContainer(m_trackContainerName);
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackContainer(m_trackContainerName, ctx);
     ATH_CHECK( trackContainer.isValid() );
 
     std::vector<const xAOD::TrackParticle*> tracksJpsi;
@@ -358,11 +359,11 @@ namespace DerivationFramework {
     std::array<double,2> massesJpsi2{m_vtx2Daug1MassHypo, m_vtx2Daug2MassHypo};
 
     // Get Psi container
-    SG::ReadHandle<xAOD::VertexContainer> psiContainer(m_vertexPsiContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> psiContainer(m_vertexPsiContainerKey, ctx);
     ATH_CHECK( psiContainer.isValid() );
 
     // Get Jpsi container
-    SG::ReadHandle<xAOD::VertexContainer> jpsiContainer(m_vertexContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> jpsiContainer(m_vertexContainerKey, ctx);
     ATH_CHECK( jpsiContainer.isValid() );
 
     // Select the J/psi candidates before calling cascade fit

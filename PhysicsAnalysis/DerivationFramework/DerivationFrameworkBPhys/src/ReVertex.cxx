@@ -109,22 +109,22 @@ StatusCode ReVertex::initialize() {
 
 StatusCode ReVertex::addBranches() const {
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    SG::WriteHandle<xAOD::VertexContainer> vtxContainer(m_OutputContainerName);
+    SG::WriteHandle<xAOD::VertexContainer> vtxContainer(m_OutputContainerName, ctx);
     ATH_CHECK(vtxContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
 
     const size_t Ntracks = m_TrackIndices.size();
 
-    SG::ReadHandle<xAOD::VertexContainer> InVtxContainer(m_inputContainerName);
-    SG::ReadHandle<xAOD::TrackParticleContainer> importedTrackCollection(m_trackContainer);
+    SG::ReadHandle<xAOD::VertexContainer> InVtxContainer(m_inputContainerName, ctx);
+    SG::ReadHandle<xAOD::TrackParticleContainer> importedTrackCollection(m_trackContainer, ctx);
     ATH_CHECK(InVtxContainer.isValid());
     ATH_CHECK(importedTrackCollection.isValid());
     //----------------------------------------------------
     // retrieve primary vertices
     //----------------------------------------------------
-    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_defaultPVContainerName);
+    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_defaultPVContainerName, ctx);
     ATH_CHECK(defaultPVContainer.isValid());
 
-    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_pvContainerName);
+    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_pvContainerName, ctx);
     ATH_CHECK(pvContainer.isValid());
 
     std::vector<const xAOD::TrackParticle*> fitpair(Ntracks + m_useAdditionalTrack);
@@ -174,7 +174,7 @@ StatusCode ReVertex::addBranches() const {
 
     if(m_AddPVData){
      // Give the helper class the ptr to v0tools and beamSpotsSvc to use
-     SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
      if(not evt.isValid()) ATH_MSG_ERROR("Cannot Retrieve " << evt.key() );
      BPhysPVTools helper(&(*m_v0Tools), evt.cptr());
      helper.SetMinNTracksInPV(m_PV_minNTracks);
@@ -184,7 +184,7 @@ StatusCode ReVertex::addBranches() const {
         //----------------------------------------------------
         // Try to retrieve refitted primary vertices
         //----------------------------------------------------
-        SG::WriteHandle<xAOD::VertexContainer> refPvContainer(m_refPVContainerName);
+      SG::WriteHandle<xAOD::VertexContainer> refPvContainer(m_refPVContainerName, ctx);
         ATH_CHECK(refPvContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
 
         if(vtxContainer->size() >0){

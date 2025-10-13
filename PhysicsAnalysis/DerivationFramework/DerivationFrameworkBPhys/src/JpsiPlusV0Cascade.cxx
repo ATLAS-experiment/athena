@@ -73,6 +73,7 @@ namespace DerivationFramework {
 
     StatusCode JpsiPlusV0Cascade::addBranches() const
     {
+      const EventContext& ctx = Gaudi::Hive::currentContext();
       std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
       constexpr int topoN = 2;
       std::array<xAOD::VertexContainer*, topoN> Vtxwritehandles;
@@ -83,16 +84,16 @@ namespace DerivationFramework {
          Vtxwritehandles[i] = new xAOD::VertexContainer();
          Vtxwritehandlesaux[i] = new xAOD::VertexAuxContainer();
          Vtxwritehandles[i]->setStore(Vtxwritehandlesaux[i]);
-         CHECK(evtStore()->record(Vtxwritehandles[i]   , m_cascadeOutputsKeys[i]       ));
-         CHECK(evtStore()->record(Vtxwritehandlesaux[i], m_cascadeOutputsKeys[i] + "Aux."));
+         CHECK(evtStore()->record(Vtxwritehandles[i]   , m_cascadeOutputsKeys[i]       )); // FIXME Use Handles
+         CHECK(evtStore()->record(Vtxwritehandlesaux[i], m_cascadeOutputsKeys[i] + "Aux.")); // FIXME Use Handles
       }
 
       //----------------------------------------------------
       // retrieve primary vertices
       //----------------------------------------------------
-      const xAOD::Vertex * primaryVertex(nullptr);
-      const xAOD::VertexContainer *pvContainer(nullptr);
-      CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName));
+      const xAOD::Vertex * primaryVertex{};
+      const xAOD::VertexContainer *pvContainer{};
+      CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName)); // FIXME Use Handles
       ATH_MSG_DEBUG("Found " << m_VxPrimaryCandidateName << " in StoreGate!");
 
       if (pvContainer->size()==0){
@@ -105,20 +106,20 @@ namespace DerivationFramework {
       //----------------------------------------------------
       // Try to retrieve refitted primary vertices
       //----------------------------------------------------
-      xAOD::VertexContainer*    refPvContainer    = NULL;
-      xAOD::VertexAuxContainer* refPvAuxContainer = NULL;
+      xAOD::VertexContainer*    refPvContainer{};
+      xAOD::VertexAuxContainer* refPvAuxContainer{};
       if (m_refitPV) {
           // refitted PV container does not exist. Create a new one.
           refPvContainer = new xAOD::VertexContainer;
           refPvAuxContainer = new xAOD::VertexAuxContainer;
           refPvContainer->setStore(refPvAuxContainer);
-          CHECK(evtStore()->record(refPvContainer   , m_refPVContainerName       ));
-          CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName + "Aux."));
+          CHECK(evtStore()->record(refPvContainer   , m_refPVContainerName       )); // FIXME Use Handles
+          CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName + "Aux.")); // FIXME Use Handles
       }
 
-      ATH_CHECK(performSearch(&cascadeinfoContainer));
+      ATH_CHECK(performSearch(&cascadeinfoContainer, ctx));
 
-      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
       if(not evt.isValid()) ATH_MSG_ERROR("Cannot Retrieve " << m_eventInfo_key.key() );
       BPhysPVCascadeTools helper(&(*m_CascadeTools), evt.cptr());
       helper.SetMinNTracksInPV(m_PV_minNTracks);
@@ -143,10 +144,10 @@ namespace DerivationFramework {
       ATH_MSG_DEBUG("cascadeinfoContainer size " << cascadeinfoContainer.size());
 
       // Get Jpsi container and identify the input Jpsi
-      const xAOD::VertexContainer  *jpsiContainer(nullptr);
-      CHECK(evtStore()->retrieve(jpsiContainer   , m_vertexContainerKey       ));
-      const xAOD::VertexContainer  *v0Container(nullptr);
-      CHECK(evtStore()->retrieve(v0Container   , m_vertexV0ContainerKey       ));
+      const xAOD::VertexContainer  *jpsiContainer{};
+      CHECK(evtStore()->retrieve(jpsiContainer   , m_vertexContainerKey       )); // FIXME Use Handles
+      const xAOD::VertexContainer  *v0Container{};
+      CHECK(evtStore()->retrieve(v0Container   , m_vertexV0ContainerKey       )); // FIXME Use Handles
 
       for (Trk::VxCascadeInfo* x : cascadeinfoContainer) {
         if(x==nullptr) {
@@ -423,24 +424,24 @@ namespace DerivationFramework {
 
     JpsiPlusV0Cascade::~JpsiPlusV0Cascade(){ }
 
-    StatusCode JpsiPlusV0Cascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer) const
+    StatusCode JpsiPlusV0Cascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const
     {
         ATH_MSG_DEBUG( "JpsiPlusV0Cascade::performSearch" );
         assert(cascadeinfoContainer!=nullptr);
 
         // Get TrackParticle containers (for setting links to the original tracks)
-        const xAOD::TrackParticleContainer  *jpsiTrackContainer(nullptr);
-        CHECK(evtStore()->retrieve(jpsiTrackContainer   , m_jpsiTrackContainerName      ));
-        const xAOD::TrackParticleContainer  *v0TrackContainer(nullptr);
-        CHECK(evtStore()->retrieve(v0TrackContainer   , m_v0TrackContainerName      ));
+        const xAOD::TrackParticleContainer  *jpsiTrackContainer{};
+        CHECK(evtStore()->retrieve(jpsiTrackContainer   , m_jpsiTrackContainerName      )); // FIXME Use Handles
+        const xAOD::TrackParticleContainer  *v0TrackContainer{};
+        CHECK(evtStore()->retrieve(v0TrackContainer   , m_v0TrackContainerName      )); // FIXME Use Handles
 
         // Get Jpsi container
-        const xAOD::VertexContainer  *jpsiContainer(nullptr);
-        CHECK(evtStore()->retrieve(jpsiContainer   , m_vertexContainerKey       ));
+        const xAOD::VertexContainer  *jpsiContainer{};
+        CHECK(evtStore()->retrieve(jpsiContainer   , m_vertexContainerKey       )); // FIXME Use Handles
 
         // Get V0 container
-        const xAOD::VertexContainer  *v0Container(nullptr);
-        CHECK(evtStore()->retrieve(v0Container   , m_vertexV0ContainerKey       ));
+        const xAOD::VertexContainer  *v0Container{};
+        CHECK(evtStore()->retrieve(v0Container   , m_vertexV0ContainerKey       )); // FIXME Use Handles
 
         double mass_v0 = m_mass_ks; 
         double mass_tracks = MC::isElectron(m_jpsi_trk_pdg) ? m_mass_electron : m_mass_muon;
@@ -464,7 +465,6 @@ namespace DerivationFramework {
            mass_v0 = m_mass_lambda;
            Masses.push_back(m_mass_lambda);
         }
-        const EventContext& ctx = Gaudi::Hive::currentContext();
         std::vector<const xAOD::TrackParticleContainer*> trackCols;
         for(const auto &str : m_RelinkContainers){
            SG::ReadHandle<xAOD::TrackParticleContainer> handle(str,ctx);
@@ -545,7 +545,7 @@ namespace DerivationFramework {
               // Do the work
               std::unique_ptr<Trk::VxCascadeInfo> result(m_iVertexFitter->fitCascade(*state));
 
-              if (result != NULL) {
+              if (result) {
                 // reset links to original tracks
                 if(trackCols.empty()) BPhysPVCascadeTools::PrepareVertexLinks(result.get(), v0TrackContainer);
                 else                  BPhysPVCascadeTools::PrepareVertexLinks(result.get(), trackCols);

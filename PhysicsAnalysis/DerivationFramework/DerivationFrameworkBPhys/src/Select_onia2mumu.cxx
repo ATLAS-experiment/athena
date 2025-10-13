@@ -130,8 +130,8 @@ namespace DerivationFramework {
   
   StatusCode Select_onia2mumu::addBranches() const
   {
-    
-    SG::ReadHandle<xAOD::VertexContainer> oniaContainer(m_inputVtxContainerName);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::ReadHandle<xAOD::VertexContainer> oniaContainer(m_inputVtxContainerName, ctx);
     SG::auxid_set_t decor_auxids;
 
     bool doPt   = (m_DoVertexType & 1) != 0;

@@ -16,6 +16,8 @@
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace HepPDT{
   class ParticleDataTable;
@@ -41,7 +43,7 @@ namespace DerivationFramework {
         JpsiPlusDs1Cascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~JpsiPlusDs1Cascade();
         virtual StatusCode initialize() override;
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
+        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
         virtual StatusCode addBranches() const override;
 
       private:

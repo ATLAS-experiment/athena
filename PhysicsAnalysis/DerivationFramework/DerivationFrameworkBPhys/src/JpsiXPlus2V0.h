@@ -19,6 +19,8 @@
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "xAODEventInfo/EventInfo.h"
 #include <vector>
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace Trk {
     class IVertexFitter;
@@ -43,7 +45,7 @@ namespace DerivationFramework {
     JpsiXPlus2V0(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~JpsiXPlus2V0() = default;
     virtual StatusCode initialize() override;
-    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates) const;
+    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates, const EventContext& ctx) const;
     virtual StatusCode addBranches() const override;
 
   private:
