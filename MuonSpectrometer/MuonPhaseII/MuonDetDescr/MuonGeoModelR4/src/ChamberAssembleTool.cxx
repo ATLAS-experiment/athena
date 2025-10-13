@@ -288,8 +288,8 @@ ChamberAssembleTool::TrfWithBounds
       SurfBoundPtr_t surfToReturn{};
       if (std::abs(envelopeBounds->get(BoundEnum::eHalfLengthXnegY) - 
                   envelopeBounds->get(BoundEnum::eHalfLengthXposY)) > margin) {
-         surfToReturn = surfBoundSet.makeBounds<Acts::TrapezoidBounds>(envelopeBounds->get(BoundEnum::eHalfLengthXposY),
-                                                                       envelopeBounds->get(BoundEnum::eHalfLengthXnegY),
+         surfToReturn = surfBoundSet.makeBounds<Acts::TrapezoidBounds>(envelopeBounds->get(BoundEnum::eHalfLengthXnegY),
+                                                                       envelopeBounds->get(BoundEnum::eHalfLengthXposY),
                                                                        envelopeBounds->get(BoundEnum::eHalfLengthY)); 
       } else {
          const double maxX = std::max(envelopeBounds->get(BoundEnum::eHalfLengthXnegY), 
@@ -394,6 +394,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
          SpectrometerSector::defineArgs sectorArgs{};
          sectorArgs.bounds = envelopeBox;
          sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toCenter.inverse() * envelopeCentre, envelopePlane);
+         //print the rotation of the surface
           //sort the readout elements in the chamber per technology (in cases we have multiple technologies in the same chamber)
          std::ranges::sort(candidate.detEles,[](const MuonReadoutElement* a, 
 						const MuonReadoutElement* b){
