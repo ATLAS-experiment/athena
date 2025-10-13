@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////////////////
-// trackIsolationDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Christopher Young (christopher.young@cern.ch)
 #include "DerivationFrameworkSUSY/trackIsolationDecorator.h"
 #include "AthenaKernel/errorcheck.h"
@@ -16,21 +13,16 @@
 
 // Constructor
 DerivationFramework::trackIsolationDecorator::trackIsolationDecorator(const std::string& t,
-							    const std::string& n,
-							    const IInterface* p):
+                                                                      const std::string& n,
+                                                                      const IInterface* p):
   base_class(t, n, p),
-  m_trackIsolationTool(),
   m_decorators(xAOD::Iso::numIsolationTypes, 0)
 {
-  declareProperty("TrackIsolationTool", m_trackIsolationTool);
-  declareProperty("TargetContainer",    m_containerName = "InDetTrackParticles");
-  declareProperty("ptcones",            m_ptcones);
-  declareProperty("Prefix",             m_prefix="");
 }
-  
+
 // Destructor
 DerivationFramework::trackIsolationDecorator::~trackIsolationDecorator() {
-}  
+}
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::trackIsolationDecorator::initialize()
@@ -39,8 +31,8 @@ StatusCode DerivationFramework::trackIsolationDecorator::initialize()
 
   // load the matching tool
   if( ! m_trackIsolationTool.empty() ) {
-     CHECK( m_trackIsolationTool.retrieve() );
-     ATH_MSG_INFO( "Successfully retrived the TrackIsolationTool!" );
+    CHECK( m_trackIsolationTool.retrieve() );
+    ATH_MSG_INFO( "Successfully retrived the TrackIsolationTool!" );
   }
 
   m_trkCorrList.trackbitset.set(static_cast<unsigned int>(xAOD::Iso::coreTrackPtr));
@@ -49,7 +41,7 @@ StatusCode DerivationFramework::trackIsolationDecorator::initialize()
   m_ptconeTypes.clear();
   for(auto c: m_ptcones){
     xAOD::Iso::IsolationType t = static_cast<xAOD::Iso::IsolationType>(c);
-    m_decorators[c] = new SG::AuxElement::Decorator< float >(m_prefix+xAOD::Iso::toCString(t));
+    m_decorators[c] = new SG::Decorator< float >(m_prefix+xAOD::Iso::toCString(t));
     m_ptconeTypes.push_back(t);
   }
 
@@ -71,11 +63,11 @@ StatusCode DerivationFramework::trackIsolationDecorator::finalize()
 StatusCode DerivationFramework::trackIsolationDecorator::addBranches() const
 {
   // retrieve container
-   const xAOD::IParticleContainer* toDecorate = 0;
-   if(evtStore()->retrieve(toDecorate, m_containerName).isFailure()) {
-     ATH_MSG_FATAL( "Unable to retrieve " << m_containerName );
-     return StatusCode::FAILURE;
-   }
+  const xAOD::IParticleContainer* toDecorate{};
+  if(evtStore()->retrieve(toDecorate, m_containerName).isFailure()) { // FIXME Use Handles
+    ATH_MSG_FATAL( "Unable to retrieve " << m_containerName );
+    return StatusCode::FAILURE;
+  }
 
   /// Loop over tracks
   for(auto particle : *toDecorate) {
@@ -83,15 +75,15 @@ StatusCode DerivationFramework::trackIsolationDecorator::addBranches() const
     /// track isolation
     xAOD::TrackIsolation resultTrack;
     if (m_trackIsolationTool->trackIsolation(resultTrack, *particle, m_ptconeTypes, m_trkCorrList)){
-        for(unsigned int i=0; i<m_ptcones.size(); i++){
-//           (*(m_decorators[static_cast<int>(m_ptcones[i])]))(*particle) = resultTrack.ptcones.at(i);
-          (*(m_decorators[m_ptcones[i]]))(*particle) = resultTrack.ptcones.at(i);
-        }
+      for(unsigned int i=0; i<m_ptcones.size(); i++){
+        //           (*(m_decorators[static_cast<int>(m_ptcones[i])]))(*particle) = resultTrack.ptcones.at(i);
+        (*(m_decorators[m_ptcones[i]]))(*particle) = resultTrack.ptcones.at(i);
+      }
     }else{
-        ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
+      ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
     }
 
-  } 
+  }
 
   return StatusCode::SUCCESS;
 }
