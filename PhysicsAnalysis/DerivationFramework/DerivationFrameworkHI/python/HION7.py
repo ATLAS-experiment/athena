@@ -127,14 +127,16 @@ def HION7GlobalAugmentationToolCfg(flags):
     # Configure the augmentation tool
     # This adds FCalEtA, FCalEtC, ...
     doTopoClus = True
-
+    caloClusterKey = "CaloCalTopoClusters"
     from AthenaConfiguration.Enums import HIMode
     if flags.Reco.HIMode == HIMode.HI:
         doTopoClus = False
+        caloClusterKey = ""
 
     augmentation_tool = CompFactory.DerivationFramework.HIGlobalAugmentationTool(name="HION7AugmentationTool",
-                                                                                nHarmonic=5, # to capture higher-order harmonics for anisotropic flow
-                                                                                doTopoClusDec = doTopoClus
+                                                                                 nHarmonic=5, # to capture higher-order harmonics for anisotropic flow
+                                                                                 doTopoClusDec = doTopoClus,
+                                                                                 CaloClusterKey = caloClusterKey
                                                                                 )
 
     acc.addPublicTool(augmentation_tool, primary=True)

@@ -1,10 +1,6 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-/////////////////////////////////////////////////////////////////
-// HICentralityDecorationTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "PathResolver/PathResolver.h"
 #include "HICentralityDecorationTool.h"
@@ -21,6 +17,7 @@ namespace DerivationFramework
         // Athena initialize and finalize
         StatusCode HICentralityDecorationTool::initialize() {
     
+          ATH_CHECK( m_eventInfoKey.initialize() );
         // Resolve the path to the centrality definition file
         std::string resolvedPath = PathResolver::find_file(m_centralityDefinitionFile, "CALIBPATH");
     
@@ -62,9 +59,9 @@ namespace DerivationFramework
 
     StatusCode HICentralityDecorationTool::addBranches() const
     {
+        const EventContext& ctx = Gaudi::Hive::currentContext();
         // Load event EventInfo
-        const xAOD::EventInfo* eventInfo = nullptr;     
-        ATH_CHECK(evtStore()->retrieve( eventInfo ));
+        SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 
         // Set up the decorators for centrality
         const static SG::AuxElement::Decorator< float > ecCentralityMin("CentralityMin") ;
