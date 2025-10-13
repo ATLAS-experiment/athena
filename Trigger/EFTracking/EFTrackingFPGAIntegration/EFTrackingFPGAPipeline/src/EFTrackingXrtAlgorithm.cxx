@@ -106,6 +106,42 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
     m_runs[kernelName]->set_arg(argumentIndex, m_outputBuffers.back());
   }
 
+  for (const auto& [kernelName, argumentIndex, sourceKernelName, sourceArgumentIndex] : m_sharedInterfaces) {
+    const std::vector<std::shared_ptr<xrt::device>> devices = 
+      m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
+
+    ATH_CHECK(devices.size() != 0);
+
+    if (!m_kernels.contains(kernelName)) {
+      m_kernels[kernelName] = std::make_unique<xrt::kernel>(
+        *(devices[0]),
+        devices[0]->get_xclbin_uuid(),
+        kernelName,
+        xrt::kernel::cu_access_mode::exclusive
+      );
+    }
+
+    if (!m_runs.contains(kernelName)) {
+      m_runs[kernelName] = std::make_unique<xrt::run>(*m_kernels[kernelName]);
+    }
+
+    ATH_CHECK(m_runs[kernelName].get() != nullptr);
+
+    std::size_t index = 0;
+    for (const auto& [outputKernelName, outputStoreGateKey, outputArgumentIndex] : m_outputInterfaces) {
+      if (
+        outputKernelName == sourceKernelName &&
+        outputArgumentIndex == sourceArgumentIndex
+      ) {
+        m_runs[kernelName]->set_arg(argumentIndex, m_outputBuffers[index]);
+
+        break;
+      }
+
+      index++;
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -125,7 +161,7 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
 
     ATH_MSG_DEBUG("Copy " + inputDataStream.name() + " from storegate to host side map");
     {
-      Athena::Chrono  chrono(
+      Athena::Chrono chrono(
         "Copy " + inputDataStream.name() + " from storegate to host side map",
         m_chronoSvc.get()
       );
@@ -137,7 +173,7 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     
     ATH_MSG_DEBUG("Copy " + inputDataStream.name() + " from host side map to device");
     {
-      Athena::Chrono  chrono(
+      Athena::Chrono chrono(
         "Copy " + inputDataStream.name() + " from host side map to device",
         m_chronoSvc.get()
       );
@@ -155,7 +191,7 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     m_vSizeDataStreamKeys
   ) {
     SG::ReadHandle<std::vector<unsigned long>> vSizeDataStream(vSizeDataStreamKey, ctx);
-    ATH_MSG_DEBUG("Setting VSize: " << vSizeDataStream.name());
+    ATH_MSG_DEBUG("Setting VSize: " << vSizeDataStream.name() << ", " << vSizeDataStream->size());
     const auto& [kernelName, storeGateKey, argumentIndex] = m_vSizeInterfaces[vSizeHandleIndex];
 
     m_runs.at(kernelName)->set_arg(argumentIndex, vSizeDataStream->size());
@@ -163,14 +199,18 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
 
   ATH_MSG_DEBUG("Run kernels");
   {
-    Athena::Chrono  chrono("Run kernels", m_chronoSvc.get());
+    Athena::Chrono chrono("Run kernels", m_chronoSvc.get());
 
-    for (const auto& [key, run] : m_runs) {
-      run->start();
-    }
+    for (const auto& kernelNames : m_kernelOrder) {
+      for (const auto& kernelName : kernelNames) {
+        ATH_MSG_DEBUG("Running: " << kernelName);
+        m_runs.at(kernelName)->start();
+      }
 
-    for (const auto& [key, run] : m_runs) {
-      run->wait();
+      for (const auto& kernelName : kernelNames) {
+        ATH_MSG_DEBUG("Waiting: " << kernelName);
+        m_runs.at(kernelName)->wait();
+      }
     }
   }
 
@@ -184,7 +224,7 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
 
     ATH_MSG_DEBUG("Copy " + outputDataStream.name() + " from device to host side map");
     {
-      Athena::Chrono  chrono(
+      Athena::Chrono chrono(
         "Copy " + outputDataStream.name() + " from device to host side map",
         m_chronoSvc.get()
       );
@@ -195,7 +235,7 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     const unsigned long* outputMap = m_outputBuffers.at(outputHandleIndex).map<unsigned long*>();
     ATH_MSG_DEBUG("Copy " + outputDataStream.name() + " from host side map to storegate");
     {
-      Athena::Chrono  chrono(
+      Athena::Chrono chrono(
         "Copy " + outputDataStream.name() + " from host side map to storegate",
         m_chronoSvc.get()
       );
