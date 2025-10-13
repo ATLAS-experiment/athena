@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -11,6 +11,7 @@
 
 // Athena includes
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictMgr.h"
 
 // Gaudi includes
 #include "GaudiKernel/ISvcLocator.h"
