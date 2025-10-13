@@ -64,10 +64,10 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::finalize()
 
 StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
 {
-
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_DEBUG( "DiphotonVertexDecorator::AddingBranches" );
   
-  SG::ReadHandle<xAOD::VertexContainer> PV (m_primaryVertexKey);
+  SG::ReadHandle<xAOD::VertexContainer> PV (m_primaryVertexKey, ctx);
 
   if (!PV->empty() && PV->at(0)) {
     ATH_MSG_DEBUG( "Default PV " << PV->at(0) << ", type = " << PV->at(0)->vertexType() << " , z = " << PV->at(0)->z()  );
@@ -75,7 +75,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
   
   // Select the two highest pt photons that pass a preselection
 
-  SG::ReadHandle<xAOD::PhotonContainer> photons (m_photonKey);
+  SG::ReadHandle<xAOD::PhotonContainer> photons (m_photonKey, ctx);
   const xAOD::Photon *ph1 = nullptr, *ph2 = nullptr;
 
   for (const xAOD::Photon* ph: *photons)
@@ -100,7 +100,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
   std::vector<std::pair<const xAOD::Vertex*, float> > vxResult;
   const xAOD::Vertex *newPV = nullptr;
 
-  SG::ReadHandle<xAOD::FlowElementContainer> FEHandle(m_FEContainerHandleKey);
+  SG::ReadHandle<xAOD::FlowElementContainer> FEHandle(m_FEContainerHandleKey, ctx);
   SG::Decorator<char> passORDec("passOR");
   for(const auto *const fe : *FEHandle) passORDec(*fe) = true;
   
@@ -120,7 +120,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
   std::pair< xAOD::VertexContainer*, xAOD::ShallowAuxContainer* > HggPV = xAOD::shallowCopyContainer( *PV );
   HggPV.second->setShallowIO(false);
 
-  SG::WriteHandle<xAOD::VertexContainer> vertexContainer(m_diphotonVertexKey);
+  SG::WriteHandle<xAOD::VertexContainer> vertexContainer(m_diphotonVertexKey, ctx);
   ATH_CHECK(vertexContainer.recordNonConst(std::unique_ptr< xAOD::VertexContainer >(HggPV.first),
                                            std::unique_ptr< xAOD::ShallowAuxContainer >(HggPV.second)));
 
