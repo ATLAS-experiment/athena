@@ -6,6 +6,7 @@
 #define LARONLINE_SUPERCELLID_H
 
 #include "LArIdentifier/LArOnlineID_Base.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "string.h"
 #include <vector>
 #include <algorithm>
@@ -41,6 +42,7 @@ class LArOnline_SuperCellID : public LArOnlineID_Base
 };
 
 CLASS_DEF( LArOnline_SuperCellID , 115600394 , 1 )
+SG_BASES( LArOnline_SuperCellID, LArOnlineID_Base );
 
 #endif // LARONLINE_ID_H
 
