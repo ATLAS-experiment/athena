@@ -6,6 +6,8 @@ def EFTrackingXrtAlgorithmCfg(flags, **kwargs):
     kwargs.setdefault("inputInterfaces", [])
     kwargs.setdefault("vSizeInterfaces", [])
     kwargs.setdefault("outputInterfaces", [])
+    kwargs.setdefault("sharedInterfaces", [])
+    kwargs.setdefault("kernelOrder", [])
     kwargs.setdefault("inputDataStreamKeys", [storeGateKey for kernelName, storeGateKey, argumentIndex in kwargs["inputInterfaces"]])
     kwargs.setdefault("vSizeDataStreamKeys", [storeGateKey for kernelName, storeGateKey, argumentIndex in kwargs["vSizeInterfaces"]])
     kwargs.setdefault("outputDataStreamKeys", [storeGateKey for kernelName, storeGateKey, argumentIndex in kwargs["outputInterfaces"]])
