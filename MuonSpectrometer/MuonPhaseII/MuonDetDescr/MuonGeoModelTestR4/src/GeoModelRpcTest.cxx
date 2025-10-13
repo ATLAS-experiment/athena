@@ -233,7 +233,8 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
                     m_stripDblPhi.push_back(doubPhi);
 
                     if (strip != 1) continue;
-                    const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, layHash);
+                    const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, layHash)
+                                                      * Amg::getRotateZ3D(90.*Gaudi::Units::deg * measPhi);
                     m_stripRot.push_back(locToGlob);
                     m_stripRotGasGap.push_back(gasGap);
                     m_stripRotMeasPhi.push_back(measPhi);
