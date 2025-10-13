@@ -26,18 +26,25 @@ namespace GlobalSim {
     SG::ReadHandle<xAOD::eFexEMRoIContainer> inContainer(m_eEmRoIKey, ctx);
     CHECK(inContainer.isValid());
 
+    ATH_MSG_DEBUG("Number of eFexROIs read in " << inContainer->size());
+    
     using OutContainer=GlobalSim::IOBitwise::IeEmTOBContainer;
-    auto outContainer =  SG::WriteHandle<OutContainer>(m_eEmTOBContainerKey,
-						      ctx);
-    CHECK(outContainer.isValid());
+
+    auto outContainer = std::make_unique<OutContainer>();
+ 
     outContainer->reserve(inContainer->size());
+
 
     using ConcTOB=GlobalSim::IOBitwise::eEmTOB;
     std::transform(std::cbegin(*inContainer),
 		   std::cend(*inContainer),
-		   std::begin(*outContainer),
+		   std::back_inserter(*outContainer),
 		   [](const auto& inTob){
-		     return std::make_unique<ConcTOB>(*inTob);});
+		     return new ConcTOB(*inTob);});
+
+    auto h_write =  SG::WriteHandle<OutContainer>(m_eEmTOBContainerKey,
+						  ctx);
+    CHECK(h_write.record(std::move(outContainer)));
 
     return StatusCode::SUCCESS;
   }

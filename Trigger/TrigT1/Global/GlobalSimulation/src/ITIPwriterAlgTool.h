@@ -1,33 +1,29 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GLOBALSIM_IGLOBALSIMALGTOOL_H
-#define GLOBALSIM_IGLOBALSIMALGTOOL_H
+#ifndef GLOBALSIM_ITIPWRITERALGTOOL_H
+#define GLOBALSIM_ITIPWRITERALGTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/EventContext.h"
 
 #include <string>
 #include <bitset>
 
 // provide an pure abstract interface to AlgTools implementing
-// GlobalSim Algs.
+// AlgTools which write to the TIP word.
 
 namespace GlobalSim {
-  class IGlobalSimAlgTool : virtual public ::IAlgTool {
+  class ITIPwriterAlgTool : virtual public ::IAlgTool {
 
   public:
-
-    // FIXME to be moved to ITIPwriterAlgTool.
+    
     /// Number of bits for the TIP word. The TIP word gathers
     /// results from Global, and sends to the the CTP.
     static constexpr std::size_t s_nbits_TIP{1024};
     
-    DeclareInterfaceID(IGlobalSimAlgTool, 1, 0);
-    virtual ~IGlobalSimAlgTool() = default;
-
-    virtual StatusCode run(const EventContext& ctx) const = 0;
+    DeclareInterfaceID(ITIPwriterAlgTool, 1, 0);
+    virtual ~ITIPwriterAlgTool() = default;
 
     virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
 				 const EventContext& ) const = 0;

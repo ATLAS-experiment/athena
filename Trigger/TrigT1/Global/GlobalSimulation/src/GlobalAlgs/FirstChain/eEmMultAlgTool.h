@@ -7,7 +7,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "../../IGlobalSimAlgTool.h"
+#include "../../ITIPwriterAlgTool.h"
+#include "../../IGlobalSimAlgTool.h" // temporary - access to TIP word
 #include "../../IO/IeEmTOBContainer.h"
 
 #include "ICommonSelector.h"
@@ -27,7 +28,7 @@ namespace GlobalSim {
    */
 
 
-  class eEmMultAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
+  class eEmMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
 
   public:
     eEmMultAlgTool(const std::string& type,
@@ -38,12 +39,12 @@ namespace GlobalSim {
 
     /** @brief Initialize function running before first event */
     virtual StatusCode initialize() override;
-  
-    /** @brief Main functional block running for each event */
-    virtual StatusCode run(const EventContext& ctx) const override;
 
     virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
 				 const EventContext&) const override;
+
+    virtual std::string toString() const override;
+
   private:
   
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};
@@ -55,20 +56,6 @@ namespace GlobalSim {
       "eEmTOBs",
       "eEmTOBs",
       "Key for GlobalSim eEmTOB container"};
-
-    SG::ReadHandleKey<ulong>
-    m_multiplicity_in {
-      this,
-      "mult",
-      "mult",
-      "Key to read in intermediate result"};
-    
-    SG::WriteHandleKey<ulong>
-    m_multiplicity_out{
-      this,
-      "mult",
-      "mult",
-      "Key to write out  intermediate result"};
     
     Gaudi::Property<std::string> m_et_low_str {
       this,

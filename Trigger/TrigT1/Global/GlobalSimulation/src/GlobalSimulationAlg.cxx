@@ -16,16 +16,24 @@ namespace GlobalSim {
     
   StatusCode GlobalSimulationAlg::initialize () {
 
-    ATH_MSG_INFO("number of AlgTools " << m_algTools.size());
+    ATH_MSG_INFO("number of TOB creators " << m_algTools.size());
+    ATH_MSG_INFO("number of TIP writers " << m_TIPwriters.size());
 
     CHECK(m_tipWordKey.initialize());
     
     if (m_enableDumps) {
       std::stringstream ss;
+      ss << "\nTOB creators\n";
       for (const auto& tool : m_algTools) {
 	ss << tool->toString() << '\n';
 	ss << "=========\n";
       }
+      ss << "\nTIP writers\n";
+      for (const auto& tool : m_TIPwriters) {
+	ss << tool->toString() << '\n';
+	ss << "=========\n";
+      }
+ 
       std::ofstream out(name() + "_init.log");
       out << ss.str();
       out.close();
@@ -48,11 +56,13 @@ namespace GlobalSim {
     }
 
     auto tipword = std::make_unique<TipWord>(); // all zeros
-    for (const auto& tool : m_algTools) {
+    for (const auto& tool : m_TIPwriters) {
       ATH_MSG_DEBUG("Collecting TIP bits  " << tool.name());
       CHECK(tool -> updateTIP(*tipword, ctx));
     }
 
+    ATH_MSG_DEBUG("TIP " << *tipword);
+    
     // write out the selection result
     SG::WriteHandle<TipWord> h_write(m_tipWordKey, ctx);
     CHECK(h_write.record(std::move(tipword)));
