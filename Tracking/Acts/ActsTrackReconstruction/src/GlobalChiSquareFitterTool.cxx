@@ -140,7 +140,9 @@ GlobalChiSquareFitterTool::Gx2FitterOptions_t
                               m_gx2fExtensions[static_cast<int>(slType)], 
                               std::move(propagationOption),
                               surface, m_option_includeScat, 
-                              m_option_includeELoss};
+                              m_option_includeELoss,
+                              Acts::FreeToBoundCorrection{m_doJacobianCorr},
+                              m_nIterMax};                           
 }
 
 // refit a track
