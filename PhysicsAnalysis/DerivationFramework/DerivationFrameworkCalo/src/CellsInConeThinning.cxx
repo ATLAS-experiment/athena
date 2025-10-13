@@ -45,13 +45,13 @@ DerivationFramework::CellsInConeThinning::finalize()
 StatusCode
 DerivationFramework::CellsInConeThinning::addBranches() const
 {
-
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   /// Make new container
-  SG::WriteHandle<xAOD::CaloClusterContainer> dclHdl(m_OutputClusterSGKey);
+  SG::WriteHandle<xAOD::CaloClusterContainer> dclHdl(m_OutputClusterSGKey, ctx);
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(dclHdl));
  
   /// Input objects
-  SG::ReadHandle<xAOD::EgammaContainer> egHdl(m_SGKey);
+  SG::ReadHandle<xAOD::EgammaContainer> egHdl(m_SGKey, ctx);
   const xAOD::EgammaContainer* egammas = egHdl.cptr();
   if (!egammas) {
     ATH_MSG_ERROR("Couldn't retrieve egamma container with key: " << m_SGKey);
@@ -63,7 +63,7 @@ DerivationFramework::CellsInConeThinning::addBranches() const
     return StatusCode::SUCCESS;
   }
 
-  SG::ReadHandle<CaloCellContainer> cellHdl(m_InputCellsSGKey);
+  SG::ReadHandle<CaloCellContainer> cellHdl(m_InputCellsSGKey, ctx);
   const CaloCellContainer* cells = cellHdl.cptr();
   if (!cells) {
     ATH_MSG_ERROR(
@@ -71,7 +71,7 @@ DerivationFramework::CellsInConeThinning::addBranches() const
     return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{ m_caloMgrKey };
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{ m_caloMgrKey, ctx };
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
 
   // We have a selection string
@@ -105,7 +105,7 @@ DerivationFramework::CellsInConeThinning::addBranches() const
   }
   /// Finalize clusters
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks(
-    m_OutputCellLinkSGKey);
+                                                          m_OutputCellLinkSGKey, ctx);
   ATH_CHECK(CaloClusterStoreHelper::finalizeClusters(cellLinks, dclHdl.ptr()));
   /// Return
   return StatusCode::SUCCESS;
