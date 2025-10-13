@@ -20,10 +20,6 @@ namespace GlobalSim {
 
     CHECK(m_eEmTOBContainerKey.initialize());
 
-    // to maintain const, use the event store as scratch space
-    CHECK(m_multiplicity_in.initialize());
-    CHECK(m_multiplicity_out.initialize());
-
     if (m_n_multbits < 0) {
       ATH_MSG_ERROR("number of bits to write to TIP is negative");
       return StatusCode::FAILURE;
@@ -58,13 +54,8 @@ namespace GlobalSim {
   }
 
   
-  // Main functional block running for each event
-  StatusCode eEmMultAlgTool::run(const EventContext& ctx) const {
-    /*
-     * write out the number of TOBS passing cuts, to be read in
-     * in updateTIP()
-     */
- 
+  StatusCode eEmMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+				       const EventContext& ctx) const {
     auto tobs =
       SG::ReadHandle<GlobalSim::IOBitwise::IeEmTOBContainer>(m_eEmTOBContainerKey,
 							     ctx);
@@ -78,45 +69,33 @@ namespace GlobalSim {
     // m_n_multbits tested to be > 0 in initialize()
     ulong max_mult_unsigned = static_cast<ulong> (m_n_multbits);
 
-    auto tob_count = std::make_unique<ulong>(0);
+    ulong tob_count{0};
     for (const auto& t : *tobs){
       if (m_c_selector->select(*t) and m_e_selector->select(*t)) {
-	if (++(*tob_count) == max_mult_unsigned){break;}
+	if (++tob_count == max_mult_unsigned){break;}
       }
     }
 
-    
-    auto h_write = SG::WriteHandle<ulong>(m_multiplicity_out, ctx);
-    CHECK(h_write.record(std::move(tob_count)));
-    
-    return StatusCode::SUCCESS;
-    
-  }
+    ATH_MSG_DEBUG("no of passing TOBS");
 
-
-  StatusCode eEmMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
-				       const EventContext& ctx) const {
-
-    /*
-     * Read in the multiplicity count (written out by run())
-     * and set the appropriate buts in the TIP word.
-     */
+    auto count_bits = std::bitset<IGlobalSimAlgTool::s_nbits_TIP>(tob_count);
     
-    auto tob_count =
-      SG::ReadHandle<ulong>(m_multiplicity_in, ctx);
-    
-    auto count_bits = std::bitset<IGlobalSimAlgTool::s_nbits_TIP>(*tob_count);
-
     int p0{0};
     int p1{m_TIP_position};
     
     const int& mxb = m_n_multbits;
-
+    
     for (; p0 != mxb; ++p0, ++p1) {
       if (count_bits.test(p0)) {word.set(p1);}
     }
-	   
+
+    ATH_MSG_DEBUG("TIP word " << word);
+
     return StatusCode::SUCCESS;
+  }
+
+  std::string eEmMultAlgTool::toString() const {
+    return "eEmMultAlgTool read, select, count and report number of related eEmTOBS";
   }
 
 }
