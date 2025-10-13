@@ -83,9 +83,9 @@ namespace EFTrackingFPGAIntegration
        Gaudi::Property<std::string> m_insideOutInputName{this, "InsideOutInputName", "", "Name of the inside out input kernel"};
        Gaudi::Property<std::string> m_insideOutOutputName{this, "InsideOutOutputName", "", "Name of the inside out output kernel"};
 
-       mutable std::atomic<cl_ulong> m_kernelTime{0};       //!< Time for kernel execution
-       mutable std::atomic<cl_ulong> m_sum_kernelTime{0};  //!< Sum for the average time of the kernel execution
-       mutable std::atomic<ulonglong> m_num_Events{0}; //!< Number of events for the average time of the kernel execution
+       mutable std::atomic<cl_ulong> m_IO_kernelTime{0};       //!< Time for kernel execution
+       mutable std::atomic<cl_ulong> m_SE_kernelTime{0};  //!< Sum for the average time of the kernel execution
+       mutable std::atomic<ulonglong> m_numEvents{0}; //!< Number of events for the average time of the kernel execution
        // For IP access through XRT
        xrt::device m_xrt_accelerator;
 

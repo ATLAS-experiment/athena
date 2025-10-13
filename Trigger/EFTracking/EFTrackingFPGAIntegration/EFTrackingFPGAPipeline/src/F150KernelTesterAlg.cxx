@@ -125,68 +125,86 @@ namespace EFTrackingFPGAIntegration
 
         cl_int err = CL_SUCCESS;
 
+        // increment the event if there is data in this event
+        if(pixelDataIN.size() > 6) m_numEvents++;
+
         if (m_runSE) {
+          // Events (write → kSEInput → kSEOutput → read)
+          cl::Event evtSEWriteIn;
+          cl::Event evtSEKInputDone;
+          cl::Event evtSEKOutputDone;
+          cl::Event evtSEReadOut;
+
           ATH_MSG_DEBUG("Allocating SE buffers");
+          const size_t pixel_size_bytes = pixelDataIN.size() * sizeof(uint64_t);
 
-          size_t pixel_size_bytes = pixelDataIN.size() * sizeof(uint64_t);
-
-          m_slicingEngineInputBuffer = cl::Buffer(m_context, CL_MEM_READ_ONLY, pixel_size_bytes, NULL, &err);
-          m_slicingEngineOutputBuffer = cl::Buffer(m_context, CL_MEM_WRITE_ONLY, pixel_size_bytes, NULL, &err);
+          m_slicingEngineInputBuffer  = cl::Buffer(m_context, CL_MEM_READ_ONLY,  pixel_size_bytes, nullptr, &err);
+          m_slicingEngineOutputBuffer = cl::Buffer(m_context, CL_MEM_WRITE_ONLY, pixel_size_bytes, nullptr, &err);
 
           m_slicingEngineInput.setArg(0, m_slicingEngineInputBuffer);
-          m_slicingEngineInput.setArg(2, static_cast<unsigned long long>(pixelDataIN.size()));
+          m_slicingEngineInput.setArg(2, static_cast<unsigned long long>(pixelDataIN.size())); 
 
           m_slicingEngineOutput.setArg(1, m_slicingEngineOutputBuffer);
 
-          ATH_MSG_DEBUG("Transfering SE data");
-          m_queue.enqueueWriteBuffer(m_slicingEngineInputBuffer, CL_FALSE, 0, sizeof(uint64_t) * pixelDataIN.size(), &pixelDataIN);
-          m_queue.finish();
-          
+          ATH_MSG_DEBUG("Transferring SE data");
+          m_queue.enqueueWriteBuffer(m_slicingEngineInputBuffer, CL_TRUE, 0, pixel_size_bytes, pixelDataIN.data(), nullptr, &evtSEWriteIn);
+
           // Execute
-          ATH_MSG_DEBUG("Executing SE kernel");
-          m_queue.enqueueTask(m_slicingEngineInput);
-          m_queue.enqueueTask(m_slicingEngineOutput);
-          m_queue.finish();
+          ATH_MSG_DEBUG("Executing SE kernels");
+          std::vector<cl::Event> waitAfterSEWrite{evtSEWriteIn};
+          m_queue.enqueueTask(m_slicingEngineInput,  &waitAfterSEWrite, &evtSEKInputDone);
+          m_queue.enqueueTask(m_slicingEngineOutput, NULL, &evtSEKOutputDone);
 
           // Read
           ATH_MSG_DEBUG("Reading output data from kernel");
           std::vector<uint64_t> out_data(pixelDataIN.size(), 0);
-          m_queue.enqueueReadBuffer(m_slicingEngineOutputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
-          m_queue.finish();
+          std::vector<cl::Event> waitForSERead{evtSEKOutputDone};
+          m_queue.enqueueReadBuffer(m_slicingEngineOutputBuffer, /*blocking*/ CL_TRUE, 0, pixel_size_bytes,out_data.data(),&waitForSERead, &evtSEReadOut);
+
+          // Optional explicit sync (blocking read already waits)
+          cl::Event::waitForEvents({evtSEReadOut});
 
           dumpHexData(out_data, "HW_slicingOut_pixel.txt");
-        }
-        if (m_runIO) {
-          ATH_MSG_DEBUG("Allocating IO buffers");
-          size_t pixel_size_bytes = dataPixelOut.size() * sizeof(uint64_t);
 
-          m_insideOutInputBuffer = cl::Buffer(m_context, CL_MEM_READ_ONLY, pixel_size_bytes, NULL, &err);
-          m_insideOutOutputBuffer = cl::Buffer(m_context, CL_MEM_WRITE_ONLY, pixel_size_bytes, NULL, &err);
+          m_SE_kernelTime += evtSEKOutputDone.getProfilingInfo<CL_PROFILING_COMMAND_END>() - evtSEKInputDone.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+
+        }
+        if (m_runIO) 
+        {
+          cl::Event evtWriteIn;
+          cl::Event evtKInputDone;
+          cl::Event evtKOutputDone;
+          cl::Event evtReadOut;
+
+          ATH_MSG_DEBUG("Allocating IO buffers");
+          const size_t pixel_size_bytes = dataPixelOut.size() * sizeof(uint64_t);
+
+          m_insideOutInputBuffer  = cl::Buffer(m_context, CL_MEM_READ_ONLY,  pixel_size_bytes, nullptr, &err);
+          m_insideOutOutputBuffer = cl::Buffer(m_context, CL_MEM_WRITE_ONLY, pixel_size_bytes, nullptr, &err);
 
           ATH_MSG_DEBUG("Setting IO args");
-          // TODO: FIX ARGS
           m_insideOutInput.setArg(0,  m_insideOutInputBuffer);
           m_insideOutOutput.setArg(0, m_insideOutOutputBuffer);
 
-        
           ATH_MSG_DEBUG("Loading input data to IO input kernel");
-          m_queue.enqueueWriteBuffer(m_insideOutInputBuffer, CL_TRUE, 0, pixel_size_bytes, &dataPixelOut);
-          m_queue.finish();
-          
+          m_queue.enqueueWriteBuffer(m_insideOutInputBuffer, CL_TRUE, 0, pixel_size_bytes, dataPixelOut.data(), nullptr, &evtWriteIn);
 
           // Execute
-          ATH_MSG_DEBUG("Executing IO kernel");
-          m_queue.enqueueTask(m_insideOutInput);
-          m_queue.enqueueTask(m_insideOutOutput);
-          m_queue.finish();
+          ATH_MSG_DEBUG("Executing IO kernels");
+          std::vector<cl::Event> waitAfterWrite{evtWriteIn};
+          m_queue.enqueueTask(m_insideOutInput,  &waitAfterWrite, &evtKInputDone);
+          m_queue.enqueueTask(m_insideOutOutput, NULL, &evtKOutputDone);
 
           // Read
-          ATH_MSG_DEBUG("Reading output data from kernel");
+          ATH_MSG_ALWAYS("Reading output data from kernel");
           std::vector<uint64_t> out_data(dataPixelOut.size(), 0);
-          m_queue.enqueueReadBuffer(m_insideOutOutputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
-          m_queue.finish();
+          std::vector<cl::Event> waitForRead{evtKOutputDone};
+          m_queue.enqueueReadBuffer( m_insideOutOutputBuffer, CL_TRUE, 0, pixel_size_bytes, out_data.data(), &waitForRead, &evtReadOut);
 
+          // Ensure completion (optional since read is blocking, but explicit is fine)
+          cl::Event::waitForEvents({evtReadOut});
           dumpHexData(out_data, "HW_insideOut.txt");
+          m_IO_kernelTime += evtKOutputDone.getProfilingInfo<CL_PROFILING_COMMAND_END>() - evtKInputDone.getProfilingInfo<CL_PROFILING_COMMAND_START>();
         }
         
 
@@ -195,6 +213,14 @@ namespace EFTrackingFPGAIntegration
     
     StatusCode F150KernelTesterAlg::finalize()
     {
+        ATH_MSG_INFO("Finalizing F150KernelTesterAlg");
+        ATH_MSG_INFO("Number of events: " << m_numEvents);
+
+        if(m_numEvents > 0){
+            ATH_MSG_INFO("Inside out ave time: " << m_IO_kernelTime / m_numEvents / 1e6 << " ms");
+            ATH_MSG_INFO("Slicing Engine ave time: " << m_SE_kernelTime / m_numEvents / 1e6 << " ms");
+        }
+
       return StatusCode::SUCCESS;
     }
 }
