@@ -44,6 +44,8 @@ LArPedestalSubsetCnv_p1::persToTrans(const LArPedestalPersType* persObj,
 
             bool copyChannel = true;
             if (hasSparseData) {
+                // coverity[bad_shift]
+                // coverity[integer_overflow]
                 if (!(chansSet & (1 << (j - chansOffset)))) {
                     // Channel is missing data - skip
                     copyChannel = false;
