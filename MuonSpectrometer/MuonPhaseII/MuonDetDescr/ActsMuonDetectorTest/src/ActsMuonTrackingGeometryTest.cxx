@@ -106,9 +106,6 @@ namespace ActsTrk {
 
         const EventContext& ctx = Gaudi::Hive::currentContext();
 
-        if( ctx.eventID().event_number() != 5){
-            return StatusCode::SUCCESS;
-        }
 
         const ActsGeometryContext* gctx{nullptr};
         const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
