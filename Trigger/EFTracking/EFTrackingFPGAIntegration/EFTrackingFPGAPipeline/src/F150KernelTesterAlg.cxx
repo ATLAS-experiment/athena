@@ -18,12 +18,12 @@ namespace EFTrackingFPGAIntegration
         return full_cu_name;
     }
 
-    void F150KernelTesterAlg::dumpHexData(size_t dataLen, uint64_t *data, const std::string& dataDescriptor) const {
+    void F150KernelTesterAlg::dumpHexData(std::span<const uint64_t> data, const std::string& dataDescriptor) const {
         ATH_MSG_DEBUG("STARTING " << dataDescriptor << " words:");
         std::ofstream outputFile(dataDescriptor);
 
-        for (size_t i = 0; i < dataLen; i++) {
-          outputFile << std::hex << std::setw(16) << std::setfill('0') << data[i] << std::endl;
+        for (uint64_t d : data) {
+          outputFile << std::hex << std::setw(16) << std::setfill('0') << d << '\n';
         }
     
         // Write different data types
@@ -105,8 +105,8 @@ namespace EFTrackingFPGAIntegration
         SG::ReadHandle<FPGATrackSimHitCollection> hitCollectionHandle(m_FPGAHitKey, ctx);
         ATH_CHECK(m_FPGADataFormatTool->convertFPGAHitsToFPGADataFormat(hitCollectionHandle.cptr(), true, false, pixelDataIN, ctx));
         ATH_CHECK(m_FPGADataFormatTool->convertFPGAHitsToFPGADataFormat(hitCollectionHandle.cptr(), false, true, stripDataIN, ctx));
-        dumpHexData(pixelDataIN.size(), pixelDataIN.data(), "FPGATrackSim_slicingIn_pixel.txt");
-        dumpHexData(stripDataIN.size(), stripDataIN.data(), "FPGATrackSim_slicingIn_strip.txt");
+        dumpHexData(pixelDataIN, "FPGATrackSim_slicingIn_pixel.txt");
+        dumpHexData(stripDataIN, "FPGATrackSim_slicingIn_strip.txt");
 
         ATH_MSG_DEBUG("Accessing SE Out data.");
         std::vector<uint64_t> dataPixelOut;
@@ -114,13 +114,13 @@ namespace EFTrackingFPGAIntegration
         SG::ReadHandle<FPGATrackSimHitCollection> outhitCollectionHandle(m_FPGASlicedHitKey, ctx);
         ATH_CHECK(m_FPGADataFormatTool->convertFPGASliceToFPGADataFormat(outhitCollectionHandle.cptr(), true, false, dataPixelOut, ctx));
         ATH_CHECK(m_FPGADataFormatTool->convertFPGASliceToFPGADataFormat(outhitCollectionHandle.cptr(), false, true, dataStripOut, ctx));
-        dumpHexData(dataPixelOut.size(), dataPixelOut.data(), "FPGATrackSim_slicingOut_pixel.txt");
-        dumpHexData(dataStripOut.size(), dataStripOut.data(), "FPGATrackSim_slicingOut_strip.txt");
+        dumpHexData(dataPixelOut, "FPGATrackSim_slicingOut_pixel.txt");
+        dumpHexData(dataStripOut, "FPGATrackSim_slicingOut_strip.txt");
 
         ATH_MSG_DEBUG("Accessing SE Out data.");
         std::vector<uint64_t> dataInsideOut;
         ATH_CHECK(m_FPGADataFormatTool->convertFPGATracksToFPGADataFormat(outTrackCollection.cptr(), dataInsideOut, ctx));
-        dumpHexData(dataInsideOut.size(), dataInsideOut.data(), "FPGATrackSim_insideOut.txt");
+        dumpHexData(dataInsideOut, "FPGATrackSim_insideOut.txt");
 
 
         cl_int err = CL_SUCCESS;
@@ -154,7 +154,7 @@ namespace EFTrackingFPGAIntegration
           m_queue.enqueueReadBuffer(m_slicingEngineOutputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
           m_queue.finish();
 
-          dumpHexData(out_data.size(), &out_data[0], "HW_slicingOut_pixel.txt");
+          dumpHexData(out_data, "HW_slicingOut_pixel.txt");
         }
         if (m_runIO) {
           ATH_MSG_DEBUG("Allocating IO buffers");
@@ -186,7 +186,7 @@ namespace EFTrackingFPGAIntegration
           m_queue.enqueueReadBuffer(m_insideOutOutputBuffer, CL_TRUE, 0, pixel_size_bytes, &out_data);
           m_queue.finish();
 
-          dumpHexData(out_data.size(), &out_data[0], "HW_insideOut.txt");
+          dumpHexData(out_data, "HW_insideOut.txt");
         }
         
 
