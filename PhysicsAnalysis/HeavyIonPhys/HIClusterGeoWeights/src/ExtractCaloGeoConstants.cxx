@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HIEventUtils/ExtractCaloGeoConstants.h"
+#include "HIClusterGeoWeights/ExtractCaloGeoConstants.h"
 
 ExtractCaloGeoConstants::ExtractCaloGeoConstants(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
 {
