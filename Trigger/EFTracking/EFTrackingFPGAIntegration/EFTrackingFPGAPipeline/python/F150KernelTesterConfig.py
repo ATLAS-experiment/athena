@@ -9,8 +9,8 @@ def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', '/eos/project-a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F150_i/kernels.hw.xclbin')
     
-    kwarg.setdefault('RunSlicing', False) 
-    kwarg.setdefault('RunInsideOut', False) 
+    kwarg.setdefault('RunSlicing', True) 
+    kwarg.setdefault('RunInsideOut', True) 
     kwarg.setdefault('RunInsideOutOnSlicingEngine', False) 
 
     kwarg.setdefault('SlicingEngineInputName', 'configurableLengthWideLoader') 
@@ -44,7 +44,7 @@ def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
 
     return acc
 
-def F150EDMConversionAlgoCfg(flags, **kwarg):
+def F150EDMConversionAlgCfg(flags, **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('FPGAOutputTrackKey', "FPGATrackOutput")

@@ -795,9 +795,9 @@ def FPGATrackSimSeedingCfg(flags):
     
     # for testing hardware run in F150
     if(flags.Trigger.FPGATrackSim.runF150hw):
-        from EFTrackingFPGAPipeline.F150KernelTesterConfig import KernelTesterCfg, F150EDMConversionAlog
+        from EFTrackingFPGAPipeline.F150KernelTesterConfig import KernelTesterCfg, F150EDMConversionAlgCfg
         acc.merge(KernelTesterCfg(flags))
-        acc.merge(F150EDMConversionAlog(flags))
+        acc.merge(F150EDMConversionAlgCfg(flags))
 
 
     return acc
