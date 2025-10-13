@@ -2,14 +2,20 @@
 Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-void TileSamplingFraction_analysis()
+void TileSamplingFraction_analysis(std::string args="")
 {
-  const std::vector< std::string > thetalist={"-65","-60","-55","-50","-45","-40","-35","-30","-25","-20","-15","-10","-5",
-                                              "+5","+10","+15","+20","+25","+30","+35","+40","+45","+50","+55","+60","+65"};
+  std::vector<std::string> thetalist;
+  std::stringstream ss(args);
+  std::string token;
+  while (ss >> token) {
+      thetalist.push_back(token);
+  }
 
-  const int n = 26;
-  Double_t x[n], y[n], ex[n], ey[n];
-  int bin_count = 0;
+  std::sort(thetalist.begin(), thetalist.end(), [](const std::string& a, const std::string& b) {
+    return std::stof(a) < std::stof(b);
+  });
+
+  std::vector<Double_t> x, y, ex, ey;
   for(const auto& theta : thetalist) {
     TFile* file=TFile::Open(Form("hist%s.root",theta.c_str()));
     if(!file) continue;
@@ -27,19 +33,22 @@ void TileSamplingFraction_analysis()
     if(isnan(invSFerr)) continue;
 
     double th=atof(theta.c_str());
-
     cout << "1/SF value (theta="<<th<<"): " << (h_ptgen->GetMean())/(thefun->GetParameter(0)) << "+/-" << (h_ptgen->GetMean()/thefun->GetParameter(0))*(thefun->GetParError(0)/thefun->GetParameter(0)) << " dErr % " <<  (thefun->GetParError(0)/thefun->GetParameter(0))*100 << endl;   
-    x[bin_count] = th;
-    ex[bin_count] = 0;
-    y[bin_count] = invSF;
-    ey[bin_count] = invSFerr;
-    bin_count++;
+
+    x.push_back(th);
+    ex.push_back(0);
+    y.push_back(invSF);
+    ey.push_back(invSFerr);
   }
+
+
+
   TCanvas* c=new TCanvas("TileSamplingFractions","Tile Sampling Fractions");
   double ylow=30;
   double yhigh=34.5;
 
-  TGraphErrors* SF_graph = new TGraphErrors(n,x,y,ex,ey);
+  int n = x.size();
+  TGraphErrors* SF_graph = new TGraphErrors(n,&x[0], &y[0], &ex[0], &ey[0]);
   SF_graph->SetTitle(" ");
   SF_graph->GetXaxis()->SetTitle("#it{#theta} [degree]");
   SF_graph->GetYaxis()->SetTitle("Inverted Sampling Fraction");
