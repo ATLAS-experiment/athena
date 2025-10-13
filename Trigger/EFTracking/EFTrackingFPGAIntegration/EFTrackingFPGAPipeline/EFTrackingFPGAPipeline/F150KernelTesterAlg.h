@@ -30,6 +30,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <span>
 
 #define EVENT_COUNT_RST 0x80000000
 #define USER_CTRL_OFFSET 0x10
@@ -111,7 +112,7 @@ namespace EFTrackingFPGAIntegration
 
        std::string get_cu_name(const std::string& kernel_name, int cu);
        
-       void dumpHexData(size_t dataLen, uint64_t *data, const std::string &dataDescriptor) const;
+       void dumpHexData(std::span<const uint64_t> data, const std::string &dataDescriptor) const;
     };
 }
 
