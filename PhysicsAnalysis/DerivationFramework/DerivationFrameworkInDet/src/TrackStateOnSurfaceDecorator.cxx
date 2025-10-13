@@ -185,7 +185,7 @@ namespace DerivationFramework {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("Adding TSOS decorations the track particles");
 
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector< ElementLink< xAOD::TrackStateValidationContainer >  > > dectsos_msosLink(m_trackTSOSMOSLinkDecorKey);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector< ElementLink< xAOD::TrackStateValidationContainer >  > > dectsos_msosLink(m_trackTSOSMOSLinkDecorKey, ctx);
 
     // --- Retrieve track container (absolutely needed for decoration)
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_containerName,ctx);
@@ -278,9 +278,9 @@ namespace DerivationFramework {
     }
 
     SG::ReadHandle<Trk::PRDtoTrackMap>  prd_to_track_map;
-    const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
+    const Trk::PRDtoTrackMap *prd_to_track_map_cptr{};
     if (!m_prdToTrackMap.key().empty()) {
-       prd_to_track_map=SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap);
+      prd_to_track_map=SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
        if (!prd_to_track_map.isValid()) {
           ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
        }
