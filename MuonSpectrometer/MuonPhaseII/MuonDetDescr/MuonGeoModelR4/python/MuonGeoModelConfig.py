@@ -100,8 +100,7 @@ def MuonAlignStoreCfg(flags):
                                                   EventAlignStore="MdtActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
-                                                  FillAlignCache = False,
-                                                  LoadTrackingGeoSvc = False,
+                                                  FillAlignCache = False,                                                 
                                                   DetectorType=DetectorType.Mdt))
     if flags.Detector.GeometryRPC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
@@ -111,7 +110,6 @@ def MuonAlignStoreCfg(flags):
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
                                                   FillAlignCache = False,
-                                                  LoadTrackingGeoSvc = False,
                                                   DetectorType=DetectorType.Rpc))
     if flags.Detector.GeometryTGC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
@@ -121,7 +119,6 @@ def MuonAlignStoreCfg(flags):
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
                                                   FillAlignCache = False,
-                                                  LoadTrackingGeoSvc = False,
                                                   DetectorType=DetectorType.Tgc))
     if flags.Detector.GeometrysTGC: 
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
@@ -131,7 +128,6 @@ def MuonAlignStoreCfg(flags):
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
                                                   FillAlignCache = False,
-                                                  LoadTrackingGeoSvc = False,
                                                   DetectorType=DetectorType.sTgc))
 
     if flags.Detector.GeometryMM:
@@ -143,7 +139,6 @@ def MuonAlignStoreCfg(flags):
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
                                                   FillAlignCache = False,
-                                                  LoadTrackingGeoSvc = False,
                                                   DetectorType=DetectorType.Mm))
 
 

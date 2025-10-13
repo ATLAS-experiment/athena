@@ -5,7 +5,6 @@
 #include "EventPrimitives/EventPrimitives.h"
 // needed here to get the ATLAS eigen plugins in before the ACTS eigen plugins
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
-#include "ActsGeometry/DetectorVolumeSvc.h"
 #include "ActsGeometry/ActsExtrapolationAlg.h"
 #include "ActsGeometry/ActsExtrapolationTool.h"
 #include "ActsGeometry/ActsMaterialJsonWriterTool.h"
@@ -21,7 +20,6 @@
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
-#include "../SimpleCylinderDetBuilderTool.h"
 #include "../ItkBlueprintNodeBuilder.h"
 
 
@@ -42,8 +40,6 @@ DECLARE_COMPONENT(ActsTrackingGeometryTool)
 
 DECLARE_COMPONENT(ActsPropStepRootWriterSvc)
 DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
-DECLARE_COMPONENT(ActsTrk::DetectorVolumeSvc)
-DECLARE_COMPONENT(ActsTrk::SimpleCylinderDetBuilderTool)
 DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
 
 DECLARE_COMPONENT(ActsTrk::ItkBlueprintNodeBuilder)

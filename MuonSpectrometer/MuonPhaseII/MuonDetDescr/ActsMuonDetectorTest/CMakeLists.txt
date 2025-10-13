@@ -12,11 +12,6 @@ atlas_add_component( ActsMuonDetectorTest
                                     GaudiKernel MuonReadoutGeometryR4 MuonReadoutGeometry MuonGeoModelR4Lib ActsGeometryLib AthenaPoolUtilities MuonTruthHelpers
                                     xAODTruth xAODMuonSimHit TrkExInterfaces CxxUtils ActsInteropLib)
 
-atlas_add_test( testMuonDetectorNav
-                SCRIPT python -m ActsMuonDetectorTest.testMuonDetector 
-                PROPERTIES TIMEOUT 1000
-                PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( testMuonTrackingGeometry
                 SCRIPT python -m ActsMuonDetectorTest.testMuonTrackingGeometry --gen3

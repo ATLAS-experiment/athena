@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSGEOMETRY_ACTSDETALIGNCONDALG_H
 #define ACTSGEOMETRY_ACTSDETALIGNCONDALG_H
 
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
-#include "ActsGeometryInterfaces/IDetectorVolumeSvc.h"
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -22,8 +21,8 @@ namespace ActsTrk{
   class DetectorAlignCondAlg : public AthReentrantAlgorithm {
   public:
       /// Standard constructor
-      DetectorAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
-
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
+ 
       virtual ~DetectorAlignCondAlg();
 
       StatusCode initialize() override final;
@@ -39,20 +38,12 @@ namespace ActsTrk{
       SG::WriteCondHandleKey<DetectorAlignStore> m_outputKey{this, "ActsTransforms", ""};
       /// ServiceHandle to the ActsTrackingGeometry
       ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeoSvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
-      /// ServiceHandle to the IDetectorVolumeSvc
-      ServiceHandle<ActsTrk::IDetectorVolumeSvc> m_detVolSvc{this,"DetectorVolumeSvc", "DetectorVolumeSvc"};
       /// Flag determining the subdetector. Needs to be static castable to DetectorType
       Gaudi::Property<int> m_detType{this, "DetectorType", static_cast<int>(DetectorType::UnDefined)};
       /// Flag toggling whether the alignment store shall be filled with the transforms or not
       Gaudi::Property<bool> m_fillAlignStoreCache{this, "FillAlignCache", true};
       /// Static cast of >DetectorType< property
       DetectorType m_Type{DetectorType::UnDefined};
-
-      Gaudi::Property<bool> m_loadTrkGeoSvc{this, "LoadTrackingGeoSvc", true, 
-                                            "Toggle whether the tracking geometry svc shall be retrieved"};
-
-      Gaudi::Property<bool> m_loadDetVolSvc{this, "LoadDetectorVolumeSvc", false, 
-                                            "Toggle whether the detector volume svc shall be retrieved"};
 
   };
 }

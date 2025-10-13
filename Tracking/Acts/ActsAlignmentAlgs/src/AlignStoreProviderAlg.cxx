@@ -15,12 +15,8 @@ StatusCode AlignStoreProviderAlg::initialize() {
     ATH_CHECK(m_outputKey.initialize());
     /// Fill the aligned transformations during algorithm execution. 
     if (m_fillAlignStoreCache) {
-        if(m_loadTrkGeoSvc) {
-            ATH_CHECK(m_trackingGeoSvc.retrieve());
-        }
-        if (m_loadDetVolSvc) {
-            ATH_CHECK(m_detVolSvc.retrieve());
-        }   
+        ATH_CHECK(m_trackingGeoSvc.retrieve());
+     
     }
     /// If the provider alg passes through the alignment from
     /// the conditions store, the detector type does not need to be specified
@@ -67,11 +63,8 @@ StatusCode AlignStoreProviderAlg::execute(const EventContext& ctx) const {
     /// if the conditions alg upstream already did the same, the geoModelAlignment store
     /// was released and hence there's no need to recall this block again
     if (m_fillAlignStoreCache && newAlignment->geoModelAlignment) {
-        if(m_loadTrkGeoSvc && !m_trackingGeoSvc->populateAlignmentStore(*newAlignment)) {
+        if(!m_trackingGeoSvc->populateAlignmentStore(*newAlignment)) {
             ATH_MSG_WARNING("No detector elements of " << to_string(m_Type) << " are part of the tracking geometry");
-        }
-        if (m_loadDetVolSvc && !m_detVolSvc->populateAlignmentStore(*newAlignment)) {
-            ATH_MSG_WARNING("No detector elements of " << to_string(m_Type) << " are part of the detector tracking volumes");
         }
         /// There's no need of the absolute transform cache anymore
         newAlignment->geoModelAlignment.reset();
