@@ -37,8 +37,9 @@ StatusCode TauTruthMatchingTool::initialize()
 //______________________________________________________________________________
 std::unique_ptr<TauTruthMatchingTool::ITruthTausEvent> TauTruthMatchingTool::getEvent() const
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   auto truthTausEvent = std::make_unique<TruthTausEvent>();
-  if (retrieveTruthTaus(*truthTausEvent).isFailure()) {
+  if (retrieveTruthTaus(*truthTausEvent, ctx).isFailure()) {
     truthTausEvent.reset();
   }
   return truthTausEvent;
@@ -55,8 +56,8 @@ const xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xT
 							  ITruthTausEvent& itruthTausEvent) const
 {
   TruthTausEvent& truthTausEvent = dynamic_cast<TruthTausEvent&> (itruthTausEvent);
-
-  if (retrieveTruthTaus(truthTausEvent).isFailure())
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  if (retrieveTruthTaus(truthTausEvent, ctx).isFailure())
     return nullptr;
 
   if (findTruthTau(xTau, truthTausEvent).isFailure())

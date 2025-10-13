@@ -19,6 +19,8 @@
 // EDM include(s):
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace TauAnalysisTools
 {
@@ -44,7 +46,7 @@ public:
   virtual void setTruthMatchingMode() = 0;
 
   virtual StatusCode retrieveTruthTaus() = 0;
-  virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent) const = 0;
+  virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent,  const EventContext& ctx) const = 0;
 
 }; // class IBuildTruthTaus
 

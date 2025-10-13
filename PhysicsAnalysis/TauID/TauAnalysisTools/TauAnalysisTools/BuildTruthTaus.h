@@ -67,11 +67,11 @@ public:
   };
 
   virtual StatusCode retrieveTruthTaus() override;
-  virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent) const override;
+  virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent, const EventContext& ctx) const override;
 
 
 protected:
-  StatusCode retrieveTruthTaus(TruthTausEvent& truthTausEvent) const;
+  StatusCode retrieveTruthTaus(TruthTausEvent& truthTausEvent, const EventContext& ctx) const;
 
 
 private:
