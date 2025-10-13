@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArParamsFromStdNtuple.h"
@@ -78,10 +78,10 @@ StatusCode LArParamsFromStdNtuple::stop()
   outfit->SetBranchAddress("Taur", &Taur);
 
   // Create new objects
-  LArCaliPulseParamsComplete *larCaliPulseParams = new LArCaliPulseParamsComplete();
+  auto larCaliPulseParams = std::make_unique<LArCaliPulseParamsComplete>();
   ATH_CHECK ( larCaliPulseParams->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larCaliPulseParams->initialize() );
-  LArDetCellParamsComplete *larDetCellParams = new LArDetCellParamsComplete();
+  auto larDetCellParams = std::make_unique<LArDetCellParamsComplete>();
   ATH_CHECK ( larDetCellParams->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larDetCellParams->initialize() );
 
@@ -110,15 +110,8 @@ StatusCode LArParamsFromStdNtuple::stop()
     larDetCellParams->set(id,gain,Omega0,Taur);
   }
 
-  ATH_CHECK( detStore()->record(larCaliPulseParams,m_store_key_cali) );
-  ATH_CHECK( detStore()->record(larDetCellParams,m_store_key_det) );
-
-  // and symlink
-  ILArCaliPulseParams *ilarCaliPulse = nullptr;
-  ATH_CHECK( detStore()->symLink(larCaliPulseParams,ilarCaliPulse) );
-
-  ILArDetCellParams *ilarDetCell = nullptr;
-  ATH_CHECK( detStore()->symLink(larDetCellParams,ilarDetCell) );
+  ATH_CHECK( detStore()->record(std::move(larCaliPulseParams),m_store_key_cali) );
+  ATH_CHECK( detStore()->record(std::move(larDetCellParams),m_store_key_det) );
 
   ATH_MSG_INFO ( "LArParamsFromStdNtuple finalized!" );
   return StatusCode::SUCCESS;
