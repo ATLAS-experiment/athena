@@ -163,16 +163,9 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 				  std::make_unique<ClusterAuxContainer>() ));
   ClusterContainer *clusterContainer = clusterHandle.ptr();
 
-  // Fast Insertion of N elements
   using xAODCluster_t = typename ClusterContainer::base_value_type;
-  std::vector<xAODCluster_t*> toAddCollection;
-  toAddCollection.reserve(nClusters);
-  for (std::size_t i(0); i<nClusters; ++i)
-    toAddCollection.push_back(new xAODCluster_t());
-  clusterContainer->insert(clusterContainer->end(),
-			   toAddCollection.begin(),
-			   toAddCollection.end());
-  
+  clusterContainer->push_new(nClusters, [] () {return new xAODCluster_t();});
+
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;
   typename ClusterContainer::iterator finalElement = clusterContainer->end();
