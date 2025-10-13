@@ -12,11 +12,11 @@
 #ifndef GLOBALSIM_EEMNBHOODTOB_H
 #define GLOBALSIM_EEMNBHOODTOB_H
 
-#include "IeEmTOB.h"
+#include "IeEmNbhoodTOB.h"
 #include "eEmTOB.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
-#include "../IO/LArStripNeighborhood.h"
+#include "LArStripNeighborhood.h"
 
 #include <bitset>
 
@@ -25,7 +25,7 @@ namespace GlobalSim::IOBitwise {
   *
   * Additionally holds an LArStripNeighborhood alongside the eEmTOB information.
   */
-  class eEmNbhoodTOB : virtual public IeEmTOB, private eEmTOB {
+  class eEmNbhoodTOB : virtual public IeEmNbhoodTOB, private eEmTOB {
     
   public:
     /**

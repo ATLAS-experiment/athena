@@ -13,7 +13,7 @@ namespace GlobalSim {
   StatusCode
   LArStripNeighborhoodDumper::dump(const std::string& name,
 				   const xAOD::EventInfo& eventInfo,
-				   const LArStripNeighborhoodContainer& neighborhoods) const {
+				   const IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const {
 
     std::ofstream out(name + "_" +
                       std::to_string(eventInfo.eventNumber()) +
@@ -25,8 +25,8 @@ namespace GlobalSim {
         << eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
         << " weight " << eventInfo.mcEventWeight() << '\n';
 
-    for (const auto nbhd : neighborhoods) {
-      out << *nbhd << '\n';
+    for (const auto nbhdTOB : neighborhoodTOBs) {
+      out << nbhdTOB->Neighbourhood() << '\n';
     }
 
     out.close();
@@ -54,17 +54,17 @@ namespace GlobalSim {
     os << '\n';
   }
 
-  void dump_n(const LArStripNeighborhood* n,
+  void dump_n(const LArStripNeighborhood n,
               std::ostream& os){
-    dump_stripdataVector(n->phi_low(), os);
-    dump_stripdataVector(n->phi_center(), os);
-    dump_stripdataVector(n->phi_high(), os);
+    dump_stripdataVector(n.phi_low(), os);
+    dump_stripdataVector(n.phi_center(), os);
+    dump_stripdataVector(n.phi_high(), os);
   }
 
   StatusCode
   LArStripNeighborhoodDumper::dumpTerse(const std::string& name,
 					const xAOD::EventInfo& eventInfo,
-					const LArStripNeighborhoodContainer& neighborhoods) const {
+					const IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const {
 
     std::ofstream out(name + "_" +
                       std::to_string(eventInfo.eventNumber()) +
@@ -75,7 +75,7 @@ namespace GlobalSim {
 	<< eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)
 	<< " weight " << eventInfo.mcEventWeight() << '\n';
 
-    for (const auto n : neighborhoods) {dump_n(n, out);}
+    for (const auto nTOB : neighborhoodTOBs) {dump_n(nTOB->Neighbourhood(), out);}
 
 
     out.close();

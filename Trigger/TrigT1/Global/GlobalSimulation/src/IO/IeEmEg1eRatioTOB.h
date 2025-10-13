@@ -6,7 +6,7 @@
  * @file GlobalSimulation/IeEmTOB.h
  * @author A. Martynwood, martyniu@cern.ch
  * @date September 2025
- * @brief Interface class to hold eGamma1 BDT decision bits
+ * @brief Interface class to hold eGamma1 eRatio decision bits
  */
 
 #ifndef GLOBALSIM_IEEMEG1ERATIOTOB_H
@@ -35,8 +35,12 @@ namespace GlobalSim::IOBitwise {
     /** @brief Returns the eGamma1 eRatio result bits*/
     virtual std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits() const = 0;
   };
+
+  using IeEmEg1eRatioTOBContainer = std::vector<std::shared_ptr<IeEmEg1eRatioTOB>>;
+  
 } //End of namespace
 
 CLASS_DEF( GlobalSim::IOBitwise::IeEmEg1eRatioTOB , 207229871 , 1 )
+CLASS_DEF( GlobalSim::IOBitwise::IeEmEg1eRatioTOBContainer , 1214466989 , 1 )
 
 #endif //GLOBALSIM_IEEMEG1ERATIOTOB_H

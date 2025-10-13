@@ -57,11 +57,6 @@ if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
 
-    # Generate run3 L1 menu
-    from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg, generateL1Menu
-    acc.merge(L1ConfigSvcCfg(flags))
-    generateL1Menu(flags)
-
     from AthenaConfiguration.Enums import Format
     if flags.Input.Format == Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -96,7 +91,9 @@ if __name__ == '__main__':
                                      OutputLevel=DEBUG,
                                      dump=True))
 
-
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["IOBitwise::IeEmEg1BDTTOBContainer#BDTResult"]))
+    
     if acc.run().isFailure():
         import sys
         sys.exit(1)
