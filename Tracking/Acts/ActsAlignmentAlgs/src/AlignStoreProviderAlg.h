@@ -5,7 +5,6 @@
 #define ACTSGEOMETRY_ALIGNSTOREPROVIDERALG_H
 
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
-#include "ActsGeometryInterfaces/IDetectorVolumeSvc.h"
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -37,8 +36,6 @@ namespace ActsTrk{
       SG::WriteHandleKey<DetectorAlignStore> m_outputKey{this, "EventAlignStore", ""};
       /// ServiceHandle to the ActsTrackingGeometry
       ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeoSvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
-      /// ServiceHandle to the IDetectorVolumeSvc
-      ServiceHandle<ActsTrk::IDetectorVolumeSvc> m_detVolSvc{this,"DetectorVolumeSvc", "DetectorVolumeSvc"};
       /// Flag determining the subdetector. Needs to be static castable to DetectorType
       Gaudi::Property<int> m_detType{this, "DetectorType", static_cast<int>(DetectorType::UnDefined)};
       /// Flag toggling whether the full GeoAlignmentStore shall be written to store gate or whether the
@@ -50,12 +47,6 @@ namespace ActsTrk{
       Gaudi::Property<bool> m_fillAlignStoreCache{this, "FillAlignCache", true};
       /// Static cast of >DetectorType< property
       DetectorType m_Type{DetectorType::UnDefined};
-
-      Gaudi::Property<bool> m_loadTrkGeoSvc{this, "LoadTrackingGeoSvc", true, 
-                                            "Toggle whether the tracking geometry svc shall be retrieved"};
-
-      Gaudi::Property<bool> m_loadDetVolSvc{this, "LoadDetectorVolumeSvc", false, 
-                                            "Toggle whether the detector volume svc shall be retrieved"};
 
   };
 }
