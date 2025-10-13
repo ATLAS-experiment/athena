@@ -25,12 +25,10 @@ namespace IOVDbNamespace{
     if (blobPayload){
       return quote(IOVDbNamespace::base64Encode(attr.data<coral::Blob>()));
     }
-    std::string result(std::move(payloadOnly));
-    if (result=="NULL"){
-      result="null";
+    if (payloadOnly == "NULL") {
+      return "null";
     }
-
-    return result;
+    return payloadOnly;
   }
 
   std::string

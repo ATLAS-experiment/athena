@@ -173,7 +173,10 @@
     std::vector< std::pair<std::string,std::string> > spec_vec= info.getPayloadSpec().getColumns();
     auto * spec = new coral::AttributeListSpecification();
     for (auto &p : spec_vec){
-      spec->extend(p.first,cool::StorageType::storageType(typeCorrespondance.find(p.second)->second).cppType());
+      auto it = typeCorrespondance.find(p.second);
+      if (it != typeCorrespondance.end()) {
+        spec->extend(p.first,cool::StorageType::storageType(it->second).cppType());
+      }
     }
     return spec;
   }
