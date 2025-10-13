@@ -59,20 +59,21 @@ namespace DerivationFramework {
 
   StatusCode InvariantMassTool::addBranches() const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Write masses to SG for access by downstream algs     
     if (evtStore()->contains<std::vector<float> >(m_sgName.key())) {
       ATH_MSG_ERROR("Tool is attempting to write a StoreGate key " << m_sgName << " which already exists. Please use a different key");
       return StatusCode::FAILURE;
     }
     std::unique_ptr<std::vector<float> > masses(new std::vector<float>());
-    ATH_CHECK(getInvariantMasses(masses.get()));
+    ATH_CHECK(getInvariantMasses(masses.get(), ctx));
     //CHECK(evtStore()->record(std::move(masses), m_sgName));      
-    SG::WriteHandle<std::vector<float> > writeHandle(m_sgName);
+    SG::WriteHandle<std::vector<float> > writeHandle(m_sgName, ctx);
     ATH_CHECK(writeHandle.record(std::move(masses)));
     return StatusCode::SUCCESS;
   }  
 
-  StatusCode InvariantMassTool::getInvariantMasses(std::vector<float>* masses) const
+  StatusCode InvariantMassTool::getInvariantMasses(std::vector<float>* masses, const EventContext& ctx) const
   {
 
     // check the relevant information is available
@@ -82,12 +83,12 @@ namespace DerivationFramework {
       return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerName};
+    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerName, ctx};
     
     bool from2Collections(false);
     const xAOD::IParticleContainer* particles2{nullptr};
     if (!m_containerName2.key().empty() && m_containerName2.key()!=m_containerName.key()) {
-      SG::ReadHandle<xAOD::IParticleContainer> particleHdl2{m_containerName2};
+      SG::ReadHandle<xAOD::IParticleContainer> particleHdl2{m_containerName2, ctx};
       particles2=particleHdl2.cptr();
       from2Collections = true;
     }

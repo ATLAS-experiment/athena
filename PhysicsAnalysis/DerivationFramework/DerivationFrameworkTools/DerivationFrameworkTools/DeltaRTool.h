@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// DeltaRTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_DELTARTOOL_H
 #define DERIVATIONFRAMEWORK_DELTARTOOL_H
@@ -38,7 +34,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName  {this,"ContainerName","","SG key of first container"};
       SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName2 {this,"SecondContainerName","","SG key of first container"};
       
-      StatusCode getDeltaRs(std::vector<float>*) const;
+      StatusCode getDeltaRs(std::vector<float>*, const EventContext& ctx) const;
       static float calculateDeltaR(float,float,float,float) ;
   }; 
 }
