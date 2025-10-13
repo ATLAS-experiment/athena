@@ -119,9 +119,7 @@ namespace IOVDbNamespace{
 
   std::string
   sanitiseCrestTag(const std::string & fname){
-    const std::string newName{sanitiseFilename(fname)};
-    //coverity[copy_constructor_call]
-    return newName;
+    return sanitiseFilename(fname);
   }
 
   std::string
