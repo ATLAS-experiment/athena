@@ -210,7 +210,7 @@ namespace MuonR4{
 
             Gaudi::Property<double> m_maxOccStgcEta{this, "maxSTGCEtaOccupancy", 0.1, 
                                                    "Maximum occpancy of sTgc eta hits in a gasGap"};
-            Gaudi::Property<double> m_maxOccStgcPhi{this, "maxSTGCPhiOccupancy", 0.1, 
+            Gaudi::Property<double> m_maxOccStgcPhi{this, "maxSTGCPhiOccupancy", 0.5, 
                                                     "Maximum occpancy of sTgc phi hits in a gasGap"};
 
     };
