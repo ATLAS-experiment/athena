@@ -103,15 +103,8 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
-    
-
-    // using trick for fast insertion
-    std::vector< xAOD::SpacePoint* > preCollection;
-    preCollection.reserve(pixelClusters->size());
-    for ( std::size_t i(0); i<inputPixelClusterContainer->size(); ++i)
-      preCollection.push_back( new xAOD::SpacePoint() );
-    pixelSpacePoints->insert(pixelSpacePoints->end(), preCollection.begin(), preCollection.end());
-
+    // insertion of big collections
+    pixelSpacePoints->push_new(pixelClusters->size(), [] () {return new xAOD::SpacePoint();});
 
     std::map<IdentifierHash, std::vector<std::pair<unsigned int, unsigned int>>> cache_ranges;
     int groupStartIdx = 0;
