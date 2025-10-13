@@ -4,7 +4,7 @@
 # art-description: Trigger BS->RDO_TRIG athena CaloGPU test of the Dev_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
-# art-input: group.trig-hlt.data24_13p6TeV.00475321.physics_EnhancedBias.merge.RAW
+# art-input: group.trig-hlt.data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW
 # art-input-nfiles: 2
 # art-athena-mt: 8
 # art-architecture: '#&nvidia'
