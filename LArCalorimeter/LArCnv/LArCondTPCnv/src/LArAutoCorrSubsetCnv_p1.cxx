@@ -42,6 +42,8 @@ LArAutoCorrSubsetCnv_p1::persToTrans(const LArAutoCorrPersType* persObj,
 
       bool copyChannel = true;
       if (hasSparseData) {
+        // coverity[bad_shift]
+        // coverity[integer_overflow]
         if (!(chansSet & (1 << (j - chansOffset)))) {
           // Channel is missing data - skip
           copyChannel = false;
@@ -256,6 +258,7 @@ LArAutoCorrSubsetCnv_p1::transToPers(const LArAutoCorrTransType* transObj,
 
                 if (subsetIt->second[j].m_vAutoCorr.size() > 0) {
                     // store the channel number in bit map
+                    // coverity[integer_overflow]
                     assert (j >= chansOffset && (j - chansOffset) <= 31);
                     chansSet |= (1 << (j - chansOffset));
                 }

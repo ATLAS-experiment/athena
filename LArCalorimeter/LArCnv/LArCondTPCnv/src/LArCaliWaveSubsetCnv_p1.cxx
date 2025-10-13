@@ -48,7 +48,9 @@ LArCaliWaveSubsetCnv_p1::persToTrans(const LArCWPersType* persObj,
   
     for (unsigned int j = 0; j < nChannelsPerFeb; ++j){
       bool copyChannel = true;
-      if (hasSparseData) {			
+      if (hasSparseData) {
+        // coverity[bad_shift]
+        // coverity[integer_overflow]
         if (!(chansSet & (1 << (j - chansOffset)))) {
           copyChannel = false;// Channel is missing data - skip
           //					std::cout<<"0";
