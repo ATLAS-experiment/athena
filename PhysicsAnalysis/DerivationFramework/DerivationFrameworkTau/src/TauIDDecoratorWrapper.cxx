@@ -206,7 +206,7 @@ namespace DerivationFramework {
     delete shallowCopy.second;
 
     // add TauAnalysisTool MuonOLR
-    SG::ReadHandle<xAOD::MuonContainer> muonReadHandle(m_muonContainerKey);
+    SG::ReadHandle<xAOD::MuonContainer> muonReadHandle(m_muonContainerKey, ctx);
     if (!muonReadHandle.isValid()) {
       ATH_MSG_DEBUG ("Could not retrieve MuonContainer with key " << muonReadHandle.key() << " so won't add TAT MuonOLR flag");
       return StatusCode::SUCCESS;
