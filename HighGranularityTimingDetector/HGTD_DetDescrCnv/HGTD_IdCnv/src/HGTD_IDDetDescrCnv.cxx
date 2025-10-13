@@ -107,9 +107,9 @@ HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
             return StatusCode::FAILURE;
         }
         // Save state:
-        m_inDetIDTag      = inDetIDTag;
-        m_inDetIDFileName = inDetIDFileName;
-        m_inDetIdDictTag  = inDetIdDictTag;
+        m_inDetIDTag      = std::move(inDetIDTag);
+        m_inDetIDFileName = std::move(inDetIDFileName);
+        m_inDetIdDictTag  = std::move(inDetIdDictTag);
         m_doChecks        = doChecks;
     }
     

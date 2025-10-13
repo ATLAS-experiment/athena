@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_GeoModelXml_HGTD_GMXINTERFACE_H
@@ -8,13 +8,12 @@
 #include <AthenaBaseComps/AthMessaging.h>
 #include <GeoModelXml/GmxInterface.h>
 
-#include <HGTD_ReadoutGeometry/HGTD_DetectorManager.h>
-
 #include <map>
 #include <string>
-#include <sstream>
 
+class HGTD_DetectorManager;
 class IRDBAccessSvc;
+class GeoVFullPhysVol;
 
 namespace GeoModelIO{
   class ReadGeoModel;
