@@ -12,9 +12,7 @@
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "CxxUtils/phihelper.h"
 
-#include "TrkTrack/Track.h"
-#include "TrkTrack/TrackCollection.h"
-#include "TrkTrackSummary/TrackSummary.h"
+#include "xAODTracking/TrackParticle.h"
 
 TrigTauTrackRoiUpdater::TrigTauTrackRoiUpdater(const std::string& name, ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
@@ -67,9 +65,9 @@ StatusCode TrigTauTrackRoiUpdater::execute(const EventContext& ctx) const
 
 
     // Retrieve Input TrackCollection
-    SG::ReadHandle<TrackCollection> TrackCollectionHandle = SG::makeHandle(m_tracksKey, ctx);
+    SG::ReadHandle<xAOD::TrackParticleContainer> TrackCollectionHandle = SG::makeHandle(m_tracksKey, ctx);
     ATH_CHECK(TrackCollectionHandle.isValid());
-    const TrackCollection* foundTracks = TrackCollectionHandle.get();
+    const xAOD::TrackParticleContainer* foundTracks = TrackCollectionHandle.get();
 
     if(!foundTracks) {
       ATH_MSG_ERROR("No track container found, the Track RoI updater should not be scheduled");
@@ -98,38 +96,32 @@ StatusCode TrigTauTrackRoiUpdater::execute(const EventContext& ctx) const
     // Find leading track
     //---------------------------------------------------------------
 
-    const Trk::Track* leadTrack = nullptr;
+    const xAOD::TrackParticle* leadTrack = nullptr;
     float trkPtMax = 0;
     
     // Use the highest-pt track satisfying quality cuts
     // If no track is found, the input ROI is used
-    for(const Trk::Track* track : *foundTracks) {
-        const Trk::TrackSummary* summary = track->trackSummary();
-        if(!summary) {
-            ATH_MSG_WARNING("Track summary not available in RoI updater" << name() << ". Skipping track...");
-            continue;
-        }
+    for(const xAOD::TrackParticle* track : *foundTracks) {
 
-        float trackPt = track->perigeeParameters()->pT();
+        float trackPt = track->pt();
         if(trackPt > trkPtMax) {
-            int nPix = summary->get(Trk::numberOfPixelHits);
-            if(nPix < 0) nPix = 0;
-            if(nPix < m_nHitPix) {
-                ATH_MSG_DEBUG("Track rejected because nHitPix " << nPix << " < " << m_nHitPix);
-                continue;
-            }
+	  uint8_t nPix{}, nPixHoles{}, nSCTHoles{}, summaryVal{};
+	  nPix = track->summaryValue(summaryVal, xAOD::numberOfPixelHits) ? summaryVal : 0;
+	  if(nPix < m_nHitPix) {
+	    ATH_MSG_DEBUG("Track rejected because nHitPix " << static_cast<int>(nPix) << " < " << m_nHitPix);
+	    continue;
+	  }
 
-            int nPixHoles = summary->get(Trk::numberOfPixelHoles);
-            if(nPixHoles < 0) nPixHoles = 0;
-            int nSCTHoles = summary->get(Trk::numberOfSCTHoles);
-            if(nSCTHoles < 0) nSCTHoles = 0;
-            if((nPixHoles + nSCTHoles) > m_nSiHoles) {
-                ATH_MSG_DEBUG("Track rejected because nSiHoles " << nPixHoles + nSCTHoles << " > " << m_nSiHoles);
-                continue;
-            }
+	  nPixHoles = track->summaryValue(summaryVal, xAOD::numberOfPixelHoles) ? summaryVal : 0;
+	  nSCTHoles = track->summaryValue(summaryVal, xAOD::numberOfSCTHoles) ? summaryVal : 0;
+	  if((nPixHoles + nSCTHoles) > m_nSiHoles) {
+	    ATH_MSG_DEBUG("Track rejected because nSiHoles " << static_cast<int>(nPixHoles + nSCTHoles) << " > " << m_nSiHoles);
+	    continue;
+	  }
 
-            leadTrack = track;
-            trkPtMax = trackPt;
+	  leadTrack = track;
+	  trkPtMax = trackPt;
+	  ATH_MSG_VERBOSE("pTmax = " << trkPtMax);
         }
     }
 
@@ -142,11 +134,12 @@ StatusCode TrigTauTrackRoiUpdater::execute(const EventContext& ctx) const
     // If a leading track is found, update all the ROI position and size parameters;
     // else, only update the eta/phi width (etaMinus, etaPlus, phiMinus, phiPlus)
     if(leadTrack) {
-        zed = leadTrack->perigeeParameters()->parameters()[Trk::z0];
-        zedMinus = zed - m_z0HalfWidth;
-        zedPlus = zed + m_z0HalfWidth;
-        eta = leadTrack->perigeeParameters()->eta();
-        phi = leadTrack->perigeeParameters()->parameters()[Trk::phi0];
+      zed = leadTrack->z0() + leadTrack->vz();
+      ATH_MSG_DEBUG("Track z0 " << leadTrack->z0() <<" vz: " << leadTrack->vz() << " zed:" << zed);
+      zedMinus = zed - m_z0HalfWidth;
+      zedPlus = zed + m_z0HalfWidth;
+      eta = leadTrack->eta();
+      phi = leadTrack->phi0();
     }
 
     float etaMinus = eta - m_etaHalfWidth;
