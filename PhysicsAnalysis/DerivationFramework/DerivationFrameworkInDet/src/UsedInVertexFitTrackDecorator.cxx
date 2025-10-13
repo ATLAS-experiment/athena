@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ namespace DerivationFramework {
     ATH_MSG_DEBUG("In addBranches(...) for " << name() <<  "...");
 
     // Decorate our tracks
-    m_decoTool->decorate();
+    m_decoTool->decorate(); // FIXME Pass EventContext
 
     return StatusCode::SUCCESS;
   }
