@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_IDCNV_HGTD_IDDETDESCRCNV_H
@@ -8,6 +8,13 @@
 #include "DetDescrCnvSvc/DetDescrConverter.h"
 
 #include "HGTD_Identifier/HGTD_ID.h"
+
+#include <memory>
+#include <string>
+
+class IOpaqueAddress;
+class DataObject;
+class ISvcLocator;
 
 /**
  **  This class is a converter for the HGTD_ID an IdHelper which is
