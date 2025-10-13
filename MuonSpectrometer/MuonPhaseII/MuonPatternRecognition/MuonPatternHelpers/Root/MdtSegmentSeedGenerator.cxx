@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
-#include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <MuonRecToolInterfacesR4/ISpacePointCalibrator.h>
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>

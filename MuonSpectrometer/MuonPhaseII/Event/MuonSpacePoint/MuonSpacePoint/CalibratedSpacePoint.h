@@ -21,7 +21,7 @@ namespace MuonR4{
              *                      in the current chi2 iteration, but may tried in the next cycle
              *      - Outlier: The Space point is an outlier and shall never be included in the fit. It's kept for the hit counting
              *                 purpose but nothing else */
-            enum class State : uint8_t {
+            enum class State : std::uint8_t {
                 Valid = 0,
                 FailedCalib = 1,
                 Outlier = 2,
@@ -83,24 +83,35 @@ namespace MuonR4{
             void setFitState(State st);
             /** @brief Returns the local dimension of the measurement */
             unsigned dimension() const;
+            /** @brief Sets the beamline direction */
+            void setBeamDirection(Amg::Vector3D&& beamDir);
 
             friend std::ostream& operator<<(std::ostream& ostr, const CalibratedSpacePoint& sp) {
                     sp.print(ostr);
                     return ostr;
             }
         private:
+            /** @brief Print function */
             void print(std::ostream& ostr) const;
-            const SpacePoint* m_parent{nullptr};
+            /** @brief Calibrated position */
             Amg::Vector3D m_posInChamber{Amg::Vector3D::Zero()};
-            
-            double m_driftRadius{0.};
+            /** @brief Covariance array */
             Cov_t m_cov{Acts::filledArray<double, 3>(0.)};
-
+            /** @brief Calibrated drift radius */
+            double m_driftRadius{0.};
+            /** @brief Calibrated time (Acts units) */
             double m_time{0.};
-            /// By default the Mdt may measure time
-            bool m_measuresTime{type() == xAOD::UncalibMeasType::MdtDriftCircleType};
+            /** @brief Uncalibrated space point from which this 
+             *         space point is constructed */
+            const SpacePoint* m_parent{nullptr};
+            /** @brief Direction of the beamline (Beamspot constraint) */
+            std::shared_ptr<Amg::Vector3D> m_beamLine{};
+            /** @brief Calibration state */
             State m_state{State::Valid};
-    };
+            /** @brief time flag (By default true for Mdt detectors) */
+            bool m_measuresTime{type() == xAOD::UncalibMeasType::MdtDriftCircleType};
+        
+        };
         static_assert(Acts::Experimental::CompositeSpacePoint<CalibratedSpacePoint>);
 
 

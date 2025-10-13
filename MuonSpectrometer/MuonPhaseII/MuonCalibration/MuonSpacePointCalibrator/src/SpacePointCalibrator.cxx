@@ -24,7 +24,9 @@
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
+
 #include "Acts/Utilities/MathHelpers.hpp"
+#include "Acts/Utilities/Enumerate.hpp"
 
 
 namespace {
@@ -47,6 +49,15 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
 
+    void SpacePointCalibrator::updateSigns(const Amg::Vector3D& trackPos,
+                                           const Amg::Vector3D& trackDir,
+                                           CalibSpacePointVec& hitsToCalib) const {
+        std::vector<int> signs = SeedingAux::strawSigns(trackPos, trackDir,
+                                                        hitsToCalib);
+        for (const auto& [spIdx, sp]: Acts::enumerate(hitsToCalib)) {
+            sp->setDriftRadius(sp->driftRadius() * signs[spIdx]);
+        }
+    }
     CalibSpacePointPtr SpacePointCalibrator::calibrate(const EventContext& ctx,
                                                        const CalibratedSpacePoint& spacePoint,
                                                        const Amg::Vector3D& segPos,
@@ -64,15 +75,18 @@ namespace MuonR4{
         return calibSP;
     }
             
-    CalibSpacePointVec SpacePointCalibrator::calibrate(const EventContext& ctx,
-                                                       CalibSpacePointVec&& spacePoints,
+    CalibSpacePointVec SpacePointCalibrator::calibrate(const Acts::CalibrationContext& cctx,
                                                        const Amg::Vector3D& segPos,
                                                        const Amg::Vector3D& segDir,
-                                                       const double timeDelay) const {
-        for (CalibSpacePointPtr& sp : spacePoints){
-            sp = calibrate(ctx, *sp, segPos, segDir, timeDelay);
+                                                       const double timeDelay,
+                                                       const CalibSpacePointVec& spacePoints) const {
+        CalibSpacePointVec newCalib{};
+        const EventContext* ctx = cctx.get<const EventContext*>();
+        newCalib.reserve(spacePoints.size());
+        for (const CalibSpacePointPtr& sp : spacePoints){
+            newCalib.emplace_back(calibrate(*ctx, *sp, segPos, segDir, timeDelay));
         }
-        return spacePoints;
+        return newCalib;
     }
  
     CalibSpacePointPtr SpacePointCalibrator::calibrate(const EventContext& ctx,
@@ -96,6 +110,7 @@ namespace MuonR4{
 
         SpacePoint::Cov_t cov = spacePoint->covariance();
         CalibSpacePointPtr calibSP{};
+        ATH_MSG_VERBOSE("Calibrate "<<(*spacePoint) <<" -> updated pos "<<Amg::toString(calibSpPos));
         switch (spacePoint->type()) {
             case xAOD::UncalibMeasType::MdtDriftCircleType: {
                 const Amg::Vector3D locClosestApproach = posInChamb 

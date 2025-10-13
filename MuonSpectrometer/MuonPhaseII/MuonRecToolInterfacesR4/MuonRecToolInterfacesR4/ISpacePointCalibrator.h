@@ -7,15 +7,15 @@
 
 #include <GaudiKernel/IAlgTool.h>
 #include <GaudiKernel/EventContext.h>
+
 #include <GeoPrimitives/GeoPrimitives.h>
+
 #include <memory>
 
-#include "Acts/EventData/SourceLink.hpp"
-#include "Acts/Utilities/CalibrationContext.hpp"
 #include <ActsEvent/TrackContainer.h>
 
-
-class EventContext;
+#include <Acts/EventData/SourceLink.hpp>
+#include <Acts/Utilities/CalibrationContext.hpp>
 
 namespace MuonR4{
     class SpacePoint;
@@ -72,16 +72,18 @@ namespace MuonR4{
                                                  const double timeDelay) const = 0;
     
             /** @brief Refines the calibration constants of already calibrated space points
-             *  @param ctx: EventContext to access conditions data
-             *  @param spacePoints: List of already calibrated space points that's eaten by the method
+             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
              *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
-             *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
-            virtual CalibSpacePointVec calibrate(const EventContext& ctx,
-                                                 CalibSpacePointVec&& spacePoints,
-                                                 const Amg::Vector3D& seedPosInChamb,
-                                                 const Amg::Vector3D& seedDirInChamb,
-                                                 const double timeDelay) const = 0;
+             *  @param timeDelay: Shift in time to be added to the time of flight of a particle 
+             *                    going a straight path 
+             *  @param spacePoints: List of already calibrated space points that's eaten by the method */
+          
+             virtual CalibSpacePointVec calibrate(const Acts::CalibrationContext& cctx,                                            
+                                                  const Amg::Vector3D& seedPosInChamb,
+                                                  const Amg::Vector3D& seedDirInChamb,
+                                                  const double timeDelay,
+                                                  const CalibSpacePointVec& spacePoints) const = 0;
             /** @brief Returns the drift velocity for a given drift-circle space point
              *  @param ctx: EventContext to access conditions data
              *  @param spacePoint: Reference to the calibrated space point for which the velocity needs to be calculated. */
@@ -101,6 +103,14 @@ namespace MuonR4{
                                              const Acts::CalibrationContext& cctx,
                                              const Acts::SourceLink& link,
                                              ActsTrk::MutableTrackStateBackend::TrackStateProxy state) const = 0;
+            /** @brief Update the signs of the drift radii for a given straight line track
+             *         to fix the left <-> right ambiguity
+             *  @param trackPos: Position of the track intercept in the sector frame
+             *  @param trackDir: Direction of the track in the sector frame
+             *  @param hitsToCalib: List of space points to calibrate */
+            virtual void updateSigns(const Amg::Vector3D& trackPos,
+                                     const Amg::Vector3D& trackDir,
+                                     CalibSpacePointVec& hitsToCalib) const = 0;
     };
 
 }
