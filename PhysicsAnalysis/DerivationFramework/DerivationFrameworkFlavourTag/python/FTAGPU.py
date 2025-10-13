@@ -196,7 +196,7 @@ def FTAGPUCfg(flags):
     acc.merge(JetBTagginglessByVertexAlgCfg(
         flags,
         "AntiKt4EMPFlowByVertexJets",
-        dzCut_vec=[5, 3, 2],
+        dzCut_vec=[5, 2, 1],
         useMinZ0Vertex_vec=[False]))
 
     # Output stream
