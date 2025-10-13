@@ -11,15 +11,11 @@
 #include "IdDict/IdDictFieldImplementation.h"
 #include "IdDict/IdDictDefs.h"
 #include <iostream>
-#include <sstream>
+#include <format>
+#include <string>
+#include <string_view>
 
-namespace {
-  void tabify(int ntot_spaces, std::stringstream& str) {
-    for (int i = 0; i < ntot_spaces; ++i) {
-      str << " ";
-    }
-  }
-}
+
 
 const IdDictRange*
 IdDictFieldImplementation::range() const {return(m_range);}
@@ -34,52 +30,35 @@ IdDictFieldImplementation::show() const {
   std::cout << show_to_string() << std::endl;
 }
 
-std::string
-IdDictFieldImplementation::show_to_string() const {
-  std::stringstream str;
-  unsigned int pos;
-  unsigned int nchar;
-  str << "decode " << m_decode_index;
-  str << " vals ";
-  pos = str.tellp();
-  // values
-  str << (std::string) m_ored_field;
-  nchar = (unsigned int) str.tellp() - pos;
-  if (nchar < 15) tabify(15 - nchar, str);
-  str << " mask/zero mask/shift/bits/offset ";
-  pos = str.tellp();
-  // mask
-  str << std::hex << m_mask << " ";
-  nchar = (unsigned int) str.tellp() - pos;
-  if (nchar < 4) tabify(4 - nchar, str);
-  // zeroing mask
-  str << m_zeroing_mask << " " << std::dec;
-  pos = str.tellp();
-  // shift
-  str << m_shift << " ";
-  nchar = (unsigned int) str.tellp() - pos;
-  if (nchar < 3) tabify(3 - nchar, str);
-  pos = str.tellp();
-  // bits
-  str << m_bits << " ";
-  nchar = (unsigned int) str.tellp() - pos;
-  if (nchar < 3) tabify(3 - nchar, str);
-  pos = str.tellp();
-  // offset
-  str << m_bits_offset << " ";
-  nchar = (unsigned int) str.tellp() - pos;
-  if (nchar < 3) tabify(3 - nchar, str);
-  str << "indexes ";
-  pos = str.tellp();
-  // indexes
-  for (size_type i = 0; i < m_ored_field.get_indexes().size(); ++i) {
-    str << m_ored_field.get_indexes()[i] << " ";
+std::string IdDictFieldImplementation::show_to_string() const {
+  // Build the indexes list once
+  const auto& idx = m_ored_field.get_indexes();
+  std::string indexes;
+  indexes.reserve(idx.size() * 3);
+  for (std::size_t i = 0; i < idx.size(); ++i) {
+    if (i) indexes.push_back(' ');
+    indexes += std::to_string(idx[i]);
   }
-  nchar = (unsigned int) str.tellp() - pos;
-  if (nchar < 20) tabify(20 - nchar, str);
-  str << "mode  ";
-  if (m_ored_field.isBounded()) str << "both_bounded  ";
-  else if (m_ored_field.isEnumerated()) str << "enumerated  ";
-  else str << "unknown  ";
-  return(str.str());
+  // Mode string
+  std::string_view mode =
+      m_ored_field.isBounded()     ? "both_bounded"
+    : m_ored_field.isEnumerated()  ? "enumerated"
+                                   : "unknown";
+  try{
+    return std::format(
+        "decode {:d} vals {:<15} "
+        "mask/zero mask/shift/bits/offset {:<3x} {:<3x} {:<3} {:<3} {:<3} "
+        "indexes {:<20} mode  {}  ",
+        m_decode_index,
+        static_cast<std::string>(m_ored_field),
+        m_mask,
+        m_zeroing_mask,
+        m_shift,
+        m_bits,
+        m_bits_offset,
+        indexes,
+        mode);
+  } catch (std::format_error & ){
+    return {};
+  }
 }

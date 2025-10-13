@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(IdDictFieldImplementationTest)
     BOOST_TEST(s.find("mask/zero mask/shift/bits/offset") != std::string::npos);
     BOOST_TEST(s.find("indexes ") != std::string::npos);
     BOOST_TEST(s.find("mode") != std::string::npos);
-    const std::string expected{"decode 0 vals 0               mask/zero mask/shift/bits/offset 0   0 0  0  0  indexes                     mode  both_bounded  "};
+    const std::string expected{"decode 0 vals 0               mask/zero mask/shift/bits/offset 0   0   0   0   0   indexes                      mode  both_bounded  "};
     BOOST_CHECK_EQUAL(s, expected);
   }
   BOOST_AUTO_TEST_CASE(show_to_stringGivesExpectedOutputForInitialisedObject){
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE(IdDictFieldImplementationTest)
     IdentifierField f1(ev);
     impl.set_ored_field(f1);
     std::string s = impl.show_to_string();
-    const std::string expected{"decode 1 vals -4,-3,-2,-1,1,2,3,4 mask/zero mask/shift/bits/offset 7   ff8fffffffffffff 52 3  9  indexes                     mode  enumerated  "};
+    const std::string expected{"decode 1 vals -4,-3,-2,-1,1,2,3,4 mask/zero mask/shift/bits/offset 7   ff8fffffffffffff 52  3   9   indexes                      mode  enumerated  "};
     BOOST_TEST_MESSAGE(s);
     BOOST_CHECK_EQUAL(s, expected);
   }
