@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def HICaloGeoExtractCfg(flags):
+def HICaloGeoExtractCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     from CaloRec.CaloRecoConfig import CaloRecoCfg  
@@ -13,31 +13,34 @@ def HICaloGeoExtractCfg(flags):
     towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
     inputTowers = towerMaker.TowerContainerName
 
-    extractCGC = CompFactory.ExtractCaloGeoConstants("ExtractCaloGeoConstants", InputTowerKey=inputTowers, HistStream="CALOGEOEXTRACTSTREAM")
+    kwargs.setdefault("InputTowerKey", inputTowers)
+    kwargs.setdefault("CaloClusterContainerKey", "AllCalo")
+    kwargs.setdefault("HistStream", "CALOGEOEXTRACTSTREAM")
+    extractCGC = CompFactory.ExtractCaloGeoConstants("ExtractCaloGeoConstants", **kwargs)
     acc.addEventAlgo(extractCGC)
 
-    acc.addService(CompFactory.THistSvc(Output=["CALOGEOEXTRACTSTREAM DATAFILE='cluster.geo.XXX.root' OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output=["CALOGEOEXTRACTSTREAM DATAFILE='cluster.geo.W_ETA_PHI_R.root' OPT='RECREATE'"]))
 
     return acc
 
 
 if __name__ == "__main__":
     """
-     This macro will generate a new root weight file with histograms "h3_w", "h3_eta", "h3_phi", and "h3_R" 
+    This macro will generate a new root weight file with histograms "h3_w", "h3_eta", "h3_phi", and "h3_R" 
     that are stored in "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HIJetCorrection/cluster.geo....root" files.
-     It's based on the code from https://gitlab.cern.ch/atlas-physics/hi/jets/HICaloGeo/
-     To have correct weights, one needs to assure:
+    It's based on the code from https://gitlab.cern.ch/atlas-physics/hi/jets/HICaloGeo/
+    To have correct weights, one needs to assure:
         1) have consistent input file, conditions, and geometry
         2) have only 1 event processed
     To get the new file:
         1) setup Athena:
-            $ asetup Athena,master,latest,here 
+            $ asetup Athena,main,latest,here 
         2) run this code:
-            $ python -m HIEventUtils.HICaloGeoExtract
-        3) the new file is "cluster.geo.XXX.root"; rename it however is appropriate
+            $ python -m HIClusterGeoWeights.HICaloGeoExtract
+        3) the new file is "cluster.geo.W_ETA_PHI_R.root"
         
-     In the root weight file, there are also histograms "h3_eta_phi_response", "h3_eta_phi_offset", 
-    and "h1_run_index". These are produced elsewhere.
+    In the root weight file, there are also histograms "h3_eta_phi_response", "h3_eta_phi_offset", 
+    and "h1_run_index". These are produced by "HIClusterGeoFiller" and "makeHIResponse".
     """
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
