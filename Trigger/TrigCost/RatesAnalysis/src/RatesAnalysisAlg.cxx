@@ -636,12 +636,12 @@ StatusCode RatesAnalysisAlg::execute() {
   if (m_eventCounter++ == 0) { // First time in execute loop - cannot access TDT before this.
     ATH_CHECK( populateTriggers() );
   }
-
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Get event characteristics
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   ATH_CHECK( eventInfo.isValid() );
   uint32_t distance = 0;
-  ATH_CHECK( m_enhancedBiasRatesTool->getDistanceIntoTrain(eventInfo.get(), distance) );
+  ATH_CHECK( m_enhancedBiasRatesTool->getDistanceIntoTrain(eventInfo.get(), distance, ctx) );
   const bool isMC = m_enhancedBiasRatesTool->isMC();
 
   // Get the weighting & scaling characteristics
