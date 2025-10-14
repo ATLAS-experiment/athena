@@ -392,7 +392,7 @@ namespace MuonR4{
             const auto& radialDesign = stripMeas->readoutElement()->stripLayout(stripMeas->layerHash());
             const auto& wireDesign = wireMeas->readoutElement()->wireGangLayout(wireMeas->layerHash());            
             
-            const double dirDots = radialDesign.stripDir(stripMeas->channelNumber()).dot(wireDesign.stripDir());
+            const double dirDots = radialDesign.stripDir(stripMeas->channelNumber()).dot(wireDesign.stripNormal());
             /// Apply the stereo transform to the covariance
             AmgSymMatrix(2) stereoTrf{AmgSymMatrix(2)::Identity()};
             const double invDist = 1. / (1. - Acts::square(dirDots));
@@ -404,10 +404,9 @@ namespace MuonR4{
             AmgSymMatrix(2) cmbCov{AmgSymMatrix(2)::Identity()};
             cmbCov (0, 0) = wireMeas->localCovariance<1>()(0,0);
             cmbCov (1, 1) = stripMeas->localCovariance<1>()(0,0);
-            
+
             setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, cmbPos, 
                                                            stereoTrf*cmbCov*stereoTrf.transpose(), sl, state);
-
         } else {
             THROW_EXCEPTION("Undefined uncalibrated measurement "
                             <<m_idHelperSvc->toString(xAOD::identify(combinedPrd)));
