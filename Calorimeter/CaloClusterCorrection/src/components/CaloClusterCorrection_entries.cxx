@@ -1,4 +1,5 @@
 #include "CaloClusterCorrection/CaloClusterLocalCalib.h"
+#include "CaloClusterCorrection/CaloClusterMLCalibToolLite.h"
 #include "../CaloClusterLogPos.h"
 #include "CaloClusterCorrection/CaloFillRectangularCluster.h"
 #include "../CaloClusterUpdate.h"
@@ -59,6 +60,7 @@
 
 
 DECLARE_COMPONENT( CaloClusterLocalCalib )
+DECLARE_COMPONENT( CaloClusterMLCalibToolLite )
 DECLARE_COMPONENT( CaloClusterLogPos )
 DECLARE_COMPONENT( CaloFillRectangularCluster )
 DECLARE_COMPONENT( CaloClusterUpdate )
