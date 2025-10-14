@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetExternalAssocTool.h
@@ -33,30 +33,26 @@ namespace DerivationFramework{
   public:
     JetExternalAssocTool(const std::string& t, const std::string& n, const IInterface* p);
 
-    StatusCode initialize();
-    StatusCode finalize();
-    virtual StatusCode addBranches() const;
-
-    bool TransferLink(const xAOD::Jet& jet, const xAOD::Jet& jet_external) const;
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches() const override final;
 
   private:
+    StatusCode TransferLink(const xAOD::Jet& jet, const xAOD::Jet& jet_external, const EventContext& ctx) const;
+
     /// Properties.
-    std::string              m_momentPrefix;
-    std::string              m_containerName;
+    SG::ReadHandleKey<xAOD::JetContainer> m_containerName{this, "InputJets", ""};
+    SG::ReadHandleKey<xAOD::JetContainer> m_ExternalJetCollectionName{this, "ExternalJetCollectionName", ""};
+    Gaudi::Property<std::string> m_momentPrefix{this, "MomentPrefix", ""};
+    Gaudi::Property<std::vector<std::string>> m_VectorOfOldLinkNames{this, "ListOfOldLinkNames", {}};
+    Gaudi::Property<std::vector<std::string>> m_VectorOfNewLinkNames{this, "ListOfNewLinkNames", {}};
+    SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_dec_keys{this, "DecKeys", {}, "SG keys for external decorations"};
 
-    std::string              m_ExternalJetCollectionName;
-    std::vector<std::string> m_VectorOfOldLinkNames;
-    std::vector<std::string> m_VectorOfNewLinkNames;
-
-    bool                     m_dRMatch;
-    double                   m_dRCut;
+    Gaudi::Property<bool> m_dRMatch{this, "DeltaRMatch", false};
+    Gaudi::Property<double> m_dRCut{this, "DeltaRCut", 0.01};
 
     /// decoration pointers
     typedef ElementLink<xAOD::IParticleContainer>            type_el;
     typedef std::vector<type_el>                             type_ghostlink;
-
-    SG::WriteDecorHandleKeyArray<xAOD::JetContainer> m_dec_keys{this, "DecKeys", {}, "SG keys for external decorations"};
-
   };
 
 }
