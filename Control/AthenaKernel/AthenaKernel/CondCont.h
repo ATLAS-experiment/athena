@@ -1435,7 +1435,7 @@ public:
               std::shared_ptr<typename CondContSet::IPayloadDeleter> payloadDeleter, \
               size_t capacity = 16)                                      \
       : CondContMixed<T> (rcusvc, clid, id, proxy,                       \
-                          payloadDeleter, capacity) {}                   \
+                          std::move(payloadDeleter), capacity) {}        \
   };                                                                     \
   CLASS_DEF( CondCont<T>, CLID_, 1)                                      \
   SG_BASES(CondCont<T>, CondContMixed<T>);                               \
