@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "METTriggerAugmentationTool.h"
-#include <xAODTrigger/EnergySumRoI.h>
 #include <xAODTrigger/EnergySumRoIAuxInfo.h>
-#include <xAODTrigger/JetRoIContainer.h>
 #include <xAODTrigger/JetRoI.h>
 #include <PathResolver/PathResolver.h>
 #include <vector>
@@ -16,18 +14,17 @@
 namespace DerivationFramework {
 
   METTriggerAugmentationTool::METTriggerAugmentationTool(const std::string& t,
-      const std::string& n,
-      const IInterface* p) : 
+                                                         const std::string& n,
+                                                         const IInterface* p) :
     base_class(t,n,p)
   {
-    declareProperty("OutputName", m_outputName = "LVL1EnergySumRoI_KF");
-    declareProperty("LUTFile", m_LUTFileName = "LUT_data15.root");
-    declareProperty("L1METName", m_L1METName = "LVL1EnergySumRoI");
-    declareProperty("L1JetName", m_L1JetName = "LVL1JetRoIs");
   }
 
-  StatusCode METTriggerAugmentationTool::initialize() 
+  StatusCode METTriggerAugmentationTool::initialize()
   {
+    ATH_CHECK(m_L1METName.initialize());
+    ATH_CHECK(m_L1JetName.initialize());
+    ATH_CHECK(m_outputName.initialize());
     std::string fullLUTFileName = PathResolver::find_file(m_LUTFileName, "DATAPATH");
 
     if (fullLUTFileName.empty() ) {
@@ -38,7 +35,7 @@ namespace DerivationFramework {
     TFile* lutFile = TFile::Open(fullLUTFileName.c_str() );
     if (lutFile->IsZombie() ) return StatusCode::FAILURE;
 
-    TH2* lutFromFile(0);
+    TH2* lutFromFile{};
     lutFile->GetObject("LUT", lutFromFile);
     if (!lutFromFile) {
       ATH_MSG_ERROR( "LUT file doesn't contain a 'LUT' object!" );
@@ -51,36 +48,35 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METTriggerAugmentationTool::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
-
-
-
   StatusCode METTriggerAugmentationTool::addBranches() const
   {
     ATH_MSG_DEBUG(" In L1KF_METMaker::makeKFMET()" );
-
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // if the output has already been written we don't need to do anything
-    if (evtStore()->contains<xAOD::EnergySumRoI>(m_outputName) ) return StatusCode::SUCCESS;
+    if (evtStore()->contains<xAOD::EnergySumRoI>(m_outputName.key()) ) return StatusCode::SUCCESS; // FIXME  tool should not have been configured in this case
 
-    const xAOD::EnergySumRoI* originalL1(0);
-    ATH_CHECK( evtStore()->retrieve(originalL1, m_L1METName) ); // FIXME Use Handles
+    SG::ReadHandle<xAOD::EnergySumRoI> originalL1{m_L1METName, ctx};
+    if (!originalL1.isValid()){
+      ATH_MSG_ERROR("Unable to retrieve EnergySumRoI: " << m_L1METName << "!");
+      return StatusCode::FAILURE;
+    }
 
-    const xAOD::JetRoIContainer* l1Jets(0);
-    ATH_CHECK( evtStore()->retrieve(l1Jets, m_L1JetName) ); // FIXME Use Handles
+    SG::ReadHandle<xAOD::JetRoIContainer> l1Jets{m_L1JetName, ctx};
+    if (!originalL1.isValid()){
+      ATH_MSG_ERROR("Unable to retrieve JetRoIContainer: " << m_L1JetName << "!");
+      return StatusCode::FAILURE;
+    }
 
-    xAOD::EnergySumRoI* l1_kf = new xAOD::EnergySumRoI();
-    xAOD::EnergySumRoIAuxInfo* l1_kfAux = new xAOD::EnergySumRoIAuxInfo();
-
-    ATH_MSG_DEBUG( "Setting the store" );
-    // set the store
-    l1_kf->setStore(l1_kfAux);
+    SG::WriteHandle<xAOD::EnergySumRoI> l1_kf{m_outputName, ctx};
+    if (!originalL1.isValid()){
+      ATH_MSG_ERROR("Invalid WriteHandle for EnergySumRoI: " << m_outputName << "!");
+      return StatusCode::FAILURE;
+    }
+    ATH_CHECK(l1_kf.record(std::make_unique<xAOD::EnergySumRoI>(), std::make_unique<xAOD::EnergySumRoIAuxInfo>()));
 
     ATH_MSG_DEBUG( "Making deep copy" );
     // copy across the info
-    *l1_kf = *originalL1; 
+    *l1_kf = *originalL1;
 
     ATH_MSG_DEBUG( "Building KF MET" );
     float KFMETx = l1_kf->exMiss();
@@ -103,8 +99,6 @@ namespace DerivationFramework {
     l1_kf->setEnergyT(KFSumEt);
 
     ATH_MSG_DEBUG( "Built KF MET" );
-    ATH_CHECK( evtStore()->record(l1_kf, m_outputName) ); // FIXME Use Handles
-    ATH_CHECK( evtStore()->record(l1_kfAux, m_outputName+"Aux.") ); // FIXME Use Handles
     return StatusCode::SUCCESS;
   }
 }

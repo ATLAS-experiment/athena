@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef DERIVATIONFRAMEWORK_TVAAUGMENTATIONTOOL_H
@@ -10,26 +10,26 @@
 #include "AsgTools/ToolHandle.h"
 #include "TrackVertexAssociationTool/ITrackVertexAssociationTool.h"
 #include "AthLinks/ElementLink.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include <memory>
 
 namespace DerivationFramework {
   class TVAAugmentationTool : public extends<AthAlgTool, IAugmentationTool>
   {
-    public:
-      TVAAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
+  public:
+    TVAAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
 
-      virtual StatusCode initialize();
-      virtual StatusCode addBranches() const;
-    private:
-      // Properties
-      std::string m_linkName;
-      std::string m_trackName;
-      std::string m_vertexName;
-      ToolHandle<CP::ITrackVertexAssociationTool> m_tool;
-      // Internals
-      using vtxLink_t = ElementLink<xAOD::VertexContainer>;
-      SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_vtxDec_key {this, "vtxDecKey", "", "Decoration for associated vertex"};
+    virtual StatusCode initialize();
+    virtual StatusCode addBranches() const;
+  private:
+    // Properties
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackName{this, "TrackName", "InDetTrackParticles"};
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexName{this, "VertexName", "PrimaryVertices"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_vtxDec_key {this, "LinkName", m_trackName, "", "Decoration for associated vertex"};
+    PublicToolHandle<CP::ITrackVertexAssociationTool> m_tool{this, "TVATool", ""};
+    // Internals
+    using vtxLink_t = ElementLink<xAOD::VertexContainer>;
 
   }; //> end class TVAAugmentationTool
 } //> end namespace DerivationFramework
