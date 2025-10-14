@@ -63,8 +63,10 @@ namespace ActsTrk {
 
 
     Amg::Transform3D ActsMuonTrackingGeometryTest::toLocalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const {
-        const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);          
-        return reElement->globalToLocalTrans(gctx, reElement->layerHash(hitId));
+        const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);    
+        const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
+                                    reElement->measurementHash(hitId) : reElement->layerHash(hitId);        
+        return reElement->globalToLocalTrans(gctx, trfHash);
     }
 
     Amg::Transform3D ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const {
@@ -105,7 +107,6 @@ namespace ActsTrk {
     StatusCode ActsMuonTrackingGeometryTest::execute() {
 
         const EventContext& ctx = Gaudi::Hive::currentContext();
-
 
         const ActsGeometryContext* gctx{nullptr};
         const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
@@ -324,11 +325,16 @@ namespace ActsTrk {
 
                     const Identifier ID = simHit->identify();
 
-                    const Amg::Transform3D localTrf{toLocalTrf(*gctx, simHit->identify())*
-                    toGlobalTrf(*gctx,simHit->identify())};
-                    const Amg::Vector3D localPos = localTrf*xAOD::toEigen(simHit->localPosition());
+                    const Amg::Vector3D localPos = xAOD::toEigen(simHit->localPosition());
+
                     const Amg::Vector3D globalPos = toGlobalTrf(*gctx, simHit->identify())*xAOD::toEigen(simHit->localPosition());
-                    const Amg::Vector3D localDir = localTrf.linear()*xAOD::toEigen(simHit->localDirection());
+                    const Amg::Vector3D localDir = xAOD::toEigen(simHit->localDirection());
+                    
+                    if(m_r4DetMgr->getReadoutElement(ID)->detectorType() == ActsTrk::DetectorType::sTgc && localPos.z() != 0.0){
+                        continue;
+                    
+                    }
+                
                     m_detId.push_back(ID);
                     m_techIdx.push_back(toInt(m_idHelperSvc->technologyIndex(ID)));
                     m_gasGapId.push_back(layerHash(ID));
@@ -340,8 +346,8 @@ namespace ActsTrk {
                     ATH_MSG_DEBUG("Truth hit with ID: " << m_idHelperSvc->toString(ID)
                     << " at local position: " << Amg::toString(localPos)
                     << " and global position: " << Amg::toString(globalPos)
-                    << " and direction: " << Amg::toString(localDir));                 
-
+                    << " and direction: " << Amg::toString(localDir));        
+           
                     //get the matching propagated hits
                     auto it_begin = std::ranges::find_if(propagatedHits,
                                         [this, ID](const auto& propagatedHit) {
