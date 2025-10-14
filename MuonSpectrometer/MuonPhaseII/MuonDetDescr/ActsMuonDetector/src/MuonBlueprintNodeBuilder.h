@@ -71,7 +71,7 @@ private:
 
   const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
-  Gaudi::Property<bool> m_dumpVolumes{this, "dumpVolumes", true}; // Flag to control if we want to visualize each chamber volume individually
+  Gaudi::Property<bool> m_dumpVolumes{this, "dumpVolumes", false}; // Flag to control if we want to visualize each chamber volume individually
 
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; // Flag to control if we want to build the muon node from sectors or chambers
 
