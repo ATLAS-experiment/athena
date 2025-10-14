@@ -65,35 +65,28 @@ class RDBMaterialManager final : public StoredMaterialManager, public AthMessagi
   GeoElement *searchElementVector (const unsigned int atomicNumber) const;
   GeoMaterial *searchMaterialMap (const std::string & name) const;
   
-  // For DataBase connection and Query
   IRDBRecordset_ptr m_elements;
-  
-  IRDBRecordset_ptr m_trtmaterials;
-  IRDBRecordset_ptr m_trtmatcomponents;
-  IRDBRecordset_ptr m_stdmaterials;
-  IRDBRecordset_ptr m_stdmatcomponents;
-  IRDBRecordset_ptr m_larmaterials;
-  IRDBRecordset_ptr m_larmatcomponents;
-  IRDBRecordset_ptr m_muomaterials;
-  IRDBRecordset_ptr m_muomatcomponents;
-  IRDBRecordset_ptr m_pixmaterials;
-  IRDBRecordset_ptr m_pixmatcomponents;
-  IRDBRecordset_ptr m_pixtbmaterials;
-  IRDBRecordset_ptr m_pixtbmatcomponents;
-  IRDBRecordset_ptr m_sctmaterials;
-  IRDBRecordset_ptr m_sctmatcomponents;
-  IRDBRecordset_ptr m_indetmaterials;
-  IRDBRecordset_ptr m_indetmatcomponents;
-  IRDBRecordset_ptr m_shieldmaterials;
-  IRDBRecordset_ptr m_shieldmatcomponents;
-  IRDBRecordset_ptr m_tilematerials;
-  IRDBRecordset_ptr m_tilematcomponents;
-  IRDBRecordset_ptr m_toromaterials;
-  IRDBRecordset_ptr m_toromatcomponents;
 
   using GeoEleVec = std::vector<GeoIntrusivePtr<GeoElement>>;
   GeoEleVec m_elementVector;
   StoredMaterialManager::MaterialMap m_materialMap;
+
+  struct DetectorAuxData
+  {
+    DetectorAuxData(const std::string& prim_key
+		    , IRDBRecordset_ptr materials
+		    , IRDBRecordset_ptr matcomponents)
+      : m_prim_key(prim_key)
+      , m_materials(materials)
+      , m_matcomponents(matcomponents)
+    {}
+
+    std::string m_prim_key{};
+    IRDBRecordset_ptr m_materials{};
+    IRDBRecordset_ptr m_matcomponents{};
+  };
+
+  std::map<std::string,DetectorAuxData> m_detData;
 };
 
 
