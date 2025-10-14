@@ -1,0 +1,232 @@
+# CONFIGURATION FILE FOR HGM MODEL
+#
+# Last update 01.09.2025, IS
+# Comments March 12, 2025: [update, PL]
+#
+# Function names:
+# ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+#
+# The present tool implementation in c++ knows the following functions:
+#
+# c++ name       | parameters                       | Comment
+# ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐+‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐+‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+# Linear         | [offset,slope]                   | linear transformation offset+slope*x
+# Standard       | [mean,standard_dev]              | standardization (x‐mean)/standard_dev
+# Log            | []                               | ln(x)
+# LogTen         | []                               | log_10(x)
+# CubeRoot       | []                               | |x|^1/3*sign(x)
+# LogStandard    | [mean,standard_dev]              | ln standardization (ln(x)‐mean)/standard_dev (mean,standard_dev from ln(x) distribution in training sample)
+# LogTenStandard | [min,epsilon,mean,standard_dev]  | log_10 standardization (log_10(x)‐mean)/standard_dev (mean,standard_dev from log_10(x) distribution in training sample)
+#                                                   | if xmin<=0: x=x-xmin+epsilon; else: xmin=0; epsilon=0
+# MaxAbsolute    | [max_value]                      | x/|max_value|
+#
+# python or c++ syntax could be used as well. It is easy to build dictionaries in c++.
+#
+# Feature data descriptors:
+# ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
+#
+# The default yaml structure to describe a feature or truth data is (not all fields are available for all categories, indicated values are defaults):
+#
+# data:                    # - all data descriptors
+#   <category_name>:       # - "truth" or "features" category
+#     trained_name: <name> # - name in pytorch
+#     kine_name: None      # - described entity is a kinematic variable accessible or constructable from the standard kinematic interface in Athena (xAOD::IParticle); 
+#                              None = not a kinematic variable
+#     unit: None           # - a unit specifier using Gaudi standard symbols https://acode‐browser1.usatlas.bnl.gov/lxr/source/Gaudi/GaudiKernel/include/GaudiKernel/SystemOfUnits.h
+#                              (some combinations using math operators are known); default is None (no unit)
+#     preprocessing: []    # ‐ a sequence of pre‐processor function names (see above). In principle c++ or python synatx could be used, but then we need a convention for variable and
+#                               parameter names, like x = variable and { p } = { p0, p1, ... } for parameters (without the {}). Default empty feld [] indicates no pre-processing 
+#     parameter: []        # ‐ the above mentioned set of parameters { p }, like [ <p0>, <p1>, ... ], one per function; can be empty (use [] in this case)
+#                              Example: preprocessing: [ logTen, Standard ] => parameter: [], [mean,sigma]  
+#     position: 0          # ‐ position (column #) in input tensor. The input tensor is organized as array[0...#batches-1][0...#features-1]
+#
+# If a field is not present when the yaml configuration is parsed, the defaults are assumed.
+---
+name: config_hgm_mc20
+
+data:
+  truth: &Truth
+    r_e_calculated:
+      trained_name: r_ems
+      preprocessing: 
+        processors: [ LogTen ]
+  features: &Features
+    clusterE:
+      trained_name: e_ems
+      kine_name: Energy
+      unit: GeV
+      position: 0
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, 0.6347346839702431, 0.7385571482973289 ]
+        shapes:     [ 4 ]     
+    clusterEta:
+      trained_name: y_ems
+      kine_name: Rapidity
+      position: 1   
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.010181442396798685, 1.0730789413750401 ]
+        shapes:     [ 2 ] 
+    cluster_SIGNIFICANCE:
+      trained_name: m_sig
+      position: 2
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, 0.8866835528437869, 0.5548024471260036 ]
+        shapes:     [ 4 ]     
+    cluster_time:
+      trained_name: t_ems
+      unit: ns
+      position: 3 
+      preprocessing: 
+        processors: [ MaxAbsolute ]
+        parameters: [ 256.52423095703125]
+        shapes: [ 1 ]
+    cluster_SECOND_TIME:
+      trained_name: m_tim
+      unit: ns*ns
+      position: 4
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0.0, 1e-10, -0.8385087991536135, 3.5133484230525402 ]
+        shapes: [ 4 ]
+    cluster_CENTER_LAMBDA:
+      trained_name: m_lam
+      unit: mm
+      position: 5
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, 2.454458464238727, 0.455548085569537 ]
+        shapes: [ 4 ]
+    cluster_CENTER_MAG:  
+      trained_name: m_cog
+      unit: mm
+      position: 6
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 2901.331867871424, 1056.6397559178897 ]
+        shapes: [ 2 ]
+    cluster_ENG_FRAC_EM_INCL: #new feature!!!
+      trained_name: m_fem
+      position: 7
+      preprocessing:
+        processors: [ MinMaxNorm ] 
+        parameters: [ -2882.9208984375, 15179.9755859375 ]
+        shapes: [ 2 ]
+    cluster_FIRST_ENG_DENS:
+      trained_name: m_rho
+      unit: GeV/mm3
+      position: 8
+      preprocessing: 
+        processors: [ LogTenStandard ]
+        parameters: [ 0, 0, -6.154656057568099, 0.6910824492265635]
+        shapes: [ 4 ]
+    cluster_LONGITUDINAL:
+      trained_name: m_lon
+      position: 9
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.7223626116469644, 0.20625686889852246 ]
+        shapes: [ 2 ]
+    cluster_LATERAL:
+      trained_name: m_lat
+      position: 10
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.7833833900325896, 0.18259941395116977 ]
+        shapes: [ 2 ]
+    cluster_PTD:
+      trained_name: m_ptd
+      position: 11
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.34957693080870894, 0.14286381130028875]
+        shapes: [ 2 ]
+    cluster_ISOLATION:
+      trained_name: m_iso
+      position: 12
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 0.6027900102955646, 0.2512761803141686]
+        shapes: [ 2 ]
+    nPrimVtx:
+      trained_name: p_npv
+      position: 13
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 20.90668211764706, 7.262609335567245 ]
+        shapes: [ 2 ]
+    avgMu:
+      trained_name: p_mmu
+      position: 14
+      preprocessing: 
+        processors: [ Standard ]
+        parameters: [ 34.505480862450824, 12.350157368609814]
+        shapes: [ 2 ]
+
+
+model: &Model
+    model_name: hgm-mc20-85e5-2e6-5e6
+    onnx_path: CaloClusterCorrection/hgm_mc20_85e5-2e6-5e6.onnx
+    
+    init_args:
+        init_args: 
+        num_layers: 4
+        layers: [ 64, 64, 64, 64 ]
+        layers_activation: [ ReLU, ReLU, ReLU, ReLU ]
+        num_mixtures: &NumMixtures 3
+        num_nodes: 64
+        activation: ReLU 
+        in_names: [features, layer0, activation1, layer1, activation2, layer2, activation3, layer3, activation4, layer4]
+        
+    train_args:
+        loss_function: Heteroscedastic Gaussian mixture  
+        optimizer: Adam
+        num_epochs: 150
+        batch_size_trn: 4096
+        batch_size_tst: 512
+        learning_rate: 0.0001
+        lr_milestones: [25, 100]
+        val_every: 2
+        save_every: 25
+        weight_decay: 0
+
+    data_args:
+        mc_release: mc20
+        data_size_trn: 8500000
+        data_size_val: 2000000
+        data_size_tst: 5000000
+        batch_idxs: [7, 128, 64, 184, 206, 142, 204, 163, 205, 89, 123, 33, 153, 149, 14, 11, 210, 73, 40, 60, 160, 52, 200, 9, 208, 159, 108, 67, 136, 213, 80]
+        
+    output:
+        mus:
+            trained_name: means
+            description: Means of the Gaussian Mixture (log10 space)
+            shape: *NumMixtures
+        sigmas:
+            trained_name: sigmas
+            converters: [Exponential]
+            description: Standard deviations of the Gaussian Mixture (log10 space)
+            shape: *NumMixtures
+        alphas:
+            trained_name: alphas
+            description: Weights of the Gaussian Mixture
+            shape: *NumMixtures
+
+   
+    prediction:
+        mode:
+            name: mode with max LH
+            name_class: HGMPrediction
+            postprocessing: [MeanValueFromLogMean]
+            scan: Linear
+            range_fractions: [0.9,1.1]
+            nstep: 1000
+        sigma_syst:
+            name: systematic uncertainty prediction
+            name_class: HGMPrediction
+            postprocessing: [StdDevFromLogVariance]
+
+
+
