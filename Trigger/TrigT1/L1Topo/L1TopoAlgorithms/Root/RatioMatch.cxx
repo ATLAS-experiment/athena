@@ -15,7 +15,7 @@
 #include "L1TopoAlgorithms/RatioMatch.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
-
+#include "L1TopoSimulationUtils/Helpers.h"
 
 REGISTER_ALG_TCS(RatioMatch)
 
@@ -110,7 +110,14 @@ TCS::RatioMatch::process( const std::vector<TCS::TOBArray const *> & input,
    if(input.size()!=2) {
       TCS_EXCEPTION("RatioMatch alg must have exactly 2 input lists, but got " << input.size());
    }
-
+    
+   bool hasAmbiguousTruncation = TSU::isAmbiguousTruncation(input[0], p_NumberLeading1, p_MinET1) 
+                              || TSU::isAmbiguousTruncation(input[1], p_NumberLeading2, p_MinET2);
+   for(unsigned int i=0; i<numberOutputBits(); ++i) {
+      // minEt values are global, not per-result bit.
+      output[i]->setAmbiguityFlag(hasAmbiguousTruncation);
+   }
+    
    unsigned int deltaR2 = 999;
 
    for( TOBArray::const_iterator tob1 = input[0]->begin(); 
