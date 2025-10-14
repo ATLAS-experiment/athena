@@ -98,16 +98,6 @@ DbStatus DbStorageExplorer::disconnect(FileDescriptor& fDesc) {
   return m_pOuter->disconnect(fDesc);
 }
 
-/// Access the size of the database: May be undefined for some technologies
-long long int DbStorageExplorer::databaseSize(FileDescriptor& refDB)  const   {
-  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
-  if ( dbc )   {
-    DbDatabase  dbH(__DB(refDB));
-    return dbH.size();
-  }
-  return -1;
-}
-
 /// Access the containers in a given database.
 DbStatus 
 DbStorageExplorer::containers(FileDescriptor& refDB,TokenVec& conts,bool intern)  {
@@ -119,42 +109,6 @@ DbStorageExplorer::containers(FileDescriptor& refDB,TokenVec& conts,bool intern)
   return Error;
 }
 
-/// Access the container level associations between objects.
-DbStatus DbStorageExplorer::associations(FileDescriptor& refDB,TokenVec& assocs)  {
-  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
-  if ( dbc )   {
-    DbDatabase  dbH(__DB(refDB));
-    return dbH.associations(assocs);
-  }
-  return Error;
-}
-
-/// Access Shapes known to the database.
-DbStatus DbStorageExplorer::shapes(FileDescriptor& refDB,vector<ShapeH>& shaps)  {
-  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
-  if ( dbc )   {
-    // Unfortunately STL does not propagate casts of contained types
-    // If they are base-types
-    // ...nevertheless, this is a safe cast.
-    typedef vector<const DbTypeInfo*>* LPTypesVec;
-    DbDatabase  dbH(__DB(refDB));
-    LPTypesVec typs = LPTypesVec(&shaps);
-    return dbH.shapes(*typs);
-  }
-  return Error;
-}
-
-/// Add a persistent parameter to the database
-DbStatus
-DbStorageExplorer::addDbParam(FileDescriptor& refDB,const string& nam,const string& val) {
-  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
-  if ( dbc )   {
-    DbDatabase  dbH(__DB(refDB));
-    return dbH.addParam(nam, val);
-  }
-  return Error;
-}
-
 /// Retrieve existing parameter by name
 DbStatus
 DbStorageExplorer::dbParam(FileDescriptor& refDB,const string& nam,string& val) {
@@ -162,16 +116,6 @@ DbStorageExplorer::dbParam(FileDescriptor& refDB,const string& nam,string& val) 
   if ( dbc )   {
     DbDatabase  dbH(__DB(refDB));
     return dbH.param(nam, val);
-  }
-  return Error;
-}
-
-/// Retrieve all parameters
-DbStatus DbStorageExplorer::dbParams( FileDescriptor& refDB,Parameters& vals)  {
-  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
-  if ( dbc )   {
-    DbDatabase  dbH(__DB(refDB));
-    return dbH.params(vals);
   }
   return Error;
 }

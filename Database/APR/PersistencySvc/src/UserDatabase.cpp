@@ -144,8 +144,7 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
 
     if ( this->checkInRegistry() ) {
       if ( m_openMode == pool::IDatabase::READ ) {
-         m_databaseHandler->reconnect( pool::UPDATE );
-         m_openMode = pool::IDatabase::UPDATE;
+        throw std::runtime_error( "Could not open a database for write that is already connected for read. (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
       }
     }
     else { // The database is not yet connected.
