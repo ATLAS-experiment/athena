@@ -3,53 +3,40 @@
 */
 
 #include "DerivationFrameworkMCTruth/HadronOriginDecorator.h"
-#include "xAODTruth/TruthParticleContainer.h"
-#include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 namespace DerivationFramework {
 
   HadronOriginDecorator::HadronOriginDecorator(const std::string& t, const std::string& n, const IInterface* p):
-    base_class(t,n,p),
-    m_Tool("")
+    base_class(t,n,p)
   {
-
-    declareProperty("ToolName",m_Tool);
-    declareProperty("TruthEventName",m_TruthEventName="TruthParticles");
   }
 
   HadronOriginDecorator::~HadronOriginDecorator(){}
 
   StatusCode HadronOriginDecorator::initialize(){
-    ATH_MSG_INFO("Initialize " );
-
-    if(m_Tool.retrieve().isFailure()){
-      ATH_MSG_ERROR("unable to retrieve the tool " <<m_Tool);
-      return StatusCode::FAILURE;
-    }
-
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode HadronOriginDecorator::finalize(){
+    ATH_MSG_VERBOSE( "Initialize" );
+    ATH_CHECK( m_particlesKey.initialize() );
+    ATH_CHECK(m_originDecoratorKey.initialize());
+    ATH_CHECK(m_Tool.retrieve());
     return StatusCode::SUCCESS;
   }
 
   StatusCode HadronOriginDecorator::addBranches() const{
-    const xAOD::TruthParticleContainer* xTruthParticleContainer{};
-    if (evtStore()->retrieve(xTruthParticleContainer,m_TruthEventName).isFailure()) { // FIXME Use Handles
-      ATH_MSG_WARNING("could not retrieve TruthParticleContainer " <<m_TruthEventName);
+    // Event context for multi-threading
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    // Retrieve truth collections
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
+    if (!truthParticles.isValid()) {
+      ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);
       return StatusCode::FAILURE;
     }
 
     std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>  hadronMap=m_Tool->GetOriginMap();
-
-    for(xAOD::TruthParticleContainer::const_iterator PItr = xTruthParticleContainer->begin(); PItr!=xTruthParticleContainer->end(); ++PItr){
-      int flavortype=6;
-      if(hadronMap.find((*PItr))!=hadronMap.end()){
-        flavortype= static_cast<int>(hadronMap[(*PItr)]);
-      }
-      SG::AuxElement::Decorator< int > decoration("TopHadronOriginFlag");
-      decoration(**PItr) = flavortype;
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> originDecorator(m_originDecoratorKey, ctx);
+    for (auto* truthParticle : *truthParticles) {
+      originDecorator(*truthParticle) = (hadronMap.find(truthParticle)!=hadronMap.end()) ? static_cast<int>(hadronMap[truthParticle]) : 6;
     }
 
     return StatusCode::SUCCESS;
