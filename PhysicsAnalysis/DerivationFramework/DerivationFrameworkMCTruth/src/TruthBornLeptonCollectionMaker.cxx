@@ -200,10 +200,10 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
     // Fill with numerical content
     *xTruthParticle=*theParticle;
     // Copy over the decorations if they are available
-    typeDecorator(*xTruthParticle) = typeAccessor.withDefault(*theParticle, 0);
-    originDecorator(*xTruthParticle) = originAccessor.withDefault(*theParticle, 0);
-    outcomeDecorator(*xTruthParticle) = outcomeAccessor.withDefault(*theParticle, 0);
-    classificationDecorator(*xTruthParticle) = classificationAccessor.withDefault(*theParticle, 0);
+    typeDecorator(*xTruthParticle) = typeAccessor(*theParticle);
+    originDecorator(*xTruthParticle) = originAccessor(*theParticle);
+    outcomeDecorator(*xTruthParticle) = outcomeAccessor(*theParticle);
+    classificationDecorator(*xTruthParticle) = classificationAccessor(*theParticle);
   } // Loop over all particles
 
   return StatusCode::SUCCESS;
