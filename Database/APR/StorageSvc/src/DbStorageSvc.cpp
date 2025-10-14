@@ -365,16 +365,6 @@ DbStatus DbStorageSvc::connect(const SessionH session,int mod,FileDescriptor& fD
   return sc;
 }
 
-/// Reconnect to a logical Database unit with different access mode
-DbStatus DbStorageSvc::reconnect(FileDescriptor& refDb, int mode)  {
-  DbConnection* dbc = dynamic_cast<DbConnection*>(refDb.dbc());
-  if ( dbc )   {
-    DbDatabase dbH(DbDatabaseHNC(dbc->handle()));
-    return dbH.reopen(mode);
-  }
-  return Error;
-}
-
 /// Disconnect from a logical Database unit.
 DbStatus DbStorageSvc::disconnect(FileDescriptor& fDesc) {
   DbConnection* dbc = dynamic_cast<DbConnection*>(fDesc.dbc());

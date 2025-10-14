@@ -224,20 +224,6 @@ namespace pool  {
                                   int                 mode,
                                   FileDescriptor&     refDB) = 0;
 
-    /// Reconnect to a logical Database unit with different access mode
-    /** In order to reconnect, the database obviously must already be open.
-      *
-      * @param    refDB    [IN] Descriptor of the Database to be re-opened. 
-      * @param    mode     [IN] Flag to indicate the accessmode of the session.
-      *                         Since a database can only be re-opened if it 
-      *                         exists, possible values may only be:
-      *                         READ, UPDATE.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus reconnect(   FileDescriptor&     refDB,
-                                  int                 mode ) = 0;
-
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
       * are already commited. Otherwise data are lost. On disconnection the 
@@ -255,8 +241,7 @@ namespace pool  {
     virtual DbStatus disconnect(  FileDescriptor&     refDB) = 0;
 
     /// Query the access mode of a Database unit.
-    /** In order to reconnect, the database obviously must already be open.
-      *
+    /**
       * @param    refDB    [IN] Descriptor of the Database to be queried. 
       * @param    mode    [OUT] Open mod to the database.
       *

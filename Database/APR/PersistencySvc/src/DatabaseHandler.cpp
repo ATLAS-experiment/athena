@@ -141,16 +141,6 @@ pool::PersistencySvc::DatabaseHandler::accessMode() const
 }
 
 
-void
-pool::PersistencySvc::DatabaseHandler::reconnect( long accessMode )
-{
-   rollBackTransaction();
-   if( m_storageSvc.reconnect( m_fileDescriptor, accessMode ).isSuccess() ) {
-      m_accessMode = accessMode;
-   }
-}
-
-
 Token*
 pool::PersistencySvc::DatabaseHandler::writeObject( const std::string& containerName,
                                                     long minorTechnology,

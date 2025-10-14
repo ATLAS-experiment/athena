@@ -75,9 +75,6 @@ namespace pool {
       /// Returns the access mode
       long accessMode() const;
 
-      /// Reconnects with a new access mode
-      void reconnect( long accessMode );
-
       /// Writes an object and returns a token
       Token* writeObject( const std::string& containerName,
                           long minorTechnology,
