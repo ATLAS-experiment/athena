@@ -973,6 +973,7 @@ def LLP1Cfg(flags):
                                         "DisappearingSCT_MSOSs",
                                         "LowPtRoISCT_MSOSs",
                                         "LVL1MuonRoIs",
+                                        "NCB_MuonSegments"
                                         ]
 
 
