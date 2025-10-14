@@ -2,23 +2,26 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "Egamma1BaselineAlgTool.h"
+#include "Egamma1eRatioAlgTool.h"
 #include "../dump.h"
 #include "../dump.icc"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 
+#include "../IO/eEmEg1eRatioTOB.h"
+
 namespace GlobalSim {
 
-  Egamma1BaselineAlgTool::Egamma1BaselineAlgTool(const std::string& type,
+  Egamma1eRatioAlgTool::Egamma1eRatioAlgTool(const std::string& type,
 				       const std::string& name,
 				       const IInterface* parent) :
     base_class(type, name, parent){
   }
   
-  StatusCode Egamma1BaselineAlgTool::initialize() {
+  StatusCode Egamma1eRatioAlgTool::initialize() {
        
-    CHECK(m_nbhdContainerReadKey.initialize());
+    CHECK(m_nbhdTOBContainerReadKey.initialize());
+    CHECK(m_eRatioResultKey.initialize());
     CHECK(m_eRatioKey.initialize());
     CHECK(m_eRatioSimpleKey.initialize());
     
@@ -26,15 +29,14 @@ namespace GlobalSim {
   }
 
   StatusCode
-  Egamma1BaselineAlgTool::run(const EventContext& ctx) const {
+  Egamma1eRatioAlgTool::run(const EventContext& ctx) const {
     ATH_MSG_DEBUG("run()");
 
   
     // read in LArStrip neighborhoods from the event store
-    // there is one neighborhood per EFex RoI
     auto in =
-      SG::ReadHandle<LArStripNeighborhoodContainer>(m_nbhdContainerReadKey,
-						    ctx);
+      SG::ReadHandle<IOBitwise::IeEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
+							ctx);
     CHECK(in.isValid());
 
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
@@ -42,16 +44,18 @@ namespace GlobalSim {
     ap_int<16> peak = 0;
     ap_int<16> secondMax = 0;
 
-    SG::WriteHandle<std::vector<float> > h_eRatio(m_eRatioKey, ctx);
-    CHECK(h_eRatio.record(std::make_unique<std::vector<float> >()));
+    SG::WriteHandle<IOBitwise::IeEmEg1eRatioTOBContainer> h_eRatioResult(m_eRatioResultKey, ctx);
+    CHECK(h_eRatioResult.record(std::make_unique<IOBitwise::IeEmEg1eRatioTOBContainer>()));
+    SG::WriteHandle<std::vector<int> > h_eRatio(m_eRatioKey, ctx);
+    CHECK(h_eRatio.record(std::make_unique<std::vector<int> >()));
     SG::WriteHandle<std::vector<float> > h_eRatioSimple(m_eRatioSimpleKey, ctx);
     CHECK(h_eRatioSimple.record(std::make_unique<std::vector<float> >()));
-	
-    for (const auto nbhd : *in) {
-      auto c_phi = combine_phi(nbhd);
+
+    for (const auto nbhdTOB : *in) {
+      auto c_phi = combine_phi(nbhdTOB);
       if (msgLevel() <= MSG::DEBUG) {
         std::stringstream ss;
-        ss << "Baseline input: ";
+        ss << "eRatio input: ";
         for (const auto& i : c_phi) {ss << i << ' ';}
         ATH_MSG_DEBUG(ss.str());
       }
@@ -62,7 +66,7 @@ namespace GlobalSim {
 
       if (msgLevel() <= MSG::DEBUG) {
 	std::stringstream ss;
-	ss << "Baseline input: ";
+	ss << "eRatio input: ";
 	for (const auto& i : input) {ss << i << ' ';}
 	ATH_MSG_DEBUG(ss.str());
       }
@@ -95,27 +99,39 @@ namespace GlobalSim {
       ATH_MSG_DEBUG("Max element found at index "
 		    << std::distance(secondPeak.begin(), result)
 		    << " has value " << *result);
-      //tidy up.
+
       secondMax = *result;
       ATH_MSG_DEBUG("Peak " << peak << " second " << secondMax);
       
       //I am not confident on waht div_gen_0 does. So I am casting to floats for now.
       if(peak > 0 || secondMax > 0){
 	auto eRatio = static_cast< float >(peak - secondMax)/static_cast< float >(peak + secondMax);
-	h_eRatio->push_back(eRatio);
+	//h_eRatio->push_back(eRatio);
 	ATH_MSG_DEBUG("eRatio (p-sp/p+sp) is " << eRatio);
 	
 	auto eRatioSimple = static_cast< float >(secondMax)/static_cast< float >(peak);
 	h_eRatioSimple->push_back(eRatioSimple);
 	ATH_MSG_DEBUG("eRatio (sp/p) is " << eRatio);
-      } 
-      
+
+	//Make a bitset to hold the result
+	std::bitset<IOBitwise::IeEmEg1eRatioTOB::s_eGamma1eRatio_width> result = 0;
+	//Sanity check to make sure we are in range 0-1
+	if(eRatio >= 0. && eRatio <= 1.0){
+	  //Convert to 0-2047. If s_eGamma1eRatio_width changes this will change.
+	  int eRatioPower = (1 << IOBitwise::IeEmEg1eRatioTOB::s_eGamma1eRatio_width) -1;
+	  h_eRatio->push_back((int)(eRatio*eRatioPower));
+	  result = (int)(eRatio*eRatioPower);
+	} else {
+	   ATH_MSG_DEBUG("eRatio is not in the range 0-1");
+	}
+	h_eRatioResult->push_back(std::make_unique<IOBitwise::eEmEg1eRatioTOB>(*nbhdTOB, result));
+      }
     }
     
     return StatusCode::SUCCESS;
   }
 
-  ap_int<16> Egamma1BaselineAlgTool::secondPeakSearch(const std::vector<ap_int<16>>& input,
+  ap_int<16> Egamma1eRatioAlgTool::secondPeakSearch(const std::vector<ap_int<16>>& input,
 						      const ap_int<16> peak,
 						      const int startCell,
 						      const int endCell,
@@ -159,16 +175,16 @@ namespace GlobalSim {
   }
   
   std::vector<double>
-  Egamma1BaselineAlgTool::combine_phi(const LArStripNeighborhood* nbhd) const  {
+  Egamma1eRatioAlgTool::combine_phi(const IOBitwise::IeEmNbhoodTOB* nbhdTOB) const  {
     auto result = std::vector<double>();
 
-    const auto& phi_low = nbhd->phi_low();
+    const auto& phi_low = nbhdTOB->Neighbourhood().phi_low();
     //if (phi_low.size() != s_required_phi_len) {return result;}
 
-    const auto& phi_center = nbhd->phi_center();
+    const auto& phi_center = nbhdTOB->Neighbourhood().phi_center();
     //if (phi_center.size() != s_required_phi_len) {return result;}
     
-    const auto& phi_high = nbhd->phi_high();
+    const auto& phi_high = nbhdTOB->Neighbourhood().phi_high();
     //if (phi_high.size() != s_required_phi_len) {return result;}
 
     result.reserve(s_combination_len);
@@ -188,16 +204,16 @@ namespace GlobalSim {
   }
 
    StatusCode
-   Egamma1BaselineAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+   Egamma1eRatioAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
 				     const EventContext& ctx) const {
      CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
     return StatusCode::SUCCESS;
   }
-  std::string Egamma1BaselineAlgTool::toString() const {
+  std::string Egamma1eRatioAlgTool::toString() const {
 
     std::stringstream ss;
-    ss << "Egamma1BaselineAlgTool. name: " << name() << '\n'
-       << m_nbhdContainerReadKey << '\n'
+    ss << "Egamma1eRatioAlgTool. name: " << name() << '\n'
+       << m_nbhdTOBContainerReadKey << '\n'
        << '\n';
     return ss.str();
   }

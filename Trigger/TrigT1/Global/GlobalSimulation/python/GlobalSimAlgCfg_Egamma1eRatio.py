@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 from AthenaCommon.Constants import DEBUG
 
 def GlobalSimulationAlgCfg(flags,
-                           name="GlobalSimEgamma1Baseline",
+                           name="GlobalSimEgamma1eRatio",
                            OutputLevel=DEBUG,
                            dump=False):
 
@@ -16,7 +16,7 @@ def GlobalSimulationAlgCfg(flags,
 
     cfg = ComponentAccumulator()
 
-    baselineTool =  CompFactory.GlobalSim.Egamma1BaselineAlgTool(name+'AlgTool')
+    baselineTool =  CompFactory.GlobalSim.Egamma1eRatioAlgTool(name+'AlgTool')
     baselineTool.enableDump = dump
     baselineTool.OutputLevel = OutputLevel
     

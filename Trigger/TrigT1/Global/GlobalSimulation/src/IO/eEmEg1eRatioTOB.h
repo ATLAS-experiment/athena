@@ -35,6 +35,20 @@ namespace GlobalSim::IOBitwise {
      */
     eEmEg1eRatioTOB(const xAOD::eFexEMRoI& eFexTOB,
 		 std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits);
+
+    /**
+     * @brief Constructor taking an eEmTOB and eGamma1 eRatio output bits to initialise bits..
+     * @param[in] eEmTOB The input eEmTOB defining the common/eFex bits.
+     * @param[in] eGamma1eRatio_bits The input eGamma1 eRatio bits defining the result of the algorithm.
+     *
+     * To be used to create, and initilise a global eEmTOB from an existing eEmTOB and an 
+     * eGamma1 eRatio result
+     * eGamma1 eRatio result bits are set here, eFexRoI threshold bits are set in the eEmTOB 
+     * constructor, the CommonTOB constructor is used to initialise the common bits.
+     */
+    eEmEg1eRatioTOB(const IeEmTOB& eEmTOB,
+		    std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits);
+
     //! @copydoc IeEmEg1eRatioTOB::~IeEmEg1eRatioTOB()
     virtual ~eEmEg1eRatioTOB(){};
 
