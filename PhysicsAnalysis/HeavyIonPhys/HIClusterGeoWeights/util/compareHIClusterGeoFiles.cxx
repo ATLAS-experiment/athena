@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include <iostream>
 #include <memory>
 #include <string>
@@ -128,7 +131,10 @@ void compareHIClusterGeoFiles(const std::string& file1,
         a1 = h1->GetZaxis();
         a2 = h2->GetZaxis();
       }
-
+      if((not a1) or (not a2)){
+        std::cout <<"Histogram pointer a1 or a2 is null in compareHIClusterGeoFiles\n";
+       abort();
+      }
       for (int b = 1; b <= a1->GetNbins() + 1; ++b) {
         if (a1->GetBinLowEdge(b) != a2->GetBinLowEdge(b)) {
           // different bins

@@ -50,7 +50,10 @@ std::unordered_map<int, std::vector<std::pair<int, int>>> getGRLMap(char *grl) {
       }
     }
   }
-
+  int status = pclose(runList);
+  if (status == -1){
+    std::cout<<"Error in pclose\n";
+  }
   return grlMap;
 }
 
@@ -97,10 +100,7 @@ int main(int argc, char **argv) {
   for (unsigned int r = 0; r < runs.size(); r++) {
     runIndex->SetBinContent(r + 1, runs.at(r));
   }
-  if (!runIndex) {
-    std::cout << "Could not create runIndex" << std::endl;
-    return -1;
-  }
+  //runIndex cannot be nullptr here
 
   std::string prefix = argv[2];
   std::string suffix = argv[3];
