@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArABBADecoder.h"
@@ -55,7 +55,6 @@ StatusCode LArABBADecoder::convert(const RawEvent* re, LArDigitContainer* coll) 
   //Build TOC
   std::map<eformat::SubDetectorGroup, std::vector<const uint32_t*> > robIndex;
   eformat::helper::build_toc(*re, robIndex );
-  for (auto mapit : robIndex) std::cout << "Rob Index subdetgroup is " << std::hex << mapit.first << std::endl; 	
   std::map<eformat::SubDetectorGroup, std::vector<const uint32_t*> >::const_iterator robIt = robIndex.find(eformat::LAR);
   if (robIt!=robIndex.end()) {
       const std::vector<const uint32_t*>& robs = robIt->second;
@@ -119,7 +118,7 @@ void LArABBADecoder::fillCollection(const ROBFragment* robFrag, LArDigitContaine
 	//std::cout << "oss: " << oss.str() << ", oss_size: " << oss.str().size() << std::endl;
           }
      //std::cout << "ss: " << ss << "ss_size:" << ss.size() <<std::endl;
-     string.push_back(ss);  
+        string.push_back(std::move(ss));
      } 
 //std::cout << "string size: "<<string.size() << std::endl;
 
