@@ -26,11 +26,11 @@ public:
     CaloClusterMLCalibToolLite(const std::string &type, const std::string &name, const IInterface *parent);
     ~CaloClusterMLCalibToolLite();
 
-    StatusCode initialize() override;
-    StatusCode finalize() override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
 
     // Perform batch-inference for a CaloClusterContainer
-    StatusCode inference(const xAOD::CaloClusterContainer &clusters, const int &nPrimVtx, const double &avgMu, std::vector<double> &clusterE_ML_vec, std::vector<double> &clusterE_ML_Unc_vec) const;
+    virtual StatusCode inference(const xAOD::CaloClusterContainer &clusters, const int &nPrimVtx, const double &avgMu, std::vector<double> &clusterE_ML_vec, std::vector<double> &clusterE_ML_Unc_vec) const override;
 
 private:
     Gaudi::Property<std::vector<std::string>> m_preprocessingTransformNames{this, "PreprocessingTransformNames", {}, "Names of preprocessing transforms"};
