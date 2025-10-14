@@ -292,21 +292,19 @@ struct RAuxStore::impl {
 #endif  // ROOT_VERSION_CODE >= ROOT_VERSION(6, 35, 0)
         ) {
 
-          // Get the name of this sub-field.
-          const std::string subFieldName = subField->GetQualifiedFieldName();
-          const std::string subAuxName =
-              subFieldName.substr(subFieldName.find(".") + 1);
+          // Get the type of this sub-field.
+          const std::string& typeName = subField->GetTypeName();
 
           // Skip this entry if it refers to a base class.
-          if (subAuxName.starts_with("xAOD::") ||
-              subAuxName.starts_with("SG::") ||
-              subAuxName.starts_with("ILockable")) {
+          if (typeName.starts_with("xAOD::") ||
+              typeName.starts_with("SG::") ||
+              typeName.starts_with("ILockable")) {
             continue;
           }
 
           // Set up this field.
           RETURN_CHECK("xAOD::RAuxStore::impl::scanInputNtuple",
-                       setupAuxField(*subField, subAuxName));
+                       setupAuxField(*subField, subField->GetFieldName()));
         }
         // Don't check the rest of the loop's body:
         continue;
