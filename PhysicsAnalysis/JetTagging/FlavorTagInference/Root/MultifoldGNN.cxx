@@ -53,12 +53,16 @@ namespace FlavorTagInference {
 
   // Dependencies
   FTagDataDependencyNames MultifoldGNN::getDependencies() const {
-    const auto& first = m_folds.at(0)->getDependencies();
+    auto first = m_folds.at(0)->getDependencies();
     for (size_t idx = 1; idx< m_folds.size(); idx++) {
       if (m_folds.at(idx)->getDependencies() != first) {
         throw std::runtime_error("inconsistent dependencies in folds");
       }
     }
+    // this algorithm also depends on the jet fold hash, make sure
+    // it's declared.
+    first.bTagInputs.insert(
+      SG::AuxTypeRegistry::instance().getName(m_fold_hash.auxid()));
     return first;
   }
 
