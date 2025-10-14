@@ -77,7 +77,7 @@ def parse_pixelClusSF_file_data(input_file_path):
 
         #Get map between wafer id and hash id
         #Values are in order: bec, ld, phi, eta, side, ID
-        with open("pixWafer_id_hash_map.json", "r") as map_file:
+        with open("../data/pixel_wafer_id_hash_map.json", "r") as map_file:
             hash_id_map = json.load(map_file)
 
         #Grab approrpriate bec, layer, eta, sf for the run
@@ -104,9 +104,9 @@ def parse_pixelClusSF_file_data(input_file_path):
                         if etaSlice > 5: etaSlice = 6
                         waferID_val = (waferID[0], waferID[1], etaSlice)
                     else:
-                        if waferID[2] > 5:
-                            etaSlice = 6
-                            waferID_val = (waferID[0], waferID[1], etaSlice)
+                        etaSlice = waferID[2]
+                        if waferID[2] > 5: etaSlice = 6
+                        waferID_val = (waferID[0], waferID[1], etaSlice)
                 else:
                     waferID_val = tuple([abs(i) for i in waferID])
                 payload[hash_val] = coordinate_sf_pairs[tuple(waferID_val)]
@@ -122,7 +122,7 @@ def payload_to_json_string_converter(payload_data):
 
 if __name__ == "__main__":
     #Define input parameters
-    local_db_file = "TEST_HASH_24.db"
+    local_db_file = "TEST.db"
     local_db_name = "CONDBR2" #Must match what sample meta-data expects for testing
     tag = "PixelTest"
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     output_folder, output_data, output_db = prepare_output_database(local_db_name, local_db_file)
 
     #Parse data from pixel cluster scale factors input file
-    pixelClusSF_input_file_path = "sf_input_files/data24_sf_flat.root"
+    pixelClusSF_input_file_path = "sf_input_files/data23_sf_flat.root"
     pixelClusSF_data_pairs = parse_pixelClusSF_file_data(pixelClusSF_input_file_path)
 
     #Define validity keys
@@ -138,7 +138,6 @@ if __name__ == "__main__":
     validity_key_min = 0 << 32 | 0
 
     for i, run in enumerate(pixelClusSF_data_pairs.keys()): 
-        print(run)
 
         pixelClusSF_data = pixelClusSF_data_pairs[run] 
 
