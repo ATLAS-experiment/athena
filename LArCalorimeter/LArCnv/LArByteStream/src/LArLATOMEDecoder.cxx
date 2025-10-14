@@ -60,7 +60,7 @@ StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping*
   // Build TOC
   std::map<eformat::SubDetectorGroup, std::vector<const uint32_t*> > robIndex;
   eformat::helper::build_toc(*re, robIndex);
-  for (auto mapit : robIndex)
+  for (const auto& mapit : robIndex)
     ATH_MSG_DEBUG("Rob Index subdetgroup is " << std::hex << mapit.first);
   std::map<eformat::SubDetectorGroup, std::vector<const uint32_t*> >::const_iterator robIt = robIndex.find(eformat::LAR);
   if (robIt != robIndex.end()) {
@@ -484,7 +484,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   for (unsigned int i = 0; i < 4; ++i)
     pat3.patterns[i] = rod_status[i + 23];
 
-  m_latomeCalibPatternsInEvent = {pat1, pat2, pat3};
+  m_latomeCalibPatternsInEvent = {std::move(pat1), std::move(pat2), std::move(pat3)};
 
   const HWIdentifier hwidEmpty;
 

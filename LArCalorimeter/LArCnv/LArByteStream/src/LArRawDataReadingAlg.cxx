@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawDataReadingAlg.h"
@@ -108,7 +108,7 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
 
  
      eformat::helper::Version ver(rob.rod_version());
-    //(re-)init rodBlock only once per event or if (very unlikly or even impossible) some FEBs have a differnt firmware
+    //(re-)init rodBlock only once per event or if (very unlikly or even impossible) some FEBs have a different firmware
     if (rodBlock==nullptr || rodMinorVersion !=ver.minor_version() || rodBlockType!=(rob.rod_detev_type()&0xff)) {
       rodMinorVersion=ver.minor_version();
       rodBlockType=rob.rod_detev_type()&0xff;
@@ -164,7 +164,7 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
       }
     }
 
-    if (!rodBlock->setFragment(pData,nData)) {
+    if (!rodBlock || !rodBlock->setFragment(pData,nData)) {
       if (m_failOnCorruption) {
 	ATH_MSG_ERROR("Failed to assign fragment pointer to LArRodBlockStructure");
 	return StatusCode::FAILURE;
