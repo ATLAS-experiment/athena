@@ -20,6 +20,7 @@ namespace FlavorTagInference {
   {
     ATH_CHECK(m_containerKey.initialize());
     ATH_CHECK(m_constituentKey.initialize());
+    ATH_CHECK(m_electronKey.initialize(!m_electronKey.empty()));
 
     ATH_CHECK(m_decorator.retrieve());
 
@@ -30,7 +31,9 @@ namespace FlavorTagInference {
     // now we build data dependencies from the internal tools. We have
     // to reserve the vectors here to prevent a segfault since read /
     // write handles aren't movable once declaired as a property.
-    auto auxKeys = m_decorator->getAuxInputKeys();
+    auto deps = m_decorator->getDependencies();
+    // jet inputs
+    auto auxKeys = deps.bTagInputs;
     auxKeys.merge(extraDeps);
     m_aux.reserve(auxKeys.size());
     for (const std::string& key: auxKeys) {
@@ -43,8 +46,10 @@ namespace FlavorTagInference {
       m_aux.emplace_back(this, key, full, "");
       ATH_CHECK(m_aux.back().initialize());
     }
-    m_constituentAux.reserve(m_decorator->getConstituentAuxInputKeys().size());
-    for (const std::string& key: m_decorator->getConstituentAuxInputKeys()) {
+    // track inputs
+    auto trackInputs = deps.trackInputs;
+    m_constituentAux.reserve(trackInputs.size());
+    for (const std::string& key: trackInputs) {
       const std::string full = m_constituentKey.key() + "." + key;
       if (veto.count(full)) {
         ATH_MSG_DEBUG("Not declaring accessor: " + full);
@@ -54,7 +59,21 @@ namespace FlavorTagInference {
       m_constituentAux.emplace_back(this, key, full, "");
       ATH_CHECK(m_constituentAux.back().initialize());
     }
-    std::set<std::string> keys = m_decorator->getDecoratorKeys();
+    // electron inputs
+    size_t n_electron_inputs = deps.electronInputs.size();
+    if (n_electron_inputs > 0 && m_electronKey.empty()) {
+      ATH_MSG_ERROR("using electrons without defining the input container");
+      return StatusCode::FAILURE;
+    }
+    m_electronAux.reserve(n_electron_inputs);
+    for (const std::string& key: deps.electronInputs) {
+      const std::string full = m_electronKey.key() + "." + key;
+      ATH_MSG_DEBUG("Adding electron accessor: " + full);
+      m_electronAux.emplace_back(this, key, full, "");
+      ATH_CHECK(m_electronAux.back().initialize());
+    }
+    // jet outputs
+    std::set<std::string> keys = deps.bTagOutputs;
     m_decor.reserve(keys.size());
     for (const std::string& key: keys) {
       const std::string full = m_containerKey.key() + "." + key;

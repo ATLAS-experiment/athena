@@ -11,16 +11,6 @@ using namespace FlavorTagInference;
 
 namespace {
   const std::string jetLinkName = "jetLink";
-  template<typename T, typename C>
-  std::set<std::string> merged(T get, const C& c) {
-    auto first = get(*c.at(0));
-    for (size_t idx = 1; idx < c.size(); idx++) {
-      if (get(*c.at(idx)) != first) {
-        throw std::runtime_error("inconsistent dependencies in folds");
-      }
-    }
-    return first;
-  }
   auto getNNs(
     const std::vector<std::string>& nn_files,
     const GNNOptions& o)
@@ -62,16 +52,14 @@ namespace FlavorTagInference {
   }
 
   // Dependencies
-  std::set<std::string> MultifoldGNN::getDecoratorKeys() const {
-    return merged([](const auto& f){ return f.getDecoratorKeys(); }, m_folds);
-  }
-  std::set<std::string> MultifoldGNN::getAuxInputKeys() const {
-    auto out = merged([](const auto& f){ return f.getAuxInputKeys(); }, m_folds);
-    out.insert(SG::AuxTypeRegistry::instance().getName(m_fold_hash.auxid()));
-    return out;
-  }
-  std::set<std::string> MultifoldGNN::getConstituentAuxInputKeys() const {
-    return merged([](const auto& f){ return f.getConstituentAuxInputKeys(); }, m_folds);
+  FTagDataDependencyNames MultifoldGNN::getDependencies() const {
+    const auto& first = m_folds.at(0)->getDependencies();
+    for (size_t idx = 1; idx< m_folds.size(); idx++) {
+      if (m_folds.at(idx)->getDependencies() != first) {
+        throw std::runtime_error("inconsistent dependencies in folds");
+      }
+    }
+    return first;
   }
 
   const GNN& MultifoldGNN::getFold(const SG::AuxElement& element) const {

@@ -51,9 +51,8 @@ namespace FlavorTagInference {
     virtual void decorate(const xAOD::IParticle& i_jet) const;
     virtual void decorateWithDefaults(const xAOD::IParticle& jet) const;
 
-    virtual std::set<std::string> getDecoratorKeys() const;
-    virtual std::set<std::string> getAuxInputKeys() const;
-    virtual std::set<std::string> getConstituentAuxInputKeys() const;
+    // cppcheck-suppress returnByReference
+    FTagDataDependencyNames getDependencies() const;
 
   private:
     // private constructor, delegate of the above public ones

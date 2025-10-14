@@ -6,18 +6,21 @@
 #ifndef I_DEPENDENCY_REPORTER
 #define I_DEPENDENCY_REPORTER
 
+#include "FTagDataDependencyNames.h"
+
 #include <set>
 #include <string>
 
 class IDependencyReporter {
 public:
+
+  using DataDependencyNames = FlavorTagInference::FTagDataDependencyNames;
+
   /// Destructor.
   virtual ~IDependencyReporter() { };
 
   // Names of the decorations being added
-  virtual std::set<std::string> getDecoratorKeys() const = 0;
-  virtual std::set<std::string> getAuxInputKeys() const = 0;
-  virtual std::set<std::string> getConstituentAuxInputKeys() const = 0;
+  virtual DataDependencyNames getDependencies() const = 0;
 };
 
 #endif
