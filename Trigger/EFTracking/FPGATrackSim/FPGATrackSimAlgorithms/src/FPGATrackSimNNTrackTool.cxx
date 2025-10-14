@@ -279,6 +279,8 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
         temp.setHoughXBin(iroad->getXBin());
         temp.setHoughYBin(iroad->getYBin());
 
+        temp.setBinIdx(iroad->getBinIdx());
+
         ////////////////////////////////////////////////////////////////////////
         // Get a list of indices for all possible combinations given a certain
         // number of layers

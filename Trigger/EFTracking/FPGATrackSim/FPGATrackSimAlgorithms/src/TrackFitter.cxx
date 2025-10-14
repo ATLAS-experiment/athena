@@ -138,6 +138,8 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     temp.setHoughXBin(road->getXBin());
     temp.setHoughYBin(road->getYBin());
 
+    temp.setBinIdx(road->getBinIdx());
+
     // Create a list of track candidates by taking all possible combinations of hits in road.
     std::vector<FPGATrackSimTrack> track_cands;
 
