@@ -2,8 +2,9 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometry/ActsExtrapolationTool.h"
+#include "ActsGeometry/ExtrapolationTool.h"
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 // ATHENA
 #include "GaudiKernel/IInterface.h"
 
@@ -32,11 +33,18 @@
 #include <iostream>
 #include <memory>
 
+namespace {
+    using CurvedStepper_t = Acts::EigenStepper<Acts::EigenStepperDefaultExtension>;
+    using CurvedPropagator_t = Acts::Propagator<CurvedStepper_t, Acts::Navigator>;
+    using StraightStepper_t = Acts::StraightLineStepper;
+    using StraightPropagator_t = Acts::Propagator<StraightStepper_t, Acts::Navigator>;
+}
+
 namespace ActsExtrapolationDetail {
 
+
   
-  using VariantPropagatorBase = boost::variant<
-      Acts::Propagator<Acts::EigenStepper<Acts::EigenStepperDefaultExtension>, Acts::Navigator>>;
+  using VariantPropagatorBase = boost::variant<CurvedPropagator_t, StraightPropagator_t>;
 
   class VariantPropagator : public VariantPropagatorBase
   {
@@ -48,46 +56,39 @@ namespace ActsExtrapolationDetail {
 
 using ActsExtrapolationDetail::VariantPropagator;
 
-
-ActsExtrapolationTool::ActsExtrapolationTool(const std::string& type, const std::string& name,
-    const IInterface* parent)
-  : base_class(type, name, parent)
-{
-}
+namespace ActsTrk{
 
 
-ActsExtrapolationTool::~ActsExtrapolationTool()
-{
-}
+ExtrapolationTool:: ExtrapolationTool(const std::string& type, 
+                                      const std::string& name,
+                                      const IInterface* parent):
+    base_class{type,name, parent} {}
 
+ExtrapolationTool::~ExtrapolationTool() = default;
 
 StatusCode
-ActsExtrapolationTool::initialize()
+ExtrapolationTool::initialize()
 {
-  using namespace std::literals::string_literals;
-  m_logger = makeActsAthenaLogger(this, std::string("ActsExtrapTool"), std::string("Prop"));
+
 
   ATH_MSG_INFO("Initializing ACTS extrapolation");
 
-  m_logger = makeActsAthenaLogger(this, std::string("Prop"), std::string("ActsExtrapTool"));
+  m_logger = makeActsAthenaLogger(this, name());
 
   ATH_CHECK( m_trackingGeometryTool.retrieve() );
-  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
-    = m_trackingGeometryTool->trackingGeometry();
 
-  Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry } );
-
-  if (m_fieldMode == "ATLAS"s) {    
+  Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
+  Acts::Navigator navigator{std::move(navConfig), logger().clone()};
+  
+  ATH_CHECK(m_fieldCacheCondObjInputKey.initialize());
+  if (m_fieldMode == "ATLAS") {    
     ATH_MSG_INFO("Using ATLAS magnetic field service");
-    using Stepper = Acts::EigenStepper<Acts::EigenStepperDefaultExtension>;
 
-    ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
     auto bField = std::make_shared<ATLASMagneticFieldWrapper>();
 
-    auto stepper = Stepper(std::move(bField));
-    auto propagator = Acts::Propagator<Stepper, Acts::Navigator>(std::move(stepper),
-                                                                 std::move(navigator),
-								 logger().cloneWithSuffix("Prop"));
+    CurvedStepper_t stepper{std::move(bField)};
+    CurvedPropagator_t propagator{std::move(stepper), std::move(navigator),
+                                  logger().clone()};
     m_varProp = std::make_unique<VariantPropagator>(propagator);
   }
   else if (m_fieldMode == "Constant") {
@@ -101,17 +102,20 @@ ActsExtrapolationTool::initialize()
                                                       m_constantFieldVector[1], 
                                                       m_constantFieldVector[2]);
 
-    ATH_MSG_INFO("Using constant magnetic field: (Bx, By, Bz) = (" << m_constantFieldVector[0] << ", " 
-                                                                   << m_constantFieldVector[1] << ", " 
-                                                                   << m_constantFieldVector[2] << ")");
-    
-    using Stepper = Acts::EigenStepper<Acts::EigenStepperDefaultExtension>;
-
+    ATH_MSG_INFO("Using constant magnetic field: (Bx, By, Bz) = "
+                <<Amg::toString(constantFieldVector));
+ 
     auto bField = std::make_shared<Acts::ConstantBField>(constantFieldVector);
-    auto stepper = Stepper(std::move(bField));
-    auto propagator = Acts::Propagator<Stepper, Acts::Navigator>(std::move(stepper),
-                                                                 std::move(navigator));
+    CurvedStepper_t stepper{std::move(bField)};
+    CurvedPropagator_t propagator{std::move(stepper), std::move(navigator), logger().clone()};
     m_varProp = std::make_unique<VariantPropagator>(propagator);
+  } else if (m_fieldMode == "StraightLine") {
+      Acts::StraightLineStepper stepper{};
+      StraightPropagator_t propagator{stepper, std::move(navigator), logger().clone()};
+      m_varProp = std::make_unique<VariantPropagator>(propagator);
+  } else {
+     ATH_MSG_FATAL("Invalid mode provided "<<m_fieldMode<<". Allowed  : \"ATLAS\", \"Constant\", \"StraightLine\".");
+     return StatusCode::FAILURE;
   }
 
   ATH_MSG_INFO("ACTS extrapolation successfully initialized");
@@ -120,7 +124,7 @@ ActsExtrapolationTool::initialize()
 
 
 ActsPropagationOutput
-ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
+ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         Acts::Direction navDir /*= Acts::Direction::Forward()*/,
                                         double pathLimit /*= std::numeric_limits<double>::max()*/) const
@@ -180,7 +184,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
 
 std::optional<const Acts::BoundTrackParameters>
-ActsExtrapolationTool::propagate(const EventContext& ctx,
+ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  Acts::Direction navDir /*= Acts::Direction::Forward()*/,
                                  double pathLimit /*= std::numeric_limits<double>::max()*/) const
@@ -216,7 +220,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
 }
 
 ActsPropagationOutput
-ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
+ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         const Acts::Surface& target,
                                         Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -273,7 +277,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 }
 
 std::optional<const Acts::BoundTrackParameters>
-ActsExtrapolationTool::propagate(const EventContext& ctx,
+ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  const Acts::Surface& target,
                                  Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -312,20 +316,16 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
   return parameters;
 }
 
-Acts::MagneticFieldContext ActsExtrapolationTool::getMagneticFieldContext(const EventContext& ctx) const {
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
-  if (!readHandle.isValid()) {
-     std::stringstream msg;
-     msg << "Failed to retrieve magnetic field condition data " << m_fieldCacheCondObjInputKey.key() << ".";
-     throw std::runtime_error(msg.str());
+Acts::MagneticFieldContext ExtrapolationTool::getMagneticFieldContext(const EventContext& ctx) const {
+  const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
+  if (!SG::get(fieldCondObj,m_fieldCacheCondObjInputKey, ctx).isSuccess()) {
+     throw std::runtime_error("Failed to retrieve conditions data from "+m_fieldCacheCondObjInputKey.key() + ".");
   }
-  const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-
-  return Acts::MagneticFieldContext(fieldCondObj);
+  return Acts::MagneticFieldContext{fieldCondObj};
 }
 
 template<typename OptionsType>
-OptionsType ActsExtrapolationTool::prepareOptions(const Acts::GeometryContext& gctx,
+OptionsType ExtrapolationTool::prepareOptions(const Acts::GeometryContext& gctx,
                                                   const Acts::MagneticFieldContext& mctx,
                                                   const Acts::BoundTrackParameters& startParameters,
                                                   Acts::Direction navDir, 
@@ -340,11 +340,12 @@ OptionsType ActsExtrapolationTool::prepareOptions(const Acts::GeometryContext& g
   options.maxSteps = m_maxStep;
   options.direction = navDir;
   options.stepping.maxStepSize = m_maxStepSize * 1_m;
-
+  options.maxTargetSkipping = m_maxSurfSkip;
+  options.surfaceTolerance = m_surfTolerance;
   auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
   mInteractor.multipleScattering = m_interactionMultiScatering;
   mInteractor.energyLoss = m_interactionEloss;
   mInteractor.recordInteractions = m_interactionRecord;
-
   return options;
+}
 }

@@ -35,6 +35,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
+#include "Acts/Definitions/Tolerance.hpp"
 
 #include <cmath>
 
@@ -49,16 +50,18 @@ namespace ActsExtrapolationDetail {
   class VariantPropagator;
 }
 
-
-class ActsExtrapolationTool : public extends<AthAlgTool, IActsExtrapolationTool>
+namespace ActsTrk {
+class ExtrapolationTool : public extends<AthAlgTool, IActsExtrapolationTool>
 {
 public:
   virtual StatusCode initialize() override;
 
-  ActsExtrapolationTool(const std::string& type, const std::string& name,
-	           const IInterface* parent);
+  ExtrapolationTool(const std::string& type, 
+                    const std::string& name,
+                    const IInterface* parent);
 
-  ~ActsExtrapolationTool();
+
+  ~ExtrapolationTool();
 
 private:
   // set up options for propagation
@@ -106,7 +109,6 @@ public:
  private:
   const Acts::Logger& logger() const { return *m_logger; }
 
-private:
   std::unique_ptr<const ActsExtrapolationDetail::VariantPropagator> m_varProp;
   std::unique_ptr<const Acts::Logger> m_logger{nullptr};
 
@@ -114,13 +116,15 @@ private:
 
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
-  Gaudi::Property<std::string> m_fieldMode{this, "FieldMode", "ATLAS", "Either ATLAS or Constant"};
+  Gaudi::Property<std::string> m_fieldMode{this, "FieldMode", "ATLAS", "Either ATLAS or Constant or StraightLine"};
   Gaudi::Property<std::vector<double>> m_constantFieldVector{this, "ConstantFieldVector", {0, 0, 0}, "Constant field value to use if FieldMode == Constant"};
 
   Gaudi::Property<double> m_ptLoopers{this, "PtLoopers", 300, "PT loop protection threshold. Will be converted to Acts MeV unit"};
   Gaudi::Property<double> m_maxStepSize{this, "MaxStepSize", 10, "Max step size in Acts m unit"};
-  Gaudi::Property<double> m_maxStep{this, "MaxSteps", 100000, "Max number of steps"};
-
+  Gaudi::Property<unsigned> m_maxStep{this, "MaxSteps", 100000, "Max number of steps"};
+  Gaudi::Property<unsigned> m_maxSurfSkip{this, "MaxSurfaceSkip" ,100, "Maximum number of surfaces to be tried by the navigator"};
+  Gaudi::Property<double> m_surfTolerance{this, "OnSurfaceTolerance", Acts::s_onSurfaceTolerance, 
+                                          "Tolerance to consider track parameters on surface"};
   // Material inteaction option
   Gaudi::Property<bool> m_interactionMultiScatering{this, "InteractionMultiScatering", false, "Whether to consider multiple scattering in the interactor"};
   Gaudi::Property<bool> m_interactionEloss{this, "InteractionEloss", false, "Whether to consider energy loss in the interactor"};
@@ -134,5 +138,5 @@ private:
                   Acts::Direction navDir, 
                   double pathLimit) const;
 };
-
+}
 #endif
