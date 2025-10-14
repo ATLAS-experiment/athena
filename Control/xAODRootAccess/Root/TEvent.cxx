@@ -2366,9 +2366,8 @@ namespace xAOD {
             return StatusCode::FAILURE;
          }
          // Let's create a holder for the object:
-         THolder* hldr = new THolder( obj, cl, isOwner );
          TObjectManager* mgr =
-            new TObjectManager( 0, hldr, m_auxMode == kAthenaAccess );
+            new TObjectManager( 0, std::make_unique<THolder>(obj, cl, isOwner), m_auxMode == kAthenaAccess );
          m_outputMetaObjects[ key ] = mgr;
          // We're done. The rest will be done later on.
          return StatusCode::SUCCESS;
@@ -2412,22 +2411,21 @@ namespace xAOD {
          }
 
          // Let's create a holder for the object:
-         THolder* hldr = new THolder( obj, cl, isOwner );
          TObjectManager* mgr =
-            new TObjectManager( 0, hldr, m_auxMode == kAthenaAccess );
+            new TObjectManager( 0, std::make_unique<THolder>(obj, cl, isOwner), m_auxMode == kAthenaAccess );
          m_outputObjects[ key ] = mgr;
 
          // ... and let's add it to the output TTree:
          *( mgr->branchPtr() ) =
             m_outTree->Branch( key.c_str(), cl->GetName(),
-                               hldr->getPtr(), basketSize, splitLevel );
+                               mgr->holder()->getPtr(), basketSize, splitLevel );
          if( ! mgr->branch() ) {
             ::Error( "xAOD::TEvent::record",
                      XAOD_MESSAGE( "Failed to create branch \"%s\" out of "
                                    "type \"%s\"" ),
                      key.c_str(), cl->GetName() );
             // Clean up:
-            hldr->setOwner( kFALSE );
+            mgr->holder()->setOwner( kFALSE );
             delete mgr;
             return StatusCode::FAILURE;
          }
@@ -2705,9 +2703,8 @@ namespace xAOD {
       }
 
       // Create the new manager object that will hold this EDM object:
-      THolder* hldr = new THolder( ptr, realClass );
       TObjectManager* mgr =
-         new TObjectManager( 0, hldr, ( m_auxMode == kAthenaAccess ) );
+         new TObjectManager( 0, std::make_unique<THolder>(ptr, realClass), ( m_auxMode == kAthenaAccess ) );
       m_inputObjects[ key ] = mgr;
 
       // One final check. If it's not an auxiliary store, then it must have
@@ -2721,7 +2718,7 @@ namespace xAOD {
                                 "This can only be read in kAthenaAccess mode." ),
                   key.c_str(), br->GetSplitLevel() );
          // Clean up:
-         *( hldr->getPtr() ) = 0;
+         *( mgr->holder()->getPtr() ) = 0;
          delete mgr;
          m_inputObjects.erase( key );
          return StatusCode::FAILURE;
@@ -2729,7 +2726,7 @@ namespace xAOD {
 
       // Now try to connect to the branch:
       const ::Int_t status = m_inTree->SetBranchAddress( key.c_str(),
-                                                         hldr->getPtr(),
+                                                         mgr->holder()->getPtr(),
                                                          mgr->branchPtr(),
                                                          realClass, dataType,
                                                          kTRUE );
@@ -2739,7 +2736,7 @@ namespace xAOD {
                                 "input branch \"%s\". Return code: %i" ),
                   className.c_str(), key.c_str(), status );
          // Clean up:
-         *( hldr->getPtr() ) = 0;
+         *( mgr->holder()->getPtr() ) = 0;
          delete mgr;
          m_inputObjects.erase( key );
          return StatusCode::FAILURE;
@@ -2818,14 +2815,13 @@ namespace xAOD {
 
       // Create the object, and all of the managers around it:
       void* ptr = cl->New();
-      THolder* hldr = new THolder( ptr, cl );
       TObjectManager* mgr =
-         new TObjectManager( 0, hldr, m_auxMode == kAthenaAccess );
+         new TObjectManager( 0, std::make_unique<THolder>(ptr, cl), m_auxMode == kAthenaAccess );
       m_inputMetaObjects[ key ] = mgr;
 
       // Now try to connect to the branch:
       const ::Int_t status = m_inMetaTree->SetBranchAddress( key.c_str(),
-                                                             hldr->getPtr(),
+                                                             mgr->holder()->getPtr(),
                                                              mgr->branchPtr(),
                                                              cl, dt,
                                                              kTRUE );
@@ -2835,7 +2831,7 @@ namespace xAOD {
                                 "input branch \"%s\". Return code: %i" ),
                   cl->GetName(), key.c_str(), status );
          // Clean up:
-         *( hldr->getPtr() ) = 0;
+         *( mgr->holder()->getPtr() ) = 0;
          delete mgr;
          m_inputMetaObjects.erase( key );
          return StatusCode::FAILURE;

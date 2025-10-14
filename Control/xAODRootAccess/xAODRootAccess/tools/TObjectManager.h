@@ -1,24 +1,24 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODROOTACCESS_TOOLS_TOBJECTMANAGER_H
 #define XAODROOTACCESS_TOOLS_TOBJECTMANAGER_H
 
 // Local include(s):
-#include "TVirtualManager.h"
+#include "xAODRootAccess/tools/THolder.h"
+#include "xAODRootAccess/tools/IObjectManager.h"
+
+// System include(s).
+#include <memory>
 
 // Forward declaration(s):
 class TBranch;
 
 namespace xAOD {
 
-   // Forward declaration(s):
-   class THolder;
-
-   ///
    /// @short Manager for EDM objects created by ROOT
    ///
    /// This class is used when an EDM object is meant to be created
@@ -26,11 +26,12 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   class TObjectManager : public TVirtualManager {
+   class TObjectManager : public Details::IObjectManager {
 
    public:
       /// Constructor, getting hold of the created objects
-      TObjectManager( ::TBranch* br = 0, THolder* holder = 0,
+      TObjectManager( ::TBranch* br = 0,
+                      std::unique_ptr<THolder> holder = nullptr,
                       ::Bool_t renewOnRead = kFALSE );
       /// Copy constructor
       TObjectManager( const TObjectManager& parent );
@@ -44,10 +45,6 @@ namespace xAOD {
       ::TBranch* branch();
       /// Pointer to the branch's pointer
       ::TBranch** branchPtr();
-      /// Accessor to the Holder object
-      const THolder* holder() const;
-      /// Accessor to the Holder object
-      THolder* holder();
 
       /// Function for updating the object in memory if needed
       virtual ::Int_t getEntry( ::Int_t getall = 0 ) override;
@@ -69,8 +66,6 @@ namespace xAOD {
    private:
       /// Pointer keeping track of the branch
       ::TBranch* m_branch;
-      /// Holder object for the EDM object
-      THolder* m_holder;
       /// The last entry that was loaded for this branch
       ::Long64_t m_entry;
       /// Was the object set for the current event?

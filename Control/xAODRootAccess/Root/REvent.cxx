@@ -295,7 +295,7 @@ namespace xAOD {
       if( fileName.size() == 0 ) return StatusCode::SUCCESS;
 
       // For meta data, need to open file as TFile to access the meta data tree
-      std::unique_ptr< TFile > infile( TFile::Open( fileName.c_str(), "READ" ) );        
+      std::unique_ptr< TFile > infile( TFile::Open( fileName.c_str(), "READ" ) );
       if( ! infile.get() ) {
          ::Error( "xAOD::REvent::readFrom",
                   XAOD_MESSAGE( "Couldn't open file for metadata tree! File name %s"), fileName.c_str());
@@ -1524,7 +1524,7 @@ namespace xAOD {
          }
       }
       else {
-         ::Error("xAOD::REvent::getNames", "Cannot (yet) get names for event object of typename %s", 
+         ::Error("xAOD::REvent::getNames", "Cannot (yet) get names for event object of typename %s",
                  targetClassName.c_str());
          return;
       }
@@ -2470,11 +2470,11 @@ namespace xAOD {
             ::Warning( "xAOD::REvent::connectBranch", "Key \"%s\" not available on input", key.c_str() );
          }
          m_inputMissingObjects.insert( key );
-         return StatusCode::RECOVERABLE;      
+         return StatusCode::RECOVERABLE;
       }
 
 
-      // RDS: may need some logic here to get type from inputEventFormat rather than the view 
+      // RDS: may need some logic here to get type from inputEventFormat rather than the view
       //      to read in with automatic schema evolution
 
       // Get class name from the field
@@ -2524,7 +2524,7 @@ namespace xAOD {
       void* ptr = 0;
 
       // RDS: no output yet
-      
+
       // Object_t::const_iterator out_itr = m_outputObjects.find( key );
       // if( out_itr != m_outputObjects.end() ) {
       //    // It needs to be an object manager...
@@ -2548,11 +2548,9 @@ namespace xAOD {
       }
 
       // Create the new manager object that will hold this EDM object:
-      THolder* hldr = new THolder( ptr, realClass );
-
       RObjectManager* mgr =
-         new RObjectManager( m_inNtupleReader->GetView<void>(key_to_read.c_str(), hldr->get()), 
-                             m_entry, hldr, ( m_auxMode == kAthenaAccess ) );
+         new RObjectManager( m_inNtupleReader->GetView<void>(key_to_read.c_str(), ptr),
+                             m_entry, std::make_unique<THolder>(ptr, realClass) );
       m_inputObjects[ key ] = mgr;
 
       // If it's an auxiliary store object, set it up correctly:
@@ -2631,14 +2629,13 @@ namespace xAOD {
 
       // Create the object, and all of the managers around it:
       void* ptr = cl->New();
-      THolder* hldr = new THolder( ptr, cl );
       TObjectManager* mgr =
-         new TObjectManager( 0, hldr, m_auxMode == kAthenaAccess );
+         new TObjectManager( 0, std::make_unique<THolder>(ptr, cl), m_auxMode == kAthenaAccess );
       m_inputMetaObjects[ key ] = mgr;
 
       // Now try to connect to the branch:
       const ::Int_t status = m_inMetaTree->SetBranchAddress( key.c_str(),
-                                                             hldr->getPtr(),
+                                                             mgr->holder()->getPtr(),
                                                              mgr->branchPtr(),
                                                              cl, dt,
                                                              kTRUE );
@@ -2648,7 +2645,7 @@ namespace xAOD {
                                 "input branch \"%s\". Return code: %i" ),
                   cl->GetName(), key.c_str(), status );
          // Clean up:
-         *( hldr->getPtr() ) = 0;
+         *( mgr->holder()->getPtr() ) = 0;
          delete mgr;
          m_inputMetaObjects.erase( key );
          return StatusCode::FAILURE;
@@ -2726,7 +2723,7 @@ namespace xAOD {
          // object to the input:
          auto result = connectBranch( prefix );
          if( ! result.isSuccess() ) {
-            ::Error( "xAOD::REvent::connectAux", XAOD_MESSAGE( "Failed to execute connectBranch : for prefix %s" ), 
+            ::Error( "xAOD::REvent::connectAux", XAOD_MESSAGE( "Failed to execute connectBranch : for prefix %s" ),
             prefix.c_str() );
             return result;
          }
@@ -2926,7 +2923,7 @@ namespace xAOD {
    }
 
 
-   /// This function is used by connectBranch(...) 
+   /// This function is used by connectBranch(...)
    /// to set up auxiliary store type objects correctly for accessing dynamic
    /// variables from the input file.
    ///
@@ -2935,6 +2932,9 @@ namespace xAOD {
    /// @returns The usual <code>StatusCode</code> types
    ///
    StatusCode REvent::setUpDynamicStore( RObjectManager& mgr, ROOT::RNTupleReader* ntupleReader ) {
+
+      // The name of the field.
+      const std::string fieldName = mgr.field().GetField().GetFieldName();
 
       // Check if we can call setName(...) on the object:
       ::TMethodCall setNameCall;
@@ -2947,7 +2947,7 @@ namespace xAOD {
             // Yes, there is such a function. Let's call it with the branch
             // name:
             const ::TString params =
-               ::TString::Format( "\"%s\"", mgr.fieldName().c_str() );
+               ::TString::Format( "\"%s\"", fieldName.c_str() );
             const char* charParams = params.Data();
             setNameCall.Execute( mgr.holder()->get(), charParams );
          } else {
@@ -2955,7 +2955,7 @@ namespace xAOD {
             ::Warning( "xAOD::REvent::setUpDynamicStore",
                        "Couldn't find setName(...) function for container %s "
                        " (type: %s)",
-                       mgr.fieldName().c_str(),
+                       fieldName.c_str(),
                        mgr.holder()->getClass()->GetName() );
          }
       }
@@ -2983,7 +2983,7 @@ namespace xAOD {
       // RAuxStore object. It will be owned by the SG::IAuxStoreHolder
       // object.
       RAuxStore* store =
-         new RAuxStore( mgr.fieldName(), kFALSE,
+         new RAuxStore( fieldName, kFALSE,
                         ( storeHolder->getStoreType() ==
                           SG::IAuxStoreHolder::AST_ObjectStore ?
                           RAuxStore::EStructMode::kObjectStore :
@@ -2992,7 +2992,7 @@ namespace xAOD {
       // locked:
       store->lock();
       RAuxManager* amgr = new RAuxManager( store, m_entry, kFALSE );
-      m_inputObjects[ mgr.fieldName() +
+      m_inputObjects[ fieldName +
                       "Dynamic" ] = amgr;
       RETURN_CHECK( "xAOD::REvent::setUpDynamicStore", store->readFrom( *ntupleReader ) );
       // Tell the auxiliary store which entry to use. This is essential for
@@ -3112,7 +3112,7 @@ namespace xAOD {
       }
 
       // Get the branch name of the object in question:
-      const std::string key = mgr.fieldName();
+      const std::string key = mgr.field().GetField().GetFieldName();
 
       // Select which object container to use:
       Object_t& objects = ( metadata ?
@@ -3275,7 +3275,7 @@ namespace xAOD {
       return StatusCode::SUCCESS;
    }
 
-   /// For metadata from a file with a TTree implementation, for each new 
+   /// For metadata from a file with a TTree implementation, for each new
    /// file, one needs to re-connect it with its auxiliary store. This
    /// function takes care of this.
    ///
@@ -3813,7 +3813,7 @@ namespace xAOD {
    void REvent::setPrintEventProxyWarnings(bool print) {
       m_printEventProxyWarnings = print;
    }
-   
+
    } //    namespace Experimental
 
 } // namespace xAOD

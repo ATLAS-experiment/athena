@@ -15,29 +15,22 @@
 
 namespace xAOD {
 
-   TObjectManager::TObjectManager( ::TBranch* br, THolder* holder,
+   TObjectManager::TObjectManager( ::TBranch* br,
+                                   std::unique_ptr<THolder> holder,
                                    ::Bool_t renewOnRead )
-      : m_branch( br ), m_holder( holder ), m_entry( -1 ), m_isSet( kTRUE ),
+      : IObjectManager(std::move(holder)),
+        m_branch( br ), m_entry( -1 ), m_isSet( kTRUE ),
         m_renewOnRead( renewOnRead ) {
    }
 
    TObjectManager::TObjectManager( const TObjectManager& parent )
-      : TVirtualManager(), m_branch( parent.m_branch ),
-        m_holder( 0 ), m_entry( parent.m_entry ),
+      : IObjectManager(parent),
+        m_branch( parent.m_branch ), m_entry( parent.m_entry ),
         m_isSet( parent.m_isSet ), m_renewOnRead( parent.m_renewOnRead ) {
 
-      if( parent.m_holder ) {
-         m_holder = new THolder( *parent.m_holder );
-      }
    }
 
-   TObjectManager::~TObjectManager() {
-
-      // Delete the holder object if we have one:
-      if( m_holder ) {
-         delete m_holder;
-      }
-   }
+   TObjectManager::~TObjectManager() = default;
 
    TObjectManager& TObjectManager::operator=( const TObjectManager& parent ) {
 
@@ -47,13 +40,7 @@ namespace xAOD {
       }
 
       m_branch = parent.m_branch;
-      if( m_holder ) {
-         delete m_holder;
-         m_holder = 0;
-      }
-      if( parent.m_holder ) {
-         m_holder = new THolder( *parent.m_holder );
-      }
+      IObjectManager::operator=(parent);
       m_entry       = parent.m_entry;
       m_isSet       = parent.m_isSet;
       m_renewOnRead = parent.m_renewOnRead;
@@ -77,20 +64,6 @@ namespace xAOD {
       return &m_branch;
    }
 
-   /// @return A pointer to the internal data holding object
-   ///
-   const THolder* TObjectManager::holder() const {
-
-      return m_holder;
-   }
-
-   /// @return A pointer to the internal data holding object
-   ///
-   THolder* TObjectManager::holder() {
-
-      return m_holder;
-   }
-
    /// This function is used to load the contents of a branch only when it
    /// needs to be done. It keeps track of which entry was already loaded for
    /// a branch/object, and only asks the branch to load an entry when it
@@ -100,7 +73,7 @@ namespace xAOD {
    ///
    ::Int_t TObjectManager::getEntry( ::Int_t getall ) {
 
-      // Make sure that the branch is associated to a tree 
+      // Make sure that the branch is associated to a tree
       // as the entry to be read is retrieved from the tree
       if (!m_branch->GetTree()){
          Error("xAOD::TObjectManager::getEntry",
@@ -109,21 +82,21 @@ namespace xAOD {
          return -1;
       }
 
-      // Get the entry that should be read 
+      // Get the entry that should be read
       // The entry to be read is set with TTree::LoadTree()
       // NB: for a branch from a friend tree and if the friend tree has an index built,
-      // then the entry to read is found when calling the TTree::LoadTree() function 
-      // that matches the major and minor values between the main tree and the friend tree 
+      // then the entry to read is found when calling the TTree::LoadTree() function
+      // that matches the major and minor values between the main tree and the friend tree
       ::Long64_t entry = m_branch->GetTree()->GetReadEntry();
 
       if ( entry  < 0 ){
-         // Raise error as it implies 
-         // either that the TTree::LoadTree() function has not been called 
-         // or 
-         // the entry requested to be read by the user 
-         // is not corresponding to any entry for the friend tree 
-         Error("xAOD::TObjectManager::getEntry", 
-            XAOD_MESSAGE( "Entry to read is not set for branch=%s from tree=%s. " 
+         // Raise error as it implies
+         // either that the TTree::LoadTree() function has not been called
+         // or
+         // the entry requested to be read by the user
+         // is not corresponding to any entry for the friend tree
+         Error("xAOD::TObjectManager::getEntry",
+            XAOD_MESSAGE( "Entry to read is not set for branch=%s from tree=%s. "
             "It is either because TTree::LoadTree(entry) was not called "
             "beforehand in the TEvent class OR "
             "the entry requested to be read for the main tree is not corresponding to an event for the friend tree" ),
@@ -142,7 +115,7 @@ namespace xAOD {
 
       // Renew the object in memory if we are in such a mode:
       if( m_renewOnRead ) {
-         m_holder->renew();
+         holder()->renew();
       }
 
       // Load the entry.
@@ -174,12 +147,12 @@ namespace xAOD {
    ///
    const void* TObjectManager::object() const {
 
-      return std::as_const(*m_holder).get();
+      return holder()->get();
    }
 
    void* TObjectManager::object() {
 
-      return m_holder->get();
+      return holder()->get();
    }
 
    /// This is just a convenient way of calling THolder::Set from TEvent.
@@ -188,7 +161,7 @@ namespace xAOD {
    ///
    void TObjectManager::setObject( void* obj ) {
 
-      m_holder->set( obj );
+      holder()->set( obj );
       m_isSet = kTRUE;
       return;
    }

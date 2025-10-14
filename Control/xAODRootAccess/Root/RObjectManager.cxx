@@ -2,140 +2,122 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-
-// ROOT include(s):
-#include <TBranch.h>
-#include <TTree.h>
-#include <TError.h>
-
 // Local include(s):
 #include "xAODRootAccess/tools/RObjectManager.h"
-#include "xAODRootAccess/tools/THolder.h"
+
 #include "xAODRootAccess/tools/Message.h"
+#include "xAODRootAccess/tools/THolder.h"
 
-namespace xAOD {
+// ROOT include(s).
+#include <TError.h>
 
-   namespace Experimental {
+namespace xAOD::Experimental {
 
-   RObjectManager::RObjectManager( ROOT::RNTupleView<void> field,::Long64_t& entry, THolder* holder, ::Bool_t renewOnRead )
-      :
-        m_field( std::move( field ) ),
-        m_holder( holder ), 
-        m_entryToLoad( entry ), m_entry ( -1 ), m_isSet( kTRUE ), m_renewOnRead( renewOnRead ) {
-   }
+RObjectManager::RObjectManager(ROOT::RNTupleView<void> field,
+                               const ::Long64_t& entry,
+                               std::unique_ptr<THolder> holder)
+    : IObjectManager(std::move(holder)),
+      m_field(std::move(field)),
+      m_entryToLoad(entry),
+      m_entry(-1),
+      m_isSet(kTRUE) {}
 
-   RObjectManager::~RObjectManager() {}
+RObjectManager::~RObjectManager() = default;
 
-   /// @return field name
-   const std::string& RObjectManager::fieldName() const {
-      return m_field.GetField().GetFieldName();
-   }
+ROOT::RNTupleView<void>& RObjectManager::field() {
 
-   /// @return A pointer to the internal data holding object
-   ///
-   const THolder* RObjectManager::holder() const {
+  return m_field;
+}
 
-      return m_holder.get();
-   }
+const ROOT::RNTupleView<void>& RObjectManager::field() const {
 
-   /// @return A pointer to the internal data holding object
-   ///
-   THolder* RObjectManager::holder() {
+  return m_field;
+}
 
-      return m_holder.get();
-   }
-   
-   /// This function is used to load the contents of a field only when it
-   /// needs to be done. It keeps track of which entry was already loaded for
-   /// a field/object, and only asks the RNTupleView for the field to load an 
-   /// entry when it really has to be done. The next entry to load (m_entryToLoad)
-   /// is managed by the owning Event object, set in this object's constructor.
-   ///
-   /// @return 0 if no new entry was read, the number of read bytes otherwise
-   ///
-   ::Int_t RObjectManager::getEntry( [[maybe_unused]] ::Int_t getall ) {
+/// This function is used to load the contents of a field only when it
+/// needs to be done. It keeps track of which entry was already loaded for
+/// a field/object, and only asks the RNTupleView for the field to load an
+/// entry when it really has to be done. The next entry to load (m_entryToLoad)
+/// is managed by the owning Event object, set in this object's constructor.
+///
+/// @return 0 if no new entry was read, the number of read bytes otherwise
+///
+::Int_t RObjectManager::getEntry(::Int_t) {
 
-      // Must be valid entry value
-      if ( m_entryToLoad  < 0 ){
-         // Raise error as a negative entry is incorrect
-         Error("xAOD::RObjectManager::getEntry", 
-            XAOD_MESSAGE( "Entry to read must be larger than or equal to 0. entry=%i"), static_cast< int >( m_entryToLoad ) );
-         return -1;
-      }
+  // Must be valid entry value
+  if (m_entryToLoad < 0) {
+    // Raise error as a negative entry is incorrect
+    Error("xAOD::RObjectManager::getEntry",
+          XAOD_MESSAGE(
+              "Entry to read must be larger than or equal to 0. entry=%lld"),
+          m_entryToLoad.get());
+    return -1;
+  }
 
-      // Check if anything needs to be done:
-      if( m_entryToLoad == m_entry ) return 0;
+  // Check if anything needs to be done:
+  if (m_entryToLoad == m_entry) {
+    return 0;
+  }
 
-      // Renew the object in memory if we are in such a mode:
-      if( m_renewOnRead ) {
-         m_holder->renew();
-         m_field.BindRawPtr(m_holder->get());
-      }
+  // Load the entry.
+  m_field(m_entryToLoad);
 
-      // Load the entry.
-      m_field(m_entryToLoad);
+  // If successful, save entry number
+  m_entry = m_entryToLoad;
 
-      // If successful, save entry number
-      m_entry = m_entryToLoad;
+  // We don't know how to get the number of bytes read, so we just return 1.
+  return 1;
+}
 
-      // For the moment, we don't know how to get 
-      // the number of bytes read, so we just return 1
-      return 1; 
+/// This function gives an easy access to the object managed by this
+/// object.
+///
+/// @return A typeless pointer to the object being managed
+///
+const void* RObjectManager::object() const {
 
-   }
+  return holder()->get();
+}
 
+void* RObjectManager::object() {
 
-   /// This function gives an easy access to the object managed by this
-   /// object.
-   ///
-   /// @return A typeless pointer to the object being managed
-   ///
-   const void* RObjectManager::object() const {
+  return holder()->get();
+}
 
-      return std::as_const(*m_holder).get();
-   }
+/// This is just a convenient way of calling THolder::Set from TEvent.
+///
+/// @param obj The object to replace the previously managed one
+///
+void RObjectManager::setObject(void* obj) {
 
-   void* RObjectManager::object() {
+  holder()->set(obj);
+  m_isSet = kTRUE;
+  return;
+}
 
-      return m_holder->get();
-   }
+/// Dummy implementation as full objects can't be missing
+///
+::Bool_t RObjectManager::create() {
 
-   /// This is just a convenient way of calling THolder::Set from TEvent.
-   ///
-   /// @param obj The object to replace the previously managed one
-   ///
-   void RObjectManager::setObject( void* obj ) {
+  return m_isSet;
+}
 
-      m_holder->set( obj );
-      m_isSet = kTRUE;
-      return;
-   }
+/// @returns <code>kTRUE</code> if the object for this event was set,
+///          <code>kFALSE</code> otherwise
+///
+::Bool_t RObjectManager::isSet() const {
 
-   /// Dummy implementation as full objects can't be missing
-   ///
-   ::Bool_t RObjectManager::create() {
+  return m_isSet;
+}
 
-      return m_isSet;
-   }
+/// This function needs to be called after an event was filled into
+/// the output TTree. It tells the manager object that it needs to wait
+/// for another object to be set up for the upcoming event.
+///
+void RObjectManager::reset() {
 
-   /// @returns <code>kTRUE</code> if the object for this event was set,
-   ///          <code>kFALSE</code> otherwise
-   ///
-   ::Bool_t RObjectManager::isSet() const {
+  m_isSet = kFALSE;
+  return;
+}
 
-      return m_isSet;
-   }
-
-   /// This function needs to be called after an event was filled into
-   /// the output TTree. It tells the manager object that it needs to wait
-   /// for another object to be set up for the upcoming event.
-   ///
-   void RObjectManager::reset() {
-
-      m_isSet = kFALSE;
-      return;
-   }
-
-   } // namespace Experimental 
-
-} // namespace xAOD
+}  // namespace xAOD::Experimental
