@@ -5,3 +5,11 @@ atlas_subdir( JetTagConfig )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_install_scripts(
+  bin/ftag-test-tagger-names
+  )
+
+atlas_add_test(FTagNamesTest
+  SCRIPT ftag-test-tagger-names
+  POST_EXEC_SCRIPT nopost.sh )

@@ -50,8 +50,6 @@ class ElectronsLoader final : public IConstituentsLoader {
   typedef std::vector<const xAOD::Electron*> Electrons;
   typedef std::function<double(const xAOD::Electron*, const Jet&)> ElectronSortVar;
 
-  // getter function
-  typedef std::function<NamedSeq(const Jet&, const Electrons&)> SeqFromElectrons;
   // filter function
   typedef std::function<bool(const Jet&, const xAOD::Electron*)> ElectronFilter;
 

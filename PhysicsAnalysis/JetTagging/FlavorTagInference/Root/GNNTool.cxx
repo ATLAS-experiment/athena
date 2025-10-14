@@ -41,14 +41,8 @@ namespace FlavorTagInference {
   }
 
   // Dependencies
-  std::set<std::string> GNNTool::getDecoratorKeys() const {
-    return m_gnn->getDecoratorKeys();
-  }
-  std::set<std::string> GNNTool::getAuxInputKeys() const {
-    return m_gnn->getAuxInputKeys();
-  }
-  std::set<std::string> GNNTool::getConstituentAuxInputKeys() const {
-    return m_gnn->getConstituentAuxInputKeys();
+  FTagDataDependencyNames GNNTool::getDependencies() const {
+    return m_gnn->getDependencies();
   }
 
 }

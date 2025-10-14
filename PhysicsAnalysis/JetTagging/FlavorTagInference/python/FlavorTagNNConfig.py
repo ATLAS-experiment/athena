@@ -169,7 +169,8 @@ def MultifoldGNNCfg(
         tag_requirements=set(),
         defaultOutputValues={},
         foldHashName='jetFoldRankHash',
-        dz_suffix='',
+        electrons='',
+        suffix='',
 ):
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
@@ -178,7 +179,7 @@ def MultifoldGNNCfg(
         tc=TrackCollection,
         nn=nn_name,
         fc=FlipConfig,
-        dz=dz_suffix,
+        dz=suffix,
     )
 
     default_zero_tracks = NONZERO_TRACKS in tag_requirements
@@ -218,6 +219,7 @@ def MultifoldGNNCfg(
             name=algname,
             container=container,
             constituentContainer=TrackCollection,
+            electronContainer=electrons,
             decorator=CompFactory.FlavorTagInference.MultifoldGNNTool(
                 name='multifold',
                 foldHashName=foldHashName,
@@ -274,3 +276,60 @@ def _defaultsFromPaths(nn_paths):
             defaults[path] = gn2v01_fold_defaults[fold]
     return defaults
 
+
+def getModifierSet(tagger_name):
+    """
+    Translate tagger name into a list of dependencies
+    """
+    # Tagger should be of of the form GN<N><mods>V<M> where:
+    # - N is the major version number
+    # - mods specify the inputs we run on
+    # - M is the minor version number
+    tagparse = re.compile('(GN|gn)([0-9])(.*)([vV])([0-9]+)')
+    if not (matches := tagparse.match(tagger_name)):
+        raise ValueError(f"can't parse {tagger_name}")
+    pfx, major, mods, verchar, minor = matches.groups()
+    modset = set()
+
+    # first handle the pre-GN3 taggers, things were not well specified
+    # at this point
+    if int(major) < 3:
+        if "Muon" in mods:
+            modset.add("M")
+        if "Electrons" in mods:
+            modset.add("L")
+        return modset
+
+    # 2025-10-13: also one special case for GN3PflowMuonsV00, which
+    # was defined before we had any convention here. The tagger and
+    # this exception should ideally be removed soon
+    if tagger_name == "GN3PflowMuonsV00":
+        return {"L", "P"}
+
+    # See the documentation in
+    # https://ftag.docs.cern.ch/reco_algs/taggers/deploy/#naming-conventions
+    # or
+    # https://gitlab.cern.ch/atlas-flavor-tagging-tools/algorithms/ftag-docs/-/blob/64c70e9770d03a2545271150e163699905d1cba8/docs/reco_algs/taggers/deploy.md#modifiers
+
+    if verchar != "V":
+        raise ValueError(
+            f"tagger {tagger_name} should use a uppercase V as the version")
+    if pfx != "GN":
+        raise ValueError(f"Tagger {tagger_name} should start with GN prefix")
+
+    modsetparse = re.compile("[A-Z]")
+    modset = set(modsetparse.findall(mods))
+
+    allowed_mods = {
+        "X", # Xbb tagger
+        "L", # lepton decoration
+        "E", # Electrons
+        "P", # Particle Flow
+        "C", # Charge Tagger (optional, no useful effects)
+        "H", # Hybrid model (optional, no useful effects)
+    }
+    if baddies := modset - allowed_mods:
+        raise ValueError(
+            f"found forbidden modifiers {baddies} in {tagger_name}"
+        )
+    return modset

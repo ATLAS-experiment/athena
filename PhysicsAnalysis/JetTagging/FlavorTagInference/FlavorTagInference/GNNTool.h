@@ -43,9 +43,7 @@ namespace FlavorTagInference {
       virtual void decorate(const xAOD::IParticle& i_jet) const override;
       virtual void decorateWithDefaults(const xAOD::IParticle& i_jet) const override;
 
-      virtual std::set<std::string> getDecoratorKeys() const override;
-      virtual std::set<std::string> getAuxInputKeys() const override;
-      virtual std::set<std::string> getConstituentAuxInputKeys() const override;
+      virtual FTagDataDependencyNames getDependencies() const override;
 
     private:
 

@@ -35,9 +35,8 @@ namespace FlavorTagInference {
     void decorate(const xAOD::IParticle& i_jet) const;
     void decorateWithDefaults(const xAOD::IParticle& i_jet) const;
 
-    std::set<std::string> getDecoratorKeys() const;
-    std::set<std::string> getAuxInputKeys() const;
-    std::set<std::string> getConstituentAuxInputKeys() const;
+    // cppcheck-suppress returnByReference
+    FTagDataDependencyNames getDependencies() const;
   private:
     const FlavorTagInference::GNN& getFold(const SG::AuxElement& element) const;
     std::vector<std::shared_ptr<const FlavorTagInference::GNN>> m_folds;
