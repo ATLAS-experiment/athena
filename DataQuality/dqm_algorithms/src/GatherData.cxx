@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -8,9 +8,7 @@
 
 #include "dqm_algorithms/GatherData.h"
 
-#include <cmath>
-#include <iostream>
-#include <map>
+
 
 #include <TH1.h>
 #include <TGraph.h>
@@ -19,7 +17,9 @@
 #include "dqm_core/exceptions.h"
 #include "dqm_core/AlgorithmManager.h"
 #include "dqm_core/Result.h"
-
+#include <cmath>
+#include <iostream>
+#include <map>
 
 static dqm_algorithms::GatherData staticInstance;
 
@@ -89,7 +89,7 @@ execute( const std::string& name, const TObject& data, const dqm_core::Algorithm
   }
   
   dqm_core::Result* result = new dqm_core::Result( status );
-  result->tags_ = tags;
+  result->tags_ = std::move(tags);
   
   return result;
 }

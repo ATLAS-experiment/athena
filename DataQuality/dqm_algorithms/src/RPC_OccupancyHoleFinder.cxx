@@ -819,7 +819,7 @@ dqm_algorithms::RPC_OccupancyHoleFinder::execute(const std::string& name,
         dzeta.erase(0, 4);
         chamber = chamber_name.substr(0, 4);
         std::string panel_name = chamber + sector + layer + dphi + gap + dzeta + dot + view;
-        dead_rpc_panel.push_back(panel_name);
+        dead_rpc_panel.push_back(std::move(panel_name));
         coun_rpc_panel.push_back(content);
       }
     }//ybins
