@@ -811,6 +811,7 @@ ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
   cfg.elementStore = m_elementStore;
   cfg.layerCreator = layerCreator;
   cfg.idHelper = m_HGTD_idHelper;
+  cfg.numberOfBinsFactor = m_numberOfBinsFactor;
   return std::make_shared<const ActsHGTDLayerBuilder>(
       cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", std::string("ActsTGSvc")));
 }
@@ -893,6 +894,8 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
   // use class member element store
   cfg.elementStore = m_elementStore;
   cfg.layerCreator = layerCreator;
+
+  cfg.numberOfBinsFactor = m_numberOfBinsFactor;
 
   // gmLayerBuilder = std::make_shared<const ActsLayerBuilder>(
   //     cfg, makeActsAthenaLogger(this, managerName + "GMLayBldr",
