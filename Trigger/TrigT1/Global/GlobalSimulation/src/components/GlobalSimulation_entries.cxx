@@ -12,7 +12,7 @@
 #include "../GlobalAlgs/eFexRoIAlgTool.h"
 #include "../GlobalAlgs/ERatioAlgTool.h"
 #include "../GlobalAlgs/Egamma1BDTAlgTool.h"
-#include "../GlobalAlgs/Egamma1BaselineAlgTool.h"
+#include "../GlobalAlgs/Egamma1eRatioAlgTool.h"
 
 #include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerAlgTool.h"
 #include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerComparator.h"
@@ -35,7 +35,7 @@ DECLARE_COMPONENT(GlobalSim::EMB1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
 DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
-DECLARE_COMPONENT(GlobalSim::Egamma1BaselineAlgTool)
+DECLARE_COMPONENT(GlobalSim::Egamma1eRatioAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerComparator)

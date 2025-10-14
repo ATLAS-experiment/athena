@@ -2,15 +2,19 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GLOBALSIM_EGAMMA1BASELINEALGTOOL_H
-#define GLOBALSIM_EGAMMA1BASELINEALGTOOL_H
+#ifndef GLOBALSIM_EGAMMA1ERATIOALGTOOL_H
+#define GLOBALSIM_EGAMMA1ERATIOALGTOOL_H
 
 /**
- * AlgTool to read in LArStripNeighborhoods, and run the Baseline Algorithm.
+ * AlgTool to read in LArStripNeighborhoods, and run the eRatio Algorithm.
  */
 
 #include "../IGlobalSimAlgTool.h"
 #include "../IO/LArStripNeighborhoodContainer.h"
+#include "../IO/IeEmNbhoodTOBContainer.h"
+#include "../IO/IeEmNbhoodTOB.h"
+#include "../IO/IeEmEg1eRatioTOBContainer.h"
+#include "../IO/IeEmEg1eRatioTOB.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"
@@ -22,14 +26,14 @@
 #include <vector>
 
 namespace GlobalSim {
-  class Egamma1BaselineAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
+  class Egamma1eRatioAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
-    Egamma1BaselineAlgTool(const std::string& type,
+    Egamma1eRatioAlgTool(const std::string& type,
 			    const std::string& name,
 			    const IInterface* parent);
     
-    virtual ~Egamma1BaselineAlgTool() = default;
+    virtual ~Egamma1eRatioAlgTool() = default;
     
     StatusCode initialize() override;
 
@@ -48,15 +52,21 @@ namespace GlobalSim {
 	     {false},
 	     "flag to enable dumps"};
 
-    // input to the  Baseline Algorithm
-    SG::ReadHandleKey<LArStripNeighborhoodContainer>
-    m_nbhdContainerReadKey {
+    // input to the  eRatio Algorithm
+    SG::ReadHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
+    m_nbhdTOBContainerReadKey {
       this,
-      "LArNeighborhoodContainerReadKey",
-      "stripNeighborhoodContainer",
-      "key to read inLArNeighborhoodReadKeys"};
+      "LArNeighborhoodTOBContainerReadKey",
+      "stripNeighborhoodTOBContainer",
+      "key to read inLArNeighborhoodTOBsReadKeys"};
 
-    SG::WriteHandleKey<std::vector<float>>
+    SG::WriteHandleKey<IOBitwise::IeEmEg1eRatioTOBContainer>
+    m_eRatioResultKey {
+      this,
+      "eRatioResultKey",
+      "eRatioResult"};
+    
+    SG::WriteHandleKey<std::vector<int>>
     m_eRatioKey {
       this,
       "eRatioKey",
@@ -68,13 +78,13 @@ namespace GlobalSim {
       "eRatioSimpleKey",
       "eRatioSimple"};
     
-    std::vector<double> combine_phi(const LArStripNeighborhood*) const;
+    std::vector<double> combine_phi(const IOBitwise::IeEmNbhoodTOB*) const;
     ap_int<16> secondPeakSearch(const std::vector<ap_int<16>>& input, const ap_int<16> peak,
 				const int startCell, const int endCell,
 				const ap_int<16> noiseMargin) const;
     
     // a neighborhood has 3 vectors of strip energies (phi_low, phi_center.
-    // phi_high). Provide the length thes vectors must have for the Baseline to be
+    // phi_high). Provide the length thes vectors must have for the eRatio to be
     // evaluated
     static inline constexpr int s_required_phi_len = 17;
     

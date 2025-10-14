@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     from add_subsystems import add_subsystems
 
-    logger = logging.getLogger('run_Egamma1Baseline_only')
+    logger = logging.getLogger('run_Egamma1eRatio_only')
     logger.setLevel(DEBUG)
  
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -92,19 +92,18 @@ if __name__ == '__main__':
                                       dump=False,
                                                dumpTerse=False))
 
-    # add in the EgammaBaseline Algorithm to be run
-    from GlobalSimulation.GlobalSimAlgCfg_Egamma1Baseline  import GlobalSimulationAlgCfg
+    # add in the EgammaeRatio Algorithm to be run
+    from GlobalSimulation.GlobalSimAlgCfg_Egamma1eRatio  import GlobalSimulationAlgCfg
     acc.merge(GlobalSimulationAlgCfg(flags,
                                      OutputLevel=DEBUG,
                                      dump=True))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<int>#phimax"]))
-
-    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#eRatio"]))
-
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<int>#eRatio"]))
     acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#eRatioSimple"]))
- 
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#eRatioResult"]))
+    
     if acc.run().isFailure():
         import sys
         sys.exit(1)
