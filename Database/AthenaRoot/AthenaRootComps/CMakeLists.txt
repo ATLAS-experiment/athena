@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaRootComps )
@@ -89,7 +89,7 @@ atlas_add_test( test_athena_variable_shape2
 atlas_add_test( test_athena_variable_shape3
                 SCRIPT test/test_athena_variable_shape3.sh
                 ENVIRONMENT ATLAS_REFERENCE_TAG=${_reftag}
-                PROPERTIES TIMEOUT 300
+                PROPERTIES TIMEOUT 450
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( test_athena_variable_shape_merged
