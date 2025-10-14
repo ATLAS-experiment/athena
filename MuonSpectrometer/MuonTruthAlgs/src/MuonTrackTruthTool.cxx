@@ -146,7 +146,7 @@ namespace Muon {
             if (genEvent) {
                 HepMC::ConstGenParticlePtr genParticle =
 #ifdef HEPMC3
-                 genEvent->particles().at(HepMC::uniqueID(*tr_it)-1); // FIXME implement HepMC::id_to_particle/vertex explicitly
+                  (barcode>HepMC::UNDEFINED_ID) ? genEvent->particles().at(barcode-1) : nullptr; // FIXME implement HepMC::id_to_particle/vertex explicitly
 #else
                  genEvent->barcode_to_particle(HepMC::uniqueID(*tr_it));
 #endif
@@ -275,7 +275,7 @@ namespace Muon {
             std::vector<MuonSimData::Deposit>::const_iterator dit = it->second.getdeposits().begin();
             std::vector<MuonSimData::Deposit>::const_iterator dit_end = it->second.getdeposits().end();
             for (; dit != dit_end; ++dit) {
-                int barcodeIn = HepMC::barcode(dit->first); // FIXME barcode-based
+                int barcodeIn = HepMC::uniqueID(dit->first);
                 std::map<int, int>::const_iterator bit = barcode_map.find(barcodeIn);
                 if (bit == barcode_map.end()) {
                     ATH_MSG_VERBOSE(" discarding "
