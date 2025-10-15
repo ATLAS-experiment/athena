@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSSimulationState_h
@@ -26,7 +26,7 @@ namespace CLHEP {
 class HepRandomEngine;
 }
 
-constexpr std::uint32_t operator"" _FCShash(char const *s, std::size_t count);
+constexpr std::uint32_t operator""_FCShash(char const *s, std::size_t count);
 
 
 class TFCSSimulationState : public TObject, public ISF_FCS::MLogging {
@@ -208,7 +208,7 @@ template <> inline void TFCSSimulationState::AuxInfo_t::set<void *>(void *val) {
 
 // Implementation of the complile time text hash operator that can be used for
 // human readable indices to the AuxInfo
-constexpr std::uint32_t operator"" _FCShash(char const *s, std::size_t count) {
+constexpr std::uint32_t operator""_FCShash(char const *s, std::size_t count) {
   return TFCSSimulationState::fnv1a_32(s, count);
 }
 
