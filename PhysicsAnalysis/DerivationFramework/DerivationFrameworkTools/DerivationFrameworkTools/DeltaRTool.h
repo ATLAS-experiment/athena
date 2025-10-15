@@ -5,16 +5,18 @@
 #ifndef DERIVATIONFRAMEWORK_DELTARTOOL_H
 #define DERIVATIONFRAMEWORK_DELTARTOOL_H
 
-#include <string>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-
 #include "ExpressionEvaluation/ExpressionParserUser.h"
-
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 #include "xAODBase/IParticleContainer.h"
 
+#include <vector>
+#include <string>
+class EventContext;
 
 namespace DerivationFramework {
 
