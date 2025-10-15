@@ -209,7 +209,7 @@ namespace MuonValR4 {
         }
         for (const xAOD::MuonSegment* segment : truthSegs) {
             const auto [pos, dir] = makeLine(localSegmentPars(*segment));
-            const double tan = m_accumlIsEta ? houghTanTheta(dir) : houghTanPhi(dir);
+            const double tan = m_accumlIsEta ? houghTanBeta(dir) : houghTanAlpha(dir);
             const double icept = pos[m_accumlIsEta ? objViewEta : objViewPhi];
             auto truthMarker = std::make_unique<TMarker>(tan, icept, kFullCrossX);
             truthMarker->SetMarkerColor(truthColor);
