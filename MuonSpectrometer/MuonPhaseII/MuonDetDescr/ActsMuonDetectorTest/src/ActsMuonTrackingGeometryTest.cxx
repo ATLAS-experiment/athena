@@ -358,7 +358,8 @@ namespace ActsTrk {
 
                     if(it_begin == propagatedHits.end()){
                         m_actsPropLoc.push_back(dummyVec);
-                        m_actsPropDir.push_back(Amg::Vector3D::Zero());
+                        Amg::Vector3D zero = Amg::Vector3D::Zero();
+                        m_actsPropDir.push_back(zero);
                         m_actsPropGlob.push_back(dummyVec);
                         m_actsPropabsMomentum.push_back(0.);
                         m_actsStepSize.push_back(0.);
