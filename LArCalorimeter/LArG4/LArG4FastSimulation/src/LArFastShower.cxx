@@ -12,6 +12,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/IO_GenEvent.h"
+#include "CLHEP/Random/RandFlat.h"
 
 #include <stdexcept>
 
@@ -188,7 +189,7 @@ void LArFastShower::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 #endif
 
   if ( m_generate_starting_points ) {
-    if ((float)rand()/static_cast<float>(RAND_MAX) <= m_configuration.m_generated_starting_points_ratio) {
+    if (CLHEP::RandFlat::shoot(G4Random::getTheEngine()) <= m_configuration.m_generated_starting_points_ratio) {
       std::unique_ptr<const HepMC::GenEvent> ge = GetGenEvent(fastTrack);
       generateFSStartingPoint(ge);
     }
