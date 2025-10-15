@@ -20,10 +20,11 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     kwargs.setdefault("IncludeScattering", False)
     kwargs.setdefault("IncludeELoss", False)
     
-    kwargs.setdefault("MaxPropagationStep", 10000)
+    kwargs.setdefault("MaxPropagationStep", 1000000)
     kwargs.setdefault("MaxSurfacesPerNavStep", 10000000)
-    kwargs.setdefault("DoStraightLine", True)
-
+    kwargs.setdefault("DoFreeToBoundCorrection", True)
+    kwargs.setdefault("MaxIterations", 5548)
+    
 
     kwargs.setdefault("MuonCalibrationTool",result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     fitTool = result.popToolsAndMerge(ActsFitterCfg(flags, name=name, **kwargs))

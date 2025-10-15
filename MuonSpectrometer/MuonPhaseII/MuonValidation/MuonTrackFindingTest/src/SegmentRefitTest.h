@@ -29,7 +29,6 @@ namespace MuonValR4{
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_postFitKey{this, "PostFitContainer", "ActsRefitSegments"};
             /** @brief  Construct a link from the refitted segment to the input segment. */
             SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_linkKey{this, "Link", m_postFitKey, "prefitSegmentLink"};
-
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
