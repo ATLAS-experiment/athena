@@ -631,7 +631,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
       }
       ATH_MSG_WARNING(msg.str());
     }
-    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCell(cellId);
+    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCellPC(cellId);
     localPosition(0, 0) = localInPolar.xPhi();
     localCovariance(0, 0) = designNew->phiPitchPhi() * designNew->phiPitchPhi() * (1./12.);
   }
