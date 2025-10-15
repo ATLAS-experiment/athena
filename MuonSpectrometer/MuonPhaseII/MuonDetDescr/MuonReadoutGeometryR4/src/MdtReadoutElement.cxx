@@ -91,7 +91,9 @@ StatusCode MdtReadoutElement::initElement() {
       }
       ATH_CHECK(insertTransform<MdtReadoutElement>(idHash));
 #ifndef SIMULATIONBASE
-      ATH_CHECK(strawSurfaceFactory(idHash, m_pars.boundFactory->makeBounds<Acts::LineBounds>(innerTubeRadius(), 0.5*tubeLength(idHash))));
+      ATH_CHECK(strawSurfaceFactory(idHash, m_pars.boundFactory->
+                              makeBounds<Acts::LineBounds>(tubeRadius(), 
+                                                           0.5*tubeLength(idHash))));
 #endif
       ///Ensure that all linear transformations are rotations
       GeoTrf::Transform3D tubeFrame = layer.tubeTransform(tubeNumber(idHash));
