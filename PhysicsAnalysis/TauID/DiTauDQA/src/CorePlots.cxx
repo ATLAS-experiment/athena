@@ -54,6 +54,13 @@ namespace DiTau{
      eta_phi->Fill(ditau.eta(), ditau.phi(), weight);
 
      int ditau_charge = 0;
+     bool acc_charge_found = false;
+     static const SG::ConstAccessor<float> acc_charge ("charge");
+     if ( acc_charge.isAvailable(ditau) ) {
+        acc_charge_found = true;
+        ditau_charge = static_cast<int>(acc_charge(ditau));
+     }
+
      int lead_ntracks = 0;
      int subl_ntracks = 0;
      for (const auto& xTrack : ditau.trackLinks()) {
@@ -67,7 +74,7 @@ namespace DiTau{
                                      ditau.subjetPhi(i), ditau.subjetE(i));
               double dR = tlvSubjet.DeltaR((*xTrack)->p4());
               if (dR < 0.1) {
-                 ditau_charge += (*xTrack)->charge();
+                 if(!acc_charge_found){ditau_charge += (*xTrack)->charge();}
 		 if( i == 0){
 	           lead_ntracks++;		 
 		 } else{
