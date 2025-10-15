@@ -13,6 +13,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <cmath>
 
 /// @brief Reads the GRL .xml file and creates an unordered map of run numbers and associated LB ranges
 /// @param grl Path to the GRL .xml file
