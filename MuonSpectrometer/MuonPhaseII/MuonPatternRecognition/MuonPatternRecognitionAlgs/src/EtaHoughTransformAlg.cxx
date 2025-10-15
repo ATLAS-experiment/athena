@@ -11,6 +11,7 @@
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
+#include "MuonPatternEvent/SegmentFitterEventData.h"
 
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/MMCluster.h"
@@ -413,7 +414,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         // this seed looks good! Let's finalise it 
         size_t nHits = hitList.size();
         // add phi measurements - will be filtered for compatibility in separate algorithm
-        extendWithPhiHits(hitList, bucket);
+        extendWithPhiHits(hitList, bucket, max.x, max.y);
         // sort hits by layer 
         const SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitList, sorter);
@@ -467,9 +468,22 @@ void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughH
     }
 }
 void EtaHoughTransformAlg::extendWithPhiHits(std::vector<HoughHitType>& hitList, 
-                                             HoughSetupForBucket& bucket) const {
+                                             HoughSetupForBucket& bucket,
+                                             const double tanBeta,
+                                             const double interceptY) const {
+    const Amg::Vector3D maxPos = interceptY * Amg::Vector3D::UnitY();
+    const Amg::Vector3D maxDir = Acts::makeDirectionFromAxisTangents(0., tanBeta);
+
     for (const SpacePointBucket::value_type& hit : *bucket.bucket) {
-        if (!hit->measuresEta()) {
+        if (hit->measuresEta()){
+            continue;
+        }
+        using namespace SegmentFit;
+        const Amg::Vector3D& dir{hit->sensorDirection()};
+        const Amg::Vector3D& pos{hit->localPosition()};
+        const double distAlongStrip = std::abs(dir.dot(SeedingAux::extrapolateToPlane(maxPos,maxDir, *hit) - pos));
+        const double stripL = std::sqrt(hit->covariance()[Acts::toUnderlying(AxisDefs::etaCov)]);
+        if (!hit->measuresEta() && distAlongStrip < stripL + m_phiStripSafety) {
             hitList.push_back(hit.get());
         }
     }

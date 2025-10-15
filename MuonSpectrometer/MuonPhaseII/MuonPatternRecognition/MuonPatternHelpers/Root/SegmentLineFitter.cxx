@@ -11,7 +11,7 @@ CXXUTILS_TRAPPING_FP;
 #include <MuonPatternEvent/SegmentFitterEventData.h>
 
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
-#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
 
 #include <ActsInterop/Logger.h>
 #include <ActsInterop/UnitConverters.h>
@@ -22,6 +22,7 @@ CXXUTILS_TRAPPING_FP;
 
 #include <xAODMuonPrepData/sTgcMeasurement.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>
+
 
 namespace MuonR4::SegmentFit{
     using namespace Acts;
@@ -295,25 +296,47 @@ namespace MuonR4::SegmentFit{
                         <<", chi2: "<<toRecover.chi2 /std::max(toRecover.nDoF, 1ul)
                         <<", nDoF: "<<toRecover.nDoF);
         /** Setup a map to replace space points if they better suite */
-        std::unordered_set<const SpacePoint*> usedSpacePoint{};
-        for (const HitVec_t::value_type& hit : toRecover.measurements) {
-            usedSpacePoint.insert(hit->spacePoint());
+        
+        using SpPerLay_t = boost::container::small_vector<const SpacePoint* , 4>;
+
+        std::vector<SpPerLay_t> usedSpacePoints{};
+        SpacePointPerLayerSorter laySorter{};
+        for (auto& hit : toRecover.measurements) {
+            const SpacePoint* sp = hit->spacePoint(); 
+            if (!sp) {
+                continue;
+            }
+            const unsigned layNum = laySorter.sectorLayerNum(*sp);
+            if (layNum >= usedSpacePoints.size()) {
+                usedSpacePoints.resize(layNum + 1);
+            }
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Used "<<(*sp)
+            <<", layerNumber: "<<layNum);
+
+            usedSpacePoints[layNum].push_back(sp);
         }
         /** */
         const EventContext& ctx{*cctx.get<const EventContext*>()};
         
         const double timeOff = toRecover.parameters[toUnderlying(ParamDefs::t0)];
         HitVec_t candidateHits{};
-        SpacePointPerLayerSplitter hitLayers{*seed.parentBucket()};
         bool hasCandidate{false};
         const auto [locPos, locDir] = makeLine(toRecover.parameters);
 
          /// Loop over all hits in the parent bucket
         for (const auto& hit : *seed.parentBucket()){            
             /// Hit already used in the segment fit
-            if (usedSpacePoint.count(hit.get())) {
+            const unsigned layNum = laySorter.sectorLayerNum(*hit);
+         
+            if (layNum < usedSpacePoints.size() && 
+                std::ranges::any_of(usedSpacePoints[layNum], 
+                    [&hit](const SpacePoint* used){   
+                        return used == hit.get();
+                })) {
                 continue;
             }
+            std::unique_ptr<CalibratedSpacePoint> calibHit{};
+            double pull{-1.};
             if (hit->isStraw()) {
                 using namespace Acts::detail::LineHelper;
                 const double dist = signedDistance(locPos, locDir, hit->localPosition(), hit->sensorDirection());
@@ -323,22 +346,36 @@ namespace MuonR4::SegmentFit{
                     continue;
                 }
             } else {
+                /// If the hit is a phi measurement check at least if it can be hit by the segment
+                if (!hit->measuresEta() && 
+                    std::abs(hit->sensorDirection().dot(hit->localPosition() - 
+                        SeedingAux::extrapolateToPlane(locPos,locDir, *hit))) >
+                        std::sqrt(hit->covariance()[toUnderlying(AxisDefs::etaCov)])){
+                    continue;
+                }
                 /// Use the pull of the uncalibrated measurement to estimate whether 
                 ///  a calibration is actually worth
-                const double pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *hit));
-                if (pull > 1.1 * m_cfg.recoveryPull) {
+                pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *hit));
+                if (pull > 1.1 * m_cfg.recoveryPull ||
+                    /// There are already hits of the same layer kind in the collection
+                    (layNum < usedSpacePoints.size() && 
+                     std::ranges::any_of(usedSpacePoints[layNum],[hit](const SpacePoint* used) {
+                        return (used->measuresEta() && used->measuresEta() == hit->measuresEta()) ||
+                               (used->measuresPhi() && used->measuresPhi() == hit->measuresPhi());
+                    })) ) {
                     continue;
                 }
             }
-            auto calibHit = m_cfg.calibrator->calibrate(ctx, hit.get(), locPos, locDir, timeOff);
-            const double pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *calibHit));
+            calibHit = m_cfg.calibrator->calibrate(ctx, hit.get(), locPos, locDir, timeOff);
+            pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *calibHit));
             if (pull <= m_cfg.recoveryPull) {
                 hasCandidate |= calibHit->fitState() == CalibratedSpacePoint::State::Valid;
             } else {
                 calibHit->setFitState(CalibratedSpacePoint::State::Outlier);
             }
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Candidate hit for recovery "
-                    <<seed.msSector()->idHelperSvc()->toString(hit->identify())<<", pull: "<<pull);
+                    <<seed.msSector()->idHelperSvc()->toString(hit->identify())<<", pull: "<<pull
+                    <<"layer number: "<<layNum);
             candidateHits.push_back(std::move(calibHit));                
         }
         /** No extra hit has been found */
