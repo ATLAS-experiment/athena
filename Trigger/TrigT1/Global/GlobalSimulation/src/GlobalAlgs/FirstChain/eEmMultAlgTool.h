@@ -93,42 +93,42 @@ namespace GlobalSim {
       "inf",
       "phi high for window selector"};
 
-   Gaudi::Property<std::string> m_rhad_low_str {
+   Gaudi::Property<std::string> m_rhad_str {
       this,
-      "rhad_low",
+      "rhad",
       "0",
-      "rhad low for window selector"};
-    
-    Gaudi::Property<std::string> m_rhad_high_str {
+      "rhad cut value"};
+
+   Gaudi::Property<std::string> m_rhad_op {
       this,
-      "rhad_high",
-      "inf",
-      "rhad high for window selector"};
+      "rhad_op",
+      "unknown",
+      "rhad cut operator"};
+    
+   Gaudi::Property<std::string> m_reta_str {
+      this,
+      "reta",
+      "0",
+      "reta cut value"};
+
+    Gaudi::Property<std::string> m_reta_op {
+      this,
+      "reta_op",
+      "unknown",
+      "reta cut operator"};
  
-   Gaudi::Property<std::string> m_reta_low_str {
+   Gaudi::Property<std::string> m_wstot_str {
       this,
-      "reta_low",
+      "wstot",
       "0",
-      "reta low for window selector"};
-    
-    Gaudi::Property<std::string> m_reta_high_str {
-      this,
-      "reta_high",
-      "inf",
-      "reta high for window selector"};
+      "wstot lcut_value"};
 
-   Gaudi::Property<std::string> m_wstot_low_str {
+    Gaudi::Property<std::string> m_wstot_op {
       this,
-      "wstot_low",
-      "0",
-      "wstot low for window selector"};
+      "wstot_op",
+      "unknown",
+      "wstot cut_operator"};
     
-    Gaudi::Property<std::string> m_wstot_high_str {
-      this,
-      "wstot_high",
-      "inf",
-      "wstot high for window selector"};
-
     Gaudi::Property<int> m_TIP_position {
       this,
       "TIPposition",
@@ -141,6 +141,16 @@ namespace GlobalSim {
       "n_multbits",
       3,
       "number of bits to write into the TIP"};
+
+    Gaudi::Property<std::string> m_menu_name {
+      this,
+      "menu_name",
+      "unknown",
+      "name from json menu file"
+    };
+
+
+    ulong m_maxtob{0};
 
   };
 }

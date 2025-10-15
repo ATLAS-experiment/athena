@@ -61,6 +61,16 @@ namespace GlobalSim {
       CHECK(tool -> updateTIP(*tipword, ctx));
     }
 
+    if (m_enableDumps) {
+      std::stringstream ss;
+      ss << "\nRun " << ctx <<' ' << "TIP:\n" << *tipword << '\n';
+      
+ 
+      std::ofstream out(name() + "_tip.log", std::ios_base::app);
+      out << ss.str();
+      out.close();
+    }
+    
     ATH_MSG_DEBUG("TIP " << *tipword);
     
     // write out the selection result

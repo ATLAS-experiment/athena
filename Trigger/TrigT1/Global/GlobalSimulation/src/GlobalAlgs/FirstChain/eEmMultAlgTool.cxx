@@ -41,14 +41,29 @@ namespace GlobalSim {
 						    m_phi_high_str
 						    );
 
-    
-    m_e_selector = std::make_unique<eEmSelector>(m_rhad_low_str,
-						 m_rhad_high_str,
-						 m_reta_low_str,
-						 m_reta_high_str,
-						 m_wstot_low_str,
-						 m_wstot_high_str
-						 );
+    try {
+      m_e_selector = std::make_unique<eEmSelector>(std::stoul(m_rhad_str),
+						   m_rhad_op,
+						   std::stoul(m_reta_str),
+						   m_reta_op,
+						   std::stoul(m_wstot_str),
+						   m_wstot_op
+						   );
+    } catch (const std::exception& e) {
+      
+      ATH_MSG_ERROR("Error initialising eEMSelector " << e.what());
+      return StatusCode::FAILURE;
+    }
+      
+      
+
+    if (m_n_multbits == 0){
+      m_maxtob = 0;
+    } else {
+      ulong maxtob = 1;
+      for (ulong i = m_n_multbits; i != 0; --i) { maxtob *= 2;}
+      m_maxtob = maxtob - 1;
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -66,20 +81,19 @@ namespace GlobalSim {
 
     auto  selected = std::make_unique<bool>(false);
 
-    // m_n_multbits tested to be > 0 in initialize()
-    ulong max_mult_unsigned = static_cast<ulong> (m_n_multbits);
-
     ulong tob_count{0};
     for (const auto& t : *tobs){
       if (m_c_selector->select(*t) and m_e_selector->select(*t)) {
-	if (++tob_count == max_mult_unsigned){break;}
+	if (++tob_count == m_maxtob){break;}
       }
     }
+
+    
 
     ATH_MSG_DEBUG("no of passing TOBS");
 
     auto count_bits = std::bitset<IGlobalSimAlgTool::s_nbits_TIP>(tob_count);
-    
+
     int p0{0};
     int p1{m_TIP_position};
     
@@ -95,7 +109,12 @@ namespace GlobalSim {
   }
 
   std::string eEmMultAlgTool::toString() const {
-    return "eEmMultAlgTool read, select, count and report number of related eEmTOBS";
+    std::stringstream ss;
+    ss <<name () << ": " <<m_menu_name << ' '
+       << "eEmMultAlgTool read, select, count and report number of related eEmTOBS\n";
+    ss<< m_TIP_position << ' ' << m_n_multbits;
+
+    return ss.str();
   }
 
 }
