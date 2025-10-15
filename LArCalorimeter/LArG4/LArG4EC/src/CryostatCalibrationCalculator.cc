@@ -362,7 +362,7 @@ namespace LArG4 {
 
             // Add to the map that's based on volume name; it
             // contains maps based on copy number.
-            vmap[volume.volumeName] = identifierMap;
+            vmap[volume.volumeName] = std::move(identifierMap);
 
 #if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
             G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
