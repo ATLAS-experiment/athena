@@ -321,7 +321,8 @@ struct RAuxStore::impl {
         continue;
       }
       // The auxiliary property name:
-      const std::string auxName = fieldName.substr(fieldName.find(":") + 1);
+      std::string_view auxName = fieldName;
+      auxName = auxName.substr(auxName.find(':') + 1);
       // Leave the rest up to the function that is shared with the
       // dynamic fields:
       RETURN_CHECK("xAOD::RAuxStore::scanInputNtuple",
@@ -433,7 +434,8 @@ struct RAuxStore::impl {
     // Check if the registry already knows this variable name. If yes, let's
     // use the type known by the registry. To be able to deal with simple
     // schema evolution in dynamic fields.
-    if (const SG::auxid_t regAuxid = registry.findAuxID(std::string{auxName});
+    const std::string auxNameStr{auxName};//Get rid of this if everything is migrated to string_view
+    if (const SG::auxid_t regAuxid = registry.findAuxID(auxNameStr);
         regAuxid != SG::null_auxid) {
       m_data.m_auxIDs.insert(regAuxid);
       return StatusCode::SUCCESS;
@@ -442,11 +444,11 @@ struct RAuxStore::impl {
     SG::AuxVarFlags flags = SG::AuxVarFlags::SkipNameCheck;
     SG::auxid_t linkedAuxId = SG::null_auxid;
 
-    if (SG::AuxTypeRegistry::isLinkedName(std::string{auxName})) {
+    if (SG::AuxTypeRegistry::isLinkedName(auxNameStr)) {
       flags |= SG::AuxVarFlags::Linked;
     } else if (SG::AuxTypeRegistry::classNameHasLink(expectedClassName)) {
       const std::string linkedAttr =
-          SG::AuxTypeRegistry::linkedName(std::string{auxName});
+          SG::AuxTypeRegistry::linkedName(auxNameStr);
       const std::string linkedFieldName =
           SG::AuxTypeRegistry::linkedName(field.GetFieldName());
       const std::type_info* linkedTi = nullptr;
@@ -468,7 +470,7 @@ struct RAuxStore::impl {
 
     // Check for an auxiliary ID for this field:
     SG::auxid_t auxid =
-        registry.getAuxID(*ti, std::string{auxName}, "", flags, linkedAuxId);
+        registry.getAuxID(*ti, auxNameStr, "", flags, linkedAuxId);
 
     // First try to find a compiled factory for the vector type:
     if (auxid == SG::null_auxid) {
@@ -504,7 +506,7 @@ struct RAuxStore::impl {
               registry.addFactory(
                   *ti, *factory->tiAlloc(),
                   std::unique_ptr<SG::IAuxTypeVectorFactory>(factory));
-              auxid = registry.getAuxID(*ti, std::string{auxName}, "", flags,
+              auxid = registry.getAuxID(*ti, auxNameStr, "", flags,
                                         linkedAuxId);
             }
           }
@@ -532,7 +534,7 @@ struct RAuxStore::impl {
           std::string tiAllocName = factory->tiAllocName();
           registry.addFactory(*ti, tiAllocName, std::move(factory));
         }
-        auxid = registry.getAuxID(*ti, std::string{auxName}, "",
+        auxid = registry.getAuxID(*ti, auxNameStr, "",
                                   SG::AuxVarFlags::SkipNameCheck);
       } else {
         ::Warning("xAOD::RAuxStore::setupAuxField",
