@@ -54,7 +54,7 @@ namespace GlobalSim {
     os << '\n';
   }
 
-  void dump_n(const LArStripNeighborhood n,
+  void dump_n(const LArStripNeighborhood& n,
               std::ostream& os){
     dump_stripdataVector(n.phi_low(), os);
     dump_stripdataVector(n.phi_center(), os);
