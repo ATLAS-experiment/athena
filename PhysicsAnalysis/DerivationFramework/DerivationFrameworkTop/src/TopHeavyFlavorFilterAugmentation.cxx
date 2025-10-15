@@ -16,7 +16,7 @@ TopHeavyFlavorFilterAugmentation::TopHeavyFlavorFilterAugmentation(const std::st
 
 
 
-TopHeavyFlavorFilterAugmentation::~TopHeavyFlavorFilterAugmentation(){}
+TopHeavyFlavorFilterAugmentation::~TopHeavyFlavorFilterAugmentation() = default;
 
 
 

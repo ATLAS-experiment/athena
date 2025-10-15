@@ -31,7 +31,7 @@ namespace DerivationFramework {
     TopHeavyFlavorFilterAugmentation(const std::string& t, const std::string& n, const IInterface* p);
     ~TopHeavyFlavorFilterAugmentation();
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches() const override;
 
   private:
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoName{this, "EventInfoName", "EventInfo"};
