@@ -10,14 +10,22 @@ def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
     kwarg.setdefault('xclbin', '/eos/project-a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F150_i/kernels.hw.xclbin')
     
     kwarg.setdefault('RunSlicing', True) 
-    kwarg.setdefault('RunInsideOut', True) 
+    kwarg.setdefault('RunInsideOut', False) 
     kwarg.setdefault('RunInsideOutOnSlicingEngine', False) 
+    kwarg.setdefault('RunFullF150', False) 
 
     kwarg.setdefault('SlicingEngineInputName', 'configurableLengthWideLoader') 
     kwarg.setdefault('SlicingEngineOutputName', 'dynamicLengthWideUnloader') 
 
     kwarg.setdefault('InsideOutInputName', 'mem_read') 
     kwarg.setdefault('InsideOutOutputName', 'mem_write') 
+
+    kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
+    kwarg.setdefault('StripClusterKernelName','processHits')
+    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+
 
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
@@ -49,7 +57,7 @@ def F150EDMConversionAlgCfg(flags, **kwarg):
 
     kwarg.setdefault('FPGAOutputTrackKey', "FPGATrackOutput")
     kwarg.setdefault('FPGASpacePointsKey', "ITkPixelSpacePoints")
-    kwarg.setdefault('OutputSeeds', "ActsValidateF150HWPixelSeeds")
+    kwarg.setdefault('OutputSeeds', "ActsValidateF150PixelSeeds")
 
     alg = CompFactory.EFTrackingFPGAIntegration.F150EDMConversionAlg(**kwarg)
     acc.addEventAlgo(alg)
