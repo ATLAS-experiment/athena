@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 # JetInputConfig: A helper module providing function to setup algorithms
 # in charge of preparing input sources to jets (ex: EventDensity algo, track
@@ -26,7 +26,7 @@ def buildJetTrackUsedInFitDeco( parentjetdef, inputspec ):
     return getUsedInVertexFitTrackDecoratorAlg(trackCont=trkProperties["Tracks"],
                                                vtxCont= trkProperties["Vertices"])
 
-    
+
 def buildJetInputTruth(parentjetdef, truthmod):
     truthmod = truthmod or ""
     from ParticleJetTools.ParticleJetToolsConfig import getCopyTruthJetParticles
@@ -34,30 +34,18 @@ def buildJetInputTruth(parentjetdef, truthmod):
                                 tools = [ getCopyTruthJetParticles(truthmod, parentjetdef._cflags) ]
     )
 
+
 def buildJetInputTruthGEN(parentjetdef, truthmod):
-    """  Build truth constituents as in EVTGEN jobs in the r21 config. 
+    """  Build truth constituents as in EVTGEN jobs in the r21 config.
     IMPORTANT : this is expected to be temporary, only to reproduce the EVTGEN r21 config with the new config. The definitions should be harmonized with reco-level at some point and this function removed.
     The source for r21 EVTGEN config was in GeneratorFilters/share/common/GenerateTruthJets.py
     """
     truthmod = truthmod or ""
-
-    # recopy config from GeneratorFilters/share/common/GenerateTruthJets.py
-    truthClassifier = CompFactory.MCTruthClassifier("JetMCTruthClassifier") 
-
-    if truthmod == "":
-        truthpartcopy = CompFactory.CopyTruthJetParticles("truthpartcopy",
-                                                                   OutputName="JetInputTruthParticlesGEN",
-                                                                   MCTruthClassifier=truthClassifier)
-    elif truthmod=="NoWZ":
- 
-        truthpartcopy = CompFactory.CopyTruthJetParticles("truthpartcopywz",
-                                                                     OutputName="JetInputTruthParticlesGENNoWZ",
-                                                                     MCTruthClassifier=truthClassifier,
-                                                                     IncludePromptLeptons=False)
-        
+    from ParticleJetTools.ParticleJetToolsConfig import getCopyTruthJetParticlesGEN
     return _buildJetAlgForInput("truthpartcopy_"+truthmod,
-                                tools = [ truthpartcopy ]
+                                tools = [ getCopyTruthJetParticlesGEN(truthmod, parentjetdef._cflags) ]
     )
+
 
 def buildLabelledTruth(parentjetdef, truthmod):
     from ParticleJetTools.ParticleJetToolsConfig import getCopyTruthLabelParticles

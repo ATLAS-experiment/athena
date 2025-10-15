@@ -86,6 +86,24 @@ def getCopyTruthJetParticles(modspec, cflags):
     return truthpartcopy
 
 
+def getCopyTruthJetParticlesGEN(modspec, cflags):
+    """  Build truth constituents as in EVTGEN jobs in the r21 config.
+    IMPORTANT : this is expected to be temporary, only to reproduce the EVTGEN r21 config with the new config. The definitions should be harmonized with reco-level at some point and this function removed.
+    The source for r21 EVTGEN config was in GeneratorFilters/share/common/GenerateTruthJets.py
+    """
+    truthclassif = getMCTruthClassifier()
+
+    if modspec == "":
+        return CompFactory.CopyTruthJetParticles("truthpartcopy",
+                                                 OutputName="JetInputTruthParticlesGEN",
+                                                 MCTruthClassifier=truthclassif)
+    elif modspec=="NoWZ":
+         return CompFactory.CopyTruthJetParticles("truthpartcopywz",
+                                                  OutputName="JetInputTruthParticlesGENNoWZ",
+                                                  MCTruthClassifier=truthclassif,
+                                                  IncludePromptLeptons=False)
+
+
 def _getCommonLabelNames(prefix):
     """Internal unlity to name labels
 
