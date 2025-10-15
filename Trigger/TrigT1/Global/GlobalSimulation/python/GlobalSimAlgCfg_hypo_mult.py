@@ -20,6 +20,13 @@ def GlobalSimulationAlgCfg(flags,
     tool1.OutputLevel = OutputLevel
 
     tool2 =  CompFactory.GlobalSim.eEmMultAlgTool('eEmMultAlgTool')
+    tool2.rhad = '0'
+    tool2.rhad_op = '<='
+    tool2.reta = '0'
+    tool2.reta_op = '<='
+    tool2.wstot = '0'
+    tool2.wstot_op = '<='
+    
     tool2.OutputLevel = OutputLevel
 
     alg = CompFactory.GlobalSim.GlobalSimulationAlg(name + 'Alg')

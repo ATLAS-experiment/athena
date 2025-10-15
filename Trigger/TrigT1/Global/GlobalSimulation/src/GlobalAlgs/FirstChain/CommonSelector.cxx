@@ -9,31 +9,31 @@ namespace GlobalSim {
   using namespace GlobalSim::IOBitwise;
   
   CommonSelector::CommonSelector(const std::string& et_low,
-					 const std::string& et_high,
-					 const std::string& eta_low,
-					 const std::string& eta_high,
-					 const std::string& phi_low,
-					 const std::string& phi_high) :
-    m_et_low{std::bitset<ICommonTOB::s_et_width>(et_low).to_ulong()},
-    m_eta_low{std::bitset<ICommonTOB::s_eta_width>(eta_low).to_ulong()},
-    m_phi_low{std::bitset<ICommonTOB::s_phi_width>(phi_low).to_ulong()} {
+				 const std::string& et_high,
+				 const std::string& eta_low,
+				 const std::string& eta_high,
+				 const std::string& phi_low,
+				 const std::string& phi_high):
+    m_et_low{std::stoul(et_low)},
+    m_eta_low{std::stoul(eta_low)},
+    m_phi_low{std::stoul(phi_low)} {
 
     if(et_high == "inf") {
       m_et_high = ULONG_MAX;
     } else {
-      m_et_high = std::bitset<ICommonTOB::s_et_width>(et_high).to_ulong();
+      m_et_high = std::stoul(et_high);
     }
 
     if(eta_high == "inf") {
       m_eta_high = ULONG_MAX;
     } else {
-      m_eta_high = std::bitset<ICommonTOB::s_eta_width>(eta_high).to_ulong();
+      m_eta_high = std::stoul(eta_high);
     }
 
     if(eta_high == "inf") {
       m_phi_high = ULONG_MAX;
     } else {			    
-      m_phi_high = std::bitset<ICommonTOB::s_phi_width>(phi_high).to_ulong();
+      m_phi_high = std::stoul(phi_high);
     }
   }
 			    

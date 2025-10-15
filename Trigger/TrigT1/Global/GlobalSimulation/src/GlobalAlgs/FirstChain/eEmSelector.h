@@ -18,7 +18,13 @@ namespace  GlobalSim {
    */
 
   using GlobalSim::IOBitwise::IeEmTOB;
+
   
+  class ICutter {
+  public:
+    virtual bool cut(const ulong&) const = 0;
+  };
+
   class eEmSelector : public IeEmSelector {
   public:
 
@@ -26,27 +32,24 @@ namespace  GlobalSim {
     eEmSelector() = default;
 
     /// window limits from strings, to match the eEmTOB bitsets
-    eEmSelector(const std::string& rhad_low,
-		   const std::string& rhad_high,
-		   const std::string& reta_low,
-		   const std::string& reta_high,
-		   const std::string& wstot_low,
-		   const std::string& wstot_high);
-
+    eEmSelector(ulong rhad_cut,
+		const std::string& rhad_op,
+		ulong reta_cut,
+		const std::string& reta_op,
+		ulong wstot_cut,
+		const std::string& wstot_op);
+    
     virtual ~eEmSelector() = default;
-
+    
     virtual bool select(const IeEmTOB&) const override;
 
   private:
-    ulong m_rhad_low{0};
-    ulong m_rhad_high{ULONG_MAX};
-    
-    ulong m_reta_low{0};
-    ulong m_reta_high{ULONG_MAX};
-        
-    ulong m_wstot_low{0};
-    ulong m_wstot_high{ULONG_MAX};
-
+    ulong m_rhad_cut{0};
+    ulong m_eta_cut{0};
+    ulong m_wstot_cut{0};
+    std::unique_ptr<ICutter> m_rhad_cutter{nullptr};
+    std::unique_ptr<ICutter> m_reta_cutter{nullptr};
+    std::unique_ptr<ICutter> m_wstot_cutter{nullptr};
   };
 }
 #endif

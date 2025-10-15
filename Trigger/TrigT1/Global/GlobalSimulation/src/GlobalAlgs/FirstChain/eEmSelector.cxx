@@ -6,54 +6,97 @@
 
 namespace GlobalSim {
 
-  using namespace GlobalSim::IOBitwise;
+  class lt: public ICutter {
+  public:
+    lt(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
+      return v < m_cut;  
+    };
+
+  private:
+    ulong m_cut;
+  };
+
+  class leq: public ICutter {
+  public:
+    leq(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
+      return v <= m_cut;  
+    };
+
+  private:
+    ulong m_cut;
+  };
+
+  class gt: public ICutter {
+  public:
+    gt(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
+      return v > m_cut;  
+    };
+
+  private:
+    ulong m_cut;
+  };
+
   
-  eEmSelector::eEmSelector(const std::string& rhad_low,
-			   const std::string& rhad_high,
-			   const std::string& reta_low,
-			   const std::string& reta_high,
-			   const std::string& wstot_low,
-			   const std::string& wstot_high) :
-    m_rhad_low{std::bitset<IeEmTOB::s_et_width>(rhad_low).to_ulong()},
-    m_reta_low{std::bitset<IeEmTOB::s_eta_width>(reta_low).to_ulong()},
-    m_wstot_low{std::bitset<IeEmTOB::s_phi_width>(wstot_low).to_ulong()}{
+  class geq: public ICutter {
+  public:
+    geq(const ulong& c): m_cut(c) {}
+    virtual bool cut(const ulong& v) const override {
+      return v >= m_cut;  
+    };
 
-    if (rhad_high == "inf") {
-      m_rhad_high = ULONG_MAX;
+  private:
+    ulong m_cut;
+  };
+
+
+  
+
+  std::unique_ptr<ICutter> make_cutter(const ulong& cut,
+					const std::string& op) {
+    
+    auto cutter = std::unique_ptr<ICutter>(nullptr);
+
+    if (op == ">"){
+      cutter.reset(new gt(cut));
+    } else if (op == ">="){
+      cutter.reset(new geq(cut));
+    } else if (op == "<"){
+      cutter.reset(new lt(cut));
+    } else if (op == "<="){
+      cutter.reset(new leq(cut));
     } else {
-      m_rhad_high = std::bitset<IeEmTOB::s_et_width>(rhad_high).to_ulong();
+      throw std::invalid_argument("unown operator " + op);
     }
 
-    if (reta_high == "inf") {
-      m_reta_high = ULONG_MAX;
-    } else {
-      m_reta_high = std::bitset<IeEmTOB::s_eta_width>(reta_high).to_ulong();
-    }
+   
 
-    if (wstot_high == "inf") {
-      m_wstot_high = ULONG_MAX;
-    } else {
-      m_wstot_high = std::bitset<IeEmTOB::s_phi_width>(wstot_high).to_ulong();
-    }
-
+    return cutter;
   }
 
-  bool eEmSelector::select(const IeEmTOB& tob) const {
-    {
-      auto rhad = tob.RHad_bits().to_ulong();
-      if (rhad < m_rhad_low  or rhad >= m_rhad_high) {return false;}
-    }
-
-    {
-      auto reta = tob.REta_bits().to_ulong();
-      if (reta < m_reta_low  or reta >= m_reta_high) {return false;}
-    }
-
-    {
-      auto wstot = tob.WsTot_bits().to_ulong();
-      if (wstot < m_wstot_low  or wstot >= m_wstot_high) {return false;}
-    }
     
+  using namespace GlobalSim::IOBitwise;
+  
+  eEmSelector::eEmSelector(ulong rhad_cut,
+			   const std::string& rhad_op,
+			   ulong reta_cut,
+			   const std::string& reta_op,
+			   ulong wstot_cut,
+			   const std::string& wstot_op) :
+    m_rhad_cutter{make_cutter(rhad_cut, rhad_op)},
+    m_reta_cutter{make_cutter(reta_cut, reta_op)},
+    m_wstot_cutter{make_cutter(wstot_cut, wstot_op)}{
+  }
+
+
+  bool eEmSelector::select(const IeEmTOB& tob) const {
+
+    if(!m_rhad_cutter->cut(tob.RHad_bits().to_ulong())) {return false;}
+    if(!m_reta_cutter->cut(tob.REta_bits().to_ulong())) {return false;}
+    if(!m_wstot_cutter->cut(tob.WsTot_bits().to_ulong())) {return false;}
+
     return true;
   };
   
