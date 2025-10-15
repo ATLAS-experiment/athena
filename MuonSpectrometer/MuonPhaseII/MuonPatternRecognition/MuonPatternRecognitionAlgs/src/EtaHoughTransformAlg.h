@@ -90,7 +90,7 @@ namespace MuonR4{
             DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 2.0};
             // Cut on the number of weighted hits on the maximum
             DoubleProperty m_peakThreshold{this, "peakThreshold", 2.5};
-            // Minimum distance in tanTheta between two maxima
+            // Minimum distance in tanBeta between two maxima
             DoubleProperty m_minMaxDistTheta{this, "MaximumSeparationTheta", 0.};
             // Minimum distance in the intercept between two maxima
             DoubleProperty m_minMaxDistIntercept{this, "MaximumSeparationIntercept", 15.};

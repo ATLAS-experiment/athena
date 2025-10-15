@@ -75,7 +75,7 @@ std::unique_ptr<SegmentSeed>
         // use this to construct the segment seed
         SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitsOnMax, sorter);
-        return std::make_unique<SegmentSeed>(etaMax.tanTheta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
+        return std::make_unique<SegmentSeed>(etaMax.tanBeta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
 
 void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
@@ -98,9 +98,9 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
         std::optional<double> dummyIntercept = Amg::intersect<3>(hit->localPosition(), extrapDir, Amg::Vector3D::UnitZ(),0); 
         double x0 = (hit->localPosition() + dummyIntercept.value_or(0) * extrapDir).x(); 
         // now we can obtain the most likely tan(phi) via the pointing vector from the origin to our hit
-        double tanPhi = houghTanPhi(extrapDir); 
+        double tanAlpha = houghTanAlpha(extrapDir); 
         // update our search space with this info 
-        eventData.updateSearchWindow(eventData.searchSpaceTanAngle, tanPhi);
+        eventData.updateSearchWindow(eventData.searchSpaceTanAngle, tanAlpha);
         eventData.updateSearchWindow(eventData.searchSpaceIntercept, x0);
         // and increment the hit counter
         ++eventData.phiHitsOnMax; 
@@ -123,7 +123,7 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
     // and update the axis ranges for the search space according to our results
     eventData.currAxisRanges =
     Acts::HoughTransformUtils::HoughAxisRanges{searchStartTanPhi, searchEndTanPhi, searchStart, searchEnd};
-    ATH_MSG_VERBOSE("Accumulator search window: tanPhi: ["<<searchStartTanPhi<<";"<<searchEndTanPhi<<"], x0: ["
+    ATH_MSG_VERBOSE("Accumulator search window: tanAlpha: ["<<searchStartTanPhi<<";"<<searchEndTanPhi<<"], x0: ["
                 <<searchStart<<";"<<searchEnd<<"]");
 }
 
@@ -177,7 +177,7 @@ std::unique_ptr<SegmentSeed>
     std::vector<HoughHitType> hits{maximum.getHitsInMax()};
     SpacePointPerLayerSorter sorter{};
     std::ranges::stable_sort(hits, sorter);
-    return std::make_unique<SegmentSeed>(maximum.tanTheta(), maximum.interceptY(), 
+    return std::make_unique<SegmentSeed>(maximum.tanBeta(), maximum.interceptY(), 
                         data.searchSpaceTanAngle.first, 
                         data.searchSpaceIntercept.first, 
                         maximum.getCounts(), 
@@ -208,13 +208,13 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
     // loop over the previously found eta-maxima for each station
     for (const HoughMaximum* max : *maxima) {
         // for each maximum, pre-process 
-        ATH_MSG_VERBOSE("Search extra phi hits on maximum "<<max->msSector()->identString()<<", tanTheta: "<<max->tanTheta()
+        ATH_MSG_VERBOSE("Search extra phi hits on maximum "<<max->msSector()->identString()<<", tanBeta: "<<max->tanBeta()
                      <<", y0: "<<max->interceptY());
         if (m_visionTool.isEnabled() && msgLvl(MSG::VERBOSE)) {
             for (const auto& truth : m_visionTool->getLabeledSegments(max->getHitsInMax())) {
                 const Parameters truthPars = localSegmentPars(*truth);
-                ATH_MSG_VERBOSE("Truth parameters "<<toString(truthPars)<<", tanPhi: "
-                            <<houghTanPhi(Amg::dirFromAngles(truthPars[Acts::toUnderlying(ParamDefs::phi)],
+                ATH_MSG_VERBOSE("Truth parameters "<<toString(truthPars)<<", tanAlpha: "
+                            <<houghTanAlpha(Amg::dirFromAngles(truthPars[Acts::toUnderlying(ParamDefs::phi)],
                                                              truthPars[Acts::toUnderlying(ParamDefs::theta)])));
             }
         }

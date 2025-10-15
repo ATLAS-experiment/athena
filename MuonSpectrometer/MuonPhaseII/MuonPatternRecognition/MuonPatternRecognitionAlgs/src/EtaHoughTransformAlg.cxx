@@ -21,17 +21,17 @@
 
 namespace MuonR4{
     // helper to check if our trajectory traverses a chamber
-    inline bool passesThrough(const SpacePointBucket::chamberLocation & loc, double y0, double tanTheta){
-        double yCross = (y0 + loc.location().z() * tanTheta);  
+    inline bool passesThrough(const SpacePointBucket::chamberLocation & loc, double y0, double tanBeta){
+        double yCross = (y0 + loc.location().z() * tanBeta);  
         return (loc.minY() < yCross && yCross < loc. maxY()); 
     } 
     // determines the local residual when traversing a chamber 
-    inline double proximity(const SpacePoint* dc, double y0, double tanTheta) {
+    inline double proximity(const SpacePoint* dc, double y0, double tanBeta) {
         if (dc->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanTheta, dc) - y0), 
-                            std::abs(HoughHelpers::Eta::houghParamMdtRight(tanTheta, dc) - y0));
+            return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanBeta, dc) - y0), 
+                            std::abs(HoughHelpers::Eta::houghParamMdtRight(tanBeta, dc) - y0));
         }
-        return std::abs(HoughHelpers::Eta::houghParamStrip(tanTheta, dc) - y0);
+        return std::abs(HoughHelpers::Eta::houghParamStrip(tanBeta, dc) - y0);
     }
     /** @brief Calculates how much of the unkknown coordinate along the tube range 
      *         is covered by the chamber of interest.
@@ -253,7 +253,7 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
             }
         } else if (precTech) {
             /// Calculate the width / tube length at the centre crossing point 
-            /// (maximum.x -> tanTheta, maximum.y -> y0)
+            /// (maximum.x -> tanBeta, maximum.y -> y0)
             const double lowL = muonChamber.width(maximum.y + muonChamber.location().z() * maximum.x);
             const std::array<double, 2> chambEdges{muonChamber.location().x() - lowL,
                                                    muonChamber.location().x() + lowL};
@@ -329,7 +329,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
     }
     if (maxima.empty()) {
         ATH_MSG_DEBUG("Station "<<bucket.bucket->msSector()->identString()
-            <<":\n     Mean tanTheta was "<<tanThetaMean 
+            <<":\n     Mean tanBeta was "<<tanThetaMean 
             << " and my intercept "<<chamberCenter 
             <<", with hits in the bucket in "<< bucket.bucket->coveredMin() 
             <<" - "<<bucket.bucket->coveredMax() 
