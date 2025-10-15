@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,8 +44,8 @@ class LArCaliWaveBuilder : public AthAlgorithm
   SG::ReadCondHandleKey<ILArPedestal> m_pedKey{this,"PedestalKey","Pedestal","SG Key of pedestal object"};
 
   bool       m_useAccumulatedDigits;
-  StatusCode executeWithAccumulatedDigits(const LArCalibParams* calibParams=nullptr, const LArCalibLineMapping* clcabling=nullptr );
-  StatusCode executeWithStandardDigits(const LArCalibParams* calibParams=nullptr, const LArCalibLineMapping* clcabling=nullptr);
+  StatusCode executeWithAccumulatedDigits(const LArCalibParams* calibParams, const LArCalibLineMapping* clcabling );
+  StatusCode executeWithStandardDigits(const LArCalibParams* calibParams, const LArCalibLineMapping* clcabling);
   
   std::vector<std::string> m_keylist;
   std::vector<std::string> m_keylistproperty;

@@ -129,7 +129,7 @@ StatusCode LArCaliWaveBuilder::execute()
 
     int counter=m_event_counter;
     if(m_useAccumulatedDigits) counter /= calibParams->NTrigger(HWIdentifier(1007091712));
-    if(m_usePatt >= 0 && static_cast<int>(counter % numPatt) != m_usePatt) {
+    if(m_usePatt >= 0 && numPatt > 0 && static_cast<int>(counter % numPatt) != m_usePatt) {
        return StatusCode::SUCCESS;
     }
     ATH_MSG_DEBUG("Good event "<<m_event_counter<<" for pattern " << m_usePatt << " out of " << numPatt << " patterns " << calibParams->NTrigger(HWIdentifier(1007091712)) <<" triggers ");
@@ -210,7 +210,7 @@ StatusCode LArCaliWaveBuilder::executeWithAccumulatedDigits(const LArCalibParams
    for (;it!=it_end; ++it) { // Loop over all cells
 
      bool ispulsed=false;
-     if(m_useParams && calibParams) { // got LArCalibParams from DetStore
+     if(m_useParams && calibParams && clcabling) { // got LArCalibParams from DetStore
         const std::vector<HWIdentifier>& calibLineLeg = clcabling->calibSlotLine((*it)->hardwareID());
         for (const HWIdentifier &calibLineHWID : calibLineLeg) {// loop calib lines
             ispulsed |= calibParams->isPulsed(m_event_counter,calibLineHWID);

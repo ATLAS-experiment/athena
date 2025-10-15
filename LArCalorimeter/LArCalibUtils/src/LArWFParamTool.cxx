@@ -270,7 +270,7 @@ StatusCode LArWFParamTool::getLArWaveParams(const LArCaliWave& larCaliWave,
 
   wfParams.setFlag( 0 ) ;  // this should contain the method used to find parameters and the gain
 
-  if ( m_storeResOscill[ layer ] && resOscill1) {
+  if ( m_storeResOscill[ layer ] && resOscill1 && wfParams.omega0() != 0) {
     LArWave injres1 = injRespRes(gCali,wfParams.omega0(),wfParams.taur());
     *resOscill1 = LArCaliWave(injres1.getWave(),gCali.getDt(),gCali.getDAC(), 0x1, LArWave::unknown);  
   }
@@ -381,6 +381,7 @@ double LArWFParamTool::dFstep (const LArWave& gCali, const double fstep, const d
     b = m_wHelper.getSumTail( stepResp1 * dstepRespDfstep1,Ttail);
     a = m_wHelper.getSumSquareTail( dstepRespDfstep1,Ttail);
   }
+  if (a == 0) return 0;
   return -b/a ;
 }
 
