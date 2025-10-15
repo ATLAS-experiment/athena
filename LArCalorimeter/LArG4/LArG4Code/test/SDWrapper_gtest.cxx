@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -52,9 +52,9 @@ class SDWrappertest : public ::testing::Test {
 
     virtual void TearDown() override {
     }
-  LArEM_ID* m_EM = new LArEM_ID();//I used some "new" to instantiate class in my test code. But  do not need to worry about memory leakage since the test code is not a part of production code, it will be run independently and will not affect the performance of the production code at all
-  LArFCAL_ID* m_FCAL = new LArFCAL_ID();
-  LArHEC_ID* m_HEC = new LArHEC_ID();
+  LArEM_ID m_EM;
+  LArFCAL_ID m_FCAL;
+  LArHEC_ID m_HEC;
 };
 //end
 
@@ -92,7 +92,7 @@ TEST_F(SDWrappertest, EndOfAthenaEvent)
 
   DerivedILArCalculatorSvcForTest* calc = new DerivedILArCalculatorSvcForTest();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
   auto p = std::make_unique<LArG4SimpleSD>("name", calc);//instantiate a LArG4SimpleSD object and wrap it in std::unique_ptr<LArG4SimpleSD> object p
-  p.get()->setupHelpers(m_EM, m_FCAL, m_HEC);//add helpers(m_EM, m_FCAL, m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
+  p.get()->setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
   p.get()->m_timeBins.insert( std::pair<G4int, LArG4SimpleSD::hits_t*>(0,hits) );//insert the hit container hits into the container of hit container
 
   sd5.m_sdList.push_back( std::move(p) );//insert the std::unique_ptr<LArG4SimpleSD> object p into the container m_sdList
