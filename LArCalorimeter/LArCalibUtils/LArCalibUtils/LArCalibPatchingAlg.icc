@@ -68,19 +68,11 @@ template<class CONDITIONSCONTAINER>
 StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::stop() {
   ATH_MSG_INFO ( "Entering LArCalibPatchingAlg" );
   if(m_isSC) {
-     const LArOnline_SuperCellID *onlHelper=nullptr;
-     ATH_CHECK( detStore()->retrieve(onlHelper, "LArOnline_SuperCellID") );
-     m_onlineHelper=dynamic_cast<const LArOnlineID_Base*>(onlHelper);
-     const CaloCell_SuperCell_ID *caloid=nullptr;
-     ATH_CHECK( detStore()->retrieve(caloid, "CaloCell_SuperCell_ID") );
-     m_caloId = dynamic_cast<const CaloCell_Base_ID*>(caloid); 
+     ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnline_SuperCellID") );
+     ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_SuperCell_ID") );
   } else {
-     const LArOnlineID *onlHelper=nullptr;
-     ATH_CHECK( detStore()->retrieve(onlHelper, "LArOnlineID") );
-     m_onlineHelper=dynamic_cast<const LArOnlineID_Base*>(onlHelper);
-     const CaloCell_ID *caloid=nullptr;
-     ATH_CHECK( detStore()->retrieve(caloid, "CaloCell_ID") );
-     m_caloId = dynamic_cast<const CaloCell_Base_ID*>(caloid); 
+     ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
+     ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_ID") );
   }
 
   if(m_isSC) m_bcMask.setSC();
