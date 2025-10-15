@@ -11,6 +11,7 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h" 
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "Acts/Utilities/Helpers.hpp"
 
 namespace {
     constexpr double resetVal = 1.e10;
@@ -25,6 +26,7 @@ StatusCode PhiHoughTransformAlg::initialize() {
     ATH_CHECK(m_maxima.initialize());
     ATH_CHECK(m_segmentSeeds.initialize());
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
+    ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
 }
 void PhiHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
@@ -137,10 +139,10 @@ std::vector<ActsPeakFinderForMuon::Maximum>
     // fill the accumulator with the phi measurements   
     for (auto hit : maximum.getHitsInMax()){
         if (!hit->measuresPhi()) {
-            ATH_MSG_VERBOSE("Hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<" does not have a phi measurement");
+            ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hit->identify())<<" does not have a phi measurement");
             continue;
         }
-        ATH_MSG_VERBOSE("Fill hit "<<hit->msSector()->idHelperSvc()->toString(hit->identify())<<", "<<Amg::toString(hit->localPosition()));
+        ATH_MSG_VERBOSE("Fill hit "<<m_idHelperSvc->toString(hit->identify())<<", "<<Amg::toString(hit->localPosition()));
         eventData.houghPlane->fill<HoughHitType>(
             hit, eventData.currAxisRanges,
             HoughHelpers::Phi::houghParamStrip,

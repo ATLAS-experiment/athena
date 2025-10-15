@@ -75,7 +75,12 @@ namespace MuonR4{
             /// @brief extend a maximum with all compatible (pure) phi hits. 
             /// @param hitList: list of hits to extend 
             /// @param bucket: the bucket to take the phi hits from 
-            void extendWithPhiHits(std::vector<HoughHitType> & hitList, HoughSetupForBucket& bucket) const ;  
+            /// @param tanBeta: Angle estimates from the hough maximum
+            /// @param interceptY: Intercept estimated from the hough maximum
+            void extendWithPhiHits(std::vector<HoughHitType> & hitList, 
+                                   HoughSetupForBucket& bucket,
+                                   const double tanBeta,
+                                   const double interceptY) const ;  
             /// @brief Returns whether the hit is a precision hit or not
             static bool isPrecisionHit(const HoughHitType& hit);
             // target resolution in the angle
@@ -98,6 +103,9 @@ namespace MuonR4{
             DoubleProperty m_peakFractionCutOff{this, "PeakFractionCutOff", 0.6};
             // How many valid precision hits have to be on the pattern
             UnsignedIntegerProperty m_nPrecHitCut{this, "nMinPrecHits", 3};
+            // Phi strip safety margin. Phi hits are only appended if the maximum kind
+            // of crosses the strip in theory
+            DoubleProperty m_phiStripSafety{this, "PhiSafetyMargin", 15.*Gaudi::Units::cm};
             
             // number of accumulator bins for the angle 
             IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 7};
