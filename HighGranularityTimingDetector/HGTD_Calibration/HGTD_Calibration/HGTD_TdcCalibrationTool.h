@@ -52,7 +52,7 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
   // virtual StatusCode initialize() override final;
 
   /**
-   * @brief Retrives the TDC measurment window upper bound based on the sensor placement.
+   * @brief Retrieves the TDC measurment window upper bound based on the sensor placement.
    *
    * @param [in] element Detector element (module) of the activated sensor.
    *

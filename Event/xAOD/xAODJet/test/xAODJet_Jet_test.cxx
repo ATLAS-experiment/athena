@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -152,7 +152,7 @@ int testAttributes ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& jetCont){
   xAOD::JetFourMom_t p4constit = jet->getAttribute< xAOD::JetFourMom_t >("JetConstitScaleMomentum");
   TESTMACRO( p4constit == jet->jetP4(xAOD::JetScale::JetConstitScaleMomentum), "Scale momentum retrieved as attribute identical to scale");
   jet_nc->setAttribute( "MyScale", p4constit*1.2);
-  TESTMACRO( (p4constit*1.2) == jet->jetP4("MyScale"), "Scale momentum set as attribute identical when retrived as scale");
+  TESTMACRO( (p4constit*1.2) == jet->jetP4("MyScale"), "Scale momentum set as attribute identical when retrieved as scale");
 
 
   return 0;

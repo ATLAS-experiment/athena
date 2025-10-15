@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 from DQDefects import DefectsDB
@@ -274,7 +274,7 @@ class IDBSDefectData:
                 print (run, lb, defects)
             return defects
 
-        # Retrive info for entire run
+        # Retrieve info for entire run
         iovs = self.db.retrieve(since, until, channels=channels)
 
         # Check if run exists
@@ -334,7 +334,7 @@ class IDBSDefectData:
         since = (run << 32)+lbMin
         until = (run << 32)+lbMax
         
-        # Retrive info for entire run
+        # Retrieve info for entire run
         iovs = self.db.retrieve(since, until, channels=channels, nonpresent=True)
         
         # Check if run exists
