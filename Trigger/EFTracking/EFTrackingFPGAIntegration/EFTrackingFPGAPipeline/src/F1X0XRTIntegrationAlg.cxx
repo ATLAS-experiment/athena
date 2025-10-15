@@ -40,7 +40,7 @@ StatusCode F1X0XRTIntegrationAlg::initialize()
   }
   {
     Athena::Chrono chrono("XRT::load_xclbin", m_chronoSvc.get());
-    xrt::xclbin xb(m_xclbin);
+    xrt::xclbin xb(m_xclbin.value());
     m_xrtUuid = m_xrtDevice.load_xclbin(xb);
   }
   ATH_MSG_INFO("loading " << m_xclbin);
@@ -370,7 +370,7 @@ StatusCode F1X0XRTIntegrationAlg::finalize()
 
 void F1X0XRTIntegrationAlg::getListofCUs(std::vector<std::string>& cuNames)
 {
-  xrt::xclbin xrt_xclbin(m_xclbin);
+  xrt::xclbin xrt_xclbin(m_xclbin.value());
 
   ATH_MSG_INFO("xsa name: "  << xrt_xclbin.get_xsa_name());
   ATH_MSG_INFO("fpga name: " << xrt_xclbin.get_fpga_device_name());
