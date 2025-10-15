@@ -2,31 +2,22 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-def MsTrackTesterCfg(flags, name = "MsTrackTester", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("isMC", flags.Input.isMC)
-    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg
-    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
-    the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-
-def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
-    result = ComponentAccumulator()
-    if not flags.Input.isMC:
-        from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-        result.merge(LegacyMuonRecoChainCfg(flags))
-        kwargs.setdefault("TruthSegkey", "MuonSegments")
-    the_tool = CompFactory.MuonValR4.TrackVisualizationTool(name, **kwargs)
-    result.setPrivateTools(the_tool)
-    return result    
-
 def SegmentRefitTestCfg(flags,name="SegmentRefitter", **kwargs):
     result = ComponentAccumulator()
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import ActsMuonSegmentRefitAlgCfg
+
     result.merge(ActsMuonSegmentRefitAlgCfg(flags))
     the_alg = CompFactory.MuonValR4.SegmentRefitTest(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def SegmentExtpTestCfg(falgs, name="SegmentExtrapolationTest", **kwargs):
+    result = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", 
+            result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,
+                                                             FieldMode="StraightLine")))
+    the_alg = CompFactory.MuonValR4.SegmentExtpTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
@@ -48,10 +39,15 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True
     flags.Muon.doFastMMDigitization = False
-    flags, cfg = setupGeoR4TestCfg(args,flags)
+    flags.Acts.TrackingGeometry.UseBlueprint = False
 
+    ####
+    flags, cfg = setupGeoR4TestCfg(args,flags)
+    cfg.getService("MessageSvc").setVerbose = ["ActsMuonSegmentRefitAlg"]
+   
+    
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonTrackTester"))
+                                    outStream="SegmentRefitTest"))
 
 
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
@@ -62,6 +58,14 @@ if __name__=="__main__":
 
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
-    cfg.merge(SegmentRefitTestCfg(flags))
+    #cfg.merge(SegmentRefitTestCfg(flags))
+    cfg.merge(SegmentExtpTestCfg(flags))
    
+    from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
+
+    cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                        CanvasPreFix="SegmentPlotValid",
+                                                                                        AllCanvasName="AllSegmentFitPlots", displayTruthOnly = True,
+                                                                                        saveSinglePDFs = True, saveSummaryPDF= True))
+ 
     executeTest(cfg)
