@@ -74,7 +74,9 @@ namespace met {
     MET_SOFTTRK_RESOCORR  ,
     MET_SOFTCALO_SCALEUP  ,
     MET_SOFTCALO_SCALEDOWN,
-    MET_SOFTCALO_RESO     ,
+    MET_SOFTCALO_RESOPARA  ,
+    MET_SOFTCALO_RESOPERP  ,
+    MET_SOFTCALO_RESOCORR  ,
     MET_JETTRK_SCALEUP    ,
     MET_JETTRK_SCALEDOWN
   };
@@ -152,12 +154,13 @@ namespace met {
     Gaudi::Property<std::string> m_configSoftCaloFile{this, "ConfigSoftCaloFile", "", ""};
     Gaudi::Property<bool> m_useDevArea{this, "UseDevArea", false, ""};
 
-    std::unique_ptr<TH3D> m_shiftpara_pthard_njet_mu{};
-    std::unique_ptr<TH3D> m_resopara_pthard_njet_mu{};
-    std::unique_ptr<TH3D> m_resoperp_pthard_njet_mu{};
+    std::unique_ptr<TH3D> m_trk_shiftpara_pthard_njet_mu{};
+    std::unique_ptr<TH3D> m_trk_resopara_pthard_njet_mu{};
+    std::unique_ptr<TH3D> m_trk_resoperp_pthard_njet_mu{};
+    std::unique_ptr<TH3D> m_calo_shiftpara_pthard_njet_mu{};
+    std::unique_ptr<TH3D> m_calo_resopara_pthard_njet_mu{};
+    std::unique_ptr<TH3D> m_calo_resoperp_pthard_njet_mu{};
     std::unique_ptr<TH2D> m_jet_systRpt_pt_eta{};
-    std::unique_ptr<TH1D> m_h_calosyst_scale{};
-    std::unique_ptr<TH1D> m_h_calosyst_reso{};
 
     mutable boost::thread_specific_ptr<TRandom3> m_rand_tls; // thread-specific random number generator
 
@@ -177,11 +180,7 @@ namespace met {
     StatusCode extractHistoPath(std::string & histfile, std::string & systpath, std::string & configdir, std::string & suffix, SystType const & type);
 
     missingEt calcPtHard(xAOD::MissingETContainer const * const cont) const;
-    missingEt caloSyst_scale(missingEt const &softTerms , double const scale) const;
-    missingEt caloSyst_reso (missingEt const &softTerms) const;
-    missingEt softTrkSyst_scale (missingEt const & softTerms, missingEt const & ptHard, double const shift) const;
-    missingEt softTrkSyst_reso  (missingEt const & softTerms, missingEt const & ptHard, double const shift, double const smearpara,
-				       double const smearperp) const;
+    missingEt variedSoftTerm (missingEt const & softTerms, missingEt const & ptHard, double varPara, double varPerp) const;
     missingEt projectST     (missingEt const & softTerms, missingEt const & ptHard) const;
 
 

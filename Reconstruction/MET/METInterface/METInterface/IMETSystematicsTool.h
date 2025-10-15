@@ -27,7 +27,9 @@ namespace met {
   namespace softCaloAffSyst {
     const static CP::SystematicVariation MET_SoftCalo_ScaleUp  ("MET_SoftCalo_Scale__1up"  );
     const static CP::SystematicVariation MET_SoftCalo_ScaleDown("MET_SoftCalo_Scale__1down");
-    const static CP::SystematicVariation MET_SoftCalo_Reso     ("MET_SoftCalo_Reso");
+    const static CP::SystematicVariation MET_SoftCalo_ResoPara ("MET_SoftCalo_ResoPara" );
+    const static CP::SystematicVariation MET_SoftCalo_ResoPerp ("MET_SoftCalo_ResoPerp" );
+    const static CP::SystematicVariation MET_SoftCalo_ResoCorr ("MET_SoftCalo_ResoCorr" );
   }
 
   namespace softTrkAffSyst {
@@ -54,11 +56,14 @@ namespace met {
   {
     if(systematic == met::softCaloAffSyst::MET_SoftCalo_ScaleUp ||
        systematic == met::softCaloAffSyst::MET_SoftCalo_ScaleDown ||
-       systematic == met::softCaloAffSyst::MET_SoftCalo_Reso ) return SOFTCALO;
+       systematic == met::softCaloAffSyst::MET_SoftCalo_ResoPara ||
+       systematic == met::softCaloAffSyst::MET_SoftCalo_ResoPerp ||
+       systematic == met::softCaloAffSyst::MET_SoftCalo_ResoCorr ) return SOFTCALO;
     if(systematic == met::softTrkAffSyst::MET_SoftTrk_ScaleUp ||
        systematic == met::softTrkAffSyst::MET_SoftTrk_ScaleDown ||
        systematic == met::softTrkAffSyst::MET_SoftTrk_ResoPara ||
-       systematic == met::softTrkAffSyst::MET_SoftTrk_ResoPerp ) return SOFTTRK;
+       systematic == met::softTrkAffSyst::MET_SoftTrk_ResoPerp ||
+       systematic == met::softTrkAffSyst::MET_SoftTrk_ResoCorr ) return SOFTTRK;
     if(systematic == met::jetTrkAffSyst::MET_JetTrk_ScaleUp ||
        systematic == met::jetTrkAffSyst::MET_JetTrk_ScaleDown ) return JETTRK;
     return INVALID;
