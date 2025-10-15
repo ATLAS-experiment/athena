@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetMeasurementUtilities )
@@ -33,6 +33,8 @@ atlas_add_component( InDetMeasurementUtilities
 						AthenaBaseComps
 						StoreGateLib
 						BeamSpotConditionsData
+                                                AthContainers
+                                                AthAllocators
 		     )
 
 atlas_install_scripts( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

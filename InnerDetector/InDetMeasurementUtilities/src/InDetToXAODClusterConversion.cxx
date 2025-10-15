@@ -22,6 +22,7 @@
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 #include "AthContainers/DataVector.h"
+#include "AthAllocators/DataPool.h"
 #include <iterator>
 
 
@@ -92,7 +93,7 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
   }
 
   SG::WriteHandle<xAOD::PixelClusterContainer> outputPixelClusterContainer(m_outputPixelClusterContainerKey, ctx);
-  ATH_CHECK( outputPixelClusterContainer.record (std::make_unique<xAOD::PixelClusterContainer>(),
+  ATH_CHECK( outputPixelClusterContainer.record (std::make_unique<xAOD::PixelClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 						 std::make_unique<xAOD::PixelClusterAuxContainer>()) );
   ATH_MSG_DEBUG( "Recorded xAOD::PixelClusterContainer with key: " << m_outputPixelClusterContainerKey.key()  );
 
@@ -105,7 +106,8 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
     if (!clusterCollection) continue;
     nclusters += clusterCollection->size();
   }
-  outputPixelClusterContainer->push_new (nclusters, [](){return new xAOD::PixelCluster();});
+  DataPool<xAOD::PixelCluster> pool (nclusters);
+  outputPixelClusterContainer->push_new (nclusters, [&pool](){return pool.nextElementPtr();});
   size_t icluster = 0;
 
   for (const auto *const clusterCollection : *inputPixelClusterContainer) {
@@ -145,7 +147,7 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
   }
 
   SG::WriteHandle<xAOD::StripClusterContainer> outputStripClusterContainer(m_outputStripClusterContainerKey, ctx);
-  ATH_CHECK( outputStripClusterContainer.record (std::make_unique<xAOD::StripClusterContainer>(),
+  ATH_CHECK( outputStripClusterContainer.record (std::make_unique<xAOD::StripClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 						 std::make_unique<xAOD::StripClusterAuxContainer>()) );
   ATH_MSG_DEBUG( "Recorded xAOD::StripClusterContainer with key: " << m_outputStripClusterContainerKey.key()  );
 
@@ -156,7 +158,8 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
     if (!clusterCollection) continue;
     nclusters += clusterCollection->size();
   }
-  outputStripClusterContainer->push_new (nclusters, [](){return new xAOD::StripCluster();});
+  DataPool<xAOD::StripCluster> pool (nclusters);
+  outputStripClusterContainer->push_new (nclusters, [&pool](){return pool.nextElementPtr();});
   size_t icluster = 0;
 
   static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");

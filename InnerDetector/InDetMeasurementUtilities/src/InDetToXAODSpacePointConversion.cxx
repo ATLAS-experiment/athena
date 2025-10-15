@@ -10,6 +10,7 @@
 
 #include "InDetPrepRawData/SiCluster.h"
 #include "TrkPrepRawData/PrepRawData.h"
+#include "AthAllocators/DataPool.h"
 
 namespace InDet {
 
@@ -118,7 +119,7 @@ namespace InDet {
     const ::SpacePointContainer* pixel_container = pixel_handle.cptr();
 
     // Output
-    std::unique_ptr< xAOD::SpacePointContainer > pixel_xaod_container = std::make_unique< xAOD::SpacePointContainer >();
+    std::unique_ptr< xAOD::SpacePointContainer > pixel_xaod_container = std::make_unique< xAOD::SpacePointContainer >(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
     std::unique_ptr< xAOD::SpacePointAuxContainer > pixel_xaod_aux_container = std::make_unique< xAOD::SpacePointAuxContainer >();
     pixel_xaod_container->setStore( pixel_xaod_aux_container.get() );
 
@@ -126,7 +127,8 @@ namespace InDet {
     for (const ::SpacePointCollection *spc : *pixel_container) {
       nsp += spc->size();
     }
-    pixel_xaod_container->push_new (nsp, [](){return new xAOD::SpacePoint();});
+    DataPool<xAOD::SpacePoint> pool (nsp);
+    pixel_xaod_container->push_new (nsp, [&pool](){return pool.nextElementPtr();});
     size_t isp = 0;
 
     // Conversion
