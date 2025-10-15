@@ -320,7 +320,7 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
                     m_pixelId->eta_index(rdoId), // COL
                     pixelRawData->getToT(), // TOT
                     pixelRawData->getLVL1A(),  // Lvl!
-                    0 // Spare
+                    0x0F0F0F // Spare
                     );
 
             // Push the word into the vector
@@ -438,7 +438,7 @@ StatusCode FPGADataFormatTool::convertStripRDO(
                     chipID,           // chip ID
                     ITkStripID,      // cluster number
                     stripEncodingForITK.at(stripID), // cluster map
-                    0                // spare bits
+                    0x0F0F           // spare bits
                     );
 
             uint32_t encodedCluster = FPGADataFormatUtilities::get_dataformat_STRIP_EF_RDO(stripWord);
