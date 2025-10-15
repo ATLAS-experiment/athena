@@ -1,21 +1,22 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_IPROXYDICT_H
 #define XAODROOTACCESS_TOOLS_IPROXYDICT_H
 
 #ifdef XAOD_STANDALONE
 
-// System include(s):
+/// Project include(s).
+#include "AsgMessaging/StatusCode.h"
+#include "CxxUtils/sgkey_t.h"
+#include "xAODCore/CLASS_DEF.h"
+
+// System include(s).
 #include <string>
 #include <vector>
 #include <memory>
 #include <cstdint>
-
-/// The CLID typedef is taken from xAODCore
-#include "xAODCore/CLASS_DEF.h"
-#include "CxxUtils/sgkey_t.h"
 
 namespace SG {
 
