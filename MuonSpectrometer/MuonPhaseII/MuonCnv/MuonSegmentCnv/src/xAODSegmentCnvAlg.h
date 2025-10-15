@@ -40,6 +40,8 @@ namespace MuonR4{
             using DecorKey_t = SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer>;
             /** @brief Decoration to the links to the associated Uncalibrated measurements */
             DecorKey_t m_prdLinkKey{this, "PrdLinkKey",  m_writeKey, "prdLinks" };
+            /** @brief Decoration to the PrdLink state (I.e. outlier or valid) */
+            DecorKey_t m_prdStateKey{this, "PrdStateKey", m_writeKey, "prdState"};
             /** @brief Decoration to the local segment parameters */
             DecorKey_t m_localSegParKey{this, "LocalSegParKey", m_writeKey, "localSegPars"};
             /** @brief Decoration of the original segment */
