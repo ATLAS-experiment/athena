@@ -93,7 +93,10 @@ def SetupMuonStandaloneCA(flags):
    
  
     from AthenaConfiguration.Enums import Format
-    if flags.Input.Format is Format.POOL:
+    if not flags.Input.Files:
+        # No input file --- skip setting up event reading.
+        pass
+    elif flags.Input.Format is Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))
     elif flags.Input.Format == Format.BS:
