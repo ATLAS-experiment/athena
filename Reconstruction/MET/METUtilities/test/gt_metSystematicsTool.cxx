@@ -72,9 +72,9 @@ namespace met {
   TEST_F( METSystTest,  TestDefaultHistosFilled ){
     ASSERT_TRUE(tool.initialize().isSuccess());
 
-    ASSERT_TRUE(tool.m_shiftpara_pthard_njet_mu!=nullptr);
-    ASSERT_TRUE(tool.m_resopara_pthard_njet_mu !=nullptr);
-    ASSERT_TRUE(tool.m_resoperp_pthard_njet_mu !=nullptr);
+    ASSERT_TRUE(tool.m_trk_shiftpara_pthard_njet_mu!=nullptr);
+    ASSERT_TRUE(tool.m_trk_resopara_pthard_njet_mu !=nullptr);
+    ASSERT_TRUE(tool.m_trk_resoperp_pthard_njet_mu !=nullptr);
     ASSERT_TRUE(tool.m_jet_systRpt_pt_eta      ==nullptr);
   }
 
@@ -84,9 +84,9 @@ namespace met {
     ASSERT_TRUE(tool.setProperty("ConfigJetTrkFile" ,"JetTrackSyst.config"));
     ASSERT_TRUE(tool.initialize().isSuccess());
 
-    ASSERT_TRUE(tool.m_shiftpara_pthard_njet_mu==nullptr);
-    ASSERT_TRUE(tool.m_resopara_pthard_njet_mu ==nullptr);
-    ASSERT_TRUE(tool.m_resoperp_pthard_njet_mu ==nullptr);
+    ASSERT_TRUE(tool.m_trk_shiftpara_pthard_njet_mu==nullptr);
+    ASSERT_TRUE(tool.m_trk_resopara_pthard_njet_mu ==nullptr);
+    ASSERT_TRUE(tool.m_trk_resoperp_pthard_njet_mu ==nullptr);
     ASSERT_TRUE(tool.m_jet_systRpt_pt_eta      !=nullptr);
   }
 
@@ -128,13 +128,13 @@ namespace met {
     met::missingEt yaxisSoftTerm (0., 15., 50.);
     met::missingEt xaxisHardTerm (10., 0., 50.);
 
-    met::missingEt proj = tool.softTrkSyst_scale(yaxisSoftTerm, xaxisHardTerm, 0. );
+    met::missingEt proj = tool.variedSoftTerm(yaxisSoftTerm, xaxisHardTerm, 0., 0.);
     EXPECT_FLOAT_EQ( proj.mpx  , yaxisSoftTerm.mpx );
     EXPECT_FLOAT_EQ( proj.mpy  , yaxisSoftTerm.mpy );
     EXPECT_FLOAT_EQ( proj.sumet, yaxisSoftTerm.sumet );
 
     double shift = 1.;
-    proj = tool.softTrkSyst_scale(yaxisSoftTerm, xaxisHardTerm, shift); //
+    proj = tool.variedSoftTerm(yaxisSoftTerm, xaxisHardTerm, shift, 0.); //
     EXPECT_FLOAT_EQ( proj.mpx  , (yaxisSoftTerm.mpx+shift) );
     EXPECT_FLOAT_EQ( proj.mpy  ,  yaxisSoftTerm.mpy );
     EXPECT_FLOAT_EQ( proj.sumet,  yaxisSoftTerm.sumet );
