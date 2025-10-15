@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 #include "LArHitEMapToDigitAlg.h"
 #include "AthenaKernel/ITriggerTime.h"
@@ -305,7 +305,7 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
     if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE, Samples).isFailure() ) {
       return StatusCode::SUCCESS;
     }
-    if(m_doDigiTruth){
+    if(m_doDigiTruth && TimeE_DigiHSTruth){
       if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE_DigiHSTruth, Samples_DigiHSTruth).isFailure() ) {
         return StatusCode::SUCCESS;
       }
