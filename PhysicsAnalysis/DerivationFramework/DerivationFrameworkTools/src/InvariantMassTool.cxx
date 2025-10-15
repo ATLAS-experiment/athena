@@ -9,9 +9,8 @@
 //
 
 #include "DerivationFrameworkTools/InvariantMassTool.h"
-#include "xAODBase/IParticleContainer.h"
-#include <vector>
-#include <string>
+#include <utility> //for std::pair
+#include <cmath> //for std::hypot
 
 namespace DerivationFramework {
 
@@ -117,23 +116,17 @@ namespace DerivationFramework {
 
     // Double loop to get all possible index pairs
     unsigned int outerIt, innerIt;
-    std::vector<std::vector<int> > pairs;
+    std::vector<std::pair<int, int> > pairs;
     // Loop for case where both legs are from the same container
     if (!from2Collections) {
       for (outerIt=0; outerIt<nEntries; ++outerIt) {
         for (innerIt=outerIt+1; innerIt<nEntries; ++innerIt) {
-          std::vector<int> tmpPair;
-          tmpPair.push_back(outerIt); tmpPair.push_back(innerIt);
-          pairs.push_back(tmpPair);
+          pairs.push_back({static_cast<int>(outerIt),static_cast<int>(innerIt)});
         }
       }
       // Select the pairs for which the mass should be calculated, and then calculate it	
-      std::vector<std::vector<int> >::iterator pairIt;
-      for (pairIt=pairs.begin(); pairIt!=pairs.end(); ++pairIt) {
-        unsigned int first = (*pairIt)[0];
-        unsigned int second = (*pairIt)[1];    
+      for (const auto & [first, second]: pairs) { 
         if ( (entries[first]==1 && entries2[second]==1) || (entries2[first]==1 && entries[second]==1) ) {
-         
           const float mass = calculateInvariantMass( ((*particles)[first])->p4().Vect(),
 						     ((*particles)[second])->p4().Vect(),
 						     m_massHypothesis,
@@ -149,16 +142,11 @@ namespace DerivationFramework {
         if (entries[outerIt]==0) continue;
         for (innerIt=0; innerIt<nEntries2; ++innerIt) {
           if (entries2[innerIt]==0) continue;
-          std::vector<int> tmpPair;
-          tmpPair.push_back(outerIt); tmpPair.push_back(innerIt);
-          pairs.push_back(tmpPair);
+          pairs.push_back({static_cast<int>(outerIt),static_cast<int>(innerIt)});
         }
       }
       // Select the pairs for which the mass should be calculated, and then calculate it        
-      std::vector<std::vector<int> >::iterator pairIt;
-      for (pairIt=pairs.begin(); pairIt!=pairs.end(); ++pairIt) {
-        unsigned int first = (*pairIt)[0];
-        unsigned int second = (*pairIt)[1];
+      for (const auto & [first, second]: pairs) {
         const float mass = calculateInvariantMass( ((*particles)[first])->p4().Vect(),
                                                    ((*particles2)[second])->p4().Vect(),
                                                    m_massHypothesis,

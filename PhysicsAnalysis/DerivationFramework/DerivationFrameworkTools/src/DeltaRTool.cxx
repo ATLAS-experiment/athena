@@ -6,9 +6,6 @@
 //
 
 #include "DerivationFrameworkTools/DeltaRTool.h"
-#include "xAODBase/IParticleContainer.h"
-#include <vector>
-#include <string>
 
 namespace DerivationFramework {
 
