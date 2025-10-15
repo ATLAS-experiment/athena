@@ -286,7 +286,8 @@ def DFCommonTruthTauDressingToolCfg(flags):
                                 dressParticlesKey     = "TruthTaus",
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.2, # Tau special
-                                particleIDsToDress    = [15])
+                                particleIDsToDress    = [15],
+                                decoratePhotons = False)
 
 def DFCommonTruthElectronIsolationTool1Cfg(flags):
     """Configure the electron isolation tool, cone=0.2"""
