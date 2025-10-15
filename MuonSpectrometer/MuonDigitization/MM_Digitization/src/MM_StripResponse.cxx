@@ -1,8 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MM_Digitization/MM_StripResponse.h"
+#include "MM_Digitization/MM_IonizationCluster.h"
+
+#include <algorithm>
+#include <cmath>
 
 MM_StripResponse::MM_StripResponse(std::vector<std::unique_ptr<MM_IonizationCluster>>& IonizationClusters, float timeResolution,
                                    float stripPitch, int stripID, int minstripID, int maxstripID) :
@@ -117,12 +121,10 @@ void MM_StripResponse::calculateSummaries(float chargeThreshold) {
             }
             if (!found) {  // 	// strip not in vector, add new entry
                 m_v_strip.push_back(stripVal);
-                std::vector<float> qTemp;
-                qTemp.push_back(stripChargeVal);
-                m_v_stripTotalCharge.push_back(qTemp);
-                std::vector<float> tTemp;
-                tTemp.push_back(timeBin * m_timeResolution);
-                m_v_stripTimeThreshold.push_back(tTemp);
+                //construct vector of 1 value of stripChargeVal in-place
+                m_v_stripTotalCharge.emplace_back(1,stripChargeVal);
+                //construct vector of 1 value of timeBin * m_timeResolution in-place
+                m_v_stripTimeThreshold.emplace_back(1, timeBin * m_timeResolution);
             }
         }
     }
