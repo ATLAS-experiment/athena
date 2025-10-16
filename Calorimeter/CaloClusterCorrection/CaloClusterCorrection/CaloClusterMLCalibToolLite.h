@@ -5,13 +5,15 @@
 #ifndef CALOCLUSTERCORRECTION_CALOCLUSTERMLCALIBTOOLLITE_H
 #define CALOCLUSTERCORRECTION_CALOCLUSTERMLCALIBTOOLLITE_H
 
-#include "CaloUtils/CaloClusterProcessor.h"
-#include "xAODCaloEvent/CaloCluster.h"
+//
+#include "AthenaBaseComps/AthAlgTool.h"
+#include "CaloClusterCorrection/ICaloClusterMLCalibToolLite.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "AthOnnxInterfaces/IAthInferenceTool.h"
-#include "StoreGate/WriteDecorHandleKey.h"
-#include "CaloClusterCorrection/ICaloClusterMLCalibToolLite.h"
-#include "CaloClusterCorrection/CaloClusterMLCalibFeatureTransform.h"
+#include "CaloClusterCorrection/CaloClusterMLCalibFeatureTransform.h"// for CaloClusterMLCalib::TransformFunc
+#include "GaudiKernel/ToolHandle.h"
+#include <vector>
+#include <string>
 
 struct PreprocessTransform
 {
