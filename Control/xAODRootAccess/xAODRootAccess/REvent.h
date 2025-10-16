@@ -1,560 +1,112 @@
-// Dear emacs, this is -*- c++ -*-
-//
 // Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-//
 #ifndef XAODROOTACCESS_REVENT_H
 #define XAODROOTACCESS_REVENT_H
 
-// STL include(s):
-#include <unordered_map>
-#include <set>
-#include <string>
-#include <vector>
-#include <memory>
-#include <unordered_map>
+// Local include(s).
+#include "xAODRootAccess/Event.h"
 
-// ROOT include(s):
-#include <Rtypes.h>
-#include <ROOT/REntry.hxx>
-#include <ROOT/RNTupleModel.hxx>
+// ROOT include(s).
 #include <ROOT/RNTupleReader.hxx>
-#include <ROOT/RNTupleWriter.hxx>
-#include <ROOT/RError.hxx>
 
-// EDM include(s):
-#include "xAODEventFormat/EventFormat.h"
-#include "AthContainersInterfaces/IAuxStoreHolder.h"
-#include "CxxUtils/checker_macros.h"
-#include "AthContainers/tools/threading.h"
-#include "AthContainers/tools/upgrade_mutex.h"
-#include "CxxUtils/sgkey_t.h"
+// System include(s).
+#include <memory>
+#include <string_view>
 
-// Interface include(s):
-#include "xAODRootAccessInterfaces/TVirtualEvent.h"
+namespace xAOD::Experimental {
 
-// Local include(s):
-#include "AsgMessaging/StatusCode.h"
-#include "CxxUtils/checker_macros.h"
-#include "xAODRootAccess/tools/IProxyDict.h"
+// Forward declaration(s).
+class RObjectManager;
 
-// Make the RNTuple types available in the ROOT namespace
-// with all versions of ROOT.
-#if ROOT_VERSION_CODE < ROOT_VERSION(6, 35, 1)
-namespace ROOT {
-using Experimental::RNTupleReader;
-using Experimental::RNTupleWriter;
-using Experimental::REntry;
-using Experimental::RException;
-using Experimental::kInvalidDescriptorId;
-}  // namespace ROOT
-#endif  // ROOT_VERSION_CODE < ROOT_VERSION(6, 36, 0)
+/// @short Tool for accessing xAOD files outside of Athena, version RNTuple
+///
+/// Proper access to xAOD files in ROOT (outside of Athena) needs to
+/// be done through such an object. It takes care of reading and
+/// writing xAOD files together with their file format metadata,
+/// setting up smart pointers correctly, etc.
+///
 
+class REvent : public Event {
 
-// Forward declaration(s):
-class TFile;
-class TChain;
-class TTree;
-namespace std {
-   class type_info;
-}
-namespace SG {
-   class IAuxStore;
-}
-namespace xAODPrivate {
-   class RHolderBucket;
-   class RLoader;
-}
-// namespace CP {
-//    class xAODWriterAlg;
-// }
-// class xAODTEventBranch;
-// class xAODTMetaBranch;
+ public:
+  /// Default constructor
+  REvent();
 
-namespace xAOD {
+  /// Destructor
+  virtual ~REvent();
 
-   // Forward declaration(s):
-   class TVirtualManager;
-   class TVirtualIncidentListener;
-   class TObjectManager;
-   // class TAuxStore;
-   class THolder;
-   // ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( REvent&, const char* );
+  /// @name Setup functions
+  /// @{
 
-   namespace Experimental {
+  /// Set up the reading of an input file
+  StatusCode readFrom(std::string_view fileName);
 
-   // Forward declaration(s):
-   class RObjectManager;
-   class REvent;
+  /// @}
 
-   /// @short Tool for accessing xAOD files outside of Athena, version RNTuple
-   ///
-   /// Proper access to xAOD files in ROOT (outside of Athena) needs to
-   /// be done through such an object. It takes care of reading and
-   /// writing xAOD files together with their file format metadata,
-   /// setting up smart pointers correctly, etc.
-   ///
-   /// For a detailed description of the usage of this class, see:
-   ///   <Link to be added here...>
-   ///
-   /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-   ///
+  /// @name Persistent data accessor/modifier functions
+  /// @{
 
-#ifdef XAOD_STANDALONE
-   class REvent : public TVirtualEvent, IProxyDict {
-#else
-   class REvent : public TVirtualEvent, public implements<IProxyDict> {
-#endif
-      // Declare the friend functions/classes:
-      // friend ::TTree* MakeTransientTree( REvent&, const char* );
-      // friend class ::xAODTEventBranch;
-      // friend class ::xAODTMetaBranch;
-      friend class xAODPrivate::RHolderBucket;
-      friend class xAODPrivate::RLoader;
-      // friend class CP::xAODWriterAlg;
+  /// Get how many entries are available from the current input file(s)
+  ::Long64_t getEntries() const;
+  /// Function loading a given entry of the input TTree
+  ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0);
 
-   public:
+  /// @}
 
-      /// Auxiliary store "mode"
-      enum EAuxMode {
-         kBranchAccess = 0, ///< Access auxiliary data branch-by-branch
-         kClassAccess  = 1, ///< Access auxiliary data using the aux containers
-         kAthenaAccess = 2, ///< Access containers/objects like Athena does
-         kUndefinedAccess = 3 ///< Undefined, to be selected by the object
-      };
+ private:
+  /// @name Functions implemented from @c xAOD::Event
+  /// @{
 
-      /// Default constructor
-      REvent( EAuxMode mode = kUndefinedAccess );
+  /// Check if an input file is connected to the object
+  bool hasInput() const override;
+  /// Check if an output file is connected to the object
+  bool hasOutput() const override;
 
-      /// Destructor
-      virtual ~REvent();
+  /// Function determining the list keys associated with a type name
+  StatusCode getNames(const std::string& targetClassName,
+                      std::vector<std::string>& vkeys,
+                      bool metadata) const override;
 
-      /// Do not allow copy-constructing this object:
-      REvent( const REvent& parent ) = delete;
+  /// Function setting up access to a particular object
+  StatusCode connectObject(const std::string& key, bool silent) override;
+  /// Function setting up access to a particular metadata object
+  StatusCode connectMetaObject(const std::string& key, bool silent) override;
+  /// Function setting up access to a set of auxiliary branches
+  StatusCode connectAux(const std::string& prefix, bool standalone) override;
+  /// Function setting up access to a set of auxiliary branches for a
+  /// metadata object
+  StatusCode connectMetaAux(const std::string& prefix,
+                            bool standalone) override;
 
-      /// Do not allow copying this object
-      REvent& operator=( const REvent& rhs ) = delete;
+  /// Function connecting a DV object to its auxiliary store
+  StatusCode setAuxStore(const std::string& key, Details::IObjectManager& mgr,
+                         bool metadata) override;
 
-      /// Get what auxiliary access mode the object was constructed with
-      EAuxMode auxMode() const;
+  /// Record an object into a connected output file
+  StatusCode record(void* obj, const std::string& typeName,
+                    const std::string& key, bool overwrite, bool metadata,
+                    bool isOwner) override;
 
-      /// Function creating a user-readable dump of the current input
-      std::string dump();
+  /// @}
 
-      /// Function printing the I/O statistics of the current process
-      void printIOStats() const;
+  /// Function to initialise the statistics for all Tree content
+  StatusCode initStats();
 
-      /// Function to silence warnings associated with broken element
-      /// links. These appear harmless so long as you don't actually
-      /// try to access the links (which will cause other errors).
-      void setPrintEventProxyWarnings(bool);
+  /// event uses RNTupleReader:
+  StatusCode setUpDynamicStore(RObjectManager& mgr,
+                               ROOT::RNTupleReader& ntupleReader);
 
-      /// @name Setup functions
-      /// @{
+  /// The main event data reader
+  std::unique_ptr<ROOT::RNTupleReader> m_eventReader;
+  /// Whether the input has an event RNTuple or not
+  bool m_inputNTupleIsMissing = false;
+  /// The metadata reader
+  std::unique_ptr<ROOT::RNTupleReader> m_metaReader;
 
-      /// This function takes care of connecting the event object to a new input
-      /// file. It reads in the metadata of the input file needed for reading
-      /// the file.
-      ///
-      /// @param fileName name of file needed for metadata access
-      ///
-      StatusCode readFrom( const std::string& fileName );
+  /// The entry to look at from the input tree
+  ::Long64_t m_entry;
 
-      // /// Connect the object to an output file
-      // StatusCode writeTo( ::TFile* file, Int_t autoFlush = 200,
-      //                      const char* treeName = EVENT_RNTUPLE_NAME );
-      // /// Finish writing to an output file
-      // StatusCode finishWritingTo( ::TFile* file );
+};  // class REvent
 
-      /// Set this event object as the currently active one
-      void setActive() const;
+}  // namespace xAOD::Experimental
 
-      /// Configure which dynamic variables to write out for a given store
-      void setAuxItemList( const std::string& containerKey,
-                           const std::string& itemList );
-
-      /// Register an incident listener object
-      StatusCode addListener( TVirtualIncidentListener* listener );
-      /// Remove an incident listener object
-      StatusCode removeListener( TVirtualIncidentListener* listener );
-      /// Remove all listeners from the object
-      void clearListeners();
-
-      /// Add a name re-mapping rule
-      StatusCode addNameRemap( const std::string& onfile,
-                                const std::string& newName );
-      /// Clear the current name re-mapping
-      void clearNameRemap();
-      /// Print the current name re-mapping rules
-      void printNameRemap() const;
-
-      /// @}
-
-      /// @name Event data accessor/modifier functions
-      /// @{
-
-      /// Function checking if an object is available from the store
-      template< typename T >
-      ::Bool_t contains( const std::string& key );
-      /// Function checking if an object is already in memory
-      template< typename T >
-      ::Bool_t transientContains( const std::string& key ) const;
-
-      /// Retrieve either an input or an output object from the event
-      template< typename T >
-      StatusCode retrieve( const T*& obj, const std::string& key );
-      /// Retrieve an output object from the event
-      template< typename T >
-      StatusCode retrieve( T*& obj, const std::string& key );
-
-      // /// Add an output object to the event
-      // template< typename T >
-      // StatusCode record( T* obj, const std::string& key,
-      //                     ::Int_t basketSize = 32000, ::Int_t splitLevel = 0 );
-      // /// Add an output object to the event, explicitly taking ownership of it
-      // template< typename T >
-      // StatusCode record( std::unique_ptr< T > obj, const std::string& key,
-      //                     ::Int_t basketSize = 32000, ::Int_t splitLevel = 0 );
-
-      // /// Add an auxiliary store object to the output
-      // SG::IAuxStore* recordAux( const std::string& key,
-      //                           SG::IAuxStoreHolder::AuxStoreType type =
-      //                           SG::IAuxStoreHolder::AST_ContainerStore,
-      //                           Int_t basketSize = 32000,
-      //                           Int_t splitLevel = 0 );
-
-      // /// Copy an object directly from the input to the output
-      // StatusCode copy( const std::string& key,
-      //                   ::Int_t basketSize = 32000, ::Int_t splitLevel = 0 );
-      // /// Copy all (ROOT readable) objects directly from the input to the output
-      // StatusCode copy( ::Int_t basketSize = 32000, ::Int_t splitLevel = 0 );
-
-      /// @}
-
-      /// @name Metadata accessor/modifier functions
-      /// @{
-
-      /// Function checking if a meta-object is available from the store
-      template< typename T >
-      ::Bool_t containsMeta( const std::string& key );
-      /// Function checking if a meta-object is already in memory
-      template< typename T >
-      ::Bool_t transientContainsMeta( const std::string& key ) const;
-
-      /// Retrieve an input metadata object
-      template< typename T >
-      StatusCode retrieveMetaInput( const T*& obj, const std::string& key );
-
-      /// Retrieve an output metadata object
-      template< typename T >
-      StatusCode retrieveMetaOutput( const T*& obj, const std::string& key );
-      // /// Retrieve an output metadata object
-      // template< typename T >
-      // StatusCode retrieveMetaOutput( T*& obj, const std::string& key );
-
-      /// Add an object to the output file's metadata
-      template< typename T >
-      StatusCode recordMeta( T* obj, const std::string& key,
-                              ::Int_t basketSize = 32000,
-                              ::Int_t splitLevel = 1 );
-      /// Add an object to the output file's metadata, explicitly taking
-      /// ownership of it
-      template< typename T >
-      StatusCode recordMeta( std::unique_ptr< T > obj, const std::string& key,
-                              ::Int_t basketSize = 32000,
-                              ::Int_t splitLevel = 1 );
-
-      /// @}
-
-      /// @name Persistent data accessor/modifier functions
-      /// @{
-
-      /// Get how many entries are available from the current input file(s)
-      ::Long64_t getEntries() const;
-      /// Function loading a given entry of the input TTree
-      ::Int_t getEntry( ::Long64_t entry, ::Int_t getall = 0 );
-
-      /// RDS: Only valid for TChains, i.e. RNTuple doesn't (yet) have a way to
-      ///      specify multiple files as TChain does.
-      // /// Get how many files are available on the currently defined input
-      // ::Long64_t getFiles() const;
-      // /// Load the first event for a given file from the input TChain
-      // ::Int_t getFile( ::Long64_t file, ::Int_t getall = 0 );
-
-      // /// Function filling one event into the output tree
-      // ::Int_t fill();
-
-      /// Get information about the input objects
-      const EventFormat* inputEventFormat() const;
-      // /// Get information about the output objects
-      // const EventFormat* outputEventFormat() const;
-
-      /// @}
-
-      /// @name Functions implementing the xAOD::TVirtualEvent interface
-      /// @{
-
-      /// Function returning the hash describing an object name
-      SG::sgkey_t getHash( const std::string& key ) const override;
-      /// Function returning the hash describing a known object
-      SG::sgkey_t getKey( const void* obj ) const override;
-      /// Function returning the key describing a known object
-      const std::string& getName( const void* obj ) const override;
-      /// Function returning the key describing a known object
-      const std::string& getName( SG::sgkey_t hash ) const override;
-
-      /// Internal function for recording an object into the output
-      // Declared public so we can call it from python.
-      StatusCode record( void* obj, const std::string& typeName,
-                          const std::string& key);
-                        //   const std::string& key,
-                        //   ::Int_t basketSize, ::Int_t splitLevel,
-                        //   ::Bool_t overwrite = kFALSE,
-                        //   ::Bool_t metadata = kFALSE,
-                        //   ::Bool_t isOwner = kTRUE );
-
-      // RDS: TEvent version:
-      // /// Internal function for recording an object into the output
-      // // Declared public so we can call it from python.
-      // StatusCode record( void* obj, const std::string& typeName,
-      //                     const std::string& key,
-      //                     ::Int_t basketSize, ::Int_t splitLevel,
-      //                     ::Bool_t overwrite = kFALSE,
-      //                     ::Bool_t metadata = kFALSE,
-      //                     ::Bool_t isOwner = kTRUE );
-
-   protected:
-      // /// Function for retrieving an output object in a non-template way
-      void* getOutputObject( SG::sgkey_t key,
-                             const std::type_info& ti ) override;
-      /// Function for retrieving an input object in a non-template way
-      const void* getInputObject( SG::sgkey_t key,
-                                  const std::type_info& ti,
-                                  bool silent = false ) override;
-
-      /// Function determining the list keys associated with a type name
-      void getNames(const std::string& targetClassName,
-                    std::vector<std::string>& vkeys,
-                    bool metadata = false) const;
-
-      /// @}
-
-      /// @name Functions implementing the IProxyDict interface
-      /// @{
-
-      /// get proxy for a given data object address in memory
-      SG::DataProxy* proxy( const void* const pTransient ) const override;
-
-      /// get proxy with given id and key. Returns 0 to flag failure
-      SG::DataProxy* proxy( const CLID& id,
-                            const std::string& key ) const override;
-
-      /// Get proxy given a hashed key+clid.
-      SG::DataProxy* proxy_exact( SG::sgkey_t sgkey ) const override;
-
-      /// Add a new proxy to the store.
-      StatusCode addToStore( CLID id, SG::DataProxy* proxy ) override;
-
-      /// return the list of all current proxies in store
-      std::vector< const SG::DataProxy* > proxies() const override;
-
-      /// Find the string corresponding to a given key.
-      SG::sgkey_t stringToKey( const std::string& str, CLID clid ) override;
-
-      /// Find the string corresponding to a given key.
-      const std::string* keyToString( SG::sgkey_t key ) const override;
-
-      /// Find the string and CLID corresponding to a given key.
-      const std::string* keyToString( SG::sgkey_t key,
-                                      CLID& clid ) const override;
-
-      /// Remember an additional mapping from key to string/CLID.
-      void registerKey( SG::sgkey_t key, const std::string& str,
-                        CLID clid ) override;
-
-      /// Record an object in the store
-      SG::DataProxy*
-      recordObject( SG::DataObjectSharedPtr< DataObject > obj,
-                    const std::string& key,
-                    bool allowMods,
-                    bool returnExisting ) override;
-
-      /// Get the name of the instance
-      const std::string& name() const override;
-
-      /// @}
-
-      /// Function to initialise the statistics for all Tree content
-      StatusCode initStats();
-      // /// Function for retrieving an output object in a non-template way
-      void* getOutputObject( const std::string& key,
-                             const std::type_info& ti,
-                             ::Bool_t metadata = kFALSE ) const;
-      /// Function for retrieving an input object in a non-template way
-      const void* getInputObject( const std::string& key,
-                                  const std::type_info& ti,
-                                  ::Bool_t silent = kFALSE,
-                                  ::Bool_t metadata = kFALSE );
-      // /// Internal function for adding an auxiliary store object to the output
-      // StatusCode record( TAuxStore* store, const std::string& key,
-      //                     ::Int_t basketSize, ::Int_t splitLevel,
-      //                     ::Bool_t ownsStore = kFALSE );
-      /// Function setting up access to a particular branch
-      StatusCode connectBranch( const std::string& key,
-                                 ::Bool_t silent = kFALSE );
-      /// Function setting up access to a branch in the metadata tree
-      StatusCode connectMetaBranch( const std::string& key,
-                                     ::Bool_t silent = kFALSE );
-      /// Function setting up access to a set of auxiliary branches
-      StatusCode connectAux( const std::string& prefix, ::Bool_t standalone );
-      /// Function setting up access to a set of auxiliary branches for a
-      /// metadata object
-      StatusCode connectMetaAux( const std::string& prefix,
-                                  ::Bool_t standalone );
-
-
-      /// Function adding dynamic variable reading capabilities to an auxiliary
-      /// store object
-      /// metadata still uses TTree:
-      StatusCode setUpDynamicStore( TObjectManager& mgr, ::TTree* tree );
-      /// event uses RNTupleReader:
-      StatusCode setUpDynamicStore( RObjectManager& mgr, ROOT::RNTupleReader* ntupleReader );
-
-
-      /// Function connecting a DV object to its auxiliary store
-      StatusCode setAuxStore( RObjectManager& mgr,
-                               ::Bool_t metadata = kFALSE );
-      /// Function connecting a DV object to its auxiliary store - using TTree, for metadata only
-      StatusCode setAuxStore( TObjectManager& mgr);
-
-      // /// Function saving the dynamically created auxiliary properties
-      // StatusCode putAux( ::TTree& outTree, TVirtualManager& mgr,
-      //                     ::Int_t basketSize = 32000, ::Int_t splitLevel = 0,
-      //                     ::Bool_t metadata = kFALSE );
-
-      /// RDS: for the three following methods, moving to directly take THolder rather than have one
-      ///      for TObjectManager and another for RObjectManager. This can eventually be moved to base class
-      ///      and have TEvent use this one.
-
-      /// Function checking if a given object may have an auxiliary store
-      static ::Bool_t hasAuxStore( const THolder& holder );
-
-      /// Function checking if a given object may be an auxiliary store
-      static ::Bool_t isAuxStore( const THolder& holder );
-
-      /// Function checking if an object is standalone (not a container)
-      static ::Bool_t isStandalone( const THolder& holder );
-
-      /// Internal function checking if an object is in the input
-      ::Bool_t contains( const std::string& key,
-                         const std::type_info& ti,
-                         ::Bool_t metadata = kFALSE );
-      /// Internal function checking if an object is already in memory
-      ::Bool_t transientContains( const std::string& key,
-                                  const std::type_info& ti,
-                                  ::Bool_t metadata = kFALSE ) const;
-
-      /// Definition of the internal data structure type
-      typedef std::unordered_map< std::string,
-                                  TVirtualManager* > Object_t;
-      /// Definition of the structure type holding on to listeners
-      typedef std::vector< TVirtualIncidentListener* > Listener_t;
-
-      /// Size of a possible TTreeCache (30 MB)
-      static const ::Int_t CACHE_SIZE;
-      /// Name of the event tree
-      static const char* const EVENT_RNTUPLE_NAME;
-      /// Name of the metadata tree
-      static const char* const METADATA_TREE_NAME;
-
-      /// The auxiliary access mode
-      EAuxMode m_auxMode;
-
-      /// The main event reader: RNTupleReader
-      std::unique_ptr<ROOT::RNTupleReader> m_inNtupleReader;
-
-      /// Pointer to the metadata tree in the input file
-      ::TTree* m_inMetaTree;
-
-      /// Boolean indicating the technology of the metadata tree, i.e. TTree of RNTuple
-      ::Bool_t m_inMetaTreeIsTTree;
-
-      /// The entry to look at from the input tree
-      ::Long64_t m_entry;
-
-      /// The tree that we are writing to
-      ::TTree* m_outTree;
-
-      /// Collection of all the managed input objects
-      Object_t m_inputObjects;
-
-      /// Objects that have been asked for, but were found to be missing
-      /// in the current input
-      std::set< std::string > m_inputMissingObjects;
-      /// Collection of all the managed output object
-      Object_t m_outputObjects;
-
-      /// Collection of all the managed input meta-objects
-      Object_t m_inputMetaObjects;
-      /// Collection of all the managed output meta-objects
-      Object_t m_outputMetaObjects;
-
-      /// Format of the current input file
-      EventFormat m_inputEventFormat;
-      /// Format of the current output file
-      EventFormat* m_outputEventFormat;
-
-      /// Rules for selecting which auxiliary branches to write
-      std::unordered_map< std::string, std::set< std::string > > m_auxItemList;
-
-      /// Listeners who should be notified when certain incidents happen
-      Listener_t m_listeners;
-
-      /// Container name re-mapping rules
-      std::unordered_map< std::string, std::string > m_nameRemapping;
-
-      /// Option to silence common warnings that seem to be harmless
-      Bool_t m_printEventProxyWarnings = true;
-
-      /// @name Variable(s) used in the IProxyDict implementation
-      /// @{
-
-      /// Helper struct used by the IProxyDict code
-      struct BranchInfo {
-         /// Data proxy describing this branch/object
-         std::unique_ptr< SG::DataProxy > m_proxy;
-         /// Dictionary describing this branch/object
-         const ::TClass* m_class = 0;
-      }; // struct BranchInfo
-
-      /// Mutex and lock for multithread synchronization
-      typedef AthContainers_detail::upgrade_mutex upgrade_mutex_t;
-      typedef AthContainers_detail::upgrading_lock< upgrade_mutex_t > upgrading_lock_t;
-      mutable upgrade_mutex_t m_branchesMutex;
-
-      /// Map from hashed sgkey to BranchInfo.
-      mutable SG::SGKeyMap< BranchInfo > m_branches ATLAS_THREAD_SAFE; // protected by mutex
-
-      /// @}
-
-      /// @name Helper functions for the IProxyDict interface
-      /// @{
-
-      /// Get the metadata object for a given "SG key"
-      const xAOD::EventFormatElement*
-      getEventFormatElement( SG::sgkey_t sgkey ) const;
-
-      /// Get the object describing one object/branch
-      const BranchInfo* getBranchInfo( SG::sgkey_t sgkey ) const;
-
-      /// @}
-
-   }; // class REvent
-
-   } // namepace Experimental
-
-} // namespace xAOD
-
-// Include the template implementation(s).
-#include "REvent.icc"
-
-#endif // XAODROOTACCESS_REVENT_H
+#endif  // XAODROOTACCESS_REVENT_H
