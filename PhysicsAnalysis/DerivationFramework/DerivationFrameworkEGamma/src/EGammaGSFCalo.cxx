@@ -57,8 +57,7 @@ StatusCode EGammaGSFCalo::finalize() {
 
 // ========================================================================
 
-StatusCode EGammaGSFCalo::addBranches() const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode EGammaGSFCalo::addBranches( const EventContext& ctx ) const {
 
   // input electron decoration handle
   SG::WriteDecorHandle<xAOD::ElectronContainer,
