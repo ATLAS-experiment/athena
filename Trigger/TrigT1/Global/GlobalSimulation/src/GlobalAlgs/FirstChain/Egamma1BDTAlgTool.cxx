@@ -3,13 +3,13 @@
 */
 
 #include "Egamma1BDTAlgTool.h"
-#include "../dump.h"
-#include "../dump.icc"
+#include "../../dump.h"
+#include "../../dump.icc"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
-#include "./Egamma1BDT/parameters.h"
+#include "../Egamma1BDT/parameters.h"
 
-#include "../IO/eEmEg1BDTTOB.h"
+#include "../../IO/eEmEg1BDTTOB.h"
 
 namespace GlobalSim {
 

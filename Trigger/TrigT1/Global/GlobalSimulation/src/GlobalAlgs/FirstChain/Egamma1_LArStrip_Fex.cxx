@@ -10,8 +10,8 @@
 #include "Egamma1_LArStrip_Fex.h"
 #include "CaloEvent/CaloCell.h"
 
-#include "../IO/LArStripNeighborhoodDumper.h"
-#include "../IO/eEmNbhoodTOB.h"
+#include "../../IO/LArStripNeighborhoodDumper.h"
+#include "../../IO/eEmNbhoodTOB.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
