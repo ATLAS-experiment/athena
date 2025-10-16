@@ -15,16 +15,6 @@
 
 #include <tuple>
 
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-namespace ROOT {
-  using REntry = ROOT::Experimental::REntry;
-  using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
-  using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
-  using RNTupleModel = ROOT::Experimental::RNTupleModel;
-  using RFieldBase = ROOT::Experimental::RFieldBase;
-}
-#endif
-
 namespace RootStorageSvc {
 
 class RNTupleWriterHelper : public AthMessaging {
