@@ -16,13 +16,11 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
-
+#include "StoreGate/ReadHandleKey.h"
 #include "xAODJet/JetContainer.h"
 
-#include "TObjArray.h"
-#include "TObjString.h"
+
 #include <vector>
 #include <string>
 

@@ -138,8 +138,8 @@ namespace DerivationFramework{
   StatusCode JetExternalAssocTool::TransferLink(const xAOD::Jet& jet, const xAOD::Jet& jet_external, const EventContext& ctx) const{
 
     for(unsigned int index_link = 0; index_link < m_VectorOfOldLinkNames.size(); index_link++){
-      auto OldLinkName = m_VectorOfOldLinkNames[index_link];
-      auto NewLinkName = m_VectorOfNewLinkNames[index_link];
+      const auto & OldLinkName = m_VectorOfOldLinkNames[index_link];
+      
 
       // assume we are always dealing a list of IParticles
       std::vector<const xAOD::IParticle*> targetObjs;
@@ -158,7 +158,7 @@ namespace DerivationFramework{
       }
 
       SG::WriteDecorHandle<xAOD::JetContainer, type_ghostlink*> dec_handle(m_dec_keys.at(index_link), ctx);
-      *dec_handle(jet) = targetLinks;
+      *dec_handle(jet) = std::move(targetLinks);
 
     }
 
