@@ -5,7 +5,10 @@
 #ifndef CALOCLUSTERCORRECTION_ICALOCLUSTERMLCALIBTOOLLITE_H
 #define CALOCLUSTERCORRECTION_ICALOCLUSTERMLCALIBTOOLLITE_H
 
+
 #include "GaudiKernel/IAlgTool.h"
+#include "xAODCaloEvent/CaloClusterContainer.h" //typedef
+#include <vector>
 
 class ICaloClusterMLCalibToolLite : public virtual IAlgTool
 {

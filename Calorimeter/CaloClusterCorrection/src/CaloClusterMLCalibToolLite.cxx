@@ -4,7 +4,7 @@
 
 #include "CaloClusterCorrection/CaloClusterMLCalibToolLite.h"
 #include "CaloClusterCorrection/CaloClusterMLGaussianMixture.h"
-
+#include "xAODCaloEvent/CaloCluster.h"
 #include "StoreGate/WriteDecorHandle.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -29,8 +29,8 @@ StatusCode CaloClusterMLCalibToolLite::initialize()
             {
                 floatParams.push_back(static_cast<float>(param));
             }
-            transform.parameters = floatParams;
-            m_featurePreprocessingTransforms.push_back(transform);
+            transform.parameters = std::move(floatParams);
+            m_featurePreprocessingTransforms.push_back(std::move(transform));
         }
         else
         {
@@ -63,27 +63,30 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
     double clusterE_TRUTH = 0;
 
     std::vector<float> transformedFeatures;
-
+    bool ok{}; //for checking return value of cluster->retrieveMoment
     for (const xAOD::CaloCluster *cluster : clusters)
     {
         clusterE = cluster->e(xAOD::CaloCluster::UNCALIBRATED) / Gaudi::Units::GeV;
         clusterEta = cluster->eta(xAOD::CaloCluster::UNCALIBRATED);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::ENG_CALIB_TOT, clusterE_TRUTH);
+        //set ok to first return value
+        ok = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::ENG_CALIB_TOT, clusterE_TRUTH);
         clusterE_TRUTH /= Gaudi::Units::GeV;
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SIGNIFICANCE, cluster_SIGNIFICANCE);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_TIME, cluster_SECOND_TIME);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SIGNIFICANCE, cluster_SIGNIFICANCE);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_TIME, cluster_SECOND_TIME);
         cluster_SECOND_TIME /= (Gaudi::Units::nanosecond * Gaudi::Units::nanosecond);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, cluster_CENTER_LAMBDA);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, cluster_CENTER_LAMBDA);
         cluster_CENTER_LAMBDA /= Gaudi::Units::millimeter;
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_MAG, cluster_CENTER_MAG);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::FIRST_ENG_DENS, cluster_FIRST_ENG_DENS);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_MAG, cluster_CENTER_MAG);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::FIRST_ENG_DENS, cluster_FIRST_ENG_DENS);
         cluster_FIRST_ENG_DENS /= (Gaudi::Units::GeV / Gaudi::Units::millimeter3);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::LONGITUDINAL, cluster_LONGITUDINAL);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::LATERAL, cluster_LATERAL);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::PTD, cluster_PTD);
-        cluster->retrieveMoment(xAOD::CaloCluster::MomentType::ISOLATION, cluster_ISOLATION);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::LONGITUDINAL, cluster_LONGITUDINAL);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::LATERAL, cluster_LATERAL);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::PTD, cluster_PTD);
+        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::ISOLATION, cluster_ISOLATION);
         cluster_time = cluster->time() / Gaudi::Units::nanosecond;
-
+        if (not ok) {
+          ATH_MSG_WARNING("CaloClusterMLCalibToolLite: retrieveMoment failed for "<<cluster);
+        }
         float e_EM = 0.0;
         for (size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++)
         {
