@@ -10,7 +10,7 @@ find_package( ROOT COMPONENTS Core MathCore )
 atlas_add_component( DerivationFrameworkEGamma
                      src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps CaloCalibHitRecLib DerivationFrameworkInterfaces EgammaAnalysisHelpersLib EgammaAnalysisInterfacesLib ExpressionEvaluationLib GaudiKernel MCTruthClassifierLib PATCoreLib PhotonVertexSelectionLib xAODBase xAODCaloEvent xAODEgamma xAODMissingET xAODMuon xAODTracking xAODTruth TruthUtils egammaCaloUtils)
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps CaloCalibHitRecLib DerivationFrameworkInterfaces EgammaAnalysisHelpersLib EgammaAnalysisInterfacesLib ExpressionEvaluationLib egammaInterfacesLib GaudiKernel MCTruthClassifierLib PATCoreLib PhotonVertexSelectionLib TrkToolInterfaces xAODBase xAODCaloEvent xAODEgamma xAODMissingET xAODMuon xAODTracking xAODTruth TruthUtils egammaCaloUtils)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

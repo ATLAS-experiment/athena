@@ -17,6 +17,7 @@
 #include "GaudiKernel/IPartPropSvc.h"
 
 #include "xAODEgamma/ElectronFwd.h"
+#include "xAODEgamma/ElectronContainer.h"
 
 #include <vector>
 #include <string>
@@ -24,6 +25,9 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODEgamma/ElectronContainerFwd.h"
 #include "xAODTracking/TrackParticleContainerFwd.h"
+
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
 /////////////////////////////////////////////////////////////////////////////
 
 namespace Trk {
@@ -97,6 +101,11 @@ namespace Analysis {
         bool m_allChCombs;
         SG::ReadHandleKey<xAOD::ElectronContainer>      m_electronCollectionKey;
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
+        SG::ReadDecorHandleKey<xAOD::ElectronContainer> m_gsfCaloLinkKey {
+            this, "GSFCaloLink", "Electrons.gsfCaloTrackParticleLink", 
+            "ReadHandleKey for electron link to GSFCalo refitted TrackParticle"
+        };
+
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::IVertexFitter > m_iV0VertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;

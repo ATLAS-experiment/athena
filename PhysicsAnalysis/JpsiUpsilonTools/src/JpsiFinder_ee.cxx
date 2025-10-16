@@ -35,6 +35,9 @@ namespace Analysis {
         ATH_CHECK(m_electronCollectionKey.initialize());
         ATH_CHECK(m_TrkParticleCollection.initialize());
 
+        // Initialize ReadDecorHandles
+        ATH_CHECK(m_gsfCaloLinkKey.initialize());
+
         // retrieving vertex Fitter
         ATH_CHECK(m_iVertexFitter.retrieve());
 
@@ -213,9 +216,18 @@ namespace Analysis {
         if (m_elel || m_eltrk) {
             for (elItr=importedElectronCollection->begin(); elItr!=importedElectronCollection->end(); ++elItr) {
                 if ( *elItr == NULL ) continue;
-	        if (!(*elItr)->trackParticleLink().isValid()) continue; // No electrons without ID tracks
-	        const xAOD::TrackParticle* elTrk(0);
-                elTrk = (*elItr)->trackParticleLink().cachedElement();
+                if (!(*elItr)->trackParticleLink().isValid()) continue; // No electrons without ID tracks
+                const xAOD::TrackParticle* elTrk(0);
+                if (m_TrkParticleCollection.key() == "GSFCaloContainer") {
+                    SG::ReadDecorHandle<xAOD::ElectronContainer, ElementLink<xAOD::TrackParticleContainer>>
+                        refittedTrackParticleLink(m_gsfCaloLinkKey, ctx);
+                    const ElementLink<xAOD::TrackParticleContainer>& refittedTrackLink = refittedTrackParticleLink(*(*elItr));
+                    if (!refittedTrackLink.isValid()) continue;
+                    elTrk = *refittedTrackLink;
+                } else {
+                    if (!(*elItr)->trackParticleLink().isValid()) continue;
+                    elTrk = (*elItr)->trackParticleLink().cachedElement();
+                }
 
                 if ( elTrk==NULL) continue;
                 if ( !m_trkSelector->decision(*elTrk, vx) ) continue; // all ID tracks must pass basic tracking cuts
@@ -255,13 +267,22 @@ namespace Analysis {
         if (m_elel) {
             for (jpsiItr=jpsiCandidates.begin(); jpsiItr!=jpsiCandidates.end(); ++jpsiItr) {
                 if ( m_useTrackMeasurement ) {
-                  (*jpsiItr).trackParticle1 = (*jpsiItr).el1->trackParticleLink().cachedElement();
-                  (*jpsiItr).trackParticle2 = (*jpsiItr).el2->trackParticleLink().cachedElement();
+                    if (m_TrkParticleCollection.key() == "GSFCaloContainer") {
+                        SG::ReadDecorHandle<xAOD::ElectronContainer, ElementLink<xAOD::TrackParticleContainer>> 
+                            refittedTrackParticleLink(m_gsfCaloLinkKey, ctx);
+                        const ElementLink<xAOD::TrackParticleContainer>& refittedTrackLink1 = refittedTrackParticleLink(*((*jpsiItr).el1));
+                        const ElementLink<xAOD::TrackParticleContainer>& refittedTrackLink2 = refittedTrackParticleLink(*((*jpsiItr).el2));
+                        (*jpsiItr).trackParticle1 = *refittedTrackLink1;
+                        (*jpsiItr).trackParticle2 = *refittedTrackLink2;
+                    } else {
+                        (*jpsiItr).trackParticle1 = (*jpsiItr).el1->trackParticleLink().cachedElement();
+                        (*jpsiItr).trackParticle2 = (*jpsiItr).el2->trackParticleLink().cachedElement();
+                    }
                   (*jpsiItr).collection1 = importedTrackCollection;
                   (*jpsiItr).collection2 = importedTrackCollection;
                 } else {
-		   ATH_MSG_WARNING("Not setup for non-track electron measurements yet....");
-		}
+                   ATH_MSG_WARNING("Not setup for non-track electron measurements yet....");
+		        }
             } // iteration over candidates
         }
 
@@ -499,6 +520,10 @@ namespace Analysis {
     std::vector<JpsiEECandidate> JpsiFinder_ee::getPairs2Colls(const std::vector<const xAOD::TrackParticle*> &tracks, const std::vector<const xAOD::Electron*> &electrons, bool tagAndProbe) const {
 
         std::vector<JpsiEECandidate> myPairs;
+        if (m_TrkParticleCollection.key() == "GSFCaloContainer") {
+            ATH_MSG_FATAL("GSFCaloContainer mode not implemented in getPairs2Colls.");
+            return myPairs;
+        }
         JpsiEECandidate pair;
 
         // Unless user is running in tag and probe mode, remove tracks which are also identified as muons
