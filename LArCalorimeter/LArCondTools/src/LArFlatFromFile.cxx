@@ -44,12 +44,7 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
   // we expect line per channel with Id, hash and value
   std::ifstream myfile(input);
   std::string line;
-  std::vector< std::vector<float> >  values;
-  for (unsigned gain=0;gain<nGain;++gain) {
-     std::vector<float> gval(m_hashMax);
-     for (unsigned hs=0;hs<m_hashMax;++hs) gval[hs]=1.0; // default
-     values.push_back(gval);
-  }   
+  std::vector< std::vector<float> >  values(nGain, std::vector<float>(m_hashMax,1.0f));
   unsigned id;
   unsigned hash;
   float value;
