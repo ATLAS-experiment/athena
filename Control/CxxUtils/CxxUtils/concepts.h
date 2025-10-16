@@ -88,6 +88,16 @@ concept AllocationFunction =
   std::invocable<F> && std::convertible_to<std::invoke_result_t<F>, T*>;
 
 
+/// Has addRef() and release()
+template <class T>
+concept RefCounted =
+  requires (T& x)
+{
+  { x.addRef() };
+  { x.release() };
+};
+
+
 } // namespace detail
 } // namespace CxxUtils
 
