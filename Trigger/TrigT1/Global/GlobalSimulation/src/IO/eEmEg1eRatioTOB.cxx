@@ -17,4 +17,10 @@ namespace GlobalSim::IOBitwise {
   std::bitset<IeEmEg1eRatioTOB::s_eGamma1eRatio_width> eEmEg1eRatioTOB::eGamma1eRatio_bits() const {
     return m_eGamma1eRatio_bits;
   }
+
+  std::string eEmEg1eRatioTOB::to_string() const {
+    return eEmTOB::to_string() +
+      " IeEmEg1eRatioTOB  details not yet implemented";
+  }
+
 }

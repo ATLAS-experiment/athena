@@ -149,8 +149,17 @@ namespace GlobalSim {
       "name from json menu file"
     };
 
+    Gaudi::Property<bool> m_enableDump {
+      this,
+      "enable_dump",
+      "False",
+      "floag to eanble debug dumps"
+    };
+
 
     ulong m_maxtob{0};
+
+    void dump() const;
 
   };
 }

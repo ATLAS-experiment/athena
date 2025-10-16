@@ -54,7 +54,7 @@ namespace GlobalSim::IOBitwise {
 
     //! @copydoc IeEmEg1eRatioTOB::eGamma1eRatio_bits()
     virtual std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits() const override;
-
+    virtual std::string to_string() const override;
   private:
     // Property: Bitset to hold the eGamma1eRatio bits
     std::bitset<s_eGamma1eRatio_width> m_eGamma1eRatio_bits;

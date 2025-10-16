@@ -3,6 +3,7 @@
 */
 
 #include "./CommonSelector.h"
+#include <sstream>
 
 namespace GlobalSim {
 
@@ -57,6 +58,17 @@ namespace GlobalSim {
     return true;
   };
   
-
+  std::string CommonSelector::to_string() const {
+    
+    auto ss = std::stringstream();
+    ss << "et_low: " << m_et_low <<' '
+       << "et_high: " << m_et_high <<' '
+       << "eta_low: " << m_eta_low <<' '
+       << "eta_high: " << m_eta_high <<' '
+       << "phi_low: " << m_phi_low <<' '
+       << "phi_high: " << m_phi_high;
+    
+    return ss.str();
+  };
 
 }

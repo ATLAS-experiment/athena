@@ -6,6 +6,8 @@
 #define GLOBALSIM_IEEMSELECTOR_H
 
 
+#include <string>
+
 namespace GlobalSim {
   namespace IOBitwise{
     class IeEmTOB;
@@ -24,7 +26,9 @@ namespace  GlobalSim {
   class IeEmSelector {
   public:
     virtual ~IeEmSelector() = default;
-    virtual bool select(const IeEmTOB&) const = 0; 
+    virtual bool select(const IeEmTOB&) const = 0;
+    virtual std::string to_string() const = 0;
+
   };
 }
 #endif

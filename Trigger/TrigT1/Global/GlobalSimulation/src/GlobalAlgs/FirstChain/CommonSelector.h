@@ -8,6 +8,7 @@
 #include "ICommonSelector.h"
 #include "../../IO/ICommonTOB.h"  // bitset widths
 
+#include <string>
 #include <climits>
 
 namespace  GlobalSim {
@@ -36,6 +37,8 @@ namespace  GlobalSim {
     virtual ~CommonSelector() = default;
 
     virtual bool select(const ICommonTOB&) const override;
+
+    virtual std::string to_string() const override;
 
   private:
     ulong m_et_low{0};

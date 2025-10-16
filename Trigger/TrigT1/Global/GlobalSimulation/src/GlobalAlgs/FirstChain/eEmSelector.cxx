@@ -3,6 +3,7 @@
 */
 
 #include "./eEmSelector.h"
+#include <sstream>
 
 namespace GlobalSim {
 
@@ -13,6 +14,12 @@ namespace GlobalSim {
       return v < m_cut;  
     };
 
+    virtual std::string to_string() const override {
+      std::stringstream ss;
+      ss << "cut: " << m_cut << " op: < ";
+      return ss.str();
+    }
+    
   private:
     ulong m_cut;
   };
@@ -24,6 +31,12 @@ namespace GlobalSim {
       return v <= m_cut;  
     };
 
+    virtual std::string to_string() const override {
+      std::stringstream ss;
+      ss << "cut: " << m_cut << " op: <= ";
+      return ss.str();
+    }
+
   private:
     ulong m_cut;
   };
@@ -34,6 +47,12 @@ namespace GlobalSim {
     virtual bool cut(const ulong& v) const override {
       return v > m_cut;  
     };
+    
+    virtual std::string to_string() const override {
+      std::stringstream ss;
+      ss << "cut: " << m_cut << " op: > ";
+      return ss.str();
+    }
 
   private:
     ulong m_cut;
@@ -46,6 +65,12 @@ namespace GlobalSim {
     virtual bool cut(const ulong& v) const override {
       return v >= m_cut;  
     };
+
+    virtual std::string to_string() const override {
+      std::stringstream ss;
+      ss << "cut: " << m_cut << " op: >= ";
+      return ss.str();
+    }
 
   private:
     ulong m_cut;
@@ -76,7 +101,6 @@ namespace GlobalSim {
     return cutter;
   }
 
-    
   using namespace GlobalSim::IOBitwise;
   
   eEmSelector::eEmSelector(ulong rhad_cut,
@@ -99,7 +123,16 @@ namespace GlobalSim {
 
     return true;
   };
-  
+
+
+  std::string eEmSelector::to_string() const {
+    
+    auto ss = std::stringstream();
+    ss << "rhad cutter: " << m_rhad_cutter->to_string() << ' '
+       << "reta cutter: " << m_reta_cutter->to_string() << ' '
+       << "wstot cutter: " << m_wstot_cutter->to_string();
+    return ss.str();
+  };
 
 
 }

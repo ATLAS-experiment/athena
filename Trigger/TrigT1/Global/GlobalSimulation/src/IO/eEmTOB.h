@@ -59,6 +59,8 @@ namespace GlobalSim::IOBitwise {
     //! @copydoc IeEmTOB::SeedIsMax_bit()
     virtual const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit() const override;
 
+    virtual std::string to_string() const override;
+
   private:
 
     /// Property: RHad threshold bitset within the eEmTOB word 
