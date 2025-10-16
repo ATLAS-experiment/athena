@@ -23,15 +23,6 @@
 
 using std::string;
 
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-namespace ROOT {
-   using ROOT::Experimental::RNTupleDescriptor;
-   using ROOT::Experimental::RFieldDescriptor;
-   using ROOT::Experimental::DescriptorId_t;
-   using ROOT::Experimental::kInvalidDescriptorId;
-}
-#endif
-
 namespace {
 
 /**
@@ -210,13 +201,9 @@ namespace RootAuxDynIO
             if( auxid != SG::null_auxid ) {
                addAuxID(auxid);
                m_fieldInfos[auxid].fieldName = field_name;
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-               m_fieldInfos[auxid].view = m_ntupleReader->GetView<void>(field_name, nullptr);
-#else
                // Can't use type_info because of default template argument in DataVectors ATEAM-1087
                const std::string& tiname = (standalone and !reg.isLinked(auxid))? reg.getTypeName(auxid) : reg.getVecTypeName(auxid);
                m_fieldInfos[auxid].view = m_ntupleReader->GetView(field_name, nullptr, tiname);
-#endif
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");
                msg << "Could not find auxid for " << attr_infile << " type: " << field_type

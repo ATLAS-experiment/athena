@@ -15,14 +15,6 @@
 #include <optional>
 #include <string>
 
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-   namespace ROOT {
-      using ROOT::Experimental::RNTupleView;
-      using ROOT::Experimental::RNTupleReader;
-   }
-#endif
-
-
 class TClass;
 
 namespace RootAuxDynIO

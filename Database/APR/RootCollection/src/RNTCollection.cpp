@@ -36,13 +36,6 @@ using namespace std;
 using namespace pool::RootCollection;
 using namespace pool::CollectionBaseNames;
 
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-namespace ROOT {
-   using RFieldBase = ROOT::Experimental::RFieldBase;
-   using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
-}
-#endif
-
 RNTCollection::RNTCollection(
    const pool::ICollectionDescription* description,
    pool::ICollection::OpenMode mode,

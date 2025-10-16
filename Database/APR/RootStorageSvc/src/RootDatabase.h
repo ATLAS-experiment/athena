@@ -22,12 +22,7 @@
 #include <unordered_map>
 
 // Forward declarations
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
 namespace ROOT { class RNTupleReader; }
-#else
-namespace ROOT::Experimental { class RNTupleReader; }
-namespace ROOT { using RNTupleReader = ROOT::Experimental::RNTupleReader; }
-#endif
 
 class TFile;
 class TTree;

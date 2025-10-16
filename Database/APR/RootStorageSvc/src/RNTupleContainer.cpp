@@ -197,16 +197,12 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          return pool::Error;
       }
       for( auto& dsc : m_fieldDescs ) {
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-         dsc.view = m_ntupleReader->GetView<void>(dsc.fieldname, nullptr);
-#else
          if( info->clazz().Name()=="pool::DbString" ) {
             dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, typeid(std::string));
          } else {
             // Can't use type_info because of default template argument in DataVectors ATEAM-1087
             dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, info->clazz().Name());
          }
-#endif
          if( dsc.auxdyn_writer ) {
             // Attach RNTuple Reader (owned by the DB)
             const std::string type_name = dsc.view->GetField().GetTypeName();
