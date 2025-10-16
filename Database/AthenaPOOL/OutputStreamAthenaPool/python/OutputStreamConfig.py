@@ -75,12 +75,26 @@ def OutputStreamCfg(
    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
    result.merge(PoolWriteCfg(flags))
 
+   # Extract the metadata storage technology for this file
+   # First try exact filename match, then wildcard
+   # If not found, default to the same technology as EventData for this file
+   metaDataTech = flags.Output.StorageTechnology.MetaData.get(fileName)
+   if metaDataTech is None:
+      metaDataTech = flags.Output.StorageTechnology.MetaData.get('*')
+   if metaDataTech is None:
+      # Fall back to EventData technology for this file
+      eventDataTech = flags.Output.StorageTechnology.EventData.get(
+         fileName,
+         flags.Output.StorageTechnology.EventData.get('*', 'ROOTTREEINDEX')
+      )
+      metaDataTech = eventDataTech
+
    # define athena output stream
    writingTool = CompFactory.AthenaOutputStreamTool(
       f"{outputStreamName(streamName)}Tool",
       DataHeaderKey=outputStreamName(streamName),
-      MetaDataPoolContainerPrefix=f"{flags.Output.StorageTechnology.MetaData}:MetaData",
-      MetaDataOutputCollection=f"{flags.Output.StorageTechnology.MetaData}:MetaDataHdr",
+      MetaDataPoolContainerPrefix=f"{metaDataTech}:MetaData",
+      MetaDataOutputCollection=f"{metaDataTech}:MetaDataHdr",
       ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc",
    )
 

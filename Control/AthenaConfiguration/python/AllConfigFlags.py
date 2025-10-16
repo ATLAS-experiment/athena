@@ -279,7 +279,8 @@ def initConfigFlags():
     acf.addFlag('Output.TemporaryStreams', [], help='list of output streams that are marked temporary')
     acf.addFlag('Output.StorageTechnology.EventData', {'*':'ROOTTREEINDEX'},
                 help="set the underlying POOL storage technology for event data, e.g., {f'{flags.Output.AODFileName}':'ROOTRNTUPLE', '*':'ROOTTREEINDEX'}")
-    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREE', help='set the underlying POOL storage technology for metadata')
+    acf.addFlag('Output.StorageTechnology.MetaData', {},
+                help="set the underlying POOL storage technology for metadata, e.g., {f'{flags.Output.AODFileName}':'ROOTRNTUPLE', '*':'ROOTTREE'}. If not set for a file, defaults to the EventData technology for that file.")
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py

@@ -57,17 +57,17 @@ SimplePoolFile1.root                                DEBUG --->Reading Assoc:F231
 SimplePoolFile1.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLContainerForm(DataHeaderForm) [202]  (8 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (9 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (9 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [202]  (a , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [203]  (a , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (b , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (b , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (c , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (c , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [202]  (d , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [203]  (d , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [202]  (e , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [203]  (e , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 ##Links                                             DEBUG No objects passing selection criteria... Container has 13 Entries in total.
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
@@ -84,12 +84,12 @@ POOLContainer(DataHeader)                           DEBUG Branch container 'Data
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:F2313678-C96A-964F-89E8-08BAB39F2DA7
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:F2313678-C96A-964F-89E8-08BAB39F2DA7
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdr(DataHeader)
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
@@ -156,17 +156,17 @@ SimplePoolFile1.root                                DEBUG --->Reading Assoc:F231
 SimplePoolFile1.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLContainerForm(DataHeaderForm) [202]  (8 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (9 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (9 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [202]  (a , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [203]  (a , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (b , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (b , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (c , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (c , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [202]  (d , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [203]  (d , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [202]  (e , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Reading Assoc:F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [203]  (e , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 ##Links                                             DEBUG No objects passing selection criteria... Container has 13 Entries in total.
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
@@ -188,19 +188,19 @@ RootDatabase.setOption                              DEBUG Got tree CollectionTre
 RootDatabase.setOption                              DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
 MetaDataSvc                                         DEBUG handle() BeginInputFile for SimplePoolFile1.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name SimplePoolFile1.root
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdr(DataHeader)
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
 MetaDataSvc                                         DEBUG Loaded input meta data store proxies
 MetaDataSvc                                         DEBUG  calling beginInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "F2313678-C96A-964F-89E8-08BAB39F2DA7"
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(xAOD::FileMetaData_v1/FileMetaData)
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
@@ -231,7 +231,7 @@ CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container Colle
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 0 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(EventStreamInfo_p3/StreamStream1)
+SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamStream1)
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Branch container 'EventStreamInfo_p3_StreamStream1'
