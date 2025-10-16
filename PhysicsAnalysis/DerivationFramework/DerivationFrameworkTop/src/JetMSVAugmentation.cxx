@@ -21,7 +21,7 @@ JetMSVAugmentation::JetMSVAugmentation(const std::string& t, const std::string& 
 
 
 
-JetMSVAugmentation::~JetMSVAugmentation(){}
+JetMSVAugmentation::~JetMSVAugmentation() = default;
 
 
 

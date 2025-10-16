@@ -22,6 +22,7 @@ namespace  GlobalSim {
   
   class ICutter {
   public:
+    virtual ~ICutter() = default;
     virtual bool cut(const ulong&) const = 0;
   };
 
@@ -44,9 +45,6 @@ namespace  GlobalSim {
     virtual bool select(const IeEmTOB&) const override;
 
   private:
-    ulong m_rhad_cut{0};
-    ulong m_eta_cut{0};
-    ulong m_wstot_cut{0};
     std::unique_ptr<ICutter> m_rhad_cutter{nullptr};
     std::unique_ptr<ICutter> m_reta_cutter{nullptr};
     std::unique_ptr<ICutter> m_wstot_cutter{nullptr};

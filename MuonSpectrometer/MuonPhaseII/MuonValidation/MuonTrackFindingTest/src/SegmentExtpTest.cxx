@@ -25,12 +25,6 @@ using namespace Acts::UnitLiterals;
 using namespace MuonR4::SegmentFit;
 using namespace Acts::detail::LineHelper;
 
-
-namespace {
-    constexpr double straightQoverP = 1. / 100._TeV;
-}
-
-
 namespace MuonValR4{
     StatusCode SegmentExtpTest::initialize(){
         ATH_CHECK(m_readKey.initialize());
@@ -46,7 +40,6 @@ namespace MuonValR4{
         const ActsGeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         const auto tgContext = gctx->context();
-        const auto initialCov{Acts::BoundMatrix::Identity()};
 
         auto extrapolate = [&](const Acts::BoundTrackParameters& start,
                                const MuonR4::SpacePoint& sp) {
