@@ -8,8 +8,8 @@
 */
 
 #include "Egamma1_LArStrip_Fex_RowAware.h"
-#include "../IO/LArStripNeighborhoodDumper.h"
-#include "../IO/eEmNbhoodTOB.h"
+#include "../../IO/LArStripNeighborhoodDumper.h"
+#include "../../IO/eEmNbhoodTOB.h"
 
 #include "CaloEvent/CaloCell.h"
 

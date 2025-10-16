@@ -9,12 +9,12 @@
  * AlgTool to read in LArStripNeighborhoods, and run the eRatio Algorithm.
  */
 
-#include "../IGlobalSimAlgTool.h"
-#include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/IeEmNbhoodTOBContainer.h"
-#include "../IO/IeEmNbhoodTOB.h"
-#include "../IO/IeEmEg1eRatioTOBContainer.h"
-#include "../IO/IeEmEg1eRatioTOB.h"
+#include "../../IGlobalSimAlgTool.h"
+#include "../../IO/LArStripNeighborhoodContainer.h"
+#include "../../IO/IeEmNbhoodTOBContainer.h"
+#include "../../IO/IeEmNbhoodTOB.h"
+#include "../../IO/IeEmEg1eRatioTOBContainer.h"
+#include "../../IO/IeEmEg1eRatioTOB.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"
