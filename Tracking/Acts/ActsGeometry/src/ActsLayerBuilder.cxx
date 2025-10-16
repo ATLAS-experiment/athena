@@ -290,6 +290,14 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
                m_cfg.mode == Mode::ITkPixelOuter) {
       size_t nBinsPhi = nModPhi * m_cfg.numberOfBinsFactor;
       size_t nBinsZ = nModZ * m_cfg.numberOfBinsFactor;
+
+      // Special treatment to allow
+      // for larger bins at high-eta and potentially avoid missing innermost hits
+      // for tracks at shallow angles
+      if (m_cfg.mode == Mode::ITkPixelInner && key==0 ) {
+        nBinsZ = nModZ * m_cfg.numberOfInnermostLayerBinsFactor;
+      }
+      
       layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
                                                 nBinsZ, pl, transform,
                                                 std::move(approachDescriptor));

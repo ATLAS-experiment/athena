@@ -159,6 +159,10 @@ private:
   /// using a higher number will reduce the number of surfaces per bin, thus speeding up navigation, but increasing memory consumption.
   Gaudi::Property<double> m_numberOfBinsFactor{this, "NumberOfBinsFactor", 5.0};
 
+  /// Special treatment for the innermost pixel layer to have more control on bin size to account for shallow angle tracks.
+  Gaudi::Property<double> m_numberOfInnermostLayerBinsFactor{this, "NumberOfInnermostLayerBinsFactor",2.0};
+  
+
 };
 
 
