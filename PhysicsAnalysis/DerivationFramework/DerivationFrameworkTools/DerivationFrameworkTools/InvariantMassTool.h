@@ -33,7 +33,7 @@ namespace DerivationFramework {
 
       StatusCode initialize();
       StatusCode finalize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
     private:
       std::string m_expression;

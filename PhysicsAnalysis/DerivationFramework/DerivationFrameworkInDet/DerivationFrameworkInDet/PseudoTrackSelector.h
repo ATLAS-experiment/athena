@@ -40,7 +40,7 @@ namespace DerivationFramework {
       StatusCode initialize();
       StatusCode execute();
       StatusCode finalize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
  
     protected:
       ///////////////////////////////////////////////////////////////////

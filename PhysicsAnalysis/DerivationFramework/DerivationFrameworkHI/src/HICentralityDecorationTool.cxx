@@ -57,9 +57,8 @@ namespace DerivationFramework
         return StatusCode::SUCCESS;
     }
 
-    StatusCode HICentralityDecorationTool::addBranches() const
+    StatusCode HICentralityDecorationTool::addBranches(const EventContext& ctx) const
     {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
         // Load event EventInfo
         SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 

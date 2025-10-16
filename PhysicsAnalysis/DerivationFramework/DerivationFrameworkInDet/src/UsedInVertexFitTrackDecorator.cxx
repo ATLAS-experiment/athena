@@ -43,7 +43,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode UsedInVertexFitTrackDecorator::addBranches() const
+  StatusCode UsedInVertexFitTrackDecorator::addBranches(const EventContext&) const
   {
     ATH_MSG_DEBUG("In addBranches(...) for " << name() <<  "...");
 

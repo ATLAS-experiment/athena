@@ -421,8 +421,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JpsiXPlus2V0::addBranches() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  StatusCode JpsiXPlus2V0::addBranches(const EventContext& ctx) const {
     size_t topoN = 4;
     if(!m_JXSubVtx) topoN--;
 

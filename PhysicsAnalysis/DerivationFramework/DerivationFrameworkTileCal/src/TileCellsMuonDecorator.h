@@ -47,7 +47,7 @@ namespace DerivationFramework {
       /// Constructor with parameters:
       using base_class::base_class;
 
-      virtual StatusCode addBranches() const override final;
+      virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
       // Athena algtool's Hooks
       virtual StatusCode initialize() override final;

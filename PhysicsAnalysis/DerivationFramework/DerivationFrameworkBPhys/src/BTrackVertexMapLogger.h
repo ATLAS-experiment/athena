@@ -35,7 +35,7 @@ namespace DerivationFramework {
       virtual StatusCode initialize();
       virtual StatusCode finalize();
       
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
       
   private:
       // job options

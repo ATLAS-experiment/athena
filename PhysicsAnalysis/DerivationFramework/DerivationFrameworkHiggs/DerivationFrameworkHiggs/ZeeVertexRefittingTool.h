@@ -39,7 +39,7 @@ namespace DerivationFramework {
 
       StatusCode initialize() override;
       StatusCode finalize() override;
-      StatusCode addBranches() const override;
+      StatusCode addBranches(const EventContext& ctx) const override;
 
     private:
       std::string m_expression;

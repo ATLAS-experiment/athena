@@ -51,7 +51,7 @@ namespace DerivationFramework {
       StatusCode initialize();
       StatusCode finalize();
       
-      StatusCode addBranches() const;
+      StatusCode addBranches(const EventContext& ctx) const;
       bool extrapolateTrack(TLorentzVector& extr_tp, const xAOD::IParticle& tp) const;
       bool extrapolateMuon(TLorentzVector& extr_tp, const xAOD::CaloCluster* cluster) const;
       xAOD::TrackParticle&  makeSlyTrack(xAOD::TrackParticle&, const TLorentzVector& candidate, const xAOD::Vertex* vertex, xAOD::BPhysHelper::pv_type vertexType) const;

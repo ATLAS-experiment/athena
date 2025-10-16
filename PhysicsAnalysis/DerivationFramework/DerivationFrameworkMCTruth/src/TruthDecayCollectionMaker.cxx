@@ -77,10 +77,9 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches(const EventContext& ctx) const
 {
     // Event context for AthenaMT
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);

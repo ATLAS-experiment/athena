@@ -28,7 +28,7 @@ namespace DerivationFramework {
     TruthDecayCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
     ~TruthDecayCollectionMaker();
     StatusCode initialize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
 
   private:
     Gaudi::Property<std::vector<int> > m_pdgIdsToKeep //!< List of PDG IDs to build this collection from

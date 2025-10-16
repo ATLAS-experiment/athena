@@ -61,11 +61,10 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HardScatterVertexDecorator::addBranches() const
+  StatusCode HardScatterVertexDecorator::addBranches(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("In addBranches(...) for " << name() <<  "...");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Open our vertex container
     SG::ReadHandle<xAOD::VertexContainer> vtxCont(m_vtxContKey, ctx);

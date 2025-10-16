@@ -33,7 +33,7 @@ namespace DerivationFramework {
     SUSYGenFilterTool(const std::string& t, const std::string& n, const IInterface* p);
     ~SUSYGenFilterTool();
     virtual StatusCode initialize() override;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   private:
     StatusCode getGenFiltVars(const xAOD::TruthParticleContainer& tpc, float& genFiltHT, float& genFiltMET, const EventContext& ctx) const;

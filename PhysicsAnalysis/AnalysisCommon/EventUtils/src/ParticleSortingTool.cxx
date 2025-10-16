@@ -119,7 +119,7 @@ else if ( evtStore()->contains<CONTAINERTYPE>( m_inCollKey.value() ) ) {        
 
 
 
-StatusCode ParticleSortingTool::addBranches() const
+StatusCode ParticleSortingTool::addBranches(const EventContext&) const
 {
   // Increase the event counter
   ++m_nEventsProcessed;
@@ -131,12 +131,12 @@ StatusCode ParticleSortingTool::addBranches() const
     // Try to get the input container as non-const
     ATH_MSG_DEBUG("Got an empty 'OutputCollection' property. "
                   << "Trying to retrieve a non-const version of the 'InputContainer'...");
-    xAOD::IParticleContainer* inCont = evtStore()->tryRetrieve<xAOD::IParticleContainer>( m_inCollKey.value() );
+    xAOD::IParticleContainer* inCont = evtStore()->tryRetrieve<xAOD::IParticleContainer>( m_inCollKey.value() ); // FIXME Use Handles
     if (inCont){ ATH_CHECK( this->doSort(inCont) ); }
     else {
       ATH_MSG_DEBUG("We couldn't retrieve a non-const version of the input container... try const.");
       const xAOD::IParticleContainer* inCont2 = nullptr;
-      ATH_CHECK( evtStore()->retrieve( inCont2, m_inCollKey.value()) );
+      ATH_CHECK( evtStore()->retrieve( inCont2, m_inCollKey.value()) ); // FIXME Use Handles
       // Now, do the copy and sorting and overwriting of all known container types
       if (false) {
       }

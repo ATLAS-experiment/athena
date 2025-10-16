@@ -28,8 +28,7 @@ StatusCode HITrackQualityAugmentationTool::initialize()
 }
 
  
-StatusCode HITrackQualityAugmentationTool::addBranches() const{
-      const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode HITrackQualityAugmentationTool::addBranches(const EventContext& ctx) const{
 
       // Get Primary vertex
       SG::ReadHandle<xAOD::VertexContainer> vertices{m_vertexContainerName, ctx};

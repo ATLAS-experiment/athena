@@ -19,8 +19,8 @@ namespace DerivationFramework {
   class METTriggerAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
   public:
     METTriggerAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
-    virtual StatusCode initialize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
   private:
     SG::ReadHandleKey<xAOD::EnergySumRoI> m_L1METName{this, "L1METName", "LVL1EnergySumRoI"};
     SG::ReadHandleKey<xAOD::JetRoIContainer> m_L1JetName{this, "L1JetName", "LVL1JetRoIs"};

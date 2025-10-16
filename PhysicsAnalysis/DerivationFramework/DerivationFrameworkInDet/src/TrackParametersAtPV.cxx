@@ -50,9 +50,8 @@ StatusCode DerivationFramework::TrackParametersAtPV::finalize()
 }
 
 // Augmentation
-StatusCode DerivationFramework::TrackParametersAtPV::addBranches() const
+StatusCode DerivationFramework::TrackParametersAtPV::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::WriteHandle< std::vector<float> >track_z0_PV(m_trackZ0PVKey,ctx);
   ATH_CHECK(track_z0_PV.record(std::make_unique< std::vector<float> >()));
 

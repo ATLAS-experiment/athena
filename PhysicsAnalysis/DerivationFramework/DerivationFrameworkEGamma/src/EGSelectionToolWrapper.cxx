@@ -51,10 +51,9 @@ EGSelectionToolWrapper::initialize()
 }
 
 StatusCode
-EGSelectionToolWrapper::addBranches() const
+EGSelectionToolWrapper::addBranches(const EventContext& ctx) const
 {
   // retrieve container
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EgammaContainer> particles{ m_ContainerName, ctx };
 
   // Decorators

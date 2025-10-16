@@ -31,7 +31,7 @@ namespace DerivationFramework {
     SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p);
     ~SUSYSignalTagger() = default;
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   private:
     bool FindSusyHardProc(const xAOD::TruthParticleContainer& truthP, int& pdgid1, int& pdgid2) const;

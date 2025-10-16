@@ -33,7 +33,7 @@ public:
   ~GainDecorator();
   StatusCode initialize();
   StatusCode finalize();
-  virtual StatusCode addBranches() const;
+  virtual StatusCode addBranches(const EventContext& ctx) const;
   static int getLayer(const CaloCell* cell);
 
   struct calculation

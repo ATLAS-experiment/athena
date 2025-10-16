@@ -43,9 +43,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode DeltaRTool::addBranches() const
+  StatusCode DeltaRTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Write deltaRs to SG for access by downstream algs     
     if (evtStore()->contains<std::vector<float> >(m_sgName.key())) { // FIXME Use Handles
       ATH_MSG_ERROR("Tool is attempting to write a StoreGate key " << m_sgName << " which already exists. Please use a different key");

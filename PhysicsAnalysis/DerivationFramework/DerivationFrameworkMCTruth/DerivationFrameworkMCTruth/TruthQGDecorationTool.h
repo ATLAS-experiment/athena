@@ -26,7 +26,7 @@ namespace DerivationFramework {
       TruthQGDecorationTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthQGDecorationTool();
       StatusCode initialize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
     private:
       /// input collection key

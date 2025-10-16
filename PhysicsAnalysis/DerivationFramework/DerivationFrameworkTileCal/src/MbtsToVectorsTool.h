@@ -36,7 +36,7 @@ namespace DerivationFramework {
       /// Constructor with parameters: 
       MbtsToVectorsTool( const std::string& type, const std::string& name, const IInterface* parent );
     
-      virtual StatusCode addBranches() const override final;
+      virtual StatusCode addBranches(const EventContext& ctx) const override final;
       virtual StatusCode initialize() override final;
 
     private:

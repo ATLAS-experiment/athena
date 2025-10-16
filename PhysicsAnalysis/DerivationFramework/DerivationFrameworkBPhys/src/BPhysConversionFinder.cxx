@@ -84,7 +84,7 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-  StatusCode BPhysConversionFinder::addBranches() const
+  StatusCode BPhysConversionFinder::addBranches(const EventContext&) const
   {
 
     int nTrackPairs_Init = 0;

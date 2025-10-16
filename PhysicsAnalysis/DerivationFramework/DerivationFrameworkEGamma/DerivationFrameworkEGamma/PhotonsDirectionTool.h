@@ -27,7 +27,7 @@ public:
     const IInterface* p);
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode addBranches() const override final;
+  virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
 private:
   SG::ReadHandleKey<xAOD::PhotonContainer> m_collName{ this,

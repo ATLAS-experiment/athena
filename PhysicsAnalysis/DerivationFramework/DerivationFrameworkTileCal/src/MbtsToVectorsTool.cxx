@@ -60,9 +60,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MbtsToVectorsTool::addBranches() const {
+  StatusCode MbtsToVectorsTool::addBranches(const EventContext& ctx) const {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::WriteHandle<std::vector<float> > energy(m_energyKey, ctx);
     ATH_CHECK( energy.record(std::make_unique<std::vector<float> >()) );

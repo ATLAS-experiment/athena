@@ -68,9 +68,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TrackToVertexWrapper::addBranches() const
+  StatusCode TrackToVertexWrapper::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // retrieve track container
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_containerName, ctx );

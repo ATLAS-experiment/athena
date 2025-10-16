@@ -56,9 +56,8 @@ StatusCode DerivationFramework::MuonTruthClassifierFallback::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches() const {
+StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches(const EventContext& ctx) const {
     // Retrieve main particle collection
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::IParticleContainer> parts{m_containerKey, ctx};
     if (!parts.isValid()) {

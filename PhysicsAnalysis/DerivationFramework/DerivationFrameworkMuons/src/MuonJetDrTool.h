@@ -26,7 +26,7 @@ namespace DerivationFramework {
         /** Destructor */
         ~MuonJetDrTool() = default;
 
-        virtual StatusCode addBranches() const override;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
         virtual StatusCode initialize() override;
 
     private:

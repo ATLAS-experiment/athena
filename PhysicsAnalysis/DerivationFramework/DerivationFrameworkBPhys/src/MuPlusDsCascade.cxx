@@ -92,9 +92,8 @@ namespace DerivationFramework {
     }
 
 
-    StatusCode MuPlusDsCascade::addBranches() const
+    StatusCode MuPlusDsCascade::addBranches(const EventContext& ctx) const
     {
-      const EventContext& ctx = Gaudi::Hive::currentContext();
       std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
       constexpr int topoN = 2;
       std::array<xAOD::VertexContainer*, topoN> Vtxwritehandles;

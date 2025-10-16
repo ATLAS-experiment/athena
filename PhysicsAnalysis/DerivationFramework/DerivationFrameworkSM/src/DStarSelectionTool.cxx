@@ -36,8 +36,7 @@ StatusCode DStarSelectionTool::initialize() {
     
 }
 
-StatusCode DStarSelectionTool::addBranches() const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode DStarSelectionTool::addBranches(const EventContext& ctx) const {
   
   // Track container
   const xAOD::TrackParticleContainer* trackParticleContainer{nullptr};

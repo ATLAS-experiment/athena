@@ -79,10 +79,9 @@ EGInvariantMassTool::initialize()
 }
 
 StatusCode
-EGInvariantMassTool::addBranches() const
+EGInvariantMassTool::addBranches(const EventContext& ctx) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::WriteHandle<std::vector<float>> writeHandle{ m_sgName, ctx };
 
   // create the vector which will hold the values invariant masses

@@ -65,10 +65,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode UnassociatedHitsDecorator::addBranches() const
+  StatusCode UnassociatedHitsDecorator::addBranches(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("Adding unassociated hits info to EventInfo");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey,ctx);
     CHECK( eventInfo.isValid() ? StatusCode::SUCCESS : StatusCode::FAILURE );

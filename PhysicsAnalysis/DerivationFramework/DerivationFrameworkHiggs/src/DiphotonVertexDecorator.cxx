@@ -62,9 +62,8 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
+StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_DEBUG( "DiphotonVertexDecorator::AddingBranches" );
   
   SG::ReadHandle<xAOD::VertexContainer> PV (m_primaryVertexKey, ctx);

@@ -1,35 +1,33 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// ISkimmingTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef DERIVATIONFRAMEWORK_INTERFACES_IAUGMENTATIONTOOL_H
-#define DERIVATIONFRAMEWORK_INTERFACES_IAUGMENTATIONTOOL_H 
+#define DERIVATIONFRAMEWORK_INTERFACES_IAUGMENTATIONTOOL_H
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/EventContext.h"
 
 namespace DerivationFramework {
 
   /**
-   @class IAugmentationTool
-       
-   @author James.Catmore-at-cern.ch
-   */
-     
+     @class IAugmentationTool
+
+     @author James.Catmore-at-cern.ch
+  */
+
   class IAugmentationTool : virtual public extend_interfaces<IAlgTool> {
-     public:
-       DeclareInterfaceID(IAugmentationTool, 1, 0);
+  public:
+    DeclareInterfaceID(IAugmentationTool, 1, 0);
 
-       /** Virtual destructor */
-       virtual ~IAugmentationTool(){}
+    /** Virtual destructor */
+    virtual ~IAugmentationTool(){}
 
-       /** Pass the thinning service  */
-       virtual StatusCode addBranches() const = 0;  	
+    /** Pass the thinning service  */
+    virtual StatusCode addBranches(const EventContext& ctx) const = 0;
   };
 
 } // end of namespace
 
-#endif 
+#endif

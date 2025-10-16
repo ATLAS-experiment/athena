@@ -61,9 +61,8 @@ namespace DerivationFramework {
     return true;
   }
 
-  StatusCode SUSYGenFilterTool::addBranches() const{
+  StatusCode SUSYGenFilterTool::addBranches(const EventContext& ctx) const{
     ATH_MSG_VERBOSE("SUSYGenFilterTool::addBranches()");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // skip mc samples not included in the MCSamples list
     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 

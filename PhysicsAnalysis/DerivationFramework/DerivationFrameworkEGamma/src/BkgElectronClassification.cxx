@@ -63,10 +63,9 @@ BkgElectronClassification::initialize()
 }
 
 StatusCode
-BkgElectronClassification::addBranches() const
+BkgElectronClassification::addBranches(const EventContext& ctx) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::ElectronContainer> electrons{ m_electronContainer, ctx };
   SG::ReadHandle<xAOD::TruthParticleContainer> truthContainer{ m_truthContainer,
                                                                ctx };

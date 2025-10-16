@@ -29,7 +29,7 @@ namespace DerivationFramework {
       TruthNavigationDecorator(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthNavigationDecorator();
       StatusCode initialize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
     private:
       /// Parameter: input particle collections

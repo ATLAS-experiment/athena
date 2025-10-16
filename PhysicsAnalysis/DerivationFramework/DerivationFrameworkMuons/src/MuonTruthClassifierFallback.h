@@ -30,7 +30,7 @@ namespace DerivationFramework {
         // Athena algtool's Hooks
         StatusCode initialize() override;
 
-        virtual StatusCode addBranches() const override;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
 
     private:
         SG::ReadHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerKey", "", "Key of the container to be decorated"};

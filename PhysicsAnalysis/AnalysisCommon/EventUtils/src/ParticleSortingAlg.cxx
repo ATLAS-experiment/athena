@@ -115,6 +115,7 @@ StatusCode ParticleSortingAlg::finalize()
 
 StatusCode ParticleSortingAlg::execute()
 {
+  const EventContext &ctx = Gaudi::Hive::currentContext();
   // Increase the event counter
   ++m_nEventsProcessed;
 
@@ -122,7 +123,7 @@ StatusCode ParticleSortingAlg::execute()
   ATH_MSG_DEBUG ( "==> execute " << name() << " on " << m_nEventsProcessed << ". event..." );
 
   // Call the tool
-  ATH_CHECK( m_tool->addBranches() );
+  ATH_CHECK( m_tool->addBranches(ctx) );
 
   return StatusCode::SUCCESS;
 }

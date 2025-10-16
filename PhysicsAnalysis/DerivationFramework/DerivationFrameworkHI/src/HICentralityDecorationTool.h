@@ -24,7 +24,7 @@ namespace DerivationFramework {
     // Athena algtool's Hooks
     StatusCode  initialize() override final;
 
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey { this, "EventInfoKey", "EventInfo", "" };

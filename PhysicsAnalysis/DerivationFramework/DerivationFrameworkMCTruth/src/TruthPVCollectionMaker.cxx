@@ -41,9 +41,8 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::initialize()
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches(const EventContext& ctx) const
 {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthEventContainer> importedTruthEvents{m_eventsKey, ctx};
     if (!importedTruthEvents.isValid()) {

@@ -20,8 +20,8 @@ namespace DerivationFramework {
   public:
     TVAAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
 
-    virtual StatusCode initialize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
   private:
     // Properties
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackName{this, "TrackName", "InDetTrackParticles"};

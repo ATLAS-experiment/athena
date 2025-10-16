@@ -67,7 +67,7 @@ namespace DerivationFramework {
     virtual StatusCode initialize() override;
  
     /** Check that the current event passes this filter */
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_trackContainerKey{

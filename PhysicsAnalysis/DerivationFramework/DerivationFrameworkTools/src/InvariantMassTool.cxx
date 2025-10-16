@@ -56,9 +56,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode InvariantMassTool::addBranches() const
+  StatusCode InvariantMassTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Write masses to SG for access by downstream algs     
     if (evtStore()->contains<std::vector<float> >(m_sgName.key())) {
       ATH_MSG_ERROR("Tool is attempting to write a StoreGate key " << m_sgName << " which already exists. Please use a different key");

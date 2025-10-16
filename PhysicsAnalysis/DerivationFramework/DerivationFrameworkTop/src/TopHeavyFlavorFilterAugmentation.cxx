@@ -31,8 +31,7 @@ StatusCode TopHeavyFlavorFilterAugmentation::initialize(){
 
 
 
-StatusCode TopHeavyFlavorFilterAugmentation::addBranches() const{
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode TopHeavyFlavorFilterAugmentation::addBranches(const EventContext& ctx) const {
 
   SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoName, ctx};
   if (!eventInfo.isValid()) {

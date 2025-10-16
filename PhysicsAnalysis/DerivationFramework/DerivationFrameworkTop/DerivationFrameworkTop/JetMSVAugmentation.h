@@ -31,7 +31,7 @@ namespace DerivationFramework {
     JetMSVAugmentation(const std::string& t, const std::string& n, const IInterface* p);
     ~JetMSVAugmentation();
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::JetContainer> m_jetCollectionName{this, "JetCollectionName", "AntiKt4EMTopoJets"};

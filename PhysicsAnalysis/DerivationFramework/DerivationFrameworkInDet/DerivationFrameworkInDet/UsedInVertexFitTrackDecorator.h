@@ -46,7 +46,7 @@ namespace DerivationFramework {
     StatusCode finalize();
 
     /// Function decorating the inputs
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
 
     /// @}
 

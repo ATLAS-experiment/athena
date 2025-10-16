@@ -51,11 +51,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode InDetTrackSelectionToolWrapper::addBranches() const
+  StatusCode InDetTrackSelectionToolWrapper::addBranches(const EventContext& ctx) const
   {
-
-    // Get current context 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // retrieve track container
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_tracksKey, ctx);

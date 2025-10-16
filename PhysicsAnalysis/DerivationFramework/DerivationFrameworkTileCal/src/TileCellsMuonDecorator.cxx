@@ -92,9 +92,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TileCellsMuonDecorator::addBranches() const {
+  StatusCode TileCellsMuonDecorator::addBranches(const EventContext& ctx) const {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::MuonContainer> muons(m_muonContainerKey, ctx);
     ATH_CHECK( muons.isValid() );

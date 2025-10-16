@@ -32,9 +32,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode AugmentationToolLeadingJets::addBranches() const
+  StatusCode AugmentationToolLeadingJets::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Set up the decorators
     SG::WriteDecorHandle<xAOD::JetContainer, bool> decorator (m_decorationKey, ctx);
 

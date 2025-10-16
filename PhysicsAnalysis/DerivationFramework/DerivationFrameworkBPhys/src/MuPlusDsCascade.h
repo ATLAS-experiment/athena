@@ -45,7 +45,7 @@ namespace DerivationFramework {
         ~MuPlusDsCascade();
         virtual StatusCode initialize() override;
         StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const;
-        virtual StatusCode addBranches() const override;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
 
         static xAOD::Vertex* FindVertexTrack(const xAOD::MuonContainer* c,  xAOD::Vertex* v);
 

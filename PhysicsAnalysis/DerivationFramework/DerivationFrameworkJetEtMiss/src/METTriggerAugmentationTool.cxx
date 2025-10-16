@@ -48,10 +48,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METTriggerAugmentationTool::addBranches() const
+  StatusCode METTriggerAugmentationTool::addBranches(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG(" In L1KF_METMaker::makeKFMET()" );
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // if the output has already been written we don't need to do anything
     if (evtStore()->contains<xAOD::EnergySumRoI>(m_outputName.key()) ) return StatusCode::SUCCESS; // FIXME  tool should not have been configured in this case
 

@@ -49,10 +49,9 @@ PhotonVertexSelectionWrapper::initialize()
 }
 
 StatusCode
-PhotonVertexSelectionWrapper::addBranches() const
+PhotonVertexSelectionWrapper::addBranches(const EventContext& ctx) const
 {
   // retrieve the input containers
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::PhotonContainer> photons{ m_photonContainer, ctx };
   SG::ReadHandle<xAOD::VertexContainer> vertices{ m_vertexContainer, ctx };
 

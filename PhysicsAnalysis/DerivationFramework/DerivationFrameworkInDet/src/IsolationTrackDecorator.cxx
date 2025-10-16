@@ -100,9 +100,8 @@ StatusCode DerivationFramework::IsolationTrackDecorator::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::IsolationTrackDecorator::addBranches() const
+StatusCode DerivationFramework::IsolationTrackDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // retrieve track container
   SG::ReadHandle<xAOD::TrackParticleContainer> toDecorate(m_trackContainerKey,ctx);
   ATH_CHECK( toDecorate.isValid() );

@@ -50,7 +50,7 @@ namespace DerivationFramework
     virtual StatusCode initialize() override;
 
     /// Calculate the matchings
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   private:
     // Properties

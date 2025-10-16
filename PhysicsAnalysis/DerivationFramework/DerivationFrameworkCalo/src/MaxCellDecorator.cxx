@@ -115,9 +115,8 @@ DerivationFramework::MaxCellDecorator::finalize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::MaxCellDecorator::addBranches() const
+DerivationFramework::MaxCellDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   if (!m_SGKey_photons.key().empty()) {
     // Retrieve photon container

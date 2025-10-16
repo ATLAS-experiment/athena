@@ -56,9 +56,8 @@ StatusCode DerivationFramework::Truth3CollectionMaker::finalize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
+StatusCode DerivationFramework::Truth3CollectionMaker::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Retrieve truth collections
   SG::ReadHandle<xAOD::TruthParticleContainer> importedTruthParticles(m_particlesKey, ctx);
   if (!importedTruthParticles.isValid()) {

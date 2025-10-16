@@ -41,7 +41,7 @@ public:
 
   ~CaloCellDecorator();
   StatusCode initialize();
-  virtual StatusCode addBranches() const;
+  virtual StatusCode addBranches(const EventContext& ctx) const;
 
   struct cell_decorations
   {

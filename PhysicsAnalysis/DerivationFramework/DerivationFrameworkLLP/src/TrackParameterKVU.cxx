@@ -59,9 +59,8 @@ StatusCode DerivationFramework::TrackParametersKVU::initialize()
 }
 
 // Augmentation
-StatusCode DerivationFramework::TrackParametersKVU::addBranches() const
+StatusCode DerivationFramework::TrackParametersKVU::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // --- Get the tracks
   //const xAOD::TrackParticleContainer* tracks = nullptr;
   SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trackContainerKey,ctx);

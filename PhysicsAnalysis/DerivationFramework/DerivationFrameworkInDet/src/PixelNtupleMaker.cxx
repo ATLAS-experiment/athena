@@ -35,8 +35,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext& ctx) const {
 
   SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_containerKey,ctx);
   if (!tracks.isValid()) { return StatusCode::SUCCESS; }

@@ -162,9 +162,8 @@ const TrackBag& Cascade3Plus1::ApplyAdditionalCuts(const TrackBag& alltracks, co
    return cuttracks;
 }
 
-StatusCode Cascade3Plus1::addBranches() const
+StatusCode Cascade3Plus1::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const xAOD::TrackParticleContainer  *trackContainer{};
   ATH_CHECK(evtStore()->retrieve(trackContainer, "InDetTrackParticles"      )); // FIXME Use Handles
 

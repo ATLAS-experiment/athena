@@ -54,9 +54,8 @@ TruthCaloShowerDecorator::finalize()
 }
 
 StatusCode
-TruthCaloShowerDecorator::addBranches() const
+TruthCaloShowerDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadHandle<xAOD::TruthParticleContainer> truthPartContainerReadHandle{
     m_truthParticleContainerName, ctx

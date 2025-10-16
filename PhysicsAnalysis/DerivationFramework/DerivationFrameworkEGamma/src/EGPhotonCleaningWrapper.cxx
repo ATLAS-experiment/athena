@@ -44,10 +44,9 @@ EGPhotonCleaningWrapper::initialize()
 }
 
 StatusCode
-EGPhotonCleaningWrapper::addBranches() const
+EGPhotonCleaningWrapper::addBranches(const EventContext& ctx) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::PhotonContainer> photons{ m_containerName, ctx };
 
   // If we're applying corrections, the correction tools will give us

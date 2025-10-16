@@ -83,9 +83,8 @@ namespace DerivationFramework {
     ATH_CHECK(m_mcReadDecor.initialize());
     return StatusCode::SUCCESS;
   }
-  StatusCode GenFilterTool::addBranches() const{
-    ATH_MSG_VERBOSE("GenFilterTool::addBranches()");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  StatusCode GenFilterTool::addBranches(const EventContext& ctx) const{
+    ATH_MSG_VERBOSE("GenFilterTool::addBranches(const EventContext& ctx)");
     SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoKey, ctx};
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoKey.fullKey());

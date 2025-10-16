@@ -51,10 +51,9 @@ StatusCode DerivationFramework::TruthIsolationTool::initialize()
 }
 
 // Function to do isolation calc, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
+StatusCode DerivationFramework::TruthIsolationTool::addBranches(const EventContext& ctx) const
 {
     // Event context 
-    const EventContext& ctx = Gaudi::Hive::currentContext(); 
 
     // Retrieve the truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> isoTruthParticles(m_isoParticlesKey, ctx);

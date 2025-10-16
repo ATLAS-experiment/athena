@@ -42,7 +42,7 @@ namespace DerivationFramework {
         ~MuPlusDpstCascade();
         virtual StatusCode initialize() override;
         StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
-        virtual StatusCode addBranches() const override;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
 
       private:
         std::string m_vertexContainerKey;

@@ -38,7 +38,7 @@ public:
     Cascade3Plus1(const std::string& t, const std::string& n, const IInterface*  p);
     virtual ~Cascade3Plus1();
     virtual StatusCode initialize() override;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
 private:
     static constexpr int s_topoN = 2;

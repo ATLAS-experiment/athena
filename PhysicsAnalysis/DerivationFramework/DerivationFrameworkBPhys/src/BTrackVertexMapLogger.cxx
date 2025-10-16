@@ -81,7 +81,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
   //--------------------------------------------------------------------------
-  StatusCode BTrackVertexMapLogger::addBranches() const {
+  StatusCode BTrackVertexMapLogger::addBranches(const EventContext&) const {
 
     ATH_MSG_DEBUG("BTrackVertexMapLogger::addBranches()");
 

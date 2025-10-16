@@ -69,7 +69,7 @@ StatusCode BPhysBGammaFinder::finalize() {
 }
 
 
-StatusCode BPhysBGammaFinder::addBranches() const {
+StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
 
   std::vector<const xAOD::Vertex*> BVertices;
   BVertices.clear();

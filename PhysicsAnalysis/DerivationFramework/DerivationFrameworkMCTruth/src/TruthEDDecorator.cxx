@@ -29,10 +29,9 @@ namespace DerivationFramework {
   }
 
 
-  StatusCode TruthEDDecorator::addBranches() const{
+  StatusCode TruthEDDecorator::addBranches(const EventContext& ctx) const{
     ATH_MSG_VERBOSE("addBranches()");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     if (!eventInfo.isValid()) {
