@@ -26,6 +26,7 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbString.h"
 #include "StorageSvc/DbOption.h"
+#include <iostream>
 
 using namespace pool;
 using namespace std;
