@@ -63,17 +63,17 @@ SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811
 SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(MagicNumber) [202]  (b , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (c , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (c , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [202]  (d , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [203]  (d , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (e , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (e , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (f , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (f , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [202]  (10 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [203]  (10 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [202]  (11 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [203]  (11 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 ##Links                                             DEBUG No objects passing selection criteria... Container has 16 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
@@ -83,12 +83,12 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 SimplePoolFile3.root                                DEBUG --->Reading Param:FID=[A811B014-0297-AD47-AF4C-B75EF418982D]
 SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdr(DataHeader)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
@@ -155,12 +155,12 @@ MetaDataSvc                                         DEBUG handle() BeginInputFil
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name SimplePoolFile3.root
 MetaDataSvc                                         DEBUG Loaded input meta data store proxies
 MetaDataSvc                                         DEBUG  calling beginInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "A811B014-0297-AD47-AF4C-B75EF418982D"
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(xAOD::FileMetaData_v1/FileMetaData)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
@@ -198,7 +198,7 @@ IOVDbSvc                                             INFO Initialised with 1 con
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 0 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(EventStreamInfo_p3/StreamReWrite)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamReWrite)
 MetaData(EventStreamInfo_p3/StreamReWrite)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamReWrite)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamReWrite)          DEBUG Branch container 'EventStreamInfo_p3_StreamReWrite'
@@ -1547,65 +1547,65 @@ StreamStream1                                       DEBUG  Added object 13163830
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::FileMetaDataAuxInfo_v1 [BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (d , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (d , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
 SimplePoolFile4.root                                DEBUG --->Adding Shape[8 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile4.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO EventStreamInfo_p3 [11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(EventStreamInfo_p3/StreamStream1)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamStream1)
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Branch container 'EventStreamInfo_p3_StreamStream1'
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opened container MetaData(EventStreamInfo_p3/StreamStream1) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(EventStreamInfo_p3/StreamStream1) [202]  (e , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(EventStreamInfo_p3/StreamStream1) [203]  (e , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
 SimplePoolFile4.root                                DEBUG --->Adding Shape[9 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolFile4.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::FileMetaData_v1 [C87E3828-4A7A-480A-95DE-0339539F6A0F]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaData_v1/FileMetaData)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (f , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (f , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
 SimplePoolFile4.root                                DEBUG --->Adding Shape[10 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolFile4.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO IOVMetaDataContainer_p1 [6C2DE6DF-6D52-43F6-B435-9F29812F40C0]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(IOVMetaDataContainer_p1//TagInfo)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opening
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG    attributes# = 1
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (10 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (10 , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
 SimplePoolFile4.root                                DEBUG --->Adding Shape[11 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolFile4.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdr(DataHeader)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdr(DataHeader) [202]  (11 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdr(DataHeader) [203]  (11 , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdrForm(DataHeaderForm) [202]  (12 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdrForm(DataHeaderForm) [203]  (12 , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile4.root                                DEBUG DB Action Commit
 StreamStream1                                       DEBUG Metadata items written: 4
