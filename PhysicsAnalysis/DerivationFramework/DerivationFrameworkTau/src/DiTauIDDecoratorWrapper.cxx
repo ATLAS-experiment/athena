@@ -22,9 +22,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode DiTauIDDecoratorWrapper::addBranches() const
+  StatusCode DiTauIDDecoratorWrapper::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // retrieve ditau container
     SG::ReadHandle<xAOD::DiTauJetContainer> ditauJetsReadHandle(m_ditauContainerKey, ctx);

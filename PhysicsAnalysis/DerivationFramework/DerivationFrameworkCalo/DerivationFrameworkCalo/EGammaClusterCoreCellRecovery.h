@@ -34,7 +34,7 @@ namespace DerivationFramework {
     ~EGammaClusterCoreCellRecovery() = default;
     StatusCode initialize();
     StatusCode finalize() { return StatusCode::SUCCESS; }
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
     
   private:
     SG::ReadHandleKey<xAOD::EgammaContainer> m_SGKey_photons

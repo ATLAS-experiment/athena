@@ -28,8 +28,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SUSYSignalTagger::addBranches() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  StatusCode SUSYSignalTagger::addBranches(const EventContext& ctx) const{
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoName, ctx);
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoName);

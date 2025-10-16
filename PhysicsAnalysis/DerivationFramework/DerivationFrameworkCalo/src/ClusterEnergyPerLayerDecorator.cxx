@@ -94,9 +94,8 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::finalize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches() const
+DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve cell container
 

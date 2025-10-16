@@ -56,9 +56,8 @@ namespace DerivationFramework
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HIGlobalAugmentationTool::addBranches() const
+  StatusCode HIGlobalAugmentationTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 
     //Load track particle container

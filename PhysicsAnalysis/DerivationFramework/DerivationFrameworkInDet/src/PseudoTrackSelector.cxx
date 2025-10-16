@@ -73,9 +73,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PseudoTrackSelector::addBranches() const
+  StatusCode PseudoTrackSelector::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::unique_ptr<xAOD::TrackParticleContainer> outputRecoReplacedWithPseudo = std::make_unique<xAOD::TrackParticleContainer>();
     std::unique_ptr<xAOD::TrackParticleAuxContainer> outputRecoReplacedWithPseudoAux = std::make_unique<xAOD::TrackParticleAuxContainer>();
     outputRecoReplacedWithPseudo->setStore(outputRecoReplacedWithPseudoAux.get());

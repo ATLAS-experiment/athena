@@ -86,10 +86,9 @@ namespace DerivationFramework {
      return StatusCode::SUCCESS;
   }
  
-  StatusCode AugOriginalCounts::addBranches() const
+  StatusCode AugOriginalCounts::addBranches(const EventContext& ctx) const
   {
 
-  	const EventContext& ctx = Gaudi::Hive::currentContext();
     
     if(!m_PVContainername.empty()){
 

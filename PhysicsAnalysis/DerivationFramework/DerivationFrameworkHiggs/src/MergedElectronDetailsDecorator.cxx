@@ -72,9 +72,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MergedElectronDetailsDecorator::addBranches() const{
+  StatusCode MergedElectronDetailsDecorator::addBranches(const EventContext& ctx) const{
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve the xAOD event info
     SG::ReadHandle<xAOD::ElectronContainer> electrons (m_electronKey, ctx);

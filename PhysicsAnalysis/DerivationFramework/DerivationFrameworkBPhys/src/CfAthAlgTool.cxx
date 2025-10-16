@@ -36,7 +36,7 @@
 //    base_class(t,n,p),
 //    ...
 //
-//   // inside a method like Bmumu_reco_mumu::addBranches():
+//   // inside a method like Bmumu_reco_mumu::addBranches(const EventContext& ctx):
 //   ...
 //    // add counter for number of events seen
 //    addEvent("dimuEvents");

@@ -107,8 +107,7 @@ StatusCode ReVertex::initialize() {
 }
 
 
-StatusCode ReVertex::addBranches() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode ReVertex::addBranches(const EventContext& ctx) const {
     SG::WriteHandle<xAOD::VertexContainer> vtxContainer(m_OutputContainerName, ctx);
     ATH_CHECK(vtxContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
 

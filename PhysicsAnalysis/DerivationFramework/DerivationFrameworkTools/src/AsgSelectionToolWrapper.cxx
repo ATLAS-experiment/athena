@@ -38,11 +38,10 @@ namespace DerivationFramework {
 
   
 
-  StatusCode AsgSelectionToolWrapper::addBranches() const
+  StatusCode AsgSelectionToolWrapper::addBranches(const EventContext& ctx) const
   {
     // retrieve container
     
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::WriteDecorHandle<xAOD::IParticleContainer, char> decorator (m_decorKey, ctx);
     if( ! decorator.isValid() ) {
         ATH_MSG_ERROR ("Couldn't retrieve IParticles with key: " << m_containerKey.fullKey() );

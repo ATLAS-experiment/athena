@@ -473,7 +473,7 @@ namespace DerivationFramework {
     return finalizeHook();
   }
   //--------------------------------------------------------------------------
-  StatusCode BPhysVertexTrackBase::addBranches() const {
+  StatusCode BPhysVertexTrackBase::addBranches(const EventContext&) const {
 
     ATH_MSG_DEBUG("BPhysVertexTrackBase::addBranches() -- begin");
 

@@ -79,11 +79,11 @@ StatusCode DerivationFramework::CommonAugmentation::execute() {
     //=============================================================================
     // AUGMENTATION ===============================================================
     //=============================================================================
-    
+    const EventContext &ctx = Gaudi::Hive::currentContext();
     ToolHandleArray<IAugmentationTool>::iterator augmentationTool(m_augmentationTools.begin());
     ToolHandleArray<IAugmentationTool>::iterator endOfAugmentationTools(m_augmentationTools.end());
     while (augmentationTool != endOfAugmentationTools) {
-    	if ( (**augmentationTool).addBranches().isFailure() ) {
+    	if ( (**augmentationTool).addBranches(ctx).isFailure() ) {
 		ATH_MSG_ERROR("Augmentation failed!");
 		return StatusCode::FAILURE;
 	}

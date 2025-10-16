@@ -89,9 +89,8 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
+DerivationFramework::EGammaClusterCoreCellRecovery::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>> decon;
   std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>> decoE;

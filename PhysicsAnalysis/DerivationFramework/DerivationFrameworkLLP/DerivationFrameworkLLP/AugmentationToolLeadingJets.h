@@ -23,7 +23,7 @@ namespace DerivationFramework {
     public: 
       AugmentationToolLeadingJets(const std::string& t, const std::string& n, const IInterface* p);
       virtual StatusCode initialize() override;
-      virtual StatusCode addBranches() const override;
+      virtual StatusCode addBranches(const EventContext& ctx) const override;
 
 
   private:

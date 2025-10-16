@@ -71,10 +71,9 @@ StatusCode DerivationFramework::TruthDressingTool::initialize()
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthDressingTool::addBranches() const
+StatusCode DerivationFramework::TruthDressingTool::addBranches(const EventContext& ctx) const
 {
     // Get the event context
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve the truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);

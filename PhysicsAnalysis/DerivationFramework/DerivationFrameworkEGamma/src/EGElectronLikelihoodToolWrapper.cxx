@@ -74,10 +74,9 @@ EGElectronLikelihoodToolWrapper::initialize()
 }
 
 StatusCode
-EGElectronLikelihoodToolWrapper::addBranches() const
+EGElectronLikelihoodToolWrapper::addBranches(const EventContext& ctx) const
 {
   // retrieve container
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EgammaContainer> particles{ m_ContainerName, ctx };
 
   // If we're applying corrections, the correction tools will give us

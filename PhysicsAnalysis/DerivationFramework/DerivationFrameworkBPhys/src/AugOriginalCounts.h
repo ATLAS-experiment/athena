@@ -63,7 +63,7 @@ namespace DerivationFramework {
     AugOriginalCounts(const std::string& t, const std::string& n,
 		      const IInterface* p);
     /// @brief Main method called for each event
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
     virtual StatusCode initialize() override;
     private:
     ///

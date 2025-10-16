@@ -72,7 +72,7 @@ namespace DerivationFramework {
     
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     
-    StatusCode Reco_4mu::addBranches() const
+    StatusCode Reco_4mu::addBranches(const EventContext&) const
     {
         // Output containers and its auxilliary store
         xAOD::VertexContainer*    pairContainer{};

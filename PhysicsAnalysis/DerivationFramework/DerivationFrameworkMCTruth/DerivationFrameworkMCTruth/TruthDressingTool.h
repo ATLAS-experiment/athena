@@ -23,8 +23,8 @@ namespace DerivationFramework {
   public:
     TruthDressingTool(const std::string& t, const std::string& n, const IInterface* p);
     ~TruthDressingTool();
-    StatusCode initialize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     /// ReadHandleKey input collection key

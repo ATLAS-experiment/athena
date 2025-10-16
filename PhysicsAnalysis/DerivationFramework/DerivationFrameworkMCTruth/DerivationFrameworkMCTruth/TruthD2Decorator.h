@@ -23,7 +23,7 @@ namespace DerivationFramework {
     public: 
       TruthD2Decorator(const std::string& t, const std::string& n, const IInterface* p);
       StatusCode initialize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
     private:
       SG::ReadHandleKey<xAOD::JetContainer> m_jetContainerKey

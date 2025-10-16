@@ -31,7 +31,7 @@ namespace DerivationFramework {
     StatusCode  initialize();
     StatusCode  finalize();
 
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
 
   private:
     Gaudi::Property<std::string> m_containerName{this, "TargetContainer", "InDetTrackParticles", "Container to be decorated"};

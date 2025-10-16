@@ -33,10 +33,9 @@ namespace DerivationFramework {
   }
 
 
-  StatusCode TruthD2Decorator::addBranches() const
+  StatusCode TruthD2Decorator::addBranches(const EventContext& ctx) const
   {
       // Event context
-      const EventContext& ctx = Gaudi::Hive::currentContext();
 
       // Set up the decorators 
       SG::WriteDecorHandle< xAOD::JetContainer, float > decoratorD2(m_decorationName, ctx); 

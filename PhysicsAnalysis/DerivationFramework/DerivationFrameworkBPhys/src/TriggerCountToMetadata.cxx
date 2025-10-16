@@ -43,7 +43,7 @@ namespace DerivationFramework {
   }  
 
   //--------------------------------------------------------------------------
-  StatusCode TriggerCountToMetadata::addBranches() const {
+  StatusCode TriggerCountToMetadata::addBranches(const EventContext&) const {
 
 	  ATH_MSG_DEBUG("Inside TriggerCountToMetadata::addBranches()");
 

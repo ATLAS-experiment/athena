@@ -30,10 +30,8 @@ namespace DerivationFramework {
   public:
     BoostedHadTopAndTopPairFilterAugmentation(const std::string& t, const std::string& n, const IInterface* p);
     ~BoostedHadTopAndTopPairFilterAugmentation();
-    StatusCode initialize();
-    virtual StatusCode addBranches() const;
-
-
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
 

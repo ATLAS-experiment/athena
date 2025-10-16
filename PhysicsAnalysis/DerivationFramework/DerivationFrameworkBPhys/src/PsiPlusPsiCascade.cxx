@@ -63,8 +63,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PsiPlusPsiCascade::addBranches() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  StatusCode PsiPlusPsiCascade::addBranches(const EventContext& ctx) const {
     if ((m_vtx1Daug_num != 3 && m_vtx1Daug_num != 4) || (m_vtx2Daug_num != 3 && m_vtx2Daug_num != 4)) {
       ATH_MSG_FATAL("Incorrect number of Psi daughters (should be 3 or 4)");
       return StatusCode::FAILURE;

@@ -35,7 +35,7 @@ namespace DerivationFramework {
       TruthMetaDataWriter(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthMetaDataWriter();
       virtual StatusCode initialize() override;
-      virtual StatusCode addBranches() const override;
+      virtual StatusCode addBranches(const EventContext& ctx) const override;
 
     private:
       /// Connection to the metadata store

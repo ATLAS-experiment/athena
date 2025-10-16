@@ -29,7 +29,7 @@ namespace DerivationFramework {
     HadronOriginDecorator(const std::string& t, const std::string& n, const IInterface* p);
     ~HadronOriginDecorator();
     StatusCode initialize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
 
   private:
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey

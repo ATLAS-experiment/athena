@@ -85,9 +85,8 @@ StatusCode DerivationFramework::RCJetSubstructureAug::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
+StatusCode DerivationFramework::RCJetSubstructureAug::addBranches(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::JetContainer> jets(m_jetKey,ctx);
     if (!jets.isValid()) {

@@ -57,9 +57,8 @@ StatusCode DerivationFramework::DistanceInTrainAugmentationTool::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches() const {
+StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches(const EventContext& ctx) const {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   auto eventInfo = SG::makeHandle (m_eventInfo_key, ctx);
   if (!eventInfo.isValid()){
     ATH_MSG_WARNING("Invalid  xAOD::EventInfo datahandle"

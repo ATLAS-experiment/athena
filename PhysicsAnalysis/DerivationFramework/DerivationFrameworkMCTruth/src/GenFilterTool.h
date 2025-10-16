@@ -36,7 +36,7 @@ namespace DerivationFramework {
   public:
     GenFilterTool(const std::string& t, const std::string& n, const IInterface* p);
     ~GenFilterTool();
-    virtual StatusCode addBranches() const override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
     virtual StatusCode initialize() override final;
 
   private:

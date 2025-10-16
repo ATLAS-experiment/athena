@@ -20,7 +20,7 @@ namespace DerivationFramework {
       TruthPVCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthPVCollectionMaker();
       StatusCode initialize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
     private:
       SG::ReadHandleKey<xAOD::TruthEventContainer> m_eventsKey{this, "EventsKey", "TruthEvents"}; //!< Input event collection (navigates to the vertices)

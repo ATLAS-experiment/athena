@@ -56,11 +56,10 @@ StatusCode DerivationFramework::TruthClassificationDecorator::finalize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthClassificationDecorator::addBranches() const
+StatusCode DerivationFramework::TruthClassificationDecorator::addBranches(const EventContext& ctx) const
 {
     
     // Event context for multi-threading
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);

@@ -33,7 +33,7 @@ namespace DerivationFramework {
     TruthBornLeptonCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
     ~TruthBornLeptonCollectionMaker();
     StatusCode initialize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
 
   private:
     //!< Input particle collection key

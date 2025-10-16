@@ -49,7 +49,7 @@ class BPhysBGammaFinder : public extends<AthAlgTool, IAugmentationTool> {
         StatusCode initialize() override;
         StatusCode finalize() override;
 
-        virtual StatusCode addBranches() const override;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
         TVector3 trackMomentum(const xAOD::Vertex * vxCandidate, int trkIndex) const;
 
     private:

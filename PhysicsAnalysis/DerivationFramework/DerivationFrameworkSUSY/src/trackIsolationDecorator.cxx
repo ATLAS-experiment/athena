@@ -60,7 +60,7 @@ StatusCode DerivationFramework::trackIsolationDecorator::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::trackIsolationDecorator::addBranches() const
+StatusCode DerivationFramework::trackIsolationDecorator::addBranches(const EventContext&) const
 {
   // retrieve container
   const xAOD::IParticleContainer* toDecorate{};

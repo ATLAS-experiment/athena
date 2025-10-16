@@ -79,7 +79,7 @@ namespace DerivationFramework {
 
       // Declare the function addBranches that adds the HF classifier in the output derivation file.
 
-      virtual StatusCode addBranches() const override;
+      virtual StatusCode addBranches(const EventContext& ctx) const override;
 
     /*
     -------------------------------------------------------------------------------------------------------------------------------------

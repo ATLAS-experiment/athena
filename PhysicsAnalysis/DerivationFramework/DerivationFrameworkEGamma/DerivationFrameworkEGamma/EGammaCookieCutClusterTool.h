@@ -30,7 +30,7 @@ namespace DerivationFramework {
 			       const std::string& n,
 			       const IInterface* p);
     StatusCode initialize() override final;
-    virtual StatusCode addBranches() const override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
     
   private:
 

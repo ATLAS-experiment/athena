@@ -47,9 +47,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BadBatmanAugmentationTool::addBranches() const
+  StatusCode BadBatmanAugmentationTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     //Running BadBatmanAugmentationTool
 
     //Set the name of the variable to augment

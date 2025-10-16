@@ -42,8 +42,7 @@ namespace DerivationFramework{
 
   //**********************************************************************
 
-  StatusCode JetExternalAssocTool::addBranches() const{
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  StatusCode JetExternalAssocTool::addBranches(const EventContext& ctx) const{
     // get jet collection to be decorated
     SG::ReadHandle<xAOD::JetContainer> jets{m_containerName, ctx};
     if (!jets.isValid()) {

@@ -32,7 +32,7 @@ namespace DerivationFramework {
       ~TruthCollectionMaker();
       StatusCode initialize();
       StatusCode finalize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
     private:
       mutable std::atomic<unsigned int> m_ntotpart, m_npasspart;

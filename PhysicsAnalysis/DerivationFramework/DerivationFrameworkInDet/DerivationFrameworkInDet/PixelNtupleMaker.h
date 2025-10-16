@@ -34,7 +34,7 @@ namespace DerivationFramework {
 
       StatusCode initialize();
       StatusCode finalize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
       static void GetLayerEtaPhiFromId(uint64_t id,int *barrelEC, int *layer, int *eta, int *phi);
 
     private:

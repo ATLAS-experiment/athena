@@ -18,7 +18,7 @@ namespace DerivationFramework {
   public:
     using base_class::base_class;
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey{this, "VertexContainer", "PrimaryVertices",""};

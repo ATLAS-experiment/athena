@@ -28,7 +28,7 @@ namespace DerivationFramework {
       StatusCode initialize();
       StatusCode finalize();
       
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
       bool isSame(const xAOD::Vertex* theVtx1, const xAOD::Vertex* theVtx2) const;
       bool isContainedIn(const xAOD::Vertex* theVtx, const std::vector<const xAOD::Vertex*> &theColl) const;

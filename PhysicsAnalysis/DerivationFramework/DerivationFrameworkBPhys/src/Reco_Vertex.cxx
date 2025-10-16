@@ -78,10 +78,9 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   
-  StatusCode Reco_Vertex::addBranches() const
+  StatusCode Reco_Vertex::addBranches(const EventContext& ctx) const
   {
     bool callTool = true;
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     if(m_checkCollections) {
       for(const auto &str : m_CollectionsToCheck){
          SG::ReadHandle<xAOD::VertexContainer> handle(str,ctx);

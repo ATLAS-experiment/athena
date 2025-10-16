@@ -26,7 +26,7 @@ namespace DerivationFramework {
       using base_class::base_class;	    
 
       virtual StatusCode initialize() override;
-      virtual StatusCode addBranches() const override;
+      virtual StatusCode addBranches(const EventContext& ctx) const override;
 
     private:
       SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input tau container key" };

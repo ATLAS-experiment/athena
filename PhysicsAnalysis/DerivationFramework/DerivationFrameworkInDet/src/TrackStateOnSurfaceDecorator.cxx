@@ -180,9 +180,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TrackStateOnSurfaceDecorator::addBranches() const
+  StatusCode TrackStateOnSurfaceDecorator::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("Adding TSOS decorations the track particles");
 
     SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector< ElementLink< xAOD::TrackStateValidationContainer >  > > dectsos_msosLink(m_trackTSOSMOSLinkDecorKey, ctx);

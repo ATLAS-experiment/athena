@@ -55,10 +55,9 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   
-  StatusCode Reco_mumu::addBranches() const
+  StatusCode Reco_mumu::addBranches(const EventContext& ctx) const
   {
     bool callJpsiFinder = true;
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     if(m_checkCollections) {
       for( SG::ReadHandle<xAOD::VertexContainer> vertContainer : m_CollectionsToCheck.makeHandles(ctx)){
          if (!vertContainer.isValid()){

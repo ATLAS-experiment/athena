@@ -35,10 +35,9 @@ StatusCode DerivationFramework::TruthQGDecorationTool::initialize() {
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthQGDecorationTool::addBranches() const
+StatusCode DerivationFramework::TruthQGDecorationTool::addBranches(const EventContext& ctx) const
 {
   // Event context
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve the jet container
   SG::ReadHandle<xAOD::JetContainer> inputJets(m_jetsKey, ctx);

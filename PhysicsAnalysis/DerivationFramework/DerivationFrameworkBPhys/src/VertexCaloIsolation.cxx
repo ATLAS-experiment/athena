@@ -126,7 +126,7 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   
-  StatusCode VertexCaloIsolation::addBranches() const {
+  StatusCode VertexCaloIsolation::addBranches(const EventContext&) const {
 
 
 	  // There is also the "MuonClusterCollection" which may already contain all the muon's clusters

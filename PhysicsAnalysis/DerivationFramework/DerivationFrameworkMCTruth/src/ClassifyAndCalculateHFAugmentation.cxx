@@ -98,10 +98,9 @@ namespace DerivationFramework {
   ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
-  StatusCode ClassifyAndCalculateHFAugmentation::addBranches() const
+  StatusCode ClassifyAndCalculateHFAugmentation::addBranches(const EventContext& ctx) const
   {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve the truth particle container
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticlesHandle(m_truthParticlesKey, ctx);

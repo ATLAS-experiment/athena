@@ -82,9 +82,8 @@ DerivationFramework::CaloCellDecorator::initialize()
 }
 
 StatusCode
-DerivationFramework::CaloCellDecorator::addBranches() const
+DerivationFramework::CaloCellDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   if (!m_SGKey_photons.key().empty()) {
 

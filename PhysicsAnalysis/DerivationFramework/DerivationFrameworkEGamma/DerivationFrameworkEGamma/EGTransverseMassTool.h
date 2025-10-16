@@ -33,7 +33,7 @@ public:
     const IInterface* p);
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode addBranches() const override final;
+  virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
 private:
   StatusCode getTransverseMasses(const EventContext& ctx, std::vector<float>&)

@@ -43,9 +43,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PFlowAugmentationTool::addBranches() const
+  StatusCode PFlowAugmentationTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Get the vertex.
     const xAOD::Vertex* pv{};
 

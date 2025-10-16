@@ -48,7 +48,7 @@ namespace DerivationFramework {
       virtual StatusCode initialize();
       virtual StatusCode finalize();
       
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
   protected:
       virtual void recordPropertyI(const std::string& name, int         val);

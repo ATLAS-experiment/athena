@@ -46,7 +46,7 @@ namespace DerivationFramework {
     StatusCode  finalize();
  
     /** Check that the current event passes this filter */
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
 
   private:
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_collTrackKey

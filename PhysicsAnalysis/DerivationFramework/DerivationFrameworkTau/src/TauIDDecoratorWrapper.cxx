@@ -72,9 +72,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TauIDDecoratorWrapper::addBranches() const
+  StatusCode TauIDDecoratorWrapper::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // retrieve tau container
     SG::ReadHandle<xAOD::TauJetContainer> tauJetsReadHandle(m_tauContainerKey, ctx);

@@ -29,7 +29,7 @@ public:
 
   StatusCode initialize();
   StatusCode finalize();
-  virtual StatusCode addBranches() const;
+  virtual StatusCode addBranches(const EventContext& ctx) const;
 
 private:
   /** @brief SG key of the truth particle container **/

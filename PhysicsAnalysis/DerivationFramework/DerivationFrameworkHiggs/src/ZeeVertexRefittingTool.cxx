@@ -68,9 +68,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ZeeVertexRefittingTool::addBranches() const
+  StatusCode ZeeVertexRefittingTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // skip mc samples not included in the MCSamples list
     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 

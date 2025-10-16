@@ -83,9 +83,8 @@ DerivationFramework::EGammaCookieCutClusterTool::initialize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::EGammaCookieCutClusterTool::addBranches() const
+DerivationFramework::EGammaCookieCutClusterTool::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // For debug
   static const std::vector<CaloSampling::CaloSample> s_sam

@@ -17,8 +17,7 @@ StatusCode DerivationFramework::MuonJetDrTool::initialize() {
     ATH_CHECK(m_jetDR_SGKey.initialize());
     return StatusCode::SUCCESS;
 }
-StatusCode DerivationFramework::MuonJetDrTool::addBranches() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode DerivationFramework::MuonJetDrTool::addBranches(const EventContext& ctx) const {
 
     // Retrieve main muonicle collection
     SG::ReadHandle<xAOD::MuonContainer> muons{m_muonSGKey, ctx};

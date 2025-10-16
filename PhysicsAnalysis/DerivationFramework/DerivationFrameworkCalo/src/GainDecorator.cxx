@@ -126,9 +126,8 @@ DerivationFramework::GainDecorator::finalize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::GainDecorator::addBranches() const
+DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Photon decorations
 

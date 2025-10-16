@@ -180,13 +180,13 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
     //=============================================================================
     // AUGMENTATION ===============================================================
     //=============================================================================
-
+    const EventContext &ctx = Gaudi::Hive::currentContext();
     if (!m_runSkimmingFirst) {
         ToolHandleArray<IAugmentationTool>::iterator augmentationTool(m_augmentationTools.begin());
         ToolHandleArray<IAugmentationTool>::iterator endOfAugmentationTools(m_augmentationTools.end());
         while (augmentationTool != endOfAugmentationTools) {
             ATH_MSG_DEBUG("Entering " << (**augmentationTool).name());
-            if ( (**augmentationTool).addBranches().isFailure() ) {
+            if ( (**augmentationTool).addBranches(ctx).isFailure() ) {
                     ATH_MSG_ERROR("Augmentation failed!");
                     return StatusCode::FAILURE;
             }
@@ -229,7 +229,7 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
         ToolHandleArray<IAugmentationTool>::iterator endOfAugmentationTools(m_augmentationTools.end());
         while (augmentationTool != endOfAugmentationTools) {
             ATH_MSG_DEBUG("Entering " << (**augmentationTool).name());
-            if ( (**augmentationTool).addBranches().isFailure() ) {
+            if ( (**augmentationTool).addBranches(ctx).isFailure() ) {
                     ATH_MSG_ERROR("Augmentation failed!");
                     return StatusCode::FAILURE;
             }

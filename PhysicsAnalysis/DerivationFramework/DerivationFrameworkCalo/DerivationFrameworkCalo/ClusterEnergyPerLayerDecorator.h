@@ -36,7 +36,7 @@ public:
   ~ClusterEnergyPerLayerDecorator();
   StatusCode initialize();
   StatusCode finalize();
-  virtual StatusCode addBranches() const;
+  virtual StatusCode addBranches(const EventContext& ctx) const;
 
 private:
   int m_eta_size = 0;

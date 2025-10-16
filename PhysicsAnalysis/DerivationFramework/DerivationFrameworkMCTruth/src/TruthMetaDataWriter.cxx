@@ -61,9 +61,8 @@ StatusCode DerivationFramework::TruthMetaDataWriter::initialize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthMetaDataWriter::addBranches() const
+StatusCode DerivationFramework::TruthMetaDataWriter::addBranches(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //The mcChannelNumber is used as a unique identifier for which truth meta data belongs to
     uint32_t mcChannelNumber = 0;

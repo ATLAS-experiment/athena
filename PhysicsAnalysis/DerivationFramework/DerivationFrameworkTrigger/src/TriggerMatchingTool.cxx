@@ -93,7 +93,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TriggerMatchingTool::addBranches() const
+  StatusCode TriggerMatchingTool::addBranches(const EventContext& ctx) const
   {
     [[maybe_unused]] static const bool firstEvent = [&](){
       auto itr = m_chainNames.begin();
@@ -111,7 +111,6 @@ namespace DerivationFramework {
       return false;
     }();
 
-    const EventContext &ctx = Gaudi::Hive::currentContext();
     const Atlas::ExtendedEventContext &extendedCtx = Atlas::getExtendedEventContext(ctx);
 
     // Now, get all the possible offline candidates

@@ -34,9 +34,7 @@ namespace DerivationFramework {
 
 
 
-  StatusCode BoostedHadTopAndTopPairFilterAugmentation::addBranches() const{
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
+  StatusCode BoostedHadTopAndTopPairFilterAugmentation::addBranches(const EventContext& ctx) const{
     SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoName, ctx};
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoName);

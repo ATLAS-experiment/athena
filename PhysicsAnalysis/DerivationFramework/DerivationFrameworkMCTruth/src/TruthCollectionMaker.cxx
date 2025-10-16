@@ -92,10 +92,9 @@ StatusCode DerivationFramework::TruthCollectionMaker::finalize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthCollectionMaker::addBranches(const EventContext& ctx) const
 {
     // Event context for AthenaMT
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Set up for some metadata handling
     // TODO: this isn't MT compliant. This information should go into the config level and avoid meta store

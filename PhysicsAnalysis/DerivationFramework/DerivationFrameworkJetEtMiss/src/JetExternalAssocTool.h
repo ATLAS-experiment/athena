@@ -32,7 +32,7 @@ namespace DerivationFramework{
     JetExternalAssocTool(const std::string& t, const std::string& n, const IInterface* p);
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches() const override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     StatusCode TransferLink(const xAOD::Jet& jet, const xAOD::Jet& jet_external, const EventContext& ctx) const;

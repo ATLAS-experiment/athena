@@ -89,7 +89,7 @@ namespace DerivationFramework {
         ~JpsiPlusV0Cascade();
         StatusCode initialize() override;
         StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
-        virtual StatusCode addBranches() const override;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
         SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
 
     };

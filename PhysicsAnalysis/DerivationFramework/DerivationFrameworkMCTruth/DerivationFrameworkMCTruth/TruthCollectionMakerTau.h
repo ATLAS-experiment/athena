@@ -24,7 +24,7 @@ namespace DerivationFramework {
     TruthCollectionMakerTau(const std::string& t, const std::string& n, const IInterface* p);
     ~TruthCollectionMakerTau();
     StatusCode initialize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const;
 
   private:
 

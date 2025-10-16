@@ -130,9 +130,8 @@ EGElectronAmbiguityTool::DecorHandles::DecorHandles
 }
 
 StatusCode
-EGElectronAmbiguityTool::addBranches() const
+EGElectronAmbiguityTool::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   DecorHandles dh (*this, ctx);
 

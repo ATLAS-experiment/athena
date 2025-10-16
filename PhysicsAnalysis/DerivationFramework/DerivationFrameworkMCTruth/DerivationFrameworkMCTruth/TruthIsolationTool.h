@@ -23,7 +23,7 @@ namespace DerivationFramework {
       TruthIsolationTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthIsolationTool();
       virtual StatusCode initialize() override;
-      virtual StatusCode addBranches() const override;
+      virtual StatusCode addBranches(const EventContext& ctx) const override;
 
     private:
       /// Parameter: input collection key

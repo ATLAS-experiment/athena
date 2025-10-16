@@ -42,8 +42,7 @@ StatusCode DerivationFramework::TruthLinkRepointTool::initialize(){
 DerivationFramework::TruthLinkRepointTool::~TruthLinkRepointTool() = default;
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventContext& ctx) const {
   // Retrieve the truth collections
   std::vector<const xAOD::TruthParticleContainer*> targets{};
   targets.reserve(m_targetKeys.size());

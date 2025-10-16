@@ -45,9 +45,8 @@ PhotonsDirectionTool::initialize()
 }
 
 StatusCode
-PhotonsDirectionTool::addBranches() const
+PhotonsDirectionTool::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Retrieve photon container
   SG::ReadHandle<xAOD::PhotonContainer> photons(m_collName, ctx);
   // define the pointers to vectors which will hold the additional payloads

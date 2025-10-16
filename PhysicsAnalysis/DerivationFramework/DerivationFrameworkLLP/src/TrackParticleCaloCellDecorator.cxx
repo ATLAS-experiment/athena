@@ -78,9 +78,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TrackParticleCaloCellDecorator::addBranches() const  {
+  StatusCode TrackParticleCaloCellDecorator::addBranches(const EventContext& ctx) const  {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::TrackParticleClusterAssociationContainer> clusterAssociations(m_trackContainerKey,ctx);
     ATH_CHECK( clusterAssociations.isValid() );
 

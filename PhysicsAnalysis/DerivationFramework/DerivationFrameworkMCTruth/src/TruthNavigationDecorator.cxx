@@ -48,10 +48,9 @@ StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
+StatusCode DerivationFramework::TruthNavigationDecorator::addBranches(const EventContext& ctx) const
 {
   // Event context 
-  const EventContext& ctx = Gaudi::Hive::currentContext();   
 
   // Retrieve the truth collections
   SG::ReadHandle<xAOD::TruthEventContainer> truthEvents(m_truthEventKey, ctx);
