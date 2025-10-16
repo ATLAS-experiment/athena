@@ -84,14 +84,14 @@ namespace MuonGMR4 {
                                                 const Amg::Vector3D& point,
                                                 const std::string& descr,
                                                 const Identifier& chamberId) const {
-        if (volume.inside(point)) {
+        if (volume.inside(point, tolerance)) {
             return StatusCode::SUCCESS;
         }
         const auto& volumeCorners = cornerPoints(volume);
         ATH_MSG_FATAL("In channel "<<m_idHelperSvc->toString(chamberId) <<", the point "
-                     << descr <<" "<<Amg::toString(point)<<" is not part of the chamber volume. The corners of the volume are:");
+                     << descr <<" "<<Amg::toString(volume.itransform()* point)<<" is not part of the chamber volume. The corners of the volume are:");
         for(const auto& corner : volumeCorners) {
-            ATH_MSG_FATAL("  "<<Amg::toString(corner));
+            ATH_MSG_FATAL("  "<<Amg::toString(volume.itransform()*corner));
         }
         return StatusCode::FAILURE;
     }
