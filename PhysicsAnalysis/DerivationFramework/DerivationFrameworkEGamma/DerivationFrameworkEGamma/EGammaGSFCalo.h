@@ -38,7 +38,7 @@ class EGammaGSFCalo : public AthAlgTool, public IAugmentationTool {
   /** @brief finalize method **/
   virtual StatusCode finalize() override;
   /** @brief addBranches method **/
-  virtual StatusCode addBranches() const override;
+  virtual StatusCode addBranches( const EventContext& ctx ) const override;
 
  private:
   SG::ReadHandleKey<xAOD::ElectronContainer> m_electronCollectionKey{
