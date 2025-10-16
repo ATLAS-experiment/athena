@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArOFCtoOFC.h"
@@ -107,8 +107,8 @@ StatusCode LArOFCtoOFC::stop()
                 newOFCb.resize(newOFCb.size()+m_numAdd, 0.);
               }
 
-              OFC_a.push_back(newOFCa);
-              OFC_b.push_back(newOFCb);
+              OFC_a.push_back(std::move(newOFCa));
+              OFC_b.push_back(std::move(newOFCb));
             } else { // Not null adding, but cloning the EMBPS medium gain to low gain ones
               if( (!onlID->isEMBPS(id)) || gain != CaloGain::LARMEDIUMGAIN ) continue; 
               OFC_a.push_back(vOFC_a.asVector());
@@ -160,8 +160,8 @@ StatusCode LArOFCtoOFC::stop()
                     newShapeDer.resize(newShapeDer.size()+m_numAdd, 0.);
                 }
 
-                Shape.push_back(newShape);
-                ShapeDer.push_back(newShapeDer);
+                Shape.push_back(std::move(newShape));
+                ShapeDer.push_back(std::move(newShapeDer));
               } else { // not nulls, but copying the medium PS gain to low gain
                  if( (!onlID->isEMBPS(id)) || gain != CaloGain::LARMEDIUMGAIN ) continue; 
                  Shape.push_back(vShape.asVector());

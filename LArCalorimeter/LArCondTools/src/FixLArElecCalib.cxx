@@ -1696,15 +1696,11 @@ StatusCode FixLArElecCalib::fix10 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping
 	    
 	    float ramp_high = ramp0.m_vRamp[1]; 
 	    
-	    std::vector<float> v_m ;
-	    v_m.push_back(0);
-	    v_m.push_back(ramp_high*9.96);
-	    ramp1.m_vRamp=v_m;
+	    std::vector<float> v_m{0.f, ramp_high*9.96f} ;
+	    ramp1.m_vRamp=std::move(v_m);
 	    
-	    std::vector<float> v_l ;
-	    v_l.push_back(0);
-	    v_l.push_back(ramp_high*9.96*9.67);
-	    ramp2.m_vRamp=v_l;
+	    std::vector<float> v_l{0.f, ramp_high*9.96f*9.67f};
+	    ramp2.m_vRamp=std::move(v_l);
 	    ++n; 
 
 	    ATH_MSG_DEBUG(" ramp hi,med,low"<< ramp0.m_vRamp[1]<< " "<<ramp1.m_vRamp[1]<<  " " <<
