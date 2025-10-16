@@ -22,7 +22,8 @@ Derivation_tf.py \
   --inputAODFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4159_r14799/1000events.AOD.34124794._001345.pool.root.1" \
   --outputDAODFile="ttree.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTTREEINDEX\";flags.Output.StorageTechnology.MetaData=\"ROOTTREE\";flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";
+  --preExec="flags.Output.StorageTechnology.EventData={\"*\":\"ROOTTREEINDEX\"};flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";\
+  # Note: flags.Output.StorageTechnology.MetaData omitted - will inherit ROOTTREEINDEX from EventData
 
 echo "art-result: $? ttree";
 
@@ -37,7 +38,8 @@ Derivation_tf.py \
   --inputAODFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4159_r14799/1000events.AOD.34124794._001345.pool.root.1" \
   --outputDAODFile="rntuple.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTRNTUPLE\";flags.Output.StorageTechnology.MetaData=\"ROOTRNTUPLE\";";
+  --preExec="flags.Output.StorageTechnology.EventData={\"*\":\"ROOTRNTUPLE\"};";\
+  # Note: flags.Output.StorageTechnology.MetaData omitted - will inherit ROOTRNTUPLE from EventData
 
 echo "art-result: $? rntuple";
 

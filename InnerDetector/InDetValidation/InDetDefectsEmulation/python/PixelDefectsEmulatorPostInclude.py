@@ -248,12 +248,15 @@ def makeITkDefectsParams( quad_cc_defect_prob,
     # - 50% of ~30% of the 3D modules have disconnected corners area 2-4mm x 2-2.5mm,
     # - roughly circular shape with a sagitta (defined by circle crossing sensor edges) of ~0-2mm,
     # - impact on all 3D sensors which are all single chip modules i.e. modules with 384 or 400 columns
+    # Update: after defect mitigation, new measurement of remaining defects: 4.1mm x 1.3 sagitta 0.44 (representative?)
     corner_defects=makeCornerDefectParam(probability=cornerDefectProb,
-                                         min_rx=2.,max_rx=8.4,
-                                         min_ry=2.,max_ry=4.5,
-                                         min_sagitta=0.,max_sagitta=2.2)
+                                         min_rx=2.,max_rx=5.,
+                                         min_ry=0.5,max_ry=1.5,
+                                         min_sagitta=0.2,max_sagitta=0.5)
     # assume each corner has equal probability to suffer corner defects
     # Assume number of corners with defects Poisson distributed
+    # According to the information on JIRA https://its.cern.ch/jira/browse/ATLITKSW-302 only bottom of
+    # sensors suffers such defects (currently not taken into account
     corner_defect_n_defect_corners=poissonFractions(cc_defect_prob=15e-2, max_n=4)
 
     return combineModuleDefects([
@@ -266,7 +269,7 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       quad_cc_defect_prob, # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                       ],
-                         fractionsOfNDefects=[quad_fractions,[1.]], # dummy fractions for circuit defects
+                         fractionsOfNDefects=[[1.], quad_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=[], # need empty lists here
@@ -281,7 +284,7 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                       ],
-                         fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
+                         fractionsOfNDefects=[[1.], circuit_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=corner_defects,
@@ -296,7 +299,7 @@ def makeITkDefectsParams( quad_cc_defect_prob,
                                       circuit_cc_defect_prob,    # probability of a module to have at least one core-column defect
                                       0.       # probability of a module to have at least one defect circuit
                                     ],
-                         fractionsOfNDefects=[circuit_fractions,[1.]], # dummy fractions for circuit defects
+                         fractionsOfNDefects=[[1.],circuit_fractions,[1.]], # dummy fractions for cell and circuit defects
                          noiseProbability=noiseProbability,
                          noiseShape=noiseShape,
                          cornerDefectParam=corner_defects,

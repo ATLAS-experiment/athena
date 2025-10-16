@@ -33,4 +33,8 @@ namespace GlobalSim::IOBitwise {
   std::bitset<CommonTOB::s_phi_width> CommonTOB::phi_bits() const {
     return m_phi_bits;
   }
+
+  std::string CommonTOB::to_string() const {
+    return ICommonTOB::to_string();
+  }
 }

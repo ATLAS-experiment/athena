@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_ATHENAATTRLISTADDRESS_H
 #define ATHENAPOOLCNVSVC_ATHENAATTRLISTADDRESS_H
 /** @file AthenaAttrListAddress.h
- *  @brief This file contains the class definition for theAthenaAttrListAddress class.
+ *  @brief This file contains the class definition for the AthenaAttrListAddress class.
  *  @author RD Schaffer <R.D.Schaffer@cern.ch>
  *  $Id: AthenaAttrListAddress.h,v 1.4 2008-08-28 12:23:21 schaffer Exp $
  **/
@@ -16,11 +16,8 @@
 // Framework include files
 #include "GaudiKernel/GenericAddress.h"
 
-// Forward declarations
-class IRegistry;
-
-/** @class AthenaAttrListAddress 
- *  @brief This class provides the an IOpaqueAddress/GenericAddress
+/** @class AthenaAttrListAddress
+ *  @brief This class provides an IOpaqueAddress/GenericAddress
  *  which can hold a pointer to an AthenaAttributeList object
  *
  **/
@@ -39,7 +36,7 @@ public:
 			  const std::string& p2="",
 			  unsigned long ip1=0,
 			  unsigned long ip2=0,
-			  AthenaAttributeList* attrList=0);
+			  AthenaAttributeList* attrList=nullptr);
 
     /// Standard Destructor
     virtual ~AthenaAttrListAddress();
@@ -61,10 +58,10 @@ private:
 
 ///  Inline definitions
 inline     
-AthenaAttrListAddress::AthenaAttrListAddress() 
-	: 
+AthenaAttrListAddress::AthenaAttrListAddress()
+	:
 	GenericAddress(),
-	m_attrList(0)
+	m_attrList(nullptr)
 {}
 
 inline     
@@ -81,7 +78,7 @@ inline
 AthenaAttrListAddress::AthenaAttrListAddress(const GenericAddress& copy)
 	:
 	GenericAddress(copy),
-	m_attrList(0)
+	m_attrList(nullptr)
 {}
 
 inline     

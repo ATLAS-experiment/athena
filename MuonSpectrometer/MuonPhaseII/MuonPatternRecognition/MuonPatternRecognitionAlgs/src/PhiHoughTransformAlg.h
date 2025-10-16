@@ -87,11 +87,13 @@ namespace MuonR4{
             std::unique_ptr<SegmentSeed> buildSegmentSeed(const HoughMaximum & etaMax,  
                                                           const MuonR4::ActsPeakFinderForMuon::Maximum & phiMax) const; 
 
+            /// Handle to the IdHelperSvc
+            ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
             // read handle key for the input maxima (from a previous eta-transform)
             SG::ReadHandleKey<EtaHoughMaxContainer> m_maxima{this, "ReadKey", "MuonHoughStationMaxima"};
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentSeedContainer> m_segmentSeeds{this, "WriteKey", "MuonHoughStationSegmentSeeds"};
-
             // access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// Pattern visualization tool

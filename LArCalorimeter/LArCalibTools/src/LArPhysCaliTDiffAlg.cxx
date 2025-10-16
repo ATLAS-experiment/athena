@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPhysCaliTDiffAlg.h"
@@ -62,6 +62,10 @@ StatusCode LArPhysCaliTDiffAlg::execute() {
     } else {   
        rein >> chidint >> gain >> offset;
        const HWIdentifier fid(chidint);
+       if (gain >= offsetMap.size()) {
+         ATH_MSG_ERROR("Read bad gain: " << gain);
+         return StatusCode::FAILURE;
+       }
        offsetMap[gain][fid]=offset;
     }
   }

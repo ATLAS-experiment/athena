@@ -131,18 +131,18 @@ namespace DerivationFramework {
 
 	  // There is also the "MuonClusterCollection" which may already contain all the muon's clusters
 
-    const xAOD::TrackParticleContainer*    idTrackParticleContainer = NULL;
-    const xAOD::VertexContainer*  vertexContainer = NULL;
+    const xAOD::TrackParticleContainer*    idTrackParticleContainer{};
+    const xAOD::VertexContainer*  vertexContainer{};
 
     Rec::CaloCellCollector  cellCollector;  //To keep private dependence for this package it is used here
 
 
-    const xAOD::MuonContainer* muons = NULL;
+    const xAOD::MuonContainer* muons{};
 
 
     //Load InDetTrackParticles
     if(evtStore()->contains<xAOD::TrackParticleContainer>(m_trackContainerName)) {
-        CHECK( evtStore()->retrieve(idTrackParticleContainer, m_trackContainerName) );
+      CHECK( evtStore()->retrieve(idTrackParticleContainer, m_trackContainerName) ); // FIXME Use Handles
     }
     else{ATH_MSG_ERROR("Failed loading IdTrackparticleContainer container");
     	return StatusCode::FAILURE;
@@ -150,17 +150,17 @@ namespace DerivationFramework {
 
     //	load vertices
     if(evtStore()->contains<xAOD::VertexContainer>(m_vertexContainerName)) {
-        CHECK( evtStore()->retrieve(vertexContainer, m_vertexContainerName) );
+        CHECK( evtStore()->retrieve(vertexContainer, m_vertexContainerName) ); // FIXME Use Handles
     }
     else{ATH_MSG_ERROR("Failed loading vertex container");
     	return StatusCode::FAILURE;
     }
 
 
-    const xAOD::CaloClusterContainer*  caloClusterContainer = NULL;
+    const xAOD::CaloClusterContainer*  caloClusterContainer{};
     //  load CaloCalTopoClusters
     if(evtStore()->contains<xAOD::CaloClusterContainer>(m_caloClusterContainerName)) {
-        CHECK( evtStore()->retrieve(caloClusterContainer, m_caloClusterContainerName) );
+        CHECK( evtStore()->retrieve(caloClusterContainer, m_caloClusterContainerName) ); // FIXME Use Handles
     }
     else{ATH_MSG_ERROR("Failed loading vertex container");
     	return StatusCode::FAILURE;
@@ -169,7 +169,7 @@ namespace DerivationFramework {
 
     //Retrieve muon container
     if(evtStore()->contains<xAOD::MuonContainer>(m_muonContainerName)) {
-        CHECK( evtStore()->retrieve(muons, m_muonContainerName) );
+        CHECK( evtStore()->retrieve(muons, m_muonContainerName) ); // FIXME Use Handles
     }
     else{ATH_MSG_ERROR("Failed loading muon contianer");
     	return StatusCode::FAILURE;
@@ -229,8 +229,8 @@ namespace DerivationFramework {
 
     	    TLorentzVector muonref;  //Place holder for the extrapolated position
 	    //Load the caloclusters of the various muons (which you need to load from here)
-	    const xAOD::MuonContainer* muons = 0;
-	    CHECK( evtStore()->retrieve( muons, "Muons" ) );
+	    const xAOD::MuonContainer* muons{};
+	    CHECK( evtStore()->retrieve( muons, "Muons" ) ); // FIXME Use Handles
 	    for ( auto muon : *muons ) {
 	    	//I ask for all information to be fine before filling in an entry (so all containers will have the same -matching- objects)
 	    	if(muon->inDetTrackParticleLink().isValid() &&  exclusionset.find(*muon->inDetTrackParticleLink() ) != exclusionset.end() ){
@@ -246,7 +246,7 @@ namespace DerivationFramework {
 
 					   // //If working with the cluster failed, try extrapolating the track
 					   // if(extrapolateTrack(muonref, *muon)){ //This does not use the muonic cluster, but uses both its tracks to determine a precise position
-					   // 	   vtxMuonCluster.push_back(clus); //Note clus can also be NULL (for if it's not in the cone there is no point to fret)
+					   // 	   vtxMuonCluster.push_back(clus); //Note clus can also be nullptr (for if it's not in the cone there is no point to fret)
 					   // 	   vtxMuons.push_back(muon);
 					   // 	   usedVtxTracks.push_back( *muon->inDetTrackParticleLink() );
 					   // 	   extrVtxMuons.push_back(muonref);
@@ -259,14 +259,14 @@ namespace DerivationFramework {
 	    //What if there was a track and not a muon??
 	    //Should be treated like the muon-without-cluster case
 
-	    if(vtxMuonCluster.size()  !=3){  //remember that some of the ctxMuonCluster elements may be NULL
+	    if(vtxMuonCluster.size()  !=3){  //remember that some of the ctxMuonCluster elements may be nullptr
 		    ATH_MSG_DEBUG( "Attempt at extrapolating the IDtrack" );
 
 		    //Attempt extrapolating the IDtrack for the missing cases
 		    for(const xAOD::TrackParticle* missingTrk : exclusionset){
 		    	if(std::find(usedVtxTracks.begin(), usedVtxTracks.end(), missingTrk) == usedVtxTracks.end()){
 				if(extrapolateTrack(muonref, *missingTrk)){
-					vtxMuonCluster.push_back(NULL); //Null, for we didn't start from a muon
+					vtxMuonCluster.push_back(nullptr); //Null, for we didn't start from a muon
 					usedVtxTracks.push_back( missingTrk );
 					extrVtxMuons.push_back(muonref);
 				}
@@ -340,7 +340,7 @@ namespace DerivationFramework {
 
 
 							//here do the check for the cluster, if it should go in, then prevent and set the bad for this cone
-							if(mucluster != NULL) clustersInCone.push_back( xAOD::CaloCluster(*mucluster) );
+							if(mucluster != nullptr) clustersInCone.push_back( xAOD::CaloCluster(*mucluster) );
 							else is_reliable[isoType] = false;
 
 

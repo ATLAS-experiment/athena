@@ -700,11 +700,6 @@ namespace CP {
     bool MuonSelectionTool::passedLowPtEfficiencyCuts(const xAOD::Muon& mu, xAOD::Muon::Quality thisMu_quality) const {
         ATH_MSG_VERBOSE("Checking whether muon passes low-pT selection...");
         
-        //LowPt Not supported in run3 for the time being
-        if(isRun3() && !m_developMode){
-            ATH_MSG_VERBOSE("LowPt WP currently not supported for run3 if not in expert mode");
-            return false;
-        }
         if (!m_useAllAuthors) {  // no allAuthors, always fail the WP
             ATH_MSG_VERBOSE("Do not have allAuthors variable - fail low-pT");
             return false;

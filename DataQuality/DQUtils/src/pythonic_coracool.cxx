@@ -70,21 +70,15 @@ const T& fetch_attribute_data(const coral::Attribute& A)
 coral_attribute_fetcher_t create_attribute_fetcher(const char*   name, 
                                                    const string& type_name)
 {
-    // Force the type of fetch_attribute, bind cannot infer it unfortunately.
-    const Attribute& (AttributeList::*fetch_attribute)(const string) const = 
-        &AttributeList::operator[];
-    
-    // below, _1 falls through to leave you with a function that "looks like"
-    // [converter(attr[name].data<type>())] (Attribute& attr)
-    
     // Test type against type_name. If true, return a functor for this type.
-    #define MAKE_FETCHER(type, converter)                    \
-        if (type_name == #type)                              \
-            return bind(converter,                           \
-                        bind(fetch_attribute_data<type>,     \
-                             bind(fetch_attribute, _1, name) \
-                        )                                    \
-                    );
+    // Be sure to use only a copy of name --- the original may not be valid
+    // by the time the lambda is called.
+    std::string sname = name;
+    #define MAKE_FETCHER(type, converter)                                \
+      if (type_name == #type) {                                          \
+          return [sname] (const AttributeList& l) -> PyObject*           \
+            { return converter(fetch_attribute_data<type>(l[sname])); }; \
+      }
     
     // See the python c-api reference for python conversion functions
     // Python/C API Reference Manual >> Concrete Objects Layer

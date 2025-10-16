@@ -117,6 +117,10 @@ public:
     std::vector<size_t> getNHits_layer() const;
     size_t getNHitCombos() const;
 
+    // Bin ID, if using FPGATrackSim binning.
+    void setBinIdx(std::vector<unsigned> x) { m_binIdx = std::move(x); }
+    const std::vector<unsigned>& getBinIdx() const { return m_binIdx; }
+
     // Weight of each barcode is the fraction of layers with corresponding hits
     // where pixels are weighted twice as much
     FPGATrackSimMultiTruth getTruth() const;
@@ -148,11 +152,13 @@ private:
     // A list of hits in the road for each layer.
     // These pointers are not owned by the road.
 
+    // bin ID. Just store this as a vector<unsigned>.
+    std::vector<unsigned> m_binIdx;
 
     ///////////////////////////////////////////////////////////////////////
     // Misc
     friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDefNV(FPGATrackSimRoad, 7);
+    ClassDefNV(FPGATrackSimRoad, 8);
 };
 
 #endif // FPGATrackSimROAD_H

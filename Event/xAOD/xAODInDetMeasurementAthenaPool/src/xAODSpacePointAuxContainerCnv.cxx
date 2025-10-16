@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -55,8 +55,7 @@ xAOD::SpacePointAuxContainer* xAODSpacePointAuxContainerCnv::createPersistentWit
   static const SG::AuxElement::Accessor< std::vector<ElementLink<xAOD::UncalibratedMeasurementContainer>> > accesor("measurementLink"); 
 
   for (xAOD::SpacePoint *sp : helper) {
-    std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > els;
-    accesor(*sp) = els;
+    accesor(*sp).clear();
 
     // get values from the trans aux container directly
     const void* ptrToSomething = trans->getData (measurementAuxId);

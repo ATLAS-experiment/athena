@@ -146,16 +146,6 @@ namespace pool  {
       */
     virtual DbStatus disconnect(    FileDescriptor&     refDB) = 0;
 
-    /** Access the size of the database: May be undefined for some technologies
-      *
-      * @param    refDB    [IN] Descriptor of the Database access. 
-      *                         This handle was retrieved when connecting 
-      *                         to the logical Database.
-      *
-      * @return                 Database size. std::string::npos in case of failure.
-      */
-    virtual long long int databaseSize(  FileDescriptor&     refDB)  const = 0;
-
     /// Access the containers in a given database.
     /** 
       *  @param   refDB     [IN] Reference to Database descriptor 
@@ -166,37 +156,6 @@ namespace pool  {
     virtual DbStatus containers(  FileDescriptor&            refDB,
                                   std::vector<const Token*>& conts,
                                   bool                       intern=false) = 0;
-
-    /// Access the container level associations between objects.
-    /** 
-      *  @param   refDB     [IN] Reference to Database descriptor 
-      *  @param   assocs   [OUT] Vector with tokens to used containers.
-      *  @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus associations(FileDescriptor&            refDB,
-                                  std::vector<const Token*>& assocs) = 0;
-
-    /// Access Shapes known to the database.
-    /** 
-      *  @param   refDB     [IN] Reference to Database descriptor 
-      *  @param   shapes   [OUT] Vector with shapes to used within the database.
-      *  @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus shapes(      FileDescriptor&            refDB,
-                                  std::vector<ShapeH>&       shapes) = 0;
-
-    /// Add a persistent parameter to the database
-    /** Add a user specified parameter to the database.
-      * The database must be open in CREATE or UPDATE mode.
-      *
-      *  @param   refDB     [IN] Reference to Database descriptor 
-      *  @param   nam       [IN] Name of the user parameter to be added.
-      *  @param   val       [IN] Value of the user parameter to be added.
-      *  @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus addDbParam(  FileDescriptor&            refDB,
-                                  const std::string&         nam, 
-                                  const std::string&         val) = 0;
 
     /// Retrieve existing parameter by name
     /** Retrieve single user specified parameter from the database.
@@ -209,16 +168,6 @@ namespace pool  {
     virtual DbStatus dbParam(     FileDescriptor&            refDB,
                                   const std::string&         nam, 
                                   std::string&               val) = 0;
-
-    /// Retrieve all parameters
-    /** Retrieve all user parameters from the database.
-      *
-      *  @param   refDB     [IN] Reference to Database descriptor 
-      *  @param   vals     [OUT] Vector containing all parameter nam/value pairs.
-      *  @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus dbParams(    FileDescriptor&            refDB,
-                                  Parameters&                vals) = 0;
 
     /// Access options for a given database domain.
     /** Domain options are global options, which refer to the

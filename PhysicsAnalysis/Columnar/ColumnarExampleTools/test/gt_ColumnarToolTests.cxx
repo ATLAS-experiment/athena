@@ -10,6 +10,7 @@
 // includes
 //
 
+#include <AsgMessaging/AsgMessaging.h>
 #include <AsgTesting/UnitTest.h>
 #include <AsgTools/AsgToolConfig.h>
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
@@ -38,6 +39,7 @@
 // different namespace, so I usually use a `using` statement like this.
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
+using columnar::TestUtils::IXAODToolCaller;
 
 
 // this is a test that manually loads data into memory, and then runs
@@ -95,33 +97,40 @@ TEST_F (ColumnarMemoryTest, SimpleSelectorExampleTool)
 // PHYSLITE test below.  there is usually some amount of boilerplate
 // code that test needs to run in XAOD mode, which is usually factored
 // out into a separate function.
-void callXAODSimpleSelectorExampleTool (const columnar::SimpleSelectorExampleTool& tool, bool isPrepCall, const std::string& name)
+class XAODSimpleSelectorExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
-  using namespace asg::msgUserCode;
-  const xAOD::JetContainer *jets = nullptr;
-  ANA_CHECK_THROW (tool.evtStore()->retrieve (jets, name));
-  // to allow for accurate performance measurements this function is
-  // generally called twice, the first time is mostly to make sure that
-  // all data is loaded into memory, and the second time is then used as
-  // a performance measurement of the tool without i/o.
-  if (isPrepCall)
+public:
+  XAODSimpleSelectorExampleToolCaller (const columnar::SimpleSelectorExampleTool& tool, const std::string& name)
+    : AsgMessaging ("XAODSimpleSelectorExampleToolCaller"), m_tool (tool), m_name (name)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
-    // for the first preparatory call we make a copy of the object to
-    // avoid the tool modifying the original object.
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*jets);
-    tool.callSingleEvent (*jetsCopy);
-    delete jetsCopy;
-    delete auxCopy;
-  } else
-  {
-    // for the second call we can skip the shallow copy, as this tool
-    // just adds to the existing object.  for tools that modify the
-    // object in place both paths would be identical, making shallow
-    // copies and then recording them (the TStore is cleared between
-    // both calls).
-    tool.callSingleEvent (*jets);
+    ANA_CHECK (evtStore.retrieve (m_jets, m_name));
+    return StatusCode::SUCCESS;
   }
-}
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets);
+    m_jets = jetsCopy;
+    ANA_CHECK (evtStore.record (jetsCopy, m_name + postfix));
+    ANA_CHECK (evtStore.record (auxCopy, m_name + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_jets);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const columnar::SimpleSelectorExampleTool& m_tool;
+  std::string m_name;
+
+  const xAOD::JetContainer *m_jets = nullptr;
+};
 
 
 // this is a test that runs the tool on PHYSLITE.  this ensures that the
@@ -137,9 +146,11 @@ TEST_F (ColumnarPhysLiteTest, SimpleSelectorExampleTool)
   auto tool = std::make_unique<columnar::SimpleSelectorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
+  XAODSimpleSelectorExampleToolCaller xAODToolCaller (*tool, "AnalysisJets");
+
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "SimpleSelectorExampleTool", "AnalysisJets", [&] (auto& args) {callXAODSimpleSelectorExampleTool (*tool, args.isPrepCall, args.inputContainer);}, {{"Particles", "AnalysisJets"}});
+  doCall (*tool, "SimpleSelectorExampleTool", "AnalysisJets", xAODToolCaller, {{"Particles", "AnalysisJets"}});
 }
 
 
@@ -296,33 +307,40 @@ TEST_F (ColumnarMemoryTest, MomentumAccessorExampleTool)
 // code that test needs to run in XAOD mode, which is usually factored
 // out into a separate function.
 template<typename ContainerType>
-void callXAODMomentumAccessorExampleTool (const columnar::MomentumAccessorExampleTool& tool, bool isPrepCall, const std::string& name)
+class XAODMomentumAccessorExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
-  using namespace asg::msgUserCode;
-  const ContainerType *jets = nullptr;
-  ANA_CHECK_THROW (tool.evtStore()->retrieve (jets, name));
-  // to allow for accurate performance measurements this function is
-  // generally called twice, the first time is mostly to make sure that
-  // all data is loaded into memory, and the second time is then used as
-  // a performance measurement of the tool without i/o.
-  if (isPrepCall)
+public:
+  XAODMomentumAccessorExampleToolCaller (const columnar::MomentumAccessorExampleTool& tool, const std::string& name)
+    : AsgMessaging ("XAODMomentumAccessorExampleToolCaller"), m_tool (tool), m_name (name)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
-    // for the first preparatory call we make a copy of the object to
-    // avoid the tool modifying the original object.
-    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*jets);
-    tool.callSingleEvent (*jetsCopy);
-    delete jetsCopy;
-    delete auxCopy;
-  } else
-  {
-    // for the second call we can skip the shallow copy, as this tool
-    // just adds to the existing object.  for tools that modify the
-    // object in place both paths would be identical, making shallow
-    // copies and then recording them (the TStore is cleared between
-    // both calls).
-    tool.callSingleEvent (*jets);
+    ATH_CHECK (evtStore.retrieve (m_jets, m_name));
+    return StatusCode::SUCCESS;
   }
-}
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    auto [jetsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_jets);
+    m_jets = jetsCopy;
+    ATH_CHECK (evtStore.record (jetsCopy, m_name + postfix));
+    ATH_CHECK (evtStore.record (auxCopy, m_name + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_jets);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const columnar::MomentumAccessorExampleTool& m_tool;
+  std::string m_name;
+
+  const ContainerType *m_jets = nullptr;
+};
 
 
 // this is a test that runs the momentum accessor example tool on
@@ -337,9 +355,11 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool)
   ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Jet)));
   ASSERT_SUCCESS (tool->initialize ());
 
+  XAODMomentumAccessorExampleToolCaller<xAOD::JetContainer> xAODToolCaller (*tool, "AnalysisJets");
+
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisJets", [&] (auto& args) {callXAODMomentumAccessorExampleTool<xAOD::JetContainer> (*tool, args.isPrepCall, args.inputContainer);}, {{"Particles", "AnalysisJets"}});
+  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisJets", xAODToolCaller, {{"Particles", "AnalysisJets"}});
 }
 
 
@@ -357,9 +377,11 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool_photons)
   ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Photon)));
   ASSERT_SUCCESS (tool->initialize ());
 
+  XAODMomentumAccessorExampleToolCaller<xAOD::PhotonContainer> xAODToolCaller (*tool, "AnalysisPhotons");
+
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisPhotons", [&] (auto& args) {callXAODMomentumAccessorExampleTool<xAOD::PhotonContainer> (*tool, args.isPrepCall, args.inputContainer);}, {{"Particles", "AnalysisPhotons"}});
+  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisPhotons", xAODToolCaller, {{"Particles", "AnalysisPhotons"}});
 }
 
 
@@ -476,38 +498,47 @@ TEST_F (ColumnarMemoryTest, VariantExampleTool)
 // this is a helper function for the PHYSLITE test below.  there is
 // usually some amount of boilerplate code that test needs to run in
 // XAOD mode, which is usually factored out into a separate function.
-void callXAODVariantExampleTool (const columnar::VariantExampleTool& tool, bool isPrepCall, const std::string& /*name*/)
+class XAODVariantExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
-  using namespace asg::msgUserCode;
-  const xAOD::ElectronContainer *electrons = nullptr;
-  ANA_CHECK_THROW (tool.evtStore()->retrieve (electrons, "AnalysisElectrons"));
-  const xAOD::MuonContainer *muons = nullptr;
-  ANA_CHECK_THROW (tool.evtStore()->retrieve (muons, "AnalysisMuons"));
-  // to allow for accurate performance measurements this function is
-  // generally called twice, the first time is mostly to make sure that
-  // all data is loaded into memory, and the second time is then used as
-  // a performance measurement of the tool without i/o.
-  if (isPrepCall)
+public:
+  XAODVariantExampleToolCaller (const columnar::VariantExampleTool& tool, const std::string& electronName, const std::string& muonName)
+    : AsgMessaging("XAODVariantExampleToolCaller"), m_tool (tool), m_electronName (electronName), m_muonName (muonName)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
-    // for the first preparatory call we make a copy of the object to
-    // avoid the tool modifying the original object.
-    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*electrons);
-    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*muons);
-    tool.callSingleEvent (*electronsCopy, *muonsCopy);
-    delete electronsCopy;
-    delete electronsAuxCopy;
-    delete muonsCopy;
-    delete muonsAuxCopy;
-  } else
-  {
-    // for the second call we can skip the shallow copy, as this tool
-    // just adds to the existing object.  for tools that modify the
-    // object in place both paths would be identical, making shallow
-    // copies and then recording them (the TStore is cleared between
-    // both calls).
-    tool.callSingleEvent (*electrons, *muons);
+    ANA_CHECK (evtStore.retrieve (m_electrons, m_electronName));
+    ANA_CHECK (evtStore.retrieve (m_muons, m_muonName));
+    return StatusCode::SUCCESS;
   }
-}
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_electrons);
+    m_electrons = electronsCopy;
+    ANA_CHECK (evtStore.record (electronsCopy, m_electronName + postfix));
+    ANA_CHECK (evtStore.record (electronsAuxCopy, m_electronName + postfix + "Aux."));
+    auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopyContainer (*m_muons);
+    m_muons = muonsCopy;
+    ANA_CHECK (evtStore.record (muonsCopy, m_muonName + postfix));
+    ANA_CHECK (evtStore.record (muonsAuxCopy, m_muonName + postfix + "Aux."));
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_electrons, *m_muons);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const columnar::VariantExampleTool& m_tool;
+  std::string m_electronName;
+  std::string m_muonName;
+
+  const xAOD::ElectronContainer *m_electrons = nullptr;
+  const xAOD::MuonContainer *m_muons = nullptr;
+};
 
 // this is a test that runs the tool on PHYSLITE.  this ensures that the
 // tool works on actual data, not just synthetic one of the in-memory
@@ -522,9 +553,11 @@ TEST_F (ColumnarPhysLiteTest, VariantExampleTool)
   auto tool = std::make_unique<columnar::VariantExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
+  XAODVariantExampleToolCaller xAODToolCaller (*tool, "AnalysisElectrons", "AnalysisMuons");
+
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "VariantExampleTool", "AnalysisElectrons", [&] (auto& args) {callXAODVariantExampleTool (*tool, args.isPrepCall, args.inputContainer);}, {{}});
+  doCall (*tool, "VariantExampleTool", "AnalysisElectrons", xAODToolCaller, {{}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

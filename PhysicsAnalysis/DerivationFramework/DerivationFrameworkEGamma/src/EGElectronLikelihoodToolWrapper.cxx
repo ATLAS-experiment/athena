@@ -144,7 +144,7 @@ EGElectronLikelihoodToolWrapper::addBranches() const
         m_decoratorResult, ctx);
   }
 
-  auto decoratorMultipleOutputs = m_decoratorMultipleOutputs.makeHandles();
+  auto decoratorMultipleOutputs = m_decoratorMultipleOutputs.makeHandles(ctx);
 
   // Write mask for each element and record to SG for subsequent selection
   for (size_t ipar = 0; const xAOD::Egamma* par : *particles) {

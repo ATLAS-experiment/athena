@@ -94,8 +94,8 @@ const xAOD::TrackParticle* MuonExtrapolationTool::getPreferredTrackParticle (con
 
 StatusCode MuonExtrapolationTool::addBranches() const
 {
-    const xAOD::MuonContainer* muons = NULL;
-    CHECK(evtStore()->retrieve(muons, m_muonContainerName));
+    const xAOD::MuonContainer* muons{};
+    CHECK(evtStore()->retrieve(muons, m_muonContainerName)); // FIXME Use Handles
     for(auto muon : *muons){
        const xAOD::TrackParticle* track = getPreferredTrackParticle(muon);
        float eta, phi = 0;

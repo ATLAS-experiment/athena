@@ -49,6 +49,8 @@ LArRampSubsetCnv_p1::persToTrans(const LArRampPersType* persObj,
 
             bool copyChannel = true;
             if (hasSparseData) {
+                // coverity[bad_shift]
+                // coverity[integer_overflow]
                 if (!(chansSet & (1 << (j - chansOffset)))) {
                     // Channel is missing data - skip
                     copyChannel = false;
@@ -275,6 +277,7 @@ LArRampSubsetCnv_p1::transToPers(const LArRampTransType* transObj,
                 if (subsetIt->second[j].m_vRamp.size() > 0) {
                     // store the channel number in bit map
                     assert (j >= chansOffset && (j - chansOffset) <= 31);
+                    // coverity[integer_overflow]
                     chansSet |= (1 << (j - chansOffset));
                 }
                 else {

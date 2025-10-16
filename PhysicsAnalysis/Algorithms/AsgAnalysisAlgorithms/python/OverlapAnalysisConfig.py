@@ -29,9 +29,11 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('boostedLeptons', False, type=bool,
             info="whether to enable boosted lepton overlap removal (toggles on the property UseSlidingDR of the ORUtils::EleJetOverlapTool and ORUtils::MuJetOverlapTool tools). The default is False.")
         self.addOption ('nominalOnly', False, type=bool,
-            info="(experimental) toggle off the running of overlap removal on systematically-varied objects (instead, copy from nominal). The default is False.")
+            info="(experimental) toggle off the running of overlap removal on systematically-varied objects (instead, copy from nominal). The default is False.",
+            expertMode=True)
         self.addOption ('nominalOnlyUnifiedSelection', False, type=bool,
-            info="(experimental) toggle off the running of overlap removal on systematically-varied objects (instead, copy from nominal), but consider the union of all systematically-varied object selections (not just nominal). The default is False.")
+            info="(experimental) toggle off the running of overlap removal on systematically-varied objects (instead, copy from nominal), but consider the union of all systematically-varied object selections (not just nominal). The default is False.",
+            expertMode=True)
         self.addOption ('jets', "", type=str,
             info="the input jet container.")
         self.addOption ('fatJets', "", type=str,

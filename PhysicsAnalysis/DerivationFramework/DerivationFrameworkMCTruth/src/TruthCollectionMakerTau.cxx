@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -43,9 +43,10 @@ StatusCode DerivationFramework::TruthCollectionMakerTau::addBranches() const
 {
   ATH_MSG_VERBOSE("addBranches() ...");
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   // One call to build the truth tau collection
   TauAnalysisTools::BuildTruthTaus::TruthTausEvent truthTausEvent;
-  ATH_CHECK( m_buildTruthTaus->retrieveTruthTaus( truthTausEvent ) );
+  ATH_CHECK( m_buildTruthTaus->retrieveTruthTaus( truthTausEvent, ctx ) );
 
   return StatusCode::SUCCESS;
 }

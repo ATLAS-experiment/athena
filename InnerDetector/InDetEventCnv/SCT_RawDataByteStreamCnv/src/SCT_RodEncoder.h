@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
  
 #ifndef SCT_RAWDATABYTESTREAMCNV_SCT_RODENCODER_H
@@ -69,7 +69,7 @@ class SCT_RodEncoder : public extends<AthAlgTool, ISCT_RodEncoder>
 
  private:
   
-  /** Definitions of enum error words to be retrived from SCT_ByteStreamErrorSvc in fillROD(...) method */
+  /** Definitions of enum error words to be retrieved from SCT_ByteStreamErrorSvc in fillROD(...) method */
   enum ErrorWords{TIMEOUT_ERR=(1<<11),
                   L1_ERR=(1<<10),
                   BCID_ERR=(1<<9),

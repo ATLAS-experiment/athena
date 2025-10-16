@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -17,15 +17,12 @@
 #ifndef ROOTCONVERSIONS_VECTORCONVERTER_H
 #define ROOTCONVERSIONS_VECTORCONVERTER_H
 
-
-#include "TMemberStreamer.h"
-#include "TBuffer.h"
-#include "TClass.h"
-#include "TROOT.h"
-#include "Rtypes.h"
 #include <string>
 #include <vector>
-#include <cassert>
+#include "Rtypes.h"
+#include "TBuffer.h"
+#include "TClass.h"
+#include "TMemberStreamer.h"
 
 
 namespace RootConversions {

@@ -34,18 +34,18 @@ namespace columnar
     AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
     {
       auto myinfoOuter = info;
-      myinfoOuter.offsetName = columnBase.containerStoreName (CI::idName);
+      myinfoOuter.offsetName = CI::idName;
       myinfoOuter.isOffset = true;
       auto myinfoInner = info;
-      myinfoInner.offsetName = columnBase.containerStoreName (CI::idName) + "." + name + ".outerOffset";
+      myinfoInner.offsetName = std::string (CI::idName) + "." + name + ".outerOffset";
       myinfoInner.isOffset = true;
-      info.offsetName = columnBase.containerStoreName (CI::idName) + "." + name + ".innerOffset";
+      info.offsetName = std::string (CI::idName) + "." + name + ".innerOffset";
       m_outerOffsetData = std::make_unique<ColumnAccessorDataArray> (&m_outerOffsetIndex, &m_outerOffsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnBase.addColumn (myinfoInner.offsetName, m_outerOffsetData.get(), std::move (myinfoOuter));
       m_innerOffsetData = std::make_unique<ColumnAccessorDataArray> (&m_innerOffsetIndex, &m_innerOffsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnBase.addColumn (info.offsetName, m_innerOffsetData.get(), std::move (myinfoInner));
       m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (ElementType), ColumnAccessMode::input);
-      columnBase.addColumn (columnBase.containerStoreName (CI::idName) + "." + name + ".data", m_dataData.get(), std::move (info));
+      columnBase.addColumn (std::string (CI::idName) + "." + name + ".data", m_dataData.get(), std::move (info));
     }
 
     AccessorTemplate (AccessorTemplate&& that)

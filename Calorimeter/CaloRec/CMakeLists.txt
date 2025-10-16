@@ -16,11 +16,12 @@ atlas_add_component( CaloRec
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloEvent TileEvent LArRecEvent CaloGeoHelpers
    CaloIdentifier AthenaBaseComps AthenaKernel CxxUtils AthenaPoolUtilities
-   Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib
+   Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib CaloClusterCorrectionLib
    StoreGateLib LumiBlockCompsLib AthenaMonitoringKernelLib
    ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
    ${EIGEN_LIBRARIES} AthAllocators IdDictParser CaloLumiConditions
-   LArRawConditions FourMom LumiBlockData xAODTrigCalo )
+   LArRawConditions FourMom LumiBlockData xAODTrigCalo
+   xAODTracking)
 
 
 

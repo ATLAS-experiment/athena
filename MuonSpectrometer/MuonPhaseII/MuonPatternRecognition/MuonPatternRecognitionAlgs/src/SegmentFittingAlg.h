@@ -4,27 +4,30 @@
 #ifndef MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
 #define MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
 
-#include "MuonPatternEvent/MuonPatternContainer.h"
-
-#include "MuonSpacePoint/CalibratedSpacePoint.h"
-#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
-#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
-
-#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-#include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "MuonPatternEvent/MuonHoughDefs.h"
-#include "MuonPatternHelpers/SegmentAmbiSolver.h"
-
-#include "xAODMuon/MuonSegmentContainer.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
+
+#include "MuonSpacePoint/CalibratedSpacePoint.h"
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
+#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
+
+#include "MuonPatternEvent/MuonPatternContainer.h"
+#include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "MuonPatternEvent/MuonHoughDefs.h"
+
+#include "MuonPatternHelpers/SegmentAmbiSolver.h"
+#include "MuonPatternHelpers/SegmentLineFitter.h"
+
+#include "xAODMuon/MuonSegmentContainer.h"
+
+
 #include <set>
 
 
-namespace MuonR4{
+namespace MuonR4 {
     /// @brief Algorithm to handle segment fits  
     /// 
     /// This is currently a placeholder to test ideas! 
@@ -34,62 +37,12 @@ namespace MuonR4{
             virtual ~SegmentFittingAlg();
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
-
-            using HitVec = SegmentFitResult::HitVec;
-
         private:
             using Parameters = SegmentFit::Parameters;
-            /** @brief Executes the segment fit with start parameters. The returned fit result
-             *         indicates whether the fit was a success and all relevant output parameters
-             *  @brief ctx: Event context needed to access the calibration constants of the hits
-             *  @brief gctx: Geometry context needed to place the segment globally within ATLAS to
-             *               calculate the nominal time of arrival
-             *  @brief startPars: Segment parameters preestimated from the SegmentSeed 
-             *                    (either  hough pattern or two drift circle seed)
-             *  @brief calibHits: Vector of strip & mdt hits to consider for the fit */
-            SegmentFitResult fitSegmentHits(const EventContext& ctx,
-                                            const ActsGeometryContext& gctx,
-                                            const Parameters& startPars,
-                                            SegmentFitResult::HitVec&& calibHits) const;
-
 
             std::vector<std::unique_ptr<Segment>> fitSegmentSeed(const EventContext& ctx,
                                                                  const ActsGeometryContext& gctx,
                                                                  const SegmentSeed* seed) const;             
-            /** @brief Spot hits with large discrepancy from the estimated parameters and remove them
-             *         from the list.
-             *  @param ctx: EventContext needed for hit calibration
-             *  @param gctx: Geometry context needed if the beamspot constaint will be packed onto the segment
-             *  @param fitResult: Data structure carrying the fit parameters & calibrated hits */
-            bool removeOutliers(const EventContext& ctx,
-                                const ActsGeometryContext& gctx,
-                                const SegmentSeed& seed,
-                                SegmentFitResult& fitResult) const;
-
-            /** @brief Recovery of missed hits. Hits in the space point bucket  that are maximally
-             *         <RecoveryPull> away from the fitted segment are put onto the segment candidate
-             *         and the candidate is refitted. If the refitted candidate has a chi2/nDoF < <OutlierRemoval>
-             *         the canidate is automatically choosen otherwise, its chi needs to be better. 
-             *  @param ctx: EventContext needed for calibration of the hits
-             *  @param gctx: Geometry context needed if the beamspot constaint will be packed onto the segment
-             *  @param seed: Segment seed from the pattern recognition to access the underlying bucket
-             *  @param toRecover: Fit result with parameters & hits to recover.  */
-            bool plugHoles(const EventContext& ctx,
-                           const ActsGeometryContext& gctx,
-                           const SegmentSeed& seed,
-                           SegmentFitResult& toRecover) const;
-            /** @brief Removes all hits from the segment which are obvious outliers. E.g. tubes 
-             *         which cannot be crossed by the segment. 
-             *  @param candidate: Reference of the segment candidate to prune. */
-            void eraseWrongHits(SegmentFitResult& candidate) const;            
-            /** @brief Converts the fit result into a segment object
-             *  @param locToGlobTrf: Local to global transform to translate the segment parameters into
-             *                       global parameters
-             *  @param parentSeed: Segment seed from which the segment was built
-             *  @param toConvert: Fitted segment that needs conversion */
-            static std::unique_ptr<Segment> convertToSegment(const Amg::Transform3D& locToGlobTrf, 
-                                                             const SegmentSeed* parentSeed,
-                                                             SegmentFitResult&& toConvert);
            
             void resolveAmbiguities(const ActsGeometryContext& gctx,
                                     std::vector<std::unique_ptr<Segment>>& segmentCandidates) const;
@@ -116,7 +69,7 @@ namespace MuonR4{
             /// Add beamline constraint
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};
-            Gaudi::Property<double> m_beamSpotL{this, "BeamSpotLength", 20. * Gaudi::Units::m};
+            Gaudi::Property<double> m_beamSpotL{this, "BeamSpotLength", 2. * Gaudi::Units::m};
 
             
             /** @brief Two mdt seeds are the same if their defining parameters match wihin */
@@ -131,7 +84,12 @@ namespace MuonR4{
             Gaudi::Property<unsigned> m_precHitCut{this, "PrecHitCut" , 3};
             /** @brief Use the fast Mdt fitter where possible */
             Gaudi::Property<bool> m_useFastFitter{this, "useFastFitter", true};
+            /** @brief Tune the number of iterations */
+            Gaudi::Property<unsigned> m_maxIter{this, "maxIterations", 50};
+            /** @brief Pointer to the ambiguity reosolution */
             std::unique_ptr<SegmentFit::SegmentAmbiSolver> m_ambiSolver{};
+            /** @brief Pointer to the actual segment fitter */
+            std::unique_ptr<SegmentFit::SegmentLineFitter> m_fitter{};
 
     };
 }

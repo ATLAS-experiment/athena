@@ -31,11 +31,11 @@ inline
 void TPIntegerVector_p2::resize( size_t  new_size ) {
    if( new_size > reserved() && !lastElement() )
       throw std::runtime_error("TPIntegerVector_p2::resize() can only enlarge the last element beyond its reserved size");
-   size_t	end = startPos() + new_size;
+   size_t end = startPos() + new_size;
    m_storage->m_endPos[m_position] = end;
    if( lastElement() ) {
       if( m_storage->m_endPos[m_position+1] < end )
-	 m_storage->m_endPos[m_position+1] = end;
+        m_storage->m_endPos[m_position+1] = end;
      m_storage->m_data.resize( end );
    }
 }
@@ -51,7 +51,7 @@ void TPIntegerVector_p2::reserve( size_t  new_size ) {
       throw std::runtime_error("TPIntegerVector_p2::reserve() can only enlarge the last element!");
    if( size() >= new_size || !lastElement() )
       return;
-   size_t	end = startPos() + new_size;
+   size_t end = startPos() + new_size;
    m_storage->m_endPos[m_position+1] = end;
    m_storage->m_data.reserve( end );
 }

@@ -10,7 +10,6 @@
 
 
 #include "CaloIdentifier/Tile_SuperCell_ID.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 

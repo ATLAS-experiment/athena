@@ -4,7 +4,7 @@
 NTHREADS=${1}
 NEVENTS=${2}
 
-inputFile=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RAW_RUN3_DATA24[0])")
+inputFile=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults; print(MuonPhaseIITestDefaults.DATA_BS[0])")
 
 # Run the job
 export TRF_ECHO=1;

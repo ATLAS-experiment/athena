@@ -9,6 +9,8 @@
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 #include "./Egamma1BDT/parameters.h"
 
+#include "../IO/eEmEg1BDTTOB.h"
+
 namespace GlobalSim {
 
   Egamma1BDTAlgTool::Egamma1BDTAlgTool(const std::string& type,
@@ -19,8 +21,9 @@ namespace GlobalSim {
   
   StatusCode Egamma1BDTAlgTool::initialize() {
        
-    CHECK(m_nbhdContainerReadKey.initialize());
-
+    CHECK(m_nbhdTOBContainerReadKey.initialize());
+    CHECK(m_BDTResultKey.initialize());
+    
     return StatusCode::SUCCESS;
   }
 
@@ -29,18 +32,19 @@ namespace GlobalSim {
     ATH_MSG_DEBUG("run()");
 
   
-    // read in LArStrip neighborhoods from the event store
-    // there is one neighborhood per EFex RoI
+    // read in LArStrip neighborhood TOBs from the event store
     auto in =
-      SG::ReadHandle<LArStripNeighborhoodContainer>(m_nbhdContainerReadKey,
+      SG::ReadHandle<IOBitwise::IeEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
 						    ctx);
     CHECK(in.isValid());
 
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
 
+    SG::WriteHandle<IOBitwise::IeEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
+    CHECK(h_BDTResult.record(std::make_unique<IOBitwise::IeEmEg1BDTTOBContainer>()));
     
-    for (const auto nbhd : *in) {
-      auto c_phi = combine_phi(nbhd);
+    for (const auto nbhdTOB : *in) {
+      auto c_phi = combine_phi(nbhdTOB);
       if (c_phi.empty()) {continue;}  // corner case: not all phi have len 17
       auto input = digitizer::digitize10(c_phi);
 
@@ -65,25 +69,31 @@ namespace GlobalSim {
 	ATH_MSG_DEBUG(ss.str());
       }
 
-    }
+      //Extract the bits (one by one) from the ap_fixed<10,5> object -> Bitset<10>
+      std::bitset<IOBitwise::IeEmEg1BDTTOB::s_eGamma1BDT_width> result;
+      for (int i=0;i<scores[0].length();i++){
+	result[i] = scores[0][0];
+      }
 
-   
+      h_BDTResult->push_back(std::make_unique<IOBitwise::eEmEg1BDTTOB>(*nbhdTOB, result));
+      
+    }
     return StatusCode::SUCCESS;
   }
 
   
   std::vector<double>
-  Egamma1BDTAlgTool::combine_phi(const LArStripNeighborhood* nbhd) const  {
+  Egamma1BDTAlgTool::combine_phi(const IOBitwise::IeEmNbhoodTOB* nbhdTOB) const  {
     auto result = std::vector<double>();
 
-    const auto& phi_low = nbhd->phi_low();
+    const auto& phi_low = nbhdTOB->Neighbourhood().phi_low();
     if (phi_low.size() != s_required_phi_len) {return result;}
 
-    const auto& phi_center = nbhd->phi_center();
+    const auto& phi_center = nbhdTOB->Neighbourhood().phi_center();
     if (phi_center.size() != s_required_phi_len) {return result;}
 
     
-    const auto& phi_high = nbhd->phi_high();
+    const auto& phi_high = nbhdTOB->Neighbourhood().phi_high();
     if (phi_high.size() != s_required_phi_len) {return result;}
 
     result.resize(s_combination_len);
@@ -116,9 +126,17 @@ namespace GlobalSim {
 
     std::stringstream ss;
     ss << "Egamma1BDTAlgTool. name: " << name() << '\n'
-       << m_nbhdContainerReadKey << '\n'
+       << m_nbhdTOBContainerReadKey << '\n'
        << '\n';
     return ss.str();
+  }
+
+  
+  
+  StatusCode Egamma1BDTAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+					  const EventContext& ctx) const {
+    CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
+    return StatusCode::SUCCESS;
   }
 }
 

@@ -185,8 +185,8 @@ void LArCelldeadOTXAlg::buildMap(const EventContext& ctx, StatusCode& sc) const 
           vector_of_chans[ch]=hashidSC.value();
         }
       }  // end loop over channels of one dead FEB
-      m_multipliers.push_back(vector_of_multipliers);
-      m_channels.push_back(vector_of_chans);
+      m_multipliers.push_back(std::move(vector_of_multipliers));
+      m_channels.push_back(std::move(vector_of_chans));
     }  // end if feb is deadAll
   }  // end loop over dead febs
 

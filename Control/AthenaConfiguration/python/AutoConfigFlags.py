@@ -63,15 +63,13 @@ class DynamicallyLoadMetadata:
         return self.metadata.keys()
 
 def GetFileMD(filenames, allowEmpty=True, maxLevel='peeker'):
-    if not filenames:
+    if not filenames or '_ATHENA_GENERIC_INPUTFILE_NAME_' in filenames:
         if allowEmpty:
             msg.info("Running an input-less job. Will have empty metadata.")
             return {}
         raise RuntimeError("Metadata can not be read in an input-less job.")
     if isinstance(filenames, str):
         filenames = [filenames]
-    if '_ATHENA_GENERIC_INPUTFILE_NAME_' in filenames:
-        raise RuntimeError('Input file name not set, instead _ATHENA_GENERIC_INPUTFILE_NAME_ found. Cannot read metadata.')
     for filename in filenames:
         if filename not in _fileMetaData:
             msg.info("Obtaining metadata of auto-configuration by peeking into '%s'", filename)

@@ -30,26 +30,32 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         self.addOption ('biasD0', None, type=float,
             info="a manual bias (float) to d0 in mm. Will be applied by the "
             "InDetTrackBiasingTool. Expert option in addition to the "
-            "recommendations. The default is 0.")
+            "recommendations. The default is 0.",
+            expertMode=True)
         self.addOption ('biasZ0', None, type=float,
             info="a manual bias (float) to z0 in mm. Will be applied by the "
             "InDetTrackBiasingTool. Expert option in addition to the "
-            "recommendations. The default is 0.")
+            "recommendations. The default is 0.",
+            expertMode=True)
         self.addOption ('biasQoverPsagitta', None, type=float,
             info="a manual bias (float) to QoverP in TeV^-1. Will be applied "
             "by the InDetTrackBiasingTool. Expert option in addition to the "
-            "recommendations. The default is 0.")
+            "recommendations. The default is 0.",
+            expertMode=True)
         self.addOption ('customRunNumber', None, type=int,
             info="manually sets the runNumber (int) in the InDetTrackBiasingTool. "
             "Expert option leads to use of different recommendations. Default is "
-            "retrieved from EventInfo")
+            "retrieved from EventInfo",
+            expertMode=True)
         self.addOption ('calibFile', None, type=str,
             info="name (str) of the calibration file to use for the CTIDE "
             "calibration. Expert option to override the recommendations "
-            "based on the campaign. The default is None.")
+            "based on the campaign. The default is None.",
+            expertMode=True)
         self.addOption ('smearingToolSeed', None, type=int,
             info="random seed (int) to be used by the InDetTrackSmearingTool. "
-            "Expert option. The default is 0.")
+            "Expert option. The default is 0.",
+            expertMode=True)
         self.addOption ('minPt', 0.5*GeV, type=float,
             info="the minimum pT cut to apply to calibrated tracks. "
             "The default is 0.5 GeV.")
@@ -203,34 +209,43 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             "use: `Loose` and `TightPrimary`. For expert studies, further "
             "WPs are available: `NoCut`, `LoosePrimary`, `LooseElectron`, "
             "`LooseMuon`, `LooseTau`, `MinBias`, `HILoose`, `HITight`, "
-            "`HILooseOptimized`, `HITightOptimized`.")
+            "`HILooseOptimized`, `HITightOptimized`.",
+            expertMode=["NoCut", "LoosePrimary", "LooseElectron",
+            "LooseMuon", "LooseTau", "MinBias", "HILoose", "HITight",
+            "HILooseOptimized", "HITightOptimized"])
         self.addOption ('additionalCuts', None, type=None,
             info="additional cuts to modify the selection WP. Only meant for "
             "expert studies of track selection. Passed as pairs of `cutName: value`. "
             "For an overview of available cuts, see twiki.cern.ch/twiki/bin/viewauth/"
-            "AtlasProtected/InDetTrackSelectionTool#List_of_possible_cuts.")
+            "AtlasProtected/InDetTrackSelectionTool#List_of_possible_cuts.",
+            expertMode=True)
         self.addOption ('runTruthFilter', True, type=bool,
             info="whether to run the TruthFilterTool. This tool is only compatible "
             "with the cut levels 'Loose' and 'TightPrimary'.")
         self.addOption ('calibFile', None, type=str,
             info="name (str) of the calibration file to use for efficiencies "
             "in the TruthFilter tool. Expert option to override the "
-            "recommendations based on the campaign. The default is None.")
+            "recommendations based on the campaign. The default is None.",
+            expertMode=True)
         self.addOption ('filterToolSeed', None, type=int,
             info="random seed (int) to be used by the InDetTrackTruthFilterTool. "
-            "Expert option. The default is 0.")
+            "Expert option. The default is 0.",
+            expertMode=True)
         self.addOption ('fFakeLoose', None, type=float,
             info="the fraction of fake tracks (float) in the Loose working point. "
             "Will be used by the InDetTrackTruthFilterTool. Expert option to "
-            "override the recommendations.")
+            "override the recommendations.",
+            expertMode=True)
         self.addOption ('fFakeTight', None, type=float,
             info="the fraction of fake tracks (float) in the TightPrimary working "
             "point. Will be used by the InDetTrackTruthFilterTool. Expert option "
-            "to override the recommendations.")
+            "to override the recommendations.",
+            expertMode=True)
         self.addOption ('trkEffSystScale', None, type=float,
             info="the track efficiency systematic scale (float). Will be used "
             "by the InDetTrackTruthFilterTool. Expert option to override the "
-            "recommendations. Default is 1.0")
+            "recommendations. Default is 1.0",
+            expertMode=True)
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only tracks satisfying the cutLevel "
             "requirements. The default is True.")

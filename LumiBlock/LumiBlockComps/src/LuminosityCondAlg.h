@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockComps/src/LuminosityCondAlg.h
@@ -21,6 +21,7 @@
 #include "CoolLumiUtilities/BunchGroupCondData.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CoralBase/Blob.h"

@@ -189,29 +189,6 @@ DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
   return sc;
 }
 
-/// Destroy persistent object in the container; does not touch transient!
-DbStatus RootKeyContainer::destroyObject(ActionList::value_type& entry) {
-  char txt[64];
-  const Token::OID_t& lnkH = entry.link;
-  // Does not work, because container size is changed...
-  ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnkH.second));
-  TDirectory::TContext dirCtxt(m_dir);
-  const TKey* key = (const TKey*)m_dir->GetListOfKeys()->FindObject(txt);
-  if ( key )    {
-    if ( m_policy == 0 || m_policy == TObject::kSingleKey )  {
-      strcat(txt,";*");
-    }
-    if ( 0 != m_ioHandler->destroy(txt) ) {
-      return Success;
-    }
-  }
-  DbPrint err( m_name);
-  err << DbPrintLvl::Error 
-      << "Could not delete object \"" << txt << "\" from directory \"" << m_dir->GetName()
-      << "\"" << DbPrint::endmsg;
-  return Error;
-}
-
 DbStatus RootKeyContainer::loadObject( void** ptr, ShapeH shape,
                                        Token::OID_t&   oid )
 {

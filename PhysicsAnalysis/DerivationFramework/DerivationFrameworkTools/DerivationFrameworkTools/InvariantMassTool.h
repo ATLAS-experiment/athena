@@ -9,15 +9,20 @@
 #ifndef DERIVATIONFRAMEWORK_INVARIANTMASSTOOL_H
 #define DERIVATIONFRAMEWORK_INVARIANTMASSTOOL_H
 
-#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
 #include "ExpressionEvaluation/ExpressionParserUser.h"
+#include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "xAODBase/IParticleContainer.h"
+#include <string>
+#include <vector>
+
+class TVector3;
+class EventContext;
 
 namespace DerivationFramework {
 
@@ -38,7 +43,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName  {this,"ContainerName","","SG key of first container"};
       SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName2 {this,"SecondContainerName","","SG key of second container"};
       SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_inputDecorNames {this, "InputDecorNames",{},"SG keys for decorations of first (and second) container(s)"};
-      StatusCode getInvariantMasses(std::vector<float>*) const;
+      StatusCode getInvariantMasses(std::vector<float>*, const EventContext& ctx) const;
       static float calculateInvariantMass(const TVector3& v1, const TVector3&v2,float M1,float M2) ;
   }; 
 }

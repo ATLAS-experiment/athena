@@ -15,21 +15,10 @@
 
 #include "RVersion.h"
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
 namespace ROOT {
    class REntry;
    class RNTupleReader;
 }
-#else
-namespace ROOT::Experimental {
-   class REntry;
-   class RNTupleReader;
-}
-namespace ROOT {
-   using REntry = ROOT::Experimental::REntry;
-   using RNTupleReader = ROOT::Experimental::RNTupleReader;
-}
-#endif
 
 namespace pool {
    namespace RootCollection {

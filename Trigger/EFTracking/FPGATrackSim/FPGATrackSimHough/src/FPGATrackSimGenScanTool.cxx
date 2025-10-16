@@ -173,7 +173,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
     // convert the group pairsets to FPGATrackSimRoads
     for (const FPGATrackSimGenScanTool::HitPairSet& pairset: pairsets)
       {      
-        addRoad(pairset.hitlist, bin.idx());
+        addRoad(pairset.hitlist, bin.idx());        
         ATH_MSG_DEBUG("Output road size=" <<pairset.hitlist.size());
 
         // debug statement if more than one road found in bin
@@ -632,6 +632,8 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
   r->setRoadID(m_roads.size() - 1);
   //    r.setPID(y * m_imageSize_y + x);
   r->setHits(std::move(sorted_hits));
+
+  r->setBinIdx(idx);
 
   FPGATrackSimBinUtil::ParSet binCenterPars = m_binnedhits->getBinTool().lastStep()->binCenter(idx);
   FPGATrackSimTrackPars trackpars = m_binnedhits->getBinTool().binDesc()->parSetToTrackPars(binCenterPars);

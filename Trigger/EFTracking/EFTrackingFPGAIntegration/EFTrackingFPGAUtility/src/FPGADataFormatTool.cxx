@@ -7,185 +7,186 @@
 #include "EFTrackingFPGAUtility/FPGADataFormatUtilities.h"
 
 StatusCode FPGADataFormatTool::initialize() {
-  ATH_MSG_INFO("Initializing IEFTrackingFPGADataFormatTool tool");
+    ATH_MSG_INFO("Initializing IEFTrackingFPGADataFormatTool tool");
 
-  ATH_CHECK(detStore()->retrieve(m_PIX_mgr, "ITkPixel"));
-  ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
-  ATH_CHECK(detStore()->retrieve(m_SCT_mgr, "ITkStrip"));
-  ATH_CHECK(detStore()->retrieve(m_sctId, "SCT_ID"));
- 
-  return StatusCode::SUCCESS;
+    ATH_CHECK(detStore()->retrieve(m_PIX_mgr, "ITkPixel"));
+    ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
+    ATH_CHECK(detStore()->retrieve(m_SCT_mgr, "ITkStrip"));
+    ATH_CHECK(detStore()->retrieve(m_sctId, "SCT_ID"));
+
+    return StatusCode::SUCCESS;
 }
 
 StatusCode FPGADataFormatTool::convertPixelHitsToFPGADataFormat(
-    const PixelRDO_Container &pixelRDO,
-    std::vector<uint64_t> &encodedData,
-    const std::vector<IdentifierHash>& hashList,
-    const EventContext &ctx) const {
+        const PixelRDO_Container &pixelRDO,
+        std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
+        const EventContext &ctx) const {
 
-  // Fill the event header
-  ATH_CHECK(fillHeader(encodedData));
+    // Fill the event header
+    ATH_CHECK(fillHeader(encodedData));
 
-  // Convert the strip RDO
-  ATH_CHECK(convertPixelRDO(pixelRDO, encodedData, hashList, ctx));
+    // Convert the strip RDO
+    ATH_CHECK(convertPixelRDO(pixelRDO, encodedData, hashList, ctx));
 
-  // Fill the event footer
-  ATH_CHECK(fillFooter(encodedData));
+    // Fill the event footer
+    ATH_CHECK(fillFooter(encodedData));
 
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 StatusCode FPGADataFormatTool::convertStripHitsToFPGADataFormat(
-    const SCT_RDO_Container &stripRDO,
-    std::vector<uint64_t> &encodedData,
-    const std::vector<IdentifierHash>& hashList,
-    const EventContext &ctx) const {
+        const SCT_RDO_Container &stripRDO,
+        std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
+        const EventContext &ctx) const {
 
-  // Fill the event header
-  ATH_CHECK(fillHeader(encodedData));
+    // Fill the event header
+    ATH_CHECK(fillHeader(encodedData));
 
-  // Convert the strip RDO
-  ATH_CHECK(convertStripRDO(stripRDO, encodedData, hashList, ctx));
+    // Convert the strip RDO
+    ATH_CHECK(convertStripRDO(stripRDO, encodedData, hashList, ctx));
 
-  // Fill the event footer
-  ATH_CHECK(fillFooter(encodedData));
+    // Fill the event footer
+    ATH_CHECK(fillFooter(encodedData));
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
 
 
 StatusCode FPGADataFormatTool::convertFPGASliceToFPGADataFormat(
-  const FPGATrackSimHitCollection* slices,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &ctx) const {
+        const FPGATrackSimHitCollection* slices,
+        bool doPixel, 
+        bool doStrip,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx) const {
 
-  // Fill the event header
-  ATH_CHECK(fillHeader(encodedData));
+    // Fill the event header
+    ATH_CHECK(fillHeader(encodedData));
 
-  // Convert Slices
-  ATH_CHECK(convertFPGASlices(slices, encodedData, ctx));
+    // Convert Slices
+    ATH_CHECK(convertFPGASlices(slices, doPixel, doStrip, encodedData, ctx));
 
-  // Fill the event footer
-  ATH_CHECK(fillFooter(encodedData));
+    // Fill the event footer
+    ATH_CHECK(fillFooter(encodedData));
 
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
 
 StatusCode FPGADataFormatTool::convertFPGASlices(
-  const FPGATrackSimHitCollection* hitsinSlice,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &/*ctx*/
-  ) const {
+        const FPGATrackSimHitCollection* hitsinSlice,
+        bool doPixel, 
+        bool doStrip,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &/*ctx*/
+        ) const {
 
     ATH_MSG_DEBUG("Encoded Slices: ");                                                                                                                                                                    
 
-    auto sliceWord_w1 = FPGADataFormatUtilities::fill_SLICE_HDR_w1(0x88, 34, 0, 0, 0);
+    auto sliceWord_w1 = FPGADataFormatUtilities::fill_SLICE_HDR_w1(FPGADataFormatUtilities::SLICE_HDR_FLAG, 34, 0, 0, 0);
     encodedData.push_back(FPGADataFormatUtilities::get_dataformat_SLICE_HDR_w1(sliceWord_w1));   
 
-    std::vector<FPGATrackSimHit> hits;
-    for (size_t i = 0; i < hitsinSlice->size(); i++)  
+    std::map<unsigned int, std::vector<const FPGATrackSimHit*> > organizedHits;
+
+    for (size_t i = 0; i < hitsinSlice->size(); i++)
     {
-	      const FPGATrackSimHit& hit = hitsinSlice->at(i);
-	
-        int cluster1D=0;
-        int cluster2D=0;
-        if(hit.getOriginalHit().getCluster1ID() >=0)
-        {
-          cluster1D=hit.getOriginalHit().getCluster1ID();
-        }
-        
-        if(hit.getOriginalHit().getCluster2ID() >=0)
-        {
-          cluster2D=hit.getOriginalHit().getCluster2ID();
-        }
+        const FPGATrackSimHit& hit = hitsinSlice->at(i);
 
-	      ATH_MSG_DEBUG("\tphiregion: " << hit.getLayer());
-        ATH_MSG_DEBUG("\tlayerbitmask: " << hit.getR());
-        ATH_MSG_DEBUG("\td0: " << hit.getGPhi());
-        ATH_MSG_DEBUG("\tz0: " << hit.getZ());
-        ATH_MSG_DEBUG("\tcluster1D: " << cluster1D);
-        ATH_MSG_DEBUG("\tcluster2D: " << cluster2D);
-
-      bool isLast = (i + 1 == hits.size());
-      auto ghit_w1 = FPGADataFormatUtilities::fill_GHITZ_w1(isLast, hit.getLayer(), hit.getR(),  hit.getGPhi(), hit.getZ(), 0, 0);
-      auto ghit_w2 = FPGADataFormatUtilities::fill_GHITZ_w2 (cluster1D, cluster2D, hit.getEtaModule(), 0);
-      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w1(ghit_w1));  
-      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w2(ghit_w2));  
-   
+        if((doPixel && hit.isPixel()) || (doStrip && hit.isStrip()))
+            organizedHits[hit.getIdentifier()].push_back(&hit);
     }
-  return StatusCode::SUCCESS;
- 
+
+    // encode the hits
+    unsigned int moduleCounter = 0;
+    for (const auto& hits: organizedHits)
+    {
+        const auto& firstHit = hits.second[0];
+        auto mod_w1 = FPGADataFormatUtilities::fill_M_HDR_w1 (FPGADataFormatUtilities::M_HDR_FLAG, firstHit->getIdentifier(), firstHit->getIdentifierHash(), 0);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_M_HDR_w1(mod_w1));
+
+        unsigned int counter = 0;
+        for(const auto& hit: hits.second)
+        {    
+            bool isLast = (counter + 1 == hits.second.size());
+            bool isLastofSlice = isLast && (moduleCounter + 1 == organizedHits.size()); // Since we are only doing once slice at a time
+            fillHit(hit, isLast, isLastofSlice, encodedData);
+            counter++;
+        }
+        moduleCounter++;
+      }
+    
+    return StatusCode::SUCCESS;
+
 }
 
 
 
 StatusCode FPGADataFormatTool::convertFPGAHitsToFPGADataFormat(
-  const FPGATrackSimHitCollection* slices,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &ctx) const {
+        const FPGATrackSimHitCollection* allHits,
+        bool doPixel, 
+        bool doStrip,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx) const {
 
-  // Fill the event header
-  ATH_CHECK(fillHeader(encodedData));
+    // Fill the event header
+    ATH_CHECK(fillHeader(encodedData));
 
-  // Convert Slices
-  ATH_CHECK(convertFPGAHits(slices, encodedData, ctx));
+    // Convert Slices
+    ATH_CHECK(convertFPGAHits(allHits, doPixel, doStrip, encodedData, ctx));
 
-  // Fill the event footer
-  ATH_CHECK(fillFooter(encodedData));
+    // Fill the event footer
+    ATH_CHECK(fillFooter(encodedData));
 
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
 
 StatusCode FPGADataFormatTool::convertFPGAHits(
-  const FPGATrackSimHitCollection* hitsinSlice,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &/*ctx*/
-  ) const {
+        const FPGATrackSimHitCollection* allHits,
+        bool doPixel, 
+        bool doStrip,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &/*ctx*/
+        ) const {
 
     ATH_MSG_DEBUG("Encodings Hits: ");                                                                                                                                                                    
 
-    std::vector<FPGATrackSimHit> hits;
-    for (size_t i = 0; i < hitsinSlice->size(); i++)
+    // first organize maps with hits group in module
+    std::map<unsigned int, std::vector<const FPGATrackSimHit*> > organizedHits;
+
+    for (size_t i = 0; i < allHits->size(); i++)
     {
-	      const FPGATrackSimHit& hit = hitsinSlice->at(i);
-	
-        int cluster1D=0;
-        int cluster2D=0;
-        if(hit.getOriginalHit().getCluster1ID() >=0)
-        {
-          cluster1D=hit.getOriginalHit().getCluster1ID();
-        }
-        
-        if(hit.getOriginalHit().getCluster2ID() >=0)
-        {
-          cluster2D=hit.getOriginalHit().getCluster2ID();
-        }
+        const FPGATrackSimHit& hit = allHits->at(i);
 
-	      ATH_MSG_DEBUG("\tphiregion: " << hit.getLayer());
-        ATH_MSG_DEBUG("\tlayerbitmask: " << hit.getR());
-        ATH_MSG_DEBUG("\td0: " << hit.getGPhi());
-        ATH_MSG_DEBUG("\tz0: " << hit.getZ());
-        ATH_MSG_DEBUG("\tcluster1D: " << cluster1D);
-        ATH_MSG_DEBUG("\tcluster2D: " << cluster2D);
-
-      bool isLast = (i + 1 == hits.size());
-      auto ghit_w1 = FPGADataFormatUtilities::fill_GHITZ_w1(isLast, hit.getLayer(), hit.getR(),  hit.getGPhi(), hit.getZ(), 0, 0);
-      auto ghit_w2 = FPGADataFormatUtilities::fill_GHITZ_w2 (cluster1D, cluster2D, hit.getEtaModule(), 0);
-      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w1(ghit_w1));  
-      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w2(ghit_w2));  
-   
+        if((doPixel && hit.isPixel()) || (doStrip && hit.isStrip()))
+            organizedHits[hit.getIdentifier()].push_back(&hit);
     }
-  return StatusCode::SUCCESS;
- 
+
+    // encode the hits
+    for (const auto& hits: organizedHits)
+    {
+        const auto& firstHit = hits.second[0];
+        auto mod_w1 = FPGADataFormatUtilities::fill_M_HDR_w1 (FPGADataFormatUtilities::M_HDR_FLAG, firstHit->getIdentifier(), firstHit->getIdentifierHash(), 0);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_M_HDR_w1(mod_w1));
+
+        unsigned int counter = 0;
+        for(const auto& hit: hits.second)
+        {    
+            bool isLast = (counter + 1 == hits.second.size());
+            fillHit(hit, isLast, false, encodedData);
+            counter++;
+        }
+    }
+    return StatusCode::SUCCESS;
+
 }
 
 
@@ -193,175 +194,154 @@ StatusCode FPGADataFormatTool::convertFPGAHits(
 
 
 StatusCode FPGADataFormatTool::convertFPGATracksToFPGADataFormat(
-  const FPGATrackSimTrackCollection* tracks,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &ctx) const {
+        const FPGATrackSimTrackCollection* tracks,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &ctx) const {
 
-// Fill the event header
-ATH_CHECK(fillHeader(encodedData));
+    // Fill the event header
+    ATH_CHECK(fillHeader(encodedData));
 
-// Convert the strip RDO
-ATH_CHECK(convertFPGATracks(tracks, encodedData, ctx));
+    // Convert the strip RDO
+    ATH_CHECK(convertFPGATracks(tracks, encodedData, ctx));
 
-// Fill the event footer
-ATH_CHECK(fillFooter(encodedData));
+    // Fill the event footer
+    ATH_CHECK(fillFooter(encodedData));
 
 
-return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 StatusCode FPGADataFormatTool::convertFPGATracks(
-  const FPGATrackSimTrackCollection* tracks,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &/*ctx*/
-  ) const {
+        const FPGATrackSimTrackCollection* tracks,
+        std::vector<uint64_t> &encodedData,
+        const EventContext &/*ctx*/
+        ) const {
 
-  for (const FPGATrackSimTrack& track : *tracks) 
-  {
-      int bitmask = 0;
-      for(const auto& hit: track.getFPGATrackSimHits())
-      {
-        bitmask |= 2 << hit.getLayer();
-      }
-
-      ATH_MSG_DEBUG("Encoded GTrack: ");
-      ATH_MSG_DEBUG("\tetaregion: " << track.getHoughY());
-      ATH_MSG_DEBUG("\tphiregion: " << track.getHoughX());
-      ATH_MSG_DEBUG("\tlayerbitmask: " << bitmask);
-      ATH_MSG_DEBUG("\td0: " << track.getD0());
-      ATH_MSG_DEBUG("\tz0: " << track.getZ0());
-      ATH_MSG_DEBUG("\tqoverpt: " << track.getQOverPt());
-      ATH_MSG_DEBUG("\tphi: " << track.getPhi());
-      ATH_MSG_DEBUG("\teta: " << track.getEta());
-
-      auto gtrackWord_w1 = FPGADataFormatUtilities::fill_GTRACK_HDR_w1(
-        0xee,
-        0,
-        track.getHoughY(),
-        track.getHoughX(),
-        0,
-        0,
-        0,
-        bitmask);
-      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w1(gtrackWord_w1));      
-
-      auto gtrackWord_w2 = FPGADataFormatUtilities::fill_GTRACK_HDR_w2(
-         0, 
-         track.getD0(),
-         track.getZ0(), 
-         0);
-      encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w2(gtrackWord_w2));  
-      
-      auto gtrackWord_w3 = FPGADataFormatUtilities::fill_GTRACK_HDR_w3(
-        track.getQOverPt(), 
-        track.getPhi(),
-        track.getEta(), 
-        0);
-     encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w3(gtrackWord_w3));  
-      
-      auto hits = track.getFPGATrackSimHits();
-      for(unsigned int i = 0 ; i < hits.size(); i++)
-      {
-        const auto& hit = hits[i];
-        int cluster1D=0;
-        int cluster2D=0;
-        if(hit.getOriginalHit().getCluster1ID() >=0)
+    for (const FPGATrackSimTrack& track : *tracks) 
+    {
+        int bitmask = 0;
+        for(const auto& hit: track.getFPGATrackSimHits())
         {
-          cluster1D=hit.getOriginalHit().getCluster1ID();
-        }
-        
-        if(hit.getOriginalHit().getCluster2ID() >=0)
-        {
-          cluster2D=hit.getOriginalHit().getCluster2ID();
+            bitmask |= 2 << hit.getLayer();
         }
 
-        ATH_MSG_DEBUG("Encoded Hits: ");
-        ATH_MSG_DEBUG("\tlast: " << (i+1 == hits.size()));
-        ATH_MSG_DEBUG("\tphiregion: " << hit.getLayer());
-        ATH_MSG_DEBUG("\tlayerbitmask: " << hit.getR());
-        ATH_MSG_DEBUG("\td0: " << hit.getGPhi());
-        ATH_MSG_DEBUG("\tz0: " << hit.getZ());
-        ATH_MSG_DEBUG("\tcluster1D: " << cluster1D);
-        ATH_MSG_DEBUG("\tcluster2D: " << cluster2D);
+        ATH_MSG_DEBUG("Encoded GTrack: ");
+        ATH_MSG_DEBUG("\tetaregion: " << track.getHoughY());
+        ATH_MSG_DEBUG("\tphiregion: " << track.getHoughX());
+        ATH_MSG_DEBUG("\tlayerbitmask: " << bitmask);
+        ATH_MSG_DEBUG("\td0: " << track.getD0());
+        ATH_MSG_DEBUG("\tz0: " << track.getZ0());
+        ATH_MSG_DEBUG("\tqoverpt: " << track.getQOverPt());
+        ATH_MSG_DEBUG("\tphi: " << track.getPhi());
+        ATH_MSG_DEBUG("\teta: " << track.getEta());
 
-    
-        auto ghit_w1 = FPGADataFormatUtilities::fill_GHITZ_w1 ((i+1 == hits.size()), hit.getLayer(), hit.getR(), hit.getGPhi(), hit.getZ(), 0, 0);
-        auto ghit_w2 = FPGADataFormatUtilities::fill_GHITZ_w2 (cluster1D, cluster2D, hit.getEtaModule(), 0);
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w1(ghit_w1));  
-        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w2(ghit_w2));  
-      
+        auto gtrackWord_w1 = FPGADataFormatUtilities::fill_GTRACK_HDR_w1(
+                0xee,
+                0,
+                track.getHoughY(),
+                track.getHoughX(),
+                0,
+                0,
+                0,
+                bitmask);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w1(gtrackWord_w1));      
 
-      }
+        auto gtrackWord_w2 = FPGADataFormatUtilities::fill_GTRACK_HDR_w2(
+                0, 
+                track.getD0(),
+                track.getZ0(), 
+                0);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w2(gtrackWord_w2));  
 
-      
+        auto gtrackWord_w3 = FPGADataFormatUtilities::fill_GTRACK_HDR_w3(
+                track.getQOverPt(), 
+                track.getPhi(),
+                track.getEta(), 
+                0);
+        encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w3(gtrackWord_w3));  
+
+        auto hits = track.getFPGATrackSimHits();
+        hits.erase(
+        std::remove_if(hits.begin(), hits.end(),
+            [](const FPGATrackSimHit& hit) { return !hit.isReal(); }),
+        hits.end());
+
+        for(unsigned int i = 0 ; i < hits.size(); i++)
+        {
+            const auto& hit = hits[i];
+            bool isLast = (i+1 == hits.size());
+            fillHit(&hit, isLast, false, encodedData);
+        }
+
+
     }
 
 
-  return StatusCode::SUCCESS;
-  }
+    return StatusCode::SUCCESS;
+}
 
 
 
 StatusCode FPGADataFormatTool::convertPixelRDO(
-    const PixelRDO_Container &pixelRDO,
-    std::vector<uint64_t> &encodedData,
-    const std::vector<IdentifierHash>& hashList,
-    const EventContext &/*ctx*/
-    ) const {
+        const PixelRDO_Container &pixelRDO,
+        std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
+        const EventContext &/*ctx*/
+        ) const {
 
-  bool filledHeader = false;
-  for (const InDetRawDataCollection<PixelRDORawData>* pixel_rdoCollection : pixelRDO) 
-  {
-    if (pixel_rdoCollection == nullptr) { continue; }
-
-    // loop on all RDOs
-    for (const PixelRDORawData* pixelRawData : *pixel_rdoCollection) 
+    bool filledHeader = false;
+    for (const InDetRawDataCollection<PixelRDORawData>* pixel_rdoCollection : pixelRDO) 
     {
-      Identifier rdoId = pixelRawData->identify();
-      // get the det element from the det element collection
-      const InDetDD::SiDetectorElement* sielement = m_PIX_mgr->getDetectorElement(rdoId); 
-      // if hash list has elements, check if the current Si in the list otherwise, continue
-      if(hashList.size() > 0)
-      {
-        if(std::find(hashList.begin(), hashList.end(), sielement->identifyHash()) == hashList.end()) continue;
-      }
+        if (pixel_rdoCollection == nullptr) { continue; }
 
-      // Fill the module header
-      if(!filledHeader)
-      {
-        ATH_CHECK(fillModuleHeader(sielement, encodedData));
-        filledHeader = true;
-      }
+        // loop on all RDOs
+        for (const PixelRDORawData* pixelRawData : *pixel_rdoCollection) 
+        {
+            Identifier rdoId = pixelRawData->identify();
+            // get the det element from the det element collection
+            const InDetDD::SiDetectorElement* sielement = m_PIX_mgr->getDetectorElement(rdoId); 
+            // if hash list has elements, check if the current Si in the list otherwise, continue
+            if(hashList.size() > 0)
+            {
+                if(std::find(hashList.begin(), hashList.end(), sielement->identifyHash()) == hashList.end()) continue;
+            }
 
-          // Get the pixel word
-          auto pixelWord = FPGADataFormatUtilities::fill_PIXEL_EF_RDO (
-            (pixelRawData == pixel_rdoCollection->back()), // last
-            m_pixelId->phi_index(rdoId), // ROW
-            m_pixelId->eta_index(rdoId), // COL
-            pixelRawData->getToT(), // TOT
-            pixelRawData->getLVL1A(),  // Lvl!
-            0 // Spare
-            );
+            // Fill the module header
+            if(!filledHeader)
+            {
+                ATH_CHECK(fillModuleHeader(sielement, encodedData));
+                filledHeader = true;
+            }
 
-          // Push the word into the vector
-          encodedData.push_back(FPGADataFormatUtilities::get_dataformat_PIXEL_EF_RDO(pixelWord));
-      //}
+            // Get the pixel word
+            auto pixelWord = FPGADataFormatUtilities::fill_PIXEL_EF_RDO (
+                    (pixelRawData == pixel_rdoCollection->back()), // last
+                    m_pixelId->phi_index(rdoId), // ROW
+                    m_pixelId->eta_index(rdoId), // COL
+                    pixelRawData->getToT(), // TOT
+                    pixelRawData->getLVL1A(),  // Lvl!
+                    0x0F0F0F // Spare
+                    );
+
+            // Push the word into the vector
+            encodedData.push_back(FPGADataFormatUtilities::get_dataformat_PIXEL_EF_RDO(pixelWord));
+            //}
     } // end for each RDO in the collection
 
     // reset the header 
     filledHeader = false;
 
-  } // for each pixel RDO collection
+} // for each pixel RDO collection
 
-  return StatusCode::SUCCESS;
+return StatusCode::SUCCESS;
 }
 
 StatusCode FPGADataFormatTool::convertStripRDO(
-    const SCT_RDO_Container &stripRDO,
-    std::vector<uint64_t> &encodedData,
-    const std::vector<IdentifierHash>& hashList,
-    const EventContext &/*ctx*/
-) const {
+        const SCT_RDO_Container &stripRDO,
+        std::vector<uint64_t> &encodedData,
+        const std::vector<IdentifierHash>& hashList,
+        const EventContext &/*ctx*/
+        ) const {
     constexpr int MaxChannelinStripRow = 128;
     long unsigned int stripNumber = 0;
     bool filledHeader = false;
@@ -429,7 +409,7 @@ StatusCode FPGADataFormatTool::convertStripRDO(
             // if hash list has elements, check if the current Si in the list otherwise, continue
             if(hashList.size() > 0)
             {
-              if(std::find(hashList.begin(), hashList.end(), sielement->identifyHash()) == hashList.end()) continue;
+                if(std::find(hashList.begin(), hashList.end(), sielement->identifyHash()) == hashList.end()) continue;
             }
 
             // Fill the module header if not already filled
@@ -454,12 +434,12 @@ StatusCode FPGADataFormatTool::convertStripRDO(
 
             // Create the encoded strip word
             auto stripWord = FPGADataFormatUtilities::fill_STRIP_EF_RDO(
-                lastBit,          // last bit indicating module boundary
-                chipID,           // chip ID
-                ITkStripID,      // cluster number
-                stripEncodingForITK.at(stripID), // cluster map
-                0                // spare bits
-            );
+                    lastBit,          // last bit indicating module boundary
+                    chipID,           // chip ID
+                    ITkStripID,      // cluster number
+                    stripEncodingForITK.at(stripID), // cluster map
+                    0x0F0F           // spare bits
+                    );
 
             uint32_t encodedCluster = FPGADataFormatUtilities::get_dataformat_STRIP_EF_RDO(stripWord);
 
@@ -478,10 +458,10 @@ StatusCode FPGADataFormatTool::convertStripRDO(
             if (lastBit && firstClusterFilled) {
                 encodedData.push_back(packedWord);
             }
-            
+
         }
-      // Reset the header flag for the next module
-      filledHeader = false;
+        // Reset the header flag for the next module
+        filledHeader = false;
     } // end for each RDO in the strip collection
 
     return StatusCode::SUCCESS;
@@ -490,43 +470,74 @@ StatusCode FPGADataFormatTool::convertStripRDO(
 // Helper function for common header and Footer info
 StatusCode FPGADataFormatTool::fillHeader(std::vector<uint64_t> &encodedData) const
 {
-  // Fill the event header
-  auto header_w1 = FPGADataFormatUtilities::fill_EVT_HDR_w1 (FPGADataFormatUtilities::EVT_HDR_FLAG, 1, 0, 0);
-  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w1(header_w1));
+    // Fill the event header
+    auto header_w1 = FPGADataFormatUtilities::fill_EVT_HDR_w1 (FPGADataFormatUtilities::EVT_HDR_FLAG, 1, 0, 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w1(header_w1));
 
-  // Fill the event header
-  auto header_w2 = FPGADataFormatUtilities::fill_EVT_HDR_w2 (242000, 0);
-  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w2(header_w2));
+    // Fill the event header
+    auto header_w2 = FPGADataFormatUtilities::fill_EVT_HDR_w2 (242000, 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w2(header_w2));
 
-  // Fill the event header
-  auto header_w3 = FPGADataFormatUtilities::fill_EVT_HDR_w3 (0, 0);
-  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w3(header_w3));
+    // Fill the event header
+    auto header_w3 = FPGADataFormatUtilities::fill_EVT_HDR_w3 (0, 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_HDR_w3(header_w3));
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 StatusCode FPGADataFormatTool::fillFooter(std::vector<uint64_t> &encodedData) const
 {
-  // Fill the event header
-  auto footer_w1 = FPGADataFormatUtilities::fill_EVT_FTR_w1 (FPGADataFormatUtilities::EVT_FTR_FLAG, 0, 0);
-  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w1(footer_w1));
+    // Fill the event header
+    auto footer_w1 = FPGADataFormatUtilities::fill_EVT_FTR_w1 (FPGADataFormatUtilities::EVT_FTR_FLAG, 0, 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w1(footer_w1));
 
-  // Fill the event header
-  auto footer_w2 = FPGADataFormatUtilities::fill_EVT_FTR_w2 (0);
-  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w2(footer_w2));
+    // Fill the event header
+    auto footer_w2 = FPGADataFormatUtilities::fill_EVT_FTR_w2 (0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w2(footer_w2));
 
-  // Fill the event header
-  auto footer_w3 = FPGADataFormatUtilities::fill_EVT_FTR_w3 (encodedData.size(), 44939973);
-  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w3(footer_w3));
+    // Fill the event header
+    auto footer_w3 = FPGADataFormatUtilities::fill_EVT_FTR_w3 (encodedData.size(), 44939973);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EVT_FTR_w3(footer_w3));
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 StatusCode FPGADataFormatTool::fillModuleHeader(const InDetDD::SiDetectorElement* sielement, std::vector<uint64_t> &encodedData) const
 {
-  auto mod_w1 = FPGADataFormatUtilities::fill_M_HDR_w1 (FPGADataFormatUtilities::M_HDR_FLAG, sielement->identify().get_identifier32().get_compact(), 
-                                                        sielement->identifyHash().value(), 0);
-  encodedData.push_back(FPGADataFormatUtilities::get_dataformat_M_HDR_w1(mod_w1));
+    auto mod_w1 = FPGADataFormatUtilities::fill_M_HDR_w1 (FPGADataFormatUtilities::M_HDR_FLAG, sielement->identify().get_identifier32().get_compact(), 
+            sielement->identifyHash().value(), 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_M_HDR_w1(mod_w1));
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
+}
+
+
+// helper to fill the hit
+void FPGADataFormatTool::fillHit(const FPGATrackSimHit* hit, bool isLast, bool isLastofSlice, std::vector<uint64_t> &encodedData) const
+{
+    int cluster1D=0;
+    int cluster2D=0;
+    if(hit->getOriginalHit().getCluster1ID() >=0)
+    {
+        cluster1D=hit->getOriginalHit().getCluster1ID();
+    }
+
+    if(hit->getOriginalHit().getCluster2ID() >=0)
+    {
+        cluster2D=hit->getOriginalHit().getCluster2ID();
+    }
+
+    ATH_MSG_DEBUG("\tphiregion: " << hit->getLayer());
+    ATH_MSG_DEBUG("\tR: " << hit->getR());
+    ATH_MSG_DEBUG("\tphi: " << hit->getGPhi());
+    ATH_MSG_DEBUG("\tZ: " << hit->getZ());
+    ATH_MSG_DEBUG("\tcluster1D: " << cluster1D);
+    ATH_MSG_DEBUG("\tcluster2D: " << cluster2D);
+
+    auto ghit_w1 = FPGADataFormatUtilities::fill_GHITZ_w1(isLast, hit->getLayer(), hit->getR(),  hit->getGPhi(), hit->getZ(), isLastofSlice, 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w1(ghit_w1));  
+    // overwrite the information for now
+    cluster1D = hit->getIdentifierHash();
+    auto ghit_w2 = FPGADataFormatUtilities::fill_GHITZ_w2 (cluster1D, cluster2D, hit->getEtaModule(), 0);
+    encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GHITZ_w2(ghit_w2));  
 }

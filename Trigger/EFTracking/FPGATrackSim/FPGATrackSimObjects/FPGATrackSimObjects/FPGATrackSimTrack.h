@@ -112,6 +112,10 @@ class FPGATrackSimTrack {
   void setValidCand(bool v)   { m_isValidCand = v; }
   void setIdealRadii(const std::vector<double>& v) { m_idealRadii = v; }
 
+  // Bin ID, if using FPGATrackSim binning.
+  void setBinIdx(std::vector<unsigned> x) { m_binIdx = std::move(x); }
+  const std::vector<unsigned>& getBinIdx() const { return m_binIdx; }
+
   void calculateTruth(); // this will calculate the above quantities based on the hits
   void setNLayers(int); //Reset/resize the track hits vector
   void setFPGATrackSimHit(unsigned i, const FPGATrackSimHit& hit);
@@ -180,6 +184,9 @@ class FPGATrackSimTrack {
 
   std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
 
+  // bin ID. Just store this as a vector<unsigned>.
+  std::vector<unsigned> m_binIdx;
+
   signed long m_eventindex = -1; // matched particle event index
   HepMcParticleLink::barcode_type m_barcode = std::numeric_limits<HepMcParticleLink::barcode_type>::max(); // matched geant particle barcode
   HepMcParticleLink::barcode_type m_uniqueID = std::numeric_limits<HepMcParticleLink::barcode_type>::max();
@@ -201,7 +208,7 @@ class FPGATrackSimTrack {
   // There is currently only one algorithm
   unsigned int m_ORcode = 1; // Each digit should represent pass/fail(1/0) result from a specific OR algorithm
 
-  ClassDefNV(FPGATrackSimTrack, 6)
+  ClassDefNV(FPGATrackSimTrack, 7)
 };
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H

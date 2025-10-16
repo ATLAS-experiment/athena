@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,19 +9,18 @@
  * @brief Base class for Root converters --- implementation.
  */
 
-
 #include "RootConversions/TVirtualConverter.h"
-#include "TROOT.h"
-#include "TClass.h"
-#include "TBaseClass.h"
-#include "TDataMember.h"
-#include "TClassEdit.h"
-#include "TDataType.h"
-#include "TBuffer.h"
-#include "TError.h"
-#include "TStreamerInfo.h"
 #include <cassert>
 #include <cstdlib>
+#include "TBaseClass.h"
+#include "TBuffer.h"
+#include "TClass.h"
+#include "TClassEdit.h"
+#include "TDataMember.h"
+#include "TDataType.h"
+#include "TError.h"
+#include "TROOT.h"
+#include "TStreamerInfo.h"
 
 
 namespace {
@@ -115,7 +114,7 @@ TVirtualConverter::TVirtualConverter (UInt_t checksum,
     fPersClass (pers_cls),
     fCheckSum (checksum),
     fOldLast (-3),
-    fPersObj (0)
+    fPersObj (nullptr)
 {
   CheckClasses();
 }
@@ -135,7 +134,7 @@ TVirtualConverter::TVirtualConverter (TClass* trans_cls,
     fCheckSum (fTransClass ?
                  CalculateCheckSum (fPersClass, fTransClass->GetName()) : 0),
     fOldLast (-3),
-    fPersObj (0)
+    fPersObj (nullptr)
 {
   CheckClasses();
 }
@@ -156,7 +155,7 @@ TVirtualConverter::TVirtualConverter (UInt_t checksum,
     fPersClass (ToClass (pers_cls)),
     fCheckSum (checksum),
     fOldLast (-3),
-    fPersObj (0)
+    fPersObj (nullptr)
 {
   CheckClasses();
 }
@@ -177,7 +176,7 @@ TVirtualConverter::TVirtualConverter (const std::string& trans_cls,
     fPersClass (ToClass (pers_cls)),
     fCheckSum (CalculateCheckSum (fPersClass, fTransClass->GetName())),
     fOldLast (-3),
-    fPersObj (0)
+    fPersObj (nullptr)
 {
   CheckClasses();
 }
@@ -188,8 +187,8 @@ TVirtualConverter::TVirtualConverter (const std::string& trans_cls,
  */
 void TVirtualConverter::CheckClasses()
 {
-  if (fTransClass == 0) {
-    if (fPersClass == 0)
+  if (fTransClass == nullptr) {
+    if (fPersClass == nullptr)
       Error ("TVirtualConverter",
              "Both transient and persistent classes are null.");
     else
@@ -197,7 +196,7 @@ void TVirtualConverter::CheckClasses()
              "Transient class is null for persistent class `%s'",
              fPersClass->GetName());
   }
-  else if (fPersClass == 0)
+  else if (fPersClass == nullptr)
     Error ("TVirtualConverter",
            "Persistent class is null for transient class `%s'",
            fTransClass->GetName());
@@ -291,7 +290,7 @@ void TVirtualConverter::ReadBuffer(TBuffer& b,
   CheckStreamInfos();
 
   // Make an instance of the persistent class, if we haven't done so already.
-  if (fPersObj == 0)
+  if (fPersObj == nullptr)
     fPersObj = NewPersObj();
 
   // Read in the object, as an instance of the persistent class.
@@ -306,7 +305,7 @@ void TVirtualConverter::ReadBuffer(TBuffer& b,
  * @brief Helper to convert a class name to a Root class pointer.
  * @param name  The name of the class to convert.
  *
- * Returns 0 on failure.
+ * Returns nullptr on failure.
  */
 TClass* TVirtualConverter::ToClass (const std::string& name)
 {
@@ -318,7 +317,7 @@ TClass* TVirtualConverter::ToClass (const std::string& name)
  * @brief Helper to convert a @c type_info to a Root class pointer.
  * @param name  The @c type_info of the class to convert.
  *
- * Returns 0 on failure.
+ * Returns nullptr on failure.
  */
 TClass* TVirtualConverter::ToClass (const std::type_info& id)
 {
@@ -411,11 +410,11 @@ void TVirtualConverter::CheckStreamInfos()
  * You must call @c SetCtorInfo after this!
  */
 TVirtualConverter::TVirtualConverter()
-  : fTransClass (0),
-    fPersClass (0),
+  : fTransClass (nullptr),
+    fPersClass (nullptr),
     fCheckSum (0),
     fOldLast (-3),
-    fPersObj (0)
+    fPersObj (nullptr)
 {
 }
 
@@ -432,7 +431,7 @@ void TVirtualConverter::SetCtorInfo (UInt_t checksum,
                                      TClass* trans_cls,
                                      TClass* pers_cls)
 {
-  assert (fTransClass == 0);
+  assert (fTransClass == nullptr);
 
   fCheckSum = checksum;
   fTransClass = trans_cls;

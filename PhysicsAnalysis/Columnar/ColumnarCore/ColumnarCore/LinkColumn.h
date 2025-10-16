@@ -98,9 +98,9 @@ namespace columnar
     static constexpr bool isNativeType = false;
     static constexpr bool useConvertInput = false;
     static constexpr bool useConvertWithDataInput = true;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& columnarTool, ColumnInfo& info)
+    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info)
     {
-      info.linkTargetNames = {columnarTool.containerStoreName(LT::idName)};
+      info.linkTargetNames = {std::string{LT::idName}};
       return info;
     }
 

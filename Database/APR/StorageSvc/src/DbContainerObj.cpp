@@ -197,11 +197,6 @@ DbStatus DbContainerObj::retire()   {
   return Success;
 }
 
-/// Query the size of the pending transaction stack
-bool DbContainerObj::updatesPending() const  {
-  return m_info != 0 ? m_info->updatesPending() : false;
-}
-
 /// Execute Transaction Action
 DbStatus DbContainerObj::transAct(Transaction::Action action) {
    return m_info?  m_info->transAct(action) : Success;
@@ -281,39 +276,11 @@ DbStatus DbContainerObj::remove(ObjHandle& objH) {
   return Error;
 }
 
-/// Destroy an existing persistent object identified by its handle
-DbStatus DbContainerObj::destroy(const Token::OID_t& linkH) {
-  if ( !isReadOnly() && hasAccess() && m_isOpen )  {
-    m_dbH.setAge(0);
-    return m_info->destroy(linkH);
-  }
-  return Error;
-}
-
 /// Save new object in the container and return its handle
 DbStatus DbContainerObj::save(DbContainer&  cntH, const void* object, ShapeH shape, Token::OID_t& linkH)  {
   if ( !isReadOnly() && hasAccess() && object && m_isOpen ) {
     m_dbH.setAge(0);
     return m_info->save(cntH, object, shape, linkH);
-  }
-  return Error;
-}
-
-/// Update an object to the container identified by its handle
-DbStatus DbContainerObj::update(DbContainer& cntH, const void* object, ShapeH shape, const Token::OID_t& linkH)  {
-  if ( !isReadOnly() && hasAccess() && object && m_isOpen ) {
-    m_dbH.setAge(0);
-    return m_info->update(cntH, object, shape, linkH);
-  }
-  return Error;
-}
-
-/// Update an object to the container identified by its handle
-DbStatus DbContainerObj::update(DbContainer& cntH, const void* object, ShapeH shape, const DbObjectHandle<DbObject>& objH)
-{
-  if ( !isReadOnly() && hasAccess() && m_isOpen ) {
-    m_dbH.setAge(0);
-    return m_info->update(cntH, object, shape, objH);
   }
   return Error;
 }

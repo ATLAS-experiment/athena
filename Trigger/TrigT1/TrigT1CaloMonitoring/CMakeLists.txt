@@ -11,7 +11,7 @@ atlas_add_component( TrigT1CaloMonitoring
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib CaloDetDescrLib CaloEvent CaloIdentifier FourMomUtils Identifier LArCablingLib LArRecConditions PathResolver SGTools StoreGateLib TrigConfData TrigDecisionToolLib TrigT1CaloCalibConditions TrigT1CaloEventLib TrigT1CaloMonitoringToolsLib TrigT1CaloToolInterfaces TrigT1CaloUtilsLib TrigT1Interfaces TrigT1Result xAODJet xAODTrigL1Calo xAODTrigger )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} L1CaloFEXByteStreamLib AthContainers AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib CaloDetDescrLib CaloEvent CaloIdentifier FourMomUtils Identifier LArCablingLib LArRecConditions PathResolver SGTools StoreGateLib TrigConfData TrigDecisionToolLib TrigT1CaloCalibConditions TrigT1CaloEventLib TrigT1CaloMonitoringToolsLib TrigT1CaloToolInterfaces TrigT1CaloUtilsLib TrigT1Interfaces TrigT1Result xAODJet xAODTrigL1Calo xAODTrigger )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py share/L1CaloPhase1Monitoring.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

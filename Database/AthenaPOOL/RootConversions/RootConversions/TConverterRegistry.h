@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TConverterRegistry.h
@@ -22,14 +22,14 @@
  */
 
 
-#ifndef TCONVERTERREGISTRY_H
-#define TCONVERTERREGISTRY_H
+#ifndef ROOTCONVERSIONS_TCONVERTERREGISTRY_H
+#define ROOTCONVERSIONS_TCONVERTERREGISTRY_H
 
-
-#include <string>
 #include <map>
 #include <mutex>
+#include <string>
 #include "Rtypes.h"
+
 class TVirtualConverter;
 class TMemberStreamer;
 
@@ -85,7 +85,7 @@ public:
    * @brief Look up a converter in the registry by name and checksum.
    * @param name     The name of the (transient) class.
    * @param checksum The checksum of the persistent class.
-   * @return The converter, or 0 if none.
+   * @return The converter, or nullptr if none.
    */
   TVirtualConverter* GetConverter (const char* name, int checksum) const;
 
@@ -108,9 +108,9 @@ private:
 
   // We store a map of names to maps of checksums to converters.
   // The bool flag tells whether or not we own this converter.
-  typedef std::pair<TVirtualConverter*, bool> Payload;
-  typedef std::map<UInt_t, Payload> CheckSumMap;
-  typedef std::map<std::string, CheckSumMap> MapType;
+  using Payload = std::pair<TVirtualConverter*, bool>;
+  using CheckSumMap = std::map<UInt_t, Payload>;
+  using MapType = std::map<std::string, CheckSumMap>;
 
   /// Map of registered converters.
   MapType fMap;
@@ -121,10 +121,10 @@ private:
 
   /// Streamer converters.
 #ifndef __CLING__
-  typedef std::map<std::string, TMemberStreamer*> SMapType;
+  using SMapType = std::map<std::string, TMemberStreamer*>;
   SMapType fSMap;
 #endif
 };
 
 
-#endif // not TCONVERTERREGISTRY_H
+#endif // not ROOTCONVERSIONS_TCONVERTERREGISTRY_H

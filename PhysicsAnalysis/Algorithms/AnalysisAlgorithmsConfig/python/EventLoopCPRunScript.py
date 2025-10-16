@@ -8,6 +8,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         super().__init__()
         self.logger.info("EventLoopCPRunScript initialized")
         self.addCustomArguments()
+        self.algSeq = None
         # Avoid putting call to parse_args() here! Otherwise it is hard to retrieve the parser infos
 
     def addCustomArguments(self):
@@ -18,6 +19,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         derivedGroup.add_argument('--work-dir', dest='work_dir', nargs='?', const='workDir', default=None,
                                   help='The work directory for the EL job. defaults to "workDir".')
         derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
+        derivedGroup.add_argument('--dump-full-config', dest='dump_full_config', action='store_true', help='Save the full CP configuration log to a json file. This can be useful for debugging purposes.')
         
         expertGroup = self.parser.add_argument_group('Experts arguments')
         expertGroup.add_argument('--run-perf-stat', dest='run_perf_stat', action='store_true', help='Run xAOD::PerfStats to get input branch access data. This is mostly useful for AMG experts wanting to understand branch access patterns.')
@@ -37,6 +39,7 @@ class EventLoopCPRunScript(CPBaseRunner):
                                               noSystematics=self.args.no_systematics)
         self.logger.info("Configuring algorithms")
         configSeq.fullConfigure(configAccumulator)
+        self.algSeq = algSeq
         return algSeq
     
     def readSamples(self):
@@ -47,6 +50,29 @@ class EventLoopCPRunScript(CPBaseRunner):
         for file in self.inputList:
             sampleFiles.add(file)
         self.sampleHandler.add(sampleFiles)
+    
+    # This functionality should not be in the runscript, instead should be put into PrintConfiguration alg.
+    # This is a temporary solution to dump the full config until PrintConfiguration alg is completely ready.
+    def _dumpFullConfig(self):
+        from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob, combine_json_files
+        import json
+        with(open("_alg_sequence.json", 'w', encoding='utf-8')) as seq_out_file:
+            output_dict = {}
+            try:
+                save_algs_from_sequence_ELjob(self.algSeq, output_dict)
+                json.dump(output_dict, seq_out_file, ensure_ascii=False, indent=4) 
+            except Exception as e: 
+                self.logger.warning(f'Dumping full config failed with: {e}')
+                self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
+            try:
+                combine_json_files(alg_file="_alg_sequence.json", output_file="full_config.json")
+                self.logger.info("Combining full config to full_config.json succeeded")
+                
+            except Exception as e:
+                self.logger.warning(f'Combining full config failed with: {e}')
+                self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
+            finally:
+                os.remove("_alg_sequence.json")
             
     def moveOutputFiles(self):
         from pathlib import Path
@@ -134,6 +160,9 @@ class EventLoopCPRunScript(CPBaseRunner):
 
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
         self.driverSubmit(driver)
+        
+        if self.args.dump_full_config:
+            self._dumpFullConfig()
         exitCode = self.getExitCode()
         
         if self.args.work_dir is None: # move output if work_dir is not used

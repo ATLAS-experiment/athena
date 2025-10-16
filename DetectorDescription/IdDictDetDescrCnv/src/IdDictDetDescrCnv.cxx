@@ -7,11 +7,9 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>   $Id: IdDictDetDescrCnv.cxx,v 1.21 2009-02-15 13:08:19 schaffer
-//Exp $ <version>     $Name: not supported by cvs2svn $
-
 #include "IdDictDetDescrCnv.h"
 
+#include "IdDict/IdDictDictionary.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaKernel/StorableConversions.h"
 #include "DetDescrCnvSvc/DetDescrAddress.h"

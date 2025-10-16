@@ -49,7 +49,7 @@ static const std::array<int,TABLESIZE> double_spin = {
   +0, +1, +1, +1, +1, +1, +1, +1, +1, +0,
   +2, +2, +2, +2, +2, +0, +0, +0, +0, +0,
   +0, +0, +2, +2, +2, +0, +0, +0, +0, +4,
-  +0, +0, -1, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +1, +2, +0, +2, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
@@ -1029,6 +1029,19 @@ template<> inline int charge3(const DecodedPID& p) {
     if (pp.ndigits() == 3) { classified = true; nq = 2; if (p.last()%2==0) {sign = -1;} signmult = -1; } // states with squark-antiquark or quark-anti-quark
     if (pp.ndigits() == 4) { classified = true; nq = 3; } // states with squark-quark-quark or quark-quark-quark
   }
+  if (!classified && isHiddenValley(p)) { // Hidden Valley particles
+    auto pp = p.shift(2);
+    if (!classified && isMeson(pp)) { classified = true; nq = 2; if ((*(pp.second.rbegin()+2)) == 2||(*(pp.second.rbegin()+2)) == 4 ) { sign=-1;} signmult =-1; }
+    if (!classified && isDiquark(pp)) {return triple_charge.at(pp(0))+triple_charge.at(pp(1)); }
+    if (!classified && isBaryon(pp)) { classified = true; nq = 3; }
+    
+  }
+  if (!classified && isKK(p)) { // Kaluza-Klein particles
+    auto pp = p.shift(2);
+    auto ap = std::abs(pp.pid());
+    if (ap < TABLESIZE ) return pp.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);
+
+  }
   if (!classified && isMonopole(p)) {
     ///Codes 411nq1nq2 nq3 0  are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
     /// when they disagree, with the overall sign of the particle set by the magnetic charge.
@@ -1085,6 +1098,15 @@ template<> inline int spin2(const DecodedPID& p) {
     auto ap = std::abs(pp.pid());
     if (ap < TABLESIZE ) { return std::abs(double_spin.at(ap)-1); } // sparticles (0->1, 1 -> 0,  2->1,  4->3)
     return p.last()-1; // R-Hadrons (p.last() == 2J +1)
+  }
+  if (isHiddenValley(p)) { //Hidden Valley spins
+    auto pp = p.shift(2);
+    if (isHadron(pp)) { return pp.last()-1; } // Hadrons (p.last == 2J+1 - special cases handled above)
+  }
+  if (isKK(p)) { // Kaluza-Klein spins
+    auto pp = p.shift(2);
+    auto ap = std::abs(pp.pid());
+    if (ap < TABLESIZE ) { return double_spin.at(ap); } // fundamental particles
   }
   auto ap = std::abs(p.pid());
   if (ap == K0S) { return 0; }

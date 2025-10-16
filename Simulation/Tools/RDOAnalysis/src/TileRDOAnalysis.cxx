@@ -99,16 +99,8 @@ TileRDOAnalysis::TileRDOAnalysis(const std::string& name, ISvcLocator* pSvcLocat
   , m_h_muDigits(0)
 
   , m_tree(0)
-  , m_ntupleFileName("/ntuples/file1")
-  , m_ntupleDirName("/TileRDOAnalysis/")
-  , m_ntupleTreeName("TileRDOAna")
-  , m_path("/TileRDOAnalysis/")
   , m_thistSvc("THistSvc", name)
 {
-  declareProperty("NtupleFileName", m_ntupleFileName);
-  declareProperty("NtupleDirectoryName", m_ntupleDirName);
-  declareProperty("NtupleTreeName", m_ntupleTreeName);
-  declareProperty("HistPath", m_path);
 }
 
 StatusCode TileRDOAnalysis::initialize() {
@@ -131,9 +123,11 @@ StatusCode TileRDOAnalysis::initialize() {
   // Grab Ntuple and histogramming service for tree
   ATH_CHECK(m_thistSvc.retrieve());
 
-  m_tree = new TTree(TString(m_ntupleTreeName), "TileRDOAna");
-  std::string fullNtupleName = "/" + m_ntupleFileName + "/" + m_ntupleDirName + "/" + m_ntupleTreeName;
-  ATH_CHECK(m_thistSvc->regTree(fullNtupleName, m_tree));
+  if(m_doNtuple){
+    m_tree = new TTree(TString(m_ntupleTreeName.value()), "TileRDOAna");
+    std::string fullNtupleName = "/" + m_ntupleFileName + "/" + m_ntupleDirName + "/" + m_ntupleTreeName;
+    ATH_CHECK(m_thistSvc->regTree(fullNtupleName, m_tree));
+  }
   if (m_tree) {
     m_tree->Branch("adcID", &m_adcID);
     m_tree->Branch("pmtID", &m_pmtID);
@@ -177,7 +171,7 @@ StatusCode TileRDOAnalysis::initialize() {
     m_tree->Branch("muDigits", &m_muDigits);
   }
   else {
-    ATH_MSG_ERROR("No tree found!");
+    if(m_doNtuple) ATH_MSG_ERROR("No tree found!");
   }
 
   // HISTOGRAMS
@@ -309,46 +303,48 @@ StatusCode TileRDOAnalysis::initialize() {
 StatusCode TileRDOAnalysis::execute() {
   ATH_MSG_DEBUG( "In TileRDOAnalysis::execute()" );
 
-  m_adcID->clear();
-  m_pmtID->clear();
-  m_cellID->clear();
-  m_ttID->clear();
-  m_mtID->clear();
-  m_fragID->clear();
-  m_rawAmp->clear();
-  m_rawTime->clear();
-  m_rawQual->clear();
-  m_rawPed->clear();
-  m_adcHWID_mu->clear();
-  m_fragID_mu->clear();
-  m_rawAmp_mu->clear();
-  m_rawTime_mu->clear();
-  m_rawQual_mu->clear();
-  m_rawPed_mu->clear();
-  m_muRcvID->clear();
-  m_muRcv_dec->clear();
-  m_muRcv_thresh->clear();
-  m_muRcv_energy->clear();
-  m_muRcv_time->clear();
-  m_ttl1MBTS_ID->clear();
-  m_ttl1MBTS_digits->clear();
-  m_ttl1_ID->clear();
-  m_ttl1_digits->clear();
-  m_L2ID->clear();
-  m_L2val->clear();
-  m_L2eta->clear();
-  m_L2phi->clear();
-  m_L2energyA->clear();
-  m_L2energyBC->clear();
-  m_L2energyD->clear();
-  m_L2qual->clear();
-  m_L2sumE->clear();
-  m_fragSize->clear();
-  m_fragBCID->clear();
-  m_digits->clear();
-  m_muFragSize->clear();
-  m_muFragBCID->clear();
-  m_muDigits->clear();
+  if(m_tree){
+    m_adcID->clear();
+    m_pmtID->clear();
+    m_cellID->clear();
+    m_ttID->clear();
+    m_mtID->clear();
+    m_fragID->clear();
+    m_rawAmp->clear();
+    m_rawTime->clear();
+    m_rawQual->clear();
+    m_rawPed->clear();
+    m_adcHWID_mu->clear();
+    m_fragID_mu->clear();
+    m_rawAmp_mu->clear();
+    m_rawTime_mu->clear();
+    m_rawQual_mu->clear();
+    m_rawPed_mu->clear();
+    m_muRcvID->clear();
+    m_muRcv_dec->clear();
+    m_muRcv_thresh->clear();
+    m_muRcv_energy->clear();
+    m_muRcv_time->clear();
+    m_ttl1MBTS_ID->clear();
+    m_ttl1MBTS_digits->clear();
+    m_ttl1_ID->clear();
+    m_ttl1_digits->clear();
+    m_L2ID->clear();
+    m_L2val->clear();
+    m_L2eta->clear();
+    m_L2phi->clear();
+    m_L2energyA->clear();
+    m_L2energyBC->clear();
+    m_L2energyD->clear();
+    m_L2qual->clear();
+    m_L2sumE->clear();
+    m_fragSize->clear();
+    m_fragBCID->clear();
+    m_digits->clear();
+    m_muFragSize->clear();
+    m_muFragBCID->clear();
+    m_muDigits->clear();
+  }
 
   // Tile Raw Channels
   // Raw info (pulse height, time, quality) for in-time beam crossing in Tile
@@ -377,28 +373,30 @@ StatusCode TileRDOAnalysis::execute() {
             const unsigned long long ttID_int = ttID.get_compact();
             const unsigned long long mtID_int = mtID.get_compact();
 
-            m_adcID->push_back(adcID_int);
-            m_pmtID->push_back(pmtID_int);
-            m_cellID->push_back(cellID_int);
-            m_ttID->push_back(ttID_int);
-            m_mtID->push_back(mtID_int);
-            m_fragID->push_back(fragID);
+            if(m_tree){
+              m_adcID->push_back(adcID_int);
+              m_pmtID->push_back(pmtID_int);
+              m_cellID->push_back(cellID_int);
+              m_ttID->push_back(ttID_int);
+              m_mtID->push_back(mtID_int);
+              m_fragID->push_back(fragID);
+            }
 
             m_h_adcID->Fill(adcID_int);
 
             for (int ix = 0; ix != rawChannel->size(); ++ix) {
-              m_rawAmp->push_back(rawChannel->amplitude(ix)); // [ADC counts]
+              if(m_tree) m_rawAmp->push_back(rawChannel->amplitude(ix)); // [ADC counts]
               m_h_rawAmp->Fill(rawChannel->amplitude(ix));
             }
             for (int jx = 0; jx != rawChannel->sizeTime(); ++jx) {
-              m_rawTime->push_back(rawChannel->time(jx)); // rel to triggering bunch
+              if(m_tree) m_rawTime->push_back(rawChannel->time(jx)); // rel to triggering bunch
               m_h_rawTime->Fill(rawChannel->time(jx));
             }
             for (int kx = 0; kx != rawChannel->sizeQuality(); ++kx) {
-              m_rawQual->push_back(rawChannel->quality(kx)); // sampling distr.
+              if(m_tree) m_rawQual->push_back(rawChannel->quality(kx)); // sampling distr.
               m_h_rawQual->Fill(rawChannel->quality(kx));
             }
-            m_rawPed->push_back(rawChannel->pedestal()); // reconstructed
+            if(m_tree) m_rawPed->push_back(rawChannel->pedestal()); // reconstructed
             m_h_rawPed->Fill(rawChannel->pedestal());
           }
         }
@@ -418,24 +416,24 @@ StatusCode TileRDOAnalysis::execute() {
             const unsigned long long adcHWID_mu_int = adcHWID_mu.get_compact();
 
             m_h_adcHWID_mu->Fill(adcHWID_mu_int);
-            m_adcHWID_mu->push_back(adcHWID_mu_int);
+            if(m_tree) m_adcHWID_mu->push_back(adcHWID_mu_int);
 
             const int fragID_mu(muRawChannel->frag_ID());
-            m_fragID_mu->push_back(fragID_mu);
+            if(m_tree) m_fragID_mu->push_back(fragID_mu);
 
             for (int lx = 0; lx != muRawChannel->size(); ++lx){
-              m_rawAmp_mu->push_back(muRawChannel->amplitude(lx));
+              if(m_tree) m_rawAmp_mu->push_back(muRawChannel->amplitude(lx));
               m_h_rawAmp_mu->Fill(muRawChannel->amplitude(lx));
             }
             for (int mx = 0; mx != muRawChannel->sizeTime(); ++mx) {
-              m_rawTime_mu->push_back(muRawChannel->time(mx));
+              if(m_tree) m_rawTime_mu->push_back(muRawChannel->time(mx));
               m_h_rawTime_mu->Fill(muRawChannel->time(mx));
             }
             for (int nx = 0; nx != muRawChannel->sizeQuality(); ++nx) {
-              m_rawQual_mu->push_back(muRawChannel->quality(nx));
+              if(m_tree) m_rawQual_mu->push_back(muRawChannel->quality(nx));
               m_h_rawQual_mu->Fill(muRawChannel->quality(nx));
             }
-            m_rawPed_mu->push_back(muRawChannel->pedestal());
+            if(m_tree) m_rawPed_mu->push_back(muRawChannel->pedestal());
             m_h_rawPed_mu->Fill(muRawChannel->pedestal());
           }
         }
@@ -456,22 +454,22 @@ StatusCode TileRDOAnalysis::execute() {
           const std::vector<float>& ene_vec = muRcv->GetEne();
           const std::vector<float>& time_vec = muRcv->GetTime();
 
-          m_muRcvID->push_back(muRcvID);
+          if(m_tree) m_muRcvID->push_back(muRcvID);
 
           for (bool dec : dec_vec) {
-            m_muRcv_dec->push_back(dec);
+            if(m_tree) m_muRcv_dec->push_back(dec);
             m_h_muRcv_dec->Fill(dec);
           }
           for (float thresh : thresh_vec) {
-            m_muRcv_thresh->push_back(thresh);
+            if(m_tree) m_muRcv_thresh->push_back(thresh);
             m_h_muRcv_thresh->Fill(thresh);
           }
           for (float ene : ene_vec) {
-            m_muRcv_energy->push_back(ene);
+            if(m_tree) m_muRcv_energy->push_back(ene);
             m_h_muRcv_energy->Fill(ene);
           }
           for (float time : time_vec) {
-            m_muRcv_time->push_back(time);
+            if(m_tree) m_muRcv_time->push_back(time);
             m_h_muRcv_time->Fill(time);
           }
 
@@ -493,8 +491,8 @@ StatusCode TileRDOAnalysis::execute() {
           const std::vector<double> ttl1MBTS_digits(ttl1MBTS->samples());
 
           const unsigned long long ttl1MBTS_ID_int = ttl1MBTS_ID.get_compact();
-          m_ttl1MBTS_ID->push_back(ttl1MBTS_ID_int); // identifier
-          m_ttl1MBTS_digits->push_back(ttl1MBTS_digits); // hardware sum of Tile channels; read out in N time slices
+          if(m_tree) m_ttl1MBTS_ID->push_back(ttl1MBTS_ID_int); // identifier
+          if(m_tree) m_ttl1MBTS_digits->push_back(ttl1MBTS_digits); // hardware sum of Tile channels; read out in N time slices
 
           for (double sample : ttl1MBTS_digits) {
             m_h_ttl1MBTS_digits->Fill(sample);
@@ -514,8 +512,8 @@ StatusCode TileRDOAnalysis::execute() {
           const std::vector<double> ttl1_digits(tile_TTL1->samples());
 
           const unsigned long long ttl1ID_int = ttl1ID.get_compact();
-          m_ttl1_ID->push_back(ttl1ID_int);
-          m_ttl1_digits->push_back(ttl1_digits);
+          if(m_tree) m_ttl1_ID->push_back(ttl1ID_int);
+          if(m_tree) m_ttl1_digits->push_back(ttl1_digits);
 
           for (double sample : ttl1_digits) {
             m_h_ttl1_digits->Fill(sample);
@@ -571,15 +569,17 @@ StatusCode TileRDOAnalysis::execute() {
             m_h_L2sumE->Fill(sumE_vec.at(kk));
           }
 
-          m_L2ID->push_back(L2ID);
-          m_L2val->push_back(val_vec);
-          m_L2eta->push_back(eta_vec);
-          m_L2energyA->push_back(enemu0_vec);
-          m_L2energyBC->push_back(enemu1_vec);
-          m_L2energyD->push_back(enemu2_vec);
-          m_L2qual->push_back(qual_vec);
-          m_L2phi->push_back(l2phi);
-          m_L2sumE->push_back(sumE_vec);
+          if(m_tree){
+              m_L2ID->push_back(L2ID);
+              m_L2val->push_back(val_vec);
+              m_L2eta->push_back(eta_vec);
+              m_L2energyA->push_back(enemu0_vec);
+              m_L2energyBC->push_back(enemu1_vec);
+              m_L2energyD->push_back(enemu2_vec);
+              m_L2qual->push_back(qual_vec);
+              m_L2phi->push_back(l2phi);
+              m_L2sumE->push_back(sumE_vec);
+          }
 
           m_h_L2ID->Fill(L2ID);
           m_h_L2phi->Fill(l2phi);
@@ -606,12 +606,12 @@ StatusCode TileRDOAnalysis::execute() {
       uint32_t fragSize(digitsCollection->getFragSize());
       uint32_t fragBCID(digitsCollection->getFragBCID());
 
-      m_fragSize->push_back(fragSize);
-      m_fragBCID->push_back(fragBCID);
+      if(m_tree) m_fragSize->push_back(fragSize);
+      if(m_tree) m_fragBCID->push_back(fragBCID);
 
       for (const TileDigits* tileDigits : *digitsCollection) {
         const std::vector<double> digits(tileDigits->get_digits());
-        m_digits->push_back(digits);
+        if(m_tree) m_digits->push_back(digits);
 
         for (const double sample : digits) {
           m_h_digits->Fill(sample);
@@ -630,12 +630,12 @@ StatusCode TileRDOAnalysis::execute() {
       const uint32_t muFragSize(muRcvDigitsCollection->getFragSize());
       const uint32_t muFragBCID(muRcvDigitsCollection->getFragBCID());
 
-      m_muFragSize->push_back(muFragSize);
-      m_muFragBCID->push_back(muFragBCID);
+      if(m_tree) m_muFragSize->push_back(muFragSize);
+      if(m_tree) m_muFragBCID->push_back(muFragBCID);
 
       for (const TileDigits* muRcvDigits : *muRcvDigitsCollection) {
         const std::vector<double> muDigits(muRcvDigits->get_digits());
-        m_muDigits->push_back(muDigits);
+        if(m_tree) m_muDigits->push_back(muDigits);
         for (const double sample : muDigits) {
           m_h_muDigits->Fill(sample);
         }

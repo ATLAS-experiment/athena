@@ -5,21 +5,18 @@
 #ifndef DETECTORDESCRIPTION_MUONIDHELPER_H
 #define DETECTORDESCRIPTION_MUONIDHELPER_H
 
-#include <cassert>
+#include "AtlasDetDescr/AtlasDetectorID.h"
+#include "IdDict/IdDictFieldImplementation.h"
+#include "Identifier/IdentifierHash.h"
+#include "Identifier/MultiRange.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include <set>
-#include <stdexcept>
+#include <map>
 #include <string>
 #include <vector>
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "IdDict/IdDictDefs.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "Identifier/IdHelper.h"
-#include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
-
 class IdDictDictionary;
+
 
 // ******************************************************************************
 // class MuonIdHelper

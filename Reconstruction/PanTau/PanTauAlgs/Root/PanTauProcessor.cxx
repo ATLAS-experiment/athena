@@ -8,17 +8,9 @@
 #include "PanTauAlgs/HelperFunctions.h"
 #include "PanTauAlgs/PanTauSeed.h"
 
-#include "xAODTau/TauJet.h"
-#include "xAODParticleEvent/Particle.h"
-#include "xAODParticleEvent/ParticleContainer.h"
-
-#include <string>
-
-
 PanTau::PanTauProcessor::PanTauProcessor(const std::string& name)
   : TauRecToolBase(name)
-{
-}
+{}
 
 
 PanTau::PanTauProcessor::~PanTauProcessor() = default;

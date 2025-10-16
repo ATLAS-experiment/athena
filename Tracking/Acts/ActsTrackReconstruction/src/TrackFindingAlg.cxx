@@ -939,7 +939,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                        const char *seedType) const
   {
 
-    std::array<unsigned int, 4> expectedLayerPattern;
+    std::array<unsigned int, 4> expectedLayerPattern{};
 
     // if the the perigeeSurface was not hit (in particular the case for the inside-out pass,
     // the track has no reference surface and the extrapolation to the perigee has not been done
@@ -985,7 +985,9 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
       for (const auto trackState : track.trackStatesReversed()) {
         updateCounts(track, trackState.typeFlags(), measurementType(trackState));
       }
-      checkCounts(track);
+      if (m_checkCounts) {
+        checkCounts(track);
+      }
     }
 
     ++ntracks;

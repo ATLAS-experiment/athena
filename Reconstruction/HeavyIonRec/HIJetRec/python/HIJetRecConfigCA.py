@@ -8,6 +8,7 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
 from JetRecConfig.JetDefinition import JetInputConstitSeq, JetInputConstit, xAODType, JetDefinition
 from JetRecConfig.JetDefinition import JetModifier, JetInputExternal
 #from JetRecConfig.JetRecConfig import getJetModifierTools 
+from JetRecConfig.JetRecConfig import getPseudoJetAlgs
 from JetRecConfig.StandardJetMods import stdJetModifiers
 from JetRecConfig import JetRecConfig
 from JetRecConfig.DependencyHelper import solveDependencies
@@ -44,6 +45,19 @@ def HIClusterMakerCfg(flags, save=False, **kwargs):
     acc.addEventAlgo(HIClusterMaker, primary=True)
     return acc
 
+def HIClusterCopierCfg(flags, save=False, **kwargs):
+    """Function to copy HI clusters to modify them in derivations."""
+
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("InputContainerKey", "HIClusters")
+    kwargs.setdefault("OutputContainerKey", flags.HeavyIon.Jet.Internal.ClusterKey)
+
+    HIClusterCopier = CompFactory.HIClusterCopier("HIClusterCopier",
+                                                  **kwargs)
+
+    acc.addEventAlgo(HIClusterCopier, primary=True)
+    return acc
 
 def HICaloJetInputConstitSeq(flags, name="HICaloConstit", **kwargs):
     kwargs.setdefault("objtype", xAODType.CaloCluster)
@@ -179,7 +193,6 @@ def HIJetCopyAlgCfg(flags, jetDef_in, jetDef, **kwargs):
     if "Provider" not in kwargs:
         jcopy = acc.popToolsAndMerge(HIJetCopierCfg(flags, InputJets=jetDef_in.fullname()))
         kwargs.setdefault("Provider", jcopy)
-
     acc.merge(HIJetAlgCfg(flags, jetDef, **kwargs))
     return acc
 
@@ -190,6 +203,12 @@ def updateStdJetModifier(flags, name, **kwargs):
        Some of the modifiers ignore kwargs which makes the code simpler."""
 
     if "Filter:" in name:
+        # already there, do nothing
+        return
+    if "JetDeltaRLabel:" in name:
+        # already there, do nothing
+        return
+    if "JetDeltaRInitialLabel:" in name:
         # already there, do nothing
         return
     if "HIJetCalib:" in name:
@@ -298,6 +317,8 @@ def HIJetDefCloner(flags, jetDef_in, **kwargs):
 
     jetDef_new = jetDef_in.clone()
 
+    if "prefix" in kwargs:
+        jetDef_new.prefix = kwargs["prefix"]
     if "suffix" in kwargs:
         jetDef_new.suffix = kwargs["suffix"]
     if "modifiers" in kwargs:
@@ -509,11 +530,16 @@ def HIJetRecCfg(flags):
     """Configures Heavy Ion Jet reconstruction."""
     acc = ComponentAccumulator()
 
-    # get HIClusters
-    acc.merge(HIClusterMakerCfg(flags))
+    if not flags.HeavyIon.isDerivation:
+        # get HIClusters
+        acc.merge(HIClusterMakerCfg(flags))
+    else:
+        # copy HIClusters
+        acc.merge(HIClusterCopierCfg(flags))
+
 
     # get weighted event shape
-    eventshapeKey = "HIEventShapeWeighted"
+    eventshapeKey = flags.HeavyIon.HIJetPrefix+"HIEventShapeWeighted"
     acc.merge(HIEventShapeMakerCfg(flags,
                                    name="HIEventShapeMaker_Weighted",
                                    doWeighted=True,
@@ -522,13 +548,13 @@ def HIJetRecCfg(flags):
 
     # get jet definition
     # R=0.2 calojets are use as seeds for UE subtraction
-    jetDef2 = HICaloJetDef(flags, jetradius=2, suffix="_Unsubtracted")
+    jetDef2 = HICaloJetDef(flags, jetradius=2, prefix=flags.HeavyIon.HIJetPrefix, suffix="_Unsubtracted")
 
     # get jet definitions for physics
     jetDef = []
     jetRlist = flags.HeavyIon.Jet.RValues #Default [0.2,0.4], Others R's should be build in Derivations or pass in preExec
     for jetR in jetRlist:
-        jetDef.append(HICaloJetDef(flags, jetradius=jetR, suffix="_Unsubtracted"))
+        jetDef.append(HICaloJetDef(flags, jetradius=jetR, prefix=flags.HeavyIon.HIJetPrefix, suffix="_Unsubtracted"))
         __log.info("HI Jet Collection for Reco: "+jetDef[-1].fullname())
 
     # get calo pseudojets
@@ -560,6 +586,7 @@ def HIJetRecCfg(flags):
 
     # copy unsubtracted jets; create seed0
     jetDef_seed0 = HIJetDefCloner(flags, jetDef_in=jetDef2,
+                                  prefix=flags.HeavyIon.HIJetPrefix,
                                   suffix="_seed0",
                                   modifiers=["HIJetAssoc", "HIJetMaxOverMean", "HIJetDiscrim", "Filter:5000"])
     acc.merge(HIJetCopyAlgCfg(flags, jetDef2, jetDef_seed0))
@@ -582,6 +609,7 @@ def HIJetRecCfg(flags):
 
     # copy jets from the first iteration; create seed1
     jetDef_seed1 = HIJetDefCloner(flags, jetDef_in=jetDef2,
+                                  prefix=flags.HeavyIon.HIJetPrefix,
                                   suffix="_seed1",
                                   modifiers=["HIJetAssoc", "subtr0", "HIJetCalib:{}___{}___{}".format(2, calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.SeedPtMin)])
     acc.merge(HIJetCopyAlgCfg(flags, jetDef2, jetDef_seed1))
@@ -626,27 +654,31 @@ def HIJetRecCfg(flags):
 
     # constituents subtraction for egamma, cell-level
     cluster_key_eGamma_deep = flags.HeavyIon.Jet.Internal.ClusterKey+"_eGamma_deep"
-    subtrToCelltool = acc.popToolsAndMerge(
-        HISubtractionToCellsCfg(flags,
-                                name="HIClusterSubtraction_egamma",
-                                EventShapeKey=jm_dict1_eg["EventShapeKey"],
-                                OutClusterKey=cluster_key_eGamma_deep,
-                                Modulator=jm_dict1["Modulator"],
-                                EventShapeMapTool=jm_dict1["EventShapeMapTool"],
-                                SetMoments=True,
-                                ApplyOriginCorrection=False)
-    )
-    acc.addEventAlgo(CompFactory.JetAlgorithm("jetalgHI_subtrToCellTool", Tools=[subtrToCelltool]))
+    if not flags.HeavyIon.isDerivation:
+        subtrToCelltool = acc.popToolsAndMerge(
+            HISubtractionToCellsCfg(flags,
+                                    name="HIClusterSubtraction_egamma",
+                                    EventShapeKey=jm_dict1_eg["EventShapeKey"],
+                                    OutClusterKey=cluster_key_eGamma_deep,
+                                    Modulator=jm_dict1["Modulator"],
+                                    EventShapeMapTool=jm_dict1["EventShapeMapTool"],
+                                    SetMoments=True,
+                                    ApplyOriginCorrection=False)
+        )
+        acc.addEventAlgo(CompFactory.JetAlgorithm("jetalgHI_subtrToCellTool", Tools=[subtrToCelltool]))
 
     # jet modifier from the second iteration
     updateStdJetModifier(flags, "subtr1", **jm_dict1)
 
     # constituents subtraction for jets, tower-level
+    clusterKey = cluster_key_eGamma_deep
+    if flags.HeavyIon.isDerivation:
+        clusterKey = flags.HeavyIon.Jet.Internal.ClusterKey
     subtrToClusterTool = acc.popToolsAndMerge(
         HISubtractionToClustersCfg(flags,
                                    name="HIClusterSubtraction_final",
                                    EventShapeKey=jm_dict1["EventShapeKey"],
-                                   ClusterKey=cluster_key_eGamma_deep,
+                                   ClusterKey=clusterKey,
                                    OutClusterKey=flags.HeavyIon.Jet.ClusterKey,
                                    Modulator=jm_dict1["Modulator"],
                                    EventShapeMapTool=jm_dict1["EventShapeMapTool"],
@@ -670,11 +702,40 @@ def HIJetRecCfg(flags):
     # configure final jets and store them
     extramods = ["Sort","Width","CaloEnergies","LArHVCorr","CaloQuality","TrackMoments","JVF","JVT"]# adding modifiers to final jets
     for jd in jetDef:
+        print("Printing flags: isDerivation: ", flags.HeavyIon.isDerivation, "doHIBTagging: ", flags.HeavyIon.doHIBTagging, "isMC: ", flags.Input.isMC,  "jet radius: ", jd.radius)
+        if flags.HeavyIon.isDerivation and flags.HeavyIon.doHIBTagging and jd.radius==0.4:
+            extramods += flags.HeavyIon.FTagModifiers
+            if flags.Input.isMC:
+                extramods += flags.HeavyIon.FTagTruthModifiers
         jetDef_final = HIJetDefCloner(flags,
                                       jetDef_in=jd,
+                                      prefix=flags.HeavyIon.HIJetPrefix,
                                       suffix="",
                                       modifiers=["subtr1", "consmod", "HIJetCalib:{}___{}___{}".format(str(float(jd.radius)*10).replace('.0',''),calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin)]+extramods)
-        acc.merge(HIJetCopyAlgCfg(flags, jd, jetDef_final))
+        if flags.HeavyIon.isDerivation and flags.HeavyIon.doHIBTagging and flags.Input.isMC and jd.radius==0.4:
+            jetDef_final.ghostdefs += ["Truth","BHadronsInitial", "BHadronsFinal", "BQuarksFinal","CHadronsInitial", "CHadronsFinal", "CQuarksFinal","TausFinal", "TQuarksFinal","Partons"]
+            jetDef_final = solveDependencies(jetDef_final, flags)
+            pjaList = getPseudoJetAlgs(jetDef_final)
+            pjaList = pjaList[1:] # removing pseudoJets from HIClusters - already created
+            for pjalg in pjaList:
+                if pjalg.Label=='GhostTrack': #pseudo jet algorithm for ghost tracks crashing, reusing pj thost tracks from HI track jets
+                    continue
+                    pjalg.name="GhostTrackPseudoJets"
+                    pjalg.InputContainer=pseudoTrkJetCont
+                    pjalg.OutputContainer=pseudoGhostTrks
+                if pjalg.Label=='merged':
+                    inpjcnt = pjalg.InputPJContainers
+                    inpjcnt.remove('PseudoJetGhostJetSelectedTracks')
+                    inpjcnt.append(pseudoGhostTrks)
+                    pjalg.InputPJContainers = inpjcnt
+                acc.addEventAlgo(pjalg)
+                finalpjs = str(pjalg.OutputContainer)
+                # Set the name of the final PseudoJetContainer to be used as input :
+                jetDef_final._internalAtt['finalPJContainer'] = finalpjs
+            jetRecAlg = getHIJetRecAlg(jetDef_final, jetDef_final.fullname())
+            acc.addEventAlgo(jetRecAlg)
+        else:
+            acc.merge(HIJetCopyAlgCfg(flags, jd, jetDef_final))
 
         output = ["xAOD::JetContainer#"+jetDef_final.fullname(),
                   "xAOD::JetAuxContainer#"+jetDef_final.fullname()+"Aux.-PseudoJet"]
@@ -689,6 +750,36 @@ def HIJetRecCfg(flags):
         acc.merge(addToAOD(flags, output))
 
     return acc
+
+def getHIJetRecAlg( jetdef, jetsName):
+    """Returns the configured HIJetRecAlg instance corresponding to jetdef
+
+    IMPORTANT : jetdef must have its dependencies solved (i.e. it must result from solveDependencies() )
+    """
+    pjContNames = jetdef._internalAtt['finalPJContainer']
+    jclust = CompFactory.JetClusterer(
+        "builder",
+        JetAlgorithm = jetdef.algorithm,
+        JetRadius = jetdef.radius,
+        PtMin = jetdef.ptmin,
+        InputPseudoJets = pjContNames,
+        GhostArea = 0.0,
+        JetInputType = int(jetdef.inputdef.jetinputtype),
+        RandomOption = 1,
+    )
+
+    mods = JetRecConfig.getJetModifierTools(jetdef)
+
+    jetname = jetsName
+    jra = CompFactory.JetRecAlg(
+        "jetrecalg_"+jetname,
+        Provider = jclust,
+        Modifiers = mods,
+        OutputContainer = jetname,
+        )
+    jra.ExtraOutputs = [('xAOD::JetContainer',f'{jetname}.Ghost{ghost}') for ghost in jetdef.ghostdefs]
+
+    return jra
 
 
 if __name__ == "__main__":

@@ -146,6 +146,12 @@ atlas_add_test( CachedValueTiming_test
   LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES}
   PROPERTIES TIMEOUT 300
   POST_EXEC_SCRIPT noerror.sh )
+  
+atlas_add_test( close_to_zero_test
+  SOURCES test/close_to_zero_test.cxx
+  LINK_LIBRARIES CxxUtils 
+  PROPERTIES TIMEOUT 300
+  POST_EXEC_SCRIPT nopost.sh )
 
 
 # Set up the "simple" tests:
@@ -168,7 +174,8 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       releasing_iterator_test SizedUInt_test UIntConv_test
       normalizeFunctionName_test pputils_test StringParse_test
       range_with_at_test range_with_conv_test
-      minmax_transformed_element_test xmalloc_test byteswap_test )
+      minmax_transformed_element_test xmalloc_test byteswap_test
+      RefCountedPtr_test )
    atlas_add_test( ${test}
       SOURCES test/${test}.cxx
       LINK_LIBRARIES CxxUtils TestTools ${Boost_LIBRARIES})

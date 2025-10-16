@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_GLOBALCHISQUAREFITTERTOOL_H
@@ -203,7 +203,10 @@ class GlobalChiSquareFitterTool
     Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false};
     /** @brief Option to toggle whether a straight line fitter shall be used */
     Gaudi::Property<bool> m_doStraightLine{this, "DoStraightLine" , false};
-
+    /** @brief Account for non linear effects from free -> bound jacobian  */
+    Gaudi::Property<bool> m_doJacobianCorr{this, "DoFreeToBoundCorrection", false };
+    /** @brief Number of iterations a fit may take */
+    Gaudi::Property<unsigned> m_nIterMax{this, "MaxIterations", 5};
     /** @brief Pass through calibrator of the Trk::MeasurementBase objects from the TrackState container */
     detail::TrkMeasurementCalibrator m_trkMeasCalibrator{};
     /** @brief Calibrator of the uncalibrated Trk::PrepRawData objects to RIO_OnTrack objects */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -59,7 +59,7 @@ GetDetectorPositions::GetDetectorPositions(std::string const&  name, ISvcLocator
 StatusCode GetDetectorPositions::initialize(){
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "initialize()" << endmsg;
   
-  /** Retrive TRT info */
+  /** Retrieve TRT info */
   if(m_doTRT){
     if (detStore()->retrieve(m_TRTHelper, "TRT_ID").isFailure()) {
       msg(MSG::FATAL) << "Could not get TRT ID helper" << endmsg;
@@ -73,7 +73,7 @@ StatusCode GetDetectorPositions::initialize(){
     }
   }
 
-  /** Retrive SCT info */
+  /** Retrieve SCT info */
   if (detStore()->retrieve(m_SCTHelper, "SCT_ID").isFailure()) {
     msg(MSG::FATAL) << "Could not get SCT ID helper" << endmsg;
     return StatusCode::FAILURE;
@@ -81,7 +81,7 @@ StatusCode GetDetectorPositions::initialize(){
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "got the SCT ID" << endmsg;
   ATH_CHECK(m_SCTDetEleCollKey.initialize());
 
-  /** Retrive Pixel info */
+  /** Retrieve Pixel info */
   if (detStore()->retrieve(m_PixelHelper, "PixelID").isFailure()) {
     msg(MSG::FATAL) << "Could not get Pixel ID helper" << endmsg;
     return StatusCode::FAILURE;

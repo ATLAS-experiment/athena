@@ -183,6 +183,10 @@ namespace pool {
      */
     virtual IFileCatalog* getCatalog( );
 
+    /**
+     * suppress (or enable) warning about a missing MessageSvc (logging)
+     */
+    static void setMessageSvcQuiet( bool quiet=true );
   };
 }
 

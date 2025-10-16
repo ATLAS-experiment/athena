@@ -27,6 +27,7 @@ class SortedCollectionCreator:
       import ROOT
       self.pool = ROOT.pool
       self.collSvc = self.pool.CollectionService()
+      self.collSvc.setMessageSvcQuiet()
 
    def readCollectionDescription(self, collection):
       """read Collection Description and remember it"""
@@ -125,5 +126,12 @@ class SortedCollectionCreator:
       self.readInputCollections(inputs)
       self.sortEvents(sortAttribute, sortReverse)
       self.writeCollection(outputCollection, outputCollectionType)
-      
+
+   def executeInSubprocess(self, *args, **kwargs):
+      import multiprocessing
+      process = multiprocessing.Process( target=self.execute, args=args, kwargs=kwargs)
+      self.debug("Sorting Events in a subprocess")
+      process.start()
+      process.join()  # Wait for completion
+      return process.exitcode
 

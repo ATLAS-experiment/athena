@@ -1,7 +1,6 @@
 Py:Athena            INFO including file "DataModelRunTests/xAODRootTest.py"
 xAOD::Init                INFO    Environment initialised for data access
 TStreamerInfo::BuildOld   WARNING Cannot convert DMTest::GAuxContainer_v1::anInt from type: vector<int> to type: SG::PackedContainer<int,allocator<int> >, skip element
-xAOD::MakeTransientTree   INFO    Created transient tree "CollectionTree" in ROOT's common memory
 ---> Event 0
 cvec
   anInt1: 201; aFloat: 400.0; anInt: 201; anInt2: 601; cEL: cvec[9]; dInt1: 801; dVar1: 901; 

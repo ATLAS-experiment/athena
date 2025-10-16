@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPhysWaveFromTuple.h"
@@ -57,15 +57,15 @@ StatusCode LArPhysWaveFromTuple::stop()
   // variable names as in the Ntuple
   Int_t           channelId; 
   UInt_t           tIndex; 
-  Double_t        Amplitude[2000]; 
-  Double_t        Time[2000]; 
+  std::vector<Double_t>        Amplitude(2000);
+  std::vector<Double_t>        Time(2000);
   outfit->SetBranchAddress("channelId", &channelId);
   outfit->SetBranchAddress("timeIndex", &tIndex);
-  outfit->SetBranchAddress("Amplitude", Amplitude);
-  outfit->SetBranchAddress("Time", Time);
+  outfit->SetBranchAddress("Amplitude", Amplitude.data());
+  outfit->SetBranchAddress("Time", Time.data());
 
   // Create new LArPhysWaveContainer
-  LArPhysWaveContainer* larPhysWaveContainerNew = new LArPhysWaveContainer();
+  auto larPhysWaveContainerNew = std::make_unique<LArPhysWaveContainer>();
   ATH_CHECK ( larPhysWaveContainerNew->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larPhysWaveContainerNew->initialize() );
 
@@ -102,7 +102,7 @@ StatusCode LArPhysWaveFromTuple::stop()
     larPhysWaveContainerNew->setPdata(id, newLArPhysWave, (CaloGain::CaloGain)m_gain.value());
   }
 
-  ATH_CHECK( detStore()->record(larPhysWaveContainerNew,m_store_key) );
+  ATH_CHECK( detStore()->record(std::move(larPhysWaveContainerNew),m_store_key) );
   ATH_MSG_INFO ( "LArPhysWaveFromTuple finalized!" );
   return StatusCode::SUCCESS;
 }

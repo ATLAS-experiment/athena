@@ -3,8 +3,12 @@
 */
 
 #include "LArIdentifier/LArOnlineID_Base.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include "LArIdentifier/LArOnlID_Exception.h"

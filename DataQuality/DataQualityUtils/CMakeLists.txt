@@ -4,7 +4,6 @@
 atlas_subdir( DataQualityUtils )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Graf Gpad MathCore RooFit RooFitCore Core Tree TreePlayer Hist Postscript )
@@ -16,7 +15,7 @@ find_package( nlohmann_json )
 atlas_add_root_dictionary( DataQualityUtils
                            DataQualityUtilsDictSource
                            ROOT_HEADERS DataQualityUtils/HanOutputFile.h DataQualityUtils/MonitoringFile.h DataQualityUtils/StatusFlagCOOL.h DataQualityUtils/StatusFlagCOOLBase.h DataQualityUtils/StatusFlagCommentCOOL.h DataQualityUtils/HistogramDataCOOL.h DataQualityUtils/CoolRpc.h DataQualityUtils/CoolMdt.h DataQualityUtils/CoolTgc.h DataQualityUtils/MdtDeadNoisyUtils.h DataQualityUtils/RootLinkDef.h
-                           EXTERNAL_PACKAGES Boost COOL ROOT CORAL )
+                           EXTERNAL_PACKAGES COOL ROOT CORAL )
 
 atlas_add_library( DataQualityUtils
                    src/HanOutputFile.cxx
@@ -61,8 +60,8 @@ atlas_add_library( DataQualityUtils
                    src/MonitoringFile_L1CaloPostProcess.cxx
                    ${DataQualityUtilsDictSource}
                    PUBLIC_HEADERS DataQualityUtils
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json
+                   INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json
                    PRIVATE_LINK_LIBRARIES DataQualityInterfaces )
     
 atlas_add_executable( han-results-print

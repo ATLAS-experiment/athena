@@ -70,7 +70,7 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
   outfit->SetBranchAddress("Triggers", Triggers);
 
   // Create new LArPhysWaveContainer
-  LArPhysWaveContainer* larPhysWaveContainerNew = new LArPhysWaveContainer();
+  auto larPhysWaveContainerNew = std::make_unique<LArPhysWaveContainer>();
   ATH_CHECK ( larPhysWaveContainerNew->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larPhysWaveContainerNew->initialize() );
 
@@ -129,7 +129,7 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
     // Add physics wave to container
     larPhysWaveContainerNew->setPdata(id, newLArPhysWave, (CaloGain::CaloGain)gain);
   } 
-  ATH_CHECK( detStore()->record(larPhysWaveContainerNew,m_store_key) );
+  ATH_CHECK( detStore()->record(std::move(larPhysWaveContainerNew),m_store_key) );
   ATH_MSG_INFO ( "LArPhysWaveFromStdNtuple finalized!" );
   return StatusCode::SUCCESS;
 }

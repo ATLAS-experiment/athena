@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  CaloIdentifier/test/LArHEC_ID_SuperCell_test.cxx
  * @author scott snyder
@@ -14,6 +12,7 @@
 #undef NDEBUG
 
 #include "CaloIdentifier/LArHEC_SuperCell_ID.h"
+#include "CaloIdentifier/LArID_Exception.h"
 #include <iostream>
 
 

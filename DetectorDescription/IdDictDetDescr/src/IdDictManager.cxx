@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,17 +7,10 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: IdDictManager.cxx,v 1.3 2003-09-22 07:01:22 schaffer Exp $
-//<version>	$Name: not supported by cvs2svn $
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "IdDictDetDescr/IdDictManager.h"
 #include "Identifier/IdHelper.h"
-#include "IdDict/IdDictDefs.h"
 
-
-//<<<<<< MEMBER FUNCTION DEFINITIONS                                    >>>>>>
 
 IdDictManager::IdDictManager()
     :

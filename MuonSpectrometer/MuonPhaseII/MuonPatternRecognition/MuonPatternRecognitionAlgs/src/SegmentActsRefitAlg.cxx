@@ -20,11 +20,13 @@
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
-#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "ActsInterop/UnitConverters.h"
+
+using namespace Acts::UnitLiterals;
 namespace{
-    constexpr double straightQoverP = 1. / (100. *Gaudi::Units::TeV);
+    constexpr double straightQoverP = 1. / (100._TeV);
     constexpr double pseudoSurfDist = 5.*Gaudi::Units::cm;
     using ProjectorType = ActsTrk::detail::MeasurementCalibratorBase::ProjectorType;
 }
@@ -47,27 +49,62 @@ namespace MuonR4{
         ATH_CHECK(m_trackingGeometryTool.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_segSelector.retrieve());
+        ATH_CHECK(detStore()->retrieve(m_detMgr));
 
+        auto trkGeo = m_trackingGeometryTool->trackingGeometry();
+        trkGeo->visitSurfaces([this](const Acts::Surface* surf){
+            const auto detEl = surf->associatedDetectorElement();
+            if (!detEl) {
+                ATH_MSG_ALWAYS("Insensitive surface "<<surf->geometryId());
+                return;
+            }
+            const auto* det = static_cast<const ActsTrk::IDetectorElementBase*>(detEl);
+            if (!m_idHelperSvc->isMuon(det->identify())){
+                return;
+            }
+            ATH_MSG_ALWAYS("Sensitive muon surface "<<m_idHelperSvc->toString(det->identify())<<" -> geoId: "
+                        <<surf->geometryId());
+
+        });
         return StatusCode::SUCCESS;
     }
     std::tuple<Amg::Vector3D, Amg::Vector3D> 
         SegmentActsRefitAlg::smearSegment(const ActsGeometryContext& gctx,
                                           const MuonR4::Segment& segment,
                                           CLHEP::HepRandomEngine* engine) const{
-        auto segPars = localSegmentPars(gctx, segment);
+        // return std::make_pair(segment.position(), segment.direction()* (segment.direction().z() < 0 ? -1. : 1.));
+        const auto segPars = localSegmentPars(gctx, segment);
+        auto smearedPars = segPars;
         /// Smear the parameters
         for (ParamDefs precPar : {ParamDefs::y0, ParamDefs::theta,
                                   ParamDefs::x0, ParamDefs::phi}) { 
-            if (precPar == ParamDefs::x0 && !segment.summary().nPhiHits) {
+            if (precPar == ParamDefs::phi && !segment.summary().nPhiHits) {
                 break;
             }
-            const unsigned idx = Acts::toUnderlying(precPar);           
-            segPars[idx] = CLHEP::RandGaussZiggurat::shoot(engine, segPars[idx], 
-                                                           m_smearRange*Amg::error(segment.covariance(), idx));
+            const unsigned idx = Acts::toUnderlying(precPar);
+            const double uncert =  Amg::error(segment.covariance(), idx) * m_smearRange;
+            smearedPars[idx] = CLHEP::RandGaussZiggurat::shoot(engine, segPars[idx], uncert);
+            ATH_MSG_VERBOSE("Apply smearing to "<<SeedingAux::parName(precPar)
+        <<" parameter -- cov: "<<uncert
+    <<", original: "<<segPars[idx]<<", smeared: "<<smearedPars[idx]<<", deviation: "
+            <<(smearedPars[idx] - segPars[idx]) / uncert );
+
         }
+        auto [smearLocPos, smearLocDir] = makeLine(smearedPars);
         const auto [locPos, locDir] = makeLine(segPars);
+        /// Ensure that the left-right ambiguity is preserved
+        if (SeedingAux::strawSigns(locPos,locDir, segment.measurements()) !=
+            SeedingAux::strawSigns(smearLocPos, smearLocDir, segment.measurements())) {
+            ATH_MSG_ALWAYS("Parameter smearng from "<<toString(segPars)<<" -> "<<toString(smearedPars)
+                        <<" changes the L/R ambiguity -> avoid for this test");
+            return smearSegment(gctx, segment, engine);
+        }
+
         const Amg::Transform3D& locToGlob{segment.msSector()->localToGlobalTrans(gctx)};
-        return std::make_tuple(locToGlob*locPos, locToGlob.linear() * locDir);
+        if (smearLocDir.z() < 0) {
+            smearLocDir = -smearLocDir;
+        }
+        return std::make_tuple(locToGlob * smearLocPos, locToGlob.linear() * smearLocDir);
     }
     StatusCode SegmentActsRefitAlg::execute(const EventContext& ctx) const {
         
@@ -103,9 +140,26 @@ namespace MuonR4{
         ParDecor_t dec_locPars{m_localParsKey, ctx};
         ParDecor_t dec_seedPars{m_seedParsKey, ctx};
         /// Loop over the segment container
-        for (const xAOD::MuonSegment* seg: *segments){
-            const MuonR4::Segment* reFitMe = MuonR4::detailedSegment(*seg);
-            const Amg::Transform3D& sectorTrf{reFitMe->msSector()->localToGlobalTrans(gctx)};
+        for (const xAOD::MuonSegment* reFitMe: *segments){
+            const auto msSector = m_detMgr->getSectorEnvelope(reFitMe->chamberIndex(), 
+                                                              reFitMe->sector(), 
+                                                              reFitMe->etaIndex());
+            const Amg::Transform3D& sectorTrf{msSector->localToGlobalTrans(gctx)};
+
+            /// Fetch a smeared segment position & direction
+            const auto [seedPos, seedDir] = smearSegment(gctx, *MuonR4::detailedSegment(*reFitMe), randEngine);
+            /// Decorate the initial seed parameters to the segment
+            {
+                auto invTrf = sectorTrf.inverse();
+                const Amg::Vector3D locSeedPos = invTrf * seedPos;
+                const Amg::Vector3D locSeedDir = invTrf.linear() *  seedDir;
+                auto& seedPars = dec_seedPars(*reFitMe);
+                seedPars[Acts::toUnderlying(ParamDefs::x0)] = locSeedPos.x();
+                seedPars[Acts::toUnderlying(ParamDefs::y0)] = locSeedPos.y();
+                seedPars[Acts::toUnderlying(ParamDefs::theta)] = locSeedDir.theta();
+                seedPars[Acts::toUnderlying(ParamDefs::phi)] = locSeedDir.phi();
+            }
+
             const GeoTrf::CoordEulerAngles sectorAngles = GeoTrf::getCoordRotationAngles(sectorTrf);
             /// Fetch the measurements
             std::vector<const xAOD::UncalibratedMeasurement*> startMeas = MuonR4::collectMeasurements(*reFitMe);
@@ -113,7 +167,10 @@ namespace MuonR4{
             const auto* refMeas = startMeas.front();
 
             const Amg::Vector3D firstSurfPos{surfAcc.get(refMeas)->transform(tgContext).translation()};
-            if (!reFitMe->summary().nPhiHits) {
+
+            if (reFitMe->nPhiLayers() < 1) {
+                ATH_MSG_VERBOSE("Skip phi layer free segment");
+                continue;
                 const Amg::Vector3D planeNormal = sectorTrf.linear().col(2);
 
                 const Amg::Vector3D lastSurfPos = surfAcc.get(startMeas.back())->transform(tgContext).translation();
@@ -128,67 +185,61 @@ namespace MuonR4{
                 startMeas.insert(startMeas.begin(), auxMeasHandle.newMeasurement<1>(surfBeneath, ProjectorType::e1DimNoTime, AmgSymMatrix(1){covVal}));
                 startMeas.insert(startMeas.end(), auxMeasHandle.newMeasurement<1>(surfAbove, ProjectorType::e1DimNoTime, AmgSymMatrix(1){covVal}));
 
-            } else if (const auto& firstMeas = reFitMe->measurements().front(); firstMeas->type() == xAOD::UncalibMeasType::Other) {
-                auto pseudoSurf = Acts::Surface::makeShared<Acts::PlaneSurface>(
-                                    GeoTrf::GeoTransformRT{sectorAngles, Amg::Vector3D::Zero()});
-                startMeas.insert(startMeas.begin(), auxMeasHandle.newMeasurement<2>(pseudoSurf, ProjectorType::e2DimNoTime, AmgSymMatrix(2)::Identity()));
             }
-            /// Global chi2 fitter runs only with at least 5 measurements
-            if (startMeas.size() < 5){
-                continue;
-            }
-            /// Fetch a smeared segment position & direction
-            const auto [pos, dir] = smearSegment(gctx,*reFitMe, randEngine);
-            ///
+            //else if (const auto& firstMeas = reFitMe->measurements().front(); firstMeas->type() == xAOD::UncalibMeasType::Other) {
+            //    auto pseudoSurf = Acts::Surface::makeShared<Acts::PlaneSurface>(
+            //                        GeoTrf::GeoTransformRT{sectorAngles, Amg::Vector3D::Zero()});
+            //    startMeas.insert(startMeas.begin(), auxMeasHandle.newMeasurement<2>(pseudoSurf, ProjectorType::e2DimNoTime, AmgSymMatrix(2)::Identity()));
+            //}
 
             /// Construct the reference surface before the first measurement
-            const double extDist = dir.dot(firstSurfPos - pos) - 5.*Gaudi::Units::cm;
+            const Amg::Vector3D trfZ = sectorTrf.linear().col(2);
+            const double extDist = Amg::intersect<3>(seedPos, seedDir, trfZ, 
+                                                     firstSurfPos.dot(trfZ) - 10.*Gaudi::Units::cm).value_or(0.);
+            // const double extDist = dir.dot(firstSurfPos - pos) - 5.*Gaudi::Units::cm;
             /// Reference position of the surface.
-            const Amg::Vector3D refPos = pos + extDist * dir;
+            const Amg::Vector3D refPos = seedPos + extDist * seedDir;
             const Amg::Transform3D trf{GeoTrf::GeoTransformRT{sectorAngles, refPos}};
             if (msgLvl(MSG::VERBOSE)) {
-                const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, *reFitMe));
+                const auto [locPos, locDir] = makeLine(localSegmentPars(*reFitMe));
 
                 std::stringstream sstr{};
-                sstr<<"pos: "<<Amg::toString(pos)<<", dir: "<<Amg::toString(dir)<<", chi2/nDoF: "
-                    <<reFitMe->chi2() / reFitMe->nDoF()<<", nDoF: "<<reFitMe->nDoF()<<", "
-                    <<reFitMe->summary().nPrecHits<<", "<<reFitMe->summary().nPhiHits<<std::endl;
-                for (const xAOD::UncalibratedMeasurement* meas : startMeas) {
-                    const auto calib_sp = std::ranges::find_if(reFitMe->measurements(), [meas](const auto& sp) {
-                        if (!sp->spacePoint()) return false;
-                        return sp->spacePoint()->primaryMeasurement() == meas || 
-                               sp->spacePoint()->secondaryMeasurement() == meas;
-                    });
-                    sstr<<" **** "<<m_idHelperSvc->toString(xAOD::identify(meas))<<" @ "
-                         <<Amg::toString(surfAcc.get(meas)->transform(tgContext).translation())
-                         <<", "<<surfAcc.get(meas)->geometryId()<<", "
-                         <<(calib_sp != reFitMe->measurements().end() ? 
-                                SeedingAux::chi2Term(locPos, locDir,**calib_sp) : 0.)
-                         <<std::endl;
+                sstr<<"pos: "<<Amg::toString(seedPos)<<", dir: "<<Amg::toString(seedDir)<<", chi2/nDoF: "
+                    <<reFitMe->chiSquared() / reFitMe->numberDoF()<<", nDoF: "<<reFitMe->numberDoF()<<", "
+                    <<reFitMe->nPrecisionHits()<<", "<<reFitMe->nPhiLayers()<<std::endl;
+                for (const auto& meas : MuonR4::detailedSegment(*reFitMe)->measurements()) {
+                    sstr<<"  **** "<<(*meas)<<", chi2: "<<SeedingAux::chi2Term(locPos, locDir, *meas)
+                        <<", sign: "<<(meas->isStraw() ? 
+                                (SeedingAux::strawSign(locPos,locDir, *meas) == 1 ? "R" : "L") : "-")
+                        <<", geoId: "<<(meas->spacePoint() ? surfAcc.get(meas->spacePoint()->primaryMeasurement())->geometryId()
+                                                 : Acts::GeometryIdentifier{})<<std::endl;
                 }
+
                 sstr<<" Target surf: "<<Amg::toString(trf)<<", firstSurf: "<< Amg::toString(trf.inverse()*firstSurfPos)
                      <<", refPoint: "<<Amg::toString(trf.inverse()*refPos)<<std::endl;
-                ATH_MSG_VERBOSE("Run G2F fit on "<<reFitMe->msSector()->identString()<<std::endl<<sstr.str());
+                ATH_MSG_VERBOSE("Run G2F fit on "<<msSector->identString()<<std::endl<<sstr.str());
             }
             /// Plane surface
             auto target = Acts::Surface::makeShared<Acts::PlaneSurface>(trf);
 
-            Acts::ActsVector<4> fourPos{};
-            fourPos.block<3,1>(Acts::ePos0, 0) = refPos;
-            fourPos[Acts::eTime] = refPos.mag() / Gaudi::Units::c_light;
+            auto fourPos{ActsTrk::convertPosToActs(refPos, refPos.mag() / Gaudi::Units::c_light)};
             Acts::BoundMatrix initialCov{Acts::BoundMatrix::Identity()};
 
-            auto initialPars = Acts::BoundTrackParameters::create(tgContext, target, fourPos, dir, straightQoverP,
+            auto initialPars = Acts::BoundTrackParameters::create(tgContext, target, fourPos, seedDir, straightQoverP,
                                                                   initialCov, Acts::ParticleHypothesis::muon());
             if (!initialPars.ok()) {
                 ATH_MSG_WARNING("Initial estimate of the parameters failed");
                 continue;
             }
-            auto fitTraject = m_trackFitTool->fit(startMeas, *initialPars, tgContext, mfContext, calContext, target.get());
+            ATH_MSG_ALWAYS("Initial parameters "<<Amg::toString((*initialPars).parameters()));
+            auto fitTraject = m_trackFitTool->fit(startMeas, *initialPars, 
+                                                  tgContext, mfContext, calContext, target.get());
             if (!fitTraject) {
                 ATH_MSG_WARNING("Track fit failed.");
+                // return StatusCode::FAILURE;
                 continue;
             }
+
             auto track = fitTraject->getTrack(0);
             ATH_MSG_DEBUG("Track fit succeeded. ");
 
@@ -205,11 +256,14 @@ namespace MuonR4{
                 ATH_MSG_VERBOSE("Loop over track state: "<<(itr++)<<", "<<m_idHelperSvc->toString(xAOD::identify(goodMeas.front()))
                                 <<", id: "<<surfAcc.get(goodMeas.front())->geometryId());
 
-                summary.nPrecHits += (goodMeas.front()->type() == xAOD::UncalibMeasType::MdtDriftCircleType);
-                if (m_idHelperSvc->measuresPhi(xAOD::identify(goodMeas.front()))){
+                const xAOD::UncalibratedMeasurement* m = goodMeas.front();
+                summary.nPrecHits += (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType);
+                if (m->type() == xAOD::UncalibMeasType::Other) {
+                }
+                else if (m_idHelperSvc->measuresPhi(xAOD::identify(m))){
                     ++summary.nPhiHits;
                 } else {
-                    summary.nEtaTrigHits += (goodMeas.front()->type() != xAOD::UncalibMeasType::MdtDriftCircleType);
+                    summary.nEtaTrigHits += (m->type() != xAOD::UncalibMeasType::MdtDriftCircleType);
                 }
             });
 
@@ -218,33 +272,26 @@ namespace MuonR4{
             /// Direction is always expressed in global frame -> transform to local
             const Amg::Vector3D globDir = parameters.direction();
             /// Express the parameters at the reference surface of the original segment
-            const Amg::Transform3D globToLoc{reFitMe->msSector()->globalToLocalTrans(gctx)};
+            const Amg::Transform3D globToLoc{sectorTrf.inverse()};
             const Amg::Vector3D refitPos = globToLoc * parameters.position(tgContext);
             const Amg::Vector3D refitDir = globToLoc.linear() * globDir;
             /// Straight line extension to plane
             const Amg::Vector3D refitSeg = refitPos + Amg::intersect<3>(refitPos, refitDir, Amg::Vector3D::UnitZ(), 0).value_or(0.) * refitDir;
-            const Amg::Vector3D globPos{reFitMe->msSector()->localToGlobalTrans(gctx) * refitSeg};
+            const Amg::Vector3D globPos{msSector->localToGlobalTrans(gctx) * refitSeg};
 
             auto newSegment = outHandle->push_back(std::make_unique<xAOD::MuonSegment>());
-            dec_segLink(*newSegment) = Link_t{*segments, seg->index(), ctx};
+            dec_segLink(*newSegment) = Link_t{*segments, reFitMe->index(), ctx};
 
             newSegment->setDirection(globDir.x(), globDir.y(), globDir.z());
             newSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
             
             newSegment->setFitQuality(track.chi2(), track.nDoF());
             newSegment->setNHits(summary.nPrecHits, summary.nPhiHits, summary.nEtaTrigHits);
-            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::x0)] = refitSeg.x();
-            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::y0)] = refitSeg.y();
-            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::theta)] = refitDir.theta();
-            dec_locPars(*newSegment)[Acts::toUnderlying(ParamDefs::phi)] = refitDir.phi();
-            /// Seed paramters
-            const Amg::Vector3D locSeedPos = globToLoc * pos;
-            const Amg::Vector3D locSeedDir = globToLoc.linear() * dir;
-            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::x0)] = locSeedPos.x();
-            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::y0)] = locSeedPos.y();
-            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::theta)] = locSeedDir.theta();
-            dec_seedPars(*newSegment)[Acts::toUnderlying(ParamDefs::phi)] = locSeedDir.phi();
-
+            auto& locFitPars = dec_locPars(*newSegment);
+            locFitPars[Acts::toUnderlying(ParamDefs::x0)] = refitSeg.x();
+            locFitPars[Acts::toUnderlying(ParamDefs::y0)] = refitSeg.y();
+            locFitPars[Acts::toUnderlying(ParamDefs::theta)] = refitDir.theta();
+            locFitPars[Acts::toUnderlying(ParamDefs::phi)] = refitDir.phi();
         }
         return StatusCode::SUCCESS;
     }

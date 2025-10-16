@@ -3,10 +3,14 @@
 */
 
 #include "CaloIdentifier/TTOnlineID.h"
+#include "CaloIdentifier/CaloID_Exception.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>

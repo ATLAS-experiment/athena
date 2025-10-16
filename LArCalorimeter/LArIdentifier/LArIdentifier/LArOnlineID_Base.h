@@ -5,24 +5,16 @@
 #ifndef LARONLINEID_BASE_H
 #define LARONLINEID_BASE_H
 
-#include "AthenaKernel/CLASS_DEF.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
+#include "IdDict/IdDictFieldImplementation.h"
 #include "Identifier/HWIdentifier.h"
 #include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-#include "LArIdentifier/LArOnlID_Exception.h"
+#include "Identifier/MultiRange.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include "boost/range/iterator_range.hpp"
-#include "string.h"
 #include <vector>
-#include <algorithm>
-
-#include <iostream>
 
 
-class IdentifierHash;
-class Range;
 
 
   /**
@@ -105,12 +97,12 @@ class LArOnlineID_Base : public AtlasDetectorID
 {
  public:        
 
-  typedef Identifier::size_type  size_type;
+  using size_type = Identifier::size_type;
   
   /** Type for iterators over identifiers. */
-  typedef std::vector<HWIdentifier>::const_iterator id_iterator;
+  using id_iterator = std::vector<HWIdentifier>::const_iterator;
   /** Type for range over identifiers. */
-  typedef boost::iterator_range<id_iterator> id_range;
+  using id_range = boost::iterator_range<id_iterator>;
 
   /** 
    * @brief Default constructor
@@ -121,7 +113,7 @@ class LArOnlineID_Base : public AtlasDetectorID
   /** 
    * @brief Default destructor
    */
-  ~LArOnlineID_Base();
+  virtual ~LArOnlineID_Base();
   
   /**
    * @brief Create a feedthrough identifier from fields 

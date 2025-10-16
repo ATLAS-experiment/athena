@@ -197,16 +197,12 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          return pool::Error;
       }
       for( auto& dsc : m_fieldDescs ) {
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-         dsc.view = m_ntupleReader->GetView<void>(dsc.fieldname, nullptr);
-#else
          if( info->clazz().Name()=="pool::DbString" ) {
             dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, typeid(std::string));
          } else {
             // Can't use type_info because of default template argument in DataVectors ATEAM-1087
             dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, info->clazz().Name());
          }
-#endif
          if( dsc.auxdyn_writer ) {
             // Attach RNTuple Reader (owned by the DB)
             const std::string type_name = dsc.view->GetField().GetTypeName();
@@ -255,10 +251,9 @@ DbStatus RNTupleContainer::initObjectFieldDesc( FieldDesc& dsc )
    if( dsc.clazz )  {
       if( dsc.clazz->GetStreamerInfo() and dsc.clazz->HasDictionary() )  {
          // AUX STORE specifics
+         // get rid of the AUX_POSTFIX dot at the end (converted to _ earlier)
+         if (dsc.fieldname.ends_with("Aux_")) dsc.fieldname.back() = ':';
          if( m_auxDynTool and m_auxDynTool->hasAuxStoreIO(dsc.clazz) ) {
-            // get rid of the AUX_POSTFIX dot at the end (converted to _ earlier)
-            auto last = dsc.fieldname.end() - 1;
-            if( *last == '_' )  *last = ':';
             dsc.auxdyn_writer = m_auxDynTool->getNTupleAuxDynWriter(*dsc.clazz);
             if( !dsc.auxdyn_writer ) {
                DbPrint log(m_name);

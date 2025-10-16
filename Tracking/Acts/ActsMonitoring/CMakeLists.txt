@@ -38,7 +38,8 @@ atlas_add_component( ActsMonitoring
                 xAODMeasurementBase
 		ActsTruthLib
                 InDetMeasurementUtilitiesLib
-                HGTD_ReadoutGeometry )
+                HGTD_ReadoutGeometry
+                TrkSurfaces )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 

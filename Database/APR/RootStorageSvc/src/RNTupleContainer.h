@@ -27,14 +27,7 @@
 class TClass;
 namespace RootAuxDynIO { class IRootAuxDynReader; class IRNTupleAuxDynWriter; }
 namespace RootStorageSvc { class RNTupleWriterHelper; }
-
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-namespace ROOT { using ROOT::Experimental::RNTupleView; }
-namespace ROOT::Experimental { class RNTupleReader; }
-namespace ROOT { using ROOT::Experimental::RNTupleReader; }
-#else
 namespace ROOT { class RNTupleReader; }
-#endif
 
 // Forward declaration
 namespace pool {

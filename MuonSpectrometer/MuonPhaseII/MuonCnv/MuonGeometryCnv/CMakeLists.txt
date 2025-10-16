@@ -4,7 +4,7 @@
 atlas_subdir( MuonGeometryCnv )
 
 
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers GeoModelIOHelpers GeoModelDBManager  GeoModelWrite )
 # Component(s) in the package:
 atlas_add_component( MuonGeometryCnv
                      src/*.cxx

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARCALIPULSEPARAMSCOMPLETE_H
 #define LARRAWCONDITIONS_LARCALIPULSEPARAMSCOMPLETE_H
 
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "LArElecCalib/ILArCaliPulseParams.h" 
 #include "LArRawConditions/LArCaliPulseParamsP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
@@ -57,4 +58,5 @@ class LArCaliPulseParamsComplete: public ILArCaliPulseParams,
 };
 
 CLASS_DEF( LArCaliPulseParamsComplete,228787406,1)
+SG_BASES(LArCaliPulseParamsComplete, ILArCaliPulseParams);
 #endif 

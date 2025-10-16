@@ -8,11 +8,11 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagInference/ConstituentsLoader.h"
 
 namespace FlavorTagInference {
-    
+
     // factory for functions which return the sort variable we
     // use to order Electrons
     ElectronsLoader::ElectronSortVar ElectronsLoader::electronSortVar(
-        ConstituentsSortOrder config) 
+        ConstituentsSortOrder config)
     {
       typedef xAOD::Electron Ip;
       typedef xAOD::IParticle Jet;
@@ -57,7 +57,7 @@ namespace FlavorTagInference {
                                                                                   std::pow(track->parameterPZ(index), 2));
                       el_dpop = 1 - track->qOverP() / (refittedTrack_LMqoverp);
                   }
-                  
+
                   float el_ptrel = el_4vec.Vect().Perp(jet_4vec.Vect());
                   // Get shower shapes
                   float el_rhad1 = el->showerShapeValue(xAOD::EgammaParameters::Rhad1);
@@ -94,28 +94,34 @@ namespace FlavorTagInference {
     ):
         IConstituentsLoader(cfg),
         m_electronSortVar(ElectronsLoader::electronSortVar(cfg.order)),
-        m_electronFilter(ElectronsLoader::electronFilter(cfg.selection).first),
+        m_electronFilter(nullptr),
         m_seqGetter(getter_utils::SeqGetter<xAOD::Electron>(
           cfg.inputs, options))
     {
-        SG::AuxElement::ConstAccessor<PartLinks> acc(options.electron_link_name);
-        m_associator = [acc](const xAOD::IParticle& jet) -> IPV {
-          IPV electrons;
-          for (const ElementLink<IPC>& link : acc(jet)){
-            if (!link.isValid()) {
-              throw std::logic_error("invalid particle link");
-            }
-            const xAOD::Electron* el = dynamic_cast<const xAOD::Electron*>(*link);
-            if (!el) {
-              throw std::logic_error("iparticle does not cast to Electron");
-            }
-            electrons.push_back(el);
+
+      // set the filter
+      auto [filter, deps] = electronFilter(cfg.selection);
+      m_electronFilter = filter;
+      m_deps.electronInputs = deps;
+
+      SG::AuxElement::ConstAccessor<PartLinks> acc(options.electron_link_name);
+      m_associator = [acc](const xAOD::IParticle& jet) -> IPV {
+        IPV electrons;
+        for (const ElementLink<IPC>& link : acc(jet)){
+          if (!link.isValid()) {
+            throw std::logic_error("invalid particle link");
           }
-          return electrons;
-        };
-        m_used_remap = m_seqGetter.getUsedRemap();
-        m_deps.bTagInputs.insert(options.electron_link_name);
-        m_name = cfg.name;
+          const xAOD::Electron* el = dynamic_cast<const xAOD::Electron*>(*link);
+          if (!el) {
+            throw std::logic_error("iparticle does not cast to Electron");
+          }
+          electrons.push_back(el);
+        }
+        return electrons;
+      };
+      m_used_remap = m_seqGetter.getUsedRemap();
+      m_deps.bTagInputs.insert(options.electron_link_name);
+      m_name = cfg.name;
     }
 
     ElectronsLoader::Electrons ElectronsLoader::getElectronsFromJet(

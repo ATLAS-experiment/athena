@@ -16,6 +16,7 @@
 #include "AthContainers/ConstAccessor.h"
 
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/AtlasPID.h"
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
@@ -24,7 +25,7 @@
 #include <algorithm>
 #include <memory>
 namespace {
-  static const SG::ConstAccessor<unsigned int> acc_origin("Classification");    
+  static const SG::ConstAccessor<unsigned int> acc_origin("Classification");
 }
 // Constructor
 DerivationFramework::TruthDressingTool::TruthDressingTool(const std::string& t,
@@ -43,36 +44,26 @@ StatusCode DerivationFramework::TruthDressingTool::initialize()
 {
     // Initialise handle keys
     ATH_CHECK(m_particlesKey.initialize());
+    ATH_CHECK(m_decorationKey.initialize(SG::AllowEmpty));
+
     ATH_CHECK(m_dressParticlesKey.initialize());
-    m_decorator_eKey = m_dressParticlesKey.key() + ".e_dressed";
     ATH_CHECK(m_decorator_eKey.initialize());
-    m_decorator_ptKey = m_dressParticlesKey.key() + ".pt_dressed";
     ATH_CHECK(m_decorator_ptKey.initialize());
-    m_decorator_etaKey= m_dressParticlesKey.key() + ".eta_dressed";
     ATH_CHECK(m_decorator_etaKey.initialize());
-    m_decorator_phiKey= m_dressParticlesKey.key() + ".phi_dressed";
     ATH_CHECK(m_decorator_phiKey.initialize());
-    m_decorator_pt_visKey = m_dressParticlesKey.key() + ".pt_vis_dressed";
     ATH_CHECK(m_decorator_pt_visKey.initialize());
-    m_decorator_eta_visKey= m_dressParticlesKey.key() + ".eta_vis_dressed";
     ATH_CHECK(m_decorator_eta_visKey.initialize());
-    m_decorator_phi_visKey= m_dressParticlesKey.key() + ".phi_vis_dressed";
     ATH_CHECK(m_decorator_phi_visKey.initialize());
-    m_decorator_m_visKey= m_dressParticlesKey.key() + ".m_vis_dressed";
     ATH_CHECK(m_decorator_m_visKey.initialize());
-    m_decorator_nphotonKey = m_dressParticlesKey.key() + ".nPhotons_dressed";
     ATH_CHECK(m_decorator_nphotonKey.initialize());
-    if (!m_decorationName.empty()) {m_decorationKey = m_particlesKey.key()+"."+m_decorationName;}
-    else {m_decorationKey = m_particlesKey.key()+".unusedPhotonDecoration";} 
-    ATH_CHECK(m_decorationKey.initialize());
-    m_truthClassKey = m_dressParticlesKey.key() + "." + SG::AuxTypeRegistry::instance().getName(acc_origin.auxid());
+
     ATH_CHECK(m_truthClassKey.initialize());
 
     // ensure we are not mixing truth taus with other truth particles
     if (m_listOfPIDs.size() > 1) {
-      if (std::find(m_listOfPIDs.begin(), m_listOfPIDs.end(), 15) != m_listOfPIDs.end()) {
-	ATH_MSG_ERROR("Truth taus must be dressed separately from other truth particles");
-	return StatusCode::FAILURE;
+      if (std::find(m_listOfPIDs.begin(), m_listOfPIDs.end(), MC::TAU) != m_listOfPIDs.end()) {
+        ATH_MSG_ERROR("Truth taus must be dressed separately from other truth particles");
+        return StatusCode::FAILURE;
       }
     }
 
@@ -91,12 +82,12 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
         ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);
         return StatusCode::FAILURE;
     }
- 
+
     SG::ReadHandle<xAOD::TruthParticleContainer> dressTruthParticles(m_dressParticlesKey,ctx);
     if (!dressTruthParticles.isValid()) {
         ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_dressParticlesKey);
         return StatusCode::FAILURE;
-    } 
+    }
 
     // Decorators
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_e(m_decorator_eKey, ctx);
@@ -112,7 +103,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,int > decorator_nphoton(m_decorator_nphotonKey, ctx);
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,char > dressDec(m_decorationKey, ctx);
     // If we want to decorate, then we need to decorate everything with false to begin with
-    if (!m_decorationName.empty()){
+    if (m_decoratePhotons){
       for (const auto * particle : *truthParticles){
         dressDec(*particle) = 0;
       }
@@ -131,28 +122,28 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     std::vector<xAOD::TruthParticle::FourMom_t> listOfDressedP4;
     std::vector<xAOD::TruthParticle::FourMom_t> listOfBareP4;
 
-    if (m_listOfPIDs.size()==1 && std::abs(m_listOfPIDs[0])==15) {
+    if (m_listOfPIDs.size()==1 && std::abs(m_listOfPIDs[0])==MC::TAU) {
       // when dressing truth taus, it is assumed that the truth tau container has been built beforehand and is used as input
       for (auto *pItr : *dressTruthParticles) {
-	if (!pItr->isTau()) {
-	  ATH_MSG_ERROR("Input particles should be truth taus.");
-	  return StatusCode::FAILURE;
-	}
-	if (!pt_visAcc.isAvailable(*pItr) || !eta_visAcc.isAvailable(*pItr) || !phi_visAcc.isAvailable(*pItr) || !mvisAcc.isAvailable(*pItr)) {
-	  ATH_MSG_ERROR("Visible momentum not available for truth taus, cannot perform dressing!");
-	  return StatusCode::FAILURE;
-	}
+        if (!pItr->isTau()) {
+          ATH_MSG_ERROR("Input particles should be truth taus.");
+          return StatusCode::FAILURE;
+        }
+        if (!pt_visAcc.isAvailable(*pItr) || !eta_visAcc.isAvailable(*pItr) || !phi_visAcc.isAvailable(*pItr) || !mvisAcc.isAvailable(*pItr)) {
+          ATH_MSG_ERROR("Visible momentum not available for truth taus, cannot perform dressing!");
+          return StatusCode::FAILURE;
+        }
 
         listOfParticlesToDress.push_back(pItr);
 
-	// we dresss the visible 4-momentum
-	xAOD::TruthParticle::FourMom_t bare_part;
-	bare_part.SetPtEtaPhiM(pt_visAcc(*pItr), eta_visAcc(*pItr), phi_visAcc(*pItr), mvisAcc(*pItr));
-	listOfDressedP4.push_back(bare_part);
+        // we dresss the visible 4-momentum
+        xAOD::TruthParticle::FourMom_t bare_part;
+        bare_part.SetPtEtaPhiM(pt_visAcc(*pItr), eta_visAcc(*pItr), phi_visAcc(*pItr), mvisAcc(*pItr));
+        listOfDressedP4.push_back(bare_part);
       }
       // in the cone-based approach, make a copy of bare P4 to avoid recomputing it
       if (!m_useAntiKt) {
-	listOfBareP4 = listOfDressedP4;
+        listOfBareP4 = listOfDressedP4;
       }
     }
     else {
@@ -162,7 +153,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       decayHelper.constructListOfFinalParticles(dressTruthParticles.ptr(), listOfParticlesToDress, m_listOfPIDs, true);
 
       for (const auto* part : listOfParticlesToDress) {
-	listOfDressedP4.push_back(part->p4());
+        listOfDressedP4.push_back(part->p4());
       }
     }
 
@@ -171,7 +162,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     //fill the photon list
     std::vector<const xAOD::TruthParticle*>  photonsFSRList;
     std::vector<int> photonPID{22};
-    const bool pass = decayHelper.constructListOfFinalParticles(truthParticles.ptr(), photonsFSRList, 
+    const bool pass = decayHelper.constructListOfFinalParticles(truthParticles.ptr(), photonsFSRList,
                                                                 photonPID, m_usePhotonsFromHadrons);
     if (!pass) {
       ATH_MSG_WARNING("Cannot construct the list of final state particles "<<m_truthClassKey.fullKey());
@@ -183,7 +174,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       for (const auto* phot : photonsFSRList) {
         double dRmin = m_coneSize;
         int idx = -1;
-  
+
         for (size_t i = 0; i < listOfParticlesToDress.size(); ++i) {
           if (!m_useLeptonsFromHadrons) {
             if (!acc_origin.isAvailable(*listOfParticlesToDress[i])) {
@@ -194,33 +185,33 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
             if (!isPrompt)  continue;
           }
           xAOD::TruthParticle::FourMom_t bare_part;
-          if (listOfParticlesToDress[i]->isTau()) {  
-	    bare_part = listOfBareP4[i];
+          if (listOfParticlesToDress[i]->isTau()) {
+            bare_part = listOfBareP4[i];
           }
           else {
             bare_part = listOfParticlesToDress[i]->p4();
           }
-  
+
           double dR = bare_part.DeltaR(phot->p4());
           if (dR < dRmin) {
             dRmin = dR;
             idx = i;
           }
         }
-  
+
         if(idx > -1) {
           listOfDressedP4[idx] += phot->p4();
           dressedParticlesNPhot[idx]++;
-          if (!m_decorationName.empty()){
+          if (m_decoratePhotons){
             dressDec(*phot) = 1;
           }
         }
       }
-  
+
       //loop over particles and add decorations
       for (size_t i = 0; i < listOfParticlesToDress.size(); ++i) {
-	const xAOD::TruthParticle* part = listOfParticlesToDress[i];
-	const xAOD::TruthParticle::FourMom_t& dressedVec = listOfDressedP4[i];
+        const xAOD::TruthParticle* part = listOfParticlesToDress[i];
+        const xAOD::TruthParticle::FourMom_t& dressedVec = listOfDressedP4[i];
 
         if(part->isTau()) {
           decorator_pt_vis(*part)      = dressedVec.Pt();
@@ -244,7 +235,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
       std::vector<fastjet::PseudoJet> fj_particles;
       for (const auto* part : listOfParticlesToDress) {
         if(part->isTau()) {
-	  const xAOD::TruthParticle::FourMom_t& tauvis = listOfDressedP4[part->index()];
+          const xAOD::TruthParticle::FourMom_t& tauvis = listOfDressedP4[part->index()];
           fj_particles.emplace_back(tauvis.Px(), tauvis.Py(), tauvis.Pz(), tauvis.E());
         }
         else {
@@ -275,7 +266,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
           for(const auto& constit : constituents) {
             if (HepMC::uniqueID(part)==constit.user_index()) {
 
-              // shall we count the number of photons among the pseudojet constituents 
+              // shall we count the number of photons among the pseudojet constituents
               // to decorate leptons with the number of dressing photons found by the anti-kt algorithm?
 
               if(part->isTau()) {
@@ -318,7 +309,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
         }
       }
       // Check if we wanted to decorate photons used for dressing
-      if (!m_decorationName.empty()){
+      if (m_decoratePhotons){
         //loop over photons, uniquely associate each to nearest bare particle
         for (const auto* phot : photonsFSRList ) {
           bool found = std::find(photon_uniqueIDs.begin(), photon_uniqueIDs.end(), HepMC::uniqueID(phot)) != photon_uniqueIDs.end();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "StoreGate/ReadDecorHandle.h"
 
@@ -315,8 +315,8 @@ namespace TCCHelpers{
     
     virtual void processPFO(const xAOD::TrackParticle* trk, const xAOD::FlowElement* pfo) {
       /// accumulate the total P4 and the pfos linked to trk
-      
-      ElementLink< xAOD::FlowElementContainer > pfoLink(*m_pfoContainer,pfo->index());
+      const xAOD::FlowElementContainer *tmp_pfoContainer = dynamic_cast< const xAOD::FlowElementContainer* >(pfo->container());
+      ElementLink< xAOD::FlowElementContainer > pfoLink(tmp_pfoContainer,pfo->index());
       m_pfoLinks.push_back(pfoLink);
       double pfo_pt       = m_useEnergy ? pfo->e() : pfo->pt();
       const FourMom_t & totalP = m_tccInfo->trackTotalClusterPt.at(trk);
@@ -381,9 +381,7 @@ StatusCode UFOTool::fillTCC(xAOD::FlowElementContainer* tccContainer, const Trac
   ufoB.combinedUFOLoop(&tccInfo, pfos.cptr());
   
   // Create a UFO for all neutral and charged PFO which are not matched to any tracks
-  unsigned int i = -1;
   for ( const xAOD::FlowElement* pfo : *pfos ) {
-    i++;
     if(pfo->pt() <= 0) continue;
     if(tccInfo.clusterToTracksWeightMap.find(pfo)!=tccInfo.clusterToTracksWeightMap.end())
       {
@@ -397,7 +395,8 @@ StatusCode UFOTool::fillTCC(xAOD::FlowElementContainer* tccContainer, const Trac
       if(!PVMatchedAcc(*pfo)) continue;
     }
     
-    ElementLink< xAOD::FlowElementContainer > pfoLink(*pfos,i);
+    const xAOD::FlowElementContainer *tmp_pfoContainer = dynamic_cast< const xAOD::FlowElementContainer* >(pfo->container());
+    ElementLink< xAOD::FlowElementContainer > pfoLink(tmp_pfoContainer,pfo->index());
     const std::vector< ElementLink<xAOD::FlowElementContainer> > PFOLink {pfoLink};    
     xAOD::FlowElement* tcc = new xAOD::FlowElement;
     tccContainer->push_back(tcc);

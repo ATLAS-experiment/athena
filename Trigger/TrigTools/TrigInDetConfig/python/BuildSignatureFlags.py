@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from TrkConfig.TrackingPassFlags import createTrackingPassFlags,createITkTrackingPassFlags
+from ActsConfig.ActsTrackingPassFlags import createActsTrackingPassFlags
 from TrigEDMConfig.TriggerEDM import recordable
 
 from AthenaCommon.Logging import logging
@@ -125,8 +126,7 @@ def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
 
   return flags  
 
-def defaultITkTrigTrackingFlags() -> AthConfigFlags:
-  
+def defaultITkTrigTrackingFlags() -> AthConfigFlags:  
   flags = createITkTrackingPassFlags()
   defaultTrigTrackingFlags(flags)
   
@@ -149,8 +149,24 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   flags.doCaloSeededAmbiSi  = False
   flags.DoubletDR_Max       = 150.0
   flags.useTIDE_Ambi        = False  
-  
+  flags.maxEta = 4.0
   return flags
+
+def defaultITkActsTrigTrackingFlags() -> AthConfigFlags:
+    flags = createActsTrackingPassFlags()
+    defaultTrigTrackingFlags(flags)
+    
+    flags.minPT               = [0.9*Units.GeV, 0.4*Units.GeV, 0.4*Units.GeV]
+    flags.minClusters         = [9, 8, 7]
+    flags.doTRT = False
+    flags.maxEta = 4.0
+    flags.maxShared = [2]
+    flags.maxHoles = [1]
+    flags.maxPixelHoles = [2]
+    flags.maxSctHoles = [2]
+    flags.maxShared = [2]
+    flags.maxDoubleHoles = [1]
+    return flags
 
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags
@@ -208,7 +224,7 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     defaults = defaultITkTrigTrackingFlags
   elif mode == "Acts":
     category = "Trigger.ActsTracking"
-    defaults = defaultITkTrigTrackingFlags
+    defaults = defaultITkActsTrigTrackingFlags
   else:                                       
     log.error("Unsupported reconstruction mode %s", mode)       
                                             
@@ -803,7 +819,7 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
   # ToDo: shouldn't be setting flags using this if type structures, the flags should be
   #       actually set somewhere in appropriate config functions
   flags.tracks_IDTrig = collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau"))
-  
+
   if recoMode == "Acts":
     flags.trkTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
     flags.trkTracks_IDTrig  = f'HLT_Acts_{flags.suffix}_Ambi_Tracks'

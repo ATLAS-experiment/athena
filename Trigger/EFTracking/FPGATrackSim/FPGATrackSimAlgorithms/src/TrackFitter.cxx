@@ -88,19 +88,22 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
       ATH_MSG_DEBUG("Attempting to fit Hough road with y = " << y << ", x = " << x << ", sector = " << road->getSector() << "and nhits = " << road->getNHits());
     }
 
-    // Error checking
-    int sector = road->getSector();
-    if (sector < 0) {
+    int sector = 0;
+    if (!m_fitFromRoad) {
+      // Error checking
+      sector = road->getSector();
+      if (sector < 0) {
         ATH_MSG_DEBUG("Bad sector " << sector);
         return FITTRACKS_OK;
-    }
-    else if (sector >= m_nominalBank->getNSectors()) {
+      }
+      else if (sector >= m_nominalBank->getNSectors()) {
         ATH_MSG_WARNING("Constants for sector " << sector << " don't exist");
         return FITTRACKS_BAD;
-    }
-    else if (!m_nominalBank->getIsGood(sector)) {
-      ATH_MSG_WARNING("Constants for sector " << sector << " are not valid");
-      return FITTRACKS_BAD;
+      }
+      else if (!m_nominalBank->getIsGood(sector)) {
+	ATH_MSG_WARNING("Constants for sector " << sector << " are not valid");
+	return FITTRACKS_BAD;
+      }
     }
 
     // Get info on layers with missing hits
@@ -114,11 +117,11 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     FPGATrackSimTrack temp;
     if(!m_do2ndStage){
       temp.setTrackStage(TrackStage::FIRST);
-      temp.setFirstSectorID(road->getSector());
+      if (!m_fitFromRoad) temp.setFirstSectorID(road->getSector());
     }
     else{
       temp.setTrackStage(TrackStage::SECOND);
-      temp.setSecondSectorID(road->getSector());
+      if (!m_fitFromRoad) temp.setSecondSectorID(road->getSector());
     }
     temp.setNLayers(m_pmap->getNLogiLayers());
     temp.setBankID(-1); // TODO
@@ -134,6 +137,8 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     temp.setSubRegion(road->getSubRegion());
     temp.setHoughXBin(road->getXBin());
     temp.setHoughYBin(road->getYBin());
+
+    temp.setBinIdx(road->getBinIdx());
 
     // Create a list of track candidates by taking all possible combinations of hits in road.
     std::vector<FPGATrackSimTrack> track_cands;

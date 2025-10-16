@@ -178,7 +178,12 @@ atlas_add_citest( DerivationRun3Data_Train
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3Data_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData=\\"ROOTRNTUPLE\\"" --parallelCompression="False"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   PROPERTIES PROCESSORS 4 )
+
+# Explicitly set maxEvents so that the preExec doesn't get overwritten
+atlas_add_citest( DerivationRun3Data_Train_SharedReader
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.MP.UseSharedReader=True"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYS
@@ -191,7 +196,12 @@ atlas_add_citest( DerivationRun3MC_PHYSLITE
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3MC_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData=\\"ROOTRNTUPLE\\"" --parallelCompression="False"' --tag mc_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag mc_PHYS_PHYSLITE --threads 4 --no-output-checks
+   PROPERTIES PROCESSORS 4 )
+
+# Explicitly set maxEvents so that the preExec doesn't get overwritten
+atlas_add_citest( DerivationRun3MC_Train_SharedReader
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.MP.UseSharedReader=True"' --tag mc_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MCAF3_PHYS

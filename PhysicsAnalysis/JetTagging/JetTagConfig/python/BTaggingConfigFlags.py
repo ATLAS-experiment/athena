@@ -142,6 +142,13 @@ def getNNs(flags):
         ],
         'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': [
             {'folds' : [nn_path]} for nn_path in lrj_paths
+        ],
+        'DFAntiKt4HIJets': [
+            {
+                'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True
+            }
         ]
     }
 
@@ -198,9 +205,6 @@ def createBTaggingConfigFlags():
 
     # GNN vertex fitter
     btagcf.addFlag("BTagging.GNNVertexFitter", False)
-
-    # a flag to enable legacy BTagging
-    btagcf.addFlag("BTagging.EnableLegacyBTagging", False)
 
     # (multifold) NN trainings, each jet collection maps to a list of
     # dicts. The dict has several keys:

@@ -91,15 +91,65 @@ class CPBaseRunner(ABC):
         return parser
 
     def _readYamlConfig(self):
-        from AthenaCommon.Utils.unixtools import find_datafile
-        yamlconfig = find_datafile(self.args.text_config)
-        if not yamlconfig:
+        yamlconfig = self._findYamlConfig(local=True)
+        if yamlconfig is None:
             raise FileNotFoundError(f'Failed to locate \"{self.args.text_config}\" config file!'
                                     'Check if you have a typo in -t/--text-config argument or missing file in the analysis configuration sub-directory.')
+        self.logger.info(f"Found YAML config at: {yamlconfig}")
         self.logger.info("Setting up configuration based on YAML config:")
         from AnalysisAlgorithmsConfig.ConfigText import TextConfig
         config = TextConfig(yamlconfig)
         return config
+    
+    
+    def _findYamlConfig(self, local=True):
+        # Find local and abs path first
+        if local and (yamlConfig := CPBaseRunner.findLocalPathYamlConfig(self.args.text_config) is not None):
+            return yamlConfig
+        # Then search in the analysis repository and warn for duplicates
+        elif (yamlConfig := CPBaseRunner.findRepoPathYamlConfig(self.args.text_config)):
+            if len(yamlConfig) > 1:
+                raise FileExistsError(f'Multiple files named \"{self.args.text_config}\" found in the analysis repository. Please provide a more specific path to the config file.\nMatches found:\n' + '\n'.join(yamlConfig))
+            else:
+                return yamlConfig[0]
+        # Finally try the slowest method using AthenaCommon
+        else:
+            from AthenaCommon.Utils.unixtools import find_datafile
+            return find_datafile(self.args.text_config)
+        
+    @staticmethod
+    def findLocalPathYamlConfig(textConfigPath):
+        configPath = os.path.normpath(os.path.expanduser(textConfigPath))
+        if os.path.isabs(configPath) and os.path.isfile(configPath):
+            return configPath
+        cwdPath = os.path.join(os.getcwd(), configPath)
+        if os.path.isfile(cwdPath):
+            return cwdPath
+        return None
+    
+    @staticmethod
+    def findRepoPathYamlConfig(textConfigPath):
+        """
+        Search for the file up to two levels deep within the first DATAPATH entry.
+        First, check directly under the analysis repository (depth 0).
+        Then, check immediate subdirectories (depth 1), looking for the file inside each.
+        Returns a list of all matches found.
+        """
+        matches = []
+        analysisRepoPath = os.environ.get('DATAPATH', '').split(os.pathsep)[0]
+        # Depth 0: Directly under analysisRepoPath
+        searchPath = os.path.join(analysisRepoPath, textConfigPath)
+        if os.path.isfile(searchPath):
+            matches.append(searchPath)
+        # Depth 1: Inside immediate subdirectories
+        try:
+            for subdir in os.listdir(analysisRepoPath):
+                candidate = os.path.join(analysisRepoPath, subdir, textConfigPath)
+                if os.path.isfile(candidate):
+                    matches.append(candidate)
+        except Exception:
+            pass
+        return matches
 
     def _parseInputFileList(path):
         files = []

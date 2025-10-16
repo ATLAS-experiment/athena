@@ -2,11 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "xAODTau/TauJet.h"
-#include "xAODPFlow/PFOContainer.h"
-#include "xAODParticleEvent/Particle.h"
-#include "xAODParticleEvent/ParticleContainer.h"
-
 #include "PanTauAlgs/Tool_DetailsArranger.h"
 #include "PanTauAlgs/PanTauSeed.h"
 #include "PanTauAlgs/HelperFunctions.h"
@@ -20,12 +15,9 @@ bool sortBDTscore(const ElementLink< xAOD::PFOContainer >& i, const ElementLink<
 
 PanTau::Tool_DetailsArranger::Tool_DetailsArranger(const std::string& name) :
   asg::AsgTool(name)
-{
-}
-
+{}
 
 PanTau::Tool_DetailsArranger::~Tool_DetailsArranger() = default;
-
 
 StatusCode PanTau::Tool_DetailsArranger::initialize() {
 

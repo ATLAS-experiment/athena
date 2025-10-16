@@ -54,7 +54,7 @@ namespace Muon
     {
     public:
       /** Constructor */
-      TgcRdoToPrepDataToolMT(const std::string& t, const std::string& n, const IInterface* p);
+      using base_class::base_class;
       
       /** Destructor */
       virtual ~TgcRdoToPrepDataToolMT()=default;

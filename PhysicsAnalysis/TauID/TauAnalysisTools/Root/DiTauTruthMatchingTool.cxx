@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauTruthMatchingTool.cxx
  * @brief Class for ditau truth matching
@@ -9,14 +9,6 @@
 
 // Local include(s)
 #include "TauAnalysisTools/DiTauTruthMatchingTool.h"
-
-// Core include(s):
-#include "AthLinks/ElementLink.h"
-#include "TruthUtils/HepMCHelpers.h"
-#include "AthContainers/ConstAccessor.h"
-#include "AthContainers/Decorator.h"
-
-#include "MCTruthClassifier/MCTruthClassifier.h"
 
 using namespace TauAnalysisTools;
 

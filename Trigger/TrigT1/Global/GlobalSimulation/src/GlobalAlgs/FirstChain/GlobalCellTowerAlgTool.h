@@ -16,6 +16,7 @@
 
 #include "../../IGlobalSimAlgTool.h"
 #include "../../IO/CommonTOB.h"
+#include "../../IO/ICommonTOB.h"
 #include "GlobalLArCellContainer.h"
 #include <bitset>
 #include <string>
@@ -44,14 +45,17 @@ namespace GlobalSim {
 
     /** @brief Overriding toString function from base class */
     virtual std::string toString() const override;
-    
+
+    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
+				 const EventContext&) const override;
+
   private:
 
     /** @brief Key to the GlobalLArCellContainer */
     SG::ReadHandleKey<GlobalSim::GlobalLArCellContainer> m_gblLArCellContainerKey {this, "GlobalLArCellsKey", "GlobalLArCells", "Key for the output container of the LAr cells sent to Global"}; 
  
     /** @brief Write key for the output cell towers as a GenericTobContainer */
-    SG::WriteHandleKey<IOBitwise::CommonTOBContainer> m_gblCellTowers {this, "GlobalCellTowersKey", "GlobalCellTowers", "Key to the container of generic TOBS containing the cell towers"};
+    SG::WriteHandleKey<IOBitwise::ICommonTOBContainer> m_gblCellTowers {this, "GlobalCellTowersKey", "GlobalCellTowers", "Key to the container of generic TOBS containing the cell towers"};
 
   };
   

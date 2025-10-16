@@ -10,20 +10,16 @@
 #include "TauAnalysisTools/TauSmearingTool.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
 
-#include <algorithm>
-
 namespace TauAnalysisTools
 {
 
 TauSmearingTool::TauSmearingTool( const std::string& sName )
   : asg::AsgMetadataTool( sName )
   , m_tCommonSmearingTool(sName+"_CommonSmearingTool", this)
-{
-}
+{}
 
 TauSmearingTool::~TauSmearingTool()
-{
-}
+{}
 
 StatusCode TauSmearingTool::initialize()
 {

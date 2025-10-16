@@ -7,8 +7,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "../../IGlobalSimAlgTool.h"
-#include "../../IO/IeEmTOB.h"
+#include "../../ITIPwriterAlgTool.h"
+#include "../../IGlobalSimAlgTool.h" // temporary - access to TIP word
+#include "../../IO/IeEmTOBContainer.h"
+
 #include "ICommonSelector.h"
 #include "IeEmSelector.h"
 
@@ -26,7 +28,7 @@ namespace GlobalSim {
    */
 
 
-  class eEmMultAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
+  class eEmMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
 
   public:
     eEmMultAlgTool(const std::string& type,
@@ -37,22 +39,128 @@ namespace GlobalSim {
 
     /** @brief Initialize function running before first event */
     virtual StatusCode initialize() override;
-  
-    /** @brief Main functional block running for each event */
-    virtual StatusCode run(const EventContext& ctx) const override;
-  
+
+    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
+				 const EventContext&) const override;
+
+    virtual std::string toString() const override;
+
   private:
   
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};
     std::unique_ptr<IeEmSelector> m_e_selector{nullptr};
   
-    /** @brief Key to the GlobalLArCellContainer */
-    SG::ReadHandleKey<GlobalSim::IOBitwise::IeEmTOB> m_gblLArCellContainerKey {
+    SG::ReadHandleKey<GlobalSim::IOBitwise::IeEmTOBContainer>
+    m_eEmTOBContainerKey {
       this,
       "eEmTOBs",
       "eEmTOBs",
-      "Key for GlobalSim eEmTOB container"}; 
-  };
+      "Key for GlobalSim eEmTOB container"};
+    
+    Gaudi::Property<std::string> m_et_low_str {
+      this,
+      "et_low",
+      "0",
+      "et low for window selector"};
+    
+    Gaudi::Property<std::string> m_et_high_str {
+      this,
+      "et_high",
+      "inf",
+      "et high for window selector"};
 
+    Gaudi::Property<std::string> m_eta_low_str {
+      this,
+      "eta_low",
+      "0",
+      "eta low for window selector"};
+    
+    Gaudi::Property<std::string> m_eta_high_str {
+      this,
+      "eta_high",
+      "inf",
+      "eta high for window selector"};
+
+    Gaudi::Property<std::string> m_phi_low_str {
+      this,
+      "phi_low",
+      "0",
+      "phi low for window selector"};
+    
+    Gaudi::Property<std::string> m_phi_high_str {
+      this,
+      "phi_high",
+      "inf",
+      "phi high for window selector"};
+
+   Gaudi::Property<std::string> m_rhad_str {
+      this,
+      "rhad",
+      "0",
+      "rhad cut value"};
+
+   Gaudi::Property<std::string> m_rhad_op {
+      this,
+      "rhad_op",
+      "unknown",
+      "rhad cut operator"};
+    
+   Gaudi::Property<std::string> m_reta_str {
+      this,
+      "reta",
+      "0",
+      "reta cut value"};
+
+    Gaudi::Property<std::string> m_reta_op {
+      this,
+      "reta_op",
+      "unknown",
+      "reta cut operator"};
+ 
+   Gaudi::Property<std::string> m_wstot_str {
+      this,
+      "wstot",
+      "0",
+      "wstot lcut_value"};
+
+    Gaudi::Property<std::string> m_wstot_op {
+      this,
+      "wstot_op",
+      "unknown",
+      "wstot cut_operator"};
+    
+    Gaudi::Property<int> m_TIP_position {
+      this,
+      "TIPposition",
+      0,
+      "start position to write into the TIP"};
+
+    
+    Gaudi::Property<int> m_n_multbits {
+      this,
+      "n_multbits",
+      3,
+      "number of bits to write into the TIP"};
+
+    Gaudi::Property<std::string> m_menu_name {
+      this,
+      "menu_name",
+      "unknown",
+      "name from json menu file"
+    };
+
+    Gaudi::Property<bool> m_enableDump {
+      this,
+      "enable_dump",
+      "False",
+      "floag to eanble debug dumps"
+    };
+
+
+    ulong m_maxtob{0};
+
+    void dump() const;
+
+  };
 }
 #endif

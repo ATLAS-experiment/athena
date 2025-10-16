@@ -6,9 +6,10 @@
 #define TAUDQA_DECAYMODEMIGRATION_H
 
 #include "TrkValHistUtils/PlotBase.h"
-#include "TauKinematicPlots.h"
+#include "xAODTau/TauDefs.h"
 #include "xAODTau/TauJet.h"
-#include "xAODPFlow/PFO.h"
+
+class TH1;
 
 namespace Tau{
 

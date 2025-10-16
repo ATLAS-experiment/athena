@@ -17,7 +17,7 @@
 #include "ActsGeometryInterfaces/IActsMaterialJsonWriterTool.h"
 
 // ACTS
-#include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
+#include "ActsPlugins/Json/MaterialMapJsonConverter.hpp"
 
 namespace Acts {
   class TrackingGeometry;

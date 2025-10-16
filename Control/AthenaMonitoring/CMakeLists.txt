@@ -37,6 +37,7 @@ atlas_add_library(
         InDetReadoutGeometry
         MuonAlignmentData
         TRT_ReadoutGeometry
+        PersistentDataModel
 )
 
 atlas_add_component(

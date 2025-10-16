@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArTimePhysPrediction.h"
@@ -143,9 +143,9 @@ StatusCode LArTimePhysPrediction::stop()
   ATH_MSG_INFO ( "Loaded LArCaliWaveContainer with key = " << m_keyinput );
 
   //Create the LArPhysCaliTdiffComplete object
-  LArPhysCaliTdiffComplete *larPhysCaliTdiffComplete = new LArPhysCaliTdiffComplete();
-  ATH_CHECK( larPhysCaliTdiffComplete->setGroupingType(m_groupingType,msg()) );
-  ATH_CHECK( larPhysCaliTdiffComplete->initialize() );
+  //LArPhysCaliTdiffComplete *larPhysCaliTdiffComplete = new LArPhysCaliTdiffComplete();
+  //ATH_CHECK( larPhysCaliTdiffComplete->setGroupingType(m_groupingType,msg()) );
+  //ATH_CHECK( larPhysCaliTdiffComplete->initialize() );
 
   IAlgTool* algTool = nullptr;
   ATH_CHECK( toolSvc()->retrieveTool("CaloDepthTool", algTool, this) );

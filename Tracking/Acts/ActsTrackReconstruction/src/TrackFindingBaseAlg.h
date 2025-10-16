@@ -135,6 +135,7 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<double>> m_maxChi2{this, "maxChi2", {}, "TrackSelector: maxChi2"};
 
     Gaudi::Property<bool> m_addCounts{this, "addCounts", true, "keep separate pixel, strip and hgtd counts and apply the following cuts"};
+    Gaudi::Property<bool> m_checkCounts{this, "checkCounts", false, "check consistency among track state counts"};
     Gaudi::Property<std::vector<std::size_t>> m_minPixelHits{this, "minPixelHits", {}, "minimum number of pixel hits"};
     Gaudi::Property<std::vector<std::size_t>> m_minStripHits{this, "minStripHits", {}, "minimum number of strip hits"};
     Gaudi::Property<std::vector<std::size_t>> m_minHgtdHits{this, "minHgtdHits", {}, "minimum number of hgtd hits"};
@@ -309,8 +310,6 @@ namespace ActsTrk {
     static void updateCounts(const detail::RecoTrackContainer::TrackProxy &track,
                              Acts::ConstTrackStateType typeFlags,
                              xAOD::UncalibMeasType detType);
-    static void copyCounts(const detail::RecoTrackContainer::TrackProxy &track,
-                           const detail::RecoTrackContainer::TrackProxy &other);
     void checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
     std::array<bool, 3> selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
 

@@ -10,7 +10,8 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree RIO Net MathCore ROOTNTuple ROOTNTupleUtil VDT)
+find_package( ROOT COMPONENTS Core Tree RIO Net MathCore ROOTNTuple ROOTNTupleUtil VDT ROOTTPython )
+find_package( Python COMPONENTS Development )
 
 # Generate a CINT dictionary source file:
 atlas_add_root_dictionary( xAODRootAccess xAODRootAccessDictSource
@@ -27,8 +28,8 @@ atlas_add_library( xAODRootAccess
    xAODRootAccess/tools/*.h xAODRootAccess/tools/*.icc
    Root/*.h Root/*.cxx ${xAODRootAccessDictSource}
    PUBLIC_HEADERS xAODRootAccess
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} AthContainers xAODCore xAODEventFormat
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} ${Python_LIBRARIES} AthContainers xAODCore xAODEventFormat
    xAODRootAccessInterfaces AsgMessagingLib CxxUtils RootUtils ${extra_libs}
    )
 

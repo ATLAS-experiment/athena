@@ -51,9 +51,7 @@ class TgcReadoutGeomTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
        /** @brief Map to share the StripLayer readout objects across multiple
         *         readout elements */
        using ReadoutTable = std::map<std::string, StripLayerPtr>;
-       ReadoutTable wireLayers{};
-       ReadoutTable stripLayers{};
-
+       ReadoutTable readoutLayers{};
        /** @brief Set to share equivalent RadialStripDesigns across multiple gas gaps */
        RadialStripDesignSet stripReadouts{};
        /** @brief Set to share equivalent WireGroupDesigns across multiple gas gaps */

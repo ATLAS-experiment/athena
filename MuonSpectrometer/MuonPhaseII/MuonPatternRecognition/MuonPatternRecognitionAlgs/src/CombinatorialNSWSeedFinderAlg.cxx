@@ -10,7 +10,6 @@
 
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
@@ -301,8 +300,8 @@ std::unique_ptr<SegmentSeed>
             return nullptr;
         }
     }
-    double tanPhi = houghTanPhi(direction);
-    double tanTheta = houghTanTheta(direction);
+    double tanAlpha = houghTanAlpha(direction);
+    double tanBeta = houghTanBeta(direction);
 
     double interceptX = segPos.x();
     double interceptY = segPos.y();
@@ -312,7 +311,7 @@ std::unique_ptr<SegmentSeed>
     auto extendedHits = extendHits(segPos, direction, extensionLayers, usedHits);
     HitVec hits{initialSeed.begin(),initialSeed.end()};
     hits.insert(hits.end(), extendedHits.begin(), extendedHits.end());
-    return std::make_unique<SegmentSeed>(tanTheta, interceptY, tanPhi,
+    return std::make_unique<SegmentSeed>(tanBeta, interceptY, tanAlpha,
                                          interceptX, hits.size(),
                                          std::move(hits), max.parentBucket());
 }
@@ -455,8 +454,8 @@ StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const
         for (auto &seed : seeds) {
             if (msgLvl(MSG::VERBOSE)){
                 std::stringstream sstr{};
-                sstr<<"Seed tanTheta = "<<seed->tanTheta()<<", y0 = "<<seed->interceptY()
-                         <<", tanPhi = "<<seed->tanPhi()<<", x0 = "<<seed->interceptX()<<", hits in the seed "
+                sstr<<"Seed tanBeta = "<<seed->tanBeta()<<", y0 = "<<seed->interceptY()
+                         <<", tanAlpha = "<<seed->tanAlpha()<<", x0 = "<<seed->interceptX()<<", hits in the seed "
                          <<seed->getHitsInMax().size()<<std::endl;
         
                 for(const auto& hit : seed->getHitsInMax()){

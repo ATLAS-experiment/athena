@@ -83,6 +83,9 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('MinSpacePointsPerSeed',3)
     cf.addFlag('MaxSpacePointsPerSeed',3)
 
+    cf.addFlag('runF150hw', False)
+
+
     def __httHough1DFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createHough1dFPGATrackSimConfigFlags
@@ -136,6 +139,7 @@ def createFPGATrackSimConfigFlags():
 
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)
+    cf.addFlag('regionToWriteDPTree', -1)
     cf.addFlag('writeOutputEventLimit', -1)
     cf.addFlag('readOfflineObjects', True)
 
@@ -368,6 +372,8 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('binFilter','IncrementalBuild')
     cf.addFlag('layerStudy',False)
     cf.addFlag('layerMapFile','')
+    cf.addFlag('useLayerRadiiFile',False)
+    cf.addFlag('usePhiShift',False)
     cf.addFlag('noCuts',False)
 
     cf.addFlag('filterInBin', False)

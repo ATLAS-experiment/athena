@@ -14,12 +14,9 @@
 // Framework include files
 #include "GaudiKernel/GenericAddress.h"
 
-// Forward declarations
-class IRegistry;
-
-/** @class CondAttrListVecAddress 
- *  @brief This class provides the an IOpaqueAddress/GenericAddress
- *  which can hold a pointer to an AthenaAttributeList object
+/** @class CondAttrListVecAddress
+ *  @brief This class provides an IOpaqueAddress/GenericAddress
+ *  which can hold a pointer to a CondAttrListVec object
  *
  **/
 class CondAttrListVecAddress : public GenericAddress {
@@ -40,7 +37,7 @@ public:
 			  const std::string& p2="",
 			  unsigned long ip1=0,
 			  unsigned long ip2=0,
-			  CondAttrListVec* attrListVec=0);
+			  CondAttrListVec* attrListVec=nullptr);
 
     /// Standard Destructor
     virtual ~CondAttrListVecAddress();
@@ -59,10 +56,10 @@ private:
 
 ///  Inline definitions
 inline     
-CondAttrListVecAddress::CondAttrListVecAddress() 
-	: 
+CondAttrListVecAddress::CondAttrListVecAddress()
+	:
 	GenericAddress(),
-	m_attrListVec(0)
+	m_attrListVec(nullptr)
 {}
 
 inline     
@@ -92,7 +89,7 @@ inline
 CondAttrListVecAddress::CondAttrListVecAddress(const GenericAddress& copy)
 	:
 	GenericAddress(copy),
-	m_attrListVec(0)
+	m_attrListVec(nullptr)
 {}
 
 inline     

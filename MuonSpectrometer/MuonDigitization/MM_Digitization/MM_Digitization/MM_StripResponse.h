@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_DIGITIZATION_MM_STRIPRESPONSE_H
@@ -9,13 +9,14 @@
 //     Simulate strip response
 //
 
-#include <algorithm>
+
 #include <map>
 #include <memory>
 #include <vector>
 
 #include "MM_Digitization/MM_Electron.h"
-#include "MM_Digitization/MM_IonizationCluster.h"
+
+class MM_IonizationCluster;
 
 class MM_StripResponse {
 public:

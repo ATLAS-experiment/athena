@@ -3,6 +3,11 @@
 */
 
 #include "MuonIdHelpers/MdtIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
 
 MdtIdHelper::MdtIdHelper() : MuonIdHelper("MdtIdHelper", "mdt") {

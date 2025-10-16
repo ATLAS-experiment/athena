@@ -13,9 +13,6 @@
 #include "TEnv.h"
 #include "THashList.h"
 
-// System include(s)
-#include <atomic>
-
 using namespace TauAnalysisTools;
 
 //=================================PUBLIC-PART==================================

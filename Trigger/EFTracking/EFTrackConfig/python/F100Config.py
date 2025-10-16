@@ -4,38 +4,6 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def dataPreparation2(flags: AthConfigFlags, signature: str, inView: bool, rois: str) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    if not inView:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        loadRDOs = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
-                    ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
-                    ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map') ]
-        acc.merge(SGInputLoaderCfg(flags, Load=loadRDOs))
-
-    
-    from EFTrackingFPGAPipeline.F100IntegrationConfig import FPGADataPreparation
-
-    kwargs = {}
-    kwargs.setdefault("isRoI_Seeded", True)
-    kwargs.setdefault("RoIs", rois)
-    kwargs.setdefault("FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs_"+signature)
-    kwargs.setdefault("FPGAEncodedStripKey", "FPGAEncodedStripRDOs_"+signature)
-    kwargs.setdefault("FPGAOutputPixelKey", "FPGAFormatPixelClusters_"+signature)
-    kwargs.setdefault("FPGAOutputStripKey", "FPGAFormatStripClusters_"+signature)
-    kwargs.setdefault('xAODPixelClusterContainer', "FPGAPixelClusters_"+signature)
-    kwargs.setdefault('xAODStripClusterContainer', "FPGAStripClusters_"+signature)
-    kwargs.setdefault('sortedxAODPixelClusterContainer', "ITkPixelClusters_"+signature)
-    kwargs.setdefault('sortedxAODStripClusterContainer', "ITkStripClusters_"+signature)
-    kwargs.setdefault("FPGAThreads", 0) #require runtime extraction instead, cannot statically configure in the trigger
-
-    acc.merge(FPGADataPreparation(flags, runStandalone=False, nameSuffix=signature, **kwargs))
-
-    #add pixel spacepoint creation
-    from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg
-    acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,name="PixelSPFormation_"+signature,useCache=False, PixelClusters = "ITkPixelClusters_"+signature, PixelSpacePoints = "ITkPixelSpacepoints_"+signature))
-
 def dataPreparation(flags: AthConfigFlags, signature: str, inView: bool, rois: str) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 

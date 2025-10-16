@@ -1,25 +1,21 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// LArG4TBECBeamChSensitiveDetector
 #undef DEBUG_SD
 #undef DEBUG_HITS
 
 #include "LArG4TBECBeamChSensitiveDetector.h"
 #include "LArG4TBECBeamChCalculator.h"
-#include "LArG4TBECBeamChHit.h"
+#include "LArG4TBSimEvent/LArG4TBECBeamChHit.h"
 
 #include "G4Version.hh"
 #include "G4Step.hh"
 #include "G4ios.hh"
 
-#include <map>
-#include <vector>
-
 LArG4TBECBeamChSensitiveDetector::LArG4TBECBeamChSensitiveDetector(const G4String& a_name)
   : G4VSensitiveDetector(a_name)
-  , m_calculator(new LArG4TBECBeamChCalculator())
+  , m_calculator(std::make_unique< LArG4TBECBeamChCalculator>())
   , m_detectorName(a_name)
 {
   // Construct a unique name for the collection of hits maintained by
@@ -53,12 +49,6 @@ LArG4TBECBeamChSensitiveDetector::LArG4TBECBeamChSensitiveDetector(const G4Strin
 #endif
 }
 
-
-LArG4TBECBeamChSensitiveDetector::~LArG4TBECBeamChSensitiveDetector()
-{
-}
-
-
 void LArG4TBECBeamChSensitiveDetector::Initialize(G4HCofThisEvent* /*m_HCE*/)
 {
         m_Hits.clear();
@@ -84,21 +74,21 @@ G4bool LArG4TBECBeamChSensitiveDetector::ProcessHits(G4Step* a_step,
             << std::endl;
 #endif
 
-        LArG4TBECBeamChHit* hit = new LArG4TBECBeamChHit(ident, x, y);
+        auto hit = std::make_unique<LArG4TBECBeamChHit>(ident, x, y);
 
 #ifdef DEBUG_HITS
-        std::cout << "LArG4TBECBeamChSensitiveDetector hit = " << hit << std::endl;
+        std::cout << "LArG4TBECBeamChSensitiveDetector hit = " << hit.get() << std::endl;
 #endif
 
         G4bool found = false;
-        for (const LArG4TBECBeamChHit* hit : m_Hits) {
+        for (const auto & hit : m_Hits) {
                 if(hit->getIdentifier() == ident){
                         found = true;
                         break;
                 }
         }
         if(!found){
-                m_Hits.push_back(hit);
+                m_Hits.push_back(std::move(hit));
                 return true;
         } else {
 #ifdef DEBUG_HITS
@@ -119,9 +109,7 @@ void LArG4TBECBeamChSensitiveDetector::EndOfEvent(G4HCofThisEvent* /*m_HCE*/)
 #endif
 
 #ifdef DEBUG_HITS
-        m_Hit_pointer i;
-        for(i = m_Hits.begin(); i != m_Hits.end(); i ++){
-                LArG4TBECBeamChHit* hit = *i;
+	for(const auto & hit : m_Hits) {
                 std::cout << "LArG4TBECBeamChSensitiveDetector::EndOfEvent"
                           << " ID= " << hit->getIdentifier()
                           << " x=" << hit->X()

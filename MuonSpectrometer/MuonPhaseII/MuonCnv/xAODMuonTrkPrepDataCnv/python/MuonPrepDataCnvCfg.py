@@ -18,11 +18,12 @@ def MuonPrepDataToxAODCnvAlg(flags,name="MuonPrepDataToxAODCnvAlg", **kwargs):
 
 def SetupArgParser():
     from argparse import ArgumentParser
+    from AthenaCommon.TestDefaults import defaultTestFiles
 
     parser = ArgumentParser()
     parser.add_argument("-t", "--threads", dest="threads", type=int, help="number of threads", default=1)
     parser.add_argument("-o", "--output", dest="output", default='PrepDataTest.pool.root', help="Text file containing each cabling channel", metavar="FILE")
-    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"], 
+    parser.add_argument("--inputFile", "-i", default=defaultTestFiles.ESD_RUN3_MC, 
                         help="Input file to run on ", nargs="+")
     return parser
 

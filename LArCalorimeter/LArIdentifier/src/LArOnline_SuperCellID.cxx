@@ -3,8 +3,11 @@
 */
 
 #include "LArIdentifier/LArOnline_SuperCellID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "LArIdentifier/LArOnlID_Exception.h"
 #include <cmath>

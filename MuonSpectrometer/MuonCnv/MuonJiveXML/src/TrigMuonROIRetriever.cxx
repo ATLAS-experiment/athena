@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonROIRetriever.h"
-
-#include <string>
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -65,16 +63,17 @@ namespace JiveXML {
     }
 
     DataMap myDataMap;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["energy"] = energy;
-    myDataMap["roiWord"] = roiWord;
-    myDataMap["thrNumber"] = thrNumber;
-    myDataMap["thrName"] = thrName;
-    myDataMap["thrValue"] = thrValue;
+    const auto ndata = phi.size();
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["energy"] = std::move(energy);
+    myDataMap["roiWord"] = std::move(roiWord);
+    myDataMap["thrNumber"] = std::move(thrNumber);
+    myDataMap["thrName"] = std::move(thrName);
+    myDataMap["thrValue"] = std::move(thrValue);
 
     //Be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< ndata << endmsg;
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey.key(), &myDataMap);

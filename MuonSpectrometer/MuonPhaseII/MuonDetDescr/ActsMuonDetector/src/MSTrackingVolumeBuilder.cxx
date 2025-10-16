@@ -17,6 +17,7 @@
 #include "Acts/Material/HomogeneousVolumeMaterial.hpp"
 #include "Acts/Utilities/BinnedArrayXD.hpp"
 #include "Acts/Surfaces/SurfaceArray.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 
 #include <ranges>
 
@@ -49,13 +50,15 @@ namespace ActsTrk{
         const unsigned chIdx = toInt(re->chamberIndex());
         auto reSurfaces = re->getSurfaces();
         msSurfaces.reserve(msSurfaces.size() + reSurfaces.size());
-        for (std::shared_ptr<Acts::Surface>& surf : re->getSurfaces()) {
+        for (std::shared_ptr<Acts::Surface>& surf : reSurfaces) {
             surf->assignGeometryId(Acts::GeometryIdentifier{}.withLayer(chIdx + m_firstLayId).withSensitive(++surfCounter[chIdx]));
+            const auto* det = static_cast<const ActsTrk::IDetectorElementBase*>(surf->associatedDetectorElement());
+            ATH_MSG_DEBUG("Append new surface "<<m_detMgr->idHelperSvc()->toString(det->identify())
+                        <<" -> geoId: "<<surf->geometryId());
             msSurfaces.push_back(std::move(surf));
         }
     }
-
-    std::ranges::transform(msSurfaces, std::back_inserter(rawSurfs), [](const auto& s) { return s.get(); });
+    rawSurfs = Acts::unpackSmartPointers(msSurfaces);
     auto surfaceArray = std::make_unique<Acts::SurfaceArray>(std::make_unique<Acts::SurfaceArray::SingleElementLookup>(rawSurfs),
                                                             msSurfaces);
   

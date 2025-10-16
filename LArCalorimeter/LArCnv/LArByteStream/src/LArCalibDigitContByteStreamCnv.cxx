@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArCalibDigitContByteStreamCnv.h"
@@ -94,6 +94,10 @@ LArCalibDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject
  
   SG::ReadCondHandle<LArCalibLineMapping> calibLineMapping (m_calibLineMappingKey);
   SG::ReadCondHandle<LArOnOffIdMapping> onOffIdMapping (m_onOffIdMappingKey);
+  if (!*calibLineMapping || !*onOffIdMapping) {
+    ATH_MSG_ERROR ("Cannot access mappings");
+    return StatusCode::FAILURE;
+  }
 
   LArCalibDigitContainer *CalibDigitContainer=new LArCalibDigitContainer;
   StatusCode sc=m_tool->convert(re,CalibDigitContainer,gain,

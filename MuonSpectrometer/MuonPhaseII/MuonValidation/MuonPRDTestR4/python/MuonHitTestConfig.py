@@ -64,12 +64,12 @@ def MuonPileUpTestCfg(flags, name="MuonDigiTester", outFile="DigiTest.root", **k
 
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
     from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.add_argument("--runTester", help="Choice on the tester to setup", default="SIM", choices=["SIM", "DIGI", "PILEUP"])
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.set_defaults(outRootFile="SimHitDumpNtuple.root")
 
     args = parser.parse_args()

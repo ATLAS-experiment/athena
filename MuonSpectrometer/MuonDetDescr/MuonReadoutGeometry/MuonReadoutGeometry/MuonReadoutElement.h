@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -112,17 +112,11 @@ namespace MuonGM {
         inline bool sideA() const;
         inline bool sideC() const;
 
-        void setParentStationPV(const PVConstLink&);
-        void setParentStationPV();
-        PVConstLink parentStationPV() const;
         const MuonStation* parentMuonStation() const;
         void setParentMuonStation(const MuonStation*);
         Amg::Transform3D toParentStation() const;
         Amg::Vector3D parentMuonStationPos() const;
-       
-        int getIndexOfREinMuonStation() const;
-       
-
+  
         bool hasCutouts() const { return m_hasCutouts; }
         void setHasCutouts(bool flag) { m_hasCutouts = flag; }
 
@@ -158,15 +152,11 @@ namespace MuonGM {
         bool m_hasCutouts{false};            //!<  true is there are cutouts in the readdout-element
 
     private:
-        void setIndexOfREinMuonStation();
-       
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonDetectorManager"};
         Trk::DetectorElemType m_type{Trk::DetectorElemType::SolidState};
-        Identifier m_id{0};                    //!< extended data-collection identifier
+        Identifier m_id{};                    //!< extended data-collection identifier
         IdentifierHash m_idhash{0};            //!< data-collection hash identifier
         IdentifierHash m_detectorElIdhash{0};  //!< detector element hash identifier
-
-        int m_indexOfREinMuonStation{-999};  //!<  index of this RE in the mother MuonStation
        
         double m_stationS{0.};
         /// Identifier field of the station index
@@ -176,7 +166,6 @@ namespace MuonGM {
         /// Identifier field of the station phi
         int m_phi{-1};
              
-        PVConstLink m_parentStationPV{nullptr};
         const MuonStation* m_parentMuonStation{nullptr};
         MuonDetectorManager* m_muon_mgr{nullptr};
     };

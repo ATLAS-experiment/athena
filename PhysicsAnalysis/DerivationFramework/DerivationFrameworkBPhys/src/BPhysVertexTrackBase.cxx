@@ -481,7 +481,7 @@ namespace DerivationFramework {
     m_nEvtsSeen++;
 
     // run and event numbers
-    CHECK(evtStore()->retrieve(m_eventInfo));
+    CHECK(evtStore()->retrieve(m_eventInfo)); // FIXME Use Handles
     m_runNumber = m_eventInfo->runNumber();
     m_evtNumber = m_eventInfo->eventNumber();
 
@@ -493,18 +493,18 @@ namespace DerivationFramework {
     
     // retrieve primary vertices container
     m_pvtxContainer = NULL;
-    CHECK(evtStore()->retrieve(m_pvtxContainer, m_pvContainerName));
+    CHECK(evtStore()->retrieve(m_pvtxContainer, m_pvContainerName)); // FIXME Use Handles
     ATH_MSG_DEBUG("Found PV collection with key " << m_pvContainerName);
 
 
     // retrieve ID track container
     m_tracks    = NULL;
     m_tracksAux = NULL;
-    CHECK(evtStore()->retrieve(m_tracks, m_trackParticleContainerName));
+    CHECK(evtStore()->retrieve(m_tracks, m_trackParticleContainerName)); // FIXME Use Handles
     if (evtStore()->contains<xAOD::
 	TrackParticleAuxContainer>(m_trackParticleContainerName+"Aux.")) {
       CHECK(evtStore()->retrieve(m_tracksAux,
-				 m_trackParticleContainerName+"Aux."));
+				 m_trackParticleContainerName+"Aux.")); // FIXME Use Handles
     } else {
       ATH_MSG_DEBUG("No aux track collection with key "
 		    << m_trackParticleContainerName+"Aux.");
@@ -522,15 +522,15 @@ namespace DerivationFramework {
       const xAOD::VertexAuxContainer*  refPVAuxContainer = NULL;
 
       // retrieve from StoreGate
-      CHECK(evtStore()->retrieve(svtxContainer, m_vertexContainerNames[i]));
+      CHECK(evtStore()->retrieve(svtxContainer, m_vertexContainerNames[i])); // FIXME Use Handles
       CHECK(evtStore()->retrieve(svtxAuxContainer,
-				 m_vertexContainerNames[i]+"Aux."));
+				 m_vertexContainerNames[i]+"Aux.")); // FIXME Use Handles
       ATH_MSG_DEBUG("Found SV collection with key "
 		    << m_vertexContainerNames[i]);
       CHECK(evtStore()->retrieve(refPVContainer   ,
-				 m_refPVContainerNames[i]));
+				 m_refPVContainerNames[i])); // FIXME Use Handles
       CHECK(evtStore()->retrieve(refPVAuxContainer,
-				 m_refPVContainerNames[i]+"Aux."));
+				 m_refPVContainerNames[i]+"Aux.")); // FIXME Use Handles
       ATH_MSG_DEBUG("Found refitted PV collection with key "
 		    << m_refPVContainerNames[i]);
       

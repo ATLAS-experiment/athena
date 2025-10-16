@@ -5,20 +5,16 @@
 #ifndef LARMiniFCAL_ID_H
 #define LARMiniFCAL_ID_H
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-
 #include "CaloIdentifier/CaloIDHelper.h"
-#include "CaloIdentifier/LArID_Exception.h"
 #include "CaloIdentifier/LArNeighbours.h"
-
+#include "IdDict/IdDictFieldImplementation.h"
+#include "Identifier/IdentifierHash.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include "boost/range/iterator_range.hpp"
 #include <vector>
 #include <algorithm>
 #include <set>
+class IdDictMgr;
 
 
 /**
@@ -50,8 +46,6 @@
   * @author adapted from Fcal for MiniFcal by M Fincke
   */  
 
-class Range;
-class LArMiniFCAL_region;
 
 class LArMiniFCAL_ID : public CaloIDHelper
 {

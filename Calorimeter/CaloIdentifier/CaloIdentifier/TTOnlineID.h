@@ -5,24 +5,16 @@
 #ifndef CALOIDENTIFIER_TTONLINEID_H
 #define CALOIDENTIFIER_TTONLINEID_H
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "GaudiKernel/MsgStream.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "Identifier/HWIdentifier.h"
-#include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
 #include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-#include "CaloIdentifier/CaloID_Exception.h"
+#include "Identifier/IdentifierHash.h"
+#include "Identifier/HWIdentifier.h"
+#include "Identifier/Range.h"
+#include "Identifier/MultiRange.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include <vector>
-#include <iostream>
 #include <algorithm>
-#include <map>
 
-//using namespace std;
-
-class IdentifierHash;
-class Range;
 
 /**
 *

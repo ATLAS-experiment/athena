@@ -111,12 +111,6 @@ DbStatus DbContainerImp::commitTransaction() {
   ActionList::iterator i = m_stack.begin();
   for(size_t j=0; j < m_size; ++j, ++i )  {
     switch( (*i).action )  {
-      case pool::DESTROY:
-        status = destroyObject(*i);
-        break;
-      case pool::UPDATE:
-        status = updateObject(*i);
-        break;
       case pool::WRITE:
         status = writeObject(*i);
         break;
@@ -174,51 +168,6 @@ DbContainerImp::save(DbContainer& /* cntH */, const void* object, ShapeH shape, 
   return Error;
 }
 
-// Update existing object in the container
-DbStatus 
-DbContainerImp::update(DbContainer& /* cntH */, const void* object, ShapeH shape, const DbObjectHandle<DbObject>& objH) {
-  if ( m_canUpdate )  {
-    if ( true || object )  {
-      if ( m_stack.size() < m_size+1 )  {
-        m_stack.resize(m_size+1024);
-      }
-      m_stack[ m_size ] = DbAction(objH.ptr(), shape, objH.oid(), pool::UPDATE);
-      m_stackType |= pool::UPDATE;
-      m_size++;
-      return Success;
-    }
-    return Error;
-  }
-  DbPrint log( m_name );
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "update existing objects."
-      << "The requested action is not supported." << DbPrint::endmsg;
-  return Error;
-}
-
-// Update existing object in the container
-DbStatus
-DbContainerImp::update(DbContainer& /* cntH */, const void* object, ShapeH shape, const Token::OID_t& linkH)
-{
-  if ( m_canUpdate )  {
-    if ( object )  {
-      if ( m_stack.size() < m_size+1 )  {
-        m_stack.resize(m_size+1024);
-      }
-      m_stack[ m_size ] = DbAction(object, shape, linkH, pool::UPDATE);
-      m_stackType |= pool::UPDATE;
-      m_size++;
-      return Success;
-    }
-    return Error;
-  }
-  DbPrint log( m_name );
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "update existing objects."
-      << "The requested action is not supported." << DbPrint::endmsg;
-  return Error;
-}
-
 // Fetch next object address of the selection to set token
 DbStatus DbContainerImp::fetch(DbSelect& sel) {
    Token::OID_t lnk = sel.link();
@@ -231,25 +180,6 @@ DbStatus DbContainerImp::fetch(DbSelect& sel) {
    }
    return Error;
 } 
-
-/// Destroy persistent object in the container; does not touch transient!
-DbStatus DbContainerImp::destroy(const Token::OID_t& linkH) {
-  if ( m_canDestroy )  {
-    if ( m_stack.size() < m_size+1 )  {
-      m_stack.resize(m_size+1024);
-    }
-    m_stack[ m_size ] = DbAction(0, 0, linkH, DESTROY);
-    m_stackType |= DESTROY;
-    m_size++;
-    return Success;
-  }
-  DbPrint log( m_name );
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "destroy existing objects from the container."
-      << "The requested action is not supported." << DbPrint::endmsg;
-  return Error;
-}
-
 
 // Fetch refined object address. Default implementation returns identity
 DbStatus DbContainerImp::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)  {

@@ -8,7 +8,8 @@
 #include "TrkValHistUtils/PlotBase.h"
 #include "TauKinematicPlots.h"
 #include "xAODTau/TauJet.h"
-#include "xAODPFlow/PFO.h"
+
+class TH1;
 
 namespace Tau{
 

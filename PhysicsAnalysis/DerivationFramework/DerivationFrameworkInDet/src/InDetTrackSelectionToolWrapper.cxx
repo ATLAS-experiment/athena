@@ -65,7 +65,7 @@ namespace DerivationFramework {
         return StatusCode::FAILURE;
     }
     // Run tool for each element and decorate with the decision
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer,bool > accept(m_decorationKey);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer,bool > accept(m_decorationKey, ctx);
     for (const auto *trItr : *tracks) {
       accept( *trItr ) = m_tool->accept(trItr).getCutResult(0);
     } // end of loop over tracks

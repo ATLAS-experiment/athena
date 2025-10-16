@@ -2,9 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "IdDict/IdDictDefs.h"
-#include "Identifier/IdentifierHash.h"
 #include "ZdcIdentifier/ZdcHardwareID.h"
+#include "Identifier/IdentifierHash.h"
 #include "GaudiKernel/MsgStream.h"
 
 

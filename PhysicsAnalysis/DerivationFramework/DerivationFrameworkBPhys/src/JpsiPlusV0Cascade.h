@@ -18,6 +18,8 @@
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace Trk {
     class IVertexFitter;
@@ -86,7 +88,7 @@ namespace DerivationFramework {
         JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~JpsiPlusV0Cascade();
         StatusCode initialize() override;
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
+        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
         virtual StatusCode addBranches() const override;
         SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
 

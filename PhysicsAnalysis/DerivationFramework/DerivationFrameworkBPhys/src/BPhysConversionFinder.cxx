@@ -99,8 +99,8 @@ namespace DerivationFramework {
     //------------------------------------
     // Look for di-muons
     //------------------------------------
-    const xAOD::VertexContainer* diMuonContainer = NULL;
-    ATH_CHECK( evtStore()->retrieve(diMuonContainer, m_diMuonCollectionToCheck) );
+    const xAOD::VertexContainer* diMuonContainer{};
+    ATH_CHECK( evtStore()->retrieve(diMuonContainer, m_diMuonCollectionToCheck) ); // FIXME Use Handles
 
     if(diMuonContainer->size() == 0) {
 
@@ -142,8 +142,8 @@ namespace DerivationFramework {
     if(callConvFinder) {
 
       // Retrieve track particles from StoreGate
-      const xAOD::TrackParticleContainer* inputTrackParticles = NULL;
-      ATH_CHECK( evtStore()->retrieve(inputTrackParticles,m_inputTrackParticleContainerName) );
+      const xAOD::TrackParticleContainer* inputTrackParticles{};
+      ATH_CHECK( evtStore()->retrieve(inputTrackParticles,m_inputTrackParticleContainerName) ); // FIXME Use Handles
 
       ATH_MSG_DEBUG("Track particle container size " <<  inputTrackParticles->size());
 
@@ -545,8 +545,8 @@ namespace DerivationFramework {
     } // callConvFinder
 
     // Write the results to StoreGate
-    CHECK(evtStore()->record(conversionContainer.release(), m_conversionContainerName));
-    CHECK(evtStore()->record(conversionAuxContainer.release(), m_conversionContainerName+"Aux."));
+    CHECK(evtStore()->record(conversionContainer.release(), m_conversionContainerName)); // FIXME Use Handles
+    CHECK(evtStore()->record(conversionAuxContainer.release(), m_conversionContainerName+"Aux.")); // FIXME Use Handles
 
     ATH_MSG_DEBUG("-------------------------");
     ATH_MSG_DEBUG("Number of track pairs: " << nTrackPairs_Init);

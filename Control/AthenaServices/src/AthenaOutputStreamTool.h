@@ -14,6 +14,7 @@
 
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 #include <string>
 #include <map>

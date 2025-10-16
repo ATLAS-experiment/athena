@@ -94,6 +94,7 @@ namespace DerivationFramework {
 
     StatusCode MuPlusDsCascade::addBranches() const
     {
+      const EventContext& ctx = Gaudi::Hive::currentContext();
       std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
       constexpr int topoN = 2;
       std::array<xAOD::VertexContainer*, topoN> Vtxwritehandles;
@@ -104,16 +105,16 @@ namespace DerivationFramework {
          Vtxwritehandles[i] = new xAOD::VertexContainer();
          Vtxwritehandlesaux[i] = new xAOD::VertexAuxContainer();
          Vtxwritehandles[i]->setStore(Vtxwritehandlesaux[i]);
-         ATH_CHECK(evtStore()->record(Vtxwritehandles[i]   , m_cascadeOutputsKeys[i]       ));
-         ATH_CHECK(evtStore()->record(Vtxwritehandlesaux[i], m_cascadeOutputsKeys[i] + "Aux."));
+         ATH_CHECK(evtStore()->record(Vtxwritehandles[i]   , m_cascadeOutputsKeys[i]       )); // FIXME Use Handles
+         ATH_CHECK(evtStore()->record(Vtxwritehandlesaux[i], m_cascadeOutputsKeys[i] + "Aux.")); // FIXME Use Handles
       }
 
       //----------------------------------------------------
       // retrieve primary vertices
       //----------------------------------------------------
-      const xAOD::Vertex * primaryVertex(nullptr);
-      const xAOD::VertexContainer *pvContainer(nullptr);
-      ATH_CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName));
+      const xAOD::Vertex * primaryVertex{};
+      const xAOD::VertexContainer *pvContainer{};
+      ATH_CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName)); // FIXME Use Handles
       ATH_MSG_DEBUG("Found " << m_VxPrimaryCandidateName << " in StoreGate!");
 
       if (pvContainer->size()==0){
@@ -126,25 +127,25 @@ namespace DerivationFramework {
       //----------------------------------------------------
       // Try to retrieve refitted primary vertices
       //----------------------------------------------------
-      xAOD::VertexContainer*    refPvContainer    = nullptr;
-      xAOD::VertexAuxContainer* refPvAuxContainer = nullptr;
+      xAOD::VertexContainer*    refPvContainer{};
+      xAOD::VertexAuxContainer* refPvAuxContainer{};
       if (m_refitPV) {
         if (evtStore()->contains<xAOD::VertexContainer>(m_refPVContainerName)) {
           // refitted PV container exists. Get it from the store gate
-          ATH_CHECK(evtStore()->retrieve(refPvContainer   , m_refPVContainerName       ));
-          ATH_CHECK(evtStore()->retrieve(refPvAuxContainer, m_refPVContainerName + "Aux."));
+          ATH_CHECK(evtStore()->retrieve(refPvContainer   , m_refPVContainerName       )); // FIXME Use Handles
+          ATH_CHECK(evtStore()->retrieve(refPvAuxContainer, m_refPVContainerName + "Aux.")); // FIXME Use Handles
         } else {
           // refitted PV container does not exist. Create a new one.
           refPvContainer = new xAOD::VertexContainer;
           refPvAuxContainer = new xAOD::VertexAuxContainer;
           refPvContainer->setStore(refPvAuxContainer);
-          ATH_CHECK(evtStore()->record(refPvContainer   , m_refPVContainerName));
-          ATH_CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux."));
+          ATH_CHECK(evtStore()->record(refPvContainer   , m_refPVContainerName)); // FIXME Use Handles
+          ATH_CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux.")); // FIXME Use Handles
         }
       }
 
-      ATH_CHECK(performSearch(&cascadeinfoContainer));
-      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+      ATH_CHECK(performSearch(&cascadeinfoContainer, ctx));
+      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
       if(!evt.isValid()) {
           ATH_MSG_ERROR("Cannot Retrieve " << m_eventInfo_key.key() );
           return StatusCode::FAILURE;
@@ -198,16 +199,16 @@ namespace DerivationFramework {
       ATH_MSG_DEBUG("cascadeinfoContainer size " << cascadeinfoContainer.size());
 
       // Get Muons container
-      const xAOD::MuonContainer* muonContainer(nullptr);
-      ATH_CHECK( evtStore()->retrieve(muonContainer, m_muonCollectionKey) );
+      const xAOD::MuonContainer* muonContainer{};
+      ATH_CHECK( evtStore()->retrieve(muonContainer, m_muonCollectionKey) ); // FIXME Use Handles
       ATH_MSG_DEBUG("Muon container size "<<muonContainer->size());
         
       // Get D_(s)+/Lambda_c+ container and identify the input D_(s)+/Lambda_c+
-      const xAOD::VertexContainer  *dxContainer(nullptr);
-      ATH_CHECK(evtStore()->retrieve(dxContainer   , m_vertexDxContainerKey       ));
+      const xAOD::VertexContainer  *dxContainer{};
+      ATH_CHECK(evtStore()->retrieve(dxContainer   , m_vertexDxContainerKey       )); // FIXME Use Handles
 
       for (Trk::VxCascadeInfo* x : cascadeinfoContainer) {
-        if(x==nullptr){
+        if(!x){
           ATH_MSG_ERROR("cascadeinfoContainer is null");
           continue;
         }
@@ -579,18 +580,18 @@ namespace DerivationFramework {
 
     MuPlusDsCascade::~MuPlusDsCascade(){ }
 
-    StatusCode MuPlusDsCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer) const
+    StatusCode MuPlusDsCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext&) const
     {
         ATH_MSG_DEBUG( "MuPlusDsCascade::performSearch" );
         assert(cascadeinfoContainer!=nullptr);
 
         // Get TrackParticle container (for setting links to the original tracks)
-        const xAOD::TrackParticleContainer  *trackContainer(nullptr);
-        ATH_CHECK(evtStore()->retrieve(trackContainer   , "InDetTrackParticles"      ));
+        const xAOD::TrackParticleContainer  *trackContainer{};
+        ATH_CHECK(evtStore()->retrieve(trackContainer   , "InDetTrackParticles"      )); // FIXME Use Handles
 
         // Get V0 container
-        const xAOD::VertexContainer  *dxContainer(nullptr);
-        ATH_CHECK(evtStore()->retrieve(dxContainer   , m_vertexDxContainerKey       ));
+        const xAOD::VertexContainer  *dxContainer{};
+        ATH_CHECK(evtStore()->retrieve(dxContainer   , m_vertexDxContainerKey       )); // FIXME Use Handles
 
         double mass_d = m_vtx1MassHypo; 
         std::vector<const xAOD::TrackParticle*> tracksMu;
@@ -612,8 +613,8 @@ namespace DerivationFramework {
         //-------------------------------------------------------------------------------
         // Retrieving and selecting muons (taken from JpsiFinder.cxx)
         // Get the muons from StoreGate
-        const xAOD::MuonContainer* importedMuonCollection;
-        StatusCode sc = evtStore()->retrieve(importedMuonCollection,m_muonCollectionKey);
+        const xAOD::MuonContainer* importedMuonCollection{};
+        StatusCode sc = evtStore()->retrieve(importedMuonCollection,m_muonCollectionKey); // FIXME Use Handles
 
         if(sc.isFailure()){
             ATH_MSG_WARNING("No muon collection with key " << m_muonCollectionKey << " found in StoreGate");
@@ -630,10 +631,10 @@ namespace DerivationFramework {
         const xAOD::Vertex* vx = 0;
         MuonBag theMuonsAfterSelection;
         for (auto mu : *importedMuonCollection) {
-            if ( mu == nullptr ) continue;
+            if ( !mu ) continue;
             if (!mu->inDetTrackParticleLink().isValid()) continue; // No muons without ID tracks
             const xAOD::TrackParticle* muonTrk = *(mu->inDetTrackParticleLink());
-            if ( muonTrk==nullptr) continue;
+            if ( !muonTrk) continue;
             if ( !m_trkSelector->decision(*muonTrk, vx) ) continue; // all ID tracks must pass basic tracking cuts
             if ( std::fabs(muonTrk->pt())<m_thresholdPt ) continue; // higher pt cut if needed
             if ( m_mcpCuts && !mu->passesIDCuts()) continue; // cuts of the MCP group recommendation
@@ -814,7 +815,7 @@ namespace DerivationFramework {
               // Do the work
               std::unique_ptr<Trk::VxCascadeInfo> result(m_iVertexFitter->fitCascade(*state));
 
-              if (result != nullptr) {
+              if (result) {
                 // reset links to original tracks
                 BPhysPVCascadeTools::PrepareVertexLinks(result.get(), trackContainer);
                 ATH_MSG_DEBUG("storing tracks " << ((result->vertices())[0] /*D_(s)+*/)->trackParticle(0) << ", "
@@ -836,9 +837,9 @@ namespace DerivationFramework {
                 //----------------------------------------------------
                 // retrieve primary vertices
                 //----------------------------------------------------
-                const xAOD::Vertex * primaryVertex(nullptr);
-                const xAOD::VertexContainer *pvContainer(nullptr);
-                ATH_CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName));
+                const xAOD::Vertex * primaryVertex{};
+                const xAOD::VertexContainer *pvContainer{};
+                ATH_CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName)); // FIXME Use Handles
                 ATH_MSG_DEBUG("Found " << m_VxPrimaryCandidateName << " in StoreGate!");
 
                 if (pvContainer->size()==0){

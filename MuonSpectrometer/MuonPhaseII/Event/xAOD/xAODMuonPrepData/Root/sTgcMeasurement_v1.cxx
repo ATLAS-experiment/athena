@@ -38,5 +38,17 @@ const Identifier& sTgcMeasurement_v1::identify() const {
 IdentifierHash sTgcMeasurement_v1::layerHash() const {
    return MuonGMR4::sTgcReadoutElement::createHash(gasGap(), channelType(), 0);
 }
-
+Amg::Vector3D sTgcMeasurement_v1::localMeasurementPos() const {
+   switch (channelType()) {
+      using enum sTgcIdHelper::sTgcChannelTypes;
+      case Strip:
+      case Wire:
+         return localPosition<1>()[0] * Amg::Vector3D::UnitX();
+      case Pad:{
+         Amg::Vector3D locPos{localPosition<2>()[0], localPosition<2>()[1], 0.};
+         return locPos;
+      }      
+   }
+   return Amg::Vector3D::Zero();
+}
 }  // namespace xAOD

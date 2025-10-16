@@ -12,6 +12,7 @@ def ActsTrackingGeometrySvcCfg(flags,
   kwargs.setdefault("NotAlignDetectors", [DetectorType.Trt, 
                                           DetectorType.Hgtd])
   kwargs.setdefault("UseBlueprint", flags.Acts.TrackingGeometry.UseBlueprint)
+  kwargs.setdefault("ObjDebugOutput", flags.Acts.TrackingGeometry.ObjDebugOutput)
  
   subDetectors = []
   blueprintTools = []
@@ -156,7 +157,7 @@ def ActsExtrapolationToolCfg(flags,
   from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
   acc.merge(AtlasFieldCacheCondAlgCfg(flags))
   kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-  acc.setPrivateTools(CompFactory.ActsExtrapolationTool(name, **kwargs))
+  acc.setPrivateTools(CompFactory.ActsTrk.ExtrapolationTool(name, **kwargs))
   return acc
 
 

@@ -100,21 +100,21 @@ dqm_algorithms::tools::MakeComparisons(	const std::map<std::string,double> & alg
       avalue=ait->second;
     } 
     else {
-      throw dqm_core::BadConfig( ERS_HERE, "None", name );
+      throw dqm_core::BadConfig( ERS_HERE, "None",std::move(name) );
     }
     
     if ( rit != rthreshold.end() ) {
       rtvalue=rit->second;
     } 
     else {
-      throw dqm_core::BadConfig( ERS_HERE, "None", name );
+      throw dqm_core::BadConfig( ERS_HERE, "None",std::move(name) );
     }
     
-
+    //cppcheck-suppress accessMoved
     if (name == "AbsMean" || name == "AbsXMean" || name== "AbsYMean") {
       avalue = fabs(avalue);
       if (gtvalue < 0 || rtvalue <0 ) {
-	throw dqm_core::BadConfig( ERS_HERE, "None", name );
+	throw dqm_core::BadConfig( ERS_HERE, "None",std::move(name) );
       }
     }
 
@@ -213,14 +213,14 @@ dqm_algorithms::tools::CompareWithErrors( const std::map<std::string,double> & a
       avalue=ait->second;
     } 
     else {
-      throw dqm_core::BadConfig( ERS_HERE, "None", name );
+      throw dqm_core::BadConfig( ERS_HERE, "None", std::move(name) );
     }
     
     if ( errItr != paramErrors.end()  ) {
       error = errItr->second;
     } 
     else {
-      throw dqm_core::BadConfig( ERS_HERE, "Problem retrieving fit param error", name );
+      throw dqm_core::BadConfig( ERS_HERE, "Problem retrieving fit param error", std::move(name) );
     }
     if ( error < 0 ) error = 0;
     
@@ -228,14 +228,14 @@ dqm_algorithms::tools::CompareWithErrors( const std::map<std::string,double> & a
       rtvalue=rit->second;
     } 
     else {
-      throw dqm_core::BadConfig( ERS_HERE, "None", name );
+      throw dqm_core::BadConfig( ERS_HERE, "None", std::move(name) );
     }
     
-
+    //cppcheck-suppress accessMoved
     if (name == "AbsMean" || name == "AbsXMean" || name== "AbsYMean") {
       avalue = fabs(avalue);
       if (gtvalue < 0 || rtvalue <0 ) {
-	throw dqm_core::BadConfig( ERS_HERE, "None", name );
+	throw dqm_core::BadConfig( ERS_HERE, "None", std::move(name) );
       }
     }
     

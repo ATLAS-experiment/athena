@@ -9,6 +9,7 @@
 
 #include "Egamma1_LArStrip_Fex_RowAware.h"
 #include "../IO/LArStripNeighborhoodDumper.h"
+#include "../IO/eEmNbhoodTOB.h"
 
 #include "CaloEvent/CaloCell.h"
 
@@ -84,24 +85,26 @@ namespace GlobalSim {
     // A neighborhood is a collection of CellData objects which
     // contain cell eta, phi and Et.
     
-    auto neighborhoods = std::make_unique<LArStripNeighborhoodContainer>();
+    auto neighborhoodTOBs = std::make_unique<IOBitwise::IeEmNbhoodTOBContainer>();
     auto phimax = std::make_unique<std::vector<int>>();
     
-    CHECK(findNeighborhoods_RowAware(rois, cells, *neighborhoods, *phimax));
+    CHECK(findNeighborhoods_RowAware(rois, cells, *neighborhoodTOBs, *phimax));
     
-    SG::WriteHandle<GlobalSim::LArStripNeighborhoodContainer> h_write(m_neighKey, ctx);
+    SG::WriteHandle<GlobalSim::IOBitwise::IeEmNbhoodTOBContainer> h_neighborhoodTOBs(m_neighKey, ctx);
     SG::WriteHandle<std::vector<int> > h_phimax(m_phimaxKey, ctx);
-    
+
     auto dumper = GlobalSim::LArStripNeighborhoodDumper();
-    if (m_dump) {
-      CHECK(dumper.dump(name(), *eventInfo, *neighborhoods));
+    if(m_dump || m_dumpTerse){
+      if (m_dump) {
+	CHECK(dumper.dump(name(), *eventInfo, *neighborhoodTOBs));
+      }
+      
+      if (m_dumpTerse) {
+	CHECK(dumper.dumpTerse(name(), *eventInfo, *neighborhoodTOBs));
+      }
     }
-
-    if (m_dumpTerse) {
-      CHECK(dumper.dumpTerse(name(), *eventInfo, *neighborhoods));
-    }
-
-    CHECK(h_write.record(std::move(neighborhoods)));
+    
+    CHECK(h_neighborhoodTOBs.record(std::move(neighborhoodTOBs)));
     CHECK(h_phimax.record(std::move(phimax)));
     
     return StatusCode::SUCCESS;
@@ -110,11 +113,11 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex_RowAware::findNeighborhoods_RowAware(const std::vector<const xAOD::eFexEMRoI*>& rois,
 							    const std::vector<const CaloCell*>& cells,
-							    LArStripNeighborhoodContainer& neighborhoods,
+							    IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs,
 							    std::vector<int>& phimax) const{
     
     for (const auto& roi : rois) {
-      CHECK(findNeighborhood_RowAware(roi, cells, neighborhoods, phimax));
+      CHECK(findNeighborhood_RowAware(roi, cells, neighborhoodTOBs, phimax));
     }
     
     return StatusCode::SUCCESS;
@@ -124,7 +127,7 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex_RowAware::findNeighborhood_RowAware(const xAOD::eFexEMRoI* roi,
 							   const std::vector<const CaloCell*>& cells,
-							   LArStripNeighborhoodContainer& neighborhoods,
+							   IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs,
 							   std::vector<int>& phimax) const {
     
     // this member function constructs an LArStripNeighborhood.
@@ -325,13 +328,10 @@ namespace GlobalSim {
     Coords cell_c{max_cell->eta(), max_cell->phi()};
     
     ATH_MSG_DEBUG("Fill with strip data");
+
+    LArStripNeighborhood neighborhood = LArStripNeighborhood(low, center, high, roi_c, cell_c, max_neigh_cell_pos);
     
-    neighborhoods.push_back(std::make_unique<LArStripNeighborhood>(low,
-								   center,
-								   high,
-								   roi_c,
-								   cell_c,
-								   max_neigh_cell_pos));
+    neighborhoodTOBs.push_back(std::make_unique<IOBitwise::eEmNbhoodTOB>(*roi, neighborhood));
     
     return StatusCode::SUCCESS;
   }

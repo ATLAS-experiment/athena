@@ -10,7 +10,9 @@
 
 
 #include "CaloIdentifier/CaloIDHelper.h"
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/Range.h"
 #include "GaudiKernel/MsgStream.h"
 

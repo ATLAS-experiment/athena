@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // local include(s)
 #include "TauAnalysisTools/DiTauSelectionCuts.h"
 #include "TauAnalysisTools/DiTauSelectionTool.h"
-
-// framework include(s)
-#include "AsgDataHandles/ReadHandle.h"
 
 using namespace TauAnalysisTools;
 
@@ -18,8 +15,7 @@ DiTauSelectionCut::DiTauSelectionCut(const std::string& sName, TauAnalysisTools:
   , m_hHistCutPre(nullptr)
   , m_hHistCut(nullptr)
   , m_tDTST(tDTST)
-{
-}
+{}
 
 //______________________________________________________________________________
 DiTauSelectionCut::~DiTauSelectionCut()
@@ -252,24 +248,29 @@ bool DiTauSelectionCutAbsCharge::accept(const xAOD::DiTauJet& xTau,
                             asg::AcceptData& acceptData)
 {
   m_bDiTauCharge = 0;
-  for (const auto& xTrack : xTau.trackLinks()) {
-     if (!xTrack.isValid())
-        continue;
+  static const SG::ConstAccessor<float> acc_charge ("charge");
+  if ( acc_charge.isAvailable(xTau) ) {
+     m_bDiTauCharge = acc_charge(xTau);
+  } else {
+     for (const auto& xTrack : xTau.trackLinks()) {
+        if (!xTrack.isValid())
+           continue;
 
-     if(xTau.nSubjets() >= 2){
-        for (int i = 0; i < 2; ++i) { // loop over two leading subjets 
-           TLorentzVector tlvSubjet = TLorentzVector();
-           tlvSubjet.SetPtEtaPhiE(xTau.subjetPt(i), xTau.subjetEta(i),
-                                  xTau.subjetPhi(i), xTau.subjetE(i));
-           double dR = tlvSubjet.DeltaR((*xTrack)->p4());
-           if (dR < 0.1) {
-              m_bDiTauCharge += (*xTrack)->charge();
-              break; //prevents double counting of tracks
-           }
-        }  // loop over subjets
-     }	   
-  } // loop over tracks
-	
+        if(xTau.nSubjets() >= 2){
+           for (int i = 0; i < 2; ++i) { // loop over two leading subjets 
+              TLorentzVector tlvSubjet = TLorentzVector();
+              tlvSubjet.SetPtEtaPhiE(xTau.subjetPt(i), xTau.subjetEta(i),
+                                     xTau.subjetPhi(i), xTau.subjetE(i));
+              double dR = tlvSubjet.DeltaR((*xTrack)->p4());
+              if (dR < 0.1) {
+                 m_bDiTauCharge += (*xTrack)->charge();
+                 break; //prevents double counting of tracks
+              }
+           }  // loop over subjets
+        }	   
+     } // loop over tracks
+  }
+
   // check charge, if ditau has one of the charges requiered then return true; false otherwise
   for( unsigned int iCharge = 0; iCharge < m_tDTST->m_vAbsCharges.size(); iCharge++ )
   {

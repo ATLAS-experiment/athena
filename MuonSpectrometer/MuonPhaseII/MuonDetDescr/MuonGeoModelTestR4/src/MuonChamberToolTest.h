@@ -15,10 +15,9 @@
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
-#include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
+#include <ActsGeometryInterfaces/IActsTrackingGeometrySvc.h>
 #include <StoreGate/ReadCondHandleKey.h>
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"

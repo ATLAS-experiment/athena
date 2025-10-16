@@ -3,17 +3,8 @@
 */
 
 #include "DiTauRecTools/DiTauIDVarCalculator.h"
-
-// Core include(s):
-#include "AthLinks/ElementLink.h"
-#include "AthContainers/Decorator.h"
-#include "AthContainers/ConstAccessor.h"
-
-// EDM include(s):
 #include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/TrackParticle.h"
-
-#include "xAODTau/DiTauJet.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 using namespace DiTauRecTools;
 

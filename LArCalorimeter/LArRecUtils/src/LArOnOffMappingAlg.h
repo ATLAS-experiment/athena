@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- C++ -*- 
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRECCONDITIONS_LARONOFFMAPPINGALG_H
@@ -13,6 +13,7 @@
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "LArCabling/LArOnOffIdMapping.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 class LArOnOffMappingAlg: public AthAlgorithm {
 

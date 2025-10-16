@@ -6,24 +6,15 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 def ActsAlignStoreProviderAlgCfg(flags, name="AlignStoreProviderAlg", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("LoadDetectorVolumeSvc", False)
 
     from AthenaConfiguration.Enums import ProductionStep
-    ### Disable the Volume & TrackingGeometry service in simulation
-    if flags.Common.ProductionStep  == ProductionStep.Simulation:       
-        kwargs.setdefault("LoadTrackingGeoSvc" , False)
-        kwargs.setdefault("LoadDetectorVolumeSvc" , False)
-    else:
-        kwargs.setdefault("LoadDetectorVolumeSvc", False)
-        kwargs.setdefault("LoadTrackingGeoSvc", True)
-
+    ### Disable the TrackingGeometry service in simulation
+    kwargs.setdefault("FillAlignCache" , 
+                      flags.Common.ProductionStep  != ProductionStep.Simulation)
+ 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     kwargs.setdefault("TrackingGeometrySvc", result.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)) 
-                                                                         if kwargs["LoadTrackingGeoSvc"] else "")
-    from ActsGeometry.DetectorVolumeSvcCfg import DetectorVolumeSvcCfg
-    kwargs.setdefault("DetectorVolumeSvc", result.getPrimaryAndMerge(DetectorVolumeSvcCfg(flags))
-                                                                      if kwargs["LoadDetectorVolumeSvc"] else "")
-
+                                                                         if kwargs["FillAlignCache"] else "")
     the_alg = CompFactory.ActsTrk.AlignStoreProviderAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
@@ -32,21 +23,14 @@ def DetectorAlignCondAlgCfg(flags, name="DetectorAlignCondAlg", **kwargs):
     result = ComponentAccumulator()
 
     from AthenaConfiguration.Enums import ProductionStep
-    ### Disable the Volume & TrackingGeometry service in simulation
-    if flags.Common.ProductionStep  == ProductionStep.Simulation:       
-        kwargs.setdefault("LoadTrackingGeoSvc" , False)
-        kwargs.setdefault("LoadDetectorVolumeSvc" , False)
-    else:
-        kwargs.setdefault("LoadDetectorVolumeSvc", False)
-        kwargs.setdefault("LoadTrackingGeoSvc", True)
-
+    ### Disable the TrackingGeometry service in simulation
+    kwargs.setdefault("FillAlignCache" , 
+                      flags.Common.ProductionStep  != ProductionStep.Simulation)
+ 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     kwargs.setdefault("TrackingGeometrySvc", result.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)) 
-                                                                         if kwargs["LoadTrackingGeoSvc"] else "")
-    from ActsGeometry.DetectorVolumeSvcCfg import DetectorVolumeSvcCfg
-    kwargs.setdefault("DetectorVolumeSvc", result.getPrimaryAndMerge(DetectorVolumeSvcCfg(flags))
-                                                                      if kwargs["LoadDetectorVolumeSvc"] else "")
-
+                                                                         if kwargs["FillAlignCache"] else "")
+ 
     the_alg = CompFactory.ActsTrk.DetectorAlignCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result

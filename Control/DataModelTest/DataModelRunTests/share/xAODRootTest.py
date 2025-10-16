@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 #
 # File: share/xAODRootTest.py
 # Author: snyder@bnl.gov
@@ -37,15 +37,6 @@ def _typename(t):
 def xAODInit():
     ROOT.xAOD.TEvent
     CHECK(ROOT.xAOD.Init())
-
-    # Monkey-patch...
-    ROOT.xAOD.TEvent.record_impl = ROOT.xAOD.TEvent.record
-    def record (event, obj, key, basketSize=32000, splitLevel = 1):
-        return event.record_impl (obj,
-                                  _typename (obj.__class__),
-                                  key,
-                                  basketSize, splitLevel)
-    ROOT.xAOD.TEvent.record = record
     return
 
 
@@ -195,60 +186,60 @@ class xAODTestRead:
         return
 
 
-    def execute (self, tree, event=None):
+    def execute (self, event):
         print (self.readPrefix + 'cvec')
-        vec = getattr (tree, self.readPrefix + 'cvec')
+        vec = event[self.readPrefix + 'cvec']
         for c in vec:
             dump_c (c)
 
         print (self.readPrefix + 'cinfo')
-        cinfo = getattr (tree, self.readPrefix + 'cinfo')
+        cinfo = event[self.readPrefix + 'cinfo']
         dump_c (cinfo)
 
         print (self.readPrefix + 'ctrig')
-        ctrig = getattr (tree, self.readPrefix + 'ctrig')
+        ctrig = event[self.readPrefix + 'ctrig']
         for c in ctrig:
             dump_c (c)
 
-        vec = getattr (tree, self.readPrefix + 'cvecWD')
+        vec = event[self.readPrefix + 'cvecWD']
         print (self.readPrefix + 'cvecWD' + ' ', vec.meta1)
         for c in vec:
             dump_c (c)
 
-        vec = getattr (tree, self.readPrefix + 'cview')
+        vec = event[self.readPrefix + 'cview']
         print (self.readPrefix + 'cview')
         for c in vec:
             dump_c (c)
 
         print (self.readPrefix + 'pvec')
-        vec = getattr (tree, self.readPrefix + 'pvec')
+        vec = event[self.readPrefix + 'pvec']
         for p in vec:
             dump_xaodobj (p)
 
         print (self.readPrefix + 'hvec')
-        vec = getattr (tree, self.readPrefix + 'hvec')
+        vec = event[self.readPrefix + 'hvec']
         for h in vec:
             dump_xaodobj (h)
 
         print (self.readPrefix + 'jvecContainer')
-        vec = getattr (tree, self.readPrefix + 'jvecContainer')
+        vec = event[self.readPrefix + 'jvecContainer']
         for h in vec:
             dump_xaodobj (h)
 
         print (self.readPrefix + 'jvecInfo')
-        jvecInfo = getattr (tree, self.readPrefix + 'jvecInfo')
+        jvecInfo = event[self.readPrefix + 'jvecInfo']
         dump_xaodobj (jvecInfo)
 
         print (self.readPrefix + 'plinksContainer')
-        vec = getattr (tree, self.readPrefix + 'plinksContainer')
+        vec = event[self.readPrefix + 'plinksContainer']
         for h in vec:
             dump_plinks (h)
 
         print (self.readPrefix + 'plinksInfo')
-        plinksInfo = getattr (tree, self.readPrefix + 'plinksInfo')
+        plinksInfo = event[self.readPrefix + 'plinksInfo']
         dump_plinks (plinksInfo)
 
-        #vec = getattr (tree, self.readPrefix + 'hview')
+        #vec = event[self.readPrefix + 'hview']
         #print (self.readPrefix + 'hview')
         #for h in vec:
         #    dump_h (h)
@@ -262,7 +253,7 @@ class xAODTestCopy:
         self.writePrefix = writePrefix
         return
 
-    def execute (self, tree, event):
+    def execute (self, event):
         CHECK (event.copy (self.readPrefix + 'cvec'))
         CHECK (event.copy (self.readPrefix + 'cinfo'))
         CHECK (event.copy (self.readPrefix + 'ctrig'))
@@ -277,40 +268,40 @@ class xAODTestCopy:
         #CHECK (event.copy (self.readPrefix + 'hview'))
 
         if self.writePrefix != None:
-            cinfo = getattr (tree, self.readPrefix + 'cinfo')
+            cinfo = event[self.readPrefix + 'cinfo']
             copy_obj (event, cinfo, self.writePrefix + 'cinfo')
 
-            cvec = getattr (tree, self.readPrefix + 'cvec')
+            cvec = event[self.readPrefix + 'cvec']
             copy_vec (event, cvec, self.writePrefix + 'cvec')
 
-            ctrig = getattr (tree, self.readPrefix + 'ctrig')
+            ctrig = event[self.readPrefix + 'ctrig']
             copy_vec (event, ctrig, self.writePrefix + 'ctrig')
 
-            cvecwd = getattr (tree, self.readPrefix + 'cvecWD')
+            cvecwd = event[self.readPrefix + 'cvecWD']
             copy_vec (event, cvecwd, self.writePrefix + 'cvecWD')
 
-            cview = getattr (tree, self.readPrefix + 'cview')
+            cview = event[self.readPrefix + 'cview']
             copy_view (event, cview, self.writePrefix + 'cview')
             
-            pvec = getattr (tree, self.readPrefix + 'pvec')
+            pvec = event[self.readPrefix + 'pvec']
             copy_vec (event, pvec, self.writePrefix + 'pvec')
 
-            hvec = getattr (tree, self.readPrefix + 'hvec')
+            hvec = event[self.readPrefix + 'hvec']
             copy_vec (event, hvec, self.writePrefix + 'hvec')
 
-            jvec = getattr (tree, self.readPrefix + 'jvecContainer')
+            jvec = event[self.readPrefix + 'jvecContainer']
             copy_vec (event, jvec, self.writePrefix + 'jvecContainer')
 
-            jvecinfo = getattr (tree, self.readPrefix + 'jvecInfo')
+            jvecinfo = event[self.readPrefix + 'jvecInfo']
             copy_obj (event, jvecinfo, self.writePrefix + 'jvecInfo')
 
-            plinks = getattr (tree, self.readPrefix + 'plinksContainer')
+            plinks = event[self.readPrefix + 'plinksContainer']
             copy_vec (event, plinks, self.writePrefix + 'plinksContainer')
 
-            plinksinfo = getattr (tree, self.readPrefix + 'plinksInfo')
+            plinksinfo = event[self.readPrefix + 'plinksInfo']
             copy_obj (event, plinksinfo, self.writePrefix + 'plinksInfo')
 
-            #hview = getattr (tree, self.readPrefix + 'hview')
+            #hview = event[self.readPrefix + 'hview']
             #copy_view (event, hview, self.writePrefix + 'hview')
             
         return
@@ -324,16 +315,16 @@ class xAODTestDecor:
         return
 
     
-    def execute (self, tree, event=None):
-        cvec = getattr (tree, self.readPrefix + 'cvec')
+    def execute (self, event):
+        cvec = event[self.readPrefix + 'cvec']
         for c in cvec:
             self.decor.set(c, self.offset + c.anInt())
 
-        ctrig = getattr (tree, self.readPrefix + 'ctrig')
+        ctrig = event[self.readPrefix + 'ctrig']
         for c in cvec:
             self.decor.set(c, self.offset + c.anInt())
 
-        cinfo = getattr (tree, self.readPrefix + 'cinfo')
+        cinfo = event[self.readPrefix + 'cinfo']
         self.decor.set(cinfo, self.offset + cinfo.anInt())
         return
 
@@ -346,8 +337,8 @@ class xAODTestPDecor:
         return
 
     
-    def execute (self, tree, event=None):
-        cvec = getattr (tree, self.readPrefix + 'cvec')
+    def execute (self, event):
+        cvec = event[self.readPrefix + 'cvec']
         assert cvec.setOption (self.decor.auxid(), ROOT.SG.AuxDataOption ('nbins', 23))
         for c in cvec:
             self.decor.set(c, self.offset + c.anInt())
@@ -360,22 +351,22 @@ class xAODTestClearDecor:
         return
 
     
-    def execute (self, tree, event=None):
-        cvec = getattr (tree, self.readPrefix + 'cvec')
+    def execute (self, event):
+        cvec = event[self.readPrefix + 'cvec']
         cvec.clearDecorations()
 
-        ctrig = getattr (tree, self.readPrefix + 'ctrig')
+        ctrig = event[self.readPrefix + 'ctrig']
         ctrig.clearDecorations()
 
-        cinfo = getattr (tree, self.readPrefix + 'cinfo')
+        cinfo = event[self.readPrefix + 'cinfo']
         cinfo.clearDecorations()
         return
 
     
 
 class AllocTestRead:
-    def execute (self, tree, event=None):
-        cont = tree.AllocTest
+    def execute (self, event):
+        cont = event['AllocTest']
         print ('AllocTest: ', end='')
         for a in cont:
             print (a.atInt1(), a.atInt2(), end=' ')
@@ -388,9 +379,9 @@ class Analysis:
     def __init__ (self, ifname, ofname = None):
         self.algs = []
         self.f = ROOT.TFile (ifname)
-        self.event = ROOT.xAOD.TEvent (ROOT.xAOD.TEvent.kAthenaAccess)
+        from xAODRootAccess.TPyEvent import TPyEvent
+        self.event = TPyEvent (ROOT.xAOD.TEvent.kAthenaAccess)
         CHECK (self.event.readFrom (self.f, True, 'CollectionTree'))
-        self.tree = ROOT.xAOD.MakeTransientTree(self.event, 'CollectionTree')
         self.fout = None
         if ofname:
             self.fout = ROOT.TFile.Open (ofname, 'recreate')
@@ -402,14 +393,14 @@ class Analysis:
         return
 
     def run (self, n=None):
-        nent = self.tree.GetEntries()
+        nent = self.event.getEntries()
         if n != None:
             nent = min (n, nent)
         for i in range(nent):
-            self.tree.GetEntry(i)
+            self.event.getEntry(i)
             print ('---> Event', i)
             for a in self.algs:
-                a.execute (self.tree, self.event)
+                a.execute (self.event)
             if self.fout != None:
                 self.event.fill()
         return

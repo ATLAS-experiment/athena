@@ -5,20 +5,11 @@
 #ifndef LARFCAL_ID_H
 #define LARFCAL_ID_H
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-
-#include "CaloIdentifier/LArID_Exception.h"
 #include "CaloIdentifier/LArFCAL_Base_ID.h"
+#include "Identifier/Identifier.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/BaseInfo.h"
-
-#include "boost/range/iterator_range.hpp"
-#include <vector>
-#include <algorithm>
-#include <set>
+class IdDictMgr;
 
 
 /**
@@ -53,17 +44,15 @@
   * @author neighbour list/code provided by Sven Menke
   */  
 
-class Range;
-class LArFCAL_region;
 
 class LArFCAL_ID : public LArFCAL_Base_ID
 {
 public:
         
-  typedef Identifier::size_type  size_type ;
+  using size_type = Identifier::size_type;
 
   LArFCAL_ID();
-  ~LArFCAL_ID();
+  virtual ~LArFCAL_ID();
 
   /** initialization from the identifier dictionary*/
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);

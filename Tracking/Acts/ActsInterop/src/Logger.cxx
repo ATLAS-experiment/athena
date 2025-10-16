@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/LoggerUtils.h"
-
+#include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/CommonMessaging.h"
 #include "GaudiKernel/IMessageSvc.h"
@@ -17,6 +17,11 @@
 #include <iostream>
 #include <string>
 
+
+ActsAthenaPrintPolicy::ActsAthenaPrintPolicy(std::shared_ptr<MsgStream> msg, const std::string& name):
+  m_svc{Athena::getMessageSvc()},
+  m_msg{msg},
+  m_name{name} {}
 void
 ActsAthenaPrintPolicy::flush(const Acts::Logging::Level& lvl, const std::string& input)
 {
@@ -31,16 +36,11 @@ ActsAthenaPrintPolicy::name() const
 }
 
 std::unique_ptr<Acts::Logging::OutputPrintPolicy> 
-ActsAthenaPrintPolicy::clone(const std::string& name) const
-{
-  auto msg = std::make_shared<MsgStream>(m_svc, name);
-  msg->setLevel(m_msg->level());
-  return std::make_unique<ActsAthenaPrintPolicy>(m_svc, msg, name);
+ActsAthenaPrintPolicy::clone(const std::string& name) const {
+  return std::make_unique<ActsAthenaPrintPolicy>(m_msg, name);
 }
 
-bool
-ActsAthenaFilterPolicy::doPrint(const Acts::Logging::Level& lvl) const 
-{
+bool ActsAthenaFilterPolicy::doPrint(const Acts::Logging::Level& lvl) const  {
 
   MSG::Level athLevel = ActsTrk::athLevelVector(lvl);
   return m_msg->level() <= athLevel;
@@ -55,7 +55,7 @@ ActsAthenaFilterPolicy::level() const
 std::unique_ptr<Acts::Logging::OutputFilterPolicy> 
 ActsAthenaFilterPolicy::clone(Acts::Logging::Level level) const 
 {
-  auto msg = std::make_shared<MsgStream>(*m_msg.get());
+  auto msg = std::make_shared<MsgStream>(*m_msg);
   msg->setLevel(ActsTrk::athLevelVector(level));
   return std::make_unique<ActsAthenaFilterPolicy>(msg);
 }
@@ -73,10 +73,17 @@ makeActsAthenaLogger(IMessageSvc *svc, const std::string& name, int level, std::
   auto msg = std::make_shared<MsgStream>(svc, full_name);
   msg->setLevel(level);
   auto filter = std::make_unique<ActsAthenaFilterPolicy>(msg);
-  auto print = std::make_unique<ActsAthenaPrintPolicy>(svc, msg, full_name);
+  auto print = std::make_unique<ActsAthenaPrintPolicy>(msg, full_name);
   return std::make_unique<const Acts::Logger>(std::move(print), std::move(filter));
 }
 
+std::unique_ptr<const Acts::Logger>
+makeActsAthenaLogger(const AthMessaging* parent, const std::string& name) {
+  auto msg = std::make_shared<MsgStream>(parent->msg());
+  auto filter = std::make_unique<ActsAthenaFilterPolicy>(msg);
+  auto print = std::make_unique<ActsAthenaPrintPolicy>(msg, name);
+  return std::make_unique<const Acts::Logger>(std::move(print), std::move(filter));
+}
 std::unique_ptr<const Acts::Logger>
 makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name)
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -19,6 +19,8 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
@@ -33,23 +35,21 @@ namespace DerivationFramework {
     virtual StatusCode initialize() override;
     virtual StatusCode addBranches() const override;
 
-    StatusCode getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltMET) const;
-
+  private:
+    StatusCode getGenFiltVars(const xAOD::TruthParticleContainer& tpc, float& genFiltHT, float& genFiltMET, const EventContext& ctx) const;
     bool isPrompt( const xAOD::TruthParticle* tp ) const;
     MCTruthPartClassifier::ParticleOrigin getPartOrigin(const xAOD::TruthParticle* tp) const;
 
-  private:
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfoName", "EventInfo"};
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_mcName{this, "MCCollectionName", "TruthParticles"};
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetsName{this, "TruthJetCollectionName", "AntiKt4TruthWZJets"};
 
-    std::string m_eventInfoName;
-    std::string m_mcName;
-    std::string m_truthJetsName;
+    Gaudi::Property<float> m_MinJetPt{this, "MinJetPt", 35e3};  //!< Min pT for the truth jets
+    Gaudi::Property<float> m_MaxJetEta{this, "MaxJetEta", 2.5}; //!< Max eta for the truth jets
+    Gaudi::Property<float> m_MinLepPt{this, "MinLeptonPt", 25e3};  //!< Min pT for the truth leptons
+    Gaudi::Property<float> m_MaxLepEta{this, "MaxLeptonEta", 2.5}; //!< Max eta for the truth leptons
 
-    float m_MinJetPt;  //!< Min pT for the truth jets
-    float m_MaxJetEta; //!< Max eta for the truth jets
-    float m_MinLepPt;  //!< Min pT for the truth leptons
-    float m_MaxLepEta; //!< Max eta for the truth leptons
-
-    ToolHandle<IMCTruthClassifier> m_classif;
+    PublicToolHandle<IMCTruthClassifier> m_classif{this, "MCTruthClassifier", "MCTruthClassifier/SUSYGenFilt_MCTruthClassifier"};
 
   };
 

@@ -86,18 +86,9 @@ namespace pool    {
     /// Access stack size
     size_t stackSize()  const   
     { return m_size;                                                          }
-    /// Query the pending transaction stack
-    virtual bool updatesPending() const override
-    { return m_size > 0;                                                      }
     /// Internal: get access to stack entry
     ActionList::value_type* stackEntry(size_t which) 
     { return (which <= m_size) ? &(*(m_stack.begin()+which)) : 0;             }
-    /// Destroy persistent object in the container; does not touch transient!
-    virtual DbStatus destroyObject(ActionList::value_type& /* entry */)  
-    { return Error;                                                   }
-    /// Update persistent object in the container
-    virtual DbStatus updateObject(ActionList::value_type& /* entry */)  
-    { return Error;                                                   }
     /// Commit single entry to container
     virtual DbStatus writeObject(ActionList::value_type& /* entry */)  
     { return Error;                                                   }
@@ -150,30 +141,6 @@ namespace pool    {
                               DbContainer& cntH) override;
     /// Fetch next object address of the selection to set token
     virtual DbStatus fetch(DbSelect&      sel) override;
-    /// Add the specified object to the delete stack.
-    virtual DbStatus destroy(const Token::OID_t& lnkH) override;
-    /// Update existing object in the container
-    /** @param cntH      [IN]     Valid handle to container 
-      * @param object    [IN]     Data object
-      * @param linkH     [IN/OUT] Object identifier
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus update(DbContainer&  cntH,
-                            const void* object,
-                            ShapeH shape,
-                            const Token::OID_t& linkH) override;
-    /// Update existing object in the container
-    /** @param cntH      [IN]     Valid handle to container 
-      * @param object    [IN]     Data object
-      * @param objH      [IN]     Object handle
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus update(DbContainer&  cntH,
-                            const void* object,
-                            ShapeH shape,
-                            const DbObjectHandle<DbObject>& objH) override;
     /// Add single entry to container
     virtual DbStatus save(  DbObjectHandle<DbObject>& objH) override;
 

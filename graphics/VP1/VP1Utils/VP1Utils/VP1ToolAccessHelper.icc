@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/VP1Msg.h"
@@ -69,10 +69,6 @@ inline toolT * VP1ToolAccessHelper::getToolPointer( const QString& tooltypeandna
       return 0;
     }
 
-    if (!isValidInterface(thetool)) {
-      message("getToolPointer(..) ERROR: Tool retrieved is not a valid interface!");
-      thetool = 0;
-    }
     if (VP1Msg::verbose())
       messageVerbose("Returning "+str(thetool)+" tool pointer.");
     //We need the cast to void ptr to work around some WEIRD pointer

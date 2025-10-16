@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArRecUtils )
@@ -16,7 +16,7 @@ atlas_add_library( LArRecUtilsLib
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES AthAllocators AthenaBaseComps AthenaKernel CaloIdentifier CaloUtilsLib CxxUtils LArCOOLConditions LArElecCalib LArIdentifier LArRawEvent LArRecConditions LArRecEvent StoreGateLib CaloTriggerToolLib
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${EIGEN_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloInterfaceLib GaudiKernel Identifier LArCablingLib LArHV LArRawConditions LArReadoutGeometry PathResolver TestTools CaloTTDetDescr )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CORAL_LIBRARIES} ${EIGEN_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloInterfaceLib GaudiKernel Identifier LArCablingLib LArHV LArRawConditions LArReadoutGeometry PathResolver TestTools CaloTTDetDescr PersistentDataModel )
 
 atlas_add_component( LArRecUtils
                      src/components/*.cxx

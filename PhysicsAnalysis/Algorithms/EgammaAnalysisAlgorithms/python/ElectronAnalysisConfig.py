@@ -63,7 +63,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "is not affected by systematics. The second step then applies the "
             "systematics dependent corrections.  The net effect is that the "
             "slower first step only has to be run once, while the second is run "
-            "once per systematic. ATLASG-2358")
+            "once per systematic. ATLASG-2358",
+            expertMode=True)
     
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
@@ -295,7 +296,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH, TightDNN, MediumDNN, LooseDNN, "
-            "TightNoCFDNN, MediumNoCFDNN, VeryLooseNoCF97DNN, NoID.")
+            "TightNoCFDNN, MediumNoCFDNN, VeryLooseNoCF97DNN, NoID.",
+            expertMode=["NoID"])
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
@@ -322,11 +324,13 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             info="whether to accept additional electrons close to muons for "
             "the purpose of FSR corrections to these muons. Expert feature "
             "requested by the H4l analysis running on PHYSLITE. "
-            "The default is False.")
+            "The default is False.",
+            expertMode=True)
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
-            "factors are not available. The default is False.")
+            "factors are not available. The default is False.",
+            expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
             info="save all the independent detailed object scale factors. "
             "The default is True.")

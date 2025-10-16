@@ -51,6 +51,8 @@ LArShapeSubsetCnv_p2::persToTrans(const LArShapePersType2* persObj,
 
             bool copyChannel = true;
             if (hasSparseData) {
+                // coverity[bad_shift]
+                // coverity[integer_overflow]
                 if (!(chansSet & (1 << (j - chansOffset)))) {
                     // Channel is missing data - skip
                     copyChannel = false;
@@ -315,6 +317,7 @@ LArShapeSubsetCnv_p2::transToPers(const LArShapeTransType2* transObj,
 	      if ((*subsetIt).second[j].shapeSize() > 0) {
                     // store the channel number in bit map
                     assert (j >= chansOffset && (j - chansOffset) <= 31);
+                    // coverity[integer_overflow]
                     chansSet |= (1 << (j - chansOffset));
                 }
                 else {

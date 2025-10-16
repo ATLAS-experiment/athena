@@ -65,14 +65,34 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     auto Decision = Monitored::Scalar<std::string>("Error", "");
     auto refTowerET = Monitored::Scalar<int>("RefTowerEt",0);
     auto refTowerSat = Monitored::Scalar<char>("RefTowerSat",0.0);
+    auto FillTree = Monitored::Scalar<bool>("FillTree",true);
 
-	unsigned int nTowers = 0;
-	for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
+    unsigned int nTowers = 0;
+    for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
+		// working with "local" fiber number, iFiber
+        unsigned int towerID = gfexTowerRoI->gFEXtowerID();
+        unsigned int offset = (towerID > 20000) ? 20000 : (towerID > 10000 && towerID < 20000) ? 10000 : 0;
+        unsigned int iFiber = (towerID - offset)/16;
+
+        // Do not exceed maximum number of fibers for FPGA
+        unsigned int maxFiberN =  (towerID > 20000) ? LVL1::gFEXPos::C_FIBERS : LVL1::gFEXPos::AB_FIBERS;
+        if (iFiber >= maxFiberN) continue;
+
+        int fiber_type  = (towerID < 10000) ? LVL1::gFEXPos::AMPD_NFI[iFiber] :
+          (towerID > 10000 && towerID < 20000) ? LVL1::gFEXPos::BMPD_NFI[iFiber] :
+          LVL1::gFEXPos::CMPD_NFI[iFiber];
+
+        // Data Type: 1 is Tile
+        int dataType = (towerID < 10000) ? LVL1::gFEXPos::AMPD_DTYP_ARR[fiber_type][towerID%16] :
+          (towerID > 10000 && towerID < 20000) ? LVL1::gFEXPos::BMPD_DTYP_ARR[fiber_type][towerID%16] :
+          LVL1::gFEXPos::CMPD_DTYP_ARR[fiber_type][towerID%16];
+
 
         Toweret=gfexTowerRoI->towerEt(); //returns MLE value
         Towersaturationflag=gfexTowerRoI->isSaturated();
         float eta = gfexTowerRoI->eta();
         float phi = gfexTowerRoI->phi();
+        if (eta == 0.0 && phi == 0.0) continue; // skip the disconnected fibers
 
         if(!emulatedTowers.empty()) {
             Towereta = eta; Towerphi = phi;
@@ -82,7 +102,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
             if(eTowerItr == emulatedTowers.end()) {
                 // missing emulated tower?
                 Decision = "MissingTower";
-                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
                 continue;
             }
 
@@ -92,18 +112,18 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
             if(refTowerET != Toweret) {
                 Decision = "ETMismatch";
-                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
             if(refTowerSat != Towersaturationflag) {
                 Decision = "SatMismatch";
-                fill("errors",Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
 
         }
 
-
-
-		fill("gTowers",Toweret);
+        // Tile gTowers have dataType ==1
+        if (dataType != 1) fill("gTowers",Toweret);
+        else fill("gTileTowers",Toweret);
 
 		if (eta < -3.17 && eta > -3.25){ eta = -3.225;}
 		if (eta < 3.3 && eta > 3.17){ eta = 3.275;}

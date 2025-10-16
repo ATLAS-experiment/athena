@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -8,7 +8,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/CommonMessaging.h"
 #include "GaudiKernel/INamedInterface.h"
-
+#include "AthenaBaseComps/AthMessaging.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include <memory>
 
 #include <optional>
@@ -17,8 +18,7 @@ class ActsAthenaPrintPolicy final : public Acts::Logging::OutputPrintPolicy
 {
 public:
 
- ActsAthenaPrintPolicy(IMessageSvc* svc, std::shared_ptr<MsgStream> msg, const std::string& name) 
-   : m_svc{svc}, m_msg(msg), m_name(name) {}
+ ActsAthenaPrintPolicy(std::shared_ptr<MsgStream> msg, const std::string& name);
 
   void
   flush(const Acts::Logging::Level& lvl, const std::string& input) override;
@@ -32,9 +32,9 @@ public:
     clone(const std::string& name) const override;
 
 private:
-  IMessageSvc* m_svc;
-  std::shared_ptr<MsgStream> m_msg;
-  std::string m_name;
+  IMessageSvc* m_svc{};
+  std::shared_ptr<MsgStream> m_msg{};
+  std::string m_name{};
 };
 
 class ActsAthenaFilterPolicy final : public Acts::Logging::OutputFilterPolicy {
@@ -64,6 +64,9 @@ std::unique_ptr<const Acts::Logger>
 makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name);
 
 std::unique_ptr<const Acts::Logger>
+makeActsAthenaLogger(const AthMessaging* parent, const std::string& name);
+
+std::unique_ptr<const Acts::Logger>
 makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name, 
     std::optional<std::string> parent_name);
 
@@ -71,4 +74,6 @@ makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name,
 std::unique_ptr<const Acts::Logger>
 makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name, 
     const std::string& parent_name); 
+
+    
 

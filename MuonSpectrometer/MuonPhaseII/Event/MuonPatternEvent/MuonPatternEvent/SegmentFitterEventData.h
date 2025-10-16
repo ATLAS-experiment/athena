@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONR4_MUONPATTERNEVENT_SEGMENTFITEVENTDATA__H
@@ -9,80 +9,67 @@
 ///
 #include <MuonPatternEvent/MuonHoughDefs.h>
 #include <xAODMuon/MuonSegment.h>
+#include <MuonSpacePoint/CalibratedSpacePoint.h>
+
+#include "Acts/Seeding/CompositeSpacePointLineFitter.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
+
+namespace MuonGMR4 {
+   class MuonDetectorManager;
+}
 
 class ActsGeometryContext;
 namespace MuonR4{
     class CalibratedSpacePoint;
     class Segment;
     
-    /** @brief Returns the hough tanTheta  [y] / [z]
+    /** @brief Returns the hough tanBeta  [y] / [z]
      *  @param v: Arbitrary direction vector */
-    double houghTanTheta(const Amg::Vector3D& v);
-    /** @brief: Returns the hough tanPhi [x] / [z] 
+    double houghTanBeta(const Amg::Vector3D& v);
+    /** @brief: Returns the hough tanAlpha [x] / [z] 
       * @param v: Arbitrary direction vector */
-    double houghTanPhi(const Amg::Vector3D& v);
+    double houghTanAlpha(const Amg::Vector3D& v);
     namespace SegmentFit {
         /**  @brief Returns the parsed parameters into an Eigen line parametrization.
          *          The first operand is the position. The other is the direction. */
         std::pair<Amg::Vector3D, Amg::Vector3D> makeLine(const Parameters& pars);
-
+        /** @brief Dumps the parameters into a string in the form of TLatex.
+         *         Distances are expressed in [mm], angles in [deg] and time in [ns]
+         *  @param pars: Reference to the parameters to dump */
         std::string makeLabel(const Parameters& pars);
+        /** @brief Dumps the parameters into a string with labels in front of each 
+         *         number. Distances are expressed in [mm], angles in [deg] 
+         *         and time in [ns]
+         *  @param pars: Reference to the parameters to dump */
         std::string toString(const Parameters& pars);
+        /** @brief Returns the parameter label
+         *  @param par: Parameter of interest */
         std::string toString(const ParamDefs par);
-        /** @brief Constructs a direction vector from tanPhi & tanTheta
-         *  @param tanPhi: Tangent of the [x] to [z] axis
-         *  @param tanTheta: Tangent of the [y] to [z] axis  */
-        Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta);
-        /** @brief Returns the localSegPars decoration from a xAODMuon::Segment*/
+        /** @brief Returns the localSegPars decoration from a xAODMuon::Segment */
         Parameters localSegmentPars(const xAOD::MuonSegment& seg);
         /** @brief Returns the local segment parameters from a segment object
          *  @param gctx: Geometry context storing the local -> global transformation
          *  @param segment: Reference to the segment */
         Parameters localSegmentPars(const ActsGeometryContext& gctx,
                                     const Segment& segment);
+        /** @brief Returns the segment parameters as boundTrackParameters. The
+         *         position is expressed locally on the sector surface & the direction in
+         *         the global frame
+         *  @param detMgr: Detector manager to pick up the proper sector object
+         *  @param segment: Reference to the segment of interest
+         *  @param cov: Uncertainty on the parsed parameters
+         *  @param hypot: The particle hypothesis to plugin (Muon by default) */
+        Acts::BoundTrackParameters boundSegmentPars(const MuonGMR4::MuonDetectorManager& detMgr,
+                                                    const xAOD::MuonSegment& segment,
+                                                    std::optional<Acts::BoundMatrix> cov = std::nullopt,
+                                                    Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
+        /** @brief Returns the segment parameters as boundTrackParameters. The
+         *         position is expressed locally on the sector surface & the direction in
+         *         the global frame */
+        Acts::BoundTrackParameters boundSegmentPars(const ActsGeometryContext& gctx,
+                                                   const Segment& segment,
+                                                   const Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
     }
-
-
-    struct SegmentFitResult {
-        SegmentFitResult() = default;
-        using ParamDefs = SegmentFit::ParamDefs;
-        using Parameters = SegmentFit::Parameters;
-        using Covariance = SegmentFit::Covariance;
-
-        using HitType = std::unique_ptr<CalibratedSpacePoint>;
-        using HitVec = std::vector<HitType>;
-        
-        /** @brief Was the time fitted */
-        bool timeFit{false};
-        /** @brief Final segment parameters */
-        Parameters segmentPars{Parameters::Zero()};
-        /** @brief Uncertainties on the segment parameters */
-        Covariance segmentParErrs{Covariance::Identity()};
-        /** @brief Calibrated measurements used in the fit */
-        HitVec calibMeasurements{};
-        /** @brief chi2 of the fit */
-        double chi2{0.};
-        /** @brief degrees of freedom */
-        int nDoF{0};
-        /** @brief Number of precision hits */
-        unsigned nPrecMeas{0};
-        /** @brief How many phi measurements */
-        unsigned nPhiMeas{0};
-        /** @brief How many measurements give time constaint */
-        unsigned nTimeMeas{0};
-        /** @brief Is the fit converged */
-        bool converged{false};
-        /** @brief Number of iterations called to reach the minimum */
-        unsigned nIter{0};
-
-        /** @brief Returns the defining parameters as a pair of Amg::Vector3D
-         *         The first part is the position expressed at the chamber centre
-         *         The second part is the direction expressed at the chamber centre */
-        std::pair<Amg::Vector3D, Amg::Vector3D> makeLine() const {
-            return SegmentFit::makeLine(segmentPars);
-        }       
-   };
-
 }
 
 #endif 

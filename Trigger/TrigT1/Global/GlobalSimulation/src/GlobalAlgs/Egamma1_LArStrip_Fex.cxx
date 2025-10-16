@@ -11,6 +11,7 @@
 #include "CaloEvent/CaloCell.h"
 
 #include "../IO/LArStripNeighborhoodDumper.h"
+#include "../IO/eEmNbhoodTOB.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -82,23 +83,25 @@ namespace GlobalSim {
     // A neighborhood is a collection of CellData objects which
     // contain cell eta, phi and Et.
     
-    auto neighborhoods = std::make_unique<LArStripNeighborhoodContainer>();
+    auto neighborhoodTOBs = std::make_unique<IOBitwise::IeEmNbhoodTOBContainer>();
     
-    CHECK(findNeighborhoods(rois, cells, *neighborhoods));
-    
-    SG::WriteHandle<GlobalSim::LArStripNeighborhoodContainer> h_write(m_neighKey, ctx);
+    CHECK(findNeighborhoods(rois, cells, *neighborhoodTOBs));
 
+    SG::WriteHandle<GlobalSim::IOBitwise::IeEmNbhoodTOBContainer> h_neighborhoodTOBs(m_neighKey, ctx);
+
+    //BROKEN ATMa
     auto dumper = GlobalSim::LArStripNeighborhoodDumper();
-    if (m_dump) {
-      CHECK(dumper.dump(name(), *eventInfo, *neighborhoods));
+    if(m_dump || m_dumpTerse){
+      if (m_dump) {
+	CHECK(dumper.dump(name(), *eventInfo, *neighborhoodTOBs));
+      }
+      
+      if (m_dumpTerse) {
+	CHECK(dumper.dumpTerse(name(), *eventInfo, *neighborhoodTOBs));
+      }
     }
-
-    if (m_dumpTerse) {
-      CHECK(dumper.dumpTerse(name(), *eventInfo, *neighborhoods));
-    }
- 
     
-    CHECK(h_write.record(std::move(neighborhoods)));
+    CHECK(h_neighborhoodTOBs.record(std::move(neighborhoodTOBs)));
 
     ATH_MSG_INFO(evtStore()->dump());
     
@@ -108,10 +111,10 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex::findNeighborhoods(const std::vector<const xAOD::eFexEMRoI*>& rois,
 					  const std::vector<const CaloCell*>& cells,
-					  LArStripNeighborhoodContainer& neighborhoods) const{
+					  IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const{
     
     for (const auto& roi : rois) {
-      CHECK(findNeighborhood(roi, cells, neighborhoods));
+      CHECK(findNeighborhood(roi, cells, neighborhoodTOBs));
     }
     
     return StatusCode::SUCCESS;
@@ -121,7 +124,7 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex::findNeighborhood(const xAOD::eFexEMRoI* roi,
 					 const std::vector<const CaloCell*>& cells,
-					 LArStripNeighborhoodContainer& neighborhoods) const {
+					 IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const {
     
     // this member function constructs an LArStripNeighborhood.
     // 
@@ -277,14 +280,10 @@ namespace GlobalSim {
 
     Coords roi_c{roi->eta(), roi->phi()};
     Coords cell_c{max_cell->eta(), max_cell->phi()};
+
+    LArStripNeighborhood neighborhood = LArStripNeighborhood(low, center, high, roi_c, cell_c, max_neigh_cell_pos);
     
-    
-    neighborhoods.push_back(std::make_unique<LArStripNeighborhood>(low,
-								   center,
-								   high,
-								   roi_c,
-								   cell_c,
-								   max_neigh_cell_pos));
+    neighborhoodTOBs.push_back(std::make_unique<IOBitwise::eEmNbhoodTOB>(*roi, neighborhood));
     
     return StatusCode::SUCCESS;
   }

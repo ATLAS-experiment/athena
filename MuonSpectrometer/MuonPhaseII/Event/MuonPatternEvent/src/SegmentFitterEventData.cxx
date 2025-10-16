@@ -4,39 +4,52 @@
 #include <MuonPatternEvent/SegmentFitterEventData.h>
 
 #include <MuonPatternEvent/Segment.h>
-#include <GaudiKernel/SystemOfUnits.h>
-#include <CxxUtils/sincos.h>
-#include <vector>
-#include <array>
+#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+#include <MuonReadoutGeometryR4/SpectrometerSector.h>
+#include <ActsInterop/UnitConverters.h>
+#include <GaudiKernel/PhysicalConstants.h>
+
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Definitions/Units.hpp"
+
+
 #include <sstream>
 #include <format>
 using namespace Acts;
+using namespace Acts::UnitLiterals;
+
+namespace {
+    constexpr double straightQoverP = 1. / 20._TeV;
+}
+
 namespace MuonR4{
-    double houghTanTheta(const Amg::Vector3D& v){ 
+    double houghTanBeta(const Amg::Vector3D& v){ 
         constexpr double eps = std::numeric_limits<float>::epsilon();
         return v.y() /  ( std::abs(v.z()) > eps ? v.z() : eps); 
     }
-    double houghTanPhi(const Amg::Vector3D& v){            
+    double houghTanAlpha(const Amg::Vector3D& v){            
         constexpr double eps = std::numeric_limits<float>::epsilon();
         return v.x() /  ( std::abs(v.z()) > eps ? v.z() : eps); 
     }
     namespace SegmentFit {
-        Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta) {
-            return Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
-        }
         std::pair<Amg::Vector3D, Amg::Vector3D> makeLine(const Parameters& pars) {
-            return std::make_pair(Amg::Vector3D(pars[toUnderlying(ParamDefs::x0)], 
-                                                pars[toUnderlying(ParamDefs::y0)],0.),
-                                  Amg::dirFromAngles(pars[toUnderlying(ParamDefs::phi)],
-                                                     pars[toUnderlying(ParamDefs::theta)]));
+            using enum ParamDefs;
+            return std::make_pair(Amg::Vector3D(pars[toUnderlying(x0)], 
+                                                pars[toUnderlying(y0)],0.),
+                                  Amg::dirFromAngles(pars[toUnderlying(phi)],
+                                                     pars[toUnderlying(theta)]));
         }
         Parameters localSegmentPars(const xAOD::MuonSegment& seg) {
             static const SG::Accessor<xAOD::MeasVector<toUnderlying(ParamDefs::nPars)>> acc{"localSegPars"};
-            return xAOD::toEigen(xAOD::ConstVectorMap<toUnderlying(ParamDefs::nPars)>{acc(seg).data()});
+            Parameters segPars{};
+            for (std::size_t p =0 ; p < segPars.size(); ++p) {
+                segPars[p] = acc(seg)[p];
+            }
+            return segPars;
         }
         Parameters localSegmentPars(const ActsGeometryContext& gctx,
                                     const Segment& segment) {
-            Parameters pars{Parameters::Zero()};
+            Parameters pars{};
             const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTrans(gctx);
             const Amg::Vector3D locPos = globToLoc * segment.position();
             const Amg::Vector3D locDir = globToLoc.linear() * segment.direction();
@@ -67,7 +80,54 @@ namespace MuonR4{
             return sstr.str();
         }
         std::string toString(const ParamDefs a) {
-           return Acts::Experimental::detail::CompSpacePointAuxiliaries::parName(a);
+           return SeedingAux::parName(a);
+        }
+        Acts::BoundTrackParameters boundSegmentPars(const MuonGMR4::MuonDetectorManager& detMgr,
+                                                    const xAOD::MuonSegment& segment,
+                                                    std::optional<Acts::BoundMatrix> cov,
+                                                    Acts::ParticleHypothesis hypot) {
+            
+            const auto* msSector = detMgr.getSectorEnvelope(segment.chamberIndex(), 
+                                                            segment.sector(),
+                                                            segment.etaIndex());
+            const Acts::Surface& surface = msSector->surface();
+
+            const auto locSegPars = localSegmentPars(segment);
+
+            const Amg::Vector3D globDir = segment.direction();
+
+            
+            Acts::BoundVector boundPars{};
+            boundPars[Acts::eBoundLoc0] = locSegPars[toUnderlying(ParamDefs::x0)];
+            boundPars[Acts::eBoundLoc1] = locSegPars[toUnderlying(ParamDefs::y0)];
+            boundPars[Acts::eBoundPhi] = globDir.phi();
+            boundPars[Acts::eBoundTheta] = globDir.theta();
+            boundPars[Acts::eBoundQOverP] = straightQoverP;
+            boundPars[Acts::eBoundTime] = ActsTrk::timeToActs(segment.position().mag() / Gaudi::Units::c_light + 
+                                                              segment.t0());
+
+            return Acts::BoundTrackParameters{surface.getSharedPtr(), std::move(boundPars),
+                                              cov, hypot};
+        }
+        Acts::BoundTrackParameters boundSegmentPars(const ActsGeometryContext& gctx,
+                                                    const Segment& segment,
+                                                    const Acts::ParticleHypothesis hypot) {
+            const auto& surface = segment.msSector()->surface();
+
+            const Amg::Vector3D locPos = surface.transform(gctx.context()).inverse() * 
+                                         segment.position();
+             Acts::BoundVector boundPars{};
+            boundPars[Acts::eBoundLoc0] = locPos.x();
+            boundPars[Acts::eBoundLoc1] = locPos.y();
+            boundPars[Acts::eBoundPhi] = segment.direction().phi();
+            boundPars[Acts::eBoundTheta] = segment.direction().theta();
+            boundPars[Acts::eBoundQOverP] = straightQoverP;
+            boundPars[Acts::eBoundTime] = ActsTrk::timeToActs(segment.position().mag() / Gaudi::Units::c_light + 
+                                                              segment.segementT0());
+            Acts::BoundMatrix cov{Acts::BoundMatrix::Identity()};
+
+            return Acts::BoundTrackParameters{surface.getSharedPtr(), std::move(boundPars),
+                                              cov, hypot};
         }
        
     }

@@ -690,6 +690,8 @@ void roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, s
       temp.setHoughYBin(road->getYBin());
       temp.setChi2(0);
 
+      temp.setBinIdx(road->getBinIdx());
+
       // This comes from FPGATrackSimFunctions
       std::vector<std::vector<int>> combs = getComboIndices(road->getNHits_layer());
       unsigned existing_size = track_cands.size();

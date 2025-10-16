@@ -176,10 +176,8 @@ def _match_vars(flags, source):
     return allvars
 
 
-def addCommonAugmentation(flags, cfg, helper):
+def addCommonAugmentation(flags, cfg, helper, target = "AntiKt4EMPFlowJets"):
     """add content common to all ftag derivations"""
-
-    target = "AntiKt4EMPFlowJets"
 
     cfg.merge(
         JetMatchingCfg(
@@ -189,7 +187,7 @@ def addCommonAugmentation(flags, cfg, helper):
         )
     )
     helper.ExtraVariables +=  [
-        '.'.join(['AntiKt4EMPFlowJets'] + _match_vars(flags, target))
+        '.'.join([target] + _match_vars(flags, target))
     ]
 
     if not flags.Input.isMC:
@@ -213,5 +211,5 @@ def addCommonAugmentation(flags, cfg, helper):
         *[f"parent{p}ParentsMask" for p in ["Higgs", "Z", "Scalar", "Top"]],
     ]
 
-    helper.ExtraVariables += ['.'.join(['AntiKt4EMPFlowJets'] + truth_labels)]
+    helper.ExtraVariables += ['.'.join([target] + truth_labels)]
 

@@ -4,10 +4,13 @@
 
 #ifndef TAUDQA_RESOLUTIONPLOTS_H
 #define TAUDQA_RESOLUTIONPLOTS_H
+
 #include "TrkValHistUtils/PlotBase.h"
-#include "TauAnalysisTools/ITauTruthMatchingTool.h"
 #include "xAODTau/TauJet.h"
-#include "TH1.h"
+#include "xAODTruth/TruthParticle.h"
+
+class TH1;
+
 namespace Tau{
 
   class ResolutionPlots: public PlotBase {

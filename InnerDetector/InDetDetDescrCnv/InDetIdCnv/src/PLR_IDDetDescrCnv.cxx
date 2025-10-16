@@ -15,6 +15,8 @@
 #include "StoreGate/StoreGateSvc.h"
 
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 #include "InDetIdentifier/PLR_ID.h"
 
 //--------------------------------------------------------------------

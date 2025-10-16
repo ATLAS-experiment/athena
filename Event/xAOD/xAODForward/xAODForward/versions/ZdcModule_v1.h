@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODFORWARD_VERSIONS_ZDCMODULE_V1_H
@@ -16,7 +16,7 @@ namespace xAOD {
   
   /// Class containing ZDC Module information
   ///
-  /// For information how to retrive, and to some level use this object,
+  /// For information how to retrieve, and to some level use this object,
   /// see the detailed package description.
   ///
   /// @author Peter Steinberg <peter.steinberg@bnl.gov>

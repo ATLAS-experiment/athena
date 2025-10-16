@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LArClusterCellDumper/src/CaloThinCellsInAODAlg.h
@@ -72,7 +72,7 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
   SG::WriteHandle<LArHitContainer> outputHits = SG::makeHandle(m_hitsOutputKey, ctx);
   ATH_CHECK(outputHits.record(std::make_unique<LArHitContainer>()));
 
-  std::bitset<200000> keepCellSet;
+  auto keepCellSet = std::make_unique<std::bitset<200000> >();
   size_t nCellsAllClus = 0;
 
   for (const xAOD::CaloCluster* clus : *clusterContainer){
@@ -110,8 +110,8 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
         HWIdentifier chhwid = larCabling->createSignalChannelID(cellId);
         IdentifierHash chOnlHash =  m_onlineID->channel_Hash(chhwid);
 
-        if (!keepCellSet.test(chOnlHash)){
-          keepCellSet.set(chOnlHash);
+        if (!keepCellSet->test(chOnlHash)){
+          keepCellSet->set(chOnlHash);
           outputCells->push_back(cell);
         }
       }    
@@ -119,11 +119,11 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
   } // end loop over clusters
   ATH_MSG_DEBUG("\tTotal Copied " << outputCells->size() << " of " << nCellsAllClus << " calo cells, linked to CaloCluster.");
 
-  if (keepCellSet.any()){  
+  if (keepCellSet->any()){
     //start loop over raw channels
     for(const LArRawChannel& chan : *inputRawChContainer) {
       const IdentifierHash onlHash=m_onlineID->channel_Hash(chan.hardwareID());
-      if (keepCellSet.test(onlHash)) {
+      if (keepCellSet->test(onlHash)) {
         outputRawChannels->push_back(chan);
       }
     }
@@ -132,7 +132,7 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
     //start loop over digits
     for (const LArDigit* dig : *inputDigitsContainer) {
       const IdentifierHash onlHash=m_onlineID->channel_Hash(dig->hardwareID());
-      if (keepCellSet.test(onlHash)) {
+      if (keepCellSet->test(onlHash)) {
         outputDigits->push_back(dig);
       }
     } //end loop over input container
@@ -141,14 +141,14 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
   
   //(MC) start loop over hits container
   if (m_isMC){
-    if (keepCellSet.any()){  
+    if (keepCellSet->any()){
       SG::ReadHandle<LArHitContainer> inputHitsContainer(m_hitsInputKey,ctx);
 
       for (const LArHit* hit : *inputHitsContainer) {
         const HWIdentifier   hwid    = larCabling->createSignalChannelID(hit->cellID());
         const IdentifierHash onlHash = m_onlineID->channel_Hash(hwid);
 
-        if (keepCellSet.test(onlHash)) {
+        if (keepCellSet->test(onlHash)) {
           LArHit* clusHit = new LArHit(hit->cellID(),hit->energy(),hit->time());
           clusHit->finalize();
           outputHits->push_back(clusHit);
@@ -156,7 +156,7 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
       } //end loop over input container
 
     ATH_MSG_DEBUG("\tCopied " << outputHits->size() << " of " << inputHitsContainer->size() << " hits.");
-    } // end keepCellSet.any()
+    } // end keepCellSet->any()
   } // end-if MC
 
   return StatusCode::SUCCESS;

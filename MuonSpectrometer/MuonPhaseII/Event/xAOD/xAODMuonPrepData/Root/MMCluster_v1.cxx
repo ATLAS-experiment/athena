@@ -59,5 +59,8 @@ void MMCluster_v1::setStripDriftErrors(const std::vector<AmgVector(2)>& stripDri
     });
     setStripDriftErrors(covariance);
 }
+Amg::Vector3D MMCluster_v1::localMeasurementPos() const {
+    return localPosition<1>()[0] * Amg::Vector3D::UnitX();
+}
 
 }  // namespace xAOD

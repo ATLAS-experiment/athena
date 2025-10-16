@@ -10,10 +10,8 @@
 #include "DerivationFrameworkInDet/EventInfoBSErrDecorator.h"
 #include "DerivationFrameworkInDet/UnassociatedHitsDecorator.h"
 #include "DerivationFrameworkInDet/UnassociatedHitsGetterTool.h"
-#include "DerivationFrameworkInDet/LArCollisionTimeDecorator.h"
 #include "DerivationFrameworkInDet/EGammaTracksThinning.h"
 #include "DerivationFrameworkInDet/TrackMeasurementThinning.h"
-#include "DerivationFrameworkInDet/EventInfoPixelDecorator.h"
 #include "DerivationFrameworkInDet/PixelNtupleMaker.h"
 #include "DerivationFrameworkInDet/InDetTrackSelectionToolWrapper.h"
 #include "DerivationFrameworkInDet/HardScatterVertexDecorator.h"
@@ -39,10 +37,8 @@ DECLARE_COMPONENT( TrackStateOnSurfaceDecorator )
 DECLARE_COMPONENT( EventInfoBSErrDecorator )
 DECLARE_COMPONENT( UnassociatedHitsDecorator )
 DECLARE_COMPONENT( DerivationFramework::UnassociatedHitsGetterTool )
-DECLARE_COMPONENT( LArCollisionTimeDecorator )
 DECLARE_COMPONENT( EGammaTracksThinning )
 DECLARE_COMPONENT( TrackMeasurementThinning )
-DECLARE_COMPONENT( EventInfoPixelDecorator )
 DECLARE_COMPONENT( PixelNtupleMaker )
 DECLARE_COMPONENT( InDetTrackSelectionToolWrapper )
 DECLARE_COMPONENT( HardScatterVertexDecorator )

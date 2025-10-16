@@ -76,6 +76,20 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
     ""
   };
 
+  Gaudi::Property<std::vector<std::tuple<std::string, int, std::string, int>>> m_sharedInterfaces {
+    this,
+    "sharedInterfaces",
+    {},
+    ""
+  };
+
+  Gaudi::Property<std::vector<std::vector<std::string>>> m_kernelOrder {
+    this,
+    "kernelOrder",
+    {},
+    ""
+  };
+
   Gaudi::Property<std::size_t> m_bufferSize {
     this,
     "bufferSize",

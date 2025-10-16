@@ -86,11 +86,11 @@ namespace FlavorTagInference {
             const std::string& name,
             const std::string& prefix);
           std::pair<InputSequence, std::set<std::string>> seqFromConsituents(
-            const InputVariableConfig& cfg, 
+            const InputVariableConfig& cfg,
             const FTagOptions& options);
           std::vector<InputSequence> m_sequence_getters;
           std::set<std::string> m_deps;
-          std::set<std::string> m_used_remap;        
+          std::set<std::string> m_used_remap;
         };
     }
 }

@@ -142,7 +142,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             info="the NP reduction scheme to use for JER: All, Full, Simple. The "
             "default is Full.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
-            info="whether to run the All/Full JER model variations also on data samples. Expert option!")
+            info="whether to run the All/Full JER model variations also on data samples. Expert option!",
+            expertMode=True)
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE derivations. "
             "The default is True.")
@@ -150,28 +151,34 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('calibToolConfigFile', None, type=str,
             info="name (str) of the config file to use for the jet calibration "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('calibToolCalibArea', None, type=str,
             info="name (str) of the CVMFS area to use for the jet calibration "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('calibToolCalibSeq', None, type=str,
             info="name (str) of the sequence to use for the jet calibration "
             "tool (e.g. 'JetArea_Residual_EtaJES_GSC'). Expert option to override "
-            "JetETmiss recommendations. The default is None.")
+            "JetETmiss recommendations. The default is None.",
+            expertMode=True)
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str,
             info="name (str) of the config file to use for the jet uncertainty "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('uncertToolCalibArea', None, type=str,
             info="name (str) of the CVMFS area to use for the jet uncertainty "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('uncertToolMCType', None, type=str,
             info="data type (str) to use for the jet uncertainty tool (e.g. "
             "'AF3' or 'MC16'). Expert option to override JetETmiss "
-            "recommendations. The default is None.")
+            "recommendations. The default is None.",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -557,38 +564,46 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('systematicsModelJMR', "Full", type=str,
             info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
-            info="whether to run the All/Full JER model variations also on data samples. Expert option!")
+            info="whether to run the All/Full JER model variations also on data samples. Expert option!",
+            expertMode=True)
         # Adding these options to override the jet uncertainty config file when we have new recommendations
         # Calibration tool options
         self.addOption ('calibToolConfigFile', None, type=str,
             info="name (str) of the config file to use for the jet calibration "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('calibToolCalibArea', None, type=str,
             info="name (str) of the CVMFS area to use for the jet calibration "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('calibToolCalibSeq', None, type=str,
             info="name (str) of the sequence to use for the jet calibration "
             "tool (e.g. 'JetArea_Residual_EtaJES_GSC'). Expert option to override "
-            "JetETmiss recommendations. The default is None.")
+            "JetETmiss recommendations. The default is None.",
+            expertMode=True)
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str,
             info="name (str) of the config file to use for the JES, JER, and JMS uncertainty "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('uncertToolConfigPathJMR', None, type=str,
             info="name (str) of the config file to use for the JMR uncertainty "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('uncertToolCalibArea', None, type=str,
             info="name (str) of the CVMFS area to use for the jet uncertainty "
             "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            "default is None.",
+            expertMode=True)
         self.addOption ('uncertToolMCType', None, type=str,
-                info="data type (str) to use for the jet uncertainty tool (e.g. "
-                "'AF3' or 'MC16'). Expert option to override JetETmiss "
-                "recommendations. The default is None.")
+            info="data type (str) to use for the jet uncertainty tool (e.g. "
+            "'AF3' or 'MC16'). Expert option to override JetETmiss "
+            "recommendations. The default is None.",
+            expertMode=True)
         self.addOption ('minPt', 200.*GeV, type=float,
             info="the minimum pt cut to apply to calibrated large-R jets. "
             "The default is 200 GeV.")

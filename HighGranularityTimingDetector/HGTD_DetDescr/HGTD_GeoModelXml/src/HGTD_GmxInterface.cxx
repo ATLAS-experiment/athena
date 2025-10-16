@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_GmxInterface.h"
-
+#include <HGTD_ReadoutGeometry/HGTD_DetectorManager.h>
 #include <HGTD_Identifier/HGTD_ID.h>
 #include <HGTD_ReadoutGeometry/HGTD_DetectorElement.h>
 #include <HGTD_ReadoutGeometry/HGTD_ModuleDesign.h>
@@ -141,7 +141,7 @@ void HGTD_GmxInterface::addSensor(const std::string &typeName,
     //
     // Get the ATLAS "Offline" wafer identifier
     //
-    const HGTD_ID* hgtdIdHelper = dynamic_cast<const HGTD_ID *> (m_commonItems->getIdHelper());
+    const HGTD_ID* hgtdIdHelper = static_cast<const HGTD_ID *> (m_commonItems->getIdHelper());
 
     Identifier id;
 
@@ -203,8 +203,7 @@ void HGTD_GmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
        for (const IRDBRecord_ptr& typeParams:*LGAD_module){
             std::map<std::string,std::string> LGAD_moduleMap;
             for(const std::string& paramName:LGAD_moduleParamNames){
-                std::string paramValue = typeParams->getString(paramName);
-                LGAD_moduleMap[paramName] = paramValue;
+                LGAD_moduleMap[paramName] = typeParams->getString(paramName);
             }
             std::string LGAD_moduleName = typeParams->getString("SensorType");
             makeLgadModule(LGAD_moduleName,LGAD_moduleMap);

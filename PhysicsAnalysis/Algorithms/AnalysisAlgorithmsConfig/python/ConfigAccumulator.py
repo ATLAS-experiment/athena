@@ -28,6 +28,13 @@ def deprecated(reason: str = ""):
         return wrapper
     return decorator
 
+class ExpertModeWarning(Warning):
+    """Warning raised when an expert-only configuration option is used."""
+    pass
+# Default filter: error out unless the user overrides
+if not any(f[0] == 'error' and f[2] is ExpertModeWarning for f in warnings.filters):
+    warnings.simplefilter('error', ExpertModeWarning)
+
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
     Data = 'data'

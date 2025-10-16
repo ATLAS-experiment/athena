@@ -45,6 +45,8 @@ LArPhysWaveSubsetCnv_p1::persToTrans(const LArPWPersType* persObj,
     for (unsigned int j = 0; j < nChannelsPerFeb; ++j){
       bool copyChannel = true;
       if (hasSparseData) {			
+        // coverity[bad_shift]
+        // coverity[integer_overflow]
         if (!(chansSet & (1 << (j - chansOffset)))) {// Channel is missing data - skip
           copyChannel = false;	//	std::cout<<"0";
         }
@@ -244,6 +246,7 @@ LArPhysWaveSubsetCnv_p1::transToPers(const LArPWTransType* transObj,
         if (!subsetIt->second[j].isEmpty()) { // channel exists
                     
           assert (j >= chansOffset && (j - chansOffset) <= 31);
+          // coverity[integer_overflow]
           chansSet |= (1 << (j - chansOffset)); //store the channel number in the bit map
 					
           //std::cout<<"1";	

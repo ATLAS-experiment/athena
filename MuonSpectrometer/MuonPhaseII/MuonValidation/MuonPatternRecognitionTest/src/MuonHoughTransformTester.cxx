@@ -6,7 +6,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonTesterTree/EventInfoBranch.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
-#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
@@ -87,10 +86,10 @@ namespace MuonValR4 {
                                                            const MuonR4::Segment& recoSeg) const{
         unsigned int same{0};
         using namespace SegmentFit;
-        Line_t recoLine{spatialLinePars(SegmentFit::localSegmentPars(truthSeg))}, 
-               trueLine{spatialLinePars(localSegmentPars(gctx, recoSeg))};
-        const std::vector<int> truthSigns = SeedingAux::strawSigns(trueLine, recoSeg.measurements());
-        const std::vector<int> recoSigns = SeedingAux::strawSigns(recoLine, recoSeg.measurements());
+        const auto[truePos, trueDir] = makeLine(localSegmentPars(truthSeg)); 
+        const auto[recoPos, recoDir] = makeLine(localSegmentPars(gctx, recoSeg));
+        const std::vector<int> truthSigns = SeedingAux::strawSigns(truePos, trueDir, recoSeg.measurements());
+        const std::vector<int> recoSigns = SeedingAux::strawSigns(recoPos, recoDir, recoSeg.measurements());
         for (unsigned int s = 0 ; s < truthSigns.size(); ++s) {
             same += (truthSigns[s] != 0) && truthSigns[s] == recoSigns[s];
         }
@@ -293,8 +292,8 @@ namespace MuonValR4 {
         m_out_gen_nTGCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) * !isBarrel(segment->chamberIndex());
         m_out_gen_nRPCHits = (segment->nPhiLayers() + segment->nTrigEtaLayers()) *  isBarrel(segment->chamberIndex());
 
-        m_out_gen_tantheta = houghTanTheta(chamberDir); 
-        m_out_gen_tanphi   = houghTanPhi(chamberDir);
+        m_out_gen_tantheta = houghTanBeta(chamberDir); 
+        m_out_gen_tanphi   = houghTanAlpha(chamberDir);
         m_out_gen_y0 = chamberPos.y(); 
         m_out_gen_x0 = chamberPos.x(); 
         m_out_gen_time = segment->t0();
@@ -360,10 +359,10 @@ namespace MuonValR4 {
             m_out_seed_hasPhiExtension.push_back(seed->hasPhiExtension()); 
             m_out_seed_nMatchedHits.push_back(countMatched(obj.truthSegment, seed));
             m_out_seed_y0.push_back(seed->interceptY());
-            m_out_seed_tantheta.push_back(seed->tanTheta());
+            m_out_seed_tantheta.push_back(seed->tanBeta());
             if (seed->hasPhiExtension()){
                 m_out_seed_x0.push_back(seed->interceptX());
-                m_out_seed_tanphi.push_back(seed->tanPhi());
+                m_out_seed_tanphi.push_back(seed->tanAlpha());
             } else{
                 m_out_seed_x0.push_back(-999);
                 m_out_seed_tanphi.push_back(-999);
@@ -456,8 +455,8 @@ namespace MuonValR4 {
             m_out_segment_err_tanphi.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::phi), Acts::toUnderlying(ParamDefs::phi)));
             m_out_segment_err_time.push_back(segment->covariance()(Acts::toUnderlying(ParamDefs::t0), Acts::toUnderlying(ParamDefs::t0)));
             const auto [locPos, locDir] = makeLine(localSegmentPars(gctx, *segment));
-            m_out_segment_tanphi.push_back(houghTanPhi(locDir));
-            m_out_segment_tantheta.push_back(houghTanTheta(locDir));
+            m_out_segment_tanphi.push_back(houghTanAlpha(locDir));
+            m_out_segment_tantheta.push_back(houghTanBeta(locDir));
             m_out_segment_y0.push_back(locPos.y());
             m_out_segment_x0.push_back(locPos.x());
             m_out_segment_time.push_back(segment->segementT0() + segment->position().mag() * c_inv);

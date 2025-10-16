@@ -31,7 +31,7 @@ def ITkActsTrackParticleCreationCfg(flags,
         
     acc = ComponentAccumulator()
 
-    prefix = "ActsCombined" if "ActiveConfig" not in flags.Tracking else flags.Tracking.ActiveConfig.extension
+    prefix = "ActsCombined" if not flags.hasCategory("Tracking.ActiveConfig") else flags.Tracking.ActiveConfig.extension
     prefix += f"To{TrackParticleContainer}"
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags,

@@ -504,6 +504,31 @@ DataVectorWithAlloc<DV, ALLOC>::push_back (Ptr pElem)
 
 
 /**
+ * @brief Create and add a number of new elements to the end of the container.
+ * @param n The number of new elements to add.
+ *          The elements will be created by calling allocate().
+ *
+ * Note: this method may only be called using the most derived
+ * @c DataVector in the hierarchy.
+ *
+ * Returns the original size of the vector.
+ */
+template <class DV, class ALLOC>
+inline
+auto
+DataVectorWithAlloc<DV, ALLOC>::push_new (size_type n) ->size_type
+{
+  auto alloc = [&]() {
+    typename elt_allocator_type::pointer p = m_heap->allocate(1);
+    // Note: not protected against exceptions.
+    m_heap->construct (p);
+    return p;
+  };
+  return DV::push_new (n, alloc);
+}
+
+
+/**
  * @brief Add an element to the end of the collection.
  * @param pElem The element to add to the collection.
  *

@@ -19,5 +19,4 @@ DECLARE_COMPONENT( PanTau::Tool_DecayModeDeterminator )
 DECLARE_COMPONENT( PanTau::Tool_DetailsArranger )
 
 DECLARE_COMPONENT( PanTau::PanTauProcessor )
-//DECLARE_COMPONENT( PanTau::PanTauProcessor )
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaKernel )
@@ -8,11 +8,6 @@ find_package( Boost COMPONENTS regex thread )
 find_package( UUID )
 find_package( CLHEP )
 find_package( TBB )
-# Only link against the RT library if it's available.
-find_library( RT_LIBRARY rt )
-if( NOT RT_LIBRARY )
-   unset( RT_LIBRARY )
-endif()
 
 # Libraries in the package:
 atlas_add_library( AthenaKernel
@@ -20,7 +15,7 @@ atlas_add_library( AthenaKernel
    PUBLIC_HEADERS AthenaKernel
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} 
    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${UUID_LIBRARIES} ${RT_LIBRARY} CxxUtils DataModelRoot GaudiKernel
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${UUID_LIBRARIES} CxxUtils DataModelRoot GaudiKernel
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CMAKE_DL_LIBS} RootUtils )
 
 atlas_add_dictionary( AthenaKernelDict
@@ -140,10 +135,6 @@ atlas_add_test( ThinningInfo_test
 atlas_add_test( getThinningCache_test
   SOURCES test/getThinningCache_test.cxx
   LINK_LIBRARIES AthenaKernel TestTools )
-
-atlas_add_test( AlgorithmTimer_test
-  SOURCES test/AlgorithmTimer_test.cxx
-  LINK_LIBRARIES AthenaKernel )
 
 atlas_add_test( ILockableTool_test
   SOURCES test/ILockableTool_test.cxx

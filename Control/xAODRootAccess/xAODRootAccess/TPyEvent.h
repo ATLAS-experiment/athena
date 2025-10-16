@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TPYEVENT_H
 #define XAODROOTACCESS_TPYEVENT_H
@@ -13,6 +13,7 @@
 
 // Local include(s):
 #include "xAODRootAccess/TEvent.h"
+#include "Python.h"
 
 namespace xAOD {
 
@@ -31,6 +32,9 @@ namespace xAOD {
    public:
       /// Constructor with an access mode - only that one is used from the python TPyEvent
       TPyEvent(EAuxMode mode = kUndefinedAccess) : TEvent(mode) {} 
+
+      /// Return the object with a given key as a PyObject.
+      PyObject* retrieve (const std::string& key);
 
       /// Function checking if an object is available from the store
       ::Bool_t contains( const std::string& key, const std::string& type );

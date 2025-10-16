@@ -16,7 +16,8 @@ atlas_add_poolcnv_library( xAODMuonPrepDataAthenaPoolCnv
          xAODMuonPrepData/sTgcStripContainer.h xAODMuonPrepData/sTgcStripAuxContainer.h 
          xAODMuonPrepData/sTgcPadContainer.h xAODMuonPrepData/sTgcPadAuxContainer.h 
          xAODMuonPrepData/sTgcWireContainer.h xAODMuonPrepData/sTgcWireAuxContainer.h 
-         xAODMuonPrepData/MMClusterContainer.h xAODMuonPrepData/MMClusterAuxContainer.h         
+         xAODMuonPrepData/MMClusterContainer.h xAODMuonPrepData/MMClusterAuxContainer.h
+         xAODMuonPrepData/CombinedMuonStripContainer.h xAODMuonPrepData/CombinedMuonStripAuxContainer.h         
    TYPES_WITH_NAMESPACE xAOD::MdtDriftCircleContainer xAOD::MdtDriftCircleAuxContainer 
                         xAOD::MdtTwinDriftCircleContainer xAOD::MdtTwinDriftCircleAuxContainer 
                         xAOD::RpcStripContainer xAOD::RpcStripAuxContainer
@@ -26,6 +27,7 @@ atlas_add_poolcnv_library( xAODMuonPrepDataAthenaPoolCnv
                         xAOD::MMClusterContainer xAOD::MMClusterAuxContainer
                         xAOD::sTgcWireContainer xAOD::sTgcWireAuxContainer 
                         xAOD::sTgcPadContainer xAOD::sTgcPadAuxContainer 
+                        xAOD::CombinedMuonStripContainer xAOD::CombinedMuonStripAuxContainer
                         
    CNV_PFX xAOD
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}

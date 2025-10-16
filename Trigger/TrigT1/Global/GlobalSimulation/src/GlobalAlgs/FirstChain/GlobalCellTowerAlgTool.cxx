@@ -54,7 +54,7 @@ namespace GlobalSim {
     }
 
     auto h_towerTOBs = SG::makeHandle(m_gblCellTowers, ctx);
-    auto towers = std::make_unique<IOBitwise::CommonTOBContainer>();
+    auto towers = std::make_unique<IOBitwise::ICommonTOBContainer>();
     towers->reserve(nEta * nPhi);
 
     for (int etaBin = 0; etaBin < nEta; ++etaBin) {
@@ -76,6 +76,13 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
+    StatusCode
+    GlobalCellTowerAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+				      const EventContext& ctx) const {
+      CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
+    return StatusCode::SUCCESS;
+  }
+  
   // Overrides toString() function from base class, unused here
   std::string GlobalCellTowerAlgTool::toString() const {
       return {};

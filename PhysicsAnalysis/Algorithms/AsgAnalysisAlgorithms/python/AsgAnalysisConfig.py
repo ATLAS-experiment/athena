@@ -4,8 +4,14 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ExpertModeWarning
 from enum import Enum
+import warnings
+
+try:
+    from AthenaCommon.Logging import logging
+except ImportError:
+    import logging
 
 class SystematicsCategories(Enum):
     JETS = ['JET_']
@@ -50,6 +56,9 @@ class CommonServicesConfig (ConfigBlock) :
             "histogram holding only the names of weight-based systematics. This is useful "
             "to help make histogramming frameworks more efficient by knowing in advance which "
             "systematics need to recompute the observable and which don't.")
+        self.addOption ('enableExpertMode', False, type=bool,
+            info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
+            "DO NOT USE FOR ANALYSIS.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -100,6 +109,30 @@ class CommonServicesConfig (ConfigBlock) :
                 weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
                 weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
+
+        if self.enableExpertMode and config._pass == 0:
+            # set any expert-mode errors to be ignored instead
+            warnings.simplefilter('ignore', ExpertModeWarning)
+            # just warning users they might be doing something dangerous
+            log = logging.getLogger('CommonServices')
+            bold = "\033[1m"
+            red = "\033[91m"
+            yellow = "\033[93m"
+            reset = "\033[0m"
+            log.warning(red +r"""
+  ________   _______  ______ _____ _______      __  __  ____  _____  ______       ______ _   _          ____  _      ______ _____
+ |  ____\ \ / /  __ \|  ____|  __ \__   __|    |  \/  |/ __ \|  __ \|  ____|     |  ____| \ | |   /\   |  _ \| |    |  ____|  __ \
+ | |__   \ V /| |__) | |__  | |__) | | |       | \  / | |  | | |  | | |__        | |__  |  \| |  /  \  | |_) | |    | |__  | |  | |
+ |  __|   > < |  ___/|  __| |  _  /  | |       | |\/| | |  | | |  | |  __|       |  __| | . ` | / /\ \ |  _ <| |    |  __| | |  | |
+ | |____ / . \| |    | |____| | \ \  | |       | |  | | |__| | |__| | |____      | |____| |\  |/ ____ \| |_) | |____| |____| |__| |
+ |______/_/ \_\_|    |______|_|  \_\ |_|       |_|  |_|\____/|_____/|______|     |______|_| \_/_/    \_\____/|______|______|_____/
+
+"""
+                        +reset)
+            log.warning(f"{bold}{yellow}These settings are not recommended for analysis. Make sure you know what you're doing, or disable them with `enableExpertMode: False` in `CommonServices`.{reset}")
+
+            import time
+            time.sleep(2)
 
 
 @groupBlocks
@@ -156,7 +189,8 @@ class PileupReweightingBlock (ConfigBlock):
             info="whether this is used as an additional alternative config for PileupReweighting. "
             "Will only store the alternative pile up weight in that case.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
-            info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)")
+            info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -166,10 +200,6 @@ class PileupReweightingBlock (ConfigBlock):
 
         from Campaigns.Utils import Campaign
 
-        try:
-            from AthenaCommon.Logging import logging
-        except ImportError:
-            import logging
         log = logging.getLogger('makePileupAnalysisSequence')
 
         eventInfoVar = ['runNumber', 'eventNumber', 'actualInteractionsPerCrossing', 'averageInteractionsPerCrossing']
@@ -353,10 +383,6 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
-        try:
-            from AthenaCommon.Logging import logging
-        except ImportError:
-            import logging
         log = logging.getLogger('makeGeneratorAnalysisSequence')
 
         if self.runNumber is None:

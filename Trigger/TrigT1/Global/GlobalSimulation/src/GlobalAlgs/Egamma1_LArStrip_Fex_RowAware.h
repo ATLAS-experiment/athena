@@ -16,6 +16,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 
 #include "../IO/LArStripNeighborhoodContainer.h"
+#include "../IO/IeEmNbhoodTOBContainer.h"
+#include "../IO/IeEmTOB.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -67,13 +69,13 @@ namespace GlobalSim {
       "dumpTerse",
       false,
       "flag to enable terse dumps"};
-
-    SG::WriteHandleKey<LArStripNeighborhoodContainer>
+    
+    SG::WriteHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
     m_neighKey {
       this,
-      "stripNeighborhoodKey",
-      "stripNeighborhoodContainer"};
-      //"location to write strip neighborhoods of EFex RoIs"};
+      "stripNeighborhoodTOBKey",
+      "stripNeighborhoodTOBContainer",
+      "location to write strip neighborhoods of EFex RoIs, with the associated TOBs"};
 
     SG::WriteHandleKey<std::vector<int>>
     m_phimaxKey {
@@ -85,13 +87,13 @@ namespace GlobalSim {
     StatusCode
     findNeighborhoods_RowAware(const std::vector<const xAOD::eFexEMRoI*>&,
 			       const std::vector<const CaloCell*>&,
-			       LArStripNeighborhoodContainer&,
+			       IOBitwise::IeEmNbhoodTOBContainer&,
 			       std::vector<int>&) const;
 
     StatusCode
     findNeighborhood_RowAware(const xAOD::eFexEMRoI*,
 			      const std::vector<const CaloCell*>&,
-			      LArStripNeighborhoodContainer&,
+			      IOBitwise::IeEmNbhoodTOBContainer&,
 			      std::vector<int>&) const;
 
     StatusCode

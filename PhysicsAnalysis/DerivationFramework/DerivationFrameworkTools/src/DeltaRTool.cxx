@@ -1,17 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// DeltaRTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: James Catmore (james.catmore@cern.ch)
 //
 
 #include "DerivationFrameworkTools/DeltaRTool.h"
-#include "xAODBase/IParticleContainer.h"
-#include <vector>
-#include <string>
 
 namespace DerivationFramework {
 
@@ -51,21 +45,22 @@ namespace DerivationFramework {
 
   StatusCode DeltaRTool::addBranches() const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Write deltaRs to SG for access by downstream algs     
-    if (evtStore()->contains<std::vector<float> >(m_sgName.key())) {
+    if (evtStore()->contains<std::vector<float> >(m_sgName.key())) { // FIXME Use Handles
       ATH_MSG_ERROR("Tool is attempting to write a StoreGate key " << m_sgName << " which already exists. Please use a different key");
       return StatusCode::FAILURE;
     }
     std::unique_ptr<std::vector<float> > deltaRs(new std::vector<float>());
-    ATH_CHECK(getDeltaRs(deltaRs.get()));
+    ATH_CHECK(getDeltaRs(deltaRs.get(), ctx ));
 
-    SG::WriteHandle<std::vector<float> > writeHandle(m_sgName);
+    SG::WriteHandle<std::vector<float> > writeHandle(m_sgName, ctx);
     ATH_CHECK(writeHandle.record(std::move(deltaRs)));
 
     return StatusCode::SUCCESS;
   }  
 
-  StatusCode DeltaRTool::getDeltaRs(std::vector<float>* deltaRs) const
+  StatusCode DeltaRTool::getDeltaRs(std::vector<float>* deltaRs, const EventContext& ctx) const
   {
 
     // check the relevant information is available
@@ -78,11 +73,11 @@ namespace DerivationFramework {
     if (!m_containerName2.key().empty()) secondContainer=true;
 
     // get the relevant branches
-    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerName};
+    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerName, ctx};
 
     const xAOD::IParticleContainer* secondParticles(nullptr);
     if (secondContainer) {
-       SG::ReadHandle<xAOD::IParticleContainer> particleHdl2{m_containerName2};
+      SG::ReadHandle<xAOD::IParticleContainer> particleHdl2{m_containerName2, ctx};
        secondParticles=particleHdl2.cptr();
     }
 

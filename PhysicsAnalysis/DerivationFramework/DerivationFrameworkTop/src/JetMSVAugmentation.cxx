@@ -1,16 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTop/JetMSVAugmentation.h"
-
-#include "xAODJet/JetContainer.h"
-#include "DerivationFrameworkTop/TTbarPlusHeavyFlavorFilterTool.h"
 
 #include "xAODBTagging/SecVtxHelper.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODBTagging/BTagging.h"
 #include "xAODBTagging/BTaggingUtilities.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 
 namespace DerivationFramework {
@@ -19,31 +17,17 @@ namespace DerivationFramework {
 JetMSVAugmentation::JetMSVAugmentation(const std::string& t, const std::string& n, const IInterface* p):
   base_class(t,n,p)
 {
-
-
-    declareProperty("JetCollectionName",m_jetCollectionName="AntiKt4EMTopoJets");
-    declareProperty("vertexAlgName",m_vtxAlgName="MSV");
-
 }
 
 
 
-JetMSVAugmentation::~JetMSVAugmentation(){}
+JetMSVAugmentation::~JetMSVAugmentation() = default;
 
 
 
 StatusCode JetMSVAugmentation::initialize(){
-
-  ATH_MSG_INFO("Initialize " );
-
-
-  return StatusCode::SUCCESS;
-
-}
-
-
-
-StatusCode JetMSVAugmentation::finalize(){
+  ATH_MSG_DEBUG("Initialize " );
+  ATH_CHECK(m_jetCollectionName.initialize());
 
   return StatusCode::SUCCESS;
 
@@ -52,33 +36,32 @@ StatusCode JetMSVAugmentation::finalize(){
 
 
 StatusCode JetMSVAugmentation::addBranches() const{
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
-
-  const xAOD::JetContainer* jets;
-  if( evtStore()->retrieve( jets, m_jetCollectionName ).isFailure() ) {
+  SG::ReadHandle<xAOD::JetContainer> jets{m_jetCollectionName, ctx};
+  if ( !jets.isValid() ) {
     ATH_MSG_ERROR ("Couldn't retrieve jets with key: " << m_jetCollectionName );
     return StatusCode::FAILURE;
   }
 
 
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxmass(m_vtxAlgName+"_vtxmass");
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxpt(m_vtxAlgName+"_vtxpt");
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxeta(m_vtxAlgName+"_vtxeta");
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxphi(m_vtxAlgName+"_vtxphi");
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxefrac(m_vtxAlgName+"_vtxefrac");
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxmass(m_dec_vtxmass, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxpt(m_dec_vtxpt, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxeta(m_dec_vtxeta, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxphi(m_dec_vtxphi, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxefrac(m_dec_vtxefrac, ctx);
 
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxx(m_vtxAlgName+"_vtxx");
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxy(m_vtxAlgName+"_vtxy");
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxz(m_vtxAlgName+"_vtxz");
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxx(m_dec_vtxx, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxy(m_dec_vtxy, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxz(m_dec_vtxz, ctx);
 
-  static const SG::AuxElement::Decorator<std::vector<int> > dec_vtxntrk(m_vtxAlgName+"_vtxntrk");
-  static const SG::AuxElement::Decorator<std::vector<float> > dec_vtxdls(m_vtxAlgName+"_vtxdls");
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<int>> dec_vtxntrk(m_dec_vtxntrk, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> dec_vtxdls(m_dec_vtxdls, ctx);
 
 
-  for(auto jet : *jets){
+  for (auto jet : *jets) {
     const xAOD::BTagging* bjet = xAOD::BTaggingUtilities::getBTagging( *jet );
-
-    if(!bjet){
+    if (!bjet) {
       ATH_MSG_WARNING("btagging information not available" );
       continue;
     }
@@ -98,7 +81,7 @@ StatusCode JetMSVAugmentation::addBranches() const{
     std::vector<float> vtx_dls;
 
 
-    for(auto vtx : msvVertices){//loop in vertices
+    for (auto vtx : msvVertices) {//loop in vertices
 
       int   ntrk = xAOD::SecVtxHelper::VtxNtrk(*vtx);
       float mass = xAOD::SecVtxHelper::VertexMass(*vtx);

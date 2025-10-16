@@ -9,9 +9,8 @@
 //
 
 #include "DerivationFrameworkTools/InvariantMassTool.h"
-#include "xAODBase/IParticleContainer.h"
-#include <vector>
-#include <string>
+#include <utility> //for std::pair
+#include <cmath> //for std::hypot
 
 namespace DerivationFramework {
 
@@ -59,20 +58,21 @@ namespace DerivationFramework {
 
   StatusCode InvariantMassTool::addBranches() const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Write masses to SG for access by downstream algs     
     if (evtStore()->contains<std::vector<float> >(m_sgName.key())) {
       ATH_MSG_ERROR("Tool is attempting to write a StoreGate key " << m_sgName << " which already exists. Please use a different key");
       return StatusCode::FAILURE;
     }
     std::unique_ptr<std::vector<float> > masses(new std::vector<float>());
-    ATH_CHECK(getInvariantMasses(masses.get()));
+    ATH_CHECK(getInvariantMasses(masses.get(), ctx));
     //CHECK(evtStore()->record(std::move(masses), m_sgName));      
-    SG::WriteHandle<std::vector<float> > writeHandle(m_sgName);
+    SG::WriteHandle<std::vector<float> > writeHandle(m_sgName, ctx);
     ATH_CHECK(writeHandle.record(std::move(masses)));
     return StatusCode::SUCCESS;
   }  
 
-  StatusCode InvariantMassTool::getInvariantMasses(std::vector<float>* masses) const
+  StatusCode InvariantMassTool::getInvariantMasses(std::vector<float>* masses, const EventContext& ctx) const
   {
 
     // check the relevant information is available
@@ -82,12 +82,12 @@ namespace DerivationFramework {
       return StatusCode::FAILURE;
     }
 
-    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerName};
+    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerName, ctx};
     
     bool from2Collections(false);
     const xAOD::IParticleContainer* particles2{nullptr};
     if (!m_containerName2.key().empty() && m_containerName2.key()!=m_containerName.key()) {
-      SG::ReadHandle<xAOD::IParticleContainer> particleHdl2{m_containerName2};
+      SG::ReadHandle<xAOD::IParticleContainer> particleHdl2{m_containerName2, ctx};
       particles2=particleHdl2.cptr();
       from2Collections = true;
     }
@@ -116,23 +116,17 @@ namespace DerivationFramework {
 
     // Double loop to get all possible index pairs
     unsigned int outerIt, innerIt;
-    std::vector<std::vector<int> > pairs;
+    std::vector<std::pair<int, int> > pairs;
     // Loop for case where both legs are from the same container
     if (!from2Collections) {
       for (outerIt=0; outerIt<nEntries; ++outerIt) {
         for (innerIt=outerIt+1; innerIt<nEntries; ++innerIt) {
-          std::vector<int> tmpPair;
-          tmpPair.push_back(outerIt); tmpPair.push_back(innerIt);
-          pairs.push_back(tmpPair);
+          pairs.push_back({static_cast<int>(outerIt),static_cast<int>(innerIt)});
         }
       }
       // Select the pairs for which the mass should be calculated, and then calculate it	
-      std::vector<std::vector<int> >::iterator pairIt;
-      for (pairIt=pairs.begin(); pairIt!=pairs.end(); ++pairIt) {
-        unsigned int first = (*pairIt)[0];
-        unsigned int second = (*pairIt)[1];    
+      for (const auto & [first, second]: pairs) { 
         if ( (entries[first]==1 && entries2[second]==1) || (entries2[first]==1 && entries[second]==1) ) {
-         
           const float mass = calculateInvariantMass( ((*particles)[first])->p4().Vect(),
 						     ((*particles)[second])->p4().Vect(),
 						     m_massHypothesis,
@@ -148,16 +142,11 @@ namespace DerivationFramework {
         if (entries[outerIt]==0) continue;
         for (innerIt=0; innerIt<nEntries2; ++innerIt) {
           if (entries2[innerIt]==0) continue;
-          std::vector<int> tmpPair;
-          tmpPair.push_back(outerIt); tmpPair.push_back(innerIt);
-          pairs.push_back(tmpPair);
+          pairs.push_back({static_cast<int>(outerIt),static_cast<int>(innerIt)});
         }
       }
       // Select the pairs for which the mass should be calculated, and then calculate it        
-      std::vector<std::vector<int> >::iterator pairIt;
-      for (pairIt=pairs.begin(); pairIt!=pairs.end(); ++pairIt) {
-        unsigned int first = (*pairIt)[0];
-        unsigned int second = (*pairIt)[1];
+      for (const auto & [first, second]: pairs) {
         const float mass = calculateInvariantMass( ((*particles)[first])->p4().Vect(),
                                                    ((*particles2)[second])->p4().Vect(),
                                                    m_massHypothesis,

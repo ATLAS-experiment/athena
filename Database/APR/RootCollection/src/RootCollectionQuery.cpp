@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollectionQuery.h"
@@ -14,7 +14,6 @@
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
-#include "CoralBase/MessageStream.h"
 
 #include "TEventList.h"
 

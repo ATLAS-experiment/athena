@@ -154,6 +154,11 @@ private:
                                                    "", "Write the blueprint graph to a file. No file will be written if empty"};
   Gaudi::Property<bool> m_doEndcapLayerMerging{this, "DoEndcapLayerMerging", true, "Merge overlapping endcap layers in z"};
 
+  /// controls how many bins are created for the sensitive surface grid.
+  /// 1 results in the same number of bins as there are surfaces per layer in each dimension.
+  /// using a higher number will reduce the number of surfaces per bin, thus speeding up navigation, but increasing memory consumption.
+  Gaudi::Property<double> m_numberOfBinsFactor{this, "NumberOfBinsFactor", 5.0};
+
 };
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ReadStats.cxx 642099 2015-01-27 16:43:18Z krasznaa $
@@ -231,7 +231,7 @@ namespace {
             // Add this variable to the result:
             const std::string brName = itr->first +
                SG::AuxTypeRegistry::instance().getName( auxid );
-            result.push_back( brName );
+            result.push_back( std::move( brName ) );
          }
       }
 

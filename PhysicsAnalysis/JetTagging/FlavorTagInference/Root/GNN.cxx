@@ -176,14 +176,8 @@ namespace FlavorTagInference {
   } // end of decorate()
 
   // Dependencies
-  std::set<std::string> GNN::getDecoratorKeys() const {
-    return m_dataLoader.data_dependency_names.bTagOutputs;
-  }
-  std::set<std::string> GNN::getAuxInputKeys() const {
-    return m_dataLoader.data_dependency_names.bTagInputs;
-  }
-  std::set<std::string> GNN::getConstituentAuxInputKeys() const {
-    return m_dataLoader.data_dependency_names.trackInputs;
+  FTagDataDependencyNames GNN::getDependencies() const {
+    return m_dataLoader.data_dependency_names;
   }
 
   std::tuple<FTagDataDependencyNames, std::set<std::string>>

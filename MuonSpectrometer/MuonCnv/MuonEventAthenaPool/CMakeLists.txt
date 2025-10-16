@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonEventAthenaPool )
@@ -51,8 +51,8 @@ atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
                         Muon::sTgcPrepDataContainer Muon::TgcCoinDataContainer
                         Muon::ChamberT0s TPCnv::MuonMeasurements
                         Muon::NSW_PadTriggerDataContainer Muon::NSW_TrigRawDataContainer
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES AthenaPoolUtilities
                   MuonRDO MuonRIO_OnTrack MuonSegment
                   AthAllocators AthContainers AthenaKernel StoreGateLib
                   AthenaPoolCnvSvcLib Identifier GaudiKernel

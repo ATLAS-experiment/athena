@@ -49,13 +49,14 @@ namespace DerivationFramework {
 
   StatusCode BadBatmanAugmentationTool::addBranches() const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     //Running BadBatmanAugmentationTool
 
     //Set the name of the variable to augment
 
-    SG::WriteDecorHandle<xAOD::EventInfo,char> dec_isBadBatman(m_isBadBatmanKey);
+    SG::WriteDecorHandle<xAOD::EventInfo,char> dec_isBadBatman(m_isBadBatmanKey, ctx);
 
-    auto eventInfo = SG::makeHandle (m_eventInfo_key);
+    auto eventInfo = SG::makeHandle (m_eventInfo_key, ctx);
     if (!eventInfo.isValid()){
       ATH_MSG_WARNING("Invalid  xAOD::EventInfo datahandle"
 		      << m_eventInfo_key.key()); 
@@ -63,7 +64,7 @@ namespace DerivationFramework {
     }
     auto ei = eventInfo.cptr();
 
-    auto clusterContainer = SG::makeHandle (m_clusterContainer_key);
+    auto clusterContainer = SG::makeHandle (m_clusterContainer_key, ctx);
     if(!clusterContainer.isValid()){
       ATH_MSG_WARNING("Invalid  xAOD::CaloClusterContainer datahandle"
 		      << m_clusterContainer_key.key());

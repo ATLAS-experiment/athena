@@ -3,8 +3,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from BTagging.BTagConfig import GetTaggerTrainingMap
-from BTagging.BTagLegacyConfig import BTagAlgsCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 
@@ -97,41 +95,6 @@ def BTagLargeRDecoration(cfgFlags, jet_col):
                 ),
             )
         )
-
-    return acc
-
-
-def LegacyBTaggingCfg(cfgFlags, jet_col, pv_col='PrimaryVertices',
-                           trackAugmenterPrefix=None):
-    """
-    Return a component accumulator which runs tagging on a single jet collection.
-    """ 
-
-    jet_col_name_without_Jets = jet_col.replace('Jets','')
-    track_collection = _getTrackCollection(cfgFlags)
-    input_muons = 'Muons'
-    if cfgFlags.BTagging.Pseudotrack:
-        input_muons = None
-
-    acc = ComponentAccumulator()
-    acc.merge(BTagTrackAugmenterAlgCfg(
-        cfgFlags,
-        TrackCollection=track_collection,
-        PrimaryVertexCollectionName=pv_col,
-        prefix=trackAugmenterPrefix
-    ))
-
-    # schedule tagging algorithms for this jet collection
-
-    acc.merge(BTagAlgsCfg(
-        inputFlags=cfgFlags,
-        JetCollection=jet_col_name_without_Jets,
-        nnList=GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets),
-        trackCollection=track_collection,
-        primaryVertices=pv_col,
-        muons=input_muons,
-        AddedJetSuffix='Jets',
-    ))
 
     return acc
 

@@ -506,17 +506,6 @@ DbStatus DbDatabaseObj::reopen(DbAccessMode mod) {
   DbPrint log(m_logon);
   if (mod == pool::READ || mod == pool::UPDATE )  {
     if ( mode() != mod )   {
-      if ( mod == pool::READ )  {
-        for (const_iterator i=begin(); i != end(); ++i )  {
-          if ( !(*i).second->updatesPending() )  {
-            log << DbPrintLvl::Error << "Cannot change mode of " << name()
-                << " to " << accessMode(mod) 
-                << " if updates are queued."
-                << DbPrint::endmsg;
-            return Error;
-          }
-        }
-      }
       setMode(mod);
       DbStatus sc = (0==m_info) ? open() : m_info->reopen(mod);
       if ( sc.isSuccess() )   {
@@ -562,38 +551,25 @@ DbStatus DbDatabaseObj::close()  {
   return sc;
 }
 
-/// Check for pending updates
-bool DbDatabaseObj::updatesPending() const  {
-  for (const_iterator i=begin(); i != end(); ++i )  {
-    if ( (*i).second->updatesPending() )  {
-      return true;
-    }
-  }
-  return false;
-}
-
 /// Close Database object
 DbStatus DbDatabaseObj::retire()  {
-  if ( !updatesPending() )  {
-    DbPrint log( m_logon);
-    log << DbPrintLvl::Info << "Database being retired..." << DbPrint::endmsg;
+  DbPrint log( m_logon);
+  log << DbPrintLvl::Info << "Database being retired..." << DbPrint::endmsg;
 
-    if (m_links.isValid()) m_links.close();
-    if (m_shapes.isValid()) m_shapes.close();
-    if (m_params.isValid()) m_params.close();
-    for (const_iterator j=begin(); j != end(); ++j )  {
-      DbContainerObj* curr = (*j).second;
-      curr->retire();
-    }
-    DbStatus ret = Success;
-    if ( m_info )    {
-      ret = m_info->close(mode());
-    }
-    cleanup();
-    m_fileAge = 0;
-    return ret;
+  if (m_links.isValid()) m_links.close();
+  if (m_shapes.isValid()) m_shapes.close();
+  if (m_params.isValid()) m_params.close();
+  for (const_iterator j=begin(); j != end(); ++j )  {
+    DbContainerObj* curr = (*j).second;
+    curr->retire();
   }
-  return Error;
+  DbStatus ret = Success;
+  if ( m_info )    {
+    ret = m_info->close(mode());
+  }
+  cleanup();
+  m_fileAge = 0;
+  return ret;
 }
 
 /// Retrieve the number of user parameters

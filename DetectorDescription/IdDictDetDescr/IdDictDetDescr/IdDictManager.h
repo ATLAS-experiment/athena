@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,24 +7,14 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: IdDictManager.h,v 1.4 2003-09-22 07:01:22 schaffer Exp $
-//<version>	$Name: not supported by cvs2svn $
-
 #ifndef IDDICTDETDESCR_IDDICTMANAGER_H
 # define IDDICTDETDESCR_IDDICTMANAGER_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
-#include "IdDict/IdDictDefs.h"
 #include "AthenaKernel/CLASS_DEF.h"
-
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
 
 class IdHelper;
 class IdDictDictionary;
 class IdDictMgr;
-
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /**
  *  IdDictManager is the interface to identifier dictionaries. This
@@ -50,8 +40,6 @@ private:
     const IdDictMgr* 	m_mgr;
 };
 
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve

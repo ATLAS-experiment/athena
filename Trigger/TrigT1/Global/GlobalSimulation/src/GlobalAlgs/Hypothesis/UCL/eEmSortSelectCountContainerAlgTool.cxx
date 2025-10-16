@@ -339,6 +339,13 @@ namespace GlobalSim {
     }
     return counts;
   }
+
+   StatusCode
+   eEmSortSelectCountContainerAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
+						 const EventContext& ctx) const {
+     CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
+    return StatusCode::SUCCESS;
+  }
   
   std::string eEmSortSelectCountContainerAlgTool::toString() const {
 

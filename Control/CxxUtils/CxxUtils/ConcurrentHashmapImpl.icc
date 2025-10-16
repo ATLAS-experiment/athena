@@ -292,6 +292,7 @@ CHMIMPL::ConcurrentHashmapImpl (Updater_t&& updater,
   // Round up capacity to a power of 2.
   size_t capacity = round_up (capacity_in);
 
+  // cppcheck-suppress noDestructor -- ownership goes to the updater
   m_table = new (capacity) Table (capacity, hasher, matcher);
   m_updater.update (std::unique_ptr<Table> (m_table), ctx);
 }
@@ -703,6 +704,7 @@ CHMIMPL::clear (size_t capacity,
   // Publish the new table.
   m_size = 0;
   m_erased = 0;
+  // cppcheck-suppress danglingLifetime -- ok
   m_table = new_table.get();
   m_updater.update (std::move (new_table), ctx);
   return it;
@@ -880,6 +882,7 @@ bool CHMIMPL::grow (const Lock_t& /*lock*/,
   m_erased = 0;
 
   // Publish the new table.
+  // cppcheck-suppress danglingLifetime -- ok
   m_table = new_table.get();
   m_updater.update (std::move (new_table), ctx);
     

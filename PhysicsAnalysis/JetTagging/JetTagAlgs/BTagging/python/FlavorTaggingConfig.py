@@ -9,13 +9,14 @@ from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCf
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg, BTagTrackAugmenterByVertexAlgCfg
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 from FlavorTagInference.FlavorTagNNConfig import MultifoldGNNCfg
+from FlavorTagInference.FlavorTagNNConfig import getModifierSet
 from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
 from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
 
-
 from pathlib import Path
+import re
 
 
 def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAccumulator:
@@ -37,9 +38,12 @@ def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAc
         An accumulator containing the additional algorithms based on the dirname.
     """
     acc = ComponentAccumulator()
-    if "GN3EPCLV01" in dirname or "Muon" in dirname:
+
+    modset = getModifierSet(dirname.split('/')[-2])
+
+    if "L" in modset:
         acc.merge(TrackLeptonDecorationCfg(cfgFlags))
-    if "GN3EPCLV01" in dirname or "Electrons" in dirname:
+    if "E" in modset:
         acc.merge(FTagElectronAssociationCfg(
             cfgFlags,
             jetCollection=jetCollection,
@@ -118,7 +122,13 @@ def FlavorTaggingCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
-        acc.merge(_addDepsByDirname(cfgFlags, dirname, JetCollection))
+
+        # assume there are no special dependencies for jetmet regression
+        if re.compile('.*/CalibArea(-[0-9]{2}){3}/.*').match(dirname):
+            modset = set()
+        else:
+            acc.merge(_addDepsByDirname(cfgFlags, dirname, JetCollection))
+            modset = getModifierSet(dirname.split('/')[-2])
 
         args = dict(
              flags=cfgFlags,
@@ -126,6 +136,7 @@ def FlavorTaggingCfg(
              TrackCollection=trackCollection,
              nnFilePaths=networks['folds'],
              remapping=networks.get('remapping', {}),
+             electrons=('Electrons' if 'E' in modset else '')
         )
 
         if foldHashName := networks.get('hash'):
@@ -230,8 +241,8 @@ def JetBTagginglessByVertexAlgCfg(
 
                 if '/GN2v01/' in dirname:
                     args['tag_requirements'] = {'nonzeroTracks'}
-                    
-                acc.merge(MultifoldGNNCfg(**args, dz_suffix=dz_suffix))
+
+                acc.merge(MultifoldGNNCfg(**args, suffix=dz_suffix))
 
     return acc
 

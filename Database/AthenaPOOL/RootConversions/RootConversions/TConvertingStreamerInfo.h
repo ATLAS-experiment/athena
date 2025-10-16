@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootConversions/TConvertingStreamerInfo.h
@@ -24,8 +24,8 @@
 #ifndef ROOTCONVERSIONS_TCONVERTINGSTREAMERINFO_H
 #define ROOTCONVERSIONS_TCONVERTINGSTREAMERINFO_H
 
-#include "TStreamerInfo.h"
 #include "TError.h"
+#include "TStreamerInfo.h"
 
 
 /**
@@ -65,7 +65,7 @@ public:
 private:
   /**
    * @brief new() method for this object.
-   * @param p Address for placement new, or 0.
+   * @param p Address for placement new, or nullptr.
    * @return Address of the new object.
    *
    * This is installed as the @c New method in @c TStreamerInfo's @c TClass.

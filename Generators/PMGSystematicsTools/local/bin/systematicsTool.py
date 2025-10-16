@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
-This module contains helper functions which allow users to manipluate multiple
+This module contains helper functions which allow users to manipulate multiple
 YODA files corresponding to different subsamples of a given process/generator,
 different sources of theory uncertainty, etc. and combine them, plotting the
 theory error bands along the way.
 
-Can be used either as a standalone exectuable or the functions can be imported
-intot a custom python script.
+Can be used either as a standalone executable or the functions can be imported
+into a custom python script.
 
 This module uses a loosely-defined datatype which shall be referred to as
 AnalysisObject, which is effectively a dict of np.arrays and strings.
@@ -88,7 +88,7 @@ def renameFilesWithoutPrefix(directory):
   `return` None
 
   Renames the files in a given directory, such that the longest common prefix
-  which occurs in all filenames is ommitted. Useful if your GRID jobs were
+  which occurs in all filenames is omitted. Useful if your GRID jobs were
   submitted with the format <prefix>.<weights_names>.yoda and you want to
   lose the <prefix>. bit !
   """
@@ -192,8 +192,8 @@ def lookupPDFSetName(lhapdfid):
   `lhapdfid` Int
   `return` String
 
-  Takes a LHAPDF ID code and figures out what is the name of the PDF Set
-  which it belons to.
+  Takes a LHAPDF ID code and figures out the name of the PDF Set
+  which it belongs to.
   """
   lhapdfid = int(lhapdfid)
   for a in lhapdf.availablePDFSets():
@@ -354,7 +354,7 @@ def splitOperand(operand, bracket="()"):
 
   Splits the operand of a formula into comma-separated chunks without splitting
   operands of nested functions.
-  eg: Funcion1(foo, Function2(bar, foo), Function3(foo, Function4 (bar, foo)))
+  eg: Function1(foo, Function2(bar, foo), Function3(foo, Function4 (bar, foo)))
   --> [foo, Function2(bar, foo), Function3(foo, Function4 (bar, foo))]
   """
   parts = []
@@ -389,9 +389,9 @@ def getFormulaComponents(formula):
   `formula` String
   `return` list(String)
 
-  Take this formula written in this string and recusively optain a list of
-  basic components which is needs eg:
-  Funcion1(foo, Function2(bar, foo), Function3(foo, Function4 (bar, foo)))
+  Take this formula written in this string and recusively obtain a list of
+  needed basic components, eg:
+  Function1(foo, Function2(bar, foo), Function3(foo, Function4 (bar, foo)))
   --> [foo, bar, foo, foo, bar, foo]
   """
   result = []
@@ -413,15 +413,15 @@ def getFormulaComponents(formula):
 
 def resolveFormula(nominal, formula, componentsMap, level=0, verbose=0):
   """
-  `nominal` AnalysisObject (nominal object, which gives us the centeal values.
-  The typ is a dict of np.arrays() encoding information equivalent
+  `nominal` AnalysisObject (nominal object, which gives us the central values
+  The type is a dict of np.arrays() encoding information equivalent
   to a Scatter2D, Histo1D, TGraphAsymmErrors or TH1D. See module description
   for more information about this format. TODO: dedicated class for this?)
   `formula` String (The formula with which to combine the components)
   `componentsMap` dict(filenames, AnalysisObjects) (this is a map between the
   file which the component corresponds to and the AnalysisObject which it
   corresponds to.
-  `level` Int [optional] (keeps track of how deep in the recursiom we have gone)
+  `level` Int [optional] (keeps track of how deep in the recursion we have gone)
   `verbose` Int [optional] (0 or 1, whether or not to print(a lot of debug messages) )
   `return` AnalysisObject
 
@@ -726,7 +726,7 @@ def combineVariationsHessian(nom, variations, asym=True):
   `asym` Bool [optional] (return asymmetric errors? Or symmetrize?)
   `return` AnalysisObject
 
-  Combine the specified variations according to the Hession prescription
+  Combine the specified variations according to the Hessian prescription
   Central value given by nom.
   """
   y = 'y'
@@ -1149,7 +1149,7 @@ def getAverageUncertaintySizePerBin(fIn, regexFilter=None, regexVeto=None):
   `return` Float
 
   Get a rough estimate of the average symmetric relative error per bin, used to
-  determine what order to plot the uncertaities in.
+  determine what order to plot the uncertainties in.
   """
   averageUncertaintySizePerBin = None
   nominalHists = readFromFile(fIn)
@@ -1186,7 +1186,7 @@ def combineVariation(wName, wInfo, fOut, regexFilter=None, regexVeto=None):
   `regexVeto` String [optional] (AOs whose names match regex are NOT processed)
   `return` None
 
-  Produce aand write a YODA file for the systematioc uncertainty wName by
+  Produce and write a YODA file for the systematic uncertainty wName by
   combining the weights listed in wInfo['weights'], according to the procedure
   specified in wInfo['combination'] for each AO.
 
@@ -1352,7 +1352,7 @@ def safeRootLatex(unsafeLatex):
   `unsafeLatex` String (unsafe Latex string to be converted)
   `return` String (safe TLatex string which can be used on ROOT plots)
 
-  TLatex is not quite the same as regular latex, and won't compiled properly
+  TLatex is not quite the same as regular latex, and won't compile properly
   out of the box unless a few changes are made. This function does that
   hopefully in the majority of cases! No promises though... *sigh*
   """
@@ -1479,7 +1479,7 @@ def makeSystematicsPlotsWithROOT(mergedSystDict, outdir, nominalName="Nominal", 
   r.gROOT.SetBatch()
   r.gStyle.SetOptStat(00000)
   outputPlots = []
-  # Want to try to retrive a .plot and reference .yoda file for the relevant analysis!
+  # Want to try to retrieve a .plot and reference .yoda file for the relevant analysis!
   # This is where to check first..
   RIVET_ANALYSIS_PATH = os.environ.get("RIVET_ANALYSIS_PATH")
   os.system("mkdir -p %s" % (outdir))
@@ -1924,10 +1924,10 @@ def makeSystematicsPlotsWithRIVET(mergedSystDict, plotsDir, nominalName="Nominal
 
 def getCombinationRecipe(systWeights, combinationRecipeFile=None, combinationRecipeName=None,):
   """
-  `systWeights` list(String) (list of weight types which are avaliable
+  `systWeights` list(String) (list of weight types which are available
   for a given dsid, to identify the correct combination recipe)
   `combinationRecipeName` String [optional] (specify if you want to use a
-  specific comboination uncertainty, otherwise, it will try to auto-
+  specific combination uncertainty, otherwise, it will try to auto-
   determine frim the systWeights)
   `combinationRecipeFile` String [optional] (specify if the target file is in
   a different location to $SYSTTOOLSPATH/data/Syst_Database.yaml
@@ -2147,7 +2147,7 @@ def extractTarballsFromDirectory(fulldir, force=False, verbose=False, rootOrYoda
 
   `return` list of [sample, newfn, filepath]
 
-  This function goes through a directpry and unpacks all the tarballs it finds.
+  This function goes through a directory and unpacks all the tarballs it finds.
   By default if a matching unpacked file has been found,
   a tarball is not needlessly re-unpacked unless option `force` is used.
   """
@@ -2224,7 +2224,7 @@ def printProgress(progress):
   `return` Void
 
   This is a helper function print(the progress update in multi-)
-  threader processes
+  threaded processes
   """
   printString = ""
   nChar = 160

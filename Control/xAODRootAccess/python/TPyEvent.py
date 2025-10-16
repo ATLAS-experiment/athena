@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Module holding the TPyEvent Python class
 #
@@ -17,11 +17,15 @@ import ROOT
 class TPyEvent( ROOT.xAOD.TPyEvent ):
 
     ## Constructor for the class
-    def __init__( self ):
+    def __init__( self, mode = ROOT.xAOD.TEvent.kUndefinedAccess ):
 
         # Forward the call to the base class's constructor:
-        ROOT.xAOD.TPyEvent.__init__( self )
+        ROOT.xAOD.TPyEvent.__init__( self, mode )
         return
+
+    ## Convenient shorthand for retrieving an object.
+    def __getitem__( self, key ):
+        return self.retrieve( key )
 
     ## Convenient version of the base class's contains function
     #

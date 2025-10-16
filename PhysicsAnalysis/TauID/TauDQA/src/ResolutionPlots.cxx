@@ -6,6 +6,8 @@
 #include "ResolutionPlots.h"
 #include "AthContainers/ConstAccessor.h"
 #include "TLorentzVector.h"
+#include "TauAnalysisTools/ITauTruthMatchingTool.h"
+
 namespace Tau{
 
   ResolutionPlots::ResolutionPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName):

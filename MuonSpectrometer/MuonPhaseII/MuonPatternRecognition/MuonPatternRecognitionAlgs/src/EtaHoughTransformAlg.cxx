@@ -11,6 +11,7 @@
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
+#include "MuonPatternEvent/SegmentFitterEventData.h"
 
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/MMCluster.h"
@@ -21,17 +22,17 @@
 
 namespace MuonR4{
     // helper to check if our trajectory traverses a chamber
-    inline bool passesThrough(const SpacePointBucket::chamberLocation & loc, double y0, double tanTheta){
-        double yCross = (y0 + loc.location().z() * tanTheta);  
+    inline bool passesThrough(const SpacePointBucket::chamberLocation & loc, double y0, double tanBeta){
+        double yCross = (y0 + loc.location().z() * tanBeta);  
         return (loc.minY() < yCross && yCross < loc. maxY()); 
     } 
     // determines the local residual when traversing a chamber 
-    inline double proximity(const SpacePoint* dc, double y0, double tanTheta) {
+    inline double proximity(const SpacePoint* dc, double y0, double tanBeta) {
         if (dc->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanTheta, dc) - y0), 
-                            std::abs(HoughHelpers::Eta::houghParamMdtRight(tanTheta, dc) - y0));
+            return std::min(std::abs(HoughHelpers::Eta::houghParamMdtLeft(tanBeta, dc) - y0), 
+                            std::abs(HoughHelpers::Eta::houghParamMdtRight(tanBeta, dc) - y0));
         }
-        return std::abs(HoughHelpers::Eta::houghParamStrip(tanTheta, dc) - y0);
+        return std::abs(HoughHelpers::Eta::houghParamStrip(tanBeta, dc) - y0);
     }
     /** @brief Calculates how much of the unkknown coordinate along the tube range 
      *         is covered by the chamber of interest.
@@ -253,7 +254,7 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
             }
         } else if (precTech) {
             /// Calculate the width / tube length at the centre crossing point 
-            /// (maximum.x -> tanTheta, maximum.y -> y0)
+            /// (maximum.x -> tanBeta, maximum.y -> y0)
             const double lowL = muonChamber.width(maximum.y + muonChamber.location().z() * maximum.x);
             const std::array<double, 2> chambEdges{muonChamber.location().x() - lowL,
                                                    muonChamber.location().x() + lowL};
@@ -329,7 +330,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
     }
     if (maxima.empty()) {
         ATH_MSG_DEBUG("Station "<<bucket.bucket->msSector()->identString()
-            <<":\n     Mean tanTheta was "<<tanThetaMean 
+            <<":\n     Mean tanBeta was "<<tanThetaMean 
             << " and my intercept "<<chamberCenter 
             <<", with hits in the bucket in "<< bucket.bucket->coveredMin() 
             <<" - "<<bucket.bucket->coveredMax() 
@@ -413,7 +414,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         // this seed looks good! Let's finalise it 
         size_t nHits = hitList.size();
         // add phi measurements - will be filtered for compatibility in separate algorithm
-        extendWithPhiHits(hitList, bucket);
+        extendWithPhiHits(hitList, bucket, max.x, max.y);
         // sort hits by layer 
         const SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitList, sorter);
@@ -467,9 +468,22 @@ void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughH
     }
 }
 void EtaHoughTransformAlg::extendWithPhiHits(std::vector<HoughHitType>& hitList, 
-                                             HoughSetupForBucket& bucket) const {
+                                             HoughSetupForBucket& bucket,
+                                             const double tanBeta,
+                                             const double interceptY) const {
+    const Amg::Vector3D maxPos = interceptY * Amg::Vector3D::UnitY();
+    const Amg::Vector3D maxDir = Acts::makeDirectionFromAxisTangents(0., tanBeta);
+
     for (const SpacePointBucket::value_type& hit : *bucket.bucket) {
-        if (!hit->measuresEta()) {
+        if (hit->measuresEta()){
+            continue;
+        }
+        using namespace SegmentFit;
+        const Amg::Vector3D& dir{hit->sensorDirection()};
+        const Amg::Vector3D& pos{hit->localPosition()};
+        const double distAlongStrip = std::abs(dir.dot(SeedingAux::extrapolateToPlane(maxPos,maxDir, *hit) - pos));
+        const double stripL = std::sqrt(hit->covariance()[Acts::toUnderlying(AxisDefs::etaCov)]);
+        if (!hit->measuresEta() && distAlongStrip < stripL + m_phiStripSafety) {
             hitList.push_back(hit.get());
         }
     }

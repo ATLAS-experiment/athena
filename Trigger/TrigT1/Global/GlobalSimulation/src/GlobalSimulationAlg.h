@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_GLOBALSIMULATIONALG_H
@@ -20,6 +20,8 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "IGlobalSimAlgTool.h"
+#include "ITIPwriterAlgTool.h"
+#include "IO/TipWord_clid.h"
 
 namespace GlobalSim {
   
@@ -33,6 +35,13 @@ namespace GlobalSim {
 
   private:
 
+    SG::WriteHandleKey<std::bitset<1024>> m_tipWordKey {
+      this,
+	"tipWord",
+	"GlobalSimTIP",
+	"Key to ewrite out TIP bitset"}; 
+    
+
     Gaudi::Property<bool>
     m_useTestInputEvent {this, "useTestInputEvent", {false},
       "use a test input event"};
@@ -42,7 +51,13 @@ namespace GlobalSim {
       "globalsim_algs",
       {},
       "ordered sequence of GlobalSim AlgTools"};
-                
+
+    ToolHandleArray<ITIPwriterAlgTool> m_TIPwriters{
+      this,
+      "TIPwriters",
+      {},
+      "sequence of TIP writer AlgTools"};
+    
     Gaudi::Property<bool>
     m_enableDumps {this, "enableDumps", {false},
       "flag to control writing debug files"};

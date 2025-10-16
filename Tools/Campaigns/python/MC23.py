@@ -473,7 +473,7 @@ def BeamspotSplitMC23e():
 def BeamspotSplitMC23g():
     """MC23g beamspot splitting configuration."""
     substeps = 4
-    event_fractions = [0.3, 0.41, 0.09, 0.2]
+    event_fractions = [0.3, 0.42, 0.08, 0.2]
 
     return substeps, event_fractions
 

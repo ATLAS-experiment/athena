@@ -9,18 +9,9 @@
 // PhysVal includes
 #include "PhysValTau.h"
 
-// STL includes
-#include <vector>
-
 // FrameWork includes
 #include "GaudiKernel/IToolSvc.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODEgamma/ElectronContainer.h" 
-#include "xAODTau/TauJetContainer.h" 
-#include "xAODTruth/TruthParticleContainer.h"
-#include "AthenaBaseComps/AthCheckMacros.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include "AthContainers/ConstAccessor.h"
 
 
 PhysValTau::PhysValTau(const std::string& type, 

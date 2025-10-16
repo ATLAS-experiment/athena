@@ -5,8 +5,10 @@ def EFTrackingDataStreamUnloaderAlgorithmCfg(flags, **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("name", "EFTrackingDataStreamUnloaderAlgorithm")
+
     from AthenaConfiguration.ComponentFactory import CompFactory 
-    acc.addEventAlgo(CompFactory.EFTrackingDataStreamUnloaderAlgorithm("EFTrackingDataStreamUnloaderAlgorithm", **kwargs))
+    acc.addEventAlgo(CompFactory.EFTrackingDataStreamUnloaderAlgorithm(**kwargs))
 
     return acc
 

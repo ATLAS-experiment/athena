@@ -24,7 +24,7 @@ public:
   const Trk::PrepRawData * getPRD() const { return m_stgc; }
 
   bool inMuonChamber() const { return true; }
-  GeoPVConstLink parentMuonChamberPV() const { return m_stgc->detectorElement()->parentStationPV(); }
+  GeoPVConstLink parentMuonChamberPV() const { return m_stgc->detectorElement()->getMaterialGeom()->getParent(); }
 
 private:
   const Muon::sTgcPrepData* m_stgc;

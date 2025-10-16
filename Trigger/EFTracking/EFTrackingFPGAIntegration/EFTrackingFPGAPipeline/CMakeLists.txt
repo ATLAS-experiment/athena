@@ -46,6 +46,7 @@ atlas_add_component(EFTrackingFPGAPipeline
                                    LibXRT 
                                    LibXOCL
                                    FPGATrackSimObjectsLib
+                                   ActsEventLib
 				   EFTrackingFPGAUtilityLib TrigSteeringEvent)
 
 atlas_install_python_modules(python/*.py)

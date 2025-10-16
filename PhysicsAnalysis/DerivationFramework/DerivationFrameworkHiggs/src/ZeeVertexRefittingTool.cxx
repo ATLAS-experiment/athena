@@ -70,8 +70,9 @@ namespace DerivationFramework {
 
   StatusCode ZeeVertexRefittingTool::addBranches() const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // skip mc samples not included in the MCSamples list
-    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 
     if(eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
       bool skipSample = true;
@@ -91,13 +92,13 @@ namespace DerivationFramework {
     }
 
 
-    SG::ReadHandle<xAOD::VertexContainer> pv_cont (m_primaryVertexKey);
+    SG::ReadHandle<xAOD::VertexContainer> pv_cont (m_primaryVertexKey, ctx);
 
     xAOD::VertexContainer* refittedPVContainer = new xAOD::VertexContainer;
     xAOD::VertexAuxContainer* refittedPVAuxContainer = new xAOD::VertexAuxContainer;
     refittedPVContainer->setStore( refittedPVAuxContainer );
   
-    SG::WriteHandle<xAOD::VertexContainer> vertexContainer(m_refitpvKey);
+    SG::WriteHandle<xAOD::VertexContainer> vertexContainer(m_refitpvKey, ctx);
     ATH_CHECK(vertexContainer.recordNonConst(std::unique_ptr< xAOD::VertexContainer >(refittedPVContainer),
                                              std::unique_ptr< xAOD::VertexAuxContainer >(refittedPVAuxContainer)));
 
@@ -114,7 +115,7 @@ namespace DerivationFramework {
     ATH_MSG_DEBUG("Found PV");
 
     // retrieve particle collections
-    SG::ReadHandle<xAOD::ElectronContainer> electrons (m_electronKey);
+    SG::ReadHandle<xAOD::ElectronContainer> electrons (m_electronKey, ctx);
 
     // create the vector which will hold the Zee pairs
     std::vector< std::vector<unsigned int> > eepairs;

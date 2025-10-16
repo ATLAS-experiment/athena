@@ -301,6 +301,9 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
 
     return result
 
+
+    
+
 def FPGATrackSimOverlapRemovalToolMonitoringCfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()

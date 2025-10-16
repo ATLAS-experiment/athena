@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARDETCELLPARAMSCOMPLETE_H
 #define LARRAWCONDITIONS_LARDETCELLPARAMSCOMPLETE_H
 
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "LArElecCalib/ILArDetCellParams.h" 
 #include "LArRawConditions/LArDetCellParamsP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
@@ -21,7 +22,7 @@
  *  - 
  */
 
-class LArDetCellParamsComplete: public ILArDetCellParams ,
+class LArDetCellParamsComplete: public ILArDetCellParams,
 	public LArConditionsContainer<LArDetCellParamsP>{
 
   
@@ -43,4 +44,5 @@ class LArDetCellParamsComplete: public ILArDetCellParams ,
 };
 
 CLASS_DEF( LArDetCellParamsComplete,191084371,1)
+SG_BASES(LArDetCellParamsComplete, ILArDetCellParams);
 #endif 

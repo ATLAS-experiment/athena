@@ -15,7 +15,8 @@ if __name__=="__main__":
     parser.set_defaults(noSTGC=True)
  
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.set_defaults(eventPrintoutLevel = 50)
    
     args = parser.parse_args()

@@ -61,7 +61,7 @@ namespace DerivationFramework {
         StatusCode finalize() override;
         static double getInvariantMass(const std::vector<const xAOD::TrackParticle*> &Tracks, const std::vector<double> &massHypotheses);
         static bool isContainedIn(const xAOD::TrackParticle* theTrack, const xAOD::MuonContainer* theColl);
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
+        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer) const;
 
     };
 }

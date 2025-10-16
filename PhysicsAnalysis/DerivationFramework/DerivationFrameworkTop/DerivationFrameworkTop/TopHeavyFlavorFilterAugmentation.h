@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,11 +13,12 @@
 #ifndef DerivationFramework_TopHeavyFlavorFilterAugmentation_H
 #define DerivationFramework_TopHeavyFlavorFilterAugmentation_H
 
-#include <string>
-
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+#include "DerivationFrameworkTop/TTbarPlusHeavyFlavorFilterTool.h"
 
 namespace DerivationFramework {
 
@@ -29,17 +30,13 @@ namespace DerivationFramework {
   public:
     TopHeavyFlavorFilterAugmentation(const std::string& t, const std::string& n, const IInterface* p);
     ~TopHeavyFlavorFilterAugmentation();
-    StatusCode initialize();
-    StatusCode finalize();
-    virtual StatusCode addBranches() const;
-
-
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches() const override;
 
   private:
-
-    std::string m_eventInfoName;
-    ToolHandle<DerivationFramework::TTbarPlusHeavyFlavorFilterTool> m_filterTool;
-    
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoName{this, "EventInfoName", "EventInfo"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_filterFlagKey{this, "FilterFlagKey", m_eventInfoName, "TopHeavyFlavorFilterFlag"};
+    PublicToolHandle<DerivationFramework::TTbarPlusHeavyFlavorFilterTool> m_filterTool{this, "FilterTool", ""};
 
   }; /// class
 

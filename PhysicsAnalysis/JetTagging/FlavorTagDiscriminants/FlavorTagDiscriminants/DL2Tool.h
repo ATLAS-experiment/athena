@@ -8,6 +8,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "FlavorTagInference/IJetTagConditionalDecorator.h"
+#include "FlavorTagInference/FTagDataDependencyNames.h"
 
 namespace FlavorTagDiscriminants {
 
@@ -26,6 +27,7 @@ namespace FlavorTagDiscriminants {
   {
     ASG_TOOL_CLASS(DL2Tool, IJetTagConditionalDecorator )
   public:
+    using DataDependencyNames = FlavorTagInference::FTagDataDependencyNames;
     DL2Tool(const std::string& name);
     ~DL2Tool();
 
@@ -35,9 +37,7 @@ namespace FlavorTagDiscriminants {
     virtual void decorate(const xAOD::IParticle& i_jet) const override;
     virtual void decorateWithDefaults(const xAOD::IParticle& i_jet) const override;
 
-    virtual std::set<std::string> getDecoratorKeys() const override;
-    virtual std::set<std::string> getAuxInputKeys() const override;
-    virtual std::set<std::string> getConstituentAuxInputKeys() const override;
+    virtual DataDependencyNames getDependencies() const override;
   private:
     DL2Properties m_props; //!
     std::unique_ptr<DL2HighLevel> m_dl2; //!

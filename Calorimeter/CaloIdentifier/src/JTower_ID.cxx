@@ -5,7 +5,6 @@
 #include "CaloIdentifier/JTower_ID.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 
 #include "GaudiKernel/MsgStream.h"
 

@@ -117,32 +117,6 @@ namespace pool  {
                                   ShapeH                shapeH,
                                   void**                object) = 0;
 
-    /// In place update of an existing object.
-    /**
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   object    [IN] Pointer to persistent data object.
-      * @param   shapeH    [IN] Handle to persistent type information
-      * @param   refToken  [IN] Reference to token containing the location
-      *                         information of the persistent object.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus update(      FileDescriptor&       refDB,
-                                  const void*           object,
-                                  ShapeH                shapeH,
-                                  Token&                refToken) = 0;
-
-    /// Destroy an existing persistent object.
-    /**
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   refToken  [IN] Reference to token containing the location
-      *                         information of the persistent object.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus destroy(           FileDescriptor& refDB,
-                                        Token&          refToken) = 0;
-
     /// Retrieve persistent shape from Storage manager.
     /** The persistent shape is saved at write time to a Database.
       * To match the transient shape of an object to the persistent shape of 
@@ -250,20 +224,6 @@ namespace pool  {
                                   int                 mode,
                                   FileDescriptor&     refDB) = 0;
 
-    /// Reconnect to a logical Database unit with different access mode
-    /** In order to reconnect, the database obviously must already be open.
-      *
-      * @param    refDB    [IN] Descriptor of the Database to be re-opened. 
-      * @param    mode     [IN] Flag to indicate the accessmode of the session.
-      *                         Since a database can only be re-opened if it 
-      *                         exists, possible values may only be:
-      *                         READ, UPDATE.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus reconnect(   FileDescriptor&     refDB,
-                                  int                 mode ) = 0;
-
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
       * are already commited. Otherwise data are lost. On disconnection the 
@@ -281,8 +241,7 @@ namespace pool  {
     virtual DbStatus disconnect(  FileDescriptor&     refDB) = 0;
 
     /// Query the access mode of a Database unit.
-    /** In order to reconnect, the database obviously must already be open.
-      *
+    /**
       * @param    refDB    [IN] Descriptor of the Database to be queried. 
       * @param    mode    [OUT] Open mod to the database.
       *

@@ -1,21 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAURECTOOLS_HELPERFUNCTIONS_H
 #define DITAURECTOOLS_HELPERFUNCTIONS_H
 
 #include "xAODTau/DiTauJet.h"
-
 #include "AsgMessaging/MessageCheck.h"
-
 #include "MVAUtils/BDT.h"
-#include "TLorentzVector.h"
 #include "TString.h"
-
 #include <vector>
 #include <map>
-
+#include <memory>
 
 namespace DiTauRecTools
 {

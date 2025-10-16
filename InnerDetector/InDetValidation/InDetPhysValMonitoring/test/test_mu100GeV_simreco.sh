@@ -2,7 +2,9 @@
 # art-description: art job for InDetPhysValMonitoring, Single mu 100GeV 
 # art-type: grid
 # art-input: mc23_13p6TeV:mc23_13p6TeV.902075.PG_singlemuon_Pt100_etaFlat0_2p7.merge.EVNT.e8582_e8528
-# art-input-nfiles: 1
+# art-input-nfiles: 10
+# art-cores: 8
+# art-memory: 4096
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: physval*.root
@@ -18,11 +20,11 @@ dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/HitV
 dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/RDOAnalysis_mu_100GeV_simreco.root 
 dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_mu100GeV_simreco.root
 
-script=test_MC_mu0_simreco.sh
+script=test_MC_mu0_simreco_multicores.sh
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${dcuberef_sim} ${dcuberef_rdo} ${dcuberef_rec}
+"$script" ${ArtProcess} ${ArtInFile} ${dcuberef_sim} ${dcuberef_rdo} ${dcuberef_rec}
 
 echo "Clean up output directory (based on compiler)"
 clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}

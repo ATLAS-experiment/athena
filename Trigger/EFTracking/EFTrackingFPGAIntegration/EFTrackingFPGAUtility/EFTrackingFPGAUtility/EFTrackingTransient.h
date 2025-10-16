@@ -27,6 +27,8 @@ namespace EFTrackingTransient
   constexpr unsigned int MAX_NUM_CLUSTERS = 409600;
   constexpr unsigned int NUM_PIXEL_WORD = 10;
   constexpr unsigned int NUM_STRIP_WORD = 9;
+  constexpr unsigned int NUM_MAXCLUSTER_WORD_INTRACK = 13;
+  constexpr unsigned int MAX_TRACK = 1000;
 
 
   constexpr unsigned int NUM_PIXEL_ROW = 19;
@@ -35,6 +37,9 @@ namespace EFTrackingTransient
   constexpr unsigned long STRIP_BLOCK_BUF_SIZE = NUM_STRIP_WORD * MAX_NUM_CLUSTERS;
   constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
   constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
+
+  constexpr unsigned long TRACK_CONTAINER_BUF_SIZE = (NUM_MAXCLUSTER_WORD_INTRACK*MAX_TRACK + 4096);
+
 
   // Optimize these, 
   constexpr unsigned int NUM_MAXINPUT_PIXEL_ROW = 3;

@@ -600,7 +600,7 @@ StatusCode LArOFCAlg::initPhysWaveContainer(const LArOnOffIdMapping* cabling) {
       return sc;
     }
       
-    m_allChannelData.reserve(m_allChannelData.size()+128*waveCnt->size());// Size doesn't give the expected response on a CondtitionsContainer 
+    m_allChannelData.reserve(std::max(m_allChannelData.size()*3/2,m_allChannelData.size()+128*waveCnt->size()));// Size doesn't give the expected response on a ConditionsContainer
 
     for (unsigned gain = CaloGain::LARHIGHGAIN ; gain < CaloGain::LARNGAIN ; gain++ ) { // loop on possible gains
       WAVEIT it=waveCnt->begin(gain);
@@ -652,7 +652,7 @@ StatusCode LArOFCAlg::initCaliWaveContainer() {
     }   
    
 
-    m_allChannelData.reserve(m_allChannelData.size()+128*waveCnt->size());// Size doesn't give the expected response on a CondtitionsContainer 
+    m_allChannelData.reserve(std::max(m_allChannelData.size()*3/2,m_allChannelData.size()+128*waveCnt->size()));// Size doesn't give the expected response on a ConditionsContainer
 
     for (unsigned gain = CaloGain::LARHIGHGAIN ; gain < CaloGain::LARNGAIN ; gain++ ) { // loop on possible gains
       WAVEIT it=waveCnt->begin(gain);
@@ -970,7 +970,9 @@ bool LArOFCAlg::verify(const HWIdentifier chid, const std::vector<float>& OFCa, 
     recTime += OFCb[iSample] * Shape[iSample];
   } //End loop over samples
 
-  recTime /= recAmpl ;
+  if (recAmpl != 0) {
+    recTime /= recAmpl ;
+  }
 
   // At this point the reconstructed amplitude must be = 1 by definition, whatever the initial normalisation!
   ATH_MSG_VERBOSE("recAmp=" << recAmpl << " ; recTime=" << recTime);

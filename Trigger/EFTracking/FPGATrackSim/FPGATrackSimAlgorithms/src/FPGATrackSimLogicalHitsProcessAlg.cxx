@@ -69,17 +69,18 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
 
     // ROOT branches created for test vectors.
-    if (m_outputRoadUnionTool) m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), true);
     m_logicEventOutputHeader = m_writeOutputTool->addOutputBranch(m_outputBranch.value(), true);
 
+    if (m_outputRoadUnionTool) m_slicedHitHeader = m_writeOutputTool->addInputBranch(m_sliceBranch.value(), m_writeInputBranches);
+      
     // Updated slicing engine test vectors will have three streams.
-    m_slicedFirstPixelHeader = m_writeOutputTool->addInputBranch(m_sliceFirstPixelBranch.value(), true);
-    m_slicedSecondPixelHeader = m_writeOutputTool->addInputBranch(m_sliceSecondPixelBranch.value(), true);
-    m_slicedStripHeader = m_writeOutputTool->addInputBranch(m_sliceStripBranch.value(), true);
-
+    m_slicedFirstPixelHeader = m_writeOutputTool->addInputBranch(m_sliceFirstPixelBranch.value(), m_writeInputBranches);
+    m_slicedSecondPixelHeader = m_writeOutputTool->addInputBranch(m_sliceSecondPixelBranch.value(), m_writeInputBranches);
+    m_slicedStripHeader = m_writeOutputTool->addInputBranch(m_sliceStripBranch.value(), m_writeInputBranches);
+    
     // We also need a pre- and post- SP copy of the SPs.
-    m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), true);
-
+    m_slicedStripHeaderPreSP = m_writeOutputTool->addInputBranch(m_sliceStripBranchPreSP.value(), m_writeInputBranches);
+    
     // Connect the slicing tools accordingly. We probably no longer need to hook up the roadfinder here.
     if (m_outputRoadUnionTool) m_roadFinderTool->setupSlices(m_slicedHitHeader);
     m_slicingEngineTool->setupSlices(m_slicedFirstPixelHeader, m_slicedSecondPixelHeader, m_slicedStripHeader);
@@ -179,7 +180,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_slicedSecondPixelHeader->newEvent(eventInfo);
     m_slicedStripHeader->newEvent(eventInfo);
     m_slicedStripHeaderPreSP->newEvent(eventInfo);
-
+    
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_output, phits_all, phits_1st, phits_2nd;
@@ -243,19 +244,20 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *(FPGATruthTracks.cptr())));
-
-    ATH_MSG_DEBUG("Looping over " << roads_1st.size() << " roads");
-    auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
-    for (auto const &road : roads_1st) {
-      unsigned bitmask = road->getHitLayers();
-      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers(); l++) {
-        if (bitmask & (1 << l)) {
-            auto mon_layerIDs_1st = Monitored::Scalar<unsigned>("layerIDs_1st",l);
-            Monitored::Group(m_monTool,mon_layerIDs_1st);
+    if (m_writeOutputData) {
+        ATH_MSG_DEBUG("Looping over " << roads_1st.size() << " roads");
+        auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
+        for (auto const& road : roads_1st) {
+            unsigned bitmask = road->getHitLayers();
+            for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers(); l++) {
+                if (bitmask & (1 << l)) {
+                    auto mon_layerIDs_1st = Monitored::Scalar<unsigned>("layerIDs_1st", l);
+                    Monitored::Group(m_monTool, mon_layerIDs_1st);
+                }
+            }
         }
-      }
+        Monitored::Group(m_monTool, mon_nroads_1st);
     }
-    Monitored::Group(m_monTool, mon_nroads_1st);
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: GetRoads");
     
     // Standard road Filter
@@ -274,8 +276,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         roads_1st = std::move(postfilter2_roads);
     }
 
-    auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());
-    Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
+    if (m_writeOutputData) {
+        auto mon_nroads_1st_postfilter = Monitored::Scalar<unsigned>("nroads_1st_postfilter", roads_1st.size());
+        Monitored::Group(m_monTool, mon_nroads_1st_postfilter);
+    }
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: RoadFiltering");
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Tracking");
 
@@ -312,8 +316,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                             tracks_1st.push_back(*bestTrackIter);
 
                             // Monitor chi2 of the best track
-                            auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all", bestTrackIter->getChi2ndof());
-                            Monitored::Group(m_monTool, mon_chi2_1st);
+                            if (m_writeOutputData) {
+                                auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all", bestTrackIter->getChi2ndof());
+                                Monitored::Group(m_monTool, mon_chi2_1st);
+                            }
                         }
                     }
                 }
@@ -324,21 +330,25 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                         [](const FPGATrackSimTrack& a, const FPGATrackSimTrack& b) {
                             return a.getChi2ndof() < b.getChi2ndof();
                         })->getChi2ndof();
-
-                    auto mon_best_chi2_1st = Monitored::Scalar<float>("best_chi2_1st", bestChi2Overall);
-                    Monitored::Group(m_monTool, mon_best_chi2_1st);
+                    if (m_writeOutputData) {
+                        auto mon_best_chi2_1st = Monitored::Scalar<float>("best_chi2_1st", bestChi2Overall);
+                        Monitored::Group(m_monTool, mon_best_chi2_1st);
+                    }
                 }
             } else { // Pass all tracks with chi2 < 1e15
-	      ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st, m_evtSel->getMin(), m_evtSel->getMax()));
-                float bestchi2 = 1.e15;
-                for (const FPGATrackSimTrack& track : tracks_1st) {
-                    float chi2 = track.getChi2ndof();
-                    if (chi2 < bestchi2) bestchi2 = chi2;
-                    auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all", chi2);
-                    Monitored::Group(m_monTool, mon_chi2_1st);
+	            ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st, m_evtSel->getMin(), m_evtSel->getMax()));
+                if (m_writeOutputData) {
+                    float bestchi2 = 1.e15;
+                    for (const FPGATrackSimTrack& track : tracks_1st) {
+                        float chi2 = track.getChi2ndof();
+                        if (chi2 < bestchi2) bestchi2 = chi2;
+
+                        auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all", chi2);
+                        Monitored::Group(m_monTool, mon_chi2_1st);
+                    }
+                    auto mon_best_chi2_1st = Monitored::Scalar<float>("best_chi2_1st", bestchi2);
+                    Monitored::Group(m_monTool, mon_best_chi2_1st);
                 }
-                auto mon_best_chi2_1st = Monitored::Scalar<float>("best_chi2_1st", bestchi2);
-                Monitored::Group(m_monTool, mon_best_chi2_1st);
             }
         }
     } else { // No tracking; 
@@ -361,8 +371,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
     }
 
-    std::vector<FPGATrackSimTruthTrack> truthtracks = *FPGATruthTracks;
-    std::vector<FPGATrackSimOfflineTrack> offlineTracks = *FPGAOfflineTracks;
+    const std::vector<FPGATrackSimTruthTrack>& truthtracks = *FPGATruthTracks;
+    const std::vector<FPGATrackSimOfflineTrack>& offlineTracks = *FPGAOfflineTracks;
     //Loop over tracks and set the region for all of them, also optionally set track parameters to truth
     for (FPGATrackSimTrack& track : tracks_1st) {
         track.setRegion(m_region);
@@ -394,8 +404,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Tracking");
 
     // Monitor the number of tracks
-    auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
-    Monitored::Group(m_monTool, mon_ntracks_1st);
+    if (m_writeOutputData) {
+        auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
+        Monitored::Group(m_monTool, mon_ntracks_1st);
+    }
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: OverlapRemoval");
     // Overlap removal
     if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
@@ -407,17 +419,20 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             if (track.passedOR()) {
                 ntrackOLRChi2++;
                 m_nTracksChi2OLRTot++;
-
-                // For tracks passing overlap removal-- record the chi2 so we can figure out the right cut.
-                float chi2olr = track.getChi2ndof();
-                auto mon_chi2_1st_or = Monitored::Scalar<float>("chi2_1st_afterOLR", chi2olr);
-                Monitored::Group(m_monTool, mon_chi2_1st_or);
+                if (m_writeOutputData) {
+                    // For tracks passing overlap removal-- record the chi2 so we can figure out the right cut.
+                    float chi2olr = track.getChi2ndof();
+                    auto mon_chi2_1st_or = Monitored::Scalar<float>("chi2_1st_afterOLR", chi2olr);
+                    Monitored::Group(m_monTool, mon_chi2_1st_or);
+                }
             }
         }
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: OverlapRemoval");
-    auto mon_ntracks_1st_olr = Monitored::Scalar<unsigned>("ntrack_1st_afterOLR", ntrackOLRChi2);
-    Monitored::Group(m_monTool,mon_ntracks_1st_olr);
+    if (m_writeOutputData) {
+        auto mon_ntracks_1st_olr = Monitored::Scalar<unsigned>("ntrack_1st_afterOLR", ntrackOLRChi2);
+        Monitored::Group(m_monTool, mon_ntracks_1st_olr);
+    }
 
     m_nRoadsTot += roads_1st.size();
     m_nTracksTot += tracks_1st.size();
@@ -425,39 +440,41 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Do some simple monitoring of efficiencies. okay, we need truth tracks here.
     if (truthtracks.size() > 0) {
         m_evt_truth++;
-        auto passroad = Monitored::Scalar<bool>("eff_road",(roads_1st.size() > 0));
-        auto passtrack = Monitored::Scalar<bool>("eff_track",(tracks_1st.size() > 0));
-        auto truthpT_zoom = Monitored::Scalar<float>("pT_zoom",truthtracks.front().getPt()*0.001);
-        auto truthpT = Monitored::Scalar<float>("pT",truthtracks.front().getPt()*0.001);
-        auto trutheta = Monitored::Scalar<float>("eta",truthtracks.front().getEta());
-        auto truthphi= Monitored::Scalar<float>("phi",truthtracks.front().getPhi());
-        auto truthd0= Monitored::Scalar<float>("d0",truthtracks.front().getD0());
-        auto truthz0= Monitored::Scalar<float>("z0",truthtracks.front().getZ0());
         if (roads_1st.size() > 0) m_nRoadsFound++;
-	if (roads_1st.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads_1st.size();
+        if (roads_1st.size() > m_maxNRoadsFound) m_maxNRoadsFound = roads_1st.size();
 
         unsigned npasschi2(0);
         unsigned npasschi2OLR(0);
         if (tracks_1st.size() > 0) {
             m_nTracksFound++;
-	    if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();
+            if (tracks_1st.size() > m_maxNTracksTot) m_maxNTracksTot = tracks_1st.size();
             for (const auto& track : tracks_1st) {
-	      if (track.getChi2ndof() < m_trackScoreCut.value()) {
-		  npasschi2++;
+                if (track.getChi2ndof() < m_trackScoreCut.value()) {
+                    npasschi2++;
                     if (track.passedOR()) {
-		      npasschi2OLR++;
+                        npasschi2OLR++;
                     }
                 }
             }
         }
-	if (npasschi2 > m_maxNTracksChi2Tot) m_maxNTracksChi2Tot = npasschi2;
-	if (npasschi2OLR > m_maxNTracksChi2OLRTot) m_maxNTracksChi2OLRTot = npasschi2OLR;
+        if (npasschi2 > m_maxNTracksChi2Tot) m_maxNTracksChi2Tot = npasschi2;
+        if (npasschi2OLR > m_maxNTracksChi2OLRTot) m_maxNTracksChi2OLRTot = npasschi2OLR;
         if (npasschi2 > 0) m_nTracksChi2Found++;
         if (npasschi2OLR > 0) m_nTracksChi2OLRFound++;
-        auto passtrackchi2 = Monitored::Scalar<bool>("eff_track_chi2",(npasschi2 > 0));
-        Monitored::Group(m_monTool,passroad,passtrack,truthpT_zoom,truthpT,trutheta,truthphi,truthd0,truthz0,passtrackchi2);
-    }
+        if (m_writeOutputData) {
+            auto passroad = Monitored::Scalar<bool>("eff_road", (roads_1st.size() > 0));
+            auto passtrack = Monitored::Scalar<bool>("eff_track", (tracks_1st.size() > 0));
+            auto truthpT_zoom = Monitored::Scalar<float>("pT_zoom", truthtracks.front().getPt() * 0.001);
+            auto truthpT = Monitored::Scalar<float>("pT", truthtracks.front().getPt() * 0.001);
+            auto trutheta = Monitored::Scalar<float>("eta", truthtracks.front().getEta());
+            auto truthphi = Monitored::Scalar<float>("phi", truthtracks.front().getPhi());
+            auto truthd0 = Monitored::Scalar<float>("d0", truthtracks.front().getD0());
+            auto truthz0 = Monitored::Scalar<float>("z0", truthtracks.front().getZ0());
 
+            auto passtrackchi2 = Monitored::Scalar<bool>("eff_track_chi2", (npasschi2 > 0));
+            Monitored::Group(m_monTool, passroad, passtrack, truthpT_zoom, truthpT, trutheta, truthphi, truthd0, truthz0, passtrackchi2);
+        }
+    }
     for (const FPGATrackSimTrack& track : tracks_1st) FPGATracks_1stHandle->push_back(track);
 
     // Now, we may want to do large-radius tracking on the hits not used by the first stage tracking.

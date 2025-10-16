@@ -46,10 +46,10 @@ namespace MuonGMR4 {
             ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
                             << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
         }
-        return constructHash(0, m_idHelper.gasGap(measId), m_idHelper.isStrip(measId));
+        return constructHash(0, m_idHelper.gasGap(measId), false);
     }
     inline IdentifierHash TgcReadoutElement::layerHash(const IdentifierHash& measHash) const {
-        return constructHash(0, gasGapNumber(measHash), isStrip(measHash));
+        return constructHash(0, gasGapNumber(measHash), false);
     }
     inline unsigned TgcReadoutElement::channelNumber(const IdentifierHash& measHash) {
         constexpr unsigned chanShift = 3;

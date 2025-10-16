@@ -25,7 +25,8 @@ namespace MuonGMR4{
          m_transform{std::move(layerTransform)},
          m_etaDesign{std::move(etaDesign)},
          m_phiDesign{std::move(phiDesign)},
-         m_hash{hash} {       
+         m_hash{hash} {
+      if (!m_phiDesign) m_phiDesign = m_etaDesign;
     }
     bool StripLayer::operator<(const StripLayer& other) const{
         if (hash() != other.hash()) {
@@ -34,7 +35,7 @@ namespace MuonGMR4{
         if (m_transform != other.m_transform) {
             return m_transform < other.m_transform;
         }
-        if (hasPhiDesign() != hasPhiDesign()){
+        if (hasPhiDesign() != other.hasPhiDesign()){
             return hasPhiDesign();
         }
         if (m_phiDesign != other.m_phiDesign) {

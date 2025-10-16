@@ -93,6 +93,11 @@ public:
     bool doEndcapLayerMerging = true;
 
     bool objDebugOutput = false;
+
+    /// controls how many bins are created for the sensitive surface grid.
+    /// 1 results in the same number of bins as there are surfaces per layer in each dimension.
+    /// using a higher number will reduce the number of surfaces per bin, thus speeding up navigation, but increasing memory consumption.
+    double numberOfBinsFactor = 5.0;
   };
 
   /// Constructor

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_IMPLICITCOLLECTION_IMPLICITCOLLECTION_H
@@ -8,6 +8,7 @@
 #include "CollectionBase/ICollection.h"
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/CollectionRowBuffer.h"
+#include "POOLCore/DbPrint.h"
 
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/PluginService.h"
@@ -22,7 +23,7 @@ namespace pool {
    class ImplicitCollectionIterator;
 
   /// An implicit collection implementation of the ICollection interface
-  class ATLAS_NOT_THREAD_SAFE ImplicitCollection : virtual public ICollection
+  class ATLAS_NOT_THREAD_SAFE ImplicitCollection : virtual public ICollection, public APRMessaging
   //    ^ due to not thread-safe ImplicitCollectionIterator
   {
   public:
@@ -84,23 +85,20 @@ namespace pool {
     /// Checks if the collection is open.
     bool isOpen() const;
 
-
     /// Returns an object used to describe the collection properties.
     virtual const ICollectionDescription& description() const;
 
     /// Returns an object used to query the collection.
     virtual ICollectionQuery*                 newQuery();
 
- protected:
-
+  protected:
     void open( ICollection::OpenMode mode, ISession* session );
-
 
   private:
     /// The underlying container handle
-    IContainer                        *m_container;
+    IContainer*                 m_container;
 
-    CollectionDescription        m_description;
+    CollectionDescription       m_description;
   };
 }
 

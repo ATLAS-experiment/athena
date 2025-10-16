@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AFPData_v1.h 693858 2015-09-09 10:30:15Z lnozka $
@@ -16,7 +16,7 @@ namespace xAOD
 
 	/// Class containing AFP information
 	///
-	/// For information how to retrive, and to some level use this object,
+	/// For information how to retrieve, and to some level use this object,
 	/// see the detailed package description.
 	///
 	/// @author Libor Nozka <Libor.Nozka@cern.ch>

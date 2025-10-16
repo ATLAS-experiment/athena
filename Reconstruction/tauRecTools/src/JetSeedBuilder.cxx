@@ -1,25 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
 
 #include "JetSeedBuilder.h"
 
-#include "xAODJet/Jet.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODTau/TauJetContainer.h"
-#include "xAODTau/TauJetAuxContainer.h"
-#include "xAODTau/TauJet.h"
-
 //______________________________________________________________________________
 JetSeedBuilder::JetSeedBuilder(const std::string& name) :
-  TauRecToolBase(name) {
-}
+  TauRecToolBase(name) {}
 
 //______________________________________________________________________________
-JetSeedBuilder::~JetSeedBuilder() {
-}
+JetSeedBuilder::~JetSeedBuilder() {}
 
 //______________________________________________________________________________
 StatusCode JetSeedBuilder::execute(xAOD::TauJet& pTau) const {

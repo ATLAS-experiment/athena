@@ -1,5 +1,6 @@
 CommonServices:
   systematicsHistogram: systematicsList
+  enableExpertMode: True
 
 PileupReweighting: {}
 

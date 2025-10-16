@@ -6,7 +6,7 @@
  * @file GlobalSimulation/IeEmTOB.h
  * @author A. Martynwood, martyniu@cern.ch
  * @date September 2025
- * @brief Interface class to hold eGamma1 BDT decision bits
+ * @brief Interface class to hold eGamma1 eRatio decision bits
  */
 
 #ifndef GLOBALSIM_IEEMEG1ERATIOTOB_H

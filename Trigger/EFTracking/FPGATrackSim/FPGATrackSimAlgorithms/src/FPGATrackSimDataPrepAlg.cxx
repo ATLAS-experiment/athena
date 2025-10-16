@@ -65,7 +65,7 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
-    m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), true);
+    m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), m_writePreClusterBranch);
     m_logicEventHeader = m_writeOutputTool->addInputBranch(m_postClusterBranch.value(), true);
     
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -313,7 +313,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << m_hits_miss.size());
 
     // At this stage, copy the logicEventHeader.
-    if(m_writeOutputData) *m_logicEventHeader_precluster = *m_logicEventHeader;
+    if(m_writeOutputData && m_writePreClusterBranch) *m_logicEventHeader_precluster = *m_logicEventHeader;
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: Clustering");
     // Clustering

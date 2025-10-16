@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from collections import defaultdict
 from copy import copy, deepcopy
 from difflib import get_close_matches
 from enum import EnumMeta
+from operator import attrgetter
 import glob
 import importlib
 from AthenaCommon.Logging import logging
@@ -119,17 +121,23 @@ def _asdict(iterator):
     return outdict
 
 class FlagAddress(object):
-    def __init__(self, f, name):
-        if isinstance(f, AthConfigFlags):
-            self._flags = f
-            rname = self._flags._renames.get(name, name)
-            self._name = rname
+    def __init__(self, flag, name):
+        if isinstance(flag, AthConfigFlags):
+            self._flags = flag
+            self._name = name
 
-        elif isinstance(f, FlagAddress):
-            self._flags = f._flags
-            name = f._name+"."+name
-            rname = self._flags._renames.get(name, name)
-            self._name  = rname
+        elif isinstance(flag, FlagAddress):
+            self._flags = flag._flags
+            self._name  = f"{flag._name}.{name}"
+
+        else:
+            raise TypeError(f"Cannot create FlagAddress for object {name} of type {type(flag)}")
+
+        # Handle renames
+        self._name = self._flags._renames.get(self._name, self._name)
+        if self._name is None:
+            raise AttributeError(f"Accessing category {name} has been blocked by cloneAndReplace")
+
 
     def __getattr__(self, name):
         return getattr(self._flags, self._name + "." + name)
@@ -139,10 +147,10 @@ class FlagAddress(object):
             return object.__setattr__(self, name, value)
         merged = self._name + "." + name
 
-        if not self._flags.hasFlag( merged ): # flag is misisng, try loading dynamic ones
+        if merged not in self._flags._flagdict: # flag is missing, try loading dynamic ones
             self._flags._loadDynaFlags( merged )
 
-        if not self._flags.hasFlag( merged ):
+        if merged not in self._flags._flagdict:
             raise RuntimeError( "No such flag: {}  The name is likely incomplete.".format(merged) )
         return self._flags._set( merged, value )
 
@@ -170,6 +178,9 @@ class FlagAddress(object):
     def __delitem__(self, name):
         merged = self._name + "." + name
         del self._flags[merged]
+
+    def __contains__(self, name):
+        return hasattr(self, name)
 
     def __iter__(self):
         self._flags.loadAllDynamicFlags()
@@ -227,7 +238,7 @@ class AthConfigFlags(object):
         self._flagdict=dict()
         self._locked=False
         self._dynaflags = dict()
-        self._loaded    = set()      # dynamic dlags that were loaded
+        self._loaded    = set()      # dynamic flags that were loaded
         self._categoryCache = set()  # cache for already found categories
         self._hash = None
         self._parser = None
@@ -262,20 +273,10 @@ class AthConfigFlags(object):
         if name in _flagdict:
             return self._get(name)
 
+        # Check (and load if needed) dynamic flags
         if self.hasCategory(name):
             return FlagAddress(self, name)
 
-        # Reaching here means that we may need to load a dynamic flag
-        self._loadDynaFlags(name)
-
-        # Try again
-        if name in _flagdict:
-            return self._get(name)
-
-        if self.hasCategory(name):
-            return FlagAddress(self, name)
-
-        # Reaching here means that it truly isn't something we know about
         raise AttributeError(f"No such flag: {name}")
 
     def __setattr__(self, name, value):
@@ -302,6 +303,9 @@ class AthConfigFlags(object):
             if key.startswith(name):
                 del self._flagdict[key]
         self._categoryCache.clear()
+
+    def __contains__(self, name):
+        return hasattr(self, name)
 
     def __iter__(self):
         self.loadAllDynamicFlags()
@@ -334,13 +338,11 @@ class AthConfigFlags(object):
         (since cloneAndReplace may or may not disable access to the old name,
         it is possible that an old name renames to multiple new names)
         """        
-        revmap = {}
+        revmap = defaultdict(list)
         
         for new, old in self._renames.items():
-            if old not in revmap:
-                revmap[old] = [ new ]
-            else:
-                revmap[old] += [ new ]
+            if old is not None:
+                revmap[old].append(new)
         
         def rename(key):
             for old, newlist in revmap.items():
@@ -432,15 +434,17 @@ class AthConfigFlags(object):
                 self._loadDynaFlags( prefix )
 
     def hasCategory(self, name):
+        """Check if category exists (loads dynamic flags if needed)"""
         # We cache successfully found categories
         if name in self._categoryCache:
             return True
 
-        if name in self._renames:
-            re_name = self._renames[name]
-            if re_name != name:
-                return self.hasCategory(re_name)
-        
+        if (re_name := self._renames.get(name)) is not None and re_name != name:
+            return self.hasCategory(re_name)
+
+        # Load dynamic flags if needed
+        self._loadDynaFlags(name)
+
         # If not found do search through all keys.
         # TODO: could be improved by using a trie for _flagdict
         for f in self._flagdict.keys():
@@ -455,7 +459,16 @@ class AthConfigFlags(object):
         return False
 
     def hasFlag(self, name):
-        return name in [y for x in self._renamed_map().values() for y in x]
+        """Check if flag exists (loads dynamic flags if needed)"""
+        # Use attrgetter to check if attribute exists. As opposed to getattr,
+        # this also supports nested attributes, which is required to trigger loading
+        # of dynamics flags.
+        try:
+            attrgetter(name)(self)
+            # Now check if flag was found (taking into account renames)
+            return any(name in x for x in self._renamed_map().values())
+        except AttributeError:
+            return False
 
     def _set(self,name,value):
         self._tryModify()
@@ -526,14 +539,14 @@ class AthConfigFlags(object):
 
         # protect against subsequent remaps within remaps: clone = flags.cloneAndReplace('Y', 'X').cloneAndReplace('X.b', 'X.a')
         for alias,src in self._renames.items():
-            if src == "": continue
+            if src is None: continue
             if src+"." in subsetToReplace:
                 raise RuntimeError(f'Can not replace flags {subsetToReplace} by {replacementSubset} because of already present replacement of {alias} by {src}')
 
 
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
-        
+
         if replacementSubset in newFlags._renames: #and newFlags._renames[replacementSubset]:
             newFlags._renames[subsetToReplace] = newFlags._renames[replacementSubset]
         else:
@@ -541,7 +554,7 @@ class AthConfigFlags(object):
         
         if not keepOriginal:
             if replacementSubset not in newFlags._renames or newFlags._renames[replacementSubset] == replacementSubset:
-                newFlags._renames[replacementSubset] = "" # block access to original flags
+                newFlags._renames[replacementSubset] = None # block access to original flags
             else:
                 del newFlags._renames[replacementSubset]
                 #If replacementSubset was a "pure renaming" of another set of flags,
@@ -580,10 +593,10 @@ class AthConfigFlags(object):
         import re
         compiled = re.compile(pattern)
         def truncate(s): return s[:maxLength] + ("..." if maxLength and len(s)>maxLength else "")
-        reverse_renames = {value: key for key, value in self._renames.items() if value != ''} # new name to old
+        reverse_renames = {value: key for key, value in self._renames.items() if value is not None} # new name to old
         for name in sorted(self._flagdict):
             renamed = name
-            if any([name.startswith(r) for r in reverse_renames.keys()]):
+            if any([name.startswith(r) for r in reverse_renames.keys() if r is not None]):
                 for oldprefix, newprefix in reverse_renames.items():
                     if name.startswith(oldprefix):
                         renamed = name.replace(oldprefix, newprefix)
@@ -660,9 +673,9 @@ class AthConfigFlags(object):
             oper = "+="
             key = key[:-1]
 
-        if not self.hasFlag(key):
-            self._loadDynaFlags( '.'.join(key.split('.')[:-1]) ) # for a flag A.B.C dymanic flags from category A.B
-        if not self.hasFlag(key):
+        if key not in self._flagdict:
+            self._loadDynaFlags( '.'.join(key.split('.')[:-1]) ) # for a flag A.B.C dynamic flags from category A.B
+        if key not in self._flagdict:
             raise KeyError(f"{key} is not a known configuration flag")
 
         flag_type = self._flagdict[key]._type

@@ -170,10 +170,10 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classifierParticleOutcomeAcc(m_outcomeAccessorKey, ctx);
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > ClassificationAcc(m_classificationAccessorKey, ctx);
 
-    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc.withDefault (old_part, 0);
-    originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault (old_part, 0);
-    outcomeDecorator(*xTruthParticle) = classifierParticleOutcomeAcc.withDefault (old_part, 0);
-    classificationDecorator(*xTruthParticle) = ClassificationAcc.withDefault (old_part, 0);
+    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc(old_part);
+    originDecorator(*xTruthParticle) = classifierParticleOriginAcc(old_part);
+    outcomeDecorator(*xTruthParticle) = classifierParticleOutcomeAcc(old_part);
+    classificationDecorator(*xTruthParticle) = ClassificationAcc(old_part);
 
     // Return a link to this particle
     return my_index;

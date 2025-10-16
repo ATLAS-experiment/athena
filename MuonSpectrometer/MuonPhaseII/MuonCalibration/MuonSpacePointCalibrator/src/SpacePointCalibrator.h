@@ -20,9 +20,9 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "NSWCalibTools/INSWCalibTool.h"
 #include "MMClusterization/IMMClusterBuilderTool.h"
-#include "xAODMuonPrepData/sTgcMeasurement.h"
-#include "xAODMuonPrepData/sTgcStripCluster.h"
 
+#include "xAODMuonPrepData/sTgcStripClusterFwd.h"
+#include "xAODMuonPrepData/CombinedMuonStripFwd.h"
 
 
 namespace MuonR4{
@@ -54,19 +54,40 @@ namespace MuonR4{
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay) const override final;
 
-            CalibSpacePointVec calibrate(const EventContext& ctx,
-                                         CalibSpacePointVec&& spacePoints,
+            CalibSpacePointVec calibrate(const Acts::CalibrationContext& ctx,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
-                                         const double timeDelay) const override final;
+                                         const double timeDelay,
+                                         const CalibSpacePointVec& spacePoints) const override final;
+
+            void updateSigns(const Amg::Vector3D& trackPos,
+                             const Amg::Vector3D& trackDir,
+                             CalibSpacePointVec& hitsToCalib) const override final;
 
             double driftVelocity(const EventContext& ctx,
                                  const CalibratedSpacePoint& spacePoint) const override final;
             double driftAcceleration(const EventContext& ctx,
                                      const CalibratedSpacePoint& spacePoint) const override final;
             
-            /**
-             * @brief Calibrates the position and covariance of a  MicroMegas (MM) cluster.
+
+
+            void calibrateSourceLink(const Acts::GeometryContext& geoctx,
+                                     const Acts::CalibrationContext& cctx,
+                                     const Acts::SourceLink& link,
+                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
+        private:
+            /** @brief Calibrates the track states from a combined muon strip. It's a pseudo measurement composed
+             *         out of two 1D strip measurements residing in the same gas gap (Relevant for Rpc/Tgc/sTgc)
+             * @param ctx The event context providing the necessary conditions and event-specific information.
+             * @param gctx Pointer to the ActsGeometryContext, used for geometry-related transformations.
+             * @param combinedPrd: Pointer to the measurement carrying the actual prds which are to be combined
+             *                     on the track state
+             * @param state: The proxy to the actual track state to fill */
+            void calibrateCombinedPrd(const EventContext& ctx, 
+                                      const ActsGeometryContext& gctx,
+                                      const xAOD::CombinedMuonStrip* combinedPrd,
+                                      ActsTrk::MutableTrackContainer::TrackStateProxy state) const;
+            /** @brief Calibrates the position and covariance of a  MicroMegas (MM) cluster.
              *
              * @param ctx The event context providing the necessary conditions and event-specific information.
              * @param gctx Pointer to the ActsGeometryContext, used for geometry-related transformations.
@@ -74,18 +95,14 @@ namespace MuonR4{
              * @param globalPos The global position from an external measurement.
              * @param globalDir The global position from an external measurement.
              * @param calibLocPos The calibrated local position of the cluster (output parameter).
-             * @param calibLocCov The calibrated local covariance of the cluster (output parameter).
-             *
-             */
-            std::pair<double, double>  calibrateMM(const EventContext& ctx, const ActsGeometryContext& gctx, const  xAOD::MMCluster& cluster,
-                                                   const Amg::Vector3D& globalPos, const Amg::Vector3D& globalDir) const;
-           
-                                                               
-
-
+             * @param calibLocCov The calibrated local covariance of the cluster (output parameter). */
+            std::pair<double, double>  calibrateMM(const EventContext& ctx, 
+                                                   const ActsGeometryContext& gctx, 
+                                                   const xAOD::MMCluster& cluster,
+                                                   const Amg::Vector3D& globalPos, 
+                                                   const Amg::Vector3D& globalDir) const;
             /**
              * @brief Calibrates the position and covariance of an sTGC (small-strip Thin Gap Chamber) cluster.
-             * 
              * 
              * @param ctx The event context providing the necessary conditions for the calibration.
              * @param gctx Pointer to the ActsGeometryContext, which provides geometry-related information.
@@ -94,17 +111,14 @@ namespace MuonR4{
              * @param globalPos The global position from an external measurement.
              * @param globalDir The global direction from an external measurement.
              * @param[out] calibLocPos The calibrated local position of the cluster (output parameter).
-             * @param[out] calibLocCov The calibrated local covariance of the cluster (output parameter).
-             * 
-             */
-            std::pair<double, double>  calibratesTGC(const EventContext& ctx, const ActsGeometryContext& gctx, const  xAOD::sTgcStripCluster& cluster,
-                                                     double posAlongTheStrip, const Amg::Vector3D& globalPos, const Amg::Vector3D& globalDir) const;
+             * @param[out] calibLocCov The calibrated local covariance of the cluster (output parameter).  */
+            std::pair<double, double>  calibratesTGC(const EventContext& ctx, 
+                                                     const ActsGeometryContext& gctx, 
+                                                     const xAOD::sTgcStripCluster& cluster,
+                                                     std::optional<double> posAlongTheStrip, 
+                                                     const Amg::Vector3D& globalPos, 
+                                                     const Amg::Vector3D& globalDir) const;
 
-            void calibrateSourceLink(const Acts::GeometryContext& geoctx,
-                                     const Acts::CalibrationContext& cctx,
-                                     const Acts::SourceLink& link,
-                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
-        private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  EventSelectorAthenaPool/src/registerKeys.cxx
@@ -25,8 +25,9 @@ void EventSelectorAthenaPoolUtil::registerKeys(const DataHeaderElement& dhe, Sto
       // May be empty if we're reading an old file.
       const std::set<CLID> clids = dhe.getClassIDs();
       size_t i = 0;
-      for (std::set<CLID>::const_iterator it = clids.begin(); it != clids.end(); ++it, ++i) {
-         store->registerKey(hashes[i], dhe.getKey(), *it);
+      for (const auto& clid : clids) {
+         store->registerKey(hashes[i], dhe.getKey(), clid);
+         ++i;
       }
    }
 }
@@ -37,8 +38,8 @@ void EventSelectorAthenaPoolUtil::registerKeys(const DataHeaderElement& dhe, Sto
  * @param store The SG store with which the hashes are to be registered.
  */
 void EventSelectorAthenaPoolUtil::registerKeys(const DataHeader& dh, StoreGateSvc* store) {
-   for (std::vector<DataHeaderElement>::const_iterator dhe_i = dh.begin(); dhe_i != dh.end(); ++dhe_i) {
-      registerKeys(*dhe_i, store);
+   for (const auto& dhe : dh) {
+      registerKeys(dhe, store);
    }
 }
 //} // namespace EventSelectorAthenaPoolUtil

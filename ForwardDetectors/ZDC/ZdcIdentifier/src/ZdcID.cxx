@@ -6,9 +6,12 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include "ZdcIdentifier/ZdcID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
-#include "IdDict/IdDictDefs.h"  
 #include <set>
 #include <iostream>
 

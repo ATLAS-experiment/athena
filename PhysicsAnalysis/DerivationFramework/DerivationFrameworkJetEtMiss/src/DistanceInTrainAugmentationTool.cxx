@@ -59,7 +59,8 @@ StatusCode DerivationFramework::DistanceInTrainAugmentationTool::finalize()
 
 StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches() const {
 
-  auto eventInfo = SG::makeHandle (m_eventInfo_key);
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  auto eventInfo = SG::makeHandle (m_eventInfo_key, ctx);
   if (!eventInfo.isValid()){
     ATH_MSG_WARNING("Invalid  xAOD::EventInfo datahandle"
 		    << m_eventInfo_key.key());
@@ -67,18 +68,17 @@ StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches() c
   }
   auto ei = eventInfo.cptr();
 
-  const EventContext& context = Gaudi::Hive::currentContext();
-  SG::ReadCondHandle<BunchCrossingCondData> bunchCrossingTool (m_bunchCrossingKey, context);
+  SG::ReadCondHandle<BunchCrossingCondData> bunchCrossingTool (m_bunchCrossingKey, ctx);
   ATH_CHECK( bunchCrossingTool.isValid() );
 
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceFront(m_BCIDDistanceFrontKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceTail(m_BCIDDistanceTailKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrain(m_BCIDGapBeforeTrainKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrain(m_BCIDGapAfterTrainKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDType(m_BCIDTypeKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrainMinus12(m_BCIDGapBeforeTrainMinus12Key);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrainMinus12(m_BCIDGapAfterTrainMinus12Key);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDTypeMinus12(m_BCIDTypeMinus12Key);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceFront(m_BCIDDistanceFrontKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceTail(m_BCIDDistanceTailKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrain(m_BCIDGapBeforeTrainKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrain(m_BCIDGapAfterTrainKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDType(m_BCIDTypeKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrainMinus12(m_BCIDGapBeforeTrainMinus12Key, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrainMinus12(m_BCIDGapAfterTrainMinus12Key, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDTypeMinus12(m_BCIDTypeMinus12Key, ctx);
 
   dec_BCIDDistanceFront(*ei)  = bunchCrossingTool->distanceFromFront(ei->bcid(), BunchCrossingCondData::BunchDistanceType::BunchCrossings);
   dec_BCIDDistanceTail(*ei)   = bunchCrossingTool->distanceFromTail(ei->bcid(), BunchCrossingCondData::BunchDistanceType::BunchCrossings);

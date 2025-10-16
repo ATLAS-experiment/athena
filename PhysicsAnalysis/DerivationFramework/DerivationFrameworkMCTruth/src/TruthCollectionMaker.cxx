@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -322,21 +322,21 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                     *xTruthParticle=*theParticle;
                     // Copy over the decorations if they are available
                     typeDecorator(*xTruthParticle) =
-                      typeReadDecor.withDefault(*theParticle, 0);
+                      typeReadDecor(*theParticle);
 
                     originDecorator(*xTruthParticle) =
-                      originReadDecor.withDefault(*theParticle, 0);
+                      originReadDecor(*theParticle);
 
                     outcomeDecorator(*xTruthParticle) =
-                      outcomeReadDecor.withDefault(*theParticle, 0);
+                      outcomeReadDecor(*theParticle);
 
                     classificationDecorator(*xTruthParticle) =
-                      classificationReadDecor.withDefault(*theParticle, 0);
+                      classificationReadDecor(*theParticle);
 
-                    if (m_outputParticlesKey.key()=="TruthHFHadrons"){
-                        static const SG::ConstAccessor<int> TopHadronOriginFlagAcc("TopHadronOriginFlag");
+                    if (m_outputParticlesKey.key()=="TruthHFHadrons"){ // FIXME Cannot find any other reference to this container name in Athena...
+                        static const SG::ConstAccessor<int> TopHadronOriginFlagAcc("TopHadronOriginFlag"); // FIXME This should be a ReadDecorHandle
                         hadronOriginDecorator(*xTruthParticle) =
-                          TopHadronOriginFlagAcc.withDefault (*theParticle, 0);
+                          TopHadronOriginFlagAcc.withDefault (*theParticle, 0); // FIXME avoid using withDefault as it masks configuration/scheduling issues?
                     }
 
                     if(m_keep_navigation_info) linkDecorator(*xTruthParticle) = eltp;
@@ -346,6 +346,6 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
         // Count the mask
         for (unsigned int i=0; i<nParticles; ++i) if (entries[i]) ++m_npasspart;
     }
-    
+
     return StatusCode::SUCCESS;
 }

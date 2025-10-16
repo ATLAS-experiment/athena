@@ -30,11 +30,12 @@ namespace GlobalSim::IOBitwise {
     virtual ~IeEmEg1BDTTOB(){}
 
     /// Count: Size of output bits of the eGamma1 BDT algorithm
-    static const std::size_t s_eGamma1BDT_width{11};
+    static const std::size_t s_eGamma1BDT_width{10};
 
     /** @brief Returns the eGamma1 BDT result bits*/
     virtual std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits() const = 0;
   };
+
 } //End of namespace
 
 CLASS_DEF( GlobalSim::IOBitwise::IeEmEg1BDTTOB , 67631718 , 1 )

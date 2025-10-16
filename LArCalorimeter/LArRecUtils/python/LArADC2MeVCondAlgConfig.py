@@ -28,8 +28,6 @@ def LArADC2MeVCondAlgCfg(flags):
         if 'COMP200' in flags.IOVDb.DatabaseInstance: # Run1 case
             theADC2MeVCondAlg.LAruA2MeVKey="LAruA2MeVSym"
             theADC2MeVCondAlg.LArDAC2uAKey="LArDAC2uASym"
-        if not flags.LAr.doHVCorr:
-            theADC2MeVCondAlg.LArHVScaleCorrKey=""
         result.merge(LArFebConfigCondAlgCfg(flags))
 
     result.merge(LArElecCalibDBCfg(flags,requiredConditions))

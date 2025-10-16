@@ -23,6 +23,7 @@
 #include <cassert>
 #include <sstream>
 #include <cstring>
+#include <algorithm>
 
 
 namespace SG {
@@ -144,7 +145,7 @@ public:
    * Require that NAME be not empty, contains only alphanumeric characters plus
    * underscore, and first character is not a digit.
    */
-  static bool checkName (const std::string& s);
+  static bool checkName (std::string_view s) noexcept;
 
 
   /**
@@ -565,14 +566,14 @@ AuxTypeRegistryImpl::addFactory (lock_t& /*lock*/,
  * Require that NAME be not empty, contains only alphanumeric characters plus
  * underscore, and first character is not a digit.
  */
-bool AuxTypeRegistryImpl::checkName (const std::string& s)
+bool AuxTypeRegistryImpl::checkName (std::string_view s) noexcept
 {
-  static const std::string chars1 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
-  static const std::string chars2 = chars1 + "0123456789";
-
-  if (s.empty()) return false;
-  if (chars1.find (s[0]) == std::string::npos) return false;
-  return s.find_first_not_of (chars2, 1) == std::string::npos;
+    if (s.empty()) return false;
+    char first = s[0];
+    if (!std::isalpha(static_cast<unsigned char>(first)) && first != '_') return false;
+    return std::all_of(s.begin() + 1, s.end(), [](char c) {
+         return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+     });
 }
 
 
@@ -1248,12 +1249,12 @@ AuxTypeRegistry::setInputRenameMap (const Athena::InputRenameMap_t* map,
 
     const std::string* from_str = pool.keyToString (from_sgkey);
     if (!from_str) continue;
-    std::string::size_type from_dpos = from_str->find (".");
+    std::string::size_type from_dpos = from_str->find ('.');
     if (from_dpos == std::string::npos || from_dpos == from_str->size()-1) continue;
 
     const std::string* to_str = pool.keyToString (to_sgkey);
     if (!to_str) continue;
-    std::string::size_type to_dpos = to_str->find (".");
+    std::string::size_type to_dpos = to_str->find ('.');
     if (to_dpos == std::string::npos || to_dpos == to_str->size()-1) continue;
 
     impl->m_renameMap[*from_str] = to_str->substr (to_dpos+1, std::string::npos);

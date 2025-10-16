@@ -326,7 +326,7 @@ void histCollection::addDirectory(TDirectory* dir, const std::string& dirName) {
 	}
       }
       if ( found == 0 ){ // Add the histrogam if we didn't already have it
-	mIt->second.histos.push_back(histo);
+	mIt->second.histos.push_back(std::move(histo));
       }
 
     }
@@ -395,7 +395,7 @@ void histCollection::write(TFile* out) {
       const std::string currFullDir(fulldir.substr(0,j1));
       const std::string currBaseDir(fulldir.substr(0,j));
       //std::cout << "Working on dir " << fulldir << " [" << currFullDir << " " << currBaseDir << " " << currDirAtLevel << std::endl;
-      lastDir=currFullDir;
+      lastDir=std::move(currFullDir);
       out->cd(currBaseDir.c_str());
       gDirectory->mkdir(currDirAtLevel.c_str());
     }//End outer while loop - full directory created 
@@ -432,7 +432,7 @@ std::vector<std::string> splitString(const std::string& in, const std::string& d
     pos2=in.find_first_of(delim,pos1);
     const std::string sub=in.substr(pos1,pos2-pos1);
     if (!sub.empty())
-      retvec.push_back(sub);
+      retvec.push_back(std::move(sub));
     pos1=pos2+1;
   }
   return retvec;

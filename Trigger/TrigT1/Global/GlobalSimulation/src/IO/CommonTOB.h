@@ -60,6 +60,7 @@ namespace GlobalSim::IOBitwise{
     //! @copydoc ICommonTOB::phi_bits()
     virtual std::bitset<s_phi_width> phi_bits() const override; 
 
+    virtual std::string to_string() const override;
   private:
     /// Property: eT bitset within the common TOB word
     std::bitset<ICommonTOB::s_et_width> m_et_bits;
@@ -69,11 +70,8 @@ namespace GlobalSim::IOBitwise{
     std::bitset<ICommonTOB::s_phi_width> m_phi_bits;
   };
 
-  using CommonTOBContainer = std::vector<std::shared_ptr<CommonTOB>>;
-
 } //End of namespace
 
 CLASS_DEF( GlobalSim::IOBitwise::CommonTOB , 186129504 , 1 )
-CLASS_DEF( GlobalSim::IOBitwise::CommonTOBContainer , 1123153720 , 1 )
 
 #endif //GLOBALSIM_COMMONTOB_H
