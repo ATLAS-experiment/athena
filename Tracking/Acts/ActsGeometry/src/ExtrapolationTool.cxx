@@ -342,6 +342,7 @@ OptionsType ExtrapolationTool::prepareOptions(const Acts::GeometryContext& gctx,
   options.stepping.maxStepSize = m_maxStepSize * 1_m;
   options.maxTargetSkipping = m_maxSurfSkip;
   options.surfaceTolerance = m_surfTolerance;
+  options.pathLimit = m_pathLimit * 1_m;
   auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
   mInteractor.multipleScattering = m_interactionMultiScatering;
   mInteractor.energyLoss = m_interactionEloss;
