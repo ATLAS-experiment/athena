@@ -9,6 +9,7 @@
 #include "DerivationFrameworkEGamma/EGElectronAmbiguityTool.h"
 #include "DerivationFrameworkEGamma/PhotonVertexSelectionWrapper.h"
 #include "DerivationFrameworkEGamma/EGammaCookieCutClusterTool.h"
+#include "DerivationFrameworkEGamma/EGammaGSFCalo.h"
 
 using namespace DerivationFramework; 
 DECLARE_COMPONENT( PhotonsDirectionTool )
@@ -22,3 +23,4 @@ DECLARE_COMPONENT( TruthCaloShowerDecorator )
 DECLARE_COMPONENT( EGElectronAmbiguityTool )
 DECLARE_COMPONENT( PhotonVertexSelectionWrapper )
 DECLARE_COMPONENT( EGammaCookieCutClusterTool )
+DECLARE_COMPONENT( EGammaGSFCalo )
