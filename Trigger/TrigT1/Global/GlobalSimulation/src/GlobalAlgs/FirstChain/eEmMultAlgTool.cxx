@@ -6,6 +6,8 @@
 #include "./CommonSelector.h"
 #include "./eEmSelector.h"
 
+#include <fstream>
+
 namespace GlobalSim {
 
   eEmMultAlgTool::eEmMultAlgTool(const std::string& type,
@@ -105,14 +107,28 @@ namespace GlobalSim {
 
     ATH_MSG_DEBUG("TIP word " << word);
 
+    
+    if (m_enableDump) {
+      std::stringstream ss;
+      ss << "\nRun " << ctx <<' ' << "TIP:\n" << word << '\n';
+      for (const auto& tob : *tobs) {ss << *tob << '\n';}
+ 
+      std::ofstream out(name() + ".log", std::ios_base::app);
+      out << ss.str();
+      out.close();
+    }
+
+
     return StatusCode::SUCCESS;
   }
 
   std::string eEmMultAlgTool::toString() const {
     std::stringstream ss;
     ss <<name () << ": " <<m_menu_name << ' '
-       << "eEmMultAlgTool read, select, count and report number of related eEmTOBS\n";
-    ss<< m_TIP_position << ' ' << m_n_multbits;
+       << "eEmMultAlgTool read, select, count and report number of related eEmTOBS\n"
+       << m_c_selector->to_string() << '\n'
+       << m_e_selector->to_string() << '\n'
+       << m_TIP_position << ' ' << m_n_multbits;
 
     return ss.str();
   }

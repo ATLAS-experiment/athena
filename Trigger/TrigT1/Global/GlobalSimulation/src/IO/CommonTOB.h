@@ -60,6 +60,7 @@ namespace GlobalSim::IOBitwise{
     //! @copydoc ICommonTOB::phi_bits()
     virtual std::bitset<s_phi_width> phi_bits() const override; 
 
+    virtual std::string to_string() const override;
   private:
     /// Property: eT bitset within the common TOB word
     std::bitset<ICommonTOB::s_et_width> m_et_bits;

@@ -3,6 +3,7 @@
 */
 
 #include "eEmTOB.h"
+#include <sstream>
 
 namespace GlobalSim::IOBitwise {
 
@@ -44,5 +45,16 @@ namespace GlobalSim::IOBitwise {
   
   const std::bitset<eEmTOB::s_SeedIsMax_width>& eEmTOB::SeedIsMax_bit() const {
     return m_SeedIsMax_bit;
+  }
+
+    std::string eEmTOB::to_string() const {
+      std::stringstream ss;
+      
+      ss << '\n'
+	 << ICommonTOB::to_string()
+	 << " RHad " << RHad_bits()
+	 << " REta " << REta_bits()
+	 << " WsTot " << WsTot_bits();
+      return ss.str();
   }
 }

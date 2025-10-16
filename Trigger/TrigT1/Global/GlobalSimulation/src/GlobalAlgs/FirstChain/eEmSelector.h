@@ -23,6 +23,7 @@ namespace  GlobalSim {
   class ICutter {
   public:
     virtual bool cut(const ulong&) const = 0;
+    virtual std::string to_string() const = 0;
   };
 
   class eEmSelector : public IeEmSelector {
@@ -42,6 +43,8 @@ namespace  GlobalSim {
     virtual ~eEmSelector() = default;
     
     virtual bool select(const IeEmTOB&) const override;
+
+    virtual std::string to_string() const override;
 
   private:
     ulong m_rhad_cut{0};
