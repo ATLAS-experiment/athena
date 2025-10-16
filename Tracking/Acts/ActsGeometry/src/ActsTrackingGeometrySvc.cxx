@@ -896,6 +896,7 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
   cfg.layerCreator = layerCreator;
 
   cfg.numberOfBinsFactor = m_numberOfBinsFactor;
+  cfg.numberOfInnermostLayerBinsFactor = m_numberOfInnermostLayerBinsFactor;
 
   // gmLayerBuilder = std::make_shared<const ActsLayerBuilder>(
   //     cfg, makeActsAthenaLogger(this, managerName + "GMLayBldr",
