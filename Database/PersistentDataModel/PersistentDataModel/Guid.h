@@ -10,7 +10,7 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
-#include <iostream> // for std::ostream
+#include <iosfwd> // for std::ostream
 #include <string>
 #include <cstring>
 

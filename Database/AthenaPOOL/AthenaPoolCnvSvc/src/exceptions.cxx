@@ -15,7 +15,7 @@
 #include "GaudiKernel/System.h"
 #include <format>
 #include <sstream>
-
+#include <iostream>
 
 namespace AthenaPoolCnvSvc {
 
