@@ -125,6 +125,7 @@ public:
   Gaudi::Property<unsigned> m_maxSurfSkip{this, "MaxSurfaceSkip" ,100, "Maximum number of surfaces to be tried by the navigator"};
   Gaudi::Property<double> m_surfTolerance{this, "OnSurfaceTolerance", Acts::s_onSurfaceTolerance, 
                                           "Tolerance to consider track parameters on surface"};
+  Gaudi::Property<unsigned> m_pathLimit{this, "PathLimit", 50, "Maximum path length to be considered during propagation in Acts m unit"};
   // Material inteaction option
   Gaudi::Property<bool> m_interactionMultiScatering{this, "InteractionMultiScatering", false, "Whether to consider multiple scattering in the interactor"};
   Gaudi::Property<bool> m_interactionEloss{this, "InteractionEloss", false, "Whether to consider energy loss in the interactor"};

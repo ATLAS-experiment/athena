@@ -319,6 +319,9 @@ atlas_add_citest( ACTS_Propagation_ITk
 atlas_add_citest( ACTS_Propagation_ITk_Gen3
    SCRIPT ActsITkTest.py --gen3)
 
+atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
+   SCRIPT ActsItkMuonTest.py --gen3)
+
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
