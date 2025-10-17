@@ -78,7 +78,7 @@
 <!-- TileTrackMuFeatureContainer -->
   <class name="TileTrackMuFeatureContainer_tlp1" id="983ED5FE-D0A2-43AE-90A9-268C8B61E8B3"/>
   <class name="TileTrackMuFeatureContainer_p3" id="25018D00-1D18-4B4C-9C07-37993260EADB"/>   
-  <class name="TileTrackMuFeatureContainer_p1" id="4BF941C-510D-4AD1-B853-34ADFCB0CBC2"/>   
+  <class name="TileTrackMuFeatureContainer_p1" id="04BF941C-510D-4AD1-B853-34ADFCB0CBC2"/>   
   <class name="std::vector<TileTrackMuFeatureContainer_p1>" />
 
 <!-- IsoMuonFeature -->

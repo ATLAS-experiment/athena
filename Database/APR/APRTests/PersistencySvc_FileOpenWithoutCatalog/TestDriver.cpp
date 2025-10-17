@@ -55,7 +55,7 @@ pool::TestDriver::write()
 {
   pool::IFileCatalog& catalog = *m_fileCatalog;
   catalog.start();
-  std::string fid {"E9143E5C-FDDA-8646-9204-2E4BAE14DC0"};
+  std::string fid {"E9143E5C-FDDA-8646-9204-2E4BAE14DC00"};
   catalog.registerPFN(m_fileName, ROOT_StorageType.storageName(), fid);
 
   std::cout << "Creating the persistency service" << std::endl;
