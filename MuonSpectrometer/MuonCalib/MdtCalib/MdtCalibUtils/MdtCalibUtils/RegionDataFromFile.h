@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_REGIONDATAFROMFILE_H
 #define MUONCALIB_REGIONDATAFROMFILE_H
 
-#include <iostream>
+#include <iosfwd>
 #include <vector>
 
 namespace MuonCalib {

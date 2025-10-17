@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibUtils/RegionDataFromFile.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
+#include <iostream>
 
 #define MAX_VALUE 100000
 
@@ -71,7 +72,7 @@ namespace MuonCalib {
                 ids.push_back(MultilayerId(s, e, p, m));
             }
 
-            m_identifiersPerRegions.push_back(ids);
+            m_identifiersPerRegions.push_back(std::move(ids));
         }
 
         return is;
