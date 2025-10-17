@@ -47,12 +47,12 @@ namespace DerivationFramework {
         virtual StatusCode addBranches(const EventContext& ctx) const override;
 
       private:
-        std::string m_vertexContainerKey;
-        std::string m_vertexD0ContainerKey;
-        std::string m_vertexK0ContainerKey;
-        std::vector<std::string> m_cascadeOutputsKeys;
+        std::string m_vertexContainerKey; // FIXME Use Handles
+        std::string m_vertexD0ContainerKey; // FIXME Use Handles
+        std::string m_vertexK0ContainerKey; // FIXME Use Handles
+        std::vector<std::string> m_cascadeOutputsKeys; // FIXME Use Handles
 
-        std::string m_VxPrimaryCandidateName;   //!< Name of primary vertex container
+        std::string m_VxPrimaryCandidateName;   //!< Name of primary vertex container // FIXME Use Handles
 
         double m_jpsiMassLower;
         double m_jpsiMassUpper;
