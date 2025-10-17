@@ -37,6 +37,7 @@ namespace MuonR4 {
         SegmentLineFitter::Config fitCfg{};
         fitCfg.calibrator = m_calibTool.get();
         fitCfg.visionTool = m_visionTool.get();
+        fitCfg.idHelperSvc = m_idHelperSvc.get();
         fitCfg.fitT0 = m_doT0Fit;
         fitCfg.recalibrate = m_recalibInFit;
         fitCfg.useFastFitter = m_useFastFitter;

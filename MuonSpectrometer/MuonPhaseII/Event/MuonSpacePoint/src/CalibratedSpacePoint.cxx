@@ -7,7 +7,20 @@ namespace {
     static const Amg::Vector3D zero{Amg::Vector3D::Zero()};
 }
 namespace MuonR4{
-
+    std::string CalibratedSpacePoint::toString(const State s) {
+        switch (s){
+            case State::Valid:
+                return "valid";
+            case State::Outlier:
+                return "outlier";
+            case State::FailedCalib:
+                return "failed calibration";
+            case State::Duplicate:
+                return "duplicate";
+               
+        }
+         return "unknown";
+    }
     CalibratedSpacePoint::CalibratedSpacePoint(const SpacePoint* uncalibSpacePoint,
                                                Amg::Vector3D&& posInChamber,
                                                State st):
@@ -72,6 +85,7 @@ namespace MuonR4{
         } else {
             ostr<<"Auxiliary measurement";
         }
+        ostr<<" ("<<toString(fitState())<<")";
         ostr<<" @ "<<Amg::toString(localPosition());
         if (type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             ostr<<", wire: "<<Amg::toString(sensorDirection())<<", drift R: "<<driftRadius();

@@ -195,7 +195,7 @@ namespace MuonValR4 {
             /** @brief Switch to visualize the eta view of the bucket event */
             Gaudi::Property<bool> m_doEtaBucketViews{this,"doEtaBucketViews", true};
             /** @brief Switch to visualize the phi view of the bucket event */
-            Gaudi::Property<bool> m_doPhiBucketViews{this,"doPhiBucketViews", true};
+            Gaudi::Property<bool> m_doPhiBucketViews{this,"doPhiBucketViews", false};
             /** @brief Switch to visualize the truth hits  */
             Gaudi::Property<bool> m_paintTruthHits{this, "paintTruthHits", false};
             /** @brief ATLAS label (Internal / Prelimnary / Simulation) */

@@ -71,6 +71,8 @@ namespace MuonR4{
         }
         if (spacePoint.fitState() == State::Outlier) {
             calibSP->setFitState(State::Outlier);
+        } else if (spacePoint.fitState() == State::Duplicate) {
+            calibSP->setFitState(State::Duplicate);
         }
         return calibSP;
     }
