@@ -413,29 +413,29 @@ namespace met {
         break;
       case MET_SOFTTRK_RESOPARA:
         smearPara = m_trk_resopara_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
-        softMetStruct = variedSoftTerm(softMetStruct, ptHard, scalePara+smearPara, 0.);
+        softMetStruct = variedSoftTerm(softMetStruct, ptHard, smearPara, 0.);
         break;
       case MET_SOFTTRK_RESOPERP:
         smearPerp = m_trk_resoperp_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
-        softMetStruct = variedSoftTerm(softMetStruct, ptHard, scalePara, smearPerp);
+        softMetStruct = variedSoftTerm(softMetStruct, ptHard, 0., smearPerp);
         break;
       case MET_SOFTTRK_RESOCORR:
         smearPara = m_trk_resopara_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
         smearPerp = m_trk_resoperp_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
-        softMetStruct = variedSoftTerm(softMetStruct, ptHard, scalePara+smearPara, smearPerp);
+        softMetStruct = variedSoftTerm(softMetStruct, ptHard, smearPara, smearPerp);
         break;
       case MET_SOFTCALO_RESOPARA:
         smearPara = m_calo_resopara_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
-        softMetStruct = variedSoftTerm(softMetStruct, ptHard, scalePara+smearPara, 0.);
+        softMetStruct = variedSoftTerm(softMetStruct, ptHard, smearPara, 0.);
         break;
       case MET_SOFTCALO_RESOPERP:
         smearPerp = m_calo_resoperp_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
-        softMetStruct = variedSoftTerm(softMetStruct, ptHard, scalePara, smearPerp);
+        softMetStruct = variedSoftTerm(softMetStruct, ptHard, 0., smearPerp);
         break;
       case MET_SOFTCALO_RESOCORR:
         smearPara = m_calo_resopara_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
         smearPerp = m_calo_resoperp_pthard_njet_mu->GetBinContent(phbin,jetbin,mubin)*randGaus;
-        softMetStruct = variedSoftTerm(softMetStruct, ptHard, scalePara+smearPara, smearPerp);
+        softMetStruct = variedSoftTerm(softMetStruct, ptHard, smearPara, smearPerp);
         break;
       default:
         ATH_MSG_DEBUG("No systematic applied, returning nominal MET term");
