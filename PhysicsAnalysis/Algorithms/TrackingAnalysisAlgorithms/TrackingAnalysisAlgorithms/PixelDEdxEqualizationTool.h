@@ -82,6 +82,7 @@ namespace CP {
     /// dE/dx equalization scale factor dataframe read from trees.
     std::shared_ptr<ROOT::RDataFrame> m_df;
     std::shared_ptr<TFile> m_file;  // Keep the file open
+    mutable std::shared_mutex m_dfMutex ATLAS_THREAD_SAFE;
 
     /// Map where key = run number, value is a filtered scale factor RDF (an RDF::RNode) with only the rows for that run number.
     /// So not filtering everytime in execute().
@@ -89,7 +90,7 @@ namespace CP {
     /// Cache map: runNumber -> vector<SFRecord>
     mutable std::map<int, std::shared_ptr<std::vector<ClusterSFRecord>>> m_cachedClusterSFData ATLAS_THREAD_SAFE;
     mutable std::map<int, std::shared_ptr<std::vector<TrackSFRecord>>> m_cachedTrackSFData ATLAS_THREAD_SAFE;
-    mutable std::shared_mutex m_mapMutex ATLAS_THREAD_SAFE;
+    mutable std::shared_mutex m_cacheMutex ATLAS_THREAD_SAFE;
 
     /// Highest eta bin for which track-based equalization SFs are define.
     /// If track has higher eta, use SF from highest bin.

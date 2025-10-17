@@ -62,7 +62,7 @@ namespace CP {
     
   private:
 
-    PixelDEdx::PixelClusterStruct getPixelClusterStruct(const xAOD::TrackMeasurementValidation* pixclus, const xAOD::TrackStateValidation* msos) const;
+    StatusCode getPixelClusterStruct(const xAOD::TrackMeasurementValidation* pixclus, const xAOD::TrackStateValidation* msos, PixelDEdx::PixelClusterStruct& cluster) const;
     
     ToolHandle<CP::IPixelDEdxEqualizationTool> m_pixelDEdxEqualizationTool{this, "PixelDEdxEqualizationTool", "", "tool for pixel dE/dx"};
 
@@ -107,10 +107,10 @@ namespace CP {
     /// Only one PixelClusters container shared by all track containers, so should not need to modify keys...
     /// Raw cluster dE/dx
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxKey
-      {this, "clusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
+      {this, "ClusterdEdxKey", "PixelClusters.dEdx", "SG key for the raw pixel cluster dE/dx attribute"};
     /// Equalized cluster dE/dx:
     SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_clusterdEdxEqKey
-      {this, "clusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
+      {this, "ClusterdEdxEqKey", "PixelClusters.dEdxEq", "SG key for the equalized pixel cluster dE/dx attribute"};
 
   }; // class PixelDEdxEqualizationAlg
 

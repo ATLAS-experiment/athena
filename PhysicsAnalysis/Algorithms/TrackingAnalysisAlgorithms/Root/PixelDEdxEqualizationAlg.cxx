@@ -41,7 +41,8 @@ namespace CP {
     }
 
     if (m_tightClusterCleaning) {
-      ATH_MSG_WARNING("Tight cluster cleaning requested for dE/dx calculation, but feature not yet supported.");
+      ATH_MSG_ERROR("Tight cluster cleaning requested for dE/dx calculation, but feature not yet supported.");
+      return StatusCode::FAILURE;
     }
 
     /// Initialize decorator keys, independent of equalization strategy.
@@ -164,19 +165,23 @@ namespace CP {
       float stored_dEdx { 0 };
       unsigned char stored_numberOfUsedHitsdEdx = 99;
       unsigned char stored_numberOfIBLOverflowsdEdx = 99;
+
       trk->summaryValue(stored_dEdx, xAOD::pixeldEdx);
-      static const SG::AuxElement::ConstAccessor< unsigned char > nUsedAcc("numberOfUsedHitsdEdx");
-      if (nUsedAcc.isAvailable(*trk)) {
-        stored_numberOfUsedHitsdEdx = nUsedAcc(*trk);
-      } else {
-        ATH_MSG_WARNING("numberOfUsedHitsdEdx auxdata is missing!");
+
+      static const SG::AuxElement::ConstAccessor<unsigned char> nUsedAcc("numberOfUsedHitsdEdx");
+      if (!nUsedAcc.isAvailable(*trk)) {
+        ATH_MSG_ERROR("numberOfUsedHitsdEdx auxdata is missing!");
+        return StatusCode::FAILURE;
       }
-      static const SG::AuxElement::ConstAccessor< unsigned char > nIBLOFAcc("numberOfIBLOverflowsdEdx");
-      if (nIBLOFAcc.isAvailable(*trk)) {
-        stored_numberOfIBLOverflowsdEdx = nIBLOFAcc(*trk);
-      } else {
-        ATH_MSG_WARNING("numberOfIBLOverflowsdEdx auxdata is missing!");
+      stored_numberOfUsedHitsdEdx = nUsedAcc(*trk);
+
+      static const SG::AuxElement::ConstAccessor<unsigned char> nIBLOFAcc("numberOfIBLOverflowsdEdx");
+      if (!nIBLOFAcc.isAvailable(*trk)) {
+        ATH_MSG_ERROR("numberOfIBLOverflowsdEdx auxdata is missing!");
+        return StatusCode::FAILURE;
       }
+      stored_numberOfIBLOverflowsdEdx = nIBLOFAcc(*trk);
+
       ////////////////////
       // Track-level EQ //
       ////////////////////
@@ -185,7 +190,11 @@ namespace CP {
         
         /// Get track-level equalization SF
         double SF = m_pixelDEdxEqualizationTool->getTrackdEdxSF(*trk, runNumber);
-        ATH_MSG_DEBUG("Found SF " << SF << " for this track.");
+        if (SF < 0.) {
+          ATH_MSG_ERROR("Could not find valid SF for this track.  Exiting!");
+          return StatusCode::FAILURE;
+        }
+        ATH_MSG_DEBUG("Found track SF: " << SF);
         
         /// Apply the SF
         float averagedEdxEq = stored_dEdx * SF;
@@ -203,7 +212,7 @@ namespace CP {
         /// Check for track states:
         static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc(m_msosLink);
         if( ! trackStateAcc.isAvailable( *trk ) ) {
-          ATH_MSG_DEBUG("Requested cluster-level equalaization, but cannot find TrackState link from xAOD::TrackParticle.");
+          ATH_MSG_DEBUG("Requested cluster-level equalization, but cannot find TrackState link from xAOD::TrackParticle.");
           ATH_MSG_DEBUG("Could be missing or thinned away. Skipping track.");
           /// Return an invalid value for the equalized truncated mean dE/dx.
           continue;
@@ -224,7 +233,7 @@ namespace CP {
           }
       
           /// Get the corresponding TrackMeasurementValidation object (cluster/drift tube)
-          const ElementLink<xAOD::TrackMeasurementValidationContainer> pixclus = (*msos)->trackMeasurementValidationLink();
+          const ElementLink<xAOD::TrackMeasurementValidationContainer>& pixclus = (*msos)->trackMeasurementValidationLink();
           if (not pixclus.isValid()) {
             ATH_MSG_DEBUG("Invalid link to cluster.");
             continue;
@@ -235,7 +244,12 @@ namespace CP {
           }
 
           /// Build simple cluster struct
-          PixelDEdx::PixelClusterStruct cluster = getPixelClusterStruct(*pixclus, *msos);
+          PixelDEdx::PixelClusterStruct cluster;
+          StatusCode sc = getPixelClusterStruct(*pixclus, *msos, cluster);
+          if (sc.isFailure()) {
+            ATH_MSG_ERROR("Failed to build a PixelClusterStruct due to missing info. Exiting.");
+            return StatusCode::FAILURE;
+          }
 
           /// Get raw cluster dE/dx.  Will update cluster.dEdx.
           PixelDEdx::getClusterdEdx(cluster, nIBLOverflowHits, m_tightClusterCleaning);
@@ -246,11 +260,14 @@ namespace CP {
             /// Get cluster SF
             double SF = m_pixelDEdxEqualizationTool->getClusterdEdxSF(cluster, runNumber);
             
-            /// If valid SF found, calculate the equalized cluster dE/dx
-            /// Otherwise, leave it at negative default value to indicate bad SF.
-            if(SF > 0.) {
-              cluster.dEdxEq = cluster.dEdx * SF;
+            if (SF < 0.) {
+              ATH_MSG_ERROR("Could not find valid SF for this cluster.  Exiting!");
+              return StatusCode::FAILURE;
             }
+            ATH_MSG_DEBUG("Found cluster SF: " << SF);
+
+            /// Valid cluster SF found, so calculate the equalized cluster dE/dx
+            cluster.dEdxEq = cluster.dEdx * SF;
             
             /// Push back to vector for truncated mean calculation
             clusters.push_back(cluster);
@@ -279,7 +296,7 @@ namespace CP {
                     << "\nThis can occur when pixel clusters are not saved to the AOD, or if they are thinned.");
         }
         else {
-          if ( std::fabs(stored_dEdx - averagedEdx) > epsilon ) {
+          if ( std::abs(stored_dEdx - averagedEdx) > epsilon ) {
             ATH_MSG_DEBUG("The track dE/dx stored in the AOD as summary variable (" << stored_dEdx
                             << ") does not match the value calculated here (" << averagedEdx << ")!"
                             << "\nThis may be due to the local (x,y) of the cluster migrating from the ESD to xAOD EDM.");
@@ -340,74 +357,71 @@ namespace CP {
 
 
 
-  PixelDEdx::PixelClusterStruct PixelDEdxEqualizationAlg::getPixelClusterStruct(const xAOD::TrackMeasurementValidation* pixclus, const xAOD::TrackStateValidation* msos) const {
+  StatusCode PixelDEdxEqualizationAlg::getPixelClusterStruct(
+                                                             const xAOD::TrackMeasurementValidation* pixclus,
+                                                             const xAOD::TrackStateValidation* msos,
+                                                             PixelDEdx::PixelClusterStruct& cluster) const {
+    cluster = PixelDEdx::PixelClusterStruct();
 
-    PixelDEdx::PixelClusterStruct cluster;
     static const SG::AuxElement::ConstAccessor< float > localXAcc("localX");
-    if (localXAcc.isAvailable(*pixclus)) {
-      cluster.locx = localXAcc(*pixclus);
-    } else {
-      ATH_MSG_WARNING("localX auxdata is missing!");
-      return cluster;
+    if (!localXAcc.isAvailable(*pixclus)) {
+      ATH_MSG_ERROR("localX auxdata is missing!");
+      return StatusCode::FAILURE;
     }
-    
-    static const SG::AuxElement::ConstAccessor< float > localYAcc("localY");
-    if (localYAcc.isAvailable(*pixclus)) {
-      cluster.locy = localYAcc(*pixclus);
-    } else {
-      ATH_MSG_WARNING("localY auxdata is missing!");
-      return cluster;
-    }
-    
-    static const SG::AuxElement::ConstAccessor< int > becAcc("bec");
-    if (becAcc.isAvailable(*pixclus)) {
-      cluster.bec = becAcc(*pixclus);
-    } else {
-      ATH_MSG_WARNING("bec auxdata is missing!");
-      return cluster;
-    }
+    cluster.locx = localXAcc(*pixclus);
 
-    static const SG::AuxElement::ConstAccessor< int > layerAcc("layer");
-    if (layerAcc.isAvailable(*pixclus)) {
-      cluster.layer = layerAcc(*pixclus);
-    } else {
-      ATH_MSG_WARNING("layer auxdata is missing!");
-      return cluster;
+    static const SG::AuxElement::ConstAccessor<float> localYAcc("localY");
+    if (!localYAcc.isAvailable(*pixclus)) {
+      ATH_MSG_ERROR("localY auxdata is missing!");
+      return StatusCode::FAILURE;
     }
-    
-    static const SG::AuxElement::ConstAccessor< int > etaAcc("eta_module");
-    if (etaAcc.isAvailable(*pixclus)) {
-      cluster.eta_module = etaAcc(*pixclus);
-    } else {
-      ATH_MSG_WARNING("eta_module auxdata is missing!");
-      return cluster;
+    cluster.locy = localYAcc(*pixclus);
+
+    static const SG::AuxElement::ConstAccessor<int> becAcc("bec");
+    if (!becAcc.isAvailable(*pixclus)) {
+      ATH_MSG_ERROR("bec auxdata is missing!");
+      return StatusCode::FAILURE;
     }
-    
-    float msosTheta = (msos)->localTheta();
-    float msosPhi = (msos)->localPhi();
-    float alpha = std::atan(std::hypot(std::tan(msosTheta),std::tan(msosPhi)));
+    cluster.bec = becAcc(*pixclus);
+
+    static const SG::AuxElement::ConstAccessor<int> layerAcc("layer");
+    if (!layerAcc.isAvailable(*pixclus)) {
+      ATH_MSG_ERROR("layer auxdata is missing!");
+      return StatusCode::FAILURE;
+    }
+    cluster.layer = layerAcc(*pixclus);
+
+    static const SG::AuxElement::ConstAccessor<int> etaAcc("eta_module");
+    if (!etaAcc.isAvailable(*pixclus)) {
+      ATH_MSG_ERROR("eta_module auxdata is missing!");
+      return StatusCode::FAILURE;
+    }
+    cluster.eta_module = etaAcc(*pixclus);
+
+    // Calculate theta and phi
+    float msosTheta = msos->localTheta();
+    float msosPhi = msos->localPhi();
+    float alpha = std::atan(std::hypot(std::tan(msosTheta), std::tan(msosPhi)));
     cluster.cosalpha = std::cos(alpha);
-    
-    static const SG::AuxElement::ConstAccessor< float > chargeAcc("charge");
-    if (chargeAcc.isAvailable(*pixclus)) {
-      cluster.charge = chargeAcc(*pixclus);
-    } else {
-      ATH_MSG_WARNING("charge auxdata is missing!");
-      return cluster;
+
+    static const SG::AuxElement::ConstAccessor<float> chargeAcc("charge");
+    if (!chargeAcc.isAvailable(*pixclus)) {
+      ATH_MSG_ERROR("charge auxdata is missing!");
+      return StatusCode::FAILURE;
     }
+    cluster.charge = chargeAcc(*pixclus);
 
     /// Keep track if this is an ibl cluster with overflow
     bool iblOverflow = false;
     if ((cluster.bec==0) and (cluster.layer==0)) { // check if IBL
-      int overflowIBLToT = 16; // see getFEI4OverflowToT() in PixelChargeCalibCondData.h
+      constexpr int overflowIBLToT = 16; // see getFEI4OverflowToT() in PixelChargeCalibCondData.h
       std::vector<int> ToTs;
       static const SG::AuxElement::ConstAccessor< std::vector<int> > totAcc("rdo_tot");
-      if (totAcc.isAvailable(*pixclus)) {
-        ToTs = totAcc(*pixclus);
-      } else {
-        ATH_MSG_WARNING("rdo_tot auxdata is missing!");
-        return cluster;
+      if (!totAcc.isAvailable(*pixclus)) {
+        ATH_MSG_ERROR("rdo_tot auxdata is missing!");
+        return StatusCode::FAILURE;
       }
+      ToTs = totAcc(*pixclus);
       
       for (int pixToT : ToTs) {
         if (pixToT >= overflowIBLToT) {
@@ -420,7 +434,7 @@ namespace CP {
       cluster.iblOverflow = iblOverflow;
     }
 
-    return cluster;
+    return StatusCode::SUCCESS;
   }
 
 } // namespace CP

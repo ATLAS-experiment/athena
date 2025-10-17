@@ -101,37 +101,47 @@ namespace CP {
   ////////////////////////////
 
   std::shared_ptr<std::vector<TrackSFRecord>> PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
-    // First try a shared lock for read-only access
+
+    // First look in the cache
+    // Use a shared lock for read-only access
     {
-      std::shared_lock readLock(m_mapMutex);
+      std::shared_lock readLock(m_cacheMutex);
       auto it = m_cachedTrackSFData.find(runNumber);
       if (it != m_cachedTrackSFData.end()) {
         ATH_MSG_DEBUG("Track SF data for run " << runNumber << " already cached!");
         return it->second;
       }
-    }
+    } // release shared lock for reading cache.
     
     // SF data not found in the cache, so prepare to find it in the dataframe.
-    // Need a unique write lock for caching.
     ATH_MSG_INFO("Track SF data for run " << runNumber << " not cached. Will filter and cache now."); // worst case, prints once per thread.
 
     // Find closest run number in m_df
-    auto runNumbers = m_df->Take<int>("runNumber");
-    int closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
-                                           [runNumber](int a, int b) {
-                                             return std::abs(a - runNumber) < std::abs(b - runNumber);
-                                           });
+    int closestRunNumber = -1;
+
+    // Even though all threads should only be reading m_df, lock to be safe.
+    {
+      std::shared_lock readLock(m_dfMutex); // Allow multiple simultaneous reads
+      auto runNumbers = m_df->Take<int>("runNumber");
+      closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
+                                               [runNumber](int a, int b) {
+                                                 return std::abs(a - runNumber) < std::abs(b - runNumber);
+                                               });
+    } // release shared lock for reading SF RDF.
 
     if(runNumber!=closestRunNumber) {
       // If MC, make sure the closest run number is the actual run number.
       if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
          runNumber==410000 || runNumber==450000 || runNumber==470000 || runNumber==495000) { //MC23a/d/e/g
-        ATH_MSG_WARNING("Could not find track-level SFs for this MC sub-campaign!  Will use SF=1."); // worst case, prints once per thread.
-        auto emptyPtr = std::make_shared<std::vector<TrackSFRecord>>();
+        ATH_MSG_WARNING("Could not find track-level SFs for this MC sub-campaign!"); // worst case, prints once per thread.
+
+        // Cache and return an empty pointer.
+        // Use a unique lock since writing to cache
+        std::shared_ptr<std::vector<TrackSFRecord>> emptyPtr = std::make_shared<std::vector<TrackSFRecord>>();
         {
-          std::unique_lock writeLock(m_mapMutex);
+          std::unique_lock writeLock(m_cacheMutex);
           m_cachedTrackSFData[runNumber] = emptyPtr;
-        }
+        } // release unique lock for writing to cache.
         return emptyPtr;
       }
       else { // data
@@ -139,69 +149,91 @@ namespace CP {
       }
     }
 
-    // Filter by closestRunNumber
-    std::string expr = "runNumber == " + std::to_string(closestRunNumber);
-    auto filtered = m_df->Filter(expr);
-    
-    // Trigger evaluation to get vectors for needed columns
-    auto etaLows = filtered.Take<double>("etaLow");
-    auto etaHighs = filtered.Take<double>("etaHigh");
-    auto sfYes = filtered.Take<double>("SF_IBLOFYes");
-    auto sfNo = filtered.Take<double>("SF_IBLOFNo");
-    
-    // Build vector of TrackSFRecord
+
+    // Create vector of TrackSFRecord .
     auto records = std::make_shared<std::vector<TrackSFRecord>>();
-    records->reserve(etaLows->size());
-    for (size_t i = 0; i < etaLows->size(); ++i) {
-      records->emplace_back(TrackSFRecord{
-          etaLows->at(i),
-          etaHighs->at(i),
-          sfYes->at(i),
-          sfNo->at(i)
-        });
-    }
-    
+
+    // Filter SF RDF by closestRunNumber
+    // Out of an abundance of caution, will use a unique_lock
     {
-      std::unique_lock writeLock(m_mapMutex);
+      std::unique_lock dfWriteLock(m_dfMutex); // Lock for exclusive access when filtering
+
+      std::string expr = "runNumber == " + std::to_string(closestRunNumber);
+      auto filtered = m_df->Filter(expr);
+    
+      // Trigger evaluation to get vectors for needed columns
+      auto etaLows = filtered.Take<double>("etaLow");
+      auto etaHighs = filtered.Take<double>("etaHigh");
+      auto sfYes = filtered.Take<double>("SF_IBLOFYes");
+      auto sfNo = filtered.Take<double>("SF_IBLOFNo");
+
+      // Fill vector of TrackSFRecord
+      records->reserve(etaLows->size());
+      for (size_t i = 0; i < etaLows->size(); ++i) {
+        records->emplace_back(TrackSFRecord{
+            etaLows->at(i),
+            etaHighs->at(i),
+            sfYes->at(i),
+            sfNo->at(i)
+          });
+      }
+    } // release unique lock for filtering SF RDF
+
+    // Now cache the results
+    // Use a unique lock since writing
+    {
+      std::unique_lock writeLock(m_cacheMutex);
       auto [it, inserted] = m_cachedTrackSFData.emplace(runNumber, records);
       if (!inserted) {
         // Another thread beat us — reuse theirs
         return it->second;
       }
-    }
+    } // release unique write lock for updating the cache
     
     return records;
   }
 
   std::shared_ptr<std::vector<ClusterSFRecord>> PixelDEdxEqualizationTool::getRunClusterSFs(const int runNumber) const {
 
-    // First try a shared lock for read-only access
+    // First look in the cache.
+    // Use a shared lock for read-only access
     {
-      std::shared_lock readLock(m_mapMutex);
+      std::shared_lock readLock(m_cacheMutex);
       auto it = m_cachedClusterSFData.find(runNumber);
       if (it != m_cachedClusterSFData.end()) {
         ATH_MSG_DEBUG("Cluster SF data for run " << runNumber << " already cached!");
         return it->second;
       }
-    }
-    
+    } // release shared lock for reading cache.
+
+    // SF data not found in the cache, so prepare to find it in the dataframe.
     ATH_MSG_INFO("SF data for run " << runNumber << " not cached. Will filter and cache now."); // worst case, prints once per thread.
     
     // Find closest run number in m_df
-    auto runNumbers = m_df->Take<int>("runNumber");
-    int closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
-                                             [runNumber](int a, int b) {
-                                               return std::abs(a - runNumber) < std::abs(b - runNumber);
-                                             });
+    int closestRunNumber = -1;
+
+    // Even though all threads should only be reading m_df, lock to be safe.
+    {
+      std::shared_lock readLock(m_dfMutex); // Allow multiple simultaneous reads
+      auto runNumbers = m_df->Take<int>("runNumber");
+      closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
+                                           [runNumber](int a, int b) {
+                                             return std::abs(a - runNumber) < std::abs(b - runNumber);
+                                           });
+    } // release shared lock for reading SF RDF.
+
     if(runNumber!=closestRunNumber) {
       if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
          runNumber==410000 || runNumber==450000 || runNumber==470000 || runNumber==495000) { //MC23a/d/e/g
-        ATH_MSG_WARNING("Could not find cluster-level SFs for this MC sub-campaign!  Will use SF=1."); // worst case, prints once per thread.
-        auto emptyPtr = std::make_shared<std::vector<ClusterSFRecord>>();
+        ATH_MSG_WARNING("Could not find cluster-level SFs for this MC sub-campaign!"); // worst case, prints once per thread.
+
+        // Cache and return an empty pointer.
+        // USe a unique lock for writing to cache.
+        std::shared_ptr<std::vector<ClusterSFRecord>> emptyPtr = std::make_shared<std::vector<ClusterSFRecord>>();
         {
-          std::unique_lock writeLock(m_mapMutex);
+          std::unique_lock writeLock(m_cacheMutex);
           m_cachedClusterSFData[runNumber] = emptyPtr;
-        }
+        } // release unique lock for writing to cache.
         return emptyPtr;
       }
       else { // data
@@ -209,34 +241,43 @@ namespace CP {
       }
     }
 
-    // Filter by closestRunNumber
-    std::string expr = "runNumber == " + std::to_string(closestRunNumber);
-    auto filtered = m_df->Filter(expr);
-    
-    // Trigger evaluation to get vectors for needed columns
-    auto becs = filtered.Take<int>("bec");
-    auto layers = filtered.Take<int>("layerID");
-    auto etas = filtered.Take<int>("etaM");
-    auto sfs = filtered.Take<double>("SF");
-    auto sf_errors = filtered.Take<double>("SF_error");
-    
-    // Build vector of SFRecords
+    // Create vector of TrackSFRecord.
     auto records = std::make_shared<std::vector<ClusterSFRecord>>();
-    records->reserve(becs->size());
-    for (size_t i = 0; i < becs->size(); ++i) {
-      records->emplace_back(ClusterSFRecord{
-          becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)
-        });
-    }
 
+    // Filter by closestRunNumber
+    // Out of an abundance of caution, use a unique lock.
     {
-      std::unique_lock writeLock(m_mapMutex);
+      std::unique_lock dfWriteLock(m_dfMutex); // Lock for exclusive access when filtering
+
+      std::string expr = "runNumber == " + std::to_string(closestRunNumber);
+      auto filtered = m_df->Filter(expr);
+    
+      // Trigger evaluation to get vectors for needed columns
+      auto becs = filtered.Take<int>("bec");
+      auto layers = filtered.Take<int>("layerID");
+      auto etas = filtered.Take<int>("etaM");
+      auto sfs = filtered.Take<double>("SF");
+      auto sf_errors = filtered.Take<double>("SF_error");
+    
+      // Build vector of SFRecords
+      records->reserve(becs->size());
+      for (size_t i = 0; i < becs->size(); ++i) {
+        records->emplace_back(ClusterSFRecord{
+            becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)
+          });
+      }
+    } // release unique lock for filtering SF DF
+
+    // Now cache the results
+    // Use a unique lock since writing.
+    {
+      std::unique_lock writeLock(m_cacheMutex);
       auto [it, inserted] = m_cachedClusterSFData.emplace(runNumber, records);
       if (!inserted) {
         // Another thread beat us — reuse theirs
         return it->second;
       }
-    }
+    } // release unique lock for updating the cache
     
     return records;
   }
@@ -246,18 +287,19 @@ namespace CP {
   //////////////////////
 
   double PixelDEdxEqualizationTool::getTrackdEdxSF(const xAOD::TrackParticle& track, const int runNumber) const {
+
     unsigned char stored_numberOfIBLOverflowsdEdx = 99;
     static const SG::AuxElement::ConstAccessor<unsigned char> nIBLOFAcc("numberOfIBLOverflowsdEdx");
-    if (nIBLOFAcc.isAvailable(track)) {
+      if (!nIBLOFAcc.isAvailable(track)) {
+        ATH_MSG_ERROR("numberOfIBLOverflowsdEdx auxdata is missing!  Returning SF = -1.");
+        return -1.0;
+      }
       stored_numberOfIBLOverflowsdEdx = nIBLOFAcc(track);
-    } else {
-      ATH_MSG_WARNING("numberOfIBLOverflowsdEdx auxdata is missing!");
-    }
     
     // Retrieve cached SF data for the given run
     std::shared_ptr<std::vector<TrackSFRecord>> sfRecords = getRunTrackSFs(runNumber);
     if (!sfRecords || sfRecords->empty()) {
-      return +1.0;
+      return -1.0;
     }
     
     // Get absolute eta, capped to the max bin range
@@ -305,10 +347,10 @@ namespace CP {
   double PixelDEdxEqualizationTool::getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const int runNumber) const {
 
     // Get the cached vector of SF records for this run
-    auto sfRecordsPtr = getRunClusterSFs(runNumber);
+    std::shared_ptr<std::vector<ClusterSFRecord>> sfRecordsPtr = getRunClusterSFs(runNumber);
 
     if (!sfRecordsPtr || sfRecordsPtr->empty()) {
-        return +1.0;
+        return -1.0;
     }
 
     /// Get bec (barrel vs endcap) & eta bin for the SF.

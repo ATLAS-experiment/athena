@@ -35,14 +35,14 @@ namespace PixelDEdx {
     if (cluster.isIBL) { // check if IBL      
       if (((cluster.eta_module >= -10 && cluster.eta_module <= -7) ||
            (cluster.eta_module >= 6 && cluster.eta_module <= 9)) &&
-          (fabs(cluster.locy) < 10. &&
+          (std::abs(cluster.locy) < 10. &&
            (cluster.locx > -8.33 &&
             cluster.locx < 8.3))) { // check if IBL 3D and good cluster selection
 
         dEdxValue = cluster.charge * cluster.cosalpha * conversionfactor / IBL_3D_sensorthickness;
         cluster.passdEdxCutsLoose = true;
       } else if ((cluster.eta_module >= -6 && cluster.eta_module <= 5) &&
-                 (fabs(cluster.locy) < 20. &&
+                 (std::abs(cluster.locy) < 20. &&
                   (cluster.locx > -8.33 &&
                    cluster.locx < 8.3))) { // check if IBL planar and good cluster
 
@@ -55,12 +55,12 @@ namespace PixelDEdx {
       }
     }
     /// PIXEL BARREL
-    else if(cluster.bec==0 && fabs(cluster.locy)<30. &&  ((cluster.locx>-8.20 && cluster.locx<-0.60) || (cluster.locx>0.50 && cluster.locx<8.10))) {
+    else if(cluster.bec==0 && std::abs(cluster.locy)<30. &&  ((cluster.locx>-8.20 && cluster.locx<-0.60) || (cluster.locx>0.50 && cluster.locx<8.10))) {
       dEdxValue = cluster.charge * cluster.cosalpha * conversionfactor / Pixel_sensorthickness;
       cluster.passdEdxCutsLoose = true;
     }
     /// PIXEL ENDCAP
-    else if (std::abs(cluster.bec)==2 && fabs(cluster.locy)<30. && ((cluster.locx>-8.15 && cluster.locx<-0.55) || (cluster.locx>0.55 && cluster.locx<8.15))) {
+    else if (std::abs(cluster.bec)==2 && std::abs(cluster.locy)<30. && ((cluster.locx>-8.15 && cluster.locx<-0.55) || (cluster.locx>0.55 && cluster.locx<8.15))) {
       dEdxValue = cluster.charge * cluster.cosalpha * conversionfactor / Pixel_sensorthickness;
       cluster.passdEdxCutsLoose = true;
     }

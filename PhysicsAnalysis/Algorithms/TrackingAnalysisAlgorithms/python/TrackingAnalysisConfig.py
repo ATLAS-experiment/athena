@@ -33,8 +33,19 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :
             info="Name of tree storing the cluster-level dE/dx equalization scale factors.")
         self.addOption ('trackSFTreeName', "track_SFs", type=str,
             info="Name of tree storing the track-level dE/dx equalization scale factors.")
+        self.addOption('trackdEdxEqKey', "", type=str,
+            info="SG key for the equalized truncated mean dE/dx decoration.")
+        self.addOption('trackdEdxStdDevKey', "", type=str,
+            info="SG key for the equalized truncated standard deviation dE/dx decoration.") # only used if equalizeClusterMeasurements == True
+        self.addOption('trackdEdxNUsedKey', "", type=str,
+           info="SG key for decorating track with the number of used hits in dE/dx truncated mean.") # only used if equalizeClusterMeasurements == True
+        self.addOption('trackdEdxIBLOFKey', "", type=str,
+           info="SG key for decorating track with the number of good IBL hits in overflow.") # only used if equalizeClusterMeasurements == True
+        self.addOption ('clusterdEdxKey', "PixelClusters.dEdx", type=str,
+            info="SG key for the raw pixel cluster dE/dx attribute.")
+        self.addOption ('clusterdEdxEqKey', "PixelClusters.dEdxEq", type=str,
+            info="SG key for the equalized pixel cluster dE/dx attribute.")
 
-        
     def makeAlgs (self, config) :
         alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg',
                                       'PixelDEdxEqualizationAlg' + self.postfix,
@@ -46,6 +57,16 @@ class PixelDEdxEqualizationBlock (ConfigBlock) :
         alg.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
         alg.TightClusterCleaning = self.tightClusterCleaning
+
+        ### Decoration Keys
+        eqStrategy = "ClusterEqualized" if self.equalizeClusterMeasurements else "TrackEqualized" if self.equalizeTrackMeasurements else ""
+        alg.TrackdEdxDecorKey = self.trackdEdxEqKey if self.trackdEdxEqKey else f"{self.containerName}.pixeldEdx{eqStrategy}"
+        alg.TrackdEdxStdDevDecorKey = self.trackdEdxStdDevKey if self.trackdEdxStdDevKey else f"{self.containerName}.pixeldEdxStdDev{eqStrategy}"
+        alg.TrackdEdxNUsedDecorKey = self.trackdEdxNUsedKey if self.trackdEdxNUsedKey else f"{self.containerName}.numberOfUsedHitsdEdx{eqStrategy}"
+        alg.TrackdEdxIBLOFDecorKey = self.trackdEdxIBLOFKey if self.trackdEdxIBLOFKey else f"{self.containerName}.numberOfIBLOverflowsdEdx{eqStrategy}"
+        alg.ClusterdEdxKey = self.clusterdEdxKey
+        alg.ClusterdEdxEqKey = self.clusterdEdxEqKey
+
         ### Tool properties
         alg.PixelDEdxEqualizationTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
         alg.PixelDEdxEqualizationTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
