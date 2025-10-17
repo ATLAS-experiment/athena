@@ -69,14 +69,10 @@ private:
   Gaudi::Property <bool> m_compareAllHits {this, "compareAllHits", true, "Compare all hits to all other hits when comparing two tracks"};
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
-  int m_totLayers = 0;                 //  Total number of layers used for a track
   ORAlgo m_algo{ORAlgo::Normal};       //  Internal ORAlgo enum for faster compare
 
 
   StatusCode runOverlapRemoval_fast(std::vector<FPGATrackSimTrack>& tracks);
-
-  //  ServiceHandle
-  ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping{this,"FPGATrackSimMappingSvc","FPGATrackSimMappingSvc"};   //  Get the number of layer through map
 
 };
 
