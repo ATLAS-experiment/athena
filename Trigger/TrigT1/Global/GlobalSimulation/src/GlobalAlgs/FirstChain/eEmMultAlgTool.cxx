@@ -84,9 +84,14 @@ namespace GlobalSim {
     auto  selected = std::make_unique<bool>(false);
 
     ulong tob_count{0};
+    std::vector<bool> tob_pass(tobs->size(), false);
     for (const auto& t : *tobs){
       if (m_c_selector->select(*t) and m_e_selector->select(*t)) {
-	if (++tob_count == m_maxtob){break;}
+	tob_pass[tob_count] = true;
+	if (++tob_count == m_maxtob){
+	  tob_pass[tob_count] = true;
+	  break;
+	}
       }
     }
 
@@ -111,7 +116,11 @@ namespace GlobalSim {
     if (m_enableDump) {
       std::stringstream ss;
       ss << "\nRun " << ctx <<' ' << "TIP:\n" << word << '\n';
-      for (const auto& tob : *tobs) {ss << *tob << '\n';}
+      std::size_t ind{0};
+      for (const auto& tob : *tobs) {
+	ss << *tob  << ' ' << std::boolalpha << " pass " << tob_pass[ind++] << '\n';
+      }
+      ss << "tob count " << tob_count << '\n';
  
       std::ofstream out(name() + ".log", std::ios_base::app);
       out << ss.str();

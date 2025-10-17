@@ -3,14 +3,14 @@
 */
 
 #include "CommonTOB.h"
-#include <iostream>
 
 
 namespace GlobalSim::IOBitwise {
 
-  CommonTOB::CommonTOB(const xAOD::eFexEMRoI& eFexTOB): m_et_bits(eFexTOB.et()),
+  CommonTOB::CommonTOB(const xAOD::eFexEMRoI& eFexTOB): m_et_bits(static_cast<ulong>(eFexTOB.et())/s_eFex_granularity),
 							m_eta_bits(eFexTOB.iEtaTopo()),
-							m_phi_bits(eFexTOB.iPhiTopo()){}
+							m_phi_bits(eFexTOB.iPhiTopo()){
+  }
 
   CommonTOB::CommonTOB(const GlobalSim::IOBitwise::ICommonTOB& CommonTOB): m_et_bits(CommonTOB.et_bits()),
 								m_eta_bits(CommonTOB.eta_bits()),
