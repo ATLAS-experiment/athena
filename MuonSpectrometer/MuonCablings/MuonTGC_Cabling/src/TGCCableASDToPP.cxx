@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableASDToPP.h"
@@ -174,7 +174,7 @@ StatusCode TGCCableASDToPP::getUpdateInfo(const int side,
 	isOK = (i==7);
       }
       if(isOK) {
-	info.push_back(entry);
+	info.push_back(std::move(entry));
       }
     }
   }
