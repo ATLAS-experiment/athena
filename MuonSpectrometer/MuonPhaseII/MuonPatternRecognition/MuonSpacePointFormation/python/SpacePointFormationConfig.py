@@ -25,7 +25,7 @@ def MuonSpacePointFormationCfg(flags):
     ### Split the Nsw hits into a separate space point container
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
         result.merge(MuonSpacePointMakerAlgCfg(flags, 
-                                               name="NswSpacePointMakerAlg",
+                                               name="MuonNswSpacePointMakerAlg",
                                                MdtKey="", RpcKey = "", TgcKey ="",
                                                WriteKey = "NswSpacePoints"))
     return result
