@@ -61,8 +61,7 @@ def make_clusters (mgr, ccc, hashes, ctx):
                 else:
                     hashes.add (hash.value())
                     cl.addCell (idx, 1)
-
-        cl.setLink(cellLinks,ctx)
+        cl.setLink(cellLinks, ctx)
 
     return (clc, clc_store, cellLinks)
 

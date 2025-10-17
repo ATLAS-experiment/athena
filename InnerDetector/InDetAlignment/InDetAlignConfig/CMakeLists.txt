@@ -8,7 +8,6 @@ atlas_subdir( InDetAlignConfig )
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_scripts( share/test_CL*.sh )
-atlas_install_scripts( scripts/runIDAlign.py )
 atlas_install_scripts( scripts/runITkAlign.py )
 
 

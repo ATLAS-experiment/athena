@@ -10,24 +10,31 @@ LOGLEVEL=$2
 ## In case the local db does not exist for some reason,
 ## allow this test to run anyway wihtout any local db input
 
-if [ -f Iter0/Solve/alignment_output.db ]; then
-    LOCALDATABASE="--localDatabase Iter0/Solve/alignment_output.db"
+if [ -f Iter0/Solve/condition.db ]; then
+    LOCALDATABASE="--localDatabase Iter0/Solve/condition.db"
 else
     LOCALDATABASE=""
 fi
 
-runIDAlign.py \
+IDAlign_tf.py \
     --alignLevel 16 \
     --maxEvents ${MAXEVENTS} \
     --accumulate \
     --baseDir Iter1 \
-    --monitorFile monitor.root \
     --logLevel ${LOGLEVEL} \
+    --outputMonitorFile monitor.root \
+    --outputTFile matrix.root \
+    --execOnly \
     ${LOCALDATABASE}
 
-runIDAlign.py \
+IDAlign_tf.py \
     --alignLevel 16 \
     --solve \
-    --baseDir Iter1 \
     --logLevel ${LOGLEVEL} \
+    --baseDir Iter1 \
+    --inputTFile Iter1/Accumulate/matrix.root \
+    --outputConditionFile condition_pool.root \
+    --outputDBFile condition.db \
+    --outputTaredLogFile align_logs.tar.gz \
+    --execOnly \
     ${LOCALDATABASE}
