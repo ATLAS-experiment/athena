@@ -166,6 +166,7 @@ StatusCode CaloHitAnalysis::initialize() {
   m_tree->Branch("CellZ", &m_cell_z);
   m_tree->Branch("CellE", &m_cell_e);
   m_tree->Branch("CellRadius", &m_cell_radius);
+  m_tree->Branch("CellLayer", &m_cell_layer);
   m_tree->Branch("Time", &m_time);
   m_tree->Branch("CalibEta", &m_calib_eta);
   m_tree->Branch("CalibPhi", &m_calib_phi);
