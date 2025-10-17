@@ -150,9 +150,8 @@ def FTAGPUCfg(flags):
                                             "Photons.TruthLink",
                                             "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink.InclusiveGNNVerticesLink",
                                             "TruthEvents.signalProcessVertexLink",
-                                            "DuplicatedTrks.btagIp_ByVertex1_d0.btagIp_ByVertex1_z0Sintheta",
                                             ]
-    
+    FTAGPUSlimmingHelper.StaticContent += ["xAOD::TrackParticleContainer#DuplicatedTrks","xAOD::TrackParticleAuxContainer#DuplicatedTrksAux."]
     # Add truth containers
     if flags.Input.isMC:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAGPUSlimmingHelper)
@@ -196,12 +195,12 @@ def FTAGPUCfg(flags):
     acc.merge(JetBTagginglessByVertexAlgCfg(
         flags,
         "AntiKt4EMPFlowByVertexJets",
-        dzCut_vec=[5, 2, 1],
+        dzCut_vec=[5],
         useMinZ0Vertex_vec=[False]))
 
     # Output stream
     FTAGPUItemList = FTAGPUSlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_FTAGPU", ItemList=FTAGPUItemList+["xAOD::TrackParticleContainer#DuplicatedTrks","xAOD::TrackParticleAuxContainer#DuplicatedTrksAux."], AcceptAlgs=["FTAGPUKernel"]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_FTAGPU", ItemList=FTAGPUItemList, AcceptAlgs=["FTAGPUKernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAGPU", AcceptAlgs=["FTAGPUKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
