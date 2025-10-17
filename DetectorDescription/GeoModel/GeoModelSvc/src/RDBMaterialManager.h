@@ -77,8 +77,8 @@ class RDBMaterialManager final : public StoredMaterialManager, public AthMessagi
 		    , IRDBRecordset_ptr materials
 		    , IRDBRecordset_ptr matcomponents)
       : m_prim_key(prim_key)
-      , m_materials(materials)
-      , m_matcomponents(matcomponents)
+      , m_materials(std::move(materials))
+      , m_matcomponents(std::move(matcomponents))
     {}
 
     std::string m_prim_key{};
