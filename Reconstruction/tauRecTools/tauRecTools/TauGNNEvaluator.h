@@ -42,14 +42,6 @@ public:
     inline const TauGNN* get_gnn_2p() const { return m_net_2p.get(); }
     inline const TauGNN* get_gnn_3p() const { return m_net_3p.get(); }
 
-    // Selects tracks to be used as input to the network
-    StatusCode get_tracks(const xAOD::TauJet &tau,
-                          std::vector<const xAOD::TauTrack *> &out) const;
-
-    // Selects clusters to be used as input to the network
-    StatusCode get_clusters(const xAOD::TauJet &tau,
-                            std::vector<xAOD::CaloVertexedTopoCluster> &out) const;
-
     enum Discriminant {
         NegLogPJet = 0,
         PTau = 1
@@ -66,6 +58,9 @@ private:
     Gaudi::Property<std::string> m_weightfile_1p{this, "NetworkFile1P", ""};
     Gaudi::Property<std::string> m_weightfile_2p{this, "NetworkFile2P", ""};
     Gaudi::Property<std::string> m_weightfile_3p{this, "NetworkFile3P", ""}; 
+    Gaudi::Property<std::string> m_input_layer_scalar{this, "InputLayerScalar","tau_vars"};
+    Gaudi::Property<std::string> m_input_layer_tracks{this, "InputLayerTracks","track_vars"};
+    Gaudi::Property<std::string> m_input_layer_clusters{this, "InputLayerClusters","cluster_vars"};
     Gaudi::Property<std::string> m_output_varname{this, "OutputVarname", "GNTauScore"}; 
     Gaudi::Property<std::string> m_output_ptau{this, "OutputPTau", "GNTauProbTau"};
     Gaudi::Property<std::string> m_output_pjet{this, "OutputPJet", "GNTauProbJet"};
@@ -80,12 +75,9 @@ private:
     Gaudi::Property<float> m_minTauPt{this, "MinTauPt", 0.};
     Gaudi::Property<bool> m_applyLooseTrackSel{this, "ApplyLooseTrackSel", false};
     Gaudi::Property<bool> m_applyTightTrackSel{this, "ApplyTightTrackSel", false};
-    Gaudi::Property<float> m_min_prong_track_pt{this, "MinProngTrackPt", 0.};
-    Gaudi::Property<std::string> m_input_layer_scalar{this, "InputLayerScalar", "tau_vars"};
-    Gaudi::Property<std::string> m_input_layer_tracks{this, "InputLayerTracks", "track_vars"};
-    Gaudi::Property<std::string> m_input_layer_clusters{this, "InputLayerClusters", "cluster_vars"};
     Gaudi::Property<std::string> m_outnode_tau{this, "NodeNameTau", "GN2TauNoAux_pb"};
     Gaudi::Property<std::string> m_outnode_jet{this, "NodeNameJet", "GN2TauNoAux_pu"};  
+    Gaudi::Property<float> m_min_prong_track_pt{this, "MinProngTrackPt", 0.};
 
     // Wrappers for lwtnn
     std::unique_ptr<TauGNN> m_net_inclusive;
@@ -94,7 +86,7 @@ private:
     std::unique_ptr<TauGNN> m_net_2p;
     std::unique_ptr<TauGNN> m_net_3p;
 
-    std::unique_ptr<TauGNN> load_network(const std::string& network_file, const TauGNN::Config& config) const;
+    std::unique_ptr<TauGNN> load_network(const std::string& network_file) const;
 };
 
 #endif // TAURECTOOLS_TAUGNNEVALUATOR_H
