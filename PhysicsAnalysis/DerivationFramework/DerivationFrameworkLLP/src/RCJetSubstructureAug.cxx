@@ -165,7 +165,7 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches(const EventCon
 
             // Timing info of constituent only for calo constituents
             if (constit->type() == xAOD::Type::CaloCluster) {
-                auto caloConstit = dynamic_cast<const xAOD::CaloCluster*> (constit);
+                auto caloConstit = static_cast<const xAOD::CaloCluster*> (constit);
                 double eConstit = caloConstit->e()* caloConstit->e();
                 time += caloConstit->time()* eConstit;
                 eTot += eConstit;

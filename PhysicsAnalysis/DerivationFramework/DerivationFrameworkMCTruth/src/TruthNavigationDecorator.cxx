@@ -7,12 +7,8 @@
 // Add navigation information to small truth collections
 
 #include "TruthNavigationDecorator.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthParticleContainer.h"
 #include "TruthUtils/MagicNumbers.h"
-#include <string>
-#include <vector>
-#include <map>
+#include <algorithm> //for std::find
 
 // Constructor
 DerivationFramework::TruthNavigationDecorator::TruthNavigationDecorator(const std::string& t,
@@ -102,8 +98,8 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches(const Even
     seen_particles.clear();
     find_children( event->truthParticle(p) , children , linkMap , seen_particles );
     // Set the maps, so that we can decorate later
-    parentMap[HepMC::uniqueID(event->truthParticle(p))] = parents;
-    childMap[HepMC::uniqueID(event->truthParticle(p))] = children;
+    parentMap[HepMC::uniqueID(event->truthParticle(p))] = std::move(parents);
+    childMap[HepMC::uniqueID(event->truthParticle(p))] = std::move(children);
   } // Loop over truth particles in the big truth collection
 
   // Now final loop over the collections and setting all the decorators
