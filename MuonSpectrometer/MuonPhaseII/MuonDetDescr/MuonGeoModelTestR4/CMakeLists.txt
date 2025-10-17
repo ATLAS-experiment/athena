@@ -10,7 +10,7 @@ find_package( ROOT COMPONENTS Core Tree TreePlayer )
 
 atlas_add_component( MuonGeoModelTestR4
                      src/components/*.cxx src/*.cxx
-                     LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
+                     LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib MuonCablingData
                                     GaudiKernel MuonReadoutGeometryR4 AthenaPoolUtilities CxxUtils)
 
 # Some functions here make heavy use of Eigen and are thus very slow in debug
