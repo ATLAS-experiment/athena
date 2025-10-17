@@ -20,13 +20,17 @@ namespace MuonR4{
              *      - FailedCalib: The calibration procedure produced invalid constants and the space point shall not be included
              *                      in the current chi2 iteration, but may tried in the next cycle
              *      - Outlier: The Space point is an outlier and shall never be included in the fit. It's kept for the hit counting
-             *                 purpose but nothing else */
+             *                 purpose but nothing else 
+             *      - Duplicate: The hit is marked during the hole recovery procedure as a duplicate. It should never
+             *                   end up on the final trajectory */
             enum class State : std::uint8_t {
-                Valid = 0,
-                FailedCalib = 1,
-                Outlier = 2,
+                Valid = 1,
+                FailedCalib,
+                Outlier,
+                Duplicate
             };
-            
+            /** @brief Converts the state enum into a string */
+            static std::string toString(const State s);
             /** @brief Standard constructor
              *  @param uncalibSpacePoint: Pointer to the underyling uncalibrated space point
              *  @param posInChamber: Calibrated position of the space point inside the chamber

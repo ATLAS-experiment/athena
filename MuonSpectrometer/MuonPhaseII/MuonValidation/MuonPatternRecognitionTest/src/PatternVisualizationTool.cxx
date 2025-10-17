@@ -574,17 +574,23 @@ namespace MuonValR4 {
                                              boxColor, fillStyle));
                 break; 
             } case xAOD::UncalibMeasType::MMClusterType: {
-                const auto* meas{static_cast<const xAOD::MMCluster*>(underlyingSp->primaryMeasurement())};
-                const int boxColor = isLabeled(*meas) ? truthColor : kAquamarine;
-                const double boxWidth = 0.5*Gaudi::Units::mm;
+                const int boxColor = isLabeled(*underlyingSp->primaryMeasurement()) ? truthColor : kAquamarine;
+                const double boxWidth = 5*Gaudi::Units::mm;
                 primitives.push_back(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm,
                                              boxColor, fillStyle));
                 break; 
-            }  case xAOD::UncalibMeasType::Other :{
+            }  case xAOD::UncalibMeasType::Other: {
                 break;
-            } default:
+            }  case xAOD::UncalibMeasType::sTgcStripType: {
+                const int boxColor = isLabeled(*underlyingSp->primaryMeasurement()) ? truthColor : kTeal;
+                const double boxWidth = 5*Gaudi::Units::mm;
+                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm,
+                                             boxColor, fillStyle));
+                break;
+            } default: {
                 ATH_MSG_WARNING("Please implement proper drawings of the new small wheel.. "<<__FILE__<<":"<<__LINE__);    
                 break;
+            }
         }
         return underlyingSp;
     }

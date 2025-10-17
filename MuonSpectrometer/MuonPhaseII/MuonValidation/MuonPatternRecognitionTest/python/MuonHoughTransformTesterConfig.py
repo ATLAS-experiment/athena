@@ -80,7 +80,7 @@ if __name__=="__main__":
         cfg.getEventAlgo("MuonNswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswSegmentFitPlotValid",
                                                                                                 AllCanvasName="AllNswSegmentFitPlots",
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= False,CanvasLimits=10000))
 
     executeTest(cfg)
     
