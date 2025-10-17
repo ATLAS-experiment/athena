@@ -52,9 +52,9 @@ namespace GlobalSim::IOBitwise {
       
       ss << '\n'
 	 << ICommonTOB::to_string()
-	 << " RHad " << RHad_bits()
-	 << " REta " << REta_bits()
-	 << " WsTot " << WsTot_bits();
+	 << " RHad " << RHad_bits() << " (" <<   RHad_bits().to_ulong() << ")"
+	 << " REta " << REta_bits() << " (" <<   REta_bits().to_ulong() << ")"
+	 << " WsTot " << WsTot_bits() << " (" <<   WsTot_bits().to_ulong() << ")";
       return ss.str();
   }
 }

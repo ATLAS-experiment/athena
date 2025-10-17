@@ -23,6 +23,16 @@ namespace GlobalSim::IOBitwise{
    * This base class defines the bitsets to hold the common et, eta, phi
    * bits in GlobalTOBs, and their retrieval functions.
    */
+
+  template<std::size_t e>
+  constexpr std::size_t pow2(){
+    std::size_t result{1};
+    for (auto i = e; i != 0; --i) {
+	result *= 2;
+    }
+    return result;
+  }
+
   class ICommonTOB {
 
   public:
@@ -31,11 +41,16 @@ namespace GlobalSim::IOBitwise{
     virtual ~ICommonTOB(){}
 
     ///Size of the eT bitset
-    static const std::size_t s_et_width{13};
+    static constexpr std::size_t s_et_width{13};
     ///Size of the eta bitset
-    static const std::size_t s_eta_width{10};
+    static constexpr std::size_t s_eta_width{10};
     ///Size of the phi bitset
-    static const std::size_t s_phi_width{9};  
+    static constexpr std::size_t s_phi_width{9};
+
+    static constexpr std::size_t s_eFex_granularity{100}; // MeV
+
+    static constexpr std::size_t max_et{pow2<s_et_width>()-1};
+
 
     /** @brief Returns the eT bits of this TOB*/
     virtual std::bitset<s_et_width> et_bits() const = 0;
