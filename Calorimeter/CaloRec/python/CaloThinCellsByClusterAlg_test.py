@@ -30,10 +30,11 @@ def make_calo_cells (mgr):
     return ccc
 
 
-def make_clusters (mgr, ccc, hashes):
+def make_clusters (mgr, ccc, hashes, ctx):
     clc = ROOT.xAOD.CaloClusterContainer()
     clc_store = ROOT.xAOD.CaloClusterAuxContainer()
     clc.setStore (clc_store)
+    cellLinks = ROOT.CaloClusterCellLinkContainer()
 
     ids = ROOT.vector(ROOT.IdentifierHash)()
 
@@ -61,8 +62,9 @@ def make_clusters (mgr, ccc, hashes):
                 else:
                     hashes.add (hash.value())
                     cl.addCell (idx, 1)
+        cl.setLink(cellLinks, ctx)
 
-    return (clc, clc_store)
+    return (clc, clc_store, cellLinks)
 
 
 class CreateDataAlg (Alg):
@@ -74,9 +76,10 @@ class CreateDataAlg (Alg):
 
         global cell_hashes
         cell_hashes = set()
-        (clc, clc_store) = make_clusters (mgr, ccc, cell_hashes)
+        (clc, clc_store, cellLinks) = make_clusters (mgr, ccc, cell_hashes, ctx)
         self.evtStore.record (clc, 'Clusters', False)
         self.evtStore.record (clc_store, 'ClustersAux.', False)
+        self.evtStore.record (cellLinks, 'Clusters_links', False)
         return StatusCode.Success
 
 
