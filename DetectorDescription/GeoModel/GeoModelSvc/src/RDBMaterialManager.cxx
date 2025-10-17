@@ -190,7 +190,7 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
     ATH_MSG_WARNING("Getting ToroMaterials with default tag");
     recMaterials = iAccessSvc->getRecordsetPtr("ToroMaterials","ToroMaterials-00");
   }
-  m_detData.emplace("toro",DetectorAuxData{"TOROMATERIALS_DATA_ID", recMaterials, recMatcomponents});
+  m_detData.emplace("toro",DetectorAuxData{"TOROMATERIALS_DATA_ID", std::move(recMaterials), std::move(recMatcomponents)});
 
   return StatusCode::SUCCESS;
 }
