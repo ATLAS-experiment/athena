@@ -6,6 +6,8 @@
 
 #include <AthenaBaseComps/AthHistogramAlgorithm.h>
 #include <StoreGate/ReadHandleKey.h>
+#include <StoreGate/ReadCondHandleKey.h>
+
 
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
@@ -15,6 +17,7 @@
 #include <MuonTesterTree/ThreeVectorBranch.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonTesterTree/CoordTransformBranch.h>
+#include <MuonCablingData/MuonMDT_CablingMap.h>
 namespace MuonGMR4{
 
 class GeoModelMdtTest : public AthHistogramAlgorithm{
@@ -35,6 +38,10 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
       SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+      
+      SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "CablingKey", "MuonMDT_CablingMap", 
+                                                            "Key of output MDT cabling map"};
+
       /// Set of stations to be tested
       std::set<Identifier> m_testStations{};
   
@@ -80,6 +87,11 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
       MuonVal::VectorBranch<double>& m_tubeLength{m_tree.newVector<double>("tubeLength")};
       MuonVal::VectorBranch<double>& m_activeTubeLength{m_tree.newVector<double>("activeTubeLength")};
       MuonVal::VectorBranch<double>& m_wireLength{m_tree.newVector<double>("wireLength")};
+      /// Cabling information
+      MuonVal::VectorBranch<uint8_t>& m_cablingCSM{m_tree.newVector<uint8_t>("tubeOnlCSM")};
+      MuonVal::VectorBranch<uint8_t>& m_cablingMROD{m_tree.newVector<uint8_t>("tubeOnlMROD")};
+      MuonVal::VectorBranch<uint8_t>& m_cablingTdcId{m_tree.newVector<uint8_t>("tubeOnlTdcId")};
+      MuonVal::VectorBranch<uint8_t>& m_cablingTdcCh{m_tree.newVector<uint8_t>("tubeOnlTdcCh")};
 
       /// Position of the readout
       MuonVal::ThreeVectorBranch m_roPos{m_tree, "readOutPos"};
