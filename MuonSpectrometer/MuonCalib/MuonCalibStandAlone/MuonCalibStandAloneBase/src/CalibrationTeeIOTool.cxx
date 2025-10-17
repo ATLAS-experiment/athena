@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibStandAloneBase/CalibrationTeeIOTool.h"
@@ -29,7 +29,7 @@ namespace MuonCalib {
                                              const NtupleStationId &station_id, int iov_start, int iov_end, bool real_rt,
                                              bool real_resolution) {
         ATH_CHECK(m_tool1->WriteRt(rt_relation, resolution, station_id, iov_start, iov_end, real_rt, real_resolution));
-        return m_tool2->WriteRt(rt_relation, resolution, station_id, iov_start, iov_end, real_rt, real_resolution);
+        return m_tool2->WriteRt(rt_relation, std::move(resolution), station_id, iov_start, iov_end, real_rt, real_resolution);
     }
 
     StatusCode CalibrationTeeIOTool::LoadT0(std::map<NtupleStationId, MdtStationT0Container *> &t0s, int iov_id) {
