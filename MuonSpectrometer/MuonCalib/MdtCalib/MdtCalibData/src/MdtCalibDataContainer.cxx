@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MdtCalibData/MdtCalibDataContainer.h>
@@ -125,7 +125,7 @@ bool MdtCalibDataContainer::storeData(const Identifier& mlID, TubeContainerPtr t
     if (m_granularity == RegionGranularity::OneRt || 
         m_idHelper.multilayer(mlID) == 2 || 
         m_idHelper.numberOfMultilayers(mlID) == 1) return true;
-    return storeData(m_idHelper.multilayerID(mlID, 2), tubeContainer, msg);
+    return storeData(m_idHelper.multilayerID(mlID, 2), std::move(tubeContainer), msg);
 }
 
 
