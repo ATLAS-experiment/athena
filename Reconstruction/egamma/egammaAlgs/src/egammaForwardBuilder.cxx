@@ -44,7 +44,9 @@ StatusCode egammaForwardBuilder::initialize()
   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
   ATH_CHECK(m_electronOutputKey.initialize());
   ATH_CHECK(m_outClusterContainerKey.initialize());
-  m_outClusterContainerCellLinkKey = m_outClusterContainerKey.key() + "_links";
+  if (m_outClusterContainerCellLinkKey.key().empty()) {
+    m_outClusterContainerCellLinkKey = m_outClusterContainerKey.key() + "_links";
+  }
   ATH_CHECK(m_outClusterContainerCellLinkKey.initialize());
 
   // Retrieve object quality tool.
