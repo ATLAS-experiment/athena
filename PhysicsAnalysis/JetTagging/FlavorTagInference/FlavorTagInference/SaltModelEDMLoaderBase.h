@@ -70,7 +70,7 @@ namespace FlavorTagInference {
             return salt_model_data;
         }
 
-        void DumpGnnInputs(const SaltModelInputs& gnn_inputs) {
+        void DumpGnnInputs(const SaltModelInputs& gnn_inputs) const {
             // Implementation for dumping GNN input data
             std::cout << "-------- Dumping GNN Input Data --------" << std::endl;
 
