@@ -69,15 +69,15 @@ if __name__=="__main__":
                                                                                                 AllCanvasName="AllSegmentFitPlots", displayTruthOnly = True,
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
     if not args.noMonitorPlots and (flags.Detector.GeometryMM or flags.Detector.GeometrysTGC):
-        cfg.getEventAlgo("NswEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+        cfg.getEventAlgo("MuonNswEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswEtaHoughPlotValid",
                                                                                                 AllCanvasName="AllNswEtaHoughiDiPuffPlots",
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
-        cfg.getEventAlgo("NswPhiSeedFinderAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+        cfg.getEventAlgo("MuonNswPhiSeedFinderAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswPhiHoughPlotValid",
                                                                                                 AllCanvasName="AllNswPhiHoughiDiPuffPlots",
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
-        cfg.getEventAlgo("NswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+        cfg.getEventAlgo("MuonNswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswSegmentFitPlotValid",
                                                                                                 AllCanvasName="AllNswSegmentFitPlots",
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))

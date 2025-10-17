@@ -62,13 +62,13 @@ def MuonPatternRecognitionCfg(flags):
     sgementContainers = []
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
         sgementContainers+=["R4MuonSegmentsNsw"]
-        result.merge(MuonEtaHoughTransformAlgCfg(flags, name="NswEtaHoughTransformAlg", 
+        result.merge(MuonEtaHoughTransformAlgCfg(flags, name="MuonNswEtaHoughTransformAlg", 
                                                         EtaHoughMaxContainer = "MuonHoughNswMaxima", 
                                                         SpacePointContainer = "NswSpacePoints"))
-        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="NswPhiSeedFinderAlg", 
+        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="MuonNswPhiSeedFinderAlg", 
                                                        CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", 
                                                        CombinatorialReadKey = "MuonHoughNswMaxima"))
-        result.merge(MuonSegmentFittingAlgCfg(flags, name="NswSegmentFitter", 
+        result.merge(MuonSegmentFittingAlgCfg(flags, name="MuonNswSegmentFitter", 
                                                      OutSegmentContainer=sgementContainers[-1],  
                                                      ReadKey="MuonHoughNswSegmentSeeds",
                                                      fitSegmentT0 = False,
