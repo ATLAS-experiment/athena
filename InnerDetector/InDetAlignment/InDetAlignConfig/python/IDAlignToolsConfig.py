@@ -198,7 +198,6 @@ def SiTrkAlignDBToolCfg(flags, name="SiTrkAlignDBTool", **kwargs):
 def TRTTrkAlignDBToolCfg(flags, name="TRTTrkAlignDBTool", **kwargs):
     cfg = ComponentAccumulator()
 
-    kwargs.setdefault("TrtAlignDbSvc", cfg.addService(CompFactory.TRT_AlignDbSvc(name)))
     kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
@@ -231,9 +230,8 @@ def MatrixToolCfg(flags, name="MatrixTool", **kwargs):
     kwargs.setdefault("AlignModuleTool", cfg.addPublicTool(
         cfg.popToolsAndMerge(InDetAlignModuleToolCfg(flags))))
 
-    kwargs.setdefault("PathBinName", f"{flags.InDet.Align.baseDir}/Accumulate/")
-    kwargs.setdefault("PathTxtName", f"{flags.InDet.Align.baseDir}/Accumulate/")
     kwargs.setdefault("InputTFiles", flags.InDet.Align.inputTFiles)
+    kwargs.setdefault("TFileName", flags.InDet.Align.outputTFile)
     kwargs.setdefault("SolveOption", 0 if flags.InDet.Align.accumulate else 1)
     kwargs.setdefault("MinNumHitsPerModule", 10)
     kwargs.setdefault("AlignIBLbutNotPixel", flags.InDet.Align.pixelAlignmentLevel == 16)
