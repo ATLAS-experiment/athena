@@ -418,7 +418,7 @@ namespace LArG4 {
 
             // Add to the map that's based on volume name; it
             // contains maps based on copy number.
-            volumeMap[volume.volumeName] = identifierMap;
+            volumeMap[volume.volumeName] = std::move(identifierMap);
 
 #if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
             G4cout << "LArG4::BarrelCryostat::CalibrationCalculator::CalibrationCalculator - "
