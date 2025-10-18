@@ -8,8 +8,13 @@
 ***************************************************************************/
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "IdDict/IdDictDefs.h"
 #include "AtlasDetectorIDHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictLabel.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRange.h"
+#include "IdDict/IdDictRegion.h"
 #include <stdio.h>
 #include <assert.h>
 #include <format>
