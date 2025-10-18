@@ -40,7 +40,7 @@ namespace GlobalSim {
 
     auto pTowerEnergies = std::make_unique<std::array<std::array<float, nPhi>, nEta>>();
     auto & towerEnergies = *pTowerEnergies;
-    for (const auto& cell : gblLArCells) {
+    for (const GlobalSim::GlobalLArCell* cell : gblLArCells) {
 
         // Compute eta and phi indices (binning in steps of 0.1)
         int eta_index = static_cast<int>(std::floor(cell->eta() * 10)) + 49;
