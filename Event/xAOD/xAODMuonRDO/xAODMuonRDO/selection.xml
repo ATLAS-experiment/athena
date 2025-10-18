@@ -8,7 +8,7 @@
     <class name="xAOD::NRPCRDOContainer_v1"
            id="E43FA4A0-9C96-45D9-824A-F692EC062F31" />
     <class name="xAOD::NSWTPRDOContainer_v1"
-           id="D5B8D004-7E09-4BB6-83DA-BE7788448F5" />
+           id="D5B8D004-7E09-4BB6-83DA-BE7788448F05" />
     <class name="xAOD::NSWMMTPRDOContainer_v1"
            id="6270E93F-13EB-4779-8997-7144F4486517" />
 
