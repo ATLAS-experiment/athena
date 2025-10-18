@@ -156,8 +156,6 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  const Decision* expressTerminusNode = TrigCompositeUtils::getExpressTerminusNode(*primaryInputHandle);
-  
   // Stage 1. Build a transient representation of the navigation graph.
   TrigTimeStamp stage1;
   NavGraph transientNavGraph;
@@ -165,11 +163,18 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   // We can optionally only keep data for a given set of chains. An empty set means to keep for all chains.
   DecisionIDContainer chainIDs = {};
   if (not m_chainsFilter.empty()) {
-    ATH_CHECK(fillChainIDs(chainIDs));
+    const Decision* applyPassingChainsFilter = nullptr;
+    if (not m_keepFailedBranches) { // In this case, we should further restrict the chainIDs to only chains which pass the event
+      applyPassingChainsFilter = terminusNode;
+    }
+    ATH_CHECK(fillChainIDs(chainIDs, applyPassingChainsFilter));
     ATH_MSG_DEBUG("Supplied " << m_chainsFilter.size() << " chain patterns. This converts to " << chainIDs.size() << " DecisionIDs to be preserved.");
-  }
-  if (chainIDs.size() == 0) {
-    ATH_MSG_DEBUG("chainIDs size is zero. No HLT-chain based filtering of the navigation graph will be performed.");
+    if (chainIDs.empty()) {
+      // No chains are in the filter. We should reject everything. But an empty set is interpreted as keep-all. So we need to add a dummy entry.
+      chainIDs.insert( HLT::Identifier("HLT_dummy").numeric() );
+    }
+  } else {
+    ATH_MSG_DEBUG("No HLT-chain based filtering of the navigation graph will be performed.");
   }
 
   std::set<const Decision*> fullyExploredFrom;
@@ -237,21 +242,50 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   // Stage 5. Fill the transientNavGraph structure (with NavGraphNode* nodes) back into an xAOD::DecisionContainer (with xAOD::Decision* nodes).
   TrigTimeStamp stage5;
   IOCacheMap cache; // Used to keep a one-to-one relationship between the const input Decision* and the mutable output Decision*
+ 
   // Do the terminus node first - such that it ends up at index 0 of the outputNavigation (fast to locate in the future)
   Decision* terminusNodeOut = nullptr;
-  ATH_CHECK(inputToOutput(terminusNode, &terminusNodeOut, cache, outputContainers, chainIDs, ctx));
+  const DecisionIDContainer emptySet = {};
+  ATH_CHECK(inputToOutput(terminusNode, &terminusNodeOut, cache, outputContainers, (m_applyChainsFilterToSummaryNodes ? chainIDs : emptySet), ctx));
+
+  const Decision* expressTerminusNode = TrigCompositeUtils::getExpressTerminusNode(*primaryInputHandle);
   if (expressTerminusNode) {
     // Do the express terminus node second - such that it ends up at index 1 of the outputNavigation (fast to locate in the future)
     Decision* expressTerminusNodeOut = nullptr;
-    ATH_CHECK(inputToOutput(expressTerminusNode, &expressTerminusNodeOut, cache, outputContainers, chainIDs, ctx));
+    ATH_CHECK(inputToOutput(expressTerminusNode, &expressTerminusNodeOut, cache, outputContainers, (m_applyChainsFilterToSummaryNodes ? chainIDs : emptySet), ctx));
   }
+
+  if (m_propagatePrescaledNode) {
+    // Prescaled summary node might come third, it is optional.
+    const Decision* prescaledNode = TrigCompositeUtils::getNodeByName(*primaryInputHandle, TrigCompositeUtils::summaryPrescaledNodeName());
+    if (prescaledNode) { // We can propagate it directly (potential for Run 4)
+      Decision* prescaleNodeOut = nullptr;
+      ATH_CHECK(inputToOutput(prescaledNode, &prescaleNodeOut, cache, outputContainers, (m_applyChainsFilterToSummaryNodes ? chainIDs : emptySet), ctx));
+    } else { // We can re-create this from the trigger bits
+      ATH_CHECK(createPresaledGraphNode(outputContainers, (m_applyChainsFilterToSummaryNodes ? chainIDs : emptySet)));
+    }
+  }
+
+  if (m_propagateL1Nodes) {
+    // L1 summary nodes are also optional.
+    const Decision* L1TBPNode = TrigCompositeUtils::getNodeByName(*primaryInputHandle, "L1TBP"); // TODO - upgrade to static string constants if we use this in production.
+    const Decision* L1TAVNode = TrigCompositeUtils::getNodeByName(*primaryInputHandle, "L1TAV");
+    if (L1TBPNode && L1TAVNode) {
+      Decision* L1TBPNodeOut = nullptr;
+      Decision* L1TAVNodeOut = nullptr;
+      ATH_CHECK(inputToOutput(L1TBPNode, &L1TBPNodeOut, cache, outputContainers, {}, ctx)); // No chain filtering, these are L1 items
+      ATH_CHECK(inputToOutput(L1TAVNode, &L1TAVNodeOut, cache, outputContainers, {}, ctx));
+    } else {
+      ATH_CHECK(createL1GraphNodes(outputContainers));
+    }
+  }
+
   // Don't have to walk the graph here, just iterate through the set of (thinned) nodes.
   // We won't end up with two terminus nodes because of this (it checks that the node hasn't already been processed)
   const std::vector<NavGraphNode*> allNodes = transientNavGraph.allNodes();
   for (const NavGraphNode* inputNode : allNodes) {
     Decision* outputNode = nullptr;
     ATH_CHECK(inputToOutput(inputNode->node(), &outputNode, cache, outputContainers, chainIDs, ctx));
-    // TODO - anything else to do here with outputNode? We cannot hook up its seeding yet, we may not yet have output nodes for all of its seeds.
   }
   // Now we have all of the new nodes in the output collection, can link them all up with their slimmed seeding relationships.
   for (const NavGraphNode* inputNode : allNodes) {
@@ -290,7 +324,12 @@ std::vector<size_t> TrigNavSlimmingMTAlg::lookupHardCodedLegMultiplicities(const
   return std::vector<size_t>();
 }
 
-StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs) const {
+StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs, const Decision* applyPassingChainsFilter) const {
+  DecisionIDContainer passingChains;
+  if (applyPassingChainsFilter) { // Expect either nullptr or a pointer to the terminus node here.
+    TrigCompositeUtils::decisionIDs(applyPassingChainsFilter, passingChains); // Extract all passing chains into the passingChains set 
+  }
+
   for (const std::string& filter : m_chainsFilter) {
     // We do this as filter->chains stage as filter could be a regexp matching a large number of chains
     const Trig::ChainGroup* cg = m_trigDec->getChainGroup(filter);
@@ -298,6 +337,10 @@ StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs) con
     for (const std::string& chain : chains) {
       const TrigConf::HLTChain* hltChain = m_trigDec->ExperimentalAndExpertMethods().getChainConfigurationDetails(chain);
       const HLT::Identifier chainID( hltChain->chain_name() );
+      if (passingChains.size() && passingChains.count( chainID.numeric() ) == 0) { // Optional additional filter on passing chains in this specific event
+        ATH_MSG_VERBOSE("Skipping " << chain << " as it didn't pass this event");
+        continue;
+      }
       chainIDs.insert( chainID.numeric() );
       std::vector<size_t> legMultiplicites = hltChain->leg_multiplicities();
       ATH_MSG_VERBOSE("Including " << chain << " and its " << legMultiplicites.size() << " legs in the trigger slimming output");
@@ -318,6 +361,57 @@ StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs) con
       }
     }
   }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TrigNavSlimmingMTAlg::createPresaledGraphNode(Outputs& outputContainers,const TrigCompositeUtils::DecisionIDContainer& chainIDs) const {
+  Decision* prescaledNode = newDecisionIn(outputContainers.nav->ptr(), TrigCompositeUtils::summaryPrescaledNodeName());
+
+  const Trig::ChainGroup* cg = m_trigDec->getChainGroup("HLT_.*|EF_.*");
+  const std::vector<std::string> chains = cg->getListOfTriggers();
+  const std::vector<unsigned int> bits = cg->isPassedBitsForEach();
+  if (chains.size() != bits.size()) { 
+    ATH_MSG_ERROR("Unexpected different sized chains and bits vectors");
+    return StatusCode::FAILURE;
+  }
+
+  DecisionIDContainer prescaledIDs;
+  for (size_t i = 0; i < bits.size(); ++i) {
+    if (bits[i] & TrigDefs::EF_prescaled) { prescaledIDs.insert( HLT::Identifier(chains[i]).numeric() ); }
+  }
+
+  if (m_applyChainsFilterToSummaryNodes && chainIDs.size()) { // Then apply the filter
+    std::erase_if(prescaledIDs, [&](int id) {
+      return !chainIDs.contains(id); // Keep only elements in chainIDs
+    });
+  }
+
+  TrigCompositeUtils::insertDecisionIDs(prescaledIDs, prescaledNode); // Copy the set of chains into the xAOD object
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TrigNavSlimmingMTAlg::createL1GraphNodes(Outputs& outputContainers) const {
+  Decision* L1TBPNode = newDecisionIn(outputContainers.nav->ptr(), "L1TBP");
+  Decision* L1TAVNode = newDecisionIn(outputContainers.nav->ptr(), "L1TAV");
+  // Note - this is for offline use, there's no point in keeping TAP (trigger after prescale) as well as TAV
+
+  const Trig::ChainGroup* cg = m_trigDec->getChainGroup("L1_.*|L0_.*"); // Note: Future proofing for Run 4
+  std::vector<std::string> chains = cg->getListOfTriggers();
+  const std::vector<unsigned int> bits = cg->isPassedBitsForEach();
+  if (chains.size() != bits.size()) { 
+    ATH_MSG_ERROR("Unexpected different sized chains and bits vectors");
+    return StatusCode::FAILURE;
+  }
+
+  DecisionIDContainer TBPIDs, TAVIDs;
+  for (size_t i = 0; i < bits.size(); ++i) {
+    if (bits[i] & TrigDefs::L1_isPassedBeforePrescale) { TBPIDs.insert( HLT::Identifier(chains[i]).numeric() ); }
+    if (bits[i] & TrigDefs::L1_isPassedAfterVeto)      { TAVIDs.insert( HLT::Identifier(chains[i]).numeric() ); }
+  }
+
+  TrigCompositeUtils::insertDecisionIDs(TBPIDs, L1TBPNode);
+  TrigCompositeUtils::insertDecisionIDs(TAVIDs, L1TAVNode);
+  ATH_MSG_INFO("Created new TAV node at index " << L1TAVNode->index() << " with " << TBPIDs.size() << " = " << TAVIDs.size() << " decisions\n" << *L1TAVNode );
   return StatusCode::SUCCESS;
 }
 
@@ -404,7 +498,7 @@ StatusCode TrigNavSlimmingMTAlg::propagateLinks(
 
   output->copyAllLinksFrom( input );
 
-  // Special behaviour to save additional disk space for keepOnlyFinalFeatures mode.
+  // Special behavior to save additional disk space for keepOnlyFinalFeatures mode.
   // In keepOnlyFinalFeatures we stop at the first hypoAlgNode, hence we will drop the preceding inputMakerNode, and all prior Steps in their entirety.
   // This means we will also drop all "roi" edges, including the final ROI.
   // We may want to keep this final "roi", and so to do this we can copy it down one level (away from L1) to live in the hypoAlgNode along side the "feature" link.
@@ -445,8 +539,7 @@ StatusCode TrigNavSlimmingMTAlg::propagateDecisionIDs(
   decisionIDs(input, fromInput);
 
   DecisionIDContainer toOutput;
-
-  if (chainIDs.size()) {
+  if ( chainIDs.size() ) {
     // Applying ChainsFilter to the set of DecisionIDs
     std::set_intersection(fromInput.begin(), fromInput.end(), chainIDs.begin(), chainIDs.end(),
       std::inserter(toOutput, toOutput.begin()));
