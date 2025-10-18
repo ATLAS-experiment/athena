@@ -74,7 +74,7 @@ namespace MuonValR4{
        
         using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
         /** @brief Segment from the truth hits */
-        SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "TruthSegmentsR4"};
+        SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "MuonTruthSegments"};
         /** @brief Key to the track collections */
         using TrackKey_t = SG::ReadHandleKey<xAOD::TrackParticleContainer>; 
         TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};

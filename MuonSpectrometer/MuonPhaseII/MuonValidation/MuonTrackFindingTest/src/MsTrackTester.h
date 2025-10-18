@@ -45,7 +45,7 @@ namespace MuonValR4{
 
         using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
         /** @brief Segment from the truth hits */
-        SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "TruthSegmentsR4"};
+        SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "MuonTruthSegments"};
         /** @brief Primary segment container */
         SegmentKey_t m_recoSegmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
         /** @brief Key to the truth particle collection */

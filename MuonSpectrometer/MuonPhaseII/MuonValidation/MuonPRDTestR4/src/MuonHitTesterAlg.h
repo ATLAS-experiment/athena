@@ -106,7 +106,7 @@ namespace MuonValR4 {
             /** @brief Flag toggling whether the truth segment container shall be written */
             Gaudi::Property<bool> m_writeTruthSeg{this, "dumpTruthSegment", false};
             /** @brief Name of the truth segment container */
-            Gaudi::Property<std::string> m_truthSegCont{this, "TruthSegments", "TruthSegmentsR4"};
+            Gaudi::Property<std::string> m_truthSegCont{this, "TruthSegments", "MuonTruthSegments"};
 
             std::shared_ptr<MuonPRDTest::ParticleVariables> m_truthParts;
             std::shared_ptr<MuonPRDTest::SegmentVariables> m_truthSegs;

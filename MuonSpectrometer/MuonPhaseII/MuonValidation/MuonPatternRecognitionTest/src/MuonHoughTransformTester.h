@@ -95,7 +95,7 @@ namespace MuonValR4{
     MuonVal::MuonTesterTree m_tree{"MuonEtaHoughTest","MuonEtaHoughTransformTest"}; 
 
     // MDT sim hits in xAOD format 
-    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","TruthSegmentsR4", "truth segment container"};
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","MuonTruthSegments", "truth segment container"};
                                                           
     SG::ReadHandleKeyArray<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKeys{this, "SegmentSeedKeys", {"MuonHoughStationSegmentSeeds"}};
     SG::ReadHandleKeyArray<MuonR4::SegmentContainer> m_inSegmentKeys{this, "SegmentKeys", {"R4MuonSegments"}};
