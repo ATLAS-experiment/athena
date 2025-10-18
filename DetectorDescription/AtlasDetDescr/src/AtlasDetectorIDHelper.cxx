@@ -3,8 +3,12 @@
  */
 
 #include "AtlasDetectorIDHelper.h"
-#include "IdDict/IdDictDefs.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include <iostream>
 
 AtlasDetectorIDHelper::AtlasDetectorIDHelper() :
