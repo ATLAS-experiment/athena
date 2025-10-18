@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFlatFromFile.h"
@@ -58,12 +58,12 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
       }
       const HWIdentifier chid(id);
       if (value < 0) {
-        errIfConnected(chid,hash,blobName);
+        errIfConnected(chid,static_cast<int>(hash),blobName);
         value=1.0; //Default vaue is 1.0, since these are multiplicative constants
         ++nDefault;
       } 
       if (hash >= nGain) {
-        errIfConnected(chid,hash,blobName," Wrong Gain !!!");
+        errIfConnected(chid,static_cast<int>(hash),blobName," Wrong Gain !!!");
         hash=0; 
       }
 
