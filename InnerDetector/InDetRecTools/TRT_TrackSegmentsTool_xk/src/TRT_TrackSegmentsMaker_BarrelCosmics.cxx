@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::endEvent (InDet::ITRT_TrackSeg
 
   // elements of m_segments created by new have not been passed on
   if ( event_data.m_segmentDriftCirclesCount < event_data.m_segments.size() ) {
-    msg(MSG::WARNING) << "endEvent() you called the function t create the segments but not retrived them later??" << endmsg;
+    msg(MSG::WARNING) << "endEvent() you called the function to create the segments but didn't retrieve them later??" << endmsg;
     msg(MSG::WARNING) << "endEvent() deleting remaining elements of m_segments" << endmsg;
     for (unsigned int i=event_data.m_segmentDriftCirclesCount; i<event_data.m_segments.size(); i++) delete event_data.m_segments[i];
   }

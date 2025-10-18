@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALIBDATA_CSCCALIBREPORTPED_H
@@ -70,7 +70,7 @@ class CscCalibReportPed : public CscCalibReportBase
     const DataVector<DataVector<TH1I> >* getSampHists() const;
 
 
-    /**Retrive bit histogram vector*/
+    /**Retrieve bit histogram vector*/
     const DataVector<TH1I> * getBitHists() const;        
 
     const DataVector<TH2F> *getBitCorrelation() const;
