@@ -541,8 +541,7 @@ if flags.Output.AODFileName != "":
   from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
   cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
-# ensure reloading OTF masking every event if running online monitoring
-if "MaskedSCCondAlg" in [a.name for a in cfg.getCondAlgos()]: cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
+
 if "MuonAlignmentCondAlg" in [a.name for a in cfg.getCondAlgos()]: cfg.getCondAlgo("MuonAlignmentCondAlg").OutputLevel=Constants.ERROR # this alg produces warnings every time, silence it!
 
 
