@@ -113,11 +113,6 @@ namespace DerivationFramework {
     
     //Create accessors  
     static const SG::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
-    static const SG::Accessor<float> acc_dz0_TV_PV0("dz0_TV_PV0");
-    static const SG::Accessor<float> acc_log_sumpt_TV("log_sumpt_TV");
-    static const SG::Accessor<float> acc_log_sumpt2_TV("log_sumpt2_TV");
-    static const SG::Accessor<float> acc_log_sumpt_PV0("log_sumpt_PV0");
-    static const SG::Accessor<float> acc_log_sumpt2_PV0("log_sumpt2_PV0");
 
     std::vector<SG::WriteDecorHandle<xAOD::TauJetContainer, float> > scoreDecors;
     scoreDecors.reserve (m_scores.size());
@@ -157,21 +152,6 @@ namespace DerivationFramework {
     auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer);
 
     for (auto tau : *shallowCopy.first) {
-      
-      //Add in the TV/PV0 vertex variables needed for some calculators in TauGNNUtils.cxx (for GNTau)
-      float dz0_TV_PV0 = -999., sumpt_TV = 0., sumpt2_TV = 0.;
-      if (pVtx!=nullptr) {
-        dz0_TV_PV0 = tau->vertex()->z() - pVtx->z();
-        for (const ElementLink<xAOD::TrackParticleContainer>& trk : tau->vertex()->trackParticleLinks()) {
-          sumpt_TV += (*trk)->pt();
-          sumpt2_TV += std::pow((*trk)->pt(), 2.);
-        }
-      }
-      acc_dz0_TV_PV0(*tau) = dz0_TV_PV0;
-      acc_log_sumpt_TV(*tau) = (sumpt_TV>0.) ? std::log(sumpt_TV) : 0.;
-      acc_log_sumpt2_TV(*tau) = (sumpt2_TV>0.) ? std::log(sumpt2_TV) : 0.;
-      acc_log_sumpt_PV0(*tau) = (sumpt_PV0>0.) ? std::log(sumpt_PV0) : 0.;
-      acc_log_sumpt2_PV0(*tau) = (sumpt2_PV0>0.) ? std::log(sumpt2_PV0) : 0.;
 
       // ABS_ETA_LEAD_TRACK is removed from the AOD content and must be redecorated when computing eVeto WPs
       // note: this redecoration is not robust against charged track thinning, but charged tracks should never be thinned      

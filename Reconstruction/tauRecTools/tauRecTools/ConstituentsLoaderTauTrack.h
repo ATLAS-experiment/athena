@@ -137,11 +137,6 @@ bool qOverP(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
 bool theta(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
 bool z0TJVA(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
 bool charge(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
-bool dz0_TV_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
-bool log_sumpt_TV(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
-bool log_sumpt2_TV(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
-bool log_sumpt_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
-bool log_sumpt2_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &track, float &out);
 
 } // namespace TrackVars
 
