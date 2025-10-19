@@ -29,7 +29,7 @@ SiHitCollection* SiHitCollectionCnv::createTransient() {
     static const pool::Guid   p1_guid("36D1FF8E-5734-4A93-A133-F286CF47DB72");
     static const pool::Guid   p2_guid("BD1469C5-C904-40B8-82B9-43D25888D884");
     static const pool::Guid   p3_guid("59E13FDA-2799-4362-8423-44D57F08734D");
-    static const pool::Guid   p4_guid("018E1E2B-6C61-752E-b26D-6ABB05FBD4D9");
+    static const pool::Guid   p4_guid("018E1E2B-6C61-752E-B26D-6ABB05FBD4D9");
     static const pool::Guid   old_guid("1EC39DA3-14F9-4901-88C7-F6909B064574");
 
     SiHitCollection       *trans_cont(nullptr);

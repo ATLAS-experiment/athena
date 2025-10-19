@@ -278,13 +278,13 @@
 
    <!-- xAOD::RoiDescriptorStore interface type(s). -->
    <class name="xAOD::RoiDescriptorStore_v1"
-          id="882822c8-906a-11e5-87f4-02163e010d8c" />
+          id="882822C8-906A-11E5-87F4-02163E010D8C" />
    <typedef name="xAOD::RoiDescriptorStore" />
 
 
    <!-- xAOD::RoiDescriptorStore auxiliary type(s). -->
    <class name="xAOD::RoiDescriptorStoreAuxInfo_v1"
-          id="8aa7eae2-906a-11e5-a100-02163e010d8c" />
+          id="8AA7EAE2-906A-11E5-A100-02163E010D8C" />
    <typedef name="xAOD::RoiDescriptorStoreAuxInfo" />
 
    <!-- xAOD::BunchConf interface type(s). -->

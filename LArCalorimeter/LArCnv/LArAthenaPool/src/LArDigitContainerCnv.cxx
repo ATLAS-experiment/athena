@@ -18,7 +18,7 @@ LArDigitContainerCnv::LArDigitContainerCnv(ISvcLocator* svcLoc) :
   LArDigitContainerCnvBase(svcLoc, "LArDigitContainerCnv"),
   m_p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"),
   m_p1_guid("F1876026-CDFE-4110-AA59-E441BAA5DE44"),
-  m_p2_guid("66F5B7Af-595C-4F79-A2B7-56590777C313"),
+  m_p2_guid("66F5B7AF-595C-4F79-A2B7-56590777C313"),
   m_p3_guid("24480EBA-1AF1-4646-95A7-11285F09717C"),
   m_storeGateSvc("StoreGateSvc", "LArDigitContainerCnv")
 {}
