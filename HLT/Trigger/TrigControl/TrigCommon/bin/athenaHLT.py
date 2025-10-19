@@ -183,8 +183,11 @@ def HLTMPPy_cfgdict(args):
    https://gitlab.cern.ch/atlas-tdaq-software/HLTMPPU/blob/master/python/HLTMPPy/runner.py"""
 
    cdict = {}
+   # Composing unique application name from hostname and PID, see ATR-31976 
+   host = os.uname().nodename.split('.')[0]
+   pid = os.getpid()
    cdict['HLTMPPU'] = {
-      'application_name' : 'athenaHLT-%d' % os.getpid(),  # unique name required to avoid interference
+      'application_name' : 'athenaHLT-%s-%d' % (host, pid),
       'extra_params' : ["dumpFDs=1", "dumpThreads=1"] if args.debug_fork else None,
       'interactive' : args.interactive,
       'log_root' : os.getcwd(),
