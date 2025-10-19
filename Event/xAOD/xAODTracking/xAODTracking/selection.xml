@@ -38,7 +38,7 @@
       ]]>
    </read>
    <class name="xAOD::TrackParticleAuxContainer_v4"
-          id="403ceb6e-2a3d-11e8-b048-080027f5cbda"/>
+          id="403CEB6E-2A3D-11E8-B048-080027F5CBDA"/>
    <read sourceClass="xAOD::TrackParticleAuxContainer_v4" version="[1-]"
          targetClass="xAOD::TrackParticleAuxContainer_v4"
          source="" target="" >

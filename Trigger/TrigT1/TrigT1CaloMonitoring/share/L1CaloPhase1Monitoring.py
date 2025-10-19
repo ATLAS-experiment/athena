@@ -121,7 +121,7 @@ if args.runNumber is not None:
   # todo: if an exact event number is provided, we can in theory use the event index and rucio to obtain a filename:
   # e.g: event-lookup -D RAW "477048 3459682284"
   # use GUID result to do:
-  # ~/getRucioLFNbyGUID.sh 264a4214-e922-ef11-ab28-b8cef6444828
+  # ~/getRucioLFNbyGUID.sh 264A4214-E922-EF11-AB28-B8CEF6444828
   # gives a filename (last part): data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0975._SFO-13._0001.data
   from glob import glob
   if args.lumiBlock is None: args.lumiBlock="*"

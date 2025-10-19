@@ -529,7 +529,7 @@ class argFile(argList):
     #  argument name, e.g., outputDESD_SGLMUFile -> DESD_SGLMU 
     #  @param guid This is a non-standard option and allows the GUID for files without an intrinsic GUID
     #  to be set explicitly at initialisation. The parameter should be a dictionary, keyed by filename,
-    #  which contains the GUID string, e.g., <tt>{'file1' : '930de3de-de8d-4819-9129-beef3bb4fadb', 'file2' : ... }</tt>
+    #  which contains the GUID string, e.g., <tt>{'file1' : '930DE3DE-DE8D-4819-9129-BEEF3BB4FADB', 'file2' : ... }</tt>
     #  @param multipleOK Explicit declaration of whether multiple arguments are allowed; default is @c True for @c input,
     #  @c False for @c output and @c temporary
     #  @param name The corresponding key for this argument in the argdict of the transform (e.g., @c inputESDFile)
