@@ -17,7 +17,7 @@ namespace {
         size_t ExpPos = str.find(exp);
         if (ExpPos == std::string::npos) return str;
         str.replace(ExpPos,exp.size(),rep);
-        if (str.find(exp) != std::string::npos) return ReplaceExpInString(str, exp, rep);
+        if (str.find(exp) != std::string::npos) return ReplaceExpInString(std::move(str), exp, rep);
         return str;
     }
     
