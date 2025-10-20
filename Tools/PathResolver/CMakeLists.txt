@@ -4,15 +4,16 @@
 atlas_subdir( PathResolver )
 
 # External dependencies:
+find_package( CURL )
 find_package( ROOT COMPONENTS RIO Core )
 
 # Component(s) in the package:
 atlas_add_library( PathResolver
    Root/*.cxx
    PUBLIC_HEADERS PathResolver
-   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} )
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CURL_LIBRARIES} )
 
 atlas_add_dictionary( PathResolverDict
    PathResolver/PathResolverDict.h PathResolver/selection.xml
