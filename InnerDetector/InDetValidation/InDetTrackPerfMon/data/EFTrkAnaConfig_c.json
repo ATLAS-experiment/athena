@@ -1,0 +1,55 @@
+
+
+{
+  ///  "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+	"SelectTruthObject" : "isFromC",
+	"truthMinCPt": 20000,
+	"truthMaxCPt": 99999
+    },
+
+
+    "TrkAnaOffl" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "MatchingType"  : "TruthMatch",
+//	"SelectTruthObject" : "isFromC",
+//	"truthMinCPt": 20000,
+//        "truthMaxCPt": 99999
+    },
+
+    "TrkAnaMu" : {
+	"enabled" : true,
+	"TestType" : "Offline",
+	"RefType" : "Truth",
+	"MatchingType" : "TruthMatch",
+	"SelectTruthObject" : "Muon"
+
+    }
+//put b and tau one with truth min 15 pt
+//use plotting scripts
+///in link federica sent, go to "Plotting and standalone script
+// -trkAnalysisRef ttbar, --trkAnalysisTest all the other things (muon,b,etc)
+//--pipelinetest truth muons, truth b, truth tau
+//--pipeline ref for ttbar
+//-t resolution -p d0/eta
+//repeat the test idtpm file like four times haha
+    "TrkAnaDoubleRatio" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Offline",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "EFTruthMatch",
+	"SelectTruthObject" : "isFromC",
+	"truthMinCPt": 20000,
+        "truthMaxCPt": 99999,
+        "SelectOfflineObject" : "Truth",
+        "plotTrackParameters" : false
+    }
+}
+                             
