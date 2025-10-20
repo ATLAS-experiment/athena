@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/MdtCondDbData.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "GeoModelKernel/throwExcept.h"
+#include "Identifier/IdentifierHash.h"
+#include "Identifier/Identifier.h"
 
 using DcsConstants = MdtCondDbData::DcsConstants;
 // --- writing identifiers -------
