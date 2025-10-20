@@ -872,7 +872,11 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
   ATH_MSG_VERBOSE("Fitted track pars" << trackpars);
 
   // and the summed chi2, which is assuming (right now) an even weighting between the two components.
-  chi2 = std::sqrt(m_etaWeight * eta_chi2 * eta_chi2 + m_phiWeight * phi_chi2 * phi_chi2);
+  // assume only options are 4 or 5 hits for now
+  chi2 = (hits.size() == 5) ?
+	  m_etaWeight_5hits * eta_chi2 * eta_chi2 + m_phiWeight_5hits * phi_chi2 * phi_chi2 :
+	  m_etaWeight_4hits * eta_chi2 * eta_chi2 + m_phiWeight_4hits * phi_chi2 * phi_chi2;
+	  
 
   return inBin;
 }

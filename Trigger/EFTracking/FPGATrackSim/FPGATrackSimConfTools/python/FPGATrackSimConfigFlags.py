@@ -243,7 +243,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doMissingHitsChecks', False)
     cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
-    cf.addFlag('chi2cut', 9)
+    cf.addFlag('chi2cut', 2.25)
     cf.addFlag('useVaryingChi2Cut', False)
     cf.addFlag('fitFromRoad', True)
 
