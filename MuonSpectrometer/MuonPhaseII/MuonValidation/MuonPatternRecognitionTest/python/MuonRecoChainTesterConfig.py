@@ -40,9 +40,8 @@ if __name__=="__main__":
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
     cfg.merge(LegacyMuonRecoChainCfg(flags))
     ### Setup the new chain
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))    
-    cfg.merge(MuonSegmentFittingAlgCfg(flags))
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
     cfg.merge(MSTrackFinderAlgCfg(flags))
    

@@ -75,7 +75,7 @@ def MuonPatternRecognitionCfg(flags):
                                                      ReadKey="MuonHoughNswSegmentSeeds",
                                                      fitSegmentT0 = False,
                                                      recalibInFit = False,
-                                                     doBeamspotConstraint=False,
+                                                     doBeamspotConstraint=True,
                                                      useHessianResidual=True,
                                                      tryPatternPars = True ))
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
@@ -92,5 +92,9 @@ def MuonPatternRecognitionCfg(flags):
         result.merge(RecoSegmentTruthAssocCfg(flags,
                                                 name="MuonSegmentsFromR4TruthMatching",
                                                 SegmentKey="MuonSegmentsFromR4"))
-
+    if flags.Muon.scheduleActsReco:
+        from MuonSegmentCnv.MuonSegmentCnvConfig import MuonR4SegmentCnvAlgCfg
+        result.merge(MuonR4SegmentCnvAlgCfg(flags,
+                                         ReadSegments = sgementContainers,
+                                         WriteKey="TrackMuonSegments"))
     return result

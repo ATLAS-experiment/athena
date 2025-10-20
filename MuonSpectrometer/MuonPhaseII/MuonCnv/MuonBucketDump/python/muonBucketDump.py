@@ -19,10 +19,9 @@ def main(args):
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
-    cfg.merge(MuonSegmentFittingAlgCfg(flags))
 
     from MuonBucketDump.MuonBucketDumpConfig import MuonBucketDumpCfg
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg

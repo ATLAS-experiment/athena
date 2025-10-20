@@ -95,3 +95,19 @@ def MuonSegmentTruthAssociationAlgCfg(flags, name="MuonSegmentTruthAssociationAl
     result = ComponentAccumulator()
     result.addEventAlgo(CompFactory.Muon.MuonSegmentTruthAssociationAlg(name, **kwargs))
     return result
+
+def MuonTruthAlgsCfg(flags):
+    result = ComponentAccumulator()
+    if not flags.Input.isMC or flags.Muon.usePhaseIIGeoSetup:
+        return result
+    from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
+    result.merge(MuonPRD_MultiTruthMakerCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
+    result.merge(TruthMuonMakerAlgCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
+    result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthHitCountsAlgCfg
+    result.merge(MuonTruthHitCountsAlgCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthSegmentCreationAlgCfg
+    result.merge(MuonTruthSegmentCreationAlgCfg(flags))
+    return result

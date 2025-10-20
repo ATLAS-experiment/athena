@@ -413,8 +413,16 @@ def MuonRDOtoPRDConvertorsCfg(flags):
         acc.merge(CscRDODecodeCfg(flags))
         acc.merge(CscClusterBuildCfg(flags))
 
-    if flags.Input.isMC and not flags.Muon.usePhaseIIGeoSetup:
-        acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
+    if flags.Muon.scheduleActsReco:
+        from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
+        acc.merge(MuonSpacePointFormationCfg(flags))
+
+    if flags.Input.isMC:
+        if not flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
+        else:
+            from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+            acc.merge(MuonTruthAlgsCfg(flags))
     return acc
 
 
