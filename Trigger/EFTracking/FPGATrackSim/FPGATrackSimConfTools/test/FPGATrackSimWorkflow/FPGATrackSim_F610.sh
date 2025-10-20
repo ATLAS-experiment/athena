@@ -57,8 +57,8 @@ if [ -z "$ArtJobType" ];then # skip file check for ART (this has already been do
     echo "... analysis output verification"
 cat << EOF > checkHist.C
 {
-    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34");
-    TH1* h = (TH1*)gDirectory->Get("nroads_1st");
+    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34/road_monitor_first_stage_reg34");
+    TH1* h = (TH1*)gDirectory->Get("nRoads");
     if ( h == nullptr )
         throw std::runtime_error("oh dear, after all of this there is no roads histogram");
     h->Print(); 

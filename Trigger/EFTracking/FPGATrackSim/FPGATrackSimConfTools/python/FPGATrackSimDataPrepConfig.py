@@ -426,8 +426,8 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     
     theFPGATrackSimDataPrepAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimDataPrepOutputCfg(flags))
 
-    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg
-    theFPGATrackSimDataPrepAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimDataPrepMonitoringCfg
+    theFPGATrackSimDataPrepAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimDataPrepMonitoringCfg(flags))
 
     result.addEventAlgo(theFPGATrackSimDataPrepAlg)
 

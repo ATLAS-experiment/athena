@@ -243,8 +243,8 @@ def addLRTDoubletFPGATrackSimool(algo_tag):
     return tool
 
 
-def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
-    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import getPhiRange,getEtaRange
+## original monitor histograms
+def FPGATrackSimDataPrepMonitoringCfg(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -256,7 +256,31 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
         nbin=100
         high=99.5
 
+    monTool.defineHistogram('regionID', path='EXPERT', type='TH1I', title='regionID', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nHits_1st', path='EXPERT', type='TH1I', title='nHits_1st', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nHits_1st_unmapped', path='EXPERT', type='TH1I', title='nHits_1st_unmapped', xbins=nbin, xmin=low, xmax=high)
+    result.setPrivateTools(monTool)
 
+    return result
+
+
+## new monitoring tool
+def FPGATrackSimTrackMonCfg(name,flags,variety='road'):
+    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import getPhiRange, getEtaRange, nameWithRegionSuffix
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool')
+    
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+
+    nbin=1000
+    low=-0.5
+    high=99999.5
+    if flags.Trigger.FPGATrackSim.singleTrackSample:
+        nbin=100
+        high=99.5
+    
     phis=getPhiRange(flags)
     etas=getEtaRange(flags)
     phimin=phis[0]
@@ -265,41 +289,42 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     etamax=etas[1]
 
     phimin = phimin-flags.Trigger.FPGATrackSim.phiShift
-    phimax = phimax-flags.Trigger.FPGATrackSim.phiShift    
+    phimax = phimax-flags.Trigger.FPGATrackSim.phiShift
     
-    monTool.defineHistogram('regionID', path='EXPERT', type='TH1I', title='regionID', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('nHits_1st', path='EXPERT', type='TH1I', title='nHits_1st', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('nHits_1st_unmapped', path='EXPERT', type='TH1I', title='nHits_1st_unmapped', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('nroads_1st', path='EXPERT', type='TH1I', title='nroads_1st', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('nroads_1st_postfilter', path='EXPERT', type='TH1I', title='nroads_1st_postfilter', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=20, xmin=-0.5, xmax = 19.5)
-    monTool.defineHistogram('chi2_1st_all', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('chi2_1st_afterOLR', path='EXPERT', type='TH1F', title='chi2_1st_afterOLR', xbins=nbin, xmin=0, xmax=10.0)
-    monTool.defineHistogram('best_chi2_1st', path='EXPERT', type='TH1F', title='best_chi2_1st', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('ntrack_1st', path='EXPERT', type='TH1F', title='ntrack_1st', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('ntrack_1st_afterOLR', path='EXPERT', type='TH1F', title='ntrack_1st_afterOLR', xbins=nbin, xmin=low, xmax=high)
-    monTool.defineHistogram('eff_road,pT', path='EXPERT', type='TEfficiency', title='eff_road_pt', xbins=20, xmin=0, xmax=100)
-    monTool.defineHistogram('eff_track,pT', path='EXPERT', type='TEfficiency', title='eff_track_pt', xbins=20, xmin=0, xmax=100)
-    monTool.defineHistogram('eff_track_chi2,pT', path='EXPERT', type='TEfficiency', title='eff_track_chi2_pt', xbins=20, xmin=0, xmax=100)
-    monTool.defineHistogram('eff_road,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_road_pt_zoom', xbins=10, xmin=0, xmax=10)
-    monTool.defineHistogram('eff_track,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_track_pt_zoom', xbins=10, xmin=0, xmax=10)
-    monTool.defineHistogram('eff_track_chi2,pT_zoom', path='EXPERT', type='TEfficiency', title='eff_track_chi2_pt_zoom', xbins=10, xmin=0, xmax=10) 
-    monTool.defineHistogram('eff_road,eta', path='EXPERT', type='TEfficiency', title='eff_road_eta', xbins = 20, xmin=etamin, xmax=etamax)
-    monTool.defineHistogram('eff_track,eta', path='EXPERT', type='TEfficiency', title='eff_track_eta', xbins = 20, xmin=etamin, xmax=etamax)
-    monTool.defineHistogram('eff_track_chi2,eta', path='EXPERT', type='TEfficiency', title='eff_track_chi2_eta', xbins = 20, xmin=etamin, xmax=etamax)
-    monTool.defineHistogram('eff_road,phi', path='EXPERT', type='TEfficiency', title='eff_road_phi', xbins = 20, xmin=phimin, xmax=phimax)
-    monTool.defineHistogram('eff_track,phi', path='EXPERT', type='TEfficiency', title='eff_track_phi', xbins = 20, xmin=phimin, xmax=phimax)
-    monTool.defineHistogram('eff_track_chi2,phi', path='EXPERT', type='TEfficiency', title='eff_track_chi2_phi', xbins = 20, xmin=phimin, xmax=phimax)
-    monTool.defineHistogram('eff_road,d0', path='EXPERT', type='TEfficiency', title='eff_road_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
-    monTool.defineHistogram('eff_track,d0', path='EXPERT', type='TEfficiency', title='eff_track_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
-    monTool.defineHistogram('eff_track_chi2,d0', path='EXPERT', type='TEfficiency', title='eff_track_chi2_d0', xbins = 20, xmin = -2.0, xmax = 2.0)
-    monTool.defineHistogram('eff_road,z0', path='EXPERT', type='TEfficiency', title='eff_road_z0', xbins = 20, xmin = -150, xmax = 150.0)
-    monTool.defineHistogram('eff_track,z0', path='EXPERT', type='TEfficiency', title='eff_track_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
-    monTool.defineHistogram('eff_track_chi2,z0', path='EXPERT', type='TEfficiency', title='eff_track_chi2_z0', xbins = 20, xmin = -150.0, xmax = 150.0)
+    ## (name should match FPGATrackSimAlgorithm/src/FPGATrackSimTrackMonitor.cxx)
+    ## hisotgram for roads
+    if variety=='road':
+        monTool.defineHistogram('nRoads', path='EXPERT', type='TH1I', title='nRoads', xbins=nbin, xmin=low, xmax=high)
+        monTool.defineHistogram('layerIDs', path='EXPERT', type='TH1I', title='layerIDs', xbins=20, xmin=-0.5, xmax = 19.5)
+        monTool.defineHistogram('nLayers', path='EXPERT', type='TH1I', title='nLayers', xbins=nbin, xmin=low, xmax=high)
+        
+    ## hisotgram for tracks
+    elif variety=='track':
+        monTool.defineHistogram('nTracks', path='EXPERT', type='TH1I', title='nTracks', xbins=nbin, xmin=low, xmax=high)
+        monTool.defineHistogram('chi2_all', path='EXPERT', type='TH1F', title='chi2_all', xbins=nbin, xmin=low, xmax=high)
+        monTool.defineHistogram('best_chi2', path='EXPERT', type='TH1F', title='best_chi2', xbins=nbin, xmin=low, xmax=high)
+    
+    ## efficiency histograms  ## cannot add x-y labels
+    monTool.defineHistogram(f'eff_{variety},pT_zoom', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs pT_zoom', xbins=10, xmin=0, xmax=10)
+    monTool.defineHistogram(f'eff_{variety},pT', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs pT', xbins=20, xmin=0, xmax=100)
+    monTool.defineHistogram(f'eff_{variety},eta', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs eta', xbins=20, xmin=etamin, xmax=etamax)
+    monTool.defineHistogram(f'eff_{variety},phi', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs phi', xbins=20, xmin=phimin, xmax=phimax)
+    monTool.defineHistogram(f'eff_{variety},d0', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs d0', xbins=20, xmin=-2.0, xmax=2.0)
+    monTool.defineHistogram(f'eff_{variety},z0', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs z0', xbins=20, xmin=-150.0, xmax=150.0)
 
-    result.setPrivateTools(monTool)
+    ## creates a c++ instance of the FPGATrackSimMonitor (added in FPGATrackSimTrackMonitor.h/.cxx) tool via CompFactory
+    trackmon = CompFactory.FPGATrackSimTrackMonitor(nameWithRegionSuffix(flags,f"{variety}_monitor_{name}"))
+    
+    ## attaches a generic monitoring tool (the tool can still use the standard athena monitoring infraestructure)
+    trackmon.MonTool = monTool
+
+    ## set as a private tool
+    
+    result.setPrivateTools(trackmon)
 
     return result
+
+
 
 
     
