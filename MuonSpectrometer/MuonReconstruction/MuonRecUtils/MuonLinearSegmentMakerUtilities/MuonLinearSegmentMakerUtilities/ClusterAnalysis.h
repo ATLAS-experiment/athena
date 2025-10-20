@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -9,10 +9,14 @@
 #ifndef CLUSTERANALYSIS_H
 #define CLUSTERANALYSIS_H
 
-#include <vector>
+
 #include "MuonLinearSegmentMakerUtilities/ClusterNtuple.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include <vector>
+#include <memory>
+
+class TTree;
 
 namespace ClusterSeg {
 
