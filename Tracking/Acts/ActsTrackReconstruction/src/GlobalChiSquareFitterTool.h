@@ -26,7 +26,7 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/SympyStepper.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
-
+#include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"
 
 // PACKAGE
@@ -146,7 +146,7 @@ class GlobalChiSquareFitterTool
 
     /// Type erased track fitter function.
     using StraightPropagator_t = Acts::Propagator<Acts::StraightLineStepper, Acts::Navigator>;
-    using CurvedPropagator_t   = Acts::Propagator<Acts::SympyStepper, Acts::Navigator>;
+    using CurvedPropagator_t   = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
 
     using StraightFitter_t = Acts::Experimental::Gx2Fitter<StraightPropagator_t, MutableTrackStateBackend>;
     using CurvedFitter_t   = Acts::Experimental::Gx2Fitter<CurvedPropagator_t, MutableTrackStateBackend>;
