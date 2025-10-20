@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibUtils/L1CaloRampMaker.h"
@@ -181,7 +181,7 @@ StatusCode L1CaloRampMaker::execute()
 	  ATH_MSG_INFO( "Gain Strategy: channel = " << channel
 	                     << ", name = " << strategy
 		             << ", status = " << status );
-	  if (gainStrategy == "") gainStrategy = strategy;
+	  if (gainStrategy.empty()) gainStrategy = std::move(strategy);
           else if (gainStrategy != strategy) consistent = false;
         }
         std::string newStrategy("");
@@ -197,11 +197,11 @@ StatusCode L1CaloRampMaker::execute()
         if (runNumber == 223073) newStrategy = "GainOne";
         if (runNumber == 223074) newStrategy = "GainOne";
         if (runNumber == 223075) newStrategy = "GainOne";
-        if (newStrategy != "") {
+        if (not newStrategy.empty()) {
           ATH_MSG_INFO( "Changing Gain Strategy to " << newStrategy);
-          gainStrategy = newStrategy;
+          gainStrategy = std::move(newStrategy);
         }
-	if (gainStrategy != "" && consistent) {
+	if (!gainStrategy.empty() && consistent) {
 	  m_isGain1 = (gainStrategy.find("GainOne") != std::string::npos);
 	  m_isOvEmb = (gainStrategy.find("OvEmb") != std::string::npos);
 	  m_isOvEmec = (gainStrategy.find("OvEmec") != std::string::npos);
