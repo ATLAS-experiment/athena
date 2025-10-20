@@ -780,7 +780,8 @@ def MuonCombinedReconstructionCfg(flags):
     if flags.Input.isMC:
         result.merge(CombinedMuonTrackTruthAlgsCfg(flags))
         result.merge(CombinedMuonTruthAssociationAlgsCfg(flags))
-        if 'MuonSegments' not in flags.Input.Collections:
+        if not flags.Muon.usePhaseIIGeoSetup and  \
+           "MuonSegments" not in flags.Input.Collections:
             # Segment truth association decorations, but only if they are not already there (e.g. when running on ESDs)
             from MuonConfig.MuonTruthAlgsConfig import MuonSegmentTruthAssociationAlgCfg
             result.merge(MuonSegmentTruthAssociationAlgCfg(flags))

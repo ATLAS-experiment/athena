@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 def SegmentRefitTestCfg(flags,name="SegmentRefitter", **kwargs):
     result = ComponentAccumulator()
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import ActsMuonSegmentRefitAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import ActsMuonSegmentRefitAlgCfg
 
     result.merge(ActsMuonSegmentRefitAlgCfg(flags))
     the_alg = CompFactory.MuonValR4.SegmentRefitTest(name, **kwargs)
@@ -56,7 +56,7 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
     #cfg.merge(SegmentRefitTestCfg(flags))
     cfg.merge(SegmentExtpTestCfg(flags))

@@ -195,16 +195,8 @@ def MuonReconstructionCfg(flags):
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.
         if flags.Muon.makePRDs:
             if not flags.Muon.usePhaseIIGeoSetup:
-                from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
-                result.merge(MuonPRD_MultiTruthMakerCfg(flags))
-                from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
-                result.merge(TruthMuonMakerAlgCfg(flags))
-                from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
-                result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
-                from MuonConfig.MuonTruthAlgsConfig import MuonTruthHitCountsAlgCfg
-                result.merge(MuonTruthHitCountsAlgCfg(flags))
-                from MuonConfig.MuonTruthAlgsConfig import MuonTruthSegmentCreationAlgCfg
-                result.merge(MuonTruthSegmentCreationAlgCfg(flags))
+                from MuonConfig.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+                result.merge(MuonTruthAlgsCfg(flags))
             else:
                 from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
                 result.merge(MuonTruthAlgsCfg(flags))
