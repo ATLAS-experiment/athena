@@ -43,7 +43,7 @@ LVL1CTP::ItemMap::ItemMap( const TrigConf::L1Menu * l1menu )
 
 
 LVL1CTP::ItemMap::~ItemMap() {
-   for( auto entry : m_map ) {
+   for( auto & entry : m_map ) {
       delete entry.second;
    }
 }
@@ -102,7 +102,7 @@ LVL1CTP::ItemMap::getDefinition( const TrigConf::TriggerItem * item ) const {
       } else {
          name_mult = res[2]+"[x"+res[0]+"]"; // build "EM15VHI[x1]"
       }
-      thrNames[idx++] = name_mult;
+      thrNames[idx++] = std::move(name_mult);
    }
 
    // now take the logic (1&2&3&4&5&6) apart and replace the numbers with names "thr[xmult]"
