@@ -3,35 +3,9 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
-
 import ParticleJetTools.ParentDecoratorConfig as pdc
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
-
-
-def _addDepsByTaggername(cfgFlags, tagger: str) -> ComponentAccumulator:
-    """
-    Add additional algorithms based on the dirname of the network files.
-
-    Parameters
-    ----------
-    cfgFlags : ConfigFlags
-        The configuration flags for.
-    tagger : str
-        The name of the tagger.
-
-    Returns
-    -------
-    ComponentAccumulator
-        An accumulator containing the additional algorithms based on the dirname.
-    """
-    acc = ComponentAccumulator()
-    for gnn in ["GN2Xv02", "GN2XTauV00"]:
-        if gnn in tagger:
-            acc.merge(TrackLeptonDecorationCfg(cfgFlags))
-    return acc
 
 
 def HLTJetFTagDecorationCfg(cfgFlags):
@@ -45,56 +19,6 @@ def HLTJetFTagDecorationCfg(cfgFlags):
         Decorators=[getJetDeltaRFlavorLabelTool()]) 
 
     acc.addEventAlgo(jetDec)
-
-    return acc
-
-def BTagLargeRDecoration(cfgFlags, jet_col):
-
-    nnList = cfgFlags.BTagging.NNs[jet_col]
-
-    nnFiles = []
-    for nnDict in nnList:
-        folds = nnDict['folds']
-        if len(folds) != 1:
-            raise ValueError(
-                "Multifold networks aren't supported for large-R jets")
-        nnFiles.append(folds[0])
-
-    # Doesn't need to be configurable at the moment
-    trackContainer = 'GhostTrack'
-    primaryVertexContainer = 'PrimaryVertices'
-    variableRemapping = {'BTagTrackToJetAssociator': trackContainer}
-
-    acc = ComponentAccumulator()
-    acc.merge(BTagTrackAugmenterAlgCfg(
-        cfgFlags,
-        TrackCollection='InDetTrackParticles',
-        PrimaryVertexCollectionName=primaryVertexContainer,
-    ))
-
-    for nnFile in nnFiles:
-        # ugly string parsing to get the tagger name
-        tagger_name = nnFile.split('/')[-3]
-        # separate calse for JetCalibTools models
-        if nnFile.split('/')[0] == "JetCalibTools":
-            # not technically a tagger, but works in this code
-            tagger_name = nnFile.split('_')[-2]
-
-        acc.merge(_addDepsByTaggername(cfgFlags, tagger_name))
-
-        acc.addEventAlgo(
-            CompFactory.FlavorTagInference.JetTagDecoratorAlg(
-                f'{jet_col}{tagger_name}JetTagAlg',
-                container=jet_col,
-                constituentContainer=trackContainer,
-                decorator=CompFactory.FlavorTagInference.GNNTool(
-                    tagger_name,
-                    nnFile=nnFile,
-                    variableRemapping=variableRemapping,
-                    trackLinkType='IPARTICLE'
-                ),
-            )
-        )
 
     return acc
 
