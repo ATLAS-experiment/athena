@@ -187,12 +187,6 @@ def MultifoldGNNCfg(
 
     acc = ComponentAccumulator()
 
-    acc.merge(
-        FoldDecoratorCfg(
-            flags,
-            jetCollection=JetCollection
-        )
-    )
 
     FTI = CompFactory.FlavorTagInference
     if JetCollection is None:
@@ -210,29 +204,52 @@ def MultifoldGNNCfg(
     tp_assoc = 'BTagTrackToJetAssociator'
     ip_assoc = 'TracksForBTagging'
     remapping.setdefault(tp_assoc, ip_assoc)
-    Alg = FTI.JetTagDecoratorAlg
     algname += '_Jet'
     container = JetCollection
 
+    toolargs = dict(
+        flipTagConfig=FlipConfig,
+        variableRemapping=remapping,
+        nnSharingService=addAndReturnSharingSvc(flags, acc),
+        defaultOutputValues=defaultOutputValues,
+        defaultZeroTracks=default_zero_tracks,
+    )
+
+    # Don't bother scheduling the multifold config if there's only
+    # one.  This is arguably uglier than using multifold for
+    # everything, but groomed jets currently don't have a jetRankHash,
+    # and also don't use multifold (for now). So doing it this way
+    # lets us support large-R and small-R jets in the same function.
+    if len(nnFilePaths) == 1:
+        Tool = CompFactory.FlavorTagInference.GNNTool
+        bonusargs = dict(
+            name='unifold',
+            nnFile=nnFilePaths[0]
+        )
+
+    else:
+        Tool = CompFactory.FlavorTagInference.MultifoldGNNTool
+        bonusargs = dict(
+            name='multifold',
+            nnFiles=nnFilePaths,
+            foldHashName=foldHashName,
+            perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
+        )
+        acc.merge(
+            FoldDecoratorCfg(
+                flags,
+                jetCollection=JetCollection
+            )
+        )
+
     acc.addEventAlgo(
-        Alg(
+        FTI.JetTagDecoratorAlg(
             name=algname,
             container=container,
             constituentContainer=TrackCollection,
             electronContainer=electrons,
-            decorator=CompFactory.FlavorTagInference.MultifoldGNNTool(
-                name='multifold',
-                foldHashName=foldHashName,
-                nnFiles=nnFilePaths,
-                flipTagConfig=FlipConfig,
-                variableRemapping=remapping,
-                nnSharingService=addAndReturnSharingSvc(flags, acc),
-                defaultOutputValues=defaultOutputValues,
-                perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
-                defaultZeroTracks=default_zero_tracks,
-            ),
+            decorator=Tool(**toolargs, **bonusargs),
             undeclaredReadDecorKeys=veto_list,
-            ExtraInputs=[("xAOD::JetContainer", f"StoreGateSvc+{JetCollection}.jetFoldHash")],
         )
     )
 

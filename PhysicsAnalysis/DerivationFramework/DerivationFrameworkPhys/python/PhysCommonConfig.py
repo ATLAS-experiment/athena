@@ -86,9 +86,8 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJetsLowPt"))
     if flags.Reco.EnableBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
-        from DerivationFrameworkFlavourTag.FtagDerivationConfig import BTagLargeRDecoration
         acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
-        acc.merge(BTagLargeRDecoration(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
+        acc.merge(FlavorTaggingCfg(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
 
     acc.merge(METCommonCfg(flags))
 
