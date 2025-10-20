@@ -136,7 +136,7 @@ namespace MuonValR4{
                                             const Amg::Vector2D& posOnCylinder,
                                             const DisplayView view);
             /** @brief Key to the truth segment selection to draw the segment parameters */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegkey", "TruthSegmentsR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegkey", "MuonTruthSegments"};
             /** @brief Maximum canvases to draw */
             Gaudi::Property<unsigned> m_canvasLimit{this, "CanvasLimit", 5000};
             /** @brief If set to true each canvas is saved into a dedicated pdf file */ 

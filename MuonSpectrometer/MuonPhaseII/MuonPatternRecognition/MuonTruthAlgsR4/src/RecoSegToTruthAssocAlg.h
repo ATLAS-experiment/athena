@@ -34,7 +34,7 @@ namespace MuonR4{
             /** @brief Loops over the segment container and fetches the segments with truth matched hits */
             std::vector<SegmentWithTruth> matchSimHits(const xAOD::MuonSegmentContainer& segments) const;
             /** @brief Key to the truth segment container */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegKey", "TruthSegmentsR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegKey", "MuonTruthSegments"};
             /** @brief Key to the truth segment -> truth particle association */
             SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_truthSegLinkKey{this, "TruthSegLinkKey", m_truthSegKey, "truthParticleLink"};
             /** @brief Key to the reconstructed segment container to truth match */

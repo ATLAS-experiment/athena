@@ -28,7 +28,7 @@ namespace MuonR4{
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Key to the primary muon container to select the muon from  */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segKey{this, "SegmentKey", "TruthSegmentsR4" };
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segKey{this, "SegmentKey", "MuonTruthSegments" };
             /** @brief Key that's decorated to mark the uncalibrated measurement */
             Gaudi::Property<std::string> m_writeMarker{this, "writeMarker", "matchedToTruthSeg"};
             /** @brief Key to indicate the associated MuonSegment link */
