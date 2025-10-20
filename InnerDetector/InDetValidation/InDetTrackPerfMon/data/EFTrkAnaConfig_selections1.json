@@ -1,0 +1,69 @@
+{
+
+    "TrkAnaEF": {
+	"enabled" : true,
+	"TestType" : "EFTrigger",
+	"RefType" : "Truth",
+	"TrigTrkKey" : "InDetTrackParticles",
+	"MatchingType": "TruthMatch"
+    },
+
+
+    "TrkAnaEF_b" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+	"SelectTruthObject" : "isFromB",
+	"truthMinParentPt" : 15000
+    },
+
+    "TrkAnaEF_heavy" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+        "SelectTruthObject" : "isFromHeavy"
+    },
+
+     "TrkAnaEF_light" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+        "SelectTruthObject" : "isFromLight"
+    },
+
+    "TrkAnaEF_c" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+        "SelectTruthObject" : "isFromC"
+    },
+
+
+    "TrkAnaEF_tau" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+        "SelectTruthObject" : "isFromTau",
+	"truthMinParentPt" : 15000
+    },
+
+    "TrkAnaEF_muon" : {
+	"enabled" : true,
+	"TestType" : "EFTrigger",
+	"RefType" : "Truth",
+	"TrigTrkKey" : "InDetTrackParticles",
+	"MatchingType" : "TruthMatch",
+	"SelectTruthObject" : "Muon"
+    }
+}
+                             

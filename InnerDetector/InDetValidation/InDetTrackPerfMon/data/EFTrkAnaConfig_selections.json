@@ -1,0 +1,41 @@
+{
+
+    "TrkAnaEF": {
+	"enabled" : true,
+	"TestType" : "EFTrigger",
+	"RefType" : "Truth",
+	"TrigTrkKey" : "InDetTrackParticles",
+	"MatchingType": "TruthMatch"
+    },
+
+
+    "TrkAnaEF_b" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+	"SelectTruthObject" : "isFromB",
+	"truthMinBPt" : 15000
+    },
+
+     "TrkAnaEF_tau" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+        "SelectTruthObject" : "isFromTau",
+	"truthMinTauPt" : 15000
+    },
+
+    "TrkAnaEF_muon" : {
+	"enabled" : true,
+	"TestType" : "EFTrigger",
+	"RefType" : "Truth",
+	"TrigTrkKey" : "InDetTrackParticles",
+	"MatchingType" : "TruthMatch",
+	"SelectTruthObject" : "Muon"
+    }
+}
+                             
