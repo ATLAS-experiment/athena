@@ -18,7 +18,7 @@
 #include <set>
 
 class RpcIdHelper;
-class RPCofflineId;
+struct RPCofflineId;
 
 class RpcCablingCondData {
     friend class RpcCablingCondAlg;

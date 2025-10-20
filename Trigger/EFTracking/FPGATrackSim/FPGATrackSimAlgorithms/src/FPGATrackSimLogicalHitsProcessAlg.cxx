@@ -450,14 +450,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // monitor variables (vectors of pointers)
     std::vector<const FPGATrackSimTrack*> tracks_1st_after_chi2;
     std::vector<const FPGATrackSimTrack*> tracks_1st_after_overlap;
-    unsigned ntrackOLRChi2 = 0;
     for (const FPGATrackSimTrack& track : tracks_1st) {
         if (track.getChi2ndof() < m_trackScoreCut.value()) {
             m_nTracksChi2Tot++;
             tracks_1st_after_chi2.push_back(&track);
             if (track.passedOR()) {
                 tracks_1st_after_overlap.push_back(&track);
-                ntrackOLRChi2++;
                 m_nTracksChi2OLRTot++;
             }
         }
