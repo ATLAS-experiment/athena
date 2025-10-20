@@ -266,6 +266,9 @@ StatusCode TruthParentDecoratorAlg::initialize() {
   for (auto& key: m_cascade_count_writer_keys) declare(key);
   ATH_CHECK(m_cascade_count_writer_keys.initialize());
 
+  // ATLASRECTS-8290: this should be removed eventually
+  if (m_use_barcode) m_uid = SG::ConstAccessor<int>("barcode");
+
   return StatusCode::SUCCESS;
 }
 
@@ -339,8 +342,9 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
   unsigned int n_parents = 0;
   for (const auto* p: psort) {
     unsigned int parent_index = n_parents++;
-    ATH_MSG_VERBOSE("pdgid: " << p->pdgId() << ", barcode: " << HepMC::uniqueID(p));
-    for (auto& [cbar, histbars]: findAllDescendants(HepMC::uniqueID(p), barcodex)) {
+    // ATLASRECTS-8290: this should be replaced with ->uid()
+    ATH_MSG_VERBOSE("pdgid: " << p->pdgId() << ", barcode: " << m_uid(*p));
+    for (auto& [cbar, histbars]: findAllDescendants(m_uid(*p), barcodex)) {
       IPMap::mapped_type& barkids = ipmap.at(cbar);
       const xAOD::TruthParticle* child = selectChild(barkids);
       std::vector<std::pair<float, const J*>> drs;
@@ -470,9 +474,10 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
   };
 
   // insert a particle into the record, return the child set
-  auto insert = [&barcodex, &ipmap](const xAOD::TruthParticle* p) -> auto& {
-    ipmap[HepMC::uniqueID(p)].insert(p);
-    return barcodex[HepMC::uniqueID(p)];
+  // ATLASRECTS-8290: this should be replaced with ->uid()
+  auto insert = [this, &barcodex, &ipmap](const auto* p) -> auto& {
+    ipmap[m_uid(*p)].insert(p);
+    return barcodex[m_uid(*p)];
   };
 
   for (const xAOD::TruthParticle* p: container) {
@@ -494,7 +499,8 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
           } else {
             auto problem = std::format(
               "null truth child [barcode={},pdg_id={},child={}of{}]",
-              HepMC::uniqueID(p), p->pdgId(), child_n, p->nChildren());
+             // ATLASRECTS-8290: m_uid should be replaced with ->uid()
+              m_uid(*p), p->pdgId(), child_n, p->nChildren());
             const auto& warn_missing = m_warn_missing_children_pdgids.value();
             if (warn_missing.contains(p->pdgId())) {
               m_missing_n_warned++;
@@ -505,7 +511,8 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
           }
         } else if (cascadeWants(c)) {
           insert(c);
-          child_set.insert(HepMC::uniqueID(c));
+          // ATLASRECTS-8290: m_uid should be replaced with ->uid()
+          child_set.insert(m_uid(*c));
         }
       };
     }

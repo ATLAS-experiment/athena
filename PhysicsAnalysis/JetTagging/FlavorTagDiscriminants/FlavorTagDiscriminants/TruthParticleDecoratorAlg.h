@@ -61,6 +61,13 @@ namespace FlavorTagDiscriminants {
     Gaudi::Property<float> m_truthVertexMergeDistance {
       this, "truthVertexMergeDistance", 0.1, 
         "Merge any truth vertices within this distance [mm]"};
+
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    Gaudi::Property<bool> m_use_barcode {
+      this, "useBarcode", false, "use barcode rather than UID"
+    };
+    SG::ConstAccessor<int> m_uid{"uid"};
+
   };
 }
 
