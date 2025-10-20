@@ -34,9 +34,9 @@ public:
    virtual StatusCode stop() override;
 
 private:
-   StringProperty m_conditionName;
-   DoubleProperty m_weight;
-   DoubleProperty m_offset;
+   Gaudi::Property<std::string> m_conditionName{this, "ConditionName", "PedestalWriteData"};
+   Gaudi::Property<double> m_weight{this, "Weight", 0.0};
+   Gaudi::Property<double> m_offset{this, "Offset", 0.0};
 
    SG::ReadHandleKey<ExampleHitContainer> m_exampleHitKey { this, "ExampleHitKey", "MyHits" };
 };

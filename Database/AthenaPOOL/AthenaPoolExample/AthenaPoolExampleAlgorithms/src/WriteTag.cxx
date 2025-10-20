@@ -20,7 +20,6 @@ using namespace AthPoolEx;
 WriteTag::WriteTag(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator), m_attribListSpec(0)
 {
-   declareProperty("Magic", m_magic = 0);
 }
 //___________________________________________________________________________
 WriteTag::~WriteTag() {
