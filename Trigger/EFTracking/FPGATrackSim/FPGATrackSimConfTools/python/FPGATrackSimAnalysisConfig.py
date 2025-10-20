@@ -605,6 +605,9 @@ def SPRoadFilterToolCfg(flags,secondStage=False,name="FPGATrackSimSpacepointRoad
     result.setPrivateTools(SPRoadFilter)
     return result
 
+
+
+
 def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHitsProcessAlg",**kwargs):
 
     flags = prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(inputFlags)
@@ -694,9 +697,28 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
         theFPGATrackSimLogicalHitsProcessAlg.doLRT = True
         theFPGATrackSimLogicalHitsProcessAlg.LRTHitFiltering = (not flags.Trigger.FPGATrackSim.ActiveConfig.lrtSkipHitFiltering)
 
-    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg
-    theFPGATrackSimLogicalHitsProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
 
+    ## new TrackMonitor
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimTrackMonCfg
+    
+    ## (first road monitor)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage', flags, variety='road'))
+    ## (second road monitor, after road filter 1)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadPostFilter1Monitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_filter_1', flags, variety='road'))
+    ## (third road monitor, after overlap removal)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadPostOverlapRemovalMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_overlap_removal', flags, variety='road'))
+    ## (fourth road monitor, after road filter 2)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadPostFilter2Monitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_filter_2', flags, variety='road'))
+    
+    ## (first track monitor, after getting tracks)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage', flags, variety='track'))
+    ## (second track monitor, after set track parameters to truth)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackPostSetTruthMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_set_truth', flags, variety='track'))
+    ## (third track monitor, after chi2)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackPostChi2Monitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_chi2', flags, variety='track'))
+    ## (fourth track monitor, after overlap removal)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackPostOverlapRemovalTrackMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_overlap_removal', flags, variety='track'))
+  
     result.addEventAlgo(theFPGATrackSimLogicalHitsProcessAlg)
 
     return result

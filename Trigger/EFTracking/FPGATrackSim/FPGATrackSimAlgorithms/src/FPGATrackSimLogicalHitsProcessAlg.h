@@ -28,7 +28,8 @@
 #include "FPGATrackSimLRT/FPGATrackSimLLPRoadFilterTool.h"
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h"
 #include "FPGATrackSimSGInput/IFPGATrackSimInputTool.h"
-
+//// track monitor
+#include "FPGATrackSimTrackMonitor.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include <fstream>
@@ -94,6 +95,32 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimSlicingEngineTool>        m_slicingEngineTool {this, "SlicingEngineTool", "FPGATrackSimSlicingEngineTool/FPGATrackSimSlicingEngineTool", "Slicing engine tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<IFPGATrackSimEventSelectionSvc>    m_evtSel {this, "eventSelector", "", "Event selection Svc"};
+        
+
+        //// main algorithm monitoring tool,    handles direct monitoring calls like Monitored::Scalar/Group
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
+        
+        //// declare the monitoring tool deperdency in the algorithm
+        //// allows JobOptions (python configs) to steer monitor behaivior
+        //// enabled LogicalHitProcessAlg to call into monitor with first stage FPGA road collectiond
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_road_monitor {this, "FirstStageRoadMonitor", "FPGATrackSimTrackMonitor", "First Stage Road Monitor"};
+        //// (second road monitoring)
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_road_post_filter_1_monitor {this, "FirstStageRoadPostFilter1Monitor", "FPGATrackSimTrackMonitor", "First Stage Road Post Filter1 Monitor"};
+        //// (third road monitoring)
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_road_post_OLR_monitor {this, "FirstStageRoadPostOverlapRemovalMonitor", "FPGATrackSimTrackMonitor", "First Stage Road Post Overlap Removal Monitor"};
+        //// (fourth road monitoring)
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_road_post_filter_2_monitor {this, "FirstStageRoadPostFilter2Monitor", "FPGATrackSimTrackMonitor", "First Stage Road Post Filter2 Monitor"};
+        
+        //// (first track monitor)
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_track_monitor {this, "FirstStageTrackMonitor", "FPGATrackSimTrackMonitor", "First Stage Track Monitor"};
+        //// (second track monitor)
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_track_post_setTruth_monitor {this, "FirstStageTrackPostSetTruthMonitor", "FPGATrackSimTrackMonitor", "First Stage Track Post Set to TruthTracks Monitor"};
+        //// (third track monitorl)
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_track_post_chi2_monitor {this, "FirstStageTrackPostChi2Monitor", "FPGATrackSimTrackMonitor", "First Stage Track Post Chi2 Monitor"};
+        //// (fourth track monitor)
+        ToolHandle<FPGATrackSimTrackMonitor> m_1st_stage_track_post_OLR_monitor {this, "FirstStageTrackPostOverlapRemovalTrackMonitor", "FPGATrackSimTrackMonitor", "First Stage Track Post Overlap Removal Monitor"};
+        
+        
         // chrono service
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
@@ -163,7 +190,6 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
         void printHitSubregions(std::vector<FPGATrackSimHit> const & hits);
 
-        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
         // Read hits from data prep algorithm. TODO: regionalize.
         SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey {this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim hits key"};
