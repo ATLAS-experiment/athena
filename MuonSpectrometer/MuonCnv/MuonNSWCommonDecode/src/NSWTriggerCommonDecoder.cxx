@@ -1,17 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eformat/eformat.h"
-
+#include "MuonNSWCommonDecode/NSWTriggerCommonDecoder.h"
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
 #include "MuonNSWCommonDecode/NSWTriggerMML1AElink.h"
 #include "MuonNSWCommonDecode/NSWTriggerMMMonElink.h"
 #include "MuonNSWCommonDecode/NSWTriggerSTGL1AElink.h"
 #include "MuonNSWCommonDecode/NSWPadTriggerL1a.h"
-#include "MuonNSWCommonDecode/NSWTriggerCommonDecoder.h"
 
-#include <string>
 
 Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read::ROBFragment &robFrag, const std::string& triggerType)
   : m_has_error (false),
@@ -47,7 +44,7 @@ Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read
         elink = tmplink;
       } else {
 	std::shared_ptr<Muon::nsw::NSWTriggerElink> tmplink = std::make_shared<Muon::nsw::NSWTriggerElink>(pp, remaining);
-	elink = tmplink;
+	elink = std::move(tmplink);
       }
 
       m_elinks.push_back(elink);

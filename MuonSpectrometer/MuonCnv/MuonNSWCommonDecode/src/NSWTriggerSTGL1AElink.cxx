@@ -1,20 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonNSWCommonDecode/NSWTriggerSTGL1AElink.h"
 
+#include "MuonNSWCommonDecode/NSWResourceId.h"
+#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
+#include "ers/ers.h"
 #include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-
-#include "MuonNSWCommonDecode/NSWResourceId.h"
-#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
-#include "MuonNSWCommonDecode/NSWTriggerElink.h"
-#include "MuonNSWCommonDecode/STGTPPackets.h"
-#include "ers/ers.h"
 
 Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink(const uint32_t* bs, const uint32_t remaining)
     : NSWTriggerElink(bs, remaining), m_data{bs, remaining} {
@@ -299,7 +296,7 @@ std::vector<std::vector<std::uint32_t>> Muon::nsw::NSWTriggerSTGL1AElink::decode
     for (std::size_t j = 0; j < felix_n_words; ++j) {
       data.push_back(decode(readPointer, word_size));
     }
-    current_stream_data.push_back(data);
+    current_stream_data.push_back(std::move(data));
   }
   return current_stream_data;
 }
@@ -315,7 +312,7 @@ std::vector<std::vector<std::uint32_t>> Muon::nsw::NSWTriggerSTGL1AElink::decode
     for (std::size_t j = 0; j < header.data_size; ++j) {
       data.push_back(decode(readPointer, word_size));
     }
-    current_stream_data.push_back(data);
+    current_stream_data.push_back(std::move(data));
   }
   return current_stream_data;
  
