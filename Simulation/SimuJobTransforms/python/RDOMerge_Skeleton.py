@@ -50,6 +50,10 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True)
 
+    # Setup perfmon flags from runargs
+    from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
+
     # Pre-include
     processPreInclude(runArgs, flags)
 
@@ -115,6 +119,11 @@ def fromRunArgs(runArgs):
     # Silence HepMcParticleLink warnings
     from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))
+
+    # Add PerfMon
+    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
+        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+        cfg.merge(PerfMonMTSvcCfg(flags))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
