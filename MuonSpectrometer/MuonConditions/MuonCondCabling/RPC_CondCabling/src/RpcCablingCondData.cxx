@@ -1,9 +1,10 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "RPC_CondCabling/RpcCablingCondData.h"
-
+#include "RPC_CondCabling/RPCofflineId.h"
+#include "MuonIdHelpers/RpcIdHelper.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -315,7 +316,7 @@ std::list<Identifier> RpcCablingCondData::give_strip_id(unsigned short int Subsy
         rpcId.measuresPhi = static_cast<int>(decode.view());
         rpcId.strip = RPC_strip + 1;
 
-        offlineIdList.push_back(rpcId);
+        offlineIdList.push_back(std::move(rpcId));
 
         ++it;
     }

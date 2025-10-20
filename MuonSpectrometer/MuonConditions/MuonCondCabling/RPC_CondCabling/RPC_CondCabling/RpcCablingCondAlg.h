@@ -1,13 +1,9 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONCONDALG_RPCCABLINGCONDALG_H
 #define MUONCONDALG_RPCCABLINGCONDALG_H
-
-#include <array>
-#include <map>
-#include <string>
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -16,6 +12,11 @@
 #include "RPC_CondCabling/RpcCablingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
+
+#include <array>
+#include <map>
+#include <string>
+#include <list>
 
 class RpcCablingCondAlg : public AthAlgorithm {
 public:
