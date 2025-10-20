@@ -11,6 +11,20 @@ log = AthenaLogger(__name__)
 #### Now inmport Data Prep config from other file
 from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
 
+### return a number 0-19, 0 is most central bin, 19 is most forward (based on absolute value of eta)
+def getEtaBin(flags):
+    etaBin = (flags.Trigger.FPGATrackSim.region >> 6) & 0x1f
+    return etaBin
+
+def getFitWeights(etaBin):
+    weight4Eta = [563.9382667,493.23055,381.835315,264.7819679,179.555554,116.0867029,96.30409326,96.13504916,163.7278321,270.5480971,270.6937626,180.2164132,129.0011743,91.50412962,72.65953377,49.77568766,32.518927,20.38964651,12.97547848,9]
+    weight4Phi = [5291.005291,4784.688995,4739.336493,4329.004329,3508.77193,3278.688525,4366.812227,6756.756757,10752.68817,14925.37313,16666.66667,16949.15254,17543.85965,16666.66667,19230.76923,20833.33333,20408.16327,20000,20000,20000]
+    weights5Eta = [217.5331768,184.2304061,148.3134888,98.13939253,66.37534817,42.93312711,33.65526204,34.33247487,47.5202135,77.16881734,110.4844013,100.8706594,83.79061435,58.69032222,44.9857434,30.5678705,18.85832071,12.76889006,8.270441607,6]
+    weights5Phi = [1302.083333,1138.952164,1068.376068,961.5384615,831.9467554,764.5259939,996.0159363,1481.481481,2857.142857,3875.968992,4504.504505,5076.142132,5681.818182,5747.126437,6493.506494,6578.947368,6622.516556,6802.721088,6849.315068,7000]
+
+    assert(etaBin >= 0 and etaBin < 20)
+    return [weight4Eta[etaBin], weight4Phi[etaBin], weights5Eta[etaBin], weights5Phi[etaBin]]
+    
 def getNSubregions(filePath):
     with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
@@ -339,9 +353,12 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
 
     # For the 'track fitter' part of GenScanTool.
     tool.inBinFiltering = flags.Trigger.FPGATrackSim.GenScan.filterInBin
-    tool.phiChi2Weight = flags.Trigger.FPGATrackSim.GenScan.phiChi2Weight
-    tool.etaChi2Weight = flags.Trigger.FPGATrackSim.GenScan.etaChi2Weight
-
+    weights =  getFitWeights(getEtaBin(flags))
+    tool.etaChi2Weight_4hits = weights[0]
+    tool.phiChi2Weight_4hits = weights[1]
+    tool.etaChi2Weight_5hits = weights[2]
+    tool.phiChi2Weight_5hits = weights[3]
+    
     # configure which filers and thresholds to apply
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
