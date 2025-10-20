@@ -413,33 +413,4 @@ bool charge(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, float &out
     return true;
 }
 
-bool dz0_TV_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, float &out) {
-    static const SG::ConstAccessor<float> acc_dz0TVPV0("dz0_TV_PV0");
-    out = acc_dz0TVPV0.withDefault(tau, 0);
-    return true;
-}
-
-bool log_sumpt_TV(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, float &out) {
-    static const SG::ConstAccessor<float> acc_logsumptTV("log_sumpt_TV");
-    out = acc_logsumptTV.withDefault(tau, 0);
-    return true;
-}
-
-bool log_sumpt2_TV(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, float &out) {
-    static const SG::ConstAccessor<float> acc_logsumpt2TV("log_sumpt2_TV");
-    out = acc_logsumpt2TV.withDefault(tau, 0);
-    return true;
-}
-
-bool log_sumpt_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, float &out) {
-    static const SG::ConstAccessor<float> acc_logsumptPV0("log_sumpt_PV0");
-    out = acc_logsumptPV0.withDefault(tau, 0);
-    return true;
-}
-
-bool log_sumpt2_PV0(const xAOD::TauJet& tau, const xAOD::TauTrack &/*track*/, float &out) {
-    static const SG::ConstAccessor<float> acc_logsumpt2PV0("log_sumpt2_PV0");
-    out = acc_logsumpt2PV0.withDefault(tau, 0);
-    return true;
-}
 } // namespace TrackVars
