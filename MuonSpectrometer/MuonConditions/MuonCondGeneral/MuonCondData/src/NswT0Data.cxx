@@ -1,10 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCondData/NswT0Data.h"
 #include "MuonIdHelpers/MmIdHelper.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
 #include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "GeoModelKernel/throwExcept.h"
 
