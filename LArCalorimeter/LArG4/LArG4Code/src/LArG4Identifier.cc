@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,14 +51,7 @@ LArG4Identifier::LArG4Identifier ()
 }
 
 //-----------------------------------------------
-LArG4Identifier::LArG4Identifier (const LArG4Identifier& other) :
-#ifndef LARG4NOROOT
-  TObject(),
-#endif
-    m_fields(other.m_fields)
-
-{
-}
+LArG4Identifier::LArG4Identifier (const LArG4Identifier& other) = default;
 
 //-----------------------------------------------
 LArG4Identifier::LArG4Identifier (const LArG4Identifier& other, size_type start)
@@ -83,14 +76,7 @@ LArG4Identifier::LArG4Identifier (const std::string& text)
   // Modifications
 
 //-----------------------------------------------
-LArG4Identifier& LArG4Identifier::operator=(const LArG4Identifier& other)
-{
- if(this != &other)
-   {
-     m_fields = other.m_fields;
-   }
- return *this;
-}
+LArG4Identifier& LArG4Identifier::operator=(const LArG4Identifier& other) = default;
 
 //-----------------------------------------------
 void LArG4Identifier::add (element_type value)

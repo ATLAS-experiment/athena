@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -52,11 +52,11 @@ class LArG4SimpleSDtest : public ::testing::Test {
     virtual void TearDown() override {
     }
 
-// Here I initialize 4 Identifier helper class objects, and they are used to convert a set of numbers stored in a LArG4Identifier object into a Identifier object.
+// Here I initialize 3 Identifier helper class objects, and they are used to convert a set of numbers stored in a LArG4Identifier object into a Identifier object.
 // they can be used by all the TEST_F
-  LArEM_ID* m_EM = new LArEM_ID(); 
-  LArFCAL_ID* m_FCAL = new LArFCAL_ID();
-  LArHEC_ID* m_HEC = new LArHEC_ID();
+  LArEM_ID m_EM;
+  LArFCAL_ID m_FCAL;
+  LArHEC_ID m_HEC;
 };
 //end
 
@@ -69,7 +69,7 @@ TEST_F( LArG4SimpleSDtest, ProcessHits )
 
   DerivedILArCalculatorSvcForTest* calc = new DerivedILArCalculatorSvcForTest();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
   LArG4SimpleSD sd1("name1", calc);//instantiate the tested class LArG4SimpleSD
-  sd1.setupHelpers(m_EM, m_FCAL, m_HEC);//add helpers(m_EM, m_FCAL, m_HEC) which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
+  sd1.setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC) which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
   sd1.ProcessHits(aStep, th);//after invoking the tested member function ProcessHits, it also generate a new hit and stores it in the variable m_timeBins. Next statements will test if the hit was created correctly according to previous setting.
 
   LArG4SimpleSD::hits_t* hitCollection = (*(sd1.m_timeBins.begin())).second;//firstly, get the hitCollection that was stored in the container m_timeBins
@@ -99,7 +99,7 @@ TEST_F( LArG4SimpleSDtest, SimpleHit )
 
   DerivedILArCalculatorSvcForTest* calc = new DerivedILArCalculatorSvcForTest();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
   LArG4SimpleSD sd2("name2", calc);//instantiate the tested class LArG4SimpleSD
-  sd2.setupHelpers(m_EM, m_FCAL, m_HEC);//add helpers(m_EM, m_FCAL, m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
+  sd2.setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
   sd2.SimpleHit(a_ident, time, energy);//invoke the tested member function SimpleHit, it will generated a new hit and stores it in the variable m_timeBins
 
   LArG4SimpleSD::hits_t* hitCollection = (*(sd2.m_timeBins.begin())).second;//firstly, get the hitCollection that was stored in the container m_timeBins
@@ -122,7 +122,7 @@ TEST_F( LArG4SimpleSDtest, EndOfAthenaEvent )
 
   DerivedILArCalculatorSvcForTest* calc = new DerivedILArCalculatorSvcForTest();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
   LArG4SimpleSD sd3("name3", calc);//instantiate the tested class LArG4SimpleSD
-  sd3.setupHelpers(m_EM, m_FCAL, m_HEC);//add helpers(m_EM, m_FCAL, m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
+  sd3.setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
   sd3.m_timeBins.insert( std::pair<G4int, LArG4SimpleSD::hits_t*>(0,hits) );//insert the hit container hits into the container of hit container
   LArHitContainer* hitContainer = new LArHitContainer("name");//define another hit container
   sd3.EndOfAthenaEvent(hitContainer);//invoke the tested member function EndOfAthenaEvent, which will put the hit stored in the container named m_timeBins into the hit container named hitContainer
@@ -147,7 +147,7 @@ TEST_F( LArG4SimpleSDtest, ConvertID )
 
   DerivedILArCalculatorSvcForTest* calc = new DerivedILArCalculatorSvcForTest();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
   LArG4SimpleSD sd4("name4", calc);//instantiate the tested class LArG4SimpleSD
-  sd4.setupHelpers(m_EM, m_FCAL, m_HEC);//add helpers(m_EM, m_FCAL, m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
+  sd4.setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
   Identifier id = sd4.ConvertID(a_ident); //generally speaking, a set of number was compact into a single number stored in id
 
   unsigned long long compact_num = id.get_compact();
@@ -161,7 +161,7 @@ TEST_F( LArG4SimpleSDtest, getTimeBin )
   
   DerivedILArCalculatorSvcForTest* calc = new DerivedILArCalculatorSvcForTest();//use the derived ILArCalculatorSvc class since ILArCalculatorSvc is abstact and can not be instantiated
   LArG4SimpleSD sd5("name5", calc);//instantiate the tested class LArG4SimpleSD
-  sd5.setupHelpers(m_EM, m_FCAL, m_HEC);//add helpers(m_EM, m_FCAL, m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
+  sd5.setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
   double output = sd5.getTimeBin(aTime);//invoke the tested member function, and its output should be 13 according to the member function definition
 
   ASSERT_EQ(output, 13);//test if the output is as we expected
