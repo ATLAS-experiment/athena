@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONNSWCMOMONDECODE_NSWTRIGGERCOMMONDECODER_H
 #define MUONNSWCMOMONDECODE_NSWTRIGGERCOMMONDECODER_H
 
-#include <stdint.h>
+#include "eformat/eformat.h"
 #include <vector>
 #include <string>
 #include <memory>
-
-#include "eformat/eformat.h"
 
 namespace Muon
 {

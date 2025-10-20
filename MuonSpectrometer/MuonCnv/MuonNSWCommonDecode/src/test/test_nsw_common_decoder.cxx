@@ -90,7 +90,7 @@ int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
 	  break;
         case 'd':
 	  det = argv[++i];
-	  params.detectors.push_back (det);
+	  params.detectors.push_back (std::move(det));
 	  break;
         case 'r':
 	  params.print_raw = true;
@@ -114,7 +114,7 @@ int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
     else
     {
       std::string data_file_name (argv[i]);
-      params.file_names.push_back (data_file_name);
+      params.file_names.push_back (std::move(data_file_name));
     }
   }
 
