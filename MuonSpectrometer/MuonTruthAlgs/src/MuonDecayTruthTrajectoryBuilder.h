@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -8,8 +8,10 @@
 #define MUONDECAYTRUTHTRAJECTORYBUILDER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenVertex_fwd.h"
+#include "AtlasHepMC/GenParticle_fwd.h"
 #include "TrkToolInterfaces/ITruthTrajectoryBuilder.h"
+#include <utility> //for std::pair
 
 namespace Muon {
 
