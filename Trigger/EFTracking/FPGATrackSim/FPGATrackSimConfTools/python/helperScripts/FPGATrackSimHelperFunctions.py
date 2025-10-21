@@ -11,7 +11,7 @@ def convertRegionsExpressionToArray(expression, min_value=0, max_value=1279):
             return [num]  # Return the single integer as a list
         else:
             raise ValueError(f"Invalid choise: {expression}. Number out of range [{min_value}-{max_value}].")
-
+    
     # Start with all numbers within min_value to max_value
     numbers = set(range(min_value, max_value + 1))
 
@@ -27,6 +27,7 @@ def convertRegionsExpressionToArray(expression, min_value=0, max_value=1279):
     for part in parts:
         part = part.strip()
         
+
         # Exclude regions (e.g. "!5-30")
         if part.startswith("!"):
             exclude_set.update(parse_range_or_wildcard(part[1:], min_value, max_value))
@@ -52,6 +53,11 @@ def parse_range_or_wildcard(expr, min_value, max_value):
     if expr.isdigit():
         num = int(expr)
         return {num} if min_value <= num <= max_value else set()  # Ignore if out of range
+
+    if "eta" in expr:   
+        etanum = int(expr.replace("eta",""))
+        # the lowest bits at the 32 phi regions    
+        return parse_range_or_wildcard(f"{32*etanum}-{32*(etanum+1)-1}",min_value, max_value)
 
     # Handle wildcards
     pattern = "^" + expr.replace("*", ".*") + "$"

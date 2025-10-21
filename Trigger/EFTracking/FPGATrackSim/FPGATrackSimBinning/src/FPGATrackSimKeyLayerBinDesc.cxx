@@ -15,6 +15,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "src/FPGATrackSimKeyLayerTool.h"
+#include <cmath>
 
 
 
@@ -61,7 +62,7 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
         auto half_xm_bin_pars = parSetToKeyPars(step.binCenter(idx));
         half_xm_bin_pars.xm = step.binWidth(4)/2.0; // 4 = xm par
         double xshift =
-            m_keylyrtool.xExpected(half_xm_bin_pars, storedhit.hitptr->getR(), storedhit.hitptr->getGPhi()+m_phiOffset);
+            m_keylyrtool.xExpected(half_xm_bin_pars, storedhit.hitptr->getR(), remainder(storedhit.hitptr->getGPhi()+m_phiOffset,2*M_PI));
         double xrange = std::abs(xshift) + r1 * step.binWidth(2) / 2.0
                         + ((r2*step.binWidth(3) - r1*step.binWidth(2)) / (r2 - r1) * (hitr - r1))/2.0;
 
@@ -92,7 +93,7 @@ bool FPGATrackSimKeyLayerBinDesc::hitInBin(const FPGATrackSimBinStep &step,
 
         // Firmware x-check
         phiLUTConsts phiconsts = getPhiLUTConsts(step,step.stepIdx(idx));
-        double fw_phiShift = phiconsts.phiShift(storedhit.hitptr->getGPhi() + m_phiOffset,  hitr);
+        double fw_phiShift = phiconsts.phiShift(remainder(storedhit.hitptr->getGPhi() + m_phiOffset,2*M_PI),  hitr);
         double fw_phiWindow = phiconsts.phiWindow( hitr);        
         ATH_MSG_VERBOSE("FW x-check: phiShift orig: " << storedhit.phiShift << " fwcalc: " << fw_phiShift << " diff: " << storedhit.phiShift-fw_phiShift);
         ATH_MSG_VERBOSE("FW " << phiconsts.w_in << " " << phiconsts.dw_dr*(hitr-phiconsts.r_in) << " " <<  phiconsts.w_x*(hitr-phiconsts.r_in)*(phiconsts.r_out-hitr) 

@@ -128,6 +128,9 @@ def getEtaRange(flags):
             else: return [-binSize*(etaBin+1),-binSize*etaBin]
 
 
+def getEtaSideBits(flags):
+    # this includes both the eta and side bits
+    return flags.Trigger.FPGATrackSim.region >> 5
 
 def FPGATrackSimRawLogicCfg(flags,name="FPGATrackSimRawLogicTool"):
     result=ComponentAccumulator()

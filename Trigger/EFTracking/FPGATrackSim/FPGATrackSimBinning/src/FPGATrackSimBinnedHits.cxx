@@ -87,7 +87,6 @@ StatusCode FPGATrackSimBinnedHits::fill(
   for (const auto &step : m_bintool->steps()) {
 
     ATH_MSG_DEBUG("fill binning: step num " << stepnum << " " << step->stepName());
-    ATH_MSG_DEBUG("Number of valid bins (full) = " << step->validBinsFull().size());
     for (auto &bin : step->validBinsFull()) {
 
       // skip bin if it is invalid

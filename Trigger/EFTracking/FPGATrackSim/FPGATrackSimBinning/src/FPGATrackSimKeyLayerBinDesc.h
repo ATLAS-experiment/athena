@@ -57,8 +57,8 @@ public:
         keypars.phi1+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R1());
         keypars.phi2+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R2());
       }
-      keypars.phi1+=m_phiOffset;
-      keypars.phi2+=m_phiOffset;
+      keypars.phi1=remainder(keypars.phi1+m_phiOffset,2*M_PI);
+      keypars.phi2=remainder(keypars.phi2+m_phiOffset,2*M_PI);
       return keyparsToParSet(keypars);
     }
 
@@ -66,8 +66,8 @@ public:
 
     virtual const FPGATrackSimTrackPars parSetToTrackPars(const FPGATrackSimBinUtil::ParSet &parset) const override {
       FPGATrackSimKeyLayerTool::KeyLyrPars keypars = parSetToKeyPars(parset);
-      keypars.phi1-=m_phiOffset;
-      keypars.phi2-=m_phiOffset;
+      keypars.phi1=remainder(keypars.phi1-m_phiOffset,2*M_PI);
+      keypars.phi2=remainder(keypars.phi2-m_phiOffset,2*M_PI);      
       return m_keylyrtool.keyParsToTrackPars(keypars);
     }
 
