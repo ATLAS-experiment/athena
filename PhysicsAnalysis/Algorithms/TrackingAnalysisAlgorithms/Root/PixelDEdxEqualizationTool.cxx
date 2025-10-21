@@ -33,21 +33,21 @@ namespace CP {
       return StatusCode::FAILURE;
     }
 
-    /// Set up scale factors.
-    /// Read SFs from trees stored in ASG calibration area by default.
-    /// But let users provide a local file to override.
+    /// Get name of ROOT file with SF trees.
+    /// By default, read SFs from trees stored in ASG calibration area.
+    /// Users can override by providing a local file.
     if (m_sfLocalFileName != "") {
       m_filename = m_sfLocalFileName;
       ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfLocalFileName << "\"!! FOR DEVELOPMENT USE ONLY !! ");
     }
     else {
       m_filename = PathResolverFindCalibFile( m_sfFileName );
+      /// Make sure PathResolverFindCalibFile found the file
+      if (m_filename.empty()) {
+        ATH_MSG_ERROR("Could not find SF file: " << m_filename);
+        return StatusCode::FAILURE;
+      }
       ATH_MSG_INFO("Using default calibration file from ASG area:" << m_filename);
-    }
-
-    if (m_filename.empty()) {
-      ATH_MSG_ERROR("Could not find SF file: " << m_filename);
-      return StatusCode::FAILURE;
     }
 
     return StatusCode::SUCCESS;
@@ -62,9 +62,7 @@ namespace CP {
   std::shared_ptr<std::vector<RecordType>> PixelDEdxEqualizationTool::getRunSFs(
                                                                                 const int runNumber, 
                                                                                 std::map<int, std::shared_ptr<std::vector<RecordType>>>& cache, 
-                                                                                const std::string& fileName, 
-                                                                                const std::string& treeName, 
-                                                                                std::function<void(std::shared_ptr<std::vector<RecordType>>,FilteredType&)> extractRecords) const {
+                                                                                const std::string& treeName) const {
     
     // Use a shared lock for read-only access
     {
@@ -83,7 +81,7 @@ namespace CP {
     auto emptyPtr = std::make_shared<std::vector<RecordType>>();
 
     // Open the SF tree file
-    TFile* file = TFile::Open(fileName.c_str(), "READ");
+    TFile* file = TFile::Open(m_filename.c_str(), "READ");
     if (!file || file->IsZombie()) {
         ATH_MSG_ERROR("Failed to open ROOT file.");
         {
@@ -123,13 +121,42 @@ namespace CP {
 
     // Filter the dataframe and extract records using the provided callback
     std::string expr = "runNumber == " + std::to_string(closestRunNumber);
-    FilteredType filtered = df.Filter(expr);
+    auto filtered = df.Filter(expr);
     
     // Initialize records
     auto records = std::make_shared<std::vector<RecordType>>();
-    
-    // Call the lambda to extract records
-    extractRecords(records, filtered);
+
+    // Fill records to trigger evaluation
+    if constexpr (std::is_same<RecordType, TrackSFRecord>::value) {
+      auto etaLows = filtered.Take<double>("etaLow");
+      auto etaHighs = filtered.Take<double>("etaHigh");
+      auto sfYes = filtered.Take<double>("SF_IBLOFYes");
+      auto sfNo = filtered.Take<double>("SF_IBLOFNo");
+      records->reserve(etaLows->size());
+      for (size_t i = 0; i < etaLows->size(); ++i) {
+        records->emplace_back(TrackSFRecord{
+            etaLows->at(i),
+            etaHighs->at(i),
+            sfYes->at(i),
+            sfNo->at(i)
+          });
+      }
+    }
+    else if constexpr (std::is_same<RecordType, ClusterSFRecord>::value) {
+      auto becs = filtered.Take<int>("bec");
+      auto layers = filtered.Take<int>("layerID");
+      auto etas = filtered.Take<int>("etaM");
+      auto sfs = filtered.Take<double>("SF");
+      auto sf_errors = filtered.Take<double>("SF_error");
+
+      // Build vector of SFRecords
+      records->reserve(becs->size());
+      for (size_t i = 0; i < becs->size(); ++i) {
+        records->emplace_back(ClusterSFRecord{
+            becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)
+          });
+      }
+    }
 
     // Cache the results
     {
@@ -147,35 +174,12 @@ namespace CP {
 
   // Specific implementation for TrackSFs
   std::shared_ptr<std::vector<TrackSFRecord>> PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
-    return getRunSFs<TrackSFRecord>(runNumber, m_cachedTrackSFData, m_filename, m_trackSFTreeName.value(), 
-                                    [](std::shared_ptr<std::vector<TrackSFRecord>> records, FilteredType& filtered) {
-            auto etaLows = filtered.Take<double>("etaLow");
-            auto etaHighs = filtered.Take<double>("etaHigh");
-            auto sfYes = filtered.Take<double>("SF_IBLOFYes");
-            auto sfNo = filtered.Take<double>("SF_IBLOFNo");
-            records->reserve(etaLows->size());
-            for (size_t i = 0; i < etaLows->size(); ++i) {
-                records->emplace_back(TrackSFRecord{etaLows->at(i), etaHighs->at(i), sfYes->at(i), sfNo->at(i)});
-            }
-            return records;
-        });
+    return getRunSFs<TrackSFRecord>(runNumber, m_cachedTrackSFData, m_trackSFTreeName.value());
   }
 
   // Specific implementation for ClusterSFs
   std::shared_ptr<std::vector<ClusterSFRecord>> PixelDEdxEqualizationTool::getRunClusterSFs(const int runNumber) const {
-    return getRunSFs<ClusterSFRecord>(runNumber, m_cachedClusterSFData, m_filename, m_clusterSFTreeName.value(),
-                                      [](std::shared_ptr<std::vector<ClusterSFRecord>> records, FilteredType& filtered) {
-            auto becs = filtered.Take<int>("bec");
-            auto layers = filtered.Take<int>("layerID");
-            auto etas = filtered.Take<int>("etaM");
-            auto sfs = filtered.Take<double>("SF");
-            auto sf_errors = filtered.Take<double>("SF_error");
-            records->reserve(becs->size());
-            for (size_t i = 0; i < becs->size(); ++i) {
-                records->emplace_back(ClusterSFRecord{becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)});
-            }
-            return records;
-        });
+    return getRunSFs<ClusterSFRecord>(runNumber, m_cachedClusterSFData, m_clusterSFTreeName.value());
   }
 
   //////////////////////

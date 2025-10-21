@@ -64,17 +64,11 @@ namespace CP {
     std::shared_ptr<std::vector<TrackSFRecord>> getRunTrackSFs(const int runNumber) const;
     std::shared_ptr<std::vector<ClusterSFRecord>> getRunClusterSFs(const int runNumber) const;
 
-    
-    // Helper function for shared logic
-    using FilteredType = ROOT::RDF::RInterface<ROOT::Detail::RDF::RJittedFilter, void>;
-
     template<typename RecordType>
     std::shared_ptr<std::vector<RecordType>> getRunSFs(
-        const int runNumber, 
-        std::map<int, std::shared_ptr<std::vector<RecordType>>>& cache, 
-        const std::string& fileName, 
-        const std::string& treeName, 
-        std::function<void(std::shared_ptr<std::vector<RecordType>>, FilteredType&)> extractRecords) const;
+        const int runNumber,
+        std::map<int, std::shared_ptr<std::vector<RecordType>>>& cache,
+        const std::string& treeName) const;
 
     /// Flags
     Gaudi::Property<bool> m_equalizeTrackMeasurements
