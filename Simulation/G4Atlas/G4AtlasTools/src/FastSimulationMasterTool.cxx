@@ -22,7 +22,8 @@ StatusCode FastSimulationMasterTool::initializeFastSims(){
   ATH_MSG_INFO( "Initializing list of " << m_FastSimList.size() << " fast simulation tools in " << name() );
   CHECK( m_FastSimList.retrieve() );
 
-  // Initialize the SDs
+  // Initialize the FastSim processes. Each process will attach
+  // itself to the relevant region at construction
   for (auto& ifs : m_FastSimList){
     CHECK(ifs->initializeFastSim());
   }

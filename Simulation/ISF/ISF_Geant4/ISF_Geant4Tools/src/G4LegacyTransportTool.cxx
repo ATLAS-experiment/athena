@@ -10,7 +10,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "G4AtlasAlg/G4AtlasRunManager.h"
 #include "G4AtlasTools/G4AtlasActionInitialization.h"
-#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 #include "ISFFluxRecorder.h"
 
 // ISF classes
@@ -131,7 +130,6 @@ void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
   std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
     std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
   m_pRunMgr->SetUserInitialization(actionInitialization.release());
-  m_pRunMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 
   G4UImanager *ui = G4UImanager::GetUIpointer();
 
