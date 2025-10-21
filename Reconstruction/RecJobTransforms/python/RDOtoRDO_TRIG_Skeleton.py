@@ -67,6 +67,7 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
     cfg.merge( runHLT.runHLTCfg(flags) )
+    # Enabling PerfMon always for trigger jobs regardless of PerfMon flags (unlike most other skeletons)
     cfg.merge( PerfMonMTSvcCfg(flags) )
 
     # Post-include
