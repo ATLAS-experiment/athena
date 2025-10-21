@@ -305,7 +305,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
                     std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
                     // Add this hit to the road
                     if (hit->isReal()){
-                        hit_list.push_back(hit);
+                        hit_list.push_back(std::move(hit));
                     }
                 }
             }
