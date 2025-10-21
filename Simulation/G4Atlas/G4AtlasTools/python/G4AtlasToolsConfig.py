@@ -66,6 +66,13 @@ def FastSimulationMasterToolCfg(flags, **kwargs):
     return result
 
 
+def FastSimulationConstructorToolCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    FastSimulationConstructorTool = CompFactory.FastSimulationConstructorTool
+    result.setPrivateTools(FastSimulationConstructorTool(name="FastSimulationConstructorTool", **kwargs))
+    return result
+
+
 def EmptyFastSimulationMasterToolCfg(flags, **kwargs):
     result = ComponentAccumulator()
     FastSimulationMasterTool = CompFactory.FastSimulationMasterTool

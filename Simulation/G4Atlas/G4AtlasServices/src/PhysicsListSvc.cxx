@@ -39,6 +39,9 @@ StatusCode PhysicsListSvc::initialize( )
       ATH_MSG_INFO( "Initializing list of " <<  m_phys_decay.size() << " Decays "  );
       CHECK( m_phys_decay.retrieve() );
     }
+  
+  CHECK(m_fastSimulation.retrieve());
+  CHECK(m_fastSimulationConstructor.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -128,6 +131,11 @@ void PhysicsListSvc::CreatePhysicsList()
     {
       ATH_MSG_DEBUG("Registering " << physDecayTool->name());
       m_physicsList->RegisterPhysics(physDecayTool->GetPhysicsOption().release());
+    }
+
+    if(m_fastSimulation->HasFastSimulationModels()) {
+      ATH_MSG_INFO("Registering fast simulation physics constructor: " << m_fastSimulationConstructor->name());
+      m_physicsList->RegisterPhysics(m_fastSimulationConstructor->GetPhysicsOption().release());
     }
 
   //ConstructProcess();

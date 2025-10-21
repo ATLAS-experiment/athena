@@ -6,7 +6,6 @@
 #include "G4AtlasAlg.h"
 #include "G4AtlasFluxRecorder.h"
 #include "G4AtlasTools/G4AtlasActionInitialization.h"
-#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CxxUtils/checker_macros.h"
@@ -168,7 +167,6 @@ void G4AtlasAlg::initializeOnce()
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
-    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 #else
     throw std::runtime_error("Trying to use multi-threading in non-MT build!");
 #endif
@@ -186,7 +184,6 @@ void G4AtlasAlg::initializeOnce()
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
-    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
   }
 
   // G4 user interface commands

@@ -6,6 +6,7 @@
 #define G4ATLASTOOLS_PHYSICSLISTSVC_H
 
 // Base classes
+#include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
 #include "AthenaBaseComps/AthService.h"
 
@@ -39,6 +40,10 @@ private:
 
   /// This command prints a message about a G4Command depending on its returnCode
   void CommandLog(int returnCode, const std::string& commandString) const;
+
+  PublicToolHandle<IFastSimulationMasterTool> m_fastSimulation{this, "FastSimMasterTool", "", "Tool handle to fast simulation physics option"};
+
+  ToolHandle<IPhysicsOptionTool> m_fastSimulationConstructor{this, "FastSimConstructor", "", "Physics Constructor for fast simulation physics"};
 
   ToolHandleArray<IPhysicsOptionTool> m_phys_option{this, "PhysOption", {}, "Tool handle array of physics options" };
   ToolHandleArray<IPhysicsOptionTool> m_phys_decay{this, "PhysicsDecay", {}, "Tool handle array of physics decays"};
