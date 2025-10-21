@@ -91,7 +91,6 @@ namespace DerivationFramework {
     }
     const xAOD::VertexContainer* vtxContainer = vtxReadHandle.cptr();
     const xAOD::Vertex* pVtx = nullptr;
-    float sumpt_PV0 = 0., sumpt2_PV0 = 0.;
 
     // Check that PV container exists and is non-empty, find the PV if possible
     if (vtxContainer != nullptr && !vtxContainer->empty()) {
@@ -103,11 +102,6 @@ namespace DerivationFramework {
       if (pVtx == nullptr){
         ATH_MSG_DEBUG("No PV found, using the first element instead!");
         pVtx = vtxContainer->at(0);
-      }
-
-      for (const ElementLink<xAOD::TrackParticleContainer>& trk : pVtx->trackParticleLinks()) {
-	sumpt_PV0 += (*trk)->pt();
-	sumpt2_PV0 += std::pow((*trk)->pt(), 2.);
       }
     }
     
