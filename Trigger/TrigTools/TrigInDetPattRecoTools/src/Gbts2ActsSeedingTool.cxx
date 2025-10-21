@@ -7,7 +7,6 @@
 #include "xAODInDetMeasurement/PixelCluster.h"
 
 #include "Gbts2ActsSeedingTool.h"
-#include "GNN_TrackingFilter.h"
 
 #include <optional>
 
@@ -110,78 +109,36 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     ATH_MSG_DEBUG("Created graph with "<<graphStats.first<<" edges and "<<graphStats.second<< " edge links");
 
+    if (graphStats.first == 0 || graphStats.second == 0) return StatusCode::SUCCESS;
+
     int maxLevel = runCCA(graphStats.first, edgeStorage);
 
     ATH_MSG_DEBUG("Reached Level "<<maxLevel<<" after GNN iterations");
+    
+    std::vector<std::tuple<float, int, std::vector<unsigned int> > > vSeedCandidates;
 
-    int minLevel = 3;//a triplet + 2 confirmation
+    extractSeedsFromTheGraph(maxLevel, graphStats.first, spContainer.size(), edgeStorage, vSeedCandidates);
 
-    if(m_LRTmode) {
-        minLevel = 2;//a triplet + 1 confirmation
-    }
+    if (vSeedCandidates.empty()) return StatusCode::SUCCESS;
 
-    if(maxLevel < minLevel) return StatusCode::SUCCESS;
+    for (const auto& seed : vSeedCandidates) {
 
-    std::vector<GNN_Edge*> vSeeds;
-
-    vSeeds.reserve(graphStats.first/2);
-
-    for(int edgeIndex = 0; edgeIndex < graphStats.first; edgeIndex++) {
+      if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
       
-      GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
+      std::vector<const xAOD::SpacePoint*> sps;
 
-      if(pS->m_level < minLevel) continue;
-
-      vSeeds.push_back(pS);
-    }
-
-    if(vSeeds.empty()) return StatusCode::SUCCESS;
- 
-    std::sort(vSeeds.begin(), vSeeds.end(), GNN_Edge::CompareLevel());
-
-    //backtracking
-
-    TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
-
-    for(auto pS : vSeeds) {
-        if(pS->m_level == -1) continue;
-
-        TrigFTF_GNN_EdgeState rs(false);
-
-        tFilter.followTrack(pS, rs);
-
-        if(!rs.m_initialized) {
-            continue;
-        }
-
-        if(static_cast<int>(rs.m_vs.size()) < minLevel) continue;
-
-        std::vector<const GNN_Node*> vN;
-
-        for(std::vector<GNN_Edge*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
-            (*sIt)->m_level = -1;//mark as collected
-            
-            if(sIt == rs.m_vs.rbegin()) {
-                vN.push_back((*sIt)->m_n1);
-            }
-
-            vN.push_back((*sIt)->m_n2);
-	    
-        }
-
-        if(vN.size()<3) continue;
+      sps.reserve(std::get<2>(seed).size());
+      
+      for (const auto& sp_idx : std::get<2>(seed)) {
+	sps.push_back(&spContainer.at(sp_idx).externalSpacePoint());
+      }
 	
-        std::vector<const xAOD::SpacePoint*> sps;
-        sps.reserve(vN.size());
-        for (const auto* vNptr : vN) {
-          sps.push_back(&spContainer.at(vNptr->sp_idx()).externalSpacePoint());
-        }
-	
-	//add seed to output
+      //add seed to output
 
-	std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(std::move(sps));
+      std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(std::move(sps));
 	
-        seedContainer.push_back(std::move(to_add));
+      seedContainer.push_back(std::move(to_add));
+      
     }
 
     ATH_MSG_DEBUG("GBTS created "<<seedContainer.size()<<" seeds");

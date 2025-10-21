@@ -15,6 +15,9 @@
 
 #include "SeedingToolBase.h"
 
+#include "GNN_TrackingFilter.h"
+
+#include <numeric>
 
 StatusCode SeedingToolBase::initialize() {
   ATH_CHECK(AthAlgTool::initialize());
@@ -100,6 +103,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   const float min_z0            = m_LRTmode ? -600.0 : roi.zedMinus();
   const float max_z0            = m_LRTmode ? 600.0 : roi.zedPlus();
   const float min_deltaPhi      = m_LRTmode ? 0.01f : 0.001f;
+  const float tau_ratio_precut  = 0.009f;
   
   const float maxOuterRadius    = m_LRTmode ? 1050.0 : 550.0;
 
@@ -115,7 +119,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
  
   float maxKappa_high_eta          = m_LRTmode ? 1.0f*maxCurv : std::sqrt(0.8f)*maxCurv;
   float maxKappa_low_eta           = m_LRTmode ? 1.0f*maxCurv : std::sqrt(0.6f)*maxCurv;
-
+  
   if(!m_useOldTunings && !m_LRTmode) {//new settings for curvature cuts
     maxKappa_high_eta          = 4.75e-4f*pt_scale;
     maxKappa_low_eta           = 3.75e-4f*pt_scale;
@@ -140,7 +144,9 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
     if(B1.empty()) continue;
 
     float rb1 = B1.getMinBinRadius();
- 
+    
+    const unsigned int lk1 = B1.m_layerKey;
+
     for(const auto& b2_idx : bg.second) {
 
       const TrigFTF_GNN_EtaBin& B2 = storage->getEtaBin(b2_idx);
@@ -148,7 +154,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
       if(B2.empty()) continue;
       
       float rb2 = B2.getMaxBinRadius();
-    
+      
       if(m_useEtaBinning) {
 	float abs_dr = std::fabs(rb2-rb1);
 	if (m_useOldTunings) {
@@ -249,8 +255,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  }
 
 	  float exp_eta = std::sqrt(1.f+tau*tau)-tau;
-	  
-	  if (m_matchBeforeCreate) {//match edge candidate against edges incoming to n2
+        
+	  if (m_matchBeforeCreate && (lk1 == 80000 || lk1 == 81000) ) {//match edge candidate against edges incoming to n2
 
 	    bool isGood = v2In.size() <= 2;//we must have enough incoming edges to decide
 
@@ -263,7 +269,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 		float tau2 = edgeStorage.at(n2_in_idx).m_p[0]; 
 		float tau_ratio = tau2*uat_1 - 1.0f;
 		
-		if(std::fabs(tau_ratio) > cut_tau_ratio_max){//bad match
+		if(std::fabs(tau_ratio) > tau_ratio_precut){//bad match
 		  continue;
 		}
 		isGood = true;//good match found
@@ -296,7 +302,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
 	      
 	      if(pS->m_nNei >= N_SEG_CONNS) continue;
-	    
+	      
 	      float tau_ratio = pS->m_p[0]*uat_2 - 1.0f;
 	      
 	      if(std::abs(tau_ratio) > cut_tau_ratio_max){//bad match
@@ -308,7 +314,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      if(dPhi<-M_PI) dPhi += M_2PI;
 	      else if(dPhi>M_PI) dPhi -= M_2PI;
 	      
-	      if(dPhi < -cut_dphi_max || dPhi > cut_dphi_max) {
+	      if(std::abs(dPhi) > cut_dphi_max) {
 		continue;
 	      }
             
@@ -405,3 +411,145 @@ int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStora
   return maxLevel;  
 }
 
+void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHits, std::vector<GNN_Edge>& edgeStorage, std::vector<std::tuple<float, int, std::vector<unsigned int> > >& vSeedCandidates) const {
+
+  const float edge_mask_min_eta = 1.5;
+  const float hit_share_threshold = 0.49;
+  
+  vSeedCandidates.clear();
+
+  int minLevel = 3;//a triplet + 2 confirmation
+
+  if(m_LRTmode) {
+    minLevel = 2;//a triplet + 1 confirmation
+  }
+
+  if(maxLevel < minLevel) return;
+  
+  std::vector<GNN_Edge*> vSeeds;
+
+  vSeeds.reserve(nEdges/2);
+
+  for(int edgeIndex = 0; edgeIndex < nEdges; edgeIndex++) {
+    
+    GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
+    
+    if(pS->m_level < minLevel) continue;
+    
+    vSeeds.push_back(pS);
+  }
+  
+  if(vSeeds.empty()) return;
+  
+  std::sort(vSeeds.begin(), vSeeds.end(), GNN_Edge::CompareLevel());
+    
+  //backtracking
+
+  vSeedCandidates.reserve(vSeeds.size());
+  
+  TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
+
+  for(auto pS : vSeeds) {
+
+    if(pS->m_level == -1) continue;
+
+    TrigFTF_GNN_EdgeState rs(false);
+
+    tFilter.followTrack(pS, rs);
+
+    if(!rs.m_initialized) {
+      continue;
+    }
+
+    if(static_cast<int>(rs.m_vs.size()) < minLevel) continue;
+
+    float seed_eta = std::abs(-std::log(pS->m_p[0]));
+    
+    std::vector<const GNN_Node*> vN;
+
+    for(std::vector<GNN_Edge*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
+
+      if (seed_eta > edge_mask_min_eta) {
+	(*sIt)->m_level = -1;//mark as collected
+      }
+      
+      if(sIt == rs.m_vs.rbegin()) {
+	vN.push_back((*sIt)->m_n1);
+      }
+
+      vN.push_back((*sIt)->m_n2);
+	    
+    }
+
+    if(vN.size()<3) continue;
+
+    std::vector<unsigned int> vSpIdx;
+
+    vSpIdx.resize(vN.size());
+
+    for(unsigned int k = 0; k < vN.size(); k++) {
+      vSpIdx[k] = vN[k]->sp_idx();
+    }
+    
+    vSeedCandidates.emplace_back(-rs.m_J/vN.size(), 0, vSpIdx);
+    
+  }
+
+  //clone removal code goes below ...
+
+  std::sort(vSeedCandidates.begin(), vSeedCandidates.end());
+
+  std::vector<int> vTrackIds(vSeedCandidates.size());
+
+  // fills the vector from 1 to N
+    
+  std::iota(vTrackIds.begin(), vTrackIds.end(), 1);
+
+  std::vector<int> H2T(nHits + 1, 0);//hit to track associations
+
+  int seedIdx = 0;
+    
+  for(const auto& seed : vSeedCandidates) {
+    
+    for(const auto& h : std::get<2>(seed) ) {//loop over spacepoints indices
+	
+      unsigned int hit_id = h + 1;
+      
+      int tid     = H2T[hit_id];
+      int trackId = vTrackIds[seedIdx];
+      
+      if(tid == 0 || tid > trackId) {//un-used hit or used by a lesser track
+	
+	H2T[hit_id] = trackId;//overwrite
+	
+      }
+    }
+    
+    seedIdx++;
+      
+  }
+
+  for(unsigned int trackIdx = 0; trackIdx < vSeedCandidates.size(); trackIdx++) {
+
+    int nTotal = std::get<2>(vSeedCandidates[trackIdx]).size();
+    int nOther = 0;
+    
+    int trackId = vTrackIds[trackIdx];
+
+    for(const auto& h : std::get<2>(vSeedCandidates[trackIdx]) ) {
+
+      unsigned int hit_id = h + 1;
+      
+      int tid = H2T[hit_id];
+
+	if(tid != trackId) {//taken by a better candidate
+          nOther++;
+	}
+    }
+
+    if (nOther > hit_share_threshold*nTotal) {
+        std::get<1>(vSeedCandidates[trackIdx]) = -1;//reject
+    }
+
+  }
+}
