@@ -47,7 +47,7 @@ def ActsMuonSegmentRefitAlgCfg(flags,name="ActsMuonSegmentRefitAlg", **kwargs):
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     
     kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags,
-                                                                              StraightLine=True)))       
+                                                                              DoStraightLine=True)))       
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
