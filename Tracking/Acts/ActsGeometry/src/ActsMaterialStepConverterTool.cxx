@@ -8,7 +8,7 @@
 #include "GaudiKernel/EventContext.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 // Tracking
 #include "TrkGeometry/MaterialStep.h"

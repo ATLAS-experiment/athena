@@ -67,7 +67,7 @@ namespace MuonR4{
             SG::ReadHandleKey<Muon::MMPrepDataContainer> m_keyMM{this, "MmKey", "MM_Measurements"};
 
             SG::ReadHandleKeyArray<SegmentSeedContainer> m_readKeys{this, "Patterns", {"MuonHoughStationSegmentSeeds"}};
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             SG::WriteHandleKey<::MuonPatternCombinationCollection> m_combiKey{this, "PatternCombiKey", "MuonLayerHoughCombis"};
             SG::WriteHandleKey<Muon::HoughDataPerSectorVec> m_dataPerSecKey{this, "HoughDataPerSecKey",

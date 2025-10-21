@@ -31,7 +31,7 @@ namespace MuonValR4{
         /** @brief Track extrapolation tool */
         ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
         /** @brief Dependency on the geometry alignment */
-        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
         /** @brief Detector manager to fetch the sector surfaces */
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
     };

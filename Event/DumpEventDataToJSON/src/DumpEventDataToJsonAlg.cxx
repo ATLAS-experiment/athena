@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DumpEventDataToJsonAlg.h"
@@ -24,7 +24,7 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+
 
 
 DumpEventDataToJsonAlg::DumpEventDataToJsonAlg(const std::string &name,
@@ -45,24 +45,15 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
 
   // ACTS
   ATH_CHECK(m_trackContainerKeys.initialize());
-  if (!m_cscPrepRawDataKey.empty())
-    ATH_CHECK(m_cscPrepRawDataKey.initialize());
-  if (!m_mdtPrepRawDataKey.empty())
-    ATH_CHECK(m_mdtPrepRawDataKey.initialize());
-  if (!m_tgcPrepRawDataKey.empty())
-    ATH_CHECK(m_tgcPrepRawDataKey.initialize());
-  if (!m_rpcPrepRawDataKey.empty())
-    ATH_CHECK(m_rpcPrepRawDataKey.initialize());
-  if (!m_mmPrepRawDataKey.empty())
-    ATH_CHECK(m_mmPrepRawDataKey.initialize());
-  if (!m_stgcPrepRawDataKey.empty())
-    ATH_CHECK(m_stgcPrepRawDataKey.initialize());
-  if (!m_pixelPrepRawDataKey.empty())
-    ATH_CHECK(m_pixelPrepRawDataKey.initialize());
-  if (!m_sctPrepRawDataKey.empty())
-    ATH_CHECK(m_sctPrepRawDataKey.initialize());
-  if (!m_trtPrepRawDataKey.empty())
-    ATH_CHECK(m_trtPrepRawDataKey.initialize());
+  ATH_CHECK(m_cscPrepRawDataKey.initialize(!m_cscPrepRawDataKey.empty()));
+  ATH_CHECK(m_mdtPrepRawDataKey.initialize(!m_mdtPrepRawDataKey.empty()));
+  ATH_CHECK(m_tgcPrepRawDataKey.initialize(!m_tgcPrepRawDataKey.empty()));
+  ATH_CHECK(m_rpcPrepRawDataKey.initialize(!m_rpcPrepRawDataKey.empty()));
+  ATH_CHECK(m_mmPrepRawDataKey.initialize(!m_mmPrepRawDataKey.empty()));
+  ATH_CHECK(m_stgcPrepRawDataKey.initialize(!m_stgcPrepRawDataKey.empty()));
+  ATH_CHECK(m_pixelPrepRawDataKey.initialize(!m_pixelPrepRawDataKey.empty()));
+  ATH_CHECK(m_sctPrepRawDataKey.initialize(!m_sctPrepRawDataKey.empty()));
+  ATH_CHECK(m_trtPrepRawDataKey.initialize(!m_trtPrepRawDataKey.empty()));
 
   ATH_CHECK(m_extrapolator.retrieve( DisableTool{m_extrapolator.empty()} ));
   if (m_extrapolator.empty()) {
@@ -165,7 +156,7 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   // ACTS
   if (!m_geometryContextKey.empty()){
   auto tcHandles = m_trackContainerKeys.makeHandles();
-  SG::ReadHandle<ActsGeometryContext> gcx(m_geometryContextKey, Gaudi::Hive::currentContext());
+  SG::ReadHandle gcx(m_geometryContextKey, Gaudi::Hive::currentContext());
 
   for ( SG::ReadHandle<ActsTrk::TrackContainer>& tcHandle: tcHandles ) {
     // Temporary debugging information

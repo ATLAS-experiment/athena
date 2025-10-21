@@ -33,16 +33,16 @@ const ActsTrk::DetectorElementToActsGeometryIdMap* ActsTrackingGeometryTool::sur
     return m_detIdMap.get();
 }
 
-const ActsGeometryContext& ActsTrackingGeometryTool::getGeometryContext(const EventContext& ctx) const {
+const GeometryContext& ActsTrackingGeometryTool::getGeometryContext(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Creating alignment context for event");
-    const ActsGeometryContext* geoCtx{nullptr};
+    const GeometryContext* geoCtx{nullptr};
     if (!SG::get(geoCtx, m_rchk, ctx).isSuccess()) {
         ATH_MSG_ERROR("Creating alignment context failed: read cond handle invalid!");
     }
     return *geoCtx;
 }
 
-const ActsGeometryContext& ActsTrackingGeometryTool::getNominalGeometryContext() const {
+const GeometryContext& ActsTrackingGeometryTool::getNominalGeometryContext() const {
      return m_trackingGeometrySvc->getNominalContext();
 }
 

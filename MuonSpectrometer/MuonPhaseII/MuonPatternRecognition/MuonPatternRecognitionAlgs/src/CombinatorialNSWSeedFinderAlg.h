@@ -123,7 +123,7 @@ class CombinatorialNSWSeedFinderAlg : public AthReentrantAlgorithm {
         SG::WriteHandleKey<SegmentSeedContainer> m_writeKey{this, "CombinatorialPhiWriteKey", "MuonHoughNswSegmentSeeds"};
 
         // access to the ACTS geometry context 
-        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
         // access to the Muon Id Helper
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -131,7 +131,7 @@ class CombinatorialNSWSeedFinderAlg : public AthReentrantAlgorithm {
         //build and return seeds from the same eta maximum
         std::vector<std::unique_ptr<SegmentSeed>> 
               findSeedsFromMaximum(const HoughMaximum& max, 
-                                   const ActsGeometryContext& gctx) const;
+                                   const ActsTrk::GeometryContext& gctx) const;
   
         //the window in theta to search for hits in the seed extension
         DoubleProperty m_windowTheta {this, "thetaWindow", 0.5 * Gaudi::Units::deg};

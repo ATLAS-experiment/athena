@@ -97,7 +97,7 @@ namespace MuonGMR4 {
     }
 
     template <class EnvelopeType>
-    StatusCode MuonChamberToolTest::allReadoutInEnvelope(const ActsGeometryContext& gctx,
+    StatusCode MuonChamberToolTest::allReadoutInEnvelope(const ActsTrk::GeometryContext& gctx,
                                                          const EnvelopeType& envelope) const {
         std::shared_ptr<Acts::Volume> boundVol = envelope.boundingVolume(gctx);
         const Chamber::ReadoutSet reEles = envelope.readoutEles();
@@ -240,7 +240,7 @@ namespace MuonGMR4 {
 
 
     StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
         /** Check that all chambers covered by their sector envelopes */
@@ -331,7 +331,7 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
     template <class EnvelopeType>
-    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                                    const MdtReadoutElement& mdtMl,
                                                    const EnvelopeType& chamber,
                                                    const Acts::Volume& detVol) const {
@@ -365,7 +365,7 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
     template<class EnvelopeType>
-    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                                    const RpcReadoutElement& rpc,
                                                    const EnvelopeType& chamber,
                                                    const Acts::Volume& detVol) const {
@@ -390,7 +390,7 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
     template <class EnevelopeType>
-    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                                    const TgcReadoutElement& tgc,
                                                    const EnevelopeType& chamber,
                                                    const Acts::Volume& detVol) const {        
@@ -407,7 +407,7 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
     template <class EnevelopeType>
-    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                                    const MmReadoutElement& mm,
                                                    const EnevelopeType& chamber,
                                                    const Acts::Volume& detVol) const {
@@ -427,7 +427,7 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
     template <class EnvelopeType>
-    StatusCode MuonChamberToolTest::testReadoutEle(const ActsGeometryContext& gctx,
+    StatusCode MuonChamberToolTest::testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                                    const sTgcReadoutElement& stgc,
                                                    const EnvelopeType& chamber,
                                                    const Acts::Volume& detVol) const{

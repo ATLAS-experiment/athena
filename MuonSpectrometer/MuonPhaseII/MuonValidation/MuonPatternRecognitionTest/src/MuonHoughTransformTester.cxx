@@ -81,7 +81,7 @@ namespace MuonValR4 {
     }
 
 
-    unsigned int MuonHoughTransformTester::countOnSameSide(const ActsGeometryContext& gctx,
+    unsigned int MuonHoughTransformTester::countOnSameSide(const ActsTrk::GeometryContext& gctx,
                                                            const xAOD::MuonSegment& truthSeg,
                                                            const MuonR4::Segment& recoSeg) const{
         unsigned int same{0};
@@ -96,7 +96,7 @@ namespace MuonValR4 {
         return same;
     }
     std::vector<ObjectMatching> 
-            MuonHoughTransformTester::matchWithTruth(const ActsGeometryContext& gctx,
+            MuonHoughTransformTester::matchWithTruth(const ActsTrk::GeometryContext& gctx,
                                                      const xAOD::MuonSegmentContainer* truthSegments,
                                                      const SegmentSeedContainer* seedContainer,
                                                      const SegmentContainer* segmentContainer) const {
@@ -231,9 +231,9 @@ namespace MuonValR4 {
     StatusCode MuonHoughTransformTester::execute()  {
         
         const EventContext & ctx = Gaudi::Hive::currentContext();
-        const ActsGeometryContext* gctxPtr{nullptr};
+        const ActsTrk::GeometryContext* gctxPtr{nullptr};
         ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
-        const ActsGeometryContext& gctx{*gctxPtr};
+        const ActsTrk::GeometryContext& gctx{*gctxPtr};
 
 
         ConstDataVector<MuonR4::SegmentSeedContainer> segmentSeeds{SG::VIEW_ELEMENTS};
@@ -270,7 +270,7 @@ namespace MuonValR4 {
         m_out_stationSide = msSector->side();
         m_out_stationPhi = msSector->stationPhi();
     }                
-    void MuonHoughTransformTester:: fillTruthInfo(const ActsGeometryContext& gctx,
+    void MuonHoughTransformTester:: fillTruthInfo(const ActsTrk::GeometryContext& gctx,
                                                   const xAOD::MuonSegment* segment) {
         if (!segment) return; 
         m_out_hasTruth = true; 
@@ -435,7 +435,7 @@ namespace MuonValR4 {
         }
     }
     
-    void MuonHoughTransformTester::fillSegmentInfo(const ActsGeometryContext& gctx,
+    void MuonHoughTransformTester::fillSegmentInfo(const ActsTrk::GeometryContext& gctx,
                                                    const ObjectMatching& obj){
         using namespace SegmentFit;
 

@@ -14,7 +14,7 @@ namespace MuonR4::SegmentFit {
     double SegmentAmbiSolver::redChi2(const Segment& segment) const {
         return segment.chi2() / segment.nDoF();
     }
-    SegmentVec SegmentAmbiSolver::resolveAmbiguity(const ActsGeometryContext& gctx,
+    SegmentVec SegmentAmbiSolver::resolveAmbiguity(const ActsTrk::GeometryContext& gctx,
                                                    SegmentVec&& toResolve) const {
         
         std::ranges::stable_sort(toResolve,[this](const SegmentVec::value_type& a,
@@ -92,7 +92,7 @@ namespace MuonR4::SegmentFit {
         }
         return resolved;
     }
-    std::vector<int> SegmentAmbiSolver::driftSigns(const ActsGeometryContext& gctx,
+    std::vector<int> SegmentAmbiSolver::driftSigns(const ActsTrk::GeometryContext& gctx,
                                                    const Segment& segment,
                                                    const Segment::MeasVec& measurements) const {
         const auto [pos, dir] = makeLine(localSegmentPars(gctx, segment));

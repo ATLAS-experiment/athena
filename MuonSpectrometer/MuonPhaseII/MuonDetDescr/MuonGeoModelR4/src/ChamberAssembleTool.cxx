@@ -158,7 +158,7 @@ Amg::Transform3D ChamberAssembleTool::centerTrapezoid(const std::array<Amg::Vect
 
 
 ChamberAssembleTool::TrfWithBounds 
-      ChamberAssembleTool::boundingBox(const ActsGeometryContext& gctx,
+      ChamberAssembleTool::boundingBox(const ActsTrk::GeometryContext& gctx,
                                        const std::vector<const MuonReadoutElement*>& readoutEles,
                                        const Amg::Transform3D& toCenter,
                                        Acts::VolumeBoundFactory& volBoundSet,
@@ -377,7 +377,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
       }
     }
     /// Find the chamber middle and create the geometry from that
-    ActsGeometryContext gctx{};    
+    ActsTrk::GeometryContext gctx{};    
 
 
    Acts::VolumeBoundFactory volBoundSet{};

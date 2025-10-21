@@ -28,8 +28,10 @@ namespace Trk {
   class StraightLineSurface;
 }
 
+namespace ActsTrk {
+  class GeometryContext;
+}
 class MdtDigit;
-class ActsGeometryContext;
 
 class MdtCalibInput {
     public:
@@ -44,7 +46,7 @@ class MdtCalibInput {
                     const int16_t adc,
                     const int16_t tdc,
                     const MuonGMR4::MdtReadoutElement* reEle,
-                    const ActsGeometryContext& gctx);
+                    const ActsTrk::GeometryContext& gctx);
     
       /** @brief Minimal constructor in the legacy geomerty setup. It takes all necessary ingredients to run
        *         later the calibration loop.
@@ -70,14 +72,14 @@ class MdtCalibInput {
        *  @param gctx: Geometry context to globally align the tube within ATLAS */
       MdtCalibInput(const MdtDigit& digit,
                     const MuonGMR4::MuonDetectorManager& detMgr,
-                    const ActsGeometryContext& gctx);
+                    const ActsTrk::GeometryContext& gctx);
       /** Constructor taking the MdtPrepdata. The   */
       MdtCalibInput(const Muon::MdtPrepData& prd);
       /** Constructor taking taking the xAOD::MdtDriftCircle
         * @param prd: Reference to the uncalibrated Drift circle
         * @param gctx: Geometry context to place the drift circle globally within ATLAS */
       MdtCalibInput(const xAOD::MdtDriftCircle& prd,
-                    const ActsGeometryContext& gctx);
+                    const ActsTrk::GeometryContext& gctx);
 
 
       MdtCalibInput(MdtCalibInput&& other) = default;
@@ -154,7 +156,7 @@ class MdtCalibInput {
     int16_t m_tdc{0};
 
     /** @brief Geometry context, needed to fetch the alignment */
-    const ActsGeometryContext* m_gctx{nullptr};
+    const ActsTrk::GeometryContext* m_gctx{nullptr};
     /** @brief Variant type to store the legacy & Phase-II style readout geometry in a single variable */
     using ReadoutEle_t = std::variant<const MuonGM::MdtReadoutElement*, const MuonGMR4::MdtReadoutElement*>;
     /** @brief Pointer to the associated readout element */

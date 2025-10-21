@@ -23,7 +23,7 @@
 #include "TrkExInterfaces/IExtrapolator.h"
 // ACTS
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "TrkExAlgs/PropResultRootWriterSvc.h"
 #include "Acts/EventData/TrackParameters.hpp"

@@ -51,7 +51,7 @@
 
 
 namespace {
-    using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
+    using SubDetAlignment = ActsTrk::GeometryContext::AlignmentStorePtr;
     bool  hasStationVolume(const PVConstLink treeTop,
                            const std::set<PVConstLink>& translated) {
         const unsigned int nCh = treeTop->getNChildVols();
@@ -85,7 +85,7 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     }
     writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
     /// Prepare the Geometry context
-    ActsGeometryContext geoContext{};
+    ActsTrk::GeometryContext geoContext{};
     using TrackingAlignment = ActsTrk::DetectorAlignStore::TrackingAlignStore;
     for (const SG::ReadCondHandleKey<ActsTrk::DetectorAlignStore>& key : m_alignStoreKeys) {
         SG::ReadCondHandle<ActsTrk::DetectorAlignStore> readHandle{key, ctx};
@@ -149,7 +149,7 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(writeHandle.record(std::move(cacheObj.detMgr)));
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::buildStation(const ActsTrk::GeometryContext& gctx,
                                            const Identifier& stationId,
                                            ConstructionCache& cacheObj) const {
     const std::string stName{m_idHelperSvc->stationNameString(stationId)};
@@ -263,7 +263,7 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
 }
 
 
-StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsTrk::GeometryContext& gctx,
                                                  const Identifier& reId,
                                                  ConstructionCache& cacheObj,
                                                  GeoIntrusivePtr<GeoVFullPhysVol>& physVol,
@@ -303,7 +303,7 @@ StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& gctx
     return StatusCode::SUCCESS;
 }
 
-StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {
     
     const std::vector<const MuonGMR4::RpcReadoutElement*> readoutEles = m_detMgr->getAllRpcReadoutElements();
     ATH_MSG_INFO("Copy "<<readoutEles.size()<<" Rpc readout elements to the legacy system");
@@ -396,7 +396,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
 }
 
 
-StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {
 
     std::vector<const MuonGMR4::TgcReadoutElement*> tgcReadouts{m_detMgr->getAllTgcReadoutElements()};
     std::ranges::stable_sort(tgcReadouts,[](const MuonGMR4::TgcReadoutElement* a, const MuonGMR4::TgcReadoutElement* b){
@@ -499,7 +499,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
 }
 
 GeoIntrusivePtr<GeoVFullPhysVol> 
-            ReadoutGeomCnvAlg::cloneNswWedge(const ActsGeometryContext& gctx,
+            ReadoutGeomCnvAlg::cloneNswWedge(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::MuonReadoutElement* copyMe,
                                              ConstructionCache& cacheObj) const {
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
@@ -512,7 +512,7 @@ GeoIntrusivePtr<GeoVFullPhysVol>
     cacheObj.world->add(physVol);
     return physVol;
 }
-StatusCode ReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildMM(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {
 
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mm);
     const auto alignStore = alignItr ?
@@ -568,7 +568,7 @@ StatusCode ReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx, Construct
     return StatusCode::SUCCESS;
 }
 
-StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const{
+StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const{
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::sTgc);
     auto alignStore = alignItr ? static_cast<const sTgcAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
@@ -683,7 +683,7 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {    
+StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {    
     /// Access the B-Line and As-built parameters
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mdt);
     const MdtAlignmentStore* alignStore = alignItr ?
@@ -812,7 +812,7 @@ StatusCode ReadoutGeomCnvAlg::checkIdCompability(const MuonGMR4::MuonReadoutElem
     return StatusCode::SUCCESS;
 }
 
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::MmReadoutElement& refEle,
                                              const MuonGM::MMReadoutElement& testEle) const {
 
@@ -860,7 +860,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
     return StatusCode::SUCCESS;
 }
 
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::MdtReadoutElement& refEle,
                                              const MuonGM::MdtReadoutElement& testEle) const {
     
@@ -917,7 +917,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
 
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::RpcReadoutElement& refEle,
                                              const MuonGM::RpcReadoutElement& testEle) const {
     
@@ -978,7 +978,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::TgcReadoutElement& refEle,
                                              const MuonGM::TgcReadoutElement& testEle) const {
     
@@ -1055,7 +1055,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::sTgcReadoutElement& refEle,
                                              const MuonGM::sTgcReadoutElement& testEle) const {
     if (!m_checkGeo) {

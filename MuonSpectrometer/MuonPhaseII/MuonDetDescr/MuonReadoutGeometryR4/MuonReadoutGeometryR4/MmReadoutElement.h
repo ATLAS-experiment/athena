@@ -106,14 +106,14 @@ class MmReadoutElement : public MuonReadoutElement {
     
     static IdentifierHash createHash(const int gasGap, const int strip);
       /// Returns the position of the strip center
-    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D stripPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D stripPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
     /// Returns the global position of the strip edge
-    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const; 
+    Amg::Vector3D leftStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const; 
     /// Returns the global position of the strip edge
-    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D rightStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
 
     const StripLayer& stripLayer(const Identifier& measId) const;    
     const StripLayer& stripLayer(const IdentifierHash& measHash) const;    

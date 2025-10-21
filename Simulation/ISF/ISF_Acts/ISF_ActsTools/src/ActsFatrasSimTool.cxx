@@ -114,7 +114,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   // get Geo and Mag map
   ATH_MSG_VERBOSE(name() << " Getting per event Geo and Mag map");
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
+  const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
   auto anygctx = gctx.context();
   // Loop over ISFParticleVector and process each separately
   ATH_MSG_VERBOSE(name() << " Processing particles in ISFParticleVector.");

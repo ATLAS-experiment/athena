@@ -25,13 +25,13 @@ namespace MuonValR4 {
       protected:
           const Muon::IMuonIdHelperSvc* idHelperSvc() const;
           const MuonGMR4::MuonDetectorManager* getDetMgr() const;
-          const ActsGeometryContext& getGeoCtx(const EventContext& ctx) const;
+          const ActsTrk::GeometryContext& getGeoCtx(const EventContext& ctx) const;
           virtual bool declare_keys() = 0;
 
       private:
           const MuonGMR4::MuonDetectorManager* m_detMgr{};
           ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", name()};
-          SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{"ActsAlignment"};
+          SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{"ActsAlignment"};
 
 
     };

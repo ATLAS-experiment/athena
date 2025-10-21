@@ -30,7 +30,7 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     if (!readOutEle) {
        return false;
     }
-    const ActsGeometryContext gctx{getGeoContext()};
+    const ActsTrk::GeometryContext gctx{getGeoContext()};
     
     const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
     ATH_MSG_VERBOSE(" Track is inside volume "
@@ -67,7 +67,7 @@ const MuonGMR4::TgcReadoutElement* TgcSensitiveDetector::getReadoutElement(const
     return m_detMgr->getTgcReadoutElement(stationId);
 }
 
-Identifier TgcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+Identifier TgcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                const MuonGMR4::TgcReadoutElement* readOutEle, 
                                                const Amg::Vector3D& hitAtGapPlane, bool phiGap) const {
     const TgcIdHelper& idHelper{m_detMgr->idHelperSvc()->tgcIdHelper()};

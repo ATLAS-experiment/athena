@@ -19,7 +19,7 @@
 #include "Acts/Utilities/Logger.hpp"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/IActsPropStepRootWriterSvc.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialTrackWriterSvc.h"
@@ -109,7 +109,6 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
 
     if (charge != 0.) {
       // Perigee, no alignment -> default geo context
-      ActsGeometryContext gctx = m_trackingGeometryTool->getNominalGeometryContext();
       Acts::GenericBoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
       output = m_extrapolationTool->propagationSteps(ctx, startParameters);
       if(output.first.size() == 0) {

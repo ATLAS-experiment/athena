@@ -4,7 +4,7 @@
 #include "ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 // ATHENA
 #include "AthenaKernel/IOVInfiniteRange.h"

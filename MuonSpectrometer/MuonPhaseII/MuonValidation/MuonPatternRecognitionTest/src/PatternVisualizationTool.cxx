@@ -252,7 +252,7 @@ namespace MuonValR4 {
             return;
         }
         auto truthHits = getMatchingSimHits(truthSeg);
-        const ActsGeometryContext* geoCtx{nullptr};
+        const ActsTrk::GeometryContext* geoCtx{nullptr};
         if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
             return;
         }
@@ -446,7 +446,7 @@ namespace MuonValR4 {
         }
         Parameters segPars{};
         {
-            const ActsGeometryContext* geoCtx{nullptr};
+            const ActsTrk::GeometryContext* geoCtx{nullptr};
             if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
                 return;
             }

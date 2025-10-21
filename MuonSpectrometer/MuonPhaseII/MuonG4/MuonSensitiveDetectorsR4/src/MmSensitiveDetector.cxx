@@ -34,7 +34,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   if (!processStep(aStep)) {
     return true;
   }
-  const ActsGeometryContext gctx{getGeoContext()};
+  const ActsTrk::GeometryContext gctx{getGeoContext()};
 
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
   const MuonGMR4::MmReadoutElement* readOutEle = getReadoutElement(gctx, touchHist);
@@ -54,7 +54,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   return true;
 }
 
-Identifier MmSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+Identifier MmSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                               const MuonGMR4::MmReadoutElement* readOutEle, 
                                               const Amg::Vector3D& hitAtGapPlane) const {
   /// that's the poor man's solution to find out in which gas gap we're
@@ -73,7 +73,7 @@ Identifier MmSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
                   <<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify()));
   return Identifier{};
 }
-const MuonGMR4::MmReadoutElement* MmSensitiveDetector::getReadoutElement(const ActsGeometryContext& gctx,
+const MuonGMR4::MmReadoutElement* MmSensitiveDetector::getReadoutElement(const ActsTrk::GeometryContext& gctx,
                                                                          const G4TouchableHistory* touchHist) const {
    /// The fourth volume is the envelope volume of the NSW station. It will tell us the sector and station eta
    const std::string& stationVolume = touchHist->GetVolume(4)->GetName();

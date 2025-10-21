@@ -42,7 +42,7 @@ namespace MuonR4{
           /** @brief Returns the transform from the local simHit frame -> chamber frame
            *  @param gctx: Geometry context to align the chambers within ATLAS
            *  @param chanId: Identifier of the channel for which the transform shall be fetched */
-          Amg::Transform3D toChamber(const ActsGeometryContext& gctx,
+          Amg::Transform3D toChamber(const ActsTrk::GeometryContext& gctx,
                                      const Identifier& chanId) const;
           
           /** @brief Tuple consisting out of pointer to the sim hit and the position & direction
@@ -124,7 +124,7 @@ namespace MuonR4{
           /** @brief List of sim hit containers from which the truth segments shall be retrieved */
           SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_readKeys{this, "SimHitKeys", {}};
           /** @brief Key to the geometry context. Needed to align the hits inside ATLAS */
-          SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+          SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
           /** @brief Key under which the segment Container will be recorded in StoreGate */
           SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "WriteKey", "MuonTruthSegments"};
           /** @brief Decoration key of the associated sim hit links */

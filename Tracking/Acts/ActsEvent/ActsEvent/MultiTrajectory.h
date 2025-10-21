@@ -14,7 +14,7 @@
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Utilities/HashedString.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "Acts/Surfaces/Surface.hpp"
 #include "CxxUtils/concepts.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
@@ -405,7 +405,7 @@ class MutableMultiTrajectory final
   std::vector<std::optional<Acts::SourceLink>> m_uncalibratedSourceLinks;
 
   std::vector<StoredSurface> m_surfaces;
-  ActsGeometryContext m_geoContext;
+  GeometryContext m_geoContext;
 
   xAOD::TrackStateContainer m_trackStatesIface;
 

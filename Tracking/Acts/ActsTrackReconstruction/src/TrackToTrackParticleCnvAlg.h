@@ -42,7 +42,7 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 
-class ActsGeometryContext;
+class GeometryContext;
 
 namespace ActsTrk
 {

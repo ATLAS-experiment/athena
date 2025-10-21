@@ -126,30 +126,30 @@ class MdtReadoutElement : public MuonReadoutElement {
         double moduleThickness() const;
 
         /// Returns the global position of the tube center. 
-        Amg::Vector3D globalTubePos(const ActsGeometryContext& ctx,
+        Amg::Vector3D globalTubePos(const ActsTrk::GeometryContext& ctx,
                                     const Identifier& measId) const;
 
-        Amg::Vector3D globalTubePos(const ActsGeometryContext& ctx,
+        Amg::Vector3D globalTubePos(const ActsTrk::GeometryContext& ctx,
                                     const IdentifierHash& hash) const;
 
         /// Returns the global position of the readout card
-        Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
+        Amg::Vector3D readOutPos(const ActsTrk::GeometryContext& ctx,
                                 const Identifier& measId) const;
 
-        Amg::Vector3D readOutPos(const ActsGeometryContext& ctx,
+        Amg::Vector3D readOutPos(const ActsTrk::GeometryContext& ctx,
                                 const IdentifierHash& measId) const;
 
         /// Returns the global position of the High Voltage connectors
-        Amg::Vector3D highVoltPos(const ActsGeometryContext& ctx,
+        Amg::Vector3D highVoltPos(const ActsTrk::GeometryContext& ctx,
                                 const Identifier& measId) const;
-        Amg::Vector3D highVoltPos(const ActsGeometryContext& ctx,
+        Amg::Vector3D highVoltPos(const ActsTrk::GeometryContext& ctx,
                                 const IdentifierHash& measId) const;
         /// Returns the distance along the wire from the readout card
         /// The distance is given as the delta z of the readout card in the local tube frame
-        double distanceToReadout(const ActsGeometryContext& ctx,
+        double distanceToReadout(const ActsTrk::GeometryContext& ctx,
                                 const Identifier& measId,
                                 const Amg::Vector3D& globPoint) const;
-        double distanceToReadout(const ActsGeometryContext& ctx,
+        double distanceToReadout(const ActsTrk::GeometryContext& ctx,
                                 const IdentifierHash& measHash,
                                 const Amg::Vector3D& globPoint) const;
 

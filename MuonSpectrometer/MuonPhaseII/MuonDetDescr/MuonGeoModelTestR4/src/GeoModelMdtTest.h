@@ -11,7 +11,7 @@
 
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -37,7 +37,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+      SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
       
       SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "CablingKey", "MuonMDT_CablingMap", 
                                                             "Key of output MDT cabling map"};
@@ -54,7 +54,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
       Gaudi::Property<std::string> m_swapRead{this, "ReadoutSideXML", ""};
 
       StatusCode dumpToTree(const EventContext& ctx,
-                            const ActsGeometryContext& gctx, const MdtReadoutElement* readoutEle);
+                            const ActsTrk::GeometryContext& gctx, const MdtReadoutElement* readoutEle);
      
       MuonVal::MuonTesterTree m_tree{"MdtGeoModelTree", "GEOMODELTESTER"};
 

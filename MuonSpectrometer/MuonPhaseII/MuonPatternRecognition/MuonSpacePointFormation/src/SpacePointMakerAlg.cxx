@@ -36,7 +36,7 @@ namespace {
      *  @param sectorTrans: Reference to the transform from global -> sector frame
      *  @param meas: Reference to the measurement of interest */
     template<class MeasType>
-        Amg::Transform3D toChamberTransform(const ActsGeometryContext& gctx, 
+        Amg::Transform3D toChamberTransform(const ActsTrk::GeometryContext& gctx, 
                                             const Amg::Transform3D& sectorTrans,
                                             const MeasType& meas) {
         const MuonGMR4::MuonReadoutElement* reEle{meas.readoutElement()};
@@ -191,7 +191,7 @@ template <>
        return false;
     }
 template <typename PrdType>
-    void SpacePointMakerAlg::fillUncombinedSpacePoints(const ActsGeometryContext& gctx,
+    void SpacePointMakerAlg::fillUncombinedSpacePoints(const ActsTrk::GeometryContext& gctx,
                                                        const Amg::Transform3D& sectorTrans,
                                                        const std::vector<const PrdType*>& prdsToFill,
                                                        std::vector<SpacePoint>& outColl) const {
@@ -266,7 +266,7 @@ template <class ContType>
         ATH_MSG_DEBUG("nothing to do"); 
         return StatusCode::SUCCESS;
     }
-    const ActsGeometryContext* gctx{nullptr};
+    const ActsTrk::GeometryContext* gctx{nullptr};
     ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
     
     using PrdType = typename ContType::const_value_type;

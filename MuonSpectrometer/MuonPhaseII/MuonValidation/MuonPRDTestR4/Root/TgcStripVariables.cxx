@@ -18,7 +18,7 @@ namespace MuonValR4{
         return declare_dependency(m_key);
     }
     bool TgcStripVariables::fill(const EventContext& ctx){
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
@@ -64,7 +64,7 @@ namespace MuonValR4{
         }
         return insert_itr.first->second; 
     }
-    void TgcStripVariables::dump(const ActsGeometryContext& gctx,
+    void TgcStripVariables::dump(const ActsTrk::GeometryContext& gctx,
                                  const xAOD::TgcStrip& strip) {
         const MuonGMR4::TgcReadoutElement* re = strip.readoutElement();
         const Identifier id{strip.identify()};

@@ -18,7 +18,7 @@ namespace MuonValR4{
         return declare_dependency(m_key);
     }
     bool RpcMeasurementVariables::fill(const EventContext& ctx){
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
@@ -64,7 +64,7 @@ namespace MuonValR4{
         }
         return insert_itr.first->second; 
     }
-    void RpcMeasurementVariables::dump(const ActsGeometryContext& gctx,
+    void RpcMeasurementVariables::dump(const ActsTrk::GeometryContext& gctx,
                                        const xAOD::RpcMeasurement& strip) {
         const MuonGMR4::RpcReadoutElement* re = strip.readoutElement();
         const Identifier id{re->measurementId(strip.measurementHash())};

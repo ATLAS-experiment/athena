@@ -41,10 +41,10 @@ namespace MuonR4 {
             using Parameters = SegmentFit::Parameters;
 
             std::vector<std::unique_ptr<Segment>> fitSegmentSeed(const EventContext& ctx,
-                                                                 const ActsGeometryContext& gctx,
+                                                                 const ActsTrk::GeometryContext& gctx,
                                                                  const SegmentSeed* seed) const;             
            
-            void resolveAmbiguities(const ActsGeometryContext& gctx,
+            void resolveAmbiguities(const ActsTrk::GeometryContext& gctx,
                                     std::vector<std::unique_ptr<Segment>>& segmentCandidates) const;
 
             /// ReadHandle of the seeds
@@ -52,7 +52,7 @@ namespace MuonR4 {
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "OutSegmentContainer", "R4MuonSegments"};
             // access to the ACTS geometry context 
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// IdHelperSvc
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /// Handle to the space point calibrator

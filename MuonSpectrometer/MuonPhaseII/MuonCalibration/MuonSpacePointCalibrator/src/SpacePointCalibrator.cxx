@@ -97,7 +97,7 @@ namespace MuonR4{
                                                        const Amg::Vector3D& dirInChamb,
                                                        const double timeOffset) const {
         
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             return nullptr;
         }
@@ -323,7 +323,7 @@ namespace MuonR4{
 
 
     std::pair<double, double> SpacePointCalibrator::calibrateMM(const EventContext& ctx, 
-                                                                const ActsGeometryContext& gctx,
+                                                                const ActsTrk::GeometryContext& gctx,
                                                                 const xAOD::MMCluster& cluster, 
                                                                 const Amg::Vector3D& globalPos, 
                                                                 const Amg::Vector3D& globalDir) const {
@@ -351,7 +351,7 @@ namespace MuonR4{
     }
 
     std::pair<double, double> SpacePointCalibrator::calibratesTGC(const EventContext& /*ctx*/, 
-                                                                  const ActsGeometryContext& gctx, 
+                                                                  const ActsTrk::GeometryContext& gctx, 
                                                                   const xAOD::sTgcStripCluster& cluster,
                                                                   std::optional<double> posAlongTheStrip, 
                                                                   const Amg::Vector3D& globalPos, 
@@ -368,7 +368,7 @@ namespace MuonR4{
         return std::make_pair(cluster.localPosition<1>()[0], cluster.localCovariance<1>()(0,0));
     }
     void SpacePointCalibrator::calibrateCombinedPrd(const EventContext& /*ctx*/, 
-                                                    const ActsGeometryContext& /*gctx*/,
+                                                    const ActsTrk::GeometryContext& /*gctx*/,
                                                     const xAOD::CombinedMuonStrip* combinedPrd,
                                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const {
         const auto sl = ActsTrk::detail::xAODUncalibMeasCalibrator::pack(combinedPrd);
@@ -426,7 +426,7 @@ namespace MuonR4{
         
 
         const auto* muonMeas = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(link);
-        const ActsGeometryContext* gctx = geoctx.get<const ActsGeometryContext*>();
+        const ActsTrk::GeometryContext* gctx = geoctx.get<const ActsTrk::GeometryContext*>();
         const EventContext* ctx = cctx.get<const EventContext*>();
         ATH_MSG_VERBOSE("Calibrate measurement "<<m_idHelperSvc->toString(xAOD::identify(muonMeas))
                      <<" @ surface "<<trackState.referenceSurface().geometryId());

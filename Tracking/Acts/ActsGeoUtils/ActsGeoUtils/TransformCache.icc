@@ -31,7 +31,7 @@ namespace ActsTrk {
 #ifndef SIMULATIONBASE
     ATH_FLATTEN
     inline const Amg::Transform3D& TransformCache::transform(const Acts::GeometryContext& anygctx) const {
-        const ActsGeometryContext* gctx = anygctx.get<const ActsGeometryContext*>();    
+        const GeometryContext* gctx = anygctx.get<const GeometryContext*>();    
         // unpack the alignment store from the context
         return getTransform(gctx->getStore(m_type).get());
 

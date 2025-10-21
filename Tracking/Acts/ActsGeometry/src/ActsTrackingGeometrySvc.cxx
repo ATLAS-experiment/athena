@@ -51,7 +51,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsLayerBuilder.h"
 #include "ActsGeometry/ActsStrawLayerBuilder.h"
 #include "ActsGeometry/ActsHGTDLayerBuilder.h"
@@ -1135,7 +1135,7 @@ unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore 
     ATH_MSG_DEBUG("Populated with " << nElements << " elements");
     return nElements;
 }
-const ActsGeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
+const GeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
 
 Acts::CylinderVolumeBuilder::Config
 ActsTrackingGeometrySvc::makeBeamPipeConfig(

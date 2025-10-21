@@ -9,7 +9,7 @@
 #include "AthenaBaseComps/AthService.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IActsTrackingVolumeBuilder.h"
 #include "ActsGeometryInterfaces/IBlueprintNodeBuilder.h"
 #include "ActsGeometry/ActsLayerBuilder.h"
@@ -52,7 +52,7 @@ class BlueprintNode;
 
 }
 
-class ActsTrackingGeometrySvc : public extends<AthService, IActsTrackingGeometrySvc> {
+class ActsTrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
 public:
 
   StatusCode initialize() override;
@@ -64,7 +64,7 @@ public:
 
   unsigned int populateAlignmentStore(ActsTrk::DetectorAlignStore& store) const override;
 
-  const ActsGeometryContext& getNominalContext() const override;
+  const ActsTrk::GeometryContext& getNominalContext() const override;
 
 private:
   ActsLayerBuilder::Config
@@ -101,7 +101,7 @@ private:
   const TRT_ID *m_TRT_idHelper{nullptr};
   const HGTD_ID *m_HGTD_idHelper{nullptr};
   
-  ActsGeometryContext m_nominalContext{};
+  ActsTrk::GeometryContext m_nominalContext{};
   
   Gaudi::Property<bool> m_useMaterialMap{this, "UseMaterialMap", false, ""};
   Gaudi::Property<bool> m_objDebugOutput{this, "ObjDebugOutput", false, ""};

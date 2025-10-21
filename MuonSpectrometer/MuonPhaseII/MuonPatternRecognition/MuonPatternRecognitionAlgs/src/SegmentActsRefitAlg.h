@@ -40,7 +40,7 @@ namespace MuonR4{
              *  @param gctx: Geometry context to fetch the alignment of the segment
              *  @param segment: Reference to the segment to smear
              *  @param engine: Random engine to pass through the random number sequence */
-            std::tuple<Amg::Vector3D, Amg::Vector3D> smearSegment(const ActsGeometryContext& gctx,
+            std::tuple<Amg::Vector3D, Amg::Vector3D> smearSegment(const ActsTrk::GeometryContext& gctx,
                                                                   const MuonR4::Segment& segment,
                                                                   CLHEP::HepRandomEngine* engine) const;
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container */

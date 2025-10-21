@@ -4,7 +4,7 @@
 #ifndef ACTSGEOMETRY_ALIGNSTOREPROVIDERALG_H
 #define ACTSGEOMETRY_ALIGNSTOREPROVIDERALG_H
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -14,7 +14,7 @@
  *  The AlignStoreProviderAlg loads the rigid alignment corrections and pipes them through the 
  *  readout geometry to cache the final transformations of the sensor surfaces associated to one
  *  particular detector technology (Pixel, Sct, etc.). The transformations are cached in the 
- *  DetectorAlignmentStore which is later propagated to the ActsGeometryContext.
+ *  DetectorAlignmentStore which is later propagated to the GeometryContext.
  * 
  */
 namespace ActsTrk{
@@ -35,7 +35,7 @@ namespace ActsTrk{
       /// Key to the alignment transformations written by the alg
       SG::WriteHandleKey<DetectorAlignStore> m_outputKey{this, "EventAlignStore", ""};
       /// ServiceHandle to the ActsTrackingGeometry
-      ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeoSvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+      ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeoSvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
       /// Flag determining the subdetector. Needs to be static castable to DetectorType
       Gaudi::Property<int> m_detType{this, "DetectorType", static_cast<int>(DetectorType::UnDefined)};
       /// Flag toggling whether the full GeoAlignmentStore shall be written to store gate or whether the
