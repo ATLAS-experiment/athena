@@ -373,7 +373,6 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('layerStudy',False)
     cf.addFlag('layerMapFile','')
     cf.addFlag('useLayerRadiiFile',False)
-    cf.addFlag('usePhiShift',False)
     cf.addFlag('noCuts',False)
 
     cf.addFlag('filterInBin', False)

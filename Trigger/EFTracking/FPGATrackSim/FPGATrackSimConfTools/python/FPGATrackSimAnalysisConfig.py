@@ -274,11 +274,13 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
         if flags.Trigger.FPGATrackSim.oldRegionDefs:
             BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
         else:
+            print("Loading Layer Radii from ", PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+                f"regioneta{FPGATrackSimDataPrepConfig.getEtaSideBits(flags)}_lyrradii.json")
             # now assumed to be in the map directory with name = basename for region + _lyrmap.json
             if flags.Trigger.FPGATrackSim.GenScan.useLayerRadiiFile:
                 BinnnedHits.layerRadiiFile =os.path.join(
                 PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
-                f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrradii.json")
+                f"regioneta{FPGATrackSimDataPrepConfig.getEtaSideBits(flags)}_lyrradii.json")
             else:   
                 BinnnedHits.layerMapFile =os.path.join(
                 PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
@@ -334,7 +336,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
 
     # make the monitoring class
     Monitor = CompFactory.FPGATrackSimGenScanMonitoring(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanMonitoring"))
-    Monitor.dir = "/GENSCAN/"
+    Monitor.dir = "/GENSCAN/"+FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanMonitoring")+"/"
     Monitor.THistSvc = CompFactory.THistSvc()
     Monitor.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     Monitor.phiScale = 10.0

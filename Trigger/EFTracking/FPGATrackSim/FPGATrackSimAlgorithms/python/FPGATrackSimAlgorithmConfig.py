@@ -352,16 +352,22 @@ def FPGATrackSimSecondStageAlgMonitoringCfg(flags):
     low=-0.5
     high=99.5
 
-    phis=getPhiRange(flags)
-    etas=getEtaRange(flags)
-    phimin=phis[0]
-    phimax=phis[1]
-    etamin=etas[0]
-    etamax=etas[1]
-
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray    
+    flagsLS = flags.clone()
+    phiranges=[]
+    etaranges=[]
+    for region in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList):
+        flagsLS.Trigger.FPGATrackSim.region = region
+        phiranges.append(getPhiRange(flags))
+        etaranges.append(getEtaRange(flags))
+    phimin = min([v[0] for v in phiranges])
+    phimax = max([v[1] for v in phiranges])
+    etamin = min([v[0] for v in etaranges])
+    etamax = max([v[1] for v in etaranges])
+    
     phimin = phimin-flags.Trigger.FPGATrackSim.phiShift
     phimax = phimax-flags.Trigger.FPGATrackSim.phiShift    
-
+    
     monTool.defineHistogram('nHits_2nd', path='EXPERT', type='TH1I', title='nHits_2nd', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('nHits_2nd_unmapped', path='EXPERT', type='TH1I', title='nHits_2nd_unmapped', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('nroads_2nd', path='EXPERT', type='TH1I', title='nroads_2nd', xbins=nbin, xmin=low, xmax=high)
