@@ -7,6 +7,7 @@
 
 // Trigger includes
 #include "xAODTrigger/L1TopoSimResults.h"
+#include "xAODTrigger/TrigCompositeAuxContainer.h"
 #include "TrigT1Result/CTP_Decoder.h"
 #include "L1TopoRDO/Helpers.h"
 #include "L1TopoRDO/L1TopoROD.h"
