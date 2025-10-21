@@ -440,7 +440,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
                 road_hits.push_back(*layerH);
             }
         }
-        FPGAHitsInRoads_1st->push_back(road_hits);
+        FPGAHitsInRoads_1st->push_back(std::move(road_hits));
         FPGARoads_1st->push_back(*road);
     }
 
@@ -515,7 +515,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
         } else {
             ATH_MSG_DEBUG("No hit filtering requested; using all hits for LRT.");
-            remainingHits = phits_1st;
+            remainingHits = std::move(phits_1st);
         }
 
         // Get LRT roads with remaining hits
