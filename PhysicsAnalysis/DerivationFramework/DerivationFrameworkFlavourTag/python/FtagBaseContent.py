@@ -13,6 +13,8 @@ from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
 )
 from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
+from DerivationFrameworkFlavourTag.FlowEnergyDecorator import FlowEnergyDecorator
+
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_SmartCollections = [
     "Electrons",
@@ -213,3 +215,10 @@ def addCommonAugmentation(flags, cfg, helper, target = "AntiKt4EMPFlowJets"):
 
     helper.ExtraVariables += ['.'.join([target] + truth_labels)]
 
+    # add flow energy decorator
+    cfg.merge(
+        FlowEnergyDecorator(
+        )
+    )
+    
+ 
