@@ -287,7 +287,7 @@ void FPGATrackSimConstGenAlgo::generate_constants()
         // Fill the constant tree and good matrix tree
         fillConstTree(modules, acc, geo);
         writer.fill(modules, acc);
-        m_geo_consts.push_back(geo);
+        m_geo_consts.push_back(std::move(geo));
 
         // If needed, we generate the same as above but dropping/ignoring each potential hit
         if (m_dumpMissingHitsConstants) createMissingHitsConstants(acc_norm, entry);
@@ -323,11 +323,11 @@ void FPGATrackSimConstGenAlgo::createMissingHitsConstants(FPGATrackSimMatrixAccu
         {
             // push this back to keep the order correct (ie same numbering as nominal constants)
             geo_constants emptyGeo(m_nCoords);
-            m_geo_consts_with_missinghit[ip].push_back(emptyGeo);
+            m_geo_consts_with_missinghit[ip].push_back(std::move(emptyGeo));
         }
         else
         {
-            m_geo_consts_with_missinghit[ip].push_back(geo);
+            m_geo_consts_with_missinghit[ip].push_back(std::move(geo));
         }
     }
 }
