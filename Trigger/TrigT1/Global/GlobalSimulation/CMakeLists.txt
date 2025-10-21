@@ -9,8 +9,8 @@ find_package( GTest )
 find_package( APTypes )
 
 atlas_add_component (GlobalSimulation
-   src/*.h src/*.cxx src/L1TopoAlgs/*.h src/L1TopoAlgs/*.cxx
-   src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx
+   src/*.h src/*.cxx src/L1TopoAlgs/*.h 
+   src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx src/GlobalAlgs/Utilities/*.cxx
    src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp 
    src/GlobalAlgs/Hypothesis/UCL/*.h src/GlobalAlgs/Hypothesis/UCL/*.cxx 
    src/GlobalAlgs/FirstChain/*.h src/GlobalAlgs/FirstChain/*.cxx 
@@ -59,11 +59,5 @@ atlas_add_test( testEfex
    PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT noerror.sh )
 
-   
-
-atlas_add_test( test_eEmSortSelectCount
-   SCRIPT python/run_hypo_container_ctest.py --evtMax 2
-   PRIVATE_WORKING_DIRECTORY
-   POST_EXEC_SCRIPT noerror.sh )
 
 

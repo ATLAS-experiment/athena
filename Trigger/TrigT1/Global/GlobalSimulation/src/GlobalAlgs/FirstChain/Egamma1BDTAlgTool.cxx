@@ -131,12 +131,5 @@ namespace GlobalSim {
     return ss.str();
   }
 
-  
-  
-  StatusCode Egamma1BDTAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
-					  const EventContext& ctx) const {
-    CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
-    return StatusCode::SUCCESS;
-  }
 }
 

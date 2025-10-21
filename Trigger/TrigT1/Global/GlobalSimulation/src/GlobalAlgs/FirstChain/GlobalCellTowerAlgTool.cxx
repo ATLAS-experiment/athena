@@ -76,13 +76,6 @@ namespace GlobalSim {
     return StatusCode::SUCCESS;
   }
 
-    StatusCode
-    GlobalCellTowerAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
-				      const EventContext& ctx) const {
-      CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
-    return StatusCode::SUCCESS;
-  }
-  
   // Overrides toString() function from base class, unused here
   std::string GlobalCellTowerAlgTool::toString() const {
       return {};

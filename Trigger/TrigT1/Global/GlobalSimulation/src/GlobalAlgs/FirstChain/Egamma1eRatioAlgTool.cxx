@@ -203,12 +203,6 @@ namespace GlobalSim {
     return result;
   }
 
-   StatusCode
-   Egamma1eRatioAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
-				     const EventContext& ctx) const {
-     CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
-    return StatusCode::SUCCESS;
-  }
   std::string Egamma1eRatioAlgTool::toString() const {
 
     std::stringstream ss;

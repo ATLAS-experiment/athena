@@ -48,7 +48,7 @@ namespace GlobalSim {
     ATH_MSG_DEBUG("Executing ...");
 
 
-    using TipWord = std::bitset<IGlobalSimAlgTool::s_nbits_TIP>;
+    using TipWord = std::bitset<ITIPwriterAlgTool::s_nbits_TIP>;
 
     for (const auto& tool : m_algTools) {
       ATH_MSG_DEBUG("Running Algtool " << tool.name());
