@@ -49,6 +49,12 @@ def getOption(runArgs, name, substep, first, output):
     else:
         msg.warning('No BS filename defined, athenaHLT will not save the output')
 
+    # Added support for multithread option of trfArgs
+    from PyJobTransforms.trfMTTools import detectAthenaMTThreads
+    athenaMT, athenaConcurrentEvents = detectAthenaMTThreads(runArgs, name, False)
+    option['threads'] = athenaMT
+    option['concurrent-events'] = athenaConcurrentEvents
+
     # TODO (ATR-11854) l1psk, hltpsk, smk should be compared to triggerConfig
     # example below based on old comparison but needs work to retrieve keys and do comparisons of all three keys
     # if 'triggerConfig' in runArgs:
