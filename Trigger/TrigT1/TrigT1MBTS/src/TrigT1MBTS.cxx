@@ -1,12 +1,13 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 #include "TrigT1MBTS.h"
+#include "TileIdentifier/TileTBID.h"
 #include "TrigT1Interfaces/MbtsCTP.h"
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
 #include "TrigConfData/L1Menu.h"
-#include "CxxUtils/starts_with.h"
 
+#include "TileEvent/TileContainer.h"
 
 
 LVL1::TrigT1MBTS::TrigT1MBTS(const std::string& name, ISvcLocator* pSvcLocator)
@@ -56,16 +57,16 @@ LVL1::TrigT1MBTS::initialize()
       if(thr->name() == "MBTS_A") {
          m_cablestart_a = startbit;
          if(m_ThrVecSize12) {
-            m_thresholds_short_a = hwThrValues;
+            m_thresholds_short_a = std::move(hwThrValues);
          } else {
-            m_thresholds_a = hwThrValues;
+            m_thresholds_a = std::move(hwThrValues);
          }
       } else {
          m_cablestart_c = startbit;
          if(m_ThrVecSize12) {
-            m_thresholds_short_c = hwThrValues;
+            m_thresholds_short_c = std::move(hwThrValues);
          } else {
-            m_thresholds_c = hwThrValues;
+            m_thresholds_c = std::move(hwThrValues);
          }
       }
    }
@@ -89,7 +90,7 @@ LVL1::TrigT1MBTS::initialize()
             m_thresholds_c[module] = hwValue;
             m_cablestarts_c[module] = startbit;
          }
-      } else if(CxxUtils::starts_with (thrname, "MBTS_A") && thrname.size()>6) {
+      } else if(thrname.starts_with("MBTS_A") && thrname.size()>6) {
          // Get the discriminator threshold settings (single inputs) for the A side.
          // figure out module number from threshold name
          if(module >= m_thresholds_a.size()) {
