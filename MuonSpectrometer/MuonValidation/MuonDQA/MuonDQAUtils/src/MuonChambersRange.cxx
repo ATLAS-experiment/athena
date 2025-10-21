@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDQAUtils/MuonChambersRange.h"
+
 
 bool selectChambersRange(const std::string& f_hardware_name, const std::string& f_chamberName, 
 			 int f_stationEta, int f_StationEta, 
