@@ -21,7 +21,7 @@
 #include <bitset>
 
 namespace GlobalSim::IOBitwise {
-  /*! @copydoc IeEmTOB 
+  /*! @copydoc IeEmNbhoodTOB 
   *
   * Additionally holds an LArStripNeighborhood alongside the eEmTOB information.
   */
@@ -51,11 +51,14 @@ namespace GlobalSim::IOBitwise {
      */
     eEmNbhoodTOB(const GlobalSim::IOBitwise::IeEmTOB& IeEmTOB, const GlobalSim::LArStripNeighborhood& nbhood);
 
-    //! @copydoc IeEmTOB::~IeEmTOB()   
+    //! @copydoc IeEmNbhoodTOB::~IeEmNbhoodTOB()   
     virtual ~eEmNbhoodTOB(){};
 
-    /** @brief Returns the LArStripNeighborhood */ 
+    //! @copydoc IeEmNbhoodTOB::Neighbourhood()
     virtual const LArStripNeighborhood& Neighbourhood() const;
+
+    //! @copydoc IeEmNbhoodTOB::to_string()  
+    virtual std::string to_string() const override;
     
   private:
      /// Property: LArStripNeighborhood associated with this eEmTOB 
