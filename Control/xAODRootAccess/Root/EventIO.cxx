@@ -27,14 +27,21 @@ namespace xAOD {
 ///
 StatusCode Event::copy(const std::string& pattern) {
 
+  // Tell the user what's happening.
+  ATH_MSG_DEBUG("Copying objects matching pattern \"" << pattern
+                                                      << "\" to the output");
+
   // Collect a list of keys to copy.
-  std::vector<std::string> keys;
+  std::set<std::string> keys;
 
   // The regular expression to use.
   std::regex re{pattern};
 
   // Loop over the known input containers.
-  for (auto& [key, efe] : m_inputEventFormat) {
+  for (const auto& [key, efe] : m_inputEventFormat) {
+
+    // Tell the user what's happening.
+    ATH_MSG_VERBOSE("Considering input object with key \"" << key << "\"");
 
     // Check if the class in question matches the requested pattern.
     if (std::regex_match(key, re) == false) {
@@ -54,7 +61,28 @@ StatusCode Event::copy(const std::string& pattern) {
       continue;
     }
     // Add the key to the list.
-    keys.push_back(key);
+    ATH_MSG_VERBOSE("Matched key \"" << key << "\"");
+    keys.insert(key);
+  }
+
+  // Check if the pattern matches any of the name remapping rules.
+  for (const auto& [newname, onfile] : m_nameRemapping) {
+
+    // Tell the user what's happening.
+    ATH_MSG_VERBOSE("Considering remapped key \"" << newname << "\"");
+
+    // Check if the remapped name matches the pattern.
+    if (std::regex_match(newname, re) == false) {
+      continue;
+    }
+    // Ignore objects that don't exist on the input.
+    static const bool SILENT = true;
+    if (connectObject(onfile, SILENT).isSuccess() == false) {
+      continue;
+    }
+    // Add the remapped name to the list.
+    ATH_MSG_VERBOSE("Matched remapped key \"" << newname << "\"");
+    keys.insert(newname);
   }
 
   // Now loop over all of the found keys.
@@ -93,26 +121,18 @@ StatusCode Event::copy(const std::string& pattern) {
     }
 
     // Put the interface object into the output.
-    static const bool OVERWRITE = false;
+    static const bool OVERWRITE = true;
     static const bool IS_OWNER = true;
     ATH_CHECK(record(objMgr->object(), objMgr->holder()->getClass()->GetName(),
-                     keyToUse, OVERWRITE, METADATA, IS_OWNER));
+                     key, OVERWRITE, METADATA, IS_OWNER));
 
-    // If there is no auxiliary store for this object/container, we're done
-    // already.
-    Object_t::const_iterator vauxMgr = m_inputObjects.find(keyToUse + "Aux.");
-    if (vauxMgr == m_inputObjects.end()) {
-      continue;
+    // If there is also an auxiliary store for this object/container, copy that
+    // as well.
+    const std::string auxKey = keyToUse + "Aux.";
+    if (m_inputObjects.contains(auxKey)) {
+      ATH_CHECK(
+          recordAux(*(m_inputObjects.at(auxKey)), key + "Aux.", METADATA));
     }
-    // Put the auxiliary store object into the output.
-    Details::IObjectManager* auxMgr =
-        dynamic_cast<Details::IObjectManager*>(vauxMgr->second.get());
-    if (!auxMgr) {
-      ATH_MSG_FATAL("Internal logic error detected");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK(record(auxMgr->object(), auxMgr->holder()->getClass()->GetName(),
-                     keyToUse + "Aux.", OVERWRITE, METADATA, IS_OWNER));
   }
 
   // Return gracefully:
@@ -254,9 +274,10 @@ const void* Event::getInputObject(const std::string& key,
     return nullptr;
   }
 
-  // Make sure that the current entry is loaded for event data objects:
-  if (!metadata) {
-    if (mgr->getEntry()) {
+  // Make sure that the current entry is loaded for event data objects.
+  if (metadata == false) {
+    const Int_t readBytes = mgr->getEntry();
+    if (readBytes > 0) {
       // Connect the auxiliary store to objects needing it. This call also
       // takes care of updating the dynamic store of auxiliary containers,
       // when they are getting accessed directly.
@@ -265,8 +286,12 @@ const void* Event::getInputObject(const std::string& key,
         ATH_MSG_ERROR("Failed to set the auxiliary store for "
                       << mgr->holder()->getClass()->GetName() << "/"
                       << keyToUse);
-        return 0;
+        return nullptr;
       }
+    } else if (readBytes < 0) {
+      ATH_MSG_ERROR("Failed to load current entry for object "
+                    << mgr->holder()->getClass()->GetName() << "/" << keyToUse);
+      return nullptr;
     }
   }
 

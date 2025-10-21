@@ -85,6 +85,9 @@ class REvent : public Event {
   StatusCode record(void* obj, const std::string& typeName,
                     const std::string& key, bool overwrite, bool metadata,
                     bool isOwner) override;
+  /// Record an auxiliary store into a connected output file
+  StatusCode recordAux(TVirtualManager& mgr, const std::string& key,
+                       bool metadata) override;
 
   /// @}
 

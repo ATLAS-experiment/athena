@@ -7,6 +7,7 @@
 
 // Project include(s).
 #include "xAODCore/tools/IOStats.h"
+#include "xAODCore/tools/PerfStats.h"
 #include "xAODRootAccessInterfaces/TActiveEvent.h"
 #ifndef XAOD_STANDALONE
 #include "SGTools/CurrentEventStore.h"
@@ -26,7 +27,14 @@ namespace xAOD {
 Event::Event(std::string_view name)
     : TVirtualEvent(),
       Details::IProxyDictBase(),
-      asg::AsgMessaging(std::string{name}) {}
+      asg::AsgMessaging(std::string{name}) {
+
+  // Make sure that the I/O monitoring is active.
+  PerfStats::instance();
+
+  // Make this the active event.
+  setActive();
+}
 
 Event::~Event() {
 

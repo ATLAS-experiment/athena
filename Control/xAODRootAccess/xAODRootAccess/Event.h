@@ -126,7 +126,7 @@ class Event : public TVirtualEvent,
 
   /// Provide a list of all data object keys associated with a specific type
   template <typename T>
-  StatusCode keys(std::vector<std::string>& vkeys) const;
+  StatusCode keys(std::vector<std::string>& vkeys, bool metadata) const;
 
   /// Retrieve either an input or an output object from the event
   template <typename T>
@@ -281,6 +281,9 @@ class Event : public TVirtualEvent,
   virtual StatusCode record(void* obj, const std::string& typeName,
                             const std::string& key, bool overwrite,
                             bool metadata, bool isOwner) = 0;
+  /// Record an auxiliary store into a connected output file
+  virtual StatusCode recordAux(TVirtualManager& mgr, const std::string& key,
+                               bool metadata) = 0;
 
   /// @}
 
