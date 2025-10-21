@@ -1,20 +1,21 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Muon_MuonDQAFitFunc_H
 #define Muon_MuonDQAFitFunc_H
 
-#include <string>
-#include <sstream>
-#include <vector>
-#include <iostream>
-#include "TH1F.h"
-#include "TH2.h"
-#include "TProfile.h"
-#include "TProfile2D.h"
+
+
+
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include <string>
+
+class TH1F;
+class TH2F;
+class TProfile;
+class TProfile2D;
 
 static const InterfaceID IID_MuonDQAFitFunc("Muon::MuonDQAFitFunc",1,0);
 
@@ -31,7 +32,6 @@ namespace Muon {
  
     /** @brief constructor */
     MuonDQAFitFunc(const std::string& type, const std::string& name, const IInterface* parent);
-    //const std::string&,const std::string&,const IInterface*);
 
     /** @brief destructor */
     virtual ~MuonDQAFitFunc() {};
@@ -51,7 +51,6 @@ namespace Muon {
     void MinWindow2Set_from_TProf(TProfile2D* hProf, float windowMin, float windowMax) const;
     
     void FillMeanRmsProj(TH2F*, TH1F*, int) const;
-    //void FillRMSFromProfile(TProfile*, TProfile*) const;
     
     /**  Fills a histogram with the RMS values of a TProfile */
     void FillRMSFromProfile(TProfile*, TH1F*) const;

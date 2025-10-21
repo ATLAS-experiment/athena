@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////
@@ -12,14 +12,8 @@
 ///////////////////////////////////////////////////////////////////////////
 
 
-#include "TF1.h"
-#include "TH1F.h"
 #include <string>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <math.h>
-
+class TH1F;
 
 double	getContentInRange(TH1F *hist, double centralX, double halfWidth);
 
