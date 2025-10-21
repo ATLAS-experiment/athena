@@ -41,7 +41,7 @@ private:
    SG::WriteHandleKey<DataHeader> m_aliasName{this, "AliasName", ""};
 
    /// KeepCurrentInput, keep the original InputDataHeader: default = false
-   BooleanProperty m_keepInput { this, "KeepCurrentInput", false, };
+   Gaudi::Property<bool> m_keepInput { this, "KeepCurrentInput", false };
 };
 
 #endif

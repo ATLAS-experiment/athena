@@ -37,7 +37,7 @@ public:
 
 private:
    SG::WriteHandleKey<AthenaAttributeList> m_key { this, "Key", "RunEventTag" };
-   IntegerProperty m_magic;
+   Gaudi::Property<int> m_magic{this, "Magic", 0};
    /// Specification of the event tag metadata schema
    AthenaAttributeListSpecification* m_attribListSpec;
 };

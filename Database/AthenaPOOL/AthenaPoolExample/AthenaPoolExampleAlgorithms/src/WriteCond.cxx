@@ -19,10 +19,7 @@ using namespace AthPoolEx;
 //___________________________________________________________________________
 WriteCond::WriteCond(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
-{ 
-   declareProperty("ConditionName", m_conditionName = "PedestalWriteData");
-   declareProperty("Weight", m_weight = 0.0);
-   declareProperty("Offset", m_offset = 0.0);
+{
 }
 //___________________________________________________________________________
 WriteCond::~WriteCond() {
