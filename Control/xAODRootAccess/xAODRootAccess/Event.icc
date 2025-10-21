@@ -45,13 +45,13 @@ bool Event::transientContains(const std::string& key) const {
 /// type.
 ///
 /// @param vkeys will be filled with the list of keys (may be empty)
+/// @param metadata Whether to look for metadata or data objects
 /// @returns The usual @c StatusCode types
 ///
 template <typename T>
-StatusCode Event::keys(std::vector<std::string>& vkeys) const {
+StatusCode Event::keys(std::vector<std::string>& vkeys, bool metadata) const {
 
-  static const bool METADATA = false;
-  ATH_CHECK(getNames(SG::normalizedTypeinfoName(typeid(T)), vkeys, METADATA));
+  ATH_CHECK(getNames(SG::normalizedTypeinfoName(typeid(T)), vkeys, metadata));
   return StatusCode::SUCCESS;
 }
 
@@ -162,8 +162,8 @@ StatusCode Event::record(std::unique_ptr<T> obj, const std::string& key) {
   static const bool OVERWRITE = false;
   static const bool METADATA = false;
   static const bool ISOWNER = true;
-  ATH_CHECK(record(obj, SG::normalizedTypeinfoName(typeid(T)), key, OVERWRITE,
-                   METADATA, ISOWNER));
+  ATH_CHECK(record(obj.get(), SG::normalizedTypeinfoName(typeid(T)), key,
+                   OVERWRITE, METADATA, ISOWNER));
 
   // If the record was successful, let's release the object from the unique
   // pointer.
@@ -335,8 +335,8 @@ StatusCode Event::recordMeta(std::unique_ptr<T> obj, const std::string& key) {
   static const bool OVERWRITE = false;
   static const bool METADATA = true;
   static const bool ISOWNER = true;
-  ATH_CHECK(record(obj, SG::normalizedTypeinfoName(typeid(T)), key, OVERWRITE,
-                   METADATA, ISOWNER));
+  ATH_CHECK(record(obj.get(), SG::normalizedTypeinfoName(typeid(T)), key,
+                   OVERWRITE, METADATA, ISOWNER));
 
   // If the record was successful, let's release the object from the unique
   // pointer.

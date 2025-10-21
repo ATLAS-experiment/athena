@@ -22,7 +22,6 @@
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODCore/AuxInfoBase.h"
 #include "xAODCore/tools/IOStats.h"
-#include "xAODCore/tools/PerfStats.h"
 #include "xAODCore/tools/ReadStats.h"
 
 // ROOT include(s).
@@ -146,14 +145,7 @@ namespace xAOD::Experimental {
 static const char* const EVENT_NTUPLE_NAME = "EventData";
 static const char* const METADATA_NTUPLE_NAME = "MetaData";
 
-REvent::REvent() : Event("xAOD::Experimental::REvent") {
-
-  // Make sure that the I/O monitoring is active.
-  PerfStats::instance();
-
-  // Make this the active event.
-  setActive();
-}
+REvent::REvent() : Event("xAOD::Experimental::REvent") {}
 
 REvent::~REvent() {
 
@@ -918,6 +910,12 @@ StatusCode REvent::record(void*, const std::string&, const std::string&, bool,
   return StatusCode::FAILURE;
 }
 
+StatusCode REvent::recordAux(TVirtualManager&, const std::string&, bool) {
+
+  ATH_MSG_ERROR("xAOD::REvent::recordAux not yet implemented");
+  return StatusCode::FAILURE;
+}
+
 /// This function is used internally to initialise the reading of an input
 /// file. It prepares the "monitoring information" in memory that gets filled
 /// while the code is running, with information about xAOD I/O.
@@ -1036,9 +1034,7 @@ StatusCode REvent::setUpDynamicStore(RObjectManager& mgr,
   } else {
     // This is weird. What sort of auxiliary container is this? :-/
     ATH_MSG_WARNING("Couldn't find setName(...) function for container \""
-                    << fieldName
-                    << "\" "
-                       " (type: "
+                    << fieldName << "\"  (type: "
                     << mgr.holder()->getClass()->GetName() << ")");
   }
 
@@ -1071,14 +1067,18 @@ StatusCode REvent::setUpDynamicStore(RObjectManager& mgr,
   // This object is used to read data from the input, it needs to be
   // locked:
   store->lock();
-  static constexpr bool SHARED_OWNER = false;
-  m_inputObjects[fieldName + "Dynamic"] =
-      std::make_unique<RAuxManager>(store.get(), m_entry, SHARED_OWNER);
+
+  // Set it up to read from the input RNTuple.
   ATH_CHECK(store->readFrom(reader));
   // Tell the auxiliary store which entry to use. This is essential for
   // metadata objects, and non-important for event data objects, which will
   // get a possibly different entry loaded in setAuxStore(...).
   ATH_CHECK(store->getEntry(0));
+
+  // Set up a manager for it.
+  static constexpr bool SHARED_OWNER = false;
+  m_inputObjects[fieldName + "Dynamic"] =
+      std::make_unique<RAuxManager>(store.get(), m_entry, SHARED_OWNER);
 
   // Give this object to the store holder.
   storeHolder->setStore(store.release());
