@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Module holding the TPyStore Python class
 #
@@ -29,7 +29,7 @@ class TPyStore( ROOT.xAOD.TPyStore ):
     # type name of some C++ type, to rather write code like:
     #
     # <code>
-    #   if store.contains( "Electrons", ROOT.xAOD.ElectronContainer_v1 ):
+    #   if store.contains( "Electrons", ROOT.xAOD.ElectronContainer ):
     # </code>
     #
     # @param key  The string key of the object to check for
@@ -44,7 +44,7 @@ class TPyStore( ROOT.xAOD.TPyStore ):
             clname = type.__cpp_name__
             pass
         # Call the parent class's function:
-        return super( TPyStore, self ).contains( key, clname )
+        return super( TPyStore, self ).pyContains( key, clname )
 
     ## Convenient version of the base class's isConst function
     #
@@ -52,7 +52,7 @@ class TPyStore( ROOT.xAOD.TPyStore ):
     # type name of some C++ type, to rather write code like:
     #
     # <code>
-    #   if store.isConst( "Electrons", ROOT.xAOD.ElectronContainer_v1 ):
+    #   if store.isConst( "Electrons", ROOT.xAOD.ElectronContainer ):
     # </code>
     #
     # @param key  The string key of the object to check for
@@ -67,7 +67,7 @@ class TPyStore( ROOT.xAOD.TPyStore ):
             clname = type.__cpp_name__
             pass
         # Call the parent class's function:
-        return super( TPyStore, self ).isConst( key, clname )
+        return super( TPyStore, self ).pyIsConst( key, clname )
 
     ## Convenient version of the base class's record function
     #
@@ -75,7 +75,7 @@ class TPyStore( ROOT.xAOD.TPyStore ):
     # record objects into the transient store like:
     #
     # <code>
-    #   el = ROOT.xAOD.ElectronContainer_v1()
+    #   el = ROOT.xAOD.ElectronContainer()
     #   store.record( el, "MyElectrons" )
     # </code>
     #
@@ -92,4 +92,4 @@ class TPyStore( ROOT.xAOD.TPyStore ):
             pass
         # Call the parent class's function:
         print("Recording",key,clname)
-        return super( TPyStore, self ).record( obj, key, clname )
+        return super( TPyStore, self ).pyRecord( obj, key, clname )
