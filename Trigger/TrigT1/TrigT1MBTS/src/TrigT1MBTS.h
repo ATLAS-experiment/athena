@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1MBTS_H
@@ -7,13 +7,9 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-
-#include "TileEvent/TileContainer.h"
-#include "TileIdentifier/TileTBID.h"
-
 #include <string>
 #include <vector>
+class TileTBID;
 
 namespace LVL1 {
   /** @class TrigT1MBTS
