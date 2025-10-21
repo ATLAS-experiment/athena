@@ -100,6 +100,32 @@ class STGTPSegmentPacket {
   size_t Size(const int ver);
 };
 
+class STGTPStripPacket {
+ public:
+  explicit STGTPStripPacket(const std::vector<std::uint32_t>& payload, const int ver);
+
+  virtual ~STGTPStripPacket() = default;
+
+  [[nodiscard]] const std::array<std::uint32_t, STGTPStrips::num_strips>& Strips() const { return m_stripData; }
+  [[nodiscard]] std::uint32_t Strip(std::size_t strip) const;
+  [[nodiscard]] const std::array<std::uint32_t, STGTPStrips::num_offsets>& Offsets() const { return m_offsets; }
+  [[nodiscard]] std::uint32_t Offset(std::size_t offset) const;
+
+  [[nodiscard]] std::uint32_t PhiIdValue() const { return m_phiIdValue; }
+  [[nodiscard]] std::uint32_t PhiIdSign() const { return m_phiIdSign; }
+  [[nodiscard]] std::uint32_t BandId() const { return m_bandId; }
+  [[nodiscard]] std::uint32_t BCID() const { return m_BCID; }
+
+ private:
+  std::array<std::uint32_t, STGTPStrips::num_strips> m_stripData{};
+  std::array<std::uint32_t, STGTPStrips::num_offsets> m_offsets{};
+  std::uint32_t m_phiIdValue{};
+  std::uint32_t m_phiIdSign{};
+  std::uint32_t m_bandId{};
+  std::uint32_t m_BCID{};
+  size_t Size(const int ver);
+};
+
 }  // namespace Muon::nsw
 
 #endif  // MUONNSWCOMMONDECODE_STGTPPACKETS_H

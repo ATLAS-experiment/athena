@@ -270,6 +270,15 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_STGL1A_mm_BCID = {};
   std::vector<std::vector<uint32_t>> b_STGL1A_mm_header = {};
 
+  // Strip packet data
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPStrips::num_strips> b_STGL1A_strip_adc{};
+  std::array<std::vector<std::vector<uint32_t>>, Muon::nsw::STGTPStrips::num_offsets> b_STGL1A_strip_offsets{};
+  std::vector<std::vector<uint32_t>> b_STGL1A_strip_phiIdValue = {};
+  std::vector<std::vector<uint32_t>> b_STGL1A_strip_phiIdSign = {};
+  std::vector<std::vector<uint32_t>> b_STGL1A_strip_bandId = {};
+  std::vector<std::vector<uint32_t>> b_STGL1A_strip_BCID = {};
+  std::vector<std::vector<uint32_t>> b_STGL1A_strip_header = {};
+
   std::vector<uint32_t> b_STGL1A_trailer_CRC = {} ;
 };
 
@@ -513,6 +522,19 @@ int test_nsw_trigger_common_decoder_init_tree (TTree &outtree, outBranches &data
 
     outtree.Branch( "STGL1A_mm_BCID", &data.b_STGL1A_mm_BCID);
     outtree.Branch( "STGL1A_mm_header", &data.b_STGL1A_mm_header);
+
+    // Strip packet branches
+    for (std::size_t i=0; i < Muon::nsw::STGTPStrips::num_strips; ++i) {
+      outtree.Branch( Muon::nsw::format("STGL1A_strip_adc{}", i).c_str(), &data.b_STGL1A_strip_adc.at(i));
+    }
+    for (std::size_t i=0; i < Muon::nsw::STGTPStrips::num_offsets; ++i) {
+      outtree.Branch( Muon::nsw::format("STGL1A_strip_offset{}", i).c_str(), &data.b_STGL1A_strip_offsets.at(i));
+    }
+    outtree.Branch( "STGL1A_strip_phiIdValue", &data.b_STGL1A_strip_phiIdValue);
+    outtree.Branch( "STGL1A_strip_phiIdSign", &data.b_STGL1A_strip_phiIdSign);
+    outtree.Branch( "STGL1A_strip_bandId", &data.b_STGL1A_strip_bandId);
+    outtree.Branch( "STGL1A_strip_BCID", &data.b_STGL1A_strip_BCID);
+    outtree.Branch( "STGL1A_strip_header", &data.b_STGL1A_strip_header);
 
     outtree.Branch( "STGL1A_trailer_CRC", &data.b_STGL1A_trailer_CRC);
   }

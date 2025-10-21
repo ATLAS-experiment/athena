@@ -439,9 +439,20 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
 
       data.b_STGL1A_mm_BCID.resize(n_elinks);
       data.b_STGL1A_mm_header.resize(n_elinks);
+
+      // Resize strip data structures
+      resize_segment(data.b_STGL1A_strip_adc);
+      resize_segment(data.b_STGL1A_strip_offsets);
+      data.b_STGL1A_strip_phiIdValue.resize(n_elinks);
+      data.b_STGL1A_strip_phiIdSign.resize(n_elinks);
+      data.b_STGL1A_strip_bandId.resize(n_elinks);
+      data.b_STGL1A_strip_BCID.resize(n_elinks);
+      data.b_STGL1A_strip_header.resize(n_elinks);
+
       uint i_pad   = 0;
       uint i_mm    = 0;
       uint i_merge = 0;
+      uint i_strip_pkt = 0;
       uint i_elink = 0;
       for (const auto& baseLink : nsw_trigger_decoder.get_elinks()) {
         const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
@@ -540,6 +551,21 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
           data.b_STGL1A_mm_header[i_mm].push_back(i_elink);
         }  // end of mm packets
 
+        const auto& strip_packets = link->strip_packet();
+        for (auto packet : strip_packets) {
+          for (std::size_t i_strip = 0; i_strip < Muon::nsw::STGTPStrips::num_strips; ++i_strip) {
+            data.b_STGL1A_strip_adc.at(i_strip).at(i_strip_pkt).push_back(packet.Strip(i_strip));
+          }
+          for (std::size_t i_offset = 0; i_offset < Muon::nsw::STGTPStrips::num_offsets; ++i_offset) {
+            data.b_STGL1A_strip_offsets.at(i_offset).at(i_strip_pkt).push_back(packet.Offset(i_offset));
+          }
+          data.b_STGL1A_strip_phiIdValue[i_strip_pkt].push_back(packet.PhiIdValue());
+          data.b_STGL1A_strip_phiIdSign[i_strip_pkt].push_back(packet.PhiIdSign());
+          data.b_STGL1A_strip_bandId[i_strip_pkt].push_back(packet.BandId());
+          data.b_STGL1A_strip_BCID[i_strip_pkt].push_back(packet.BCID());
+          data.b_STGL1A_strip_header[i_strip_pkt].push_back(i_elink);
+        }  // end of strip packets
+
         //// indeces /////
         if (pad_packets.size() > 0)
         {
@@ -552,6 +578,10 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
         if (mm_packets.size() > 0)
         {
            i_mm++;
+        }
+        if (strip_packets.size() > 0)
+        {
+           i_strip_pkt++;
         }
         i_elink++;
       }  // end of stgc elink loop
