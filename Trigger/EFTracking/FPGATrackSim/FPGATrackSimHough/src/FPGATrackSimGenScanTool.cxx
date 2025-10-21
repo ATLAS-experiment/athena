@@ -100,10 +100,11 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   
   // Check inputs
   bool ok = false;
-  if (std::ssize(m_pairFilterDeltaPhiCut) != static_cast<int>(m_binnedhits->getNLayers()) - 1)
-    ATH_MSG_FATAL("initialize() pairFilterDeltaPhiCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaPhiCut.size());
-  else if (m_pairFilterDeltaEtaCut.size() != m_binnedhits->getNLayers() - 1)
-    ATH_MSG_FATAL("initialize() pairFilterDeltaEtaCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaEtaCut.size());
+  const int signedSize = static_cast<int>(m_binnedhits->getNLayers()) - 1;
+  if (std::ssize(m_pairFilterDeltaPhiCut) != signedSize)
+    ATH_MSG_FATAL("initialize() pairFilterDeltaPhiCut must have size nLayers-1=" << signedSize << " found " << m_pairFilterDeltaPhiCut.size());
+  else if (std::ssize(m_pairFilterDeltaEtaCut) != signedSize)
+    ATH_MSG_FATAL("initialize() pairFilterDeltaEtaCut must have size nLayers-1=" << signedSize << " found " << m_pairFilterDeltaEtaCut.size());
   else if (m_pairFilterPhiExtrapCut.size() != 2)
     ATH_MSG_FATAL("initialize() pairFilterPhiExtrapCut must have size 2 found " << m_pairFilterPhiExtrapCut.size());
   else if (m_pairFilterEtaExtrapCut.size() != 2)
@@ -306,7 +307,7 @@ void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
         HitPairSet newset(pairset);
         newset.addPair(nextpair);
         pairset_used[ps_idx]=true;
-        outputstate.pairsets.push_back(newset);
+        outputstate.pairsets.push_back(std::move(newset));
         // put inpair hits in list of hits not to pair again with the new hits
         for (auto vetohit : pairset.hitlist) {
           vetoList.insert(vetohit);
