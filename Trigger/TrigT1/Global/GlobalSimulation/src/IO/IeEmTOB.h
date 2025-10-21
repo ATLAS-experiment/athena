@@ -65,13 +65,14 @@ namespace GlobalSim::IOBitwise {
      * True if the seed supercell is a local maxima
      **/
     virtual const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit() const = 0;
-
+    /** @brief print out contents to string*/
     virtual std::string to_string() const = 0;
   };
 } //End of namespace
 
-CLASS_DEF( GlobalSim::IOBitwise::IeEmTOB , 246749139 , 1 )
+std::ostream& operator << (std::ostream&,
+			   const GlobalSim::IOBitwise::IeEmTOB&);
 
-std::ostream& operator<< (std::ostream&,  const GlobalSim::IOBitwise::IeEmTOB&);
+CLASS_DEF( GlobalSim::IOBitwise::IeEmTOB , 246749139 , 1 )
 
 #endif //GLOBALSIM_IEEMTOB_H

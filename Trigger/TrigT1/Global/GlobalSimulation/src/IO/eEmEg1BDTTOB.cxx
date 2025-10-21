@@ -19,10 +19,7 @@ namespace GlobalSim::IOBitwise {
   }
   
   std::string eEmEg1BDTTOB::to_string() const {
-    return eEmTOB::to_string()  +
-      " specifics of eEmEg1BDTTOB not yet implemented";
-
+    return IeEmEg1BDTTOB::to_string();
   }
-
   
 }

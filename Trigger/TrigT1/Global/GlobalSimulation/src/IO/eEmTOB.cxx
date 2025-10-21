@@ -47,14 +47,8 @@ namespace GlobalSim::IOBitwise {
     return m_SeedIsMax_bit;
   }
 
-    std::string eEmTOB::to_string() const {
-      std::stringstream ss;
-      
-      ss << '\n'
-	 << ICommonTOB::to_string()
-	 << " RHad " << RHad_bits() << " (" <<   RHad_bits().to_ulong() << ")"
-	 << " REta " << REta_bits() << " (" <<   REta_bits().to_ulong() << ")"
-	 << " WsTot " << WsTot_bits() << " (" <<   WsTot_bits().to_ulong() << ")";
-      return ss.str();
+  std::string eEmTOB::to_string() const {
+    return IeEmTOB::to_string();
   }
+
 }

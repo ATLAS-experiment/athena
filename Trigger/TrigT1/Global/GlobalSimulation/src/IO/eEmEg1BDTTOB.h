@@ -54,6 +54,7 @@ namespace GlobalSim::IOBitwise {
     //! @copydoc IeEmEg1BDTTOB::eGamma1BDT_bits()
     virtual std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits() const override;
 
+    //! @copydoc IeEmEg1BDTTOB::to_string() 
     virtual std::string to_string() const override;
   private:
     /// Property: Bitset to hold the eGamma1BDT bits

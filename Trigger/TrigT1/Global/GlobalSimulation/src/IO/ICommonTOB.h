@@ -58,7 +58,7 @@ namespace GlobalSim::IOBitwise{
     virtual std::bitset<s_eta_width> eta_bits() const = 0;
     /** @brief Returns the phi bits of this TOB*/
     virtual std::bitset<s_phi_width> phi_bits() const = 0;
-
+    /** @brief print out contents to string*/
     virtual std::string to_string() const = 0;
   };
 
