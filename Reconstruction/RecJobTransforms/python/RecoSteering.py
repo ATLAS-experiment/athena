@@ -296,14 +296,7 @@ def RecoSteering(flags):
         from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
         acc.merge(AlgoJiveXMLCfg(flags))
         log.info("---------- Configured JiveXML writing")
-    
-    # Set up PerfMon
-    acc.flagPerfmonDomain('PerfMon')
-    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        acc.merge(PerfMonMTSvcCfg(flags))
-        log.info("---------- Configured PerfMon")
-    
+
     return acc
 
 

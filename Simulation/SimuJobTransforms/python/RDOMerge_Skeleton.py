@@ -120,11 +120,6 @@ def fromRunArgs(runArgs):
     from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))
 
-    # Add PerfMon
-    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
-
     # Post-include
     processPostInclude(runArgs, flags, cfg)
 

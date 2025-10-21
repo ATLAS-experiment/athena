@@ -79,7 +79,7 @@ def fromRunArgs(runArgs):
     from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
     cfg.merge(PhysValMonitoringCfg(flags))
 
-    # PerfMonSD
+    # Enabling PerfMon always for physics validation jobs regardless of PerfMon flags (unlike most other skeletons)
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     cfg.merge(PerfMonMTSvcCfg(flags))
 

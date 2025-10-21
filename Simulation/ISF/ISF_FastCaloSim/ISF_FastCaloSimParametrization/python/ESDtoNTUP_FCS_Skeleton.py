@@ -109,11 +109,6 @@ def fromRunArgs(runArgs):
                                  doG4Hits=doG4HitsArg, doClusterInfo=doClusterInfoArg, outputGeoFileName=outputGeoFileName))
     # TODO! FCS config here
 
-    # Add PerfMon
-    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
-
     # Post-include
     log.info('**** Processing postInclude')
     processPostInclude(runArgs, flags, cfg)
