@@ -78,7 +78,7 @@ def parse_pixelClusSF_file_data(input_file_path):
         #Get map between wafer id and hash id
         #Values are in order: bec, ld, phi, eta, side, ID
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        json_path = os.path.join(script_dir, "data", "pixWafer_id_hash_map.json")
+        json_path = os.path.join(script_dir, "data", "pixel_wafer_id_hash_map.json")
         with open(json_path, "r") as map_file:
             hash_id_map = json.load(map_file)
 
