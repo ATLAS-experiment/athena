@@ -53,7 +53,7 @@ namespace pool    {
     /// Constructor with initializing arguments
     FileDescriptor(const FileID& fid, const std::string& pfn)
       : m_FID(fid), m_PFN(pfn), m_DBC(0)    {
-      if (!m_FID.empty() && Guid(m_FID).toString() != m_FID) {
+      if (!m_FID.empty() && !Guid::isGuid(m_FID)) {
         MD5 checkSum((unsigned char*)m_FID.c_str(), m_FID.size());
         uuid_t checkSumUuid;
         checkSum.raw_digest((unsigned char*)(&checkSumUuid));
