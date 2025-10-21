@@ -61,9 +61,20 @@ namespace CP {
 
   private:
     
-    StatusCode initSFsFromTrees();
     std::shared_ptr<std::vector<TrackSFRecord>> getRunTrackSFs(const int runNumber) const;
     std::shared_ptr<std::vector<ClusterSFRecord>> getRunClusterSFs(const int runNumber) const;
+
+    
+    // Helper function for shared logic
+    using FilteredType = ROOT::RDF::RInterface<ROOT::Detail::RDF::RJittedFilter, void>;
+
+    template<typename RecordType>
+    std::shared_ptr<std::vector<RecordType>> getRunSFs(
+        const int runNumber, 
+        std::map<int, std::shared_ptr<std::vector<RecordType>>>& cache, 
+        const std::string& fileName, 
+        const std::string& treeName, 
+        std::function<void(std::shared_ptr<std::vector<RecordType>>, FilteredType&)> extractRecords) const;
 
     /// Flags
     Gaudi::Property<bool> m_equalizeTrackMeasurements
@@ -71,18 +82,15 @@ namespace CP {
     Gaudi::Property<bool> m_equalizeClusterMeasurements
     { this, "EqualizeClusterMeasurements", false, "Equalize cluster dE/dx before truncated mean"};
 
-    // PathResolverFindCalibFile needs the logical filename in ASG calibration area.
+    /// PathResolverFindCalibFile needs the logical filename in ASG calibration area.
     Gaudi::Property<std::string> m_sfFileName { this, "SFFileName", "PixelDEdxCalib/pixeldEdxEqualizationSFs_v1p1.root"};
     /// Override version in ASG calibration area with a local file is not empty string.
     Gaudi::Property<std::string> m_sfLocalFileName {this, "SFLocalFileName", ""};
+    std::string m_filename;
+    
     /// Name of SF tree.
     Gaudi::Property<std::string> m_clusterSFTreeName { this, "ClusterSFTreeName", "cluster_SFs"};
     Gaudi::Property<std::string> m_trackSFTreeName { this, "TrackSFTreeName", "track_SFs"};
-
-    /// dE/dx equalization scale factor dataframe read from trees.
-    std::shared_ptr<ROOT::RDataFrame> m_df;
-    std::shared_ptr<TFile> m_file;  // Keep the file open
-    mutable std::shared_mutex m_dfMutex ATLAS_THREAD_SAFE;
 
     /// Map where key = run number, value is a filtered scale factor RDF (an RDF::RNode) with only the rows for that run number.
     /// So not filtering everytime in execute().

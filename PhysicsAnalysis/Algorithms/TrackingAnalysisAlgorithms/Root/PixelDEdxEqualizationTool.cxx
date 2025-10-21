@@ -8,6 +8,7 @@ namespace CP {
   
   PixelDEdxEqualizationTool::PixelDEdxEqualizationTool(const std::string& tool_name)
     : asg::AsgTool(tool_name),
+      m_filename(""),
       m_maxEta(2.5) {
   }
   
@@ -32,254 +33,149 @@ namespace CP {
       return StatusCode::FAILURE;
     }
 
-    /// Set up scale factors. Read SFs from trees stored in ASG calibration area by default.
+    /// Set up scale factors.
+    /// Read SFs from trees stored in ASG calibration area by default.
+    /// But let users provide a local file to override.
     if (m_sfLocalFileName != "") {
-        ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfLocalFileName << "\"!! FOR DEVELOPMENT USE ONLY !! ");
+      m_filename = m_sfLocalFileName;
+      ATH_MSG_WARNING("!! SETTING UP WITH USER SPECIFIED INPUT LOCATION \"" << m_sfLocalFileName << "\"!! FOR DEVELOPMENT USE ONLY !! ");
     }
     else {
-      ATH_MSG_INFO("Using default calibration file from ASG area:" << m_sfFileName);
+      m_filename = PathResolverFindCalibFile( m_sfFileName );
+      ATH_MSG_INFO("Using default calibration file from ASG area:" << m_filename);
     }
-    ATH_CHECK(initSFsFromTrees());
+
+    if (m_filename.empty()) {
+      ATH_MSG_ERROR("Could not find SF file: " << m_filename);
+      return StatusCode::FAILURE;
+    }
 
     return StatusCode::SUCCESS;
   }
-
-  //////////////////
-  //////////////////
-  //////////////////
-
-  /// Initialize SFs from ROOT TTrees from ASG calibration area.
-  /// Read into an RDataFrame.  Will filter to get SFs from closest run later.
-  StatusCode PixelDEdxEqualizationTool::initSFsFromTrees()  {
-    
-    ATH_MSG_INFO("Initializing dE/dx equalization scale factor trees");
-
-    /// Get path to SF trees.
-    std::string filename;
-    
-    if (!m_sfLocalFileName.empty()) { // override official version in ASG calibration area.
-      filename = m_sfLocalFileName;
-    }
-    else {
-      filename = PathResolverFindCalibFile( m_sfFileName );
-    }
-
-    if (filename.empty()) {
-      ATH_MSG_ERROR("Could not find file: " << filename);
-      return StatusCode::FAILURE;
-    }
-
-    ATH_MSG_INFO("Found scale factor tree file: " << filename);
-
-    /// Get file
-    m_file = std::make_shared<TFile>(filename.c_str(), "READ");
-    if (!m_file || m_file->IsZombie()) {
-      ATH_MSG_ERROR("Failed to open file: " << filename);
-      return StatusCode::FAILURE;
-    }
-
-    /// Get dataframe
-    /// Already checked in initialize that m_equalizeClusterMeasurements or m_equalizeTrackMeasurements is true, but not both.
-    if(m_equalizeClusterMeasurements) {
-      m_df = std::make_shared<ROOT::RDataFrame>(m_clusterSFTreeName.value().c_str(), m_file.get());
-    }
-    else if(m_equalizeTrackMeasurements) {
-      m_df = std::make_shared<ROOT::RDataFrame>(m_trackSFTreeName.value().c_str(), m_file.get());
-    }
-    else { // should not get here
-      ATH_MSG_ERROR("Called initSFsFromTrees() but did not request dE/dx equalization at cluster or track level.");
-      return StatusCode::FAILURE;
-    }
-
-    ATH_MSG_INFO("RDataFrame successfully initialized.");
-
-    return StatusCode::SUCCESS;
-  }
-
+  
   ////////////////////////////
   /// Get SF from this run ///
   ////////////////////////////
 
-  std::shared_ptr<std::vector<TrackSFRecord>> PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
-
-    // First look in the cache
+   // Template helper function for common logic
+  template<typename RecordType>
+  std::shared_ptr<std::vector<RecordType>> PixelDEdxEqualizationTool::getRunSFs(
+                                                                                const int runNumber, 
+                                                                                std::map<int, std::shared_ptr<std::vector<RecordType>>>& cache, 
+                                                                                const std::string& fileName, 
+                                                                                const std::string& treeName, 
+                                                                                std::function<void(std::shared_ptr<std::vector<RecordType>>,FilteredType&)> extractRecords) const {
+    
     // Use a shared lock for read-only access
     {
-      std::shared_lock readLock(m_cacheMutex);
-      auto it = m_cachedTrackSFData.find(runNumber);
-      if (it != m_cachedTrackSFData.end()) {
-        ATH_MSG_DEBUG("Track SF data for run " << runNumber << " already cached!");
-        return it->second;
-      }
+        std::shared_lock readLock(m_cacheMutex);
+        auto it = cache.find(runNumber);
+        if (it != cache.end()) {
+            ATH_MSG_DEBUG("SF data for run " << runNumber << " already cached!");
+            return it->second;
+        }
     } // release shared lock for reading cache.
-    
-    // SF data not found in the cache, so prepare to find it in the dataframe.
-    ATH_MSG_INFO("Track SF data for run " << runNumber << " not cached. Will filter and cache now."); // worst case, prints once per thread.
 
-    // Find closest run number in m_df
-    int closestRunNumber = -1;
+    // Not already cached, prepare to find it in the dataframe
+    ATH_MSG_INFO("SF data for run " << runNumber << " not cached. Will filter and cache now."); 
 
-    // Even though all threads should only be reading m_df, lock to be safe.
-    {
-      std::shared_lock readLock(m_dfMutex); // Allow multiple simultaneous reads
-      auto runNumbers = m_df->Take<int>("runNumber");
-      closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
-                                               [runNumber](int a, int b) {
-                                                 return std::abs(a - runNumber) < std::abs(b - runNumber);
-                                               });
-    } // release shared lock for reading SF RDF.
+    // Declare empty pointer to cache & return if any issues
+    auto emptyPtr = std::make_shared<std::vector<RecordType>>();
 
-    if(runNumber!=closestRunNumber) {
-      // If MC, make sure the closest run number is the actual run number.
-      if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
-         runNumber==410000 || runNumber==450000 || runNumber==470000 || runNumber==495000) { //MC23a/d/e/g
-        ATH_MSG_WARNING("Could not find track-level SFs for this MC sub-campaign!"); // worst case, prints once per thread.
-
-        // Cache and return an empty pointer.
-        // Use a unique lock since writing to cache
-        std::shared_ptr<std::vector<TrackSFRecord>> emptyPtr = std::make_shared<std::vector<TrackSFRecord>>();
+    // Open the SF tree file
+    TFile* file = TFile::Open(fileName.c_str(), "READ");
+    if (!file || file->IsZombie()) {
+        ATH_MSG_ERROR("Failed to open ROOT file.");
         {
-          std::unique_lock writeLock(m_cacheMutex);
-          m_cachedTrackSFData[runNumber] = emptyPtr;
-        } // release unique lock for writing to cache.
+            std::unique_lock writeLock(m_cacheMutex);
+            cache[runNumber] = emptyPtr;
+        }
         return emptyPtr;
-      }
-      else { // data
-        ATH_MSG_WARNING("Could not find track-level SFs for this exact run, so using closest run: " << closestRunNumber); // worst case, prints once per thread.
-      }
     }
 
+    ROOT::RDataFrame df(treeName.c_str(), file);
 
-    // Create vector of TrackSFRecord .
-    auto records = std::make_shared<std::vector<TrackSFRecord>>();
+    // Extract run numbers
+    auto runNumbers = df.Take<int>("runNumber");
 
-    // Filter SF RDF by closestRunNumber
-    // Out of an abundance of caution, will use a unique_lock
-    {
-      std::unique_lock dfWriteLock(m_dfMutex); // Lock for exclusive access when filtering
+    // Get closest run number
+    int closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
+                                             [runNumber](int a, int b) {
+                                                 return std::abs(a - runNumber) < std::abs(b - runNumber);
+                                             });
 
-      std::string expr = "runNumber == " + std::to_string(closestRunNumber);
-      auto filtered = m_df->Filter(expr);
+    // Handle closest run number logic (similar as before)
+    if(runNumber != closestRunNumber) {
+        if (runNumber == 284500 || runNumber == 300000 || runNumber == 310000 ||
+            runNumber == 410000 || runNumber == 450000 || runNumber == 470000 || 
+            runNumber == 495000) {
+            ATH_MSG_WARNING("Could not find SFs for this MC sub-campaign!"); 
+            {
+                std::unique_lock writeLock(m_cacheMutex);
+                cache[runNumber] = emptyPtr;
+            }
+            file->Close(); 
+            return emptyPtr;
+        } else {
+            ATH_MSG_WARNING("Using closest run: " << closestRunNumber);
+        }
+    }
+
+    // Filter the dataframe and extract records using the provided callback
+    std::string expr = "runNumber == " + std::to_string(closestRunNumber);
+    FilteredType filtered = df.Filter(expr);
     
-      // Trigger evaluation to get vectors for needed columns
-      auto etaLows = filtered.Take<double>("etaLow");
-      auto etaHighs = filtered.Take<double>("etaHigh");
-      auto sfYes = filtered.Take<double>("SF_IBLOFYes");
-      auto sfNo = filtered.Take<double>("SF_IBLOFNo");
-
-      // Fill vector of TrackSFRecord
-      records->reserve(etaLows->size());
-      for (size_t i = 0; i < etaLows->size(); ++i) {
-        records->emplace_back(TrackSFRecord{
-            etaLows->at(i),
-            etaHighs->at(i),
-            sfYes->at(i),
-            sfNo->at(i)
-          });
-      }
-    } // release unique lock for filtering SF RDF
-
-    // Now cache the results
-    // Use a unique lock since writing
-    {
-      std::unique_lock writeLock(m_cacheMutex);
-      auto [it, inserted] = m_cachedTrackSFData.emplace(runNumber, records);
-      if (!inserted) {
-        // Another thread beat us — reuse theirs
-        return it->second;
-      }
-    } // release unique write lock for updating the cache
+    // Initialize records
+    auto records = std::make_shared<std::vector<RecordType>>();
     
+    // Call the lambda to extract records
+    extractRecords(records, filtered);
+
+    // Cache the results
+    {
+        std::unique_lock writeLock(m_cacheMutex);
+        auto [it, inserted] = cache.emplace(runNumber, records); // Ensure records are accessible
+        if (!inserted) {
+            file->Close(); 
+            return it->second;
+        }
+    }
+
+    file->Close(); 
     return records;
   }
 
+  // Specific implementation for TrackSFs
+  std::shared_ptr<std::vector<TrackSFRecord>> PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
+    return getRunSFs<TrackSFRecord>(runNumber, m_cachedTrackSFData, m_filename, m_trackSFTreeName.value(), 
+                                    [](std::shared_ptr<std::vector<TrackSFRecord>> records, FilteredType& filtered) {
+            auto etaLows = filtered.Take<double>("etaLow");
+            auto etaHighs = filtered.Take<double>("etaHigh");
+            auto sfYes = filtered.Take<double>("SF_IBLOFYes");
+            auto sfNo = filtered.Take<double>("SF_IBLOFNo");
+            records->reserve(etaLows->size());
+            for (size_t i = 0; i < etaLows->size(); ++i) {
+                records->emplace_back(TrackSFRecord{etaLows->at(i), etaHighs->at(i), sfYes->at(i), sfNo->at(i)});
+            }
+            return records;
+        });
+  }
+
+  // Specific implementation for ClusterSFs
   std::shared_ptr<std::vector<ClusterSFRecord>> PixelDEdxEqualizationTool::getRunClusterSFs(const int runNumber) const {
-
-    // First look in the cache.
-    // Use a shared lock for read-only access
-    {
-      std::shared_lock readLock(m_cacheMutex);
-      auto it = m_cachedClusterSFData.find(runNumber);
-      if (it != m_cachedClusterSFData.end()) {
-        ATH_MSG_DEBUG("Cluster SF data for run " << runNumber << " already cached!");
-        return it->second;
-      }
-    } // release shared lock for reading cache.
-
-    // SF data not found in the cache, so prepare to find it in the dataframe.
-    ATH_MSG_INFO("SF data for run " << runNumber << " not cached. Will filter and cache now."); // worst case, prints once per thread.
-    
-    // Find closest run number in m_df
-    int closestRunNumber = -1;
-
-    // Even though all threads should only be reading m_df, lock to be safe.
-    {
-      std::shared_lock readLock(m_dfMutex); // Allow multiple simultaneous reads
-      auto runNumbers = m_df->Take<int>("runNumber");
-      closestRunNumber = *std::min_element(runNumbers.begin(), runNumbers.end(),
-                                           [runNumber](int a, int b) {
-                                             return std::abs(a - runNumber) < std::abs(b - runNumber);
-                                           });
-    } // release shared lock for reading SF RDF.
-
-    if(runNumber!=closestRunNumber) {
-      if(runNumber==284500 || runNumber==300000 || runNumber==310000 || //MC20a/d/e
-         runNumber==410000 || runNumber==450000 || runNumber==470000 || runNumber==495000) { //MC23a/d/e/g
-        ATH_MSG_WARNING("Could not find cluster-level SFs for this MC sub-campaign!"); // worst case, prints once per thread.
-
-        // Cache and return an empty pointer.
-        // USe a unique lock for writing to cache.
-        std::shared_ptr<std::vector<ClusterSFRecord>> emptyPtr = std::make_shared<std::vector<ClusterSFRecord>>();
-        {
-          std::unique_lock writeLock(m_cacheMutex);
-          m_cachedClusterSFData[runNumber] = emptyPtr;
-        } // release unique lock for writing to cache.
-        return emptyPtr;
-      }
-      else { // data
-        ATH_MSG_WARNING("Could not find cluster-level SFs for this exact run, so using closest run: " << closestRunNumber); // worst case, prints once per thread.
-      }
-    }
-
-    // Create vector of TrackSFRecord.
-    auto records = std::make_shared<std::vector<ClusterSFRecord>>();
-
-    // Filter by closestRunNumber
-    // Out of an abundance of caution, use a unique lock.
-    {
-      std::unique_lock dfWriteLock(m_dfMutex); // Lock for exclusive access when filtering
-
-      std::string expr = "runNumber == " + std::to_string(closestRunNumber);
-      auto filtered = m_df->Filter(expr);
-    
-      // Trigger evaluation to get vectors for needed columns
-      auto becs = filtered.Take<int>("bec");
-      auto layers = filtered.Take<int>("layerID");
-      auto etas = filtered.Take<int>("etaM");
-      auto sfs = filtered.Take<double>("SF");
-      auto sf_errors = filtered.Take<double>("SF_error");
-    
-      // Build vector of SFRecords
-      records->reserve(becs->size());
-      for (size_t i = 0; i < becs->size(); ++i) {
-        records->emplace_back(ClusterSFRecord{
-            becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)
-          });
-      }
-    } // release unique lock for filtering SF DF
-
-    // Now cache the results
-    // Use a unique lock since writing.
-    {
-      std::unique_lock writeLock(m_cacheMutex);
-      auto [it, inserted] = m_cachedClusterSFData.emplace(runNumber, records);
-      if (!inserted) {
-        // Another thread beat us — reuse theirs
-        return it->second;
-      }
-    } // release unique lock for updating the cache
-    
-    return records;
+    return getRunSFs<ClusterSFRecord>(runNumber, m_cachedClusterSFData, m_filename, m_clusterSFTreeName.value(),
+                                      [](std::shared_ptr<std::vector<ClusterSFRecord>> records, FilteredType& filtered) {
+            auto becs = filtered.Take<int>("bec");
+            auto layers = filtered.Take<int>("layerID");
+            auto etas = filtered.Take<int>("etaM");
+            auto sfs = filtered.Take<double>("SF");
+            auto sf_errors = filtered.Take<double>("SF_error");
+            records->reserve(becs->size());
+            for (size_t i = 0; i < becs->size(); ++i) {
+                records->emplace_back(ClusterSFRecord{becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)});
+            }
+            return records;
+        });
   }
 
   //////////////////////

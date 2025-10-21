@@ -28,12 +28,12 @@ namespace CP {
     }
     else if (m_equalizeClusterMeasurements) {
       ATH_MSG_INFO("Will equalize individual cluster dE/dx measurements and calculate the truncated mean.");
-      ATH_MSG_INFO("NB: MC20 does not model radiation damage and is not yet supported.  Will apply SF=1 to any MC20 track.");
+      ATH_MSG_INFO("NB: MC20 does not model radiation damage and is not yet supported.  Will throw error.");
     }
     else if (m_equalizeTrackMeasurements) {
       ATH_MSG_INFO("Will equalize the track-level truncated mean dE/dx from the AOD.");
       ATH_MSG_INFO("NB: Run 3 data is not yet supported.  Will apply SFs from end of Run 2 to Run 3 tracks.");
-      ATH_MSG_INFO("NB: MC20 and MC23 are not yet supported.  Will apply SF=1 to any MC20 or MC23 track.  Radiation damage not modeled in MC20.");
+      ATH_MSG_INFO("NB: MC20 and MC23 are not yet supported. Will throw error.");
     }
     else{
       ATH_MSG_ERROR("Must choose to equalize the dE/dx measurements at cluster-level OR track-level.");
