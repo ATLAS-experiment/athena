@@ -77,7 +77,9 @@ def parse_pixelClusSF_file_data(input_file_path):
 
         #Get map between wafer id and hash id
         #Values are in order: bec, ld, phi, eta, side, ID
-        with open("../data/pixel_wafer_id_hash_map.json", "r") as map_file:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        json_path = os.path.join(script_dir, "data", "pixWafer_id_hash_map.json")
+        with open(json_path, "r") as map_file:
             hash_id_map = json.load(map_file)
 
         #Grab approrpriate bec, layer, eta, sf for the run
@@ -130,7 +132,7 @@ if __name__ == "__main__":
     output_folder, output_data, output_db = prepare_output_database(local_db_name, local_db_file)
 
     #Parse data from pixel cluster scale factors input file
-    pixelClusSF_input_file_path = "sf_input_files/data23_sf_flat.root"
+    pixelClusSF_input_file_path = sys.argv[1]
     pixelClusSF_data_pairs = parse_pixelClusSF_file_data(pixelClusSF_input_file_path)
 
     #Define validity keys
