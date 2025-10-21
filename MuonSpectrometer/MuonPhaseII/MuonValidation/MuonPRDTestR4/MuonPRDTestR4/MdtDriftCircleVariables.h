@@ -42,7 +42,7 @@ namespace MuonValR4{
              */
             void enableSeededDump(); 
         private:
-           void dump(const ActsGeometryContext& gctx,
+           void dump(const ActsTrk::GeometryContext& gctx,
                      const xAOD::MdtDriftCircle& dc);
 
            SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_key{};

@@ -6,7 +6,7 @@
 /// Header file to manage the common inlcudes
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 ///
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 
 #include <limits>
 #include <set>

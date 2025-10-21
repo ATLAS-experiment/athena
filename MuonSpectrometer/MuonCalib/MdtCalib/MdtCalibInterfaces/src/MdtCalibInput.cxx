@@ -33,7 +33,7 @@ MdtCalibInput::MdtCalibInput(const Identifier& id,
                              const int16_t adc,
                              const int16_t tdc,
                              const MuonGMR4::MdtReadoutElement* reEle,
-                             const ActsGeometryContext& gctx):
+                             const ActsTrk::GeometryContext& gctx):
    m_id{id},
    m_adc{adc},
    m_tdc{tdc},
@@ -43,7 +43,7 @@ MdtCalibInput::MdtCalibInput(const Identifier& id,
 
 MdtCalibInput::MdtCalibInput(const MdtDigit& digit,
                              const MuonGMR4::MuonDetectorManager& detMgr,
-                             const ActsGeometryContext& gctx):
+                             const ActsTrk::GeometryContext& gctx):
    MdtCalibInput(digit.identify(), digit.adc(), digit.tdc(), 
                  detMgr.getMdtReadoutElement(digit.identify()), gctx){}
  
@@ -63,7 +63,7 @@ MdtCalibInput::MdtCalibInput(const MdtDigit& digit,
 
 
 MdtCalibInput::MdtCalibInput(const xAOD::MdtDriftCircle& prd,
-                             const ActsGeometryContext& gctx):
+                             const ActsTrk::GeometryContext& gctx):
    m_id{prd.identify()},
    m_adc{prd.adc()},
    m_tdc{prd.tdc()},

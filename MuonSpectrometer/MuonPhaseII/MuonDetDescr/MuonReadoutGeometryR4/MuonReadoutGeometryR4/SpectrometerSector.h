@@ -140,9 +140,9 @@ namespace MuonGMR4 {
             bool barrel() const;
             /** @brief  Returns the local -> global tarnsformation from the sector
               * @param gctx: Geometry context carrrying the alignment transformations */
-            const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& gctx) const;
+            const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the global -> local transformation from the ATLAS global */
-            Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
+            Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the associated surface */
             const Acts::PlaneSurface& surface() const;
             /** @brief Returns the associated chambers with this sector */
@@ -159,7 +159,7 @@ namespace MuonGMR4 {
             const defineArgs& parameters() const;
             /** @brief Returns the Acts::Volume representation of the sector.
               * @param gctx: Geometry context carrrying the alignment transformations */
-            std::shared_ptr<Acts::Volume> boundingVolume(const ActsGeometryContext& gctx) const;
+            std::shared_ptr<Acts::Volume> boundingVolume(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the volume bounds */
             std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
             /** @brief Returns the list of all associated readout elements */

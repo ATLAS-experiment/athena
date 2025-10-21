@@ -12,7 +12,7 @@
 
 #include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <xAODMuon/MuonSegmentContainer.h>
 
 #include <MuonPatternEvent/HoughEventData.h>
@@ -224,7 +224,7 @@ namespace MuonValR4 {
             /** @brief pointer to the Detector manager */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
             /** @brief Geometry context key to retrieve the alignment */ 
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Service Handle to the IMuonIdHelperSvc */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

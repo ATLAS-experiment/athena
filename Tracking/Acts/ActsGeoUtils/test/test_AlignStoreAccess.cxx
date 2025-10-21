@@ -6,7 +6,7 @@
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
 
 #include "ActsGeoUtils/TransformCache.h"
@@ -97,7 +97,7 @@ class WorkerTask : public GeoThreading::ThreadPool::IThreadTask {
             std::mt19937 g(rd());
             std::ranges::shuffle(m_detEles, g);
 
-            ActsGeometryContext gctx{};
+            ActsTrk::GeometryContext gctx{};
             gctx.setStore(m_store);
             
             for (const auto& det : m_detEles) {
@@ -159,8 +159,8 @@ int main() {
     
     ExpectationMap_t unalignedTrfs{}, alignedTrfs{};
     {
-        ActsGeometryContext uGctx{};
-        ActsGeometryContext aGctx{};
+        ActsTrk::GeometryContext uGctx{};
+        ActsTrk::GeometryContext aGctx{};
         uGctx.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(ActsTrk::DetectorType::Csc));
         aGctx.setStore(makeAlignedStore(condAlignment));
         for (unsigned int k =0 ; k < nAlign ; ++k) {

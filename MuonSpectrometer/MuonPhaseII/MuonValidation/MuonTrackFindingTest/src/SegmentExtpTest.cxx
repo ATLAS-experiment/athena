@@ -37,7 +37,7 @@ namespace MuonValR4{
     StatusCode SegmentExtpTest::execute(const EventContext& ctx) const {
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_readKey, ctx));
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         const auto tgContext = gctx->context();
 

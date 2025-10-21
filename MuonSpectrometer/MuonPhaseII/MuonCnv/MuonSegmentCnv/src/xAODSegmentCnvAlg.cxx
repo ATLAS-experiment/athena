@@ -59,7 +59,7 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     StatusCode xAODSegmentCnvAlg::execute(const EventContext& ctx) const {
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
         SG::WriteHandle outContainer{m_writeKey, ctx};

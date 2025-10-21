@@ -3,7 +3,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMmTest.h"
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <fstream>
@@ -88,9 +88,9 @@ StatusCode GeoModelMmTest::finalize() {
 }
 StatusCode GeoModelMmTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    const ActsGeometryContext* geoContextHandle{nullptr};
+    const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
-    const ActsGeometryContext& gctx{*geoContextHandle};
+    const ActsTrk::GeometryContext& gctx{*geoContextHandle};
 
     for (const Identifier& test_me : m_testStations) {
         ATH_MSG_DEBUG("Test retrieval of Mm detector element "<<m_idHelperSvc->toStringDetEl(test_me));
@@ -168,7 +168,7 @@ StatusCode GeoModelMmTest::execute() {
    return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
-                                       const ActsGeometryContext& gctx, 
+                                       const ActsTrk::GeometryContext& gctx, 
                                        const MmReadoutElement* reElement) {
 
 

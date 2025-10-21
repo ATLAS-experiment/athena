@@ -25,7 +25,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"

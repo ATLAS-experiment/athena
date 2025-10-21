@@ -33,7 +33,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
   
-  const ActsGeometryContext gctx{getGeoContext()};
+  const ActsTrk::GeometryContext gctx{getGeoContext()};
 
   const MuonGMR4::sTgcReadoutElement* readOutEle = getReadoutElement(gctx, touchHist);
 
@@ -54,7 +54,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   return true;
 }
 
-Identifier sTgcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+Identifier sTgcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                 const MuonGMR4::sTgcReadoutElement* readOutEle, 
                                                 const Amg::Vector3D& hitAtGapPlane, 
                                                 sTgcIdHelper::sTgcChannelTypes chType) const {
@@ -72,7 +72,7 @@ Identifier sTgcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
   const int gasGap = std::round(std::abs(locHitPos.z()) /  readOutEle->gasGapPitch()) + 1;
   return idHelper.channelID(readOutEle->identify(),readOutEle->multilayer(), gasGap, chType, 1);
 }
-const MuonGMR4::sTgcReadoutElement* sTgcSensitiveDetector::getReadoutElement(const ActsGeometryContext& gctx,
+const MuonGMR4::sTgcReadoutElement* sTgcSensitiveDetector::getReadoutElement(const ActsTrk::GeometryContext& gctx,
                                                                              const G4TouchableHistory* touchHist) const {
    
    

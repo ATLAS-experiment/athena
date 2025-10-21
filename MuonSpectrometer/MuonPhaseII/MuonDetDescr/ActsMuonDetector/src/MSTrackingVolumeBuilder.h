@@ -20,8 +20,9 @@ namespace Acts {
     class Surface;
 }
 
-
-class ActsGeometryContext;
+namespace ActsTrk {
+    class GeometryContext;
+}
 
 
 namespace ActsTrk{

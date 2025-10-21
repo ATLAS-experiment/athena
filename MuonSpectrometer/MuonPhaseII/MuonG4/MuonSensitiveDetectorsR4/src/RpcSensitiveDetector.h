@@ -100,7 +100,7 @@ private:
     /// Retrieves the matching readout element to a G4 hit
     const MuonGMR4::RpcReadoutElement* getReadoutElement(const G4TouchableHistory* touchHist) const;
     /// Extracts the gasGap Identifier of the hit expressed at the origin of the local gasGap system
-    Identifier getIdentifier(const ActsGeometryContext& gctx,
+    Identifier getIdentifier(const ActsTrk::GeometryContext& gctx,
                              const MuonGMR4::RpcReadoutElement* readOutEle, 
                              const Amg::Vector3D& hitAtGapPlane, bool phiGap) const;
    

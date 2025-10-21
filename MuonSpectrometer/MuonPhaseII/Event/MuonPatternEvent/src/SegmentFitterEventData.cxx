@@ -47,7 +47,7 @@ namespace MuonR4{
             }
             return segPars;
         }
-        Parameters localSegmentPars(const ActsGeometryContext& gctx,
+        Parameters localSegmentPars(const ActsTrk::GeometryContext& gctx,
                                     const Segment& segment) {
             Parameters pars{};
             const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTrans(gctx);
@@ -109,7 +109,7 @@ namespace MuonR4{
             return Acts::BoundTrackParameters{surface.getSharedPtr(), std::move(boundPars),
                                               cov, hypot};
         }
-        Acts::BoundTrackParameters boundSegmentPars(const ActsGeometryContext& gctx,
+        Acts::BoundTrackParameters boundSegmentPars(const ActsTrk::GeometryContext& gctx,
                                                     const Segment& segment,
                                                     const Acts::ParticleHypothesis hypot) {
             const auto& surface = segment.msSector()->surface();

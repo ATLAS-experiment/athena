@@ -142,7 +142,7 @@ namespace MuonR4{
         ATH_CHECK(SG::get(stgcPrds, m_keysTgc, ctx));
         ATH_CHECK(SG::get(mmPrds, m_keyMM, ctx));
 
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         
         std::vector<std::unique_ptr<Trk::RIO_OnTrack>> rots{};

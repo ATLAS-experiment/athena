@@ -24,7 +24,7 @@ class TruthSegmentCsvDumperAlg: public AthAlgorithm {
   
   private:
     const MuonGMR4::SpectrometerSector* msSector(const xAOD::MuonSegment& segment) const;
-    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_inSegmentKey{this, "MuonTruthSegmentsKey", "MuonTruthSegments"};
     
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

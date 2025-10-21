@@ -58,7 +58,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
     const MdtReadoutElement* reEle{getReadoutElement(touchHist)};
 
-    const ActsGeometryContext gctx{getGeoContext()};
+    const ActsTrk::GeometryContext gctx{getGeoContext()};
 
   
     const Identifier HitID = getIdentifier(gctx, reEle, touchHist);
@@ -108,7 +108,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     saveHit(HitID, driftHit, trackLocDir, globalTime, aStep);
     return true;
 }
-Identifier MdtSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+Identifier MdtSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                const MuonGMR4::MdtReadoutElement* readOutEle,
                                                const G4TouchableHistory* touchHist) const {
    const Amg::Transform3D localToGlobal{getTransform(touchHist, 0)};

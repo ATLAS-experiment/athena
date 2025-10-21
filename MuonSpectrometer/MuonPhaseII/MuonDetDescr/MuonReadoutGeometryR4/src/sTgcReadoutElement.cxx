@@ -94,7 +94,7 @@ StatusCode sTgcReadoutElement::initElement() {
 #endif
 
    }
-   ActsGeometryContext gctx{};
+   ActsTrk::GeometryContext gctx{};
    m_gasGapPitch = (center(gctx, createHash(1, sTgcIdHelper::sTgcChannelTypes::Strip, 0)) -
                     center(gctx, createHash(2, sTgcIdHelper::sTgcChannelTypes::Strip, 0))).mag(); 
    return StatusCode::SUCCESS;
@@ -174,7 +174,7 @@ Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& mea
    }
 }
 
-Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    unsigned int gasGap = gasGapNumber(measHash);
@@ -191,7 +191,7 @@ Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContex
 
 using localCornerArray = std::array<Amg::Vector2D, 4>;
 using globalCornerArray = std::array<Amg::Vector3D, 4>;
-globalCornerArray sTgcReadoutElement::globalPadCorners(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+globalCornerArray sTgcReadoutElement::globalPadCorners(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    unsigned int gasGap = gasGapNumber(measHash);
@@ -230,7 +230,7 @@ int sTgcReadoutElement::padNumber(const Amg::Vector2D& hitPos, const IdentifierH
    return channel;   
 }
 
-Amg::Vector3D sTgcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector3D sTgcReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int gasGap = gasGapNumber(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
@@ -274,7 +274,7 @@ Amg::Vector3D sTgcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, 
 }
 
 
-Amg::Vector3D sTgcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector3D sTgcReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int gasGap = gasGapNumber(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRYINTERFACES_ACTSGEOMETRYCONTEXT_H
-#define ACTSGEOMETRYINTERFACES_ACTSGEOMETRYCONTEXT_H
+#ifndef ACTSGEOMETRYINTERFACES_GEOMETRYCONTEXT_H
+#define ACTSGEOMETRYINTERFACES_GEOMETRYCONTEXT_H
 
 #include <map>
 #include <memory>
@@ -24,7 +24,8 @@
  *         Further, it carries the transformations for each tracking layer
  *  
 */
-class ActsGeometryContext {
+namespace ActsTrk{
+class GeometryContext {
 public:
     using DetectorType = ActsTrk::DetectorType;
     using AlignmentStore = ActsTrk::DetectorAlignStore;
@@ -49,8 +50,9 @@ private:
     using SubDetAlignments = std::array<AlignmentStorePtr, static_cast<unsigned>(DetectorType::UnDefined)>;
     SubDetAlignments m_alignmentStores{};
 };
+}
 
-CLASS_DEF(ActsGeometryContext, 51464195, 1)
-CONDCONT_DEF(ActsGeometryContext, 11228079);
+CLASS_DEF( ActsTrk::GeometryContext , 184998957 , 1 );
+CONDCONT_DEF( ActsTrk::GeometryContext , 186862071 );
 
 #endif

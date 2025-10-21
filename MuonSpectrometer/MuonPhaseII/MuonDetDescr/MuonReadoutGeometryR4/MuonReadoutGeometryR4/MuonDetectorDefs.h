@@ -7,7 +7,7 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 ///
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 
 #include <CxxUtils/ArrayHelper.h>
 #include <CxxUtils/StringUtils.h>

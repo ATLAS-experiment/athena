@@ -318,7 +318,7 @@ std::unique_ptr<SegmentSeed>
 
 
 std::vector<std::unique_ptr<SegmentSeed>>
-CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, const ActsGeometryContext &gctx) const {
+CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, const ActsTrk::GeometryContext &gctx) const {
     // first sort the hits per layer from the maximum
     SpacePointPerLayerSplitter hitLayers{max.getHitsInMax()};
 
@@ -433,7 +433,7 @@ StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const
     const EtaHoughMaxContainer *maxima{nullptr};
     ATH_CHECK(SG::get( maxima, m_etaKey, ctx));
 
-    const ActsGeometryContext *gctx{nullptr};
+    const ActsTrk::GeometryContext *gctx{nullptr};
     ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // prepare our output collection

@@ -98,7 +98,7 @@ namespace MuonR4{
         const float e{hit.kineticEnergy()},m{hit.mass()};
         return std::sqrt(std::max(e*e - m*m, 0.f)) * std::sin(globDir.theta());
     }
-    Amg::Transform3D TruthSegmentMaker::toChamber(const ActsGeometryContext& gctx,
+    Amg::Transform3D TruthSegmentMaker::toChamber(const ActsTrk::GeometryContext& gctx,
                                                   const Identifier& chanId) const {
         const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(chanId);
         const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ?
@@ -279,7 +279,7 @@ namespace MuonR4{
     }
                                         
     StatusCode TruthSegmentMaker::execute(const EventContext& ctx) const {
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         
         using HitsPerParticle = std::unordered_map<HepMC::ConstGenParticlePtr, SimHitVec_t>;

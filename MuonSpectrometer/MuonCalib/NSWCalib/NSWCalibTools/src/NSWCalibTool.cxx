@@ -135,7 +135,11 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon
 }
 
 
-StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster& prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
+StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, 
+                                             const ActsTrk::GeometryContext& gctx, 
+                                             const xAOD::MMCluster& prepData, 
+                                             const Amg::Vector3D& globalPos, 
+                                             std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
 
   double lorentzAngle {0.};
   if(m_applyMmBFieldCalib){

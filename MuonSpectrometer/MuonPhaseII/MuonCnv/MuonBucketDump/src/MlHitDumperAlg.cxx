@@ -34,7 +34,7 @@ namespace MuonR4{
     }
     StatusCode MlHitDumperAlg::execute() {
         const EventContext& ctx{Gaudi::Hive::currentContext()};
-        const ActsGeometryContext* gctx{};
+        const ActsTrk::GeometryContext* gctx{};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
         std::unordered_map<const xAOD::MuonSimHit*, const xAOD::TruthParticle*> hitPartMap{};
@@ -63,7 +63,7 @@ namespace MuonR4{
 
         return StatusCode::SUCCESS;
     }
-    std::size_t MlHitDumperAlg::fillSpacePoint(const ActsGeometryContext& gctx, const SpacePoint& sp){
+    std::size_t MlHitDumperAlg::fillSpacePoint(const ActsTrk::GeometryContext& gctx, const SpacePoint& sp){
         const Amg::Transform3D& lToGlob = sp.msSector()->localToGlobalTrans(gctx);
         std::size_t idx = m_spCollection->push_back(sp);
         m_spGlobPos.set(lToGlob * sp.localPosition(), idx);

@@ -3,7 +3,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMdtTest.h"
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
@@ -92,10 +92,10 @@ StatusCode GeoModelMdtTest::finalize() {
 StatusCode GeoModelMdtTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
     
-    const ActsGeometryContext* geoContextHandle{nullptr};
+    const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
 
-    const ActsGeometryContext& gctx{*geoContextHandle};
+    const ActsTrk::GeometryContext& gctx{*geoContextHandle};
 
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     for (const Identifier& test_me : m_testStations) {
@@ -168,7 +168,7 @@ void GeoModelMdtTest::dumpReadoutSideXML() const {
 
 }
 StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
-                                       const ActsGeometryContext& gctx, 
+                                       const ActsTrk::GeometryContext& gctx, 
                                        const MdtReadoutElement* readoutEle) {
 
                                   

@@ -13,7 +13,7 @@
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
 #include <MuonSpacePoint/SpacePointContainer.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include "xAODMuon/MuonSegmentContainer.h"
 
@@ -53,7 +53,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     SG::ReadHandleKeyArray<xAOD::MuonSegmentContainer> m_inSegmentKeys{this, "SegmentKey", {"MuonSegmentsFromR4"}};
 
     SG::ReadDecorHandleKeyArray<xAOD::MuonSegmentContainer> m_truthDecorKeys{this, "TruthDecorLinks", {}};
-    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     
     Gaudi::Property<bool> m_isMC{this, "isMC", true};
     Gaudi::Property<double> m_fracToKeep{this,"dataFracToKeep", 1.}; // 0.055 to balanced dataset without MC

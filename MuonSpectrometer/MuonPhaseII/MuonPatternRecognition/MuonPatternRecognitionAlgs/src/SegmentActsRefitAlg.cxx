@@ -69,7 +69,7 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     std::tuple<Amg::Vector3D, Amg::Vector3D> 
-        SegmentActsRefitAlg::smearSegment(const ActsGeometryContext& gctx,
+        SegmentActsRefitAlg::smearSegment(const ActsTrk::GeometryContext& gctx,
                                           const MuonR4::Segment& segment,
                                           CLHEP::HepRandomEngine* engine) const{
         // return std::make_pair(segment.position(), segment.direction()* (segment.direction().z() < 0 ? -1. : 1.));
@@ -111,7 +111,7 @@ namespace MuonR4{
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_readKey, ctx));
         /// Create the context object
-        const ActsGeometryContext& gctx{m_trackingGeometryTool->getGeometryContext(ctx)};
+        const ActsTrk::GeometryContext& gctx{m_trackingGeometryTool->getGeometryContext(ctx)};
         const Acts::GeometryContext tgContext = gctx.context();
         const Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
         const Acts::CalibrationContext calContext = ActsTrk::getCalibrationContext(ctx);

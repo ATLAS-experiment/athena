@@ -10,9 +10,9 @@
 #include "StoreGate/ReadHandleKey.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 // ACTS
@@ -33,18 +33,18 @@ class ActsTrackingGeometryTool : public extends<AthAlgTool, ActsTrk::ITrackingGe
 
       virtual std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() const override;
 
-      virtual const ActsGeometryContext& getGeometryContext(const EventContext& ctx) const override;
+      virtual const ActsTrk::GeometryContext& getGeometryContext(const EventContext& ctx) const override;
 
-      virtual const ActsGeometryContext& getNominalGeometryContext() const override;
+      virtual const ActsTrk::GeometryContext& getNominalGeometryContext() const override;
 
       virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const override;
     private:
       /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
       std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> createDetectorElementToGeoIdMap() const;
      
-      ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+      ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-      SG::ReadHandleKey<ActsGeometryContext> m_rchk{this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
+      SG::ReadHandleKey<ActsTrk::GeometryContext> m_rchk{this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
 
       std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 };

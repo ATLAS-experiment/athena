@@ -35,7 +35,7 @@ namespace MuonR4{
             /** @brief Output segment container key */
             SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_writeKey{this, "OutSegmentKey", "MuonSegmentsFromR4"};
             /** @brief Alignment container key */            
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Abrivation of the extra declared auxVariables  */
             using DecorKey_t = SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer>;
             /** @brief Decoration to the links to the associated Uncalibrated measurements */

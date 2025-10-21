@@ -89,7 +89,7 @@ private:
     * @param boundsFactory The factory for volume bounds
     *  This function constructs and returns the sensitive elements (volumes and surfaces) of the sector. */
    template<typename T>
-   std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>> getSensitiveElements(const ActsGeometryContext& gctx,
+   std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>> getSensitiveElements(const ActsTrk::GeometryContext& gctx,
                                                                                   const T& element,
                                                                                   const Acts::GeometryIdentifier& chId,
                                                                                   Acts::VolumeBoundFactory& boundsFactory) const;

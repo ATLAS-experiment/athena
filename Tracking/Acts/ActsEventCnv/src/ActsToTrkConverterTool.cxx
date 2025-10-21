@@ -24,7 +24,7 @@
 // PACKAGE
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeoUtils/SurfaceCache.h"

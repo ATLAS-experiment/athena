@@ -104,9 +104,9 @@ namespace L0Muon
   StatusCode RPCSimulation::buildFromTruth(L0Muon::RPCCandDataContainer& outputCands,
                                            const EventContext &ctx) const
   {
-    const ActsGeometryContext* geoContextHandle{nullptr};
+    const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
-    const ActsGeometryContext& gctx{*geoContextHandle};
+    const ActsTrk::GeometryContext& gctx{*geoContextHandle};
     /// retrieve the truth hits
     const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
     /// retrieve the truth particles

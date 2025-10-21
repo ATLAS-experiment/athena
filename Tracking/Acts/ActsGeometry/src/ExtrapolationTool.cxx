@@ -9,7 +9,7 @@
 #include "GaudiKernel/IInterface.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
@@ -133,7 +133,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
@@ -192,7 +192,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
@@ -231,7 +231,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
   ActsPropagationOutput output;
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
@@ -287,7 +287,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
   
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
