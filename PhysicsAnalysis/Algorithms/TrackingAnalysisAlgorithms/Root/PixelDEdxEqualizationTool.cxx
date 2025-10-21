@@ -83,7 +83,7 @@ namespace CP {
         ATH_MSG_ERROR("Failed to open ROOT file.");
         {
             std::unique_lock writeLock(m_cacheMutex);
-            auto [it, _] = cache.emplace(runNumber, std::vector<RecordType>{});
+            auto [it, inserted] = cache.emplace(runNumber, std::vector<RecordType>{});
             return it->second;
         }
     }
@@ -106,7 +106,7 @@ namespace CP {
         ATH_MSG_WARNING("Could not find SFs for this MC sub-campaign!");
         {
           std::unique_lock writeLock(m_cacheMutex);
-          auto [it, _] = cache.emplace(runNumber, std::vector<RecordType>{});
+          auto [it, inserted] = cache.emplace(runNumber, std::vector<RecordType>{});
           return it->second;
         }
       } else {
