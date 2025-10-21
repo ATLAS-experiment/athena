@@ -183,8 +183,7 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
               firstSlice=false;
 
           //make new slice (to be improved, since "new" will give pointer)
-          LVL1::MuCTPIBits::Slice s;
-          slice =  s;
+          slice =  LVL1::MuCTPIBits::Slice();
 
           const auto header = LVL1::MuCTPIBits::timesliceHeader(word);
           ATH_MSG_DEBUG("This is a timeslice header word with BCID=" << header.bcid
@@ -333,7 +332,7 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
 
   //add last timeslice in vector, since there is no end-slice flag
   ATH_MSG_DEBUG(" MUCTPI DQ DEBUG: out of words (pushing last slice)");
-  slices.push_back( slice );
+  slices.push_back( std::move(slice) );
 
   // Check that the number of exceptions is below a limit based on the number of slices.
   // Exceptions can occur if word is present in multiple timeslices for same event.

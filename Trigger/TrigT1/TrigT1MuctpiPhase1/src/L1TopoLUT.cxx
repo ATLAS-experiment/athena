@@ -1,3 +1,7 @@
+/*
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "TrigT1MuctpiPhase1/L1TopoLUT.h"
 
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // silence Boost pragma message (fixed in Boost 1.76)
@@ -24,9 +28,9 @@ namespace LVL1MUCTPIPHASE1
       }
       //cannot get around stoi as outer layer may be non-continuous (some indices/keys are not present)
       if (outer_elem.first.length() > 0) { //string type key
-        theLut[std::stoi(outer_elem.first)] = buff;
+        theLut[std::stoi(outer_elem.first)] = std::move(buff);
       } else {
-        theLut[outerIndex] = buff;
+        theLut[outerIndex] = std::move(buff);
         ++outerIndex; //ok to only count in this case, mixed keys/indices at same depth are not valid 
       }
     }
@@ -51,7 +55,7 @@ namespace LVL1MUCTPIPHASE1
         buff[std::stoi(inner_elem.first)] = { codeBuff[0], codeBuff[1] } ; 
       }
       //cannot get around stoi as outer layer may be non-continuous (some indices/keys are not present)
-      theLut[std::stoi(outer_elem.first)] = buff;
+      theLut[std::stoi(outer_elem.first)] = std::move(buff);
     }
     return;
   }
@@ -161,6 +165,7 @@ namespace LVL1MUCTPIPHASE1
       inFile >> phi_max;
 
       double eta = getCompactedValue_eta(subsystem, side, sectorID, roi);
+      // coverity [tainted_data]
       double phi = getCompactedValue_phi(subsystem, side, sectorID, roi);
       
       unsigned short ieta = 0;
