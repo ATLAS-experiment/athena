@@ -1,5 +1,6 @@
 #ifndef EVENTCONTAINERS_DELETER_H
 //#define EVENTCONTAINERS_DELETER_H
+#include <bit>
 
 #if 0
   struct deleter
@@ -22,7 +23,7 @@
     {
       static void deleter (const void* p)
       {
-        delete reinterpret_cast<const T*>(p);
+        delete std::bit_cast<const T*>(p);
       }
     };
 
