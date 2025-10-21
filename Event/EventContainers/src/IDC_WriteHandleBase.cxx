@@ -17,8 +17,8 @@ IDC_WriteHandleBase::~IDC_WriteHandleBase() { ReleaseLock(); }
 void IDC_WriteHandleBase::ReleaseLock(){
    if(m_atomic==nullptr) return;
 //Convenience declarations
-   const void* waitstate = reinterpret_cast<const void*>(IdentifiableCacheBase::INVALIDflag);
-   const void* ABORTstate = reinterpret_cast<const void*>(IdentifiableCacheBase::ABORTEDflag);
+   const void* waitstate = std::bit_cast<const void*>(IdentifiableCacheBase::INVALIDflag);
+   const void* ABORTstate = std::bit_cast<const void*>(IdentifiableCacheBase::ABORTEDflag);
 
 //Running code
    assert(m_atomic->load() != ABORTstate);
