@@ -14,9 +14,6 @@
 #include "../GlobalAlgs/FirstChain/Egamma1BDTAlgTool.h"
 #include "../GlobalAlgs/FirstChain/Egamma1eRatioAlgTool.h"
 
-#include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerAlgTool.h"
-#include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerComparator.h"
-
 #include "../GlobalAlgs/FirstChain/LArCellPreparationAlg.h"
 #include "../GlobalAlgs/FirstChain/LArCellMuxAlg.h"
 #include "../GlobalAlgs/FirstChain/GlobalCellTowerAlgTool.h"
@@ -36,9 +33,6 @@ DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
 DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1eRatioAlgTool)
-
-DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerAlgTool)
-DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerComparator)
 
 DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
 DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)

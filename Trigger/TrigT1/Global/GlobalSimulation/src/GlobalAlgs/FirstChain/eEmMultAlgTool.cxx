@@ -27,7 +27,7 @@ namespace GlobalSim {
       return StatusCode::FAILURE;
     }
     
-    int max_tip_pos = IGlobalSimAlgTool::s_nbits_TIP - m_n_multbits;
+    int max_tip_pos = s_nbits_TIP - m_n_multbits;
 
     if (m_TIP_position < 0 or m_TIP_position > max_tip_pos) {
       ATH_MSG_ERROR("TIP word out of bounds " << m_TIP_position);
@@ -99,7 +99,7 @@ namespace GlobalSim {
 
     ATH_MSG_DEBUG("no of passing TOBS");
 
-    auto count_bits = std::bitset<IGlobalSimAlgTool::s_nbits_TIP>(tob_count);
+    auto count_bits = std::bitset<s_nbits_TIP>(tob_count);
 
     int p0{0};
     int p1{m_TIP_position};

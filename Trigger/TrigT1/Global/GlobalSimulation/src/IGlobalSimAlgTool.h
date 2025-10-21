@@ -19,20 +19,10 @@ namespace GlobalSim {
 
   public:
 
-    // FIXME to be moved to ITIPwriterAlgTool.
-    /// Number of bits for the TIP word. The TIP word gathers
-    /// results from Global, and sends to the the CTP.
-    static constexpr std::size_t s_nbits_TIP{1024};
-    
     DeclareInterfaceID(IGlobalSimAlgTool, 1, 0);
     virtual ~IGlobalSimAlgTool() = default;
 
     virtual StatusCode run(const EventContext& ctx) const = 0;
-
-    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
-				 const EventContext& ) const = 0;
-
-
     virtual std::string toString() const = 0;
   };
   

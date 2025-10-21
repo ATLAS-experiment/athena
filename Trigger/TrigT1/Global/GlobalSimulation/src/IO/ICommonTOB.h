@@ -24,15 +24,6 @@ namespace GlobalSim::IOBitwise{
    * bits in GlobalTOBs, and their retrieval functions.
    */
 
-  template<std::size_t e>
-  constexpr std::size_t pow2(){
-    std::size_t result{1};
-    for (auto i = e; i != 0; --i) {
-	result *= 2;
-    }
-    return result;
-  }
-
   class ICommonTOB {
 
   public:
@@ -49,8 +40,10 @@ namespace GlobalSim::IOBitwise{
 
     static constexpr std::size_t s_eFex_granularity{100}; // MeV
 
-    static constexpr std::size_t max_et{pow2<s_et_width>()-1};
-
+    static constexpr ulong max_et{(1UL << s_et_width)-1};
+    // Errors if 0 or small
+    static_assert(max_et != 0 && max_et <(1ULL << 63),
+		  "Overflow or UB detected!");
 
     /** @brief Returns the eT bits of this TOB*/
     virtual std::bitset<s_et_width> et_bits() const = 0;

@@ -4,7 +4,7 @@
 */
 
 #include "eEmSortSelectCountContainerComparator.h"
-#include "hexStrToBinStr.h" 
+#include "../../Utilities/hexStrToBinStr.h" 
 
 #include "../../../dump.h"
 #include "../../../dump.icc"
@@ -186,13 +186,6 @@ namespace GlobalSim {
        << '\n';
     return ss.str();
   }
-
   
-  StatusCode
-  eEmSortSelectCountContainerComparator::updateTIP(std::bitset<s_nbits_TIP>& word,
-						   const EventContext& ctx) const {
-    CHECK(IGlobalSimAlgTool::updateTIP(word, ctx));
-    return StatusCode::SUCCESS;
-  }
 }
 

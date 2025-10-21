@@ -5,7 +5,7 @@
 
 #include "GenericTob.h"
 #include "AlgoDataTypes.h"
-#include "binStrToHexStr.h"
+#include "../../Utilities/binStrToHexStr.h"
 #include <sstream>
 
 namespace GlobalSim {
