@@ -61,14 +61,14 @@ namespace CP {
 
   private:
     
-    std::shared_ptr<std::vector<TrackSFRecord>> getRunTrackSFs(const int runNumber) const;
-    std::shared_ptr<std::vector<ClusterSFRecord>> getRunClusterSFs(const int runNumber) const;
+    const std::vector<TrackSFRecord>& getRunTrackSFs(const int runNumber) const;
+    const std::vector<ClusterSFRecord>& getRunClusterSFs(const int runNumber) const;
 
     template<typename RecordType>
-    std::shared_ptr<std::vector<RecordType>> getRunSFs(
-        const int runNumber,
-        std::map<int, std::shared_ptr<std::vector<RecordType>>>& cache,
-        const std::string& treeName) const;
+    const std::vector<RecordType>& getRunSFs(
+                                             const int runNumber,
+                                             std::map<int, std::vector<RecordType>>& cache,
+                                             const std::string& treeName) const;
 
     /// Flags
     Gaudi::Property<bool> m_equalizeTrackMeasurements
@@ -86,12 +86,9 @@ namespace CP {
     Gaudi::Property<std::string> m_clusterSFTreeName { this, "ClusterSFTreeName", "cluster_SFs"};
     Gaudi::Property<std::string> m_trackSFTreeName { this, "TrackSFTreeName", "track_SFs"};
 
-    /// Map where key = run number, value is a filtered scale factor RDF (an RDF::RNode) with only the rows for that run number.
-    /// So not filtering everytime in execute().
-    /// Will be updated in execute, so must be mutable
     /// Cache map: runNumber -> vector<SFRecord>
-    mutable std::map<int, std::shared_ptr<std::vector<ClusterSFRecord>>> m_cachedClusterSFData ATLAS_THREAD_SAFE;
-    mutable std::map<int, std::shared_ptr<std::vector<TrackSFRecord>>> m_cachedTrackSFData ATLAS_THREAD_SAFE;
+    mutable std::map<int, std::vector<ClusterSFRecord>> m_cachedClusterSFData ATLAS_THREAD_SAFE;
+    mutable std::map<int, std::vector<TrackSFRecord>> m_cachedTrackSFData ATLAS_THREAD_SAFE;
     mutable std::shared_mutex m_cacheMutex ATLAS_THREAD_SAFE;
 
     /// Highest eta bin for which track-based equalization SFs are define.

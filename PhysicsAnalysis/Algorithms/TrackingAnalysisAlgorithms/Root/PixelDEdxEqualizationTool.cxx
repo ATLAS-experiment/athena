@@ -59,10 +59,10 @@ namespace CP {
 
    // Template helper function for common logic
   template<typename RecordType>
-  std::shared_ptr<std::vector<RecordType>> PixelDEdxEqualizationTool::getRunSFs(
-                                                                                const int runNumber, 
-                                                                                std::map<int, std::shared_ptr<std::vector<RecordType>>>& cache, 
-                                                                                const std::string& treeName) const {
+  const std::vector<RecordType>& PixelDEdxEqualizationTool::getRunSFs(
+                                                                      const int runNumber,
+                                                                      std::map<int, std::vector<RecordType>>& cache,
+                                                                      const std::string& treeName) const {
     
     // Use a shared lock for read-only access
     {
@@ -77,21 +77,18 @@ namespace CP {
     // Not already cached, prepare to find it in the dataframe
     ATH_MSG_INFO("SF data for run " << runNumber << " not cached. Will filter and cache now."); 
 
-    // Declare empty pointer to cache & return if any issues
-    auto emptyPtr = std::make_shared<std::vector<RecordType>>();
-
     // Open the SF tree file
-    TFile* file = TFile::Open(m_filename.c_str(), "READ");
+    auto file = std::unique_ptr<TFile>(TFile::Open(m_filename.c_str(), "READ"));
     if (!file || file->IsZombie()) {
         ATH_MSG_ERROR("Failed to open ROOT file.");
         {
             std::unique_lock writeLock(m_cacheMutex);
-            cache[runNumber] = emptyPtr;
+            auto [it, _] = cache.emplace(runNumber, std::vector<RecordType>{});
+            return it->second;
         }
-        return emptyPtr;
     }
 
-    ROOT::RDataFrame df(treeName.c_str(), file);
+    ROOT::RDataFrame df(treeName.c_str(), file.get());
 
     // Extract run numbers
     auto runNumbers = df.Take<int>("runNumber");
@@ -104,19 +101,17 @@ namespace CP {
 
     // Handle closest run number logic (similar as before)
     if(runNumber != closestRunNumber) {
-        if (runNumber == 284500 || runNumber == 300000 || runNumber == 310000 ||
-            runNumber == 410000 || runNumber == 450000 || runNumber == 470000 || 
-            runNumber == 495000) {
-            ATH_MSG_WARNING("Could not find SFs for this MC sub-campaign!"); 
-            {
-                std::unique_lock writeLock(m_cacheMutex);
-                cache[runNumber] = emptyPtr;
-            }
-            file->Close(); 
-            return emptyPtr;
-        } else {
-            ATH_MSG_WARNING("Using closest run: " << closestRunNumber);
+      if (runNumber == 284500 || runNumber == 300000 || runNumber == 310000 || //MC20
+          runNumber == 410000 || runNumber == 450000 || runNumber == 470000 || runNumber == 495000) { //MC23
+        ATH_MSG_WARNING("Could not find SFs for this MC sub-campaign!");
+        {
+          std::unique_lock writeLock(m_cacheMutex);
+          auto [it, _] = cache.emplace(runNumber, std::vector<RecordType>{});
+          return it->second;
         }
+      } else {
+        ATH_MSG_WARNING("Using closest run: " << closestRunNumber);
+      }
     }
 
     // Filter the dataframe and extract records using the provided callback
@@ -124,7 +119,7 @@ namespace CP {
     auto filtered = df.Filter(expr);
     
     // Initialize records
-    auto records = std::make_shared<std::vector<RecordType>>();
+    std::vector<RecordType> records;
 
     // Fill records to trigger evaluation
     if constexpr (std::is_same<RecordType, TrackSFRecord>::value) {
@@ -132,9 +127,9 @@ namespace CP {
       auto etaHighs = filtered.Take<double>("etaHigh");
       auto sfYes = filtered.Take<double>("SF_IBLOFYes");
       auto sfNo = filtered.Take<double>("SF_IBLOFNo");
-      records->reserve(etaLows->size());
+      records.reserve(etaLows->size());
       for (size_t i = 0; i < etaLows->size(); ++i) {
-        records->emplace_back(TrackSFRecord{
+        records.emplace_back(TrackSFRecord{
             etaLows->at(i),
             etaHighs->at(i),
             sfYes->at(i),
@@ -150,9 +145,9 @@ namespace CP {
       auto sf_errors = filtered.Take<double>("SF_error");
 
       // Build vector of SFRecords
-      records->reserve(becs->size());
+      records.reserve(becs->size());
       for (size_t i = 0; i < becs->size(); ++i) {
-        records->emplace_back(ClusterSFRecord{
+        records.emplace_back(ClusterSFRecord{
             becs->at(i), layers->at(i), etas->at(i), sfs->at(i), sf_errors->at(i)
           });
       }
@@ -161,24 +156,19 @@ namespace CP {
     // Cache the results
     {
         std::unique_lock writeLock(m_cacheMutex);
-        auto [it, inserted] = cache.emplace(runNumber, records); // Ensure records are accessible
-        if (!inserted) {
-            file->Close(); 
-            return it->second;
-        }
+        // check if another thread beat us.  If so, do not overwrite.
+        auto [it, inserted] = cache.try_emplace(runNumber, std::move(records));
+        return it->second;
     }
-
-    file->Close(); 
-    return records;
   }
 
   // Specific implementation for TrackSFs
-  std::shared_ptr<std::vector<TrackSFRecord>> PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
+  const std::vector<TrackSFRecord>& PixelDEdxEqualizationTool::getRunTrackSFs(const int runNumber) const {
     return getRunSFs<TrackSFRecord>(runNumber, m_cachedTrackSFData, m_trackSFTreeName.value());
   }
 
   // Specific implementation for ClusterSFs
-  std::shared_ptr<std::vector<ClusterSFRecord>> PixelDEdxEqualizationTool::getRunClusterSFs(const int runNumber) const {
+  const std::vector<ClusterSFRecord>& PixelDEdxEqualizationTool::getRunClusterSFs(const int runNumber) const {
     return getRunSFs<ClusterSFRecord>(runNumber, m_cachedClusterSFData, m_clusterSFTreeName.value());
   }
 
@@ -197,8 +187,8 @@ namespace CP {
       stored_numberOfIBLOverflowsdEdx = nIBLOFAcc(track);
     
     // Retrieve cached SF data for the given run
-    std::shared_ptr<std::vector<TrackSFRecord>> sfRecords = getRunTrackSFs(runNumber);
-    if (!sfRecords || sfRecords->empty()) {
+    const auto& sfRecords = getRunTrackSFs(runNumber);
+    if (sfRecords.empty()) {
       return -1.0;
     }
     
@@ -214,7 +204,7 @@ namespace CP {
     double SF = -1.;
     int matchCount = 0;
     
-    for (const TrackSFRecord& rec : *sfRecords) {
+    for (const TrackSFRecord& rec : sfRecords) {
       if (rec.etaLow <= absEta && absEta <= rec.etaHigh) {
         ++matchCount;
         if (matchCount == 1) {
@@ -247,9 +237,9 @@ namespace CP {
   double PixelDEdxEqualizationTool::getClusterdEdxSF(const PixelDEdx::PixelClusterStruct& cluster, const int runNumber) const {
 
     // Get the cached vector of SF records for this run
-    std::shared_ptr<std::vector<ClusterSFRecord>> sfRecordsPtr = getRunClusterSFs(runNumber);
+    const auto& sfRecords = getRunClusterSFs(runNumber);
 
-    if (!sfRecordsPtr || sfRecordsPtr->empty()) {
+    if (sfRecords.empty()) {
         return -1.0;
     }
 
@@ -275,7 +265,7 @@ namespace CP {
     // Find matching SF record
     double SF = -1.;
     int matchCount = 0;
-    for (const auto& rec : *sfRecordsPtr) {
+    for (const auto& rec : sfRecords) {
       if (rec.bec == sfBECBin && rec.layerID == cluster.layer && rec.etaM == sfEtaBin) {
         ++matchCount;
         if (matchCount == 1) {
