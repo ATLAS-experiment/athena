@@ -3,8 +3,6 @@
 from AnaAlgorithm.AlgSequence import AlgSequence
 from AnaAlgorithm.PythonConfig import PrivateToolConfig
 from AthenaCommon.Logging import logging
-from functools import reduce
-import operator
 
 import os
 import json
@@ -184,66 +182,3 @@ def _safe_add_property(key, value, output_dict):
         output_dict['Properties'][key] = value
     except Exception as e:
         log.warning(f"Couldn't add property '{key}' to dict. Value: {value}. Error: {e}")
-
-def combine_json_files(combine_dictionaries = False, txtfile = 'tool_config.txt',
-                       alg_file = 'alg_sequence.json', output_file = 'my_analysis_config.json'):
-    tool_dict = {}
-    new_tool_dict = {}
-    if combine_dictionaries:
-        with open(alg_file, 'r', encoding='utf-8') as alg_file: 
-            tool_dict = json.load(alg_file)
-            
-    for key, value in tool_dict.items():
-        props = value.get("Properties", False)
-        if props: 
-            tools = props.get("Tools")
-            if len(tools.keys()) == 0: 
-                tool_dict[key]["Properties"].pop("Tools")
-
-    with open(txtfile,"r") as tool_config_file:
-        previous_tool_string = ''
-        tool_string = ''
-        
-        for iline,line in enumerate(tool_config_file.readlines()):   
-            line_tool_string = line.split("=")[0].strip()
-            tools = [t.strip() for t in line_tool_string.split(".")] #get rid of pesky whitespace
-            toolprop = line.split("=")[1].strip()
-
-            if len(previous_tool_string) == 0 or toolprop.find(line_tool_string)>-1:
-                tool_string = line_tool_string
-
-            if tool_string == previous_tool_string:
-                #keep making this subtool's dictionary
-                new_tool_dict[tools[-1]] = toolprop.strip()
-            
-            elif len(previous_tool_string) > 0:
-                #first we save the old one (or create the first one)
-                prev_tools = [t.strip() for t in previous_tool_string.split(".")] 
-                prev_tools_structure = [prev_tools[0],'Properties'] 
-                for tool in prev_tools[1:]:
-                    prev_tools_structure += ['Tools']
-                    prev_tools_structure += [tool]
-                for i in range(0,len(prev_tools_structure)): 
-                    try:
-                        reduce(operator.getitem, prev_tools_structure[:i+1], tool_dict)
-                    except KeyError:
-                        reduce(operator.getitem, prev_tools_structure[:i], tool_dict)[prev_tools_structure[i]] ={}
-                reduce(operator.getitem, prev_tools_structure[:-1], tool_dict)[prev_tools_structure[-1]].update( new_tool_dict)
-                
-                #then we create the new one
-                if toolprop.find(tool_string)>-1: 
-                    previous_tool_string = tool_string
-                    new_tool_dict = { 'name': toolprop.strip()}
-                    
-            elif len(previous_tool_string) == 0:
-                #then we create the new one
-                if toolprop.find(tool_string)>-1:  
-                    previous_tool_string = tool_string
-                    new_tool_dict = { 'name': toolprop.strip()}
-            else:
-                print('doing nothing, you should investigate why!')
-
-    with open(output_file, 'w', encoding='utf-8') as outfile: 
-        json.dump(tool_dict, outfile, ensure_ascii=False, indent=4)
-
-    return
