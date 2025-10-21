@@ -184,6 +184,9 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
   
   for(auto& b : m_etaBins) {
     b.initializeNodes();
+    if(!b.m_vn.empty()) {
+      b.m_layerKey = m_geo.getTrigFTF_GNN_LayerKeyByIndex((*b.m_vn.begin())->m_layer);
+    }
   }
   
   if(!useML) return;
@@ -198,11 +201,11 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
       continue;
     }
     
-    bool isBarrel = (pL->m_layer.m_type == 0);
+    bool isBarrel = (pL->m_layer.m_type == 0);//TO-DO: implement a separate id for inclined barrel layers
 
     if(!isBarrel) continue;
-
-    // adjusting cuts on |cot(theta)| using pre-trained LUT
+    
+    // adjusting cuts on |cot(theta)| using pre-trained LUT loaded from a file
     
     int lutSize = m_mlLUT.size();
     
@@ -224,7 +227,7 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
 
 	if (lutBinIdx >= lutSize) continue;
 
-	const std::array<float, 5> lutBin = m_mlLUT.at(lutBinIdx);
+	const std::array<float, 5> lutBin = m_mlLUT[lutBinIdx];
 	
 	float dist2border = 10.0 - std::abs(locPosY);
 

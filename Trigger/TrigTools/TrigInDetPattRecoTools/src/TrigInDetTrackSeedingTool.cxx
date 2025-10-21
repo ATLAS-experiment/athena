@@ -212,75 +212,27 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
     seedStats.m_nGraphEdges = graphStats.first;
     seedStats.m_nEdgeLinks  = graphStats.second;
   
-    if(graphStats.second == 0) return seedStats;
+    if (graphStats.second == 0) return seedStats;
     
     int maxLevel = runCCA(graphStats.first, edgeStorage);
 
     ATH_MSG_DEBUG("Reached Level "<<maxLevel<<" after GNN iterations");
 
-    int minLevel = 3;//a triplet + 1 confirmation
+    std::vector<std::tuple<float, int, std::vector<unsigned int> > > vSeedCandidates;
 
-    if(m_LRTmode) {
-      minLevel = 2;//a triplet
-    }
-  
-    if(maxLevel < minLevel) return seedStats;
-  
-    std::vector<GNN_Edge*> vSeeds;
+    extractSeedsFromTheGraph(maxLevel, graphStats.first, vSP.size(), edgeStorage, vSeedCandidates);
 
-    vSeeds.reserve(graphStats.first/2);
+    if (vSeedCandidates.empty()) return seedStats;
 
-    for(int edgeIndex=0;edgeIndex<graphStats.first;edgeIndex++) {
-      GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
+    for(const auto& seed : vSeedCandidates) {
 
-      if(pS->m_level < minLevel) continue;
-      
-      vSeeds.push_back(pS);
-    }
-  
-    if(vSeeds.empty()) return seedStats;
- 
-    std::sort(vSeeds.begin(), vSeeds.end(), GNN_Edge::CompareLevel());
-
-    //backtracking
-
-    TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
-
-    output.reserve(vSeeds.size());
-  
-    for(auto pS : vSeeds) {
-      
-      if(pS->m_level == -1) continue;
-      
-      TrigFTF_GNN_EdgeState rs(false);
-      
-      tFilter.followTrack(pS, rs);
-      
-      if(!rs.m_initialized) {
-	continue;
-      }
-      
-      if(static_cast<int>(rs.m_vs.size()) < minLevel) continue;
-      
-      std::vector<const GNN_Node*> vN;
-      
-      for(std::vector<GNN_Edge*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
-        
-	(*sIt)->m_level = -1;//mark as collected
-	
-	if(sIt == rs.m_vs.rbegin()) {
-	  vN.push_back((*sIt)->m_n1);
-	}
-	vN.push_back((*sIt)->m_n2);
-      }
-      
-      if(vN.size()<3) continue;
+      if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
       
       unsigned int lastIdx = output.size();
-      output.emplace_back(rs.m_J);
+      output.emplace_back(std::get<0>(seed));
       
-      for(const auto& n : vN) {
-	output[lastIdx].addSpacePoint(vSP[n->m_idx]);
+      for(const auto& sp_idx : std::get<2>(seed)) {
+	output[lastIdx].addSpacePoint(vSP[sp_idx]);
       }
     }
   
