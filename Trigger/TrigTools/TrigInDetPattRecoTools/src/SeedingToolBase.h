@@ -6,12 +6,8 @@
 #define TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_H
 
 #include "GaudiKernel/ToolHandle.h"
-//#include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
-#include <string>
-#include <vector>
-#include <tuple>
 
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
@@ -19,6 +15,12 @@
 #include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
 #include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "GNN_DataStorage.h"
+#include <string>
+#include <vector>
+#include <utility> //for std::pair
+#include <tuple>
+#include <memory>
+#include <array>
 
 class AtlasDetectorID;
 class SCT_ID;
