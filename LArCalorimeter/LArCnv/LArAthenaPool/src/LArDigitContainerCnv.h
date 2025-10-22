@@ -27,10 +27,6 @@ protected:
   virtual LArDigitContainer* createTransient();
   virtual LArDigitContainerPERS* createPersistent(LArDigitContainer*);
  private:
-  pool::Guid   m_p0_guid;
-  pool::Guid   m_p1_guid;
-  pool::Guid   m_p2_guid;
-  pool::Guid   m_p3_guid;
   const LArOnlineID_Base* m_idHelper = nullptr;
   const LArOnlineID_Base* m_idSCHelper = nullptr;
   ServiceHandle<StoreGateSvc> m_storeGateSvc;

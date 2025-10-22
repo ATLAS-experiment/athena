@@ -16,10 +16,6 @@
 
 LArDigitContainerCnv::LArDigitContainerCnv(ISvcLocator* svcLoc) : 
   LArDigitContainerCnvBase(svcLoc, "LArDigitContainerCnv"),
-  m_p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"),
-  m_p1_guid("F1876026-CDFE-4110-AA59-E441BAA5DE44"),
-  m_p2_guid("66F5B7AF-595C-4F79-A2B7-56590777C313"),
-  m_p3_guid("24480EBA-1AF1-4646-95A7-11285F09717C"),
   m_storeGateSvc("StoreGateSvc", "LArDigitContainerCnv")
 {}
 
@@ -51,11 +47,16 @@ LArDigitContainerPERS* LArDigitContainerCnv::createPersistent(LArDigitContainer*
 
 LArDigitContainer* LArDigitContainerCnv::createTransient() {
 
-   if (compareClassGuid(m_p0_guid)) {
+   constexpr pool::Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502");
+   constexpr pool::Guid p1_guid("F1876026-CDFE-4110-AA59-E441BAA5DE44");
+   constexpr pool::Guid p2_guid("66F5B7AF-595C-4F79-A2B7-56590777C313");
+   constexpr pool::Guid p3_guid("24480EBA-1AF1-4646-95A7-11285F09717C");
+
+   if (compareClassGuid(p0_guid)) {
      ATH_MSG_DEBUG("Read version p0 of LArDigitContainer. GUID=" << m_classID.toString());
      return poolReadObject<LArDigitContainer>();
    }
-   else if (compareClassGuid(m_p1_guid)) {
+   else if (compareClassGuid(p1_guid)) {
      ATH_MSG_DEBUG("Reading LArDigitContainer_p1. GUID=" << m_classID.toString());
      LArDigitContainer* trans=new LArDigitContainer();
      std::unique_ptr<LArDigitContainer_p1> pers(poolReadObject<LArDigitContainer_p1>());
@@ -63,7 +64,7 @@ LArDigitContainer* LArDigitContainerCnv::createTransient() {
      converter.persToTrans(pers.get(), trans, msg());
      return trans;
    } 
-   else if (compareClassGuid(m_p2_guid)) {
+   else if (compareClassGuid(p2_guid)) {
      ATH_MSG_DEBUG("Reading LArDigitContainer_p2. GUID=" << m_classID.toString());
      LArDigitContainer* trans=new LArDigitContainer();
      std::unique_ptr<LArDigitContainer_p2> pers(poolReadObject<LArDigitContainer_p2>());
@@ -71,7 +72,7 @@ LArDigitContainer* LArDigitContainerCnv::createTransient() {
      converter.persToTrans(pers.get(), trans, msg());
      return trans;
    }
-   else if (compareClassGuid(m_p3_guid)) {
+   else if (compareClassGuid(p3_guid)) {
      ATH_MSG_DEBUG("Reading LArDigitContainer_p3. GUID=" << m_classID.toString());
      LArDigitContainer* trans=new LArDigitContainer();
      std::unique_ptr<LArDigitContainer_p3> pers(poolReadObject<LArDigitContainer_p3>());

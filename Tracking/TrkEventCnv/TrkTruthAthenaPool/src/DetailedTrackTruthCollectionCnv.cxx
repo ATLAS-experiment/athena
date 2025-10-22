@@ -19,11 +19,11 @@
 #include "StoreGate/StoreGateSvc.h"
 
 // This is release 12 guid for DetailedTrackTruthVector.
-const pool::Guid DetailedTrackTruthCollectionCnv::s_p0_guid("8F573396-F26F-47FD-B05C-549E9D5C77E1");
-const pool::Guid DetailedTrackTruthCollectionCnv::s_p1_guid("1BA26DEE-BACE-43D6-8F19-E9490CDE8BB8");
-const pool::Guid DetailedTrackTruthCollectionCnv::s_p2_guid("B30AE3A0-F34E-45B6-A8A1-B9CB5E669EB2");
-const pool::Guid DetailedTrackTruthCollectionCnv::s_p3_guid("F5A1DC75-C3FB-4575-8178-905223CF1277");
-const pool::Guid DetailedTrackTruthCollectionCnv::s_p4_guid("018E422D-E420-7894-9245-A824C0ECE535");
+constexpr pool::Guid s_p0_guid("8F573396-F26F-47FD-B05C-549E9D5C77E1");
+constexpr pool::Guid s_p1_guid("1BA26DEE-BACE-43D6-8F19-E9490CDE8BB8");
+constexpr pool::Guid s_p2_guid("B30AE3A0-F34E-45B6-A8A1-B9CB5E669EB2");
+constexpr pool::Guid s_p3_guid("F5A1DC75-C3FB-4575-8178-905223CF1277");
+constexpr pool::Guid s_p4_guid("018E422D-E420-7894-9245-A824C0ECE535");
 
 //================================================================
 DetailedTrackTruthCollectionCnv::DetailedTrackTruthCollectionCnv(ISvcLocator* svcLoc) :
