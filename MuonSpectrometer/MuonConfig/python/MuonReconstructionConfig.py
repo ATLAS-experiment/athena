@@ -46,7 +46,7 @@ def StandaloneMuonOutputCfg(flags):
 
         # Truth Segment Container
         aod_items += ["xAOD::MuonSegmentContainer#MuonTruthSegments"]
-        aod_items += ["xAOD::MuonSegmentAuxContainer#MuonTruthSegmentsAux."]
+        aod_items += ["xAOD::MuonSegmentAuxContainer#MuonTruthSegmentsAux.-localSegPars"]
 
     # ESD list includes all AOD items
     esd_items = []
