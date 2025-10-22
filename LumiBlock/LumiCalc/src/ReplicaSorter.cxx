@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReplicaSorter.cxx
@@ -117,7 +117,7 @@ bool ReplicaSorter::readConfig() {
   	    sequal=true;
           } else if (!sequal) {
  	    // token is a domain name
-	    domains.push_back(token);
+	    domains.push_back(std::move(token));
           } else {
   	    // token is a server name
 	    // only add Frontier ATLF server if FRONTIER_CLIENT set
