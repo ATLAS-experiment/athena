@@ -34,8 +34,6 @@ protected:
   virtual TBLArDigitContainerPERS* createPersistent(TBLArDigitContainer*);
  private:
   TBLArDigitContainerCnv_p1 m_converter;
-  pool::Guid   p0_guid;
-  pool::Guid   p1_guid;
 
 };
 

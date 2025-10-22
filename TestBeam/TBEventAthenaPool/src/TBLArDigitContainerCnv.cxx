@@ -8,9 +8,7 @@
 
 
 TBLArDigitContainerCnv::TBLArDigitContainerCnv(ISvcLocator* svcLoc) : 
-  TBLArDigitContainerCnvBase(svcLoc),
-  p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"),	// GUID of the transient object
-  p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649")		// GUID of the persistent object
+  TBLArDigitContainerCnvBase(svcLoc)
 {}
 
 
@@ -27,6 +25,8 @@ TBLArDigitContainerPERS* TBLArDigitContainerCnv::createPersistent(TBLArDigitCont
 
 TBLArDigitContainer* TBLArDigitContainerCnv::createTransient() {
    MsgStream log(msgSvc(), "TBLArDigitContainerCnv" );
+   constexpr pool::Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"); // GUID of the transient object
+   constexpr pool::Guid p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649");  // GUID of the persistent object
    TBLArDigitContainer* trans=new TBLArDigitContainer();
    if (compareClassGuid(p0_guid)) {
      log << MSG::DEBUG << "Read version p0 of TBLArDigitContainer. GUID=" 
