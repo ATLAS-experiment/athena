@@ -98,9 +98,9 @@ def MPIHiveEventLoopMgrCfg(flags):
     )
 
     cfg.merge(SQLiteDBSvcCfg(flags, name="LogDBSvc", dbPath="mpilog.db"))
-    cfg.addService(CompFactory.MPIClusterSvc("ClusterSvc", LogDatabaseSvc="LogDBSvc"))
+    cfg.addService(CompFactory.MPIClusterSvc("MPIClusterSvc", LogDatabaseSvc="SQLiteDBSvc/LogDBSvc"))
     elmgr = CompFactory.MPIHiveEventLoopMgr(
-        MPIClusterSvc="ClusterSvc",
+        MPIClusterSvc="MPIClusterSvc",
         WhiteboardSvc="EventDataSvc",
         SchedulerSvc=scheduler.getName(),
         FirstEventIndex=flags.Exec.SkipEvents,

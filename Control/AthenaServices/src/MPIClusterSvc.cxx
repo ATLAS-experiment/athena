@@ -3,6 +3,9 @@
 */
 #include "MPIClusterSvc.h"
 
+#include "CxxUtils/XXH.h"
+#include "GaudiKernel/FileIncident.h"
+
 #include <boost/serialization/variant.hpp>
 
 StatusCode MPIClusterSvc::initialize() {
@@ -29,23 +32,40 @@ StatusCode MPIClusterSvc::initialize() {
           "INSERT INTO ranks (rank, node, start_time) "
           "VALUES(?1, ?2, julianday('now'))")
       .run(m_rank, m_env->processor_name());
+  m_mpiLog->createStatement(
+      "CREATE TABLE files (fileId INTEGER PRIMARY KEY, fileName TEXT)")
+      .run();
   m_mpiLog
       ->createStatement(
           "CREATE TABLE event_log (rank INTEGER, id INTEGER UNIQUE,"
+          "inputFileId INTEGER,"
           "runNumber INTEGER, eventNumber INTEGER, complete INTEGER,"
           "status INTEGER, request_time_ns INTEGER, start_time FLOAT,"
           "end_time FLOAT, PRIMARY KEY (runNumber, eventNumber), "
-          "FOREIGN KEY (rank) REFERENCES ranks(rank))")
+          "FOREIGN KEY (rank) REFERENCES ranks(rank),"
+          "FOREIGN KEY (inputFileId) REFERENCES files(fileId))")
       .run();
   m_mpiLog_addEvent = m_mpiLog->createStatement(
-      "INSERT INTO event_log(id, rank, runNumber, eventNumber, complete, "
+      "INSERT INTO event_log(id, rank, inputFileId, runNumber, eventNumber, complete, "
       "start_time, request_time_ns) "
-      "VALUES(?1, ?4, ?2, ?3, 0, julianday('now'), ?5)");
+      "VALUES(?1, ?4, ?6, ?2, ?3, 0, julianday('now'), ?5)");
   m_mpiLog_completeEvent = m_mpiLog->createStatement(
       "UPDATE event_log SET complete = 1, status = ?3, end_time = "
       "julianday('now') WHERE runNumber = ?1 "
       "AND "
       "eventNumber = ?2");
+  m_mpiLog_addFile = m_mpiLog->createStatement(
+      "INSERT INTO files (fileId, fileName) VALUES(?1, ?2)");
+
+  // Set up incident listener
+  ServiceHandle<IIncidentSvc> incsvc("IncidentSvc", this->name());
+  if (!incsvc.retrieve().isSuccess()) {
+    ATH_MSG_FATAL("Cannot get IncidentSvc.");
+    return(StatusCode::FAILURE);
+  }
+  incsvc->addListener(this, IncidentType::BeginInputFile, 100);
+  incsvc->addListener(this, IncidentType::BeginProcessing, 100);
+
   return StatusCode::SUCCESS;
 }
 
@@ -57,6 +77,31 @@ StatusCode MPIClusterSvc::finalize() {
   m_env.reset(nullptr);
   return StatusCode::SUCCESS;
 }
+
+/// Handles BeginInputFile to keep track of which input file an event came from
+void MPIClusterSvc::handle(const Incident& inc) {
+  // Fill in slot map at start of every event
+  if (inc.type() == IncidentType::BeginProcessing) {
+    const std::size_t slot = Gaudi::Hive::currentContext().slot();
+    m_inputFileSlotMap[slot] = m_lastInputFileHash;
+  }
+
+  // Cache new input filename on start of every file
+  if (inc.type() == IncidentType::BeginInputFile) {
+    const FileIncident* fileInc = dynamic_cast<const FileIncident*>(&inc);
+    if (fileInc == nullptr) {
+      ATH_MSG_ERROR("BeginInputFile does not have a file name attached");
+      return;
+    }
+
+    const std::string fileName = fileInc->fileName();
+    // Convert the hash into a signed int64. Just a hash so this doesn't matter.
+    m_lastInputFileHash = static_cast<std::int64_t>(xxh3::hash64(fileName));
+    m_mpiLog_addFile.run(m_lastInputFileHash, fileName);
+  }
+  return;
+}
+
 
 int MPIClusterSvc::numRanks() const {
   return m_world.size();
@@ -156,9 +201,11 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
 
 void MPIClusterSvc::log_addEvent(int eventIdx, std::int64_t run_number,
                                  std::int64_t event_number,
-                                 std::int64_t request_time_ns) {
+                                 std::int64_t request_time_ns,
+                                 std::size_t slot) {
   m_mpiLog_addEvent.run(eventIdx, run_number, event_number, m_rank,
-                        request_time_ns);
+                        request_time_ns,
+                        m_inputFileSlotMap[slot]);
 }
 
 void MPIClusterSvc::log_completeEvent(std::int64_t run_number,
