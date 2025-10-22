@@ -33,6 +33,7 @@ public:
    constexpr Guid(const char *s) { fromString(s); }
    /// Copy constructor
    Guid(const Guid& c) = default;
+   Guid& operator=(const Guid& c) = default;
    /// Magic spaceship operator
    auto operator<=>(const Guid&) const = default;
    bool operator==(const Guid&) const = default;
