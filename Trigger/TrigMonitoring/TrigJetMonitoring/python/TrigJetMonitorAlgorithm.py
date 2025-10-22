@@ -135,12 +135,12 @@ Chain2L1JetCollDict['pp'] = { # set L1 jet collection name for L1 jet chains
 }
 
 Chain2L1JetCollDict['HI'] = {
-  'L1_jJTE20': ['L1_jFexSRJetRoI'],
 
-  'L1_jJ10': ['L1_jFexSRJetRoI'],
-  'L1_jJ20': ['L1_jFexSRJetRoI'],
+  'L1_jJ40': ['L1_jFexSRJetRoI'],
+  'L1_jJ55': ['L1_jFexSRJetRoI'],
+  'L1_jJ80': ['L1_jFexSRJetRoI'],
 
-  'L1_jJ10p30ETA49': ['L1_jFexSRJetRoI'],
+  'L1_jJ40p30ETA49': ['L1_jFexSRJetRoI'],
 }
 
 ############################################
@@ -170,7 +170,6 @@ JetCollections['pp'] = {
 JetCollections['HI'] = {
   'HLT_AntiKt4HIJets'  : {'MatchTo': 'AntiKt4HIJets'},
   'HLT_AntiKt4EMPFlowJets_jes_ftf' : {'MatchTo': 'AntiKt4HIJets'},
-  'HLT_AntiKt4EMTopoJets_subjesIS' : {'MatchTo': 'AntiKt4HIJets'}, #Only for HI O+O collisions in 2025
 }
 
 
@@ -189,44 +188,24 @@ def getChains2Monitor(inputFlags, monMode):
 
   if monMode == 'HI':
     for chainName in Chains2Monitor['HI']:
-      if '_ionp_' in chainName:
+      if '_ion_' in chainName:
           Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4HIJets"
           Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4HIJets"
-      elif '_pf_ftf_' in chainName:
+      else:
           Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_jes_ftf"
           Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4EMPFlowJets"
-      else: 
-          Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4EMTopoJets_subjesIS"
-          Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4HIJets"
+
     # only HLT_noalg get efficiency curves by default, so...
     # these are additional hard-coded chains for efficiency monitoring
     #Standard HI chains (obsolete for O+O)
     if Chains2Monitor['HI'].get('HLT_j60_ion_L1jJ40'): Chains2Monitor['HI']['HLT_j60_ion_L1jJ40'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j75_ion_L1jJ60'): Chains2Monitor['HI']['HLT_j75_ion_L1jJ60'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j85_ion_L1jJ60'): Chains2Monitor['HI']['HLT_j85_ion_L1jJ60'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j150_ion_L1jJ90'): Chains2Monitor['HI']['HLT_j150_ion_L1jJ90'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j200_ion_L1jJ90'): Chains2Monitor['HI']['HLT_j200_ion_L1jJ90'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j75_ion_L1jJ55'): Chains2Monitor['HI']['HLT_j75_ion_L1jJ55'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j85_ion_L1jJ55'): Chains2Monitor['HI']['HLT_j85_ion_L1jJ55'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j150_ion_L1jJ80'): Chains2Monitor['HI']['HLT_j150_ion_L1jJ80'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j200_ion_L1jJ80'): Chains2Monitor['HI']['HLT_j200_ion_L1jJ80'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
 
     if Chains2Monitor['HI'].get('HLT_j50f_ion_L1jJ40p30ETA49'): Chains2Monitor['HI']['HLT_j50f_ion_L1jJ40p30ETA49'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
     if Chains2Monitor['HI'].get('HLT_j60f_ion_L1jJ40p30ETA49'): Chains2Monitor['HI']['HLT_j60f_ion_L1jJ40p30ETA49'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
-
-    #O+O chains
-    #EMTopo jets
-    if Chains2Monitor['HI'].get('HLT_j20_L1jJ10'): Chains2Monitor['HI']['HLT_j20_L1jJ10'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j40_L1jJ20'): Chains2Monitor['HI']['HLT_j40_L1jJ20'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j30a_L1jTE20'): Chains2Monitor['HI']['HLT_j30a_L1jTE20'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j25f_L1jJ10p30ETA49'): Chains2Monitor['HI']['HLT_j25f_L1jJ10p30ETA49'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-
-    #HIP jets
-    if Chains2Monitor['HI'].get('HLT_j20_ionp_L1jJ10'): Chains2Monitor['HI']['HLT_j20_ionp_L1jJ10'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j40_ionp_L1jJ20'): Chains2Monitor['HI']['HLT_j40_ionp_L1jJ20'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j30a_ionp_L1jTE20'): Chains2Monitor['HI']['HLT_j30a_ionp_L1jTE20'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j25f_ionp_L1jJ10p30ETA49'): Chains2Monitor['HI']['HLT_j25f_ionp_L1jJ10p30ETA49'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-
-    #EMPFlow jets
-    if Chains2Monitor['HI'].get('HLT_j20_pf_ftf_L1jJ10'): Chains2Monitor['HI']['HLT_j20_pf_ftf_L1jJ10'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j40_pf_ftf_L1jJ20'): Chains2Monitor['HI']['HLT_j40_pf_ftf_L1jJ20'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
-    if Chains2Monitor['HI'].get('HLT_j30a_pf_ftf_L1jTE20'): Chains2Monitor['HI']['HLT_j30a_pf_ftf_L1jTE20'].update({"RefChain": "HLT_mb_sptrk_L1TRT_FILLED", "OfflineColl": "AntiKt4HIJets"})
 
   elif monMode == "pp":  
     # logic to define HLTColl, RefChain, OfflineColl
@@ -276,7 +255,8 @@ def getEtaRange(chain):
     etaMax      = etaParts[1].split('_')[0]
     etaMax      = int(etaMax)/10
 
-  if 'f_' in chain: #workaround for the HLT forward triggers
+  # Check for 2-3 digit number before f_ for forward triggers
+  if re.search(r'\d{2,3}f_', chain): #workaround for the HLT forward triggers with 2-3 digit numbers
     etaMin,etaMax = 3.2,4.9
 
   if 'a_' in chain: #new full eta range triggers

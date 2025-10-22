@@ -349,6 +349,9 @@ void Muon::nsw::NSWTriggerSTGL1AElink::analyze_data_v3(int version) {
         case STGTPMMData::mm_stream_header:
           m_mm_packets.emplace_back(dataWord,version);
           break;
+        case STGTPStrips::strip_stream_header:
+          m_strip_packets.emplace_back(dataWord,version);
+          break;
         default:
           throw std::runtime_error(Muon::nsw::format("Invalid stream type {}", m_stream_head_streamID.at(counterChunk)));
       }
@@ -379,6 +382,9 @@ void Muon::nsw::NSWTriggerSTGL1AElink::analyze_data(int version) {
           break;
         case STGTPSegments::merge_stream_header:
           m_segment_packets.emplace_back(dataWord,version);
+          break;
+        case STGTPStrips::strip_stream_header:
+          m_strip_packets.emplace_back(dataWord,version);
           break;
         default:
           throw std::runtime_error(Muon::nsw::format("Invalid stream type {}", m_stream_head_streamID.at(counterChunk)));
