@@ -241,7 +241,12 @@ StatusCode MPIHiveEventLoopMgr::workerEventLoop() {
     ClusterMessage msg = m_clusterSvc->waitReceiveMessage();
     auto request_time = Clock::now() - start_time;
     if (msg.messageType == ClusterMessageType::EmergencyStop) {
-      // Emergency stop, return FAILURE
+      // Emergency stop, return FAILURE after fully draining the scheduler to prevent segfault
+      std::size_t numSlots = m_whiteboard->getNumberOfStores();
+      while (m_schedulerSvc->freeSlots() < numSlots) {
+        // Ignore StatusCode, going to return FAILURE anyway
+        (void)(drainLocalScheduler());
+      }
       ATH_MSG_ERROR("Received EmergencyStop message!");
       return StatusCode::FAILURE;
     }
@@ -329,18 +334,20 @@ StatusCode MPIHiveEventLoopMgr::insertEvent(int eventIdx, bool& endOfStream,
   endOfStream = false;
   auto ctx = createEventContext();
   Gaudi::Hive::setCurrentContext(ctx);
+  ctx.setEvt(eventIdx); // Make the event numbers in the log actually make sense
   if (!ctx.valid()) {
     endOfStream = true;  // BUG: Doesn't actually mean end of stream. Remove
                          // after making sure!
     return StatusCode::FAILURE;
   }
 
+  const std::size_t slot = ctx.slot(); // Need this for later
   ATH_CHECK(seek(eventIdx));
   // execute event
   StatusCode sc = executeEvent(std::move(ctx));
-  const auto evtID = m_lastEventContext.eventID();
+  const auto evtID = m_lastEventContext.eventID(); // Set in AthenaHiveEventLoopMgr
   m_clusterSvc->log_addEvent(eventIdx, evtID.run_number(), evtID.event_number(),
-                             requestTime_ns);
+                             requestTime_ns, slot);
 
   if (sc.isRecoverable()) {
     ++m_nLocalSkippedEvts;
@@ -398,12 +405,21 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
         m_aess->eventStatus(*thisFinishedEvtContext));
 
     if (m_aess->eventStatus(*thisFinishedEvtContext) != EventStatus::Success) {
-      ATH_MSG_FATAL("Failed event detected on "
+      ATH_MSG_ERROR("Failed event detected on "
                     << thisFinishedEvtContext << " w/ fail mode: "
                     << m_aess->eventStatus(*thisFinishedEvtContext));
-      thisFinishedEvtContext.reset();
-      fail = StatusCode::FAILURE;
-      continue;
+      ++m_contiguousFailedEvts;
+      ++m_totalFailedEvts;
+      if (m_contiguousFailedEvts >= 3 || m_totalFailedEvts >= 10) {
+        // If we have 3 contiguous failed events or 10 total, end the job
+        thisFinishedEvtContext.reset();
+        fail = StatusCode::FAILURE;
+        continue;
+      }
+    }
+    else {
+      // Event succeeded, reset contiguous failed events
+      m_contiguousFailedEvts = 0;
     }
 
     EventID::number_type n_run(0);

@@ -1405,6 +1405,9 @@ class athenaExecutor(scriptExecutor):
         # Very simple: if we get ERROR or worse, we're dead, except if ignoreErrors=True
         if worstError['nLevel'] == stdLogLevels['ERROR'] and ('ignoreErrors' in self.conf.argdict and self.conf.argdict['ignoreErrors'].value is True):
             msg.warning('Found ERRORs in the logfile, but ignoring this as ignoreErrors=True (see jobReport for details)')
+        # Act as if ignoreErrors=True if running in MPI, because we want to be tolerant to the occasional event failure
+        elif worstError['nLevel'] >= stdLogLevels['ERROR'] and (not mpi.mpiShouldValidate()):
+            msg.warning(f'Found {worstError['level']} in the logfile in MPI rank {mpi.getMPIRank()} but moving on to be failure-tolerant')
         elif worstError['nLevel'] >= stdLogLevels['ERROR']:
             self._isValidated = False
             msg.error('Fatal error in athena logfile (level {0})'.format(worstError['level']))

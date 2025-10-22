@@ -48,6 +48,9 @@ class MPIHiveEventLoopMgr : public AthenaHiveEventLoopMgr {
   /// Master event loop (runs on master, provides events over MPI)
   StatusCode masterEventLoop(int maxEvt);
 
+  // Keep track of how many failed events we've had
+  int m_contiguousFailedEvts{0};
+  int m_totalFailedEvts{0};
   // Keeps track of events already processed
   int m_nLocalCreatedEvts{0};
   int m_nLocalSkippedEvts{0};
