@@ -81,7 +81,12 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::initialize() {
     ATH_CHECK(m_muDetMgrKey.initialize());
     ATH_CHECK(m_prdContainerCacheKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_coindataContainerCacheKey.initialize(SG::AllowEmpty));
+    m_spuriousHitCounter=0;
     return StatusCode::SUCCESS;
+}
+StatusCode Muon::RpcRdoToPrepDataToolMT::finalize() {
+  ATH_MSG_INFO(" Total number of spurious RPC channels in RAW data that are not associated to RPC strips: " << m_spuriousHitCounter);
+  return StatusCode::SUCCESS;
 }
 StatusCode Muon::RpcRdoToPrepDataToolMT::loadProcessedChambers(const EventContext& ctx, State& state) const {
     if (!m_prdContainerCacheKey.key().empty()) {
@@ -1283,8 +1288,9 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
         Identifier chanId{};
         if (!readCdo->getOfflineId(cabling_data, msgStream()) ||
             !readCdo->convert(cabling_data, chanId, false)){
-             ATH_MSG_FATAL("Failed to retrieve the offline Identifier");
-             return StatusCode::FAILURE;
+             // If online channel is not associated to offline, continue to decode the remaining part of the RDO
+             m_spuriousHitCounter++;
+             continue;
         }
         const IdentifierHash  rpcHashId = m_idHelperSvc->moduleHash(chanId);
         RpcPrepDataCollection* collection = state.getPrepCollection(rpcHashId, msgStream());

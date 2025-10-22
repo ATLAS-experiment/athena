@@ -40,6 +40,8 @@ namespace Muon {
         // setup/teardown functions, similar like those for Algorithm/Service
         virtual StatusCode initialize() override;
 
+        virtual StatusCode finalize() override;
+
         // debugging
         virtual void printInputRdo(const EventContext& ctx) const override;
         void printPrepDataImpl(const Muon::RpcPrepDataContainer& rpcPrepDataContainer,
@@ -154,6 +156,8 @@ namespace Muon {
          SG::UpdateHandleKey<RpcPrepDataCollection_Cache> m_prdContainerCacheKey{this,"RpcPrdContainerCacheKey", "", "Optional external cache for the RPC PRD container"};
          SG::UpdateHandleKey<RpcCoinDataCollection_Cache> m_coindataContainerCacheKey{this, "RpcCoinDataContainerCacheKey", "" , "Optional external cache for the RPC coin data container"};
 
+    private:
+        mutable std::atomic_int m_spuriousHitCounter;
     };
 }  // namespace Muon
 
