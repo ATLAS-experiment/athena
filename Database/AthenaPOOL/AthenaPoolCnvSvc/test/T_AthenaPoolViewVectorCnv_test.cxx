@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/test/T_AthenaPoolViewVectorCnv_test.cxx
@@ -248,7 +248,7 @@ DataVector<Y_v2>& makeVecs (SGTest::TestStore& store)
   return ret;
 }
 
-
+//coverity [root_function]
 int main()
 {
   CxxUtils::ubsan_suppress ([]() {TInterpreter::Instance(); });

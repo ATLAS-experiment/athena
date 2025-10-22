@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StorageSvc/DbReflex.h"
@@ -23,7 +23,7 @@ bool testGuid( const string& guid, bool shouldwork, DbPrint& mylog )
    return not (shouldwork xor typ);
 }
 
-
+//coverity [root_function]
 int main()
 {
    DbPrint mylog("APR Guid TEST");
