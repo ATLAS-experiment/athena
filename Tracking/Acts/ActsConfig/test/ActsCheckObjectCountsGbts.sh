@@ -14,7 +14,9 @@ Reco_tf.py \
              from ActsConfig.ActsConfigFlags import SeedingStrategy; \
              flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2; \
              flags.Tracking.doTruth=False; \
-             flags.Tracking.doPixelDigitalClustering=True" \
+             flags.Tracking.doPixelDigitalClustering=True; \
+             from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
+             flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \

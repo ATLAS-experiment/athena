@@ -99,6 +99,8 @@ private:
     Gaudi::Property<bool> m_isITk {this, "isITk", true,
       "True if running in ITk"};
 
+    Gaudi::Property<unsigned int> m_errorStrategy{this, "errorStrategy", 0, "Use different error strategies for the strip clusters"};
+
     int m_timeBinBits[3]{-1, -1, -1};
 
 

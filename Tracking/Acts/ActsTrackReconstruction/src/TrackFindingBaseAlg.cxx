@@ -183,10 +183,11 @@ namespace ActsTrk {
   std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingBaseAlg::setMeasurementSelector(
       const detail::TrackFindingMeasurements &measurements,
       TrackFinderOptions &options) const {
-    ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+        m_stripCalibTool.isEnabled() ? &(*m_stripCalibTool) : nullptr,
+        m_hgtdCalibTool.isEnabled() ? &(*m_hgtdCalibTool) : nullptr,
         measurements.measurementRanges(),
         m_measurementSelectorConfig.m_etaBins,
         m_measurementSelectorConfig.m_chi2CutOffOutlier,

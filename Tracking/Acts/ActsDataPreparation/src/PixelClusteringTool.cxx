@@ -42,10 +42,18 @@ namespace ActsTrk {
 StatusCode PixelClusteringTool::initialize()
 {
   ATH_MSG_DEBUG("Initializing " << name() << " ...");
+
+  ATH_MSG_DEBUG("   " << m_addCorners );
+  ATH_MSG_DEBUG("   " << m_useWeightedPos );
+  ATH_MSG_DEBUG("   " << m_broadErrors );
+  ATH_MSG_DEBUG("   " << m_checkGanged );
+    
   ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
   ATH_CHECK(m_pixelReadout.retrieve());
 
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
+
+  ATH_MSG_INFO("   Charge Data Key:" << m_chargeDataKey);
 
   ATH_CHECK( detStore()->retrieve(m_pixelID, "PixelID") );
   

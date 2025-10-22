@@ -18,6 +18,8 @@
 
 namespace ActsTrk {
 constexpr double ONE_TWELFTH = 1./12.;
+constexpr float oneStripSF = 1.1025;
+constexpr float twoStripSF = 0.0729; 
   
   // Required by ACTS clusterization
 static
@@ -28,7 +30,7 @@ int getCellColumn(const StripClusteringTool::Cell& cell)
 
 // Required by ACTS clusterization
 static inline void clusterReserve(StripClusteringTool::Cluster& cl,
-				  std::size_t n)
+                                  std::size_t n)
 {
   cl.ids.reserve(n);
 } 
@@ -39,7 +41,7 @@ void clusterAddCell(StripClusteringTool::Cluster& cl, const StripClusteringTool:
 {
     cl.ids.push_back(cell.id.get_compact());
     if (cl.ids.size() < (sizeof(cl.hitsInThirdTimeBin) * 8)) {
-	cl.hitsInThirdTimeBin |= cell.timeBits.test(0) << cl.ids.size();
+      cl.hitsInThirdTimeBin |= cell.timeBits.test(0) << cl.ids.size();
     }
 }
 
@@ -52,6 +54,14 @@ StripClusteringTool::StripClusteringTool(
 StatusCode StripClusteringTool::initialize()
 {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
+
+    ATH_MSG_DEBUG(m_stripDetElStatus);
+    ATH_MSG_DEBUG(m_checkBadModules);
+    ATH_MSG_DEBUG(m_maxFiredStrips);
+    ATH_MSG_DEBUG(m_stripDetEleCollKey);
+    ATH_MSG_DEBUG(m_isITk);
+    ATH_MSG_DEBUG(m_errorStrategy);
+
 
     ATH_CHECK(m_conditionsTool.retrieve(DisableTool{!m_stripDetElStatus.empty()} ));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
@@ -243,6 +253,26 @@ StripClusteringTool::makeCluster(Cluster &cluster,
     // This is the same strategy used in Athena:
     // Since clusterId is arbitary (it only needs to be unique) just use ID of first strip
     // For strip Cluster it has been found that "identifierOfPosition" does not produces unique values
+
+
+    // If requiring broad errors, use the cluster size as error -
+    // TODO use SiWidth to get the right cluster size as I'm assuming equal strip pitch
+    
+    if (m_errorStrategy == 1)   {// use width
+      
+      localCov *= size*size;
+      
+    } else if (m_errorStrategy == 2) { //use tuned error as function of size
+      
+      if (size == 1)
+        localCov *= oneStripSF;
+      else if (size == 2)
+        localCov *= twoStripSF*size*size;
+      else
+        localCov *= size*size;
+      
+    }
+    
     cl.setMeasurement<1>(element.identifyHash(), localPos, localCov);
     cl.setIdentifier( cluster.ids.front() );
 

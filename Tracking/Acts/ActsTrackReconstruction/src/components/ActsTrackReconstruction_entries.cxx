@@ -16,6 +16,7 @@
 
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
+#include "src/ITkStripCalibrationTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "src/KalmanFitterTool.h"
 #include "src/GaussianSumFitterTool.h"
@@ -39,6 +40,7 @@ DECLARE_COMPONENT( ActsTrk::ActsToXAODTrackConverterAlg )
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
+DECLARE_COMPONENT( ActsTrk::ITkStripCalibrationTool )
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinterTool )
 DECLARE_COMPONENT( ActsTrk::KalmanFitterTool )
 DECLARE_COMPONENT( ActsTrk::GaussianSumFitterTool )
