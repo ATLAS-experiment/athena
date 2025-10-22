@@ -17,7 +17,9 @@
 
 #include "GNN_TrackingFilter.h"
 
-#include <numeric>
+#include <cmath>
+#include <numeric> //for std::iota
+#include <algorithm> //for std::sort
 
 StatusCode SeedingToolBase::initialize() {
   ATH_CHECK(AthAlgTool::initialize());
@@ -447,7 +449,7 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
 
   vSeedCandidates.reserve(vSeeds.size());
   
-  TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
+  auto tFilter = std::make_unique<TrigFTF_GNN_TrackingFilter>(m_layerGeometry, edgeStorage);
 
   for(auto pS : vSeeds) {
 
@@ -455,7 +457,7 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
 
     TrigFTF_GNN_EdgeState rs(false);
 
-    tFilter.followTrack(pS, rs);
+    tFilter->followTrack(pS, rs);
 
     if(!rs.m_initialized) {
       continue;
