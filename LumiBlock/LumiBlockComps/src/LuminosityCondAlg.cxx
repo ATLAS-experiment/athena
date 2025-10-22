@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockComps/src/LuminosityCondAlg.cxx
@@ -594,8 +594,8 @@ LuminosityCondAlg::updatePerBunchLumiRun1 (const EventContext& ctx,
   }
 
   // Almost done, now we apply the scale factor to all BCIDs
-  for (float& lumi : calLumiVec) {
-    lumi *= offlineOnlineRatio;
+  for (float& bclumi : calLumiVec) {
+    bclumi *= offlineOnlineRatio;
   }
 
   lumi.setLbLuminosityPerBCIDVector (std::move (calLumiVec));
