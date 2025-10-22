@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdio> // For sprintf on gcc45
@@ -27,7 +27,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 using namespace std;
 using namespace pool;
 
-
+//coverity [root_function]
 int main(int argc, char** )
 {
   SystemTools::initGaudi();
