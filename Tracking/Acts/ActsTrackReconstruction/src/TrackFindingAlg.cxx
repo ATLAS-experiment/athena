@@ -854,7 +854,7 @@ struct Collector {
         detail::addToExpectedLayerPattern(*result, *detElem);
       }
     }
-  };
+  }
 };
 }
 
