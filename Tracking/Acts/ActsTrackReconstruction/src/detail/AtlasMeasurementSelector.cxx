@@ -395,20 +395,24 @@ namespace {
       ActsTrk::MeasurementCalibrator         m_calibrator;
 
       // the actual measurement selector
-      TheAtlasMeasurementSelector             m_measurementSelector;
+      TheAtlasMeasurementSelector            m_measurementSelector;
    };
 }
 
 namespace ActsTrk::detail {
 // return a configured, wrapper for the measurement selector
-std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
+std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
+                                                                       const ActsTrk::IOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
+                                                                       const ActsTrk::IOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
                                                                        const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                                                        const std::vector<float> &etaBinsf,
                                                                        const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
                                                                        const std::vector<size_t> &numMeasurementsCutOff) {
 
     // set calibrators per measurement container type (order does not matter);
-    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(onTrackCalibratorTool);
+    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(pixelOnTrackCalibratorTool,
+                                                              stripOnTrackCalibratorTool,
+                                                              hgtdOnTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
     using AtlMeasurementSelector = AtlasActsMeasurmentSelector<RecoTrackContainer>;

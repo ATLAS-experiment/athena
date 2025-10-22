@@ -24,6 +24,32 @@ class AmbiguitySolverMode(FlagEnum):
     END_OF_TF = 1
     DURING_TF = 2
 
+# Define the Pixel cluster calibration error strategy modes (the errors that will be used for filtering)
+# CALIBRATED : load the calibration constants from database
+# PITCH  : if we used broad clusters during clustering (so the error is the cluster width) rescale it by the number of pixels
+#          to assign the pitch as error to the cluster
+class PixelErrorStrategy(FlagEnum):
+    CALIBRATED = 0
+    PITCH = 1
+
+# Define the Strip clustering errors assigned to the measurements during clustering
+# These errors will be used during track finding
+# PITCH : assign the pitch as cluster error
+# WIDTH : use the cluster width as cluster error
+# TUNED : use an error 1.05 x pitch for 1strip clusters, a 0.27 x width for 2strip clusters and width for >=3strip clusters 
+class StripClusteringErrorMode(FlagEnum):
+    PITCH = 0
+    WIDTH = 1
+    TUNED = 2
+
+# Define the Strip cluster calibration error strategy modes (the errors that will be used for filtering)
+# CLUSTERING : Use directly the clustering errors 
+# PITCH  : if we used broad clusters during clustering (so the error is the cluster width) rescale it by the number of pixels
+#          to assign the pitch as error to the cluster
+class StripErrorStrategy(FlagEnum):
+    CLUSTERING = 0
+    PITCH = 1
+
 
 # This is temporary during the integration of ACTS.
 class SpacePointStrategy(FlagEnum):
@@ -46,6 +72,15 @@ class PixelCalibrationStrategy(FlagEnum):
     AnalogueClustering = "AnalogueClustering"
     AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
 
+# Flag for strip calibration strategy during track finding
+# - use cluster as is (Uncalibrated)
+# - use strip pitch / sqrt(12) as error either before selecting
+#   measurements for extending tracks (DigitalCalibration)
+# - or only apply it to selected measurements (DigitalCalibrationAfterSelection)
+class StripCalibrationStrategy(FlagEnum):
+    Uncalibrated = "Uncalibrated"
+    DigitalCalibration = "DigitalCalibration"
+    DigitalCalibrationAfterSelection = "DigitalCalibrationAfterSelection"
     
 def createActsConfigFlags():
     actscf = AthConfigFlags()
@@ -99,6 +134,8 @@ def createActsConfigFlags():
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
     actscf.addFlag("Acts.Clusters.RetrieveChargeInformation", lambda pcf: not pcf.Tracking.doPixelDigitalClustering)
+    actscf.addFlag("Acts.Clusters.StripClusteringErrorMode", StripClusteringErrorMode.PITCH,type=StripClusteringErrorMode)
+    actscf.addFlag("Acts.Clusters.UsePixelBroadErrors", False)
     
     # SpacePoint
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
@@ -108,6 +145,7 @@ def createActsConfigFlags():
     
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
+    actscf.addFlag('Acts.StripCalibrationStrategy', StripCalibrationStrategy.Uncalibrated, type=StripCalibrationStrategy)
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)

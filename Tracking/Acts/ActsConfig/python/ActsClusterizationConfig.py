@@ -68,7 +68,9 @@ def ActsPixelClusteringToolCfg(flags,
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
 
     kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
-    kwargs.setdefault('UseBroadErrors', flags.Beam.Type is BeamType.Cosmics)
+
+    #Always use broad errors if cosmics
+    kwargs.setdefault('UseBroadErrors', flags.Acts.Clusters.UsePixelBroadErrors or flags.Beam.Type is BeamType.Cosmics)
 
     acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
@@ -96,6 +98,10 @@ def ActsStripClusteringToolCfg(flags,
     if flags.ITk.selectStripIntimeHits and 'timeBins' not in kwargs:
         coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
         kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
+
+
+    #Error strategy
+    kwargs.setdefault("errorStrategy",flags.Acts.Clusters.StripClusteringErrorMode.value)
 
     acc.setPrivateTools(CompFactory.ActsTrk.StripClusteringTool(name, **kwargs))
     return acc
