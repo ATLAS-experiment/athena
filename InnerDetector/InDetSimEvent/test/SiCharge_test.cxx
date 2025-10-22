@@ -19,6 +19,7 @@ BOOST_AUTO_TEST_SUITE(SiChargeTests)
   }
   BOOST_AUTO_TEST_CASE(CanBeCopyConstructed){
     SiCharge c1(0,0,process);
+    //coverity [copy_constructor_call]
     BOOST_CHECK_NO_THROW(SiCharge c(c1));
   }
   BOOST_AUTO_TEST_CASE(CanBeMoveConstructed){
@@ -27,6 +28,7 @@ BOOST_AUTO_TEST_SUITE(SiChargeTests)
   }
   BOOST_AUTO_TEST_CASE(CanBeAssigned){
     SiCharge c1(0,0,process);
+    //coverity [copy_constructor_call]
     BOOST_CHECK_NO_THROW(SiCharge c = c1);
   }
   BOOST_AUTO_TEST_CASE(CanBeMoveAssigned){
