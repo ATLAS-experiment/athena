@@ -34,6 +34,7 @@
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionRowBuffer.h"
 #include "CollectionBase/TokenList.h"
+#include "StorageSvc/DbType.h"
 
 #include <boost/tokenizer.hpp>
 #include <algorithm>
@@ -719,7 +720,7 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
    }
    auto token = std::make_unique<Token>();
    token->fromString(tokenStr);
-   iop = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", "EventSelector", IPoolSvc::kInputStream, std::move(token));
+   iop = new TokenAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), "", "EventSelector", IPoolSvc::kInputStream, std::move(token));
    return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________

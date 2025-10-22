@@ -23,6 +23,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "StorageSvc/DbType.h"
 
 #include <vector>
 
@@ -64,7 +65,7 @@ StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
    }
    ATH_MSG_DEBUG("The current File contains: " << dataHeader->size() << " objects");
    for (const auto& element : *dataHeader) {
-      SG::TransientAddress* tadd = element.getAddress();
+      SG::TransientAddress* tadd = element.getAddress(pool::POOL_StorageType.type());
       if (tadd->clID() == ClassID_traits<DataHeader>::ID()) {
          delete tadd; tadd = nullptr;
       } else {
@@ -109,7 +110,7 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
          ATH_MSG_ERROR("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
          return StatusCode::FAILURE;
       }
-      IOpaqueAddress* iop = new GenericAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), tokenStr, "SecondaryEventSelector");
+      IOpaqueAddress* iop = new GenericAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), tokenStr, "SecondaryEventSelector");
       if (!eventStore()->recordAddress(iop).isSuccess()) {
          ATH_MSG_ERROR("Cannot record address to StoreGate with token string: " << tokenStr);
          return StatusCode::FAILURE;
@@ -124,7 +125,7 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
       if (doRegister) {
          EventSelectorAthenaPoolUtil::registerKeys(element, eventStore());
       }
-      SG::TransientAddress* tadd = element.getAddress();
+      SG::TransientAddress* tadd = element.getAddress(pool::POOL_StorageType.type());
       if (tadd->clID() == ClassID_traits<DataHeader>::ID()) { // self reference
          delete tadd; tadd = nullptr;
       } else {
