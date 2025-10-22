@@ -58,17 +58,21 @@ namespace {
       asgmsg.msg(MSG::WARNING) << "unable to open " << output_path << endmsg;
       return false;
     }
-
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 60L);
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &file);
-
+    auto setCurlOption =[curl](auto option, const auto &value)->bool{
+      CURLcode ret = curl_easy_setopt(curl, option, value);
+      return (ret == CURLE_OK);
+    };
+    bool setupOk = setCurlOption(CURLOPT_TIMEOUT, 60L);
+    setupOk &= setCurlOption(CURLOPT_URL, url.c_str());
+    setupOk &= setCurlOption(CURLOPT_WRITEFUNCTION, write_data);
+    setupOk &= setCurlOption(CURLOPT_WRITEDATA, &file);
     // Optional: follow redirects
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
+    setupOk &= setCurlOption(CURLOPT_FOLLOWLOCATION, 1L);
+    if (not setupOk) {
+      asgmsg.msg(MSG::WARNING) << "curl setup failed in PathResolver." <<endmsg;
+      return false;
+    }
     CURLcode res = curl_easy_perform(curl);
-
     if (res != CURLE_OK) {
       asgmsg.msg(MSG::WARNING) << "error downloading file: "
                              << curl_easy_strerror(res)
