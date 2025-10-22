@@ -39,7 +39,7 @@ namespace {
                     return re->padDesign(prd->measurementHash());
             }
         }
-        THROW_EXCEPTION("Invalid space point for design retrival "<<sp.msSector()->idHelperSvc()->toString(sp.identify()));
+        THROW_EXCEPTION("Invalid space point for design retrieval "<<sp.msSector()->idHelperSvc()->toString(sp.identify()));
     }
     inline double stripHalfLength(const MuonR4::SpacePoint& sp) {
         const auto& design = getDesign(sp);
