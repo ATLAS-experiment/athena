@@ -2,9 +2,12 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDictParser/test/tid.cxx,v 1.3 2005-04-29 16:11:22 schaffer Exp $ 
-  
 #include "IdDictParser/IdDictParser.h"  
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictFieldImplementation.h"
+#include "IdDict/IdDictRange.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/Range.h" 
 #include "Identifier/Identifier.h" 
  

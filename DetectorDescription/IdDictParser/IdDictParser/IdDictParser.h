@@ -1,12 +1,18 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICTPARSER_IDDICTPARSER_H
 #define IDDICTPARSER_IDDICTPARSER_H
   
 #include "XMLCoreParser/XMLCoreParser.h"  
-#include "IdDict/IdDictDefs.h"  
+#include "IdDict/IdDictMgr.h"
+class IdDictDictionary;
+class IdDictField;
+class IdDictRegion;
+class IdDictAltRegions;
+class IdDictSubRegion;
+class IdDictRegionEntry;
   
 class IdDictParser : public XMLCoreParser  
 { 
