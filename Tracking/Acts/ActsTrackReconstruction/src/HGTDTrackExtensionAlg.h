@@ -50,7 +50,7 @@
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 
 // Tools
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -98,7 +98,7 @@ private:
       m_monTool{this, "MonTool", "", "Monitoring tool"};
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> 
       m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-  ToolHandle<IActsExtrapolationTool> 
+  ToolHandle<ActsTrk::IExtrapolationTool> 
       m_extrapolationTool{this, "ExtrapolationTool", ""};
   
   ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>

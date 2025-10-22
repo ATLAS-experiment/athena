@@ -11,7 +11,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 
 #include "MuonPatternEvent/MuonPatternContainer.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
@@ -61,7 +61,7 @@ namespace MuonR4{
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
             /** @brief Track extrapolation tool */
-            ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Segment selection tool to pick the good quality segments */
             ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Range service to smear the segment parameters */

@@ -10,6 +10,8 @@
 #include "CxxUtils/checker_macros.h"
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+
 // ACTS
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
@@ -33,7 +35,6 @@ class IActsMaterialTrackWriterSvc;
 
 class EventContext;
 class IAthRNGSvc;
-class IActsExtrapolationTool;
 class IActsPropStepRootWriterSvc;
 
 class ActsExtrapolationAlg : public AthReentrantAlgorithm {
@@ -47,7 +48,7 @@ private:
   ServiceHandle<IActsPropStepRootWriterSvc> m_propStepWriterSvc{this, "PropStepRootWriterSvc", "ActsPropStepRootWriterSvc"};
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "AthRNGSvc", "AthRNGSvc"};
 
-  ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
+  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
 
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 

@@ -21,12 +21,10 @@
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 //other
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
 
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
