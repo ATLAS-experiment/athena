@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CondAttrListVecCnv.cxx
@@ -19,6 +19,7 @@
 #include "AthenaPoolUtilities/CondAttrListVecAddress.h"
 
 #include "StoreGate/StoreGateSvc.h"
+#include "StorageSvc/DbType.h"
 
 //--------------------------------------------------------------------
 
@@ -81,7 +82,7 @@ StatusCode CondAttrListVecCnv::createRep(DataObject* pObj, IOpaqueAddress*& pAdd
     CondAttrListVec* list = 0; //dynamic_cast<AthenaAttributeList*>(pObj);
     SG::fromStorable(pObj, list);
     if ( pAddr != nullptr ) pAddr->release();
-    CondAttrListVecAddress* addr = new CondAttrListVecAddress(POOL_StorageType,
+    CondAttrListVecAddress* addr = new CondAttrListVecAddress(storageType(),
 		    classID(),
 		    "POOLContainer_CondAttrListVec][CLID=x");
     addr->setAttrListVec(list);
@@ -92,7 +93,7 @@ StatusCode CondAttrListVecCnv::createRep(DataObject* pObj, IOpaqueAddress*& pAdd
 }
 //__________________________________________________________________________
 long CondAttrListVecCnv::storageType() {
-   return(POOL_StorageType);
+   return pool::POOL_StorageType.type();
 }
 //__________________________________________________________________________
 const CLID& CondAttrListVecCnv::classID() {
@@ -100,6 +101,6 @@ const CLID& CondAttrListVecCnv::classID() {
 }
 //__________________________________________________________________________
 CondAttrListVecCnv::CondAttrListVecCnv(ISvcLocator* svcloc) :
-	Converter(POOL_StorageType, classID(), svcloc) {
+	Converter(storageType(), classID(), svcloc) {
 }
 //__________________________________________________________________________

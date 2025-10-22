@@ -126,10 +126,6 @@ const Token* DataHeaderElement::getToken() const {
    return(&m_token);
 }
 //_____________________________________________________________________________
-long DataHeaderElement::getStorageType() const {
-   return(POOL_StorageType);
-}
-//_____________________________________________________________________________
 const std::vector<DataHeaderElement::sgkey_t>&
 DataHeaderElement::getHashes() const {
    return(m_hashes);
@@ -145,14 +141,13 @@ void DataHeaderElement::addHash(IStringPool* pool) {
    }
 }
 //______________________________________________________________________________
-SG::TransientAddress* DataHeaderElement::getAddress(unsigned long contextId) const {
-   return(getAddress(m_key, contextId));
+SG::TransientAddress* DataHeaderElement::getAddress(long storageType) const {
+   return getAddress(storageType, m_key);
 }
 //______________________________________________________________________________
-SG::TransientAddress* DataHeaderElement::getAddress(const std::string& key,
-	unsigned long contextId) const {
+SG::TransientAddress* DataHeaderElement::getAddress(long storageType, const std::string& key) const {
    CLID primaryClID = getPrimaryClassID();
-   TokenAddress* tokAdd = new TokenAddress(this->getStorageType(), primaryClID, "", m_key, contextId , &m_token);
+   TokenAddress* tokAdd = new TokenAddress(storageType, primaryClID, "", m_key, 0, &m_token);
    SG::TransientAddress* sgAddress = new SG::TransientAddress(primaryClID, key, tokAdd, m_clids);
    if (!m_hashes.empty()) {
      // If we have the sgkey corresponding to the primary clid, record

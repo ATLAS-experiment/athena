@@ -56,7 +56,7 @@ StatusCode AthenaPoolConverter::finalize() {
 }
 //__________________________________________________________________________
 long AthenaPoolConverter::repSvcType() const {
-   return(POOL_StorageType);
+   return pool::POOL_StorageType.type();
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) {
@@ -153,12 +153,12 @@ StatusCode AthenaPoolConverter::fillRepRefs(IOpaqueAddress* pAddr, DataObject* p
 }
 //__________________________________________________________________________
 long AthenaPoolConverter::storageType() {
-   return(POOL_StorageType);
+   return pool::POOL_StorageType.type();
 }
 //__________________________________________________________________________
 AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLocator,
                                          const char* name /*= nullptr*/) :
-		::Converter(POOL_StorageType, myCLID, pSvcLocator),
+		::Converter(storageType(), myCLID, pSvcLocator),
 		::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
                                name ? name : "AthenaPoolConverter"),
 	m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),

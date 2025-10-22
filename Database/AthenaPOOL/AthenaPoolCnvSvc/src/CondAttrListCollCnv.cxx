@@ -20,6 +20,7 @@
 #include "AthenaPoolUtilities/CondAttrListCollAddress.h"
 
 #include "StoreGate/StoreGateSvc.h"
+#include "StorageSvc/DbType.h"
 
 //--------------------------------------------------------------------
 
@@ -83,7 +84,7 @@ StatusCode CondAttrListCollCnv::createRep(DataObject* pObj, IOpaqueAddress*& pAd
     CondAttrListCollection* list = 0; //dynamic_cast<CondAttrListCollection*>(pObj);
     SG::fromStorable(pObj, list);
     if ( pAddr != nullptr ) pAddr->release();
-    CondAttrListCollAddress* addr = new CondAttrListCollAddress(POOL_StorageType,
+    CondAttrListCollAddress* addr = new CondAttrListCollAddress(storageType(),
 		    classID(),
 		    "POOLContainer_CondAttrListCollection][CLID=x");
     addr->setAttrListColl(list);
@@ -95,7 +96,7 @@ StatusCode CondAttrListCollCnv::createRep(DataObject* pObj, IOpaqueAddress*& pAd
 }
 //__________________________________________________________________________
 long CondAttrListCollCnv::storageType() {
-   return(POOL_StorageType);
+   return pool::POOL_StorageType.type();
 }
 //__________________________________________________________________________
 const CLID& CondAttrListCollCnv::classID() {
@@ -103,6 +104,6 @@ const CLID& CondAttrListCollCnv::classID() {
 }
 //__________________________________________________________________________
 CondAttrListCollCnv::CondAttrListCollCnv(ISvcLocator* svcloc) :
-	Converter(POOL_StorageType, classID(), svcloc) {
+	Converter(storageType(), classID(), svcloc) {
 }
 //__________________________________________________________________________

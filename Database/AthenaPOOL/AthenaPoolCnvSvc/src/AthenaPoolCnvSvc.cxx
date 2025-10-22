@@ -450,8 +450,8 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
 		const std::string* par,
 		const unsigned long* ip,
 		IOpaqueAddress*& refpAddress) {
-   if (svcType != POOL_StorageType) {
-      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << POOL_StorageType);
+   if( svcType != repSvcType() ) {
+      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << repSvcType());
       return(StatusCode::FAILURE);
    }
    std::unique_ptr<Token> token;
@@ -467,7 +467,7 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
    if (token == nullptr) {
       return(StatusCode::RECOVERABLE);
    }
-   refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
+   refpAddress = new TokenAddress(repSvcType(), clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -475,11 +475,11 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
 		const CLID& clid,
 		const std::string& refAddress,
 		IOpaqueAddress*& refpAddress) {
-   if (svcType != POOL_StorageType) {
-      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << POOL_StorageType);
+   if (svcType != repSvcType()) {
+      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << repSvcType());
       return(StatusCode::FAILURE);
    }
-   refpAddress = new GenericAddress(POOL_StorageType, clid, refAddress);
+   refpAddress = new GenericAddress(repSvcType(), clid, refAddress);
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -496,9 +496,7 @@ StatusCode AthenaPoolCnvSvc::convertAddress(const IOpaqueAddress* pAddress,
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const {
-  if (fileSpec.starts_with ( "oracle") || fileSpec.starts_with ( "mysql")) {
-      outputTech = pool::POOL_RDBMS_StorageType.type();
-   } else if (fileSpec.starts_with ( "ROOTKEY:")) {
+   if (fileSpec.starts_with ( "ROOTKEY:")) {
       outputTech = pool::ROOTKEY_StorageType.type();
       fileSpec.erase(0, 8);
    } else if (fileSpec.starts_with ( "ROOTTREE:")) {
@@ -589,7 +587,7 @@ void AthenaPoolCnvSvc::handle(const Incident& incident) {
 }
 //______________________________________________________________________________
 AthenaPoolCnvSvc::AthenaPoolCnvSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	base_class(name, pSvcLocator, POOL_StorageType) {
+	base_class(name, pSvcLocator, pool::POOL_StorageType.type()) {
 }
 //__________________________________________________________________________
 void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property,

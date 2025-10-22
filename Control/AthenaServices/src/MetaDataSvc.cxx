@@ -201,7 +201,7 @@ StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::t
                if (verNumber != 0) {
                   key = myVersObjKey;
                }
-               tads.push_back(dhe.getAddress(key));
+               tads.push_back(dhe.getAddress(m_storageType, key));
             }
          }
       }

@@ -75,16 +75,13 @@ public: // Non-static members
    const std::vector<std::string>& getAlias() const;
    /// @return token by pointer (and give away ownership).
    const Token* getToken() const;
-   /// @return StorageType needed to read the DataObject (depends on technology).
-   long getStorageType() const;
    /// @return the list of hash codes.
    ///         In 1-1 correspondence with the CLID set.
    const std::vector<sgkey_t>& getHashes() const;
    /// @return a pointer to the TransientAddress of the DataObject.
-   SG::TransientAddress* getAddress(unsigned long contextId = 0) const;
+   SG::TransientAddress* getAddress( long storageType ) const;
    /// @return a pointer to the TransientAddress of the DataObject, with new transient key.
-   SG::TransientAddress* getAddress(const std::string& key,
-	   unsigned long contextId = 0) const;
+   SG::TransientAddress* getAddress( long storageType, const std::string& key ) const;
    /// Add new entry to hash map
    void addHash(IStringPool* pool);
 

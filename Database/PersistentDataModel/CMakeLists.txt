@@ -4,7 +4,7 @@
 atlas_subdir( PersistentDataModel )
 
 # External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
+find_package( CORAL COMPONENTS CoralBase )
 find_package( UUID )
 
 # Component(s) in the package:

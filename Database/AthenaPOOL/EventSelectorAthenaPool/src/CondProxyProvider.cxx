@@ -24,6 +24,7 @@
 
 // Pool
 #include "CollectionBase/ICollectionCursor.h"
+#include "StorageSvc/DbType.h"
 
 #include <vector>
 #include <list>
@@ -100,7 +101,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
       SG::VersionedKey myVersKey(name(), verNumber);
       auto token = std::make_unique<Token>();
       token->fromString(headerIterator->eventRef().toString());
-      TokenAddress* tokenAddr = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", myVersKey, m_contextId, std::move(token));
+      TokenAddress* tokenAddr = new TokenAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), "", myVersKey, m_contextId, std::move(token));
       if (!detectorStoreSvc->recordAddress(tokenAddr).isSuccess()) {
          delete tokenAddr;
          ATH_MSG_ERROR("Cannot record DataHeader.");
@@ -116,7 +117,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
       SG::ReadHandle<DataHeader> dataHeader = version.dataObject;
       ATH_MSG_DEBUG("The current File contains: " << dataHeader->size() << " objects");
       for (const auto& element : *dataHeader) {
-         SG::TransientAddress* tadd = element.getAddress();
+         SG::TransientAddress* tadd = element.getAddress(pool::POOL_StorageType.type());
          if (tadd->clID() == ClassID_traits<DataHeader>::ID()) {
             delete tadd; tadd = 0;
          } else {
