@@ -54,7 +54,7 @@ namespace Muon {
         const RpcCablingOfflineID& offId{translatorCache};
         OfflToOnlMap::const_iterator itr = m_offToOnline.find(offId);
         if (itr == m_offToOnline.end()) {
-            log << MSG::ERROR<<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": The offline identifier "
+            log << MSG::DEBUG<<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": The offline identifier "
                 << offId << " is unknown " << endmsg;
             return false;
         }
@@ -86,14 +86,14 @@ namespace Muon {
                 log <<MSG::DEBUG<<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<":\n"<<(*onlineCard.flatCable)<<endmsg;
             }
         }
-        log << MSG::ERROR<<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": No tdc channel could be found for the object "
+        log << MSG::DEBUG<<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": No tdc channel could be found for the object "
             << static_cast<const RpcCablingOfflineID&>(translatorCache)<< " strip: " << static_cast<int>(translatorCache.strip) << endmsg;
         return false;
     }
     bool RpcCablingMap::getOfflineId(RpcCablingData& translatorCache, MsgStream& log) const {
         OnlToOfflMap::const_iterator itr = m_onToOffline.find(translatorCache);
         if (itr == m_onToOffline.end()) {
-            log << MSG::ERROR <<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": The tdc chip "
+            log << MSG::DEBUG <<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": The tdc chip "
                 << static_cast<const RpcCablingOnlineID&>(translatorCache) << " is unknown " << endmsg;
             return false;
         }
@@ -112,7 +112,7 @@ namespace Muon {
             }
             return true;
         }
-        log << MSG::ERROR<<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": No tdc channel could be found for the object "
+        log << MSG::DEBUG<<"RpcCablingMap::"<<__func__<<"() - "<<__LINE__<<": No tdc channel could be found for the object "
             << static_cast<const RpcCablingOnlineID&>(translatorCache)
             << " tdc: " << static_cast<int>(translatorCache.channelId) << endmsg;
 

@@ -463,6 +463,7 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
         if (x & 0x00080000) { x  = 0xFFFF0000 | x;  }
         if (y & 0x00080000) { y  = 0xFFFF0000 | y;  }
         sum_x += x;
+        if (container.key() == "L1_gScalarEJwoj" && y < 0) y = 0;
         sum_y += y;
     }
 
