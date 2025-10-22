@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -19,7 +19,6 @@
  */
 
 
-//#include <iostream>
 #include "TRT_FillCablingData_TB04.h"
 #include <fstream>
 
@@ -135,9 +134,9 @@ void TRT_FillCablingData_TB04::defineParameters()
   std::vector<int> ncol2 (std::begin(numberOfStrawsInLayersC), 
     std::end(numberOfStrawsInLayersC));  
 
-  m_ncol.push_back(ncol0);
-  m_ncol.push_back(ncol1);
-  m_ncol.push_back(ncol2);
+  m_ncol.push_back(std::move(ncol0));
+  m_ncol.push_back(std::move(ncol1));
+  m_ncol.push_back(std::move(ncol2));
 
   m_StrawsByModule[0] = 329;
   m_StrawsByModule[1] = 520;
@@ -205,6 +204,7 @@ void TRT_FillCablingData_TB04::defineTables()
 	const bool validPhi = inRange(phiModuleId, invalidInput, maxPossiblePhiModule);
 	const bool validModule = inRange(moduleId, invalidInput, maxPossibleModule);
 	const bool validStrawNumber = inRange(strawNumberInModule, invalidInput, m_StrawsByModule[moduleId]);
+	//coverity [tainted_data]
 	const bool validBuffer = inRange(BufferLocation, invalidInput, maxPossibleBufferLocation);
 	if (not (validPhi and validModule and validStrawNumber and validBuffer)) {
 		ATH_MSG_WARNING("One of the following is out of range: " << phiModuleId << ", " << moduleId
