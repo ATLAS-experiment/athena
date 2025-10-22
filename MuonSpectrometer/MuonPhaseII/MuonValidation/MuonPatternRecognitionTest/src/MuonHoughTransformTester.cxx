@@ -371,14 +371,12 @@ namespace MuonValR4 {
             m_out_seed_nHits.push_back(seed->getHitsInMax().size());
             unsigned nMdtSeed{0}, nRpcSeed{0}, nTgcSeed{0}, nMmSeed{0}, nsTgcSeed{0}; 
             unsigned nPrecHits{0}, nEtaHits{0}, nPhiHits{0}, nTrueHits{0}, nTruePrecHits{0}, nTrueEtaHits{0}, nTruePhiHits{0};
-            std::vector<unsigned char> matched{};
+            std::vector<unsigned char> treeIdxs{};
+           
             for (const HoughHitType & houghSP: seed->getHitsInMax()){                
                 if (m_writeSpacePoints){
                     unsigned treeIdx = m_spTester->push_back(*houghSP);
-                    if (treeIdx >= matched.size()){
-                        matched.resize(treeIdx +1);
-                    }
-                    matched[treeIdx] = true;
+                    treeIdxs.push_back(treeIdx);
                 }
                 nPrecHits += isPrecHit(*houghSP);
                 nPhiHits  += houghSP->measuresPhi();
@@ -430,7 +428,8 @@ namespace MuonValR4 {
 
             m_out_seed_ledToSegment.push_back(obj.matchedSeedFoundSegment.at(iseed));
             if (m_writeSpacePoints) {
-                m_spMatchedToPattern[iseed] = std::move(matched);
+                m_spMatchedToPattern[iseed] = std::move(treeIdxs);
+                
             } 
         }
     }
