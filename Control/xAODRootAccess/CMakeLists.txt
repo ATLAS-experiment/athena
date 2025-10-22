@@ -78,6 +78,23 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE )
    _add_test( ut_xaodrootaccess_slimming_test )
    _add_test( ut_xaodrootaccess_stats_test )
    _add_test( ut_xaodrootaccess_tchain_test )
+   _add_test( ut_xaodrootaccess_transtree_test )
+   atlas_add_test( ut_xaodrootaccess_transtree2_test
+      SCRIPT python
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_transtree2_test.py
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 600 )
+endif()
+if( NOT XAOD_STANDALONE AND NOT GENERATIONBASE )
+   _add_test( ut_xaodrootaccess_proxydict_test )
+endif()
+if( NOT SIMULATIONBASE )
+   _add_test( ut_xaodrootaccess_tevent_copy_test )
+   atlas_add_test( ut_xaodrootaccess_tpyevent_test
+      SCRIPT python
+      ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_tpyevent_test.py
+      POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 600 )
 endif()
 _add_test( ut_xaodrootaccess_tauxvector_test )
 _add_test( ut_xaodrootaccess_tauxvectorfactory_test )
@@ -91,23 +108,4 @@ atlas_add_test( ut_xaodrootaccess_tpystore_test
    SCRIPT python
    ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_tpystore_test.py
    POST_EXEC_SCRIPT nopost.sh )
-
-if( XAOD_ANALYSIS )
-   _add_test( ut_xaodrootaccess_tevent_test )
-   _add_test( ut_xaodrootaccess_tevent_copy_test )
-   _add_test( ut_xaodrootaccess_transtree_test )
-   atlas_add_test( ut_xaodrootaccess_tpyevent_test
-      SCRIPT python
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_tpyevent_test.py
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( ut_xaodrootaccess_transtree2_test
-      SCRIPT python
-      ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_transtree2_test.py
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
-endif()
-
-if( NOT XAOD_STANDALONE AND NOT GENERATIONBASE )
-   _add_test( ut_xaodrootaccess_proxydict_test )
-endif()
+_add_test( ut_xaodrootaccess_tevent_test )
