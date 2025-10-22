@@ -19,6 +19,7 @@
 
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 
@@ -27,7 +28,7 @@
 #include <StoreGate/ReadHandleKey.h>
 
 class IAthRNGSvc;
-class IActsExtrapolationTool;
+
 
 namespace ActsTrk {
 

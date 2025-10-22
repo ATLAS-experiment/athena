@@ -25,7 +25,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
@@ -71,7 +71,7 @@ namespace ActsTrk {
     }
 
   private:
-    const Trk::ITrackLink* m_trkLink;
+    const Trk::ITrackLink* m_trkLink{nullptr};
     Acts::BoundTrackParameters m_boundParams;
   };
 
@@ -128,7 +128,7 @@ namespace ActsTrk {
     std::optional<TrackLinearizer> m_linearizer = std::nullopt;
 
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
-    ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "", "ActsExtrapolationTool"};
+    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "", "ActsExtrapolationTool"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "TrackSelector", "", "InDetTrackSelectionTool"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 

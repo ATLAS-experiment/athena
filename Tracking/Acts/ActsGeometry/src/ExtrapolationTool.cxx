@@ -123,7 +123,7 @@ ExtrapolationTool::initialize()
 }
 
 
-ActsPropagationOutput
+ExtrapolationTool::PropagationOutput
 ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -137,7 +137,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
-  ActsPropagationOutput output;
+  PropagationOutput output;
 
   auto res = boost::apply_visitor([&](const auto& propagator) -> ResultType {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -183,7 +183,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 
 
 
-std::optional<const Acts::BoundTrackParameters>
+std::optional<Acts::BoundTrackParameters>
 ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -219,7 +219,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
   return parameters;
 }
 
-ActsPropagationOutput
+ExtrapolationTool::PropagationOutput
 ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         const Acts::Surface& target,
@@ -228,7 +228,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 {
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
-  ActsPropagationOutput output;
+  PropagationOutput output;
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
   const GeometryContext& geo_ctx
@@ -276,7 +276,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
   return output;
 }
 
-std::optional<const Acts::BoundTrackParameters>
+std::optional<Acts::BoundTrackParameters>
 ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  const Acts::Surface& target,

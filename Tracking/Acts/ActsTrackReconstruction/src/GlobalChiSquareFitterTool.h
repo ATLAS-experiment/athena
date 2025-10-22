@@ -32,7 +32,7 @@
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
@@ -181,7 +181,7 @@ class GlobalChiSquareFitterTool
                                     const Acts::Surface* surface,
                                     detail::SourceLinkType slType) const;
    
-    ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
 

@@ -21,7 +21,7 @@
 #include "Acts/Propagator/Propagator.hpp"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
@@ -51,7 +51,7 @@ namespace ActsExtrapolationDetail {
 }
 
 namespace ActsTrk {
-class ExtrapolationTool : public extends<AthAlgTool, IActsExtrapolationTool>
+class ExtrapolationTool : public extends<AthAlgTool, IExtrapolationTool>
 {
 public:
   virtual StatusCode initialize() override;
@@ -67,26 +67,24 @@ private:
   // set up options for propagation
   using SteppingLogger = Acts::detail::SteppingLogger;
   using EndOfWorld = Acts::EndOfWorldReached;
-  using ResultType = Acts::Result<ActsPropagationOutput>;
+  using ResultType = Acts::Result<PropagationOutput>;
 
 
 public:
-  virtual
-  ActsPropagationOutput
+  virtual PropagationOutput
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    Acts::Direction navDir = Acts::Direction::Forward(),
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
-  std::optional<const Acts::BoundTrackParameters>
+  std::optional<Acts::BoundTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const override;
 
-  virtual
-  ActsPropagationOutput
+  virtual PropagationOutput
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
@@ -94,7 +92,7 @@ public:
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
-  std::optional<const Acts::BoundTrackParameters>
+  std::optional<Acts::BoundTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,
