@@ -7,7 +7,10 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "xAODPFlow/FlowElementContainer.h"
+#include "CxxUtils/close_to_zero.h"
 #include <utility>
+
+using CxxUtils::close_to_zero;
 
 FlowEnergyDecorator::FlowEnergyDecorator(const std::string& name, ISvcLocator* loc)
   : AthReentrantAlgorithm(name, loc)
@@ -128,6 +131,7 @@ StatusCode FlowEnergyDecorator::execute(const EventContext& ctx) const {
       for ( auto& el : pflowLinks ) {  
         if ( !el.isValid() ) {throw std::runtime_error("Invalid ElementLink found.");};
         const xAOD::FlowElement* c = dynamic_cast<const xAOD::FlowElement*>(*el);
+        if (not c) continue;
         if (c->charge() != 0) continue; // if the constituent is a track, continue
         e += layerAccessor(*c); // else the constituent is a cluster, so add the energy of every cluster for a given layer for the considered UFO
       }
@@ -164,8 +168,9 @@ StatusCode FlowEnergyDecorator::execute(const EventContext& ctx) const {
 
     // decorate the UFO with the electromagnetic or hadronic energy fractions once the loop over the layers is over for a given UFO
     const float eTOT = eEM + eHAD;
-    eFracEMDecorHandle(*flow) = (eTOT > 0) ? eEM / eTOT : 0.;
-    eFracHADDecorHandle(*flow) = (eTOT > 0) ? eHAD / eTOT : 0.;
+    const bool eTotZero = close_to_zero(eTOT);
+    eFracEMDecorHandle(*flow) = (eTotZero) ? (eEM / eTOT) : 0.;
+    eFracHADDecorHandle(*flow) = (eTotZero) ? (eHAD / eTOT) : 0.;
   }
 
   return StatusCode::SUCCESS;
