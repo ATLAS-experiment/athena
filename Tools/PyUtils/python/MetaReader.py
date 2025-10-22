@@ -6,6 +6,8 @@ from fnmatch import fnmatchcase
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AthConfigFlags import isGaudiEnv
 from ROOT import gSystem
+from AthenaConfiguration.Enums import Project
+
 
 msg = logging.getLogger('MetaReader')
 
@@ -116,6 +118,11 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         current_file_type = 'POOL'
                         meta_dict[filename]['file_type'] = 'POOL'
 
+                    elif Project.determine() in (
+                            Project.AnalysisBase, Project.AthAnalysis):
+                        raise RuntimeError(
+                            f"{filename} is not a ROOT file, assumed bytestream"
+                            ", this is not supported in Analysis releases")
                     else:
                         current_file_type = 'BS'
                         meta_dict[filename]['file_type'] = 'BS'
