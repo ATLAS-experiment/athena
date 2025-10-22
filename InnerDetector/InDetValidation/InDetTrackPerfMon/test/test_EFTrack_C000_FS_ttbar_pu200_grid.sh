@@ -145,5 +145,5 @@ run "PrintSummaryTable_last_skipRC" \
     -t IDTPM.${OutSampleName}.HIST.root \
     -r ${referenceName_absPath} \
     -R "last_nightly" -T "new_nightly" \
-    -o "TrkAnaSummary_last_&TrkAnaName&.html" \
+    -o "TrkAnaSummary_last_\&TrkAnaName\&.html" \
     -a "${allTrkAna}"
