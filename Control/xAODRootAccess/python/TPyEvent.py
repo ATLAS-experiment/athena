@@ -25,7 +25,7 @@ class TPyEvent( ROOT.xAOD.TPyEvent ):
 
     ## Convenient shorthand for retrieving an object.
     def __getitem__( self, key ):
-        return self.retrieve( key )
+        return self.pyRetrieve( key )
 
     ## Convenient version of the base class's contains function
     #
