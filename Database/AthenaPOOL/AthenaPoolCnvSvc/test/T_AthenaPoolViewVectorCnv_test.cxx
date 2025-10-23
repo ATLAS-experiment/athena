@@ -248,7 +248,7 @@ DataVector<Y_v2>& makeVecs (SGTest::TestStore& store)
   return ret;
 }
 
-//coverity [root_function]
+//coverity[root_function]
 int main()
 {
   CxxUtils::ubsan_suppress ([]() {TInterpreter::Instance(); });

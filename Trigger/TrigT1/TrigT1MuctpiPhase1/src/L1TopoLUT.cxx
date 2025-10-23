@@ -165,7 +165,7 @@ namespace LVL1MUCTPIPHASE1
       inFile >> phi_max;
 
       double eta = getCompactedValue_eta(subsystem, side, sectorID, roi);
-      // coverity [tainted_data]
+      //coverity[tainted_data]
       double phi = getCompactedValue_phi(subsystem, side, sectorID, roi);
       
       unsigned short ieta = 0;

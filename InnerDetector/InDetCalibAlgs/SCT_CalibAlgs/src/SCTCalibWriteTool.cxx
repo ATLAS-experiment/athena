@@ -653,7 +653,7 @@ SCTCalibWriteTool::setBasicValues(coral::AttributeList& attrList, const Identifi
    //
    const std::string becName{capsFormat?"BarrelEndcap":"barrel_endcap"};
    attrList["SampleSize"].setValue(static_cast<int>(samplesize));
-   //coverity [copy_constructor_call]
+   //coverity[copy_constructor_call]
    attrList[becName].setValue(static_cast<int>(barrel_ec));
    attrList["Layer"].setValue(static_cast<int>(layer));
    attrList["Eta"].setValue(static_cast<int>(eta));
