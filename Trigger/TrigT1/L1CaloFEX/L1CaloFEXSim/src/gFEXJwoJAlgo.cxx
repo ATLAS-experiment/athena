@@ -520,6 +520,10 @@ void gFEXJwoJAlgo::etTotal(int A_ET,
                             int & ET ) const {
 
   //  leave at 200 MeV scale 	
+  if (A_ET < 0 ) A_ET = 0;
+  if (B_ET < 0 ) B_ET = 0;
+  if (C_ET < 0 ) C_ET = 0;
+
   ET = (A_ET + B_ET + C_ET) ; 
 
 
