@@ -204,7 +204,7 @@ void TRT_FillCablingData_TB04::defineTables()
 	const bool validPhi = inRange(phiModuleId, invalidInput, maxPossiblePhiModule);
 	const bool validModule = inRange(moduleId, invalidInput, maxPossibleModule);
 	const bool validStrawNumber = inRange(strawNumberInModule, invalidInput, m_StrawsByModule[moduleId]);
-	//coverity [tainted_data]
+	//coverity[tainted_data]
 	const bool validBuffer = inRange(BufferLocation, invalidInput, maxPossibleBufferLocation);
 	if (not (validPhi and validModule and validStrawNumber and validBuffer)) {
 		ATH_MSG_WARNING("One of the following is out of range: " << phiModuleId << ", " << moduleId

@@ -131,7 +131,7 @@ void test1()
   assert (!tpcnv.persToTrans (cnvx, &x2, "key", msg));
 }
 
-// coverity [root_function]
+// coverity[root_function]
 int main()
 {
   gSystem->Load("libAthenaPoolCnvSvcTestDict");

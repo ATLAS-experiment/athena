@@ -27,7 +27,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 using namespace std;
 using namespace pool;
 
-//coverity [root_function]
+//coverity[root_function]
 int main(int argc, char** )
 {
   SystemTools::initGaudi();

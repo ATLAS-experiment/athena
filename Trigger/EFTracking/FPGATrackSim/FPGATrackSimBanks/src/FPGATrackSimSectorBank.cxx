@@ -38,7 +38,7 @@ FPGATrackSimSectorBank::FPGATrackSimSectorBank(std::string const & filepath)
     readSectors(fin);
 
     // Make m2sMap
-    //coverity  [tainted_data]
+    //coverity[tainted_data]
     makeInverseMap();
 }
 

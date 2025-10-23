@@ -16,7 +16,7 @@
 
 
 //Use spacepoints from a real event, run triplet making outside Athena
-//coverity [root_function]
+//coverity[root_function]
 int main()
 {
   typedef boost::tokenizer<boost::escaped_list_separator<char>> tokenizer;

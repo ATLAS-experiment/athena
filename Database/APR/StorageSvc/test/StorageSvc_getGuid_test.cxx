@@ -23,7 +23,7 @@ bool testGuid( const string& guid, bool shouldwork, DbPrint& mylog )
    return not (shouldwork xor typ);
 }
 
-//coverity [root_function]
+//coverity[root_function]
 int main()
 {
    DbPrint mylog("APR Guid TEST");
