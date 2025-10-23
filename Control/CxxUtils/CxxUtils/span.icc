@@ -9,6 +9,9 @@
  */
 
 
+#include "CxxUtils/throw_out_of_range.h"
+
+
 namespace CxxUtils {
 
 
@@ -199,7 +202,7 @@ inline
 constexpr typename span<T>::reference
 span<T>::at (size_type i)
 {
-  if (i >= m_size) throw std::out_of_range ("CxxUtils::span::at");
+  if (i >= m_size) throw_out_of_range (__PRETTY_FUNCTION__, i, m_size, this);
   return m_ptr[i];
 }
 
@@ -213,7 +216,7 @@ inline
 constexpr typename span<T>::const_reference
 span<T>::at (size_type i) const
 {
-  if (i >= m_size) throw std::out_of_range ("CxxUtils::span::at");
+  if (i >= m_size) throw_out_of_range (__PRETTY_FUNCTION__, i, m_size, this);
   return m_ptr[i];
 }
 

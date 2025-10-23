@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/src/PackedArray.cxx
@@ -10,6 +10,7 @@
 
 
 #include "CxxUtils/PackedArray.h"
+#include "CxxUtils/throw_out_of_range.h"
 #include <stdexcept>
 #include <climits>
 #include <cassert>
@@ -128,7 +129,7 @@ void PackedArray::doset (size_type ndx, int off, value_type v)
 void PackedArray::range_check (size_type n) const
 {
   if (n >= m_size) {
-    throw std::out_of_range ("PackedArray");
+    throw_out_of_range (__PRETTY_FUNCTION__, n, m_size, this);
   }
 }
 
