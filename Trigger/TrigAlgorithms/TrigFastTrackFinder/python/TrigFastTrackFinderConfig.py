@@ -315,6 +315,39 @@ def ITkTrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> Compo
 
   return acc
 
+def TrigR3SeedingToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
+
+  from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+  acc = BeamSpotCondAlgCfg(flags)
+  
+  if "layerNumberTool" not in kwargs:
+      ntargs = {"UseNewLayerScheme" : True}
+      kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,**ntargs)))
+  
+  kwargs.setdefault("DoPhiFiltering", flags.Tracking.ActiveConfig.DoPhiFiltering)
+  kwargs.setdefault("UseBeamTilt", False)
+  kwargs.setdefault("PixelSP_ContainerName", "PixelTrigSpacePoints")  
+  kwargs.setdefault("SCT_SP_ContainerName", "StripTrigSpacePoints")
+  kwargs.setdefault("UsePixelSpacePoints",flags.Tracking.ActiveConfig.UsePixelSpacePoints)
+  kwargs.setdefault("UseSctSpacePoints",False) 
+  kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
+  kwargs.setdefault("MaxGraphEdges", 3000000)
+  kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if flags.Tracking.ActiveConfig.isLRT else "binTables_ITK_RUN4.txt")
+
+  from RegionSelector.RegSelToolConfig import (regSelTool_SCT_Cfg, regSelTool_Pixel_Cfg)
+  
+  if "RegSelTool_Pixel" not in kwargs:
+    kwargs.setdefault("RegSelTool_Pixel", acc.popToolsAndMerge( regSelTool_Pixel_Cfg( flags)))
+
+  if "RegSelTool_SCT" not in kwargs:
+    kwargs.setdefault("RegSelTool_SCT", acc.popToolsAndMerge( regSelTool_SCT_Cfg( flags)))
+
+  acc.setPrivateTools(CompFactory.TrigInDetR3TrackSeedingTool(**kwargs))
+
+  return acc
+
+
+
 def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature) -> ComponentAccumulator:
   acc = ComponentAccumulator()
   
@@ -357,6 +390,10 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
 
   useNewLayerNumberScheme = True
 
+  seedingTool = None
+
+  spTool = None
+
   if flags.Detector.GeometryITk:
 
     spTool = acc.popToolsAndMerge(ITkTrigSpacePointConversionToolCfg(flags))
@@ -371,7 +408,29 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   else:
   
     if flags.Tracking.ActiveConfig.useGBTSeedingTool:
-      log.error ("Gaudi Property initialzed but packages required are not ready yet")
+
+      spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+
+      numberingTool = acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags))
+
+      seedingTool = acc.popToolsAndMerge(TrigR3SeedingToolCfg(flags))
+
+      from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
+      TrackMaker_FTF = acc.popToolsAndMerge(
+          TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+signature)
+      )
+      from TrkConfig.TrkRIO_OnTrackCreatorConfig import TrigRotCreatorCfg
+      TrigRotCreator = acc.popToolsAndMerge(TrigRotCreatorCfg(flags))
+      acc.addPublicTool(TrigRotCreator)
+
+      acc.addPublicTool(
+          CompFactory.TrigInDetTrackFitter(
+              name = "TrigInDetTrackFitter_"+signature,
+              doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecoverySi,
+              correctClusterPos = True,  #improved err(z0) estimates in Run 2
+              ROTcreator = TrigRotCreator,
+          )
+      )
 
     else:
 
@@ -455,6 +514,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
         RoIs = RoIs,
         ITkMode = True if flags.Detector.GeometryITk else False,
+        SeedingTool = seedingTool,
     )
     
   ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min

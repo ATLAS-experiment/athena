@@ -75,7 +75,7 @@ StatusCode TrigInDetR3TrackSeedingTool::finalize() {
 TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDescriptor& internalRoI, std::vector<TrigInDetTracklet>& output, const EventContext& ctx) const {
 
   TrigInDetTrackSeedingResult seedStats;
-  
+
   output.clear();
 
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };  
@@ -83,7 +83,7 @@ TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDes
   float shift_x = vertex.x() - beamSpotHandle->beamTilt(0)*vertex.z();
   float shift_y = vertex.y() - beamSpotHandle->beamTilt(1)*vertex.z();
 
-  std::unique_ptr<GNNR3_DataStorage> storage = std::make_unique<GNNR3_DataStorage>(*m_geo);
+  //std::unique_ptr<GNNR3_DataStorage> storage = std::make_unique<GNNR3_DataStorage>(*m_geo);
   
   int nPixels = 0;
   int nStrips = 0;
@@ -124,7 +124,7 @@ TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDes
   }
 
   if (m_usePixelSpacePoints) {
-    
+
     SG::ReadHandle<SpacePointContainer> pixHandle(m_pixelSpacePointsContainerKey, ctx);
 
     if(!pixHandle.isValid()) {
@@ -167,20 +167,23 @@ TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDes
 
     trigSpStorage[0].resize(m_layerNumberTool->pixelLayers()->size());
 
+
     for(const auto& lColl : detIdMap) {
 
       short layerIndex = lColl.first;
 
-      int layerKey = m_geo->getTrigFTF_GNNR3_LayerByIndex(layerIndex)->m_layer.m_subdet;
-      
-      bool isPixel = layerKey > 20000;
+      //int layerKey = m_geo->getTrigFTF_GNNR3_LayerByIndex(layerIndex)->m_layer.m_subdet;  // varaiable needed in later Dev
+
+      //bool isPixel = layerKey > 20000;
+
+	  bool isPixel = true;
 
       auto pCont = isPixel ? pixelSpacePointsContainer : sctSpacePointsContainer;
 
       int contIdx= isPixel ? 0 : 1;
 
       int nNewNodes = 0;
-      
+
       for(const auto& idx : lColl.second) {
       
         std::vector<GNNR3_Node>& tmpColl = trigSpStorage[contIdx].at(static_cast<int>(idx));
@@ -193,8 +196,8 @@ TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDes
 
         nNewNodes += (isPixel) ? storage->loadPixelGraphNodes(layerIndex, tmpColl, m_useML) : storage->loadStripGraphNodes(layerIndex, tmpColl);
       }
-
-      if(isPixel) nPixels += nNewNodes;
+		 
+	  if(isPixel) nPixels += nNewNodes;
       else nStrips += nNewNodes;      
     }
 
