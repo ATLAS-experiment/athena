@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -18,6 +18,7 @@
 #include "LArCoverageAlg.h"
 #include "Identifier/IdentifierHash.h"
 #include "LArElecCalib/LArProvenance.h"
+#include "CaloDetDescr/CaloDetDescrElement.h"
 
 #include "TMath.h"
 

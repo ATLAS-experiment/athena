@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -40,6 +40,7 @@
 #include "LArRawEvent/LArSCDigit.h"
 #include "LArRawEvent/LArLATOMEHeaderContainer.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include "CaloDetDescr/CaloDetDescrElement.h"
 #include "LArTrigStreamMatching.h"
 
 #include "LArCOOLConditions/LArPedestalSC.h"
