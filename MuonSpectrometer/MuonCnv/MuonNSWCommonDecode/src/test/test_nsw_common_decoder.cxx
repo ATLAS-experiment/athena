@@ -2,11 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL include files
 
-#include <vector>
-#include <string>
-#include <chrono>
 
 // TDAQ include files
 
@@ -19,6 +15,11 @@
 #include "MuonNSWCommonDecode/NSWElink.h"
 #include "MuonNSWCommonDecode/VMMChannel.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
+// STL include files
+
+#include <vector>
+#include <string>
+#include <chrono>
 
 // Number of sectors - Module ID, to be checked to avoid confusion with NSW TP
 
