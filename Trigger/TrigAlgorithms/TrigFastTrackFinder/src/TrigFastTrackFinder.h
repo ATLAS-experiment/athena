@@ -21,7 +21,6 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
-
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventUtils/PRDtoTrackMap.h"
 
@@ -57,6 +56,8 @@
 #include "TrigInDetAccelerationTool/ITrigInDetAccelerationTool.h"
 #include "TrigInDetAccelerationService/ITrigInDetAccelerationSvc.h"
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
+
+#include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
 
 #include <string>
 #include <vector>
@@ -278,7 +279,8 @@ protected:
   Gaudi::Property<bool> m_useEtaBinning {this, "UseEtaBinning",   true, "Split layers into eta bins"};
   Gaudi::Property<bool> m_doCloneRemoval{this,  "doCloneRemoval", true, "Remove tracks sharing too many hits"};
   Gaudi::Property<bool> m_doTrackRefit  {this, "doTrackRefit",    true, "Refit tracks after the combinatorial track following"};
-  Gaudi::Property<bool> m_useGBTSeedingTool {this, "useGBTSeedingTool", false, "GBT seeding tool for tracker"};
+  Gaudi::Property<bool> m_useGBTSeedingTool {this, "useGBTSeedingTool", false, "use GBT seeding tool for tracker"};
+  ToolHandle< ITrigInDetTrackSeedingTool > m_seedingTool { this, "SeedingTool", "TrigInDetTrackSeedingTool"};
   
 };
 

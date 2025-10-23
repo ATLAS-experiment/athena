@@ -59,8 +59,8 @@ class TrigInDetR3TrackSeedingTool:  public SeedingToolBase, public ITrigInDetTra
   BooleanProperty m_useSctSpacePoints{this, "UseSctSpacePoints", false};
   
   //offline/EF containers
-  SG::ReadHandleKey<SpacePointContainer> m_sctSpacePointsContainerKey{this, "SCT_SP_ContainerName", "ITkStripTrigSpacePoints"};
-  SG::ReadHandleKey<SpacePointContainer> m_pixelSpacePointsContainerKey{this, "PixelSP_ContainerName", "ITkPixelTrigSpacePoints"};
+  SG::ReadHandleKey<SpacePointContainer> m_sctSpacePointsContainerKey{this, "SCT_SP_ContainerName", "StripTrigSpacePoints"};
+  SG::ReadHandleKey<SpacePointContainer> m_pixelSpacePointsContainerKey{this, "PixelSP_ContainerName", "PixelTrigSpacePoints"};
 
   
   /// region selector tools
