@@ -161,13 +161,14 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                  preselection=True)
 
-        alg = config.createAlgorithm( 'CP::InDetTrackMomentumDecoratorAlg', 'MomentumDecorator' )
+        # Multiple variables are not included in the SmartCollection (momentum, eta, charge)
+        alg = config.createAlgorithm( 'CP::InDetTrackExtraVarDecoratorAlg', 'ExtraVarDecorator' )
         alg.inDetTracks = config.readName(self.containerName)
 
         config.addOutputVar (self.containerName, 'pt_%SYS%', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'eta_%SYS%', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+        config.addOutputVar (self.containerName, 'charge_%SYS%', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'qOverP', 'qOverP')
         config.addOutputVar (self.containerName, 'd0', 'd0')
         config.addOutputVar (self.containerName, 'z0', 'z0')

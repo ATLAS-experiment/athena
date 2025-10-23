@@ -4,8 +4,8 @@
 
 /// @author Daniel Werner
 
-#ifndef TRACKING_ANALYSIS_ALGORITHMS__MOMENTUMDECORATOR_ALG__H
-#define TRACKING_ANALYSIS_ALGORITHMS__MOMENTUMDECORATOR_ALG__H 
+#ifndef TRACKING_ANALYSIS_ALGORITHMS__EXTRAVARDECORATOR_ALG__H
+#define TRACKING_ANALYSIS_ALGORITHMS__EXTRAVARDECORATOR_ALG__H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysListHandle.h>
@@ -16,7 +16,7 @@
 
 namespace CP {
 
-  class InDetTrackMomentumDecoratorAlg final : public EL::AnaAlgorithm {
+  class InDetTrackExtraVarDecoratorAlg final : public EL::AnaAlgorithm {
 
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
@@ -29,6 +29,10 @@ namespace CP {
       this, "inDetTracks", "", "the track collection to run on"};
     CP::SysWriteDecorHandle<float> m_momentumDecor {
       this, "momentumDecoration", "pt_%SYS%", "decoration for per-object transverse momentum"};
+    CP::SysWriteDecorHandle<float> m_etaDecor {
+      this, "etaDecoration", "eta_%SYS%", "decoration for per-object pseudorapidity"};
+    CP::SysWriteDecorHandle<float> m_chargeDecor {
+      this, "chargeDecoration", "charge_%SYS%", "decoration for per-object charge"};
 
   };
 
