@@ -13,7 +13,7 @@
 
 RDBParamRecords::RDBParamRecords(RDBParamReader* rdbParAcc, IRDBRecordset_ptr initRecSet)
   : m_rdbParAcc(rdbParAcc),
-    m_RecSet(initRecSet)
+    m_RecSet(std::move(initRecSet))
 {
 }
 
