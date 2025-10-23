@@ -3,6 +3,7 @@
 // Local include(s).
 #include "xAODRootAccess/REvent.h"
 
+#include "IOUtils.h"
 #include "xAODRootAccess/RAuxStore.h"
 #include "xAODRootAccess/TActiveStore.h"
 #include "xAODRootAccess/TStore.h"
@@ -18,7 +19,6 @@
 #include "AthContainers/AuxVectorBase.h"
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
-#include "CxxUtils/no_sanitize_undefined.h"
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODCore/AuxInfoBase.h"
 #include "xAODCore/tools/IOStats.h"
@@ -38,22 +38,6 @@
 #include <utility>
 
 namespace {
-
-/// Helper class for exposing the @c SG::AuxVectorBase::initAuxVectorBase
-/// function
-class ForceTrackIndices : public SG::AuxVectorBase {
- public:
-  using SG::AuxVectorBase::initAuxVectorBase;
-};  // class ForceTrackIndices
-
-/// Helper function for calling @c SG::AuxVectorBase::initAuxVectorBase
-void forceTrackIndices NO_SANITIZE_UNDEFINED(SG::AuxVectorBase& vec) {
-  // Treat the received object like it would be of type @c ForceTrackIndices
-  ForceTrackIndices& xvec = static_cast<ForceTrackIndices&>(vec);
-  xvec.initAuxVectorBase<DataVector<SG::IAuxElement> >(
-      SG::OWN_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
-  return;
-}
 
 /// This function is used to search for a field in an RNTuple that
 /// contains a given substring. It returns the name of the first field
@@ -76,65 +60,6 @@ std::string getFirstFieldMatch(ROOT::RNTupleReader& reader,
   }
 
   return pre;
-}
-
-/// Helper function deciding if a given type "has an auxiliary store"
-///
-/// @param cl The dictionary for the type being interrogated
-/// @returns @c true if the type has an auxiliary store, @c false otherwise
-///
-bool hasAuxStore(const TClass& cl) {
-
-  // The classes whose children can have an auxiliary store attached
-  // to them.
-  static const TClass* const dvClass =
-      ::TClass::GetClass(typeid(SG::AuxVectorBase));
-  static const TClass* const aeClass =
-      ::TClass::GetClass(typeid(SG::AuxElement));
-
-  // Do the check.
-  return (cl.InheritsFrom(dvClass) || cl.InheritsFrom(aeClass));
-}
-
-/// Helper function deciding if a given type "is an auxiliary store"
-///
-/// @param cl The dictionary for the type being interrogated
-/// @returns @c true if the type is an auxiliary store, @c false otherwise
-///
-bool isAuxStore(const TClass& cl) {
-
-  // The classes whose children are considered auxiliary stores.
-  static const TClass* const storeClass =
-      ::TClass::GetClass(typeid(SG::IConstAuxStore));
-  static const TClass* const storeHolderClass =
-      ::TClass::GetClass(typeid(SG::IAuxStoreHolder));
-
-  // Do the check.
-  return (cl.InheritsFrom(storeClass) || cl.InheritsFrom(storeHolderClass));
-}
-
-/// Helper function deciding if a given type "is a standalone object"
-///
-/// @param cl The dictionary for the type being interrogated
-/// @returns @c true if the type is a standalone object, @c false otherwise
-///
-bool isStandalone(const TClass& cl) {
-
-  // The classes whose children can have an auxiliary store attached
-  // to them:
-  static const TClass* const dvClass =
-      TClass::GetClass(typeid(SG::AuxVectorBase));
-  static const TClass* const aeClass = TClass::GetClass(typeid(SG::AuxElement));
-
-  // Do the check:
-  if (cl.InheritsFrom(aeClass)) {
-    return kTRUE;
-  } else if (cl.InheritsFrom(dvClass)) {
-    return kFALSE;
-  }
-
-  // Some logic error happened.
-  throw std::runtime_error("A logic error happened in the code");
 }
 
 }  // namespace
@@ -540,14 +465,14 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
   m_inputObjects[key] = std::move(mgr);
 
   // If it's an auxiliary store object, set it up correctly.
-  if (isAuxStore(*(mgrPtr->holder()->getClass()))) {
+  if (Details::isAuxStore(*(mgrPtr->holder()->getClass()))) {
     ATH_CHECK(setUpDynamicStore(*mgrPtr, *m_eventReader));
   }
 
   // If it (probably) has an associated auxiliary store, set it up as well.
-  if (hasAuxStore(*(mgrPtr->holder()->getClass()))) {
-    ATH_CHECK(connectAux(key + "Aux.",
-                         isStandalone(*(mgrPtr->holder()->getClass()))));
+  if (Details::hasAuxStore(*(mgrPtr->holder()->getClass()))) {
+    ATH_CHECK(connectAux(
+        key + "Aux.", Details::isStandalone(*(mgrPtr->holder()->getClass()))));
   }
 
   // Return gracefully.
@@ -624,14 +549,14 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
   m_inputMetaObjects[key] = std::move(mgr);
 
   // If it's an auxiliary store object, set it up correctly.
-  if (isAuxStore(*(mgrPtr->holder()->getClass()))) {
+  if (Details::isAuxStore(*(mgrPtr->holder()->getClass()))) {
     ATH_CHECK(setUpDynamicStore(*mgrPtr, *m_metaReader));
   }
 
   // If it (probably) has an associated auxiliary store, set it up as well.
-  if (hasAuxStore(*(mgrPtr->holder()->getClass()))) {
-    ATH_CHECK(connectMetaAux(key + "Aux.",
-                             isStandalone(*(mgrPtr->holder()->getClass()))));
+  if (Details::hasAuxStore(*(mgrPtr->holder()->getClass()))) {
+    ATH_CHECK(connectMetaAux(
+        key + "Aux.", Details::isStandalone(*(mgrPtr->holder()->getClass()))));
   }
 
   // Return gracefully.
@@ -799,8 +724,8 @@ StatusCode REvent::setAuxStore(const std::string& key,
                                Details::IObjectManager& mgr, bool metadata) {
 
   // Check if we need to do anything:
-  if ((!hasAuxStore(*(mgr.holder()->getClass()))) &&
-      (!isAuxStore(*(mgr.holder()->getClass())))) {
+  if ((Details::hasAuxStore(*(mgr.holder()->getClass())) == false) &&
+      (Details::isAuxStore(*(mgr.holder()->getClass())) == false)) {
     return StatusCode::SUCCESS;
   }
 
@@ -810,7 +735,7 @@ StatusCode REvent::setAuxStore(const std::string& key,
   // Look up the auxiliary object's manager:
   TVirtualManager* auxMgr = nullptr;
   std::string auxKey;
-  if (isAuxStore(*(mgr.holder()->getClass()))) {
+  if (Details::isAuxStore(*(mgr.holder()->getClass()))) {
     auxMgr = &mgr;
     auxKey = key;
   } else {
@@ -863,7 +788,7 @@ StatusCode REvent::setAuxStore(const std::string& key,
   // Check whether index tracking is enabled for the type. If not, then
   // we need to fix it...
   if (vec && (!vec->trackIndices())) {
-    forceTrackIndices(*vec);
+    Details::forceTrackIndices(*vec);
   }
 
   // Check if we were successful:
