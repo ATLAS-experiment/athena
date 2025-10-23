@@ -55,7 +55,7 @@ namespace GlobalSim::IOBitwise {
     virtual ~eEmNbhoodTOB(){};
 
     //! @copydoc IeEmNbhoodTOB::Neighbourhood()
-    virtual const LArStripNeighborhood& Neighbourhood() const;
+    virtual const LArStripNeighborhood& Neighbourhood() const override;
 
     //! @copydoc IeEmNbhoodTOB::to_string()  
     virtual std::string to_string() const override;
