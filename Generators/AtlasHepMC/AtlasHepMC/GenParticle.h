@@ -14,7 +14,7 @@
 namespace HepMC3 {
 /// @brief Print one-line info with idiomatic C++ printing
 /// @note More generic printing methods from HepMC3::Print should be preffered - move to PrintStreams.h?
-inline std::ostream& operator<<(std::ostream& os,  GenParticlePtr p) {ConstGenParticlePtr cp = p; Print::line(os,cp); return os; }
+inline std::ostream& operator<<(std::ostream& os,  GenParticlePtr p) {ConstGenParticlePtr cp = p; Print::line(os,std::move(cp)); return os; }
 }
 namespace HepMC {
 typedef HepMC3::GenParticlePtr GenParticlePtr;
