@@ -49,7 +49,7 @@ class ttj_MiNNLO(PowhegV2):
 
         # defining ttjMiNNLOPATH environment variable to bypass file path problems in fortran code
         # this is definitly a hack, see discussion in AGENE-2055
-        os.environ['ttjMiNNLOPATH'] = os.path.dirname(self.executable)
+        os.environ['ttjMiNNLOPATH'] = os.path.dirname(os.path.dirname(self.executable))
         logger.info("ttjMiNNLOPATH defined as = {0}".format(os.getenv('ttjMiNNLOPATH')))
 
         # Add algorithms to the sequence
