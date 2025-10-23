@@ -31,10 +31,6 @@ StatusCode FastSimulationMasterTool::initializeFastSims(){
   return StatusCode::SUCCESS;
 }
 
-bool FastSimulationMasterTool::HasFastSimulationModels() const {
-  return !m_FastSimList.empty();
-}
-
 StatusCode FastSimulationMasterTool::BeginOfAthenaEvent(){
   // Method that gets called at the beginning of every *athena* event
   for (auto& ifs : m_FastSimList){
