@@ -169,8 +169,8 @@ StatusCode FlowEnergyDecorator::execute(const EventContext& ctx) const {
     // decorate the UFO with the electromagnetic or hadronic energy fractions once the loop over the layers is over for a given UFO
     const float eTOT = eEM + eHAD;
     const bool eTotZero = close_to_zero(eTOT);
-    eFracEMDecorHandle(*flow) = (eTotZero) ? (eEM / eTOT) : 0.;
-    eFracHADDecorHandle(*flow) = (eTotZero) ? (eHAD / eTOT) : 0.;
+    eFracEMDecorHandle(*flow) = (!eTotZero) ? (eEM / eTOT) : 0.;
+    eFracHADDecorHandle(*flow) = (!eTotZero) ? (eHAD / eTOT) : 0.;
   }
 
   return StatusCode::SUCCESS;
