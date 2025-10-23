@@ -261,26 +261,21 @@ int egammaEnergyCorrectionTool::initialize() {
 
   // Energy corrections and systematic uncertainties
   //////////////////////////////////////////////////
-
+  
+  auto load = [&rootFile](auto &ptr, const std::string & path){
+    ptr.reset(checked_own_cast<decltype(ptr.get())>(rootFile->Get(path.c_str())));
+  };
   // Legacy numbers for 2010
   if (m_esmodel == egEnergyCorr::es2010) {
     m_use_new_resolution_model = false;
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2010/alphaPS_errTot")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2010/alphaS12_errTot")));
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2010/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2010/alphaZee_errSyst")));
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2010/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2010/ctZee_errSyst")));
-    m_peakResData.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2010/resZee_Data")));
-    m_peakResMC.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2010/resZee_MC")));
+    load(m_aPSNom,"Scales/es2010/alphaPS_errTot");
+    load(m_aS12Nom, "Scales/es2010/alphaS12_errTot");
+    load(m_zeeNom, "Scales/es2010/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2010/alphaZee_errSyst");
+    load(m_resNom, "Resolution/es2010/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2010/ctZee_errSyst");
+    load(m_peakResData, "Resolution/es2010/resZee_Data");
+    load(m_peakResMC, "Resolution/es2010/resZee_MC");
     m_begRunNumber = 152166;
     m_endRunNumber = 170482;
     // mc11c : faulty electron multiple scattering in G4; old geometry
@@ -288,22 +283,14 @@ int egammaEnergyCorrectionTool::initialize() {
 
   } else if (m_esmodel == egEnergyCorr::es2011c) {
     m_use_new_resolution_model = false;
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011c/alphaPS_errTot")));
-    m_aS12Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2011c/alphaS12_errTot")));
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2011c/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2011c/alphaZee_errSyst")));
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2011c/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2011c/ctZee_errSyst")));
-    m_peakResData.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2011c/resZee_Data")));
-    m_peakResMC.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2011c/resZee_MC")));
+    load(m_aPSNom, "Scales/es2011c/alphaPS_errTot");
+    load(m_aS12Nom, "Scales/es2011c/alphaS12_errTot");
+    load(m_zeeNom, "Scales/es2011c/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2011c/alphaZee_errSyst");
+    load(m_resNom, "Resolution/es2011c/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2011c/ctZee_errSyst");
+    load(m_peakResData, "Resolution/es2011c/resZee_Data");
+    load(m_peakResMC, "Resolution/es2011c/resZee_MC");
 
     m_begRunNumber = 177531;
     m_endRunNumber = 194382;
@@ -315,94 +302,58 @@ int egammaEnergyCorrectionTool::initialize() {
              m_esmodel == egEnergyCorr::es2011dTight) {
     m_use_new_resolution_model = true;
     m_resolution_tool = std::make_unique<eg_resolution>("run1");
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/alphaPS_uncor")));
-    m_daPSCor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/dalphaPS_cor")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/alphaS12_uncor")));
-    m_daS12Cor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2011d/dalphaS12_cor")));
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2011d/momentum_errSyst")));
+    load(m_aPSNom, "Scales/es2011d/alphaPS_uncor");
+    load(m_daPSCor, "Scales/es2011d/dalphaPS_cor");
+    load(m_aS12Nom, "Scales/es2011d/alphaS12_uncor");
+    load(m_daS12Cor, "Scales/es2011d/dalphaS12_cor");
+    load(m_trkSyst, "Scales/es2011d/momentum_errSyst");
 
     if (m_esmodel == egEnergyCorr::es2011d) {
 
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011d/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011d/alphaZee_errSyst")));
-      m_resNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Resolution/es2011d/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Resolution/es2011d/ctZee_errSyst")));
+      load(m_zeeNom, "Scales/es2011d/alphaZee_errStat");
+      load(m_zeeSyst, "Scales/es2011d/alphaZee_errSyst");
+      load(m_resNom, "Resolution/es2011d/ctZee_errStat");
+      load(m_resSyst, "Resolution/es2011d/ctZee_errSyst");
 
     } else if (m_esmodel == egEnergyCorr::es2011dMedium) {
 
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011dMedium/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011dMedium/alphaZee_errSyst")));
-      m_zeePhys.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011dMedium/alphaZee_errPhys")));
-      m_resNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Resolution/es2011dMedium/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Resolution/es2011dMedium/ctZee_errSyst")));
+      load(m_zeeNom, "Scales/es2011dMedium/alphaZee_errStat");
+      load(m_zeeSyst, "Scales/es2011dMedium/alphaZee_errSyst");
+      load(m_zeePhys, "Scales/es2011dMedium/alphaZee_errPhys");
+      load(m_resNom, "Resolution/es2011dMedium/ctZee_errStat");
+      load(m_resSyst, "Resolution/es2011dMedium/ctZee_errSyst");
 
     } else if (m_esmodel == egEnergyCorr::es2011dTight) {
 
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011dTight/alphaZee_errStat")));
-      m_zeeSyst.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011dTight/alphaZee_errSyst")));
-      m_zeePhys.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2011dTight/alphaZee_errPhys")));
-      m_resNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Resolution/es2011dTight/ctZee_errStat")));
-      m_resSyst.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Resolution/es2011dTight/ctZee_errSyst")));
+      load(m_zeeNom, "Scales/es2011dTight/alphaZee_errStat");
+      load(m_zeeSyst, "Scales/es2011dTight/alphaZee_errSyst");
+      load(m_zeePhys, "Scales/es2011dTight/alphaZee_errPhys");
+      load(m_resNom, "Resolution/es2011dTight/ctZee_errStat");
+      load(m_resSyst, "Resolution/es2011dTight/ctZee_errSyst");
     }
 
-    m_pedestalL0.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2011d/pedestals_l0")));
-    m_pedestalL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2011d/pedestals_l1")));
-    m_pedestalL2.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2011d/pedestals_l2")));
-    m_pedestalL3.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2011d/pedestals_l3")));
+    load(m_pedestalL0, "Pedestals/es2011d/pedestals_l0");
+    load(m_pedestalL1, "Pedestals/es2011d/pedestals_l1");
+    load(m_pedestalL2, "Pedestals/es2011d/pedestals_l2");
+    load(m_pedestalL3, "Pedestals/es2011d/pedestals_l3");
 
-    m_dX_ID_Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+    load(m_dX_ID_Nom, "Material/DX0_ConfigA");
 
-    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+    load(m_dX_IPPS_Nom, "Material/Measured/DXerr_IPPS_NewG_errUncor");
+    load(m_dX_IPPS_LAr, "Material/Measured/DXerr_IPPS_NewG_errLAr");
 
-    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+    load(m_dX_IPAcc_Nom, "Material/Measured/DXerr_IPAcc_NewG_errUncor");
+    load(m_dX_IPAcc_LAr, "Material/Measured/DXerr_IPAcc_NewG_errLAr");
+    load(m_dX_IPAcc_G4, "Material/Measured/DXerr_IPAcc_NewG_errG4");
+    load(m_dX_IPAcc_GL1, "Material/Measured/DXerr_IPAcc_NewG_errGL1");
 
-    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+    load(m_dX_PSAcc_Nom, "Material/Measured/DXerr_PSAcc_NewG_errUncor");
+    load(m_dX_PSAcc_LAr, "Material/Measured/DXerr_PSAcc_NewG_errLAr");
+    load(m_dX_PSAcc_G4, "Material/Measured/DXerr_PSAcc_NewG_errG4");
 
-    m_convRadius.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2011d/convRadiusMigrations")));
-    m_convFakeRate.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2011d/convFakeRate")));
-    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2011d/convRecoEfficiency")));
+    load(m_convRadius, "Conversions/es2011d/convRadiusMigrations");
+    load(m_convFakeRate, "Conversions/es2011d/convFakeRate");
+    load(m_convRecoEfficiency, "Conversions/es2011d/convRecoEfficiency");
 
     m_begRunNumber = 177531;
     m_endRunNumber = 194382;
@@ -422,24 +373,16 @@ int egammaEnergyCorrectionTool::initialize() {
     // All systematics as in 2010.
   } else if (m_esmodel == egEnergyCorr::es2012a) {
     m_use_new_resolution_model = false;
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012a/alphaPS_errTot")));
-    m_aS12Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012a/alphaS12_errTot")));
+    load(m_aPSNom, "Scales/es2012a/alphaPS_errTot");
+    load(m_aS12Nom, "Scales/es2012a/alphaS12_errTot");
 
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012a/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012a/alphaZee_errSyst")));
+    load(m_zeeNom, "Scales/es2012a/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2012a/alphaZee_errSyst");
 
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2012a/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2012a/ctZee_errSyst")));
-    m_peakResData.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2012a/resZee_Data")));
-    m_peakResMC.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Resolution/es2012a/resZee_MC")));
+    load(m_resNom, "Resolution/es2012a/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2012a/ctZee_errSyst");
+    load(m_peakResData, "Resolution/es2012a/resZee_Data");
+    load(m_peakResMC, "Resolution/es2012a/resZee_MC");
 
     m_begRunNumber = 195847;
     m_endRunNumber = 219365;
@@ -450,67 +393,41 @@ int egammaEnergyCorrectionTool::initialize() {
     m_use_new_resolution_model = true;
     m_resolution_tool = std::make_unique<eg_resolution>("run1");
 
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-    m_daPSCor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-    m_daS12Cor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    load(m_aPSNom, "Scales/es2012c/alphaPS_uncor");
+    load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+    load(m_aS12Nom, "Scales/es2012c/alphaS12_uncor");
+    load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
 
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+    load(m_trkSyst, "Scales/es2012c/momentum_errSyst");
 
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/alphaZee_errSyst")));
+    load(m_zeeNom, "Scales/es2012c/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2012c/alphaZee_errSyst");
 
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2012c/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2012c/ctZee_errSyst")));
+    load(m_resNom, "Resolution/es2012c/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2012c/ctZee_errSyst");
 
-    m_pedestalL0.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-    m_pedestalL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-    m_pedestalL2.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-    m_pedestalL3.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+    load(m_pedestalL0, "Pedestals/es2012c/pedestals_l0");
+    load(m_pedestalL1, "Pedestals/es2012c/pedestals_l1");
+    load(m_pedestalL2, "Pedestals/es2012c/pedestals_l2");
+    load(m_pedestalL3, "Pedestals/es2012c/pedestals_l3");
 
-    m_dX_ID_Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+    load(m_dX_ID_Nom, "Material/DX0_ConfigA");
 
-    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+    load(m_dX_IPPS_Nom, "Material/Measured/DXerr_IPPS_NewG_errUncor");
+    load(m_dX_IPPS_LAr, "Material/Measured/DXerr_IPPS_NewG_errLAr");
 
-    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+    load(m_dX_IPAcc_Nom, "Material/Measured/DXerr_IPAcc_NewG_errUncor");
+    load(m_dX_IPAcc_LAr, "Material/Measured/DXerr_IPAcc_NewG_errLAr");
+    load(m_dX_IPAcc_G4, "Material/Measured/DXerr_IPAcc_NewG_errG4");
+    load(m_dX_IPAcc_GL1, "Material/Measured/DXerr_IPAcc_NewG_errGL1");
 
-    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+    load(m_dX_PSAcc_Nom, "Material/Measured/DXerr_PSAcc_NewG_errUncor");
+    load(m_dX_PSAcc_LAr, "Material/Measured/DXerr_PSAcc_NewG_errLAr");
+    load(m_dX_PSAcc_G4, "Material/Measured/DXerr_PSAcc_NewG_errG4");
 
-    m_convRadius.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-    m_convFakeRate.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convFakeRate")));
-    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+    load(m_convRadius, "Conversions/es2012c/convRadiusMigrations");
+    load(m_convFakeRate, "Conversions/es2012c/convFakeRate");
+    load(m_convRecoEfficiency, "Conversions/es2012c/convRecoEfficiency");
 
     m_begRunNumber = 195847;
     m_endRunNumber = 219365;
@@ -530,67 +447,41 @@ int egammaEnergyCorrectionTool::initialize() {
     m_use_new_resolution_model = true;
     m_resolution_tool = std::make_unique<eg_resolution>("run1");
 
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-    m_daPSCor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-    m_daS12Cor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    load(m_aPSNom, "Scales/es2012c/alphaPS_uncor");
+    load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+    load(m_aS12Nom, "Scales/es2012c/alphaS12_uncor");
+    load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
 
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+    load(m_trkSyst, "Scales/es2012c/momentum_errSyst");
 
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/alphaZee_errSyst")));
+    load(m_zeeNom, "Scales/es2015PRE/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2012c/alphaZee_errSyst");
 
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2012c/ctZee_errSyst")));
+    load(m_resNom, "Resolution/es2015PRE/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2012c/ctZee_errSyst");
 
-    m_pedestalL0.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-    m_pedestalL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-    m_pedestalL2.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-    m_pedestalL3.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+    load(m_pedestalL0, "Pedestals/es2012c/pedestals_l0");
+    load(m_pedestalL1, "Pedestals/es2012c/pedestals_l1");
+    load(m_pedestalL2, "Pedestals/es2012c/pedestals_l2");
+    load(m_pedestalL3, "Pedestals/es2012c/pedestals_l3");
 
-    m_dX_ID_Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+    load(m_dX_ID_Nom, "Material/DX0_ConfigA");
 
-    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+    load(m_dX_IPPS_Nom, "Material/Measured/DXerr_IPPS_NewG_errUncor");
+    load(m_dX_IPPS_LAr, "Material/Measured/DXerr_IPPS_NewG_errLAr");
 
-    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+    load(m_dX_IPAcc_Nom, "Material/Measured/DXerr_IPAcc_NewG_errUncor");
+    load(m_dX_IPAcc_LAr, "Material/Measured/DXerr_IPAcc_NewG_errLAr");
+    load(m_dX_IPAcc_G4, "Material/Measured/DXerr_IPAcc_NewG_errG4");
+    load(m_dX_IPAcc_GL1, "Material/Measured/DXerr_IPAcc_NewG_errGL1");
 
-    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+    load(m_dX_PSAcc_Nom, "Material/Measured/DXerr_PSAcc_NewG_errUncor");
+    load(m_dX_PSAcc_LAr, "Material/Measured/DXerr_PSAcc_NewG_errLAr");
+    load(m_dX_PSAcc_G4, "Material/Measured/DXerr_PSAcc_NewG_errG4");
 
-    m_convRadius.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-    m_convFakeRate.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convFakeRate")));
-    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+    load(m_convRadius, "Conversions/es2012c/convRadiusMigrations");
+    load(m_convFakeRate, "Conversions/es2012c/convFakeRate");
+    load(m_convRecoEfficiency, "Conversions/es2012c/convRecoEfficiency");
 
     m_begRunNumber = 195847;
     m_endRunNumber = 219365;
@@ -611,79 +502,49 @@ int egammaEnergyCorrectionTool::initialize() {
     m_use_new_resolution_model = true;
     m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
 
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-    m_daPSCor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-    m_daS12Cor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    load(m_aPSNom, "Scales/es2012c/alphaPS_uncor");
+    load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+    load(m_aS12Nom, "Scales/es2012c/alphaS12_uncor");
+    load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
 
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+    load(m_trkSyst, "Scales/es2012c/momentum_errSyst");
 
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015PRE/alphaZee_errSyst")));
-    m_uA2MeV_2015_first2weeks_correction.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015PRE/histo_uA2MeV_week12")));
+    load(m_zeeNom, "Scales/es2015PRE/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2015PRE/alphaZee_errSyst");
+    load(m_uA2MeV_2015_first2weeks_correction, "Scales/es2015PRE/histo_uA2MeV_week12");
 
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015PRE/ctZee_errSyst")));
+    load(m_resNom, "Resolution/es2015PRE/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2015PRE/ctZee_errSyst");
 
-    m_pedestalL0.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-    m_pedestalL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-    m_pedestalL2.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-    m_pedestalL3.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+    load(m_pedestalL0, "Pedestals/es2012c/pedestals_l0");
+    load(m_pedestalL1, "Pedestals/es2012c/pedestals_l1");
+    load(m_pedestalL2, "Pedestals/es2012c/pedestals_l2");
+    load(m_pedestalL3, "Pedestals/es2012c/pedestals_l3");
 
-    m_dX_ID_Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+    load(m_dX_ID_Nom, "Material/DX0_ConfigA");
 
-    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+    load(m_dX_IPPS_Nom, "Material/Measured/DXerr_IPPS_NewG_errUncor");
+    load(m_dX_IPPS_LAr, "Material/Measured/DXerr_IPPS_NewG_errLAr");
 
-    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+    load(m_dX_IPAcc_Nom, "Material/Measured/DXerr_IPAcc_NewG_errUncor");
+    load(m_dX_IPAcc_LAr, "Material/Measured/DXerr_IPAcc_NewG_errLAr");
+    load(m_dX_IPAcc_G4, "Material/Measured/DXerr_IPAcc_NewG_errG4");
+    load(m_dX_IPAcc_GL1, "Material/Measured/DXerr_IPAcc_NewG_errGL1");
 
-    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+    load(m_dX_PSAcc_Nom, "Material/Measured/DXerr_PSAcc_NewG_errUncor");
+    load(m_dX_PSAcc_LAr, "Material/Measured/DXerr_PSAcc_NewG_errLAr");
+    load(m_dX_PSAcc_G4, "Material/Measured/DXerr_PSAcc_NewG_errG4");
 
-    m_convRadius.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-    m_convFakeRate.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convFakeRate")));
-    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+    load(m_convRadius, "Conversions/es2012c/convRadiusMigrations");
+    load(m_convFakeRate, "Conversions/es2012c/convFakeRate");
+    load(m_convRecoEfficiency, "Conversions/es2012c/convRecoEfficiency");
 
     m_begRunNumber = 195847;
     m_endRunNumber = 219365;
 
-    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+    load(m_G4OverAFII_resolution_electron, "FastSim/es2015/el_full_fast_resolution");
+    load(m_G4OverAFII_resolution_unconverted, "FastSim/es2015/ph_unconv_full_fast_resolution");
+    load(m_G4OverAFII_resolution_converted, "FastSim/es2015/ph_conv_full_fast_resolution");
 
     assert(m_G4OverAFII_resolution_electron);
     assert(m_G4OverAFII_resolution_unconverted);
@@ -705,79 +566,49 @@ int egammaEnergyCorrectionTool::initialize() {
     m_use_new_resolution_model = true;
     m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
 
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-    m_daPSCor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-    m_daS12Cor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    load(m_aPSNom, "Scales/es2012c/alphaPS_uncor");
+    load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+    load(m_aS12Nom, "Scales/es2012c/alphaS12_uncor");
+    load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
 
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+    load(m_trkSyst, "Scales/es2012c/momentum_errSyst");
 
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015PRE/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015PRE/alphaZee_errSyst")));
-    m_uA2MeV_2015_first2weeks_correction.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015PRE/histo_uA2MeV_week12")));
+    load(m_zeeNom, "Scales/es2015PRE/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2015PRE/alphaZee_errSyst");
+    load(m_uA2MeV_2015_first2weeks_correction, "Scales/es2015PRE/histo_uA2MeV_week12");
 
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015PRE/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015PRE_res_improved/ctZee_errSyst")));
+    load(m_resNom, "Resolution/es2015PRE/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2015PRE_res_improved/ctZee_errSyst");
 
-    m_pedestalL0.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-    m_pedestalL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-    m_pedestalL2.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-    m_pedestalL3.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+    load(m_pedestalL0, "Pedestals/es2012c/pedestals_l0");
+    load(m_pedestalL1, "Pedestals/es2012c/pedestals_l1");
+    load(m_pedestalL2, "Pedestals/es2012c/pedestals_l2");
+    load(m_pedestalL3, "Pedestals/es2012c/pedestals_l3");
 
-    m_dX_ID_Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+    load(m_dX_ID_Nom, "Material/DX0_ConfigA");
 
-    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+    load(m_dX_IPPS_Nom, "Material/Measured/DXerr_IPPS_NewG_errUncor");
+    load(m_dX_IPPS_LAr, "Material/Measured/DXerr_IPPS_NewG_errLAr");
 
-    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+    load(m_dX_IPAcc_Nom, "Material/Measured/DXerr_IPAcc_NewG_errUncor");
+    load(m_dX_IPAcc_LAr, "Material/Measured/DXerr_IPAcc_NewG_errLAr");
+    load(m_dX_IPAcc_G4, "Material/Measured/DXerr_IPAcc_NewG_errG4");
+    load(m_dX_IPAcc_GL1, "Material/Measured/DXerr_IPAcc_NewG_errGL1");
 
-    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+    load(m_dX_PSAcc_Nom, "Material/Measured/DXerr_PSAcc_NewG_errUncor");
+    load(m_dX_PSAcc_LAr, "Material/Measured/DXerr_PSAcc_NewG_errLAr");
+    load(m_dX_PSAcc_G4, "Material/Measured/DXerr_PSAcc_NewG_errG4");
 
-    m_convRadius.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-    m_convFakeRate.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convFakeRate")));
-    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+    load(m_convRadius, "Conversions/es2012c/convRadiusMigrations");
+    load(m_convFakeRate, "Conversions/es2012c/convFakeRate");
+    load(m_convRecoEfficiency, "Conversions/es2012c/convRecoEfficiency");
 
     m_begRunNumber = 195847;
     m_endRunNumber = 219365;
 
-    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+    load(m_G4OverAFII_resolution_electron, "FastSim/es2015/el_full_fast_resolution");
+    load(m_G4OverAFII_resolution_unconverted, "FastSim/es2015/ph_unconv_full_fast_resolution");
+    load(m_G4OverAFII_resolution_converted, "FastSim/es2015/ph_conv_full_fast_resolution");
 
     assert(m_G4OverAFII_resolution_electron);
     assert(m_G4OverAFII_resolution_unconverted);
@@ -797,78 +628,49 @@ int egammaEnergyCorrectionTool::initialize() {
     m_use_new_resolution_model = true;
     m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
 
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-    m_daPSCor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-    m_daS12Cor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    load(m_aPSNom, "Scales/es2012c/alphaPS_uncor");
+    load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+    load(m_aS12Nom, "Scales/es2012c/alphaS12_uncor");
+    load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
 
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+    load(m_trkSyst, "Scales/es2012c/momentum_errSyst");
 
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015Summer/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015Summer/alphaZee_errSyst")));
+    load(m_zeeNom, "Scales/es2015Summer/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2015Summer/alphaZee_errSyst");
     m_uA2MeV_2015_first2weeks_correction = nullptr;
 
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015Summer/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015Summer/ctZee_errSyst")));
+    load(m_resNom, "Resolution/es2015Summer/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2015Summer/ctZee_errSyst");
 
-    m_pedestalL0.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-    m_pedestalL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-    m_pedestalL2.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-    m_pedestalL3.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+    load(m_pedestalL0, "Pedestals/es2012c/pedestals_l0");
+    load(m_pedestalL1, "Pedestals/es2012c/pedestals_l1");
+    load(m_pedestalL2, "Pedestals/es2012c/pedestals_l2");
+    load(m_pedestalL3, "Pedestals/es2012c/pedestals_l3");
 
-    m_dX_ID_Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+    load(m_dX_ID_Nom, "Material/DX0_ConfigA");
 
-    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+    load(m_dX_IPPS_Nom, "Material/Measured/DXerr_IPPS_NewG_errUncor");
+    load(m_dX_IPPS_LAr, "Material/Measured/DXerr_IPPS_NewG_errLAr");
 
-    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+    load(m_dX_IPAcc_Nom, "Material/Measured/DXerr_IPAcc_NewG_errUncor");
+    load(m_dX_IPAcc_LAr, "Material/Measured/DXerr_IPAcc_NewG_errLAr");
+    load(m_dX_IPAcc_G4, "Material/Measured/DXerr_IPAcc_NewG_errG4");
+    load(m_dX_IPAcc_GL1, "Material/Measured/DXerr_IPAcc_NewG_errGL1");
 
-    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+    load(m_dX_PSAcc_Nom, "Material/Measured/DXerr_PSAcc_NewG_errUncor");
+    load(m_dX_PSAcc_LAr, "Material/Measured/DXerr_PSAcc_NewG_errLAr");
+    load(m_dX_PSAcc_G4, "Material/Measured/DXerr_PSAcc_NewG_errG4");
 
-    m_convRadius.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-    m_convFakeRate.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convFakeRate")));
-    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+    load(m_convRadius, "Conversions/es2012c/convRadiusMigrations");
+    load(m_convFakeRate, "Conversions/es2012c/convFakeRate");
+    load(m_convRecoEfficiency, "Conversions/es2012c/convRecoEfficiency");
 
     m_begRunNumber = 195847;
     m_endRunNumber = 219365;
 
-    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+    load(m_G4OverAFII_resolution_electron, "FastSim/es2015/el_full_fast_resolution");
+    load(m_G4OverAFII_resolution_unconverted, "FastSim/es2015/ph_unconv_full_fast_resolution");
+    load(m_G4OverAFII_resolution_converted, "FastSim/es2015/ph_conv_full_fast_resolution");
 
     assert(m_G4OverAFII_resolution_electron);
     assert(m_G4OverAFII_resolution_unconverted);
@@ -891,77 +693,48 @@ int egammaEnergyCorrectionTool::initialize() {
     m_use_new_resolution_model = true;
     m_resolution_tool = std::make_unique<eg_resolution>("run2_pre");
 
-    m_aPSNom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-    m_daPSCor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-    m_aS12Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-    m_daS12Cor.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+    load(m_aPSNom, "Scales/es2012c/alphaPS_uncor");
+    load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+    load(m_aS12Nom, "Scales/es2012c/alphaS12_uncor");
+    load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
 
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+    load(m_trkSyst, "Scales/es2012c/momentum_errSyst");
 
-    m_zeeNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015Summer/alphaZee_errStat")));
-    m_zeeSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2015Summer/alphaZee_errSyst")));
+    load(m_zeeNom, "Scales/es2015Summer/alphaZee_errStat");
+    load(m_zeeSyst, "Scales/es2015Summer/alphaZee_errSyst");
 
-    m_resNom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015Summer/ctZee_errStat")));
-    m_resSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Resolution/es2015Summer/ctZee_errSyst")));
+    load(m_resNom, "Resolution/es2015Summer/ctZee_errStat");
+    load(m_resSyst, "Resolution/es2015Summer/ctZee_errSyst");
 
-    m_pedestalL0.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l0")));
-    m_pedestalL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l1")));
-    m_pedestalL2.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l2")));
-    m_pedestalL3.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Pedestals/es2012c/pedestals_l3")));
+    load(m_pedestalL0, "Pedestals/es2012c/pedestals_l0");
+    load(m_pedestalL1, "Pedestals/es2012c/pedestals_l1");
+    load(m_pedestalL2, "Pedestals/es2012c/pedestals_l2");
+    load(m_pedestalL3, "Pedestals/es2012c/pedestals_l3");
 
-    m_dX_ID_Nom.reset(
-        checked_own_cast<TH1*>(rootFile->Get("Material/DX0_ConfigA")));
+    load(m_dX_ID_Nom, "Material/DX0_ConfigA");
 
-    m_dX_IPPS_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errUncor")));
-    m_dX_IPPS_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPPS_NewG_errLAr")));
+    load(m_dX_IPPS_Nom, "Material/Measured/DXerr_IPPS_NewG_errUncor");
+    load(m_dX_IPPS_LAr, "Material/Measured/DXerr_IPPS_NewG_errLAr");
 
-    m_dX_IPAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errUncor")));
-    m_dX_IPAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errLAr")));
-    m_dX_IPAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errG4")));
-    m_dX_IPAcc_GL1.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_IPAcc_NewG_errGL1")));
+    load(m_dX_IPAcc_Nom, "Material/Measured/DXerr_IPAcc_NewG_errUncor");
+    load(m_dX_IPAcc_LAr, "Material/Measured/DXerr_IPAcc_NewG_errLAr");
+    load(m_dX_IPAcc_G4, "Material/Measured/DXerr_IPAcc_NewG_errG4");
+    load(m_dX_IPAcc_GL1, "Material/Measured/DXerr_IPAcc_NewG_errGL1");
 
-    m_dX_PSAcc_Nom.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errUncor")));
-    m_dX_PSAcc_LAr.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errLAr")));
-    m_dX_PSAcc_G4.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Material/Measured/DXerr_PSAcc_NewG_errG4")));
+    load(m_dX_PSAcc_Nom, "Material/Measured/DXerr_PSAcc_NewG_errUncor");
+    load(m_dX_PSAcc_LAr, "Material/Measured/DXerr_PSAcc_NewG_errLAr");
+    load(m_dX_PSAcc_G4, "Material/Measured/DXerr_PSAcc_NewG_errG4");
 
-    m_convRadius.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRadiusMigrations")));
-    m_convFakeRate.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convFakeRate")));
-    m_convRecoEfficiency.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Conversions/es2012c/convRecoEfficiency")));
+    load(m_convRadius, "Conversions/es2012c/convRadiusMigrations");
+    load(m_convFakeRate, "Conversions/es2012c/convFakeRate");
+    load(m_convRecoEfficiency, "Conversions/es2012c/convRecoEfficiency");
 
     m_begRunNumber = 195847;
     m_endRunNumber = 219365;
 
-    m_G4OverAFII_resolution_electron.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/el_full_fast_resolution")));
-    m_G4OverAFII_resolution_unconverted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_unconv_full_fast_resolution")));
-    m_G4OverAFII_resolution_converted.reset(checked_own_cast<TH2*>(
-        rootFile->Get("FastSim/es2015/ph_conv_full_fast_resolution")));
+    load(m_G4OverAFII_resolution_electron, "FastSim/es2015/el_full_fast_resolution");
+    load(m_G4OverAFII_resolution_unconverted, "FastSim/es2015/ph_unconv_full_fast_resolution");
+    load(m_G4OverAFII_resolution_converted, "FastSim/es2015/ph_conv_full_fast_resolution");
 
     assert(m_G4OverAFII_resolution_electron);
     assert(m_G4OverAFII_resolution_unconverted);
@@ -1020,122 +793,80 @@ int egammaEnergyCorrectionTool::initialize() {
         m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0 or 
         m_esmodel == egEnergyCorr::es2018_R21_v0 ||
         m_esmodel == egEnergyCorr::es2022_R22_PRE) {
-      m_aPSNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_summer_final/alphaPS_uncor")));
-      m_daPSb12.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_summer_final/dalphaPS_b12")));
-      m_daPSCor.reset(
-          checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_summer_final/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+      load(m_aPSNom, "Scales/es2017_summer_final/alphaPS_uncor");
+      load(m_daPSb12, "Scales/es2017_summer_final/dalphaPS_b12");
+      load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+      load(m_aS12Nom, "Scales/es2017_summer_final/alphaS12_uncor");
+      load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
     } else if (m_esmodel == egEnergyCorr::es2018_R21_v1) {
-      m_aPSNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_summer_final/alphaPS_uncor")));
-      m_daPSb12.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_summer_final/dalphaPS_b12")));
-      m_daPSCor.reset(
-          checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2018_R21_v1/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+      load(m_aPSNom, "Scales/es2017_summer_final/alphaPS_uncor");
+      load(m_daPSb12, "Scales/es2017_summer_final/dalphaPS_b12");
+      load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+      load(m_aS12Nom, "Scales/es2018_R21_v1/alphaS12_uncor");
+      load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
     } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v0) {
-      m_aPSNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2023_R22_Run2_v0/alphaPS_uncor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2023_R22_Run2_v0/alphaS12_uncor")));
+      load(m_aPSNom, "Scales/es2023_R22_Run2_v0/alphaPS_uncor");
+      load(m_aS12Nom, "Scales/es2023_R22_Run2_v0/alphaS12_uncor");
     } else if (m_esmodel == egEnergyCorr::es2023_R22_Run2_v1 or
                m_esmodel == egEnergyCorr::es2024_Run3_v0) { 
       // es2024_Run3_v0 has different central value but same systematic
-      m_aPSNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2023_R22_Run2_v0/alphaPS_uncor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2023_R22_Run2_v1/hE1E2_emu_run2_rel21_v0_fix")));
+      load(m_aPSNom, "Scales/es2023_R22_Run2_v0/alphaPS_uncor");
+      load(m_aS12Nom, "Scales/es2023_R22_Run2_v1/hE1E2_emu_run2_rel21_v0_fix");
     } else {
-      m_aPSNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2012c/alphaPS_uncor")));
-      m_daPSCor.reset(
-          checked_own_cast<TH1*>(rootFile->Get("Scales/es2012c/dalphaPS_cor")));
-      m_aS12Nom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2012c/alphaS12_uncor")));
-      m_daS12Cor.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2012c/dalphaS12_cor")));
+      load(m_aPSNom, "Scales/es2012c/alphaPS_uncor");
+      load(m_daPSCor, "Scales/es2012c/dalphaPS_cor");
+      load(m_aS12Nom, "Scales/es2012c/alphaS12_uncor");
+      load(m_daS12Cor, "Scales/es2012c/dalphaS12_cor");
     }
-    m_trkSyst.reset(checked_own_cast<TH1*>(
-        rootFile->Get("Scales/es2012c/momentum_errSyst")));
+    load(m_trkSyst, "Scales/es2012c/momentum_errSyst");
 
     if (m_esmodel == egEnergyCorr::es2017) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017/alphaZee_errStat_period_2016")));
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017/alphaZee_errStat_period_2015")));
+      load(m_zeeNom, "Scales/es2017/alphaZee_errStat_period_2016");
+      load(m_zeeNom_data2015, "Scales/es2017/alphaZee_errStat_period_2015");
     } else if (m_esmodel == egEnergyCorr::es2017_summer or
                m_esmodel == egEnergyCorr::es2017_summer_improved) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_summer/alphaZee_errStat_period_2016")));
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_summer/alphaZee_errStat_period_2015")));
+      load(m_zeeNom, "Scales/es2017_summer/alphaZee_errStat_period_2016");
+      load(m_zeeNom_data2015, "Scales/es2017_summer/alphaZee_errStat_period_2015");
     } else if (m_esmodel == egEnergyCorr::es2017_summer_final) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get(
-          "Scales/es2017_summer_final/alphaZee_errStat_period_2016")));
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get(
-          "Scales/es2017_summer_final/alphaZee_errStat_period_2015")));
+      load(m_zeeNom, "Scales/es2017_summer_final/alphaZee_errStat_period_2016");
+      load(m_zeeNom_data2015, "Scales/es2017_summer_final/alphaZee_errStat_period_2015");
     } else if (m_esmodel == egEnergyCorr::es2015_5TeV) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2015_5TeV/alphaZee_errStat_period_2015")));
+      load(m_zeeNom, "Scales/es2015_5TeV/alphaZee_errStat_period_2015");
       // Same histogram added twice for simplicity
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2015_5TeV/alphaZee_errStat_period_2015")));
+      load(m_zeeNom_data2015, "Scales/es2015_5TeV/alphaZee_errStat_period_2015");
     } else if (m_esmodel == egEnergyCorr::es2017_R21_v0) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2017")));
-      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2016")));
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_R21_v0/alphaZee_errStat_period_2015")));
+      load(m_zeeNom, "Scales/es2017_R21_v0/alphaZee_errStat_period_2017");
+      load(m_zeeNom_data2016, "Scales/es2017_R21_v0/alphaZee_errStat_period_2016");
+      load(m_zeeNom_data2015, "Scales/es2017_R21_v0/alphaZee_errStat_period_2015");
     } else if (m_esmodel == egEnergyCorr::es2017_R21_v1) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2017")));
-      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2016")));
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2017_R21_v1/alphaZee_errStat_period_2015")));
+      load(m_zeeNom, "Scales/es2017_R21_v1/alphaZee_errStat_period_2017");
+      load(m_zeeNom_data2016, "Scales/es2017_R21_v1/alphaZee_errStat_period_2016");
+      load(m_zeeNom_data2015, "Scales/es2017_R21_v1/alphaZee_errStat_period_2015");
       m_zeeFwdk.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
       m_zeeFwdb.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
     } else if (m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get(
-          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2017")));
-      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(rootFile->Get(
-          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2016")));
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(rootFile->Get(
-          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2015")));
-      m_zeeNom_data2018.reset(checked_own_cast<TH1*>(rootFile->Get(
-          "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2018")));
+      load(m_zeeNom, "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2017");
+      load(m_zeeNom_data2016, "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2016");
+      load(m_zeeNom_data2015, "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2015");
+      load(m_zeeNom_data2018, "Scales/es2017_R21_ofc0_v1/alphaZee_errStat_period_2018");
       m_zeeFwdk.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
       m_zeeFwdb.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
     } else if (m_esmodel == egEnergyCorr::es2024_Run3_ofc0_v0) {
-      m_zeeNom.reset(checked_own_cast<TH1*>(rootFile->Get(
-          "Scales/es2024_Run3_ofc0_v0/alphaZee_errStat")));
+      load(m_zeeNom, "Scales/es2024_Run3_ofc0_v0/alphaZee_errStat");
       m_zeeFwdk.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalk")));
       m_zeeFwdb.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2017_R21_v1/alphaFwd_Finalb")));
     } else if (m_esmodel == egEnergyCorr::es2018_R21_v0) {
 
-      m_zeeNom.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2018")));
-      m_zeeNom_data2017.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2017")));
-      m_zeeNom_data2016.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2016")));
-      m_zeeNom_data2015.reset(checked_own_cast<TH1*>(
-          rootFile->Get("Scales/es2018_R21_v0/alphaZee_errStat_period_2015")));
+      load(m_zeeNom, "Scales/es2018_R21_v0/alphaZee_errStat_period_2018");
+      load(m_zeeNom_data2017, "Scales/es2018_R21_v0/alphaZee_errStat_period_2017");
+      load(m_zeeNom_data2016, "Scales/es2018_R21_v0/alphaZee_errStat_period_2016");
+      load(m_zeeNom_data2015, "Scales/es2018_R21_v0/alphaZee_errStat_period_2015");
       m_zeeFwdk.reset(checked_own_cast<TH1*>(
           rootFile->Get("Scales/es2018_R21_v0/alphaFwd_Finalk")));
       m_zeeFwdb.reset(checked_own_cast<TH1*>(
