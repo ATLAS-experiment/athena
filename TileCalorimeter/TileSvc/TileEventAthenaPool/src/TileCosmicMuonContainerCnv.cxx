@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCosmicMuonContainerCnv.cxx 
@@ -41,7 +41,6 @@ TileCosmicMuonContainer* TileCosmicMuonContainerCnv::createTransient() {
   TileCosmicMuonContainer *transObj = 0;
 
   static const pool::Guid tr_guid("81711CFC-C75C-49F4-BA12-31D6FAA2D903");
-  static const pool::Guid p0_guid("51A1E48E-5D5D-4491-85D0-3EFCCEBA5253"); //old before T/P
   static const pool::Guid p1_guid("716F406D-8F59-4879-AA07-C28BA374E6EF");
   static const pool::Guid p2_guid("8957FF04-12E8-43BA-A0C8-D7D9638E242E");
 
