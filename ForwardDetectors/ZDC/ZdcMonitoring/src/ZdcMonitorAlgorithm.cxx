@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcMonitoring/ZdcMonitorAlgorithm.h"
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
 #include "ZdcAnalysis/RpdSubtractCentroidTool.h"
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "AthContainers/ConstAccessor.h"
 #include <sstream>     // for std::ostringstream
 #include <utility>     // for std::pair (if not already included indirectly)
