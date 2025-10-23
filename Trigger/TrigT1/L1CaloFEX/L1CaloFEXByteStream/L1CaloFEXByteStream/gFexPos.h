@@ -36,7 +36,8 @@ namespace LVL1::gFEXPos {
         constexpr unsigned int JWOJ_MST_POSITION    = 1 ;//position of JwoJ MST word in Global TOB dataframe, within the same slice
         constexpr unsigned int JWOJ_MET_POSITION    = 2 ;//position of JwoJ MET word in Global TOB dataframe, within the same slice
         constexpr unsigned int JWOJ_SCALAR_POSITION = 3 ;//position of JwoJ Scalar word in Global TOB dataframe, within the same slice
-
+        constexpr unsigned int GESPRESSO_POSITION   = 5 ;//position of gEspresso word in Global TOB dataframe, within the same slice
+ 
         constexpr unsigned int NC_MET_POSITION      = 7 ;//position of Noise Cut MET word in Global TOB dataframe, within the same slice
         constexpr unsigned int NC_SCALAR_POSITION   = 9 ;//position of Noise Cut Scalar word in Global TOB dataframe, within the same slice
  
