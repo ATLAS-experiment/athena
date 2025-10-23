@@ -2,16 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL include files
 
-#include <vector>
-#include <string>
-#include <chrono>
-#include <iomanip>
-#include <limits>
-#include <math.h>
-#include <regex>
-#include <span>
 
 // TDAQ include files
 
@@ -35,6 +26,16 @@
 #include <TTree.h>
 
 #include "test_nsw_trigger_common_decoder_aux.h"
+// STL include files
+
+#include <vector>
+#include <string>
+#include <chrono>
+#include <iomanip>
+#include <limits>
+#include <math.h>
+#include <regex>
+#include <span>
 
 void test_nsw_trigger_common_decoder_help (char *progname) {
   std::cout << "Usage: " << progname
@@ -87,8 +88,7 @@ int test_nsw_trigger_common_decoder_opt (int argc, char **argv, Params& params) 
 	return 1;
       }
     } else {
-      std::string data_file_name (argv[i]);
-      params.file_names.push_back (data_file_name);
+      params.file_names.emplace_back (argv[i]);
     }
   }
   
@@ -152,7 +152,8 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
   uint16_t m = source_id.module_id ();
   
   const uint32_t *bs = r.rod_data ();
-
+  std::ios oldState(nullptr);
+  oldState.copyfmt(std::cout);
   // Print out raw fragment
   if (params.print_only || params.printout_level > 2) {
     std::cout << "ROD Fragment sizes in words:" << std::endl;
@@ -168,7 +169,7 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
       std::cout << " " << std::setfill('0') << std::setw(8) << bs[i];
       if (i % 4 == 3) std::cout << std::endl;
     }
-    std::cout << std::dec;
+    std::cout.copyfmt(oldState);
     std::cout << std::endl;
   }
 
@@ -303,11 +304,11 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
             tmp_art_fiberIDs.push_back(art->art_fiberID());
           }
         }
-        data.b_MML1A_art_BCID.push_back(tmp_art_BCIDs);
-        data.b_MML1A_art_pipeID.push_back(tmp_art_pipeIDs);
-        data.b_MML1A_art_fiberID.push_back(tmp_art_fiberIDs);
-        data.b_MML1A_art_layers.push_back(tmp_art_layers);
-        data.b_MML1A_art_channels.push_back(tmp_art_channels);
+        data.b_MML1A_art_BCID.push_back(std::move(tmp_art_BCIDs));
+        data.b_MML1A_art_pipeID.push_back(std::move(tmp_art_pipeIDs));
+        data.b_MML1A_art_fiberID.push_back(std::move(tmp_art_fiberIDs));
+        data.b_MML1A_art_layers.push_back(std::move(tmp_art_layers));
+        data.b_MML1A_art_channels.push_back(std::move(tmp_art_channels));
 
         const std::vector<std::shared_ptr<Muon::nsw::MMTrigPacket>>& trigs = link->trig_packets();
         std::vector<uint32_t> tmp_trig_globalX;
@@ -324,12 +325,12 @@ int test_nsw_trigger_common_decoder_fragment (const eformat::read::ROBFragment &
           tmp_trig_phiBin.push_back(trig->trig_phiBin());
           tmp_trig_rBin.push_back(trig->trig_rBin());
         }
-        data.b_MML1A_trig_globalX.push_back(tmp_trig_globalX);
-        data.b_MML1A_trig_globalU.push_back(tmp_trig_globalU);
-        data.b_MML1A_trig_BCID.push_back(tmp_trig_BCID);
-        data.b_MML1A_trig_dTheta.push_back(tmp_trig_dTheta);
-        data.b_MML1A_trig_phiBin.push_back(tmp_trig_phiBin);
-        data.b_MML1A_trig_rBin.push_back(tmp_trig_rBin);
+        data.b_MML1A_trig_globalX.push_back(std::move(tmp_trig_globalX));
+        data.b_MML1A_trig_globalU.push_back(std::move(tmp_trig_globalU));
+        data.b_MML1A_trig_BCID.push_back(std::move(tmp_trig_BCID));
+        data.b_MML1A_trig_dTheta.push_back(std::move(tmp_trig_dTheta));
+        data.b_MML1A_trig_phiBin.push_back(std::move(tmp_trig_phiBin));
+        data.b_MML1A_trig_rBin.push_back(std::move(tmp_trig_rBin));
 
         data.b_MML1A_trailer_CRC.push_back(link->trailer_CRC());
         data.b_MML1A_CRC_ok.push_back(link->is_crc_ok());
@@ -707,7 +708,7 @@ int test_nsw_trigger_common_decoder_event(eformat::read::FullEventFragment& f, o
 
 int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statistics) {
 
-  outBranches data;
+  auto data = std::make_unique<outBranches>();
 
   for (const std::string& filename : params.file_names) {
 
@@ -725,7 +726,7 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
       std::cout << "Saving here file " << out_file_name << std::endl;
       outfile = new TFile(out_file_name.c_str(), "recreate");
       outtree = new TTree("decoded_data", "decoded_data");
-      test_nsw_trigger_common_decoder_init_tree(*outtree, data, params);
+      test_nsw_trigger_common_decoder_init_tree(*outtree, *data, params);
     }
 
     // building a dummy A01
@@ -804,7 +805,7 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
         continue;
       }
 
-      data = outBranches();
+      data = std::make_unique<outBranches>();
 
       if (params.cherry_pick_event != std::numeric_limits<uint32_t>::max()) {
         if (params.cherry_pick_event > statistics.nevents) {
@@ -816,7 +817,7 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
       }
 
       int report = 0;
-      if ((report = test_nsw_trigger_common_decoder_fragment(r, params.elink_types[0], data, params, statistics))) {
+      if ((report = test_nsw_trigger_common_decoder_fragment(r, params.elink_types[0], *data, params, statistics))) {
         std::cout << "Cannot decode properly event " << statistics.nevents << "; skipping it! \n" << std::endl;
         ++statistics.nevents;
         continue; 
@@ -838,7 +839,7 @@ int test_nsw_trigger_common_decoder_loop_txt(Params& params, Statistics& statist
 }
 
 int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics) {
-  outBranches data;
+  auto data = std::make_unique<outBranches>();
 
   for (const std::string& filename : params.file_names) {
 
@@ -856,7 +857,7 @@ int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics)
       std::cout << "Saving here file " << out_file_name << std::endl;
       outfile = new TFile(out_file_name.c_str(), "recreate");
       outtree = new TTree("decoded_data", "decoded_data");
-      test_nsw_trigger_common_decoder_init_tree(*outtree, data, params);
+      test_nsw_trigger_common_decoder_init_tree(*outtree, *data, params);
     }
 
     std::unique_ptr<DataReader> in_file;
@@ -886,7 +887,7 @@ int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics)
 
       eformat::read::FullEventFragment p(reinterpret_cast<unsigned int*>(buf));
 
-      data = outBranches();
+      data = std::make_unique<outBranches>();
 
       if (params.cherry_pick_event != std::numeric_limits<uint32_t>::max()) {
         if (params.cherry_pick_event > statistics.nevents) {
@@ -898,7 +899,7 @@ int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics)
       }
 
       int report = 0;
-      if ((report = test_nsw_trigger_common_decoder_event(p, data, params, statistics))) {
+      if ((report = test_nsw_trigger_common_decoder_event(p, *data, params, statistics))) {
         std::cout << "No requested ROBs found for event " << statistics.nevents << "; skipping it! \n" << std::endl;
         ++statistics.nevents;
         if (buf) {
@@ -921,7 +922,7 @@ int test_nsw_trigger_common_decoder_loop(Params& params, Statistics& statistics)
   }
   return 0;
 }
-
+//coverity[UNCAUGHT_EXCEPT:SUPPRESS]
 int main(int argc, char** argv) {
   Params params;
   Statistics statistics;
