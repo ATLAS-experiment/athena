@@ -32,7 +32,7 @@ namespace LArG4 {
 	std::string merr{"LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler FATAL: invalid eHECGeometryType specified "};
 	merr += m_geometryTypeProp.value();
 	ATH_MSG_ERROR(merr);
-	throw GaudiException(merr, "LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
+	throw GaudiException(std::move(merr), "LArHECCalibrationWheelCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
       }
     }
 
