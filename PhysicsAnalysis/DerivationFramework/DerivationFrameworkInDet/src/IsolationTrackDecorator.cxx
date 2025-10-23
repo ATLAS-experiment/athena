@@ -34,12 +34,12 @@ StatusCode DerivationFramework::IsolationTrackDecorator::initialize()
   // load the matching tool
   if( ! m_caloIsolationTool.empty() ) {
     ATH_CHECK( m_caloIsolationTool.retrieve() );
-    ATH_MSG_INFO( "Successfully retrived the CaloIsolationTool!" );
+    ATH_MSG_INFO( "Successfully retrieved the CaloIsolationTool!" );
   }
 
   if( ! m_trackIsolationTool.empty() ) {
     ATH_CHECK( m_trackIsolationTool.retrieve() );
-    ATH_MSG_INFO( "Successfully retrived the TrackIsolationTool!" );
+    ATH_MSG_INFO( "Successfully retrieved the TrackIsolationTool!" );
   }
 
   ATH_CHECK(m_trackContainerKey.initialize());
