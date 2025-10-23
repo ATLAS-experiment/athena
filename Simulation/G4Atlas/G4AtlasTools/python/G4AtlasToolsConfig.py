@@ -46,6 +46,11 @@ def FastSimulationToolListCfg(flags):
         if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read] and not flags.Sim.RecordFlux:
             from TrackWriteFastSim.TrackWriteFastSimConfig import NeutronFastSimCfg
             tools += [ result.popToolsAndMerge(NeutronFastSimCfg(flags)) ]
+
+    from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
+    result.merge(PhysicsListSvcCfg(flags))
+    result.getService("PhysicsListSvc").FastSimConstructor.InitializeFastSimulation = len(tools) > 0
+
     result.setPrivateTools(tools)
     return result
 

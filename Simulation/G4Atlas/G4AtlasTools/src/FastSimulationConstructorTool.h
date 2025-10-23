@@ -33,11 +33,16 @@ class FastSimulationConstructorTool final : public extends<AthAlgTool, IPhysicsO
 
   class PhysicsConstructor : public IPhysicsContructor {
    public:
-    using IPhysicsContructor::IPhysicsContructor;
+    PhysicsConstructor(bool initializeFastSimulation, const std::string& name, MSG::Level level);
 
     virtual void ConstructParticle() override;
     virtual void ConstructProcess() override;
+   private:
+    bool m_initializeFastSimulation{true};
    };
+
+ private:
+  Gaudi::Property<bool> m_initializeFastSimulation{this, "InitializeFastSimulation", true, "Fast simulation initialization flag"};
 };
 
 #endif //FastSimulationConstructorTool_H

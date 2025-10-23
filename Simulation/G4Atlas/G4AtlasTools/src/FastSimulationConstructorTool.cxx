@@ -30,18 +30,27 @@ StatusCode FastSimulationConstructorTool::initialize() {
 
 auto FastSimulationConstructorTool::GetPhysicsOption() -> UPPhysicsConstructor {
   return std::make_unique<FastSimulationConstructorTool::PhysicsConstructor>(
-      name(), this->msgLevel());
+      m_initializeFastSimulation, name(), this->msgLevel());
 }
 
 //=============================================================================
 // Physics Constructor implementation
 //=============================================================================
 
+FastSimulationConstructorTool::PhysicsConstructor::PhysicsConstructor(
+    bool initializeFastSimulation, const std::string& name, MSG::Level level)
+    : IPhysicsContructor(name, level), m_initializeFastSimulation(initializeFastSimulation) {}
+
 void FastSimulationConstructorTool::PhysicsConstructor::ConstructParticle() {}
 
 void FastSimulationConstructorTool::PhysicsConstructor::ConstructProcess() {
 
-  ATH_MSG_DEBUG("ConstructProcess for FastSimulation being run");
+  if(!m_initializeFastSimulation) {
+    ATH_MSG_INFO("Fast simulation initialization flag is set to false. Skipping fast simulation setup.");
+    return;
+  }
+
+  ATH_MSG_INFO("ConstructProcess for FastSimulation being run");
   // Enable fast simulation processes for all particle types
   G4FastSimulationManagerProcess* fastSimManagerProcess =
       new G4FastSimulationManagerProcess;
