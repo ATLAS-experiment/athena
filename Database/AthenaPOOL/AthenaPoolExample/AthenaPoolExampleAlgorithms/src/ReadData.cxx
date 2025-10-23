@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolExampleAlgorithms/src/ReadData.cxx
@@ -10,7 +10,7 @@
 
 #include "ReadData.h"
 
-// the user data-class defintions
+// the user data-class definitions
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
 #include "AthenaPoolExampleData/ExampleTrackContainer.h"
 
@@ -32,21 +32,12 @@ ReadData::ReadData(const std::string& name, ISvcLocator* pSvcLocator)
 {
 }
 //___________________________________________________________________________
-ReadData::~ReadData() {
-}
-//___________________________________________________________________________
 StatusCode ReadData::initialize() {
    ATH_MSG_INFO("in initialize()");
 
    // Locate the StoreGateSvc and initialize our local ptr
-   if (!p_SGinMeta.retrieve().isSuccess()) {
-      ATH_MSG_ERROR("Could not find Input MetaData StoreGateSvc");
-      return StatusCode::FAILURE;
-   }
-   if (!p_SGmeta.retrieve().isSuccess()) {
-      ATH_MSG_ERROR("Could not find Tag MetaData StoreGateSvc");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( p_SGinMeta.retrieve() );
+   ATH_CHECK( p_SGmeta.retrieve() );
 
    ATH_CHECK( m_dataHeaderKey.initialize() );
    if (!m_exampleTrackKey.key().empty()) {
@@ -102,8 +93,8 @@ StatusCode ReadData::execute (const EventContext& ctx) const {
    for (const DataHeaderElement& dhe : *dh) {
       ATH_MSG_INFO("DataHeader (Event Content) " << dhe.getToken()->toString());
    }
-   for (std::vector<DataHeaderElement>::const_iterator dhe_p = dh->beginProvenance(); dhe_p != dh->endProvenance(); ++dhe_p) {
-      ATH_MSG_INFO("DataHeader (Provenance) " << dhe_p->getToken()->toString());
+   for (const DataHeaderElement& dhe : std::ranges::subrange(dh->beginProvenance(), dh->endProvenance())) {
+      ATH_MSG_INFO("DataHeader (Provenance) " << dhe.getToken()->toString());
    }
 
    // Get the event header, print out event and run number
@@ -122,16 +113,16 @@ StatusCode ReadData::execute (const EventContext& ctx) const {
            ATH_MSG_INFO("ElementLink1 = " << x);
            ATH_MSG_INFO("ElementLink2 = " << track->getElement2()->getX());
            ATH_MSG_INFO("Link ElementLinkVector = " << track->getElementLinkVector()->size());
-           for (ElementLinkVector<ExampleHitContainer>::const_iterator iter = track->getElementLinkVector()->begin(); iter != track->getElementLinkVector()->end(); ++iter) {
-             ATH_MSG_INFO("Element = " << (**iter) << " : " << (**iter)->getX());
+           for (const auto& link : *track->getElementLinkVector()) {
+             ATH_MSG_INFO("Element = " << (*link) << " : " << (*link)->getX());
            }
            ATH_MSG_INFO("Link Navigable = " << track->getNavigable()->size());
-           for (Navigable<ExampleHitContainer>::object_iter iter = track->getNavigable()->begin(); iter != track->getNavigable()->end(); iter++) {
-             ATH_MSG_INFO("Element = " << (*iter) << " : " << (*iter)->getX());
+           for (const auto* elem : *track->getNavigable()) {
+             ATH_MSG_INFO("Element = " << elem << " : " << elem->getX());
            }
            ATH_MSG_INFO("Link Weighted Navigable = " << track->getWeightedNavigable()->size());
-           for (Navigable<ExampleHitContainer, double>::object_iter iter = track->getWeightedNavigable()->begin(); iter != track->getWeightedNavigable()->end(); iter++) {
-             ATH_MSG_INFO("Element = " << (*iter) << " : " << (*iter)->getX());
+           for (const auto* elem : *track->getWeightedNavigable()) {
+             ATH_MSG_INFO("Element = " << elem << " : " << elem->getX());
            }
          } catch (...) {
            ATH_MSG_WARNING("Could not follow ExampleTrackContainer/MyTracks ElementLinks to ExampleHitContainer/MyHits");

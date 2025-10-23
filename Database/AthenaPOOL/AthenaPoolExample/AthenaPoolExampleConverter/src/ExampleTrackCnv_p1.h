@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EXAMPLETRACKCNV_P1_H
@@ -22,12 +22,12 @@
 class ExampleTrackCnv_p1 : public T_AthenaPoolTPCnvBase<ExampleTrack, ExampleTrack_p1> { 
 
 public:
-   ExampleTrackCnv_p1() {}
+   ExampleTrackCnv_p1() = default;
 
    /** Method creating the transient representation of @c ExampleTrack
     *  from its persistent representation @c ExampleTrack_p1
     */
-   virtual void persToTrans(const ExampleTrack_p1* persObj, ExampleTrack* transObj, MsgStream& msg) {
+   virtual void persToTrans(const ExampleTrack_p1* persObj, ExampleTrack* transObj, MsgStream& msg) override final {
       transObj->setDetector (persObj->m_detector);
       elCnv.persToTrans(&persObj->m_elementlink1, transObj->getElementLink1(), msg);
       elCnv.persToTrans(&persObj->m_elementlink2, transObj->getElementLink2(), msg);
@@ -42,7 +42,7 @@ public:
    /** Method creating the persistent representation @c ExampleTrack_p1
     *  from its transient representation @c ExampleTrack
     */
-   virtual void transToPers(const ExampleTrack* transObj, ExampleTrack_p1* persObj, MsgStream& msg) {
+   virtual void transToPers(const ExampleTrack* transObj, ExampleTrack_p1* persObj, MsgStream& msg) override final {
       persObj->m_detector = transObj->getDetector();
       elCnv.transToPers(transObj->getElementLink1(), &persObj->m_elementlink1, msg);
       elCnv.transToPers(transObj->getElementLink2(), &persObj->m_elementlink2, msg);

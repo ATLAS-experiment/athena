@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
- */
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLEELECTRONAUXCONTAINER_V1_H
 #define ATHENAPOOLEXAMPLEDATA_EXAMPLEELECTRONAUXCONTAINER_V1_H

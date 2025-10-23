@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EXAMPLEHITCNV_P1_H
@@ -20,12 +20,12 @@
 class ExampleHitCnv_p1 : public T_AthenaPoolTPCnvBase<ExampleHit, ExampleHit_p1> { 
 
 public:
-   ExampleHitCnv_p1() {}
+   ExampleHitCnv_p1() = default;
 
    /** Method creating the transient representation of @c ExampleHit
     *  from its persistent representation @c ExampleHit_p1
     */
-   virtual void persToTrans(const ExampleHit_p1* persObj, ExampleHit* transObj, MsgStream&/* msg*/) {
+   virtual void persToTrans(const ExampleHit_p1* persObj, ExampleHit* transObj, MsgStream&/* msg*/) override final {
       transObj->setX (persObj->m_vec.x());
       transObj->setY (persObj->m_vec.y());
       transObj->setZ (persObj->m_vec.z());
@@ -35,7 +35,7 @@ public:
    /** Method creating the persistent representation @c ExampleHit_p1
     *  from its transient representation @c ExampleHit
     */
-   virtual void transToPers(const ExampleHit* transObj, ExampleHit_p1* persObj, MsgStream&/* msg*/) {
+   virtual void transToPers(const ExampleHit* transObj, ExampleHit_p1* persObj, MsgStream&/* msg*/) override final {
       persObj->m_vec.setX (transObj->getX());
       persObj->m_vec.setY (transObj->getY());
       persObj->m_vec.setZ (transObj->getZ());

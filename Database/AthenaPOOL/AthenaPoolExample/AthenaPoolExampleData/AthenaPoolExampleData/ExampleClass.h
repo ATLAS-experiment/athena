@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLECLASS_H
@@ -20,9 +20,9 @@ class ExampleClass {
 
 public: // Constructor and Destructor
    /// Default Constructor
-   ExampleClass() : m_run(0), m_event(0), m_text("") {}
+   ExampleClass() = default;
    /// Destructor
-   virtual ~ExampleClass() {}
+   virtual ~ExampleClass() = default;
 
 public: // Non-static members
    /// @return the run number.
@@ -47,8 +47,8 @@ public: // Non-static members
    void setText(const std::string& text) { m_text = text; }
 
 private:
-   int m_run;
-   int m_event;
+   int m_run{0};
+   int m_event{0};
    std::string m_text;
 };
 #include "AthenaKernel/CLASS_DEF.h"

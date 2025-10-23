@@ -15,15 +15,12 @@
 using namespace AthPoolEx;
 
 //___________________________________________________________________________
-QueryTag::~QueryTag() {
-}
-//___________________________________________________________________________
 StatusCode QueryTag::initialize() {
    ATH_MSG_INFO("in initialize()");
    const IService* parentSvc = dynamic_cast<const IService*>(this->parent());
-   if (parentSvc != 0) {
+   if (parentSvc != nullptr) {
       const IProperty* propertyServer = dynamic_cast<const IProperty*>(parentSvc);
-      if (propertyServer != 0) {
+      if (propertyServer != nullptr) {
          StringProperty attrKeyProperty("AttributeListKey", "");
          StatusCode status = propertyServer->getProperty(&attrKeyProperty);
          if (status.isSuccess()) {
@@ -46,10 +43,7 @@ StatusCode QueryTag::preNext() const {
 //__________________________________________________________________________
 StatusCode QueryTag::postNext() const {
    SG::ReadHandle<AthenaAttributeList> attrList (m_attrListKey);
-   if (!attrList.isValid()) {
-      ATH_MSG_ERROR("Could not retrieve AthenaAttributeList");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( attrList.isValid() );
 
    try {
       unsigned int eventNumber = (*attrList)["EventNumber"].data<unsigned int>();
