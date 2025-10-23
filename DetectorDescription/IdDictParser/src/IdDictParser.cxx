@@ -526,9 +526,7 @@ RangeFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
         if (next == std::string::npos) break; 
         pos = next; 
         next = labels.find_first_of (" ", pos); 
-        std::string label; 
-        label = labels.substr (pos, next - pos); 
-        label_vec.push_back (label);
+        label_vec.push_back (labels.substr (pos, next - pos));
         if (next == std::string::npos) { 
           break; 
         } else  { 
