@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/EMBHVManager.h"
@@ -241,11 +241,11 @@ EMBHVManager::getData (const idfunc_t& idfunc,
       // 2. Construct the identifier
       HWIdentifier id = m_c->hvId->HVLineId(1,1,cannode,line);
 
-      std::vector<HWIdentifier> electrodeIdVec = idfunc(id);
+      const std::vector<HWIdentifier>& electrodeIdVec = idfunc(id);
 
       for(size_t i=0;i<electrodeIdVec.size();i++)
       {
-        HWIdentifier& elecHWID = electrodeIdVec[i];
+        HWIdentifier elecHWID = electrodeIdVec[i];
         int detector = m_c->elecId->detector(elecHWID);
         if (detector==0) {
 
@@ -343,7 +343,8 @@ EMBHVManager::EMBHVData
 EMBHVManager::getData (const LArHVIdMapping& hvIdMapping,
                        const std::vector<const CondAttrListCollection*>& attrLists) const
 {
-  auto idfunc = [&] (HWIdentifier id) { return hvIdMapping.getLArElectrodeIDvec(id); };
+  auto idfunc = [&] (HWIdentifier id) -> const std::vector<HWIdentifier>
+    { return hvIdMapping.getLArElectrodeIDvec(id); };
   return getData (idfunc, attrLists);
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/EMECPresamplerHVManager.h"
@@ -188,10 +188,10 @@ EMECPresamplerHVManager::getData (const idfunc_t& idfunc,
       HWIdentifier id = m_c->hvId->HVLineId(1,1,cannode,line);
 
 
-      std::vector<HWIdentifier> electrodeIdVec = idfunc(id);
+      const std::vector<HWIdentifier>& electrodeIdVec = idfunc(id);
 
       for(size_t i=0;i<electrodeIdVec.size();i++) {
-        HWIdentifier& elecHWID = electrodeIdVec[i];
+        HWIdentifier elecHWID = electrodeIdVec[i];
         int detector = m_c->elecId->detector(elecHWID);
         // check we are in EMECPresampler
         if (detector==3) {
@@ -241,7 +241,8 @@ EMECPresamplerHVManager::EMECPresamplerHVData
 EMECPresamplerHVManager::getData (const LArHVIdMapping& hvIdMapping,
                                   const std::vector<const CondAttrListCollection*>& attrLists) const
 {
-  auto idfunc = [&] (HWIdentifier id) { return hvIdMapping.getLArElectrodeIDvec(id); };
+  auto idfunc = [&] (HWIdentifier id) -> const std::vector<HWIdentifier>
+    { return hvIdMapping.getLArElectrodeIDvec(id); };
   return getData (idfunc, attrLists);
 }
 
