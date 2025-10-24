@@ -2,9 +2,8 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-// $Header: /DetectorDescription/IdDict/src/IdDictMgr.cxx,v 1.43 2008-12-09 09:49:43 dquarrie Exp $
-
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictDictionary.h"
 #include "Identifier/RangeIterator.h"
 #include "Identifier/MultiRange.h"
 #include "src/Debugger.h"

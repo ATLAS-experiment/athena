@@ -6,6 +6,7 @@
 #define IDDICT_IdDictRegion_H
 
 #include "IdDict/IdDictDictEntry.h"
+#include "IdDict/IdDictFieldImplementation.h"
 
 #include <string>
 #include <vector>
@@ -14,7 +15,6 @@ class Range;
 class IdDictMgr;
 class IdDictDictionary;
 class IdDictRegionEntry;
-class IdDictFieldImplementation;
 class IdDictRegion;
 
 class IdDictRegion : public IdDictDictEntry{ 
