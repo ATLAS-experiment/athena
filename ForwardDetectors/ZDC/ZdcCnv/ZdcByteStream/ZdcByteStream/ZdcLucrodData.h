@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_LUCRODDATA_H
@@ -8,6 +8,10 @@
 // working in ADC scale for Run 3
 //#define ADC2MV 0.3663
 #define ADC2MV 1 
+#include <vector>
+#include <cstdint>
+#include <sstream>
+#include <iostream>
 
 typedef struct ZdcLucrodChannelType {
 
@@ -15,7 +19,7 @@ typedef struct ZdcLucrodChannelType {
   std::vector <uint16_t> waveform;
 } ZdcLucrodChannel;
 
-#include <vector>
+
 
 class ZdcLucrodData {
 
@@ -61,7 +65,7 @@ class ZdcLucrodData {
     //
     if (waveform.size() != m_numBCs*8) return false;
 
-    m_chanData.push_back(channel);
+    m_chanData.push_back(std::move(channel));
     return true;
   }
 
