@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // BarrelCryostatConstruction
@@ -155,7 +155,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
       }
     }
 
-    const IRDBRecord *posRec = GeoDBUtils::getTransformRecord(larPosition, names[n]);
+    const IRDBRecord *posRec = GeoDBUtils::getTransformRecord(std::move(larPosition), names[n]);
     if (!posRec) throw std::runtime_error("Error, no lar position record in the database") ;
     GeoTrf::Transform3D xfPos = GeoDBUtils::getTransform(posRec);
     xf[n] = new GeoAlignableTransform(xfPos);
