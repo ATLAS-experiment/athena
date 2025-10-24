@@ -139,8 +139,8 @@ StatusCode PhysValTau::fillHistograms()
 
     // Fill truth and fake histograms
     static const SG::ConstAccessor<char> IsTruthMatchedAcc("IsTruthMatched");
-    if ( (bool)IsTruthMatchedAcc(*tau) ) {
-      ATH_MSG_DEBUG("Tau is truth-matched");
+    if ( (bool)IsTruthMatchedAcc(*tau) && (!(MC::isSMQuark(trueTau) || MC::isGluon(trueTau))) ) {
+      ATH_MSG_DEBUG("Tau is truth-matched and not with a quark or a jet");
       if ( trueTau->isTau() ) {
         static const SG::ConstAccessor<char> IsHadronicTauAcc("IsHadronicTau");
 	if ( (bool)IsHadronicTauAcc(*trueTau) ) {
@@ -203,47 +203,10 @@ StatusCode PhysValTau::fillHistograms()
 	  m_oTauValidationPlotsNominal->m_oElMatchedEVetoPlotsNom.fill(*tau, weight);
 	  if(recProng == 1) m_oTauValidationPlotsNominal->m_oElMatchedEff1PPlotsNom.fill(*tau, weight);
         }
-	
-      } else if( MC::isSMQuark(trueTau) || MC::isGluon(trueTau) ){
-        ATH_MSG_DEBUG("Tau is matched to a jet");
-	if(m_TauJetContainerName=="TauJets"){
-	  m_oTauValidationPlotsNoCuts->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
-	  // Substructure/PFO histograms
-	  m_oTauValidationPlotsNoCuts->m_oFakeTauAllProngsPlots.fill(*tau, weight);
-	  m_oTauValidationPlotsNoCuts->m_oNewCoreFakePlots.fill(*tau, weight);
-	  m_oTauValidationPlotsNoCuts->m_oFakeTauEffPlots.fill(*tau, weight);
-	}
-        if ( nominal ) {
-          m_oTauValidationPlotsNominal->m_oFakeGeneralNom.fill(*tau, weight);
-          m_oTauValidationPlotsNominal->m_oFakeTauEffPlotsNom.fill(*tau, weight);
-          m_oTauValidationPlotsNominal->m_oFakeTauRecoTauPlotsNom.fill(*tau, weight);
-          m_oTauValidationPlotsNominal->m_oNewCoreFakePlotsNom.fill(*tau, weight);
-        }
-        if ( recProng == 1 ) {
-	  if(m_TauJetContainerName=="TauJets"){
-	    m_oTauValidationPlotsNoCuts->m_oFakeHad1ProngPlots.fill(*tau, weight);
-	    m_oTauValidationPlotsNoCuts->m_oFakeTauEff1PPlots.fill(*tau, weight);
-	  }
-          if ( nominal ) {
-            m_oTauValidationPlotsNominal->m_oFakeHad1ProngNom.fill(*tau, weight);
-            m_oTauValidationPlotsNominal->m_oFakeTauEff1PPlotsNom.fill(*tau, weight);
-          }
-        }
-        if ( recProng == 3 ) {
-	  if(m_TauJetContainerName=="TauJets"){
-	    m_oTauValidationPlotsNoCuts->m_oFakeTauEff3PPlots.fill(*tau, weight);
-	    m_oTauValidationPlotsNoCuts->m_oFakeHad3ProngPlots.fill(*tau, weight);
-	  }
-	  
-          if ( nominal ) {
-            m_oTauValidationPlotsNominal->m_oFakeHad3ProngNom.fill(*tau, weight);
-            m_oTauValidationPlotsNominal->m_oFakeTauEff3PPlotsNom.fill(*tau, weight);
-          }
-        }
       }	       
     }
     else {
-      ATH_MSG_DEBUG("Tau is unmatched - consider it as fake");
+      ATH_MSG_DEBUG("Tau is matched to a jet or Tau is unmatched - consider it as fake");
       if(m_TauJetContainerName=="TauJets"){
 	m_oTauValidationPlotsNoCuts->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
 	// Substructure/PFO histograms
