@@ -58,7 +58,6 @@ namespace DerivationFramework {
     // initialize read/write handle keys
     ATH_CHECK( m_tauContainerKey.initialize() );
     ATH_CHECK( m_muonContainerKey.initialize() );
-    ATH_CHECK( m_vtxContainerKey.initialize() );
     ATH_CHECK( m_scoreDecorKeys.initialize() );
     ATH_CHECK( m_WPDecorKeys.initialize() );
     ATH_CHECK( m_trackWidthKey.initialize() );
@@ -83,28 +82,6 @@ namespace DerivationFramework {
     }
     const xAOD::TauJetContainer* tauContainer = tauJetsReadHandle.cptr();
 
-    // retrieve PrimaryVertices container
-    SG::ReadHandle<xAOD::VertexContainer> vtxReadHandle(m_vtxContainerKey, ctx);
-    if (!vtxReadHandle.isValid()) {
-      ATH_MSG_ERROR ("Could not retrieve VertexContainer with key " << vtxReadHandle.key());
-      return StatusCode::FAILURE;
-    }
-    const xAOD::VertexContainer* vtxContainer = vtxReadHandle.cptr();
-    const xAOD::Vertex* pVtx = nullptr;
-
-    // Check that PV container exists and is non-empty, find the PV if possible
-    if (vtxContainer != nullptr && !vtxContainer->empty()) {
-      auto itrVtx = std::find_if(vtxContainer->begin(), vtxContainer->end(),
-				 [](const xAOD::Vertex* vtx) {
-				   return vtx->vertexType() == xAOD::VxType::PriVtx;
-				 });
-      pVtx = (itrVtx == vtxContainer->end() ? nullptr : *itrVtx);
-      if (pVtx == nullptr){
-        ATH_MSG_DEBUG("No PV found, using the first element instead!");
-        pVtx = vtxContainer->at(0);
-      }
-    }
-    
     //Create accessors  
     static const SG::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
 
