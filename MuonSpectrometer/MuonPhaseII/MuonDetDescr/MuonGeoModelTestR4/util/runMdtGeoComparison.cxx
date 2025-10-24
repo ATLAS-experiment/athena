@@ -187,9 +187,6 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
         MdtChamber newchamber{};
 
         newchamber.id.stationIndex = (*stationIndex);
-        if (newchamber.id.stationIndex!= 13) {
-            continue;
-        }
         newchamber.id.eta = (*stationEta);
         newchamber.id.phi = (*stationPhi);
         newchamber.id.multilayer = (*stationML);
