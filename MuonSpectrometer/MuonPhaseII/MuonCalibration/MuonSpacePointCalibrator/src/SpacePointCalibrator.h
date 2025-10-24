@@ -68,13 +68,13 @@ namespace MuonR4{
                                  const CalibratedSpacePoint& spacePoint) const override final;
             double driftAcceleration(const EventContext& ctx,
                                      const CalibratedSpacePoint& spacePoint) const override final;
-            
-
-
+  
             void calibrateSourceLink(const Acts::GeometryContext& geoctx,
                                      const Acts::CalibrationContext& cctx,
                                      const Acts::SourceLink& link,
                                      ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
+
+            void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const override final;
         private:
             /** @brief Calibrates the track states from a combined muon strip. It's a pseudo measurement composed
              *         out of two 1D strip measurements residing in the same gas gap (Relevant for Rpc/Tgc/sTgc)
@@ -151,6 +151,8 @@ namespace MuonR4{
                                                "Load the Tgc BC-ID on the track states for the fit"};
             Gaudi::Property<bool> m_usesTgcTime{this, "usesTgcTime", false,
                                                "Load the sTgc time on the track states for the fit"};
+            Gaudi::Property<bool> m_MdtSignFromSegment{this, "useSegmentSigns", true,
+                                    "Mdt drift signs are copied from the segment line instead from the track state"};
     };
 
 }

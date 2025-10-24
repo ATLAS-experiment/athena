@@ -9,17 +9,26 @@
 #include <GaudiKernel/EventContext.h>
 
 #include <GeoPrimitives/GeoPrimitives.h>
+///
+#include <xAODMuon/MuonSegment.h>
+#include <ActsEvent/TrackContainer.h>
+#include <Acts/EventData/SourceLink.hpp>
 
 #include <memory>
 
-#include <ActsEvent/TrackContainer.h>
-
-#include <Acts/EventData/SourceLink.hpp>
-#include <Acts/Utilities/CalibrationContext.hpp>
-
+namespace ActsTrk{
+    class GeometryContext;
+}
+namespace Acts{
+    class CalibrationContext;
+    class GeometryContext;
+}
 namespace MuonR4{
     class SpacePoint;
     class CalibratedSpacePoint;
+}
+
+namespace MuonR4{
     /** @brief Interface class to refine the space point calibration with an external seed */
     class ISpacePointCalibrator : virtual public IAlgTool {
         public:
@@ -111,6 +120,14 @@ namespace MuonR4{
             virtual void updateSigns(const Amg::Vector3D& trackPos,
                                      const Amg::Vector3D& trackDir,
                                      CalibSpacePointVec& hitsToCalib) const = 0;
+            
+            /** @brief Stamps the signs of the drift radii w.r.t. the segment line
+             *         onto the uncalibrated measurements. The stamped signs are later
+             *         picked up by the source link calibration in the context of the 
+             *         track fit to stabilize the fit.
+             * @param segment: Reference to the reconstructed segment for which the sign
+             *                 stamp shall be executed */
+            virtual void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const = 0;
     };
 
 }

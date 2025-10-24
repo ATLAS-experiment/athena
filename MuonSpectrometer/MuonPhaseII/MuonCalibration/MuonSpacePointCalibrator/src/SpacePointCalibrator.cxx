@@ -18,6 +18,7 @@
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/MatrixUtils.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
 
 #include "MuonPrepRawData/NswClusteringUtils.h"
 
@@ -31,6 +32,7 @@
 
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
+    static const SG::Decorator<int> dec_trackSign{"segmentFitDriftSign"};
 }
 
 namespace MuonR4{
@@ -448,7 +450,9 @@ namespace MuonR4{
                 calibInput.setClosestApproach(trackPos);
                 //calibInput.setTimeOfFlight(trackPars.parameters()[Acts::eBoundTime]);
                 calibInput.setTrackDirection(trackDir, true);
-                const double driftSign = sign(trackPars.parameters()[Acts::eBoundLoc0]);
+                const double driftSign = m_MdtSignFromSegment ? 
+                                         static_cast<double>(dec_trackSign(*dc)) :
+                                         sign(trackPars.parameters()[Acts::eBoundLoc0]);
 
                 /** Vast majority of the measurements are ordinary drift tubes */
                 if (ATH_LIKELY(muonMeas->numDimensions() == 1)) {
@@ -601,6 +605,16 @@ namespace MuonR4{
                 break;
             } default: {
                 THROW_EXCEPTION("The parsed measurement is not a muon measurement. Please check.");
+            }
+        }
+    }
+    void SpacePointCalibrator::stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const {
+        const auto [segPos, segLine] = makeLine(localSegmentPars(segment));
+        const Segment* detSeg = MuonR4::detailedSegment(segment);
+        for (const auto& meas : detSeg->measurements()) {
+            if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+                dec_trackSign(*meas->spacePoint()->primaryMeasurement()) =
+                    SeedingAux::strawSign(segPos, segLine, *meas);
             }
         }
     }
