@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -138,7 +138,7 @@ class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOpti
 
       NLOHMANN_DEFINE_TYPE_INTRUSIVE(KernelInfo, usage_start, usage_end,
                                      grid_x, grid_y, grid_z,
-                                     block_x, block_y, block_z);
+                                     block_x, block_y, block_z)
     };
 
     std::string device;
