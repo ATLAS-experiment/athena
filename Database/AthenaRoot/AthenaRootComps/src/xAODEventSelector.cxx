@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODEventSelector.cxx 
@@ -949,16 +949,16 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
 
 
 	ATH_MSG_DEBUG("id = " << id << ", m_metadataName.value() = " << m_metadataName.value() << ", br_name = " << br_name << ", value_ptr = " << value_ptr);
-	Athena::xAODBranchAddress* addr = new Athena::xAODBranchAddress
-	  (POOL_ROOTTREE_StorageType, id, 
-	   m_metadataName.value(), 
-	   br_name, 
-	   (unsigned long)(value_ptr),
-	   (unsigned long)(1)); //IMPORTANT THIS IS 1: signals to BranchAddress to read metadata
-	if (!m_imetaStore->recordAddress(br_name, addr, true).isSuccess()) {
+        CxxUtils::RefCountedPtr<Athena::xAODBranchAddress> addr
+          (new Athena::xAODBranchAddress
+           (POOL_ROOTTREE_StorageType, id,
+            m_metadataName.value(),
+            br_name,
+            (unsigned long)(value_ptr),
+            (unsigned long)(1))); //IMPORTANT THIS IS 1: signals to BranchAddress to read metadata
+	if (!m_imetaStore->recordAddress(br_name, std::move(addr), true).isSuccess()) {
 	  ATH_MSG_ERROR("could not record address at [" << br_name << "] in store ["
 			<< m_imetaStore->name() << "]");
-	  delete addr; addr = 0;
 	}
 	// SG::TransientAddress* taddr = new SG::TransientAddress
 	//   (id, sg_key, addr);

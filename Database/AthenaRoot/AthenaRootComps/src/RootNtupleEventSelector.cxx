@@ -1043,16 +1043,16 @@ RootNtupleEventSelector::createMetaDataRootBranchAddresses(StoreGateSvc *store,
                      << type_name << "]");
         continue;
       }
-      Athena::RootBranchAddress* addr = new Athena::RootBranchAddress
-        (ROOT_StorageType, id, 
-         tree_name, 
-         br_name, 
-         (unsigned long)(value_ptr),
-         (unsigned long)(0));
-      if (!store->recordAddress(sg_key, addr, true).isSuccess()) {
+      CxxUtils::RefCountedPtr<Athena::RootBranchAddress> addr
+        (new Athena::RootBranchAddress
+         (ROOT_StorageType, id,
+          tree_name,
+          br_name,
+          (unsigned long)(value_ptr),
+          (unsigned long)(0)));
+      if (!store->recordAddress(sg_key, std::move(addr), true).isSuccess()) {
         ATH_MSG_ERROR("could not record address at [" << sg_key << "] in store ["
                       << store->name() << "]");
-        delete addr; addr = 0;
       }
       // SG::TransientAddress* taddr = new SG::TransientAddress
       //   (id, sg_key, addr);

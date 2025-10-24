@@ -80,13 +80,15 @@ StoreGateSvc::commitNewDataObjects() {
 /// Create a proxy object using an IOpaqueAddress and a transient key
 StatusCode 
 StoreGateSvc::recordAddress(const std::string& skey,
-                            IOpaqueAddress* pAddress, bool clearAddressFlag) {
-  _SGXCALL(recordAddress, (skey, pAddress, clearAddressFlag), StatusCode::FAILURE);
+                            CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                            bool clearAddressFlag) {
+  _SGXCALL(recordAddress, (skey, std::move(pAddress), clearAddressFlag), StatusCode::FAILURE);
 }
 /// Create a proxy object using an IOpaqueAddress
 StatusCode 
-StoreGateSvc::recordAddress(IOpaqueAddress* pAddress, bool clearAddressFlag) {
-  _SGXCALL(recordAddress, (pAddress, clearAddressFlag), StatusCode::FAILURE);
+StoreGateSvc::recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                            bool clearAddressFlag) {
+  _SGXCALL(recordAddress, (std::move(pAddress), clearAddressFlag), StatusCode::FAILURE);
 }
 
 

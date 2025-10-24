@@ -109,6 +109,9 @@ class DataStore;
     /// set an IOpaqueAddress
     virtual void setAddress(IOpaqueAddress* ioa) override final;
 
+    /// set an IOpaqueAddress
+    void setAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> ioa);
+
     /// Retrieve IOpaqueAddress
     virtual IOpaqueAddress* address() const override final;
 

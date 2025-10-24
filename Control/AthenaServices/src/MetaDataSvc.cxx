@@ -462,7 +462,6 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
       return(StatusCode::FAILURE);
    }
    if (m_inputDataStore->recordAddress(keyName, opqAddr).isFailure()) {
-      delete opqAddr; opqAddr = nullptr;
       ATH_MSG_FATAL("addProxyToInputMetaDataStore: Cannot create proxy for " << tokenStr);
       return(StatusCode::FAILURE);
    }
@@ -511,7 +510,6 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
                }
             }
             if (m_inputDataStore->recordAddress(myVersKey, opqAddr).isFailure()) {
-               delete opqAddr; opqAddr = nullptr;
                ATH_MSG_WARNING("initInputMetaDataStore: Cannot create proxy for DataHeader, key = " << myVersKey);
             }
          }

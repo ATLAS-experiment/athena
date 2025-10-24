@@ -418,7 +418,7 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     // Now add ref to xAOD::EventInfo
     std::unique_ptr<IOpaqueAddress> iopx = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventInfo>::ID(), key, "");
-    ATH_CHECK(m_storeGate->recordAddress(key, iopx.release()));
+    ATH_CHECK(m_storeGate->recordAddress(key, std::move(iopx)));
     const SG::DataProxy* ptmpx = m_storeGate->transientProxy(
         ClassID_traits<xAOD::EventInfo>::ID(), key);
     if (ptmpx != nullptr) {
@@ -432,7 +432,7 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     // Now add ref to xAOD::EventAuxInfo
     std::unique_ptr<IOpaqueAddress> iopaux = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventAuxInfo>::ID(), key, "");
-    ATH_CHECK(m_storeGate->recordAddress(key, iopaux.release()));
+    ATH_CHECK(m_storeGate->recordAddress(key, std::move(iopaux)));
     const SG::DataProxy* ptmpaux = m_storeGate->transientProxy(
         ClassID_traits<xAOD::EventAuxInfo>::ID(), key);
     if (ptmpaux !=0) {
