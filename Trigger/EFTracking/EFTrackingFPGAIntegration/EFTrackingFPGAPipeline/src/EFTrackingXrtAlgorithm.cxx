@@ -22,6 +22,15 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   ATH_CHECK(m_outputDataStreamKeys.initialize());
 
   for (const auto& [kernelName, storeGateKey, argumentIndex] : m_inputInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up " << 
+      kernelName << 
+      " to read " << 
+      storeGateKey << 
+      " into argument " << 
+      argumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -53,6 +62,15 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   }
 
   for (const auto& [kernelName, storeGateKey, argumentIndex] : m_vSizeInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up " << 
+      kernelName << 
+      " to get input size from " << 
+      storeGateKey << 
+      " for argument " << 
+      argumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -77,6 +95,15 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   }
 
   for (const auto& [kernelName, storeGateKey, argumentIndex] : m_outputInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up " << 
+      kernelName << 
+      " to write " << 
+      storeGateKey << 
+      " from argument " << 
+      argumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -107,6 +134,17 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   }
 
   for (const auto& [kernelName, argumentIndex, sourceKernelName, sourceArgumentIndex] : m_sharedInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up shared buffer between " << 
+      kernelName << 
+      " argument " << 
+      argumentIndex << 
+      " and " << 
+      sourceKernelName <<
+      " argument " <<
+      sourceArgumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -191,10 +229,11 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     m_vSizeDataStreamKeys
   ) {
     SG::ReadHandle<std::vector<unsigned long>> vSizeDataStream(vSizeDataStreamKey, ctx);
-    ATH_MSG_DEBUG("Setting VSize: " << vSizeDataStream.name() << ", " << vSizeDataStream->size());
     const auto& [kernelName, storeGateKey, argumentIndex] = m_vSizeInterfaces[vSizeHandleIndex];
+    ATH_MSG_DEBUG("Setting VSize: " << kernelName << ", " << vSizeDataStream.name() << ", " << vSizeDataStream->size());
 
     m_runs.at(kernelName)->set_arg(argumentIndex, vSizeDataStream->size());
+    vSizeHandleIndex++;
   }
 
   ATH_MSG_DEBUG("Run kernels");
