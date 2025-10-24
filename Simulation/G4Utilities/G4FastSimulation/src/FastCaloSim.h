@@ -20,8 +20,6 @@
 // Geant4 Punchthrough G4 Tool
 #include "G4AtlasInterfaces/IPunchThroughSimWrapper.h"
 
-// Random generator service interface
-#include "AthenaKernel/IAthRNGSvc.h"
 // FastCaloSim tool
 #include "FastCaloSimTool.h"
 
@@ -36,8 +34,6 @@ class FastCaloSim: public G4VFastSimulationModel
 
   FastCaloSim(const std::string& name,
               G4Region* region,
-              const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
-              const std::string& randomEngineName,
               const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
               const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
               const PublicToolHandle<IG4CaloTransportTool>& G4CaloTransportTool,
@@ -51,8 +47,6 @@ class FastCaloSim: public G4VFastSimulationModel
 
   G4bool IsApplicable(const G4ParticleDefinition&) override final;
   void DoIt(const G4FastTrack&, G4FastStep&) override final;
-  void StartOfAthenaEvent(const EventContext& ctx);
-  void EndOfAthenaEvent(const EventContext& ctx);
 
   /** Determines the applicability of the fast sim model to this particular track.
   Checks that geometric location, energy, and particle type are within bounds.  Also checks for
@@ -66,12 +60,6 @@ class FastCaloSim: public G4VFastSimulationModel
   G4bool passedIDCaloBoundary(const G4FastTrack& fastTrack);
   
  private:
-
-  // Random generator services
-  ServiceHandle<IAthRNGSvc> m_rndmGenSvc;
-  std::string m_randomEngineName;
-  ATHRNG::RNGWrapper* m_rngWrapper{};
-
   // FastCaloSimCaloTransportation tool to transport particles through the detector with the ATLAS tracking tools 
   PublicToolHandle<IFastCaloSimCaloTransportation> m_FastCaloSimCaloTransportation;
   // FastCaloSimCaloExtrapolation tool to extrapolate particle shower positions to layers
