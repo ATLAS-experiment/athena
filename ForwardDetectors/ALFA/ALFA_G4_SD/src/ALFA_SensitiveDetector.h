@@ -49,19 +49,19 @@ public:
   //template <class... Args> void AddHit(Args&&... args){ m_HitColl->Emplace( args... ); }
 
 private:
-  int m_hitID;
+  int m_hitID{};
 
-  int m_eventNumber;
-  int m_numberOfHits;
-  int m_numberOfODHits;
+  int m_eventNumber{};
+  int m_numberOfHits{};
+  int m_numberOfODHits{};
 
   // The hits collections
   SG::WriteHandle<ALFA_HitCollection> m_HitCollection;
   SG::WriteHandle<ALFA_ODHitCollection> m_ODHitCollection;
 
-  int m_pos1, m_pos2;
+  int m_pos1{}, m_pos2{};
 
-  int m_num[3];
+  int m_num[3]{};
 };
 
 #endif //ALFA_G4_SD_ALFA_SensitiveDetector_h
