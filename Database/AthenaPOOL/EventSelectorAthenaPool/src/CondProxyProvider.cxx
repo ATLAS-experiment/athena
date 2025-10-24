@@ -101,9 +101,9 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
       SG::VersionedKey myVersKey(name(), verNumber);
       auto token = std::make_unique<Token>();
       token->fromString(headerIterator->eventRef().toString());
-      TokenAddress* tokenAddr = new TokenAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), "", myVersKey, m_contextId, std::move(token));
-      if (!detectorStoreSvc->recordAddress(tokenAddr).isSuccess()) {
-         delete tokenAddr;
+      CxxUtils::RefCountedPtr<TokenAddress> tokenAddr
+        (new TokenAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), "", myVersKey, m_contextId, std::move(token)));
+      if (!detectorStoreSvc->recordAddress(std::move(tokenAddr)).isSuccess()) {
          ATH_MSG_ERROR("Cannot record DataHeader.");
          return StatusCode::FAILURE;
       }

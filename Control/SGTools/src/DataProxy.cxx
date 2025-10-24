@@ -403,6 +403,13 @@ void DataProxy::setAddress(IOpaqueAddress* address)
   lock_t lock (m_mutex);
   m_tAddress.setAddress(address);
 }
+
+// set IOpaqueAddress
+void DataProxy::setAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> address)
+{
+  lock_t lock (m_mutex);
+  m_tAddress.setAddress(std::move(address));
+}
 //////////////////////////////////////////////////////////////
 
 
