@@ -326,7 +326,7 @@ class Event : public TVirtualEvent,
   std::unordered_map<std::string, std::set<std::string>> m_auxItemList;
 
   /// Listeners who should be notified when certain incidents happen
-  std::set<TVirtualIncidentListener*> m_listeners;
+  std::vector<TVirtualIncidentListener*> m_listeners;
 
   /// Container name re-mapping rules
   std::unordered_map<std::string, std::string> m_nameRemapping;

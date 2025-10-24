@@ -102,11 +102,16 @@ StatusCode Event::addListener(TVirtualIncidentListener* listener) {
     return StatusCode::FAILURE;
   }
 
-  // Add the listener.
-  if (m_listeners.insert(listener).second == false) {
+  // Check whether we already have this listener.
+  auto itr = std::find(m_listeners.begin(), m_listeners.end(), listener);
+  if (itr != m_listeners.end()) {
     ATH_MSG_WARNING("Listener " << static_cast<void*>(listener)
-                                << " was added previously already");
+                                << " is already registered");
+    return StatusCode::SUCCESS;
   }
+
+  // Add the listener.
+  m_listeners.push_back(listener);
 
   // Return gracefully:
   return StatusCode::SUCCESS;
@@ -121,10 +126,12 @@ StatusCode Event::addListener(TVirtualIncidentListener* listener) {
 StatusCode Event::removeListener(TVirtualIncidentListener* listener) {
 
   // Remove the listener. Or at least try to...
-  if (m_listeners.erase(listener) != 1u) {
+  auto itr = std::find(m_listeners.begin(), m_listeners.end(), listener);
+  if (itr == m_listeners.end()) {
     ATH_MSG_ERROR("Listener " << static_cast<void*>(listener) << " not known");
     return StatusCode::FAILURE;
   }
+  m_listeners.erase(itr);
 
   // Return gracefully:
   return StatusCode::SUCCESS;
