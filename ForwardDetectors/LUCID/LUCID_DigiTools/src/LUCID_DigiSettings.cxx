@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_DigiTools/LUCID_DigiSettings.h"
-#include "CLHEP/Units/PhysicalConstants.h"
-#include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/MsgStream.h"
 #include <iostream>
@@ -196,7 +194,7 @@ void LUCID_DigiSettings::DefNewParameterDouble(std::string parDescription,
   parD.high           = high;
   parD.overwriteVal   = m_parValueNotSetByUserDouble;
   
-  m_doubleMap[parname] = parD;
+  m_doubleMap[parname] = std::move(parD);
 }
 
 void LUCID_DigiSettings::DefNewParameterInt(std::string parDescription,
