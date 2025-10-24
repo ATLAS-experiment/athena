@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file WriteCond.cxx
@@ -10,7 +10,7 @@
 
 #include "WriteCond.h"
 
-// the user data-class defintions
+// the user data-class definitions
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
 #include "StoreGate/ReadHandle.h"
 
@@ -22,21 +22,15 @@ WriteCond::WriteCond(const std::string& name, ISvcLocator* pSvcLocator)
 {
 }
 //___________________________________________________________________________
-WriteCond::~WriteCond() {
-}
-//___________________________________________________________________________
 StatusCode WriteCond::initialize() {
    ATH_MSG_INFO("in initialize()");
 
-   ExampleHitContainer* pPedestal = new ExampleHitContainer();
-   ExampleHit* pEntry = new ExampleHit();
+   auto pPedestal = std::make_unique<ExampleHitContainer>();
+   auto pEntry = std::make_unique<ExampleHit>();
    pEntry->setDetector("<");
-   pPedestal->push_back(pEntry);
+   pPedestal->push_back(std::move(pEntry));
 
-   if (detStore()->record(pPedestal, m_conditionName).isFailure()) {
-      ATH_MSG_ERROR("could not register Pedestal Object");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( detStore()->record(std::move(pPedestal), m_conditionName) );
 
    ATH_CHECK( m_exampleHitKey.initialize() );
    return StatusCode::SUCCESS;
@@ -47,10 +41,7 @@ StatusCode WriteCond::execute (const EventContext& ctx) const {
 
    SG::ReadHandle<ExampleHitContainer> hits (m_exampleHitKey, ctx);
    ExampleHitContainer* ep = nullptr;
-   if (detStore()->retrieve(ep, m_conditionName).isFailure()) {
-     ATH_MSG_ERROR("Could not find ExampleHitContainer/" << m_conditionName);
-     return StatusCode::FAILURE;
-   }
+   ATH_CHECK( detStore()->retrieve(ep, m_conditionName) );
    ExampleHit* pEntry = *ep->begin();
    for (const ExampleHit* hit : *hits) {
      ATH_MSG_INFO("Hit x = " << hit->getX() << " y = " << hit->getY() << " z = " << hit->getZ() << " detector = " << hit->getDetector());
@@ -67,10 +58,7 @@ StatusCode WriteCond::execute (const EventContext& ctx) const {
 //___________________________________________________________________________
 StatusCode WriteCond::stop() {
    ExampleHitContainer* ep = nullptr;
-   if (detStore()->retrieve(ep, m_conditionName).isFailure()) {
-      ATH_MSG_ERROR("Could not find DataObject");
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( detStore()->retrieve(ep, m_conditionName) );
    ExampleHit* pEntry = *ep->begin();
    pEntry->setDetector(pEntry->getDetector() + ">");
    ATH_MSG_INFO("in finalize()");

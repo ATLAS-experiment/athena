@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLEHITCONTAINER_H
@@ -21,9 +21,9 @@ class ExampleHitContainer : public DataVector<ExampleHit> {
 
 public: // Constructor and Destructor
    /// Default Constructor
-   ExampleHitContainer(SG::OwnershipPolicy ownPolicy = SG::OWN_ELEMENTS) : DataVector<ExampleHit>(ownPolicy) {};
+   ExampleHitContainer(SG::OwnershipPolicy ownPolicy = SG::OWN_ELEMENTS) : DataVector<ExampleHit>(ownPolicy) {}
    /// Destructor
-   virtual ~ExampleHitContainer() {};
+   virtual ~ExampleHitContainer() = default;
 };
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(ExampleHitContainer, 9102, 1)

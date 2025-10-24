@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolExampleAlgorithms/src/PassNoneFilter.cxx
@@ -12,8 +12,6 @@
 using namespace AthPoolEx;
 
 PassNoneFilter::PassNoneFilter(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
-
-PassNoneFilter::~PassNoneFilter() {}
 
 StatusCode PassNoneFilter::initialize() { return StatusCode::SUCCESS; }
 

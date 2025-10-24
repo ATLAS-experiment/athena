@@ -23,20 +23,18 @@ namespace AthPoolEx {
  *  @brief This class provides an example for reading with a ISelectorTool to veto events on AttributeList.
  **/
 class QueryTag : public extends<AthAlgTool, IAthenaSelectorTool> {
-public: // Constructor and Destructor
-   /// Standard Tool Constructor
+public:
    using base_class::base_class;
-   /// Destructor
-   virtual ~QueryTag();
+   virtual ~QueryTag() = default;
 
 public:
    /// IAthenaSelectorTool Interface method implementations:
-   virtual StatusCode initialize() override;
-   virtual StatusCode postInitialize() override;
-   virtual StatusCode preNext() const override;
-   virtual StatusCode postNext() const override;
-   virtual StatusCode preFinalize() override;
-   virtual StatusCode finalize() override;
+   virtual StatusCode initialize() override final;
+   virtual StatusCode postInitialize() override final;
+   virtual StatusCode preNext() const override final;
+   virtual StatusCode postNext() const override final;
+   virtual StatusCode preFinalize() override final;
+   virtual StatusCode finalize() override final;
 
 private:
    SG::ReadHandleKey<AthenaAttributeList> m_attrListKey;

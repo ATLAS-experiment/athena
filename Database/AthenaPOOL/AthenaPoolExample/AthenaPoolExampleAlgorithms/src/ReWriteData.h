@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEALGORITHMS_REWRITEDATA_H
@@ -23,23 +23,21 @@ namespace AthPoolEx {
  *  @brief This class provides an example for reading and writing data objects from/to Pool.
  **/
 class ReWriteData : public AthReentrantAlgorithm {
-public: // Constructor and Destructor
-   /// Standard Service Constructor
-   ReWriteData(const std::string& name, ISvcLocator* pSvcLocator);
-   /// Destructor
-   virtual ~ReWriteData();
+ public:
+  ReWriteData(const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~ReWriteData() = default;
 
-public:
-/// Gaudi Service Interface method implementations:
-   virtual StatusCode initialize() override;
-   virtual StatusCode execute (const EventContext& ctx) const override;
-   virtual StatusCode finalize() override;
+ public:
+  /// Gaudi Service Interface method implementations:
+  virtual StatusCode initialize() override final;
+  virtual StatusCode execute(const EventContext& ctx) const override final;
+  virtual StatusCode finalize() override final;
 
-private:
-   SG::ReadHandleKey<ExampleHitContainer> m_exampleHitKey { this, "ExampleHitKey", "MyHits" };
-   SG::WriteHandleKey<ExampleTrackContainer> m_exampleTrackKey { this, "ExampleTrackKey", "MyTracks" };
+ private:
+  SG::ReadHandleKey<ExampleHitContainer> m_exampleHitKey{this, "ExampleHitKey", "MyHits"};
+  SG::WriteHandleKey<ExampleTrackContainer> m_exampleTrackKey{this, "ExampleTrackKey", "MyTracks"};
 };
 
-} // end AthPoolEx namespace
+}  // namespace AthPoolEx
 
 #endif

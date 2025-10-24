@@ -1,34 +1,45 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# AthenaPoolExampleAlgorithms
 
-/**
+This package contains example algorithms for writing and reading data objects using AthenaPool.
 
-@page AthenaPoolExampleAlgorithms_page 
+## Overview
 
-The package Database/AthenaPOOL/AthenaPoolExample contains running examples of algorithms writing and
-reading Data Objects using AthenaPool. This sub package, AthenaPoolExampleAlgorithms, defines the 
-algorithms write and read data, tags and conditions via AthenaPOOL.
+The algorithms in this package demonstrate writing and reading data, tags, and conditions via AthenaPool.
 
-WriteData: The WriteData algorithm creates some ExampleHits in a ExampleHitContainer and records them
-into StoreGate.
+## Key Algorithms
 
-WriteTag: The WriteTag algorithm creates an AthenaAttributeList and records it in StoreGate so it can be
-used for collections.
+### Event Data I/O
+- **WriteData**: Creates ExampleHits in an ExampleHitContainer and records them into StoreGate
+- **ReadData**: Reads event data objects (ExampleHits, ExampleTracks) and demonstrates navigation through ElementLinks and Navigables
+- **ReWriteData**: Reads ExampleHits and processes them into ExampleTracks with navigational relations (ElementLinks, ElementLinkVector, Navigable, WeightedNavigable)
 
-AthenaPoolExample_WriteJobOptions.py: These jobOptions create two streams to write two different data
-files via AthenaPOOL.
+### xAOD I/O
+- **WriteExampleElectron**: Writes xAOD::ExampleElectronContainer with decorations
+- **ReadExampleElectron**: Reads xAOD::ExampleElectronContainer and demonstrates selective decoration reading
 
-	Tests:
+### Conditions Data I/O
+- **WriteCond**: Writes conditions data objects to the detector store
+- **ReadCond**: Reads conditions data objects from the detector store
 
-	- Simple Writing of EventData and InFile MetaData.
-	- Multiple Streams.
-	- Tag Writing.
+### Metadata I/O
+- **WriteTag**: Creates and writes AthenaAttributeList for event tagging and collections
+- **ReadMeta**: Reads file metadata (EventStreamInfo, EventBookkeeperCollection) using IMetaDataTool interface
+- **QueryTag**: Selector tool for filtering events based on tag metadata
 
+### Filtering
+- **PassNoneFilter**: Simple filter algorithm that rejects all events (demonstrates filtering mechanism)
 
-@verbatim
+## Example Tests
 
-run > checkFile.py SimplePoolFile1.root
+### Simple Writing
+Test writing of EventData and InFile MetaData with multiple streams and tag writing.
+
+```bash
+checkFile.py SimplePoolFile1.root
+```
+
+Expected output:
+```
 ## opening file [SimplePoolFile1.root]...
 ## importing ROOT...
 ## importing ROOT... [DONE]
@@ -50,7 +61,14 @@ Nbr Events: 20
      208.618 kb        0.000 kb        0.000 kb        0.000       20  TOTAL (POOL containers)
 ================================================================================
 ## Bye.
-run > checkFile.py SimplePoolFile2.root
+```
+
+```bash
+checkFile.py SimplePoolFile2.root
+```
+
+Expected output:
+```
 ## opening file [SimplePoolFile2.root]...
 ## importing ROOT...
 ## importing ROOT... [DONE]
@@ -71,23 +89,15 @@ Nbr Events: 20
      173.780 kb        0.000 kb        0.000 kb        0.000       20  TOTAL (POOL containers)
 ================================================================================
 ## Bye.
+```
 
-@endverbatim
+### Appending
+Test appending EventData and InFile MetaData, and tag writing in update mode.
 
-AthenaPoolExample_AppendJobOptions.py: These jobOptions appends events and tags to the second stream written by
-AthenaPoolExample_WriteJobOptions.py.
+**Note**: Appending InFile MetaData does not work in the current framework.
 
-        Tests:
-
-        - Simple Appending of EventData and InFile MetaData.
-        - Tag Writing in update (append) mode.
-
-	Note:
-	- Appending InFile MetaData does _not_ work in the current framework.
-
-@verbatim
-
-run > checkFile.py SimplePoolFile2.root
+After appending, `checkFile.py SimplePoolFile2.root` should show:
+```
 ## opening file [SimplePoolFile2.root]...
 ## importing ROOT...
 ## importing ROOT... [DONE]
@@ -109,22 +119,17 @@ Nbr Events: 40
      207.125 kb        0.000 kb        0.000 kb        0.000       40  TOTAL (POOL containers)
 ================================================================================
 ## Bye.
+```
 
-@endverbatim
+### Reading and Writing
+Test reading EventData (SimplePoolFile1.root) and writing EventData with navigational relations (ElementLinks, ElementLinkVector, Navigable) to upstream EventData.
 
-AthenaPoolExample_RWJobOptions.py: These jobOptions read the previous events (SimplePoolFile1.root from
-AthenaPoolExample_WriteJobOptions.py) and processes the hits into tracks which are than written out.
+```bash
+checkFile.py SimplePoolFile3.root
+```
 
-        Tests:
-
-        - Reading of EventData (without navigation) and InFile MetaData.
-	- Writing EventData with navigational relations (ElementLinks, ElementLinkVector, Navigable) to
-	  upstream EventData.
-
-
-@verbatim
-
-run > checkFile.py SimplePoolFile3.root
+Expected output:
+```
 ## opening file [SimplePoolFile3.root]...
 ## importing ROOT...
 ## importing ROOT... [DONE]
@@ -146,34 +151,17 @@ Nbr Events: 20
      235.086 kb        0.000 kb        0.000 kb        0.000       20  TOTAL (POOL containers)
 ================================================================================
 ## Bye.
+```
 
-@endverbatim
+### Reading with Navigation
+Test reading EventData with navigation and InFile MetaData, including event skipping.
 
-AthenaPoolExample_ReadJobOptions.py: These jobOptions read the previous events (SimplePoolFile1-3.root).
+Files read:
+- SimplePoolFile1.root: EventInfo, Hits
+- SimplePoolFile2.root: EventInfo
+- SimplePoolFile3.root: EventInfo, Hits (via Navigation), Tracks
 
-        Tests:
+## Additional Information
 
-        - Reading of EventData (with navigation) and InFile MetaData.
-	- Skipping events.
-
-SimplePoolFile1.root: EventInfo, Hits
-SimplePoolFile2.root: EventInfo
-SimplePoolFile3.root: EventInfo, Hits (via Navigation), Tracks
-
-
-@section AthenaPoolExampleAlgorithms_Documentation Additional Documentation
-
-See the ATLAS User/Developer HowTo document for additional information.
-
-The code can be browsed using LXR
-(http://alxr.usatlas.bnl.gov/lxr/source/atlas/Database/AthenaPOOL/AthenaPoolExample/AthenaPoolExampleAlgorithms/)
-
-
-
-
-
-
-
-
-@author Peter van Gemmeren <gemmeren@anl.gov>
-*/
+For more information on Athena I/O:
+- [Athena I/O Documentation](https://atlas-software.docs.cern.ch/athena/io/)

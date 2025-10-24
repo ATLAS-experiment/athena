@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file WriteTag.cxx
@@ -18,12 +18,12 @@ using namespace AthPoolEx;
 
 //___________________________________________________________________________
 WriteTag::WriteTag(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator), m_attribListSpec(0)
+  : AthReentrantAlgorithm(name, pSvcLocator), m_attribListSpec(nullptr)
 {
 }
 //___________________________________________________________________________
 WriteTag::~WriteTag() {
-   if (m_attribListSpec != 0) {
+   if (m_attribListSpec != nullptr) {
       m_attribListSpec->release();
    }
 }
@@ -39,8 +39,8 @@ StatusCode WriteTag::initialize() {
       m_attribListSpec->extend("MagicNumber", "unsigned int");
    }
    ATH_MSG_DEBUG("Printing out attribute list specification:");
-   for (AthenaAttributeListSpecification::const_iterator first = m_attribListSpec->begin(), last = m_attribListSpec->end(); first != last; ++first) {
-      ATH_MSG_DEBUG(" name " << (*first).name() << " type " << (*first).typeName());
+   for (const auto& attr : *m_attribListSpec) {
+      ATH_MSG_DEBUG(" name " << attr.name() << " type " << attr.typeName());
    }
 
    ATH_CHECK( m_key.initialize() );
