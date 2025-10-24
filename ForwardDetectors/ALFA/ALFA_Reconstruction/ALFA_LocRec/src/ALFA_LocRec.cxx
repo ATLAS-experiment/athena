@@ -1,9 +1,22 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec.h"
 #include "ALFA_Geometry/ALFA_GeometryReader.h"
+#include "ALFA_LocRec/ALFA_ODTracking.h"
+#include "ALFA_LocRec/ALFA_MDTracking.h"
+#include "ALFA_LocRec/ALFA_MDOverlap.h"
+#include "ALFA_LocRec/ALFA_CenterGravity.h"
+#include "ALFA_LocRec/ALFA_MDMultiple.h"
+#include "ALFA_LocRec/ALFA_HalfReco.h"
+#include "ALFA_LocRec/ALFA_MDGap.h"
+#include "ALFA_LocRec/ALFA_EdgeMethod.h"
+#include "ALFA_LocRecEv/ALFA_LocRecEvCollection.h"
+#include "ALFA_LocRecEv/ALFA_LocRecODEvCollection.h"
+#include "ALFA_RawEv/ALFA_DigitCollection.h"
+#include "ALFA_RawEv/ALFA_ODDigitCollection.h"
+
 
 #include "AthenaKernel/errorcheck.h"
 using namespace std;
@@ -744,7 +757,7 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 					vecFibSel.push_back(iLayer);
 				}
 
-				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(2, eRPName-1, fRecPosX, fRecPosY, fOverlapU, fOverlapV, iNumU, iNumV, vecFibSel));
+				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(2, eRPName-1, fRecPosX, fRecPosY, fOverlapU, fOverlapV, iNumU, iNumV, std::move(vecFibSel)));
 			}
 
 			delete pMDTracking;
@@ -900,8 +913,8 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 
 			if (fRecPosX[0]!=-9999.0 && fRecPosY[0]!=-9999.0 && fRecPosX[1]!=-9999.0 && fRecPosY[1]!=-9999.0)
 			{
-				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(6, eRPName-1, fRecPosX[0], fRecPosY[0], fOverlapU[0], fOverlapV[0], iNumU[0], iNumV[0], vecFibSel0));
-				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(6, eRPName-1, fRecPosX[1], fRecPosY[1], fOverlapU[1], fOverlapV[1], iNumU[1], iNumV[1], vecFibSel1));
+				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(6, eRPName-1, fRecPosX[0], fRecPosY[0], fOverlapU[0], fOverlapV[0], iNumU[0], iNumV[0], std::move(vecFibSel0)));
+				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(6, eRPName-1, fRecPosX[1], fRecPosY[1], fOverlapU[1], fOverlapV[1], iNumU[1], iNumV[1], std::move(vecFibSel1)));
 			}
 
 			delete pHalfReco;
