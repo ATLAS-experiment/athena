@@ -18,20 +18,39 @@ import AthenaCommon.Constants
 JobProperties.jobPropertiesDisallowed = True
 
 def getT0SolveDB(runArgs):
+    # Check which file to use to extract metadata
+    if runArgs.solve:
+        outputFile = runArgs.outputConditionFile
+        iteration = runArgs.iteration - 1
+    
+    elif hasattr(runArgs, "outputTFile"): 
+        outputFile = runArgs.outputTFile
+        iteration = runArgs.iteration - 1
+
+    elif hasattr(runArgs, "outputMonitorFile"):
+        # For monitoring, the iteration DB file to use is the one from the current iteration
+        outputFile = runArgs.outputMonitorFile
+        iteration = runArgs.iteration
+        
+    else:
+        raise Exception("No output files provided from which metadata can be extracted from")
+
     # Extract data taking period, stream, ect from output file name
     try:
-        meta_data = re.search(r"^(data.*?_.*?)\.(\d+)\.(\w+).*?(c\d+.*?).*?(Block\d+)", runArgs.outputTFile if runArgs.accumulate else runArgs.outputConditionFile)
+        meta_data = re.search(r"^(data.*?_.*?)\.(\d+)\.(\w+).*?(c\d+.*?).*?(Block\d+)", outputFile)
         data_period, run, data_stream, AMI_tag, block = meta_data.groups()
     
     except Exception:
-        raise Exception(f"Can not extract metadata from: {runArgs.outputTFile}")
+        raise Exception(f"Can not extract metadata from: {outputFile}")
         
     # Try to find local database file
-    localDatabaseWildcard = f"{runArgs.eosT0Dir}/{data_period}/{data_stream}/{run}/{data_period}.{run}.{data_stream}.idalignsolve.ROOT_DB.Iter{runArgs.iteration - 1}*/*{block}*"
+    localDatabaseWildcard = f"{runArgs.eosT0Dir}/{data_period}/{data_stream}/{run}/{data_period}.{run}.{data_stream}.idalignsolve.ROOT_DB.Iter{iteration}*/*{block}*"
     
     try:
         from glob import glob
-        localDataBase = glob(localDatabaseWildcard)[0]
+
+        # Get always latest DB files, in case a job restarted with a new AMI tag
+        localDataBase = glob(localDatabaseWildcard)[-1]
     
     except Exception:
         raise Exception(f"Could not find local database from wildcard: {localDatabaseWildcard}")
@@ -50,7 +69,7 @@ def configureFlags(runArgs):
     if hasattr(runArgs, "localDatabase"): 
         flags.InDet.Align.localDataBase = os.path.abspath(runArgs.localDatabase)
     
-    elif runArgs.eosT0Dir != "" and runArgs.iteration > 0:
+    elif runArgs.eosT0Dir != "" and (runArgs.iteration > 0 or hasattr(runArgs, "outputMonitorFile")):
         flags.InDet.Align.localDataBase = getT0SolveDB(runArgs)
         
     else:
@@ -89,7 +108,8 @@ def configureFlags(runArgs):
     flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
     
     if runArgs.accumulate:
-        flags.InDet.Align.outputTFile = runArgs.outputTFile
+        if hasattr(runArgs, "outputTFile"):
+            flags.InDet.Align.outputTFile = runArgs.outputTFile
     
         if hasattr(runArgs, "outputMonitorFile"):
             flags.InDet.Align.doMonitoring = True
