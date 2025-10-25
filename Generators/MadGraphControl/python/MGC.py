@@ -185,6 +185,9 @@ class MGControl:
                 self.runCardDict['cudacpp_backend'] = 'cppauto'
             elif MADGRAPH_DEVICES.lower()=='madevent_gpu':
                 self.runCardDict['cudacpp_backend'] = 'cuda'
+                # In case we have "too new" a gcc version for the nvcc version on the node, which should be ok
+                # This patch should be temporary, but is fine while we are validating things at least
+                os.environ['ALLOW_UNSUPPORTED_COMPILER_IN_CUDA'] = 'Y'
             elif MADGRAPH_DEVICES.lower() == 'max':
                 self.mglog.warning('Not fully implemented yet; setting avx')
                 self.runCardDict['cudacpp_backend'] = 'cppauto'
