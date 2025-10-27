@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/JetMatcherAlg.h"
@@ -314,7 +314,7 @@ StatusCode JetMatcherAlg::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("evtStore() does not contain L1 jet Collection with name "<< m_gFexJetRoIKey);
       return StatusCode::FAILURE;
     } 
-    return jetMatching(jets1, jets2, m_l1gFexmatchedKey, m_l1gFexJetVarHandleKeys, ctx);
+    return jetMatching(std::move(jets1), std::move(jets2), m_l1gFexmatchedKey, m_l1gFexJetVarHandleKeys, ctx);
   }
 
   ATH_MSG_ERROR("unsupported type for jet matching targe");
