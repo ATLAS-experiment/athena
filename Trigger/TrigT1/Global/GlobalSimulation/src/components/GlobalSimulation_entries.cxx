@@ -20,6 +20,8 @@
 #include "../GlobalAlgs/FirstChain/eFexCvtrAlgTool.h"
 #include "../GlobalAlgs/FirstChain/eEmMultAlgTool.h"
 
+#include "../GlobalAlgs/FirstChain/eEmMultTestBench.h"
+
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 DECLARE_COMPONENT(GlobalSim::HypoTestBenchAlg)
@@ -40,3 +42,5 @@ DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
+
+DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)

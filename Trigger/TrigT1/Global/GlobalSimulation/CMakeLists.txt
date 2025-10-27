@@ -34,6 +34,7 @@ atlas_add_component (GlobalSimulation
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_runtime(share/*.txt share/*.json)
+atlas_install_data( data/* )
 
 atlas_add_test(ap_fixed
                SOURCES src/NumericTypes/Tests/all_tests.cxx

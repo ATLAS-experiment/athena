@@ -2,6 +2,7 @@
 
 #include "HypoTestBenchAlg.h"
 #include "AlgoConstants.h"
+#include "../../Utilities/trim.h"
 
 #include <fstream>
 
@@ -29,6 +30,7 @@ namespace GlobalSim {
 
     return StatusCode::SUCCESS;
   }
+
   
   HypoTestBenchAlg::HypoTestBenchAlg(const std::string& name,
 				     ISvcLocator *pSvcLocator):
@@ -123,28 +125,7 @@ namespace GlobalSim {
 
     return StatusCode::SUCCESS;
   }
-
   
-      
-  std::string trim(std::string s){
-    const char* t = " \t\n\r\f\v";
-    
-    // trim from right
-    auto l_rtrim =  [&t](std::string& s){
-      s.erase(s.find_last_not_of(t) + 1);
-      return s;
-    };
-   
-    // trim from left
-    auto l_ltrim = [&t] (std::string& s){
-      s.erase(0, s.find_first_not_of(t));
-      return s;
-    };
-    
-    auto rs = l_rtrim(s);
-    return l_ltrim(rs);
-  }
-
   StatusCode
   HypoTestBenchAlg::init_from_file() {
     CHECK(init_tests_from_file());
