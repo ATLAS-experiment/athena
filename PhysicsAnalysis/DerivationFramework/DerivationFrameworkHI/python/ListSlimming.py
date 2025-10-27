@@ -244,6 +244,8 @@ def HION5ExtraVariables():
         ".".join(["InDetTrackParticles", field]) for field in [
             "truthMatchProbability.x.y.z.vx.vy.vz",
             "numberOfInnermostPixelLayerSplitHits",
+            "numberOfTRTHoles",
+            "expectInnermostPixelLayerHit",
             "numberOfNextToInnermostPixelLayerSplitHits",
             "numberOfNextToInnermostPixelLayerSharedHits",
             "numberOfPixelSplitHits",
@@ -317,7 +319,7 @@ def HION5ExtraVariables():
 
     return variables
 
-def HION5AllVariables():
+def HION5AllVariables(runnumber):
     variables  = []
     variables += ["AntiKt4HITrackJets"]
     variables += ["AntiKt2HIJets"]
@@ -332,6 +334,17 @@ def HION5AllVariables():
     variables += ["ZdcTriggerTowers"]
     variables += ["PeripheralCaloCalTopoClusters"]
     variables += ["MET_Track1000", "MET_Track2000", "MET_Track3000", "MET_Track4000", "MET_Track5000"]
+
+    
+    from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
+    info=getTypeForRun(runnumber)
+    isOxygenOxygenCollision = False
+    if (info.getBeam1Type() == 8) or (info.getBeam2Type() == 8):
+        isOxygenOxygenCollision = True
+
+    if isOxygenOxygenCollision:
+        variables += ["MET_Calo"]
+        variables += ["MET_Track"]
 
     return variables
 

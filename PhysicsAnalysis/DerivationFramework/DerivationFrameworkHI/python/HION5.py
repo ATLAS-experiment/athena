@@ -45,18 +45,29 @@ def HION5Thinning(flags):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg,JetTrackParticleThinningCfg
     acc = ComponentAccumulator()
 
-    track_thinning_expression  = "InDetTrackParticles.pt > 0.9*GeV"
+    # find collision type
+    from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
+    info=getTypeForRun(flags.Input.RunNumbers[0])
+    isOxygenOxygenCollision = False
+    if (info.getBeam1Type() == 8) or (info.getBeam2Type() == 8):
+        isOxygenOxygenCollision = True
+
+    pTCut = 0.9
+    if isOxygenOxygenCollision:
+        pTCut = 0.5
+
+    track_thinning_expression  = f"InDetTrackParticles.pt > {pTCut}*GeV"
     TrackParticleThinningTool  = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
          flags,
          name                    = "PHYSTrackParticleThinningTool",
-         StreamName              = "streamDAOD_HION5", 
+         StreamName              = "StreamDAOD_HION5", 
          SelectionString         = track_thinning_expression,
          InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     AntiKt2HIJetsThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
          flags,
          name                    = "AntiKt2HIJetsThinningTool",
-         StreamName              = "streamDAOD_HION5",
+         StreamName              = "StreamDAOD_HION5",
          JetKey                  = "AntiKt2HIJets",
          SelectionString         = "AntiKt2HIJets.pt > 15*GeV",
          InDetTrackParticlesKey  = "InDetTrackParticles"))
@@ -64,7 +75,7 @@ def HION5Thinning(flags):
     AntiKt4HIJetsThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
          flags,
          name                    = "AntiKt4HIJetsThinningTool",
-         StreamName              = "streamDAOD_HION5",
+         StreamName              = "StreamDAOD_HION5",
          JetKey                  = "AntiKt4HIJets",
          SelectionString         = "AntiKt4HIJets.pt > 15*GeV",
          InDetTrackParticlesKey  = "InDetTrackParticles"))
@@ -202,7 +213,7 @@ def HION5Cfg(flags):
         acc.merge(Cfg_METTrack(flags, ptCut))
 
     AllVariables  = []    
-    AllVariables += ListSlimming.HION5AllVariables()
+    AllVariables += ListSlimming.HION5AllVariables(flags.Input.RunNumbers[0])
     AllVariables += ListSlimming.HION5ExtraContainersTrigger()
 
     if flags.Input.isMC:
