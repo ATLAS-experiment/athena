@@ -14,7 +14,7 @@
 #include "GaudiKernel/DataObject.h"
 
 #include "PersistentDataModel/Token.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 #include <string>
 #include <set>
@@ -64,7 +64,7 @@ public: // Constructor and Destructor
 public: // Non-static members
    /// Assignment Operator
    DataHeaderElement& operator=(const DataHeaderElement& rhs);
- 
+
    /// @return primary ClassID.
    CLID getPrimaryClassID() const;
    /// @return a set of all ClassIDs (primary and symlinked).
@@ -86,7 +86,7 @@ public: // Non-static members
    void addHash(IStringPool* pool);
 
    void dump(std::ostream& ostr) const;
-  
+
 private:
    friend class DataHeaderElementCnv_p3;
    friend class DataHeaderElementCnv_p4;
@@ -135,7 +135,7 @@ public: // Constructor and Destructor
 public: // Non-static members
    /// Assignment Operator
    DataHeader& operator=(const DataHeader& rhs);
- 
+
    /// Set StatusFlag enum for DataHeader.
    void setStatus(statusFlag status);
    /// Check whether StatusFlag is "Input".
@@ -196,7 +196,7 @@ public: // Non-static members
 protected:
   /// Called before this object is recycled.
   virtual void recycle();
-  
+
 
 private:
    friend class DataHeaderCnv_p3;

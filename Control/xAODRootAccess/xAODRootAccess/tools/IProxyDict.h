@@ -9,7 +9,7 @@
 
 /// Project include(s).
 #include "AsgMessaging/StatusCode.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "xAODCore/CLASS_DEF.h"
 
 // System include(s).

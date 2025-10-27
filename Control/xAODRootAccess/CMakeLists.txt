@@ -30,7 +30,7 @@ atlas_add_library( xAODRootAccess
    PUBLIC_HEADERS xAODRootAccess
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} ${Python_LIBRARIES} AthContainers xAODCore xAODEventFormat
-   xAODRootAccessInterfaces AsgMessagingLib CxxUtils RootUtils ${extra_libs}
+   xAODRootAccessInterfaces AsgMessagingLib CxxUtils RootUtils SGCoreLib ${extra_libs}
    )
 
 

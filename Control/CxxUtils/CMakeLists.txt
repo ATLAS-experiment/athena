@@ -13,7 +13,7 @@ atlas_add_library( CxxUtils
    Root/*.cxx
    PUBLIC_HEADERS CxxUtils
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS}
-   PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} ${UUID_LIBRARIES} )
+   PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} ${UUID_LIBRARIES} SGCoreLib )
 
 # Additional libraries in the package:
 atlas_add_library( exctrace_collector src/exctrace/exctrace_collector.cxx
@@ -137,7 +137,7 @@ atlas_add_test( exctrace2_test
 
 atlas_add_test( stringUtilsTest
                 SOURCES test/StringUtils_test.cxx
-                LINK_LIBRARIES CxxUtils 
+                LINK_LIBRARIES CxxUtils
                 POST_EXEC_SCRIPT nopost.sh)
 
 
@@ -146,10 +146,10 @@ atlas_add_test( CachedValueTiming_test
   LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES}
   PROPERTIES TIMEOUT 300
   POST_EXEC_SCRIPT noerror.sh )
-  
+
 atlas_add_test( close_to_zero_test
   SOURCES test/close_to_zero_test.cxx
-  LINK_LIBRARIES CxxUtils 
+  LINK_LIBRARIES CxxUtils
   PROPERTIES TIMEOUT 300
   POST_EXEC_SCRIPT nopost.sh )
 

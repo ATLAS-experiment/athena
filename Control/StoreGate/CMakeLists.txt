@@ -11,7 +11,7 @@ atlas_add_library( StoreGateLib src/*.cxx
    PUBLIC_HEADERS StoreGate
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES AthAllocators AthenaKernel AthContainers
-   AthContainersInterfaces SGTools GaudiKernel PersistentDataModel
+   AthContainersInterfaces SGTools SGCoreLib GaudiKernel PersistentDataModel
    PRIVATE_LINK_LIBRARIES CxxUtils TestTools)
 
 atlas_add_component( StoreGate src/components/*.cxx
@@ -34,7 +34,7 @@ function( _add_test name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-      LINK_LIBRARIES ${Boost_LIBRARIES} StoreGateLib SGtests TestTools
+      LINK_LIBRARIES ${Boost_LIBRARIES} StoreGateLib SGCoreLib SGtests TestTools
       ${extra_arg} )
 endfunction( _add_test )
 

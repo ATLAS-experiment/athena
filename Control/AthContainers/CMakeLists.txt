@@ -1,6 +1,4 @@
-################################################################################
-# Package: AthContainers
-################################################################################
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthContainers )
@@ -24,7 +22,7 @@ atlas_add_library( AthContainers
    PUBLIC_HEADERS AthContainers
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${TBB_LIBRARIES}
-                  AthContainersInterfaces AthLinks CxxUtils ${extra_libs} )
+                  AthContainersInterfaces AthLinks CxxUtils SGCoreLib ${extra_libs} )
 
 atlas_add_dictionary( AthContainersDict
    AthContainers/AthContainersDict.h
@@ -43,7 +41,7 @@ atlas_add_dictionary( AthContainersPackedContainersDict
    AthContainers/AthContainersPackedContainersDict.h
    AthContainers/selectionPackedContainers.xml
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers 
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers
    EXTRA_FILES Root/dict/PackedContainerStreamer.cxx )
 
 atlas_add_dictionary( AthContainersJaggedVecsDict

@@ -16,7 +16,7 @@
 
 // EDM include(s):
 #include "AthContainers/ConstDataVector.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 // Local include(s):
 #include "AsgMessaging/StatusCode.h"

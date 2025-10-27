@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileEvent )
@@ -7,7 +7,7 @@ atlas_subdir( TileEvent )
 atlas_add_library( TileEvent
                    src/Tile*.cxx
                    PUBLIC_HEADERS TileEvent
-                   LINK_LIBRARIES CaloEvent AthContainers AthenaKernel Identifier GaudiKernel TileIdentifier TileSimEvent StoreGateLib TileConditionsLib EventContainers
+                   LINK_LIBRARIES CaloEvent AthContainers AthenaKernel SGCoreLib Identifier GaudiKernel TileIdentifier TileSimEvent StoreGateLib TileConditionsLib EventContainers
                    PRIVATE_LINK_LIBRARIES CaloDetDescrLib CaloIdentifier TileCalibBlobObjs )
 
 atlas_add_dictionary( TileEventDict

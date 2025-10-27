@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: EventFormatElement.h 568357 2013-11-01 16:21:30Z krasznaa $
 #ifndef XAODEVENTFORMAT_EVENTFORMATELEMENT_H
 #define XAODEVENTFORMAT_EVENTFORMATELEMENT_H
 
@@ -17,7 +16,7 @@ extern "C" {
 #include <string>
 #include <iosfwd>
 
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 namespace xAOD {
 
@@ -32,9 +31,6 @@ namespace xAOD {
    /// transient means of storing data.
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-   ///
-   /// $Revision: 568357 $
-   /// $Date: 2013-11-01 17:21:30 +0100 (Fri, 01 Nov 2013) $
    ///
    class EventFormatElement {
 

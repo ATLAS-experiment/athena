@@ -14,10 +14,10 @@ endif()
 atlas_add_library( TrigCompositeUtilsLib
   TrigCompositeUtils/*.h TrigCompositeUtils/*.icc Root/*.cxx
   PUBLIC_HEADERS TrigCompositeUtils
-  LINK_LIBRARIES TrigConfHLTUtilsLib CxxUtils AsgMessagingLib AsgDataHandlesLib AsgTools TrigDecisionInterface xAODBase xAODTrigger TrigConfHLTData ${extra_libs}
+  LINK_LIBRARIES TrigConfHLTUtilsLib CxxUtils SGCoreLib AsgMessagingLib AsgDataHandlesLib AsgTools TrigDecisionInterface xAODBase xAODTrigger TrigConfHLTData ${extra_libs}
   PRIVATE_LINK_LIBRARIES TrigSteeringEvent )
 
-atlas_add_dictionary( ChainNameParserDict 
+atlas_add_dictionary( ChainNameParserDict
    TrigCompositeUtils/ChainNameParserDict.h
    TrigCompositeUtils/selection.xml
    LINK_LIBRARIES TrigCompositeUtilsLib )
