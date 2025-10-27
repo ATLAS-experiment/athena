@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/LightweightGraph.h"
@@ -154,7 +154,7 @@ namespace lwtDev {
     for (size_t iii = 0; iii < labels.size(); iii++) {
       VectorXd row = result.row(iii);
       std::vector<double> out_vector(row.data(), row.data() + row.size());
-      output[labels.at(iii)] = out_vector;
+      output[labels.at(iii)] = std::move(out_vector);
     }
     return output;
   }
