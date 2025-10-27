@@ -521,8 +521,8 @@ public:
     (*m_msgFunc_p)(ZDCMsg::Info, ("Setting non-linear parameters for module: " + m_tag + ", reference ADC = " +
 				  std::to_string(refADC) + ", reference scale = " + std::to_string(refScale)));
 
-    (*m_msgFunc_p)(ZDCMsg::Info, HGParamsStr);
-    (*m_msgFunc_p)(ZDCMsg::Info, LGParamsStr);
+    (*m_msgFunc_p)(ZDCMsg::Info, std::move(HGParamsStr));
+    (*m_msgFunc_p)(ZDCMsg::Info, std::move(LGParamsStr));
 
     m_nonLinCorrRefADC = refADC;
     m_nonLinCorrRefScale = refScale;

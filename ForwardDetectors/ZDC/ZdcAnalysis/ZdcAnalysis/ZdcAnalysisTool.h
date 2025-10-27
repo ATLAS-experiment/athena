@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCANALYSISTOOL_H
@@ -20,6 +20,7 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "CxxUtils/checker_macros.h"
+#include <memory>
 
 
 namespace ZDC
@@ -89,7 +90,7 @@ public:
       return passesStreamOutputLevel;
     };
 
-    return ZDCMsg::MessageFunctionPtr(new ZDCMsg::MessageFunction(msgFunction));
+    return ZDCMsg::MessageFunctionPtr(new ZDCMsg::MessageFunction(std::move(msgFunction)));
   }
 
   void Dump_setting() {

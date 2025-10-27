@@ -12,6 +12,7 @@
 #include <array>
 #include <string>
 #include <memory>
+#include <cmath> //for std::sqrt
 
 #include "CxxUtils/checker_macros.h"
 
