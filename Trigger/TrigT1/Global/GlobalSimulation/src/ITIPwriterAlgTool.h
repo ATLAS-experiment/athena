@@ -31,6 +31,8 @@ namespace GlobalSim {
 
     virtual std::string toString() const = 0;
   };
-  
+
+  using TIPword = std::bitset<ITIPwriterAlgTool::s_nbits_TIP>;
+
 }
 #endif
