@@ -164,6 +164,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "unlinkedAsFakes"          , True )
     icf.addFlag( "plotDuplicateRates"       , False )
     icf.addFlag( "plotHitsOnTracks"         , True )
+    icf.addFlag( "plotHitsOnTracksExpert"   , False )
     icf.addFlag( "plotHitsOnTracksReference", False )
     icf.addFlag( "plotHitsOnMatchedTracks"  , False )
     icf.addFlag( "plotHitsOnFakeTracks"     , False )
