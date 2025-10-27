@@ -40,7 +40,7 @@ void test1()
   assert (what == "CxxUtils::throw_out_of_range test1b requested index 10 >= 5 for object at 0x1234");
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "CxxUtils/throw_out_of_range_test\n";
