@@ -25,14 +25,20 @@ namespace columnar
 
     using CM = ColumnarModeArray;
 
+    AccessorTemplate () = default;
+
     AccessorTemplate (ColumnarTool<CM>& columnBase,
-                      const std::string& name)
+                      const std::string& name,
+                      ColumnInfo&& info = {})
       : m_columnBase (&columnBase),
         m_name (name)
     {
-      columnBase.setContainerUserName (CI::idName, name);
+      if (!name.empty())
+        columnBase.setContainerUserName (CI::idName, name);
       m_offsetsData = std::make_unique<ColumnAccessorDataArray> (&m_offsetsIndex, &m_offsetsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-      columnBase.addColumn (std::string (CI::idName), m_offsetsData.get(), {.offsetName = (CI::perEventRange ? numberOfEventsName : ""), .isOffset = true});
+      info.offsetName = (CI::perEventRange ? numberOfEventsName : "");
+      info.isOffset = true;
+      columnBase.addColumn (std::string (CI::idName), m_offsetsData.get(), std::move(info));
     }
 
     AccessorTemplate (AccessorTemplate&& that)
@@ -76,6 +82,12 @@ namespace columnar
     {
       return ObjectRange<CI,CM> (eventRange.getData(), eventRange.beginIndex(), eventRange.endIndex());
     }
+
+    [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> eventId) const noexcept
+    {
+      auto *offsets = static_cast<const ColumnarOffsetType*>(eventId.getData()[m_offsetsIndex]);
+      return offsets != nullptr;
+    }      
 
 
 

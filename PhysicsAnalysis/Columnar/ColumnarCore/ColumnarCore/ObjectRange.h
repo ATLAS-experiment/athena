@@ -90,6 +90,10 @@ namespace columnar
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
 
+    /// get the index inside the given range
+    [[nodiscard]] std::size_t getIndexInRange (const ObjectId<CI,CM>& obj) const {
+      return obj.getXAODObjectNoexcept().index(); }
+
 
 
     /// Private Members
@@ -271,6 +275,10 @@ namespace columnar
       requires std::invocable<Acc,ObjectRange<CI,ColumnarModeArray>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
+
+    /// get the index inside the given range
+    [[nodiscard]] std::size_t getIndexInRange (const ObjectId<CI,CM>& obj) const {
+      return obj.getIndex() - m_beginIndex; }
 
 
 
