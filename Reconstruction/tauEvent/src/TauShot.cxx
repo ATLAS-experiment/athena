@@ -4,7 +4,7 @@
 
 #include "tauEvent/TauShot.h"
 #include "tauEvent/TauDetails.h"
-//#include <sstream>
+
 
 namespace Analysis
 {
@@ -139,14 +139,14 @@ namespace Analysis
     std::vector<std::vector<const CaloCell*> > TauShot::getCellVector(const CaloCell_ID* calo_id) const
     {
         std::vector<std::vector<const CaloCell*> > cellVector;
-        std::vector<const CaloCell*> oneEtaLayer;
-        for(int iCell=0; iCell<m_nCellsInEta;++iCell) oneEtaLayer.push_back(NULL);
+        
+        
         // have two layers in phi
-        cellVector.push_back(oneEtaLayer);
-        cellVector.push_back(oneEtaLayer);
+        cellVector.emplace_back(m_nCellsInEta, nullptr);
+        cellVector.emplace_back(m_nCellsInEta, nullptr);
         const CaloCell* seedCell = this->seedCell();
-        const CaloCell* mergedCell = NULL;
-        // get merged cell in phi. Keep NULL if shot is not merged across phi
+        const CaloCell* mergedCell = nullptr;
+        // get merged cell in phi. Keep nullptr if shot is not merged across phi
         std::vector<IdentifierHash> nextInPhi;
         std::vector<IdentifierHash> prevInPhi;
         calo_id->get_neighbours(seedCell->caloDDE()->calo_hash(),LArNeighbours::nextInPhi,nextInPhi);
@@ -160,23 +160,23 @@ namespace Analysis
                 mergedCell = (*cellItr);
                 break;
             }
-            if(mergedCell!=NULL) break;
+            if(mergedCell!=nullptr) break;
             itr = prevInPhi.begin();
             for( ; itr!=prevInPhi.end(); ++itr ){
                 if((*cellItr)->caloDDE()->calo_hash() != (*itr)) continue;
                 mergedCell = (*cellItr);
                 break;
             }
-            if(mergedCell!=NULL) break;
+            if(mergedCell!=nullptr) break;
         }
         // store cells in the eta layer, which contains the seed cell
         int nCellsFromSeed = 1;
         const CaloCell* lastCell = seedCell;
         cellVector.at(0).at(m_nCellsInEta/2) = seedCell; // store seed cell
         std::vector<IdentifierHash> next;
-        while(lastCell!=NULL && nCellsFromSeed<m_nCellsInEta/2+1){
+        while(lastCell!=nullptr && nCellsFromSeed<m_nCellsInEta/2+1){
             calo_id->get_neighbours(lastCell->caloDDE()->calo_hash(),LArNeighbours::nextInEta,next);
-            lastCell = NULL;
+            lastCell = nullptr;
             for(cellItr=this->cluster()->cell_begin();cellItr!=cellItrE;++cellItr){
                 std::vector<IdentifierHash>::iterator itr = next.begin();
                 for( ; itr!=next.end(); ++itr ){
@@ -189,9 +189,9 @@ namespace Analysis
         }
         nCellsFromSeed = 1;
         lastCell = seedCell;
-        while(lastCell!=NULL && nCellsFromSeed<m_nCellsInEta/2+1){
+        while(lastCell!=nullptr && nCellsFromSeed<m_nCellsInEta/2+1){
             calo_id->get_neighbours(lastCell->caloDDE()->calo_hash(),LArNeighbours::prevInEta,next);
-            lastCell = NULL;
+            lastCell = nullptr;
             for(cellItr=this->cluster()->cell_begin();cellItr!=cellItrE;++cellItr){
                 std::vector<IdentifierHash>::iterator itr = next.begin();
                 for( ; itr!=next.end(); ++itr ){
@@ -204,11 +204,11 @@ namespace Analysis
         }
         // store cells in the eta layer, which contains the merged cell
         int nCellsFromMerged = 1;
-        lastCell = mergedCell; // is NULL if shot is not merged
+        lastCell = mergedCell; // is nullptr if shot is not merged
         cellVector.at(1).at(m_nCellsInEta/2) = mergedCell; // store merged cell
-        while(lastCell!=NULL && nCellsFromMerged<m_nCellsInEta/2+1){
+        while(lastCell!=nullptr && nCellsFromMerged<m_nCellsInEta/2+1){
             calo_id->get_neighbours(lastCell->caloDDE()->calo_hash(),LArNeighbours::nextInEta,next);
-            lastCell = NULL;
+            lastCell = nullptr;
             for(cellItr=this->cluster()->cell_begin();cellItr!=cellItrE;++cellItr){
                 std::vector<IdentifierHash>::iterator itr = next.begin();
                 for( ; itr!=next.end(); ++itr ){
@@ -221,9 +221,9 @@ namespace Analysis
         }
         nCellsFromMerged = 1;
         lastCell = mergedCell;
-        while(lastCell!=NULL && nCellsFromMerged<m_nCellsInEta/2+1){
+        while(lastCell!=nullptr && nCellsFromMerged<m_nCellsInEta/2+1){
             calo_id->get_neighbours(lastCell->caloDDE()->calo_hash(),LArNeighbours::prevInEta,next);
-            lastCell = NULL;
+            lastCell = nullptr;
             for(cellItr=this->cluster()->cell_begin();cellItr!=cellItrE;++cellItr){
                 std::vector<IdentifierHash>::iterator itr = next.begin();
                 for( ; itr!=next.end(); ++itr ){

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/Stack.h"
@@ -808,7 +808,7 @@ namespace lwtDev {
         "Output dims mismatch, W: " + std::to_string(n_out) +
         ", U: " + std::to_string(u_out) + ", b: " + std::to_string(b_out));
     }
-    return {weights, U, bias};
+    return {std::move(weights), std::move(U), std::move(bias)};
   }
 
 
