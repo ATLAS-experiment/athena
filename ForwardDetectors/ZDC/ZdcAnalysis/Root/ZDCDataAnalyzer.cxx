@@ -5,7 +5,6 @@
 #include <ZdcAnalysis/ZDCDataAnalyzer.h>
 #include <ZdcAnalysis/ZDCPulseAnalyzer.h>
 
-#include <sstream>
 #include <utility>
 
 #include "CxxUtils/trapping_fp.h"
@@ -16,7 +15,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
                                  unsigned int LGMode) :
-  m_msgFunc_p(msgFunc_p),
+  m_msgFunc_p(std::move(msgFunc_p)),
   m_nSample(nSample), m_deltaTSample(deltaTSample), m_preSampleIdx(preSampleIdx),
   m_fitFunction(std::move(fitFunction)),
   m_LGMode(LGMode),
@@ -76,10 +75,8 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   //
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
-      std::ostringstream moduleTag;
-      moduleTag << "_s" << side << "_m" << module;
-
-      m_moduleAnalyzers[side][module].reset (new ZDCPulseAnalyzer(m_msgFunc_p, moduleTag.str(), m_nSample, m_deltaTSample, m_preSampleIdx,
+      std::string moduleTag= "_s" + std::to_string(side) + "_m" +std::to_string(module);
+      m_moduleAnalyzers[side][module].reset (new ZDCPulseAnalyzer(m_msgFunc_p, std::move(moduleTag), m_nSample, m_deltaTSample, m_preSampleIdx,
                                              m_pedestals[side][module], m_HGGains[side][module], m_fitFunction,
                                              peak2ndDerivMinSamples[side][module],
                                              peak2ndDerivMinThresholdsHG[side][module],
