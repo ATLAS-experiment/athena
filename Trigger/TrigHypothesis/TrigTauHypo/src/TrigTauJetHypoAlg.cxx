@@ -1,54 +1,55 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "AthViews/ViewHelper.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-#include "TrigTauPrecisionHypoAlg.h"
+#include "TrigTauJetHypoAlg.h"
 
 
 using namespace TrigCompositeUtils;
 
-TrigTauPrecisionHypoAlg::TrigTauPrecisionHypoAlg(const std::string& name, ISvcLocator* pSvcLocator)
+TrigTauJetHypoAlg::TrigTauJetHypoAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : ::HypoBase(name, pSvcLocator)
 {
 
 }
 
 
-StatusCode TrigTauPrecisionHypoAlg::initialize() {
+StatusCode TrigTauJetHypoAlg::initialize()
+{
     ATH_CHECK(m_hypoTools.retrieve());
     ATH_CHECK(m_tauJetKey.initialize());
-
-    // TauJet are made in views, so they are not in the EvtStore: hide them
-    renounce(m_tauJetKey);
+    
+    // TauJets are made in views, so they are not in the EvtStore: hide them
+    renounce(m_tauJetKey); 
 
     return StatusCode::SUCCESS;
 }
 
 
-StatusCode TrigTauPrecisionHypoAlg::execute(const EventContext& context) const
+StatusCode TrigTauJetHypoAlg::execute(const EventContext& ctx) const
 {
     ATH_MSG_DEBUG("Executing " << name());
 
-    // Retrieve previous decisions from the previous step
-    SG::ReadHandle<DecisionContainer> previousDecisionsHandle = SG::makeHandle(decisionInput(), context);
+    // Retrieve previous decisions (from the HLT Seeding or previous HLT step)
+    SG::ReadHandle<DecisionContainer> previousDecisionsHandle(decisionInput(), ctx);
     if(!previousDecisionsHandle.isValid()) {
         ATH_MSG_DEBUG("No implicit RH for previous decisions " << decisionInput().key() << ": is this expected?");
-        return StatusCode::SUCCESS;
+        return StatusCode::SUCCESS;      
     }
-
+    
     ATH_MSG_DEBUG("Running with " << previousDecisionsHandle->size() << " previous decisions");
 
 
     // Create output decision handle
-    SG::WriteHandle<DecisionContainer> outputHandle = createAndStore(decisionOutput(), context);
+    SG::WriteHandle<DecisionContainer> outputHandle = createAndStore(decisionOutput(), ctx);
 
 
     // Prepare inputs for the decision tools
-    std::vector<ITrigTauPrecisionHypoTool::ToolInfo> toolInput;
+    std::vector<ITrigTauJetHypoTool::ToolInfo> toolInput;
     int counter = -1;
     for(const xAOD::TrigComposite* previousDecision : *previousDecisionsHandle) {
         counter++;
@@ -63,11 +64,8 @@ StatusCode TrigTauPrecisionHypoAlg::execute(const EventContext& context) const
         const TrigRoiDescriptor* roi = *roiEL.link;
 
         // Get TauJet
-        SG::ReadHandle<xAOD::TauJetContainer> tauHandle = ViewHelper::makeHandle(*viewEL, m_tauJetKey, context);
-        if(!tauHandle.isValid()) {
-            ATH_MSG_WARNING("Something is wrong, missing TauJet container! Continuing anyways skipping view");
-            continue;
-        }
+        SG::ReadHandle<xAOD::TauJetContainer> tauHandle = ViewHelper::makeHandle(*viewEL, m_tauJetKey, ctx);
+        ATH_CHECK(tauHandle.isValid());
         ATH_MSG_DEBUG("Tau handle size: " << tauHandle->size());
         if(tauHandle->size() != 1) {
             ATH_MSG_DEBUG("Something is wrong, an unexpected number of taus was found (expected 1), continuing anyways skipping view");
@@ -92,14 +90,15 @@ StatusCode TrigTauPrecisionHypoAlg::execute(const EventContext& context) const
 
     ATH_MSG_DEBUG("Found " << toolInput.size() << " inputs to tools");
 
-
+    
     // Execute decisions from all tools
     for(auto& tool : m_hypoTools) {
         ATH_CHECK(tool->decide(toolInput));
     }
-
  
+
     ATH_CHECK(hypoBaseOutputProcessing(outputHandle));
 
     return StatusCode::SUCCESS;
 }
+

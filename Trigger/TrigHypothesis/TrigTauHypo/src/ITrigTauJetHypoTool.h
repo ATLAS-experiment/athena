@@ -1,10 +1,10 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGTAUHYPO_ITrigTauCaloHypoTool_H
-#define TRIGTAUHYPO_ITrigTauCaloHypoTool_H
+#ifndef TRIGTAUHYPO_ITrigTauJetHypoTool_H
+#define TRIGTAUHYPO_ITrigTauJetHypoTool_H
 
 #include "GaudiKernel/IAlgTool.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -13,14 +13,12 @@
 
 
 /**
- * @brief Base class for the TrigTauCaloHypoTool
+ * @brief Base class for the TrigTauJetHypoTool
  **/
-class ITrigTauCaloHypoTool : virtual public ::IAlgTool
+class ITrigTauJetHypoTool : virtual public ::IAlgTool
 { 
 public: 
-    DeclareInterfaceID(ITrigTauCaloHypoTool, 1, 0);
-
-    virtual ~ITrigTauCaloHypoTool() {}
+    DeclareInterfaceID(ITrigTauJetHypoTool, 1, 0);
 
     struct ToolInfo {
         ToolInfo(TrigCompositeUtils::Decision* d, const TrigRoiDescriptor* r, const xAOD::TauJetContainer *c,
@@ -40,16 +38,13 @@ public:
   
   
     /**
-     * @brief decides upon all inputs
-     * Note it is for a reason a non-virtual method, it is an interface in gaudi sense and implementation.
-     * There will be many tools called often to perform this quick operation and we do not want to pay for polymorphism which we do not need to use.
-     * Will actually see when N obj hypos will enter the scene
+     * @brief decides upon all inputs.
      **/
     virtual StatusCode decide(std::vector<ToolInfo>& input) const = 0;
 
     /**
-     * @brief Makes a decision for a single object
-     * The decision needs to be returned
+     * @brief Makes a decision for a single object.
+     * The decision needs to be returned.
      **/ 
     virtual bool decide(const ToolInfo& i) const = 0;
 };

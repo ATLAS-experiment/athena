@@ -11,22 +11,21 @@
 
 #include "Gaudi/Parsers/Factory.h"
 
-#include "ITrigTauPrecisionHypoTool.h"
+#include "ITrigTauJetHypoTool.h"
 
 
 /**
  * @class TrigTauPrecisionIDHypoTool
  * @brief Precision step hypothesis tool for applying ID cuts (standard chains)
  **/
-class TrigTauPrecisionIDHypoTool : public extends<AthAlgTool, ITrigTauPrecisionHypoTool> {
+class TrigTauPrecisionIDHypoTool : public extends<AthAlgTool, ITrigTauJetHypoTool> {
 public:
     TrigTauPrecisionIDHypoTool(const std::string& type, const std::string& name, const IInterface* parent);
-    virtual ~TrigTauPrecisionIDHypoTool();
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode decide(std::vector<ITrigTauPrecisionHypoTool::ToolInfo>& input) const override;
-    virtual bool decide(const ITrigTauPrecisionHypoTool::ToolInfo& i) const override;
+    virtual StatusCode decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input) const override;
+    virtual bool decide(const ITrigTauJetHypoTool::ToolInfo& i) const override;
 
 private:
     enum IDMethod {
