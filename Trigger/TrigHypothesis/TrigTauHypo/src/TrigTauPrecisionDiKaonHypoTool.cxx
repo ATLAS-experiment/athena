@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -66,7 +66,7 @@ StatusCode TrigTauPrecisionDiKaonHypoTool::initialize()
 }
 
 
-bool TrigTauPrecisionDiKaonHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInfo& input) const
+bool TrigTauPrecisionDiKaonHypoTool::decide(const ITrigTauJetHypoTool::ToolInfo& input) const
 {
     ATH_MSG_DEBUG(name() << ": in execute()");
 
@@ -260,9 +260,9 @@ bool TrigTauPrecisionDiKaonHypoTool::decide(const ITrigTauPrecisionHypoTool::Too
     return pass;
 }
 
-StatusCode TrigTauPrecisionDiKaonHypoTool::decide(std::vector<ITrigTauPrecisionHypoTool::ToolInfo>& input)  const
+StatusCode TrigTauPrecisionDiKaonHypoTool::decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input)  const
 {
-    for(auto& i : input) {
+    for(ITrigTauJetHypoTool::ToolInfo& i : input) {
         if(passed(m_decisionId.numeric(), i.previousDecisionIDs)) {
             if(decide(i)) {
                 addDecisionID(m_decisionId, i.decision);

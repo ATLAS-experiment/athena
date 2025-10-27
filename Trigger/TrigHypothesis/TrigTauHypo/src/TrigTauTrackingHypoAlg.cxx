@@ -1,42 +1,42 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthViews/ViewHelper.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-#include "TrigTauPrecTrackHypoAlg.h"
+#include "TrigTauTrackingHypoAlg.h"
 
 
 using namespace TrigCompositeUtils;
 
-TrigTauPrecTrackHypoAlg::TrigTauPrecTrackHypoAlg(const std::string& name, ISvcLocator* pSvcLocator)
+TrigTauTrackingHypoAlg::TrigTauTrackingHypoAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : ::HypoBase(name, pSvcLocator)
 {
 
 }
 
 
-StatusCode TrigTauPrecTrackHypoAlg::initialize()
+StatusCode TrigTauTrackingHypoAlg::initialize()
 {
     ATH_CHECK(m_hypoTools.retrieve());
     ATH_CHECK(m_tracksKey.initialize());
-    ATH_CHECK(m_roiForID2ReadKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_roiKey.initialize(SG::AllowEmpty));
     
-    // Precision Track are made in views, so they are not in the EvtStore: hide them
+    // Track particles and RoIs are made in views, so they are not in the EvtStore: hide them
     renounce(m_tracksKey);
-    renounce(m_roiForID2ReadKey);
+    renounce(m_roiKey);
 
     return StatusCode::SUCCESS;
 }
 
 
-StatusCode TrigTauPrecTrackHypoAlg::execute(const EventContext& context) const
+StatusCode TrigTauTrackingHypoAlg::execute(const EventContext& ctx) const
 {
     ATH_MSG_DEBUG("Executing " << name());
     
     // Retrieve previous decisions (from the previous step)
-    SG::ReadHandle<DecisionContainer> previousDecisionsHandle = SG::makeHandle(decisionInput(), context);
+    SG::ReadHandle<DecisionContainer> previousDecisionsHandle(decisionInput(), ctx);
     if(!previousDecisionsHandle.isValid()) {
         ATH_MSG_DEBUG("No implicit RH for previous decisions " << decisionInput().key() << ": is this expected?");
         return StatusCode::SUCCESS;
@@ -46,11 +46,11 @@ StatusCode TrigTauPrecTrackHypoAlg::execute(const EventContext& context) const
 
 
     // Create output decision handle
-    SG::WriteHandle<DecisionContainer> outputHandle = createAndStore(decisionOutput(), context);
+    SG::WriteHandle<DecisionContainer> outputHandle = createAndStore(decisionOutput(), ctx);
 
 
     // Prepare inputs for the decision tools
-    std::vector<ITrigTauPrecTrackHypoTool::ToolInfo> toolInput;
+    std::vector<ITrigTauTrackingHypoTool::ToolInfo> toolInput;
     int counter = -1;
     for(const xAOD::TrigComposite* previousDecision : *previousDecisionsHandle) {
         counter++;
@@ -61,8 +61,8 @@ StatusCode TrigTauPrecTrackHypoAlg::execute(const EventContext& context) const
 
         // Get RoI
         const TrigRoiDescriptor *roi = nullptr;
-        if(!m_roiForID2ReadKey.key().empty()) {
-            SG::ReadHandle<TrigRoiDescriptorCollection> roiHandle = ViewHelper::makeHandle(*viewEL, m_roiForID2ReadKey, context);
+        if(!m_roiKey.empty()) {
+            SG::ReadHandle<TrigRoiDescriptorCollection> roiHandle = ViewHelper::makeHandle(*viewEL, m_roiKey, ctx);
             ATH_CHECK(roiHandle.isValid());
             if(roiHandle->size() != 1) {
                 ATH_MSG_ERROR("Expected exactly one updated ROI");
@@ -75,8 +75,8 @@ StatusCode TrigTauPrecTrackHypoAlg::execute(const EventContext& context) const
            roi = *roiEL.link;
         }
 
-        // Get Precision tracks
-        SG::ReadHandle<xAOD::TrackParticleContainer> tracksHandle = ViewHelper::makeHandle(*viewEL, m_tracksKey, context);
+        // Get track particles
+        SG::ReadHandle<xAOD::TrackParticleContainer> tracksHandle = ViewHelper::makeHandle(*viewEL, m_tracksKey, ctx);
         ATH_CHECK(tracksHandle.isValid());
         ATH_MSG_DEBUG("Tracks handle size: " << tracksHandle->size());
 
@@ -91,7 +91,7 @@ StatusCode TrigTauPrecTrackHypoAlg::execute(const EventContext& context) const
             newDecision->setObjectLink(featureString(), newTracksEL);
         } else {
             // If not, use the new decision as the feature
-            ElementLink<DecisionContainer> decisionEL = decisionToElementLink(newDecision, context);
+            ElementLink<DecisionContainer> decisionEL = decisionToElementLink(newDecision, ctx);
             ATH_CHECK(decisionEL.isValid());
             newDecision->setObjectLink(featureString(), decisionEL);
         }
@@ -99,7 +99,7 @@ StatusCode TrigTauPrecTrackHypoAlg::execute(const EventContext& context) const
         // Create tool input
         toolInput.emplace_back(newDecision, roi, tracksHandle.cptr(), previousDecision);
 
-        ATH_MSG_DEBUG("Added view, roi, tracks, previous decision to new decision " << counter << " for view " << (*viewEL)->name());
+        ATH_MSG_DEBUG("Added view/roi/tracks/previous decision to new decision " << counter << " for view " << (*viewEL)->name());
     }
 
     ATH_MSG_DEBUG("Found " << toolInput.size() << " inputs to tools");
