@@ -10,7 +10,7 @@ if __name__=="__main__":
     cfgFlags.Output.AODFileName="output_AOD.root"
     cfgFlags.Output.doWriteAOD=True
     cfgFlags.PF.addCPData=True
-    cfgFlags.Tau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
+    cfgFlags.DiTau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
     cfgFlags.fillFromArgs()
     cfgFlags.lock()
 

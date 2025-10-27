@@ -355,7 +355,7 @@ def TauReconstructionCfg(flags):
             result.merge(TauxAODthinngCfg(flags_TauEleRM))
 
     # had-had boosted ditaus
-    if flags.Tau.doDiTauRec:
+    if flags.DiTau.doDiTauRec:
         from DiTauRec.DiTauBuilderConfig import DiTauBuilderCfg
         result.merge(DiTauBuilderCfg(flags))
 
