@@ -554,7 +554,12 @@ def HION5SkimmingTriggers():
     triggers += ["HLT_g40_loose_L1eEM18"]
     triggers += ["HLT_g40_loose_L1eEM26"]
     triggers += ["HLT_g50_loose_L1eEM26"]
-    
+
+    # 2025 OO
+
+    triggers += ["HLT_mu8_L1MU5VF"]
+    triggers += ["HLT_e10_loose_L1eEM9"]
+
     return triggers
 
 #################################################################################
