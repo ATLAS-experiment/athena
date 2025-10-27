@@ -304,25 +304,25 @@ namespace MuonR4{
         }
         return calibSpacePoints;
     }
-    double SpacePointCalibrator::driftVelocity(const EventContext& ctx,
+    double SpacePointCalibrator::driftVelocity(const Acts::CalibrationContext& ctx,
                                                const CalibratedSpacePoint& spacePoint) const {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
+            
+            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
             const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
             return calibConsts->rtRelation->rt()->driftVelocity(driftTime.value_or(0.));
         }
         return 0.;
     }
-    double SpacePointCalibrator::driftAcceleration(const EventContext& ctx,
+    double SpacePointCalibrator::driftAcceleration(const Acts::CalibrationContext& ctx,
                                                    const CalibratedSpacePoint& spacePoint) const  {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
+            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
             const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
             return calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.));
         }
         return 0.;
     }
-
 
     std::pair<double, double> SpacePointCalibrator::calibrateMM(const EventContext& ctx, 
                                                                 const ActsTrk::GeometryContext& gctx,

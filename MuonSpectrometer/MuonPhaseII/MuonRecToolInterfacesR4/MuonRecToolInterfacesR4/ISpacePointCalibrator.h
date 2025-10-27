@@ -93,15 +93,16 @@ namespace MuonR4{
                                                   const Amg::Vector3D& seedDirInChamb,
                                                   const double timeDelay,
                                                   const CalibSpacePointVec& spacePoints) const = 0;
+
             /** @brief Returns the drift velocity for a given drift-circle space point
-             *  @param ctx: EventContext to access conditions data
+             *  @param ctx: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the velocity needs to be calculated. */
-            virtual double driftVelocity(const EventContext& ctx,
+            virtual double driftVelocity(const Acts::CalibrationContext& cctx,
                                          const CalibratedSpacePoint& spacePoint) const = 0;
             /** @brief Returns the drift acceleration for a given drift-circle space point
-             *  @param ctx: EventContext to access conditions data
+             *  @param ctx: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the acceleration needs to be calculated. */
-            virtual double driftAcceleration(const EventContext& ctx,
+            virtual double driftAcceleration(const Acts::CalibrationContext& cctx,
                                              const CalibratedSpacePoint& spacePoint) const = 0;
             /** @brief Function that's hooked to the calibration delegate of the implemented Acts fitters
               *  @param geoctx: The geometry context to fetch the local -> global transformations for the surfaces

@@ -64,11 +64,12 @@ namespace MuonR4{
                              const Amg::Vector3D& trackDir,
                              CalibSpacePointVec& hitsToCalib) const override final;
 
-            double driftVelocity(const EventContext& ctx,
+            double driftVelocity(const Acts::CalibrationContext& ctx,
                                  const CalibratedSpacePoint& spacePoint) const override final;
-            double driftAcceleration(const EventContext& ctx,
+
+            double driftAcceleration(const Acts::CalibrationContext& ctx,
                                      const CalibratedSpacePoint& spacePoint) const override final;
-  
+
             void calibrateSourceLink(const Acts::GeometryContext& geoctx,
                                      const Acts::CalibrationContext& cctx,
                                      const Acts::SourceLink& link,
