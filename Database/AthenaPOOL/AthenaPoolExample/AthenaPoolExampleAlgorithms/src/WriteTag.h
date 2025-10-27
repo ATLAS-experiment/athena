@@ -22,7 +22,7 @@ namespace AthPoolEx {
 /** @class AthPoolEx::WriteTag
  *  @brief This class provides an example for writing event data objects to Pool.
  **/
-class WriteTag : public AthReentrantAlgorithm {
+class WriteTag final : public AthReentrantAlgorithm {
 public:
    WriteTag(const std::string& name, ISvcLocator* pSvcLocator);
    virtual ~WriteTag() override final;
