@@ -7,15 +7,10 @@
 
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
-
 // Geant4 includes used in functions
-//#include "G4RunManager.hh"
-//#include "G4VUserDetectorConstruction.hh"
 #include "G4LogicalVolumeStore.hh"
+#include "G4MultiSensitiveDetector.hh"
 #include "G4SDManager.hh"
-
-// From this package, borrowed from G4 10.2
-#include "G4AtlasTools/G4MultiSensitiveDetector.hh"
 
 
 
