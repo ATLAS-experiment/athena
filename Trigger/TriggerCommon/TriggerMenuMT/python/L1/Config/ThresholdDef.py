@@ -282,11 +282,20 @@ class ThresholdDef:
         # gTE
         for thrV in [3,5,10,200]:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
-
+        
+        #gTE from BC+2 (for HI anti-shadowing)
+        for thrV in []:
+            TEThreshold('gESPRESSO%i' % thrV, 'gTE').setTE(thrV)
+            
         # jXE
         jXE_cuts = [60, 70, 80, 90, 100, 110, 120, 500]
         for thrV in jXE_cuts:
             XEThreshold('jXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
+        
+        # cXE (linear combination of jFEX+gFEX MET)
+        cXE_cuts = []
+        for thrV in cXE_cuts:
+            XEThreshold('cXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
 
         # ENERGY SPARES
         # decrement jXE spares for addtional heavy ion jTE/gTE thresholds
