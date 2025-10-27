@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file ViewVectorBase.h
@@ -18,7 +18,7 @@
 #include "AthContainers/dataVectorAsELV.h"
 #include "AthContainers/tools/CurrentEventStore.h"
 #include "AthLinks/ElementLinkBase.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include <vector>
 #include <cstdint>
 
@@ -58,7 +58,7 @@ public:
    */
   void clearPersistent();
 
-  
+
   /**
    * @brief Set a flag to declare that the vector should be cleared
    *        on the next call to toPersistent().
@@ -68,7 +68,7 @@ public:
    */
   void setClearOnPersistent();
 
-  
+
 protected:
   /**
    * @brief Convert to persistent form.
@@ -163,7 +163,7 @@ protected:
 #endif
   }
 
-  
+
 private:
   // For unit testing.
   friend class ::ViewVectorBaseTest;

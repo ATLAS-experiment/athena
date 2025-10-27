@@ -14,9 +14,7 @@
 #include "AthContainersInterfaces/IAuxStore.h"
 #include "AthContainers/tools/threading.h"
 #include "CxxUtils/checker_macros.h"
-#ifndef XAOD_STANDALONE
-#   include "AthenaKernel/ILockable.h"
-#endif
+#include "SGCore/ILockable.h"
 
 // Forward declaration(s):
 namespace SG {
@@ -37,10 +35,8 @@ namespace xAOD {
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
    class ByteStreamAuxContainer_v1
-     : public SG::IAuxStore
-#ifndef XAOD_STANDALONE
-     , public ILockable
-#endif
+     : public SG::IAuxStore,
+       public ILockable
    {
 
    public:
@@ -115,7 +111,7 @@ namespace xAOD {
       virtual bool insertMove (size_t pos,
                                IAuxStore& other,
                                const SG::auxid_set_t& ignore) override;
- 
+
       /// @}
 
       /// Function resetting the internal (cached) state of the object

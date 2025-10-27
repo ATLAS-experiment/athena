@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaServices/src/AthReadAlg.h
@@ -16,7 +16,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/TypelessWriteHandleKey.h"
-#include "AthenaKernel/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 
 /**

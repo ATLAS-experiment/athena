@@ -7,12 +7,12 @@
 
 /** @file DataHeader_p6.h
  *  @brief This file contains the class definitions for the
- *  DataHeader_p6 and DataHeaderForm_p6 
+ *  DataHeader_p6 and DataHeaderForm_p6
  *  @author Peter van Gemmeren <gemmeren@anl.gov>, Marcin Nowak
  **/
 
 #include "PersistentDataModel/Guid.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 #include <vector>
 #include <string>
@@ -96,7 +96,7 @@ private:
    unsigned             m_version { DHverFormRef };
    /// DataHeader SG Key
    std::string          m_processTag;
-  
+
    // transient members:
    /// indicates that the last event was somehow different and a new DHForm needs to be written
    bool                 m_modified { true };
@@ -114,7 +114,7 @@ class  DataHeader_p6
 {
   friend class DataHeaderCnv_p6;
 
-public: 
+public:
   struct FullElement {
     FullElement() : oid2(0), dbIdx(0), objIdx(0) {}
     FullElement(unsigned long long o2, unsigned db, unsigned obj) : oid2(o2), dbIdx(db), objIdx(obj) {}
@@ -126,12 +126,12 @@ public:
    DataHeader_p6() {};
    const std::string& dhFormToken() const;
    void setDhFormToken(const std::string& formToken);
-  
+
 private:
    /// common DB entry index used by all short DH elements
    unsigned                     m_commonDbIndex{};
    unsigned long long           m_commonOID2{};
-  
+
    std::vector<int>             m_shortElements;
    std::vector<FullElement>     m_fullElements;
    unsigned int                 m_provenanceSize{};

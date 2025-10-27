@@ -18,7 +18,7 @@ atlas_add_library( xAODTrigger
    Root/*.cxx
    PUBLIC_HEADERS xAODTrigger
    LINK_LIBRARIES AthContainers AthLinks xAODCore xAODBase TrigNavStructure CxxUtils TrigT1MuctpiBits
-   ${extra_libs} )
+   SGCoreLib ${extra_libs} )
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODTrigger/selection.xml
@@ -48,7 +48,7 @@ atlas_add_test( ut_xaodtrigger_bytestreamauxcontainer_v1_test
   SOURCES test/ut_xaodtrigger_bytestreamauxcontainer_v1_test.cxx
   LINK_LIBRARIES AthContainers xAODTrigger )
 
-atlas_add_test( ut_xaodtrigger_gFexEDM_test 
+atlas_add_test( ut_xaodtrigger_gFexEDM_test
   SOURCES test/ut_xaodtrigger_gFexEDM_test.cxx
   LINK_LIBRARIES AthContainers xAODTrigger TestTools )
 

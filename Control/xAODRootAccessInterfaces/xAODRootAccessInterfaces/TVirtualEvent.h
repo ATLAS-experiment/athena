@@ -6,7 +6,7 @@
 #define XAODROOTACCESSINTERFACES_TVIRTUALEVENT_H
 
 // Project include(s).
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 // Forward declaration(s):
 namespace std {

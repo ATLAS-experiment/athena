@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/** @class IProxyRegistry   
+/** @class IProxyRegistry
  * @brief a proxy registry (a read/write dictionary)
  *
  * @author Paolo Calafiura - ATLAS
@@ -15,7 +15,7 @@
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/ClassID.h"
 #include "AthenaKernel/StoreID.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include <string>
 
 //<<<<<< CLASS FORWARD DECLARATIONS                                      >>>>>>
@@ -51,13 +51,3 @@ public:
   virtual ~IProxyRegistry() {}
 };
 #endif // ATHENAKERNEL_IPROXYREGISTRY_H
-
-
-
-
-
-
-
-
-
-

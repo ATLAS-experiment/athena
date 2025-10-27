@@ -170,6 +170,7 @@
 + Control/AthenaServices
 + Control/StoreGate
 + Control/SGComps
++ Control/SGCore
 + Control/SGTools
 + Control/StoreGateBindings
 + Control/AthenaBaseComps

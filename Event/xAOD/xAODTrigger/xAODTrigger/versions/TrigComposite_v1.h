@@ -19,11 +19,11 @@ extern "C" {
 #include "AthContainers/AuxElement.h"
 #include "AthLinks/ElementLink.h"
 #include "xAODBase/IParticleContainer.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 #include "CxxUtils/checker_macros.h"
 
-namespace TrigCompositeUtils{ 
+namespace TrigCompositeUtils{
    typedef unsigned int DecisionID;
    typedef std::set<DecisionID> DecisionIDContainer;
 }
@@ -130,10 +130,10 @@ namespace xAOD {
       objectCollectionLinks( const std::string& collectionName ) const;
 
       /// Add a link without type
-      void typelessSetObjectLink( const std::string& name, 
-                                  const sgkey_t key, 
-                                  const uint32_t clid, 
-                                  const index_type beginIndex, 
+      void typelessSetObjectLink( const std::string& name,
+                                  const sgkey_t key,
+                                  const uint32_t clid,
+                                  const index_type beginIndex,
                                   const index_type endIndex = 0 );
 
       /// Fetches a single link without type. Note: Will not work for collections of links, use typelessGetObjectCollectionLinks
@@ -142,9 +142,9 @@ namespace xAOD {
       /// @param[out] clid Type of the object's collection
       /// @param[out] index Index within the collection of the link-object
       /// @return True if a link was found
-      bool typelessGetObjectLink( const std::string& name, 
+      bool typelessGetObjectLink( const std::string& name,
                                   sgkey_t& key,
-                                  uint32_t& clid, 
+                                  uint32_t& clid,
                                   index_type& index) const;
 
       /// Fetches a collection of links without type.
@@ -153,9 +153,9 @@ namespace xAOD {
       /// @param[out] clidVec Type of the objects will be pushed on to this vector
       /// @param[out] indexVec Index of the objects within their collections  will be pushed on to this vector
       /// @return True if at least one link was found
-      bool typelessGetObjectCollectionLinks( const std::string& name, 
+      bool typelessGetObjectCollectionLinks( const std::string& name,
                                   std::vector<sgkey_t>& keyVec,
-                                  std::vector<uint32_t>& clidVec, 
+                                  std::vector<uint32_t>& clidVec,
                                   std::vector<index_type>& indexVec) const;
 
 
@@ -217,9 +217,9 @@ namespace xAOD {
 
       /// Raw access to the persistent link names
       const std::vector< std::string >& linkColNames() const;
-      /// Raw access to the persistent link labels. 
+      /// Raw access to the persistent link labels.
       const std::vector< sgkey_t >& linkColKeys() const;
-      /// Raw access to the persistent link indices. 
+      /// Raw access to the persistent link indices.
       const std::vector< index_type >& linkColIndices() const;
       /// Raw access to the persistent link CLIDs
       const std::vector< uint32_t >& linkColClids() const;
@@ -262,7 +262,7 @@ namespace xAOD {
       static const std::string s_hypoAlgNodeNameString;
       /// Constant used to identify a navigation graph node as being from a Combo Hypo Alg
       static const std::string s_comboHypoAlgNodeNameString;
-      /// Constant used to identify a navigation graph node as being from 
+      /// Constant used to identify a navigation graph node as being from
       /// a final Filter created by the DecisionSummaryMaker algorithm
       static const std::string s_summaryFilterNodeNameString;
       /// Constant used to identify the single terminus graph node
@@ -294,7 +294,7 @@ namespace xAOD {
       /// Helper function. Check if the requested type can be down cast to an IParticle transient interface
       bool derivesFromIParticle(const CLID clid) const;
 
-      /// Helper function. Contains type logic check for use during actual link retrieval. Throws on error. 
+      /// Helper function. Contains type logic check for use during actual link retrieval. Throws on error.
       template< class CONTAINER >
       void checkTypes(const CLID storedCLID, const std::string& name) const;
 

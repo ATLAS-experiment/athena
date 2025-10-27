@@ -16,7 +16,6 @@
 #include "AthenaKernel/IAthenaSummarySvc.h"
 #include "AthenaKernel/ITPCnvSvc.h"
 #include "AthenaKernel/ITPCnvBase.h"
-#include "AthenaKernel/ILockable.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ICutFlowSvc.h"
 #include "AthenaKernel/BaseInfo.h"

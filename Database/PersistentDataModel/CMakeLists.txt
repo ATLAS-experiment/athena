@@ -13,7 +13,7 @@ atlas_add_library( PersistentDataModel
                    PUBLIC_HEADERS PersistentDataModel
                    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${UUID_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CxxUtils GaudiKernel
+                   LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CxxUtils SGCoreLib GaudiKernel
                    PRIVATE_LINK_LIBRARIES ${UUID_LIBRARIES} SGTools )
 
 atlas_add_dictionary( PersistentDataModelDict

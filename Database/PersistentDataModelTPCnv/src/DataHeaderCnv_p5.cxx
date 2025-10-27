@@ -10,7 +10,7 @@
 
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModelTPCnv/DataHeaderCnv_p5.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include <algorithm>
 
 DataHeaderElementCnv_p5::DataHeaderElementCnv_p5() {}

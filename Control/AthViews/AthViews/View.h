@@ -11,7 +11,7 @@
 #include "AthenaKernel/IProxyDict.h"
 #include "AthContainers/DataVector.h"
 #include "AthLinks/ElementLink.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "CxxUtils/sgkey_utilities.h"
 #include "SGTools/transientKey.h"
 #include "StoreGate/StoreGateSvc.h"

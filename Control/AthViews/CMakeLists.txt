@@ -10,7 +10,7 @@ find_package( GTest )
 atlas_add_library( AthViews
                    src/*.cxx
                    PUBLIC_HEADERS AthViews
-                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel GaudiKernel SGTools StoreGateLib TrigSteeringEvent
+                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel GaudiKernel SGCoreLib SGTools StoreGateLib TrigSteeringEvent
                    PRIVATE_LINK_LIBRARIES AthenaBaseComps )
 
 atlas_add_component( AthViewsAlgs
