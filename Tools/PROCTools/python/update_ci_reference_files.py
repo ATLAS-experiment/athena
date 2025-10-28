@@ -156,11 +156,14 @@ def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_na
     new_version_number=None
 
     #  differs from the reference 'q447_AOD_digest.ref' (<):
-    ref_file_match = re.search(r'(.*differs from the reference \')(.*)(\')', text)
+    ref_file_match = re.search(
+        r"differs from the reference (?:'|&#x27;)([^'&]+?)(?:'|&#x27;)",
+        text
+    )
     if not ref_file_match:
         print("FATAL: Could not find matching reference file")
         sys.exit(1)
-    ref_file_path = ref_file_match.groups()[1]
+    ref_file_path = ref_file_match.group(1)
 
     old_diff_lines = []
     new_diff_lines = []
