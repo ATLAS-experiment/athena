@@ -17,6 +17,8 @@
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
 #include "ZdcUtils/ZdcEventInfo.h"
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 namespace ZDC
 {
@@ -33,6 +35,7 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
 
     declareProperty("ZdcModuleContainerName", m_zdcModuleContainerName = "ZdcModules", "Location of ZDC processed data");
     declareProperty("ZdcSumContainerName", m_zdcSumContainerName = "ZdcSums", "Location of ZDC processed sums");
+    declareProperty("JSONConfigurationFile",m_jsonConfigurationFile = "ZdcAnalysisConfig.json" );
     declareProperty("Configuration", m_configuration = "PbPb2015");
     declareProperty("FlipEMDelay", m_flipEMDelay = false);
     declareProperty("LowGainMode", m_lowGainMode = 0);
@@ -195,6 +198,28 @@ void ZdcAnalysisTool::initializeTriggerEffs(unsigned int runNumber)
 
     return;
 
+}
+
+std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeFromJSON()
+{
+  std::string fullPath="ZdcAnalysis/"+m_jsonConfigurationFile;
+  std::string filePath = PathResolverFindCalibFile( fullPath );
+  std::ifstream ifs(filePath);
+  nlohmann::json jsonConfig;
+  if (ifs.is_open())
+    {
+      ifs >> jsonConfig;
+      ATH_MSG_INFO("Loaded ZDC JSON from file " << filePath);
+      ATH_MSG_DEBUG("JSON config dump: " << jsonConfig.dump());
+    }
+  else
+    ATH_MSG_ERROR("No ZDC JSON found at " << filePath);
+  
+  
+  //std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer(new ZDCDataAnalyzer(MakeMessageFunction(),jsonConfig["ZDC"]));
+  std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer = std::make_unique<ZDCDataAnalyzer>(MakeMessageFunction(),jsonConfig["ZDC"]);
+
+  return zdcDataAnalyzer;
 }
 
 std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
@@ -1899,7 +1924,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2015G4()
     zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, DeltaT0CutLowHG, DeltaT0CutHighHG, DeltaT0CutLowLG, DeltaT0CutHighLG);
 
     zdcDataAnalyzer->SetFitTimeMax(85);
-    zdcDataAnalyzer->SetSaveFitFunc(false);
 
     return zdcDataAnalyzer;
 }
@@ -2008,7 +2032,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepPb2016()
 
     zdcDataAnalyzer->enableDelayed(-12.5, defaultPedestalShifts);
     zdcDataAnalyzer->SetFitTimeMax(140); // This restrict the fit range of the pulse fitting
-    zdcDataAnalyzer->SetSaveFitFunc(false);
     zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLin, 500, 100, 
 					 slewingParamsHG, slewingParamsLG); // add time slewing correction Sep 17 2019 Bill
     // ref. https://indico.cern.ch/event/849143/contributions/3568263/attachments/1909759/3155352/ZDCWeekly_20190917_PengqiYin.pdf
@@ -2132,7 +2155,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2018()
 
     zdcDataAnalyzer->enableDelayed(delayDeltaTs, defaultPedestalShifts);
     zdcDataAnalyzer->SetFitTimeMax(140); // This restrict the fit range of the pulse fitting, requested by BAC 4/6/19
-    zdcDataAnalyzer->SetSaveFitFunc(false);
     zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG); // add repass as default Jul 21 2020 Bill
     zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLin, 500, 100,
 					 slewingParamsHG, slewingParamsLG); // add time slewing correction Sep 17 2019 Bill
@@ -2259,7 +2281,6 @@ void ZdcAnalysisTool::initialize40MHz()
 			      {0}}} }};
 
     if (m_doNonLinCorr) m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
-    m_zdcDataAnalyzer_40MHz->SetSaveFitFunc(false);
 
 }
 
@@ -2379,7 +2400,6 @@ void ZdcAnalysisTool::initialize80MHz()
 			      {0}}} }};
 
     if (m_doNonLinCorr) m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
-    m_zdcDataAnalyzer_80MHz->SetSaveFitFunc(false);
 }
 
 StatusCode ZdcAnalysisTool::initialize()
@@ -2465,6 +2485,9 @@ StatusCode ZdcAnalysisTool::initialize()
     else if (m_configuration == "MonteCarloPbPb2023") {
       m_zdcDataAnalyzer = initializeMonteCarloPbPb2023();
     }
+    else if (m_configuration == "JSON") {
+      m_zdcDataAnalyzer = initializeFromJSON();
+    }
     else {
         ATH_MSG_ERROR("Unknown configuration: "  << m_configuration);
         return StatusCode::FAILURE;
@@ -2500,6 +2523,8 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_MSG_DEBUG("DeltaTCut: " << m_deltaTCut);
     ATH_MSG_DEBUG("ChisqRatioCut: " << m_ChisqRatioCut);
 
+    Dump_setting(); // for good measure
+    
     ATH_CHECK( m_eventInfoKey.initialize());
 
     // Initialize decorations
