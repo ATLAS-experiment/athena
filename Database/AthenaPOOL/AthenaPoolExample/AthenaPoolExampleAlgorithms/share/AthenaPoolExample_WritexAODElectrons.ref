@@ -9,8 +9,7 @@ MetaDataSvc                                          INFO Initializing MetaDataS
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
-MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
-MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:A811B014-0297-AD47-AF4C-B75EF418982D
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile3.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -26,19 +25,15 @@ SimplePoolFile3.root                                DEBUG --->Reading Shape[3 , 
 SimplePoolFile3.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile3.root                                DEBUG --->Reading Shape[4 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[5 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]: [1 Column(s)]
-SimplePoolFile3.root                                DEBUG ---->[0]:Token Typ:Token [18] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[6 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]: [1 Column(s)]
-SimplePoolFile3.root                                DEBUG ---->[0]:unsigned int Typ:unsigned int [3] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[7 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[5 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[8 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[6 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[9 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[7 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[10 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[8 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-##Shapes                                            DEBUG No objects passing selection criteria... Container has 11 Entries in total.
+##Shapes                                            DEBUG No objects passing selection criteria... Container has 9 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
 ##Links                                             DEBUG Opening
 ##Links                                             DEBUG    attributes# = 1
@@ -55,27 +50,19 @@ SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811
 SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLContainerForm(DataHeaderForm) [203]  (7 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(Token) [202]  (8 , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(RunNumber) [202]  (9 , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(EventNumber) [202]  (a , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(MagicNumber) [202]  (b , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (c , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (8 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [203]  (d , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [203]  (9 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (e , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (a , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (f , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (b , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [203]  (10 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [203]  (c , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [203]  (11 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [203]  (d , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-##Links                                             DEBUG No objects passing selection criteria... Container has 16 Entries in total.
+##Links                                             DEBUG No objects passing selection criteria... Container has 12 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
 ##Params                                            DEBUG Opening
 ##Params                                            DEBUG    attributes# = 1
@@ -83,6 +70,13 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 SimplePoolFile3.root                                DEBUG --->Reading Param:FID=[A811B014-0297-AD47-AF4C-B75EF418982D]
 SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
+POOLContainer(DataHeader)                           DEBUG Opening
+POOLContainer(DataHeader)                           DEBUG    attributes# = 1
+POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
+POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
+MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
+MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:A811B014-0297-AD47-AF4C-B75EF418982D
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
@@ -136,7 +130,76 @@ StreamWritexAODElectrons                            DEBUG data dependencies:
   + OUTPUT  ( 'SG::SelectionVetoes' , 'StoreGateSvc+SelectionVetoes_StreamWritexAODElectrons' ) 
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
+StorageSvc                                          DEBUG Disconnect request for database: FID=A811B014-0297-AD47-AF4C-B75EF418982D PFN=SimplePoolFile3.root
+StorageSvc                                          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
+RootDatabase.close                                  DEBUG Closing DB SimplePoolFile3.root
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile3.root, name=POOLContainer(DataHeader), contextID=0
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+##Shapes                                            DEBUG Opening
+##Shapes                                            DEBUG    attributes# = 1
+##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
+SimplePoolFile3.root                                DEBUG --->Reading Shape[0 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:ExampleTrackContainer_p1 Typ:ExampleTrackContainer_p1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[1 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[2 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[3 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[4 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[5 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[6 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[7 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[8 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
+##Shapes                                            DEBUG No objects passing selection criteria... Container has 9 Entries in total.
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
+##Links                                             DEBUG Opening
+##Links                                             DEBUG    attributes# = 1
+##Links                                             DEBUG Opened container ##Links of type ROOT_Tree
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/##Params [200]  (2 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(ExampleTrackContainer_p1/MyTracks) [203]  (3 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:FF777FDA-721C-4756-BBF3-4CE28C2A3AF5
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [203]  (4 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventInfo_v1/EventInfo) [203]  (5 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLContainer(DataHeader) [203]  (6 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLContainerForm(DataHeaderForm) [203]  (7 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (8 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [203]  (9 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (a , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (b , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [203]  (c , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [203]  (d , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
+##Links                                             DEBUG No objects passing selection criteria... Container has 12 Entries in total.
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
+##Params                                            DEBUG Opening
+##Params                                            DEBUG    attributes# = 1
+##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
+SimplePoolFile3.root                                DEBUG --->Reading Param:FID=[A811B014-0297-AD47-AF4C-B75EF418982D]
+SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
+##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
+POOLContainer(DataHeader)                           DEBUG Opening
+POOLContainer(DataHeader)                           DEBUG    attributes# = 1
+POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
+POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 ApplicationMgr                                       INFO Application Manager Started successfully
 RootDatabase.setOption                              DEBUG Request tree cache 
 RootDatabase.setOption                              DEBUG File name SimplePoolFile3.root
@@ -144,6 +207,11 @@ RootDatabase.setOption                              DEBUG Got tree CollectionTre
 RootDatabase.setOption                              DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
 MetaDataSvc                                         DEBUG handle() BeginInputFile for SimplePoolFile3.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name SimplePoolFile3.root
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
+MetaDataHdr(DataHeader)                             DEBUG Opening
+MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
+MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
+MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
 MetaDataSvc                                         DEBUG Loaded input meta data store proxies
 MetaDataSvc                                         DEBUG  calling beginInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "A811B014-0297-AD47-AF4C-B75EF418982D"
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
@@ -159,11 +227,6 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaD
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaData_v1 ClassID: 178309087
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaDataAuxInfo_v1 ClassID: 73252552
 ToolSvc.xAODMaker::FileMetaDataTool                  INFO Copied "FileMetaData" to MetaDataStore
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
-POOLContainer(DataHeader)                           DEBUG Opening
-POOLContainer(DataHeader)                           DEBUG    attributes# = 1
-POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
-POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainerForm(DataHeaderForm)
 POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
