@@ -315,6 +315,10 @@ def getModifierSet(tagger_name):
             modset.add("M")
         if "Electrons" in mods:
             modset.add("L")
+        # GN2X also used leponID
+        if "X" in mods:
+            if int(minor) == 2 or "Tau" in mods:
+                modset.add("L")
         return modset
 
     # 2025-10-13: also one special case for GN3PflowMuonsV00, which
