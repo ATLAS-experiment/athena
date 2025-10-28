@@ -30,6 +30,9 @@ namespace {
 
     constexpr double extraMargin = 50.*Gaudi::Units::cm * inM;
 
+    static const Muon::MuonSectorMapping sectorMap{};
+
+
     std::unique_ptr<TMarker> drawMarker(const Amg::Vector2D& pos, const int mStyle, const int mColor, const int mSize = 2) {
         auto marker = std::make_unique<TMarker>(pos.x(), pos.y(), mStyle);
         marker->SetMarkerColor(mColor);
@@ -135,6 +138,7 @@ namespace MuonValR4{
             plotStyle->SetPalette(kViridis);
         }
         ATH_CHECK(m_truthSegKey.initialize(SG::AllowEmpty));
+        ATH_CHECK(m_geoCtxKey.initialize());
         return StatusCode::SUCCESS;
     }
     void TrackVisualizationTool::displaySeeds(const EventContext& ctx,
@@ -171,8 +175,9 @@ namespace MuonValR4{
                                               const xAOD::MuonSegmentContainer& segments,
                                               const MsTrackSeedContainer& seeds,
                                               const std::string& extraLabel,
-                                             PrimitivesVec_t& extPrimitives) const{
+                                              PrimitivesVec_t& extPrimitives) const{
 
+ 
         const unsigned nPrim = extPrimitives.size();
         PlotLegend legend{0.005,0.005, 0.6,0.1};
         /** First add the truth points*/
@@ -187,35 +192,48 @@ namespace MuonValR4{
             });
         };
            
+        const ActsTrk::GeometryContext* gctx{nullptr};
+        if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
+            THROW_EXCEPTION("Failed to fetch the geometry context "<<m_geoCtxKey.fullKey());
+        }
 
         for (const xAOD::MuonSegment* segment: segments) {
             using enum Location;
+            using enum MsTrackSeeder::SectorProjector;
             using namespace Muon;
             const MuonGMR4::SpectrometerSector* msSector = detailedSegment(*segment)->msSector();
             const auto chIdx = segment->chamberIndex();
             const int mColor = msSector->barrel() ? ColorBarrel : (msSector->side() > 0 ? ColorEndcapA : ColorEndcapC);
-            const double phi = segment->direction().phi();
-            for (const Location loc : {Barrel, Endcap}) {
-                const Amg::Vector2D projPos{seeder.expressOnCylinder(*segment, loc)};
-                if (!seeder.withinBounds(projPos, loc)) {
+
+            for (const auto secProj : {leftOverlap, center, rightOverlap}) {
+                if (!sectorMap.insideSector(segment->sector() + Acts::toUnderlying(secProj),
+                                            segment->position().phi())){
                     continue;
                 }
-                const bool isGood = onSeed(segment, loc);
-                const int mStyle = stationMarkerSyle(chIdx, false, isGood);
-                const Amg::Vector2D markerPos{viewVector(phi, projPos, view)};
-                extPrimitives.emplace_back(drawMarker(markerPos, mStyle, mColor));
 
-                if (view == DisplayView::XY) {
-                    const double r = markerPos.mag() + extraMargin;
-                    boundBox[0].expand(-r, r);
-                    boundBox[1].expand(-r, r);
-                } else {
-                    boundBox[0].expand(markerPos[0] - extraMargin, markerPos[0] + extraMargin);
-                    boundBox[1].expand(markerPos[1] - extraMargin, markerPos[1] + extraMargin);
+                for (const Location loc : {Barrel, Endcap}) {
+                    const Amg::Vector2D projPos{seeder.expressOnCylinder(*gctx, *segment, loc, secProj)};
+                    if (!seeder.withinBounds(projPos, loc)) {
+                        continue;
+                    }
+                    const bool isGood = onSeed(segment, loc);
+                    const int mStyle = stationMarkerSyle(chIdx, false, isGood);
+                    const double phi = seeder.projectedPhi(segment->sector(), secProj);
+                    const Amg::Vector2D markerPos{viewVector(phi, projPos, view)};
+                    extPrimitives.emplace_back(drawMarker(markerPos, mStyle, mColor));
+
+                    if (view == DisplayView::XY) {
+                        const double r = markerPos.mag() + extraMargin;
+                        boundBox[0].expand(-r, r);
+                        boundBox[1].expand(-r, r);
+                    } else {
+                        boundBox[0].expand(markerPos[0] - extraMargin, markerPos[0] + extraMargin);
+                        boundBox[1].expand(markerPos[1] - extraMargin, markerPos[1] + extraMargin);
+                    }
+                    legend.addMarker(mStyle, std::format("{:}{:}", MuonStationIndex::layerName(MuonStationIndex::toLayerIndex(chIdx)), 
+                                                         isGood ? "" : " (discarded)"));
+                    legend.addColor(mColor, msSector->barrel() ? "Barrel" : msSector->side() > 0 ? "Endcap A" : "Endcap C");
                 }
-                legend.addMarker(mStyle, std::format("{:}{:}", MuonStationIndex::layerName(MuonStationIndex::toLayerIndex(chIdx)), 
-                                                     isGood ? "" : " (discarded)"));
-                legend.addColor(mColor, msSector->barrel() ? "Barrel" : msSector->side() > 0 ? "Endcap A" : "Endcap C");
             }
         }
         for (const MsTrackSeed& seed : seeds) {
@@ -225,7 +243,6 @@ namespace MuonValR4{
             legend.addMarker(kFullDiamond, "track seed");
         }
         /** Draw the sector map */
-        const Muon::MuonSectorMapping sectorMap{};
         for (unsigned int s = 1; s<=16 ; ++s) {
             if (view != DisplayView::XY) {
                 break;
@@ -283,21 +300,33 @@ namespace MuonValR4{
         if (!truthSegs) {
             return;
         }
+        const ActsTrk::GeometryContext* gctx{nullptr};
+        if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
+            THROW_EXCEPTION("Failed to fetch the geometry context "<<m_geoCtxKey.fullKey());
+        }
+
         bool addedEntry{false};
         for (const xAOD::MuonSegment* segment: *truthSegs) {
             const auto chIdx = segment->chamberIndex();
             const int mStyle = stationMarkerSyle(chIdx, false, true);
-            const double phi = segment->direction().phi();
 
             using enum Location;
-            for (const Location loc : {Barrel, Endcap}) {
-                const Amg::Vector2D projected{seeder.expressOnCylinder(*segment, loc)};
-                if (!seeder.withinBounds(projected, loc)) {
+            using enum MsTrackSeeder::SectorProjector;
+            for (const auto secProj : {leftOverlap, center, rightOverlap}) {
+                if (!sectorMap.insideSector(segment->sector() + Acts::toUnderlying(secProj),
+                                            segment->position().phi())){
                     continue;
                 }
-                drawPrim.push_back(drawMarker(viewVector(phi, projected, view), mStyle, truthColor, 3));
-                legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)));
-                addedEntry = true;
+                for (const Location loc : {Barrel, Endcap}) {
+                    const Amg::Vector2D projected{seeder.expressOnCylinder(*gctx, *segment, loc, secProj)};
+                    if (!seeder.withinBounds(projected, loc)) {
+                        continue;
+                    }
+                    const double phi = MsTrackSeeder::projectedPhi(segment->sector(), secProj);
+                    drawPrim.push_back(drawMarker(viewVector(phi, projected, view), mStyle, truthColor, 3));
+                    legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)));
+                    addedEntry = true;
+                }
             }
         }
         if (addedEntry) {

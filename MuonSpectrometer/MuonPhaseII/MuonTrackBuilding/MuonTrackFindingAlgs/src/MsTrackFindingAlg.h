@@ -25,10 +25,12 @@
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 #include "MuonRecToolInterfacesR4/ITrackVisualizationTool.h"
 
-#include "ActsEvent/TrackContainerHandlesHelper.h"
 
+#include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 
@@ -46,7 +48,7 @@ namespace MuonR4{
         private:
             /** @brief Iterates over the search tree and combines close-by segments to a track seed.
              *         Seeds with the same segments as other seeds are deduplicated
-             *  @brief ctx: The event's context to access StoreGate & Conditions
+             *  @param ctx: The event's context to access StoreGate & Conditions
              *  @param segments: Full segment container */
             std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
                                                                  const xAOD::MuonSegmentContainer& segments) const;
@@ -57,6 +59,7 @@ namespace MuonR4{
                                   const Acts::CalibrationContext& cCtx,
                                   const MsTrackSeed& seed,
                                   ActsTrk::MutableTrackContainer& outContainer) const;
+
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
@@ -64,13 +67,14 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Pointer to the MuonDetectorManager */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-            
             /** @brief Temporary container write handle to push the seeds to store gate for later efficiency analysis */
             SG::WriteHandleKey<MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
             /** @brief Segment selection tool to pick the good quality segments */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Track fitting tool */
             ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
+
+            ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", ""};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
             /** @brief Track extrapolation tool */
@@ -79,9 +83,10 @@ namespace MuonR4{
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
             /** @brief Maximum search window to search segments for */
             Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
-            /** @brief Output track container prefix */
-            Gaudi::Property<std::string> m_writePrefix{this, "WritePrefix", "MuonSA"};
-            ActsTrk::MutableTrackContainerHandlesHelper m_trackContKeys{this};
+            /** @brief Key to the output track container */
+            SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MsTracks"};
+            /** @brief Pointer to the actual seeder implementation */
+            std::unique_ptr<MsTrackSeeder> m_seeder{};
     };      
 }
 

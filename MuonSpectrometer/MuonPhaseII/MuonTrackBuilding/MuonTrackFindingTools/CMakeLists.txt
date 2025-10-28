@@ -11,15 +11,16 @@ find_package( Acts COMPONENTS Core )
 atlas_add_library(MuonTrackFindingToolsLib
                    Root/*.cxx 
                    PUBLIC_HEADERS MuonTrackFindingTools
-                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternHelpers MuonPatternEvent
-                                  xAODMuon MuonSpacePoint MuonStationIndexLib MuonTrackEvent )
+                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternHelpers
+                                  xAODMuon MuonSpacePoint MuonStationIndexLib MuonTrackEvent
+                   PRIVATE_LINK_LIBRARIES MuonTruthHelpers Identifier MuonPatternEvent MuonDetDescrUtils)
 
 
 atlas_add_component( MuonTrackFindingTools
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib AthenaBaseComps GaudiKernel MuonReadoutGeometryR4
-                                     xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib MuonDetDescrUtils
-                                     MuonPatternEvent ActsGeometryLib MuonRecToolInterfacesR4 MuonTrackFindingToolsLib)
+                                    xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib MuonDetDescrUtils
+                                    MuonPatternEvent ActsGeometryLib MuonRecToolInterfacesR4 MuonTrackFindingToolsLib)
 
 
 # Install files from the package:
