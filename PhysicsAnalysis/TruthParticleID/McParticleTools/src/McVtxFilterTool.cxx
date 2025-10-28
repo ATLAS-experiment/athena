@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -300,7 +300,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
 
     } else {
     // set the mother's decay to our (new) vertex
-    vtx->add_particle_in( mother );
+    vtx->add_particle_in( std::move(mother) );
     }
   }//> loop over ingoing particles
   
