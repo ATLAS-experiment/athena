@@ -224,8 +224,9 @@ namespace GlobalSim {
   
     // Saturated cell
     if (energy > m_readoutRanges[4]) {
-          int max_value = m_stepsPerRange+(m_stepsPerRange*m_valueGainFactor.value())+(m_stepsPerRange*m_valueGainFactor.value()*m_valueGainFactor.value()) +
-                         ((m_stepsPerRange-1)*m_valueGainFactor.value()*m_valueGainFactor.value()*m_valueGainFactor.value())*m_valueLSB.value();
+          int max_value = ( m_stepsPerRange + m_stepsPerRange*m_valueGainFactor.value() +
+                            m_stepsPerRange*m_valueGainFactor.value()*m_valueGainFactor.value() +
+                            (m_stepsPerRange-1)*m_valueGainFactor.value()*m_valueGainFactor.value()*m_valueGainFactor.value() ) * m_valueLSB.value();
           return std::pair<float,boost::dynamic_bitset<>>(max_value,boost::dynamic_bitset<>(m_numberOfEnergyBits.value(),std::pow(2,m_numberOfEnergyBits.value())-1));
     }
   
