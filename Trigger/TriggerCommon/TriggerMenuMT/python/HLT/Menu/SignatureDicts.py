@@ -984,10 +984,10 @@ MinBiasChainParts = {
                         'nototpix20', 'nototpix30','nototpix50', 'nototpix70', 'nototpix100', 'nototpix200', 'nototpix500'],
     'pileupInfo'     : ['pusup0', 'pusup7', 'pusup10', 'pusup15', 'pusup20', 'pusup30', 'pusup40','pusup50','pusup60', 'pusup70', 'pusup80', 'pusup90', 'pusup100', 'pusup110', 'pusup120', 'pusup130', 'pusup150', 'pusup180', 'pusup190',
                         'pusup200', 'pusup220', 'pusup240', 'pusup250', 'pusup260', 'pusup270', 'pusup280', 'pusup290', 'pusup300'],
-    'hypoTrkInfo'    : ['trk3','trk5','trk10','trk15',  'trk20', 'trk25',  'trk30', 'trk35', 'trk40', 'trk45', 'trk50', 'trk55', 'trk60', 'trk65', 'trk70', 'trk75', 'trk80', 'trk90',
+    'hypoTrkInfo'    : ['trk2', 'trk3','trk5','trk10','trk15',  'trk20', 'trk25',  'trk30', 'trk35', 'trk40', 'trk45', 'trk50', 'trk55', 'trk60', 'trk65', 'trk70', 'trk75', 'trk80', 'trk90',
                         'trk100', 'trk110', 'trk120', 'trk130', 'trk140', 'trk150', 'trk160', 'trk180', 'trk200', 'trk220', 'trk240', 'trk260', 'trk280', 'trk290',
                          '2trk6', '1trk4', '1trk5', '1trk2', '0trk2'], #ranges for exclusive tracks
-    'hypoPtInfo'     : [ 'pt0p2', 'pt0p5', 'pt1', 'pt2', 'pt4', 'pt6', 'pt8', 'pt10' ],
+    'hypoPtInfo'     : [ 'pt0p2', 'pt0p5', 'pt0p8', 'pt1', 'pt2', 'pt4', 'pt6', 'pt8', 'pt10' ],
     'recoAlg'        : ['mbts', 'sptrk', 'sp', 'noalg', 'perf', 'hmt', 'hmtperf', 'idperf', 'zdcperf', 'afprec', 'afptof', 'afpdz5', 'afpdz10', 'excl', 'pixsptrk'],
     'addInfo'        : ['peb', 'pc'],
     'sigFolder'     : ['MinBias'],
