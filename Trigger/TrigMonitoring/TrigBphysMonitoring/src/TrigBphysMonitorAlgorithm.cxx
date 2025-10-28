@@ -9,6 +9,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "TrigInDetToolInterfaces/TrigParticleTable.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 using namespace Gaudi::Units;
 

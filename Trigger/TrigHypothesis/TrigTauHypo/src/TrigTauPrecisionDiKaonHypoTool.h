@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -19,22 +19,22 @@
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
-#include "ITrigTauPrecisionHypoTool.h"
+#include "ITrigTauJetHypoTool.h"
 
 
 /**
  * @class TrigTauPrecisionDiKaonHypoTool
  * @brief Precision step hypothesis tool for applying meson kinematic cuts (meson chains)
  **/
-class TrigTauPrecisionDiKaonHypoTool : public extends<AthAlgTool, ITrigTauPrecisionHypoTool>
+class TrigTauPrecisionDiKaonHypoTool : public extends<AthAlgTool, ITrigTauJetHypoTool>
 {
 public:
     TrigTauPrecisionDiKaonHypoTool(const std::string& type, const std::string& name, const IInterface* parent);
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode decide(std::vector<ITrigTauPrecisionHypoTool::ToolInfo>& input) const override;
-    virtual bool decide(const ITrigTauPrecisionHypoTool::ToolInfo& i) const override;
+    virtual StatusCode decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input) const override;
+    virtual bool decide(const ITrigTauJetHypoTool::ToolInfo& i) const override;
 
 private:
     HLT::Identifier m_decisionId;

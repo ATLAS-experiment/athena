@@ -190,8 +190,7 @@ class TopoAlgoDefMultiplicity:
             'jXE60', 'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE120', 'jXE500',
 
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
-            'gTE3', 'gTE5', 'gTE10', 'gTE200',
-
+            'gTE3', 'gTE5', 'gTE10', 'gTE200', 
             # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
             'jTE100', 'jTE600', 'jTE1500', 'jTE4000', 'jTE6500', 'jTE8300', 'jTE9000', 'jTE10000', 'jTE12000',
@@ -277,7 +276,7 @@ class TopoAlgoDefMultiplicity:
                 thrtype = algo.input
                 if 'LArSaturation' in algo.name:
                     thrtype = 'LArSaturation'
-                elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input:
+                elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input or 'ESPRESSO' in algo.input:
                     thrtype = 'EN'
                 elif 'eEmVar' in algo.classtype:
                     thrtype = 'eEMV'

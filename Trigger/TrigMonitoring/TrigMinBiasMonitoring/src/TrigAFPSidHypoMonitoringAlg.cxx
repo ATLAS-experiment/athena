@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigAFPSidHypoMonitoringAlg.h"
 
 #include "xAODForward/AFPTrackContainer.h"
 #include "xAODForward/AFPTrack.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
+#include <cmath>
 
 TrigAFPSidHypoMonitoringAlg::TrigAFPSidHypoMonitoringAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthMonitorAlgorithm (name, pSvcLocator)
@@ -52,7 +54,7 @@ StatusCode TrigAFPSidHypoMonitoringAlg::fillHistograms(const EventContext& conte
       xDiff = track->xLocal()-off_track->xLocal();
       yDiff = track->yLocal()-off_track->yLocal();
 
-      dR = TMath::Sqrt(TMath::Power(xDiff,2)+TMath::Power(yDiff,2));
+      dR = std::hypot(xDiff, yDiff);
 
       if(dR<dRmin){
 	dRmin = dR;
