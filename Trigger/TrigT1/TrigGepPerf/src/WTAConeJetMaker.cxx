@@ -9,9 +9,12 @@
  { // Makesure the WTA parameters are set before calling makeJets()
  
    std::vector<WTATrigObj> input_towers;
-   for(const auto &TopoTower: inTopoTowers)
+   const unsigned int inTopoTowersN = inTopoTowers.size();
+  //  for(const auto &TopoTower: inTopoTowers)
+   for(unsigned int i = 0; i < inTopoTowersN; i++)
    {
-     WTATrigObj this_tower(TopoTower.vec.Pt(), TopoTower.vec.Eta(), TopoTower.vec.Phi(), TopoTower.vec.M());
+     const auto TopoTower = inTopoTowers[i];
+     WTATrigObj this_tower(TopoTower.vec.Pt(), TopoTower.vec.Eta(), TopoTower.vec.Phi(), TopoTower.vec.M(), i);
      input_towers.push_back(this_tower);
    }
  
@@ -42,6 +45,15 @@
      Gep::Jet thisjet;
      thisjet.vec.SetPtEtaPhiM(WTAJet.pt(), WTAJet.eta(), WTAJet.phi(), WTAJet.m());
      thisjet.nConstituents = WTAJet.GetConstituentCount();
+     thisjet.seedEt = WTAJet.GetSeed().pt();
+     thisjet.seedEta = WTAJet.GetSeed().eta();
+     thisjet.seedPhi = WTAJet.GetSeed().phi();
+     const std::vector<WTATrigObj> ConstituentList = WTAJet.GetConstituentList();
+     thisjet.constituentsIndices.clear();
+     for(const auto& constituent: ConstituentList)
+     {
+      thisjet.constituentsIndices.push_back(constituent.idx());
+     }
      GepJetList.push_back(thisjet);
    }
  
