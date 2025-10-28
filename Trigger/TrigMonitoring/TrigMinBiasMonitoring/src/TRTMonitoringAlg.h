@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGMINBIASMONITORING_TRTMonitoringAlg_H
 #define TRIGMINBIASMONITORING_TRTMonitoringAlg_H
@@ -8,6 +8,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include <AthenaMonitoring/AthMonitorAlgorithm.h>
 #include "GaudiKernel/ToolHandle.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "xAODTracking/TrackParticleContainer.h"
 
 // STL includes
 #include <string>
