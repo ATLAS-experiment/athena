@@ -77,7 +77,7 @@ class WTAConeMaker{
         void InitiateInputs(const std::vector<IntOrFloat>& ptVec, const std::vector<IntOrFloat>& etaVec, const std::vector<IntOrFloat>& phiVec, const std::vector<IntOrFloat>& mVec); // LoadInputs() + FillLists()
         void InitiateInputs(const std::vector<WTATrigObj>& InputTowers); // LoadInputs() + FillLists()
 
-        void InsertToConstList(WTATrigObj obj);
+        void InsertToConstList(const WTATrigObj& obj);
         virtual void SeedCleaning(); // Do baseline cleaning
         virtual void MergeConstsToSeeds(); // Can be overwritten
 
@@ -119,7 +119,7 @@ inline void WTAConeMaker::FillLists(const std::vector<WTATrigObj>& InputTowers) 
     const int MaxTowersToReadPerEvent = m_WTAConeMakerParameter.GetMaxInputTowers();
     if(m_DEBUG) std::cout << "MaxTowersToReadPerEvent = " << MaxTowersToReadPerEvent << ", Size of event = " << InputTowers.size() << std::endl;
     int nTowers = 0;
-    for(auto tower: InputTowers)
+    for(const auto& tower: InputTowers)
     {
         if(tower.pt() < m_WTAConeMakerParameter.GetConstEtCut())continue; // Skip Et < 2GeV
         if(tower.pt() >= m_WTAConeMakerParameter.GetSeedEtCut())m_SeedSortingList.push_back(tower); // Harmonize >=
@@ -158,7 +158,7 @@ inline void WTAConeMaker::PrintSeedList()
     std::cout << "+++++++++++++++++++++++++" << std::endl;
 }
 
-inline void WTAConeMaker::InsertToConstList(WTATrigObj obj)
+inline void WTAConeMaker::InsertToConstList(const WTATrigObj& obj)
 {
     if(m_WTAConeMakerParameter.GetAddConstFirst())m_ConstituentList.insert(m_ConstituentList.begin(), obj); // Insert obj at the beginnning
     else m_ConstituentList.push_back(obj); // Insert obj at the end
@@ -197,13 +197,13 @@ inline void WTAConeMaker::ResizeSeedList()
 
 inline WTAJet WTAConeMaker::WTATrigObjToWTAJet(const WTATrigObj& obj)
 {
-    WTAJet thisjet(obj.pt(), obj.eta(), obj.phi(), obj.m());
+    WTAJet thisjet(obj.pt(), obj.eta(), obj.phi(), obj.m(), obj.idx());
     return thisjet;
 }
 
 inline WTATrigObj WTAConeMaker::WTAJetToWTATrigObj(const WTAJet& jet)
 {
-    WTATrigObj thisobj(jet.pt(), jet.eta(), jet.phi(), jet.m());
+    WTATrigObj thisobj(jet.pt(), jet.eta(), jet.phi(), jet.m(), jet.idx());
     return thisobj;
 }
 
@@ -232,7 +232,7 @@ inline void WTAConeMaker::SeedCleaning()
 {
     m_SeedList.clear();
     if(m_DEBUG)std::cout << "Baseline Seed Cleaning......" << std::endl;
-    for(auto seed: m_SeedSortingList)
+    for(const auto& seed: m_SeedSortingList)
     {
         int jet_N = m_SeedList.size();
         if(jet_N == 0)
