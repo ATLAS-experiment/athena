@@ -8,35 +8,21 @@
 #include <sstream>
 #include <utility>
 
+const ZDCJSONConfig::JSONParamList ZDCDataAnalyzer::JSONConfigParams = {
+  {"moduleEnabled", {JSON::value_t::array, 4, true, false}},
+  {"iterativeCalibCorr", {JSON::value_t::array, 4, true, false}}
+};
+
 
 ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSample, float deltaTSample, size_t preSampleIdx, std::string fitFunction,
                                  const ZDCModuleIntArray& peak2ndDerivMinSamples,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
                                  unsigned int LGMode) :
-  m_msgFunc_p(msgFunc_p),
-  m_nSample(nSample), m_deltaTSample(deltaTSample), m_preSampleIdx(preSampleIdx),
-  m_fitFunction(std::move(fitFunction)),
-  m_LGMode(LGMode),
-  m_repassEnabled(false),
-  m_eventCount(0),
-  m_haveECalib(false),
-  m_haveT0Calib(false),
-  m_currentLB(-1),
-  m_moduleMask(0),
-  m_moduleSum({{0, 0}}),
-  m_moduleSumErrSq({{0, 0}}),
-  m_moduleSumPreSample({{0, 0}}),
-  m_calibModuleSum({{0, 0}}),
-  m_calibModuleSumErrSq({{0, 0}}),
-  m_haveNLcalib(false),
-  m_NLcalibModuleSum({{0, 0}}),
-  m_NLcalibModuleSumErrSq({{0, 0}}),
-  m_averageTime({{0, 0}}),
-  m_fail({{false, false}})
+  m_msgFunc_p(msgFunc_p)
 {
-  m_moduleDisabled[0] = {{false, false, false, false}};
-  m_moduleDisabled[1] = {{false, false, false, false}};
+  m_moduleEnabled[0] = {{true, true, true, true}};
+  m_moduleEnabled[1] = {{true, true, true, true}};
 
   m_moduleAnalyzers[0] = {{0, 0, 0, 0}};
   m_moduleAnalyzers[1] = {{0, 0, 0, 0}};
@@ -79,18 +65,154 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
       std::ostringstream moduleTag;
       moduleTag << "_s" << side << "_m" << module;
 
-      m_moduleAnalyzers[side][module].reset (new ZDCPulseAnalyzer(m_msgFunc_p, moduleTag.str().c_str(), m_nSample, m_deltaTSample, m_preSampleIdx,
-                                             m_pedestals[side][module], m_HGGains[side][module], m_fitFunction,
-                                             peak2ndDerivMinSamples[side][module],
-                                             peak2ndDerivMinThresholdsHG[side][module],
-                                             peak2ndDerivMinThresholdsLG[side][module]));
-      m_moduleAnalyzers[side][module]->setLGMode(m_LGMode);
+      m_moduleAnalyzers[side][module] = make_unique<ZDCPulseAnalyzer>(m_msgFunc_p, moduleTag.str().c_str(), nSample, deltaTSample, preSampleIdx,
+								      m_pedestals[side][module], m_HGGains[side][module], fitFunction,
+								      peak2ndDerivMinSamples[side][module],
+								      peak2ndDerivMinThresholdsHG[side][module],
+								      peak2ndDerivMinThresholdsLG[side][module]);
+      m_moduleAnalyzers[side][module]->setLGMode(LGMode);
     }
   }
 }
 
-ZDCDataAnalyzer::~ZDCDataAnalyzer()
+ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSON& configJSON) :
+  m_msgFunc_p(msgFunc_p)
 {
+  init();
+  
+  // Construct the object that will extract the data and pulse analyzer
+  //   configurations from the input JSON configuration
+  //
+  //  For the data anlyzer we use 1 channel since the relevant
+  //    configurations will all be per-side
+  //
+  m_dataAnalyzerConfig = std::make_unique<ZDCJSONConfig>(std::vector<std::string>{"C", "A"}, 1);
+  m_pulseAnalyzerConfig = std::make_unique<ZDCJSONConfig>(std::vector<std::string>{"C", "A"}, 4);
+
+
+  // Extract the JSON object for the pulse analyzer(s)
+  //
+  JSON DAconfig = configJSON["DataAnalyzer"];
+  if (DAconfig.is_null()) {
+    (*m_msgFunc_p)(ZDCMsg::Fatal, "JSON configuration object for ZDCDataAnalyzer not found");
+    return;
+  }
+  
+  auto [result, resultStr] = m_dataAnalyzerConfig->ParseConfig(DAconfig, ZDCDataAnalyzer::JSONConfigParams);
+  if (!result) {
+    (*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCDataAnalyzer JSON config, error = " + resultStr);
+    return;
+  }
+  
+  // The data analyzer configuration is simple enough we handle it inline
+  //
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleEnabled[side][module] = true;
+    }
+
+    // Now extract information from ZDCDataAnalyzer-specific configuration
+    //
+    JSON sideConfig = m_pulseAnalyzerConfig->getChannelConfig(side, 0);
+    JSON modEnable = sideConfig["moduleEnabled"];
+    if (!modEnable.is_null()) {
+      if (modEnable.size() != 4) {
+	(*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCDataAnalyzer JSON config, incorrect size of moduleEnabled");
+	return;
+      }
+      
+      for (size_t module : {0, 1, 2, 3}) {
+	m_moduleEnabled[side][module] = modEnable[module];
+      }
+    }
+  }
+
+  // Extract the JSON object for the pulse analyzer(s)
+  //
+  JSON PAconfig = configJSON["PulseAnalyzer"];
+  if (PAconfig.is_null()) {
+    (*m_msgFunc_p)(ZDCMsg::Fatal, "JSON configuration object for ZDCPulseAnalyzer not found");
+    return;
+  }
+
+  // Do the parsing of the pulse analyzer JSON configuration
+  //
+  auto [result2, resultStr2] = m_pulseAnalyzerConfig->ParseConfig(PAconfig, ZDCPulseAnalyzer::JSONConfigParams);
+  if (!result2) {
+    (*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCPulseAnalyzer JSON config, error = " + resultStr2);
+    return;
+  }
+
+  // Now set up each of the pulse analyzers
+  //
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      
+      (*m_msgFunc_p)(ZDCMsg::Info, "Setting up ZDCPulseAnalyzer for side " + std::to_string(side) +
+		     ", module " + std::to_string(module));
+
+      //
+      // Get the parsed configuration JSON object for this module
+      //
+      JSON moduleConfig = m_pulseAnalyzerConfig->getChannelConfig(side, module);
+      
+      std::ostringstream ostr;
+      ostr << "JSON configuration for ZDC pulse analyyzer for side " << std::to_string(side)
+	   << ", module " <<  std::to_string(module) << "\n" <<  moduleConfig.dump(2);
+      (*m_msgFunc_p)(ZDCMsg::Verbose, ostr.str().c_str());
+
+      // Construct the ZDCPulseAnalyzer object
+      //
+      m_moduleAnalyzers[side][module] = std::make_unique<ZDCPulseAnalyzer>(msgFunc_p, moduleConfig);
+
+      (*m_msgFunc_p)(ZDCMsg::Info, "Finished constructing ZDCPulseAnalyzer for side " + std::to_string(side) +
+		     ", module " + std::to_string(module));
+
+    }
+  }
+
+  // Check for the enabling of re-pass
+  //
+  getPulseAnalyzerGlobalPar("enableRepass", m_repassEnabled);
+  
+  (*m_msgFunc_p)(ZDCMsg::Info, "ZDCDataAnalyzer construction complete");
+}
+
+void ZDCDataAnalyzer::init()
+{
+  for (size_t side : {0, 1}) {
+    m_moduleSum[side] = 0;
+    m_moduleSumErrSq[side] = 0;
+    m_moduleSumPreSample[side] = 0;
+    m_calibModuleSum[side] = 0;
+    m_calibModuleSumErrSq[side] = 0;
+
+    m_NLcalibModuleSum[side] = 0;
+    m_NLcalibModuleSumErrSq[side] = 0;
+    m_averageTime[side] = 0;
+    m_fail[side] = 0;
+
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleEnabled[side][module] = true;
+      m_calibAmplitude[side][module] = 0;
+      m_calibTime[side][module] = 0;
+
+      m_dataLoaded[side][module] = false;
+      m_delayedOrder[side][module] = 0;
+
+      // Default "calibrations"
+      //
+      m_currentECalibCoeff[side][module] = 1;
+      m_currentT0OffsetsHG[side][module] = 0;
+      m_currentT0OffsetsLG[side][module] = 0;
+
+    }
+  }
+
+  m_NLcalibFactors = {{
+      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }},
+      {{ {{0,0,0,0,0,0}},{{0,0,0,0,0,0}},{{0,0,0,0,0,0}} }}  }};
+
 }
 
 bool ZDCDataAnalyzer::disableModule(size_t side, size_t module)
@@ -101,7 +223,7 @@ bool ZDCDataAnalyzer::disableModule(size_t side, size_t module)
     //
     if (m_dataLoaded[side][module]) return false;
     else {
-      m_moduleDisabled[side][module] = true;
+      m_moduleEnabled[side][module] = false;
       return true;
     }
   }
@@ -183,6 +305,15 @@ void ZDCDataAnalyzer::enableRepass(const ZDCModuleFloatArray& peak2ndDerivMinRep
   }
 }
 
+void ZDCDataAnalyzer::setMinimumSignificance(float sigMinHG, float sigMinLG)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->setMinimumSignificance(sigMinHG, sigMinLG);
+    }
+  }
+}
+
 void ZDCDataAnalyzer::set2ndDerivStep(size_t step)
 {
   for (size_t side : {0, 1}) {
@@ -227,10 +358,6 @@ void ZDCDataAnalyzer::SetFitTimeMax(float tmax) {
   }
 }
 
-
-void ZDCDataAnalyzer::SetSaveFitFunc(bool save) {
-  ZDCPulseAnalyzer::SetSaveFitFunc(save);
-}
 
 
 void ZDCDataAnalyzer::SetTauT0Values(const ZDCModuleBoolArray& fixTau1, const ZDCModuleBoolArray& fixTau2,
@@ -351,6 +478,11 @@ void ZDCDataAnalyzer::enableFADCCorrections(bool correctPerSample,
 					    std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& corrHistHG,
 					    std::array<std::array<std::unique_ptr<const TH1>, 4>, 2>& corrHistLG)
 {
+  if (correctPerSample)
+    (*m_msgFunc_p)(ZDCMsg::Info, "ZDCDataAnalyzer::enabling FADC Corrections per sample");
+  else
+    (*m_msgFunc_p)(ZDCMsg::Info, "ZDCDataAnalyzer::enabling FADC Corrections per amplitude");
+    
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
       m_moduleAnalyzers[side][module]->enableFADCCorrections(correctPerSample, corrHistHG[side][module], corrHistLG[side][module]);
@@ -384,9 +516,15 @@ void ZDCDataAnalyzer::StartEvent(int lumiBlock)
 
   // By default we perform quiet pulse fits
   //
-  if ((*m_msgFunc_p)(ZDCMsg::Verbose, "")) {ZDCPulseAnalyzer::SetQuietFits(false);}
-  else {ZDCPulseAnalyzer::SetQuietFits(true);}
-
+  /*
+  if ((*m_msgFunc_p)(ZDCMsg::Verbose, "")) {
+    invokeAll([](ZDCPulseAnalyzer* pa){pa->setQuietFits();});
+  }
+  else {
+    invokeAll([](ZDCPulseAnalyzer* pa){pa->setQuietFits();});
+  }
+  */
+  
   //  See if we have to load up new calibrations
   //
   if (lumiBlock != m_currentLB) {
@@ -476,7 +614,7 @@ void ZDCDataAnalyzer::LoadAndAnalyzeData(size_t side, size_t module, const std::
 
   // We immediately return if this module is disabled
   //
-  if (m_moduleDisabled[side][module]) {
+  if (!m_moduleEnabled[side][module]) {
     (*m_msgFunc_p)(ZDCMsg::Verbose, ("Skipping analysis of disabled module for event index " + std::to_string(m_eventCount) + ", side, module = " + std::to_string(side) + ", " + std::to_string(module)));
 
     return;
@@ -488,7 +626,7 @@ void ZDCDataAnalyzer::LoadAndAnalyzeData(size_t side, size_t module, const std::
   pulseAna_p->LoadAndAnalyzeData(HGSamples, LGSamples);
   m_dataLoaded[side][module] = true;
 
-  if (pulseAna_p->Failed()) {
+  if (pulseAna_p->failed()) {
     (*m_msgFunc_p)(ZDCMsg::Debug, ("ZDCPulseAnalyzer::LoadData() returned fail for event " + std::to_string(m_eventCount) + ", side, module = " + std::to_string(side) + ", " + std::to_string(module)));
 
     m_fail[side] = true;
@@ -502,7 +640,7 @@ void ZDCDataAnalyzer::LoadAndAnalyzeData(size_t side, size_t module, const std::
 {
   // We immediately return if this module is disabled
   //
-  if (m_moduleDisabled[side][module]) {
+  if (!m_moduleEnabled[side][module]) {
     (*m_msgFunc_p)(ZDCMsg::Debug,  ("Skipping analysis of disabled mofule for event index " + std::to_string(m_eventCount) + ", side, module = " + std::to_string(side) + ", " + std::to_string(module)));
 
     return;
@@ -524,7 +662,7 @@ void ZDCDataAnalyzer::LoadAndAnalyzeData(size_t side, size_t module, const std::
   }
   m_dataLoaded[side][module] = true;
 
-  if (pulseAna_p->Failed()) {
+  if (pulseAna_p->failed()) {
     (*m_msgFunc_p)(ZDCMsg::Debug, ("ZDCPulseAnalyzer::LoadData() returned fail for event " + std::to_string(m_eventCount) + ", side, module = " + std::to_string(side) + ", " + std::to_string(module)));
 
     m_fail[side] = true;
@@ -541,8 +679,8 @@ bool ZDCDataAnalyzer::FinishEvent()
 
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
-      if (!m_dataLoaded[side][module] && !m_moduleDisabled[side][module]) {return false;}
-      if (m_moduleAnalyzers[side][module]->ArmSumInclude()) {sideNPulsesMod[side]++;}
+      if (!m_dataLoaded[side][module] && m_moduleEnabled[side][module]) {return false;}
+      if (m_moduleAnalyzers[side][module]->armSumInclude()) {sideNPulsesMod[side]++;}
     }
   }
 
@@ -554,13 +692,13 @@ bool ZDCDataAnalyzer::FinishEvent()
       if (sideNPulsesMod[side] == 0) continue;
 
       for (size_t module : {0, 1, 2, 3}) {
-	if (m_moduleDisabled[side][module]) continue;
+	if (!m_moduleEnabled[side][module]) continue;
 
         ZDCPulseAnalyzer* pulseAna_p = m_moduleAnalyzers[side][module].get();
 
         // If this module had no pulse the first time, reanalyze it (with a lower 2nd derivative threshold)
         //
-        if (!pulseAna_p->HavePulse()) {
+        if (!pulseAna_p->havePulse()) {
           (*m_msgFunc_p)(ZDCMsg::Debug, ("ZDCPulseAnalyzer:: performing a repass on data for side, module = " + std::to_string(side) + ", " + std::to_string(module)));
           pulseAna_p->ReanalyzeData();
 	  m_moduleStatus[side][module] = pulseAna_p->GetStatusMask();
@@ -579,7 +717,7 @@ bool ZDCDataAnalyzer::FinishEvent()
     for (size_t module : {0, 1, 2, 3}) {
       ZDCPulseAnalyzer* pulseAna_p = m_moduleAnalyzers[side][module].get();
 
-      if (pulseAna_p->ArmSumInclude()) {
+      if (pulseAna_p->armSumInclude()) {
         int moduleMaskBit = 4 * side + module;
         m_moduleMask |= 1 << moduleMaskBit;
 
@@ -592,7 +730,7 @@ bool ZDCDataAnalyzer::FinishEvent()
         float calibAmpError = ampError * m_currentECalibCoeff[side][module];
 
         float timeCalib = pulseAna_p->GetT0Corr();
-        if (pulseAna_p->UseLowGain()) {timeCalib -= m_currentT0OffsetsLG[side][module];}
+        if (pulseAna_p->useLowGain()) {timeCalib -= m_currentT0OffsetsLG[side][module];}
         else {timeCalib -= m_currentT0OffsetsHG[side][module];}
 
         m_calibTime[side][module] = timeCalib;
@@ -666,6 +804,10 @@ void ZDCDataAnalyzer::DoNLcalibModuleSum()
 	    {
 	      Had2CorrFact += std::pow(fHad2 - m_NLcalibFactors[iside][2][0],i)*m_NLcalibFactors[iside][2][i+1];
 	    }
+
+	  std::ostringstream ostr;
+	  ostr << "ZDCDataAnalyzer: " << m_calibModuleSum[iside] << " " << EMCorrFact << " " << Had1CorrFact << " " << Had2CorrFact << std::endl;
+	  (*m_msgFunc_p)(ZDCMsg::Debug,ostr.str().c_str());
 	  
 	  float ECorrEM = m_calibModuleSum[iside]/EMCorrFact;
 	  float ECorrEMHad1 = ECorrEM/Had1CorrFact;
@@ -677,6 +819,7 @@ void ZDCDataAnalyzer::DoNLcalibModuleSum()
 	}
       else
 	{
+	  (*m_msgFunc_p)(ZDCMsg::Info,"SUM = 0!!");
 	  m_NLcalibModuleSum[iside] = 0.;
 	  m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
 	}
