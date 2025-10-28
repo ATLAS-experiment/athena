@@ -18,9 +18,6 @@ def InDetTestPixelLayerToolCfg(flags, name="InDetTestPixelLayerTool", **kwargs):
             PixelConditionsSummaryCfg(flags)))
 
     if "PixelDetElStatus" not in kwargs and not flags.Common.isOnline:
-        from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
-            PixelReadoutManagerCfg)
-        result.merge(PixelReadoutManagerCfg(flags))
         from PixelConditionsAlgorithms.PixelConditionsConfig import (
             PixelDetectorElementStatusAlgCfg)
         result.merge(PixelDetectorElementStatusAlgCfg(flags))
@@ -107,10 +104,6 @@ def ITkTestPixelLayerToolCfg(flags, name="ITkTestPixelLayerTool", **kwargs):
                 ITkPixelDetectorElementStatusAlgCfg)
             result.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
         kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
-
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
-    kwargs.setdefault("PixelReadoutManager", result.getPrimaryAndMerge(
-        ITkPixelReadoutManagerCfg(flags)))
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg

@@ -12,7 +12,6 @@
 #include "InDetRawData/PixelRDORawData.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 
@@ -64,9 +63,6 @@ private:
 	   const InDetDD::SiDetectorElement& element);
 
 private:  
-  ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "InDetDD::ITk::PixelReadoutManager",
-      "Pixel readout manager" };
-  
   ToolHandle< ISiLorentzAngleTool > m_pixelLorentzAngleTool {this, "PixelLorentzAngleTool", "", "Tool to retreive Lorentz angle of Pixel"};
   
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "",

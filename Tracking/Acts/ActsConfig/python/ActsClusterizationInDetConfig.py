@@ -18,10 +18,6 @@ def ActsIDPixelClusteringToolCfg(flags,
     acc.merge(PixelOfflineCalibCondAlgCfg(flags))
     kwargs.setdefault("PixelChargeCalibCondData", "PixelChargeCalibCondData")
 
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
-    acc.merge(PixelReadoutManagerCfg(flags))
-    kwargs.setdefault("PixelReadoutManager", "InDetDD::PixelReadoutManager")
-
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( PixelLorentzAngleToolCfg(flags) ))

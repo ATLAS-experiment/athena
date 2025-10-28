@@ -151,10 +151,6 @@ StatusCode  ClusterMakerTool::initialize(){
 
    ATH_MSG_DEBUG ( name() << " initialize()" );
 
-   if (not m_pixelReadout.empty()) {
-     ATH_CHECK(m_pixelReadout.retrieve());
-   }
-
    if (not m_pixelLorentzAngleTool.empty()) {
      ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
    } else {
@@ -229,16 +225,25 @@ ClusterType ClusterMakerTool::makePixelCluster(
   int nRDO=rdoList.size();
   if (calibData) {
     chargeList.reserve(nRDO);
+    IdentifierHash moduleHash = element->identifyHash(); // wafer hash
     for (int i=0; i<nRDO; i++) {
       Identifier pixid=rdoList[i];
       int ToT=totList[i];
 
       float charge = ToT;
-      Identifier moduleID = pixelID.wafer_id(pixid);
-      IdentifierHash moduleHash = pixelID.wafer_hash(moduleID); // wafer hash
-      unsigned int FE = m_pixelReadout->getFE(pixid, moduleID);
-      InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(pixid);
-      charge = calibData->getCharge(type, moduleHash, FE, ToT);
+      assert( element->identifyHash() == pixelID.wafer_hash(pixelID.wafer_id(pixid)));
+      std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+         = InDetDD::PixelDiodeTree::makeCellIndex(pixelID.phi_index(pixid),
+                                                  pixelID.eta_index(pixid));
+      InDetDD::PixelDiodeTree::DiodeProxy si_param ( design->diodeProxyFromIdx(diode_idx));
+      std::uint32_t feValue = design->getFE(si_param);
+      auto diode_type = design->getDiodeType(si_param);
+      if (   design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3
+          && design->numberOfConnectedCells(  design->readoutIdOfCell(InDetDD::SiCellId(diode_idx[0],diode_idx[1])))>1) {
+         diode_type = InDetDD::PixelDiodeType::GANGED;
+      }
+
+      charge = calibData->getCharge(diode_type, moduleHash, feValue, ToT);
       if (design->getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash<12 || moduleHash>2035)) {
         charge = ToT/8.0*(8000.0-1200.0)+1200.0;
       }
