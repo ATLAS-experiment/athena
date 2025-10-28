@@ -1,9 +1,9 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef GLOBALSIM_EGAMMA1_LARSTRIP_FEX_H
-#define GLOBALSIM_EGAMMA1_LARSTRIP_FEX_H
+#ifndef GLOBALSIM_EGAMMA1_LARSTRIP_FEX_ROWAWARE_H
+#define GLOBALSIM_EGAMMA1_LARSTRIP_FEX_ROWAWARE_H
 
 /*
   This Algorithm finds and outputs CaloCell in the neighborhoods of eFEX
@@ -12,10 +12,12 @@
 
 #include "ICaloCellsProducer.h"
 #include "eFexRoIAlgTool.h"
+#include "Egamma1_LArStrip_Fex.h"
+#include "CaloEvent/CaloCellContainer.h"
 
-#include "../../IO/LArStripNeighborhoodContainer.h"
-#include "../../IO/IeEmNbhoodTOBContainer.h"
-#include "../../IO/IeEmTOB.h"
+#include "../IO/LArStripNeighborhoodContainer.h"
+#include "../IO/IeEmNbhoodTOBContainer.h"
+#include "../IO/IeEmTOB.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -25,11 +27,11 @@
 namespace GlobalSim {
 
 
-  class Egamma1_LArStrip_Fex: public AthReentrantAlgorithm { 
+  class Egamma1_LArStrip_Fex_RowAware: public AthReentrantAlgorithm {
+
   public:
     
-    
-    Egamma1_LArStrip_Fex(const std::string& name, ISvcLocator* pSvcLocator);
+    Egamma1_LArStrip_Fex_RowAware(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode  initialize() override;   
     virtual StatusCode  execute(const EventContext& ) const override;    
@@ -43,7 +45,6 @@ namespace GlobalSim {
 	"EventInfo name"};
     
     // tool to get a vector of cal cells
-    
     ToolHandle<ICaloCellsProducer> m_cellProducer{this,
 	"caloCellProducer",
 	"EMB1CellFromCaloCells",
@@ -51,7 +52,6 @@ namespace GlobalSim {
 	};
 
     // tool to get eFexRoIs
-    
     ToolHandle<eFexRoIAlgTool>
     m_roiAlgTool{this,
 		 "roiAlgTool",
@@ -69,7 +69,7 @@ namespace GlobalSim {
       "dumpTerse",
       false,
       "flag to enable terse dumps"};
-
+    
     SG::WriteHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
     m_neighKey {
       this,
@@ -77,21 +77,29 @@ namespace GlobalSim {
       "stripNeighborhoodTOBContainer",
       "location to write strip neighborhoods of EFex RoIs, with the associated TOBs"};
 
-    StatusCode
-    findNeighborhoods(const std::vector<const xAOD::eFexEMRoI*>&,
-		      const std::vector<const CaloCell*>&,
-		      IOBitwise::IeEmNbhoodTOBContainer&) const;
+    SG::WriteHandleKey<std::vector<int>>
+    m_phimaxKey {
+      this,
+      "phimaxKey",
+      "phimax"};
+      //"location to write strip neighborhoods of EFex RoIs"};
 
     StatusCode
-    findNeighborhood(const xAOD::eFexEMRoI*,
-		     const std::vector<const CaloCell*>&,
-		     IOBitwise::IeEmNbhoodTOBContainer&) const;
+    findNeighborhoods_RowAware(const std::vector<const xAOD::eFexEMRoI*>&,
+			       const std::vector<const CaloCell*>&,
+			       IOBitwise::IeEmNbhoodTOBContainer&,
+			       std::vector<int>&) const;
+
+    StatusCode
+    findNeighborhood_RowAware(const xAOD::eFexEMRoI*,
+			      const std::vector<const CaloCell*>&,
+			      IOBitwise::IeEmNbhoodTOBContainer&,
+			      std::vector<int>&) const;
 
     StatusCode
     findClosestCellToRoI(const xAOD::eFexEMRoI*,
 			 const std::vector<const CaloCell*>&,
 			 const CaloCell*&) const;
-
   };
 
 }

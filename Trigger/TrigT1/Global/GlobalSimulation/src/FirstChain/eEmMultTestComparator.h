@@ -13,9 +13,9 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "../../ITIPwriterAlgTool.h" // TIP word declaration
+#include "../ITIPwriterAlgTool.h" // TIP word declaration
 
-#include "../../IO/TipWord_clid.h"
+#include "../IO/TipWord_clid.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 

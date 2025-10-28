@@ -3,12 +3,12 @@
 */
 
 #include "Egamma1eRatioAlgTool.h"
-#include "../../dump.h"
-#include "../../dump.icc"
+#include "../dump.h"
+#include "../dump.icc"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 
-#include "../../IO/eEmEg1eRatioTOB.h"
+#include "../IO/eEmEg1eRatioTOB.h"
 
 namespace GlobalSim {
 
