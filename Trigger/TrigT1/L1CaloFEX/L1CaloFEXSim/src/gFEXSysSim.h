@@ -141,7 +141,7 @@ namespace LVL1 {
     std::vector<uint32_t>  m_allgBlockTobs;
     std::vector<uint32_t>  m_allgJetTobs;
 
-    std::vector<uint32_t>  m_allgScalarEJwojTobs;
+    std::vector<int32_t>  m_allgScalarEJwojTobs;
     std::vector<uint32_t>  m_allgMETComponentsJwojTobs;
     std::vector<uint32_t>  m_allgMHTComponentsJwojTobs;
     std::vector<uint32_t>  m_allgMSTComponentsJwojTobs;
