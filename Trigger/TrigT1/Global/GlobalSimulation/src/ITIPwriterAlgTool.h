@@ -6,6 +6,7 @@
 #define GLOBALSIM_ITIPWRITERALGTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/EventContext.h"
 
 #include <string>
 #include <bitset>

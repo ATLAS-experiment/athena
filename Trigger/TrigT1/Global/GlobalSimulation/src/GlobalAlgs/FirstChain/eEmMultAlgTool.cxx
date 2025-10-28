@@ -97,7 +97,7 @@ namespace GlobalSim {
 
     
 
-    ATH_MSG_DEBUG("no of passing TOBS");
+    ATH_MSG_DEBUG("no of passing TOBS" << tob_count);
 
     auto count_bits = std::bitset<s_nbits_TIP>(tob_count);
 

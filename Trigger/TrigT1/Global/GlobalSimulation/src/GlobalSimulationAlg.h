@@ -35,7 +35,7 @@ namespace GlobalSim {
 
   private:
 
-    SG::WriteHandleKey<std::bitset<1024>> m_tipWordKey {
+    SG::WriteHandleKey<TIPword> m_tipWordKey {
       this,
 	"tipWord",
 	"GlobalSimTIP",

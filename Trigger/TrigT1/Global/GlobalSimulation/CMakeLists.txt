@@ -61,4 +61,9 @@ atlas_add_test( testEfex
    POST_EXEC_SCRIPT noerror.sh )
 
 
+atlas_add_test(test_eEmMult
+   SCRIPT python/run_hypo_mult_ctest.py --evtMax 1
+   PRIVATE_WORKING_DIRECTORY
+   POST_EXEC_SCRIPT noerror.sh )
+
 

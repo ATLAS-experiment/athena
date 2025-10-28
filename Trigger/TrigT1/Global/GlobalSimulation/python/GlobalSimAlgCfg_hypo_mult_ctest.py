@@ -32,9 +32,17 @@ def GlobalSimulationAlgCfg(flags,
 
     alg = CompFactory.GlobalSim.GlobalSimulationAlg(name + 'Alg')
     alg.TIPwriters = [tool]
+    
     alg.enableDumps = dump
     alg.OutputLevel = OutputLevel
-
     cfg.addEventAlgo(alg)
+
+    
+    comparator_alg = CompFactory.GlobalSim.eEmMultTestComparator(
+        'eEmMultTestComparator')
+    comparator_alg.OutputLevel = OutputLevel
+
+
+    cfg.addEventAlgo(comparator_alg)
     
     return cfg

@@ -64,7 +64,7 @@ namespace GlobalSim {
     m_TIPword_WriteKey {
       this,
       "TIPwordWriteKey",
-      "TIPwords",
+      "ExpectedTIPwords",
       "key to write out expectations for the TIP word"
     };
     
