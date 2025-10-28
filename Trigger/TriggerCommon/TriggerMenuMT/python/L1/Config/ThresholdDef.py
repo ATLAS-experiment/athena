@@ -166,7 +166,7 @@ class ThresholdDef:
             jEMThreshold('jEMSPARE%i' % thrV, 'jEM').addThrValue(thrVal_SPARE)
 
         # eTAU
-        eTAU_cuts = [1, 12, 20, 30, 35, 60, 70, 80, 140]
+        eTAU_cuts = [1, 2, 12, 20, 30, 35, 60, 70, 80, 140]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value
         ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eTAU')
         ptMin = ttconfig["ptMinToTopo"]
@@ -284,7 +284,7 @@ class ThresholdDef:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
         
         #gTE from BC+2 (for HI anti-shadowing)
-        for thrV in []:
+        for thrV in [200]:
             TEThreshold('gESPRESSO%i' % thrV, 'gTE').setTE(thrV)
             
         # jXE
@@ -313,13 +313,13 @@ class ThresholdDef:
 
         # jTE
         # additional heavy ion jTE threhsolds
-        for thrV in [3,4,5,10,20,50,100,200,600,1500,4000,6500,8300,9000,10000,12000]:
+        for thrV in [3, 4, 5, 10, 20, 50, 100, 200, 600, 1500, 4000, 6500]:
             TEThreshold('jTE%i' % thrV, 'jTE').setTE(thrV)
 
         for thrV in [200,]:
             TEThreshold('jTEC%i' % thrV, 'jTE').setTE(thrV)
 
-        for thrV in [100,6500]:
+        for thrV in [100, 2600, 5600, 6300, 6600]:
             TEThreshold('jTEFWD%i' % thrV, 'jTE').setTE(thrV)
 
         for thrV in [100,5,1]:
