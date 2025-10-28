@@ -252,7 +252,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
 
 
    // Use the gFEXJetAlgoTool
-   std::array<uint32_t, 4> outJwojTOB = {0};
+   std::array<int32_t, 4> outJwojTOB = {0};
    std::array<uint32_t, 4> outAltMetTOB = {0};
 
    //Parameters related to gXE (MET objects, both JwoJ and alternative MET calculation)
@@ -356,7 +356,7 @@ std::vector<uint32_t> gFEXSim::getgJetTOBs() const
   return m_gJetTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgScalarEJwojTOBs() const
+std::vector<int32_t> gFEXSim::getgScalarEJwojTOBs() const
 {
   return m_gScalarEJwojTobWords;
 }
