@@ -37,6 +37,13 @@ class TauCalibrationConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
+        # protection for EleRM taus, which are available only from 2024 onward
+        if 'EleRM' in self.inputContainer:
+            if config.dataType() is DataType.Data and config.dataYear() <= 2023:
+                raise RuntimeError("EleRM taus are only available from 2024 dataset onward")
+            elif config.dataType() is not DataType.Data and config.campaign() <= Campaign.MC23d:
+                raise RuntimeError("EleRM taus are only available from 2024 dataset onward")
+
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
