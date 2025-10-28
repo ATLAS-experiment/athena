@@ -19,8 +19,12 @@ def ActsITkPixelClusterizationMonitoringToolCfg(flags,
     monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
-                            xbins=100, xmin=0, xmax=10000)
-    
+                            xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram('TIME_readingRDOs', path='EXPERT', type='TH1F', title='Time for reading RDOs',
+                            xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram('TIME_clusterization', path='EXPERT', type='TH1F', title='Time for clustering:',
+                            xbins=100, xmin=0, xmax=1000)
+
     monTool.defineHistogram('NClustersCreated', path='EXPERT', type='TH1F', title='Number of clusters produced',
                             xbins=100, xmin=0, xmax=5000)
     
@@ -37,8 +41,12 @@ def ActsITkStripClusterizationMonitoringToolCfg(flags,
     monTool = GenericMonitoringTool(flags, name)
     
     monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
-                            xbins=100, xmin=0, xmax=10000)
-    
+                            xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram('TIME_readingRDOs', path='EXPERT', type='TH1F', title='Time for reading RDOs',
+                            xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram('TIME_clusterization', path='EXPERT', type='TH1F', title='Time for clustering:',
+                            xbins=100, xmin=0, xmax=1000)
+
     monTool.defineHistogram('NClustersCreated', path='EXPERT', type='TH1F', title='Number of clusters produced',
                             xbins=100, xmin=0, xmax=5000)
     
