@@ -21,6 +21,7 @@
 #include "../GlobalAlgs/FirstChain/eEmMultAlgTool.h"
 
 #include "../GlobalAlgs/FirstChain/eEmMultTestBench.h"
+#include "../GlobalAlgs/FirstChain/eEmMultTestComparator.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
@@ -44,3 +45,4 @@ DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
+DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)
