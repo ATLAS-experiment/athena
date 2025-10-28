@@ -35,17 +35,17 @@ namespace GlobalSim::IOBitwise {
 
 
     /// Count: Size of hadronic thresholds satisfied bitset
-    static const std::size_t s_RHad_width{2};
+    static constexpr std::size_t s_RHad_width{2};
     /// Count: Size of WsTot algorithm thresholds satisfied bitset
-    static const std::size_t s_WsTot_width{2};
+    static constexpr std::size_t s_WsTot_width{2};
     /// Count: Size of R0 thresholds satisfied bitset 
-    static const std::size_t s_REta_width{2};
+    static constexpr std::size_t s_REta_width{2};
     /// Count: Size of Seed eta position in the TOB bitset
-    static const std::size_t s_Seed_width{2};
+    static constexpr std::size_t s_Seed_width{2};
     /// Count: Size of UpnotDown bit
-    static const std::size_t s_UpNotDown_width{1};
+    static constexpr std::size_t s_UpNotDown_width{1};
     /// Count: Size of Seed supercell is a local maxima bit
-    static const std::size_t s_SeedIsMax_width{1};
+    static constexpr std::size_t s_SeedIsMax_width{1};
 
     /** @brief Returns the eFexRoI Rhad threshold bits*/
     virtual const std::bitset<s_RHad_width>& RHad_bits() const = 0;
