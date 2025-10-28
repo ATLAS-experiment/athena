@@ -20,7 +20,6 @@
 #include "LUCID_RawEvent/LUCID_RawDataContainer.h"
 #include "RecBackgroundEvent/BeamBackgroundData.h"
 #include "TrkSpacePoint/SpacePointContainer.h"
-#include "xAODJet/JetContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
 class DQTBackgroundMon : public AthMonitorAlgorithm {
