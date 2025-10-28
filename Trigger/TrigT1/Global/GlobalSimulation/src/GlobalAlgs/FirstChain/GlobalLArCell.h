@@ -40,6 +40,10 @@ namespace GlobalSim{
     void setEnergy (float energy, boost::dynamic_bitset<>&& energy_bitset);
     /** @brief set position of cell in eta-phi space */
     void setPosition (float eta, float phi);
+    /** @brief set sampling of cell */
+    void setSampling (int sampling);
+    /** @brief set layer of cell */
+    void setLayer (int layer);
     /** @brief set significancy of energy deposit */
     void setSigma (float sigma);
     /** @brief set name of associated MUX */
@@ -65,6 +69,10 @@ namespace GlobalSim{
     float eta () const;
     /** @brief get the phi position of the cell */
     float phi () const;
+    /** @brief get the sampling of the cell */
+    int getSampling() const;
+    /** @brief get the layer of the cell */
+    int getLayer() const;
     /** @brief get the name of the FEB2 this cell is associated with */
     const std::string& getFEB2 () const;
     /** @brief get the name of the MUX this cell is associated with */
@@ -87,6 +95,12 @@ namespace GlobalSim{
 
     /** @brief phi position of this cell */
     float m_phi = -99.9;
+
+    /** @brief sampling of this cell */
+    int m_sampling = -1;
+
+    /** @brief layer of this cell */
+    int m_layer = -1;
 
     /** @brief name of the FEB2 through which this cell is read out */
     std::string m_feb2 = "";
@@ -153,6 +167,8 @@ namespace GlobalSim{
       m_eta = eta;
       m_phi = phi;
   }
+  inline void GlobalLArCell::setSampling (int sampling) { m_sampling = sampling; }
+  inline void GlobalLArCell::setLayer (int layer) { m_layer = layer; }
   inline void GlobalLArCell::setSigma (float sigma) { m_sigma = sigma; }
   inline void GlobalLArCell::setMUX (std::string muxname) { m_mux = std::move(muxname); };
   inline void GlobalLArCell::setLASP (std::string laspname) { m_lasp = std::move(laspname); };
@@ -171,6 +187,8 @@ namespace GlobalSim{
   inline float GlobalLArCell::getSigma () const { return m_sigma; }
   inline float GlobalLArCell::eta () const { return m_eta; }
   inline float GlobalLArCell::phi () const { return m_phi; }
+  inline int GlobalLArCell::getSampling () const { return m_sampling; }
+  inline int GlobalLArCell::getLayer () const { return m_layer; }
   inline const std::string& GlobalLArCell::getFEB2 () const { return m_feb2; }
   inline const std::string& GlobalLArCell::getMUX() const { return m_mux; }
   inline const std::string& GlobalLArCell::getLASP() const { return m_lasp; }

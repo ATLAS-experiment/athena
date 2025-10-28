@@ -169,6 +169,8 @@ namespace GlobalSim {
         gblLArCell.setEnergy(gep_energy.first, std::move(gep_energy.second));
         gblLArCell.setSigma(sigma);
         gblLArCell.setPosition(cell->eta(), cell->phi());
+        gblLArCell.setSampling(cell->caloDDE()->getSampling());
+        gblLArCell.setLayer(cell->caloDDE()->getLayer());
 
         // Fill cells into map according to FEB  
         auto feb2_itr = gblLArCellsPerFEB2.find(gblLArCell.getFEB2());
