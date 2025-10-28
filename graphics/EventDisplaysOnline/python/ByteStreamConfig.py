@@ -20,6 +20,7 @@ def ByteStreamCfg(flags, **kwargs):
     bytestreamInput.BufferSize = 10
     bytestreamInput.ISServer = '' # Disable histogramming
     bytestreamInput.StreamNames = flags.OnlineEventDisplays.TriggerStreams
+    bytestreamInput.ProcessCorruptedEvents = True
     #bytestreamInput.StreamType = "physics" #comment out for all streams, e.g. if you also want claibration streams
     bytestreamInput.StreamLogic = "Or"
 
