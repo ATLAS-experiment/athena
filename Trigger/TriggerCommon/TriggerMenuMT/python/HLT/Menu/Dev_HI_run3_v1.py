@@ -67,6 +67,7 @@ def getDevHISignatures():
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L125SUM-DPHI-2jJ5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MultiJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L115INVM-15SUM-DPHI-2jJ5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MultiJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L120INVM-20SUM-DPHI-2jJ5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MultiJetGroup+SupportPhIGroup),
+        
     ]
 
 

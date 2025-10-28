@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # PhysicsP1_HI_run3_v1.py menu
@@ -281,7 +281,103 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10_pf_jes_ftf_L1jTAU1_TRT_ZDC_XOR_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10_pf_jes_ftf_L1TRT_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
 
-
+        #UPC jets - primary candidates with jTE5
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L11ZDC_NZDC_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #backup with jTE10
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #backup with TRT_jTE5
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #UPC jets - primary candidates with gTE5
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L11ZDC_NZDC_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream, 'express'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:t0','jetMon:online']),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #UPC jets supporting without lower TE
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1VZDC_A_VZDC_C_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ZDC_XOR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #UPC jets supporting with jTE5
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #UPC jets supporting with gTE5
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L15ZDC_A_5ZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L15ZDC_A_5ZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        # UPC jets - supporting with jJ5
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ZDC_XOR_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L11ZDC_NZDC_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        # UPC jets - supporting with jJ10
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ZDC_XOR_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L11ZDC_NZDC_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L1ZDC_XOR_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20a_preselVETOMULT11a15_pf_jes_ftf_L11ZDC_NZDC_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #HF UPC jets, ATR-30208
+        ChainProp(name='HLT_j10_preselVETOMULT11a10_pf_jes_ftf_L1TRT_ZDC_XOR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10_preselVETOMULT11a10_pf_jes_ftf_L1eEM1_TRT_ZDC_XOR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10_preselVETOMULT11a10_pf_jes_ftf_L1eTAU1_TRT_ZDC_XOR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10_preselVETOMULT11a10_pf_jes_ftf_L1jTAU1_TRT_ZDC_XOR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j10_preselVETOMULT11a10_pf_jes_ftf_L1TRT_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
     ]
 
 
