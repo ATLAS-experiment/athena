@@ -22,9 +22,7 @@ The algorithms in this package demonstrate writing and reading data, tags, and c
 - **ReadCond**: Reads conditions data objects from the detector store
 
 ### Metadata I/O
-- **WriteTag**: Creates and writes AthenaAttributeList for event tagging and collections
 - **ReadMeta**: Reads file metadata (EventStreamInfo, EventBookkeeperCollection) using IMetaDataTool interface
-- **QueryTag**: Selector tool for filtering events based on tag metadata
 
 ### Filtering
 - **PassNoneFilter**: Simple filter algorithm that rejects all events (demonstrates filtering mechanism)

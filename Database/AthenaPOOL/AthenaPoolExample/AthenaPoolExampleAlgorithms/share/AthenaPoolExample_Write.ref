@@ -27,22 +27,6 @@ WriteData                                            INFO in initialize()
 WriteData                                           DEBUG data dependencies:
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+PetersHits' ) 
-WriteTag                                             INFO in initialize()
-WriteTag                                            DEBUG Defining the attribute list specification.
-WriteTag                                            DEBUG Printing out attribute list specification:
-WriteTag                                            DEBUG  name RunNumber type unsigned int
-WriteTag                                            DEBUG  name EventNumber type unsigned int
-WriteTag                                            DEBUG  name MagicNumber type unsigned int
-WriteTag                                            DEBUG data dependencies:
-  + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+RunEventTag' ) 
-MagicWriteTag                                        INFO in initialize()
-MagicWriteTag                                       DEBUG Defining the attribute list specification.
-MagicWriteTag                                       DEBUG Printing out attribute list specification:
-MagicWriteTag                                       DEBUG  name RunNumber type unsigned int
-MagicWriteTag                                       DEBUG  name EventNumber type unsigned int
-MagicWriteTag                                       DEBUG  name MagicNumber type unsigned int
-MagicWriteTag                                       DEBUG data dependencies:
-  + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+MagicTag' ) 
 StreamStream1                                       DEBUG In initialize
 StreamStream1                                       DEBUG In initialize 
 StreamStream1                                       DEBUG Found IDecisionSvc.
@@ -51,6 +35,7 @@ StreamStream1                                       DEBUG End initialize
 StreamStream1                                       DEBUG Found StoreGateSvc/StoreGateSvc store.
 StreamStream1                                       DEBUG Found StoreGateSvc/MetaDataStore store.
 StreamStream1.StreamStream1Tool                      INFO Initializing StreamStream1.StreamStream1Tool
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Creating new xAOD::FileMetaData object to fill
 StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Initializing StreamStream1.StreamStream1_MakeEventStreamInfo
 StreamStream1                                        INFO Data output: ROOTTREE:SimplePoolFile1.root
 StreamStream1                                        INFO ../O reinitialization...
@@ -60,7 +45,7 @@ StreamStream1                                       DEBUG Adding private ToolHan
 StreamStream1                                       DEBUG Adding private ToolHandle tool StreamStream1.StreamStream1_MakeEventStreamInfo (MakeEventStreamInfo)
 StreamStream1                                       DEBUG Adding private ToolHandle tool StreamStream1.StreamStream1Tool (AthenaOutputStreamTool)
 StreamStream1                                       DEBUG data dependencies:
-  + INPUT   ( 'AthenaAttributeList' , 'StoreGateSvc+MagicTag' )  [StreamStream1.StreamStream1Tool]
+  + INPUT IGNORED  ( 'AthenaAttributeList' , '' )  [StreamStream1.StreamStream1Tool]
   + OUTPUT  ( 'DataHeader' , 'StoreGateSvc+StreamStream1' ) 
   + OUTPUT  ( 'SG::CompressionInfo' , 'StoreGateSvc+CompressionInfo_StreamStream1' ) 
   + OUTPUT  ( 'SG::SelectionVetoes' , 'StoreGateSvc+SelectionVetoes_StreamStream1' ) 
@@ -82,12 +67,6 @@ AthenaEventLoopMgr                                   INFO   ===>>>  start proces
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 1  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 1  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 1  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -118,6 +97,7 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -135,6 +115,8 @@ SimplePoolFile1.root                                DEBUG --> Access   DbContain
 SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/##Params [200]  (2 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
 ##Params                                            DEBUG No objects passing selection criteria... Container has 0 Entries in total.
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO EventInfo_p4 [C634FDB6-CC4B-4BA2-B8F9-A84BE6A786C7]
@@ -208,45 +190,18 @@ SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-
 SimplePoolFile1.root                                DEBUG --->Adding Shape[5 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:DataHeaderForm_p6
 SimplePoolFile1.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
-StorageSvc                                           INFO Token [E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(Token)
-POOLCollectionTree(Token)                           DEBUG Opening
-POOLCollectionTree(Token)                           DEBUG    attributes# = 1
-POOLCollectionTree(Token)                           DEBUG Branch container 'Token'
-POOLCollectionTree(Token)                           DEBUG Opened container POOLCollectionTree(Token) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(Token) [202]  (9 , ffffffffffffffff)
-SimplePoolFile1.root                                DEBUG ---->ClassID:E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A
-SimplePoolFile1.root                                DEBUG --->Adding Shape[6 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]:  [1 Column(s)] 
-SimplePoolFile1.root                                DEBUG ---->Class:Token
-SimplePoolFile1.root                                DEBUG ---->[0]:Token Typ:Token [18] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
-StorageSvc                                           INFO unsigned int [BBACA313-D7B0-3A4C-9161-089CACF4B1CC]
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(RunNumber)
-POOLCollectionTree(RunNumber)                       DEBUG Opening
-POOLCollectionTree(RunNumber)                       DEBUG    attributes# = 1
-POOLCollectionTree(RunNumber)                       DEBUG Branch container 'RunNumber'
-POOLCollectionTree(RunNumber)                       DEBUG Opened container POOLCollectionTree(RunNumber) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(RunNumber) [202]  (a , ffffffffffffffff)
-SimplePoolFile1.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile1.root                                DEBUG --->Adding Shape[7 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]:  [1 Column(s)] 
-SimplePoolFile1.root                                DEBUG ---->Class:unsigned int
-SimplePoolFile1.root                                DEBUG ---->[0]:unsigned int Typ:unsigned int [3] Size:0 Offset:0 #Elements:1
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(EventNumber)
-POOLCollectionTree(EventNumber)                     DEBUG Opening
-POOLCollectionTree(EventNumber)                     DEBUG    attributes# = 1
-POOLCollectionTree(EventNumber)                     DEBUG Branch container 'EventNumber'
-POOLCollectionTree(EventNumber)                     DEBUG Opened container POOLCollectionTree(EventNumber) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(EventNumber) [202]  (b , ffffffffffffffff)
-SimplePoolFile1.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(MagicNumber)
-POOLCollectionTree(MagicNumber)                     DEBUG Opening
-POOLCollectionTree(MagicNumber)                     DEBUG    attributes# = 1
-POOLCollectionTree(MagicNumber)                     DEBUG Branch container 'MagicNumber'
-POOLCollectionTree(MagicNumber)                     DEBUG Opened container POOLCollectionTree(MagicNumber) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/POOLCollectionTree(MagicNumber) [202]  (c , ffffffffffffffff)
-SimplePoolFile1.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG setting xAOD::FileMetaData::productionRelease to Athena-25.0.45
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG beam energy "" tag could not be converted to float
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Failed to set xAOD::FileMetaData::simFlavour or xAOD::FileMetaData::isDataOverlay. Trying to get them from input metadata store.
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG set xAOD::FileMetaData::dataType to StreamStream1
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG added 1 to list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG added 1 to list of lumiBlocks
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Retrieved  'EventInfoKey':'EventInfo'
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG setting xAOD::FileMetaData::mcProcID to 0
 StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -325,52 +280,12 @@ SimplePoolFile2.root                                DEBUG ---->ClassID:7BE56CEF-
 SimplePoolFile2.root                                DEBUG --->Adding Shape[5 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:DataHeaderForm_p6
 SimplePoolFile2.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(Token)
-POOLCollectionTree(Token)                           DEBUG Opening
-POOLCollectionTree(Token)                           DEBUG    attributes# = 1
-POOLCollectionTree(Token)                           DEBUG Branch container 'Token'
-POOLCollectionTree(Token)                           DEBUG Opened container POOLCollectionTree(Token) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(Token) [202]  (9 , ffffffffffffffff)
-SimplePoolFile2.root                                DEBUG ---->ClassID:E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A
-SimplePoolFile2.root                                DEBUG --->Adding Shape[6 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]:  [1 Column(s)] 
-SimplePoolFile2.root                                DEBUG ---->Class:Token
-SimplePoolFile2.root                                DEBUG ---->[0]:Token Typ:Token [18] Size:0 Offset:0 #Elements:1
-SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(RunNumber)
-POOLCollectionTree(RunNumber)                       DEBUG Opening
-POOLCollectionTree(RunNumber)                       DEBUG    attributes# = 1
-POOLCollectionTree(RunNumber)                       DEBUG Branch container 'RunNumber'
-POOLCollectionTree(RunNumber)                       DEBUG Opened container POOLCollectionTree(RunNumber) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(RunNumber) [202]  (a , ffffffffffffffff)
-SimplePoolFile2.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile2.root                                DEBUG --->Adding Shape[7 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]:  [1 Column(s)] 
-SimplePoolFile2.root                                DEBUG ---->Class:unsigned int
-SimplePoolFile2.root                                DEBUG ---->[0]:unsigned int Typ:unsigned int [3] Size:0 Offset:0 #Elements:1
-SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(EventNumber)
-POOLCollectionTree(EventNumber)                     DEBUG Opening
-POOLCollectionTree(EventNumber)                     DEBUG    attributes# = 1
-POOLCollectionTree(EventNumber)                     DEBUG Branch container 'EventNumber'
-POOLCollectionTree(EventNumber)                     DEBUG Opened container POOLCollectionTree(EventNumber) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(EventNumber) [202]  (b , ffffffffffffffff)
-SimplePoolFile2.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(MagicNumber)
-POOLCollectionTree(MagicNumber)                     DEBUG Opening
-POOLCollectionTree(MagicNumber)                     DEBUG    attributes# = 1
-POOLCollectionTree(MagicNumber)                     DEBUG Branch container 'MagicNumber'
-POOLCollectionTree(MagicNumber)                     DEBUG Opened container POOLCollectionTree(MagicNumber) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/POOLCollectionTree(MagicNumber) [202]  (c , ffffffffffffffff)
-SimplePoolFile2.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967298, run #1 1 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 2  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 2  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 2  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -401,20 +316,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967298, run #1 2 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967299, run #1 2 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 3  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 3  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 3  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -445,20 +360,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967299, run #1 3 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #, run #1 3 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 4  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 4  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 4  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -489,20 +404,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #, run #1 4 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 4 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 5  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 5  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 5  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -533,20 +448,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 5 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #2, run #1 5 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 6  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 6  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 6  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -577,20 +492,21 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG added 2 to list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #2, run #1 6 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #3, run #1 6 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 7  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 7  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 7  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -621,20 +537,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #3, run #1 7 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4, run #1 7 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 8  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 8  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 8  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -665,20 +581,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 8 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #5, run #1 8 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 9  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 9  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 9  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -709,20 +625,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #5, run #1 9 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #6, run #1 9 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 10  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 10  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 10  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -753,20 +669,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #6, run #1 10 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #7, run #1 10 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 11  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 11  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 11  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -797,20 +713,21 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG added 3 to list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #7, run #1 11 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #8, run #1 11 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 12  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 12  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 12  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -841,20 +758,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #8, run #1 12 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #9, run #1 12 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 13  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 13  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 13  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -885,8 +802,14 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #9, run #1 13 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4, run #1 13 events processed so far  <<<===
@@ -894,12 +817,6 @@ WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 14  run: 1
 WriteData                                            INFO Now creating ExampleHit alias for event: 14
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 14  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 14  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -928,20 +845,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 14 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967311, run #1 14 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 15  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 15  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 15  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -970,20 +887,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967311, run #1 15 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967312, run #1 15 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 16  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 16  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 16  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1012,20 +929,21 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG added 4 to list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967312, run #1 16 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967313, run #1 16 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 17  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 17  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 17  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1054,20 +972,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967313, run #1 17 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967314, run #1 17 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 18  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 18  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 18  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1096,20 +1014,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967314, run #1 18 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967315, run #1 18 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 19  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 19  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 19  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1138,20 +1056,20 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967315, run #1 19 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967316, run #1 19 events processed so far  <<<===
 WriteData                                           DEBUG in execute()
 WriteData                                            INFO EventInfo event: 20  run: 1
 WriteData                                            INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 20  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 20  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1180,11 +1098,19 @@ StreamStream1                                       DEBUG addItemObjects(1677280
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of runNumbers
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG retrieved existing list of lumiBlocks
 SimplePoolFile2.root                                DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 20 events processed so far  <<<===
 StreamStream1                                       DEBUG handle() incident type: MetaDataStop
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG Could not get mcProcID
+StreamStre...StreamStream1_FileMetaDataCreatorTool  DEBUG FileMetaData payload replaced in store with content created for this stream
 ToolSvc.BookkeeperTool                               INFO Successfully copied CutBookkeepers to the output MetaDataStore
 StreamStream1                                       DEBUG addItemObjects(73252552,"FileMetaDataAux.") called
 StreamStream1                                       DEBUG            Key:FileMetaDataAux.
@@ -1206,6 +1132,9 @@ StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
 StreamStream1                                       DEBUG  Added object 1316383046,"/TagInfo"
+StreamStream1.StreamStream1Tool                     DEBUG In connectOutput ROOTTREE:SimplePoolFile1.root[OutputCollection=MetaDataHdr][PoolContainerPrefix=MetaData][AttributeListKey=]
+StreamStream1.StreamStream1Tool                     DEBUG Connected to ROOTTREE:SimplePoolFile1.root[OutputCollection=MetaDataHdr][PoolContainerPrefix=MetaData][AttributeListKey=]
+StreamStream1.StreamStream1Tool                     DEBUG Recorded DataHeader with key  'DataHeaderKey':'StreamStream1'
 StreamStream1                                       DEBUG connectOutput done for ROOTTREE:SimplePoolFile1.root
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::FileMetaDataAuxInfo_v1 [BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]
@@ -1214,9 +1143,9 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (d , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (9 , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile1.root                                DEBUG --->Adding Shape[8 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[6 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -1226,9 +1155,9 @@ MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Branch container 'EventStreamInfo_p3_StreamStream1'
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opened container MetaData(EventStreamInfo_p3/StreamStream1) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [203]  (e , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(EventStreamInfo_p3/StreamStream1) [203]  (a , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile1.root                                DEBUG --->Adding Shape[9 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[7 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolFile1.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -1238,9 +1167,9 @@ MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (f , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (b , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile1.root                                DEBUG --->Adding Shape[10 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[8 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolFile1.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
@@ -1250,9 +1179,9 @@ MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opening
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG    attributes# = 1
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (10 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (c , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile1.root                                DEBUG --->Adding Shape[11 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
+SimplePoolFile1.root                                DEBUG --->Adding Shape[9 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
 SimplePoolFile1.root                                DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolFile1.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdr(DataHeader)
@@ -1260,15 +1189,16 @@ MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [203]  (11 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdr(DataHeader) [203]  (d , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [203]  (12 , ffffffffffffffff)
+SimplePoolFile1.root                                DEBUG --->Adding Assoc :F2313678-C96A-964F-89E8-08BAB39F2DA7/MetaDataHdrForm(DataHeaderForm) [203]  (e , ffffffffffffffff)
 SimplePoolFile1.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
+StreamStream1.StreamStream1Tool                     DEBUG In commitOutput
 SimplePoolFile1.root                                DEBUG DB Action Commit
 StreamStream1                                       DEBUG Metadata items written: 4
 StreamStream1                                       DEBUG Leaving incident handler for MetaDataStop
@@ -1277,9 +1207,9 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (d , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (9 , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile2.root                                DEBUG --->Adding Shape[8 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[6 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile2.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamStream2)
@@ -1287,9 +1217,9 @@ MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG Branch container 'EventStreamInfo_p3_StreamStream2'
 MetaData(EventStreamInfo_p3/StreamStream2)          DEBUG Opened container MetaData(EventStreamInfo_p3/StreamStream2) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(EventStreamInfo_p3/StreamStream2) [203]  (e , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(EventStreamInfo_p3/StreamStream2) [203]  (a , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile2.root                                DEBUG --->Adding Shape[9 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[7 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolFile2.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
@@ -1297,9 +1227,9 @@ MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (f , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (b , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile2.root                                DEBUG --->Adding Shape[10 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[8 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolFile2.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
@@ -1307,9 +1237,9 @@ MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opening
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG    attributes# = 1
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (10 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (c , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile2.root                                DEBUG --->Adding Shape[11 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
+SimplePoolFile2.root                                DEBUG --->Adding Shape[9 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
 SimplePoolFile2.root                                DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolFile2.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdr(DataHeader)
@@ -1317,14 +1247,14 @@ MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdr(DataHeader) [203]  (11 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdr(DataHeader) [203]  (d , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdrForm(DataHeaderForm) [203]  (12 , ffffffffffffffff)
+SimplePoolFile2.root                                DEBUG --->Adding Assoc :73F77177-D136-9344-B64D-29693F68D6C2/MetaDataHdrForm(DataHeaderForm) [203]  (e , ffffffffffffffff)
 SimplePoolFile2.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile2.root                                DEBUG DB Action Commit
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  CREATE    [ROOT_All] ##Shapes
@@ -1428,8 +1358,6 @@ PoolSvc                                             DEBUG Disconnected Persisten
 ApplicationMgr                                       INFO Application Manager Stopped successfully
 AllExecutedEventsCounterAlg                          INFO accepted 20 out of 20 events for filter AllExecutedEvents (Number of processed events before any cut)
 WriteData                                            INFO in finalize()
-WriteTag                                             INFO in finalize()
-MagicWriteTag                                        INFO in finalize()
 StreamStream1                                       DEBUG finalize: Optimize output
 PoolSvc                                             DEBUG Disconnect request for contextId=4
 StreamStream1                                       DEBUG finalize: end optimize output
