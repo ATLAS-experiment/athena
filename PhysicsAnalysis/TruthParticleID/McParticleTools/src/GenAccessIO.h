@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHHELPER_GENACCESSIO_H
@@ -59,7 +59,7 @@ public:
                 if (genEvt == 0) return StatusCode::FAILURE;
                 if (ifgen) {
                     for (auto it: *genEvt) {
-                        if (!HepMC::is_simulation_particle(it)) mcParticles.push_back(it);
+                        if (!HepMC::is_simulation_particle(it)) mcParticles.push_back(std::move(it));
                     }
                 } else {
                     for (auto it: *genEvt) {
