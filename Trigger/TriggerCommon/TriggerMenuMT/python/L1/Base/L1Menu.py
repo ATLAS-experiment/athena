@@ -147,10 +147,10 @@ class L1Menu(object):
         boardName = connDefName+fpgaName
 
         allowedInputs = {}
-        allowedInputs['Topo1Opt0'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                      'ZeroBiasA'] # TOPO1A, FPGA1
-        allowedInputs['Topo1Opt1'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                     ] # TOPO1A, FPGA2
-        allowedInputs['Topo1Opt2'] = ['MU',        'eTAU', 'cTAU', 'j',               'gXE', 'gTE', 'gMHT'] # TOPO1B, FPGA1
-        allowedInputs['Topo1Opt3'] = ['MU',        'eTAU', 'cTAU', 'j',               'gXE', 'gTE', 'gMHT', 'LArSaturation', 'ZeroBiasB'] # TOPO1B, FPGA2
+        allowedInputs['Topo1Opt0'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                      'ZeroBiasA'] # TOPO1A, fiber 1
+        allowedInputs['Topo1Opt1'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                     ] # TOPO1A, fiber 2
+        allowedInputs['Topo1Opt2'] = ['MU',        'eTAU', 'cTAU', 'j',               'cXE', 'gXE', 'gTE', 'gMHT', 'gESPRESSO', 'LArSaturation', 'ZeroBiasB'] # TOPO1B, fiber 1
+        allowedInputs['Topo1Opt3'] = ['MU',        'eTAU', 'cTAU', 'j',               'cXE', 'gXE', 'gTE', 'gMHT', 'gESPRESSO', 'LArSaturation', 'ZeroBiasB'] # TOPO1B, fiber 2
         allowedInputs['Topo2El0']  = ['MU',        'eTAU',         'j',      ] # TOPO2, FPGA1
         allowedInputs['Topo2El1']  = [      'eEM',                 'j',      ] # TOPO2, FPGA2
         allowedInputs['Topo3El0']  = [      'eEM', 'eTAU',         'j',      ] # TOPO3, FPGA1
@@ -408,7 +408,7 @@ class L1Menu(object):
              inputtype = alg.input
              if 'cTAU' in inputtype:
                  inputtype = 'eTAU'
-             elif any(substring in inputtype for substring in ['XE','TE','MHT','LArSaturation','ZeroBias']):
+             elif any(substring in inputtype for substring in ['XE','TE','MHT', 'ESPRESSO','LArSaturation','ZeroBias']):
                  continue
              thr = self.thresholds.thresholds[threshold]
              minEt = 99999 

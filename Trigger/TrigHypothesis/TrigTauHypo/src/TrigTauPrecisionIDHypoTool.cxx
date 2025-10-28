@@ -20,12 +20,6 @@ TrigTauPrecisionIDHypoTool::TrigTauPrecisionIDHypoTool(const std::string& type, 
 }
 
 
-TrigTauPrecisionIDHypoTool::~TrigTauPrecisionIDHypoTool()
-{  
-
-}
-
-
 StatusCode TrigTauPrecisionIDHypoTool::initialize()
 {
     ATH_MSG_DEBUG(name() << ": in initialize()");
@@ -80,7 +74,7 @@ StatusCode TrigTauPrecisionIDHypoTool::initialize()
 }
 
 
-bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInfo& input) const
+bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauJetHypoTool::ToolInfo& input) const
 {
     ATH_MSG_DEBUG(name() << ": in execute()");
 
@@ -144,10 +138,10 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
             // Raise the track pT threshold when counting tracks in the 'perf' step, to reduce sensitivity to pileup tracks
             // Overrides the default 1 GeV cut by the InDetTrackSelectorTool used during the TauJet construction
             for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)) {
-	      if(track->pt() > m_trackPtCut) numTrack++;
+                if(track->pt() > m_trackPtCut) numTrack++;
             }
             for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
-	      if(track->pt() > m_trackPtCut) numIsoTrack++;
+                if(track->pt() > m_trackPtCut) numIsoTrack++;
             }
         } else {
             // Use the default 1 GeV selection in the InDetTrackSelectorTool, executed during the TauJet construction
@@ -160,16 +154,16 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
 
         // Apply track multiplicity cuts, except for idperf
         if(!m_acceptAll) {
-	  // NTrackMin and NIsoTracksMax
-	  if(pT < m_highPtTrkThr) {
-	    if(numTrack < m_numTrackMin) continue;
-            if(numIsoTrack > m_numIsoTrackMax) continue;
-	  }
-	  // NTrackMax
-	  if(pT < m_highPtJetThr) {
-            if(numTrack > m_numTrackMax) continue;
-	  }
-	}
+            // NTrackMin and NIsoTracksMax
+            if(pT < m_highPtTrkThr) {
+                if(numTrack < m_numTrackMin) continue;
+                if(numIsoTrack > m_numIsoTrackMax) continue;
+            }
+            // NTrackMax
+            if(pT < m_highPtJetThr) {
+                if(numTrack > m_numTrackMax) continue;
+            }
+        }
         // Note: we disabled the track selection for high pT taus
 
         passedCuts++;
@@ -232,10 +226,10 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
         // TauID Score monitoring
         for(const auto& [key, p] : m_monitoredIdAccessors) {
             if(!p.first.isAvailable(*Tau))
-	      ATH_MSG_WARNING("TauID Score " << m_monitoredIdScores.value().at(key).first << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
+                ATH_MSG_WARNING("TauID Score " << m_monitoredIdScores.value().at(key).first << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
 
             if(!p.second.isAvailable(*Tau))
-	      ATH_MSG_WARNING("TauID ScoreSigTrans " << m_monitoredIdScores.value().at(key).second << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
+                ATH_MSG_WARNING("TauID ScoreSigTrans " << m_monitoredIdScores.value().at(key).second << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
 
             ATH_MSG_DEBUG(" TauID \"" << key << "\" ScoreSigTrans: " << p.second(*Tau));
 
@@ -267,8 +261,8 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
 }
 
 
-StatusCode TrigTauPrecisionIDHypoTool::decide(std::vector<ITrigTauPrecisionHypoTool::ToolInfo>& input) const {
-    for(auto& i : input) {
+StatusCode TrigTauPrecisionIDHypoTool::decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input) const {
+    for(ITrigTauJetHypoTool::ToolInfo& i : input) {
         if(passed(m_decisionId.numeric(), i.previousDecisionIDs)) {
             if(decide(i)) {
 	            addDecisionID(m_decisionId, i.decision);
@@ -278,4 +272,3 @@ StatusCode TrigTauPrecisionIDHypoTool::decide(std::vector<ITrigTauPrecisionHypoT
 
     return StatusCode::SUCCESS;
 }
-

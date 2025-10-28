@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from typing import Any
 
 from AthenaCommon.SystemOfUnits import GeV
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 from .TrigTauHypoMonitoring import getTrigTauPrecisionIDHypoToolMonitoring, getTrigTauPrecisionDiKaonHypoToolMonitoring
 
@@ -12,7 +13,7 @@ log = logging.getLogger('TrigHLTTauHypoTool')
 #============================================================================================
 # Precision step hypothesis tool
 #============================================================================================
-def TrigTauPrecisionHypoToolFromDict(flags, chainDict):
+def TrigTauPrecisionHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
     chainPart = chainDict['chainParts'][0]
 
     from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainIDConfigName
@@ -53,7 +54,7 @@ class TauCuts:
         
         raise ValueError(f'Invalid selection: {sel}')
 
-def TrigTauPrecisionIDHypoToolFromDict(flags, chainDict):
+def TrigTauPrecisionIDHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
     '''TrigTauPrecisionIDHypoTool configuration for the standard Tau triggers'''
     name = chainDict['chainName']
     chainPart = chainDict['chainParts'][0]
@@ -149,7 +150,7 @@ thresholds_singlepion = {
     ('singlepion', 25): SinglePionCuts(30.0*GeV, 25.0*GeV, 1, 0, 0.06, 0.4, 0.85),
 }
 
-def TrigTauPrecisionDiKaonHypoToolFromDict(flags, chainDict):
+def TrigTauPrecisionDiKaonHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
     '''TrigTauPrecisionDiKaonHypoTool configuration for the meson cut-based Tau triggers (ATR-22644)'''
     name = chainDict['chainName']
     chainPart = chainDict['chainParts'][0]
@@ -189,26 +190,13 @@ def TrigTauPrecisionDiKaonHypoToolFromDict(flags, chainDict):
 
 
 #============================================================================================
-# Precision Tracking step hypothesis tool (without selection)
+# Tracking step hypothesis tool (without selection)
 #============================================================================================
-def TrigTauPrecTrackHypoToolFromDict(flags, chainDict):
+def TrigTauTrackingHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
     name = chainDict['chainName']
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    currentHypo = CompFactory.TrigTauPrecTrackHypoTool(name)
-
-    return currentHypo
-
-
-
-#============================================================================================
-# FTF steps hypothesis tools (without selection)
-#============================================================================================
-def TrigTauFastTrackHypoToolFromDict(flags, chainDict):
-    name = chainDict['chainName']
-
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    currentHypo = CompFactory.TrigTauFastTrackHypoTool(name)
+    currentHypo = CompFactory.TrigTauTrackingHypoTool(name)
 
     return currentHypo
 
@@ -217,7 +205,7 @@ def TrigTauFastTrackHypoToolFromDict(flags, chainDict):
 #============================================================================================
 # CaloMVA step hypothesis tool
 #============================================================================================
-def TrigTauCaloMVAHypoToolFromDict(flags, chainDict):
+def TrigTauCaloMVAHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
     name = chainDict['chainName']
     threshold = float(chainDict['chainParts'][0]['threshold'])
 
