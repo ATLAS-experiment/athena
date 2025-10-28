@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // System include(s):
@@ -290,7 +290,8 @@ namespace xAOD {
          }
 
          // Check if the object is actually available on the input:
-         if( ! event.contains( efe.branchName(), *ti ) ) {
+         static constexpr bool METADATA = false;
+         if( ! event.contains( efe.branchName(), *ti, METADATA ) ) {
             continue;
          }
 

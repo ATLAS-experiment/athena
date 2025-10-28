@@ -127,11 +127,8 @@ StatusCode TPyEvent::pyRecord(void* obj, const std::string& key,
   static constexpr bool OVERWRITE = false;
   static constexpr bool METADATA = false;
   static constexpr bool IS_OWNER = false;
-  static constexpr int BASKET_SIZE = 32000;
-  static constexpr int SPLIT_LEVEL = 0;
   RETURN_CHECK("xAOD::TPyEvent::pyRecord",
-               record(obj, type, key, BASKET_SIZE, SPLIT_LEVEL, OVERWRITE,
-                      METADATA, IS_OWNER));
+               record(obj, type, key, OVERWRITE, METADATA, IS_OWNER));
   // Return gracefully:
   return StatusCode::SUCCESS;
 }

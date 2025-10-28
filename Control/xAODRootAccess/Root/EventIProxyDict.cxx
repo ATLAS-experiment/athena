@@ -90,8 +90,8 @@ class HolderBucket : public DataBucketBase {
 
     // Do the cast:
     static constexpr bool SILENT = true;
-    static constexpr bool METADATA = true;
-    const void* result = 0;
+    static constexpr bool METADATA = false;
+    const void* result = nullptr;
     if (isConst == false) {
       // Just look among the outputs.
       result = m_event.getOutputObject(m_key, tinfo, METADATA);
@@ -99,7 +99,7 @@ class HolderBucket : public DataBucketBase {
       // Look among the output objects first:
       result = m_event.getOutputObject(m_key, tinfo, METADATA);
       // Check if it succeeded:
-      if (!result) {
+      if (result == nullptr) {
         // Try the input then:
         result = m_event.getInputObject(m_key, tinfo, SILENT, METADATA);
       } else {
@@ -157,14 +157,16 @@ class Loader : public Converter {
     // Try to find the object amongst the output objects first:
     if (m_event.getOutputObject(m_name, m_ti, METADATA)) {
       obj = new xAODPrivate::HolderBucket(m_name, m_ti, m_event);
+      return StatusCode::SUCCESS;
     }
     // If it's not on the output, try the input:
     else if (m_event.getInputObject(m_name, m_ti, SILENT, METADATA)) {
       obj = new xAODPrivate::HolderBucket(m_name, m_ti, m_event);
       m_proxy->setConst();
+      return StatusCode::SUCCESS;
     }
 
-    return StatusCode::SUCCESS;
+    return StatusCode::FAILURE;
   }
   virtual long repSvcType() const override { return 0; }
 
@@ -402,12 +404,12 @@ const Event::BranchInfo* Event::getBranchInfo(SG::sgkey_t sgkey) const {
 
 #ifndef XAOD_STANDALONE
   // Create a proper proxy for the input branch:
-  SG::TransientAddress* taddr = new SG::TransientAddress(
+  auto taddr = std::make_unique<SG::TransientAddress>(
       CLID_NULL, efe->branchName(), new GenericAddress());
   taddr->setSGKey(sgkey);
   xAODPrivate::Loader* loader = new xAODPrivate::Loader(
       *nc_this, getName(sgkey), *bi.m_class->GetTypeInfo());
-  bi.m_proxy.reset(new SG::DataProxy(taddr, loader));
+  bi.m_proxy = std::make_unique<SG::DataProxy>(std::move(taddr), loader);
   loader->setProxy(*bi.m_proxy.get());
 #endif  // not XAOD_STANDALONE
 

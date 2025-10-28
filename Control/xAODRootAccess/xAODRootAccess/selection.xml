@@ -1,16 +1,10 @@
-<!-- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
-   <!-- The TEvent class: -->
-   <class name="xAOD::TEvent" >
-      <field name="m_auxMode" transient="true" />
-      <field name="m_inTree" transient="true" />
-      <field name="m_inChain" transient="true" />
-      <field name="m_inChainTracker" transient="true" />
-      <field name="m_inTreeNumber" transient="true" />
-      <field name="m_entry" transient="true" />
-      <field name="m_outTree" transient="true" />
+   <!-- The xAOD::Event class: -->
+   <class name="xAOD::Event">
       <field name="m_inputObjects" transient="true" />
+      <field name="m_inputMissingObjects" transient="true" />
       <field name="m_outputObjects" transient="true" />
       <field name="m_inputMetaObjects" transient="true" />
       <field name="m_outputMetaObjects" transient="true" />
@@ -19,6 +13,21 @@
       <field name="m_auxItemList" transient="true" />
       <field name="m_listeners" transient="true" />
       <field name="m_nameRemapping" transient="true" />
+      <field name="m_branchesMutex" transient="true" />
+      <field name="m_branches" transient="true" />
+   </class>
+
+   <!-- The TEvent class: -->
+   <class name="xAOD::TEvent" >
+      <field name="m_auxMode" transient="true" />
+      <field name="m_inTree" transient="true" />
+      <field name="m_inTreeMissing" transient="true" />
+      <field name="m_inChain" transient="true" />
+      <field name="m_inChainTracker" transient="true" />
+      <field name="m_inTreeNumber" transient="true" />
+      <field name="m_inMetaTree" transient="true" />
+      <field name="m_entry" transient="true" />
+      <field name="m_outTree" transient="true" />
    </class>
 
    <!-- And things that it depends on: -->

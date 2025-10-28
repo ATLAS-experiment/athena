@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -87,7 +87,8 @@ namespace xAOD {
          }
 
          // And do one final check that we can really read this type.
-         if( ! contains( efe.branchName(), *ti ) ) {
+         static constexpr bool METADATA = false;
+         if( ! contains( efe.branchName(), *ti, METADATA ) ) {
             continue;
          }
 
@@ -125,7 +126,10 @@ namespace xAOD {
       // Loop over all "registered" objects.
       for( auto& obj : m_objects ) {
          // (Re-)Access this object.
-         obj.second = getInputObject( obj.first.first, *( obj.first.second ) );
+         static constexpr bool SILENT = false;
+         static constexpr bool METADATA = false;
+         obj.second = getInputObject( obj.first.first, *( obj.first.second ),
+                                     SILENT, METADATA );
       }
 
       // Return gracefully.
