@@ -40,12 +40,13 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True
     flags.Muon.doFastMMDigitization = True
+    flags.Acts.TrackingGeometry.UseBlueprint = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonTrackTester"))
 
-
+    # cfg.getService("MessageSvc").setVerbose = ["MsTrackTester", "MSTrackFinderAlg", "MuonSegmentFittingAlg"]
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
     cfg.merge(xAODUncalibMeasPrepCfg(flags))
     
@@ -59,5 +60,31 @@ if __name__=="__main__":
     cfg.merge(MSTrackFinderAlgCfg(flags,
                                 VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
     cfg.merge(MsTrackTesterCfg(flags))
-   
+
+    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
+                                    outStream="MuonEtaHoughTransformTest"))
+
+    from MuonPatternRecognitionTest.PatternTestConfig import MuonHoughTransformTesterCfg, PatternVisualizationToolCfg
+
+    
+    cfg.merge(MuonHoughTransformTesterCfg(flags,
+                                            VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
+
+####    cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+####                                                                                                CanvasPreFix="SegmentPlotValid",
+####                                                                                                AllCanvasName="AllSegmentFitPlots",
+####                                                                                                displayTruthOnly = False,
+####                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
+####
+####    cfg.getEventAlgo("NswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+####                                                                                                CanvasPreFix="NswSegmentPlotValid",
+####                                                                                                AllCanvasName="AllSegmentFitPlots",
+####                                                                                                displayTruthOnly = False,
+####                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
+
+    
+
+# 
+
+
     executeTest(cfg)

@@ -137,6 +137,8 @@ namespace MuonValR4{
                                             const DisplayView view);
             /** @brief Key to the truth segment selection to draw the segment parameters */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegkey", "MuonTruthSegments"};
+            /** @brief Dependency on the geometry alignment */
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Maximum canvases to draw */
             Gaudi::Property<unsigned> m_canvasLimit{this, "CanvasLimit", 5000};
             /** @brief If set to true each canvas is saved into a dedicated pdf file */ 
