@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -126,8 +126,8 @@ CalibrationDataContainer::listUncertainties() const
   std::vector<std::string> uncertainties;
   TIter it(GetTable());
   while (TPair* pair = (TPair*) it()) {
-    std::string spec(pair->Key()->GetName());
-    uncertainties.push_back(spec);
+    
+    uncertainties.emplace_back(pair->Key()->GetName());
   }
   return uncertainties;
 }
