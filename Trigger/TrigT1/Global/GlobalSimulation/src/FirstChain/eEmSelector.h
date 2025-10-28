@@ -6,7 +6,7 @@
 #define GLOBALSIM_EEMSELECTOR_H
 
 #include "IeEmSelector.h"
-#include "../../IO/IeEmTOB.h"  // bitset widths
+#include "../IO/IeEmTOB.h"  // bitset widths
 
 #include <climits>
 

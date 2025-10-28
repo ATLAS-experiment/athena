@@ -4,22 +4,22 @@
 
 #include "../GlobalSimulationAlg.h"
 
-#include "../GlobalAlgs/FirstChain/Egamma1_LArStrip_Fex.h"
-#include "../GlobalAlgs/FirstChain/Egamma1_LArStrip_Fex_RowAware.h"
-#include "../GlobalAlgs/FirstChain/EMB1CellsFromCaloCells.h"
-#include "../GlobalAlgs/FirstChain/eFexRoIAlgTool.h"
+#include "../FirstChain/Egamma1_LArStrip_Fex.h"
+#include "../FirstChain/Egamma1_LArStrip_Fex_RowAware.h"
+#include "../FirstChain/EMB1CellsFromCaloCells.h"
+#include "../FirstChain/eFexRoIAlgTool.h"
 #include "../GlobalAlgs/ERatioAlgTool.h"
-#include "../GlobalAlgs/FirstChain/Egamma1BDTAlgTool.h"
-#include "../GlobalAlgs/FirstChain/Egamma1eRatioAlgTool.h"
+#include "../FirstChain/Egamma1BDTAlgTool.h"
+#include "../FirstChain/Egamma1eRatioAlgTool.h"
 
-#include "../GlobalAlgs/FirstChain/LArCellPreparationAlg.h"
-#include "../GlobalAlgs/FirstChain/LArCellMuxAlg.h"
-#include "../GlobalAlgs/FirstChain/GlobalCellTowerAlgTool.h"
-#include "../GlobalAlgs/FirstChain/eFexCvtrAlgTool.h"
-#include "../GlobalAlgs/FirstChain/eEmMultAlgTool.h"
+#include "../FirstChain/LArCellPreparationAlg.h"
+#include "../FirstChain/LArCellMuxAlg.h"
+#include "../FirstChain/GlobalCellTowerAlgTool.h"
+#include "../FirstChain/eFexCvtrAlgTool.h"
+#include "../FirstChain/eEmMultAlgTool.h"
 
-#include "../GlobalAlgs/FirstChain/eEmMultTestBench.h"
-#include "../GlobalAlgs/FirstChain/eEmMultTestComparator.h"
+#include "../FirstChain/eEmMultTestBench.h"
+#include "../FirstChain/eEmMultTestComparator.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)

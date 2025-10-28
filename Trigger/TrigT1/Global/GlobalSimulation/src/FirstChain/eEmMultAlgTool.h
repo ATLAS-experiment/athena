@@ -7,9 +7,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "../../ITIPwriterAlgTool.h"
-#include "../../IGlobalSimAlgTool.h" // temporary - access to TIP word
-#include "../../IO/IeEmTOBContainer.h"
+#include "../ITIPwriterAlgTool.h"
+#include "../IO/IeEmTOBContainer.h"
 
 #include "ICommonSelector.h"
 #include "IeEmSelector.h"

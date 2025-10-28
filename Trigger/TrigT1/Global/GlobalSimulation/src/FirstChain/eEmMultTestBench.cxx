@@ -1,11 +1,11 @@
 //  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "eEmMultTestBench.h"
-#include "../../ITIPwriterAlgTool.h"  // TIP word width
-#include "../../IO/IeEmTOB.h"
-#include "../../IO/eEmTOB.h"
-#include "../../IO/CommonTOB.h"
-#include "../../IO/TipWord_clid.h"
+#include "../ITIPwriterAlgTool.h"  // TIP word width
+#include "../IO/IeEmTOB.h"
+#include "../IO/eEmTOB.h"
+#include "../IO/CommonTOB.h"
+#include "../IO/TipWord_clid.h"
 #include "../Utilities/trim.h"
 
 #include "PathResolver/PathResolver.h"

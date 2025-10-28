@@ -7,10 +7,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "../../IGlobalSimAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
 
-#include "../../IO/IeEmTOBContainer.h"
+#include "../IO/IeEmTOBContainer.h"
 
 namespace GlobalSim {
 

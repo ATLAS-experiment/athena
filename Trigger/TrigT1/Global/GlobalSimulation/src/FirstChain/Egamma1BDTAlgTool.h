@@ -9,18 +9,18 @@
  * AlgTool to read in LArStripNeighborhoods, and run the BDT Algorithm.
  */
 
-#include "../../IGlobalSimAlgTool.h"
-#include "../../IO/LArStripNeighborhoodContainer.h"
-#include "../../IO/IeEmNbhoodTOBContainer.h"
-#include "../../IO/IeEmNbhoodTOB.h"
-#include "../../IO/IeEmEg1BDTTOBContainer.h"
-#include "../../IO/IeEmEg1BDTTOB.h"
+#include "../IGlobalSimAlgTool.h"
+#include "../IO/LArStripNeighborhoodContainer.h"
+#include "../IO/IeEmNbhoodTOBContainer.h"
+#include "../IO/IeEmNbhoodTOB.h"
+#include "../IO/IeEmEg1BDTTOBContainer.h"
+#include "../IO/IeEmEg1BDTTOB.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"
 #include "Digitizer.h"
 
-#include "../Egamma1BDT/BDT.h"
+#include "../GlobalAlgs/Egamma1BDT/BDT.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 

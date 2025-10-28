@@ -6,7 +6,7 @@
 #define GLOBALSIM_COMMONMULTSELECTOR_H
 
 #include "ICommonSelector.h"
-#include "../../IO/ICommonTOB.h"  // bitset widths
+#include "../IO/ICommonTOB.h"  // bitset widths
 
 #include <string>
 #include <climits>

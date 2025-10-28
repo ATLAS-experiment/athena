@@ -9,11 +9,10 @@ find_package( GTest )
 find_package( APTypes )
 
 atlas_add_component (GlobalSimulation
-   src/*.h src/*.cxx src/L1TopoAlgs/*.h 
-   src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx src/GlobalAlgs/Utilities/*.cxx
-   src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp 
-   src/GlobalAlgs/Hypothesis/UCL/*.h src/GlobalAlgs/Hypothesis/UCL/*.cxx 
-   src/GlobalAlgs/FirstChain/*.h src/GlobalAlgs/FirstChain/*.cxx 
+   src/*.h src/*.cxx  
+   src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx src/Utilities/*.cxx
+   src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp
+   src/FirstChain/*.h src/FirstChain/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
