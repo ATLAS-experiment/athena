@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -841,7 +841,7 @@ CalibrationDataEigenVariations::removeVariations(const IndexSet &set)
       if (set.count(index) == 0) new_eigen.push_back(m_eigen[index]);
       else { delete m_eigen[index].first; delete m_eigen[index].second; }
     }
-  m_eigen = new_eigen;
+  m_eigen = std::move(new_eigen);
 }
 
 //________________________________________________________________________________
@@ -2189,7 +2189,7 @@ CalibrationDataGlobalEigenVariations::removeVariations(const IndexSet &set, std:
       }
     }
 
-  m_flav_eigen[flav] = new_eigen;
+  m_flav_eigen[flav] = std::move(new_eigen);
 
 }
 
