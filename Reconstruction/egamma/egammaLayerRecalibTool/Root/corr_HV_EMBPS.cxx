@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaLayerRecalibTool/corr_HV_EMBPS.h"
@@ -122,7 +122,8 @@ float corr_HV_EMBPS::Respo(float e, float e_nominal,float tempe)
   if (e < -999.) return 1.;
   if (e < 0.01) return 0;
   if ( e > e_nominal ) return 1;
-  float resp = (InvCharge(e_nominal)*vdrift(e,tempe))/(InvCharge(e)*vdrift(e_nominal,tempe));
+  float den = InvCharge(e)*vdrift(e_nominal,tempe);
+  float resp = den == 0 ? 0 : (InvCharge(e_nominal)*vdrift(e,tempe))/den;
   return resp;
 }
 
