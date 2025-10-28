@@ -435,6 +435,14 @@ atlas_add_citest( ACTS_CheckObjectCounts_Workflow
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
 
+atlas_add_citest( ACTS_TriggerC100
+  SCRIPT test_trigAna_ActsTriggerC100_build.py
+  LOG_IGNORE_PATTERN "Propagation reached the step count limit|Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters")
+
+atlas_add_citest( ACTS_TriggerC230
+  SCRIPT test_trigAna_ActsTriggerC230_build.py
+  LOG_IGNORE_PATTERN "Propagation reached the step count limit|Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters")
+
 #################################################################################
 #                 Muon Phase II CI tests
 #################################################################################
