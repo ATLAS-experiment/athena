@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "../GlobalSimulationAlg.h"
-#include "../GlobalAlgs/Hypothesis/UCL/HypoTestBenchAlg.h"
-#include "../GlobalAlgs/Hypothesis/UCL/InvMassDPhiInc2TestBenchAlg.h"
 
 #include "../GlobalAlgs/FirstChain/Egamma1_LArStrip_Fex.h"
 #include "../GlobalAlgs/FirstChain/Egamma1_LArStrip_Fex_RowAware.h"
@@ -25,9 +23,6 @@
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
-DECLARE_COMPONENT(GlobalSim::HypoTestBenchAlg)
-DECLARE_COMPONENT(GlobalSim::InvMassDPhiInc2TestBenchAlg)
-
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
