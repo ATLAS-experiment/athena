@@ -144,7 +144,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)  # Define Seeding Strategy
     
     # Track finding
-    actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.AnalogueClusteringAfterSelection, type=PixelCalibrationStrategy)
+    actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.Uncalibrated, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.StripCalibrationStrategy', StripCalibrationStrategy.Uncalibrated, type=StripCalibrationStrategy)
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
