@@ -26,10 +26,6 @@ StatusCode MuonTrackMonitorAlgorithm::initialize()
     ATH_CHECK(m_VertexContainerKey.initialize(!m_VertexContainerKey.empty()));
     ATH_CHECK(m_derEventInfoKey.initialize());
     /// https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODEventInfoCnv/src/EventInfoBeamSpotDecoratorAlg.h#L64-78
-    
-    for (const std::string beam : {"beamPosSigmaX", "beamPosSigmaY", "beamPosSigmaZ", "beamPosSigmaXY"}) {
-        m_beamSpotKey.emplace_back(m_derEventInfoKey.key() + "."+beam);
-    }
     ATH_CHECK(m_beamSpotKey.initialize(m_useBeamSpot));
     return StatusCode::SUCCESS;
 }

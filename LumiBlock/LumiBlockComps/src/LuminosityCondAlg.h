@@ -183,11 +183,11 @@ private:
   { this, "EventInfoKey", "EventInfo", "EventInfo key, used to read in simulated mu in MC" };
 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_actualMuKey 
-  { this, "actualMuKey", "EventInfo.actualInteractionsPerCrossing",
+  { this, "actualMuKey", m_eventInfoKey, "actualInteractionsPerCrossing",
     "Decoration for Actual Interaction Per Crossing, for MC" };
 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_averageMuKey 
-  { this, "averageMuKey", "EventInfo.averageInteractionsPerCrossing",
+  { this, "averageMuKey", m_eventInfoKey, "averageInteractionsPerCrossing",
     "Decoration for Average Interaction Per Crossing" };
 
   /// Output conditions object.

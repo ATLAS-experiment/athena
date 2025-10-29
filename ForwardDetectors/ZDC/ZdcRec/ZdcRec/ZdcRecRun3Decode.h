@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ private:
 	Gaudi::Property<unsigned int> m_nFragments{this,"NFragments",6,"Number of expected LUCROD fragments"};
 
 	SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-	SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", "EventInfo.forwardDetFlags", "Key for EventInfo decoration object"};  
+	SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", m_eventInfoKey, "forwardDetFlags", "Key for EventInfo decoration object"};
 
 	SG::ReadHandleKey<ZdcLucrodDataContainer> m_zldContainerName
           { this, "ZdcLucrodDataContainerKey", "ZdcLucrodDataContainer", "" };

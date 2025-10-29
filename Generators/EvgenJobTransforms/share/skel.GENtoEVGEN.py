@@ -145,7 +145,7 @@ theApp.EvtMax = -1
 if not hasattr(postSeq, "CountHepMC"):
     postSeq += CountHepMC(InputEventInfo="TMPEvtInfo",
                           OutputEventInfo="EventInfo",
-                          mcEventWeightsKey="TMPEvtInfo.mcEventWeights")
+                          mcEventWeightsKey="mcEventWeights")
 #postSeq.CountHepMC.RequestedOutput = evgenConfig.nEventsPerJob if runArgs.maxEvents == -1 else runArgs.maxEvents
 
 postSeq.CountHepMC.FirstEvent = runArgs.firstEvent

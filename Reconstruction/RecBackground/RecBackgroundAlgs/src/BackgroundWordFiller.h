@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Algorihtm to fill the background word that is stored in the EventInfo
@@ -70,7 +70,7 @@ class BackgroundWordFiller : public AthAlgorithm {
 
   /** WriteDecorHandleKey: needed for scheduling downstream clients */
   SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{
-      this, "eventInfoDecorKey", "EventInfo.backgroundWord",
+      this, "eventInfoDecorKey", m_eventInfoKey, "backgroundWord",
       "Decoration key for downstream clients"};
 
   Gaudi::Property<bool> m_isMC{this, "IsMC", false,

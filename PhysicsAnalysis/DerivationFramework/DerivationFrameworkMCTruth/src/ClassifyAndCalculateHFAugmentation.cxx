@@ -55,18 +55,16 @@ namespace DerivationFramework {
 
     ATH_MSG_INFO("Jets Container Name "            << m_jetCollectionKey.key());
     ATH_MSG_INFO("Truth Particles Container Name " << m_truthParticlesKey.key());
-    ATH_MSG_INFO("HF Classifier Name "             << m_hfDecorationName);
-    ATH_MSG_INFO("Simple HF Classifier Name "      << m_SimplehfDecorationName);
-    ATH_MSG_INFO("Jet Origin ID Decoration Name "  << m_jetIDDecorationName);
-
+    ATH_MSG_INFO("HF Classifier Name "             << m_hfDecorKey.key());
+    ATH_MSG_INFO("Simple HF Classifier Name "      << m_SimplehfDecorKey.key());
+    ATH_MSG_INFO("Jet Origin ID Decoration Name "  << m_jetIDDecorationKey.key());
+    std::size_t pos = m_hfDecorKey.key().find(".");
+    if (pos != std::string::npos) { m_hfDecorationName = m_hfDecorKey.key().substr (pos+1); }
     ATH_CHECK( m_truthParticlesKey.initialize() );
     ATH_CHECK( m_jetCollectionKey.initialize() );
     ATH_CHECK( m_eventInfoKey.initialize() );
-    ATH_CHECK( m_hfDecorKey.assign(m_eventInfoKey.key()+"."+m_hfDecorationName) );
     ATH_CHECK( m_hfDecorKey.initialize() );
-    ATH_CHECK( m_SimplehfDecorKey.assign(m_eventInfoKey.key()+"."+m_SimplehfDecorationName) );
     ATH_CHECK( m_SimplehfDecorKey.initialize() );
-    ATH_CHECK( m_jetIDDecorationKey.assign(m_jetCollectionKey.key()+"."+m_jetIDDecorationName) );
     ATH_CHECK( m_jetIDDecorationKey.initialize() );
 
     // Retrieve the necessary tools

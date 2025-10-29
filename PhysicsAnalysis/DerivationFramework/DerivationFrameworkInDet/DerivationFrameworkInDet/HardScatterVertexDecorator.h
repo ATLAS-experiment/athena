@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -63,26 +63,16 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContKey{this, "VertexContainerName", "PrimaryVertices", 
                                                           "Name of the input vertex container"};
 
-    /// Name of the output hardscatter decoration (applied to xAOD::EventInfo)
-    Gaudi::Property<std::string> m_evtDecoName{this, "HardScatterDecoName", "hardScatterVertexLink", 
-                                              "Name of the hardscatter vertex decoration (applied to xAOD::EventInfo)"};
-
     /// ToolHandle for the IInDetHardScatterSelectionTool
     ToolHandle<InDet::IInDetHardScatterSelectionTool> m_vtxSelectTool{this, "HardScatterSelectionTool", "",
                                                                       "IInDetHardScatterSelectionTool for selecting the hardscatter vertex" };
-
-    /// @}
-  private:
-
-    /// @name Truly private internal data members
-    /// @{
 
     /// xAOD::EventInfo ReadHandleKey
     SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey {this, "EventInfo", "EventInfo", "EventInfo key"};
 
     /// WriteDecorHandleKey for the output hardscatter decoration (applied to xAOD::EventInfo)
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtDecoKey{this, "VertexDecorationKey", "", 
-                                            "Declaration of the HardScatterVertexLink key. Will be overwrriten during initialize"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtDecoKey{this, "HardScatterDecoName", m_evtInfoKey, "hardScatterVertexLink", 
+                                              "Name of the hardscatter vertex decoration (applied to xAOD::EventInfo)"};
 
     /// @}
 

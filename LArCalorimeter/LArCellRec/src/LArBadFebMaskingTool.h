@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LArBadFebMaskingTool_H
@@ -86,7 +86,7 @@ public:
 
   SG::ReadHandleKey<LArFebErrorSummary> m_larFebErrorSummaryKey{this,"FebErrorSummaryKey","LArFebErrorSummary"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey","EventInfo.larFlags"};
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey",m_eventInfoKey, "larFlags"};
   /** compute bit mask of errors to mask
   */
   uint16_t m_errorToMask=0;

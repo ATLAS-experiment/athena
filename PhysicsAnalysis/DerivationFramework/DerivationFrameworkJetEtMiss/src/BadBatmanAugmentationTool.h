@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ namespace DerivationFramework {
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_isBadBatmanKey {this
 	,"IsBadBatmanKey"
-	,"EventInfo.DFCommonJets_isBadBatman"
+	,m_eventInfo_key, "DFCommonJets_isBadBatman"
 	,"Decoration for isBadBatman flag"};
 
   }; 

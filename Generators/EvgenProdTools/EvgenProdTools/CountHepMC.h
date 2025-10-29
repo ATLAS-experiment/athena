@@ -53,7 +53,7 @@ private:
   SG::ReadHandleKey<xAOD::EventInfo>  m_inputEvtInfoKey { this, "InputEventInfo",  "TMPEvtInfo", "ReadHandleKey for Input xAOD::EventInfo" };
   SG::WriteHandleKey<xAOD::EventInfo> m_outputEvtInfoKey{ this, "OutputEventInfo", "EventInfo", "WriteHandleKey for Output xAOD::EventInfo" };
 
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_mcWeightsKey {this, "mcEventWeightsKey", "TMPEvtInfo.mcEventWeights", "Decoration for MC Event Weights"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_mcWeightsKey {this, "mcEventWeightsKey", m_inputEvtInfoKey, "mcEventWeights", "Decoration for MC Event Weights"};
 
 };
 
