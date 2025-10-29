@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TreeShapeErrorGetter.h"
@@ -264,7 +264,7 @@ bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TStr
   int hash, gain, lwb1, lwb2, nSamples;
   double xi1[99], xi2[99], xip1[99], xip2[99];
   int calo;
-  unsigned int layer, ft, slot, channel;
+  int layer, ft, slot, channel;
   double eta, phi;
 
   tree->Branch("hash", &hash);
