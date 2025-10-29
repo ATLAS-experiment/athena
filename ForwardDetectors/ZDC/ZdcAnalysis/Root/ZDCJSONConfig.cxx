@@ -80,7 +80,7 @@ std::pair<bool, std::string> ZDCJSONConfig::ParseConfig(const JSON& config, cons
   return {result, resultString};
 }
 
-template<typename T> std::pair<bool, std::string> ZDCJSONConfig::ParsePerChannelParams(std::string paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize)
+template<typename T> std::pair<bool, std::string> ZDCJSONConfig::ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize)
 {
   bool result = true;
   std::string resultString = "success";

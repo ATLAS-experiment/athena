@@ -74,8 +74,8 @@ private:
 
   //  Static data
   //
-  bool m_quietFits;
-  bool m_saveFitFunc;
+  bool m_quietFits{};
+  bool m_saveFitFunc{};
   
   static TH1* s_undelayedFitHist;
   static TH1* s_delayedFitHist;
@@ -87,10 +87,10 @@ private:
   // Quantities provided/set in the constructor
   //
   ZDCMsg::MessageFunctionPtr m_msgFunc_p{};
-  std::string m_tag;
+  std::string m_tag{};
   unsigned int m_Nsample{};
   unsigned int m_preSampleIdx{};
-  float m_freqMHz;
+  float m_freqMHz{};
   float m_deltaTSample{};
   int m_pedestal{};
   float m_gainHG{};
@@ -98,7 +98,7 @@ private:
   float m_tmin{};
   float m_tmax{};
 
-  std::string m_fitFunction;
+  std::string m_fitFunction{};
   size_t m_2ndDerivStep{1};
   size_t m_peak2ndDerivMinSample{};
   size_t m_peak2ndDerivMinTolerance{1};
@@ -123,7 +123,7 @@ private:
 
   // Default fit values and cuts that can be set via modifier methods
   //
-  std::string m_fitOptions;
+  std::string m_fitOptions{};
   int m_HGOverflowADC{};
   int m_HGUnderflowADC{};
   int m_LGOverflowADC{};
@@ -164,8 +164,8 @@ private:
   float m_fitAmpMaxLG{};      // Minimum amplitude in the fit
 
   bool m_haveSignifCuts{false};
-  float m_sigMinHG;           // Minimum amplitude significance to be considered valid pulse
-  float m_sigMinLG;           // Minimum amplitude significance to be considered valid pulse
+  float m_sigMinHG{};           // Minimum amplitude significance to be considered valid pulse
+  float m_sigMinLG{};           // Minimum amplitude significance to be considered valid pulse
   
   // Enabling (or not) of exclusion of early or late samples from OOT pileup
   //
@@ -183,14 +183,14 @@ private:
   unsigned int m_timingCorrMode{NoTimingCorr};
   float m_timingCorrRefADC{500};
   float m_timingCorrScale{100};
-  std::vector<float> m_LGT0CorrParams; // Parameters used to correct the fit LG times
-  std::vector<float> m_HGT0CorrParams; // Parameters used to correct the fit HG times
+  std::vector<float> m_LGT0CorrParams{}; // Parameters used to correct the fit LG times
+  std::vector<float> m_HGT0CorrParams{}; // Parameters used to correct the fit HG times
 
   bool m_haveNonlinCorr{false};
   float m_nonLinCorrRefADC{500};
   float m_nonLinCorrRefScale{100};
-  std::vector<float> m_nonLinCorrParamsHG;
-  std::vector<float> m_nonLinCorrParamsLG;
+  std::vector<float> m_nonLinCorrParamsHG{};
+  std::vector<float> m_nonLinCorrParamsLG{};
 
   bool m_haveFADCCorrections{false};
   std::string m_fadcCorrFileName;
@@ -200,13 +200,13 @@ private:
   
   // Histogram used to perform the fits and function wrappers
   //
-  std::unique_ptr<TH1> m_fitHist;
-  std::unique_ptr<TH1> m_fitHistLGRefit;
+  std::unique_ptr<TH1> m_fitHist{};
+  std::unique_ptr<TH1> m_fitHistLGRefit{};
 
   bool m_initializedFits{false};
-  std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper;
-  std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapper;
-  std::unique_ptr<ZDCPreExpFitWrapper> m_preExpFitWrapper;
+  std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper{};
+  std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapper{};
+  std::unique_ptr<ZDCPreExpFitWrapper> m_preExpFitWrapper{};
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //
@@ -220,11 +220,11 @@ private:
   bool  m_useFixedBaseline{};
   float m_delayedDeltaT{};
   float m_delayedPedestalDiff{};
-  std::unique_ptr<TH1> m_delayedHist;
-  std::unique_ptr<TH1> m_delayedHistLGRefit;
+  std::unique_ptr<TH1> m_delayedHist{};
+  std::unique_ptr<TH1> m_delayedHistLGRefit{};
 
-  std::unique_ptr<TFitter> m_prePulseCombinedFitter;
-  std::unique_ptr<TFitter> m_defaultCombinedFitter;
+  std::unique_ptr<TFitter> m_prePulseCombinedFitter{};
+  std::unique_ptr<TFitter> m_defaultCombinedFitter{};
 
   // Dynamic data loaded for each pulse (event)
   // ==========================================

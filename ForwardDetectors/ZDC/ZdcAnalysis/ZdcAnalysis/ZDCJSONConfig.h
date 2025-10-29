@@ -60,7 +60,7 @@ private:
     }
   }
 
-  template<typename T> void setChannelParameter(unsigned int side, unsigned int chanIndex, std::string key, T value)
+  template<typename T> void setChannelParameter(unsigned int side, unsigned int chanIndex, const std::string& key, T value)
   {
     unsigned int index = side*m_numChannelsPerSide + chanIndex;
     m_channelConfig[index][key] = value;
@@ -80,7 +80,7 @@ private:
   }
 
   template<typename T> std::pair<bool, std::string>
-  ParsePerChannelParams(std::string paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize);
+  ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize);
 
   
 public:

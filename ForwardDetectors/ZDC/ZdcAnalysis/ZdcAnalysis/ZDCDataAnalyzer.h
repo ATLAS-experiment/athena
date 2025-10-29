@@ -70,7 +70,7 @@ private:
   std::array<float, 2> m_moduleSum{};
   std::array<float, 2> m_moduleSumErrSq{};
   std::array<float, 2> m_moduleSumPreSample{};
-  std::array<float, 2> m_moduleSumBkgdFrac;
+  std::array<float, 2> m_moduleSumBkgdFrac{};
 
   std::array<float, 2> m_calibModuleSum{};
   std::array<float, 2> m_calibModuleSumErrSq{};
@@ -103,7 +103,7 @@ public:
 
   ~ZDCDataAnalyzer(){};
 
-  template<typename T> bool getPulseAnalyzerGlobalPar(std::string key, T& value) {
+  template<typename T> bool getPulseAnalyzerGlobalPar(const std::string& key, T& value) {
     if (m_pulseAnalyzerConfig.get()) return m_pulseAnalyzerConfig->getGlobalParam(key, value);
     else return false;
   }
