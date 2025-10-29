@@ -60,18 +60,15 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
     double cluster_LATERAL = 0;
     double cluster_PTD = 0;
     double cluster_ISOLATION = 0;
-    double clusterE_TRUTH = 0;
 
     std::vector<float> transformedFeatures;
-    bool ok{}; //for checking return value of cluster->retrieveMoment
+    bool ok{}; // for checking return value of cluster->retrieveMoment
+
     for (const xAOD::CaloCluster *cluster : clusters)
     {
         clusterE = cluster->e(xAOD::CaloCluster::UNCALIBRATED) / Gaudi::Units::GeV;
         clusterEta = cluster->eta(xAOD::CaloCluster::UNCALIBRATED);
-        //set ok to first return value
-        ok = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::ENG_CALIB_TOT, clusterE_TRUTH);
-        clusterE_TRUTH /= Gaudi::Units::GeV;
-        ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SIGNIFICANCE, cluster_SIGNIFICANCE);
+        ok = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SIGNIFICANCE, cluster_SIGNIFICANCE);
         ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_TIME, cluster_SECOND_TIME);
         cluster_SECOND_TIME /= (Gaudi::Units::nanosecond * Gaudi::Units::nanosecond);
         ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, cluster_CENTER_LAMBDA);
@@ -84,9 +81,12 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
         ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::PTD, cluster_PTD);
         ok &= cluster->retrieveMoment(xAOD::CaloCluster::MomentType::ISOLATION, cluster_ISOLATION);
         cluster_time = cluster->time() / Gaudi::Units::nanosecond;
-        if (not ok) {
-          ATH_MSG_WARNING("CaloClusterMLCalibToolLite: retrieveMoment failed for "<<cluster);
+
+        if (!ok) {
+            ATH_MSG_ERROR("retrieveMoment() failed for " << cluster);
+            return StatusCode::FAILURE;
         }
+
         float e_EM = 0.0;
         for (size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++)
         {
@@ -131,42 +131,45 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
     inputData["features"] = std::make_pair(
         inputShape, std::move(transformedFeatures));
 
-    AthInfer::OutputDataMap outputData; // Looks like there is bug in AthInfer at this moment,
-                                        // using actual names for the output layers doesn't ensure correct mapping.
-    outputData["0"] = std::make_pair(   // Hence using dummy names like "0", "1" and "2" to avoid confusion.
+    AthInfer::OutputDataMap outputData;
+
+    outputData["mus"] = std::make_pair(
         std::vector<int64_t>{numClusters, 3}, std::vector<float>{});
-    outputData["1"] = std::make_pair(
+    outputData["sigmas"] = std::make_pair(
         std::vector<int64_t>{numClusters, 3}, std::vector<float>{});
-    outputData["2"] = std::make_pair(
+    outputData["alphas"] = std::make_pair(
         std::vector<int64_t>{numClusters, 3}, std::vector<float>{});
 
     ATH_CHECK(m_onnxTool->inference(inputData, outputData));
 
-    std::vector<float> &onnx_mus = std::get<std::vector<float>>(outputData["0"].second);
-    std::vector<float> &onnx_sigma2s = std::get<std::vector<float>>(outputData["1"].second);
-    std::vector<float> &onnx_alphas = std::get<std::vector<float>>(outputData["2"].second);
+    std::vector<float> &onnx_mus = std::get<std::vector<float>>(outputData["mus"].second);
+    std::vector<float> &onnx_sigma2s = std::get<std::vector<float>>(outputData["sigmas"].second);
+    std::vector<float> &onnx_alphas = std::get<std::vector<float>>(outputData["alphas"].second);
+
+    int nan_in_mus = 0;
+    int nan_in_sigma2s = 0;
+    int nan_in_alphas = 0;
 
     for (float val : onnx_mus)
-    {
         if (std::isnan(val))
-        {
-            ATH_MSG_WARNING("NaN value found in `mus` output layer during ONNX inference");
-        }
-    }
+            nan_in_mus++;
+
     for (float val : onnx_sigma2s)
-    {
         if (std::isnan(val))
-        {
-            ATH_MSG_WARNING("NaN value found in `sigma2s` output layer during ONNX inference");
-        }
-    }
+            nan_in_sigma2s++;
+
     for (float val : onnx_alphas)
-    {
         if (std::isnan(val))
-        {
-            ATH_MSG_WARNING("NaN value found in `alphas` output layer during ONNX inference");
-        }
-    }
+            nan_in_alphas++;
+
+    if (nan_in_mus > 0)
+        ATH_MSG_WARNING(nan_in_mus << " NaN value found in `mus` output layer during ONNX inference");
+
+    if (nan_in_sigma2s)
+        ATH_MSG_WARNING(nan_in_sigma2s << " NaN value found in `sigmas` output layer during ONNX inference");
+
+    if (nan_in_alphas)
+        ATH_MSG_WARNING(nan_in_alphas << " NaN value found in `alphas` output layer during ONNX inference");
 
     clusterE_ML_vec.clear();
     clusterE_ML_Unc_vec.clear();
