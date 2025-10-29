@@ -68,8 +68,8 @@ Muon::MuonInertMaterialBuilderImpl::DetachedVolumeVecWithTrfs
         const GeoVPhysVol* cv = vol.getVolume();
         const GeoLogVol* clv = cv->getLogVol();
         const std::string_view vname = clv->getName();
-        if (vname.size() > 7 && vname.substr(vname.size() - 7, 7) ==
-                                    "Station") {  // do nothing, active station
+        const GeoFullPhysVol* cfv = dynamic_cast<const GeoFullPhysVol*> (cv);
+        if (cfv || (vname.size() > 7 && vname.substr(vname.size() - 7, 7) == "Station") ) {  // do nothing, active station        
         } else {
             bool accepted = true;
             if (vname.substr(0, 3) == "BAR" || vname.substr(0, 2) == "BT" ||

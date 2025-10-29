@@ -156,6 +156,17 @@ namespace MuonGM {
             return nullptr;
     }
 
+    const std::vector<const MuonStation*> MuonDetectorManager::getMuonStations() const { 
+
+        std::vector<const MuonStation*> stationList;
+        stationList.reserve(m_MuonStationMap.size());
+        for (const auto & [name,ptr]: m_MuonStationMap){
+            stationList.push_back(ptr.get());
+        }    
+        return stationList;
+    } 
+
+
     void MuonDetectorManager::addRpcReadoutElement(std::unique_ptr<RpcReadoutElement>&& x) {
         const Identifier id = x->identify();        
         int idx = rpcIdentToArrayIdx(id);
