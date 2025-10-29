@@ -27,6 +27,8 @@ def defineMenu():
         "L1_eTAU1_EMPTY",
         "L1_eEM2_EMPTY",
         "L1_eEM5_EMPTY",
+        # 2025 HI
+        "L1_eTAU2_EMPTY",
         ## 
         # MU
         ##
@@ -83,10 +85,6 @@ def defineMenu():
         'L1_jTE600',
         'L1_jTE1500',
         'L1_jTE6500',
-        'L1_jTE8300',
-        'L1_jTE9000',
-        'L1_jTE10000',
-        'L1_jTE12000',
         'L1_VjTE10',
         'L1_VjTE200',
         'L1_VjTE600',
@@ -94,7 +92,14 @@ def defineMenu():
         'L1_jTE50_VjTE200',
 
         # jTEFWD UCC seeds: ATR-30726
-        'L1_jTEFWD6500',
+        'L1_jTEFWD2600',
+        'L1_jTEFWD5600',
+        'L1_jTEFWD6300',
+        'L1_jTEFWD6600',
+        'L1_ZDC_PU_jTEFWD2600',
+        'L1_ZDC_PU_jTEFWD5600',
+        'L1_ZDC_PU_jTEFWD6300',
+        'L1_ZDC_PU_jTEFWD6600',
 
         #Overlay items
         'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
@@ -115,17 +120,18 @@ def defineMenu():
         'L1_eTAU1_TRT_VjTE200_EMPTY','L1_eTAU1_TRT_VjTE200_UNPAIRED_ISO','L1_eTAU1_TRT_VjTE200_UNPAIRED_NONISO',
         'L1_eEM1_TRT_VjTE50', 'L1_eTAU1_TRT_VjTE50', 'L1_DPHI-2eEM1_VjTE200_EMPTY', 'L1_DPHI-2eTAU1_VjTE200_EMPTY',
 
-        'L1_eTAU1', 'L1_jTAU1',
+        'L1_eTAU1',
+        'L1_eTAU2', 'L1_eTAU2_VjTE200', 'L1_2eTAU2_VjTE200',
         
         #UPC - TRT,  phase-1 calo
         'L1_TRT_VjTE20', 'L1_TRT_VjTE50', 'L1_TRT_VjTE200', 'L1_TRT_ZDC_XOR_VjTE200', 'L1_TRT_1ZDC_NZDC_VjTE200',
-        'L1_eEM1_TRT_VjTE100', 'L1_eTAU1_TRT_VjTE100', 'L1_jTAU1_TRT_VjTE100',
-        'L1_eEM1_TRT_ZDC_XOR_VjTE200', 'L1_eTAU1_TRT_ZDC_XOR_VjTE200', 'L1_jTAU1_TRT_ZDC_XOR_VjTE200',
+        'L1_eEM1_TRT_VjTE100', 'L1_eTAU1_TRT_VjTE100',
+        'L1_eEM1_TRT_ZDC_XOR_VjTE200', 'L1_eTAU1_TRT_ZDC_XOR_VjTE200',
         'L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100', 'L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100', 
         'L1_eEM1_TRT_ZDC_XOR4_VjTE100', 'L1_eTAU1_TRT_ZDC_XOR4_VjTE100', 
-        'L1_eEM1_TRT_VjTE200_GAP_AANDC', 'L1_eTAU1_TRT_VjTE200_GAP_AANDC', 'L1_jTAU1_TRT_VjTE100_GAP_AANDC',
+        'L1_eEM1_TRT_VjTE200_GAP_AANDC', 'L1_eTAU1_TRT_VjTE200_GAP_AANDC',
          #UPC, calo only, phase-1
-         'L1_jTE5_VjTE200', 'L1_gTE5_VjTE200',
+         'L1_jTE5_VjTE200',
 
         
         #LUCID
@@ -158,15 +164,18 @@ def defineMenu():
         'L1_1ZDC_A_1ZDC_C_VjTE200', 'L1_ZDC_1XOR5_VjTE200',
         'L1_ZDC_XOR_VjTE200', 'L1_VZDC_A_VZDC_C_VjTE200',
         'L1_ZDC_A_C_VjTE50',
-        'L1_ZDC_OR_VjTE50', 'L1_ZDC_XOR_VjTE50', 'L1_TRT_ZDC_OR_VjTE50', 'L1_TRT_ZDC_A_C_VjTE50', 'L1_TRT_ZDC_XOR_VjTE50',  # for O+O/p+O
+        'L1_ZDC_OR_VjTE50', 'L1_ZDC_XOR_VjTE50',
+
+        # TRT + ZDC + Phase-1 calo
+        'L1_TRT_VZDC_A_VZDC_C_VjTE200',
+        'L1_TRT_ZDC_OR_VjTE200',
+        'L1_TRT_ZDC_A_C_VjTE200',
+
         #UPC jet items
         'L1_VZDC_A_VZDC_C_jTE5_VjTE200','L1_ZDC_XOR_jTE5_VjTE200',
         'L1_1ZDC_NZDC_jTE5_VjTE200','L1_5ZDC_A_5ZDC_C_jTE5_VjTE200',
         'L1_VZDC_A_VZDC_C_jTE5_VjTE200_UNPAIRED_ISO','L1_ZDC_XOR_jTE5_VjTE200_UNPAIRED_ISO',
         'L1_VZDC_A_VZDC_C_jTE10_VjTE200', 'L1_ZDC_XOR_jTE10_VjTE200', 'L1_1ZDC_NZDC_jTE10_VjTE200',
-        'L1_VZDC_A_VZDC_C_gTE5_VjTE200','L1_ZDC_XOR_gTE5_VjTE200',
-        'L1_1ZDC_NZDC_gTE5_VjTE200','L1_5ZDC_A_5ZDC_C_gTE5_VjTE200',
-        'L1_VZDC_A_VZDC_C_gTE5_VjTE200_UNPAIRED_ISO','L1_ZDC_XOR_gTE5_VjTE200_UNPAIRED_ISO',
         'L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200',
         'L1_ZDC_XOR_jJ5_VjTE200', 'L1_1ZDC_NZDC_jJ5_VjTE200', 'L1_VZDC_A_VZDC_C_jJ5_VjTE200',
         'L1_ZDC_XOR_jJ10_VjTE200', 'L1_1ZDC_NZDC_jJ10_VjTE200', 'L1_VZDC_A_VZDC_C_jJ10_VjTE200',
@@ -187,7 +196,6 @@ def defineMenu():
         #UPC hmt trk25
         'L1_VZDC_A_ZDC_C_jTE3_VjTE200', 'L1_ZDC_A_VZDC_C_jTE3_VjTE200',
         'L1_1ZDC_NZDC_jTE3_VjTE200', 
-        'L1_VZDC_A_ZDC_C_gTE3_VjTE200', 'L1_ZDC_A_VZDC_C_gTE3_VjTE200',
         #UPC hmt trk25 with MBTS_1
         'L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200', 'L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200',
         'L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200',
@@ -195,7 +203,6 @@ def defineMenu():
         'L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C', 'L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_C',
         #UPC hmt trk35
         'L1_VZDC_A_ZDC_C_jTE5_VjTE200', 'L1_ZDC_A_VZDC_C_jTE5_VjTE200',
-        'L1_VZDC_A_ZDC_C_gTE5_VjTE200', 'L1_ZDC_A_VZDC_C_gTE5_VjTE200',
         #UPC hmt trk35 with MBTS_1
         'L1_MBTS_1_VZDC_A_ZDC_C_jTE5_VjTE200', 'L1_MBTS_1_ZDC_A_VZDC_C_jTE5_VjTE200',
         'L1_MBTS_1_1ZDC_NZDC_jTE5_VjTE200',
@@ -213,9 +220,9 @@ def defineMenu():
         'L1_TRT_ZDC_XOR_jTE5_VjTE200',
 
         #ZDC ucc
-        'L1_ZDC_HELT15_jTE4000', 'L1_ZDC_HELT20_jTE4000', 'L1_ZDC_HELT25_jTE4000',
-        'L1_ZDC_HELT35_jTE4000', 'L1_ZDC_HELT50_jTE4000',
-
+        'L1_ZDC_HELT20_jTEFWD2600',
+        'L1_ZDC_HELT35_jTEFWD2600',
+        'L1_ZDC_HELT50_jTEFWD2600',
 
         # VDM
         'L1_TRT_BGRP11',
@@ -252,34 +259,34 @@ def defineMenu():
         # 'L1_ZDC_PP_A_UNPAIRED_NONISO','L1_ZDC_PP_C_UNPAIRED_NONISO',
         # 'L1_ZDC_PP_A2_UNPAIRED_NONISO','L1_ZDC_PP_C2_UNPAIRED_NONISO',
 
-        # Run3 ZDC items for O+O runs (ATR-30690)
-        'L1_ZDC_XNXN',
-        'L1_ZDC_XNYN',
-        'L1_ZDC_XNZN',
-        'L1_ZDC_XN_XOR',
-        'L1_ZDC_YN_XOR',
-        'L1_ZDC_ZN_XOR',
-        'L1_ZDC_YN',
-        'L1_ZDC_ZN',
-        'L1_ZDC_LOR',
-        'L1_ZDC_YNYN',
-        'L1_ZDC_LOR_EMPTY', 'L1_ZDC_LOR_UNPAIRED_NONISO',
+        # Run3 ZDC items for light ions runs (ATR-30690)
+        # 'L1_ZDC_XNXN',
+        # 'L1_ZDC_XNYN',
+        # 'L1_ZDC_XNZN',
+        # 'L1_ZDC_XN_XOR',
+        # 'L1_ZDC_YN_XOR',
+        # 'L1_ZDC_ZN_XOR',
+        # 'L1_ZDC_YN',
+        # 'L1_ZDC_ZN',
+        # 'L1_ZDC_LOR',
+        # 'L1_ZDC_YNYN',
+        # 'L1_ZDC_LOR_EMPTY', 'L1_ZDC_LOR_UNPAIRED_NONISO',
         
-        # Run3 TRT+ZDC items for O+O runs (ATR-30690)
-        'L1_TRT_ZDC_OR',
-        'L1_TRT_ZDC_XNXN',
-        'L1_TRT_ZDC_XNYN',
-        'L1_TRT_ZDC_XNZN',
-        'L1_TRT_ZDC_XN_XOR',
-        'L1_TRT_ZDC_YN_XOR',
-        'L1_TRT_ZDC_ZN_XOR',
-        'L1_TRT_ZDC_YN',
-        'L1_TRT_ZDC_ZN',
-        'L1_TRT_ZDC_LOR',
-        'L1_TRT_ZDC_YNYN',
-        'L1_TRT_ZDC_A',
-        'L1_TRT_ZDC_C',
-        'L1_TRT_ZDC_A_C',
+        # Run3 TRT+ZDC items for light ions runs (ATR-30690)
+        # 'L1_TRT_ZDC_OR',
+        # 'L1_TRT_ZDC_XNXN',
+        # 'L1_TRT_ZDC_XNYN',
+        # 'L1_TRT_ZDC_XNZN',
+        # 'L1_TRT_ZDC_XN_XOR',
+        # 'L1_TRT_ZDC_YN_XOR',
+        # 'L1_TRT_ZDC_ZN_XOR',
+        # 'L1_TRT_ZDC_YN',
+        # 'L1_TRT_ZDC_ZN',
+        # 'L1_TRT_ZDC_LOR',
+        # 'L1_TRT_ZDC_YNYN',
+        # 'L1_TRT_ZDC_A',
+        # 'L1_TRT_ZDC_C',
+        # 'L1_TRT_ZDC_A_C',
 
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
@@ -330,18 +337,20 @@ def defineMenu():
         #ATR-30145
         'L1_JPSI-1M5-eEM9',
         #ATR-29784
-        'L1_DPHI-2eEM1','L1_DPHI-2eTAU1', 'L1_DPHI-2jTAU1',
+        'L1_DPHI-2eEM1','L1_DPHI-2eTAU1',
         'L1_DPHI-2eEM1_VjTE200','L1_DPHI-2eTAU1_VjTE200',
         'L1_DPHI-2eEM1_VjTE200_GAP_AANDC','L1_DPHI-2eTAU1_VjTE200_GAP_AANDC',
 
-        # ATR-30727
-        'L1_10INVM-DPHI-2jJ5_VjTE200', 'L1_15INVM-DPHI-2jJ5_VjTE200', 'L1_20INVM-DPHI-2jJ5_VjTE200', 'L1_25INVM-DPHI-2jJ5_VjTE200',
-        'L1_10SUM-DPHI-2jJ5_VjTE200', 'L1_15SUM-DPHI-2jJ5_VjTE200', 'L1_20SUM-DPHI-2jJ5_VjTE200', 'L1_25SUM-DPHI-2jJ5_VjTE200',
-        'L1_15INVM-15SUM-DPHI-2jJ5_VjTE200', 'L1_20INVM-20SUM-DPHI-2jJ5_VjTE200',
-
         # ATR-30728
-        'L1_1INVM-DPHI-2eTAU1_VjTE200', 'L1_2INVM-DPHI-2eTAU1_VjTE200', 'L1_3INVM-DPHI-2eTAU1_VjTE200', 'L1_4INVM-DPHI-2eTAU1_VjTE200',
-        'L1_3SUM-DPHI-2eTAU1_VjTE200', 'L1_4SUM-DPHI-2eTAU1_VjTE200',
+        'L1_23INVM-24DPHI-2eTAU1_VjTE200',
+        'L1_28INVM-24DPHI-2eTAU1_VjTE200',
+        'L1_23INVM-25DPHI-2eTAU1_VjTE200',
+        'L1_33INVM-25DPHI-2eTAU1_VjTE200',
+        'L1_23INVM-27DPHI-2eTAU1_VjTE200',
+
+        'L1_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
+        'L1_23INVM-27DPHI-2eTAU1_VjTE200_UNPAIRED_ISO',
+        'L1_23INVM-27DPHI-2eTAU1_VjTE200_UNPAIRED_NONISO',
 
          # ATR-31097
         'L1_TeAsymmetry-jTENoSort',
@@ -368,6 +377,61 @@ def defineMenu():
 
         "L1_jJ160",
 
+        "L1_TEA_TeAsymmetry-jTENoSort",
+        "L1_TEA_eEM2",
+        "L1_TEA_eTAU2",
+        "L1_TEA_jJ5",
+        "L1_TEA_jJ5p30ETA49",
+        "L1_ESP_TeAsymmetry-jTENoSort",
+        "L1_ESP_eEM2",
+        "L1_ESP_eTAU2",
+        "L1_ESP_jJ5",
+        "L1_ESP_jJ5p30ETA49",
+
+        # jJ + ZDC + TeATIME for 2025 HI
+        'L1_TEA_1ZDC_NZDC_jJ10_VjTE200',
+        'L1_TEA_1ZDC_NZDC_jJ5_VjTE200',
+        'L1_TEA_5ZDC_A_5ZDC_C_jJ10_VjTE200',
+        'L1_TEA_5ZDC_A_5ZDC_C_jJ5_VjTE200',
+        'L1_TEA_VZDC_A_VZDC_C_jJ10_VjTE200',
+        'L1_TEA_VZDC_A_VZDC_C_jJ10p30ETA49_VjTE200',
+        'L1_TEA_VZDC_A_VZDC_C_jJ5_VjTE200',
+        'L1_TEA_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200',
+        'L1_TEA_ZDC_5XOR_jJ10_VjTE200',
+        'L1_TEA_ZDC_5XOR_jJ5_VjTE200',
+        'L1_TEA_ZDC_XOR_jJ10_VjTE200',
+        'L1_TEA_ZDC_XOR_jJ10p30ETA49_VjTE200',
+        'L1_TEA_ZDC_XOR_jJ5_VjTE200',
+        'L1_TEA_ZDC_XOR_jJ5p30ETA49_VjTE200',
+
+        # UPC HMT with TeAsymmetry for 2025 HI
+        'L1_TEA_ASYM0_TRT_ZDC_XOR_VjTE200',
+        'L1_TEA_ASYM1_TRT_ZDC_XOR_VjTE200',
+        'L1_TEA_ASYM2_TRT_ZDC_XOR_VjTE200',
+        'L1_TEA_ASYM3_TRT_ZDC_XOR_VjTE200',
+
+        'L1_TEA_ASYM0_ZDC_XOR_VjTE200',
+        'L1_TEA_ASYM1_ZDC_XOR_VjTE200',
+        'L1_TEA_ASYM2_ZDC_XOR_VjTE200',
+        'L1_TEA_ASYM3_ZDC_XOR_VjTE200',
+
+        # Ditaus for 2025 HI
+        'L1_eEM2_TRT_VZDC_A_VZDC_C_VjTE200',
+        'L1_eEM2_TRT_ZDC_OR_VjTE200',
+        'L1_eTAU2_TRT_VZDC_A_VZDC_C_VjTE200',
+        'L1_eTAU2_TRT_ZDC_OR_VjTE200',
+
+        'L1_TEA_eEM2_VjTE200',
+        'L1_TEA_eTAU2_VjTE200',
+
+        # for LAr (2025 HI)
+        'L1_jJ5_EMPTY',
+        'L1_jJ10_EMPTY',
+
+        # supporting for UPC egamma
+        'L1_eEM2_VjTE200_EMPTY',
+        'L1_eEM5_VjTE200_EMPTY',
+        'L1_eTAU2_VjTE200_EMPTY',
     ]
 
 

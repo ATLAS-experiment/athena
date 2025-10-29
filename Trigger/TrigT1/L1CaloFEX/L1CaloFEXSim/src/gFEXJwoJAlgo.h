@@ -38,7 +38,7 @@ namespace LVL1 {
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) override;
 
     virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
-                                                                 std::array<uint32_t, 4> & outTOB) const override;
+                                                                 std::array<int32_t, 4> & outTOB) const override;
 
 
 
@@ -67,6 +67,9 @@ namespace LVL1 {
     void etFPGA(int FPGAnum,const gTowersType& twrs, gTowersType &gBlkSum,
                 int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const;
 
+    void etFastFPGA(int FPGAnum,const gTowersType& twrs, gTowersType &gBlkSum,
+                int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const;
+
     void metTotal(int A_MET_x, int A_MET_y,
                   int B_MET_x, int B_MET_y,
                   int C_MET_x, int C_MET_y,
@@ -76,7 +79,6 @@ namespace LVL1 {
                  int B_ET, 
                  int C_ET, 
                  int & ET ) const;  
-
 
     float sinLUT(unsigned int phiIDX, unsigned int aw) const;
 

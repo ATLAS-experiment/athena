@@ -94,17 +94,15 @@ public:
   }
 
   void Dump_setting() {
-    if (s_debugLevel > 2) {
       ATH_MSG_INFO("========================================================================================================================");
       for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 4; j++) {
           ATH_MSG_INFO("-------------------------------------------------------------------------------------------------------------------");
           ATH_MSG_INFO("Side: " << i << ", Module: " << j);
-          m_zdcDataAnalyzer->GetPulseAnalyzer(i, j)->dumpSetting();
+          m_zdcDataAnalyzer->GetPulseAnalyzer(i, j)->dumpConfiguration();
         }
       }
       ATH_MSG_INFO("========================================================================================================================");
-    }
   }
 
 private:
@@ -126,7 +124,8 @@ private:
   std::unique_ptr<ZDCDataAnalyzer> initializeInjectorPbPb2024();
   std::unique_ptr<ZDCDataAnalyzer> initializeInjectorpOOONeNe2025();
   std::unique_ptr<ZDCDataAnalyzer> initializeMonteCarloPbPb2023();
-
+  std::unique_ptr<ZDCDataAnalyzer> initializeFromJSON();
+  
   StatusCode configureNewRun(unsigned int runNumber);
 
   // Data members
@@ -134,6 +133,7 @@ private:
   std::string m_name;
   bool m_init;
   std::string m_configuration;
+  std::string m_jsonConfigurationFile;
   std::string m_zdcAnalysisConfigPath;
   std::string m_zdcEnergyCalibFileName;
   std::string m_zdcTimeCalibFileName;

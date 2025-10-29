@@ -5,6 +5,7 @@
 #ifndef ZDCANALYSIS_ZDCDataAnalyzer_h
 #define ZDCANALYSIS_ZDCDataAnalyzer_h
 
+#include "ZDCJSONConfig.h"
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
 #include "ZdcAnalysis/ZDCMsg.h"
 #include "TSpline.h"
@@ -13,6 +14,7 @@
 #include <string>
 #include <memory>
 #include <cmath> //for std::sqrt
+#include <functional>
 
 #include "CxxUtils/checker_macros.h"
 
@@ -24,44 +26,42 @@ public:
   typedef std::array<std::array<bool, 4>, 2> ZDCModuleBoolArray;
   typedef std::array<std::array<int, 4>, 2> ZDCModuleIntArray;
 
+  using JSON = ZDCJSONConfig::JSON;
+  static const ZDCJSONConfig::JSONParamList JSONConfigParams;
+  
 private:
   ZDCMsg::MessageFunctionPtr m_msgFunc_p;
-  size_t m_nSample{};
-  float m_deltaTSample{};
-  size_t m_preSampleIdx{};
-  std::string m_fitFunction;
-  unsigned int m_LGMode{};
-
-  bool m_repassEnabled{};
+  std::unique_ptr<ZDCJSONConfig> m_dataAnalyzerConfig{};
+  std::unique_ptr<ZDCJSONConfig> m_pulseAnalyzerConfig{};
+  
+  bool m_repassEnabled{false};
 
   std::array<std::array<int, 4>, 2> m_delayedOrder{};
 
-  ZDCModuleBoolArray m_moduleDisabled{};
+  ZDCModuleBoolArray m_moduleEnabled{};
   std::array<std::array<std::unique_ptr<ZDCPulseAnalyzer>, 4>, 2> m_moduleAnalyzers{};
 
-  int m_eventCount{};
+  int m_eventCount{0};
 
   ZDCModuleFloatArray m_HGGains{};
   ZDCModuleFloatArray m_pedestals{};
 
-  bool m_haveECalib{};
+  bool m_haveECalib{false};
+  bool m_haveT0Calib{false};
   std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_LBDepEcalibSplines{};
-
-  bool m_haveT0Calib{};
   std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0HGOffsetSplines{};
   std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> m_T0LGOffsetSplines{};
 
   // Transient data that is updated each LB or each event
   //
-  int m_currentLB{};
+  int m_currentLB{-1};
   ZDCModuleFloatArray m_currentECalibCoeff{};
   ZDCModuleFloatArray m_currentT0OffsetsHG{};
   ZDCModuleFloatArray m_currentT0OffsetsLG{};
 
   std::array<std::array<bool, 4>, 2> m_dataLoaded{};
-  // std::array<std::array<bool, 4>, 2> _moduleFail;
 
-  unsigned int m_moduleMask;
+  unsigned int m_moduleMask{0};
 
   std::array<std::array<unsigned int, 4>, 2> m_moduleStatus{};
   std::array<std::array<float, 4>, 2> m_calibAmplitude{};
@@ -76,7 +76,7 @@ private:
   std::array<float, 2> m_calibModuleSumErrSq{};
   std::array<float, 2> m_calibModSumBkgdFrac{};
 
-  bool m_haveNLcalib{};
+  bool m_haveNLcalib{false};
   std::array< std::array< std::array<float,6>, 3>, 2> m_NLcalibFactors{}; // 3 POL5s for each side
   
   std::array<float, 2> m_NLcalibModuleSum{};
@@ -88,6 +88,8 @@ private:
 
   std::array<std::array<float, 4>, 2> m_moduleAmpFractionLG{};
 
+  void init();
+  
 public:
 
   ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr messageFunc_p, int nSample, float deltaTSample,
@@ -97,8 +99,24 @@ public:
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
                   unsigned int LGMode = ZDCPulseAnalyzer::LGModeNormal);
 
-  ~ZDCDataAnalyzer();
+  ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr messageFunc_p, const JSON& configJSON);
 
+  ~ZDCDataAnalyzer(){};
+
+  template<typename T> bool getPulseAnalyzerGlobalPar(const std::string& key, T& value) {
+    if (m_pulseAnalyzerConfig.get()) return m_pulseAnalyzerConfig->getGlobalParam(key, value);
+    else return false;
+  }
+
+  template<typename T> void invokeAll(T functor)
+  {
+    for (size_t side : {0, 1}) {
+      for (size_t module : {0, 1, 2, 3}) {
+	functor(m_moduleAnalyzers[side][module].get());
+      }
+    }
+  }
+  
   void enableDelayed(float deltaT, const ZDCModuleFloatArray& undelayedDelayedPedestalDiff);
   void enableDelayed(const ZDCModuleFloatArray& delayDeltaT, const ZDCModuleFloatArray& undelayedDelayedPedestalDiff);
 
@@ -110,7 +128,8 @@ public:
   void enablePostExclusion(unsigned int maxSamplesExcl, const ZDCModuleIntArray& HGADCThresh, const ZDCModuleIntArray& LGADCThresh);
   void enablePostExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh);
 
-  bool ModuleDisabled(unsigned int side, unsigned int module) const {return m_moduleDisabled[side][module];}
+  bool ModuleDisabled(unsigned int side, unsigned int module) const {return !m_moduleEnabled[side][module];}
+  bool moduleEnabled(unsigned int side, unsigned int module) const {return m_moduleEnabled[side][module];}
 
   unsigned int GetModuleMask() const {return m_moduleMask;}
 
@@ -142,10 +161,13 @@ public:
   float GetdelayedBS(size_t side, size_t module) const {return m_moduleAnalyzers.at(side).at(module)->GetdelayBS();}
 
   const ZDCPulseAnalyzer* GetPulseAnalyzer(size_t side, size_t module) const {return m_moduleAnalyzers.at(side).at(module).get();}
+  ZDCPulseAnalyzer* GetPulseAnalyzer(size_t side, size_t module) {return m_moduleAnalyzers.at(side).at(module).get();}
 
   bool disableModule(size_t side, size_t module);
 
   void set2ndDerivStep(size_t step);
+
+  void setMinimumSignificance(float sigMinHG, float sigMinLG);
   
   void SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG);
 
