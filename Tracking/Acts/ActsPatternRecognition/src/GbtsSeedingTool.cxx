@@ -117,18 +117,7 @@ namespace ActsTrk {
     seedContainer.reserve(groupSeeds.size());
     for( Acts::Seed<xAOD::SpacePoint, 3ul>& seed: groupSeeds) {
       //turn interim into group seeds 
-
-      const auto& spacepoints = seed.sp() ; 
-      assert(spacepoints.size()==3) ;  
-      const xAOD::SpacePoint* sp1 = spacepoints[0] ; 
-      const xAOD::SpacePoint* sp2 = spacepoints[1] ; 
-      const xAOD::SpacePoint* sp3 = spacepoints[2] ; 
-
-      std::unique_ptr<seed_type> to_add = std::make_unique<seed_type>(*sp1, *sp2, *sp3);
-      to_add->setVertexZ(seed.z());
-      to_add->setQuality(seed.seedQuality());
-      seedContainer.push_back(std::move(to_add));  
-
+      seedContainer.push_back(&seed);
     }
 
     return StatusCode::SUCCESS;

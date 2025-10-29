@@ -15,7 +15,6 @@
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
 // ActsTrk
-#include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"

@@ -11,7 +11,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 
 #include "ActsEvent/TrackContainer.h"
-#include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"

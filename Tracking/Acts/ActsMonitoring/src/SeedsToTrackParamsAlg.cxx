@@ -50,7 +50,7 @@ namespace ActsTrk {
     const InDetDD::SiDetectorElementCollection &detElements = *detEleHandle.cptr();
 
     for (std::size_t iseed = 0; iseed < seeds.size(); ++iseed) {
-      const ActsTrk::Seed& seed = *seeds[iseed];
+      ActsTrk::Seed seed = seeds[iseed];
 
       const bool useTopSp = m_autoReverseSearch && shouldReverseSearch(seed);
 

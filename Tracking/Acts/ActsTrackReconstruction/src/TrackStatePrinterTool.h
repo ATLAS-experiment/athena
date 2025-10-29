@@ -23,7 +23,7 @@
 // PACKAGE
 #include "src/detail/MeasurementIndex.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"

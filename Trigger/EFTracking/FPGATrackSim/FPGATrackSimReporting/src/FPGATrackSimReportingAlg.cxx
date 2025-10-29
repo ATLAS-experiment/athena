@@ -283,7 +283,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGASeeds(SG::ReadHandle<ActsT
     unsigned int counter = 0;
     for (const auto thisTrack : *seedContainer)
     {
-        auto spList = thisTrack->sp();
+        auto spList = thisTrack.sp();
         ++counter;
         for(int i = 0; i < 3; i++)
         {

@@ -433,13 +433,14 @@ StatusCode GridTripletSeedingTool::createSeeds2(
 
   Acts::SpacePointContainer2 selectedSpacePoints;
   selectedSpacePoints.createColumns(
-      Acts::SpacePointColumns::SourceLinks | Acts::SpacePointColumns::XY |
+      Acts::SpacePointColumns::XY |
       Acts::SpacePointColumns::ZR | Acts::SpacePointColumns::VarianceZ |
       Acts::SpacePointColumns::VarianceR);
   if (m_useDetailedDoubleMeasurementInfo) {
     selectedSpacePoints.createColumns(Acts::SpacePointColumns::Strip);
   }
   selectedSpacePoints.reserve(grid.numberOfSpacePoints());
+  seedContainer.spacePoints().reserve(grid.numberOfSpacePoints());
   std::vector<Acts::SpacePointIndex2> copyFromIndices;
   copyFromIndices.reserve(grid.numberOfSpacePoints());
   std::vector<Acts::SpacePointIndexRange2> gridSpacePointRanges;
@@ -449,9 +450,8 @@ StatusCode GridTripletSeedingTool::createSeeds2(
     for (const Acts::SpacePointIndex2 spIndex : grid.at(i)) {
       const xAOD::SpacePoint* sp = selectedXAODSpacePoints[spIndex];
 
+      seedContainer.spacePoints().push_back(sp);
       auto newSp = selectedSpacePoints.createSpacePoint();
-      newSp.assignSourceLinks(
-          std::array<Acts::SourceLink, 1>{Acts::SourceLink(sp)});
       newSp.xy() =
           std::array<float, 2>{static_cast<float>(sp->x() - beamSpotPos[0]),
                                static_cast<float>(sp->y() - beamSpotPos[1])};
@@ -534,7 +534,6 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   std::vector<Acts::SpacePointContainer2::ConstRange> topSpRanges;
 
   Acts::SeedContainer2 tmpSeedContainer;
-  tmpSeedContainer.reserve(seedContainer.capacity());
 
   for (const auto [bottom, middle, top] : grid.binnedGroup()) {
     ACTS_VERBOSE("Process middle bin " << middle);
@@ -600,23 +599,7 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       continue;
     }
 
-    const xAOD::SpacePoint* bottom =
-        selectedSpacePoints.at(seed.spacePointIndices()[0])
-            .sourceLinks()[0]
-            .get<const xAOD::SpacePoint*>();
-    const xAOD::SpacePoint* middle =
-        selectedSpacePoints.at(seed.spacePointIndices()[1])
-            .sourceLinks()[0]
-            .get<const xAOD::SpacePoint*>();
-    const xAOD::SpacePoint* top =
-        selectedSpacePoints.at(seed.spacePointIndices()[2])
-            .sourceLinks()[0]
-            .get<const xAOD::SpacePoint*>();
-
-    auto outputSeed = std::make_unique<ActsTrk::Seed>(*bottom, *middle, *top);
-    outputSeed->setVertexZ(seed.vertexZ());
-    outputSeed->setQuality(seed.quality());
-    seedContainer.push_back(std::move(outputSeed));
+    seedContainer.push_back(seed);
   }
 
   return StatusCode::SUCCESS;

@@ -238,7 +238,7 @@ ATH_FLATTEN
 			   external_iterator_t spEnd,
 			   const Acts::Vector3& beamSpotPos,
 			   const Acts::Vector3& bField,
-			   DataVector< ActsTrk::ActsSeed< typename SeedingTool::external_type, 3ul > >& seedContainer) const
+			   ActsTrk::SeedContainer& seedContainer) const
   {
     static_assert(std::is_same<typename external_spacepoint< external_iterator_t >::type, const value_type&>::value,
 		  "Inconsistent type");
@@ -246,6 +246,10 @@ ATH_FLATTEN
     if (spBegin == spEnd)
       return StatusCode::SUCCESS;
 
+    seedContainer.spacePoints().reserve(std::distance(spBegin, spEnd));
+    for (auto sp = spBegin; sp != spEnd; ++sp) {
+      seedContainer.spacePoints().push_back(&(*sp).externalSpacePoint());
+    }
     std::vector< seed_type > seeds;
 
     // Space Point Grid Options
@@ -353,18 +357,7 @@ ATH_FLATTEN
     // Store seeds
     seedContainer.reserve(seeds.size());
     for(const auto& seed: seeds) {
-      assert(seed.sp().size() == 3ul);
-      const auto bottom = seed.sp().at(0);
-      const auto middle = seed.sp().at(1);
-      const auto top = seed.sp().at(2);
-
-      std::unique_ptr< ActsTrk::Seed > toAdd =
-	std::make_unique< ActsTrk::Seed >(bottom->externalSpacePoint(),
-					  middle->externalSpacePoint(),
-					  top->externalSpacePoint());
-      toAdd->setVertexZ(seed.z());
-      toAdd->setQuality(seed.seedQuality());
-      seedContainer.push_back(std::move(toAdd)); 
+      seedContainer.push_back(&seed);
     }
 
     return StatusCode::SUCCESS;

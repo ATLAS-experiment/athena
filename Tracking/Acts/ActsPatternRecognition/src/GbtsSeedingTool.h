@@ -49,7 +49,7 @@ namespace ActsTrk {
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
 
   public:
-    using seed_type = ActsSeed< xAOD::SpacePoint >;
+    using seed_type = Acts::Seed< xAOD::SpacePoint >;
 
     GbtsSeedingTool(const std::string& type, const std::string& name,
 			  const IInterface* parent);
