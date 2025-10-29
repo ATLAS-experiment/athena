@@ -15,6 +15,7 @@
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometry/MuonStation.h"
 #include "MuonTrackingGeometry/MuonStationTypeBuilder.h"
 #include "TrkDetDescrGeoModelCnv/GMTreeBrowser.h"
 #include "TrkDetDescrGeoModelCnv/GeoMaterialConverter.h"
@@ -30,6 +31,11 @@ class MaterialProperties;
 
 namespace Muon {
 
+struct GMInfo{
+    Amg::Transform3D trf{Amg::Transform3D::Identity()};
+    int volId{0};
+    const MuonGM::MuonStation* mstation{nullptr};
+};
 
 
 /** @class MuonStationBuilderImpl
@@ -41,7 +47,6 @@ namespace Muon {
 
 class MuonStationBuilderImpl : public AthAlgTool {
    public:
-    using GMInfo = std::pair<Amg::Transform3D, int>;
     virtual ~MuonStationBuilderImpl() = default;
     virtual StatusCode initialize() override;
 
@@ -88,6 +93,8 @@ class MuonStationBuilderImpl : public AthAlgTool {
                       std::vector<Amg::Transform3D>>>& vols,
         std::vector<std::string>& volNames) const;
 
+    void getEnvelopeDimensions(const GeoShape* shape, GeoTrf::Transform3D transf, double& halfX1, double& halfX2, double& halfY1, double& halfY2, double& halfZ) const; 
+
     ToolHandle<Muon::MuonStationTypeBuilder> m_muonStationTypeBuilder{
         this, "StationTypeBuilder",
         "Muon::MuonStationTypeBuilder/"
@@ -112,6 +119,7 @@ class MuonStationBuilderImpl : public AthAlgTool {
     Gaudi::Property<bool> m_buildEndcap{this, "BuildEndcapStations", true};
     Gaudi::Property<bool> m_buildCsc{this, "BuildCSCStations", true};
     Gaudi::Property<bool> m_buildTgc{this, "BuildTGCStations", true};
+    Gaudi::Property<bool> m_identifyLayers{this, "IdentifyLayers", false};
 };
 
 }  // namespace Muon

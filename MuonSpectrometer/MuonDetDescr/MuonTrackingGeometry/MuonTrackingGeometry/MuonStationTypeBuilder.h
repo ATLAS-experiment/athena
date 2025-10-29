@@ -40,6 +40,14 @@ namespace MuonGM{
 }
 namespace Muon {
 
+struct MaterialInput{
+  const GeoVPhysVol* gmVol{nullptr};
+  unsigned int nCopies{0};
+  GeoTrf::Transform3D refX{Amg::Transform3D::Identity()};
+  double pitch{0.};
+};
+
+
 /** @class MuonStationTypeBuilder
 
     The Muon::MuonStationTypeBuilder retrieves components of muon stations from
@@ -103,14 +111,9 @@ class MuonStationTypeBuilder : public AthAlgTool {
                                                             const Amg::Transform3D& transf) const;
 
     /** components */
-    std::unique_ptr<Trk::TrackingVolume> processMdtBox(const Trk::Volume& trkVol,
-                                                       const GeoVPhysVol*,
-                                                       const Amg::Transform3D&,
-                                                       double, Cache&) const;
-
-    std::unique_ptr<Trk::TrackingVolume> processMdtTrd(const Trk::Volume& trkVol,
-                                                       const GeoVPhysVol*,
-                                                       const Amg::Transform3D&, Cache&) const;
+    std::unique_ptr<Trk::TrackingVolume> processMdt(const Trk::Volume& trkVol,
+                                                       const GeoVPhysVol* gv,
+                                                       const Amg::Transform3D& transf, double zShift, Cache& cache) const;
 
     std::unique_ptr<Trk::TrackingVolume> processRpc(const Trk::Volume& inVol,
                                                     const std::vector<const GeoVPhysVol*>& childVols,
@@ -133,6 +136,8 @@ class MuonStationTypeBuilder : public AthAlgTool {
     std::unique_ptr<Trk::LayerArray> processTGCComponent(const GeoVPhysVol*,
                                                          const Trk::TrapezoidVolumeBounds&,
                                                          const Amg::Transform3D&, Cache&) const;
+
+    void getMaterialInputs(const GeoVPhysVol* gv, GeoTrf::Transform3D trfRef, std::vector<Muon::MaterialInput>& mVols) const;
 
     std::pair<std::unique_ptr<Trk::Layer>,
               std::vector<std::unique_ptr<Trk::Layer>>> createLayerRepresentation(Trk::TrackingVolume& trVol) const;
