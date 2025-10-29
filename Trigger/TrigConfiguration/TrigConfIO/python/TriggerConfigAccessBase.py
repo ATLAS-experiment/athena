@@ -5,6 +5,7 @@ import json
 import re
 from typing import Any
 import xml.etree.ElementTree as ET
+from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
 import coral
 
 from AthenaCommon.Logging import logging
@@ -405,14 +406,10 @@ class ConfigCrestLoader(ConfigLoader):
     def load(self) -> dict:
         # see SCHEMA_MAP in https://gitlab.cern.ch/crest-db/crest/-/blob/master/src/main/java/hep/crest/server/repositories/triggerdb/TriggerDb.java
         self.schema = ConfigCrestLoader._getDBSchemaName(self.dbalias)
-        url_schema = {
-            "ATLAS_CONF_TRIGGER_RUN3": "CONF_DATA_RUN3",
-            "ATLAS_CONF_TRIGGER_MC_RUN3": "CONF_MC_RUN3",
-            "ATLAS_CONF_TRIGGER_REPR_RUN3": "CONF_REPR_RUN3", 
-        }.get(self.schema)
-        if url_schema is None:
-            raise RuntimeError(f"Oracle server {self.schema} is not implemented in the crest server {self.crestServer}")
-        hash = f"triggerdb://{url_schema}/{self.configType.crestkey}/{self.dbkey}"
+        crest_conn = TriggerCrestUtil.getCrestConnection(self.schema)
+        if crest_conn is None:
+            raise RuntimeError(f"Oracle db {self.schema} is not accessible through the crest server {self.crestServer}")
+        hash = f"triggerdb://{crest_conn}/{self.configType.crestkey}/{self.dbkey}"
         config = self._get_payload(hash=hash)
         return config
 

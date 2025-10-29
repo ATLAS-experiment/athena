@@ -4,6 +4,8 @@
 
 #include "./HLTPrescaleCondAlg.h"
 #include "./TrigConfMD5.h"
+#include "TrigConfSvcHelper.h"
+
 #include "TrigConfIO/TrigDBHLTPrescalesSetLoader.h"
 #include "TrigConfIO/JsonFileLoader.h"
 #include "TrigConfInterfaces/IJobOptionsSvc.h"
@@ -46,7 +48,14 @@ TrigConf::HLTPrescaleCondAlg::createFromDB( unsigned int psk, bool isRun3 ) cons
    // load the HLT psk into the HLT prescales set
    ATH_MSG_DEBUG( "Setting up TrigDBHLTPrescalesSetLoader with DB connection " << m_dbConnection.value() );
    TrigConf::TrigDBHLTPrescalesSetLoader psLoader(m_dbConnection);
-   psLoader.setLevel(TrigConf::MSGTC::WARNING); 
+   std::string crest_server("");
+   std::string crest_api("");
+   std::string dbname("");
+   if(isCrestConnection(m_dbConnection, crest_server, crest_api, dbname)) {
+      psLoader.setCrestTrigDB(dbname);
+      psLoader.setCrestConnection(crest_server, crest_api);
+   }
+   psLoader.setLevel(TrigConf::MSGTC::WARNING);
    ATH_MSG_DEBUG( "Going to load prescales" );
    try {
       psLoader.loadHLTPrescales( psk, *pss );

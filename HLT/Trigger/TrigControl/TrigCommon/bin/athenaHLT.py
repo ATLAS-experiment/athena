@@ -40,6 +40,9 @@ import argparse
 import ast
 import collections.abc
 from datetime import datetime as dt
+from typing import Any
+
+from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
 
 # Use single-threaded oracle client library to avoid extra
 # threads when forking (see ATR-21890, ATDBOPS-115)
@@ -57,7 +60,7 @@ log = logging.getLogger('athenaHLT')
 ##
 ## The following arg_* methods are used as custom types in argparse
 ##
-def arg_sor_time(s):
+def arg_sor_time(s) -> str:
    """Convert possible SOR time arguments to an OWLTime compatible string"""
    fmt = '%d/%m/%y %H:%M:%S.%f'
    if s=='now':        return dt.now().strftime(fmt)
@@ -114,6 +117,9 @@ def check_args(parser, args):
    if not args.file and not args.dump_config_exit:
       parser.error("--file is required unless using --dump-config-exit")
 
+   if args.use_crest and not args.use_database:
+      parser.error("--use-database is required when using --use-crest")
+
 def update_pcommands(args, cdict):
    """Apply modifications to pre/postcommands"""
 
@@ -122,8 +128,8 @@ def update_pcommands(args, cdict):
    if args.lb_number is not None:
       cdict['trigger']['precommand'].append('_lb_number=%d' % args.lb_number)
 
-def update_run_params(args):
-   """Update run parameters from file/COOL"""
+def update_run_params(args, flags):
+   """Update run parameters from file or conditions DB"""
 
    if (args.run_number and not args.lb_number) or (not args.run_number and args.lb_number):
       log.error("Both or neither of the options -R (--run-number) and -L (--lb-number) have to be specified")
@@ -134,9 +140,12 @@ def update_run_params(args):
       args.run_number = dr.runNumber()
       args.lb_number = dr.lumiblockNumber()
 
-   sor_params = None
+   sor_params: dict[str, Any] | None = None
    if (args.sor_time is None or args.detector_mask is None) and args.run_number is not None:
-      sor_params = AthHLT.get_sor_params(args.run_number)
+      if flags.Trigger.useCrest:
+         sor_params = AthHLT.get_eor_params_crest(args.run_number, flags.Trigger.crestServer)
+      else:
+         sor_params = AthHLT.get_sor_params(args.run_number)
       log.debug('SOR parameters: %s', sor_params)
       if sor_params is None:
          log.error("Run %d does not exist. If you want to use this run-number specify "
@@ -152,13 +161,20 @@ def update_run_params(args):
          dmask = hex(dmask)
       args.detector_mask = arg_detector_mask(dmask)
 
-def update_trigconf_keys(args):
+def update_trigconf_keys(args, flags):
    """Update trigger configuration keys"""
 
    if args.smk is None or args.l1psk is None or args.hltpsk is None:
-      try:
+      if flags.Trigger.useCrest:
+         log.info("Reading trigger configuration keys from CREST for run %s", args.run_number)
+         trigconf = AthHLT.get_trigconf_keys_crest(args.run_number, args.lb_number, flags.Trigger.crestServer)      
+         log.info(f"Retrived these trigger keys from CREST: {trigconf}")
+      else:
          log.info("Reading trigger configuration keys from COOL for run %s", args.run_number)
          trigconf = AthHLT.get_trigconf_keys(args.run_number, args.lb_number)
+         log.info(f"Retrived these trigger keys from COOL: {trigconf}")
+
+      try:
          if args.smk is None:
             args.smk = trigconf['SMK']
          if args.l1psk is None:
@@ -166,7 +182,7 @@ def update_trigconf_keys(args):
          if args.hltpsk is None:
             args.hltpsk = trigconf['HLTPSK']
       except KeyError:
-         log.error("Cannot read trigger configuration keys from COOL for run %d", args.run_number)
+         log.error("Cannot read trigger configuration keys from the conditions database for run %d", args.run_number)
          sys.exit(1)
 
 def update_nested_dict(d, u):
@@ -283,12 +299,19 @@ def HLTMPPy_cfgdict(args):
          args.jobOptions.endswith('.json') else 'TrigPSC.TrigPSCPythonCASetup'
 
    else:
+      if args.use_crest:
+         crestconn: str | None = TriggerCrestUtil.getCrestConnection(args.db_server)
+         dbalias: str = f"{args.crest_server}/{crestconn}"
+      else:
+         dbalias = args.db_server
       cdict['trigger'].update({
          'module': 'DBPython',
          'pythonSetupFile' : 'TrigPSC.TrigPSCPythonDbSetup',
-         'db_alias': args.db_server,
+         'db_alias': dbalias,
          'coral_server': args.db_server,
          'use_coral': True,
+         'crest_server': args.crest_server,
+         'use_crest': args.use_crest,
          'SMK': args.smk,
          'l1PSK': args.l1psk,
          'HLTPSK': args.hltpsk,
@@ -363,8 +386,10 @@ def main():
    ## Database
    g = parser.add_argument_group('Database')
    g.add_argument('--use-database', '-b', action='store_true',
-                  help='configure from trigger database, reading keys from COOL if not specified')
+                  help='configure from trigger database, reading keys from conditions DB if not specified')
    g.add_argument('--db-server', metavar='DB', default='TRIGGERDB_RUN3', help='DB server name')
+   g.add_argument('--use-crest', action='store_true', help='Use Crest when reading the trigger configuration')
+   g.add_argument('--crest-server', help='Crest server for reading trigger configuration, if not specified it uses the one that is used for condition access')
    g.add_argument('--smk', type=int, default=None, help='Super Master Key')
    g.add_argument('--l1psk', type=int, default=None, help='L1 prescale key')
    g.add_argument('--hltpsk', type=int, default=None, help='HLT prescale key')
@@ -388,9 +413,9 @@ def main():
                   help='The Start Of Run time. Three formats are accepted: '
                   '1) the string "now", for current time; '
                   '2) the number of nanoseconds since epoch (e.g. 1386355338658000000 or int(time.time() * 1e9)); '
-                  '3) human-readable "20/11/18 17:40:42.3043". If not specified the sor-time is read from COOL')
+                  '3) human-readable "20/11/18 17:40:42.3043". If not specified the sor-time is read from the conditions DB')
    g.add_argument('--detector-mask', metavar='MASK', type=arg_detector_mask,
-                  help='detector mask (if None, read from COOL), use string "all" to enable all detectors')
+                  help='detector mask (if None, read from the conditions DB), use string "all" to enable all detectors')
 
    ## Expert options
    g = parser.add_argument_group('Expert')
@@ -442,12 +467,25 @@ def main():
    # Update args and set athena flags
    from TrigPSC import PscConfig
 
-   update_run_params(args)
+   # Extra Psc configuration
+   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
+   flags = defaultOnlineFlags()
+   
+   log.info(f"Using Crest for trigger configuration: {args.use_crest}")
+   if args.use_crest:
+      flags.Trigger.useCrest = True
+      if args.crest_server:
+         flags.Trigger.crestServer = args.crest_server
+      else:
+         args.crest_server = flags.Trigger.crestServer
+
+   update_run_params(args, flags)
+   
    if args.use_database:
-      # If HLTPSK was given on the command line, we ignore what is stored in COOL
+      # If HLTPSK was given on the command line, we ignore what is stored in the conditions DB
       PscConfig.forcePSK = (args.hltpsk is not None)
       # We always read the keys corresponding to the run/LB in the first file
-      update_trigconf_keys(args)
+      update_trigconf_keys(args, flags)
 
    # get HLTMPPY config dictionary
    cdict = HLTMPPy_cfgdict(args)
@@ -457,10 +495,6 @@ def main():
 
    # Modify pre/postcommands if necessary
    update_pcommands(args, cdict)
-
-   # Extra Psc configuration
-   from TrigPSC.PscDefaultFlags import defaultOnlineFlags
-   flags = defaultOnlineFlags()
 
    # Fill flags from command line (if not running from DB/JSON):
    if not args.use_database and not args.jobOptions.endswith('.json'):

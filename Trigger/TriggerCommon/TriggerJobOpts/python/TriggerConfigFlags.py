@@ -404,6 +404,12 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags),
                   help='Trigger configuration source (https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag)')
 
+    flags.addFlag('Trigger.useCrest', lambda prevFlags: prevFlags.IOVDb.UseCREST, # only effective if Trigger.triggerConfig is set to 'DB'
+                  help='Flag enables trigger configuration database access through CREST')
+
+    flags.addFlag('Trigger.crestServer', lambda prevFlags: prevFlags.IOVDb.CrestServer,
+                  help='CREST server to access trigger configuration')
+
     flags.addFlag('Trigger.triggerMenuSetup', lambda flags: 'MC_pp_run3_v1_BulkMCProd_prescale' if flags.GeoModel.Run is LHCPeriod.Run3 else 'MC_pp_run4_v1_BulkMCProd_prescale',
                   help='name of the trigger menu')
 

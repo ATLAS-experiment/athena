@@ -2,6 +2,7 @@
 #
 # Utilities used in athenaHLT.py
 #
+from typing import Any
 from AthenaCommon.Logging import logging
 log = logging.getLogger('athenaHLT')
 
@@ -25,14 +26,14 @@ class CondDB:
          return '/TDAQ/RunCtrl/SOR_Params'
 
 @cache
-def get_sor_params(run_number):
+def get_sor_params(run_number) -> dict[str, Any] | None:
    from CoolConvUtilities import AtlCoolLib
 
    log.info('Reading SOR record for run %s from COOL', run_number)
 
    cdb = CondDB(run_number)
    dbcon = AtlCoolLib.readOpen('COOLONL_TDAQ/%s' % cdb.db_instance())
-   folder = dbcon.getFolder(cdb.sor_folder())
+   folder = dbcon.getFolder(cdb.sor_folder())   # type: ignore
 
    # need to keep sor variable while using payload (cannot do the following in
    # one single line nor overwrite sor). Otherwise: 1) GC comes into play;
@@ -47,6 +48,11 @@ def get_sor_params(run_number):
    d = {k: payload[k] for k in payload}
    return d
 
+@cache
+def get_eor_params_crest(run_number, crest_server:str) -> dict[str, Any] | None:
+   from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
+   log.info('Reading EOR record for run %s from Crest', run_number)
+   return TriggerCrestUtil.getEORParams(run_number, server=crest_server)
 
 @cache
 def get_trigconf_keys(run_number, lb_number):
@@ -72,6 +78,32 @@ def get_trigconf_keys(run_number, lb_number):
 
    return d
 
+@cache
+def get_trigconf_keys_crest(run_number, lb_number, crest_server):
+   """Read Trigger keys from CREST"""
+   from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
+   
+   def _find_lb(config: list[dict[str, Any]], lb:int) -> int:
+      ret_key: int = -1
+      for c in config:
+         if c['since_lb'] > lb:
+            break
+         ret_key = c['key']
+      if ret_key == -1:
+            raise RuntimeError(f"LB {lb} not found in list of config keys {config}")
+      return ret_key
+   
+   log.info("Using CREST server %s", crest_server)
+   api = TriggerCrestUtil.getCrestApi(server=crest_server)
+   cfgkeysinfo = TriggerCrestUtil.getHLTConfigKeys(run_number, api=api)
+
+   return {
+      'SMK': cfgkeysinfo['SMK'],
+      'LVL1PSK': _find_lb(TriggerCrestUtil.getL1ConfigKeys(run_number, api=api), lb=lb_number),
+      'HLTPSK': _find_lb(TriggerCrestUtil.getHLTPrescaleKeys(run_number, api=api), lb=lb_number),
+      'LVL1BGK': _find_lb(TriggerCrestUtil.getBunchGroupKey(run_number, api=api),lb=lb_number),
+      'DBAlias': cfgkeysinfo['DB']
+   }
 
 def getCACfg(jopath):
    """Return the CA Cfg function based on joboptions path.
@@ -137,15 +169,32 @@ if __name__=='__main__':
 
    # Unit testing case:
    d = get_sor_params(327265)  # Run-2
-   print(d)
-   assert(d['DetectorMask']=='0000000000000000c10069fffffffff7')
+   assert(d is not None)
+   if d is not None:
+      print(d)
+      assert(d['DetectorMask']=='0000000000000000c10069fffffffff7')
+
+   d = get_eor_params_crest(327265, "https://crest.cern.ch/api-v5.0")  # Run-2
+   assert(d is not None)
+   if d is not None:
+      print(d)
+      assert(d['DetectorMask']=='0000000000000000c10069fffffffff7')
 
    d = get_sor_params(216416)  # Run-1
-   print(d)
-   assert(d['DetectorMask']==281474976710647)
+   assert(d is not None)
+   if d is not None:
+      print(d)
+      assert(d['DetectorMask']==281474976710647)
 
    # Config keys
    d = get_trigconf_keys(360026, 1)
+   print(d)
+   assert(d['SMK']==2749)
+   assert(d['LVL1PSK']==15186)
+   assert(d['HLTPSK']==17719)
+
+   # Config keys crest
+   d = get_trigconf_keys_crest(360026, 1, "https://crest.cern.ch/api-v5.0")
    print(d)
    assert(d['SMK']==2749)
    assert(d['LVL1PSK']==15186)
