@@ -27,11 +27,6 @@ namespace {
     using Location = MsTrackSeeder::Location;
 
 
-
-    constexpr const std::pair<double, double> absMin(const std::pair<double, double>& a, 
-                                                     const std::pair<double, double>& b){
-            return a.first < 0 ? b :(a.first < b.first ? a : b);
-    }
     constexpr int overlapSector(const int sec1 , const int sec2) {
         constexpr int nSec = Muon::MuonStationIndex::numberOfSectors();
         if (sec2 > sec1) return overlapSector(sec2, sec1);
