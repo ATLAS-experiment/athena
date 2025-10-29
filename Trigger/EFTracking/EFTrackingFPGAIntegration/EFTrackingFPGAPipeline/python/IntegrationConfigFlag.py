@@ -30,6 +30,6 @@ def addFPGADataPrepFlags():
     return flags
 
 def addClusterMakerFlags(flags):
-    flags.addFlag("ClusterMaker.DoBulkCopy", False)
+    flags.addFlag("ClusterMaker.DoBulkCopy", True)
     
     return flags

@@ -35,7 +35,7 @@ def xAODClusterMakerCfg(flags, name = 'xAODClusterMaker', **kwarg):
     
     kwarg.setdefault('PixelClusterContainerKey', 'FPGAPixelClusters')
     kwarg.setdefault('StripClusterContainerKey', 'FPGAStripClusters')
-    kwarg.setdefault('DoBulkCopy', False)
+    kwarg.setdefault('DoBulkCopy', True)
     
     acc.setPrivateTools(CompFactory.xAODClusterMaker(name, **kwarg))
     return acc
