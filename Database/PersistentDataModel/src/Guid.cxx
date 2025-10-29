@@ -79,14 +79,13 @@ bool Guid::isGuid(std::string_view sv) noexcept{
 }
 
 bool Guid::operator==(std::string_view str) const {
-   return str.size() == 36 && *this == Guid(str);
+   return str.size() == Guid::string::stringSize() && *this == Guid(str);
 }
 
 
 std::ostream& operator<<(std::ostream& os, const Guid& rhs) {
-  std::array<char, 36> buff;
-  rhs.toString(buff);
-  os.write(buff.data(), 36);
+  auto buff = rhs.to_fixed_string();
+  os.write(buff.data(), buff.size());
   return os; 
 }
 

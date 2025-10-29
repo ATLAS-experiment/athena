@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DbReflex.cpp 717955 2016-01-15 13:34:52Z mnowak $
@@ -29,7 +29,7 @@ mutex_t guidMapMutex;
    This must match the GUIDs in selection.xml files.
    GUIDs should never change, so it is safe to hardcode them here.
 */
-const std::pair<Guid, const char*> GuidToClname[] = {
+constexpr std::pair<Guid, const char*> GuidToClname[] = {
    {Guid("F41DF744-242D-11E6-B472-02163E010CEC"), "xAOD::TrackParticleAuxContainer_v3"}
   ,{Guid("8251F481-EA4C-4852-AE72-BED87E6FD2FB"), "xAOD::MuonAuxContainer_v4"}
   ,{Guid("89AE2C6B-A862-499C-8BDA-11D24FAC83F1"), "xAOD::JetTrigAuxContainer_v1"}

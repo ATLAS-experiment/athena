@@ -17,12 +17,26 @@
 #include <type_traits>
 #include <span>
 #include <algorithm>
+#include <format>
 
 /** @class Guid
  *  @brief This class provides a encapsulation of a GUID/UUID/CLSID/IID data structure (128 bit number).
  **/
 class Guid {
 public:
+   static constexpr size_t StrLen = 36;
+   /** @class Guid::string
+    *  @brief A class designed to facilitate exchange of Guid::string objects without additional allocations
+    **/
+   class string : public std::array<char, StrLen> {
+   public:
+       constexpr operator std::string_view() const {
+           return std::string_view(data(), size());
+       }
+       constexpr std::string_view sv() const {return std::string_view(data(), size());}
+       static constexpr int stringSize() { return StrLen; }
+   };
+
    /// Standard constructor
    constexpr Guid() : m_data1(0U), m_data2(0U), m_data3(0U), m_data4() {}
    /// Standard constructor (With possible initialization)
@@ -39,16 +53,23 @@ public:
    bool operator==(const Guid&) const = default;
    bool operator==(std::string_view str) const;
 
+   constexpr static int stringSize() { return StrLen; }
+
    /// Automatic conversion to string representation
-   constexpr void toString(std::span<char, 36> buf, bool uppercase = true) const noexcept;
+   constexpr void toString(std::span<char, StrLen> buf, bool uppercase = true) const noexcept;
    constexpr std::string toString(bool uppercase = true) const{
-      std::string buf(36, ' ');
-      toString(std::span<char, 36>(buf.data(), 36), uppercase);
+      std::string buf(Guid::string::stringSize(), ' ');
+      toString(std::span<char, stringSize()>(buf.data(), stringSize()), uppercase);
       return buf;
+   }
+   constexpr Guid::string to_fixed_string(bool uppercase = true) const{
+      Guid::string buffer;
+      toString(buffer, uppercase);
+      return buffer;
    }
    static bool isGuid(std::string_view) noexcept;
    /// Automatic conversion from string representation 
-   constexpr Guid& fromString(std::string_view s);
+   constexpr void fromString(std::string_view s);
    /// NULL-Guid: static class method
    static const Guid& null() noexcept;
 
@@ -88,6 +109,21 @@ private:
    std::array<unsigned char,8> m_data4{};
 };
 
+//This piece of code allows std::format to deal with Guid::string without additional boilerplate
+//This may be able to be removed in C++23
+template <>
+struct std::formatter<Guid::string> : std::formatter<std::string_view> {
+    constexpr auto format(const Guid::string& guid, auto& ctx) const {
+        return std::formatter<std::string_view>::format(static_cast<std::string_view>(guid), ctx);
+    }
+};
+
+//This piece of code allows it to be piped into std::ostream without additional boilerplate
+//This may be able to be removed in C++23
+inline std::ostream& operator<<(std::ostream& os, const Guid::string& guid) {
+    return os << static_cast<std::string_view>(guid);
+}
+
 constexpr void Guid::setToNull() noexcept {
    m_data1 = 0U;
    m_data2 = 0U;
@@ -96,7 +132,7 @@ constexpr void Guid::setToNull() noexcept {
 }
 
 //This is an unrolled method provided by AI, it should work to ~20ns
-constexpr Guid& Guid::fromString(std::string_view sv) {
+constexpr void Guid::fromString(std::string_view sv) {
    // Trim any whitespace
    if(std::is_constant_evaluated() && std::min(sv.find_first_not_of(' '), sv.size()) > 0){
         throw std::runtime_error("Remove spaces from GUID");
@@ -119,7 +155,7 @@ constexpr Guid& Guid::fromString(std::string_view sv) {
       if(std::is_constant_evaluated()){
          throw std::runtime_error("failed to compile time parse GUID");
       }
-      return *this;
+      return;
    }
    bool success = true;
    // Custom constexpr hex parser
@@ -172,7 +208,7 @@ constexpr Guid& Guid::fromString(std::string_view sv) {
          throw std::runtime_error("failed to compile time parse GUID");
       }
    }
-   return *this;
+   return;
 }
 
 //This is an unrolled method provided by ai, is should work to ~20ns
