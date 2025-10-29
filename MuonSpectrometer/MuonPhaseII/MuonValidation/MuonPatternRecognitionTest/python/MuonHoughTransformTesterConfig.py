@@ -50,9 +50,8 @@ if __name__=="__main__":
         # "MDTTwinMapping_compactFormat_Run123",  
         from IOVDbSvc.IOVDbSvcConfig import addOverride
         cfg.merge(addOverride(flags, "/MDT/TWINMAPPING", "MDTTwinMapping_compactFormat_Run123"))
-
-    
-        cfg.merge(MuonHoughTransformTesterCfg(flags,
+        
+    cfg.merge(MuonHoughTransformTesterCfg(flags,
                                               VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     if not args.noMonitorPlots and (flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
@@ -77,6 +76,7 @@ if __name__=="__main__":
                                                                                                 CanvasPreFix="NswPhiHoughPlotValid",
                                                                                                 AllCanvasName="AllNswPhiHoughiDiPuffPlots",
                                                                                                 saveSinglePDFs = True, saveSummaryPDF= False))
+
         cfg.getEventAlgo("MuonNswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswSegmentFitPlotValid",
                                                                                                 AllCanvasName="AllNswSegmentFitPlots",
