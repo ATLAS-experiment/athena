@@ -111,6 +111,16 @@ const IdDictMgr::dictionary_map& IdDictMgr::get_dictionary_map() const {
   return(m_dictionaries);
 }
 
+std::vector<const IdDictDictionary*> IdDictMgr::get_dictionaries () const
+{
+  std::vector<const IdDictDictionary*> out;
+  out.reserve (m_dictionaries.size());
+  for (const auto& p : m_dictionaries) {
+    out.push_back (p.second);
+  }
+  return out;
+}
+
 IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) const {
   dictionary_map::const_iterator it;
 

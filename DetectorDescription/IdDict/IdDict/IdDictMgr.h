@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IDDICTMGR_H
@@ -8,11 +8,13 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 class IdDictDictionary;
 
 class IdDictMgr  {  
 public:  
+    using dictionary_vec = std::vector<const IdDictDictionary*>;
     typedef std::map<std::string, IdDictDictionary*> dictionary_map; 
     typedef std::map<std::string, std::string>       metadata_map; 
 
@@ -27,6 +29,7 @@ public:
 
     /// Access to all dictionaries
     const dictionary_map& get_dictionary_map      () const;  
+    dictionary_vec        get_dictionaries        () const;
 
     /// DTD version
     const std::string&    DTD_version             () const;
@@ -75,4 +78,4 @@ private:
     bool                  m_do_neighbours;
 }; 
 
-#endif 
+#endif
