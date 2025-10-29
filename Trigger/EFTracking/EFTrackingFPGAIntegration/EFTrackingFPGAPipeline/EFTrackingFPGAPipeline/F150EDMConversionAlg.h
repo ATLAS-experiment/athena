@@ -15,7 +15,6 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 
 // ACTS
-#include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 
 // STL include
@@ -35,7 +34,7 @@ namespace EFTrackingFPGAIntegration
 
         virtual StatusCode initialize() override;
 
-        virtual StatusCode execute(const EventContext &ctx) const;
+        StatusCode execute(const EventContext &ctx) const override;
 
 
     protected:

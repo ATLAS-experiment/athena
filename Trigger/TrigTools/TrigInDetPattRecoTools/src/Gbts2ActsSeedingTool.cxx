@@ -32,7 +32,8 @@ StatusCode Gbts2ActsSeedingTool::finalize() {
 }
 
 StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
-  
+
+  seedContainer.spacePoints().reserve(spContainer.size());
   std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
@@ -53,6 +54,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
     for(size_t idx=0; idx<spContainer.size(); idx++){
         const auto & sp = spContainer.at(idx);
         const auto & extSP = sp.externalSpacePoint();
+        seedContainer.spacePoints().push_back(&extSP);
         const std::vector<xAOD::DetectorIDHashType>& elementlist = extSP.elementIdList() ;
 
         bool isPixel(elementlist.size() == 1);
@@ -121,23 +123,15 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     if (vSeedCandidates.empty()) return StatusCode::SUCCESS;
 
+    seedContainer.reserve(vSeedCandidates.size(), 7.0f);  // 7 SP/seed to optimise allocations (average is 6.1 SP/seed)
+
     for (const auto& seed : vSeedCandidates) {
 
       if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
       
-      std::vector<const xAOD::SpacePoint*> sps;
-
-      sps.reserve(std::get<2>(seed).size());
-      
-      for (const auto& sp_idx : std::get<2>(seed)) {
-	sps.push_back(&spContainer.at(sp_idx).externalSpacePoint());
-      }
-	
       //add seed to output
-
-      std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(std::move(sps));
 	
-      seedContainer.push_back(std::move(to_add));
+      seedContainer.push_back(std::get<2>(seed));
       
     }
 

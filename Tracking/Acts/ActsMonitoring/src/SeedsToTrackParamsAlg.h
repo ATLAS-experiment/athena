@@ -14,7 +14,6 @@
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 
-#include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"

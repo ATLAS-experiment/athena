@@ -488,7 +488,7 @@ namespace ActsTrk
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
       {
         // Get the seed
-        const ActsTrk::Seed& seed = *seeds[iseed];
+        const ActsTrk::Seed seed = seeds[iseed];
 
         category_i = typeIndex * (m_statEtaBins.size() + 1);
         tracksContainerTemp.clear();
@@ -828,7 +828,7 @@ namespace ActsTrk
       ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
     }
     ++nPrinted;
-    m_trackStatePrinter->printSeed(detContext.geometry, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
+    m_trackStatePrinter->printSeed(detContext.geometry, seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
   }
 
 namespace {

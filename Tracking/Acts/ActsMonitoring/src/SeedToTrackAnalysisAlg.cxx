@@ -83,14 +83,14 @@ namespace ActsTrk {
     std::size_t nElements = seeds->size();
 
     for (std::size_t i(0); i<nElements; ++i) {
-      const ActsTrk::Seed* seed = seeds->at(i);
+      ActsTrk::Seed seed = seeds->at(i);
       const Acts::BoundTrackParameters* pars = params->at(i);
       const int destiny = destinies->at(i);
 
       // in case param estimation for this seed failed somehow
       if (not pars) continue;
 
-      const auto& sps = seed->sp();
+      const auto& sps = seed.sp();
       const auto& bottom = sps[0];
       const auto& middle = sps[1];
       const auto& top = sps[2];
@@ -111,7 +111,7 @@ namespace ActsTrk {
       float topR = std::sqrt( topX * topX + topY * topY );      
 
       float probability = 0.f;
-      ATH_CHECK( getTruthProbability(*seed,
+      ATH_CHECK( getTruthProbability(seed,
 				     truthAssociationMaps,
 				     probability) );
 
@@ -142,8 +142,8 @@ namespace ActsTrk {
 
       auto monitor_seed_eta = Monitored::Scalar<float>( "eta", Acts::VectorHelpers::eta(pars->momentum()) );
       auto monitor_seed_pt = Monitored::Scalar<float>( "pt", pars->transverseMomentum() );
-      auto monitor_seed_quality = Monitored::Scalar<float>( "quality",  seed->seedQuality() );
-      auto monitor_seed_vtx_z = Monitored::Scalar<float>( "vtxZ", seed->z() );
+      auto monitor_seed_quality = Monitored::Scalar<float>( "quality",  seed.seedQuality() );
+      auto monitor_seed_vtx_z = Monitored::Scalar<float>( "vtxZ", seed.z() );
 
       auto monitor_seed_probability = Monitored::Scalar<float>( "truthProb", probability );
       
