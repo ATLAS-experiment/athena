@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -31,16 +31,10 @@ namespace DerivationFramework {
     // Print configuration
     ATH_MSG_DEBUG("Initializing " << name() << "...");
     ATH_MSG_DEBUG("Using VertexContainerName: "      << m_vtxContKey);
-    ATH_MSG_DEBUG("Using HardScatterDecoName: "      << m_evtDecoName);
     ATH_MSG_DEBUG("Using HardScatterSelectionTool: " << m_vtxSelectTool);
 
     if (m_vtxContKey.empty()) {
       ATH_MSG_ERROR("No xAOD::VertexContainer provided!");
-      return StatusCode::FAILURE;
-    }
-
-    if (m_evtDecoName.empty()) {
-      ATH_MSG_ERROR("Hardscatter decoration name cannot be empty!");
       return StatusCode::FAILURE;
     }
 
@@ -54,8 +48,7 @@ namespace DerivationFramework {
     ATH_CHECK(m_evtInfoKey.initialize());
 
     // Instantiate and initialize our event info decorator write
-    m_evtDecoKey = m_evtInfoKey.key() + "." + m_evtDecoName;
-    ATH_CHECK(m_evtDecoKey.initialize());    
+    ATH_CHECK(m_evtDecoKey.initialize());
     // Fetch our InDet::IInDetHardScatterSelectionTool
     ATH_CHECK(m_vtxSelectTool.retrieve());
     return StatusCode::SUCCESS;

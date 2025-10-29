@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ================================================
@@ -92,7 +92,6 @@ namespace LVL1 {
       m_isDataReprocessing(false),
       m_doOverlay(false), m_isReco(false)
   {
-    declareProperty("xAODEventInfoKey", m_xaodevtKey=std::string{"EventInfo"});
     declareProperty("RngSvc", m_rngSvc, "Random number service");
     declareProperty("DigiEngine", m_digiEngine = "TrigT1CaloSim_Digitization");
 

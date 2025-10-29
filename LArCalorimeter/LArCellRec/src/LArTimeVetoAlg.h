@@ -32,6 +32,6 @@ class LArTimeVetoAlg : public AthReentrantAlgorithm {
 
     SG::ReadCondHandleKey<AthenaAttributeList> m_eventVetoKey{this, "folderName", "/LAR/BadChannelsOfl/EventVeto", "Folder name for DB access"};
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", "EventInfo.larFlags", "Key for EventInfo object"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", m_eventInfoKey, "larFlags", "Key for EventInfo object"};
 };
 #endif
