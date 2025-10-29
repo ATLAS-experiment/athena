@@ -41,6 +41,8 @@ public:
     const std::string&  name();
     const std::vector<IdDictDictEntry*>& entries();
     const std::vector<IdDictRegion*>&    regions();
+    size_t n_regions() const;
+    const IdDictRegion&  region(size_t index) const;
 
 
     //@}
@@ -212,5 +214,20 @@ private:
     /// The list of region nodes.
     std::vector<IdDictRegionTreeNode> m_region_tree;
 }; 
+
+
+inline
+size_t IdDictGroup::n_regions() const
+{
+    return m_regions.size();
+}
+
+
+inline
+const IdDictRegion& IdDictGroup::region(size_t index) const
+{
+    return *m_regions.at(index);
+}
+
 
 #endif
