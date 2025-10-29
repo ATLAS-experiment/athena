@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -16,6 +16,7 @@
 
 #include "IdDictParser/IdDictParser.h"  
 #include "InDetIdentifier/SCT_ID.h"
+#include "Identifier/IdContext.h"
 #include <string>
 
 #include <boost/test/unit_test.hpp>

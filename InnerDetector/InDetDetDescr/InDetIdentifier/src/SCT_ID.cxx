@@ -17,6 +17,7 @@
 #include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
+#include "Identifier/IdContext.h"
 #include <set>
 #include <algorithm>
 #include <iostream>
@@ -781,4 +782,46 @@ SCT_ID::neighbours_by_phi(const IdentifierHash & idh) const{
     m_prev_eta_wafer_vec[index], m_next_eta_wafer_vec[index]
   };
   else return  invalidHashes;
+}
+
+
+Identifier
+SCT_ID::strip_id(const ExpandedIdentifier& id) const {
+  // Build identifier
+  Identifier result((Identifier::value_type) 0);
+
+  // Pack fields independently
+  m_indet_impl.pack(indet_field_value(), result);
+  m_sct_impl.pack(sct_field_value(), result);
+  m_bec_impl.pack(id[m_indices[BARREL_EC]], result);
+  m_lay_disk_impl.pack(id[m_indices[LAYER_DISK]], result);
+  m_phi_mod_impl.pack(id[m_indices[PHI]], result);
+  m_eta_mod_impl.pack(id[m_indices[ETA]], result);
+  m_side_impl.pack(id[m_indices[SIDE]], result);
+  if (m_hasRows) {
+    m_row_impl.pack(id[m_indices[ROW]], result);
+  }
+  m_strip_impl.pack(id[m_indices[STRIP]], result);
+
+  // Do checks
+  if (m_do_checks) {
+    strip_id_checks(id);
+  }
+  return result;
+}
+
+
+IdContext
+SCT_ID::wafer_context() const {
+  ExpandedIdentifier id;
+
+  return(IdContext(id, 0, m_indices[SIDE]));
+}
+
+
+IdContext
+SCT_ID::strip_context() const {
+  ExpandedIdentifier id;
+
+  return(IdContext(id, 0, m_indices[STRIP]));
 }
