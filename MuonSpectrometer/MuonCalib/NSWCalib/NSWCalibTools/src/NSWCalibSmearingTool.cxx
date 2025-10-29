@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NSWCalibSmearingTool.h"
@@ -369,7 +369,7 @@ StatusCode NSWCalibSmearingTool::readHighVoltagesStatus()
 
     std::string line;
     bool isLM,isSM,isIP,isHO;
-    int stationName,stationEta,stationPhi,multilayer,gasGap,HVval;
+    int stationName,stationPhi,gasGap,HVval;
     int side = 0;
     std::string layerId[4] = {"L1","L2","L3","L4"};
 
@@ -403,11 +403,12 @@ StatusCode NSWCalibSmearingTool::readHighVoltagesStatus()
       isSM = (fSM!=std::string::npos);
       
       // get layer 1 from the line with the module name
-      if ( isLM || isSM ) { 
+      if ( isLM || isSM ) {
+        int stationEta = 0;
 	if ( isSM ) {
 	  stationEta = side*std::stoi(line.substr(fSM+2,1));
 	}
-	else if ( isLM ) {
+	else {
 	  stationEta = side*std::stoi(line.substr(fLM+2,1));
 	}
 	
@@ -419,7 +420,8 @@ StatusCode NSWCalibSmearingTool::readHighVoltagesStatus()
 	}
 	
 	isSM ? stationName=55 : stationName=56;
-	
+
+        int multilayer = 0;
 	std::size_t fIP = line.find("IP");
 	isIP = (fIP!=std::string::npos);
 	std::size_t fHO = line.find("HO");
