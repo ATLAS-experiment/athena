@@ -54,7 +54,7 @@ namespace MuonValR4{
       std::vector<const MuonR4::Segment*> matchedSegments;
       /// @brief All seeds matched to this object
       std::vector<const MuonR4::SegmentSeed*> matchedSeeds; 
-      std::vector<char> matchedSeedFoundSegment{0};
+      std::vector<char> matchedSeedFoundSegment;
     };
 
   private:

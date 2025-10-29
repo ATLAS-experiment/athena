@@ -59,7 +59,8 @@ namespace MuonValR4 {
             if (m_isMC) infoOpts = EventInfoBranch::isMC;
             m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree, infoOpts));  
         }
-        ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));
+        
+        ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));        
         /// The collection of readHandle keys should be either 1 or 2
         ATH_CHECK(m_inSegmentKeys.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKeys.initialize());
@@ -211,15 +212,17 @@ namespace MuonValR4 {
             match.matchedSeeds = {seg->parent()};
             // this seed has been written as well - do not write it in the following loop 
             usedSeeds.insert(seg->parent());
+            match.matchedSeedFoundSegment.push_back(1);
         }
         for (const SegmentSeed* seed: *seedContainer) {
-            // skip seeds that are on segments or seen in the truth loop 
+            // skip seeds that are on segments or seen in the truth loop so these will be seeds without segment 
             if (usedSeeds.count(seed)) {
                 continue;
             }
             ObjectMatching & match = allAssociations.emplace_back(); 
             match.chamber = seed->msSector();
             match.matchedSeeds = {seed}; 
+            match.matchedSeedFoundSegment.push_back(0);
         }
         return allAssociations;
     }
@@ -250,7 +253,10 @@ namespace MuonValR4 {
             segments.insert(segments.end(),readSegments->begin(), readSegments->end());
         }
         const xAOD::MuonSegmentContainer* readTruthSegments{nullptr};
-        ATH_CHECK(SG::get(readTruthSegments , m_truthSegmentKey, ctx));
+
+        if(m_isMC){
+             ATH_CHECK(SG::get(readTruthSegments , m_truthSegmentKey, ctx));
+        }
             
         ATH_MSG_DEBUG("Succesfully retrieved input collections. Seeds: "<<segmentSeeds.size()
                     <<", segments: "<<segments.size() <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)<<".");
@@ -258,9 +264,9 @@ namespace MuonValR4 {
                                                              segments.asDataVector());
         for (const ObjectMatching& obj : objects) {
             fillChamberInfo(obj.chamber);
-            fillTruthInfo(gctx, obj.truthSegment);
             fillSeedInfo(obj);
             fillSegmentInfo(gctx, obj);
+            if(m_isMC) fillTruthInfo(gctx, obj.truthSegment);
             ATH_CHECK(m_tree.fill(ctx));
         }
         return StatusCode::SUCCESS;
