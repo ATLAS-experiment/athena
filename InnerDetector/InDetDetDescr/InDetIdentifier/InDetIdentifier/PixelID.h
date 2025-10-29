@@ -582,21 +582,6 @@ PixelID::base_bit() const {
 }
 
 //----------------------------------------------------------------------------
-inline IdContext
-PixelID::wafer_context() const {
-  ExpandedIdentifier id;
-
-  return(IdContext(id, 0, m_ETA_MODULE_INDEX));
-}
-
-//----------------------------------------------------------------------------
-inline IdContext
-PixelID::pixel_context() const {
-  // For pixel only, the prefix is the first two levels
-  return(IdContext(m_baseExpandedIdentifier, m_BARREL_EC_INDEX, m_ETA_INDEX_INDEX));
-}
-
-//----------------------------------------------------------------------------
 inline bool
 PixelID::is_barrel(const Identifier& id) const {
   // Normal unshifted id

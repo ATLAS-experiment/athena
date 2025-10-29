@@ -17,6 +17,7 @@
 #include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
+#include "Identifier/IdContext.h"
 #include <set>
 #include <algorithm>
 #include <iostream>
@@ -954,4 +955,61 @@ TRT_ID::test_trt_ids() {
         << nids << " ids. "
         << endmsg;
   
+}
+
+
+Identifier
+TRT_ID::straw_id(const ExpandedIdentifier& id) const {
+  // Check if TRT_ID is valid for this layout
+  if (!m_is_valid) invalidMessage();
+
+  Identifier result;
+  if (m_STRAW_INDEX < id.fields()) {
+    result = straw_id(id[m_BARREL_EC_INDEX],
+                      id[m_PHI_MODULE_INDEX],
+                      id[m_LAYER_OR_WHEEL_INDEX],
+                      id[m_STRAW_LAYER_INDEX],
+                      id[m_STRAW_INDEX]);
+  }
+  return(result);
+}
+
+
+inline IdContext
+TRT_ID::barrel_context() const {
+  // Check if TRT_ID is valid for this layout
+  if (!m_is_valid) invalidMessage();
+
+  ExpandedIdentifier id;
+  return(IdContext(id, 0, m_BARREL_EC_INDEX));
+}
+
+
+IdContext
+TRT_ID::module_context() const {
+  // Check if TRT_ID is valid for this layout
+  if (!m_is_valid) invalidMessage();
+
+  ExpandedIdentifier id;
+  return(IdContext(id, 0, m_LAYER_OR_WHEEL_INDEX));
+}
+
+
+IdContext
+TRT_ID::straw_layer_context() const {
+  // Check if TRT_ID is valid for this layout
+  if (!m_is_valid) invalidMessage();
+
+  ExpandedIdentifier id;
+  return(IdContext(id, 0, m_STRAW_LAYER_INDEX));
+}
+
+
+IdContext
+TRT_ID::straw_context() const {
+  // Check if TRT_ID is valid for this layout
+  if (!m_is_valid) invalidMessage();
+
+  ExpandedIdentifier id;
+  return(IdContext(id, 0, m_STRAW_INDEX));
 }
