@@ -309,7 +309,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
                 if (slotField.isBounded() || slotField.isEnumerated()) {
                     // save values
                     unsigned int nvalues = slotField.get_indices();
-                    hc.m_slot_values.reserve(hc.m_slot_values.size() + nvalues);
+                    hc.m_slot_values.reserve(std::max(hc.m_slot_values.size()*3/2, hc.m_slot_values.size() + nvalues));
                     for (unsigned int j = 0; j < nvalues; ++j) {
                         hc.m_slot_values.push_back(slotField.get_value_at(j));
                     }
@@ -318,7 +318,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
         }
 
         // Set hash calculator
-        m_feb_hash_calcs[m_bec_ft_impl.unpack(min)] = hc;
+        m_feb_hash_calcs[m_bec_ft_impl.unpack(min)] = std::move(hc);
 
 
         if (m_bec_ft_impl.unpack(min) >= size) {
