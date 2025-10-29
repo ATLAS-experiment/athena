@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARROD_LARHITTOCELL_H
@@ -96,7 +96,7 @@ private:
 
 
     template <class T>
-  const T* retrieve(const EventContext& context, SG::ReadCondHandleKey<T> handleKey) const {
+  const T* retrieve(const EventContext& context, const SG::ReadCondHandleKey<T>& handleKey) const {
         SG::ReadCondHandle<T> handle( handleKey, context);
         if ( not handle.isValid() ) {
                 ATH_MSG_ERROR("could not retrieve : " << handle.key() );
