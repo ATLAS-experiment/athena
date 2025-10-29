@@ -32,23 +32,15 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
   
   //everything below is just for EleBDT!
   static const SG::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK"); 
-  static const SG::Accessor<float> acc_absDeltaEta("TAU_ABSDELTAETA");
-  static const SG::Accessor<float> acc_absDeltaPhi("TAU_ABSDELTAPHI");
   static const SG::ConstAccessor<float> acc_sumEMCellEtOverLeadTrkPt("sumEMCellEtOverLeadTrkPt");
-  static const SG::ConstAccessor<float> acc_etHadAtEMScale("etHadAtEMScale");
-  static const SG::ConstAccessor<float> acc_etEMAtEMScale("etEMAtEMScale");
-  static const SG::Accessor<float> acc_EMFractionAtEMScaleMOVEE3("EMFRACTIONATEMSCALE_MOVEE3");
-  static const SG::Accessor<float> acc_seedTrkSecMaxStripEtOverPt("TAU_SEEDTRK_SECMAXSTRIPETOVERPT");
   static const SG::ConstAccessor<float> acc_secMaxStripEt("secMaxStripEt");
   static const SG::ConstAccessor<float> acc_centFrac("centFrac");
 
   // Will: Fixed variables for R21
   static const SG::Accessor<float> acc_EMFracFixed("EMFracFixed");
   static const SG::Accessor<float> acc_hadLeakFracFixed("hadLeakFracFixed");
-  static const SG::Accessor<float> acc_etHotShotDR1("etHotShotDR1"); // replace secMaxStripEt
   static const SG::Accessor<float> acc_etHotShotWin("etHotShotWin"); // replace secMaxStripEt
-  static const SG::Accessor<float> acc_etHotShotDR1OverPtLeadTrk("etHotShotDR1OverPtLeadTrk"); // replace TAU_SEEDTRK_SECMAXSTRIPETOVERPT
-  static const SG::Accessor<float> acc_etHotShotWinOverPtLeadTrk("etHotShotWinOverPtLeadTrk"); // replace TAU_SEEDTRK_SECMAXSTRIPETOVERPT
+  static const SG::Accessor<float> acc_etHotShotWinOverPtLeadTrk("etHotShotWinOverPtLeadTrk"); 
 
 
   // EMFracFixed and eHad1AtEMScaleFixed (for acc_hadLeakFracFixed)
@@ -94,18 +86,6 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
   if(tau.nTracks() > 0){
     const xAOD::TrackParticle* track = tau.track(0)->track();
     acc_absEtaLead(tau) = std::abs( track->eta() );
-    acc_absDeltaEta(tau) = std::abs( track->eta() - tau.eta() );
-    acc_absDeltaPhi(tau) = std::abs( track->p4().DeltaPhi(tau.p4()) );
-    //EMFRACTIONATEMSCALE_MOVEE3:
-    float etEMScale1 = acc_etEMAtEMScale(tau);
-    float etEMScale2 = acc_etHadAtEMScale(tau);
-    float tau_sumETCellsLAr = acc_sumEMCellEtOverLeadTrkPt(tau) * track->pt();
-    float tau_E3 = tau_sumETCellsLAr - etEMScale1;
-    float tau_seedCalo_etHadAtEMScale_noE3 = etEMScale2 - tau_E3;
-    float tau_seedCalo_etEMAtEMScale_yesE3 = etEMScale1 + tau_E3;
-    acc_EMFractionAtEMScaleMOVEE3(tau) = tau_seedCalo_etEMAtEMScale_yesE3 / (tau_seedCalo_etEMAtEMScale_yesE3 + tau_seedCalo_etHadAtEMScale_noE3);
-    //TAU_SEEDTRK_SECMAXSTRIPETOVERPT:
-    acc_seedTrkSecMaxStripEtOverPt(tau) = (track->pt() != 0.) ? acc_secMaxStripEt(tau) / track->pt() : LOW_NUMBER;
 
     // hadLeakFracFixed
     acc_hadLeakFracFixed(tau) = (track->p4().P() != 0.) ? eHad1AtEMScaleFixed / track->p4().P() : LOW_NUMBER;
@@ -123,7 +103,6 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
     ATH_MSG_DEBUG("track EM " << ", eta: " << etaCalo << ", phi: " << phiCalo );
     
     // Get hottest shot in dR<0.1 and in 0.05 x 0.1 window
-    float etHotShotDR1 = 0.;
     float etHotShotWin = 0.;
     for( const auto& shotLink : tau.shotPFOLinks() ){
         if( not shotLink.isValid() ){
@@ -134,31 +113,19 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
         float etShot = 0.;
         shot->attribute(xAOD::PFODetails::tauShots_pt3, etShot);
        
-        // In dR < 0.1
-        if(xAOD::P4Helpers::deltaR(*shot, etaCalo, phiCalo, false) and etShot > etHotShotDR1){
-          etHotShotDR1 = etShot;
-        }
         // In 0.012 x 0.1 window
         if(std::abs(shot->eta() - etaCalo) > 0.012 ) continue;
         if(std::abs(xAOD::P4Helpers::deltaPhi(shot->phi(), phiCalo)) > 0.1 ) continue;
         if(etShot > etHotShotWin) etHotShotWin = etShot;
     }
-    acc_etHotShotDR1(tau) = etHotShotDR1;
     acc_etHotShotWin(tau) = etHotShotWin;
-    acc_etHotShotDR1OverPtLeadTrk(tau) = (track->pt() != 0.) ? etHotShotDR1 / track->pt() : LOW_NUMBER;
     acc_etHotShotWinOverPtLeadTrk(tau) = (track->pt() != 0.) ? etHotShotWin / track->pt() : LOW_NUMBER;
 
   }
   else{
     acc_absEtaLead(tau) = LOW_NUMBER;
-    acc_absDeltaEta(tau) = LOW_NUMBER;
-    acc_absDeltaPhi(tau) = LOW_NUMBER;
-    acc_EMFractionAtEMScaleMOVEE3(tau) = LOW_NUMBER;
-    acc_seedTrkSecMaxStripEtOverPt(tau) = LOW_NUMBER;
     acc_hadLeakFracFixed(tau) = LOW_NUMBER;
-    acc_etHotShotDR1(tau) = LOW_NUMBER; 
     acc_etHotShotWin(tau) = LOW_NUMBER;
-    acc_etHotShotDR1OverPtLeadTrk(tau) = LOW_NUMBER; 
     acc_etHotShotWinOverPtLeadTrk(tau) = LOW_NUMBER; 
   }
  
