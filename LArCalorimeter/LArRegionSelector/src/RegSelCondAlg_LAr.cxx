@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -229,7 +229,9 @@ std::unique_ptr<RegSelectorHashMap> RegSelCondAlg_LAr::createTable (const LArRoI
 
     IdContext IdCntx = helper->layer_context(); 
 
-    helper->get_hash(layer_id, hashid, &IdCntx ) ; 
+    if (helper->get_hash(layer_id, hashid, &IdCntx ) != 0) {
+      ATH_MSG_ERROR ("Bad return from get_hash");
+    }
 
     // quite special treatment for FCALHAD
     if ( isFcal && ( samp != 0 ) ) {
