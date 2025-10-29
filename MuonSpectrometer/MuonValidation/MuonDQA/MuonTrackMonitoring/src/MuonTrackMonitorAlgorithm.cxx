@@ -1,9 +1,10 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
     2020 Matthias Schott - Uni Mainz
 */
 
 #include "MuonTrackMonitoring/MuonTrackMonitorAlgorithm.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "xAODEventInfo/EventInfo.h"
 
