@@ -272,7 +272,9 @@ public:
    *
    * The event store takes shared ownership of the object.
    */
-  StatusCode record (SG::DataObjectSharedPtr<T> data);
+  template <std::derived_from<DataObject> DOBJ>
+  requires std::convertible_to<DOBJ*, T*>
+  StatusCode record (SG::DataObjectSharedPtr<DOBJ> data);
 
 
   /**
@@ -281,7 +283,9 @@ public:
    *
    * The event store takes shared ownership of the object.
    */
-  StatusCode recordNonConst (SG::DataObjectSharedPtr<T> data);
+  template <std::derived_from<DataObject> DOBJ>
+  requires std::convertible_to<DOBJ*, T*>
+  StatusCode recordNonConst (SG::DataObjectSharedPtr<DOBJ> data);
 
 
   /**
@@ -410,7 +414,9 @@ public:
    *
    * The event store takes shared ownership of the object.
    */
-  const_pointer_type put (SG::DataObjectSharedPtr<T> data) const;
+  template <std::derived_from<DataObject> DOBJ>
+  requires std::convertible_to<DOBJ*, T*>
+  const_pointer_type put (SG::DataObjectSharedPtr<DOBJ> data) const;
 
 
   /**
@@ -426,8 +432,10 @@ public:
    *
    * The event store takes shared ownership of the object.
    */
+  template <std::derived_from<DataObject> DOBJ>
+  requires std::convertible_to<DOBJ*, T*>
   const_pointer_type put (const EventContext& ctx,
-                          SG::DataObjectSharedPtr<T> data) const;
+                          SG::DataObjectSharedPtr<DOBJ> data) const;
 
 
   /**

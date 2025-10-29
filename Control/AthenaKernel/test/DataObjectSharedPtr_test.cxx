@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthenaKernel/test/DataObjectSharedPtr_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,6 +11,7 @@
 
 #undef NDEBUG
 #include "AthenaKernel/DataObjectSharedPtr.h"
+#include <cassert>
 #include <iostream>
 
 
@@ -41,6 +40,8 @@ void test1()
     }
     assert (ptr->refCount() == 1);
 
+    SG::DataObjectSharedPtr<MyObj> pp1;
+    SG::DataObjectSharedPtr<DataObject> pp2 (pp1);
     assert (f (ptr) == 2);
     assert (ptr->refCount() == 1);
     
