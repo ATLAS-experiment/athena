@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArAutoCorrNoiseCondAlg.h"
@@ -76,6 +76,7 @@ StatusCode LArAutoCorrNoiseCondAlg::execute()
   larOnOffIdMapping = *larOnOffIdMappingHdl;
   if ( larOnOffIdMapping == nullptr ) {
     ATH_MSG_ERROR( "Failed to retrieve LArOnOffIdMapping object" );
+    return StatusCode::FAILURE;
   }
   // MC symmetrization helper
   const LArMCSym*              larMCsym = nullptr;
@@ -151,7 +152,7 @@ StatusCode LArAutoCorrNoiseCondAlg::execute()
           }
         }
 
-        terms[igain][id] = vTerms;
+        terms[igain][id] = std::move(vTerms);
 
       } //(loop on gains)
 

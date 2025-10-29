@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArAutoCorrTotalCondAlg.h"
@@ -135,6 +135,7 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
   larADC2MeV = *ADC2MeVHdl;
   if (larADC2MeV == nullptr) {
     ATH_MSG_ERROR("Failed to retrieve LArADC2MeV object");
+    return StatusCode::FAILURE;
   }
   writeHandle.addDependency(ADC2MeVHdl);
 
