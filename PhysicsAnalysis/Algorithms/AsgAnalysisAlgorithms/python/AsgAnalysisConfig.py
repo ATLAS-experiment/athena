@@ -131,8 +131,6 @@ class CommonServicesConfig (ConfigBlock) :
                         +reset)
             log.warning(f"{bold}{yellow}These settings are not recommended for analysis. Make sure you know what you're doing, or disable them with `enableExpertMode: False` in `CommonServices`.{reset}")
 
-            import time
-            time.sleep(2)
 
 
 @groupBlocks
