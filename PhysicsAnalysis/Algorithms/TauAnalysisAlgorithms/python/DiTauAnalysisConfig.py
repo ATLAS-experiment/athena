@@ -23,6 +23,8 @@ class DiTauCalibrationConfig (ConfigBlock):
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
             "CP::DiTauTruthMatchingAlg). The default is True.")
+        self.addOption ('decorateTruth', False, type=bool,
+            info="decorate truth particle information on the reconstructed one")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -47,6 +49,25 @@ class DiTauCalibrationConfig (ConfigBlock):
                             'TauAnalysisTools::DiTauTruthMatchingTool' )
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
+
+        # decorate truth tau information on the reconstructed object:
+        if self.decorateTruth and self.rerunTruthMatching and config.dataType() is not DataType.Data:
+            # in the case of the ditau, the DiTauTruthMatchingTool decorates directly the reco ditau with truth information.
+            # So information can be written directly out without any additional algorithm 
+            config.addOutputVar (self.containerName, 'TruthVisLeadPt', 'TruthVisLeadPt', noSys=True) 
+            config.addOutputVar (self.containerName, 'TruthVisLeadEta', 'TruthVisLeadEta', noSys=True) 
+            config.addOutputVar (self.containerName, 'TruthVisLeadPhi', 'TruthVisLeadPhi', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisLeadM', 'TruthVisLeadM', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthLeadPdgID', 'TruthLeadPdgID', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadPt', 'TruthVisSubleadPt', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadEta', 'TruthVisSubleadEta', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadPhi', 'TruthVisSubleadPhi', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadM', 'TruthVisSubleadM', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthSubleadPdgID', 'TruthSubleadPdgID', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisDeltaR', 'TruthVisDeltaR', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisMass', 'TruthVisMass', noSys=True)
+            config.addOutputVar (self.containerName, 'IsTruthMatched', 'IsTruthMatched', noSys=True)
+            config.addOutputVar (self.containerName, 'IsTruthHadronic', 'IsTruthHadronic', noSys=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' )
