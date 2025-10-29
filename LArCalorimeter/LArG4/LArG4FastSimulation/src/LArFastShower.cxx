@@ -386,13 +386,13 @@ std::unique_ptr<const HepMC::GenEvent> LArFastShower::GetGenEvent(const G4FastTr
   HepMC::GenParticlePtr gpi = HepMC::newGenParticlePtr(
       HepMC::FourVector(0.,0.,0.,0.),
       999, 4 );
-  gv->add_particle_in(gpi);
+  gv->add_particle_in(std::move(gpi));
 
   // output particle (status=1) is the FourVector of the shower.
   HepMC::GenParticlePtr gpo = HepMC::newGenParticlePtr(
       HepMC::FourVector(showerMom.x(), showerMom.y(), showerMom.z(), energy),
       pdgcode, 1 );
-  gv->add_particle_out(gpo);
+  gv->add_particle_out(std::move(gpo));
 
   // return auto_pointer. will be deleted automatically
   return ge;
