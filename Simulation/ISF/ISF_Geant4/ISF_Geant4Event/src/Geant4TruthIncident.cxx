@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -47,7 +47,7 @@
   Simulation/G4Sim/SimHelpers/src/StepHelper.cxx
   - provids convenient information of a G4Step
   Simulation/G4Utilities/G4TruthStrategies/src/BremsstrahlungStrategy.cxx
-  - retrives information from a G4Step (via StepHelper)
+  - retrieves information from a G4Step (via StepHelper)
   Simulation/G4Sim/MCTruth/MCTruth/TruthStrategy.h
   - common base for different truth strategies
   Simulation/G4Sim/MCTruth/src/AtlasG4EventUserInfo.cxx
