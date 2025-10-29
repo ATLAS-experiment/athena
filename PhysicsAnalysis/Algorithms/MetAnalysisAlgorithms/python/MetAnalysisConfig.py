@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AthenaConfiguration.Enums import LHCPeriod
 
 
 class MetAnalysisConfig (ConfigBlock):
@@ -51,6 +52,20 @@ class MetAnalysisConfig (ConfigBlock):
             expertMode=True)
         self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
+        self.addOption ('jetCalibConfig', "", type=str,
+            info="config file used in jet calibration (for MET significance)")
+        self.addOption ('jetCalibSequence', "", type=str,
+            info="jet calibration sequence (for MET significance)")
+        self.addOption ('jetCalibArea', "", type=str,
+            info="CalibArea used in jet calibration (for MET significance)")
+        self.addOption ('egammaESModel', "", type=str,
+            info="ESModel for egamma calibration (for MET significance)")
+        self.addOption ('egammaDecorrelationModel', "1NP_v1", type=str,
+            info="Decorrelation model for egamma calibration (for MET significance)")
+        self.addOption ('tauTESConfig', "CombinedTES_R22_Round2.5_v2.root", type=str,
+            info="Config file for tau energy scale calibration (for MET significance)")
+        self.addOption ('tauUseMVAResolution', True, type=bool,
+            info="Use MVA resolution for taus? (for MET significance)")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
             info="whether to save some additional (event-based) MET significance variables (default=False)")
         self.addOption ('useLRT', False, type=bool,
@@ -137,11 +152,39 @@ class MetAnalysisConfig (ConfigBlock):
                 alg.significanceTool.MuonCalibTool.calibMode = (
                     config.getContainerMeta(self.muons.split(".")[0], 'calibMode', failOnMiss=True))
 
+            # Standard jet calibration. Must be kept in agreement with JetAnalysisConfig.py
+            if self.jetCalibConfig == "":
+                if config.geometry() is LHCPeriod.Run2:
+                    self.jetCalibConfig = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
+                    self.jetCalibArea = "00-04-82"
+                elif config.geometry() >= LHCPeriod.Run3:
+                    self.jetCalibConfig = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config"
+                    self.jetCalibArea = "00-04-83"
+
+            if self.jetCalibSequence == "":
+                # Omit the in situ piece, even on data.
+                # This is for technical reasons and allows access to the correct resolutions for both data and MC.
+                self.jetCalibSequence = 'JetArea_Residual_EtaJES_GSC'
+
+            # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
+            if self.egammaESModel == "":
+                if config.geometry() is LHCPeriod.Run2:
+                    self.egammaESModel = 'es2023_R22_Run2_v1'
+                elif config.geometry() is LHCPeriod.Run3:
+                    self.egammaESModel = 'es2024_Run3_v0'
+
             alg.significanceTool.SoftTermParam = 0
             if self.softTermResolution > 0:
                 alg.significanceTool.SoftTermReso = self.softTermResolution
             alg.significanceTool.TreatPUJets = self.treatPUJets
-            alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
+            alg.significanceTool.JetCalibConfig = self.jetCalibConfig
+            alg.significanceTool.JetCalibSequence = self.jetCalibSequence
+            alg.significanceTool.JetCalibArea = self.jetCalibArea
+            alg.significanceTool.EgammaESModel = self.egammaESModel
+            alg.significanceTool.EgammaDecorrelationModel = self.egammaDecorrelationModel
+            alg.significanceTool.EgammaUseFastsim = (config.dataType() is DataType.FastSim)
+            alg.significanceTool.TauTESConfig = self.tauTESConfig
+            alg.significanceTool.TauUseMVAResolution = self.tauUseMVAResolution
             alg.met = config.readName (self.containerName)
             config.addOutputVar (self.containerName, 'significance_%SYS%', 'significance')
             if self.addExtraSignificanceVars:

@@ -2027,13 +2027,20 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "SoftTermParam", m_softTermParam));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "TreatPUJets", m_treatPUJets));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "DoPhiReso", m_doPhiReso));
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "IsAFII", isAtlfast()));
-      if(jetname == "AntiKt4EMTopo" || jetname =="AntiKt4EMPFlow"){
-        ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", jetname) );
-      } else {
-          ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
-          ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", "AntiKt4EMTopo") );
+      if(jetname =="AntiKt4EMPFlow")
+        ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", "AntiKt4EMPFlow"));
+      std::string JESconfig = isAtlfast() ? m_jesConfigAFII : m_jesConfig;
+      if(isAtlfast() && m_isRun3) {
+        ATH_MSG_WARNING("Jet JES/JER recommendations currently not available for fast sim in Run 3, falling back to full sim version");
+        JESconfig = m_jesConfig;
       }
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibConfig", JESconfig) );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibSequence", "JetArea_Residual_EtaJES_GSC") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibArea", m_jesCalibArea) );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaESModel", m_isRun3 ? "es2024_Run3_v0" : "es2023_R22_Run2_v1") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaDecorrelationModel", "1NP_v1") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaUseFastsim", isAtlfast()) );
       // setup a dedicated new muon calib tool for passing down to METSignificance
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "MuonCalibTool", "CP::MuonCalibTool/calibTool"));
       if (m_isRun3)
@@ -2046,17 +2053,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.doExtraSmearing", m_muHighPtExtraSmear));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "OutputLevel", this->msg().level()));
-#else // AnalysisBase; can just pass the muon calib tool configured above
+#else // AnalysisBase; can just pass the jet/egamma/muon calib tools configured above
       ATH_CHECK( m_metSignif.setProperty("SoftTermParam", m_softTermParam) );
       ATH_CHECK( m_metSignif.setProperty("TreatPUJets", m_treatPUJets) );
       ATH_CHECK( m_metSignif.setProperty("DoPhiReso", m_doPhiReso) );
-      ATH_CHECK( m_metSignif.setProperty("IsAFII", isAtlfast()) );
-      if(jetname == "AntiKt4EMTopo" || jetname =="AntiKt4EMPFlow"){
-        ATH_CHECK( m_metSignif.setProperty("JetCollection", jetname) );
-      } else {
-        ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
-        ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMTopo") );
-      }
+      if(jetname =="AntiKt4EMPFlow")
+        ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
+      ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMPFlow") );
+      ATH_CHECK( m_metSignif.setProperty("jetCalibTool", m_jetCalibTool.getHandle()) );
+      ATH_CHECK( m_metSignif.setProperty("egammaCalibTool", m_egammaCalibTool.getHandle()) );
       // just pass the muon calib tool
       ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));
       ATH_CHECK( m_metSignif.setProperty("OutputLevel", this->msg().level()) );
