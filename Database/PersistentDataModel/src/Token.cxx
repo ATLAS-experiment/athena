@@ -134,9 +134,9 @@ bool Token::less(const Token& copy) const {
 const std::string Token::toString() const {
    return std::format(
       "[DB={}][CNT={}][CLID={}][TECH={:08X}][OID={:016X}-{:016X}]{}",
-      m_dbID.toString(),
+      m_dbID.to_fixed_string(),
       m_cntID,
-      m_classID.toString(),
+      m_classID.to_fixed_string(),
       m_technology,
       static_cast<uint64_t>(m_oid.first),
       static_cast<uint64_t>(m_oid.second),
@@ -206,9 +206,9 @@ Token& Token::fromString(const std::string_view src)    {
 const std::string Token::key() const {
    return std::format(
       "[DB={}][CNT={}][CLID={}][TECH={:08X}]",
-      m_dbID.toString(),
+      m_dbID.to_fixed_string(),
       m_cntID,
-      m_classID.toString(),
+      m_classID.to_fixed_string(),
       m_technology & KEY_MASK
    );
 }

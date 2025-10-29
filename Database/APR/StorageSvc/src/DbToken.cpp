@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -13,6 +13,7 @@
 #include "StorageSvc/DbToken.h"
 #include "CxxUtils/checker_macros.h"
 #include <cstdio>
+#include <format>
 using namespace pool;
 
 void genMD5(const std::string& s, void* code);
@@ -21,10 +22,13 @@ static const int KEY_MASK = (~0x0)&0x00;
 /// Produce the token keys only on demand for export
 void DbToken::makeKey(const Token* tok, int which, Guid& guid)  {
   char text[32];
+  std::string s;
   switch(which)   {
   case TOKEN_CONT_KEY:
     std::sprintf(text, "][TECH=%08X]", tok->technology()&KEY_MASK);
-    genMD5("[DB="+tok->dbID().toString()+"][CNT="+tok->contID()+"][CLID="+tok->classID().toString()+text, &guid);
+    s = std::format("[DB={}][CNT={}][CLID={}{}]", tok->dbID().to_fixed_string(),
+                       tok->contID(), tok->classID().to_fixed_string(), text);
+    genMD5(s, &guid);
     break;
   case TOKEN_FULL_KEY:
     genMD5(tok->toString(), &guid);
@@ -42,7 +46,8 @@ void DbToken::setKey(int which) {
     switch(which)   {
     case TOKEN_CONT_KEY:
       std::sprintf(text, "][TECH=%08X]", technology()&KEY_MASK);
-      s = "[DB="+dbID().toString()+"][CNT="+contID()+"][CLID="+classID().toString()+text;
+      s = std::format("[DB={}][CNT={}][CLID={}{}]", dbID().to_fixed_string(),
+		       contID(), classID().to_fixed_string(), text);
       genMD5(s, &m_contKey);
       //m_type |= TOKEN_CONT_KEY;
       setType(type()|TOKEN_CONT_KEY);
