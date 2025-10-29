@@ -1,4 +1,4 @@
-#Copyright(C) 2002 - 2023 CERN for the benefit of the ATLAS collaboration
+#Copyright(C) 2002 - 2025 CERN for the benefit of the ATLAS collaboration
 
 #Declare the package name:
 atlas_subdir( TrkGaussianSumFilterUtils )
@@ -12,6 +12,10 @@ atlas_add_library( TrkGaussianSumFilterUtilsLib
                       TrkGeometry PathResolver
            PRIVATE_LINK_LIBRARIES CxxUtils PathResolver TrkExUtils
            PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
+  # Suppress useless warning about changed ABI for pair<> on arm.
+  set_target_properties( TrkGaussianSumFilterUtilsLib PROPERTIES COMPILE_FLAGS " -Wno-psabi " )
+endif()
 
 #Tests
 atlas_add_test(ut_GSF_testAlignedDynArray
