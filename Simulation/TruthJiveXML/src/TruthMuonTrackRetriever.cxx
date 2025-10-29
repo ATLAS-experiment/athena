@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthMuonTrackRetriever.h"
@@ -62,7 +62,7 @@ namespace JiveXML {
     for (auto CollNameItr : m_TrackRecCollNames ) {
       //be verbose
       ATH_MSG_DEBUG( "Trying to retrieve " << CollNameItr );
-      //try to retrive
+      //try to retrieve
       if ( !evtStore()->contains<TrackRecordCollection>( CollNameItr )){ continue; } // skip if not in SG
       if (evtStore()->retrieve(TrackRecordColl, CollNameItr).isSuccess()) break ;
     }
