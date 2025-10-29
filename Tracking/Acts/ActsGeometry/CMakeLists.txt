@@ -64,7 +64,6 @@ atlas_add_component( ActsGeometry
                      src/ActsMaterialMapping.cxx
                      src/ActsSurfaceMappingTool.cxx
                      src/ActsVolumeMappingTool.cxx
-                     src/ActsObjWriterTool.cxx
                      src/ActsMaterialStepConverterTool.cxx
                      src/ActsMaterialJsonWriterTool.cxx
                      src/ActsMaterialTrackWriterSvc.cxx
