@@ -7,6 +7,7 @@
 
 #include "CxxUtils/checker_macros.h"
 #include "ZdcAnalysis/ZDCFitWrapper.h"
+#include "ZdcAnalysis/ZDCJSONConfig.h"
 #include "ZdcAnalysis/ZDCMsg.h"
 #include "TGraphErrors.h"
 #include "TFitter.h"
@@ -16,11 +17,14 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <tuple>
 
 
 class ATLAS_NOT_THREAD_SAFE ZDCPulseAnalyzer
 {
 public:
+  using JSON = ZDCJSONConfig::JSON;
+
   enum {PulseBit              = 0,  //  &1
         LowGainBit            = 1,  //  &2
         FailBit               = 2,  //  &4
@@ -43,8 +47,8 @@ public:
         //
         FitMinAmpBit          = 16, // 0x10000
         RepassPulseBit        = 17, // 0x20000
-        ArmSumIncludeBit      = 18,
-
+        ArmSumIncludeBit      = 18, // 0x40000
+	FailSigCutBit         = 19, // 0x80000
         N_STATUS_BITS
        };
 
@@ -56,13 +60,23 @@ public:
   
   enum TimingCorrMode {NoTimingCorr = 0, TimingCorrLin, TimingCorrLog};
 
+  //
+  // List of allowed JSON configuration parameters
+  //
+  //  For each parameter we have name, JSON value type, whether it can be set per channel, and whether it is required
+  //
+  //  if the type is -1, then there's no value, the presence of the parameter itself is a boolean -- i.e. enabling  
+  //
+  
+  static const ZDCJSONConfig::JSONParamList JSONConfigParams;
 private:
   typedef std::vector<float>::const_iterator SampleCIter;
 
   //  Static data
   //
-  static bool s_quietFits;
-  static bool s_saveFitFunc;
+  bool m_quietFits;
+  bool m_saveFitFunc;
+  
   static TH1* s_undelayedFitHist;
   static TH1* s_delayedFitHist;
   static TF1* s_combinedFitFunc;
@@ -76,6 +90,7 @@ private:
   std::string m_tag;
   unsigned int m_Nsample{};
   unsigned int m_preSampleIdx{};
+  float m_freqMHz;
   float m_deltaTSample{};
   int m_pedestal{};
   float m_gainHG{};
@@ -148,6 +163,10 @@ private:
   float m_fitAmpMaxHG{};      // Minimum am`plitude in the fit
   float m_fitAmpMaxLG{};      // Minimum amplitude in the fit
 
+  bool m_haveSignifCuts{false};
+  float m_sigMinHG;           // Minimum amplitude significance to be considered valid pulse
+  float m_sigMinLG;           // Minimum amplitude significance to be considered valid pulse
+  
   // Enabling (or not) of exclusion of early or late samples from OOT pileup
   //
   bool m_enablePreExcl{false};
@@ -174,6 +193,7 @@ private:
   std::vector<float> m_nonLinCorrParamsLG;
 
   bool m_haveFADCCorrections{false};
+  std::string m_fadcCorrFileName;
   bool m_FADCCorrPerSample{false};
   std::unique_ptr<const TH1> m_FADCCorrHG{};
   std::unique_ptr<const TH1> m_FADCCorrLG{};
@@ -190,7 +210,7 @@ private:
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //
-  bool m_adjTimeRangeEvent{}; // indicates whether we adjust the time range for this specific event
+  bool m_adjTimeRangeEvent{false}; // indicates whether we adjust the time range for this specific event
 
   unsigned int m_minSampleEvt{};
   unsigned int m_maxSampleEvt{};
@@ -237,6 +257,7 @@ private:
   bool m_fixPrePulse{};
   bool m_fitMinAmp{};
   bool m_repassPulse{};
+  bool m_failSigCut{};
 
   // -----------------------
 
@@ -351,6 +372,10 @@ private:
   //
   void Reset(bool reanalyze = false);
   void SetDefaults();
+  
+  std::pair<bool, std::string> ValidateJSONConfig(const JSON& config);
+  std::pair<bool, std::string> ConfigFromJSON(const JSON& config);
+
   void SetupFitFunctions();
 
   bool DoAnalysis(bool repass);
@@ -421,6 +446,8 @@ private:
     }
   }
 
+  void checkTF1Limits(TF1* func);
+  
   void DoFit(bool refitLG = false);
   void DoFitCombined(bool refitLG = false);
 
@@ -434,15 +461,20 @@ private:
 
 public:
 
-  ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const std::string& tag, int Nsample, float deltaTSample, size_t preSampleIdx, int pedestal, float gainHG,
-                   const std::string& fitFunction, int peak2ndDerivMinSample, float peak2DerivMinThreshHG, float peak2DerivMinThreshLG);
+  ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const std::string& tag, int Nsample, float deltaTSample, size_t preSampleIdx,
+		   int pedestal, float gainHG, const std::string& fitFunction, int peak2ndDerivMinSample, float peak2DerivMinThreshHG,
+		   float peak2DerivMinThreshLG);
+
+  ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSON& configJSON);
 
   ~ZDCPulseAnalyzer(){}
 
-  void SetFitOPtions(const std::string& fitOptions) { m_fitOptions = fitOptions;}
-  static void SetQuietFits  (bool quiet) {s_quietFits = quiet;}
-  static void SetSaveFitFunc(bool save ) {s_saveFitFunc = save;}
-  static bool QuietFits() {return s_quietFits;}
+  void setFitOPtions(const std::string& fitOptions) { m_fitOptions = fitOptions;}
+  void saveFitFunc() {m_saveFitFunc = true;}
+
+  bool quietFits() const {return m_quietFits;}
+  void setQuietFits() {m_quietFits = true;}
+  void setUnquietFits() {m_quietFits = false;}
 
   void enableDelayed(float deltaT, float pedestalShift, bool fixedBaseline = false);
 
@@ -492,6 +524,8 @@ public:
 
   void SetFitMinMaxAmp(float minAmpHG, float minAmpLG, float maxAmpHG, float maxAmpLG);
 
+  void setMinimumSignificance(float sigMinHG, float sigMinLG);
+  
   void SetTauT0Values(bool fixTau1, bool fixTau2, float tau1, float tau2, float t0HG, float t0LG);
 
   void SetADCOverUnderflowValues(int HGOverflowADC, int HGUnderflowADC, int LGOverflowADC);
@@ -549,9 +583,9 @@ public:
   // ------------------------------------------------------------
   // Status bit setting functions
   //
-  bool HavePulse()  const {return m_havePulse;}
-  bool UseLowGain() const {return m_useLowGain;}
-  bool Failed()     const {return m_fail;}
+  bool havePulse()  const {return m_havePulse;}
+  bool useLowGain() const {return m_useLowGain;}
+  bool failed()     const {return m_fail;}
   bool HGOverflow() const {return m_HGOverflow;}
 
   bool HGUnderflow()       const {return m_HGUnderflow;}
@@ -559,18 +593,19 @@ public:
   bool LGOverflow()        const {return m_LGOverflow;}
   bool LGUnderflow()       const {return m_LGUnderflow;}
 
-  bool PrePulse()  const {return m_prePulse;}
-  bool PostPulse() const {return m_postPulse;}
-  bool FitFailed() const {return m_fitFailed;}
-  bool BadChisq()  const {return m_badChisq;}
+  bool prePulse()  const {return m_prePulse;}
+  bool postPulse() const {return m_postPulse;}
+  bool fitFailed() const {return m_fitFailed;}
+  bool badChisq()  const {return m_badChisq;}
 
-  bool BadT0()          const {return m_badT0;}
-  bool ExcludeEarlyLG() const {return m_ExcludeEarly;}
-  bool ExcludeLateLG()  const {return m_ExcludeLate;}
+  bool badT0()          const {return m_badT0;}
+  bool excludeEarlyLG() const {return m_ExcludeEarly;}
+  bool excludeLateLG()  const {return m_ExcludeLate;}
   bool preExpTail()     const {return m_preExpTail;}
   bool fitMinimumAmplitude() const {return m_fitMinAmp;}
   bool repassPulse() const {return m_repassPulse;}
-  bool ArmSumInclude() const {return HavePulse() && !(FitFailed() || BadChisq() || BadT0() || fitMinimumAmplitude() || LGOverflow());}
+  bool armSumInclude() const {return havePulse() && !(fitFailed() || badChisq() || badT0() || fitMinimumAmplitude() || LGOverflow() || failSigCut());}
+  bool failSigCut() const {return m_failSigCut;}
 
   // ------------------------------------------------------------
 
@@ -696,7 +731,7 @@ public:
   std::vector<float> GetFitPulls(bool forceLG = false) const;
 
   void dump() const;
-  void dumpSetting() const;
+  void dumpConfiguration() const;
   void dumpTF1(const TF1*) const;
 
   const std::vector<float>& GetSamplesSub() const {return m_samplesSub;}

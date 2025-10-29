@@ -46,16 +46,14 @@ void gFEXJwoJAlgo::setAlgoConstant(int aFPGA_A, int bFPGA_A,
   m_gBlockthresholdA = gXE_seedThrA;
   m_gBlockthresholdB = gXE_seedThrB;
   m_gBlockthresholdC = gXE_seedThrC;
-
 }
 
-
-
 std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
-                                                                 std::array<uint32_t, 4> & outTOB) const {
+                                                                 std::array<int32_t, 4> & outTOB) const {
 
 
   // input towers have 200 MeV LSB
+  bool SumETfast = true;
 
   // find gBlocks
   gTowersType AgBlk;
@@ -116,7 +114,6 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   int B_ets = 0x0;
   int B_etw = 0x0;
 
-
   //FPGA C observables
   int C_MHT_x = 0x0;
   int C_MHT_y = 0x0;
@@ -128,7 +125,6 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   int C_eth = 0x0;
   int C_ets = 0x0;
   int C_etw = 0x0;
-
 
   //Global observables
   int MHT_x = 0x0;
@@ -149,15 +145,17 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   // will need to hard code etFPGA ,a's and b's 
   int etBprime =0;
 
-
   metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
-  etFPGA (0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw); 
+  if (SumETfast) etFastFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw);
+  else etFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw);
 
   metFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
-  etFPGA (1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw); 
+  if (SumETfast) etFastFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw);
+  else etFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw);
 
   metFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
-  etFPGA (2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw); 
+  if (SumETfast) etFastFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw);
+  else etFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw);
 
   metTotal(A_MHT_x, A_MHT_y, B_MHT_x, B_MHT_y, C_MHT_x, C_MHT_y, MHT_x, MHT_y);
   metTotal(A_MST_x, A_MST_y, B_MST_x, B_MST_y, C_MST_x, C_MST_y, MST_x, MST_y);
@@ -166,8 +164,7 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   etTotal(A_eth, B_eth, C_eth, ETH);
   etTotal(A_ets, B_ets, C_ets, ETS);
   etTotal(A_etw, B_etw, C_etw, ETW);
-
-  total_sumEt = ETW;	  
+  total_sumEt = ETW;
 
   // components should all be less than 12 bits at this point with 200 MeV LSB
   int MET2 = MET_x * MET_x + MET_y * MET_y;
@@ -492,6 +489,57 @@ void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBl
   }
 }
 
+void gFEXJwoJAlgo::etFastFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBlkSum,
+                          int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const {
+
+  gBlockthreshold = gBlockthreshold * 200 / 800; //gBlockthreshold is provided in counts with a resolution of 200 MeV, but here needs to be applied with a resolution of 800 GeV
+  int64_t ethard_hi = 0;
+  int64_t etsoft_hi = 0;
+  int64_t ethard_lo = 0;
+  int64_t etsoft_lo = 0;
+
+  int64_t ethard = 0.0;
+  int64_t etsoft = 0.0;
+
+  // firmware treats upper and lower columns differently 
+  for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(int jcolumn = 0; jcolumn<6; jcolumn++){
+      	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+	          ethard_lo = ethard_lo + twrs[irow][jcolumn]; 
+	      }
+        else {
+            etsoft_lo = etsoft_lo + twrs[irow][jcolumn];
+        }
+    }
+  }
+
+  for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(int jcolumn = 6; jcolumn<12; jcolumn++){
+      	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+	          ethard_hi = ethard_hi + twrs[irow][jcolumn]; 
+	      }
+        else {
+	          etsoft_hi = etsoft_hi + twrs[irow][jcolumn];
+        }
+    }
+  }
+
+  ethard = ethard_hi + ethard_lo;
+  etsoft = etsoft_hi + etsoft_lo;
+
+  // convert 200 MeV LSB here 
+  eth  = ethard;
+  ets  = etsoft; // Keep for reference -- not used in etFast
+  etw  = ethard; // For EtFast the weighted term is just the hard term
+
+  // 16 bits signed, set max and min
+  if( etw < -32768 ) etw  = -32768;
+  if( etw > 32767 ) etw  =  32767;
+
+  if(msgLvl(MSG::DEBUG)) { 
+    std::cout << "DMS FPGA gTEJWOJ " << std::hex <<  FPGAnum << "et sum hard " << eth << "etsum soft" << ets << " A " << A << " B " << B << " weighted term " << etw << std::endl << std::dec; 
+  }
+}
 
 void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
                             int B_MET_x, int B_MET_y,
@@ -526,11 +574,11 @@ void gFEXJwoJAlgo::etTotal(int A_ET,
 
   ET = (A_ET + B_ET + C_ET) ; 
 
-
-  // main vlaue of ET is always positive 
-  if( ET > 0x0000FFF) ET =  0x0000FFF; 
+  // main value of ET is always positive 
+  if( ET > 0x0000FFF) ET =  0x0000FFF;
 
 }
+
 //----------------------------------------------------------------------------------
 // bitwise simulation of sine LUT in firmware
 //----------------------------------------------------------------------------------
