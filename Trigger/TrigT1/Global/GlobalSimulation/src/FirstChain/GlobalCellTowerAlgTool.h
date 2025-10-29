@@ -14,7 +14,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "../IGlobalSimAlgTool.h"
+#include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/CommonTOB.h"
 #include "../IO/ICommonTOB.h"
 #include "GlobalLArCellContainer.h"

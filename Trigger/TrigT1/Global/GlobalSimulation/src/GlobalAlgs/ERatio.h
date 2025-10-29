@@ -19,8 +19,6 @@
 class StatusCode;
 
 namespace GlobalSim {
-  // class GenericTOBArray;
-  // class Decision;
   
   class ERatio {
   public:

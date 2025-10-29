@@ -21,7 +21,7 @@
 
 #include "IGlobalSimAlgTool.h"
 #include "ITIPwriterAlgTool.h"
-#include "IO/TipWord_clid.h"
+#include "../IO/TipWord_clid.h"
 
 namespace GlobalSim {
   

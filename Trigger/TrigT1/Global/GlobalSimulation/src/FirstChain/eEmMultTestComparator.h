@@ -13,7 +13,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "../ITIPwriterAlgTool.h" // TIP word declaration
+#include "../GlobalSimComponents/ITIPwriterAlgTool.h" // TIP word declaration
 
 #include "../IO/TipWord_clid.h"
 

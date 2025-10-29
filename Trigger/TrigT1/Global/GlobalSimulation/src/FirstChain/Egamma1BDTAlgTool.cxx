@@ -3,8 +3,8 @@
 */
 
 #include "Egamma1BDTAlgTool.h"
-#include "../dump.h"
-#include "../dump.icc"
+#include "../Utilities/dump.h"
+#include "../Utilities/dump.icc"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 #include "../GlobalAlgs/Egamma1BDT/parameters.h"

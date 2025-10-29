@@ -14,8 +14,7 @@
  
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "../IGlobalSimAlgTool.h"
-#include "../ITIPwriterAlgTool.h"
+#include "../GlobalSimComponents/ITIPwriterAlgTool.h"
 #include "../IO/IeEmTOBContainer.h" 
 
 #include <string>
@@ -34,7 +33,7 @@ namespace GlobalSim {
 
   
   /**
-   * @brief AlgTool to count create inputs and expectations to test the
+   * @brief Algorithm to count create inputs and expectations to test the
    * eEmMultAlgTool class.
    *
    */

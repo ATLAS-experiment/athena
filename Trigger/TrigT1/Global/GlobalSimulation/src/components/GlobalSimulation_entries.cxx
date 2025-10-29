@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "../GlobalSimulationAlg.h"
+#include "../GlobalSimComponents/GlobalSimulationAlg.h"
 
 #include "../FirstChain/Egamma1_LArStrip_Fex.h"
 #include "../FirstChain/Egamma1_LArStrip_Fex_RowAware.h"

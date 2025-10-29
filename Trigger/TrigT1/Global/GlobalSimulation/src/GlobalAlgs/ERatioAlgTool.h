@@ -9,7 +9,7 @@
  * AlgTool to read in LArStripNeighborhoods, and run the ERatio Algorithm.
  */
 
-#include "../IGlobalSimAlgTool.h"
+#include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/LArStripNeighborhoodContainer.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
