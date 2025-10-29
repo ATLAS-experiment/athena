@@ -71,7 +71,7 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
     std::vector<std::string> m_PartitionLayers;
     Int_t m_nHistCategories; // categories used for mapping performances
     std::vector<std::string> m_HistCategories;
-    std::vector<std::vector<std::unique_ptr<TH2I> > > m_HistCellmaps;  // mapping histograms loaded from input rootfile
+    std::vector<std::vector<TH2I*> > m_HistCellmaps;  // mapping histograms loaded from input rootfile
 };
 
 #endif

@@ -1303,7 +1303,7 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
      }
    }
 
-   MeanHits = ((double)TotalRecordedHits/(double)nlb_corr)/(double)nCells;
+   MeanHits = (nCells==0||nlb_corr==0) ? 0 : static_cast<double>(TotalRecordedHits)/(nlb_corr*nCells);
    // MeanHits = tp_ev->GetMean()/(double)nCells;
    // rmsHits = tp_ev->GetRMS()/(double)nCells;
 

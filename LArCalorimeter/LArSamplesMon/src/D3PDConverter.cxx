@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/D3PDConverter.h"
@@ -98,7 +98,7 @@ bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
 
 bool D3PDConverter::initMapping(const TString& templateFile, const TString& translatorFile)
 {
-  LArIdTranslatorHelper* translator = new LArIdTranslatorHelper(translatorFile);
+  LArIdTranslatorHelper translator(translatorFile);
   m_template = Interface::open(templateFile);
 
   cout << "Making online->hash map" << endl;
@@ -110,11 +110,10 @@ bool D3PDConverter::initMapping(const TString& templateFile, const TString& tran
   }
 
   cout << "Making offlineID->hash map" << endl;
-  for (unsigned int i = 0; i < translator->Tree()->GetEntries(); i++) {
-    translator->Tree()->GetEntry(i);
-    m_id2hash[translator->offlid] = on2hash[translator->onlid] + 1;
+  for (unsigned int i = 0; i < translator.Tree()->GetEntries(); i++) {
+    translator.Tree()->GetEntry(i);
+    m_id2hash[translator.offlid] = on2hash[translator.onlid] + 1;
   }
-  // delete translator; // crashes
   return true;
 }
 

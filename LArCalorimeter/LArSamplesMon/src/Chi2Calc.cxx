@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Chi2Calc.h"
@@ -110,7 +110,7 @@ bool Chi2Calc::bestRescale(const AbsShape& data, const AbsShape& reference, doub
   double sumR2 = scalarProduct(r, r, invCovMat);
   double sumRV = scalarProduct(r, v, invCovMat);
   double sumV2 = scalarProduct(v, v, invCovMat);
-  k = sumRV/sumR2; // optimal K-factor
+  k = sumR2==0 ? 0 : sumRV/sumR2; // optimal K-factor
   chi2 = sumV2 - 2*k*sumRV + k*k*sumR2; // chi2
 
   return true;

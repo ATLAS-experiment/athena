@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/History.h"
@@ -61,8 +61,8 @@ History::History(const std::vector<const Data*>& data, const CellInfo& info,
 {
   ClassCounts::incrementInstanceCount("History");
   unsigned int i = 0;
-  for (const Data* data : m_data)
-    data->setCallBacks(this, i);
+  for (const Data* pdata : m_data)
+    pdata->setCallBacks(this, i);
 }
       
 
