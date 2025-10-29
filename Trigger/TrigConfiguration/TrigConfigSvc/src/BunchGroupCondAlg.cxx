@@ -4,6 +4,8 @@
 
 #include "./BunchGroupCondAlg.h"
 #include "./TrigConfMD5.h"
+#include "TrigConfSvcHelper.h"
+
 #include "CoolKernel/types.h"
 #include "TrigConfIO/JsonFileLoader.h"
 #include "TrigConfIO/TrigDBL1BunchGroupSetLoader.h"
@@ -74,6 +76,13 @@ TrigConf::BunchGroupCondAlg::createFromDB( unsigned int bgk ) const {
    auto bgs = std::make_shared<L1BunchGroupSet>();
    ATH_MSG_DEBUG( "Setting up TrigDBL1BunchGroupSetLoader with DB connection " << m_dbConnection.value() );
    TrigConf::TrigDBL1BunchGroupSetLoader bgLoader(m_dbConnection);
+   std::string crest_server("");
+   std::string crest_api("");
+   std::string dbname("");
+   if(isCrestConnection(m_dbConnection, crest_server, crest_api, dbname)) {
+      bgLoader.setCrestTrigDB(dbname);
+      bgLoader.setCrestConnection(crest_server, crest_api);
+   }
    bgLoader.setLevel(TrigConf::MSGTC::WARNING); 
    try {
       bgLoader.loadBunchGroupSet( bgk, *bgs );
