@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "../ITIPwriterAlgTool.h"
+#include "../GlobalSimComponents/ITIPwriterAlgTool.h"
 #include "../IO/IeEmTOBContainer.h"
 
 #include "ICommonSelector.h"

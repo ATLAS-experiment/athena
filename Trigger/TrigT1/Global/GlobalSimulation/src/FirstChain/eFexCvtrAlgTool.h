@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "../IGlobalSimAlgTool.h"
+#include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
 
 #include "../IO/IeEmTOBContainer.h"

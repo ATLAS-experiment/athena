@@ -11,6 +11,7 @@ find_package( APTypes )
 atlas_add_component (GlobalSimulation
    src/*.h src/*.cxx  
    src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx src/Utilities/*.cxx
+   src/GlobalSimComponents/*.h src/GlobalSimComponents/*.cxx
    src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp
    src/FirstChain/*.h src/FirstChain/*.cxx 
    src/IO/*.h src/IO/*.cxx
