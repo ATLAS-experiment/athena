@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Unit test for the xAOD::TPyEvent class.
 #
@@ -22,6 +22,11 @@ def main():
 
     # Set up the environment:
     import ROOT
+    try:
+        ROOT.xAOD.EgammaContainer # Work around cling assertion failure
+    except AttributeError:
+        # EgammaContainer isn't in all projects.
+        pass
     if not ROOT.xAOD.Init( APP_NAME ).isSuccess():
         logger.error( "Failed to call xAOD::Init(...)" )
         return 1
