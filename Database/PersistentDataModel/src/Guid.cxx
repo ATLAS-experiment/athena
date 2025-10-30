@@ -5,7 +5,7 @@
 #include "PersistentDataModel/Guid.h"
 
 #include <iostream>
-
+#include <cstdio>
 #include "uuid/uuid.h"
 
 //{ 0x0,0x0,0x0,{0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0}};
@@ -82,6 +82,26 @@ bool Guid::operator==(std::string_view str) const {
    return str.size() == Guid::string::stringSize() && *this == Guid(str);
 }
 
+
+void Guid::fromStringFallBack(const std::string &s){
+   //If it conforms to correct Guid use fast method
+   if(isGuid(s)){
+      fromString(s);
+      return;
+   }
+   //If not try "old" more error tolerant method
+   //sscanf will correct subtle corner cases: 
+   //when the input string was missing a single hexadecimal digit,
+   // e.g., 83B9F174-5E27-11E4-98C2-02163E00A82,
+   // sscanf still reported 11 successful conversions.
+   //So, the outcome is an "auto-corrected" CLID as 83B9F174-5E27-11E4-98C2-02163E00A802
+   static const char* const fmt_Guid = "%08X-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX";
+   if (::sscanf(s.c_str(), fmt_Guid, &m_data1, &m_data2, &m_data3,
+        &m_data4[0], &m_data4[1], &m_data4[2], &m_data4[3], &m_data4[4], &m_data4[5], &m_data4[6], &m_data4[7]) != 11) {
+       setToNull();
+   }
+   return;
+}
 
 std::ostream& operator<<(std::ostream& os, const Guid& rhs) {
   auto buff = rhs.to_fixed_string();
