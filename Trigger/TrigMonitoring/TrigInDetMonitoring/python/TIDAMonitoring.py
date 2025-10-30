@@ -114,7 +114,10 @@ def TIDAelectron( flags, key, toolkey, tools, monlevel, mcTruth ) :
         chains = getchains( flags, 
                             [ "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  
                               "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_IDTrig",
-                              "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*)(?!.*nogsf.*).*:key=HLT_IDTrack_Electron_GSF",                              
+                              "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*)(?!.*nogsf.*).*:key=HLT_IDTrack_Electron_GSF",
+                              "HLT_e.*idperf.*ion.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",                                
+                              "HLT_e.*idperf.*ion.*:key=HLT_IDTrack_Electron_FTF",
+                              "HLT_e.*idperf.*ion.*:key=HLT_IDTrack_Electron_IDTrig",
                               "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1",
                               "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_tag:roi=HLT_Roi_FastElectron:te=0",
                               "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_probe:roi=HLT_Roi_FastElectron:te=1",
@@ -338,7 +341,10 @@ def TIDAbjet( flags, key, toolkey, tools, monlevel, mcTruth ) :
                               "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig:roi=HLT_Roi_Bjet", 
                               "HLT_j45_pf_ftf_preselj20_L1J15:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                               "HLT_j.*_ftf.*boffperf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
-                              "HLT_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS"
+                              "HLT_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+                              "HLT_.*_j.*ion.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+                              "HLT_.*_j.*ion.*:key=HLT_IDTrack_Bjet_FTF:roi=HLT_Roi_Bjet",
+                              "HLT_.*_j.*ion.*:key=HLT_IDTrack_Bjet_IDTrig:roi=HLT_Roi_Bjet" 
                             ], monlevel )
 
         # if we find no chains, try to get more generic chains
