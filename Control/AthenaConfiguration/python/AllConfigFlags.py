@@ -253,6 +253,7 @@ def initConfigFlags():
     acf.addFlag('Beam.vdMScan.PV.PDF', 'Default', help='vdM Scan Sim/BSFit PV PDF Histogram')
 
     # output
+    acf.addFlag('Output.BSFileName', '', help='BS output file name')
     acf.addFlag('Output.EVNTFileName', '', help='EVNT output file name')
     acf.addFlag('Output.EVNT_TRFileName', '', help='EVNT_TR output file name')
     acf.addFlag('Output.HITSFileName', '', help='HITS output file name')

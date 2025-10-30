@@ -124,6 +124,7 @@ def ByteStreamWriteCfg(flags, type_names=None):
         MaxFileMB=15000,
         MaxFileNE=15000000,  # event (beyond which it creates a new file)
         OutputDirectory="./",
+        SimpleFileName=flags.Output.BSFileName,
         AppName="Athena",
         RunNumber=all_runs.pop(),
     )
