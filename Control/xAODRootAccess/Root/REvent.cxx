@@ -201,7 +201,7 @@ StatusCode REvent::readFrom(std::string_view fileName) {
         static constexpr bool SILENT = kTRUE;
         ::TClass* cl = ::TClass::GetClass(className, LOAD, SILENT);
         if ((cl != nullptr) && cl->InheritsFrom(ROOT::RNTuple::Class())) {
-          lOtherMetaTupleNames.insert(keyName);
+          lOtherMetaTupleNames.insert(std::move(keyName));
         }
       }
     }
