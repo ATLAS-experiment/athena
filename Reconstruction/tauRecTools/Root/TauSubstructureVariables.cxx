@@ -36,21 +36,10 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
 
   if (!isFilled) {
     ATH_MSG_DEBUG("problem in calculating calo cluster variables -> will be set to -1111");
-
     tau.setDetail(xAOD::TauJetParameters::numTopoClusters, static_cast<int>(DEFAULT));
-    tau.setDetail(xAOD::TauJetParameters::numEffTopoClusters, DEFAULT);
-    tau.setDetail(xAOD::TauJetParameters::topoInvMass, DEFAULT);
-    tau.setDetail(xAOD::TauJetParameters::effTopoInvMass, DEFAULT);
-    tau.setDetail(xAOD::TauJetParameters::topoMeanDeltaR, DEFAULT);
-    tau.setDetail(xAOD::TauJetParameters::effTopoMeanDeltaR, DEFAULT);
   } 
   else {
     tau.setDetail(xAOD::TauJetParameters::numTopoClusters, static_cast<int>(CaloClusterVariablesTool.numConstituents()));
-    tau.setDetail(xAOD::TauJetParameters::numEffTopoClusters, static_cast<float>(CaloClusterVariablesTool.effectiveNumConstituents()));
-    tau.setDetail(xAOD::TauJetParameters::topoInvMass, static_cast<float>(CaloClusterVariablesTool.totalMass()));
-    tau.setDetail(xAOD::TauJetParameters::effTopoInvMass, static_cast<float>(CaloClusterVariablesTool.effectiveMass()));
-    tau.setDetail(xAOD::TauJetParameters::topoMeanDeltaR, static_cast<float>(CaloClusterVariablesTool.averageRadius()));
-    tau.setDetail(xAOD::TauJetParameters::effTopoMeanDeltaR, static_cast<float>(CaloClusterVariablesTool.averageEffectiveRadius()));
   }
 
   //*****************************************************
@@ -58,8 +47,6 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   //*****************************************************
   // New cluster-based variables
   float totalEnergy(0.);
-  float calo_iso(0.);
-  float dr(0.);
 
   TLorentzVector leadClusVec;
   TLorentzVector subLeadClusVec;
@@ -76,13 +63,8 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
     TLorentzVector clusterP4 = vertexedCluster.p4();
 
     totalEnergy += clusterP4.E();
-		
-    dr = tauAxis.DeltaR(clusterP4); 
     
-    if (0.2 <= dr && dr < 0.4) {
-      calo_iso += clusterP4.Et();
-    }
-    else if (dr < 0.2) {
+    if (tauAxis.DeltaR(clusterP4) < 0.2) {
       const xAOD::CaloCluster& cluster = vertexedCluster.clust();
       double clusEnergyBE = ( cluster.energyBE(0) + cluster.energyBE(1) + cluster.energyBE(2) );
 		    
@@ -115,22 +97,6 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
     return left.e() > right.e();
   };
   std::sort(vertexedClusterList.begin(), vertexedClusterList.end(), compare);
-
-  // determine energy sum of leading 2 and leading 3 clusters
-  float sum2LeadClusterE = 0.;
-  if(!vertexedClusterList.empty()) {
-    sum2LeadClusterE = vertexedClusterList.at(0).e();
-    if(vertexedClusterList.size()>1) sum2LeadClusterE += vertexedClusterList.at(1).e();
-  }
-  float sum3LeadClusterE = sum2LeadClusterE;
-  if(vertexedClusterList.size()>2) sum3LeadClusterE += vertexedClusterList.at(2).e();
-
-  if (totalEnergy != 0.) {
-    tau.setDetail(xAOD::TauJetParameters::lead2ClusterEOverAllClusterE, (sum2LeadClusterE / totalEnergy) );
-    tau.setDetail(xAOD::TauJetParameters::lead3ClusterEOverAllClusterE, (sum3LeadClusterE / totalEnergy) );
-  }
-
-  tau.setDetail(xAOD::TauJetParameters::caloIso, calo_iso);
 
   // calculate calorimeter energies in different layers
   float PSSEnergy(0.);
