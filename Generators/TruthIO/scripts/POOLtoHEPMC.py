@@ -3,6 +3,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Simple script for converting an EVNT, HITS, or RDO file into a HEPMC file
 
+# Example execution:
+# POOLtoHEPMC.py --filesInput=EVNT.34993204._006761.pool.root.1 Output.HepMCFileName=output.hepmc
+
 # Options: input and output file, and compression (tgz)
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
@@ -33,7 +36,7 @@ cfg.addEventAlgo(CompFactory.FixHepMC("FixHepMC"))
 
 # Use the WriteHepMC AlgTool from TruthIO to do the conversion
 cfg.addEventAlgo( CompFactory.WriteHepMC( 'WriteHepMC',
-                  OutputFile = flags.Output.HepMCFileName.replace('.tgz',''),
+                  OutputFile = flags.Output.HepMCFileName.replace('.tgz','').replace('.tar.gz',''),
                   McEventKey = McEventKey ) )
 cfg.run(flags.Exec.MaxEvents)
 
@@ -41,10 +44,15 @@ cfg.run(flags.Exec.MaxEvents)
 if flags.Output.CompressHepMC:
     print('Compressing output (this may take a moment)')
     import tarfile
-    final_name = flags.Output.HepMCFileName if '.tgz' in flags.Output.HepMCFileName else flags.Output.HepMCFileName+'.tgz'
+    if '.tgz' in flags.Output.HepMCFileName or '.tar.gz' in flags.Output.HepMCFileName:
+        final_name = flags.Output.HepMCFileName
+    else:
+        final_name = flags.Output.HepMCFileName+'.tgz'
     tar = tarfile.open(final_name,'w:gz')
     tar.add(flags.Output.HepMCFileName.replace('.tgz',''))
     tar.close()
     # Remove the original uncompressed file
     import os
     os.remove(flags.Output.HepMCFileName.replace('.tgz',''))
+else if '.tar' in flags.Output.HepMCFileName or '.tar.gz' in flags.Output.HepMCFileName:
+    print('Check input flags -- no compression was requested, but the output file name looks like it expects to be a compressed tarball')
