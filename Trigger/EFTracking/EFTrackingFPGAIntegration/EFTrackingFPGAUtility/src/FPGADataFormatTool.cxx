@@ -235,29 +235,30 @@ StatusCode FPGADataFormatTool::convertFPGATracks(
         ATH_MSG_DEBUG("\tphi: " << track.getPhi());
         ATH_MSG_DEBUG("\teta: " << track.getEta());
 
+        auto trackBinsIndex = track.getBinIdx();
         auto gtrackWord_w1 = FPGADataFormatUtilities::fill_GTRACK_HDR_w1(
                 0xee,
                 0,
                 track.getHoughY(),
                 track.getHoughX(),
-                0,
-                0,
+                trackBinsIndex[0],
+                trackBinsIndex[1],
                 0,
                 bitmask);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w1(gtrackWord_w1));      
 
         auto gtrackWord_w2 = FPGADataFormatUtilities::fill_GTRACK_HDR_w2(
-                0, 
+                trackBinsIndex[2], 
                 track.getD0(),
                 track.getZ0(), 
-                0);
+                trackBinsIndex[3]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w2(gtrackWord_w2));  
 
         auto gtrackWord_w3 = FPGADataFormatUtilities::fill_GTRACK_HDR_w3(
                 track.getQOverPt(), 
                 track.getPhi(),
                 track.getEta(), 
-                0);
+                trackBinsIndex[3]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w3(gtrackWord_w3));  
 
         auto hits = track.getFPGATrackSimHits();
