@@ -5,7 +5,7 @@
 #ifndef RNTUPLEWRITERHELPER_H
 #define RNTUPLEWRITERHELPER_H
 
-#include "AthenaBaseComps/AthMessaging.h"
+#include "POOLCore/DbPrint.h"
 
 #include "ROOT/REntry.hxx"
 #include "ROOT/RField.hxx"
@@ -17,7 +17,7 @@
 
 namespace RootStorageSvc {
 
-class RNTupleWriterHelper : public AthMessaging {
+class RNTupleWriterHelper : public pool::APRMessaging {
  public:
   /// Constructor
   RNTupleWriterHelper(TFile* file, const std::string& ntupleName,
