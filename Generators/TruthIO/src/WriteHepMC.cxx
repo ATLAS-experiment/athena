@@ -13,7 +13,7 @@ WriteHepMC::WriteHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("OutputFile", m_outfile="events.hepmc");
   declareProperty("Precision", m_precision=8);
   declareProperty("Format", m_format="hepmc2");
-  declareProperty("Units", m_units="GEVMM");
+  declareProperty("Units", m_units="MEVMM");
 }
 
 
