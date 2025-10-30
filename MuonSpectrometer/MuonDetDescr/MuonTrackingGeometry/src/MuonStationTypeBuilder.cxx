@@ -1159,7 +1159,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         thickness = subVs[2].second.translation().mag();
 
 
-                        auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::move(std::make_unique<Trk::Volume>(*cVol, Amg::getTranslateX3D(2 * shift))));
+                        auto volEx = std::make_shared<const Trk::VolumeExcluder>(std::make_unique<Trk::Volume>(*cVol, Amg::getTranslateX3D(2 * shift)));
                         
                         surf = Trk::PlaneSurface{transf[ic] * Amg::getRotateX3D(M_PI_2), std::move(bounds)};
                         auto subPlaneBis = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), std::move(volEx), false);
