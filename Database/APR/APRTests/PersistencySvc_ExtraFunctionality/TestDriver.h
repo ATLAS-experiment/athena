@@ -7,10 +7,6 @@
 
 #include <vector>
 #include <string>
-#include "SimpleTestClass.h"
-#include "TestClassPrimitives.h"
-#include "TestClassVectors.h"
-#include "TestClassSTLContainers.h"
 #include "TestClassSTLContainersExt.h"
 
 class Token;
@@ -21,27 +17,22 @@ namespace pool {
 
   class TestDriver {
   public:
-    explicit TestDriver( const std::string& catname = "PersF.catatlog.xml" );
+    explicit TestDriver( const std::string& catname = "PersExtF.catatlog.xml" );
     ~TestDriver();
     TestDriver(const TestDriver & ) = delete;
     TestDriver& operator=(const TestDriver & ) = delete;
     void loadLibraries( const std::vector<std::string>& libraries );
     void write( pool::DbType storageType );
     void read();
-    void readCollections();
     void clearCache();
-    void readFileSizes();
 
   private:
     pool::IFileCatalog*   m_fileCatalog;
-    std::string           m_fileName1;
-    std::string           m_fileName2;
+    std::string           m_fileName;
+    int                   m_eventsToCommitAndHold;
     int                   m_events;
-    std::vector< Token* >                     m_tokens;
-    std::vector< SimpleTestClass >            m_simpleTestClass;
-    std::vector< TestClassPrimitives >        m_testClassPrimitives;
-    std::vector< TestClassVectors >           m_testClassVectors;
-    std::vector< TestClassSTLContainers >     m_testClassSTLContainers;
+    std::vector< Token* > m_tokens;
+    std::vector< TestClassSTLContainersExt >  m_testClassSTLContainersExt;
   };
 
 }

@@ -1,16 +1,15 @@
 [OVAL] Creating the test driver.
 [OVAL] Creating a file catalog
-APRFileCatalog      DEBUG addCatalog("xmlcatalog_file:PoolFileCatalog.xml")
+APRFileCatalog      DEBUG addCatalog("xmlcatalog_file:PersF.catatlog.xml")
 [OVAL] Loading the shared libraries.
 Loading library test_TestDictionaryDict
 [OVAL] Writing objects in the database using ROOT_Key storage type.
 Creating the persistency service
 Writing 100 objects of each type
-APRFileCatalog      DEBUG Registering PFN=pool1.root of type=ROOT_All GUID=36F311A4-DB4D-6645-B613-989F91BAB721
-APRFileCatalog      DEBUG Registering PFN=pool2.root of type=ROOT_All GUID=3C7E5AF0-737A-4840-B316-94E39722C72A
+APRFileCatalog      DEBUG Registering PFN=PersF.pool1.root of type=ROOT_All GUID=69468D71-2EA6-CA4A-A31C-CFA2B6167D60
+APRFileCatalog      DEBUG Registering PFN=PersF.pool2.root of type=ROOT_All GUID=A0E15D57-6957-4840-B0AF-381601BD9355
 Committing the transaction.
-Committing the transaction.
-XMLCatalog           INFO File 'PoolFileCatalog.xml' does not exist. New file created.
+XMLCatalog           INFO File 'PersF.catatlog.xml' does not exist. New file created.
 [OVAL] ...done
 [OVAL] Reading the objects back from the database.
 Creating the persistency service
@@ -31,7 +30,6 @@ Committing the transaction.
 [OVAL] Writing objects in the database using ROOT_Tree storage type.
 Creating the persistency service
 Writing 100 objects of each type
-Committing the transaction.
 Committing the transaction.
 [OVAL] ...done
 [OVAL] Reading the objects back from the database.
@@ -54,7 +52,6 @@ Committing the transaction.
 Creating the persistency service
 Writing 100 objects of each type
 Committing the transaction.
-Committing the transaction.
 [OVAL] ...done
 [OVAL] Reading the objects back from the database.
 Creating the persistency service
@@ -72,5 +69,29 @@ Container : TestClassPrimitives_Container
 Committing the transaction.
 [OVAL] ...done
 
+[OVAL] Writing objects in the database using ROOT_RNTuple storage type.
+Creating the persistency service
+Writing 100 objects of each type
+RNTupleWriterHe...VERBOSE Setting the loglevel to 4
+RNTupleWriterHe...VERBOSE Setting the loglevel to 4
+RNTupleWriterHe...VERBOSE Setting the loglevel to 4
+RNTupleWriterHe...VERBOSE Setting the loglevel to 4
+Committing the transaction.
+[OVAL] ...done
+[OVAL] Reading the objects back from the database.
+Creating the persistency service
+Reading back the objects.
+Committing the transaction.
+[OVAL] ...done
+[OVAL] Clearing the tokens.
+[OVAL] ...done
+[OVAL] Reading the objects back from the database as implicit collections.
+Creating the persistency service
+Container : SimpleTestClass_Container
+100 objects found in the container.
+Container : TestClassPrimitives_Container
+100 objects found in the container.
+Committing the transaction.
+[OVAL] ...done
 [OVAL] Number of floating tokens : 0
 [OVAL] Exiting...
