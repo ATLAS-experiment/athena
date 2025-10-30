@@ -136,7 +136,7 @@ namespace MuonR4{
                     } case RpcStripType:
                       case TgcStripType: {
                         if (sp->primaryMeasurement() && sp->secondaryMeasurement()) {
-                            if (sp->primaryMeasurement() != sp->primaryMeasurement()) {
+                            if (sp->primaryMeasurement() != sp->secondaryMeasurement()) {
                                 combine(sp->primaryMeasurement(), sp->secondaryMeasurement(), meas->fitState());
                             } else {  // BI - RPC measurements
                                 appendLink(sp->primaryMeasurement(), meas->fitState());
