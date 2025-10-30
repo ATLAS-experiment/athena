@@ -10,6 +10,7 @@ inputFile=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITe
 # Run the job
 export TRF_ECHO=1;
 python -m MuonPatternRecognitionTest.MuonRecoChainTesterConfig ${OPT} \
+    --noSTGC \
     --nEvents ${NEVENTS} \
     --threads ${NTHREADS} \
     --inputFile ${inputFile} > log.MuonR4Reco 2>&1;
