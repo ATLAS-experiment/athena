@@ -4,7 +4,6 @@
 
 #include "DQBadLBFilterAlg.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
-#include "AthenaPoolUtilities/AthenaAttributeListSpecification.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/AttributeListException.h"
 
