@@ -155,7 +155,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
-    actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: pcf.Acts.SeedingStrategy!=SeedingStrategy.Gbts2 or pcf.Tracking.doPixelDigitalClustering) # GBTS forceTrackOnSeed only seems to work with digital clustering
+    actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: not(pcf.Acts.SeedingStrategy is SeedingStrategy.Gbts2 and
+                                                            pcf.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection)) # forceTrackOnSeed does not seem to work with GBTS seeds and analogue cluster calibration
         
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', True)
