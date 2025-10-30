@@ -25,6 +25,8 @@ class DiTauCalibrationConfig (ConfigBlock):
             "CP::DiTauTruthMatchingAlg). The default is True.")
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
+        self.addOption ('decorateExtraVariables', True, type=bool,
+            info="decorate extra variables for the reconstructed ditau")    
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -68,6 +70,21 @@ class DiTauCalibrationConfig (ConfigBlock):
             config.addOutputVar (self.containerName, 'TruthVisMass', 'TruthVisMass', noSys=True)
             config.addOutputVar (self.containerName, 'IsTruthMatched', 'IsTruthMatched', noSys=True)
             config.addOutputVar (self.containerName, 'IsTruthHadronic', 'IsTruthHadronic', noSys=True)
+
+        # Decorate extra variables
+        if self.decorateExtraVariables:
+           alg = config.createAlgorithm( 'CP::DiTauExtraVariablesAlg',
+                                         'DiTauExtraVariablesAlg',
+                                         reentrant=True )
+           alg.ditaus = config.readName (self.containerName)
+           config.addOutputVar (self.containerName, 'leadSubjetPt', 'leadSubjetPt', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetEta', 'leadSubjetEta', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetPhi', 'leadSubjetPhi', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetE', 'leadSubjetE', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetPt', 'subleadSubjetPt', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetEta', 'subleadSubjetEta', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetPhi', 'subleadSubjetPhi', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetE', 'subleadSubjetE', noSys=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' )
