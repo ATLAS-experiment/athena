@@ -1,5 +1,9 @@
-#include "eflowRec/PFCalcRadialEnergyProfiles.h"
-#include "eflowRec/eflowCaloObject.h"
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "PFRadialEnergyCalculatorTool.h"
+
 #include "eflowRec/eflowCellList.h"
 #include "eflowRec/eflowRecCluster.h"
 #include "eflowRec/eflowRecTrack.h"
@@ -8,11 +12,11 @@
 #include "eflowRec/eflowTrackClusterLink.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-void PFCalcRadialEnergyProfiles::calculate(const PFData& data) const{
+StatusCode PFRadialEnergyCalculatorTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer){
 
   ATH_MSG_DEBUG("Accessed radial energy profile function");
 
-  for (auto thisEflowCaloObject : *data.caloObjects){
+  for (auto thisEflowCaloObject : theEflowCaloObjectContainer){
 
     //If there are no clusters available then we cannot calculate any calorimeter shower profiles
     if (thisEflowCaloObject->nClusters() < 1 ) continue;
@@ -30,7 +34,7 @@ void PFCalcRadialEnergyProfiles::calculate(const PFData& data) const{
 
       std::vector<std::pair<xAOD::CaloCluster*, bool> > clusterSubtractionList;
       clusterSubtractionList.reserve(matchedClusters.size());
-for (auto *thisEFlowRecCluster : matchedClusters) clusterSubtractionList.emplace_back(thisEFlowRecCluster->getCluster(),false);
+      for (auto *thisEFlowRecCluster : matchedClusters) clusterSubtractionList.emplace_back(thisEFlowRecCluster->getCluster(),false);
 
       eflowCellList calorimeterCellList;
       eflowSubtract::Subtractor::makeOrderedCellList(efRecTrack->getTrackCaloPoints(),clusterSubtractionList,calorimeterCellList);
@@ -128,4 +132,5 @@ for (auto *thisEFlowRecCluster : matchedClusters) clusterSubtractionList.emplace
 
   }//loop on eflowCaloObjectContainer
 
+  return StatusCode::SUCCESS;
 }

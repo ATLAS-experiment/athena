@@ -15,15 +15,12 @@
 #include "eflowRec/PFEnergyPredictorTool.h"
 #include "eflowRec/PFMatchPositions.h"
 #include "eflowRec/PFTrackClusterMatchingTool.h"
-#include "eflowRec/PFCalcRadialEnergyProfiles.h"
 #include "eflowRec/PFSimulateTruthShowerTool.h"
 #include "eflowRec/PFSubtractionStatusSetter.h"
 #include "eflowRec/PFSubtractionEnergyRatioCalculator.h"
 #include "eflowRec/eflowSubtractor.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODTracking/TrackParticle.h"
-
-
 
 class eflowCaloObjectContainer;
 class eflowEEtaBinnedParameters;
@@ -99,7 +96,6 @@ private:
   Gaudi::Property<bool> m_addCPData{this,"addCPData",false,"Toggle whether to decorate FlowElements with addutional data for Combined Performance studies "};
 
   //Helpers
-  PFCalcRadialEnergyProfiles m_pfCalc{};
   PFSubtractionStatusSetter m_pfSubtractionStatusSetter{};
   PFSubtractionEnergyRatioCalculator m_pfSubtractionEnergyRatioCalculator{};
   eflowSubtract::Subtractor m_subtractor{};

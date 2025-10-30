@@ -466,6 +466,9 @@ def getOfflinePFAlgorithm(inputFlags):
     PFMomentCalculatorTools=result.popToolsAndMerge(getPFMomentCalculatorTool(inputFlags,[]))
     PFAlgorithm.BaseToolList = [PFMomentCalculatorTools]
     PFAlgorithm.BaseToolList += [getPFLCCalibTool(inputFlags)]
+    if inputFlags.PF.EOverPMode:
+        PFAlgorithm.BaseToolList += [CompFactory.PFRadialEnergyCalculatorTool()]
+
     result.addEventAlgo(PFAlgorithm)
     return result
 

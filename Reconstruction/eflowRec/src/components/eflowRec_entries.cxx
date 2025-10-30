@@ -27,6 +27,7 @@
 #include "eflowRec/PFEnergyPredictorTool.h"
 #include "../PFClusterWidthDecorator.h"
 #include "eflowRec/PFSimulateTruthShowerTool.h"
+#include "../PFRadialEnergyCalculatorTool.h"
 
 DECLARE_COMPONENT( PFLeptonSelector )
 DECLARE_COMPONENT( PFClusterSelectorTool )
@@ -53,3 +54,4 @@ DECLARE_COMPONENT( PFTrackMuonIsoTaggingAlg )
 DECLARE_COMPONENT( PFEnergyPredictorTool )
 DECLARE_COMPONENT( PFSimulateTruthShowerTool)
 DECLARE_COMPONENT( PFClusterWidthDecorator )
+DECLARE_COMPONENT( PFRadialEnergyCalculatorTool )
