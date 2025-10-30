@@ -28,32 +28,8 @@ public:
     // ID Variables
     unsigned int numConstituents() const { return (unsigned int) m_numConstit; }
 
-    double totalMass()     const { return m_totMass; }
-    double effectiveMass() const { return m_effMass; }
-    
-    double effectiveNumConstituents()  const { return m_effNumConstit; }
-    int effectiveNumConstituents_int() const { return m_effNumConstit_int; }
-
-    double averageEffectiveRadius() const { return m_aveEffRadius; }
-    double averageRadius()          const { return m_aveRadius; }
-
-    // Energy Variables
-    double totalEnergy()     { return m_totEnergy; }
-    double effectiveEnergy() { return m_effEnergy; }
-
 private:
     int m_numConstit;
-    int m_effNumConstit_int;
-    double m_effNumConstit;
-    double m_aveRadius;
-    double m_aveEffRadius;
-    double m_totMass;
-    double m_effMass;
-    double m_totEnergy;
-    double m_effEnergy;
-
-    // Calculate the geometrical center of the tau constituents
-    TLorentzVector calculateTauCentroid(int nConst, const std::vector<TLorentzVector>& clusterP4Vector) const;
 };
 
 //-------------------------------------------------------------------------
