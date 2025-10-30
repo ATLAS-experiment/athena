@@ -77,14 +77,18 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
 
     ATH_MSG_DEBUG("rejectTrack is " << rejectTrack);
     
+    const xAOD::TrackParticleContainer* trkcont{nullptr};
     if (!rejectTrack) {
       // Monitor the time per selected track
       auto t_track = Monitored::Timer<std::chrono::microseconds>( "TIME_track" );
       eta_track = thisTrack->eta();
       pt_track = thisTrack->pt() * invGeV;
+      if(trkcont==nullptr) {
+        trkcont = static_cast<const xAOD::TrackParticleContainer*>(thisTrack->container());
+      }
 
       /* Create the eflowRecCluster and put it in the container */
-      std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ElementLink<xAOD::TrackParticleContainer>(*tracksReadHandle, trackIndex), m_theTrackExtrapolatorTool);
+      std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ElementLink<xAOD::TrackParticleContainer>(trkcont, thisTrack->index()), m_theTrackExtrapolatorTool);
       thisEFRecTrack->setTrackId(trackIndex);
       eflowRecTracksWriteHandle->push_back(std::move(thisEFRecTrack));
 
