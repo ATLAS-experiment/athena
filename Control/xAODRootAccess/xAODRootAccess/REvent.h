@@ -106,7 +106,7 @@ class REvent : public Event {
   std::unique_ptr<ROOT::RNTupleReader> m_metaReader;
 
   /// The entry to look at from the input tree
-  ::Long64_t m_entry;
+  ::Long64_t m_entry{};
 
 };  // class REvent
 

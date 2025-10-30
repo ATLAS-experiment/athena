@@ -182,17 +182,17 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
 
   // Helper lambda for collecting the event format metadata from an RNTuple
   // with a given name.
-  auto readEventFormatMetadata = [&](std::string_view treeName) -> StatusCode {
+  auto readEventFormatMetadata = [&](std::string_view thisTreeName) -> StatusCode {
     // Look for the metadata tree:
-    TTree* metaTree = file->Get<TTree>(treeName.data());
+    TTree* metaTree = file->Get<TTree>(thisTreeName.data());
     if (metaTree == nullptr) {
-      ATH_MSG_ERROR("Couldn't find metadata tree \"" << treeName
+      ATH_MSG_ERROR("Couldn't find metadata tree \"" << thisTreeName
                                                      << "\"on input.");
       return StatusCode::FAILURE;
     }
     // Set metadata entry to be read.
     if (metaTree->LoadTree(0) < 0) {
-      ATH_MSG_ERROR("Failed to load entry 0 for metadata tree \"" << treeName
+      ATH_MSG_ERROR("Failed to load entry 0 for metadata tree \"" << thisTreeName
                                                                   << "\"");
       return StatusCode::FAILURE;
     }
