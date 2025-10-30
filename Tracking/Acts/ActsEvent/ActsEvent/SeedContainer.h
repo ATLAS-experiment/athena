@@ -48,6 +48,7 @@ namespace ActsTrk {
       return push_back(pSeed, [this](const Acts::SpacePointProxy<container_t> *sp) -> Acts::SpacePointIndex2 {
         assert(sp->index() < m_spacePoints.size());
         assert(m_spacePoints[sp->index()] == &sp->externalSpacePoint());
+	std::ignore = m_spacePoints.size(); // Silence Clang warning about unused lambda capture
         return sp->index();
       });
     }
