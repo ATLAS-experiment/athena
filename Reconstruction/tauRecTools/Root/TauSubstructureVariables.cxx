@@ -16,7 +16,6 @@
 #include "xAODTau/TauJet.h"
 #include "CxxUtils/trapping_fp.h"
 
-#include "tauRecTools/CaloClusterVariables.h"
 #include "tauRecTools/TauSubstructureVariables.h"
 #include "tauRecTools/HelperFunctions.h"
 
@@ -29,18 +28,6 @@ TauSubstructureVariables::TauSubstructureVariables( const std::string& name )
 
 
 StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
-
-  CaloClusterVariables CaloClusterVariablesTool;
-
-  bool isFilled = CaloClusterVariablesTool.update(tau);
-
-  if (!isFilled) {
-    ATH_MSG_DEBUG("problem in calculating calo cluster variables -> will be set to -1111");
-    tau.setDetail(xAOD::TauJetParameters::numTopoClusters, static_cast<int>(DEFAULT));
-  } 
-  else {
-    tau.setDetail(xAOD::TauJetParameters::numTopoClusters, static_cast<int>(CaloClusterVariablesTool.numConstituents()));
-  }
 
   //*****************************************************
   // calculate some new cluster based ID variables
@@ -59,6 +46,9 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   // TODO: check which scale is needed here
   // p4 from cluster is at LC scale, p4 from vertexedCluster is at LC/EM scale for LC/EM seed jets
   std::vector<xAOD::CaloVertexedTopoCluster> vertexedClusterList = tau.vertexedClusters();
+
+  tau.setDetail(xAOD::TauJetParameters::numTopoClusters, static_cast<int>(vertexedClusterList.size()));
+
   for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList){
     TLorentzVector clusterP4 = vertexedCluster.p4();
 
