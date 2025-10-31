@@ -41,7 +41,8 @@ writeAdditionalOutputData="0"
 regionList="34"
 keepHitsStrategy="-1"   # NEW: user-settable via -g/--keepHitsStrategy
 doGNN="0"
-
+xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
+bdfid="0000:c3:00.1"
 ## parsing flags
 while [ $# -ge 1 ]; do
     case "$1" in
@@ -57,6 +58,8 @@ while [ $# -ge 1 ]; do
         -g  | --keepHitsStrategy ) if [ $# -lt 2 ] ; then usage 1 "Missing value for --keepHitsStrategy"; fi ; keepHitsStrategy="$2" ; shift ;;
         -j  | --doGNN )         doGNN="1" ;;
         -h  | --help )          usage 0 ;;
+        -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
+        -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         *) shift ; continue ;;
     esac
     shift
@@ -113,7 +116,8 @@ if [ "$writeAdditionalOutputData" == "0" ]; then
 fi
 
 preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.Hough.genScan=True;flags.Trigger.FPGATrackSim.sampleType='skipTruth';"
-preExecFlags="${preExecFlags}flags.FPGADataPrep.bdfID='0000:01:00.1';flags.Trigger.FPGATrackSim.runF150hw=True;"
+preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.runF150hw=True;"
+preExecFlags="${preExecFlags}flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\""
 
 
 

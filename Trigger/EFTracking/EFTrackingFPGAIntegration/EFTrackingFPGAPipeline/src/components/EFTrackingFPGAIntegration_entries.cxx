@@ -9,6 +9,7 @@
 #include "EFTrackingFPGAPipeline/F1X0XRTIntegrationAlg.h"
 #include "EFTrackingFPGAPipeline/F100StreamIntegrationAlg.h"
 #include "EFTrackingFPGAPipeline/F150KernelTesterAlg.h"
+#include "EFTrackingFPGAPipeline/F150IntegrationAlg.h"
 #include "EFTrackingFPGAPipeline/F110IntegrationAlg.h"
 #include "EFTrackingFPGAPipeline/F110StreamIntegrationAlg.h"
 #include "EFTrackingFPGAPipeline/F100DataEncodingAlg.h"
@@ -27,6 +28,7 @@ DECLARE_COMPONENT(EFTrackingFPGAIntegration::F1X0IntegrationAlg)
 DECLARE_COMPONENT(EFTrackingFPGAIntegration::F1X0XRTIntegrationAlg)
 DECLARE_COMPONENT(EFTrackingFPGAIntegration::F100StreamIntegrationAlg)
 DECLARE_COMPONENT(EFTrackingFPGAIntegration::F110IntegrationAlg)
+DECLARE_COMPONENT(EFTrackingFPGAIntegration::F150IntegrationAlg)
 DECLARE_COMPONENT(EFTrackingFPGAIntegration::F110StreamIntegrationAlg)
 DECLARE_COMPONENT(EFTrackingFPGAIntegration::F150KernelTesterAlg)
 DECLARE_COMPONENT(EFTrackingFPGAIntegration::F100EDMConversionAlg)
