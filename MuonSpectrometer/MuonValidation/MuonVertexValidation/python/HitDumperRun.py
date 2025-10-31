@@ -33,7 +33,7 @@ def execute(cfg):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneCA
 
     args = GetArgsFromParser()
     flags = initConfigFlags()
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     flags.Detector.EnableCSC = False
     flags.lock()
 
-    cfg = setupServicesCfg(flags)
+    cfg = SetupMuonStandaloneCA(flags)
     from MuonPRDTest.HitValAlgReco import HitValAlgRecoCfg
     cfg.merge(HitValAlgRecoCfg(flags, outFile=args.outputFile, 
                                doTruth=False, doMuEntry=False, 
