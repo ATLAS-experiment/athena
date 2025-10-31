@@ -358,11 +358,11 @@ class TauWorkingPointConfig (ConfigBlock) :
                     config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
-                    if self.quality=="Loose":
+                    if self.quality=="Loose" or self.manual_sel_rnnwp == "loose":
                         JetIDLevel = 7
-                    elif self.quality=="Medium":
+                    elif self.quality=="Medium" or self.manual_sel_rnnwp == "medium":
                         JetIDLevel = 8
-                    elif self.quality=="Tight":
+                    elif self.quality=="Tight" or self.manual_sel_rnnwp == "tight":
                         JetIDLevel = 9
                     else:
                         raise ValueError ("invalid tauID: \"" + self.quality + "\". Allowed values are loose, medium, tight")
@@ -391,15 +391,21 @@ class TauWorkingPointConfig (ConfigBlock) :
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
                     # since all TauSelectionTool config files have loose eRNN, code only this option for now
                     alg.efficiencyCorrectionsTool.EleIDLevel = 2
+                    #overwrite decision in case user selects a WP manually
+                    if self.manual_sel_evetowp == "loose":
+                        alg.efficiencyCorrectionsTool.EleIDLevel = 2
+                    elif self.manual_sel_evetowp == "medium":
+                        alg.efficiencyCorrectionsTool.EleIDLevel = 3
+                        
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                     alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                     alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
                     # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN 
-                    if self.quality=="Loose":
+                    if self.quality=="Loose" or self.manual_sel_rnnwp == "loose":
                         JetIDLevel = 7
-                    elif self.quality=="Medium":
+                    elif self.quality=="Medium" or self.manual_sel_rnnwp == "medium":
                         JetIDLevel = 8
-                    elif self.quality=="Tight": 
+                    elif self.quality=="Tight" or self.manual_sel_rnnwp == "tight": 
                         log.warning("eVeto SFs are not available for Tight WP -> fallback to Medium WP")
                         JetIDLevel = 8
                     alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel 
