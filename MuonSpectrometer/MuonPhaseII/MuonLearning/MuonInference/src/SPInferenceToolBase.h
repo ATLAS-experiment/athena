@@ -1,8 +1,6 @@
-/*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-*/
-#ifndef MUONINFERENCETOOLS_GRAPHINFERENCETOOL_H
-#define MUONINFERENCETOOLS_GRAPHINFERENCETOOL_H
+#ifndef MUONINFERENCETOOLS_SPINFERENCETOOL_H
+#define MUONINFERENCETOOLS_SPINFERENCETOOL_H
+
 
 #include "MuonInferenceInterfaces/IGraphInferenceTool.h"
 #include "MuonInferenceInterfaces/NodeFeatureList.h"
@@ -19,7 +17,7 @@
 
 namespace MuonML{
     /** @brief Baseline tool to handle the  */
-    class GraphInferenceToolBase : public extends<AthAlgTool, IGraphInferenceTool> {
+    class SPInferenceToolBase : public extends<AthAlgTool, IGraphInferenceTool> {
         public:
             /** @brief Keep the constructor of the parent class */
             using base_class::base_class;
