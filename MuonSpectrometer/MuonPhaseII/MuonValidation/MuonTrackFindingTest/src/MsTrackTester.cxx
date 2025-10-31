@@ -8,6 +8,8 @@
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonPRDTestR4/TrackContainerModule.h"
+#include "MuonTesterTree/MuonTesterTreeDict.h"
+#include "xAODTruth/xAODTruthHelpers.h"
 
 #include "Acts/Definitions/Units.hpp"
 
@@ -101,6 +103,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_segSelector.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_fieldCacheKey.initialize());
+        ATH_CHECK(m_legacyTrackKey.initialize(false));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
         MsTrackSeeder::Config seederCfg{};
@@ -194,12 +197,30 @@ namespace MuonValR4 {
         m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree, evOpts));
         m_tree.addBranch(std::make_unique<TrackContainerModule>(m_tree, "MsTracks", msgLevel()));
 
+        if(!m_legacyTrackKey.empty()) {
+            m_legacyTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "LegacyMSTrks");
+            m_legacyTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_legacyTrks));
+            if (m_isMC) {
+                BilateralLinkerBranch::connectCollections(m_legacyTrks, m_truthTrks, [](const xAOD::IParticle* trk){ 
+                                                      return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "LegacyMS");
+            }
+            m_tree.addBranch(m_legacyTrks);
+        } 
+
         ATH_CHECK(m_trkTruthLinks.initialize());
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
     }
     StatusCode MsTrackTester::execute() {
         const EventContext& ctx{Gaudi::Hive::currentContext()};
+
+        const xAOD::TrackParticleContainer* legacyTrks{nullptr};
+        ATH_CHECK(SG::get(legacyTrks, m_legacyTrackKey, ctx));
+        if (legacyTrks){
+            for (const xAOD::TrackParticle* track : *legacyTrks) {
+                m_legacyTrks->push_back(track);
+            }
+        }
         /** Fetch the containers from store gate */
         const xAOD::MuonSegmentContainer* recoSegments{nullptr};
         ATH_CHECK(SG::get(recoSegments, m_recoSegmentKey, ctx));
@@ -234,7 +255,7 @@ namespace MuonValR4 {
             const auto[seedLength, theta] = calcSeedLength(*gctx, seed);
             m_seedLength+= seedLength;
             m_seedThetaCone+=theta;
-            // m_seedQP +=  m_seeder->estimateQtimesP(*gctx, *magCache, seed) / Gaudi::Units::GeV; 
+            m_seedQP += m_seeder->estimateQtimesP(*gctx, *magCache, seed) / Gaudi::Units::GeV; 
         }
         for (const xAOD::MuonSegment* seg : *recoSegments) {
             m_recoSegs->push_back(*seg);

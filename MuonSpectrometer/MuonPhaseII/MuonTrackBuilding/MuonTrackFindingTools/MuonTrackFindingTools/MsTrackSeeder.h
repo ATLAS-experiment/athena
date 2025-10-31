@@ -145,11 +145,11 @@ namespace MuonR4{
             std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
                                                                  const ActsTrk::GeometryContext& gctx,
                                                                  const xAOD::MuonSegmentContainer& segments) const;
-        private:
-             /** @brief Returns the spectrometer envelope associated to the segment
+            /** @brief Returns the spectrometer envelope associated to the segment
              *         (Coord system where the parameter are expressed)
              *  @param segment: Reference to the segment of interest */
             const MuonGMR4::SpectrometerSector* envelope(const xAOD::MuonSegment& segment) const;
+        private:
             /** @brief Calculates the radius of the bending circle from three points using the 
              *         sagitta. If one point is not defined, the origin is inserted instead.
              *         If two or more points are not set, a nullopt is returned */

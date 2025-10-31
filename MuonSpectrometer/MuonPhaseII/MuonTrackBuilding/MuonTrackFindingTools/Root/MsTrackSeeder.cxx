@@ -94,7 +94,7 @@ namespace MuonR4{
                                        const SectorProjector proj) {
         return sectorMap.sectorOverlapPhi(sector, ringSector(sector + Acts::toUnderlying(proj)));
     }
-    inline const MuonGMR4::SpectrometerSector* 
+    const MuonGMR4::SpectrometerSector* 
         MsTrackSeeder::envelope(const xAOD::MuonSegment& segment) const{
         return m_cfg.detMgr->getSectorEnvelope(segment.chamberIndex(), 
                                                segment.sector(), 

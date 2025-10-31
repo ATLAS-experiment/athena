@@ -27,7 +27,7 @@ namespace MuonValR4{
             return false;
         }
         for (const auto& track : *tracks) {
-            const auto trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
+            const Amg::Vector3D trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
             const double chi2 = track.chi2();
             const int q = sign(track.qOverP());
             const unsigned nDoF = track.nDoF();
@@ -38,6 +38,7 @@ namespace MuonValR4{
             m_trackQ += q;
             m_trackNdoF += nDoF;
             m_trackChi2 += chi2;
+            m_parentSeed += track.component<std::size_t, Acts::hashString("parentSeed")>();
         }
         return true;
     }

@@ -15,6 +15,7 @@
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonPRDTest/SegmentVariables.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
@@ -113,6 +114,9 @@ namespace MuonValR4{
         MuonVal::VectorBranch<float>& m_truthMuonQP{m_tree.newVector<float>("TruthMuons_qTimesP")};
         /** @brief Segment selection tool to pick the good quality segments */
         ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
+        /** @brief Legacy track reconstruction chain */
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
+        ParticleBranchPtr_t m_legacyTrks{};
     };
 }
 
