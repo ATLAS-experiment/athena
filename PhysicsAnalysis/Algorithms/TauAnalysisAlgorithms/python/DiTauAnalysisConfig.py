@@ -52,6 +52,7 @@ class DiTauCalibrationConfig (ConfigBlock):
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+       
         # decorate truth tau information on the reconstructed object:
         if self.decorateTruth and self.rerunTruthMatching and config.dataType() is not DataType.Data:
             # in the case of the ditau, the DiTauTruthMatchingTool decorates directly the reco ditau with truth information.
@@ -92,6 +93,13 @@ class DiTauCalibrationConfig (ConfigBlock):
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+
+        # Save base kinematic ditau variables in output
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'm', 'm', noSys=True)
+
 
 
 class DiTauWorkingPointConfig (ConfigBlock) :
