@@ -93,7 +93,6 @@ private:
   float m_freqMHz{};
   float m_deltaTSample{};
   int m_pedestal{};
-  float m_gainHG{};
   unsigned int m_LGMode{LGModeNormal};
   float m_tmin{};
   float m_tmax{};
@@ -462,7 +461,7 @@ private:
 public:
 
   ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const std::string& tag, int Nsample, float deltaTSample, size_t preSampleIdx,
-		   int pedestal, float gainHG, const std::string& fitFunction, int peak2ndDerivMinSample, float peak2DerivMinThreshHG,
+		   int pedestal, const std::string& fitFunction, int peak2ndDerivMinSample, float peak2DerivMinThreshHG,
 		   float peak2DerivMinThreshLG);
 
   ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSON& configJSON);
