@@ -16,10 +16,7 @@ namespace MuonR4 {
       ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector()<<std::endl;
       using namespace Muon::MuonStationIndex;
       for (const xAOD::MuonSegment* seg : seed.segments()) {
-        ostr<<"  **** "<< std::format( "{:}{:}{:}{:}", chName(seg->chamberIndex()),
-                                                       std::abs(seg->etaIndex()),
-                                                       seg->etaIndex() > 0 ? 'A' : 'C',
-                                                       seg->sector())
+        ostr<<"  **** "<< printID(*seg)
             <<", theta: "<<(seg->direction().theta() /Gaudi::Units::degree)
             <<", phi: "<<(seg->direction().phi() /Gaudi::Units::degree)
             <<", R: "<<Acts::fastHypot(seg->x(), seg->y())

@@ -24,6 +24,11 @@ namespace MuonR4{
      *                      measurements should be ignored */                                                                    
     std::vector<const xAOD::UncalibratedMeasurement*> collectMeasurements(const xAOD::MuonSegment& segment,
                                                                           bool skipOutlier = true);
+    /** @brief Print the chamber ID of a segment, e.g. BMS1A12, meaning that the
+     *         segment is in the first BMS eta station on the A-side in sector 12
+     *  @param seg: Reference to the segment from which the id should be printed */
+    std::string printID(const xAOD::MuonSegment& seg);
+
 
 }
 

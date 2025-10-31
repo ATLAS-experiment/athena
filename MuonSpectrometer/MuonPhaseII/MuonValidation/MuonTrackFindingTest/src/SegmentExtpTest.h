@@ -34,6 +34,8 @@ namespace MuonValR4{
         SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
         /** @brief Detector manager to fetch the sector surfaces */
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+        /** @brief Option to draw every extrapolation asan obj file*/
+        Gaudi::Property<bool> m_drawEvent{this , "drawEvent", false };
     };
 }
 

@@ -11,6 +11,14 @@ namespace{
 }
 
 namespace MuonR4{
+
+   std::string printID(const xAOD::MuonSegment& seg) {
+        using namespace Muon::MuonStationIndex;
+        return std::format("{:}{:}{:}{:}", chName(seg.chamberIndex()),
+                                                  std::abs(seg.etaIndex()),
+                                                  seg.etaIndex() > 0 ? 'A' : 'C',
+                                                  seg.sector());
+    }
     const Segment* detailedSegment(const xAOD::MuonSegment& seg) {
         using SegLink_t = ElementLink<SegmentContainer>;
         static const SG::ConstAccessor<SegLink_t> acc{"parentSegment"};
