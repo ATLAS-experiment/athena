@@ -46,7 +46,6 @@ namespace DerivationFramework {
     ATH_CHECK( m_eventInfo_key.initialize() );
     ATH_CHECK(m_muonCollectionKey.initialize());
     ATH_CHECK(m_TrkParticleCollection.initialize());
-    m_muonIndex = m_muonCollectionKey.key() + ".BPHY4MuonIndex";
     ATH_CHECK(m_muonIndex.initialize());
     ATH_MSG_DEBUG("Initialize successful");
 
