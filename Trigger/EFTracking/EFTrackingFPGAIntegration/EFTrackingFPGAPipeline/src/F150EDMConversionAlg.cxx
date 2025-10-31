@@ -90,7 +90,7 @@ namespace EFTrackingFPGAIntegration
 
                 if(hitsInTrack != spacePointsToStoreInSeed.size())
                 {
-                    ATH_MSG_ERROR("Track does not have the same number of hits in the output as the seed container");
+                    ATH_MSG_WARNING("Track does not have the same number of hits in the output as the seed container hitsInTrack: "<<hitsInTrack<<" spacePointsToStoreInSeed: "<<spacePointsToStoreInSeed.size());
                 }
                 // construct seed based on the space points stored in the vector
                 if (spacePointsToStoreInSeed.size() >= m_minSpacePointsPerSeed) { // check that seeds contains at least the minimum number of desired space points

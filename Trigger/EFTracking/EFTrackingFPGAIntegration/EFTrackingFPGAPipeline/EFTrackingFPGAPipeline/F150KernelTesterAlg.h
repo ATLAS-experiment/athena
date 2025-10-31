@@ -68,6 +68,7 @@ namespace EFTrackingFPGAIntegration
             Gaudi::Property<bool> m_runIO{this, "RunInsideOut", "", "Whether to run inside out or not"}; //!<  Whether to run inside out or not
             Gaudi::Property<bool> m_runIOOnSE{this, "RunInsideOutOnSlicingEngine", "", "Whether to run inside out on the output of the slicing engine"}; //!<  Whether to run inside out on the output of slicing engine 
             Gaudi::Property<bool> m_runFull150{this, "RunFullF150", "", "Whether to run Full 150 chain"}; //!<  Whether to run the Full F150 include F100 on hy 
+            Gaudi::Property<bool> m_outputTextFile{this, "outputTextFile", "", "Whether to output text file"}; //!<  Whether to run SE or not
 
             SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey {this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim hits key"}; // Pixel CLS Output
             SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGASlicedHitKey{this, "FPGATrackSimHitKey_1st", "FPGAHits_1st_reg34", "FPGATrackSim Hits 1st stage key"}; // Slicing Engine Output
@@ -152,7 +153,7 @@ namespace EFTrackingFPGAIntegration
 
             std::string get_cu_name(const std::string& kernel_name, int cu);
 
-            void dumpHexData(std::span<const uint64_t> data, const std::string &dataDescriptor) const;
+            void dumpHexData(std::span<const uint64_t> data, const std::string &dataDescriptor, const EventContext &ctx) const;
     };
 }
 
