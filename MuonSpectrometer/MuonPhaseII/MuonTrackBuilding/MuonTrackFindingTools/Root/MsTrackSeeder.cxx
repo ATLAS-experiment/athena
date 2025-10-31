@@ -53,16 +53,8 @@ namespace {
     float reducedChi2(const xAOD::MuonSegment& seg) {
         return seg.chiSquared() / std::max(1.f, seg.numberDoF());
     }
-
-    std::string printID(const xAOD::MuonSegment& seg) {
-        using namespace Muon::MuonStationIndex;
-        return std::format("{:}{:}{:}{:}", chName(seg.chamberIndex()),
-                                                  std::abs(seg.etaIndex()),
-                                                  seg.etaIndex() > 0 ? 'A' : 'C',
-                                                  seg.sector());
-    }
     std::string print(const xAOD::MuonSegment& seg) {
-        return std::format("{:}, nPrecHits: {:}, nPhiHits: {:}", printID(seg),
+        return std::format("{:}, nPrecHits: {:}, nPhiHits: {:}", MuonR4::printID(seg),
                            seg.nPrecisionHits(), seg.nPhiLayers());
     }
     static const Muon::MuonSectorMapping sectorMap{};
@@ -209,7 +201,7 @@ namespace MuonR4{
         }
         const Amg::Vector3D sagittaDir = leverL.cross(planeNorm).unit();
         std::optional<double> sagitta = Amg::intersect<3>(*pI, leverL.unit(), *pM, sagittaDir);
-        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Estimated sagitta: "<<(sagitta ? 
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Estimated sagitta: "<<(sagitta ? 
                      std::to_string(sagitta.value_or(0.)) : "---")<<", lever arm: "
                     <<(leverL.mag() / Gaudi::Units::m)<<" [m]"  );
         if (!sagitta) {
@@ -431,7 +423,7 @@ namespace MuonR4{
             MsTrackSeed newSeed{static_cast<Location>(std::abs(coords[Acts::toUnderlying(eDetSection)])),
                                 static_cast<int>(coords[Acts::toUnderlying(eSector)])};
             /** Using the cube above, let the tree search for all compatible segments */
-            ATH_MSG_ALWAYS("Search for compatible segments to "<<print(*seedCandidate)<<".");
+            ATH_MSG_VERBOSE("Search for compatible segments to "<<print(*seedCandidate)<<".");
             orderedSegs.rangeSearchMapDiscard(selectRange, [&](
                     const SearchTree_t::coordinate_t& /*coords*/,
                     const xAOD::MuonSegment* extendWithMe) {
@@ -469,10 +461,10 @@ namespace MuonR4{
                               + z * Amg::Vector3D::UnitZ();
             
             newSeed.setPosition(std::move(pos));
-            ATH_MSG_ALWAYS("Add new seed "<<newSeed);
+            ATH_MSG_VERBOSE("Add new seed "<<newSeed);
             trackSeeds.emplace_back(std::move(newSeed));
         }
-        ATH_MSG_ALWAYS("Found in total "<<trackSeeds.size()<<" before overlap removal");
+        ATH_MSG_VERBOSE("Found in total "<<trackSeeds.size()<<" before overlap removal");
         return resolveOverlaps(std::move(trackSeeds));
     }
     std::unique_ptr<MsTrackSeedContainer> 
@@ -498,7 +490,7 @@ namespace MuonR4{
                     });
                 /** There is no segment which shares at least one segment with this candidate */
                 if (test_itr == outputSeeds->end()) {
-                    ATH_MSG_ALWAYS("Add new seed "<<testMe);
+                    ATH_MSG_VERBOSE("Add new seed "<<testMe);
                     return true;
                 }
                 /// Take the longer seed

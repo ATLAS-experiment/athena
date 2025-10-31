@@ -27,8 +27,8 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
                                             action='store_true')
-    parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
-                                              default=False, action='store_true')
+    parser.add_argument("--dumpObjFiles", help="If set to true, the spacepoints in the bucket are saved to disk",
+                        default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
@@ -59,7 +59,7 @@ if __name__=="__main__":
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
     #cfg.merge(SegmentRefitTestCfg(flags))
-    cfg.merge(SegmentExtpTestCfg(flags))
+    cfg.merge(SegmentExtpTestCfg(flags, drawEvent = args.dumpObjFiles ))
    
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
 

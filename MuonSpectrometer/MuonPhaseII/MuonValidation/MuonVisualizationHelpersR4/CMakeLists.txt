@@ -14,6 +14,7 @@ atlas_add_library( MuonVisualizationHelpersR4
                    src/*.cxx
                   PUBLIC_HEADERS MuonVisualizationHelpersR4
                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                  LINK_LIBRARIES ${ROOT_LIBRARIES} MuonPatternEvent MuonSpacePoint GeoPrimitives)
+                  LINK_LIBRARIES ${ROOT_LIBRARIES} MuonPatternEvent MuonSpacePoint GeoPrimitives
+                  PRIVATE_LINK_LIBRARIES MuonTrackEvent)
               
 

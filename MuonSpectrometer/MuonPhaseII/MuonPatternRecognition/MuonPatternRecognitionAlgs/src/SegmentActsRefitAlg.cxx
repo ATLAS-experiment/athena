@@ -20,6 +20,7 @@
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "ActsInterop/UnitConverters.h"
@@ -139,6 +140,9 @@ namespace MuonR4{
         
         ParDecor_t dec_locPars{m_localParsKey, ctx};
         ParDecor_t dec_seedPars{m_seedParsKey, ctx};
+
+        Acts::ObjVisualization3D visualHelper{};
+
         /// Loop over the segment container
         for (const xAOD::MuonSegment* reFitMe: *segments){
             const auto msSector = m_detMgr->getSectorEnvelope(reFitMe->chamberIndex(), 
@@ -186,6 +190,12 @@ namespace MuonR4{
                 startMeas.insert(startMeas.end(), auxMeasHandle.newMeasurement<1>(surfAbove, ProjectorType::e1DimNoTime, AmgSymMatrix(1){covVal}));
 
             }
+            if (m_drawEvent) {
+                /// Draw the reference segment as a red line
+                MuonValR4::drawSegmentLine(gctx, *reFitMe, visualHelper,
+                                Acts::ViewConfig{.color = {220, 0, 0}});
+                MuonValR4::drawSegmentMeasurements(gctx, *reFitMe, visualHelper, Acts::s_viewSurface);
+            }
             //else if (const auto& firstMeas = reFitMe->measurements().front(); firstMeas->type() == xAOD::UncalibMeasType::Other) {
             //    auto pseudoSurf = Acts::Surface::makeShared<Acts::PlaneSurface>(
             //                        GeoTrf::GeoTransformRT{sectorAngles, Amg::Vector3D::Zero()});
@@ -231,12 +241,20 @@ namespace MuonR4{
                 ATH_MSG_WARNING("Initial estimate of the parameters failed");
                 continue;
             }
+            if (m_drawEvent) {
+                MuonValR4::drawBoundParameters(gctx, *initialPars, visualHelper,
+                                               Acts::ViewConfig{.color={0,220,0}});
+            }
             ATH_MSG_ALWAYS("Initial parameters "<<Amg::toString((*initialPars).parameters()));
             auto fitTraject = m_trackFitTool->fit(startMeas, *initialPars, 
                                                   tgContext, mfContext, calContext, target.get());
             if (!fitTraject) {
                 ATH_MSG_WARNING("Track fit failed.");
-                // return StatusCode::FAILURE;
+                if (m_drawEvent) {
+                    visualHelper.write(std::format("SegmentReFitTest_failed_{:}_{:}_{:}.obj", 
+                                          ctx.eventID().event_number(), reFitMe->index(), 
+                                          MuonR4::printID(*reFitMe)));
+                }
                 continue;
             }
 
@@ -268,7 +286,14 @@ namespace MuonR4{
             });
 
             Acts::BoundTrackParameters parameters = track.createParametersAtReference();
+            if (m_drawEvent) {
+                MuonValR4::drawBoundParameters(gctx, parameters, visualHelper,
+                                               Acts::ViewConfig{.color={0, 0, 220}});
 
+                visualHelper.write(std::format("SegmentReFitTest_goodone_{:}_{:}_{:}.obj", 
+                                          ctx.eventID().event_number(), reFitMe->index(), 
+                                          MuonR4::printID(*reFitMe)));
+            }
             /// Direction is always expressed in global frame -> transform to local
             const Amg::Vector3D globDir = parameters.direction();
             /// Express the parameters at the reference surface of the original segment
