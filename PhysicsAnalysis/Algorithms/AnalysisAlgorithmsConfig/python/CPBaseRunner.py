@@ -104,7 +104,7 @@ class CPBaseRunner(ABC):
     
     def _findYamlConfig(self, local=True):
         # Find local and abs path first
-        if local and (yamlConfig := CPBaseRunner.findLocalPathYamlConfig(self.args.text_config) is not None):
+        if local and ((yamlConfig := CPBaseRunner.findLocalPathYamlConfig(self.args.text_config)) is not None):
             return yamlConfig
         # Then search in the analysis repository and warn for duplicates
         elif (yamlConfig := CPBaseRunner.findRepoPathYamlConfig(self.args.text_config)):
