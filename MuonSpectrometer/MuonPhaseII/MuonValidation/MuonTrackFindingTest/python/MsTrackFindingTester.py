@@ -59,6 +59,11 @@ if __name__=="__main__":
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
     cfg.merge(MSTrackFinderAlgCfg(flags,
                                 VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
+    
+    ### Schedule the legacy MS track building to compare the two reconstruction chains
+    ### from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
+    ### cfg.merge(LegacyMuonRecoChainCfg(flags))
+
     cfg.merge(MsTrackTesterCfg(flags))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
