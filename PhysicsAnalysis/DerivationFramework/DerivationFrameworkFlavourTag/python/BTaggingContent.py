@@ -12,9 +12,6 @@ from AthenaConfiguration.Enums import LHCPeriod
 # ---------------------------------------------------------------------
 # Convenience functions
 # ---------------------------------------------------------------------
-def _getBtagging(jetcol):
-    """Convenience function for getting btagging names"""
-    return "BTagging_" + jetcol.split('Jets')[0]
 
 def _isRun4(ConfigFlags):
     """Convenience function for checking if we are in Run4"""
@@ -166,32 +163,15 @@ BTaggingHighLevelAux = [
 # Functions which define smart slimming content for different use cases
 # ---------------------------------------------------------------------
 def BTaggingExpertContent(jetcol, ConfigFlags = None):
-    btagging = _getBtagging(jetcol)
-
     # jet variables
     jetcontent = _getVariableList(jetcol, JetStandardAux + JetExtendedAux)
-
-    # b-tagging variables
-    isRun4 = _isRun4(ConfigFlags)
-    aux = BTaggingRun4Aux if isRun4 else BTaggingRun3Aux
-    aux += BTaggingHighLevelAux
-    btagcontent = _getVariableList(btagging, aux)
-
-    return jetcontent + btagcontent
+    return jetcontent
 
 
 def BTaggingStandardContent(jetcol, ConfigFlags = None):
-    btagging = _getBtagging(jetcol)
     # jet variables
     jetcontent = _getVariableList(jetcol, JetStandardAux)
-
-    # b-tagging variables
-    isRun4 = _isRun4(ConfigFlags)
-    aux = BTaggingRun4Aux if isRun4 else BTaggingRun3Aux
-    btagcontent = _getVariableList(btagging, aux)
-
-
-    return jetcontent + btagcontent
+    return jetcontent
 
 
 def BTaggingLargeRContent(jetcol, ConfigFlags = None):
