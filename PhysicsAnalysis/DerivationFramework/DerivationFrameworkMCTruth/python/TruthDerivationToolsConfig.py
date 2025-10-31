@@ -257,7 +257,7 @@ def HadronOriginClassifierCfg(flags, name, **kwargs):
     """get the hadron origin classification"""
     acc = ComponentAccumulator()
     HadronOriginClassifier = CompFactory.DerivationFramework.HadronOriginClassifier
-    kwargs.setdfault("DSID", flags.Input.MCChannelNumber)
+    kwargs.setdefault("DSID", flags.Input.MCChannelNumber)
     acc.addPublicTool(HadronOriginClassifier(name = name, **kwargs),
                       primary = True)
     return acc
