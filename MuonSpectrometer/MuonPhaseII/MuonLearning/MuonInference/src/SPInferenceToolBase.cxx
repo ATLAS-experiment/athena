@@ -1,7 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "GraphInferenceToolBase.h"
+#include "SPInferenceToolBase.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "MuonInferenceInterfaces/GraphData.h"
@@ -84,10 +84,10 @@ namespace {
     }
 }
 namespace MuonML{
-    Ort::Session& GraphInferenceToolBase::model() const {
+    Ort::Session& SPInferenceToolBase::model() const {
         return m_onnxSessionTool->session();
     }
-    StatusCode GraphInferenceToolBase::setupModel() {
+    StatusCode SPInferenceToolBase::setupModel() {
         ATH_CHECK(m_onnxSessionTool.retrieve());
         ATH_CHECK(m_readKey.initialize());
             
@@ -111,8 +111,8 @@ namespace MuonML{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode GraphInferenceToolBase::buildGraph(const EventContext& ctx,
-                                                  GraphRawData& graphData) const {
+    StatusCode SPInferenceToolBase::buildGraph(  const EventContext& ctx,
+                                                    GraphRawData& graphData) const {
 
         /** Check whether the graph needs a rebuild */
         if (graphData.previousList && (*graphData.previousList) != m_graphFeatures) {
@@ -185,7 +185,7 @@ namespace MuonML{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode GraphInferenceToolBase::runInference(GraphRawData& graphData) const {
+    StatusCode SPInferenceToolBase::runInference(GraphRawData& graphData) const {
         if (!m_graphFeatures.isValid()) {
             ATH_MSG_ERROR("ONNX model is not loaded. Please call setupModel()");
             return StatusCode::FAILURE;
@@ -236,3 +236,4 @@ namespace MuonML{
     }
     
 }
+

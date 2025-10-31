@@ -3,22 +3,18 @@
 */
 #include "InferenceAlg.h"
 
-#include "MuonInferenceInterfaces/GraphData.h"
+StatusCode MuonML::InferenceAlg::initialize() {
+    ATH_CHECK(m_inferenceTools.retrieve());
+    return StatusCode::SUCCESS;
+}
 
-namespace MuonML{
-    StatusCode InferenceAlg::initialize() {
-        if (m_inferenceTools.empty()) {
-            ATH_MSG_ERROR("Provide at least one inference tool");
-            return StatusCode::FAILURE;
-        }
-        ATH_CHECK(m_inferenceTools.retrieve());
-        return StatusCode::SUCCESS;
+StatusCode MuonML::InferenceAlg::execute(const EventContext& ctx) const {
+  // Fresh, per-event graph workspace for THIS alg instance
+    MuonML::GraphRawData graphData{};
+
+    // This alg has one tool, but loop is fine.
+    for (const auto& tool : m_inferenceTools) {
+        ATH_CHECK(tool->runGraphInference(ctx, graphData));
     }
-    StatusCode InferenceAlg::execute(const EventContext& ctx) const {
-        GraphRawData graphData{};
-        for (const auto& infTool : m_inferenceTools) {
-            ATH_CHECK(infTool->runGraphInference(ctx, graphData));
-        }
-        return StatusCode::SUCCESS;
-    }
+    return StatusCode::SUCCESS;
 }

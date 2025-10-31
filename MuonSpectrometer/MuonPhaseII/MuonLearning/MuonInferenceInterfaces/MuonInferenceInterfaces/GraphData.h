@@ -34,6 +34,12 @@ namespace MuonML{
         EdgeCounterVec_t desEdges{};
         /** @brief  Vector keeping track of how many space points are in each parsed bucket */
         NodeConnectVec_t spacePointsInBucket{};
+        /** @brief Packed edge index buffer (kept alive for ONNX tensors that reference it)
+         *  This stores [srcEdges, dstEdges] packed together and is used as backing storage
+         *  for the ONNX 'edge_index' input tensor so that the Ort::Value does not point
+         *  to a local (stack) buffer that would be freed at function exit.
+         */
+        EdgeCounterVec_t edgeIndexPacked{};
         /** @brief Pointer to the latest parsed NodeFeatureList */
         const NodeFeatureList* previousList{};
         /** @brief Pointer to the graph to be parsed to ONNX */
