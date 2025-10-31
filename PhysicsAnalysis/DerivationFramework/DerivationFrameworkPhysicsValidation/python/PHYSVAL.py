@@ -10,7 +10,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
-from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
 def PHYSVALKernelCfg(flags, name='PHYSVALKernel', **kwargs):
@@ -84,8 +84,6 @@ def PHYSVALCfg(flags):
                                               "AntiKt4EMTopoJets",
                                               "AntiKt4EMPFlowJets",
                                               "AntiKt4LCTopoJets",
-                                              "BTagging_AntiKt4EMPFlow",
-                                              "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                               "MET_Baseline_AntiKt4EMTopo",
                                               "MET_Baseline_AntiKt4EMPFlow",
                                               "TauJets",
@@ -109,13 +107,6 @@ def PHYSVALCfg(flags):
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
                                            "AntiKt4LCTopoJets",
-                                           "BTagging_AntiKt4EMPFlow",
-                                           "BTagging_AntiKt4EMTopo",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track",
-                                           "BTagging_AntiKt4EMPFlowJFVtx",
-                                           "BTagging_AntiKt4EMPFlowJFVtxFlip", #Flip version of JetFitter
-                                           "BTagging_AntiKt4EMPFlowSecVtx",
-                                           "BTagging_AntiKt4EMPFlowSecVtxFlip", #Flip version of SV1
                                            "TauJets",
                                            "TauJets_MuonRM",
                                            "TauJets_EleRM",
@@ -132,11 +123,6 @@ def PHYSVALCfg(flags):
                                            "CaloCalTopoClusters", "EMOriginTopoClusters","LCOriginTopoClusters",
                                            "JetETMissChargedParticleFlowObjects", "JetETMissNeutralParticleFlowObjects"]
 
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        PHYSVALSlimmingHelper.AllVariables += ["BTagging_AntiKt4EMTopoJFVtx",
-                                               "BTagging_AntiKt4EMTopoJFVtxFlip", #Flip version of JetFitter
-                                               "BTagging_AntiKt4EMTopoSecVtx",
-                                               "BTagging_AntiKt4EMTopoSecVtxFlip"] #Flip version of SV1
 
     # TODO: for now we don't have a ConfigFlag for this so it is set to False
     AddPseudoTracks = False
@@ -164,7 +150,6 @@ def PHYSVALCfg(flags):
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
-    StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
     StaticContent += ["xAOD::TauJetContainer#TauJets_MuonRM"]
     StaticContent += ["xAOD::TauJetAuxContainer#TauJets_MuonRMAux.-VertexedClusters"]
     StaticContent += ["xAOD::VertexContainer#TauSecondaryVertices_MuonRM"]
@@ -173,14 +158,6 @@ def PHYSVALCfg(flags):
     for wp in ["","_LeptonsMod_LRTR3_1p0"]:
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
-
-    if flags.BTagging.RunFlipTaggers is True:
-        StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxFlipAux.-vxTrackAtVertex"]
-
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxAux.-vxTrackAtVertex"]
-        if flags.BTagging.RunFlipTaggers is True:
-            StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxFlipAux.-vxTrackAtVertex"]
 
  
     PHYSVALSlimmingHelper.StaticContent = StaticContent
@@ -209,23 +186,12 @@ def PHYSVALCfg(flags):
                                                     'TruthPrimaryVertices':'xAOD::TruthVertexContainer','TruthPrimaryVerticesAux':'xAOD::TruthVertexAuxContainer',
                                                     'AntiKt10TruthTrimmedPtFrac5SmallR20Jets':'xAOD::JetContainer', 'AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux':'xAOD::JetAuxContainer',
                                                     'AntiKt10LCTopoJets':'xAOD::JetContainer', 'AntiKt10LCTopoJetsAux':'xAOD::JetAuxContainer',
-                                                    'BTagging_AntiKtVR30Rmax4Rmin02Track':'xAOD::BTaggingContainer','BTagging_AntiKtVR30Rmax4Rmin02TrackAux':'xAOD::BTaggingAuxContainer',
                                                     'EMOriginTopoClusters':'xAOD::CaloClusterContainer', 'EMOriginTopoClustersAux':'xAOD::ShallowAuxContainer',
                                                     'LCOriginTopoClusters':'xAOD::CaloClusterContainer', 'LCOriginTopoClustersAux':'xAOD::ShallowAuxContainer',
-                                                    'BTagging_AntiKt4EMPFlowJFVtx':'xAOD::BTagVertexContainer','BTagging_AntiKt4EMPFlowJFVtxAux':'xAOD::BTagVertexAuxContainer',
-                                                    'BTagging_AntiKt4EMPFlowSecVtx':'xAOD::VertexContainer','BTagging_AntiKt4EMPFlowSecVtxAux':'xAOD::VertexAuxContainer',
                                                     'GlobalChargedParticleFlowObjects':'xAOD::FlowElementContainer','GlobalChargedParticleFlowObjectsAux':'xAOD::FlowElementAuxContainer',
                                                     'GlobalNeutralParticleFlowObjects':'xAOD::FlowElementContainer', 'GlobalNeutralParticleFlowObjectsAux':'xAOD::FlowElementAuxContainer',
                                                     'CHSGChargedParticleFlowObjects': 'xAOD::FlowElementContainer', 'CHSGChargedParticleFlowObjectsAux':'xAOD::ShallowAuxContainer',
-                                                    'CHSGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer', 'CHSGNeutralParticleFlowObjectsAux':'xAOD::ShallowAuxContainer',
-                                                    'BTagging_AntiKt4EMPFlowJFVtxFlip':'xAOD::BTagVertexContainer','BTagging_AntiKt4EMPFlowJFVtxFlipAux':'xAOD::BTagVertexAuxContainer',#For Flip version of JetFitter
-                                                    'BTagging_AntiKt4EMPFlowSecVtxFlip':'xAOD::VertexContainer','BTagging_AntiKt4EMPFlowSecVtxFlipAux':'xAOD::VertexAuxContainer'}
-
-        if flags.GeoModel.Run >= LHCPeriod.Run4:
-            PHYSVALSlimmingHelper.AppendToDictionary.update({'BTagging_AntiKt4EMTopoJFVtx':'xAOD::BTagVertexContainer','BTagging_AntiKt4EMTopoJFVtxAux':'xAOD::BTagVertexAuxContainer',
-                                                             'BTagging_AntiKt4EMTopoSecVtx':'xAOD::VertexContainer','BTagging_AntiKt4EMTopoSecVtxAux':'xAOD::VertexAuxContainer',
-                                                             'BTagging_AntiKt4EMTopoJFVtxFlip':'xAOD::BTagVertexContainer','BTagging_AntiKt4EMTopoJFVtxFlipAux':'xAOD::BTagVertexAuxContainer',#For Flip version of JetFitter
-                                                             'BTagging_AntiKt4EMTopoSecVtxFlip':'xAOD::VertexContainer','BTagging_AntiKt4EMTopoSecVtxFlipAux':'xAOD::VertexAuxContainer'})
+                                                    'CHSGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer', 'CHSGNeutralParticleFlowObjectsAux':'xAOD::ShallowAuxContainer'}
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSVALSlimmingHelper)
