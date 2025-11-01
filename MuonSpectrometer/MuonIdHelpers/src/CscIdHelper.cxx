@@ -49,7 +49,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         return 0;
     }
 
-    IdDictField* field = m_dict->find_field("chamberLayer");
+    const IdDictField* field = m_dict->find_field("chamberLayer");
     if (field) {
         m_CHAMBERLAYER_INDEX = field->index();
     } else {
@@ -86,11 +86,11 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     /// save an index to the first region of csc
 
-    IdDictGroup* cscGroup = m_dict->find_group("csc");
+    const IdDictGroup* cscGroup = m_dict->find_group("csc");
     if (!cscGroup) {
         ATH_MSG_ERROR("Cannot find csc group");
     } else {
-        m_GROUP_INDEX = cscGroup->regions()[0]->index();
+        m_GROUP_INDEX = cscGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);

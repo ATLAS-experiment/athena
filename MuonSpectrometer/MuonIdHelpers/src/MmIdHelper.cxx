@@ -53,7 +53,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         return 0;
     }
 
-    IdDictField* field = m_dict->find_field("mmMultilayer");
+    const IdDictField* field = m_dict->find_field("mmMultilayer");
     if (field) {
         m_DETECTORELEMENT_INDEX = field->index();
     } else {
@@ -81,11 +81,11 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     //// m_DETECTORELEMENT_INDEX = m_MODULE_INDEX;
 
     // save an index to the first region of MM
-    IdDictGroup* mmGroup = m_dict->find_group("mm");
+    const IdDictGroup* mmGroup = m_dict->find_group("mm");
     if (!mmGroup) {
         ATH_MSG_ERROR("Cannot find mm group");
     } else {
-        m_GROUP_INDEX = mmGroup->regions()[0]->index();
+        m_GROUP_INDEX = mmGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);

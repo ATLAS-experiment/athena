@@ -41,7 +41,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     // Initialize some of the field indices
     if (initLevelsFromDict()) return (1);
 
-    IdDictField* field = m_dict->find_field("tgcGasGap");
+    const IdDictField* field = m_dict->find_field("tgcGasGap");
     if (field) {
         m_GASGAP_INDEX = field->index();
     } else {
@@ -69,11 +69,11 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_DETECTORELEMENT_INDEX = m_MODULE_INDEX;
 
     // save an index to the first region of tgc
-    IdDictGroup* tgcGroup = m_dict->find_group("tgc");
+    const IdDictGroup* tgcGroup = m_dict->find_group("tgc");
     if (!tgcGroup) {
         ATH_MSG_ERROR("Cannot find tgc group");
     } else {
-        m_GROUP_INDEX = tgcGroup->regions()[0]->index();
+        m_GROUP_INDEX = tgcGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
