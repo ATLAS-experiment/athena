@@ -52,7 +52,6 @@ inline void buildNodesAndFeatures(const MuonR4::SpacePointContainer& buckets,
   spInBucket.reserve(buckets.size());
 
   MuonR4::SpacePointPerLayerSorter layerSorter{};
-  unsigned long bucketIdx = 0;
 
   for (const MuonR4::SpacePointBucket* bucket : buckets) {
     const double bsize = bucket_size_mm(*bucket);
@@ -90,7 +89,6 @@ inline void buildNodesAndFeatures(const MuonR4::SpacePointContainer& buckets,
     featuresLeaves.push_back(static_cast<float>(n.bucketSize));
 
     spInBucket.emplace_back(static_cast<int64_t>(n.nSp));  // store as int64_t
-    ++bucketIdx;
   }
 }
 
