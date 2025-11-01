@@ -102,7 +102,7 @@ def BPHY25Cfg(flags):
         muAndTrack                  = False,
         TrackAndTrack               = False,
         assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
-        trackThresholdPt            = 3800.,
+        trackThresholdPt            = 3400.,
         invMassLower                = Jpsi_lo,
         invMassUpper                = Jpsi_hi,
         Chi2Cut                     = 4., # NDF=1 if no mass constraint
