@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JetQGTaggerBDT.h"
@@ -9,6 +9,7 @@
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 
 #include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/TrackParticle.h"
 
 namespace CP {
 
