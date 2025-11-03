@@ -4,7 +4,13 @@
 #include <AsgTools/StandaloneToolHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
 
+#ifdef XAOD_STANDALONE
+#include "xAODRootAccess/TEvent.h"
+#define TEVENT xAOD::TEvent
+#else
 #include "POOLRootAccess/TEvent.h"
+#define TEVENT POOL::TEvent
+#endif
 
 #include <string>
 #include <iomanip>
@@ -17,7 +23,7 @@ using namespace testBTagEfficiency;
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   const char* TEST_NAME = argv[0];
-  if (argc < 3) {
+  if (argc < 4) {
     ANA_MSG_ERROR ( "No right inputs received!" );
     ANA_MSG_ERROR ( "Usage: " << TEST_NAME << "[CDI path] [b-tagger name] [WP name]" );
     return 1;
@@ -30,15 +36,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string workingPointName = argv[3];
   std::string JetCollectionName = "AntiKt4EMPFlowJets";
   // select your efficiency map based on the DSID of your sample:
-  unsigned int sample_dsid = 410470;
+  unsigned int sample_dsid = 601229;
 
   asg::StandaloneToolHandle<IBTaggingEfficiencyTool> tool("BTaggingEfficiencyTool/BTagEffTest");
   StatusCode code1 = tool.setProperty("ScaleFactorFileName", CDIPath);
-  StatusCode code2 = tool.setProperty( "EfficiencyCalibrations", sample_dsid);
-  StatusCode code3 = tool.setProperty("TaggerName",          taggerName);
-  StatusCode code4 = StatusCode::SUCCESS;
-  StatusCode code5 = StatusCode::SUCCESS;
-  StatusCode code6 = tool.setProperty("OutputLevel",         MSG::WARNING);
+  StatusCode code2 = tool.setProperty("TaggerName",    taggerName);
+  StatusCode code3 = tool.setProperty("OperatingPoint", workingPointName);
+  StatusCode code4 = tool.setProperty("JetAuthor", JetCollectionName);
+  StatusCode code5 = tool.setProperty("MinPt", 20. );
+  StatusCode code6 = tool.setProperty("EfficiencyCalibrations", sample_dsid);
   StatusCode code7 = tool.initialize();
   std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7};
   for (const auto& code : codes) {
@@ -54,21 +60,23 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   ANA_MSG_INFO("Allowed systematics variations for tool " << tool->name() << ":");
   for (auto var : allowed_variations) {
     ANA_MSG_INFO( std::setw(40) << std::left << var.first.name() << ":");
-    for (auto flv : var.second) 
-        ANA_MSG_INFO( " " << flv);
+    for (auto flv : var.second) ANA_MSG_INFO( " " << flv);
   }
   ANA_MSG_DEBUG( "-----------------------------------------------------");
   
 
   ANA_MSG_DEBUG( "Creating a jet");
   xAOD::JetFourMom_t p4(50000.,0.7,0.3,1000.);
-
   xAOD::Jet * jet = new xAOD::Jet();
   jet->makePrivateStore();
-  ANA_MSG_DEBUG( "Setting jet 4 momentum");
+  ANA_MSG_DEBUG("Setting jet 4 momentum");
   jet->setJetP4(p4);
   ANA_MSG_DEBUG("Setting jet attribute");
   jet->setAttribute("HadronConeExclTruthLabelID", 5);
+  jet->setAttribute(taggerName+"_pb", 5.);
+  jet->setAttribute(taggerName+"_pc", 5.);
+  jet->setAttribute(taggerName+"_pu", 5.);
+  jet->setAttribute(taggerName+"_ptau", 5.);
   float sf=0;
   float eff=0;
   CorrectionCode result;
@@ -78,8 +86,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   if( result!=CorrectionCode::Ok) { 
     ANA_MSG_ERROR("b jet get efficiency failed!"); 
     return 1;
-  }
-  else {
+  } else {
     ANA_MSG_DEBUG( "b jet get efficiency succeeded: " << eff );
   }
   result = tool->getScaleFactor(*jet,sf);
@@ -87,8 +94,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   if( result!=CorrectionCode::Ok) { 
     ANA_MSG_ERROR("b jet get scale factor failed"); 
     return 1;
-  }
-  else {
+  } else {
     ANA_MSG_INFO( "b jet get scale factor succeeded: " << sf );
   }
 
