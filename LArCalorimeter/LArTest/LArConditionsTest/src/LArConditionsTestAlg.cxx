@@ -160,7 +160,7 @@ LArConditionsTestAlg::createCompareObjects()
 	    if (icorr % 10 != 5) continue;
 	    // Just change sign of ramp values
 	    for (unsigned int i = 0; i < 3; ++i)ramp.m_vRamp[i] = -ramp.m_vRamp[i];
-	    m_rampCorrections.push_back(ramp);
+	    m_rampCorrections.push_back(std::move(ramp));
 	}
     }
     
