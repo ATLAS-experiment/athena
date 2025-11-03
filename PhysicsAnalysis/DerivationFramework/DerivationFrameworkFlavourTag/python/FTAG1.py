@@ -198,7 +198,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     return acc
 
-def FTAG1Cfg(flags):
+def FTAG1Cfg(flags, name_tag='FTAG1'):
 
     acc = ComponentAccumulator()
 
@@ -209,13 +209,11 @@ def FTAG1Cfg(flags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     FTAG1TriggerListsHelper = TriggerListsHelper(flags)
    
-    # name_tag has to be consistent between KernelCfg and CoreCfg
-    FTAG1_name_tag = 'FTAG1'
 
     # Common augmentations
-    acc.merge(FTAG1KernelCfg(flags, name=FTAG1_name_tag + "Kernel", StreamName = 'StreamDAOD_'+FTAG1_name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
+    acc.merge(FTAG1KernelCfg(flags, name=name_tag + "Kernel", StreamName = 'StreamDAOD_'+name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
     # Content of FTAG1 
-    acc.merge(FTAG1CoreCfg(flags, FTAG1_name_tag, trigger_option='FTAG1', TriggerListsHelper = FTAG1TriggerListsHelper))
+    acc.merge(FTAG1CoreCfg(flags, name_tag, trigger_option=name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
 
     return acc
 

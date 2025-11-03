@@ -1,7 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG2.py
-# This defines DAOD_FTAG2, an unskimmed DAOD format for Run 3.
+# This defines DAOD_FTAG2, an unskimmed DAOD format for Run 3 with an
+# event-level skim that requires at least two leptons (e or mu) with pT>18 GeV,
+# at least one of which must have pT>25 GeV.
 # It contains the variables and objects needed for the large majority 
 # of physics analyses in ATLAS.
 # It requires the flag FTAG2 in Derivation_tf.py   
@@ -9,9 +11,9 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
-from DerivationFrameworkFlavourTag.FtagBaseContent import (
-    addCommonAugmentation
+
+from DerivationFrameworkFlavourTag.FTAG1 import (
+    FTAG1Cfg
 )
 
 # Main algorithm config
@@ -23,41 +25,27 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
+    lepton_skimming_expression = (
+        'count( (Muons.pt > 18*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) '
+        '+ count(( Electrons.pt > 18*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 2 '
+        '&& '
+        'count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) '
+        '+ count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
+    )
+
+    skim_expr = lepton_skimming_expression
+
+    FTAG2SkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
+        name = "FTAG2SkimmingTool",
+        expression = skim_expr
+    )
+    acc.addPublicTool(FTAG2SkimmingTool)
+
+
+    from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetConstituentThinningCfg, JetGhostThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
 
-
-    # filter leptons
-    # 2-leptons
-    lepton_skimming_expression = 'count( (Muons.pt > 18*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 18*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 2 && count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
-    # 1-lepton + 1-tau
-    taul_skimming_expression = '(count( TauJets.pt >= 20*GeV && abs(TauJets.eta) < 2.5 && abs(TauJets.charge)==1.0 && (TauJets.nTracks == 1 || TauJets.nTracks == 3) && TauJets.DFTauRNNLoose) >= 1) && (count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1)'
-
-    total_skimming_expression = '('+lepton_skimming_expression+') || ('+taul_skimming_expression+')'
-    
-    FTAG2LeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG2LeptonSkimmingTool",
-            expression = total_skimming_expression )
-    acc.addPublicTool(FTAG2LeptonSkimmingTool)
-
-    # Thin jets that are below 15 GeV
-    FTAG2AntiKt4EMPFlowJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(
-        flags,
-        name = "FTAG2AntiKt4EMPFlowJetThinningTool",
-        StreamName = kwargs['StreamName'],
-        ContainerName = "AntiKt4EMPFlowJets",
-        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
-    ))
-
-    # TrackParticles associated with small-R jets
-    FTAG2AntiKt4EMPFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
-        name            = "FTAG2AntiKt4EMPFlowJetTPThinningTool",
-        StreamName      = kwargs['StreamName'],
-        JetKey   = "AntiKt4EMPFlowJets",
-        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-
+    thinningTools = []
     # Include inner detector tracks associated with muons
     FTAG2MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
         flags,
@@ -65,28 +53,68 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
-
+    thinningTools.append(FTAG2MuonTPThinningTool)
+    
     # Include inner detector tracks associated with electrons
     FTAG2ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
         flags,
         name                    = "FTAG2ElectronTPThinningTool",
         StreamName              = kwargs['StreamName'],
-        SGKey                 = "Electrons",
+        SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
+    thinningTools.append(FTAG2ElectronTPThinningTool)
+
+
+    # Thin jets that are below their pT requirement GeV
+    FTAG2JetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(
+        flags,
+        name = "FTAG2AntiKt4EMPFlowJetsThinningTool",
+        StreamName = kwargs['StreamName'],
+        ContainerName = "AntiKt4EMPFlowJets",
+        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
+    ))
+    thinningTools.append(FTAG2JetThinningTool)
+
+    # TrackParticles associated with small-R jets
+    FTAG2JetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
+        name            = "FTAG2AntiKt4EMPFlowJetsTPThinningTool",
+        StreamName      = kwargs['StreamName'],
+        JetKey          = "AntiKt4EMPFlowJets",
+        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
+    thinningTools.append(FTAG2JetTPThinningTool)
+    
+    # Only keep forward calo towers associated with jets above pT threshold
+    FTAG2GhostTowerThinningTool = acc.getPrimaryAndMerge(JetGhostThinningCfg(
+        flags,
+        name                = "FTAG2AntiKt4EMPFlowJetsGhostTowerThinningTool",
+        StreamName          = kwargs['StreamName'],
+        JetKey              = "AntiKt4EMPFlowJets",
+        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
+        GhostName           = "GhostTower",
+        GhostContainerName  = "CaloCalFwdTopoTowers"
+    ))
+    thinningTools.append(FTAG2GhostTowerThinningTool)
+
+    # Only keep the charged and neutral constituents of jets above pT threshold
+    FTAG2JetConstituentThinningTool = acc.getPrimaryAndMerge(JetConstituentThinningCfg(
+        flags,
+        name                     = "FTAG2AntiKt4EMPFlowJetsConstituentThinningTool",
+        StreamName               = kwargs['StreamName'],
+        JetKey                   = "AntiKt4EMPFlowJets",
+        SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
+        JetConstituentName       = "CHSG",
+        GlobalConstituentName    = "Global",
+        OtherObjectsName = "CaloCalTopoClusters"
+    ))
+    thinningTools.append(FTAG2JetConstituentThinningTool)
+
+    # Use ONLY the combined skimming tool
+    skimmingTools = [FTAG2SkimmingTool]
 
     # Finally the kernel itself
-    thinningTools = [
-            FTAG2AntiKt4EMPFlowJetThinningTool,
-            FTAG2AntiKt4EMPFlowJetTPThinningTool,
-            FTAG2MuonTPThinningTool,
-            FTAG2ElectronTPThinningTool,
-            ]
-    skimmingTools = [
-            FTAG2LeptonSkimmingTool,
-            ]
-
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))       
+    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))
     return acc
 
 
@@ -99,56 +127,14 @@ def FTAG2Cfg(flags):
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     FTAG2TriggerListsHelper = TriggerListsHelper(flags)
-
-    # Common augmentations
-    acc.merge(FTAG2KernelCfg(flags, name="FTAG2Kernel", StreamName = 'StreamDAOD_FTAG2', TriggerListsHelper = FTAG2TriggerListsHelper))
-
-    # ============================
-    # Define contents of the format
-    # =============================
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    # FTAG2 is FTAG1 content plus our skimming and thinning defined above
+    acc.merge(FTAG1Cfg(flags, name_tag='FTAG2'))
 
-    from DerivationFrameworkFlavourTag import FtagBaseContent
-
-    addCommonAugmentation(flags, acc, FTAG2SlimmingHelper)
-
-    FTAG2SlimmingHelper.SmartCollections = []
-    FtagBaseContent.add_baseline_slimming_smartcollections(FTAG2SlimmingHelper)
-
-    FTAG2SlimmingHelper.AllVariables = ["AntiKt4EMPFlowJets",]
-    FtagBaseContent.add_baseline_slimming_allvariables(FTAG2SlimmingHelper)
-    
-    # update AppendToDictionary
-    extra_AppendToDictionary = {} #only add those items specifically for FTAG2 here!
-    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG2SlimmingHelper, flags, extra_AppendToDictionary)
-
-    # Static content
-    extra_StaticContent = [] #only add those items specifically for FTAG2 here! 
-    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper, flags, extra_StaticContent)
-
-    # Add truth containers
-    if flags.Input.isMC:
-        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG2SlimmingHelper)
-        if flags.Trigger.EDMVersion == 3:
-            # Add truth labels to Run 3 trigger jets
-            from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
-            acc.merge(HLTJetFTagDecorationCfg(flags))
-
-    # Add ExtraVariables
-    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG2SlimmingHelper, flags)
-   
-    # Trigger content
-    FtagBaseContent.trigger_setup(FTAG2SlimmingHelper, 'FTAG2')
-    FtagBaseContent.trigger_matching(FTAG2SlimmingHelper, FTAG2TriggerListsHelper, flags)
-
-    # Output stream
-    FTAG2ItemList = FTAG2SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(flags, "DAOD_FTAG2", ItemList=FTAG2ItemList, AcceptAlgs=["FTAG2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAG2", AcceptAlgs=["FTAG2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    # Common augmentations + skimming kernel
+    acc.merge(FTAG2KernelCfg(flags,
+                             name="FTAG2Kernel",
+                             StreamName = 'StreamDAOD_FTAG2',
+                             TriggerListsHelper = FTAG2TriggerListsHelper))
 
     return acc
-
