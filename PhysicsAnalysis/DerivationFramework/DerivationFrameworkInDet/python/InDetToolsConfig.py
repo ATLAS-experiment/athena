@@ -637,6 +637,30 @@ def JetTrackParticleThinningCfg(flags, name, **kwargs):
     return acc
 
 
+def UFOTrackParticleThinningCfg(flags, name, **kwargs):
+    """Configure the UFOTrackParticleThinning tool"""
+    acc = ComponentAccumulator()
+    acc.addPublicTool(CompFactory.DerivationFramework.UFOTrackParticleThinning(
+        name, **kwargs), primary=True)
+    return acc
+
+
+def JetConstituentThinningCfg(flags, name, **kwargs):
+    """Configure the JetConstituentThinning tool"""
+    acc = ComponentAccumulator()
+    acc.addPublicTool(CompFactory.DerivationFramework.JetConstituentThinning(
+        name, **kwargs), primary=True)
+    return acc
+
+
+def JetGhostThinningCfg(flags, name, **kwargs):
+    """Configure the JetGhostThinning tool"""
+    acc = ComponentAccumulator()
+    acc.addPublicTool(CompFactory.DerivationFramework.JetGhostThinning(
+        name, **kwargs), primary=True)
+    return acc
+
+
 def TauJetLepRMParticleThinningCfg(flags, name, **kwargs):
     """Configure the DiTauTrackParticleThinning tool"""
     acc = ComponentAccumulator()
