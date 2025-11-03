@@ -24,7 +24,6 @@
 class DataHeaderElementCnv_p5 {
 public:
    DataHeaderElementCnv_p5();
-   ~DataHeaderElementCnv_p5();
 
    void persToTrans(const DataHeaderElement_p5& pers,
                     DataHeaderElement& trans,
@@ -42,7 +41,6 @@ public:
 class DataHeaderCnv_p5 {
 public:
    DataHeaderCnv_p5();
-   ~DataHeaderCnv_p5();
 
    std::unique_ptr<DataHeader>
    createTransient(const DataHeader_p5& persObj,
