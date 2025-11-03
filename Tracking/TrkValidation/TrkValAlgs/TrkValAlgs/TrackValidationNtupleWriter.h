@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ protected:
                             std::vector<Trk::ValidationTrackTruthData>&  truthData,
                             const Trk::Vertex* primaryVertex = NULL);
 
-/** method to write track particle data to Ntuple. Rec::Track particles are retrived from the SG */
+/** method to write track particle data to Ntuple. Rec::Track particles are retrieved from SG */
   StatusCode writeTrackParticleData(unsigned int trackParticleColIndex); 
 
   ToolHandleArray<Trk::ITrackValidationNtupleTool> m_ValidationNtupleTools;//!< set of tools for writing Trk::Track into the Ntuple

@@ -1138,7 +1138,7 @@ Trk::TimedExtrapolator::overlapSearch(Trk::TimedExtrapolator::Cache &cache,
 
   // search for the overlap ------------------------------------------------------------------------
   if (detParameters) {
-    // retrive compatible subsurfaces
+    // retrieve compatible subsurfaces
     std::vector<Trk::SurfaceIntersection> cSurfaces;
     size_t ncSurfaces = lay.compatibleSurfaces(cSurfaces, *detParameters, Trk::anyDirection, bcheck, false);
 

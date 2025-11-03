@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -26,7 +26,7 @@ SCT_ReadoutTestAlg::SCT_ReadoutTestAlg(const std::string& name, ISvcLocator* pSv
 StatusCode SCT_ReadoutTestAlg::initialize() {  
   ATH_MSG_INFO("Calling initialize");
 
-  // Retrive readout tool
+  // Retrieve readout tool
   ATH_CHECK(m_readout.retrieve());
 
   // Initalise chips configured in job options and add to vector
