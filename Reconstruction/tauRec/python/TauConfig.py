@@ -41,7 +41,6 @@ def TauBuildAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.ElectronVetoVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
 
     if flags.Tau.doPi0Clus:
@@ -150,6 +149,7 @@ def TauRunnerAlgCfg(flags):
     # do some extra variable calculation
     if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
         tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.ElectronVetoVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
   
