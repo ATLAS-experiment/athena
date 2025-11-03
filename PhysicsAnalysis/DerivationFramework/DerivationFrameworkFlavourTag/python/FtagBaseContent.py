@@ -23,7 +23,6 @@ PHYSVAL_FTAG1_FTAG2_SmartCollections = [
     "InDetTrackParticles",
     "AntiKt4EMPFlowJets",
     "AntiKt4TruthJets",
-    "BTagging_AntiKt4EMPFlow",
     "MET_Baseline_AntiKt4EMPFlow",
     "TauJets",
 ]
@@ -32,9 +31,6 @@ PHYSVAL_FTAG1_FTAG2_AllVariables = [
     "EventInfo",
     "PrimaryVertices",
     "InDetTrackParticles",
-    "BTagging_AntiKt4EMPFlow",
-    "BTagging_AntiKt4EMPFlowJFVtx",
-    "BTagging_AntiKt4EMPFlowSecVtx",
     "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
 ]
 
@@ -63,7 +59,6 @@ PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux." + excludedVertexAuxData]
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
 
 ## Common functions used in PHYSVAL, FTAG1 and FTAG2
 def update_AppendToDictionary_in_SlimmingHelper(SlimmingHelper, flags, extra_AppendToDictionary={}):
