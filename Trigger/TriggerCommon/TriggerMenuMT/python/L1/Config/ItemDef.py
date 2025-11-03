@@ -1055,9 +1055,13 @@ class ItemDef:
         MenuItem('L1_jTEFWDC100' ).setLogic( d.jTEFWDC100 & physcond).setTriggerType(TT.calo)
         #ATR-31097
         MenuItem('L1_TeAsymmetry-jTENoSort' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_TeAsymmetry1-jTENoSort' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet1 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_TeAsymmetry2-jTENoSort' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet2 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_TeAsymmetry3-jTENoSort' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet3 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TEA_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & TeATIME & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESP_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & gESPRESSO & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_TeATIME-jTENoSort' ).setLogic( TeATIME & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_TeATIME-jTENoSort' ).setLogic( d.TOPO_TeATIME_jTENoSort_ParamSet0 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_ESPRESSO' ).setLogic( d.gESPRESSO200 & physcond).setTriggerType(TT.calo)
 
         # additional jTE items for 2023 heavy ion runs
         MenuItem('L1_jTE3'     ).setLogic( d.jTE3  & physcond).setTriggerType(TT.calo)

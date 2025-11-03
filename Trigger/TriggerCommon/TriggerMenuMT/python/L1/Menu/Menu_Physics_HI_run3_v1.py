@@ -354,9 +354,12 @@ def defineMenu():
 
          # ATR-31097
         'L1_TeAsymmetry-jTENoSort',
+        'L1_TeAsymmetry1-jTENoSort',
+        'L1_TeAsymmetry2-jTENoSort',
+        'L1_TeAsymmetry3-jTENoSort',
         'L1_TeATIME-jTENoSort',
+        'L1_ESPRESSO',
 
-        
         #ATR-28678 Ph1 Items for Phisics_pp_Run3
         "L1_jJ30_BGRP12",
         "L1_jJ30_EMPTY",

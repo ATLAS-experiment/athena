@@ -456,6 +456,13 @@ class MonitorDef:
                     #
                     'L1_TEA_eEM2_VjTE200',
                     'L1_TEA_eTAU2_VjTE200',
+                    #
+                    'L1_TeATIME-jTENoSort',
+                    'L1_ESPRESSO',
+                    'L1_TeAsymmetry-jTENoSort',
+                    'L1_TeAsymmetry1-jTENoSort',
+                    'L1_TeAsymmetry2-jTENoSort',
+                    'L1_TeAsymmetry3-jTENoSort',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu
