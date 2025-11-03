@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG1.py
 # This defines DAOD_FTAG1, an unskimmed DAOD format for Run 3.
@@ -78,7 +78,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
 
     FTAG1SlimmingHelper.SmartCollections += [
-                                           "BTagging_AntiKt4UFOCSSK",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            "AntiKt4EMPFlowJets_FTAG",
                                           ]
@@ -86,7 +85,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTAG1SlimmingHelper.SmartCollections += [
                                                 "AntiKt4EMTopoJets",
-                                                "BTagging_AntiKt4EMTopo",
                                                 "MET_Baseline_AntiKt4EMTopo",
                                                 ]
 
@@ -121,9 +119,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTAG1SlimmingHelper.AllVariables += [
             "AntiKt4EMTopoJets",
-            "BTagging_AntiKt4EMTopo",
-            "BTagging_AntiKt4EMTopoJFVtx",
-            "BTagging_AntiKt4EMTopoSecVtx",
             "AntiKt4TruthJets",
             "ITkPixelMeasurements",
             "ITkStripMeasurements"
