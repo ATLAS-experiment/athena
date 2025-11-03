@@ -592,7 +592,7 @@ SCT_ID::initLevelsFromDict() {
   }
   
   auto findField = [this](const std::string &name, const size_t indx){
-    IdDictField* pField = m_dict->find_field(name);
+    const IdDictField* pField = m_dict->find_field(name);
     if (pField) {
       m_indices[indx] = pField->index();
       return true;

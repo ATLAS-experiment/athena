@@ -224,7 +224,7 @@ int LArHVLineID::initLevelsFromDict()
   log << MSG::DEBUG  << "[initLevelsFromDict] data member initialization OK ... "  << endmsg;
   
   // Search with region name
-  IdDictRegion* reg = m_dict->find_region("LArHV-HEC-A");
+  const IdDictRegion* reg = m_dict->find_region("LArHV-HEC-A");
   if (reg) {
       m_larhvRegion_index = reg->index();}
   else {
@@ -236,7 +236,7 @@ int LArHVLineID::initLevelsFromDict()
 
   // Find ATLAS field 
   // ========================================================================
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_atlas_index = field->index();}
   else {
