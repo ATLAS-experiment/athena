@@ -82,10 +82,12 @@ class DiTauCalibrationConfig (ConfigBlock):
            config.addOutputVar (self.containerName, 'leadSubjetEta', 'leadSubjetEta', noSys=True)
            config.addOutputVar (self.containerName, 'leadSubjetPhi', 'leadSubjetPhi', noSys=True)
            config.addOutputVar (self.containerName, 'leadSubjetE', 'leadSubjetE', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetNTracks', 'leadSubjetNTracks', noSys=True)
            config.addOutputVar (self.containerName, 'subleadSubjetPt', 'subleadSubjetPt', noSys=True)
            config.addOutputVar (self.containerName, 'subleadSubjetEta', 'subleadSubjetEta', noSys=True)
            config.addOutputVar (self.containerName, 'subleadSubjetPhi', 'subleadSubjetPhi', noSys=True)
            config.addOutputVar (self.containerName, 'subleadSubjetE', 'subleadSubjetE', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetNTracks', 'subleadSubjetNTracks', noSys=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' )

@@ -30,6 +30,10 @@ namespace CP {
       m_leadSubjetEKey = m_ditausKey.key() + "." + m_leadSubjetEKey.key();
     }
 
+    if (m_leadSubjetNTracksKey.contHandleKey().key() == m_leadSubjetNTracksKey.key()) {
+      m_leadSubjetNTracksKey = m_ditausKey.key() + "." + m_leadSubjetNTracksKey.key();
+    }
+
     // subleading subjet info
     if (m_subleadSubjetPtKey.contHandleKey().key() == m_subleadSubjetPtKey.key()) {
       m_subleadSubjetPtKey = m_ditausKey.key() + "." + m_subleadSubjetPtKey.key();
@@ -47,16 +51,21 @@ namespace CP {
       m_subleadSubjetEKey = m_ditausKey.key() + "." + m_subleadSubjetEKey.key();
     }
 
+    if (m_subleadSubjetNTracksKey.contHandleKey().key() == m_subleadSubjetNTracksKey.key()) {
+      m_subleadSubjetNTracksKey = m_ditausKey.key() + "." + m_subleadSubjetNTracksKey.key();
+    }
 
     ANA_CHECK(m_ditausKey.initialize());
     ANA_CHECK(m_leadSubjetPtKey.initialize());
     ANA_CHECK(m_leadSubjetEtaKey.initialize());
     ANA_CHECK(m_leadSubjetPhiKey.initialize());
     ANA_CHECK(m_leadSubjetEKey.initialize());
+    ANA_CHECK(m_leadSubjetNTracksKey.initialize());
     ANA_CHECK(m_subleadSubjetPtKey.initialize());
     ANA_CHECK(m_subleadSubjetEtaKey.initialize());
     ANA_CHECK(m_subleadSubjetPhiKey.initialize());
     ANA_CHECK(m_subleadSubjetEKey.initialize());
+    ANA_CHECK(m_subleadSubjetNTracksKey.initialize());
    
     return StatusCode::SUCCESS;
   }
@@ -69,11 +78,13 @@ namespace CP {
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> leadSubjetEtaHandle(m_leadSubjetEtaKey, ctx);    
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> leadSubjetPhiHandle(m_leadSubjetPhiKey, ctx);
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> leadSubjetEHandle(m_leadSubjetEKey, ctx);
+    SG::WriteDecorHandle<xAOD::DiTauJetContainer, int>  leadSubjetNTracksHandle(m_leadSubjetNTracksKey, ctx);
 
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> subleadSubjetPtHandle(m_subleadSubjetPtKey, ctx);
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> subleadSubjetEtaHandle(m_subleadSubjetEtaKey, ctx);
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> subleadSubjetPhiHandle(m_subleadSubjetPhiKey, ctx);
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> subleadSubjetEHandle(m_subleadSubjetEKey, ctx);
+    SG::WriteDecorHandle<xAOD::DiTauJetContainer, int> subleadSubjetNTracksHandle(m_subleadSubjetNTracksKey, ctx);
 
     for (const xAOD::DiTauJet *ditau : *ditaus) {
 
@@ -90,9 +101,33 @@ namespace CP {
       subleadSubjetPhiHandle(*ditau) = ditau->subjetPhi(1);
       subleadSubjetEHandle(*ditau) = ditau->subjetE(1);
 
-    }
-    
+      // leading and subleading subjet ntracks
+      int lead_ntracks = 0;
+      int subl_ntracks = 0;
 
+      for (const auto& xTrack : ditau->trackLinks()) {
+         if (!xTrack.isValid())
+            continue;
+
+         for (int i = 0; i < 2;  ++i) {  // loop over two leading subjets
+             TLorentzVector tlvSubjet = TLorentzVector();
+             tlvSubjet.SetPtEtaPhiE(ditau->subjetPt(i), ditau->subjetEta(i),ditau->subjetPhi(i), ditau->subjetE(i));
+             double dR = tlvSubjet.DeltaR((*xTrack)->p4());
+
+             if (dR < 0.1) {
+                if (i == 0) {
+                   lead_ntracks++;
+                } else if (i == 1) {
+                   subl_ntracks++;
+                }
+                break;  // prevents double counting of tracks
+            }
+         }  // loop over subjets
+      }
+      leadSubjetNTracksHandle(*ditau) = lead_ntracks;
+      subleadSubjetNTracksHandle(*ditau) = subl_ntracks;
+
+    }
     return StatusCode::SUCCESS;
   }
 

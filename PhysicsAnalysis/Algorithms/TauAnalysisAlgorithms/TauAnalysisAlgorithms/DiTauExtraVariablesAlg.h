@@ -28,11 +28,13 @@ namespace CP {
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetEtaKey{this, "leadSubjetEta", "leadSubjetEta", "decoration name for leading subjet eta"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetPhiKey{this, "leadSubjetPhi", "leadSubjetPhi", "decoration name for leading subjet phi"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetEKey{this, "leadSubjetE", "leadSubjetE", "decoration name for leading subjet energy"};
-   
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetNTracksKey{this, "leadSubjetNTracks", "leadSubjetNTracks", "decoration name for leading subjet number of tracks"};
+
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetPtKey{this, "subleadSubjetPt", "subleadSubjetPt", "decoration name for subleading subjet pt"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetEtaKey{this, "subleadSubjetEta", "subleadSubjetEta", "decoration name for subleading subjet eta"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetPhiKey{this, "subleadSubjetPhi", "subleadSubjetPhi", "decoration name for subleading subjet phi"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetEKey{this, "subleadSubjetE", "subleadSubjetE", "decoration name for subleading subjet energy"};
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetNTracksKey{this, "subleadSubjetNTracks", "subleadSubjetNTracks", "decoration name for subleading subjet number of tracks"};
 
   };
 
