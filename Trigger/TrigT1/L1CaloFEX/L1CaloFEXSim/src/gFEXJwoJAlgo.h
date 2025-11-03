@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlgo - Jets without jets algorithm for gFEX
@@ -12,13 +12,16 @@
 #define gFEXJwoJAlgo_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L1CaloFEXToolInterfaces/IgFEXJwoJAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/gFEXJwoJTOB.h"
-#include "L1CaloFEXSim/gTowerContainer.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
+#include "L1CaloFEXToolInterfaces/IgFEXJwoJAlgo.h" //also has gTowersType typedef
 
 
+#include <vector>
+#include <memory>
+#include <cstdint>
+#include <string>
+#include <array>
+
+class gFEXJwoJTOB;
 
 namespace LVL1 {
 

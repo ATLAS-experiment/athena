@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlg - Jets without jets algorithm for gFEX
@@ -8,13 +8,12 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include <cmath>
-#include <vector>
+
 
 #include "gFEXJwoJAlgo.h"
 #include "L1CaloFEXSim/gFEXJwoJTOB.h"
-#include "L1CaloFEXSim/gTowerContainer.h"
-#include "L1CaloFEXSim/gTower.h"
+
+#include <cmath> //for std::sqrt
 
 namespace LVL1 {
 
@@ -53,7 +52,7 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
 
 
   // input towers have 200 MeV LSB
-  bool SumETfast = true;
+  constexpr bool SumETfast = true;
 
   // find gBlocks
   gTowersType AgBlk;
