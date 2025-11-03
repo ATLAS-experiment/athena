@@ -515,7 +515,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     return (1);
   }
 
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_LAR_INDEX = field->index();
   }
