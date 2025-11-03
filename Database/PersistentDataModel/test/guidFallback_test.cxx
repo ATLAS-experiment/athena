@@ -10,7 +10,7 @@
 #undef NDEBUG
 #include "PersistentDataModel/Guid.h"
 #include <cassert>
-
+//coverity[root_function]
 int main() {
    std::string badstring ("A17F6DA3-2C0A-4F06-82D6-8302F63B786");
    std::string goodstring("A17F6DA3-2C0A-4F06-82D6-8302F63B7806");
