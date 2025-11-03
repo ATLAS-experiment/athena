@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
   <class name="CaloDetDescrManager_Base"/>
   <class name="CaloDetDescrManager"/>
@@ -22,12 +22,10 @@
   <class name="ICaloRecoMaterialTool"/>
   <class name="ICaloRecoSimpleGeomTool"/>
 
-  <class name="boost::iterator_range<std::vector<CaloDetDescriptor*>::const_iterator>"/>
   <class name="std::vector<CaloDetDescriptor*>::const_iterator"/>
   <function proto_pattern="*operator==*CaloDetDescriptor*"/>
   <function proto_pattern="*operator!=*CaloDetDescriptor*"/>
 
-  <class name="boost::iterator_range<std::vector<CaloDetDescrElement*>::const_iterator>"/>
   <class name="std::vector<CaloDetDescrElement*>::const_iterator"/>
   <function proto_pattern="*operator==*CaloDetDescrElement*"/>
   <function proto_pattern="*operator!=*CaloDetDescrElement*"/>
