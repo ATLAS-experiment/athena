@@ -125,10 +125,11 @@ RootTreeContainer::BranchDesc::BranchDesc( TClass* cl, TBranch* b, TLeaf* l, voi
 {}
 
 
-RootTreeContainer::RootTreeContainer()
-: m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
-  m_rootDb(nullptr), m_branchName(), m_ioBytes(0), m_treeFillMode(false),
-  m_isDirty(false)
+RootTreeContainer::RootTreeContainer(const std::string& name) :
+   DbContainerImp(name),
+   m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
+   m_rootDb(nullptr), m_branchName(), m_ioBytes(0), m_treeFillMode(false),
+   m_isDirty(false)
 {
 }
 

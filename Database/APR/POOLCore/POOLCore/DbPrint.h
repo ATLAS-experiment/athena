@@ -28,34 +28,23 @@ namespace pool {
       static const MsgLevel Always      = MsgLevel::ALWAYS;
 
       static std::atomic<MsgLevel>   outputLvl;
-      inline static void       setLevel( MsgLevel l )  { outputLvl=l; }
+      inline static void         setLevel( MsgLevel l )  { outputLvl.store(l); }
+      inline static MSG::Level   getLevel( const std::string& name );
    };
 
 
-   class DbPrint : public MsgStream
-   {
+   class DbPrint : public MsgStream {
    public:
-     DbPrint( const std::string& name )
-         // 'quiet=true' option only works with 'Eager' creation
-         : MsgStream( Athena::getMessageSvc(Athena::Options::Eager,true), name )
-     {
-        if( DbPrintLvl::outputLvl != DbPrintLvl::None ) {
-           setLevel( DbPrintLvl::outputLvl );
-        }
-     }
+     DbPrint( const std::string& name );
 
      static MsgStream& endmsg( MsgStream& s ) { return ::endmsg(s); }
    };
 
+
    /// @brief  AthMessaging wrapper to set the output level in APR components
    class APRMessaging : public AthMessaging {
    public:
-      APRMessaging(const std::string& name) : AthMessaging(name) {
-         auto lvl = SystemTools::GetOutputLvl();
-         // an output line needed to initialize AthMessaging or setLevel will not work
-         ATH_MSG_VERBOSE("Setting the loglevel to " << (int) lvl );
-         setLevel( lvl );
-      }
+      APRMessaging(const std::string& name);
 
       APRMessaging(const APRMessaging&) = delete;
       APRMessaging& operator=(const APRMessaging&) = delete;

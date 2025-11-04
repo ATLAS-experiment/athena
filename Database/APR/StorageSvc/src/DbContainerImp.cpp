@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -11,7 +11,6 @@
 //====================================================================
 
 /// Framework include files
-#include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbContainerImp.h"
@@ -21,8 +20,9 @@ using namespace std;
 using namespace pool;
 
 /// Standard Constructor
-DbContainerImp::DbContainerImp()
-: m_size(0), m_writeSize(0), m_name("UNKNOWN"),
+DbContainerImp::DbContainerImp(const std::string& name) :
+  APRMessaging(name),
+  m_size(0), m_writeSize(0), m_name("UNKNOWN"),
   m_canUpdate(false),
   m_canDestroy(false)
 {
@@ -120,10 +120,8 @@ DbStatus DbContainerImp::commitTransaction() {
     }
     if ( !status.isSuccess() ) {
       iret = status;
-      DbPrint log( m_name);
-      log << DbPrintLvl::Error << "The Transaction cannot be committed..." 
-          << " Container has " << size() << " Entries in total."
-          << DbPrint::endmsg;
+      ATH_MSG_ERROR("The Transaction cannot be committed..."
+                    << " Container has " << size() << " Entries in total.");
       break;
     }
   }
@@ -207,9 +205,8 @@ DbStatus DbContainerImp::load( void** ptr, ShapeH shape,
          oid.second++;
       }
       if( linkH.second < 0 || (uint64_t)linkH.second <= size() ) {
-         DbPrint log( m_name );
-         log << DbPrintLvl::Debug << "No objects passing selection criteria..." 
-             << " Container has " << size() << " Entries in total." << DbPrint::endmsg;
+         ATH_MSG_DEBUG("No objects passing selection criteria..."
+                       << " Container has " << size() << " Entries in total.");
       }
    }
    else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -17,6 +17,7 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbContainer.h"
+#include "POOLCore/DbPrint.h"
 
 /*
  *  POOL namespace declaration
@@ -46,7 +47,7 @@ namespace pool  {
     explicit DbObjectHolder(DbObject* p) : m_obj(p) {}
     int release();
   };
-  class DbContainerObj : public  DbAccessObj<DbObject*, DbObjectHolder >  {
+  class DbContainerObj : public  DbAccessObj<DbObject*, DbObjectHolder >, public APRMessaging {
   private:
     typedef DbObjectHandle<DbObject> ObjHandle;
 

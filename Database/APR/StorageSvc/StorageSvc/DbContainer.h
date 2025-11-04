@@ -66,7 +66,7 @@ namespace pool  {
 
   public:
     /// Constructor with initializing arguments
-    DbContainer(const DbType& typ=POOL_StorageType) { m_type=typ;          }
+    explicit DbContainer(const DbType& typ=POOL_StorageType) { m_type=typ;          }
     /// Copy constructor
     DbContainer(const DbContainer& c) : Base()  { switchPtr(c.m_ptr);      }
     /// Constructor taking transient object

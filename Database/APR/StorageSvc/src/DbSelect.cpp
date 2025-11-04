@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbSelect.cpp 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //
 //  Package    : System (The POOL project)
@@ -102,27 +101,20 @@ DbStatus DbSelect::start(DbDatabase& dbH, const std::string& cntName)   {
         }
         // What to do ?
         DbPrint err0(cntName);
-        err0 << DbPrintLvl::Error
-             << "Cannot issue select container:" << cntName
-             << DbPrint::endmsg;
+        err0 << MSG::ERROR << "Cannot issue select container:" << cntName << endmsg;
         return Error;
       }
       DbPrint err1(cntName);
-      err1 << DbPrintLvl::Error
-           << "The requested container:" << cntName << " cannot be opened!" 
-           << DbPrint::endmsg;
+      err1 << MSG::ERROR << "The requested container:" << cntName << " cannot be opened!" << endmsg;
       return Error;
     }
     DbPrint err2(cntName);
-    err2 << DbPrintLvl::Error
-         << "The requested container:" << cntName 
-         << " seems not to be part of this database!" << DbPrint::endmsg;
+    err2 << MSG::ERROR << "The requested container:" << cntName 
+         << " seems not to be part of this database!" << endmsg;
     return Error;
   }
   DbPrint err3(cntName);
-  err3 << DbPrintLvl::Error
-       << "The requested database for the container:" << cntName 
-       << " is invalid!" << DbPrint::endmsg;
+  err3 << MSG::ERROR << "The requested database for the container:" << cntName << " is invalid!" << endmsg;
   return Error;
 }
 

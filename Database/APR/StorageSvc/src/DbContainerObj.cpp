@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -15,8 +15,6 @@
 
 // Framework include files
 #include "DbContainerObj.h"
-#include "POOLCore/DbPrint.h"
-#include "StorageSvc/IOODatabase.h"
 #include "StorageSvc/IDbContainer.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbSelect.h"
@@ -43,9 +41,10 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
                                 const string&     nam, 
                                 const DbType&     dbtyp,
                                 DbAccessMode      mod)   
-: Base(nam, mod, dbtyp, dbH.db()), m_info(0), m_tokH(0)
+: Base(nam, mod, dbtyp, dbH.db()),
+  APRMessaging( dbH.logon() ),
+  m_info(0), m_tokH(0)
 {
-  DbPrint log( dbH.logon() );
   m_isOpen    = false;
 
   if ( 0 != db() && dbtyp == dbH.type() )   {
@@ -56,38 +55,32 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
         if ( mod & pool::UPDATE ) {
           setMode(mod |= pool::CREATE);
         }
-        log << DbPrintLvl::Debug << "--> Access   DbContainer  " 
+        ATH_MSG_DEBUG("--> Access   DbContainer  " 
             << accessMode(mode())
             << " [" << type().storageName() << "] " 
-            << name() 
-            << DbPrint::endmsg;
+            << name() );
         return;
       }
     }
   }
-  log << DbPrintLvl::Error
-      << "--> Access   DbContainer  "
+  ATH_MSG_ERROR("--> Access   DbContainer  "
       << " Mode:" << accessMode(mode()) 
       << "  " << name()
       << " impossible."
-      << " [" << type().storageName() << "] " 
-      << DbPrint::endmsg;
-  type().missingDriver(log);
+      << " [" << type().storageName() << "] " );
+  type().missingDriver(msg());
 }
 
 // Destructor
 DbContainerObj::~DbContainerObj()     {
-  string id = m_dbH.isValid() ? m_dbH.logon() : name();
-  DbPrint log( id );
-  clearEntries();
-  releasePtr(m_info);
-  m_dbH.remove(this);
-  log << DbPrintLvl::Debug
-      << "--> Deaccess DbContainer  " 
+   string id = m_dbH.isValid() ? m_dbH.logon() : name();
+   clearEntries();
+   releasePtr(m_info);
+   m_dbH.remove(this);
+   ATH_MSG_DEBUG("--> Deaccess DbContainer  " 
       << accessMode(mode()) 
       << " [" << type().storageName() << "] " 
-      << name()
-      << DbPrint::endmsg;
+      << name());
 }
 
 // Check database access
@@ -108,23 +101,20 @@ bool DbContainerObj::hasAccess()    {
 uint64_t DbContainerObj::size()   {
   if ( !hasAccess() )    {
     string id = database().isValid() ? database().logon() : name();
-    DbPrint log( id );
-    log << DbPrintLvl::Error
-        << "--> Access   DbContainer::size()" 
+    ATH_MSG_ERROR("--> Access   DbContainer::size()" 
         << "  " << name()
-        << " impossible - invalid object!"
-        << DbPrint::endmsg;
-    return -1;
-  }
-  database().setAge(0);
-  return m_info->size();
+        << " impossible - invalid object!");
+     return -1;
+   }
+   database().setAge(0);
+   return m_info->size();
 }
 
 /// Open Database container
 DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
   if ( !m_isOpen )    {
     if ( 0 == m_info )  {
-      m_info = db()->createContainer(type());
+      m_info = db()->createContainer(name(), type());
     }
     if ( 0 != m_info && 0 != typ && database().isValid() )  {
       DbStatus sc = info()->open(database(), name(), typ, mode());
@@ -164,7 +154,7 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
 /// Check if we can access the container
 DbStatus DbContainerObj::checkAccess() {
   DbStatus result = Error;
-  auto container = db()->createContainer(type());
+  auto container = db()->createContainer(name(), type());
   if( database().isValid() && container ) {
     result = container->checkAccess(database(), name());
   }

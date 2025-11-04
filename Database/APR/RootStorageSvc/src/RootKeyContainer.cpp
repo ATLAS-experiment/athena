@@ -38,7 +38,8 @@
 
 using namespace pool;
 
-RootKeyContainer::RootKeyContainer() :
+RootKeyContainer::RootKeyContainer(const std::string& name) :
+  DbContainerImp(name),
   m_dir(0),
   m_dbH(POOL_StorageType),
   m_rootDb(0),

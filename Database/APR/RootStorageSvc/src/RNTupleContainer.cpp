@@ -85,11 +85,12 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
 }
 
 /// Standard constructor
-RNTupleContainer::RNTupleContainer()
-   : m_type(nullptr),
-     m_dbH(POOL_StorageType), m_rootDb(nullptr),
-     m_ioBytes(0), m_isDirty(false),
-     m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
+RNTupleContainer::RNTupleContainer(const std::string& name) :
+   DbContainerImp(name),
+   m_type(nullptr),
+   m_dbH(POOL_StorageType), m_rootDb(nullptr),
+   m_ioBytes(0), m_isDirty(false),
+   m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
 { }
 
 
