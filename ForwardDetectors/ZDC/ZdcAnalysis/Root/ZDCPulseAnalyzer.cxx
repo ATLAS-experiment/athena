@@ -170,7 +170,7 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const s
 }
 
 ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSON& configJSON) :
-  m_msgFunc_p(msgFunc_p)
+  m_msgFunc_p(std::move(msgFunc_p))
 {
   SetDefaults();
 
@@ -184,7 +184,7 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const J
   
   // Create the histogram used for fitting
   //
-  m_deltaTSample = 1000./m_freqMHz;
+  if (m_freqMHz >1.e-6)  m_deltaTSample = 1000./m_freqMHz;
   m_tmin = -m_deltaTSample / 2;
   m_tmax = m_tmin + ((float)m_Nsample) * m_deltaTSample;
   m_defaultFitTMax = m_tmax;
