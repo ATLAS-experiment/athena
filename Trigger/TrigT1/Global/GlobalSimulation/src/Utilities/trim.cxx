@@ -8,15 +8,15 @@ namespace GlobalSim {
     const char* t = " \t\n\r\f\v";
     
     // trim from right
-    auto l_rtrim =  [&t](std::string& s){
-      s.erase(s.find_last_not_of(t) + 1);
-      return s;
+    auto l_rtrim =  [&t](std::string& str){
+      str.erase(str.find_last_not_of(t) + 1);
+      return str;
     };
     
     // trim from left
-    auto l_ltrim = [&t] (std::string& s){
-      s.erase(0, s.find_first_not_of(t));
-      return s;
+    auto l_ltrim = [&t] (std::string& str){
+      str.erase(0, str.find_first_not_of(t));
+      return str;
     };
     
     auto rs = l_rtrim(s);

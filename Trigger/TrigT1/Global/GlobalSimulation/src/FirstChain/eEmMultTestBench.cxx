@@ -8,8 +8,7 @@
 #include "../Utilities/trim.h"
 
 #include "PathResolver/PathResolver.h"
-
-#include <fstream>
+#include <bitset>
 #include <sstream>
 
 namespace GlobalSim {
@@ -107,7 +106,7 @@ namespace GlobalSim {
     auto line = std::string();
     using TIP = std::bitset<ITIPwriterAlgTool::s_nbits_TIP>;
     std::getline(*m_TIPword_stream, line);
-    auto twp =  std::make_unique<TIP>(std::stoul(trim(line)));
+    auto twp =  std::make_unique<TIP>(std::stoul(trim(std::move(line))));
     return twp;
   }
 
