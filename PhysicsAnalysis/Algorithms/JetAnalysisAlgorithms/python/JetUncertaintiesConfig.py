@@ -16,12 +16,19 @@ class JetUncertaintiesConfig (ConfigBlock) :
     def __init__ (self) :
         super (JetUncertaintiesConfig, self).__init__ ()
         self.setBlockName('Uncertainties')
+        self.addDependency('OverlapRemoval', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('jetInput', '', type=str,
             noneAction='error',
             info="")
+        self.addOption('analysisJetSelection', '', type=str,
+            info="the jet selection to use to calculate N jets for an analysis specific "
+            "jet flavor composition uncertainty. Of the form jvt_selection,as_char&&passesOR,as_char...")
+        self.addOption('analysisFile', '', type=str,
+            info="the file containing gluon fraction histograms needed to calculate an analysis specific "
+            "jet flavor composition uncertainty.")
         self.addOption ('largeRMass', "Comb", type=str,
             info="")
         self.addOption ('systematicsModelJES', "Category", type=str,
@@ -224,11 +231,15 @@ class JetUncertaintiesConfig (ConfigBlock) :
         config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
         jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
         jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
+        from PathResolver import PathResolver
+        if self.analysisFile is not None:
+          jetUncertaintiesAlg.uncertaintiesTool.AnalysisFile = PathResolver.FindCalibFile(self.analysisFile)
         if calibArea is not None:
             jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
         jetUncertaintiesAlg.uncertaintiesTool.MCType = mcType
         jetUncertaintiesAlg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
         jetUncertaintiesAlg.uncertaintiesTool.PseudoDataJERsmearingMode = False
+        jetUncertaintiesAlg.uncertaintiesTool.NJetAccessorName = "Njet_NOSYS"
 
         # JER smearing on data 
         if config.dataType() is DataType.Data and not (config.isPhyslite() and doPseudoData and self.runJERsystematicsOnData):
@@ -264,6 +275,12 @@ class JetUncertaintiesConfig (ConfigBlock) :
         radius = int(match.group(1) )
         if radius not in [2, 4, 6, 10]:
             raise ValueError("Jet collection has an unsupported radius '{0}'!".format(radius) )
+
+        if (self.analysisJetSelection!= ''):
+            alg = config.createAlgorithm( 'CP::NJetDecoratorAlg', 'NJetDecoratorAlg' )
+            alg.jets = config.readName(self.containerName)
+            alg.jetSelection = self.analysisJetSelection
+            config.addOutputVar('EventInfo', 'Njet_%SYS%', 'Njet')
 
         # Jet uncertainties
         if (radius == 4):

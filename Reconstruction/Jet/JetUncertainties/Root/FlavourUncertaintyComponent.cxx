@@ -49,7 +49,8 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(   const ComponentHelpe
                                                             const TString& path,
                                                             const TString& calibArea,
                                                             const bool absEtaGluonFraction,
-                                                            const TString& analysisHistPattern
+                                                            const TString& analysisHistPattern,
+                                                            const TString& NjetAccessorName 
                                                             )
     : UncertaintyComponent(component,component.flavourType == FlavourComp::Composition ? 2 : 1)
     , m_flavourType(component.flavourType)
@@ -68,7 +69,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(   const ComponentHelpe
     , m_respType(FlavourResp_UNKNOWN)
     , m_secondRespType(FlavourResp_UNKNOWN)
     , m_BjetAccessor("IsBjet")
-    , m_NjetAccessor("Njet")
+    , m_NjetAccessor(NjetAccessorName.Data())
     , m_largeRJetTruthLabelAccessor(m_largeRJetTruthLabelName)
     , m_gluonFractionHists()
     , m_gluonFractionErrorHists()
