@@ -10,7 +10,7 @@ namespace FlavorTagInference {
     ConstituentLoaderTauTrack::ConstituentLoaderTauTrack(const ConstituentsInputConfig& cfg) :
         IConstituentsLoader(cfg)
     {
-        for (auto input_var : cfg.inputs) {
+        for (const InputVariableConfig& input_var : cfg.inputs) {
             m_feature_extractors.push_back(getFeatureExtractor(input_var.name));
         }
     }
