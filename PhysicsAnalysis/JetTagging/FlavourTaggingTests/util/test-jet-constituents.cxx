@@ -18,6 +18,7 @@
 #include <iostream>
 #include <iomanip>
 
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
 
   ANA_CHECK_SET_TYPE (int);
