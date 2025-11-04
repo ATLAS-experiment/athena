@@ -145,46 +145,49 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
     // --------------------------
     // Precompute spans into aux data store
     // --------------------------
-    static const SG::Accessor<unsigned int> idHashAcc("identifierHash");
-    static const SG::Accessor<unsigned long> idAcc("identifier");
-    static const SG::Accessor<std::array<float, 1>> locPosXAcc("localPositionDim1");
-    static const SG::Accessor<std::array<float, 1>> locCovXXAcc("localCovarianceDim1");
-    static const SG::Accessor<std::array<float, 3>> gpAcc("globalPosition");
-    static const SG::Accessor<int> channelsPhiAcc("channelsInPhi");
-    static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
-    
-    auto idSpan          = idAcc.getDataSpan(*stripCl);
-    auto idHashSpan      = idHashAcc.getDataSpan(*stripCl);
-    auto locPosXSpan     = locPosXAcc.getDataSpan(*stripCl);
-    auto locCovXXSpan    = locCovXXAcc.getDataSpan(*stripCl);
-    auto gpSpan          = gpAcc.getDataSpan(*stripCl);
-    auto channelsPhiSpan = channelsPhiAcc.getDataSpan(*stripCl);
-    auto rdoSpan         = rdoListAcc.getDataSpan(*stripCl);
-    
-    // --------------------------
-    // Vectorized bulk assignments
-    // --------------------------
+    if(nClusters > 0)
     {
-      Athena::Chrono chrono("Strip assignments", m_chronoSvc.get());
-      for (size_t i = 0; i < nClusters; ++i) {
-        idHashSpan[i] = static_cast<unsigned int>(idHashPtr[i]);
-        idSpan[i]     = static_cast<unsigned long>(identifierPtr[i]);
-        
-        // double (bit pattern in u64) -> float, via bit_cast
-        locPosXSpan[i][0]  = static_cast<float>(std::bit_cast<double>(localPosXPtr[i]));
-        locCovXXSpan[i][0] = static_cast<float>(std::bit_cast<double>(localCovXXPtr[i]));
-        
-        gpSpan[i][0] = static_cast<float>(std::bit_cast<double>(gpXPtr[i]));
-        gpSpan[i][1] = static_cast<float>(std::bit_cast<double>(gpYPtr[i]));
-        gpSpan[i][2] = static_cast<float>(std::bit_cast<double>(gpZPtr[i]));
-        
-        channelsPhiSpan[i] = static_cast<int>(channelsPhiPtr[i]);
-        
-        // Inline RDO copy (avoid heap reallocations)
-        auto& rdoList = rdoSpan[i];
-        rdoList.reserve(4);
-        for (int r = 0; r < 4; ++r) {
-          if (rdoPtrs[r][i]) rdoList.emplace_back(rdoPtrs[r][i]);
+      static const SG::Accessor<unsigned int> idHashAcc("identifierHash");
+      static const SG::Accessor<unsigned long> idAcc("identifier");
+      static const SG::Accessor<std::array<float, 1>> locPosXAcc("localPositionDim1");
+      static const SG::Accessor<std::array<float, 1>> locCovXXAcc("localCovarianceDim1");
+      static const SG::Accessor<std::array<float, 3>> gpAcc("globalPosition");
+      static const SG::Accessor<int> channelsPhiAcc("channelsInPhi");
+      static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
+      
+      auto idSpan          = idAcc.getDataSpan(*stripCl);
+      auto idHashSpan      = idHashAcc.getDataSpan(*stripCl);
+      auto locPosXSpan     = locPosXAcc.getDataSpan(*stripCl);
+      auto locCovXXSpan    = locCovXXAcc.getDataSpan(*stripCl);
+      auto gpSpan          = gpAcc.getDataSpan(*stripCl);
+      auto channelsPhiSpan = channelsPhiAcc.getDataSpan(*stripCl);
+      auto rdoSpan         = rdoListAcc.getDataSpan(*stripCl);
+      
+      // --------------------------
+      // Vectorized bulk assignments
+      // --------------------------
+      {
+        Athena::Chrono chrono("Strip assignments", m_chronoSvc.get());
+        for (size_t i = 0; i < nClusters; ++i) {
+          idHashSpan[i] = static_cast<unsigned int>(idHashPtr[i]);
+          idSpan[i]     = static_cast<unsigned long>(identifierPtr[i]);
+          
+          // double (bit pattern in u64) -> float, via bit_cast
+          locPosXSpan[i][0]  = static_cast<float>(std::bit_cast<double>(localPosXPtr[i]));
+          locCovXXSpan[i][0] = static_cast<float>(std::bit_cast<double>(localCovXXPtr[i]));
+          
+          gpSpan[i][0] = static_cast<float>(std::bit_cast<double>(gpXPtr[i]));
+          gpSpan[i][1] = static_cast<float>(std::bit_cast<double>(gpYPtr[i]));
+          gpSpan[i][2] = static_cast<float>(std::bit_cast<double>(gpZPtr[i]));
+          
+          channelsPhiSpan[i] = static_cast<int>(channelsPhiPtr[i]);
+          
+          // Inline RDO copy (avoid heap reallocations)
+          auto& rdoList = rdoSpan[i];
+          rdoList.reserve(4);
+          for (int r = 0; r < 4; ++r) {
+            if (rdoPtrs[r][i]) rdoList.emplace_back(rdoPtrs[r][i]);
+          }
         }
       }
     }
@@ -391,60 +394,63 @@ const EventContext &ctx) const {
   // --------------------------
   // Precompute spans into aux data store
   // --------------------------
-  static const SG::Accessor<unsigned int> idHashAcc("identifierHash");
-  static const SG::Accessor<unsigned long> idAcc("identifier");
-  static const SG::Accessor<std::array<float, 3>> gpAcc("globalPosition");
-  static const SG::Accessor<std::array<float, 2>> locPosAcc("localPositionDim2");
-  static const SG::Accessor<std::array<float, 4>> locCovAcc("localCovarianceDim2");
-  static const SG::Accessor<int> totalToTAcc("totalToT");
-  static const SG::Accessor<int> channelsPhiAcc("channelsInPhi");
-  static const SG::Accessor<int> channelsEtaAcc("channelsInEta");
-  static const SG::Accessor<float> widthEtaAcc("widthInEta");
-  static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
-  
-  auto idSpan          = idAcc.getDataSpan(*pixelCl);
-  auto idHashSpan      = idHashAcc.getDataSpan(*pixelCl);
-  auto gpSpan          = gpAcc.getDataSpan(*pixelCl);
-  auto locPosSpan      = locPosAcc.getDataSpan(*pixelCl);
-  auto locCovSpan      = locCovAcc.getDataSpan(*pixelCl);
-  auto totalToTSpan    = totalToTAcc.getDataSpan(*pixelCl);
-  auto channelsPhiSpan = channelsPhiAcc.getDataSpan(*pixelCl);
-  auto channelsEtaSpan = channelsEtaAcc.getDataSpan(*pixelCl);
-  auto widthEtaSpan    = widthEtaAcc.getDataSpan(*pixelCl);
-  auto rdoSpan         = rdoListAcc.getDataSpan(*pixelCl);
-  
-  // --------------------------
-  // Vectorized bulk assignments
-  // --------------------------
-  {
-    Athena::Chrono chrono("Pixel assignments", m_chronoSvc.get());
-    for (size_t i = 0; i < nClusters; ++i) {
-      idHashSpan[i] = static_cast<unsigned int>(idHashPtr[i]);
-      idSpan[i] = static_cast<unsigned long>(identifierPtr[i]);
+    if(nClusters > 0)
+    {
+      static const SG::Accessor<unsigned int> idHashAcc("identifierHash");
+      static const SG::Accessor<unsigned long> idAcc("identifier");
+      static const SG::Accessor<std::array<float, 3>> gpAcc("globalPosition");
+      static const SG::Accessor<std::array<float, 2>> locPosAcc("localPositionDim2");
+      static const SG::Accessor<std::array<float, 4>> locCovAcc("localCovarianceDim2");
+      static const SG::Accessor<int> totalToTAcc("totalToT");
+      static const SG::Accessor<int> channelsPhiAcc("channelsInPhi");
+      static const SG::Accessor<int> channelsEtaAcc("channelsInEta");
+      static const SG::Accessor<float> widthEtaAcc("widthInEta");
+      static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
       
-      // reinterpret_cast instead of bit_cast for double→float conversion
-      locPosSpan[i][0] = static_cast<float>(std::bit_cast<double>(localXPtr[i]));
-      locPosSpan[i][1] = static_cast<float>(std::bit_cast<double>(localYPtr[i]));
-      locCovSpan[i][0] = static_cast<float>(std::bit_cast<double>(covXXPtr[i]));
-      locCovSpan[i][3] = static_cast<float>(std::bit_cast<double>(covYYPtr[i]));
+      auto idSpan          = idAcc.getDataSpan(*pixelCl);
+      auto idHashSpan      = idHashAcc.getDataSpan(*pixelCl);
+      auto gpSpan          = gpAcc.getDataSpan(*pixelCl);
+      auto locPosSpan      = locPosAcc.getDataSpan(*pixelCl);
+      auto locCovSpan      = locCovAcc.getDataSpan(*pixelCl);
+      auto totalToTSpan    = totalToTAcc.getDataSpan(*pixelCl);
+      auto channelsPhiSpan = channelsPhiAcc.getDataSpan(*pixelCl);
+      auto channelsEtaSpan = channelsEtaAcc.getDataSpan(*pixelCl);
+      auto widthEtaSpan    = widthEtaAcc.getDataSpan(*pixelCl);
+      auto rdoSpan         = rdoListAcc.getDataSpan(*pixelCl);
       
-      gpSpan[i][0] = static_cast<float>(std::bit_cast<double>(gpXPtr[i]));
-      gpSpan[i][1] = static_cast<float>(std::bit_cast<double>(gpYPtr[i]));
-      gpSpan[i][2] = static_cast<float>(std::bit_cast<double>(gpZPtr[i]));
-      
-      channelsPhiSpan[i] = static_cast<int>(channelsPhiPtr[i]);
-      channelsEtaSpan[i] = static_cast<int>(channelsEtaPtr[i]);
-      widthEtaSpan[i]    = static_cast<float>(std::bit_cast<double>(widthEtaPtr[i]));
-      totalToTSpan[i]    = static_cast<int>(totalToTPtr[i]);
-      
-      // Inline RDO copy (avoid heap reallocations)
-      auto& rdoList = rdoSpan[i];
-      rdoList.reserve(4);
-      for (int r = 0; r < 4; ++r) {
-        if (rdoPtrs[r][i]) rdoList.emplace_back(rdoPtrs[r][i]);
+      // --------------------------
+      // Vectorized bulk assignments
+      // --------------------------
+      {
+        Athena::Chrono chrono("Pixel assignments", m_chronoSvc.get());
+        for (size_t i = 0; i < nClusters; ++i) {
+          idHashSpan[i] = static_cast<unsigned int>(idHashPtr[i]);
+          idSpan[i] = static_cast<unsigned long>(identifierPtr[i]);
+          
+          // reinterpret_cast instead of bit_cast for double→float conversion
+          locPosSpan[i][0] = static_cast<float>(std::bit_cast<double>(localXPtr[i]));
+          locPosSpan[i][1] = static_cast<float>(std::bit_cast<double>(localYPtr[i]));
+          locCovSpan[i][0] = static_cast<float>(std::bit_cast<double>(covXXPtr[i]));
+          locCovSpan[i][3] = static_cast<float>(std::bit_cast<double>(covYYPtr[i]));
+          
+          gpSpan[i][0] = static_cast<float>(std::bit_cast<double>(gpXPtr[i]));
+          gpSpan[i][1] = static_cast<float>(std::bit_cast<double>(gpYPtr[i]));
+          gpSpan[i][2] = static_cast<float>(std::bit_cast<double>(gpZPtr[i]));
+          
+          channelsPhiSpan[i] = static_cast<int>(channelsPhiPtr[i]);
+          channelsEtaSpan[i] = static_cast<int>(channelsEtaPtr[i]);
+          widthEtaSpan[i]    = static_cast<float>(std::bit_cast<double>(widthEtaPtr[i]));
+          totalToTSpan[i]    = static_cast<int>(totalToTPtr[i]);
+          
+          // Inline RDO copy (avoid heap reallocations)
+          auto& rdoList = rdoSpan[i];
+          rdoList.reserve(4);
+          for (int r = 0; r < 4; ++r) {
+            if (rdoPtrs[r][i]) rdoList.emplace_back(rdoPtrs[r][i]);
+          }
+        }
       }
     }
-  }
   
   {
     Athena::Chrono chrono("Pixel Copy", m_chronoSvc.get());
@@ -552,6 +558,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
         // Prepare local buffers for each of the
         // fixed-size attributes.
         // --------------------------
+        
         std::vector<long unsigned int> identifierBuffer(nClusters);
         std::vector<unsigned int> idHashBuffer(nClusters);
         std::vector<std::array<float, 3>> gpBuffer(nClusters);
