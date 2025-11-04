@@ -172,6 +172,14 @@ namespace xAOD {
       template< class CONTAINER >
       std::vector<std::string> getObjectCollectionNames() const;
 
+      /// Type erased look up all links stored to objects of (container) type clid
+      /// @return Vector of names to all links to objects
+      std::vector<std::string> getObjectNames(const CLID clid) const;
+
+      /// Type erased look up all links stored to collections objects from (container) type clid
+      /// @return Vector of names to all collections of links to objects
+      std::vector<std::string> getObjectCollectionNames(const CLID clid) const;
+
       /// Delete any stored element link with the given name
       /// @param[in] name Name of the stored link
       /// @return True if a link of the given name was found and deleted

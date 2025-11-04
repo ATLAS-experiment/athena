@@ -145,6 +145,7 @@ namespace TrigCompositeUtils {
   }
 
 
+  // DEPRECATED
   template<class CONTAINER>
   void filterLinkVectorByContainerKey(const std::string& containerSGKey, std::vector<ElementLink<CONTAINER>>& vector) {
     if (containerSGKey.empty()) {
@@ -157,7 +158,7 @@ namespace TrigCompositeUtils {
     vector.erase(it, vector.end());
   }
 
-
+  // DEPRECATED
   template<class CONTAINER>
   const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType(
     const NavGraph& navGraph,
@@ -183,7 +184,7 @@ namespace TrigCompositeUtils {
     return features;
   }
 
-
+  // DEPRECATED
   template<class CONTAINER>
   void recursiveGetFeaturesOfTypeInternal(
     std::vector< LinkInfo<CONTAINER> >& features, 
