@@ -170,9 +170,7 @@ def JETM4Cfg(flags):
                                             "AntiKt4EMPFlowJets","AntiKt4EMTopoJets","AntiKt4UFOCSSKLowPtJets",
                                             "AntiKt10UFOCSSKJets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track"]
+                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
 
     JETM4SlimmingHelper.AllVariables = ["CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
                                         "MuonSegments",

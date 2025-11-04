@@ -50,10 +50,9 @@ def _getTruthVars():
 # ---------------------------------------------------------------------
 # some jet variables we always want to save
 fold_hashes = ['jetFoldHash', 'jetFoldHash_noHits']
-JetStandardAux = fold_hashes + [
+JetBasicAux = fold_hashes + [
     "pt",
     "eta",
-    "btaggingLink",
     "GhostTrack",
     "jetRank",
     "ConeExclBHadronsFinal",
@@ -73,7 +72,7 @@ JetExtendedAux = [
 ]
 
 # standard largeR jets truth outputs 
-LargeRJetStandardAux = [
+LargeRJetTruthAux = [
     "R10TruthLabel_R22v1",
     "R10TruthLabel_R22v1_TruthJetMass",
     "R10TruthLabel_R22v1_TruthJetPt"
@@ -162,27 +161,15 @@ BTaggingHighLevelAux = [
 # ---------------------------------------------------------------------
 # Functions which define smart slimming content for different use cases
 # ---------------------------------------------------------------------
-def BTaggingExpertContent(jetcol, ConfigFlags = None):
-    # jet variables
-    jetcontent = _getVariableList(jetcol, JetStandardAux + JetExtendedAux)
-    return jetcontent
-
-
-def BTaggingStandardContent(jetcol, ConfigFlags = None):
-    # jet variables
-    jetcontent = _getVariableList(jetcol, JetStandardAux)
-    return jetcontent
-
-
 def BTaggingLargeRContent(jetcol, ConfigFlags = None):
-    jetcontent = _getVariableList(jetcol, LargeRJetStandardAux)
+    jetcontent = _getVariableList(jetcol, LargeRJetTruthAux)
     # b-tagging variables
     aux = BTaggingLargeRAux
     btagcontent = _getVariableList(jetcol, aux)
     return jetcontent + btagcontent
 
 def BTaggingVRContent(jetcol, ConfigFlags = None):
-    aux = JetStandardAux + [
+    aux = JetBasicAux + [
         "SV1_NGTinSvx", 
         "SV1_masssvx",
         "SV1_TrackParticleLinks"
@@ -190,9 +177,12 @@ def BTaggingVRContent(jetcol, ConfigFlags = None):
     jetcontent = _getVariableList(jetcol, aux)
     return jetcontent
 
-
-
-def BTagginglessContent(jetcol, ConfigFlags=None):
+def BTaggingStandardContent(jetcol, ConfigFlags=None):
+    # jet truth variables
+    jetTruthContent = []
+    #! very ugly temporary fix, should be followed up immidiately after !83922
+    if jetcol != "AntiKt4EMTopoJets":
+        jetTruthContent = _getVariableList(jetcol, JetBasicAux)
     # GN2v01 was the recommended tagger as of 30-06-2025
     BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['SimpleFlip'])
     BTaggingRun3AuxVar += ["SV1_NGTinSvx", "SV1_masssvx",]
@@ -221,5 +211,10 @@ def BTagginglessContent(jetcol, ConfigFlags=None):
 
     isRun4 = _isRun4(ConfigFlags)
     aux = BTaggingRun3AuxVar if not isRun4 else []
-    btagcontent = _getVariableList(jetcol, aux)
-    return btagcontent
+    btagContent = _getVariableList(jetcol, aux)
+    return btagContent + jetTruthContent
+
+def BTaggingExpertContent(jetcol, ConfigFlags = None):
+    # jet variables
+    jetcontent = _getVariableList(jetcol, JetBasicAux + JetExtendedAux)
+    return jetcontent

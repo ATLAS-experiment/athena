@@ -225,7 +225,7 @@ def HIGG1D2Cfg(flags):
                                               "PrimaryVertices",
                                               "InDetTrackParticles",
                                               "AntiKt4EMPFlowJets",
-                                              "BTagging_AntiKt4EMPFlow"]
+]
 
     # Trigger content
     HIGG1D2SlimmingHelper.IncludeTriggerNavigation = False
@@ -249,7 +249,6 @@ def HIGG1D2Cfg(flags):
                                             "InDetTrackParticles.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                             "AntiKt4EMPFlowJets.Jvt.JVFCorr",
                                             "CombinedMuonTrackParticles.z0.vz",
-                                            "BTagging_AntiKt4EMTopo.MV1_discriminant",
                                             "ExtrapolatedMuonTrackParticles.z0.vz",
                                             "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.TTVA_AMVFVertices_forReco.TTVA_AMVFWeights_forReco.TTVA_AMVFVertices_forHiggs.TTVA_AMVFWeights_forHiggs.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                             "EventInfo.hardScatterVertexLink.timeStampNSOffset"]

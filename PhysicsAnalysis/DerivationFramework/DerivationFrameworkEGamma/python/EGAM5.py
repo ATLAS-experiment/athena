@@ -391,7 +391,7 @@ def EGAM5Cfg(flags):
         "PrimaryVertices",
         "AntiKt4EMPFlowJets",
         "MET_Baseline_AntiKt4EMPFlow",
-        "BTagging_AntiKt4EMPFlow",
+
     ]
     # muons, tau, MET, b-tagging could be switched off if not needed
     # and use too much space
