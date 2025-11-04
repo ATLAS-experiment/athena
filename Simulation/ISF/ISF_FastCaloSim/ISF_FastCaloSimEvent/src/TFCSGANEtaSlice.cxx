@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ bool TFCSGANEtaSlice::LoadGAN() {
     inputFileName = m_param.GetInputFolder() + "/neural_net_" +
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
                     "_" + std::to_string(m_etaMax) + "_UltraLow12.*";
-    m_net_low = TFCSNetworkFactory::create(inputFileName);
+    m_net_low = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_low == nullptr)
       success = false;
   }
