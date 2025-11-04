@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2019 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -85,7 +85,7 @@ public:
 
 private:
 
-    double m_beam_size;
+    double m_beam_size{};
 };
 
 } // end namespace
