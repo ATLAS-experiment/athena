@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSNetworkFactory.h"
@@ -121,7 +121,7 @@ TFCSNetworkFactory::create(std::vector<char> const &vector_input,
   } else if (string_input.length() > 0) {
     ATH_MSG_NOCLASS(logger, "No data in bytes, string contains data, "
                                 << "creating from string.");
-    return create(string_input);
+    return create(std::move(string_input));
   } else {
     throw std::invalid_argument(
         "Neither vector_input nor string_input contain data");
@@ -144,7 +144,7 @@ TFCSNetworkFactory::create(std::vector<char> const &vector_input,
   } else if (string_input.length() > 0) {
     ATH_MSG_NOCLASS(logger, "No data in bytes, string contains data, "
                                 << "creating from string.");
-    return create(string_input, graph_form);
+    return create(std::move(string_input), graph_form);
   } else {
     throw std::invalid_argument(
         "Neither vector_input nor string_input contain data");
