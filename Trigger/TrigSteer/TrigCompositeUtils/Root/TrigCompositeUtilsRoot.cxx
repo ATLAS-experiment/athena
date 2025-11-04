@@ -603,7 +603,7 @@ namespace TrigCompositeUtils {
   bool typelessFindLinks(const Decision* start, 
     const std::string& linkName,
     std::vector<sgkey_t>& keyVec, 
-    std::vector<uint32_t>& clidVec, 
+    std::vector<CLID>& clidVec, 
     std::vector<Decision::index_type>& indexVec, 
     std::vector<const Decision*>& sourceVec,
     const unsigned int behaviour, 
@@ -649,7 +649,7 @@ namespace TrigCompositeUtils {
   bool typelessFindLinks(const NavGraphNode* start, 
     const std::string& linkName,
     std::vector<sgkey_t>& keyVec, 
-    std::vector<uint32_t>& clidVec, 
+    std::vector<CLID>& clidVec, 
     std::vector<Decision::index_type>& indexVec, 
     std::vector<const Decision*>& sourceVec,
     const unsigned int behaviour, 
@@ -697,20 +697,20 @@ namespace TrigCompositeUtils {
   bool typelessFindLinksCommonLinkCollection(const Decision* start,
     const std::string& linkName,
     std::vector<sgkey_t>& keyVec, 
-    std::vector<uint32_t>& clidVec,
+    std::vector<CLID>& clidVec,
     std::vector<Decision::index_type>& indexVec, 
     std::vector<const Decision*>& sourceVec) 
   {
     bool found = false;
     std::vector<sgkey_t> tmpKeyVec;
-    std::vector<uint32_t> tmpClidVec;
+    std::vector<CLID> tmpClidVec;
     std::vector<Decision::index_type> tmpIndexVec;
     if (start->hasObjectCollectionLinks(linkName)) {
       found = start->typelessGetObjectCollectionLinks(linkName, tmpKeyVec, tmpClidVec, tmpIndexVec);
     }
     if (start->hasObjectLink(linkName)) {
       sgkey_t tmpKey{0};
-      uint32_t tmpClid{0};
+      CLID tmpClid{0};
       Decision::index_type tmpIndex{0};
       found |= start->typelessGetObjectLink(linkName, tmpKey, tmpClid, tmpIndex);
       tmpKeyVec.push_back(tmpKey);
@@ -720,8 +720,8 @@ namespace TrigCompositeUtils {
     // De-duplicate
     for (size_t tmpi = 0; tmpi < tmpKeyVec.size(); ++tmpi) {
       bool alreadyAdded = false;
-      const uint32_t tmpKey = tmpKeyVec.at(tmpi);
-      const uint32_t tmpClid = tmpClidVec.at(tmpi);
+      const sgkey_t tmpKey = tmpKeyVec.at(tmpi);
+      const CLID tmpClid = tmpClidVec.at(tmpi);
       const Decision::index_type tmpIndex = tmpIndexVec.at(tmpi);
       for (size_t veci = 0; veci < keyVec.size(); ++veci) {
         if (SG::sgkeyEqual (keyVec.at(veci), tmpKey)
@@ -747,7 +747,7 @@ namespace TrigCompositeUtils {
   bool typelessFindLink(const Decision* start,
     const std::string& linkName, 
     sgkey_t& key, 
-    uint32_t& clid, 
+    CLID& clid, 
     Decision::index_type& index,
     const Decision*& source,
     const bool suppressMultipleLinksWarning)
@@ -760,7 +760,7 @@ namespace TrigCompositeUtils {
     // If both parent2 and parent3 possessed an admissible ElementLink, then the warning below will trigger, and only one of the
     // links will be returned (whichever of parent2 or parent3 happened to be the first seed of parent1).
     std::vector<sgkey_t> keyVec;
-    std::vector<uint32_t> clidVec;
+    std::vector<CLID> clidVec;
     std::vector<Decision::index_type> indexVec;
     std::vector<const Decision*> sourceVec;
     std::set<const xAOD::TrigComposite*> fullyExploredFrom;
@@ -785,7 +785,7 @@ namespace TrigCompositeUtils {
   bool typelessFindLink(const NavGraph& subGraph,
     const std::string& linkName, 
     sgkey_t& key,
-    uint32_t& clid,
+    CLID& clid,
     Decision::index_type& index,
     const Decision*& source,
     const bool suppressMultipleLinksWarning)

@@ -1,0 +1,28 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "TrigCompositeUtils/LinkInfo.h"
+#include "TrigCompositeUtils/TypelessLinkInfo.h"
+
+namespace FeatureRequestHelpers {
+
+  template<class CONTAINER>
+  std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> typedFeaturesWrapper(
+    const std::vector<TrigCompositeUtils::TypelessLinkInfo>& typelessLinkInfos,
+    [[maybe_unused]] const EventContext& ctx,
+    [[maybe_unused]] const asg::EventStoreType* eventStore)
+  {
+    std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> returnVector;
+    returnVector.reserve(typelessLinkInfos.size());
+    for (const TrigCompositeUtils::TypelessLinkInfo& f : typelessLinkInfos) {
+#ifdef XAOD_STANDALONE
+      returnVector.emplace_back(f, ElementLink<CONTAINER>(f.key, f.index, eventStore->event()));
+#else
+      returnVector.emplace_back(f, ElementLink<CONTAINER>(f.key, f.index, ctx));
+#endif
+    } 
+    return returnVector;
+  }
+
+} // namespace FeatureRequestHelpers
