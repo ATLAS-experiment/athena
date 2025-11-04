@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Header: /cvs/PF/pool/StorageSvc/src/DbStorageExplorer.h,v 1.16 2010/05/11 00:16:07 frankb Exp $
 #ifndef POOL_DBSTORAGEEXPLORER_H
 #define POOL_DBSTORAGEEXPLORER_H
 
 // Framework include files
 #include "StorageSvc/IStorageExplorer.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 /*
  *  pool namespace declaration
@@ -32,7 +32,7 @@ namespace pool  {
     * @author  Markus Frank
     * @version 1.0
     */
-  class DbStorageExplorer  : virtual public IStorageExplorer
+  class DbStorageExplorer  : virtual public IStorageExplorer, public AthMessaging
   {
     typedef std::vector<const Token*> TokenVec;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -14,6 +14,7 @@
 /// Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/IDbContainer.h"
+#include "POOLCore/DbPrint.h"
 
 // STL include files
 #include <map>
@@ -39,7 +40,7 @@ namespace pool    {
     *  @author  M.Frank
     *  @version 1.0
     */
-  class DbContainerImp : virtual public IDbContainer
+  class DbContainerImp : virtual public IDbContainer, public APRMessaging
   {
   protected:
 
@@ -96,7 +97,7 @@ namespace pool    {
     virtual DbStatus commitTransaction();
 
   public:
-    DbContainerImp();
+    explicit DbContainerImp(const std::string& name);
     /// Release instance (Abstract interfaces do not expose destructor!)
     virtual void release() override                    { delete this;           }
     /// Size of the container

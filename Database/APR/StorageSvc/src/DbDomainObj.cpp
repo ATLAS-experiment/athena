@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -17,8 +17,8 @@
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbSession.h"
 #include "StorageSvc/IDbDomain.h"
-#include "StorageSvc/IOODatabase.h"
 #include "POOLCore/DbPrint.h"
+#include "StorageSvc/IOODatabase.h"
 #include "DbDatabaseObj.h"
 #include "DbDomainObj.h"
 
@@ -32,58 +32,50 @@ using namespace pool;
 DbDomainObj::DbDomainObj(DbSession& sessionH, 
                                const DbType& typ,
                                DbAccessMode mode)
-: Base("", mode, typ, sessionH.db(typ)), 
+: Base("Domain["+typ.storageName()+"]", mode, typ, sessionH.db(typ)),
+  APRMessaging(name()),
   m_session(sessionH),
   m_maxAge(2),
   m_info(0)
 {
-  setName("Domain["+type().storageName()+"]");
-  DbPrint log(name());    
   if ( 0 == db() )    {
-    log << DbPrintLvl::Error << ">   Access   DbDomain     "<<accessMode(mode)
-        << " " << name() << " (UNKNOWN)" 
-        << " impossible."
-        << " [" << typ.storageName() << "] " 
-        << DbPrint::endmsg;
-    type().missingDriver(log);
+    ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
+        << " " << name() << " (UNKNOWN) impossible."
+        << " [" << typ.storageName() << "]" );
+    type().missingDriver(msg());
     return;
   }
   m_info = db()->createDomain();
   if ( !m_session.add( this ).isSuccess() )    {
-    log << DbPrintLvl::Error << ">   Access   DbDomain     "<<accessMode(mode)
-        << " " << name() 
-        << " (" << db()->name() << ")" 
-        << " impossible. Error inserting domain!"
-        << DbPrint::endmsg;
+    ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
+        << " " << name()
+        << " (" << db()->name() << ")"
+        << " impossible. Error inserting domain!" );
     return;
   }
-  log << DbPrintLvl::Info    << ">   Access   DbDomain     "
+  ATH_MSG_INFO( ">   Access   DbDomain     "
       << accessMode(mode)
-      << " [" << type().storageName() << "] " 
-      << DbPrint::endmsg;
+      << " [" << type().storageName() << "]" );
 }
 
 /// Destructor
 DbDomainObj::~DbDomainObj()  {
-  DbPrint log( name() );
-
   clearEntries();
   if ( m_session.isValid() )    {
     m_session.remove (this);
   }
   deletePtr(m_info);
-  log << DbPrintLvl::Info    << ">   Deaccess DbDomain     "
+  ATH_MSG_INFO( ">   Deaccess DbDomain     "
       << accessMode(mode()) 
-      << " [" << type().storageName() << "] " 
-      << DbPrint::endmsg;
+      << " [" << type().storageName() << "]" );
 }
 
 bool DbDomainObj::existsDbase( const string& name)
 {  return (m_info) ? m_info->existsDbase( name ) : false;               }
 
-DbStatus DbDomainObj::open(DbAccessMode mod)   {
+DbStatus DbDomainObj::open(DbAccessMode mod) {
   setMode(mod);
-//  return m_info ? m_info->open(session(),name(),mode()) : Error;
+  //  return m_info ? m_info->open(session(),name(),mode()) : Error;
   return m_info ? Success : Error;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -60,7 +60,7 @@ namespace pool    {
     /// Create Database
     virtual IDbDatabase* createDatabase(void) = 0;
     /// Create Database container
-    virtual IDbContainer* createContainer(const DbType& typ) = 0;
+    virtual IDbContainer* createContainer(const std::string& name, const DbType& typ) = 0;
 
     ///  delete object if ref count drops to 0
     void release() { if( RefCounter::subRef() <= 0 ) delete this; }

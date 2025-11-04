@@ -106,9 +106,7 @@ class RNTupleContainer : public pool::DbContainerImp
    std::unique_ptr<RootAuxDynIO::IFactoryTool>       m_auxDynTool;
 
  public:
-   /// Standard constructor
-  RNTupleContainer();
-
+  explicit RNTupleContainer(const std::string& name);
   virtual ~RNTupleContainer();
 
   /// Close the container and deallocate resources

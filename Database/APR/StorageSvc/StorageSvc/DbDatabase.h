@@ -61,7 +61,7 @@ namespace pool  {
     void switchPtr(DbDatabaseObj* obj);
   public:
     /// Constructor with initializing arguments
-    DbDatabase(const DbType& typ=POOL_StorageType) { m_type = typ;        }
+    explicit DbDatabase(const DbType& typ=POOL_StorageType) { m_type = typ;        }
     /// Copy constructor
     DbDatabase(const DbDatabase& cp) : Base()   { switchPtr(cp.m_ptr);    }
     /// Constructor
