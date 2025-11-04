@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_Geo2G4Svc_H
@@ -27,7 +27,7 @@ public:
   /// AthService methods
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override final;
   /// Geo2G4SvcBase methods
-  virtual void SetDefaultBuilder(std::string n) override final {m_defaultBuilder=n;}
+  virtual void SetDefaultBuilder(std::string n) override final {m_defaultBuilder=std::move(n);}
   virtual VolumeBuilder* GetVolumeBuilder(std::string s) const override final;
   virtual VolumeBuilder* GetDefaultBuilder() const override final {return m_builders.at(m_defaultBuilder).get();}
   virtual bool UseTopTransforms() const override final {return m_getTopTransform;}
