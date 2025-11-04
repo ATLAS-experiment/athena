@@ -8,12 +8,13 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODPFlow/FlowElementContainer.h"
 #include "AsgDataHandles/ReadHandleKey.h"
-#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "StoreGate/WriteDecorHandle.h"
 
-#include "xAODBase/IParticleContainer.h"
-#include "xAODBase/IParticle.h"
+#include <string>
+#include <vector>
+#include <utility> //for std::pair
+
+
 #include "AthContainers/AuxElement.h"  // For SG::AuxElement::Accessor
 
 class FlowEnergyDecorator : public AthReentrantAlgorithm {

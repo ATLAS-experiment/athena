@@ -4,11 +4,12 @@
 
 #include "FlowEnergyDecorator.h"
 #include "xAODPFlow/FlowElement.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "xAODPFlow/FlowElementContainer.h"
+#include "xAODBase/IParticleContainer.h"
+#include "xAODBase/IParticle.h"
 #include "CxxUtils/close_to_zero.h"
-#include <utility>
 
 using CxxUtils::close_to_zero;
 
@@ -154,7 +155,7 @@ StatusCode FlowEnergyDecorator::execute(const EventContext& ctx) const {
         // loop over all available pflows of a given UFO
       for ( auto& el : pflowLinks ) {  
         if ( !el.isValid() ) {throw std::runtime_error("Invalid ElementLink found.");};
-        const xAOD::FlowElement* c = dynamic_cast<const xAOD::FlowElement*>(*el);
+        const xAOD::FlowElement* c = static_cast<const xAOD::FlowElement*>(*el);
         if (c->charge() != 0) continue;
         e += layerAccessor(*c);
       }
