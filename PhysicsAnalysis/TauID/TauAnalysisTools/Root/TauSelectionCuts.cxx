@@ -644,9 +644,9 @@ bool TauSelectionCutMuonOLR::accept(const xAOD::TauJet& xTau,
   // MuonOLR : removing tau overlapped with muon satisfying pt>2GeV and not calo-tagged
   m_bTauMuonOLR = true;
 
-  static const SG::ConstAccessor<bool> acc_taumuonolr ("passTATTauMuonOLR");
+  static const SG::ConstAccessor<char> acc_taumuonolr ("passTATTauMuonOLR");
   if ( acc_taumuonolr.isAvailable(xTau) ) {
-    m_bTauMuonOLR = acc_taumuonolr(xTau);
+    m_bTauMuonOLR = static_cast<bool>(acc_taumuonolr(xTau));
   } else {
     // fallback to manual calculation 	  
     SG::ReadHandle<xAOD::MuonContainer> muonContainerHandle( m_tTST->m_muonContainerKey );
