@@ -24,7 +24,7 @@ def HION5SkimmingToolCfg(flags):
     
     triggers = ListTriggers.HION5SkimmingTriggers()
     
-    req_electrons = 'count( Electrons.DFCommonElectronsLHLoose && ( Electrons.pt > 15*GeV ))>0'
+    req_electrons = 'count( ( Electrons.pt > 15*GeV ) && ( abs(Electrons.eta) < 2.5) )>0'
     req_muons     = 'count( Muons.DFCommonMuonPassPreselection && (Muons.pt > 15*GeV) && ( abs(Muons.eta) < 2.7))>0'
     req_photons = 'count( Photons.DFCommonPhotonsIsEMLoose && (Photons.pt > 30*GeV) ) > 0'
     req_total = '(' + req_electrons + ' || ' + req_muons + ' || ' + req_photons + ')'
