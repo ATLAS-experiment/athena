@@ -19,8 +19,6 @@
 
 #include <string>
 #include <memory>
-#include <bitset>
-#include <vector>
 #include <fstream>
 
 namespace GlobalSim {
