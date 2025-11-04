@@ -13,6 +13,8 @@
 #include "TestTools/expect.h"
 #include "TestTools/expect_exception.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include "TrigAnalysisHelpers/FeatureRequestHelpers.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "CxxUtils/checker_macros.h"
@@ -32,6 +34,7 @@ void printFeatures(const std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> >&
 int main ATLAS_NOT_THREAD_SAFE () {
 
   using namespace TrigCompositeUtils;
+  using namespace FeatureRequestHelpers;
   xAOD::TrigComposite::s_throwOnCopyError = true;
 
   errorcheck::ReportMessage::hideFunctionNames (true);
@@ -356,11 +359,17 @@ int main ATLAS_NOT_THREAD_SAFE () {
   log << MSG::INFO << "All" << endmsg;
   graph_HLT_all.printAllPaths(log, MSG::INFO);
 
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_mufast_chain = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mufast_chain, "", TrigDefs::allFeaturesOfType, featureString(), mufast_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_mu_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_chain, "", TrigDefs::allFeaturesOfType, featureString(), mu_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_mu_em_chain  = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_em_chain, "", TrigDefs::allFeaturesOfType, featureString(), mu_em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_em_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_em_chain, "", TrigDefs::allFeaturesOfType, featureString(), em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_all          = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_all, "", TrigDefs::allFeaturesOfType, featureString(), all_IDcont);
+  Trig::FeatureRequestDescriptor frd("");
+  frd.setFeatureCollectionMode(TrigDefs::allFeaturesOfType);
+  frd.setLinkName(featureString());
+
+  const CLID iPartCLID = ClassID_traits<xAOD::IParticleContainer>::ID();
+
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_mufast_chain = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mufast_chain, frd, iPartCLID, mufast_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_mu_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_chain, frd, iPartCLID, mu_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_mu_em_chain  = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, iPartCLID, mu_em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_em_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_em_chain, frd, iPartCLID, em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_all_HLT_all          = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_all, frd, iPartCLID, all_IDcont, ctx), ctx);
 
   printFeatures(features_pass_all_HLT_mufast_chain, "[All passing features] HLT_mufast_chain", log);
   printFeatures(features_pass_all_HLT_mu_chain, "[All passing features] HLT_mu_chain", log);
@@ -368,11 +377,13 @@ int main ATLAS_NOT_THREAD_SAFE () {
   printFeatures(features_pass_all_HLT_em_chain, "[All passing features] HLT_em_chain", log);
   printFeatures(features_pass_all_HLT_all, "[All passing features] All chains", log);
 
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_mufast_chain = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mufast_chain, "", TrigDefs::lastFeatureOfType, featureString(), mufast_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_mu_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_chain, "", TrigDefs::lastFeatureOfType, featureString(), mu_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_mu_em_chain  = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_em_chain, "", TrigDefs::lastFeatureOfType, featureString(), mu_em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_em_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_em_chain, "", TrigDefs::lastFeatureOfType, featureString(), em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_all          = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_all, "", TrigDefs::lastFeatureOfType, featureString(), all_IDcont);
+  frd.setFeatureCollectionMode(TrigDefs::lastFeatureOfType);
+
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_mufast_chain = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mufast_chain, frd, iPartCLID, mufast_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_mu_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_chain, frd, iPartCLID, mu_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_mu_em_chain  = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, iPartCLID, mu_em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_em_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_em_chain, frd, iPartCLID, em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_pass_final_HLT_all          = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_all, frd, iPartCLID, all_IDcont, ctx), ctx);
 
   printFeatures(features_pass_final_HLT_mufast_chain, "[Final passing feature] HLT_mufast_chain", log);
   printFeatures(features_pass_final_HLT_mu_chain, "[Final passing feature] HLT_mu_chain", log);
@@ -415,11 +426,13 @@ int main ATLAS_NOT_THREAD_SAFE () {
   log << MSG::INFO << "All" << endmsg;
   graph_HLT_all.printAllPaths(log, MSG::INFO);
 
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_mufast_chain = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mufast_chain, "", TrigDefs::allFeaturesOfType, featureString(), mufast_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_mu_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_chain, "", TrigDefs::allFeaturesOfType, featureString(), mu_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_mu_em_chain  = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_em_chain, "", TrigDefs::allFeaturesOfType, featureString(), mu_em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_em_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_em_chain, "", TrigDefs::allFeaturesOfType, featureString(), em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_all          = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_all, "", TrigDefs::allFeaturesOfType, featureString(), all_IDcont);
+  frd.setFeatureCollectionMode(TrigDefs::allFeaturesOfType);
+
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_mufast_chain = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mufast_chain, frd, iPartCLID, mufast_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_mu_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_chain, frd, iPartCLID, mu_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_mu_em_chain  = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, iPartCLID, mu_em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_em_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_em_chain, frd, iPartCLID, em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_all_HLT_all          = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_all, frd, iPartCLID, all_IDcont, ctx), ctx);
 
   printFeatures(features_passfail_all_HLT_mufast_chain, "[All passing/failing features] HLT_mufast_chain", log);
   printFeatures(features_passfail_all_HLT_mu_chain, "[All passing/failing features] HLT_mu_chain", log);
@@ -427,11 +440,13 @@ int main ATLAS_NOT_THREAD_SAFE () {
   printFeatures(features_passfail_all_HLT_em_chain, "[All passing/failing features] HLT_em_chain", log);
   printFeatures(features_passfail_all_HLT_all, "[All passing/failing features] All chains", log);
 
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_mufast_chain = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mufast_chain, "", TrigDefs::lastFeatureOfType, featureString(), mufast_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_mu_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_chain, "", TrigDefs::lastFeatureOfType, featureString(), mu_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_mu_em_chain  = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_mu_em_chain, "", TrigDefs::lastFeatureOfType, featureString(), mu_em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_em_chain     = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_em_chain, "", TrigDefs::lastFeatureOfType, featureString(), em_IDcont);
-  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_all          = recursiveGetFeaturesOfType<xAOD::IParticleContainer>(graph_HLT_all, "", TrigDefs::lastFeatureOfType, featureString(), all_IDcont);
+  frd.setFeatureCollectionMode(TrigDefs::lastFeatureOfType);
+
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_mufast_chain = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mufast_chain, frd, iPartCLID, mufast_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_mu_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_chain, frd, iPartCLID, mu_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_mu_em_chain  = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, iPartCLID, mu_em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_em_chain     = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_em_chain, frd, iPartCLID, em_IDcont, ctx), ctx);
+  std::vector< LinkInfo<xAOD::IParticleContainer> > features_passfail_final_HLT_all          = typedFeaturesWrapper<xAOD::IParticleContainer>( typelessGetFeatures(graph_HLT_all, frd, iPartCLID, all_IDcont, ctx), ctx);
 
   printFeatures(features_passfail_final_HLT_mufast_chain, "[Final passing/failing feature] HLT_mufast_chain", log);
   printFeatures(features_passfail_final_HLT_mu_chain, "[Final passing/failing feature] HLT_mu_chain", log);
@@ -527,14 +542,20 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   // Check typed retrieval too
   // Note we are *not* passing the set of interested chains here so expect the state to be unset
-  std::vector< LinkInfo<xAOD::MuonContainer> >     features_final_mu  = recursiveGetFeaturesOfType<xAOD::MuonContainer>(graph_HLT_mu_em_chain);
-  std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em  = recursiveGetFeaturesOfType<xAOD::ElectronContainer>(graph_HLT_mu_em_chain);
+  frd.setFeatureCollectionMode(TrigDefs::lastFeatureOfType);
+  const CLID muCLID = ClassID_traits<xAOD::MuonContainer>::ID();
+  const CLID elCLID = ClassID_traits<xAOD::ElectronContainer>::ID();
+  std::vector< LinkInfo<xAOD::MuonContainer> >     features_final_mu  = typedFeaturesWrapper<xAOD::MuonContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, muCLID, {}, ctx), ctx);
+  std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em  = typedFeaturesWrapper<xAOD::ElectronContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, elCLID, {}, ctx), ctx);
   printFeatures(features_final_mu, "[Explicit Final Muon Features] HLT_mu_em_chain", log);
   printFeatures(features_final_em, "[Explicit Final Electron Features] HLT_mu_em_chain", log);  
 
   // Check filtering on the collection name. Note reg-ex matching, omitting the "My".
-  std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em_correctContainer   = recursiveGetFeaturesOfType<xAOD::ElectronContainer>(graph_HLT_mu_em_chain, ".*ElectronContainer.*");
-  std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em_incorrectContainer = recursiveGetFeaturesOfType<xAOD::ElectronContainer>(graph_HLT_mu_em_chain, "WrongContainerName");
+  frd.setFeatureCollectionMode(TrigDefs::lastFeatureOfType);
+  frd.setRequireSGKey(".*ElectronContainer.*");
+  std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em_correctContainer   = typedFeaturesWrapper<xAOD::ElectronContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, elCLID, {}, ctx), ctx);
+  frd.setRequireSGKey("WrongContainerName");
+  std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em_incorrectContainer = typedFeaturesWrapper<xAOD::ElectronContainer>( typelessGetFeatures(graph_HLT_mu_em_chain, frd, elCLID, {}, ctx), ctx);
   VALUE ( features_final_em_correctContainer.size() ) EXPECTED ( features_final_em.size() );
   VALUE ( features_final_em_incorrectContainer.size() ) EXPECTED ( 0 );
 

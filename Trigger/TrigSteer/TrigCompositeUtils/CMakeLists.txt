@@ -33,11 +33,6 @@ if( NOT XAOD_STANDALONE )
     LINK_LIBRARIES TestTools AthenaKernel GaudiKernel SGTools StoreGateLib
     CxxUtils xAODTrigger TrigCompositeUtilsLib AthContainers
     LOG_IGNORE_PATTERN "@0x[0-9a-f]{4,}" )
-
-  atlas_add_test( TrigTraversal_test
-    SOURCES test/TrigTraversal_test.cxx
-    LINK_LIBRARIES TestTools StoreGateLib AthenaKernel GaudiKernel SGTools
-    CxxUtils xAODTrigger xAODEgamma xAODMuon xAODBase TrigCompositeUtilsLib )
 endif()
 
 atlas_add_test( Combinators_test
