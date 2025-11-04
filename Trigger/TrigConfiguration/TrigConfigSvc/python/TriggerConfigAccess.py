@@ -253,7 +253,7 @@ def getHLTJobOptionsAccess( flags = None ) -> HLTJobOptionsAccess:
 
 
 @AccumulatorCache
-def getHLTMonitoringAccess( flags = None ) -> HLTMonitoringAccess:
+def getHLTMonitoringAccess( flags = None, filterOnActiveChains = False ) -> HLTMonitoringAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
         cfg = HLTMonitoringAccess( filename = getHLTMonitoringFileName( flags ) )
@@ -290,4 +290,15 @@ def getHLTMonitoringAccess( flags = None ) -> HLTMonitoringAccess:
 
     else:
         raise RuntimeError("Unknown source of trigger configuration: %s" % tc["SOURCE"])
+
+    # Optional deletion of chains from the monitoring JSON which were not enabled,
+    # based on the first HLT PS set in the file or the HLT PS set for the RAW file's LB.
+    if filterOnActiveChains:
+        hltPs = getHLTPrescalesSetAccess(flags)
+        if hltPs:
+            for sig in cfg["signatures"]:
+                for chain in list(cfg["signatures"][sig]): # Make a copy as we might be deleting
+                    if not hltPs.enabled(chain):
+                        del cfg["signatures"][sig][chain]
+
     return cfg
