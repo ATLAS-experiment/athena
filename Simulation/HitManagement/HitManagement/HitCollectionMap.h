@@ -113,7 +113,7 @@ class HitCollectionMap
    */
   template <class T>
   void TransformAndRecord(std::string const& hitCollectionName, std::function<void(T&)> transform) {
-    TransformAndRecord(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext(), transform);
+    TransformAndRecord(hitCollectionName, hitCollectionName, Gaudi::Hive::currentContext(), std::move(transform));
   }
 
  private:
