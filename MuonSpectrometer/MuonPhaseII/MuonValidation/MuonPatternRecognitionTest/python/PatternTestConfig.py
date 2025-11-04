@@ -134,7 +134,7 @@ def MuonR4PatternRecoChainCfg(flags):
     from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
 
     from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
-    result.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromHoughR4",
+    result.merge(MuPatTrackBuilderCfg(flags, name="MuPatTrackBuilderFromHoughR4",
                                       MuonSegmentCollection = "TrkMuonSegmentsFromHoughR4",
                                       SpectrometerTrackOutputLocation="MuonTracksFromHoughR4"))
     result.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,"MuonXAODParticleConvFromHoughR4",
@@ -143,7 +143,7 @@ def MuonR4PatternRecoChainCfg(flags):
 
     ### Decorate the segment parameters to the xAOD segment objects
     from MuonObjectMarker.ObjectMarkerConfig import MuonSegmentFitParDecorAlgCfg
-    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="SegmentParDecorAlgHougR4", 
+    result.merge(MuonSegmentFitParDecorAlgCfg(flags, name="MuonSegmentParDecorAlgHougR4", 
                                               SegmentKey="MuonSegmentsFromHoughR4"))
     if flags.Input.isMC:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
@@ -160,7 +160,7 @@ def MuonR4SegmentRecoChainCfg(flags):
     result.merge(MuonR4SegmentCnvAlgCfg(flags))
     
     from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
-    result.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromR4Segments",
+    result.merge(MuPatTrackBuilderCfg(flags, name="MuPatTrackBuilderFromR4",
                                              MuonSegmentCollection = "TrackMuonSegmentsR4",
                                              SpectrometerTrackOutputLocation="MuonTracksR4"))
     from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
