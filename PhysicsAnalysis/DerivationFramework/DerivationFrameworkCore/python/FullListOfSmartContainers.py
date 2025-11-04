@@ -44,8 +44,6 @@ def FullListOfSmartContainers(flags=None):
       "AntiKt4EMPFlowLowPtJets",
       "AntiKt2LCTopoJets",
       "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-      "AntiKt4EMPFlowJets_FTAG",
-      "AntiKtVR30Rmax4Rmin02Track_FTAG",
       "InDetTrackParticles",
       "InDetLargeD0TrackParticles",
       "PrimaryVertices",

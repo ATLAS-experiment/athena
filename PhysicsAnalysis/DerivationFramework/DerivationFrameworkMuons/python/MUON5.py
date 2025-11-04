@@ -345,7 +345,7 @@ def MUON5Cfg(flags):
                                             "Muons",
                                             "AntiKt4EMPFlowJets",
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-                                            "BTagging_AntiKt4EMPFlow",
+
                                             "MET_Baseline_AntiKt4EMPFlow",
                                           ]
     

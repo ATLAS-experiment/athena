@@ -425,7 +425,7 @@ class SlimmingHelper:
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoJetsCPContent import AntiKt4EMTopoJetsCPContent
                         items.extend(AntiKt4EMTopoJetsCPContent)
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4EMPFlowJets", self.flags))
+                        items.extend(BTaggingStandardContent("AntiKt4EMTopoJets", self.flags))
                 elif collectionName=="AntiKt4EMTopoLowPtJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoLowPtJetsCPContent import AntiKt4EMTopoLowPtJetsCPContent
                         items.extend(AntiKt4EMTopoLowPtJetsCPContent)
@@ -504,9 +504,6 @@ class SlimmingHelper:
                 elif collectionName=="AntiKtVR30Rmax4Rmin02PV0TrackJets":
                         from DerivationFrameworkJetEtMiss.AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent import AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent
                         items.extend(AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent)
-                elif collectionName=="AntiKt4EMPFlowJets_FTAG":
-                        from DerivationFrameworkFlavourTag.BTaggingContent import BTagginglessContent
-                        items.extend(BTagginglessContent("AntiKt4EMPFlowJets", self.flags))
                 elif collectionName=="AntiKtVR30Rmax4Rmin02Track_FTAG":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingVRContent
                         items.extend(BTaggingVRContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.flags))

@@ -246,7 +246,7 @@ def JETM3Cfg(flags):
                                             "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMPFlowJets","AntiKt4EMTopoJets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                            "BTagging_AntiKt4EMPFlow"]
+]
     
     JETM3SlimmingHelper.AllVariables = ["CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
                                         "MuonSegments","LVL1JetRoIs",

@@ -268,8 +268,7 @@ def HIGG1D1Cfg(flags):
                                               "InDetTrackParticles",
                                               "AntiKt4EMTopoJets",
                                               "AntiKt4EMPFlowJets",
-                                              "BTagging_AntiKt4EMPFlow",
-                                              "BTagging_AntiKtVR30Rmax4Rmin02Track",
+
                                               "MET_Baseline_AntiKt4EMTopo",
                                               "MET_Baseline_AntiKt4EMPFlow",
                                               "TauJets",
@@ -398,8 +397,6 @@ def HIGG1D1Cfg(flags):
                 "AFPVertexContainerAux":"xAOD::AFPVertexAuxContainer",
                 "AFPToFTrackContainer":"xAOD::AFPToFTrackContainer",
                 "AFPToFTrackContainerAux":"xAOD::AFPToFTrackAuxContainer",
-                "BTagging_AntiKt4EMPFlowCustomVtx":"xAOD::BTaggingContainer",
-                "BTagging_AntiKt4EMPFlowCustomVtxAux":"xAOD::BTaggingAuxContainer"
              })
 
     HIGG1D1SlimmingHelper.AllVariables += [

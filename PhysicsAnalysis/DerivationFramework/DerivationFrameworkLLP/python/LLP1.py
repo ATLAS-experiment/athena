@@ -921,10 +921,7 @@ def LLP1Cfg(flags):
                                            "InDetLargeD0TrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
-                                           "AntiKt4EMPFlowJets_FTAG",
-                                           "BTagging_AntiKt4EMTopo",
-                                           "BTagging_AntiKt4EMPFlow",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track",
+
                                            "MET_Baseline_AntiKt4EMTopo",
                                            "MET_Baseline_AntiKt4EMPFlow",
                                            "TauJets",

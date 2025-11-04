@@ -208,8 +208,7 @@ def TRIG8Cfg(flags):
                                             "InDetLargeD0TrackParticles",
                                             "AntiKt4EMTopoJets",
                                             "AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMTopo",
-                                            "BTagging_AntiKt4EMPFlow",
+
                                             "TauJets"
                                             ]
 
@@ -244,7 +243,6 @@ def TRIG8Cfg(flags):
                                         "HLT_IDTrack_Cosmic_FTF", 
                                         "HLT_IDTrack_Cosmic_IDTrig", 
                                         "HLT_IDTrack_DJLRT_FTF",
-                                        "BTagging_AntiKt4EMPFlowSecVtx",
                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx",
                                         "HLT_IDVertex_FS",
                                         "HLT_IDVertex_JetSuper",

@@ -471,9 +471,7 @@ def BPHY5Cfg(flags):
    
    for jet_collection in tagJetCollections:
        AllVariables   += [jet_collection]
-       AllVariables   += ["BTagging_%s"       % (jet_collection[:-4]) ]
-       AllVariables   += ["BTagging_%sJFVtx"  % (jet_collection[:-4]) ]
-       AllVariables   += ["BTagging_%sSecVtx" % (jet_collection[:-4]) ]
+
    
    
    # Truth information for MC only

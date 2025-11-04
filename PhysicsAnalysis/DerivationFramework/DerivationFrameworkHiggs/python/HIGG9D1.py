@@ -427,8 +427,7 @@ def HIGG9D1Cfg(flags):
         "InDetTrackParticles",
         "AntiKt4EMTopoJets",
         "AntiKt4EMPFlowJets",
-        "BTagging_AntiKt4EMPFlow",
-        "AntiKt4EMPFlowJets_FTAG",
+
         "MET_Baseline_AntiKt4EMTopo",
         "MET_Baseline_AntiKt4EMPFlow",
         "TauJets",

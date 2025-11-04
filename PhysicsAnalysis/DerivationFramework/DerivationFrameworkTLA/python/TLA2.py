@@ -143,7 +143,7 @@ def TLA2Cfg(flags):
                         "Muons",
                         "AntiKt4EMTopoJets",
                         "AntiKt4EMPFlowJets",
-                        "BTagging_AntiKt4EMPFlow",
+
     ]
     
     # Extra content

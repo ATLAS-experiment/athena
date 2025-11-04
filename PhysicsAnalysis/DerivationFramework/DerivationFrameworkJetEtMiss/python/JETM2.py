@@ -123,10 +123,7 @@ def JETM2Cfg(flags):
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoNoPtCutJets","AntiKt4EMPFlowJets",
-                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                            "AntiKt4EMPFlowJets_FTAG",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track"]
+                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
 
     JETM2SlimmingHelper.AllVariables = ["CaloCalFwdTopoTowers",
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
@@ -163,9 +160,7 @@ def JETM2Cfg(flags):
                                            "PrimaryVertices.x.y.z.covariance.trackWeights",
                                            "TauJets.clusterLinks",
                                            "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
-                                           "MuonSegments.x.y.z.px.py.pz",
-                                           "BTagging_AntiKt4EMPFlow.jetLink",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track.jetLink"]
+                                           "MuonSegments.x.y.z.px.py.pz"]
 
     JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
                                                    'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',

@@ -261,9 +261,7 @@ def STDM17Cfg(flags):
                                              "Electrons", "Photons", "Muons", "TauJets", "TauJets_MuonRM",
                                              "InDetTrackParticles", "PrimaryVertices",
                                              "MET_Baseline_AntiKt4EMPFlow",
-                                             "AntiKt4EMPFlowJets",
-                                             "BTagging_AntiKt4EMPFlow",
-                                             "AntiKt4EMPFlowJets_FTAG",]
+                                             "AntiKt4EMPFlowJets"]
 
 
     STDM17SlimmingHelper.AllVariables = ["MuonSegments","InDetTrackParticles",

@@ -207,8 +207,6 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                            "AntiKt4EMPFlowJets",
                                            "AntiKt10UFOCSSKJets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "BTagging_AntiKt4EMPFlow",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                            "MET_Baseline_AntiKt4EMTopo",
                                            "MET_Baseline_AntiKt4EMPFlow",
                                            "TauJets",
