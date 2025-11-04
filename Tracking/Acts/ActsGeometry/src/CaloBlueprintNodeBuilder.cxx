@@ -103,7 +103,10 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
 
   //for each calo sampling collect all the DDE in a vector    
   for (const CaloDetDescrElement* theDDE : m_caloDetSecrMgr->element_range()){
-    if (!theDDE) ATH_MSG_ERROR("Null pointer to CaloDetDescrElement");
+    if (!theDDE){ 
+      ATH_MSG_ERROR("Null pointer to CaloDetDescrElement");
+      continue;
+    }
     CaloCell_ID::CaloSample currentSample=theDDE->getSampling();
     caloSampleDDEElementsMap[currentSample].push_back(theDDE);
   }
@@ -112,7 +115,7 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
     for (auto currentSample : caloSampleList) {
       std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
       std::sort(currentElements.begin(), currentElements.end(), [](const CaloDetDescrElement* a, const CaloDetDescrElement* b) {return a->z() < b->z();});
-      caloSampleDDEElementsMap[currentSample] = currentElements;
+      caloSampleDDEElementsMap[currentSample] = std::move(currentElements);
     }
   };
 
@@ -335,7 +338,7 @@ void ActsTrk::CaloBlueprintNodeBuilder::addCylindricalTrackingVolumeToCaloNode(C
       std::make_shared<CylinderVolumeBounds>(caloDimensionMap[volumeName+"MinR"], caloDimensionMap[volumeName+"MaxR"], caloDimensionMap[volumeName+"HalfLengthZ"]),
       volumeName);
 
-  for (auto surface : surfaces) trackingVolume->addSurface(surface);
+  for (auto surface : surfaces) trackingVolume->addSurface(std::move(surface));
 
 
   cylinder.addStaticVolume(std::move(trackingVolume));
