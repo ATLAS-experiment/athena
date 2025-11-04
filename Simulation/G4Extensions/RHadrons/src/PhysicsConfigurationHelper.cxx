@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "G4ios.hh"
 #include "PhysicsConfigurationHelper.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include <iostream>
 #include <fstream>
-#include <stdexcept>
 
-#include "CxxUtils/checker_macros.h"
 
 PhysicsConfigurationHelper::PhysicsConfigurationHelper()
 {
@@ -105,7 +104,7 @@ void PhysicsConfigurationHelper::ReadAndParse(const G4String& str,
       while(temp[temp.size()-1] == ' ') temp.erase(temp.size()-1,1);
 
       // Found a token, add it to the vector.
-      tokens.push_back(temp);
+      tokens.push_back(std::move(temp));
 
       // Skip delimiters.  Note the "not_of"
       lastPos = str.find_first_not_of(delimiters, pos);
