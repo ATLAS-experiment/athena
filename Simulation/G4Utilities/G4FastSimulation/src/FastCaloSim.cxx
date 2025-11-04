@@ -257,7 +257,7 @@ void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
     for (unsigned int i = 0; i < 24; i++){simEfrac.push_back(simState.Efrac(i));}
 
     // run actual method (no return, it will do fastStep.CreateSecondaryTrack(...) under the hood)
-    m_PunchThroughSimWrapper->DoPunchThroughSim(*ptable, G4Random::getTheEngine(), simE, simEfrac, fastTrack, fastStep);
+    m_PunchThroughSimWrapper->DoPunchThroughSim(*ptable, G4Random::getTheEngine(), simE, std::move(simEfrac), fastTrack, fastStep);
   }
 
   // Clean up the auxiliary info from the simulation state
