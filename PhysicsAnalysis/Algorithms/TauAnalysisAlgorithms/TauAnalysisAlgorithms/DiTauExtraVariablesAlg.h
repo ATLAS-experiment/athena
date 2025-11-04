@@ -23,18 +23,22 @@ namespace CP {
 
   private:
     SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditausKey { this, "ditaus", "", "the input ditau jet container" };
-    
+
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_omniScoreKey{this, "omniScore", "omniScore", "decoration name for the ditau ID"};
+      
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetPtKey{this, "leadSubjetPt", "leadSubjetPt", "decoration name for leading subjet pt"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetEtaKey{this, "leadSubjetEta", "leadSubjetEta", "decoration name for leading subjet eta"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetPhiKey{this, "leadSubjetPhi", "leadSubjetPhi", "decoration name for leading subjet phi"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetEKey{this, "leadSubjetE", "leadSubjetE", "decoration name for leading subjet energy"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetNTracksKey{this, "leadSubjetNTracks", "leadSubjetNTracks", "decoration name for leading subjet number of tracks"};
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_leadSubjetChargeKey{this, "leadSubjetCharge", "leadSubjetCharge", "decoration name for leading subjet charge"};
 
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetPtKey{this, "subleadSubjetPt", "subleadSubjetPt", "decoration name for subleading subjet pt"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetEtaKey{this, "subleadSubjetEta", "subleadSubjetEta", "decoration name for subleading subjet eta"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetPhiKey{this, "subleadSubjetPhi", "subleadSubjetPhi", "decoration name for subleading subjet phi"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetEKey{this, "subleadSubjetE", "subleadSubjetE", "decoration name for subleading subjet energy"};
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetNTracksKey{this, "subleadSubjetNTracks", "subleadSubjetNTracks", "decoration name for subleading subjet number of tracks"};
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_subleadSubjetChargeKey{this, "subleadSubjetCharge", "subleadSubjetCharge", "decoration name for subleading subjet charge"};
 
   };
 
