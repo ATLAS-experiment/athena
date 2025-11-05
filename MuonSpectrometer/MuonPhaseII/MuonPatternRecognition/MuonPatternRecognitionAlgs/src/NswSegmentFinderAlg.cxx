@@ -2,9 +2,10 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CombinatorialNSWSeedFinderAlg.h"
+#include "NswSegmentFinderAlg.h"
 
 #include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
+#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
 #include <MuonTruthHelpers/MuonSimHitHelpers.h>
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
@@ -55,24 +56,39 @@ namespace MuonR4 {
 
 using namespace SegmentFit;
 constexpr unsigned int minLayers{4};
+using CalibSpacePointVec = ISpacePointCalibrator::CalibSpacePointVec;
 
-StatusCode CombinatorialNSWSeedFinderAlg::initialize() {
+StatusCode NswSegmentFinderAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_etaKey.initialize());
-    ATH_CHECK(m_writeKey.initialize());
+    ATH_CHECK(m_writeSegmentKey.initialize());
+    ATH_CHECK(m_writeSegmentSeedKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(m_calibTool.retrieve());
     ATH_CHECK(m_visionTool.retrieve(DisableTool{m_visionTool.empty()}));
 
     if (!(m_idHelperSvc->hasMM() || m_idHelperSvc->hasSTGC())) {
         ATH_MSG_ERROR("MM or STGC not part of initialized detector layout");
         return StatusCode::FAILURE;
     }
-   
+
+    SegmentLineFitter::Config fitCfg{};
+    fitCfg.calibrator = m_calibTool.get();
+    fitCfg.visionTool = m_visionTool.get();
+    fitCfg.idHelperSvc = m_idHelperSvc.get();
+    
+    m_lineFitter = std::make_unique<SegmentFit::SegmentLineFitter>(name(), std::move(fitCfg));
+
+    if(m_dumpSeedStatistics){
+
+        m_seedCounter = std::make_unique<SeedStatistics>();
+    }
+
     return StatusCode::SUCCESS;
 }
 
-CombinatorialNSWSeedFinderAlg::UsedHitMarker_t 
-    CombinatorialNSWSeedFinderAlg::emptyBookKeeper(const HitLayVec& sortedSp) const{
+NswSegmentFinderAlg::UsedHitMarker_t 
+    NswSegmentFinderAlg::emptyBookKeeper(const HitLayVec& sortedSp) const{
         UsedHitMarker_t emptyKeeper(sortedSp.size());
         for (std::size_t l = 0; l < sortedSp.size(); ++l) {
             emptyKeeper[l].resize(sortedSp[l].size(), 0);
@@ -80,8 +96,8 @@ CombinatorialNSWSeedFinderAlg::UsedHitMarker_t
         return emptyKeeper;
 }
 
-CombinatorialNSWSeedFinderAlg::StripOrient 
-    CombinatorialNSWSeedFinderAlg::classifyStrip(const SpacePoint& sp) const{
+NswSegmentFinderAlg::StripOrient 
+    NswSegmentFinderAlg::classifyStrip(const SpacePoint& sp) const{
     
     if (sp.type() == xAOD::UncalibMeasType::MMClusterType) {
         const auto& design = getDesign(sp);
@@ -100,8 +116,8 @@ CombinatorialNSWSeedFinderAlg::StripOrient
     ATH_MSG_WARNING("Cannot classify orientation of "<<m_idHelperSvc->toString(sp.identify()));
     return StripOrient::Unknown;
 }
-inline CombinatorialNSWSeedFinderAlg::HitWindow 
-    CombinatorialNSWSeedFinderAlg::hitFromIPCorridor(const SpacePoint& testHit, 
+inline NswSegmentFinderAlg::HitWindow 
+    NswSegmentFinderAlg::hitFromIPCorridor(const SpacePoint& testHit, 
                                                      const Amg::Vector3D& beamSpotPos, 
                                                      const Amg::Vector3D& dirEstUp,
                                                      const Amg::Vector3D& dirEstDn) const{
@@ -156,7 +172,7 @@ inline CombinatorialNSWSeedFinderAlg::HitWindow
 #define TEST_HIT_CORRIDOR(LAYER, HIT_ITER, START_LAYER)               \
 {                                                                     \
     const SpacePoint* testMe = combinatoricLayers[LAYER].get()[HIT_ITER]; \
-    if (usedHits[LAYER].get()[HIT_ITER]) {                 \
+    if (usedHits[LAYER].get()[HIT_ITER] > m_maxUsed) {                 \
         ATH_MSG_VERBOSE(__func__<<":"<<__LINE__<<" - "     \
             <<m_idHelperSvc->toString(testMe->identify())  \
             <<" already used in good seed." );             \
@@ -178,7 +194,7 @@ inline CombinatorialNSWSeedFinderAlg::HitWindow
     }                                                          \
 }
 
-void CombinatorialNSWSeedFinderAlg::constructPrelimnarySeeds(const Amg::Vector3D& beamSpot,
+void NswSegmentFinderAlg::constructPrelimnarySeeds(const Amg::Vector3D& beamSpot,
                                                              const HitLaySpan_t& combinatoricLayers,
                                                              const UsedHitSpan_t& usedHits,
                                                              InitialSeedVec_t& seedHitsFromLayers) const {
@@ -196,7 +212,7 @@ void CombinatorialNSWSeedFinderAlg::constructPrelimnarySeeds(const Amg::Vector3D
     
     for( ; iterLay0 <  combinatoricLayers[0].get().size() ; ++iterLay0){
         /// The hit is alrady in a good seed. Don't consider again
-        if (usedHits[0].get()[iterLay0]) {
+        if (usedHits[0].get()[iterLay0] > m_maxUsed) {
             continue;
         }
         const SpacePoint* hit0 = combinatoricLayers[0].get()[iterLay0];
@@ -226,8 +242,8 @@ void CombinatorialNSWSeedFinderAlg::constructPrelimnarySeeds(const Amg::Vector3D
 }
 #undef TEST_HIT_CORRIDOR
 
-CombinatorialNSWSeedFinderAlg::HitVec 
-    CombinatorialNSWSeedFinderAlg::extendHits(const Amg::Vector3D& startPos, 
+NswSegmentFinderAlg::HitVec 
+    NswSegmentFinderAlg::extendHits(const Amg::Vector3D& startPos, 
                                               const Amg::Vector3D& direction, 
                                               const HitLaySpan_t& extensionLayers,
                                               const UsedHitSpan_t& usedHits) const {
@@ -246,7 +262,7 @@ CombinatorialNSWSeedFinderAlg::HitVec
        
         // loop over the hits on the same layer
         for (unsigned int j = 0; j < layer.size(); ++j) {
-            if (usedHits[i].get().at(j)) {
+            if (usedHits[i].get().at(j) > m_maxUsed) {
                 continue;
             }
             auto hit = layer.at(j);
@@ -280,11 +296,29 @@ CombinatorialNSWSeedFinderAlg::HitVec
 }
 
 std::unique_ptr<SegmentSeed> 
-    CombinatorialNSWSeedFinderAlg::buildSegmentSeed(const InitialSeed_t& initialSeed,
+    NswSegmentFinderAlg::buildSegmentSeed(const InitialSeed_t& initialSeed,
                                                     const AmgSymMatrix(2)& bMatrix, 
                                                     const HoughMaximum& max, 
                                                     const HitLaySpan_t& extensionLayers,
                                                     const UsedHitSpan_t& usedHits) const {
+                                                        
+
+    //we reject seeds with all clusters' sizes less than min value
+    bool allValid = std::all_of(initialSeed.begin(), initialSeed.end(), [this](const auto& hit){
+
+    if (hit->type() == xAOD::UncalibMeasType::MMClusterType) {
+        const auto* mmClust = static_cast<const xAOD::MMCluster*>(hit->primaryMeasurement());
+        return mmClust->stripNumbers().size() >= m_minClusSize;
+    }
+        
+        return false;
+    });
+
+    if (!allValid) {
+        ATH_MSG_VERBOSE("Seed rejection: Not all clusters meet minimum strip size");
+        return nullptr; 
+    }
+    
 
     std::array<double, 4> params = defineParameters(bMatrix, initialSeed);
 
@@ -311,26 +345,52 @@ std::unique_ptr<SegmentSeed>
     auto extendedHits = extendHits(segPos, direction, extensionLayers, usedHits);
     HitVec hits{initialSeed.begin(),initialSeed.end()};
     hits.insert(hits.end(), extendedHits.begin(), extendedHits.end());
+    
+
     return std::make_unique<SegmentSeed>(tanBeta, interceptY, tanAlpha,
                                          interceptX, hits.size(),
                                          std::move(hits), max.parentBucket());
 }
 
 
-std::vector<std::unique_ptr<SegmentSeed>>
-CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, const ActsTrk::GeometryContext &gctx) const {
+std::unique_ptr<Segment> NswSegmentFinderAlg::fitSegmentSeed(const EventContext& ctx,
+                                                                       const ActsTrk::GeometryContext& gctx, 
+                                                                       const SegmentSeed* patternSeed) const{
+
+    ATH_MSG_VERBOSE("Fit the SegmentSeed");
+
+    //Calibration of the seed spacepoints
+    CalibSpacePointVec calibratedHits = m_calibTool->calibrate(ctx, patternSeed->getHitsInMax(), 
+    patternSeed->localPosition(), patternSeed->localDirection(), 0.);
+
+    const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTrans(gctx)};
+ 
+    auto segment = m_lineFitter->fitSegment(ctx, patternSeed, patternSeed->parameters(),
+                                                locToGlob, std::move(calibratedHits));
+
+    return segment;
+
+}
+
+std::pair<std::vector<std::unique_ptr<SegmentSeed>>, std::vector<std::unique_ptr<Segment>>>
+NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max, const ActsTrk::GeometryContext &gctx, const EventContext& ctx) const {
     // first sort the hits per layer from the maximum
     SpacePointPerLayerSplitter hitLayers{max.getHitsInMax()};
 
     const HitLayVec& stripHitsLayers{hitLayers.stripHits()};
     const std::size_t layerSize = stripHitsLayers.size();
     
+    //seeds and segments containers
     std::vector<std::unique_ptr<SegmentSeed>> seeds{};
+    std::vector<std::unique_ptr<Segment>> segments{};
+
+    //counters for the number of seeds, extented seeds and segments
+    unsigned int nSeeds{0}, nExtSeeds{0}, nSegments{0};
 
 
     if (layerSize < minLayers) {
         ATH_MSG_VERBOSE("Not enough layers to build a seed");
-        return seeds;
+        return std::make_pair(std::move(seeds),std::move(segments));
     }
 
 
@@ -355,11 +415,13 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
                                 !design.hasStereoAngle() ? "X" : design.stereoAngle() >0 ? "U": "V",pull, pull2),legX,legY,14));
             legY-=0.05;           
         }
-        m_visionTool->visualizeBucket(Gaudi::Hive::currentContext(), *max.parentBucket(),
+        m_visionTool->visualizeBucket(ctx, *max.parentBucket(),
                                       "truth", std::move(primitives));
     }
 
-    UsedHitMarker_t allUsedHits = emptyBookKeeper(stripHitsLayers);
+    UsedHitMarker_t allUsedHits = emptyBookKeeper(stripHitsLayers); 
+      
+
     const Amg::Transform3D globToLocal = max.msSector()->globalToLocalTrans(gctx);
     std::array<const SpacePoint*, 4> seedHits{};
 
@@ -373,12 +435,27 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
                 seedHits[2] = stripHitsLayers[k].front();
                 for (std::size_t l = k + 1; l < layerSize; ++l) {
                     seedHits[3] = stripHitsLayers[l].front();
+
+                    const HitLaySpan_t layers{stripHitsLayers[i], stripHitsLayers[j], stripHitsLayers[k], stripHitsLayers[l]};
+
+                    //skip combination with at least one too busy layer
+                    if (std::any_of(layers.begin(), layers.end(),
+                    [this](const auto& layer) {
+                    return layer.get().size() > m_maxClustersInLayer;
+                    })) {
+                        continue; // skip this combination
+                    }
+
                     AmgSymMatrix(2) bMatrix = betaMatrix(seedHits);                   
                     if (std::abs(bMatrix.determinant()) < 1.e-6) {
                         continue;
                     }
+                  ATH_MSG_DEBUG("Space point positions for seed layers: "
+                                 << Amg::toString(seedHits[0]->localPosition()) << ", "
+                                 << Amg::toString(seedHits[1]->localPosition()) << ", "
+                                 << Amg::toString(seedHits[2]->localPosition()) << ", "
+                                 << Amg::toString(seedHits[3]->localPosition()));
                   
-                    const HitLaySpan_t layers{stripHitsLayers[i], stripHitsLayers[j], stripHitsLayers[k], stripHitsLayers[l]};
                     UsedHitSpan_t usedHits{allUsedHits[i], allUsedHits[j], allUsedHits[k], allUsedHits[l]};    
                     // each layer may have more than one hit - take the hit combinations                    
                     constructPrelimnarySeeds(globToLocal.translation(), layers, usedHits, preLimSeeds);
@@ -398,37 +475,110 @@ CombinatorialNSWSeedFinderAlg::findSeedsFromMaximum(const HoughMaximum &max, con
                     // start by 4 hits for the seed and try to build the seed for the combinatorics found
                     for (auto &combinatoricHits : preLimSeeds) {
                         auto seed = buildSegmentSeed(combinatoricHits, bMatrix, max, extensionLayers, usedExtensionHits);
-                        if (seed) {
-                            markHitsAsUsed(*seed,stripHitsLayers, allUsedHits);
-                            seeds.push_back(std::move(seed));
+                        if (seed) {                            
+                        //if the seed build is successful, try to build the segment 
+                         ++nSeeds;  
+                        if(seed->getHitsInMax().size() < m_minSeedHits){
+                            ATH_MSG_VERBOSE("Not succesfully extended seed");
+                            continue;
+                           
                         }
+                        ++nExtSeeds;
+                        std::unique_ptr<Segment> segment = fitSegmentSeed(ctx, gctx, seed.get());
+                        seeds.push_back(std::move(seed)); 
+                                          
+
+                        if (!segment) {
+                            ATH_MSG_VERBOSE("Seed Rejection: Segment fit failed");
+                            if(m_markHitsFromSeed){
+                                //mark hits from extended seed if no succesfully led to segment
+                                markHitsAsUsed(seeds.back()->getHitsInMax(), stripHitsLayers, allUsedHits, 1, false);
+                            }
+                            continue;
+                        }
+
+                        ++nSegments;
+                        // Flag hits as used and in the window around segment   
+                        HitVec segMeasSP;
+                        segMeasSP.reserve(segment->measurements().size());
+                        std::transform(segment->measurements().begin(),
+                                        segment->measurements().end(),
+                                        std::back_inserter(segMeasSP),
+                                        [](const auto& m) { return m->spacePoint(); });
+                            //mark hits from segment
+                        markHitsAsUsed(segMeasSP, stripHitsLayers, allUsedHits, 10, true);
+                        segments.push_back(std::move(segment));
+
+                        }                        
                     }
                 }
             }
         }
     }
 
-    return seeds;
+    if(m_dumpSeedStatistics){
+        m_seedCounter->addToStat(max.msSector(), nSeeds, nExtSeeds, nSegments);
+    }
+    
+    return std::make_pair(std::move(seeds),std::move(segments));
 }
-void CombinatorialNSWSeedFinderAlg::markHitsAsUsed(const SegmentSeed& seed,
-                                                   const HitLayVec& allSortHits,
-                                                   UsedHitMarker_t& usedHitMarker) const {
-    /// That's ultra slow & should be revised
-    for (const auto* sp : seed.getHitsInMax()) {
+
+
+void NswSegmentFinderAlg::markHitsAsUsed(const HitVec& spacePoints,
+                                        const HitLayVec& allSortHits,
+                                        UsedHitMarker_t& usedHitMarker, 
+                                        unsigned int incr,
+                                        bool markNeighborHits) const {
+
+    SpacePointPerLayerSorter layerSorter{};
+      
+    for(const auto& sp : spacePoints){
+
+        if(!sp){
+            continue;
+        }           
+
+        unsigned int measLayer = layerSorter.sectorLayerNum(*sp);
+        
         bool found{false};
+        double spPosX = sp->primaryMeasurement()->localPosition<1>().x();
+
         for (std::size_t lIdx = 0; !found && lIdx < allSortHits.size(); ++lIdx) {
             const HitVec& hVec{allSortHits[lIdx]}; 
+            //check if they are not in the same layer
+            unsigned int hitLayer = layerSorter.sectorLayerNum(*hVec.front());
+            if(hitLayer != measLayer){
+                ATH_MSG_VERBOSE("Not in the same layer since measLayer = "<< measLayer << " and "<<hitLayer);
+                continue;
+            }
+            
             for (std::size_t hIdx  = 0 ; hIdx < hVec.size(); ++hIdx) {
-                if (hVec[hIdx] == sp) {
-                    usedHitMarker[lIdx][hIdx] = true;
-                    found = true;
-                    break;
+                //check the dY between the measurement and the hits
+                
+                auto testHit = hVec[hIdx];
+                              
+                if (testHit == sp) {
+                    usedHitMarker[lIdx][hIdx] += incr;
+                    found = true;   
+                    if(!markNeighborHits){
+                        break;
+                    }                     
                 }
+
+                //if the hit not found let's see if it is too close to the segment's measurement  
+                double deltaX = std::abs(testHit->primaryMeasurement()->localPosition<1>().x() - spPosX);          
+                if(deltaX < m_maxdYWindow){               
+                    usedHitMarker[lIdx][hIdx] += incr;
+                    
+                }    
             }
         }
+
     }
+    
 }
-StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const {
+
+StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
     // read the inputs
     const EtaHoughMaxContainer *maxima{nullptr};
     ATH_CHECK(SG::get( maxima, m_etaKey, ctx));
@@ -437,13 +587,18 @@ StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const
     ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // prepare our output collection
-    SG::WriteHandle writeMaxima{m_writeKey, ctx};
-    ATH_CHECK(writeMaxima.record(std::make_unique<SegmentSeedContainer>()));
+    SG::WriteHandle writeSegments{m_writeSegmentKey, ctx};
+    ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
+
+    SG::WriteHandle writeSegmentSeeds{m_writeSegmentSeedKey, ctx};
+    ATH_CHECK(writeSegmentSeeds.record(std::make_unique<SegmentSeedContainer>()));
 
     // we use the information from the previous eta-hough transform
     // to get the combined hits that belong in the same maxima
     for (const HoughMaximum *max : *maxima) {
-        std::vector<std::unique_ptr<SegmentSeed>> seeds = findSeedsFromMaximum(*max, *gctx);
+
+        auto [seeds, segments] = findSegmentsFromMaximum(*max, *gctx, ctx);
+       
         if (msgLvl(MSG::VERBOSE)) {
             for(const auto& hitMax : max->getHitsInMax()){
                 ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitMax->identify())<<", "
@@ -451,8 +606,10 @@ StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const
                                 <<Amg::toString(hitMax->sensorDirection()));
             }
         }
-        for (auto &seed : seeds) {
-            if (msgLvl(MSG::VERBOSE)){
+
+        for(auto& seed: seeds){
+
+             if (msgLvl(MSG::VERBOSE)){
                 std::stringstream sstr{};
                 sstr<<"Seed tanBeta = "<<seed->tanBeta()<<", y0 = "<<seed->interceptY()
                          <<", tanAlpha = "<<seed->tanAlpha()<<", x0 = "<<seed->interceptX()<<", hits in the seed "
@@ -467,10 +624,80 @@ StatusCode CombinatorialNSWSeedFinderAlg::execute(const EventContext &ctx) const
             if (m_visionTool.isEnabled()) {          
                 m_visionTool->visualizeSeed(ctx, *seed, "#phi-combinatorialSeed");
             }
-            writeMaxima->push_back(std::move(seed));
+
+            writeSegmentSeeds->push_back(std::move(seed));
+
         }
+
+        for (auto &seg : segments) {
+
+            const Parameters pars = localSegmentPars(*gctx, *seg);
+
+            ATH_MSG_VERBOSE("Segment parameters : "<<toString(pars));
+
+            if (m_visionTool.isEnabled()) {          
+                m_visionTool->visualizeSegment(ctx, *seg, "#phi-segment");
+            }
+            
+            writeSegments->push_back(std::move(seg));
+            
+        }
+    }
+    
+    return StatusCode::SUCCESS;
+}
+
+StatusCode NswSegmentFinderAlg::finalize(){
+    
+    if(m_dumpSeedStatistics){
+        m_seedCounter->printTableSeedStats(msgStream());
     }
     return StatusCode::SUCCESS;
 }
+
+void NswSegmentFinderAlg::SeedStatistics::addToStat(const MuonGMR4::SpectrometerSector* msSector, unsigned int seeds, unsigned int extSeeds, unsigned int segments){
+    std::unique_lock guard{m_mutex};
+    SectorField key{};
+    key.chIdx = msSector->chamberIndex();
+    key.phi = msSector->stationPhi();
+    key.eta = msSector->chambers().front()->stationEta();
+    key.side = msSector->side();
+
+    auto &entry = m_seedStat[key]; 
+    entry.nSeeds    += seeds;
+    entry.nExtSeeds += extSeeds;
+    entry.nSegments += segments;
+}
+
+void NswSegmentFinderAlg::SeedStatistics::printTableSeedStats(MsgStream& msg) const{
+
+
+   msg<<MSG::ALWAYS<<"Seed statistics per sector:"<<endmsg;
+   msg<<MSG::ALWAYS<<"------------------------------------------------------------"<<endmsg;
+   msg<<MSG::ALWAYS<<"| Chamber | Phi | Eta | Side |   Seeds | ExtSeeds | Segments |"<<endmsg;
+   msg<<MSG::ALWAYS<<"------------------------------------------------------------"<<endmsg;
+
+   using Muon::MuonStationIndex::ChIndex;
+
+    for (const auto& entry : m_seedStat) {
+        const auto& sector = entry.first;
+        const auto& stats  = entry.second;
+
+        
+        msg<<MSG::ALWAYS << "| " << std::setw(3) << (sector.chIdx == ChIndex::EIL ? "EIL" :"EIS")
+                        <<"  | " << std::setw(2) << sector.phi
+                        << " | " << std::setw(3) << sector.eta
+                        << " | " << std::setw(4) << (sector.side > 0 ? "A" : "C")
+                        << " | " << std::setw(7) << stats.nSeeds
+                        << " | " << std::setw(8) << stats.nExtSeeds
+                        << " | " << std::setw(8) << stats.nSegments
+                        << " |"<<endmsg;
+
+        
+    }
+
+    msg<<MSG::ALWAYS<<"------------------------------------------------------------"<<endmsg;
+ }
+  
 
 }  // namespace MuonR4
