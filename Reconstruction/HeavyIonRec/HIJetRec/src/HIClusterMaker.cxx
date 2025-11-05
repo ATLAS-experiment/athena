@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIClusterMaker.h"
@@ -99,7 +99,7 @@ StatusCode HIClusterMaker::execute(const EventContext &ctx) const
     float eta0=towerItr->eta();
     float phi0=towerItr->phi();
 
-    if(E_cl < m_EminMoment)
+    if(E_cl < m_EminMoment || E_cl==0)
     {
       eta_cl=eta0;
       phi_cl=phi0;
