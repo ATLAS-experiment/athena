@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/RCUObject.icc
@@ -33,49 +33,9 @@ void IRCUObject::quiescent()
 inline
 void IRCUObject::quiescent (const EventContext& ctx)
 {
-  if (!m_dirty) return;
-  lock_t g (m_mutex);
-  if (!endGrace(g, ctx, m_grace)) {
-    clearAll(g);
-    m_nold = 0;
-    m_dirty = false;
+  if (m_dirty) {
+    quiescentOol (ctx);
   }
-  else if (m_nold > 0 && !endGrace(g, ctx, m_oldGrace)) {
-    if (clearOld(g, m_nold)) {
-      m_dirty = false;
-    }
-    m_nold = 0;
-  }
-}
-
-
-/**
- * @brief Declare that the grace period for a slot is ending.
- * @param lock Lock object (external locking).
- * @param ctx Event context for the slot.
- * @returns true if any slot is still in a grace period.
- *          false if no slots are in a grace period.
- *
- * The caller must be holding the mutex for this object.
- */
-inline
-bool IRCUObject::endGrace (lock_t& lock, const EventContext& ctx)
-{
-  return endGrace (lock, ctx, m_grace);
-}
-
-
-/**
- * @brief Declare that all slots are in a grace period.
- * @param Lock object (external locking).
- *
- * The caller must be holding the mutex for this object.
- */
-inline
-void IRCUObject::setGrace (lock_t& /*lock*/)
-{
-  m_grace.set();
-  if (!m_dirty) m_dirty = true;
 }
 
 
@@ -86,48 +46,6 @@ inline
 typename IRCUObject::mutex_t& IRCUObject::mutex()
 {
   return m_mutex;
-}
-
-
-/**
- * @brief Make existing pending objects old, if possible.
- * @param lock Lock object (external locking).
- * @param garbageSize Present number of objects pending deletion.
- *
- * A new object is about to be added to the list of objects pending deletion.
- * If there are any existing pending objects and there are no existing
- * old objects, make the current pending objects old.
- */
-inline
-void IRCUObject::makeOld (lock_t& /*lock*/, size_t garbageSize)
-{
-  if (garbageSize && m_nold == 0) {
-    m_oldGrace = m_grace;
-    m_nold = garbageSize;
-  }
-}
-
-
-/**
- * @brief Declare that the grace period for a slot is ending.
- * @param Lock object (external locking).
- * @param ctx Event context for the slot.
- * @param grace Bitmask tracking grace periods.
- * @returns true if any slot is still in a grace period.
- *          false if no slots are in a grace period.
- *
- * The caller must be holding the mutex for this object.
- */
-inline
-bool IRCUObject::endGrace (lock_t& /*lock*/,
-                           const EventContext& ctx,
-                           boost::dynamic_bitset<>& grace) const
-{
-  EventContext::ContextID_t slot = ctx.slot();
-  if (slot == EventContext::INVALID_CONTEXT_ID) return false;
-  if (slot >= grace.size()) std::abort();
-  grace[slot] = false;
-  return grace.any();
 }
 
 
