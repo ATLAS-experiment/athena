@@ -9,7 +9,7 @@
 #include "ActsGeoUtils/SurfaceEncoding.h"
 
 // this is list of xAOD container variable names that are "hardcoded" in TrackSummary_v1
-// their compatibility is maintain ed by the unit tests: AllStaticxAODVaraiblesAreKnown
+// their compatibility is maintained by the unit tests: AllStaticxAODVariablesAreKnown
 const std::set<std::string> ActsTrk::TrackSummaryContainer::staticVariables = {
     "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
     "ndf",    "nOutliers", "nSharedHits",   "tipIndex", "stemIndex",
@@ -264,7 +264,7 @@ void ActsTrk::MutableTrackSummaryContainer::clear() {
 
 void ActsTrk::MutableTrackSummaryContainer::setReferenceSurface_impl(
     ActsTrk::IndexType itrack, std::shared_ptr<const Acts::Surface> surface) {
-  m_surfaces[itrack] = surface;
+  m_surfaces[itrack] = std::move(surface);
 }
 
 void ActsTrk::MutableTrackSummaryContainer::encodeSurfaces(xAOD::TrackSurfaceAuxContainer* dest, const Acts::GeometryContext& geoContext) {
