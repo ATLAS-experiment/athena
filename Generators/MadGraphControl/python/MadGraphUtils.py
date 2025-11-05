@@ -163,6 +163,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
         # Some events required if we specify MadSpin usage!
         my_settings = {'nevents':'1000'}
+
         if isNLO:
             my_settings['req_acc']=str(required_accuracy)
         else:
@@ -217,6 +218,11 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     # Check the run card
     run_card_consistency_check(isNLO=isNLO)
 
+    # For grid packs we also need to move the systematics program aside
+    if grid_pack:
+        original_systematics_program = None if 'systematics_program' not in my_MGC_instance.runCardDict else my_MGC_instance.runCardDict['systematics_program']
+        modify_run_card(process_dir=process_dir,settings={'systematics_program':'None'},skipBaseFragment=True)
+
     # Since the consistency check can update some settings, print the cards now
     print_cards_from_dir(process_dir=os.getcwd())
 
@@ -264,6 +270,9 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         energy = energy.replace('.0','').replace('.','p')
         gridpack_name='mc_'+energy+'TeV.'+get_physics_short()+'.GRID.tar.gz'
         mglog.info('Tidying up gridpack '+gridpack_name)
+
+        # Return the setting for the systematics_program
+        modify_run_card(process_dir=process_dir,settings={'systematics_program':original_systematics_program})
 
         if not isNLO:
             # At LO, no events are generated. That means we need to move the MS card aside and back.
