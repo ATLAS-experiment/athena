@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,7 +19,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
   kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
   kwargs.setdefault("UseBeamTilt", False)
 
-  isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
+  isLRT = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
   
   kwargs.setdefault("pTmin", 0.9 * GaudiUnits.GeV)
   kwargs.setdefault("MaxGraphEdges", 3000000)
