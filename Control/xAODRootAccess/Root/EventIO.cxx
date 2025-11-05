@@ -47,17 +47,17 @@ StatusCode Event::copy(const std::string& pattern) {
     if (std::regex_match(key, re) == false) {
       continue;
     }
-    // Ignore objects that don't exist on the input.
-    static const bool SILENT = true;
-    if (connectObject(key, SILENT).isSuccess() == false) {
-      continue;
-    }
     // Skip all branches ending in "Aux.":
     if (key.ends_with("Aux.")) {
       continue;
     }
     // Also skip dynamic branches:
     if (efe.parentName() != "") {
+      continue;
+    }
+    // Ignore objects that don't exist on the input.
+    static const bool SILENT = true;
+    if (connectObject(key, SILENT).isSuccess() == false) {
       continue;
     }
     // Add the key to the list.
