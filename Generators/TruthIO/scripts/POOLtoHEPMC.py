@@ -54,5 +54,5 @@ if flags.Output.CompressHepMC:
     # Remove the original uncompressed file
     import os
     os.remove(flags.Output.HepMCFileName.replace('.tgz',''))
-else if '.tar' in flags.Output.HepMCFileName or '.tar.gz' in flags.Output.HepMCFileName:
+elif '.tar' in flags.Output.HepMCFileName or '.tar.gz' in flags.Output.HepMCFileName:
     print('Check input flags -- no compression was requested, but the output file name looks like it expects to be a compressed tarball')
