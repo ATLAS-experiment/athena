@@ -31,7 +31,7 @@ namespace DerivationFramework {
     }
 
     std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>  hadronMap=m_Tool->GetOriginMap();
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> originDecorator(m_originDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> originDecorator(m_originDecoratorKey, ctx);
     for (auto* truthParticle : *truthParticles) {
       originDecorator(*truthParticle) = (hadronMap.find(truthParticle)!=hadronMap.end()) ? static_cast<int>(hadronMap[truthParticle]) : 6;
     }
