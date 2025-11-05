@@ -505,7 +505,7 @@ namespace xAOD {
             // Name is mangled in storage, need to un-mangle it before returning it to the user. 
             const std::string unmangledName = names[i].substr(0, names[i].size() - s_collectionSuffix.size());
             if ( std::none_of(returnVec.begin(), returnVec.end(), [&](const auto& s) {return unmangledName == s;}) ) {
-               returnVec.push_back( unmangledName );
+               returnVec.push_back( std::move(unmangledName) );
             }
          }
       }
