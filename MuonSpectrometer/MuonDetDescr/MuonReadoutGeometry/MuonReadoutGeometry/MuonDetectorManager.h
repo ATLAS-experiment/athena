@@ -137,7 +137,6 @@ namespace MuonGM {
         MuonStation* getMuonStation(const std::string& stName, int eta, int phi);
         //<! access to the MuonStation by StationName, Jzz, Jff (amdb indices!!!! not stationPhi and Eta)
         static std::string muonStationKey(const std::string& stName, int statEtaIndex, int statPhiIndex) ;
-        const std::vector<const MuonStation*> getMuonStations() const;
 
         void clearCache();
         void fillCache();

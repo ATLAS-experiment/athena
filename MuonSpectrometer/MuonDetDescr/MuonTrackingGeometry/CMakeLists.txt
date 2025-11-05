@@ -4,7 +4,7 @@
 atlas_subdir( MuonTrackingGeometry )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers )
+find_package( GeoModel COMPONENTS GeoModelKernel )
 
 # Component(s) in the package:
 atlas_add_component( MuonTrackingGeometry
