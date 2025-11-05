@@ -64,8 +64,7 @@ if __name__=="__main__":
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
 
     cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                        CanvasPreFix="SegmentPlotValid",
-                                                                                        AllCanvasName="AllSegmentFitPlots", displayTruthOnly = True,
-                                                                                        saveSinglePDFs = True, saveSummaryPDF= True))
- 
+                                                                                        CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
+                                                                                        displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= True))
+
     executeTest(cfg)

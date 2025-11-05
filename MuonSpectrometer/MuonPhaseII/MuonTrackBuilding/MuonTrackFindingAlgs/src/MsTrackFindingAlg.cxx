@@ -105,7 +105,7 @@ namespace MuonR4{
         auto seedContainer = m_seeder->findTrackSeeds(ctx, m_trackingGeometryTool->getGeometryContext(ctx), segments);
 
         if (!m_visualizationTool.empty()) {
-            m_visualizationTool->displaySeeds(ctx, *m_seeder, segments, *seedContainer, "all seeds");
+            m_visualizationTool->displaySeeds(ctx, *m_seeder, segments, *seedContainer);
         }
         return seedContainer;
     }
@@ -188,31 +188,6 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         return std::make_pair(std::move(initialPars),  std::move(measurements));
 
     }
-    void MsTrackFindingAlg::visualizeObj(const Acts::GeometryContext& tgContext,
-                                         const Acts::CalibrationContext& calContext,
-                                         const MsTrackSeed& seed,
-                                         const OptBoundPars_t& parsToExt) const {
-        if (!m_drawEvent) {
-            return;
-        }
-        const EventContext& ctx {*calContext.get<const EventContext*>()};
-        const ActsTrk::GeometryContext& gctx{*tgContext.get<const ActsTrk::GeometryContext*>()};
-        Acts::ObjVisualization3D visualHelper{};
-        if (parsToExt.ok()) {
-            MuonValR4::drawPropagation(m_extrapolationTool->propagationSteps(ctx, *parsToExt).first,
-                                       visualHelper);
-        }
-        std::string saveStr = std::format("MsTrackFinding_{:}", ctx.eventID().event_number());
-        for (const xAOD::MuonSegment* seg : seed.segments()) {
-            MuonValR4::drawSegmentMeasurements(gctx,* seg, visualHelper);
-            MuonValR4::drawSegmentLine(gctx,*seg, visualHelper);
-            saveStr += std::format("_{:}_{:}", printID(*seg), seg->index());
-        }
-        saveStr+=".obj";
-        visualHelper.write(saveStr);
-    }
-
-
     bool MsTrackFindingAlg::fitSeedCandidate(const Acts::GeometryContext& tgContext,
                                              const Acts::MagneticFieldContext& mfContext,
                                              const Acts::CalibrationContext& calContext,
@@ -220,12 +195,14 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                                              ActsTrk::MutableTrackContainer& outContainer) const {
         
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Attempt to fit a new track seed \n"<<seed);
-
+        const EventContext& ctx{*calContext.get<const EventContext*>()};
         const auto [initialPars, measurements] = prepareFit(tgContext, mfContext, calContext, seed);
         
         if (!initialPars.ok()) {
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to construct valid parameters for seed \n"<<seed);
-            visualizeObj(tgContext, calContext, seed, initialPars);
+            if (m_visualizationTool.isEnabled()) {
+                m_visualizationTool->displayTrackSeedObj(ctx, seed, initialPars, "FailedStartPars");
+            }
             return false;
         }
         auto fitTraject = m_trackFitTool->fit(measurements, *initialPars, 
@@ -233,13 +210,19 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                                               &(*initialPars).referenceSurface());
         if (!fitTraject || fitTraject->size() == 0) {
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fit failed ");
-            visualizeObj(tgContext, calContext, seed, initialPars);
+            if (m_visualizationTool.isEnabled()) {
+                m_visualizationTool->displayTrackSeedObj(ctx, seed, initialPars, "FailedFit");
+            }
             return false;
         }
         outContainer.ensureDynamicColumns(*fitTraject);
         auto destProxy = outContainer.getTrack(outContainer.addTrack());
         destProxy.copyFrom(fitTraject->getTrack(0));
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Good track fit...");
+        if (m_visualizationTool.isEnabled()) {
+            m_visualizationTool->displayTrackSeedObj(ctx, seed, 
+                destProxy.createParametersAtReference(), "GoodFit");
+        }
         for (const auto state : destProxy.trackStates()) {
             if (!state.hasUncalibratedSourceLink()){
                 continue;

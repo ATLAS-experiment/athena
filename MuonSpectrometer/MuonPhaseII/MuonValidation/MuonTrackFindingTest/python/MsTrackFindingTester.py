@@ -18,6 +18,8 @@ def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
         from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
         result.merge(LegacyMuonRecoChainCfg(flags))
         kwargs.setdefault("TruthSegkey", "MuonSegments")
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
     the_tool = CompFactory.MuonValR4.TrackVisualizationTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result    
@@ -75,17 +77,14 @@ if __name__=="__main__":
     cfg.merge(MuonHoughTransformTesterCfg(flags,
                                             VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
-####    cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-####                                                                                                CanvasPreFix="SegmentPlotValid",
-####                                                                                                AllCanvasName="AllSegmentFitPlots",
-####                                                                                                displayTruthOnly = False,
-####                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
-####
-####    cfg.getEventAlgo("NswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-####                                                                                                CanvasPreFix="NswSegmentPlotValid",
-####                                                                                                AllCanvasName="AllSegmentFitPlots",
-####                                                                                                displayTruthOnly = False,
-####                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
+    cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= True))
+ 
+    cfg.getEventAlgo("MuonNswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                            CanvasPreFix="NswSegmentFitPlotValid", outSubDir="SegmentValidPlots",
+                                                                                            doPhiBucketViews = False, saveSinglePDFs = True, 
+                                                                                            saveSummaryPDF= True,CanvasLimits=10000))
 
     
 

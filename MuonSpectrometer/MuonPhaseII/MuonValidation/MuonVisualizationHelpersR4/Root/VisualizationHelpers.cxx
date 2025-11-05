@@ -9,6 +9,14 @@
 namespace MuonValR4{
     using namespace MuonR4;
     using namespace SegmentFit;
+
+    std::vector<std::unique_ptr<TObject>> clone(const std::vector<std::unique_ptr<TObject>>& cloneMe) {
+        std::vector<std::unique_ptr<TObject>> cloned{};
+        for (auto& obj : cloneMe) {
+            cloned.emplace_back(obj->Clone());
+        }
+        return cloned;
+    }
     std::unique_ptr<TEllipse> drawDriftCircle(const Amg::Vector3D& center,
                                               const double radius, const int color,
                                               const int fillStyle) {
