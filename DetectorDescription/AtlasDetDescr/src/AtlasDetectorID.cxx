@@ -9,6 +9,8 @@
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "AtlasDetectorIDHelper.h"
+#include "Identifier/IdContext.h"
+#include "Identifier/ExpandedIdentifier.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictField.h"
 #include "IdDict/IdDictLabel.h"
@@ -1041,4 +1043,131 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         }
     }
     return 0;
+}
+
+
+ExpandedIdentifier
+AtlasDetectorID::indet_exp           (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_INDET_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_exp             (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_LAR_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::tile_exp            (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_TILE_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::muon_exp            (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_MUON_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::calo_exp(void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_CALO_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::fwd_exp             (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_FWD_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::pixel_exp           (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_PIXEL_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::sct_exp             (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_SCT_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::trt_exp             (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_TRT_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::hgtd_exp           (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_HGTD_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lumi_exp           (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_LUMI_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_em_exp          (void) const
+{
+    ExpandedIdentifier result(lar_exp());
+    return (result << m_LAR_EM_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_hec_exp         (void) const
+{
+    ExpandedIdentifier result(lar_exp());
+    return (result << m_LAR_HEC_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_fcal_exp        (void) const
+{
+    ExpandedIdentifier result(lar_exp());
+    return (result << m_LAR_FCAL_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::alfa_exp             (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_ALFA_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::bcm_exp             (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_BCM_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lucid_exp           (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_LUCID_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::zdc_exp             (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_ZDC_ID);
 }
