@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -229,7 +229,7 @@ void prepareDCSFolder(const std::string& key, const FolderData<T>& folderData) {
     coral::AttributeList attributeList;
 
     for (const std::pair<std::string, T>& nameValuePair : nameValuePairs) {
-      std::string name = nameValuePair.first;
+      const std::string & name = nameValuePair.first;
       T value = nameValuePair.second;
       attributeList.extend<T>(name);
       attributeList[name].data<T>() = value;
@@ -263,18 +263,18 @@ void prepareDCSHVFolder(void) {
       int pmt = std::abs(cabling->channel2hole(ROS, channel));
       std::string name = (pmt < 10) ? "HVOUT0" : "HVOUT";
       name += std::to_string(pmt);
-      drawerHV[pmt - 1].first = name;
+      drawerHV[pmt - 1].first = std::move(name);
       drawerHV[pmt - 1].second = getChannelHV(ROS, drawer, channel);
     }
 
     for (; channel < drawerHV.size(); ++channel) {
       std::string name = "TEMP";
       name += std::to_string(channel - TileCalibUtils::MAX_CHAN + 1);
-      drawerHV[channel].first = name;
+      drawerHV[channel].first = std::move(name);
       drawerHV[channel].second = channel;
     }
 
-    hvFolder[drawer + DRAWER_SHIFT_IN_COOL] = drawerHV;
+    hvFolder[drawer + DRAWER_SHIFT_IN_COOL] = std::move(drawerHV);
 
   }
 
@@ -299,14 +299,14 @@ void prepareDCSHVSetFolder(void) {
       int pmt = std::abs(cabling->channel2hole(ROS, channel));
       std::string name = "hvOut";
       name += std::to_string(pmt);
-      drawerHV[pmt - 1].first = name;
+      drawerHV[pmt - 1].first = std::move(name);
       drawerHV[pmt - 1].second = getChannelHVSet(ROS, drawer, channel);
     }
 
     for (int i = 1; i < 5; ++i) {
       std::string name = "hvIn";
       name += std::to_string(i);
-      drawerHV[channel].first = name;
+      drawerHV[channel].first = std::move(name);
       drawerHV[channel].second = 0.0F;
       ++channel;
     }
@@ -314,7 +314,7 @@ void prepareDCSHVSetFolder(void) {
     for (int i = 1; i < 8; ++i) {
       std::string name = "temp";
       name += std::to_string(i);
-      drawerHV[channel].first = name;
+      drawerHV[channel].first = std::move(name);
       drawerHV[channel].second = i * 5.0F;
       ++channel;
     }
@@ -322,7 +322,7 @@ void prepareDCSHVSetFolder(void) {
     for (int i = 1; i < 8; ++i) {
       std::string name = "volt";
       name += std::to_string(i);
-      drawerHV[channel].first = name;
+      drawerHV[channel].first = std::move(name);
       drawerHV[channel].second = i * 2.0F;
       ++channel;
     }
@@ -330,13 +330,13 @@ void prepareDCSHVSetFolder(void) {
     for (int i = 1; i < 3; ++i) {
       std::string name = "vFix";
       name += std::to_string(i);
-      drawerHV[channel].first = name;
+      drawerHV[channel].first = std::move(name);
       drawerHV[channel].second = 1230.0F;
       ++channel;
     }
 
 
-    hvSetFolder[drawer + DRAWER_SHIFT_IN_COOL] = drawerHV;
+    hvSetFolder[drawer + DRAWER_SHIFT_IN_COOL] = std::move(drawerHV);
 
   }
 
@@ -359,7 +359,7 @@ void prepareDCSStatesFolder(void) {
     std::vector<std::pair<std::string, int32_t>> drawerStates{
       {"FORDAQ_MBHV", drawerState[drawer]}
     };
-    statesFolder[drawer + DRAWER_SHIFT_IN_COOL] = drawerStates;
+    statesFolder[drawer + DRAWER_SHIFT_IN_COOL] = std::move(drawerStates);
   }
 
   prepareDCSFolder(TILE_DCS_STATES, statesFolder);

@@ -116,12 +116,12 @@ StatusCode TilePaterMonTool:: initialize()
       m_fragIDsToIgnoreDMUerrors = v;
     }
 
-    if ( m_fragIDsDemonstrators.size() == 0) {
-      m_fragIDsDemonstrators = v;
+    if ( m_fragIDsDemonstrators.empty()) {
+      m_fragIDsDemonstrators = std::move(v);
     }
   }
 
-  if ( m_fragIDsToIgnoreDMUerrors.size() != 0) {
+  if ( not m_fragIDsToIgnoreDMUerrors.empty()) {
 
     std::sort(m_fragIDsToIgnoreDMUerrors.begin(),m_fragIDsToIgnoreDMUerrors.end());
 
