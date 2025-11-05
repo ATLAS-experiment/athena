@@ -207,7 +207,7 @@ void AnalysisConfig_Ntuple::book() {
 		return;
 	}
 
-	m_provider->msg(MSG::INFO) << "[91;1m" << " Successfully retrived the TrigDecisionTool" << "[m" << endmsg;
+	m_provider->msg(MSG::INFO) << "[91;1m" << " Successfully retrieved the TrigDecisionTool" << "[m" << endmsg;
 	m_provider->msg(MSG::INFO) << "[91;1m" << " booking ntuple" << "[m" << endmsg;
 	m_provider->msg(MSG::INFO) << "[91;1m" << " trying to create new ntple file" << "[m" << endmsg;
 
