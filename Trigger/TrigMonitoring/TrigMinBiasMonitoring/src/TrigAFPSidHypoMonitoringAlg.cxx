@@ -44,20 +44,19 @@ StatusCode TrigAFPSidHypoMonitoringAlg::fillHistograms(const EventContext& conte
   auto xDiff = Monitored::Scalar("xDiff",-999.);
   auto yDiff = Monitored::Scalar("yDiff",-999.);
 
-  float dR = -999.;
-  float dRmin = 9e9;
-
   // Match online track to offline
-  for(const auto track: *tracksAFP){
-    for(const auto off_track: *tracksAFPoff){
+  for(const auto* track: *tracksAFP){
+    float dRmin = 9e9;
+    for(const auto* off_track: *tracksAFPoff){
       
-      xDiff = track->xLocal()-off_track->xLocal();
-      yDiff = track->yLocal()-off_track->yLocal();
-
-      dR = std::hypot(xDiff, yDiff);
+      float dx = track->xLocal()-off_track->xLocal();
+      float dy = track->yLocal()-off_track->yLocal();
+      float dR = std::hypot(dx, dy);
 
       if(dR<dRmin){
 	dRmin = dR;
+	xDiff = dx;
+	yDiff = dy;
       }
     } // End of loop over offline tracks
 
@@ -67,7 +66,7 @@ StatusCode TrigAFPSidHypoMonitoringAlg::fillHistograms(const EventContext& conte
 
   // in future should be split into many smaller methods called from here
   std::vector<std::string> passedAFPChains = {"all"}; // also includes ALL events counter
-  for (auto chainName: m_chains) {
+  for (const auto& chainName: m_chains) {
     if ( getTrigDecisionTool()->isPassed(chainName) ){
       passedAFPChains.emplace_back(chainName);
     }

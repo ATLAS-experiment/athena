@@ -2,46 +2,34 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGCOMPOSITEUTILS_LINKINFO_H
-#define TRIGCOMPOSITEUTILS_LINKINFO_H
+#ifndef TRIGCOMPOSITEUTILS_TYPELESSLINKINFO_H
+#define TRIGCOMPOSITEUTILS_TYPELESSLINKINFO_H
 
 #include "xAODTrigger/TrigComposite.h"
-#include "AthLinks/ElementLink.h"
-#include "AsgMessaging/StatusCode.h"
+#include "CxxUtils/sgkey_utilities.h"
 #include "ActiveState.h"
-#include "TypelessLinkInfo.h"
 
-#include <optional>
 #include <unordered_set>
 
 namespace TrigCompositeUtils {
   /**
    * @brief Helper to keep a Decision object, ElementLink and ActiveState (with respect to some requested ChainGroup) linked together (for convenience)
+   * This is the internal type erased version, a typed version also exists which is exposed by the public facing API.
    **/
-  template<typename T>
-  struct LinkInfo {
-    LinkInfo() = default;
-    LinkInfo(const Decision* s, const ElementLink<T>& l, ActiveState as = ActiveState::UNSET)
-      : source{s}, link{l}, state{as} {
+  struct TypelessLinkInfo {
+    using index_type = uint32_t;
+
+    TypelessLinkInfo() = default;
+    TypelessLinkInfo(const Decision* s, const SG::sgkey_t k, const CLID c, const index_type i, ActiveState as = ActiveState::UNSET)
+    : source{s}, key{k}, clid{c}, index{i}, state{as}
+    {
       if (s) decisions.emplace(s->decisions().begin(), s->decisions().end());
     }
 
-    LinkInfo(const Decision* s, const ElementLink<T>& l, ActiveState as, const DecisionIDContainer &decisionIDs)
-      : source{s}, link{l}, state{as} {
+    TypelessLinkInfo(const Decision* s, const SG::sgkey_t k, const CLID c, const index_type i, ActiveState as, const DecisionIDContainer &decisionIDs) 
+    : source{s}, key{k}, clid{c}, index{i}, state{as}
+    {
       decisions.emplace(decisionIDs.begin(), decisionIDs.end());
-    }
-
-    LinkInfo(const TypelessLinkInfo& li, const ElementLink<T>& l) : source{li.source}, link{l}, state{li.state}, decisions{li.decisions} {
-    }
-
-    bool isValid() const {
-      return source && link.isValid();
-    }
-    /**
-     * @brief helper conversion to make it usable with CHECK macro expecting StatusCode
-     */
-    operator StatusCode () {
-      return (isValid() ? StatusCode::SUCCESS : StatusCode::FAILURE);
     }
 
     /**
@@ -51,8 +39,10 @@ namespace TrigCompositeUtils {
      * attached to multiple nodes and only one of those nodes will be returned here.
     */
     const Decision* source{nullptr};
-    /// Link to the feature
-    ElementLink<T> link;
+    /// Type erased link to the feature
+    SG::sgkey_t key;
+    CLID clid;
+    index_type index{};
     /// Was the linked feature active for any requested chains
     ActiveState state{ActiveState::UNSET};
     /// All decision IDs active for this feature. Only available if filled explicitly via constructor
@@ -61,4 +51,4 @@ namespace TrigCompositeUtils {
   };
 } //> end namespace TrigCompositeUtils
 
-#endif //> !TRIGCOMPOSITEUTILS_LINKINFO_H
+#endif //> !TRIGCOMPOSITEUTILS_TYPELESSLINKINFO_H

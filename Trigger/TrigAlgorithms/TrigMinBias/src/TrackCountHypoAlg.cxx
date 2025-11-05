@@ -31,6 +31,7 @@ StatusCode TrackCountHypoAlg::initialize()
   ATH_CHECK(m_trackCountKey.initialize());
   renounce(m_tracksKey);
   ATH_CHECK(m_minPt.size() == m_maxZ0.size());
+  ATH_CHECK(m_minPt.size() == m_vertexZ.size());
 
   if (m_tracksKey.key() == "Undefined" || m_trackCountKey.key() == "Undefined")
   {

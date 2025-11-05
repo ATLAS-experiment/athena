@@ -25,6 +25,7 @@ namespace Trig {
     m_chainGroupName = "";
     m_condition = TrigDefs::Physics;
     m_containerSGKey = "";
+    m_containerSGKeyExpression = std::regex("");
     m_featureCollectionMode = TrigDefs::lastFeatureOfType;
     m_navElementLinkKey = TrigCompositeUtils::featureString();
     m_restrictToLegIndex = -1;
@@ -87,6 +88,7 @@ namespace Trig {
 
   FeatureRequestDescriptor& FeatureRequestDescriptor::setRequireSGKey(const std::string& containerSGKey) {
     m_containerSGKey = containerSGKey;
+    m_containerSGKeyExpression = std::regex(containerSGKey);
     return *this;
   }
 
@@ -127,6 +129,11 @@ namespace Trig {
 
   const std::string& FeatureRequestDescriptor::SGKey() const {
     return m_containerSGKey;
+  }
+
+
+  const std::regex& FeatureRequestDescriptor::SGKeyExpression() const {
+    return m_containerSGKeyExpression;
   }
 
 
