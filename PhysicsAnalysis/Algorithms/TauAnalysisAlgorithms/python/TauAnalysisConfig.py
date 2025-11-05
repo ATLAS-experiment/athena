@@ -230,10 +230,10 @@ class TauWorkingPointConfig (ConfigBlock) :
                 nameFormat = nameFormat + '_muonolr' 
             nameFormat = nameFormat + '.conf'    
 
-        if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
-            raise ValueError ("invalid tau quality: \"" + self.quality +
-                              "\", allowed values are Tight, Medium, Loose, " +
-                              "VeryLoose, Baseline, BaselineForFakes")
+            if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
+                raise ValueError ("invalid tau quality: \"" + self.quality +
+                                  "\", allowed values are Tight, Medium, Loose, " +
+                                  "VeryLoose, Baseline, BaselineForFakes")
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' )
