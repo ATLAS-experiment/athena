@@ -119,13 +119,15 @@ def SetConfigTag(flags):
             elif flags.Input.ProjectName in ["data24_5p36TeV", "data24_900GeV", "data24_13p6TeV", "data24_refcomm"]:
                 config = "pp2024"
             elif flags.Input.ProjectName in ["data24_hi", "data24_hicomm"]:
-                config = "PbPb2024" 
+                config = "configZDC_PbPb2024.v5.json" 
             elif flags.Input.ProjectName in ["data25_hipcomm"]:
                 config = "pO2025"
             elif flags.Input.ProjectName in ["data25_hip"]:
                 config = "pO2025B"
             elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]:
                 config = "OONeNe2025"
+            elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]:
+                config = "configZDC_PbPb2025.v1.json"
         elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
                 config = "PbPb2015"
@@ -279,17 +281,26 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=
 
     log.info('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
 
+    jsonFile = ''
+    
+    if (config[-5:]=='.json'):
+        jsonFile = config
+        config = "JSON"
+        log.info('ZdcAnalysisToolCfg: setting up with JSON file '+jsonFile)
+        
     acc.setPrivateTools(CompFactory.ZDC.ZdcAnalysisTool(
         name = 'ZdcAnalysisTool'+config, 
         Configuration = config,
         DoCalib = DoCalib,
         DoFADCCorr = DoFADCCorr,
+        DoFADCCorrPerSample = True,
         DoNonLinCorr = DoNonLinCorr,
         DoTimeCalib = DoTimeCalib,
         DoTrigEff = DoTrigEff,
         ForceCalibRun = ForceCalibRun,
         ForceCalibLB = ForceCalibLB,
         AuxSuffix = AuxSuffix,
+        JSONConfigurationFile=jsonFile,
         LHCRun = run ))
     return acc
 
@@ -420,7 +431,7 @@ def ZdcRecRun3Cfg(flags):
         elif flags.Input.ProjectName == "data24_hi": # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
             doTimeCalib = True
-            doFADCCorr = False
+            doFADCCorr = True
             doNonLinCorr = False
         elif flags.Input.ProjectName in ["data25_hip","data25_hipcomm"]: # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
@@ -429,8 +440,8 @@ def ZdcRecRun3Cfg(flags):
             doNonLinCorr = False
         elif flags.Input.ProjectName in ["data25_hi","data25_hicomm"]: # for "data24_hi" or "data24_5p36TeV," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
             doCalib = True
-            doTimeCalib = False
-            doFADCCorr = False
+            doTimeCalib = True
+            doFADCCorr = True
             doNonLinCorr = False
 
     # No calibration required (or exists) for MC
@@ -590,9 +601,9 @@ def ZdcLEDRecCfg(flags):
         #config = 'ppALFA2023'
         doFADCCorr = False
 
-        if (flags.GeoModel.Run == LHCPeriod.Run3):
-            doFADCCorr = False
-        
+        if flags.Input.ProjectName in ["data24_hi","data25_hip","data25_hi"]:
+            doFADCCorr = True
+    
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
         acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
 
@@ -663,6 +674,8 @@ if __name__ == '__main__':
 
     flags = initConfigFlags()
 
+    #flags.Exec.FPE = 3
+    
     ZdcGenericFlagSetting(flags) # set generic (stream-independent) ZDC flags
 
     flags.Output.AODFileName="AOD.pool.root"
