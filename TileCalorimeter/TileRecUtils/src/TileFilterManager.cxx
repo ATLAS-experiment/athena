@@ -550,7 +550,7 @@ int TileFilterManager::makeFitterArrays() {
       vFitter[index] = *tileFitter;
       delete tileFitter;
     }
-    m_vNpFitter.push_back(vFitter);
+    m_vNpFitter.push_back(std::move(vFitter));
   }
   return 0;
 }

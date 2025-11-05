@@ -3236,7 +3236,7 @@ void TileTBAANtuple::DIGI_addBranch(void)
         if (ros == 0) {
           std::string suff = m_drawerList[i];
           suff.replace(suff.find("0x"), 2, "");
-          suffixArr[i] = suff;
+          suffixArr[i] = std::move(suff);
         } else {
           suffixArr[i] = m_rosName[ros] + digits;
         }
@@ -3690,7 +3690,7 @@ void TileTBAANtuple::HIT_addBranch(void)
       if (ros == 0) {
         std::string suff = m_drawerList[i];
         suff.replace(suff.find("0x"), 2, "");
-        suffixArr[i] = suff;
+        suffixArr[i] = std::move(suff);
       } else {
         suffixArr[i] = m_rosName[ros] + digits;
       }

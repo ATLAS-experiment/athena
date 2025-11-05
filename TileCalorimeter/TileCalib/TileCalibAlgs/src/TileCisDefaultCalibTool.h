@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBALG_TILECISDEFAULTCALIBTOOL_H
@@ -15,14 +15,13 @@
 
 // Tile includes
 #include "TileCalibAlgs/ITileCalibTool.h"
-#include "TileConditions/TileCablingService.h"
+
 #include "TileEvent/TileDQstatus.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 #include "TileMonitoring/ITileStuckBitsProbsTool.h"
-#include "TileConditions/TileInfo.h"
 
 #include "TString.h"
 #include <stdint.h>
@@ -36,7 +35,7 @@
 class TileHWID;
 class TileCablingSvc;
 class TFile;
-class TileRawChannelContainer;
+class TileInfo;
 class TMap;
 
 class TileCisDefaultCalibTool: public AthAlgTool
