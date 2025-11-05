@@ -12,9 +12,11 @@ def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwar
     return result
 
 
-def MuonNSWPhiSeedFinderAlgCfg(flags, name = "MuonNswPhiSeedFinderAlg", **kwargs):
+def MuonNSWSegmentFinderAlgCfg(flags, name = "MuonNswSegmentFinderAlg", **kwargs):
     result = ComponentAccumulator()
-    theAlg = CompFactory.MuonR4.CombinatorialNSWSeedFinderAlg(name, **kwargs)
+    from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+    theAlg = CompFactory.MuonR4.NswSegmentFinderAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
     
@@ -61,32 +63,26 @@ def MuonPatternRecognitionCfg(flags):
     result = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
-    sgementContainers = []
+    segmentContainers = []
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
-        sgementContainers+=["R4MuonSegmentsNsw"]
+        segmentContainers+=["MuonNswSegments"]
         result.merge(MuonEtaHoughTransformAlgCfg(flags, name="MuonNswEtaHoughTransformAlg", 
                                                         EtaHoughMaxContainer = "MuonHoughNswMaxima", 
                                                         SpacePointContainer = "NswSpacePoints"))
-        result.merge(MuonNSWPhiSeedFinderAlgCfg(flags, name="MuonNswPhiSeedFinderAlg", 
-                                                       CombinatorialPhiWriteKey = "MuonHoughNswSegmentSeeds", 
+        result.merge(MuonNSWSegmentFinderAlgCfg(flags, name="MuonNswSegmentFinderAlg", 
+                                                       MuonNswSegmentWriteKey = segmentContainers[-1], 
+                                                       MuonNswSegmentSeedWriteKey = "MuonNswSegmentSeeds",
                                                        CombinatorialReadKey = "MuonHoughNswMaxima"))
-        result.merge(MuonSegmentFittingAlgCfg(flags, name="MuonNswSegmentFitter", 
-                                                     OutSegmentContainer=sgementContainers[-1],  
-                                                     ReadKey="MuonHoughNswSegmentSeeds",
-                                                     fitSegmentT0 = False,
-                                                     recalibInFit = False,
-                                                     doBeamspotConstraint=True,
-                                                     useHessianResidual=True,
-                                                     tryPatternPars = True ))
+       
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
         result.merge(MuonEtaHoughTransformAlgCfg(flags))
         result.merge(MuonPhiHoughTransformAlgCfg(flags))
-        sgementContainers+=["R4MuonSegments"]
+        segmentContainers+=["R4MuonSegments"]
     
-        result.merge(MuonSegmentFittingAlgCfg(flags,  OutSegmentContainer=sgementContainers[-1]))
+        result.merge(MuonSegmentFittingAlgCfg(flags,  OutSegmentContainer=segmentContainers[-1]))
         
     from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
-    result.merge(xAODSegmentCnvAlgCfg(flags, InSegmentKeys = sgementContainers))
+    result.merge(xAODSegmentCnvAlgCfg(flags, InSegmentKeys = segmentContainers))
     if flags.Input.isMC:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
         result.merge(RecoSegmentTruthAssocCfg(flags,
@@ -95,6 +91,6 @@ def MuonPatternRecognitionCfg(flags):
     if flags.Muon.scheduleActsReco:
         from MuonSegmentCnv.MuonSegmentCnvConfig import MuonR4SegmentCnvAlgCfg
         result.merge(MuonR4SegmentCnvAlgCfg(flags,
-                                         ReadSegments = sgementContainers,
+                                         ReadSegments = segmentContainers,
                                          WriteKey="TrackMuonSegments"))
     return result

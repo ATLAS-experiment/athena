@@ -27,5 +27,5 @@ def MuonSpacePointFormationCfg(flags):
         result.merge(MuonSpacePointMakerAlgCfg(flags, 
                                                name="MuonNswSpacePointMakerAlg",
                                                MdtKey="", RpcKey = "", TgcKey ="",
-                                               WriteKey = "NswSpacePoints"))
+                                               WriteKey = "NswSpacePoints", maxBucketLength = 500., spacePointOverlap = 100.))
     return result
