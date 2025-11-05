@@ -7,6 +7,10 @@
 #include "TrigAnalysisHelpers/FeatureRequestHelpers.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
 
+#ifndef XAOD_STANDALONE
+#include "AthenaKernel/ExtendedEventContext.h"
+#endif
+
 namespace FeatureRequestHelpers {
 
   std::vector<TrigCompositeUtils::TypelessLinkInfo> typelessFeaturesImplimentation(

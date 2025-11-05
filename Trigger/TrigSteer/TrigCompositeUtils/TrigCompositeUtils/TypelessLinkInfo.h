@@ -6,7 +6,7 @@
 #define TRIGCOMPOSITEUTILS_TYPELESSLINKINFO_H
 
 #include "xAODTrigger/TrigComposite.h"
-#include "CxxUtils/sgkey_t.h"
+#include "CxxUtils/sgkey_utilities.h"
 #include "ActiveState.h"
 
 #include <unordered_set>
@@ -42,7 +42,7 @@ namespace TrigCompositeUtils {
     /// Type erased link to the feature
     SG::sgkey_t key;
     CLID clid;
-    index_type index;
+    index_type index{};
     /// Was the linked feature active for any requested chains
     ActiveState state{ActiveState::UNSET};
     /// All decision IDs active for this feature. Only available if filled explicitly via constructor

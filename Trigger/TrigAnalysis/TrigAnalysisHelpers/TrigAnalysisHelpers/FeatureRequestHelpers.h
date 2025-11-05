@@ -16,7 +16,7 @@
 #include "TrigCompositeUtils/LinkInfo.h"
 #include "TrigCompositeUtils/TypelessLinkInfo.h"
 
-#include "CxxUtils/sgkey_t.h"
+#include "CxxUtils/sgkey_utilities.h"
 
 #include <vector>
 
