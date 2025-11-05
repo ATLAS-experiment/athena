@@ -1,5 +1,5 @@
- /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -68,9 +68,9 @@ IDPerfMonEoverP::IDPerfMonEoverP(const std::string& name,
   m_isDATA(true),
   m_validationMode(true),
   m_fillDetailedTree(false),
-  m_validationTreeName("EGrefitter"),
-  m_validationTreeDescription("egamma track refitter caches"),
-  m_validationTreeFolder("/eoverpValidation/efitterValidation"),
+  m_validationTreeName( "EGrefitter" ),
+  m_validationTreeDescription( "egamma track refitter caches" ),
+  m_validationTreeFolder( "/ZmumuValidationUserSel/EGrefitter"), // use same root file name as Zmumu
   m_validationTree(0),
   m_runNumber{},
   m_evtNumber{},
@@ -133,6 +133,7 @@ IDPerfMonEoverP::IDPerfMonEoverP(const std::string& name,
   declareProperty("ValidationMode",                   m_validationMode);
   declareProperty("FillDetailedTree",                 m_fillDetailedTree);
   declareProperty("ElectronLikelihoodTune",           m_lhTune="mc15_20150712");
+  declareProperty("ValidationTreeFolder",             m_validationTreeFolder, "/ZmumuValidationUserSel/EGrefitter"); // use same root file name as Zmumu
 }
 
 // DESTRUCTOR:
@@ -248,8 +249,9 @@ StatusCode IDPerfMonEoverP::initialize()
   
   // If the validation nuptle has been requested Setup the ntuple
   if (m_validationMode){
-    if (m_validationTree == 0 ){
+    if (m_validationTree == nullptr ){ // validation tree does not exist yet
       // create the new Tree
+      ATH_MSG_DEBUG ( "Booking validationTree with name: " << m_validationTreeName );
       m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
       std::string FitterNames[3] = {"GX2","Refitted1","Refitted2"};
       m_validationTree->Branch("runNumber"      ,  &m_runNumber,  "runNumber/I");
@@ -259,17 +261,19 @@ StatusCode IDPerfMonEoverP::initialize()
       m_validationTree->Branch("nElectrons"      ,  &m_nelectrons,  "nElectrons/I");
       // Track fitter information
       for(int fitter(0); fitter < 3; ++fitter){
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_Theta").c_str()   ,  m_electronTheta[fitter], std::string(FitterNames[fitter]+"_Theta0[nElectrons]/F").c_str() );
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_Phi0").c_str()    ,  m_electronPhi[fitter], std::string(FitterNames[fitter]+"_Phi0[nElectrons]/F").c_str() );
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_QoverP").c_str()  ,  m_electronQoverP[fitter], std::string(FitterNames[fitter]+"_QoverP[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_d0").c_str()      ,  m_electrond0[fitter], std::string(FitterNames[fitter]+"_d0[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_z0").c_str()      ,  m_electronz0[fitter], std::string(FitterNames[fitter]+"_z0[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_LMQoverP").c_str()  ,  m_electronLMQoverP[fitter], std::string(FitterNames[fitter]+"_LMQoverP[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_ThetaErr").c_str()   ,  m_electronErrTheta[fitter], std::string(FitterNames[fitter]+"_Theta0Err[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_Phi0Err").c_str()    ,  m_electronErrPhi[fitter], std::string(FitterNames[fitter]+"_Phi0Err[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_QoverPErr").c_str()  ,  m_electronErrQoverP[fitter], std::string(FitterNames[fitter]+"_QoverPErr[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_d0Err").c_str()      ,  m_electronErrd0[fitter], std::string(FitterNames[fitter]+"_d0Err[nElectrons]/F").c_str());
-        m_validationTree->Branch(std::string(FitterNames[fitter]+"_z0Err").c_str()      ,  m_electronErrz0[fitter], std::string(FitterNames[fitter]+"_z0Err[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_Theta").c_str()    ,  m_electronTheta[fitter],    (FitterNames[fitter]+"_Theta0[nElectrons]/F").c_str() );
+        m_validationTree->Branch( (FitterNames[fitter]+"_Eta").c_str()      ,  m_electronEta[fitter],      (FitterNames[fitter]+"_Eta[nElectrons]/F").c_str() );
+	m_validationTree->Branch( (FitterNames[fitter]+"_Eta").c_str()      ,  m_electronEta[fitter],      (FitterNames[fitter]+"_Eta[nElectrons]/F").c_str() );
+        m_validationTree->Branch( (FitterNames[fitter]+"_Phi0").c_str()     ,  m_electronPhi[fitter],      (FitterNames[fitter]+"_Phi0[nElectrons]/F").c_str() );
+        m_validationTree->Branch( (FitterNames[fitter]+"_QoverP").c_str()   ,  m_electronQoverP[fitter],   (FitterNames[fitter]+"_QoverP[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_d0").c_str()       ,  m_electrond0[fitter],       (FitterNames[fitter]+"_d0[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_z0").c_str()       ,  m_electronz0[fitter],       (FitterNames[fitter]+"_z0[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_LMQoverP").c_str() ,  m_electronLMQoverP[fitter], (FitterNames[fitter]+"_LMQoverP[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_ThetaErr").c_str() ,  m_electronErrTheta[fitter], (FitterNames[fitter]+"_Theta0Err[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_Phi0Err").c_str()  ,  m_electronErrPhi[fitter],   (FitterNames[fitter]+"_Phi0Err[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_QoverPErr").c_str(),  m_electronErrQoverP[fitter],(FitterNames[fitter]+"_QoverPErr[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_d0Err").c_str()    ,  m_electronErrd0[fitter],    (FitterNames[fitter]+"_d0Err[nElectrons]/F").c_str());
+        m_validationTree->Branch( (FitterNames[fitter]+"_z0Err").c_str()    ,  m_electronErrz0[fitter],    (FitterNames[fitter]+"_z0Err[nElectrons]/F").c_str());
       }
 
       m_validationTree->Branch("associatedToVtx" ,  m_associatedToVtx, "associatedToVtx[nElectrons]/I");
@@ -339,7 +343,7 @@ StatusCode IDPerfMonEoverP::initialize()
     }
 
 
-    if(m_smallValidationTree == 0){
+    if(m_smallValidationTree == nullptr){
 
       m_smallValidationTree = new TTree(m_smallValidationTreeName.c_str(), m_smallValidationTreeDescription.c_str());
 
@@ -354,24 +358,39 @@ StatusCode IDPerfMonEoverP::initialize()
       m_smallValidationTree->Branch("TrackTheta"   ,&m_smallTrackTheta,"TrackTheta/D");
     }
 
-      // now register the Tree
+    // Access THistSvc
     ServiceHandle<ITHistSvc> tHistSvc("THistSvc", name());
-    if (tHistSvc.retrieve().isFailure()){
+    if ( tHistSvc.retrieve().isSuccess()) {
+      ATH_MSG_DEBUG(" initialize() THistSvc successfully retrieved ");
+    }
+    else {
       ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
       delete m_validationTree;      m_validationTree = 0;
       delete m_smallValidationTree; m_smallValidationTree = 0;
       m_validationMode = false;
     }
-    if ((tHistSvc->regTree(m_validationTreeFolder, m_validationTree)).isFailure() ) {
-      ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !");
-      delete m_validationTree; m_validationTree = 0;
-      m_validationMode = false;
+    
+    // now register the Tree
+    if (m_validationTree != nullptr ) {
+      if ( (tHistSvc->regTree(m_validationTreeFolder, m_validationTree)).isSuccess() ) {
+	ATH_MSG_DEBUG( "initialize() validation tree (" << m_validationTree->GetName() <<") successfully registered in folder " << m_validationTreeFolder );
+      }
+      else {
+	ATH_MSG_ERROR( "initialize() Could not register the validation Tree -> Switching ValidationMode Off !");
+	delete m_validationTree; m_validationTree = 0;
+	m_validationMode = false;
+      }
     }
+    else {
+      ATH_MSG_DEBUG( "initialize() no validation tree to register :( ");
+    }
+
     if ((tHistSvc->regTree(m_smallValidationTreeFolder, m_smallValidationTree)).isFailure() ) {
       ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !");
       delete m_smallValidationTree; m_smallValidationTree = 0;
       m_validationMode = false;
-    } else {
+    }
+    else {
       m_ZeeLooseMassOS_Cluster = new TH1F("ZeeMassLooseOS","ZeeMassLooseOS", 120, 60000 ,120000);
       m_ZeeLooseMassSS_Cluster  = new TH1F("ZeeMassLooseSS","ZeeMassLooseSS", 120, 60000 ,120000);
       m_ZeeMediumMassOS_Cluster = new TH1F("ZeeMassMediumOS","ZeeMassMediumOS", 120, 60000 ,120000);
@@ -404,7 +423,6 @@ StatusCode IDPerfMonEoverP::initialize()
       if (somethingFailed) ATH_MSG_ERROR("initialize() Could not register histogram ");
         
       ATH_MSG_INFO("Booked Small Tree add histograms");
-
     }
 
     ATH_MSG_INFO("Loaded THistSvc");
@@ -478,6 +496,7 @@ StatusCode IDPerfMonEoverP::execute()
     m_runNumber = evt->runNumber();
     m_evtNumber = evt->eventNumber();
     m_lumi_block = evt->lumiBlock();
+    ATH_MSG_DEBUG(" --> run: " << m_runNumber << "    event: " << m_evtNumber << "    lumiblock: " << m_lumi_block );
   }
   else {
     ATH_MSG_ERROR("Could not retrieve event info."); // Keeping ERROR only to preserve old functionality
@@ -485,27 +504,31 @@ StatusCode IDPerfMonEoverP::execute()
 
   ATH_MSG_DEBUG("Retrieved Trigger info.");
   fillTriggerInformation();
-  if ( fillVertexInformation(trackParticleVertexMap, primaryVertexFirstCandidate) ){
-    ATH_MSG_DEBUG("Retrieved Primary Vertex info.");
-  } else {
-    ATH_MSG_DEBUG("No Primary Vertex");
+
+  if ( not fillVertexInformation(trackParticleVertexMap, primaryVertexFirstCandidate) ){
+    ATH_MSG_DEBUG("No Primary Vertex info found");
   }
 
   ATH_MSG_DEBUG("MET info.being stored");
-  if( storeMETinformation() )
+  if( storeMETinformation() ) {
     ATH_MSG_DEBUG("MET info. stored");
+  }
+  else { 
+    ATH_MSG_DEBUG("NO MET info. stored :(");
+  }
+  
   // Get the electron AOD container
   const xAOD::ElectronContainer* ElectronInput_container;
-
+  ATH_MSG_DEBUG("Retrieving ElectronInput_container: " << m_InputElectronContainerName);
   sc =  evtStore()->retrieve(ElectronInput_container, m_InputElectronContainerName);
-  if (sc!=StatusCode::SUCCESS){
-    ATH_MSG_WARNING("No electron container");
+  if (sc != StatusCode::SUCCESS){
+    ATH_MSG_WARNING("No electron container --> return");
     deleteAction();
     return StatusCode::SUCCESS;
   }
 
-
   if (ElectronInput_container->empty() ){
+    ATH_MSG_DEBUG("-- ElectronInput_container is empty -> return");
     deleteAction();
     return StatusCode::SUCCESS;
   }
@@ -521,6 +544,7 @@ StatusCode IDPerfMonEoverP::execute()
   // Loop over the Electrons
   ATH_MSG_DEBUG("Electron info. being stored");
   for(; iter != iterEnd ; ++iter) {
+    ATH_MSG_DEBUG("Dealing with electron: "<< m_electronCounter+1);
     if (m_electronCounter >= NOS_ELECTRONS) break;
     const xAOD::Electron *pThisElectron = (*iter);
     m_author[m_electronCounter] = pThisElectron->author(xAOD::EgammaParameters::AuthorElectron);
@@ -532,11 +556,12 @@ StatusCode IDPerfMonEoverP::execute()
     // Fill IsEm info
     fillIsEM( pThisElectron );
 
-
     //Get the track particle
     const xAOD::TrackParticle* mytp = (*iter)->trackParticle();
+    if ( mytp != nullptr ) ATH_MSG_DEBUG("-- electron: "<< m_electronCounter+1 << "  pt: " << mytp->p4().Perp() );
     
-    if(mytp){
+    
+    if( mytp != nullptr ){
       uint8_t dummy(0);
       auto summaryByDetector=[&mytp,&dummy]( const xAOD::SummaryType & t){
         return mytp->summaryValue(dummy, t) ? (dummy) : (-1);
@@ -670,10 +695,11 @@ void IDPerfMonEoverP::addToValidationNtuple(const Trk::Perigee* perigee,const xA
   if (perigee){
     ATH_MSG_DEBUG(  "Adding data to ntuple" );
     if (isOriginal >=  0  &&  isOriginal <3){
-      m_electrond0[isOriginal][m_electronCounter] = perigee->parameters()[Trk::d0];
-      m_electronz0[isOriginal][m_electronCounter] = perigee->parameters()[Trk::z0];
-      m_electronPhi[isOriginal][m_electronCounter] = perigee->parameters()[Trk::phi0];
-      m_electronTheta[isOriginal][m_electronCounter]= perigee->parameters()[Trk::theta];
+      m_electrond0[isOriginal][m_electronCounter]    = perigee->parameters()[Trk::d0];
+      m_electronz0[isOriginal][m_electronCounter]    = perigee->parameters()[Trk::z0];
+      m_electronPhi[isOriginal][m_electronCounter]   = perigee->parameters()[Trk::phi0];
+      m_electronTheta[isOriginal][m_electronCounter] = perigee->parameters()[Trk::theta];
+      m_electronEta[isOriginal][m_electronCounter]   = perigee->eta();
       m_electronQoverP[isOriginal][m_electronCounter]= perigee->parameters()[Trk::qOverP];
       //
       const AmgSymMatrix(5)* matrix = perigee->covariance();
@@ -690,12 +716,9 @@ void IDPerfMonEoverP::addToValidationNtuple(const Trk::Perigee* perigee,const xA
   }
 
    ATH_MSG_DEBUG(  "Finished adding data to ntuple" );
-
 }
 
-
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void IDPerfMonEoverP::fillIsEM(const xAOD::Electron *eg)
 {
   ATH_MSG_DEBUG(  "fillIsEM" );
@@ -741,15 +764,16 @@ void IDPerfMonEoverP::fillGeneral(const xAOD::Electron *eg)
 
 void IDPerfMonEoverP::clearValidationNtuple()
 {
-  ATH_MSG_DEBUG(  "clearValidationNtuple" );
+  ATH_MSG_DEBUG(  "clear ValidationNtuple variables" );
   for (int i = 0 ;  i < NOS_ELECTRONS ; ++i){
     for (int j = 0 ;  j <3 ; ++j){
       m_electrond0[j][i]        = 0;
       m_electronz0[j][i]        = 0;
       m_electronPhi[j][i]       = 0;
       m_electronTheta[j][i]     = 0;
+      m_electronEta[j][i]       = 0;
       m_electronQoverP[j][i]    = 0;
-      m_electronLMQoverP[j][i]    = 0;
+      m_electronLMQoverP[j][i]  = 0;
 
       m_electronErrd0[j][i]     = 0;
       m_electronErrz0[j][i]     = 0;
@@ -803,27 +827,30 @@ void IDPerfMonEoverP::clearValidationNtuple()
   m_missingEtx=0;
   m_missingEty=0;
 
+  return;
 }
 
-
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void IDPerfMonEoverP::deleteAction() const
 {
 
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void IDPerfMonEoverP::validationAction()
 {
-  ATH_MSG_DEBUG( "Writing Data to ntuple" );
-
+  ATH_MSG_DEBUG( "validationAction() -- START -- ");
   // first record the values
   if (m_validationTree){
     m_nelectrons = long(m_electronCounter);
-    if(m_fillDetailedTree)m_validationTree->Fill();
+    if(m_fillDetailedTree) {
+      m_validationTree->Fill();
+      ATH_MSG_DEBUG( "Writing data into ntuple " << m_validationTree->GetName() << ". Entry #" << m_validationTree->GetEntries() );
+    }
     // then reset
     m_electronCounter = 0;
   }
+  ATH_MSG_DEBUG( "validationAction() -- completed -- current number of entries " << m_validationTree->GetEntries() );
 }
 
 
@@ -870,39 +897,52 @@ bool IDPerfMonEoverP::passMETCleaningCuts() const
   return cleanJet;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool IDPerfMonEoverP::fillVertexInformation(std::map<const xAOD::TrackParticle*, VxPos >& trackParticleVertexMap,
                                             xAOD::Vertex const* & primaryVertexFirstCandidate)
 {
-  ATH_MSG_DEBUG( "fillVertexInformation()" );
+  ATH_MSG_DEBUG( "fillVertexInformation() -- START --" );
   const xAOD::VertexContainer* vxContainer(0);
   int npv = 0;
   StatusCode sc = evtStore()->retrieve(vxContainer, m_primaryVertexCollection);
   if (sc.isFailure()) {
     ATH_MSG_WARNING( "Could not retrieve primary vertex info: " << m_primaryVertexCollection );
     return false;
-  } else {
+  }
+  else {
     ATH_MSG_DEBUG( "Found primary vertex info: " << m_primaryVertexCollection );
     if(vxContainer) {
       ATH_MSG_DEBUG("Nb of reco primary vertex for coll "
 		    << " = " << vxContainer->size() );
       primaryVertexFirstCandidate = std::begin(*vxContainer)[0];
-      ATH_MSG_DEBUG( "The primary vertex : " << primaryVertexFirstCandidate->type() );
+      ATH_MSG_DEBUG( "The primary vertex type: " << primaryVertexFirstCandidate->type() );
+      int vtxCount = 0;
       for(const auto* vxI : *vxContainer ) {
         int type = (int)(vxI)->vertexType();
 	const xAOD::Vertex* primaryVertex = vxI;
+	vtxCount++;
+	ATH_MSG_DEBUG( " -- dealing with vertex " << vtxCount << "  type: " << type );
         int nbtk = 0;
 	const std::vector< ElementLink< xAOD::TrackParticleContainer > > tpLinks =  vxI->trackParticleLinks();
 	float sumpt = 0.;
 	if(not tpLinks.empty()) {
 	  nbtk = tpLinks.size();
+	  ATH_MSG_DEBUG( " -- vertex " << vtxCount << "  has  "  << nbtk << " track particles" );
+	  int trkCount = 0;
 	  for(const auto& tp_elem : tpLinks ){
+	    trkCount++;
 	    const xAOD::TrackParticle* trk = *tp_elem;
-	    VxPos myVxPos = std::make_pair(vxI,npv);
-	    trackParticleVertexMap.insert( std::make_pair( trk, myVxPos )  );
-	    if(trk) {
-	      sumpt += trk->p4().Perp();
+	    if (trk != NULL) {
+	      VxPos myVxPos = std::make_pair(vxI,npv);
+	      trackParticleVertexMap.insert( std::make_pair( trk, myVxPos )  );
+	      if(trk) { 
+		sumpt += trk->p4().Perp();
+	      }
 	    }
-	  }
+	    else {
+	      ATH_MSG_DEBUG( "   -- trk is NULL :(" );
+	    } // trk not null
+	  } // loop on tracks 
 	  ATH_MSG_DEBUG( "Reco PV " << npv << ": ("
 			 << primaryVertex->position().x() << ","
 			 << primaryVertex->position().y() << ","
@@ -935,7 +975,7 @@ bool IDPerfMonEoverP::fillVertexInformation(std::map<const xAOD::TrackParticle*,
   }
   m_nbpv = npv;
 
-  ATH_MSG_DEBUG("Done filling Vertex information");
+  ATH_MSG_DEBUG("Done filling Vertex information -- completed -- ");
 
   if (npv == 0)  return false;
   return true;
@@ -1029,24 +1069,27 @@ bool IDPerfMonEoverP::fillLastMeasurement(const Trk::Track* track, const int fit
 
 }
 
-
-
-
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool IDPerfMonEoverP::passZeeSelection(std::vector<int>& electrons)
 {
-  ATH_MSG_VERBOSE("In passZeeSelection()");
+  ATH_MSG_VERBOSE("In passZeeSelection() -- START -- ");
   //ATH_MSG_WARNING("Zee seletion needs to be adjusted for run2");
   // Adjusted according to https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/WZCommonAnalysisTopics2015
-  if(m_nbpv<1) return false;
+  if(m_nbpv<1) {
+    ATH_MSG_DEBUG (" -- passZeeSelection() -- failing on primary vertices: m_nbpv= " << m_nbpv);
+    return false;
+  }
+  
   bool primaryVertexOk(false);
   electrons.clear();
 
   for (int i=0; i<m_nbpv; ++i){
     if (m_pvnbtk[i] > 2) primaryVertexOk = true;
   }
-  if(!primaryVertexOk) return false;
-
+  if(!primaryVertexOk) {
+    ATH_MSG_DEBUG (" -- passZeeSelection() -- failing on primary vertices");
+    return false;
+  }
   //Trigger
   //No need to pass the trigger for tracking performance studies
 
@@ -1075,7 +1118,7 @@ bool IDPerfMonEoverP::passZeeSelection(std::vector<int>& electrons)
 
   int pairsLooseInMassWindow = 0;
 
-  ATH_MSG_DEBUG("N Loose electrons " << goodLooseElectrons.size());
+  ATH_MSG_DEBUG(" -- passZeeSelection() -- report -- N Loose electrons " << goodLooseElectrons.size());
 
   //Fill Loose electron ET spectrum;
   for(int gele1 = 0; gele1 < (int)goodLooseElectrons.size()-1; ++gele1){
@@ -1093,7 +1136,10 @@ bool IDPerfMonEoverP::passZeeSelection(std::vector<int>& electrons)
     }
   }
 
-  if (pairsLooseInMassWindow < 1) return false;
+  if (pairsLooseInMassWindow < 1) {
+    ATH_MSG_DEBUG (" -- passZeeSelection() -- failing pairsLooseInMassWindow= " << pairsLooseInMassWindow );
+    return false;
+  }
   std::vector<int> goodMediumElectrons;
 
   for(int gele = 0; gele < (int)goodLooseElectrons.size(); ++gele){
@@ -1104,7 +1150,10 @@ bool IDPerfMonEoverP::passZeeSelection(std::vector<int>& electrons)
   }
 
   //Reject events with more than two good electrons
-  if (goodMediumElectrons.size() != 2) return false;
+  if (goodMediumElectrons.size() != 2) {
+    ATH_MSG_DEBUG (" -- passZeeSelection() -- failing goodMediumElectrons != 2 --> " << goodMediumElectrons.size());
+    return false;
+  }
 
   // Make the mass out of the highest pt electrons ....
   double mass = getMassCluster(goodMediumElectrons[0],goodMediumElectrons[1]);
@@ -1128,9 +1177,10 @@ bool IDPerfMonEoverP::passZeeSelection(std::vector<int>& electrons)
   return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool IDPerfMonEoverP::passWenuSelection(std::vector<int>& electrons)
 {
-  ATH_MSG_VERBOSE("In passWenuSelection()");
+  ATH_MSG_VERBOSE("In passWenuSelection() -- START -- ");
   if(m_nbpv<1) return false;
   bool primaryVertexOk(false);
   electrons.clear();
@@ -1138,10 +1188,16 @@ bool IDPerfMonEoverP::passWenuSelection(std::vector<int>& electrons)
   for (int i(0); i<m_nbpv; ++i){
     if (m_pvnbtk[i] > 2) primaryVertexOk = true;
   }
-  if(!primaryVertexOk) return false;
-
+  if(!primaryVertexOk) {
+    ATH_MSG_DEBUG (" -- passWenuSelection() -- failing on primary vertices");
+    return false;
+  }
+  
   //MET Goodness
-  if( m_isDATA && !m_METgoodness) return false;
+  if( m_isDATA && !m_METgoodness) {
+    ATH_MSG_DEBUG (" -- passWenuSelection() -- failing on m_isDATA && !m_METgoodness");
+    return false;
+  }
 
   //Trigger
   //no need to pass trigger for perfromance studies
@@ -1186,12 +1242,15 @@ bool IDPerfMonEoverP::passWenuSelection(std::vector<int>& electrons)
   }
 
   //Reject events with more than one good electron
-  if (nMediumElectrons >2)
+  if (nMediumElectrons >2) {
+    ATH_MSG_DEBUG (" -- passWenuSelection() -- failing number of medium electrons cut " << nMediumElectrons ); 
     return false;
+  }
   //Reject events with no tight electrons;
-  if (nTightElectrons <1)
+  if (nTightElectrons <1) {
+    ATH_MSG_DEBUG (" -- passWenuSelection() -- failing number of tight electrons cut " << nTightElectrons ); 
     return false;
-
+  }
   double metphi = atan2(m_missingEty,m_missingEtx);
   double trackEt = m_ClusterEnergy[tightElectron]*std::sin(m_electronTheta[0][tightElectron]);
   double clusterEt = std::cosh( m_ClusterEta[tightElectron] ) !=0 ?  m_ClusterEnergy[tightElectron] / std::cosh( m_ClusterEta[tightElectron] ) : 0.;
@@ -1204,10 +1263,16 @@ bool IDPerfMonEoverP::passWenuSelection(std::vector<int>& electrons)
   m_WenuTight_Met->Fill(m_missingEt);
   m_WenuTight_MT->Fill(massT);
 
-  if (m_missingEt <= 25000) return false;
+  if (m_missingEt <= 25000) {
+    ATH_MSG_DEBUG (" -- passWenuSelection() -- failing missingEt cut " << m_missingEt );
+    return false;
+  }
   m_WenuTightMet_MT->Fill(massT);
 
-  if (massT <= 50000) return false;
+  if (massT <= 50000) {
+    ATH_MSG_DEBUG (" -- passWenuSelection() -- failing transverse mass cut " << massT );
+    return false;
+  }
 
   m_WenuTightElectronET->Fill(clusterEt);
 
@@ -1229,6 +1294,7 @@ bool IDPerfMonEoverP::passWenuSelection(std::vector<int>& electrons)
 
   electrons.push_back(tightElectron);
 
+  ATH_MSG_VERBOSE("In passWenuSelection() -- completed -- ");
   return true;
 }
 
@@ -1253,8 +1319,11 @@ std::vector<int> IDPerfMonEoverP::FillSimpleTree()
   ATH_MSG_VERBOSE("In fillSimpleTree()");
   std::vector<int> electronsZee;
   std::vector<int> electronsWenu;
+
+  // check if Zee or Wenu event
   passZeeSelection(electronsZee);
   passWenuSelection(electronsWenu);
+
   std::vector<int> allInterestingElectrons;
   for(int i(0); i < (int)electronsZee.size(); ++i){
     int ele  = electronsZee[i];
@@ -1285,5 +1354,5 @@ std::vector<int> IDPerfMonEoverP::FillSimpleTree()
     m_smallValidationTree->Fill();
   }
 
-	return allInterestingElectrons;
+  return allInterestingElectrons;
 }
