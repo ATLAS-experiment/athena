@@ -100,7 +100,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             }
         }
         std::vector<miniRoad> roadsToExtrapolate;
-        roadsToExtrapolate.push_back(road);
+        roadsToExtrapolate.push_back(std::move(road));
 
         std::vector<miniRoad> completedRoads;
 
@@ -120,7 +120,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             // Check exit condition
             if (currentRoad.getNHits() >= (m_nLayers_1stStage+m_nLayers_2ndStage))
             {
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue; // this one is done
             }
             // Other try to find the next hit in this road
@@ -164,7 +164,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             bool foundhitForRoad = false;
             if(fineID == 215){
                 ATH_MSG_DEBUG("Stopping condition reached");
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue;
             }
             // Get the last layer and hit in the road
@@ -178,7 +178,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             bool lastHitWasReal = lastHit->isReal();
             float lastHitR = lastHit->getR();
             if(layer >= (m_nLayers_1stStage + m_nLayers_2ndStage)) {
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue;
             }
             unsigned int hitsInWindow = 0;
@@ -482,12 +482,12 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
         }
         if (thit->isPixel())
         {
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
         }
         else if (thit->isStrip() && (thit->getHitType() == HitType::spacepoint))
         {
             // This is a proper strips SP, push the first hit back and skip the next one since its a duplicate
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
             skipHit = true;
         }
         else if (thit->isStrip() && (thit->getHitType() == HitType::guessed))
