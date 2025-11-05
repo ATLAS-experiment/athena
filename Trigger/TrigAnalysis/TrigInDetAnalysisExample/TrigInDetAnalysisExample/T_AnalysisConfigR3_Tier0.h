@@ -1127,7 +1127,7 @@ protected:
     }
 
     if(m_provider->msg().level() <= MSG::VERBOSE) {
-      m_provider->msg(MSG::VERBOSE) << " Successfully retrived the TrigDecisionTool"  << endmsg;
+      m_provider->msg(MSG::VERBOSE) << " Successfully retrieved the TrigDecisionTool"  << endmsg;
     }
 
 
