@@ -1,0 +1,50 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+TauJets:
+- containerName: AnaTauJets
+  decorateTruth: true
+  WorkingPoint:
+  - useSelectionConfigFile: false
+    manual_sel_minpt: 15.0
+    manual_sel_rnnwp: loose 
+    manual_sel_evetowp: medium
+    manual_sel_muonolr: true   
+  TriggerSF:
+  - tauID: Loose
+    triggerChainsPerYear:
+      2015:
+      - HLT_tau25_medium1_tracktwo
+      - HLT_tau35_medium1_tracktwo
+      - HLT_tau80L1TAU60_medium1_tracktwo  
+      - HLT_tau125_medium1_tracktwo  
+      2016:
+      - HLT_tau25_medium1_tracktwo
+      - HLT_tau35_medium1_tracktwo
+      - HLT_tau50L1TAU12_medium1_tracktwo
+      - HLT_tau80L1TAU60_medium1_tracktwo
+      - HLT_tau160_medium1_tracktwo
+      2017:
+      - HLT_tau25_medium1_tracktwo
+      - HLT_tau35_medium1_tracktwo
+      - HLT_tau50L1TAU12_medium1_tracktwo
+      - HLT_tau60_medium1_tracktwo  
+      - HLT_tau80L1TAU60_medium1_tracktwo
+      - HLT_tau160_medium1_tracktwo
+      2018:
+      - HLT_tau25_medium1_tracktwoEF
+      - HLT_tau35_medium1_tracktwoEF
+      - HLT_tau60_medium1_tracktwoEF  
+      - HLT_tau80L1TAU60_medium1_tracktwoEF
+      - HLT_tau160L1TAU100_medium1_tracktwoEF  
+  MCTCClassification:
+    prefix: truth_
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}
