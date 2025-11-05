@@ -81,11 +81,6 @@ namespace MuonR4{
                                                             const Acts::CalibrationContext& calContext,
                                                             const MsTrackSeed& seed) const;
             
-            void visualizeObj(const Acts::GeometryContext& tgContext,
-                              const Acts::CalibrationContext& calContext,
-                              const MsTrackSeed& seed,
-                              const OptBoundPars_t& parsToExt) const;
-
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
@@ -99,7 +94,7 @@ namespace MuonR4{
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Track fitting tool */
             ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
-
+            /** @brief Calibration tool to fill the track states */
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", ""};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
@@ -111,9 +106,6 @@ namespace MuonR4{
             Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
             /** @brief Key to the output track container */
             SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MsTracks"};
-            /** @brief Dump the segments & the pre estimated track parameters */
-            Gaudi::Property<bool> m_drawEvent{this , "drawEvent", false };
- 
             /** @brief Pointer to the actual seeder implementation */
             std::unique_ptr<MsTrackSeeder> m_seeder{};
     };      

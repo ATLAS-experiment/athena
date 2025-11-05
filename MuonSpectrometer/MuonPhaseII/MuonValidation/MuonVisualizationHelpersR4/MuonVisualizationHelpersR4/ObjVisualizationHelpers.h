@@ -19,8 +19,10 @@
 
 
 namespace MuonValR4{
-
-
+    /** @brief Draws the recorded propagation steps as a polygon line
+     *  @param step: List of steps to draw
+     * @param vsualHelper: Obj helper to which the drawn trajectory is appended
+     * @param viewConfig: Configuration style of the drawn polygon. */
     void drawPropagation(const std::vector<Acts::detail::Step>& steps,
                          Acts::ObjVisualization3D& visualHelper,
                          const Acts::ViewConfig& viewConfig = Acts::s_viewLine);
