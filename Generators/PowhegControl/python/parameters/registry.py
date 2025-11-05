@@ -589,7 +589,7 @@ class Registry(metaclass=Singleton):
         self.add_default("softtest", 1, description="check soft limits. [0:disabled]")
         self.add_default("stage2init", -1, description="[1:enabled]")
         self.add_default("sthw2", powheg_atlas_common.EW_parameters.sin2thetaW, description="sin(theta_W)^2")
-        self.add_default("storeinfo_rwgt", 0, frozen=True, description="write out PDF information for reweighting. [0:disabled; 1:enabled]")
+        self.add_default("storeinfo_rwgt", 0, frozen=False, description="write out PDF information for reweighting. [0:disabled; 1:enabled]")
         self.add_default("storemintupb", 1, description="cache cross sections (stage2 btilde calls) to speed up construction of upper bounding envelope. [1:enabled]")
         self.add_default("st_nlight_default", 5, description="")
         self.add_default("st_nlight_as", 5, description="")
