@@ -66,40 +66,36 @@ IdDictCnvTest::initialize()
     ATH_MSG_DEBUG ( " Found the IdDictManager. " );
     ATH_MSG_DEBUG ( " Tag is " << idDictMgr->manager()->tag() );
 
-    const IdDictMgr::dictionary_map& dm = idDictMgr->manager()->get_dictionary_map (); 
-    IdDictMgr::dictionary_map::const_iterator it;  
+    IdDictMgr::dictionary_vec dv = idDictMgr->manager()->get_dictionaries();
  
     int n = 0; 
 
-    if (dm.begin () == dm.end ()) {
+    if (dv.empty()) {
  	// No dicts found
         ATH_MSG_ERROR ( "No dictionaries found!" );
  	return StatusCode::FAILURE;
     }
     
- 
-    for (it = dm.begin (); it != dm.end (); ++it, ++n) { 
- 	const IdDictDictionary& dictionary = *((*it).second); 
- 
- 
+
+    for (const IdDictDictionary* dictionary : dv) {
  	ATH_MSG_INFO( "---- " << n << " ----------------------------" );
- 	std::string version = ("" != dictionary.version()) ? dictionary.version() : "default";
- 	ATH_MSG_INFO ( "Dictionary " << dictionary.name()
+        std::string version = ("" != dictionary->version()) ? dictionary->version() : "default";
+        ATH_MSG_INFO ( "Dictionary " << dictionary->name()
                        << " version " << version );
 
- 	if(dictionary.verify()) {
+        if(dictionary->verify()) {
           ATH_MSG_INFO( "Dictionary verification is OK" );
  	}
  	else {
           ATH_MSG_FATAL( "Dictionary verification has failed: "
-                         << dictionary.name() << " multirange: "
-                         << (std::string)dictionary.build_multirange() );
+                         << dictionary->name() << " multirange: "
+                         << (std::string)dictionary->build_multirange() );
  	    return StatusCode::FAILURE;
  	}
 	
  
 // 	std::vector<IdDictRegion*>::const_iterator rit; 
-// 	for (rit = dictionary.m_regions.begin (); rit != dictionary.m_regions.end (); ++rit) { 
+// 	for (rit = dictionary->m_regions.begin (); rit != dictionary->m_regions.end (); ++rit) {
 // 	    const IdDictRegion& region = *(*rit); 
  
 // 	    log << MSG::DEBUG 
