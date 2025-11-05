@@ -68,3 +68,13 @@ atlas_add_test( AODEventPicking_run3_mc
                 SCRIPT test/AODEventPicking_run3_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
                 LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
                 PROPERTIES TIMEOUT 900 )
+
+atlas_add_test( EventPicking_ESD_run3_mc
+                SCRIPT test/EventPicking_ESD_run3_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                PROPERTIES TIMEOUT 900 )
+
+atlas_add_test( EventPicking_ESD_run3_data22
+                SCRIPT test/EventPicking_ESD_run3_data22.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                PROPERTIES TIMEOUT 900 )
