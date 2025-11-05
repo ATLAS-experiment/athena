@@ -26,22 +26,17 @@ int main (int argc, char* argv[])
   
   const IdDictMgr& idd = parser.parse (argv[1]);  
  
-  const IdDictMgr::dictionary_map& dm = idd.get_dictionary_map (); 
-  IdDictMgr::dictionary_map::const_iterator it;  
- 
   int n = 0; 
  
-  for (it = dm.begin (); it != dm.end (); ++it, ++n) 
+  for (const IdDictDictionary* dictionary : idd.get_dictionaries())
     { 
-      const IdDictDictionary& dictionary = *((*it).second); 
- 
       std::cout << "---- " << n << " ----------------------------" << std::endl; 
-      std::cout << "Dictionary " << dictionary.name() << std::endl;
+      std::cout << "Dictionary " << dictionary->name() << std::endl;
 
-      size_t nregions = dictionary.n_regions();
+      size_t nregions = dictionary->n_regions();
       for (size_t i = 0; i < nregions; ++i)
         {
-          const IdDictRegion& region = dictionary.region(i);
+          const IdDictRegion& region = dictionary->region(i);
           std::cout << "region #" << region.index() << std::endl;
  
           size_t width = 0; 

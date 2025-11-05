@@ -443,7 +443,7 @@ RegionFactory::idd_end (IdDictParser& parser, const XMLCoreNode& /*node*/)  {
       if (parser.m_dictionary != 0) parser.m_dictionary->add_region (parser.m_region);
       // Check whether region is empty, i.e. no region entries have
       // been found and added
-      if (parser.m_region->entries().size() == 0) {
+      if (parser.m_region->n_entries() == 0) {
         parser.m_region->set_is_empty();
       }
     } else if (parser.m_dictionary != 0) {
@@ -451,7 +451,7 @@ RegionFactory::idd_end (IdDictParser& parser, const XMLCoreNode& /*node*/)  {
       parser.m_dictionary->add_region (parser.m_region);
       // Check whether region is empty, i.e. no region entries have
       // been found and added
-      if (parser.m_region->entries().size() == 0) {
+      if (parser.m_region->n_entries() == 0) {
           parser.m_region->set_is_empty();
       }
     } else {
