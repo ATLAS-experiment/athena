@@ -156,7 +156,6 @@ namespace met {
     double m_jetMinEfrac{};
     double m_jetMinWeightedPt{};
     std::string m_jetConstitScaleMom;
-    std::string m_jetJvtMomentName;
     std::string m_jetRejectionDec;
 
     double m_CenJetPtCut{}, m_FwdJetPtCut{} ; // jet pt cut for central/forward jets
