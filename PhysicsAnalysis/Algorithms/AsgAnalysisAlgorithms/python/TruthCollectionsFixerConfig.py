@@ -38,7 +38,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
         if config.dataType() is DataType.Data: return
 
         partContainers = None
-        if self.truthParticleContainersToFix:
+        if self.truthParticleContainersToFix is not None:
             partContainers = self.truthParticleContainersToFix
         elif config.isPhyslite():
             partContainers = [
@@ -62,7 +62,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             ]
             
         vertContainers = None
-        if self.truthVertexContainersToFix:
+        if self.truthVertexContainersToFix is not None:
             vertContainers = self.truthVertexContainersToFix
         elif config.isPhyslite():
             vertContainers = [
