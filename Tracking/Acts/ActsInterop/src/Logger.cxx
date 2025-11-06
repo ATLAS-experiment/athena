@@ -106,12 +106,12 @@ makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name,
   if (inamed != nullptr) {
     level = parent->msg().level();
   }
-  return makeActsAthenaLogger(parent->msgSvc().get(), name, level, parent_name);
+  return makeActsAthenaLogger(parent->msgSvc().get(), name, level, std::move(parent_name));
 }
 
 std::unique_ptr<const Acts::Logger>
 makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name, const std::string& parent_name)
 {
   
-  return makeActsAthenaLogger(parent, name, std::optional<std::string>(std::move(parent_name)));
+  return makeActsAthenaLogger(parent, name, std::optional<std::string>(parent_name));
 }
