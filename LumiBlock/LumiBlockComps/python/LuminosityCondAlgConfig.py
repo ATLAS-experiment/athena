@@ -44,16 +44,10 @@ def LuminosityCondAlgCfg (flags, useOnlineLumi=None, suffix=None):
   
     if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
          kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
-         kwargs.setdefault("actualMuKey", flags.Overlay.BkgPrefix + "EventInfo.actualInteractionsPerCrossing")
-         kwargs.setdefault("averageMuKey", flags.Overlay.BkgPrefix + "EventInfo.averageInteractionsPerCrossing")
 
-    LuminosityCondAlg=CompFactory.LuminosityCondAlg
+    kwargs.setdefault("LuminosityOutputKey", "LuminosityCondData" + suffix)
 
-    alg = LuminosityCondAlg (name,
-                             LuminosityOutputKey = 'LuminosityCondData' + suffix,
-                             **kwargs)
-
-    result.addCondAlgo (alg)
+    result.addCondAlgo(CompFactory.LuminosityCondAlg(name, **kwargs))
     return result
 
 
