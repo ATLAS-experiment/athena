@@ -56,6 +56,10 @@ class CommonServicesConfig (ConfigBlock) :
             "histogram holding only the names of weight-based systematics. This is useful "
             "to help make histogramming frameworks more efficient by knowing in advance which "
             "systematics need to recompute the observable and which don't.")
+        self.addOption ('metadataHistogram', None , type=str,
+            info="the name (string) of the metadata histogram which contains information about "
+            "data type, campaign, etc. The default is None (don't write out "
+            "the histogram).")
         self.addOption ('enableExpertMode', False, type=bool,
             info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
             "DO NOT USE FOR ANALYSIS.")
@@ -109,6 +113,24 @@ class CommonServicesConfig (ConfigBlock) :
                 weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
                 weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
+
+        if self.metadataHistogram is not None:
+            # add histogram with metadata
+            if not config.flags:
+                raise ValueError ("Writing out the metadata histogram requires to pass config flags")
+            metadataHistAlg = config.createAlgorithm( 'CP::MetadataHistAlg', 'MetadataHistAlg' )
+            metadataHistAlg.histogramName = self.metadataHistogram
+            metadataHistAlg.dataType = str(config.dataType().value)
+            metadataHistAlg.campaign = str(config.dataYear()) if config.dataType() is DataType.Data else str(config.campaign().value)
+            metadataHistAlg.mcChannelNumber = str(config.dsid())
+            if config.dataType() is DataType.Data:
+                etag = "unavailable"
+            else:
+                from AthenaConfiguration.AutoConfigFlags import GetFileMD
+                metadata = GetFileMD(config.flags.Input.Files)
+                amiTags = metadata.get("AMITag", "not found!")
+                etag = str(amiTags.split("_")[0])
+            metadataHistAlg.etag = etag
 
         if self.enableExpertMode and config._pass == 0:
             # set any expert-mode errors to be ignored instead
@@ -412,13 +434,13 @@ class GeneratorAnalysisBlock (ConfigBlock):
             alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg', reentrant=True )
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
-        
+
         if self.doHFProdFracReweighting:
             generatorInfo = config.flags.Input.GeneratorsInfo
             log.info(f"Loaded generator info: {generatorInfo}")
 
             DSID = "000000"
-            
+
             if not generatorInfo:
                 log.warning("No generator info found.")
                 DSID = "000000"
