@@ -196,8 +196,11 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_stripEtaWidth = reElement->stripEtaWidth();
    m_stripPhiWidth = reElement->stripPhiWidth();
    m_stripEtaLength = reElement->stripEtaLength(); 
-   m_stripPhiLength = reElement->stripPhiLength();     
- 
+   m_stripPhiLength = reElement->stripPhiLength();
+
+   m_envelopeHeight = 2.*reElement->getParameters().halfThickness;
+   m_envelopeWidth  = 2.*reElement->getParameters().halfWidth;
+   m_envelopeLength = 2.*reElement->getParameters().halfLength;
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;

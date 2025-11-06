@@ -928,9 +928,7 @@ bool IDPerfMonEoverP::fillVertexInformation(std::map<const xAOD::TrackParticle*,
 	if(not tpLinks.empty()) {
 	  nbtk = tpLinks.size();
 	  ATH_MSG_DEBUG( " -- vertex " << vtxCount << "  has  "  << nbtk << " track particles" );
-	  int trkCount = 0;
 	  for(const auto& tp_elem : tpLinks ){
-	    trkCount++;
 	    const xAOD::TrackParticle* trk = *tp_elem;
 	    if (trk != NULL) {
 	      VxPos myVxPos = std::make_pair(vxI,npv);

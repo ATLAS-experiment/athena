@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UserDatabase.h"
@@ -12,7 +12,6 @@
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/pool.h"
 #include "FileCatalog/IFileCatalog.h"
-#include "POOLCore/DbPrint.h"
 
 #include <exception>
 
@@ -25,6 +24,7 @@ pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::Technolo
                                                   pool::PersistencySvc::DatabaseRegistry& registry,
                                                   const std::string& name,
                                                   pool::DatabaseSpecification::NameType nameType ):
+  APRMessaging("PersistencySvc::UserDB"),                                                  
   m_technologyDispatcher( technologyDispatcher ),
   m_policy( policy ),
   m_catalog( catalog ),
@@ -165,8 +165,7 @@ pool::PersistencySvc::UserDatabase::connectForWrite( const pool::DatabaseConnect
 	  pool::DbType dbType( m_technology );
 	  pool::DbType dbTypeMajor( dbType.majorType() );
 	  m_catalog.registerPFN( m_the_pfn.substr(0, m_the_pfn.find('?')), dbTypeMajor.storageName(), m_the_fid );
-          DbPrint log("PersistencySvc::UserDB::connectForWrite()" );
-          log << DbPrintLvl::Debug << "registered PFN: " << m_the_pfn << " with FID:" << m_the_fid << endmsg;
+    ATH_MSG_DEBUG("registered PFN: " << m_the_pfn << " with FID:" << m_the_fid);
 	  dbRegistered = true;
 	  if( policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::OVERWRITE ) {
 	     accessMode = pool::CREATE;
@@ -260,14 +259,12 @@ pool::PersistencySvc::UserDatabase::fid()
       if ( m_nameType == pool::DatabaseSpecification::PFN ) {
          std::string technology;
          m_catalog.lookupFileByPFN( m_name.substr(0, m_name.find('?')), m_the_fid, technology );
-         DbPrint log("PersistencySvc::UserDB::fid()" );
-         log << DbPrintLvl::Debug << "lookupPFN: " << m_name << " returned FID: '" << m_the_fid << "'"
-             << " tech=" << technology << endmsg;
+         ATH_MSG_DEBUG("lookupPFN: " << m_name << " returned FID: '" << m_the_fid << "'" << " tech=" << technology);
          if ( ! m_the_fid.empty() ) {
             if( technology.empty() ) {
                m_nameType = DatabaseSpecification::LFN;
-               log << DbPrintLvl::Debug << "Retrying 'connect' using assumed PFN " << m_name
-                   << " as LFN (no tech found in PFC)" << endmsg;
+               ATH_MSG_DEBUG("Retrying 'connect' using assumed PFN " << m_name
+                            << " as LFN (no tech found in PFC)" );
                return m_the_fid;
             }
             m_the_pfn = m_name;
@@ -277,8 +274,8 @@ pool::PersistencySvc::UserDatabase::fid()
          else {
            if( m_transaction.type() != pool::ITransaction::UPDATE ) { // Fetch the FID from the db itself !
               if( !m_technologySet ) {
-                 log << DbPrintLvl::Debug << "Opening database '" << m_name
-                     << "' with no catalog entry and no technology set - assuming ROOT storage" << endmsg;
+                 ATH_MSG_DEBUG("Opening database '" << m_name 
+                              << "' with no catalog entry and no technology set - assuming ROOT storage" );
                  m_technology = pool::ROOT_StorageType.type();
                  m_technologySet = true;
               }
@@ -289,7 +286,8 @@ pool::PersistencySvc::UserDatabase::fid()
                  std::string  pfn, tech;
                  m_catalog.getFirstPFN( m_the_fid, pfn, tech );
                  if( !pfn.empty() ) {
-                    log << DbPrintLvl::Warning << "Opening file '" << m_name << "' which is already registered in the Catalog as '" << pfn <<"' (GUID " << m_the_fid << ") - this is not supported and may even lead to a crash!" << endmsg;
+                    ATH_MSG_WARNING("Opening file '" << m_name << "' which is already registered in the Catalog as '" << pfn 
+                                    <<"' (GUID " << m_the_fid << ") - this is not supported and may even lead to a crash!" );
                  }
                  m_the_pfn = m_name;
                  m_alreadyConnected = true;

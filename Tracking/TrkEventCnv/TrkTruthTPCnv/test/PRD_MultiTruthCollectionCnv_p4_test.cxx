@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -79,7 +79,7 @@ void test1(const std::vector<HepMC::GenParticlePtr> & genPartVector)
   testit (trans1);
 }
 
-
+//coverity[root_function]
 int main()
 {
   ISvcLocator* pSvcLoc = nullptr;

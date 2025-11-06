@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_GLOBALTRANSACTION_H
@@ -7,6 +7,8 @@
 
 #include "PersistencySvc/ITransaction.h"
 #include "DatabaseRegistry.h"
+#include "POOLCore/DbPrint.h"
+
 #include <list>
 
 namespace pool {
@@ -17,7 +19,7 @@ namespace pool {
      *  GlobalTransaction is an implementation of the ITransaction interface.
      *
      */
-    class GlobalTransaction : virtual public ITransaction {
+    class GlobalTransaction : virtual public ITransaction, public APRMessaging {
     public:
       /// Constructor
       explicit GlobalTransaction( DatabaseRegistry& registry );

@@ -51,9 +51,6 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::JetContainer>m_truthFatJetsKey{this, "TruthFatJetCollectionName", "AntiKt10TruthJets"};
 
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_mcReadDecor{this, "TruthClassKey",m_mcKey,"classifierParticleOrigin"};
-    
-
-    SG::WriteDecorHandleKeyArray<xAOD::EventInfo> m_decorKeys{this, "DecorationKeys", m_eventInfoKey, {} , "Decorations added to the eventinfo"};
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_dec_genFiltHTKey
       { this, "GenFiltHTKey", m_eventInfoKey, "GenFiltHT", "GenFiltHT EventInfo decoration name" };

@@ -98,7 +98,7 @@ def MuonSegmentTruthAssociationAlgCfg(flags, name="MuonSegmentTruthAssociationAl
 
 def MuonTruthAlgsCfg(flags):
     result = ComponentAccumulator()
-    if not flags.Input.isMC or flags.Muon.usePhaseIIGeoSetup:
+    if not(flags.Input.isMC or flags.Overlay.DataOverlay) or flags.Muon.usePhaseIIGeoSetup:
         return result
     from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
     result.merge(MuonPRD_MultiTruthMakerCfg(flags))

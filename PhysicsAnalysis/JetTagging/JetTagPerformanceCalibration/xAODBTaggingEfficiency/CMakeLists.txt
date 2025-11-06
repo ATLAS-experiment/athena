@@ -35,7 +35,7 @@ atlas_add_dictionary( xAODBTaggingEfficiencyDict
   xAODBTaggingEfficiency/selection.xml
   LINK_LIBRARIES xAODBTaggingEfficiencyLib )
 
-if( XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
+if( XAOD_ANALYSIS )
 
   atlas_add_executable(
     BTaggingToolsTester
@@ -58,8 +58,8 @@ if( XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
   )
 
   atlas_add_executable(
-    SystematicStrategyComparison
-    util/SystematicStrategyComparison.cxx
+    BTaggingSystematicStrategyComparison
+    util/BTaggingSystematicStrategyComparison.cxx
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib PathResolver
   )
@@ -105,7 +105,7 @@ if( XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
     PRIVATE ${XAOD_ACCESS_LIB} )
   target_link_libraries( BTaggingEigenVectorRecompositionToolTester
     PRIVATE ${XAOD_ACCESS_LIB} )
-  target_link_libraries( SystematicStrategyComparison
+  target_link_libraries( BTaggingSystematicStrategyComparison
     PRIVATE ${XAOD_ACCESS_LIB} )
 
   unset(XAOD_ACCESS_LIB)
@@ -146,8 +146,8 @@ if( XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
     POST_EXEC_SCRIPT nopost.sh
   )
   atlas_add_test(
-    ut_SystematicStrategyComparison
-    SCRIPT SystematicStrategyComparison ${FTAG_INPUT_XAOD} ${FTAG_LATEST_CDI} GN2v01 Continuous
+    ut_BTaggingSystematicStrategyComparison
+    SCRIPT BTaggingSystematicStrategyComparison ${FTAG_INPUT_XAOD} ${FTAG_LATEST_CDI} GN2v01 Continuous
     POST_EXEC_SCRIPT nopost.sh
   )
 
@@ -155,7 +155,7 @@ if( XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
   unset(FTAG_LATEST_CDI)
   unset(FTAG_XBB_LATEST_JSON)
 
-endif() # XAOD_STANDALONE
+endif() # XAOD_ANALYSIS
 
 # Install files from the package:
 atlas_install_runtime( share/*.root )

@@ -7,7 +7,7 @@
 
 #include <TObject.h>
 #include <Acts/Utilities/ArrayHelpers.hpp>
-#include <climits>
+#include <limits>
 #include <atomic>
 
 namespace MuonValR4::detail {
@@ -20,6 +20,7 @@ namespace MuonValR4::detail {
 
             DrawCanvasObject(const std::string& canvasName, 
                              const std::size_t evtNumber);
+            virtual ~DrawCanvasObject() = default;
             
             virtual void expandPad(const double x, const double y) override final;
 
