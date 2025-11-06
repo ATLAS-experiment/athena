@@ -7,7 +7,7 @@
 
 #include <TObject.h>
 #include <Acts/Utilities/ArrayHelpers.hpp>
-#include <climits>
+#include <limits>
 #include <atomic>
 
 namespace MuonValR4::detail {
