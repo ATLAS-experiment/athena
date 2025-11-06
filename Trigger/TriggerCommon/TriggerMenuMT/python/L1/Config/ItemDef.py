@@ -119,15 +119,14 @@ class ItemDef:
         PHYS_1ZDC_NZDC             = Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 ) & Not( d.ZDC_1 & d.ZDC_0)
 
         #ATR-26984 refine ZDC_A and ZDC_C logic
-        #ZDC_A, ZDC_C and ZDC_A_C redefined due to O+O configuration, ATR-30690
-        #ZDC_A     = ( Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 ) ) | ( d.ZDC_2 & Not(d.ZDC_1) )
-        #ZDC_C     = d.ZDC_1 | (d.ZDC_0 & Not(d.ZDC_2) )
+        ZDC_A     = ( Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 ) ) | ( d.ZDC_2 & Not(d.ZDC_1) )
+        ZDC_C     = d.ZDC_1 | (d.ZDC_0 & Not(d.ZDC_2) )
 
-        #ZDC_A_C   = Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 )
-        #ZDC_AND   = ZDC_A_C
+        ZDC_A_C   = Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 )
+        ZDC_AND   = ZDC_A_C
         VZDC_A_C  = ZDC_comb0
         ZDC_XOR   = d.ZDC_2
-        #VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
+        VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
         ZDCOR = Not(ZDC_comb0)
 
         # ZDC configuration for LHCf+ZDC special run in Sep. 2022
@@ -182,12 +181,10 @@ class ItemDef:
         
         # new LG items for the upcoming O+O runs, ATR-30690
         ZDC_LOR = Not(ZDC_alt_comb0)
-        ZDC_A = d.ZDC_ALT_0
-        ZDC_C = d.ZDC_ALT_1
-        ZDC_A_C = d.ZDC_ALT_0 & d.ZDC_ALT_1
+        # ZDC_A = d.ZDC_ALT_0
+        # ZDC_C = d.ZDC_ALT_1
+        # ZDC_A_C = d.ZDC_ALT_0 & d.ZDC_ALT_1
         ZDC_YnYn = ZDC_alt_comb7
-        ZDC_AND   = ZDC_A_C
-        VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
 
         # Item for TeATIME
         TeATIME = Not(d.TOPO_TeATIME_jTENoSort_ParamSet0)
