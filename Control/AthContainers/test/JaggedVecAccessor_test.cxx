@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecAccessor_test.cxx
@@ -443,7 +443,7 @@ void test2()
   assert (vfloatEQ (pvec, {1.5, 9.5, 20.5, 21.5, 22.5, 3.5, 4.5, 5.5}));
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainers/JaggedVecAccessor_test\n";
