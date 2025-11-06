@@ -14,11 +14,11 @@ bool testGuid( const string& guid, bool shouldwork, DbPrint& mylog )
    
    TypeH typ = DbReflex::forGuid( Guid(guid) );
    if( shouldwork ) {
-      if( typ ) mylog << DbPrintLvl::Info << "GetGuid (" << guid << ") worked as expected" << DbPrint::endmsg;
-      else      mylog << DbPrintLvl::Error << "GetGuid did NOT work as expected" << DbPrint::endmsg;
+      if( typ ) mylog << MSG::INFO  << "GetGuid (" << guid << ") worked as expected" << endmsg;
+      else      mylog << MSG::ERROR << "GetGuid did NOT work as expected" << endmsg;
    } else {
-      if( !typ ) mylog << DbPrintLvl::Info << "GetGuid failed as expected" << DbPrint::endmsg;
-      else       mylog << DbPrintLvl::Error << "GetGuid(" << guid << ") did NOT fail as expected" << DbPrint::endmsg;
+      if( !typ ) mylog << MSG::INFO << "GetGuid failed as expected" << endmsg;
+      else       mylog << MSG::ERROR << "GetGuid(" << guid << ") did NOT fail as expected" << endmsg;
    }
    return not (shouldwork xor typ);
 }
@@ -27,11 +27,11 @@ bool testGuid( const string& guid, bool shouldwork, DbPrint& mylog )
 int main()
 {
    DbPrint mylog("APR Guid TEST");
-   mylog.setLevel( DbPrintLvl::Verbose );
+   mylog.setLevel( MSG::VERBOSE );
    bool res = true;
    res = testGuid( "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAF", false, mylog ) and res;
    res = testGuid( "F41DF744-242D-11E6-B472-02163E010CEC", true, mylog ) and res;
    
-   mylog << DbPrintLvl::Info << "Test " << (res?"SUCCESS":"FAILURE") << DbPrint::endmsg;
+   mylog << MSG::INFO << "Test " << (res?"SUCCESS":"FAILURE") << endmsg;
    return res? 0 : -1;
 }

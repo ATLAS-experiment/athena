@@ -67,6 +67,8 @@ s/([0-9][0-9]* ms)/(xx ms)/
 s/([0-9][0-9]* ms total)/(xx ms total)/
 s/[[][0-9;]*m//g
 s/INFO set[(][)]/INFO set([])/  #py2 vs py3
+s/^RootDatabase[^ ]\\+/RootDatabase/   #logging change in APR RootStorageSvc
+s/^.*(DEBUG DB Action Commit).*$/\\\\1/
 EOF
 
 # Patterns that cannot be ignored
@@ -175,7 +177,8 @@ PP="$PP"'|using job opts'
 PP="$PP"'|Terminating thread-pool resources|Joining Scheduler thread|Disconnecting from sqlite|Opening COOL connection|Initializing CondInputLoader|preLoadAddresses: Removing|IOVRanges will be checked|User session with|ConnectionService I[nN][fF][oO]|Disconnect from the database|RalSessionMgr I[nN][fF][oO]|Connect to the database'
 
 # Outputs dependent on whether or not a file catalog already exists.
-PP="$PP"'|XMLFileCatalog|File is not in Catalog|Failed to open container to check POOL collection|Open     DbSession|Access   DbDomain|Access   DbDatabase|^RootDatabase.open|Deaccess DbDatabase'
+PP="$PP"'|XMLFileCatalog|File is not in Catalog|Failed to open container to check POOL collection'
+PP="$PP"'|Open     DbSession|Access   DbDomain|Access   DbDatabase|^RootDatabase.*File version:|Deaccess DbDatabase|AUTO_FLUSH'
 
 PP="$PP"'|^Py:ConfigurableDb'
 PP="$PP"'|^DBReplicaSvc.*INFO'

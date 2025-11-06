@@ -17,7 +17,6 @@
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbSession.h"
 #include "StorageSvc/IDbDomain.h"
-#include "POOLCore/DbPrint.h"
 #include "StorageSvc/IOODatabase.h"
 #include "DbDatabaseObj.h"
 #include "DbDomainObj.h"
@@ -40,22 +39,19 @@ DbDomainObj::DbDomainObj(DbSession& sessionH,
 {
   if ( 0 == db() )    {
     ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
-        << " " << name() << " (UNKNOWN) impossible."
-        << " [" << typ.storageName() << "]" );
+        << " " << name() << " (UNKNOWN) impossible." << " [" << typ.storageName() << "]" );
     type().missingDriver(msg());
     return;
   }
   m_info = db()->createDomain();
   if ( !m_session.add( this ).isSuccess() )    {
-    ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
-        << " " << name()
-        << " (" << db()->name() << ")"
+    ATH_MSG_ERROR( ">   Access   DbDomain     " 
+        << accessMode(mode) << " " << name() << " (" << db()->name() << ")"
         << " impossible. Error inserting domain!" );
     return;
   }
   ATH_MSG_INFO( ">   Access   DbDomain     "
-      << accessMode(mode)
-      << " [" << type().storageName() << "]" );
+        << accessMode(mode) << " [" << type().storageName() << "]" );
 }
 
 /// Destructor

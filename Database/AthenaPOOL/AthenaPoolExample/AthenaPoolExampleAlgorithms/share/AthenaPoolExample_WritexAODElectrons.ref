@@ -132,7 +132,7 @@ AthenaEventLoopMgr                                   INFO Setup EventSelector se
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 StorageSvc                                          DEBUG Disconnect request for database: FID=A811B014-0297-AD47-AF4C-B75EF418982D PFN=SimplePoolFile3.root
 StorageSvc                                          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
-RootDatabase.close                                  DEBUG Closing DB SimplePoolFile3.root
+RootDatabase                                        DEBUG Closing DB SimplePoolFile3.root
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile3.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -201,10 +201,10 @@ POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 ApplicationMgr                                       INFO Application Manager Started successfully
-RootDatabase.setOption                              DEBUG Request tree cache 
-RootDatabase.setOption                              DEBUG File name SimplePoolFile3.root
-RootDatabase.setOption                              DEBUG Got tree CollectionTree read entry -1
-RootDatabase.setOption                              DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
+RootDatabase                                        DEBUG Request tree cache
+RootDatabase                                        DEBUG File name SimplePoolFile3.root
+RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
+RootDatabase                                        DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
 MetaDataSvc                                         DEBUG handle() BeginInputFile for SimplePoolFile3.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name SimplePoolFile3.root
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
@@ -333,25 +333,18 @@ SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContain
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/##Params [200]  (2 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
 ##Params                                            DEBUG No objects passing selection criteria... Container has 0 Entries in total.
-RootDatabase.setOption                              DEBUG Request TREE_AUTO_FLUSH 
-RootDatabase.setOption                              DEBUG File name SimplePoolFile_xAOD.root
-RootDatabase.setOption                              DEBUG Demand to set AUTO_FLUSH for TTree: CollectionTree with value: 10
-RootDatabase.setOption                              DEBUG Request TREE_AUTO_FLUSH 
-RootDatabase.setOption                              DEBUG File name SimplePoolFile_xAOD.root
-RootDatabase.setOption                              DEBUG Demand to set AUTO_FLUSH for TTree: POOLContainer with value: 10
-RootDatabase.setOption                              DEBUG Request TREE_AUTO_FLUSH 
-RootDatabase.setOption                              DEBUG File name SimplePoolFile_xAOD.root
-RootDatabase.setOption                              DEBUG Demand to set AUTO_FLUSH for TTree: POOLContainerForm with value: 10
+RootDatabase                                        DEBUG File name SimplePoolFile_xAOD.root
+RootDatabase                                        DEBUG File name SimplePoolFile_xAOD.root
+RootDatabase                                        DEBUG File name SimplePoolFile_xAOD.root
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(MyTracks)
 CollectionTree(MyTracks)                            DEBUG Opening
 CollectionTree(MyTracks)                            DEBUG    attributes# = 1
 CollectionTree(MyTracks)                            DEBUG Branch container 'MyTracks'
 CollectionTree(MyTracks)                            DEBUG Opened container CollectionTree(MyTracks) of type ROOT_Tree
-CollectionTree(MyTracks)                            DEBUG Setting AUTO_FLUSH for TTree: CollectionTree to value: 10
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(MyTracks) [203]  (3 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:FF777FDA-721C-4756-BBF3-4CE28C2A3AF5
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[0 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[0 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:ExampleTrackContainer_p1
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:ExampleTrackContainer_p1 Typ:ExampleTrackContainer_p1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(EventInfoAux.)
@@ -361,7 +354,7 @@ CollectionTree(EventInfoAux.)                       DEBUG Branch container 'Even
 CollectionTree(EventInfoAux.)                       DEBUG Opened container CollectionTree(EventInfoAux.) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(EventInfoAux.) [203]  (4 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[1 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[1 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::EventAuxInfo_v3
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(EventInfo)
@@ -371,10 +364,10 @@ CollectionTree(EventInfo)                           DEBUG Branch container 'Even
 CollectionTree(EventInfo)                           DEBUG Opened container CollectionTree(EventInfo) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(EventInfo) [203]  (5 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[2 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[2 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::EventInfo_v1
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc                                           INFO xAOD::ExampleElectronAuxContainer_v1 [A57CD90B-B697-4067-93C7-28252B1FF9D5]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(TestContainerAux.)
 CollectionTree(TestContainerAux.)                   DEBUG Opening
@@ -383,10 +376,10 @@ CollectionTree(TestContainerAux.)                   DEBUG Branch container 'Test
 CollectionTree(TestContainerAux.)                   DEBUG Opened container CollectionTree(TestContainerAux.) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(TestContainerAux.) [203]  (6 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:A57CD90B-B697-4067-93C7-28252B1FF9D5
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[3 , A57CD90B-B697-4067-93C7-28252B1FF9D5]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[3 , A57CD90B-B697-4067-93C7-28252B1FF9D5]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::ExampleElectronAuxContainer_v1
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::ExampleElectronAuxContainer_v1 Typ:xAOD::ExampleElectronAuxContainer_v1 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc                                           INFO DataVector<xAOD::ExampleElectron_v1> [4508E3FC-03A7-4770-BF41-050C]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(TestContainer)
 CollectionTree(TestContainer)                       DEBUG Opening
@@ -395,7 +388,7 @@ CollectionTree(TestContainer)                       DEBUG Branch container 'Test
 CollectionTree(TestContainer)                       DEBUG Opened container CollectionTree(TestContainer) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/CollectionTree(TestContainer) [203]  (7 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:4508E3FC-03A7-4770-BF41-050C
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[4 , 4508E3FC-03A7-4770-BF41-050C]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[4 , 4508E3FC-03A7-4770-BF41-050C]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:DataVector<xAOD::ExampleElectron_v1>
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:DataVector<xAOD::ExampleElectron_v1> Typ:DataVector<xAOD::ExampleElectron_v1> [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] POOLContainer(DataHeader)
@@ -403,10 +396,9 @@ POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
-POOLContainer(DataHeader)                           DEBUG Setting AUTO_FLUSH for TTree: POOLContainer to value: 10
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/POOLContainer(DataHeader) [203]  (8 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[5 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[5 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:DataHeader_p6
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] POOLContainerForm(DataHeaderForm)
@@ -414,13 +406,12 @@ POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
 POOLContainerForm(DataHeaderForm)                   DEBUG Opened container POOLContainerForm(DataHeaderForm) of type ROOT_Tree
-POOLContainerForm(DataHeaderForm)                   DEBUG Setting AUTO_FLUSH for TTree: POOLContainerForm to value: 10
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/POOLContainerForm(DataHeaderForm) [203]  (9 , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[6 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[6 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:DataHeaderForm_p6
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 MetaDataSvc                                         DEBUG MetaDataSvc will handle EventStreamInfo ClassID: 167728019
 Str...StreamWritexAODElectrons_MakeEventStreamInfo  DEBUG Resetting the EventStreamInfo payload at the first event
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967297, run #1 1 events processed so far  <<<===
@@ -485,7 +476,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967298, run #1 2 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -548,7 +539,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967299, run #1 3 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -611,7 +602,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #, run #1 4 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -674,7 +665,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 5 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -737,7 +728,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #2, run #1 6 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -800,7 +791,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #3, run #1 7 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -863,7 +854,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 8 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -926,7 +917,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #5, run #1 9 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -989,10 +980,20 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
-SimplePoolFile_xAOD.root                            DEBUG TestContainerAux. Initial basket size = 1536 increased to 3072
-SimplePoolFile_xAOD.root                            DEBUG TestContainer Initial basket size = 512 increased to 1024
-SimplePoolFile_xAOD.root                            DEBUG TestContainerAuxDyn.decor1 Initial basket size = 512 increased to 1024
+DEBUG DB Action Commit
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfo Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/TestContainerAux. Initial basket size = 1536 increased to 3072
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/TestContainer Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/index_ref Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.mcEventNumber Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.streamTagRobs Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.streamTagDets Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.actualInteractionsPerCrossing Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.averageInteractionsPerCrossing Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.mcChannelNumber Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.mcEventWeights Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/TestContainerAuxDyn.decor1 Initial basket size = 512 increased to 1024
+RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/index_ref Initial basket size = 512 increased to 1024
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #6, run #1 10 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1055,7 +1056,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #7, run #1 11 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1118,7 +1119,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #8, run #1 12 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1181,7 +1182,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #9, run #1 13 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1244,7 +1245,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4, run #1 14 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1307,7 +1308,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967311, run #1 15 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1370,7 +1371,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967312, run #1 16 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1433,7 +1434,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967313, run #1 17 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1496,7 +1497,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967314, run #1 18 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1559,7 +1560,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967315, run #1 19 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
@@ -1622,14 +1623,14 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 20 events processed so far  <<<===
 MetaDataSvc                                         DEBUG handle() EndInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
 MetaDataSvc                                         DEBUG retireMetadataSource: FID:A811B014-0297-AD47-AF4C-B75EF418982D
 MetaDataSvc                                         DEBUG  calling endInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "A811B014-0297-AD47-AF4C-B75EF418982D"
 StorageSvc                                          DEBUG Disconnect request for database: FID=A811B014-0297-AD47-AF4C-B75EF418982D PFN=SimplePoolFile3.root
 StorageSvc                                          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
-RootDatabase.close                                  DEBUG Closing DB SimplePoolFile3.root
+RootDatabase                                        DEBUG Closing DB SimplePoolFile3.root
 AthenaEventLoopMgr                                   INFO No more events in event selection 
 MetaDataSvc                                         DEBUG MetaDataSvc::stop()
 StreamWritexAODElectrons                            DEBUG handle() incident type: MetaDataStop
@@ -1660,7 +1661,7 @@ StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 
 MetaDataSvc                                         DEBUG Not translating metadata item ID #1316383046
 StreamWritexAODElectrons                            DEBUG  Added object 1316383046,"/TagInfo"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc                                           INFO xAOD::FileMetaDataAuxInfo_v1 [BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(FileMetaDataAux.)
 MetaData(FileMetaDataAux.)                          DEBUG Opening
@@ -1669,10 +1670,10 @@ MetaData(FileMetaDataAux.)                          DEBUG Branch container 'File
 MetaData(FileMetaDataAux.)                          DEBUG Opened container MetaData(FileMetaDataAux.) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/MetaData(FileMetaDataAux.) [203]  (a , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[7 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[7 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc                                           INFO EventStreamInfo_p3 [11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(StreamWritexAODElectrons)
 MetaData(StreamWritexAODElectrons)                  DEBUG Opening
@@ -1681,10 +1682,10 @@ MetaData(StreamWritexAODElectrons)                  DEBUG Branch container 'Stre
 MetaData(StreamWritexAODElectrons)                  DEBUG Opened container MetaData(StreamWritexAODElectrons) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/MetaData(StreamWritexAODElectrons) [203]  (b , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[8 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[8 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc                                           INFO xAOD::FileMetaData_v1 [C87E3828-4A7A-480A-95DE-0339539F6A0F]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(FileMetaData)
 MetaData(FileMetaData)                              DEBUG Opening
@@ -1693,10 +1694,10 @@ MetaData(FileMetaData)                              DEBUG Branch container 'File
 MetaData(FileMetaData)                              DEBUG Opened container MetaData(FileMetaData) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/MetaData(FileMetaData) [203]  (c , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[9 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[9 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
-StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
+StorageSvc                                           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc                                           INFO IOVMetaDataContainer_p1 [6C2DE6DF-6D52-43F6-B435-9F29812F40C0]
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(/TagInfo)
 MetaData(/TagInfo)                                  DEBUG Opening
@@ -1705,7 +1706,7 @@ MetaData(/TagInfo)                                  DEBUG Branch container '_Tag
 MetaData(/TagInfo)                                  DEBUG Opened container MetaData(/TagInfo) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/MetaData(/TagInfo) [203]  (d , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[10 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
+SimplePoolFile_xAOD.root                            DEBUG --->Adding Shape[10 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)]
 SimplePoolFile_xAOD.root                            DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolFile_xAOD.root                            DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdr(DataHeader)
@@ -1722,17 +1723,17 @@ MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'Data
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
 SimplePoolFile_xAOD.root                            DEBUG --->Adding Assoc :E8353C9A-1573-094C-8D68-B9F75DAECAFE/MetaDataHdrForm(DataHeaderForm) [203]  (f , ffffffffffffffff)
 SimplePoolFile_xAOD.root                            DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 StreamWritexAODElectrons                            DEBUG Metadata items written: 4
 MetaDataSvc                                         DEBUG Unlocking metadata tools
 StreamWritexAODElectrons                            DEBUG Leaving incident handler for MetaDataStop
 PoolSvc                                             DEBUG Disconnect request for contextId=0
 PoolSvc                                             DEBUG Disconnected PersistencySvc session
 PoolSvc                                             DEBUG Disconnect request for contextId=1
-SimplePoolFile_xAOD.root                            DEBUG DB Action Commit
+DEBUG DB Action Commit
 StorageSvc                                          DEBUG Disconnect request for database: FID=E8353C9A-1573-094C-8D68-B9F75DAECAFE PFN=SimplePoolFile_xAOD.root
 StorageSvc                                          DEBUG Closing database: FID=E8353C9A-1573-094C-8D68-B9F75DAECAFE
-RootDatabase.close                                  DEBUG Closing DB SimplePoolFile_xAOD.root
+RootDatabase                                        DEBUG Closing DB SimplePoolFile_xAOD.root
 PoolSvc                                             DEBUG Disconnected PersistencySvc session
 ApplicationMgr                                       INFO Application Manager Stopped successfully
 ReadData                                             INFO in finalize()
