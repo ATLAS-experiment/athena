@@ -298,7 +298,7 @@ def getHLTMonitoringAccess( flags = None, filterOnActiveChains = False ) -> HLTM
         if hltPs:
             for sig in cfg["signatures"]:
                 for chain in list(cfg["signatures"][sig]): # Make a copy as we might be deleting
-                    if not hltPs.enabled(chain):
+                    if chain in hltPs.chainNames() and not hltPs.enabled(chain):
                         del cfg["signatures"][sig][chain]
 
     return cfg
