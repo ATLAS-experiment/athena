@@ -53,8 +53,6 @@ class ttZ(PowhegV2):
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("bornonly")
         self.add_keyword("elbranching")
-        self.add_keyword("btlscalect", 1)
-        self.add_keyword("btlscalereal", 1)
         self.add_keyword("bmass")
         self.add_keyword("CKM_Vcd")
         self.add_keyword("CKM_Vcs")
