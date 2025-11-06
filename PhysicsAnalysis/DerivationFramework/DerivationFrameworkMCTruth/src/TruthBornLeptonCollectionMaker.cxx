@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////
 // TruthBornLeptonCollectionMaker.cxx
 // Makes a special collection of Born leptons
-
+#include "GeneratorObjects/McEventCollection.h"
 // R/W/D handles
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -30,7 +30,9 @@ DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMa
                                 const IInterface* p)
   : base_class(t,n,p)
   , m_metaStore( "MetaDataStore", n )
+  , m_mcEventsName("GEN_AOD")
 {
+	 declareProperty("McEvent", m_mcEventsName, "input McEventCollection container name");
   declareProperty( "MetaDataStore", m_metaStore );
 }
 
@@ -76,7 +78,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
 StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(const EventContext& ctx) const
 {
   // Event context
-  
+  /*
   // Set up for some metadata handling
   static const bool is_sherpa = [this]() {
     bool is_sherpa = false;
@@ -106,7 +108,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
     }
     return is_sherpa;
   }();
-
+*/
   // Retrieve truth collections
   SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);    
   if (!truthParticles.isValid()) {        
@@ -131,13 +133,22 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
   SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeAccessor(m_outcomeAccessorKey, ctx);
   SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationAccessor(m_classificationAccessorKey, ctx);
 
+  // Retrieve input data
+  const McEventCollection* mcEvts = nullptr;
+  if (!evtStore()->retrieve(mcEvts, m_mcEventsName).isSuccess() || nullptr == mcEvts) {
+    ATH_MSG_WARNING("could not retrieve mc collection at [" << m_mcEventsName << "]!");
+    return StatusCode::FAILURE;
+  }
+
+
+
   // add relevant particles to new collection
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
     // Grab the particle
     const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
     if (!theParticle) continue; // Protection against null pointers
     if (!theParticle->isLepton()) continue; // Only include leptons!
-
+/*
     if (is_sherpa) {
       // For Sherpa, skip is not status 11
       if (MC::isPhysical(theParticle)) continue;
@@ -193,6 +204,8 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
       }
     } // End of treatment for generators that are not Sherpa
 
+
+*/
     // Add this particle to the new collection
     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
     newParticlesWriteHandle->push_back( xTruthParticle );
