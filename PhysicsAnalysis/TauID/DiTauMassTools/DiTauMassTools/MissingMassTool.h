@@ -85,7 +85,7 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
   Gaudi::Property<int>  m_float_stop_miniter{this, "FloatStoppingCritMinIter", 10000, "Minimum number of iteration to apply Floating Stopping Criterion"};
   Gaudi::Property<int>  m_float_stop_checkfreq{this, "FloatStoppingCritCheckFreq", 1000, "Number of events frequency for Floating Stopping Criterion to be applied after minimum number of iteration"}; 
   Gaudi::Property<double> m_float_stop_comp{this, "FloatStoppingCritCheckComp", 0.05, "Percentage to assess the sigma compatibilities in the Floating Stopping Criterion"};  
-  Gaudi::Property<std::string> m_calib_set{this, "CalibSet", "2019"}; // Change to "2024" if the new MMC version is to be used.
+  Gaudi::Property<std::string> m_calib_set{this, "CalibSet", "2024"}; // Change to "2019" if the old MMC version is to be used.
   // default negative. Only set parameter if positive
   // so that the default are in MissingMassCalculator code
   Gaudi::Property<double> m_n_sigma_met{this, "NsigmaMET", -1};
@@ -98,7 +98,7 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
   Gaudi::Property<int> m_use_defaults{this, "UseDefaults", -1};
   Gaudi::Property<int> m_use_efficiency_recovery{this, "UseEfficiencyRecovery", -1};
   Gaudi::Property<bool> m_use_met_param_dphiLL{this, "UseMETDphiLL", false};
-  Gaudi::Property<std::string> m_param_file_path{this, "ParamFilePath", "MMC_params_v1_fixed.root"}; // // Available parameterization files: MMC_params_v051224_angle_noLikelihoodFit.root and MMC_params_v051224_angle_likelihoodFit.root. More details on the differences between these two options can be found in the slides https://indico.cern.ch/event/1487242/contributions/6269201/attachments/2989313/5265428/HbbHtautau_MMCstudies_statusReport_181224_v2.pdf
+  Gaudi::Property<std::string> m_param_file_path{this, "ParamFilePath", "MMC_params_v051224_angle_noLikelihoodFit.root"}; // // Available parameterization files: MMC_params_v051224_angle_noLikelihoodFit.root and MMC_params_v051224_angle_likelihoodFit.root. More details on the differences between these two options can be found in the slides https://indico.cern.ch/event/1487242/contributions/6269201/attachments/2989313/5265428/HbbHtautau_MMCstudies_statusReport_181224_v2.pdf . Use MMC_params_v1_fixed.root for 2019 CalibSet
   Gaudi::Property<double> m_beam_energy{this, "BeamEnergy", 6500.0};
   Gaudi::Property<bool> m_lfv_leplep_refit{this, "LFVLeplepRefit", true};
   Gaudi::Property<bool> m_save_llh_histo{this, "SaveLlhHisto", false}; 
