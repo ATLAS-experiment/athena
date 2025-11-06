@@ -68,7 +68,12 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<float>& m_stripEtaWidth{m_tree.newScalar<float>("stripEtaWidth")};
       MuonVal::ScalarBranch<float>& m_stripPhiWidth{m_tree.newScalar<float>("stripPhiWidth")};
       MuonVal::ScalarBranch<float>& m_stripEtaLength{m_tree.newScalar<float>("stripEtaLength")};
-      MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")};    
+      MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")}; 
+      /// Box dimension
+      MuonVal::ScalarBranch<float>& m_envelopeHeight{m_tree.newScalar<float>("envelopeHeight")}; 
+      MuonVal::ScalarBranch<float>& m_envelopeWidth{m_tree.newScalar<float>("envelopeWidth")}; 
+      MuonVal::ScalarBranch<float>& m_envelopeLength{m_tree.newScalar<float>("envelopeLength")}; 
+         
       /// Number of eta & phi gas gaps
       
       MuonVal::ScalarBranch<uint8_t>& m_numRpcLayers{m_tree.newScalar<uint8_t>("numRpcLayers")};      
