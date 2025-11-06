@@ -63,6 +63,9 @@ namespace DerivationFramework {
     ServiceHandle<StoreGateSvc> m_metaStore; //!< Handle on the metadata store for init
     /// Helper function for finding bare descendents of born leptons
     bool hasBareDescendent( const xAOD::TruthParticle* p ) const;
+    
+      std::string m_mcEventsName;
+    
   };
 }
 

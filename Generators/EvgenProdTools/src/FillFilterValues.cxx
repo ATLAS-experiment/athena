@@ -38,14 +38,14 @@ StatusCode FillFilterValues::execute() {
   // write filter values into xAOD::EventInfo
   
   SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtHT(m_mcFilterHTKey);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterHT") != NULL){
+  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterHT")){
      std::shared_ptr<HepMC3::DoubleAttribute>  fHT =   event_const()->attribute<HepMC3::DoubleAttribute>("filterHT"); 
      double fHT_double = fHT->value();
      dec_filtHT(0) = fHT_double;
   }
 
   SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtMET(m_mcFilterMETKey);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterMET") != NULL){
+  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterMET")){
     std::shared_ptr<HepMC3::DoubleAttribute>  fMET =   event_const()->attribute<HepMC3::DoubleAttribute>("filterMET");
     double fMET_double = fMET->value();
     dec_filtMET(0) = fMET_double;
