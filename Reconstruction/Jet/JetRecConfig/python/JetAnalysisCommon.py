@@ -45,18 +45,18 @@ import logging
 logging.setLoggerClass( logging.Logger ) 
     
 # #*******************************************************************
+def stringPropValue( value ):    
+    """Helper function producing a string property value"""
+    
+    stringValue = str( value )
+    if isinstance( value, bool ):
+        stringValue = str( int( value ) )
+        pass
+    return stringValue
 
-
-def stringPropValue( value ):
-     """Helper function producing a string property value"""
- 
-     stringValue = str( value )
-     if isinstance( value, bool ):
-         stringValue = str( int( value ) )
-         pass
-     return stringValue
 
 class ConfArray:
+     
     """A simplistic array of Configured (see below) to replace the ToolHandleArray of Athena """
     def __init__(self, key, conflist , parent):
         self.key = key
@@ -79,12 +79,13 @@ class ConfArray:
     def assignAllProperties(self, anaAlg):
         self._anaAlg = anaAlg
         for conf in self.conflist:
-            actualName = anaAlg.createPrivateToolInArray(conf.fullname(), conf.type)
-            conf._name = actualName.split('.')[-1] # because AnaAlgorithmConfig will assign it's own naming scheme
+            tool = anaAlg.addPrivateToolInArray(conf.fullname(), conf.type)
+            conf._name = tool._prefix.split('.')[-1] # because AnaAlgorithmConfig will assign it's own naming scheme
             conf.assignAllProperties(anaAlg)
             
             
 class Configured:
+     
     """A replacement for Athena auto-generated Configured python class.
     Configured has the same interface as its Athena counterpart and can describe both Tools and Algorithms
 
@@ -92,6 +93,7 @@ class Configured:
     to hold the configuration of such tool/alg  (see generateConfigured())
     """
     _properties=set()
+    _propTypes={}
     _parent = None
     _anaAlg = None
     # the list of properties and attribute memeber which are allowed to be set.
@@ -99,9 +101,10 @@ class Configured:
     _allowed = ['_properties', '_name', '_parent', '_anaAlg']
 
     def __init__(self, name, **props):
+        
         self._name = name
         self._properties = set()
-        for k,v in props.items():
+        for k,v in props.items():             
             setattr(self,k,v)
 
     def __setattr__(self, k, v):
@@ -155,7 +158,10 @@ class Configured:
     def typeAndName(self):
         return self.type+'/'+self._name
 
+    
     def asAnaAlg(self):
+        """Returns this configured alg as an instance of Ana(Reentrant)AlgorithmConfig       
+        """
         if issubclass(self._cppclass, ROOT.EL.AnaReentrantAlgorithm):
             alg=ROOT.EL.AnaReentrantAlgorithmConfig()
         else:
@@ -165,7 +171,22 @@ class Configured:
         self.assignAllProperties(alg)
         return alg
 
+
+    def toToolInAnaAlg(self, anaAlg, handlename):
+        """If self represents a configured AlgTool,
+        this call will configure the AnaAlgorithmConfig 'anaAlg' so
+        its ToolHandle property 'handlename' is configured with self
+        """
+        props = {handlename:self,  }
+        klass=type('TmpConf', (Configured,), dict(_allowed=self._allowed+[handlename], _propTypes={},
+                                                              type=anaAlg.getType(),_cppclass='none') )
+
+        c=klass(anaAlg.name(), **props)
+        c.assignAllProperties(anaAlg)
+        
     def assignAllProperties(self, anaAlg):
+        """ Transfer all the configuration in self to anaAlg
+        where anaAlg is an AnaAlgorithmConfig."""
         self._anaAlg = anaAlg 
         for (k,v) in self.properties():
             self.setPropToAnaAlg(k,v)
@@ -174,18 +195,20 @@ class Configured:
         alg=self._anaAlg
         if isinstance(v , Configured):
             # it must be a Tool :
-            alg.createPrivateTool(v.fullname(), v.type)
+            alg.addPrivateTool(v.fullname(), v.type)
             v.assignAllProperties(alg)
         elif isinstance(v, ConfArray ):
             # it is a Tool array 
             v.assignAllProperties(alg)
         else:
             # any other type :
-            alg.setPropertyFromString(self.prefixed(k) , stringPropValue( v ) )
+            cpptype = self._propTypes[k]
+            alg.setProperty[cpptype](self.prefixed(k) , v)
 
     def getType(self):
         return self.type
-        
+
+    
 def generateConfigured(classname, cppclass, prefix=""):
     import cppyy
 
@@ -196,12 +219,29 @@ def generateConfigured(classname, cppclass, prefix=""):
         dummy = cppclass('dummy', 0)
 
     # find all the properties of the Tool/Algorithm
-    allowedProp = Configured._allowed + [k for k,v in  dummy.getPropertyMgr().getProperties() ]
+    pm = dummy.getPropertyMgr()
+    propkeys  = [str(k) for k,p in  pm.getProperties() ]
+    propTypes = dict( (k,propertyType(pm.getProperty(k)) ) for k in propkeys)
+    allowedProp = Configured._allowed + [k for k in propkeys]
     # generate the class derived from Configured for this Tool/Alg
-    klass=type(classname+'Conf', (Configured,), dict(_allowed=allowedProp,
+    klass=type(classname+'Conf', (Configured,), dict(_allowed=allowedProp, _propTypes=propTypes,
                                                               type=prefix+classname,_cppclass=cppclass) )
 
     return klass
+
+def propertyType(p):
+    """Guess the type of the TProperty p.
+    p is a C++ instance of a TProperty.
+
+    This simply interpret the cpp name as set by cppyy...
+    """
+    clsname = p.__class__.__cpp_name__
+    # clsname is in the form : 'TProperty<vector<double> >'
+    typ = clsname[10:-1].strip()
+    if 'Handle' in typ:
+        typ='string'
+    return typ
+
 
 class ConfNameSpace:
     """A namespace able to automatically generate Configured when quering attributes :
