@@ -47,7 +47,7 @@ using CP::CorrectionCode;
 // can filter down what combinations to study but adding some simple statements of the form "if(...) continue;", below
 
 ANA_MSG_HEADER(testSysStratComp)
-ANA_MSG_SOURCE(testSysStratComp, "SystematicStrategyComparison")
+ANA_MSG_SOURCE(testSysStratComp, "BTaggingSystematicStrategyComparison")
 using namespace testSysStratComp;
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
@@ -79,14 +79,13 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   POOL::Init();
   #endif
 
-  ANA_MSG_INFO("Starting up the SystematicStrategyComparison . . .");
+  ANA_MSG_INFO("Starting up the BTaggingSystematicStrategyComparison . . .");
   // select your efficiency map based on the DSID of your sample:
   unsigned int sample_dsid = 601229;
 
   // systematic strategies to compare
   std::vector<std::string> strats;
   strats.push_back("SFEigen");
-  strats.push_back("SFGlobalEigen");
 
   TEVENT event(TEVENT::kClassAccess);
   gErrorIgnoreLevel = kError;
@@ -107,7 +106,11 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   for(const std::string& strat : strats ){
     ANA_MSG_INFO("\n\n\n######################## Strat: " << strat << " ########################");
 
-    asg::StandaloneToolHandle<IBTaggingEfficiencyTool> tool("BTaggingEfficiencyTool/SysStratTest");
+    // NB: it is important to give unique names to tools 
+    // as otherwise in AthAnalysis if a tool with the same name is already existing then 
+    // the call of initialize is ignored (while it is not the case for AnalysisBase)
+    // Hence here using the "+ strat" to have different tools names for the different strategies  
+    asg::StandaloneToolHandle<IBTaggingEfficiencyTool> tool("BTaggingEfficiencyTool/SysStratTest_" + strat);
     StatusCode code1 = tool.setProperty("ScaleFactorFileName", CDIPath);
     StatusCode code2 = tool.setProperty("TaggerName", taggerName);
     StatusCode code3 = tool.setProperty("OperatingPoint", workingPointName);

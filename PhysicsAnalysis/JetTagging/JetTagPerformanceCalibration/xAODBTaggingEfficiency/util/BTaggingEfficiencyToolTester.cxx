@@ -4,12 +4,15 @@
 #include <AsgTools/StandaloneToolHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
 
+// Define alias for the TEvent class 
+// which is not the same for AnalysisBase and AthAnalysis
 #ifdef XAOD_STANDALONE
+// Those lines are only included if using AnalysisBase
+#include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
-#define TEVENT xAOD::TEvent
 #else
+// Those lines are only included if using AthAnalysis
 #include "POOLRootAccess/TEvent.h"
-#define TEVENT POOL::TEvent
 #endif
 
 #include <string>
@@ -22,6 +25,11 @@ using namespace testBTagEfficiency;
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
+  // Change type returned by the ANA_CHECK function in case of error 
+  // NB: this is needed here because the main() function should return an integer
+  // In principle you should NOT call this line for your regular code 
+  ANA_CHECK_SET_TYPE (int);
+
   const char* TEST_NAME = argv[0];
   if (argc < 4) {
     ANA_MSG_ERROR ( "No right inputs received!" );
@@ -29,7 +37,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     return 1;
   }
 
+  // Important to do this first!
+  #ifdef XAOD_STANDALONE
+  // Those lines are only included if using AnalysisBase
+  ANA_CHECK (xAOD::Init()) ;
+  #else
+  // Those lines are only included if using AthAnalysis
   POOL::Init();
+  #endif
 
   std::string CDIPath = argv[1];
   std::string taggerName = argv[2];
