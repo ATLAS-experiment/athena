@@ -6,8 +6,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def MsTrackTesterCfg(flags, name = "MsTrackTester", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
-    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg
+    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
+    kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
     the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -59,8 +60,7 @@ if __name__=="__main__":
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-    cfg.merge(MSTrackFinderAlgCfg(flags,
-                                VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))))
+    cfg.merge(MSTrackFinderAlgCfg(flags))
     
     ### Schedule the legacy MS track building to compare the two reconstruction chains
     ### from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
@@ -77,13 +77,16 @@ if __name__=="__main__":
     cfg.merge(MuonHoughTransformTesterCfg(flags,
                                             VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
-    cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                                CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
-                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= True))
- 
-    cfg.getEventAlgo("MuonNswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+    
+    if not args.noMonitorPlots:
+        cfg.getEventAlgo("MSTrackFinderAlg").VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))
+        cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                            CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
+                                                                                            displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= True))
+    
+        cfg.getEventAlgo("MuonNswSegmentFinderAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                             CanvasPreFix="NswSegmentFitPlotValid", outSubDir="SegmentValidPlots",
-                                                                                            doPhiBucketViews = False, saveSinglePDFs = True, 
+                                                                                            doPhiBucketViews = False, saveSinglePDFs = False, 
                                                                                             saveSummaryPDF= True,CanvasLimits=10000))
 
     

@@ -20,7 +20,8 @@ atlas_add_component( MuonTrackFindingTools
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib AthenaBaseComps GaudiKernel MuonReadoutGeometryR4
                                     xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib MuonDetDescrUtils
-                                    MuonPatternEvent ActsGeometryLib MuonRecToolInterfacesR4 MuonTrackFindingToolsLib)
+                                    MuonPatternEvent ActsGeometryLib MuonRecToolInterfacesR4 MuonTrackFindingToolsLib
+                                    ActsCalibratorsLib)
 
 
 # Install files from the package:

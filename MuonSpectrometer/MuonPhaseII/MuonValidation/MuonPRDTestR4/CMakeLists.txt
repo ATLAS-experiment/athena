@@ -9,7 +9,7 @@ atlas_add_library( MuonPRDTestR4Lib
                    Root/*.cxx
                    PUBLIC_HEADERS MuonPRDTestR4
                    LINK_LIBRARIES MuonReadoutGeometryR4 GeoPrimitives Identifier ActsGeometryInterfacesLib 
-                                  MuonIdHelpersLib MuonTesterTreeLib GeoModelUtilities xAODMuonSimHit 
+                                  MuonIdHelpersLib MuonTesterTreeLib GeoModelUtilities xAODMuonSimHit MuonTrackEvent
                                   xAODMuonPrepData CxxUtils MuonSpacePoint ActsEventLib MuonPatternHelpers)
 
 atlas_add_component( MuonPRDTestR4
