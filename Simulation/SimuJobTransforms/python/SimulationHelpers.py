@@ -26,7 +26,7 @@ def getDetectorsFromRunArgs(flags, runArgs):
     #     detectors.add('Cavern')
 
     # Fatras does not support simulating the BCM, so have to switch that off
-    if flags.Sim.ISF.Simulator.usesFatras():
+    if flags.Sim.ISF.Simulator.usesFatras() and not flags.Detector.GeometryITk:
         try:
             detectors.remove('BCM')
         except ValueError:
