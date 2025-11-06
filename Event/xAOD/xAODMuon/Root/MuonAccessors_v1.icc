@@ -1,7 +1,5 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,9 +8,9 @@
 // #include "MuonAccessors_v1.h"
 /// Helper macro for managing cluster moment Accessor objects
 #define DEFINE_ACCESSOR(TYPE, NAME )                               \
-   case xAOD::Muon_v1::NAME:                                                \
+   case xAOD::Muon_v1::NAME:                                       \
    {                                                               \
-      static const SG::AuxElement::Accessor< TYPE > a( #NAME );          \
+      static const SG::Accessor< TYPE > a( #NAME );                \
       return &a;                                                   \
    }                                                               \
    break;
@@ -21,7 +19,7 @@ namespace xAOD {
 
    
   template<>
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    parameterAccessorV1<float>( Muon_v1::ParamDef type ) {
       switch( type ) {
         DEFINE_ACCESSOR( float, spectrometerFieldIntegral        );
@@ -61,7 +59,7 @@ namespace xAOD {
    }
    
    template<>
-    const SG::AuxElement::Accessor< int >*
+    const SG::Accessor< int >*
     parameterAccessorV1<int>( Muon_v1::ParamDef type ) {
        switch( type ) {
          DEFINE_ACCESSOR( int,   msInnerMatchDOF                  );
