@@ -9,7 +9,7 @@ using namespace pool;
 
 // Global variable for setting APR output level from the outside (Athena)
 // otherwise the environment variable POOL_OUTMSG_LEVEL can be used for that
-std::atomic<DbPrintLvl::MsgLevel> DbPrintLvl::outputLvl = MSG::NIL;
+std::atomic<MSG::Level> DbPrintLvl::outputLvl = MSG::NIL;
 
 
  MSG::Level  DbPrintLvl::getLevel(const std::string& name) 

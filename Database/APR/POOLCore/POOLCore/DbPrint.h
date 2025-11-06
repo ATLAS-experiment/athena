@@ -17,18 +17,8 @@
 namespace pool {
 
    struct  DbPrintLvl {
-      typedef   MSG::Level      MsgLevel;
-      static const MsgLevel None        = MsgLevel::NIL;
-      static const MsgLevel Verbose     = MsgLevel::VERBOSE;
-      static const MsgLevel Debug       = MsgLevel::DEBUG;
-      static const MsgLevel Info        = MsgLevel::INFO;
-      static const MsgLevel Warning     = MsgLevel::WARNING;
-      static const MsgLevel Error       = MsgLevel::ERROR;
-      static const MsgLevel Fatal       = MsgLevel::FATAL;
-      static const MsgLevel Always      = MsgLevel::ALWAYS;
-
-      static std::atomic<MsgLevel>   outputLvl;
-      inline static void         setLevel( MsgLevel l )  { outputLvl.store(l); }
+      static std::atomic<MSG::Level>   outputLvl;
+      inline static void         setLevel( MSG::Level l )  { outputLvl.store(l); }
       inline static MSG::Level   getLevel( const std::string& name );
    };
 
