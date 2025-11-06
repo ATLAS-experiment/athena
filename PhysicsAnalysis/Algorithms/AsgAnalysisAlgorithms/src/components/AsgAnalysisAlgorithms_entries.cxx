@@ -51,6 +51,7 @@
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/VGammaORAlg.h>
+#include <AsgAnalysisAlgorithms/MetadataHistAlg.h>
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -108,3 +109,4 @@ DECLARE_COMPONENT (CP::SystPhotonUnioniserAlg)
 DECLARE_COMPONENT (CP::SystMuonUnioniserAlg)
 DECLARE_COMPONENT (CP::SystTauUnioniserAlg)
 DECLARE_COMPONENT (CP::SystDiTauUnioniserAlg)
+DECLARE_COMPONENT (CP::MetadataHistAlg)
