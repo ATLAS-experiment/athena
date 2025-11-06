@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecConversions_test.cxx
@@ -507,7 +507,7 @@ void test_JaggedVecConverter()
   assert (payload[1]== 10);
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainers/JaggedVecConversions_test\n";
