@@ -50,8 +50,8 @@ class DiTauMassBlock(ConfigBlock):
                    info='event frequency for floating stopping criterion to be checked after minimum number of iteration. The default is 1000.')
     self.addOption('floatStopCriterionComp', 0.05, type=float,
                    info='percentage used to assess compatibility for floating stopping criterion to be applied. The default is 5%.') 
-    self.addOption('calibration', '2019', type=str,
-                   info='the calibration set (string) to use. The default is `2019` (recommended).')
+    self.addOption('calibration', '2024', type=str,
+                   info='the calibration set (string) to use. The default is `2024` (recommended).')
     self.addOption('nSigmaMet', -1, type=int,
                    info='the number (int) of sigmas for the MET resolution scan. The default is `-1` (no scan).')
     self.addOption('useTailCleanup', -1, type=int,
@@ -70,8 +70,8 @@ class DiTauMassBlock(ConfigBlock):
                    info='whether to enable refitting for failed events, to improve efficiency. The default is -1.')
     self.addOption('useMETdphiLL', False, type=bool,
                    info='whether to parameterise the MET resolution using sumET and dphiLL (only for the lep-lep case). The default is `False`.')
-    self.addOption('paramFilePath', 'MMC_params_v1_fixed.root', type=str,
-                   info='path (string) to the ROOT file used with `calibSet` ≥ 2019, containing the PDFs for the likelihood. The default is `MMC_params_v1_fixed.root` (recommended).')
+    self.addOption('paramFilePath', 'MMC_params_v051224_angle_noLikelihoodFit.root', type=str,
+                   info='path (string) to the ROOT file used with `calibSet` ≥ 2024, containing the PDFs for the likelihood. The default is `MMC_params_v051224_angle_noLikelihoodFit.root` (recommended).')
     self.addOption('doMLNU3P', False, type=bool,
                    info='save information about the reconstruction with the best-fit neutrino kinematics.')
     self.addOption('doMAXW', False, type=bool,
