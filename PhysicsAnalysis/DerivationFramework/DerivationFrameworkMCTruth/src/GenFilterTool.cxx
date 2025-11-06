@@ -74,7 +74,6 @@ namespace DerivationFramework {
     ATH_CHECK(m_mcKey.initialize());
     ATH_CHECK(m_truthJetsKey.initialize());
     ATH_CHECK(m_truthFatJetsKey.initialize());
-    ATH_CHECK(m_decorKeys.initialize());
     ATH_CHECK(m_dec_genFiltHTKey.initialize());
     ATH_CHECK(m_dec_genFiltHTinclNuKey.initialize());
     ATH_CHECK(m_dec_genFiltMETKey.initialize());
