@@ -42,10 +42,6 @@ SG::WriteDecorHandleKey<xAOD::EventInfo> m_mcFilterMETKey {this
       , "TMPEvtInfo.mcFilterMET" 
       , "Decoration for MC Filter MET"};
 
-SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_mcOriginalMomentum 
-{this, "mcOriginalMomentum", "TMPEvtInfo.mcOriginalMomentum", "Original momentum"};
-   
-
 
 };
 
