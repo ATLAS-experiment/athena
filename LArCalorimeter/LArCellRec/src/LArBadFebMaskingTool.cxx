@@ -144,7 +144,8 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
 
       if (toMask1 || inError) {
          m_mask++;
-         for (int ch=0; ch<128; ++ch) {
+         const int nChanPerFeb=m_onlineID->channelInSlotMax(febId);
+         for (int ch=0; ch<nChanPerFeb; ++ch) {
            HWIdentifier hwid = m_onlineID->channel_Id(febId, ch);
            if (cabling->isOnlineConnected(hwid)) {
               Identifier id = cabling->cnvToIdentifier( hwid);
