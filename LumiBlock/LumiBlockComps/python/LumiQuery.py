@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # module LumiQuery
 from past.builtins import long
@@ -85,7 +85,6 @@ def ListFromFile(filename="FewEventsLumi.pool.root", label = "LumiBlockCollectio
 
 def PrintList():
     """ An example function. It prints the list returned by ListFromFile. """
-    global LumiRangeList
     for (x,y) in LumiRangeList: print(x, 'to', y)
 
 
