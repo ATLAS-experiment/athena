@@ -73,9 +73,10 @@ coral_attribute_fetcher_t create_attribute_fetcher(const char*   name,
     // Test type against type_name. If true, return a functor for this type.
     // Be sure to use only a copy of name --- the original may not be valid
     // by the time the lambda is called.
-    std::string sname = name;
+    std::string sname =name;
     #define MAKE_FETCHER(type, converter)                                \
       if (type_name == #type) {                                          \
+          /*coverity[copy_constructor_call] */                           \
           return [sname] (const AttributeList& l) -> PyObject*           \
             { return converter(fetch_attribute_data<type>(l[sname])); }; \
       }
@@ -141,7 +142,7 @@ bool make_fetchers(
         if ( pff && *pff == &no_coral_conversion_available)
             return false; // Failure: A python exception was thrown above
             
-        payload_fetchers.push_back(pf);
+        payload_fetchers.push_back(std::move(pf));
         Py_DECREF(py_name);
     }
     
@@ -173,7 +174,7 @@ CoraCoolFolderPtr fetch_coracool_folder(IDatabasePtr cooldb, const string & fold
 const cool::RecordSpecification 
     get_coracool_payload_spec(IDatabasePtr cooldb, const string & folder)
 {
-    return fetch_coracool_folder(cooldb, folder)->payloadSpecification();
+    return fetch_coracool_folder(std::move(cooldb), folder)->payloadSpecification();
 }
 
 inline PyObject* make_iov_key(PyObject *iovkey_wrapper, 
@@ -195,7 +196,7 @@ PyObject *browse_coracool(IDatabasePtr cooldb, const string & folder,
                           PyObject *iovkey_wrapper = NULL)
 {
     // Browse CoraCool objects
-    CoraCoolFolderPtr     coralFolder = fetch_coracool_folder(cooldb, folder);
+    CoraCoolFolderPtr     coralFolder = fetch_coracool_folder(std::move(cooldb), folder);
     CoraCoolObjectIterPtr objects     = coralFolder->browseObjects(since, until, 
                                                                    cs, tag);
     

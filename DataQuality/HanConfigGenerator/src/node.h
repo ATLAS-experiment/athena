@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 // emacs: this is -*- c++ -*-
 //
 //   @file    node.h        
