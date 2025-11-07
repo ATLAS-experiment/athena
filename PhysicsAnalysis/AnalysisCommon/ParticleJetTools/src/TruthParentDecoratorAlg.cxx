@@ -367,7 +367,7 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
           match.cascade_pids.insert(selectChild(ipmap.at(histbar))->pdgId());
         }
         if (match.deltaR < m_match_delta_r) {
-          labeled_targets[drsMinMatch].push_back(match);
+          labeled_targets[drsMinMatch].push_back(std::move(match));
         }
       }
     }

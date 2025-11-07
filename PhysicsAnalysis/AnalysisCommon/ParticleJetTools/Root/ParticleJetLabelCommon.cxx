@@ -158,7 +158,7 @@ namespace ParticleJetTools {
       link.toIndexedElement(*ipc, ip->index());
       links.push_back(link);
     }
-    m_dec(jet) = links;
+    m_dec(jet) = std::move(links);
   }
 
   void setJetLabels(const xAOD::Jet& jet,
