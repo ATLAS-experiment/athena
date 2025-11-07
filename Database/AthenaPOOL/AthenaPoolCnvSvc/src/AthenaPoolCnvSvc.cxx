@@ -607,7 +607,7 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
          const std::string tag = attrib.tag;
          const std::string val = attrib.value;
          if (tag == "DatabaseName") {
-            databaseName = val;
+            databaseName = std::move(val);
          } else if (tag == "ContainerName") {
             if (databaseName.empty()) {
                databaseName = "*";

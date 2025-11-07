@@ -40,7 +40,7 @@ public:
         uris.push_back(elem);
       }else{
         elem=m_contact;
-        uris.push_back(elem);
+        uris.push_back(std::move(elem));
         break;
       }
     }
