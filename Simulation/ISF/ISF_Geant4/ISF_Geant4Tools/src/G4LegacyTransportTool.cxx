@@ -338,6 +338,7 @@ StatusCode iGeant4::G4LegacyTransportTool::setupEvent(
   rngWrapper->setSeed( m_randomStreamName, ctx );
   G4Random::setTheEngine(rngWrapper->getEngine(ctx));
   ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(hitCollections));
+  ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(hitCollections));
 
   m_nrOfEntries++;
   if (m_doTiming) m_eventTimer->Start();
@@ -389,6 +390,7 @@ StatusCode iGeant4::G4LegacyTransportTool::releaseEvent(
   }
 
   ATH_CHECK(m_senDetTool->EndOfAthenaEvent(hitCollections));
+  ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(hitCollections));
   ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
   return StatusCode::SUCCESS;
