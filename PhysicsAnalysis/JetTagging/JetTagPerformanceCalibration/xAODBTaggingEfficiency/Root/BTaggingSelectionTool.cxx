@@ -89,13 +89,6 @@ StatusCode BTaggingSelectionTool::initialize() {
  
   //set taggerEnum to avid string comparison:
   m_taggerEnum = SetTaggerEnum(m_taggerName);
-
-  //special requirement for VR TrackJets:
-  if((m_jetAuthor.find("AntiKt2PV0TrackJets") != std::string::npos) ||
-     (m_jetAuthor.find("AntiKt4PV0TrackJets") != std::string::npos) ||
-     (m_jetAuthor.find("AntiKtVR30Rmax4Rmin02TrackJets") != std::string::npos)) {
-    m_StoreNConstituents = true;
- }
  
  // Change the minPt cut if the user didn't touch it
  if (m_minPt < 0){
@@ -462,11 +455,6 @@ asg::AcceptData BTaggingSelectionTool::accept( const xAOD::Jet& jet ) const {
   if (! m_initialised) {
     ATH_MSG_ERROR("BTaggingSelectionTool has not been initialised");
     return acceptData;
-  }
-
-  if  (m_StoreNConstituents){
-    // We want at least 2 tracks in a track jet
-    acceptData.setCutResult( "NConstituents", jet.numConstituents() >= 2 );
   }
 
   double pT = jet.pt();
