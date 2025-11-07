@@ -81,6 +81,7 @@ def StandaloneMuonOutputCfg(flags):
         esd_items += ["xAOD::RpcStrip2DContainer#xRpcBILStrips", "xAOD::RpcStrip2DAuxContainer#xRpcBILStripsAux." ]
 
 
+
     # trigger related info for offline DQA
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"]
@@ -128,6 +129,10 @@ def StandaloneMuonOutputCfg(flags):
             esd_items+=["MuonSimDataCollection#TGC_SDO"]
             if flags.Detector.EnablesTGC: esd_items+=["MuonSimDataCollection#sTGC_SDO"]
             if flags.Detector.EnableMM: esd_items+=["MuonSimDataCollection#MM_SDO"]
+ 
+            if flags.Muon.writexAODPRD:
+                for item in ["MDT_SDO","RPC_SDO","TGC_SDO","MM_SDO","sTGC_SDO"]:
+                    esd_items += [f"xAOD::MuonSimHitContainer#{item}", f"xAOD::MuonSimHitAuxContainer#{item}Aux."] 
 
     if flags.Output.doWriteESD:
         result.merge(OutputStreamCfg(flags, "ESD", esd_items))
