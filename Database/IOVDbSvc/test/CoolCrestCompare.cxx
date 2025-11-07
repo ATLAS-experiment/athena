@@ -137,6 +137,7 @@ public:
     }
   }
 };
+//coverity[root_function]
 int main(int argc, char ** argv)
 {
     boost::program_options::options_description description( "Options" );

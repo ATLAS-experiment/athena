@@ -404,7 +404,7 @@ size_t asmtest [[maybe_unused]] (const SG::AuxElement& e,
   return out;
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainers/PackedLinkConstAccessor_test\n";
