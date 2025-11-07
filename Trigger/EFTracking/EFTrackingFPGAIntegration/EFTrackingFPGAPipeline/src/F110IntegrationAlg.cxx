@@ -35,6 +35,9 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_FPGAStripRDO.initialize());
         ATH_CHECK(m_FPGAPixelRDO.initialize());
 
+        ATH_CHECK(m_FPGAPixelRDOSize.initialize());
+        ATH_CHECK(m_FPGAStripRDOSize.initialize());
+
         ATH_CHECK(m_FPGAStripOutput.initialize());
         ATH_CHECK(m_FPGAPixelOutput.initialize());
 
@@ -141,6 +144,10 @@ namespace EFTrackingFPGAIntegration
         auto pixelInput = SG::get(m_FPGAPixelRDO, ctx);
         auto stripInput = SG::get(m_FPGAStripRDO, ctx);
    
+        const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
+        ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
+        ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));
+
         // logic
         unsigned int nthreads = m_FPGAThreads.value();
 
@@ -193,7 +200,7 @@ namespace EFTrackingFPGAIntegration
         stripClusteringKernel.setArg<cl::Buffer>(0, stripClusterInputBuffer);
         stripClusteringKernel.setArg<cl::Buffer>(1, stripClusterOutputBuffer);
         stripClusteringKernel.setArg<cl::Buffer>(2, stripClusterEDMOutputBuffer);
-        stripClusteringKernel.setArg<unsigned int>(3, (*stripInput).size());
+        stripClusteringKernel.setArg<unsigned int>(3, *stripInputSize);
 
         stripL2GKernel.setArg<cl::Buffer>(0, stripClusterOutputBuffer);
         stripL2GKernel.setArg<cl::Buffer>(1, stripClusterEDMOutputBuffer);
@@ -286,8 +293,8 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Event> terminationDeps = { readPixelOutputEvt, readStripOutputEvt };
         cl::Event::waitForEvents(terminationDeps);
 
-        if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
-        if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
+        if(*pixelInputSize == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
+        if(*stripInputSize == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
 
 
        // calculate the time for the kernel execution

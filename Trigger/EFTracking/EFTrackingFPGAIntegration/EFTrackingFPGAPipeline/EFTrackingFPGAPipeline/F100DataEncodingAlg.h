@@ -50,6 +50,9 @@ namespace EFTrackingFPGAIntegration
         SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelRDO{this, "FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs", "Pixel RDO converted to FPGA format"};
         SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripRDO{this, "FPGAEncodedStripKey", "FPGAEncodedStripRDOs", "Strip RDO converted to FPGA format"};
         
+        SG::WriteHandleKey<int> m_FPGAPixelRDOSize{this, "FPGAEncodedPixelSizeKey", "FPGAEncodedPixelSizeRDOs", "Size of the Pixel RDO converted to FPGA format"};
+        SG::WriteHandleKey<int> m_FPGAStripRDOSize{this, "FPGAEncodedStripSizeKey", "FPGAEncodedStripSizeRDOs", "Size of the Strip RDO converted to FPGA format"};
+
 
     };
 }
