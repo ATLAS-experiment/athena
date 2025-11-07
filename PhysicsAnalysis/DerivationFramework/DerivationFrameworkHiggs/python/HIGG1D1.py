@@ -274,8 +274,7 @@ def HIGG1D1Cfg(flags):
                                               "TauJets",
                                               "DiTauJets",
                                               "DiTauJetsLowPt",
-                                              "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                              "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+                                              "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
     
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
