@@ -84,6 +84,8 @@ public:
   Gaudi::Property<bool> m_maskMissingHeader{this,"maskMissingHeader",true};
   Gaudi::Property<bool> m_maskBadGain{this,"maskBadGain",true};
 
+  Gaudi::Property<bool> m_noFebErrors{this,"noFebErrors",false,"do not read LArFebErrorSummary (MC case)"};
+
   SG::ReadHandleKey<LArFebErrorSummary> m_larFebErrorSummaryKey{this,"FebErrorSummaryKey","LArFebErrorSummary"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
   SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey","EventInfo.larFlags"};
@@ -103,6 +105,11 @@ public:
   /** Number of Feb masked
   */
   mutable std::atomic<int> m_mask{0};
+
+  /** Empty dummy map for MC case
+  */
+  const std::map<unsigned int,uint16_t> m_dummyFebMap{}; 
+   
 };
 
 #endif
