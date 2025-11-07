@@ -61,6 +61,7 @@ def FullListOfSmartContainers(flags=None):
       "HLT_TrigTauRecMerged_MVA",
       "HLT_BJetTriggerByYearContent",
       "HLT_FULL_EDM",
+      "HLT_DiTauJets",
    ]
 
    if flags is not None and flags.Tracking.doPseudoTracking:
