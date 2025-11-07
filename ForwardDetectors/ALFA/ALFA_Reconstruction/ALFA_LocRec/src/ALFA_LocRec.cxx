@@ -813,7 +813,7 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 					vecFibSel.push_back(iLayer);
 				}
 
-				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(4, eRPName-1, fRecPosX, fRecPosY, fOverlapU, fOverlapV, iNumU, iNumV, vecFibSel));
+				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(4, eRPName-1, fRecPosX, fRecPosY, fOverlapU, fOverlapV, iNumU, iNumV, std::move(vecFibSel)));
 			}
 
 			delete pCenterGravity;
