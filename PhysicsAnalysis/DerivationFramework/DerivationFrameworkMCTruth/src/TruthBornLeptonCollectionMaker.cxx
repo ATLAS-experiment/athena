@@ -30,9 +30,7 @@ DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMa
                                 const IInterface* p)
   : base_class(t,n,p)
   , m_metaStore( "MetaDataStore", n )
-  , m_mcEventsName("GEN_AOD")
 {
-	 declareProperty("McEvent", m_mcEventsName, "input McEventCollection container name");
   declareProperty( "MetaDataStore", m_metaStore );
 }
 
@@ -48,6 +46,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
    // Input truth particles
    ATH_CHECK( m_particlesKey.initialize() );
    ATH_MSG_INFO("Using " << m_particlesKey.key() << " as the input truth container key");
+   ATH_CHECK( m_mcEventsName.initialize() );
 
    // ReadDecorHandleKeys
    ATH_CHECK(m_originAccessorKey.initialize());
@@ -134,11 +133,12 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
   SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationAccessor(m_classificationAccessorKey, ctx);
 
   // Retrieve input data
-  const McEventCollection* mcEvts = nullptr;
-  if (!evtStore()->retrieve(mcEvts, m_mcEventsName).isSuccess() || nullptr == mcEvts) {
-    ATH_MSG_WARNING("could not retrieve mc collection at [" << m_mcEventsName << "]!");
-    return StatusCode::FAILURE;
+  SG::ReadHandle<McEventCollection> mcEvts(m_mcEventsName,ctx);    
+  if (!mcEvts.isValid()) {        
+    ATH_MSG_ERROR("Couldn't retrieve McEventCollection collection with name " << m_mcEventsName);        
+    return StatusCode::FAILURE;    
   }
+
   const HepMC::GenEvent* evt = mcEvts->front();
   const auto& attrs = evt->attributes();
   std::map<int, std::shared_ptr<HepMC3::Attribute> > attrsparticle;
