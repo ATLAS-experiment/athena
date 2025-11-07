@@ -156,7 +156,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
       const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
       if (!theParticle) continue;
       if (!theParticle->isLepton()) continue;
-      int id  = HepMC::UniqueID(theParticle); // Get particle id
+      int id  = HepMC::uniqueID(theParticle); // Get particle id
       if (!attrsparticle.count(id)) continue; // Check that the particle has atribute "original_momentum", i.e. was a subject to radiation by PHOTOS.
       auto vecAttr = std::dynamic_pointer_cast<HepMC3::VectorDoubleAttribute>(attrs.at(id)); // Cast the attribute to VectorDoubleAttribute
       if (!vecAttr) continue;
