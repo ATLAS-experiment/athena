@@ -2027,17 +2027,13 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "SoftTermParam", m_softTermParam));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "TreatPUJets", m_treatPUJets));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "DoPhiReso", m_doPhiReso));
-      if(jetname =="AntiKt4EMPFlow")
+      if(jetname != "AntiKt4EMPFlow")
         ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", "AntiKt4EMPFlow"));
-      std::string JESconfig = isAtlfast() ? m_jesConfigAFII : m_jesConfig;
-      if(isAtlfast() && m_isRun3) {
-        ATH_MSG_WARNING("Jet JES/JER recommendations currently not available for fast sim in Run 3, falling back to full sim version");
-        JESconfig = m_jesConfig;
-      }
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibConfig", JESconfig) );
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibSequence", "JetArea_Residual_EtaJES_GSC") );
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibArea", m_jesCalibArea) );
+      // This is the only recommended set of jet resolutions for use with R22+ MET Significance until "Consolidated" recommendations are available
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibConfig", "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibSequence", "JetArea_Residual_EtaJES_GSC_Smear") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibArea", "00-04-81") );
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaESModel", m_isRun3 ? "es2024_Run3_v0" : "es2023_R22_Run2_v1") );
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaDecorrelationModel", "1NP_v1") );
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaUseFastsim", isAtlfast()) );
@@ -2057,10 +2053,13 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_metSignif.setProperty("SoftTermParam", m_softTermParam) );
       ATH_CHECK( m_metSignif.setProperty("TreatPUJets", m_treatPUJets) );
       ATH_CHECK( m_metSignif.setProperty("DoPhiReso", m_doPhiReso) );
-      if(jetname =="AntiKt4EMPFlow")
+      if(jetname != "AntiKt4EMPFlow")
         ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
-      ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMPFlow") );
-      ATH_CHECK( m_metSignif.setProperty("jetCalibTool", m_jetCalibTool.getHandle()) );
+      ATH_CHECK( m_metSignif.setProperty( "JetCollection", "AntiKt4EMPFlow"));
+      // This is the only recommended set of jet resolutions for use with R22+ MET Significance until "Consolidated" recommendations are available
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibConfig", "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config") );
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibSequence", "JetArea_Residual_EtaJES_GSC_Smear") );
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibArea", "00-04-81") );
       ATH_CHECK( m_metSignif.setProperty("egammaCalibTool", m_egammaCalibTool.getHandle()) );
       // just pass the muon calib tool
       ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));

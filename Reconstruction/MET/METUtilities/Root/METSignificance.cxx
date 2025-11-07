@@ -134,7 +134,7 @@ namespace met {
       if(m_jetCalibConfig.empty() || m_jetCalibSeq.empty())
         m_jetOK = false;
       else{
-        asg::AsgToolConfig toolConfig ("JetCalibrationTool/jetCalibTool_"+m_JetCollection);
+        asg::AsgToolConfig toolConfig ("JetCalibrationTool/MetSigAutoConf_JetCalibTool_"+m_JetCollection);
         ATH_CHECK( toolConfig.setProperty("JetCollection",m_JetCollection) );
         ATH_CHECK( toolConfig.setProperty("ConfigFile",m_jetCalibConfig) );
         ATH_CHECK( toolConfig.setProperty("CalibSequence",m_jetCalibSeq) );
