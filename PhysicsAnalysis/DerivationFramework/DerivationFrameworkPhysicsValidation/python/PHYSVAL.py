@@ -92,8 +92,7 @@ def PHYSVALCfg(flags):
                                               "DiTauJets",
                                               "DiTauJetsLowPt",
                                               "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                              "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
 
     PHYSVALSlimmingHelper.AllVariables =  ["EventInfo",
                                            "Electrons", "ForwardElectrons","LRTElectrons",
@@ -209,7 +208,6 @@ def PHYSVALCfg(flags):
                                              "Electrons.TruthLink","LRTElectrons.TruthLink",
                                              "Muons.TruthLink","MuonsLRT.TruthLink",
                                              "Photons.TruthLink",
-                                             "AntiKt2PV0TrackJets.pt.eta.phi.m",
                                              "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID",
                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.DFCommonJets_fJvt",
                                              "TruthPrimaryVertices.t.x.y.z",
