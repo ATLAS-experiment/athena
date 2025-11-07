@@ -871,9 +871,16 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_noalg_eb_L12eTAU1_VjTE200',      l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L12eEM1_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L1DPHI-2eTAU1_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1eTAU2_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1eEM2_VjTE200',        l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L12eTAU2_VjTE200',      l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L12eEM2_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
 
         ChainProp(name='HLT_noalg_eb_L1eEM1_TRT_VjTE50',  l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L1eTAU1_TRT_VjTE50', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+
+        ChainProp(name='HLT_noalg_eb_L1eTAU2_TRT_ZDC_OR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1eEM2_TRT_ZDC_OR_VjTE200',  l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
 
         ChainProp(name='HLT_noalg_eb_L1ZDC_A_C_VjTE50',             l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L1ZDC_XOR_VjTE10',             l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
@@ -885,6 +892,12 @@ def getPhysicsHISignatures():
 
         ChainProp(name='HLT_noalg_eb_L1TRT_ZDC_A_VjTE50', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L1TRT_ZDC_C_VjTE50', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1TRT_VjTE200',      l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+
+        ChainProp(name='HLT_noalg_eb_L1ZDC_XOR_jJ5_VjTE200',  l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1ZDC_XOR_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1jJ5p30ETA49_VjTE200',  l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1jJ10p30ETA49_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
 
         ChainProp(name='HLT_noalg_eb_L1MBTS_1_1',     l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L1RD1_FILLED',   l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
