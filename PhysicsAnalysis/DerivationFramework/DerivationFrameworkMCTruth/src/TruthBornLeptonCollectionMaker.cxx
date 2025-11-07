@@ -139,15 +139,28 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
     ATH_MSG_WARNING("could not retrieve mc collection at [" << m_mcEventsName << "]!");
     return StatusCode::FAILURE;
   }
+  const HepMC3::GenEvent* evt = mcEvts->front();
+  const auto& attrs = evt->attributes();
+  std::map<int, std::shared_ptr<HepMC3::Attribute> > attrsparticle;
+  if (attrs.find("original_momentum") != attrs.end()) {
+  // We have info from PHOTOS
+  attrsparticle = attrs.at("original_momentum");
+  } else {
 
-
-
+  return StatusCode::SUCCESS;
+  }
   // add relevant particles to new collection
   for (unsigned int i=0; i<truthParticles->size(); ++i) {
     // Grab the particle
     const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
     if (!theParticle) continue; // Protection against null pointers
     if (!theParticle->isLepton()) continue; // Only include leptons!
+    int id  = HepMC::UniqueID(theParticle);
+    if (!attrsparticle.count(id)) continue;
+    auto vecAttr = std::dynamic_pointer_cast<HepMC3::VectorDoubleAttribute>(attrs.at(id));
+    if (!vecAttr) {
+       continue;
+    }
 /*
     if (is_sherpa) {
       // For Sherpa, skip is not status 11
@@ -211,6 +224,10 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
     newParticlesWriteHandle->push_back( xTruthParticle );
     // Fill with numerical content
     *xTruthParticle=*theParticle;
+    xTruthParticle->SetPx(vecAttr.at(0));
+    xTruthParticle->SetPy(vecAttr.at(1));
+    xTruthParticle->SetPz(vecAttr.at(2));
+    xTruthParticle->SetE(vecAttr.at(3));
     // Copy over the decorations if they are available
     typeDecorator(*xTruthParticle) = typeAccessor(*theParticle);
     originDecorator(*xTruthParticle) = originAccessor(*theParticle);
@@ -220,7 +237,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
 
   return StatusCode::SUCCESS;
 }
-
+/*
 // Find out if a particle has a bare descendent
 bool DerivationFramework::TruthBornLeptonCollectionMaker::hasBareDescendent( const xAOD::TruthParticle* p ) const
 {
@@ -237,4 +254,4 @@ bool DerivationFramework::TruthBornLeptonCollectionMaker::hasBareDescendent( con
   // No luck -- this branch is a dead end
   return false;
 }
-
+*/
