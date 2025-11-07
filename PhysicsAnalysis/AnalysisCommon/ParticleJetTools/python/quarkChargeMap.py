@@ -72,7 +72,7 @@ hadrons_dict={
     5512:5,    #Xi_bb- (bbd)    
     5522:5,    #Xi_bb0 (bbu)    
     5514:5,    #Xi*_bb-         
-    5514:5,    #Xi*_bb0         
+    5524:5,    #Xi*_bb0
     5532:5,    #Omega_bb- (bbs) 
     5534:5,    #Omega*_bb-      
     5542:5,    #Omega_bbc0      
