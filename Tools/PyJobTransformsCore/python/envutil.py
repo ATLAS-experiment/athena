@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os, re, glob
 from PyJobTransformsCore import fileutil
@@ -205,7 +205,6 @@ def find_libraries( lib ):
     <lib> can contain wildcards, in which case all files matching the wildcard will be returned.
     If the same file appears in several paths, the first one found will be taken."""
     # require extension .so (or .so with version numbers)
-    global _libraryNameRE
     libsfull = []
     libname = lib
     if _libraryNameRE.search(lib): # fully specified ending

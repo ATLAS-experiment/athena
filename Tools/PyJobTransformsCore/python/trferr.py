@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os
 
 class TransformError( Exception ):
     """Base class for PyJobTransform Exception classes"""
-    def __init__(self,message=None,error='TRF_UNKNOWN',**kwargs):
+    def __init__(self,message=None,error='TRF_UNKNOWN',**kwargs): # noqa: B042
         Exception.__init__(self,error,message)
         self.message = message
         self.error = error
@@ -29,13 +29,13 @@ class TransformError( Exception ):
 
 class TransformConfigError( TransformError ):
     """Exception raised in case of an error in the transform configuration"""
-    def __init__(self,message=None,error='TRF_CONFIG',**kwargs):
+    def __init__(self,message=None,error='TRF_CONFIG',**kwargs): # noqa: B042
         TransformError.__init__(self,message,error,**kwargs)
 
 
 class JobOptionsNotFoundError( TransformError ):
     """Exception raised in case a joboptions file can not be found"""
-    def __init__(self,filename,message=None,error='ATH_JOP_NOTFOUND'):
+    def __init__(self,filename,message=None,error='ATH_JOP_NOTFOUND'): # noqa: B042
         mess = "JobOptions file %s not found" % filename
         if message: mess += '. ' + message
         TransformError.__init__(self,mess,error)
