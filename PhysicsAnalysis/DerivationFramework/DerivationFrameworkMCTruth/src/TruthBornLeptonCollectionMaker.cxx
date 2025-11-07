@@ -139,28 +139,27 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
     ATH_MSG_WARNING("could not retrieve mc collection at [" << m_mcEventsName << "]!");
     return StatusCode::FAILURE;
   }
-  const HepMC3::GenEvent* evt = mcEvts->front();
+  const HepMC::GenEvent* evt = mcEvts->front();
   const auto& attrs = evt->attributes();
   std::map<int, std::shared_ptr<HepMC3::Attribute> > attrsparticle;
-  if (attrs.find("original_momentum") != attrs.end()) {
-  // We have info from PHOTOS
-  attrsparticle = attrs.at("original_momentum");
-  } else {
+  if (attrs.find("original_momentum") == attrs.end()) {
+    // Here one should implement treatment of e.g. SHERPA, anything that does not use PHOTOS.
+    // The implementation should be just a normal loop over event record with some conditions.
+    return StatusCode::SUCCESS;
 
-  return StatusCode::SUCCESS;
-  }
-  // add relevant particles to new collection
-  for (unsigned int i=0; i<truthParticles->size(); ++i) {
-    // Grab the particle
-    const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
-    if (!theParticle) continue; // Protection against null pointers
-    if (!theParticle->isLepton()) continue; // Only include leptons!
-    int id  = HepMC::UniqueID(theParticle);
-    if (!attrsparticle.count(id)) continue;
-    auto vecAttr = std::dynamic_pointer_cast<HepMC3::VectorDoubleAttribute>(attrs.at(id));
-    if (!vecAttr) {
-       continue;
-    }
+
+  } else {
+    // We have info from PHOTOS
+    attrsparticle = attrs.at("original_momentum");
+    // Loop over particles, add relevant particles to new collection
+    for (unsigned int i=0; i<truthParticles->size(); ++i) {
+      const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
+      if (!theParticle) continue;
+      if (!theParticle->isLepton()) continue;
+      int id  = HepMC::UniqueID(theParticle); // Get particle id
+      if (!attrsparticle.count(id)) continue; // Check that the particle has atribute "original_momentum", i.e. was a subject to radiation by PHOTOS.
+      auto vecAttr = std::dynamic_pointer_cast<HepMC3::VectorDoubleAttribute>(attrs.at(id)); // Cast the attribute to VectorDoubleAttribute
+      if (!vecAttr) continue;
 /*
     if (is_sherpa) {
       // For Sherpa, skip is not status 11
@@ -224,17 +223,18 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
     newParticlesWriteHandle->push_back( xTruthParticle );
     // Fill with numerical content
     *xTruthParticle=*theParticle;
-    xTruthParticle->SetPx(vecAttr.at(0));
-    xTruthParticle->SetPy(vecAttr.at(1));
-    xTruthParticle->SetPz(vecAttr.at(2));
-    xTruthParticle->SetE(vecAttr.at(3));
+    // Use original momenta from attribute
+    xTruthParticle->SetPx(vecAttr->value().at(0));
+    xTruthParticle->SetPy(vecAttr->value().at(1));
+    xTruthParticle->SetPz(vecAttr->value().at(2));
+    xTruthParticle->SetE(vecAttr->value().at(3));
     // Copy over the decorations if they are available
     typeDecorator(*xTruthParticle) = typeAccessor(*theParticle);
     originDecorator(*xTruthParticle) = originAccessor(*theParticle);
     outcomeDecorator(*xTruthParticle) = outcomeAccessor(*theParticle);
     classificationDecorator(*xTruthParticle) = classificationAccessor(*theParticle);
   } // Loop over all particles
-
+  }
   return StatusCode::SUCCESS;
 }
 /*
