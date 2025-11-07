@@ -203,6 +203,11 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "Eff_z0",     path=mypath, type="TProfile", title="z0 efficiency",       xbins=50,   xmin=-225., xmax=225. )
     defineHisto( monTool,  "Eff_nVtx",   path=mypath, type="TProfile", title="nVtx efficiency",     xbins=101,   xmin=-0.5,  xmax=100.5 )
     defineHisto( monTool,  "Eff_lb",     path=mypath, type="TProfile", title="efficiency vs lumiblock",      xbins=301, xmin=-0.5, xmax=3009.5 )
+
+    if ( "FS_FTF" in cs.tail or "JetSuper_FTF" in cs.tail or "mb" in chain ): 
+        defineHisto( monTool,  "Eff_ntrax",     path=mypath, type="TProfile", title="ntrack efficiency",       xbins=vnbins   )
+    else:
+        defineHisto( monTool,  "Eff_ntrax",     path=mypath, type="TProfile", title="ntrack efficiency", xbins=61, xmin=-0.5, xmax=60.5  )
     
     defineHisto( monTool,  "trkvtx_x_vs_lb", path=mypath, type="TProfile", title="track vertex x vs lumiblock", xbins=301, xmin=-0.5, xmax=3009.5 )
     defineHisto( monTool,  "trkvtx_y_vs_lb", path=mypath, type="TProfile", title="track vertex y vs lumiblock", xbins=301, xmin=-0.5, xmax=3009.5 )
