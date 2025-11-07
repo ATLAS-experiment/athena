@@ -984,7 +984,6 @@ DEBUG DB Action Commit
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfo Initial basket size = 512 increased to 1024
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/TestContainerAux. Initial basket size = 1536 increased to 3072
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/TestContainer Initial basket size = 512 increased to 1024
-RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/index_ref Initial basket size = 512 increased to 1024
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.mcEventNumber Initial basket size = 512 increased to 1024
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.streamTagRobs Initial basket size = 512 increased to 1024
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.streamTagDets Initial basket size = 512 increased to 1024
@@ -993,7 +992,6 @@ RootDatabase                                        DEBUG SimplePoolFile_xAOD.ro
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.mcChannelNumber Initial basket size = 512 increased to 1024
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/EventInfoAuxDyn.mcEventWeights Initial basket size = 512 increased to 1024
 RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/TestContainerAuxDyn.decor1 Initial basket size = 512 increased to 1024
-RootDatabase                                        DEBUG SimplePoolFile_xAOD.root/index_ref Initial basket size = 512 increased to 1024
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #6, run #1 10 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 4 objects
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9103, name = MyTracks
