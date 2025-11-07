@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -174,7 +174,7 @@ namespace CP
       }
     }
 
-    m_result = myresult;
+    m_result = std::move(myresult);
   }
 
 
@@ -185,7 +185,7 @@ namespace CP
     RCU_CHANGE_INVARIANT (this);
     GroupConfig config;
     config.label = val_label;
-    m_config.push_back (config);
+    m_config.push_back (std::move(config));
   }
 
 
@@ -243,7 +243,7 @@ namespace CP
     {
       // extract the ensemble if we have one
       SystematicVariation ensemble;
-      for (auto mysys : sys.second)
+      for (const auto & mysys : sys.second)
       {
 	if (mysys.isEnsemble())
 	{
@@ -284,7 +284,7 @@ namespace CP
 
       if (!ensemble.empty())
       {
-	basesysList[group][sys.first].push_back (ensemble);
+	basesysList[group][sys.first].push_back (std::move(ensemble));
       } else
       {
 	basesysList[group][sys.first] = std::move (sys.second);
