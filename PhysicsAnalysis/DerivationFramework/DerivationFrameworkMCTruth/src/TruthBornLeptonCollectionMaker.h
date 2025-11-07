@@ -65,7 +65,7 @@ namespace DerivationFramework {
     /// Helper function for finding bare descendents of born leptons
     bool hasBareDescendent( const xAOD::TruthParticle* p ) const;
 */    
-      SG::ReadHandleKey<McEventCollection> m_mcEventsName{this,"McEvent", "m_mcEventsName", "GEN_AOD", "input McEventCollection container name"};
+      SG::ReadHandleKey<McEventCollection> m_mcEventsName{this,"McEvent", "GEN_AOD", "input McEventCollection container name"};
     
   };
 }
