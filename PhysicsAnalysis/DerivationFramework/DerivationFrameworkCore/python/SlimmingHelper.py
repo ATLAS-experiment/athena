@@ -94,6 +94,7 @@ class SlimmingHelper:
                 self.IncludeJetTriggerContent = False
                 self.IncludeTrackingTriggerContent = False
                 self.IncludeTauTriggerContent = False
+                self.IncludeDiTauTriggerContent = False
                 self.IncludeEtMissTriggerContent = False
                 self.IncludeBJetTriggerContent = False
                 self.IncludeBJetTriggerByYearContent = False
@@ -198,6 +199,9 @@ class SlimmingHelper:
                         from DerivationFrameworkCore.EtMissTriggerFixContent import EtMissTriggerFixContent
                         for item in EtMissTriggerFixContent:
                                 self.FinalItemList.append(item)
+                if (self.IncludeDiTauTriggerContent is True):
+                        triggerContent = True
+                        self.SmartCollections.append("HLT_DiTauJets")
 
                 if (self.IncludeTauTriggerContent is True):
                         triggerContent = True
@@ -582,6 +586,9 @@ class SlimmingHelper:
                 elif collectionName=="HLT_TrigTauRecMerged_MVA":
                         from DerivationFrameworkCore.TauTriggerContent import TauTriggerContentRun3
                         items.extend(TauTriggerContentRun3)
+                elif collectionName=="HLT_DiTauJets":
+                        from DerivationFrameworkCore.DiTauTriggerContent import DiTauTriggerContent
+                        items.extend(DiTauTriggerContent)
                 elif collectionName=="HLT_xAOD__BTaggingContainer_HLTBjetFex":
                         from DerivationFrameworkFlavourTag.BJetTriggerContent import BJetTriggerContent
                         items.extend(BJetTriggerContent)
