@@ -110,7 +110,6 @@ def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
 
 
 def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False, extlhapath=None, required_accuracy=0.01, runArgs=None, bias_module=None, requirePMGSettings=False):
-    global my_MGC_instance
     # Just in case
     setup_path_protection()
 
@@ -255,7 +254,6 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         mglog.info('Setting up serial generation.')
 
     generate_prep(process_dir=os.getcwd())
-    global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess(command,stdin=subprocess.PIPE, stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
@@ -338,7 +336,6 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
 
 def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None, requirePMGSettings=False):
-    global my_MGC_instance
     # Get of info out of the runArgs
     beamEnergy,random_seed = get_runArgs_info(runArgs)
 
@@ -392,7 +389,6 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
 
     # Make sure we've set the number of processes appropriately
     setNCores(process_dir=MADGRAPH_GRIDPACK_LOCATION)
-    global MADGRAPH_CATCH_ERRORS
 
     # Run the consistency check, print some useful info
     ls_dir(currdir)
@@ -572,8 +568,6 @@ def setupFastjet(process_dir=None):
 
 
 def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
-    global my_MGC_instance
-
     isNLO=is_NLO_run(process_dir=process_dir)
 
     origLHAPATH=os.environ['LHAPATH']
@@ -765,7 +759,6 @@ add_time_of_flight '''+run+((' --threshold='+str(threshold)) if threshold is not
 
     mglog.info('Started adding time of flight info '+str(time.asctime()))
 
-    global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess([python,me_exec,'time_of_flight_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
@@ -819,7 +812,6 @@ decay_events '''+run)
 
     mglog.info('Started running madspin at '+str(time.asctime()))
 
-    global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess([python,me_exec,'madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
@@ -877,7 +869,6 @@ def madspin_on_lhe(input_LHE,madspin_card,runArgs=None,keep_original=False):
     if not os.access(madpath+'/MadSpin/madspin',os.R_OK):
         raise RuntimeError('madspin executable not found in '+madpath)
     mglog.info('Starting madspin at '+str(time.asctime()))
-    global MADGRAPH_CATCH_ERRORS
     generate = stack_subprocess([python,madpath+'/MadSpin/madspin','madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
@@ -1860,7 +1851,6 @@ def get_cluster_type(process_dir=MADGRAPH_GRIDPACK_LOCATION):
 def run_card_consistency_check(isNLO=False,process_dir='.'):
     cardpath=process_dir+'/Cards/run_card.dat'
     mydict=getDictFromCard(cardpath)
-    global my_MGC_instance
     # We should always use event_norm = average [AGENE-1725] otherwise Pythia cross sections are wrong
     # Modification: average or bias is ok; sum is incorrect. Change the test to set sum to average
     if checkSetting('event_norm','sum',mydict):
@@ -1997,7 +1987,6 @@ def add_reweighting(run_name,reweight_card=None,process_dir=MADGRAPH_GRIDPACK_LO
         mglog.info('Copying new reweight card from '+reweight_card)
         shutil.move(reweight_card,process_dir+'/Cards/reweight_card.dat')
     reweight_cmd='{}/bin/madevent reweight {} -f'.format(process_dir,run_name)
-    global MADGRAPH_CATCH_ERRORS
     reweight = stack_subprocess([python]+reweight_cmd.split(),stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = reweight.communicate()
     error_check(err,reweight.returncode)
