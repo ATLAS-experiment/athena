@@ -39,26 +39,6 @@ using namespace pool;
 
 static UCharDbArrayAthena s_char_Blob ATLAS_THREAD_SAFE;
 
-namespace {
-/* Temporarily install ROOT error handler to filter out warnings about RNTuple
-   being in development Remove in production
- */
-static struct ErrorHandlerInit {
-  static ErrorHandlerFunc_t m_oldHandler ATLAS_THREAD_SAFE;
-  ErrorHandlerInit() { m_oldHandler = SetErrorHandler(RNTErrorHandler); }
-  static void RNTErrorHandler(int level, Bool_t abort, const char* location,
-                              const char* msg) {
-    // filter out RNTuple warnings, print all other messages
-    if (strstr(msg, "The RNTuple file format will change") == NULL and
-        strstr(msg, "Pre-release format version") == NULL and m_oldHandler) {
-      m_oldHandler(level, abort, location, msg);
-    }
-  }
-} EHI;
-ErrorHandlerFunc_t ErrorHandlerInit::m_oldHandler ATLAS_THREAD_SAFE;
-
-}  // namespace
-
 
 /// Required here for unique_ptr compilation
 RNTupleContainer::FieldDesc::FieldDesc(const DbColumn& c) : DbColumn(c) {}
