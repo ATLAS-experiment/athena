@@ -369,7 +369,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
          FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
          incSvc->fireIncident(beginInputIncident);
-         FileIncident endInputIncident(name(), "EndInputMemFile", memName);
+         FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
          incSvc->fireIncident(endInputIncident);
          if (sc.isFailure()) {
             ATH_MSG_INFO("All SharedWriter clients stopped - exiting");
