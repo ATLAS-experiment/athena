@@ -36,45 +36,17 @@ class L1CaloTriggerTowerDecoratorAlg : public AthAlgorithm {
   { this, "sgKey_TriggerTowers", LVL1::TrigT1CaloDefs::xAODTriggerTowerLocation, "" };
   std::string m_sgKey_TriggerTowers;
 
-  /// Decoration strings (leave empty to disable the decoration)
-  std::string m_caloCellEnergy;
-  std::string m_caloCellET;
-  std::string m_caloCellEnergyByLayer;
-  std::string m_caloCellETByLayer;
-  std::string m_caloCellsQuality;
-  std::string m_caloCellEnergyByLayerByReceiver;
-  std::string m_caloCellETByLayerByReceiver;
-
   ToolHandle<LVL1::IL1CaloxAODOfflineTriggerTowerTools> m_ttTools;
 
-  // The following are set automatically based on input and the string
-  // properties
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
-    m_caloCellEnergyKey{ this, "caloCellEnergyKey_doNoSet", "", "" };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
-    m_caloCellETKey{ this, "caloCellETKey_doNoSet", "", "" };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
-    m_caloCellsQualityKey{ this, "caloCellsQualityKey_doNoSet", "", "" };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyByLayerKey{
-    this,
-    "caloCellEnergyByLayerKey_doNoSet",
-    "",
-    ""
-  };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
-    m_caloCellETByLayerKey{ this, "caloCellETByLayerKey_doNoSet", "", "" };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
-    m_caloCellEnergyByLayerByReceiverKey{
-      this,
-      "caloCellEnergyByLayerByReceiverKey_doNoSet",
-      "",
-      ""
-    };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
-    m_caloCellETByLayerByReceiverKey{ this,
-                                      "caloCellETByLayerByReceiverKey_doNotSet",
-                                      "",
-                                      "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyKey{ this, "caloCellEnergyKey", "", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETKey{ this, "caloCellETKey", "", "" };
+
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellsQualityKey{ this, "caloCellsQualityKey", m_triggerTowerContainerKey.key()+".CaloCellQuality", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyByLayerKey{this, "caloCellEnergyByLayerKey", m_triggerTowerContainerKey.key()+".CaloCellEnergyByLayer",""};
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETByLayerKey{ this, "caloCellETByLayerKey", m_triggerTowerContainerKey.key()+".CaloCellETByLayer", "" };
+
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyByLayerByReceiverKey{ this, "caloCellEnergyByLayerByReceiverKey", "", ""};
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETByLayerByReceiverKey{ this, "caloCellETByLayerByReceiverKey", "", "" };
 };
 }
 #endif
