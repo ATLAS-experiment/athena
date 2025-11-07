@@ -85,6 +85,7 @@ def PoolWriteCfg(flags):
 
     # Loop over all streams and set the appropriate attributes
     maxAutoFlush = -1
+    storageTechnologyMap = flags.Output.StorageTechnology.EventData or {'*': flags.PoolSvc.DefaultContainerType}
     for stream in _getStreamsFromFlags(flags):
 
         # Get the file name - Guaranteed to exist at this point
@@ -171,6 +172,11 @@ def PoolWriteCfg(flags):
         # Find the maximum AutoFlush across all formats
         maxAutoFlush = max(maxAutoFlush, autoFlush)
 
+        # If no EventData technology is set for this specific file
+        # (or globally) use flags.PoolSvc.DefaultContainerType
+        if fileName not in storageTechnologyMap and '*' not in storageTechnologyMap:
+             storageTechnologyMap[fileName] = flags.PoolSvc.DefaultContainerType
+
     # If we don't have "enough" events, disable parallelCompression if we're using SharedWriter
     # In this context, "enough" means each worker has a chance to make at least one flush to the disk
     useParallelCompression = flags.MP.UseSharedWriter and flags.MP.UseParallelCompression
@@ -190,12 +196,12 @@ def PoolWriteCfg(flags):
         return AthenaPoolSharedIOCnvSvcCfg(flags,
                                            PoolAttributes=PoolAttributes,
                                            ParallelCompression=useParallelCompression,
-                                           StorageTechnology=flags.Output.StorageTechnology.EventData,
+                                           StorageTechnology=storageTechnologyMap,
                                            OutputMetadataContainers=OutputMetadataContainers,
                                            OneDataHeaderForm = oneDHForm)
     else:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         return AthenaPoolCnvSvcCfg(flags,
                                    PoolAttributes=PoolAttributes,
-                                   StorageTechnology=flags.Output.StorageTechnology.EventData,
+                                   StorageTechnology=storageTechnologyMap,
                                    OneDataHeaderForm = oneDHForm)
