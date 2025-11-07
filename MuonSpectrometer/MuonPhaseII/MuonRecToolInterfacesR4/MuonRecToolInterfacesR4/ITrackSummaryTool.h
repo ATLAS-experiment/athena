@@ -11,7 +11,7 @@
 #include "xAODBase/IParticle.h"
 
 namespace MuonR4{
-    class HitSummary;
+    struct HitSummary;
     class MsTrackSeed;
 }
 
