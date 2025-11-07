@@ -40,8 +40,8 @@ StatusCode FwdAFPJetEffMonitoringAlg::fillHistograms(const EventContext& context
   auto isHLT = [](const std::string& name) { return name.compare(0, 4, "HLT_") == 0; };
 
   for (size_t index = 0; index < m_references.size(); ++index) {
-    const auto trig = m_chains[index];
-    const auto ref = m_references[index];
+    const auto& trig = m_chains[index];
+    const auto& ref = m_references[index];
 
     ATH_MSG_VERBOSE("Check: " << trig << " vs " << ref << "...");
 
