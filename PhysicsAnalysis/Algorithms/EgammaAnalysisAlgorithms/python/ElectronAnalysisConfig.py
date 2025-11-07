@@ -228,12 +228,16 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.AFII_corr = (
                 0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
+            alg.isolationCorrectionTool.FixTimingIssueInCore = True
             alg.isolationCorrectionTool.ToolVer = "REL22"
             alg.isolationCorrectionTool.CorrFile = "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root"
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-
+        else:
+            log.warning("You are not applying the isolation corrections")
+            log.warning("This is only intended to be used for testing purposes")
+            
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
