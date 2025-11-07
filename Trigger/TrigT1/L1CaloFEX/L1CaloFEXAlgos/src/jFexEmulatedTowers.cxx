@@ -16,6 +16,8 @@
 
 #include "jFexEmulatedTowers.h"
 #include "L1CaloFEXSim/jFEXCompression.h"
+#include "StoreGate/WriteDecorHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 #include <iostream>
 #include <fstream>
@@ -46,12 +48,33 @@ StatusCode jFexEmulatedTowers::initialize() {
     //Reading from CVMFS Trigger Tower and their corresponding SCell ID
     ATH_CHECK(ReadSCfromFile(m_jFEX2Scellmapping));
     ATH_CHECK(ReadTilefromFile(m_jFEX2Tilemapping));
-    
+
+    // offline energy decoration setup
+    // SCell to Cell mapping
+    if (!m_CaloCellKey.empty()) {
+      ATH_CHECK( m_scellIdTool.retrieve() );
+      ATH_CHECK( detStore()->retrieve (m_caloCellIdHelper, "CaloCell_ID") );
+    }
+
+    // Calo cell container
+    ATH_CHECK( m_CaloCellKey.initialize(SG::AllowEmpty) );
+
+    // read Tile Tower decoration
+    ATH_CHECK( m_readTileOfflineDecorKey.initialize(SG::AllowEmpty) );
+
+    // Readout path cell sum Et decoration
+    ATH_CHECK( m_caloCellSumETdecorKey.initialize(SG::AllowEmpty) );
+
+    // tower energy decorations
+    ATH_CHECK( m_jtowerEtMeVdecorKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_jtowerEtTimingMeVdecorKey.initialize(SG::AllowEmpty) );
+
+
     return StatusCode::SUCCESS;
 }
 
 StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
-    
+
     //Reading the Scell container
     SG::ReadHandle<CaloCellContainer> ScellContainer(m_SCellKey, ctx);
     if(!ScellContainer.isValid()) {
@@ -66,17 +89,28 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
 
+    // Reading the offline Calo cell container
+    const CaloCellContainer* caloCells = nullptr;
+    if (!m_CaloCellKey.empty()) {
+      SG::ReadHandle<CaloCellContainer> caloCellContainer(m_CaloCellKey, ctx);
+      if(!caloCellContainer.isValid()) {
+        ATH_MSG_ERROR("Could not retrieve collection " << caloCellContainer.key() );
+        return StatusCode::FAILURE;
+      }
+      caloCells = caloCellContainer.cptr();
+    }
+
     //WriteHandle for jFEX EDMs
     //---jTower EDM
     SG::WriteHandle<xAOD::jFexTowerContainer> jTowersContainer(m_jTowersWriteKey, ctx);
     ATH_CHECK(jTowersContainer.record(std::make_unique<xAOD::jFexTowerContainer>(), std::make_unique<xAOD::jFexTowerAuxContainer>()));
     ATH_MSG_DEBUG("Recorded jFexEmulatedTower container with key " << jTowersContainer.key());
-     
+
     if(ScellContainer->empty() || triggerTowerContainer->empty() ){
         ATH_MSG_WARNING("Cannot fill jTowers here, at least one container is empty. ScellContainer.size="<<ScellContainer->size() << " or triggerTowerContainer.size=" << triggerTowerContainer->size() );
         return StatusCode::SUCCESS;
     }
-    
+
     // building Scell ID pointers
     std::unordered_map< uint64_t, const CaloCell*> map_ScellID2ptr;
     
@@ -114,8 +148,12 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         
         
         uint16_t Total_Et_encoded = 0;
+        uint16_t Total_Et_Timing_encoded = 0;
         char jTower_sat = 0;
-        
+
+	float caloCellSumET(0); // Readout Et for Tower
+	int Total_Et_decoded(0);
+	int Total_Et_Timing_decoded(0);
         if( source != 1 ){
             
             const std::unordered_map< uint32_t, std::vector<uint64_t> > * ptr_TTower2Cells;
@@ -136,6 +174,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
             }
         
             int Total_Et = 0;
+            int Total_Timing_Et = 0;
             float Total_Et_float = 0;
             bool invalid = m_apply_masking&&m_isDATA; // the isDATA is because there is no concept of invalid supercell in MC (the provenance bit is actually used for BCID in MC), so can never have an invalid jTower. 
             bool masked = m_apply_masking;
@@ -153,6 +192,7 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 bool isMasked = m_apply_masking ? ((myCell)->provenance()&0x80) : false;
                 bool isInvalid = (m_apply_masking&&m_isDATA) ? ((myCell)->provenance()&0x40) : false;
                 bool isSaturated = (m_isDATA) ? myCell->quality() : false; // saturation algorithm not implemented in MC yet
+                bool passTiming = ( (myCell)->provenance() & 0x200 );
 
                 invalid &= isInvalid;
                 masked &= isMasked;
@@ -170,22 +210,44 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 
                 Total_Et += val;
                 if(val!=0) Total_Et_float += myCell->et();
+
+		// tau timing cut
+		Total_Timing_Et += (passTiming) ? val : 0;
+
+		// Readout path energy sum
+		if ( !m_CaloCellKey.empty() ) {
+		  const std::vector<Identifier> caloCellIds = m_scellIdTool->superCellToOfflineID(myCell->ID());
+		  float caloCellEt(0.);  // offline Et for the SCell
+		  //use findCell function of CaloCellContainer, which takes an identifier hash
+		  for(auto& caloCellId : caloCellIds) {
+		    const CaloCell* caloCell = caloCells->findCell(m_caloCellIdHelper->calo_cell_hash(caloCellId));
+		    if(!caloCell) { ATH_MSG_WARNING("Could not find cell"); continue; }
+		    caloCellEt += caloCell->e()*caloCell->sinTh();
+		  }
+		  caloCellSumET += caloCellEt;
+		}
                 
-            }
+            } // SCell loop
 
             // now must convert Total_Et int value into fex value: multi-level encoding
             if(masked) {
                 Total_Et_encoded = 0; // no data
+		Total_Et_Timing_encoded = 0;
             } else if(invalid) {
                 Total_Et_encoded = 4095; // invalid
+                Total_Et_Timing_encoded = 4095;
             } else {
-                Total_Et_encoded = jFEXCompression::Compress( Total_Et*12.5, false );
+                Total_Et_encoded = jFEXCompression::Compress( Total_Et*12.5);
+                Total_Et_Timing_encoded = jFEXCompression::Compress( Total_Timing_Et*12.5);
             }
 
             // leaving this commented while outstanding questions above about treatment of supercells
             // using floating point for MC until determine correct procedure for MC values re invalid/masking
             if(!m_isDATA) Total_Et_encoded = jFEXCompression::Compress( Total_Et_float, masked );
-            
+
+	    //
+	    Total_Et_decoded = jFEXCompression::Expand( Total_Et_encoded );
+	    Total_Et_Timing_decoded = jFEXCompression::Expand( Total_Et_Timing_encoded );
         }
         else{
             
@@ -206,9 +268,22 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
             }
             else{
                 Total_Et_encoded = (it_TileID2ptr->second)->cpET();
-            }           
-        }
-        
+
+		//
+		Total_Et_decoded = Total_Et_encoded * 500;
+		Total_Et_Timing_decoded = Total_Et_encoded * 500;
+
+		// get the offline reconstructed energy from xAODTriggerTower decoration
+		if ( !m_CaloCellKey.empty() ) {
+		  SG::ReadDecorHandle<xAOD::TriggerTowerContainer, std::vector<float>> cellEtByLayer_handle(m_readTileOfflineDecorKey, ctx);
+		  if ( cellEtByLayer_handle.isAvailable() ) {
+		    std::vector<float> cellEtByLayer = cellEtByLayer_handle(*it_TileID2ptr->second);
+		    // Stored in GeV, see TrigT1CaloCalibTools/src/L1CaloCells2TriggerTowers.cxx
+		    caloCellSumET = 1000.0 * std::accumulate(cellEtByLayer.begin(), cellEtByLayer.end(), 0.0);
+		  }
+		}
+	    }
+        } // end of Tile
         std::vector<uint16_t> vtower_ET;
         vtower_ET.clear();
         vtower_ET.push_back(Total_Et_encoded);
@@ -223,9 +298,24 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDSimulation, source, vtower_ET, jfex, fpga, channel, tower, vtower_SAT ); 
         
         if( m_doThinning && !jTowersContainer->back()->isCore() ){
-            jTowersContainer->pop_back(); 
-        }
-    }
+            jTowersContainer->pop_back();
+        } else {
+	  // decorate with offline energy
+	  if (!m_caloCellSumETdecorKey.empty()) {
+	    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float> jTowerCaloCellSumEt (m_caloCellSumETdecorKey, ctx);
+	    (jTowerCaloCellSumEt) (*jTowersContainer->back()) = caloCellSumET;
+	  }
+	  // decorate tower energies in MeV without/with timing cut
+	  if (!m_jtowerEtMeVdecorKey.empty()) {
+	    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtMeV (m_jtowerEtMeVdecorKey , ctx);
+	    (jTowerEtMeV) (*jTowersContainer->back()) = Total_Et_decoded;
+	  }
+	  if (!m_jtowerEtTimingMeVdecorKey.empty()) {
+	    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtTimingMeV (m_jtowerEtTimingMeVdecorKey , ctx);
+	    (jTowerEtTimingMeV) (*jTowersContainer->back()) = Total_Et_Timing_decoded;
+	  }
+	}
+    } // firmware tower map
     
     // Return gracefully
     return StatusCode::SUCCESS;
