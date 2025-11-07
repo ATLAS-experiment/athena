@@ -44,6 +44,9 @@ namespace EFTrackingFPGAIntegration
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAPixelRDO{this, "FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs", "Pixel RDO converted to FPGA format"};
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAStripRDO{this, "FPGAEncodedStripKey", "FPGAEncodedStripRDOs", "Strip RDO converted to FPGA format"};
 
+        SG::ReadHandleKey<int> m_FPGAPixelRDOSize{this, "FPGAEncodedPixelSizeKey", "FPGAEncodedPixelSizeRDOs", "Pixel RDO converted to FPGA format"};
+        SG::ReadHandleKey<int> m_FPGAStripRDOSize{this, "FPGAEncodedStripSizeKey", "FPGAEncodedStripSizeRDOs", "Strip RDO converted to FPGA format"};
+
         SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
         SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
 
@@ -63,16 +66,11 @@ namespace EFTrackingFPGAIntegration
         Gaudi::Property<std::string> m_stripEndClusterKernelName{this, "StripEndClusterKernelName", "", "Name of the strip clustering end kernel"}; //!< Name of the strip clustering kernel start
 
 
-        Gaudi::Property<std::string> m_stripL2GKernelName{this, "StripL2GKernelName", "", "Name of the strip L2G kernel"}; //!< Name of the strip L2G kernelS
-
-
-
         mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
         mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
         mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
         mutable std::atomic<cl_ulong> m_pixelClusteringTime{0}; //!< Time for pixel clustering
         mutable std::atomic<cl_ulong> m_stripClusteringTime{0}; //!< Time for strip clustering
-        mutable std::atomic<cl_ulong> m_stripL2GTime{0};        //!< Time for strip L2G
         mutable std::atomic<cl_ulong> m_pixelEdmPrepTime{0};    //!< Time for pixel EDM preparation
         mutable std::atomic<cl_ulong> m_stripEdmPrepTime{0};    //!< Time for strip EDM preparation
         mutable std::atomic<cl_ulong> m_pixelOutputTime{0};     //!< Time for pixel output buffer read
@@ -86,9 +84,6 @@ namespace EFTrackingFPGAIntegration
         mutable std::vector<cl::Kernel> m_stripStartClusteringKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripEndClusteringKernels ATLAS_THREAD_SAFE;
 
-        // L2G
-        mutable std::vector<cl::Kernel> m_stripL2GKernels ATLAS_THREAD_SAFE;
-
         // EDM prep
         mutable std::vector<cl::Kernel> m_pixelEdmPrepKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripEdmPrepKernels ATLAS_THREAD_SAFE;
@@ -97,12 +92,8 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Buffer> m_pixelClusterInputBufferList;
         std::vector<cl::Buffer> m_stripClusterInputBufferList;
         // Buffers for Clustering
-        std::vector<cl::Buffer> m_stripClusterOutputBufferList;
         std::vector<cl::Buffer> m_pixelClusterEDMOutputBufferList;
         std::vector<cl::Buffer> m_stripClusterEDMOutputBufferList;
-        // L2G
-        std::vector<cl::Buffer> m_stripL2GOutputBufferList;
-        std::vector<cl::Buffer> m_stripL2GEDMOutputBufferList;
         // EDMPrep
         std::vector<cl::Buffer> m_edmPixelOutputBufferList;
         std::vector<cl::Buffer> m_edmStripOutputBufferList;

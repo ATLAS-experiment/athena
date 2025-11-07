@@ -49,7 +49,9 @@ StatusCode F1X0XRTIntegrationAlg::initialize()
   ATH_CHECK(m_FPGAPixelRDO.initialize());
   ATH_CHECK(m_FPGAStripOutput.initialize());
   ATH_CHECK(m_FPGAPixelOutput.initialize());
-
+  ATH_CHECK(m_FPGAPixelRDOSize.initialize());
+  ATH_CHECK(m_FPGAStripRDOSize.initialize());
+  
   // Enumerate CUs
   std::vector<std::string> listofCUs;
   getListofCUs(listofCUs);
@@ -148,6 +150,10 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   ATH_CHECK(SG::get(pixelInput, m_FPGAPixelRDO, ctx));
   ATH_CHECK(SG::get(stripInput, m_FPGAStripRDO, ctx));
 
+  const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
+  ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
+  ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));
+
 
   // Thread/buffer index
   unsigned int nthreads = (m_FPGAThreads.value() < 1) ? SG::getNSlots() : m_FPGAThreads.value();
@@ -218,7 +224,7 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
     r_pix_cl.set_arg(2, bo_pix_cl_edm);
 
     // extra size args (bytes), rounded to 256 elements
-    int rounded = static_cast<int>(std::ceil(static_cast<double>(pixelInput->size()) / 256.0)) * 256;
+    int rounded = static_cast<int>(std::ceil(static_cast<double>(*pixelInputSize) / 256.0)) * 256;
     uint32_t hit_bytes     = static_cast<uint32_t>(sizeof(uint64_t) * rounded);
     uint32_t cluster_bytes = static_cast<uint32_t>(sizeof(uint64_t) * rounded);
     uint32_t edm_bytes     = static_cast<uint32_t>(sizeof(uint64_t) * rounded * 8);
@@ -234,7 +240,7 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   r_str_cl.set_arg(0, bo_str_in);
   r_str_cl.set_arg(1, bo_str_cl);
   r_str_cl.set_arg(2, bo_str_cl_edm);
-  r_str_cl.set_arg(3, static_cast<unsigned int>(stripInput->size()));
+  r_str_cl.set_arg(3, static_cast<unsigned int>(*stripInputSize));
   const auto t_sc_start = std::chrono::steady_clock::now();
   r_str_cl.start();
 
@@ -338,8 +344,8 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Strip output buffer read time: " << (ns_between(t_ro2, t_ro3) / 1e6) << " ms");
 
 
-  if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
-  if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
+  if(*pixelInputSize == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
+  if(*stripInputSize == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
 
   return StatusCode::SUCCESS;
 }
