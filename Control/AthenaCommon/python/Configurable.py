@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/Configurable.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -647,8 +647,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
       return '<%s at %s>' % (self.getFullJobOptName(),hex(id(self)))
 
    def __str__( self, indent = 0, headerLastIndentUnit=indentUnit ):
-      global log  # to print some info depending on output level
-
       def _sorted_repr_set(value):
          """Helper to print sorted set representation"""
          return "{" + repr(sorted(value))[1:-1] + "}" if value else "set()"
