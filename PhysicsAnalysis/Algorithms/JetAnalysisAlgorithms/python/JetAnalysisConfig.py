@@ -667,16 +667,6 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection,
         raise ValueError("Jet collection has an unsupported radius '{0}'!".format(radius) )
     jetInput = match.group(2)
 
-    if jetCollectionName == 'AntiKtVR30Rmax4Rmin02PV0TrackJets' :
-        # don't to anything on track jets
-        config = PreJetAnalysisConfig()
-        config.setOptionValue ('containerName', containerName)
-        config.setOptionValue ('jetCollection', jetCollection)
-        config.setOptionValue ('runOriginalObjectLink', False)
-        config.setOptionValue ('runGhostMuonAssociation', False)
-        seq.append (config)
-        return
-
     config = PreJetAnalysisConfig()
     config.setOptionValue ('containerName', containerName)
     config.setOptionValue ('jetCollection', jetCollection)
