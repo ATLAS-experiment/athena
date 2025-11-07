@@ -215,7 +215,6 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                            "DiTauJetsLowPt",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
     if TauJets_EleRM_in_input:
         STDM6SlimmingHelper.SmartCollections.append("TauJets_EleRM")
