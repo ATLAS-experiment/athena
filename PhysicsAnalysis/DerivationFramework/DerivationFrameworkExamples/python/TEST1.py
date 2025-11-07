@@ -47,8 +47,7 @@ def TEST1Cfg(flags):
                                             "TauJets",
                                             "DiTauJets",
                                             "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
     TEST1ItemList = TEST1SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(flags, "DAOD_TEST1", ItemList=TEST1ItemList, AcceptAlgs=["TEST1Kernel"]))
