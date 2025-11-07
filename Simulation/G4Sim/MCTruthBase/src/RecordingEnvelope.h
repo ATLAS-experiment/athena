@@ -7,7 +7,6 @@
 
 // Athena headers
 #include "TrackRecord/TrackRecordCollection.h"
-#include "StoreGate/WriteHandle.h"
 
 // STL headers
 #include <string>
@@ -38,7 +37,7 @@ public:
 
   /// Called at the start of each G4 event. Recreates the
   /// TrackRecordCollection if necessary.
-  void BeginOfEvent();
+  void BeginOfEvent(TrackRecordCollection*);
 
   /// Returns the number of levels beneath the world volume that the
   /// G4LogicalVolume associated with this recording envelope lies.
@@ -53,7 +52,7 @@ public:
 
   /// Returns the name of the TrackRecordCollection to which tracks
   /// crossing this recording envelope should be written.
-  inline std::string GetTrackRecordCollectionName() const;
+  inline const std::string& GetTrackRecordCollectionName() const;
 
   /// Add a TrackRecord to the TrackRecordCollection owned by this
   /// recording envelope based on the information in aStep.
@@ -76,8 +75,9 @@ private:
   /// Name of the G4LogicalVolume used by this recording envelope.
   const std::string m_envelopeVolumeName;
 
-  /// WriteHandle to the TrackRecordCollection used by this envelope.
-  SG::WriteHandle<TrackRecordCollection> m_trackRecordCollection;
+  /// TrackRecordCollection used by this envelope.
+  TrackRecordCollection* m_trackRecordCollection{};
+  std::string m_trackRecordCollectionName;
 };
 
 const std::string& RecordingEnvelope::GetVolumeName() const
@@ -90,9 +90,9 @@ const G4LogicalVolume* RecordingEnvelope::GetLogicalVolume() const
   return m_logicalVolume;
 }
 
-std::string RecordingEnvelope::GetTrackRecordCollectionName() const
+const std::string& RecordingEnvelope::GetTrackRecordCollectionName() const
 {
-  return m_trackRecordCollection.name();
+  return m_trackRecordCollectionName;
 }
 
 int RecordingEnvelope::GetLevel() const
