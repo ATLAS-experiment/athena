@@ -224,9 +224,9 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
     // Fill with numerical content
     *xTruthParticle=*theParticle;
     // Use original momenta from attribute
-    xTruthParticle->SetPx(vecAttr->value().at(0));
-    xTruthParticle->SetPy(vecAttr->value().at(1));
-    xTruthParticle->SetPz(vecAttr->value().at(2));
+    xTruthParticle->setPx(vecAttr->value().at(0));
+    xTruthParticle->setPy(vecAttr->value().at(1));
+    xTruthParticle->setPz(vecAttr->value().at(2));
     xTruthParticle->SetE(vecAttr->value().at(3));
     // Copy over the decorations if they are available
     typeDecorator(*xTruthParticle) = typeAccessor(*theParticle);
