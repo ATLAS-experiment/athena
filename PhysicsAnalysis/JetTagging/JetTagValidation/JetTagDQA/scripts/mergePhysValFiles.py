@@ -62,7 +62,6 @@ sub_categories_type_4 = [ 'jet']
 jetcontainers = ['AntiKt4EMTopoJets',
                  'AntiKt4EMPFlowJets',
                  'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets',
-                 'AntiKtVR30Rmax4Rmin02PV0TrackJets',
                  ]
 
 # parser arguments
