@@ -19,7 +19,6 @@
 #include "IdDict/IdDictFieldImplementation.h"
 #include "Identifier/IdentifierHash.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "boost/range/iterator_range.hpp"
 
 #include <vector>
 #include <algorithm>
