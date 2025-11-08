@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef CALOREC_CALOCLUSTERENERGYMLCALIBDECORALG_H
 #define CALOREC_CALOCLUSTERENERGYMLCALIBDECORALG_H
@@ -11,7 +11,7 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
-#include "CaloClusterCorrection/ICaloClusterMLCalibToolLite.h"
+#include "CaloInterface/ICaloClusterMLCalibToolLite.h"
 // #include "TFile.h"
 // #include "TTree.h"
 

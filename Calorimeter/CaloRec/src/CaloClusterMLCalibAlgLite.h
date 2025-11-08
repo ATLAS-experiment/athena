@@ -12,7 +12,7 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
-#include "CaloClusterCorrection/ICaloClusterMLCalibToolLite.h"
+#include "CaloInterface/ICaloClusterMLCalibToolLite.h"
 
 /**
  * @class CaloClusterMLCalibAlgLite

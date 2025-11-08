@@ -1,5 +1,5 @@
 #include "CaloClusterCorrection/CaloClusterLocalCalib.h"
-#include "CaloClusterCorrection/CaloClusterMLCalibToolLite.h"
+#include "../CaloClusterMLCalibToolLite.h"
 #include "../CaloClusterLogPos.h"
 #include "CaloClusterCorrection/CaloFillRectangularCluster.h"
 #include "../CaloClusterUpdate.h"
