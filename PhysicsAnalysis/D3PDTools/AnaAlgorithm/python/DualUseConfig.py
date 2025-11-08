@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 useComponentAccumulator = False
 isAthena = False
@@ -26,9 +26,6 @@ def createComponent( typeName, instanceName, componentType ):
       componentType -- The type of component in AnalysisBase
 
     """
-
-    global isAthena
-    global useComponentAccumulator
 
     if isAthena:
         # Try to get a configurable for this C++ class "from Athena".
@@ -95,9 +92,6 @@ def createPublicTool( typeName, toolName ):
                   the algorithm. Also the instance name of the tool.
     """
 
-    global isAthena
-    global useComponentAccumulator
-
     if isAthena:
         # Look up the Athena configurable of this tool:
         from AthenaConfiguration.ComponentFactory import CompFactory
@@ -142,9 +136,6 @@ def createService( typeName, serviceName, sequence=None ):
                   in EventLoop (ignored in Athena)
 
     """
-
-    global isAthena
-    global useComponentAccumulator
 
     if isAthena:
 
@@ -191,8 +182,6 @@ def addPrivateTool( alg, toolName, typeName ):
                   the algorithm. Also the instance name of the tool.
       typeName -- The C++ type name of the private tool
     """
-
-    global isAthena
 
     if isAthena:
 
@@ -242,8 +231,6 @@ def addPrivateToolInArray( alg, toolName, typeName ):
       typeName -- The C++ type name of the private tool
 
     """
-
-    global isAthena
 
     if isAthena:
 
