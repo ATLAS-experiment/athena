@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import pickle
 import ast
@@ -219,7 +219,6 @@ def renameComps(dic, args) -> Dict:
             for line in refile:
                 if not (line.startswith("#") or line.isspace() ):
                     compsToRename.append( line.rstrip('\n') )
-    global componentRenamingDict
     componentRenamingDict.update({
         old_name: new_name
         for old_name, new_name in [
