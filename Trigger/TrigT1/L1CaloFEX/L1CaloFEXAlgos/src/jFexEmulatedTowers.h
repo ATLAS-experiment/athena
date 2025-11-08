@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -87,7 +87,7 @@ class jFexEmulatedTowers : public AthReentrantAlgorithm{
         // SCell to offline LAr cell mapping tool
         ToolHandle<ICaloSuperCellIDTool>   m_scellIdTool{this, "CaloSuperCellIDTool", "", "Offline / SuperCell ID mapping tool"};
         // and for finding the Cell
-        const CaloCell_ID* m_caloCellIdHelper;
+        const CaloCell_ID* m_caloCellIdHelper{};
 
         // read the offline energy decoration from the xAODTriggerTowers for the Tile
         SG::ReadDecorHandleKey<xAOD::TriggerTowerContainer> m_readTileOfflineDecorKey  { this, "TileOfflineETKey", m_triggerTowerKey, "", "decoration of offline energy from Tile Towers" };
