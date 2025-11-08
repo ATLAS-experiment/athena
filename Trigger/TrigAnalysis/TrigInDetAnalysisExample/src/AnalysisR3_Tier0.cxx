@@ -119,14 +119,13 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_hpTeff    = TIDA::Histogram<float>( monTool(),  "Eff_pT" );
   m_hetaeff   = TIDA::Histogram<float>( monTool(),  "Eff_Eta" );
   m_hphieff   = TIDA::Histogram<float>( monTool(),  "Eff_Phi" );
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
-  } else { 
-    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
-  } 
+  /// different binning for the histograms for the LRT instances now defined
+  /// in the python file 
+  m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
   m_hz0eff    = TIDA::Histogram<float>( monTool(),  "Eff_z0" );
   m_hnVtxeff  = TIDA::Histogram<float>( monTool(),  "Eff_nVtx" );
-  
+  m_hntraxeff = TIDA::Histogram<float>( monTool(),  "Eff_ntrax" );
+
   
   m_hlbeff = TIDA::Histogram<float>( monTool(),  "Eff_lb" );
 
@@ -339,6 +338,8 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
 
     if (tevt) m_hlbeff->Fill( tevt->lumi_block(), eff_weight );
 
+    m_hntraxeff->Fill( referenceTracks.size(), eff_weight );
+    
     m_htrkpT->Fill( std::fabs(referencePT)*0.001 );
     m_htrketa->Fill( referenceEta );
     m_htrkphi->Fill( referencePhi );
