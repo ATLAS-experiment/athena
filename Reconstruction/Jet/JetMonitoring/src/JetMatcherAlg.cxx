@@ -180,8 +180,8 @@ StatusCode JetMatcherAlg::GetTLV(const xAOD::gFexJetRoI* jet, TLorentzVector& tl
 template <typename T>
 StatusCode JetMatcherAlg::jetMatching(SG::ReadHandle<DataVector<T>> jets1,
 				SG::ReadHandle<xAOD::JetContainer> jets2,
-				SG::WriteDecorHandleKey<DataVector<T>> matchedHandleKey,
-				std::vector<std::reference_wrapper<SG::WriteDecorHandleKey<DataVector<T>>>> varHandleKeys,
+				const SG::WriteDecorHandleKey<DataVector<T>>& matchedHandleKey,
+				const std::vector<std::reference_wrapper<SG::WriteDecorHandleKey<DataVector<T>>>>& varHandleKeys,
 				const EventContext& ctx) const{
 
   SG::WriteDecorHandle<DataVector<T>, double> ptDiffHandle(varHandleKeys[0].get(), ctx);
