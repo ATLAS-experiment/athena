@@ -21,7 +21,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
 
   isLRT = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
   
-  kwargs.setdefault("pTmin", 0.9 * GaudiUnits.GeV)
+  kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
@@ -44,6 +44,7 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("rMax", 320. * ActsUnits.mm)
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
+    kwargs.setdefault("impactMax", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed / GaudiUnits.mm * ActsUnits.mm)
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("rRangeMiddleSP", [
         [0,0],
@@ -69,9 +70,7 @@ def ActsFastPixelSeedingToolCfg(flags,
                                 name: str = "ActsFastPixelSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 0.9 * ActsUnits.GeV)
     kwargs.setdefault("sigmaScattering", 2.)
-    kwargs.setdefault("maxPtScattering", float("inf"))
     kwargs.setdefault("maxSeedsPerSpM", 3)
     kwargs.setdefault("collisionRegionMin", -150 * ActsUnits.mm)
     kwargs.setdefault("collisionRegionMax", 150 * ActsUnits.mm)
@@ -120,10 +119,7 @@ def ActsFastPixelSeedingToolCfg(flags,
     ])
     
     kwargs.setdefault("zBinEdges", [-3000., -2000, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2000, 3000.])
-    kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
-    kwargs.setdefault("rMax", 320 * ActsUnits.mm)
-    kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
 
     kwargs.setdefault("deltaRMaxTopSP", 220 * ActsUnits.mm)
     kwargs.setdefault("deltaRMaxBottomSP", 135 * ActsUnits.mm)
