@@ -15,28 +15,28 @@ atlas_add_test( OverlayTest_MC_Run2
                 SCRIPT test/OverlayTest.py -r RUN2
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 1200
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( OverlayTest_MC_Run3
                 SCRIPT test/OverlayTest.py -r RUN3
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 900
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( OverlayTest_MC_Run4
                 SCRIPT test/OverlayTest.py -r RUN4
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 900
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( OverlayTest_data
                 SCRIPT test/OverlayTest.py -d
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 1200
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( OverlayMetadataConfig_test
                 SCRIPT test/OverlayMetadataConfig_test.py
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
