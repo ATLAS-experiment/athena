@@ -78,13 +78,13 @@ private:
       "Decoration for Tau Decay Mode"};
 
   // Tool handler for onnx inference session
-    ToolHandle< AthInfer::IAthInferenceTool >  m_onnxTool_1p1n{
+    ToolHandle< AthInfer::IAthInferenceTool > m_onnxTool_1p1n{
         this, "ORTInferenceTool_1p1n", "AthOnnx::OnnxRuntimeInferenceTool"
     };
-    ToolHandle< AthInfer::IAthInferenceTool >  m_onnxTool_1pXn{
+    ToolHandle< AthInfer::IAthInferenceTool > m_onnxTool_1pXn{
         this, "ORTInferenceTool_1pXn", "AthOnnx::OnnxRuntimeInferenceTool"
     };
-    ToolHandle< AthInfer::IAthInferenceTool >  m_onnxTool_3pXn{
+    ToolHandle< AthInfer::IAthInferenceTool > m_onnxTool_3pXn{
         this, "ORTInferenceTool_3pXn", "AthOnnx::OnnxRuntimeInferenceTool"
     };
 

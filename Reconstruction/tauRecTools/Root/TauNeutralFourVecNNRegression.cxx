@@ -49,8 +49,8 @@ StatusCode TauNeutralFourVecNNRegression::initialize()
   ATH_MSG_INFO("Initializing TauNeutralFourVecNNRegression");
   ATH_CHECK ( m_decayModeName.initialize() );
   ATH_CHECK( m_onnxTool_1p1n.retrieve() );
-  ATH_CHECK( m_onnxTool_1pXn.retrieve() );
-  ATH_CHECK( m_onnxTool_3pXn.retrieve() );
+  // ATH_CHECK( m_onnxTool_1pXn.retrieve() );
+  // ATH_CHECK( m_onnxTool_3pXn.retrieve() );
   // find input JSON files
   // std::string weightFile_1p1n = find_file(m_weightFile_1p1n);
   // std::string weightFile_1pXn = find_file(m_weightFile_1pXn);
@@ -138,6 +138,7 @@ StatusCode TauNeutralFourVecNNRegression::initialize()
   //   return StatusCode::FAILURE;
   // }
 
+  ATH_MSG_INFO("Successfully initialized TauNeutralFourVecNNRegression");
   return StatusCode::SUCCESS;
 }
 
@@ -146,6 +147,8 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   // Read the previously classified decay mode of the tau
   // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
   // they are encoded as 0, 1, 2, 3, 4
+  
+  ATH_MSG_INFO("Executing TauNeutralFourVecNNRegression");
   
   SG::ReadDecorHandle<xAOD::TauJetContainer, int> decayModeHandle( m_decayModeName );
   if (!decayModeHandle.isPresent())
@@ -159,6 +162,7 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
       return StatusCode::FAILURE;  
   }
   int decayMode = decayModeHandle(xTau);
+  ATH_MSG_INFO("Loaded Decay Mode to be " << decayMode);
 
   // // inputs
   // // ------
@@ -215,7 +219,7 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   //   }
   // }
   // /*
-  // * This should also work, but I think it's more convoluted. To fill the outputs map to then read it to the pi0fourVec std:array
+  // * This should also work, but I think it's more convoluted. To fill the outputs map to then read it to the neutralFourVec std:array
   // * Instead I'll just initialise the array with 0s in all entries and only fill it with the content of the output map, if the decay mode is not a 0n one.
   // */
   // // else // 1p0n or 3p0n
@@ -227,60 +231,149 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   // // }
 
   // prepare inputs
-  std::vector<float> inputDataVector;
+  std::vector<float> inputDataVector_chargedPFOs;
+  std::vector<float> inputDataVector_neutralPFOs;
+  std::vector<float> inputDataVector_conversionTracks;
+  std::vector<float> inputDataVector_photonShots;
 
-  inputDataVector.reserve(m_input_tensor_values_notFlat.size());
-  for (const std::vector<std::vector<float> >& imageData : m_input_tensor_values_notFlat){
-    std::vector<float> flatten = AthOnnxUtils::flattenNestedVectors(imageData);
-    inputDataVector.insert(inputDataVector.end(), flatten.begin(), flatten.end());
-  }
-  std::vector<int64_t> inputShape_1 = {1, 3, 4}; // Charged PFOs
-  std::vector<int64_t> inputShape_2 = {1, 10, 12}; // Neutral PFOs
-  std::vector<int64_t> inputShape_3 = {1, 6, 4}; // Conversion Tracks
-  std::vector<int64_t> inputShape_4 = {1, 4, 4}; // Photon Shots
+  // inputDataVector.reserve(m_input_tensor_values_notFlat.size());
+  // for (const std::vector<std::vector<float> >& imageData : m_input_tensor_values_notFlat){
+  //   std::vector<float> flatten = AthOnnxUtils::flattenNestedVectors(imageData);
+  //   inputDataVector.insert(inputDataVector.end(), flatten.begin(), flatten.end());
+  // }
+  int n_chargedPFOs = 3; // overwrite this with the number of those objects in the given tau
+  int n_neutralPFOs = 10;
+  int n_conversionTracks = 6;
+  int n_photonShots = 4;
+  std::vector<int64_t> inputShape_chargedPFOs = {1, n_chargedPFOs, 4};
+  std::vector<int64_t> inputShape_neutralPFOs = {1, n_neutralPFOs, 12};
+  std::vector<int64_t> inputShape_conversionTracks = {1, n_conversionTracks, 4};
+  std::vector<int64_t> inputShape_photonShots = {1, n_photonShots, 4};
+
+  ATH_MSG_INFO("Input Vector Shapes Defined. Creating Input Data Map.");
 
   AthInfer::InputDataMap inputData;
-  inputData["input_1"] = std::make_pair( // Charged PFOs
-    inputShape_1, std::move(inputDataVector)
+  inputData["input_1"] = std::make_pair( 
+    inputShape_chargedPFOs, std::move(inputDataVector_chargedPFOs)
   );
-  inputData["input_2"] = std::make_pair( // Neutral PFOs
-    inputShape_2, std::move(inputDataVector)
+  inputData["input_2"] = std::make_pair(
+    inputShape_neutralPFOs, std::move(inputDataVector_neutralPFOs)
   );
-  inputData["input_3"] = std::make_pair( // Conversion Tracks
-    inputShape_3, std::move(inputDataVector)
+  inputData["input_3"] = std::make_pair(
+    inputShape_conversionTracks, std::move(inputDataVector_conversionTracks)
   );
-  inputData["input_4"] = std::make_pair( // Photon Shots
-    inputShape_4, std::move(inputDataVector)
+  inputData["input_4"] = std::make_pair(
+    inputShape_photonShots, std::move(inputDataVector_photonShots)
   );
+
+  // ATH_MSG_INFO("Filling Input Data Map with arabitray values for testing.");
+  // for (const auto& [key, valuePair] : inputData) {
+  //   if (std::holds_alternative<std::vector<float>>(valuePair.second)) {
+  //     for (const auto& val : std::get<std::vector<float>>(valuePair.second))
+  //       val = 0.5;
+  //   } else if (std::holds_alternative<std::vector<int64_t>>(valuePair.second)) {
+  //     for (const auto& val : std::get<std::vector<int64_t>>(valuePair.second))
+  //       val = 1;
+  //   } 
+  // }
+
+  ATH_MSG_INFO("Input Data Map Created. Creating Output Data Map.");
 
   AthInfer::OutputDataMap outputData;
   outputData["dense_10"] = std::make_pair(
-    std::vector<int64_t>{m_batchSize, 1}, std::vector<float>{} // pT
+    std::vector<int64_t>{1, 1}, std::vector<float>{} // pT
   );
   outputData["dense_11"] = std::make_pair(
-    std::vector<int64_t>{m_batchSize, 1}, std::vector<float>{} // eta
+    std::vector<int64_t>{1, 1}, std::vector<float>{} // eta
   );
   outputData["dense_12"] = std::make_pair(
-    std::vector<int64_t>{m_batchSize, 1}, std::vector<float>{} // phi
+    std::vector<int64_t>{1, 1}, std::vector<float>{} // phi
   );
+
+  ATH_MSG_INFO("Output Data Map Created. Running Inference.");
+
+  ATH_MSG_INFO("Input Data Map:");
+  for (const auto& [key, valuePair] : inputData) {
+    ATH_MSG_INFO("Key: " << key);
+
+    std::ostringstream oss1;
+    oss1 << "[ ";
+    for (const auto& val : valuePair.first) oss1 << val << " ";
+    oss1 << "]";
+    ATH_MSG_INFO("  Shape: " << oss1.str());
+
+    std::ostringstream oss2;
+    oss2 << "[ ";
+    // Handle variant type for data
+    if (std::holds_alternative<std::vector<float>>(valuePair.second)) {
+      for (const auto& val : std::get<std::vector<float>>(valuePair.second))
+        oss2 << val << " ";
+    } else if (std::holds_alternative<std::vector<int64_t>>(valuePair.second)) {
+      for (const auto& val : std::get<std::vector<int64_t>>(valuePair.second))
+        oss2 << val << " ";
+    } else {
+      oss2 << "(unknown type)";
+    }
+    oss2 << "]";
+    ATH_MSG_INFO("  Data:  " << oss2.str());
+  }
+  ATH_MSG_INFO("Output Data Map:");
+  for (const auto& [key, valuePair] : outputData) {
+    ATH_MSG_INFO("Key: " << key);
+
+    std::ostringstream oss1;
+    oss1 << "[ ";
+    for (const auto& val : valuePair.first) oss1 << val << " ";
+    oss1 << "]";
+    ATH_MSG_INFO("  Shape: " << oss1.str());
+
+    std::ostringstream oss2;
+    oss2 << "[ ";
+    // Handle variant type for data
+    if (std::holds_alternative<std::vector<float>>(valuePair.second)) {
+      for (const auto& val : std::get<std::vector<float>>(valuePair.second))
+        oss2 << val << " ";
+    } else if (std::holds_alternative<std::vector<int64_t>>(valuePair.second)) {
+      for (const auto& val : std::get<std::vector<int64_t>>(valuePair.second))
+        oss2 << val << " ";
+    } else {
+      oss2 << "(unknown type)";
+    }
+    oss2 << "]";
+    ATH_MSG_INFO("  Data:  " << oss2.str());
+  }
 
   if (decayMode == 1)
   {
     ATH_CHECK(m_onnxTool_1p1n->inference(inputData, outputData));
+    ATH_MSG_INFO("ONNX Inference Successfully Run for Decay Mode 1 (1p1n).");
   }
   else if (decayMode == 2)
   {
-    ATH_CHECK(m_onnxTool_1pXn->inference(inputData, outputData));
+    ATH_CHECK(m_onnxTool_1p1n->inference(inputData, outputData));
+    // only using 1p1n for initial tests
+    // ATH_CHECK(m_onnxTool_1pXn->inference(inputData, outputData));
+    ATH_MSG_INFO("ONNX Inference Successfully Run for Decay Mode 2 (1pXn). Used 1p1n Network for testing purposes.");
   }
   else if (decayMode == 4)
   {
-    ATH_CHECK(m_onnxTool_3pXn->inference(inputData, outputData));
+    ATH_CHECK(m_onnxTool_1p1n->inference(inputData, outputData));
+    // only using 1p1n for initial tests
+    // ATH_CHECK(m_onnxTool_3pXn->inference(inputData, outputData));
+    ATH_MSG_INFO("ONNX Inference Successfully Run for Decay Mode 4 (3pXn). Used 1p1n Network for testing purposes.");
+  }
+  else
+  {
+    // TODO
+    // fill outputData with zeros.
+    // alternatively initialize it that way?
+    // or initialize the neutralFourVec as {0,0,0} and only overwrite that if decayMode is 1, 2 or 4?
+    ATH_MSG_INFO("Nothing done, because decay mode isn't 1, 2, or 4 and filling outputData with zeros isn't implemented yet.");
   }
 
-  // TODO
-  // Fill with 0 if different decay mode or initialize with 0's.
-  std::array<float, 3> pi0fourVec = {std::get<std::vector<float>>(outputData["dense_10"].second), std::get<std::vector<float>>(outputData["dense_11"].second), std::get<std::vector<float>>(outputData["dense_12"].second)};
+  std::array<float, 3> neutralFourVec = {std::get<std::vector<float>>(outputData["dense_10"].second).front(), std::get<std::vector<float>>(outputData["dense_11"].second).front(), std::get<std::vector<float>>(outputData["dense_12"].second).front()};
 
+  ATH_MSG_INFO("Read Inference Output into neutralFourVec array: " << neutralFourVec);
   // Results
   // -------
   /*
@@ -291,24 +384,25 @@ StatusCode TauNeutralFourVecNNRegression::execute(xAOD::TauJet &xTau) const
   */
   // Outputs are E, eta, and phi
   // here they are encoded as 0, 1, 2
-  // std::array<float, 3> pi0fourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
+  // std::array<float, 3> neutralFourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
   // if (decayMode != 0 && decayMode != 3) // not 1p0n or 3p0n
   // {
   //   // the prefix to match to output name in the json weight file
   //   std::string prefix = "c_";
-  //   for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
+  //   for (std::size_t i = 0; i < neutralFourVec.size(); ++i)
   //   {
-  //     pi0fourVec[i] = outputs.at(prefix + m_fourVecDimNames[i]);
+  //     neutralFourVec[i] = outputs.at(prefix + m_fourVecDimNames[i]);
   //   }
   // }
 
-  for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
+  for (std::size_t i = 0; i < neutralFourVec.size(); ++i)
   {
     const std::string fourVecDimName = m_outputPrefix + m_fourVecDimNames[i];
     const SG::AuxElement::Accessor<float> accPi0(fourVecDimName);
-    accPi0(xTau) = pi0fourVec[i];
+    accPi0(xTau) = neutralFourVec[i];
   }
 
+  ATH_MSG_INFO("Successfully Exectued TauNeutralFourVecNNRegression.");
   return StatusCode::SUCCESS;
 }
 

@@ -892,22 +892,16 @@ def TauNeutralFourVecNNRegressionCfg(flags, **kwargs):
     kwargs.setdefault("ORTInferenceTool_3pXn", result.popToolsAndMerge(
         OnnxRuntimeInferenceToolCfg(flags, model_fname_3pXn, execution_provider, name="TauNeutralFourVecNNRegression_onnx_3pXn")
     ))
-
-    result.addEventAlgo(CompFactory.AthOnnx.EvaluateModelWithAthInfer(_name, **kwargs))
     
-    return result
-    
-    # result = ComponentAccumulator()
-    # _name = flags.Tau.ActiveConfig.prefix + 'TauNeutralFourVecNNRegression'
-
-    # TauNeutralFourVecNNRegression = CompFactory.getComp("TauNeutralFourVecNNRegression")
-    # myTauNeutralFourVecNNRegression = TauNeutralFourVecNNRegression(name=_name,
+    TauNeutralFourVecNNRegression = CompFactory.getComp("TauNeutralFourVecNNRegression")
+    myTauNeutralFourVecNNRegression = TauNeutralFourVecNNRegression(name=_name, **kwargs)#,
     #                               WeightFile_1p1n=flags.Tau.NeutralFourVecNNRegressionConfig1p1n,
     #                               WeightFile_1pXn=flags.Tau.NeutralFourVecNNRegressionConfig1pXn,
     #                               WeightFile_3pXn=flags.Tau.NeutralFourVecNNRegressionConfig3pXn)
-
-    # result.setPrivateTools(myTauNeutralFourVecNNRegression)
-    # return result
+    
+    result.setPrivateTools(myTauNeutralFourVecNNRegression)
+    
+    return result
 
 def TauAODSelectorCfg(flags):
     result = ComponentAccumulator()
