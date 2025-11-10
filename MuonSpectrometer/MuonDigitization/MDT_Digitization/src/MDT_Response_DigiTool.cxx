@@ -20,6 +20,7 @@ MDT_Response_DigiTool::MDT_Response_DigiTool(const std::string& type, const std:
     declareProperty("Threshold", m_threshold = 20.);
     declareProperty("AttenuationLength", m_attenuationLength = 16000);
     declareProperty("DoQballGamma", m_DoQballGamma = false);
+    declareProperty("DoUpdatedMdtDigi", m_DoUpdatedMdtDigi = false);
 }
 
 MdtDigiToolOutput MDT_Response_DigiTool::digitize(const MdtDigiToolInput& input, CLHEP::HepRandomEngine* rndmEngine) {
@@ -51,6 +52,9 @@ MdtDigiToolOutput MDT_Response_DigiTool::digitize(const MdtDigiToolInput& input,
 }
 
 StatusCode MDT_Response_DigiTool::initialize() {
+    // overwrite default-constructed member to propagate flag once its value is known
+    m_tube = MDT_Response{m_DoUpdatedMdtDigi}; 
+
     const MuonGM::MuonDetectorManager* muDetMgr = nullptr;
     if (detStore()->contains<MuonDetectorManager>("Muon")) {
         ATH_CHECK(detStore()->retrieve(muDetMgr));
@@ -75,8 +79,19 @@ bool MDT_Response_DigiTool::initializeTube(const MuonGM::MuonDetectorManager* de
 
     ATH_MSG_DEBUG("INITIALIZED Inner tube radius to " << innerR);
     m_tube.SetTubeRadius(innerR);
-    m_tube.SetClusterDensity(m_clusterDensity);
-    m_tube.SetAttLength(m_attenuationLength);
+    if (m_DoUpdatedMdtDigi) {
+        m_tube.SetClusterDensity(10.);
+        m_tube.SetAttLength(30000.);
+        m_tube.SetIntegrationWindow(18.5);
+        m_tube.SetAdcOffset(35.); // constants determined Z -> mumu data in 2025
+        m_tube.SetAdcFactor(150.); // constants determined Z -> mumu data in 2025
+        m_tube.SetDoUpdatedMdtDigi(true);
+    }
+    else {
+        m_tube.SetClusterDensity(m_clusterDensity);
+        m_tube.SetAttLength(m_attenuationLength);
+    }
+    
     m_tube.SetTriggerElectron(m_threshold);
     return true;
 }

@@ -27,6 +27,7 @@ void  Amplifier::InitAmplifierParameters()
   m_adcFactor = 90.;
   m_adcFraction = 10.;
   m_binsize = 1.;
+  m_integrationWindowNs = 20.;
   //std::cout << "Amplifier Threshold " << m_triggerElectron << std::endl;
 } 
 
@@ -98,7 +99,7 @@ double Amplifier::ResponseFunction(double time)
 void Amplifier::InitResponse(unsigned int bins, double binsize)
 {
   m_binsize = binsize;  
-  m_integrationWindow =  (int)(20./binsize)-1 ;
+  m_integrationWindow =  (int)(m_integrationWindowNs/binsize)-1 ;
 
   m_response.resize(bins);
   m_signal.resize(bins);

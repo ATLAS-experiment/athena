@@ -50,6 +50,7 @@ def MDT_Response_DigiToolCfg(flags, name="MDT_Response_DigiTool",**kwargs):
     acc = ComponentAccumulator()
     QballConfig = (flags.Input.SpecialConfiguration.get("MDT_QballConfig", "False") == "True")
     kwargs.setdefault("DoQballGamma", QballConfig)
+    kwargs.setdefault("DoUpdatedMdtDigi", QballConfig)
     MDT_Response_DigiTool = CompFactory.MDT_Response_DigiTool
     acc.setPrivateTools(MDT_Response_DigiTool(name, **kwargs))
     return acc
@@ -70,6 +71,7 @@ def MDT_DigitizationToolCommonCfg(flags, name="MdtDigitizationTool", **kwargs):
     kwargs.setdefault("DigitizationTool", digiTool)
     QballConfig = (flags.Input.SpecialConfiguration.get("MDT_QballConfig", "False") == "True")
     kwargs.setdefault("DoQballCharge", QballConfig)
+    kwargs.setdefault("DoUpdatedMdtDigi", QballConfig)
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", MDT_FirstXing())
         kwargs.setdefault("LastXing", MDT_LastXing())
