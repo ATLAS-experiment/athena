@@ -1060,7 +1060,6 @@ def _convert_value(value, aux = None):
                 return _extract_fields_iovmdc(value)
 
             elif cl.__cpp_name__ == 'IOVPayloadContainer_p1':
-                global _gbl_mode
                 if _gbl_mode == 'iov':
                     return _extract_iov_detailed(value)
                 else:

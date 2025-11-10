@@ -29,7 +29,7 @@ public:
     const std::string& name() const;
     size_t index() const;
     size_t get_label_number () const;
-    IdDictLabel* find_label (const std::string& name) const;
+    const IdDictLabel* find_label (const std::string& name) const;
     const IdDictLabel& label (size_t index) const;
     const std::string& get_label (size_t index) const;
     ExpandedIdentifier::element_type get_label_value (const std::string& name) const; 
@@ -40,7 +40,7 @@ public:
     //** @name Methods used to initialize the object.
     // @{
 
-    void add_label (IdDictLabel* label);
+    void add_label (const IdDictLabel* label);
     void set_index (size_t index);
     bool verify () const;  
     void clear ();
@@ -50,9 +50,9 @@ public:
 
 
 private:
-    std::string                   m_name;  
-    std::vector <IdDictLabel*>    m_labels; 
-    size_t                        m_index{}; 
+    std::string                      m_name;
+    std::vector <const IdDictLabel*> m_labels;
+    size_t                           m_index{};
 }; 
 
 

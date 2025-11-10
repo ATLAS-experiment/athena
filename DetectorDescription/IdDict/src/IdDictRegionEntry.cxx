@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictRegionEntry.h"
@@ -8,7 +8,7 @@ IdDictRegionEntry::IdDictRegionEntry () = default;
 
 IdDictRegionEntry::~IdDictRegionEntry () = default;
 
-void IdDictRegionEntry::resolve_references(const IdDictMgr& /*idd*/,
+void IdDictRegionEntry::resolve_references(IdDictMgr& /*idd*/,
                                            IdDictDictionary& /*dictionary*/,
                                            IdDictRegion& /*region*/) {
 }

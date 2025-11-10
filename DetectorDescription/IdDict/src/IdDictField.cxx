@@ -20,9 +20,9 @@ bool IdDictField::verify() const {
   return(true);
 }
 
-IdDictLabel* IdDictField::find_label(const std::string& name) const {
+const IdDictLabel* IdDictField::find_label(const std::string& name) const {
   for (size_t i = 0; i < m_labels.size(); ++i) {
-    IdDictLabel* label = m_labels[i];
+    const IdDictLabel* label = m_labels[i];
     if ((label != 0) && (label->name() == name)) return(label);
   }
 
@@ -30,7 +30,7 @@ IdDictLabel* IdDictField::find_label(const std::string& name) const {
 }
 
 void
-IdDictField::add_label(IdDictLabel* label) {
+IdDictField::add_label(const IdDictLabel* label) {
   m_labels.push_back(label);
 }
 
@@ -79,7 +79,7 @@ IdDictField::get_label_value(const std::string& name) const {
 
 void IdDictField::clear() {
   for (size_t i = 0; i < m_labels.size(); ++i) {
-    IdDictLabel* label = m_labels[i];
+    const IdDictLabel* label = m_labels[i];
     delete label;
   }
   m_labels.clear();

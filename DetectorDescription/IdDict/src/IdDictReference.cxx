@@ -26,7 +26,7 @@ IdDictReference::IdDictReference (IdDictSubRegion* subregion)
 IdDictReference::~IdDictReference () {
 }
 
-void IdDictReference::resolve_references(const IdDictMgr& /*idd*/,
+void IdDictReference::resolve_references(IdDictMgr& /*idd*/,
                                          IdDictDictionary& dictionary,
                                          IdDictRegion& /*region*/) {
   if (!m_resolved_references) {

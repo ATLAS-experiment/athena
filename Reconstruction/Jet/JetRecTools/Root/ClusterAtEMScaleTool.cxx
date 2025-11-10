@@ -24,6 +24,7 @@ StatusCode ClusterAtEMScaleTool::initialize() {
 StatusCode ClusterAtEMScaleTool::setClustersToEMScale(xAOD::CaloClusterContainer& cont) const {
   for(xAOD::CaloCluster* cl : cont ) {
 		cl->setCalE( cl->rawE() );
+    cl->setCalM( cl->rawM() );
 		cl->setCalPhi( cl->rawPhi() );
 		cl->setCalEta( cl->rawEta() );
   }

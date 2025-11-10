@@ -191,7 +191,15 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
         float onnx_s = CaloClusterMLCalib::sigma_stoch(current_mus, current_sigma2s, current_alphas);
         float s = std::abs(std::log(10) * r) * onnx_s;
 
-        clusterE_ML_vec.push_back((clusters[i]->e(xAOD::CaloCluster::UNCALIBRATED) / static_cast<double>(r)));
+        if (!std::isfinite(r) || std::abs(r) < 1e-6) {
+            ATH_MSG_WARNING("ML-correction factor to cluster energy (used as denominator) is " << r << "; The ML-correction factor is reset to 1. Uncertainty is set to 0.");
+            r = 1.0;
+            s = 0.0;
+        }
+        
+        const double cluster_energy = clusters[i]->e(xAOD::CaloCluster::UNCALIBRATED) / static_cast<double>(r);
+        
+        clusterE_ML_vec.push_back(cluster_energy);
         clusterE_ML_Unc_vec.push_back(static_cast<double>(s));
     }
 

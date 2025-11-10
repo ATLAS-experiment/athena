@@ -124,7 +124,7 @@ void IdDictRegion::set_is_empty()
 
 
 void
-IdDictRegion::resolve_references(const IdDictMgr& idd, IdDictDictionary& dictionary) {
+IdDictRegion::resolve_references(IdDictMgr& idd, IdDictDictionary& dictionary) {
   std::vector<IdDictRegionEntry*>::iterator it;
   for (it = m_entries.begin(); it != m_entries.end(); ++it) {
     IdDictRegionEntry* entry = *it;
@@ -150,7 +150,7 @@ IdDictRegion::generate_implementation(const IdDictMgr& idd,
 }
 
 void
-IdDictRegion::find_neighbours(const IdDictDictionary& dictionary) {
+IdDictRegion::find_neighbours(IdDictDictionary& dictionary) {
   // Find the neighbours
   IdDictRegion* region = 0;
 
