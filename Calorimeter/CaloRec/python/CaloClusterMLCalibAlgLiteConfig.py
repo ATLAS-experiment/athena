@@ -5,29 +5,23 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from SGComps.AddressRemappingConfig import InputRenameCfg
 from CaloClusterCorrection.CaloClusterMLCalibToolLiteCfg import CaloClusterMLCalibToolLiteCfg
 
-
 def CaloClusterMLCalibAlgLiteCfg(flags, name="CaloClusterMLCalibAlgLite", **kwargs):
+    print("CaloClusterMLCalibAlgLiteCfg: Configuring CaloClusterMLCalibAlgLite...")
     ca = ComponentAccumulator()
 
-    legacy = "CaloCalTopoClusters"         # the name you want on disk at the end
-    tempIn = "CaloCalTopoClusters_in"      # a private, in-memory name for reading
-
-    # --- Read old key under a temp name
-    ca.merge(InputRenameCfg("xAOD::CaloClusterContainer",    legacy,        tempIn))
-    ca.merge(InputRenameCfg("xAOD::CaloClusterAuxContainer", legacy+"Aux.", tempIn+"Aux."))
+    clusterContainerName = "CaloCalTopoClusters"         # the name you want on disk at the end
 
     alg = CompFactory.CaloClusterMLCalibAlgLite(name, **kwargs)
     alg.CaloClusterMLCalibToolLite = ca.popToolsAndMerge(CaloClusterMLCalibToolLiteCfg(flags))
 
     # Read the temp key, write the legacy key
-    alg.InputClusterContainer  = tempIn
-    alg.OutputClusterContainer = legacy
+    alg.ClusterContainer = clusterContainerName
 
     # Decor goes on the OUTPUT (legacy) collection
-    alg.ClusterMLCalibratedEnergyUncKeyName = f"{legacy}.clusterE_ML_unc"
+    alg.ClusterMLCalibratedEnergyKeyName = f"{clusterContainerName}.clusterE_ML"
+    alg.ClusterMLCalibratedEnergyUncKeyName = f"{clusterContainerName}.clusterE_ML_unc"
 
     ca.addEventAlgo(alg)
     return ca

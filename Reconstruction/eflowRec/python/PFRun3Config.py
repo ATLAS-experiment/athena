@@ -142,6 +142,22 @@ def PFTauFELinkCfg(inputFlags,**kwargs):
   result.addEventAlgo(getTauFlowElementAssocAlgorithm(inputFlags))
   return result
 
+# Builder for ML-based neutral flow element creator algorithm
+def PFOClusterMLCorrectionAlgorithmBuilder(inputFlags,spec):
+    result=ComponentAccumulator()
+    from eflowRec.PFCfg import getPFOClusterMLCorrectionAlgorithmCfg, getNeutralPFOClusterMLCorrectionToolCfg
+    
+    alg = getPFOClusterMLCorrectionAlgorithmCfg(inputFlags, inputNameBase = "Global", outputNameBase = "GlobalClusterMLCorrected")
+    correctionTool_cfg = getNeutralPFOClusterMLCorrectionToolCfg(
+        inputFlags,
+        toolName = "NeutralPFOClusterMLCorrectionTool",
+        clusterMLCorrectedEnergyDecorationKey = "clusterE_ML"
+    )
+    alg.PFOContainerCorrectionTool = result.popToolsAndMerge(correctionTool_cfg)
+
+    result.addEventAlgo(alg)
+    return result
+
 # Run with python -m eflowRec.PFRun3Config
 def PFRun3ConfigTest(flags=None):
 

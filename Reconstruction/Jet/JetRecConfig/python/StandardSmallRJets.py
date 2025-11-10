@@ -87,6 +87,15 @@ AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                lock = True
 )
 
+
+AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
+                               infix = "ML",
+                               ghostdefs = standardghosts+flavourghosts,
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               lock = True
+)
+
+
 AntiKt4EMPFlow_noElectrons = JetDefinition("AntiKt",0.4,cst.GPFlow_noElectrons,
                                     ghostdefs = standardghosts+flavourghosts,
                                     modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
