@@ -88,8 +88,6 @@ def standardReco(input):
         
     return f
 
-
-
 ########################################################################
 ## List of standard input sources for jets.
 
@@ -142,6 +140,18 @@ def _largeRTracksExist(flags):
             return True, warning
     return False, warning
 
+def getCaloClusterEnergyMLCalibAlgBuilder():
+    def f(flags,spec):
+        from CaloRec.CaloClusterMLCalibAlgLiteConfig import CaloClusterMLCalibAlgLiteCfg
+        return CaloClusterMLCalibAlgLiteCfg(flags._cflags)
+    return f
+def getPFOClusterMLCorrectionAlgorithmBuilder():
+    def f(flags,spec):
+        from eflowRec.PFRun3Config import PFOClusterMLCorrectionAlgorithmBuilder
+        return PFOClusterMLCorrectionAlgorithmBuilder(flags._cflags, spec)
+    return f
+
+    
 
 _stdInputList = [
     # Format is :
@@ -150,7 +160,10 @@ _stdInputList = [
     #  it will be called as : algoBuilder(jetdef, spec) where jetdef is the parent JetDefinition 
     
     # *****************************
-    JetInputExternal("CaloCalTopoClusters", xAODType.CaloCluster, algoBuilder= standardReco("CaloClusters") ),
+    # ML calibrated clusters
+    JetInputExternal("CaloCalTopoClusters", xAODType.CaloCluster, algoBuilder= standardReco("CaloClusters")),
+
+    JetInputExternal("CaloCalTopoClustersML", xAODType.CaloCluster, algoBuilder= getCaloClusterEnergyMLCalibAlgBuilder(), prereqs = ["input:CaloCalTopoClusters"]),
 
     JetInputExternal("HLT_TopoCaloClustersFS", xAODType.CaloCluster ),
 
@@ -162,6 +175,10 @@ _stdInputList = [
     JetInputExternal("GlobalParticleFlowObjects", xAODType.FlowElement,
                      algoBuilder = inputcfg.buildPFlowSel,
                      prereqs = ["input:JetETMissParticleFlowObjects", ],
+                     ),
+
+    JetInputExternal("GlobalClusterMLCorrectedParticleFlowObjects", xAODType.FlowElement, algoBuilder = getPFOClusterMLCorrectionAlgorithmBuilder(),
+                     prereqs = ["input:GlobalParticleFlowObjects", "input:CaloCalTopoClusters", "input:CaloCalTopoClustersML"],
                      ),
 
     JetInputExternal("GlobalParticleFlowObjects_noElectrons", xAODType.FlowElement,
@@ -411,8 +428,6 @@ _stdSeqList = [
     JetInputConstitSeq("LCTopoCSSK",  xAODType.CaloCluster, ["LC","Origin","CS","SK"],
                        "CaloCalTopoClusters", "LCOriginTopoCSSK", jetinputtype="LCTopo",
                        ),
-    
-
 
     
     # *****************************
@@ -420,6 +435,9 @@ _stdSeqList = [
     # For now we don't specify a scale, as only one works well, but
     # this could be incorporated into the naming scheme and config
     JetInputConstitSeq("EMPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'JetETMissParticleFlowObjects', 'CHSParticleFlowObjects'),
+
+    # EM-scale particle flow objects with correction to ML cluster scale, with charged hadron subtraction
+    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
     JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
@@ -558,7 +576,7 @@ _stdModList = [
                        properties=dict(VertexContainerKey=propFromContext("Vertices"),
                                        WeightPFOTool= _getPFOTool,
                                        DoByVertex = lambda jdef, _: jdef.byVertex) ), 
-              
+          
     JetConstitModifier("CHS",    "ChargedHadronSubtractionTool",
                        # get the track properties from the context with wich jet will be configured with propFromContext
                        # See StandardJetContext.py for the default values.

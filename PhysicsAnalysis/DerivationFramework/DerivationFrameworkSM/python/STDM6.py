@@ -82,7 +82,7 @@ def JETM1ExtraContentCfg(flags):
 
     from JetRecConfig.JetRecConfig import JetRecCfg, getModifier
     from JetRecConfig.StandardJetMods import stdJetModifiers
-    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut
 
     #=======================================
     # Schedule additional jet decorations
@@ -101,7 +101,7 @@ def JETM1ExtraContentCfg(flags):
     # SCHEDULE SMALL-R JETS WITH NO PT CUT
     #=======================================
     if flags.Input.isMC:
-        jetList += [AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut]
+        jetList += [AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut]
 
     #=======================================
     # CSSK R = 0.4 UFO jets
@@ -360,7 +360,7 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
 
     jetOutputList = ["AntiKt4PV0TrackJets", "AntiKt4UFOCSSKJets"]
     if flags.Input.isMC:
-        jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets"]
+        jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets","AntiKt4EMPFlowMLJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(STDM6SlimmingHelper, jetOutputList, STDM6SlimmingHelper.SmartCollections)
 
