@@ -33,11 +33,6 @@ RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name)
   declareProperty("UseCalibDecorations", m_forceUseCalibDecorations, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values");
 }
 
-StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key) {
-  readHandleKey = containerName + key + m_auxSuffix;
-  return readHandleKey.initialize();
-}
-
 StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
   writeHandleKey = containerName + key + m_auxSuffix;
   return writeHandleKey.initialize();
@@ -111,31 +106,6 @@ StatusCode RpdSubtractCentroidTool::initialize() {
 
   ATH_CHECK(m_eventInfoKey.initialize());
 
-  // zdc modules read keys
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_xposRelKey, ".xposRel"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_yposRelKey, ".yposRel"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_rowKey, ".row"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_colKey, ".col"));
-
-  if (m_readZDCDecorations) {
-    ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_ZDCModuleCalibEnergyKey, ".CalibEnergy"));
-    ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_ZDCModuleStatusKey, ".Status"));
-  }
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeKey, ".RPDChannelAmplitude"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelAmplitudeCalibKey, ".RPDChannelAmplitudeCalib"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCKey, ".RPDChannelMaxADC"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelMaxADCCalibKey, ".RPDChannelMaxADCCalib"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelPileupFracKey, ".RPDChannelPileupFrac"));
-  ATH_CHECK(initializeKey(m_ZDCModuleContainerName, m_RPDChannelStatusKey, ".RPDChannelStatus"));
-
-  // zdc sums read keys
-  ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDSideStatusKey, ".RPDStatus"));
-  if (m_readZDCDecorations) {
-    ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_ZDCFinalEnergyKey, ".FinalEnergy"));
-    ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_ZDCStatusKey, ".Status"));
-  }
-
-  // zdc sums write keys
   ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_centroidEventValidKey, ".centroidEventValid"));
   ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_centroidStatusKey, ".centroidStatus"));
   ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_RPDChannelSubtrAmpKey, ".RPDChannelSubtrAmp"));
@@ -199,37 +169,39 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
     return SubstepStatus::SkipEvent;
   }
 
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> xposRelHandle(m_xposRelKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> yposRelHandle(m_yposRelKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned short> rowHandle(m_rowKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned short> colHandle(m_colKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelSumAdcHandle(m_RPDChannelAmplitudeKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelSumAdcCalibHandle(m_RPDChannelAmplitudeCalibKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelMaxADCHandle(m_RPDChannelMaxADCKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelMaxADCCalibHandle(m_RPDChannelMaxADCCalibKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelPileupFracHandle(m_RPDChannelPileupFracKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> rpdChannelStatusHandle(m_RPDChannelStatusKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> rpdSideStatusHandle(m_RPDSideStatusKey);
-  std::optional<SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float>> zdcModuleCalibEnergyHandle;
-  std::optional<SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int>> zdcModuleStatusHandle;
-  std::optional<SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float>> zdcFinalEnergyHandle;
-  std::optional<SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int>> zdcStatusHandle;
-  if (m_readZDCDecorations) {
-    zdcModuleCalibEnergyHandle = SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float>(m_ZDCModuleCalibEnergyKey);
-    zdcModuleStatusHandle = SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int>(m_ZDCModuleStatusKey);
-    zdcFinalEnergyHandle = SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float>(m_ZDCFinalEnergyKey);
-    zdcStatusHandle = SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int>(m_ZDCStatusKey);
-  }
+  static SG::ConstAccessor<float> const xposRelAcc("xposRel" + m_auxSuffix);
+  static SG::ConstAccessor<float> const yposRelAcc("yposRel" + m_auxSuffix);
+  static SG::ConstAccessor<unsigned short> const rowAcc("row" + m_auxSuffix);
+  static SG::ConstAccessor<unsigned short> const colAcc("col" + m_auxSuffix);
+  static SG::ConstAccessor<float> const rpdChannelSumAdcAcc("RPDChannelAmplitude" + m_auxSuffix);
+  static SG::ConstAccessor<float> const rpdChannelSumAdcCalibAcc("RPDChannelAmplitudeCalib" + m_auxSuffix);
+  static SG::ConstAccessor<float> const rpdChannelMaxADCAcc("RPDChannelMaxADC" + m_auxSuffix);
+  static SG::ConstAccessor<float> const rpdChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + m_auxSuffix);
+  static SG::ConstAccessor<float> const rpdChannelPileupFracAcc("RPDChannelPileupFrac" + m_auxSuffix);
+  static SG::ConstAccessor<unsigned int> const rpdChannelStatusAcc("RPDChannelStatus" + m_auxSuffix);
+  static SG::ConstAccessor<unsigned int> const rpdSideStatusAcc("RPDStatus" + m_auxSuffix);
+  static auto const zdcModuleCalibEnergyAcc = m_readZDCDecorations
+    ? std::optional<SG::ConstAccessor<float>>("CalibEnergy" + m_auxSuffix)
+    : std::nullopt;
+  static auto const zdcModuleStatusAcc = m_readZDCDecorations
+    ? std::optional<SG::ConstAccessor<unsigned int>>("Status" + m_auxSuffix)
+    : std::nullopt;
+  static auto const zdcFinalEnergyAcc = m_readZDCDecorations
+    ? std::optional<SG::ConstAccessor<float>>("FinalEnergy" + m_auxSuffix)
+    : std::nullopt;
+  static auto const zdcStatusAcc = m_readZDCDecorations
+    ? std::optional<SG::ConstAccessor<unsigned int>>("Status" + m_auxSuffix)
+    : std::nullopt;
 
   ATH_MSG_DEBUG("Processing modules");
 
-  for (auto const zdcModule : moduleContainer) {
+  for (auto const * const zdcModule : moduleContainer) {
     unsigned int const side = RPDUtils::ZDCSideToSideIndex(zdcModule->zdcSide());
     if (zdcModule->zdcType() == RPDUtils::ZDCModuleZDCType && zdcModule->zdcModule() == RPDUtils::ZDCModuleEMModule) {
       // this is a ZDC module and this is an EM module
       if (m_readZDCDecorations) {
-        m_EMCalibEnergy->at(side) = (*zdcModuleCalibEnergyHandle)(*zdcModule);
-        m_EMStatus->at(side) = (*zdcModuleStatusHandle)(*zdcModule);
+        m_EMCalibEnergy->at(side) = (*zdcModuleCalibEnergyAcc)(*zdcModule);
+        m_EMStatus->at(side) = (*zdcModuleStatusAcc)(*zdcModule);
       }
     } else if (zdcModule->zdcType() == RPDUtils::ZDCModuleRPDType) {
       // this is a Run 3 RPD module
@@ -239,41 +211,41 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
         ATH_MSG_ERROR("Invalid RPD channel found on side " << side << ": channel number = " << zdcModule->zdcChannel());
       }
       // channel numbers are fixed in mapping in ZdcConditions, numbered 0-15
-      unsigned int const channel = zdcModule->zdcChannel();
-      auto const& row = rowHandle(*zdcModule);
-      auto const& col = colHandle(*zdcModule);
-      m_RPDChannelData.at(side).at(row).at(col).channel = channel;
-      m_RPDChannelData.at(side).at(row).at(col).xposRel = xposRelHandle(*zdcModule);
-      m_RPDChannelData.at(side).at(row).at(col).yposRel = yposRelHandle(*zdcModule);
-      m_RPDChannelData.at(side).at(row).at(col).row = rowHandle(*zdcModule);
-      m_RPDChannelData.at(side).at(row).at(col).col = colHandle(*zdcModule);
+      auto const channel = zdcModule->zdcChannel();
+      auto const& row = rowAcc(*zdcModule);
+      auto const& col = colAcc(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).channel = static_cast<unsigned int>(channel);
+      m_RPDChannelData.at(side).at(row).at(col).xposRel = xposRelAcc(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).yposRel = yposRelAcc(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).row = rowAcc(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).col = colAcc(*zdcModule);
       if (m_useRPDSumAdc) {
         if (m_useCalibDecorations) {
-          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcCalibHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcCalibAcc(*zdcModule);
         } else {
-          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelSumAdcAcc(*zdcModule);
         }
       } else {
         if (m_useCalibDecorations) {
-          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCCalibHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCCalibAcc(*zdcModule);
         } else {
-          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCHandle(*zdcModule);
+          m_RPDChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCAcc(*zdcModule);
         }
       }
-      m_RPDChannelData.at(side).at(row).at(col).pileupFrac = rpdChannelPileupFracHandle(*zdcModule);
-      m_RPDChannelData.at(side).at(row).at(col).status = rpdChannelStatusHandle(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).pileupFrac = rpdChannelPileupFracAcc(*zdcModule);
+      m_RPDChannelData.at(side).at(row).at(col).status = rpdChannelStatusAcc(*zdcModule);
     }
   }
 
-  for (auto const zdcSum: moduleSumContainer) {
+  for (auto const * const zdcSum: moduleSumContainer) {
     if (zdcSum->zdcSide() == RPDUtils::ZDCSumsGlobalZDCSide) {
       // skip global sum (it's like the side between sides)
       continue;
     }
     unsigned int const side = RPDUtils::ZDCSideToSideIndex(zdcSum->zdcSide());
-    m_RPDSideStatus.at(side) = rpdSideStatusHandle(*zdcSum);
-    if (m_ZDCSideStatus) m_ZDCSideStatus->at(side) = (*zdcStatusHandle)(*zdcSum);
-    if (m_ZDCFinalEnergy) m_ZDCFinalEnergy->at(side) = (*zdcFinalEnergyHandle)(*zdcSum);
+    m_RPDSideStatus.at(side) = rpdSideStatusAcc(*zdcSum);
+    if (m_ZDCSideStatus) m_ZDCSideStatus->at(side) = (*zdcStatusAcc)(*zdcSum);
+    if (m_ZDCFinalEnergy) m_ZDCFinalEnergy->at(side) = (*zdcFinalEnergyAcc)(*zdcSum);
   }
 
   return SubstepStatus::Success;
@@ -281,7 +253,7 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
 
 bool RpdSubtractCentroidTool::checkZdcRpdValidity(unsigned int side) {
   if (m_readZDCDecorations) {
-    if (!m_ZDCSideStatus->at(side)) {
+    if (m_ZDCSideStatus->at(side) == 0) {
       // zdc bad
       m_centroidStatus.at(side).set(ZDCInvalidBit, true);
       m_centroidStatus.at(side).set(ValidBit, false);
@@ -417,10 +389,10 @@ void RpdSubtractCentroidTool::calculateReactionPlaneAngle(unsigned int side) {
   // however, we expect correlated deflection, so we want the difference between the angles
   // to be small when the centroids are in opposite quadrants of the two RPDs
   // therefore, we add pi to side A (chosen arbitrarily)
-  if (side == RPDUtils::sideA) angle += std::numbers::pi;
+  if (side == RPDUtils::sideA) angle += std::numbers::pi_v<float>;
   // also, restrict to [-pi, pi)
   // we choose this rather than (-pi, pi] for ease of binning the edge case +/- pi
-  if (angle >= std::numbers::pi) angle -= 2*std::numbers::pi;
+  if (angle >= std::numbers::pi) angle -= 2*std::numbers::pi_v<float>;
   m_reactionPlaneAngle.at(side) = angle;
 }
 
@@ -444,7 +416,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> reactionPlaneAngleHandle(m_reactionPlaneAngleKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> cosDeltaReactionPlaneAngleHandle(m_cosDeltaReactionPlaneAngleKey);
 
-  for (auto const zdcSum: moduleSumContainer) {
+  for (auto const * const zdcSum: moduleSumContainer) {
     if (zdcSum->zdcSide() == RPDUtils::ZDCSumsGlobalZDCSide) {
       // global sum container
       // event status is bool, but stored as char to save disk space
