@@ -14,6 +14,7 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 // EDM includes for the particles we need
 #include "xAODTruth/TruthParticle.h"
+#include "GeneratorObjects/McEventCollection.h"
 // R/W/D key handles
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
