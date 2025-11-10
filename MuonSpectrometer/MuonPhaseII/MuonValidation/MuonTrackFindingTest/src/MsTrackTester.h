@@ -19,6 +19,7 @@
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
+#include "xAODMuon/MuonContainer.h"
 #include "MuonPRDTest/SegmentVariables.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonTrackFindingTools/MsTrackSeeder.h"

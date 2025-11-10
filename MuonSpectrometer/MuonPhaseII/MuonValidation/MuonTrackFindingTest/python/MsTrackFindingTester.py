@@ -41,8 +41,8 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.PerfMon.doFullMonMT = True
-    flags.Muon.doFastMMDigitization = True
+    flags.PerfMon.doFullMonMT = False
+    flags.Muon.doFastMMDigitization = False
     flags.Acts.TrackingGeometry.UseBlueprint = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
@@ -62,9 +62,9 @@ if __name__=="__main__":
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
     cfg.merge(MSTrackFinderAlgCfg(flags))
     
-    ### Schedule the legacy MS track building to compare the two reconstruction chains
-    ### from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-    ### cfg.merge(LegacyMuonRecoChainCfg(flags))
+    #### Schedule the legacy MS track building to compare the two reconstruction chains
+    from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
+    cfg.merge(LegacyMuonRecoChainCfg(flags))
 
     cfg.merge(MsTrackTesterCfg(flags))
 
