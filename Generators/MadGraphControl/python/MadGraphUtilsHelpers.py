@@ -1,4 +1,4 @@
-# Copyright (C) 2002-20204 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os,glob
 #The Import line  is  temporary for backwards compatibility of clients.
@@ -117,7 +117,6 @@ def get_runArgs_info(runArgs):
 
 
 def error_check(errors_a, return_code):
-    global MADGRAPH_CATCH_ERRORS
     if not MADGRAPH_CATCH_ERRORS:
         return
     unmasked_error = False
@@ -220,7 +219,6 @@ def write_test_script():
     mglog.info('to reproduce the error locally. If you make additional')
     mglog.info('modifications by hand (not using MadGraphControl) in your JO,')
     mglog.info('make sure that you check and modify the script as needed.\n\n')
-    global MADGRAPH_COMMAND_STACK
     mglog.info('# Script start; trim off columns left of the "#"')
     # Write offline stand-alone reproduction script
     with open('standalone_script.sh','w') as standalone_script:
