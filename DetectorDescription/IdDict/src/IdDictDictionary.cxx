@@ -44,28 +44,45 @@ IdDictDictionary::IdDictDictionary (const std::string& name,
 {
 }
 
-IdDictField* IdDictDictionary::find_field(const std::string& name) const {
-  std::map <std::string, IdDictField*>::const_iterator it;
-
-  it = m_fields.find(name);
+const IdDictField* IdDictDictionary::find_field(const std::string& name) const {
+  auto it = m_fields.find(name);
 
   if (it == m_fields.end()) {
     // If parent exists, look for field there
     if (m_parent_dict) {
       it = m_parent_dict->m_fields.find(name);
       if (it == m_parent_dict->m_fields.end()) {
-        return(0);
+        return nullptr;
       }
     } else {
-      return(0);
+      return nullptr;
     }
   }
 
-  return((*it).second);
+  return it->second;
 }
 
-IdDictLabel* IdDictDictionary::find_label(const std::string& field, const std::string& label) const {
-  IdDictField* idField = find_field(field);
+IdDictField* IdDictDictionary::find_field(const std::string& name) {
+  auto it = m_fields.find(name);
+
+  if (it == m_fields.end()) {
+    // If parent exists, look for field there
+    if (m_parent_dict) {
+      it = m_parent_dict->m_fields.find(name);
+      if (it == m_parent_dict->m_fields.end()) {
+        return nullptr;
+      }
+    } else {
+      return nullptr;
+    }
+  }
+
+  return it->second;
+}
+
+const IdDictLabel*
+IdDictDictionary::find_label(const std::string& field, const std::string& label) const {
+  const IdDictField* idField = find_field(field);
 
   if (!idField) return nullptr;
 
@@ -73,7 +90,7 @@ IdDictLabel* IdDictDictionary::find_label(const std::string& field, const std::s
 }
 
 int IdDictDictionary::get_label_value(const std::string& field, const std::string& label, int& value) const {
-  IdDictLabel* idLabel = find_label(field, label);
+  const IdDictLabel* idLabel = find_label(field, label);
 
   if (!idLabel || !idLabel->valued()) return(1);
 
@@ -88,7 +105,7 @@ void IdDictDictionary::add_field(IdDictField* field) {
 }
 
 IdDictSubRegion*
-IdDictDictionary::find_subregion(const std::string& name) const {
+IdDictDictionary::find_subregion(const std::string& name) {
   std::map <std::string, IdDictSubRegion*>::const_iterator it;
 
   it = m_subregions.find(name);
@@ -98,11 +115,13 @@ IdDictDictionary::find_subregion(const std::string& name) const {
   return((*it).second);
 }
 
-IdDictRegion* IdDictDictionary::find_region(const std::string& region_name) const {
+const IdDictRegion*
+IdDictDictionary::find_region(const std::string& region_name) const {
   return find_region(region_name, "");
 }
 
-IdDictRegion* IdDictDictionary::find_region(const std::string& region_name, const std::string& group_name) const {
+IdDictRegion*
+IdDictDictionary::find_region(const std::string& region_name, const std::string& group_name) {
   for (IdDictRegion* region : m_regions) {
     if (!region) continue;
     if ((group_name != "") && (region->group_name() != group_name)) continue;
@@ -112,13 +131,31 @@ IdDictRegion* IdDictDictionary::find_region(const std::string& region_name, cons
   return nullptr;
 }
 
-IdDictGroup* IdDictDictionary::find_group(const std::string& group_name) const {
-  for (size_t i = 0; i < m_groups.size(); ++i) {
-    IdDictGroup* group = m_groups[i];
-    if ((group != 0) && (group->name() == group_name)) return(group);
+const IdDictRegion*
+IdDictDictionary::find_region(const std::string& region_name, const std::string& group_name) const {
+  for (IdDictRegion* region : m_regions) {
+    if (!region) continue;
+    if ((group_name != "") && (region->group_name() != group_name)) continue;
+    if ((region_name != "") && (region->name() != region_name)) continue;
+    return region;
   }
+  return nullptr;
+}
 
-  return(0);
+IdDictGroup*
+IdDictDictionary::find_group(const std::string& group_name) {
+  for (IdDictGroup* g : m_groups) {
+    if (g && g->name() == group_name) return g;
+  }
+  return nullptr;
+}
+
+const IdDictGroup*
+IdDictDictionary::find_group(const std::string& group_name) const {
+  for (const IdDictGroup* g : m_groups) {
+    if (g && g->name() == group_name) return g;
+  }
+  return nullptr;
 }
 
 void IdDictDictionary::add_subregion(IdDictSubRegion* subregion) {
@@ -150,7 +187,7 @@ void IdDictDictionary::add_region(IdDictRegion* region) {
   m_all_regions.push_back(region);
 }
 
-void IdDictDictionary::resolve_references(const IdDictMgr& idd) {
+void IdDictDictionary::resolve_references(IdDictMgr& idd) {
   {
     std::map<std::string, IdDictSubRegion*>::iterator it;
 
@@ -161,10 +198,8 @@ void IdDictDictionary::resolve_references(const IdDictMgr& idd) {
   }
   {
     size_t index = 0;
-
-    IdDictDictionary::groups_it it;
-    for (it = m_groups.begin(); it != m_groups.end(); ++it) {
-      (*it)->resolve_references(idd, *this, index);
+    for (IdDictGroup* g : m_groups) {
+      g->resolve_references(idd, *this, index);
     }
   }
 }
@@ -178,29 +213,25 @@ void IdDictDictionary::generate_implementation(const IdDictMgr& idd,
   if (!m_generated_implementation) {
     // Propagate to each region and copy their generation into the
     // dict's vector.
-    IdDictDictionary::groups_it it;
-    for (it = m_groups.begin(); it != m_groups.end(); ++it) {
-      (*it)->generate_implementation(idd, *this, tag);
+    for (IdDictGroup* g : m_groups) {
+      g->generate_implementation(idd, *this, tag);
       // Get regions from group and save in m_regions
-      const regions_type& regions = (*it)->regions();
-      IdDictDictionary::regions_const_it it1;
-      for (it1 = regions.begin(); it1 != regions.end(); ++it1) {
-        m_regions.push_back(*it1);
+      for (IdDictRegion* re : g->regions()) {
+        m_regions.push_back(re);
       }
     }
 
     // Loop again over groups and set the bit-packing - starting at
     // level 0
-    for (it = m_groups.begin(); it != m_groups.end(); ++it) {
+    for (IdDictGroup* g : m_groups) {
       // Copy to temporary vector all regions in the group. And
       // look for regions in local m_regions vector for any
       // regions "dummy", which come from reference
       // dictionaries.
       // Skip special group
-      if ("dummy" == (*it)->name()) continue;
+      if ("dummy" == g->name()) continue;
 
-      get_bits(m_regions, 0, (*it)->name());
-//	  get_bits (regions, 0, (*it)->name());
+      get_bits(m_regions, 0, g->name());
     }
 
     // Set integral over the number of bits
@@ -252,11 +283,11 @@ IdDictDictionary::find_region(const ExpandedIdentifier& id, size_type& index) co
   return(1);
 }
 
-IdDictRegion* IdDictDictionary::find_region(const ExpandedIdentifier& id) const {
+const IdDictRegion* IdDictDictionary::find_region(const ExpandedIdentifier& id) const {
   return find_region(id, "");
 }
 
-IdDictRegion* IdDictDictionary::find_region(const ExpandedIdentifier& id, const std::string& group_name) const {
+const IdDictRegion* IdDictDictionary::find_region(const ExpandedIdentifier& id, const std::string& group_name) const {
   // Find first region that matches id
 
   IdDictRegion* pRegion = 0;

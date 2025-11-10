@@ -38,9 +38,7 @@ public:
     //** @name Simple accessors.
     // @{
 
-    const std::string&  name();
-    const std::vector<IdDictDictEntry*>& entries();
-    const std::vector<IdDictRegion*>&    regions();
+    const std::string&  name() const;
     size_t n_regions() const;
     const IdDictRegion&  region(size_t index) const;
 
@@ -49,12 +47,16 @@ public:
     // ==================================
     //** @name Methods used to initialize the object.
     // @{
-    ///  Get MultiRange for this group
 
+    /// Non-const access to regions.
+    const std::vector<IdDictRegion*>&    regions();
+
+    ///  Get MultiRange for this group
     MultiRange build_multirange () const; 
+
     void add_dictentry (IdDictDictEntry* entry);
 
-    void resolve_references (const IdDictMgr& idd,  
+    void resolve_references (IdDictMgr& idd,
                              IdDictDictionary& dictionary,
                              size_t& index);  
     void generate_implementation (const IdDictMgr& idd,  
@@ -214,6 +216,12 @@ private:
     /// The list of region nodes.
     std::vector<IdDictRegionTreeNode> m_region_tree;
 }; 
+
+
+inline
+const std::string& IdDictGroup::name() const {
+    return m_name;
+}
 
 
 inline

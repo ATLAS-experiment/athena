@@ -107,10 +107,6 @@ IdDictMgr::set_DTD_version(const std::string& DTD_version) {
   m_DTD_version = DTD_version;
 }
 
-const IdDictMgr::dictionary_map& IdDictMgr::get_dictionary_map() const {
-  return(m_dictionaries);
-}
-
 std::vector<const IdDictDictionary*> IdDictMgr::get_dictionaries () const
 {
   std::vector<const IdDictDictionary*> out;
@@ -121,14 +117,16 @@ std::vector<const IdDictDictionary*> IdDictMgr::get_dictionaries () const
   return out;
 }
 
-IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) const {
-  dictionary_map::const_iterator it;
+const IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) const {
+  auto it = m_dictionaries.find(name);
+  if (it == m_dictionaries.end()) return nullptr;
+  return it->second;
+}
 
-  it = m_dictionaries.find(name);
-
-  if (it == m_dictionaries.end()) return(0);
-
-  return((*it).second);
+IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) {
+  auto it = m_dictionaries.find(name);
+  if (it == m_dictionaries.end()) return nullptr;
+  return it->second;
 }
 
 void IdDictMgr::add_dictionary(IdDictDictionary* dictionary) {

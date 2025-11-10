@@ -105,7 +105,7 @@ public:
     /// Enable wraparound.
     void set_wrap_around();
 
-    virtual void resolve_references (const IdDictMgr& idd,
+    virtual void resolve_references (IdDictMgr& idd,
                                      IdDictDictionary& dictionary,
                                      IdDictRegion& region) override;
     virtual void generate_implementation (const IdDictMgr& idd,

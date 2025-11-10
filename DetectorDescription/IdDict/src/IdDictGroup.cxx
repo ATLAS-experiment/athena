@@ -33,15 +33,6 @@ IdDictGroup::IdDictGroup (const std::string& name)
 IdDictGroup::~IdDictGroup () {
 }
 
-const std::string& IdDictGroup::name() {
-  return(m_name);
-}
-
-const std::vector<IdDictDictEntry*>&
-IdDictGroup::entries() {
-  return(m_entries);
-}
-
 const std::vector<IdDictRegion*>&
 IdDictGroup::regions() {
   return(m_regions);
@@ -73,7 +64,7 @@ IdDictGroup::add_dictentry(IdDictDictEntry* region) {
 }
 
 void
-IdDictGroup::resolve_references(const IdDictMgr& idd,
+IdDictGroup::resolve_references(IdDictMgr& idd,
                                 IdDictDictionary& dictionary,
                                 size_t& index) {
   for (IdDictDictEntry* ent : m_entries) {
@@ -162,10 +153,9 @@ void IdDictGroup::sort() {
   }
   if (regions.size() == m_regions.size()) {
     // Reorder the regions
-    std::map< ExpandedIdentifier, IdDictDictEntry* >::iterator mapIt = regions.begin();
     std::vector<IdDictRegion*>::size_type vecIt = 0;
-    for (; mapIt != regions.end(); ++mapIt, ++vecIt) {
-      m_entries[vecIt] = (*mapIt).second;
+    for (auto& p : regions) {
+      m_entries[vecIt++] = p.second;
     }
   } else {
     std::cout << "IdDictGroup::sort - WARNING region map size is NOT the same as the vector size. Map size "
@@ -182,6 +172,7 @@ IdDictGroup::clear() {
   }
 
   m_entries.clear();
+  m_region_tree.clear();
 }
 
 
