@@ -33,7 +33,7 @@ namespace {
         if (!posSlot) {
             posSlot = segPos;
         } else {
-            posSlot = 0.5 * ((*posSlot) + segPos); 
+            *posSlot = 0.5 * (*posSlot + segPos);
         }
     }
     /** @brief return the segment theta */
@@ -330,9 +330,9 @@ namespace MuonR4{
         /// If no radius could be calculated return the straight line estimator
         if (!barrelR && !endcapR) {
             return 5.*Gaudi::Units::TeV;
-        } 
-        const double r = 0.5* (barrelR.value_or(*endcapR) +
-                               endcapR.value_or(*barrelR));
+        }
+        const double r = 0.5* ((barrelR ? *barrelR : *endcapR) +
+                               (endcapR ? *endcapR : *barrelR));
         ///
         const double P = 0.3* Gaudi::Units::GeV* avgBField * r / std::abs(std::sin(avgTheta)); 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloRec )
@@ -16,7 +16,7 @@ atlas_add_component( CaloRec
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloEvent TileEvent LArRecEvent CaloGeoHelpers
    CaloIdentifier AthenaBaseComps AthenaKernel CxxUtils AthenaPoolUtilities
-   Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib CaloClusterCorrectionLib
+   Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib
    StoreGateLib LumiBlockCompsLib AthenaMonitoringKernelLib
    ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
    ${EIGEN_LIBRARIES} AthAllocators IdDictParser CaloLumiConditions

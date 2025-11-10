@@ -56,7 +56,7 @@ namespace MuonR4{
                                            CalibSpacePointVec& hitsToCalib) const {
         std::vector<int> signs = SeedingAux::strawSigns(trackPos, trackDir,
                                                         hitsToCalib);
-        for (const auto& [spIdx, sp]: Acts::enumerate(hitsToCalib)) {
+        for (const auto [spIdx, sp]: Acts::enumerate(hitsToCalib)) {
             sp->setDriftRadius(sp->driftRadius() * signs[spIdx]);
         }
     }

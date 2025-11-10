@@ -137,7 +137,7 @@ atlas_add_dictionary( ISF_FastCaloSimEventDict
 atlas_add_test( GenericNetwork_test
                 SOURCES test/GenericNetwork_test.cxx 
                 INCLUDE_DIRS ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
-                LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ALL_ONNX_LIBS} ISF_FastCaloSimEvent 
+                LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ALL_ONNX_LIBS} ISF_FastCaloSimEvent PathResolver
                 PROPERTIES TIMEOUT 600 )
 
 # Takes a bit longer, could be converted to a atlas_add_citest

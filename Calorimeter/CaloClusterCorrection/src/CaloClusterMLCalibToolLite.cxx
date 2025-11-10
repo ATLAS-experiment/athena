@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloClusterCorrection/CaloClusterMLCalibToolLite.h"
-#include "CaloClusterCorrection/CaloClusterMLGaussianMixture.h"
+#include "CaloClusterMLCalibToolLite.h"
+#include "CaloClusterMLGaussianMixture.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "StoreGate/WriteDecorHandle.h"
 
@@ -43,7 +43,11 @@ StatusCode CaloClusterMLCalibToolLite::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContainer &clusters, const int &nPrimVtx, const double &avgMu, std::vector<double> &clusterE_ML_vec, std::vector<double> &clusterE_ML_Unc_vec) const
+StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContainer &clusters,
+                                                 int nPrimVtx,
+                                                 double avgMu,
+                                                 std::vector<double> &clusterE_ML_vec,
+                                                 std::vector<double> &clusterE_ML_Unc_vec) const
 {
     ATH_MSG_DEBUG("Executing " << name() << "...");
 

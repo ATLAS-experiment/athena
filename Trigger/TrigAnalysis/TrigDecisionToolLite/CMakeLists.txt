@@ -14,10 +14,8 @@ atlas_add_dictionary( TrigDecisionToolLiteDict
    TrigDecisionToolLite/selection.xml
    LINK_LIBRARIES TrigDecisionToolLiteLib ${ROOT_LIBRARIES} )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( TrigDecisionToolLite
-      src/components/*.cxx
-      LINK_LIBRARIES TrigDecisionToolLiteLib )
-endif()
+atlas_add_component( TrigDecisionToolLite
+   src/components/*.cxx
+   LINK_LIBRARIES TrigDecisionToolLiteLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

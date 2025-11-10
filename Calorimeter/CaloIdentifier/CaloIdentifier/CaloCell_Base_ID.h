@@ -19,6 +19,7 @@
 #include "CaloIdentifier/CaloID.h"
 #include "CaloIdentifier/LArNeighbours.h"
 #include "CaloGeoHelpers/CaloSampling.h"
+#include <ranges>
 
 
 class CaloNeighbours;
@@ -173,9 +174,9 @@ public:
   IdentifierHash calo_region_hash (const int subCalo, const IdentifierHash subCaloHash) const;
 
   /** Type for iterators over identifiers. */
-  typedef std::vector<Identifier>::const_iterator id_iterator;
+  using id_iterator = std::vector<Identifier>::const_iterator;
   /** Type for range over identifiers. */
-  typedef boost::iterator_range<id_iterator> id_range;
+  using id_range    = std::ranges::subrange<id_iterator>;
 
   /** begin iterator over full set of Identifiers (LAr + Tiles) */
   id_iterator cell_begin    () const;

@@ -143,7 +143,7 @@ namespace FeatureRequestHelpers {
       navGraph, 
       frd,
       clid,
-      chainIDs,
+      std::move(chainIDs),
       ctx,
       eventStore);
   }

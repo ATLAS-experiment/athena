@@ -55,7 +55,7 @@ StatusCode LArBadFebMaskingTool::initialize()
   ATH_MSG_INFO (" bit mask for errors to mask " << m_errorToMask);
 
   // initialize read handle keys
-  ATH_CHECK(m_larFebErrorSummaryKey.initialize());
+  ATH_CHECK(m_larFebErrorSummaryKey.initialize(!m_noFebErrors));
   ATH_CHECK( m_badFebKey.initialize());
   ATH_CHECK( m_cablingKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());
@@ -86,19 +86,20 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
 {
   m_evt++;
 
+  const std::map<unsigned int,uint16_t>* febMap = &m_dummyFebMap; //empty dummy map for MC case
+  if (!m_noFebErrors) {
+    ATH_MSG_DEBUG (" in LArBadFebMaskingTool::process ");
+    SG::ReadHandle<LArFebErrorSummary>larFebErrorSummary(m_larFebErrorSummaryKey, ctx);
+    if (!larFebErrorSummary.isValid()) {
+      ATH_MSG_WARNING ("Cannot retrieve Feb error summary with key " << m_larFebErrorSummaryKey.key() <<". Skip LArBadFebMaskingTool::process ");
+      return StatusCode::SUCCESS;
+    }
 
-  ATH_MSG_DEBUG (" in LArBadFebMaskingTool::process ");
-  SG::ReadHandle<LArFebErrorSummary>larFebErrorSummary(m_larFebErrorSummaryKey, ctx);
-  if (!larFebErrorSummary.isValid()) {
-    ATH_MSG_WARNING ("Cannot retrieve Feb error summary with key " << m_larFebErrorSummaryKey.key() <<". Skip LArBadFebMaskingTool::process ");
-    return StatusCode::SUCCESS;
-  }
-
-  // retrieve map of Feb-errors
-  const std::map<unsigned int,uint16_t>& febMap = larFebErrorSummary->get_all_febs();
-
-  ATH_MSG_DEBUG (" Number of Febs " << febMap.size());
-
+    // retrieve map of Feb-errors
+    febMap = &larFebErrorSummary->get_all_febs();
+    ATH_MSG_DEBUG (" Number of Febs " << febMap->size());
+  }//end if m_noFebErrors
+  
   // catch cases of empty LAR container  => severe problem in decoding => flag event as in ERROR
   unsigned int nLar = theCont->nCellsCalo(CaloCell_ID::LAREM)+theCont->nCellsCalo(CaloCell_ID::LARHEC)+theCont->nCellsCalo(CaloCell_ID::LARFCAL);
   if (nLar==0) {
@@ -131,8 +132,8 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
       unsigned int ifeb = febId.get_identifier32().get_compact();
       ATH_MSG_DEBUG (" process Feb: " << ifeb);
 
-      std::map<unsigned int,uint16_t>::const_iterator it1 = febMap.find(ifeb);
-      if (it1 != febMap.end()) {
+      std::map<unsigned int,uint16_t>::const_iterator it1 = febMap->find(ifeb);
+      if (it1 != febMap->end()) {
         uint16_t ierror = (*it1).second;
         if (ierror & m_errorToMask) toMask1=true;
         ATH_MSG_DEBUG (" ierror,toMask " << ierror << " " << toMask1 << " ");
@@ -144,7 +145,8 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
 
       if (toMask1 || inError) {
          m_mask++;
-         for (int ch=0; ch<128; ++ch) {
+         const int nChanPerFeb=m_onlineID->channelInSlotMax(febId);
+         for (int ch=0; ch<nChanPerFeb; ++ch) {
            HWIdentifier hwid = m_onlineID->channel_Id(febId, ch);
            if (cabling->isOnlineConnected(hwid)) {
               Identifier id = cabling->cnvToIdentifier( hwid);

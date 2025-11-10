@@ -14,6 +14,9 @@
 #include <vector>
 #include "G4UserSteppingAction.hh"
 #include "G4AtlasInterfaces/IUserActionTool.h"
+
+class HitCollectionMap;
+
 namespace G4UA
 {
 
@@ -42,6 +45,9 @@ namespace G4UA
     /// @param service_tool 
     /// @return 
     virtual StatusCode addActionTool(const ToolHandle<IUserActionTool>& service_tool) = 0;
+
+    virtual StatusCode BeginOfAthenaEvent(HitCollectionMap&) = 0;
+    virtual StatusCode EndOfAthenaEvent(HitCollectionMap&) = 0;
 
 
     /// Creates the InterfaceID and interfaceID() method

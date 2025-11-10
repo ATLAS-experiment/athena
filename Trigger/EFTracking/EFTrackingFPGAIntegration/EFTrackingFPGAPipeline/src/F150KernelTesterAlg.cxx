@@ -112,8 +112,9 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_FPGAPixelRDO.initialize(m_runFull150));
         ATH_CHECK(m_FPGAStripOutput.initialize(m_runFull150));
         ATH_CHECK(m_FPGAPixelOutput.initialize(m_runFull150));
-        
-        
+        ATH_CHECK(m_FPGAPixelRDOSize.initialize(m_runFull150));
+        ATH_CHECK(m_FPGAStripRDOSize.initialize(m_runFull150));
+
         return StatusCode::SUCCESS;
     }
     
@@ -321,7 +322,12 @@ namespace EFTrackingFPGAIntegration
             // Get the input data
             auto pixelInput = SG::get(m_FPGAPixelRDO, ctx);
             auto stripInput = SG::get(m_FPGAStripRDO, ctx);
-            
+
+            const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
+            ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
+            ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));
+
+
             // Set kernel arguments
             m_pixelClusteringKernel.setArg(0, m_pixelClusterInputBuffer);
             m_pixelClusteringKernel.setArg(1, m_pixelClusterEDMOutputBuffer);
@@ -329,8 +335,8 @@ namespace EFTrackingFPGAIntegration
             m_stripClusteringKernel.setArg(0, m_stripClusterInputBuffer);
             m_stripClusteringKernel.setArg(1, m_stripClusterOutputBuffer);
             m_stripClusteringKernel.setArg(2, m_stripClusterEDMOutputBuffer);
-            m_stripClusteringKernel.setArg(3, static_cast<unsigned int>((*stripInput).size()));
-            
+            m_stripClusteringKernel.setArg(3, static_cast<unsigned int>(*stripInputSize));
+
             m_stripL2GKernel.setArg(0, m_stripClusterOutputBuffer);
             m_stripL2GKernel.setArg(1, m_stripClusterEDMOutputBuffer);
             m_stripL2GKernel.setArg(2, m_stripL2GOutputBuffer);
@@ -342,8 +348,8 @@ namespace EFTrackingFPGAIntegration
             m_stripEdmPrepKernel.setArg(1, m_edmStripOutputBuffer);
             
             m_slicingEngineInput.setArg(0, m_pixelClusterInputBuffer); // TO change
-            m_slicingEngineInput.setArg(3, static_cast<unsigned int>((*pixelInput).size()));
-            
+            m_slicingEngineInput.setArg(3, static_cast<unsigned int>(*pixelInputSize));
+
             m_slicingEngineOutput.setArg(1, m_slicingEngineOutputBuffer);
             
             m_insideOutInput.setArg(0,  m_slicingEngineOutputBuffer);

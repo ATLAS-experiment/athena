@@ -38,6 +38,9 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_FPGAStripOutput.initialize());
         ATH_CHECK(m_FPGAPixelOutput.initialize());
 
+        ATH_CHECK(m_FPGAPixelRDOSize.initialize());
+        ATH_CHECK(m_FPGAStripRDOSize.initialize());
+
         std::vector<std::string> listofCUs;
 
         getListofCUs(listofCUs);
@@ -127,6 +130,10 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(SG::get(pixelInput, m_FPGAPixelRDO, ctx));
         ATH_CHECK(SG::get(stripInput, m_FPGAStripRDO, ctx));  
 
+        const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
+        ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
+        ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));
+
     
         // logic
         unsigned int nthreads = m_FPGAThreads.value();
@@ -166,13 +173,13 @@ namespace EFTrackingFPGAIntegration
 
         // Set kernel arguments
         pixelStartClusteringKernel.setArg(0, m_pixelClusterInputBufferList[bufferIndex]);
-        pixelStartClusteringKernel.setArg(2, static_cast<unsigned long long>((*pixelInput).size()));
+        pixelStartClusteringKernel.setArg(2, static_cast<unsigned long long>(*pixelInputSize));
 
         pixelEndClusteringClusterKernel.setArg(1, m_pixelClusterOutputBufferList[bufferIndex]);
         pixelEndClusteringEDMKernel.setArg(1, m_pixelClusterEDMOutputBufferList[bufferIndex]);
 
         stripStartClusteringKernel.setArg(0, m_stripClusterInputBufferList[bufferIndex]);
-        stripStartClusteringKernel.setArg(2, static_cast<unsigned long long>((*stripInput).size()));
+        stripStartClusteringKernel.setArg(2, static_cast<unsigned long long>(*stripInputSize));
 
         stripEndClusteringKernel.setArg(1, m_stripClusterOutputBufferList[bufferIndex]);
         
@@ -265,8 +272,8 @@ namespace EFTrackingFPGAIntegration
         cl::Event::waitForEvents(wait_for_reads);
 
 
-        if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
-        if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
+        if(*pixelInputSize == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
+        if(*stripInputSize == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
 
 
         // calculate the time for the kernel execution

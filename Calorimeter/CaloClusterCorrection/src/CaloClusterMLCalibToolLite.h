@@ -7,10 +7,10 @@
 
 //
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CaloClusterCorrection/ICaloClusterMLCalibToolLite.h"
+#include "CaloInterface/ICaloClusterMLCalibToolLite.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "AthOnnxInterfaces/IAthInferenceTool.h"
-#include "CaloClusterCorrection/CaloClusterMLCalibFeatureTransform.h"// for CaloClusterMLCalib::TransformFunc
+#include "CaloClusterMLCalibFeatureTransform.h"// for CaloClusterMLCalib::TransformFunc
 #include "GaudiKernel/ToolHandle.h"
 #include <vector>
 #include <string>
@@ -32,7 +32,11 @@ public:
     virtual StatusCode finalize() override;
 
     // Perform batch-inference for a CaloClusterContainer
-    virtual StatusCode inference(const xAOD::CaloClusterContainer &clusters, const int &nPrimVtx, const double &avgMu, std::vector<double> &clusterE_ML_vec, std::vector<double> &clusterE_ML_Unc_vec) const override;
+    virtual StatusCode inference(const xAOD::CaloClusterContainer &clusters,
+                                 int nPrimVtx,
+                                 double avgMu,
+                                 std::vector<double> &clusterE_ML_vec,
+                                 std::vector<double> &clusterE_ML_Unc_vec) const override;
 
 private:
     Gaudi::Property<std::vector<std::string>> m_preprocessingTransformNames{this, "PreprocessingTransformNames", {}, "Names of preprocessing transforms"};

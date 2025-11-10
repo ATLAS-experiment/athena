@@ -18,7 +18,7 @@ namespace FPTracker{
 
       double zpos = zsign*cData.coll_z[side][i];
       Collimator::Ptr_t col(new Collimator(zpos,  cData.coll_xap[side][i], side));
-      collimators.push_back(col);
+      collimators.push_back(std::move(col));
       
     }
 

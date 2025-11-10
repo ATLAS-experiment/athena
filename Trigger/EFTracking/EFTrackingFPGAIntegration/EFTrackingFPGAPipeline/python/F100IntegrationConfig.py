@@ -143,7 +143,6 @@ def F110StreamIntegrationCfg(flags, name = 'F110StreamIntegrationAlg', **kwarg):
 
     kwarg.setdefault('StripStartClusterKernelName','stripLoader')
     kwarg.setdefault('StripEndClusterKernelName','stripUnloader')
-    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
 
@@ -240,7 +239,7 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
                                                perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
                                             **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
                                                 'xAODStripClusterContainers' : ['ITkStripClusters'],
-                                                'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
+                                                'FPGAActsTracks' : [],
                                                 'isDataPrep': True} ))
         
         from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg

@@ -119,7 +119,7 @@ def _getmonchains( flags, regex, monlevel=None ):
             from AthenaConfiguration.AllConfigFlags import ConfigFlags
             flags = ConfigFlags
 
-        moniAccess = getHLTMonitoringAccess(flags)
+        moniAccess = getHLTMonitoringAccess(flags, filterOnActiveChains=True )
 
         _monchains = moniAccess.monitoredChains( signatures=sig, monLevels=levels )
 

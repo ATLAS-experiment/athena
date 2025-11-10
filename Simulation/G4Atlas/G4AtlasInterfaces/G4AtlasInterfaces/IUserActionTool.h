@@ -18,6 +18,7 @@ class G4UserEventAction;
 class G4UserTrackingAction;
 class G4UserSteppingAction;
 class G4UserStackingAction;
+class HitCollectionMap;
 
 namespace G4UA
 {
@@ -55,6 +56,9 @@ namespace G4UA
 
       /// Constructs a user action and populates the user action lists with it.
       virtual StatusCode fillUserAction(G4AtlasUserActions& userActions) = 0;
+
+      virtual StatusCode BeginOfAthenaEvent(HitCollectionMap&) = 0;
+      virtual StatusCode EndOfAthenaEvent(HitCollectionMap&) = 0;
 
       /// Declare this interface to the framework
       DeclareInterfaceID(IUserActionTool, 1, 0);

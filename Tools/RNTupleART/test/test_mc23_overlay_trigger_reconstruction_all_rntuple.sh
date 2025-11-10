@@ -34,7 +34,6 @@ Reco_tf.py \
   --digiSeedOffset2="232" \
   --AMITag="r14799" \
   --steering "doOverlay" "doRDO_TRIG" "doTRIGtoALL" \
-  --preExec="flags.Output.StorageTechnology.EventData={\"*\":\"ROOTRNTUPLE\"};flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";\
-  # Note: flags.Output.StorageTechnology.MetaData omitted - will inherit ROOTRNTUPLE from EventData
+  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";\
  
 echo "art-result: $? full-chain";

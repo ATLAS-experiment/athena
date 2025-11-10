@@ -435,8 +435,7 @@ def HIGG9D1Cfg(flags):
         "DiTauJets",
         "DiTauJetsLowPt",
         "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-        "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
 
     if flags.Tau.TauEleRM_isAvailable:
         HIGG9D1SlimmingHelper.SmartCollections.append("TauJets_EleRM")

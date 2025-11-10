@@ -152,19 +152,14 @@ class MetAnalysisConfig (ConfigBlock):
                 alg.significanceTool.MuonCalibTool.calibMode = (
                     config.getContainerMeta(self.muons.split(".")[0], 'calibMode', failOnMiss=True))
 
-            # Standard jet calibration. Must be kept in agreement with JetAnalysisConfig.py
+            # Preliminary R22 recommendation is to use R21 jet resolutions from 2018 for MET significance.
+            # See Jet/Etmiss recommendation documentation for details.
             if self.jetCalibConfig == "":
-                if config.geometry() is LHCPeriod.Run2:
-                    self.jetCalibConfig = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
-                    self.jetCalibArea = "00-04-82"
-                elif config.geometry() >= LHCPeriod.Run3:
-                    self.jetCalibConfig = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config"
-                    self.jetCalibArea = "00-04-83"
-
-            if self.jetCalibSequence == "":
-                # Omit the in situ piece, even on data.
+                self.jetCalibConfig = "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config"
+                self.jetCalibArea = "00-04-81"
+                # Include Smear and not InSitu, even when running on data.
                 # This is for technical reasons and allows access to the correct resolutions for both data and MC.
-                self.jetCalibSequence = 'JetArea_Residual_EtaJES_GSC'
+                self.jetCalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
 
             # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
             if self.egammaESModel == "":

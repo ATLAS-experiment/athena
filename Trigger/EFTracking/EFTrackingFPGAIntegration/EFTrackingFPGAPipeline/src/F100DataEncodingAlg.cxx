@@ -16,6 +16,9 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_FPGAPixelRDO.initialize());
         ATH_CHECK(m_FPGAStripRDO.initialize());
 
+        ATH_CHECK(m_FPGAPixelRDOSize.initialize());
+        ATH_CHECK(m_FPGAStripRDOSize.initialize());
+
         ATH_CHECK(m_FPGADataFormatTool.retrieve());
 
         ATH_CHECK(m_roiCollectionKey.initialize(m_roiSeeded));
@@ -64,6 +67,27 @@ namespace EFTrackingFPGAIntegration
         // Encode RDOs into byte stream
         ATH_CHECK(m_FPGADataFormatTool->convertPixelHitsToFPGADataFormat(*pixelRDOHandle, *FPGAPixelRDO, listOfPixelIds, ctx));
         ATH_CHECK(m_FPGADataFormatTool->convertStripHitsToFPGADataFormat(*stripRDOHandle, *FPGAStripRDO, listOfStripIds, ctx));
+
+        // Store the size
+        SG::WriteHandle<int> FPGAPixelRDOSize(m_FPGAPixelRDOSize, ctx);
+        ATH_CHECK(FPGAPixelRDOSize.record(std::make_unique<int>(FPGAPixelRDO->size())));
+
+        SG::WriteHandle<int> FPGAStripRDOSize(m_FPGAStripRDOSize, ctx);
+        ATH_CHECK(FPGAStripRDOSize.record(std::make_unique<int>(FPGAStripRDO->size())));
+
+        int pixelPadLength = 8;
+        auto pixRemainder = FPGAPixelRDO->size() % pixelPadLength;
+        if (pixRemainder != 0) {
+            size_t to_add = pixelPadLength - pixRemainder;
+            FPGAPixelRDO->insert(FPGAPixelRDO->end(), to_add, 0); // append zeros
+        }
+
+        int stripPadLength = 8;
+        size_t stripRemainder = FPGAStripRDO->size() % stripPadLength;
+        if (stripRemainder != 0) {
+            size_t to_add = stripPadLength - stripRemainder;
+            FPGAStripRDO->insert(FPGAStripRDO->end(), to_add, 0); // append zeros
+        }
 
         if (msgLvl(MSG::DEBUG)){
           for (unsigned int i = 0; i < FPGAPixelRDO->size(); i++)

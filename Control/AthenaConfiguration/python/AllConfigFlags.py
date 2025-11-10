@@ -278,8 +278,8 @@ def initConfigFlags():
     acf.addFlag('Output.OneDataHeaderForm', False, help="Write only a single common DataHeaderForm per stream")
     acf.addFlag('Output.TreeAutoFlush', {}, help="dict with auto-flush settings for stream e.g. {'STREAM': 123}")
     acf.addFlag('Output.TemporaryStreams', [], help='list of output streams that are marked temporary')
-    acf.addFlag('Output.StorageTechnology.EventData', {'*':'ROOTTREEINDEX'},
-                help="set the underlying POOL storage technology for event data, e.g., {f'{flags.Output.AODFileName}':'ROOTRNTUPLE', '*':'ROOTTREEINDEX'}")
+    acf.addFlag('Output.StorageTechnology.EventData', {},
+                help="set the underlying POOL storage technology for event data, e.g., {f'{flags.Output.AODFileName}':'ROOTRNTUPLE', '*':'ROOTTREEINDEX'}. If not set for a file, defaults to PoolSvc.DefaultContainerType.")
     acf.addFlag('Output.StorageTechnology.MetaData', {},
                 help="set the underlying POOL storage technology for metadata, e.g., {f'{flags.Output.AODFileName}':'ROOTRNTUPLE', '*':'ROOTTREE'}. If not set for a file, defaults to the EventData technology for that file.")
 
