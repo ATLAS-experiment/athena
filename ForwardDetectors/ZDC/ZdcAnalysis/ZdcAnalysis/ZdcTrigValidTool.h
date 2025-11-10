@@ -64,7 +64,6 @@ class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcAnalysisTool, 
   std::string m_name;
   bool m_writeAux;
 
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmp{this, "ZdcModuleAmplitude", "", "ZDC module Amplitude"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_trigValStatus{this, "TrigValStatus", "","Trigger validation status"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {

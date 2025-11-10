@@ -70,8 +70,6 @@ StatusCode ZdcTrigValidTool::initialize() {
   m_simTrig = std::make_shared<ZDCTriggerSimModuleAmpls>(ZDCTriggerSimModuleAmpls(sideALUT, sideCLUT, combLUT));
   ATH_MSG_INFO(m_name<<" Initialised");
 
-  m_zdcModuleAmp = "ZdcModules.Amplitude"+m_auxSuffix;
-  ATH_CHECK(m_zdcModuleAmp.initialize());
   m_trigValStatus = "ZdcSums.TrigValStatus"+m_auxSuffix;
   ATH_CHECK(m_trigValStatus.initialize());
 
@@ -96,7 +94,7 @@ StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& modu
       return StatusCode::SUCCESS;
     }
   
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmp(m_zdcModuleAmp);
+  static SG::ConstAccessor<float> const zdcModuleAmpAcc("Amplitude" + m_auxSuffix);
 
   bool trigMatch = false;
   for (const auto zdcModule : moduleContainer) {
@@ -105,12 +103,12 @@ StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& modu
     
     // Side A
     if (zdcModule->zdcSide() > 0) {
-      moduleEnergy.at(zdcModule->zdcModule()) = zdcModuleAmp(*zdcModule);
+      moduleEnergy.at(zdcModule->zdcModule()) = zdcModuleAmpAcc(*zdcModule);
     }
     
     // Side C
     if (zdcModule->zdcSide() < 0) {
-      moduleEnergy.at(zdcModule->zdcModule() + 4) = zdcModuleAmp(*zdcModule);
+      moduleEnergy.at(zdcModule->zdcModule() + 4) = zdcModuleAmpAcc(*zdcModule);
     }
   } 
   // Get Output as an integer (0-7)

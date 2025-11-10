@@ -2996,7 +2996,7 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
 
             if (s)
             {
-                splines[iside][imod].reset (s);
+	      splines[iside][imod].reset (s);
             }
             else
             {
@@ -3132,7 +3132,9 @@ void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
       ATH_MSG_DEBUG("setFADCCorrections: Searching for histograms HG and LG: " << histNameHG << ", " << histNameLG);
       
       TH1* histHG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameHG.c_str(), "TH1"));
+      histHG_ptr->SetDirectory(0);
       TH1* histLG_ptr = static_cast<TH1*>(fFADCCorr->GetObjectChecked(histNameLG.c_str(), "TH1"));
+      histLG_ptr->SetDirectory(0);
 
       if (!histHG_ptr || !histLG_ptr) {
 	std::string errMsg = "setFADCCorrections: unable to read FADC correction histogram(s) ";
