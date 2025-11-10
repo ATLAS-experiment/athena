@@ -227,7 +227,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(cons
     xTruthParticle->setPx(vecAttr->value().at(0));
     xTruthParticle->setPy(vecAttr->value().at(1));
     xTruthParticle->setPz(vecAttr->value().at(2));
-    xTruthParticle->SetE(vecAttr->value().at(3));
+    xTruthParticle->setE(vecAttr->value().at(3));
     // Copy over the decorations if they are available
     typeDecorator(*xTruthParticle) = typeAccessor(*theParticle);
     originDecorator(*xTruthParticle) = originAccessor(*theParticle);
