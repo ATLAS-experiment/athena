@@ -24,6 +24,7 @@ from AthenaCommon.Constants import INFO
 #
 def DataModelTestFlags (infile = None, evtMax = 20, **kw):
     flags = initConfigFlags()
+    flags.addFlag('rntuple', False)
     flags.Exec.MaxEvents = evtMax
     flags.Exec.OutputLevel = INFO
     flags.Common.MsgSourceLength = 18
@@ -48,7 +49,8 @@ def DataModelTestFlags (infile = None, evtMax = 20, **kw):
     flags.Input.MCCampaign = Campaign.Unknown
     flags.fillFromArgs()
 
-    if 'ROOTRNTUPLE' in flags.Output.StorageTechnology.EventData.values():
+    if flags.rntuple:
+        flags.Output.StorageTechnology.EventData = {'*' : 'ROOTRNTUPLE'}
         def to_rntup (s):
             return s.replace ('.root', '.rntup.root')
         flags.Input.Files = [to_rntup(f) for f in flags.Input.Files]
