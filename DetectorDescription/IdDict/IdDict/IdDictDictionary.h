@@ -73,13 +73,16 @@ public:
     //** @name Search for field/label/region by name.
     // @{
 
-    IdDictField* find_field (const std::string& name) const;  
-    IdDictLabel* find_label (const std::string& field, const std::string& label) const;
+    const IdDictField* find_field (const std::string& name) const;
+          IdDictField* find_field (const std::string& name);
+    const IdDictLabel* find_label (const std::string& field, const std::string& label) const;
     int get_label_value (const std::string& field, const std::string& label, int& value) const;  // > 0 == error
-    IdDictSubRegion* find_subregion (const std::string& subregion_name) const;  
-    IdDictRegion* find_region (const std::string& region_name) const;  
-    IdDictRegion* find_region (const std::string& region_name, const std::string& group_name) const;  
-    IdDictGroup* find_group (const std::string& group_name) const;
+    IdDictSubRegion* find_subregion (const std::string& subregion_name);
+    const IdDictRegion* find_region (const std::string& region_name) const;
+          IdDictRegion* find_region (const std::string& region_name, const std::string& group_name);
+    const IdDictRegion* find_region (const std::string& region_name, const std::string& group_name) const;
+    IdDictGroup* find_group (const std::string& group_name);
+    const IdDictGroup* find_group (const std::string& group_name) const;
 
 
     //@}
@@ -88,8 +91,8 @@ public:
     // @{
 
     int find_region(const ExpandedIdentifier& id, size_type& index) const;
-    IdDictRegion* find_region(const ExpandedIdentifier& id) const;
-    IdDictRegion* find_region(const ExpandedIdentifier& id,const std::string& group_name) const;
+    const IdDictRegion* find_region(const ExpandedIdentifier& id) const;
+    const IdDictRegion* find_region(const ExpandedIdentifier& id,const std::string& group_name) const;
 
 
     //@}
@@ -113,7 +116,7 @@ public:
     /// Set the dictionary tag
     void                set_dict_tag     (const std::string& tag);
 
-    void resolve_references (const IdDictMgr& idd);  
+    void resolve_references (IdDictMgr& idd);
     void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");  
     void reset_implementation ();  
     bool verify   () const;

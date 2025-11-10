@@ -43,7 +43,7 @@ IdDictAltRegions::set_index(size_t index) {
 }
 
 void
-IdDictAltRegions::resolve_references(const IdDictMgr& idd,
+IdDictAltRegions::resolve_references(IdDictMgr& idd,
                                      IdDictDictionary& dictionary) {
   // We assume that it is not necessary to select only those with
   // the correct tag -> send to all in map

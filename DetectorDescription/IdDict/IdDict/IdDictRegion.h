@@ -102,11 +102,11 @@ public:
     /// Set is_empty flag.
     void set_is_empty();
 
-    void find_neighbours (const IdDictDictionary& dictionary);
+    void find_neighbours (IdDictDictionary& dictionary);
 
     virtual void set_index (size_t index) override;
     virtual Range build_range () const override;
-    virtual void resolve_references (const IdDictMgr& idd,
+    virtual void resolve_references (IdDictMgr& idd,
                                      IdDictDictionary& dictionary) override;
     virtual void generate_implementation (const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,

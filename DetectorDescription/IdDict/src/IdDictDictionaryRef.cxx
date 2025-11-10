@@ -32,7 +32,7 @@ IdDictDictionaryRef::IdDictDictionaryRef (IdDictDictionary* dictionary)
 IdDictDictionaryRef::~IdDictDictionaryRef () {
 }
 
-void IdDictDictionaryRef::resolve_references(const IdDictMgr& idd,
+void IdDictDictionaryRef::resolve_references(IdDictMgr& idd,
                                              IdDictDictionary& dictionary,
                                              IdDictRegion& /*region*/) {
   if (!m_resolved_references) {

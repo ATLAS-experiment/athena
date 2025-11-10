@@ -15,8 +15,7 @@ class IdDictDictionary;
 class IdDictMgr  {  
 public:  
     using dictionary_vec = std::vector<const IdDictDictionary*>;
-    typedef std::map<std::string, IdDictDictionary*> dictionary_map; 
-    typedef std::map<std::string, std::string>       metadata_map; 
+    using metadata_map = std::map<std::string, std::string>;
 
     IdDictMgr();
     ~IdDictMgr();
@@ -25,10 +24,10 @@ public:
     const std::string&    tag                     () const;
 
     /// Access dictionary by name
-    IdDictDictionary*     find_dictionary         (const std::string& name) const;  
+    const IdDictDictionary* find_dictionary       (const std::string& name) const;
+          IdDictDictionary* find_dictionary       (const std::string& name);
 
     /// Access to all dictionaries
-    const dictionary_map& get_dictionary_map      () const;  
     dictionary_vec        get_dictionaries        () const;
 
     /// DTD version
@@ -64,6 +63,8 @@ public:
     
  
 private:
+
+    using dictionary_map = std::map<std::string, IdDictDictionary*>;
 
     void                  find_subdicts(IdDictDictionary* dict);
 

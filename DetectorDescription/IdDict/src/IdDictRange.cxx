@@ -129,7 +129,7 @@ void IdDictRange::set_wrap_around()
 
 
 void
-IdDictRange::resolve_references(const IdDictMgr& /*idd*/,
+IdDictRange::resolve_references(IdDictMgr& /*idd*/,
                                 IdDictDictionary& dictionary, IdDictRegion& /*region*/) {
   if (!m_resolved_references) {
     m_field = dictionary.find_field(m_field_name);
