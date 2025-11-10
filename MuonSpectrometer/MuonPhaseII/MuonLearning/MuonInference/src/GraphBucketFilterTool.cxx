@@ -8,6 +8,7 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include <fmt/format.h>
 
 namespace MuonML {
 
