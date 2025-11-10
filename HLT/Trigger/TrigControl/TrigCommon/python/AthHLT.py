@@ -4,6 +4,7 @@
 #
 from typing import Any
 from AthenaCommon.Logging import logging
+from pycrest.api.crest_api import CrestApi
 log = logging.getLogger('athenaHLT')
 
 from functools import cache
@@ -59,51 +60,20 @@ def get_trigconf_keys(run_number, lb_number):
    """Read Trigger keys from COOL"""
 
    from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
+   confKeys: dict[str, Any] = TriggerCoolUtil.getTrigConfKeys(run_number, lb_number)
+   confKeys['DBAlias'] = confKeys.pop('DB', None)
+   return confKeys
 
-   cdb = CondDB(run_number)
-   db = TriggerCoolUtil.GetConnection(cdb.db_instance())
-   run_range = [[run_number,run_number]]
-   d = {}
-   d['SMK'] = TriggerCoolUtil.getHLTConfigKeys(db, run_range)[run_number]['SMK']
-
-   def findKey(keys):
-      for (key, firstLB, lastLB) in keys:
-         if lb_number>=firstLB and lb_number<=lastLB:
-            return key
-      return None
-
-   # Find L1/HLT prescale key
-   d['LVL1PSK'] = findKey(TriggerCoolUtil.getL1ConfigKeys(db, run_range)[run_number]['LVL1PSK'])
-   d['HLTPSK'] = findKey(TriggerCoolUtil.getHLTPrescaleKeys(db, run_range)[run_number]['HLTPSK2'])
-
-   return d
 
 @cache
 def get_trigconf_keys_crest(run_number, lb_number, crest_server):
    """Read Trigger keys from CREST"""
-   from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
-   
-   def _find_lb(config: list[dict[str, Any]], lb:int) -> int:
-      ret_key: int = -1
-      for c in config:
-         if c['since_lb'] > lb:
-            break
-         ret_key = c['key']
-      if ret_key == -1:
-            raise RuntimeError(f"LB {lb} not found in list of config keys {config}")
-      return ret_key
-   
+   from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil   
    log.info("Using CREST server %s", crest_server)
-   api = TriggerCrestUtil.getCrestApi(server=crest_server)
-   cfgkeysinfo = TriggerCrestUtil.getHLTConfigKeys(run_number, api=api)
-
-   return {
-      'SMK': cfgkeysinfo['SMK'],
-      'LVL1PSK': _find_lb(TriggerCrestUtil.getL1ConfigKeys(run_number, api=api), lb=lb_number),
-      'HLTPSK': _find_lb(TriggerCrestUtil.getHLTPrescaleKeys(run_number, api=api), lb=lb_number),
-      'LVL1BGK': _find_lb(TriggerCrestUtil.getBunchGroupKey(run_number, api=api),lb=lb_number),
-      'DBAlias': cfgkeysinfo['DB']
-   }
+   api: CrestApi = TriggerCrestUtil.getCrestApi(server=crest_server)
+   confKeys: dict[str, Any] = TriggerCrestUtil.getTrigConfKeys(run_number, lb_number, api=api)
+   confKeys['DBAlias'] = confKeys.pop('DB', None)
+   return confKeys
 
 def getCACfg(jopath):
    """Return the CA Cfg function based on joboptions path.
