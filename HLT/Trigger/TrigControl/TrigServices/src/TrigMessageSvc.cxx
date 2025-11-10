@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigMessageSvc.h"
 #include "GaudiKernel/IAppMgrUI.h"
@@ -424,7 +424,7 @@ void TrigMessageSvc::reportMessage(const Message& msg)
 
 void TrigMessageSvc::reportMessage(std::string source, int type, std::string message)
 {
-  reportMessage(Message{source, type, message});
+  reportMessage(Message{std::move(source), type, std::move(message)});
 }
 
 int TrigMessageSvc::outputLevel() const
