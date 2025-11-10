@@ -9,6 +9,7 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "DiTauRec/DiTauOnnxDiscriminantTool.h"
+#include "DiTauRec/DiTauWPDecorator.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODTau/DiTauJetContainer.h"
 
@@ -31,8 +32,15 @@ namespace DerivationFramework {
     private:
       SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input tau container key" };
       SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_scoreDecorKey{this, "ScoreDecorationKey", "" };
+      SG::WriteDecorHandleKeyArray<xAOD::DiTauJetContainer> m_WPDecorKeys{ this, "WPDecorationKeys", {}, "List of WP decorations added to the ditau"};
 
       ToolHandle<DiTauOnnxDiscriminantTool> m_tDiTauOnnxDiscriminantTool{this, "DiTauOnnxDiscriminantTool", ""};
+      ToolHandle<DiTauWPDecorator> m_tDiTauWPDecoratorTool{this, "DiTauWPDecorator", ""};
+ 
+      Gaudi::Property<bool> m_doWPDecor{this, "DoWPDecor", false, "Enable WP decoration"}; 
+
+      std::vector<std::string> m_WPs;
+      std::vector<float> m_WPCuts;
 
   };
 }

@@ -30,14 +30,20 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
             onnxModelPath                   = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx",
         ))
 
+    diTauWPDecorator = acc.popToolsAndMerge(DiTauTools.DiTauWPDecoratorCfg(
+            flags,
+            ))
+
     acc.addPublicTool(diTauOnnxScoreCalculator)
+    acc.addPublicTool(diTauWPDecorator)
 
     DiTauIDDecoratorWrapper = CompFactory.DerivationFramework.DiTauIDDecoratorWrapper
     DiTauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
 
     DiTauIDDecoratorWrapper = DiTauIDDecoratorWrapper(name               = "DiTauIDDecoratorWrapper",
                                                       DiTauContainerName = kwargs['DiTauContainerName'],
-                                                      DiTauOnnxDiscriminantTool = diTauOnnxScoreCalculator)
+                                                      DiTauOnnxDiscriminantTool = diTauOnnxScoreCalculator,
+                                                      DiTauWPDecorator = diTauWPDecorator)
 
     acc.addPublicTool(DiTauIDDecoratorWrapper)
     acc.addEventAlgo(DiTauIDDecoratorKernel(name              = "DiTauIDDecorKernel",
