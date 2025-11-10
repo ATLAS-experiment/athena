@@ -3,6 +3,8 @@
 */
 #include "MuonPRDTestR4/TrackSummaryModule.h"
 
+#include "MuonTrackEvent/MsTrackSeed.h"
+
 #include <format>
 using namespace MuonR4;
 using namespace Muon::MuonStationIndex;
@@ -75,7 +77,7 @@ namespace MuonValR4{
         push_back(m_summaryTool->makeSummary(ctx, track));
     }
     void TrackSummaryModule::push_back(const EventContext& ctx, const MsTrackSeed& seed) {
-        push_back(m_summaryTool->makeSummary(ctx, seed));
+        push_back(m_summaryTool->makeSummary(ctx, seed.segments()));
     }
     void TrackSummaryModule::push_back(const HitSummary& summary) {
         for(const auto& br : m_values){

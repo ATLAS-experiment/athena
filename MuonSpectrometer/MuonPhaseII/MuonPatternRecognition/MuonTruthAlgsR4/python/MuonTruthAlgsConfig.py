@@ -62,40 +62,49 @@ def TruthHitAssociationCfg(flags):
                                              AssocPull = 1. if cont_name=="xAODsTgcPads" else 3. ))
     return result
 
-def SdoMultiTruthMakerCfg(flags, useSDO = False):
+def SimHitToTruthPartAlgCfg(flags, useSDO = False):
     result = ComponentAccumulator()
-
     if flags.Detector.GeometryMDT: 
         container = "xMdtSimHits" if not useSDO else "MDT_SDO"
-        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerMdt",
-                                                        SimContainer = container, 
-                                                        WriteKey = "MDT_TruthMap")
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonMdtSimHitToTruthMappingAlg",
+                                                        SimHitContainer = container, 
+                                                        HitIdDecoration = "truthMdtHits")
         result.addEventAlgo(the_alg)
     if flags.Detector.GeometryRPC:
         container = "xRpcSimHits" if not useSDO else "RPC_SDO"
-        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerRpc",
-                                                        SimContainer = container, 
-                                                        WriteKey = "RPC_TruthMap")
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonRpcSimHitToTruthMappingAlg",
+                                                        SimHitContainer = container, 
+                                                        HitIdDecoration = "truthRpcHits")
         result.addEventAlgo(the_alg)
     if flags.Detector.GeometryTGC: 
         container = "xTgcSimHits" if not useSDO else "TGC_SDO"
-        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerTgc",
-                                                        SimContainer = container,
-                                                        WriteKey = "TGC_TruthMap")
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonTgcSimHitToTruthMappingAlg",
+                                                        SimHitContainer = container,
+                                                        HitIdDecoration = "truthTgcHits")
         result.addEventAlgo(the_alg)       
     if flags.Detector.GeometryMM: 
         container = "xMmSimHits" if not useSDO else "MM_SDO"
-        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerMm",
-                                                        SimContainer = container, 
-                                                        WriteKey = "MM_TruthMap")
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonMmSimHitToTruthMappingAlg",
+                                                        SimHitContainer = container, 
+                                                        HitIdDecoration = "truthMMHits")
         result.addEventAlgo(the_alg) 
     if flags.Detector.GeometrysTGC: 
         container = "xStgcSimHits" if not useSDO else "sTGC_SDO"
-        the_alg = CompFactory.MuonR4.SdoMultiTruthMaker("SdoMultiTruthMakerSTGC",
-                                                        SimContainer = container, 
-                                                        WriteKey = "STGC_TruthMap")
+        the_alg = CompFactory.MuonR4.SimHitToTruthPartAssocAlg("MuonsTGCSimHitToTruthMappingAlg",
+                                                        SimHitContainer = container, 
+                                                        HitIdDecoration = "truthStgcHits")
         result.addEventAlgo(the_alg) 
 
+    return result
+
+def TruthHitSummaryAlgCfg(flags, name="MuonTruthHitSummaryAlg", **kwargs):
+    result = ComponentAccumulator()
+    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
+    kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags,  
+                                                                fillHoles=False, fillOutliers=False, 
+                                                                recomputeSegment =False)))
+    the_alg = CompFactory.MuonR4.TruthHitSummaryAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
     return result
 
 def RecoSegmentTruthAssocCfg(flags, **kwargs):
@@ -143,10 +152,12 @@ def MuonTruthAlgsCfg(flags):
     PrdLinkInputs = [( "xAOD::UncalibratedMeasurementContainer" , 
                      "StoreGateSvc+{cont_name}.simHitLink".format(cont_name = cont_name)) for cont_name in PrimaryMeasContNamesCfg(flags) ]
     result.merge(TruthSegmentMakerCfg(flags, ExtraInputs = PrdLinkInputs))
-    result.merge(SdoMultiTruthMakerCfg(flags, useSDO = True))
-    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg, MuonTruthHitCountsAlgCfg
+   
+    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
     result.merge(TruthMuonMakerAlgCfg(flags))
-    result.merge(MuonTruthHitCountsAlgCfg(flags))
+    result.merge(SimHitToTruthPartAlgCfg(flags))
+    result.merge(TruthHitSummaryAlgCfg(flags))
+    # result.merge(MuonTruthHitCountsAlgCfg(flags))
     #### Disable for the moment because tracking geometry explodes for R4
     ### from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
     ### result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
