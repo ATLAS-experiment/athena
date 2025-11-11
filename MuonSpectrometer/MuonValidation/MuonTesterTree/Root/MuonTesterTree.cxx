@@ -55,7 +55,7 @@ bool MuonTesterTree::registerBranch(std::shared_ptr<IMuonTesterBranch> branch) {
         ATH_MSG_FATAL("Tree structure is already finalized");
         return false;
     }
-    m_branches.push_back(branch);
+    m_branches.push_back(std::move(branch));
     return true;
 }
 bool MuonTesterTree::addBranch(std::shared_ptr<IMuonTesterBranch> branch) { return registerBranch(branch) && addBranch(branch.get()); }
