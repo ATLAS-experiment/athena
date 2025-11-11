@@ -193,6 +193,7 @@ private:
 
     // MULTI-CHARGE PARTICLES DIGITIZATION
     Gaudi::Property<bool> m_DoQballCharge{this, "DoQballCharge", false, "dEdx for Qballs with account of electric charge"};
+    Gaudi::Property<bool> m_DoUpdatedMdtDigi{this, "DoUpdatedMdtDigi", false, "MDT digitization with updated constants and corrections"};
 
     // pile-up
     std::unique_ptr<TimedHitCollection<MDTSimHit>> m_thpcMDT{};  // the hits
