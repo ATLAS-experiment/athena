@@ -20,7 +20,7 @@
 #include "ap_fixed.h"
 #include "Digitizer.h"
 
-#include "../GlobalAlgs/Egamma1BDT/BDT.h"
+#include "./Egamma1BDT/BDT.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 

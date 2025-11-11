@@ -7,7 +7,7 @@
 #include "../Utilities/dump.icc"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
-#include "../GlobalAlgs/Egamma1BDT/parameters.h"
+#include "./Egamma1BDT/parameters.h"
 
 #include "../IO/eEmEg1BDTTOB.h"
 
