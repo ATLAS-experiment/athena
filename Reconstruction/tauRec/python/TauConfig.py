@@ -35,10 +35,8 @@ def TauBuildAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
 
-    if flags.Beam.Type is not BeamType.Cosmics:
-        if flags.Tau.doRNNTrackClass:
-            tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
+    if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
+        tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
@@ -132,6 +130,9 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterScalerCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0SelectorCfg(flags)) )
+
+    if flags.Beam.Type is not BeamType.Cosmics:
+        tools.append( result.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
 
     if flags.Tau.doPanTau:
         import PanTauAlgs.JobOptions_Main_PanTau as pantau
