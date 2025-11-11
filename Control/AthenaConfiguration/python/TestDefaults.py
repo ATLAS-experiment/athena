@@ -41,6 +41,7 @@ class defaultTestFiles:
     RAW_RUN2_DATA18 =   [f"{d}/RecJobTransformTests/data18_13TeV/data18_13TeV.00348885.physics_Main.daq.RAW._lb0827._SFO-8._0002.data"]
     RAW_RUN3_DATA22 =   [f"{d}/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data"]
     RAW_RUN3_DATA24 =   [f"{d}/CampaignInputs/data24/RAW/data24_13p6TeV.00484909.physics_Main.daq.RAW/1627events_data24_13p6TeV.00484909.physics_Main.daq.RAW._lb0098._SFO-16._0001.data"]
+    RAW_RUN3_DATA25 =   [f"{d}/RecJobTransformTests/data25_13p6TeV/data25_13p6TeV.00509891.physics_Main.daq.RAW/data25_13p6TeV.00509891.physics_Main.daq.RAW._lb0843._SFO-18._0001.data"]
 
     RDO_RUN2 = [f"{d}/CampaignInputs/mc20/RDO/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/100events.RDO.pool.root"]
     RDO_RUN3 = [f"{d}/CampaignInputs/mc23/RDO/mc23_13p6TeV.801451.Py8EG_A3_NNPDF23LO_minbias_ND.recon.RDO.e8486_e8528_s4232_s4114_r15112/300events_RDO.39752217._004082.pool.root.1"] #low-mu minbias sample

@@ -5,6 +5,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-architecture: '#x86_64-intel'
 # art-input: group.trig-hlt.data23_cos.00457007.physics_CosmicMuons.merge.RAW
 # art-input-nfiles: 1
 # art-athena-mt: 8
