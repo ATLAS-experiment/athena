@@ -121,7 +121,7 @@ bool ReplicaSorter::readConfig() {
           } else {
   	    // token is a server name
 	    // only add Frontier ATLF server if FRONTIER_CLIENT set
-	    if (token!="ATLF" || m_frontiergen) servers.push_back(token);
+	    if (token!="ATLF" || m_frontiergen) servers.push_back(std::move(token));
           }
 	}
         iofs1=iofs2+1;
