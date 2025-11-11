@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -64,7 +64,7 @@ AuxDataFillerTool::Var::Var (const std::string& the_name,
       if (ti == 0) {
         ti = reg.getType (auxid);
         type.init (reg.getTypeName (auxid));
-        firstName = name;
+        firstName = std::move(name);
         firstId = auxid;
       }
       else {
@@ -225,7 +225,7 @@ StatusCode AuxDataFillerTool::parseVars()
       boost::algorithm::trim (l);
       l = m_auxprefix + l;
       boost::algorithm::trim (label_class);
-      label_classes.push_back (label_class);
+      label_classes.push_back (std::move(label_class));
     }
 
     boost::algorithm::trim (name);
@@ -245,8 +245,13 @@ StatusCode AuxDataFillerTool::parseVars()
         SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
         const std::type_info* ti = typ.getTypeInfo();
         if (ti) {
-          for (size_t i = 0; i < labels.size(); i++)
-            reg.getAuxID (*ti, labels[i], label_classes[i]);
+          for (size_t i = 0; i < labels.size(); i++){
+            auto auxid = reg.getAuxID (*ti, labels[i], label_classes[i]);
+            if (auxid == SG::null_auxid){
+              REPORT_MESSAGE(MSG::WARNING)
+                <<"AuxDataFillerTool::parseVars: auxid is invalid for "<<labels[i]<<"\n";
+            }
+          }
         }
       }
     }

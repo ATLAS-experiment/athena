@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -89,7 +89,7 @@ mergeObjects( const std::set< D3PD::ObjectMetadata >& objects );
 
 /// A convenience declaration to save myself some typeing
 namespace po = boost::program_options;
-
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] ) {
    // Let's disable the ROOT warnings:
    gErrorIgnoreLevel = kError;
@@ -202,7 +202,7 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] ) {
          std::string key_name = key->GetName();
          if( ( key_name.find( "Meta" ) != key_name.npos ) &&
              ( key->GetClassName() == std::string( "TDirectoryFile" ) ) ) {
-            metaDirectories.push_back( key_name );
+            metaDirectories.push_back( std::move(key_name) );
          }
       }
 
