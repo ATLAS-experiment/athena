@@ -10,6 +10,13 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 * @date Mar. 11, 2025
 */
 
+constexpr bool enableBenchmark = 
+#ifdef STANDALONE_FPGA_BENCHMARK
+    true;
+#else
+    false;
+#endif
+
 #include "EFTrackingFPGAUtility/xAODClusterMaker.h"
 
 #include "AthContainers/Accessor.h"
@@ -110,7 +117,7 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
     auto stripCl = std::make_unique<xAOD::StripClusterContainer>();
     stripCl->reserve(nClusters);
     {
-      Athena::Chrono chrono("Strip object creating", m_chronoSvc.get());
+      if constexpr (enableBenchmark) Athena::Chrono chrono("Strip object creating", m_chronoSvc.get());
       for (std::size_t i = 0; i < nClusters; ++i) {
         stripCl->push_back(std::make_unique<xAOD::StripCluster>());
       }
@@ -167,7 +174,7 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
       // Vectorized bulk assignments
       // --------------------------
       {
-        Athena::Chrono chrono("Strip assignments", m_chronoSvc.get());
+        if constexpr (enableBenchmark) Athena::Chrono chrono("Strip assignments", m_chronoSvc.get());
         for (size_t i = 0; i < nClusters; ++i) {
           idHashSpan[i] = static_cast<unsigned int>(idHashPtr[i]);
           idSpan[i]     = static_cast<unsigned long>(identifierPtr[i]);
@@ -193,7 +200,7 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
     }
     
     {
-      Athena::Chrono chrono("Strip Copy", m_chronoSvc.get());
+      if constexpr (enableBenchmark) Athena::Chrono chrono("Strip Copy", m_chronoSvc.get());
       ATH_CHECK(stripClustersHandle.record(std::move(stripCl), std::move(stripClAux)));
     }
     
@@ -354,7 +361,7 @@ const EventContext &ctx) const {
   auto pixelCl = std::make_unique<xAOD::PixelClusterContainer>();
   pixelCl->reserve(nClusters);
   {
-    Athena::Chrono chrono("Pixel object creating", m_chronoSvc.get());
+    if constexpr (enableBenchmark) Athena::Chrono chrono("Pixel object creating", m_chronoSvc.get());
     for (std::size_t i = 0; i < nClusters; ++i) {
       pixelCl->push_back(std::make_unique<xAOD::PixelCluster>());
     }
@@ -422,7 +429,7 @@ const EventContext &ctx) const {
       // Vectorized bulk assignments
       // --------------------------
       {
-        Athena::Chrono chrono("Pixel assignments", m_chronoSvc.get());
+        if constexpr (enableBenchmark) Athena::Chrono chrono("Pixel assignments", m_chronoSvc.get());
         for (size_t i = 0; i < nClusters; ++i) {
           idHashSpan[i] = static_cast<unsigned int>(idHashPtr[i]);
           idSpan[i] = static_cast<unsigned long>(identifierPtr[i]);
@@ -453,7 +460,7 @@ const EventContext &ctx) const {
     }
   
   {
-    Athena::Chrono chrono("Pixel Copy", m_chronoSvc.get());
+    if constexpr (enableBenchmark) Athena::Chrono chrono("Pixel Copy", m_chronoSvc.get());
     ATH_CHECK(pixelClustersHandle.record(std::move(pixelCl), std::move(pixelClAux)));
   }
   
@@ -477,7 +484,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
       // proceed with the element-wise method
       // --------------------------------------------------------------------
       ATH_MSG_DEBUG("You are running the element-wise container creation method.");
-      Athena::Chrono chrono("ElementWiseMethod", m_chronoSvc.get());
+      if constexpr (enableBenchmark) Athena::Chrono chrono("ElementWiseMethod", m_chronoSvc.get());
       
       ATH_CHECK(pixelClustersHandle.record(
         std::make_unique<xAOD::PixelClusterContainer>(),
@@ -531,7 +538,7 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
         // --------------------------------------------------------------------
         
         ATH_MSG_DEBUG("You are running the bulk copy container creation method.");
-        Athena::Chrono chrono("BulkCopyMethod", m_chronoSvc.get());
+        if constexpr (enableBenchmark) Athena::Chrono chrono("BulkCopyMethod", m_chronoSvc.get());
         
         // --------------------------
         // Create the container and aux. container
