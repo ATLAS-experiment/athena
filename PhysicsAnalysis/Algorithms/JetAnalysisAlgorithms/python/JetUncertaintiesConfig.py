@@ -16,7 +16,6 @@ class JetUncertaintiesConfig (ConfigBlock) :
     def __init__ (self) :
         super (JetUncertaintiesConfig, self).__init__ ()
         self.setBlockName('Uncertainties')
-        self.addDependency('OverlapRemoval', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
