@@ -24,6 +24,7 @@ class MDT_Response {
 
   MDT_Response();
   MDT_Response(double timewindow, double binsize); // time window in which to look for threshold
+  MDT_Response(bool doUpdatedMdtDigi);
   ~MDT_Response();
 
   // set segment
@@ -38,6 +39,10 @@ class MDT_Response {
   void SetTriggerElectron(double el);
   void SetIntegrationWindow(double win);
   void SetRtParameters(int npar,double *par);
+  void SetAdcOffset(double offset);
+  void SetAdcFactor(double factor);
+  void SetAdcFraction(double fraction);
+  void SetDoUpdatedMdtDigi(bool doUpdatedMdtDigi);
   
   // get functions
   bool   GetSignal(CLHEP::HepRandomEngine *rndmEngine);        // processes hit, returns true if amplifier passed threshold
@@ -71,20 +76,21 @@ class MDT_Response {
 
   double     m_radius = 0.0;              // radius of the tube
 
-  double     m_rhit;                // radius of the current hit
-  double     m_xhit;                // position along the tube of the current hit
-  double     m_pathLength;          // path length of particle in tube
+  double     m_rhit = 0.0;                // radius of the current hit
+  double     m_xhit = 0.0;                // position along the tube of the current hit
+  double     m_pathLength = 0.0;          // path length of particle in tube
  
   double m_clusterDensity = 0.0;          // clusters per mm
   std::vector<double> m_gammaFactorVec; // gamma	
   std::vector<double> m_numberOfClustersPerCmVec; // clusters per cm 
+  std::vector<double> m_numberOfClustersPerMmVec; // clusters per mm
 
   double m_attLength = 0.0;               // attenuation length of tube
   double m_signalSpeed = 0.0;             // propagation speed along wire
  
   int     m_rtMode = 0;                  // choose rt mode
   unsigned int m_rtNpar = 0U;
-  double* m_rtParameters;
+  double* m_rtParameters = nullptr;
 
   double m_difSmearing = 0.0;             // width of gaussian smearing 
 
@@ -95,10 +101,16 @@ class MDT_Response {
   int m_offset = 0;
   int m_bins = 0;
 
+  // parameters for Wilkinson ADC response
+  double m_amp_adcOffset = 0.0;
+  double m_amp_adcFactor = 0.0;
+  double m_amp_adcFraction = 0.0;
+
   Amplifier  m_amplifier;           // amplifier
   clusterVec m_clusters;            // produced clusters
 
-  double m_t0;
+  double m_t0 = 0.0;
+  bool m_DoUpdatedMdtDigi = false;
 };
 
 inline   
@@ -215,6 +227,22 @@ inline void MDT_Response::SetTriggerElectron(double el)
 
 inline void MDT_Response::SetIntegrationWindow(double win) 
 { m_integrationWindow = win; m_amplifier.SetIntegrationWindow(win); }
+
+inline void MDT_Response::SetAdcOffset(double offset) { 
+    m_amp_adcOffset = offset;
+}
+
+inline void MDT_Response::SetAdcFactor(double factor) { 
+    m_amp_adcFactor = factor;
+}
+
+inline void MDT_Response::SetAdcFraction(double fraction) { 
+    m_amp_adcFraction = fraction;
+}
+
+inline void MDT_Response::SetDoUpdatedMdtDigi(bool doUpdatedMdtDigi) {
+  m_DoUpdatedMdtDigi = doUpdatedMdtDigi;
+}
 
 inline void MDT_Response::SetRtParameters(int npar,double *par)
 {
