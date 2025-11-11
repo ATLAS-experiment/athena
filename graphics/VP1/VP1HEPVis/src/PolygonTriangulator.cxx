@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "PolygonTriangulator.h"
 
 ///////////////////////////////////////////////////////////////////////
@@ -1951,7 +1954,7 @@ void PolygonTriangulator::Polygon::searchMonotones()
 	  if(next->endPoint(0) !=endp ) next->reverse();
 	}
 
-      m_mpolys.push_back(poly);
+      m_mpolys.push_back(std::move(poly));
     }
 }
 
@@ -1992,7 +1995,7 @@ void  PolygonTriangulator::Polygon::triangulateMonotone(internal_poltrig::Monopo
 	      v[1]=p1.id;
 	      v[2]=p2.id;
 	      sort(v.begin(),v.end());//TK
-	      m_triangles.push_back(v);
+	      m_triangles.push_back(std::move(v));
 
 	    }
 	  spoint.pop();

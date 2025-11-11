@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -2002,6 +2002,7 @@ HepPolyhedron BooleanProcessor::createPolyhedron()
     polyhedron.m_pF[m_faces[i].inew] =
       G4Facet(v[0],f[0], v[1],f[1], v[2],f[2], v[3],f[3]);
   }
+  //coverity[copy_constructor_call]
   return polyhedron;
 }
 
