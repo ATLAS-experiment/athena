@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def TruthSegmentMakerCfg(flags, name = "TruthSegmentMakerAlg", **kwargs):
+def TruthSegmentMakerCfg(flags, name = "MuonTruthSegmentMaker", useSDO = True, **kwargs):
     result = ComponentAccumulator()
     if not flags.Input.isMC:
         return result
@@ -13,11 +13,11 @@ def TruthSegmentMakerCfg(flags, name = "TruthSegmentMakerAlg", **kwargs):
     result.merge(ActsGeometryContextAlgCfg(flags))
     containerNames = []
     ## If the tester runs on MC add the truth information
-    if flags.Detector.EnableMDT: containerNames+=["MDT_SDO"]       
-    if flags.Detector.EnableRPC: containerNames+=["RPC_SDO"]
-    if flags.Detector.EnableTGC: containerNames+=["TGC_SDO"]
-    if flags.Detector.EnableMM: containerNames+=["MM_SDO"]
-    if flags.Detector.EnablesTGC: containerNames+=["sTGC_SDO"] 
+    if flags.Detector.EnableMDT: containerNames+=["MDT_SDO" if useSDO else "xMdtSimHits"]       
+    if flags.Detector.EnableRPC: containerNames+=["RPC_SDO" if useSDO else "xRpcSimHits"]
+    if flags.Detector.EnableTGC: containerNames+=["TGC_SDO" if useSDO else "xTgcSimHits"]
+    if flags.Detector.EnableMM: containerNames+=["MM_SDO" if useSDO else "xMmSimHits"]
+    if flags.Detector.EnablesTGC: containerNames+=["sTGC_SDO" if useSDO else "xStgcSimHits"] 
     #### Mdt calib db alg
     from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg, NswErrorCalibDbAlgCfg
     if flags.Detector.EnableMDT:
@@ -143,23 +143,23 @@ def TrackToTruthPartAssocCfg(flags, **kwargs):
 
 
 @AccumulatorCache
-def MuonTruthAlgsCfg(flags):
+def MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = True):
     result = ComponentAccumulator()
     if not flags.Input.isMC:
         return result
-    result.merge(TruthHitAssociationCfg(flags))
-    from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
-    PrdLinkInputs = [( "xAOD::UncalibratedMeasurementContainer" , 
-                     "StoreGateSvc+{cont_name}.simHitLink".format(cont_name = cont_name)) for cont_name in PrimaryMeasContNamesCfg(flags) ]
-    result.merge(TruthSegmentMakerCfg(flags, ExtraInputs = PrdLinkInputs))
+    if useSDO and recoAssoc:
+        result.merge(TruthHitAssociationCfg(flags))
    
     from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
     result.merge(TruthMuonMakerAlgCfg(flags))
-    result.merge(SimHitToTruthPartAlgCfg(flags))
+    result.merge(SimHitToTruthPartAlgCfg(flags, useSDO = useSDO))
+    result.merge(TruthSegmentMakerCfg(flags, useSDO = useSDO))
     result.merge(TruthHitSummaryAlgCfg(flags))
+
     # result.merge(MuonTruthHitCountsAlgCfg(flags))
     #### Disable for the moment because tracking geometry explodes for R4
     ### from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
     ### result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
     result.merge(TruthSegmentToTruthPartAssocCfg(flags))
+
     return result

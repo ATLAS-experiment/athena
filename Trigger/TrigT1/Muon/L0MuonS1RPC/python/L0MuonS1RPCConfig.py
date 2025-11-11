@@ -9,18 +9,11 @@ _log = logging.getLogger(__name__)
 def TruthMuonCfg(flags):
     result = ComponentAccumulator()
 
-
-    from MuonTruthAlgsR4.MuonTruthAlgsConfig import TruthSegmentMakerCfg, TruthSegmentToTruthPartAssocCfg, SdoMultiTruthMakerCfg
-    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg, MuonTruthHitCountsAlgCfg
-    result.merge(TruthMuonMakerAlgCfg(flags))
-    result.merge(MuonTruthHitCountsAlgCfg(flags))
-    result.merge(TruthSegmentToTruthPartAssocCfg(flags))
-    result.merge(TruthSegmentMakerCfg(flags))
-    result.merge(TruthSegmentToTruthPartAssocCfg(flags))
-    result.merge(SdoMultiTruthMakerCfg(flags, useSDO=True))
-
+    from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+    result.merge(MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = False))
 
     return result
+
 def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
     
     result = ComponentAccumulator()
