@@ -27,6 +27,8 @@ constexpr bool enableBenchmark =
 #include "StoreGate/WriteHandle.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+#include "AthAllocators/DataPool.h"
+
 
 StatusCode xAODClusterMaker::initialize() {
   ATH_MSG_INFO("Initialising xAODClusterMaker tool");
@@ -114,17 +116,15 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
     // Create the container and aux. container
     // --------------------------
     const size_t nClusters = metadata->numOfStripClusters;
-    auto stripCl = std::make_unique<xAOD::StripClusterContainer>();
-    stripCl->reserve(nClusters);
+    DataPool<xAOD::StripCluster> stripPool{ctx};
+    stripPool.reserve(nClusters);
+    auto stripCl = std::make_unique<xAOD::StripClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
     {
       if constexpr (enableBenchmark) Athena::Chrono chrono("Strip object creating", m_chronoSvc.get());
-      for (std::size_t i = 0; i < nClusters; ++i) {
-        stripCl->push_back(std::make_unique<xAOD::StripCluster>());
-      }
+      stripCl->push_new(nClusters, [&stripPool]() { return stripPool.nextElementPtr(); });
     }
-    
     auto stripClAux = std::make_unique<xAOD::StripClusterAuxContainer>();
-    stripClAux->resize(stripCl->size());
+    stripClAux->resize(nClusters);
     stripCl->setStore(stripClAux.get());
     
     
@@ -358,17 +358,15 @@ const EventContext &ctx) const {
   // Create the container and aux. container
   // --------------------------
   const size_t nClusters = metadata->numOfPixelClusters;  
-  auto pixelCl = std::make_unique<xAOD::PixelClusterContainer>();
-  pixelCl->reserve(nClusters);
+  DataPool<xAOD::PixelCluster> pixelPool{ctx};
+  pixelPool.reserve(nClusters);
+  auto pixelCl = std::make_unique<xAOD::PixelClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
   {
     if constexpr (enableBenchmark) Athena::Chrono chrono("Pixel object creating", m_chronoSvc.get());
-    for (std::size_t i = 0; i < nClusters; ++i) {
-      pixelCl->push_back(std::make_unique<xAOD::PixelCluster>());
-    }
+    pixelCl->push_new(nClusters, [&pixelPool]() { return pixelPool.nextElementPtr(); });
   }
-  
   auto pixelClAux = std::make_unique<xAOD::PixelClusterAuxContainer>();
-  pixelClAux->resize(pixelCl->size());
+  pixelClAux->resize(nClusters);
   pixelCl->setStore(pixelClAux.get());
   
 
@@ -696,4 +694,3 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
           ATH_MSG_DEBUG("Bulk copy for fixed-size variables done.");
           return StatusCode::SUCCESS;
           }
-                  
