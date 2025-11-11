@@ -13,7 +13,7 @@
     ATH_MSG_INFO( "InitializePythiaInfo " << name() << " with process " << m_process);
     if (m_process == 1) {
       PDFPtr photonFlux = PNEW(Lepton2gamma2, -11);
-      pythia.setPhotonFluxPtr(photonFlux, 0);
+      pythia.setPhotonFluxPtr(std::move(photonFlux), 0);
       return StatusCode::SUCCESS;
     }
     else if(m_process ==2 || m_process ==3) {    

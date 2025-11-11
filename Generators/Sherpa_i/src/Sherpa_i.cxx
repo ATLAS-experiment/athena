@@ -175,7 +175,7 @@ StatusCode Sherpa_i::genInitialize(){
     std::string(SHERPA_VERSION)+ "." + std::string(SHERPA_SUBVERSION), 
     std::string("Used generator")
   };
-  m_runinfo->tools().push_back(generator);
+  m_runinfo->tools().push_back(std::move(generator));
   #endif
   return StatusCode::SUCCESS;
 }
