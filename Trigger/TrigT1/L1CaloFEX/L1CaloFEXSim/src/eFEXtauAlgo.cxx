@@ -67,11 +67,14 @@ unsigned int LVL1::eFEXtauAlgo::getEt() const {
   unsigned int out = 0;
 
   out += m_em0cells[0][1];
-  out += m_em0cells[1][1];
-  out += m_em0cells[2][1];
-  out += m_em0cells[0][m_offPhi];
-  out += m_em0cells[1][m_offPhi];
-  out += m_em0cells[2][m_offPhi];
+
+  if (m_AlgoVersion==0){
+    out += m_em0cells[1][1];
+    out += m_em0cells[2][1];
+    out += m_em0cells[0][m_offPhi];
+    out += m_em0cells[1][m_offPhi];
+    out += m_em0cells[2][m_offPhi];
+  }
 
   out += m_em1cells[m_seed][1];
   out += m_em1cells[m_seed + 1][1];
