@@ -592,6 +592,7 @@ int main(int argc, char * argv[]){
       logger << Root::kINFO << "Using Directory name: " << d3pddirname.c_str() << Root::GEndl;
       dir = dynamic_cast<TDirectoryFile*>(file->GetDirectory(d3pddirname.c_str()));
       if(!dir){
+      //coverity[copy_constructor_call]
 	logger << Root::kERROR << "Directory [" << d3pddirname << "] doesn't exist in file " << filename << Root::GEndl;
 	exit(-1);
       }else{
