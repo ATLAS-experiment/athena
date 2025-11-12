@@ -34,55 +34,20 @@ namespace DerivationFramework {
     ATH_CHECK( m_cellContainerKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_clusterContainerKey.initialize(SG::AllowEmpty) );
 
-    const std::string baseName = m_muonContainerKey.key() + ".";
-
-    m_selectedMuKey = baseName + m_prefix + m_selectedMuKey.key();
     ATH_CHECK( m_selectedMuKey.initialize() );
-
-    m_econeMuKey = baseName + m_prefix + m_econeMuKey.key() + std::to_string(int(m_isoCone * 100));
     ATH_CHECK( m_econeMuKey.initialize() );
-
-    m_cellsMuonXKey = baseName + m_prefix + m_cellsMuonXKey.key();
     ATH_CHECK( m_cellsMuonXKey.initialize() );
-
-    m_cellsMuonYKey = baseName + m_prefix + m_cellsMuonYKey.key();
     ATH_CHECK( m_cellsMuonYKey.initialize() );
-
-    m_cellsMuonZKey = baseName + m_prefix + m_cellsMuonZKey.key();
     ATH_CHECK( m_cellsMuonZKey.initialize() );
-
-    m_cellsMuonEtaKey = baseName + m_prefix + m_cellsMuonEtaKey.key();
     ATH_CHECK( m_cellsMuonEtaKey.initialize() );
-
-    m_cellsMuonPhiKey = baseName + m_prefix + m_cellsMuonPhiKey.key();
     ATH_CHECK( m_cellsMuonPhiKey.initialize() );
-
-    m_cellsToMuonDxKey = baseName + m_prefix + m_cellsToMuonDxKey.key();
     ATH_CHECK( m_cellsToMuonDxKey.initialize() );
-
-    m_cellsToMuonDyKey = baseName + m_prefix + m_cellsToMuonDyKey.key();
     ATH_CHECK( m_cellsToMuonDyKey.initialize() );
-
-    m_cellsToMuonDzKey = baseName + m_prefix + m_cellsToMuonDzKey.key();
     ATH_CHECK( m_cellsToMuonDzKey.initialize() );
-
-    m_cellsToMuonDetaKey = baseName + m_prefix + m_cellsToMuonDetaKey.key();
     ATH_CHECK( m_cellsToMuonDetaKey.initialize() );
-
-    m_cellsToMuonDphiKey = baseName + m_prefix + m_cellsToMuonDphiKey.key();
     ATH_CHECK( m_cellsToMuonDphiKey.initialize() );
-
-    m_cellsMuonDxKey = baseName + m_prefix + m_cellsMuonDxKey.key();
     ATH_CHECK( m_cellsMuonDxKey.initialize() );
-
-    m_cellsMuonDeDxKey = baseName + m_prefix + m_cellsMuonDeDxKey.key();
     ATH_CHECK( m_cellsMuonDeDxKey.initialize() );
-
-    if (!m_clusterContainerKey.empty()) {
-      for (double dr : m_drCones) {
-        m_larEnergyInConeKeyArray.emplace_back(baseName + m_prefix + "elarcone" + std::to_string(int(dr * 100)));
-      }
-    }
     ATH_CHECK( m_larEnergyInConeKeyArray.initialize(SG::AllowEmpty) );
 
     for (unsigned int layer : m_energyInLayers) {
