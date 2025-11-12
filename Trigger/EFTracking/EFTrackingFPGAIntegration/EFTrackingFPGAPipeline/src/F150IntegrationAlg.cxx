@@ -70,8 +70,8 @@ namespace EFTrackingFPGAIntegration
             m_stripL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_stripL2GEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             // EDMPrep
-            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
-            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
+            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint32_t), nullptr, &err));
+            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint32_t), nullptr, &err));
 
 
             m_slicingEngineOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
@@ -281,116 +281,21 @@ namespace EFTrackingFPGAIntegration
 
 
         // output handles
-        SG::WriteHandle<std::vector<uint64_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
-        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
+        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
 
-        SG::WriteHandle<std::vector<uint64_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
-        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
+        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
 
         SG::WriteHandle<std::vector<uint64_t>> FPGATrackOutput(m_FPGATrackOutput, ctx);
         ATH_CHECK(FPGATrackOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE, 0)));
 
-        acc_queue.enqueueReadBuffer(m_edmPixelOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint64_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
-        acc_queue.enqueueReadBuffer(m_edmStripOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint64_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
+        acc_queue.enqueueReadBuffer(m_edmPixelOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint32_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
+        acc_queue.enqueueReadBuffer(m_edmStripOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint32_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
         acc_queue.enqueueReadBuffer(m_insideOutOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint64_t) * (*FPGATrackOutput).size(), (*FPGATrackOutput).data(), &evt_vec_insideout_output, &evt_track_output);
 
         std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_strip_cluster_output, evt_track_output };
         cl::Event::waitForEvents(wait_for_reads);
-
-
-        dumpHexData((*FPGATrackOutput), "HW_F150i_Stream_insideOut.txt", ctx);
-
-
-        // ---------- Read remaining device buffers & dump to hex ----------
-
-        // Helper to query buffer size (bytes) -> element count
-        auto bufferElemCount = [](const cl::Buffer& b) -> size_t {
-            size_t bytes = 0;
-            b.getInfo(CL_MEM_SIZE, &bytes);
-            return bytes / sizeof(uint64_t);
-        };
-
-        // Host scratch areas (sized dynamically from device buffers)
-        std::vector<uint64_t> pixelClusterEDMOut(bufferElemCount(m_pixelClusterEDMOutputBufferList[bufferIndex]), 0);
-        std::vector<uint64_t> stripClusterOut    (bufferElemCount(m_stripClusterOutputBufferList[bufferIndex]),     0);
-        std::vector<uint64_t> stripClusterEDMOut (bufferElemCount(m_stripClusterEDMOutputBufferList[bufferIndex]),  0);
-        std::vector<uint64_t> stripL2GOut        (bufferElemCount(m_stripL2GOutputBufferList[bufferIndex]),         0);
-        std::vector<uint64_t> stripL2GEDMOut     (bufferElemCount(m_stripL2GEDMOutputBufferList[bufferIndex]),      0);
-        std::vector<uint64_t> slicingEngineOut   (bufferElemCount(m_slicingEngineOutputBufferList[bufferIndex]),     0);
-
-        // Read events for the above
-        cl::Event evt_read_pixel_cluster_edm;
-        cl::Event evt_read_strip_cluster;
-        cl::Event evt_read_strip_cluster_edm;
-        cl::Event evt_read_strip_l2g;
-        cl::Event evt_read_strip_l2g_edm;
-        cl::Event evt_read_slicing_out;
-
-        // Dependencies: make each read wait on the kernel that produced the buffer
-        std::vector<cl::Event> deps_pixel_clust_edm { evt_pixel_clustering };  // pixelClusteringKernel -> pixelClusterEDM
-        std::vector<cl::Event> deps_strip_clust     { evt_strip_clustering  }; // stripClusteringKernel -> strip cluster buffers
-        std::vector<cl::Event> deps_strip_l2g       { evt_strip_l2g         }; // stripL2GKernel -> strip L2G buffers
-        std::vector<cl::Event> deps_slicing         { evt_slicing_done      }; // slicingEngineOutputKernel -> slicing buffer
-
-        // Enqueue reads of intermediate / remaining buffers
-        acc_queue.enqueueReadBuffer(
-            m_pixelClusterEDMOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * pixelClusterEDMOut.size(), pixelClusterEDMOut.data(),
-            &deps_pixel_clust_edm, &evt_read_pixel_cluster_edm);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripClusterOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripClusterOut.size(), stripClusterOut.data(),
-            &deps_strip_clust, &evt_read_strip_cluster);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripClusterEDMOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripClusterEDMOut.size(), stripClusterEDMOut.data(),
-            &deps_strip_clust, &evt_read_strip_cluster_edm);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripL2GOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripL2GOut.size(), stripL2GOut.data(),
-            &deps_strip_l2g, &evt_read_strip_l2g);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripL2GEDMOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripL2GEDMOut.size(), stripL2GEDMOut.data(),
-            &deps_strip_l2g, &evt_read_strip_l2g_edm);
-
-        acc_queue.enqueueReadBuffer(
-            m_slicingEngineOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * slicingEngineOut.size(), slicingEngineOut.data(),
-            &deps_slicing, &evt_read_slicing_out);
-
-        // Wait for *all* reads (existing finals + new intermediates)
-        std::vector<cl::Event> all_reads = {
-            // existing final outputs:
-            evt_pixel_cluster_output, evt_strip_cluster_output, evt_track_output,
-            // new reads:
-            evt_read_pixel_cluster_edm,
-            evt_read_strip_cluster, evt_read_strip_cluster_edm,
-            evt_read_strip_l2g, evt_read_strip_l2g_edm,
-            evt_read_slicing_out
-        };
-        cl::Event::waitForEvents(all_reads);
-
-        // Dump everything to hex files (include inputs for completeness)
-        dumpHexData((*pixelInput), "HW_F150i_Stream_pixelInput_event.txt", ctx);
-        dumpHexData((*stripInput), "HW_F150i_Stream_stripInput_event.txt", ctx);
-
-        // Final container outputs (already read into WriteHandles)
-        dumpHexData((*FPGAPixelOutput), "HW_F150i_Stream_pixelEDM_event.txt", ctx);
-        dumpHexData((*FPGAStripOutput), "HW_F150i_Stream_stripEDM_event.txt", ctx);
-
-        // Intermediates
-        dumpHexData(pixelClusterEDMOut,  "HW_F150i_Stream_pixelClusterEDM_event.txt", ctx);
-        dumpHexData(stripClusterOut,     "HW_F150i_Stream_stripCluster_event.txt", ctx);
-        dumpHexData(stripClusterEDMOut,  "HW_F150i_Stream_stripClusterEDM_event.txt", ctx);
-        dumpHexData(stripL2GOut,         "HW_F150i_Stream_stripL2G_event.txt", ctx);
-        dumpHexData(stripL2GEDMOut,      "HW_F150i_Stream_stripL2GEDM_event.txt", ctx);
-        dumpHexData(slicingEngineOut,    "HW_F150i_Stream_slicingEngineOut_event.txt", ctx);
-
 
 
         mnt_timer_Total.stop();

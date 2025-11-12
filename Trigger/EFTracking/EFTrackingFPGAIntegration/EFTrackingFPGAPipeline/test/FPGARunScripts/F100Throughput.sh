@@ -86,7 +86,7 @@ echo "running local"
 ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
-    --preExec "flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
+    --preExec "flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False; flags.FPGADataPrep.ForTiming=True;\
                 flags.Tracking.doTruth=False; flags.Output.doGEN_AOD2xAOD=False; flags.Reco.PostProcessing.GeantTruthThinning=False; \
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};flags.Tracking.doVertexFinding=False;\
                 flags.Concurrency.NumProcs=${nproc}; flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads}; flags.Output.AODFileName=\"\"; flags.Output.doWriteAOD=False;\

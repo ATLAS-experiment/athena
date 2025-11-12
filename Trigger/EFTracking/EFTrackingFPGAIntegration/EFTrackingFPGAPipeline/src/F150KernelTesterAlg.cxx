@@ -180,8 +180,8 @@ namespace EFTrackingFPGAIntegration
         m_stripL2GEDMOutputBuffer = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err);
         
         // EDMPrep
-        m_edmPixelOutputBuffer = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err);
-        m_edmStripOutputBuffer = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err);
+        m_edmPixelOutputBuffer = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint32_t), nullptr, &err);
+        m_edmStripOutputBuffer = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint32_t), nullptr, &err);
         
         m_slicingEngineInputBuffer  = cl::Buffer(m_context, CL_MEM_READ_ONLY,  pixelDataIN.size() * sizeof(uint64_t), nullptr, &err);
         m_slicingEngineOutputBuffer = cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err);
@@ -400,11 +400,11 @@ namespace EFTrackingFPGAIntegration
             m_queue.enqueueTask(m_insideOutOutput, nullptr, &evt_Insideout_OutputDone);
             
             // output handles
-            SG::WriteHandle<std::vector<uint64_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
-            ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
+            SG::WriteHandle<std::vector<uint32_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
+            ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
             
-            SG::WriteHandle<std::vector<uint64_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
-            ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
+            SG::WriteHandle<std::vector<uint32_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
+            ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
             
             SG::WriteHandle<std::vector<uint64_t>> FPGATrackOutput(m_FPGATrackOutput, ctx);
             ATH_CHECK(FPGATrackOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE, 0)));
@@ -412,8 +412,8 @@ namespace EFTrackingFPGAIntegration
             std::vector<cl::Event> evt_vec_pixel_edm_prep{evt_pixel_edm_prep};
             std::vector<cl::Event> evt_vec_strip_edm_prep{evt_strip_edm_prep};
             std::vector<cl::Event> waitForInsideout{evt_Insideout_OutputDone};
-            m_queue.enqueueReadBuffer(m_edmPixelOutputBuffer, CL_FALSE, 0, sizeof(uint64_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
-            m_queue.enqueueReadBuffer(m_edmStripOutputBuffer, CL_FALSE, 0, sizeof(uint64_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
+            m_queue.enqueueReadBuffer(m_edmPixelOutputBuffer, CL_FALSE, 0, sizeof(uint32_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
+            m_queue.enqueueReadBuffer(m_edmStripOutputBuffer, CL_FALSE, 0, sizeof(uint32_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
             m_queue.enqueueReadBuffer( m_insideOutOutputBuffer, CL_FALSE, 0, sizeof(uint64_t) * (*FPGATrackOutput).size(), (*FPGATrackOutput).data(), &waitForInsideout, &evt_track_output);
             
             std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_strip_cluster_output, evt_track_output };

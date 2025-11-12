@@ -238,6 +238,73 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<Da
     ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
 }
 
+template <>
+void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<DataVector< xAOD::PixelCluster >>& clusterContainer) const
+{
+    std::string mainTable = "\n"
+        "|===================================================================================================================================================================================|\n"
+        "|      # |             Global coordinates             |      Local coordinates      |      Local Covariance       |             Size            |     Hash ID  |      Identifier    |\n"
+        "|        |       x      |       y      |       z      |       0      |       1      |      0,0     |     1,1      |      phi     |     eta      |              |                    |\n"
+        "|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n";
+    unsigned int counter = 0;
+    std::map<int, int> counterMap;
+    for (const auto& cluster : *clusterContainer)
+    {
+        ++counter;
+
+            mainTable += std::format("| {:>6} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:#018x} |\n",
+            counter,
+            cluster->globalPosition().x(),
+            cluster->globalPosition().y(),
+            cluster->globalPosition().z(),
+            cluster->localPosition<2>()[0],
+            cluster->localPosition<2>()[1],
+            cluster->localCovariance<2>()(0, 0),
+            cluster->localCovariance<2>()(1, 1),
+            cluster->channelsInPhi(),
+            cluster->channelsInEta(),
+            cluster->identifierHash(),
+            cluster->identifier());
+            
+            counterMap[cluster->identifierHash()]++;
+        }
+    mainTable += "|=========================================================================================|";
+
+    ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
+}
+
+template <>
+void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<DataVector< xAOD::StripCluster >>& clusterContainer) const
+{
+    std::string mainTable = "\n"
+        "|======================================================================================================================================|\n"
+        "|      # |             Global coordinates             |     Local    |    Local     |     Size     |     Hash ID  |      Identifier    |\n"
+        "|        |       x      |       y      |       z      |     Pos      |     Cov      |              |              |                    |\n"
+        "|--------------------------------------------------------------------------------------------------------------------------------------|\n";
+    unsigned int counter = 0;
+    std::map<int, int> counterMap;
+    for (const auto& cluster : *clusterContainer)
+    {
+        ++counter;
+
+        mainTable += std::format("| {:>6} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:#018x} |\n",
+        counter,
+        cluster->globalPosition().x(),
+        cluster->globalPosition().y(),
+        cluster->globalPosition().z(),
+        cluster->localPosition<1>()[0],
+        cluster->localCovariance<1>()(0, 0),
+        cluster->channelsInPhi(),
+        cluster->identifierHash(),
+        cluster->identifier());
+
+        counterMap[cluster->identifierHash()]++;
+    }
+    mainTable += "|=========================================================================================|";
+
+    ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
+}
+
 
 void FPGATrackSim::FPGATrackSimReportingAlg::processxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const
 {
