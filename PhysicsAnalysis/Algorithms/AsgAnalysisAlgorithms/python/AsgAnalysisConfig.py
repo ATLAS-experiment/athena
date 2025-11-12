@@ -63,6 +63,9 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('enableExpertMode', False, type=bool,
             info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
             "DO NOT USE FOR ANALYSIS.")
+        self.addOption ('streamName', 'ANALYSIS', type=str,
+            info="name of the output stream to save the cut bookkeeper in. "
+            "The default is ANALYSIS.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -107,6 +110,7 @@ class CommonServicesConfig (ConfigBlock) :
             # print out all systematics
             allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
             allSysDumper.histogramName = self.systematicsHistogram
+            allSysDumper.RootStreamName = self.streamName
 
             if self.separateWeightSystematics:
                 # print out only the weight systematics (for more efficient histogramming down the line)
