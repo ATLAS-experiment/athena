@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// EventInfoBSErrDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Daiki Hayakawa ( daiki.hayakawa@cern.ch )
 
 #include "DerivationFrameworkInDet/EventInfoBSErrDecorator.h"
@@ -19,13 +16,6 @@
 
 namespace DerivationFramework {
 
-  EventInfoBSErrDecorator::EventInfoBSErrDecorator(const std::string& type,
-      const std::string& name,
-      const IInterface* parent) :
-    base_class(type,name,parent)
-  {
-  }
-
   StatusCode EventInfoBSErrDecorator::initialize()
   {
 
@@ -38,8 +28,8 @@ namespace DerivationFramework {
     // need Atlas id-helpers to identify sub-detectors, take them from detStore
     if( detStore()->retrieve(m_sctId,"SCT_ID").isFailure() ){
       ATH_MSG_ERROR("Could not retrieve SCT helper");
-      return StatusCode::FAILURE; 
-    } 
+      return StatusCode::FAILURE;
+    }
 
     CHECK ( m_byteStreamErrTool.retrieve() );
     CHECK ( m_cabling.retrieve() );
@@ -62,10 +52,6 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode EventInfoBSErrDecorator::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
 
   StatusCode EventInfoBSErrDecorator::addBranches(const EventContext& ctx) const
   {
@@ -121,6 +107,6 @@ namespace DerivationFramework {
        int_decor_handles[decorate_i](*eventInfo) = std::move(scterr[decorate_i]);
     }
     return StatusCode::SUCCESS;
-  }  
-  
+  }
+
 }
