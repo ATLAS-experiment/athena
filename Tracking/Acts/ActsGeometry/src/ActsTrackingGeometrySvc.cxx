@@ -48,6 +48,7 @@
 #include <Acts/Surfaces/LineSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
+#include <Acts/Geometry/detail/TrackingGeometryPrintVisitor.hpp>
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IDetectorElement.h"
@@ -85,8 +86,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     }
   }
   ATH_CHECK(m_caloVolumeBuilder.retrieve(EnableTool{!m_caloVolumeBuilder.empty()}));
-  ATH_CHECK(m_msVolumeBuilder.retrieve(EnableTool{!m_msVolumeBuilder.empty()}));
-
  
   // FIXME: ActsCaloTrackingVolumeBuilder holds ReadHandle to
   // CaloDetDescrManager. Hopefully this service is never called before that
@@ -208,6 +207,11 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
 
   }
+    if (m_printGeo) {
+        Acts::detail::TrackingGeometryPrintVisitor printer{m_nominalContext.context()};
+        m_trackingGeometry->apply(printer);
+        ATH_MSG_INFO("Built tracking geometry \n"<<printer.stream().str());
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -480,12 +484,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
           });
     }
 
-    if (m_msVolumeBuilder.isEnabled()){
-      tgbConfig.trackingVolumeBuilders.push_back(
-          [&](const auto &gctx, const auto &inner, const auto &) {
-            return m_msVolumeBuilder->trackingVolume(gctx, inner, nullptr);
-          });
-    }
   } catch (const std::exception &e) {
     ATH_MSG_ERROR("Encountered error when building Acts tracking geometry");
     ATH_MSG_ERROR(e.what());

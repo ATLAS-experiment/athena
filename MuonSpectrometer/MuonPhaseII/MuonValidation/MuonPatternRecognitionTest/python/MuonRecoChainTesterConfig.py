@@ -7,6 +7,7 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
+    parser.set_defaults(noSTGC = True)    
     parser.set_defaults(outRootFile="RecoChainTester.root")
     parser.set_defaults(inputFile= MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.add_argument("--monitorPlots", action='store_true', default=False, 
