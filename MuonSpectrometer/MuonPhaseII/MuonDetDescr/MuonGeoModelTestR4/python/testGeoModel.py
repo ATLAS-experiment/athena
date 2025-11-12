@@ -223,6 +223,8 @@ def setupGeoR4TestCfg(args,  flags = None):
     if args.noMdt:
         flags.Detector.GeometryMDT = False
 
+    flags.Acts.TrackingGeometry.UseBlueprint = True
+
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.ShowDataFlow = True
