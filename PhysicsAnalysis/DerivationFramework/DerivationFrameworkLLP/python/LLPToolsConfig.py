@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for LLP Derivations
@@ -39,6 +39,31 @@ def JetLargeD0TrackParticleThinningCfg(flags, name, **kwargs):
 def RCJetSubstructureAugCfg(flags, name, **kwargs):
     """Configure the RC jet substructure computation tool"""
     acc = ComponentAccumulator()
+    suffix = kwargs.pop("Suffix", "")
+    if not suffix:
+        raise AttributeError("Suffix not set!")
+    kwargs.setdefault("dec_Qw", "Qw_" + suffix)
+    kwargs.setdefault("dec_Tau1", "Tau1_" + suffix)
+    kwargs.setdefault("dec_Tau2", "Tau2_" + suffix)
+    kwargs.setdefault("dec_Tau3", "Tau3_" + suffix)
+    kwargs.setdefault("dec_Tau4", "Tau4_" + suffix)
+    kwargs.setdefault("dec_Tau21", "Tau21_" + suffix)
+    kwargs.setdefault("dec_Tau32", "Tau32_" + suffix)
+    kwargs.setdefault("dec_Split12", "Split12_" + suffix)
+    kwargs.setdefault("dec_Split23", "Split23_" + suffix)
+    kwargs.setdefault("dec_Split34", "Split34_" + suffix)
+    kwargs.setdefault("dec_ECF1", "ECF1_" + suffix)
+    kwargs.setdefault("dec_ECF2", "ECF2_" + suffix)
+    kwargs.setdefault("dec_ECF3", "ECF3_" + suffix)
+    kwargs.setdefault("dec_ECF4", "ECF4_" + suffix)
+    kwargs.setdefault("dec_C2", "C2_" + suffix)
+    kwargs.setdefault("dec_D2", "D2_" + suffix)
+    kwargs.setdefault("dec_pT", "pT_" + suffix)
+    kwargs.setdefault("dec_m", "m_" + suffix)
+    kwargs.setdefault("dec_NConstits", "NConstits_" + suffix)
+    kwargs.setdefault("dec_eta", "eta_" + suffix)
+    kwargs.setdefault("dec_phi", "phi_" + suffix)
+    kwargs.setdefault("dec_timing", "timing_" + suffix)
     RCJetSubstructureAug = CompFactory.DerivationFramework.RCJetSubstructureAug
     acc.addPublicTool(RCJetSubstructureAug(name, **kwargs),
                       primary = True)
@@ -51,6 +76,7 @@ def AugmentationToolLeadingJetsCfg(flags):
     acc.addPublicTool(CompFactory.DerivationFramework.AugmentationToolLeadingJets(name       = "LLP1AugmentationToolLeadingJets"),
                       primary = True)
     return acc
+
 
 # Vertex constraint tool
 def TrackParametersKVUCfg(flags, name, **kwargs):
@@ -70,10 +96,34 @@ def TrackParametersKVUCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+
 # Calo cell cluster decorator
 def TrackParticleCaloCellDecoratorCfg(flags, name, **kwargs):
     """Confiure the isolation decorator tool"""
     acc = ComponentAccumulator()
+    prefix = kwargs.pop("DecorationPrefix", "LLP1")
+    kwargs.setdefault("ClusterAssocContainerName", kwargs["ContainerName"] + "ClusterAssociations")
+    kwargs.setdefault("decCellEtaKey", prefix + "_CaloCellEta")
+    kwargs.setdefault("decCellPhiKey", prefix + "_CaloCellPhi")
+    kwargs.setdefault("decCellRKey", prefix + "_CaloCellR")
+    kwargs.setdefault("decCelldEtaKey", prefix + "_CaloCelldEta")
+    kwargs.setdefault("decCelldPhiKey", prefix + "_CaloCelldPhi")
+    kwargs.setdefault("decCelldRKey", prefix + "_CaloCelldR")
+    kwargs.setdefault("decCellXKey", prefix + "_CaloCellX")
+    kwargs.setdefault("decCellYKey", prefix + "_CaloCellY")
+    kwargs.setdefault("decCellZKey", prefix + "_CaloCellZ")
+    kwargs.setdefault("decCelldXKey", prefix + "_CaloCelldX")
+    kwargs.setdefault("decCelldYKey", prefix + "_CaloCelldY")
+    kwargs.setdefault("decCelldZKey", prefix + "_CaloCelldZ")
+    kwargs.setdefault("decCellTKey", prefix + "_CaloCellTime")
+    kwargs.setdefault("decCellEKey", prefix + "_CaloCellE")
+    kwargs.setdefault("decCellIDKey", prefix + "_CaloCellID")
+    kwargs.setdefault("decCellSamplingKey", prefix + "_CaloCellSampling")
+    kwargs.setdefault("decCellQualityKey", prefix + "_CaloCellQuality")
+    kwargs.setdefault("decCellProvenanceKey", prefix + "_CaloCellProvenance")
+    kwargs.setdefault("decCellGainKey", prefix + "_CaloCellGain")
+    kwargs.setdefault("decCellEneDiffKey", prefix + "_CaloCellEneDiff")
+    kwargs.setdefault("decCellTimeDiffKey", prefix + "_CaloCellTimeDiff")
     TrackParticleCaloCellDecorator = CompFactory.DerivationFramework.TrackParticleCaloCellDecorator
     acc.addPublicTool(TrackParticleCaloCellDecorator(name, **kwargs),
                       primary = True)
