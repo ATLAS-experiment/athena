@@ -82,12 +82,14 @@ Trk::Segment::operator=(const Trk::Segment& seg)
 }
 
 // move assignment operator
+//coverity[exn_spec_violation]
 Trk::Segment&
 Trk::Segment::operator=(Trk::Segment&& seg) noexcept
 {
   if (this != &seg) {
     Trk::MeasurementBase::operator=(seg);
     m_fitQuality = std::move(seg.m_fitQuality);
+    //called function throws exception of type SG::ExcInsertionInBaseClass.
     m_containedMeasBases = std::move(seg.m_containedMeasBases);
     m_author = seg.m_author;
   }
