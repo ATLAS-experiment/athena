@@ -232,9 +232,13 @@ namespace ActsTrk {
     } // loop on sps
 
     // probability
-    for (const auto [pid, nEntries] : particleIds) {
-      float prob = static_cast<float>(nEntries) / nMeasurements;
-      probability = std::max(probability, prob);
+    if (nMeasurements!=0){
+      for (const auto [pid, nEntries] : particleIds) {
+        float prob = static_cast<float>(nEntries) / nMeasurements;
+        probability = std::max(probability, prob);
+      }
+    } else {
+      ATH_MSG_WARNING("nMeasurements is zero!");
     }
     
     return StatusCode::SUCCESS;
