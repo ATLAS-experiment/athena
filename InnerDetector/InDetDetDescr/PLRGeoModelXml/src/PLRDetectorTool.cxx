@@ -40,9 +40,9 @@ StatusCode PLRDetectorTool::create()
   std::string table{"PLRXDD"};
 
   //
-  // Check the availability
+  // Check the availability (if not running from SQLite)
   //
-  if(sqlreader){
+  if(!sqlreader){
       if (!isAvailable(node, table)) {
         ATH_MSG_ERROR("No PLR geometry found. PLR can not be built.");
         return StatusCode::FAILURE;
