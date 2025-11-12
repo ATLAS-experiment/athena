@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/LArShapeCompleteMakerAlg.h"
@@ -62,6 +62,7 @@ StatusCode LArShapeCompleteMakerAlg::execute()
 
   if (lsc->setGroupingType(m_groupingType, msg()).isFailure() || lsc->initialize().isFailure()) {
     ATH_MSG_ERROR("Unable to initialize LArShapeComplete");
+    delete lsc;
     return StatusCode::FAILURE;    
   };
 
@@ -81,6 +82,7 @@ StatusCode LArShapeCompleteMakerAlg::execute()
     CellInfo* info = m_dumperTool->makeCellInfo(channelID, id);
     if (!info) {
       ATH_MSG_ERROR("Problem making cell info for hash = " << k << ", terminating...");
+      delete errorGetter;
       return StatusCode::FAILURE;
     }
     
