@@ -3,7 +3,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 FtagBaseContent.py
 This module contains common configuration used by PHYSVAL, FTAG1 and FTAG2.
-Most of the configuration of which variables to save is handled by the 
+Most of the configuration of which variables to save is handled by the
 smart slimming lists, whhich are defined in BTaggingContent.py. New variables
 should be added there, not here.
 """
@@ -13,7 +13,7 @@ from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
 )
 from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
-from DerivationFrameworkFlavourTag.FlowEnergyDecorator import FlowEnergyDecorator
+from DerivationFrameworkFlavourTag.FlowEnergyDecoratorConfig import FlowEnergyDecoratorCfg
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_SmartCollections = [
@@ -140,10 +140,10 @@ def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper, 
-                                               OutputContainerPrefix = "TrigMatch_", 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
+                                               OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper, 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
                                                OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
@@ -212,8 +212,6 @@ def addCommonAugmentation(flags, cfg, helper, target = "AntiKt4EMPFlowJets"):
 
     # add flow energy decorator
     cfg.merge(
-        FlowEnergyDecorator(
+        FlowEnergyDecoratorCfg(
         )
     )
-    
- 
