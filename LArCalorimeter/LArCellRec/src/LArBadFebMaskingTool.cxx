@@ -165,7 +165,7 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
                 aCell->setTime(0.);
                 uint16_t qua=0;
                 aCell->setQuality(qua);
-                const uint16_t provenance = (aCell->provenance() | LArProv::MASKED);// 0x0800
+                const uint16_t provenance = (aCell->provenance() | LArProv::MASKED | LArProv::DEADFEB);// 0x0800 | 0x4000 
                 aCell->setProvenance(provenance);
               }
 
