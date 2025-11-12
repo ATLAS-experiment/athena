@@ -127,7 +127,7 @@ StatusCode ActsMaterialMapping::finalize() {
     }
   }
   
-  auto context = m_trackingGeometryTool->getNominalGeometryContext();
+  const auto & context = m_trackingGeometryTool->getNominalGeometryContext();
   m_materialJsonWriterTool->write(context, detectorMaterial);
 
   return StatusCode::SUCCESS;
