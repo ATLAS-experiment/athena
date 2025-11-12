@@ -1,10 +1,17 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 import os.path
 import subprocess
 import re
 import shlex
+
+# Force flushing print 
+# Since this script is executed within a TPython::Exec() function call in the the PrunDriver class, 
+# if not forcing flushing then no printed messages in this script would be displayed to the user 
+# (unless an error is raised then the buffer would also be printed)
+import functools
+print = functools.partial(print, flush=True)
 
 def ELG_prun(sample) :
 
