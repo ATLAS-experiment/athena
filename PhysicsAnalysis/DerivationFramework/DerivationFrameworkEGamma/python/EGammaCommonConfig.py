@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # EGammaCommonConfig.py
@@ -79,7 +79,6 @@ def EGammaCommonCfg(ConfigFlags):
 
     lhMenu = electronLHmenu.offlineMC21
     from AthenaConfiguration.Enums import LHCPeriod
-
     if ConfigFlags.GeoModel.Run is LHCPeriod.Run2:
         lhMenu = electronLHmenu.offlineMC20
 
@@ -286,11 +285,17 @@ def EGammaCommonCfg(ConfigFlags):
         AsgPhotonIsEMSelectorCfg,
     )
     from ElectronPhotonSelectorTools.PhotonIsEMSelectorMapping import photonPIDmenu
+    pidMenu = photonPIDmenu.offlineMC21
+    if ConfigFlags.GeoModel.Run is LHCPeriod.Run2:
+        pidMenu = photonPIDmenu.offlineMC20
 
     # Loose
     PhotonIsEMSelectorLoose = acc.popToolsAndMerge(
         AsgPhotonIsEMSelectorCfg(
-            ConfigFlags, name="PhotonIsEMSelectorLoose", quality=egammaPID.PhotonIDLoose
+            ConfigFlags,
+            name="PhotonIsEMSelectorLoose",
+            quality=egammaPID.PhotonIDLoose,
+            menu=pidMenu
         )
     )
     acc.addPublicTool(PhotonIsEMSelectorLoose)
@@ -298,30 +303,25 @@ def EGammaCommonCfg(ConfigFlags):
     # Medium
     PhotonIsEMSelectorMedium = acc.popToolsAndMerge(
         AsgPhotonIsEMSelectorCfg(
-            ConfigFlags, name="PhotonIsEMSelectorMedium", quality=egammaPID.PhotonIDMedium
+            ConfigFlags,
+            name="PhotonIsEMSelectorMedium",
+            quality=egammaPID.PhotonIDMedium,
+            menu=pidMenu
         )
     )
     acc.addPublicTool(PhotonIsEMSelectorMedium)
 
-    # Tight (default == pt-dependent)
+    # Tight
     PhotonIsEMSelectorTight = acc.popToolsAndMerge(
         AsgPhotonIsEMSelectorCfg(
-            ConfigFlags, name="PhotonIsEMSelectorTight", quality=egammaPID.PhotonIDTight
+            ConfigFlags,
+            name="PhotonIsEMSelectorTight",
+            quality=egammaPID.PhotonIDTight,
+            menu=pidMenu
         )
     )
     acc.addPublicTool(PhotonIsEMSelectorTight)
 
-    # Tight (pt-inclusive)
-    # To be removed when pt-dependent menu above is supported with scale factors
-    PhotonIsEMSelectorTightPtIncl = acc.popToolsAndMerge(
-        AsgPhotonIsEMSelectorCfg(
-            ConfigFlags,
-            name="PhotonIsEMSelectorTightPtIncl",
-            quality=egammaPID.PhotonIDTight,
-            menu=photonPIDmenu.menuPtInclJan2018,
-        )
-    )
-    acc.addPublicTool(PhotonIsEMSelectorTightPtIncl)
 
     # ====================================================================
     # RECTANGULAR CLUSTER TOOLS
@@ -663,21 +663,6 @@ def EGammaCommonCfg(ConfigFlags):
         )
     )
 
-    # decorate photons with the output of IsEM tight pt-inclusive menu
-    # Can be removed once pt-dependent cuts are fully supported.
-    # On full-sim MC, fudge the shower shapes before computing the ID
-    # (but the original shower shapes are not overridden)
-    PhotonPassIsEMTightPtIncl = acc.getPrimaryAndMerge(
-        EGSelectionToolWrapperCfg(
-            ConfigFlags,
-            name="PhotonPassIsEMTightPtIncl",
-            EGammaSelectionTool=PhotonIsEMSelectorTightPtIncl,
-            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
-            CutType="",
-            StoreGateEntryName="DFCommonPhotonsIsEMTightPtIncl",
-            ContainerName="Photons",
-        )
-    )
 
     # decorate photons with the photon cleaning flags
     # on MC, fudge the shower shapes before computing the flags
@@ -723,7 +708,6 @@ def EGammaCommonCfg(ConfigFlags):
         PhotonPassIsEMLoose,
         PhotonPassIsEMMedium,
         PhotonPassIsEMTight,
-        PhotonPassIsEMTightPtIncl,
         PhotonPassCleaning,
         ElectronAmbiguity,
     ]
