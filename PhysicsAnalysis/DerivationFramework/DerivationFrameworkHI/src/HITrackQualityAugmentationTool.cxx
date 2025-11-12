@@ -6,295 +6,287 @@
 
 namespace DerivationFramework {
 
-HITrackQualityAugmentationTool::HITrackQualityAugmentationTool(const std::string& t,
-      const std::string& n,
-      const IInterface* p) :
-    base_class(t,n,p)
+  StatusCode HITrackQualityAugmentationTool::initialize()
   {
+    ATH_CHECK(m_trackParticlesName.initialize());
+    ATH_CHECK(m_vertexContainerName.initialize());
+    ATH_CHECK(m_decorator.initialize());
+
+    CHECK(m_trkSelTool_pp.retrieve());
+    CHECK(m_trkSelTool_hi_loose.retrieve());
+    CHECK(m_trkSelTool_hi_tight.retrieve());
+
+    return StatusCode::SUCCESS;
   }
 
-StatusCode HITrackQualityAugmentationTool::initialize()
-{
-  ATH_CHECK(m_trackParticlesName.initialize());
-  ATH_CHECK(m_vertexContainerName.initialize());
-  m_decorator = m_trackParticlesName.key() + "." + m_decorator.key();
-  ATH_CHECK(m_decorator.initialize());
 
-  CHECK(m_trkSelTool_pp.retrieve());
-  CHECK(m_trkSelTool_hi_loose.retrieve());
-  CHECK(m_trkSelTool_hi_tight.retrieve());
+  StatusCode HITrackQualityAugmentationTool::addBranches(const EventContext& ctx) const{
 
-  return StatusCode::SUCCESS;
-}
-
- 
-StatusCode HITrackQualityAugmentationTool::addBranches(const EventContext& ctx) const{
-
-      // Get Primary vertex
-      SG::ReadHandle<xAOD::VertexContainer> vertices{m_vertexContainerName, ctx};
-      if(!vertices.isValid()) {
-        ATH_MSG_ERROR ("Couldn't retrieve VertexContainer with key " << m_vertexContainerName.key());
-        return StatusCode::FAILURE;
+    // Get Primary vertex
+    SG::ReadHandle<xAOD::VertexContainer> vertices{m_vertexContainerName, ctx};
+    if(!vertices.isValid()) {
+      ATH_MSG_ERROR ("Couldn't retrieve VertexContainer with key " << m_vertexContainerName.key());
+      return StatusCode::FAILURE;
+    }
+    const xAOD::Vertex* pv(0);
+    for (const xAOD::Vertex* vx : *vertices) {
+      if (vx->vertexType() == xAOD::VxType::PriVtx) {
+        pv = vx;
+        break;
       }
-      const xAOD::Vertex* pv(0);
-      for (const xAOD::Vertex* vx : *vertices) {
-        if (vx->vertexType() == xAOD::VxType::PriVtx) {
-          pv = vx;
-          break;
-        }
-      }
- 
-      // Get the track container
-      SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_trackParticlesName, ctx};
-      if(!tracks.isValid()) {
-        ATH_MSG_ERROR ("Couldn't retrieve TrackParticleContainer with key " << m_trackParticlesName.key());
-        return StatusCode::FAILURE;
-      }
-     
-      // Decorator
-      SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned short> decorator{m_decorator, ctx };
- 
-      // Get track quality this is what we're adding
-      for(const auto* track:*tracks) {
-        if(pv) decorator(*track) =GetTrackQualityNew(track,pv);
-        else   decorator(*track) = 0;
-      }
- 
-      return StatusCode::SUCCESS;
-}
+    }
 
+    // Get the track container
+    SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_trackParticlesName, ctx};
+    if(!tracks.isValid()) {
+      ATH_MSG_ERROR ("Couldn't retrieve TrackParticleContainer with key " << m_trackParticlesName.key());
+      return StatusCode::FAILURE;
+    }
 
-unsigned short HITrackQualityAugmentationTool::GetTrackQualityNew(const xAOD::TrackParticle* track,const xAOD::Vertex* pv) const {
-  
-  static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
-  int n_sct_hits = acc_n_sct_hits(*track);
-    
-  
-  float d0      = track->d0();
-  float z0_wrtPV= track->z0()+track->vz()-pv->z();
-  float theta   = track->theta();
+    // Decorator
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned short> decorator{m_decorator, ctx };
 
-  //-------------------------------------------------------------------------------------------------
-  bool pass_min_bias=false;
-  if (m_trkSelTool_pp->accept(*track, pv)) pass_min_bias=true;
-  //-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------
-  bool pass_hi_loose=false;
-  if (m_trkSelTool_hi_loose->accept(*track, pv)) pass_hi_loose=true;
-  //-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------
-  bool pass_hi_loose_additional_SCT_hit=true;
-  if(!pass_hi_loose || n_sct_hits<7) pass_hi_loose_additional_SCT_hit=false;
-  //-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------
-  bool pass_hi_loose_tight_d0_z0=true;
-  if(!pass_hi_loose || fabs(d0)>1.0 || fabs(z0_wrtPV*sin(theta))>1.0) pass_hi_loose_tight_d0_z0=false;
-  //-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------
-  bool pass_hi_loose_tighter_d0_z0=true;
-  if(!pass_hi_loose || fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_loose_tighter_d0_z0=false;
-  //-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------
-  bool pass_hi_tight=false;
-  if (m_trkSelTool_hi_tight->accept(*track, pv)) pass_hi_tight=true;
-  //-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------
-  bool pass_hi_tight_loose_d0_z0=true;
-  if(pass_hi_tight==false){
-    const auto& taccept = m_trkSelTool_hi_tight->getAcceptInfo();
-    asg::AcceptData acceptData(&taccept);
-    static const auto d0Index = taccept.getCutPosition("D0");
-    static const auto z0Index = taccept.getCutPosition("Z0SinTheta");
-    static const auto nCuts = taccept.getNCuts();
-    auto cutBitset = acceptData.getCutResultBitSet();
-    cutBitset |= (1 << d0Index) | (1 << z0Index);
-    if(cutBitset.count() != nCuts                   ) pass_hi_tight_loose_d0_z0=false;
-    if(fabs(d0)>1.5 || fabs(z0_wrtPV*sin(theta))>1.5) pass_hi_tight_loose_d0_z0=false;
+    // Get track quality this is what we're adding
+    for(const auto* track:*tracks) {
+      if(pv) decorator(*track) =GetTrackQualityNew(track,pv);
+      else   decorator(*track) = 0;
+    }
+
+    return StatusCode::SUCCESS;
   }
-  //-------------------------------------------------------------------------------------------------
-  //-------------------------------------------------------------------------------------------------
-  bool pass_hi_tight_tighter_d0_z0=true;
-  if(!pass_hi_tight || fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_tight_tighter_d0_z0=false;
-  //-------------------------------------------------------------------------------------------------
-
-  unsigned short    quality =0;
-  if(pass_min_bias                   ) quality+=PP_MIN_BIAS;
-  if(pass_hi_loose                   ) quality+=HI_LOOSE;
-  if(pass_hi_loose_additional_SCT_hit) quality+=HI_LOOSE_7SCT_HITS;
-  if(pass_hi_loose_tight_d0_z0       ) quality+=HI_LOOSE_TIGHT_D0_Z0;
-  if(pass_hi_loose_tighter_d0_z0     ) quality+=HI_LOOSE_TIGHTER_D0_Z0;
-  if(pass_hi_tight_loose_d0_z0       ) quality+=HI_TIGHT_LOOSE_D0_Z0;
-  if(pass_hi_tight                   ) quality+=HI_TIGHT;
-  if(pass_hi_tight_tighter_d0_z0     ) quality+=HI_TIGHT_TIGHTER_D0_Z0;
-  return quality;
-}
 
 
+  unsigned short HITrackQualityAugmentationTool::GetTrackQualityNew(const xAOD::TrackParticle* track,const xAOD::Vertex* pv) const {
 
-unsigned short HITrackQualityAugmentationTool::GetTrackQuality(const xAOD::TrackParticle* track,float z_vtx) const {
-          //-------------------------------------------------------------------------------------------------
-          float pt      = track->pt();
-          float eta     = track->eta();
-          //float phi     = track->phi();
-          
-    
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_Ipix_hits("numberOfInnermostPixelLayerHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_Ipix_expected("expectInnermostPixelLayerHit");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_NIpix_hits("numberOfNextToInnermostPixelLayerHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_NIpix_expected("expectNextToInnermostPixelLayerHit");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_pix_hits("numberOfPixelHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_holes("numberOfSCTHoles");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_dead("numberOfSCTDeadSensors");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_pix_dead("numberOfPixelDeadSensors");
-
-          int n_Ipix_hits = acc_n_Ipix_hits(*track);
-          int n_Ipix_expected = acc_n_Ipix_expected(*track);
-          int n_NIpix_hits = acc_n_NIpix_hits(*track);
-          int n_NIpix_expected = acc_n_NIpix_expected(*track);
-          int n_sct_hits = acc_n_sct_hits(*track);
-          int n_pix_hits = acc_n_pix_hits(*track);
-          int n_sct_holes = acc_n_sct_holes(*track);
-          int n_sct_dead = acc_n_sct_dead(*track);
-          int n_pix_dead = acc_n_pix_dead(*track);  
-
-    
-          float chi2=track->chiSquared();
-          float ndof=track->numberDoF();
-    
-          float d0      = track->d0();
-          float z0_wrtPV= track->z0()+track->vz()-z_vtx;
-          float theta   = track->theta();
-          //-------------------------------------------------------------------------------------------------
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
+    int n_sct_hits = acc_n_sct_hits(*track);
 
 
-          //-------------------------------------------------------------------------------------------------
-          bool pass_min_bias=true;
-          {
-            if(fabs(eta)>2.5) pass_min_bias=false;
-            if(n_Ipix_expected>0){
-              if (n_Ipix_hits==0) pass_min_bias=false;
-            }
-            else{
-              if(n_NIpix_expected>0 && n_NIpix_hits==0) pass_min_bias=false;
-            }
-      
-            int n_sct=n_sct_hits+n_sct_dead;
-            if     (pt<=300) {if (n_sct <2)  pass_min_bias=false;}
-            else if(pt<=400) {if (n_sct <4)  pass_min_bias=false;}
-            else if(pt> 400) {if (n_sct <6)  pass_min_bias=false;}
-      
-            int n_pix=n_pix_hits+n_pix_dead;
-            if(n_pix<=0) pass_min_bias=false;
-      
-            if(fabs(d0)>1.5) pass_min_bias=false;
-            if(fabs(z0_wrtPV*sin(theta))>1.5) pass_min_bias=false;
-      
-            if(pt>10000 && TMath::Prob(chi2,ndof)<=0.01) pass_min_bias=false;
-            //if(n_sct_holes>1 || n_pix_holes>0) continue;
-            //if(n_pix_hits<3 || n_sct_hits<8) continue;
-          }
-          //-------------------------------------------------------------------------------------------------
+    float d0      = track->d0();
+    float z0_wrtPV= track->z0()+track->vz()-pv->z();
+    float theta   = track->theta();
 
+    //-------------------------------------------------------------------------------------------------
+    bool pass_min_bias=false;
+    if (m_trkSelTool_pp->accept(*track, pv)) pass_min_bias=true;
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose=false;
+    if (m_trkSelTool_hi_loose->accept(*track, pv)) pass_hi_loose=true;
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose_additional_SCT_hit=true;
+    if(!pass_hi_loose || n_sct_hits<7) pass_hi_loose_additional_SCT_hit=false;
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose_tight_d0_z0=true;
+    if(!pass_hi_loose || fabs(d0)>1.0 || fabs(z0_wrtPV*sin(theta))>1.0) pass_hi_loose_tight_d0_z0=false;
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose_tighter_d0_z0=true;
+    if(!pass_hi_loose || fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_loose_tighter_d0_z0=false;
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_tight=false;
+    if (m_trkSelTool_hi_tight->accept(*track, pv)) pass_hi_tight=true;
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_tight_loose_d0_z0=true;
+    if(pass_hi_tight==false){
+      const auto& taccept = m_trkSelTool_hi_tight->getAcceptInfo();
+      asg::AcceptData acceptData(&taccept);
+      static const auto d0Index = taccept.getCutPosition("D0");
+      static const auto z0Index = taccept.getCutPosition("Z0SinTheta");
+      static const auto nCuts = taccept.getNCuts();
+      auto cutBitset = acceptData.getCutResultBitSet();
+      cutBitset |= (1 << d0Index) | (1 << z0Index);
+      if(cutBitset.count() != nCuts                   ) pass_hi_tight_loose_d0_z0=false;
+      if(fabs(d0)>1.5 || fabs(z0_wrtPV*sin(theta))>1.5) pass_hi_tight_loose_d0_z0=false;
+    }
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_tight_tighter_d0_z0=true;
+    if(!pass_hi_tight || fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_tight_tighter_d0_z0=false;
+    //-------------------------------------------------------------------------------------------------
 
- 
-          //-------------------------------------------------------------------------------------------------
-          bool pass_hi_loose=true;
-          {
-            if(fabs(eta)>2.5) pass_hi_loose=false;
-            if(n_Ipix_expected>0){
-              if (n_Ipix_hits==0) pass_hi_loose=false;
-            }
-            else{
-              if(n_NIpix_expected>0 && n_NIpix_hits==0) pass_hi_loose=false;
-            }
-      
-            if(n_pix_hits==0) pass_hi_loose=false;
-            if(n_sct_hits< 6) pass_hi_loose=false;
-            if(pt>10000 && TMath::Prob(chi2,ndof)<=0.01) pass_hi_loose=false;
-            if(fabs(d0) >1.5) pass_hi_loose=false;
-            if(fabs(z0_wrtPV*sin(theta))>1.5) pass_hi_loose=false;
-          }
-          //-------------------------------------------------------------------------------------------------
+    unsigned short    quality =0;
+    if(pass_min_bias                   ) quality+=PP_MIN_BIAS;
+    if(pass_hi_loose                   ) quality+=HI_LOOSE;
+    if(pass_hi_loose_additional_SCT_hit) quality+=HI_LOOSE_7SCT_HITS;
+    if(pass_hi_loose_tight_d0_z0       ) quality+=HI_LOOSE_TIGHT_D0_Z0;
+    if(pass_hi_loose_tighter_d0_z0     ) quality+=HI_LOOSE_TIGHTER_D0_Z0;
+    if(pass_hi_tight_loose_d0_z0       ) quality+=HI_TIGHT_LOOSE_D0_Z0;
+    if(pass_hi_tight                   ) quality+=HI_TIGHT;
+    if(pass_hi_tight_tighter_d0_z0     ) quality+=HI_TIGHT_TIGHTER_D0_Z0;
+    return quality;
+  }
 
 
 
-          //-------------------------------------------------------------------------------------------------
-          bool pass_hi_loose_additional_SCT_hit=true;
-          if(!pass_hi_loose) pass_hi_loose_additional_SCT_hit=false;
-          else{
-            if(n_sct_hits<7) pass_hi_loose_additional_SCT_hit=false;
-          }
-          //-------------------------------------------------------------------------------------------------
+  unsigned short HITrackQualityAugmentationTool::GetTrackQuality(const xAOD::TrackParticle* track,float z_vtx) const {
+    //-------------------------------------------------------------------------------------------------
+    float pt      = track->pt();
+    float eta     = track->eta();
+    //float phi     = track->phi();
+
+
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_Ipix_hits("numberOfInnermostPixelLayerHits");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_Ipix_expected("expectInnermostPixelLayerHit");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_NIpix_hits("numberOfNextToInnermostPixelLayerHits");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_NIpix_expected("expectNextToInnermostPixelLayerHit");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_pix_hits("numberOfPixelHits");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_holes("numberOfSCTHoles");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_dead("numberOfSCTDeadSensors");
+    static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_pix_dead("numberOfPixelDeadSensors");
+
+    int n_Ipix_hits = acc_n_Ipix_hits(*track);
+    int n_Ipix_expected = acc_n_Ipix_expected(*track);
+    int n_NIpix_hits = acc_n_NIpix_hits(*track);
+    int n_NIpix_expected = acc_n_NIpix_expected(*track);
+    int n_sct_hits = acc_n_sct_hits(*track);
+    int n_pix_hits = acc_n_pix_hits(*track);
+    int n_sct_holes = acc_n_sct_holes(*track);
+    int n_sct_dead = acc_n_sct_dead(*track);
+    int n_pix_dead = acc_n_pix_dead(*track);
+
+
+    float chi2=track->chiSquared();
+    float ndof=track->numberDoF();
+
+    float d0      = track->d0();
+    float z0_wrtPV= track->z0()+track->vz()-z_vtx;
+    float theta   = track->theta();
+    //-------------------------------------------------------------------------------------------------
+
+
+    //-------------------------------------------------------------------------------------------------
+    bool pass_min_bias=true;
+    {
+      if(fabs(eta)>2.5) pass_min_bias=false;
+      if(n_Ipix_expected>0){
+        if (n_Ipix_hits==0) pass_min_bias=false;
+      }
+      else{
+        if(n_NIpix_expected>0 && n_NIpix_hits==0) pass_min_bias=false;
+      }
+
+      int n_sct=n_sct_hits+n_sct_dead;
+      if     (pt<=300) {if (n_sct <2)  pass_min_bias=false;}
+      else if(pt<=400) {if (n_sct <4)  pass_min_bias=false;}
+      else if(pt> 400) {if (n_sct <6)  pass_min_bias=false;}
+
+      int n_pix=n_pix_hits+n_pix_dead;
+      if(n_pix<=0) pass_min_bias=false;
+
+      if(fabs(d0)>1.5) pass_min_bias=false;
+      if(fabs(z0_wrtPV*sin(theta))>1.5) pass_min_bias=false;
+
+      if(pt>10000 && TMath::Prob(chi2,ndof)<=0.01) pass_min_bias=false;
+      //if(n_sct_holes>1 || n_pix_holes>0) continue;
+      //if(n_pix_hits<3 || n_sct_hits<8) continue;
+    }
+    //-------------------------------------------------------------------------------------------------
 
 
 
-          //-------------------------------------------------------------------------------------------------
-          bool pass_hi_loose_tight_d0_z0=true;
-          if(!pass_hi_loose || fabs(d0)>1.0 || fabs(z0_wrtPV*sin(theta))>1.0) pass_hi_loose_tight_d0_z0=false;
-          //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose=true;
+    {
+      if(fabs(eta)>2.5) pass_hi_loose=false;
+      if(n_Ipix_expected>0){
+        if (n_Ipix_hits==0) pass_hi_loose=false;
+      }
+      else{
+        if(n_NIpix_expected>0 && n_NIpix_hits==0) pass_hi_loose=false;
+      }
+
+      if(n_pix_hits==0) pass_hi_loose=false;
+      if(n_sct_hits< 6) pass_hi_loose=false;
+      if(pt>10000 && TMath::Prob(chi2,ndof)<=0.01) pass_hi_loose=false;
+      if(fabs(d0) >1.5) pass_hi_loose=false;
+      if(fabs(z0_wrtPV*sin(theta))>1.5) pass_hi_loose=false;
+    }
+    //-------------------------------------------------------------------------------------------------
 
 
 
-          //-------------------------------------------------------------------------------------------------
-          bool pass_hi_loose_tighter_d0_z0=true;
-          if(!pass_hi_loose || fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_loose_tighter_d0_z0=false;
-          //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose_additional_SCT_hit=true;
+    if(!pass_hi_loose) pass_hi_loose_additional_SCT_hit=false;
+    else{
+      if(n_sct_hits<7) pass_hi_loose_additional_SCT_hit=false;
+    }
+    //-------------------------------------------------------------------------------------------------
 
 
 
-         //-------------------------------------------------------------------------------------------------
-         bool pass_hi_tight_loose_d0_z0=true;
-         if(!pass_hi_loose) pass_hi_tight_loose_d0_z0=false;
-         else{
-           if(n_pix_hits <2  ) pass_hi_tight_loose_d0_z0=false;
-           if(n_sct_hits <8  ) pass_hi_tight_loose_d0_z0=false;
-           if(n_sct_holes>1  ) pass_hi_tight_loose_d0_z0=false;
-           if(ndof==0) pass_hi_tight_loose_d0_z0=false;
-           else if(chi2/ndof>6) pass_hi_tight_loose_d0_z0=false;
-         }
-         //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose_tight_d0_z0=true;
+    if(!pass_hi_loose || fabs(d0)>1.0 || fabs(z0_wrtPV*sin(theta))>1.0) pass_hi_loose_tight_d0_z0=false;
+    //-------------------------------------------------------------------------------------------------
 
 
 
-          //-------------------------------------------------------------------------------------------------
-          bool pass_hi_tight=true;
-          if(!pass_hi_loose) pass_hi_tight=false;
-          else{
-            if(n_pix_hits <2  ) pass_hi_tight=false;
-            if(n_sct_hits <8  ) pass_hi_tight=false;
-            if(n_sct_holes>1  ) pass_hi_tight=false;
-            if(fabs(d0)   >1.0) pass_hi_tight=false;
-            if(fabs(z0_wrtPV*sin(theta))>1.0) pass_hi_tight=false;
-            if(ndof==0) pass_hi_tight=false;
-            else if(chi2/ndof>6) pass_hi_tight=false;
-          }
-          //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_loose_tighter_d0_z0=true;
+    if(!pass_hi_loose || fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_loose_tighter_d0_z0=false;
+    //-------------------------------------------------------------------------------------------------
 
 
 
-          //-------------------------------------------------------------------------------------------------
-          bool pass_hi_tight_tighter_d0_z0=true;
-          if(!pass_hi_tight) pass_hi_tight_tighter_d0_z0=false;
-          else{
-            if(fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_tight_tighter_d0_z0=false;
-          }
-          //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_tight_loose_d0_z0=true;
+    if(!pass_hi_loose) pass_hi_tight_loose_d0_z0=false;
+    else{
+      if(n_pix_hits <2  ) pass_hi_tight_loose_d0_z0=false;
+      if(n_sct_hits <8  ) pass_hi_tight_loose_d0_z0=false;
+      if(n_sct_holes>1  ) pass_hi_tight_loose_d0_z0=false;
+      if(ndof==0) pass_hi_tight_loose_d0_z0=false;
+      else if(chi2/ndof>6) pass_hi_tight_loose_d0_z0=false;
+    }
+    //-------------------------------------------------------------------------------------------------
+
+
+
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_tight=true;
+    if(!pass_hi_loose) pass_hi_tight=false;
+    else{
+      if(n_pix_hits <2  ) pass_hi_tight=false;
+      if(n_sct_hits <8  ) pass_hi_tight=false;
+      if(n_sct_holes>1  ) pass_hi_tight=false;
+      if(fabs(d0)   >1.0) pass_hi_tight=false;
+      if(fabs(z0_wrtPV*sin(theta))>1.0) pass_hi_tight=false;
+      if(ndof==0) pass_hi_tight=false;
+      else if(chi2/ndof>6) pass_hi_tight=false;
+    }
+    //-------------------------------------------------------------------------------------------------
+
+
+
+    //-------------------------------------------------------------------------------------------------
+    bool pass_hi_tight_tighter_d0_z0=true;
+    if(!pass_hi_tight) pass_hi_tight_tighter_d0_z0=false;
+    else{
+      if(fabs(d0)>0.5 || fabs(z0_wrtPV*sin(theta))>0.5) pass_hi_tight_tighter_d0_z0=false;
+    }
+    //-------------------------------------------------------------------------------------------------
 
 
 
 
 
-          unsigned short    quality =0;
-          if(pass_min_bias                   ) quality+=PP_MIN_BIAS;
-          if(pass_hi_loose                   ) quality+=HI_LOOSE;
-          if(pass_hi_loose_additional_SCT_hit) quality+=HI_LOOSE_7SCT_HITS;
-          if(pass_hi_loose_tight_d0_z0       ) quality+=HI_LOOSE_TIGHT_D0_Z0;
-          if(pass_hi_loose_tighter_d0_z0     ) quality+=HI_LOOSE_TIGHTER_D0_Z0;
-          if(pass_hi_tight_loose_d0_z0       ) quality+=HI_TIGHT_LOOSE_D0_Z0;
-          if(pass_hi_tight                   ) quality+=HI_TIGHT;
-          if(pass_hi_tight_tighter_d0_z0     ) quality+=HI_TIGHT_TIGHTER_D0_Z0;
-          return quality;
-}
+    unsigned short    quality =0;
+    if(pass_min_bias                   ) quality+=PP_MIN_BIAS;
+    if(pass_hi_loose                   ) quality+=HI_LOOSE;
+    if(pass_hi_loose_additional_SCT_hit) quality+=HI_LOOSE_7SCT_HITS;
+    if(pass_hi_loose_tight_d0_z0       ) quality+=HI_LOOSE_TIGHT_D0_Z0;
+    if(pass_hi_loose_tighter_d0_z0     ) quality+=HI_LOOSE_TIGHTER_D0_Z0;
+    if(pass_hi_tight_loose_d0_z0       ) quality+=HI_TIGHT_LOOSE_D0_Z0;
+    if(pass_hi_tight                   ) quality+=HI_TIGHT;
+    if(pass_hi_tight_tighter_d0_z0     ) quality+=HI_TIGHT_TIGHTER_D0_Z0;
+    return quality;
+  }
 
 }
