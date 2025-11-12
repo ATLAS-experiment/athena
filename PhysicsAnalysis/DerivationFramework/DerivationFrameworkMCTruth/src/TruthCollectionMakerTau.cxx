@@ -10,23 +10,8 @@
 #include "DerivationFrameworkMCTruth/TruthCollectionMakerTau.h"
 
 // Tool header file
-#include "TauAnalysisTools/IBuildTruthTaus.h"
 // for TruthTausEvent
 #include "TauAnalysisTools/BuildTruthTaus.h"
-
-// Constructor
-DerivationFramework::TruthCollectionMakerTau::TruthCollectionMakerTau(const std::string& t,
-								      const std::string& n,
-								      const IInterface* p )
-  : base_class(t,n,p)
-  , m_buildTruthTaus("TauAnalysisTools::BuildTruthTaus/BuildTruthTaus")
-{
-  declareProperty("BuildTruthTaus", m_buildTruthTaus);
-}
-
-// Destructor
-DerivationFramework::TruthCollectionMakerTau::~TruthCollectionMakerTau() {
-}
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::TruthCollectionMakerTau::initialize()

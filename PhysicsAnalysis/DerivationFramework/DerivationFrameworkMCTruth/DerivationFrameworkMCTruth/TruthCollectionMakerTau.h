@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHCOLLECTIONMAKERTAU_H
@@ -12,25 +12,23 @@
 // For the tool handle
 #include "GaudiKernel/ToolHandle.h"
 
-// Forward declarations
-namespace TauAnalysisTools{
-  class IBuildTruthTaus;
-}
+#include "TauAnalysisTools/IBuildTruthTaus.h"
 
 namespace DerivationFramework {
 
   class TruthCollectionMakerTau : public extends<AthAlgTool, IAugmentationTool> {
-  public: 
-    TruthCollectionMakerTau(const std::string& t, const std::string& n, const IInterface* p);
-    ~TruthCollectionMakerTau();
-    StatusCode initialize();
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+  public:
+
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
 
-    ToolHandle<TauAnalysisTools::IBuildTruthTaus> m_buildTruthTaus;
+    PublicToolHandle<TauAnalysisTools::IBuildTruthTaus> m_buildTruthTaus{this, "BuildTruthTaus", "TauAnalysisTools::BuildTruthTaus/BuildTruthTaus"};
 
-  }; 
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_TRUTHCOLLECTIONMAKERTAU_H

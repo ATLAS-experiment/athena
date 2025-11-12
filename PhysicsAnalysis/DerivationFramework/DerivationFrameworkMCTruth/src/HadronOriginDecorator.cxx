@@ -7,13 +7,6 @@
 
 namespace DerivationFramework {
 
-  HadronOriginDecorator::HadronOriginDecorator(const std::string& t, const std::string& n, const IInterface* p):
-    base_class(t,n,p)
-  {
-  }
-
-  HadronOriginDecorator::~HadronOriginDecorator(){}
-
   StatusCode HadronOriginDecorator::initialize(){
     ATH_MSG_VERBOSE( "Initialize" );
     ATH_CHECK( m_particlesKey.initialize() );
