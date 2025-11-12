@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ void ElementTableCnv_p1::transToPers( const Trk::ElementTable *transObj,
         if (transObj->contains(im)){
             Trk::Material_p1 pMaterial;
             m_materialCnv.transToPers( transObj->element(im), &pMaterial, mlog );
-            persObj->table.push_back( pMaterial );
+            persObj->table.push_back( std::move(pMaterial) );
             persObj->names.push_back( transObj->elementName(im) );     
         }
     }
