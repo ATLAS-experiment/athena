@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,11 +12,9 @@
 // gain
 
 #include "DerivationFrameworkCalo/GainDecorator.h"
+#include "CaloEvent/CaloCell.h"
 
-#include <regex>
-#include <string>
-#include <vector>
-namespace {}
+
 
 // Constructor
 DerivationFramework::GainDecorator::GainDecorator(const std::string& t,
@@ -41,16 +39,16 @@ DerivationFramework::GainDecorator::GainDecorator(const std::string& t,
                    std::to_string(layer));
       name.replace(
         name.find("{gain}"), std::string("{gain}").size(), kv.second);
-      std::string name_E(name), name_rnoW(name), name_nCells(name);
+      std::string name_E(name), name_rnoW(name), name_nCells(std::move(name));
       name_E.replace(name_E.find("{info}"), std::string("{info}").size(), "E");
       name_rnoW.replace(name_rnoW.find("{info}"), std::string("{info}").size(), "rnoW");
       name_nCells.replace(
         name_nCells.find("{info}"), std::string("{info}").size(), "nCells");
 
       std::pair<int, int> key(kv.first, layer);
-      m_names_E[key] = name_E;
-      m_names_rnoW[key] = name_rnoW;
-      m_names_nCells[key] = name_nCells;
+      m_names_E[key] = std::move(name_E);
+      m_names_rnoW[key] = std::move(name_rnoW);
+      m_names_nCells[key] = std::move(name_nCells);
     }
 
   for (const auto& kv : m_names_E) {
