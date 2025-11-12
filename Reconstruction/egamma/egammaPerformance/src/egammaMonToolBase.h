@@ -85,7 +85,7 @@ class egammaMonToolBase : public ManagedMonitorToolBase
 
   enum { BARREL=0, CRACK, ENDCAP, FORWARD, NREGION };
 
-  bool hasBadLar();
+  bool hasBadLar(const EventContext& ctx);
   static int  GetRegion(float eta);
   static int  GetForwardRegion(float eta);
   void bookTH1F(TH1* &h, MonGroup& mygroup, const std::string& hname, const std::string& htitle, int nbins, float low, float high);
@@ -101,7 +101,7 @@ class egammaMonToolBase : public ManagedMonitorToolBase
   static void fillTH2FperRegion(std::vector<TH2*> &vhist, unsigned int ir, float x, float y);
   void fillEfficiencies(TH1* h, TH1* href);
   bool hasGoodTrigger(const std::string& comment);
-  unsigned int getCurrentLB();
+  unsigned int getCurrentLB(const EventContext& ctx);
 
   std::vector<std::string> m_Trigger; // generic Trigger Name
   ToolHandle<Trig::TrigDecisionTool> m_trigdec; // Trigger Decision Tool Handle

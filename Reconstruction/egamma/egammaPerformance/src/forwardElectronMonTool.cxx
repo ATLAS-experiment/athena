@@ -187,18 +187,19 @@ StatusCode forwardElectronMonTool::fillHistograms()
 
   if (!hasGoodTrigger("forward electron")) return StatusCode::SUCCESS; 
 
-  //check whether Lar signalled event bad
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
-  if(hasBadLar()) {
+  //check whether Lar signalled event bad
+  if(hasBadLar(ctx)) {
     ATH_MSG_DEBUG("forwardElectronMonTool::hasBadLar()");
     return StatusCode::RECOVERABLE;
   }
-  
+
   //--------------------
   //figure out current LB
   //--------------------
   unsigned int previousLB = m_currentLB;
-  m_currentLB = getCurrentLB();
+  m_currentLB = getCurrentLB(ctx);
 
   //deal with the change of LB
   if (m_currentLB>previousLB) {
