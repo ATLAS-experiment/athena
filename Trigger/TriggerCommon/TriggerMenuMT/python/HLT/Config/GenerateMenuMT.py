@@ -377,7 +377,7 @@ class GenerateMenuMT(metaclass=Singleton):
         """
 
         from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitInterSignatureChainDict
-        from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices, anomdetWPIndices
+        from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices, anomdetWPIndices, topo3VarLegIndices
         from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
         from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences, TLABuildingSequences
 
@@ -478,6 +478,9 @@ class GenerateMenuMT(metaclass=Singleton):
                     
                     if "anomdet" in thetopo:
                         thetopo = thetopo.rstrip(anomdetWPIndices)
+
+                    if "masswiso" in thetopo:
+                        thetopo = thetopo.rstrip(topo3VarLegIndices)
                                       
                     theChainConfig.addTopo((comboConfigurator[thetopo],thetopo))
                                     
