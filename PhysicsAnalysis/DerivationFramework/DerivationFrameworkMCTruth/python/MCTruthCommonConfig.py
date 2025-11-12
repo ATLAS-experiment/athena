@@ -347,16 +347,16 @@ def AddPVCollectionCfg(flags):
 # Add navigation decorations on the truth collections
 def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefix=''):
     """Tool to add navigation decorations on the truth collections"""
-    acc = ComponentAccumulator() 
-    if len(TruthCollections)==0: return
-    # Set up a tool to add the navigation decorations
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthNavigationDecoratorCfg
-    DFCommonTruthNavigationDecorator = acc.getPrimaryAndMerge(TruthNavigationDecoratorCfg(flags,
-                                                                                          name             = prefix+'DFCommonTruthNavigationDecorator',
-                                                                                          InputCollections = TruthCollections))
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(prefix+"MCTruthNavigationDecoratorKernel",
-                                        AugmentationTools = [DFCommonTruthNavigationDecorator] ))
+    acc = ComponentAccumulator()
+    if len(TruthCollections) > 0:
+        # Set up a tool to add the navigation decorations
+        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthNavigationDecoratorCfg
+        DFCommonTruthNavigationDecorator = acc.getPrimaryAndMerge(TruthNavigationDecoratorCfg(flags,
+                                                                                              name             = prefix+'DFCommonTruthNavigationDecorator',
+                                                                                              InputCollections = TruthCollections))
+        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+        acc.addEventAlgo(CommonAugmentation(prefix+"MCTruthNavigationDecoratorKernel",
+                                            AugmentationTools = [DFCommonTruthNavigationDecorator] ))
     return acc
 
 # Add BSM particles and their downstream particles (immediate and further decay products) in a special collection
@@ -402,6 +402,18 @@ def AddLargeRJetD2Cfg(flags):
     acc.addEventAlgo(TruthD2DecoratorKernel("TRUTHD2Kernel", AugmentationTools = [theTruthD2Decorator] ))
     return acc
 
+
+def DFCommonTruthEDDecoratorCfg(flags, name="DFCommonTruthEDDecorator", **kwargs):
+    """Truth energy density decorator"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("EventInfoName", "EventInfo")
+    kwargs.setdefault("EventShapeKeys", ["TruthIsoCentralEventShape","TruthIsoForwardEventShape"])
+    suffix = kwargs.pop("DecorationSuffix", "_rho")
+    kwargs.setdefault("EnergyDensityDecorKeys", [ x + suffix for x in kwargs["EventShapeKeys"] ])
+    acc.setPrivateTools(CompFactory.DerivationFramework.TruthEDDecorator(name, **kwargs))
+    return acc
+
+
 # Truth energy density tools
 def AddTruthEnergyDensityCfg(flags):
     """Truth energy density tools"""
@@ -428,16 +440,9 @@ def AddTruthEnergyDensityCfg(flags):
     acc.addPublicTool(DFCommonTruthForwardEDTool)
     acc.addEventAlgo(EventDensityAthAlg("DFCommonTruthForwardEDAlg", EventDensityTool = DFCommonTruthForwardEDTool ))
 
-    # Now add the tool to do the decoration
-    DFCommonTruthEDDecorator = CompFactory.DerivationFramework.TruthEDDecorator("DFCommonTruthEDDecorator",
-                                                                                EventInfoName="EventInfo",
-                                                                                EventShapeKeys=["TruthIsoCentralEventShape","TruthIsoForwardEventShape"],
-                                                                                DecorationSuffix="_rho"
-                                                                               )
-    acc.addPublicTool(DFCommonTruthEDDecorator)
-    
     DFCommonTruthEDKernel = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(DFCommonTruthEDKernel("DFCommonTruthEDKernel", AugmentationTools = [DFCommonTruthEDDecorator] ))
+    acc.addEventAlgo(DFCommonTruthEDKernel("DFCommonTruthEDKernel", AugmentationTools =
+                                           [acc.addPublicTool(acc.popToolsAndMerge(DFCommonTruthEDDecoratorCfg(flags)))] ))
     return acc
 
 

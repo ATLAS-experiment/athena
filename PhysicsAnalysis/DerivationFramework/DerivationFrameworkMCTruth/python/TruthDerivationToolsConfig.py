@@ -208,6 +208,9 @@ def TruthQGDecorationToolCfg(flags, name, **kwargs):
 def TruthNavigationDecoratorCfg(flags, name, **kwargs):
     """Congigure the truth navigation decorator tool"""
     acc = ComponentAccumulator()
+    kwargs.setdefault("InputCollections", [])
+    kwargs.setdefault("parentDecorKeys", [ key + ".parentLinks" for key in kwargs["InputCollections"] ])
+    kwargs.setdefault("childDecorKeys", [ key + ".childLinks" for key in kwargs["InputCollections"] ])
     TruthNavigationDecorator = CompFactory.DerivationFramework.TruthNavigationDecorator
     acc.addPublicTool(TruthNavigationDecorator(name = name, **kwargs),
                       primary = True)

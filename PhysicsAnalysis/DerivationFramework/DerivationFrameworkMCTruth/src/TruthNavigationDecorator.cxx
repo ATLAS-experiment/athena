@@ -10,32 +10,12 @@
 #include "TruthUtils/MagicNumbers.h"
 #include <algorithm> //for std::find
 
-// Constructor
-DerivationFramework::TruthNavigationDecorator::TruthNavigationDecorator(const std::string& t,
-        const std::string& n,
-        const IInterface* p ) :
-    base_class(t,n,p)
-{
-}
-
-// Destructor
-DerivationFramework::TruthNavigationDecorator::~TruthNavigationDecorator() {
-}
-
 // Initialise
 StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
 
   // Initialise input keys
-  ATH_CHECK( m_inputKeys.initialize() ); 
-  ATH_CHECK( m_truthEventKey.initialize() );  
-
-  // Decorations - dependent on the name of the input keys 
-  // Loop over the container names provided by the user
-  for (const auto& key : m_inputKeys) {
-    m_parentLinksDecorKeys.emplace_back(key.key()+".parentLinks");   
-    m_childLinksDecorKeys.emplace_back(key.key()+".childLinks");  
-  }
-  
+  ATH_CHECK( m_inputKeys.initialize() );
+  ATH_CHECK( m_truthEventKey.initialize() );
   ATH_CHECK( m_parentLinksDecorKeys.initialize() );
   ATH_CHECK( m_childLinksDecorKeys.initialize() );
 
@@ -46,7 +26,7 @@ StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
 // Function to do dressing, implements interface in IAugmentationTool
 StatusCode DerivationFramework::TruthNavigationDecorator::addBranches(const EventContext& ctx) const
 {
-  // Event context 
+  // Event context
 
   // Retrieve the truth collections
   SG::ReadHandle<xAOD::TruthEventContainer> truthEvents(m_truthEventKey, ctx);
@@ -60,7 +40,7 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches(const Even
   inputParticles.reserve(m_inputKeys.size());
   for (const SG::ReadHandleKey<xAOD::TruthParticleContainer>& inputKey : m_inputKeys) {
     inputParticles.push_back(SG::ReadHandle<xAOD::TruthParticleContainer>(inputKey, ctx));
-  }  
+  }
 
   // Build a dictionary of uniqueIDs and element links
   std::map<int,ElementLink<xAOD::TruthParticleContainer> > linkMap;

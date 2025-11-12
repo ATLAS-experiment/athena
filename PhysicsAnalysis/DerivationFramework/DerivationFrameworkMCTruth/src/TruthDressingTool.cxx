@@ -27,19 +27,8 @@
 namespace {
   static const SG::ConstAccessor<unsigned int> acc_origin("Classification");
 }
-// Constructor
-DerivationFramework::TruthDressingTool::TruthDressingTool(const std::string& t,
-        const std::string& n,
-        const IInterface* p )
-   : base_class(t,n,p)
-{
-}
 
-// Destructor
-DerivationFramework::TruthDressingTool::~TruthDressingTool() {
-}
-
-// Athena initialize and finalize
+// Athena initialize
 StatusCode DerivationFramework::TruthDressingTool::initialize()
 {
     // Initialise handle keys
