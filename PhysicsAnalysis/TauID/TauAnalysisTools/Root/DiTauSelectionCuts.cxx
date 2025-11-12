@@ -325,3 +325,98 @@ bool DiTauSelectionCutOmniScore::accept(const xAOD::DiTauJet& xTau,
   return false;
 }
 
+//_____________________________SelectionCutOmniIDWP______________________________
+//_______________________________________________________________________________
+DiTauSelectionCutOmniIDWP::DiTauSelectionCutOmniIDWP(DiTauSelectionTool* tDTST)
+  : DiTauSelectionCut("CutOmniIDWP", tDTST)
+{
+  m_hHistCutPre = CreateControlPlot("hOmniIDWP_pre","OmniIDWP_pre;; events",8,-.5,7.5);
+  m_hHistCut = CreateControlPlot("hOmniIDWP_cut","OmniIDWP_cut;; events",8,-.5,7.5);
+  // only proceed if histograms are defined
+  if (!m_hHistCutPre or !m_hHistCut)
+    return;
+
+  m_hHistCutPre->GetXaxis()->SetBinLabel(1,"!VeryLoose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(2,"VeryLoose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(3,"!Loose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(4,"Loose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(5,"!Medium");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(6,"Medium");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(7,"!Tight");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(8,"Tight");
+  m_hHistCut->GetXaxis()->SetBinLabel(1,"!VeryLoose");
+  m_hHistCut->GetXaxis()->SetBinLabel(2,"VeryLoose");
+  m_hHistCut->GetXaxis()->SetBinLabel(3,"!Loose");
+  m_hHistCut->GetXaxis()->SetBinLabel(4,"Loose");
+  m_hHistCut->GetXaxis()->SetBinLabel(5,"!Medium");
+  m_hHistCut->GetXaxis()->SetBinLabel(6,"Medium");
+  m_hHistCut->GetXaxis()->SetBinLabel(7,"!Tight");
+  m_hHistCut->GetXaxis()->SetBinLabel(8,"Tight");
+}
+
+//______________________________________________________________________________
+void DiTauSelectionCutOmniIDWP::fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const
+{
+  if(m_tDTST->m_useOmniScore){ 
+     static const SG::ConstAccessor<char> acc_OmniVeryLoose("omni_score_VL");
+     static const SG::ConstAccessor<char> acc_OmniLoose("omni_score_L");
+     static const SG::ConstAccessor<char> acc_OmniMedium("omni_score_M");
+     static const SG::ConstAccessor<char> acc_OmniTight("omni_score_T");
+     hHist.Fill(acc_OmniVeryLoose(xTau));
+     hHist.Fill(acc_OmniLoose(xTau)+2);
+     hHist.Fill(acc_OmniMedium(xTau)+4);
+     hHist.Fill(acc_OmniTight(xTau)+6);
+  } 
+}
+
+//______________________________________________________________________________
+void DiTauSelectionCutOmniIDWP::setAcceptInfo(asg::AcceptInfo& info) const
+{
+  info.addCut( "OmniIDWP",
+               "Selection of ditaus according to their OmniIDScore" );
+}
+//______________________________________________________________________________
+bool DiTauSelectionCutOmniIDWP::accept(const xAOD::DiTauJet& xTau,
+                                 asg::AcceptData& acceptData)
+{
+  // check Omni ID working point, if ditau passes OmniID working point then return true; false otherwise
+  bool bPass = false;
+  switch (m_tDTST->m_iOmniIDWP)
+  {
+  case OMNIIDNONE:
+    bPass = true;
+    break;
+  case OMNIIDVERYLOOSE:
+    static const SG::ConstAccessor<char> acc_OmniVeryLoose("omni_score_VL");
+    if (!acc_OmniVeryLoose.isAvailable(xTau)) m_tDTST->msg() << MSG::WARNING << "Omni VeryLoose WP not available" << endmsg;
+    else bPass = acc_OmniVeryLoose(xTau);
+    break;
+  case OMNIIDLOOSE:
+    static const SG::ConstAccessor<char> acc_OmniLoose("omni_score_L");
+    if (!acc_OmniLoose.isAvailable(xTau)) m_tDTST->msg() << MSG::WARNING << "Omni Loose WP not available" << endmsg;
+    else bPass = acc_OmniLoose(xTau);
+    break;
+  case OMNIIDMEDIUM:
+    static const SG::ConstAccessor<char> acc_OmniMedium("omni_score_M");
+    if (!acc_OmniMedium.isAvailable(xTau)) m_tDTST->msg() << MSG::WARNING << "Omni Medium WP not available" << endmsg;
+    else bPass = acc_OmniMedium(xTau);
+    break;
+  case OMNIIDTIGHT:
+    static const SG::ConstAccessor<char> acc_OmniTight("omni_score_T");
+    if (!acc_OmniTight.isAvailable(xTau)) m_tDTST->msg() << MSG::WARNING << "Omni Tight WP not available" << endmsg;
+    else bPass = acc_OmniTight(xTau);
+    break;
+  default:
+    m_tDTST->msg() << MSG::WARNING << "The Omni ID working point with the enum " << m_tDTST->m_iOmniIDWP << " is not available" << endmsg;
+    break;
+  }
+  if (bPass)
+  {
+    acceptData.setCutResult( "OmniIDWP", true );
+    return true;
+  }
+  m_tDTST->msg() << MSG::VERBOSE << "DiTau failed OmniIDWP requirement" << endmsg;  
+  return false;
+}
+
+
