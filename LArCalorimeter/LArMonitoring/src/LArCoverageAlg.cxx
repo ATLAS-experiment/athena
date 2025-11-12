@@ -20,7 +20,7 @@
 #include "LArElecCalib/LArProvenance.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
-#include "TMath.h"
+
 
 #include <sstream>
 #include <iomanip>
@@ -162,8 +162,8 @@ LArCoverageAlg::fillHistograms( const EventContext& ctx ) const
    */
   std::map<int,std::map<std::string,std::vector<LArChanHelp> > > coverageMap;
   for(auto code : m_availableErrorCodes) {
-    for(auto part : m_CoverageBarrelPartitions) coverageMap[code][part] = std::vector<LArChanHelp>(0);
-    for(auto part : m_CoverageEndcapPartitions) coverageMap[code][part] = std::vector<LArChanHelp>(0);
+    for(const auto & part : m_CoverageBarrelPartitions) coverageMap[code][part] = std::vector<LArChanHelp>(0);
+    for(const auto & part : m_CoverageEndcapPartitions) coverageMap[code][part] = std::vector<LArChanHelp>(0);
   }
 
   /** known problematic FEB array, used to avoid retrieving FEB information for each channel*/
@@ -252,7 +252,12 @@ LArCoverageAlg::fillHistograms( const EventContext& ctx ) const
     if (m_LArOnlineIDHelper->isHECchannel(id)) phiChan = CaloPhiRange::fix(phiChan);
     
     /** Retrieve expected noise */
-    noise = noiseCDO->getNoise(offlineID,m_highestGain[caloDetElement->getSubCalo()]); 
+    const auto idx = caloDetElement->getSubCalo();
+    if (idx == CaloCell_ID::NOT_VALID){
+      ATH_MSG_ERROR( "Invalid calo cell index" );
+      continue;
+    }
+    noise = noiseCDO->getNoise(offlineID,m_highestGain[idx]); 
     
     if(ctx.evt() == 0){ //first event
       /** Plot the average expected noise vs eta for reference */
