@@ -3,7 +3,7 @@
 */
 
 /////////////////////////////////////////////////////////////////
-// UsedInVertexFitTrackDecorator.cxx, (c) ATLAS Detector software
+// UsedInVertexFitTrackDecorator.cxx
 ///////////////////////////////////////////////////////////////////
 // Author: Matthew Basso (matthew.joseph.basso@cern.ch)
 // A very simple tool for decorating tracks with their "used-in-fit" info (AMVF fit vertices and weights)
@@ -12,14 +12,6 @@
 #include "DerivationFrameworkInDet/UsedInVertexFitTrackDecorator.h"
 
 namespace DerivationFramework {
-
-  UsedInVertexFitTrackDecorator::UsedInVertexFitTrackDecorator(const std::string& type, const std::string& name, const IInterface* parent) : 
-    base_class(type, name, parent),
-    m_decoTool("InDet::InDetUsedInFitTrackDecoratorTool/" + name + "_IDUsedInFitDecoratorTool", this)
-  {
-    // Property declarations
-    declareProperty("UsedInFitDecoratorTool", m_decoTool, "IInDetUsedInFitTrackDecoratorTool for decorating tracks");
-  }
 
   StatusCode UsedInVertexFitTrackDecorator::initialize()
   {
