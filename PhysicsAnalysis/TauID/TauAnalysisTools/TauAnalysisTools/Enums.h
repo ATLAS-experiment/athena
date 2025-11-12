@@ -25,6 +25,15 @@ namespace TauAnalysisTools
     JETIDGNTAUMEDIUM       = 12,
     JETIDGNTAUTIGHT        = 13,
   };
+ 
+  enum OmniID
+  {
+    OMNIIDNONE              = 0,
+    OMNIIDVERYLOOSE         = 1,
+    OMNIIDLOOSE             = 2,
+    OMNIIDMEDIUM            = 3,
+    OMNIIDTIGHT             = 4,
+  };
 
   enum EleID
   {
@@ -59,7 +68,8 @@ namespace TauAnalysisTools
     DiTauCutAbsEta       = 1<<1, // 000000000010
     DiTauCutNSubjets     = 1<<2, // 000000000100
     DiTauCutAbsCharge    = 1<<3, // 000000001000
-    DiTauCutOmniScore       = 1<<4, // 000000010000 
+    DiTauCutOmniScore    = 1<<4, // 000000010000 
+    DiTauCutOmniIDWP     = 1<<5, // 000000100000
   };
 
   enum EfficiencyCorrectionType
