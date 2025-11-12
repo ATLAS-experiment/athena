@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CompactHardTruth.cxx
@@ -17,8 +17,6 @@
 
 // FrameWork includes
 #include "Gaudi/Property.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -27,7 +25,6 @@
 #include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 // Needed for FourVector
-#include "AtlasHepMC/SimpleVector.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
@@ -115,9 +112,9 @@ StatusCode CompactHardTruth::execute() {
   // before and after thinning.
   // doExtra adds extra intermediate event printouts.
   // doDebug allows debug printout for a range of events.
-  bool doPrint = m_evtCount < m_maxCount;
-  bool doDebug = false;
-  bool doExtra = false;
+  const bool doPrint = m_evtCount < m_maxCount;
+  const bool doDebug = false;
+  const bool doExtra = false;
   // doDebug = doPrint;
   // doExtra = doPrint;
 
@@ -335,14 +332,14 @@ StatusCode CompactHardTruth::execute() {
     if (!HepMC::is_simulation_vertex(hadv)) continue;
     for (auto  pin: hadv->particles_in()) {
       removePV.push_back(vpPair(hadv, pin));
-      if (HepMC::is_simulation_particle(pin)) { deleteP.push_back(pin); }
+      if (HepMC::is_simulation_particle(pin)) { deleteP.push_back(std::move(pin)); }
     }
     for (auto  pout: hadv->particles_out()) {
       removePV.push_back(vpPair(hadv, pout));
-      if (HepMC::is_simulation_particle(pout)) { deleteP.push_back(pout); }
+      if (HepMC::is_simulation_particle(pout)) { deleteP.push_back(std::move(pout)); }
     }
     removeV.push_back(hadv);
-    deleteV.push_back(hadv);
+    deleteV.push_back(std::move(hadv));
   }
 #else
   for (hadv = hadvB; hadv != hadvE; ++hadv) {
@@ -379,7 +376,7 @@ StatusCode CompactHardTruth::execute() {
     HepMC::GenParticlePtr p = removePV[i].second;
 #ifdef HEPMC3
     v->remove_particle_in(p);
-    v->remove_particle_out(p);
+    v->remove_particle_out(std::move(p));
 #else
     v->remove_particle(p);
 #endif
@@ -388,7 +385,7 @@ StatusCode CompactHardTruth::execute() {
   for (unsigned int i = 0; i < addoutPV.size(); ++i) {
     HepMC::GenVertexPtr v = addoutPV[i].first;
     HepMC::GenParticlePtr p = addoutPV[i].second;
-    v->add_particle_out(p);
+    v->add_particle_out(std::move(p));
   }
 #ifdef HEPMC3
   for (unsigned int iv = 1; iv < hadVertices.size(); ++iv) {
@@ -1123,7 +1120,7 @@ StatusCode CompactHardTruth::execute() {
     if (vtx->particles_in().size() != 0) continue;
     if (vtx->particles_out().size() != 0) continue;
     removeV.push_back(vtx);
-    deleteV.push_back(vtx);
+    deleteV.push_back(std::move(vtx));
   }
   if (doDebug) ATH_MSG_DEBUG("Removing/deleting 0-particle vertices " << removeV.size() << " " << deleteV.size());
   for (unsigned int i = 0; i < removeV.size(); ++i) {
@@ -1195,7 +1192,7 @@ StatusCode CompactHardTruth::execute() {
         continue;
       }
       moreV1 = true;
-      vtx11 = v;
+      vtx11 = std::move(v);
       if (doDebug) ATH_MSG_DEBUG("One-body " << pin << " " << vtx11 << " " << pout);
       break;
     }
@@ -1287,9 +1284,9 @@ StatusCode CompactHardTruth::execute() {
       if (pt > m_danglePtCut) continue;
       if (doDebug) ATH_MSG_DEBUG("1->0: removing pp,badv,pt " << pp << " " << badv << " " << pt);
       removePV.push_back(vpPair(badv, pp));
-      deleteP.push_back(pp);
+      deleteP.push_back(std::move(pp));
       removeV.push_back(badv);
-      deleteV.push_back(badv);
+      deleteV.push_back(std::move(badv));
       ++m_dangleRemoved;
     }
     // Actually implement changes -- remove particles from vertices
@@ -1297,7 +1294,7 @@ StatusCode CompactHardTruth::execute() {
       HepMC::GenVertexPtr v = removePV[i].first;
       HepMC::GenParticlePtr p = removePV[i].second;
       v->remove_particle_in(p);
-      v->remove_particle_out(p);
+      v->remove_particle_out(std::move(p));
     }
     // Actually implement changes -- remove vertices
     for (unsigned int i = 0; i < removeV.size(); ++i) {

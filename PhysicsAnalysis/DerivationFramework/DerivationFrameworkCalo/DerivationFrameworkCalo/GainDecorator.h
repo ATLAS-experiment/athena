@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,16 +11,18 @@
 #ifndef DERIVATIONFRAMEWORK_GainDecorator_H
 #define DERIVATIONFRAMEWORK_GainDecorator_H
 
-#include <map>
-#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
-#include "CaloEvent/CaloCell.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODEgamma/EgammaContainer.h"
+#include <map>
+#include <string>
+#include <vector>
+
+class CaloCell;
 
 namespace DerivationFramework {
 

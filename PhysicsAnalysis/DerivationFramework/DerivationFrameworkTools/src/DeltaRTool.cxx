@@ -6,6 +6,7 @@
 //
 
 #include "DerivationFrameworkTools/DeltaRTool.h"
+#include <utility> //for std::pair
 
 namespace DerivationFramework {
 
@@ -103,38 +104,30 @@ namespace DerivationFramework {
     }
 
     // Double loop to get the pairs for which the mass should be calculated	
-    std::vector<std::vector<int> > pairs;
+    std::vector<std::pair<unsigned, unsigned>> pairs;
     if (!secondContainer) {
-      unsigned int outerIt, innerIt;
-      for (outerIt=0; outerIt<nEntries; ++outerIt) {
-        for (innerIt=outerIt+1; innerIt<nEntries; ++innerIt) {
-          std::vector<int> tmpPair;
+      for (unsigned outerIt=0; outerIt<nEntries; ++outerIt) {
+        for (unsigned innerIt=outerIt+1; innerIt<nEntries; ++innerIt) {
           if (entries[outerIt]==1 && entries[innerIt]==1) {
-            tmpPair.push_back(outerIt); tmpPair.push_back(innerIt);
-            pairs.push_back(tmpPair);
+            pairs.emplace_back(outerIt, innerIt);
           }
         }
       }
     }
 
     if (secondContainer) {
-      unsigned int coll1It, coll2It;
-      for (coll1It=0; coll1It<nEntries; ++coll1It) {
-        for (coll2It=0; coll2It<nEntries2; ++coll2It) {
-          std::vector<int> tmpPair;
+      for (unsigned coll1It=0; coll1It<nEntries; ++coll1It) {
+        for (unsigned coll2It=0; coll2It<nEntries2; ++coll2It) {
+          //coverity[copy_paste_error]
           if (entries[coll1It]==1 && entries2[coll2It]==1) {
-            tmpPair.push_back(coll1It); tmpPair.push_back(coll2It);
-            pairs.push_back(tmpPair);
+            pairs.emplace_back(coll1It, coll2It);
           }
         }
       }
     }
 
     // Loop over the pairs; calculate the mass; put into vector and return
-    std::vector<std::vector<int> >::iterator pairIt;
-    for (pairIt=pairs.begin(); pairIt!=pairs.end(); ++pairIt) {
-      unsigned int first = (*pairIt)[0];
-      unsigned int second = (*pairIt)[1];
+    for (const auto & [first, second] : pairs) {
       if (!secondContainer) {
 	float phi1f = ((*particles)[first])->p4().Phi(); float phi2f = ((*particles)[second])->p4().Phi();
         float eta1f = ((*particles)[first])->p4().Eta(); float eta2f = ((*particles)[second])->p4().Eta();
