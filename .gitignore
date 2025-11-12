@@ -22,7 +22,9 @@
 *.la
 *.lib
 *.root
+*.onnx
 tmp.*
 *.pkl
 .cache
 compile_commands.json
+docs/html/*
