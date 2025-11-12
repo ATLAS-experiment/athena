@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ==============================================================================
 # Provides configs for the tools used for e-gamma decorations used in DAOD
@@ -22,6 +22,11 @@ def PhotonsDirectionToolCfg(flags, name, **kwargs):
 def EGSelectionToolWrapperCfg(flags, name, **kwargs):
     """Configure the E-gamma selection tool wrapper"""
     acc = ComponentAccumulator()
+    sgName = kwargs.pop("StoreGateEntryName", "")
+    if not sgName:
+        raise AttributeError("StoreGateEntryName not set")
+    kwargs.setdefault("decoratorPass", sgName)
+    kwargs.setdefault("decoratorIsEM", sgName + "IsEMValue")
     EGSelectionToolWrapper = CompFactory.DerivationFramework.EGSelectionToolWrapper
     acc.addPublicTool(EGSelectionToolWrapper(name, **kwargs), primary=True)
     return acc
@@ -31,6 +36,22 @@ def EGSelectionToolWrapperCfg(flags, name, **kwargs):
 def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
     """Configure the electron likelihood tool wrapper"""
     acc = ComponentAccumulator()
+    sgName = kwargs.pop("StoreGateEntryName", "")
+    containerName = kwargs.setdefault("ContainerName", "")
+    if not sgName:
+        raise AttributeError("StoreGateEntryName not set")
+    if not containerName:
+        raise AttributeError("ContainerName empty string")
+    storeTResult = kwargs.setdefault("StoreTResult", False)
+    storeMultipleOutputs = kwargs.setdefault("StoreMultipleOutputs", False)
+    sgMultipleNames = kwargs.pop("StoreGateEntryMultipleNames", [])
+    # Write decoration handle keys
+    kwargs.setdefault("decoratorPass", sgName)
+    kwargs.setdefault("decoratorIsEM", sgName + "IsEMValue")
+    kwargs.setdefault("decoratorResult", sgName + "Result" if storeTResult else "")
+    kwargs.setdefault("decoratorMultipleOutputs", [containerName + "." + n for n in sgMultipleNames] if storeMultipleOutputs else [])
+    # FIXME Would ideally do this, but currently this syntax overwrites the parent container key
+    #kwargs.setdefault("decoratorMultipleOutputs", sgMultipleNames if storeMultipleOutputs else [])
     EGElectronLikelihoodToolWrapper = (
         CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper
     )
@@ -42,6 +63,10 @@ def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
 def EGPhotonCleaningWrapperCfg(flags, name, **kwargs):
     """Configure the photon cleaning tool wrapper"""
     acc = ComponentAccumulator()
+    sgName = kwargs.pop("StoreGateEntryName", "DFCommonPhotonsCleaning")
+    # Write decoration handle keys
+    kwargs.setdefault("decoratorPass", sgName)
+    kwargs.setdefault("decoratorPassDelayed", sgName + "NoTime")
     EGPhotonCleaningWrapper = CompFactory.DerivationFramework.EGPhotonCleaningWrapper
     acc.addPublicTool(EGPhotonCleaningWrapper(name, **kwargs), primary=True)
     return acc
@@ -79,6 +104,13 @@ def ElectronMergerCfg(flags, name, **kwargs):
 def PhotonVertexSelectionWrapperCfg(
         flags, name="PhotonVertexSelectionWrapper", **kwargs):
     acc = ComponentAccumulator()
+    prefix = kwargs.pop("DecorationPrefix", "")
+    if prefix: prefix += "_"
+    kwargs.setdefault("pt", prefix + "pt")
+    kwargs.setdefault("eta", prefix + "eta")
+    kwargs.setdefault("phi", prefix + "phi")
+    kwargs.setdefault("sumPt", prefix + "sumPt")
+    kwargs.setdefault("sumPt2", prefix + "sumPt2")
 
     if "PhotonPointingTool" not in kwargs:
         from PhotonVertexSelection.PhotonVertexSelectionConfig import (
@@ -105,6 +137,7 @@ def PhotonVertexSelectionWrapperKernelCfg(
         CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
     return acc
 
+
 def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
     acc = ComponentAccumulator()
     # needed for reading cells, do not rely on other config to do that
@@ -112,10 +145,23 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
     acc.merge(LArGMCfg(flags))
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
-    #
-    kwargs.setdefault('StoreCookedMoments',False)
-    kwargs.setdefault('StoreInputMoments',False)
+
+    kwargs.setdefault("ClusterContainerName", "ForwardElectronCookieCutClusters")
+    kwargs.setdefault("ClusterContainerLinksName", kwargs["ClusterContainerName"] + "_links")
+    #These two properties need to be in sync
+    if kwargs["ClusterContainerLinksName"] is not kwargs["ClusterContainerName"] + "_links":
+        raise AttributeError("ClusterContainerLinksName is not syncrhonised with ClusterContainerName")
+    kwargs.setdefault('StoreCookedMoments', False)
+    kwargs.setdefault('StoreInputMoments', False)
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.ForwardElectrons)
+    # TODO Need to keep this in sync with EGammaCookieCutClusterTool::m_vecMName (make into a property?)
+    momentNames = ["SECOND_LAMBDA", "LATERAL", "LONGITUDINAL", "ENG_FRAC_MAX",
+                   "SECOND_R", "CENTER_LAMBDA", "SECOND_ENG_DENS", "SIGNIFICANCE"]
+    cookedMoments = [ "cookiecut" + moment for moment in momentNames] if kwargs['StoreCookedMoments'] else []
+    originalMoments = [ "original" + moment for moment in momentNames] if kwargs['StoreInputMoments'] else []
+    electronDecorations = [i for sublist in zip(cookedMoments, originalMoments) for i in sublist]
+    electronDecorations += ["cookiecutClusterLink"]
+    kwargs.setdefault("SGKey_electrons_decorations", electronDecorations)
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
