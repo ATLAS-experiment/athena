@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PPMSimBSMonitorAlgorithm.h"
@@ -402,7 +402,7 @@ StatusCode PPMSimBSMonitorAlgorithm::makePPMTower( const xAOD::TriggerTower* tt,
   monTT.phi1d = 0;
   monTT.maxADC = 0;
   vecMonTT.push_back(monTT);
-   
+
   return StatusCode::SUCCESS; 
 }
 
@@ -426,12 +426,12 @@ StatusCode PPMSimBSMonitorAlgorithm::fillPPMEtaPhi( MonitorTT &monTT,
   if (absEta > 3.2) {
     // Fill four bins in phi
     phiMod = std::floor(phiMod/4)*4. + 2.;
-    offset = offset32;
+    offset = std::move(offset32);
   } 
   else if (absEta > 2.5) {
     // Fill two bins in phi
     phiMod = std::floor(phiMod/2)*2. + 1.;
-    offset = offset25;
+    offset = std::move(offset25);
   }     
   else {
     offset = {0.};
