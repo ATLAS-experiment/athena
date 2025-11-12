@@ -16,7 +16,7 @@ StatusCode ExampleMonitorAlgorithm::initialize() {
     std::vector<std::string> layers = {"layer1","layer2"};
     std::vector<std::string> clusters = {"clusterX","clusterB"};
     m_cGroups1 = buildToolMap<int>(m_tools,"ExampleMonitor",layers);
-    m_cGroups2 = buildToolMap<std::map<std::string,int>>(m_tools,"ExampleMonitor",layers,clusters);
+    m_cGroups2 = buildToolMap<std::map<std::string,int>>(m_tools,"ExampleMonitor",layers,std::move(clusters));
     return StatusCode::SUCCESS;
 }
 
@@ -72,7 +72,7 @@ StatusCode ExampleMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     fill("ExampleMonitor",lumiPerBCID,lb,random,pT,pT_passed,mon_pT_vec,testweight,mon_str,mon_strvec,mon_evtstr);
 
     // Alternative fill method. Get the group yourself, and pass it to the fill function.
-    auto tool = getGroup("ExampleMonitor");
+    const auto & tool = getGroup("ExampleMonitor");
     fill(tool,run);
 
     // Fill with a vector; useful in some circumstances.
