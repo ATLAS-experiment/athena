@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcMonitoring/ZdcLEDMonitorAlgorithm.h"
@@ -39,8 +39,8 @@ StatusCode ZdcLEDMonitorAlgorithm::initialize() {
     std::vector<std::string> modules = {"0","1","2","3"};
     std::vector<std::string> channels = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"};
 
-    if (m_enableZDC)    m_ZDCModuleLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames,sides,modules);
-    if (m_enableRPD)    m_RPDChannelLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames,sides,channels);
+    if (m_enableZDC)    m_ZDCModuleLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames,sides,std::move(modules));
+    if (m_enableRPD)    m_RPDChannelLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames,std::move(sides),std::move(channels));
 
     //---------------------------------------------------
     // initialize superclass
