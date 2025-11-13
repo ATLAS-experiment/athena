@@ -4,8 +4,10 @@
 
 #include "TrkDriftCircleMath/DCSLFitter.h"
 #include "CxxUtils/sincos.h"
+#include "CxxUtils/close_to_zero.h"
+#include <cmath>
 
-#include <iostream>
+using CxxUtils::close_to_zero;
 
 namespace TrkDriftCircleMath {
 
@@ -52,8 +54,12 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
     data.push_back(std::move(datum));
     ++ii;
   }
-  Zc = Sz / S;
-  Yc = Sy / S;
+  if (not close_to_zero(S)){
+    Zc = Sz / S;
+    Yc = Sy / S;
+  } else{
+    throw std::runtime_error("DCSLFitter::fit: S is approx. zero!");
+  }
 
   //
   //    shift hits
@@ -174,9 +180,10 @@ bool DCSLFitter::fit(Segment& result, const Line& line, const DCOnTrackVec& dcs,
     result.dcs().back().residual(residuals);
     result.dcs().back().errorTrack(errorResiduals);
   }
-
-  result.set(chi2, nhits - 2, dtheta, dy0);
-  result.line().set(LocVec2D(Zc - sc.sn * d, Yc + sc.cs * d), theta);
+  if (nhits>=2){
+    result.set(chi2, nhits - 2, dtheta, dy0);
+    result.line().set(LocVec2D(Zc - sc.sn * d, Yc + sc.cs * d), theta);
+  }
 
   return true;
 }
