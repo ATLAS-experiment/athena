@@ -1660,7 +1660,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Initialise tau trigger efficiency tool(s)
 
     if (!isData()) {
-      int iTauID = (int) TauAnalysisTools::JETIDNONEUNCONFIGURED;
+      int iTauID = (int) TauAnalysisTools::JETIDNONE;
       if (m_tauId == "rnn001")   iTauID = (int) TauAnalysisTools::JETIDNONE;
       else if (m_tauId == "VeryLoose")   iTauID = (int) TauAnalysisTools::JETIDRNNVERYLOOSE;
       else if (m_tauId == "Loose")  iTauID = (int) TauAnalysisTools::JETIDRNNLOOSE;
