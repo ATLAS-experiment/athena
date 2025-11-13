@@ -41,6 +41,8 @@ class FPGATrackSimTrack {
   float getEta() const { return m_eta; }
   float getTheta() const { return 2*std::atan(std::exp(-m_eta)); }
   float getChi2() const { return m_chi2; }
+  float getChi2Phi() const { return m_chi2_phi; }
+  float getChi2Eta() const { return m_chi2_eta; }
   float getOrigChi2() const { return m_origchi2; }
   float getChi2ndof() const { return m_chi2 / (getNCoords() - m_nmissing - 5); }
   float getOrigChi2ndof() const { return m_origchi2 / (getNCoords() - m_nmissing - 5); }
@@ -95,6 +97,8 @@ class FPGATrackSimTrack {
   void setZ0(float v) { m_z0 = v; }
   void setEta(float v) { m_eta = v; }
   void setChi2(float v) { m_chi2 = v; }
+  void setChi2Phi(float v) { m_chi2_phi = v; }
+  void setChi2Eta(float v) { m_chi2_eta = v; }
   void setOrigChi2(float v) { m_origchi2 = v; }
   void setNMissing(int v) { m_nmissing = v; }
   void setTypeMask(unsigned int v) { m_typemask = v; }
@@ -167,6 +171,8 @@ class FPGATrackSimTrack {
   float m_z0 = 0.0F; // z0 in standard ATLAS reference system
   float m_eta = 0.0F; // eta of the track
   float m_chi2 = 0.0F; // chi2 of the track
+  float m_chi2_phi = 0.0F; // chi2 of the track for phi coord only (if used)
+  float m_chi2_eta = 0.0F; // chi2 of the track for eta coord only (if used)
   float m_origchi2 = 0.0F; // In the case of majority recovery, this is the chi2 of
 
   //TODO: Switch to matchedhits mask

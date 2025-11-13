@@ -161,6 +161,8 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
         if (!m_do2ndStage && m_fitFromRoad) {
             // Then actually do it using the road values.
             track_cand.setChi2(road->getFitChi2());
+            track_cand.setChi2Phi(road->getFitChi2Phi());
+            track_cand.setChi2Eta(road->getFitChi2Eta());
             track_cand.setPars(road->getFitParams());
             ATH_MSG_DEBUG("Assigned chi2 = " << track_cand.getChi2() << " and parameters from genscan tool");
             ATH_MSG_DEBUG("Set q/pt = " << track_cand.getQOverPt());
@@ -168,6 +170,8 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
             ATH_MSG_DEBUG("Set z0 = " << track_cand.getZ0());
             ATH_MSG_DEBUG("Set eta = " << track_cand.getEta());
             ATH_MSG_DEBUG("Set phi = " << track_cand.getPhi());
+            tracks.push_back(track_cand);
+            continue;
         } else {
 
         if (nMissing == 0 || m_guessinghits)
@@ -231,7 +235,7 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     }
 
     // Do recovery fits
-    if (nMissing == 0) {
+    if ((nMissing == 0)&&(!m_fitFromRoad)) {
         // In the case of m_do_majority > 1, we only do majority fits if ALL full fits fail the chi2 cut
         if (m_do_majority == 1 || (m_do_majority > 1 && !hasGoodFit(tracks, m_Chi2Dof_recovery_min)))
         {

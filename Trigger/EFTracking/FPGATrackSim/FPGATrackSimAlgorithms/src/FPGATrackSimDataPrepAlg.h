@@ -93,6 +93,7 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doEvtSel {this, "doEvtSel", false, "do event selection"};
         Gaudi::Property<bool> m_useInternalTruthTracks {this,"useInternalTruthTracks", false, "case when runnin on RDO file (and not or wrapper)"};
         Gaudi::Property<bool> m_recordHits {this,"recordHits", true, "For F-100 this is not needed"};
+        Gaudi::Property<int> m_writeRegion {this,"writeRegion", -1, "Only output selected region, default is -1 which means not requirement"};
 
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_preClusterBranch      {this, "preClusterBranch", "LogicalEventInputHeader_PreCluster", "Name of the branch for pre-cluster input data in output ROOT file." };

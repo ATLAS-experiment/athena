@@ -173,7 +173,7 @@ protected:
     void addRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx);
 
     // Experimental fit
-    bool fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2) const;
+    bool fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars,  double& chi2, double& chi2_phi,double& chi2_eta ) const;
 
     std::vector<unsigned> PickHitsToUse(layer_bitmask_t) const;
 

@@ -623,8 +623,8 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
 
   // "Fit" the track.
   FPGATrackSimTrackPars fittedpars;
-  double chi2;
-  bool inBin = fitRoad(hits, idx, fittedpars, chi2);
+  double chi2,chi2_phi,chi2_eta;
+  bool inBin = fitRoad(hits, idx, fittedpars, chi2, chi2_phi,chi2_eta);
   if (!inBin && m_inBinFiltering) return;
 
   m_roads.emplace_back(std::make_unique<FPGATrackSimRoad>());
@@ -648,6 +648,7 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
   // Store the fitted information on the track.
   r->setFitParams(fittedpars);
   r->setFitChi2(chi2);
+  r->setFitChi2_2d(chi2_phi,chi2_eta);
 }
 
 
@@ -751,7 +752,7 @@ double FPGATrackSimGenScanTool::HitPairSet::PhiOutExtrapCurved(const HitPair &pa
 
 
 // format final pairsets into expected output of getRoads
-bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2) const
+bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2, double& phi_chi2, double& eta_chi2) const
 {
 
   double N =hits.size();
@@ -850,13 +851,13 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
 
   double ec0 = etavars[0];
   double ec1 = etavars[1];
-  double eta_chi2 =  sum_Eta2 - 2*ec0*sum_Eta - 2*ec1*sum_EtaR + N*ec0*ec0 + 2*ec0*ec1*sum_R + ec1*ec1*sum_R2;
+  eta_chi2 =  sum_Eta2 - 2*ec0*sum_Eta - 2*ec1*sum_EtaR + N*ec0*ec0 + 2*ec0*ec1*sum_R + ec1*ec1*sum_R2;
 
   double pc0 = phivars[0];
   double pc1 = phivars[1];
   double pc2 = phivars[2];
 
-  double phi_chi2 = sum_Phi2 - 2*pc0*sum_Phi - 2*pc1*sum_PhiR - 2*pc2*sum_PhiR2 + N*pc0*pc0 + 2*pc0*pc1*sum_R + 2*pc0*pc2*sum_R2 + 2*pc1*pc2*sum_R3 + pc1*pc1*sum_R2 + pc2*pc2*sum_R4;
+  phi_chi2 = sum_Phi2 - 2*pc0*sum_Phi - 2*pc1*sum_PhiR - 2*pc2*sum_PhiR2 + N*pc0*pc0 + 2*pc0*pc1*sum_R + 2*pc0*pc2*sum_R2 + 2*pc1*pc2*sum_R3 + pc1*pc1*sum_R2 + pc2*pc2*sum_R4;
 
   for (const FPGATrackSimBinUtil::StoredHit* hit : hits)
   {

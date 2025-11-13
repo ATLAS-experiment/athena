@@ -44,6 +44,8 @@ def FPGATrackSimWriteOutputCfg(flags):
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
         FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
+    if flags.Trigger.FPGATrackSim.writeRegion>=0: # negative is off
+        FPGATrackSimWriteOutput.RequireActivation=True
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
@@ -677,6 +679,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.SlicingEngineTool = result.getPrimaryAndMerge(FPGATrackSimSlicingEngineCfg(flags))
 
     theFPGATrackSimLogicalHitsProcessAlg.HoughRootOutputTool = result.getPrimaryAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.writeRegion=flags.Trigger.FPGATrackSim.writeRegion
 
     LRTRoadFilter = CompFactory.FPGATrackSimLLPRoadFilterTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimLLPRoadFilterTool"))
     result.addPublicTool(LRTRoadFilter)
@@ -992,7 +995,6 @@ if __name__ == "__main__":
 
         # Configure both the dataprep and logical hits algorithms.
         acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-
         from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
         acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
 

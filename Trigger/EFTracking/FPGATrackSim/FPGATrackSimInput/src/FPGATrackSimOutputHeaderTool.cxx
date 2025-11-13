@@ -87,7 +87,14 @@ StatusCode FPGATrackSimOutputHeaderTool::configureReadBranches() {
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimOutputHeaderTool::initialize()
 {
- 
+  // Dump the configuration to make sure it propagated through right
+  const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+  for( Gaudi::Details::PropertyBase* prop : props ) {
+    if (prop->ownerTypeName()==this->type()) {      
+      ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+    }
+  }
+
   ATH_CHECK(m_tHistSvc.retrieve());
 
   if( m_rwoption.value()!=std::string("HEADER"))
@@ -176,26 +183,34 @@ StatusCode FPGATrackSimOutputHeaderTool::writeData() {
     return StatusCode::SUCCESS;
   }
 
-  ATH_MSG_DEBUG ("Writing data in TTree");
+  ATH_MSG_DEBUG ("Writing data in TTree,  event cnt=" << m_event << " limit=" << m_eventLimit << " activated" <<  m_activated);
 
   // Interpret -1 as no limit.
-  if (m_event < static_cast<unsigned>(m_eventLimit) || m_eventLimit < 0) {
+  if ((m_event < static_cast<unsigned>(m_eventLimit) || m_eventLimit < 0) &&
+      (m_activated || !m_requireActivation)) {
     m_EventTree->Fill();
+    m_event++;
+    m_activated=0;
+
+    for (unsigned i = 0; i < m_eventInputHeaders.size(); i++) {
+      ATH_MSG_DEBUG("Wrote event " << m_event << " in input header (" << m_branchNameIns.at(i) << ") event " <<  m_eventInputHeaders.at(i)->event());
+    }
+    for (unsigned i = 0; i < m_eventOutputHeaders.size(); i++) {
+      ATH_MSG_DEBUG("Wrote event " << m_event << " in output header (" << m_branchNameOuts.at(i) << ")");
+      ATH_MSG_DEBUG("n.roads_1st = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_1st());
+      ATH_MSG_DEBUG("n.roads_2nd = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_2nd());
+      ATH_MSG_DEBUG("n.tracks_1st = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_1st());
+      ATH_MSG_DEBUG("n.tracks_2nd = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_2nd());
+    }
   }
 
   // Reset any input headers that we wrote out (with debugging prints).
   for (unsigned i = 0; i < m_eventInputHeaders.size(); i++) {
-    ATH_MSG_DEBUG("Wrote event " << m_event << " in input header (" << m_branchNameIns.at(i) << ") event " <<  m_eventInputHeaders.at(i)->event());
-    m_eventInputHeaders.at(i)->reset();
+    m_eventInputHeaders.at(i)->reset();    
   }
 
   // Reset any output headers that we wrote out (With debugging prints).
-  for (unsigned i = 0; i < m_eventOutputHeaders.size(); i++) {
-    ATH_MSG_DEBUG("Wrote event " << m_event << " in output header (" << m_branchNameOuts.at(i) << ")");
-    ATH_MSG_DEBUG("n.roads_1st = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_1st());
-    ATH_MSG_DEBUG("n.roads_2nd = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_2nd());
-    ATH_MSG_DEBUG("n.tracks_1st = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_1st());
-    ATH_MSG_DEBUG("n.tracks_2nd = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_2nd());
+  for (unsigned i = 0; i < m_eventOutputHeaders.size(); i++) {    
     m_eventOutputHeaders.at(i)->reset();
   }
 
@@ -205,8 +220,6 @@ StatusCode FPGATrackSimOutputHeaderTool::writeData() {
     return StatusCode::FAILURE;
   }
   
-  m_event++;
-
   return StatusCode::SUCCESS;
 }
 
@@ -255,7 +268,6 @@ StatusCode FPGATrackSimOutputHeaderTool::readData(bool &last)
   
   m_event++;
   m_totevent++;
-
 
   return StatusCode::SUCCESS;
 }

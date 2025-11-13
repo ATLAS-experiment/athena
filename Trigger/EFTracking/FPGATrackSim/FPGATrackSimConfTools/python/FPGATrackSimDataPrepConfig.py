@@ -172,6 +172,8 @@ def FPGATrackSimDataPrepOutputCfg(flags):
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
         FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
+    if flags.Trigger.FPGATrackSim.writeRegion>=0: # negative is off
+        FPGATrackSimWriteOutput.RequireActivation=True
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
@@ -388,6 +390,7 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg.doEvtSel= False if flags.Trigger.FPGATrackSim.pipeline.startswith('F-1') or flags.Trigger.FPGATrackSim.sampleType == 'skipTruth' else True
     theFPGATrackSimDataPrepAlg.useInternalTruthTracks = flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching
     theFPGATrackSimDataPrepAlg.recordHits = not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')
+    theFPGATrackSimDataPrepAlg.writeRegion = flags.Trigger.FPGATrackSim.writeRegion
     
 
     theFPGATrackSimDataPrepAlg.RawToLogicalHitsTools = []
