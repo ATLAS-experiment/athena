@@ -2,7 +2,7 @@
  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/PFMuonFlowElementAssoc.h"
+#include "PFMuonFlowElementAssoc.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
