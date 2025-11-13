@@ -61,6 +61,19 @@ def get_input_years(config: ConfigAccumulator) -> list[int]:
     return years
 
 
+def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun):
+    triggers = set()
+    if includeAllYearsPerRun:
+        for year in triggerChainsPerYear:
+            if not is_year_in_current_period(config, year):
+                continue
+            triggers.update(get_year_data(triggerChainsPerYear, year))
+    else:
+        for year in get_input_years(config):
+            triggers.update(get_year_data(triggerChainsPerYear, year))
+    return triggers
+
+
 class TriggerAnalysisSFBlock(ConfigBlock):
     """the ConfigBlock for trigger analysis"""
     def __init__(self):

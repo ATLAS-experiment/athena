@@ -9,7 +9,7 @@ from AthenaCommon.Logging import logging
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
-from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import trigger_set
+from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
 
 class FTagJetSFBlock(ConfigBlock):
@@ -165,7 +165,7 @@ class FTagJetSFBlock(ConfigBlock):
                         "under development. This is not ready yet for analysis usage!")
 
             triggers = trigger_set(config, self.triggerChainsPerYear,
-                                   self.includeAllYearsPerRun, log)
+                                   self.includeAllYearsPerRun)
             
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
